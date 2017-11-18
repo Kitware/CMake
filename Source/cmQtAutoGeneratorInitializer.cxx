@@ -1061,7 +1061,7 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
       currentLine.push_back(cmSystemTools::GetCMakeCommand());
       currentLine.push_back("-E");
       currentLine.push_back("cmake_autogen");
-      currentLine.push_back(autogenInfoDir);
+      currentLine.push_back(autogenInfoDir + "/AutogenInfo.cmake");
       currentLine.push_back("$<CONFIGURATION>");
       commandLines.push_back(std::move(currentLine));
     }
@@ -1197,12 +1197,19 @@ void cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(
                        cmQtAutoGen::MultiConfigName(multiConfig));
   AddDefinitionEscaped(makefile, "_build_dir",
                        GetAutogenTargetBuildDir(target));
-  AddDefinitionEscaped(makefile, "_sources", digest.Sources);
-  AddDefinitionEscaped(makefile, "_headers", digest.Headers);
   AddDefinitionEscaped(makefile, "_qt_version_major", digest.QtVersionMajor);
   AddDefinitionEscaped(makefile, "_qt_version_minor", digest.QtVersionMinor);
   {
     if (digest.MocEnabled || digest.UicEnabled) {
+      {
+        std::string settingsFile = GetAutogenTargetFilesDir(target);
+        cmSystemTools::ConvertToUnixSlashes(settingsFile);
+        settingsFile += "/AutogenOldSettings.cmake";
+        AddDefinitionEscaped(makefile, "_settings_file", settingsFile);
+      }
+      AddDefinitionEscaped(makefile, "_sources", digest.Sources);
+      AddDefinitionEscaped(makefile, "_headers", digest.Headers);
+
       SetupAcquireSkipFiles(digest, setup);
       if (digest.MocEnabled) {
         SetupAutoTargetMoc(digest, configDefault, configsList, setup);

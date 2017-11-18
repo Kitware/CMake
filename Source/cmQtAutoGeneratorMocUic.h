@@ -7,6 +7,7 @@
 
 #include "cmFilePathChecksum.h"
 #include "cmQtAutoGen.h"
+#include "cmQtAutoGenerator.h"
 #include "cmsys/RegularExpression.hxx"
 
 #include <map>
@@ -17,12 +18,11 @@
 
 class cmMakefile;
 
-class cmQtAutoGeneratorMocUic
+class cmQtAutoGeneratorMocUic : public cmQtAutoGenerator
 {
   CM_DISABLE_COPY(cmQtAutoGeneratorMocUic)
 public:
   cmQtAutoGeneratorMocUic();
-  bool Run(std::string const& targetDirectory, std::string const& config);
 
 private:
   // -- Types
@@ -81,8 +81,7 @@ private:
   };
 
   // -- Initialization
-  bool InitInfoFile(cmMakefile* makefile, std::string const& targetDirectory,
-                    std::string const& config);
+  bool InitInfoFile(cmMakefile* makefile);
 
   // -- Settings file
   void SettingsFileRead(cmMakefile* makefile);
@@ -93,7 +92,7 @@ private:
   }
 
   // -- Central processing
-  bool Process();
+  bool Process(cmMakefile* makefile) override;
 
   // -- Source parsing
   bool ParseSourceFile(std::string const& absFilename, const SourceJob& job);
@@ -136,45 +135,14 @@ private:
   bool UicGenerateAll();
   bool UicGenerateFile(const UicJob& uicJob);
 
-  // -- Log info
-  void LogBold(std::string const& message) const;
-  void LogInfo(cmQtAutoGen::Generator genType,
-               std::string const& message) const;
-  // -- Log warning
-  void LogWarning(cmQtAutoGen::Generator genType,
-                  std::string const& message) const;
-  void LogFileWarning(cmQtAutoGen::Generator genType,
-                      std::string const& filename,
-                      std::string const& message) const;
-  // -- Log error
-  void LogError(cmQtAutoGen::Generator genType,
-                std::string const& message) const;
-  void LogFileError(cmQtAutoGen::Generator genType,
-                    std::string const& filename,
-                    std::string const& message) const;
-  void LogCommandError(cmQtAutoGen::Generator genType,
-                       std::string const& message,
-                       std::vector<std::string> const& command,
-                       std::string const& output) const;
-
   // -- Utility
-  bool MakeParentDirectory(cmQtAutoGen::Generator genType,
-                           std::string const& filename) const;
-  bool FileDiffers(std::string const& filename, std::string const& content);
-  bool FileWrite(cmQtAutoGen::Generator genType, std::string const& filename,
-                 std::string const& content);
   bool FindHeader(std::string& header, std::string const& testBasePath) const;
-  bool RunCommand(std::vector<std::string> const& command,
-                  std::string& output) const;
 
   // -- Meta
-  std::string InfoFile;
   std::string ConfigSuffix;
   cmQtAutoGen::MultiConfig MultiConfig;
   // -- Settings
   bool IncludeProjectDirsBefore;
-  bool Verbose;
-  bool ColorOutput;
   std::string SettingsFile;
   std::string SettingsStringMoc;
   std::string SettingsStringUic;

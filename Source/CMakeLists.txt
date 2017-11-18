@@ -312,6 +312,8 @@ set(SRCS
   cmQtAutoGen.cxx
   cmQtAutoGen.h
   cmQtAutoGenDigest.h
+  cmQtAutoGenerator.cxx
+  cmQtAutoGenerator.h
   cmQtAutoGeneratorInitializer.cxx
   cmQtAutoGeneratorInitializer.h
   cmQtAutoGeneratorMocUic.cxx

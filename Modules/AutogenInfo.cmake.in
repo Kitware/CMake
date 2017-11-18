@@ -9,6 +9,7 @@ set(AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE "@CMAKE_INCLUDE_DIRECTORIES_PROJ
 set(AM_BUILD_DIR @_build_dir@)
 set(AM_SOURCES @_sources@)
 set(AM_HEADERS @_headers@)
+set(AM_SETTINGS_FILE @_settings_file@)
 # Qt environment
 set(AM_QT_VERSION_MAJOR @_qt_version_major@)
 set(AM_QT_VERSION_MINOR @_qt_version_minor@)

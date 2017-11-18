@@ -3,146 +3,22 @@
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGeneratorRcc.h"
 
-#include "cmsys/FStream.hxx"
-#include "cmsys/Terminal.h"
-
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
-#include "cmFilePathChecksum.h"
-#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
-#include "cmStateDirectory.h"
-#include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
-
-#if defined(__APPLE__)
-#include <unistd.h>
-#endif
 
 // -- Static variables
 
 static const char* SettingsKeyRcc = "ARCC_SETTINGS_HASH";
 
-// -- Static functions
-
-static std::string HeadLine(std::string const& title)
-{
-  std::string head = title;
-  head += '\n';
-  head.append(head.size() - 1, '-');
-  head += '\n';
-  return head;
-}
-
-static std::string QuotedCommand(std::vector<std::string> const& command)
-{
-  std::string res;
-  for (std::string const& item : command) {
-    if (!res.empty()) {
-      res.push_back(' ');
-    }
-    std::string const cesc = cmQtAutoGen::Quoted(item);
-    if (item.empty() || (cesc.size() > (item.size() + 2)) ||
-        (cesc.find(' ') != std::string::npos)) {
-      res += cesc;
-    } else {
-      res += item;
-    }
-  }
-  return res;
-}
-
-static bool ReadFile(std::string& content, std::string const& filename,
-                     std::string* error = nullptr)
-{
-  bool success = false;
-  if (cmSystemTools::FileExists(filename)) {
-    std::size_t const length = cmSystemTools::FileLength(filename);
-    cmsys::ifstream ifs(filename.c_str(), (std::ios::in | std::ios::binary));
-    if (ifs) {
-      content.resize(length);
-      ifs.read(&content.front(), content.size());
-      if (ifs) {
-        success = true;
-      } else {
-        content.clear();
-        if (error != nullptr) {
-          error->append("Reading from the file failed.");
-        }
-      }
-    } else if (error != nullptr) {
-      error->append("Opening the file for reading failed.");
-    }
-  } else if (error != nullptr) {
-    error->append("The file does not exist.");
-  }
-  return success;
-}
-
-/**
- * @brief Tests if buildFile is older than sourceFile
- * @return True if buildFile  is older than sourceFile.
- *         False may indicate an error.
- */
-static bool FileIsOlderThan(std::string const& buildFile,
-                            std::string const& sourceFile,
-                            std::string* error = nullptr)
-{
-  int result = 0;
-  if (cmSystemTools::FileTimeCompare(buildFile, sourceFile, &result)) {
-    return (result < 0);
-  }
-  if (error != nullptr) {
-    error->append(
-      "File modification time comparison failed for the files\n  ");
-    error->append(cmQtAutoGen::Quoted(buildFile));
-    error->append("\nand\n  ");
-    error->append(cmQtAutoGen::Quoted(sourceFile));
-  }
-  return false;
-}
-
 // -- Class methods
 
 cmQtAutoGeneratorRcc::cmQtAutoGeneratorRcc()
   : MultiConfig(cmQtAutoGen::WRAP)
-  , Verbose(cmSystemTools::HasEnv("VERBOSE"))
-  , ColorOutput(true)
   , SettingsChanged(false)
 {
-  {
-    std::string colorEnv;
-    cmSystemTools::GetEnv("COLOR", colorEnv);
-    if (!colorEnv.empty()) {
-      this->ColorOutput = cmSystemTools::IsOn(colorEnv.c_str());
-    }
-  }
-}
-
-bool cmQtAutoGeneratorRcc::Run(std::string const& infoFile,
-                               std::string const& config)
-{
-  // Info settings
-  this->InfoFile = infoFile;
-  this->InfoDir = cmSystemTools::GetFilenamePath(infoFile);
-  this->InfoConfig = config;
-
-  cmake cm(cmake::RoleScript);
-  cm.SetHomeOutputDirectory(this->InfoDir);
-  cm.SetHomeDirectory(this->InfoDir);
-  cm.GetCurrentSnapshot().SetDefaultDefinitions();
-  cmGlobalGenerator gg(&cm);
-
-  cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
-  snapshot.GetDirectory().SetCurrentBinary(this->InfoDir);
-  snapshot.GetDirectory().SetCurrentSource(this->InfoDir);
-
-  auto makefile = cm::make_unique<cmMakefile>(&gg, snapshot);
-  gg.SetCurrentMakefile(makefile.get());
-
-  return this->Process(makefile.get());
 }
 
 bool cmQtAutoGeneratorRcc::InfoFileRead(cmMakefile* makefile)
@@ -161,7 +37,7 @@ bool cmQtAutoGeneratorRcc::InfoFileRead(cmMakefile* makefile)
     {
       std::string keyConf = key;
       keyConf += '_';
-      keyConf += this->InfoConfig;
+      keyConf += this->GetInfoConfig();
       valueConf = makefile->GetDefinition(keyConf);
     }
     if (valueConf == nullptr) {
@@ -177,8 +53,8 @@ bool cmQtAutoGeneratorRcc::InfoFileRead(cmMakefile* makefile)
   };
 
   // -- Read info file
-  if (!makefile->ReadListFile(this->InfoFile.c_str())) {
-    this->LogFileError(cmQtAutoGen::RCC, this->InfoFile,
+  if (!makefile->ReadListFile(this->GetInfoFile().c_str())) {
+    this->LogFileError(cmQtAutoGen::RCC, this->GetInfoFile(),
                        "File processing failed");
     return false;
   }
@@ -189,7 +65,7 @@ bool cmQtAutoGeneratorRcc::InfoFileRead(cmMakefile* makefile)
   this->ConfigSuffix = InfoGetConfig("ARCC_CONFIG_SUFFIX");
   if (this->ConfigSuffix.empty()) {
     this->ConfigSuffix = "_";
-    this->ConfigSuffix += this->InfoConfig;
+    this->ConfigSuffix += this->GetInfoConfig();
   }
 
   this->SettingsFile = InfoGetConfig("ARCC_SETTINGS_FILE");
@@ -219,27 +95,27 @@ bool cmQtAutoGeneratorRcc::InfoFileRead(cmMakefile* makefile)
 
   // - Validity checks
   if (this->SettingsFile.empty()) {
-    this->LogFileError(cmQtAutoGen::RCC, this->InfoFile,
+    this->LogFileError(cmQtAutoGen::RCC, this->GetInfoFile(),
                        "Settings file name missing");
     return false;
   }
   if (this->AutogenBuildDir.empty()) {
-    this->LogFileError(cmQtAutoGen::RCC, this->InfoFile,
+    this->LogFileError(cmQtAutoGen::RCC, this->GetInfoFile(),
                        "Autogen build directory missing");
     return false;
   }
   if (this->RccExecutable.empty()) {
-    this->LogFileError(cmQtAutoGen::RCC, this->InfoFile,
+    this->LogFileError(cmQtAutoGen::RCC, this->GetInfoFile(),
                        "rcc executable missing");
     return false;
   }
   if (this->QrcFile.empty()) {
-    this->LogFileError(cmQtAutoGen::RCC, this->InfoFile,
+    this->LogFileError(cmQtAutoGen::RCC, this->GetInfoFile(),
                        "rcc input file missing");
     return false;
   }
   if (this->RccFile.empty()) {
-    this->LogFileError(cmQtAutoGen::RCC, this->InfoFile,
+    this->LogFileError(cmQtAutoGen::RCC, this->GetInfoFile(),
                        "rcc output file missing");
     return false;
   }
@@ -304,7 +180,7 @@ bool cmQtAutoGeneratorRcc::SettingsFileWrite()
   bool success = true;
   // Only write if any setting changed
   if (this->SettingsChanged) {
-    if (this->Verbose) {
+    if (this->GetVerbose()) {
       this->LogInfo(cmQtAutoGen::RCC, "Writing settings file " +
                       cmQtAutoGen::Quoted(this->SettingsFile));
     }
@@ -392,7 +268,7 @@ bool cmQtAutoGeneratorRcc::RccGenerate()
     success = false;
   }
   if (success && !generate && !cmSystemTools::FileExists(rccFileAbs.c_str())) {
-    if (this->Verbose) {
+    if (this->GetVerbose()) {
       generateReason = "Generating ";
       generateReason += cmQtAutoGen::Quoted(rccFileAbs);
       generateReason += " from its source file ";
@@ -402,7 +278,7 @@ bool cmQtAutoGeneratorRcc::RccGenerate()
     generate = true;
   }
   if (success && !generate && this->SettingsChanged) {
-    if (this->Verbose) {
+    if (this->GetVerbose()) {
       generateReason = "Generating ";
       generateReason += cmQtAutoGen::Quoted(rccFileAbs);
       generateReason += " from ";
@@ -414,7 +290,7 @@ bool cmQtAutoGeneratorRcc::RccGenerate()
   if (success && !generate) {
     std::string error;
     if (FileIsOlderThan(rccFileAbs, this->QrcFile, &error)) {
-      if (this->Verbose) {
+      if (this->GetVerbose()) {
         generateReason = "Generating ";
         generateReason += cmQtAutoGen::Quoted(rccFileAbs);
         generateReason += " because it is older than ";
@@ -457,7 +333,7 @@ bool cmQtAutoGeneratorRcc::RccGenerate()
           break;
         }
         if (FileIsOlderThan(rccFileAbs, resFile, &error)) {
-          if (this->Verbose) {
+          if (this->GetVerbose()) {
             generateReason = "Generating ";
             generateReason += cmQtAutoGen::Quoted(rccFileAbs);
             generateReason += " from ";
@@ -482,7 +358,7 @@ bool cmQtAutoGeneratorRcc::RccGenerate()
   // Regenerate on demand
   if (generate) {
     // Log
-    if (this->Verbose) {
+    if (this->GetVerbose()) {
       this->LogBold("Generating RCC source " + rccFileRel);
       this->LogInfo(cmQtAutoGen::RCC, generateReason);
     }
@@ -531,7 +407,7 @@ bool cmQtAutoGeneratorRcc::RccGenerate()
     // Write content to file
     if (this->FileDiffers(wrapperFileAbs, content)) {
       // Write new wrapper file
-      if (this->Verbose) {
+      if (this->GetVerbose()) {
         this->LogBold("Generating RCC wrapper " + wrapperFileRel);
       }
       if (!this->FileWrite(cmQtAutoGen::RCC, wrapperFileAbs, content)) {
@@ -541,7 +417,7 @@ bool cmQtAutoGeneratorRcc::RccGenerate()
       }
     } else if (rccGenerated) {
       // Just touch the wrapper file
-      if (this->Verbose) {
+      if (this->GetVerbose()) {
         this->LogInfo(cmQtAutoGen::RCC,
                       "Touching RCC wrapper " + wrapperFileRel);
       }
@@ -550,189 +426,4 @@ bool cmQtAutoGeneratorRcc::RccGenerate()
   }
 
   return success;
-}
-
-void cmQtAutoGeneratorRcc::LogBold(std::string const& message) const
-{
-  cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
-                                     cmsysTerminal_Color_ForegroundBold,
-                                   message.c_str(), true, this->ColorOutput);
-}
-
-void cmQtAutoGeneratorRcc::LogInfo(cmQtAutoGen::Generator genType,
-                                   std::string const& message) const
-{
-  std::string msg = cmQtAutoGen::GeneratorName(genType);
-  msg += ": ";
-  msg += message;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  cmSystemTools::Stdout(msg.c_str(), msg.size());
-}
-
-void cmQtAutoGeneratorRcc::LogWarning(cmQtAutoGen::Generator genType,
-                                      std::string const& message) const
-{
-  std::string msg = cmQtAutoGen::GeneratorName(genType);
-  msg += " warning:";
-  if (message.find('\n') == std::string::npos) {
-    // Single line message
-    msg.push_back(' ');
-  } else {
-    // Multi line message
-    msg.push_back('\n');
-  }
-  // Message
-  msg += message;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
-  cmSystemTools::Stdout(msg.c_str(), msg.size());
-}
-
-void cmQtAutoGeneratorRcc::LogFileWarning(cmQtAutoGen::Generator genType,
-                                          std::string const& filename,
-                                          std::string const& message) const
-{
-  std::string msg = "  ";
-  msg += cmQtAutoGen::Quoted(filename);
-  msg.push_back('\n');
-  // Message
-  msg += message;
-  this->LogWarning(genType, msg);
-}
-
-void cmQtAutoGeneratorRcc::LogError(cmQtAutoGen::Generator genType,
-                                    std::string const& message) const
-{
-  std::string msg;
-  msg.push_back('\n');
-  msg += HeadLine(cmQtAutoGen::GeneratorName(genType) + " error");
-  // Message
-  msg += message;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
-  cmSystemTools::Stderr(msg.c_str(), msg.size());
-}
-
-void cmQtAutoGeneratorRcc::LogFileError(cmQtAutoGen::Generator genType,
-                                        std::string const& filename,
-                                        std::string const& message) const
-{
-  std::string emsg = "  ";
-  emsg += cmQtAutoGen::Quoted(filename);
-  emsg += '\n';
-  // Message
-  emsg += message;
-  this->LogError(genType, emsg);
-}
-
-void cmQtAutoGeneratorRcc::LogCommandError(
-  cmQtAutoGen::Generator genType, std::string const& message,
-  std::vector<std::string> const& command, std::string const& output) const
-{
-  std::string msg;
-  msg.push_back('\n');
-  msg += HeadLine(cmQtAutoGen::GeneratorName(genType) + " subprocess error");
-  msg += message;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
-  msg += HeadLine("Command");
-  msg += QuotedCommand(command);
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
-  msg += HeadLine("Output");
-  msg += output;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
-  cmSystemTools::Stderr(msg.c_str(), msg.size());
-}
-
-/**
- * @brief Generates the parent directory of the given file on demand
- * @return True on success
- */
-bool cmQtAutoGeneratorRcc::MakeParentDirectory(
-  cmQtAutoGen::Generator genType, std::string const& filename) const
-{
-  bool success = true;
-  std::string const dirName = cmSystemTools::GetFilenamePath(filename);
-  if (!dirName.empty()) {
-    if (!cmSystemTools::MakeDirectory(dirName)) {
-      this->LogFileError(genType, filename,
-                         "Could not create parent directory");
-      success = false;
-    }
-  }
-  return success;
-}
-
-bool cmQtAutoGeneratorRcc::FileDiffers(std::string const& filename,
-                                       std::string const& content)
-{
-  bool differs = true;
-  {
-    std::string oldContents;
-    if (ReadFile(oldContents, filename)) {
-      differs = (oldContents != content);
-    }
-  }
-  return differs;
-}
-
-bool cmQtAutoGeneratorRcc::FileWrite(cmQtAutoGen::Generator genType,
-                                     std::string const& filename,
-                                     std::string const& content)
-{
-  std::string error;
-  // Make sure the parent directory exists
-  if (this->MakeParentDirectory(genType, filename)) {
-    cmsys::ofstream outfile;
-    outfile.open(filename.c_str(),
-                 (std::ios::out | std::ios::binary | std::ios::trunc));
-    if (outfile) {
-      outfile << content;
-      // Check for write errors
-      if (!outfile.good()) {
-        error = "File writing failed";
-      }
-    } else {
-      error = "Opening file for writing failed";
-    }
-  }
-  if (!error.empty()) {
-    this->LogFileError(genType, filename, error);
-    return false;
-  }
-  return true;
-}
-
-/**
- * @brief Runs a command and returns true on success
- * @return True on success
- */
-bool cmQtAutoGeneratorRcc::RunCommand(std::vector<std::string> const& command,
-                                      std::string& output) const
-{
-  // Log command
-  if (this->Verbose) {
-    std::string qcmd = QuotedCommand(command);
-    qcmd.push_back('\n');
-    cmSystemTools::Stdout(qcmd.c_str(), qcmd.size());
-  }
-  // Execute command
-  int retVal = 0;
-  bool res = cmSystemTools::RunSingleCommand(
-    command, &output, &output, &retVal, nullptr, cmSystemTools::OUTPUT_NONE);
-  return (res && (retVal == 0));
 }

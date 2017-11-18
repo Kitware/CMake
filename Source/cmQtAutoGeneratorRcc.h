@@ -7,18 +7,18 @@
 
 #include "cmFilePathChecksum.h"
 #include "cmQtAutoGen.h"
+#include "cmQtAutoGenerator.h"
 
 #include <string>
 #include <vector>
 
 class cmMakefile;
 
-class cmQtAutoGeneratorRcc
+class cmQtAutoGeneratorRcc : public cmQtAutoGenerator
 {
   CM_DISABLE_COPY(cmQtAutoGeneratorRcc)
 public:
   cmQtAutoGeneratorRcc();
-  bool Run(std::string const& infoFile, std::string const& config);
 
 private:
   // -- Initialization & settings
@@ -26,47 +26,13 @@ private:
   void SettingsFileRead(cmMakefile* makefile);
   bool SettingsFileWrite();
   // -- Central processing
-  bool Process(cmMakefile* makefile);
+  bool Process(cmMakefile* makefile) override;
   bool RccGenerate();
-  // -- Log info
-  void LogBold(std::string const& message) const;
-  void LogInfo(cmQtAutoGen::Generator genType,
-               std::string const& message) const;
-  // -- Log warning
-  void LogWarning(cmQtAutoGen::Generator genType,
-                  std::string const& message) const;
-  void LogFileWarning(cmQtAutoGen::Generator genType,
-                      std::string const& filename,
-                      std::string const& message) const;
-  // -- Log error
-  void LogError(cmQtAutoGen::Generator genType,
-                std::string const& message) const;
-  void LogFileError(cmQtAutoGen::Generator genType,
-                    std::string const& filename,
-                    std::string const& message) const;
-  void LogCommandError(cmQtAutoGen::Generator genType,
-                       std::string const& message,
-                       std::vector<std::string> const& command,
-                       std::string const& output) const;
-  // -- Utility
-  bool MakeParentDirectory(cmQtAutoGen::Generator genType,
-                           std::string const& filename) const;
-  bool FileDiffers(std::string const& filename, std::string const& content);
-  bool FileWrite(cmQtAutoGen::Generator genType, std::string const& filename,
-                 std::string const& content);
-  bool RunCommand(std::vector<std::string> const& command,
-                  std::string& output) const;
 
-  // -- Info settings
-  std::string InfoFile;
-  std::string InfoDir;
-  std::string InfoConfig;
   // -- Config settings
   std::string ConfigSuffix;
   cmQtAutoGen::MultiConfig MultiConfig;
   // -- Settings
-  bool Verbose;
-  bool ColorOutput;
   bool SettingsChanged;
   std::string SettingsFile;
   std::string SettingsString;
