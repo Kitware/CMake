@@ -154,8 +154,7 @@ private:
   std::string AutogenBuildDir;
   std::string AutogenIncludeDir;
   // -- Qt environment
-  std::string QtMajorVersion;
-  std::string QtMinorVersion;
+  unsigned long QtVersionMajor;
   std::string MocExecutable;
   std::string UicExecutable;
   // -- File lists

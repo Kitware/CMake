@@ -899,10 +899,9 @@ void cmQtAutoGeneratorInitializer::SetupCustomTargets()
   AddDefinitionEscaped(makefile, "_multi_config",
                        cmQtAutoGen::MultiConfigName(this->MultiConfig));
   AddDefinitionEscaped(makefile, "_build_dir", this->DirBuild);
-  AddDefinitionEscaped(makefile, "_qt_version_major", this->QtVersionMajor);
-  AddDefinitionEscaped(makefile, "_qt_version_minor", this->QtVersionMinor);
 
   if (this->MocEnabled || this->UicEnabled) {
+    AddDefinitionEscaped(makefile, "_qt_version_major", this->QtVersionMajor);
     AddDefinitionEscaped(makefile, "_settings_file",
                          this->AutogenSettingsFile);
     AddDefinitionEscaped(makefile, "_sources", this->Sources);

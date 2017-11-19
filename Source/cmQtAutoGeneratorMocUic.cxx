@@ -49,6 +49,7 @@ static bool ListContains(std::vector<std::string> const& list,
 cmQtAutoGeneratorMocUic::cmQtAutoGeneratorMocUic()
   : MultiConfig(cmQtAutoGen::WRAP)
   , IncludeProjectDirsBefore(false)
+  , QtVersionMajor(4)
   , MocSettingsChanged(false)
   , MocPredefsChanged(false)
   , MocRelaxedMode(false)
@@ -163,18 +164,12 @@ bool cmQtAutoGeneratorMocUic::InitInfoFile(cmMakefile* makefile)
   }
 
   // - Qt environment
-  this->QtMajorVersion = InfoGet("AM_QT_VERSION_MAJOR");
-  this->QtMinorVersion = InfoGet("AM_QT_VERSION_MINOR");
+  if (!cmSystemTools::StringToULong(InfoGet("AM_QT_VERSION_MAJOR"),
+                                    &this->QtVersionMajor)) {
+    this->QtVersionMajor = 4;
+  }
   this->MocExecutable = InfoGet("AM_QT_MOC_EXECUTABLE");
   this->UicExecutable = InfoGet("AM_QT_UIC_EXECUTABLE");
-
-  // Check Qt version
-  if ((this->QtMajorVersion != "4") && (this->QtMajorVersion != "5")) {
-    this->LogFileError(cmQtAutoGen::GEN, this->GetInfoFile(),
-                       "Unsupported Qt version: " +
-                         cmQtAutoGen::Quoted(this->QtMajorVersion));
-    return false;
-  }
 
   // - Moc
   if (this->MocEnabled()) {
@@ -203,7 +198,7 @@ bool cmQtAutoGeneratorMocUic::InitInfoFile(cmMakefile* makefile)
       std::vector<std::string> const mocDependFilters =
         InfoGetList("AM_MOC_DEPEND_FILTERS");
       // Insert Q_PLUGIN_METADATA dependency filter
-      if (this->QtMajorVersion != "4") {
+      if (this->QtVersionMajor != 4) {
         this->MocDependFilterPush("Q_PLUGIN_METADATA",
                                   "[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\("
                                   "[^\\)]*FILE[ \t]*\"([^\"]+)\"");
@@ -1686,7 +1681,7 @@ bool cmQtAutoGeneratorMocUic::UicGenerateFile(const UicJob& uicJob)
         auto optionIt = this->UicOptions.find(uicJob.SourceFile);
         if (optionIt != this->UicOptions.end()) {
           cmQtAutoGen::UicMergeOptions(allOpts, optionIt->second,
-                                       (this->QtMajorVersion == "5"));
+                                       (this->QtVersionMajor == 5));
         }
         cmd.insert(cmd.end(), allOpts.begin(), allOpts.end());
       }
