@@ -65,8 +65,11 @@ private:
   bool MocEnabled;
   bool UicEnabled;
   bool RccEnabled;
+  // Qt
   std::string QtVersionMajor;
   std::string QtVersionMinor;
+  std::string RccExecutable;
+  std::vector<std::string> RccListOptions;
   // Configurations
   std::string ConfigDefault;
   std::vector<std::string> ConfigsList;

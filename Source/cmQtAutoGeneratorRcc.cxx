@@ -78,8 +78,8 @@ bool cmQtAutoGeneratorRcc::InfoFileRead(cmMakefile* makefile)
   this->AutogenBuildDir = InfoGet("ARCC_BUILD_DIR");
 
   // - Qt environment
-  this->QtMajorVersion = InfoGet("ARCC_QT_VERSION_MAJOR");
-  this->RccExecutable = InfoGet("ARCC_QT_RCC_EXECUTABLE");
+  this->RccExecutable = InfoGet("ARCC_RCC_EXECUTABLE");
+  this->RccListOptions = InfoGetList("ARCC_RCC_LIST_OPTIONS");
 
   // - Job
   this->QrcFile = InfoGet("ARCC_SOURCE");
@@ -134,6 +134,8 @@ void cmQtAutoGeneratorRcc::SettingsFileRead(cmMakefile* makefile)
     {
       std::string str;
       str += this->RccExecutable;
+      str += sep;
+      str += cmJoin(this->RccListOptions, ";");
       str += sep;
       str += this->QrcFile;
       str += sep;
@@ -307,7 +309,7 @@ bool cmQtAutoGeneratorRcc::RccGenerate()
     } else {
       // Read input file list from qrc file
       std::string error;
-      if (cmQtAutoGen::RccListInputs(this->QtMajorVersion, this->RccExecutable,
+      if (cmQtAutoGen::RccListInputs(this->RccExecutable, this->RccListOptions,
                                      this->QrcFile, readFiles, &error)) {
         files = &readFiles;
       } else {

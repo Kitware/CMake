@@ -44,8 +44,8 @@ private:
   std::string AutogenBuildDir;
   cmFilePathChecksum FilePathChecksum;
   // -- Qt environment
-  std::string QtMajorVersion;
   std::string RccExecutable;
+  std::vector<std::string> RccListOptions;
   // -- Job
   std::string QrcFile;
   std::string RccFile;

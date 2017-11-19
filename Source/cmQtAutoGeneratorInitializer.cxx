@@ -14,6 +14,7 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmProcessOutput.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
 #include "cmState.h"
@@ -190,40 +191,6 @@ static bool StaticLibraryCycle(cmGeneratorTarget const* targetOrigin,
   return cycle;
 }
 
-static std::string RccGetExecutable(cmGeneratorTarget const* target,
-                                    std::string const& qtMajorVersion)
-{
-  std::string rccExec;
-  std::string err;
-
-  cmLocalGenerator* localGen = target->GetLocalGenerator();
-  if (qtMajorVersion == "5") {
-    cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse("Qt5::rcc");
-    if (tgt != nullptr) {
-      rccExec = SafeString(tgt->ImportedGetLocation(""));
-    } else {
-      err = "AUTORCC: Qt5::rcc target not found";
-    }
-  } else if (qtMajorVersion == "4") {
-    cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse("Qt4::rcc");
-    if (tgt != nullptr) {
-      rccExec = SafeString(tgt->ImportedGetLocation(""));
-    } else {
-      err = "AUTORCC: Qt4::rcc target not found";
-    }
-  } else {
-    err = "The AUTORCC feature supports only Qt 4 and Qt 5";
-  }
-
-  if (!err.empty()) {
-    err += " (";
-    err += target->GetName();
-    err += ")";
-    cmSystemTools::Error(err.c_str());
-  }
-  return rccExec;
-}
-
 cmQtAutoGeneratorInitializer::cmQtAutoGeneratorInitializer(
   cmGeneratorTarget* target, bool mocEnabled, bool uicEnabled, bool rccEnabled,
   std::string const& qtVersionMajor)
@@ -366,6 +333,56 @@ void cmQtAutoGeneratorInitializer::InitCustomTargets()
       includeDir += "_$<CONFIG>";
     }
     this->Target->AddIncludeDirectory(includeDir, true);
+  }
+
+  // Acquire rcc executable and features
+  if (this->RccEnabled) {
+    {
+      std::string err;
+      if (this->QtVersionMajor == "5") {
+        cmGeneratorTarget* tgt =
+          localGen->FindGeneratorTargetToUse("Qt5::rcc");
+        if (tgt != nullptr) {
+          this->RccExecutable = SafeString(tgt->ImportedGetLocation(""));
+        } else {
+          err = "AUTORCC: Qt5::rcc target not found";
+        }
+      } else if (QtVersionMajor == "4") {
+        cmGeneratorTarget* tgt =
+          localGen->FindGeneratorTargetToUse("Qt4::rcc");
+        if (tgt != nullptr) {
+          this->RccExecutable = SafeString(tgt->ImportedGetLocation(""));
+        } else {
+          err = "AUTORCC: Qt4::rcc target not found";
+        }
+      } else {
+        err = "The AUTORCC feature supports only Qt 4 and Qt 5";
+      }
+      if (!err.empty()) {
+        err += " (";
+        err += this->Target->GetName();
+        err += ")";
+        cmSystemTools::Error(err.c_str());
+      }
+    }
+    // Detect if rcc supports (-)-list
+    if (!this->RccExecutable.empty() && (this->QtVersionMajor == "5")) {
+      std::vector<std::string> command;
+      command.push_back(this->RccExecutable);
+      command.push_back("--help");
+      std::string rccStdOut;
+      std::string rccStdErr;
+      int retVal = 0;
+      bool result = cmSystemTools::RunSingleCommand(
+        command, &rccStdOut, &rccStdErr, &retVal, nullptr,
+        cmSystemTools::OUTPUT_NONE, 0.0, cmProcessOutput::Auto);
+      if (result && retVal == 0 &&
+          rccStdOut.find("--list") != std::string::npos) {
+        this->RccListOptions.push_back("--list");
+      } else {
+        this->RccListOptions.push_back("-list");
+      }
+    }
   }
 
   // Extract relevant source files
@@ -548,8 +565,6 @@ void cmQtAutoGeneratorInitializer::InitCustomTargets()
   // Process qrc files
   if (!this->Qrcs.empty()) {
     const bool QtV5 = (this->QtVersionMajor == "5");
-    std::string const rcc =
-      RccGetExecutable(this->Target, this->QtVersionMajor);
     // Target rcc options
     std::vector<std::string> optionsTarget;
     cmSystemTools::ExpandListArgument(
@@ -673,9 +688,9 @@ void cmQtAutoGeneratorInitializer::InitCustomTargets()
           // Add the resource files to the dependencies
           {
             std::string error;
-            if (cmQtAutoGen::RccListInputs(this->QtVersionMajor, rcc,
-                                           qrc.QrcFile, qrc.Resources,
-                                           &error)) {
+            if (cmQtAutoGen::RccListInputs(this->RccExecutable,
+                                           this->RccListOptions, qrc.QrcFile,
+                                           qrc.Resources, &error)) {
               for (std::string const& fileName : qrc.Resources) {
                 // Add resource file to the custom command dependencies
                 ccDepends.push_back(fileName);
@@ -881,8 +896,9 @@ void cmQtAutoGeneratorInitializer::SetupCustomTargets()
     }
   }
   if (this->RccEnabled) {
-    AddDefinitionEscaped(makefile, "_qt_rcc_executable",
-                         RccGetExecutable(this->Target, this->QtVersionMajor));
+    AddDefinitionEscaped(makefile, "_qt_rcc_executable", this->RccExecutable);
+    AddDefinitionEscaped(makefile, "_qt_rcc_list_options",
+                         this->RccListOptions);
   }
 
   // Create info directory on demand
