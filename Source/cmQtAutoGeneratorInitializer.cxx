@@ -147,6 +147,26 @@ static void AddCleanFile(cmMakefile* makefile, std::string const& fileName)
                            false);
 }
 
+static std::string FileProjectRelativePath(cmMakefile* makefile,
+                                           std::string const& fileName)
+{
+  std::string res;
+  {
+    std::string pSource = cmSystemTools::RelativePath(
+      makefile->GetCurrentSourceDirectory(), fileName.c_str());
+    std::string pBinary = cmSystemTools::RelativePath(
+      makefile->GetCurrentBinaryDirectory(), fileName.c_str());
+    if (pSource.size() < pBinary.size()) {
+      res = std::move(pSource);
+    } else if (pBinary.size() < fileName.size()) {
+      res = std::move(pBinary);
+    } else {
+      res = fileName;
+    }
+  }
+  return res;
+}
+
 /* @brief Tests if targetDepend is a STATIC_LIBRARY and if any of its
  * recursive STATIC_LIBRARY dependencies depends on targetOrigin
  * (STATIC_LIBRARY cycle).
@@ -646,7 +666,7 @@ void cmQtAutoGeneratorInitializer::InitCustomTargets()
         commandLines.push_back(std::move(currentLine));
       }
       std::string ccComment = "Automatic RCC for ";
-      ccComment += qrc.QrcFile;
+      ccComment += FileProjectRelativePath(makefile, qrc.QrcFile);
 
       if (qrc.Generated) {
         // Create custom rcc target
