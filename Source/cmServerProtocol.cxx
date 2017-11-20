@@ -1118,10 +1118,23 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
     const cmMakefile* mf = lg->GetMakefile();
     pObj[kMINIMUM_CMAKE_VERSION] =
       mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
-    pObj[kHAS_INSTALL_RULE] = mf->GetInstallGenerators().empty() == false;
     pObj[kSOURCE_DIRECTORY_KEY] = mf->GetCurrentSourceDirectory();
     pObj[kBUILD_DIRECTORY_KEY] = mf->GetCurrentBinaryDirectory();
     pObj[kTARGETS_KEY] = DumpTargetsList(projectIt.second, config);
+
+    // For a project-level install rule it might be defined in any of its
+    // associated generators.
+    bool hasInstallRule = false;
+    for (const auto generator : projectIt.second) {
+      hasInstallRule =
+        generator->GetMakefile()->GetInstallGenerators().empty() == false;
+
+      if (hasInstallRule) {
+        break;
+      }
+    }
+
+    pObj[kHAS_INSTALL_RULE] = hasInstallRule;
 
     result.append(pObj);
   }
