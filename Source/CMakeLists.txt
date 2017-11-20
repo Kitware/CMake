@@ -918,7 +918,7 @@ if(UNIX)
     # OpenBSD and also Linux and OSX. Look for the header and
     # the library; it's a warning on FreeBSD if they're not
     # found, and informational on other platforms.
-    find_path(FREEBSD_PKG_INCLUDE_DIRS "pkg.h" PATHS /usr/local)
+    find_path(FREEBSD_PKG_INCLUDE_DIRS "pkg.h")
     if(FREEBSD_PKG_INCLUDE_DIRS)
       find_library(FREEBSD_PKG_LIBRARIES
         pkg

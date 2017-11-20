@@ -63,10 +63,6 @@ set(FREETYPE_FIND_ARGS
   HINTS
     ENV FREETYPE_DIR
   PATHS
-    /usr/X11R6
-    /usr/local/X11R6
-    /usr/local/X11
-    /usr/freeware
     ENV GTKMM_BASEPATH
     [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]

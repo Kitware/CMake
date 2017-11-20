@@ -126,8 +126,6 @@ list(APPEND JAVA_AWT_LIBRARY_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/lib"
   )
 JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
-  /usr/lib
-  /usr/local/lib
   /usr/lib/jvm/java/lib
   /usr/lib/java/jre/lib/{libarch}
   /usr/lib/jvm/jre/lib/{libarch}
@@ -185,8 +183,6 @@ list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES
 )
 
 JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_INCLUDE_DIRECTORIES
-  /usr/include
-  /usr/local/include
   /usr/lib/java/include
   /usr/local/lib/java/include
   /usr/lib/jvm/java/include
