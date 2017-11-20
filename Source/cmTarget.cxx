@@ -279,6 +279,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("CUDA_STANDARD_REQUIRED", nullptr);
     this->SetPropertyDefault("CUDA_EXTENSIONS", nullptr);
     this->SetPropertyDefault("CUDA_COMPILER_LAUNCHER", nullptr);
+    this->SetPropertyDefault("CUDA_SEPARABLE_COMPILATION", nullptr);
     this->SetPropertyDefault("LINK_SEARCH_START_STATIC", nullptr);
     this->SetPropertyDefault("LINK_SEARCH_END_STATIC", nullptr);
   }
