@@ -200,6 +200,11 @@ cmake::cmake(Role role)
   this->SourceFileExtensions.push_back("M");
   this->SourceFileExtensions.push_back("mm");
 
+  std::copy(this->SourceFileExtensions.begin(),
+            this->SourceFileExtensions.end(),
+            std::inserter(this->SourceFileExtensionsSet,
+                          this->SourceFileExtensionsSet.end()));
+
   this->HeaderFileExtensions.push_back("h");
   this->HeaderFileExtensions.push_back("hh");
   this->HeaderFileExtensions.push_back("h++");
@@ -208,6 +213,11 @@ cmake::cmake(Role role)
   this->HeaderFileExtensions.push_back("hxx");
   this->HeaderFileExtensions.push_back("in");
   this->HeaderFileExtensions.push_back("txx");
+
+  std::copy(this->HeaderFileExtensions.begin(),
+            this->HeaderFileExtensions.end(),
+            std::inserter(this->HeaderFileExtensionsSet,
+                          this->HeaderFileExtensionsSet.end()));
 }
 
 cmake::~cmake()
@@ -1645,6 +1655,21 @@ void cmake::AddCacheEntry(const std::string& key, const char* value,
   this->State->AddCacheEntry(key, value, helpString,
                              cmStateEnums::CacheEntryType(type));
   this->UnwatchUnusedCli(key);
+}
+
+std::string cmake::StripExtension(const std::string& file) const
+{
+  auto dotpos = file.rfind('.');
+  if (dotpos != std::string::npos) {
+    auto ext = file.substr(dotpos + 1);
+#if defined(_WIN32) || defined(__APPLE__)
+    ext = cmSystemTools::LowerCase(ext);
+#endif
+    if (this->IsSourceExtension(ext) || this->IsHeaderExtension(ext)) {
+      return file.substr(0, dotpos);
+    }
+  }
+  return file;
 }
 
 const char* cmake::GetCacheDefinition(const std::string& name) const

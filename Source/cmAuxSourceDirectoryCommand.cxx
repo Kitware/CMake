@@ -54,10 +54,8 @@ bool cmAuxSourceDirectoryCommand::InitialPass(
         std::string ext = file.substr(dotpos + 1);
         std::string base = file.substr(0, dotpos);
         // Process only source files
-        std::vector<std::string> const& srcExts =
-          this->Makefile->GetCMakeInstance()->GetSourceExtensions();
-        if (!base.empty() &&
-            std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end()) {
+        auto cm = this->Makefile->GetCMakeInstance();
+        if (!base.empty() && cm->IsSourceExtension(ext)) {
           std::string fullname = templateDirectory;
           fullname += "/";
           fullname += file;
