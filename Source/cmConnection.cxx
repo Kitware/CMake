@@ -97,11 +97,10 @@ void cmEventBasedConnection::ReadData(const std::string& data)
   this->RawReadBuffer += data;
   if (BufferStrategy) {
     std::string packet = BufferStrategy->BufferMessage(this->RawReadBuffer);
-    do {
+    while (!packet.empty()) {
       ProcessRequest(packet);
       packet = BufferStrategy->BufferMessage(this->RawReadBuffer);
-    } while (!packet.empty());
-
+    }
   } else {
     ProcessRequest(this->RawReadBuffer);
     this->RawReadBuffer.clear();
