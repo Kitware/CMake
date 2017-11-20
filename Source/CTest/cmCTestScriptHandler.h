@@ -94,9 +94,9 @@ public:
   /**
    * Return the time remaianing that the script is allowed to run in
    * seconds if the user has set the variable CTEST_TIME_LIMIT. If that has
-   * not been set it returns 1e7 seconds
+   * not been set it returns a very large value.
    */
-  double GetRemainingTimeAllowed();
+  std::chrono::duration<double> GetRemainingTimeAllowed();
 
   cmCTestScriptHandler();
   ~cmCTestScriptHandler() override;

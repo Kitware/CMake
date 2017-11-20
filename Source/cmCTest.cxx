@@ -1,5 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
+#ifdef _WIN32
+/* windows.h defines min() and max() macros by default. This interferes with
+ * C++ functions names.
+ */
+#define NOMINMAX
+#endif
 #include "cmCTest.h"
 
 #include "cm_curl.h"
@@ -44,6 +50,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProcess.h"
 #include "cmProcessOutput.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
@@ -278,9 +285,9 @@ cmCTest::cmCTest()
   this->TestModel = cmCTest::EXPERIMENTAL;
   this->MaxTestNameWidth = 30;
   this->InteractiveDebugMode = true;
-  this->TimeOut = 0;
-  this->GlobalTimeout = 0;
-  this->LastStopTimeout = 24 * 60 * 60;
+  this->TimeOut = std::chrono::duration<double>::zero();
+  this->GlobalTimeout = std::chrono::duration<double>::zero();
+  this->LastStopTimeout = std::chrono::hours(24);
   this->CompressXMLFiles = false;
   this->ScheduleType.clear();
   this->StopTime.clear();
@@ -678,7 +685,8 @@ bool cmCTest::UpdateCTestConfiguration()
     this->BinaryDir = this->GetCTestConfiguration("BuildDirectory");
     cmSystemTools::ChangeDirectory(this->BinaryDir);
   }
-  this->TimeOut = atoi(this->GetCTestConfiguration("TimeOut").c_str());
+  this->TimeOut =
+    std::chrono::seconds(atoi(this->GetCTestConfiguration("TimeOut").c_str()));
   std::string const& testLoad = this->GetCTestConfiguration("TestLoad");
   if (!testLoad.empty()) {
     unsigned long load;
@@ -836,7 +844,8 @@ int cmCTest::ProcessSteps()
   for (Part p = PartStart; notest && p != PartCount; p = Part(p + 1)) {
     notest = !this->Parts[p];
   }
-  if (this->Parts[PartUpdate] && (this->GetRemainingTimeAllowed() - 120 > 0)) {
+  if (this->Parts[PartUpdate] &&
+      (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     cmCTestGenericHandler* uphandler = this->GetHandler("update");
     uphandler->SetPersistentOption(
       "SourceDirectory",
@@ -850,33 +859,34 @@ int cmCTest::ProcessSteps()
     return 0;
   }
   if (this->Parts[PartConfigure] &&
-      (this->GetRemainingTimeAllowed() - 120 > 0)) {
+      (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     if (this->GetHandler("configure")->ProcessHandler() < 0) {
       res |= cmCTest::CONFIGURE_ERRORS;
     }
   }
-  if (this->Parts[PartBuild] && (this->GetRemainingTimeAllowed() - 120 > 0)) {
+  if (this->Parts[PartBuild] &&
+      (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("build")->ProcessHandler() < 0) {
       res |= cmCTest::BUILD_ERRORS;
     }
   }
   if ((this->Parts[PartTest] || notest) &&
-      (this->GetRemainingTimeAllowed() - 120 > 0)) {
+      (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("test")->ProcessHandler() < 0) {
       res |= cmCTest::TEST_ERRORS;
     }
   }
   if (this->Parts[PartCoverage] &&
-      (this->GetRemainingTimeAllowed() - 120 > 0)) {
+      (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("coverage")->ProcessHandler() < 0) {
       res |= cmCTest::COVERAGE_ERRORS;
     }
   }
   if (this->Parts[PartMemCheck] &&
-      (this->GetRemainingTimeAllowed() - 120 > 0)) {
+      (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("memcheck")->ProcessHandler() < 0) {
       res |= cmCTest::MEMORY_ERRORS;
@@ -955,7 +965,8 @@ int cmCTest::GetTestModelFromString(const char* str)
 //######################################################################
 
 int cmCTest::RunMakeCommand(const char* command, std::string& output,
-                            int* retVal, const char* dir, int timeout,
+                            int* retVal, const char* dir,
+                            std::chrono::duration<double> timeout,
                             std::ostream& ofs, Encoding encoding)
 {
   // First generate the command and arguments
@@ -1071,26 +1082,37 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
 //######################################################################
 
 int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
-                     int* retVal, std::ostream* log, double testTimeOut,
+                     int* retVal, std::ostream* log,
+                     std::chrono::duration<double> testTimeOut,
                      std::vector<std::string>* environment, Encoding encoding)
 {
   bool modifyEnv = (environment && !environment->empty());
 
   // determine how much time we have
-  double timeout = this->GetRemainingTimeAllowed() - 120;
-  if (this->TimeOut > 0 && this->TimeOut < timeout) {
+  std::chrono::duration<double> timeout =
+    std::min<std::chrono::duration<double>>(this->GetRemainingTimeAllowed(),
+                                            std::chrono::minutes(2));
+  if (this->TimeOut > std::chrono::duration<double>::zero() &&
+      this->TimeOut < timeout) {
     timeout = this->TimeOut;
   }
-  if (testTimeOut > 0 && testTimeOut < this->GetRemainingTimeAllowed()) {
+  if (testTimeOut > std::chrono::duration<double>::zero() &&
+      testTimeOut < this->GetRemainingTimeAllowed()) {
     timeout = testTimeOut;
   }
 
   // always have at least 1 second if we got to here
-  if (timeout <= 0) {
-    timeout = 1;
+  if (timeout <= std::chrono::duration<double>::zero()) {
+    timeout = std::chrono::seconds(1);
   }
-  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-             "Test timeout computed to be: " << timeout << "\n");
+  cmCTestLog(
+    this, HANDLER_VERBOSE_OUTPUT, "Test timeout computed to be: "
+      << (timeout == std::chrono::duration<double>::max()
+            ? std::string("infinite")
+            : std::to_string(
+                std::chrono::duration_cast<std::chrono::seconds>(timeout)
+                  .count()))
+      << "\n");
   if (cmSystemTools::SameFile(argv[0], cmSystemTools::GetCTestCommand()) &&
       !this->ForceNewCTestProcess) {
     cmCTest inst;
@@ -1107,10 +1129,12 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
         // make sure we pass the timeout in for any build and test
         // invocations. Since --build-generator is required this is a
         // good place to check for it, and to add the arguments in
-        if (strcmp(i, "--build-generator") == 0 && timeout > 0) {
+        if (strcmp(i, "--build-generator") == 0 &&
+            timeout > std::chrono::duration<double>::zero()) {
           args.push_back("--test-timeout");
           std::ostringstream msg;
-          msg << timeout;
+          msg << std::chrono::duration_cast<std::chrono::seconds>(timeout)
+                   .count();
           args.push_back(msg.str());
         }
         args.push_back(i);
@@ -1757,7 +1781,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
 
   if (this->CheckArgument(arg, "--timeout") && i < args.size() - 1) {
     i++;
-    double timeout = atof(args[i].c_str());
+    auto timeout = std::chrono::duration<double>(atof(args[i].c_str()));
     this->GlobalTimeout = timeout;
   }
 
@@ -2564,7 +2588,9 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(
 
 bool cmCTest::RunCommand(std::vector<std::string> const& args,
                          std::string* stdOut, std::string* stdErr, int* retVal,
-                         const char* dir, double timeout, Encoding encoding)
+                         const char* dir,
+                         std::chrono::duration<double> timeout,
+                         Encoding encoding)
 {
   std::vector<const char*> argv;
   argv.reserve(args.size() + 1);
@@ -2775,10 +2801,10 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
   }
 }
 
-double cmCTest::GetRemainingTimeAllowed()
+std::chrono::duration<double> cmCTest::GetRemainingTimeAllowed()
 {
   if (!this->GetHandler("script")) {
-    return 1.0e7;
+    return std::chrono::duration<double>::max();
   }
 
   cmCTestScriptHandler* ch =

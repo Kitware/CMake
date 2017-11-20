@@ -1,5 +1,9 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
+#ifdef _WIN32
+/* windows.h defines min() and max() macros that interfere. */
+#define NOMINMAX
+#endif
 #include "cmCTestRunTest.h"
 
 #include "cmCTest.h"
@@ -14,6 +18,7 @@
 #include "cmsys/Base64.h"
 #include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
+#include <algorithm>
 #include <chrono>
 #include <iomanip>
 #include <sstream>
@@ -26,7 +31,7 @@ cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
   this->CTest = handler->CTest;
   this->TestHandler = handler;
   this->TestProcess = nullptr;
-  this->TestResult.ExecutionTime = 0;
+  this->TestResult.ExecutionTime = std::chrono::duration<double>::zero();
   this->TestResult.ReturnValue = 0;
   this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = 0;
@@ -52,7 +57,7 @@ bool cmCTestRunTest::CheckOutput()
   std::string line;
   while ((timeout = timeEnd - std::chrono::steady_clock::now(),
           timeout > std::chrono::seconds(0))) {
-    int p = this->TestProcess->GetNextOutputLine(line, timeout.count());
+    int p = this->TestProcess->GetNextOutputLine(line, timeout);
     if (p == cmsysProcess_Pipe_None) {
       // Process has terminated and all output read.
       return false;
@@ -71,7 +76,9 @@ bool cmCTestRunTest::CheckOutput()
             cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex()
                          << ": "
                          << "Test timeout changed to "
-                         << this->TestProperties->AlternateTimeout
+                         << std::chrono::duration_cast<std::chrono::seconds>(
+                              this->TestProperties->AlternateTimeout)
+                              .count()
                          << std::endl);
             this->TestProcess->ResetStartTime();
             this->TestProcess->ChangeTimeout(
@@ -259,7 +266,11 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
 
   passed = this->TestResult.Status == cmCTestTestHandler::COMPLETED;
   char buf[1024];
-  sprintf(buf, "%6.2f sec", this->TestProcess->GetTotalTime());
+  sprintf(buf, "%6.2f sec",
+          double(std::chrono::duration_cast<std::chrono::milliseconds>(
+                   this->TestProcess->GetTotalTime())
+                   .count()) /
+            1000.0);
   cmCTestLog(this->CTest, HANDLER_OUTPUT, buf << "\n");
 
   if (outputTestErrorsToConsole) {
@@ -295,12 +306,16 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       reasonType = "Test Fail Reason";
       pass = false;
     }
-    double ttime = this->TestProcess->GetTotalTime();
-    int hours = static_cast<int>(ttime / (60 * 60));
-    int minutes = static_cast<int>(ttime / 60) % 60;
-    int seconds = static_cast<int>(ttime) % 60;
+    auto ttime = this->TestProcess->GetTotalTime();
+    auto hours = std::chrono::duration_cast<std::chrono::hours>(ttime);
+    ttime -= hours;
+    auto minutes = std::chrono::duration_cast<std::chrono::minutes>(ttime);
+    ttime -= minutes;
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(ttime);
     char buffer[100];
-    sprintf(buffer, "%02d:%02d:%02d", hours, minutes, seconds);
+    sprintf(buffer, "%02d:%02d:%02d", static_cast<unsigned>(hours.count()),
+            static_cast<unsigned>(minutes.count()),
+            static_cast<unsigned>(seconds.count()));
     *this->TestHandler->LogFile
       << "----------------------------------------------------------"
       << std::endl;
@@ -380,7 +395,11 @@ void cmCTestRunTest::ComputeWeightedCost()
 {
   double prev = static_cast<double>(this->TestProperties->PreviousRuns);
   double avgcost = static_cast<double>(this->TestProperties->Cost);
-  double current = this->TestResult.ExecutionTime;
+  double current =
+    double(std::chrono::duration_cast<std::chrono::milliseconds>(
+             this->TestResult.ExecutionTime)
+             .count()) /
+    1000.0;
 
   if (this->TestResult.Status == cmCTestTestHandler::COMPLETED) {
     this->TestProperties->Cost =
@@ -418,7 +437,7 @@ bool cmCTestRunTest::StartTest(size_t total)
   // Return immediately if test is disabled
   if (this->TestProperties->Disabled) {
     this->TestResult.Properties = this->TestProperties;
-    this->TestResult.ExecutionTime = 0;
+    this->TestResult.ExecutionTime = std::chrono::duration<double>::zero();
     this->TestResult.CompressOutput = false;
     this->TestResult.ReturnValue = -1;
     this->TestResult.CompletionStatus = "Disabled";
@@ -435,7 +454,7 @@ bool cmCTestRunTest::StartTest(size_t total)
   this->ComputeArguments();
   std::vector<std::string>& args = this->TestProperties->Args;
   this->TestResult.Properties = this->TestProperties;
-  this->TestResult.ExecutionTime = 0;
+  this->TestResult.ExecutionTime = std::chrono::duration<double>::zero();
   this->TestResult.CompressOutput = false;
   this->TestResult.ReturnValue = -1;
   this->TestResult.CompletionStatus = "Failed to start";
@@ -512,7 +531,7 @@ bool cmCTestRunTest::StartTest(size_t total)
   }
   this->StartTime = this->CTest->CurrentTime();
 
-  double timeout = this->ResolveTimeout();
+  auto timeout = this->ResolveTimeout();
 
   if (this->StopTimePassed) {
     return false;
@@ -593,9 +612,9 @@ void cmCTestRunTest::DartProcessing()
   }
 }
 
-double cmCTestRunTest::ResolveTimeout()
+std::chrono::duration<double> cmCTestRunTest::ResolveTimeout()
 {
-  double timeout = this->TestProperties->Timeout;
+  auto timeout = this->TestProperties->Timeout;
 
   if (this->CTest->GetStopTime().empty()) {
     return timeout;
@@ -625,31 +644,37 @@ double cmCTestRunTest::ResolveTimeout()
           lctime->tm_mon + 1, lctime->tm_mday,
           this->CTest->GetStopTime().c_str(), tzone_offset);
 
-  time_t stop_time = curl_getdate(buf, &current_time);
-  if (stop_time == -1) {
+  time_t stop_time_t = curl_getdate(buf, &current_time);
+  if (stop_time_t == -1) {
     return timeout;
   }
 
+  auto stop_time = std::chrono::system_clock::from_time_t(stop_time_t);
+
   // the stop time refers to the next day
   if (this->CTest->NextDayStopTime) {
-    stop_time += 24 * 60 * 60;
+    stop_time += std::chrono::hours(24);
   }
-  int stop_timeout =
-    static_cast<int>(stop_time - current_time) % (24 * 60 * 60);
+  auto stop_timeout =
+    (stop_time - std::chrono::system_clock::from_time_t(current_time)) %
+    std::chrono::hours(24);
   this->CTest->LastStopTimeout = stop_timeout;
 
-  if (stop_timeout <= 0 || stop_timeout > this->CTest->LastStopTimeout) {
+  if (stop_timeout <= std::chrono::duration<double>::zero() ||
+      stop_timeout > this->CTest->LastStopTimeout) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "The stop time has been passed. "
                                            "Stopping all tests."
                  << std::endl);
     this->StopTimePassed = true;
-    return 0;
+    return std::chrono::duration<double>::zero();
   }
-  return timeout == 0 ? stop_timeout
-                      : (timeout < stop_timeout ? timeout : stop_timeout);
+  return timeout == std::chrono::duration<double>::zero()
+    ? stop_timeout
+    : (timeout < stop_timeout ? timeout : stop_timeout);
 }
 
-bool cmCTestRunTest::ForkProcess(double testTimeOut, bool explicitTimeout,
+bool cmCTestRunTest::ForkProcess(std::chrono::duration<double> testTimeOut,
+                                 bool explicitTimeout,
                                  std::vector<std::string>* environment)
 {
   this->TestProcess = new cmProcess;
@@ -660,26 +685,37 @@ bool cmCTestRunTest::ForkProcess(double testTimeOut, bool explicitTimeout,
   this->TestProcess->SetCommandArguments(this->Arguments);
 
   // determine how much time we have
-  double timeout = this->CTest->GetRemainingTimeAllowed() - 120;
-  if (this->CTest->GetTimeOut() > 0 && this->CTest->GetTimeOut() < timeout) {
+  std::chrono::duration<double> timeout =
+    std::min<std::chrono::duration<double>>(
+      this->CTest->GetRemainingTimeAllowed(), std::chrono::minutes(2));
+  if (this->CTest->GetTimeOut() > std::chrono::duration<double>::zero() &&
+      this->CTest->GetTimeOut() < timeout) {
     timeout = this->CTest->GetTimeOut();
   }
-  if (testTimeOut > 0 &&
+  if (testTimeOut > std::chrono::duration<double>::zero() &&
       testTimeOut < this->CTest->GetRemainingTimeAllowed()) {
     timeout = testTimeOut;
   }
   // always have at least 1 second if we got to here
-  if (timeout <= 0) {
-    timeout = 1;
+  if (timeout <= std::chrono::duration<double>::zero()) {
+    timeout = std::chrono::seconds(1);
   }
   // handle timeout explicitly set to 0
-  if (testTimeOut == 0 && explicitTimeout) {
-    timeout = 0;
+  if (testTimeOut == std::chrono::duration<double>::zero() &&
+      explicitTimeout) {
+    timeout = std::chrono::duration<double>::zero();
   }
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
-                       << ": "
-                       << "Test timeout computed to be: " << timeout << "\n",
-                     this->TestHandler->GetQuiet());
+  cmCTestOptionalLog(
+    this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
+      << ": "
+      << "Test timeout computed to be: "
+      << (timeout == std::chrono::duration<double>::max()
+            ? std::string("infinite")
+            : std::to_string(
+                std::chrono::duration_cast<std::chrono::seconds>(timeout)
+                  .count()))
+      << "\n",
+    this->TestHandler->GetQuiet());
 
   this->TestProcess->SetTimeout(timeout);
 

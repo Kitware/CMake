@@ -653,7 +653,11 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
     for (std::string const& l : p.Labels) {
       // only use labels found in labels
       if (labels.find(l) != labels.end()) {
-        labelTimes[l] += result.ExecutionTime * result.Properties->Processors;
+        labelTimes[l] +=
+          double(std::chrono::duration_cast<std::chrono::milliseconds>(
+                   result.ExecutionTime)
+                   .count()) /
+          1000.0 * result.Properties->Processors;
         ++labelCounts[l];
       }
     }
@@ -1239,7 +1243,9 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
       p.Cost = static_cast<float>(rand());
     }
 
-    if (p.Timeout == 0 && this->CTest->GetGlobalTimeout() != 0) {
+    if (p.Timeout == std::chrono::duration<double>::zero() &&
+        this->CTest->GetGlobalTimeout() !=
+          std::chrono::duration<double>::zero()) {
       p.Timeout = this->CTest->GetGlobalTimeout();
     }
 
@@ -1321,7 +1327,11 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
       xml.StartElement("NamedMeasurement");
       xml.Attribute("type", "numeric/double");
       xml.Attribute("name", "Execution Time");
-      xml.Element("Value", result.ExecutionTime);
+      xml.Element("Value",
+                  double(std::chrono::duration_cast<std::chrono::milliseconds>(
+                           result.ExecutionTime)
+                           .count()) /
+                    1000.0);
       xml.EndElement(); // NamedMeasurement
       if (!result.Reason.empty()) {
         const char* reasonType = "Pass Reason";
@@ -2142,7 +2152,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             rt.FixturesRequired.insert(lval.begin(), lval.end());
           }
           if (key == "TIMEOUT") {
-            rt.Timeout = atof(val.c_str());
+            rt.Timeout = std::chrono::duration<double>(atof(val.c_str()));
             rt.ExplicitTimeout = true;
           }
           if (key == "COST") {
@@ -2222,7 +2232,8 @@ bool cmCTestTestHandler::SetTestsProperties(
                          "TIMEOUT_AFTER_MATCH expects two arguments, found "
                            << propArgs.size() << std::endl);
             } else {
-              rt.AlternateTimeout = atof(propArgs[0].c_str());
+              rt.AlternateTimeout =
+                std::chrono::duration<double>(atof(propArgs[0].c_str()));
               std::vector<std::string> lval;
               cmSystemTools::ExpandListArgument(propArgs[1], lval);
               for (std::string const& cr : lval) {
@@ -2340,7 +2351,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.WillFail = false;
   test.Disabled = false;
   test.RunSerial = false;
-  test.Timeout = 0;
+  test.Timeout = std::chrono::duration<double>::zero();
   test.ExplicitTimeout = false;
   test.Cost = 0;
   test.Processors = 1;

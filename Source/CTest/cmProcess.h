@@ -10,6 +10,13 @@
 #include <string>
 #include <vector>
 
+/*
+ * A wrapper function for cmsysProcess_SetTimeout that takes an
+ * std::chrono::duration. For convenience only.
+ */
+void cmsysProcess_SetTimeout(cmsysProcess* process,
+                             std::chrono::duration<double> timeout);
+
 /** \class cmProcess
  * \brief run a process with c++
  *
@@ -24,8 +31,8 @@ public:
   void SetCommand(const char* command);
   void SetCommandArguments(std::vector<std::string> const& arg);
   void SetWorkingDirectory(const char* dir) { this->WorkingDirectory = dir; }
-  void SetTimeout(double t) { this->Timeout = t; }
-  void ChangeTimeout(double t);
+  void SetTimeout(std::chrono::duration<double> t) { this->Timeout = t; }
+  void ChangeTimeout(std::chrono::duration<double> t);
   void ResetStartTime();
   // Return true if the process starts
   bool StartProcess();
@@ -37,7 +44,7 @@ public:
   int GetId() { return this->Id; }
   void SetId(int id) { this->Id = id; }
   int GetExitValue() { return this->ExitValue; }
-  double GetTotalTime() { return this->TotalTime; }
+  std::chrono::duration<double> GetTotalTime() { return this->TotalTime; }
   int GetExitException();
   std::string GetExitExceptionString();
   /**
@@ -47,12 +54,13 @@ public:
    *   cmsysProcess_Pipe_STDOUT  = Line came from stdout or stderr
    *   cmsysProcess_Pipe_Timeout = Timeout expired while waiting
    */
-  int GetNextOutputLine(std::string& line, double timeout);
+  int GetNextOutputLine(std::string& line,
+                        std::chrono::duration<double> timeout);
 
 private:
-  double Timeout;
+  std::chrono::duration<double> Timeout;
   std::chrono::steady_clock::time_point StartTime;
-  double TotalTime;
+  std::chrono::duration<double> TotalTime;
   cmsysProcess* Process;
   class Buffer : public std::vector<char>
   {

@@ -337,7 +337,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   }
 
   int runTestRes = this->CTest->RunTest(testCommand, &outs, &retval, nullptr,
-                                        remainingTime.count(), nullptr);
+                                        remainingTime, nullptr);
 
   if (runTestRes != cmsysProcess_State_Exited || retval != 0) {
     out << "Test command failed: " << testCommand[0] << "\n";
