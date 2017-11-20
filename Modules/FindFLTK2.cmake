@@ -80,11 +80,11 @@ if(NOT FLTK2_DIR)
     # Look in places relative to the system executable search path.
     ${FLTK2_DIR_SEARCH}
 
-    # Look in standard UNIX install locations.
-    /usr/local/lib/fltk2
-    /usr/lib/fltk2
-    /usr/local/fltk2
-    /usr/X11R6/include
+    PATH_SUFFIXES
+    fltk2
+    fltk2/include
+    lib/fltk2
+    lib/fltk2/include
 
     # Help the user find it if we cannot.
     DOC "The ${FLTK2_DIR_STRING}"
@@ -175,25 +175,16 @@ if(FLTK2_DIR)
       set(FLTK2_WRAP_UI 1)
     endif()
 
-    set(FLTK2_INCLUDE_SEARCH_PATH ${FLTK2_INCLUDE_SEARCH_PATH}
-      /usr/local/fltk2
-      /usr/X11R6/include
-      )
+    find_path(FLTK2_INCLUDE_DIR fltk/run.h ${FLTK2_INCLUDE_SEARCH_PATH} PATH_SUFFIXES fltk2 fltk2/include)
 
-    find_path(FLTK2_INCLUDE_DIR fltk/run.h ${FLTK2_INCLUDE_SEARCH_PATH})
-
-    set(FLTK2_LIBRARY_SEARCH_PATH ${FLTK2_LIBRARY_SEARCH_PATH}
-      /usr/local/fltk2/lib
-      /usr/X11R6/lib
-      ${FLTK2_INCLUDE_DIR}/lib
-      )
+    list(APPEND FLTK2_LIBRARY_SEARCH_PATH ${FLTK2_INCLUDE_DIR}/lib)
 
     find_library(FLTK2_BASE_LIBRARY NAMES fltk2
-      PATHS ${FLTK2_LIBRARY_SEARCH_PATH})
+      PATHS ${FLTK2_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk2 fltk2/lib)
     find_library(FLTK2_GL_LIBRARY NAMES fltk2_gl
-      PATHS ${FLTK2_LIBRARY_SEARCH_PATH})
+      PATHS ${FLTK2_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk2 fltk2/lib)
     find_library(FLTK2_IMAGES_LIBRARY NAMES fltk2_images
-      PATHS ${FLTK2_LIBRARY_SEARCH_PATH})
+      PATHS ${FLTK2_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk2 fltk2/lib)
 
     # Find the extra libraries needed for the fltk_images library.
     if(UNIX)
