@@ -1,12 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmQtAutoGenerators_h
-#define cmQtAutoGenerators_h
+#ifndef cmQtAutoGeneratorMocUic_h
+#define cmQtAutoGeneratorMocUic_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmFilePathChecksum.h"
 #include "cmQtAutoGen.h"
+#include "cmQtAutoGenerator.h"
 #include "cmsys/RegularExpression.hxx"
 
 #include <map>
@@ -17,12 +18,11 @@
 
 class cmMakefile;
 
-class cmQtAutoGenerators
+class cmQtAutoGeneratorMocUic : public cmQtAutoGenerator
 {
-  CM_DISABLE_COPY(cmQtAutoGenerators)
+  CM_DISABLE_COPY(cmQtAutoGeneratorMocUic)
 public:
-  cmQtAutoGenerators();
-  bool Run(std::string const& targetDirectory, std::string const& config);
+  cmQtAutoGeneratorMocUic();
 
 private:
   // -- Types
@@ -80,30 +80,19 @@ private:
     std::string IncludeString;
   };
 
-  /// @brief RCC job
-  struct RccJob
-  {
-    std::string QrcFile;
-    std::string RccFile;
-    std::vector<std::string> Options;
-    std::vector<std::string> Inputs;
-  };
-
   // -- Initialization
-  bool InitInfoFile(cmMakefile* makefile, std::string const& targetDirectory,
-                    std::string const& config);
+  bool InitInfoFile(cmMakefile* makefile);
 
   // -- Settings file
   void SettingsFileRead(cmMakefile* makefile);
   bool SettingsFileWrite();
   bool SettingsChanged() const
   {
-    return (this->MocSettingsChanged || this->RccSettingsChanged ||
-            this->UicSettingsChanged);
+    return (this->MocSettingsChanged || this->UicSettingsChanged);
   }
 
   // -- Central processing
-  bool Process();
+  bool Process(cmMakefile* makefile) override;
 
   // -- Source parsing
   bool ParseSourceFile(std::string const& absFilename, const SourceJob& job);
@@ -146,54 +135,17 @@ private:
   bool UicGenerateAll();
   bool UicGenerateFile(const UicJob& uicJob);
 
-  // -- Rcc
-  bool RccEnabled() const { return !this->RccExecutable.empty(); }
-  bool RccGenerateAll();
-  bool RccGenerateFile(const RccJob& rccJob);
-
-  // -- Log info
-  void LogBold(std::string const& message) const;
-  void LogInfo(cmQtAutoGen::Generator genType,
-               std::string const& message) const;
-  // -- Log warning
-  void LogWarning(cmQtAutoGen::Generator genType,
-                  std::string const& message) const;
-  void LogFileWarning(cmQtAutoGen::Generator genType,
-                      std::string const& filename,
-                      std::string const& message) const;
-  // -- Log error
-  void LogError(cmQtAutoGen::Generator genType,
-                std::string const& message) const;
-  void LogFileError(cmQtAutoGen::Generator genType,
-                    std::string const& filename,
-                    std::string const& message) const;
-  void LogCommandError(cmQtAutoGen::Generator genType,
-                       std::string const& message,
-                       std::vector<std::string> const& command,
-                       std::string const& output) const;
-
   // -- Utility
-  bool MakeParentDirectory(cmQtAutoGen::Generator genType,
-                           std::string const& filename) const;
-  bool FileDiffers(std::string const& filename, std::string const& content);
-  bool FileWrite(cmQtAutoGen::Generator genType, std::string const& filename,
-                 std::string const& content);
   bool FindHeader(std::string& header, std::string const& testBasePath) const;
-  bool RunCommand(std::vector<std::string> const& command,
-                  std::string& output) const;
 
   // -- Meta
-  std::string InfoFile;
   std::string ConfigSuffix;
   cmQtAutoGen::MultiConfig MultiConfig;
   // -- Settings
   bool IncludeProjectDirsBefore;
-  bool Verbose;
-  bool ColorOutput;
   std::string SettingsFile;
   std::string SettingsStringMoc;
   std::string SettingsStringUic;
-  std::string SettingsStringRcc;
   // -- Directories
   std::string ProjectSourceDir;
   std::string ProjectBinaryDir;
@@ -202,11 +154,9 @@ private:
   std::string AutogenBuildDir;
   std::string AutogenIncludeDir;
   // -- Qt environment
-  std::string QtMajorVersion;
-  std::string QtMinorVersion;
+  unsigned long QtVersionMajor;
   std::string MocExecutable;
   std::string UicExecutable;
-  std::string RccExecutable;
   // -- File lists
   std::map<std::string, SourceJob> HeaderJobs;
   std::map<std::string, SourceJob> SourceJobs;
@@ -240,9 +190,6 @@ private:
   std::vector<std::string> UicSearchPaths;
   cmsys::RegularExpression UicRegExpInclude;
   std::vector<std::unique_ptr<UicJob>> UicJobs;
-  // -- Rcc
-  bool RccSettingsChanged;
-  std::vector<RccJob> RccJobs;
 };
 
 #endif

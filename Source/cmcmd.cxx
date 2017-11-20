@@ -6,7 +6,8 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmQtAutoGenerators.h"
+#include "cmQtAutoGeneratorMocUic.h"
+#include "cmQtAutoGeneratorRcc.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
@@ -992,11 +993,20 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-    if (args[1] == "cmake_autogen" && args.size() >= 4) {
-      cmQtAutoGenerators autogen;
+    if ((args[1] == "cmake_autogen") && (args.size() >= 4)) {
+      cmQtAutoGeneratorMocUic autoGen;
+      std::string const& infoDir = args[2];
       std::string const& config = args[3];
-      bool autogenSuccess = autogen.Run(args[2], config);
-      return autogenSuccess ? 0 : 1;
+      return autoGen.Run(infoDir, config) ? 0 : 1;
+    }
+    if ((args[1] == "cmake_autorcc") && (args.size() >= 3)) {
+      cmQtAutoGeneratorRcc autoGen;
+      std::string const& infoFile = args[2];
+      std::string config;
+      if (args.size() > 3) {
+        config = args[3];
+      };
+      return autoGen.Run(infoFile, config) ? 0 : 1;
     }
 #endif
 

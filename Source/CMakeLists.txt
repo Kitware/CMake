@@ -311,11 +311,14 @@ set(SRCS
   cmPropertyMap.h
   cmQtAutoGen.cxx
   cmQtAutoGen.h
-  cmQtAutoGenDigest.h
+  cmQtAutoGenerator.cxx
+  cmQtAutoGenerator.h
   cmQtAutoGeneratorInitializer.cxx
   cmQtAutoGeneratorInitializer.h
-  cmQtAutoGenerators.cxx
-  cmQtAutoGenerators.h
+  cmQtAutoGeneratorMocUic.cxx
+  cmQtAutoGeneratorMocUic.h
+  cmQtAutoGeneratorRcc.cxx
+  cmQtAutoGeneratorRcc.h
   cmRST.cxx
   cmRST.h
   cmScriptGenerator.h
