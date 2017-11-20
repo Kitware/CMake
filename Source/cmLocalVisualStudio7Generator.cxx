@@ -1600,7 +1600,7 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
   }
 
   // If the group has a name, write the header.
-  std::string name = sg->GetName();
+  std::string const& name = sg->GetName();
   if (!name.empty()) {
     this->WriteVCProjBeginGroup(fout, name.c_str(), "");
   }

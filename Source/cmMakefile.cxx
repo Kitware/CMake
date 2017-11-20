@@ -1950,7 +1950,7 @@ cmSourceGroup* cmMakefile::GetSourceGroup(
 
   // first look for source group starting with the same as the one we want
   for (cmSourceGroup const& srcGroup : this->SourceGroups) {
-    std::string sgName = srcGroup.GetName();
+    std::string const& sgName = srcGroup.GetName();
     if (sgName == name[0]) {
       sg = const_cast<cmSourceGroup*>(&srcGroup);
       break;
@@ -2014,7 +2014,8 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   }
   // build the whole source group path
   for (++i; i <= lastElement; ++i) {
-    sg->AddChild(cmSourceGroup(name[i].c_str(), nullptr, sg->GetFullName()));
+    sg->AddChild(
+      cmSourceGroup(name[i].c_str(), nullptr, sg->GetFullName().c_str()));
     sg = sg->LookupChild(name[i].c_str());
   }
 

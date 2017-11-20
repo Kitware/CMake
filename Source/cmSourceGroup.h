@@ -55,12 +55,12 @@ public:
   /**
    * Get the name of this group.
    */
-  const char* GetName() const;
+  std::string const& GetName() const;
 
   /**
    * Get the full path name for group.
    */
-  const char* GetFullName() const;
+  std::string const& GetFullName() const;
 
   /**
    * Check if the given name matches this group's regex.

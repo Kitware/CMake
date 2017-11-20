@@ -2797,13 +2797,13 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateOrGetPBXGroup(
   // If it's the default source group (empty name) then put the source file
   // directly in the tgroup...
   //
-  if (std::string(sg->GetFullName()).empty()) {
+  if (sg->GetFullName().empty()) {
     this->GroupNameMap[s] = tgroup;
     return tgroup;
   }
 
   // It's a recursive folder structure, let's find the real parent group
-  if (std::string(sg->GetFullName()) != std::string(sg->GetName())) {
+  if (sg->GetFullName() != sg->GetName()) {
     std::string curr_folder = target;
     curr_folder += "/";
     for (auto const& folder :
