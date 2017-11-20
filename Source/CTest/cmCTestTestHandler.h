@@ -207,8 +207,8 @@ protected:
   std::vector<std::string> CustomTestsIgnore;
   std::string StartTest;
   std::string EndTest;
-  unsigned int StartTestTime;
-  unsigned int EndTestTime;
+  std::chrono::system_clock::time_point StartTestTime;
+  std::chrono::system_clock::time_point EndTestTime;
   bool MemCheck;
   int CustomMaximumPassedTestOutputSize;
   int CustomMaximumFailedTestOutputSize;
