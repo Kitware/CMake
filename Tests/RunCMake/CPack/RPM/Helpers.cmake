@@ -47,14 +47,29 @@ function(getPackageContentList FILE RESULT_VAR)
 endfunction()
 
 function(toExpectedContentList FILE_NO CONTENT_VAR)
-  if(NOT DEFINED TEST_INSTALL_PREFIX_PATHS)
-    set(TEST_INSTALL_PREFIX_PATHS "/usr")
+  # add install prefix to expected paths
+  if(DEFINED EXPECTED_FILE_${FILE_NO}_PACKAGING_PREFIX)
+    set(EXPECTED_FILE_PACKAGING_PREFIX
+      "${EXPECTED_FILE_${FILE_NO}_PACKAGING_PREFIX}")
+  elseif(NOT DEFINED EXPECTED_FILE_PACKAGING_PREFIX)
+    # default CPackRPM packaging install prefix
+    set(EXPECTED_FILE_PACKAGING_PREFIX "/usr")
   endif()
-
-  unset(filtered_)
+  set(prepared_ "${EXPECTED_FILE_PACKAGING_PREFIX}")
   foreach(part_ IN LISTS ${CONTENT_VAR})
+    list(APPEND prepared_ "${EXPECTED_FILE_PACKAGING_PREFIX}${part_}")
+  endforeach()
+
+  # remove paths that are excluded from auto packaging
+  if(NOT DEFINED CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
+    set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST
+      /etc /etc/init.d /usr /usr/bin /usr/include /usr/lib
+      /usr/libx32 /usr/lib64 /usr/share /usr/share/aclocal /usr/share/doc)
+  endif()
+  unset(filtered_)
+  foreach(part_ IN LISTS prepared_)
     unset(dont_add_)
-    foreach(for_removal_ IN LISTS TEST_INSTALL_PREFIX_PATHS)
+    foreach(for_removal_ IN LISTS CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
       if(part_ STREQUAL for_removal_)
         set(dont_add_ TRUE)
         break()

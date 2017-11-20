@@ -96,6 +96,14 @@ the test has to run some functions after CPack.cmake is included. In such cases
 a function run_after_include_cpack can be declared in test.cmake file and that
 function will run after the inclusion of CPack.cmake.
 
+NOTE: During CMake configure stage developer warnings may be expected. In such
+cases an expected output regular expression can be provided by creating
+'<test_name>/configure-stdout.txt' and/or '<test_name>/configure-stderr.txt'
+file. There are also more specialized versions of the file available:
+- configure-${PACKAGING_TYPE}-${SUBTEST_SUFFIX}-std${o}.txt
+- configure-${SUBTEST_SUFFIX}-std${o}.txt
+- configure-${PACKAGING_TYPE}-std${o}.txt
+
 build phase (optional and not available for source package tests)
 -----------------------------------------------------------------
 
@@ -153,13 +161,19 @@ this step and must contain
         is later changed automatically depending on the generator so expected
         package content can be written only once per test for all generators.
 
+- EXPECTED_FILE_PACKAGING_PREFIX and
+  EXPECTED_FILE_<file_number_starting_with_1>_PACKAGING_PREFIX variables can be
+  set to explicitly specified CPACK_PACKAGING_PREFIX value. By default this
+  variable does not need to be set as it is implicitly set to package generator
+  specific prefix.
+
 Optional verification phase is generator specific and is optionaly executed.
 This phase is executed if '<test_name>/VerifyResult.cmake' script exists.
 
 VerifyResult.cmake script also automatically prints out standard output and
 standard error from CPack execution phase that is compared with
 '<test_name>/<generator_name>-stdout.txt' regular expression and
-and '<test_name>/<generator_name>-stderr.txt' regular expresson respectively.
+'<test_name>/<generator_name>-stderr.txt' regular expresson respectively.
 NOTE: For subtests generator name can also be suffixed with subtest name and/or
       packaging type (MONOLITHIC, COMPONENT, GROUP) and in such cases the
       preferences of which file will be used are as follows:

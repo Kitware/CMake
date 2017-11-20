@@ -45,13 +45,22 @@ function(toExpectedContentList FILE_NO CONTENT_VAR)
     unset(prefix_)
   endif()
 
-  if(NOT DEFINED TEST_MAIN_INSTALL_PREFIX_PATH)
-    set(TEST_MAIN_INSTALL_PREFIX_PATH "/usr")
+  # add install prefix to expected paths
+  if(DEFINED EXPECTED_FILE_${FILE_NO}_PACKAGING_PREFIX)
+    set(EXPECTED_FILE_PACKAGING_PREFIX
+      "${EXPECTED_FILE_${FILE_NO}_PACKAGING_PREFIX}")
+  elseif(NOT DEFINED EXPECTED_FILE_PACKAGING_PREFIX)
+    # default CPack Archive packaging install prefix
+    set(EXPECTED_FILE_PACKAGING_PREFIX "/")
   endif()
+  set(prepared_ "${EXPECTED_FILE_PACKAGING_PREFIX}")
+  foreach(part_ IN LISTS ${CONTENT_VAR})
+    list(APPEND prepared_ "${EXPECTED_FILE_PACKAGING_PREFIX}${part_}")
+  endforeach()
 
   unset(filtered_)
-  foreach(part_ IN LISTS ${CONTENT_VAR})
-    string(REGEX REPLACE "^${TEST_MAIN_INSTALL_PREFIX_PATH}(/|$)" "" part_ "${part_}")
+  foreach(part_ IN LISTS prepared_)
+    string(REGEX REPLACE "^/" "" part_ "${part_}")
 
     if(part_)
       list(APPEND filtered_ "${prefix_}${part_}")
