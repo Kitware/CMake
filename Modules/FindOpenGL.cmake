@@ -99,11 +99,13 @@
 #  If the GLVND OpenGL and GLX libraries are available, prefer them.
 #  This forces ``OPENGL_gl_LIBRARY`` to be empty.
 #  This is the default if components were requested (since components
-#  correspond to GLVND libraries).
+#  correspond to GLVND libraries) or if policy :policy:`CMP0072` is
+#  set to ``NEW``.
 #
 # ``LEGACY``
 #  Prefer to use the legacy libGL library, if available.
-#  This is the default if no components were requested.
+#  This is the default if no components were requested and
+#  policy :policy:`CMP0072` is not set to ``NEW``.
 #
 # For EGL targets the client must rely on GLVND support on the user's system.
 # Linking should use the ``OpenGL::OpenGL OpenGL::EGL`` targets.  Using GLES*
@@ -220,6 +222,7 @@ else()
           /usr/shlib /usr/X11R6/lib
   )
 
+  set(_OpenGL_GL_POLICY_WARN 0)
   if(NOT DEFINED OpenGL_GL_PREFERENCE)
     set(OpenGL_GL_PREFERENCE "")
   endif()
@@ -237,8 +240,17 @@ else()
     set(OpenGL_GL_PREFERENCE "GLVND")
   else()
     # No preference was explicitly specified and no GLVND components were
-    # requested.  Prefer libGL for legacy GL.
-    set(OpenGL_GL_PREFERENCE "LEGACY")
+    # requested.  Use a policy to choose the default.
+    cmake_policy(GET CMP0072 _OpenGL_GL_POLICY)
+    if("x${_OpenGL_GL_POLICY}x" STREQUAL "xNEWx")
+      set(OpenGL_GL_PREFERENCE "GLVND")
+    else()
+      set(OpenGL_GL_PREFERENCE "LEGACY")
+      if("x${_OpenGL_GL_POLICY}x" STREQUAL "xx")
+        set(_OpenGL_GL_POLICY_WARN 1)
+      endif()
+    endif()
+    unset(_OpenGL_GL_POLICY)
   endif()
 
   if("x${OpenGL_GL_PREFERENCE}x" STREQUAL "xGLVNDx" AND OPENGL_opengl_LIBRARY AND OPENGL_glx_LIBRARY)
@@ -256,6 +268,23 @@ else()
             ${_OPENGL_LIB_PATH}
       )
   endif()
+
+  if(_OpenGL_GL_POLICY_WARN AND OPENGL_gl_LIBRARY AND OPENGL_opengl_LIBRARY AND OPENGL_glx_LIBRARY)
+    message(AUTHOR_WARNING
+      "Policy CMP0072 is not set: FindOpenGL prefers GLVND by default when available.  "
+      "Run \"cmake --help-policy CMP0072\" for policy details.  "
+      "Use the cmake_policy command to set the policy and suppress this warning."
+      "\n"
+      "FindOpenGL found both a legacy GL library:\n"
+      "  OPENGL_gl_LIBRARY: ${OPENGL_gl_LIBRARY}\n"
+      "and GLVND libraries for OpenGL and GLX:\n"
+      "  OPENGL_opengl_LIBRARY: ${OPENGL_opengl_LIBRARY}\n"
+      "  OPENGL_glx_LIBRARY: ${OPENGL_glx_LIBRARY}\n"
+      "OpenGL_GL_PREFERENCE has not been set to \"GLVND\" or \"LEGACY\", so for "
+      "compatibility with CMake 3.10 and below the legacy GL library will be used."
+      )
+  endif()
+  unset(_OpenGL_GL_POLICY_WARN)
 
   # FPHSA cannot handle "this OR that is required", so we conditionally set what
   # it must look for.  First clear any previous config we might have done:
