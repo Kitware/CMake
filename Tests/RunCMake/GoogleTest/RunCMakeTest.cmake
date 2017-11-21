@@ -15,10 +15,16 @@ function(run_GoogleTest)
     --build .
     --config Debug
   )
-  run_cmake_command(GoogleTest-test
+  run_cmake_command(GoogleTest-test1
     ${CMAKE_CTEST_COMMAND}
     -C Debug
-    -L TEST
+    -L TEST1
+    --no-label-summary
+  )
+  run_cmake_command(GoogleTest-test2
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    -L TEST2
     --no-label-summary
   )
 endfunction()
