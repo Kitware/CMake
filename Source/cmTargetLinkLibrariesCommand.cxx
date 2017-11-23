@@ -94,16 +94,6 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
     return true;
   }
 
-  // OBJECT libraries are not allowed on the LHS of the command.
-  if (this->Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-    std::ostringstream e;
-    e << "Object library target \"" << args[0] << "\" "
-      << "may not link to anything.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-    cmSystemTools::SetFatalErrorOccured();
-    return true;
-  }
-
   // Having a UTILITY library on the LHS is a bug.
   if (this->Target->GetType() == cmStateEnums::UTILITY) {
     std::ostringstream e;

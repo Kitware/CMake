@@ -13,7 +13,20 @@ else()
   run_cmake(Install)
 endif()
 run_cmake(Export)
-run_cmake(LinkObjLHS)
+
+function (run_object_lib_build name)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${name}-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  run_cmake(${name})
+  run_cmake_command(${name}-build ${CMAKE_COMMAND} --build .)
+endfunction ()
+
+run_object_lib_build(LinkObjLHSShared)
+run_object_lib_build(LinkObjLHSStatic)
+
 run_cmake(LinkObjRHS1)
 run_cmake(LinkObjRHS2)
 run_cmake(MissingSource)
