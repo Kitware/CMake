@@ -66,11 +66,14 @@ static bool cmVS10IsTargetsFile(std::string const& path)
   return cmSystemTools::Strucmp(ext.c_str(), ".targets") == 0;
 }
 
-static std::string computeProjectFileExtension(cmGeneratorTarget const* t)
+static std::string computeProjectFileExtension(cmGeneratorTarget const* t,
+                                               const std::string& config)
 {
   std::string res;
   res = ".vcxproj";
-  if (cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(t)) {
+  std::string lang = t->GetLinkerLanguage(config);
+  if (cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(t) ||
+      lang == "CSharp") {
     res = ".csproj";
   }
   return res;
@@ -199,8 +202,8 @@ void cmVisualStudio10TargetGenerator::Generate()
       this->GeneratorTarget->GetProperty("EXTERNAL_MSPROJECT")) {
     return;
   }
-  this->ProjectFileExtension =
-    computeProjectFileExtension(this->GeneratorTarget);
+  this->ProjectFileExtension = computeProjectFileExtension(
+    this->GeneratorTarget, *this->Configurations.begin());
   if (this->ProjectFileExtension == ".vcxproj") {
     this->ProjectType = vcxproj;
     this->Managed = false;
@@ -1393,7 +1396,8 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   std::string path = this->LocalGenerator->GetCurrentBinaryDirectory();
   path += "/";
   path += this->Name;
-  path += computeProjectFileExtension(this->GeneratorTarget);
+  path += computeProjectFileExtension(this->GeneratorTarget,
+                                      *this->Configurations.begin());
   path += ".filters";
   cmGeneratedFileStream fout(path.c_str());
   fout.SetCopyIfDifferent(true);
@@ -3670,7 +3674,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
       path = lg->GetCurrentBinaryDirectory();
       path += "/";
       path += dt->GetName();
-      path += computeProjectFileExtension(dt);
+      path += computeProjectFileExtension(dt, *this->Configurations.begin());
     }
     this->ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << cmVS10EscapeXML(path) << "\">\n";
