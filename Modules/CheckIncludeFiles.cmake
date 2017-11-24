@@ -6,7 +6,7 @@
 # -----------------
 #
 # Provides a macro to check if a list of one or more header files can
-# be included together in ``C``.
+# be included together.
 #
 # .. command:: CHECK_INCLUDE_FILES
 #
@@ -15,12 +15,14 @@
 #     CHECK_INCLUDE_FILES("<includes>" <variable> [LANGUAGE <language>])
 #
 #   Check if the given ``<includes>`` list may be included together
-#   in a ``C`` source file and store the result in an internal cache
+#   in a source file and store the result in an internal cache
 #   entry named ``<variable>``.  Specify the ``<includes>`` argument
 #   as a :ref:`;-list <CMake Language Lists>` of header file names.
 #
 # If LANGUAGE is set, the specified compiler will be used to perform the
-# check. Acceptable values are C and CXX.
+# check. Acceptable values are ``C`` and ``CXX``. If not set, the C compiler
+# will be used if enabled. If the C compiler is not enabled, the C++
+# compiler will be used if enabled.
 #
 # The following variables may be set before calling this macro to modify
 # the way the check is run:
