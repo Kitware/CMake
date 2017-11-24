@@ -1,7 +1,7 @@
 CMake Error at .*/Modules/CheckIncludeFiles.cmake:[0-9]+. \(message\):
-  Unknown arguments:
+  No languages listed for LANGUAGE option.
 
-    LANGUAGE
+  Supported languages: C, CXX.
 
 Call Stack \(most recent call first\):
   CheckIncludeFilesMissingLanguage.cmake:[0-9]+ \(check_include_files\)
