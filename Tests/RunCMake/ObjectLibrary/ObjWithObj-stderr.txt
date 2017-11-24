@@ -1,4 +1,10 @@
-CMake Error at ObjWithObj.cmake:2 \(add_library\):
-  Only executables and non-OBJECT libraries may reference target objects.
+^CMake Error at ObjWithObj.cmake:[0-9]+ \(add_library\):
+  OBJECT library \"B\" contains:
+
+    [^
+]*a(\.c)?\.o(bj)?
+
+  but may contain only sources that compile, header files, and other files
+  that would not affect linking of a normal library.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)$

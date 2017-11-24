@@ -159,7 +159,9 @@ cmStateEnums::TargetType cmExportBuildFileGenerator::GetExportTargetType(
 {
   cmStateEnums::TargetType targetType = target->GetType();
   // An object library exports as an interface library if we cannot
-  // tell clients where to find the objects.
+  // tell clients where to find the objects.  This is sufficient
+  // to support transitive usage requirements on other targets that
+  // use the object library.
   if (targetType == cmStateEnums::OBJECT_LIBRARY &&
       !this->LG->GetGlobalGenerator()->HasKnownObjectFileLocation(nullptr)) {
     targetType = cmStateEnums::INTERFACE_LIBRARY;

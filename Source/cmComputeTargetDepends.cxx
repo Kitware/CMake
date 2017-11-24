@@ -211,11 +211,11 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
           if (depender->GetType() != cmStateEnums::EXECUTABLE &&
               depender->GetType() != cmStateEnums::STATIC_LIBRARY &&
               depender->GetType() != cmStateEnums::SHARED_LIBRARY &&
-              depender->GetType() != cmStateEnums::MODULE_LIBRARY) {
+              depender->GetType() != cmStateEnums::MODULE_LIBRARY &&
+              depender->GetType() != cmStateEnums::OBJECT_LIBRARY) {
             this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
               cmake::FATAL_ERROR,
-              "Only executables and non-OBJECT libraries may "
-              "reference target objects.",
+              "Only executables and libraries may reference target objects.",
               depender->GetBacktrace());
             return;
           }

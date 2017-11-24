@@ -26,9 +26,9 @@ endfunction ()
 
 run_object_lib_build(LinkObjLHSShared)
 run_object_lib_build(LinkObjLHSStatic)
+run_object_lib_build(LinkObjRHSShared)
+run_object_lib_build(LinkObjRHSStatic)
 
-run_cmake(LinkObjRHS1)
-run_cmake(LinkObjRHS2)
 run_cmake(MissingSource)
 run_cmake(ObjWithObj)
 run_cmake(OwnSources)

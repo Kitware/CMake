@@ -240,13 +240,16 @@ const char* cmGeneratorTarget::GetOutputTargetType(
     case cmStateEnums::MODULE_LIBRARY:
       switch (artifact) {
         case cmStateEnums::RuntimeBinaryArtifact:
-          // Module import libraries are treated as archive targets.
+          // Module libraries are always treated as library targets.
           return "LIBRARY";
         case cmStateEnums::ImportLibraryArtifact:
-          // Module libraries are always treated as library targets.
+          // Module import libraries are treated as archive targets.
           return "ARCHIVE";
       }
       break;
+    case cmStateEnums::OBJECT_LIBRARY:
+      // Object libraries are always treated as object targets.
+      return "OBJECT";
     case cmStateEnums::EXECUTABLE:
       switch (artifact) {
         case cmStateEnums::RuntimeBinaryArtifact:
@@ -1671,6 +1674,7 @@ bool cmGeneratorTarget::HaveWellDefinedOutputFiles() const
   return this->GetType() == cmStateEnums::STATIC_LIBRARY ||
     this->GetType() == cmStateEnums::SHARED_LIBRARY ||
     this->GetType() == cmStateEnums::MODULE_LIBRARY ||
+    this->GetType() == cmStateEnums::OBJECT_LIBRARY ||
     this->GetType() == cmStateEnums::EXECUTABLE;
 }
 
@@ -5323,20 +5327,6 @@ cmGeneratorTarget* cmGeneratorTarget::FindTargetToLink(
     tgt = nullptr;
   }
 
-  if (tgt && tgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-    std::ostringstream e;
-    e << "Target \"" << this->GetName() << "\" links to "
-                                           "OBJECT library \""
-      << tgt->GetName()
-      << "\" but this is not "
-         "allowed.  "
-         "One may link only to STATIC or SHARED libraries, or to executables "
-         "with the ENABLE_EXPORTS property set.";
-    cmake* cm = this->LocalGenerator->GetCMakeInstance();
-    cm->IssueMessage(cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
-    tgt = nullptr;
-  }
-
   return tgt;
 }
 
@@ -5400,6 +5390,7 @@ bool cmGeneratorTarget::IsLinkable() const
           this->GetType() == cmStateEnums::SHARED_LIBRARY ||
           this->GetType() == cmStateEnums::MODULE_LIBRARY ||
           this->GetType() == cmStateEnums::UNKNOWN_LIBRARY ||
+          this->GetType() == cmStateEnums::OBJECT_LIBRARY ||
           this->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
           this->IsExecutableWithExports());
 }
