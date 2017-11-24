@@ -835,14 +835,10 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   std::string temp = relativeObj;
   temp += ".provides.build";
   std::vector<std::string> r_commands;
-  std::string tgtMakefileName =
-    this->LocalGenerator->GetRelativeTargetDirectory(this->GeneratorTarget);
-  tgtMakefileName += "/build.make";
-  r_commands.push_back(
-    this->LocalGenerator->GetRecursiveMakeCall(tgtMakefileName.c_str(), temp));
 
   p_depends.clear();
   p_depends.push_back(objectRequires);
+  p_depends.push_back(temp);
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
                                       objectProvides, p_depends, r_commands,
                                       true);

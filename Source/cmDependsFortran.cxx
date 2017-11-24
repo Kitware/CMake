@@ -388,7 +388,6 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
   if (!info.Provides.empty()) {
     // Create a target to copy the module after the object file
     // changes.
-    makeDepends << obj_m << ".provides.build:\n";
     for (std::string const& i : info.Provides) {
       // Include this module in the set provided by this target.
       this->Internal->TargetProvides.insert(i);
@@ -407,11 +406,25 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       stampFile += "/";
       stampFile += m;
       stampFile += ".mod.stamp";
-      stampFile = this->LocalGenerator->ConvertToOutputFormat(
-        this->MaybeConvertToRelativePath(binDir, stampFile),
-        cmOutputConverter::SHELL);
+      stampFile = this->MaybeConvertToRelativePath(binDir, stampFile);
+      std::string const stampFileForShell =
+        this->LocalGenerator->ConvertToOutputFormat(stampFile,
+                                                    cmOutputConverter::SHELL);
+      std::string const stampFileForMake =
+        cmSystemTools::ConvertToOutputPath(stampFile.c_str());
+
+      makeDepends << obj_m << ".provides.build"
+                  << ": " << stampFileForMake << "\n";
+      // Note that when cmake_copy_f90_mod finds that a module file
+      // and the corresponding stamp file have no differences, the stamp
+      // file is not updated. In such case the stamp file will be always
+      // older than its prerequisite and trigger cmake_copy_f90_mod
+      // on each new build. This is expected behavior for incremental
+      // builds and can not be changed without preforming recursive make
+      // calls that would considerably slow down the building process.
+      makeDepends << stampFileForMake << ": " << obj_m << "\n";
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod " << modFile
-                  << " " << stampFile;
+                  << " " << stampFileForShell;
       cmMakefile* mf = this->LocalGenerator->GetMakefile();
       const char* cid = mf->GetDefinition("CMAKE_Fortran_COMPILER_ID");
       if (cid && *cid) {
@@ -419,6 +432,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       }
       makeDepends << "\n";
     }
+    makeDepends << obj_m << ".provides.build:\n";
     // After copying the modules update the timestamp file so that
     // copying will not be done again until the source rebuilds.
     makeDepends << "\t$(CMAKE_COMMAND) -E touch " << obj_m

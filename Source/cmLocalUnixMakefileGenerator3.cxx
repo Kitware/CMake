@@ -1444,6 +1444,8 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if (lang == "Fortran") {
+      ruleFileStream << "# Note that incremental build could trigger "
+                     << "a call to cmake_copy_f90_mod on each re-build\n";
       scanner = new cmDependsFortran(this);
     } else if (lang == "Java") {
       scanner = new cmDependsJava();
