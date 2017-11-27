@@ -61,9 +61,9 @@ public:
 
   /// @brief Reads the resource files list from from a .qrc file
   /// @arg fileName Must be the absolute path of the .qrc file
-  /// @return True if the rcc file was successfully parsed
-  static bool RccListInputs(std::string const& qtMajorVersion,
-                            std::string const& rccCommand,
+  /// @return True if the rcc file was successfully read
+  static bool RccListInputs(std::string const& rccCommand,
+                            std::vector<std::string> const& rccListOptions,
                             std::string const& fileName,
                             std::vector<std::string>& files,
                             std::string* errorMessage = nullptr);

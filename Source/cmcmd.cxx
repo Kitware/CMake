@@ -6,7 +6,8 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmQtAutoGenerators.h"
+#include "cmQtAutoGeneratorMocUic.h"
+#include "cmQtAutoGeneratorRcc.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
@@ -33,15 +34,14 @@
 #include "cmsys/Process.h"
 #include "cmsys/Terminal.h"
 #include <algorithm>
-#include <functional>
 #include <iostream>
-#include <map>
+#include <iterator>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
-#include <utility>
 
 class cmConnection;
 
@@ -160,7 +160,8 @@ static bool cmTarFilesFrom(std::string const& file,
   return true;
 }
 
-int cmcmd::HandleIWYU(const std::string& runCmd, const std::string&,
+static int HandleIWYU(const std::string& runCmd,
+                      const std::string& /* sourceFile */,
                       const std::vector<std::string>& orig_cmd)
 {
   // Construct the iwyu command line by taking what was given
@@ -187,7 +188,7 @@ int cmcmd::HandleIWYU(const std::string& runCmd, const std::string&,
   return 0;
 }
 
-int cmcmd::HandleTidy(const std::string& runCmd, const std::string& sourceFile,
+static int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
                       const std::vector<std::string>& orig_cmd)
 {
   // Construct the clang-tidy command line by taking what was given
@@ -218,7 +219,8 @@ int cmcmd::HandleTidy(const std::string& runCmd, const std::string& sourceFile,
   return ret;
 }
 
-int cmcmd::HandleLWYU(const std::string& runCmd, const std::string&,
+static int HandleLWYU(const std::string& runCmd,
+                      const std::string& /* sourceFile */,
                       const std::vector<std::string>&)
 {
   // Construct the ldd -r -u (link what you use lwyu) command line
@@ -250,7 +252,7 @@ int cmcmd::HandleLWYU(const std::string& runCmd, const std::string&,
   return 0;
 }
 
-int cmcmd::HandleCppLint(const std::string& runCmd,
+static int HandleCppLint(const std::string& runCmd,
                          const std::string& sourceFile,
                          const std::vector<std::string>&)
 {
@@ -274,7 +276,7 @@ int cmcmd::HandleCppLint(const std::string& runCmd,
   return ret;
 }
 
-int cmcmd::HandleCppCheck(const std::string& runCmd,
+static int HandleCppCheck(const std::string& runCmd,
                           const std::string& sourceFile,
                           const std::vector<std::string>& orig_cmd)
 {
@@ -326,60 +328,70 @@ int cmcmd::HandleCppCheck(const std::string& runCmd,
   return 0;
 }
 
+typedef int (*CoCompileHandler)(const std::string&, const std::string&,
+                                const std::vector<std::string>&);
+
+struct CoCompiler
+{
+  const char* Option;
+  CoCompileHandler Handler;
+  bool NoOriginalCommand;
+};
+
+static CoCompiler CoCompilers[] = { // Table of options and handlers.
+  { "--cppcheck=", HandleCppCheck, false },
+  { "--cpplint=", HandleCppLint, false },
+  { "--iwyu=", HandleIWYU, false },
+  { "--lwyu=", HandleLWYU, true },
+  { "--tidy=", HandleTidy, false }
+};
+
+struct CoCompileJob
+{
+  std::string Command;
+  CoCompileHandler Handler;
+};
+
 // called when args[0] == "__run_co_compile"
 int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
 {
-  // initialize a map from command option to handler function
-  std::map<std::string,
-           std::function<int(const std::string&, const std::string&,
-                             const std::vector<std::string>&)>>
-    coCompileTypes;
-  auto a1 = std::placeholders::_1;
-  auto a2 = std::placeholders::_2;
-  auto a3 = std::placeholders::_3;
-  // create a map from option to handler function for option
-  // if the option does not call the original command then it will need
-  // to set runOriginalCmd to false later in this function
-  coCompileTypes["--iwyu="] = std::bind(&cmcmd::HandleIWYU, a1, a2, a3);
-  coCompileTypes["--tidy="] = std::bind(&cmcmd::HandleTidy, a1, a2, a3);
-  coCompileTypes["--lwyu="] = std::bind(&cmcmd::HandleLWYU, a1, a2, a3);
-  coCompileTypes["--cpplint="] = std::bind(&cmcmd::HandleCppLint, a1, a2, a3);
-  coCompileTypes["--cppcheck="] =
-    std::bind(&cmcmd::HandleCppCheck, a1, a2, a3);
-  // copy the command options to a vector of strings
-  std::vector<std::string> commandOptions;
-  commandOptions.reserve(coCompileTypes.size());
-  for (const auto& i : coCompileTypes) {
-    commandOptions.push_back(i.first);
-  }
+  std::vector<CoCompileJob> jobs;
+  std::string sourceFile; // store --source=
 
-  std::string runCmd;       // command to be run from --thing=command
-  std::string sourceFile;   // store --source=
-  std::string commandFound; // the command that was in the args list
+  // Default is to run the original command found after -- if the option
+  // does not need to do that, it should be specified here, currently only
+  // lwyu does that.
+  bool runOriginalCmd = true;
+
   std::vector<std::string> orig_cmd;
   bool doing_options = true;
-  for (std::string::size_type cc = 2; cc < args.size(); cc++) {
-    std::string const& arg = args[cc];
+  for (std::string::size_type i = 2; i < args.size(); ++i) {
+    std::string const& arg = args[i];
     // if the arg is -- then the rest of the args after
     // go into orig_cmd
     if (arg == "--") {
       doing_options = false;
     } else if (doing_options) {
       bool optionFound = false;
-      // check arg against all the commandOptions
-      for (auto const& command : commandOptions) {
-        if (arg.compare(0, command.size(), command) == 0) {
+      for (CoCompiler const* cc = cm::cbegin(CoCompilers);
+           cc != cm::cend(CoCompilers); ++cc) {
+        size_t optionLen = strlen(cc->Option);
+        if (arg.compare(0, optionLen, cc->Option) == 0) {
           optionFound = true;
-          runCmd = arg.substr(command.size());
-          commandFound = command;
+          CoCompileJob job;
+          job.Command = arg.substr(optionLen);
+          job.Handler = cc->Handler;
+          jobs.push_back(std::move(job));
+          if (cc->NoOriginalCommand) {
+            runOriginalCmd = false;
+          }
         }
       }
-      // check arg with --source=
       if (cmHasLiteralPrefix(arg, "--source=")) {
         sourceFile = arg.substr(9);
         optionFound = true;
       }
-      // if it was not a commandOptions or --source then error
+      // if it was not a co-compiler or --source then error
       if (!optionFound) {
         std::cerr << "__run_co_compile given unknown argument: " << arg
                   << "\n";
@@ -389,39 +401,40 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
       orig_cmd.push_back(arg);
     }
   }
-  if (commandFound.empty()) {
-    std::cerr << "__run_co_compile missing command to run. Looking for one of "
-                 "the following:\n";
-    for (const auto& i : commandOptions) {
-      std::cerr << i << "\n";
+  if (jobs.empty()) {
+    std::cerr << "__run_co_compile missing command to run. "
+                 "Looking for one or more of the following:\n";
+    for (CoCompiler const* cc = cm::cbegin(CoCompilers);
+         cc != cm::cend(CoCompilers); ++cc) {
+      std::cerr << cc->Option << "\n";
     }
     return 1;
   }
-  // Default is to run the original command found after -- if the option
-  // does not need to do that, it should be specified here, currently only
-  // lwyu does that.
-  bool runOriginalCmd = true;
-  if (commandFound == "--lwyu=") {
-    runOriginalCmd = false;
-  }
+
   if (runOriginalCmd && orig_cmd.empty()) {
     std::cerr << "__run_co_compile missing compile command after --\n";
     return 1;
   }
 
-  // call the command handler here
-  int ret = coCompileTypes[commandFound](runCmd, sourceFile, orig_cmd);
-  // if the command returns non-zero then return and fail.
-  // for commands that do not want to break the build, they should return
-  // 0 no matter what.
-  if (ret != 0) {
-    return ret;
+  for (CoCompileJob const& job : jobs) {
+    // call the command handler here
+    int ret = job.Handler(job.Command, sourceFile, orig_cmd);
+
+    // if the command returns non-zero then return and fail.
+    // for commands that do not want to break the build, they should return
+    // 0 no matter what.
+    if (ret != 0) {
+      return ret;
+    }
   }
+
   // if there is no original command to run return now
   if (!runOriginalCmd) {
-    return ret;
+    return 0;
   }
+
   // Now run the real compiler command and return its result value
+  int ret;
   if (!cmSystemTools::RunSingleCommand(orig_cmd, nullptr, nullptr, &ret,
                                        nullptr,
                                        cmSystemTools::OUTPUT_PASSTHROUGH)) {
@@ -980,11 +993,20 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-    if (args[1] == "cmake_autogen" && args.size() >= 4) {
-      cmQtAutoGenerators autogen;
+    if ((args[1] == "cmake_autogen") && (args.size() >= 4)) {
+      cmQtAutoGeneratorMocUic autoGen;
+      std::string const& infoDir = args[2];
       std::string const& config = args[3];
-      bool autogenSuccess = autogen.Run(args[2], config);
-      return autogenSuccess ? 0 : 1;
+      return autoGen.Run(infoDir, config) ? 0 : 1;
+    }
+    if ((args[1] == "cmake_autorcc") && (args.size() >= 3)) {
+      cmQtAutoGeneratorRcc autoGen;
+      std::string const& infoFile = args[2];
+      std::string config;
+      if (args.size() > 3) {
+        config = args[3];
+      };
+      return autoGen.Run(infoFile, config) ? 0 : 1;
     }
 #endif
 
@@ -1013,8 +1035,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           } else if (cmHasLiteralPrefix(arg, "--format=")) {
             format = arg.substr(9);
             bool isKnown =
-              std::find(cmArrayBegin(knownFormats), cmArrayEnd(knownFormats),
-                        format) != cmArrayEnd(knownFormats);
+              std::find(cm::cbegin(knownFormats), cm::cend(knownFormats),
+                        format) != cm::cend(knownFormats);
 
             if (!isKnown) {
               cmSystemTools::Error("Unknown -E tar --format= argument: ",
@@ -1565,9 +1587,11 @@ std::ostream& operator<<(std::ostream& stream,
   stream.flags(flags);
   return stream;
 }
+
 static bool RunCommand(const char* comment, std::vector<std::string>& command,
                        bool verbose, NumberFormat exitFormat,
-                       int* retCodeOut = nullptr)
+                       int* retCodeOut = nullptr,
+                       bool (*retCodeOkay)(int) = nullptr)
 {
   if (verbose) {
     std::cout << comment << ":\n";
@@ -1577,18 +1601,17 @@ static bool RunCommand(const char* comment, std::vector<std::string>& command,
   int retCode = 0;
   bool commandResult = cmSystemTools::RunSingleCommand(
     command, &output, &output, &retCode, nullptr, cmSystemTools::OUTPUT_NONE);
-  bool returnValue;
+  bool const retCodeSuccess =
+    retCode == 0 || (retCodeOkay && retCodeOkay(retCode));
+  bool const success = commandResult && retCodeSuccess;
   if (retCodeOut) {
-    if (!commandResult) {
-      *retCodeOut = (retCode == 0) ? -1 : retCode;
-    } else {
+    if (commandResult || !retCodeSuccess) {
       *retCodeOut = retCode;
+    } else {
+      *retCodeOut = -1;
     }
-    returnValue = true; // always return true if retCodeOut is requested
-  } else {
-    returnValue = commandResult && (retCode == 0);
   }
-  if (!commandResult || retCode) {
+  if (!success) {
     std::cout << comment << ": command \"" << cmJoin(command, " ")
               << "\" failed (exit code "
               << NumberFormatter(exitFormat, retCode)
@@ -1601,7 +1624,7 @@ static bool RunCommand(const char* comment, std::vector<std::string>& command,
       std::cout << output;
     }
   }
-  return returnValue;
+  return success;
 }
 
 bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
@@ -1699,6 +1722,13 @@ int cmVSLink::Link()
   return LinkNonIncremental();
 }
 
+static bool mtRetIsUpdate(int mtRet)
+{
+  // 'mt /notify_update' returns a special value (differing between
+  // Windows and POSIX hosts) when it updated the manifest file.
+  return mtRet == 0x41020001 || mtRet == 0xbb;
+}
+
 int cmVSLink::LinkIncremental()
 {
   // This follows the steps listed here:
@@ -1770,9 +1800,9 @@ int cmVSLink::LinkIncremental()
   // Run the manifest tool to create the final manifest.
   int mtRet = this->RunMT("/out:" + this->ManifestFile, true);
 
-  // If mt returns 1090650113 (or 187 on a posix host) then it updated the
-  // manifest file so we need to embed it again.  Otherwise we are done.
-  if (mtRet != 1090650113 && mtRet != 187) {
+  // If mt returns a special value then it updated the manifest file so
+  // we need to embed it again.  Otherwise we are done.
+  if (!mtRetIsUpdate(mtRet)) {
     return mtRet;
   }
 
@@ -1825,7 +1855,8 @@ int cmVSLink::RunMT(std::string const& out, bool notify)
     mtCommand.push_back("/notify_update");
   }
   int mtRet = 0;
-  if (!RunCommand("MT", mtCommand, this->Verbose, FORMAT_HEX, &mtRet)) {
+  if (!RunCommand("MT", mtCommand, this->Verbose, FORMAT_HEX, &mtRet,
+                  mtRetIsUpdate)) {
     return -1;
   }
   return mtRet;

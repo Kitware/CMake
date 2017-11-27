@@ -35,10 +35,27 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source PACK
       "-DRunCMake_TEST_FILE_PREFIX=${TEST_NAME}"
       "-DRunCMake_SUBTEST_SUFFIX=${SUBTEST_SUFFIX}"
       "-DPACKAGING_TYPE=${PACKAGING_TYPE}")
+
+    foreach(o out err)
+      if(SUBTEST_SUFFIX AND EXISTS ${RunCMake_SOURCE_DIR}/tests/${TEST_NAME}/configure-${PACKAGING_TYPE}-${SUBTEST_SUFFIX}-std${o}.txt)
+        set(RunCMake-std${o}-file "tests/${TEST_NAME}/configure-${PACKAGING_TYPE}-${SUBTEST_SUFFIX}-std${o}.txt")
+      elseif(SUBTEST_SUFFIX AND EXISTS ${RunCMake_SOURCE_DIR}/tests/${TEST_NAME}/configure-${SUBTEST_SUFFIX}-std${o}.txt)
+        set(RunCMake-std${o}-file "tests/${TEST_NAME}/configure-${SUBTEST_SUFFIX}-std${o}.txt")
+      elseif(EXISTS ${RunCMake_SOURCE_DIR}/tests/${TEST_NAME}/configure-${PACKAGING_TYPE}-std${o}.txt)
+        set(RunCMake-std${o}-file "tests/${TEST_NAME}/configure-${PACKAGING_TYPE}-std${o}.txt")
+      elseif(EXISTS ${RunCMake_SOURCE_DIR}/tests/${TEST_NAME}/configure-std${o}.txt)
+        set(RunCMake-std${o}-file "tests/${TEST_NAME}/configure-std${o}.txt")
+      else()
+        unset(RunCMake-std${o}-file)
+      endif()
+    endforeach()
+
     run_cmake(${full_test_name_})
 
     # execute optional build step
     if(build)
+      unset(RunCMake-stdout-file)
+      unset(RunCMake-stderr-file)
       run_cmake_command(${full_test_name_}-Build "${CMAKE_COMMAND}" --build "${RunCMake_TEST_BINARY_DIR}")
     endif()
 
@@ -68,8 +85,12 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source PACK
         set(RunCMake-std${o}-file "tests/${TEST_NAME}/${TEST_TYPE}-${SUBTEST_SUFFIX}-std${o}.txt")
       elseif(EXISTS ${RunCMake_SOURCE_DIR}/tests/${TEST_NAME}/${TEST_TYPE}-std${o}.txt)
         set(RunCMake-std${o}-file "tests/${TEST_NAME}/${TEST_TYPE}-std${o}.txt")
+      elseif(SUBTEST_SUFFIX AND EXISTS ${RunCMake_SOURCE_DIR}/tests/${TEST_NAME}/${SUBTEST_SUFFIX}-std${o}.txt)
+        set(RunCMake-std${o}-file "tests/${TEST_NAME}/${SUBTEST_SUFFIX}-std${o}.txt")
       elseif(EXISTS ${RunCMake_SOURCE_DIR}/${TEST_TYPE}/default_expected_std${o}.txt)
         set(RunCMake-std${o}-file "${TEST_TYPE}/default_expected_std${o}.txt")
+      else()
+        unset(RunCMake-std${o}-file)
       endif()
     endforeach()
 

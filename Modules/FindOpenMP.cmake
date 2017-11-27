@@ -75,6 +75,7 @@
 # the OpenMP specification implemented by the ``<lang>`` compiler.
 
 cmake_policy(PUSH)
+cmake_policy(SET CMP0012 NEW) # if() recognizes numbers and booleans
 cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
@@ -230,6 +231,7 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
                 DOC "Path to the ${_OPENMP_IMPLICIT_LIB_PLAIN} library for OpenMP"
                 HINTS ${OpenMP_${LANG}_IMPLICIT_LINK_DIRS}
                 CMAKE_FIND_ROOT_PATH_BOTH
+                NO_DEFAULT_PATH
               )
             endif()
             mark_as_advanced(OpenMP_${_OPENMP_IMPLICIT_LIB_PLAIN}_LIBRARY)
@@ -244,6 +246,8 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           find_library(OpenMP_libiomp5md_LIBRARY
             NAMES "libiomp5md"
             HINTS ${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES}
+            CMAKE_FIND_ROOT_PATH_BOTH
+            NO_DEFAULT_PATH
           )
           mark_as_advanced(OpenMP_libiomp5md_LIBRARY)
         else()

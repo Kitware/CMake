@@ -183,12 +183,19 @@ public:
                           const std::vector<std::string>& srcs,
                           bool excludeFromAll = false);
 
+  /** Where the target originated from. */
+  enum class TargetOrigin
+  {
+    Project,
+    Generator
+  };
+
   /**
    * Add a utility to the build.  A utiltity target is a command that
    * is run every time the target is built.
    */
   cmTarget* AddUtilityCommand(const std::string& utilityName,
-                              bool excludeFromAll,
+                              TargetOrigin origin, bool excludeFromAll,
                               const std::vector<std::string>& depends,
                               const char* workingDirectory,
                               const char* command, const char* arg1 = nullptr,
@@ -196,13 +203,13 @@ public:
                               const char* arg3 = nullptr,
                               const char* arg4 = nullptr);
   cmTarget* AddUtilityCommand(
-    const std::string& utilityName, bool excludeFromAll,
+    const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
     const char* workingDirectory, const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
     const char* comment = nullptr, bool uses_terminal = false,
     bool command_expand_lists = false);
   cmTarget* AddUtilityCommand(
-    const std::string& utilityName, bool excludeFromAll,
+    const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
     const char* workingDirectory, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
@@ -561,7 +568,7 @@ public:
                        bool atOnly, bool escapeQuotes) const;
 
   /**
-   * Copy file but change lines acording to ConfigureString
+   * Copy file but change lines according to ConfigureString
    */
   int ConfigureFile(const char* infile, const char* outfile, bool copyonly,
                     bool atOnly, bool escapeQuotes,
@@ -639,6 +646,11 @@ public:
    *  not found, then a null pointer is returned.
    */
   cmTest* GetTest(const std::string& testName) const;
+
+  /**
+   * Get all tests that run under the given configuration.
+   */
+  void GetTests(const std::string& config, std::vector<cmTest*>& tests);
 
   /**
    * Return a location of a file in cmake or custom modules directory
@@ -743,6 +755,9 @@ public:
   /** Set whether or not to report a CMP0000 violation.  */
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }
 
+  bool CheckCMP0037(std::string const& targetName,
+                    cmStateEnums::TargetType targetType) const;
+
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
   cmStringRange GetCompileOptionsEntries() const;
@@ -799,7 +814,7 @@ public:
   void RemoveExportBuildFileGeneratorCMP0024(cmExportBuildFileGenerator* gen);
   void AddExportBuildFileGenerator(cmExportBuildFileGenerator* gen);
 
-  // Maintain a stack of pacakge names to determine the depth of find modules
+  // Maintain a stack of package names to determine the depth of find modules
   // we are currently being called with
   std::deque<std::string> FindPackageModuleStack;
 
@@ -815,7 +830,18 @@ protected:
   // libraries, classes, and executables
   mutable cmTargets Targets;
   std::map<std::string, std::string> AliasTargets;
-  std::vector<cmSourceFile*> SourceFiles;
+
+  typedef std::vector<cmSourceFile*> SourceFileVec;
+  SourceFileVec SourceFiles;
+
+  // Because cmSourceFile names are compared in a fuzzy way (see
+  // cmSourceFileLocation::Match()) we can't have a straight mapping from
+  // filename to cmSourceFile.  To make lookups more efficient we store the
+  // Name portion of the cmSourceFileLocation and then compare on the list of
+  // cmSourceFiles that might match that name.  Note that on platforms which
+  // have a case-insensitive filesystem we store the key in all lowercase.
+  typedef std::unordered_map<std::string, SourceFileVec> SourceFileMap;
+  SourceFileMap SourceFileSearchIndex;
 
   // Tests
   std::map<std::string, cmTest*> Tests;

@@ -111,6 +111,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
@@ -200,6 +201,11 @@ cmake::cmake(Role role)
   this->SourceFileExtensions.push_back("M");
   this->SourceFileExtensions.push_back("mm");
 
+  std::copy(this->SourceFileExtensions.begin(),
+            this->SourceFileExtensions.end(),
+            std::inserter(this->SourceFileExtensionsSet,
+                          this->SourceFileExtensionsSet.end()));
+
   this->HeaderFileExtensions.push_back("h");
   this->HeaderFileExtensions.push_back("hh");
   this->HeaderFileExtensions.push_back("h++");
@@ -208,6 +214,11 @@ cmake::cmake(Role role)
   this->HeaderFileExtensions.push_back("hxx");
   this->HeaderFileExtensions.push_back("in");
   this->HeaderFileExtensions.push_back("txx");
+
+  std::copy(this->HeaderFileExtensions.begin(),
+            this->HeaderFileExtensions.end(),
+            std::inserter(this->HeaderFileExtensionsSet,
+                          this->HeaderFileExtensionsSet.end()));
 }
 
 cmake::~cmake()
@@ -1532,22 +1543,22 @@ void cmake::CreateDefaultGlobalGenerator()
   if (vsSetupAPIHelper.IsVS2017Installed()) {
     found = "Visual Studio 15 2017";
   } else {
-      for (VSVersionedGenerator const* g = cmArrayBegin(vsGenerators);
-          found.empty() && g != cmArrayEnd(vsGenerators); ++g) {
-          for (const char* const* v = cmArrayBegin(vsVariants);
-              found.empty() && v != cmArrayEnd(vsVariants); ++v) {
-              for (const char* const* e = cmArrayBegin(vsEntries);
-                  found.empty() && e != cmArrayEnd(vsEntries); ++e) {
-                  std::string const reg = vsregBase + *v + g->MSVersion + *e;
-                  std::string dir;
-                  if (cmSystemTools::ReadRegistryValue(reg, dir,
-                      cmSystemTools::KeyWOW64_32) &&
-                      cmSystemTools::PathExists(dir)) {
-                      found = g->GeneratorName;
-                  }
-              }
+    for (VSVersionedGenerator const* g = cm::cbegin(vsGenerators);
+         found.empty() && g != cm::cend(vsGenerators); ++g) {
+      for (const char* const* v = cm::cbegin(vsVariants);
+           found.empty() && v != cm::cend(vsVariants); ++v) {
+        for (const char* const* e = cm::cbegin(vsEntries);
+             found.empty() && e != cm::cend(vsEntries); ++e) {
+          std::string const reg = vsregBase + *v + g->MSVersion + *e;
+          std::string dir;
+          if (cmSystemTools::ReadRegistryValue(reg, dir,
+                                               cmSystemTools::KeyWOW64_32) &&
+              cmSystemTools::PathExists(dir)) {
+            found = g->GeneratorName;
           }
+        }
       }
+    }
   }
   cmGlobalGenerator* gen = this->CreateGlobalGenerator(found);
   if (!gen) {
@@ -1706,6 +1717,21 @@ void cmake::AddCacheEntry(const std::string& key, const char* value,
   this->UnwatchUnusedCli(key);
 }
 
+std::string cmake::StripExtension(const std::string& file) const
+{
+  auto dotpos = file.rfind('.');
+  if (dotpos != std::string::npos) {
+    auto ext = file.substr(dotpos + 1);
+#if defined(_WIN32) || defined(__APPLE__)
+    ext = cmSystemTools::LowerCase(ext);
+#endif
+    if (this->IsSourceExtension(ext) || this->IsHeaderExtension(ext)) {
+      return file.substr(0, dotpos);
+    }
+  }
+  return file;
+}
+
 const char* cmake::GetCacheDefinition(const std::string& name) const
 {
   return this->State->GetInitializedCacheValue(name);
@@ -1795,8 +1821,8 @@ bool cmake::LoadCache(const std::string& path, bool internal,
   bool result = this->State->LoadCache(path, internal, excludes, includes);
   static const char* entries[] = { "CMAKE_CACHE_MAJOR_VERSION",
                                    "CMAKE_CACHE_MINOR_VERSION" };
-  for (const char* const* nameIt = cmArrayBegin(entries);
-       nameIt != cmArrayEnd(entries); ++nameIt) {
+  for (const char* const* nameIt = cm::cbegin(entries);
+       nameIt != cm::cend(entries); ++nameIt) {
     this->UnwatchUnusedCli(*nameIt);
   }
   return result;
@@ -1809,8 +1835,8 @@ bool cmake::SaveCache(const std::string& path)
                                    "CMAKE_CACHE_MINOR_VERSION",
                                    "CMAKE_CACHE_PATCH_VERSION",
                                    "CMAKE_CACHEFILE_DIR" };
-  for (const char* const* nameIt = cmArrayBegin(entries);
-       nameIt != cmArrayEnd(entries); ++nameIt) {
+  for (const char* const* nameIt = cm::cbegin(entries);
+       nameIt != cm::cend(entries); ++nameIt) {
     this->UnwatchUnusedCli(*nameIt);
   }
   return result;

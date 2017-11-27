@@ -25,7 +25,7 @@
 #   JAVA_INCLUDE_PATH2    = the include path to jni_md.h
 #   JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
 
-# Expand {libarch} occurences to java_libarch subdirectory(-ies) and set ${_var}
+# Expand {libarch} occurrences to java_libarch subdirectory(-ies) and set ${_var}
 macro(java_append_library_directories _var)
     # Determine java arch-specific library subdir
     # Mostly based on openjdk/jdk/make/common/shared/Platform.gmk as of openjdk
@@ -46,7 +46,7 @@ macro(java_append_library_directories _var)
         set(_java_libarch "arm" "aarch32")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^mips")
         # mips* machines are bi-endian mostly so processor does not tell
-        # endianess of the underlying system.
+        # endianness of the underlying system.
         set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "mips" "mipsel" "mipseb" "mips64" "mips64el" "mipsn32" "mipsn32el")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64le")
         set(_java_libarch "ppc64" "ppc64le")
@@ -126,8 +126,6 @@ list(APPEND JAVA_AWT_LIBRARY_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/lib"
   )
 JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
-  /usr/lib
-  /usr/local/lib
   /usr/lib/jvm/java/lib
   /usr/lib/java/jre/lib/{libarch}
   /usr/lib/jvm/jre/lib/{libarch}
@@ -185,8 +183,6 @@ list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES
 )
 
 JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_INCLUDE_DIRECTORIES
-  /usr/include
-  /usr/local/include
   /usr/lib/java/include
   /usr/local/lib/java/include
   /usr/lib/jvm/java/include

@@ -122,7 +122,7 @@
 #
 #    write_basic_package_version_file(<filename>
 #      [VERSION <major.minor.patch>]
-#      COMPATIBILITY <AnyNewerVersion|SameMajorVersion|ExactVersion> )
+#      COMPATIBILITY <AnyNewerVersion|SameMajorVersion|SameMinorVersion|ExactVersion> )
 #
 #
 # Writes a file for use as ``<package>ConfigVersion.cmake`` file to
@@ -144,6 +144,9 @@
 # requested, e.g.  version 2.0 will not be considered compatible if 1.0 is
 # requested.  This mode should be used for packages which guarantee backward
 # compatibility within the same major version.
+# If ``SameMinorVersion`` is used, the behaviour is the same as
+# ``SameMajorVersion``, but both major and minor version must be the same as
+# requested, e.g version 0.2 will not be compatible if 0.1 is requested.
 # If ``ExactVersion`` is used, then the package is only considered compatible if
 # the requested version matches exactly its own version number (not considering
 # the tweak version).  For example, version 1.2.3 of a package is only
@@ -154,10 +157,9 @@
 # macro.
 #
 # Internally, this macro executes :command:`configure_file()` to create the
-# resulting version file.  Depending on the ``COMPATIBLITY``, either the file
-# ``BasicConfigVersion-SameMajorVersion.cmake.in`` or
-# ``BasicConfigVersion-AnyNewerVersion.cmake.in`` is used.  Please note that
-# these two files are internal to CMake and you should not call
+# resulting version file.  Depending on the ``COMPATIBILITY``, the corresponding
+# ``BasicConfigVersion-<COMPATIBILITY>.cmake.in`` file is used.
+# Please note that these files are internal to CMake and you should not call
 # :command:`configure_file()` on them yourself, but they can be used as starting
 # point to create more sophisticted custom ``ConfigVersion.cmake`` files.
 #

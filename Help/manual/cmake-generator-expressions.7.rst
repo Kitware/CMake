@@ -97,7 +97,7 @@ Available logical expressions are:
   compile features and a list of supported compilers.
 ``$<COMPILE_LANGUAGE:lang>``
   ``1`` when the language used for compilation unit matches ``lang``,
-  otherwise ``0``.  This expression used to specify compile options for
+  otherwise ``0``.  This expression may be used to specify compile options for
   source files of a particular language in a target. For example, to specify
   the use of the ``-fno-exceptions`` compile option (compiler id checks
   elided):
@@ -109,10 +109,12 @@ Available logical expressions are:
       PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
     )
 
-  This generator expression has limited use because it is not possible to
-  use it with the Visual Studio generators.  Portable buildsystems would
-  not use this expression, and would create separate libraries for each
-  source file language instead:
+  Note that with :ref:`Visual Studio Generators` there is no way to represent
+  target-wide flags separately for ``C`` and ``CXX`` languages.  Under these
+  generators, target-wide flags for both C and C++ sources will be evaluated
+  using ``CXX`` if there are any C++ sources and otherwise using ``C``.
+  A workaround is to create separate libraries for each source file language
+  instead:
 
   .. code-block:: cmake
 

@@ -590,7 +590,7 @@ void cmFindPackageCommand::SetModuleVariables(const std::string& components)
     this->AddFindDefinition(exact, this->VersionExact ? "1" : "0");
   }
 
-  // Push on to the pacakge stack
+  // Push on to the package stack
   this->Makefile->FindPackageModuleStack.push_back(this->Name);
 }
 

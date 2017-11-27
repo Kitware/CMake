@@ -60,14 +60,14 @@ void cmSourceGroup::AddGroupFile(const std::string& name)
   this->GroupFiles.insert(name);
 }
 
-const char* cmSourceGroup::GetName() const
+std::string const& cmSourceGroup::GetName() const
 {
-  return this->Name.c_str();
+  return this->Name;
 }
 
-const char* cmSourceGroup::GetFullName() const
+std::string const& cmSourceGroup::GetFullName() const
 {
-  return this->FullName.c_str();
+  return this->FullName;
 }
 
 bool cmSourceGroup::MatchesRegex(const char* name)
@@ -105,7 +105,7 @@ cmSourceGroup* cmSourceGroup::LookupChild(const char* name) const
 
   // st
   for (; iter != end; ++iter) {
-    std::string sgName = iter->GetName();
+    std::string const& sgName = iter->GetName();
 
     // look if descenened is the one were looking for
     if (sgName == name) {

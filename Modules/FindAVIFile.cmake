@@ -21,14 +21,8 @@
 
 if (UNIX)
 
-  find_path(AVIFILE_INCLUDE_DIR avifile.h
-    /usr/local/avifile/include
-    /usr/local/include/avifile
-  )
-
-  find_library(AVIFILE_AVIPLAY_LIBRARY aviplay
-    /usr/local/avifile/lib
-  )
+  find_path(AVIFILE_INCLUDE_DIR avifile.h PATH_SUFFIXES avifile/include include/avifile include/avifile-0.7)
+  find_library(AVIFILE_AVIPLAY_LIBRARY aviplay aviplay-0.7 PATH_SUFFIXES avifile/lib)
 
 endif ()
 

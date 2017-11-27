@@ -7,10 +7,8 @@
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -63,35 +61,9 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
   if (nameOk && !importTarget && !isAlias) {
     nameOk = exename.find(':') == std::string::npos;
   }
-  if (!nameOk) {
-    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-    std::ostringstream e;
-    bool issueMessage = false;
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0037)) {
-      case cmPolicies::WARN:
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << "\n";
-        issueMessage = true;
-      case cmPolicies::OLD:
-        break;
-      case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        issueMessage = true;
-        messageType = cmake::FATAL_ERROR;
-    }
-    if (issueMessage) {
-      /* clang-format off */
-      e << "The target name \"" << exename <<
-          "\" is reserved or not valid for certain "
-          "CMake features, such as generator expressions, and may result "
-          "in undefined behavior.";
-      /* clang-format on */
-      this->Makefile->IssueMessage(messageType, e.str());
-
-      if (messageType == cmake::FATAL_ERROR) {
-        return false;
-      }
-    }
+  if (!nameOk &&
+      !this->Makefile->CheckCMP0037(exename, cmStateEnums::EXECUTABLE)) {
+    return false;
   }
 
   // Special modifiers are not allowed with IMPORTED signature.
@@ -140,8 +112,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
     if (!aliasedTarget) {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" does not already "
-                          "exist.";
+        << aliasedName << "\" does not already exist.";
       this->SetError(e.str());
       return false;
     }
@@ -149,15 +120,15 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
     if (type != cmStateEnums::EXECUTABLE) {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" is not an "
-                          "executable.";
+        << aliasedName << "\" is not an executable.";
       this->SetError(e.str());
       return false;
     }
-    if (aliasedTarget->IsImported()) {
+    if (aliasedTarget->IsImported() &&
+        !aliasedTarget->IsImportedGloballyVisible()) {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" is IMPORTED.";
+        << aliasedName << "\" is imported but not globally visible.";
       this->SetError(e.str());
       return false;
     }

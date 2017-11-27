@@ -16,15 +16,12 @@
 #   PIKE_INCLUDE_PATH       = path to where program.h is found
 #   PIKE_EXECUTABLE         = full path to the pike binary
 
-file(GLOB PIKE_POSSIBLE_INCLUDE_PATHS
-  /usr/include/pike/*
-  /usr/local/include/pike/*)
-
 find_path(PIKE_INCLUDE_PATH program.h
-  ${PIKE_POSSIBLE_INCLUDE_PATHS})
+  ${PIKE_POSSIBLE_INCLUDE_PATHS}
+  PATH_SUFFIXES include/pike8.0/pike include/pike7.8/pike include/pike7.4/pike)
 
 find_program(PIKE_EXECUTABLE
-  NAMES pike7.4
+  NAMES pike8.0 pike 7.8 pike7.4
   )
 
 mark_as_advanced(

@@ -65,6 +65,11 @@ add_executable(mocOnly mocOnlySource/main.cpp mocOnlySource/StyleA.cpp mocOnlySo
 set_property(TARGET mocOnly PROPERTY AUTOMOC ON)
 target_link_libraries(mocOnly ${QT_LIBRARIES})
 
+add_executable(mocOnlyOpts mocOnlySource/main.cpp mocOnlySource/StyleA.cpp mocOnlySource/StyleB.cpp)
+set_property(TARGET mocOnlyOpts PROPERTY AUTOMOC ON)
+set_property(TARGET mocOnlyOpts PROPERTY AUTOMOC_MOC_OPTIONS "-nw")
+target_link_libraries(mocOnlyOpts ${QT_LIBRARIES})
+
 # -- Test
 # UIC only
 if(ALLOW_WRAP_CPP)
@@ -212,6 +217,10 @@ add_subdirectory(objectLibrary)
 # -- Test
 # Source files with the same basename in different subdirectories
 add_subdirectory(sameName)
+
+# -- Test
+# Tests static library cycles
+add_subdirectory(staticLibraryCycle)
 
 # -- Test
 # Complex test case

@@ -345,8 +345,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
   all_files_map_t allFiles;
   std::vector<std::string> cFiles;
 
-  std::vector<std::string> const& srcExts =
-    this->GlobalGenerator->GetCMakeInstance()->GetSourceExtensions();
+  auto cm = this->GlobalGenerator->GetCMakeInstance();
 
   for (cmLocalGenerator* lg : lgs) {
     cmMakefile* makefile = lg->GetMakefile();
@@ -377,12 +376,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
             std::string lang = s->GetLanguage();
             if (lang == "C" || lang == "CXX") {
               std::string const& srcext = s->GetExtension();
-              for (std::string const& ext : srcExts) {
-                if (srcext == ext) {
-                  isCFile = true;
-                  break;
-                }
-              }
+              isCFile = cm->IsSourceExtension(srcext);
             }
 
             std::string const& fullPath = s->GetFullPath();

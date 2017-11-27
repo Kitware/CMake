@@ -35,7 +35,6 @@ protected:
                                       bool prepend, bool system);
 
 private:
-  virtual void HandleImportedTarget(const std::string& tgt) = 0;
   virtual void HandleMissingTarget(const std::string& name) = 0;
 
   virtual bool HandleDirectContent(cmTarget* tgt,

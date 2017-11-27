@@ -11,5 +11,13 @@ gtest_discover_tests(
   TEST_PREFIX TEST:
   TEST_SUFFIX !1
   EXTRA_ARGS how now "\"brown\" cow"
-  PROPERTIES LABELS TEST
+  PROPERTIES LABELS TEST1
+)
+
+gtest_discover_tests(
+  fake_gtest
+  TEST_PREFIX TEST:
+  TEST_SUFFIX !2
+  EXTRA_ARGS how now "\"brown\" cow"
+  PROPERTIES LABELS TEST2
 )

@@ -107,7 +107,7 @@ public:
   }
 
   /**
-   * Replace replace all occurences of the string in the source string.
+   * Replace replace all occurrences of the string in the source string.
    */
   static void ReplaceString(std::string& source, const char* replace,
                             const char* with);
@@ -175,7 +175,7 @@ public:
   static bool StringEndsWith(const std::string& str1, const char* str2);
 
   /**
-   * Returns a pointer to the last occurence of str2 in str1
+   * Returns a pointer to the last occurrence of str2 in str1
    */
   static const char* FindLastString(const char* str1, const char* str2);
 
@@ -553,13 +553,20 @@ public:
    */
   static FILE* Fopen(const std::string& file, const char* mode);
 
+/**
+ * Visual C++ does not define mode_t (note that Borland does, however).
+ */
+#if defined(_MSC_VER)
+  typedef unsigned short mode_t;
+#endif
+
   /**
    * Make a new directory if it is not there.  This function
    * can make a full path even if none of the directories existed
    * prior to calling this function.
    */
-  static bool MakeDirectory(const char* path);
-  static bool MakeDirectory(const std::string& path);
+  static bool MakeDirectory(const char* path, const mode_t* mode = 0);
+  static bool MakeDirectory(const std::string& path, const mode_t* mode = 0);
 
   /**
    * Copy the source file to the destination file only
@@ -749,13 +756,6 @@ public:
    */
   static long int CreationTime(const std::string& filename);
 
-/**
- * Visual C++ does not define mode_t (note that Borland does, however).
- */
-#if defined(_MSC_VER)
-  typedef unsigned short mode_t;
-#endif
-
   /**
    * Get and set permissions of the file.  If honor_umask is set, the umask
    * is queried and applied to the given permissions.  Returns false if
@@ -905,7 +905,7 @@ public:
 
   /**
    * Delay the execution for a specified amount of time specified
-   * in miliseconds
+   * in milliseconds
    */
   static void Delay(unsigned int msec);
 

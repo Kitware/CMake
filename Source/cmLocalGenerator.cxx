@@ -135,8 +135,8 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
     this->VariableMappings[compilerOptionSysroot] =
       this->Makefile->GetSafeDefinition(compilerOptionSysroot);
 
-    for (const char* const* replaceIter = cmArrayBegin(ruleReplaceVars);
-         replaceIter != cmArrayEnd(ruleReplaceVars); ++replaceIter) {
+    for (const char* const* replaceIter = cm::cbegin(ruleReplaceVars);
+         replaceIter != cm::cend(ruleReplaceVars); ++replaceIter) {
       std::string actualReplace = *replaceIter;
       if (actualReplace.find("${LANG}") != std::string::npos) {
         cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
@@ -482,6 +482,20 @@ void cmLocalGenerator::GenerateInstallRules()
       "# Is this installation the result of a crosscompile?\n"
       "if(NOT DEFINED CMAKE_CROSSCOMPILING)\n"
       "  set(CMAKE_CROSSCOMPILING \"" << crosscompiling << "\")\n"
+      "endif()\n"
+      "\n";
+    /* clang-format on */
+  }
+
+  // Write default directory permissions.
+  if (const char* defaultDirPermissions = this->Makefile->GetDefinition(
+        "CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS")) {
+    /* clang-format off */
+    fout <<
+      "# Set default install directory permissions.\n"
+      "if(NOT DEFINED CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS)\n"
+      "  set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS \""
+         << defaultDirPermissions << "\")\n"
       "endif()\n"
       "\n";
     /* clang-format on */

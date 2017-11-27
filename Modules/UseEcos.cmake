@@ -181,7 +181,7 @@ macro(ECOS_ADD_EXECUTABLE _exe_NAME )
 #the executable depends on ecos target.ld
    ECOS_ADD_TARGET_LIB(${ARGN})
 
-# when using nmake makefiles, the custom buildtype supresses the default cl.exe flags
+# when using nmake makefiles, the custom buildtype suppresses the default cl.exe flags
 # and the rules for creating objects are adjusted for gcc
    set(CMAKE_BUILD_TYPE CUSTOM_ECOS_BUILD)
    set(CMAKE_C_COMPILE_OBJECT     "<CMAKE_C_COMPILER>   <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")

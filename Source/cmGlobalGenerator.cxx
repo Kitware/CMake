@@ -962,7 +962,7 @@ std::string cmGlobalGenerator::GetLanguageOutputExtension(
     }
   } else {
     // if no language is found then check to see if it is already an
-    // ouput extension for some language.  In that case it should be ignored
+    // output extension for some language.  In that case it should be ignored
     // and in this map, so it will not be compiled but will just be used.
     std::string const& ext = source.GetExtension();
     if (!ext.empty()) {
@@ -1314,7 +1314,10 @@ bool cmGlobalGenerator::Compute()
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
   // the AUTOMOC, AUTOUIC or AUTORCC property set
-  cmQtAutoGenDigestUPV autogenDigests = this->CreateQtAutoGeneratorsTargets();
+  auto autogenInits = this->CreateQtAutoGenInitializers();
+  for (auto& autoGen : autogenInits) {
+    autoGen->InitCustomTargets();
+  }
 #endif
 
   // Add generator specific helper commands
@@ -1335,10 +1338,11 @@ bool cmGlobalGenerator::Compute()
   }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  for (cmQtAutoGenDigestUP const& digest : autogenDigests) {
-    cmQtAutoGeneratorInitializer::SetupAutoGenerateTarget(*digest);
+  for (auto& autoGen : autogenInits) {
+    autoGen->SetupCustomTargets();
+    autoGen.reset(nullptr);
   }
-  autogenDigests.clear();
+  autogenInits.clear();
 #endif
 
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
@@ -1469,9 +1473,10 @@ bool cmGlobalGenerator::ComputeTargetDepends()
   return true;
 }
 
-cmQtAutoGenDigestUPV cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
+std::vector<std::unique_ptr<cmQtAutoGeneratorInitializer>>
+cmGlobalGenerator::CreateQtAutoGenInitializers()
 {
-  cmQtAutoGenDigestUPV autogenDigests;
+  std::vector<std::unique_ptr<cmQtAutoGeneratorInitializer>> autogenInits;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
@@ -1507,25 +1512,12 @@ cmQtAutoGenDigestUPV cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
         continue;
       }
 
-      {
-        cmQtAutoGenDigestUP digest(new cmQtAutoGenDigest(target));
-        digest->QtVersionMajor = std::move(qtVersionMajor);
-        digest->QtVersionMinor =
-          cmQtAutoGeneratorInitializer::GetQtMinorVersion(
-            target, digest->QtVersionMajor);
-        digest->MocEnabled = mocEnabled;
-        digest->UicEnabled = uicEnabled;
-        digest->RccEnabled = rccEnabled;
-        autogenDigests.emplace_back(std::move(digest));
-      }
+      autogenInits.emplace_back(new cmQtAutoGeneratorInitializer(
+        target, mocEnabled, uicEnabled, rccEnabled, qtVersionMajor));
     }
   }
-  // Initialize autogen targets
-  for (const cmQtAutoGenDigestUP& digest : autogenDigests) {
-    cmQtAutoGeneratorInitializer::InitializeAutogenTarget(*digest);
-  }
 #endif
-  return autogenDigests;
+  return autogenInits;
 }
 
 cmLinkLineComputer* cmGlobalGenerator::CreateLinkLineComputer(
@@ -2220,6 +2212,45 @@ inline std::string removeQuotes(const std::string& s)
   return s;
 }
 
+bool cmGlobalGenerator::CheckCMP0037(std::string const& targetName,
+                                     std::string const& reason) const
+{
+  cmTarget* tgt = this->FindTarget(targetName);
+  if (!tgt) {
+    return true;
+  }
+  cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+  std::ostringstream e;
+  bool issueMessage = false;
+  switch (tgt->GetPolicyStatusCMP0037()) {
+    case cmPolicies::WARN:
+      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << "\n";
+      issueMessage = true;
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      break;
+    case cmPolicies::NEW:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      issueMessage = true;
+      messageType = cmake::FATAL_ERROR;
+      break;
+  }
+  if (issueMessage) {
+    e << "The target name \"" << targetName << "\" is reserved " << reason
+      << ".";
+    if (messageType == cmake::AUTHOR_WARNING) {
+      e << "  It may result in undefined behavior.";
+    }
+    this->GetCMakeInstance()->IssueMessage(messageType, e.str(),
+                                           tgt->GetBacktrace());
+    if (messageType == cmake::FATAL_ERROR) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void cmGlobalGenerator::CreateDefaultGlobalTargets(
   std::vector<GlobalTargetInfo>& targets)
 {
@@ -2235,6 +2266,20 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
   std::vector<GlobalTargetInfo>& targets)
 {
   cmMakefile* mf = this->Makefiles[0];
+  std::string configFile = mf->GetCurrentBinaryDirectory();
+  configFile += "/CPackConfig.cmake";
+  if (!cmSystemTools::FileExists(configFile.c_str())) {
+    return;
+  }
+
+  const char* reservedTargets[] = { "package", "PACKAGE" };
+  for (const char* const* tn = cm::cbegin(reservedTargets);
+       tn != cm::cend(reservedTargets); ++tn) {
+    if (!this->CheckCMP0037(*tn, "when CPack packaging is enabled")) {
+      return;
+    }
+  }
+
   const char* cmakeCfgIntDir = this->GetCMakeCFGIntDir();
   GlobalTargetInfo gti;
   gti.Name = this->GetPackageTargetName();
@@ -2248,8 +2293,6 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
     singleLine.push_back(cmakeCfgIntDir);
   }
   singleLine.push_back("--config");
-  std::string configFile = mf->GetCurrentBinaryDirectory();
-  configFile += "/CPackConfig.cmake";
   std::string relConfigFile = "./CPackConfig.cmake";
   singleLine.push_back(relConfigFile);
   gti.CommandLines.push_back(singleLine);
@@ -2262,61 +2305,81 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
       gti.Depends.push_back(this->GetAllTargetName());
     }
   }
-  if (cmSystemTools::FileExists(configFile.c_str())) {
-    targets.push_back(gti);
-  }
+  targets.push_back(gti);
 }
 
 void cmGlobalGenerator::AddGlobalTarget_PackageSource(
   std::vector<GlobalTargetInfo>& targets)
 {
-  cmMakefile* mf = this->Makefiles[0];
   const char* packageSourceTargetName = this->GetPackageSourceTargetName();
-  if (packageSourceTargetName) {
-    GlobalTargetInfo gti;
-    gti.Name = packageSourceTargetName;
-    gti.Message = "Run CPack packaging tool for source...";
-    gti.WorkingDir = mf->GetCurrentBinaryDirectory();
-    gti.UsesTerminal = true;
-    cmCustomCommandLine singleLine;
-    singleLine.push_back(cmSystemTools::GetCPackCommand());
-    singleLine.push_back("--config");
-    std::string configFile = mf->GetCurrentBinaryDirectory();
-    configFile += "/CPackSourceConfig.cmake";
-    std::string relConfigFile = "./CPackSourceConfig.cmake";
-    singleLine.push_back(relConfigFile);
-    if (cmSystemTools::FileExists(configFile.c_str())) {
-      singleLine.push_back(configFile);
-      gti.CommandLines.push_back(singleLine);
-      targets.push_back(gti);
+  if (!packageSourceTargetName) {
+    return;
+  }
+
+  cmMakefile* mf = this->Makefiles[0];
+  std::string configFile = mf->GetCurrentBinaryDirectory();
+  configFile += "/CPackSourceConfig.cmake";
+  if (!cmSystemTools::FileExists(configFile.c_str())) {
+    return;
+  }
+
+  const char* reservedTargets[] = { "package_source" };
+  for (const char* const* tn = cm::cbegin(reservedTargets);
+       tn != cm::cend(reservedTargets); ++tn) {
+    if (!this->CheckCMP0037(*tn, "when CPack source packaging is enabled")) {
+      return;
     }
   }
+
+  GlobalTargetInfo gti;
+  gti.Name = packageSourceTargetName;
+  gti.Message = "Run CPack packaging tool for source...";
+  gti.WorkingDir = mf->GetCurrentBinaryDirectory();
+  gti.UsesTerminal = true;
+  cmCustomCommandLine singleLine;
+  singleLine.push_back(cmSystemTools::GetCPackCommand());
+  singleLine.push_back("--config");
+  std::string relConfigFile = "./CPackSourceConfig.cmake";
+  singleLine.push_back(relConfigFile);
+  singleLine.push_back(configFile);
+  gti.CommandLines.push_back(singleLine);
+  targets.push_back(gti);
 }
 
 void cmGlobalGenerator::AddGlobalTarget_Test(
   std::vector<GlobalTargetInfo>& targets)
 {
   cmMakefile* mf = this->Makefiles[0];
-  const char* cmakeCfgIntDir = this->GetCMakeCFGIntDir();
-  if (mf->IsOn("CMAKE_TESTING_ENABLED")) {
-    GlobalTargetInfo gti;
-    gti.Name = this->GetTestTargetName();
-    gti.Message = "Running tests...";
-    gti.UsesTerminal = true;
-    cmCustomCommandLine singleLine;
-    singleLine.push_back(cmSystemTools::GetCTestCommand());
-    singleLine.push_back("--force-new-ctest-process");
-    if (cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.') {
-      singleLine.push_back("-C");
-      singleLine.push_back(cmakeCfgIntDir);
-    } else // TODO: This is a hack. Should be something to do with the
-           // generator
-    {
-      singleLine.push_back("$(ARGS)");
-    }
-    gti.CommandLines.push_back(singleLine);
-    targets.push_back(gti);
+  if (!mf->IsOn("CMAKE_TESTING_ENABLED")) {
+    return;
   }
+
+  const char* reservedTargets[] = { "test", "RUN_TESTS" };
+  for (const char* const* tn = cm::cbegin(reservedTargets);
+       tn != cm::cend(reservedTargets); ++tn) {
+    if (!this->CheckCMP0037(*tn, "when CTest testing is enabled")) {
+      return;
+    }
+  }
+
+  const char* cmakeCfgIntDir = this->GetCMakeCFGIntDir();
+  GlobalTargetInfo gti;
+  gti.Name = this->GetTestTargetName();
+  gti.Message = "Running tests...";
+  gti.UsesTerminal = true;
+  cmCustomCommandLine singleLine;
+  singleLine.push_back(cmSystemTools::GetCTestCommand());
+  singleLine.push_back("--force-new-ctest-process");
+  if (cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.') {
+    singleLine.push_back("-C");
+    singleLine.push_back(cmakeCfgIntDir);
+  } else // TODO: This is a hack. Should be something to do with the
+         // generator
+  {
+    singleLine.push_back("$(ARGS)");
+  }
+  gti.CommandLines.push_back(singleLine);
+  targets.push_back(gti);
 }
 
 void cmGlobalGenerator::AddGlobalTarget_EditCache(
@@ -2582,14 +2645,13 @@ bool cmGlobalGenerator::IsReservedTarget(std::string const& name)
   // by one or more of the cmake generators.
 
   // Adding additional targets to this list will require a policy!
-  const char* reservedTargets[] = {
-    "all",        "ALL_BUILD", "help",       "install",        "INSTALL",
-    "preinstall", "clean",     "edit_cache", "rebuild_cache",  "test",
-    "RUN_TESTS",  "package",   "PACKAGE",    "package_source", "ZERO_CHECK"
-  };
+  const char* reservedTargets[] = { "all",       "ALL_BUILD",  "help",
+                                    "install",   "INSTALL",    "preinstall",
+                                    "clean",     "edit_cache", "rebuild_cache",
+                                    "ZERO_CHECK" };
 
-  return std::find(cmArrayBegin(reservedTargets), cmArrayEnd(reservedTargets),
-                   name) != cmArrayEnd(reservedTargets);
+  return std::find(cm::cbegin(reservedTargets), cm::cend(reservedTargets),
+                   name) != cm::cend(reservedTargets);
 }
 
 void cmGlobalGenerator::SetExternalMakefileProjectGenerator(

@@ -144,9 +144,6 @@ if(NOT SQUISH_INSTALL_DIR)
     # Look in places relative to the system executable search path.
     ${SQUISH_INSTALL_DIR_SEARCH}
 
-    # Look in standard UNIX install locations.
-    #/usr/local/squish
-
     DOC "The ${SQUISH_INSTALL_DIR_STRING}"
     )
 endif()

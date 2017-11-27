@@ -390,7 +390,7 @@ if(WIN32_STYLE_FIND)
 
   if (NOT WXWINDOWS_USE_SHARED_LIBS)
     set(WXWINDOWS_LIBRARIES ${WXWINDOWS_LIBRARIES}
-      ##  these ones dont seem required, in particular  ctl3d32 is not neccesary (Jan Woetzel 07/2003)
+      ##  these ones don't seem required, in particular  ctl3d32 is not necessary (Jan Woetzel 07/2003)
       #   ctl3d32
       debug ${WXWINDOWS_STATIC_DEBUG_LIBRARY_ZLIB}   optimized ${WXWINDOWS_STATIC_LIBRARY_ZLIB}
       debug ${WXWINDOWS_STATIC_DEBUG_LIBRARY_REGEX}  optimized ${WXWINDOWS_STATIC_LIBRARY_REGEX}
@@ -546,7 +546,7 @@ if(WIN32_STYLE_FIND)
   endif()
 
 
-  ## not neccessary in wxWindows 2.4.1 and 2.6.2
+  ## not necessary in wxWindows 2.4.1 and 2.6.2
   ## but it may fix a previous bug, see
   ## http://lists.wxwindows.org/cgi-bin/ezmlm-cgi?8:mss:37574:200305:mpdioeneabobmgjenoap
   option(WXWINDOWS_SET_DEFINITIONS "Set additional defines for wxWindows" OFF)
@@ -617,7 +617,8 @@ else()
 
     # wx-config should be in your path anyhow, usually no need to set WXWIN or
     # search in ../wx or ../../wx
-    find_program(CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE wx-config
+    find_program(CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE
+      NAMES $ENV{WX_CONFIG} wx-config
       HINTS
         ENV WXWIN
         $ENV{WXWIN}/bin

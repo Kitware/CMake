@@ -9,6 +9,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include <algorithm>
+#include <iterator>
 #include <sstream>
 #include <stddef.h>
 
@@ -79,16 +80,6 @@ void MergeOptions(std::vector<std::string>& baseOpts,
   baseOpts.insert(baseOpts.end(), extraOpts.begin(), extraOpts.end());
 }
 
-static std::string utilStripCR(std::string const& line)
-{
-  // Strip CR characters rcc may have printed (possibly more than one!).
-  std::string::size_type cr = line.find('\r');
-  if (cr != std::string::npos) {
-    return line.substr(0, cr);
-  }
-  return line;
-}
-
 /// @brief Reads the resource files list from from a .qrc file - Qt4 version
 /// @return True if the .qrc file was successfully parsed
 static bool RccListInputsQt4(std::string const& fileName,
@@ -106,10 +97,10 @@ static bool RccListInputsQt4(std::string const& fileName,
       qrcContents = osst.str();
     } else {
       if (errorMessage != nullptr) {
-        std::ostringstream ost;
-        ost << "rcc file not readable:\n"
-            << "  " << cmQtAutoGen::Quoted(fileName) << "\n";
-        *errorMessage = ost.str();
+        std::string& err = *errorMessage;
+        err = "rcc file not readable:\n  ";
+        err += cmQtAutoGen::Quoted(fileName);
+        err += "\n";
       }
       allGood = false;
     }
@@ -145,6 +136,7 @@ static bool RccListInputsQt4(std::string const& fileName,
 /// @brief Reads the resource files list from from a .qrc file - Qt5 version
 /// @return True if the .qrc file was successfully parsed
 static bool RccListInputsQt5(std::string const& rccCommand,
+                             std::vector<std::string> const& rccListOptions,
                              std::string const& fileName,
                              std::vector<std::string>& files,
                              std::string* errorMessage)
@@ -152,24 +144,6 @@ static bool RccListInputsQt5(std::string const& rccCommand,
   if (rccCommand.empty()) {
     cmSystemTools::Error("rcc executable not available");
     return false;
-  }
-
-  // Read rcc features
-  bool hasDashDashList = false;
-  {
-    std::vector<std::string> command;
-    command.push_back(rccCommand);
-    command.push_back("--help");
-    std::string rccStdOut;
-    std::string rccStdErr;
-    int retVal = 0;
-    bool result = cmSystemTools::RunSingleCommand(
-      command, &rccStdOut, &rccStdErr, &retVal, nullptr,
-      cmSystemTools::OUTPUT_NONE, 0.0, cmProcessOutput::Auto);
-    if (result && retVal == 0 &&
-        rccStdOut.find("--list") != std::string::npos) {
-      hasDashDashList = true;
-    }
   }
 
   std::string const fileDir = cmSystemTools::GetFilenamePath(fileName);
@@ -183,7 +157,8 @@ static bool RccListInputsQt5(std::string const& rccCommand,
   {
     std::vector<std::string> command;
     command.push_back(rccCommand);
-    command.push_back(hasDashDashList ? "--list" : "-list");
+    command.insert(command.end(), rccListOptions.begin(),
+                   rccListOptions.end());
     command.push_back(fileNameName);
     result = cmSystemTools::RunSingleCommand(
       command, &rccStdOut, &rccStdErr, &retVal, fileDir.c_str(),
@@ -191,22 +166,32 @@ static bool RccListInputsQt5(std::string const& rccCommand,
   }
   if (!result || retVal) {
     if (errorMessage != nullptr) {
-      std::ostringstream ost;
-      ost << "rcc list process failed for\n  " << cmQtAutoGen::Quoted(fileName)
-          << "\n"
-          << rccStdOut << "\n"
-          << rccStdErr << "\n";
-      *errorMessage = ost.str();
+      std::string& err = *errorMessage;
+      err = "rcc list process failed for:\n  ";
+      err += cmQtAutoGen::Quoted(fileName);
+      err += "\n";
+      err += rccStdOut;
+      err += "\n";
+      err += rccStdErr;
+      err += "\n";
     }
     return false;
   }
+
+  // Lambda to strip CR characters
+  auto StripCR = [](std::string& line) {
+    std::string::size_type cr = line.find('\r');
+    if (cr != std::string::npos) {
+      line = line.substr(0, cr);
+    }
+  };
 
   // Parse rcc std output
   {
     std::istringstream ostr(rccStdOut);
     std::string oline;
     while (std::getline(ostr, oline)) {
-      oline = utilStripCR(oline);
+      StripCR(oline);
       if (!oline.empty()) {
         files.push_back(oline);
       }
@@ -217,17 +202,17 @@ static bool RccListInputsQt5(std::string const& rccCommand,
     std::istringstream estr(rccStdErr);
     std::string eline;
     while (std::getline(estr, eline)) {
-      eline = utilStripCR(eline);
+      StripCR(eline);
       if (cmHasLiteralPrefix(eline, "RCC: Error in")) {
         static std::string searchString = "Cannot find file '";
 
         std::string::size_type pos = eline.find(searchString);
         if (pos == std::string::npos) {
           if (errorMessage != nullptr) {
-            std::ostringstream ost;
-            ost << "rcc lists unparsable output:\n"
-                << cmQtAutoGen::Quoted(eline) << "\n";
-            *errorMessage = ost.str();
+            std::string& err = *errorMessage;
+            err = "rcc lists unparsable output:\n";
+            err += cmQtAutoGen::Quoted(eline);
+            err += "\n";
           }
           return false;
         }
@@ -301,8 +286,7 @@ std::string cmQtAutoGen::Quoted(std::string const& text)
                                  "\r", "\\r",  "\t", "\\t",  "\v", "\\v" };
 
   std::string res = text;
-  for (const char* const* it = cmArrayBegin(rep); it != cmArrayEnd(rep);
-       it += 2) {
+  for (const char* const* it = cm::cbegin(rep); it != cm::cend(rep); it += 2) {
     cmSystemTools::ReplaceString(res, *it, *(it + 1));
   }
   res = '"' + res;
@@ -349,25 +333,26 @@ void cmQtAutoGen::RccMergeOptions(std::vector<std::string>& baseOpts,
   MergeOptions(baseOpts, newOpts, valueOpts, isQt5);
 }
 
-bool cmQtAutoGen::RccListInputs(std::string const& qtMajorVersion,
-                                std::string const& rccCommand,
+bool cmQtAutoGen::RccListInputs(std::string const& rccCommand,
+                                std::vector<std::string> const& rccListOptions,
                                 std::string const& fileName,
                                 std::vector<std::string>& files,
                                 std::string* errorMessage)
 {
   bool allGood = false;
   if (cmSystemTools::FileExists(fileName.c_str())) {
-    if (qtMajorVersion == "4") {
+    if (rccListOptions.empty()) {
       allGood = RccListInputsQt4(fileName, files, errorMessage);
     } else {
-      allGood = RccListInputsQt5(rccCommand, fileName, files, errorMessage);
+      allGood = RccListInputsQt5(rccCommand, rccListOptions, fileName, files,
+                                 errorMessage);
     }
   } else {
     if (errorMessage != nullptr) {
-      std::ostringstream ost;
-      ost << "rcc file does not exist:\n"
-          << "  " << cmQtAutoGen::Quoted(fileName) << "\n";
-      *errorMessage = ost.str();
+      std::string& err = *errorMessage;
+      err = "rcc resource file does not exist:\n  ";
+      err += cmQtAutoGen::Quoted(fileName);
+      err += "\n";
     }
   }
   return allGood;

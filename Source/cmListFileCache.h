@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <stddef.h>
 #include <string>
 #include <vector>
 
@@ -137,6 +138,9 @@ public:
 
   // Print the call stack below the top of the backtrace.
   void PrintCallStack(std::ostream& out) const;
+
+  // Get the number of 'frames' in this backtrace
+  size_t Depth() const;
 
 private:
   struct Entry;

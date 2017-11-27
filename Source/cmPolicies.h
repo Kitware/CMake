@@ -126,7 +126,7 @@ class cmMakefile;
          3, 0, 0, cmPolicies::WARN)                                           \
   SELECT(POLICY, CMP0040,                                                     \
          "The target in the TARGET signature of add_custom_command() must "   \
-         "exist.",                                                            \
+         "exist and must be defined in the current directory.",               \
          3, 0, 0, cmPolicies::WARN)                                           \
   SELECT(POLICY, CMP0041,                                                     \
          "Error on relative include with generator expression.", 3, 0, 0,     \
@@ -211,7 +211,10 @@ class cmMakefile;
          "Define file(GENERATE) behavior for relative paths.", 3, 10, 0,      \
          cmPolicies::WARN)                                                    \
   SELECT(POLICY, CMP0071, "Let AUTOMOC and AUTOUIC process GENERATED files.", \
-         3, 10, 0, cmPolicies::WARN)
+         3, 10, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0072,                                                     \
+         "FindOpenGL prefers GLVND by default when available.", 3, 11, 0,     \
+         cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -225,6 +228,7 @@ class cmMakefile;
   F(CMP0021)                                                                  \
   F(CMP0022)                                                                  \
   F(CMP0027)                                                                  \
+  F(CMP0037)                                                                  \
   F(CMP0038)                                                                  \
   F(CMP0041)                                                                  \
   F(CMP0042)                                                                  \

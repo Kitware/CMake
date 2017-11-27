@@ -828,18 +828,21 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
     }
     std::string genName = gg->GetName();
     if (genName.find("Visual Studio") != std::string::npos) {
-      reportError(context, content->GetOriginalExpression(),
-                  "$<COMPILE_LANGUAGE:...> may not be used with Visual Studio "
-                  "generators.");
-      return std::string();
-    }
-    if (genName.find("Xcode") != std::string::npos) {
       if (dagChecker && (dagChecker->EvaluatingCompileDefinitions() ||
                          dagChecker->EvaluatingIncludeDirectories())) {
         reportError(
           context, content->GetOriginalExpression(),
-          "$<COMPILE_LANGUAGE:...> may only be used with COMPILE_OPTIONS "
-          "with the Xcode generator.");
+          "$<COMPILE_LANGUAGE:...> may only be used for COMPILE_OPTIONS "
+          "and file(GENERATE) with the Visual Studio generator.");
+        return std::string();
+      }
+    } else if (genName.find("Xcode") != std::string::npos) {
+      if (dagChecker && (dagChecker->EvaluatingCompileDefinitions() ||
+                         dagChecker->EvaluatingIncludeDirectories())) {
+        reportError(
+          context, content->GetOriginalExpression(),
+          "$<COMPILE_LANGUAGE:...> may only be used for COMPILE_OPTIONS "
+          "and file(GENERATE) with the Xcode generator.");
         return std::string();
       }
     } else {
@@ -1035,7 +1038,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         // No error. We just skip cyclic references.
         return std::string();
       case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
-        for (size_t i = 1; i < cmArraySize(targetPropertyTransitiveWhitelist);
+        for (size_t i = 1; i < cm::size(targetPropertyTransitiveWhitelist);
              ++i) {
           if (targetPropertyTransitiveWhitelist[i] == propertyName) {
             // No error. We're not going to find anything new here.
@@ -1443,7 +1446,7 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
     context->HadContextSensitiveCondition = true;
     context->HadHeadSensitiveCondition = true;
 
-    for (size_t i = 1; i < cmArraySize(targetPolicyWhitelist); ++i) {
+    for (size_t i = 1; i < cm::size(targetPolicyWhitelist); ++i) {
       const char* policy = targetPolicyWhitelist[i];
       if (parameters.front() == policy) {
         cmLocalGenerator* lg = context->HeadTarget->GetLocalGenerator();

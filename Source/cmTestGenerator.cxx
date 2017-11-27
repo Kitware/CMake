@@ -34,6 +34,16 @@ void cmTestGenerator::Compute(cmLocalGenerator* lg)
   this->LG = lg;
 }
 
+bool cmTestGenerator::TestsForConfig(const std::string& config)
+{
+  return this->GeneratesForConfig(config);
+}
+
+cmTest* cmTestGenerator::GetTest() const
+{
+  return this->Test;
+}
+
 void cmTestGenerator::GenerateScriptConfigs(std::ostream& os, Indent indent)
 {
   // Create the tests.

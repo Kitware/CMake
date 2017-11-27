@@ -593,15 +593,20 @@ if(_IRSL_HAVE_Intel)
     endif()
   endif()
   if(WIN32)
-    set(__install_dirs "${_Intel_redistdir}/irml" "${_Intel_redistdir}/irml_c"
-      "${_Intel_redistdir}/1033" "${_Intel_redistdir}/1041")
+    set(__install_dirs "${_Intel_redistdir}/1033")
+    if(EXISTS "${_Intel_redistdir}/1041")
+      list(APPEND __install_dirs "${_Intel_redistdir}/1041")
+    endif()
+    if(_Intel_compiler_ver VERSION_LESS 18)
+      list(APPEND __install_dirs "${_Intel_redistdir}/irml" "${_Intel_redistdir}/irml_c")
+    endif()
     foreach(__Intel_lib IN ITEMS cilkrts20.dll libchkp.dll libgfxoffload.dll libioffload_host.dll libirngmd.dll
       libmmd.dll libmmdd.dll libmpx.dll liboffload.dll svml_dispmd.dll)
 
       list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
     endforeach()
     if(CMAKE_Fortran_COMPILER_ID STREQUAL Intel)
-      foreach(__Intel_lib IN ITEMS libicaf.dll libifcoremd.dll libifcoremdd.dll libifcorert.dll libifcorertd.dll libifportmd.dll)
+      foreach(__Intel_lib IN ITEMS ifdlg100.dll libicaf.dll libifcoremd.dll libifcoremdd.dll libifcorert.dll libifcorertd.dll libifportmd.dll)
 
         list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
       endforeach()

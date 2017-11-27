@@ -8,6 +8,7 @@
 #include "cmCTestGenericHandler.h"
 
 #include "cmsys/RegularExpression.hxx"
+#include <chrono>
 #include <iosfwd>
 #include <map>
 #include <set>
@@ -39,7 +40,7 @@ public:
   int ProcessHandler() override;
 
   /**
-   * When both -R and -I are used should te resulting test list be the
+   * When both -R and -I are used should the resulting test list be the
    * intersection or the union of the lists. By default it is the
    * intersection.
    */
@@ -198,7 +199,7 @@ protected:
   //! Clean test output to specified length
   bool CleanTestOutput(std::string& output, size_t length);
 
-  double ElapsedTestingTime;
+  std::chrono::duration<double> ElapsedTestingTime;
 
   typedef std::vector<cmCTestTestResult> TestResultsVector;
   TestResultsVector TestResults;
@@ -206,8 +207,8 @@ protected:
   std::vector<std::string> CustomTestsIgnore;
   std::string StartTest;
   std::string EndTest;
-  unsigned int StartTestTime;
-  unsigned int EndTestTime;
+  std::chrono::system_clock::time_point StartTestTime;
+  std::chrono::system_clock::time_point EndTestTime;
   bool MemCheck;
   int CustomMaximumPassedTestOutputSize;
   int CustomMaximumFailedTestOutputSize;

@@ -227,6 +227,8 @@ set(SRCS
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmFortranParserImpl.cxx
+  cmFSPermissions.cxx
+  cmFSPermissions.h
   cmGeneratedFileStream.cxx
   cmGeneratorExpressionContext.cxx
   cmGeneratorExpressionContext.h
@@ -320,11 +322,14 @@ set(SRCS
   cmPropertyMap.h
   cmQtAutoGen.cxx
   cmQtAutoGen.h
-  cmQtAutoGenDigest.h
+  cmQtAutoGenerator.cxx
+  cmQtAutoGenerator.h
   cmQtAutoGeneratorInitializer.cxx
   cmQtAutoGeneratorInitializer.h
-  cmQtAutoGenerators.cxx
-  cmQtAutoGenerators.h
+  cmQtAutoGeneratorMocUic.cxx
+  cmQtAutoGeneratorMocUic.h
+  cmQtAutoGeneratorRcc.cxx
+  cmQtAutoGeneratorRcc.h
   cmRST.cxx
   cmRST.h
   cmScriptGenerator.h
@@ -604,6 +609,7 @@ set(SRCS
   cm_utf8.c
   cm_codecvt.hxx
   cm_codecvt.cxx
+  cm_thread.hxx
   )
 
 SET_PROPERTY(SOURCE cmProcessOutput.cxx APPEND PROPERTY COMPILE_DEFINITIONS
@@ -928,7 +934,7 @@ if(UNIX)
     # OpenBSD and also Linux and OSX. Look for the header and
     # the library; it's a warning on FreeBSD if they're not
     # found, and informational on other platforms.
-    find_path(FREEBSD_PKG_INCLUDE_DIRS "pkg.h" PATHS /usr/local)
+    find_path(FREEBSD_PKG_INCLUDE_DIRS "pkg.h")
     if(FREEBSD_PKG_INCLUDE_DIRS)
       find_library(FREEBSD_PKG_LIBRARIES
         pkg
@@ -1075,6 +1081,19 @@ endif()
 
 include (${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 include (${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
+
+if(WIN32)
+  # Add Windows executable version information.
+  configure_file("CMakeVersion.rc.in" "CMakeVersion.rc" @ONLY)
+
+  # We use a separate object library for this to work around a limitation of
+  # MinGW's windres tool with spaces in the path to the include directories.
+  add_library(CMakeVersion OBJECT "${CMAKE_CURRENT_BINARY_DIR}/CMakeVersion.rc")
+  set_property(TARGET CMakeVersion PROPERTY INCLUDE_DIRECTORIES "")
+  foreach(_tool ${_tools})
+    target_sources(${_tool} PRIVATE $<TARGET_OBJECTS:CMakeVersion>)
+  endforeach()
+endif()
 
 # Install tools
 

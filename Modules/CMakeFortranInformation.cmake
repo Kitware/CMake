@@ -169,7 +169,7 @@ foreach(c "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
 endforeach()
 
 set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS_INIT}" CACHE STRING
-     "Flags for Fortran compiler.")
+     "Flags used by the compiler during all build types.")
 
 include(CMakeCommonLanguageInclude)
 

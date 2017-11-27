@@ -591,7 +591,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
     std::string::size_type commaPos = input.find(',', nameStartPos);
     std::string::size_type nextOpenPos = input.find("$<", nameStartPos);
     if (commaPos == std::string::npos    // Implied 'this' target
-        || closePos == std::string::npos // Imcomplete expression.
+        || closePos == std::string::npos // Incomplete expression.
         || closePos < commaPos           // Implied 'this' target
         || nextOpenPos < commaPos)       // Non-literal
     {

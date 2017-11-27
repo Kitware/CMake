@@ -15,11 +15,18 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
   \"set(CMAKE_Fortran_COMPILER_SUPPORTS_F90 \\\"\${CMAKE_Fortran_COMPILER_SUPPORTS_F90}\\\")\\n\"
   )
 ")
+  if(CMAKE_GENERATOR_INSTANCE)
+    set(_D_CMAKE_GENERATOR_INSTANCE "-DCMAKE_GENERATOR_INSTANCE:INTERNAL=${CMAKE_GENERATOR_INSTANCE}")
+  else()
+    set(_D_CMAKE_GENERATOR_INSTANCE "")
+  endif()
   execute_process(
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CheckFortran
     COMMAND ${CMAKE_COMMAND} . -G ${CMAKE_GENERATOR}
                                -A "${CMAKE_GENERATOR_PLATFORM}"
                                -T "${CMAKE_GENERATOR_TOOLSET}"
+                               ${_D_CMAKE_GENERATOR_INSTANCE}
+    TIMEOUT 60
     OUTPUT_VARIABLE output
     ERROR_VARIABLE output
     RESULT_VARIABLE result

@@ -2485,6 +2485,11 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
 #define KWSYSPE_PS_FORMAT "%d %d %*[^\n]\n"
 #endif
 
+void kwsysProcess_KillPID(unsigned long process_id)
+{
+  kwsysProcessKill((pid_t)process_id);
+}
+
 static void kwsysProcessKill(pid_t process_id)
 {
 #if defined(__linux__) || defined(__CYGWIN__)

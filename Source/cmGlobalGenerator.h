@@ -15,7 +15,6 @@
 
 #include "cmCustomCommandLines.h"
 #include "cmExportSetMap.h"
-#include "cmQtAutoGenDigest.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -33,6 +32,7 @@ class cmLinkLineComputer;
 class cmLocalGenerator;
 class cmMakefile;
 class cmOutputConverter;
+class cmQtAutoGeneratorInitializer;
 class cmSourceFile;
 class cmStateDirectory;
 class cmake;
@@ -433,7 +433,8 @@ protected:
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
   // Qt auto generators
-  cmQtAutoGenDigestUPV CreateQtAutoGeneratorsTargets();
+  std::vector<std::unique_ptr<cmQtAutoGeneratorInitializer>>
+  CreateQtAutoGenInitializers();
 
   std::string SelectMakeProgram(const std::string& makeProgram,
                                 const std::string& makeDefault = "") const;
@@ -567,6 +568,9 @@ private:
   void CreateGeneratorTargets(TargetTypes targetTypes);
 
   void ClearGeneratorMembers();
+
+  bool CheckCMP0037(std::string const& targetName,
+                    std::string const& reason) const;
 
   void IndexMakefile(cmMakefile* mf);
 

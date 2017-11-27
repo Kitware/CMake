@@ -14,6 +14,7 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmServer.h"
 #include "cmServerDictionary.h"
 #include "cmSourceFile.h"
@@ -23,6 +24,7 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmTest.h"
 #include "cm_uv.h"
 #include "cmake.h"
 #include "cmTest.h"
@@ -869,6 +871,100 @@ static void DumpBacktraceRange(Json::Value& result, const std::string& type,
   }
 }
 
+static Json::Value DumpCTestInfo(cmTest* testInfo)
+{
+  Json::Value result = Json::objectValue;
+  result[kCTEST_NAME] = testInfo->GetName();
+
+  // Concat command entries together. After the first should be the arguments
+  // for the command
+  std::string command;
+  for (auto const& cmd : testInfo->GetCommand()) {
+    command.append(cmd);
+    command.append(" ");
+  }
+  result[kCTEST_COMMAND] = command;
+
+  // Build up the list of properties that may have been specified
+  Json::Value properties = Json::arrayValue;
+  for (auto& prop : testInfo->GetProperties()) {
+    Json::Value entry = Json::objectValue;
+    entry[kKEY_KEY] = prop.first;
+    entry[kVALUE_KEY] = prop.second.GetValue();
+    properties.append(entry);
+  }
+  result[kPROPERTIES_KEY] = properties;
+
+  // Need backtrace to figure out where this test was originally added
+  result[kBACKTRACE_KEY] = DumpBacktrace(testInfo->GetBacktrace());
+
+  return result;
+}
+
+static void DumpMakefileTests(cmMakefile* mf, const std::string& config,
+                              Json::Value* result)
+{
+  std::vector<cmTest*> tests;
+  mf->GetTests(config, tests);
+  for (auto test : tests) {
+    Json::Value tmp = DumpCTestInfo(test);
+    if (!tmp.isNull()) {
+      result->append(tmp);
+    }
+  }
+}
+
+static Json::Value DumpCTestProjectList(const cmake* cm,
+                                        std::string const& config)
+{
+  Json::Value result = Json::arrayValue;
+
+  auto globalGen = cm->GetGlobalGenerator();
+
+  for (const auto& projectIt : globalGen->GetProjectMap()) {
+    Json::Value pObj = Json::objectValue;
+    pObj[kNAME_KEY] = projectIt.first;
+
+    Json::Value tests = Json::arrayValue;
+
+    // Gather tests for every generator
+    for (const auto& lg : projectIt.second) {
+      // Make sure they're generated.
+      lg->GenerateTestFiles();
+      cmMakefile* mf = lg->GetMakefile();
+      DumpMakefileTests(mf, config, &tests);
+    }
+
+    pObj[kCTEST_INFO] = tests;
+
+    result.append(pObj);
+  }
+
+  return result;
+}
+
+static Json::Value DumpCTestConfiguration(const cmake* cm,
+                                          const std::string& config)
+{
+  Json::Value result = Json::objectValue;
+  result[kNAME_KEY] = config;
+
+  result[kPROJECTS_KEY] = DumpCTestProjectList(cm, config);
+
+  return result;
+}
+
+static Json::Value DumpCTestConfigurationsList(const cmake* cm)
+{
+  Json::Value result = Json::arrayValue;
+
+  for (const std::string& c : getConfigurations(cm)) {
+    result.append(DumpCTestConfiguration(cm, c));
+  }
+
+  return result;
+}
+
 static Json::Value DumpTarget(cmGeneratorTarget* target,
                               const std::string& config)
 {
@@ -893,6 +989,8 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
 
   Json::Value result = Json::objectValue;
   result[kNAME_KEY] = target->GetName();
+  result[kIS_GENERATOR_PROVIDED_KEY] =
+    target->Target->GetIsGeneratorProvided();
   result[kTYPE_KEY] = typeName;
   result[kSOURCE_DIRECTORY_KEY] = lg->GetCurrentSourceDirectory();
   result[kBUILD_DIRECTORY_KEY] = lg->GetCurrentBinaryDirectory();
@@ -1066,10 +1164,25 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
 
     // Project structure information:
     const cmMakefile* mf = lg->GetMakefile();
-    pObj[kHAS_INSTALL_RULE] = mf->GetInstallGenerators().empty() == false;
+    pObj[kMINIMUM_CMAKE_VERSION] =
+      mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
     pObj[kSOURCE_DIRECTORY_KEY] = mf->GetCurrentSourceDirectory();
     pObj[kBUILD_DIRECTORY_KEY] = mf->GetCurrentBinaryDirectory();
     pObj[kTARGETS_KEY] = DumpTargetsList(projectIt.second, config);
+
+    // For a project-level install rule it might be defined in any of its
+    // associated generators.
+    bool hasInstallRule = false;
+    for (const auto generator : projectIt.second) {
+      hasInstallRule =
+        generator->GetMakefile()->GetInstallGenerators().empty() == false;
+
+      if (hasInstallRule) {
+        break;
+      }
+    }
+
+    pObj[kHAS_INSTALL_RULE] = hasInstallRule;
 
     result.append(pObj);
   }
@@ -1325,14 +1438,15 @@ cmServerResponse cmServerProtocol1::ProcessFileSystemWatchers(
 }
 
 cmServerResponse cmServerProtocol1::ProcessCTests(
-  const cmServerRequest & request)
+  const cmServerRequest& request)
 {
   if (this->m_State < STATE_COMPUTED) {
     return request.ReportError("This instance was not yet computed.");
   }
 
   Json::Value result = Json::objectValue;
-  result[kCONFIGURATIONS_KEY] = DumpCTestConfigurationsList(this->CMakeInstance());
+  result[kCONFIGURATIONS_KEY] =
+    DumpCTestConfigurationsList(this->CMakeInstance());
   return request.Reply(result);
 }
 

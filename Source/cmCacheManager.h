@@ -107,7 +107,7 @@ public:
                  std::set<std::string>& excludes,
                  std::set<std::string>& includes);
 
-  ///! Save cache for given makefile.  Saves to ouput path/CMakeCache.txt
+  ///! Save cache for given makefile.  Saves to output path/CMakeCache.txt
   bool SaveCache(const std::string& path);
 
   ///! Delete the cache given

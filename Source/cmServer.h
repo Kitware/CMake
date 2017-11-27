@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cm_jsoncpp_value.h"
+#include "cm_thread.hxx"
 #include "cm_uv.h"
 
 #include <memory> // IWYU pragma: keep
@@ -61,7 +62,7 @@ public:
   void OnDisconnect(cmConnection* pConnection);
 
 protected:
-  mutable uv_rwlock_t ConnectionsMutex;
+  mutable cm::shared_mutex ConnectionsMutex;
   std::vector<std::unique_ptr<cmConnection>> Connections;
 
   bool ServeThreadRunning = false;

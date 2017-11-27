@@ -27,6 +27,7 @@
 #include <iostream>
 #include <set>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 // Work-around CMake dependency scanning limitation.  This must
@@ -751,15 +752,15 @@ FILE* SystemTools::Fopen(const std::string& file, const char* mode)
 #endif
 }
 
-bool SystemTools::MakeDirectory(const char* path)
+bool SystemTools::MakeDirectory(const char* path, const mode_t* mode)
 {
   if (!path) {
     return false;
   }
-  return SystemTools::MakeDirectory(std::string(path));
+  return SystemTools::MakeDirectory(std::string(path), mode);
 }
 
-bool SystemTools::MakeDirectory(const std::string& path)
+bool SystemTools::MakeDirectory(const std::string& path, const mode_t* mode)
 {
   if (SystemTools::PathExists(path)) {
     return SystemTools::FileIsDirectory(path);
@@ -774,8 +775,12 @@ bool SystemTools::MakeDirectory(const std::string& path)
   std::string topdir;
   while ((pos = dir.find('/', pos)) != std::string::npos) {
     topdir = dir.substr(0, pos);
-    Mkdir(topdir);
-    pos++;
+
+    if (Mkdir(topdir) == 0 && mode != 0) {
+      SystemTools::SetPermissions(topdir, *mode);
+    }
+
+    ++pos;
   }
   topdir = dir;
   if (Mkdir(topdir) != 0) {
@@ -790,7 +795,10 @@ bool SystemTools::MakeDirectory(const std::string& path)
           ) {
       return false;
     }
+  } else if (mode != 0) {
+    SystemTools::SetPermissions(topdir, *mode);
   }
+
   return true;
 }
 
@@ -1684,7 +1692,7 @@ bool SystemTools::StringEndsWith(const std::string& str1, const char* str2)
     : false;
 }
 
-// Returns a pointer to the last occurence of str2 in str1
+// Returns a pointer to the last occurrence of str2 in str1
 const char* SystemTools::FindLastString(const char* str1, const char* str2)
 {
   if (!str1 || !str2) {
@@ -3365,7 +3373,7 @@ std::string SystemTools::RelativePath(const std::string& local,
 }
 
 #ifdef _WIN32
-static std::string GetCasePathName(std::string const& pathIn)
+static std::pair<std::string, bool> GetCasePathName(std::string const& pathIn)
 {
   std::string casePath;
   std::vector<std::string> path_components;
@@ -3374,7 +3382,7 @@ static std::string GetCasePathName(std::string const& pathIn)
   {
     // Relative paths cannot be converted.
     casePath = pathIn;
-    return casePath;
+    return std::make_pair(casePath, false);
   }
 
   // Start with root component.
@@ -3426,7 +3434,7 @@ static std::string GetCasePathName(std::string const& pathIn)
 
     casePath += path_components[idx];
   }
-  return casePath;
+  return std::make_pair(casePath, converting);
 }
 #endif
 
@@ -3441,12 +3449,14 @@ std::string SystemTools::GetActualCaseForPath(const std::string& p)
   if (i != SystemTools::PathCaseMap->end()) {
     return i->second;
   }
-  std::string casePath = GetCasePathName(p);
-  if (casePath.size() > MAX_PATH) {
-    return casePath;
+  std::pair<std::string, bool> casePath = GetCasePathName(p);
+  if (casePath.first.size() > MAX_PATH) {
+    return casePath.first;
   }
-  (*SystemTools::PathCaseMap)[p] = casePath;
-  return casePath;
+  if (casePath.second) {
+    (*SystemTools::PathCaseMap)[p] = casePath.first;
+  }
+  return casePath.first;
 #endif
 }
 

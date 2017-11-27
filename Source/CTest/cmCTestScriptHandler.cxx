@@ -5,10 +5,12 @@
 #include "cmsys/Directory.hxx"
 #include "cmsys/Process.h"
 #include <map>
+#include <ratio>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <type_traits>
 #include <utility>
 
 #include "cmCTest.h"
@@ -79,9 +81,9 @@ cmCTestScriptHandler::cmCTestScriptHandler()
   this->CMake = nullptr;
   this->GlobalGenerator = nullptr;
 
-  this->ScriptStartTime = 0;
+  this->ScriptStartTime = std::chrono::steady_clock::time_point();
 
-  // the *60 is becuase the settings are in minutes but GetTime is seconds
+  // the *60 is because the settings are in minutes but GetTime is seconds
   this->MinimumInterval = 30 * 60;
   this->ContinuousDuration = -1;
 }
@@ -111,7 +113,7 @@ void cmCTestScriptHandler::Initialize()
   this->ContinuousDuration = -1;
 
   // what time in seconds did this script start running
-  this->ScriptStartTime = 0;
+  this->ScriptStartTime = std::chrono::steady_clock::time_point();
 
   delete this->Makefile;
   this->Makefile = nullptr;
@@ -158,11 +160,10 @@ void cmCTestScriptHandler::UpdateElapsedTime()
 {
   if (this->Makefile) {
     // set the current elapsed time
-    char timeString[20];
-    int itime = static_cast<unsigned int>(cmSystemTools::GetTime() -
-                                          this->ScriptStartTime);
-    sprintf(timeString, "%i", itime);
-    this->Makefile->AddDefinition("CTEST_ELAPSED_TIME", timeString);
+    auto itime = std::chrono::duration_cast<std::chrono::seconds>(
+      std::chrono::steady_clock::now() - this->ScriptStartTime);
+    auto timeString = std::to_string(itime.count());
+    this->Makefile->AddDefinition("CTEST_ELAPSED_TIME", timeString.c_str());
   }
 }
 
@@ -507,7 +508,7 @@ int cmCTestScriptHandler::RunConfigurationScript(
 
   int result;
 
-  this->ScriptStartTime = cmSystemTools::GetTime();
+  this->ScriptStartTime = std::chrono::steady_clock::now();
 
   // read in the script
   if (pscope) {
@@ -558,22 +559,27 @@ int cmCTestScriptHandler::RunCurrentScript()
   // for a continuous, do we ned to run it more than once?
   if (this->ContinuousDuration >= 0) {
     this->UpdateElapsedTime();
-    double ending_time = cmSystemTools::GetTime() + this->ContinuousDuration;
+    auto ending_time = std::chrono::steady_clock::now() +
+      std::chrono::duration<double>(this->ContinuousDuration);
     if (this->EmptyBinDirOnce) {
       this->EmptyBinDir = true;
     }
     do {
-      double interval = cmSystemTools::GetTime();
+      auto startOfInterval = std::chrono::steady_clock::now();
       result = this->RunConfigurationDashboard();
-      interval = cmSystemTools::GetTime() - interval;
-      if (interval < this->MinimumInterval) {
-        this->SleepInSeconds(
-          static_cast<unsigned int>(this->MinimumInterval - interval));
+      auto interval = std::chrono::steady_clock::now() - startOfInterval;
+      auto minimumInterval =
+        std::chrono::duration<double>(this->MinimumInterval);
+      if (interval < minimumInterval) {
+        auto sleepTime = std::chrono::duration_cast<std::chrono::seconds>(
+                           minimumInterval - interval)
+                           .count();
+        this->SleepInSeconds(static_cast<unsigned int>(sleepTime));
       }
       if (this->EmptyBinDirOnce) {
         this->EmptyBinDir = false;
       }
-    } while (cmSystemTools::GetTime() < ending_time);
+    } while (std::chrono::steady_clock::now() < ending_time);
   }
   // otherwise just run it once
   else {
@@ -830,7 +836,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     }
   }
 
-  // if all was succesful, delete the backup dirs to free up disk space
+  // if all was successful, delete the backup dirs to free up disk space
   if (this->Backup) {
     cmSystemTools::RemoveADirectory(this->BackupSourceDir);
     cmSystemTools::RemoveADirectory(this->BackupBinaryDir);
@@ -967,7 +973,9 @@ double cmCTestScriptHandler::GetRemainingTimeAllowed()
     return 1.0e7;
   }
 
-  double timelimit = atof(timelimitS);
+  auto timelimit = std::chrono::duration<double>(atof(timelimitS));
 
-  return timelimit - cmSystemTools::GetTime() + this->ScriptStartTime;
+  auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(
+    std::chrono::steady_clock::now() - this->ScriptStartTime);
+  return (timelimit - duration).count();
 }

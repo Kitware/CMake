@@ -338,7 +338,7 @@ function(cpack_encode_variables)
         set(value "${${var}}")
       endif()
 
-      string(APPEND commands "\nSET(${var} \"${value}\")")
+      string(APPEND commands "\nset(${var} \"${value}\")")
     endif()
   endforeach()
 
@@ -383,6 +383,12 @@ _cpack_set_default(CPACK_RESOURCE_FILE_WELCOME
   "${CMAKE_ROOT}/Templates/CPack.GenericWelcome.txt")
 
 _cpack_set_default(CPACK_MODULE_PATH "${CMAKE_MODULE_PATH}")
+
+# Set default directory creation permissions mode
+if(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS)
+  _cpack_set_default(CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
+    "${CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS}")
+endif()
 
 if(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL)
   set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)

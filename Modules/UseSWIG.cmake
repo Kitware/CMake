@@ -201,10 +201,32 @@ macro(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   if(SWIG_MODULE_${name}_EXTRA_FLAGS)
     set(swig_extra_flags ${swig_extra_flags} ${SWIG_MODULE_${name}_EXTRA_FLAGS})
   endif()
+  # IMPLICIT_DEPENDS below can not handle situations where a dependent file is
+  # removed. We need an extra step with timestamp and custom target, see #16830
+  # As this is needed only for Makefile generator do it conditionally
+  if(CMAKE_GENERATOR MATCHES "Make")
+    get_filename_component(swig_generated_timestamp
+      "${swig_generated_file_fullname}" NAME_WE)
+    set(swig_gen_target gen_${swig_generated_timestamp})
+    set(swig_generated_timestamp
+      "${swig_outdir}/${swig_generated_timestamp}.stamp")
+    set(swig_custom_output ${swig_generated_timestamp})
+    set(swig_custom_products
+      BYPRODUCTS "${swig_generated_file_fullname}" ${swig_extra_generated_files})
+    set(swig_timestamp_command
+      COMMAND ${CMAKE_COMMAND} -E touch ${swig_generated_timestamp})
+  else()
+    set(swig_custom_output
+      "${swig_generated_file_fullname}" ${swig_extra_generated_files})
+    set(swig_custom_products)
+    set(swig_timestamp_command)
+  endif()
   add_custom_command(
-    OUTPUT "${swig_generated_file_fullname}" ${swig_extra_generated_files}
+    OUTPUT ${swig_custom_output}
+    ${swig_custom_products}
     # Let's create the ${swig_outdir} at execution time, in case dir contains $(OutDir)
     COMMAND ${CMAKE_COMMAND} -E make_directory ${swig_outdir}
+    ${swig_timestamp_command}
     COMMAND "${SWIG_EXECUTABLE}"
     ARGS "-${SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG}"
     ${swig_source_file_flags}
@@ -219,6 +241,13 @@ macro(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     DEPENDS ${SWIG_MODULE_${name}_EXTRA_DEPS}
     IMPLICIT_DEPENDS CXX "${swig_source_file_fullname}"
     COMMENT "Swig source")
+  if(CMAKE_GENERATOR MATCHES "Make")
+    add_custom_target(${swig_gen_target} DEPENDS ${swig_generated_timestamp})
+  endif()
+  unset(swig_generated_timestamp)
+  unset(swig_custom_output)
+  unset(swig_custom_products)
+  unset(swig_timestamp_command)
   set_source_files_properties("${swig_generated_file_fullname}" ${swig_extra_generated_files}
     PROPERTIES GENERATED 1)
   set(${outfiles} "${swig_generated_file_fullname}" ${swig_extra_generated_files})
@@ -281,6 +310,10 @@ macro(SWIG_ADD_LIBRARY name)
     ${_SAM_TYPE}
     ${swig_generated_sources}
     ${swig_other_sources})
+  if(CMAKE_GENERATOR MATCHES "Make")
+    # see IMPLICIT_DEPENDS above
+    add_dependencies(${SWIG_MODULE_${name}_REAL_NAME} ${swig_gen_target})
+  endif()
   if("${_SAM_TYPE}" STREQUAL "MODULE")
     set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES NO_SONAME ON)
   endif()

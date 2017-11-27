@@ -115,16 +115,15 @@ void cmXCodeObject::Print(std::ostream& out)
   if (separator == "\n") {
     out << separator;
   }
-  std::map<std::string, cmXCodeObject*>::iterator i;
   cmXCodeObject::Indent(3 * indentFactor, out);
   out << "isa = " << PBXTypeNames[this->IsA] << ";" << separator;
-  for (i = this->ObjectAttributes.begin(); i != this->ObjectAttributes.end();
-       ++i) {
-    if (i->first == "isa") {
+  for (const auto& keyVal : this->ObjectAttributes) {
+    if (keyVal.first == "isa") {
       continue;
     }
 
-    PrintAttribute(out, 3, separator, indentFactor, i->first, i->second, this);
+    PrintAttribute(out, 3, separator, indentFactor, keyVal.first,
+                   keyVal.second, this);
   }
   cmXCodeObject::Indent(2 * indentFactor, out);
   out << "};\n";
@@ -167,11 +166,9 @@ void cmXCodeObject::PrintAttribute(std::ostream& out, int level,
       if (separator == "\n") {
         out << separator;
       }
-      std::map<std::string, cmXCodeObject*>::const_iterator i;
-      for (i = object->ObjectAttributes.begin();
-           i != object->ObjectAttributes.end(); ++i) {
-        PrintAttribute(out, (level + 1) * factor, separator, factor, i->first,
-                       i->second, object);
+      for (const auto& keyVal : object->ObjectAttributes) {
+        PrintAttribute(out, (level + 1) * factor, separator, factor,
+                       keyVal.first, keyVal.second, object);
       }
       cmXCodeObject::Indent(level * factor, out);
       out << "};" << separator;
@@ -221,7 +218,7 @@ void cmXCodeObject::CopyAttributes(cmXCodeObject* copy)
   this->Object = copy->Object;
 }
 
-void cmXCodeObject::PrintString(std::ostream& os, std::string String)
+void cmXCodeObject::PrintString(std::ostream& os, const std::string& String)
 {
   // The string needs to be quoted if it contains any characters
   // considered special by the Xcode project file parser.
@@ -234,13 +231,12 @@ void cmXCodeObject::PrintString(std::ostream& os, std::string String)
 
   // Print the string, quoted and escaped as necessary.
   os << quote;
-  for (std::string::const_iterator i = String.begin(); i != String.end();
-       ++i) {
-    if (*i == '"' || *i == '\\') {
+  for (auto c : String) {
+    if (c == '"' || c == '\\') {
       // Escape double-quotes and backslashes.
       os << '\\';
     }
-    os << *i;
+    os << c;
   }
   os << quote;
 }

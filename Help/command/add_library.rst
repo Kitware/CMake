@@ -125,7 +125,8 @@ Alias Libraries
 Creates an :ref:`Alias Target <Alias Targets>`, such that ``<name>`` can be
 used to refer to ``<target>`` in subsequent commands.  The ``<name>`` does
 not appear in the generated buildsystem as a make target.  The ``<target>``
-may not be an :ref:`Imported Target <Imported Targets>` or an ``ALIAS``.
+may not be a non-``GLOBAL`` :ref:`Imported Target <Imported Targets>` or an
+``ALIAS``.
 ``ALIAS`` targets can be used as linkable targets and as targets to
 read properties from.  They can also be tested for existence with the
 regular :command:`if(TARGET)` subcommand.  The ``<name>`` may not be used

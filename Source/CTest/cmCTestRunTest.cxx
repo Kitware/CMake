@@ -14,6 +14,7 @@
 #include "cmsys/Base64.h"
 #include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
+#include <chrono>
 #include <iomanip>
 #include <sstream>
 #include <stdio.h>
@@ -46,11 +47,12 @@ cmCTestRunTest::~cmCTestRunTest()
 bool cmCTestRunTest::CheckOutput()
 {
   // Read lines for up to 0.1 seconds of total time.
-  double timeout = 0.1;
-  double timeEnd = cmSystemTools::GetTime() + timeout;
+  std::chrono::duration<double> timeout = std::chrono::milliseconds(100);
+  auto timeEnd = std::chrono::steady_clock::now() + timeout;
   std::string line;
-  while ((timeout = timeEnd - cmSystemTools::GetTime(), timeout > 0)) {
-    int p = this->TestProcess->GetNextOutputLine(line, timeout);
+  while ((timeout = timeEnd - std::chrono::steady_clock::now(),
+          timeout > std::chrono::seconds(0))) {
+    int p = this->TestProcess->GetNextOutputLine(line, timeout.count());
     if (p == cmsysProcess_Pipe_None) {
       // Process has terminated and all output read.
       return false;

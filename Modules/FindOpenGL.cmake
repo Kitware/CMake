@@ -53,7 +53,7 @@
 #  Path to the EGL include directory.
 # ``OPENGL_LIBRARIES``
 #  Paths to the OpenGL library, windowing system libraries, and GLU libraries.
-#  On Linux, this assumes glX and is never correct for EGL-based targets.
+#  On Linux, this assumes GLX and is never correct for EGL-based targets.
 #  Clients are encouraged to use the ``OpenGL::*`` import targets instead.
 #
 # Cache variables
@@ -80,14 +80,32 @@
 # context libraries from OpenGL itself; OpenGL lives in "libOpenGL", and
 # contexts are defined in "libGLX" or "libEGL".  GLVND is currently the only way
 # to get OpenGL 3+ functionality via EGL in a manner portable across vendors.
+# Projects may use GLVND explicitly with target ``OpenGL::OpenGL`` and either
+# ``OpenGL::GLX`` or ``OpenGL::EGL``.
 #
-# On Linux systems FindOpenGL defaults to using GLVND if available.  Users can
-# utilize GLVND explicitly with targets ``OpenGL::OpenGL``, ``OpenGL::GLX``, and
-# ``OpenGL::EGL``.  Additionally, when GLVND is available the ``OpenGL::GL``
-# target is equivalent to ``OpenGL::OpenGL OpenGL::GLX``.  When the system is
-# not GLVND-based, ``OpenGL::GL`` expands to libGL as it has historically done.
-# Thus, for non-EGL-based Linux targets, the ``OpenGL::GL`` target is most
-# portable.
+# Projects may use the ``OpenGL::GL`` target (or ``OPENGL_LIBRARIES`` variable)
+# to use legacy GL interfaces.  These will use the legacy GL library located
+# by ``OPENGL_gl_LIBRARY``, if available.  If ``OPENGL_gl_LIBRARY`` is empty or
+# not found and GLVND is available, the ``OpenGL::GL`` target will use GLVND
+# ``OpenGL::OpenGL`` and ``OpenGL::GLX`` (and the ``OPENGL_LIBRARIES``
+# variable will use the corresponding libraries).  Thus, for non-EGL-based
+# Linux targets, the ``OpenGL::GL`` target is most portable.
+#
+# A ``OpenGL_GL_PREFERENCE`` variable may be set to specify the preferred way
+# to provide legacy GL interfaces in case multiple choices are available.
+# The value may be one of:
+#
+# ``GLVND``
+#  If the GLVND OpenGL and GLX libraries are available, prefer them.
+#  This forces ``OPENGL_gl_LIBRARY`` to be empty.
+#  This is the default if components were requested (since components
+#  correspond to GLVND libraries) or if policy :policy:`CMP0072` is
+#  set to ``NEW``.
+#
+# ``LEGACY``
+#  Prefer to use the legacy libGL library, if available.
+#  This is the default if no components were requested and
+#  policy :policy:`CMP0072` is not set to ``NEW``.
 #
 # For EGL targets the client must rely on GLVND support on the user's system.
 # Linking should use the ``OpenGL::OpenGL OpenGL::EGL`` targets.  Using GLES*
@@ -166,7 +184,7 @@ else()
   find_path(OPENGL_INCLUDE_DIR GL/gl.h
     /usr/share/doc/NVIDIA_GLX-1.0/include
     /usr/openwin/share/include
-    /opt/graphics/OpenGL/include /usr/X11R6/include
+    /opt/graphics/OpenGL/include
     ${_OPENGL_INCLUDE_PATH}
   )
   find_path(OPENGL_GLX_INCLUDE_DIR GL/glx.h ${_OPENGL_INCLUDE_PATH})
@@ -174,28 +192,19 @@ else()
   find_path(OPENGL_xmesa_INCLUDE_DIR GL/xmesa.h
     /usr/share/doc/NVIDIA_GLX-1.0/include
     /usr/openwin/share/include
-    /opt/graphics/OpenGL/include /usr/X11R6/include
+    /opt/graphics/OpenGL/include
   )
 
-  find_library(OPENGL_gl_LIBRARY
-    NAMES GL MesaGL
-    PATHS /opt/graphics/OpenGL/lib
-          /usr/openwin/lib
-          /usr/shlib /usr/X11R6/lib
-          ${_OPENGL_LIB_PATH}
-  )
   # Search for the GLVND libraries.  We do this regardless of COMPONENTS; we'll
   # take into account the COMPONENTS logic later.
   find_library(OPENGL_opengl_LIBRARY
     NAMES OpenGL
-    PATHS /usr/X11R6/lib
-          ${_OPENGL_LIB_PATH}
+    PATHS ${_OPENGL_LIB_PATH}
   )
 
   find_library(OPENGL_glx_LIBRARY
     NAMES GLX
-    PATHS /usr/X11R6/lib
-          ${_OPENGL_LIB_PATH}
+    PATHS ${_OPENGL_LIB_PATH}
   )
 
   find_library(OPENGL_egl_LIBRARY
@@ -208,8 +217,72 @@ else()
     PATHS ${OPENGL_gl_LIBRARY}
           /opt/graphics/OpenGL/lib
           /usr/openwin/lib
-          /usr/shlib /usr/X11R6/lib
+          /usr/shlib
   )
+
+  set(_OpenGL_GL_POLICY_WARN 0)
+  if(NOT DEFINED OpenGL_GL_PREFERENCE)
+    set(OpenGL_GL_PREFERENCE "")
+  endif()
+  if(NOT OpenGL_GL_PREFERENCE STREQUAL "")
+    # A preference has been explicitly specified.
+    if(NOT OpenGL_GL_PREFERENCE MATCHES "^(GLVND|LEGACY)$")
+      message(FATAL_ERROR
+        "OpenGL_GL_PREFERENCE value '${OpenGL_GL_PREFERENCE}' not recognized.  "
+        "Allowed values are 'GLVND' and 'LEGACY'."
+        )
+    endif()
+  elseif(OpenGL_FIND_COMPONENTS)
+    # No preference was explicitly specified, but the caller did request
+    # at least one GLVND component.  Prefer GLVND for legacy GL.
+    set(OpenGL_GL_PREFERENCE "GLVND")
+  else()
+    # No preference was explicitly specified and no GLVND components were
+    # requested.  Use a policy to choose the default.
+    cmake_policy(GET CMP0072 _OpenGL_GL_POLICY)
+    if("x${_OpenGL_GL_POLICY}x" STREQUAL "xNEWx")
+      set(OpenGL_GL_PREFERENCE "GLVND")
+    else()
+      set(OpenGL_GL_PREFERENCE "LEGACY")
+      if("x${_OpenGL_GL_POLICY}x" STREQUAL "xx")
+        set(_OpenGL_GL_POLICY_WARN 1)
+      endif()
+    endif()
+    unset(_OpenGL_GL_POLICY)
+  endif()
+
+  if("x${OpenGL_GL_PREFERENCE}x" STREQUAL "xGLVNDx" AND OPENGL_opengl_LIBRARY AND OPENGL_glx_LIBRARY)
+    # We can provide legacy GL using GLVND libraries.
+    # Do not use any legacy GL library.
+    set(OPENGL_gl_LIBRARY "")
+  else()
+    # We cannot provide legacy GL using GLVND libraries.
+    # Search for the legacy GL library.
+    find_library(OPENGL_gl_LIBRARY
+      NAMES GL MesaGL
+      PATHS /opt/graphics/OpenGL/lib
+            /usr/openwin/lib
+            /usr/shlib
+            ${_OPENGL_LIB_PATH}
+      )
+  endif()
+
+  if(_OpenGL_GL_POLICY_WARN AND OPENGL_gl_LIBRARY AND OPENGL_opengl_LIBRARY AND OPENGL_glx_LIBRARY)
+    message(AUTHOR_WARNING
+      "Policy CMP0072 is not set: FindOpenGL prefers GLVND by default when available.  "
+      "Run \"cmake --help-policy CMP0072\" for policy details.  "
+      "Use the cmake_policy command to set the policy and suppress this warning."
+      "\n"
+      "FindOpenGL found both a legacy GL library:\n"
+      "  OPENGL_gl_LIBRARY: ${OPENGL_gl_LIBRARY}\n"
+      "and GLVND libraries for OpenGL and GLX:\n"
+      "  OPENGL_opengl_LIBRARY: ${OPENGL_opengl_LIBRARY}\n"
+      "  OPENGL_glx_LIBRARY: ${OPENGL_glx_LIBRARY}\n"
+      "OpenGL_GL_PREFERENCE has not been set to \"GLVND\" or \"LEGACY\", so for "
+      "compatibility with CMake 3.10 and below the legacy GL library will be used."
+      )
+  endif()
+  unset(_OpenGL_GL_POLICY_WARN)
 
   # FPHSA cannot handle "this OR that is required", so we conditionally set what
   # it must look for.  First clear any previous config we might have done:
@@ -277,7 +350,7 @@ else()
     PATHS ${OPENGL_gl_LIBRARY}
           /opt/graphics/OpenGL/lib
           /usr/openwin/lib
-          /usr/shlib /usr/X11R6/lib
+          /usr/shlib
   )
 endif ()
 
@@ -360,18 +433,8 @@ if(OPENGL_FOUND)
                           "${OPENGL_GLX_INCLUDE_DIR}")
   endif()
 
-  if(TARGET OpenGL::OpenGL AND TARGET OpenGL::GLX AND NOT TARGET OpenGL::GL)
-    # if GLVND with GLX is available, make ::GL a synonym for 'OpenGL::OpenGL
-    # OpenGL::GLX'.
-    add_library(OpenGL::GL INTERFACE IMPORTED)
-    set_target_properties(OpenGL::GL PROPERTIES INTERFACE_LINK_LIBRARIES
-                          OpenGL::OpenGL)
-    set_property(TARGET OpenGL::GL APPEND PROPERTY INTERFACE_LINK_LIBRARIES
-                 OpenGL::GLX)
-    set_target_properties(OpenGL::GL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                          "${OPENGL_INCLUDE_DIR}")
-
-  elseif(NOT TARGET OpenGL::GL)
+  if(OPENGL_gl_LIBRARY AND NOT TARGET OpenGL::GL)
+    # A legacy GL library is available, so use it for the legacy GL target.
     if(IS_ABSOLUTE "${OPENGL_gl_LIBRARY}")
       add_library(OpenGL::GL UNKNOWN IMPORTED)
       if(OPENGL_gl_LIBRARY MATCHES "/([^/]+)\\.framework$")
@@ -392,6 +455,16 @@ if(OPENGL_FOUND)
     endif()
     set_target_properties(OpenGL::GL PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${OPENGL_INCLUDE_DIR}")
+  elseif(NOT TARGET OpenGL::GL AND TARGET OpenGL::OpenGL AND TARGET OpenGL::GLX)
+    # A legacy GL library is not available, but we can provide the legacy GL
+    # target using GLVND OpenGL+GLX.
+    add_library(OpenGL::GL INTERFACE IMPORTED)
+    set_target_properties(OpenGL::GL PROPERTIES INTERFACE_LINK_LIBRARIES
+                          OpenGL::OpenGL)
+    set_property(TARGET OpenGL::GL APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+                 OpenGL::GLX)
+    set_target_properties(OpenGL::GL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                          "${OPENGL_INCLUDE_DIR}")
   endif()
 
   # ::EGL is a GLVND library, and thus Linux-only: we don't bother checking
@@ -440,9 +513,12 @@ if(OPENGL_FOUND)
   endif()
 
   # OPENGL_LIBRARIES mirrors OpenGL::GL's logic ...
-  set(OPENGL_LIBRARIES ${OPENGL_gl_LIBRARY})
-  if(TARGET OpenGL::GLX AND TARGET OpenGL::OpenGL)
+  if(OPENGL_gl_LIBRARY)
+    set(OPENGL_LIBRARIES ${OPENGL_gl_LIBRARY})
+  elseif(TARGET OpenGL::OpenGL AND TARGET OpenGL::GLX)
     set(OPENGL_LIBRARIES ${OPENGL_opengl_LIBRARY} ${OPENGL_glx_LIBRARY})
+  else()
+    set(OPENGL_LIBRARIES "")
   endif()
   # ... and also includes GLU, if available.
   if(TARGET OpenGL::GLU)

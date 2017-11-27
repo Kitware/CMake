@@ -12,8 +12,10 @@ Add compile options to a target.
 Specify compile options to use when compiling a given target.  The
 named ``<target>`` must have been created by a command such as
 :command:`add_executable` or :command:`add_library` and must not be an
-:ref:`IMPORTED Target <Imported Targets>`.  If ``BEFORE`` is specified,
-the content will be prepended to the property instead of being appended.
+:ref:`ALIAS target <Alias Targets>`.
+
+If ``BEFORE`` is specified, the content will be prepended to the property
+instead of being appended.
 
 This command can be used to add any options, but
 alternative commands exist to add preprocessor definitions
@@ -27,8 +29,9 @@ The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
 specify the scope of the following arguments.  ``PRIVATE`` and ``PUBLIC``
 items will populate the :prop_tgt:`COMPILE_OPTIONS` property of
 ``<target>``.  ``PUBLIC`` and ``INTERFACE`` items will populate the
-:prop_tgt:`INTERFACE_COMPILE_OPTIONS` property of ``<target>``.  The
-following arguments specify compile options.  Repeated calls for the same
+:prop_tgt:`INTERFACE_COMPILE_OPTIONS` property of ``<target>``.
+(:ref:`IMPORTED targets <Imported Targets>` only support ``INTERFACE`` items.)
+The following arguments specify compile options.  Repeated calls for the same
 ``<target>`` append items in the order called.
 
 Arguments to ``target_compile_options`` may use "generator expressions"

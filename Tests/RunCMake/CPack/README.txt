@@ -96,6 +96,14 @@ the test has to run some functions after CPack.cmake is included. In such cases
 a function run_after_include_cpack can be declared in test.cmake file and that
 function will run after the inclusion of CPack.cmake.
 
+NOTE: During CMake configure stage developer warnings may be expected. In such
+cases an expected output regular expression can be provided by creating
+'<test_name>/configure-stdout.txt' and/or '<test_name>/configure-stderr.txt'
+file. There are also more specialized versions of the file available:
+- configure-${PACKAGING_TYPE}-${SUBTEST_SUFFIX}-std${o}.txt
+- configure-${SUBTEST_SUFFIX}-std${o}.txt
+- configure-${PACKAGING_TYPE}-std${o}.txt
+
 build phase (optional and not available for source package tests)
 -----------------------------------------------------------------
 
@@ -149,9 +157,15 @@ this step and must contain
   NOTE: This variable should be used only as last resort as it sets generator
         specific regular expression.
         EXPECTED_FILE_CONTENT_<file_number_starting_with_1>_LIST should be
-        prefered as it requires a list of expected files and directories that
+        preferred as it requires a list of expected files and directories that
         is later changed automatically depending on the generator so expected
         package content can be written only once per test for all generators.
+
+- EXPECTED_FILE_PACKAGING_PREFIX and
+  EXPECTED_FILE_<file_number_starting_with_1>_PACKAGING_PREFIX variables can be
+  set to explicitly specified CPACK_PACKAGING_PREFIX value. By default this
+  variable does not need to be set as it is implicitly set to package generator
+  specific prefix.
 
 Optional verification phase is generator specific and is optionaly executed.
 This phase is executed if '<test_name>/VerifyResult.cmake' script exists.
@@ -159,7 +173,7 @@ This phase is executed if '<test_name>/VerifyResult.cmake' script exists.
 VerifyResult.cmake script also automatically prints out standard output and
 standard error from CPack execution phase that is compared with
 '<test_name>/<generator_name>-stdout.txt' regular expression and
-and '<test_name>/<generator_name>-stderr.txt' regular expresson respectively.
+'<test_name>/<generator_name>-stderr.txt' regular expresson respectively.
 NOTE: For subtests generator name can also be suffixed with subtest name and/or
       packaging type (MONOLITHIC, COMPONENT, GROUP) and in such cases the
       preferences of which file will be used are as follows:
@@ -167,6 +181,7 @@ NOTE: For subtests generator name can also be suffixed with subtest name and/or
         - generator name + packaging type
         - generator name + subtest name
         - generator name
+        - subtest name
         - default generator
       File name format: '<generator_name>-<packaging_type>-<subtest_name>-std<type>.txt'
                         where <type> can either be 'out' or 'err'.
@@ -209,7 +224,7 @@ To add a new generator we must
       + FILE that will contain the package file for which the package content
         should be returned.
       + RESULT_VAR that will tell the function which variable in parent scope
-        should contain the result (list of pacakge content)
+        should contain the result (list of package content)
     - toExpectedContentList: This function should convert an expected package
                              content list into one that is expected for the
                              generator (e.g. rpm packages have install/relocate

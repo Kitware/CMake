@@ -311,6 +311,7 @@ CMAKE_CXX_SOURCES="\
   cmFindProgramCommand \
   cmForEachCommand \
   cmFunctionCommand \
+  cmFSPermissions \
   cmGeneratedFileStream \
   cmGeneratorExpression \
   cmGeneratorExpressionContext \
