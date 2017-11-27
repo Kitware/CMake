@@ -184,7 +184,7 @@ else()
   find_path(OPENGL_INCLUDE_DIR GL/gl.h
     /usr/share/doc/NVIDIA_GLX-1.0/include
     /usr/openwin/share/include
-    /opt/graphics/OpenGL/include /usr/X11R6/include
+    /opt/graphics/OpenGL/include
     ${_OPENGL_INCLUDE_PATH}
   )
   find_path(OPENGL_GLX_INCLUDE_DIR GL/glx.h ${_OPENGL_INCLUDE_PATH})
@@ -192,21 +192,19 @@ else()
   find_path(OPENGL_xmesa_INCLUDE_DIR GL/xmesa.h
     /usr/share/doc/NVIDIA_GLX-1.0/include
     /usr/openwin/share/include
-    /opt/graphics/OpenGL/include /usr/X11R6/include
+    /opt/graphics/OpenGL/include
   )
 
   # Search for the GLVND libraries.  We do this regardless of COMPONENTS; we'll
   # take into account the COMPONENTS logic later.
   find_library(OPENGL_opengl_LIBRARY
     NAMES OpenGL
-    PATHS /usr/X11R6/lib
-          ${_OPENGL_LIB_PATH}
+    PATHS ${_OPENGL_LIB_PATH}
   )
 
   find_library(OPENGL_glx_LIBRARY
     NAMES GLX
-    PATHS /usr/X11R6/lib
-          ${_OPENGL_LIB_PATH}
+    PATHS ${_OPENGL_LIB_PATH}
   )
 
   find_library(OPENGL_egl_LIBRARY
@@ -219,7 +217,7 @@ else()
     PATHS ${OPENGL_gl_LIBRARY}
           /opt/graphics/OpenGL/lib
           /usr/openwin/lib
-          /usr/shlib /usr/X11R6/lib
+          /usr/shlib
   )
 
   set(_OpenGL_GL_POLICY_WARN 0)
@@ -264,7 +262,7 @@ else()
       NAMES GL MesaGL
       PATHS /opt/graphics/OpenGL/lib
             /usr/openwin/lib
-            /usr/shlib /usr/X11R6/lib
+            /usr/shlib
             ${_OPENGL_LIB_PATH}
       )
   endif()
@@ -352,7 +350,7 @@ else()
     PATHS ${OPENGL_gl_LIBRARY}
           /opt/graphics/OpenGL/lib
           /usr/openwin/lib
-          /usr/shlib /usr/X11R6/lib
+          /usr/shlib
   )
 endif ()
 

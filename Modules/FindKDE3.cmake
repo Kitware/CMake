@@ -200,8 +200,7 @@ find_path(KDE3_INCLUDE_DIR kpassdlg.h
   PATHS
   /opt/kde3/include
   /opt/kde/include
-  /usr/include/kde
-  /usr/local/include/kde
+  PATH_SUFFIXES include/kde
   )
 
 #now the KDE library directory

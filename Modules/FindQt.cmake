@@ -105,13 +105,11 @@ find_file( QT4_QGLOBAL_H_FILE qglobal.h
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\4.0.0;InstallDir]/include/Qt"
   ${qt_headers}/Qt
   $ENV{QTDIR}/include/Qt
-  /usr/local/qt/include/Qt
-  /usr/local/include/Qt
   /usr/lib/qt/include/Qt
-  /usr/include/Qt
   /usr/share/qt4/include/Qt
   /usr/local/include/X11/qt4/Qt
-  C:/Progra~1/qt/include/Qt )
+  C:/Progra~1/qt/include/Qt
+  PATH_SUFFIXES qt/include/Qt include/Qt)
 
 if(QT4_QGLOBAL_H_FILE)
   set(QT4_INSTALLED TRUE)
@@ -125,14 +123,10 @@ find_file( QT3_QGLOBAL_H_FILE qglobal.h
   C:/Qt/3.3.3Educational/include
   $ENV{QTDIR}/include
   /usr/include/qt3/Qt
-  /usr/local/qt/include
-  /usr/local/include
-  /usr/lib/qt/include
-  /usr/include
   /usr/share/qt3/include
   /usr/local/include/X11/qt3
   C:/Progra~1/qt/include
-  /usr/include/qt3 )
+  PATH_SUFFIXES qt/include include/qt3)
 
 if(QT3_QGLOBAL_H_FILE)
   set(QT3_INSTALLED TRUE)

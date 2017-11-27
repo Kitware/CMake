@@ -20,19 +20,11 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
 find_program(SELF_PACKER_FOR_EXECUTABLE
   upx
   ${CYGWIN_INSTALL_PATH}/bin
-  /bin
-  /usr/bin
-  /usr/local/bin
-  /sbin
 )
 
 find_program(SELF_PACKER_FOR_SHARED_LIB
   upx
   ${CYGWIN_INSTALL_PATH}/bin
-  /bin
-  /usr/bin
-  /usr/local/bin
-  /sbin
 )
 
 mark_as_advanced(

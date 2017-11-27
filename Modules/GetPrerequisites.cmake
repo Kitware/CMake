@@ -687,8 +687,6 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     "$ENV{VS71COMNTOOLS}/../../VC7/bin"
     "C:/Program Files/Microsoft Visual Studio .NET 2003/VC7/BIN"
     "C:/Program Files (x86)/Microsoft Visual Studio .NET 2003/VC7/BIN"
-    "/usr/local/bin"
-    "/usr/bin"
     )
 
   # <setup-gp_tool-vars>

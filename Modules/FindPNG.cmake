@@ -51,9 +51,7 @@ endif()
 find_package(ZLIB ${_FIND_ZLIB_ARG})
 
 if(ZLIB_FOUND)
-  find_path(PNG_PNG_INCLUDE_DIR png.h
-  /usr/local/include/libpng             # OpenBSD
-  )
+  find_path(PNG_PNG_INCLUDE_DIR png.h PATH_SUFFIXES include/libpng)
 
   list(APPEND PNG_NAMES png libpng)
   unset(PNG_NAMES_DEBUG)

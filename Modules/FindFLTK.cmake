@@ -114,12 +114,11 @@ if(NOT FLTK_DIR)
     # Look in places relative to the system executable search path.
     ${FLTK_DIR_SEARCH}
 
-    PATHS
-    # Look in standard UNIX install locations.
-    /usr/local/lib/fltk
-    /usr/lib/fltk
-    /usr/local/fltk
-    /usr/X11R6/include
+    PATH_SUFFIXES
+    fltk
+    fltk/include
+    lib/fltk
+    lib/fltk/include
 
     # Help the user find it if we cannot.
     DOC "The ${FLTK_DIR_STRING}"
@@ -216,14 +215,11 @@ endif()
       endif()
     endif()
 
-    set(FLTK_INCLUDE_SEARCH_PATH ${FLTK_INCLUDE_SEARCH_PATH}
-      /usr/local/fltk
-      /usr/X11R6/include
-      ${_FLTK_POSSIBLE_INCLUDE_DIRS}
-      )
+    list(APPEND FLTK_INCLUDE_SEARCH_PATH ${_FLTK_POSSIBLE_INCLUDE_DIRS})
 
     find_path(FLTK_INCLUDE_DIR
         NAMES FL/Fl.h FL/Fl.H    # fltk 1.1.9 has Fl.H (#8376)
+        PATH_SUFFIXES fltk fltk/include
         PATHS ${FLTK_INCLUDE_SEARCH_PATH})
 
     #
@@ -237,21 +233,16 @@ endif()
       endif()
     endif()
 
-    set(FLTK_LIBRARY_SEARCH_PATH ${FLTK_LIBRARY_SEARCH_PATH}
-      /usr/local/fltk/lib
-      /usr/X11R6/lib
-      ${FLTK_INCLUDE_DIR}/lib
-      ${_FLTK_POSSIBLE_LIBRARY_DIR}
-      )
+    list(APPEND FLTK_LIBRARY_SEARCH_PATH ${FLTK_INCLUDE_DIR}/lib ${_FLTK_POSSIBLE_LIBRARY_DIR})
 
     find_library(FLTK_BASE_LIBRARY NAMES fltk fltkd
-      PATHS ${FLTK_LIBRARY_SEARCH_PATH})
+      PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
     find_library(FLTK_GL_LIBRARY NAMES fltkgl fltkgld fltk_gl
-      PATHS ${FLTK_LIBRARY_SEARCH_PATH})
+      PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
     find_library(FLTK_FORMS_LIBRARY NAMES fltkforms fltkformsd fltk_forms
-      PATHS ${FLTK_LIBRARY_SEARCH_PATH})
+      PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
     find_library(FLTK_IMAGES_LIBRARY NAMES fltkimages fltkimagesd fltk_images
-      PATHS ${FLTK_LIBRARY_SEARCH_PATH})
+      PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
 
     # Find the extra libraries needed for the fltk_images library.
     if(UNIX)
