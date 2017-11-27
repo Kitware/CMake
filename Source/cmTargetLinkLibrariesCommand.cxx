@@ -388,26 +388,26 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
         << this->Target->GetName()
         << "\" which is not built in this directory.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-    } else {
-
-      cmTarget* tgt = this->Makefile->GetGlobalGenerator()->FindTarget(lib);
-
-      if (tgt && (tgt->GetType() != cmStateEnums::STATIC_LIBRARY) &&
-          (tgt->GetType() != cmStateEnums::SHARED_LIBRARY) &&
-          (tgt->GetType() != cmStateEnums::UNKNOWN_LIBRARY) &&
-          (tgt->GetType() != cmStateEnums::INTERFACE_LIBRARY) &&
-          !tgt->IsExecutableWithExports()) {
-        std::ostringstream e;
-        e << "Target \"" << lib << "\" of type "
-          << cmState::GetTargetTypeName(tgt->GetType())
-          << " may not be linked into another target.  "
-          << "One may link only to STATIC or SHARED libraries, or "
-          << "to executables with the ENABLE_EXPORTS property set.";
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-      }
-
-      this->Target->AddLinkLibrary(*this->Makefile, lib, llt);
+      return false;
     }
+
+    cmTarget* tgt = this->Makefile->GetGlobalGenerator()->FindTarget(lib);
+
+    if (tgt && (tgt->GetType() != cmStateEnums::STATIC_LIBRARY) &&
+        (tgt->GetType() != cmStateEnums::SHARED_LIBRARY) &&
+        (tgt->GetType() != cmStateEnums::UNKNOWN_LIBRARY) &&
+        (tgt->GetType() != cmStateEnums::INTERFACE_LIBRARY) &&
+        !tgt->IsExecutableWithExports()) {
+      std::ostringstream e;
+      e << "Target \"" << lib << "\" of type "
+        << cmState::GetTargetTypeName(tgt->GetType())
+        << " may not be linked into another target.  "
+        << "One may link only to STATIC or SHARED libraries, or "
+        << "to executables with the ENABLE_EXPORTS property set.";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    }
+
+    this->Target->AddLinkLibrary(*this->Makefile, lib, llt);
 
     if (this->CurrentProcessingState == ProcessingLinkLibraries) {
       this->Target->AppendProperty(
