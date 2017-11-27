@@ -1393,6 +1393,7 @@ endif()
 #           support libraries
 if(WIN32 AND Boost_USE_DEBUG_RUNTIME)
   if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC"
+          OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xClang"
           OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xIntel")
     string(APPEND _boost_DEBUG_ABI_TAG "g")
   endif()
