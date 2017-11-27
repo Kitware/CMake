@@ -67,38 +67,7 @@ endif()
 # Support for CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT and friends:
 set(CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT "$ENV{ASM${ASM_DIALECT}FLAGS} ${CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT}")
 
-foreach(c "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
-  string(STRIP "${CMAKE_ASM${ASM_DIALECT}_FLAGS${c}_INIT}" CMAKE_ASM${ASM_DIALECT}_FLAGS${c}_INIT)
-endforeach()
-
-set (CMAKE_ASM${ASM_DIALECT}_FLAGS "${CMAKE_ASM${ASM_DIALECT}_FLAGS_INIT}" CACHE STRING
-     "Flags used by the assembler during all build types.")
-
-if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
-  get_property(_GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-  # default build type is none
-  if(NOT _GENERATOR_IS_MULTI_CONFIG AND NOT CMAKE_NO_BUILD_TYPE)
-    set (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_INIT} CACHE STRING
-      "Choose the type of build, options are: None, Debug Release RelWithDebInfo MinSizeRel.")
-  endif()
-  unset(_GENERATOR_IS_MULTI_CONFIG)
-  set (CMAKE_ASM${ASM_DIALECT}_FLAGS_DEBUG "${CMAKE_ASM${ASM_DIALECT}_FLAGS_DEBUG_INIT}" CACHE STRING
-    "Flags used by the assembler during debug builds.")
-  set (CMAKE_ASM${ASM_DIALECT}_FLAGS_MINSIZEREL "${CMAKE_ASM${ASM_DIALECT}_FLAGS_MINSIZEREL_INIT}" CACHE STRING
-    "Flags used by the assembler during release minsize builds.")
-  set (CMAKE_ASM${ASM_DIALECT}_FLAGS_RELEASE "${CMAKE_ASM${ASM_DIALECT}_FLAGS_RELEASE_INIT}" CACHE STRING
-    "Flags used by the assembler during release builds.")
-  set (CMAKE_ASM${ASM_DIALECT}_FLAGS_RELWITHDEBINFO "${CMAKE_ASM${ASM_DIALECT}_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
-    "Flags used by the assembler during Release with Debug Info builds.")
-endif()
-
-mark_as_advanced(CMAKE_ASM${ASM_DIALECT}_FLAGS
-                 CMAKE_ASM${ASM_DIALECT}_FLAGS_DEBUG
-                 CMAKE_ASM${ASM_DIALECT}_FLAGS_MINSIZEREL
-                 CMAKE_ASM${ASM_DIALECT}_FLAGS_RELEASE
-                 CMAKE_ASM${ASM_DIALECT}_FLAGS_RELWITHDEBINFO
-                )
-
+cmake_initialize_per_config_variable(CMAKE_ASM${ASM_DIALECT}_FLAGS "Flags used by the ASM${ASM_DIALECT} compiler")
 
 if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILE_OBJECT)
   set(CMAKE_ASM${ASM_DIALECT}_COMPILE_OBJECT "<CMAKE_ASM${ASM_DIALECT}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")

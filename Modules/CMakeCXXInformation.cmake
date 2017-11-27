@@ -197,24 +197,7 @@ endforeach()
 # and you can set these flags in the cmake cache
 set(CMAKE_CXX_FLAGS_INIT "$ENV{CXXFLAGS} ${CMAKE_CXX_FLAGS_INIT}")
 
-foreach(c "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
-  string(STRIP "${CMAKE_CXX_FLAGS${c}_INIT}" CMAKE_CXX_FLAGS${c}_INIT)
-endforeach()
-
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT}" CACHE STRING
-     "Flags used by the compiler during all build types.")
-
-if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
-  set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG_INIT}" CACHE STRING
-     "Flags used by the compiler during debug builds.")
-  set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL_INIT}" CACHE STRING
-     "Flags used by the compiler during release builds for minimum size.")
-  set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE_INIT}" CACHE STRING
-     "Flags used by the compiler during release builds.")
-  set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
-     "Flags used by the compiler during release builds with debug info.")
-
-endif()
+cmake_initialize_per_config_variable(CMAKE_CXX_FLAGS "Flags used by the CXX compiler")
 
 if(CMAKE_CXX_STANDARD_LIBRARIES_INIT)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES_INIT}"
@@ -287,11 +270,7 @@ endif()
 
 mark_as_advanced(
 CMAKE_VERBOSE_MAKEFILE
-CMAKE_CXX_FLAGS
-CMAKE_CXX_FLAGS_RELEASE
-CMAKE_CXX_FLAGS_RELWITHDEBINFO
-CMAKE_CXX_FLAGS_MINSIZEREL
-CMAKE_CXX_FLAGS_DEBUG)
+)
 
 set(CMAKE_CXX_INFORMATION_LOADED 1)
 

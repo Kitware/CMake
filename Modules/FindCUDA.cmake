@@ -524,7 +524,7 @@ set(CUDA_GENERATED_OUTPUT_DIR "" CACHE PATH "Directory to put all the output fil
 option(CUDA_HOST_COMPILATION_CPP "Generated file extension" ON)
 
 # Extra user settable flags
-set(CUDA_NVCC_FLAGS "" CACHE STRING "Semi-colon delimit multiple arguments.")
+cmake_initialize_per_config_variable(CUDA_NVCC_FLAGS "Semi-colon delimit multiple arguments.")
 
 if(CMAKE_GENERATOR MATCHES "Visual Studio")
   set(CUDA_HOST_COMPILER "$(VCInstallDir)bin" CACHE FILEPATH "Host side compiler used by NVCC")
@@ -577,23 +577,6 @@ mark_as_advanced(
   CUDA_VERBOSE_BUILD
   CUDA_SEPARABLE_COMPILATION
   )
-
-# Single config generators like Makefiles or Ninja don't usually have
-# CMAKE_CONFIGURATION_TYPES defined (but note that it can be defined if set by
-# projects or developers). Even CMAKE_BUILD_TYPE might not be defined for
-# single config generators (and should not be defined for multi-config
-# generators). To ensure we get a complete superset of all possible
-# configurations, we combine CMAKE_CONFIGURATION_TYPES, CMAKE_BUILD_TYPE and
-# all of the standard configurations, then weed out duplicates with
-# list(REMOVE_DUPLICATES). Looping over the unique set then ensures we have
-# each configuration-specific set of nvcc flags defined and marked as advanced.
-set(CUDA_configuration_types ${CMAKE_CONFIGURATION_TYPES} ${CMAKE_BUILD_TYPE} Debug MinSizeRel Release RelWithDebInfo)
-list(REMOVE_DUPLICATES CUDA_configuration_types)
-foreach(config ${CUDA_configuration_types})
-    string(TOUPPER ${config} config_upper)
-    set(CUDA_NVCC_FLAGS_${config_upper} "" CACHE STRING "Semi-colon delimit multiple arguments.")
-    mark_as_advanced(CUDA_NVCC_FLAGS_${config_upper})
-endforeach()
 
 ###############################################################################
 ###############################################################################

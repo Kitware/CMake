@@ -19,23 +19,7 @@ include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL)
 
 set(CMAKE_RC_FLAGS_INIT "$ENV{RCFLAGS} ${CMAKE_RC_FLAGS_INIT}")
 
-foreach(c "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
-  string(STRIP "${CMAKE_RC_FLAGS${c}_INIT}" CMAKE_RC_FLAGS${c}_INIT)
-endforeach()
-
-set (CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS_INIT}" CACHE STRING
-     "Flags for Windows Resource Compiler.")
-
-if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
-  set (CMAKE_RC_FLAGS_DEBUG "${CMAKE_RC_FLAGS_DEBUG_INIT}" CACHE STRING
-    "Flags for Windows Resource Compiler during debug builds.")
-  set (CMAKE_RC_FLAGS_MINSIZEREL "${CMAKE_RC_FLAGS_MINSIZEREL_INIT}" CACHE STRING
-    "Flags for Windows Resource Compiler during release builds for minimum size.")
-  set (CMAKE_RC_FLAGS_RELEASE "${CMAKE_RC_FLAGS_RELEASE_INIT}" CACHE STRING
-    "Flags for Windows Resource Compiler during release builds.")
-  set (CMAKE_RC_FLAGS_RELWITHDEBINFO "${CMAKE_RC_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
-    "Flags for Windows Resource Compiler during release builds with debug info.")
-endif()
+cmake_initialize_per_config_variable(CMAKE_RC_FLAGS "Flags for Windows Resource Compiler")
 
 # These are the only types of flags that should be passed to the rc
 # command, if COMPILE_FLAGS is used on a target this will be used
@@ -51,12 +35,5 @@ if(NOT CMAKE_RC_COMPILE_OBJECT)
     "<CMAKE_RC_COMPILER> <DEFINES> <INCLUDES> <FLAGS> /fo<OBJECT> <SOURCE>")
 endif()
 
-mark_as_advanced(
-CMAKE_RC_FLAGS
-CMAKE_RC_FLAGS_DEBUG
-CMAKE_RC_FLAGS_MINSIZEREL
-CMAKE_RC_FLAGS_RELEASE
-CMAKE_RC_FLAGS_RELWITHDEBINFO
-)
 # set this variable so we can avoid loading this more than once.
 set(CMAKE_RC_INFORMATION_LOADED 1)
