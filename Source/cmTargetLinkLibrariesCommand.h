@@ -20,6 +20,9 @@ class cmTarget;
  * cmTargetLinkLibrariesCommand is used to specify a list of libraries to link
  * into executable(s) or shared objects. The names of the libraries
  * should be those defined by the LIBRARY(library) command(s).
+ *
+ * Additionally, it allows to propagate usage-requirements (including link
+ * libraries) from one target into another.
  */
 class cmTargetLinkLibrariesCommand : public cmCommand
 {
