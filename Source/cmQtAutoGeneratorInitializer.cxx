@@ -684,8 +684,9 @@ void cmQtAutoGeneratorInitializer::InitCustomTargets()
           ccDepends.push_back(qrc.QrcFile);
 
           cmTarget* autoRccTarget = makefile->AddUtilityCommand(
-            ccName, true, this->DirWork.c_str(), ccOutput, ccDepends,
-            commandLines, false, ccComment.c_str());
+            ccName, cmMakefile::TargetOrigin::Generator, true,
+            this->DirWork.c_str(), ccOutput, ccDepends, commandLines, false,
+            ccComment.c_str());
           // Create autogen generator target
           localGen->AddGeneratorTarget(
             new cmGeneratorTarget(autoRccTarget, localGen));
@@ -852,9 +853,9 @@ void cmQtAutoGeneratorInitializer::InitCustomTargets()
 
       // Create autogen target
       cmTarget* autogenTarget = makefile->AddUtilityCommand(
-        this->AutogenTargetName, true, this->DirWork.c_str(),
-        /*byproducts=*/autogenProvides, autogenDepends, commandLines, false,
-        autogenComment.c_str());
+        this->AutogenTargetName, cmMakefile::TargetOrigin::Generator, true,
+        this->DirWork.c_str(), /*byproducts=*/autogenProvides, autogenDepends,
+        commandLines, false, autogenComment.c_str());
       // Create autogen generator target
       localGen->AddGeneratorTarget(
         new cmGeneratorTarget(autogenTarget, localGen));

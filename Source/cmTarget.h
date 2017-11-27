@@ -180,6 +180,12 @@ public:
   bool GetHaveInstallRule() const { return this->HaveInstallRule; }
   void SetHaveInstallRule(bool h) { this->HaveInstallRule = h; }
 
+  /**
+  * Get/Set whether this target was auto-created by a generator.
+  */
+  bool GetIsGeneratorProvided() const { return this->IsGeneratorProvided; }
+  void SetIsGeneratorProvided(bool igp) { this->IsGeneratorProvided = igp; }
+
   /** Add a utility on which this project depends. A utility is an executable
    * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
    * commands. It is not a full path nor does it have an extension.
@@ -284,6 +290,7 @@ private:
                             std::string const& value) const;
 
 private:
+  bool IsGeneratorProvided;
   cmPropertyMap Properties;
   std::set<std::string> SystemIncludeDirectories;
   std::set<std::string> LinkDirectoriesEmmitted;

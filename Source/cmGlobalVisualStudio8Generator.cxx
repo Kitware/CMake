@@ -225,9 +225,9 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   }
 
   cmCustomCommandLines noCommandLines;
-  cmTarget* tgt =
-    mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
-                          no_working_directory, no_depends, noCommandLines);
+  cmTarget* tgt = mf->AddUtilityCommand(
+    CMAKE_CHECK_BUILD_SYSTEM_TARGET, cmMakefile::TargetOrigin::Generator,
+    false, no_working_directory, no_depends, noCommandLines);
 
   cmGeneratorTarget* gt = new cmGeneratorTarget(tgt, lg);
   lg->AddGeneratorTarget(gt);
