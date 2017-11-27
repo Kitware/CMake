@@ -617,11 +617,6 @@ public:
   cmGlobalGenerator* GetGlobalGenerator() const;
 
   /**
-   * Get all the test names this makefile knows about
-   */
-  void GetTestNames(std::vector<std::string>& testNames);
-
-  /**
    * Get all the source files this makefile knows about
    */
   const std::vector<cmSourceFile*>& GetSourceFiles() const
@@ -642,6 +637,11 @@ public:
    *  not found, then a null pointer is returned.
    */
   cmTest* GetTest(const std::string& testName) const;
+
+  /**
+   * Get all tests that run under the given configuration.
+   */
+  void GetTests(const std::string& config, std::vector<cmTest*>& tests);
 
   /**
    * Return a location of a file in cmake or custom modules directory
