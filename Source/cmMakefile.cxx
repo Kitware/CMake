@@ -3336,15 +3336,6 @@ cmGlobalGenerator* cmMakefile::GetGlobalGenerator() const
   return this->GlobalGenerator;
 }
 
-void cmMakefile::GetTestNames(std::vector<std::string> & testNames)
-{
-  for (auto it = Tests.begin(); it != Tests.end(); ++it) {
-	  testNames.push_back(it->first);
-  }
-
-  return;
-}
-
 #ifdef CMAKE_BUILD_WITH_CMAKE
 cmVariableWatch* cmMakefile::GetVariableWatch() const
 {

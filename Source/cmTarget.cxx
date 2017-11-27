@@ -849,17 +849,17 @@ cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
 
 void cmTarget::SetProperty(const std::string& prop, const char* value)
 {
-	if (!cmTargetPropertyComputer::PassesWhitelist(
-		this->GetType(), prop, this->Makefile->GetMessenger(),
-		this->Makefile->GetBacktrace())) {
-		return;
-	}
-	if (prop == "MANUALLY_ADDED_DEPENDENCIES") {
-		std::ostringstream e;
-		e << "MANUALLY_ADDED_DEPENDENCIES property is read-only\n";
-		this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-		return;
-	}
+  if (!cmTargetPropertyComputer::PassesWhitelist(
+        this->GetType(), prop, this->Makefile->GetMessenger(),
+        this->Makefile->GetBacktrace())) {
+    return;
+  }
+  if (prop == "MANUALLY_ADDED_DEPENDENCIES") {
+    std::ostringstream e;
+    e << "MANUALLY_ADDED_DEPENDENCIES property is read-only\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+  }
   if (prop == "NAME") {
     std::ostringstream e;
     e << "NAME property is read-only\n";
