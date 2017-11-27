@@ -160,8 +160,9 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
           this->CurrentProcessingState != ProcessingKeywordPublicInterface &&
           this->CurrentProcessingState != ProcessingKeywordLinkInterface) {
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR, "The INTERFACE option must appear as the second "
-                              "argument, just after the target name.");
+          cmake::FATAL_ERROR,
+          "The INTERFACE, PUBLIC or PRIVATE option must appear as the second "
+          "argument, just after the target name.");
         return true;
       }
       this->CurrentProcessingState = ProcessingKeywordLinkInterface;
@@ -183,7 +184,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
           this->CurrentProcessingState != ProcessingKeywordLinkInterface) {
         this->Makefile->IssueMessage(
           cmake::FATAL_ERROR,
-          "The PUBLIC or PRIVATE option must appear as the second "
+          "The INTERFACE, PUBLIC or PRIVATE option must appear as the second "
           "argument, just after the target name.");
         return true;
       }
@@ -206,7 +207,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
           this->CurrentProcessingState != ProcessingKeywordLinkInterface) {
         this->Makefile->IssueMessage(
           cmake::FATAL_ERROR,
-          "The PUBLIC or PRIVATE option must appear as the second "
+          "The INTERFACE, PUBLIC or PRIVATE option must appear as the second "
           "argument, just after the target name.");
         return true;
       }
@@ -349,12 +350,11 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       // form must be the plain form.
       const char* existingSig =
         (sig == cmTarget::KeywordTLLSignature ? "plain" : "keyword");
-      e << "The " << existingSig << " signature for target_link_libraries "
-                                    "has already been used with the target \""
-        << this->Target->GetName() << "\".  All uses of "
-                                      "target_link_libraries with a target "
-        << modal << " be either "
-                    "all-keyword or all-plain.\n";
+      e << "The " << existingSig << " signature for target_link_libraries has "
+                                    "already been used with the target \""
+        << this->Target->GetName()
+        << "\".  All uses of target_link_libraries with a target " << modal
+        << " be either all-keyword or all-plain.\n";
       this->Target->GetTllSignatureTraces(e,
                                           sig == cmTarget::KeywordTLLSignature
                                             ? cmTarget::PlainTLLSignature
@@ -401,9 +401,9 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       std::ostringstream e;
       e << "Target \"" << lib << "\" of type "
         << cmState::GetTargetTypeName(tgt->GetType())
-        << " may not be linked into another target.  "
-        << "One may link only to STATIC or SHARED libraries, or "
-        << "to executables with the ENABLE_EXPORTS property set.";
+        << " may not be linked into another target.  One may link only to "
+           "INTERFACE, STATIC or SHARED libraries, or to executables with the "
+           "ENABLE_EXPORTS property set.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     }
 
