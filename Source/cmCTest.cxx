@@ -12,6 +12,7 @@
 #include "cmsys/String.hxx"
 #include "cmsys/SystemInformation.hxx"
 #include <algorithm>
+#include <chrono>
 #include <ctype.h>
 #include <iostream>
 #include <map>
@@ -281,7 +282,6 @@ cmCTest::cmCTest()
   this->GlobalTimeout = 0;
   this->LastStopTimeout = 24 * 60 * 60;
   this->CompressXMLFiles = false;
-  this->CTestConfigFile.clear();
   this->ScheduleType.clear();
   this->StopTime.clear();
   this->NextDayStopTime = false;
@@ -622,12 +622,9 @@ bool cmCTest::UpdateCTestConfiguration()
   if (this->SuppressUpdatingCTestConfiguration) {
     return true;
   }
-  std::string fileName = this->CTestConfigFile;
-  if (fileName.empty()) {
-    fileName = this->BinaryDir + "/CTestConfiguration.ini";
-    if (!cmSystemTools::FileExists(fileName.c_str())) {
-      fileName = this->BinaryDir + "/DartConfiguration.tcl";
-    }
+  std::string fileName = this->BinaryDir + "/CTestConfiguration.ini";
+  if (!cmSystemTools::FileExists(fileName.c_str())) {
+    fileName = this->BinaryDir + "/DartConfiguration.tcl";
   }
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
              "UpdateCTestConfiguration  from :" << fileName << "\n");
@@ -1421,7 +1418,7 @@ int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
     std::string note_time = this->CurrentTime();
     xml.StartElement("Note");
     xml.Attribute("Name", file);
-    xml.Element("Time", cmSystemTools::GetTime());
+    xml.Element("Time", std::chrono::system_clock::now());
     xml.Element("DateTime", note_time);
     xml.StartElement("Text");
     cmsys::ifstream ifs(file.c_str());

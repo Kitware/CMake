@@ -218,8 +218,8 @@ void CCONV cmAddUtilityCommand(void* arg, const char* utilityName,
   }
 
   // Pass the call to the makefile instance.
-  mf->AddUtilityCommand(utilityName, (all ? false : true), nullptr, depends2,
-                        commandLines);
+  mf->AddUtilityCommand(utilityName, cmMakefile::TargetOrigin::Project,
+                        (all ? false : true), nullptr, depends2, commandLines);
 }
 void CCONV cmAddCustomCommand(void* arg, const char* source,
                               const char* command, int numArgs,

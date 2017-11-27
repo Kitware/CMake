@@ -62,9 +62,6 @@
   !defined(@KWSYS_NAMESPACE@_LFS_NO_DEFINE_FILE_OFFSET_BITS)
 #define _FILE_OFFSET_BITS 64
 #endif
-#if 0 && (defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS < 64)
-#error "_FILE_OFFSET_BITS must be defined to at least 64"
-#endif
 #endif
 #endif
 

@@ -8,6 +8,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "cmInstalledFile.h"
@@ -225,10 +226,26 @@ public:
   {
     return this->SourceFileExtensions;
   }
+
+  bool IsSourceExtension(const std::string& ext) const
+  {
+    return this->SourceFileExtensionsSet.find(ext) !=
+      this->SourceFileExtensionsSet.end();
+  }
+
   const std::vector<std::string>& GetHeaderExtensions() const
   {
     return this->HeaderFileExtensions;
   }
+
+  bool IsHeaderExtension(const std::string& ext) const
+  {
+    return this->HeaderFileExtensionsSet.find(ext) !=
+      this->HeaderFileExtensionsSet.end();
+  }
+
+  // Strips the extension (if present and known) from a filename
+  std::string StripExtension(const std::string& file) const;
 
   /**
    * Given a variable name, return its value (as a string).
@@ -486,7 +503,9 @@ private:
   std::string CheckStampList;
   std::string VSSolutionFile;
   std::vector<std::string> SourceFileExtensions;
+  std::unordered_set<std::string> SourceFileExtensionsSet;
   std::vector<std::string> HeaderFileExtensions;
+  std::unordered_set<std::string> HeaderFileExtensionsSet;
   bool ClearBuildSystem;
   bool DebugTryCompile;
   cmFileTimeComparison* FileComparison;

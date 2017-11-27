@@ -150,7 +150,7 @@ public:
     return this->List;
   }
   void SetComment(const std::string& c) { this->Comment = c; }
-  static void PrintString(std::ostream& os, std::string String);
+  static void PrintString(std::ostream& os, const std::string& String);
 
 protected:
   void PrintString(std::ostream& os) const;

@@ -298,8 +298,6 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
             /usr/libx32
             /usr/lib64
             /usr/lib
-            /usr/X11R6/include
-            /usr/X11R6/lib
             /opt/gnome/include
             /opt/gnome/lib
             /opt/openwin/include

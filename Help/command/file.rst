@@ -110,7 +110,7 @@ regular expressions, but much simpler.  If ``RELATIVE`` flag is
 specified, the results will be returned as relative paths to the given
 path.  The results will be ordered lexicographically.
 
-By default ``GLOB`` lists directories - directories are omited in result if
+By default ``GLOB`` lists directories - directories are omitted in result if
 ``LIST_DIRECTORIES`` is set to false.
 
 .. note::

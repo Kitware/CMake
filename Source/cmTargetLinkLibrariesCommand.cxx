@@ -40,6 +40,16 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
     this->Makefile->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(
       args[0]);
   if (!this->Target) {
+    const std::vector<cmTarget*>& importedTargets =
+      this->Makefile->GetOwnedImportedTargets();
+    for (cmTarget* importedTarget : importedTargets) {
+      if (importedTarget->GetName() == args[0]) {
+        this->Target = importedTarget;
+        break;
+      }
+    }
+  }
+  if (!this->Target) {
     cmake::MessageType t = cmake::FATAL_ERROR; // fail by default
     std::ostringstream e;
     e << "Cannot specify link libraries for target \"" << args[0] << "\" "
@@ -228,7 +238,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
     } else {
       // Lookup old-style cache entry if type is unspecified.  So if you
       // do a target_link_libraries(foo optimized bar) it will stay optimized
-      // and not use the lookup.  As there maybe the case where someone has
+      // and not use the lookup.  As there may be the case where someone has
       // specifed that a library is both debug and optimized.  (this check is
       // only there for backwards compatibility when mixing projects built
       // with old versions of CMake and new)
@@ -299,6 +309,14 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       "target_link_libraries");
     return false;
   }
+  if (this->Target->IsImported() &&
+      this->CurrentProcessingState != ProcessingKeywordLinkInterface) {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "IMPORTED library can only be used with the INTERFACE keyword of "
+      "target_link_libraries");
+    return false;
+  }
 
   cmTarget::TLLSignature sig =
     (this->CurrentProcessingState == ProcessingPlainPrivateInterface ||
@@ -354,6 +372,16 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
 
     cmTarget* t =
       this->Makefile->FindLocalNonAliasTarget(this->Target->GetName());
+    if (!t) {
+      const std::vector<cmTarget*>& importedTargets =
+        this->Makefile->GetOwnedImportedTargets();
+      for (cmTarget* importedTarget : importedTargets) {
+        if (importedTarget->GetName() == this->Target->GetName()) {
+          t = importedTarget;
+          break;
+        }
+      }
+    }
     if (!t) {
       std::ostringstream e;
       e << "Attempt to add link library \"" << lib << "\" to target \""

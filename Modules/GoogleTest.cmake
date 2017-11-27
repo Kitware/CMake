@@ -361,9 +361,32 @@ function(gtest_discover_tests TARGET)
     set(_TEST_LIST ${TARGET}_TESTS)
   endif()
 
+  get_property(
+    has_counter
+    TARGET ${TARGET}
+    PROPERTY CTEST_DISCOVERED_TEST_COUNTER
+    SET
+  )
+  if(has_counter)
+    get_property(
+      counter
+      TARGET ${TARGET}
+      PROPERTY CTEST_DISCOVERED_TEST_COUNTER
+    )
+    math(EXPR counter "${counter} + 1")
+  else()
+    set(counter 1)
+  endif()
+  set_property(
+    TARGET ${TARGET}
+    PROPERTY CTEST_DISCOVERED_TEST_COUNTER
+    ${counter}
+  )
+
   # Define rule to generate test list for aforementioned test executable
-  set(ctest_include_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}_include.cmake")
-  set(ctest_tests_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}_tests.cmake")
+  set(ctest_file_base "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}[${counter}]")
+  set(ctest_include_file "${ctest_file_base}_include.cmake")
+  set(ctest_tests_file "${ctest_file_base}_tests.cmake")
   get_property(crosscompiling_emulator
     TARGET ${TARGET}
     PROPERTY CROSSCOMPILING_EMULATOR

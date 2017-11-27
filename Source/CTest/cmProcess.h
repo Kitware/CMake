@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmsys/Process.h"
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -50,7 +51,7 @@ public:
 
 private:
   double Timeout;
-  double StartTime;
+  std::chrono::steady_clock::time_point StartTime;
   double TotalTime;
   cmsysProcess* Process;
   class Buffer : public std::vector<char>

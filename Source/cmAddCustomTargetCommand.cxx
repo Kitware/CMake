@@ -8,7 +8,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmPolicies.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
@@ -160,35 +160,9 @@ bool cmAddCustomTargetCommand::InitialPass(
   if (nameOk) {
     nameOk = targetName.find(':') == std::string::npos;
   }
-  if (!nameOk) {
-    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-    std::ostringstream e;
-    bool issueMessage = false;
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0037)) {
-      case cmPolicies::WARN:
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << "\n";
-        issueMessage = true;
-      case cmPolicies::OLD:
-        break;
-      case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        issueMessage = true;
-        messageType = cmake::FATAL_ERROR;
-    }
-    if (issueMessage) {
-      /* clang-format off */
-      e << "The target name \"" << targetName <<
-          "\" is reserved or not valid for certain "
-          "CMake features, such as generator expressions, and may result "
-          "in undefined behavior.";
-      /* clang-format on */
-      this->Makefile->IssueMessage(messageType, e.str());
-
-      if (messageType == cmake::FATAL_ERROR) {
-        return false;
-      }
-    }
+  if (!nameOk &&
+      !this->Makefile->CheckCMP0037(targetName, cmStateEnums::UTILITY)) {
+    return false;
   }
 
   // Store the last command line finished.
@@ -235,9 +209,9 @@ bool cmAddCustomTargetCommand::InitialPass(
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
   cmTarget* target = this->Makefile->AddUtilityCommand(
-    targetName, excludeFromAll, working_directory.c_str(), byproducts, depends,
-    commandLines, escapeOldStyle, comment, uses_terminal,
-    command_expand_lists);
+    targetName, cmMakefile::TargetOrigin::Project, excludeFromAll,
+    working_directory.c_str(), byproducts, depends, commandLines,
+    escapeOldStyle, comment, uses_terminal, command_expand_lists);
 
   // Add additional user-specified source files to the target.
   target->AddSources(sources);

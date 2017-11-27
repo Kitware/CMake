@@ -16,3 +16,10 @@ check_target_property(tgt custom)
 check_target_property(tgt noexist)
 check_target_property(tgt SOURCE_DIR)
 check_target_property(tgt BINARY_DIR)
+
+add_library(imported_local_tgt SHARED IMPORTED)
+add_library(imported_global_tgt SHARED IMPORTED GLOBAL)
+
+check_target_property(tgt IMPORTED_GLOBAL)
+check_target_property(imported_local_tgt IMPORTED_GLOBAL)
+check_target_property(imported_global_tgt IMPORTED_GLOBAL)

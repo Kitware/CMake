@@ -2,6 +2,6 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 
-# work around an old bug in ITK prior to verison 3.0
+# work around an old bug in ITK prior to version 3.0
 set(TIFF_RIGHT_VERSION 1)
 

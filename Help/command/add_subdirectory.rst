@@ -30,7 +30,7 @@ project that is useful but not necessary, such as a set of examples.
 Typically the subdirectory should contain its own :command:`project`
 command invocation so that a full build system will be generated in the
 subdirectory (such as a VS IDE solution file).  Note that inter-target
-dependencies supercede this exclusion.  If a target built by the
+dependencies supersede this exclusion.  If a target built by the
 parent project depends on a target in the subdirectory, the dependee
 target will be included in the parent project build system to satisfy
 the dependency.

@@ -57,6 +57,7 @@ bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
     builtIns.insert("COMPATIBLE_INTERFACE_STRING");
     builtIns.insert("EXPORT_NAME");
     builtIns.insert("IMPORTED");
+    builtIns.insert("IMPORTED_GLOBAL");
     builtIns.insert("NAME");
     builtIns.insert("TYPE");
   }

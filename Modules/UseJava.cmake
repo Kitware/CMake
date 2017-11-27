@@ -286,7 +286,7 @@
 #
 #    Example:
 #    create_javadoc(my_example_doc
-#      PACKAGES com.exmaple.foo com.example.bar
+#      PACKAGES com.example.foo com.example.bar
 #      SOURCEPATH "${CMAKE_CURRENT_SOURCE_DIR}"
 #      CLASSPATH ${CMAKE_JAVA_INCLUDE_PATH}
 #      WINDOWTITLE "My example"

@@ -1,5 +1,5 @@
 MODULE Available
-! no conent
+! no content
 END MODULE
 
 PROGRAM PPTEST

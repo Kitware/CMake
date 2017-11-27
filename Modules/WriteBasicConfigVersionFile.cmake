@@ -11,7 +11,7 @@
 #
 #   WRITE_BASIC_CONFIG_VERSION_FILE( filename
 #     [VERSION major.minor.patch]
-#     COMPATIBILITY (AnyNewerVersion|SameMajorVersion)
+#     COMPATIBILITY (AnyNewerVersion|SameMajorVersion|SameMinorVersion|ExactVersion)
 #     )
 #
 #

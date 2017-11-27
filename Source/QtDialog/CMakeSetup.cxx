@@ -44,6 +44,10 @@ static void cmAddPluginPath();
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin);
 #endif
 
+#if defined(USE_QWindowsIntegrationPlugin)
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin);
+#endif
+
 int main(int argc, char** argv)
 {
   cmsys::Encoding::CommandLineArguments encoding_args =

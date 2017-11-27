@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <ctype.h>
+#include <iterator>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdlib.h>
@@ -120,6 +121,42 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
     }
   }
   this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace());
+}
+
+bool cmMakefile::CheckCMP0037(std::string const& targetName,
+                              cmStateEnums::TargetType targetType) const
+{
+  cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+  std::ostringstream e;
+  bool issueMessage = false;
+  switch (this->GetPolicyStatus(cmPolicies::CMP0037)) {
+    case cmPolicies::WARN:
+      if (targetType != cmStateEnums::INTERFACE_LIBRARY) {
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << "\n";
+        issueMessage = true;
+      }
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      break;
+    case cmPolicies::NEW:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      issueMessage = true;
+      messageType = cmake::FATAL_ERROR;
+      break;
+  }
+  if (issueMessage) {
+    e << "The target name \"" << targetName
+      << "\" is reserved or not valid for certain "
+         "CMake features, such as generator expressions, and may result "
+         "in undefined behavior.";
+    this->IssueMessage(messageType, e.str());
+
+    if (messageType == cmake::FATAL_ERROR) {
+      return false;
+    }
+  }
+  return true;
 }
 
 cmStringRange cmMakefile::GetIncludeDirectoriesEntries() const
@@ -562,7 +599,7 @@ void cmMakefile::EnforceDirectoryLevelRules() const
         << "\"cmake --help-policy CMP0000\".";
     switch (this->GetPolicyStatus(cmPolicies::CMP0000)) {
       case cmPolicies::WARN:
-        // Warn because the user did not provide a mimimum required
+        // Warn because the user did not provide a minimum required
         // version.
         this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
                                                msg.str(), this->Backtrace);
@@ -970,7 +1007,7 @@ void cmMakefile::AddCustomCommandOldStyle(
 }
 
 cmTarget* cmMakefile::AddUtilityCommand(
-  const std::string& utilityName, bool excludeFromAll,
+  const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
   const std::vector<std::string>& depends, const char* workingDirectory,
   const char* command, const char* arg1, const char* arg2, const char* arg3,
   const char* arg4)
@@ -994,25 +1031,25 @@ cmTarget* cmMakefile::AddUtilityCommand(
   commandLines.push_back(commandLine);
 
   // Call the real signature of this method.
-  return this->AddUtilityCommand(utilityName, excludeFromAll, workingDirectory,
-                                 depends, commandLines);
+  return this->AddUtilityCommand(utilityName, origin, excludeFromAll,
+                                 workingDirectory, depends, commandLines);
 }
 
 cmTarget* cmMakefile::AddUtilityCommand(
-  const std::string& utilityName, bool excludeFromAll,
+  const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
   const char* workingDirectory, const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, bool escapeOldStyle,
   const char* comment, bool uses_terminal, bool command_expand_lists)
 {
   std::vector<std::string> no_byproducts;
-  return this->AddUtilityCommand(utilityName, excludeFromAll, workingDirectory,
-                                 no_byproducts, depends, commandLines,
-                                 escapeOldStyle, comment, uses_terminal,
-                                 command_expand_lists);
+  return this->AddUtilityCommand(utilityName, origin, excludeFromAll,
+                                 workingDirectory, no_byproducts, depends,
+                                 commandLines, escapeOldStyle, comment,
+                                 uses_terminal, command_expand_lists);
 }
 
 cmTarget* cmMakefile::AddUtilityCommand(
-  const std::string& utilityName, bool excludeFromAll,
+  const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
   const char* workingDirectory, const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, bool escapeOldStyle,
@@ -1020,6 +1057,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
 {
   // Create a target instance for this utility.
   cmTarget* target = this->AddNewTarget(cmStateEnums::UTILITY, utilityName);
+  target->SetIsGeneratorProvided(origin == TargetOrigin::Generator);
   if (excludeFromAll) {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
@@ -1913,7 +1951,7 @@ cmSourceGroup* cmMakefile::GetSourceGroup(
 
   // first look for source group starting with the same as the one we want
   for (cmSourceGroup const& srcGroup : this->SourceGroups) {
-    std::string sgName = srcGroup.GetName();
+    std::string const& sgName = srcGroup.GetName();
     if (sgName == name[0]) {
       sg = const_cast<cmSourceGroup*>(&srcGroup);
       break;
@@ -1977,7 +2015,8 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   }
   // build the whole source group path
   for (++i; i <= lastElement; ++i) {
-    sg->AddChild(cmSourceGroup(name[i].c_str(), nullptr, sg->GetFullName()));
+    sg->AddChild(
+      cmSourceGroup(name[i].c_str(), nullptr, sg->GetFullName().c_str()));
     sg = sg->LookupChild(name[i].c_str());
   }
 
@@ -3083,9 +3122,16 @@ void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
 {
   cmSourceFileLocation sfl(this, sourceName);
-  for (cmSourceFile* sf : this->SourceFiles) {
-    if (sf->Matches(sfl)) {
-      return sf;
+  auto name = this->GetCMakeInstance()->StripExtension(sfl.GetName());
+#if defined(_WIN32) || defined(__APPLE__)
+  name = cmSystemTools::LowerCase(name);
+#endif
+  auto sfsi = this->SourceFileSearchIndex.find(name);
+  if (sfsi != this->SourceFileSearchIndex.end()) {
+    for (auto sf : sfsi->second) {
+      if (sf->Matches(sfl)) {
+        return sf;
+      }
     }
   }
   return nullptr;
@@ -3099,6 +3145,14 @@ cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
     sf->SetProperty("GENERATED", "1");
   }
   this->SourceFiles.push_back(sf);
+
+  auto name =
+    this->GetCMakeInstance()->StripExtension(sf->GetLocation().GetName());
+#if defined(_WIN32) || defined(__APPLE__)
+  name = cmSystemTools::LowerCase(name);
+#endif
+  this->SourceFileSearchIndex[name].push_back(sf);
+
   return sf;
 }
 
@@ -3280,15 +3334,6 @@ cmMessenger* cmMakefile::GetMessenger() const
 cmGlobalGenerator* cmMakefile::GetGlobalGenerator() const
 {
   return this->GlobalGenerator;
-}
-
-void cmMakefile::GetTestNames(std::vector<std::string> & testNames)
-{
-  for (auto it = Tests.begin(); it != Tests.end(); ++it) {
-	  testNames.push_back(it->first);
-  }
-
-  return;
 }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -3624,6 +3669,16 @@ cmTest* cmMakefile::GetTest(const std::string& testName) const
     return mi->second;
   }
   return nullptr;
+}
+
+void cmMakefile::GetTests(const std::string& config,
+                          std::vector<cmTest*>& tests)
+{
+  for (auto generator : this->GetTestGenerators()) {
+    if (generator->TestsForConfig(config)) {
+      tests.push_back(generator->GetTest());
+    }
+  }
 }
 
 void cmMakefile::AddCMakeDependFilesFromUser()
@@ -3990,7 +4045,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 
   // Deprecate old policies, especially those that require a lot
   // of code to maintain the old behavior.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0036) {
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0054) {
     this->IssueMessage(cmake::DEPRECATION_WARNING,
                        cmPolicies::GetPolicyDeprecatedWarning(id));
   }
@@ -4143,15 +4198,15 @@ bool cmMakefile::CompileFeatureKnown(cmTarget const* target,
   assert(cmGeneratorExpression::Find(feature) == std::string::npos);
 
   bool isCFeature =
-    std::find_if(cmArrayBegin(C_FEATURES) + 1, cmArrayEnd(C_FEATURES),
-                 cmStrCmp(feature)) != cmArrayEnd(C_FEATURES);
+    std::find_if(cm::cbegin(C_FEATURES) + 1, cm::cend(C_FEATURES),
+                 cmStrCmp(feature)) != cm::cend(C_FEATURES);
   if (isCFeature) {
     lang = "C";
     return true;
   }
   bool isCxxFeature =
-    std::find_if(cmArrayBegin(CXX_FEATURES) + 1, cmArrayEnd(CXX_FEATURES),
-                 cmStrCmp(feature)) != cmArrayEnd(CXX_FEATURES);
+    std::find_if(cm::cbegin(CXX_FEATURES) + 1, cm::cend(CXX_FEATURES),
+                 cmStrCmp(feature)) != cm::cend(CXX_FEATURES);
   if (isCxxFeature) {
     lang = "CXX";
     return true;
@@ -4240,8 +4295,8 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
     // Return true so the caller does not try to lookup the default standard.
     return true;
   }
-  if (std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
-                   cmStrCmp(defaultCStandard)) == cmArrayEnd(C_STANDARDS)) {
+  if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
+                   cmStrCmp(defaultCStandard)) == cm::cend(C_STANDARDS)) {
     std::ostringstream e;
     e << "The CMAKE_C_STANDARD_DEFAULT variable contains an "
          "invalid value: \""
@@ -4261,8 +4316,8 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
     existingCStandard = defaultCStandard;
   }
 
-  if (std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
-                   cmStrCmp(existingCStandard)) == cmArrayEnd(C_STANDARDS)) {
+  if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
+                   cmStrCmp(existingCStandard)) == cm::cend(C_STANDARDS)) {
     std::ostringstream e;
     e << "The C_STANDARD property on target \"" << target->GetName()
       << "\" contained an invalid value: \"" << existingCStandard << "\".";
@@ -4271,23 +4326,23 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
   }
 
   const char* const* existingCIt = existingCStandard
-    ? std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
+    ? std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
                    cmStrCmp(existingCStandard))
-    : cmArrayEnd(C_STANDARDS);
+    : cm::cend(C_STANDARDS);
 
   if (needC11 && existingCStandard &&
-      existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                 cmArrayEnd(C_STANDARDS), cmStrCmp("11"))) {
+      existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
+                                 cm::cend(C_STANDARDS), cmStrCmp("11"))) {
     return false;
   }
   if (needC99 && existingCStandard &&
-      existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                 cmArrayEnd(C_STANDARDS), cmStrCmp("99"))) {
+      existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
+                                 cm::cend(C_STANDARDS), cmStrCmp("99"))) {
     return false;
   }
   if (needC90 && existingCStandard &&
-      existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                 cmArrayEnd(C_STANDARDS), cmStrCmp("90"))) {
+      existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
+                                 cm::cend(C_STANDARDS), cmStrCmp("90"))) {
     return false;
   }
   return true;
@@ -4299,16 +4354,16 @@ bool cmMakefile::IsLaterStandard(std::string const& lang,
 {
   if (lang == "C") {
     const char* const* rhsIt = std::find_if(
-      cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS), cmStrCmp(rhs));
+      cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS), cmStrCmp(rhs));
 
-    return std::find_if(rhsIt, cmArrayEnd(C_STANDARDS), cmStrCmp(lhs)) !=
-      cmArrayEnd(C_STANDARDS);
+    return std::find_if(rhsIt, cm::cend(C_STANDARDS), cmStrCmp(lhs)) !=
+      cm::cend(C_STANDARDS);
   }
   const char* const* rhsIt = std::find_if(
-    cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS), cmStrCmp(rhs));
+    cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS), cmStrCmp(rhs));
 
-  return std::find_if(rhsIt, cmArrayEnd(CXX_STANDARDS), cmStrCmp(lhs)) !=
-    cmArrayEnd(CXX_STANDARDS);
+  return std::find_if(rhsIt, cm::cend(CXX_STANDARDS), cmStrCmp(lhs)) !=
+    cm::cend(CXX_STANDARDS);
 }
 
 bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
@@ -4324,9 +4379,8 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
     // Return true so the caller does not try to lookup the default standard.
     return true;
   }
-  if (std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
-                   cmStrCmp(defaultCxxStandard)) ==
-      cmArrayEnd(CXX_STANDARDS)) {
+  if (std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
+                   cmStrCmp(defaultCxxStandard)) == cm::cend(CXX_STANDARDS)) {
     std::ostringstream e;
     e << "The CMAKE_CXX_STANDARD_DEFAULT variable contains an "
          "invalid value: \""
@@ -4347,9 +4401,8 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
     existingCxxStandard = defaultCxxStandard;
   }
 
-  if (std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
-                   cmStrCmp(existingCxxStandard)) ==
-      cmArrayEnd(CXX_STANDARDS)) {
+  if (std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
+                   cmStrCmp(existingCxxStandard)) == cm::cend(CXX_STANDARDS)) {
     std::ostringstream e;
     e << "The CXX_STANDARD property on target \"" << target->GetName()
       << "\" contained an invalid value: \"" << existingCxxStandard << "\".";
@@ -4358,32 +4411,28 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
   }
 
   const char* const* existingCxxIt = existingCxxStandard
-    ? std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
+    ? std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
                    cmStrCmp(existingCxxStandard))
-    : cmArrayEnd(CXX_STANDARDS);
+    : cm::cend(CXX_STANDARDS);
 
   if (needCxx17 &&
-      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                   cmArrayEnd(CXX_STANDARDS),
-                                   cmStrCmp("17"))) {
+      existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                   cm::cend(CXX_STANDARDS), cmStrCmp("17"))) {
     return false;
   }
   if (needCxx14 &&
-      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                   cmArrayEnd(CXX_STANDARDS),
-                                   cmStrCmp("14"))) {
+      existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                   cm::cend(CXX_STANDARDS), cmStrCmp("14"))) {
     return false;
   }
   if (needCxx11 &&
-      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                   cmArrayEnd(CXX_STANDARDS),
-                                   cmStrCmp("11"))) {
+      existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                   cm::cend(CXX_STANDARDS), cmStrCmp("11"))) {
     return false;
   }
   if (needCxx98 &&
-      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                   cmArrayEnd(CXX_STANDARDS),
-                                   cmStrCmp("98"))) {
+      existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                   cm::cend(CXX_STANDARDS), cmStrCmp("98"))) {
     return false;
   }
   return true;
@@ -4433,9 +4482,9 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
 
   const char* existingCxxStandard = target->GetProperty("CXX_STANDARD");
   if (existingCxxStandard) {
-    if (std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
+    if (std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
                      cmStrCmp(existingCxxStandard)) ==
-        cmArrayEnd(CXX_STANDARDS)) {
+        cm::cend(CXX_STANDARDS)) {
       std::ostringstream e;
       e << "The CXX_STANDARD property on target \"" << target->GetName()
         << "\" contained an invalid value: \"" << existingCxxStandard << "\".";
@@ -4449,9 +4498,9 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
     }
   }
   const char* const* existingCxxIt = existingCxxStandard
-    ? std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
+    ? std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
                    cmStrCmp(existingCxxStandard))
-    : cmArrayEnd(CXX_STANDARDS);
+    : cm::cend(CXX_STANDARDS);
 
   bool setCxx98 = needCxx98 && !existingCxxStandard;
   bool setCxx11 = needCxx11 && !existingCxxStandard;
@@ -4459,23 +4508,22 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
   bool setCxx17 = needCxx17 && !existingCxxStandard;
 
   if (needCxx17 && existingCxxStandard &&
-      existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                   cmArrayEnd(CXX_STANDARDS),
-                                   cmStrCmp("17"))) {
+      existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                   cm::cend(CXX_STANDARDS), cmStrCmp("17"))) {
     setCxx17 = true;
   } else if (needCxx14 && existingCxxStandard &&
-             existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                          cmArrayEnd(CXX_STANDARDS),
+             existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                          cm::cend(CXX_STANDARDS),
                                           cmStrCmp("14"))) {
     setCxx14 = true;
   } else if (needCxx11 && existingCxxStandard &&
-             existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                          cmArrayEnd(CXX_STANDARDS),
+             existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                          cm::cend(CXX_STANDARDS),
                                           cmStrCmp("11"))) {
     setCxx11 = true;
   } else if (needCxx98 && existingCxxStandard &&
-             existingCxxIt < std::find_if(cmArrayBegin(CXX_STANDARDS),
-                                          cmArrayEnd(CXX_STANDARDS),
+             existingCxxIt < std::find_if(cm::cbegin(CXX_STANDARDS),
+                                          cm::cend(CXX_STANDARDS),
                                           cmStrCmp("98"))) {
     setCxx98 = true;
   }
@@ -4532,8 +4580,8 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
 
   const char* existingCStandard = target->GetProperty("C_STANDARD");
   if (existingCStandard) {
-    if (std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
-                     cmStrCmp(existingCStandard)) == cmArrayEnd(C_STANDARDS)) {
+    if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
+                     cmStrCmp(existingCStandard)) == cm::cend(C_STANDARDS)) {
       std::ostringstream e;
       e << "The C_STANDARD property on target \"" << target->GetName()
         << "\" contained an invalid value: \"" << existingCStandard << "\".";
@@ -4547,26 +4595,26 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
     }
   }
   const char* const* existingCIt = existingCStandard
-    ? std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
+    ? std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
                    cmStrCmp(existingCStandard))
-    : cmArrayEnd(C_STANDARDS);
+    : cm::cend(C_STANDARDS);
 
   bool setC90 = needC90 && !existingCStandard;
   bool setC99 = needC99 && !existingCStandard;
   bool setC11 = needC11 && !existingCStandard;
 
   if (needC11 && existingCStandard &&
-      existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                 cmArrayEnd(C_STANDARDS), cmStrCmp("11"))) {
+      existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
+                                 cm::cend(C_STANDARDS), cmStrCmp("11"))) {
     setC11 = true;
   } else if (needC99 && existingCStandard &&
-             existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                        cmArrayEnd(C_STANDARDS),
+             existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
+                                        cm::cend(C_STANDARDS),
                                         cmStrCmp("99"))) {
     setC99 = true;
   } else if (needC90 && existingCStandard &&
-             existingCIt < std::find_if(cmArrayBegin(C_STANDARDS),
-                                        cmArrayEnd(C_STANDARDS),
+             existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
+                                        cm::cend(C_STANDARDS),
                                         cmStrCmp("90"))) {
     setC90 = true;
   }

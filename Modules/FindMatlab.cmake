@@ -356,7 +356,7 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
   endif()
 
 
-  if(${win64} AND ${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "64")
+  if(${win64} AND CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "64")
     set(APPEND_REG "/reg:64")
   else()
     set(APPEND_REG "/reg:32")
@@ -1198,7 +1198,7 @@ if(_numbers_of_matlab_roots EQUAL 0)
 
 
   # At this point, we have no other choice than trying to find it from PATH.
-  # If set by the user, this wont change
+  # If set by the user, this won't change
   find_program(
     _matlab_main_tmp
     NAMES matlab)

@@ -2,6 +2,26 @@
 #if 0
 ! Identify the compiler
 #endif
+#if defined(_MSC_VER)
+       PRINT *, 'INFO:simulate[MSVC]'
+# if _MSC_VER >= 1900
+       PRINT *, 'INFO:simulate_version[019.00]'
+# elif _MSC_VER >= 1800
+       PRINT *, 'INFO:simulate_version[018.00]'
+# elif _MSC_VER >= 1700
+       PRINT *, 'INFO:simulate_version[017.00]'
+# elif _MSC_VER >= 1600
+       PRINT *, 'INFO:simulate_version[016.00]'
+# elif _MSC_VER >= 1500
+       PRINT *, 'INFO:simulate_version[015.00]'
+# elif _MSC_VER >= 1400
+       PRINT *, 'INFO:simulate_version[014.00]'
+# elif _MSC_VER >= 1310
+       PRINT *, 'INFO:simulate_version[013.01]'
+# else
+       PRINT *, 'INFO:simulate_version[013.00]'
+# endif
+#endif
 #if defined(__INTEL_COMPILER) || defined(__ICC)
         PRINT *, 'INFO:compiler[Intel]'
 # define COMPILER_VERSION_MAJOR DEC(__INTEL_COMPILER/100)
@@ -13,27 +33,6 @@
 # endif
 # if defined(__INTEL_COMPILER_BUILD_DATE)
 #  define COMPILER_VERSION_TWEAK DEC(__INTEL_COMPILER_BUILD_DATE)
-# endif
-
-# if defined(_MSC_VER)
-        PRINT *, 'INFO:simulate[MSVC]'
-#  if _MSC_VER >= 1900
-        PRINT *, 'INFO:simulate_version[019.00]'
-#  elif _MSC_VER >= 1800
-        PRINT *, 'INFO:simulate_version[018.00]'
-#  elif _MSC_VER >= 1700
-        PRINT *, 'INFO:simulate_version[017.00]'
-#  elif _MSC_VER >= 1600
-        PRINT *, 'INFO:simulate_version[016.00]'
-#  elif _MSC_VER >= 1500
-        PRINT *, 'INFO:simulate_version[015.00]'
-#  elif _MSC_VER >= 1400
-        PRINT *, 'INFO:simulate_version[014.00]'
-#  elif _MSC_VER >= 1310
-        PRINT *, 'INFO:simulate_version[013.01]'
-#  else
-        PRINT *, 'INFO:simulate_version[013.00]'
-#  endif
 # endif
 #elif defined(__SUNPRO_F95)
         PRINT *, 'INFO:compiler[SunPro]'

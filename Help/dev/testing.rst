@@ -16,7 +16,7 @@ welcome to provide testing machines in order to help keep support for their
 platforms working.
 
 The `CMake Dashboard Scripts Repository`_ provides CTest scripts to drive
-nightly, continous, and experimental testing of CMake.  Use the following
+nightly, continuous, and experimental testing of CMake.  Use the following
 commands to set up a new integration testing client:
 
 .. code-block:: console

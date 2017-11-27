@@ -1,9 +1,9 @@
 " Vim indent file
 " Language:     CMake (ft=cmake)
 " Author:       Andy Cedilnik <andy.cedilnik@kitware.com>
-" Maintainer:   Karthik Krishnan <karthik.krishnan@kitware.com>
-" Last Change:  $Date$
-" Version:      $Revision$
+" Maintainer:   Dimitri Merejkowsky <d.merej@gmail.com>
+" Former Maintainer: Karthik Krishnan <karthik.krishnan@kitware.com>
+" Last Change:  2017 Aug 30
 "
 " Licence:      The CMake license applies to this file. See
 "               https://cmake.org/licensing
@@ -13,6 +13,9 @@ if exists("b:did_indent")
   finish
 endif
 let b:did_indent = 1
+
+let s:keepcpo= &cpo
+set cpo&vim
 
 setlocal indentexpr=CMakeGetIndent(v:lnum)
 setlocal indentkeys+==ENDIF(,ENDFOREACH(,ENDMACRO(,ELSE(,ELSEIF(,ENDWHILE(
@@ -64,20 +67,23 @@ fun! CMakeGetIndent(lnum)
     let ind = ind
   else
     if previous_line =~? cmake_indent_begin_regex
-      let ind = ind + &sw
+      let ind = ind + shiftwidth()
     endif
     if previous_line =~? cmake_indent_open_regex
-      let ind = ind + &sw
+      let ind = ind + shiftwidth()
     endif
   endif
 
   " Subtract
   if this_line =~? cmake_indent_end_regex
-    let ind = ind - &sw
+    let ind = ind - shiftwidth()
   endif
   if previous_line =~? cmake_indent_close_regex
-    let ind = ind - &sw
+    let ind = ind - shiftwidth()
   endif
 
   return ind
 endfun
+
+let &cpo = s:keepcpo
+unlet s:keepcpo

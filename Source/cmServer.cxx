@@ -245,11 +245,10 @@ cmFileMonitor* cmServer::FileMonitor() const
 void cmServer::WriteJsonObject(const Json::Value& jsonValue,
                                const DebugInfo* debug) const
 {
-  uv_rwlock_rdlock(&ConnectionsMutex);
+  cm::shared_lock<cm::shared_mutex> lock(ConnectionsMutex);
   for (auto& connection : this->Connections) {
     WriteJsonObject(connection.get(), jsonValue, debug);
   }
-  uv_rwlock_rdunlock(&ConnectionsMutex);
 }
 
 void cmServer::WriteJsonObject(cmConnection* connection,
@@ -456,14 +455,12 @@ bool cmServerBase::Serve(std::string* errorMessage)
   OnServeStart();
 
   {
-    uv_rwlock_rdlock(&ConnectionsMutex);
+    cm::shared_lock<cm::shared_mutex> lock(ConnectionsMutex);
     for (auto& connection : Connections) {
       if (!connection->OnServeStart(errorMessage)) {
-        uv_rwlock_rdunlock(&ConnectionsMutex);
         return false;
       }
     }
-    uv_rwlock_rdunlock(&ConnectionsMutex);
   }
 
   if (uv_run(&Loop, UV_RUN_DEFAULT) != 0) {
@@ -501,12 +498,11 @@ void cmServerBase::StartShutDown()
   }
 
   {
-    uv_rwlock_wrlock(&ConnectionsMutex);
+    cm::unique_lock<cm::shared_mutex> lock(ConnectionsMutex);
     for (auto& connection : Connections) {
       connection->OnConnectionShuttingDown();
     }
     Connections.clear();
-    uv_rwlock_wrunlock(&ConnectionsMutex);
   }
 
   uv_walk(&Loop, on_walk_to_shutdown, nullptr);
@@ -525,9 +521,6 @@ cmServerBase::cmServerBase(cmConnection* connection)
   (void)err;
   assert(err == 0);
 
-  err = uv_rwlock_init(&ConnectionsMutex);
-  assert(err == 0);
-
   AddNewConnection(connection);
 }
 
@@ -540,14 +533,14 @@ cmServerBase::~cmServerBase()
   }
 
   uv_loop_close(&Loop);
-  uv_rwlock_destroy(&ConnectionsMutex);
 }
 
 void cmServerBase::AddNewConnection(cmConnection* ownedConnection)
 {
-  uv_rwlock_wrlock(&ConnectionsMutex);
-  Connections.emplace_back(ownedConnection);
-  uv_rwlock_wrunlock(&ConnectionsMutex);
+  {
+    cm::unique_lock<cm::shared_mutex> lock(ConnectionsMutex);
+    Connections.emplace_back(ownedConnection);
+  }
   ownedConnection->SetServer(this);
 }
 
@@ -561,11 +554,13 @@ void cmServerBase::OnDisconnect(cmConnection* pConnection)
   auto pred = [pConnection](const std::unique_ptr<cmConnection>& m) {
     return m.get() == pConnection;
   };
-  uv_rwlock_wrlock(&ConnectionsMutex);
-  Connections.erase(
-    std::remove_if(Connections.begin(), Connections.end(), pred),
-    Connections.end());
-  uv_rwlock_wrunlock(&ConnectionsMutex);
+  {
+    cm::unique_lock<cm::shared_mutex> lock(ConnectionsMutex);
+    Connections.erase(
+      std::remove_if(Connections.begin(), Connections.end(), pred),
+      Connections.end());
+  }
+
   if (Connections.empty()) {
     StartShutDown();
   }

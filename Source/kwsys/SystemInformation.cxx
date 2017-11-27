@@ -3633,7 +3633,7 @@ SystemInformationImplementation::GetHostMemoryAvailable(
   // apply resource limits across groups of processes.
   // this is of use on certain SMP systems (eg. SGI UV)
   // where the host has a large amount of ram but a given user's
-  // access to it is severly restricted. The system will
+  // access to it is severely restricted. The system will
   // apply a limit across a set of processes. Units are in KiB.
   if (hostLimitEnvVarName) {
     const char* hostLimitEnvVarValue = getenv(hostLimitEnvVarName);

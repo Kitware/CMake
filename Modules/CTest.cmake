@@ -65,7 +65,7 @@ endfunction()
 include(CTestUseLaunchers)
 
 if(BUILD_TESTING)
-  # Setup some auxilary macros
+  # Setup some auxiliary macros
   macro(SET_IF_NOT_SET var val)
     if(NOT DEFINED "${var}")
       set("${var}" "${val}")

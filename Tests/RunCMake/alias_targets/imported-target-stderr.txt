@@ -1,5 +1,9 @@
-CMake Error at imported-target.cmake:6 \(add_library\):
-  add_library cannot create ALIAS target "alias" because target "foo" is
-  IMPORTED.
+^CMake Error at imported-target.cmake:[0-9]+ \(add_executable\):
+  add_executable cannot create ALIAS target \"alias-test-exe\" because target
+  \"test-exe\" is imported but not globally visible.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+'alias-test-exe' does not exist![?]
+'alias-test-lib' does not exist![?]$

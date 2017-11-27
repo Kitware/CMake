@@ -35,7 +35,7 @@ namespace @KWSYS_NAMESPACE@ {
  * or absolute) pathname.  Otherwise, the dynamic linker searches for the
  * library as follows : see ld.so(8) for further details):
  * Whereas this distinction does not exist on Win32. Therefore ideally you
- * should be doing full path to garantee to have a consistent way of dealing
+ * should be doing full path to guarantee to have a consistent way of dealing
  * with dynamic loading of shared library.
  *
  * \warning the Cygwin implementation do not use the Win32 HMODULE. Put extra
@@ -72,7 +72,7 @@ public:
   static LibraryHandle OpenLibrary(const std::string&);
 
   /** Attempt to detach a dynamic library from the
-   * process.  A value of true is returned if it is sucessful. */
+   * process.  A value of true is returned if it is successful. */
   static int CloseLibrary(LibraryHandle);
 
   /** Find the address of the symbol in the given library. */

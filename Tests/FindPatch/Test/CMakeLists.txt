@@ -70,8 +70,8 @@ index 68059b3..c6f30c2 100644
 )
 
 add_custom_target(TestPatch ALL
-  COMMAND ${Patch_EXECUTABLE} -p1 -i quote-add-author.patch
-  COMMAND Patch::patch -p1 -i quote-add-date.patch
+  COMMAND ${Patch_EXECUTABLE} -p1 -i quote-add-author.patch --binary
+  COMMAND Patch::patch -p1 -i quote-add-date.patch --binary
   COMMAND ${CMAKE_COMMAND} -E compare_files QUOTE.txt QUOTE.txt.baseline
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   )

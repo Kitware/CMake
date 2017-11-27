@@ -151,7 +151,7 @@ macro (QT4_GENERATE_MOC infile outfile )
       set(moc_target ${ARGV3})
    endif()
    QT4_CREATE_MOC_COMMAND(${abs_infile} ${_outfile} "${moc_flags}" "" "${moc_target}")
-   set_source_files_properties(${outfile} PROPERTIES SKIP_AUTOMOC TRUE)  # dont run automoc on this file
+   set_source_files_properties(${outfile} PROPERTIES SKIP_AUTOMOC TRUE)  # don't run automoc on this file
 endmacro ()
 
 

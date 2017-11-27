@@ -145,7 +145,7 @@
 #
 # Version 1.3 (8/19/10) (CMake 2.8.3)
 #     Included patch by Simone Rossetto to check if either Python or Perl
-#     are present in the system.  Whichever intepreter that is detected
+#     are present in the system.  Whichever interpreter that is detected
 #     is now used to run the test generator program.  If both interpreters
 #     are detected, the CXXTEST_USE_PYTHON variable is obeyed.
 #

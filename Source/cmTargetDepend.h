@@ -16,7 +16,7 @@ class cmTargetDepend
   cmGeneratorTarget const* Target;
 
   // The set order depends only on the Target, so we use
-  // mutable members to acheive a map with set syntax.
+  // mutable members to achieve a map with set syntax.
   mutable bool Link;
   mutable bool Util;
 

@@ -1,9 +1,5 @@
 include(RunCMake)
 
-if (RunCMake_GENERATOR MATCHES "Visual Studio")
-    set(RunCMake-stderr-file CompileOptions-stderr-VS.txt)
-    run_cmake(CompileOptions)
-endif()
 if (RunCMake_GENERATOR STREQUAL "Xcode")
     set(RunCMake-stderr-file CompileDefinitions-stderr-Xcode.txt)
     run_cmake(CompileDefinitions)

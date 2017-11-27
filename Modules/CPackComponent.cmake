@@ -66,7 +66,7 @@
 #  the component differently depending on the value of this variable:
 #
 #  * ONE_PER_GROUP (default): creates one package file per component group
-#  * ALL_COMPONENTS_IN_ONE : creates a single package with all (requested) component
+#  * ALL_COMPONENTS_IN_ONE : creates a single package with all (requested) components
 #  * IGNORE : creates one package per component, i.e. IGNORE component group
 #
 #  One can specify different grouping for different CPack generator by

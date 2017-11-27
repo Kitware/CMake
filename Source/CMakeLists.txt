@@ -43,18 +43,7 @@ if(WIN32)
 
   # minimize windows.h content
   add_definitions(-DWIN32_LEAN_AND_MEAN)
-
-  # version support for generated exes
-  configure_file(
-    "${CMake_SOURCE_DIR}/Source/cmakeversion.rc.in"
-    "${CMake_BINARY_DIR}/Source/cmakeversion.rc"
-    )
-
-    set(VERSION_RC_FILE "${CMake_BINARY_DIR}/Source/cmakeversion.rc")
 endif()
-
-set(CMAKE_VERSION "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
-set(CMAKE_SOVERSION "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
 
 # configure the .dox.in file
 if(CMake_BUILD_DEVELOPER_REFERENCE)
@@ -227,6 +216,8 @@ set(SRCS
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmFortranParserImpl.cxx
+  cmFSPermissions.cxx
+  cmFSPermissions.h
   cmGeneratedFileStream.cxx
   cmGeneratorExpressionContext.cxx
   cmGeneratorExpressionContext.h
@@ -320,11 +311,14 @@ set(SRCS
   cmPropertyMap.h
   cmQtAutoGen.cxx
   cmQtAutoGen.h
-  cmQtAutoGenDigest.h
+  cmQtAutoGenerator.cxx
+  cmQtAutoGenerator.h
   cmQtAutoGeneratorInitializer.cxx
   cmQtAutoGeneratorInitializer.h
-  cmQtAutoGenerators.cxx
-  cmQtAutoGenerators.h
+  cmQtAutoGeneratorMocUic.cxx
+  cmQtAutoGeneratorMocUic.h
+  cmQtAutoGeneratorRcc.cxx
+  cmQtAutoGeneratorRcc.h
   cmRST.cxx
   cmRST.h
   cmScriptGenerator.h
@@ -604,6 +598,7 @@ set(SRCS
   cm_utf8.c
   cm_codecvt.hxx
   cm_codecvt.cxx
+  cm_thread.hxx
   )
 
 SET_PROPERTY(SOURCE cmProcessOutput.cxx APPEND PROPERTY COMPILE_DEFINITIONS
@@ -734,11 +729,9 @@ set(_tools)
 
 if(WIN32 AND NOT CYGWIN)
   set_source_files_properties(cmcldeps.cxx PROPERTIES COMPILE_DEFINITIONS _WIN32_WINNT=0x0501)
-  add_executable(cmcldeps cmcldeps.cxx ${MANIFEST_FILE} ${VERSION_RC_FILE})
+  add_executable(cmcldeps cmcldeps.cxx ${MANIFEST_FILE})
   list(APPEND _tools cmcldeps)
   target_link_libraries(cmcldeps CMakeLib)
-  set_target_properties(cmcldeps PROPERTIES VERSION ${CMAKE_VERSION})
-  set_target_properties(cmcldeps PROPERTIES SOVERSION ${CMAKE_SOVERSION})
 endif()
 
 foreach(v CURL_CA_BUNDLE CURL_CA_PATH)
@@ -928,7 +921,7 @@ if(UNIX)
     # OpenBSD and also Linux and OSX. Look for the header and
     # the library; it's a warning on FreeBSD if they're not
     # found, and informational on other platforms.
-    find_path(FREEBSD_PKG_INCLUDE_DIRS "pkg.h" PATHS /usr/local)
+    find_path(FREEBSD_PKG_INCLUDE_DIRS "pkg.h")
     if(FREEBSD_PKG_INCLUDE_DIRS)
       find_library(FREEBSD_PKG_LIBRARIES
         pkg
@@ -1031,11 +1024,9 @@ if(APPLE)
 endif()
 
 # Build CMake executable
-add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h ${MANIFEST_FILE} ${VERSION_RC_FILE})
+add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h ${MANIFEST_FILE})
 list(APPEND _tools cmake)
 target_link_libraries(cmake CMakeLib)
-set_target_properties(cmake PROPERTIES VERSION ${CMAKE_VERSION})
-set_target_properties(cmake PROPERTIES SOVERSION ${CMAKE_SOVERSION})
 
 add_library(CMakeServerLib
   cmConnection.h cmConnection.cxx
@@ -1049,18 +1040,14 @@ target_link_libraries(CMakeServerLib CMakeLib)
 target_link_libraries(cmake CMakeServerLib)
 
 # Build CTest executable
-add_executable(ctest ctest.cxx ${MANIFEST_FILE} ${VERSION_RC_FILE})
+add_executable(ctest ctest.cxx ${MANIFEST_FILE})
 list(APPEND _tools ctest)
 target_link_libraries(ctest CTestLib)
-set_target_properties(ctest PROPERTIES VERSION ${CMAKE_VERSION})
-set_target_properties(ctest PROPERTIES SOVERSION ${CMAKE_SOVERSION})
 
 # Build CPack executable
-add_executable(cpack CPack/cpack.cxx ${MANIFEST_FILE} ${VERSION_RC_FILE})
+add_executable(cpack CPack/cpack.cxx ${MANIFEST_FILE})
 list(APPEND _tools cpack)
 target_link_libraries(cpack CPackLib)
-set_target_properties(cpack PROPERTIES VERSION ${CMAKE_VERSION})
-set_target_properties(cpack PROPERTIES SOVERSION ${CMAKE_SOVERSION})
 
 # Curses GUI
 if(BUILD_CursesDialog)
@@ -1075,6 +1062,19 @@ endif()
 
 include (${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 include (${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
+
+if(WIN32)
+  # Add Windows executable version information.
+  configure_file("CMakeVersion.rc.in" "CMakeVersion.rc" @ONLY)
+
+  # We use a separate object library for this to work around a limitation of
+  # MinGW's windres tool with spaces in the path to the include directories.
+  add_library(CMakeVersion OBJECT "${CMAKE_CURRENT_BINARY_DIR}/CMakeVersion.rc")
+  set_property(TARGET CMakeVersion PROPERTY INCLUDE_DIRECTORIES "")
+  foreach(_tool ${_tools})
+    target_sources(${_tool} PRIVATE $<TARGET_OBJECTS:CMakeVersion>)
+  endforeach()
+endif()
 
 # Install tools
 

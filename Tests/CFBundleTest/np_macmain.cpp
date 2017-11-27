@@ -4,7 +4,7 @@
   Based on the default np_macmain.cpp from FireBreath
   http://firebreath.googlecode.com
 
-  This file has been stripped to prevent it from accidently
+  This file has been stripped to prevent it from accidentally
   doing anything useful.
 \***********************************************************/
 

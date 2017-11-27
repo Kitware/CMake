@@ -198,8 +198,7 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
   std::map<std::string, cmSourceFile*>& cFiles,
   std::set<std::string>& otherFiles)
 {
-  const std::vector<std::string>& srcExts =
-    this->GlobalGenerator->GetCMakeInstance()->GetSourceExtensions();
+  auto cm = this->GlobalGenerator->GetCMakeInstance();
 
   std::string projectType;
   switch (gt->GetType()) {
@@ -233,12 +232,7 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
         std::string lang = s->GetLanguage();
         if (lang == "C" || lang == "CXX") {
           std::string const& srcext = s->GetExtension();
-          for (std::string const& ext : srcExts) {
-            if (srcext == ext) {
-              isCFile = true;
-              break;
-            }
-          }
+          isCFile = cm->IsSourceExtension(srcext);
         }
 
         // then put it accordingly into one of the two containers

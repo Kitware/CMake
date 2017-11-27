@@ -49,14 +49,6 @@ find_path(GDAL_INCLUDE_DIR gdal.h
   PATH_SUFFIXES
      include/gdal
      include/GDAL
-     include
-  PATHS
-      ~/Library/Frameworks/gdal.framework/Headers
-      /Library/Frameworks/gdal.framework/Headers
-      /sw # Fink
-      /opt/local # DarwinPorts
-      /opt/csw # Blastwave
-      /opt
 )
 
 if(UNIX)
@@ -68,12 +60,6 @@ if(UNIX)
         HINTS
           ENV GDAL_DIR
           ENV GDAL_ROOT
-        PATH_SUFFIXES bin
-        PATHS
-            /sw # Fink
-            /opt/local # DarwinPorts
-            /opt/csw # Blastwave
-            /opt
     )
 
     if(GDAL_CONFIG)
@@ -93,13 +79,6 @@ find_library(GDAL_LIBRARY
      ENV GDAL_DIR
      ENV GDAL_ROOT
      ${_gdal_libpath}
-  PATH_SUFFIXES lib
-  PATHS
-    /sw
-    /opt/local
-    /opt/csw
-    /opt
-    /usr/freeware
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)

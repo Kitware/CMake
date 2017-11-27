@@ -30,6 +30,11 @@ public:
 
   void Compute(cmLocalGenerator* lg);
 
+  /** Test if this generator installs the test for a given configuration.  */
+  bool TestsForConfig(const std::string& config);
+
+  cmTest* GetTest() const;
+
 protected:
   void GenerateScriptConfigs(std::ostream& os, Indent indent) override;
   void GenerateScriptActions(std::ostream& os, Indent indent) override;

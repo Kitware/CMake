@@ -38,12 +38,14 @@ codecvt::codecvt(Encoding e)
   }
 }
 
-codecvt::~codecvt(){};
+codecvt::~codecvt()
+{
+}
 
 bool codecvt::do_always_noconv() const throw()
 {
   return m_noconv;
-};
+}
 
 std::codecvt_base::result codecvt::do_out(mbstate_t& state, const char* from,
                                           const char* from_end,
@@ -122,7 +124,7 @@ std::codecvt_base::result codecvt::do_out(mbstate_t& state, const char* from,
   static_cast<void>(to_next);
   return std::codecvt_base::noconv;
 #endif
-};
+}
 
 std::codecvt_base::result codecvt::do_unshift(mbstate_t& state, char* to,
                                               char* to_end,
@@ -143,7 +145,7 @@ std::codecvt_base::result codecvt::do_unshift(mbstate_t& state, char* to,
   static_cast<void>(to_end);
   return std::codecvt_base::ok;
 #endif
-};
+}
 
 #if defined(_WIN32)
 std::codecvt_base::result codecvt::Decode(mbstate_t& state, int size,
@@ -235,9 +237,9 @@ void codecvt::BufferPartial(mbstate_t& state, int size,
 int codecvt::do_max_length() const throw()
 {
   return 4;
-};
+}
 
 int codecvt::do_encoding() const throw()
 {
   return 0;
-};
+}

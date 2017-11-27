@@ -214,7 +214,7 @@ function(_HDF5_test_regular_compiler_C success version is_parallel)
     )
     set(${version} ${CMAKE_MATCH_1})
     if(CMAKE_MATCH_3)
-      set(${version} ${HDF5_CXX_VERSION}.${CMAKE_MATCH_3})
+      set(${version} ${HDF5_C_VERSION}.${CMAKE_MATCH_3})
     endif()
     set(${version} ${${version}} PARENT_SCOPE)
 
@@ -479,7 +479,7 @@ if(NOT HDF5_FOUND AND NOT HDF5_NO_FIND_PACKAGE_CONFIG_FILE)
             #if we detect that occurrence clear the suffix
             if(_suffix AND NOT TARGET ${HDF5_${_lang}_TARGET}${_suffix})
               if(NOT TARGET ${HDF5_${_lang}_TARGET})
-                #cant find this component with or without the suffix
+                #can't find this component with or without the suffix
                 #so bail out, and let the following locate HDF5
                 set(HDF5_FOUND FALSE)
                 break()
