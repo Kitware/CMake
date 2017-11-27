@@ -432,8 +432,6 @@ bool cmCTestRunTest::StartTest(size_t total)
     return false;
   }
 
-  this->ComputeArguments();
-  std::vector<std::string>& args = this->TestProperties->Args;
   this->TestResult.Properties = this->TestProperties;
   this->TestResult.ExecutionTime = 0;
   this->TestResult.CompressOutput = false;
@@ -444,6 +442,10 @@ bool cmCTestRunTest::StartTest(size_t total)
   this->TestResult.Name = this->TestProperties->Name;
   this->TestResult.Path = this->TestProperties->Directory;
 
+  // Check for failed fixture dependencies before we even look at the command
+  // arguments because if we are not going to run the test, the command and
+  // its arguments are irrelevant. This matters for the case where a fixture
+  // dependency might be creating the executable we want to run.
   if (!this->FailedDependencies.empty()) {
     this->TestProcess = new cmProcess;
     std::string msg = "Failed test dependencies:";
@@ -459,6 +461,8 @@ bool cmCTestRunTest::StartTest(size_t total)
     return false;
   }
 
+  this->ComputeArguments();
+  std::vector<std::string>& args = this->TestProperties->Args;
   if (args.size() >= 2 && args[1] == "NOT_AVAILABLE") {
     this->TestProcess = new cmProcess;
     std::string msg;
