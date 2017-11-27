@@ -828,18 +828,21 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
     }
     std::string genName = gg->GetName();
     if (genName.find("Visual Studio") != std::string::npos) {
-      reportError(context, content->GetOriginalExpression(),
-                  "$<COMPILE_LANGUAGE:...> may not be used with Visual Studio "
-                  "generators.");
-      return std::string();
-    }
-    if (genName.find("Xcode") != std::string::npos) {
       if (dagChecker && (dagChecker->EvaluatingCompileDefinitions() ||
                          dagChecker->EvaluatingIncludeDirectories())) {
         reportError(
           context, content->GetOriginalExpression(),
-          "$<COMPILE_LANGUAGE:...> may only be used with COMPILE_OPTIONS "
-          "with the Xcode generator.");
+          "$<COMPILE_LANGUAGE:...> may only be used for COMPILE_OPTIONS "
+          "and file(GENERATE) with the Visual Studio generator.");
+        return std::string();
+      }
+    } else if (genName.find("Xcode") != std::string::npos) {
+      if (dagChecker && (dagChecker->EvaluatingCompileDefinitions() ||
+                         dagChecker->EvaluatingIncludeDirectories())) {
+        reportError(
+          context, content->GetOriginalExpression(),
+          "$<COMPILE_LANGUAGE:...> may only be used for COMPILE_OPTIONS "
+          "and file(GENERATE) with the Xcode generator.");
         return std::string();
       }
     } else {

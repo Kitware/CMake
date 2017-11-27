@@ -32,6 +32,8 @@ add_executable(CudaOnlyWithDefs ${main})
 
 target_compile_options(CudaOnlyWithDefs
   PRIVATE
+    -DCOMPILE_LANG_$<COMPILE_LANGUAGE>
+    -DLANG_IS_CUDA=$<COMPILE_LANGUAGE:CUDA>
     -Xcompiler=-DHOST_DEFINE
     $<$<CONFIG:DEBUG>:$<BUILD_INTERFACE:${debug_compile_flags}>>
   )
