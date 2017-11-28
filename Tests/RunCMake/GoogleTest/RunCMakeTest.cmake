@@ -41,6 +41,13 @@ function(run_GoogleTest)
     -L TEST2
     --no-label-summary
   )
+
+  run_cmake_command(GoogleTest-test-missing
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    -R timeout
+    --no-label-summary
+  )
 endfunction()
 
 run_GoogleTest()
