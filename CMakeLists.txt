@@ -2,7 +2,11 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideC.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideCXX.cmake)
 project(CMake)
+unset(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX)
+unset(CMAKE_USER_MAKE_RULES_OVERRIDE_C)
 
 # Make sure we can find internal find_package modules only used for
 # building CMake and not for shipping externally

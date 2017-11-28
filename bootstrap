@@ -982,6 +982,9 @@ if [ -z "${CC}" -a -z "${CXX}" ]; then
 fi
 
 thread_flags=''
+case "${cmake_system}" in
+  *AIX*)   thread_flags='-pthread' ;;
+esac
 
 #-----------------------------------------------------------------------------
 # Test C compiler
@@ -1001,6 +1004,10 @@ TMPFILE=`cmake_tmp_file`
 echo '
 #ifdef __cplusplus
 # error "The CMAKE_C_COMPILER is set to a C++ compiler"
+#endif
+
+#if defined(_AIX) && defined(__GNUC__) && !defined(_THREAD_SAFE)
+#error "On AIX with GNU we need the -pthread flag."
 #endif
 
 #if defined(__sun) && __STDC_VERSION__ < 199901L
@@ -1064,6 +1071,10 @@ echo '
 
 #if __cplusplus < 201103L
 #error "Compiler is not in a mode aware of C++11."
+#endif
+
+#if defined(_AIX) && defined(__GNUC__) && !defined(_THREAD_SAFE)
+#error "On AIX with GNU we need the -pthread flag."
 #endif
 
 #if defined(__SUNPRO_CC) && __SUNPRO_CC < 0x5140
@@ -1326,7 +1337,7 @@ else
   uv_c_flags="${uv_c_flags} -DCMAKE_BOOTSTRAP"
   case "${cmake_system}" in
     *AIX*)
-      uv_c_flags="${uv_c_flags} -D_ALL_SOURCE -D_XOPEN_SOURCE=500 -D_LINUX_SOURCE_COMPAT -D_THREAD_SAFE"
+      uv_c_flags="${uv_c_flags} -D_ALL_SOURCE -D_XOPEN_SOURCE=500 -D_LINUX_SOURCE_COMPAT"
       libs="${libs} -lperfstat"
       ;;
     *Darwin*)
