@@ -9,7 +9,6 @@
 #include <chrono>
 #include <ostream>
 #include <string>
-#include <type_traits>
 
 cmCTestConfigureHandler::cmCTestConfigureHandler()
 {

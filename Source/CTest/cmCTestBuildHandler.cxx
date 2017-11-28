@@ -17,7 +17,6 @@
 #include <set>
 #include <stdlib.h>
 #include <string.h>
-#include <type_traits>
 
 static const char* cmCTestErrorMatches[] = {
   "^[Bb]us [Ee]rror",

@@ -16,7 +16,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <type_traits>
 
 #include "cmAlgorithms.h"
 #include "cmCTest.h"

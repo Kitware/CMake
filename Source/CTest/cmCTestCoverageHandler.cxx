@@ -27,7 +27,6 @@
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <type_traits>
 #include <utility>
 
 class cmMakefile;

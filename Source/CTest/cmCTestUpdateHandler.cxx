@@ -20,7 +20,6 @@
 #include <chrono>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
-#include <type_traits>
 
 static const char* cmCTestUpdateHandlerUpdateStrings[] = {
   "Unknown", "CVS", "SVN", "BZR", "GIT", "HG", "P4"

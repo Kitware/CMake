@@ -4,7 +4,6 @@
 
 #include "cmProcessOutput.h"
 #include <iostream>
-#include <type_traits>
 
 cmProcess::cmProcess()
 {
