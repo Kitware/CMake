@@ -9,18 +9,32 @@ function(run_GoogleTest)
   endif()
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
   run_cmake(GoogleTest)
+
   run_cmake_command(GoogleTest-build
     ${CMAKE_COMMAND}
     --build .
     --config Debug
+    --target fake_gtest
   )
+
+  set(RunCMake_TEST_OUTPUT_MERGE 1)
+  run_cmake_command(GoogleTest-timeout
+    ${CMAKE_COMMAND}
+    --build .
+    --config Debug
+    --target timeout_test
+  )
+  set(RunCMake_TEST_OUTPUT_MERGE 0)
+
   run_cmake_command(GoogleTest-test1
     ${CMAKE_CTEST_COMMAND}
     -C Debug
     -L TEST1
     --no-label-summary
   )
+
   run_cmake_command(GoogleTest-test2
     ${CMAKE_CTEST_COMMAND}
     -C Debug

@@ -217,6 +217,14 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     executable is being used in multiple calls to ``gtest_discover_tests()``.
     Note that this variable is only available in CTest.
 
+  ``TIMEOUT num``
+    Specifies how long (in seconds) CMake will wait for the test to enumerate
+    available tests.  If the test takes longer than this, discovery (and your
+    build) will fail.  Most test executables will enumerate their tests very
+    quickly, but under some exceptional circumstances, a test may require a
+    longer timeout.  The default is 5.  See also the ``TIMEOUT`` option of
+    :command:`execute_process`.
+
 #]=======================================================================]
 
 #------------------------------------------------------------------------------
@@ -349,7 +357,7 @@ function(gtest_discover_tests TARGET)
   cmake_parse_arguments(
     ""
     "NO_PRETTY_TYPES;NO_PRETTY_VALUES"
-    "TEST_PREFIX;TEST_SUFFIX;WORKING_DIRECTORY;TEST_LIST"
+    "TEST_PREFIX;TEST_SUFFIX;WORKING_DIRECTORY;TEST_LIST;TIMEOUT"
     "EXTRA_ARGS;PROPERTIES"
     ${ARGN}
   )
@@ -359,6 +367,9 @@ function(gtest_discover_tests TARGET)
   endif()
   if(NOT _TEST_LIST)
     set(_TEST_LIST ${TARGET}_TESTS)
+  endif()
+  if(NOT _TIMEOUT)
+    set(_TIMEOUT 5)
   endif()
 
   get_property(
@@ -407,6 +418,7 @@ function(gtest_discover_tests TARGET)
             -D "NO_PRETTY_VALUES=${_NO_PRETTY_VALUES}"
             -D "TEST_LIST=${_TEST_LIST}"
             -D "CTEST_FILE=${ctest_tests_file}"
+            -D "TEST_DISCOVERY_TIMEOUT=${_TIMEOUT}"
             -P "${_GOOGLETEST_DISCOVER_TESTS_SCRIPT}"
     VERBATIM
   )
