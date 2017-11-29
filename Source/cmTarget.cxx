@@ -239,6 +239,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("COMPILE_PDB_OUTPUT_DIRECTORY", nullptr);
     this->SetPropertyDefault("Fortran_FORMAT", nullptr);
     this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", nullptr);
+    this->SetPropertyDefault("Fortran_COMPILER_LAUNCHER", nullptr);
     this->SetPropertyDefault("GNUtoMS", nullptr);
     this->SetPropertyDefault("OSX_ARCHITECTURES", nullptr);
     this->SetPropertyDefault("IOS_INSTALL_COMBINED", nullptr);
