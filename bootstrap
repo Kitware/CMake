@@ -981,6 +981,11 @@ if [ -z "${CC}" -a -z "${CXX}" ]; then
   cmake_toolchain_detect
 fi
 
+thread_flags=''
+case "${cmake_system}" in
+  *AIX*)   thread_flags='-pthread' ;;
+esac
+
 #-----------------------------------------------------------------------------
 # Test C compiler
 cmake_c_compiler=
@@ -1001,6 +1006,10 @@ echo '
 # error "The CMAKE_C_COMPILER is set to a C++ compiler"
 #endif
 
+#if defined(_AIX) && defined(__GNUC__) && !defined(_THREAD_SAFE)
+#error "On AIX with GNU we need the -pthread flag."
+#endif
+
 #if defined(__sun) && __STDC_VERSION__ < 199901L
 #error "On Solaris we need C99."
 #endif
@@ -1014,16 +1023,18 @@ int main(int argc, char* argv[])
 }
 ' > "${TMPFILE}.c"
 for std in 11 99 90; do
-  try_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" C \"${std}\"`"
+  std_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" C \"${std}\"`"
   for compiler in ${cmake_c_compilers}; do
-    for flag in '' $try_flags; do
-      echo "Checking whether '${compiler} ${cmake_c_flags} ${flag}' works." >> cmake_bootstrap.log 2>&1
-      if cmake_try_run "${compiler}" "${cmake_c_flags} ${flag}" \
-        "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
-        cmake_c_compiler="${compiler}"
-        cmake_c_flags="${cmake_c_flags} ${flag}"
-        break 3
-      fi
+    for std_flag in '' $std_flags; do
+      for thread_flag in '' $thread_flags; do
+        echo "Checking whether '${compiler} ${cmake_c_flags} ${std_flag} ${thread_flag}' works." >> cmake_bootstrap.log 2>&1
+        if cmake_try_run "${compiler}" "${cmake_c_flags} ${std_flag} ${thread_flag}" \
+          "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
+          cmake_c_compiler="${compiler}"
+          cmake_c_flags="${cmake_c_flags} ${std_flag} ${thread_flag}"
+          break 3
+        fi
+      done
     done
   done
 done
@@ -1062,6 +1073,10 @@ echo '
 #error "Compiler is not in a mode aware of C++11."
 #endif
 
+#if defined(_AIX) && defined(__GNUC__) && !defined(_THREAD_SAFE)
+#error "On AIX with GNU we need the -pthread flag."
+#endif
+
 #if defined(__SUNPRO_CC) && __SUNPRO_CC < 0x5140
 #error "SunPro <= 5.13 mode not supported due to bug in move semantics."
 #endif
@@ -1081,16 +1096,18 @@ int main()
 }
 ' > "${TMPFILE}.cxx"
 for std in 17 14 11; do
-  try_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" CXX \"${std}\"`"
+  std_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" CXX \"${std}\"`"
   for compiler in ${cmake_cxx_compilers}; do
-    for flag in '' $try_flags; do
-      echo "Checking whether '${compiler} ${cmake_cxx_flags} ${flag}' works." >> cmake_bootstrap.log 2>&1
-      if cmake_try_run "${compiler}" "${cmake_cxx_flags} ${flag}" \
-        "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-        cmake_cxx_compiler="${compiler}"
-        cmake_cxx_flags="${cmake_cxx_flags} ${flag} "
-        break 3
-      fi
+    for std_flag in '' $std_flags; do
+      for thread_flag in '' $thread_flags; do
+        echo "Checking whether '${compiler} ${cmake_cxx_flags} ${std_flag} ${thread_flag}' works." >> cmake_bootstrap.log 2>&1
+        if cmake_try_run "${compiler}" "${cmake_cxx_flags} ${std_flag} ${thread_flag}" \
+          "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+          cmake_cxx_compiler="${compiler}"
+          cmake_cxx_flags="${cmake_cxx_flags} ${std_flag} ${thread_flag} "
+          break 3
+        fi
+      done
     done
   done
 done
@@ -1320,7 +1337,7 @@ else
   uv_c_flags="${uv_c_flags} -DCMAKE_BOOTSTRAP"
   case "${cmake_system}" in
     *AIX*)
-      uv_c_flags="${uv_c_flags} -D_ALL_SOURCE -D_XOPEN_SOURCE=500 -D_LINUX_SOURCE_COMPAT -D_THREAD_SAFE"
+      uv_c_flags="${uv_c_flags} -D_ALL_SOURCE -D_XOPEN_SOURCE=500 -D_LINUX_SOURCE_COMPAT"
       libs="${libs} -lperfstat"
       ;;
     *Darwin*)
