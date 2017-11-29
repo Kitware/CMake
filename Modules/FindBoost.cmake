@@ -429,9 +429,7 @@ endfunction()
 # Guesses Boost's compiler prefix used in built library names
 # Returns the guess by setting the variable pointed to by _ret
 function(_Boost_GUESS_COMPILER_PREFIX _ret)
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "Intel"
-      OR CMAKE_CXX_COMPILER MATCHES "icl"
-      OR CMAKE_CXX_COMPILER MATCHES "icpc")
+  if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xIntel")
     if(WIN32)
       set (_boost_COMPILER "-iw")
     else()
@@ -1395,8 +1393,8 @@ endif()
 #           support libraries
 if(WIN32 AND Boost_USE_DEBUG_RUNTIME)
   if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC"
-          OR "${CMAKE_CXX_COMPILER}" MATCHES "icl"
-          OR "${CMAKE_CXX_COMPILER}" MATCHES "icpc")
+          OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xClang"
+          OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xIntel")
     string(APPEND _boost_DEBUG_ABI_TAG "g")
   endif()
 endif()
