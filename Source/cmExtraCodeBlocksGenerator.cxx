@@ -642,6 +642,13 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
 // Translate the cmake compiler id into the CodeBlocks compiler id
 std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
 {
+  // allow the user to overwrite the detected compiler
+  std::string userCompiler =
+    mf->GetSafeDefinition("CMAKE_CODEBLOCKS_COMPILER_ID");
+  if (!userCompiler.empty()) {
+    return userCompiler;
+  }
+
   // figure out which language to use
   // for now care only for C, C++, and Fortran
 
