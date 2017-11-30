@@ -712,10 +712,16 @@ static Json::Value DumpSourceFilesList(
       fileData.IncludePathList = ld.IncludePathList;
 
       std::set<std::string> defines;
-      lg->AppendDefines(defines, file->GetProperty("COMPILE_DEFINITIONS"));
+      if (const char* defs = file->GetProperty("COMPILE_DEFINITIONS")) {
+        lg->AppendDefines(defines, genexInterpreter.Evaluate(defs));
+      }
+
       const std::string defPropName =
         "COMPILE_DEFINITIONS_" + cmSystemTools::UpperCase(config);
-      lg->AppendDefines(defines, file->GetProperty(defPropName));
+      if (const char* config_defs = file->GetProperty(defPropName)) {
+        lg->AppendDefines(defines, genexInterpreter.Evaluate(config_defs));
+      }
+
       defines.insert(ld.Defines.begin(), ld.Defines.end());
 
       fileData.SetDefines(defines);

@@ -258,8 +258,13 @@ add_custom_target(check-part4 ALL
   VERBATIM
   )
 
-add_executable(srcgenex srcgenex.c)
-set_property(SOURCE srcgenex.c PROPERTY COMPILE_FLAGS "-DNAME=$<TARGET_PROPERTY:NAME>")
+#-----------------------------------------------------------------------------
+# Cover source file properties with generator expressions.
+add_executable(srcgenex_flags srcgenex_flags.c)
+set_property(SOURCE srcgenex_flags.c PROPERTY COMPILE_FLAGS "-DNAME=$<TARGET_PROPERTY:NAME>")
+
+add_executable(srcgenex_defs srcgenex_defs.c)
+set_property(SOURCE srcgenex_defs.c PROPERTY COMPILE_DEFINITIONS NAME=$<TARGET_PROPERTY:NAME>)
 
 #-----------------------------------------------------------------------------
 # Cover test properties with generator expressions.

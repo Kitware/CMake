@@ -19,6 +19,7 @@ if (NOT XCODE_VERSION VERSION_LESS 6)
 endif()
 
 run_cmake(PerConfigPerSourceFlags)
+run_cmake(PerConfigPerSourceDefinitions)
 
 # Use a single build tree for a few tests without cleaning.
 

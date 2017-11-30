@@ -177,13 +177,20 @@ std::string cmNinjaTargetGenerator::ComputeDefines(cmSourceFile const* source,
                                                    const std::string& language)
 {
   std::set<std::string> defines;
-  this->LocalGenerator->AppendDefines(
-    defines, source->GetProperty("COMPILE_DEFINITIONS"));
-  {
-    std::string defPropName = "COMPILE_DEFINITIONS_";
-    defPropName += cmSystemTools::UpperCase(this->GetConfigName());
-    this->LocalGenerator->AppendDefines(defines,
-                                        source->GetProperty(defPropName));
+  const std::string config = this->LocalGenerator->GetConfigName();
+  cmGeneratorExpressionInterpreter genexInterpreter(
+    this->LocalGenerator, this->GeneratorTarget, config);
+
+  if (const char* compile_defs = source->GetProperty("COMPILE_DEFINITIONS")) {
+    this->LocalGenerator->AppendDefines(
+      defines, genexInterpreter.Evaluate(compile_defs));
+  }
+
+  std::string defPropName = "COMPILE_DEFINITIONS_";
+  defPropName += cmSystemTools::UpperCase(config);
+  if (const char* config_compile_defs = source->GetProperty(defPropName)) {
+    this->LocalGenerator->AppendDefines(
+      defines, genexInterpreter.Evaluate(config_compile_defs));
   }
 
   std::string definesString = this->GetDefines(language);

@@ -1484,13 +1484,13 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
       }
     }
     if (const char* cdefs = sf.GetProperty("COMPILE_DEFINITIONS")) {
-      fc.CompileDefs = cdefs;
+      fc.CompileDefs = genexInterpreter.Evaluate(cdefs);
       needfc = true;
     }
     std::string defPropName = "COMPILE_DEFINITIONS_";
     defPropName += configUpper;
-    if (const char* ccdefs = sf.GetProperty(defPropName.c_str())) {
-      fc.CompileDefsConfig = ccdefs;
+    if (const char* ccdefs = sf.GetProperty(defPropName)) {
+      fc.CompileDefsConfig = genexInterpreter.Evaluate(ccdefs);
       needfc = true;
     }
 

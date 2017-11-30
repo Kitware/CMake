@@ -1,4 +1,4 @@
-int srcgenex(void)
+int srcgenex_flags(void)
 {
   return 0;
 }
