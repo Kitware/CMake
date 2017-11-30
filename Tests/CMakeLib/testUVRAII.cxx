@@ -157,6 +157,7 @@ static bool testAllMoves()
     uv_stream_ptr _7;
     uv_timer_ptr _8;
     uv_tty_ptr _9;
+    uv_process_ptr _11;
     uv_pipe_ptr _12;
     uv_async_ptr _13;
     uv_signal_ptr _14;

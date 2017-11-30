@@ -172,6 +172,13 @@ uv_pipe_ptr::operator uv_stream_t*() const
 }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
+int uv_process_ptr::spawn(uv_loop_t& loop, uv_process_options_t const& options,
+                          void* data)
+{
+  allocate(data);
+  return uv_spawn(&loop, *this, &options);
+}
+
 int uv_timer_ptr::init(uv_loop_t& loop, void* data)
 {
   allocate(data);
@@ -210,6 +217,8 @@ UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(stream)
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(async)
+
+UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(process)
 
 UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(timer)
 
