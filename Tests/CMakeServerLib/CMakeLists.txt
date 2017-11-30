@@ -6,11 +6,15 @@ include_directories(
 
 set(CMakeServerLib_TESTS
   testServerBuffering
+  testUVRAII
   )
 
 create_test_sourcelist(CMakeLib_TEST_SRCS CMakeServerLibTests.cxx ${CMakeServerLib_TESTS})
 add_executable(CMakeServerLibTests ${CMakeLib_TEST_SRCS})
 target_link_libraries(CMakeServerLibTests CMakeLib CMakeServerLib)
+
+SET_PROPERTY(TARGET CMakeServerLibTests PROPERTY C_CLANG_TIDY "")
+SET_PROPERTY(TARGET CMakeServerLibTests PROPERTY CXX_CLANG_TIDY "")
 
 foreach(test ${CMakeServerLib_TESTS})
   add_test(CMakeServerLib.${test} CMakeServerLibTests ${test} ${${test}_ARGS})

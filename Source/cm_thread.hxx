@@ -9,6 +9,7 @@
 namespace cm {
 class mutex
 {
+  CM_DISABLE_COPY(mutex)
   uv_mutex_t _M_;
 
 public:
@@ -24,6 +25,7 @@ template <typename T>
 class lock_guard
 {
   T& _mutex;
+  CM_DISABLE_COPY(lock_guard)
 
 public:
   lock_guard(T& m)
@@ -37,6 +39,7 @@ public:
 class shared_mutex
 {
   uv_rwlock_t _M_;
+  CM_DISABLE_COPY(shared_mutex)
 
 public:
   shared_mutex() { uv_rwlock_init(&_M_); }
@@ -55,6 +58,7 @@ template <typename T>
 class shared_lock
 {
   T& _mutex;
+  CM_DISABLE_COPY(shared_lock)
 
 public:
   shared_lock(T& m)
@@ -68,6 +72,8 @@ public:
 template <typename T>
 class unique_lock : public lock_guard<T>
 {
+  CM_DISABLE_COPY(unique_lock)
+
 public:
   unique_lock(T& m)
     : lock_guard<T>(m)

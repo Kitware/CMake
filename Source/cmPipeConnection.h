@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmUVHandlePtr.h"
 #include <string>
 
 #include "cmConnection.h"
@@ -23,6 +24,5 @@ public:
 
 private:
   const std::string PipeName;
-  uv_pipe_t* ServerPipe = nullptr;
-  uv_pipe_t* ClientPipe = nullptr;
+  cm::uv_pipe_ptr ServerPipe;
 };

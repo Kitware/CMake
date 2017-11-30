@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmUVHandlePtr.h"
 #include "cm_uv.h"
 
 #include <cstddef>
@@ -107,8 +108,6 @@ public:
   bool OnConnectionShuttingDown() override;
 
   virtual void OnDisconnect(int errorCode);
-  uv_stream_t* ReadStream = nullptr;
-  uv_stream_t* WriteStream = nullptr;
 
   static void on_close(uv_handle_t* handle);
 
@@ -119,6 +118,8 @@ public:
   }
 
 protected:
+  cm::uv_stream_ptr WriteStream;
+
   std::string RawReadBuffer;
 
   std::unique_ptr<cmConnectionBufferStrategy> BufferStrategy;
