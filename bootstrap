@@ -418,6 +418,7 @@ CMAKE_CXX_SOURCES="\
   cmTryRunCommand \
   cmUnexpectedCommand \
   cmUnsetCommand \
+  cmUVHandlePtr \
   cmVersion \
   cmWhileCommand \
   cmWorkingDirectory \
