@@ -166,8 +166,8 @@ if (CMAKE_CROSSCOMPILING  AND NOT _CMAKE_TOOLCHAIN_PREFIX)
 
 endif ()
 
-include(CMakeFindBinUtils)
 set(_CMAKE_PROCESSING_LANGUAGE "C")
+include(CMakeFindBinUtils)
 include(Compiler/${CMAKE_C_COMPILER_ID}-FindBinUtils OPTIONAL)
 unset(_CMAKE_PROCESSING_LANGUAGE)
 

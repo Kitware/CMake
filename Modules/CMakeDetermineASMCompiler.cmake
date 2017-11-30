@@ -163,8 +163,8 @@ if (NOT _CMAKE_TOOLCHAIN_PREFIX)
 endif ()
 
 
-include(CMakeFindBinUtils)
 set(_CMAKE_PROCESSING_LANGUAGE "ASM")
+include(CMakeFindBinUtils)
 include(Compiler/${CMAKE_ASM${ASM_DIALECT}_COMPILER_ID}-FindBinUtils OPTIONAL)
 unset(_CMAKE_PROCESSING_LANGUAGE)
 
