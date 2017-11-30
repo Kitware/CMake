@@ -172,6 +172,18 @@ uv_pipe_ptr::operator uv_stream_t*() const
 }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
+int uv_timer_ptr::init(uv_loop_t& loop, void* data)
+{
+  allocate(data);
+  return uv_timer_init(&loop, *this);
+}
+
+int uv_timer_ptr::start(uv_timer_cb cb, uint64_t timeout, uint64_t repeat)
+{
+  assert(handle);
+  return uv_timer_start(*this, cb, timeout, repeat);
+}
+
 uv_tty_ptr::operator uv_stream_t*() const
 {
   return reinterpret_cast<uv_stream_t*>(handle.get());
@@ -198,6 +210,8 @@ UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(stream)
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(async)
+
+UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(timer)
 
 UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(tty)
 #endif
