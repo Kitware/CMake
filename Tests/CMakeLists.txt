@@ -1433,6 +1433,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(GoogleTest)
   endif()
 
+  if(CMake_TEST_FindIconv)
+    add_subdirectory(FindIconv)
+  endif()
+
   if(CMake_TEST_FindICU)
     add_subdirectory(FindICU)
   endif()
