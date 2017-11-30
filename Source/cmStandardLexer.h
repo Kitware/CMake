@@ -3,7 +3,7 @@
 #ifndef cmStandardLexer_h
 #define cmStandardLexer_h
 
-#include "cmConfigure.h" // IWYU pragma: keep
+#include "cmsys/Configure.h" // IWYU pragma: keep
 
 /* Disable some warnings.  */
 #if defined(_MSC_VER)
