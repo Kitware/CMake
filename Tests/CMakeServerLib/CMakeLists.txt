@@ -6,7 +6,6 @@ include_directories(
 
 set(CMakeServerLib_TESTS
   testServerBuffering
-  testUVRAII
   )
 
 create_test_sourcelist(CMakeLib_TEST_SRCS CMakeServerLibTests.cxx ${CMakeServerLib_TESTS})

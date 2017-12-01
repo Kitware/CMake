@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <type_traits>
 
@@ -164,6 +165,23 @@ struct uv_pipe_ptr : public uv_handle_ptr_<uv_pipe_t>
   int init(uv_loop_t& loop, int ipc, void* data = nullptr);
 };
 
+struct uv_process_ptr : public uv_handle_ptr_<uv_process_t>
+{
+  CM_PERFECT_FWD_CTOR(uv_process_ptr, uv_handle_ptr_<uv_process_t>);
+
+  int spawn(uv_loop_t& loop, uv_process_options_t const& options,
+            void* data = nullptr);
+};
+
+struct uv_timer_ptr : public uv_handle_ptr_<uv_timer_t>
+{
+  CM_PERFECT_FWD_CTOR(uv_timer_ptr, uv_handle_ptr_<uv_timer_t>);
+
+  int init(uv_loop_t& loop, void* data = nullptr);
+
+  int start(uv_timer_cb cb, uint64_t timeout, uint64_t repeat);
+};
+
 struct uv_tty_ptr : public uv_handle_ptr_<uv_tty_t>
 {
   CM_PERFECT_FWD_CTOR(uv_tty_ptr, uv_handle_ptr_<uv_tty_t>);
@@ -190,7 +208,11 @@ UV_HANDLE_PTR_INSTANTIATE_EXTERN(signal)
 
 UV_HANDLE_PTR_INSTANTIATE_EXTERN(pipe)
 
+UV_HANDLE_PTR_INSTANTIATE_EXTERN(process)
+
 UV_HANDLE_PTR_INSTANTIATE_EXTERN(stream)
+
+UV_HANDLE_PTR_INSTANTIATE_EXTERN(timer)
 
 UV_HANDLE_PTR_INSTANTIATE_EXTERN(tty)
 

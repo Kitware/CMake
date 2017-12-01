@@ -82,6 +82,7 @@ uv_handle_ptr_<T>::operator T*() const
   return this->handle.get();
 }
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
 template <>
 struct uv_handle_deleter<uv_async_t>
 {
@@ -126,6 +127,7 @@ int uv_async_ptr::init(uv_loop_t& loop, uv_async_cb async_cb, void* data)
   allocate(data);
   return uv_async_init(&loop, handle.get(), async_cb);
 }
+#endif
 
 template <>
 struct uv_handle_deleter<uv_signal_t>
@@ -169,6 +171,26 @@ uv_pipe_ptr::operator uv_stream_t*() const
   return reinterpret_cast<uv_stream_t*>(handle.get());
 }
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
+int uv_process_ptr::spawn(uv_loop_t& loop, uv_process_options_t const& options,
+                          void* data)
+{
+  allocate(data);
+  return uv_spawn(&loop, *this, &options);
+}
+
+int uv_timer_ptr::init(uv_loop_t& loop, void* data)
+{
+  allocate(data);
+  return uv_timer_init(&loop, *this);
+}
+
+int uv_timer_ptr::start(uv_timer_cb cb, uint64_t timeout, uint64_t repeat)
+{
+  assert(handle);
+  return uv_timer_start(*this, cb, timeout, repeat);
+}
+
 uv_tty_ptr::operator uv_stream_t*() const
 {
   return reinterpret_cast<uv_stream_t*>(handle.get());
@@ -179,6 +201,7 @@ int uv_tty_ptr::init(uv_loop_t& loop, int fd, int readable, void* data)
   allocate(data);
   return uv_tty_init(&loop, *this, fd, readable);
 }
+#endif
 
 template class uv_handle_ptr_base_<uv_handle_t>;
 
@@ -186,13 +209,19 @@ template class uv_handle_ptr_base_<uv_handle_t>;
   template class uv_handle_ptr_base_<uv_##NAME##_t>;                          \
   template class uv_handle_ptr_<uv_##NAME##_t>;
 
-UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(async)
-
 UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(signal)
 
 UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(pipe)
 
 UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(stream)
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
+UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(async)
+
+UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(process)
+
+UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(timer)
+
 UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(tty)
+#endif
 }

@@ -12,6 +12,7 @@ set(CMakeLib_TESTS
   testXMLParser
   testXMLSafe
   testFindPackageCommand
+  testUVRAII
   )
 
 set(testRST_ARGS ${CMAKE_CURRENT_SOURCE_DIR})
@@ -30,6 +31,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testXMLParser.h.in
 create_test_sourcelist(CMakeLib_TEST_SRCS CMakeLibTests.cxx ${CMakeLib_TESTS})
 add_executable(CMakeLibTests ${CMakeLib_TEST_SRCS})
 target_link_libraries(CMakeLibTests CMakeLib)
+
+set_property(TARGET CMakeLibTests PROPERTY C_CLANG_TIDY "")
+set_property(TARGET CMakeLibTests PROPERTY CXX_CLANG_TIDY "")
 
 add_executable(testEncoding testEncoding.cxx)
 target_link_libraries(testEncoding cmsys)
