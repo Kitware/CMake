@@ -1068,6 +1068,7 @@ TMPFILE=`cmake_tmp_file`
 echo '
 #include <iostream>
 #include <memory>
+#include <unordered_map>
 
 #if __cplusplus < 201103L
 #error "Compiler is not in a mode aware of C++11."
