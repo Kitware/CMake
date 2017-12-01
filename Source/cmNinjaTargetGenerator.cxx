@@ -136,12 +136,11 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
 
   // Add source file specific flags.
   if (const char* cflags = source->GetProperty("COMPILE_FLAGS")) {
-    std::string config = this->LocalGenerator->GetConfigName();
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
-    const char* evaluatedFlags = cge->Evaluate(this->LocalGenerator, config,
-                                               false, this->GeneratorTarget);
-    this->LocalGenerator->AppendFlags(flags, evaluatedFlags);
+    cmGeneratorExpressionInterpreter genexInterpreter(
+      this->LocalGenerator, this->GeneratorTarget,
+      this->LocalGenerator->GetConfigName());
+    this->LocalGenerator->AppendFlags(flags,
+                                      genexInterpreter.Evaluate(cflags));
   }
 
   return flags;

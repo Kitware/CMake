@@ -153,4 +153,54 @@ private:
   bool EvaluateForBuildsystem;
 };
 
+class cmGeneratorExpressionInterpreter
+{
+  CM_DISABLE_COPY(cmGeneratorExpressionInterpreter)
+
+public:
+  cmGeneratorExpressionInterpreter(cmLocalGenerator* localGenerator,
+                                   cmGeneratorTarget* generatorTarget,
+                                   const std::string& config)
+    : LocalGenerator(localGenerator)
+    , GeneratorTarget(generatorTarget)
+    , Config(config)
+  {
+  }
+
+  const char* Evaluate(const char* expression)
+  {
+    this->CompiledGeneratorExpression =
+      this->GeneratorExpression.Parse(expression);
+
+    return this->CompiledGeneratorExpression->Evaluate(
+      this->LocalGenerator, this->Config, false, this->GeneratorTarget);
+  }
+  const char* Evaluate(const std::string& expression)
+  {
+    return this->Evaluate(expression.c_str());
+  }
+
+protected:
+  cmGeneratorExpression& GetGeneratorExpression()
+  {
+    return this->GeneratorExpression;
+  }
+
+  cmCompiledGeneratorExpression& GetCompiledGeneratorExpression()
+  {
+    return *(this->CompiledGeneratorExpression);
+  }
+
+  cmLocalGenerator* GetLocalGenerator() { return this->LocalGenerator; }
+
+  cmGeneratorTarget* GetGeneratorTarget() { return this->GeneratorTarget; }
+
+private:
+  cmGeneratorExpression GeneratorExpression;
+  std::unique_ptr<cmCompiledGeneratorExpression> CompiledGeneratorExpression;
+  cmLocalGenerator* LocalGenerator = nullptr;
+  cmGeneratorTarget* GeneratorTarget = nullptr;
+  std::string Config;
+};
+
 #endif

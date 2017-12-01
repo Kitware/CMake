@@ -2062,10 +2062,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   bool configDependentFlags = false;
   std::string defines;
   if (const char* cflags = sf.GetProperty("COMPILE_FLAGS")) {
-
-    if (cmGeneratorExpression::Find(cflags) != std::string::npos) {
-      configDependentFlags = true;
-    }
+    configDependentFlags =
+      cmGeneratorExpression::Find(cflags) != std::string::npos;
     flags += cflags;
   }
   if (const char* cdefs = sf.GetProperty("COMPILE_DEFINITIONS")) {
@@ -2122,8 +2120,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     }
     // if we have flags or defines for this config then
     // use them
-    if (!flags.empty() || configDependentFlags || !configDefines.empty() ||
-        compileAs || noWinRT) {
+    if (!flags.empty() || !configDefines.empty() || compileAs || noWinRT) {
       (*this->BuildFileStream) << firstString;
       firstString = ""; // only do firstString once
       hasFlags = true;
@@ -2144,6 +2141,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       } else if (srclang == "CSharp") {
         flagtable = gg->GetCSharpFlagTable();
       }
+      cmGeneratorExpressionInterpreter genexInterpreter(
+        this->LocalGenerator, this->GeneratorTarget, *config);
       cmVisualStudioGeneratorOptions clOptions(
         this->LocalGenerator, cmVisualStudioGeneratorOptions::Compiler,
         flagtable, 0, this);
@@ -2154,11 +2153,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         clOptions.AddFlag("CompileAsWinRT", "false");
       }
       if (configDependentFlags) {
-        cmGeneratorExpression ge;
-        std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(flags);
-        std::string evaluatedFlags = cge->Evaluate(
-          this->LocalGenerator, *config, false, this->GeneratorTarget);
-        clOptions.Parse(evaluatedFlags.c_str());
+        clOptions.Parse(genexInterpreter.Evaluate(flags));
       } else {
         clOptions.Parse(flags.c_str());
       }

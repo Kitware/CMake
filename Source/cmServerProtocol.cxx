@@ -692,6 +692,8 @@ static Json::Value DumpSourceFilesList(
 
   std::vector<cmSourceFile*> files;
   target->GetSourceFiles(files, config);
+  cmGeneratorExpressionInterpreter genexInterpreter(
+    target->GetLocalGenerator(), target, config);
 
   std::unordered_map<LanguageData, std::vector<std::string>> fileGroups;
   for (cmSourceFile* file : files) {
@@ -703,11 +705,7 @@ static Json::Value DumpSourceFilesList(
 
       std::string compileFlags = ld.Flags;
       if (const char* cflags = file->GetProperty("COMPILE_FLAGS")) {
-        cmGeneratorExpression ge;
-        auto cge = ge.Parse(cflags);
-        const char* processed =
-          cge->Evaluate(target->GetLocalGenerator(), config);
-        lg->AppendFlags(compileFlags, processed);
+        lg->AppendFlags(compileFlags, genexInterpreter.Evaluate(cflags));
       }
       fileData.Flags = compileFlags;
 

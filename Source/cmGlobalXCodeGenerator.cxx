@@ -676,9 +676,51 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFileFromPath(
   return buildFile;
 }
 
+class XCodeGeneratorExpressionInterpreter
+  : public cmGeneratorExpressionInterpreter
+{
+  CM_DISABLE_COPY(XCodeGeneratorExpressionInterpreter)
+
+public:
+  XCodeGeneratorExpressionInterpreter(cmSourceFile* sourceFile,
+                                      cmLocalGenerator* localGenerator,
+                                      cmGeneratorTarget* generatorTarget)
+    : cmGeneratorExpressionInterpreter(localGenerator, generatorTarget,
+                                       "NO-PER-CONFIG-SUPPORT-IN-XCODE")
+    , SourceFile(sourceFile)
+  {
+  }
+
+  using cmGeneratorExpressionInterpreter::Evaluate;
+
+  const char* Evaluate(const char* expression, const char* property)
+  {
+    const char* processed = this->Evaluate(expression);
+    if (this->GetCompiledGeneratorExpression()
+          .GetHadContextSensitiveCondition()) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+          "Xcode does not support per-config per-source " << property << ":\n"
+          "  " << expression << "\n"
+          "specified for source:\n"
+          "  " << this->SourceFile->GetFullPath() << "\n";
+      /* clang-format on */
+      this->GetLocalGenerator()->IssueMessage(cmake::FATAL_ERROR, e.str());
+    }
+
+    return processed;
+  }
+
+private:
+  cmSourceFile* SourceFile = nullptr;
+};
+
 cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   cmLocalGenerator* lg, cmSourceFile* sf, cmGeneratorTarget* gtgt)
 {
+  XCodeGeneratorExpressionInterpreter genexInterpreter(sf, lg, gtgt);
+
   // Add flags from target and source file properties.
   std::string flags;
   const char* srcfmt = sf->GetProperty("Fortran_FORMAT");
@@ -693,24 +735,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
       break;
   }
   if (const char* cflags = sf->GetProperty("COMPILE_FLAGS")) {
-    cmGeneratorExpression ge;
-    std::string configName = "NO-PER-CONFIG-SUPPORT-IN-XCODE";
-    std::unique_ptr<cmCompiledGeneratorExpression> compiledExpr =
-      ge.Parse(cflags);
-    const char* processed =
-      compiledExpr->Evaluate(lg, configName, false, gtgt);
-    if (compiledExpr->GetHadContextSensitiveCondition()) {
-      std::ostringstream e;
-      /* clang-format off */
-      e <<
-        "Xcode does not support per-config per-source COMPILE_FLAGS:\n"
-        "  " << cflags << "\n"
-        "specified for source:\n"
-        "  " << sf->GetFullPath() << "\n";
-      /* clang-format on */
-      lg->IssueMessage(cmake::FATAL_ERROR, e.str());
-    }
-    lg->AppendFlags(flags, processed);
+    lg->AppendFlags(flags, genexInterpreter.Evaluate(cflags, "COMPILE_FLAGS"));
   }
 
   // Add per-source definitions.

@@ -1456,15 +1456,14 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
        i != configs.end(); ++i, ++ci) {
     std::string configUpper = cmSystemTools::UpperCase(*i);
     cmLVS7GFileConfig fc;
+    cmGeneratorExpressionInterpreter genexInterpreter(lg, gt, *i);
     bool needfc = false;
     if (!objectName.empty()) {
       fc.ObjectName = objectName;
       needfc = true;
     }
     if (const char* cflags = sf.GetProperty("COMPILE_FLAGS")) {
-      cmGeneratorExpression ge;
-      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
-      fc.CompileFlags = cge->Evaluate(lg, *i, false, gt);
+      fc.CompileFlags = genexInterpreter.Evaluate(cflags);
       needfc = true;
     }
     if (lg->FortranProject) {
