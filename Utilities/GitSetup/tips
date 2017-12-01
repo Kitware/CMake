@@ -19,7 +19,7 @@
 
 # Project configuration instructions: NONE
 
-egrep-q() {
+egrep_q() {
 	egrep "$@" >/dev/null 2>/dev/null
 }
 
@@ -33,7 +33,7 @@ One may enable color output from Git commands with
 fi
 
 # Suggest bash completion.
-if ! bash -i -c 'echo $PS1' | egrep-q '__git_ps1'; then
+if ! bash -i -c 'echo $PS1' | egrep_q '__git_ps1'; then
 	echo '
 A dynamic, informative Git shell prompt can be obtained by sourcing
 the git bash-completion script in your "~/.bashrc".  Set the PS1

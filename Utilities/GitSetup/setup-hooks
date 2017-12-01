@@ -26,7 +26,7 @@
 #    hooks.url    = Repository URL publishing "hooks" branch
 #    hooks.branch = Repository branch instead of "hooks"
 
-egrep-q() {
+egrep_q() {
 	egrep "$@" >/dev/null 2>/dev/null
 }
 
@@ -42,7 +42,7 @@ if url=$(git config --get hooks.url); then
 	# Fetch hooks from locally configured repository.
 	branch=$(git config hooks.branch || echo hooks)
 elif git for-each-ref refs/remotes/origin/hooks 2>/dev/null |
-     egrep-q 'refs/remotes/origin/hooks$'; then
+     egrep_q 'refs/remotes/origin/hooks$'; then
 	# Use hooks cloned from origin.
 	url=.. && branch=remotes/origin/hooks
 elif url=$(git config -f config --get hooks.url); then
