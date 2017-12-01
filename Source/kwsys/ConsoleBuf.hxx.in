@@ -264,6 +264,7 @@ private:
         if (m_isConsoleInput) {
           break;
         }
+        @KWSYS_NAMESPACE@_FALLTHROUGH;
       case FILE_TYPE_PIPE:
         m_activeInputCodepage = input_pipe_codepage;
         break;
@@ -290,6 +291,7 @@ private:
         if (m_isConsoleOutput) {
           break;
         }
+        @KWSYS_NAMESPACE@_FALLTHROUGH;
       case FILE_TYPE_PIPE:
         m_activeOutputCodepage = output_pipe_codepage;
         break;
