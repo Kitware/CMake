@@ -189,7 +189,7 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
     // This way, selecting C will automatically select everything it depends
     // on (B and A), while selecting something that depends on C--either D
     // or E--will automatically cause C to get selected.
-    std::ostringstream selected("my.choice.selected");
+    std::ostringstream selected("my.choice.selected", std::ios_base::ate);
     std::set<const cmCPackComponent*> visited;
     AddDependencyAttributes(component, visited, selected);
     visited.clear();
