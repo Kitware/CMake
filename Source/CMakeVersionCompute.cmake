@@ -27,3 +27,13 @@ endif()
 if(CMake_VERSION_IS_DIRTY)
   set(CMake_VERSION ${CMake_VERSION}-dirty)
 endif()
+
+# Compute the binary version that appears in the RC file. Version
+# components in the RC file are 16-bit integers so we may have to
+# split the patch component.
+if(CMake_VERSION_PATCH MATCHES "^([0-9]+)([0-9][0-9][0-9][0-9])$")
+  set(CMake_RCVERSION ${CMake_VERSION_MAJOR},${CMake_VERSION_MINOR},${CMAKE_MATCH_1},${CMAKE_MATCH_2})
+else()
+  set(CMake_RCVERSION ${CMake_VERSION_MAJOR},${CMake_VERSION_MINOR},${CMake_VERSION_PATCH})
+endif()
+set(CMake_RCVERSION_STR ${CMake_VERSION})
