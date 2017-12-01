@@ -4,9 +4,9 @@
 #include "cmUVHandlePtr.h"
 
 #include <assert.h>
+#include <mutex>
 #include <stdlib.h>
 
-#include "cm_thread.hxx"
 #include "cm_uv.h"
 
 namespace cm {
@@ -97,16 +97,16 @@ struct uv_handle_deleter<uv_async_t>
   * which is mandated by the standard for Deleter on
   * shared_ptrs.
   */
-  std::shared_ptr<cm::mutex> handleMutex;
+  std::shared_ptr<std::mutex> handleMutex;
 
   uv_handle_deleter()
-    : handleMutex(std::make_shared<cm::mutex>())
+    : handleMutex(std::make_shared<std::mutex>())
   {
   }
 
   void operator()(uv_async_t* handle)
   {
-    cm::lock_guard<cm::mutex> lock(*handleMutex);
+    std::lock_guard<std::mutex> lock(*handleMutex);
     default_delete(handle);
   }
 };
@@ -116,7 +116,7 @@ void uv_async_ptr::send()
   auto deleter = std::get_deleter<uv_handle_deleter<uv_async_t>>(this->handle);
   assert(deleter);
 
-  cm::lock_guard<cm::mutex> lock(*deleter->handleMutex);
+  std::lock_guard<std::mutex> lock(*deleter->handleMutex);
   if (this->handle) {
     uv_async_send(*this);
   }
