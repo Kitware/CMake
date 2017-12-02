@@ -101,6 +101,8 @@ public:
   /** Return true if building for Windows CE */
   virtual bool TargetsWindowsCE() const { return false; }
 
+  bool IsIncludeExternalMSProjectSupported() const override { return true; }
+
   class TargetSet : public std::set<cmGeneratorTarget const*>
   {
   };
