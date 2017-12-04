@@ -32,6 +32,7 @@
 #   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 #   CMAKE_REQUIRED_QUIET = execute quietly without messages
 
+include_guard(GLOBAL)
 include(CheckSymbolExists)
 
 macro(CHECK_CXX_SYMBOL_EXISTS SYMBOL FILES VARIABLE)

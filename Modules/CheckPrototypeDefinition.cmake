@@ -41,9 +41,9 @@
 
 #
 
-
 get_filename_component(__check_proto_def_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
+include_guard(GLOBAL)
 
 function(CHECK_PROTOTYPE_DEFINITION _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIABLE)
 

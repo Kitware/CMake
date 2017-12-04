@@ -43,6 +43,8 @@ the way the check is run:
   execute quietly without messages
 #]=======================================================================]
 
+include_guard(GLOBAL)
+
 macro(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
   if(CMAKE_C_COMPILER_LOADED)
     __CHECK_SYMBOL_EXISTS_IMPL("${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckSymbolExists.c" "${SYMBOL}" "${FILES}" "${VARIABLE}" )

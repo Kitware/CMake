@@ -38,6 +38,8 @@
 #   * ``check_function_exists()`` only verifies linking, it does not verify
 #     that the function is declared in system headers.
 
+include_guard(GLOBAL)
+
 macro(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
   if(NOT DEFINED "${VARIABLE}" OR "x${${VARIABLE}}" STREQUAL "x${VARIABLE}")
     set(MACRO_CHECK_FUNCTION_DEFINITIONS

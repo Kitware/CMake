@@ -31,6 +31,8 @@
 #     message(STATUS "No Fortran support")
 #   endif()
 
+include_guard(GLOBAL)
+
 macro(check_language lang)
   if(NOT DEFINED CMAKE_${lang}_COMPILER)
     set(_desc "Looking for a ${lang} compiler")

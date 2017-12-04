@@ -60,6 +60,8 @@ subsequently be run.
 
 #]=======================================================================]
 
+include_guard(GLOBAL)
+
 macro(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
   if(NOT DEFINED "${VAR}")
     set(MACRO_CHECK_FUNCTION_DEFINITIONS
