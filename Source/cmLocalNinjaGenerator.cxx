@@ -207,6 +207,9 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
 
   const char* jobpools =
     this->GetCMakeInstance()->GetState()->GetGlobalProperty("JOB_POOLS");
+  if (!jobpools) {
+    jobpools = this->GetMakefile()->GetDefinition("CMAKE_JOB_POOLS");
+  }
   if (jobpools) {
     cmGlobalNinjaGenerator::WriteComment(
       os, "Pools defined by global property JOB_POOLS");
