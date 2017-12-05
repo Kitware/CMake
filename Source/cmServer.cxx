@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <utility>
 
 void on_signal(uv_signal_t* signal, int signum)
@@ -490,7 +491,7 @@ void cmServerBase::StartShutDown()
   SIGHUPHandler.reset();
 
   {
-    cm::unique_lock<cm::shared_mutex> lock(ConnectionsMutex);
+    std::unique_lock<cm::shared_mutex> lock(ConnectionsMutex);
     for (auto& connection : Connections) {
       connection->OnConnectionShuttingDown();
     }
@@ -537,7 +538,7 @@ cmServerBase::~cmServerBase()
 void cmServerBase::AddNewConnection(cmConnection* ownedConnection)
 {
   {
-    cm::unique_lock<cm::shared_mutex> lock(ConnectionsMutex);
+    std::unique_lock<cm::shared_mutex> lock(ConnectionsMutex);
     Connections.emplace_back(ownedConnection);
   }
   ownedConnection->SetServer(this);
@@ -554,7 +555,7 @@ void cmServerBase::OnDisconnect(cmConnection* pConnection)
     return m.get() == pConnection;
   };
   {
-    cm::unique_lock<cm::shared_mutex> lock(ConnectionsMutex);
+    std::unique_lock<cm::shared_mutex> lock(ConnectionsMutex);
     Connections.erase(
       std::remove_if(Connections.begin(), Connections.end(), pred),
       Connections.end());
