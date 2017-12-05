@@ -21,7 +21,6 @@
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cmake.h"
 
@@ -630,8 +629,6 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       makefileName = localName;
       makefileName += "/build.make";
 
-      bool needRequiresStep = this->NeedRequiresStep(gtarget);
-
       lg->WriteDivider(ruleFileStream);
       ruleFileStream << "# Target rules for target " << localName << "\n\n";
 
@@ -641,13 +638,6 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       commands.push_back(
         lg->GetRecursiveMakeCall(makefileName.c_str(), makeTargetName));
 
-      // add requires if we need it for this generator
-      if (needRequiresStep) {
-        makeTargetName = localName;
-        makeTargetName += "/requires";
-        commands.push_back(
-          lg->GetRecursiveMakeCall(makefileName.c_str(), makeTargetName));
-      }
       makeTargetName = localName;
       makeTargetName += "/build";
       commands.push_back(
@@ -951,22 +941,4 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule(
   lg->WriteMakeRule(ruleFileStream, "Help Target", "help", no_depends,
                     commands, true);
   ruleFileStream << "\n\n";
-}
-
-bool cmGlobalUnixMakefileGenerator3::NeedRequiresStep(
-  const cmGeneratorTarget* target)
-{
-  std::set<std::string> languages;
-  target->GetLanguages(
-    languages,
-    target->Target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE"));
-  for (std::string const& l : languages) {
-    std::string var = "CMAKE_NEEDS_REQUIRES_STEP_";
-    var += l;
-    var += "_FLAG";
-    if (target->Target->GetMakefile()->GetDefinition(var)) {
-      return true;
-    }
-  }
-  return false;
 }

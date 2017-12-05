@@ -331,24 +331,6 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       continue;
     }
 
-    // If the module is provided in this target special handling is
-    // needed.
-    if (this->Internal->TargetProvides.find(i) !=
-        this->Internal->TargetProvides.end()) {
-      // The module is provided by a different source in the same
-      // target.  Add the proxy dependency to make sure the other
-      // source builds first.
-      std::string proxy = stamp_dir;
-      proxy += "/";
-      proxy += i;
-      proxy += ".mod.proxy";
-      proxy = cmSystemTools::ConvertToOutputPath(
-        this->MaybeConvertToRelativePath(binDir, proxy).c_str());
-
-      // since we require some things add them to our list of requirements
-      makeDepends << obj_m << ".requires: " << proxy << std::endl;
-    }
-
     // The object file should depend on timestamped files for the
     // modules it uses.
     TargetRequiresMap::const_iterator required =
@@ -371,17 +353,6 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
         makeDepends << obj_m << ": " << module << "\n";
       }
     }
-  }
-
-  // Write provided modules to the output stream.
-  for (std::string const& i : info.Provides) {
-    std::string proxy = stamp_dir;
-    proxy += "/";
-    proxy += i;
-    proxy += ".mod.proxy";
-    proxy = cmSystemTools::ConvertToOutputPath(
-      this->MaybeConvertToRelativePath(binDir, proxy).c_str());
-    makeDepends << proxy << ": " << obj_m << ".provides" << std::endl;
   }
 
   // If any modules are provided then they must be converted to stamp files.
@@ -433,8 +404,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       makeDepends << "\n";
     }
     makeDepends << obj_m << ".provides.build:\n";
-    // After copying the modules update the timestamp file so that
-    // copying will not be done again until the source rebuilds.
+    // After copying the modules update the timestamp file.
     makeDepends << "\t$(CMAKE_COMMAND) -E touch " << obj_m
                 << ".provides.build\n";
 

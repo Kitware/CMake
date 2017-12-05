@@ -818,61 +818,6 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
                                           commands, false);
     }
   }
-
-  // If the language needs provides-requires mode, create the
-  // corresponding targets.
-  std::string objectRequires = relativeObj;
-  objectRequires += ".requires";
-  std::vector<std::string> p_depends;
-  // always provide an empty requires target
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
-                                      objectRequires, p_depends, no_commands,
-                                      true);
-
-  // write a build rule to recursively build what this obj provides
-  std::string objectProvides = relativeObj;
-  objectProvides += ".provides";
-  std::string temp = relativeObj;
-  temp += ".provides.build";
-  std::vector<std::string> r_commands;
-
-  p_depends.clear();
-  p_depends.push_back(objectRequires);
-  p_depends.push_back(temp);
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
-                                      objectProvides, p_depends, r_commands,
-                                      true);
-
-  // write the provides.build rule dependency on the obj file
-  p_depends.clear();
-  p_depends.push_back(relativeObj);
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr, temp,
-                                      p_depends, no_commands, false);
-}
-
-void cmMakefileTargetGenerator::WriteTargetRequiresRules()
-{
-  std::vector<std::string> depends;
-  std::vector<std::string> no_commands;
-
-  // Construct the name of the dependency generation target.
-  std::string depTarget =
-    this->LocalGenerator->GetRelativeTargetDirectory(this->GeneratorTarget);
-  depTarget += "/requires";
-
-  // This target drives dependency generation for all object files.
-  std::string relPath = this->LocalGenerator->GetHomeRelativeOutputPath();
-  std::string objTarget;
-  for (std::string const& obj : this->Objects) {
-    objTarget = relPath;
-    objTarget += obj;
-    objTarget += ".requires";
-    depends.push_back(objTarget);
-  }
-
-  // Write the rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
-                                      depTarget, depends, no_commands, true);
 }
 
 void cmMakefileTargetGenerator::WriteTargetCleanRules()

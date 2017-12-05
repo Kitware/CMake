@@ -63,9 +63,6 @@ protected:
   void WriteCommonCodeRules();
   void WriteTargetLanguageFlags();
 
-  // write the provide require rules for this target
-  void WriteTargetRequiresRules();
-
   // write the clean rules for this target
   void WriteTargetCleanRules();
 
