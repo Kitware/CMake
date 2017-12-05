@@ -52,6 +52,7 @@ static std::string cmVS10EscapeComment(std::string comment)
       case '>': /* no break */
       case '^':
         echoable += '^'; /* no break */
+        CM_FALLTHROUGH;
       default:
         echoable += *c;
         break;

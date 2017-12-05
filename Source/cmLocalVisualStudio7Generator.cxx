@@ -615,6 +615,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   switch (target->GetType()) {
     case cmStateEnums::OBJECT_LIBRARY:
       targetBuilds = false; // no manifest tool for object library
+      CM_FALLTHROUGH;
     case cmStateEnums::STATIC_LIBRARY:
       projectType = "typeStaticLibrary";
       configType = "4";
@@ -630,6 +631,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     case cmStateEnums::UTILITY:
     case cmStateEnums::GLOBAL_TARGET:
       configType = "10";
+      CM_FALLTHROUGH;
     default:
       targetBuilds = false;
       break;
