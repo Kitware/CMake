@@ -34,6 +34,115 @@
 
 namespace @KWSYS_NAMESPACE@ {
 
+// Forward declaration
+class RegularExpression;
+
+/** \class RegularExpressionMatch
+ * \brief Stores the pattern matches of a RegularExpression
+ */
+class @KWSYS_NAMESPACE@_EXPORT RegularExpressionMatch
+{
+public:
+  RegularExpressionMatch();
+
+  bool isValid() const;
+  void clear();
+
+  std::string::size_type start() const;
+  std::string::size_type end() const;
+  std::string::size_type start(int n) const;
+  std::string::size_type end(int n) const;
+  std::string match(int n) const;
+
+  enum
+  {
+    NSUBEXP = 10
+  };
+
+private:
+  friend class RegularExpression;
+  const char* startp[NSUBEXP];
+  const char* endp[NSUBEXP];
+  const char* searchstring;
+};
+
+/**
+ * \brief Creates an invalid match object
+ */
+inline RegularExpressionMatch::RegularExpressionMatch()
+{
+  startp[0] = 0;
+  endp[0] = 0;
+  searchstring = 0;
+}
+
+/**
+ * \brief Returns true if the match pointers are valid
+ */
+inline bool RegularExpressionMatch::isValid() const
+{
+  return (this->startp[0] != 0);
+}
+
+/**
+ * \brief Resets to the (invalid) construction state.
+ */
+inline void RegularExpressionMatch::clear()
+{
+  startp[0] = 0;
+  endp[0] = 0;
+  searchstring = 0;
+}
+
+/**
+ * \brief Returns the start index of the full match.
+ */
+inline std::string::size_type RegularExpressionMatch::start() const
+{
+  return static_cast<std::string::size_type>(this->startp[0] - searchstring);
+}
+
+/**
+ * \brief Returns the end index of the full match.
+ */
+inline std::string::size_type RegularExpressionMatch::end() const
+{
+  return static_cast<std::string::size_type>(this->endp[0] - searchstring);
+}
+
+/**
+ * \brief Returns the start index of nth submatch.
+ *        start(0) is the start of the full match.
+ */
+inline std::string::size_type RegularExpressionMatch::start(int n) const
+{
+  return static_cast<std::string::size_type>(this->startp[n] -
+                                             this->searchstring);
+}
+
+/**
+ * \brief Returns the end index of nth submatch.
+ *        end(0) is the end of the full match.
+ */
+inline std::string::size_type RegularExpressionMatch::end(int n) const
+{
+  return static_cast<std::string::size_type>(this->endp[n] -
+                                             this->searchstring);
+}
+
+/**
+ * \brief Returns the nth submatch as a string.
+ */
+inline std::string RegularExpressionMatch::match(int n) const
+{
+  if (this->startp[n] == 0) {
+    return std::string();
+  } else {
+    return std::string(this->startp[n], static_cast<std::string::size_type>(
+                                          this->endp[n] - this->startp[n]));
+  }
+}
+
 /** \class RegularExpression
  * \brief Implements pattern matching with regular expressions.
  *
@@ -170,6 +279,9 @@ namespace @KWSYS_NAMESPACE@ {
  *      the same as the two characters before  the first p  encounterd in
  *      the line.  It would match "drepa qrepb" in "rep drepa qrepb".
  *
+ * All methods of RegularExpression can be called simultaneously from
+ * different threads but only if each invocation uses an own instance of
+ * RegularExpression.
  */
 class @KWSYS_NAMESPACE@_EXPORT RegularExpression
 {
@@ -213,9 +325,19 @@ public:
 
   /**
    * Matches the regular expression to the given string.
+   * Returns true if found, and sets start and end indexes
+   * in the RegularExpressionMatch instance accordingly.
+   *
+   * This method is thread safe when called with different
+   * RegularExpressionMatch instances.
+   */
+  bool find(char const*, RegularExpressionMatch&) const;
+
+  /**
+   * Matches the regular expression to the given string.
    * Returns true if found, and sets start and end indexes accordingly.
    */
-  bool find(char const*);
+  inline bool find(char const*);
 
   /**
    * Matches the regular expression to the given std string.
@@ -224,14 +346,18 @@ public:
   inline bool find(std::string const&);
 
   /**
-   * Index to start of first find.
+   * Match indices
    */
+  inline RegularExpressionMatch const& regMatch() const;
   inline std::string::size_type start() const;
+  inline std::string::size_type end() const;
+  inline std::string::size_type start(int n) const;
+  inline std::string::size_type end(int n) const;
 
   /**
-   * Index to end of first find.
+   * Match strings
    */
-  inline std::string::size_type end() const;
+  inline std::string match(int n) const;
 
   /**
    * Copy the given regular expression.
@@ -266,29 +392,14 @@ public:
    */
   inline void set_invalid();
 
-  /**
-   * Destructor.
-   */
-  // awf added
-  std::string::size_type start(int n) const;
-  std::string::size_type end(int n) const;
-  std::string match(int n) const;
-
-  enum
-  {
-    NSUBEXP = 10
-  };
-
 private:
-  const char* startp[NSUBEXP];
-  const char* endp[NSUBEXP];
+  RegularExpressionMatch regmatch;
   char regstart;                  // Internal use only
   char reganch;                   // Internal use only
   const char* regmust;            // Internal use only
   std::string::size_type regmlen; // Internal use only
   char* program;
   int progsize;
-  const char* searchstring;
 };
 
 /**
@@ -344,25 +455,66 @@ inline bool RegularExpression::compile(std::string const& s)
  * Matches the regular expression to the given std string.
  * Returns true if found, and sets start and end indexes accordingly.
  */
+inline bool RegularExpression::find(const char* s)
+{
+  return this->find(s, this->regmatch);
+}
+
+/**
+ * Matches the regular expression to the given std string.
+ * Returns true if found, and sets start and end indexes accordingly.
+ */
 inline bool RegularExpression::find(std::string const& s)
 {
   return this->find(s.c_str());
 }
 
 /**
- * Set the start position for the regular expression.
+ * Returns the internal match object
  */
-inline std::string::size_type RegularExpression::start() const
+inline RegularExpressionMatch const& RegularExpression::regMatch() const
 {
-  return static_cast<std::string::size_type>(this->startp[0] - searchstring);
+  return this->regmatch;
 }
 
 /**
- * Returns the start/end index of the last item found.
+ * Returns the start index of the full match.
+ */
+inline std::string::size_type RegularExpression::start() const
+{
+  return regmatch.start();
+}
+
+/**
+ * Returns the end index of the full match.
  */
 inline std::string::size_type RegularExpression::end() const
 {
-  return static_cast<std::string::size_type>(this->endp[0] - searchstring);
+  return regmatch.end();
+}
+
+/**
+ * Return start index of nth submatch. start(0) is the start of the full match.
+ */
+inline std::string::size_type RegularExpression::start(int n) const
+{
+  return regmatch.start(n);
+}
+
+/**
+ * Return end index of nth submatch. end(0) is the end of the full match.
+ */
+inline std::string::size_type RegularExpression::end(int n) const
+{
+  return regmatch.end(n);
+}
+
+/**
+ * Return nth submatch as a string.
+ */
+inline std::string RegularExpression::match(int n) const
+{
+  return regmatch.match(n);
 }
 
 /**
@@ -389,35 +541,6 @@ inline void RegularExpression::set_invalid()
   delete[] this->program;
   //#endif
   this->program = 0;
-}
-
-/**
- * Return start index of nth submatch. start(0) is the start of the full match.
- */
-inline std::string::size_type RegularExpression::start(int n) const
-{
-  return static_cast<std::string::size_type>(this->startp[n] - searchstring);
-}
-
-/**
- * Return end index of nth submatch. end(0) is the end of the full match.
- */
-inline std::string::size_type RegularExpression::end(int n) const
-{
-  return static_cast<std::string::size_type>(this->endp[n] - searchstring);
-}
-
-/**
- * Return nth submatch as a string.
- */
-inline std::string RegularExpression::match(int n) const
-{
-  if (this->startp[n] == 0) {
-    return std::string("");
-  } else {
-    return std::string(this->startp[n], static_cast<std::string::size_type>(
-                                          this->endp[n] - this->startp[n]));
-  }
 }
 
 } // namespace @KWSYS_NAMESPACE@
