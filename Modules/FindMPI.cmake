@@ -1336,7 +1336,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
     set(MPI_${LANG}_FIND_VERSION_EXACT ${MPI_FIND_VERSION_EXACT})
 
     unset(MPI_${LANG}_REQUIRED_VARS)
-    if (MPI_${LANG}_WRAPPER_FOUND OR MPI_${LANG}_GUESS_FOUND)
+    if (NOT "${MPI_${LANG}_COMPILER}" STREQUAL "${CMAKE_${LANG}_COMPILER}")
       foreach(mpilibname IN LISTS MPI_${LANG}_LIB_NAMES)
         list(APPEND MPI_${LANG}_REQUIRED_VARS "MPI_${mpilibname}_LIBRARY")
       endforeach()
