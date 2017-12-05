@@ -124,9 +124,9 @@ public:
     float Cost;
     int PreviousRuns;
     bool RunSerial;
-    double Timeout;
+    std::chrono::duration<double> Timeout;
     bool ExplicitTimeout;
-    double AlternateTimeout;
+    std::chrono::duration<double> AlternateTimeout;
     int Index;
     // Requested number of process slots
     int Processors;
@@ -147,7 +147,7 @@ public:
     std::string Path;
     std::string Reason;
     std::string FullCommandLine;
-    double ExecutionTime;
+    std::chrono::duration<double> ExecutionTime;
     int ReturnValue;
     int Status;
     std::string ExceptionStatus;

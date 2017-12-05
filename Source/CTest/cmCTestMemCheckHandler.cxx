@@ -14,7 +14,6 @@
 #include <iostream>
 #include <sstream>
 #include <string.h>
-#include <type_traits>
 
 struct CatToErrorType
 {

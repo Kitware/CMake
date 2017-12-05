@@ -17,7 +17,6 @@
 #include <set>
 #include <stdlib.h>
 #include <string.h>
-#include <type_traits>
 
 static const char* cmCTestErrorMatches[] = {
   "^[Bb]us [Ee]rror",
@@ -283,7 +282,7 @@ int cmCTestBuildHandler::ProcessHandler()
                      this->Quiet);
 
   // do we have time for this
-  if (this->CTest->GetRemainingTimeAllowed() < 120) {
+  if (this->CTest->GetRemainingTimeAllowed() < std::chrono::minutes(2)) {
     return 0;
   }
 

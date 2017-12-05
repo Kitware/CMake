@@ -9,7 +9,6 @@
 #include <chrono>
 #include <ostream>
 #include <string>
-#include <type_traits>
 
 cmCTestConfigureHandler::cmCTestConfigureHandler()
 {
@@ -63,8 +62,9 @@ int cmCTestConfigureHandler::ProcessHandler()
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "Configure with command: " << cCommand << std::endl,
                        this->Quiet);
-    res = this->CTest->RunMakeCommand(cCommand.c_str(), output, &retVal,
-                                      buildDirectory.c_str(), 0, ofs);
+    res = this->CTest->RunMakeCommand(
+      cCommand.c_str(), output, &retVal, buildDirectory.c_str(),
+      std::chrono::duration<double>::zero(), ofs);
 
     if (ofs) {
       ofs.close();

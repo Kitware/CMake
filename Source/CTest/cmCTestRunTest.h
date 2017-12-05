@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <chrono>
 #include <set>
 #include <stddef.h>
 #include <string>
@@ -78,8 +79,9 @@ private:
   void DartProcessing();
   void ExeNotFound(std::string exe);
   // Figures out a final timeout which is min(STOP_TIME, NOW+TIMEOUT)
-  double ResolveTimeout();
-  bool ForkProcess(double testTimeOut, bool explicitTimeout,
+  std::chrono::duration<double> ResolveTimeout();
+  bool ForkProcess(std::chrono::duration<double> testTimeOut,
+                   bool explicitTimeout,
                    std::vector<std::string>* environment);
   void WriteLogOutputTop(size_t completed, size_t total);
   // Run post processing of the process output for MemCheck

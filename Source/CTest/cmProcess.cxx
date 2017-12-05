@@ -4,13 +4,22 @@
 
 #include "cmProcessOutput.h"
 #include <iostream>
-#include <type_traits>
+
+void cmsysProcess_SetTimeout(cmsysProcess* process,
+                             std::chrono::duration<double> timeout)
+{
+  cmsysProcess_SetTimeout(
+    process,
+    double(
+      std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()) /
+      1000.0);
+};
 
 cmProcess::cmProcess()
 {
   this->Process = nullptr;
-  this->Timeout = 0;
-  this->TotalTime = 0;
+  this->Timeout = std::chrono::duration<double>::zero();
+  this->TotalTime = std::chrono::duration<double>::zero();
   this->ExitValue = 0;
   this->Id = 0;
   this->StartTime = std::chrono::steady_clock::time_point();
@@ -101,10 +110,15 @@ bool cmProcess::Buffer::GetLast(std::string& line)
   return false;
 }
 
-int cmProcess::GetNextOutputLine(std::string& line, double timeout)
+int cmProcess::GetNextOutputLine(std::string& line,
+                                 std::chrono::duration<double> timeout)
 {
   cmProcessOutput processOutput(cmProcessOutput::UTF8);
   std::string strdata;
+  double waitTimeout =
+    double(
+      std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()) /
+    1000.0;
   for (;;) {
     // Look for lines already buffered.
     if (this->Output.GetLine(line)) {
@@ -114,7 +128,8 @@ int cmProcess::GetNextOutputLine(std::string& line, double timeout)
     // Check for more data from the process.
     char* data;
     int length;
-    int p = cmsysProcess_WaitForData(this->Process, &data, &length, &timeout);
+    int p =
+      cmsysProcess_WaitForData(this->Process, &data, &length, &waitTimeout);
     if (p == cmsysProcess_Pipe_Timeout) {
       return cmsysProcess_Pipe_Timeout;
     }
@@ -137,23 +152,19 @@ int cmProcess::GetNextOutputLine(std::string& line, double timeout)
   }
 
   // No more data.  Wait for process exit.
-  if (!cmsysProcess_WaitForExit(this->Process, &timeout)) {
+  if (!cmsysProcess_WaitForExit(this->Process, &waitTimeout)) {
     return cmsysProcess_Pipe_Timeout;
   }
 
   // Record exit information.
   this->ExitValue = cmsysProcess_GetExitValue(this->Process);
-  this->TotalTime =
-    static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(
-                          std::chrono::steady_clock::now() - this->StartTime)
-                          .count()) /
-    1000.0;
+  this->TotalTime = std::chrono::steady_clock::now() - this->StartTime;
   // Because of a processor clock scew the runtime may become slightly
   // negative. If someone changed the system clock while the process was
   // running this may be even more. Make sure not to report a negative
   // duration here.
-  if (this->TotalTime <= 0.0) {
-    this->TotalTime = 0.0;
+  if (this->TotalTime <= std::chrono::duration<double>::zero()) {
+    this->TotalTime = std::chrono::duration<double>::zero();
   }
   //  std::cerr << "Time to run: " << this->TotalTime << "\n";
   return cmsysProcess_Pipe_None;
@@ -226,7 +237,7 @@ int cmProcess::ReportStatus()
   return result;
 }
 
-void cmProcess::ChangeTimeout(double t)
+void cmProcess::ChangeTimeout(std::chrono::duration<double> t)
 {
   this->Timeout = t;
   cmsysProcess_SetTimeout(this->Process, this->Timeout);
