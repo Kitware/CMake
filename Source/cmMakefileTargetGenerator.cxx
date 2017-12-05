@@ -425,6 +425,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
 
   std::string config = this->LocalGenerator->GetConfigName();
   std::string configUpper = cmSystemTools::UpperCase(config);
+  cmGeneratorExpressionInterpreter genexInterpreter(
+    this->LocalGenerator, this->GeneratorTarget, config);
 
   // Add Fortran format flags.
   if (lang == "Fortran") {
@@ -433,10 +435,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
 
   // Add flags from source file properties.
   if (const char* cflags = source.GetProperty("COMPILE_FLAGS")) {
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(cflags);
-    const char* evaluatedFlags = cge->Evaluate(this->LocalGenerator, config,
-                                               false, this->GeneratorTarget);
+    const char* evaluatedFlags = genexInterpreter.Evaluate(cflags);
     this->LocalGenerator->AppendFlags(flags, evaluatedFlags);
     *this->FlagFileStream << "# Custom flags: " << relativeObj
                           << "_FLAGS = " << evaluatedFlags << "\n"
