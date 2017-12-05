@@ -358,6 +358,10 @@ public:
 
   virtual bool IsIPOSupported() const { return false; }
 
+  /** Return whether the generator can import external visual studio project
+      using INCLUDE_EXTERNAL_MSPROJECT */
+  virtual bool IsIncludeExternalMSProjectSupported() const { return false; }
+
   /** Return whether the generator should use EFFECTIVE_PLATFORM_NAME. This is
       relevant for mixed macOS and iOS builds. */
   virtual bool UseEffectivePlatformName(cmMakefile*) const { return false; }
