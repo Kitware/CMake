@@ -9,7 +9,6 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkLineComputer.h"
-#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmServer.h"
@@ -20,7 +19,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmTarget.h"
 #include "cm_uv.h"
 #include "cmake.h"
 
@@ -732,37 +730,6 @@ static Json::Value DumpSourceFilesList(
   return result;
 }
 
-static Json::Value DumpBacktrace(const cmListFileBacktrace& backtrace)
-{
-  Json::Value result = Json::arrayValue;
-
-  cmListFileBacktrace backtraceCopy = backtrace;
-  while (!backtraceCopy.Top().FilePath.empty()) {
-    Json::Value entry = Json::objectValue;
-    entry[kPATH_KEY] = backtraceCopy.Top().FilePath;
-    if (backtraceCopy.Top().Line) {
-      entry[kLINE_NUMBER_KEY] = static_cast<int>(backtraceCopy.Top().Line);
-    }
-    if (!backtraceCopy.Top().Name.empty()) {
-      entry[kNAME_KEY] = backtraceCopy.Top().Name;
-    }
-    result.append(entry);
-    backtraceCopy = backtraceCopy.Pop();
-  }
-  return result;
-}
-
-static void DumpBacktraceRange(Json::Value& result, const std::string& type,
-                               cmBacktraceRange range)
-{
-  for (auto const& bt : range) {
-    Json::Value obj = Json::objectValue;
-    obj[kTYPE_KEY] = type;
-    obj[kBACKTRACE_KEY] = DumpBacktrace(bt);
-    result.append(obj);
-  }
-}
-
 static Json::Value DumpTarget(cmGeneratorTarget* target,
                               const std::string& config)
 {
@@ -796,22 +763,6 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
   }
 
   result[kFULL_NAME_KEY] = target->GetFullName(config);
-
-  Json::Value crossRefs = Json::objectValue;
-  crossRefs[kBACKTRACE_KEY] = DumpBacktrace(target->Target->GetBacktrace());
-
-  Json::Value statements = Json::arrayValue;
-  DumpBacktraceRange(statements, "target_compile_definitions",
-                     target->Target->GetCompileDefinitionsBacktraces());
-  DumpBacktraceRange(statements, "target_include_directories",
-                     target->Target->GetIncludeDirectoriesBacktraces());
-  DumpBacktraceRange(statements, "target_compile_options",
-                     target->Target->GetCompileOptionsBacktraces());
-  DumpBacktraceRange(statements, "target_link_libraries",
-                     target->Target->GetLinkImplementationBacktraces());
-
-  crossRefs[kRELATED_STATEMENTS_KEY] = std::move(statements);
-  result[kTARGET_CROSS_REFERENCES_KEY] = std::move(crossRefs);
 
   if (target->HaveWellDefinedOutputFiles()) {
     Json::Value artifacts = Json::arrayValue;
