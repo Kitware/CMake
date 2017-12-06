@@ -13,6 +13,6 @@ set(EXPECTED_FILE_CONTENT_3_LIST "/bas;/bas/libtest_lib.so")
 
 set(EXPECTED_FILE_4_NAME "Debuginfo")
 set(EXPECTED_FILE_4_COMPONENT "applications-debuginfo")
-set(EXPECTED_FILE_CONTENT_4 ".*/src${whitespaces_}/src/src_1${whitespaces_}/src/src_1/main.cpp.*")
+set(EXPECTED_FILE_CONTENT_4 ".*/src${whitespaces_}/src/src_1${whitespaces_}/src/src_1/main.cpp.*\.debug.*")
 set(EXPECTED_FILE_5 "libs-DebugInfoPackage.rpm")
-set(EXPECTED_FILE_CONTENT_5 ".*/src${whitespaces_}/src/src_1${whitespaces_}/src/src_1/test_lib.cpp.*")
+set(EXPECTED_FILE_CONTENT_5 ".*/src${whitespaces_}/src/src_1${whitespaces_}/src/src_1/test_lib.cpp.*\.debug.*")
