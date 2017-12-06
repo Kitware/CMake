@@ -517,9 +517,6 @@ Each target object can have the following keys:
   with the sysroot path.
 "fileGroups"
   contains the source files making up the target.
-"crossReferences"
-  contains the location of the target in the corresponding CMakeLists.txt
-  file and the locations of the related statements like "target_link_libraries"
 
 FileGroups are used to group sources using similar settings together.
 
@@ -544,16 +541,6 @@ Each fileGroup object may contain the following keys:
 
 All file paths in the fileGroup are either absolute or relative to the
 sourceDirectory of the target.
-
-CrossReferences object is used to report the location of the target (including
-the entire call stack if the target is defined in a function) and the related
-"target_link_libraries", "target_include_directories", "target_compile_definitions"
-and "target_compile_options" statements.
-
-See the example below for details on the internal format of the "crossReferences" object.
-Line numbers stated in the "backtrace" entries are 1-based. The last entry of a backtrace
-is a special entry with missing "line" and "name" fields that specifies the initial
-CMakeLists.txt file.
 
 Example::
 
@@ -591,34 +578,7 @@ CMake will reply::
                 "linkerLanguage": "C",
                 "name": "cmForm",
                 "sourceDirectory": "/home/code/src/cmake/Source/CursesDialog/form",
-                "type": "STATIC_LIBRARY",
-                "crossReferences": {
-                   "backtrace": [
-                      {
-                         "line": 7,
-                         "name": "add_executable",
-                         "path": "C:/full/path/CMakeLists.txt"
-                      },
-                      {
-                         "path": "c:/full/path/CMakeLists.txt"
-                      }
-                   ],
-                   "relatedStatements": [
-                      {
-                         "backtrace": [
-                            {
-                               "line": 8,
-                               "name": "target_link_libraries",
-                               "path": "c:/full/path/CMakeLists.txt"
-                            },
-                            {
-                               "path": "c:/full/path/CMakeLists.txt"
-                            }
-                         ],
-                         "type": "target_link_libraries"
-                      }
-                   ]
-                 }
+                "type": "STATIC_LIBRARY"
               }
             ]
           },
