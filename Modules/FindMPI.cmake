@@ -602,6 +602,9 @@ function (_MPI_interrogate_compiler lang)
   if(MPI_DIRECT_LIB_NAMES_WORK)
     set(MPI_PLAIN_LIB_NAMES_WORK "${MPI_DIRECT_LIB_NAMES_WORK};${MPI_PLAIN_LIB_NAMES_WORK}")
   endif()
+  if(MPI_${LANG}_EXTRA_LIB_NAMES)
+    list(APPEND MPI_PLAIN_LIB_NAMES_WORK "${MPI_${LANG}_EXTRA_LIB_NAMES}")
+  endif()
 
   # MPI might require pthread to work. The above mechanism wouldn't detect it, but we need to
   # link it in that case. -lpthread is covered by the normal library treatment on the other hand.
@@ -1076,18 +1079,21 @@ foreach (LANG IN ITEMS C CXX)
   endif()
 
   # If a list of libraries was given, we'll split it into new-style cache variables
+  unset(MPI_${LANG}_EXTRA_LIB_NAMES)
   if(NOT MPI_${LANG}_LIB_NAMES)
     foreach(_MPI_LIB IN LISTS MPI_${LANG}_LIBRARIES MPI_LIBRARY MPI_EXTRA_LIBRARY)
-      get_filename_component(_MPI_PLAIN_LIB_NAME "${_MPI_LIB}" NAME_WE)
-      get_filename_component(_MPI_LIB_NAME "${_MPI_LIB}" NAME)
-      get_filename_component(_MPI_LIB_DIR "${_MPI_LIB}" DIRECTORY)
-      list(APPEND MPI_PLAIN_LIB_NAMES_WORK "${_MPI_PLAIN_LIB_NAME}")
-      find_library(MPI_${_MPI_PLAIN_LIB_NAME}_LIBRARY
-        NAMES "${_MPI_LIB_NAME}" "lib${_MPI_LIB_NAME}"
-        HINTS ${_MPI_LIB_DIR} $ENV{MPI_LIB}
-        DOC "Location of the ${_MPI_PLAIN_LIB_NAME} library for MPI"
-      )
-      mark_as_advanced(MPI_${_MPI_PLAIN_LIB_NAME}_LIBRARY)
+      if(_MPI_LIB)
+        get_filename_component(_MPI_PLAIN_LIB_NAME "${_MPI_LIB}" NAME_WE)
+        get_filename_component(_MPI_LIB_NAME "${_MPI_LIB}" NAME)
+        get_filename_component(_MPI_LIB_DIR "${_MPI_LIB}" DIRECTORY)
+        list(APPEND MPI_${LANG}_EXTRA_LIB_NAMES "${_MPI_PLAIN_LIB_NAME}")
+        find_library(MPI_${_MPI_PLAIN_LIB_NAME}_LIBRARY
+          NAMES "${_MPI_LIB_NAME}" "lib${_MPI_LIB_NAME}"
+          HINTS ${_MPI_LIB_DIR} $ENV{MPI_LIB}
+          DOC "Location of the ${_MPI_PLAIN_LIB_NAME} library for MPI"
+        )
+        mark_as_advanced(MPI_${_MPI_PLAIN_LIB_NAME}_LIBRARY)
+      endif()
     endforeach()
   endif()
 endforeach()
