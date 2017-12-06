@@ -669,17 +669,6 @@ Each test object can have the following keys:
   contains the test command.
 "properties"
   contains a list of test property objects.
-"backtrace"
-  contains a list of backtrace objects that specify where the test was defined.
-
-Each backtrace object can have the following keys:
-
-"path"
-  contains the full path to the file containing the statement.
-"line"
-  contains the line number in the file where the statement was defined.
-"name"
-  contains the name of the statement that added the test.
 
 Each test property object can have the following keys:
 

@@ -799,9 +799,6 @@ static Json::Value DumpCTestInfo(cmTest* testInfo)
   }
   result[kPROPERTIES_KEY] = properties;
 
-  // Need backtrace to figure out where this test was originally added
-  result[kBACKTRACE_KEY] = DumpBacktrace(testInfo->GetBacktrace());
-
   return result;
 }
 
