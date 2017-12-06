@@ -2066,12 +2066,15 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   std::string flags;
   bool configDependentFlags = false;
   std::string defines;
+  bool configDependentDefines = false;
   if (const char* cflags = sf.GetProperty("COMPILE_FLAGS")) {
     configDependentFlags =
       cmGeneratorExpression::Find(cflags) != std::string::npos;
     flags += cflags;
   }
   if (const char* cdefs = sf.GetProperty("COMPILE_DEFINITIONS")) {
+    configDependentDefines =
+      cmGeneratorExpression::Find(cdefs) != std::string::npos;
     defines += cdefs;
   }
   std::string lang =
@@ -2121,6 +2124,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       if (!configDefines.empty()) {
         configDefines += ";";
       }
+      configDependentDefines |=
+        cmGeneratorExpression::Find(ccdefs) != std::string::npos;
       configDefines += ccdefs;
     }
     // if we have flags or defines for this config then
@@ -2170,7 +2175,11 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         clOptions.AppendFlag("DisableSpecificWarnings",
                              "%(DisableSpecificWarnings)");
       }
-      clOptions.AddDefines(configDefines.c_str());
+      if (configDependentDefines) {
+        clOptions.AddDefines(genexInterpreter.Evaluate(configDefines));
+      } else {
+        clOptions.AddDefines(configDefines.c_str());
+      }
       clOptions.SetConfiguration((*config).c_str());
       clOptions.PrependInheritedString("AdditionalOptions");
       clOptions.OutputFlagMap(*this->BuildFileStream, "      ");

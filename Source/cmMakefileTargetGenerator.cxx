@@ -447,18 +447,19 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
 
   // Add source-sepcific preprocessor definitions.
   if (const char* compile_defs = source.GetProperty("COMPILE_DEFINITIONS")) {
-    this->LocalGenerator->AppendDefines(defines, compile_defs);
+    const char* evaluatedDefs = genexInterpreter.Evaluate(compile_defs);
+    this->LocalGenerator->AppendDefines(defines, evaluatedDefs);
     *this->FlagFileStream << "# Custom defines: " << relativeObj
-                          << "_DEFINES = " << compile_defs << "\n"
+                          << "_DEFINES = " << evaluatedDefs << "\n"
                           << "\n";
   }
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += configUpper;
   if (const char* config_compile_defs = source.GetProperty(defPropName)) {
-    this->LocalGenerator->AppendDefines(defines, config_compile_defs);
+    const char* evaluatedDefs = genexInterpreter.Evaluate(config_compile_defs);
+    this->LocalGenerator->AppendDefines(defines, evaluatedDefs);
     *this->FlagFileStream << "# Custom defines: " << relativeObj << "_DEFINES_"
-                          << configUpper << " = " << config_compile_defs
-                          << "\n"
+                          << configUpper << " = " << evaluatedDefs << "\n"
                           << "\n";
   }
 

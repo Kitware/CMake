@@ -740,8 +740,11 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
 
   // Add per-source definitions.
   BuildObjectListOrString flagsBuild(this, false);
-  this->AppendDefines(flagsBuild, sf->GetProperty("COMPILE_DEFINITIONS"),
-                      true);
+  if (const char* compile_defs = sf->GetProperty("COMPILE_DEFINITIONS")) {
+    this->AppendDefines(
+      flagsBuild,
+      genexInterpreter.Evaluate(compile_defs, "COMPILE_DEFINITIONS"), true);
+  }
   if (!flagsBuild.IsEmpty()) {
     if (!flags.empty()) {
       flags += ' ';

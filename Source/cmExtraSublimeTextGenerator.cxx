@@ -379,6 +379,7 @@ std::string cmExtraSublimeTextGenerator::ComputeDefines(
   cmMakefile* makefile = lg->GetMakefile();
   const std::string& language = source->GetLanguage();
   const std::string& config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  cmGeneratorExpressionInterpreter genexInterpreter(lg, target, config);
 
   // Add the export symbol definition for shared library objects.
   if (const char* exportMacro = target->GetExportMacro()) {
@@ -387,11 +388,14 @@ std::string cmExtraSublimeTextGenerator::ComputeDefines(
 
   // Add preprocessor definitions for this target and configuration.
   lg->AddCompileDefinitions(defines, target, config, language);
-  lg->AppendDefines(defines, source->GetProperty("COMPILE_DEFINITIONS"));
-  {
-    std::string defPropName = "COMPILE_DEFINITIONS_";
-    defPropName += cmSystemTools::UpperCase(config);
-    lg->AppendDefines(defines, source->GetProperty(defPropName));
+  if (const char* compile_defs = source->GetProperty("COMPILE_DEFINITIONS")) {
+    lg->AppendDefines(defines, genexInterpreter.Evaluate(compile_defs));
+  }
+
+  std::string defPropName = "COMPILE_DEFINITIONS_";
+  defPropName += cmSystemTools::UpperCase(config);
+  if (const char* config_compile_defs = source->GetProperty(defPropName)) {
+    lg->AppendDefines(defines, genexInterpreter.Evaluate(config_compile_defs));
   }
 
   std::string definesString;
