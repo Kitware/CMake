@@ -279,6 +279,102 @@ macro(_pkg_recalculate _prefix _no_cmake_path _no_cmake_environment_path _imp_ta
 endmacro()
 
 ###
+macro(_pkg_set_path_internal)
+  set(_extra_paths)
+
+  if(NOT _no_cmake_path)
+    _pkgconfig_add_extra_path(_extra_paths CMAKE_PREFIX_PATH)
+    _pkgconfig_add_extra_path(_extra_paths CMAKE_FRAMEWORK_PATH)
+    _pkgconfig_add_extra_path(_extra_paths CMAKE_APPBUNDLE_PATH)
+  endif()
+
+  if(NOT _no_cmake_environment_path)
+    _pkgconfig_add_extra_path(_extra_paths ENV CMAKE_PREFIX_PATH)
+    _pkgconfig_add_extra_path(_extra_paths ENV CMAKE_FRAMEWORK_PATH)
+    _pkgconfig_add_extra_path(_extra_paths ENV CMAKE_APPBUNDLE_PATH)
+  endif()
+
+  if(NOT "${_extra_paths}" STREQUAL "")
+    # Save the PKG_CONFIG_PATH environment variable, and add paths
+    # from the CMAKE_PREFIX_PATH variables
+    set(_pkgconfig_path_old "$ENV{PKG_CONFIG_PATH}")
+    set(_pkgconfig_path "${_pkgconfig_path_old}")
+    if(NOT "${_pkgconfig_path}" STREQUAL "")
+      file(TO_CMAKE_PATH "${_pkgconfig_path}" _pkgconfig_path)
+    endif()
+
+    # Create a list of the possible pkgconfig subfolder (depending on
+    # the system
+    set(_lib_dirs)
+    if(NOT DEFINED CMAKE_SYSTEM_NAME
+        OR (CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU)$"
+            AND NOT CMAKE_CROSSCOMPILING))
+      if(EXISTS "/etc/debian_version") # is this a debian system ?
+        if(CMAKE_LIBRARY_ARCHITECTURE)
+          list(APPEND _lib_dirs "lib/${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig")
+        endif()
+      else()
+        # not debian, check the FIND_LIBRARY_USE_LIB32_PATHS and FIND_LIBRARY_USE_LIB64_PATHS properties
+        get_property(uselib32 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS)
+        if(uselib32 AND CMAKE_SIZEOF_VOID_P EQUAL 4)
+          list(APPEND _lib_dirs "lib32/pkgconfig")
+        endif()
+        get_property(uselib64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+        if(uselib64 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+          list(APPEND _lib_dirs "lib64/pkgconfig")
+        endif()
+        get_property(uselibx32 GLOBAL PROPERTY FIND_LIBRARY_USE_LIBX32_PATHS)
+        if(uselibx32 AND CMAKE_INTERNAL_PLATFORM_ABI STREQUAL "ELF X32")
+          list(APPEND _lib_dirs "libx32/pkgconfig")
+        endif()
+      endif()
+    endif()
+    if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" AND NOT CMAKE_CROSSCOMPILING)
+      list(APPEND _lib_dirs "libdata/pkgconfig")
+    endif()
+    list(APPEND _lib_dirs "lib/pkgconfig")
+    list(APPEND _lib_dirs "share/pkgconfig")
+
+    # Check if directories exist and eventually append them to the
+    # pkgconfig path list
+    foreach(_prefix_dir ${_extra_paths})
+      foreach(_lib_dir ${_lib_dirs})
+        if(EXISTS "${_prefix_dir}/${_lib_dir}")
+          list(APPEND _pkgconfig_path "${_prefix_dir}/${_lib_dir}")
+          list(REMOVE_DUPLICATES _pkgconfig_path)
+        endif()
+      endforeach()
+    endforeach()
+
+    # Prepare and set the environment variable
+    if(NOT "${_pkgconfig_path}" STREQUAL "")
+      # remove empty values from the list
+      list(REMOVE_ITEM _pkgconfig_path "")
+      file(TO_NATIVE_PATH "${_pkgconfig_path}" _pkgconfig_path)
+      if(UNIX)
+        string(REPLACE ";" ":" _pkgconfig_path "${_pkgconfig_path}")
+        string(REPLACE "\\ " " " _pkgconfig_path "${_pkgconfig_path}")
+      endif()
+      set(ENV{PKG_CONFIG_PATH} "${_pkgconfig_path}")
+    endif()
+
+    # Unset variables
+    unset(_lib_dirs)
+    unset(_pkgconfig_path)
+  endif()
+endmacro()
+
+macro(_pkg_restore_path_internal)
+  if(NOT "${_extra_paths}" STREQUAL "")
+    # Restore the environment variable
+    set(ENV{PKG_CONFIG_PATH} "${_pkgconfig_path_old}")
+  endif()
+
+  unset(_extra_paths)
+  unset(_pkgconfig_path_old)
+endmacro()
+
+###
 macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global _prefix)
   _pkgconfig_unset(${_prefix}_FOUND)
   _pkgconfig_unset(${_prefix}_VERSION)
@@ -318,88 +414,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
     set(_pkg_check_modules_packages)
     set(_pkg_check_modules_failed)
 
-    set(_extra_paths)
-
-    if(NOT _no_cmake_path)
-      _pkgconfig_add_extra_path(_extra_paths CMAKE_PREFIX_PATH)
-      _pkgconfig_add_extra_path(_extra_paths CMAKE_FRAMEWORK_PATH)
-      _pkgconfig_add_extra_path(_extra_paths CMAKE_APPBUNDLE_PATH)
-    endif()
-
-    if(NOT _no_cmake_environment_path)
-      _pkgconfig_add_extra_path(_extra_paths ENV CMAKE_PREFIX_PATH)
-      _pkgconfig_add_extra_path(_extra_paths ENV CMAKE_FRAMEWORK_PATH)
-      _pkgconfig_add_extra_path(_extra_paths ENV CMAKE_APPBUNDLE_PATH)
-    endif()
-
-    if(NOT "${_extra_paths}" STREQUAL "")
-      # Save the PKG_CONFIG_PATH environment variable, and add paths
-      # from the CMAKE_PREFIX_PATH variables
-      set(_pkgconfig_path_old "$ENV{PKG_CONFIG_PATH}")
-      set(_pkgconfig_path "${_pkgconfig_path_old}")
-      if(NOT "${_pkgconfig_path}" STREQUAL "")
-        file(TO_CMAKE_PATH "${_pkgconfig_path}" _pkgconfig_path)
-      endif()
-
-      # Create a list of the possible pkgconfig subfolder (depending on
-      # the system
-      set(_lib_dirs)
-      if(NOT DEFINED CMAKE_SYSTEM_NAME
-          OR (CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU)$"
-              AND NOT CMAKE_CROSSCOMPILING))
-        if(EXISTS "/etc/debian_version") # is this a debian system ?
-          if(CMAKE_LIBRARY_ARCHITECTURE)
-            list(APPEND _lib_dirs "lib/${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig")
-          endif()
-        else()
-          # not debian, check the FIND_LIBRARY_USE_LIB32_PATHS and FIND_LIBRARY_USE_LIB64_PATHS properties
-          get_property(uselib32 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS)
-          if(uselib32 AND CMAKE_SIZEOF_VOID_P EQUAL 4)
-            list(APPEND _lib_dirs "lib32/pkgconfig")
-          endif()
-          get_property(uselib64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
-          if(uselib64 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
-            list(APPEND _lib_dirs "lib64/pkgconfig")
-          endif()
-          get_property(uselibx32 GLOBAL PROPERTY FIND_LIBRARY_USE_LIBX32_PATHS)
-          if(uselibx32 AND CMAKE_INTERNAL_PLATFORM_ABI STREQUAL "ELF X32")
-            list(APPEND _lib_dirs "libx32/pkgconfig")
-          endif()
-        endif()
-      endif()
-      if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" AND NOT CMAKE_CROSSCOMPILING)
-        list(APPEND _lib_dirs "libdata/pkgconfig")
-      endif()
-      list(APPEND _lib_dirs "lib/pkgconfig")
-      list(APPEND _lib_dirs "share/pkgconfig")
-
-      # Check if directories exist and eventually append them to the
-      # pkgconfig path list
-      foreach(_prefix_dir ${_extra_paths})
-        foreach(_lib_dir ${_lib_dirs})
-          if(EXISTS "${_prefix_dir}/${_lib_dir}")
-            list(APPEND _pkgconfig_path "${_prefix_dir}/${_lib_dir}")
-            list(REMOVE_DUPLICATES _pkgconfig_path)
-          endif()
-        endforeach()
-      endforeach()
-
-      # Prepare and set the environment variable
-      if(NOT "${_pkgconfig_path}" STREQUAL "")
-        # remove empty values from the list
-        list(REMOVE_ITEM _pkgconfig_path "")
-        file(TO_NATIVE_PATH "${_pkgconfig_path}" _pkgconfig_path)
-        if(UNIX)
-          string(REPLACE ";" ":" _pkgconfig_path "${_pkgconfig_path}")
-          string(REPLACE "\\ " " " _pkgconfig_path "${_pkgconfig_path}")
-        endif()
-        set(ENV{PKG_CONFIG_PATH} "${_pkgconfig_path}")
-      endif()
-
-      # Unset variables
-      unset(_lib_dirs)
-      unset(_pkgconfig_path)
-    endif()
+    _pkg_set_path_internal()
 
     # iterate through module list and check whether they exist and match the required version
     foreach (_pkg_check_modules_pkg ${_pkg_check_modules_list})
@@ -502,13 +517,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global})
     endif()
 
-    if(NOT "${_extra_paths}" STREQUAL "")
-      # Restore the environment variable
-      set(ENV{PKG_CONFIG_PATH} "${_pkgconfig_path_old}")
-    endif()
-
-    unset(_extra_paths)
-    unset(_pkgconfig_path_old)
+    _pkg_restore_path_internal()
   else()
     if (${_is_required})
       message(SEND_ERROR "pkg-config tool not found")
