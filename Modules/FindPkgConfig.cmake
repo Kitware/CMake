@@ -84,26 +84,8 @@ macro(_pkgconfig_invoke _pkglist _prefix _varname _regexp)
   endif()
 endmacro()
 
-#[========================================[.rst:
-.. command:: pkg_get_variable
-
-  Retrieves the value of a pkg-config variable ``varName`` and stores it in the
-  result variable ``resultVar`` in the calling scope.
-
-  .. code-block:: cmake
-
-    pkg_get_variable(<resultVar> <moduleName> <varName>)
-
-  If ``pkg-config`` returns multiple values for the specified variable,
-  ``resultVar`` will contain a :ref:`;-list <CMake Language Lists>`.
-
-  For example:
-
-  .. code-block:: cmake
-
-    pkg_get_variable(GI_GIRDIR gobject-introspection-1.0 girdir)
-#]========================================]
-function (pkg_get_variable result pkg variable)
+# Internal version of pkg_get_variable; expects PKG_CONFIG_PATH to already be set
+function (_pkg_get_variable result pkg variable)
   _pkgconfig_invoke("${pkg}" "prefix" "result" "" "--variable=${variable}")
   set("${result}"
     "${prefix_result}"
@@ -294,12 +276,12 @@ macro(_pkg_set_path_internal)
     _pkgconfig_add_extra_path(_extra_paths ENV CMAKE_APPBUNDLE_PATH)
   endif()
 
-  if(NOT "${_extra_paths}" STREQUAL "")
+  if(NOT _extra_paths STREQUAL "")
     # Save the PKG_CONFIG_PATH environment variable, and add paths
     # from the CMAKE_PREFIX_PATH variables
     set(_pkgconfig_path_old "$ENV{PKG_CONFIG_PATH}")
     set(_pkgconfig_path "${_pkgconfig_path_old}")
-    if(NOT "${_pkgconfig_path}" STREQUAL "")
+    if(NOT _pkgconfig_path STREQUAL "")
       file(TO_CMAKE_PATH "${_pkgconfig_path}" _pkgconfig_path)
     endif()
 
@@ -347,7 +329,7 @@ macro(_pkg_set_path_internal)
     endforeach()
 
     # Prepare and set the environment variable
-    if(NOT "${_pkgconfig_path}" STREQUAL "")
+    if(NOT _pkgconfig_path STREQUAL "")
       # remove empty values from the list
       list(REMOVE_ITEM _pkgconfig_path "")
       file(TO_NATIVE_PATH "${_pkgconfig_path}" _pkgconfig_path)
@@ -365,7 +347,7 @@ macro(_pkg_set_path_internal)
 endmacro()
 
 macro(_pkg_restore_path_internal)
-  if(NOT "${_extra_paths}" STREQUAL "")
+  if(NOT _extra_paths STREQUAL "")
     # Restore the environment variable
     set(ENV{PKG_CONFIG_PATH} "${_pkgconfig_path_old}")
   endif()
@@ -720,6 +702,34 @@ macro(pkg_search_module _prefix _module0)
     _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global})
   endif()
 endmacro()
+
+#[========================================[.rst:
+.. command:: pkg_get_variable
+
+  Retrieves the value of a pkg-config variable ``varName`` and stores it in the
+  result variable ``resultVar`` in the calling scope.
+
+  .. code-block:: cmake
+
+    pkg_get_variable(<resultVar> <moduleName> <varName>)
+
+  If ``pkg-config`` returns multiple values for the specified variable,
+  ``resultVar`` will contain a :ref:`;-list <CMake Language Lists>`.
+
+  For example:
+
+  .. code-block:: cmake
+
+    pkg_get_variable(GI_GIRDIR gobject-introspection-1.0 girdir)
+#]========================================]
+function (pkg_get_variable result pkg variable)
+  _pkg_set_path_internal()
+  _pkgconfig_invoke("${pkg}" "prefix" "result" "" "--variable=${variable}")
+  set("${result}"
+    "${prefix_result}"
+    PARENT_SCOPE)
+  _pkg_restore_path_internal()
+endfunction ()
 
 
 #[========================================[.rst:
