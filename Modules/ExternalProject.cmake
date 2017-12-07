@@ -714,8 +714,9 @@ control needed to implement such step-level capabilities.
   The command line, comment, working directory and byproducts of every
   standard and custom step are processed to replace the tokens
   ``<SOURCE_DIR>``, ``<SOURCE_SUBDIR>``, ``<BINARY_DIR>``, ``<INSTALL_DIR>``
-  and ``<TMP_DIR>`` with their corresponding property values defined in the
-  original call to :command:`ExternalProject_Add`.
+  ``<TMP_DIR>``, ``<DOWNLOAD_DIR>`` and ``<DOWNLOADED_FILE>`` with their
+  corresponding property values defined in the original call to
+  :command:`ExternalProject_Add`.
 
 .. command:: ExternalProject_Add_StepTargets
 
@@ -1665,7 +1666,7 @@ macro(_ep_replace_location_tags target_name)
   set(vars ${ARGN})
   foreach(var ${vars})
     if(${var})
-      foreach(dir SOURCE_DIR SOURCE_SUBDIR BINARY_DIR INSTALL_DIR TMP_DIR DOWNLOADED_FILE)
+      foreach(dir SOURCE_DIR SOURCE_SUBDIR BINARY_DIR INSTALL_DIR TMP_DIR DOWNLOAD_DIR DOWNLOADED_FILE)
         get_property(val TARGET ${target_name} PROPERTY _EP_${dir})
         string(REPLACE "<${dir}>" "${val}" ${var} "${${var}}")
       endforeach()
