@@ -97,11 +97,6 @@ static const std::string kCTEST_INFO = "ctestInfo";
 static const std::string kMINIMUM_CMAKE_VERSION = "minimumCMakeVersion";
 static const std::string kIS_GENERATOR_PROVIDED_KEY = "isGeneratorProvided";
 
-static const std::string kTARGET_CROSS_REFERENCES_KEY = "crossReferences";
-static const std::string kLINE_NUMBER_KEY = "line";
-static const std::string kBACKTRACE_KEY = "backtrace";
-static const std::string kRELATED_STATEMENTS_KEY = "relatedStatements";
-
 static const std::string kSTART_MAGIC = "[== \"CMake Server\" ==[";
 static const std::string kEND_MAGIC = "]== \"CMake Server\" ==]";
 
