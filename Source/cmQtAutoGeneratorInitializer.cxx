@@ -1046,31 +1046,28 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     target->Target->AddPreBuildCommand(cc);
   } else {
 
-    // Convert file dependencies std::set to std::vector
-    std::vector<std::string> autogenDepends(autogenDependFiles.begin(),
-                                            autogenDependFiles.end());
-
     // Add link library target dependencies to the autogen target dependencies
-    for (std::string const& config : configsList) {
-      cmLinkImplementationLibraries const* libs =
-        target->GetLinkImplementationLibraries(config);
-      if (libs != nullptr) {
-        for (cmLinkItem const& item : libs->Libraries) {
-          cmGeneratorTarget const* libTarget = item.Target;
-          if ((libTarget != nullptr) &&
-              !StaticLibraryCycle(target, libTarget, config)) {
-            std::string util;
-            if (configsList.size() > 1) {
-              util += "$<$<CONFIG:";
-              util += config;
-              util += ">:";
+    {
+      // add_dependencies/addUtility do not support generator expressions.
+      // We depend only on the libraries found in all configs therefore.
+      std::map<cmGeneratorTarget const*, std::size_t> commonTargets;
+      for (std::string const& config : configsList) {
+        cmLinkImplementationLibraries const* libs =
+          target->GetLinkImplementationLibraries(config);
+        if (libs != nullptr) {
+          for (cmLinkItem const& item : libs->Libraries) {
+            cmGeneratorTarget const* libTarget = item.Target;
+            if ((libTarget != nullptr) &&
+                !StaticLibraryCycle(target, libTarget, config)) {
+              // Increment target config count
+              commonTargets[libTarget]++;
             }
-            util += libTarget->GetName();
-            if (configsList.size() > 1) {
-              util += ">";
-            }
-            autogenDepends.push_back(util);
           }
+        }
+      }
+      for (auto const& item : commonTargets) {
+        if (item.second == configsList.size()) {
+          autogenDependTargets.insert(item.first->Target);
         }
       }
     }
@@ -1078,8 +1075,10 @@ void cmQtAutoGeneratorInitializer::InitializeAutogenTarget(
     // Create autogen target
     cmTarget* autogenTarget = makefile->AddUtilityCommand(
       autogenTargetName, true, workingDirectory.c_str(),
-      /*byproducts=*/autogenProvides, autogenDepends, commandLines, false,
-      autogenComment.c_str());
+      /*byproducts=*/autogenProvides,
+      std::vector<std::string>(autogenDependFiles.begin(),
+                               autogenDependFiles.end()),
+      commandLines, false, autogenComment.c_str());
     // Create autogen generator target
     localGen->AddGeneratorTarget(
       new cmGeneratorTarget(autogenTarget, localGen));

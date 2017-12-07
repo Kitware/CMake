@@ -215,6 +215,12 @@ add_subdirectory(uicInclude)
 add_subdirectory(objectLibrary)
 
 # -- Test
+# MacOS Framework
+if(APPLE AND (NOT QT_TEST_VERSION STREQUAL 4))
+  add_subdirectory(macosFW)
+endif()
+
+# -- Test
 # Source files with the same basename in different subdirectories
 add_subdirectory(sameName)
 
