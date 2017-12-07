@@ -35,13 +35,12 @@
 
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
 
-#include <algorithm>  // lower_bound
-#include <functional> // unary_function
-#include <iterator>   // iterator_traits
-#include <memory>     // allocator
-#include <stddef.h>   // size_t
-#include <utility>    // pair
-#include <vector>     // vector
+#include <algorithm> // lower_bound
+#include <iterator>  // iterator_traits
+#include <memory>    // allocator
+#include <stddef.h>  // size_t
+#include <utility>   // pair
+#include <vector>    // vector
 
 #if defined(_MSC_VER)
 #pragma warning(push)

@@ -49,7 +49,7 @@ namespace @KWSYS_NAMESPACE@ {
 
 // identity is an extension: it is not part of the standard.
 template <class _Tp>
-struct _Identity : public std::unary_function<_Tp, _Tp>
+struct _Identity
 {
   const _Tp& operator()(const _Tp& __x) const { return __x; }
 };
