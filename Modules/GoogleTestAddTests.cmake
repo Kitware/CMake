@@ -24,19 +24,24 @@ endfunction()
 # Run test executable to get list of available tests
 if(NOT EXISTS "${TEST_EXECUTABLE}")
   message(FATAL_ERROR
-    "Specified test executable '${TEST_EXECUTABLE}' does not exist"
+    "Specified test executable does not exist.\n"
+    "  Path: '${TEST_EXECUTABLE}'"
   )
 endif()
 execute_process(
   COMMAND ${TEST_EXECUTOR} "${TEST_EXECUTABLE}" --gtest_list_tests
+  TIMEOUT ${TEST_DISCOVERY_TIMEOUT}
   OUTPUT_VARIABLE output
   RESULT_VARIABLE result
 )
 if(NOT ${result} EQUAL 0)
+  string(REPLACE "\n" "\n    " output "${output}")
   message(FATAL_ERROR
-    "Error running test executable '${TEST_EXECUTABLE}':\n"
+    "Error running test executable.\n"
+    "  Path: '${TEST_EXECUTABLE}'\n"
     "  Result: ${result}\n"
-    "  Output: ${output}\n"
+    "  Output:\n"
+    "    ${output}\n"
   )
 endif()
 
