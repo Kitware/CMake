@@ -21,3 +21,9 @@ gtest_discover_tests(
   EXTRA_ARGS how now "\"brown\" cow"
   PROPERTIES LABELS TEST2
 )
+
+add_executable(timeout_test timeout_test.cpp)
+
+gtest_discover_tests(
+  timeout_test
+)
