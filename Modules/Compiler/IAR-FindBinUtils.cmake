@@ -10,7 +10,7 @@ get_filename_component(__iar_hint_2 "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPI
 
 set(__iar_hints "${__iar_hint_1}" "${__iar_hint_2}")
 
-if("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
+if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
   # could allow using normal binutils ar, since objects are normal ELF files?
   find_program(CMAKE_IAR_LINKARM ilinkarm.exe HINTS ${__iar_hints}
       DOC "The IAR ARM linker")
@@ -38,7 +38,7 @@ set(CMAKE_IAR_LINKARM \"${CMAKE_IAR_LINKARM}\")
 ")
 
 
-elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR")
+elseif("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR")
 
   # For AVR and AVR32, IAR uses the "xlink" linker and the "xar" archiver:
   find_program(CMAKE_IAR_LINKER xlink.exe HINTS ${__iar_hints}
