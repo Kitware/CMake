@@ -18,7 +18,6 @@
 #include "cmsys/Base64.h"
 #include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
-#include <algorithm>
 #include <chrono>
 #include <iomanip>
 #include <sstream>
@@ -686,8 +685,10 @@ bool cmCTestRunTest::ForkProcess(std::chrono::duration<double> testTimeOut,
 
   // determine how much time we have
   std::chrono::duration<double> timeout =
-    std::min<std::chrono::duration<double>>(
-      this->CTest->GetRemainingTimeAllowed(), std::chrono::minutes(2));
+    this->CTest->GetRemainingTimeAllowed();
+  if (timeout != std::chrono::duration<double>::max()) {
+    timeout -= std::chrono::minutes(2);
+  }
   if (this->CTest->GetTimeOut() > std::chrono::duration<double>::zero() &&
       this->CTest->GetTimeOut() < timeout) {
     timeout = this->CTest->GetTimeOut();
