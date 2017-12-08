@@ -49,7 +49,7 @@ namespace @KWSYS_NAMESPACE@ {
 
 // select1st is an extension: it is not part of the standard.
 template <class T1, class T2>
-struct hash_select1st : public std::unary_function<std::pair<T1, T2>, T1>
+struct hash_select1st
 {
   const T1& operator()(const std::pair<T1, T2>& __x) const
   {
