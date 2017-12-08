@@ -41,9 +41,8 @@ macro(ADD_AUTOGEN_TEST NAME)
   unset(_BuildDir)
 endmacro()
 
-
 # Allow using qtx_wrap_cpp and qtx_generate_moc or not
-set(ALLOW_WRAP_CPP TRUE)
+set(QT_TEST_ALLOW_QT_MACROS TRUE)
 # Do a simple check if there is are non ASCII character in the build path
 string(REGEX MATCH "[^ -~]+" NON_ASCII_BDIR ${CMAKE_CURRENT_BINARY_DIR})
 if(NON_ASCII_BDIR)
@@ -51,11 +50,11 @@ if(NON_ASCII_BDIR)
   # qtx_wrap_cpp
   # https://bugreports.qt.io/browse/QTBUG-35480
   if(QT_TEST_VERSION STREQUAL 4)
-    set(ALLOW_WRAP_CPP FALSE)
+    set(QT_TEST_ALLOW_QT_MACROS FALSE)
   endif()
   # On windows qtx_wrap_cpp also fails in Qt5 when used on a path that
   # contains non ASCII characters
   if(WIN32)
-    set(ALLOW_WRAP_CPP FALSE)
+    set(QT_TEST_ALLOW_QT_MACROS FALSE)
   endif()
 endif()

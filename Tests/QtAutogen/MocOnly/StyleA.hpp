@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+/* clang-format off */
 /// Q_OBJECT on a single new line
 ///
 class StyleA : public QObject
@@ -11,5 +12,6 @@ class StyleA : public QObject
 public:
   StyleA();
 };
+/* clang-format on */
 
 #endif
