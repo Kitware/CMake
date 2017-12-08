@@ -1,8 +1,8 @@
 
-#include "skipSource/qItemA.hpp"
-#include "skipSource/qItemB.hpp"
-#include "skipSource/qItemC.hpp"
-#include "skipSource/qItemD.hpp"
+#include "qItemA.hpp"
+#include "qItemB.hpp"
+#include "qItemC.hpp"
+#include "qItemD.hpp"
 
 int main(int, char**)
 {

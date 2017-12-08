@@ -60,41 +60,6 @@ if(NON_ASCII_BDIR AND WIN32)
 endif()
 
 # -- Test
-# Test for SKIP_AUTOMOC and SKIP_AUTOGEN on an AUTOMOC enabled target
-if(ALLOW_WRAP_CPP)
-  # Generate header mocs manually
-  qtx_wrap_cpp(skipMocWrapMoc
-    skipSource/qItemA.hpp
-    skipSource/qItemB.hpp
-    skipSource/qItemC.hpp
-    skipSource/qItemD.hpp
-    )
-  set(skipMocSources
-    skipMoc.cpp
-    skipSource/qItemA.cpp
-    skipSource/qItemB.cpp
-    skipSource/qItemC.cpp
-    skipSource/qItemD.cpp
-    )
-  # When cpp files are skipped, the hpp won't be processed either,
-  # unless they are mentioned in the sources - which they aren't.
-  set_property(SOURCE skipSource/qItemA.cpp PROPERTY SKIP_AUTOMOC ON)
-  set_property(SOURCE skipSource/qItemB.cpp PROPERTY SKIP_AUTOGEN ON)
-  # When hpp files are skipped, the cpp still get processed.
-  set_property(SOURCE skipSource/qItemC.hpp PROPERTY SKIP_AUTOMOC ON)
-  set_property(SOURCE skipSource/qItemD.hpp PROPERTY SKIP_AUTOGEN ON)
-  # AUTOMOC enabled only
-  add_executable(skipMocA ${skipMocSources} ${skipMocWrapMoc})
-  set_property(TARGET skipMocA PROPERTY AUTOMOC ON)
-  target_link_libraries(skipMocA ${QT_LIBRARIES})
-  # AUTOMOC and AUTOUIC enabled
-  add_executable(skipMocB ${skipMocSources} ${skipMocWrapMoc})
-  set_property(TARGET skipMocB PROPERTY AUTOMOC ON)
-  set_property(TARGET skipMocB PROPERTY AUTOUIC ON)
-  target_link_libraries(skipMocB ${QT_LIBRARIES})
-endif()
-
-# -- Test
 # Test for SKIP_AUTOUIC and SKIP_AUTOGEN on an AUTOUIC enabled target
 set(skipUicSources
   skipUic.cpp
