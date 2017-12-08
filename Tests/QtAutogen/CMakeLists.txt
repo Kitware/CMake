@@ -60,13 +60,6 @@ if(NON_ASCII_BDIR AND WIN32)
 endif()
 
 # -- Test
-# Tests various include moc patterns
-if(ALLOW_WRAP_CPP)
-  add_subdirectory(mocIncludeStrict)
-  add_subdirectory(mocIncludeRelaxed)
-endif()
-
-# -- Test
 # Tests policy 0071
 if(ALLOW_WRAP_CPP)
   add_subdirectory(mocCMP0071)

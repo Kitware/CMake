@@ -35,6 +35,7 @@ EObjA::EObjA()
 
 EObjA::~EObjA()
 {
+  delete d;
 }
 
 // For EObjALocal
