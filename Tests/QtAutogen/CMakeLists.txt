@@ -60,10 +60,6 @@ if(NON_ASCII_BDIR AND WIN32)
 endif()
 
 # -- Test
-# OBJECT libraries
-add_subdirectory(objectLibrary)
-
-# -- Test
 # MacOS Framework
 if(APPLE AND (NOT QT_TEST_VERSION STREQUAL 4))
   add_subdirectory(macosFW)
