@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.9)
-cmake_policy(SET CMP0071 OLD)
+cmake_minimum_required(VERSION 3.10)
+cmake_policy(SET CMP0071 NEW)
 
 # *Generate* files
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
@@ -11,8 +11,6 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy ${CSD}/../Obj.cpp ${CBD}/Obj.cpp
   COMMAND ${CMAKE_COMMAND} -E copy ${CSD}/../main.cpp ${CBD}/main.cpp)
 
-# Generate moc files externally
-qtx_wrap_cpp(mocCMP0071OldMoc ${CBD}/Obj.hpp ${CBD}/Obj_p.h)
-add_executable(mocCMP0071Old ${CBD}/Obj.cpp ${CBD}/main.cpp ${mocCMP0071OldMoc})
-target_link_libraries(mocCMP0071Old ${QT_LIBRARIES})
-set_target_properties(mocCMP0071Old PROPERTIES AUTOMOC ON)
+add_executable(mocCMP0071New ${CBD}/Obj.cpp ${CBD}/main.cpp)
+target_link_libraries(mocCMP0071New ${QT_LIBRARIES})
+set_target_properties(mocCMP0071New PROPERTIES AUTOMOC ON)

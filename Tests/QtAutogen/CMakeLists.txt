@@ -60,12 +60,6 @@ if(NON_ASCII_BDIR AND WIN32)
 endif()
 
 # -- Test
-# Tests policy 0071
-if(ALLOW_WRAP_CPP)
-  add_subdirectory(mocCMP0071)
-endif()
-
-# -- Test
 # Tests various .ui include directories
 add_subdirectory(uicInclude)
 
