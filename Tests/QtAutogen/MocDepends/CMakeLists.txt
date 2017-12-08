@@ -1,18 +1,6 @@
-cmake_minimum_required(VERSION 3.9)
-cmake_policy(SET CMP0071 NEW)
-project(mocDepends CXX)
-
-if (QT_TEST_VERSION STREQUAL 4)
-  find_package(Qt4 REQUIRED)
-  set(QT_CORE_TARGET Qt4::QtCore)
-else()
-  if (NOT QT_TEST_VERSION STREQUAL 5)
-    message(SEND_ERROR "Invalid Qt version specified.")
-  endif()
-
-  find_package(Qt5Core REQUIRED)
-  set(QT_CORE_TARGET Qt5::Core)
-endif()
+cmake_minimum_required(VERSION 3.10)
+project(MocDepends)
+include("../AutogenTest.cmake")
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
@@ -42,7 +30,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy ${CSD}/object_valid.hpp.in ${CBD}/GenFile.hpp)
 
 add_executable(mocDepGenFile testGenFile.cpp ${CBD}/GenFile.hpp)
-target_link_libraries(mocDepGenFile ${QT_CORE_TARGET})
+target_link_libraries(mocDepGenFile ${QT_QTCORE_TARGET})
 set_target_properties(mocDepGenFile PROPERTIES AUTOMOC TRUE)
 
 
@@ -69,7 +57,7 @@ add_custom_target(mocDepTargetUtil
   COMMAND ${CMAKE_COMMAND} -E copy ${CSD}/object_valid.hpp.in ${CBD}/GenTarget.hpp)
 
 add_executable(mocDepTarget testGenTarget.cpp)
-target_link_libraries(mocDepTarget ${QT_CORE_TARGET})
+target_link_libraries(mocDepTarget ${QT_QTCORE_TARGET})
 set_target_properties(mocDepTarget PROPERTIES AUTOMOC TRUE)
 add_dependencies(mocDepTarget mocDepTargetUtil)
 
@@ -96,10 +84,10 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy ${CSD}/simpleLib.hpp.in ${CBD}/simpleLib.hpp
   COMMAND ${CMAKE_COMMAND} -E copy ${CSD}/simpleLib.cpp.in ${CBD}/simpleLib.cpp)
 add_library(SimpleLib STATIC ${CBD}/simpleLib.hpp ${CBD}/simpleLib.cpp)
-target_link_libraries(SimpleLib ${QT_CORE_TARGET})
+target_link_libraries(SimpleLib ${QT_QTCORE_TARGET})
 
 add_executable(mocDepGenLib testGenLib.cpp)
-target_link_libraries(mocDepGenLib SimpleLib ${QT_CORE_TARGET})
+target_link_libraries(mocDepGenLib SimpleLib ${QT_QTCORE_TARGET})
 set_target_properties(mocDepGenLib PROPERTIES AUTOMOC TRUE)
 
 
@@ -122,7 +110,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy ${CSD}/object_valid.hpp.in ${CBD}/ATDFile.hpp)
 
 add_executable(mocDepATDFile testATDFile.cpp)
-target_link_libraries(mocDepATDFile ${QT_CORE_TARGET})
+target_link_libraries(mocDepATDFile ${QT_QTCORE_TARGET})
 set_target_properties(mocDepATDFile PROPERTIES AUTOMOC TRUE)
 set_target_properties(mocDepATDFile PROPERTIES AUTOGEN_TARGET_DEPENDS ${CBD}/ATDFile.hpp)
 
@@ -146,6 +134,6 @@ add_custom_target(mocDepATDTargetUtil
   COMMAND ${CMAKE_COMMAND} -E copy ${CSD}/object_valid.hpp.in ${CBD}/ATDTarget.hpp)
 
 add_executable(mocDepATDTarget testATDTarget.cpp)
-target_link_libraries(mocDepATDTarget ${QT_CORE_TARGET})
+target_link_libraries(mocDepATDTarget ${QT_QTCORE_TARGET})
 set_target_properties(mocDepATDTarget PROPERTIES AUTOMOC TRUE)
 set_target_properties(mocDepATDTarget PROPERTIES AUTOGEN_TARGET_DEPENDS mocDepATDTargetUtil)

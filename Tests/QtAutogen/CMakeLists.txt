@@ -60,10 +60,6 @@ if(NON_ASCII_BDIR AND WIN32)
 endif()
 
 # -- Test
-# Tests AUTOMOC with generated sources
-add_subdirectory(mocDepends)
-
-# -- Test
 # Tests various include moc patterns
 if(ALLOW_WRAP_CPP)
   add_subdirectory(mocIncludeStrict)
