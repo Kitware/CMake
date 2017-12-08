@@ -1,7 +1,7 @@
 
-#include "skipSource/skipUicGen.hpp"
-#include "skipSource/skipUicNoGen1.hpp"
-#include "skipSource/skipUicNoGen2.hpp"
+#include "skipUicGen.hpp"
+#include "skipUicNoGen1.hpp"
+#include "skipUicNoGen2.hpp"
 
 int main(int, char**)
 {
