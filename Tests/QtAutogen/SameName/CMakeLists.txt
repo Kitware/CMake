@@ -1,3 +1,7 @@
+cmake_minimum_required(VERSION 3.10)
+project(SameName)
+include("../AutogenTest.cmake")
+
 # Test AUTOMOC and AUTORCC on source files with the same name
 # but in different subdirectories
 
@@ -20,7 +24,8 @@ target_link_libraries(sameName ${QT_LIBRARIES})
 set_target_properties(sameName PROPERTIES
   AUTOMOC TRUE
   AUTOUIC TRUE
-  AUTORCC TRUE)
+  AUTORCC TRUE
+)
 
 # Set different compression levels
 if (QT_TEST_VERSION STREQUAL 4)

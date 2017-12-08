@@ -60,10 +60,6 @@ if(NON_ASCII_BDIR AND WIN32)
 endif()
 
 # -- Test
-# Source files with the same basename in different subdirectories
-add_subdirectory(sameName)
-
-# -- Test
 # Tests static library cycles
 add_subdirectory(staticLibraryCycle)
 
