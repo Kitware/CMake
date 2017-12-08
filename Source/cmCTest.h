@@ -427,9 +427,6 @@ public:
   void SetFailover(bool failover) { this->Failover = failover; }
   bool GetFailover() { return this->Failover; }
 
-  void SetBatchJobs(bool batch = true) { this->BatchJobs = batch; }
-  bool GetBatchJobs() { return this->BatchJobs; }
-
   bool GetVerbose() { return this->Verbose; }
   bool GetExtraVerbose() { return this->ExtraVerbose; }
 
@@ -475,7 +472,6 @@ private:
   bool UseHTTP10;
   bool PrintLabels;
   bool Failover;
-  bool BatchJobs;
 
   bool ForceNewCTestProcess;
 

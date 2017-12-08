@@ -19,7 +19,6 @@
 
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
-#include "cmCTestBatchTestHandler.h"
 #include "cmCTestMultiProcessHandler.h"
 #include "cmCommand.h"
 #include "cmGeneratedFileStream.h"
@@ -1210,9 +1209,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   this->StartTestTime = std::chrono::system_clock::now();
   auto elapsed_time_start = std::chrono::steady_clock::now();
 
-  cmCTestMultiProcessHandler* parallel = this->CTest->GetBatchJobs()
-    ? new cmCTestBatchTestHandler
-    : new cmCTestMultiProcessHandler;
+  cmCTestMultiProcessHandler* parallel = new cmCTestMultiProcessHandler;
   parallel->SetCTest(this->CTest);
   parallel->SetParallelLevel(this->CTest->GetParallelLevel());
   parallel->SetTestHandler(this);

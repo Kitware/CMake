@@ -3069,8 +3069,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
   add_test(CTestTestShowOnly ${CMAKE_CTEST_COMMAND} -N)
 
-  add_test(CTestBatchTest ${CMAKE_CTEST_COMMAND} -B)
-
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestFdSetSize/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestFdSetSize/test.cmake"
