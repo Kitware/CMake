@@ -1,6 +1,7 @@
 #include "Object.hpp"
 
 Object::Object()
+  : _test(0)
 {
 }
 

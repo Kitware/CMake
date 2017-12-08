@@ -60,12 +60,6 @@ if(NON_ASCII_BDIR AND WIN32)
 endif()
 
 # -- Test
-# MOC AUTOMOC_MACRO_NAMES
-if (NOT QT_TEST_VERSION STREQUAL 4)
-  add_subdirectory(mocMacroName)
-endif()
-
-# -- Test
 # Tests AUTOMOC with generated sources
 add_subdirectory(mocDepends)
 

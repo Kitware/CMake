@@ -6,10 +6,14 @@
 class Gadget
 {
   Q_GADGET
-  Q_PROPERTY(int test MEMBER test)
+  Q_PROPERTY(int test READ getTest)
 public:
   Gadget();
-  int test;
+
+  int getTest() { return _test; }
+
+private:
+  int _test;
 };
 
 #endif

@@ -1,6 +1,6 @@
 #include "Gadget.hpp"
 
 Gadget::Gadget()
-  : test(0)
+  : _test(0)
 {
 }

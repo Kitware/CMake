@@ -6,14 +6,17 @@
 class Object : public QObject
 {
   Q_OBJECT
-  Q_PROPERTY(int test MEMBER test)
+  Q_PROPERTY(int test READ getTest)
 public:
   Object();
+
+  int getTest() { return _test; }
 
   Q_SLOT
   void aSlot();
 
-  int test;
+private:
+  int _test;
 };
 
 #endif
