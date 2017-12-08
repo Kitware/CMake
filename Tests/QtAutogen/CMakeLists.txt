@@ -60,10 +60,6 @@ if(NON_ASCII_BDIR AND WIN32)
 endif()
 
 # -- Test
-# Tests various .ui include directories
-add_subdirectory(uicInclude)
-
-# -- Test
 # OBJECT libraries
 add_subdirectory(objectLibrary)
 

@@ -1,5 +1,8 @@
-# Test moc include patterns
+cmake_minimum_required(VERSION 3.10)
+project(UicInclude)
+include("../AutogenTest.cmake")
 
+# Test uic include patterns
 set(CMAKE_AUTOUIC_SEARCH_PATHS "dirA")
 
 add_executable(uicInclude main.cpp)
