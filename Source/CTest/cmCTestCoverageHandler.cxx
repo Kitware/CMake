@@ -11,7 +11,6 @@
 #include "cmParseGTMCoverage.h"
 #include "cmParseJacocoCoverage.h"
 #include "cmParsePHPCoverage.h"
-#include "cmProcess.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
@@ -81,7 +80,7 @@ public:
 
     cmsysProcess_SetOption(this->Process, cmsysProcess_Option_HideWindow, 1);
     if (this->TimeOut >= std::chrono::duration<double>::zero()) {
-      cmsysProcess_SetTimeout(this->Process, this->TimeOut);
+      cmsysProcess_SetTimeout(this->Process, this->TimeOut.count());
     }
     cmsysProcess_Execute(this->Process);
     this->PipeState = cmsysProcess_GetState(this->Process);
