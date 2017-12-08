@@ -60,15 +60,6 @@ if(NON_ASCII_BDIR AND WIN32)
 endif()
 
 # -- Test
-# UIC only
-if(ALLOW_WRAP_CPP)
-  qtx_wrap_cpp(uicOnlyMoc uicOnlySource/uiconly.h)
-  add_executable(uicOnly uicOnlySource/uiconly.cpp ${uicOnlyMoc})
-  set_property(TARGET uicOnly PROPERTY AUTOUIC ON)
-  target_link_libraries(uicOnly ${QT_LIBRARIES})
-endif()
-
-# -- Test
 # RCC only
 add_executable(rccOnly rccOnly.cpp rccOnlyRes.qrc)
 set_property(TARGET rccOnly PROPERTY AUTORCC ON)
