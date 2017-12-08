@@ -60,9 +60,5 @@ if(NON_ASCII_BDIR AND WIN32)
 endif()
 
 # -- Test
-# Tests static library cycles
-add_subdirectory(staticLibraryCycle)
-
-# -- Test
 # Complex test case
 add_subdirectory(complex)

@@ -6,6 +6,8 @@
 class A : public QObject
 {
   Q_OBJECT
+  static bool recursed;
+
 public:
   A();
 };
