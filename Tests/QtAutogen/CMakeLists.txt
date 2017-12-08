@@ -60,18 +60,6 @@ if(NON_ASCII_BDIR AND WIN32)
 endif()
 
 # -- Test
-# RCC only
-add_executable(rccOnly rccOnly.cpp rccOnlyRes.qrc)
-set_property(TARGET rccOnly PROPERTY AUTORCC ON)
-target_link_libraries(rccOnly ${QT_QTCORE_TARGET})
-
-# -- Test
-# RCC empty
-add_executable(rccEmpty rccEmpty.cpp rccEmptyRes.qrc)
-set_property(TARGET rccEmpty PROPERTY AUTORCC ON)
-target_link_libraries(rccEmpty ${QT_QTCORE_TARGET})
-
-# -- Test
 # Add not_generated_file.qrc to the source list to get the file-level
 # dependency, but don't generate a c++ file from it.  Disable the AUTORCC
 # feature for this target.  This tests that qrc files in the sources don't
