@@ -1089,9 +1089,10 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
   bool modifyEnv = (environment && !environment->empty());
 
   // determine how much time we have
-  std::chrono::duration<double> timeout =
-    std::min<std::chrono::duration<double>>(this->GetRemainingTimeAllowed(),
-                                            std::chrono::minutes(2));
+  std::chrono::duration<double> timeout = this->GetRemainingTimeAllowed();
+  if (timeout != std::chrono::duration<double>::max()) {
+    timeout -= std::chrono::minutes(2);
+  }
   if (this->TimeOut > std::chrono::duration<double>::zero() &&
       this->TimeOut < timeout) {
     timeout = this->TimeOut;
