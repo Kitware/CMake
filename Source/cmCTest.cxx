@@ -1131,6 +1131,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
         // invocations. Since --build-generator is required this is a
         // good place to check for it, and to add the arguments in
         if (strcmp(i, "--build-generator") == 0 &&
+            timeout != std::chrono::duration<double>::max() &&
             timeout > std::chrono::duration<double>::zero()) {
           args.push_back("--test-timeout");
           std::ostringstream msg;
