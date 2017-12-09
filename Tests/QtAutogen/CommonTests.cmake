@@ -33,3 +33,6 @@ ADD_AUTOGEN_TEST(StaticLibraryCycle slc)
 ADD_AUTOGEN_TEST(Complex QtAutogen)
 # Rerun tests
 ADD_AUTOGEN_TEST(RerunMocBasic)
+if(NOT QT_TEST_VERSION STREQUAL 4)
+  ADD_AUTOGEN_TEST(RerunMocPlugin)
+endif()

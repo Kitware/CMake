@@ -40,10 +40,4 @@ endif()
 add_executable(dummy dummy.cpp)
 
 # -- Test
-# Tests Q_PLUGIN_METADATA json file change detection
-if (NOT QT_TEST_VERSION STREQUAL 4)
-  include("mocPlugin.cmake")
-endif()
-
-# -- Test
 include("rccDepends.cmake")

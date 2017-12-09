@@ -1,19 +1,15 @@
-cmake_minimum_required(VERSION 3.9)
-project(mocPlugin CXX)
-
-set(CMAKE_AUTOMOC_DEPEND_FILTERS
-  "A_CUSTOM_MACRO"
-  "[\n][ \t]*A_CUSTOM_MACRO[ \t\r\n]*\\([^,]+,[ \t\r\n]*\"([^\"]+)\""
-  )
+cmake_minimum_required(VERSION 3.10)
+project(MocPlugin)
+include("../../AutogenTest.cmake")
 
 if (NOT QT_TEST_VERSION STREQUAL 5)
   message(SEND_ERROR "Invalid Qt version specified.")
 endif()
-find_package(Qt5Widgets REQUIRED)
 
-if(Qt5_POSITION_INDEPENDENT_CODE AND CMAKE_CXX_COMPILE_OPTIONS_PIC)
-  add_definitions(${CMAKE_CXX_COMPILE_OPTIONS_PIC})
-endif()
+set(CMAKE_AUTOMOC_DEPEND_FILTERS
+  "A_CUSTOM_MACRO"
+  "[\n][ \t]*A_CUSTOM_MACRO[ \t\r\n]*\\([^,]+,[ \t\r\n]*\"([^\"]+)\""
+)
 
 configure_file(jsonIn/StyleC.json jsonFiles/StyleC.json)
 configure_file(jsonIn/StyleC.json jsonFiles/StyleC_Custom.json)
@@ -22,7 +18,7 @@ configure_file(jsonIn/StyleD.json jsonFiles/sub/StyleD_Custom.json)
 configure_file(jsonIn/StyleE.json jsonFiles/StyleE.json)
 configure_file(jsonIn/StyleE.json jsonFiles/StyleE_Custom.json)
 
-# Enable automoc
+# Enable AUTOMOC
 set(CMAKE_AUTOMOC TRUE)
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/jsonFiles")
