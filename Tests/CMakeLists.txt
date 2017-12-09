@@ -1263,21 +1263,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
     add_subdirectory(Qt5Autogen)
 
-    add_test(NAME Qt5AutogenRerun COMMAND ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/QtAutogenRerun"
-      "${CMake_BINARY_DIR}/Tests/Qt5AutogenRerun"
-      ${build_generator_args}
-      --build-project QtAutogenRerun
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt5AutogenRerun"
-      --force-new-ctest-process
-      --build-options ${build_options}
-        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
-        -DQT_TEST_VERSION=5
-        ${QtAutogen_BUILD_OPTIONS}
-      )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt5AutogenRerun")
-
     add_test(Qt5AutoUicInterface ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/QtAutoUicInterface"
@@ -1294,21 +1279,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   endif()
   if(QT4_WORKS AND QT_QTGUI_FOUND)
     add_subdirectory(Qt4Autogen)
-
-    add_test(NAME Qt4AutogenRerun COMMAND ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/QtAutogenRerun"
-      "${CMake_BINARY_DIR}/Tests/Qt4AutogenRerun"
-      ${build_generator_args}
-      --build-project QtAutogenRerun
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4AutogenRerun"
-      --force-new-ctest-process
-      --build-options ${build_options}
-        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
-        -DQT_TEST_VERSION=4
-        ${QtAutogen_BUILD_OPTIONS}
-      )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4AutogenRerun")
 
     add_test(Qt4AutoUicInterface ${CMAKE_CTEST_COMMAND}
       --build-and-test

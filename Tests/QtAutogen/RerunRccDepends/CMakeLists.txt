@@ -1,8 +1,17 @@
+cmake_minimum_required(VERSION 3.10)
+project(RerunRccDepends)
+include("../AutogenTest.cmake")
+
+# Tests rcc rebuilding when a resource file changes
+
+# Dummy executable to generate a clean target
+add_executable(dummy dummy.cpp)
+
 # When a .qrc or a file listed in a .qrc file changes,
 # the target must be rebuilt
 set(timeformat "%Y%j%H%M%S")
-set(rccDepSD "${CMAKE_CURRENT_SOURCE_DIR}/rccDepends")
-set(rccDepBD "${CMAKE_CURRENT_BINARY_DIR}/rccDepends")
+set(rccDepSD "${CMAKE_CURRENT_SOURCE_DIR}/RccDepends")
+set(rccDepBD "${CMAKE_CURRENT_BINARY_DIR}/RccDepends")
 
 # Initial build
 configure_file(${rccDepSD}/resPlainA.qrc.in ${rccDepBD}/resPlain.qrc COPYONLY)
@@ -10,10 +19,9 @@ configure_file(${rccDepSD}/resGenA.qrc.in ${rccDepBD}/resGen.qrc.in COPYONLY)
 try_compile(RCC_DEPENDS
   "${rccDepBD}"
   "${rccDepSD}"
-  rccDepends
-  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
-              "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
-              "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
+  RccDepends
+  CMAKE_FLAGS "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+              "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
   OUTPUT_VARIABLE output
 )
 if (NOT RCC_DEPENDS)
