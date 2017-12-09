@@ -43,6 +43,8 @@ static const char* cmDocumentationOptions[][2] = {
   { "-D <var>=<value>", "Set a CPack variable." },
   { "--config <config file>", "Specify the config file." },
   { "--verbose,-V", "enable verbose output" },
+  { "--trace", "Put underlying cmake scripts in trace mode." },
+  { "--trace-expand", "Put underlying cmake scripts in expanded trace mode." },
   { "--debug", "enable debug output (for CPack developers)" },
   { "-P <package name>", "override/define CPACK_PACKAGE_NAME" },
   { "-R <package version>", "override/define CPACK_PACKAGE_VERSION" },
@@ -119,6 +121,8 @@ int main(int argc, char const* const* argv)
   bool help = false;
   bool helpVersion = false;
   bool verbose = false;
+  bool trace = false;
+  bool traceExpand = false;
   bool debug = false;
   std::string helpFull;
   std::string helpMAN;
@@ -154,6 +158,10 @@ int main(int argc, char const* const* argv)
   arg.AddArgument("--debug", argT::NO_ARGUMENT, &debug, "-V");
   arg.AddArgument("--config", argT::SPACE_ARGUMENT, &cpackConfigFile,
                   "CPack configuration file");
+  arg.AddArgument("--trace", argT::NO_ARGUMENT, &trace,
+                  "Put underlying cmake scripts in trace mode.");
+  arg.AddArgument("--trace-expand", argT::NO_ARGUMENT, &traceExpand,
+                  "Put underlying cmake scripts in expanded trace mode.");
   arg.AddArgument("-C", argT::SPACE_ARGUMENT, &cpackBuildConfig,
                   "CPack build configuration");
   arg.AddArgument("-G", argT::SPACE_ARGUMENT, &generator, "CPack generator");
@@ -196,6 +204,14 @@ int main(int argc, char const* const* argv)
 #if defined(__CYGWIN__)
   globalMF.AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
 #endif
+
+  if (trace) {
+    cminst.SetTrace(true);
+  }
+  if (traceExpand) {
+    cminst.SetTrace(true);
+    cminst.SetTraceExpand(true);
+  }
 
   bool cpackConfigFileSpecified = true;
   if (cpackConfigFile.empty()) {
@@ -340,6 +356,10 @@ int main(int argc, char const* const* argv)
                                                               << std::endl);
             parsed = 0;
           }
+
+          cpackGenerator->SetTrace(trace);
+          cpackGenerator->SetTraceExpand(traceExpand);
+
           if (parsed && !cpackGenerator->Initialize(gen, mf)) {
             cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                         "Cannot initialize the generator " << gen

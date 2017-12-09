@@ -62,6 +62,12 @@ Options
 
  Run cpack with debug output (for CPack developers).
 
+``--trace``
+ Put underlying cmake scripts in trace mode.
+
+``--trace-expand``
+ Put underlying cmake scripts in expanded trace mode.
+
 ``-P <package name>``
  override/define CPACK_PACKAGE_NAME
 

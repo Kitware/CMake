@@ -637,6 +637,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         cm.GetCurrentSnapshot().SetDefaultDefinitions();
         cm.AddCMakePaths();
         cm.SetProgressCallback(cmCPackGeneratorProgress, this);
+        cm.SetTrace(this->Trace);
+        cm.SetTraceExpand(this->TraceExpand);
         cmGlobalGenerator gg(&cm);
         cmMakefile mf(&gg, cm.GetCurrentSnapshot());
         if (!installSubDirectory.empty() && installSubDirectory != "/" &&
