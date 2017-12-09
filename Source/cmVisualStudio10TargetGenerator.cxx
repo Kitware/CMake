@@ -2448,7 +2448,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       clOptions.FixExceptionHandlingDefault();
       clOptions.AddFlag("PrecompiledHeader", "NotUsing");
       std::string asmLocation = configName + "/";
-      clOptions.AddFlag("AssemblerListingLocation", asmLocation.c_str());
+      clOptions.AddFlag("AssemblerListingLocation", asmLocation);
     }
   }
   clOptions.Parse(flags.c_str());
@@ -3315,8 +3315,8 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     imLib += "/";
     imLib += targetNameImport;
 
-    linkOptions.AddFlag("ImportLibrary", imLib.c_str());
-    linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
+    linkOptions.AddFlag("ImportLibrary", imLib);
+    linkOptions.AddFlag("ProgramDataBaseFile", pdb);
 
     // A Windows Runtime component uses internal .NET metadata,
     // so does not have an import library.
@@ -3337,7 +3337,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
       linkOptions.AppendFlag("IgnoreSpecificDefaultLibraries", "ole32.lib");
     }
   } else if (this->NsightTegra) {
-    linkOptions.AddFlag("SoName", targetNameSO.c_str());
+    linkOptions.AddFlag("SoName", targetNameSO);
   }
 
   linkOptions.Parse(flags.c_str());
