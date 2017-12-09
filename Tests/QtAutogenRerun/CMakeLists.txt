@@ -6,7 +6,7 @@ project(QtAutogenRerun)
 if(QT_QMAKE_EXECUTABLE)
   get_filename_component(Qt_BIN_DIR "${QT_QMAKE_EXECUTABLE}" PATH)
   get_filename_component(Qt_PREFIX_DIR "${Qt_BIN_DIR}" PATH)
-  set(CMAKE_PREFIX_PATH ${Qt_PREFIX_DIR})
+  list(APPEND CMAKE_PREFIX_PATH ${Qt_PREFIX_DIR})
 endif()
 
 if (QT_TEST_VERSION STREQUAL 4)
@@ -38,9 +38,6 @@ endif()
 
 # Dummy executable to generate clean target
 add_executable(dummy dummy.cpp)
-
-# -- Test
-include("mocRerun.cmake")
 
 # -- Test
 # Tests Q_PLUGIN_METADATA json file change detection

@@ -31,3 +31,5 @@ endif()
 ADD_AUTOGEN_TEST(SameName sameName)
 ADD_AUTOGEN_TEST(StaticLibraryCycle slc)
 ADD_AUTOGEN_TEST(Complex QtAutogen)
+# Rerun tests
+ADD_AUTOGEN_TEST(RerunMocBasic)
