@@ -29,6 +29,22 @@ enum LinkLibraryScopeType
 const char* const GRAPHVIZ_PRIVATE_EDEGE_STYLE = "dashed";
 const char* const GRAPHVIZ_INTERFACE_EDEGE_STYLE = "dotted";
 
+std::string getLinkLibraryStyle(const LinkLibraryScopeType& type)
+{
+  std::string style;
+  switch (type) {
+    case LLT_SCOPE_PRIVATE:
+      style = "[style = " + std::string(GRAPHVIZ_PRIVATE_EDEGE_STYLE) + "]";
+      break;
+    case LLT_SCOPE_INTERFACE:
+      style = "[style = " + std::string(GRAPHVIZ_INTERFACE_EDEGE_STYLE) + "]";
+      break;
+    default:
+      break;
+  }
+  return style;
+}
+
 const char* getShapeForTarget(const cmGeneratorTarget* target)
 {
   if (!target) {
@@ -132,6 +148,7 @@ cmGraphVizWriter::cmGraphVizWriter(
   , GenerateForStaticLibs(true)
   , GenerateForSharedLibs(true)
   , GenerateForModuleLibs(true)
+  , GenerateForInterface(true)
   , GenerateForExternals(true)
   , GeneratePerTarget(true)
   , GenerateDependers(true)
@@ -192,6 +209,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   __set_bool_if_set(this->GenerateForStaticLibs, "GRAPHVIZ_STATIC_LIBS");
   __set_bool_if_set(this->GenerateForSharedLibs, "GRAPHVIZ_SHARED_LIBS");
   __set_bool_if_set(this->GenerateForModuleLibs, "GRAPHVIZ_MODULE_LIBS");
+  __set_bool_if_set(this->GenerateForInterface, "GRAPHVIZ_INTERFACE");
   __set_bool_if_set(this->GenerateForExternals, "GRAPHVIZ_EXTERNAL_LIBS");
   __set_bool_if_set(this->GeneratePerTarget, "GRAPHVIZ_GENERATE_PER_TARGET");
   __set_bool_if_set(this->GenerateDependers, "GRAPHVIZ_GENERATE_DEPENDERS");
@@ -379,16 +397,7 @@ void cmGraphVizWriter::WriteConnections(
 
       str << "    \"" << myNodeName << "\" -> \"" << libNameIt->second << "\"";
 
-      switch (llit.second) {
-        case LLT_SCOPE_PRIVATE:
-          str << "[style = " << GRAPHVIZ_PRIVATE_EDEGE_STYLE << "]";
-          break;
-        case LLT_SCOPE_INTERFACE:
-          str << "[style = " << GRAPHVIZ_INTERFACE_EDEGE_STYLE << "]";
-          break;
-        default:
-          break;
-      }
+      str << getLinkLibraryStyle(llit.second);
 
       str << " // " << targetName << " -> " << libName << std::endl;
       this->WriteConnections(libName, insertedNodes, insertedConnections, str);
@@ -429,12 +438,11 @@ void cmGraphVizWriter::WriteDependerConnections(
 
     // Now we have a target, check whether it links against targetName.
     // If so, draw a connection, and then continue with dependers on that one.
-    const cmTarget::LinkLibraryVectorType* ll =
-      &(tptr.second->Target->GetOriginalLinkLibraries());
+    std::map<std::string, LinkLibraryScopeType> ll =
+      getScopedLinkLibrariesFromTarget(tptr.second->Target);
 
-    for (auto const& llit : *ll) {
-      std::string libName = llit.first;
-      if (libName == targetName) {
+    for (auto const& llit : ll) {
+      if (llit.first == targetName) {
         // So this target links against targetName.
         std::map<std::string, std::string>::const_iterator dependerNodeNameIt =
           this->TargetNamesNodes.find(tptr.first);
@@ -452,6 +460,7 @@ void cmGraphVizWriter::WriteDependerConnections(
             str << "    \"" << dependerNodeNameIt->second << "\" -> \""
                 << myNodeName << "\"";
             str << " // " << targetName << " -> " << tptr.first << std::endl;
+            str << getLinkLibraryStyle(llit.second);
             this->WriteDependerConnections(tptr.first, insertedNodes,
                                            insertedConnections, str);
           }
@@ -572,6 +581,8 @@ bool cmGraphVizWriter::GenerateForTargetType(
       return this->GenerateForSharedLibs;
     case cmStateEnums::MODULE_LIBRARY:
       return this->GenerateForModuleLibs;
+    case cmStateEnums::INTERFACE_LIBRARY:
+      return this->GenerateForInterface;
     default:
       break;
   }
