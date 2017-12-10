@@ -4,27 +4,27 @@
 
 #include "cmCTest.h"
 #include "cmCTestMemCheckHandler.h"
-#include "cmCTestTestHandler.h"
+#include "cmCTestMultiProcessHandler.h"
 #include "cmProcess.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
 #include "cm_zlib.h"
 #include "cmsys/Base64.h"
-#include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
+#include <cmAlgorithms.h>
 #include <iomanip>
 #include <ratio>
 #include <sstream>
 #include <stdio.h>
 #include <utility>
 
-cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
+cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler)
+  : MultiTestHandler(multiHandler)
 {
-  this->CTest = handler->CTest;
-  this->TestHandler = handler;
-  this->TestProcess = nullptr;
+  this->CTest = multiHandler.CTest;
+  this->TestHandler = multiHandler.TestHandler;
   this->TestResult.ExecutionTime = std::chrono::duration<double>::zero();
   this->TestResult.ReturnValue = 0;
   this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
@@ -38,50 +38,32 @@ cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
   this->RunAgain = false;     // default to not having to run again
 }
 
-bool cmCTestRunTest::CheckOutput()
+void cmCTestRunTest::CheckOutput(std::string const& line)
 {
-  // Read lines for up to 0.1 seconds of total time.
-  std::chrono::duration<double> timeout = std::chrono::milliseconds(100);
-  auto timeEnd = std::chrono::steady_clock::now() + timeout;
-  std::string line;
-  while ((timeout = timeEnd - std::chrono::steady_clock::now(),
-          timeout > std::chrono::seconds(0))) {
-    int p = this->TestProcess->GetNextOutputLine(line, timeout);
-    if (p == cmsysProcess_Pipe_None) {
-      // Process has terminated and all output read.
-      return false;
-    }
-    if (p == cmsysProcess_Pipe_STDOUT) {
-      // Store this line of output.
-      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex()
-                   << ": " << line << std::endl);
-      this->ProcessOutput += line;
-      this->ProcessOutput += "\n";
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex()
+               << ": " << line << std::endl);
+  this->ProcessOutput += line;
+  this->ProcessOutput += "\n";
 
-      // Check for TIMEOUT_AFTER_MATCH property.
-      if (!this->TestProperties->TimeoutRegularExpressions.empty()) {
-        for (auto& reg : this->TestProperties->TimeoutRegularExpressions) {
-          if (reg.first.find(this->ProcessOutput.c_str())) {
-            cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex()
-                         << ": "
-                         << "Test timeout changed to "
-                         << std::chrono::duration_cast<std::chrono::seconds>(
-                              this->TestProperties->AlternateTimeout)
-                              .count()
-                         << std::endl);
-            this->TestProcess->ResetStartTime();
-            this->TestProcess->ChangeTimeout(
-              this->TestProperties->AlternateTimeout);
-            this->TestProperties->TimeoutRegularExpressions.clear();
-            break;
-          }
-        }
+  // Check for TIMEOUT_AFTER_MATCH property.
+  if (!this->TestProperties->TimeoutRegularExpressions.empty()) {
+    for (auto& reg : this->TestProperties->TimeoutRegularExpressions) {
+      if (reg.first.find(this->ProcessOutput.c_str())) {
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex()
+                     << ": "
+                     << "Test timeout changed to "
+                     << std::chrono::duration_cast<std::chrono::seconds>(
+                          this->TestProperties->AlternateTimeout)
+                          .count()
+                     << std::endl);
+        this->TestProcess->ResetStartTime();
+        this->TestProcess->ChangeTimeout(
+          this->TestProperties->AlternateTimeout);
+        this->TestProperties->TimeoutRegularExpressions.clear();
+        break;
       }
-    } else { // if(p == cmsysProcess_Pipe_Timeout)
-      break;
     }
   }
-  return true;
 }
 
 // Streamed compression of test output.  The compressed data
@@ -344,7 +326,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   if (!this->NeedsToRerun()) {
     this->TestHandler->TestResults.push_back(this->TestResult);
   }
-  delete this->TestProcess;
+  this->TestProcess.reset();
   return passed || skipped;
 }
 
@@ -426,7 +408,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     this->TestResult.TestCount = this->TestProperties->Index;
     this->TestResult.Name = this->TestProperties->Name;
     this->TestResult.Path = this->TestProperties->Directory;
-    this->TestProcess = new cmProcess;
+    this->TestProcess = cm::make_unique<cmProcess>(*this);
     this->TestResult.Output = "Disabled";
     this->TestResult.FullCommandLine.clear();
     return false;
@@ -447,7 +429,7 @@ bool cmCTestRunTest::StartTest(size_t total)
   // its arguments are irrelevant. This matters for the case where a fixture
   // dependency might be creating the executable we want to run.
   if (!this->FailedDependencies.empty()) {
-    this->TestProcess = new cmProcess;
+    this->TestProcess = cm::make_unique<cmProcess>(*this);
     std::string msg = "Failed test dependencies:";
     for (std::string const& failedDep : this->FailedDependencies) {
       msg += " " + failedDep;
@@ -464,7 +446,7 @@ bool cmCTestRunTest::StartTest(size_t total)
   this->ComputeArguments();
   std::vector<std::string>& args = this->TestProperties->Args;
   if (args.size() >= 2 && args[1] == "NOT_AVAILABLE") {
-    this->TestProcess = new cmProcess;
+    this->TestProcess = cm::make_unique<cmProcess>(*this);
     std::string msg;
     if (this->CTest->GetConfigType().empty()) {
       msg = "Test not available without configuration.";
@@ -487,7 +469,7 @@ bool cmCTestRunTest::StartTest(size_t total)
   for (std::string const& file : this->TestProperties->RequiredFiles) {
     if (!cmSystemTools::FileExists(file.c_str())) {
       // Required file was not found
-      this->TestProcess = new cmProcess;
+      this->TestProcess = cm::make_unique<cmProcess>(*this);
       *this->TestHandler->LogFile << "Unable to find required file: " << file
                                   << std::endl;
       cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -503,7 +485,7 @@ bool cmCTestRunTest::StartTest(size_t total)
   if (this->ActualCommand.empty()) {
     // if the command was not found create a TestResult object
     // that has that information
-    this->TestProcess = new cmProcess;
+    this->TestProcess = cm::make_unique<cmProcess>(*this);
     *this->TestHandler->LogFile << "Unable to find executable: " << args[1]
                                 << std::endl;
     cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -612,7 +594,7 @@ bool cmCTestRunTest::ForkProcess(std::chrono::duration<double> testTimeOut,
                                  bool explicitTimeout,
                                  std::vector<std::string>* environment)
 {
-  this->TestProcess = new cmProcess;
+  this->TestProcess = cm::make_unique<cmProcess>(*this);
   this->TestProcess->SetId(this->Index);
   this->TestProcess->SetWorkingDirectory(
     this->TestProperties->Directory.c_str());
@@ -664,7 +646,7 @@ bool cmCTestRunTest::ForkProcess(std::chrono::duration<double> testTimeOut,
     cmSystemTools::AppendEnv(*environment);
   }
 
-  return this->TestProcess->StartProcess();
+  return this->TestProcess->StartProcess(this->MultiTestHandler.Loop);
 }
 
 void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
@@ -737,4 +719,9 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
   cmCTestLog(this->CTest, HANDLER_OUTPUT, outname.c_str());
   cmCTestLog(this->CTest, DEBUG, "Testing " << this->TestProperties->Name
                                             << " ... ");
+}
+
+void cmCTestRunTest::FinalizeTest()
+{
+  this->MultiTestHandler.FinishTestProcess(this, true);
 }

@@ -12,9 +12,10 @@
 #include <vector>
 
 #include "cmCTestTestHandler.h"
+#include "cmProcess.h" // IWYU pragma: keep (for unique_ptr)
 
 class cmCTest;
-class cmProcess;
+class cmCTestMultiProcessHandler;
 
 /** \class cmRunTest
  * \brief represents a single test to be run
@@ -24,7 +25,7 @@ class cmProcess;
 class cmCTestRunTest
 {
 public:
-  explicit cmCTestRunTest(cmCTestTestHandler* handler);
+  explicit cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler);
 
   ~cmCTestRunTest() = default;
 
@@ -57,7 +58,7 @@ public:
   }
 
   // Read and store output.  Returns true if it must be called again.
-  bool CheckOutput();
+  void CheckOutput(std::string const& line);
 
   // Compresses the output, writing to CompressedOutput
   void CompressOutput();
@@ -72,6 +73,10 @@ public:
   void ComputeWeightedCost();
 
   bool StartAgain();
+
+  cmCTest* GetCTest() const { return this->CTest; }
+
+  void FinalizeTest();
 
 private:
   bool NeedsToRerun();
@@ -88,12 +93,13 @@ private:
   // Pointer back to the "parent"; the handler that invoked this test run
   cmCTestTestHandler* TestHandler;
   cmCTest* CTest;
-  cmProcess* TestProcess;
+  std::unique_ptr<cmProcess> TestProcess;
   std::string ProcessOutput;
   std::string CompressedOutput;
   double CompressionRatio;
   // The test results
   cmCTestTestHandler::cmCTestTestResult TestResult;
+  cmCTestMultiProcessHandler& MultiTestHandler;
   int Index;
   std::set<std::string> FailedDependencies;
   std::string StartTime;
