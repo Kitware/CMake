@@ -705,9 +705,13 @@ ENDIF()
 # selected components.  Initialize with required components.
 SET(KWSYS_CLASSES)
 SET(KWSYS_H_FILES Configure SharedForward)
-SET(KWSYS_HXX_FILES Configure String
-  hashtable hash_fun hash_map hash_set
-  )
+SET(KWSYS_HXX_FILES Configure String)
+
+IF(NOT CMake_SOURCE_DIR)
+  SET(KWSYS_HXX_FILES ${KWSYS_HXX_FILES}
+    hashtable hash_fun hash_map hash_set
+    )
+ENDIF()
 
 # Add selected C++ classes.
 SET(cppclasses
@@ -1027,7 +1031,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     ENDFOREACH()
 
     # C++ tests
-    IF(NOT WATCOM)
+    IF(NOT WATCOM AND NOT CMake_SOURCE_DIR)
       SET(KWSYS_CXX_TESTS
         testHashSTL
         )
