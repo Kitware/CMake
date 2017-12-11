@@ -1,9 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifdef _WIN32
-/* windows.h defines min() and max() macros that interfere. */
-#define NOMINMAX
-#endif
 #include "cmCTestRunTest.h"
 
 #include "cmCTest.h"
@@ -678,7 +674,7 @@ bool cmCTestRunTest::ForkProcess(std::chrono::duration<double> testTimeOut,
   // determine how much time we have
   std::chrono::duration<double> timeout =
     this->CTest->GetRemainingTimeAllowed();
-  if (timeout != std::chrono::duration<double>::max()) {
+  if (timeout != cmCTest::MaxDuration()) {
     timeout -= std::chrono::minutes(2);
   }
   if (this->CTest->GetTimeOut() > std::chrono::duration<double>::zero() &&
@@ -702,7 +698,7 @@ bool cmCTestRunTest::ForkProcess(std::chrono::duration<double> testTimeOut,
     this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
       << ": "
       << "Test timeout computed to be: "
-      << (timeout == std::chrono::duration<double>::max()
+      << (timeout == cmCTest::MaxDuration()
             ? std::string("infinite")
             : std::to_string(
                 std::chrono::duration_cast<std::chrono::seconds>(timeout)

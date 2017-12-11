@@ -208,6 +208,8 @@ public:
    */
   std::chrono::duration<double> GetRemainingTimeAllowed();
 
+  static std::chrono::duration<double> MaxDuration();
+
   /**
    * Open file in the output directory and set the stream
    */
