@@ -621,17 +621,11 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
   if (testTimeOut == cmDuration::zero() && explicitTimeout) {
     timeout = cmDuration::zero();
   }
-  cmCTestOptionalLog(
-    this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
-      << ": "
-      << "Test timeout computed to be: "
-      << (timeout == cmCTest::MaxDuration()
-            ? std::string("infinite")
-            : std::to_string(
-                std::chrono::duration_cast<std::chrono::seconds>(timeout)
-                  .count()))
-      << "\n",
-    this->TestHandler->GetQuiet());
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
+                       << ": "
+                       << "Test timeout computed to be: "
+                       << cmDurationTo<unsigned int>(timeout) << "\n",
+                     this->TestHandler->GetQuiet());
 
   this->TestProcess->SetTimeout(timeout);
 

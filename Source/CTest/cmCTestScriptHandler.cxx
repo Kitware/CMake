@@ -159,9 +159,9 @@ void cmCTestScriptHandler::UpdateElapsedTime()
 {
   if (this->Makefile) {
     // set the current elapsed time
-    auto itime = std::chrono::duration_cast<std::chrono::seconds>(
-      std::chrono::steady_clock::now() - this->ScriptStartTime);
-    auto timeString = std::to_string(itime.count());
+    auto itime = cmDurationTo<unsigned int>(std::chrono::steady_clock::now() -
+                                            this->ScriptStartTime);
+    auto timeString = std::to_string(itime);
     this->Makefile->AddDefinition("CTEST_ELAPSED_TIME", timeString.c_str());
   }
 }
@@ -569,10 +569,9 @@ int cmCTestScriptHandler::RunCurrentScript()
       auto interval = std::chrono::steady_clock::now() - startOfInterval;
       auto minimumInterval = cmDuration(this->MinimumInterval);
       if (interval < minimumInterval) {
-        auto sleepTime = std::chrono::duration_cast<std::chrono::seconds>(
-                           minimumInterval - interval)
-                           .count();
-        this->SleepInSeconds(static_cast<unsigned int>(sleepTime));
+        auto sleepTime =
+          cmDurationTo<unsigned int>(minimumInterval - interval);
+        this->SleepInSeconds(sleepTime);
       }
       if (this->EmptyBinDirOnce) {
         this->EmptyBinDir = false;

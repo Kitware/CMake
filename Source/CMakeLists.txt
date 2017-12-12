@@ -602,6 +602,9 @@ set(SRCS
   cm_codecvt.hxx
   cm_codecvt.cxx
   cm_thread.hxx
+
+  cmDuration.h
+  cmDuration.cxx
   )
 
 SET_PROPERTY(SOURCE cmProcessOutput.cxx APPEND PROPERTY COMPILE_DEFINITIONS

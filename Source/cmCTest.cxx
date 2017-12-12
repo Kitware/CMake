@@ -1092,14 +1092,11 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
   if (timeout <= cmDuration::zero()) {
     timeout = std::chrono::seconds(1);
   }
-  cmCTestLog(
-    this, HANDLER_VERBOSE_OUTPUT, "Test timeout computed to be: "
-      << (timeout == cmCTest::MaxDuration()
-            ? std::string("infinite")
-            : std::to_string(
-                std::chrono::duration_cast<std::chrono::seconds>(timeout)
-                  .count()))
-      << "\n");
+  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Test timeout computed to be: "
+               << (timeout == cmCTest::MaxDuration()
+                     ? std::string("infinite")
+                     : std::to_string(cmDurationTo<unsigned int>(timeout)))
+               << "\n");
   if (cmSystemTools::SameFile(argv[0], cmSystemTools::GetCTestCommand()) &&
       !this->ForceNewCTestProcess) {
     cmCTest inst;
@@ -1121,8 +1118,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
             timeout > cmDuration::zero()) {
           args.push_back("--test-timeout");
           std::ostringstream msg;
-          msg << std::chrono::duration_cast<std::chrono::seconds>(timeout)
-                   .count();
+          msg << cmDurationTo<unsigned int>(timeout);
           args.push_back(msg.str());
         }
         args.push_back(i);
