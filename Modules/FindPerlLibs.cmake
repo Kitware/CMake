@@ -107,6 +107,11 @@ if (PERL_EXECUTABLE)
   if (NOT PERL_POSSIBLE_LIBRARY_NAMES)
     set(PERL_POSSIBLE_LIBRARY_NAMES perl${PERL_VERSION_STRING} perl)
   endif()
+  if (CMAKE_SYSTEM_NAME MATCHES "MSYS|CYGWIN")
+    # on MSYS and CYGWIN environments, current perl -V:libperl gives shared library name
+    # rather than the import library. So, extends possible library names
+    list (APPEND PERL_POSSIBLE_LIBRARY_NAMES perl)
+  endif()
 
   ### PERL_INCLUDE_PATH
   find_path(PERL_INCLUDE_PATH
