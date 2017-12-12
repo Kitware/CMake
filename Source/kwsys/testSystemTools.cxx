@@ -813,6 +813,39 @@ static bool CheckFind()
   return res;
 }
 
+static bool CheckIsSubDirectory()
+{
+  bool res = true;
+
+  if (kwsys::SystemTools::IsSubDirectory("/foo", "/") == false) {
+    std::cerr << "Problem with IsSubDirectory (root - unix): " << std::endl;
+    res = false;
+  }
+  if (kwsys::SystemTools::IsSubDirectory("c:/foo", "c:/") == false) {
+    std::cerr << "Problem with IsSubDirectory (root - dos): " << std::endl;
+    res = false;
+  }
+  if (kwsys::SystemTools::IsSubDirectory("/foo/bar", "/foo") == false) {
+    std::cerr << "Problem with IsSubDirectory (deep): " << std::endl;
+    res = false;
+  }
+  if (kwsys::SystemTools::IsSubDirectory("/foo", "/foo") == true) {
+    std::cerr << "Problem with IsSubDirectory (identity): " << std::endl;
+    res = false;
+  }
+  if (kwsys::SystemTools::IsSubDirectory("/fooo", "/foo") == true) {
+    std::cerr << "Problem with IsSubDirectory (substring): " << std::endl;
+    res = false;
+  }
+  if (kwsys::SystemTools::IsSubDirectory("/foo/", "/foo") == true) {
+    std::cerr << "Problem with IsSubDirectory (prepended slash): "
+              << std::endl;
+    res = false;
+  }
+
+  return res;
+}
+
 static bool CheckGetLineFromStream()
 {
   const std::string fileWithFiveCharsOnFirstLine(TEST_SYSTEMTOOLS_SOURCE_DIR
@@ -896,6 +929,8 @@ int testSystemTools(int, char* [])
   res &= CheckGetPath();
 
   res &= CheckFind();
+
+  res &= CheckIsSubDirectory();
 
   res &= CheckGetLineFromStream();
 

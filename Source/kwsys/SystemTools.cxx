@@ -4234,11 +4234,16 @@ bool SystemTools::IsSubDirectory(const std::string& cSubdir,
   std::string dir = cDir;
   SystemTools::ConvertToUnixSlashes(subdir);
   SystemTools::ConvertToUnixSlashes(dir);
-  if (subdir.size() > dir.size() && subdir[dir.size()] == '/') {
-    std::string s = subdir.substr(0, dir.size());
-    return SystemTools::ComparePath(s, dir);
+  if (subdir.size() <= dir.size() || dir.empty()) {
+    return false;
   }
-  return false;
+  bool isRootPath = *dir.rbegin() == '/'; // like "/" or "C:/"
+  size_t expectedSlashPosition = isRootPath ? dir.size() - 1u : dir.size();
+  if (subdir[expectedSlashPosition] != '/') {
+    return false;
+  }
+  std::string s = subdir.substr(0, dir.size());
+  return SystemTools::ComparePath(s, dir);
 }
 
 void SystemTools::Delay(unsigned int msec)
