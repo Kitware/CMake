@@ -56,10 +56,13 @@
 #   Specify the :command:`install(PROGRAMS)` command ``COMPONENT``
 #   option.  If not specified, no such option will be used.
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
+
 set(_IRSL_HAVE_Intel FALSE)
 set(_IRSL_HAVE_MSVC FALSE)
 foreach(LANG IN ITEMS C CXX Fortran)
-  if(CMAKE_${LANG}_COMPILER_ID STREQUAL Intel)
+  if("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "Intel")
     if(NOT _IRSL_HAVE_Intel)
       get_filename_component(_Intel_basedir "${CMAKE_${LANG}_COMPILER}" PATH)
       if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -81,7 +84,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
       endif()
       set(_IRSL_HAVE_Intel TRUE)
     endif()
-  elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL MSVC)
+  elseif("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "MSVC")
     set(_IRSL_HAVE_MSVC TRUE)
   endif()
 endforeach()
@@ -740,3 +743,5 @@ if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
       )
   endif()
 endif()
+
+cmake_policy(POP)
