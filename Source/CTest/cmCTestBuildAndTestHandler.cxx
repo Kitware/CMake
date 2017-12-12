@@ -11,6 +11,7 @@
 
 #include "cmsys/Process.h"
 #include <chrono>
+#include <ratio>
 #include <stdlib.h>
 
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
@@ -18,7 +19,7 @@ cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
   this->BuildTwoConfig = false;
   this->BuildNoClean = false;
   this->BuildNoCMake = false;
-  this->Timeout = 0;
+  this->Timeout = std::chrono::duration<double>::zero();
 }
 
 void cmCTestBuildAndTestHandler::Initialize()
@@ -224,10 +225,9 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   }
   for (std::string const& tar : this->BuildTargets) {
     std::chrono::duration<double> remainingTime = std::chrono::seconds(0);
-    if (this->Timeout > 0) {
-      remainingTime = std::chrono::duration<double>(this->Timeout) -
-        std::chrono::duration_cast<std::chrono::seconds>(
-                        std::chrono::steady_clock::now() - clock_start);
+    if (this->Timeout > std::chrono::duration<double>::zero()) {
+      remainingTime =
+        this->Timeout - (std::chrono::steady_clock::now() - clock_start);
       if (remainingTime <= std::chrono::seconds(0)) {
         if (outstring) {
           *outstring = "--build-and-test timeout exceeded. ";
@@ -324,10 +324,9 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   // how much time is remaining
   std::chrono::duration<double> remainingTime = std::chrono::seconds(0);
-  if (this->Timeout > 0) {
-    remainingTime = std::chrono::duration<double>(this->Timeout) -
-      std::chrono::duration_cast<std::chrono::seconds>(
-                      std::chrono::steady_clock::now() - clock_start);
+  if (this->Timeout > std::chrono::duration<double>::zero()) {
+    remainingTime =
+      this->Timeout - (std::chrono::steady_clock::now() - clock_start);
     if (remainingTime <= std::chrono::seconds(0)) {
       if (outstring) {
         *outstring = "--build-and-test timeout exceeded. ";
@@ -396,7 +395,7 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
   }
   if (currentArg.find("--test-timeout", 0) == 0 && idx < allArgs.size() - 1) {
     idx++;
-    this->Timeout = atof(allArgs[idx].c_str());
+    this->Timeout = std::chrono::duration<double>(atof(allArgs[idx].c_str()));
   }
   if (currentArg == "--build-generator" && idx < allArgs.size() - 1) {
     idx++;

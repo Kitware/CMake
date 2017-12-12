@@ -1,12 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-
-#ifdef _WIN32
-/* windows.h defines min() and max() macros, unless told to otherwise. This
- * interferes with std::min() and std::max() at the very least. */
-#define NOMINMAX
-#endif
-
 #include "cmCTestScriptHandler.h"
 
 #include "cmsys/Directory.hxx"
@@ -970,13 +963,13 @@ bool cmCTestScriptHandler::TryToRemoveBinaryDirectoryOnce(
 std::chrono::duration<double> cmCTestScriptHandler::GetRemainingTimeAllowed()
 {
   if (!this->Makefile) {
-    return std::chrono::duration<double>::max();
+    return cmCTest::MaxDuration();
   }
 
   const char* timelimitS = this->Makefile->GetDefinition("CTEST_TIME_LIMIT");
 
   if (!timelimitS) {
-    return std::chrono::duration<double>::max();
+    return cmCTest::MaxDuration();
   }
 
   auto timelimit = std::chrono::duration<double>(atof(timelimitS));

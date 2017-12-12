@@ -1,9 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifdef _WIN32
-/* windows.h defines min() and max() macros that interfere. */
-#define NOMINMAX
-#endif
 #include "cmCTestRunTest.h"
 
 #include "cmCTest.h"
@@ -265,11 +261,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
 
   passed = this->TestResult.Status == cmCTestTestHandler::COMPLETED;
   char buf[1024];
-  sprintf(buf, "%6.2f sec",
-          double(std::chrono::duration_cast<std::chrono::milliseconds>(
-                   this->TestProcess->GetTotalTime())
-                   .count()) /
-            1000.0);
+  sprintf(buf, "%6.2f sec", this->TestProcess->GetTotalTime().count());
   cmCTestLog(this->CTest, HANDLER_OUTPUT, buf << "\n");
 
   if (outputTestErrorsToConsole) {
@@ -394,11 +386,7 @@ void cmCTestRunTest::ComputeWeightedCost()
 {
   double prev = static_cast<double>(this->TestProperties->PreviousRuns);
   double avgcost = static_cast<double>(this->TestProperties->Cost);
-  double current =
-    double(std::chrono::duration_cast<std::chrono::milliseconds>(
-             this->TestResult.ExecutionTime)
-             .count()) /
-    1000.0;
+  double current = this->TestResult.ExecutionTime.count();
 
   if (this->TestResult.Status == cmCTestTestHandler::COMPLETED) {
     this->TestProperties->Cost =
@@ -690,7 +678,7 @@ bool cmCTestRunTest::ForkProcess(std::chrono::duration<double> testTimeOut,
   // determine how much time we have
   std::chrono::duration<double> timeout =
     this->CTest->GetRemainingTimeAllowed();
-  if (timeout != std::chrono::duration<double>::max()) {
+  if (timeout != cmCTest::MaxDuration()) {
     timeout -= std::chrono::minutes(2);
   }
   if (this->CTest->GetTimeOut() > std::chrono::duration<double>::zero() &&
@@ -714,7 +702,7 @@ bool cmCTestRunTest::ForkProcess(std::chrono::duration<double> testTimeOut,
     this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
       << ": "
       << "Test timeout computed to be: "
-      << (timeout == std::chrono::duration<double>::max()
+      << (timeout == cmCTest::MaxDuration()
             ? std::string("infinite")
             : std::to_string(
                 std::chrono::duration_cast<std::chrono::seconds>(timeout)

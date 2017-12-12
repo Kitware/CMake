@@ -539,10 +539,8 @@ int cmCTestTestHandler::ProcessHandler()
       this->PrintLabelOrSubprojectSummary(false);
     }
     char realBuf[1024];
-    auto durationInMs = std::chrono::duration_cast<std::chrono::milliseconds>(
-                          clock_finish - clock_start)
-                          .count();
-    sprintf(realBuf, "%6.2f sec", static_cast<double>(durationInMs) / 1000.0);
+    std::chrono::duration<double> durationInSecs = clock_finish - clock_start;
+    sprintf(realBuf, "%6.2f sec", durationInSecs.count());
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "\nTotal Test time (real) = " << realBuf << "\n",
                        this->Quiet);
@@ -653,10 +651,7 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
       // only use labels found in labels
       if (labels.find(l) != labels.end()) {
         labelTimes[l] +=
-          double(std::chrono::duration_cast<std::chrono::milliseconds>(
-                   result.ExecutionTime)
-                   .count()) /
-          1000.0 * result.Properties->Processors;
+          result.ExecutionTime.count() * result.Properties->Processors;
         ++labelCounts[l];
       }
     }
@@ -1324,11 +1319,7 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
       xml.StartElement("NamedMeasurement");
       xml.Attribute("type", "numeric/double");
       xml.Attribute("name", "Execution Time");
-      xml.Element("Value",
-                  double(std::chrono::duration_cast<std::chrono::milliseconds>(
-                           result.ExecutionTime)
-                           .count()) /
-                    1000.0);
+      xml.Element("Value", result.ExecutionTime.count());
       xml.EndElement(); // NamedMeasurement
       if (!result.Reason.empty()) {
         const char* reasonType = "Pass Reason";

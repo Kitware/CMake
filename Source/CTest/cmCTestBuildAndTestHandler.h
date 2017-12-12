@@ -7,6 +7,7 @@
 
 #include "cmCTestGenericHandler.h"
 
+#include <chrono>
 #include <sstream>
 #include <stddef.h>
 #include <string>
@@ -67,7 +68,7 @@ protected:
   std::vector<std::string> TestCommandArgs;
   std::vector<std::string> BuildTargets;
   bool BuildNoCMake;
-  double Timeout;
+  std::chrono::duration<double> Timeout;
 };
 
 #endif

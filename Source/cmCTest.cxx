@@ -1,11 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifdef _WIN32
-/* windows.h defines min() and max() macros by default. This interferes with
- * C++ functions names.
- */
-#define NOMINMAX
-#endif
 #include "cmCTest.h"
 
 #include "cm_curl.h"
@@ -50,7 +44,6 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProcess.h"
 #include "cmProcessOutput.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
@@ -997,7 +990,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
   cmsysProcess_SetCommand(cp, &*argv.begin());
   cmsysProcess_SetWorkingDirectory(cp, dir);
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
-  cmsysProcess_SetTimeout(cp, timeout);
+  cmsysProcess_SetTimeout(cp, timeout.count());
   cmsysProcess_Execute(cp);
 
   // Initialize tick's
@@ -1088,9 +1081,10 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
   bool modifyEnv = (environment && !environment->empty());
 
   // determine how much time we have
-  std::chrono::duration<double> timeout =
-    std::min<std::chrono::duration<double>>(this->GetRemainingTimeAllowed(),
-                                            std::chrono::minutes(2));
+  std::chrono::duration<double> timeout = this->GetRemainingTimeAllowed();
+  if (timeout != cmCTest::MaxDuration()) {
+    timeout -= std::chrono::minutes(2);
+  }
   if (this->TimeOut > std::chrono::duration<double>::zero() &&
       this->TimeOut < timeout) {
     timeout = this->TimeOut;
@@ -1106,7 +1100,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
   }
   cmCTestLog(
     this, HANDLER_VERBOSE_OUTPUT, "Test timeout computed to be: "
-      << (timeout == std::chrono::duration<double>::max()
+      << (timeout == cmCTest::MaxDuration()
             ? std::string("infinite")
             : std::to_string(
                 std::chrono::duration_cast<std::chrono::seconds>(timeout)
@@ -1129,6 +1123,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
         // invocations. Since --build-generator is required this is a
         // good place to check for it, and to add the arguments in
         if (strcmp(i, "--build-generator") == 0 &&
+            timeout != cmCTest::MaxDuration() &&
             timeout > std::chrono::duration<double>::zero()) {
           args.push_back("--test-timeout");
           std::ostringstream msg;
@@ -1183,7 +1178,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   }
 
-  cmsysProcess_SetTimeout(cp, timeout);
+  cmsysProcess_SetTimeout(cp, timeout.count());
   cmsysProcess_Execute(cp);
 
   char* data;
@@ -2604,7 +2599,7 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
   if (cmSystemTools::GetRunCommandHideConsole()) {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   }
-  cmsysProcess_SetTimeout(cp, timeout);
+  cmsysProcess_SetTimeout(cp, timeout.count());
   cmsysProcess_Execute(cp);
 
   std::vector<char> tempOutput;
@@ -2800,13 +2795,18 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
 std::chrono::duration<double> cmCTest::GetRemainingTimeAllowed()
 {
   if (!this->GetHandler("script")) {
-    return std::chrono::duration<double>::max();
+    return cmCTest::MaxDuration();
   }
 
   cmCTestScriptHandler* ch =
     static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
 
   return ch->GetRemainingTimeAllowed();
+}
+
+std::chrono::duration<double> cmCTest::MaxDuration()
+{
+  return std::chrono::duration<double>(1.0e7);
 }
 
 void cmCTest::OutputTestErrors(std::vector<char> const& process_output)

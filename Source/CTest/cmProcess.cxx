@@ -5,16 +5,6 @@
 #include "cmProcessOutput.h"
 #include <iostream>
 
-void cmsysProcess_SetTimeout(cmsysProcess* process,
-                             std::chrono::duration<double> timeout)
-{
-  cmsysProcess_SetTimeout(
-    process,
-    double(
-      std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()) /
-      1000.0);
-};
-
 cmProcess::cmProcess()
 {
   this->Process = nullptr;
@@ -59,7 +49,7 @@ bool cmProcess::StartProcess()
     cmsysProcess_SetWorkingDirectory(this->Process,
                                      this->WorkingDirectory.c_str());
   }
-  cmsysProcess_SetTimeout(this->Process, this->Timeout);
+  cmsysProcess_SetTimeout(this->Process, this->Timeout.count());
   cmsysProcess_SetOption(this->Process, cmsysProcess_Option_MergeOutput, 1);
   cmsysProcess_Execute(this->Process);
   return (cmsysProcess_GetState(this->Process) ==
@@ -115,10 +105,7 @@ int cmProcess::GetNextOutputLine(std::string& line,
 {
   cmProcessOutput processOutput(cmProcessOutput::UTF8);
   std::string strdata;
-  double waitTimeout =
-    double(
-      std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()) /
-    1000.0;
+  double waitTimeout = timeout.count();
   for (;;) {
     // Look for lines already buffered.
     if (this->Output.GetLine(line)) {
@@ -240,7 +227,7 @@ int cmProcess::ReportStatus()
 void cmProcess::ChangeTimeout(std::chrono::duration<double> t)
 {
   this->Timeout = t;
-  cmsysProcess_SetTimeout(this->Process, this->Timeout);
+  cmsysProcess_SetTimeout(this->Process, this->Timeout.count());
 }
 
 void cmProcess::ResetStartTime()
