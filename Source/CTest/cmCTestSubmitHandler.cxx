@@ -16,6 +16,7 @@
 #include "cmCTestScriptHandler.h"
 #include "cmCryptoHash.h"
 #include "cmCurl.h"
+#include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmProcessOutput.h"
 #include "cmState.h"
@@ -497,7 +498,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
           ? ""
           : this->GetOption("RetryCount");
 
-        auto delay = std::chrono::duration<double>(
+        auto delay = cmDuration(
           retryDelay.empty()
             ? atoi(this->CTest->GetCTestConfiguration("CTestSubmitRetryDelay")
                      .c_str())

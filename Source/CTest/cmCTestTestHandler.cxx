@@ -21,6 +21,7 @@
 #include "cmCTest.h"
 #include "cmCTestMultiProcessHandler.h"
 #include "cmCommand.h"
+#include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -346,7 +347,7 @@ void cmCTestTestHandler::Initialize()
 {
   this->Superclass::Initialize();
 
-  this->ElapsedTestingTime = std::chrono::duration<double>();
+  this->ElapsedTestingTime = cmDuration();
 
   this->TestResults.clear();
 
@@ -539,7 +540,7 @@ int cmCTestTestHandler::ProcessHandler()
       this->PrintLabelOrSubprojectSummary(false);
     }
     char realBuf[1024];
-    std::chrono::duration<double> durationInSecs = clock_finish - clock_start;
+    cmDuration durationInSecs = clock_finish - clock_start;
     sprintf(realBuf, "%6.2f sec", durationInSecs.count());
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "\nTotal Test time (real) = " << realBuf << "\n",
@@ -1235,9 +1236,8 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
       p.Cost = static_cast<float>(rand());
     }
 
-    if (p.Timeout == std::chrono::duration<double>::zero() &&
-        this->CTest->GetGlobalTimeout() !=
-          std::chrono::duration<double>::zero()) {
+    if (p.Timeout == cmDuration::zero() &&
+        this->CTest->GetGlobalTimeout() != cmDuration::zero()) {
       p.Timeout = this->CTest->GetGlobalTimeout();
     }
 
@@ -2140,7 +2140,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             rt.FixturesRequired.insert(lval.begin(), lval.end());
           }
           if (key == "TIMEOUT") {
-            rt.Timeout = std::chrono::duration<double>(atof(val.c_str()));
+            rt.Timeout = cmDuration(atof(val.c_str()));
             rt.ExplicitTimeout = true;
           }
           if (key == "COST") {
@@ -2220,8 +2220,7 @@ bool cmCTestTestHandler::SetTestsProperties(
                          "TIMEOUT_AFTER_MATCH expects two arguments, found "
                            << propArgs.size() << std::endl);
             } else {
-              rt.AlternateTimeout =
-                std::chrono::duration<double>(atof(propArgs[0].c_str()));
+              rt.AlternateTimeout = cmDuration(atof(propArgs[0].c_str()));
               std::vector<std::string> lval;
               cmSystemTools::ExpandListArgument(propArgs[1], lval);
               for (std::string const& cr : lval) {
@@ -2339,7 +2338,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.WillFail = false;
   test.Disabled = false;
   test.RunSerial = false;
-  test.Timeout = std::chrono::duration<double>::zero();
+  test.Timeout = cmDuration::zero();
   test.ExplicitTimeout = false;
   test.Cost = 0;
   test.Processors = 1;

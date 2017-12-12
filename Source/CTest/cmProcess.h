@@ -4,6 +4,7 @@
 #define cmProcess_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
+#include "cmDuration.h"
 
 #include "cmProcessOutput.h"
 #include "cmUVHandlePtr.h"
@@ -31,8 +32,8 @@ public:
   void SetCommand(const char* command);
   void SetCommandArguments(std::vector<std::string> const& arg);
   void SetWorkingDirectory(const char* dir) { this->WorkingDirectory = dir; }
-  void SetTimeout(std::chrono::duration<double> t) { this->Timeout = t; }
-  void ChangeTimeout(std::chrono::duration<double> t);
+  void SetTimeout(cmDuration t) { this->Timeout = t; }
+  void ChangeTimeout(cmDuration t);
   void ResetStartTime();
   // Return true if the process starts
   bool StartProcess(uv_loop_t& loop);
@@ -53,7 +54,7 @@ public:
   int GetId() { return this->Id; }
   void SetId(int id) { this->Id = id; }
   int GetExitValue() { return this->ExitValue; }
-  std::chrono::duration<double> GetTotalTime() { return this->TotalTime; }
+  cmDuration GetTotalTime() { return this->TotalTime; }
 
   enum class Exception
   {
@@ -69,9 +70,9 @@ public:
   std::string GetExitExceptionString();
 
 private:
-  std::chrono::duration<double> Timeout;
+  cmDuration Timeout;
   std::chrono::steady_clock::time_point StartTime;
-  std::chrono::duration<double> TotalTime;
+  cmDuration TotalTime;
   bool ReadHandleClosed = false;
   bool ProcessHandleClosed = false;
 

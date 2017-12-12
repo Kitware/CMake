@@ -25,7 +25,7 @@ cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler)
 {
   this->CTest = multiHandler.CTest;
   this->TestHandler = multiHandler.TestHandler;
-  this->TestResult.ExecutionTime = std::chrono::duration<double>::zero();
+  this->TestResult.ExecutionTime = cmDuration::zero();
   this->TestResult.ReturnValue = 0;
   this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = 0;
@@ -400,7 +400,7 @@ bool cmCTestRunTest::StartTest(size_t total)
   // Return immediately if test is disabled
   if (this->TestProperties->Disabled) {
     this->TestResult.Properties = this->TestProperties;
-    this->TestResult.ExecutionTime = std::chrono::duration<double>::zero();
+    this->TestResult.ExecutionTime = cmDuration::zero();
     this->TestResult.CompressOutput = false;
     this->TestResult.ReturnValue = -1;
     this->TestResult.CompletionStatus = "Disabled";
@@ -415,7 +415,7 @@ bool cmCTestRunTest::StartTest(size_t total)
   }
 
   this->TestResult.Properties = this->TestProperties;
-  this->TestResult.ExecutionTime = std::chrono::duration<double>::zero();
+  this->TestResult.ExecutionTime = cmDuration::zero();
   this->TestResult.CompressOutput = false;
   this->TestResult.ReturnValue = -1;
   this->TestResult.CompletionStatus = "Failed to start";
@@ -590,8 +590,7 @@ void cmCTestRunTest::DartProcessing()
   }
 }
 
-bool cmCTestRunTest::ForkProcess(std::chrono::duration<double> testTimeOut,
-                                 bool explicitTimeout,
+bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
                                  std::vector<std::string>* environment)
 {
   this->TestProcess = cm::make_unique<cmProcess>(*this);
@@ -602,27 +601,25 @@ bool cmCTestRunTest::ForkProcess(std::chrono::duration<double> testTimeOut,
   this->TestProcess->SetCommandArguments(this->Arguments);
 
   // determine how much time we have
-  std::chrono::duration<double> timeout =
-    this->CTest->GetRemainingTimeAllowed();
+  cmDuration timeout = this->CTest->GetRemainingTimeAllowed();
   if (timeout != cmCTest::MaxDuration()) {
     timeout -= std::chrono::minutes(2);
   }
-  if (this->CTest->GetTimeOut() > std::chrono::duration<double>::zero() &&
+  if (this->CTest->GetTimeOut() > cmDuration::zero() &&
       this->CTest->GetTimeOut() < timeout) {
     timeout = this->CTest->GetTimeOut();
   }
-  if (testTimeOut > std::chrono::duration<double>::zero() &&
+  if (testTimeOut > cmDuration::zero() &&
       testTimeOut < this->CTest->GetRemainingTimeAllowed()) {
     timeout = testTimeOut;
   }
   // always have at least 1 second if we got to here
-  if (timeout <= std::chrono::duration<double>::zero()) {
+  if (timeout <= cmDuration::zero()) {
     timeout = std::chrono::seconds(1);
   }
   // handle timeout explicitly set to 0
-  if (testTimeOut == std::chrono::duration<double>::zero() &&
-      explicitTimeout) {
-    timeout = std::chrono::duration<double>::zero();
+  if (testTimeOut == cmDuration::zero() && explicitTimeout) {
+    timeout = cmDuration::zero();
   }
   cmCTestOptionalLog(
     this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index

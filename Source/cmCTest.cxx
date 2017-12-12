@@ -277,8 +277,8 @@ cmCTest::cmCTest()
   this->TestModel = cmCTest::EXPERIMENTAL;
   this->MaxTestNameWidth = 30;
   this->InteractiveDebugMode = true;
-  this->TimeOut = std::chrono::duration<double>::zero();
-  this->GlobalTimeout = std::chrono::duration<double>::zero();
+  this->TimeOut = cmDuration::zero();
+  this->GlobalTimeout = cmDuration::zero();
   this->CompressXMLFiles = false;
   this->ScheduleType.clear();
   this->OutputLogFile = nullptr;
@@ -954,8 +954,7 @@ int cmCTest::GetTestModelFromString(const char* str)
 //######################################################################
 
 int cmCTest::RunMakeCommand(const char* command, std::string& output,
-                            int* retVal, const char* dir,
-                            std::chrono::duration<double> timeout,
+                            int* retVal, const char* dir, cmDuration timeout,
                             std::ostream& ofs, Encoding encoding)
 {
   // First generate the command and arguments
@@ -1071,28 +1070,26 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
 //######################################################################
 
 int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
-                     int* retVal, std::ostream* log,
-                     std::chrono::duration<double> testTimeOut,
+                     int* retVal, std::ostream* log, cmDuration testTimeOut,
                      std::vector<std::string>* environment, Encoding encoding)
 {
   bool modifyEnv = (environment && !environment->empty());
 
   // determine how much time we have
-  std::chrono::duration<double> timeout = this->GetRemainingTimeAllowed();
+  cmDuration timeout = this->GetRemainingTimeAllowed();
   if (timeout != cmCTest::MaxDuration()) {
     timeout -= std::chrono::minutes(2);
   }
-  if (this->TimeOut > std::chrono::duration<double>::zero() &&
-      this->TimeOut < timeout) {
+  if (this->TimeOut > cmDuration::zero() && this->TimeOut < timeout) {
     timeout = this->TimeOut;
   }
-  if (testTimeOut > std::chrono::duration<double>::zero() &&
+  if (testTimeOut > cmDuration::zero() &&
       testTimeOut < this->GetRemainingTimeAllowed()) {
     timeout = testTimeOut;
   }
 
   // always have at least 1 second if we got to here
-  if (timeout <= std::chrono::duration<double>::zero()) {
+  if (timeout <= cmDuration::zero()) {
     timeout = std::chrono::seconds(1);
   }
   cmCTestLog(
@@ -1121,7 +1118,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
         // good place to check for it, and to add the arguments in
         if (strcmp(i, "--build-generator") == 0 &&
             timeout != cmCTest::MaxDuration() &&
-            timeout > std::chrono::duration<double>::zero()) {
+            timeout > cmDuration::zero()) {
           args.push_back("--test-timeout");
           std::ostringstream msg;
           msg << std::chrono::duration_cast<std::chrono::seconds>(timeout)
@@ -1772,7 +1769,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
 
   if (this->CheckArgument(arg, "--timeout") && i < args.size() - 1) {
     i++;
-    auto timeout = std::chrono::duration<double>(atof(args[i].c_str()));
+    auto timeout = cmDuration(atof(args[i].c_str()));
     this->GlobalTimeout = timeout;
   }
 
@@ -2575,8 +2572,7 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(
 
 bool cmCTest::RunCommand(std::vector<std::string> const& args,
                          std::string* stdOut, std::string* stdErr, int* retVal,
-                         const char* dir,
-                         std::chrono::duration<double> timeout,
+                         const char* dir, cmDuration timeout,
                          Encoding encoding)
 {
   std::vector<const char*> argv;
@@ -2788,7 +2784,7 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
   }
 }
 
-std::chrono::duration<double> cmCTest::GetRemainingTimeAllowed()
+cmDuration cmCTest::GetRemainingTimeAllowed()
 {
   if (!this->GetHandler("script")) {
     return cmCTest::MaxDuration();
@@ -2800,9 +2796,9 @@ std::chrono::duration<double> cmCTest::GetRemainingTimeAllowed()
   return ch->GetRemainingTimeAllowed();
 }
 
-std::chrono::duration<double> cmCTest::MaxDuration()
+cmDuration cmCTest::MaxDuration()
 {
-  return std::chrono::duration<double>(1.0e7);
+  return cmDuration(1.0e7);
 }
 
 void cmCTest::OutputTestErrors(std::vector<char> const& process_output)

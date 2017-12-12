@@ -4,6 +4,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
+#include "cmDuration.h"
 #include "cmFileTimeComparison.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
@@ -633,8 +634,8 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
   }
 }
 
-void cmCTestBuildHandler::GenerateXMLFooter(
-  cmXMLWriter& xml, std::chrono::duration<double> elapsed_build_time)
+void cmCTestBuildHandler::GenerateXMLFooter(cmXMLWriter& xml,
+                                            cmDuration elapsed_build_time)
 {
   xml.StartElement("Log");
   xml.Attribute("Encoding", "base64");

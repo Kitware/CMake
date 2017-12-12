@@ -4,6 +4,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
+#include "cmDuration.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
@@ -37,12 +38,12 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   const char* ctestTimeout =
     this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
 
-  std::chrono::duration<double> timeout;
+  cmDuration timeout;
   if (ctestTimeout) {
-    timeout = std::chrono::duration<double>(atof(ctestTimeout));
+    timeout = cmDuration(atof(ctestTimeout));
   } else {
     timeout = this->CTest->GetTimeOut();
-    if (timeout <= std::chrono::duration<double>::zero()) {
+    if (timeout <= cmDuration::zero()) {
       // By default use timeout of 10 minutes
       timeout = std::chrono::minutes(10);
     }

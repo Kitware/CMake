@@ -558,8 +558,8 @@ int cmCTestScriptHandler::RunCurrentScript()
   // for a continuous, do we ned to run it more than once?
   if (this->ContinuousDuration >= 0) {
     this->UpdateElapsedTime();
-    auto ending_time = std::chrono::steady_clock::now() +
-      std::chrono::duration<double>(this->ContinuousDuration);
+    auto ending_time =
+      std::chrono::steady_clock::now() + cmDuration(this->ContinuousDuration);
     if (this->EmptyBinDirOnce) {
       this->EmptyBinDir = true;
     }
@@ -567,8 +567,7 @@ int cmCTestScriptHandler::RunCurrentScript()
       auto startOfInterval = std::chrono::steady_clock::now();
       result = this->RunConfigurationDashboard();
       auto interval = std::chrono::steady_clock::now() - startOfInterval;
-      auto minimumInterval =
-        std::chrono::duration<double>(this->MinimumInterval);
+      auto minimumInterval = cmDuration(this->MinimumInterval);
       if (interval < minimumInterval) {
         auto sleepTime = std::chrono::duration_cast<std::chrono::seconds>(
                            minimumInterval - interval)
@@ -960,7 +959,7 @@ bool cmCTestScriptHandler::TryToRemoveBinaryDirectoryOnce(
   return cmSystemTools::RemoveADirectory(directoryPath);
 }
 
-std::chrono::duration<double> cmCTestScriptHandler::GetRemainingTimeAllowed()
+cmDuration cmCTestScriptHandler::GetRemainingTimeAllowed()
 {
   if (!this->Makefile) {
     return cmCTest::MaxDuration();
@@ -972,9 +971,9 @@ std::chrono::duration<double> cmCTestScriptHandler::GetRemainingTimeAllowed()
     return cmCTest::MaxDuration();
   }
 
-  auto timelimit = std::chrono::duration<double>(atof(timelimitS));
+  auto timelimit = cmDuration(atof(timelimitS));
 
-  auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(
+  auto duration = std::chrono::duration_cast<cmDuration>(
     std::chrono::steady_clock::now() - this->ScriptStartTime);
   return (timelimit - duration);
 }
