@@ -32,12 +32,14 @@
 #
 # ::
 #
-#   PERL_SITESEARCH    = path to the sitesearch install dir
-#   PERL_SITELIB       = path to the sitelib install directory
-#   PERL_VENDORARCH    = path to the vendor arch install directory
-#   PERL_VENDORLIB     = path to the vendor lib install directory
-#   PERL_ARCHLIB       = path to the arch lib install directory
-#   PERL_PRIVLIB       = path to the priv lib install directory
+#   PERL_SITESEARCH     = path to the sitesearch install dir (-V:installsitesearch)
+#   PERL_SITELIB        = path to the sitelib install directory (-V:installsitelib)
+#   PERL_VENDORARCH     = path to the vendor arch install directory (-V:installvendorarch)
+#   PERL_VENDORLIB      = path to the vendor lib install directory (-V:installvendorlib)
+#   PERL_ARCHLIB        = path to the core arch lib install directory (-V:archlib)
+#   PERL_PRIVLIB        = path to the core priv lib install directory (-V:privlib)
+#   PERL_UPDATE_ARCHLIB = path to the update arch lib install directory (-V:installarchlib)
+#   PERL_UPDATE_PRIVLIB = path to the update priv lib install directory (-V:installprivlib)
 #   PERL_EXTRA_C_FLAGS = Compilation flags used to build perl
 
 # find the perl executable
@@ -142,60 +144,60 @@ if (PERL_EXECUTABLE)
     file(TO_CMAKE_PATH "${PERL_VENDORLIB}" PERL_VENDORLIB)
   endif ()
 
-  macro(perl_adjust_darwin_lib_variable varname)
-    string( TOUPPER PERL_${varname} FINDPERL_VARNAME )
-    string( TOLOWER install${varname} PERL_VARNAME )
-
-    if (NOT PERL_MINUSV_OUTPUT_VARIABLE)
-      execute_process(
-        COMMAND
-        ${PERL_EXECUTABLE} -V
-        OUTPUT_VARIABLE
-        PERL_MINUSV_OUTPUT_VARIABLE
-        RESULT_VARIABLE
-        PERL_MINUSV_RESULT_VARIABLE
-        )
-    endif()
-
-    if (NOT PERL_MINUSV_RESULT_VARIABLE)
-      string(REGEX MATCH "(${PERL_VARNAME}.*points? to the Updates directory)"
-        PERL_NEEDS_ADJUSTMENT ${PERL_MINUSV_OUTPUT_VARIABLE})
-
-      if (PERL_NEEDS_ADJUSTMENT)
-        string(REGEX REPLACE "(.*)/Updates/" "/System/\\1/" ${FINDPERL_VARNAME} ${${FINDPERL_VARNAME}})
-      endif ()
-
-    endif ()
-  endmacro()
-
   ### PERL_ARCHLIB
   execute_process(
     COMMAND
-      ${PERL_EXECUTABLE} -V:installarchlib
+      ${PERL_EXECUTABLE} -V:archlib
       OUTPUT_VARIABLE
         PERL_ARCHLIB_OUTPUT_VARIABLE
       RESULT_VARIABLE
         PERL_ARCHLIB_RESULT_VARIABLE
   )
   if (NOT PERL_ARCHLIB_RESULT_VARIABLE)
-    string(REGEX REPLACE "install[a-z]+='([^']+)'.*" "\\1" PERL_ARCHLIB ${PERL_ARCHLIB_OUTPUT_VARIABLE})
-    perl_adjust_darwin_lib_variable( ARCHLIB )
+    string(REGEX REPLACE "archlib='([^']+)'.*" "\\1" PERL_ARCHLIB ${PERL_ARCHLIB_OUTPUT_VARIABLE})
     file(TO_CMAKE_PATH "${PERL_ARCHLIB}" PERL_ARCHLIB)
   endif ()
 
   ### PERL_PRIVLIB
   execute_process(
     COMMAND
-      ${PERL_EXECUTABLE} -V:installprivlib
+      ${PERL_EXECUTABLE} -V:privlib
     OUTPUT_VARIABLE
       PERL_PRIVLIB_OUTPUT_VARIABLE
     RESULT_VARIABLE
       PERL_PRIVLIB_RESULT_VARIABLE
   )
   if (NOT PERL_PRIVLIB_RESULT_VARIABLE)
-    string(REGEX REPLACE "install[a-z]+='([^']+)'.*" "\\1" PERL_PRIVLIB ${PERL_PRIVLIB_OUTPUT_VARIABLE})
-    perl_adjust_darwin_lib_variable( PRIVLIB )
+    string(REGEX REPLACE "privlib='([^']+)'.*" "\\1" PERL_PRIVLIB ${PERL_PRIVLIB_OUTPUT_VARIABLE})
     file(TO_CMAKE_PATH "${PERL_PRIVLIB}" PERL_PRIVLIB)
+  endif ()
+
+  ### PERL_UPDATE_ARCHLIB
+  execute_process(
+    COMMAND
+      ${PERL_EXECUTABLE} -V:installarchlib
+      OUTPUT_VARIABLE
+        PERL_UPDATE_ARCHLIB_OUTPUT_VARIABLE
+      RESULT_VARIABLE
+        PERL_UPDATE_ARCHLIB_RESULT_VARIABLE
+  )
+  if (NOT PERL_UPDATE_ARCHLIB_RESULT_VARIABLE)
+    string(REGEX REPLACE "install[a-z]+='([^']+)'.*" "\\1" PERL_UPDATE_ARCHLIB ${PERL_UPDATE_ARCHLIB_OUTPUT_VARIABLE})
+    file(TO_CMAKE_PATH "${PERL_UPDATE_ARCHLIB}" PERL_UPDATE_ARCHLIB)
+  endif ()
+
+  ### PERL_UPDATE_PRIVLIB
+  execute_process(
+    COMMAND
+      ${PERL_EXECUTABLE} -V:installprivlib
+    OUTPUT_VARIABLE
+      PERL_UPDATE_PRIVLIB_OUTPUT_VARIABLE
+    RESULT_VARIABLE
+      PERL_UPDATE_PRIVLIB_RESULT_VARIABLE
+  )
+  if (NOT PERL_UPDATE_PRIVLIB_RESULT_VARIABLE)
+    string(REGEX REPLACE "install[a-z]+='([^']+)'.*" "\\1" PERL_UPDATE_PRIVLIB ${PERL_UPDATE_PRIVLIB_OUTPUT_VARIABLE})
+    file(TO_CMAKE_PATH "${PERL_UPDATE_PRIVLIB}" PERL_UPDATE_PRIVLIB)
   endif ()
 
   ### PERL_POSSIBLE_LIBRARY_NAMES
@@ -218,6 +220,7 @@ if (PERL_EXECUTABLE)
     NAMES
       perl.h
     PATHS
+      ${PERL_UPDATE_ARCHLIB}/CORE
       ${PERL_ARCHLIB}/CORE
       /usr/lib/perl5/${PERL_VERSION_STRING}/${PERL_ARCHNAME}/CORE
       /usr/lib/perl/${PERL_VERSION_STRING}/${PERL_ARCHNAME}/CORE
@@ -230,6 +233,7 @@ if (PERL_EXECUTABLE)
     NAMES
       ${PERL_POSSIBLE_LIBRARY_NAMES}
     PATHS
+      ${PERL_UPDATE_ARCHLIB}/CORE
       ${PERL_ARCHLIB}/CORE
       /usr/lib/perl5/${PERL_VERSION_STRING}/${PERL_ARCHNAME}/CORE
       /usr/lib/perl/${PERL_VERSION_STRING}/${PERL_ARCHNAME}/CORE
