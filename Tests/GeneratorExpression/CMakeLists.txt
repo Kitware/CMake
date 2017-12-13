@@ -263,8 +263,16 @@ add_custom_target(check-part4 ALL
 add_executable(srcgenex_flags srcgenex_flags.c)
 set_property(SOURCE srcgenex_flags.c PROPERTY COMPILE_FLAGS "-DNAME=$<TARGET_PROPERTY:NAME>")
 
+add_executable(srcgenex_flags_COMPILE_LANGUAGE srcgenex_flags_COMPILE_LANGUAGE.c)
+set_property(SOURCE srcgenex_flags_COMPILE_LANGUAGE.c PROPERTY COMPILE_FLAGS "$<$<COMPILE_LANGUAGE:C>:-DNAME=$<TARGET_PROPERTY:NAME>>")
+
 add_executable(srcgenex_defs srcgenex_defs.c)
 set_property(SOURCE srcgenex_defs.c PROPERTY COMPILE_DEFINITIONS NAME=$<TARGET_PROPERTY:NAME>)
+
+if (CMAKE_GENERATOR MATCHES "Makefiles|Ninja|Watcom WMake")
+  add_executable(srcgenex_defs_COMPILE_LANGUAGE srcgenex_defs_COMPILE_LANGUAGE.c)
+  set_property(SOURCE srcgenex_defs_COMPILE_LANGUAGE.c PROPERTY COMPILE_DEFINITIONS $<$<COMPILE_LANGUAGE:C>:NAME=$<TARGET_PROPERTY:NAME>>)
+endif()
 
 #-----------------------------------------------------------------------------
 # Cover test properties with generator expressions.

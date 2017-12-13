@@ -361,9 +361,11 @@ std::string cmExtraSublimeTextGenerator::ComputeFlagsForObject(
   }
 
   // Add source file specific flags.
-  if (const char* cflags = source->GetProperty("COMPILE_FLAGS")) {
-    cmGeneratorExpressionInterpreter genexInterpreter(lg, gtgt, config);
-    lg->AppendFlags(flags, genexInterpreter.Evaluate(cflags));
+  const std::string COMPILE_FLAGS("COMPILE_FLAGS");
+  if (const char* cflags = source->GetProperty(COMPILE_FLAGS)) {
+    cmGeneratorExpressionInterpreter genexInterpreter(
+      lg, gtgt, config, gtgt->GetName(), language);
+    lg->AppendFlags(flags, genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
   }
 
   return flags;
@@ -379,7 +381,8 @@ std::string cmExtraSublimeTextGenerator::ComputeDefines(
   cmMakefile* makefile = lg->GetMakefile();
   const std::string& language = source->GetLanguage();
   const std::string& config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  cmGeneratorExpressionInterpreter genexInterpreter(lg, target, config);
+  cmGeneratorExpressionInterpreter genexInterpreter(
+    lg, target, config, target->GetName(), language);
 
   // Add the export symbol definition for shared library objects.
   if (const char* exportMacro = target->GetExportMacro()) {
@@ -388,14 +391,17 @@ std::string cmExtraSublimeTextGenerator::ComputeDefines(
 
   // Add preprocessor definitions for this target and configuration.
   lg->AddCompileDefinitions(defines, target, config, language);
-  if (const char* compile_defs = source->GetProperty("COMPILE_DEFINITIONS")) {
-    lg->AppendDefines(defines, genexInterpreter.Evaluate(compile_defs));
+  const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
+  if (const char* compile_defs = source->GetProperty(COMPILE_DEFINITIONS)) {
+    lg->AppendDefines(
+      defines, genexInterpreter.Evaluate(compile_defs, COMPILE_DEFINITIONS));
   }
 
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += cmSystemTools::UpperCase(config);
   if (const char* config_compile_defs = source->GetProperty(defPropName)) {
-    lg->AppendDefines(defines, genexInterpreter.Evaluate(config_compile_defs));
+    lg->AppendDefines(defines, genexInterpreter.Evaluate(config_compile_defs,
+                                                         COMPILE_DEFINITIONS));
   }
 
   std::string definesString;

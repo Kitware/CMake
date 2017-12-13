@@ -426,7 +426,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   std::string config = this->LocalGenerator->GetConfigName();
   std::string configUpper = cmSystemTools::UpperCase(config);
   cmGeneratorExpressionInterpreter genexInterpreter(
-    this->LocalGenerator, this->GeneratorTarget, config);
+    this->LocalGenerator, this->GeneratorTarget, config,
+    this->GeneratorTarget->GetName(), lang);
 
   // Add Fortran format flags.
   if (lang == "Fortran") {
@@ -434,8 +435,10 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   }
 
   // Add flags from source file properties.
-  if (const char* cflags = source.GetProperty("COMPILE_FLAGS")) {
-    const char* evaluatedFlags = genexInterpreter.Evaluate(cflags);
+  const std::string COMPILE_FLAGS("COMPILE_FLAGS");
+  if (const char* cflags = source.GetProperty(COMPILE_FLAGS)) {
+    const char* evaluatedFlags =
+      genexInterpreter.Evaluate(cflags, COMPILE_FLAGS);
     this->LocalGenerator->AppendFlags(flags, evaluatedFlags);
     *this->FlagFileStream << "# Custom flags: " << relativeObj
                           << "_FLAGS = " << evaluatedFlags << "\n"
@@ -446,8 +449,10 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   std::set<std::string> defines;
 
   // Add source-sepcific preprocessor definitions.
-  if (const char* compile_defs = source.GetProperty("COMPILE_DEFINITIONS")) {
-    const char* evaluatedDefs = genexInterpreter.Evaluate(compile_defs);
+  const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
+  if (const char* compile_defs = source.GetProperty(COMPILE_DEFINITIONS)) {
+    const char* evaluatedDefs =
+      genexInterpreter.Evaluate(compile_defs, COMPILE_DEFINITIONS);
     this->LocalGenerator->AppendDefines(defines, evaluatedDefs);
     *this->FlagFileStream << "# Custom defines: " << relativeObj
                           << "_DEFINES = " << evaluatedDefs << "\n"
@@ -456,7 +461,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += configUpper;
   if (const char* config_compile_defs = source.GetProperty(defPropName)) {
-    const char* evaluatedDefs = genexInterpreter.Evaluate(config_compile_defs);
+    const char* evaluatedDefs =
+      genexInterpreter.Evaluate(config_compile_defs, COMPILE_DEFINITIONS);
     this->LocalGenerator->AppendDefines(defines, evaluatedDefs);
     *this->FlagFileStream << "# Custom defines: " << relativeObj << "_DEFINES_"
                           << configUpper << " = " << evaluatedDefs << "\n"

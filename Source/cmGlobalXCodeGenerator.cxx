@@ -684,18 +684,21 @@ class XCodeGeneratorExpressionInterpreter
 public:
   XCodeGeneratorExpressionInterpreter(cmSourceFile* sourceFile,
                                       cmLocalGenerator* localGenerator,
-                                      cmGeneratorTarget* generatorTarget)
+                                      cmGeneratorTarget* generatorTarget,
+                                      const std::string& lang)
     : cmGeneratorExpressionInterpreter(localGenerator, generatorTarget,
-                                       "NO-PER-CONFIG-SUPPORT-IN-XCODE")
+                                       "NO-PER-CONFIG-SUPPORT-IN-XCODE",
+                                       generatorTarget->GetName(), lang)
     , SourceFile(sourceFile)
   {
   }
 
   using cmGeneratorExpressionInterpreter::Evaluate;
 
-  const char* Evaluate(const char* expression, const char* property)
+  const char* Evaluate(const char* expression, const std::string& property)
   {
-    const char* processed = this->Evaluate(expression);
+    const char* processed =
+      this->cmGeneratorExpressionInterpreter::Evaluate(expression, property);
     if (this->GetCompiledGeneratorExpression()
           .GetHadContextSensitiveCondition()) {
       std::ostringstream e;
@@ -719,7 +722,9 @@ private:
 cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   cmLocalGenerator* lg, cmSourceFile* sf, cmGeneratorTarget* gtgt)
 {
-  XCodeGeneratorExpressionInterpreter genexInterpreter(sf, lg, gtgt);
+  std::string lang = this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
+
+  XCodeGeneratorExpressionInterpreter genexInterpreter(sf, lg, gtgt, lang);
 
   // Add flags from target and source file properties.
   std::string flags;
@@ -734,16 +739,18 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     default:
       break;
   }
-  if (const char* cflags = sf->GetProperty("COMPILE_FLAGS")) {
-    lg->AppendFlags(flags, genexInterpreter.Evaluate(cflags, "COMPILE_FLAGS"));
+  const std::string COMPILE_FLAGS("COMPILE_FLAGS");
+  if (const char* cflags = sf->GetProperty(COMPILE_FLAGS)) {
+    lg->AppendFlags(flags, genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
   }
 
   // Add per-source definitions.
   BuildObjectListOrString flagsBuild(this, false);
-  if (const char* compile_defs = sf->GetProperty("COMPILE_DEFINITIONS")) {
+  const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
+  if (const char* compile_defs = sf->GetProperty(COMPILE_DEFINITIONS)) {
     this->AppendDefines(
-      flagsBuild,
-      genexInterpreter.Evaluate(compile_defs, "COMPILE_DEFINITIONS"), true);
+      flagsBuild, genexInterpreter.Evaluate(compile_defs, COMPILE_DEFINITIONS),
+      true);
   }
   if (!flagsBuild.IsEmpty()) {
     if (!flags.empty()) {
@@ -751,8 +758,6 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     }
     flags += flagsBuild.GetString();
   }
-
-  std::string lang = this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
 
   cmXCodeObject* buildFile =
     this->CreateXCodeSourceFileFromPath(sf->GetFullPath(), gtgt, lang, sf);

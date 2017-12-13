@@ -135,12 +135,14 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   }
 
   // Add source file specific flags.
-  if (const char* cflags = source->GetProperty("COMPILE_FLAGS")) {
+  const std::string COMPILE_FLAGS("COMPILE_FLAGS");
+  if (const char* cflags = source->GetProperty(COMPILE_FLAGS)) {
     cmGeneratorExpressionInterpreter genexInterpreter(
       this->LocalGenerator, this->GeneratorTarget,
-      this->LocalGenerator->GetConfigName());
-    this->LocalGenerator->AppendFlags(flags,
-                                      genexInterpreter.Evaluate(cflags));
+      this->LocalGenerator->GetConfigName(), this->GeneratorTarget->GetName(),
+      language);
+    this->LocalGenerator->AppendFlags(
+      flags, genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
   }
 
   return flags;
@@ -179,18 +181,21 @@ std::string cmNinjaTargetGenerator::ComputeDefines(cmSourceFile const* source,
   std::set<std::string> defines;
   const std::string config = this->LocalGenerator->GetConfigName();
   cmGeneratorExpressionInterpreter genexInterpreter(
-    this->LocalGenerator, this->GeneratorTarget, config);
+    this->LocalGenerator, this->GeneratorTarget, config,
+    this->GeneratorTarget->GetName(), language);
 
-  if (const char* compile_defs = source->GetProperty("COMPILE_DEFINITIONS")) {
+  const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
+  if (const char* compile_defs = source->GetProperty(COMPILE_DEFINITIONS)) {
     this->LocalGenerator->AppendDefines(
-      defines, genexInterpreter.Evaluate(compile_defs));
+      defines, genexInterpreter.Evaluate(compile_defs, COMPILE_DEFINITIONS));
   }
 
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += cmSystemTools::UpperCase(config);
   if (const char* config_compile_defs = source->GetProperty(defPropName)) {
     this->LocalGenerator->AppendDefines(
-      defines, genexInterpreter.Evaluate(config_compile_defs));
+      defines,
+      genexInterpreter.Evaluate(config_compile_defs, COMPILE_DEFINITIONS));
   }
 
   std::string definesString = this->GetDefines(language);

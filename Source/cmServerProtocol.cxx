@@ -691,8 +691,6 @@ static Json::Value DumpSourceFilesList(
 
   std::vector<cmSourceFile*> files;
   target->GetSourceFiles(files, config);
-  cmGeneratorExpressionInterpreter genexInterpreter(
-    target->GetLocalGenerator(), target, config);
 
   std::unordered_map<LanguageData, std::vector<std::string>> fileGroups;
   for (cmSourceFile* file : files) {
@@ -701,24 +699,31 @@ static Json::Value DumpSourceFilesList(
     if (!fileData.Language.empty()) {
       const LanguageData& ld = languageDataMap.at(fileData.Language);
       cmLocalGenerator* lg = target->GetLocalGenerator();
+      cmGeneratorExpressionInterpreter genexInterpreter(
+        lg, target, config, target->GetName(), fileData.Language);
 
       std::string compileFlags = ld.Flags;
-      if (const char* cflags = file->GetProperty("COMPILE_FLAGS")) {
-        lg->AppendFlags(compileFlags, genexInterpreter.Evaluate(cflags));
+      const std::string COMPILE_FLAGS("COMPILE_FLAGS");
+      if (const char* cflags = file->GetProperty(COMPILE_FLAGS)) {
+        lg->AppendFlags(compileFlags,
+                        genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
       }
       fileData.Flags = compileFlags;
 
       fileData.IncludePathList = ld.IncludePathList;
 
+      const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
       std::set<std::string> defines;
-      if (const char* defs = file->GetProperty("COMPILE_DEFINITIONS")) {
-        lg->AppendDefines(defines, genexInterpreter.Evaluate(defs));
+      if (const char* defs = file->GetProperty(COMPILE_DEFINITIONS)) {
+        lg->AppendDefines(
+          defines, genexInterpreter.Evaluate(defs, COMPILE_DEFINITIONS));
       }
 
       const std::string defPropName =
         "COMPILE_DEFINITIONS_" + cmSystemTools::UpperCase(config);
       if (const char* config_defs = file->GetProperty(defPropName)) {
-        lg->AppendDefines(defines, genexInterpreter.Evaluate(config_defs));
+        lg->AppendDefines(defines, genexInterpreter.Evaluate(
+                                     config_defs, COMPILE_DEFINITIONS));
       }
 
       defines.insert(ld.Defines.begin(), ld.Defines.end());

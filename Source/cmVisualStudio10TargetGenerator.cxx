@@ -2152,7 +2152,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         flagtable = gg->GetCSharpFlagTable();
       }
       cmGeneratorExpressionInterpreter genexInterpreter(
-        this->LocalGenerator, this->GeneratorTarget, *config);
+        this->LocalGenerator, this->GeneratorTarget, *config,
+        this->GeneratorTarget->GetName(), lang);
       cmVisualStudioGeneratorOptions clOptions(
         this->LocalGenerator, cmVisualStudioGeneratorOptions::Compiler,
         flagtable, 0, this);
@@ -2163,7 +2164,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         clOptions.AddFlag("CompileAsWinRT", "false");
       }
       if (configDependentFlags) {
-        clOptions.Parse(genexInterpreter.Evaluate(flags));
+        clOptions.Parse(genexInterpreter.Evaluate(flags, "COMPILE_FLAGS"));
       } else {
         clOptions.Parse(flags.c_str());
       }
@@ -2176,7 +2177,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
                              "%(DisableSpecificWarnings)");
       }
       if (configDependentDefines) {
-        clOptions.AddDefines(genexInterpreter.Evaluate(configDefines));
+        clOptions.AddDefines(
+          genexInterpreter.Evaluate(configDefines, "COMPILE_DEFINITIONS"));
       } else {
         clOptions.AddDefines(configDefines.c_str());
       }
