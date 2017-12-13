@@ -258,7 +258,7 @@ void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
 
 void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
 {
-  static const char* ENABLE_UAC = "EnableUAC";
+  static std::string const ENABLE_UAC = "EnableUAC";
   if (!HasFlag(ENABLE_UAC)) {
     return;
   }
@@ -304,8 +304,7 @@ void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
         continue;
       }
 
-      AddFlag(uacMap[keyValue[0]].c_str(),
-              uacExecuteLevelMap[keyValue[1]].c_str());
+      AddFlag(uacMap[keyValue[0]], uacExecuteLevelMap[keyValue[1]]);
       continue;
     }
 
@@ -314,7 +313,7 @@ void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
         // unknown uiAccess value
         continue;
       }
-      AddFlag(uacMap[keyValue[0]].c_str(), keyValue[1].c_str());
+      AddFlag(uacMap[keyValue[0]], keyValue[1]);
       continue;
     }
 

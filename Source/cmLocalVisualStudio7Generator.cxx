@@ -701,7 +701,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   Options targetOptions(this, t, table, gg->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
   std::string asmLocation = configName + "/";
-  targetOptions.AddFlag("AssemblerListingLocation", asmLocation.c_str());
+  targetOptions.AddFlag("AssemblerListingLocation", asmLocation);
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
   targetOptions.ParseFinish();
@@ -1007,7 +1007,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
   if (mdi && !mdi->DefFile.empty()) {
     std::string defFile =
       this->ConvertToOutputFormat(mdi->DefFile, cmOutputConverter::SHELL);
-    linkOptions.AddFlag("ModuleDefinitionFile", defFile.c_str());
+    linkOptions.AddFlag("ModuleDefinitionFile", defFile);
   }
 
   switch (target->GetType()) {

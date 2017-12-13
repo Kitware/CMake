@@ -155,12 +155,12 @@ std::vector<std::string> const& cmIDEOptions::GetDefines() const
   return this->Defines;
 }
 
-void cmIDEOptions::AddFlag(const char* flag, const char* value)
+void cmIDEOptions::AddFlag(std::string const& flag, std::string const& value)
 {
   this->FlagMap[flag] = value;
 }
 
-void cmIDEOptions::AddFlag(const char* flag,
+void cmIDEOptions::AddFlag(std::string const& flag,
                            std::vector<std::string> const& value)
 {
   this->FlagMap[flag] = value;
@@ -185,7 +185,7 @@ void cmIDEOptions::AppendFlagString(std::string const& flag,
   this->FlagMap[flag].append_with_space(value);
 }
 
-void cmIDEOptions::RemoveFlag(const char* flag)
+void cmIDEOptions::RemoveFlag(std::string const& flag)
 {
   this->FlagMap.erase(flag);
 }
@@ -195,12 +195,13 @@ bool cmIDEOptions::HasFlag(std::string const& flag) const
   return this->FlagMap.find(flag) != this->FlagMap.end();
 }
 
-const char* cmIDEOptions::GetFlag(const char* flag)
+const char* cmIDEOptions::GetFlag(std::string const& flag) const
 {
   // This method works only for single-valued flags!
-  std::map<std::string, FlagValue>::iterator i = this->FlagMap.find(flag);
-  if (i != this->FlagMap.end() && i->second.size() == 1) {
+  std::map<std::string, FlagValue>::const_iterator i =
+    this->FlagMap.find(flag);
+  if (i != this->FlagMap.cend() && i->second.size() == 1) {
     return i->second[0].c_str();
   }
-  return 0;
+  return nullptr;
 }
