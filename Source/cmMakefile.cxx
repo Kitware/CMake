@@ -4486,6 +4486,27 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
     }
   }
 
+  const char* existingCudaStandard = target->GetProperty("CUDA_STANDARD");
+  const char* const* existingCudaLevel = nullptr;
+  if (existingCudaStandard) {
+    existingCudaLevel =
+      std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
+                   cmStrCmp(existingCudaStandard));
+    if (existingCudaLevel == cm::cend(CXX_STANDARDS)) {
+      std::ostringstream e;
+      e << "The CUDA_STANDARD property on target \"" << target->GetName()
+        << "\" contained an invalid value: \"" << existingCudaStandard
+        << "\".";
+      if (error) {
+        *error = e.str();
+      } else {
+        this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                                               this->Backtrace);
+      }
+      return false;
+    }
+  }
+
   /* clang-format off */
   const char* const* needCxxLevel =
     needCxx17 ? &CXX_STANDARDS[3]
@@ -4500,6 +4521,11 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
     // the needed C++ features.
     if (!existingCxxLevel || existingCxxLevel < needCxxLevel) {
       target->SetProperty("CXX_STANDARD", *needCxxLevel);
+    }
+
+    // Ensure the CUDA language level is high enough to support
+    // the needed C++ features.
+    if (!existingCudaLevel || existingCudaLevel < needCxxLevel) {
       target->SetProperty("CUDA_STANDARD", *needCxxLevel);
     }
   }
