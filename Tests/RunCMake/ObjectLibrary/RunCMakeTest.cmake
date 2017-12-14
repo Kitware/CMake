@@ -40,6 +40,8 @@ run_object_lib_build(LinkObjLHSStatic)
 run_object_lib_build(LinkObjRHSShared)
 run_object_lib_build(LinkObjRHSStatic)
 run_object_lib_build2(LinkObjRHSObject)
+run_object_lib_build(LinkObjRHSShared2)
+run_object_lib_build(LinkObjRHSStatic2)
 run_object_lib_build2(LinkObjRHSObject2)
 
 run_cmake(MissingSource)

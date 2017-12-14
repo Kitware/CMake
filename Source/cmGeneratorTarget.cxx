@@ -809,6 +809,26 @@ static void AddInterfaceEntries(
   }
 }
 
+static void AddObjectEntries(
+  cmGeneratorTarget const* thisTarget, std::string const& config,
+  std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries)
+{
+  if (cmLinkImplementationLibraries const* impl =
+        thisTarget->GetLinkImplementationLibraries(config)) {
+    for (cmLinkImplItem const& lib : impl->Libraries) {
+      if (lib.Target &&
+          lib.Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+        std::string genex = "$<TARGET_OBJECTS:" + lib + ">";
+        cmGeneratorExpression ge(lib.Backtrace);
+        std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
+        cge->SetEvaluateForBuildsystem(true);
+        entries.push_back(
+          new cmGeneratorTarget::TargetPropertyEntry(std::move(cge), lib));
+      }
+    }
+  }
+}
+
 static bool processSources(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
@@ -849,13 +869,10 @@ static bool processSources(
         std::ostringstream err;
         if (!targetName.empty()) {
           err << "Target \"" << targetName
-              << "\" contains relative "
-                 "path in its INTERFACE_SOURCES:\n"
-                 "  \""
+              << "\" contains relative path in its INTERFACE_SOURCES:\n  \""
               << src << "\"";
         } else {
-          err << "Found relative path while evaluating sources of "
-                 "\""
+          err << "Found relative path while evaluating sources of \""
               << tgt->GetName() << "\":\n  \"" << src << "\"\n";
         }
         tgt->GetLocalGenerator()->IssueMessage(cmake::FATAL_ERROR, err.str());
@@ -932,23 +949,32 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<std::string>& files,
     processSources(this, this->SourceEntries, files, uniqueSrcs, &dagChecker,
                    config, debugSources);
 
+  // Collect INTERFACE_SOURCES of all direct link-dependencies.
   std::vector<cmGeneratorTarget::TargetPropertyEntry*>
     linkInterfaceSourcesEntries;
-
   AddInterfaceEntries(this, config, "INTERFACE_SOURCES",
                       linkInterfaceSourcesEntries);
-
   std::vector<std::string>::size_type numFilesBefore = files.size();
   bool contextDependentInterfaceSources =
     processSources(this, linkInterfaceSourcesEntries, files, uniqueSrcs,
                    &dagChecker, config, debugSources);
 
+  // Collect TARGET_OBJECTS of direct object link-dependencies.
+  std::vector<cmGeneratorTarget::TargetPropertyEntry*> linkObjectsEntries;
+  AddObjectEntries(this, config, linkObjectsEntries);
+  std::vector<std::string>::size_type numFilesBefore2 = files.size();
+  bool contextDependentObjects =
+    processSources(this, linkObjectsEntries, files, uniqueSrcs, &dagChecker,
+                   config, debugSources);
+
   if (!contextDependentDirectSources &&
-      !(contextDependentInterfaceSources && numFilesBefore < files.size())) {
+      !(contextDependentInterfaceSources && numFilesBefore < files.size()) &&
+      !(contextDependentObjects && numFilesBefore2 < files.size())) {
     this->LinkImplementationLanguageIsContextDependent = false;
   }
 
   cmDeleteAll(linkInterfaceSourcesEntries);
+  cmDeleteAll(linkObjectsEntries);
 }
 
 void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*>& files,
