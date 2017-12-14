@@ -54,17 +54,29 @@
 #
 # The following cache variables are also available to set or use:
 #
-# ``FLTK_BASE_LIBRARY``
-#   Path to the FLTK base library
+# ``FLTK_BASE_LIBRARY_RELEASE``
+#   The FLTK base library (optimized)
 #
-# ``FLTK_GL_LIBRARY``
-#   Path to the FLTK GL library
+# ``FLTK_BASE_LIBRARY_DEBUG``
+#   The FLTK base library (debug)
 #
-# ``FLTK_FORMS_LIBRARY``
-#   Path to the FLTK Forms library
+# ``FLTK_GL_LIBRARY_RELEASE``
+#   The FLTK GL library (optimized)
 #
-# ``FLTK_IMAGES_LIBRARY``
-#   Path to the FLTK Images protobuf library
+# ``FLTK_GL_LIBRARY_DEBUG``
+#   The FLTK GL library (debug)
+#
+# ``FLTK_FORMS_LIBRARY_RELEASE``
+#   The FLTK Forms library (optimized)
+#
+# ``FLTK_FORMS_LIBRARY_DEBUG``
+#   The FLTK Forms library (debug)
+#
+# ``FLTK_IMAGES_LIBRARY_RELEASE``
+#   The FLTK Images protobuf library (optimized)
+#
+# ``FLTK_IMAGES_LIBRARY_DEBUG``
+#   The FLTK Images library (debug)
 
 if(NOT FLTK_SKIP_OPENGL)
   find_package(OpenGL)
@@ -244,14 +256,29 @@ else()
 
   list(APPEND FLTK_LIBRARY_SEARCH_PATH ${FLTK_INCLUDE_DIR}/lib ${_FLTK_POSSIBLE_LIBRARY_DIR})
 
-  find_library(FLTK_BASE_LIBRARY NAMES fltk fltkd
-    PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
-  find_library(FLTK_GL_LIBRARY NAMES fltkgl fltkgld fltk_gl
-    PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
-  find_library(FLTK_FORMS_LIBRARY NAMES fltkforms fltkformsd fltk_forms
-    PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
-  find_library(FLTK_IMAGES_LIBRARY NAMES fltkimages fltkimagesd fltk_images
-    PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
+  include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+
+  # Allow libraries to be set manually
+  if(NOT FLTK_BASE_LIBRARY)
+      find_library(FLTK_BASE_LIBRARY_RELEASE NAMES fltk PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
+      find_library(FLTK_BASE_LIBRARY_DEBUG NAMES fltkd PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
+      select_library_configurations(FLTK_BASE)
+  endif()
+  if(NOT FLTK_GL_LIBRARY)
+      find_library(FLTK_GL_LIBRARY_RELEASE NAMES fltkgl fltk_gl PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
+      find_library(FLTK_GL_LIBRARY_DEBUG NAMES fltkgld fltk_gld PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
+      select_library_configurations(FLTK_GL)
+  endif()
+  if(NOT FLTK_FORMS_LIBRARY)
+      find_library(FLTK_FORMS_LIBRARY_RELEASE NAMES fltkforms fltk_forms PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
+      find_library(FLTK_FORMS_LIBRARY_DEBUG NAMES fltkformsd fltk_formsd PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
+      select_library_configurations(FLTK_FORMS)
+  endif()
+  if(NOT FLTK_IMAGES_LIBRARY)
+      find_library(FLTK_IMAGES_LIBRARY_RELEASE NAMES fltkimages fltk_images PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
+      find_library(FLTK_IMAGES_LIBRARY_DEBUG NAMES fltkimagesd fltk_imagesd PATHS ${FLTK_LIBRARY_SEARCH_PATH} PATH_SUFFIXES fltk fltk/lib)
+      select_library_configurations(FLTK_IMAGES)
+  endif()
 
   # Find the extra libraries needed for the fltk_images library.
   if(UNIX)
