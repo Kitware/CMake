@@ -5,57 +5,66 @@
 # FindFLTK
 # --------
 #
-# Find the native FLTK includes and library
+# Find the FLTK library
 #
+# Input Variables
+# ^^^^^^^^^^^^^^^
 #
+# By default this module will search for all of the FLTK components and
+# add them to the FLTK_LIBRARIES variable.  You can limit the components
+# which get placed in FLTK_LIBRARIES by defining one or more of the
+# following three options:
 #
-# By default FindFLTK.cmake will search for all of the FLTK components
-# and add them to the FLTK_LIBRARIES variable.
+# ``FLTK_SKIP_OPENGL``
+#   Set to true to disable searching for the FLTK GL library
 #
-# ::
+# ``FLTK_SKIP_FORMS``
+#   Set to true to disable searching for the FLTK Forms library
 #
-#    You can limit the components which get placed in FLTK_LIBRARIES by
-#    defining one or more of the following three options:
+# ``FLTK_SKIP_IMAGES``
+#   Set to true to disable searching for the FLTK Images library
 #
+# FLTK is composed also by a binary tool. You can set the following option:
 #
+# ``FLTK_SKIP_FLUID``
+#   Set to true to not look for the FLUID binary
 #
-# ::
-#
-#      FLTK_SKIP_OPENGL, set to true to disable searching for opengl and
-#                        the FLTK GL library
-#      FLTK_SKIP_FORMS, set to true to disable searching for fltk_forms
-#      FLTK_SKIP_IMAGES, set to true to disable searching for fltk_images
-#
-#
-#
-# ::
-#
-#      FLTK_SKIP_FLUID, set to true if the fluid binary need not be present
-#                       at build time
-#
-#
+# Result Variables
+# ^^^^^^^^^^^^^^^^
 #
 # The following variables will be defined:
 #
-# ::
+# ``FLTK_FOUND``
+#   True if all components not skipped were found
 #
-#      FLTK_FOUND, True if all components not skipped were found
-#      FLTK_INCLUDE_DIR, where to find include files
-#      FLTK_LIBRARIES, list of fltk libraries you should link against
-#      FLTK_FLUID_EXECUTABLE, where to find the Fluid tool
-#      FLTK_WRAP_UI, This enables the FLTK_WRAP_UI command
+# ``FLTK_INCLUDE_DIR``
+#   Path to the include directory for FLTK header files
 #
+# ``FLTK_LIBRARIES``
+#   List of the FLTK libraries found
 #
+# ``FLTK_FLUID_EXECUTABLE``
+#   Path to the FLUID binary tool
 #
-# The following cache variables are assigned but should not be used.
-# See the FLTK_LIBRARIES variable instead.
+# ``FLTK_WRAP_UI``
+#   True if FLUID is found, used to enable the FLTK_WRAP_UI command
 #
-# ::
+# Cache Variables
+# ^^^^^^^^^^^^^^^
 #
-#      FLTK_BASE_LIBRARY   = the full path to fltk.lib
-#      FLTK_GL_LIBRARY     = the full path to fltk_gl.lib
-#      FLTK_FORMS_LIBRARY  = the full path to fltk_forms.lib
-#      FLTK_IMAGES_LIBRARY = the full path to fltk_images.lib
+# The following cache variables are also available to set or use:
+#
+# ``FLTK_BASE_LIBRARY``
+#   Path to the FLTK base library
+#
+# ``FLTK_GL_LIBRARY``
+#   Path to the FLTK GL library
+#
+# ``FLTK_FORMS_LIBRARY``
+#   Path to the FLTK Forms library
+#
+# ``FLTK_IMAGES_LIBRARY``
+#   Path to the FLTK Images protobuf library
 
 if(NOT FLTK_SKIP_OPENGL)
   find_package(OpenGL)
