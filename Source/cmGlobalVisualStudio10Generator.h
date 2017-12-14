@@ -96,6 +96,7 @@ public:
   void PathTooLong(cmGeneratorTarget* target, cmSourceFile const* sf,
                    std::string const& sfRel);
 
+  std::string Encoding() override;
   virtual const char* GetToolsVersion() { return "4.0"; }
 
   bool FindMakeProgram(cmMakefile* mf) override;

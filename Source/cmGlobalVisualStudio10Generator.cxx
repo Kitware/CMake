@@ -951,6 +951,11 @@ void cmGlobalVisualStudio10Generator::PathTooLong(cmGeneratorTarget* target,
   }
 }
 
+std::string cmGlobalVisualStudio10Generator::Encoding()
+{
+  return "utf-8";
+}
+
 bool cmGlobalVisualStudio10Generator::IsNsightTegra() const
 {
   return !this->NsightTegraVersion.empty();
