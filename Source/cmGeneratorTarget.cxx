@@ -1054,9 +1054,6 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
       kind = SourceKindHeader;
     } else if (sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {
       kind = SourceKindExternalObject;
-      if (this->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-        badObjLib.push_back(sf);
-      }
     } else if (!sf->GetLanguage().empty()) {
       kind = SourceKindObjectSource;
     } else if (ext == "def") {
