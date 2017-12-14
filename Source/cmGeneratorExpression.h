@@ -160,24 +160,37 @@ class cmGeneratorExpressionInterpreter
 public:
   cmGeneratorExpressionInterpreter(cmLocalGenerator* localGenerator,
                                    cmGeneratorTarget* generatorTarget,
-                                   const std::string& config)
+                                   const std::string& config,
+                                   const std::string& target,
+                                   const std::string& lang)
     : LocalGenerator(localGenerator)
     , GeneratorTarget(generatorTarget)
     , Config(config)
+    , Target(target)
+    , Language(lang)
+  {
+  }
+  cmGeneratorExpressionInterpreter(cmLocalGenerator* localGenerator,
+                                   cmGeneratorTarget* generatorTarget,
+                                   const std::string& config)
+    : cmGeneratorExpressionInterpreter(localGenerator, generatorTarget, config,
+                                       std::string(), std::string())
   {
   }
 
   const char* Evaluate(const char* expression)
   {
-    this->CompiledGeneratorExpression =
-      this->GeneratorExpression.Parse(expression);
-
-    return this->CompiledGeneratorExpression->Evaluate(
-      this->LocalGenerator, this->Config, false, this->GeneratorTarget);
+    return this->EvaluateExpression(expression);
   }
   const char* Evaluate(const std::string& expression)
   {
     return this->Evaluate(expression.c_str());
+  }
+  const char* Evaluate(const char* expression, const std::string& property);
+  const char* Evaluate(const std::string& expression,
+                       const std::string& property)
+  {
+    return this->Evaluate(expression.c_str(), property);
   }
 
 protected:
@@ -195,12 +208,34 @@ protected:
 
   cmGeneratorTarget* GetGeneratorTarget() { return this->GeneratorTarget; }
 
+  const std::string& GetTargetName() const { return this->Target; }
+  const std::string& GetLanguage() const { return this->Language; }
+
+  const char* EvaluateExpression(
+    const char* expression,
+    cmGeneratorExpressionDAGChecker* dagChecker = nullptr)
+  {
+    this->CompiledGeneratorExpression =
+      this->GeneratorExpression.Parse(expression);
+
+    if (dagChecker == nullptr) {
+      return this->CompiledGeneratorExpression->Evaluate(
+        this->LocalGenerator, this->Config, false, this->GeneratorTarget);
+    }
+
+    return this->CompiledGeneratorExpression->Evaluate(
+      this->LocalGenerator, this->Config, false, this->GeneratorTarget,
+      dagChecker, this->Language);
+  }
+
 private:
   cmGeneratorExpression GeneratorExpression;
   std::unique_ptr<cmCompiledGeneratorExpression> CompiledGeneratorExpression;
   cmLocalGenerator* LocalGenerator = nullptr;
   cmGeneratorTarget* GeneratorTarget = nullptr;
   std::string Config;
+  std::string Target;
+  std::string Language;
 };
 
 #endif

@@ -1458,14 +1458,28 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
        i != configs.end(); ++i, ++ci) {
     std::string configUpper = cmSystemTools::UpperCase(*i);
     cmLVS7GFileConfig fc;
-    cmGeneratorExpressionInterpreter genexInterpreter(lg, gt, *i);
+
+    std::string lang =
+      lg->GlobalGenerator->GetLanguageFromExtension(sf.GetExtension().c_str());
+    const std::string& sourceLang = lg->GetSourceFileLanguage(sf);
+    bool needForceLang = false;
+    // source file does not match its extension language
+    if (lang != sourceLang) {
+      needForceLang = true;
+      lang = sourceLang;
+    }
+
+    cmGeneratorExpressionInterpreter genexInterpreter(lg, gt, *i,
+                                                      gt->GetName(), lang);
+
     bool needfc = false;
     if (!objectName.empty()) {
       fc.ObjectName = objectName;
       needfc = true;
     }
-    if (const char* cflags = sf.GetProperty("COMPILE_FLAGS")) {
-      fc.CompileFlags = genexInterpreter.Evaluate(cflags);
+    const std::string COMPILE_FLAGS("COMPILE_FLAGS");
+    if (const char* cflags = sf.GetProperty(COMPILE_FLAGS)) {
+      fc.CompileFlags = genexInterpreter.Evaluate(cflags, COMPILE_FLAGS);
       needfc = true;
     }
     if (lg->FortranProject) {
@@ -1483,14 +1497,16 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
           break;
       }
     }
-    if (const char* cdefs = sf.GetProperty("COMPILE_DEFINITIONS")) {
-      fc.CompileDefs = genexInterpreter.Evaluate(cdefs);
+    const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
+    if (const char* cdefs = sf.GetProperty(COMPILE_DEFINITIONS)) {
+      fc.CompileDefs = genexInterpreter.Evaluate(cdefs, COMPILE_DEFINITIONS);
       needfc = true;
     }
     std::string defPropName = "COMPILE_DEFINITIONS_";
     defPropName += configUpper;
     if (const char* ccdefs = sf.GetProperty(defPropName)) {
-      fc.CompileDefsConfig = genexInterpreter.Evaluate(ccdefs);
+      fc.CompileDefsConfig =
+        genexInterpreter.Evaluate(ccdefs, COMPILE_DEFINITIONS);
       needfc = true;
     }
 
@@ -1508,16 +1524,7 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
       }
     }
 
-    std::string lang =
-      lg->GlobalGenerator->GetLanguageFromExtension(sf.GetExtension().c_str());
-    const std::string& sourceLang = lg->GetSourceFileLanguage(sf);
     const std::string& linkLanguage = gt->GetLinkerLanguage(i->c_str());
-    bool needForceLang = false;
-    // source file does not match its extension language
-    if (lang != sourceLang) {
-      needForceLang = true;
-      lang = sourceLang;
-    }
     // If HEADER_FILE_ONLY is set, we must suppress this generation in
     // the project file
     fc.ExcludedFromBuild = sf.GetPropertyAsBool("HEADER_FILE_ONLY") ||
