@@ -3521,7 +3521,7 @@ void cmGlobalXCodeGenerator::AppendDefines(
 }
 
 void cmGlobalXCodeGenerator::AppendFlag(std::string& flags,
-                                        std::string const& flag)
+                                        std::string const& flag) const
 {
   // Short-circuit for an empty flag.
   if (flag.empty()) {

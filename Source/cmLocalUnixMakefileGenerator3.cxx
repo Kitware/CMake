@@ -830,8 +830,8 @@ std::string cmLocalUnixMakefileGenerator3::GetRelativeTargetDirectory(
   return dir;
 }
 
-void cmLocalUnixMakefileGenerator3::AppendFlags(std::string& flags,
-                                                const std::string& newFlags)
+void cmLocalUnixMakefileGenerator3::AppendFlags(
+  std::string& flags, const std::string& newFlags) const
 {
   if (this->IsWatcomWMake() && !newFlags.empty()) {
     std::string newf = newFlags;
@@ -845,7 +845,7 @@ void cmLocalUnixMakefileGenerator3::AppendFlags(std::string& flags,
 }
 
 void cmLocalUnixMakefileGenerator3::AppendFlags(std::string& flags,
-                                                const char* newFlags)
+                                                const char* newFlags) const
 {
   this->cmLocalGenerator::AppendFlags(flags, newFlags);
 }

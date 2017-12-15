@@ -792,19 +792,14 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
   if (const char* langFlagRegexStr =
         this->Makefile->GetDefinition(langFlagRegexVar)) {
     // Filter flags acceptable to this language.
-    cmsys::RegularExpression r(langFlagRegexStr);
     std::vector<std::string> opts;
     if (const char* targetFlags = target->GetProperty("COMPILE_FLAGS")) {
       cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
     }
     target->GetCompileOptions(opts, config, lang);
-    for (std::string const& opt : opts) {
-      if (r.find(opt.c_str())) {
-        // (Re-)Escape this flag.  COMPILE_FLAGS were already parsed
-        // as a command line above, and COMPILE_OPTIONS are escaped.
-        this->AppendFlagEscape(flags, opt);
-      }
-    }
+    // (Re-)Escape these flags.  COMPILE_FLAGS were already parsed
+    // as a command line above, and COMPILE_OPTIONS are escaped.
+    this->AppendCompileOptions(flags, opts, langFlagRegexStr);
   } else {
     // Use all flags.
     if (const char* targetFlags = target->GetProperty("COMPILE_FLAGS")) {
@@ -813,10 +808,8 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
     }
     std::vector<std::string> opts;
     target->GetCompileOptions(opts, config, lang);
-    for (std::string const& opt : opts) {
-      // COMPILE_OPTIONS are escaped.
-      this->AppendFlagEscape(flags, opt);
-    }
+    // COMPILE_OPTIONS are escaped.
+    this->AppendCompileOptions(flags, opts);
   }
 
   for (auto const& it : target->GetMaxLanguageStandards()) {
@@ -1876,7 +1869,7 @@ void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
 }
 
 void cmLocalGenerator::AppendFlags(std::string& flags,
-                                   const std::string& newFlags)
+                                   const std::string& newFlags) const
 {
   if (!newFlags.empty()) {
     if (!flags.empty()) {
@@ -1886,7 +1879,8 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
   }
 }
 
-void cmLocalGenerator::AppendFlags(std::string& flags, const char* newFlags)
+void cmLocalGenerator::AppendFlags(std::string& flags,
+                                   const char* newFlags) const
 {
   if (newFlags && *newFlags) {
     this->AppendFlags(flags, std::string(newFlags));
@@ -1894,7 +1888,7 @@ void cmLocalGenerator::AppendFlags(std::string& flags, const char* newFlags)
 }
 
 void cmLocalGenerator::AppendFlagEscape(std::string& flags,
-                                        const std::string& rawFlag)
+                                        const std::string& rawFlag) const
 {
   this->AppendFlags(flags, this->EscapeForShell(rawFlag));
 }
@@ -1927,6 +1921,41 @@ void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
   cmSystemTools::ExpandListArgument(rawFlagsList, flagsList);
   for (std::string const& o : flagsList) {
     this->AppendFlagEscape(flags, o);
+  }
+}
+
+void cmLocalGenerator::AppendCompileOptions(std::string& options,
+                                            const char* options_list,
+                                            const char* regex) const
+{
+  // Short-circuit if there are no options.
+  if (!options_list) {
+    return;
+  }
+
+  // Expand the list of options.
+  std::vector<std::string> options_vec;
+  cmSystemTools::ExpandListArgument(options_list, options_vec);
+  this->AppendCompileOptions(options, options_vec, regex);
+}
+
+void cmLocalGenerator::AppendCompileOptions(
+  std::string& options, const std::vector<std::string>& options_vec,
+  const char* regex) const
+{
+  if (regex != nullptr) {
+    // Filter flags upon specified reges.
+    cmsys::RegularExpression r(regex);
+
+    for (std::string const& opt : options_vec) {
+      if (r.find(opt.c_str())) {
+        this->AppendFlagEscape(options, opt);
+      }
+    }
+  } else {
+    for (std::string const& opt : options_vec) {
+      this->AppendFlagEscape(options, opt);
+    }
   }
 }
 

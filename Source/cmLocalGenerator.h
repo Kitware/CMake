@@ -118,10 +118,11 @@ public:
                                   cmGeneratorTarget const* target,
                                   const std::string& lang);
   ///! Append flags to a string.
-  virtual void AppendFlags(std::string& flags, const std::string& newFlags);
-  virtual void AppendFlags(std::string& flags, const char* newFlags);
+  virtual void AppendFlags(std::string& flags,
+                           const std::string& newFlags) const;
+  virtual void AppendFlags(std::string& flags, const char* newFlags) const;
   virtual void AppendFlagEscape(std::string& flags,
-                                const std::string& rawFlag);
+                                const std::string& rawFlag) const;
   void AppendIPOLinkerFlags(std::string& flags, cmGeneratorTarget* target,
                             const std::string& config,
                             const std::string& lang);
@@ -164,6 +165,22 @@ public:
   }
   void AppendDefines(std::set<std::string>& defines,
                      const std::vector<std::string>& defines_vec) const;
+
+  /**
+   * Encode a list of compile options for the compiler
+   * command line.
+   */
+  void AppendCompileOptions(std::string& options, const char* options_list,
+                            const char* regex = nullptr) const;
+  void AppendCompileOptions(std::string& options,
+                            std::string const& options_list,
+                            const char* regex = nullptr) const
+  {
+    this->AppendCompileOptions(options, options_list.c_str(), regex);
+  }
+  void AppendCompileOptions(std::string& options,
+                            const std::vector<std::string>& options_vec,
+                            const char* regex = nullptr) const;
 
   /**
    * Join a set of defines into a definesString with a space separator.

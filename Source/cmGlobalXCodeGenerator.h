@@ -104,7 +104,7 @@ public:
   bool ShouldStripResourcePath(cmMakefile*) const override;
 
   bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf) override;
-  void AppendFlag(std::string& flags, std::string const& flag);
+  void AppendFlag(std::string& flags, std::string const& flag) const;
 
 protected:
   void AddExtraIDETargets() override;

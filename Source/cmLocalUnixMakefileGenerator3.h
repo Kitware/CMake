@@ -88,8 +88,9 @@ public:
                                    const std::string& tgt);
 
   // append flags to a string
-  void AppendFlags(std::string& flags, const std::string& newFlags) override;
-  void AppendFlags(std::string& flags, const char* newFlags) override;
+  void AppendFlags(std::string& flags,
+                   const std::string& newFlags) const override;
+  void AppendFlags(std::string& flags, const char* newFlags) const override;
 
   // append an echo command
   enum EchoColor
