@@ -661,8 +661,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
   foreach (IT ${BLAS_SEARCH_LIBS})
     string(REPLACE " " ";" SEARCH_LIBS ${IT})
-    if (${_LIBRARIES})
-    else ()
+    if (NOT ${_LIBRARIES})
       check_fortran_libraries(
         ${_LIBRARIES}
         BLAS
