@@ -67,11 +67,6 @@ if(CMAKE_USER_MAKE_RULES_OVERRIDE_Fortran)
   set(CMAKE_USER_MAKE_RULES_OVERRIDE_Fortran "${_override}")
 endif()
 
-
-# Fortran needs cmake to do a requires step during its build process to
-# catch any modules
-set(CMAKE_NEEDS_REQUIRES_STEP_Fortran_FLAG 1)
-
 if(NOT CMAKE_Fortran_COMPILE_OPTIONS_PIC)
   set(CMAKE_Fortran_COMPILE_OPTIONS_PIC ${CMAKE_C_COMPILE_OPTIONS_PIC})
 endif()

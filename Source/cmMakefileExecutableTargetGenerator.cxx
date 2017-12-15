@@ -69,9 +69,6 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
     this->WriteExecutableRule(true);
   }
 
-  // Write the requires target.
-  this->WriteTargetRequiresRules();
-
   // Write clean target
   this->WriteTargetCleanRules();
 

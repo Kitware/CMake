@@ -89,9 +89,6 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
       break;
   }
 
-  // Write the requires target.
-  this->WriteTargetRequiresRules();
-
   // Write clean target
   this->WriteTargetCleanRules();
 

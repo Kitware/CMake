@@ -174,9 +174,6 @@ protected:
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
                                  cmGeneratorTarget* target);
 
-  // does this generator need a requires step for any of its targets
-  bool NeedRequiresStep(cmGeneratorTarget const*);
-
   // Target name hooks for superclass.
   const char* GetAllTargetName() const override { return "all"; }
   const char* GetInstallTargetName() const override { return "install"; }
