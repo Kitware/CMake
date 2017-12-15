@@ -421,25 +421,40 @@ function (_MPI_interrogate_compiler lang)
     set(MPI_LINK_CMDLINE "${MPI_COMPILE_CMDLINE}")
   endif()
 
-  # At this point, we obtained some output from a compiler wrapper that works.
-  # We'll now try to parse it into variables with meaning to us.
-  if("${LANG}" STREQUAL "Fortran")
-    # Some MPICH-1 and MVAPICH-1 versions return a three command answer for Fortran, consisting
-    # out of a symlink command for mpif.h, the actual compiler command and a deletion of the
-    # created symlink. We need to detect that case, remember the include path and drop the
-    # symlink/deletion operation to obtain the link/compile lines we'd usually expect.
-    if("${MPI_COMPILE_CMDLINE}" MATCHES "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h")
-      get_filename_component(MPI_INCLUDE_DIRS_WORK "${CMAKE_MATCH_1}" DIRECTORY)
-      string(REGEX REPLACE "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h\n" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
-      string(REGEX REPLACE "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h\n" "" MPI_LINK_CMDLINE "${MPI_LINK_CMDLINE}")
-      string(REGEX REPLACE "\nrm -f mpif.h$" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
-      string(REGEX REPLACE "\nrm -f mpif.h$" "" MPI_LINK_CMDLINE "${MPI_LINK_CMDLINE}")
+  # For MSVC and cl-compatible compilers, the keyword /link indicates a point after which
+  # everything following is passed to the linker. In this case, we drop all prior information
+  # from the link line and treat any unknown extra flags as linker flags.
+  set(_MPI_FILTERED_LINK_INFORMATION FALSE)
+  if(MSVC)
+    if(MPI_LINK_CMDLINE MATCHES " [/-]link ")
+      string(REGEX REPLACE ".+[/-]link +" "" MPI_LINK_CMDLINE "${MPI_LINK_CMDLINE}")
+      set(_MPI_FILTERED_LINK_INFORMATION TRUE)
     endif()
+    string(REGEX REPLACE " +[/-]link .+" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
   endif()
 
-  # The Intel MPI wrapper on Linux will emit some objcopy commands after its compile command
-  # if -static_mpi was passed to the wrapper. To avoid spurious matches, we need to drop these lines.
   if(UNIX)
+    # At this point, we obtained some output from a compiler wrapper that works.
+    # We'll now try to parse it into variables with meaning to us.
+    if("${LANG}" STREQUAL "Fortran")
+      # If MPICH (and derivates) didn't recognize the Fortran compiler include flag during configuration,
+      # they'll return a set of three commands, consisting out of a symlink command for mpif.h,
+      # the actual compiler command and deletion of the created symlink.
+      # Especially with M(VA)PICH-1, this appears to happen erroneously, and therefore we should translate
+      # this output into an additional include directory and then drop it from the output.
+      if("${MPI_COMPILE_CMDLINE}" MATCHES "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h")
+        get_filename_component(MPI_INCLUDE_DIRS_WORK "${CMAKE_MATCH_1}" DIRECTORY)
+        string(REGEX REPLACE "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h\n" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
+        string(REGEX REPLACE "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h\n" "" MPI_LINK_CMDLINE "${MPI_LINK_CMDLINE}")
+        string(REGEX REPLACE "\nrm -f mpif.h$" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
+        string(REGEX REPLACE "\nrm -f mpif.h$" "" MPI_LINK_CMDLINE "${MPI_LINK_CMDLINE}")
+      endif()
+    endif()
+
+    # If Intel MPI was configured for static linkage with -static_mpi, the wrapper will by default strip
+    # debug information from resulting binaries (see I_MPI_DEBUG_INFO_STRIP).
+    # Since we cannot process this information into CMake logic, we need to discard the resulting objcopy
+    # commands from the output.
     string(REGEX REPLACE "(^|\n)objcopy[^\n]+(\n|$)" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
     string(REGEX REPLACE "(^|\n)objcopy[^\n]+(\n|$)" "" MPI_LINK_CMDLINE "${MPI_LINK_CMDLINE}")
   endif()
@@ -460,7 +475,7 @@ function (_MPI_interrogate_compiler lang)
   endforeach()
 
   # Same deal, with the definitions. We also treat arguments passed to the preprocessor directly.
-  string(REGEX MATCHALL "(^| )(-Wp,|-Xpreprocessor |)[-/]D([^\" ]+|\"[^\"]+\")" MPI_ALL_COMPILE_DEFINITIONS "${MPI_COMPILE_CMDLINE}")
+  string(REGEX MATCHALL "(^| )(-Wp,|-Xpreprocessor )?[-/]D([^\" ]+|\"[^\"]+\")" MPI_ALL_COMPILE_DEFINITIONS "${MPI_COMPILE_CMDLINE}")
 
   foreach(_MPI_COMPILE_DEFINITION IN LISTS MPI_ALL_COMPILE_DEFINITIONS)
     string(REGEX REPLACE "^ ?(-Wp,|-Xpreprocessor )?[-/]D" "" _MPI_COMPILE_DEFINITION "${_MPI_COMPILE_DEFINITION}")
@@ -489,7 +504,7 @@ function (_MPI_interrogate_compiler lang)
   endforeach()
 
   # Extract linker paths from the link command line
-  string(REGEX MATCHALL "(^| )(-Wl,|-Xlinker |)(-L|[/-]LIBPATH:|[/-]libpath:)([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_PATHS "${MPI_LINK_CMDLINE}")
+  string(REGEX MATCHALL "(^| )(-Wl,|-Xlinker )?(-L|[/-]LIBPATH:|[/-]libpath:)([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_PATHS "${MPI_LINK_CMDLINE}")
 
   # If extracting failed to work, we'll try using -showme:libdirs.
   if (NOT MPI_ALL_LINK_PATHS)
@@ -506,8 +521,14 @@ function (_MPI_interrogate_compiler lang)
     list(APPEND MPI_LINK_DIRECTORIES_WORK "${_MPI_LPATH}")
   endforeach()
 
+  if(NOT _MPI_FILTERED_LINK_INFORMATION)
+    set(_MPI_LINK_FLAG_REGEX "(-Wl,|-Xlinker )")
+  else()
+    set(_MPI_LINK_FLAG_REGEX "")
+  endif()
+
   # Extract linker flags from the link command line
-  string(REGEX MATCHALL "(^| )(-Wl,|-Xlinker )([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_FLAGS "${MPI_LINK_CMDLINE}")
+  string(REGEX MATCHALL "(^| )${_MPI_LINK_FLAG_REGEX}([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_FLAGS "${MPI_LINK_CMDLINE}")
 
   foreach(_MPI_LINK_FLAG IN LISTS MPI_ALL_LINK_FLAGS)
     string(STRIP "${_MPI_LINK_FLAG}" _MPI_LINK_FLAG)
@@ -521,8 +542,7 @@ function (_MPI_interrogate_compiler lang)
     endif()
   endforeach()
 
-  # Extract the set of libraries to link against from the link command
-  # line
+  # Extract the set of libraries to link against from the link command line
   string(REGEX MATCHALL "(^| )-l([^\" ]+|\"[^\"]+\")" MPI_LIBNAMES "${MPI_LINK_CMDLINE}")
 
   foreach(_MPI_LIB_NAME IN LISTS MPI_LIBNAMES)
@@ -536,34 +556,31 @@ function (_MPI_interrogate_compiler lang)
     endif()
   endforeach()
 
-  if(WIN32)
-    # A compiler wrapper on Windows will just have the name of the
-    # library to link on its link line, potentially with a full path
-    string(REGEX MATCHALL "(^| )([^\" ]+\\.lib|\"[^\"]+\\.lib\")" MPI_LIBNAMES "${MPI_LINK_CMDLINE}")
-    foreach(_MPI_LIB_NAME IN LISTS MPI_LIBNAMES)
-      string(REGEX REPLACE "^ " "" _MPI_LIB_NAME "${_MPI_LIB_NAME}")
-      string(REPLACE "\"" "" _MPI_LIB_NAME "${_MPI_LIB_NAME}")
-      get_filename_component(_MPI_LIB_PATH "${_MPI_LIB_NAME}" DIRECTORY)
-      if(NOT "${_MPI_LIB_PATH}" STREQUAL "")
-        list(APPEND MPI_LIB_FULLPATHS_WORK "${_MPI_LIB_NAME}")
-      else()
-        list(APPEND MPI_LIB_NAMES_WORK "${_MPI_LIB_NAME}")
-      endif()
-    endforeach()
+  # Treat linker objects given by full path, for example static libraries, import libraries
+  # or shared libraries if there aren't any import libraries in use on the system.
+  # Note that we do not consider CMAKE_<TYPE>_LIBRARY_PREFIX intentionally here: The linker will for a given file
+  # decide how to link it based on file type, not based on a prefix like 'lib'.
+  set(_MPI_LIB_NAME_REGEX "[^\" ]+${CMAKE_STATIC_LIBRARY_SUFFIX}|\"[^\"]+${CMAKE_STATIC_LIBRARY_SUFFIX}\"")
+  if(DEFINED CMAKE_IMPORT_LIBRARY_SUFFIX)
+    if(NOT ("${CMAKE_IMPORT_LIBRARY_SUFFIX}" STREQUAL "${CMAKE_STATIC_LIBRARY_SUFFIX}"))
+      string(APPEND _MPI_LIB_NAME_REGEX "[^\" ]+${CMAKE_IMPORT_LIBRARY_SUFFIX}|\"[^\"]+${CMAKE_IMPORT_LIBRARY_SUFFIX}\"")
+    endif()
   else()
-    # On UNIX platforms, archive libraries can be given with full path.
-    string(REGEX MATCHALL "(^| )([^\" ]+\\.a|\"[^\"]+\\.a\")" MPI_LIBFULLPATHS "${MPI_LINK_CMDLINE}")
-    foreach(_MPI_LIB_NAME IN LISTS MPI_LIBFULLPATHS)
-      string(REGEX REPLACE "^ " "" _MPI_LIB_NAME "${_MPI_LIB_NAME}")
-      string(REPLACE "\"" "" _MPI_LIB_NAME "${_MPI_LIB_NAME}")
-      get_filename_component(_MPI_LIB_PATH "${_MPI_LIB_NAME}" DIRECTORY)
-      if(NOT "${_MPI_LIB_PATH}" STREQUAL "")
-        list(APPEND MPI_LIB_FULLPATHS_WORK "${_MPI_LIB_NAME}")
-      else()
-        list(APPEND MPI_LIB_NAMES_WORK "${_MPI_LIB_NAME}")
-      endif()
-    endforeach()
+    string(APPEND _MPI_LIB_NAME_REGEX "[^\" ]+${CMAKE_SHARED_LIBRARY_SUFFIX}|\"[^\"]+${CMAKE_SHARED_LIBRARY_SUFFIX}\"")
   endif()
+  string(REPLACE "." "\\." _MPI_LIB_NAME_REGEX "${_MPI_LIB_NAME_REGEX}")
+
+  string(REGEX MATCHALL "(^| )(${_MPI_LIB_NAME_REGEX})" MPI_LIBNAMES "${MPI_LINK_CMDLINE}")
+  foreach(_MPI_LIB_NAME IN LISTS MPI_LIBNAMES)
+    string(REGEX REPLACE "^ " "" _MPI_LIB_NAME "${_MPI_LIB_NAME}")
+    string(REPLACE "\"" "" _MPI_LIB_NAME "${_MPI_LIB_NAME}")
+    get_filename_component(_MPI_LIB_PATH "${_MPI_LIB_NAME}" DIRECTORY)
+    if(NOT "${_MPI_LIB_PATH}" STREQUAL "")
+      list(APPEND MPI_LIB_FULLPATHS_WORK "${_MPI_LIB_NAME}")
+    else()
+      list(APPEND MPI_LIB_NAMES_WORK "${_MPI_LIB_NAME}")
+    endif()
+  endforeach()
 
   # An MPI compiler wrapper could have its MPI libraries in the implictly
   # linked directories of the compiler itself.
@@ -589,16 +606,11 @@ function (_MPI_interrogate_compiler lang)
   unset(MPI_DIRECT_LIB_NAMES_WORK)
   foreach(_MPI_LIB_FULLPATH IN LISTS MPI_LIB_FULLPATHS_WORK)
     get_filename_component(_MPI_PLAIN_LIB_NAME "${_MPI_LIB_FULLPATH}" NAME_WE)
-    get_filename_component(_MPI_LIB_NAME "${_MPI_LIB_FULLPATH}" NAME)
-    get_filename_component(_MPI_LIB_PATH "${_MPI_LIB_FULLPATH}" DIRECTORY)
     list(APPEND MPI_DIRECT_LIB_NAMES_WORK "${_MPI_PLAIN_LIB_NAME}")
-    find_library(MPI_${_MPI_PLAIN_LIB_NAME}_LIBRARY
-      NAMES "${_MPI_LIB_NAME}"
-      HINTS ${_MPI_LIB_PATH}
-      DOC "Location of the ${_MPI_PLAIN_LIB_NAME} library for MPI"
-    )
+    set(MPI_${_MPI_PLAIN_LIB_NAME}_LIBRARY "${_MPI_LIB_FULLPATH}" CACHE FILEPATH "Location of the ${_MPI_PLAIN_LIB_NAME} library for MPI")
     mark_as_advanced(MPI_${_MPI_PLAIN_LIB_NAME}_LIBRARY)
   endforeach()
+  # Directly linked objects should be linked first in case some generic linker flags are needed for them.
   if(MPI_DIRECT_LIB_NAMES_WORK)
     set(MPI_PLAIN_LIB_NAMES_WORK "${MPI_DIRECT_LIB_NAMES_WORK};${MPI_PLAIN_LIB_NAMES_WORK}")
   endif()
