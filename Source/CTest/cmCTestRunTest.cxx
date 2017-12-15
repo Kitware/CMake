@@ -9,7 +9,6 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
-#include "cm_curl.h"
 #include "cm_zlib.h"
 #include "cmsys/Base64.h"
 #include "cmsys/Process.h"
@@ -18,7 +17,6 @@
 #include <iomanip>
 #include <sstream>
 #include <stdio.h>
-#include <time.h>
 #include <utility>
 
 cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
@@ -607,48 +605,13 @@ std::chrono::duration<double> cmCTestRunTest::ResolveTimeout()
 {
   auto timeout = this->TestProperties->Timeout;
 
-  if (this->CTest->GetStopTime().empty()) {
-    return timeout;
-  }
-  struct tm* lctime;
-  time_t current_time = time(nullptr);
-  lctime = gmtime(&current_time);
-  int gm_hour = lctime->tm_hour;
-  time_t gm_time = mktime(lctime);
-  lctime = localtime(&current_time);
-  int local_hour = lctime->tm_hour;
-
-  int tzone_offset = local_hour - gm_hour;
-  if (gm_time > current_time && gm_hour < local_hour) {
-    // this means gm_time is on the next day
-    tzone_offset -= 24;
-  } else if (gm_time < current_time && gm_hour > local_hour) {
-    // this means gm_time is on the previous day
-    tzone_offset += 24;
-  }
-
-  tzone_offset *= 100;
-  char buf[1024];
-  // add todays year day and month to the time in str because
-  // curl_getdate no longer assumes the day is today
-  sprintf(buf, "%d%02d%02d %s %+05i", lctime->tm_year + 1900,
-          lctime->tm_mon + 1, lctime->tm_mday,
-          this->CTest->GetStopTime().c_str(), tzone_offset);
-
-  time_t stop_time_t = curl_getdate(buf, &current_time);
-  if (stop_time_t == -1) {
+  std::chrono::system_clock::time_point stop_time = this->CTest->GetStopTime();
+  if (stop_time == std::chrono::system_clock::time_point()) {
     return timeout;
   }
 
-  auto stop_time = std::chrono::system_clock::from_time_t(stop_time_t);
-
-  // the stop time refers to the next day
-  if (this->CTest->NextDayStopTime) {
-    stop_time += std::chrono::hours(24);
-  }
   auto stop_timeout =
-    (stop_time - std::chrono::system_clock::from_time_t(current_time)) %
-    std::chrono::hours(24);
+    (stop_time - std::chrono::system_clock::now()) % std::chrono::hours(24);
 
   if (stop_timeout <= std::chrono::duration<double>::zero()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "The stop time has been passed. "

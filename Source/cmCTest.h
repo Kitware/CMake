@@ -226,7 +226,10 @@ public:
   bool ShouldCompressTestOutput();
   bool CompressString(std::string& str);
 
-  std::string GetStopTime() { return this->StopTime; }
+  std::chrono::system_clock::time_point GetStopTime()
+  {
+    return this->StopTime;
+  }
   void SetStopTime(std::string const& time);
 
   /** Used for parallel ctest job scheduling */
@@ -464,8 +467,7 @@ private:
   bool RepeatUntilFail;
   std::string ConfigType;
   std::string ScheduleType;
-  std::string StopTime;
-  bool NextDayStopTime;
+  std::chrono::system_clock::time_point StopTime;
   bool Verbose;
   bool ExtraVerbose;
   bool ProduceXML;
@@ -480,8 +482,6 @@ private:
   bool RunConfigurationScript;
 
   int GenerateNotesFile(const char* files);
-
-  void DetermineNextDayStop();
 
   // these are helper classes
   typedef std::map<std::string, cmCTestGenericHandler*> t_TestingHandlers;
