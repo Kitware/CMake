@@ -2509,6 +2509,14 @@ bool SystemTools::RemoveFile(const std::string& source)
   if (IsJunction(ws) && DeleteJunction(ws)) {
     return true;
   }
+  const DWORD DIRECTORY_SOFT_LINK_ATTRS =
+    FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT;
+  DWORD attrs = GetFileAttributesW(ws.c_str());
+  if (attrs != INVALID_FILE_ATTRIBUTES &&
+      (attrs & DIRECTORY_SOFT_LINK_ATTRS) == DIRECTORY_SOFT_LINK_ATTRS &&
+      RemoveDirectoryW(ws.c_str())) {
+    return true;
+  }
   if (DeleteFileW(ws.c_str()) || GetLastError() == ERROR_FILE_NOT_FOUND ||
       GetLastError() == ERROR_PATH_NOT_FOUND) {
     return true;
