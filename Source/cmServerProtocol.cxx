@@ -708,6 +708,11 @@ static Json::Value DumpSourceFilesList(
         lg->AppendFlags(compileFlags,
                         genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
       }
+      const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
+      if (const char* coptions = file->GetProperty(COMPILE_OPTIONS)) {
+        lg->AppendCompileOptions(
+          compileFlags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
+      }
       fileData.Flags = compileFlags;
 
       fileData.IncludePathList = ld.IncludePathList;

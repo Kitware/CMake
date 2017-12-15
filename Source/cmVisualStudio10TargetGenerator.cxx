@@ -2036,12 +2036,19 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   }
   std::string flags;
   bool configDependentFlags = false;
+  std::string options;
+  bool configDependentOptions = false;
   std::string defines;
   bool configDependentDefines = false;
   if (const char* cflags = sf.GetProperty("COMPILE_FLAGS")) {
     configDependentFlags =
       cmGeneratorExpression::Find(cflags) != std::string::npos;
     flags += cflags;
+  }
+  if (const char* coptions = sf.GetProperty("COMPILE_OPTIONS")) {
+    configDependentOptions =
+      cmGeneratorExpression::Find(coptions) != std::string::npos;
+    options += coptions;
   }
   if (const char* cdefs = sf.GetProperty("COMPILE_DEFINITIONS")) {
     configDependentDefines =
@@ -2099,7 +2106,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     }
     // if we have flags or defines for this config then
     // use them
-    if (!flags.empty() || !configDefines.empty() || compileAs || noWinRT) {
+    if (!flags.empty() || !options.empty() || !configDefines.empty() ||
+        compileAs || noWinRT) {
       (*this->BuildFileStream) << firstString;
       firstString = ""; // only do firstString once
       hasFlags = true;
@@ -2136,6 +2144,17 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         clOptions.Parse(genexInterpreter.Evaluate(flags, "COMPILE_FLAGS"));
       } else {
         clOptions.Parse(flags.c_str());
+      }
+      if (!options.empty()) {
+        std::string expandedOptions;
+        if (configDependentOptions) {
+          this->LocalGenerator->AppendCompileOptions(
+            expandedOptions,
+            genexInterpreter.Evaluate(options, "COMPILE_OPTIONS"));
+        } else {
+          this->LocalGenerator->AppendCompileOptions(expandedOptions, options);
+        }
+        clOptions.Parse(expandedOptions.c_str());
       }
       if (clOptions.HasFlag("AdditionalIncludeDirectories")) {
         clOptions.AppendFlag("AdditionalIncludeDirectories",

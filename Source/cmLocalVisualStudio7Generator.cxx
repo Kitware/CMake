@@ -1494,6 +1494,12 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
       fc.CompileFlags = genexInterpreter.Evaluate(cflags, COMPILE_FLAGS);
       needfc = true;
     }
+    const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
+    if (const char* coptions = sf.GetProperty(COMPILE_OPTIONS)) {
+      lg->AppendCompileOptions(
+        fc.CompileFlags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
+      needfc = true;
+    }
     if (lg->FortranProject) {
       switch (cmOutputConverter::GetFortranFormat(
         sf.GetProperty("Fortran_FORMAT"))) {

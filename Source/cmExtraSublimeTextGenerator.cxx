@@ -361,11 +361,18 @@ std::string cmExtraSublimeTextGenerator::ComputeFlagsForObject(
   }
 
   // Add source file specific flags.
+  cmGeneratorExpressionInterpreter genexInterpreter(lg, gtgt, config,
+                                                    gtgt->GetName(), language);
+
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
   if (const char* cflags = source->GetProperty(COMPILE_FLAGS)) {
-    cmGeneratorExpressionInterpreter genexInterpreter(
-      lg, gtgt, config, gtgt->GetName(), language);
     lg->AppendFlags(flags, genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
+  }
+
+  const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
+  if (const char* coptions = source->GetProperty(COMPILE_OPTIONS)) {
+    lg->AppendCompileOptions(
+      flags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
   }
 
   return flags;

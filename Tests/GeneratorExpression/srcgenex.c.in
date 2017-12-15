@@ -1,4 +1,4 @@
-int srcgenex_flags(void)
+int @TARGET_NAME@(void)
 {
   return 0;
 }

@@ -260,17 +260,33 @@ add_custom_target(check-part4 ALL
 
 #-----------------------------------------------------------------------------
 # Cover source file properties with generator expressions.
-add_executable(srcgenex_flags srcgenex_flags.c)
-set_property(SOURCE srcgenex_flags.c PROPERTY COMPILE_FLAGS "-DNAME=$<TARGET_PROPERTY:NAME>")
+## generate various source files
+foreach (item IN ITEMS flags flags_COMPILE_LANGUAGE
+                       options options_COMPILE_LANGUAGE
+                       defs defs_COMPILE_LANGUAGE)
+  set(TARGET_NAME srcgenex_${item})
+  configure_file(srcgenex.c.in ${TARGET_NAME}.c @ONLY)
+endforeach()
+add_executable(srcgenex_flags "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_flags.c")
+set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_flags.c"
+             PROPERTY COMPILE_FLAGS "-DNAME=$<TARGET_PROPERTY:NAME>")
+add_executable(srcgenex_flags_COMPILE_LANGUAGE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_flags_COMPILE_LANGUAGE.c")
+set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_flags_COMPILE_LANGUAGE.c"
+             PROPERTY COMPILE_FLAGS "$<$<COMPILE_LANGUAGE:C>:-DNAME=$<TARGET_PROPERTY:NAME>>")
 
-add_executable(srcgenex_flags_COMPILE_LANGUAGE srcgenex_flags_COMPILE_LANGUAGE.c)
-set_property(SOURCE srcgenex_flags_COMPILE_LANGUAGE.c PROPERTY COMPILE_FLAGS "$<$<COMPILE_LANGUAGE:C>:-DNAME=$<TARGET_PROPERTY:NAME>>")
+add_executable(srcgenex_options "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_options.c")
+set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_options.c"
+             PROPERTY COMPILE_OPTIONS -DUNUSED -DNAME=$<TARGET_PROPERTY:NAME>)
+add_executable(srcgenex_options_COMPILE_LANGUAGE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_options_COMPILE_LANGUAGE.c")
+set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_options_COMPILE_LANGUAGE.c"
+             PROPERTY COMPILE_OPTIONS $<$<COMPILE_LANGUAGE:C>:-DNAME=$<TARGET_PROPERTY:NAME>>)
 
-add_executable(srcgenex_defs srcgenex_defs.c)
-set_property(SOURCE srcgenex_defs.c PROPERTY COMPILE_DEFINITIONS NAME=$<TARGET_PROPERTY:NAME>)
-
-add_executable(srcgenex_defs_COMPILE_LANGUAGE srcgenex_defs_COMPILE_LANGUAGE.c)
-set_property(SOURCE srcgenex_defs_COMPILE_LANGUAGE.c PROPERTY COMPILE_DEFINITIONS $<$<COMPILE_LANGUAGE:C>:NAME=$<TARGET_PROPERTY:NAME>>)
+add_executable(srcgenex_defs "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_defs.c")
+set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_defs.c"
+             PROPERTY COMPILE_DEFINITIONS NAME=$<TARGET_PROPERTY:NAME>)
+add_executable(srcgenex_defs_COMPILE_LANGUAGE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_defs_COMPILE_LANGUAGE.c")
+set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_defs_COMPILE_LANGUAGE.c"
+             PROPERTY COMPILE_DEFINITIONS $<$<COMPILE_LANGUAGE:C>:NAME=$<TARGET_PROPERTY:NAME>>)
 
 #-----------------------------------------------------------------------------
 # Cover test properties with generator expressions.
