@@ -112,7 +112,7 @@ void cmCTestMultiProcessHandler::RunTests()
   this->UpdateCostData();
 }
 
-void cmCTestMultiProcessHandler::StartTestProcess(int test)
+bool cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
   std::chrono::system_clock::time_point stop_time = this->CTest->GetStopTime();
   if (stop_time != std::chrono::system_clock::time_point() &&
@@ -121,7 +121,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
                                            "Stopping all tests."
                  << std::endl);
     this->StopTimePassed = true;
-    return;
+    return false;
   }
 
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -155,23 +155,25 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
 
   if (testRun->StartTest(this->Total)) {
     this->RunningTests.insert(testRun);
-  } else {
-
-    for (auto& j : this->Tests) {
-      j.second.erase(test);
-    }
-
-    this->UnlockResources(test);
-    this->Completed++;
-    this->TestFinishMap[test] = true;
-    this->TestRunningMap[test] = false;
-    this->RunningCount -= GetProcessorsUsed(test);
-    testRun->EndTest(this->Completed, this->Total, false);
-    if (!this->Properties[test]->Disabled) {
-      this->Failed->push_back(this->Properties[test]->Name);
-    }
-    delete testRun;
+    return true;
   }
+
+  for (auto& j : this->Tests) {
+    j.second.erase(test);
+  }
+
+  this->UnlockResources(test);
+  this->Completed++;
+  this->TestFinishMap[test] = true;
+  this->TestRunningMap[test] = false;
+  this->RunningCount -= GetProcessorsUsed(test);
+  testRun->EndTest(this->Completed, this->Total, false);
+  if (!this->Properties[test]->Disabled) {
+    this->Failed->push_back(this->Properties[test]->Name);
+  }
+  delete testRun;
+
+  return false;
 }
 
 void cmCTestMultiProcessHandler::LockResources(int index)
@@ -229,8 +231,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
 
   // if there are no depends left then run this test
   if (this->Tests[test].empty()) {
-    this->StartTestProcess(test);
-    return true;
+    return this->StartTestProcess(test);
   }
   // This test was not able to start because it is waiting
   // on depends to run
