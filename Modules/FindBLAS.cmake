@@ -63,6 +63,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 cmake_push_check_state()
 set(CMAKE_REQUIRED_QUIET ${BLAS_FIND_QUIETLY})
 
@@ -676,51 +677,14 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
  endif ()
 endif ()
 
-
 if(BLA_F95)
- if(BLAS95_LIBRARIES)
-    set(BLAS95_FOUND TRUE)
-  else()
-    set(BLAS95_FOUND FALSE)
+  find_package_handle_standard_args(BLAS REQUIRED_VARS BLAS95_LIBRARIES)
+  set(BLAS95_FOUND ${BLAS_FOUND})
+  if(BLAS_FOUND)
+    set(BLAS_LIBRARIES "${BLAS95_LIBRARIES}")
   endif()
-
-  if(NOT BLAS_FIND_QUIETLY)
-    if(BLAS95_FOUND)
-      message(STATUS "A library with BLAS95 API found.")
-    else()
-      if(BLAS_FIND_REQUIRED)
-        message(FATAL_ERROR
-        "A required library with BLAS95 API not found. Please specify library location.")
-      else()
-        message(STATUS
-        "A library with BLAS95 API not found. Please specify library location.")
-      endif()
-    endif()
-  endif()
-  set(BLAS_FOUND TRUE)
-  set(BLAS_LIBRARIES "${BLAS95_LIBRARIES}")
 else()
-  if(BLAS_LIBRARIES)
-    set(BLAS_FOUND TRUE)
-  else()
-    set(BLAS_FOUND FALSE)
-  endif()
-
-  if(NOT BLAS_FIND_QUIETLY)
-    if(BLAS_FOUND)
-      message(STATUS "A library with BLAS API found.")
-    else()
-      if(BLAS_FIND_REQUIRED)
-        message(FATAL_ERROR
-        "A required library with BLAS API not found. Please specify library location."
-        )
-      else()
-        message(STATUS
-        "A library with BLAS API not found. Please specify library location."
-        )
-      endif()
-    endif()
-  endif()
+  find_package_handle_standard_args(BLAS REQUIRED_VARS BLAS_LIBRARIES)
 endif()
 
 cmake_pop_check_state()
