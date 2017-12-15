@@ -512,8 +512,6 @@ private:
 
   std::chrono::duration<double> GlobalTimeout;
 
-  std::chrono::duration<double> LastStopTimeout;
-
   int MaxTestNameWidth;
 
   int ParallelLevel;

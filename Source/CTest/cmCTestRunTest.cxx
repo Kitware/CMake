@@ -649,10 +649,8 @@ std::chrono::duration<double> cmCTestRunTest::ResolveTimeout()
   auto stop_timeout =
     (stop_time - std::chrono::system_clock::from_time_t(current_time)) %
     std::chrono::hours(24);
-  this->CTest->LastStopTimeout = stop_timeout;
 
-  if (stop_timeout <= std::chrono::duration<double>::zero() ||
-      stop_timeout > this->CTest->LastStopTimeout) {
+  if (stop_timeout <= std::chrono::duration<double>::zero()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "The stop time has been passed. "
                                            "Stopping all tests."
                  << std::endl);

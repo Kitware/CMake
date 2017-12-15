@@ -279,7 +279,6 @@ cmCTest::cmCTest()
   this->InteractiveDebugMode = true;
   this->TimeOut = std::chrono::duration<double>::zero();
   this->GlobalTimeout = std::chrono::duration<double>::zero();
-  this->LastStopTimeout = std::chrono::hours(24);
   this->CompressXMLFiles = false;
   this->ScheduleType.clear();
   this->StopTime.clear();
