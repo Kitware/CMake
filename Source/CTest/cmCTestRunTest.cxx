@@ -15,6 +15,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
 #include <iomanip>
+#include <ratio>
 #include <sstream>
 #include <stdio.h>
 #include <utility>
@@ -32,7 +33,6 @@ cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
   this->ProcessOutput.clear();
   this->CompressedOutput.clear();
   this->CompressionRatio = 2;
-  this->StopTimePassed = false;
   this->NumberOfRunsLeft = 1; // default to 1 run of the test
   this->RunUntilFail = false; // default to run the test once
   this->RunAgain = false;     // default to not having to run again
@@ -524,15 +524,11 @@ bool cmCTestRunTest::StartTest(size_t total)
 
   std::chrono::system_clock::time_point stop_time = this->CTest->GetStopTime();
   if (stop_time != std::chrono::system_clock::time_point()) {
-    auto stop_timeout =
+    std::chrono::duration<double> stop_timeout =
       (stop_time - std::chrono::system_clock::now()) % std::chrono::hours(24);
 
     if (stop_timeout <= std::chrono::duration<double>::zero()) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, "The stop time has been passed. "
-                                             "Stopping all tests."
-                   << std::endl);
-      this->StopTimePassed = true;
-      return false;
+      stop_timeout = std::chrono::duration<double>::zero();
     }
     if (timeout == std::chrono::duration<double>::zero() ||
         stop_timeout < timeout) {

@@ -13,6 +13,7 @@
 #include "cmsys/String.hxx"
 #include "cmsys/SystemInformation.hxx"
 #include <algorithm>
+#include <chrono>
 #include <iomanip>
 #include <list>
 #include <math.h>
@@ -113,6 +114,16 @@ void cmCTestMultiProcessHandler::RunTests()
 
 void cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
+  std::chrono::system_clock::time_point stop_time = this->CTest->GetStopTime();
+  if (stop_time != std::chrono::system_clock::time_point() &&
+      stop_time <= std::chrono::system_clock::now()) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "The stop time has been passed. "
+                                           "Stopping all tests."
+                 << std::endl);
+    this->StopTimePassed = true;
+    return;
+  }
+
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "test " << test << "\n", this->Quiet);
   this->TestRunningMap[test] = true; // mark the test as running
@@ -144,10 +155,6 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
 
   if (testRun->StartTest(this->Total)) {
     this->RunningTests.insert(testRun);
-  } else if (testRun->IsStopTimePassed()) {
-    this->StopTimePassed = true;
-    delete testRun;
-    return;
   } else {
 
     for (auto& j : this->Tests) {
