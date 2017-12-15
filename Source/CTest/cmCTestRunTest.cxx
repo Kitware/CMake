@@ -520,11 +520,26 @@ bool cmCTestRunTest::StartTest(size_t total)
   }
   this->StartTime = this->CTest->CurrentTime();
 
-  auto timeout = this->ResolveTimeout();
+  auto timeout = this->TestProperties->Timeout;
 
-  if (this->StopTimePassed) {
-    return false;
+  std::chrono::system_clock::time_point stop_time = this->CTest->GetStopTime();
+  if (stop_time != std::chrono::system_clock::time_point()) {
+    auto stop_timeout =
+      (stop_time - std::chrono::system_clock::now()) % std::chrono::hours(24);
+
+    if (stop_timeout <= std::chrono::duration<double>::zero()) {
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "The stop time has been passed. "
+                                             "Stopping all tests."
+                   << std::endl);
+      this->StopTimePassed = true;
+      return false;
+    }
+    if (timeout == std::chrono::duration<double>::zero() ||
+        stop_timeout < timeout) {
+      timeout = stop_timeout;
+    }
   }
+
   return this->ForkProcess(timeout, this->TestProperties->ExplicitTimeout,
                            &this->TestProperties->Environment);
 }
@@ -599,30 +614,6 @@ void cmCTestRunTest::DartProcessing()
       }
     }
   }
-}
-
-std::chrono::duration<double> cmCTestRunTest::ResolveTimeout()
-{
-  auto timeout = this->TestProperties->Timeout;
-
-  std::chrono::system_clock::time_point stop_time = this->CTest->GetStopTime();
-  if (stop_time == std::chrono::system_clock::time_point()) {
-    return timeout;
-  }
-
-  auto stop_timeout =
-    (stop_time - std::chrono::system_clock::now()) % std::chrono::hours(24);
-
-  if (stop_timeout <= std::chrono::duration<double>::zero()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "The stop time has been passed. "
-                                           "Stopping all tests."
-                 << std::endl);
-    this->StopTimePassed = true;
-    return std::chrono::duration<double>::zero();
-  }
-  return timeout == std::chrono::duration<double>::zero()
-    ? stop_timeout
-    : (timeout < stop_timeout ? timeout : stop_timeout);
 }
 
 bool cmCTestRunTest::ForkProcess(std::chrono::duration<double> testTimeOut,

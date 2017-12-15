@@ -78,8 +78,6 @@ private:
   bool NeedsToRerun();
   void DartProcessing();
   void ExeNotFound(std::string exe);
-  // Figures out a final timeout which is min(STOP_TIME, NOW+TIMEOUT)
-  std::chrono::duration<double> ResolveTimeout();
   bool ForkProcess(std::chrono::duration<double> testTimeOut,
                    bool explicitTimeout,
                    std::vector<std::string>* environment);
