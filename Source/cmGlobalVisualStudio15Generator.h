@@ -22,11 +22,11 @@ public:
                                   const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
-  virtual bool MatchesGeneratorName(const std::string& name) const;
+  bool MatchesGeneratorName(const std::string& name) const override;
 
-  virtual void WriteSLNHeader(std::ostream& fout);
+  void WriteSLNHeader(std::ostream& fout) override;
 
-  virtual const char* GetToolsVersion() { return "15.0"; }
+  const char* GetToolsVersion() override { return "15.0"; }
 
   bool SetGeneratorInstance(std::string const& i, cmMakefile* mf) override;
 
@@ -34,13 +34,13 @@ public:
 
 protected:
   bool InitializeWindows(cmMakefile* mf) override;
-  virtual bool SelectWindowsStoreToolset(std::string& toolset) const;
+  bool SelectWindowsStoreToolset(std::string& toolset) const override;
 
-  virtual const char* GetIDEVersion() { return "15.0"; }
+  const char* GetIDEVersion() override { return "15.0"; }
 
   // Used to verify that the Desktop toolset for the current generator is
   // installed on the machine.
-  virtual bool IsWindowsDesktopToolsetInstalled() const;
+  bool IsWindowsDesktopToolsetInstalled() const override;
 
   // These aren't virtual because we need to check if the selected version
   // of the toolset is installed

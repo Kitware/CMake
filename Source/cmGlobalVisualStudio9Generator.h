@@ -21,23 +21,23 @@ public:
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
-  virtual void WriteSLNHeader(std::ostream& fout);
+  void WriteSLNHeader(std::ostream& fout) override;
 
   /**
    * Where does this version of Visual Studio look for macros for the
    * current user? Returns the empty string if this version of Visual
    * Studio does not implement support for VB macros.
    */
-  virtual std::string GetUserMacrosDirectory();
+  std::string GetUserMacrosDirectory() override;
 
   /**
    * What is the reg key path to "vsmacros" for this version of Visual
    * Studio?
    */
-  virtual std::string GetUserMacrosRegKeyBase();
+  std::string GetUserMacrosRegKeyBase() override;
 
 protected:
-  virtual const char* GetIDEVersion() { return "9.0"; }
+  const char* GetIDEVersion() override { return "9.0"; }
 private:
   class Factory;
   friend class Factory;
