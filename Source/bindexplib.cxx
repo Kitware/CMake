@@ -328,8 +328,9 @@ bool DumpFile(const char* filename, std::set<std::string>& symbols,
   /* Does it look like a COFF OBJ file??? */
   else if (((dosHeader->e_magic == IMAGE_FILE_MACHINE_I386) ||
             (dosHeader->e_magic == IMAGE_FILE_MACHINE_AMD64) ||
-            (dosHeader->e_magic == IMAGE_FILE_MACHINE_ARMNT)) &&
-           (dosHeader->e_sp == 0)) {
+            (dosHeader->e_magic == IMAGE_FILE_MACHINE_ARMNT)) ||
+           (dosHeader->e_magic == IMAGE_FILE_MACHINE_ARM64) &&
+             (dosHeader->e_sp == 0)) {
     /*
     * The two tests above aren't what they look like.  They're
     * really checking for IMAGE_FILE_HEADER.Machine == i386 (0x14C)
