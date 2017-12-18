@@ -357,7 +357,7 @@ function (_MPI_check_compiler LANG QUERY_FLAG OUTPUT_VARIABLE RESULT_VARIABLE)
   set(${RESULT_VARIABLE} "${WRAPPER_RETURN}" PARENT_SCOPE)
 endfunction()
 
-function (_MPI_interrogate_compiler lang)
+function (_MPI_interrogate_compiler LANG)
   unset(MPI_COMPILE_CMDLINE)
   unset(MPI_LINK_CMDLINE)
 
@@ -421,16 +421,26 @@ function (_MPI_interrogate_compiler lang)
     set(MPI_LINK_CMDLINE "${MPI_COMPILE_CMDLINE}")
   endif()
 
+  # Visual Studio parsers permit each flag prefixed by either / or -.
+  # We'll normalize this to the - syntax we use for CMake purposes anyways.
+  if(MSVC)
+    string(TOLOWER)
+    foreach(_MPI_VARIABLE IN ITEMS COMPILE LINK)
+      string(REGEX REPLACE "(^| )/" "\\1-" MPI_${_MPI_VARIABLE}_CMDLINE "${MPI_${_MPI_VARIABLE}_CMDLINE}")
+      string(REPLACE "-libpath:" "-LIBPATH:" MPI_${_MPI_VARIABLE}_CMDLINE "${MPI_${_MPI_VARIABLE}_CMDLINE}")
+    endforeach()
+  endif()
+
   # For MSVC and cl-compatible compilers, the keyword /link indicates a point after which
   # everything following is passed to the linker. In this case, we drop all prior information
   # from the link line and treat any unknown extra flags as linker flags.
   set(_MPI_FILTERED_LINK_INFORMATION FALSE)
   if(MSVC)
-    if(MPI_LINK_CMDLINE MATCHES " [/-]link ")
-      string(REGEX REPLACE ".+[/-]link +" "" MPI_LINK_CMDLINE "${MPI_LINK_CMDLINE}")
+    if(MPI_LINK_CMDLINE MATCHES " -(link|LINK) ")
+      string(REGEX REPLACE ".+-(link|LINK) +" "" MPI_LINK_CMDLINE "${MPI_LINK_CMDLINE}")
       set(_MPI_FILTERED_LINK_INFORMATION TRUE)
     endif()
-    string(REGEX REPLACE " +[/-]link .+" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
+    string(REGEX REPLACE " +-(link|LINK) .+" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
   endif()
 
   if(UNIX)
@@ -459,26 +469,41 @@ function (_MPI_interrogate_compiler lang)
     string(REGEX REPLACE "(^|\n)objcopy[^\n]+(\n|$)" "" MPI_LINK_CMDLINE "${MPI_LINK_CMDLINE}")
   endif()
 
-  # Extract compile options from the compile command line.
-  string(REGEX MATCHALL "(^| )-f([^\" ]+|\"[^\"]+\")" MPI_ALL_COMPILE_OPTIONS "${MPI_COMPILE_CMDLINE}")
+  # For Visual C++, extracting compiler options in a generic fashion isn't easy. However, no MPI implementation
+  # on Windows seems to require any specific ones, either.
+  if(NOT MSVC)
+    # Extract compile options from the compile command line.
+    string(REGEX MATCHALL "(^| )-f([^\" ]+|\"[^\"]+\")" MPI_ALL_COMPILE_OPTIONS "${MPI_COMPILE_CMDLINE}")
 
-  foreach(_MPI_COMPILE_OPTION IN LISTS MPI_ALL_COMPILE_OPTIONS)
-    string(REGEX REPLACE "^ " "" _MPI_COMPILE_OPTION "${_MPI_COMPILE_OPTION}")
-    # Ignore -fstack-protector directives: These occur on MPICH and MVAPICH when the libraries
-    # themselves were built with this flag. However, this flag is unrelated to using MPI, and
-    # we won't match the accompanying --param-ssp-size and -Wp,-D_FORTIFY_SOURCE flags and therefore
-    # produce inconsistent results with the regularly flags.
-    # Similarly, aliasing flags do not belong into our flag array.
-    if(NOT "${_MPI_COMPILE_OPTION}" MATCHES "^-f(stack-protector|(no-|)strict-aliasing|PI[CE]|pi[ce])")
-      list(APPEND MPI_COMPILE_OPTIONS_WORK "${_MPI_COMPILE_OPTION}")
-    endif()
-  endforeach()
+    foreach(_MPI_COMPILE_OPTION IN LISTS MPI_ALL_COMPILE_OPTIONS)
+      string(REGEX REPLACE "^ " "" _MPI_COMPILE_OPTION "${_MPI_COMPILE_OPTION}")
 
-  # Same deal, with the definitions. We also treat arguments passed to the preprocessor directly.
-  string(REGEX MATCHALL "(^| )(-Wp,|-Xpreprocessor )?[-/]D([^\" ]+|\"[^\"]+\")" MPI_ALL_COMPILE_DEFINITIONS "${MPI_COMPILE_CMDLINE}")
+      # Ignore -fstack-protector directives: These occur on MPICH and MVAPICH when the libraries
+      # themselves were built with this flag. However, this flag is unrelated to using MPI, and
+      # we won't match the accompanying --param-ssp-size and -Wp,-D_FORTIFY_SOURCE flags and therefore
+      # produce inconsistent results with the regularly flags.
+      # Similarly, aliasing flags do not belong into our flag array.
+      if(NOT "${_MPI_COMPILE_OPTION}" MATCHES "^-f(stack-protector|(no-|)strict-aliasing|PI[CE]|pi[ce])")
+        list(APPEND MPI_COMPILE_OPTIONS_WORK "${_MPI_COMPILE_OPTION}")
+      endif()
+    endforeach()
+  endif()
+
+  # For GNU-style compilers, it's possible to prefix includes and definitions with certain flags to pass them
+  # only to the preprocessor. For CMake purposes, we need to treat, but ignore such scopings.
+  # Note that we do not support spaces between the arguments, i.e. -Wp,-I -Wp,/opt/mympi will not be parsed
+  # correctly. This form does not seem to occur in any common MPI implementation, however.
+  if(NOT MSVC)
+    set(_MPI_PREPROCESSOR_FLAG_REGEX "(-Wp,|-Xpreprocessor )?")
+  else()
+    set(_MPI_PREPROCESSOR_FLAG_REGEX "")
+  endif()
+
+  # Same deal as above, for the definitions.
+  string(REGEX MATCHALL "(^| )${_MPI_PREPROCESSOR_FLAG_REGEX}-D *([^\" ]+|\"[^\"]+\")" MPI_ALL_COMPILE_DEFINITIONS "${MPI_COMPILE_CMDLINE}")
 
   foreach(_MPI_COMPILE_DEFINITION IN LISTS MPI_ALL_COMPILE_DEFINITIONS)
-    string(REGEX REPLACE "^ ?(-Wp,|-Xpreprocessor )?[-/]D" "" _MPI_COMPILE_DEFINITION "${_MPI_COMPILE_DEFINITION}")
+    string(REGEX REPLACE "^ ?${_MPI_PREPROCESSOR_FLAG_REGEX}-D *" "" _MPI_COMPILE_DEFINITION "${_MPI_COMPILE_DEFINITION}")
     string(REPLACE "\"" "" _MPI_COMPILE_DEFINITION "${_MPI_COMPILE_DEFINITION}")
     if(NOT "${_MPI_COMPILE_DEFINITION}" MATCHES "^_FORTIFY_SOURCE.*")
       list(APPEND MPI_COMPILE_DEFINITIONS_WORK "${_MPI_COMPILE_DEFINITION}")
@@ -486,7 +511,8 @@ function (_MPI_interrogate_compiler lang)
   endforeach()
 
   # Extract include paths from compile command line
-  string(REGEX MATCHALL "(^| )[-/]I([^\" ]+|\"[^\"]+\")" MPI_ALL_INCLUDE_PATHS "${MPI_COMPILE_CMDLINE}")
+  string(REGEX MATCHALL "(^| )${_MPI_PREPROCESSOR_FLAG_REGEX}${CMAKE_INCLUDE_FLAG_${LANG}} *([^\" ]+|\"[^\"]+\")"
+    MPI_ALL_INCLUDE_PATHS "${MPI_COMPILE_CMDLINE}")
 
   # If extracting failed to work, we'll try using -showme:incdirs.
   if (NOT MPI_ALL_INCLUDE_PATHS)
@@ -497,16 +523,66 @@ function (_MPI_interrogate_compiler lang)
   endif()
 
   foreach(_MPI_INCLUDE_PATH IN LISTS MPI_ALL_INCLUDE_PATHS)
-    string(REGEX REPLACE "^ ?[-/]I" "" _MPI_INCLUDE_PATH "${_MPI_INCLUDE_PATH}")
+    string(REGEX REPLACE "^ ?${_MPI_PREPROCESSOR_FLAG_REGEX}${CMAKE_INCLUDE_FLAG_${LANG}} *" "" _MPI_INCLUDE_PATH "${_MPI_INCLUDE_PATH}")
     string(REPLACE "\"" "" _MPI_INCLUDE_PATH "${_MPI_INCLUDE_PATH}")
     get_filename_component(_MPI_INCLUDE_PATH "${_MPI_INCLUDE_PATH}" REALPATH)
     list(APPEND MPI_INCLUDE_DIRS_WORK "${_MPI_INCLUDE_PATH}")
   endforeach()
 
-  # Extract linker paths from the link command line
-  string(REGEX MATCHALL "(^| )(-Wl,|-Xlinker )?(-L|[/-]LIBPATH:|[/-]libpath:)([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_PATHS "${MPI_LINK_CMDLINE}")
+  # The next step are linker flags and library directories. Here, we first take the flags given in raw -L or -LIBPATH: syntax.
+  string(REGEX MATCHALL "(^| )${CMAKE_LIBRARY_PATH_FLAG} *([^\" ]+|\"[^\"]+\")" MPI_DIRECT_LINK_PATHS "${MPI_LINK_CMDLINE}")
+  foreach(_MPI_LPATH IN LISTS MPI_DIRECT_LINK_PATHS)
+    string(REGEX REPLACE "(^| )${CMAKE_LIBRARY_PATH_FLAG} *" "" _MPI_LPATH "${_MPI_LPATH}")
+    list(APPEND MPI_ALL_LINK_PATHS "${_MPI_LPATH}")
+  endforeach()
 
-  # If extracting failed to work, we'll try using -showme:libdirs.
+  # If the link commandline hasn't been filtered (e.g. when using MSVC and /link), we need to extract the relevant parts first.
+  if(NOT _MPI_FILTERED_LINK_INFORMATION)
+    string(REGEX MATCHALL "(^| )(-Wl,|-Xlinker +)([^\" ]+|\"[^\"]+\")" MPI_LINK_FLAGS "${MPI_LINK_CMDLINE}")
+
+    # In this case, we could also find some indirectly given linker paths, e.g. prefixed by -Xlinker or -Wl,
+    # Since syntaxes like -Wl,-L -Wl,/my/path/to/lib are also valid, we parse these paths by first removing -Wl, and -Xlinker
+    # from the list of filtered flags and then parse the remainder of the output.
+    string(REGEX REPLACE "(-Wl,|-Xlinker +)" "" MPI_LINK_FLAGS_RAW "${MPI_LINK_FLAGS}")
+
+    # Now we can parse the leftover output. Note that spaces can now be handled since the above example would reduce to
+    # -L /my/path/to/lib and can be extracted correctly.
+    string(REGEX MATCHALL "^(${CMAKE_LIBRARY_PATH_FLAG},? *|--library-path=)([^\" ]+|\"[^\"]+\")"
+      MPI_INDIRECT_LINK_PATHS "${MPI_LINK_FLAGS_RAW}")
+
+    foreach(_MPI_LPATH IN LISTS MPI_INDIRECT_LINK_PATHS)
+      string(REGEX REPLACE "^(${CMAKE_LIBRARY_PATH_FLAG},? *|--library-path=)" "" _MPI_LPATH "${_MPI_LPATH}")
+      list(APPEND MPI_ALL_LINK_PATHS "${_MPI_LPATH}")
+    endforeach()
+
+    # We need to remove the flags we extracted from the linker flag list now.
+    string(REGEX REPLACE "(^| )(-Wl,|-Xlinker +)(${CMAKE_LIBRARY_PATH_FLAG},? *(-Wl,|-Xlinker +)?|--library-path=)([^\" ]+|\"[^\"]+\")" ""
+      MPI_LINK_CMDLINE_FILTERED "${MPI_LINK_CMDLINE}")
+
+    # Some MPI implementations pass on options they themselves were built with. Since -z,noexecstack is a common
+    # hardening, we should strip it. In general, the -z options should be undesirable.
+    string(REGEX REPLACE "(^| )-Wl,-z(,[^ ]+| +-Wl,[^ ]+)" "" MPI_LINK_CMDLINE_FILTERED "${MPI_LINK_CMDLINE_FILTERED}")
+    string(REGEX REPLACE "(^| )-Xlinker +-z +-Xlinker +[^ ]+" "" MPI_LINK_CMDLINE_FILTERED "${MPI_LINK_CMDLINE_FILTERED}")
+
+    # We only consider options of the form -Wl or -Xlinker:
+    string(REGEX MATCHALL "(^| )(-Wl,|-Xlinker +)([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_FLAGS "${MPI_LINK_CMDLINE_FILTERED}")
+
+    # As a next step, we assemble the linker flags extracted in a preliminary flags string
+    foreach(_MPI_LINK_FLAG IN LISTS MPI_ALL_LINK_FLAGS)
+      string(STRIP "${_MPI_LINK_FLAG}" _MPI_LINK_FLAG)
+      if (MPI_LINK_FLAGS_WORK)
+        string(APPEND MPI_LINK_FLAGS_WORK " ${_MPI_LINK_FLAG}")
+      else()
+        set(MPI_LINK_FLAGS_WORK "${_MPI_LINK_FLAG}")
+      endif()
+    endforeach()
+  else()
+    # In the filtered case, we obtain the link time flags by just stripping the library paths.
+    string(REGEX REPLACE "(^| )${CMAKE_LIBRARY_PATH_FLAG} *([^\" ]+|\"[^\"]+\")" "" MPI_LINK_CMDLINE_FILTERED "${MPI_LINK_CMDLINE}")
+  endif()
+
+  # If we failed to extract any linker paths, we'll try using the -showme:libdirs option with the MPI compiler.
+  # This will return a list of folders, not a set of flags!
   if (NOT MPI_ALL_LINK_PATHS)
     _MPI_check_compiler(${LANG} "-showme:libdirs" MPI_LIBDIRS_CMDLINE MPI_LIBDIRS_COMPILER_RETURN)
     if(MPI_LIBDIRS_COMPILER_RETURN)
@@ -514,47 +590,30 @@ function (_MPI_interrogate_compiler lang)
     endif()
   endif()
 
+  # We need to remove potential quotes and convert the paths to CMake syntax while resolving them, too.
   foreach(_MPI_LPATH IN LISTS MPI_ALL_LINK_PATHS)
-    string(REGEX REPLACE "^ ?(-Wl,|-Xlinker )?(-L|[/-]LIBPATH:|[/-]libpath:)" "" _MPI_LPATH "${_MPI_LPATH}")
     string(REPLACE "\"" "" _MPI_LPATH "${_MPI_LPATH}")
     get_filename_component(_MPI_LPATH "${_MPI_LPATH}" REALPATH)
     list(APPEND MPI_LINK_DIRECTORIES_WORK "${_MPI_LPATH}")
   endforeach()
 
-  if(NOT _MPI_FILTERED_LINK_INFORMATION)
-    set(_MPI_LINK_FLAG_REGEX "(-Wl,|-Xlinker )")
-  else()
-    set(_MPI_LINK_FLAG_REGEX "")
-  endif()
-
-  # Extract linker flags from the link command line
-  string(REGEX MATCHALL "(^| )${_MPI_LINK_FLAG_REGEX}([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_FLAGS "${MPI_LINK_CMDLINE}")
-
-  foreach(_MPI_LINK_FLAG IN LISTS MPI_ALL_LINK_FLAGS)
-    string(STRIP "${_MPI_LINK_FLAG}" _MPI_LINK_FLAG)
-    # MPI might be marked to build with non-executable stacks but this should not propagate.
-    if (NOT "${_MPI_LINK_FLAG}" MATCHES "(-Wl,|-Xlinker )-z,noexecstack")
-      if (MPI_LINK_FLAGS_WORK)
-        string(APPEND MPI_LINK_FLAGS_WORK " ${_MPI_LINK_FLAG}")
-      else()
-        set(MPI_LINK_FLAGS_WORK "${_MPI_LINK_FLAG}")
-      endif()
-    endif()
-  endforeach()
-
   # Extract the set of libraries to link against from the link command line
-  string(REGEX MATCHALL "(^| )-l([^\" ]+|\"[^\"]+\")" MPI_LIBNAMES "${MPI_LINK_CMDLINE}")
+  # This only makes sense if CMAKE_LINK_LIBRARY_FLAG is defined, i.e. a -lxxxx syntax is supported by the compiler.
+  if(CMAKE_LINK_LIBRARY_FLAG)
+    string(REGEX MATCHALL "(^| )${CMAKE_LINK_LIBRARY_FLAG}([^\" ]+|\"[^\"]+\")"
+      MPI_LIBNAMES "${MPI_LINK_CMDLINE}")
 
-  foreach(_MPI_LIB_NAME IN LISTS MPI_LIBNAMES)
-    string(REGEX REPLACE "^ ?-l" "" _MPI_LIB_NAME "${_MPI_LIB_NAME}")
-    string(REPLACE "\"" "" _MPI_LIB_NAME "${_MPI_LIB_NAME}")
-    get_filename_component(_MPI_LIB_PATH "${_MPI_LIB_NAME}" DIRECTORY)
-    if(NOT "${_MPI_LIB_PATH}" STREQUAL "")
-      list(APPEND MPI_LIB_FULLPATHS_WORK "${_MPI_LIB_NAME}")
-    else()
-      list(APPEND MPI_LIB_NAMES_WORK "${_MPI_LIB_NAME}")
-    endif()
-  endforeach()
+    foreach(_MPI_LIB_NAME IN LISTS MPI_LIBNAMES)
+      string(REGEX REPLACE "^ ?${CMAKE_LINK_LIBRARY_FLAG}" "" _MPI_LIB_NAME "${_MPI_LIB_NAME}")
+      string(REPLACE "\"" "" _MPI_LIB_NAME "${_MPI_LIB_NAME}")
+      get_filename_component(_MPI_LIB_PATH "${_MPI_LIB_NAME}" DIRECTORY)
+      if(NOT "${_MPI_LIB_PATH}" STREQUAL "")
+        list(APPEND MPI_LIB_FULLPATHS_WORK "${_MPI_LIB_NAME}")
+      else()
+        list(APPEND MPI_LIB_NAMES_WORK "${_MPI_LIB_NAME}")
+      endif()
+    endforeach()
+  endif()
 
   # Treat linker objects given by full path, for example static libraries, import libraries
   # or shared libraries if there aren't any import libraries in use on the system.
