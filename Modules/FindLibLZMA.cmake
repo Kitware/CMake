@@ -23,7 +23,7 @@
 #   LIBLZMA_VERSION_STRING    - version number as a string (ex: "5.0.3")
 
 find_path(LIBLZMA_INCLUDE_DIR lzma.h )
-find_library(LIBLZMA_LIBRARY lzma)
+find_library(LIBLZMA_LIBRARY NAMES lzma liblzma)
 
 if(LIBLZMA_INCLUDE_DIR AND EXISTS "${LIBLZMA_INCLUDE_DIR}/lzma/version.h")
     file(STRINGS "${LIBLZMA_INCLUDE_DIR}/lzma/version.h" LIBLZMA_HEADER_CONTENTS REGEX "#define LZMA_VERSION_[A-Z]+ [0-9]+")
