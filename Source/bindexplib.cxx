@@ -331,38 +331,42 @@ bool DumpFile(const char* filename, std::set<std::string>& symbols,
     return false;
   }
 
-  const PIMAGE_FILE_HEADER imageHeader = (PIMAGE_FILE_HEADER)lpFileBase;
-  if (imageHeader->Machine == IMAGE_DOS_SIGNATURE) {
+  const PIMAGE_DOS_HEADER dosHeader = (PIMAGE_DOS_HEADER)lpFileBase;
+  if (dosHeader->e_magic == IMAGE_DOS_SIGNATURE) {
     fprintf(stderr, "File is an executable.  I don't dump those.\n");
     return false;
-  }
-  /* Does it look like a COFF OBJ file??? */
-  else if (((imageHeader->Machine == IMAGE_FILE_MACHINE_I386) ||
-            (imageHeader->Machine == IMAGE_FILE_MACHINE_AMD64) ||
-            (imageHeader->Machine == IMAGE_FILE_MACHINE_ARM) ||
-            (imageHeader->Machine == IMAGE_FILE_MACHINE_ARMNT) ||
-            (imageHeader->Machine == IMAGE_FILE_MACHINE_ARM64)) &&
-           (imageHeader->Characteristics == 0)) {
-    /*
-    * The two tests above aren't what they look like.  They're
-    * really checking for IMAGE_FILE_HEADER.Machine == i386 (0x14C)
-    * and IMAGE_FILE_HEADER.SizeOfOptionalHeader == 0;
-    */
-    DumpSymbols<IMAGE_FILE_HEADER, IMAGE_SYMBOL> symbolDumper(
-      (PIMAGE_FILE_HEADER)lpFileBase, symbols, dataSymbols,
-      (imageHeader->Machine == IMAGE_FILE_MACHINE_I386));
-    symbolDumper.DumpObjFile();
   } else {
-    // check for /bigobj format
-    cmANON_OBJECT_HEADER_BIGOBJ* h = (cmANON_OBJECT_HEADER_BIGOBJ*)lpFileBase;
-    if (h->Sig1 == 0x0 && h->Sig2 == 0xffff) {
-      DumpSymbols<cmANON_OBJECT_HEADER_BIGOBJ, cmIMAGE_SYMBOL_EX> symbolDumper(
-        (cmANON_OBJECT_HEADER_BIGOBJ*)lpFileBase, symbols, dataSymbols,
-        (h->Machine == IMAGE_FILE_MACHINE_I386));
+    const PIMAGE_FILE_HEADER imageHeader = (PIMAGE_FILE_HEADER)lpFileBase;
+    /* Does it look like a COFF OBJ file??? */
+    if (((imageHeader->Machine == IMAGE_FILE_MACHINE_I386) ||
+         (imageHeader->Machine == IMAGE_FILE_MACHINE_AMD64) ||
+         (imageHeader->Machine == IMAGE_FILE_MACHINE_ARM) ||
+         (imageHeader->Machine == IMAGE_FILE_MACHINE_ARMNT) ||
+         (imageHeader->Machine == IMAGE_FILE_MACHINE_ARM64)) &&
+        (imageHeader->Characteristics == 0)) {
+      /*
+      * The tests above are checking for IMAGE_FILE_HEADER.Machine
+      * if it contains supported machine formats (currently ARM and x86)
+      * and IMAGE_FILE_HEADER.Characteristics == 0 indicating that
+      * this is not linked COFF OBJ file;
+      */
+      DumpSymbols<IMAGE_FILE_HEADER, IMAGE_SYMBOL> symbolDumper(
+        (PIMAGE_FILE_HEADER)lpFileBase, symbols, dataSymbols,
+        (imageHeader->Machine == IMAGE_FILE_MACHINE_I386));
       symbolDumper.DumpObjFile();
     } else {
-      printf("unrecognized file format in '%s'\n", filename);
-      return false;
+      // check for /bigobj format
+      cmANON_OBJECT_HEADER_BIGOBJ* h =
+        (cmANON_OBJECT_HEADER_BIGOBJ*)lpFileBase;
+      if (h->Sig1 == 0x0 && h->Sig2 == 0xffff) {
+        DumpSymbols<cmANON_OBJECT_HEADER_BIGOBJ, cmIMAGE_SYMBOL_EX>
+        symbolDumper((cmANON_OBJECT_HEADER_BIGOBJ*)lpFileBase, symbols,
+                     dataSymbols, (h->Machine == IMAGE_FILE_MACHINE_I386));
+        symbolDumper.DumpObjFile();
+      } else {
+        printf("unrecognized file format in '%s'\n", filename);
+        return false;
+      }
     }
   }
   UnmapViewOfFile(lpFileBase);
