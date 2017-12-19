@@ -7,6 +7,7 @@
 
 #include <iosfwd>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -24,6 +25,8 @@ class cmVisualStudioGeneratorOptions;
 
 class cmVisualStudio10TargetGenerator
 {
+  CM_DISABLE_COPY(cmVisualStudio10TargetGenerator)
+
 public:
   cmVisualStudio10TargetGenerator(cmGeneratorTarget* target,
                                   cmGlobalVisualStudio10Generator* gg);
@@ -169,7 +172,7 @@ private:
 
 private:
   typedef cmVisualStudioGeneratorOptions Options;
-  typedef std::map<std::string, Options*> OptionsMap;
+  typedef std::map<std::string, std::unique_ptr<Options>> OptionsMap;
   OptionsMap ClOptions;
   OptionsMap RcOptions;
   OptionsMap CudaOptions;

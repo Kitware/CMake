@@ -13,6 +13,7 @@ cmIDEOptions::cmIDEOptions()
 {
   this->DoingDefine = false;
   this->AllowDefine = true;
+  this->DoingInclude = false;
   this->AllowSlash = false;
   this->DoingFollowing = 0;
   for (int i = 0; i < FlagTableCount; ++i) {
@@ -33,6 +34,13 @@ void cmIDEOptions::HandleFlag(const char* flag)
     return;
   }
 
+  // If the last option was -I then this option is the include directory.
+  if (this->DoingInclude) {
+    this->DoingInclude = false;
+    this->Includes.push_back(flag);
+    return;
+  }
+
   // If the last option expected a following value, this is it.
   if (this->DoingFollowing) {
     this->FlagMapUpdate(this->DoingFollowing, flag);
@@ -50,6 +58,17 @@ void cmIDEOptions::HandleFlag(const char* flag)
       } else {
         // Store this definition.
         this->Defines.push_back(flag + 2);
+      }
+      return;
+    }
+    // Look for include directory.
+    if (this->AllowInclude && flag[1] == 'I') {
+      if (flag[2] == '\0') {
+        // The next argument will have the include directory.
+        this->DoingInclude = true;
+      } else {
+        // Store this include directory.
+        this->Includes.push_back(flag + 2);
       }
       return;
     }
@@ -153,6 +172,29 @@ void cmIDEOptions::AddDefines(const std::vector<std::string>& defines)
 std::vector<std::string> const& cmIDEOptions::GetDefines() const
 {
   return this->Defines;
+}
+
+void cmIDEOptions::AddInclude(const std::string& include)
+{
+  this->Includes.push_back(include);
+}
+
+void cmIDEOptions::AddIncludes(const char* includes)
+{
+  if (includes) {
+    // Expand the list of includes.
+    cmSystemTools::ExpandListArgument(includes, this->Includes);
+  }
+}
+void cmIDEOptions::AddIncludes(const std::vector<std::string>& includes)
+{
+  this->Includes.insert(this->Includes.end(), includes.begin(),
+                        includes.end());
+}
+
+std::vector<std::string> const& cmIDEOptions::GetIncludes() const
+{
+  return this->Includes;
 }
 
 void cmIDEOptions::AddFlag(std::string const& flag, std::string const& value)

@@ -29,23 +29,8 @@ static std::string cmVisualStudioGeneratorOptionsEscapeForXML(std::string ret)
 cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
   cmLocalVisualStudioGenerator* lg, Tool tool,
   cmVisualStudio10TargetGenerator* g)
-  : cmIDEOptions()
-  , LocalGenerator(lg)
-  , Version(lg->GetVersion())
-  , CurrentTool(tool)
-  , TargetGenerator(g)
+  : cmVisualStudioGeneratorOptions(lg, tool, nullptr, nullptr, g)
 {
-  // Preprocessor definitions are not allowed for linker tools.
-  this->AllowDefine = (tool != Linker);
-
-  // Slash options are allowed for VS.
-  this->AllowSlash = true;
-
-  this->FortranRuntimeDebug = false;
-  this->FortranRuntimeDLL = false;
-  this->FortranRuntimeMT = false;
-
-  this->UnknownFlagField = "AdditionalOptions";
 }
 
 cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
@@ -63,6 +48,9 @@ cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
 
   // Preprocessor definitions are not allowed for linker tools.
   this->AllowDefine = (tool != Linker);
+
+  // include directories are not allowed for linker tools.
+  this->AllowInclude = (tool != Linker);
 
   // Slash options are allowed for VS.
   this->AllowSlash = true;
@@ -506,6 +494,69 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   }
   if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
     fout << ";%(" << tag << ")</" << tag << ">" << suffix;
+  } else {
+    fout << "\"" << suffix;
+  }
+}
+
+void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
+  std::ostream& fout, const char* prefix, const char* suffix,
+  const std::string& lang)
+{
+  if (this->Includes.empty()) {
+    return;
+  }
+
+  const char* tag = "AdditionalIncludeDirectories";
+  if (lang == "CUDA") {
+    tag = "Include";
+  } else if (lang == "ASM_MASM" || lang == "ASM_NASM") {
+    tag = "IncludePaths";
+  }
+
+  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+    // if there are configuration specific flags, then
+    // use the configuration specific tag for PreprocessorDefinitions
+    if (!this->Configuration.empty()) {
+      fout << prefix;
+      this->TargetGenerator->WritePlatformConfigTag(
+        tag, this->Configuration.c_str(), 0, 0, 0, &fout);
+    } else {
+      fout << prefix << "<" << tag << ">";
+    }
+  } else {
+    fout << prefix << tag << "=\"";
+  }
+
+  const char* sep = "";
+  for (std::string include : this->Includes) {
+    // first convert all of the slashes
+    std::string::size_type pos = 0;
+    while ((pos = include.find('/', pos)) != std::string::npos) {
+      include[pos] = '\\';
+      pos++;
+    }
+
+    if (lang == "ASM_NASM") {
+      include += "\\";
+    }
+
+    // Escape this include for the IDE.
+    fout << sep << (this->Version >= cmGlobalVisualStudioGenerator::VS10
+                      ? cmVisualStudio10GeneratorOptionsEscapeForXML(include)
+                      : cmVisualStudioGeneratorOptionsEscapeForXML(include));
+    sep = ";";
+
+    if (lang == "Fortran") {
+      include += "/$(ConfigurationName)";
+      fout << sep << (this->Version >= cmGlobalVisualStudioGenerator::VS10
+                        ? cmVisualStudio10GeneratorOptionsEscapeForXML(include)
+                        : cmVisualStudioGeneratorOptionsEscapeForXML(include));
+    }
+  }
+
+  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+    fout << sep << "%(" << tag << ")</" << tag << ">" << suffix;
   } else {
     fout << "\"" << suffix;
   }

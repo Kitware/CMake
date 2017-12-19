@@ -20,11 +20,16 @@ public:
   cmIDEOptions();
   virtual ~cmIDEOptions();
 
-  // Store definitions and flags.
+  // Store definitions, includes and flags.
   void AddDefine(const std::string& define);
   void AddDefines(const char* defines);
   void AddDefines(const std::vector<std::string>& defines);
   std::vector<std::string> const& GetDefines() const;
+
+  void AddInclude(const std::string& includes);
+  void AddIncludes(const char* includes);
+  void AddIncludes(const std::vector<std::string>& includes);
+  std::vector<std::string> const& GetIncludes() const;
 
   void AddFlag(std::string const& flag, std::string const& value);
   void AddFlag(std::string const& flag, std::vector<std::string> const& value);
@@ -76,8 +81,13 @@ protected:
   // Preprocessor definitions.
   std::vector<std::string> Defines;
 
+  // Include directories.
+  std::vector<std::string> Includes;
+
   bool DoingDefine;
   bool AllowDefine;
+  bool DoingInclude;
+  bool AllowInclude;
   bool AllowSlash;
   cmIDEFlagTable const* DoingFollowing;
   enum
