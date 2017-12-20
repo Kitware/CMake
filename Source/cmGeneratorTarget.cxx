@@ -5133,7 +5133,12 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
       std::string objLib = extObj->GetObjectLibrary();
       if (cmGeneratorTarget* tgt =
             this->LocalGenerator->FindGeneratorTargetToUse(objLib)) {
-        objectLibraries.push_back(tgt);
+        auto const objLibIt =
+          std::find_if(objectLibraries.cbegin(), objectLibraries.cend(),
+                       [tgt](cmGeneratorTarget* t) { return t == tgt; });
+        if (objectLibraries.cend() == objLibIt) {
+          objectLibraries.push_back(tgt);
+        }
       }
     }
   }
