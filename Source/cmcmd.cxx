@@ -1237,9 +1237,12 @@ int cmcmd::HashSumFile(std::vector<std::string>& args, cmCryptoHash::Algo algo)
 int cmcmd::SymlinkLibrary(std::vector<std::string>& args)
 {
   int result = 0;
-  std::string const& realName = args[2];
-  std::string const& soName = args[3];
-  std::string const& name = args[4];
+  std::string realName = args[2];
+  std::string soName = args[3];
+  std::string name = args[4];
+  cmSystemTools::ConvertToUnixSlashes(realName);
+  cmSystemTools::ConvertToUnixSlashes(soName);
+  cmSystemTools::ConvertToUnixSlashes(name);
   if (soName != realName) {
     if (!cmcmd::SymlinkInternal(realName, soName)) {
       cmSystemTools::ReportLastSystemError("cmake_symlink_library");
