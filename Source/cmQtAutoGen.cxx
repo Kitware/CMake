@@ -248,7 +248,7 @@ static bool RccListInputsQt5(std::string const& rccCommand,
 
 // - Class definitions
 
-std::string const cmQtAutoGen::listSep = "@LSEP@";
+std::string const cmQtAutoGen::listSep = "<<<S>>>";
 
 std::string const& cmQtAutoGen::GeneratorName(Generator type)
 {
