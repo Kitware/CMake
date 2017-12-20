@@ -78,6 +78,9 @@ bool cmQtAutoGenerator::Run(std::string const& infoFile,
   snapshot.GetDirectory().SetCurrentSource(this->InfoDir);
 
   auto makefile = cm::make_unique<cmMakefile>(&gg, snapshot);
+  // The OLD/WARN behavior for policy CMP0053 caused a speed regression.
+  // https://gitlab.kitware.com/cmake/cmake/issues/17570
+  makefile->SetPolicyVersion("3.9");
   gg.SetCurrentMakefile(makefile.get());
 
   return this->Process(makefile.get());
