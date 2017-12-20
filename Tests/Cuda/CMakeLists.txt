@@ -2,6 +2,7 @@
 ADD_TEST_MACRO(Cuda.Complex CudaComplex)
 ADD_TEST_MACRO(Cuda.ConsumeCompileFeatures CudaConsumeCompileFeatures)
 ADD_TEST_MACRO(Cuda.ObjectLibrary CudaObjectLibrary)
+ADD_TEST_MACRO(Cuda.MixedStandardLevels MixedStandardLevels)
 ADD_TEST_MACRO(Cuda.ToolkitInclude CudaToolkitInclude)
 ADD_TEST_MACRO(Cuda.ProperLinkFlags ProperLinkFlags)
 ADD_TEST_MACRO(Cuda.WithC CudaWithC)
