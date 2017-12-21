@@ -21,7 +21,7 @@ endif()
 # Resolve the device symbols into that static library
 # Verify that we can't use those device symbols from anything that links
 # to the static library
-string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=compute_30")
+string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=[compute_30] -gencode arch=compute_50,code=\\\"compute_50\\\"")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CUDA_STANDARD 11)
 
