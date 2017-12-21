@@ -93,6 +93,15 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     }
   }
 
+  // RemoveTargetDir
+  if (this->IsSetToOff("CPACK_IFW_PACKAGE_REMOVE_TARGET_DIR")) {
+    this->RemoveTargetDir = "false";
+  } else if (this->IsOn("CPACK_IFW_PACKAGE_REMOVE_TARGET_DIR")) {
+    this->RemoveTargetDir = "true";
+  } else {
+    this->RemoveTargetDir.clear();
+  }
+
   // Logo
   if (const char* option = this->GetOption("CPACK_IFW_PACKAGE_LOGO")) {
     if (cmSystemTools::FileExists(option)) {
@@ -420,6 +429,10 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   // Maintenance tool ini file
   if (!this->IsVersionLess("2.0") && !this->MaintenanceToolIniFile.empty()) {
     xout.Element("MaintenanceToolIniFile", this->MaintenanceToolIniFile);
+  }
+
+  if (!this->RemoveTargetDir.empty()) {
+    xout.Element("RemoveTargetDir", this->RemoveTargetDir);
   }
 
   // Different allows
