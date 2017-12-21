@@ -2024,6 +2024,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   bool configDependentOptions = false;
   std::string defines;
   bool configDependentDefines = false;
+  std::string includes;
+  bool configDependentIncludes = false;
   if (const char* cflags = sf.GetProperty("COMPILE_FLAGS")) {
     configDependentFlags =
       cmGeneratorExpression::Find(cflags) != std::string::npos;
@@ -2038,6 +2040,11 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     configDependentDefines =
       cmGeneratorExpression::Find(cdefs) != std::string::npos;
     defines += cdefs;
+  }
+  if (const char* cincludes = sf.GetProperty("INCLUDE_DIRECTORIES")) {
+    configDependentIncludes =
+      cmGeneratorExpression::Find(cincludes) != std::string::npos;
+    includes += cincludes;
   }
   std::string lang =
     this->GlobalGenerator->GetLanguageFromExtension(sf.GetExtension().c_str());
@@ -2091,7 +2098,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     // if we have flags or defines for this config then
     // use them
     if (!flags.empty() || !options.empty() || !configDefines.empty() ||
-        compileAs || noWinRT) {
+        !includes.empty() || compileAs || noWinRT) {
       (*this->BuildFileStream) << firstString;
       firstString = ""; // only do firstString once
       hasFlags = true;
@@ -2150,6 +2157,16 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       } else {
         clOptions.AddDefines(configDefines.c_str());
       }
+      std::vector<std::string> includeList;
+      if (configDependentIncludes) {
+        this->LocalGenerator->AppendIncludeDirectories(
+          includeList,
+          genexInterpreter.Evaluate(includes, "INCLUDE_DIRECTORIES"), *source);
+      } else {
+        this->LocalGenerator->AppendIncludeDirectories(includeList, includes,
+                                                       *source);
+      }
+      clOptions.AddIncludes(includeList);
       clOptions.SetConfiguration(config.c_str());
       clOptions.PrependInheritedString("AdditionalOptions");
       clOptions.OutputFlagMap(*this->BuildFileStream, "      ");

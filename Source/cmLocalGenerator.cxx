@@ -16,6 +16,7 @@
 #include "cmMakefile.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocation.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
@@ -37,6 +38,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
+#include <unordered_set>
 #include <utility>
 
 #if defined(__HAIKU__)
@@ -1955,6 +1957,52 @@ void cmLocalGenerator::AppendCompileOptions(
   } else {
     for (std::string const& opt : options_vec) {
       this->AppendFlagEscape(options, opt);
+    }
+  }
+}
+
+void cmLocalGenerator::AppendIncludeDirectories(
+  std::vector<std::string>& includes, const char* includes_list,
+  const cmSourceFile& sourceFile) const
+{
+  // Short-circuit if there are no includes.
+  if (!includes_list) {
+    return;
+  }
+
+  // Expand the list of includes.
+  std::vector<std::string> includes_vec;
+  cmSystemTools::ExpandListArgument(includes_list, includes_vec);
+  this->AppendIncludeDirectories(includes, includes_vec, sourceFile);
+}
+
+void cmLocalGenerator::AppendIncludeDirectories(
+  std::vector<std::string>& includes,
+  const std::vector<std::string>& includes_vec,
+  const cmSourceFile& sourceFile) const
+{
+  std::unordered_set<std::string> uniqueIncludes;
+
+  for (const std::string& include : includes_vec) {
+    if (!cmSystemTools::FileIsFullPath(include.c_str())) {
+      std::ostringstream e;
+      e << "Found relative path while evaluating include directories of "
+           "\""
+        << sourceFile.GetLocation().GetName() << "\":\n  \"" << include
+        << "\"\n";
+
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return;
+    }
+
+    std::string inc = include;
+
+    if (!cmSystemTools::IsOff(inc.c_str())) {
+      cmSystemTools::ConvertToUnixSlashes(inc);
+    }
+
+    if (uniqueIncludes.insert(inc).second) {
+      includes.push_back(inc);
     }
   }
 }

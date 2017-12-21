@@ -764,6 +764,16 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     flags += flagsBuild.GetString();
   }
 
+  // Add per-source include directories.
+  std::vector<std::string> includes;
+  const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
+  if (const char* cincludes = sf->GetProperty(INCLUDE_DIRECTORIES)) {
+    lg->AppendIncludeDirectories(
+      includes, genexInterpreter.Evaluate(cincludes, INCLUDE_DIRECTORIES),
+      *sf);
+  }
+  lg->AppendFlags(flags, lg->GetIncludeFlags(includes, gtgt, lang, true));
+
   cmXCodeObject* buildFile =
     this->CreateXCodeSourceFileFromPath(sf->GetFullPath(), gtgt, lang, sf);
 

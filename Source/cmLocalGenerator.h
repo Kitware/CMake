@@ -153,6 +153,23 @@ public:
   cmGeneratorTarget* FindGeneratorTargetToUse(const std::string& name) const;
 
   /**
+   * Process a list of include directories
+   */
+  void AppendIncludeDirectories(std::vector<std::string>& includes,
+                                const char* includes_list,
+                                const cmSourceFile& sourceFile) const;
+  void AppendIncludeDirectories(std::vector<std::string>& includes,
+                                std::string const& includes_list,
+                                const cmSourceFile& sourceFile) const
+  {
+    this->AppendIncludeDirectories(includes, includes_list.c_str(),
+                                   sourceFile);
+  }
+  void AppendIncludeDirectories(std::vector<std::string>& includes,
+                                const std::vector<std::string>& includes_vec,
+                                const cmSourceFile& sourceFile) const;
+
+  /**
    * Encode a list of preprocessor definitions for the compiler
    * command line.
    */

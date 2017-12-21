@@ -283,10 +283,26 @@ set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_options_COMPILE_LANGUA
 
 add_executable(srcgenex_defs "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_defs.c")
 set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_defs.c"
-             PROPERTY COMPILE_DEFINITIONS NAME=$<TARGET_PROPERTY:NAME>)
+             PROPERTY COMPILE_DEFINITIONS UNUSED NAME=$<TARGET_PROPERTY:NAME>)
 add_executable(srcgenex_defs_COMPILE_LANGUAGE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_defs_COMPILE_LANGUAGE.c")
 set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_defs_COMPILE_LANGUAGE.c"
-             PROPERTY COMPILE_DEFINITIONS $<$<COMPILE_LANGUAGE:C>:NAME=$<TARGET_PROPERTY:NAME>>)
+               PROPERTY COMPILE_DEFINITIONS $<$<COMPILE_LANGUAGE:C>:NAME=$<TARGET_PROPERTY:NAME>>)
+
+foreach (item IN ITEMS basic COMPILE_LANGUAGE)
+  set(TARGET_NAME srcgenex_includes_${item})
+  configure_file(srcgenex_includes.h.in "sf_includes_${item}/${TARGET_NAME}.h" @ONLY)
+  configure_file(srcgenex_includes.c.in ${TARGET_NAME}.c @ONLY)
+endforeach()
+add_executable(srcgenex_includes_basic "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_includes_basic.c")
+# first include directory is useless but ensure list aspect is tested
+set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_includes_basic.c"
+             PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/sf_includes_basic")
+if (CMAKE_GENERATOR MATCHES "Makefiles|Ninja|Watcom WMake")
+  add_executable(srcgenex_includes_COMPILE_LANGUAGE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_includes_COMPILE_LANGUAGE.c")
+  # first include directory is useless but ensure list aspect is tested
+  set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_includes_COMPILE_LANGUAGE.c"
+               PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}" $<$<COMPILE_LANGUAGE:C>:${CMAKE_CURRENT_BINARY_DIR}/sf_includes_COMPILE_LANGUAGE>)
+endif()
 
 #-----------------------------------------------------------------------------
 # Cover test properties with generator expressions.
