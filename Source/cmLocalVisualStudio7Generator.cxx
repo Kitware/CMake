@@ -70,14 +70,13 @@ void cmLocalVisualStudio7Generator::AddHelperCommands()
 {
   // Now create GUIDs for targets
   const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
-       l != tgts.end(); ++l) {
-    if ((*l)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  for (cmGeneratorTarget const* l : tgts) {
+    if (l->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
-    const char* path = (*l)->GetProperty("EXTERNAL_MSPROJECT");
+    const char* path = l->GetProperty("EXTERNAL_MSPROJECT");
     if (path) {
-      this->ReadAndStoreExternalGUID((*l)->GetName().c_str(), path);
+      this->ReadAndStoreExternalGUID(l->GetName(), path);
     }
   }
 
@@ -96,9 +95,8 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
   // commands for targets in which no sources are built.  Add dummy
   // rules to force these targets to build.
   const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
-       l != tgts.end(); l++) {
-    if ((*l)->GetType() == cmStateEnums::GLOBAL_TARGET) {
+  for (cmGeneratorTarget* l : tgts) {
+    if (l->GetType() == cmStateEnums::GLOBAL_TARGET) {
       std::vector<std::string> no_depends;
       cmCustomCommandLine force_command;
       force_command.push_back("cd");
@@ -109,12 +107,12 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       std::string force = this->GetCurrentBinaryDirectory();
       force += cmake::GetCMakeFilesDirectory();
       force += "/";
-      force += (*l)->GetName();
+      force += l->GetName();
       force += "_force";
       if (cmSourceFile* file = this->Makefile->AddCustomCommandToOutput(
             force.c_str(), no_depends, no_main_dependency, force_commands, " ",
             0, true)) {
-        (*l)->AddSource(file->GetFullPath());
+        l->AddSource(file->GetFullPath());
       }
     }
   }
@@ -138,15 +136,14 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
   const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
 
   // Create the project file for each target.
-  for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
-       l != tgts.end(); l++) {
-    if ((*l)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  for (cmGeneratorTarget* l : tgts) {
+    if (l->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
-    if (!(*l)->GetProperty("EXTERNAL_MSPROJECT")) {
-      this->CreateSingleVCProj((*l)->GetName().c_str(), *l);
+    if (!l->GetProperty("EXTERNAL_MSPROJECT")) {
+      this->CreateSingleVCProj(l->GetName(), l);
     }
   }
 }

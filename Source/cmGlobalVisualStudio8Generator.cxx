@@ -66,10 +66,8 @@ public:
     parser.ParseVersion("8.0");
     const std::vector<std::string>& availablePlatforms =
       parser.GetAvailablePlatforms();
-    for (std::vector<std::string>::const_iterator i =
-           availablePlatforms.begin();
-         i != availablePlatforms.end(); ++i) {
-      names.push_back("Visual Studio 8 2005 " + *i);
+    for (std::string const& i : availablePlatforms) {
+      names.push_back("Visual Studio 8 2005 " + i);
     }
   }
 
@@ -117,9 +115,8 @@ std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
 void cmGlobalVisualStudio8Generator::EnableLanguage(
   std::vector<std::string> const& lang, cmMakefile* mf, bool optional)
 {
-  for (std::vector<std::string>::const_iterator it = lang.begin();
-       it != lang.end(); ++it) {
-    if (*it == "ASM_MASM") {
+  for (std::string const& it : lang) {
+    if (it == "ASM_MASM") {
       this->MasmEnabled = true;
     }
   }
@@ -249,10 +246,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     stampListFile += stampList;
     std::string stampFile;
     cmGeneratedFileStream fout(stampListFile.c_str());
-    for (std::vector<cmLocalGenerator*>::const_iterator gi =
-           generators.begin();
-         gi != generators.end(); ++gi) {
-      stampFile = (*gi)->GetMakefile()->GetCurrentBinaryDirectory();
+    for (cmLocalGenerator const* gi : generators) {
+      stampFile = gi->GetMakefile()->GetCurrentBinaryDirectory();
       stampFile += "/";
       stampFile += cmake::GetCMakeFilesDirectoryPostSlash();
       stampFile += "generate.stamp";
@@ -323,10 +318,9 @@ void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
       const std::vector<cmGeneratorTarget*>& tgts =
         this->LocalGenerators[i]->GetGeneratorTargets();
       // All targets depend on the build-system check target.
-      for (std::vector<cmGeneratorTarget*>::const_iterator ti = tgts.begin();
-           ti != tgts.end(); ++ti) {
-        if ((*ti)->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
-          (*ti)->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+      for (cmGeneratorTarget const* ti : tgts) {
+        if (ti->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
+          ti->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
         }
       }
     }
@@ -337,10 +331,9 @@ void cmGlobalVisualStudio8Generator::WriteSolutionConfigurations(
   std::ostream& fout, std::vector<std::string> const& configs)
 {
   fout << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n";
-  for (std::vector<std::string>::const_iterator i = configs.begin();
-       i != configs.end(); ++i) {
-    fout << "\t\t" << *i << "|" << this->GetPlatformName() << " = " << *i
-         << "|" << this->GetPlatformName() << "\n";
+  for (std::string const& i : configs) {
+    fout << "\t\t" << i << "|" << this->GetPlatformName() << " = " << i << "|"
+         << this->GetPlatformName() << "\n";
   }
   fout << "\tEndGlobalSection\n";
 }
@@ -352,35 +345,34 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
   std::string const& platformMapping)
 {
   std::string guid = this->GetGUID(name);
-  for (std::vector<std::string>::const_iterator i = configs.begin();
-       i != configs.end(); ++i) {
+  for (std::string const& i : configs) {
     std::vector<std::string> mapConfig;
-    const char* dstConfig = i->c_str();
+    const char* dstConfig = i.c_str();
     if (target.GetProperty("EXTERNAL_MSPROJECT")) {
       if (const char* m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
-                                             cmSystemTools::UpperCase(*i))) {
+                                             cmSystemTools::UpperCase(i))) {
         cmSystemTools::ExpandListArgument(m, mapConfig);
         if (!mapConfig.empty()) {
           dstConfig = mapConfig[0].c_str();
         }
       }
     }
-    fout << "\t\t{" << guid << "}." << *i << "|" << this->GetPlatformName()
+    fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
          << ".ActiveCfg = " << dstConfig << "|"
          << (!platformMapping.empty() ? platformMapping
                                       : this->GetPlatformName())
          << "\n";
     std::set<std::string>::const_iterator ci =
-      configsPartOfDefaultBuild.find(*i);
+      configsPartOfDefaultBuild.find(i);
     if (!(ci == configsPartOfDefaultBuild.end())) {
-      fout << "\t\t{" << guid << "}." << *i << "|" << this->GetPlatformName()
+      fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
            << ".Build.0 = " << dstConfig << "|"
            << (!platformMapping.empty() ? platformMapping
                                         : this->GetPlatformName())
            << "\n";
     }
     if (this->NeedsDeploy(target.GetType())) {
-      fout << "\t\t{" << guid << "}." << *i << "|" << this->GetPlatformName()
+      fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
            << ".Deploy.0 = " << dstConfig << "|"
            << (!platformMapping.empty() ? platformMapping
                                         : this->GetPlatformName())
@@ -410,12 +402,11 @@ void cmGlobalVisualStudio8Generator::WriteProjectDepends(
 {
   TargetDependSet const& unordered = this->GetTargetDirectDepends(gt);
   OrderedTargetDependSet depends(unordered, std::string());
-  for (OrderedTargetDependSet::const_iterator i = depends.begin();
-       i != depends.end(); ++i) {
-    if ((*i)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  for (cmTargetDepend const& i : depends) {
+    if (i->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
-    std::string guid = this->GetGUID((*i)->GetName().c_str());
+    std::string guid = this->GetGUID(i->GetName());
     fout << "\t\t{" << guid << "} = {" << guid << "}\n";
   }
 }
@@ -424,11 +415,9 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
   cmGeneratorTarget* target)
 {
   // Look for utility dependencies that magically link.
-  for (std::set<std::string>::const_iterator ui =
-         target->GetUtilities().begin();
-       ui != target->GetUtilities().end(); ++ui) {
+  for (std::string const& ui : target->GetUtilities()) {
     if (cmGeneratorTarget* depTarget =
-          target->GetLocalGenerator()->FindGeneratorTargetToUse(ui->c_str())) {
+          target->GetLocalGenerator()->FindGeneratorTargetToUse(ui)) {
       if (depTarget->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
           depTarget->GetProperty("EXTERNAL_MSPROJECT")) {
         // This utility dependency names an external .vcproj target.

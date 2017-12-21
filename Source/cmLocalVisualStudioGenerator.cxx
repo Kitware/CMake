@@ -39,10 +39,8 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
   // windows file names are not case sensitive.
   std::map<std::string, int> counts;
 
-  for (std::map<cmSourceFile const*, std::string>::iterator si =
-         mapping.begin();
-       si != mapping.end(); ++si) {
-    cmSourceFile const* sf = si->first;
+  for (auto const& si : mapping) {
+    cmSourceFile const* sf = si.first;
     std::string objectNameLower = cmSystemTools::LowerCase(
       cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()));
     if (custom_ext) {
@@ -57,10 +55,8 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
   // For all source files producing duplicate names we need unique
   // object name computation.
 
-  for (std::map<cmSourceFile const*, std::string>::iterator si =
-         mapping.begin();
-       si != mapping.end(); ++si) {
-    cmSourceFile const* sf = si->first;
+  for (auto& si : mapping) {
+    cmSourceFile const* sf = si.first;
     std::string objectName =
       cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
     if (custom_ext) {
@@ -74,7 +70,7 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
       objectName = this->GetObjectFileNameWithoutTarget(
         *sf, dir_max, &keptSourceExtension, custom_ext);
     }
-    si->second = objectName;
+    si.second = objectName;
   }
 }
 
