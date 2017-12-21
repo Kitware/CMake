@@ -330,10 +330,38 @@ associated with the tests run. The label time summary will not include labels
 that are mapped to subprojects.
 
 When the :prop_test:`PROCESSORS` test property is set, CTest will display a
-weighted test timing result in label and subproject summaries. The wall clock
-time for the test run will be multiplied by this property to give a better
-idea of how much cpu resource CTest allocated for the test. The time is
+weighted test timing result in label and subproject summaries. The time is
 reported with `sec*proc` instead of just `sec`.
+
+The weighted time summary reported for each label or subproject j is computed
+as::
+
+  Weighted Time Summary for Label/Subproject j =
+      sum(raw_test_time[j,i] * num_processors[j,i], i=1...num_tests[j])
+
+  for labels/subprojects j=1...total
+
+where:
+
+* raw_test_time[j,i]: Wall-clock time for the ith test for the jth label or
+  subproject
+* num_processors[j,i]: Value of the CTest PROCESSORS property for the ith test
+  for the jth label or subproject
+* num_tests[j]: Number of tests associated with the jth label or subproject
+* total: Total number of labels or subprojects that have at least one test run
+
+Therefore, the weighted time summary for each label or subproject represents
+the amount of time that CTest gave to run the tests for each label or
+subproject and gives a good representation of the total expense of the tests
+for each label or subproject when compared to other labels or subprojects.
+
+For example, if "SubprojectA" showed "100 sec*proc" and "SubprojectB" showed
+"10 sec*proc", then CTest allocated approximately  10 times the CPU/core time
+to run the tests for "SubprojectA" than for "SubprojectB" (e.g. so if effort
+is going to be expended to reduce the cost of the test suite for the whole
+project, then reducing the cost of the test suite for "SubprojectA" would
+likely have a larger impact than effort to reduce the cost of the test suite
+for "SubprojectB").
 
 .. _`Build and Test Mode`:
 
