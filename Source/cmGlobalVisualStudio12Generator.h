@@ -22,32 +22,32 @@ public:
                                   const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
-  virtual bool MatchesGeneratorName(const std::string& name) const;
+  bool MatchesGeneratorName(const std::string& name) const override;
 
-  virtual void WriteSLNHeader(std::ostream& fout);
+  void WriteSLNHeader(std::ostream& fout) override;
 
   // in Visual Studio 2013 they detached the MSBuild tools version
   // from the .Net Framework version and instead made it have it's own
   // version number
-  virtual const char* GetToolsVersion() { return "12.0"; }
+  const char* GetToolsVersion() override { return "12.0"; }
 protected:
   bool ProcessGeneratorToolsetField(std::string const& key,
                                     std::string const& value) override;
 
-  virtual bool InitializeWindowsPhone(cmMakefile* mf);
-  virtual bool InitializeWindowsStore(cmMakefile* mf);
-  virtual bool SelectWindowsPhoneToolset(std::string& toolset) const;
-  virtual bool SelectWindowsStoreToolset(std::string& toolset) const;
+  bool InitializeWindowsPhone(cmMakefile* mf) override;
+  bool InitializeWindowsStore(cmMakefile* mf) override;
+  bool SelectWindowsPhoneToolset(std::string& toolset) const override;
+  bool SelectWindowsStoreToolset(std::string& toolset) const override;
 
   // Used to verify that the Desktop toolset for the current generator is
   // installed on the machine.
-  virtual bool IsWindowsDesktopToolsetInstalled() const;
+  bool IsWindowsDesktopToolsetInstalled() const override;
 
   // These aren't virtual because we need to check if the selected version
   // of the toolset is installed
   bool IsWindowsPhoneToolsetInstalled() const;
   bool IsWindowsStoreToolsetInstalled() const;
-  virtual const char* GetIDEVersion() { return "12.0"; }
+  const char* GetIDEVersion() override { return "12.0"; }
 private:
   class Factory;
 };

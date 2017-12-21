@@ -18,42 +18,42 @@ public:
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
-  virtual std::string GetName() const { return this->Name; }
+  std::string GetName() const override { return this->Name; }
 
   /** Get the name of the main stamp list file. */
   static std::string GetGenerateStampList();
 
-  virtual void EnableLanguage(std::vector<std::string> const& languages,
-                              cmMakefile*, bool optional);
+  void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
+                      bool optional) override;
   virtual void AddPlatformDefinitions(cmMakefile* mf);
 
-  virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
+  bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
 
   /**
    * Override Configure and Generate to add the build-system check
    * target.
    */
-  virtual void Configure();
+  void Configure() override;
 
   /**
    * Where does this version of Visual Studio look for macros for the
    * current user? Returns the empty string if this version of Visual
    * Studio does not implement support for VB macros.
    */
-  virtual std::string GetUserMacrosDirectory();
+  std::string GetUserMacrosDirectory() override;
 
   /**
    * What is the reg key path to "vsmacros" for this version of Visual
    * Studio?
    */
-  virtual std::string GetUserMacrosRegKeyBase();
+  std::string GetUserMacrosRegKeyBase() override;
 
   /** Return true if the target project file should have the option
       LinkLibraryDependencies and link to .sln dependencies. */
-  virtual bool NeedLinkLibraryDependencies(cmGeneratorTarget* target);
+  bool NeedLinkLibraryDependencies(cmGeneratorTarget* target) override;
 
   /** Return true if building for Windows CE */
-  virtual bool TargetsWindowsCE() const
+  bool TargetsWindowsCE() const override
   {
     return !this->WindowsCEVersion.empty();
   }
@@ -62,12 +62,12 @@ public:
   bool IsExpressEdition() const { return this->ExpressEdition; }
 
 protected:
-  virtual void AddExtraIDETargets();
-  virtual const char* GetIDEVersion() { return "8.0"; }
+  void AddExtraIDETargets() override;
+  const char* GetIDEVersion() override { return "8.0"; }
 
-  virtual std::string FindDevEnvCommand();
+  std::string FindDevEnvCommand() override;
 
-  virtual bool VSLinksDependencies() const { return false; }
+  bool VSLinksDependencies() const override { return false; }
 
   bool AddCheckTarget();
 
@@ -75,18 +75,18 @@ protected:
   virtual bool NeedsDeploy(cmStateEnums::TargetType type) const;
 
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
-  virtual void WriteSLNHeader(std::ostream& fout);
-  virtual void WriteSolutionConfigurations(
-    std::ostream& fout, std::vector<std::string> const& configs);
-  virtual void WriteProjectConfigurations(
+  void WriteSLNHeader(std::ostream& fout) override;
+  void WriteSolutionConfigurations(
+    std::ostream& fout, std::vector<std::string> const& configs) override;
+  void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name,
     cmGeneratorTarget const& target, std::vector<std::string> const& configs,
     const std::set<std::string>& configsPartOfDefaultBuild,
-    const std::string& platformMapping = "");
-  virtual bool ComputeTargetDepends();
-  virtual void WriteProjectDepends(std::ostream& fout, const std::string& name,
-                                   const char* path,
-                                   const cmGeneratorTarget* t);
+    const std::string& platformMapping = "") override;
+  bool ComputeTargetDepends() override;
+  void WriteProjectDepends(std::ostream& fout, const std::string& name,
+                           const char* path,
+                           const cmGeneratorTarget* t) override;
 
   bool UseFolderProperty();
 
