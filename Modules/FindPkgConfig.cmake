@@ -191,10 +191,10 @@ function(_pkg_create_imp_target _prefix _no_cmake_path _no_cmake_environment_pat
   # set the options that are used as long as the .pc file does not provide a library
   # path to look into
   if(_no_cmake_path)
-    set(_find_opts "NO_CMAKE_PATH")
+    list(APPEND _find_opts "NO_CMAKE_PATH")
   endif()
   if(_no_cmake_environment_path)
-    string(APPEND _find_opts " NO_CMAKE_ENVIRONMENT_PATH")
+    list(APPEND _find_opts "NO_CMAKE_ENVIRONMENT_PATH")
   endif()
 
   unset(_search_paths)
@@ -458,7 +458,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" CFLAGS_OTHER        ""        --cflags-only-other )
 
       if (_imp_target)
-        _pkg_create_imp_target("${_prefix}" _no_cmake_path _no_cmake_environment_path)
+        _pkg_create_imp_target("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path})
       endif()
     endif()
 
@@ -590,7 +590,7 @@ macro(pkg_check_modules _prefix _module0)
       _pkgconfig_set(__pkg_config_arguments_${_prefix} "${_module0};${ARGN}")
     endif()
   elseif (${_prefix}_FOUND AND ${_imp_target})
-    _pkg_create_imp_target("${_prefix}" _no_cmake_path _no_cmake_environment_path)
+    _pkg_create_imp_target("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path})
   endif()
 endmacro()
 
@@ -644,7 +644,7 @@ macro(pkg_search_module _prefix _module0)
 
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
   elseif (${_prefix}_FOUND AND ${_imp_target})
-    _pkg_create_imp_target("${_prefix}" _no_cmake_path _no_cmake_environment_path)
+    _pkg_create_imp_target("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path})
   endif()
 endmacro()
 
