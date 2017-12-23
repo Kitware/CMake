@@ -8,7 +8,6 @@
 #include "cmsys/FStream.hxx"
 #include <algorithm>
 #include <ctype.h>
-#include <functional>
 #include <iterator>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
@@ -114,7 +113,7 @@ std::string cmGlobalNinjaGenerator::EncodeIdent(const std::string& ident,
                                                 std::ostream& vars)
 {
   if (std::find_if(ident.begin(), ident.end(),
-                   std::not1(std::ptr_fun(IsIdentChar))) != ident.end()) {
+                   [](char c) { return !IsIdentChar(c); }) != ident.end()) {
     static unsigned VarNum = 0;
     std::ostringstream names;
     names << "ident" << VarNum++;
