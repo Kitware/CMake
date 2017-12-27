@@ -13,7 +13,7 @@ cmProcessOutput::Encoding cmProcessOutput::FindEncoding(
   std::string const& name)
 {
   Encoding encoding = Auto;
-  if (name == "UTF8") {
+  if ((name == "UTF8") || (name == "UTF-8")) {
     encoding = UTF8;
   } else if (name == "NONE") {
     encoding = None;
