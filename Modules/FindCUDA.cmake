@@ -578,12 +578,15 @@ mark_as_advanced(
   CUDA_SEPARABLE_COMPILATION
   )
 
-# Makefile and similar generators don't define CMAKE_CONFIGURATION_TYPES, so we
-# need to add another entry for the CMAKE_BUILD_TYPE.  We also need to add the
-# standerd set of 4 build types (Debug, MinSizeRel, Release, and RelWithDebInfo)
-# for completeness.  We need run this loop in order to accommodate the addition
-# of extra configuration types.  Duplicate entries will be removed by
-# REMOVE_DUPLICATES.
+# Single config generators like Makefiles or Ninja don't usually have
+# CMAKE_CONFIGURATION_TYPES defined (but note that it can be defined if set by
+# projects or developers). Even CMAKE_BUILD_TYPE might not be defined for
+# single config generators (and should not be defined for multi-config
+# generators). To ensure we get a complete superset of all possible
+# configurations, we combine CMAKE_CONFIGURATION_TYPES, CMAKE_BUILD_TYPE and
+# all of the standard configurations, then weed out duplicates with
+# list(REMOVE_DUPLICATES). Looping over the unique set then ensures we have
+# each configuration-specific set of nvcc flags defined and marked as advanced.
 set(CUDA_configuration_types ${CMAKE_CONFIGURATION_TYPES} ${CMAKE_BUILD_TYPE} Debug MinSizeRel Release RelWithDebInfo)
 list(REMOVE_DUPLICATES CUDA_configuration_types)
 foreach(config ${CUDA_configuration_types})

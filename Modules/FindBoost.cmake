@@ -275,13 +275,14 @@ endif()
 macro(_Boost_ADJUST_LIB_VARS basename)
   if(Boost_INCLUDE_DIR )
     if(Boost_${basename}_LIBRARY_DEBUG AND Boost_${basename}_LIBRARY_RELEASE)
-      # if the generator supports configuration types then set
-      # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
-      if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+      # if the generator is multi-config or if CMAKE_BUILD_TYPE is set for
+      # single-config generators, set optimized and debug libraries
+      get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+      if(_isMultiConfig OR CMAKE_BUILD_TYPE)
         set(Boost_${basename}_LIBRARY optimized ${Boost_${basename}_LIBRARY_RELEASE} debug ${Boost_${basename}_LIBRARY_DEBUG})
       else()
-        # if there are no configuration types and CMAKE_BUILD_TYPE has no value
-        # then just use the release libraries
+        # For single-config generators where CMAKE_BUILD_TYPE has no value,
+        # just use the release libraries
         set(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY_RELEASE} )
       endif()
       # FIXME: This probably should be set for both cases

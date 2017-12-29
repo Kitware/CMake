@@ -38,7 +38,8 @@ endif()
 #
 
 set(__conf_types "")
-if(CMAKE_CONFIGURATION_TYPES)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_isMultiConfig)
   # We need to pass the configuration type on the test command line.
   set(__conf_types -C "${CMAKE_CFG_INTDIR}")
 endif()

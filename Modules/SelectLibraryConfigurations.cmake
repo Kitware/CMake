@@ -38,11 +38,12 @@ macro( select_library_configurations basename )
         set(${basename}_LIBRARY_DEBUG "${basename}_LIBRARY_DEBUG-NOTFOUND" CACHE FILEPATH "Path to a library.")
     endif()
 
+    get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
     if( ${basename}_LIBRARY_DEBUG AND ${basename}_LIBRARY_RELEASE AND
            NOT ${basename}_LIBRARY_DEBUG STREQUAL ${basename}_LIBRARY_RELEASE AND
-           ( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE ) )
-        # if the generator supports configuration types or CMAKE_BUILD_TYPE
-        # is set, then set optimized and debug options.
+           ( _isMultiConfig OR CMAKE_BUILD_TYPE ) )
+        # if the generator is multi-config or if CMAKE_BUILD_TYPE is set for
+        # single-config generators, set optimized and debug libraries
         set( ${basename}_LIBRARY "" )
         foreach( _libname IN LISTS ${basename}_LIBRARY_RELEASE )
             list( APPEND ${basename}_LIBRARY optimized "${_libname}" )
