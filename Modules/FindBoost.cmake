@@ -791,7 +791,7 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
       set(_Boost_WAVE_DEPENDENCIES filesystem system serialization thread chrono date_time atomic)
       set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
     endif()
-    if(NOT Boost_VERSION VERSION_LESS 106600)
+    if(NOT Boost_VERSION VERSION_LESS 106700)
       message(WARNING "New Boost version may have incorrect or missing dependencies and imported targets")
       set(_Boost_IMPORTED_TARGETS FALSE)
     endif()
@@ -925,8 +925,8 @@ endfunction()
 # `${Boost_ROOT}/libs/fiber/build/Jamfile.v2`.
 #
 function(_Boost_COMPILER_FEATURES component _ret)
-  # Boost >= 1.62 and < 1.65
-  if(NOT Boost_VERSION VERSION_LESS 106200 AND Boost_VERSION VERSION_LESS 106500)
+  # Boost >= 1.62 and < 1.67
+  if(NOT Boost_VERSION VERSION_LESS 106200 AND Boost_VERSION VERSION_LESS 106700)
     set(_Boost_FIBER_COMPILER_FEATURES
         cxx_alias_templates
         cxx_auto_type
@@ -1032,7 +1032,7 @@ else()
   # _Boost_COMPONENT_HEADERS.  See the instructions at the top of
   # _Boost_COMPONENT_DEPENDENCIES.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
-    "1.65.1" "1.65.0" "1.65"
+    "1.66.0" "1.66" "1.65.1" "1.65.0" "1.65"
     "1.64.0" "1.64" "1.63.0" "1.63" "1.62.0" "1.62" "1.61.0" "1.61" "1.60.0" "1.60"
     "1.59.0" "1.59" "1.58.0" "1.58" "1.57.0" "1.57" "1.56.0" "1.56" "1.55.0" "1.55"
     "1.54.0" "1.54" "1.53.0" "1.53" "1.52.0" "1.52" "1.51.0" "1.51"
