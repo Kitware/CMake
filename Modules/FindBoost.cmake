@@ -1379,8 +1379,11 @@ if(Boost_DEBUG)
 endif()
 
 #======================
-# Systematically build up the Boost ABI tag
-# http://boost.org/doc/libs/1_41_0/more/getting_started/windows.html#library-naming
+# Systematically build up the Boost ABI tag for the 'tagged' and 'versioned' layouts
+# http://boost.org/doc/libs/1_66_0/more/getting_started/windows.html#library-naming
+# http://boost.org/doc/libs/1_66_0/boost/config/auto_link.hpp
+# http://boost.org/doc/libs/1_66_0/tools/build/src/tools/common.jam
+# http://boost.org/doc/libs/1_66_0/boostcpp.jam
 set( _boost_RELEASE_ABI_TAG "-")
 set( _boost_DEBUG_ABI_TAG   "-")
 # Key       Use this library when:
@@ -1412,9 +1415,38 @@ if(Boost_USE_STLPORT)
   string(APPEND _boost_DEBUG_ABI_TAG "p")
 endif()
 #  n        using the STLport deprecated "native iostreams" feature
+#           removed from the documentation in 1.43.0 but still present in
+#           boost/config/auto_link.hpp
 if(Boost_USE_STLPORT_DEPRECATED_NATIVE_IOSTREAMS)
   string(APPEND _boost_RELEASE_ABI_TAG "n")
   string(APPEND _boost_DEBUG_ABI_TAG "n")
+endif()
+
+#  -x86     Architecture and address model tag
+#           First character is the architecture, then word-size, either 32 or 64
+#           Only used in 'versioned' layout, added in Boost 1.66.0
+set(_boost_ARCHITECTURE_TAG "")
+# {CMAKE_CXX_COMPILER_ARCHITECTURE_ID} is not currently set for all compilers
+if(NOT "x${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "x" AND NOT Boost_VERSION VERSION_LESS 106600)
+  string(APPEND _boost_ARCHITECTURE_TAG "-")
+  # This needs to be kept in-sync with the section of CMakePlatformId.h.in
+  # inside 'defined(_WIN32) && defined(_MSC_VER)'
+  if(${CMAKE_CXX_COMPILER_ARCHITECTURE_ID} STREQUAL "IA64")
+    string(APPEND _boost_ARCHITECTURE_TAG "i")
+  elseif(${CMAKE_CXX_COMPILER_ARCHITECTURE_ID} STREQUAL "X86"
+            OR ${CMAKE_CXX_COMPILER_ARCHITECTURE_ID} STREQUAL "x64")
+    string(APPEND _boost_ARCHITECTURE_TAG "x")
+  elseif(${CMAKE_CXX_COMPILER_ARCHITECTURE_ID} MATCHES "^ARM")
+    string(APPEND _boost_ARCHITECTURE_TAG "a")
+  elseif(${CMAKE_CXX_COMPILER_ARCHITECTURE_ID} STREQUAL "MIPS")
+    string(APPEND _boost_ARCHITECTURE_TAG "m")
+  endif()
+
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    string(APPEND _boost_ARCHITECTURE_TAG "64")
+  else()
+    string(APPEND _boost_ARCHITECTURE_TAG "32")
+  endif()
 endif()
 
 if(Boost_DEBUG)
@@ -1610,22 +1642,22 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   unset(_boost_RELEASE_NAMES)
   foreach(compiler IN LISTS _boost_COMPILER)
     list(APPEND _boost_RELEASE_NAMES
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG} )
   endforeach()
   list(APPEND _boost_RELEASE_NAMES
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}-${Boost_LIB_VERSION}
+    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT} )
   if(_boost_STATIC_RUNTIME_WORKAROUND)
     set(_boost_RELEASE_STATIC_ABI_TAG "-s${_boost_RELEASE_ABI_TAG}")
     foreach(compiler IN LISTS _boost_COMPILER)
       list(APPEND _boost_RELEASE_NAMES
-        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
         ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG} )
     endforeach()
     list(APPEND _boost_RELEASE_NAMES
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG} )
   endif()
   if(Boost_THREADAPI AND ${COMPONENT} STREQUAL "thread")
@@ -1660,11 +1692,11 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   unset(_boost_DEBUG_NAMES)
   foreach(compiler IN LISTS _boost_COMPILER)
     list(APPEND _boost_DEBUG_NAMES
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG} )
   endforeach()
   list(APPEND _boost_DEBUG_NAMES
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}-${Boost_LIB_VERSION}
+    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}
     ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT} )
@@ -1672,11 +1704,11 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
     set(_boost_DEBUG_STATIC_ABI_TAG "-s${_boost_DEBUG_ABI_TAG}")
     foreach(compiler IN LISTS _boost_COMPILER)
       list(APPEND _boost_DEBUG_NAMES
-        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
         ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG} )
     endforeach()
     list(APPEND _boost_DEBUG_NAMES
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG} )
   endif()
   if(Boost_THREADAPI AND ${COMPONENT} STREQUAL "thread")
