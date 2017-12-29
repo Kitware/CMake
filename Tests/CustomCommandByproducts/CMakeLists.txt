@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.9)
+cmake_policy(SET CMP0058 OLD)
 project(CustomCommandByproducts C)
 
 # Generate a byproduct in a rule that runs in the target consuming it.
@@ -81,7 +82,8 @@ add_custom_command(OUTPUT timestamp8.txt
 
 # Generate the library file of an imported target as a byproduct
 # of an external project.
-if(CMAKE_CONFIGURATION_TYPES)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_isMultiConfig)
   set(cfg /${CMAKE_CFG_INTDIR})
 else()
   set(cfg)
@@ -105,7 +107,7 @@ add_dependencies(ExternalLibrary ExternalTarget)
 # Generate the library file of an imported target as a byproduct
 # of an external project. The byproduct uses <BINARY_DIR> that is substituted
 # by the real binary path
-if(CMAKE_CONFIGURATION_TYPES)
+if(_isMultiConfig)
   set(cfg /${CMAKE_CFG_INTDIR})
 else()
   set(cfg)

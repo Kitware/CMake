@@ -5,7 +5,7 @@ run_cmake(CMP0070-OLD)
 run_cmake(CMP0070-WARN)
 
 run_cmake(CommandConflict)
-if("${RunCMake_GENERATOR}" MATCHES "Visual Studio|Xcode")
+if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
   run_cmake(OutputConflict)
 endif()
 run_cmake(EmptyCondition1)

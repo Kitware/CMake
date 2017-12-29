@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.9)
 project (TestSimpleInstall)
 set(CMAKE_VERBOSE_MAKEFILE 1)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
@@ -307,7 +307,8 @@ else()
         INSTALL_NAME_DIR @executable_path/../lib)
 endif()
 
-if(CMAKE_CONFIGURATION_TYPES)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_isMultiConfig)
   set(SI_CONFIG --config $<CONFIGURATION>)
 else()
   set(SI_CONFIG)

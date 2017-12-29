@@ -1,6 +1,6 @@
 # Autogen build options
 set(Autogen_BUILD_OPTIONS "-DQT_TEST_VERSION=${QT_TEST_VERSION}")
-if(NOT CMAKE_CONFIGURATION_TYPES)
+if(NOT _isMultiConfig)   # Set in Tests/CMakeLists.txt
   list(APPEND Autogen_BUILD_OPTIONS "-DCMAKE_BUILD_TYPE=$<CONFIGURATION>")
 endif()
 list(APPEND Autogen_BUILD_OPTIONS

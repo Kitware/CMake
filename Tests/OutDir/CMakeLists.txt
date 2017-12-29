@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.9)
 project(OutDir C)
 
-if(CMAKE_CONFIGURATION_TYPES)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_isMultiConfig)
   foreach(config ${CMAKE_CONFIGURATION_TYPES})
     string(TOUPPER "${config}" CONFIG)
     list(APPEND configs "${CONFIG}")

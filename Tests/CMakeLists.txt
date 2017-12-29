@@ -38,9 +38,21 @@ set(ENV{HOME} \"${TEST_HOME}\")
 ")
 endif()
 
+# 3.9 or later provides a definitive answer to whether we are multi-config
+# through a global property. Prior to 3.9, CMAKE_CONFIGURATION_TYPES being set
+# is assumed to mean multi-config, but developers might modify it so it is
+# technically not as reliable.
+if(NOT CMAKE_VERSION VERSION_LESS 3.9)
+  get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+elseif(CMAKE_CONFIGURATION_TYPES)
+  set(_isMultiConfig True)
+else()
+  set(_isMultiConfig False)
+endif()
+
 # Choose a default configuration for CTest tests.
 set(CTestTest_CONFIG Debug)
-if(NOT CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)
+if(NOT _isMultiConfig AND CMAKE_BUILD_TYPE)
   set(CTestTest_CONFIG ${CMAKE_BUILD_TYPE})
 endif()
 
@@ -3190,7 +3202,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
           OUTPUT_QUIET ERROR_QUIET RESULT_VARIABLE _result
           )
         if(_result EQUAL 0)
-          if(CMAKE_CONFIGURATION_TYPES)
+          if(_isMultiConfig)
             set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah/$<CONFIGURATION>)
           else()
             set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah)

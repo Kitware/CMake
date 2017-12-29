@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.9)
 project(StagingPrefix)
 
 # Wipe out the install tree
@@ -17,7 +17,8 @@ set_property(
   PROPERTY SYMBOLIC 1
   )
 
-if(CMAKE_CONFIGURATION_TYPES)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_isMultiConfig)
   set(NESTED_CONFIG_TYPE -C "${CMAKE_CFG_INTDIR}")
 else()
   if(CMAKE_BUILD_TYPE)

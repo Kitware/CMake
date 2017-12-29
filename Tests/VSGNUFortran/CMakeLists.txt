@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.9)
 project(VSGNUFortran)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
@@ -9,7 +9,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 # because gmake build of fortran will not be in a config
 # directory, and for easier testing we want the exe and .dll
 # to be in the same directory.
-if(CMAKE_CONFIGURATION_TYPES)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_isMultiConfig)
   foreach(config ${CMAKE_CONFIGURATION_TYPES})
     string(TOUPPER "${config}" config)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${config}
