@@ -793,7 +793,6 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
     endif()
     if(NOT Boost_VERSION VERSION_LESS 106700)
       message(WARNING "New Boost version may have incorrect or missing dependencies and imported targets")
-      set(_Boost_IMPORTED_TARGETS FALSE)
     endif()
   endif()
 
