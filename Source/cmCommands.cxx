@@ -343,7 +343,7 @@ void GetProjectCommandsInScriptMode(cmState* state)
   CM_UNEXPECTED_PROJECT_COMMAND("try_compile");
   CM_UNEXPECTED_PROJECT_COMMAND("try_run");
 
-  // deprected commands
+  // deprecated commands
   CM_UNEXPECTED_PROJECT_COMMAND("export_library_dependencies");
   CM_UNEXPECTED_PROJECT_COMMAND("load_command");
   CM_UNEXPECTED_PROJECT_COMMAND("output_required_files");

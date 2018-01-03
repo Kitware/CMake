@@ -977,7 +977,7 @@ if(NOT CUDA_VERSION VERSION_LESS "9.0")
   find_cuda_helper_libs(npps)
   set(CUDA_npp_LIBRARY "${CUDA_nppc_LIBRARY};${CUDA_nppial_LIBRARY};${CUDA_nppicc_LIBRARY};${CUDA_nppicom_LIBRARY};${CUDA_nppidei_LIBRARY};${CUDA_nppif_LIBRARY};${CUDA_nppig_LIBRARY};${CUDA_nppim_LIBRARY};${CUDA_nppist_LIBRARY};${CUDA_nppisu_LIBRARY};${CUDA_nppitc_LIBRARY};${CUDA_npps_LIBRARY}")
 elseif(CUDA_VERSION VERSION_GREATER "5.0")
-  # In CUDA 5.5 NPP was splitted onto 3 separate libraries.
+  # In CUDA 5.5 NPP was split into 3 separate libraries.
   find_cuda_helper_libs(nppc)
   find_cuda_helper_libs(nppi)
   find_cuda_helper_libs(npps)

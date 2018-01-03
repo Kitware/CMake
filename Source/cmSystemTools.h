@@ -59,7 +59,7 @@ public:
    *  Set the function used by GUIs to display error messages
    *  Function gets passed: message as a const char*,
    *  title as a const char*, and a reference to bool that when
-   *  set to false, will disable furthur messages (cancel).
+   *  set to false, will disable further messages (cancel).
    */
   static void SetMessageCallback(MessageCallback f,
                                  void* clientData = nullptr);
@@ -167,7 +167,7 @@ public:
    * to be at the end of the string and it does not support ?
    * []... The optional argument type specifies what kind of files you
    * want to find. 0 means all files, -1 means directories, 1 means
-   * files only. This method returns true if search was succesfull.
+   * files only. This method returns true if search was successful.
    */
   static bool SimpleGlob(const std::string& glob,
                          std::vector<std::string>& files, int type = 0);
@@ -229,7 +229,7 @@ public:
   /**
    * In this version of RunSingleCommand, command[0] should be
    * the command to run, and each argument to the command should
-   * be in comand[1]...command[command.size()]
+   * be in command[1]...command[command.size()]
    */
   static bool RunSingleCommand(std::vector<std::string> const& command,
                                std::string* captureStdOut = nullptr,

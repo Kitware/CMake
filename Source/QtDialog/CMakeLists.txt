@@ -40,7 +40,7 @@ if (Qt5Widgets_FOUND)
   endif()
 
   # We need to install platform plugin and add qt.conf for Qt5 on Mac and Windows.
-  # FIXME: This should be part of Qt5 CMake scripts, but unfortunatelly
+  # FIXME: This should be part of Qt5 CMake scripts, but unfortunately
   # Qt5 support is missing there.
   if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
     macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var)

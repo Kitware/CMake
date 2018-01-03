@@ -110,7 +110,7 @@ std::string const& cmSourceFile::GetFullPath() const
 
 bool cmSourceFile::FindFullPath(std::string* error)
 {
-  // If thie method has already failed once do not try again.
+  // If this method has already failed once do not try again.
   if (this->FindFullPathFailed) {
     return false;
   }

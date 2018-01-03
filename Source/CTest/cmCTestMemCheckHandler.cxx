@@ -176,7 +176,7 @@ void cmCTestMemCheckHandler::GenerateTestCommand(
   }
   // Create a copy of the memory tester environment variable.
   // This is used for memory testing programs that pass options
-  // via environment varaibles.
+  // via environment variables.
   std::string memTesterEnvironmentVariable =
     this->MemoryTesterEnvironmentVariable;
   for (std::string const& arg : this->MemoryTesterOptions) {

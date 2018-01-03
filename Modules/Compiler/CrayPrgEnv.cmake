@@ -67,7 +67,7 @@ macro(__CrayPrgEnv_setup lang test_src compiler_cmd link_cmd)
   set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS "-dynamic")
 
   # If the link type is not explicitly specified in the environment then
-  # the Cray wrappers assume that the code will be built staticly so
+  # the Cray wrappers assume that the code will be built statically so
   # we check the following condition(s) are NOT met
   #  Compiler flags are explicitly dynamic
   #  Env var is dynamic and compiler flags are not explicitly static

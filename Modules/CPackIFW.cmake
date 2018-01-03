@@ -843,7 +843,7 @@ if(CPACK_IFW_VERBOSE)
   endif()
 endif()
 if(CPACK_IFW_INSTALLERBASE_EXECUTABLE AND NOT CPACK_IFW_FRAMEWORK_VERSION)
-  message(WARNING "Could not detect QtIFW tools version. Set used version to variable \"CPACK_IFW_FRAMEWORK_VERSION_FORCED\" manualy.")
+  message(WARNING "Could not detect QtIFW tools version. Set used version to variable \"CPACK_IFW_FRAMEWORK_VERSION_FORCED\" manually.")
 endif()
 
 #=============================================================================

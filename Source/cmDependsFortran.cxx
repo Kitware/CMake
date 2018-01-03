@@ -583,7 +583,7 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
     A mod file is a binary file.
     However, looking into both generated bar.mod files with a hex editor
     shows that they differ only before a sequence linefeed-zero (0x0A 0x00)
-    which is located some bytes in front of the absoulte path to the source
+    which is located some bytes in front of the absolute path to the source
     file.
 
   sun:

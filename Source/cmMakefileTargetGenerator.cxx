@@ -884,7 +884,7 @@ bool cmMakefileTargetGenerator::WriteMakeRule(
   for (std::vector<std::string>::const_iterator o = outputs.begin() + 1;
        o != outputs.end(); ++o) {
     // Touch the extra output so "make" knows that it was updated,
-    // but only if the output was acually created.
+    // but only if the output was actually created.
     std::string const out = this->LocalGenerator->ConvertToOutputFormat(
       this->LocalGenerator->MaybeConvertToRelativePath(binDir, *o),
       cmOutputConverter::SHELL);

@@ -17,7 +17,7 @@
 #   i.e. GNU/Intel/Clang/MSVC, etc.
 # ``LANGUAGE``
 #   language for which the result will be used,
-#   i.e. C/CXX/Fortan/ASM
+#   i.e. C/CXX/Fortran/ASM
 # ``MODE``
 #   ``EXIST``
 #     only check for existence of the given package

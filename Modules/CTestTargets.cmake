@@ -3,7 +3,7 @@
 
 
 if(NOT RUN_FROM_CTEST_OR_DART)
-  message(FATAL_ERROR "Do not incldue CTestTargets.cmake directly")
+  message(FATAL_ERROR "Do not include CTestTargets.cmake directly")
 endif()
 
 if(NOT PROJECT_BINARY_DIR)

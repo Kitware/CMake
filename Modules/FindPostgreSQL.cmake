@@ -23,7 +23,7 @@
 # ----------------------------------------------------------------------------
 # Note:
 # PostgreSQL_ADDITIONAL_VERSIONS is a variable that can be used to set the
-# version mumber of the implementation of PostgreSQL.
+# version number of the implementation of PostgreSQL.
 # In Windows the default installation of PostgreSQL uses that as part of the path.
 # E.g C:\Program Files\PostgreSQL\8.4.
 # Currently, the following version numbers are known to this module:

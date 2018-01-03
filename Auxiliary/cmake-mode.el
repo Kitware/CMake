@@ -352,7 +352,7 @@ and store the result as a list in LISTVAR."
 
 ;;;###autoload
 (defun cmake-help ()
-  "Queries for any of the four available help topics and prints out the approriate page."
+  "Queries for any of the four available help topics and prints out the appropriate page."
   (interactive)
   (let* ((default-entry (cmake-symbol-at-point))
          (command-list (cmake-get-list "command"))

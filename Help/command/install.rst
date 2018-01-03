@@ -347,7 +347,7 @@ included in the export but a target to which it links is not included
 the behavior is unspecified.
 
 In addition to cmake language files, the ``EXPORT_ANDROID_MK`` option maybe
-used to specifiy an export to the android ndk build system.  The Android
+used to specify an export to the android ndk build system.  The Android
 NDK supports the use of prebuilt libraries, both static and shared. This
 allows cmake to build the libraries of a project and make them available
 to an ndk build system complete with transitive dependencies, include flags

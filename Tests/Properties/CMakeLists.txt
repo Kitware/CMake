@@ -11,7 +11,7 @@ set_source_files_properties(properties.h PROPERTIES TEST1 1)
 get_source_file_property(RESULT1 properties.h TEST1)
 
 # test properties on a headerfile in the source tree
-# accessed without an extenion (also yuck)
+# accessed without an extension (also yuck)
 set_source_files_properties(properties2 PROPERTIES TEST2 1)
 get_source_file_property(RESULT2 properties2 TEST2)
 

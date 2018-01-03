@@ -1076,7 +1076,7 @@ foreach(config IN LISTS git_config)
   list(APPEND git_clone_options --config \${config})
 endforeach()
 
-# try the clone 3 times incase there is an odd git clone issue
+# try the clone 3 times in case there is an odd git clone issue
 set(error_code 1)
 set(number_of_tries 0)
 while(error_code AND number_of_tries LESS 3)

@@ -234,7 +234,7 @@ bool cmQtAutoGeneratorMocUic::InitInfoFile(cmMakefile* makefile)
       // Compare list sizes
       if (sources.size() != options.size()) {
         std::ostringstream ost;
-        ost << "files/options lists sizes missmatch (" << sources.size() << "/"
+        ost << "files/options lists sizes mismatch (" << sources.size() << "/"
             << options.size() << ")";
         this->LogFileError(cmQtAutoGen::UIC, this->GetInfoFile(), ost.str());
         return false;
