@@ -771,7 +771,7 @@ static void DumpBacktraceRange(Json::Value& result, const std::string& type,
   }
 }
 
-static Json::Value DumpCTestInfo(cmTest* testInfo)
+static Json::Value DumpCTestInfo(cmLocalGenerator * lg, cmTest* testInfo, const std::string& config)
 {
   Json::Value result = Json::objectValue;
   result[kCTEST_NAME] = testInfo->GetName();
@@ -783,14 +783,24 @@ static Json::Value DumpCTestInfo(cmTest* testInfo)
     command.append(cmd);
     command.append(" ");
   }
-  result[kCTEST_COMMAND] = command;
+
+  // Remove any config specific variables from the output.
+  cmGeneratorExpression ge;
+  auto cge = ge.Parse(command.c_str());
+  const char* processed = cge->Evaluate(lg, config);
+
+  result[kCTEST_COMMAND] = processed;
 
   // Build up the list of properties that may have been specified
   Json::Value properties = Json::arrayValue;
   for (auto& prop : testInfo->GetProperties()) {
     Json::Value entry = Json::objectValue;
     entry[kKEY_KEY] = prop.first;
-    entry[kVALUE_KEY] = prop.second.GetValue();
+
+    // Remove config variables from the value too.
+    auto cge_value = ge.Parse(prop.second.GetValue());
+    const char* processed_value = cge_value->Evaluate(lg, config);
+    entry[kVALUE_KEY] = processed_value;
     properties.append(entry);
   }
   result[kPROPERTIES_KEY] = properties;
@@ -801,13 +811,15 @@ static Json::Value DumpCTestInfo(cmTest* testInfo)
   return result;
 }
 
-static void DumpMakefileTests(cmMakefile* mf, const std::string& config,
+static void DumpMakefileTests(cmLocalGenerator* lg, const std::string& config,
                               Json::Value* result)
 {
+  auto mf = lg->GetMakefile();
   std::vector<cmTest*> tests;
   mf->GetTests(config, tests);
   for (auto test : tests) {
-    Json::Value tmp = DumpCTestInfo(test);
+    Json::Value tmp = DumpCTestInfo(lg, test, config);
+
     if (!tmp.isNull()) {
       result->append(tmp);
     }
@@ -831,8 +843,8 @@ static Json::Value DumpCTestProjectList(const cmake* cm,
     for (const auto& lg : projectIt.second) {
       // Make sure they're generated.
       lg->GenerateTestFiles();
-      cmMakefile* mf = lg->GetMakefile();
-      DumpMakefileTests(mf, config, &tests);
+
+      DumpMakefileTests(lg, config, &tests);
     }
 
     pObj[kCTEST_INFO] = tests;
