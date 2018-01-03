@@ -13,7 +13,8 @@
 
 class cmGeneratorTarget;
 
-class cmQtAutoGeneratorInitializer
+/// @brief Initializes the QtAutoGen generators
+class cmQtAutoGeneratorInitializer : public cmQtAutoGen
 {
 public:
   static std::string GetQtMajorVersion(cmGeneratorTarget const* target);
@@ -55,10 +56,14 @@ private:
   void SetupCustomTargetsUic();
 
   std::vector<std::string> AddGeneratedSource(std::string const& filename,
-                                              cmQtAutoGen::Generator genType);
+                                              GeneratorT genType);
 
   bool QtVersionGreaterOrEqual(unsigned long requestMajor,
                                unsigned long requestMinor) const;
+
+  bool RccListInputs(std::string const& fileName,
+                     std::vector<std::string>& files,
+                     std::string& errorMessage);
 
 private:
   cmGeneratorTarget* Target;
@@ -73,7 +78,7 @@ private:
   // Configurations
   std::string ConfigDefault;
   std::vector<std::string> ConfigsList;
-  cmQtAutoGen::MultiConfig MultiConfig;
+  MultiConfigT MultiConfig;
   // Names
   std::string AutogenTargetName;
   std::string AutogenFolder;

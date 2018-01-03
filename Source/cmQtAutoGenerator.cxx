@@ -4,7 +4,6 @@
 #include "cmQtAutoGenerator.h"
 
 #include "cmsys/FStream.hxx"
-#include "cmsys/Terminal.h"
 
 #include "cmAlgorithms.h"
 #include "cmGlobalGenerator.h"
@@ -14,9 +13,21 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-// -- Static functions
+#include <algorithm>
 
-static std::string HeadLine(std::string const& title)
+// -- Class methods
+
+void cmQtAutoGenerator::Logger::SetVerbose(bool value)
+{
+  Verbose_ = value;
+}
+
+void cmQtAutoGenerator::Logger::SetColorOutput(bool value)
+{
+  ColorOutput_ = value;
+}
+
+std::string cmQtAutoGenerator::Logger::HeadLine(std::string const& title)
 {
   std::string head = title;
   head += '\n';
@@ -25,153 +36,93 @@ static std::string HeadLine(std::string const& title)
   return head;
 }
 
-static std::string QuotedCommand(std::vector<std::string> const& command)
+void cmQtAutoGenerator::Logger::Info(GeneratorT genType,
+                                     std::string const& message)
 {
-  std::string res;
-  for (std::string const& item : command) {
-    if (!res.empty()) {
-      res.push_back(' ');
-    }
-    std::string const cesc = cmQtAutoGen::Quoted(item);
-    if (item.empty() || (cesc.size() > (item.size() + 2)) ||
-        (cesc.find(' ') != std::string::npos)) {
-      res += cesc;
-    } else {
-      res += item;
-    }
-  }
-  return res;
-}
-
-// -- Class methods
-
-cmQtAutoGenerator::cmQtAutoGenerator()
-  : Verbose(cmSystemTools::HasEnv("VERBOSE"))
-  , ColorOutput(true)
-{
-  {
-    std::string colorEnv;
-    cmSystemTools::GetEnv("COLOR", colorEnv);
-    if (!colorEnv.empty()) {
-      this->ColorOutput = cmSystemTools::IsOn(colorEnv.c_str());
-    }
-  }
-}
-
-bool cmQtAutoGenerator::Run(std::string const& infoFile,
-                            std::string const& config)
-{
-  // Info settings
-  this->InfoFile = infoFile;
-  cmSystemTools::ConvertToUnixSlashes(this->InfoFile);
-  this->InfoDir = cmSystemTools::GetFilenamePath(infoFile);
-  this->InfoConfig = config;
-
-  cmake cm(cmake::RoleScript);
-  cm.SetHomeOutputDirectory(this->InfoDir);
-  cm.SetHomeDirectory(this->InfoDir);
-  cm.GetCurrentSnapshot().SetDefaultDefinitions();
-  cmGlobalGenerator gg(&cm);
-
-  cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
-  snapshot.GetDirectory().SetCurrentBinary(this->InfoDir);
-  snapshot.GetDirectory().SetCurrentSource(this->InfoDir);
-
-  auto makefile = cm::make_unique<cmMakefile>(&gg, snapshot);
-  // The OLD/WARN behavior for policy CMP0053 caused a speed regression.
-  // https://gitlab.kitware.com/cmake/cmake/issues/17570
-  makefile->SetPolicyVersion("3.9");
-  gg.SetCurrentMakefile(makefile.get());
-
-  return this->Process(makefile.get());
-}
-
-void cmQtAutoGenerator::LogBold(std::string const& message) const
-{
-  cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue |
-                                     cmsysTerminal_Color_ForegroundBold,
-                                   message.c_str(), true, this->ColorOutput);
-}
-
-void cmQtAutoGenerator::LogInfo(cmQtAutoGen::Generator genType,
-                                std::string const& message) const
-{
-  std::string msg = cmQtAutoGen::GeneratorName(genType);
+  std::string msg = GeneratorName(genType);
   msg += ": ";
   msg += message;
   if (msg.back() != '\n') {
     msg.push_back('\n');
   }
-  cmSystemTools::Stdout(msg.c_str(), msg.size());
-}
-
-void cmQtAutoGenerator::LogWarning(cmQtAutoGen::Generator genType,
-                                   std::string const& message) const
-{
-  std::string msg = cmQtAutoGen::GeneratorName(genType);
-  msg += " warning:";
-  if (message.find('\n') == std::string::npos) {
-    // Single line message
-    msg.push_back(' ');
-  } else {
-    // Multi line message
-    msg.push_back('\n');
+  {
+    std::lock_guard<std::mutex> lock(Mutex_);
+    cmSystemTools::Stdout(msg.c_str(), msg.size());
   }
-  // Message
-  msg += message;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
-  cmSystemTools::Stdout(msg.c_str(), msg.size());
 }
 
-void cmQtAutoGenerator::LogFileWarning(cmQtAutoGen::Generator genType,
-                                       std::string const& filename,
-                                       std::string const& message) const
-{
-  std::string msg = "  ";
-  msg += cmQtAutoGen::Quoted(filename);
-  msg.push_back('\n');
-  // Message
-  msg += message;
-  this->LogWarning(genType, msg);
-}
-
-void cmQtAutoGenerator::LogError(cmQtAutoGen::Generator genType,
-                                 std::string const& message) const
+void cmQtAutoGenerator::Logger::Warning(GeneratorT genType,
+                                        std::string const& message)
 {
   std::string msg;
-  msg.push_back('\n');
-  msg += HeadLine(cmQtAutoGen::GeneratorName(genType) + " error");
+  if (message.find('\n') == std::string::npos) {
+    // Single line message
+    msg += GeneratorName(genType);
+    msg += " warning: ";
+  } else {
+    // Multi line message
+    msg += HeadLine(GeneratorName(genType) + " warning");
+  }
   // Message
   msg += message;
   if (msg.back() != '\n') {
     msg.push_back('\n');
   }
   msg.push_back('\n');
-  cmSystemTools::Stderr(msg.c_str(), msg.size());
+  {
+    std::lock_guard<std::mutex> lock(Mutex_);
+    cmSystemTools::Stdout(msg.c_str(), msg.size());
+  }
 }
 
-void cmQtAutoGenerator::LogFileError(cmQtAutoGen::Generator genType,
-                                     std::string const& filename,
-                                     std::string const& message) const
+void cmQtAutoGenerator::Logger::WarningFile(GeneratorT genType,
+                                            std::string const& filename,
+                                            std::string const& message)
+{
+  std::string msg = "  ";
+  msg += Quoted(filename);
+  msg.push_back('\n');
+  // Message
+  msg += message;
+  Warning(genType, msg);
+}
+
+void cmQtAutoGenerator::Logger::Error(GeneratorT genType,
+                                      std::string const& message)
+{
+  std::string msg;
+  msg += HeadLine(GeneratorName(genType) + " error");
+  // Message
+  msg += message;
+  if (msg.back() != '\n') {
+    msg.push_back('\n');
+  }
+  msg.push_back('\n');
+  {
+    std::lock_guard<std::mutex> lock(Mutex_);
+    cmSystemTools::Stderr(msg.c_str(), msg.size());
+  }
+}
+
+void cmQtAutoGenerator::Logger::ErrorFile(GeneratorT genType,
+                                          std::string const& filename,
+                                          std::string const& message)
 {
   std::string emsg = "  ";
-  emsg += cmQtAutoGen::Quoted(filename);
+  emsg += Quoted(filename);
   emsg += '\n';
   // Message
   emsg += message;
-  this->LogError(genType, emsg);
+  Error(genType, emsg);
 }
 
-void cmQtAutoGenerator::LogCommandError(
-  cmQtAutoGen::Generator genType, std::string const& message,
-  std::vector<std::string> const& command, std::string const& output) const
+void cmQtAutoGenerator::Logger::ErrorCommand(
+  GeneratorT genType, std::string const& message,
+  std::vector<std::string> const& command, std::string const& output)
 {
   std::string msg;
   msg.push_back('\n');
-  msg += HeadLine(cmQtAutoGen::GeneratorName(genType) + " subprocess error");
+  msg += HeadLine(GeneratorName(genType) + " subprocess error");
   msg += message;
   if (msg.back() != '\n') {
     msg.push_back('\n');
@@ -189,135 +140,495 @@ void cmQtAutoGenerator::LogCommandError(
     msg.push_back('\n');
   }
   msg.push_back('\n');
-  cmSystemTools::Stderr(msg.c_str(), msg.size());
+  {
+    std::lock_guard<std::mutex> lock(Mutex_);
+    cmSystemTools::Stderr(msg.c_str(), msg.size());
+  }
 }
 
-/**
- * @brief Generates the parent directory of the given file on demand
- * @return True on success
- */
-bool cmQtAutoGenerator::MakeParentDirectory(cmQtAutoGen::Generator genType,
-                                            std::string const& filename) const
+std::string cmQtAutoGenerator::FileSystem::RealPath(
+  std::string const& filename)
 {
-  bool success = true;
-  std::string const dirName = cmSystemTools::GetFilenamePath(filename);
-  if (!dirName.empty()) {
-    if (!cmSystemTools::MakeDirectory(dirName)) {
-      this->LogFileError(genType, filename,
-                         "Could not create parent directory");
-      success = false;
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::GetRealPath(filename);
+}
+
+bool cmQtAutoGenerator::FileSystem::FileExists(std::string const& filename)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::FileExists(filename);
+}
+
+bool cmQtAutoGenerator::FileSystem::FileIsOlderThan(
+  std::string const& buildFile, std::string const& sourceFile,
+  std::string* error)
+{
+  bool res(false);
+  int result = 0;
+  {
+    std::lock_guard<std::mutex> lock(Mutex_);
+    res = cmSystemTools::FileTimeCompare(buildFile, sourceFile, &result);
+  }
+  if (res) {
+    res = (result < 0);
+  } else {
+    if (error != nullptr) {
+      error->append(
+        "File modification time comparison failed for the files\n  ");
+      error->append(Quoted(buildFile));
+      error->append("\nand\n  ");
+      error->append(Quoted(sourceFile));
     }
   }
-  return success;
+  return res;
 }
 
-/**
- * @brief Tests if buildFile is older than sourceFile
- * @return True if buildFile  is older than sourceFile.
- *         False may indicate an error.
- */
-bool cmQtAutoGenerator::FileIsOlderThan(std::string const& buildFile,
-                                        std::string const& sourceFile,
-                                        std::string* error)
-{
-  int result = 0;
-  if (cmSystemTools::FileTimeCompare(buildFile, sourceFile, &result)) {
-    return (result < 0);
-  }
-  if (error != nullptr) {
-    error->append(
-      "File modification time comparison failed for the files\n  ");
-    error->append(cmQtAutoGen::Quoted(buildFile));
-    error->append("\nand\n  ");
-    error->append(cmQtAutoGen::Quoted(sourceFile));
-  }
-  return false;
-}
-
-bool cmQtAutoGenerator::FileRead(std::string& content,
-                                 std::string const& filename,
-                                 std::string* error)
+bool cmQtAutoGenerator::FileSystem::FileRead(std::string& content,
+                                             std::string const& filename,
+                                             std::string* error)
 {
   bool success = false;
-  if (cmSystemTools::FileExists(filename)) {
-    std::size_t const length = cmSystemTools::FileLength(filename);
-    cmsys::ifstream ifs(filename.c_str(), (std::ios::in | std::ios::binary));
-    if (ifs) {
-      content.resize(length);
-      ifs.read(&content.front(), content.size());
+  {
+    std::lock_guard<std::mutex> lock(Mutex_);
+    if (cmSystemTools::FileExists(filename)) {
+      std::size_t const length = cmSystemTools::FileLength(filename);
+      cmsys::ifstream ifs(filename.c_str(), (std::ios::in | std::ios::binary));
       if (ifs) {
-        success = true;
-      } else {
-        content.clear();
-        if (error != nullptr) {
-          error->append("Reading from the file failed.");
+        content.resize(length);
+        ifs.read(&content.front(), content.size());
+        if (ifs) {
+          success = true;
+        } else {
+          content.clear();
+          if (error != nullptr) {
+            error->append("Reading from the file failed.");
+          }
         }
+      } else if (error != nullptr) {
+        error->append("Opening the file for reading failed.");
       }
     } else if (error != nullptr) {
-      error->append("Opening the file for reading failed.");
+      error->append("The file does not exist.");
     }
-  } else if (error != nullptr) {
-    error->append("The file does not exist.");
   }
   return success;
 }
 
-bool cmQtAutoGenerator::FileWrite(cmQtAutoGen::Generator genType,
-                                  std::string const& filename,
-                                  std::string const& content)
+bool cmQtAutoGenerator::FileSystem::FileRead(GeneratorT genType,
+                                             std::string& content,
+                                             std::string const& filename)
 {
   std::string error;
+  if (!FileRead(content, filename, &error)) {
+    Log()->ErrorFile(genType, filename, error);
+    return false;
+  }
+  return true;
+}
+
+bool cmQtAutoGenerator::FileSystem::FileWrite(std::string const& filename,
+                                              std::string const& content,
+                                              std::string* error)
+{
+  bool success = false;
   // Make sure the parent directory exists
-  if (this->MakeParentDirectory(genType, filename)) {
+  if (MakeParentDirectory(filename)) {
+    std::lock_guard<std::mutex> lock(Mutex_);
     cmsys::ofstream outfile;
     outfile.open(filename.c_str(),
                  (std::ios::out | std::ios::binary | std::ios::trunc));
     if (outfile) {
       outfile << content;
       // Check for write errors
-      if (!outfile.good()) {
-        error = "File writing failed";
+      if (outfile.good()) {
+        success = true;
+      } else {
+        if (error != nullptr) {
+          error->assign("File writing failed");
+        }
       }
     } else {
-      error = "Opening file for writing failed";
+      if (error != nullptr) {
+        error->assign("Opening file for writing failed");
+      }
+    }
+  } else {
+    if (error != nullptr) {
+      error->assign("Could not create parent directory");
     }
   }
-  if (!error.empty()) {
-    this->LogFileError(genType, filename, error);
+  return success;
+}
+
+bool cmQtAutoGenerator::FileSystem::FileWrite(GeneratorT genType,
+                                              std::string const& filename,
+                                              std::string const& content)
+{
+  std::string error;
+  if (!FileWrite(filename, content, &error)) {
+    Log()->ErrorFile(genType, filename, error);
     return false;
   }
   return true;
 }
 
-bool cmQtAutoGenerator::FileDiffers(std::string const& filename,
-                                    std::string const& content)
+bool cmQtAutoGenerator::FileSystem::FileDiffers(std::string const& filename,
+                                                std::string const& content)
 {
   bool differs = true;
   {
     std::string oldContents;
-    if (this->FileRead(oldContents, filename)) {
+    if (FileRead(oldContents, filename)) {
       differs = (oldContents != content);
     }
   }
   return differs;
 }
 
-/**
- * @brief Runs a command and returns true on success
- * @return True on success
- */
-bool cmQtAutoGenerator::RunCommand(std::vector<std::string> const& command,
-                                   std::string& output) const
+bool cmQtAutoGenerator::FileSystem::FileRemove(std::string const& filename)
 {
-  // Log command
-  if (this->Verbose) {
-    std::string qcmd = QuotedCommand(command);
-    qcmd.push_back('\n');
-    cmSystemTools::Stdout(qcmd.c_str(), qcmd.size());
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::RemoveFile(filename);
+}
+
+bool cmQtAutoGenerator::FileSystem::Touch(std::string const& filename)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::Touch(filename, false);
+}
+
+bool cmQtAutoGenerator::FileSystem::MakeDirectory(std::string const& dirname)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::MakeDirectory(dirname);
+}
+
+bool cmQtAutoGenerator::FileSystem::MakeDirectory(GeneratorT genType,
+                                                  std::string const& dirname)
+{
+  if (!MakeDirectory(dirname)) {
+    Log()->ErrorFile(genType, dirname, "Could not create directory");
+    return false;
   }
-  // Execute command
-  int retVal = 0;
-  bool res = cmSystemTools::RunSingleCommand(
-    command, &output, &output, &retVal, nullptr, cmSystemTools::OUTPUT_NONE);
-  return (res && (retVal == 0));
+  return true;
+}
+
+bool cmQtAutoGenerator::FileSystem::MakeParentDirectory(
+  std::string const& filename)
+{
+  bool success = true;
+  std::string const dirName = cmSystemTools::GetFilenamePath(filename);
+  if (!dirName.empty()) {
+    success = MakeDirectory(dirName);
+  }
+  return success;
+}
+
+bool cmQtAutoGenerator::FileSystem::MakeParentDirectory(
+  GeneratorT genType, std::string const& filename)
+{
+  if (!MakeParentDirectory(filename)) {
+    Log()->ErrorFile(genType, filename, "Could not create parent directory");
+    return false;
+  }
+  return true;
+}
+
+int cmQtAutoGenerator::ReadOnlyProcessT::PipeT::init(uv_loop_t* uv_loop,
+                                                     ReadOnlyProcessT* process)
+{
+  Process_ = process;
+  Target_ = nullptr;
+  return UVPipe_.init(*uv_loop, 0, this);
+}
+
+int cmQtAutoGenerator::ReadOnlyProcessT::PipeT::startRead(std::string* target)
+{
+  Target_ = target;
+  return uv_read_start(uv_stream(), &PipeT::UVAlloc, &PipeT::UVData);
+}
+
+void cmQtAutoGenerator::ReadOnlyProcessT::PipeT::reset()
+{
+  Process_ = nullptr;
+  Target_ = nullptr;
+  UVPipe_.reset();
+  Buffer_.clear();
+  Buffer_.shrink_to_fit();
+}
+
+void cmQtAutoGenerator::ReadOnlyProcessT::PipeT::UVAlloc(uv_handle_t* handle,
+                                                         size_t suggestedSize,
+                                                         uv_buf_t* buf)
+{
+  auto& pipe = *reinterpret_cast<PipeT*>(handle->data);
+  pipe.Buffer_.resize(suggestedSize);
+  buf->base = &pipe.Buffer_.front();
+  buf->len = pipe.Buffer_.size();
+}
+
+void cmQtAutoGenerator::ReadOnlyProcessT::PipeT::UVData(uv_stream_t* stream,
+                                                        ssize_t nread,
+                                                        const uv_buf_t* buf)
+{
+  auto& pipe = *reinterpret_cast<PipeT*>(stream->data);
+  if (nread > 0) {
+    // Append data to merged output
+    if ((buf->base != nullptr) && (pipe.Target_ != nullptr)) {
+      pipe.Target_->append(buf->base, nread);
+    }
+  } else if (nread < 0) {
+    // EOF or error
+    auto* proc = pipe.Process_;
+    // Check it this an unusual error
+    if (nread != UV_EOF) {
+      if (!proc->Result()->error()) {
+        proc->Result()->ErrorMessage =
+          "libuv reading from pipe failed with error code ";
+        proc->Result()->ErrorMessage += std::to_string(nread);
+      }
+    }
+    // Clear libuv pipe handle and try to finish
+    pipe.reset();
+    proc->UVTryFinish();
+  }
+}
+
+void cmQtAutoGenerator::ProcessResultT::reset()
+{
+  ExitStatus = 0;
+  TermSignal = 0;
+  if (!StdOut.empty()) {
+    StdOut.clear();
+    StdOut.shrink_to_fit();
+  }
+  if (!StdErr.empty()) {
+    StdErr.clear();
+    StdErr.shrink_to_fit();
+  }
+  if (!ErrorMessage.empty()) {
+    ErrorMessage.clear();
+    ErrorMessage.shrink_to_fit();
+  }
+}
+
+void cmQtAutoGenerator::ReadOnlyProcessT::setup(
+  ProcessResultT* result, bool mergedOutput,
+  std::vector<std::string> const& command, std::string const& workingDirectory)
+{
+  Setup_.WorkingDirectory = workingDirectory;
+  Setup_.Command = command;
+  Setup_.Result = result;
+  Setup_.MergedOutput = mergedOutput;
+}
+
+bool cmQtAutoGenerator::ReadOnlyProcessT::start(
+  uv_loop_t* uv_loop, std::function<void()>&& finishedCallback)
+{
+  if (IsStarted() || (Result() == nullptr)) {
+    return false;
+  }
+
+  // Reset result before the start
+  Result()->reset();
+
+  // Fill command string pointers
+  if (!Setup().Command.empty()) {
+    CommandPtr_.reserve(Setup().Command.size() + 1);
+    for (std::string const& arg : Setup().Command) {
+      CommandPtr_.push_back(arg.c_str());
+    }
+    CommandPtr_.push_back(nullptr);
+  } else {
+    Result()->ErrorMessage = "Empty command";
+  }
+
+  if (!Result()->error()) {
+    if (UVPipeOut_.init(uv_loop, this) != 0) {
+      Result()->ErrorMessage = "libuv stdout pipe initialization failed";
+    }
+  }
+  if (!Result()->error()) {
+    if (UVPipeErr_.init(uv_loop, this) != 0) {
+      Result()->ErrorMessage = "libuv stderr pipe initialization failed";
+    }
+  }
+  if (!Result()->error()) {
+    // -- Setup process stdio options
+    // stdin
+    UVOptionsStdIO_[0].flags = UV_IGNORE;
+    UVOptionsStdIO_[0].data.stream = nullptr;
+    // stdout
+    UVOptionsStdIO_[1].flags =
+      static_cast<uv_stdio_flags>(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
+    UVOptionsStdIO_[1].data.stream = UVPipeOut_.uv_stream();
+    // stderr
+    UVOptionsStdIO_[2].flags =
+      static_cast<uv_stdio_flags>(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
+    UVOptionsStdIO_[2].data.stream = UVPipeErr_.uv_stream();
+
+    // -- Setup process options
+    std::fill_n(reinterpret_cast<char*>(&UVOptions_), sizeof(UVOptions_), 0);
+    UVOptions_.exit_cb = &ReadOnlyProcessT::UVExit;
+    UVOptions_.file = CommandPtr_[0];
+    UVOptions_.args = const_cast<char**>(&CommandPtr_.front());
+    UVOptions_.cwd = Setup_.WorkingDirectory.c_str();
+    UVOptions_.flags = UV_PROCESS_WINDOWS_HIDE;
+    UVOptions_.stdio_count = static_cast<int>(UVOptionsStdIO_.size());
+    UVOptions_.stdio = &UVOptionsStdIO_.front();
+
+    // -- Spawn process
+    if (UVProcess_.spawn(*uv_loop, UVOptions_, this) != 0) {
+      Result()->ErrorMessage = "libuv process spawn failed";
+    }
+  }
+  // -- Start reading from stdio streams
+  if (!Result()->error()) {
+    if (UVPipeOut_.startRead(&Result()->StdOut) != 0) {
+      Result()->ErrorMessage = "libuv start reading from stdout pipe failed";
+    }
+  }
+  if (!Result()->error()) {
+    if (UVPipeErr_.startRead(Setup_.MergedOutput ? &Result()->StdOut
+                                                 : &Result()->StdErr) != 0) {
+      Result()->ErrorMessage = "libuv start reading from stderr pipe failed";
+    }
+  }
+
+  if (!Result()->error()) {
+    IsStarted_ = true;
+    FinishedCallback_ = std::move(finishedCallback);
+  } else {
+    // Clear libuv handles and finish
+    UVProcess_.reset();
+    UVPipeOut_.reset();
+    UVPipeErr_.reset();
+    CommandPtr_.clear();
+  }
+
+  return IsStarted();
+}
+
+void cmQtAutoGenerator::ReadOnlyProcessT::UVExit(uv_process_t* handle,
+                                                 int64_t exitStatus,
+                                                 int termSignal)
+{
+  auto& proc = *reinterpret_cast<ReadOnlyProcessT*>(handle->data);
+  if (proc.IsStarted() && !proc.IsFinished()) {
+    // Set error message on demand
+    proc.Result()->ExitStatus = exitStatus;
+    proc.Result()->TermSignal = termSignal;
+    if (!proc.Result()->error()) {
+      if (termSignal != 0) {
+        proc.Result()->ErrorMessage = "Process was terminated by signal ";
+        proc.Result()->ErrorMessage +=
+          std::to_string(proc.Result()->TermSignal);
+      } else if (exitStatus != 0) {
+        proc.Result()->ErrorMessage = "Process failed with return value ";
+        proc.Result()->ErrorMessage +=
+          std::to_string(proc.Result()->ExitStatus);
+      }
+    }
+
+    // Reset process handle and try to finish
+    proc.UVProcess_.reset();
+    proc.UVTryFinish();
+  }
+}
+
+void cmQtAutoGenerator::ReadOnlyProcessT::UVTryFinish()
+{
+  // There still might be data in the pipes after the process has finished.
+  // Therefore check if the process is finished AND all pipes are closed before
+  // signaling the worker thread to continue.
+  if (UVProcess_.get() == nullptr) {
+    if (UVPipeOut_.uv_pipe() == nullptr) {
+      if (UVPipeErr_.uv_pipe() == nullptr) {
+        IsFinished_ = true;
+        FinishedCallback_();
+      }
+    }
+  }
+}
+
+cmQtAutoGenerator::cmQtAutoGenerator()
+  : FileSys_(&Logger_)
+{
+  // Initialize logger
+  Logger_.SetVerbose(cmSystemTools::HasEnv("VERBOSE"));
+  {
+    std::string colorEnv;
+    cmSystemTools::GetEnv("COLOR", colorEnv);
+    if (!colorEnv.empty()) {
+      Logger_.SetColorOutput(cmSystemTools::IsOn(colorEnv.c_str()));
+    } else {
+      Logger_.SetColorOutput(true);
+    }
+  }
+
+  // Initialize libuv loop
+  uv_disable_stdio_inheritance();
+#ifdef CMAKE_UV_SIGNAL_HACK
+  UVHackRAII_ = cm::make_unique<cmUVSignalHackRAII>();
+#endif
+  UVLoop_ = cm::make_unique<uv_loop_t>();
+  uv_loop_init(UVLoop());
+}
+
+cmQtAutoGenerator::~cmQtAutoGenerator()
+{
+  // Close libuv loop
+  uv_loop_close(UVLoop());
+}
+
+bool cmQtAutoGenerator::Run(std::string const& infoFile,
+                            std::string const& config)
+{
+  // Info settings
+  InfoFile_ = infoFile;
+  cmSystemTools::ConvertToUnixSlashes(InfoFile_);
+  InfoDir_ = cmSystemTools::GetFilenamePath(infoFile);
+  InfoConfig_ = config;
+
+  bool success = false;
+  {
+    cmake cm(cmake::RoleScript);
+    cm.SetHomeOutputDirectory(InfoDir());
+    cm.SetHomeDirectory(InfoDir());
+    cm.GetCurrentSnapshot().SetDefaultDefinitions();
+    cmGlobalGenerator gg(&cm);
+
+    cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
+    snapshot.GetDirectory().SetCurrentBinary(InfoDir());
+    snapshot.GetDirectory().SetCurrentSource(InfoDir());
+
+    auto makefile = cm::make_unique<cmMakefile>(&gg, snapshot);
+    // The OLD/WARN behavior for policy CMP0053 caused a speed regression.
+    // https://gitlab.kitware.com/cmake/cmake/issues/17570
+    makefile->SetPolicyVersion("3.9");
+    gg.SetCurrentMakefile(makefile.get());
+    success = this->Init(makefile.get());
+  }
+  if (success) {
+    success = this->Process();
+  }
+  return success;
+}
+
+std::string cmQtAutoGenerator::SettingsFind(std::string const& content,
+                                            const char* key)
+{
+  std::string prefix(key);
+  prefix += ':';
+  std::string::size_type pos = content.find(prefix);
+  if (pos != std::string::npos) {
+    pos += prefix.size();
+    if (pos < content.size()) {
+      std::string::size_type posE = content.find('\n', pos);
+      if ((posE != std::string::npos) && (posE != pos)) {
+        return content.substr(pos, posE - pos);
+      }
+    }
+  }
+  return std::string();
 }

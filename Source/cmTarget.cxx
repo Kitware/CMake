@@ -247,6 +247,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("AUTOMOC", nullptr);
     this->SetPropertyDefault("AUTOUIC", nullptr);
     this->SetPropertyDefault("AUTORCC", nullptr);
+    this->SetPropertyDefault("AUTOGEN_PARALLEL", nullptr);
     this->SetPropertyDefault("AUTOMOC_COMPILER_PREDEFINES", nullptr);
     this->SetPropertyDefault("AUTOMOC_DEPEND_FILTERS", nullptr);
     this->SetPropertyDefault("AUTOMOC_MACRO_NAMES", nullptr);
