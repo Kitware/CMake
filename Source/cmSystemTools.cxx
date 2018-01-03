@@ -1308,6 +1308,9 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
   if (ext == "java" || ext == ".java") {
     return cmSystemTools::JAVA_FILE_FORMAT;
   }
+  if (ext == "cu" || ext == ".cu") {
+    return cmSystemTools::CUDA_FILE_FORMAT;
+  }
   if (ext == "H" || ext == ".H" || ext == "h" || ext == ".h" || ext == "h++" ||
       ext == ".h++" || ext == "hm" || ext == ".hm" || ext == "hpp" ||
       ext == ".hpp" || ext == "hxx" || ext == ".hxx" || ext == "in" ||

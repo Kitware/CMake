@@ -196,6 +196,7 @@ cmake::cmake(Role role)
   this->SourceFileExtensions.push_back("cc");
   this->SourceFileExtensions.push_back("cpp");
   this->SourceFileExtensions.push_back("cxx");
+  this->SourceFileExtensions.push_back("cu");
   this->SourceFileExtensions.push_back("m");
   this->SourceFileExtensions.push_back("M");
   this->SourceFileExtensions.push_back("mm");

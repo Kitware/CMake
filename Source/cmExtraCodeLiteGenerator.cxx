@@ -227,10 +227,10 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
       gt->GetSourceFiles(sources,
                          makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
       for (cmSourceFile* s : sources) {
-        // check whether it is a C/C++ implementation file
+        // check whether it is a C/C++/CUDA implementation file
         bool isCFile = false;
         std::string lang = s->GetLanguage();
-        if (lang == "C" || lang == "CXX") {
+        if (lang == "C" || lang == "CXX" || lang == "CUDA") {
           std::string const& srcext = s->GetExtension();
           isCFile = cm->IsSourceExtension(srcext);
         }

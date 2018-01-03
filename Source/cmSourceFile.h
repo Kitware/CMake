@@ -120,7 +120,8 @@ private:
 #define CM_HEADER_REGEX "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$"
 
 #define CM_SOURCE_REGEX                                                       \
-  "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp|ftn|m|mm|rc|def|r|odl|idl|hpj"  \
+  "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|cu|f|f90|for|fpp|ftn|m|mm|rc|def|r|odl|idl|"  \
+  "hpj"                                                                       \
   "|bat)$"
 
 #define CM_RESOURCE_REGEX "\\.(pdf|plist|png|jpeg|jpg|storyboard|xcassets)$"
