@@ -30,7 +30,7 @@ if(NOT CMAKE_Java_CREATE_STATIC_LIBRARY)
 
   set(CMAKE_Java_CREATE_STATIC_LIBRARY
       "<CMAKE_Java_ARCHIVE> -cf <TARGET> -C <OBJECT_DIR> ${class_files_mask}")
-    # "${class_files_mask}" should really be "<OBJECTS>" but compling a *.java
+    # "${class_files_mask}" should really be "<OBJECTS>" but compiling a *.java
     # file can create more than one *.class file...
 endif()
 

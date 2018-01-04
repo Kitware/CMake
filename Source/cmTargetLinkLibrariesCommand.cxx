@@ -242,7 +242,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
       // Lookup old-style cache entry if type is unspecified.  So if you
       // do a target_link_libraries(foo optimized bar) it will stay optimized
       // and not use the lookup.  As there may be the case where someone has
-      // specifed that a library is both debug and optimized.  (this check is
+      // specified that a library is both debug and optimized.  (this check is
       // only there for backwards compatibility when mixing projects built
       // with old versions of CMake and new)
       llt = GENERAL_LibraryType;

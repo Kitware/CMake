@@ -12,7 +12,7 @@ project (CudaComplex CXX CUDA)
 #lastly build a cpp executable that uses this last cuda dynamic library
 
 #this tests that we can properly handle linking cuda and cpp together
-#and also bulding cpp targets that need cuda implicit libraries
+#and also building cpp targets that need cuda implicit libraries
 
 #verify that we can pass explicit cuda arch flags
 string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=compute_30")

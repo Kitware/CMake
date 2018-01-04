@@ -2,7 +2,7 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 
-# This module is used by the Makefile generator to determin the following variables:
+# This module is used by the Makefile generator to determine the following variables:
 # CMAKE_SYSTEM_NAME - on unix this is uname -s, for windows it is Windows
 # CMAKE_SYSTEM_VERSION - on unix this is uname -r, for windows it is empty
 # CMAKE_SYSTEM - ${CMAKE_SYSTEM}-${CMAKE_SYSTEM_VERSION}, for windows: ${CMAKE_SYSTEM}

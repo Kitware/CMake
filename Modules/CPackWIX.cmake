@@ -263,7 +263,7 @@
 #     between the system on which the installer is created
 #     and the system on which the installer might be used into account.
 #
-#     It is therefor possible that the installer e.g. might try to install
+#     It is therefore possible that the installer e.g. might try to install
 #     onto a drive that is unavailable or unintended or a path that does not
 #     follow the localization or convention of the system on which the
 #     installation is performed.

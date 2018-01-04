@@ -3218,7 +3218,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
                        << this->ConvertToRelativeForMake(tfull.c_str())
                        << "\n";
         // if building for more than one architecture
-        // then remove those exectuables as well
+        // then remove those executables as well
         if (this->Architectures.size() > 1) {
           std::string universal = this->GetObjectsNormalDirectory(
             this->CurrentProject, configName, gt);

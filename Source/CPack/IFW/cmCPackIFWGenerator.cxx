@@ -61,7 +61,7 @@ int cmCPackIFWGenerator::PackageFiles()
         }
       } else {
         cmCPackIFWLogger(WARNING, "The \"CPACK_IFW_REPOSITORIES_DIRECTORIES\" "
-                           << "variable is set, but content will be skiped, "
+                           << "variable is set, but content will be skipped, "
                            << "because this feature available only since "
                            << "QtIFW 3.1. Please update your QtIFW instance."
                            << std::endl);

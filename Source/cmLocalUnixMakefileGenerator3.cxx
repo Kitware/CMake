@@ -1161,7 +1161,7 @@ void cmLocalUnixMakefileGenerator3::AppendEcho(
         commands.push_back(cmd);
       }
 
-      // Reset the line to emtpy.
+      // Reset the line to empty.
       line.clear();
 
       // Progress appears only on first line.

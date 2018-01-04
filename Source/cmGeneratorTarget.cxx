@@ -2166,7 +2166,7 @@ void cmTargetTraceDependencies::Trace()
     // Queue the source needed to generate this file, if any.
     this->FollowName(sf->GetFullPath());
 
-    // Queue dependencies added programatically by commands.
+    // Queue dependencies added programmatically by commands.
     this->FollowNames(sf->GetDepends());
 
     // Queue custom command dependencies.
@@ -5154,7 +5154,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLanguages(
   std::set<std::string> languages;
   // Get languages used in our source files.
   this->GetLanguages(languages, config);
-  // Copy the set of langauges to the link implementation.
+  // Copy the set of languages to the link implementation.
   impl.Languages.insert(impl.Languages.begin(), languages.begin(),
                         languages.end());
 }

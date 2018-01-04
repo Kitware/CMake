@@ -162,7 +162,7 @@ When the server is busy for a long time, it is polite to send back replies of
 type "progress" to the client. These will contain a "progressMessage" with a
 string describing the action currently taking place as well as
 "progressMinimum", "progressMaximum" and "progressCurrent" with integer values
-describing the range of progess.
+describing the range of progress.
 
 Messages of type "progress" will be followed by more "progress" messages or with
 a message of type "reply" or "error" that complete the request.

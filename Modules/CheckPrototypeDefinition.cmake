@@ -5,7 +5,7 @@
 # CheckPrototypeDefinition
 # ------------------------
 #
-# Check if the protoype we expect is correct.
+# Check if the prototype we expect is correct.
 #
 # check_prototype_definition(FUNCTION PROTOTYPE RETURN HEADER VARIABLE)
 #

@@ -40,7 +40,7 @@
 # verbose:BOOL=<>          OFF: Be as quiet as possible (default)
 #                          ON : Extra output
 #
-# input_file:FILEPATH=<>   Path to dependecy file in makefile format
+# input_file:FILEPATH=<>   Path to dependency file in makefile format
 #
 # output_file:FILEPATH=<>  Path to file with dependencies in CMake readable variable
 #

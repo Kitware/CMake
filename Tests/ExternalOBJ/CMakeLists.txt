@@ -55,7 +55,7 @@ message("${EXTERNAL_OBJECT}")
 # Build an executable using the external object file.
 add_executable(ExternalOBJ executable.cxx ${CUSTOM_OBJECT})
 # A bug showed up in VS2010 where an object file that was
-# part of a custom commad output worked, but ones that were
+# part of a custom command output worked, but ones that were
 # not didn't work.  So, repeat the executable using the object
 # directly and not from the output of the copy.
 add_executable(ExternalOBJ2 executable.cxx ${EXTERNAL_OBJECT})

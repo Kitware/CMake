@@ -191,7 +191,7 @@ public:
   };
 
   /**
-   * Add a utility to the build.  A utiltity target is a command that
+   * Add a utility to the build.  A utility target is a command that
    * is run every time the target is built.
    */
   cmTarget* AddUtilityCommand(const std::string& utilityName,

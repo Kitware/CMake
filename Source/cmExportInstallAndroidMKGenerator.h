@@ -22,7 +22,7 @@ class cmInstallExportGenerator;
  * cmExportInstallAndroidMKGenerator generates files exporting targets from
  * install an installation tree.  The files are placed in a temporary
  * location for installation by cmInstallExportGenerator.  The file format
- * is for the ndk build system and is a makefile fragment specifing prebuilt
+ * is for the ndk build system and is a makefile fragment specifying prebuilt
  * libraries to the ndk build system.
  *
  * This is used to implement the INSTALL(EXPORT_ANDROID_MK) command.

@@ -29,13 +29,13 @@ public:
   /// @brief Parent directories are empty
   cmFilePathChecksum();
 
-  /// @brief Initilizes the parent directories manually
+  /// @brief Initializes the parent directories manually
   cmFilePathChecksum(std::string const& currentSrcDir,
                      std::string const& currentBinDir,
                      std::string const& projectSrcDir,
                      std::string const& projectBinDir);
 
-  /// @brief Initilizes the parent directories from a makefile
+  /// @brief Initializes the parent directories from a makefile
   cmFilePathChecksum(cmMakefile* makefile);
 
   /// @brief Allows parent directories setup after construction

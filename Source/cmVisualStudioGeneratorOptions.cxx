@@ -317,7 +317,7 @@ void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
       continue;
     }
 
-    // unknwon sub option
+    // unknown sub option
   }
 
   AddFlag(ENABLE_UAC, "true");

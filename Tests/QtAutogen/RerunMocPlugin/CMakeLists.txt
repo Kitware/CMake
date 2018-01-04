@@ -13,7 +13,7 @@ set(timeformat "%Y%j%H%M%S")
 set(mocPlugSrcDir "${CMAKE_CURRENT_SOURCE_DIR}/MocPlugin")
 set(mocPlugBinDir "${CMAKE_CURRENT_BINARY_DIR}/MocPlugin")
 
-# Initial buid
+# Initial build
 try_compile(MOC_PLUGIN
   "${mocPlugBinDir}"
   "${mocPlugSrcDir}"
