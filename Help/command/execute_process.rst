@@ -90,8 +90,10 @@ Options:
    Use the ANSI codepage.
  ``OEM``
    Use the original equipment manufacturer (OEM) code page.
- ``UTF8``
-   Use the UTF-8 codepage.
+ ``UTF8`` or ``UTF-8``
+   Use the UTF-8 codepage. Prior to CMake 3.11.0, only ``UTF8`` was accepted
+   for this encoding. In CMake 3.11.0, ``UTF-8`` was added for consistency with
+   the `UTF-8 RFC <https://www.ietf.org/rfc/rfc3629>`_ naming convention.
 
 If more than one ``OUTPUT_*`` or ``ERROR_*`` option is given for the
 same pipe the precedence is not specified.
