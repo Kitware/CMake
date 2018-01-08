@@ -2244,25 +2244,38 @@ bool cmMakefile::PlatformIsx32() const
   return false;
 }
 
-bool cmMakefile::PlatformIsAppleIos() const
+cmMakefile::AppleSDK cmMakefile::GetAppleSDKType() const
 {
   std::string sdkRoot;
   sdkRoot = this->GetSafeDefinition("CMAKE_OSX_SYSROOT");
   sdkRoot = cmSystemTools::LowerCase(sdkRoot);
 
-  const std::string embedded[] = {
-    "appletvos",       "appletvsimulator", "iphoneos",
-    "iphonesimulator", "watchos",          "watchsimulator",
+  struct
+  {
+    std::string name;
+    AppleSDK sdk;
+  } const sdkDatabase[]{
+    { "appletvos", AppleSDK::AppleTVOS },
+    { "appletvsimulator", AppleSDK::AppleTVSimulator },
+    { "iphoneos", AppleSDK::IPhoneOS },
+    { "iphonesimulator", AppleSDK::IPhoneSimulator },
+    { "watchos", AppleSDK::WatchOS },
+    { "watchsimulator", AppleSDK::WatchSimulator },
   };
 
-  for (std::string const& i : embedded) {
-    if (sdkRoot.find(i) == 0 ||
-        sdkRoot.find(std::string("/") + i) != std::string::npos) {
-      return true;
+  for (auto entry : sdkDatabase) {
+    if (sdkRoot.find(entry.name) == 0 ||
+        sdkRoot.find(std::string("/") + entry.name) != std::string::npos) {
+      return entry.sdk;
     }
   }
 
-  return false;
+  return AppleSDK::MacOS;
+}
+
+bool cmMakefile::PlatformIsAppleEmbedded() const
+{
+  return GetAppleSDKType() != AppleSDK::MacOS;
 }
 
 const char* cmMakefile::GetSONameFlag(const std::string& language) const

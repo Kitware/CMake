@@ -439,8 +439,23 @@ public:
   /** Return whether the target platform is x32.  */
   bool PlatformIsx32() const;
 
+  /** Apple SDK Type */
+  enum class AppleSDK
+  {
+    MacOS,
+    IPhoneOS,
+    IPhoneSimulator,
+    AppleTVOS,
+    AppleTVSimulator,
+    WatchOS,
+    WatchSimulator,
+  };
+
+  /** What SDK type points CMAKE_OSX_SYSROOT to? */
+  AppleSDK GetAppleSDKType() const;
+
   /** Return whether the target platform is Apple iOS.  */
-  bool PlatformIsAppleIos() const;
+  bool PlatformIsAppleEmbedded() const;
 
   /** Retrieve soname flag for the specified language if supported */
   const char* GetSONameFlag(const std::string& language) const;

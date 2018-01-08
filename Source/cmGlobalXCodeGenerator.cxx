@@ -1172,7 +1172,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
           // dstPath in frameworks is relative to Versions/<version>
           ostr << keySources.first;
         } else if (keySources.first != "MacOS") {
-          if (gtgt->Target->GetMakefile()->PlatformIsAppleIos()) {
+          if (gtgt->Target->GetMakefile()->PlatformIsAppleEmbedded()) {
             ostr << keySources.first;
           } else {
             // dstPath in bundles is relative to Contents/MacOS
@@ -2992,7 +2992,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     buildSettings->AddAttribute("ARCHS", this->CreateString(archs));
   }
   if (deploymentTarget && *deploymentTarget) {
-    buildSettings->AddAttribute("MACOSX_DEPLOYMENT_TARGET",
+    buildSettings->AddAttribute(GetDeploymentPlatform(root->GetMakefile()),
                                 this->CreateString(deploymentTarget));
   }
   if (!this->GeneratorToolset.empty()) {
@@ -3605,7 +3605,7 @@ bool cmGlobalXCodeGenerator::UseEffectivePlatformName(cmMakefile* mf) const
       "XCODE_EMIT_EFFECTIVE_PLATFORM_NAME");
 
   if (!epnValue) {
-    return mf->PlatformIsAppleIos();
+    return mf->PlatformIsAppleEmbedded();
   }
 
   return cmSystemTools::IsOn(epnValue);
@@ -3626,4 +3626,25 @@ void cmGlobalXCodeGenerator::ComputeTargetObjectDirectory(
   dir += this->ObjectDirArch;
   dir += "/";
   gt->ObjectDirectory = dir;
+}
+
+std::string cmGlobalXCodeGenerator::GetDeploymentPlatform(const cmMakefile* mf)
+{
+  switch (mf->GetAppleSDKType()) {
+    case cmMakefile::AppleSDK::AppleTVOS:
+    case cmMakefile::AppleSDK::AppleTVSimulator:
+      return "TVOS_DEPLOYMENT_TARGET";
+
+    case cmMakefile::AppleSDK::IPhoneOS:
+    case cmMakefile::AppleSDK::IPhoneSimulator:
+      return "IPHONEOS_DEPLOYMENT_TARGET";
+
+    case cmMakefile::AppleSDK::WatchOS:
+    case cmMakefile::AppleSDK::WatchSimulator:
+      return "WATCHOS_DEPLOYMENT_TARGET";
+
+    case cmMakefile::AppleSDK::MacOS:
+    default:
+      return "MACOSX_DEPLOYMENT_TARGET";
+  }
 }

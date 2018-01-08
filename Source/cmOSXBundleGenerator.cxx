@@ -82,7 +82,7 @@ void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
 
   // Configure the Info.plist file
   std::string plist = newoutpath;
-  if (!this->Makefile->PlatformIsAppleIos()) {
+  if (!this->Makefile->PlatformIsAppleEmbedded()) {
     // Put the Info.plist file into the Resources directory.
     this->MacContentFolders->insert("Resources");
     plist += "/Resources";
@@ -93,7 +93,7 @@ void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
                                                    plist.c_str());
 
   // Generate Versions directory only for MacOSX frameworks
-  if (this->Makefile->PlatformIsAppleIos()) {
+  if (this->Makefile->PlatformIsAppleEmbedded()) {
     return;
   }
 

@@ -167,7 +167,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
         to1 += ".";
         to1 += ext;
         to1 += "/";
-        if (!mf->PlatformIsAppleIos()) {
+        if (!mf->PlatformIsAppleEmbedded()) {
           to1 += "Contents/MacOS/";
         }
         to1 += targetName;
@@ -796,7 +796,7 @@ void cmInstallTargetGenerator::AddUniversalInstallRule(
 {
   cmMakefile const* mf = this->Target->Target->GetMakefile();
 
-  if (!mf->PlatformIsAppleIos() || !mf->IsOn("XCODE")) {
+  if (!mf->PlatformIsAppleEmbedded() || !mf->IsOn("XCODE")) {
     return;
   }
 
