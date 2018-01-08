@@ -1,5 +1,8 @@
 # See adjacent README.rst for documentation of this test infrastructure.
 
+# Note that the _isMultiConfig variable is set in the parent directory's
+# CMakeLists.txt (slightly complex logic to support CMake versions before 3.9)
+
 macro(add_RunCMake_test test)
   set(TEST_ARGS ${ARGN})
   if ("${ARGV1}" STREQUAL "TEST_DIR")
@@ -14,6 +17,7 @@ macro(add_RunCMake_test test)
   endif()
   add_test(NAME RunCMake.${test} COMMAND ${CMAKE_CMAKE_COMMAND}
     -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
+    -DRunCMake_GENERATOR_IS_MULTI_CONFIG=${_isMultiConfig}
     -DRunCMake_GENERATOR=${CMAKE_GENERATOR}
     -DRunCMake_GENERATOR_INSTANCE=${CMAKE_GENERATOR_INSTANCE}
     -DRunCMake_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
@@ -47,6 +51,7 @@ function(add_RunCMake_test_group test types)
       add_test(NAME RunCMake.${test}_${type} COMMAND ${CMAKE_CMAKE_COMMAND}
         -DTEST_TYPE=${type}
         -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
+        -DRunCMake_GENERATOR_IS_MULTI_CONFIG=${_isMultiConfig}
         -DRunCMake_GENERATOR=${CMAKE_GENERATOR}
         -DRunCMake_GENERATOR_INSTANCE=${CMAKE_GENERATOR_INSTANCE}
         -DRunCMake_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}

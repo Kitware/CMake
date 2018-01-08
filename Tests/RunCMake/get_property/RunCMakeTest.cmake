@@ -23,6 +23,10 @@ run_cmake(NoSource)
 run_cmake(NoProperty)
 run_cmake(NoCache)
 
+# Since we are testing the GENERATOR_IS_MULTI_CONFIG property itself,
+# don't rely on RunCMake_GENERATOR_IS_MULTI_CONFIG being set correctly
+# and instead explicitly check for a match against those generators we
+# expect to be multi-config
 if(RunCMake_GENERATOR MATCHES "Visual Studio|Xcode")
   run_cmake(IsMultiConfig)
 else()

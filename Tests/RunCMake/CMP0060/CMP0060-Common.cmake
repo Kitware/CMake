@@ -1,6 +1,7 @@
 # Always build in a predictable configuration.  For multi-config
 # generators we depend on RunCMakeTest.cmake to do this for us.
-if(NOT CMAKE_CONFIGURATION_TYPES)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(NOT _isMultiConfig)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 

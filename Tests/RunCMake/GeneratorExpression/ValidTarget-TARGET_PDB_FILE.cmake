@@ -3,7 +3,8 @@ enable_language(C)
 
 add_library(empty SHARED empty.c)
 
-if(CMAKE_CONFIGURATION_TYPES)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_isMultiConfig)
   list(GET CMAKE_CONFIGURATION_TYPES 0 FIRST_CONFIG)
   set(GENERATE_CONDITION CONDITION $<CONFIG:${FIRST_CONFIG}>)
 endif()
