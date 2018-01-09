@@ -855,7 +855,7 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
     std::string outName = gg->GenerateRuleFile(outputs[0]);
 
     // Check if the rule file already exists.
-    file = this->GetSource(outName);
+    file = this->GetSource(outName, cmSourceFileLocationKind::Known);
     if (file && file->GetCustomCommand() && !replace) {
       // The rule file already exists.
       if (commandLines != file->GetCustomCommand()->GetCommandLines()) {
@@ -868,19 +868,22 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
 
     // Create a cmSourceFile for the rule file.
     if (!file) {
-      file = this->CreateSource(outName, true);
+      file =
+        this->CreateSource(outName, true, cmSourceFileLocationKind::Known);
     }
     file->SetProperty("__CMAKE_RULE", "1");
   }
 
   // Always create the output sources and mark them generated.
   for (std::string const& o : outputs) {
-    if (cmSourceFile* out = this->GetOrCreateSource(o, true)) {
+    if (cmSourceFile* out =
+          this->GetOrCreateSource(o, true, cmSourceFileLocationKind::Known)) {
       out->SetProperty("GENERATED", "1");
     }
   }
   for (std::string const& o : byproducts) {
-    if (cmSourceFile* out = this->GetOrCreateSource(o, true)) {
+    if (cmSourceFile* out =
+          this->GetOrCreateSource(o, true, cmSourceFileLocationKind::Known)) {
       out->SetProperty("GENERATED", "1");
     }
   }
@@ -1092,7 +1095,8 @@ cmTarget* cmMakefile::AddUtilityCommand(
 
     // Always create the byproduct sources and mark them generated.
     for (std::string const& byproduct : byproducts) {
-      if (cmSourceFile* out = this->GetOrCreateSource(byproduct, true)) {
+      if (cmSourceFile* out = this->GetOrCreateSource(
+            byproduct, true, cmSourceFileLocationKind::Known)) {
         out->SetProperty("GENERATED", "1");
       }
     }

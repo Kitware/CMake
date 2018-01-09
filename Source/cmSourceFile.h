@@ -7,6 +7,7 @@
 
 #include "cmPropertyMap.h"
 #include "cmSourceFileLocation.h"
+#include "cmSourceFileLocationKind.h"
 
 #include <string>
 #include <vector>
