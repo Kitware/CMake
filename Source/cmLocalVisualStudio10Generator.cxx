@@ -64,20 +64,18 @@ cmLocalVisualStudio10Generator::~cmLocalVisualStudio10Generator()
 
 void cmLocalVisualStudio10Generator::Generate()
 {
-
   const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
-  for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
-       l != tgts.end(); ++l) {
-    if ((*l)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  for (cmGeneratorTarget* l : tgts) {
+    if (l->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     if (static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
-          ->TargetIsFortranOnly(*l)) {
-      this->CreateSingleVCProj((*l)->GetName().c_str(), *l);
+          ->TargetIsFortranOnly(l)) {
+      this->CreateSingleVCProj(l->GetName(), l);
     } else {
       cmVisualStudio10TargetGenerator tg(
-        *l, static_cast<cmGlobalVisualStudio10Generator*>(
-              this->GetGlobalGenerator()));
+        l, static_cast<cmGlobalVisualStudio10Generator*>(
+             this->GetGlobalGenerator()));
       tg.Generate();
     }
   }

@@ -76,9 +76,8 @@ void cmGlobalVisualStudio71Generator::WriteSolutionConfigurations(
   std::ostream& fout, std::vector<std::string> const& configs)
 {
   fout << "\tGlobalSection(SolutionConfiguration) = preSolution\n";
-  for (std::vector<std::string>::const_iterator i = configs.begin();
-       i != configs.end(); ++i) {
-    fout << "\t\t" << *i << " = " << *i << "\n";
+  for (std::string const& i : configs) {
+    fout << "\t\t" << i << " = " << i << "\n";
   }
   fout << "\tEndGlobalSection\n";
 }
@@ -143,9 +142,7 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(
   cmGeneratorTarget const* target)
 {
   VSDependSet const& depends = this->VSTargetDepends[target];
-  for (VSDependSet::const_iterator di = depends.begin(); di != depends.end();
-       ++di) {
-    const char* name = di->c_str();
+  for (std::string const& name : depends) {
     std::string guid = this->GetGUID(name);
     if (guid.empty()) {
       std::string m = "Target: ";
@@ -174,11 +171,10 @@ void cmGlobalVisualStudio71Generator::WriteExternalProject(
   // project instead of in the global section
   if (!depends.empty()) {
     fout << "\tProjectSection(ProjectDependencies) = postProject\n";
-    std::set<std::string>::const_iterator it;
-    for (it = depends.begin(); it != depends.end(); ++it) {
-      if (!it->empty()) {
-        fout << "\t\t{" << this->GetGUID(it->c_str()) << "} = {"
-             << this->GetGUID(it->c_str()) << "}\n";
+    for (std::string const& it : depends) {
+      if (!it.empty()) {
+        fout << "\t\t{" << this->GetGUID(it) << "} = {" << this->GetGUID(it)
+             << "}\n";
       }
     }
     fout << "\tEndProjectSection\n";
@@ -198,26 +194,25 @@ void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
   const std::string& platformName =
     !platformMapping.empty() ? platformMapping : this->GetPlatformName();
   std::string guid = this->GetGUID(name);
-  for (std::vector<std::string>::const_iterator i = configs.begin();
-       i != configs.end(); ++i) {
+  for (std::string const& i : configs) {
     std::vector<std::string> mapConfig;
-    const char* dstConfig = i->c_str();
+    const char* dstConfig = i.c_str();
     if (target.GetProperty("EXTERNAL_MSPROJECT")) {
       if (const char* m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
-                                             cmSystemTools::UpperCase(*i))) {
+                                             cmSystemTools::UpperCase(i))) {
         cmSystemTools::ExpandListArgument(m, mapConfig);
         if (!mapConfig.empty()) {
           dstConfig = mapConfig[0].c_str();
         }
       }
     }
-    fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << dstConfig
-         << "|" << platformName << std::endl;
+    fout << "\t\t{" << guid << "}." << i << ".ActiveCfg = " << dstConfig << "|"
+         << platformName << std::endl;
     std::set<std::string>::const_iterator ci =
-      configsPartOfDefaultBuild.find(*i);
+      configsPartOfDefaultBuild.find(i);
     if (!(ci == configsPartOfDefaultBuild.end())) {
-      fout << "\t\t{" << guid << "}." << *i << ".Build.0 = " << dstConfig
-           << "|" << platformName << std::endl;
+      fout << "\t\t{" << guid << "}." << i << ".Build.0 = " << dstConfig << "|"
+           << platformName << std::endl;
     }
   }
 }
