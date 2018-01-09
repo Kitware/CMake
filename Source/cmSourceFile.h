@@ -27,7 +27,9 @@ public:
    * Construct with the makefile storing the source and the initial
    * name referencing it.
    */
-  cmSourceFile(cmMakefile* mf, const std::string& name);
+  cmSourceFile(
+    cmMakefile* mf, const std::string& name,
+    cmSourceFileLocationKind kind = cmSourceFileLocationKind::Ambiguous);
 
   ~cmSourceFile();
 

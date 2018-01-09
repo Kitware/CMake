@@ -12,8 +12,9 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name)
-  : Location(mf, name)
+cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name,
+                           cmSourceFileLocationKind kind)
+  : Location(mf, name, kind)
 {
   this->CustomCommand = nullptr;
   this->FindFullPathFailed = false;

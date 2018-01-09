@@ -27,7 +27,8 @@ cmSourceFileLocation::cmSourceFileLocation(const cmSourceFileLocation& loc)
 }
 
 cmSourceFileLocation::cmSourceFileLocation(cmMakefile const* mf,
-                                           const std::string& name)
+                                           const std::string& name,
+                                           cmSourceFileLocationKind kind)
   : Makefile(mf)
 {
   this->AmbiguousDirectory = !cmSystemTools::FileIsFullPath(name.c_str());
@@ -37,7 +38,12 @@ cmSourceFileLocation::cmSourceFileLocation(cmMakefile const* mf,
     this->Directory = cmSystemTools::CollapseFullPath(this->Directory);
   }
   this->Name = cmSystemTools::GetFilenameName(name);
-  this->UpdateExtension(name);
+  if (kind == cmSourceFileLocationKind::Known) {
+    this->DirectoryUseSource();
+    this->AmbiguousExtension = false;
+  } else {
+    this->UpdateExtension(name);
+  }
 }
 
 void cmSourceFileLocation::Update(cmSourceFileLocation const& loc)
