@@ -468,7 +468,7 @@ suppression macro KWIML_ABI_NO_VERIFY was defined.
 # define KWIML_ABI_ENDIAN_ID KWIML_ABI_ENDIAN_ID_LITTLE
 
 /* RISC-V */
-#elif defined(__riscv__)
+#elif defined(__riscv) || defined(__riscv__)
 # define KWIML_ABI_ENDIAN_ID KWIML_ABI_ENDIAN_ID_LITTLE
 
 /* Unknown CPU */
