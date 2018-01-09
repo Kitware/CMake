@@ -68,7 +68,7 @@
 #
 # .. variable:: CPACK_PACKAGE_VENDOR
 #
-#  The name of the package vendor. (e.g., "Kitware").
+#  The name of the package vendor. (e.g., "Kitware"). Default is "Humanity".
 #
 # .. variable:: CPACK_PACKAGE_DIRECTORY
 #
@@ -80,15 +80,15 @@
 #
 # .. variable:: CPACK_PACKAGE_VERSION_MAJOR
 #
-#  Package major Version
+#  Package major Version. Default value is 0.
 #
 # .. variable:: CPACK_PACKAGE_VERSION_MINOR
 #
-#  Package minor Version
+#  Package minor Version. Default value is 1.
 #
 # .. variable:: CPACK_PACKAGE_VERSION_PATCH
 #
-#  Package patch Version
+#  Package patch Version. Default value is 1.
 #
 # .. variable:: CPACK_PACKAGE_DESCRIPTION_FILE
 #
@@ -262,7 +262,8 @@
 #
 # .. variable:: CPACK_SYSTEM_NAME
 #
-#  System name, defaults to the value of ${CMAKE_SYSTEM_NAME}.
+#  System name, defaults to the value of ${CMAKE_SYSTEM_NAME}, except on
+#  Windows where it will be "win32" or "win64".
 #
 # .. variable:: CPACK_PACKAGE_VERSION
 #
