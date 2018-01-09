@@ -12,6 +12,8 @@ function(run_GEH)
   run_cmake(GEH)
   run_cmake_command(GEH-build ${CMAKE_COMMAND} --build . --config Debug)
   run_cmake_command(GEH-run ${RunCMake_TEST_BINARY_DIR}/GenerateExportHeader)
+  run_cmake_command(GEH-incguard-macro-run ${RunCMake_TEST_BINARY_DIR}/test_includeguard_macro)
+  run_cmake_command(GEH-incguard-custom-run ${RunCMake_TEST_BINARY_DIR}/test_includeguard_custom)
 
   file(STRINGS "${RunCMake_TEST_BINARY_DIR}/failure_test_targets"
     failure_test_targets)

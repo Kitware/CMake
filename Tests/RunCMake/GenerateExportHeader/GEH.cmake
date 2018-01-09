@@ -85,6 +85,7 @@ macro_add_test_library(libshared)
 macro_add_test_library(libstatic)
 
 add_subdirectory(nodeprecated)
+add_subdirectory(includeguard)
 if(NOT BORLAND)
   add_subdirectory(c_identifier)
 endif()

@@ -39,4 +39,4 @@
 #  endif
 #endif
 
-#endif
+#endif /* LIBSTATIC_EXPORT_H */
