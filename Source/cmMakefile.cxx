@@ -967,7 +967,7 @@ void cmMakefile::AddCustomCommandOldStyle(
   }
 
   // Each output must get its own copy of this rule.
-  cmsys::RegularExpression sourceFiles("\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|"
+  cmsys::RegularExpression sourceFiles("\\.(C|M|c|c\\+\\+|cc|cpp|cxx|cu|m|mm|"
                                        "rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|"
                                        "hm|hpp|hxx|in|txx|inl)$");
   for (std::string const& oi : outputs) {
