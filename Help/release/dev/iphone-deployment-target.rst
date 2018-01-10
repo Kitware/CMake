@@ -7,5 +7,5 @@ iphone-deployment-target
   set for the target platform selected by :variable:`CMAKE_OSX_SYSROOT`.
 
   If for example the sysroot variable specifies an iOS SDK then the
-  value in ``CMAKE_OSX_DEPLOYMENT_TARGET`` is interpreted as minium
+  value in ``CMAKE_OSX_DEPLOYMENT_TARGET`` is interpreted as minimum
   iOS version.
