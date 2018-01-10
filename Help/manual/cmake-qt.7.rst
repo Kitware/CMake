@@ -96,7 +96,8 @@ following targets by setting the :variable:`CMAKE_AUTOMOC` variable.  The
 options to pass to ``moc``. The :variable:`CMAKE_AUTOMOC_MOC_OPTIONS`
 variable may be populated to pre-set the options for all following targets.
 
-Additional macro names to search for can be added to :prop_tgt:`AUTOMOC_MACRO_NAMES`.
+Additional macro names to search for can be added to
+:prop_tgt:`AUTOMOC_MACRO_NAMES`.
 
 Additional ``moc`` dependency file names can be extracted from source code
 by using :prop_tgt:`AUTOMOC_DEPEND_FILTERS`.

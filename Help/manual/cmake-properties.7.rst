@@ -121,6 +121,7 @@ Properties on Targets
    /prop_tgt/ARCHIVE_OUTPUT_NAME_CONFIG
    /prop_tgt/ARCHIVE_OUTPUT_NAME
    /prop_tgt/AUTOGEN_BUILD_DIR
+   /prop_tgt/AUTOGEN_PARALLEL
    /prop_tgt/AUTOGEN_TARGET_DEPENDS
    /prop_tgt/AUTOMOC_COMPILER_PREDEFINES
    /prop_tgt/AUTOMOC_DEPEND_FILTERS

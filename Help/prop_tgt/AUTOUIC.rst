@@ -33,5 +33,8 @@ autouic targets together in an IDE, e.g. in MSVS.
 Source files can be excluded from :prop_tgt:`AUTOUIC` processing by
 enabling :prop_sf:`SKIP_AUTOUIC` or the broader :prop_sf:`SKIP_AUTOGEN`.
 
+The number of parallel ``uic`` processes to start can be modified by
+setting :prop_tgt:`AUTOGEN_PARALLEL`.
+
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
