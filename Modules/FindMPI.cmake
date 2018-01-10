@@ -744,13 +744,22 @@ function(_MPI_guess_settings LANG)
         endif()
         mark_as_advanced(MPI_${LANG}_LIB_NAMES)
         set(MPI_GUESS_FOUND TRUE)
+
+        if(_MPIEXEC_NOT_GIVEN)
+          unset(MPIEXEC_EXECUTABLE CACHE)
+        endif()
+
+        find_program(MPIEXEC_EXECUTABLE
+          NAMES mpiexec
+          HINTS $ENV{MSMPI_BIN} "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MPI;InstallRoot]/Bin"
+          DOC "Executable for running MPI programs.")
       endif()
     endif()
 
     # At this point there's not many MPIs that we could still consider.
     # OpenMPI 1.6.x and below supported Windows, but these ship compiler wrappers that still work.
     # The only other relevant MPI implementation without a wrapper is MPICH2, which had Windows support in 1.4.1p1 and older.
-    if(NOT MPI_GUESS_LIBRARY_NAME OR "${MPI_GUESS_LIBRARY_NAME}" STREQUAL "MPICH2")
+    if(NOT MPI_GUESS_FOUND AND (NOT MPI_GUESS_LIBRARY_NAME OR "${MPI_GUESS_LIBRARY_NAME}" STREQUAL "MPICH2"))
       set(MPI_MPICH_PREFIX_PATHS
         "$ENV{ProgramW6432}/MPICH2/lib"
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MPICH\\SMPD;binary]/../lib"
@@ -809,6 +818,17 @@ function(_MPI_guess_settings LANG)
           unset(MPI_MPICH_ROOT_DIR)
         endif()
         set(MPI_GUESS_FOUND TRUE)
+
+        if(_MPIEXEC_NOT_GIVEN)
+          unset(MPIEXEC_EXECUTABLE CACHE)
+        endif()
+
+        find_program(MPIEXEC_EXECUTABLE
+          NAMES ${_MPIEXEC_NAMES}
+          HINTS "$ENV{ProgramW6432}/MPICH2/bin"
+                "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MPICH\\SMPD;binary]"
+                "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MPICH2;Path]/bin"
+          DOC "Executable for running MPI programs.")
       endif()
       unset(MPI_MPICH_PREFIX_PATHS)
     endif()
@@ -1034,9 +1054,6 @@ if("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
   # SUSE Linux Enterprise Server stores its MPI implementations under /usr/lib64/mpi/gcc/<name>
   # We enumerate the subfolders and append each as a prefix
   MPI_search_mpi_prefix_folder("/usr/lib64/mpi/gcc")
-elseif("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
-  # MSMPI stores its runtime in a special folder, this adds the possible locations to the hints.
-  list(APPEND MPI_HINT_DIRS $ENV{MSMPI_BIN} "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MPI;InstallRoot]")
 elseif("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "FreeBSD")
   # FreeBSD ships mpich under the normal system paths - but available openmpi implementations
   # will be found in /usr/local/mpi/<name>
@@ -1046,6 +1063,15 @@ endif()
 # Most MPI distributions have some form of mpiexec or mpirun which gives us something we can look for.
 # The MPI standard does not mandate the existence of either, but instead only makes requirements if a distribution
 # ships an mpiexec program (mpirun executables are not regulated by the standard).
+
+# We defer searching for mpiexec binaries belonging to guesses until later. By doing so, mismatches between mpiexec
+# and the MPI we found should be reduced.
+if(NOT MPIEXEC_EXECUTABLE)
+  set(_MPIEXEC_NOT_GIVEN TRUE)
+else()
+  set(_MPIEXEC_NOT_GIVEN FALSE)
+endif()
+
 find_program(MPIEXEC_EXECUTABLE
   NAMES ${_MPIEXEC_NAMES}
   PATH_SUFFIXES bin sbin
@@ -1233,17 +1259,21 @@ foreach(LANG IN ITEMS C CXX Fortran)
           endif()
         endif()
 
-        if(NOT MPI_SKIP_GUESSING AND NOT MPI_${LANG}_WRAPPER_FOUND AND NOT MPI_PINNED_COMPILER)
-          # For C++, we may use the settings for C. Should a given compiler wrapper for C++ not exist, but one for C does, we copy over the
-          # settings for C. An MPI distribution that is in this situation would be IBM Platform MPI.
-          if("${LANG}" STREQUAL "CXX" AND MPI_C_WRAPPER_FOUND)
-            set(MPI_${LANG}_COMPILE_OPTIONS          ${MPI_C_COMPILE_OPTIONS}     CACHE STRING "MPI ${LANG} compilation options"           )
-            set(MPI_${LANG}_COMPILE_DEFINITIONS      ${MPI_C_COMPILE_DEFINITIONS} CACHE STRING "MPI ${LANG} compilation definitions"       )
-            set(MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS  ${MPI_C_INCLUDE_DIRS}        CACHE STRING "MPI ${LANG} additional include directories")
-            set(MPI_${LANG}_LINK_FLAGS               ${MPI_C_LINK_FLAGS}          CACHE STRING "MPI ${LANG} linker flags"                  )
-            set(MPI_${LANG}_LIB_NAMES                ${MPI_C_LIB_NAMES}           CACHE STRING "MPI ${LANG} libraries to link against"     )
-          else()
-            _MPI_guess_settings(${LANG})
+        if(NOT MPI_PINNED_COMPILER AND NOT MPI_${LANG}_WRAPPER_FOUND)
+          # If MPI_PINNED_COMPILER wasn't given, and the MPI compiler we potentially found didn't work, we withdraw it.
+          set(MPI_${LANG}_COMPILER "MPI_${LANG}_COMPILER-NOTFOUND" CACHE FILEPATH "MPI compiler for ${LANG}" FORCE)
+          if(NOT MPI_SKIP_GUESSING)
+            # For C++, we may use the settings for C. Should a given compiler wrapper for C++ not exist, but one for C does, we copy over the
+            # settings for C. An MPI distribution that is in this situation would be IBM Platform MPI.
+            if("${LANG}" STREQUAL "CXX" AND MPI_C_WRAPPER_FOUND)
+              set(MPI_${LANG}_COMPILE_OPTIONS          ${MPI_C_COMPILE_OPTIONS}     CACHE STRING "MPI ${LANG} compilation options"           )
+              set(MPI_${LANG}_COMPILE_DEFINITIONS      ${MPI_C_COMPILE_DEFINITIONS} CACHE STRING "MPI ${LANG} compilation definitions"       )
+              set(MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS  ${MPI_C_INCLUDE_DIRS}        CACHE STRING "MPI ${LANG} additional include directories")
+              set(MPI_${LANG}_LINK_FLAGS               ${MPI_C_LINK_FLAGS}          CACHE STRING "MPI ${LANG} linker flags"                  )
+              set(MPI_${LANG}_LIB_NAMES                ${MPI_C_LIB_NAMES}           CACHE STRING "MPI ${LANG} libraries to link against"     )
+            else()
+              _MPI_guess_settings(${LANG})
+            endif()
           endif()
         endif()
       endif()
