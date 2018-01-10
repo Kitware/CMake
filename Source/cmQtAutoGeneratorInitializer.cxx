@@ -475,10 +475,16 @@ void cmQtAutoGeneratorInitializer::InitCustomTargets()
   }
   // Read skip files from makefile sources
   if (this->MocEnabled || this->UicEnabled) {
-    const std::vector<cmSourceFile*>& allSources = makefile->GetSourceFiles();
-    for (cmSourceFile* sf : allSources) {
+    std::string pathError;
+    for (cmSourceFile* sf : makefile->GetSourceFiles()) {
       // sf->GetExtension() is only valid after sf->GetFullPath() ...
-      std::string const& fPath = sf->GetFullPath();
+      // Since we're iterating over source files that might be not in the
+      // target we need to check for path errors (not existing files).
+      std::string const& fPath = sf->GetFullPath(&pathError);
+      if (!pathError.empty()) {
+        pathError.clear();
+        continue;
+      }
       cmSystemTools::FileFormat const fileType =
         cmSystemTools::GetFileFormat(sf->GetExtension().c_str());
       if (!(fileType == cmSystemTools::CXX_FILE_FORMAT) &&
@@ -1188,9 +1194,16 @@ void cmQtAutoGeneratorInitializer::SetupCustomTargetsUic()
     std::vector<std::vector<std::string>> uiFileOptions;
     {
       std::string const uiExt = "ui";
+      std::string pathError;
       for (cmSourceFile* sf : makefile->GetSourceFiles()) {
         // sf->GetExtension() is only valid after sf->GetFullPath() ...
-        std::string const& fPath = sf->GetFullPath();
+        // Since we're iterating over source files that might be not in the
+        // target we need to check for path errors (not existing files).
+        std::string const& fPath = sf->GetFullPath(&pathError);
+        if (!pathError.empty()) {
+          pathError.clear();
+          continue;
+        }
         if (sf->GetExtension() == uiExt) {
           std::string const absFile = cmSystemTools::GetRealPath(fPath);
           // Check if the .ui file should be skipped
