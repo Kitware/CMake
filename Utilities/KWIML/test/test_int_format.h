@@ -8,6 +8,7 @@
 
 #if defined(_MSC_VER)
 # pragma warning (push)
+# pragma warning (disable:4309) /* static_cast trunction of constant value */
 # pragma warning (disable:4310) /* cast truncates constant value */
 #endif
 
@@ -17,7 +18,13 @@
 # define LANG "C "
 #endif
 
-#define VALUE(T, U) (T)((U)0xab << ((sizeof(T)-1)<<3))
+#if defined(__cplusplus) && !defined(__BORLANDC__)
+# define STATIC_CAST(t,v) static_cast<t>(v)
+#else
+# define STATIC_CAST(t,v) (t)(v)
+#endif
+
+#define VALUE(T, U) STATIC_CAST(T, STATIC_CAST(U, 0xab) << ((sizeof(T)-1)<<3))
 
 #define TEST_C_(C, V, PRI, T, U)                                        \
   {                                                                     \
