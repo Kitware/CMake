@@ -159,12 +159,7 @@ set(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will
 
 set(CMAKE_Fortran_FLAGS_INIT "$ENV{FFLAGS} ${CMAKE_Fortran_FLAGS_INIT}")
 
-foreach(c "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
-  string(STRIP "${CMAKE_Fortran_FLAGS${c}_INIT}" CMAKE_Fortran_FLAGS${c}_INIT)
-endforeach()
-
-set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS_INIT}" CACHE STRING
-     "Flags used by the compiler during all build types.")
+cmake_initialize_per_config_variable(CMAKE_Fortran_FLAGS "Flags used by the Fortran compiler")
 
 include(CMakeCommonLanguageInclude)
 
@@ -215,25 +210,6 @@ if(CMAKE_Fortran_STANDARD_LIBRARIES_INIT)
     CACHE STRING "Libraries linked by default with all Fortran applications.")
   mark_as_advanced(CMAKE_Fortran_STANDARD_LIBRARIES)
 endif()
-
-if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
-  set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG_INIT}" CACHE STRING
-     "Flags used by the compiler during debug builds.")
-  set (CMAKE_Fortran_FLAGS_MINSIZEREL "${CMAKE_Fortran_FLAGS_MINSIZEREL_INIT}" CACHE STRING
-     "Flags used by the compiler during release builds for minimum size.")
-  set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE_INIT}" CACHE STRING
-     "Flags used by the compiler during release builds.")
-  set (CMAKE_Fortran_FLAGS_RELWITHDEBINFO "${CMAKE_Fortran_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
-     "Flags used by the compiler during release builds with debug info.")
-
-endif()
-
-mark_as_advanced(
-CMAKE_Fortran_FLAGS
-CMAKE_Fortran_FLAGS_DEBUG
-CMAKE_Fortran_FLAGS_MINSIZEREL
-CMAKE_Fortran_FLAGS_RELEASE
-CMAKE_Fortran_FLAGS_RELWITHDEBINFO)
 
 # set this variable so we can avoid loading this more than once.
 set(CMAKE_Fortran_INFORMATION_LOADED 1)

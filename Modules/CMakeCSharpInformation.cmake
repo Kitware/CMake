@@ -44,23 +44,8 @@ endif()
 # use _INIT variables so that this only happens the first time
 # and you can set these flags in the cmake cache
 set(CMAKE_CSharp_FLAGS_INIT "$ENV{CSFLAGS} ${CMAKE_CSharp_FLAGS_INIT}")
-# avoid just having a space as the initial value for the cache
-if(CMAKE_CSharp_FLAGS_INIT STREQUAL " ")
-  set(CMAKE_CSharp_FLAGS_INIT)
-endif()
-set (CMAKE_CSharp_FLAGS "${CMAKE_CSharp_FLAGS_INIT}" CACHE STRING
-     "Flags used by the C# compiler during all build types.")
 
-if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
-  set (CMAKE_CSharp_FLAGS_DEBUG "${CMAKE_CSharp_FLAGS_DEBUG_INIT}" CACHE STRING
-     "Flags used by the C# compiler during debug builds.")
-  set (CMAKE_CSharp_FLAGS_MINSIZEREL "${CMAKE_CSharp_FLAGS_MINSIZEREL_INIT}" CACHE STRING
-     "Flags used by the C# compiler during release builds for minimum size.")
-  set (CMAKE_CSharp_FLAGS_RELEASE "${CMAKE_CSharp_FLAGS_RELEASE_INIT}" CACHE STRING
-     "Flags used by the C# compiler during release builds.")
-  set (CMAKE_CSharp_FLAGS_RELWITHDEBINFO "${CMAKE_CSharp_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
-     "Flags used by the C# compiler during release builds with debug info.")
-endif()
+cmake_initialize_per_config_variable(CMAKE_CSharp_FLAGS "Flags used by the C# compiler")
 
 if(CMAKE_CSharp_STANDARD_LIBRARIES_INIT)
   set(CMAKE_CSharp_STANDARD_LIBRARIES "${CMAKE_CSharp_STANDARD_LIBRARIES_INIT}"
@@ -71,49 +56,12 @@ endif()
 # set missing flags (if they are not defined). This is needed in the
 # unlikely case that you have only C# and no C/C++ targets in your
 # project.
-if(NOT DEFINED CMAKE_SHARED_LINKER_FLAGS)
-    set(CMAKE_SHARED_LINKER_FLAGS "" CACHE STRING "" FORCE)
-endif()
-if(NOT DEFINED CMAKE_SHARED_LINKER_FLAGS_DEBUG)
-    set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "" CACHE STRING "" FORCE)
-endif()
-if(NOT DEFINED CMAKE_SHARED_LINKER_FLAGS_RELEASE)
-    set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "" CACHE STRING "" FORCE)
-endif()
-if(NOT DEFINED CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL)
-    set(CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL "" CACHE STRING "" FORCE)
-endif()
-if(NOT DEFINED CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO)
-    set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO "" CACHE STRING "" FORCE)
-endif()
-
-if(NOT DEFINED CMAKE_EXE_LINKER_FLAGS)
-    set(CMAKE_EXE_LINKER_FLAGS "" CACHE STRING "" FORCE)
-endif()
-if(NOT DEFINED CMAKE_EXE_LINKER_FLAGS_DEBUG)
-    set(CMAKE_EXE_LINKER_FLAGS_DEBUG "" CACHE STRING "" FORCE)
-endif()
-if(NOT DEFINED CMAKE_EXE_LINKER_FLAGS_RELEASE)
-    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "" CACHE STRING "" FORCE)
-endif()
-if(NOT DEFINED CMAKE_EXE_LINKER_FLAGS_MINSIZEREL)
-    set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "" CACHE STRING "" FORCE)
-endif()
-if(NOT DEFINED CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO)
-    set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "" CACHE STRING "" FORCE)
-endif()
+cmake_initialize_per_config_variable(CMAKE_EXE_LINKER_FLAGS    "Flags used by the linker")
+cmake_initialize_per_config_variable(CMAKE_SHARED_LINKER_FLAGS "Flags used by the linker during the creation of shared libraries")
 
 set(CMAKE_CSharp_CREATE_SHARED_LIBRARY "CSharp_NO_CREATE_SHARED_LIBRARY")
 set(CMAKE_CSharp_CREATE_SHARED_MODULE "CSharp_NO_CREATE_SHARED_MODULE")
 set(CMAKE_CSharp_LINK_EXECUTABLE "CSharp_NO_LINK_EXECUTABLE")
-
-mark_as_advanced(
-    CMAKE_CSharp_FLAGS
-    CMAKE_CSharp_FLAGS_RELEASE
-    CMAKE_CSharp_FLAGS_RELWITHDEBINFO
-    CMAKE_CSharp_FLAGS_MINSIZEREL
-    CMAKE_CSharp_FLAGS_DEBUG
-    )
 
 set(CMAKE_CSharp_USE_RESPONSE_FILE_FOR_OBJECTS 1)
 set(CMAKE_CSharp_INFORMATION_LOADED 1)

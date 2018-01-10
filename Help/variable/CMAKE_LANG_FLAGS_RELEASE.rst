@@ -1,6 +1,5 @@
 CMAKE_<LANG>_FLAGS_RELEASE
 --------------------------
 
-Flags for ``Release`` build type or configuration.
-
-``<LANG>`` flags used when :variable:`CMAKE_BUILD_TYPE` is ``Release``.
+This variable is the ``Release`` variant of the
+:variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` variable.
