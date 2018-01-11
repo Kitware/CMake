@@ -637,7 +637,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     configType = projectType;
   }
   std::string flags;
-  if (strcmp(configType, "10") != 0) {
+  if (target->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
     const std::string& linkLanguage =
       (this->FortranProject ? std::string("Fortran")
                             : target->GetLinkerLanguage(configName));
