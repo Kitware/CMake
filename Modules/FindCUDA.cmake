@@ -104,7 +104,7 @@
 #      CUDA_NVCC_FLAGS_<CONFIG> variables.  For Visual Studio targets,
 #      the host compiler is constructed with one or more visual studio macros
 #      such as $(VCInstallDir), that expands out to the path when
-#      the command is run from withing VS.
+#      the command is run from within VS.
 #
 #   CUDA_NVCC_FLAGS
 #   CUDA_NVCC_FLAGS_<CONFIG>
