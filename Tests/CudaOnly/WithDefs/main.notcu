@@ -2,6 +2,11 @@
 #include <cuda_runtime.h>
 #include <iostream>
 
+#include <inc_cuda.h>
+#ifndef INC_CUDA
+#error "INC_CUDA not defined!"
+#endif
+
 #ifndef HOST_DEFINE
 #error "HOST_DEFINE not defined!"
 #endif

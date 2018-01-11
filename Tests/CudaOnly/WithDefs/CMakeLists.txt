@@ -45,6 +45,11 @@ target_compile_definitions(CudaOnlyWithDefs
     -DDEF_LANG_IS_CUDA=$<COMPILE_LANGUAGE:CUDA>
   )
 
+target_include_directories(CudaOnlyWithDefs
+  PRIVATE
+    $<$<COMPILE_LANGUAGE:CUDA>:${CMAKE_CURRENT_SOURCE_DIR}/inc_cuda>
+)
+
 if(APPLE)
   # Help the static cuda runtime find the driver (libcuda.dyllib) at runtime.
   set_property(TARGET CudaOnlyWithDefs PROPERTY BUILD_RPATH ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})

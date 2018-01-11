@@ -95,16 +95,13 @@ private:
 
   bool ComputeClOptions();
   bool ComputeClOptions(std::string const& configName);
-  void WriteClOptions(std::string const& config,
-                      std::vector<std::string> const& includes);
+  void WriteClOptions(std::string const& config);
   bool ComputeRcOptions();
   bool ComputeRcOptions(std::string const& config);
-  void WriteRCOptions(std::string const& config,
-                      std::vector<std::string> const& includes);
+  void WriteRCOptions(std::string const& config);
   bool ComputeCudaOptions();
   bool ComputeCudaOptions(std::string const& config);
-  void WriteCudaOptions(std::string const& config,
-                        std::vector<std::string> const& includes);
+  void WriteCudaOptions(std::string const& config);
 
   bool ComputeCudaLinkOptions();
   bool ComputeCudaLinkOptions(std::string const& config);
@@ -112,20 +109,17 @@ private:
 
   bool ComputeMasmOptions();
   bool ComputeMasmOptions(std::string const& config);
-  void WriteMasmOptions(std::string const& config,
-                        std::vector<std::string> const& includes);
+  void WriteMasmOptions(std::string const& config);
   bool ComputeNasmOptions();
   bool ComputeNasmOptions(std::string const& config);
-  void WriteNasmOptions(std::string const& config,
-                        std::vector<std::string> includes);
+  void WriteNasmOptions(std::string const& config);
 
   bool ComputeLinkOptions();
   bool ComputeLinkOptions(std::string const& config);
   bool ComputeLibOptions();
   bool ComputeLibOptions(std::string const& config);
   void WriteLinkOptions(std::string const& config);
-  void WriteMidlOptions(std::string const& config,
-                        std::vector<std::string> const& includes);
+  void WriteMidlOptions(std::string const& config);
   void WriteAntBuildOptions(std::string const& config);
   void OutputLinkIncremental(std::string const& configName);
   void WriteCustomRule(cmSourceFile const* source,

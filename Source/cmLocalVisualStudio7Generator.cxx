@@ -796,10 +796,13 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
          << "\\$(ConfigurationName)\"\n";
   }
   fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
-  std::vector<std::string> includes;
-  this->GetIncludeDirectories(includes, target, "C", configName);
-  std::vector<std::string>::iterator i = includes.begin();
-  for (; i != includes.end(); ++i) {
+  std::vector<std::string> includes_cl;
+  if (!langForClCompile.empty()) {
+    this->GetIncludeDirectories(includes_cl, target, langForClCompile,
+                                configName);
+  }
+  std::vector<std::string>::iterator i = includes_cl.begin();
+  for (; i != includes_cl.end(); ++i) {
     // output the include path
     std::string ipath = this->ConvertToXMLOutputPath(i->c_str());
     fout << ipath << ";";
@@ -834,9 +837,12 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
       "\t\t\t\tName=\"MASM\"\n"
       "\t\t\t\tIncludePaths=\""
       ;
+    std::vector<std::string> includes_masm;
+    this->GetIncludeDirectories(includes_masm, target, "ASM_MASM",
+                                configName);
     /* clang-format on */
     const char* sep = "";
-    for (i = includes.begin(); i != includes.end(); ++i) {
+    for (i = includes_masm.begin(); i != includes_masm.end(); ++i) {
       std::string inc = *i;
       cmConvertToWindowsSlash(inc);
       fout << sep << this->EscapeForXML(inc);
@@ -864,7 +870,9 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   }
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"\n"
        << "\t\t\t\tAdditionalIncludeDirectories=\"";
-  for (i = includes.begin(); i != includes.end(); ++i) {
+  std::vector<std::string> includes_rc;
+  this->GetIncludeDirectories(includes_rc, target, "RC", configName);
+  for (i = includes_rc.begin(); i != includes_rc.end(); ++i) {
     std::string ipath = this->ConvertToXMLOutputPath(i->c_str());
     fout << ipath << ";";
   }
@@ -878,7 +886,9 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   }
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"\n";
   fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
-  for (i = includes.begin(); i != includes.end(); ++i) {
+  std::vector<std::string> includes_midl;
+  this->GetIncludeDirectories(includes_midl, target, "MIDL", configName);
+  for (i = includes_midl.begin(); i != includes_midl.end(); ++i) {
     std::string ipath = this->ConvertToXMLOutputPath(i->c_str());
     fout << ipath << ";";
   }

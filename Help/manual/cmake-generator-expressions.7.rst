@@ -97,27 +97,32 @@ Available logical expressions are:
   compile features and a list of supported compilers.
 ``$<COMPILE_LANGUAGE:lang>``
   ``1`` when the language used for compilation unit matches ``lang``,
-  otherwise ``0``.  This expression may be used to specify compile options
-  and compile definitions for source files of a
+  otherwise ``0``.  This expression may be used to specify compile options,
+  compile definitions, and include directories for source files of a
   particular language in a target. For example:
 
   .. code-block:: cmake
 
-    add_executable(myapp main.cpp foo.c bar.cpp)
+    add_executable(myapp main.cpp foo.c bar.cpp zot.cu)
     target_compile_options(myapp
       PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
     )
     target_compile_definitions(myapp
       PRIVATE $<$<COMPILE_LANGUAGE:CXX>:COMPILING_CXX>
+              $<$<COMPILE_LANGUAGE:CUDA>:COMPILING_CUDA>
+    )
+    target_include_directories(myapp
+      PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/opt/foo/cxx_headers>
     )
 
-  This specifies the use of the ``-fno-exceptions`` compile option
-  and ``COMPILING_CXX`` compile definition for C++ only
-  (compiler id checks elided).
+  This specifies the use of the ``-fno-exceptions`` compile option,
+  ``COMPILING_CXX`` compile definition, and ``cxx_headers`` include
+  directory for C++ only (compiler id checks elided).  It also specifies
+  a ``COMPILING_CUDA`` compile definition for CUDA.
 
   Note that with :ref:`Visual Studio Generators` and :generator:`Xcode` there
-  is no way to represent target-wide compile definitions separately for
-  ``C`` and ``CXX`` languages.
+  is no way to represent target-wide compile definitions or include directories
+  separately for ``C`` and ``CXX`` languages.
   Also, with :ref:`Visual Studio Generators` there is no way to represent
   target-wide flags separately for ``C`` and ``CXX`` languages.  Under these
   generators, expressions for both C and C++ sources will be evaluated
@@ -132,16 +137,6 @@ Available logical expressions are:
     target_compile_options(myapp_cxx PUBLIC -fno-exceptions)
     add_executable(myapp main.cpp)
     target_link_libraries(myapp myapp_c myapp_cxx)
-
-  The ``Makefile`` and ``Ninja`` based generators can also use this
-  expression to specify compile-language specific include directories:
-
-  .. code-block:: cmake
-
-    add_executable(myapp main.cpp foo.c bar.cpp)
-    target_include_directories(myapp
-      PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/opt/foo/cxx_headers>
-    )
 
 Informational Expressions
 =========================
