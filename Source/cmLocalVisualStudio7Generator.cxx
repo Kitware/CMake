@@ -637,6 +637,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     configType = projectType;
   }
   std::string flags;
+  std::string langForClCompile;
   if (target->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
     const std::string& linkLanguage =
       (this->FortranProject ? std::string("Fortran")
@@ -647,10 +648,11 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
         target->GetName().c_str());
       return;
     }
-    if (linkLanguage == "C" || linkLanguage == "CXX" ||
-        linkLanguage == "Fortran") {
+    langForClCompile = linkLanguage;
+    if (langForClCompile == "C" || langForClCompile == "CXX" ||
+        langForClCompile == "Fortran") {
       std::string baseFlagVar = "CMAKE_";
-      baseFlagVar += linkLanguage;
+      baseFlagVar += langForClCompile;
       baseFlagVar += "_FLAGS";
       flags = this->Makefile->GetRequiredDefinition(baseFlagVar.c_str());
       std::string flagVar =
@@ -667,7 +669,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     }
 
     // Add the target-specific flags.
-    this->AddCompileOptions(flags, target, linkLanguage, configName);
+    this->AddCompileOptions(flags, target, langForClCompile, configName);
 
     // Check IPO related warning/error.
     target->IsIPOEnabled(linkLanguage, configName);
