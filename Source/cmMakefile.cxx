@@ -1961,7 +1961,7 @@ cmSourceGroup* cmMakefile::GetSourceGroup(
   if (sg != nullptr) {
     // iterate through its children to find match source group
     for (unsigned int i = 1; i < name.size(); ++i) {
-      sg = sg->LookupChild(name[i].c_str());
+      sg = sg->LookupChild(name[i]);
       if (sg == nullptr) {
         break;
       }
@@ -2005,7 +2005,7 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   if (i == -1) {
     // group does not exist nor belong to any existing group
     // add its first component
-    this->SourceGroups.push_back(cmSourceGroup(name[0].c_str(), regex));
+    this->SourceGroups.push_back(cmSourceGroup(name[0], regex));
     sg = this->GetSourceGroup(currentName);
     i = 0; // last component found
   }
@@ -2015,9 +2015,8 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   }
   // build the whole source group path
   for (++i; i <= lastElement; ++i) {
-    sg->AddChild(
-      cmSourceGroup(name[i].c_str(), nullptr, sg->GetFullName().c_str()));
-    sg = sg->LookupChild(name[i].c_str());
+    sg->AddChild(cmSourceGroup(name[i], nullptr, sg->GetFullName().c_str()));
+    sg = sg->LookupChild(name[i]);
   }
 
   sg->SetGroupRegex(regex);
