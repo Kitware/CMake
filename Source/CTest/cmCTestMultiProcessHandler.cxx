@@ -9,10 +9,14 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
+#include "cm_uv.h"
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/String.hxx"
 #include "cmsys/SystemInformation.hxx"
+
 #include <algorithm>
+#include <chrono>
 #include <iomanip>
 #include <list>
 #include <math.h>
@@ -20,6 +24,43 @@
 #include <stack>
 #include <stdlib.h>
 #include <utility>
+
+#if defined(CMAKE_USE_SYSTEM_LIBUV) && !defined(_WIN32) &&                    \
+  UV_VERSION_MAJOR == 1 && UV_VERSION_MINOR < 19
+#define CMAKE_UV_SIGNAL_HACK
+/*
+   libuv does not use SA_RESTART on its signal handler, but C++ streams
+   depend on it for reliable i/o operations.  This RAII helper convinces
+   libuv to install its handler, and then revises the handler to add the
+   SA_RESTART flag.  We use a distinct uv loop that never runs to avoid
+   ever really getting a callback.  libuv may fill the hack loop's signal
+   pipe and then stop writing, but that won't break any real loops.
+ */
+class cmUVSignalHackRAII
+{
+  uv_loop_t HackLoop;
+  cm::uv_signal_ptr HackSignal;
+  static void HackCB(uv_signal_t*, int) {}
+public:
+  cmUVSignalHackRAII()
+  {
+    uv_loop_init(&this->HackLoop);
+    this->HackSignal.init(this->HackLoop);
+    this->HackSignal.start(HackCB, SIGCHLD);
+    struct sigaction hack_sa;
+    sigaction(SIGCHLD, NULL, &hack_sa);
+    if (!(hack_sa.sa_flags & SA_RESTART)) {
+      hack_sa.sa_flags |= SA_RESTART;
+      sigaction(SIGCHLD, &hack_sa, NULL);
+    }
+  }
+  ~cmUVSignalHackRAII()
+  {
+    this->HackSignal.stop();
+    uv_loop_close(&this->HackLoop);
+  }
+};
+#endif
 
 class TestComparator
 {
@@ -95,24 +136,32 @@ void cmCTestMultiProcessHandler::RunTests()
   if (this->HasCycles) {
     return;
   }
+#ifdef CMAKE_UV_SIGNAL_HACK
+  cmUVSignalHackRAII hackRAII;
+#endif
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
+
+  uv_loop_init(&this->Loop);
   this->StartNextTests();
-  while (!this->Tests.empty()) {
-    if (this->StopTimePassed) {
-      return;
-    }
-    this->CheckOutput();
-    this->StartNextTests();
-  }
-  // let all running tests finish
-  while (this->CheckOutput()) {
-  }
+  uv_run(&this->Loop, UV_RUN_DEFAULT);
+  uv_loop_close(&this->Loop);
+
   this->MarkFinished();
   this->UpdateCostData();
 }
 
-void cmCTestMultiProcessHandler::StartTestProcess(int test)
+bool cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
+  std::chrono::system_clock::time_point stop_time = this->CTest->GetStopTime();
+  if (stop_time != std::chrono::system_clock::time_point() &&
+      stop_time <= std::chrono::system_clock::now()) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "The stop time has been passed. "
+                                           "Stopping all tests."
+                 << std::endl);
+    this->StopTimePassed = true;
+    return false;
+  }
+
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "test " << test << "\n", this->Quiet);
   this->TestRunningMap[test] = true; // mark the test as running
@@ -120,7 +169,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   this->EraseTest(test);
   this->RunningCount += GetProcessorsUsed(test);
 
-  cmCTestRunTest* testRun = new cmCTestRunTest(this->TestHandler);
+  cmCTestRunTest* testRun = new cmCTestRunTest(*this);
   if (this->CTest->GetRepeatUntilFail()) {
     testRun->SetRunUntilFailOn();
     testRun->SetNumberOfRuns(this->CTest->GetTestRepeat());
@@ -143,28 +192,11 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   this->LockResources(test);
 
   if (testRun->StartTest(this->Total)) {
-    this->RunningTests.insert(testRun);
-  } else if (testRun->IsStopTimePassed()) {
-    this->StopTimePassed = true;
-    delete testRun;
-    return;
-  } else {
-
-    for (auto& j : this->Tests) {
-      j.second.erase(test);
-    }
-
-    this->UnlockResources(test);
-    this->Completed++;
-    this->TestFinishMap[test] = true;
-    this->TestRunningMap[test] = false;
-    this->RunningCount -= GetProcessorsUsed(test);
-    testRun->EndTest(this->Completed, this->Total, false);
-    if (!this->Properties[test]->Disabled) {
-      this->Failed->push_back(this->Properties[test]->Name);
-    }
-    delete testRun;
+    return true;
   }
+
+  this->FinishTestProcess(testRun, false);
+  return false;
 }
 
 void cmCTestMultiProcessHandler::LockResources(int index)
@@ -222,8 +254,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
 
   // if there are no depends left then run this test
   if (this->Tests[test].empty()) {
-    this->StartTestProcess(test);
-    return true;
+    return this->StartTestProcess(test);
   }
   // This test was not able to start because it is waiting
   // on depends to run
@@ -233,6 +264,11 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
 void cmCTestMultiProcessHandler::StartNextTests()
 {
   size_t numToStart = 0;
+
+  if (this->Tests.empty()) {
+    return;
+  }
+
   if (this->RunningCount < this->ParallelLevel) {
     numToStart = this->ParallelLevel - this->RunningCount;
   }
@@ -365,45 +401,42 @@ void cmCTestMultiProcessHandler::StartNextTests()
   }
 }
 
-bool cmCTestMultiProcessHandler::CheckOutput()
+void cmCTestMultiProcessHandler::FinishTestProcess(cmCTestRunTest* runner,
+                                                   bool started)
 {
-  // no more output we are done
-  if (this->RunningTests.empty()) {
-    return false;
-  }
-  std::vector<cmCTestRunTest*> finished;
-  std::string out, err;
-  for (cmCTestRunTest* p : this->RunningTests) {
-    if (!p->CheckOutput()) {
-      finished.push_back(p);
-    }
-  }
-  for (cmCTestRunTest* p : finished) {
-    this->Completed++;
-    int test = p->GetIndex();
+  this->Completed++;
 
-    bool testResult = p->EndTest(this->Completed, this->Total, true);
-    if (p->StartAgain()) {
+  int test = runner->GetIndex();
+  auto properties = runner->GetTestProperties();
+
+  bool testResult = runner->EndTest(this->Completed, this->Total, started);
+  if (started) {
+    if (runner->StartAgain()) {
       this->Completed--; // remove the completed test because run again
-      continue;
+      return;
     }
-    if (testResult) {
-      this->Passed->push_back(p->GetTestProperties()->Name);
-    } else {
-      this->Failed->push_back(p->GetTestProperties()->Name);
-    }
-    for (auto& t : this->Tests) {
-      t.second.erase(test);
-    }
-    this->TestFinishMap[test] = true;
-    this->TestRunningMap[test] = false;
-    this->RunningTests.erase(p);
-    this->WriteCheckpoint(test);
-    this->UnlockResources(test);
-    this->RunningCount -= GetProcessorsUsed(test);
-    delete p;
   }
-  return true;
+
+  if (testResult) {
+    this->Passed->push_back(properties->Name);
+  } else if (!properties->Disabled) {
+    this->Failed->push_back(properties->Name);
+  }
+
+  for (auto& t : this->Tests) {
+    t.second.erase(test);
+  }
+
+  this->TestFinishMap[test] = true;
+  this->TestRunningMap[test] = false;
+  this->WriteCheckpoint(test);
+  this->UnlockResources(test);
+  this->RunningCount -= GetProcessorsUsed(test);
+
+  delete runner;
+  if (started) {
+    this->StartNextTests();
+  }
 }
 
 void cmCTestMultiProcessHandler::UpdateCostData()
@@ -670,7 +703,7 @@ void cmCTestMultiProcessHandler::PrintTestList()
 
     cmWorkingDirectory workdir(p.Directory);
 
-    cmCTestRunTest testRun(this->TestHandler);
+    cmCTestRunTest testRun(*this);
     testRun.SetIndex(p.Index);
     testRun.SetTestProperties(&p);
     testRun.ComputeArguments(); // logs the command in verbose mode

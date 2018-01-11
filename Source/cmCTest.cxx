@@ -279,11 +279,8 @@ cmCTest::cmCTest()
   this->InteractiveDebugMode = true;
   this->TimeOut = std::chrono::duration<double>::zero();
   this->GlobalTimeout = std::chrono::duration<double>::zero();
-  this->LastStopTimeout = std::chrono::hours(24);
   this->CompressXMLFiles = false;
   this->ScheduleType.clear();
-  this->StopTime.clear();
-  this->NextDayStopTime = false;
   this->OutputLogFile = nullptr;
   this->OutputLogFileLastTag = -1;
   this->SuppressUpdatingCTestConfiguration = false;
@@ -2269,10 +2266,41 @@ void cmCTest::SetNotesFiles(const char* notes)
   this->NotesFiles = notes;
 }
 
-void cmCTest::SetStopTime(std::string const& time)
+void cmCTest::SetStopTime(std::string const& time_str)
 {
-  this->StopTime = time;
-  this->DetermineNextDayStop();
+
+  struct tm* lctime;
+  time_t current_time = time(nullptr);
+  lctime = gmtime(&current_time);
+  int gm_hour = lctime->tm_hour;
+  time_t gm_time = mktime(lctime);
+  lctime = localtime(&current_time);
+  int local_hour = lctime->tm_hour;
+
+  int tzone_offset = local_hour - gm_hour;
+  if (gm_time > current_time && gm_hour < local_hour) {
+    // this means gm_time is on the next day
+    tzone_offset -= 24;
+  } else if (gm_time < current_time && gm_hour > local_hour) {
+    // this means gm_time is on the previous day
+    tzone_offset += 24;
+  }
+
+  tzone_offset *= 100;
+  char buf[1024];
+  sprintf(buf, "%d%02d%02d %s %+05i", lctime->tm_year + 1900,
+          lctime->tm_mon + 1, lctime->tm_mday, time_str.c_str(), tzone_offset);
+
+  time_t stop_time = curl_getdate(buf, &current_time);
+  if (stop_time == -1) {
+    this->StopTime = std::chrono::system_clock::time_point();
+    return;
+  }
+  this->StopTime = std::chrono::system_clock::from_time_t(stop_time);
+
+  if (stop_time < current_time) {
+    this->StopTime += std::chrono::hours(24);
+  }
 }
 
 int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
@@ -2428,38 +2456,6 @@ std::string cmCTest::GetCTestConfiguration(const std::string& name)
 void cmCTest::EmptyCTestConfiguration()
 {
   this->CTestConfiguration.clear();
-}
-
-void cmCTest::DetermineNextDayStop()
-{
-  struct tm* lctime;
-  time_t current_time = time(nullptr);
-  lctime = gmtime(&current_time);
-  int gm_hour = lctime->tm_hour;
-  time_t gm_time = mktime(lctime);
-  lctime = localtime(&current_time);
-  int local_hour = lctime->tm_hour;
-
-  int tzone_offset = local_hour - gm_hour;
-  if (gm_time > current_time && gm_hour < local_hour) {
-    // this means gm_time is on the next day
-    tzone_offset -= 24;
-  } else if (gm_time < current_time && gm_hour > local_hour) {
-    // this means gm_time is on the previous day
-    tzone_offset += 24;
-  }
-
-  tzone_offset *= 100;
-  char buf[1024];
-  sprintf(buf, "%d%02d%02d %s %+05i", lctime->tm_year + 1900,
-          lctime->tm_mon + 1, lctime->tm_mday, this->StopTime.c_str(),
-          tzone_offset);
-
-  time_t stop_time = curl_getdate(buf, &current_time);
-
-  if (stop_time < current_time) {
-    this->NextDayStopTime = true;
-  }
 }
 
 void cmCTest::SetCTestConfiguration(const char* name, const char* value,
