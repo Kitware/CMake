@@ -32,8 +32,8 @@ add_executable(CudaOnlyWithDefs ${main})
 
 target_compile_options(CudaOnlyWithDefs
   PRIVATE
-    -DCOMPILE_LANG_$<COMPILE_LANGUAGE>
-    -DLANG_IS_CUDA=$<COMPILE_LANGUAGE:CUDA>
+    -DFLAG_COMPILE_LANG_$<COMPILE_LANGUAGE>
+    -DFLAG_LANG_IS_CUDA=$<COMPILE_LANGUAGE:CUDA>
     -Xcompiler=-DHOST_DEFINE
     $<$<CONFIG:DEBUG>:$<BUILD_INTERFACE:${debug_compile_flags}>>
   )
@@ -41,6 +41,8 @@ target_compile_options(CudaOnlyWithDefs
 target_compile_definitions(CudaOnlyWithDefs
   PRIVATE
     $<$<CONFIG:RELEASE>:$<BUILD_INTERFACE:${release_compile_defs}>>
+    -DDEF_COMPILE_LANG_$<COMPILE_LANGUAGE>
+    -DDEF_LANG_IS_CUDA=$<COMPILE_LANGUAGE:CUDA>
   )
 
 if(APPLE)

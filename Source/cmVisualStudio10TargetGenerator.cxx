@@ -2391,6 +2391,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       }
     }
   }
+  this->LangForClCompile = langForClCompile;
   if (!langForClCompile.empty()) {
     std::string baseFlagVar = "CMAKE_";
     baseFlagVar += langForClCompile;
@@ -2434,8 +2435,10 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   std::vector<std::string> targetDefines;
   switch (this->ProjectType) {
     case vcxproj:
-      this->GeneratorTarget->GetCompileDefinitions(targetDefines, configName,
-                                                   "CXX");
+      if (!langForClCompile.empty()) {
+        this->GeneratorTarget->GetCompileDefinitions(targetDefines, configName,
+                                                     langForClCompile);
+      }
       break;
     case csproj:
       this->GeneratorTarget->GetCompileDefinitions(targetDefines, configName,
@@ -2512,7 +2515,7 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
                        "%(AdditionalIncludeDirectories)");
   clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                          "\n", "CXX");
+                                          "\n", this->LangForClCompile);
 
   if (this->NsightTegra) {
     if (const char* processMax =

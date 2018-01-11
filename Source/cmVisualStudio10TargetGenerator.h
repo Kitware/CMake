@@ -183,6 +183,7 @@ private:
   OptionsMap MasmOptions;
   OptionsMap NasmOptions;
   OptionsMap LinkOptions;
+  std::string LangForClCompile;
   std::string PathToProjectFile;
   std::string ProjectFileExtension;
   enum VsProjectType

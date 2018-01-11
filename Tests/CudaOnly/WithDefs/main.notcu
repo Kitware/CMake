@@ -10,16 +10,28 @@
 #error "PACKED_DEFINE not defined!"
 #endif
 
-#ifndef COMPILE_LANG_CUDA
-#error "COMPILE_LANG_CUDA not defined!"
+#ifndef FLAG_COMPILE_LANG_CUDA
+#error "FLAG_COMPILE_LANG_CUDA not defined!"
 #endif
 
-#ifndef LANG_IS_CUDA
-#error "LANG_IS_CUDA not defined!"
+#ifndef FLAG_LANG_IS_CUDA
+#error "FLAG_LANG_IS_CUDA not defined!"
 #endif
 
-#if !LANG_IS_CUDA
-#error "Expected LANG_IS_CUDA"
+#if !FLAG_LANG_IS_CUDA
+#error "Expected FLAG_LANG_IS_CUDA"
+#endif
+
+#ifndef DEF_COMPILE_LANG_CUDA
+#error "DEF_COMPILE_LANG_CUDA not defined!"
+#endif
+
+#ifndef DEF_LANG_IS_CUDA
+#error "DEF_LANG_IS_CUDA not defined!"
+#endif
+
+#if !DEF_LANG_IS_CUDA
+#error "Expected DEF_LANG_IS_CUDA"
 #endif
 
 static __global__ void DetermineIfValidCudaDevice()

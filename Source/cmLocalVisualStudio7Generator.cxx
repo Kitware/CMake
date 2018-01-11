@@ -705,7 +705,9 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   targetOptions.Parse(defineFlags.c_str());
   targetOptions.ParseFinish();
   std::vector<std::string> targetDefines;
-  target->GetCompileDefinitions(targetDefines, configName, "CXX");
+  if (!langForClCompile.empty()) {
+    target->GetCompileDefinitions(targetDefines, configName, langForClCompile);
+  }
   targetOptions.AddDefines(targetDefines);
   targetOptions.SetVerboseMakefile(
     this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
@@ -812,7 +814,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   }
   fout << "\"\n";
   targetOptions.OutputFlagMap(fout, "\t\t\t\t");
-  targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n", "CXX");
+  targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n",
+                                              langForClCompile);
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
   if (target->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
     // Specify the compiler program database file if configured.

@@ -26,18 +26,18 @@ target_compile_definitions(consumer
   PRIVATE
 )
 
-if (CMAKE_GENERATOR MATCHES "Makefiles" OR CMAKE_GENERATOR MATCHES "Ninja")
-  target_sources(consumer PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/consumer.c"
-  )
+target_sources(consumer PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/consumer.c"
+)
+target_compile_definitions(consumer
+  PRIVATE
+    CONSUMER_LANG_$<COMPILE_LANGUAGE>
+    LANG_IS_CXX=$<COMPILE_LANGUAGE:CXX>
+    LANG_IS_C=$<COMPILE_LANGUAGE:C>
+)
+if(CMAKE_GENERATOR MATCHES "Visual Studio|Xcode")
   target_compile_definitions(consumer
-    PRIVATE
-      CONSUMER_LANG_$<COMPILE_LANGUAGE>
-      LANG_IS_CXX=$<COMPILE_LANGUAGE:CXX>
-      LANG_IS_C=$<COMPILE_LANGUAGE:C>
-  )
-  target_compile_definitions(consumer
-    PRIVATE -DTEST_LANG_DEFINES
+    PRIVATE TEST_LANG_DEFINES_FOR_VISUAL_STUDIO_OR_XCODE
   )
 endif()
 
