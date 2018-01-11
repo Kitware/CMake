@@ -2319,6 +2319,18 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
   }
 }
 
+std::vector<std::string> cmVisualStudio10TargetGenerator::GetIncludes(
+  std::string const& config, std::string const& lang) const
+{
+  std::vector<std::string> includes;
+  this->LocalGenerator->GetIncludeDirectories(includes, this->GeneratorTarget,
+                                              lang, config);
+  for (std::string& i : includes) {
+    this->ConvertToWindowsSlash(i);
+  }
+  return includes;
+}
+
 bool cmVisualStudio10TargetGenerator::ComputeClOptions()
 {
   for (std::string const& i : this->Configurations) {
@@ -3478,12 +3490,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     return;
   }
   for (std::string const& i : this->Configurations) {
-    std::vector<std::string> includes;
-    this->LocalGenerator->GetIncludeDirectories(includes,
-                                                this->GeneratorTarget, "C", i);
-    for (std::string& ii : includes) {
-      this->ConvertToWindowsSlash(ii);
-    }
+    std::vector<std::string> const includes = this->GetIncludes(i, "C");
     this->WritePlatformConfigTag("ItemDefinitionGroup", i, 1);
     *this->BuildFileStream << "\n";
     //    output cl compile flags <ClCompile></ClCompile>

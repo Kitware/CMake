@@ -90,6 +90,9 @@ private:
   void WriteTargetSpecificReferences();
   void WriteTargetsFileReferences();
 
+  std::vector<std::string> GetIncludes(std::string const& config,
+                                       std::string const& lang) const;
+
   bool ComputeClOptions();
   bool ComputeClOptions(std::string const& configName);
   void WriteClOptions(std::string const& config,
