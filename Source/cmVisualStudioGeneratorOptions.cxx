@@ -239,20 +239,32 @@ void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
       // It translates to -arch=<virtual> -code=<real>.
       cmSystemTools::ReplaceString(arch_name, "sm_", "compute_");
     }
-    for (std::vector<std::string>::iterator ci = codes.begin();
-         ci != codes.end(); ++ci) {
-      std::string entry = arch_name + "," + *ci;
+    for (auto const& c : codes) {
+      std::string entry = arch_name + "," + c;
       result.push_back(entry);
     }
   }
 
-  // Now add entries for the -gencode=<arch>,<code> pairs.
-  for (std::vector<std::string>::iterator ei = gencode.begin();
-       ei != gencode.end(); ++ei) {
-    std::string entry = *ei;
+  // Now add entries for the following signatures:
+  // -gencode=<arch>,<code>
+  // -gencode=<arch>,[<code1>,<code2>]
+  // -gencode=<arch>,"<code1>,<code2>"
+  for (auto const& e : gencode) {
+    std::string entry = e;
     cmSystemTools::ReplaceString(entry, "arch=", "");
     cmSystemTools::ReplaceString(entry, "code=", "");
-    result.push_back(entry);
+    cmSystemTools::ReplaceString(entry, "[", "");
+    cmSystemTools::ReplaceString(entry, "]", "");
+    cmSystemTools::ReplaceString(entry, "\"", "");
+
+    std::vector<std::string> codes = cmSystemTools::tokenize(entry, ",");
+    if (codes.size() >= 2) {
+      auto gencode_arch = cm::cbegin(codes);
+      for (auto ci = gencode_arch + 1; ci != cm::cend(codes); ++ci) {
+        std::string code_entry = *gencode_arch + "," + *ci;
+        result.push_back(code_entry);
+      }
+    }
   }
 }
 
