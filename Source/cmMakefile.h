@@ -20,6 +20,7 @@
 #include "cmListFileCache.h"
 #include "cmNewLineStyle.h"
 #include "cmPolicies.h"
+#include "cmSourceFileLocationKind.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmTarget.h"
@@ -387,22 +388,26 @@ public:
   /** Get a cmSourceFile pointer for a given source name, if the name is
    *  not found, then a null pointer is returned.
    */
-  cmSourceFile* GetSource(const std::string& sourceName) const;
+  cmSourceFile* GetSource(
+    const std::string& sourceName,
+    cmSourceFileLocationKind kind = cmSourceFileLocationKind::Ambiguous) const;
 
   /** Create the source file and return it. generated
    * indicates if it is a generated file, this is used in determining
    * how to create the source file instance e.g. name
    */
-  cmSourceFile* CreateSource(const std::string& sourceName,
-                             bool generated = false);
+  cmSourceFile* CreateSource(
+    const std::string& sourceName, bool generated = false,
+    cmSourceFileLocationKind kind = cmSourceFileLocationKind::Ambiguous);
 
   /** Get a cmSourceFile pointer for a given source name, if the name is
    *  not found, then create the source file and return it. generated
    * indicates if it is a generated file, this is used in determining
    * how to create the source file instance e.g. name
    */
-  cmSourceFile* GetOrCreateSource(const std::string& sourceName,
-                                  bool generated = false);
+  cmSourceFile* GetOrCreateSource(
+    const std::string& sourceName, bool generated = false,
+    cmSourceFileLocationKind kind = cmSourceFileLocationKind::Ambiguous);
 
   void AddTargetObject(std::string const& tgtName, std::string const& objFile);
 

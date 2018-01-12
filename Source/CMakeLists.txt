@@ -327,6 +327,7 @@ set(SRCS
   cmSourceFile.h
   cmSourceFileLocation.cxx
   cmSourceFileLocation.h
+  cmSourceFileLocationKind.h
   cmSourceGroup.cxx
   cmSourceGroup.h
   cmState.cxx

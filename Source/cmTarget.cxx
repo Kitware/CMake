@@ -23,6 +23,7 @@
 #include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
+#include "cmSourceFileLocationKind.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
@@ -606,7 +607,8 @@ public:
 
 cmSourceFile* cmTarget::AddSource(const std::string& src)
 {
-  cmSourceFileLocation sfl(this->Makefile, src);
+  cmSourceFileLocation sfl(this->Makefile, src,
+                           cmSourceFileLocationKind::Known);
   if (std::find_if(this->Internal->SourceEntries.begin(),
                    this->Internal->SourceEntries.end(),
                    TargetPropertyEntryFinder(sfl)) ==
@@ -618,7 +620,8 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
   if (cmGeneratorExpression::Find(src) != std::string::npos) {
     return nullptr;
   }
-  return this->Makefile->GetOrCreateSource(src);
+  return this->Makefile->GetOrCreateSource(src, false,
+                                           cmSourceFileLocationKind::Known);
 }
 
 void cmTarget::AddLinkDirectory(const std::string& d)

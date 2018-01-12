@@ -855,7 +855,7 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
     std::string outName = gg->GenerateRuleFile(outputs[0]);
 
     // Check if the rule file already exists.
-    file = this->GetSource(outName);
+    file = this->GetSource(outName, cmSourceFileLocationKind::Known);
     if (file && file->GetCustomCommand() && !replace) {
       // The rule file already exists.
       if (commandLines != file->GetCustomCommand()->GetCommandLines()) {
@@ -868,19 +868,22 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
 
     // Create a cmSourceFile for the rule file.
     if (!file) {
-      file = this->CreateSource(outName, true);
+      file =
+        this->CreateSource(outName, true, cmSourceFileLocationKind::Known);
     }
     file->SetProperty("__CMAKE_RULE", "1");
   }
 
   // Always create the output sources and mark them generated.
   for (std::string const& o : outputs) {
-    if (cmSourceFile* out = this->GetOrCreateSource(o, true)) {
+    if (cmSourceFile* out =
+          this->GetOrCreateSource(o, true, cmSourceFileLocationKind::Known)) {
       out->SetProperty("GENERATED", "1");
     }
   }
   for (std::string const& o : byproducts) {
-    if (cmSourceFile* out = this->GetOrCreateSource(o, true)) {
+    if (cmSourceFile* out =
+          this->GetOrCreateSource(o, true, cmSourceFileLocationKind::Known)) {
       out->SetProperty("GENERATED", "1");
     }
   }
@@ -1092,7 +1095,8 @@ cmTarget* cmMakefile::AddUtilityCommand(
 
     // Always create the byproduct sources and mark them generated.
     for (std::string const& byproduct : byproducts) {
-      if (cmSourceFile* out = this->GetOrCreateSource(byproduct, true)) {
+      if (cmSourceFile* out = this->GetOrCreateSource(
+            byproduct, true, cmSourceFileLocationKind::Known)) {
         out->SetProperty("GENERATED", "1");
       }
     }
@@ -3132,9 +3136,10 @@ void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
   }
 }
 
-cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
+cmSourceFile* cmMakefile::GetSource(const std::string& sourceName,
+                                    cmSourceFileLocationKind kind) const
 {
-  cmSourceFileLocation sfl(this, sourceName);
+  cmSourceFileLocation sfl(this, sourceName, kind);
   auto name = this->GetCMakeInstance()->StripExtension(sfl.GetName());
 #if defined(_WIN32) || defined(__APPLE__)
   name = cmSystemTools::LowerCase(name);
@@ -3151,9 +3156,10 @@ cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
 }
 
 cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
-                                       bool generated)
+                                       bool generated,
+                                       cmSourceFileLocationKind kind)
 {
-  cmSourceFile* sf = new cmSourceFile(this, sourceName);
+  cmSourceFile* sf = new cmSourceFile(this, sourceName, kind);
   if (generated) {
     sf->SetProperty("GENERATED", "1");
   }
@@ -3170,12 +3176,13 @@ cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
 }
 
 cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
-                                            bool generated)
+                                            bool generated,
+                                            cmSourceFileLocationKind kind)
 {
-  if (cmSourceFile* esf = this->GetSource(sourceName)) {
+  if (cmSourceFile* esf = this->GetSource(sourceName, kind)) {
     return esf;
   }
-  return this->CreateSource(sourceName, generated);
+  return this->CreateSource(sourceName, generated, kind);
 }
 
 void cmMakefile::AddTargetObject(std::string const& tgtName,
