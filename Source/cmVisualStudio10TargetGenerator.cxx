@@ -2640,6 +2640,12 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   cudaOptions.Parse(defineFlags.c_str());
   cudaOptions.ParseFinish();
 
+  // If we haven't explicitly enabled GPU debug information
+  // explicitly disable it
+  if (!cudaOptions.HasFlag("GPUDebugInfo")) {
+    cudaOptions.AddFlag("GPUDebugInfo", "false");
+  }
+
   if (this->GeneratorTarget->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION")) {
     cudaOptions.AddFlag("GenerateRelocatableDeviceCode", "true");
   } else if (this->GeneratorTarget->GetPropertyAsBool(
