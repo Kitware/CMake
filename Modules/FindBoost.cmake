@@ -13,6 +13,9 @@
 #     [version] [EXACT]      # Minimum or EXACT version e.g. 1.36.0
 #     [REQUIRED]             # Fail with error if Boost is not found
 #     [COMPONENTS <libs>...] # Boost libraries by their canonical name
+#                            # e.g. "date_time" for "libboost_date_time"
+#     [OPTIONAL_COMPONENTS <libs>...]
+#                            # Optional Boost libraries by their canonical name)
 #     )                      # e.g. "date_time" for "libboost_date_time"
 #
 # This module finds headers and requested component libraries OR a CMake
@@ -1777,10 +1780,9 @@ if(Boost_FOUND)
   set(_boost_CHECKED_COMPONENT FALSE)
   set(_Boost_MISSING_COMPONENTS "")
   foreach(COMPONENT ${Boost_FIND_COMPONENTS})
-    string(TOUPPER ${COMPONENT} COMPONENT)
+    string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
     set(_boost_CHECKED_COMPONENT TRUE)
-    if(NOT Boost_${COMPONENT}_FOUND)
-      string(TOLOWER ${COMPONENT} COMPONENT)
+    if(NOT Boost_${UPPERCOMPONENT}_FOUND AND Boost_FIND_REQUIRED_${COMPONENT})
       list(APPEND _Boost_MISSING_COMPONENTS ${COMPONENT})
     endif()
   endforeach()
