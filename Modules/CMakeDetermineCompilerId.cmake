@@ -352,6 +352,8 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       if(CMAKE_OSX_SYSROOT MATCHES "(^|/)[Ii][Pp][Hh][Oo][Nn][Ee]" OR
         CMAKE_OSX_SYSROOT MATCHES "(^|/)[Aa][Pp][Pp][Ll][Ee][Tt][Vv]")
         set(id_product_type "com.apple.product-type.bundle.unit-test")
+      elseif(CMAKE_OSX_SYSROOT MATCHES "(^|/)[Ww][Aa][Tt][Cc][Hh]")
+        set(id_product_type "com.apple.product-type.framework")
       endif()
     else()
       set(id_sdkroot "")
@@ -366,7 +368,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       set(id_code_sign_identity
         "CODE_SIGN_IDENTITY = \"${CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY}\";")
     else()
-      set(id_code_sign_identity "")
+      set(id_code_sign_identity "CODE_SIGN_IDENTITY = \"\";")
     endif()
     configure_file(${CMAKE_ROOT}/Modules/CompilerId/Xcode-3.pbxproj.in
       ${id_dir}/CompilerId${lang}.xcodeproj/project.pbxproj @ONLY)
@@ -491,6 +493,9 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
 
       # com.apple.package-type.bundle.unit-test
       ${_glob_id_dir}/*.xctest/*
+
+      # com.apple.product-type.framework
+      ${_glob_id_dir}/*.framework/*
       )
     list(REMOVE_ITEM files "${src}")
     set(COMPILER_${lang}_PRODUCED_FILES "")
