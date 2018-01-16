@@ -5,13 +5,14 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmProcessOutput.h"
 #include "cmUVHandlePtr.h"
 #include "cm_uv.h"
 
 #include <chrono>
 #include <stddef.h>
+#include <stdint.h>
 #include <string>
-#include <sys/types.h>
 #include <vector>
 
 class cmCTestRunTest;
@@ -80,6 +81,7 @@ private:
   std::vector<char> Buf;
 
   cmCTestRunTest& Runner;
+  cmProcessOutput Conv;
   int Signal = 0;
   cmProcess::State ProcessState = cmProcess::State::Starting;
 

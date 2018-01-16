@@ -5,18 +5,18 @@
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestTestHandler.h"
-#include "cmProcessOutput.h"
 #include "cmsys/Process.h"
 
 #include <algorithm>
 #include <fcntl.h>
 #include <iostream>
 #include <signal.h>
-#include <stdint.h>
 #include <string>
 #if !defined(_WIN32)
 #include <unistd.h>
 #endif
+
+#define CM_PROCESS_BUF_SIZE 65536
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <io.h>
@@ -60,6 +60,7 @@ static int cmProcessGetPipes(int* fds)
 
 cmProcess::cmProcess(cmCTestRunTest& runner)
   : Runner(runner)
+  , Conv(cmProcessOutput::UTF8, CM_PROCESS_BUF_SIZE)
 {
   this->Timeout = std::chrono::duration<double>::zero();
   this->TotalTime = std::chrono::duration<double>::zero();
@@ -232,9 +233,7 @@ void cmProcess::OnRead(ssize_t nread, const uv_buf_t* buf)
   std::string line;
   if (nread > 0) {
     std::string strdata;
-    cmProcessOutput processOutput(cmProcessOutput::UTF8,
-                                  static_cast<unsigned int>(buf->len));
-    processOutput.DecodeText(buf->base, static_cast<size_t>(nread), strdata);
+    this->Conv.DecodeText(buf->base, static_cast<size_t>(nread), strdata);
     this->Output.insert(this->Output.end(), strdata.begin(), strdata.end());
 
     while (this->Output.GetLine(line)) {
@@ -271,10 +270,10 @@ void cmProcess::OnAllocateCB(uv_handle_t* handle, size_t suggested_size,
   self->OnAllocate(suggested_size, buf);
 }
 
-void cmProcess::OnAllocate(size_t suggested_size, uv_buf_t* buf)
+void cmProcess::OnAllocate(size_t /*suggested_size*/, uv_buf_t* buf)
 {
-  if (this->Buf.size() < suggested_size) {
-    this->Buf.resize(suggested_size);
+  if (this->Buf.size() != CM_PROCESS_BUF_SIZE) {
+    this->Buf.resize(CM_PROCESS_BUF_SIZE);
   }
 
   *buf =
