@@ -351,8 +351,6 @@ add_RunCMake_test(IfacePaths_INCLUDE_DIRECTORIES TEST_DIR IfacePaths)
 set(IfacePaths_SOURCES_ARGS -DTEST_PROP=SOURCES)
 add_RunCMake_test(IfacePaths_SOURCES TEST_DIR IfacePaths)
 
-add_RunCMake_test(COMPILE_LANGUAGE-genex)
-
 # Matlab module related tests
 if(CMake_TEST_FindMatlab)
   add_RunCMake_test(FindMatlab)

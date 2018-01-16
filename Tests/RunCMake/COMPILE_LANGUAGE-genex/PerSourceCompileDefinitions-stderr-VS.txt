@@ -1,7 +1,0 @@
-CMake Error:
-  Error evaluating generator expression:
-
-    \$<COMPILE_LANGUAGE:CXX>
-
-  \$<COMPILE_LANGUAGE:...> may only be used for COMPILE_OPTIONS and
-  file\(GENERATE\) with the Visual Studio generator.

@@ -1703,6 +1703,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       gtgt->GetName().c_str());
     return;
   }
+  std::string const& langForPreprocessor = llang;
 
   if (gtgt->IsIPOEnabled(llang, configName)) {
     const char* ltoValue =
@@ -1723,7 +1724,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     this->AppendDefines(ppDefs, exportMacro);
   }
   std::vector<std::string> targetDefines;
-  gtgt->GetCompileDefinitions(targetDefines, configName, "C");
+  if (!langForPreprocessor.empty()) {
+    gtgt->GetCompileDefinitions(targetDefines, configName,
+                                langForPreprocessor);
+  }
   this->AppendDefines(ppDefs, targetDefines);
   buildSettings->AddAttribute("GCC_PREPROCESSOR_DEFINITIONS",
                               ppDefs.CreateList());
@@ -1996,8 +2000,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   const bool emitSystemIncludes = this->XcodeVersion >= 83;
 
   std::vector<std::string> includes;
-  this->CurrentLocalGenerator->GetIncludeDirectories(includes, gtgt, "C",
-                                                     configName);
+  if (!langForPreprocessor.empty()) {
+    this->CurrentLocalGenerator->GetIncludeDirectories(
+      includes, gtgt, langForPreprocessor, configName);
+  }
   std::set<std::string> emitted;
   emitted.insert("/System/Library/Frameworks");
 

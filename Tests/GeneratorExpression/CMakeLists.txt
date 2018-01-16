@@ -269,10 +269,8 @@ set_property(SOURCE srcgenex_flags_COMPILE_LANGUAGE.c PROPERTY COMPILE_FLAGS "$<
 add_executable(srcgenex_defs srcgenex_defs.c)
 set_property(SOURCE srcgenex_defs.c PROPERTY COMPILE_DEFINITIONS NAME=$<TARGET_PROPERTY:NAME>)
 
-if (CMAKE_GENERATOR MATCHES "Makefiles|Ninja|Watcom WMake")
-  add_executable(srcgenex_defs_COMPILE_LANGUAGE srcgenex_defs_COMPILE_LANGUAGE.c)
-  set_property(SOURCE srcgenex_defs_COMPILE_LANGUAGE.c PROPERTY COMPILE_DEFINITIONS $<$<COMPILE_LANGUAGE:C>:NAME=$<TARGET_PROPERTY:NAME>>)
-endif()
+add_executable(srcgenex_defs_COMPILE_LANGUAGE srcgenex_defs_COMPILE_LANGUAGE.c)
+set_property(SOURCE srcgenex_defs_COMPILE_LANGUAGE.c PROPERTY COMPILE_DEFINITIONS $<$<COMPILE_LANGUAGE:C>:NAME=$<TARGET_PROPERTY:NAME>>)
 
 #-----------------------------------------------------------------------------
 # Cover test properties with generator expressions.
