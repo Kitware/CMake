@@ -117,6 +117,7 @@ find_library(TCL_LIBRARY
   tcl
   tcl${TCL_LIBRARY_VERSION} tcl${TCL_TCLSH_VERSION} tcl${TK_WISH_VERSION}
   tcl86 tcl8.6
+  tcl86t tcl8.6t
   tcl85 tcl8.5
   tcl84 tcl8.4
   tcl83 tcl8.3
@@ -131,6 +132,7 @@ find_library(TK_LIBRARY
   tk
   tk${TK_LIBRARY_VERSION} tk${TCL_TCLSH_VERSION} tk${TK_WISH_VERSION}
   tk86 tk8.6
+  tk86t tk8.6t
   tk85 tk8.5
   tk84 tk8.4
   tk83 tk8.3
