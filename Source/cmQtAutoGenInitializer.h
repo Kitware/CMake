@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmQtAutoGeneratorInitializer_h
-#define cmQtAutoGeneratorInitializer_h
+#ifndef cmQtAutoGenInitializer_h
+#define cmQtAutoGenInitializer_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
 #include "cmQtAutoGen.h"
@@ -14,7 +14,7 @@
 class cmGeneratorTarget;
 
 /// @brief Initializes the QtAutoGen generators
-class cmQtAutoGeneratorInitializer : public cmQtAutoGen
+class cmQtAutoGenInitializer : public cmQtAutoGen
 {
 public:
   static std::string GetQtMajorVersion(cmGeneratorTarget const* target);
@@ -44,9 +44,9 @@ public:
   };
 
 public:
-  cmQtAutoGeneratorInitializer(cmGeneratorTarget* target, bool mocEnabled,
-                               bool uicEnabled, bool rccEnabled,
-                               std::string const& qtVersionMajor);
+  cmQtAutoGenInitializer(cmGeneratorTarget* target, bool mocEnabled,
+                         bool uicEnabled, bool rccEnabled,
+                         std::string const& qtVersionMajor);
 
   void InitCustomTargets();
   void SetupCustomTargets();

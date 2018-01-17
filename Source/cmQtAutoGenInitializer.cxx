@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGen.h"
-#include "cmQtAutoGeneratorInitializer.h"
+#include "cmQtAutoGenInitializer.h"
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
@@ -226,7 +226,7 @@ static bool StaticLibraryCycle(cmGeneratorTarget const* targetOrigin,
   return cycle;
 }
 
-cmQtAutoGeneratorInitializer::cmQtAutoGeneratorInitializer(
+cmQtAutoGenInitializer::cmQtAutoGenInitializer(
   cmGeneratorTarget* target, bool mocEnabled, bool uicEnabled, bool rccEnabled,
   std::string const& qtVersionMajor)
   : Target(target)
@@ -236,11 +236,11 @@ cmQtAutoGeneratorInitializer::cmQtAutoGeneratorInitializer(
   , QtVersionMajor(qtVersionMajor)
   , MultiConfig(MultiConfigT::WRAPPER)
 {
-  this->QtVersionMinor = cmQtAutoGeneratorInitializer::GetQtMinorVersion(
-    target, this->QtVersionMajor);
+  this->QtVersionMinor =
+    cmQtAutoGenInitializer::GetQtMinorVersion(target, this->QtVersionMajor);
 }
 
-void cmQtAutoGeneratorInitializer::InitCustomTargets()
+void cmQtAutoGenInitializer::InitCustomTargets()
 {
   cmMakefile* makefile = this->Target->Target->GetMakefile();
   cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
@@ -900,7 +900,7 @@ void cmQtAutoGeneratorInitializer::InitCustomTargets()
   }
 }
 
-void cmQtAutoGeneratorInitializer::SetupCustomTargets()
+void cmQtAutoGenInitializer::SetupCustomTargets()
 {
   cmMakefile* makefile = this->Target->Target->GetMakefile();
 
@@ -1072,7 +1072,7 @@ void cmQtAutoGeneratorInitializer::SetupCustomTargets()
   }
 }
 
-void cmQtAutoGeneratorInitializer::SetupCustomTargetsMoc()
+void cmQtAutoGenInitializer::SetupCustomTargetsMoc()
 {
   cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
   cmMakefile* makefile = this->Target->Target->GetMakefile();
@@ -1171,7 +1171,7 @@ void cmQtAutoGeneratorInitializer::SetupCustomTargetsMoc()
   }
 }
 
-void cmQtAutoGeneratorInitializer::SetupCustomTargetsUic()
+void cmQtAutoGenInitializer::SetupCustomTargetsUic()
 {
   cmMakefile* makefile = this->Target->Target->GetMakefile();
 
@@ -1289,7 +1289,7 @@ void cmQtAutoGeneratorInitializer::SetupCustomTargetsUic()
   }
 }
 
-std::vector<std::string> cmQtAutoGeneratorInitializer::AddGeneratedSource(
+std::vector<std::string> cmQtAutoGenInitializer::AddGeneratedSource(
   std::string const& filename, GeneratorT genType)
 {
   std::vector<std::string> genFiles;
@@ -1330,7 +1330,7 @@ std::vector<std::string> cmQtAutoGeneratorInitializer::AddGeneratedSource(
   return genFiles;
 }
 
-std::string cmQtAutoGeneratorInitializer::GetQtMajorVersion(
+std::string cmQtAutoGenInitializer::GetQtMajorVersion(
   cmGeneratorTarget const* target)
 {
   cmMakefile* makefile = target->Target->GetMakefile();
@@ -1346,7 +1346,7 @@ std::string cmQtAutoGeneratorInitializer::GetQtMajorVersion(
   return qtMajor;
 }
 
-std::string cmQtAutoGeneratorInitializer::GetQtMinorVersion(
+std::string cmQtAutoGenInitializer::GetQtMinorVersion(
   cmGeneratorTarget const* target, std::string const& qtVersionMajor)
 {
   cmMakefile* makefile = target->Target->GetMakefile();
@@ -1366,7 +1366,7 @@ std::string cmQtAutoGeneratorInitializer::GetQtMinorVersion(
   return qtMinor;
 }
 
-bool cmQtAutoGeneratorInitializer::QtVersionGreaterOrEqual(
+bool cmQtAutoGenInitializer::QtVersionGreaterOrEqual(
   unsigned long requestMajor, unsigned long requestMinor) const
 {
   unsigned long majorUL(0);
@@ -1382,9 +1382,9 @@ bool cmQtAutoGeneratorInitializer::QtVersionGreaterOrEqual(
 /// @brief Reads the resource files list from from a .qrc file
 /// @arg fileName Must be the absolute path of the .qrc file
 /// @return True if the rcc file was successfully read
-bool cmQtAutoGeneratorInitializer::RccListInputs(
-  std::string const& fileName, std::vector<std::string>& files,
-  std::string& error)
+bool cmQtAutoGenInitializer::RccListInputs(std::string const& fileName,
+                                           std::vector<std::string>& files,
+                                           std::string& error)
 {
   if (!cmSystemTools::FileExists(fileName.c_str())) {
     error = "rcc resource file does not exist:\n  ";
