@@ -411,6 +411,8 @@ macro(_Doxygen_find_doxygen)
             "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\doxygen_is1;Inno Setup: App Path]/bin"
             /Applications/Doxygen.app/Contents/Resources
             /Applications/Doxygen.app/Contents/MacOS
+            /Applications/Utilities/Doxygen.app/Contents/Resources
+            /Applications/Utilities/Doxygen.app/Contents/MacOS
         DOC "Doxygen documentation generation tool (http://www.doxygen.org)"
     )
     mark_as_advanced(DOXYGEN_EXECUTABLE)
@@ -492,8 +494,11 @@ macro(_Doxygen_find_dot)
             "C:/Program Files/ATT/Graphviz/bin"
             [HKEY_LOCAL_MACHINE\\SOFTWARE\\ATT\\Graphviz;InstallPath]/bin
             /Applications/Graphviz.app/Contents/MacOS
+            /Applications/Utilities/Graphviz.app/Contents/MacOS
             /Applications/Doxygen.app/Contents/Resources
             /Applications/Doxygen.app/Contents/MacOS
+            /Applications/Utilities/Doxygen.app/Contents/Resources
+            /Applications/Utilities/Doxygen.app/Contents/MacOS
         DOC "Dot tool for use with Doxygen"
     )
     mark_as_advanced(DOXYGEN_DOT_EXECUTABLE)
