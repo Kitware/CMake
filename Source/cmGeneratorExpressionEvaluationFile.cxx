@@ -13,6 +13,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocationKind.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -102,7 +103,8 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
   for (std::string const& le : enabledLanguages) {
     std::string name = this->OutputFileExpr->Evaluate(
       lg, config, false, nullptr, nullptr, nullptr, le);
-    cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(name);
+    cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(
+      name, false, cmSourceFileLocationKind::Known);
     sf->SetProperty("GENERATED", "1");
 
     gg->SetFilenameTargetDepends(
