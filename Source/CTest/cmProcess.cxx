@@ -244,6 +244,10 @@ void cmProcess::OnRead(ssize_t nread, const uv_buf_t* buf)
     return;
   }
 
+  if (nread == 0) {
+    return;
+  }
+
   // The process will provide no more data.
   if (nread != UV_EOF) {
     auto error = static_cast<int>(nread);
@@ -257,6 +261,7 @@ void cmProcess::OnRead(ssize_t nread, const uv_buf_t* buf)
   }
 
   this->ReadHandleClosed = true;
+  this->PipeReader.reset();
   if (this->ProcessHandleClosed) {
     uv_timer_stop(this->Timer);
     this->Runner.FinalizeTest();
