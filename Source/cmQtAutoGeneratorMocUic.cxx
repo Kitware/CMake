@@ -221,7 +221,7 @@ bool cmQtAutoGeneratorMocUic::JobParseT::ParseMocSource(WorkerT& wrk,
       const char* contentChars = meta.Content.c_str();
       cmsys::RegularExpressionMatch match;
       while (wrk.Moc().RegExpInclude.find(contentChars, match)) {
-        std::string incString = match.match(1);
+        std::string incString = match.match(2);
         std::string incDir(SubDirPrefix(incString));
         std::string incBase =
           cmSystemTools::GetFilenameWithoutLastExtension(incString);
@@ -500,7 +500,7 @@ bool cmQtAutoGeneratorMocUic::JobParseT::ParseUic(WorkerT& wrk,
     const char* contentChars = meta.Content.c_str();
     cmsys::RegularExpressionMatch match;
     while (wrk.Uic().RegExpInclude.find(contentChars, match)) {
-      if (!ParseUicInclude(wrk, meta, match.match(1))) {
+      if (!ParseUicInclude(wrk, meta, match.match(2))) {
         success = false;
         break;
       }
@@ -1124,9 +1124,9 @@ cmQtAutoGeneratorMocUic::cmQtAutoGeneratorMocUic()
 {
   // Precompile regular expressions
   Moc_.RegExpInclude.compile(
-    "[\n][ \t]*#[ \t]*include[ \t]+"
+    "(^|\n)[ \t]*#[ \t]*include[ \t]+"
     "[\"<](([^ \">]+/)?moc_[^ \">/]+\\.cpp|[^ \">]+\\.moc)[\">]");
-  Uic_.RegExpInclude.compile("[\n][ \t]*#[ \t]*include[ \t]+"
+  Uic_.RegExpInclude.compile("(^|\n)[ \t]*#[ \t]*include[ \t]+"
                              "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
 
   // Initialize libuv asynchronous iteration request
