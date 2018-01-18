@@ -5,52 +5,97 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmFilePathChecksum.h"
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
+#include "cm_uv.h"
 
 #include <string>
 #include <vector>
 
 class cmMakefile;
 
+// @brief AUTORCC generator
 class cmQtAutoGeneratorRcc : public cmQtAutoGenerator
 {
   CM_DISABLE_COPY(cmQtAutoGeneratorRcc)
 public:
   cmQtAutoGeneratorRcc();
+  ~cmQtAutoGeneratorRcc() override;
 
 private:
-  // -- Initialization & settings
-  bool InfoFileRead(cmMakefile* makefile);
-  void SettingsFileRead(cmMakefile* makefile);
-  bool SettingsFileWrite();
-  // -- Central processing
-  bool Process(cmMakefile* makefile) override;
-  bool RccGenerate();
+  // -- Types
 
+  /// @brief Processing stage
+  enum class StageT
+  {
+    SETTINGS_READ,
+    TEST_QRC_RCC_FILES,
+    TEST_RESOURCES_READ,
+    TEST_RESOURCES,
+    TEST_INFO_FILE,
+    GENERATE,
+    GENERATE_RCC,
+    GENERATE_WRAPPER,
+    SETTINGS_WRITE,
+    FINISH,
+    END
+  };
+
+  // -- Abstract processing interface
+  bool Init(cmMakefile* makefile) override;
+  bool Process() override;
+  // -- Process stage
+  static void UVPollStage(uv_async_t* handle);
+  void PollStage();
+  void SetStage(StageT stage);
+  // -- Settings file
+  void SettingsFileRead();
+  void SettingsFileWrite();
+  // -- Tests
+  bool TestQrcRccFiles();
+  bool TestResourcesRead();
+  bool TestResources();
+  void TestInfoFile();
+  // -- Generation
+  void GenerateParentDir();
+  bool GenerateRcc();
+  void GenerateWrapper();
+
+  // -- Utility
+  bool StartProcess(std::string const& workingDirectory,
+                    std::vector<std::string> const& command,
+                    bool mergedOutput);
+
+private:
   // -- Config settings
-  std::string ConfigSuffix;
-  cmQtAutoGen::MultiConfig MultiConfig;
-  // -- Settings
-  bool SettingsChanged;
-  std::string SettingsFile;
-  std::string SettingsString;
+  bool SettingsChanged_;
+  std::string ConfigSuffix_;
+  MultiConfigT MultiConfig_;
   // -- Directories
-  std::string ProjectSourceDir;
-  std::string ProjectBinaryDir;
-  std::string CurrentSourceDir;
-  std::string CurrentBinaryDir;
-  std::string AutogenBuildDir;
-  cmFilePathChecksum FilePathChecksum;
+  std::string AutogenBuildDir_;
   // -- Qt environment
-  std::string RccExecutable;
-  std::vector<std::string> RccListOptions;
+  std::string RccExecutable_;
+  std::vector<std::string> RccListOptions_;
   // -- Job
-  std::string QrcFile;
-  std::string RccFile;
-  std::vector<std::string> Options;
-  std::vector<std::string> Inputs;
+  std::string QrcFile_;
+  std::string QrcFileName_;
+  std::string QrcFileDir_;
+  std::string RccFile_;
+  std::string RccFileWrapper_;
+  std::string RccFileBuild_;
+  std::vector<std::string> Options_;
+  std::vector<std::string> Inputs_;
+  // -- Subprocess
+  ProcessResultT ProcessResult_;
+  std::unique_ptr<ReadOnlyProcessT> Process_;
+  // -- Settings file
+  std::string SettingsFile_;
+  std::string SettingsString_;
+  // -- libuv loop
+  StageT Stage_;
+  bool Error_;
+  bool Generate_;
+  bool BuildFileChanged_;
 };
 
 #endif

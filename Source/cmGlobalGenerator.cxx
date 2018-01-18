@@ -33,7 +33,7 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmQtAutoGeneratorInitializer.h"
+#include "cmQtAutoGenInitializer.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -1473,10 +1473,10 @@ bool cmGlobalGenerator::ComputeTargetDepends()
   return true;
 }
 
-std::vector<std::unique_ptr<cmQtAutoGeneratorInitializer>>
+std::vector<std::unique_ptr<cmQtAutoGenInitializer>>
 cmGlobalGenerator::CreateQtAutoGenInitializers()
 {
-  std::vector<std::unique_ptr<cmQtAutoGeneratorInitializer>> autogenInits;
+  std::vector<std::unique_ptr<cmQtAutoGenInitializer>> autogenInits;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
@@ -1506,13 +1506,13 @@ cmGlobalGenerator::CreateQtAutoGenInitializers()
       }
 
       std::string qtVersionMajor =
-        cmQtAutoGeneratorInitializer::GetQtMajorVersion(target);
+        cmQtAutoGenInitializer::GetQtMajorVersion(target);
       // don't do anything if there is no Qt4 or Qt5Core (which contains moc)
       if (qtVersionMajor != "4" && qtVersionMajor != "5") {
         continue;
       }
 
-      autogenInits.emplace_back(new cmQtAutoGeneratorInitializer(
+      autogenInits.emplace_back(new cmQtAutoGenInitializer(
         target, mocEnabled, uicEnabled, rccEnabled, qtVersionMajor));
     }
   }

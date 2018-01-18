@@ -1,5 +1,6 @@
 # Meta
 set(AM_MULTI_CONFIG @_multi_config@)
+set(AM_PARALLEL @_parallel@)
 # Directories and files
 set(AM_CMAKE_BINARY_DIR "@CMAKE_BINARY_DIR@/")
 set(AM_CMAKE_SOURCE_DIR "@CMAKE_SOURCE_DIR@/")

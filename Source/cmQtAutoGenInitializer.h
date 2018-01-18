@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmQtAutoGeneratorInitializer_h
-#define cmQtAutoGeneratorInitializer_h
+#ifndef cmQtAutoGenInitializer_h
+#define cmQtAutoGenInitializer_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
 #include "cmQtAutoGen.h"
@@ -13,7 +13,8 @@
 
 class cmGeneratorTarget;
 
-class cmQtAutoGeneratorInitializer
+/// @brief Initializes the QtAutoGen generators
+class cmQtAutoGenInitializer : public cmQtAutoGen
 {
 public:
   static std::string GetQtMajorVersion(cmGeneratorTarget const* target);
@@ -43,9 +44,9 @@ public:
   };
 
 public:
-  cmQtAutoGeneratorInitializer(cmGeneratorTarget* target, bool mocEnabled,
-                               bool uicEnabled, bool rccEnabled,
-                               std::string const& qtVersionMajor);
+  cmQtAutoGenInitializer(cmGeneratorTarget* target, bool mocEnabled,
+                         bool uicEnabled, bool rccEnabled,
+                         std::string const& qtVersionMajor);
 
   void InitCustomTargets();
   void SetupCustomTargets();
@@ -55,10 +56,14 @@ private:
   void SetupCustomTargetsUic();
 
   std::vector<std::string> AddGeneratedSource(std::string const& filename,
-                                              cmQtAutoGen::Generator genType);
+                                              GeneratorT genType);
 
   bool QtVersionGreaterOrEqual(unsigned long requestMajor,
                                unsigned long requestMinor) const;
+
+  bool RccListInputs(std::string const& fileName,
+                     std::vector<std::string>& files,
+                     std::string& errorMessage);
 
 private:
   cmGeneratorTarget* Target;
@@ -73,7 +78,7 @@ private:
   // Configurations
   std::string ConfigDefault;
   std::vector<std::string> ConfigsList;
-  cmQtAutoGen::MultiConfig MultiConfig;
+  MultiConfigT MultiConfig;
   // Names
   std::string AutogenTargetName;
   std::string AutogenFolder;
