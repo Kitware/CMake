@@ -2078,9 +2078,15 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     (*this->BuildFileStream) << firstString;
     firstString = "";
     hasFlags = true;
-    this->WriteString("<ObjectFileName>", 3);
-    (*this->BuildFileStream) << "$(IntDir)/" << objectName
-                             << "</ObjectFileName>\n";
+    if (lang == "CUDA") {
+      this->WriteString("<CompileOut>", 3);
+      (*this->BuildFileStream) << "$(IntDir)/" << objectName
+                               << "</CompileOut>\n";
+    } else {
+      this->WriteString("<ObjectFileName>", 3);
+      (*this->BuildFileStream) << "$(IntDir)/" << objectName
+                               << "</ObjectFileName>\n";
+    }
   }
   for (std::string const& config : this->Configurations) {
     std::string configUpper = cmSystemTools::UpperCase(config);
@@ -2687,6 +2693,11 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   if (!cudaOptions.HasFlag("GPUDebugInfo")) {
     cudaOptions.AddFlag("GPUDebugInfo", "false");
   }
+
+  // The extension on object libraries the CUDA gives isn't
+  // consistent with how MSVC generates object libraries for C+, so set
+  // the default to not have any extension
+  cudaOptions.AddFlag("CompileOut", "$(IntDir)%(Filename).obj");
 
   bool notPtx = true;
   if (this->GeneratorTarget->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION")) {
