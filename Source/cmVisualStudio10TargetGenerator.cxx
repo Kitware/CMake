@@ -2667,6 +2667,7 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
     cudaOptions.AddFlag("GPUDebugInfo", "false");
   }
 
+  bool notPtx = true;
   if (this->GeneratorTarget->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION")) {
     cudaOptions.AddFlag("GenerateRelocatableDeviceCode", "true");
   } else if (this->GeneratorTarget->GetPropertyAsBool(
@@ -2675,6 +2676,16 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
     // We drop the %(Extension) component as CMake expects all PTX files
     // to not have the source file extension at all
     cudaOptions.AddFlag("CompileOut", "$(IntDir)%(Filename).ptx");
+    notPtx = false;
+  }
+
+  if (notPtx &&
+      cmSystemTools::VersionCompareGreaterEq(
+        "8.0", this->GlobalGenerator->GetPlatformToolsetCudaString())) {
+    // Explicitly state that we want this file to be treated as a
+    // CUDA file no matter what the file extensions is
+    // This is only needed for < CUDA 9
+    cudaOptions.AppendFlagString("AdditionalOptions", "-x cu");
   }
 
   // CUDA automatically passes the proper '--machine' flag to nvcc

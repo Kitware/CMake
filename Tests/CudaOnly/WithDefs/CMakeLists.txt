@@ -21,14 +21,8 @@ set(release_compile_defs DEFREL)
 #this verifies we can pass things such as '_','(' to nvcc
 add_definitions("-DPACKED_DEFINE=__attribute__((packed))")
 
-if(CMAKE_GENERATOR MATCHES "Visual Studio")
-  # CUDA MSBuild rules do not pass '-x cu' to nvcc
-  set(main main_for_vs.cu)
-else()
-  set(main main.notcu)
-  set_source_files_properties(main.notcu PROPERTIES LANGUAGE CUDA)
-endif()
-add_executable(CudaOnlyWithDefs ${main})
+add_executable(CudaOnlyWithDefs main.notcu)
+set_source_files_properties(main.notcu PROPERTIES LANGUAGE CUDA)
 
 target_compile_options(CudaOnlyWithDefs
   PRIVATE
