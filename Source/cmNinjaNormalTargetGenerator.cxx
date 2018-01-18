@@ -760,7 +760,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
                        /*implicitOuts=*/cmNinjaDeps(), explicitDeps,
                        implicitDeps, orderOnlyDeps, vars, rspfile,
                        commandLineLengthLimit, &usedResponseFile);
-  this->WriteDeviceLinkRule(usedResponseFile);
+  this->WriteDeviceLinkRule(false);
 }
 
 void cmNinjaNormalTargetGenerator::WriteLinkStatement()
