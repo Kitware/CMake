@@ -22,7 +22,6 @@
 #  Defined to the platform-specific OpenGL libraries if the system has OpenGL.
 # ``OpenGL::OpenGL``
 #  Defined to libOpenGL if the system is GLVND-based.
-#  ``OpenGL::GL``
 # ``OpenGL::GLU``
 #  Defined if the system has GLU.
 # ``OpenGL::GLX``
