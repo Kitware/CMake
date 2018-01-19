@@ -198,8 +198,6 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
   std::map<std::string, cmSourceFile*>& cFiles,
   std::set<std::string>& otherFiles)
 {
-  auto cm = this->GlobalGenerator->GetCMakeInstance();
-
   std::string projectType;
   switch (gt->GetType()) {
     case cmStateEnums::EXECUTABLE: {
@@ -227,19 +225,18 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
       gt->GetSourceFiles(sources,
                          makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
       for (cmSourceFile* s : sources) {
-        // check whether it is a C/C++/CUDA implementation file
-        bool isCFile = false;
-        std::string lang = s->GetLanguage();
-        if (lang == "C" || lang == "CXX" || lang == "CUDA") {
-          std::string const& srcext = s->GetExtension();
-          isCFile = cm->IsSourceExtension(srcext);
-        }
-
+        // check whether it is a source or a include file
         // then put it accordingly into one of the two containers
-        if (isCFile) {
-          cFiles[s->GetFullPath()] = s;
-        } else {
-          otherFiles.insert(s->GetFullPath());
+        switch (cmSystemTools::GetFileFormat(s->GetExtension().c_str())) {
+          case cmSystemTools::C_FILE_FORMAT:
+          case cmSystemTools::CXX_FILE_FORMAT:
+          case cmSystemTools::CUDA_FILE_FORMAT:
+          case cmSystemTools::FORTRAN_FILE_FORMAT: {
+            cFiles[s->GetFullPath()] = s;
+          } break;
+          default: {
+            otherFiles.insert(s->GetFullPath());
+          }
         }
       }
     }
@@ -679,7 +676,11 @@ std::string cmExtraCodeLiteGenerator::GetSingleFileBuildCommand(
   std::string generator = mf->GetSafeDefinition("CMAKE_GENERATOR");
   if (generator == "Unix Makefiles" || generator == "MinGW Makefiles") {
     std::ostringstream ss;
-    ss << make << " -f$(ProjectPath)/Makefile $(CurrentFileName).cpp.o";
+#if defined(_WIN32)
+    ss << make << " -f$(ProjectPath)/Makefile -B $(CurrentFileFullName).obj";
+#else
+    ss << make << " -f$(ProjectPath)/Makefile -B $(CurrentFileFullName).o";
+#endif
     buildCommand = ss.str();
   }
   return buildCommand;
