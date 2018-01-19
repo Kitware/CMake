@@ -1771,7 +1771,7 @@ bool cmake::LoadCache(const std::string& path, bool internal,
 
 bool cmake::SaveCache(const std::string& path)
 {
-  bool result = this->State->SaveCache(path);
+  bool result = this->State->SaveCache(path, this->GetMessenger());
   static const char* entries[] = { "CMAKE_CACHE_MAJOR_VERSION",
                                    "CMAKE_CACHE_MINOR_VERSION",
                                    "CMAKE_CACHE_PATCH_VERSION",

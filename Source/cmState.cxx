@@ -107,9 +107,9 @@ bool cmState::LoadCache(const std::string& path, bool internal,
   return this->CacheManager->LoadCache(path, internal, excludes, includes);
 }
 
-bool cmState::SaveCache(const std::string& path)
+bool cmState::SaveCache(const std::string& path, cmMessenger* messenger)
 {
-  return this->CacheManager->SaveCache(path);
+  return this->CacheManager->SaveCache(path, messenger);
 }
 
 bool cmState::DeleteCache(const std::string& path)

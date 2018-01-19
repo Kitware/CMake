@@ -23,6 +23,7 @@ class cmCacheManager;
 class cmCommand;
 class cmPropertyDefinition;
 class cmStateSnapshot;
+class cmMessenger;
 
 class cmState
 {
@@ -59,7 +60,7 @@ public:
                  std::set<std::string>& excludes,
                  std::set<std::string>& includes);
 
-  bool SaveCache(const std::string& path);
+  bool SaveCache(const std::string& path, cmMessenger* messenger);
 
   bool DeleteCache(const std::string& path);
 

@@ -339,6 +339,7 @@ add_RunCMake_test(CPackInstallProperties)
 add_RunCMake_test(ExternalProject)
 add_RunCMake_test(FetchContent)
 add_RunCMake_test(CTestCommandLine)
+add_RunCMake_test(CacheNewline)
 # Only run this test on unix platforms that support
 # symbolic links
 if(UNIX)
