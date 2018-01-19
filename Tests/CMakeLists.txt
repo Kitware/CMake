@@ -3195,29 +3195,51 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
           --test-command ${JAVA_RUNTIME} -classpath hello3.jar HelloWorld)
         list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJarSourceListAndOutput")
 
-        # For next test, java tool must have same architecture as toolchain
+        # For next tests, java tool must have same architecture as toolchain
         math(EXPR _object_mode "${CMAKE_SIZEOF_VOID_P} * 8")
         execute_process(
           COMMAND "${Java_JAVA_EXECUTABLE}" -d${_object_mode} -version
           OUTPUT_QUIET ERROR_QUIET RESULT_VARIABLE _result
           )
         if(_result EQUAL 0)
-          if(_isMultiConfig)
-            set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah/$<CONFIGURATION>)
-          else()
-            set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah)
+          ## next test is valid only if Java version is less than 1.10
+          if ("${Java_VERSION}" VERSION_LESS 1.10)
+            if(_isMultiConfig)
+              set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah/$<CONFIGURATION>)
+            else()
+              set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah)
+            endif()
+            add_test(NAME Java.Javah COMMAND ${CMAKE_CTEST_COMMAND}
+              --build-and-test
+              "${CMake_SOURCE_DIR}/Tests/JavaJavah"
+              "${CMake_BINARY_DIR}/Tests/JavaJavah"
+              ${build_generator_args}
+              --build-project helloJavah
+              --build-two-config
+              --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJavah/"
+              --build-options ${build_options}
+              --test-command ${JAVA_RUNTIME} -Djava.library.path=${JAVAH_LIBRARY_PATH} -classpath hello3.jar HelloWorld2)
+            list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJavah")
           endif()
-          add_test(NAME Java.Javah COMMAND ${CMAKE_CTEST_COMMAND}
-            --build-and-test
-            "${CMake_SOURCE_DIR}/Tests/JavaJavah"
-            "${CMake_BINARY_DIR}/Tests/JavaJavah"
-            ${build_generator_args}
-            --build-project helloJavah
-            --build-two-config
-            --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJavah/"
-            --build-options ${build_options}
-            --test-command ${JAVA_RUNTIME} -Djava.library.path=${JAVAH_LIBRARY_PATH} -classpath hello3.jar HelloWorld2)
-          list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJavah")
+          ## next test is valid only if Java is, at least, version 1.8
+          if (NOT "${Java_VERSION}" VERSION_LESS 1.8)
+            if(_isMultiConfig)
+              set (JAVANATIVEHEADERS_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/$<CONFIGURATION>)
+            else()
+              set (JAVANATIVEHEADERS_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaNativeHeaders)
+            endif()
+            add_test(NAME Java.NativeHeaders COMMAND ${CMAKE_CTEST_COMMAND}
+              --build-and-test
+              "${CMake_SOURCE_DIR}/Tests/JavaNativeHeaders"
+              "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders"
+              ${build_generator_args}
+              --build-project helloJavaNativeHeaders
+              --build-two-config
+              --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/"
+              --build-options ${build_options}
+              --test-command ${JAVA_RUNTIME} -Djava.library.path=${JAVANATIVEHEADERS_LIBRARY_PATH} -classpath hello4.jar HelloWorld3)
+            list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders")
+          endif()
         endif()
       endif()
     endif()
