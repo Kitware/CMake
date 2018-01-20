@@ -47,6 +47,32 @@ building on older toolchains some constructs need to be handled with care:
   the result should be assigned to ``size_t`` not to ``std::size_t``,
   ``unsigned int`` or similar types.
 
+Avoiding Accidental Mistakes
+====================
+
+Always use braces when nesting if/else statements to avoid dangling else (the else branch belongs to the innermost if statement).
+
+if ( var1 ) {
+	if ( var2 ) {
+		someMethod( var1 );
+	} 
+	else {
+		someOtherMethod( var1 );
+	}
+}
+
+Do not use logic as control flow. For instance: `var1 && someMethod( var1 );` Please use if statements for that purpose.
+
+if( var1 ) {
+	someMethod( var1 );
+}
+
+Avoid writing boolean expressions without specifying the operator precedences. For instance, add parentheses to make it explicit that && operators have precedence over || operators.
+
+if ( var1 || (var2 && var3) ) {
+	someMethod( var1 );
+}
+
 Source Tree Layout
 ==================
 
