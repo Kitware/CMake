@@ -337,7 +337,7 @@ Available commands are:
     ``paxr`` (restricted pax, default), and ``zip``.
 
 ``time <command> [<args>...]``
-  Run command and return elapsed time.
+  Run command and display elapsed time.
 
 ``touch <file>``
   Touch a file.
