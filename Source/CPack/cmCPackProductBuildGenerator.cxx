@@ -8,6 +8,7 @@
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
+#include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
@@ -145,9 +146,9 @@ bool cmCPackProductBuildGenerator::RunProductBuild(const std::string& command)
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << command << std::endl);
   std::string output, error_output;
   int retVal = 1;
-  bool res = cmSystemTools::RunSingleCommand(command.c_str(), &output,
-                                             &error_output, &retVal, nullptr,
-                                             this->GeneratorVerbose, 0);
+  bool res = cmSystemTools::RunSingleCommand(
+    command.c_str(), &output, &error_output, &retVal, nullptr,
+    this->GeneratorVerbose, cmDuration::zero());
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Done running command" << std::endl);
   if (!res || retVal) {
     cmGeneratedFileStream ofs(tmpFile.c_str());

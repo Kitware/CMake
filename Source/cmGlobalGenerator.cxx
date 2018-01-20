@@ -21,6 +21,7 @@
 #include "cmComputeTargetDepends.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
+#include "cmDuration.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmGeneratedFileStream.h"
@@ -87,7 +88,7 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->InstallTargetEnabled = false;
 
   // how long to let try compiles run
-  this->TryCompileTimeout = 0;
+  this->TryCompileTimeout = cmDuration::zero();
 
   this->ExtraGenerator = nullptr;
   this->CurrentConfigureMakefile = nullptr;
@@ -1801,7 +1802,7 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
                              const std::string& target, std::string& output,
                              const std::string& makeCommandCSTR,
                              const std::string& config, bool clean, bool fast,
-                             bool verbose, double timeout,
+                             bool verbose, cmDuration timeout,
                              cmSystemTools::OutputOption outputflag,
                              std::vector<std::string> const& nativeOptions)
 {

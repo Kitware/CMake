@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "cmCustomCommandLines.h"
+#include "cmDuration.h"
 #include "cmExportSetMap.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
@@ -160,8 +161,8 @@ public:
             const std::string& projectName, const std::string& targetName,
             std::string& output, const std::string& makeProgram,
             const std::string& config, bool clean, bool fast, bool verbose,
-            double timeout, cmSystemTools::OutputOption outputflag =
-                              cmSystemTools::OUTPUT_NONE,
+            cmDuration timeout, cmSystemTools::OutputOption outputflag =
+                                  cmSystemTools::OUTPUT_NONE,
             std::vector<std::string> const& nativeOptions =
               std::vector<std::string>());
 
@@ -233,7 +234,7 @@ public:
 
   void EnableInstallTarget();
 
-  int TryCompileTimeout;
+  cmDuration TryCompileTimeout;
 
   bool GetForceUnixPaths() const { return this->ForceUnixPaths; }
   bool GetToolSupportsColor() const { return this->ToolSupportsColor; }

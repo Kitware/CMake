@@ -6,6 +6,7 @@
 
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
+#include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 #include "cm_sys_stat.h"
@@ -154,9 +155,9 @@ int cmCPackOSXX11Generator::PackageFiles()
   int numTries = 10;
   bool res = false;
   while (numTries > 0) {
-    res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
-                                          &output, &retVal, nullptr,
-                                          this->GeneratorVerbose, 0);
+    res = cmSystemTools::RunSingleCommand(
+      dmgCmd.str().c_str(), &output, &output, &retVal, nullptr,
+      this->GeneratorVerbose, cmDuration::zero());
     if (res && !retVal) {
       numTries = -1;
       break;

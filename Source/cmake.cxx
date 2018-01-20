@@ -7,6 +7,7 @@
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
 #include "cmDocumentationFormatter.h"
+#include "cmDuration.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileTimeComparison.h"
 #include "cmGeneratorTarget.h"
@@ -2475,8 +2476,8 @@ int cmake::Build(const std::string& dir, const std::string& target,
 #endif
 
   return gen->Build("", dir, projName, target, output, "", config, clean,
-                    false, verbose, 0, cmSystemTools::OUTPUT_PASSTHROUGH,
-                    nativeOptions);
+                    false, verbose, cmDuration::zero(),
+                    cmSystemTools::OUTPUT_PASSTHROUGH, nativeOptions);
 }
 
 bool cmake::Open(const std::string& dir, bool dryRun)
