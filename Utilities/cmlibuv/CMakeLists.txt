@@ -26,6 +26,7 @@ set(uv_sources
   src/threadpool.c
   src/uv-common.c
   src/uv-common.h
+  src/uv-data-getter-setters.c
   src/version.c
   )
 if(WIN32)
@@ -130,6 +131,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
     )
   list(APPEND uv_sources
     src/unix/aix.c
+    src/unix/aix-common.c
     )
 endif()
 
@@ -170,7 +172,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     src/unix/fsevents.c
     src/unix/kqueue.c
     src/unix/proctitle.c
-    src/unix/pthread-barrier.c
     )
 endif()
 

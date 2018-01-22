@@ -20,6 +20,8 @@ extract_source () {
     git_archive
     pushd "${extractdir}/${name}-reduced"
     echo "* -whitespace" > .gitattributes
+    echo >> src/unix/aix-common.c
+    echo >> src/unix/ibmi.c
     popd
 }
 
