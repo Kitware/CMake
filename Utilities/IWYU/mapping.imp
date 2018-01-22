@@ -23,8 +23,11 @@
   # HACK: check whether this can be removed with next iwyu release.
   { include: [ "<bits/shared_ptr.h>", private, "<memory>", public ] },
   { include: [ "<bits/std_function.h>", private, "<functional>", public ] },
+  { include: [ "<bits/stdint-intn.h>", private, "<stdint.h>", public ] },
+  { include: [ "<bits/stdint-uintn.h>", private, "<stdint.h>", public ] },
   { include: [ "<bits/time.h>", private, "<time.h>", public ] },
   { include: [ "<bits/types/clock_t.h>", private, "<time.h>", public ] },
+  { include: [ "<bits/types/mbstate_t.h>", private, "<wchar.h>", public ] },
   { include: [ "<bits/types/struct_timespec.h>", private, "<time.h>", public ] },
   { include: [ "<bits/types/struct_timeval.h>", private, "<time.h>", public ] },
   { include: [ "<bits/types/struct_tm.h>", private, "<time.h>", public ] },
