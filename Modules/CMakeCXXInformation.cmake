@@ -158,10 +158,6 @@ if(NOT CMAKE_INCLUDE_FLAG_CXX)
   set(CMAKE_INCLUDE_FLAG_CXX ${CMAKE_INCLUDE_FLAG_C})
 endif()
 
-if(NOT CMAKE_INCLUDE_FLAG_SEP_CXX)
-  set(CMAKE_INCLUDE_FLAG_SEP_CXX ${CMAKE_INCLUDE_FLAG_SEP_C})
-endif()
-
 # for most systems a module is the same as a shared library
 # so unless the variable CMAKE_MODULE_EXISTS is set just
 # copy the values from the LIBRARY variables
