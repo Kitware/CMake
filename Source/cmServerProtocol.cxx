@@ -1034,8 +1034,8 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
 
     // Project structure information:
     const cmMakefile* mf = lg->GetMakefile();
-    pObj[kMINIMUM_CMAKE_VERSION] =
-      mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+    auto minVersion = mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+    pObj[kMINIMUM_CMAKE_VERSION] = minVersion ? minVersion : "";
     pObj[kSOURCE_DIRECTORY_KEY] = mf->GetCurrentSourceDirectory();
     pObj[kBUILD_DIRECTORY_KEY] = mf->GetCurrentBinaryDirectory();
     pObj[kTARGETS_KEY] = DumpTargetsList(projectIt.second, config);
