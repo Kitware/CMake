@@ -12,7 +12,7 @@ information.
 The default value is ``Q_OBJECT;Q_GADGET;Q_NAMESPACE``.
 
 Example
--------
+^^^^^^^
 Let CMake know that source files that contain ``CUSTOM_MACRO`` must be ``moc``
 processed as well::
 
