@@ -1992,7 +1992,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
 
       if (si.Kind == cmGeneratorTarget::SourceKindObjectSource) {
         // FIXME: refactor generation to avoid tracking XML syntax state.
-        this->WriteSource(tool, si.Source, " ");
+        this->WriteSource(tool, si.Source, "");
         bool have_nested = this->OutputSourceSpecificFlags(si.Source);
         if (!exclude_configs.empty()) {
           if (!have_nested) {
