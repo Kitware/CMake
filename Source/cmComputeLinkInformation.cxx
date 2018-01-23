@@ -913,11 +913,9 @@ std::string cmComputeLinkInformation::CreateExtensionRegex(
   // Finish the list.
   libext += ")";
 
-  // Add an optional OpenBSD version component.
-  if (this->OpenBSD) {
-    libext += "(\\.[0-9]+\\.[0-9]+)?";
-  } else if (type == LinkShared) {
-    libext += "(\\.[0-9]+)?";
+  // Add an optional OpenBSD-style version or major.minor.version component.
+  if (this->OpenBSD || type == LinkShared) {
+    libext += "(\\.[0-9]+)*";
   }
 
   libext += "$";
