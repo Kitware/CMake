@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_SHARE_H
-#define HEADER_CURL_SHARE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -24,39 +22,23 @@
 
 #include "curl_setup.h"
 #include <curl/curl.h>
-#include "cookie.h"
 #include "urldata.h"
-#include "conncache.h"
 
-/* SalfordC says "A structure member may not be volatile". Hence:
- */
-#ifdef __SALFORDC__
-#define CURL_VOLATILE
-#else
-#define CURL_VOLATILE volatile
+#ifdef WIN32
+#  undef  PATH_MAX
+#  define PATH_MAX MAX_PATH
+#  ifndef R_OK
+#    define R_OK 4
+#  endif
 #endif
 
-/* this struct is libcurl-private, don't export details */
-struct Curl_share {
-  unsigned int specifier;
-  CURL_VOLATILE unsigned int dirty;
-
-  curl_lock_function lockfunc;
-  curl_unlock_function unlockfunc;
-  void *clientdata;
-  struct conncache conn_cache;
-  struct curl_hash hostcache;
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
-  struct CookieInfo *cookies;
+#ifndef PATH_MAX
+#define PATH_MAX 1024 /* just an extra precaution since there are systems that
+                         have their definition hidden well */
 #endif
 
-  struct curl_ssl_session *sslsession;
-  size_t max_ssl_sessions;
-  long sessionage;
-};
+CURLcode Curl_getworkingpath(struct connectdata *conn,
+                             char *homedir,
+                             char **path);
 
-CURLSHcode Curl_share_lock(struct Curl_easy *, curl_lock_data,
-                           curl_lock_access);
-CURLSHcode Curl_share_unlock(struct Curl_easy *, curl_lock_data);
-
-#endif /* HEADER_CURL_SHARE_H */
+CURLcode Curl_get_pathname(const char **cpp, char **path, char *homedir);

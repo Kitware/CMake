@@ -22,6 +22,14 @@
 
 #include "curl_setup.h"
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+#ifdef HAVE_LINUX_TCP_H
+#include <linux/tcp.h>
+#endif
+
 #include <curl/curl.h>
 
 #include "urldata.h"
@@ -241,25 +249,25 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
 
 void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
 {
-  va_list ap;
-  size_t len;
-  char error[CURL_ERROR_SIZE + 2];
-  va_start(ap, fmt);
+  if(data->set.verbose || data->set.errorbuffer) {
+    va_list ap;
+    size_t len;
+    char error[CURL_ERROR_SIZE + 2];
+    va_start(ap, fmt);
+    vsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
+    len = strlen(error);
 
-  vsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
-  len = strlen(error);
-
-  if(data->set.errorbuffer && !data->state.errorbuf) {
-    strcpy(data->set.errorbuffer, error);
-    data->state.errorbuf = TRUE; /* wrote error string */
+    if(data->set.errorbuffer && !data->state.errorbuf) {
+      strcpy(data->set.errorbuffer, error);
+      data->state.errorbuf = TRUE; /* wrote error string */
+    }
+    if(data->set.verbose) {
+      error[len] = '\n';
+      error[++len] = '\0';
+      Curl_debug(data, CURLINFO_TEXT, error, len, NULL);
+    }
+    va_end(ap);
   }
-  if(data->set.verbose) {
-    error[len] = '\n';
-    error[++len] = '\0';
-    Curl_debug(data, CURLINFO_TEXT, error, len, NULL);
-  }
-
-  va_end(ap);
 }
 
 /* Curl_sendf() sends formatted data to the server */
@@ -360,7 +368,7 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
      available. */
   pre_receive_plain(conn, num);
 
-#ifdef MSG_FASTOPEN /* Linux */
+#if defined(MSG_FASTOPEN) && !defined(TCP_FASTOPEN_CONNECT) /* Linux */
   if(conn->bits.tcp_fastopen) {
     bytes_written = sendto(sockfd, mem, len, MSG_FASTOPEN,
                            conn->ip_addr->ai_addr, conn->ip_addr->ai_addrlen);
