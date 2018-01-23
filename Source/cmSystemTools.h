@@ -503,6 +503,10 @@ public:
   static std::string GetRealPath(const std::string& path,
                                  std::string* errorMessage = 0);
 #endif
+
+  /** Perform one-time initialization of libuv.  */
+  static void InitializeLibUV();
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

@@ -99,6 +99,7 @@ int main(int argc, char const* const* argv)
   argv = args.argv();
 
   cmSystemTools::EnableMSVCDebugHook();
+  cmSystemTools::InitializeLibUV();
   cmSystemTools::FindCMakeResources(argv[0]);
   cmCPackLog log;
 
