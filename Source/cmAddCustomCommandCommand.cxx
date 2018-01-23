@@ -177,7 +177,7 @@ bool cmAddCustomCommandCommand::InitialPass(
         case doing_output:
         case doing_outputs:
         case doing_byproducts:
-          if (!cmSystemTools::FileIsFullPath(copy.c_str())) {
+          if (!cmSystemTools::FileIsFullPath(copy)) {
             // This is an output to be generated, so it should be
             // under the build tree.  CMake 2.4 placed this under the
             // source tree.  However the only case that this change
