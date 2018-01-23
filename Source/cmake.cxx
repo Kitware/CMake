@@ -744,8 +744,13 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       }
       cmGlobalGenerator* gen = this->CreateGlobalGenerator(value);
       if (!gen) {
+        const char* kdevError = nullptr;
+        if (value.find("KDevelop3", 0) != std::string::npos) {
+          kdevError = "\nThe KDevelop3 generator is not supported anymore.";
+        }
+
         cmSystemTools::Error("Could not create named generator ",
-                             value.c_str());
+                             value.c_str(), kdevError);
         this->PrintGeneratorList();
       } else {
         this->SetGlobalGenerator(gen);
