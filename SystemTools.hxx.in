@@ -881,7 +881,7 @@ public:
 
   /**
    * Get the width of the terminal window. The code may or may not work, so
-   * make sure you have some resonable defaults prepared if the code returns
+   * make sure you have some reasonable defaults prepared if the code returns
    * some bogus size.
    */
   static int GetTerminalWidth();
