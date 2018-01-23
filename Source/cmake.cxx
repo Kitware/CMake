@@ -34,14 +34,6 @@
 #include <unordered_map>
 #endif
 
-// only build kdevelop generator on non-windows platforms
-// when not bootstrapping cmake
-#if !defined(_WIN32)
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#define CMAKE_USE_KDEVELOP
-#endif
-#endif
-
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #define CMAKE_USE_ECLIPSE
 #endif
@@ -86,10 +78,6 @@
 #endif
 #include "cmExtraKateGenerator.h"
 #include "cmExtraSublimeTextGenerator.h"
-
-#ifdef CMAKE_USE_KDEVELOP
-#include "cmGlobalKdevelopGenerator.h"
-#endif
 
 #ifdef CMAKE_USE_ECLIPSE
 #include "cmExtraEclipseCDT4Generator.h"
@@ -902,9 +890,6 @@ void cmake::AddDefaultExtraGenerators()
   this->ExtraGenerators.push_back(cmExtraEclipseCDT4Generator::GetFactory());
 #endif
 
-#ifdef CMAKE_USE_KDEVELOP
-  this->ExtraGenerators.push_back(cmGlobalKdevelopGenerator::GetFactory());
-#endif
 #endif
 }
 

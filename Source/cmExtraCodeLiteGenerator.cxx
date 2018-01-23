@@ -300,7 +300,7 @@ void cmExtraCodeLiteGenerator::FindMatchingHeaderfiles(
   // files to the project. It does that by iterating over all source files,
   // replacing the file name extension with ".h" and checks whether such a
   // file exists. If it does, it is inserted into the map of files.
-  // A very similar version of that code exists also in the kdevelop
+  // A very similar version of that code exists also in the CodeBlocks
   // project generator.
   for (auto const& sit : cFiles) {
     std::string headerBasename = cmSystemTools::GetFilenamePath(sit.first);

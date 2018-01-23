@@ -607,11 +607,6 @@ set(SRCS
 SET_PROPERTY(SOURCE cmProcessOutput.cxx APPEND PROPERTY COMPILE_DEFINITIONS
   KWSYS_ENCODING_DEFAULT_CODEPAGE=${KWSYS_ENCODING_DEFAULT_CODEPAGE})
 
-# Kdevelop only works on UNIX and not windows
-if(UNIX)
-  set(SRCS ${SRCS} cmGlobalKdevelopGenerator.cxx)
-endif()
-
 # Xcode only works on Apple
 if(APPLE)
   set(SRCS ${SRCS}

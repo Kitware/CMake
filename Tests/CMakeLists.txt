@@ -624,7 +624,6 @@ if(BUILD_TESTING)
       "CodeLite"
       "Eclipse CDT4"
       "Kate"
-      "KDevelop3"
       "Sublime Text 2")
 
     foreach(extraGenerator ${extraGenerators})
@@ -3224,7 +3223,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   endif()
 
   # add some cross compiler tests, for now only with makefile based generators
-  if(CMAKE_GENERATOR MATCHES "Makefiles" OR CMAKE_GENERATOR MATCHES "KDevelop")
+  if(CMAKE_GENERATOR MATCHES "Makefiles")
 
     # if sdcc is found, build the SimpleCOnly project with sdcc
     find_program(SDCC_EXECUTABLE sdcc)

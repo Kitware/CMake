@@ -288,7 +288,7 @@ def validateGlobalSettings(cmakeCommand, cmakeCommandPath, data):
       tmp = line.strip()
     if tmp.endswith(" [arch]"):
       tmp = tmp[0:len(tmp) - 7]
-    if (len(tmp) > 0) and (" - " not in tmp) and (tmp != 'KDevelop3'):
+    if (len(tmp) > 0) and (" - " not in tmp):
       cmakeGenerators.append(tmp)
 
   generators = []
