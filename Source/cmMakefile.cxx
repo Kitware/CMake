@@ -664,7 +664,7 @@ struct file_not_persistent
   bool operator()(const std::string& path) const
   {
     return !(path.find("CMakeTmp") == std::string::npos &&
-             cmSystemTools::FileExists(path.c_str()));
+             cmSystemTools::FileExists(path));
   }
 };
 }
@@ -755,8 +755,9 @@ void cmMakefile::AddCustomCommandToTarget(
     return;
   }
 
+  cmTarget& t = ti->second;
   if (objLibraryCommands == RejectObjectLibraryCommands &&
-      ti->second.GetType() == cmStateEnums::OBJECT_LIBRARY) {
+      t.GetType() == cmStateEnums::OBJECT_LIBRARY) {
     std::ostringstream e;
     e << "Target \"" << target
       << "\" is an OBJECT library "
@@ -764,7 +765,7 @@ void cmMakefile::AddCustomCommandToTarget(
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
-  if (ti->second.GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  if (t.GetType() == cmStateEnums::INTERFACE_LIBRARY) {
     std::ostringstream e;
     e << "Target \"" << target
       << "\" is an INTERFACE library "
@@ -791,13 +792,13 @@ void cmMakefile::AddCustomCommandToTarget(
   cc.SetDepfile(depfile);
   switch (type) {
     case cmTarget::PRE_BUILD:
-      ti->second.AddPreBuildCommand(cc);
+      t.AddPreBuildCommand(cc);
       break;
     case cmTarget::PRE_LINK:
-      ti->second.AddPreLinkCommand(cc);
+      t.AddPreLinkCommand(cc);
       break;
     case cmTarget::POST_BUILD:
-      ti->second.AddPostBuildCommand(cc);
+      t.AddPostBuildCommand(cc);
       break;
   }
 }
@@ -1180,14 +1181,14 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
   static cmsys::RegularExpression valid("^[-/]D[A-Za-z_][A-Za-z0-9_]*(=.*)?$");
 
   // Make sure the definition matches.
-  if (!valid.find(def.c_str())) {
+  if (!valid.find(def)) {
     return false;
   }
 
   // Definitions with non-trivial values require a policy check.
   static cmsys::RegularExpression trivial(
     "^[-/]D[A-Za-z_][A-Za-z0-9_]*(=[A-Za-z0-9_.]+)?$");
-  if (!trivial.find(def.c_str())) {
+  if (!trivial.find(def)) {
     // This definition has a non-trivial value.
     switch (this->GetPolicyStatus(cmPolicies::CMP0005)) {
       case cmPolicies::WARN:
@@ -1409,9 +1410,9 @@ void cmMakefile::Configure()
   // make sure the CMakeFiles dir is there
   std::string filesDir = this->StateSnapshot.GetDirectory().GetCurrentBinary();
   filesDir += cmake::GetCMakeFilesDirectory();
-  cmSystemTools::MakeDirectory(filesDir.c_str());
+  cmSystemTools::MakeDirectory(filesDir);
 
-  assert(cmSystemTools::FileExists(currentStart.c_str(), true));
+  assert(cmSystemTools::FileExists(currentStart, true));
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart.c_str());
 
   cmListFile listFile;
@@ -1572,7 +1573,7 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
   newSnapshot.GetDirectory().SetCurrentSource(srcPath);
   newSnapshot.GetDirectory().SetCurrentBinary(binPath);
 
-  cmSystemTools::MakeDirectory(binPath.c_str());
+  cmSystemTools::MakeDirectory(binPath);
 
   cmMakefile* subMf = new cmMakefile(this->GlobalGenerator, newSnapshot);
   this->GetGlobalGenerator()->AddMakefile(subMf);
@@ -1876,7 +1877,7 @@ cmTarget* cmMakefile::AddLibrary(const std::string& lname,
   return target;
 }
 
-cmTarget* cmMakefile::AddExecutable(const char* exeName,
+cmTarget* cmMakefile::AddExecutable(const std::string& exeName,
                                     const std::vector<std::string>& srcs,
                                     bool excludeFromAll)
 {
@@ -1936,7 +1937,7 @@ cmSourceFile* cmMakefile::GetSourceFileWithOutput(
 {
   // If the queried path is not absolute we use the backward compatible
   // linear-time search for an output with a matching suffix.
-  if (!cmSystemTools::FileIsFullPath(name.c_str())) {
+  if (!cmSystemTools::FileIsFullPath(name)) {
     return this->LinearGetSourceFileWithOutput(name);
   }
   // Otherwise we use an efficient lookup map.
@@ -2055,7 +2056,7 @@ cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(const std::string& name)
  * inherited ones.
  */
 cmSourceGroup* cmMakefile::FindSourceGroup(
-  const char* source, std::vector<cmSourceGroup>& groups) const
+  const std::string& source, std::vector<cmSourceGroup>& groups) const
 {
   // First search for a group that lists the file explicitly.
   for (std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
@@ -3232,7 +3233,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   this->IsSourceFileTryCompile = fast;
   // does the binary directory exist ? If not create it...
   if (!cmSystemTools::FileIsDirectory(bindir)) {
-    cmSystemTools::MakeDirectory(bindir.c_str());
+    cmSystemTools::MakeDirectory(bindir);
   }
 
   // change to the tests directory and run cmake
@@ -3410,7 +3411,7 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
       cmSystemTools::ConvertToUnixSlashes(itempl);
       itempl += "/";
       itempl += filename;
-      if (cmSystemTools::FileExists(itempl.c_str())) {
+      if (cmSystemTools::FileExists(itempl)) {
         moduleInCMakeModulePath = itempl;
         break;
       }
@@ -3422,7 +3423,7 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
   moduleInCMakeRoot += "/Modules/";
   moduleInCMakeRoot += filename;
   cmSystemTools::ConvertToUnixSlashes(moduleInCMakeRoot);
-  if (!cmSystemTools::FileExists(moduleInCMakeRoot.c_str())) {
+  if (!cmSystemTools::FileExists(moduleInCMakeRoot)) {
     moduleInCMakeRoot.clear();
   }
 
@@ -3554,11 +3555,11 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
   this->AddCMakeOutputFile(soutfile);
 
   mode_t perm = 0;
-  cmSystemTools::GetPermissions(sinfile.c_str(), perm);
+  cmSystemTools::GetPermissions(sinfile, perm);
   std::string::size_type pos = soutfile.rfind('/');
   if (pos != std::string::npos) {
     std::string path = soutfile.substr(0, pos);
-    cmSystemTools::MakeDirectory(path.c_str());
+    cmSystemTools::MakeDirectory(path);
   }
 
   if (copyonly) {
@@ -3618,7 +3619,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
                                             soutfile.c_str())) {
       res = 0;
     } else {
-      cmSystemTools::SetPermissions(soutfile.c_str(), perm);
+      cmSystemTools::SetPermissions(soutfile, perm);
     }
     cmSystemTools::RemoveFile(tempOutputFile);
   }
@@ -3707,7 +3708,7 @@ void cmMakefile::AddCMakeDependFilesFromUser()
     cmSystemTools::ExpandListArgument(deps_str, deps);
   }
   for (std::string const& dep : deps) {
-    if (cmSystemTools::FileIsFullPath(dep.c_str())) {
+    if (cmSystemTools::FileIsFullPath(dep)) {
       this->AddCMakeDependFile(dep);
     } else {
       std::string f = this->GetCurrentSourceDirectory();
