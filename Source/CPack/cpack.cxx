@@ -98,6 +98,8 @@ int main(int argc, char const* const* argv)
   argc = args.argc();
   argv = args.argv();
 
+  cmSystemTools::EnableMSVCDebugHook();
+  cmSystemTools::InitializeLibUV();
   cmSystemTools::FindCMakeResources(argv[0]);
   cmCPackLog log;
 
@@ -105,8 +107,6 @@ int main(int argc, char const* const* argv)
   log.SetWarningPrefix("CPack Warning: ");
   log.SetOutputPrefix("CPack: ");
   log.SetVerbosePrefix("CPack Verbose: ");
-
-  cmSystemTools::EnableMSVCDebugHook();
 
   if (cmSystemTools::GetCurrentWorkingDirectory().empty()) {
     cmCPack_Log(&log, cmCPackLog::LOG_ERROR,

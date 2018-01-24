@@ -51,6 +51,8 @@
 // include wincrypt.h after windows.h
 #include <wincrypt.h>
 
+#include <fcntl.h> /* _O_TEXT */
+
 #include "cm_uv.h"
 #else
 #include <sys/time.h>
@@ -979,6 +981,21 @@ std::string cmSystemTools::GetRealPath(const std::string& path,
   return resolved_path;
 }
 #endif
+
+void cmSystemTools::InitializeLibUV()
+{
+#if defined(_WIN32)
+  // Perform libuv one-time initialization now, and then un-do its
+  // global _fmode setting so that using libuv does not change the
+  // default file text/binary mode.  See libuv issue 840.
+  uv_loop_close(uv_default_loop());
+#ifdef _MSC_VER
+  _set_fmode(_O_TEXT);
+#else
+  _fmode = _O_TEXT;
+#endif
+#endif
+}
 
 bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
 {
