@@ -9,7 +9,6 @@ set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")         # +s, flag for exe link to use
 set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "")       # -rpath
 set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP "")   # : or empty
 set(CMAKE_INCLUDE_FLAG_C "-I")       # -I
-set(CMAKE_INCLUDE_FLAG_C_SEP "")     # , or empty
 set(CMAKE_LIBRARY_PATH_FLAG "-L")
 set(CMAKE_LIBRARY_PATH_TERMINATOR "")  # for the Digital Mars D compiler the link paths have to be terminated with a "/"
 set(CMAKE_LINK_LIBRARY_FLAG "-l")
