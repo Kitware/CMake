@@ -470,7 +470,7 @@
 #  Usage::
 #
 #   set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
-#       "${CMAKE_CURRENT_SOURCE_DIR/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
+#       "${CMAKE_CURRENT_SOURCE_DIR}/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
 #
 #  .. note::
 #
@@ -954,7 +954,7 @@ function(cpack_deb_prepare_package_vars)
   # - prerm
   # Usage:
   # set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
-  #    "${CMAKE_CURRENT_SOURCE_DIR/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
+  #    "${CMAKE_CURRENT_SOURCE_DIR}/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
 
   # Are we packaging components ?
   if(CPACK_DEB_PACKAGE_COMPONENT)
