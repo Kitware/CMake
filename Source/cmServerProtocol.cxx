@@ -266,8 +266,8 @@ static void setErrorMessage(std::string* errorMessage, const std::string& text)
   }
 }
 
-static bool testHomeDirectory(cmState* state, std::string& value,
-                              std::string* errorMessage)
+static bool getOrTestHomeDirectory(cmState* state, std::string& value,
+                                   std::string* errorMessage)
 {
   const std::string cachedValue =
     std::string(state->GetCacheEntryValue("CMAKE_HOME_DIRECTORY"));
@@ -288,9 +288,10 @@ static bool testHomeDirectory(cmState* state, std::string& value,
   return true;
 }
 
-static bool testValue(cmState* state, const std::string& key,
-                      std::string& value, const std::string& keyDescription,
-                      std::string* errorMessage)
+static bool getOrTestValue(cmState* state, const std::string& key,
+                           std::string& value,
+                           const std::string& keyDescription,
+                           std::string* errorMessage)
 {
   const char* entry = state->GetCacheEntryValue(key);
   const std::string cachedValue =
@@ -337,31 +338,31 @@ bool cmServerProtocol1::DoActivate(const cmServerRequest& request,
       cmState* state = cm->GetState();
 
       // Check generator:
-      if (!testValue(state, "CMAKE_GENERATOR", generator, "generator",
-                     errorMessage)) {
+      if (!getOrTestValue(state, "CMAKE_GENERATOR", generator, "generator",
+                          errorMessage)) {
         return false;
       }
 
       // check extra generator:
-      if (!testValue(state, "CMAKE_EXTRA_GENERATOR", extraGenerator,
-                     "extra generator", errorMessage)) {
+      if (!getOrTestValue(state, "CMAKE_EXTRA_GENERATOR", extraGenerator,
+                          "extra generator", errorMessage)) {
         return false;
       }
 
       // check sourcedir:
-      if (!testHomeDirectory(state, sourceDirectory, errorMessage)) {
+      if (!getOrTestHomeDirectory(state, sourceDirectory, errorMessage)) {
         return false;
       }
 
       // check toolset:
-      if (!testValue(state, "CMAKE_GENERATOR_TOOLSET", toolset, "toolset",
-                     errorMessage)) {
+      if (!getOrTestValue(state, "CMAKE_GENERATOR_TOOLSET", toolset, "toolset",
+                          errorMessage)) {
         return false;
       }
 
       // check platform:
-      if (!testValue(state, "CMAKE_GENERATOR_PLATFORM", platform, "platform",
-                     errorMessage)) {
+      if (!getOrTestValue(state, "CMAKE_GENERATOR_PLATFORM", platform,
+                          "platform", errorMessage)) {
         return false;
       }
     }
