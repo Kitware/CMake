@@ -21,6 +21,12 @@ std::vector<cmGeneratorExpressionToken> cmGeneratorExpressionLexer::Tokenize(
 {
   std::vector<cmGeneratorExpressionToken> result;
 
+  if (input.find('$') == std::string::npos) {
+    result.push_back(cmGeneratorExpressionToken(
+      cmGeneratorExpressionToken::Text, input.c_str(), input.size()));
+    return result;
+  }
+
   const char* c = input.c_str();
   const char* upto = c;
 
