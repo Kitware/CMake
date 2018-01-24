@@ -277,10 +277,6 @@ Giving the "major" version of the requested protocol version will make the serve
 use the latest minor version of that protocol. Use this if you do not explicitly
 need to depend on a specific minor version.
 
-If the build directory already contains a CMake cache, it is sufficient to set
-the "buildDirectory" attribute. To create a fresh build directory, additional
-attributes are required depending on the protocol version.
-
 Protocol version 1.0 requires the following attributes to be set:
 
   * "sourceDirectory" with a path to the sources
@@ -289,6 +285,10 @@ Protocol version 1.0 requires the following attributes to be set:
   * "extraGenerator" (optional!) with the extra generator to be used
   * "platform" with the generator platform (if supported by the generator)
   * "toolset" with the generator toolset (if supported by the generator)
+
+Protocol version 1.2 makes all but the build directory optional, provided
+there is a valid cache in the build directory that contains all the other
+information already.
 
 Example::
 
