@@ -39,4 +39,4 @@
 #  endif
 #endif
 
-#endif
+#endif /* LIBSHARED_EXPORT_H */

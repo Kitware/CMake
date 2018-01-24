@@ -19,6 +19,7 @@
 #              [EXPORT_FILE_NAME <export_file_name>]
 #              [DEPRECATED_MACRO_NAME <deprecated_macro_name>]
 #              [NO_EXPORT_MACRO_NAME <no_export_macro_name>]
+#              [INCLUDE_GUARD_NAME <include_guard_name>]
 #              [STATIC_DEFINE <static_define>]
 #              [NO_DEPRECATED_MACRO_NAME <no_deprecated_macro_name>]
 #              [DEFINE_NO_DEPRECATED]
@@ -277,7 +278,7 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   set(options DEFINE_NO_DEPRECATED)
   set(oneValueArgs PREFIX_NAME BASE_NAME EXPORT_MACRO_NAME EXPORT_FILE_NAME
     DEPRECATED_MACRO_NAME NO_EXPORT_MACRO_NAME STATIC_DEFINE
-    NO_DEPRECATED_MACRO_NAME CUSTOM_CONTENT_FROM_VARIABLE)
+    NO_DEPRECATED_MACRO_NAME CUSTOM_CONTENT_FROM_VARIABLE INCLUDE_GUARD_NAME)
   set(multiValueArgs)
 
   cmake_parse_arguments(_GEH "${options}" "${oneValueArgs}" "${multiValueArgs}"
@@ -341,7 +342,11 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   endif()
   string(MAKE_C_IDENTIFIER ${NO_DEPRECATED_MACRO_NAME} NO_DEPRECATED_MACRO_NAME)
 
-  set(INCLUDE_GUARD_NAME "${EXPORT_MACRO_NAME}_H")
+  if(_GEH_INCLUDE_GUARD_NAME)
+    set(INCLUDE_GUARD_NAME ${_GEH_INCLUDE_GUARD_NAME})
+  else()
+    set(INCLUDE_GUARD_NAME "${EXPORT_MACRO_NAME}_H")
+  endif()
 
   get_target_property(EXPORT_IMPORT_CONDITION ${TARGET_LIBRARY} DEFINE_SYMBOL)
 
