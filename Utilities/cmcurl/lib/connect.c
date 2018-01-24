@@ -28,8 +28,10 @@
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h> /* for sockaddr_un */
 #endif
-#ifdef HAVE_NETINET_TCP_H
-#include <netinet/tcp.h> /* for TCP_NODELAY */
+#ifdef HAVE_LINUX_TCP_H
+#include <linux/tcp.h>
+#elif defined(HAVE_NETINET_TCP_H)
+#include <netinet/tcp.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -179,12 +181,12 @@ singleipconnect(struct connectdata *conn,
  *
  * @unittest: 1303
  */
-time_t Curl_timeleft(struct Curl_easy *data,
-                     struct curltime *nowp,
-                     bool duringconnect)
+timediff_t Curl_timeleft(struct Curl_easy *data,
+                         struct curltime *nowp,
+                         bool duringconnect)
 {
   int timeout_set = 0;
-  time_t timeout_ms = duringconnect?DEFAULT_CONNECT_TIMEOUT:0;
+  timediff_t timeout_ms = duringconnect?DEFAULT_CONNECT_TIMEOUT:0;
   struct curltime now;
 
   /* if a timeout is set, use the most restrictive one */
@@ -218,17 +220,17 @@ time_t Curl_timeleft(struct Curl_easy *data,
   }
 
   if(!nowp) {
-    now = Curl_tvnow();
+    now = Curl_now();
     nowp = &now;
   }
 
   /* subtract elapsed time */
   if(duringconnect)
     /* since this most recent connect started */
-    timeout_ms -= Curl_tvdiff(*nowp, data->progress.t_startsingle);
+    timeout_ms -= Curl_timediff(*nowp, data->progress.t_startsingle);
   else
     /* since the entire operation started */
-    timeout_ms -= Curl_tvdiff(*nowp, data->progress.t_startop);
+    timeout_ms -= Curl_timediff(*nowp, data->progress.t_startop);
   if(!timeout_ms)
     /* avoid returning 0 as that means no timeout! */
     return -1;
@@ -285,6 +287,34 @@ static CURLcode bindlocal(struct connectdata *conn,
 
     /* interface */
     if(!is_host) {
+#ifdef SO_BINDTODEVICE
+      /* I am not sure any other OSs than Linux that provide this feature,
+       * and at the least I cannot test. --Ben
+       *
+       * This feature allows one to tightly bind the local socket to a
+       * particular interface.  This will force even requests to other
+       * local interfaces to go out the external interface.
+       *
+       *
+       * Only bind to the interface when specified as interface, not just
+       * as a hostname or ip address.
+       *
+       * interface might be a VRF, eg: vrf-blue, which means it cannot be
+       * converted to an IP address and would fail Curl_if2ip. Simply try
+       * to use it straight away.
+       */
+      if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
+                    dev, (curl_socklen_t)strlen(dev) + 1) == 0) {
+        /* This is typically "errno 1, error: Operation not permitted" if
+         * you're not running as root or another suitable privileged
+         * user.
+         * If it succeeds it means the parameter was a valid interface and
+         * not an IP address. Return immediately.
+         */
+        return CURLE_OK;
+      }
+#endif
+
       switch(Curl_if2ip(af, scope, conn->scope_id, dev,
                         myhost, sizeof(myhost))) {
         case IF2IP_NOT_FOUND:
@@ -305,30 +335,6 @@ static CURLcode bindlocal(struct connectdata *conn,
           infof(data, "Local Interface %s is ip %s using address family %i\n",
                 dev, myhost, af);
           done = 1;
-
-#ifdef SO_BINDTODEVICE
-          /* I am not sure any other OSs than Linux that provide this feature,
-           * and at the least I cannot test. --Ben
-           *
-           * This feature allows one to tightly bind the local socket to a
-           * particular interface.  This will force even requests to other
-           * local interfaces to go out the external interface.
-           *
-           *
-           * Only bind to the interface when specified as interface, not just
-           * as a hostname or ip address.
-           */
-          if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
-                        dev, (curl_socklen_t)strlen(dev) + 1) != 0) {
-            error = SOCKERRNO;
-            infof(data, "SO_BINDTODEVICE %s failed with errno %d: %s;"
-                  " will do regular bind\n",
-                  dev, error, Curl_strerror(conn, error));
-            /* This is typically "errno 1, error: Operation not permitted" if
-               you're not running as root or another suitable privileged
-               user */
-          }
-#endif
           break;
       }
     }
@@ -408,6 +414,10 @@ static CURLcode bindlocal(struct connectdata *conn,
     }
 
     if(done < 1) {
+      /* errorbuf is set false so failf will overwrite any message already in
+         the error buffer, so the user receives this error message instead of a
+         generic resolve error. */
+      data->state.errorbuf = FALSE;
       failf(data, "Couldn't bind to '%s'", dev);
       return CURLE_INTERFACE_FAILED;
     }
@@ -721,7 +731,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 {
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
-  time_t allow;
+  timediff_t allow;
   int error = 0;
   struct curltime now;
   int rc;
@@ -737,7 +747,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  now = Curl_tvnow();
+  now = Curl_now();
 
   /* figure out how long time we have left to connect */
   allow = Curl_timeleft(data, &now, TRUE);
@@ -765,7 +775,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
     if(rc == 0) { /* no connection yet */
       error = 0;
-      if(curlx_tvdiff(now, conn->connecttime) >= conn->timeoutms_per_addr) {
+      if(Curl_timediff(now, conn->connecttime) >= conn->timeoutms_per_addr) {
         infof(data, "After %ldms connect time, move on!\n",
               conn->timeoutms_per_addr);
         error = ETIMEDOUT;
@@ -773,7 +783,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
       /* should we try another protocol family? */
       if(i == 0 && conn->tempaddr[1] == NULL &&
-         curlx_tvdiff(now, conn->connecttime) >= HAPPY_EYEBALLS_TIMEOUT) {
+         Curl_timediff(now, conn->connecttime) >= HAPPY_EYEBALLS_TIMEOUT) {
         trynextip(conn, sockindex, 1);
       }
     }
@@ -785,6 +795,9 @@ CURLcode Curl_is_connected(struct connectdata *conn,
         conn->sock[sockindex] = conn->tempsock[i];
         conn->ip_addr = conn->tempaddr[i];
         conn->tempsock[i] = CURL_SOCKET_BAD;
+#ifdef ENABLE_IPV6
+        conn->bits.ipv6 = (conn->ip_addr->ai_family == AF_INET6)?TRUE:FALSE;
+#endif
 
         /* close the other socket, if open */
         if(conn->tempsock[other] != CURL_SOCKET_BAD) {
@@ -978,6 +991,9 @@ static CURLcode singleipconnect(struct connectdata *conn,
   char ipaddress[MAX_IPADR_LEN];
   long port;
   bool is_tcp;
+#ifdef TCP_FASTOPEN_CONNECT
+  int optval = 1;
+#endif
 
   *sockp = CURL_SOCKET_BAD;
 
@@ -1051,17 +1067,19 @@ static CURLcode singleipconnect(struct connectdata *conn,
   /* set socket non-blocking */
   (void)curlx_nonblock(sockfd, TRUE);
 
-  conn->connecttime = Curl_tvnow();
+  conn->connecttime = Curl_now();
   if(conn->num_addr > 1)
     Curl_expire(data, conn->timeoutms_per_addr, EXPIRE_DNS_PER_NAME);
 
   /* Connect TCP sockets, bind UDP */
   if(!isconnected && (conn->socktype == SOCK_STREAM)) {
     if(conn->bits.tcp_fastopen) {
-#if defined(CONNECT_DATA_IDEMPOTENT) /* OS X */
-#ifdef HAVE_BUILTIN_AVAILABLE
+#if defined(CONNECT_DATA_IDEMPOTENT) /* Darwin */
+#  if defined(HAVE_BUILTIN_AVAILABLE)
+      /* while connectx function is available since macOS 10.11 / iOS 9,
+         it did not have the interface declared correctly until
+         Xcode 9 / macOS SDK 10.13 */
       if(__builtin_available(macOS 10.11, iOS 9.0, tvOS 9.0, watchOS 2.0, *)) {
-#endif /* HAVE_BUILTIN_AVAILABLE */
         sa_endpoints_t endpoints;
         endpoints.sae_srcif = 0;
         endpoints.sae_srcaddr = NULL;
@@ -1072,13 +1090,22 @@ static CURLcode singleipconnect(struct connectdata *conn,
         rc = connectx(sockfd, &endpoints, SAE_ASSOCID_ANY,
                       CONNECT_RESUME_ON_READ_WRITE | CONNECT_DATA_IDEMPOTENT,
                       NULL, 0, NULL, NULL);
-#ifdef HAVE_BUILTIN_AVAILABLE
       }
       else {
         rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
       }
-#endif /* HAVE_BUILTIN_AVAILABLE */
-#elif defined(MSG_FASTOPEN) /* Linux */
+#  else
+      rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
+#  endif /* HAVE_BUILTIN_AVAILABLE */
+#elif defined(TCP_FASTOPEN_CONNECT) /* Linux >= 4.11 */
+      if(setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN_CONNECT,
+                    (void *)&optval, sizeof(optval)) < 0)
+        infof(data, "Failed to enable TCP Fast Open on fd %d\n", sockfd);
+      else
+        infof(data, "TCP_FASTOPEN_CONNECT set\n");
+
+      rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
+#elif defined(MSG_FASTOPEN) /* old Linux */
       if(conn->given->flags & PROTOPT_SSL)
         rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
       else
@@ -1096,10 +1123,6 @@ static CURLcode singleipconnect(struct connectdata *conn,
     *sockp = sockfd;
     return CURLE_OK;
   }
-
-#ifdef ENABLE_IPV6
-  conn->bits.ipv6 = (addr.family == AF_INET6)?TRUE:FALSE;
-#endif
 
   if(-1 == rc) {
     switch(error) {
@@ -1145,10 +1168,10 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
                           const struct Curl_dns_entry *remotehost)
 {
   struct Curl_easy *data = conn->data;
-  struct curltime before = Curl_tvnow();
+  struct curltime before = Curl_now();
   CURLcode result = CURLE_COULDNT_CONNECT;
 
-  time_t timeout_ms = Curl_timeleft(data, &before, TRUE);
+  timediff_t timeout_ms = Curl_timeleft(data, &before, TRUE);
 
   if(timeout_ms < 0) {
     /* a precaution, no need to continue if time already is up */
@@ -1225,7 +1248,7 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
     find.tofind = data->state.lastconnect;
     find.found = FALSE;
 
-    Curl_conncache_foreach(data->multi_easy?
+    Curl_conncache_foreach(data, data->multi_easy?
                            &data->multi_easy->conn_cache:
                            &data->multi->conn_cache, &find, conn_is_conn);
 
