@@ -2,8 +2,7 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 include(Compiler/Cray)
-
-set(CMAKE_C_VERBOSE_FLAG "-v")
+__compiler_cray(C)
 
 string(APPEND CMAKE_C_FLAGS_MINSIZEREL_INIT " -DNDEBUG")
 string(APPEND CMAKE_C_FLAGS_RELEASE_INIT " -DNDEBUG")
