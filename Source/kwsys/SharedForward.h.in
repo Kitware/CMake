@@ -225,7 +225,7 @@ static const char kwsys_shared_forward_path_slash[2] = {
 #define KWSYS_SHARED_FORWARD_LDD_N 1
 #define KWSYS_SHARED_FORWARD_LDPATH "LD_LIBRARY_PATH"
 
-/* OSX */
+/* OS X */
 #elif defined(__APPLE__)
 #define KWSYS_SHARED_FORWARD_LDD "otool", "-L"
 #define KWSYS_SHARED_FORWARD_LDD_N 2

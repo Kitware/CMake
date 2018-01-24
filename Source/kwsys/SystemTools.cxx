@@ -107,7 +107,8 @@ extern char** environ;
 
 // getpwnam doesn't exist on Windows and Cray Xt3/Catamount
 // same for TIOCGWINSZ
-#if defined(_WIN32) || defined(__LIBCATAMOUNT__)
+#if defined(_WIN32) || defined(__LIBCATAMOUNT__) ||                           \
+  (defined(HAVE_GETPWNAM) && HAVE_GETPWNAM == 0)
 #undef HAVE_GETPWNAM
 #undef HAVE_TTY_INFO
 #else
@@ -306,7 +307,7 @@ inline int Chdir(const std::string& dir)
   return chdir(dir.c_str());
 }
 inline void Realpath(const std::string& path, std::string& resolved_path,
-                     std::string* errorMessage = 0)
+                     std::string* errorMessage = KWSYS_NULLPTR)
 {
   char resolved_name[KWSYS_SYSTEMTOOLS_MAXPATH];
 
@@ -352,7 +353,7 @@ double SystemTools::GetTime(void)
           11644473600.0);
 #else
   struct timeval t;
-  gettimeofday(&t, 0);
+  gettimeofday(&t, KWSYS_NULLPTR);
   return 1.0 * double(t.tv_sec) + 0.000001 * double(t.tv_usec);
 #endif
 }
@@ -414,7 +415,7 @@ public:
 
   const envchar* Release(const envchar* env)
   {
-    const envchar* old = 0;
+    const envchar* old = KWSYS_NULLPTR;
     iterator i = this->find(env);
     if (i != this->end()) {
       old = *i;
@@ -489,7 +490,7 @@ void SystemTools::GetPath(std::vector<std::string>& path, const char* env)
 
 const char* SystemTools::GetEnvImpl(const char* key)
 {
-  const char* v = 0;
+  const char* v = KWSYS_NULLPTR;
 #if defined(_WIN32)
   std::string env;
   if (SystemTools::GetEnv(key, env)) {
@@ -545,7 +546,7 @@ bool SystemTools::HasEnv(const char* key)
 #else
   const char* v = getenv(key);
 #endif
-  return v != 0;
+  return v != KWSYS_NULLPTR;
 }
 
 bool SystemTools::HasEnv(const std::string& key)
@@ -776,7 +777,7 @@ bool SystemTools::MakeDirectory(const std::string& path, const mode_t* mode)
   while ((pos = dir.find('/', pos)) != std::string::npos) {
     topdir = dir.substr(0, pos);
 
-    if (Mkdir(topdir) == 0 && mode != 0) {
+    if (Mkdir(topdir) == 0 && mode != KWSYS_NULLPTR) {
       SystemTools::SetPermissions(topdir, *mode);
     }
 
@@ -795,7 +796,7 @@ bool SystemTools::MakeDirectory(const std::string& path, const mode_t* mode)
           ) {
       return false;
     }
-  } else if (mode != 0) {
+  } else if (mode != KWSYS_NULLPTR) {
     SystemTools::SetPermissions(topdir, *mode);
   }
 
@@ -1072,7 +1073,7 @@ bool SystemTools::WriteRegistryValue(const std::string&, const std::string&,
 //      HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.1\InstallPath
 //      =>  will delete the data of the "default" value of the key
 //      HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4;Root
-//      =>  will delete  the data of the "Root" value of the key
+//      =>  will delete the data of the "Root" value of the key
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 bool SystemTools::DeleteRegistryValue(const std::string& key, KeyWOW64 view)
@@ -1520,7 +1521,7 @@ char* SystemTools::AppendStrings(const char* str1, const char* str2)
   size_t len1 = strlen(str1);
   char* newstr = new char[len1 + strlen(str2) + 1];
   if (!newstr) {
-    return 0;
+    return KWSYS_NULLPTR;
   }
   strcpy(newstr, str1);
   strcat(newstr + len1, str2);
@@ -1543,7 +1544,7 @@ char* SystemTools::AppendStrings(const char* str1, const char* str2,
   size_t len1 = strlen(str1), len2 = strlen(str2);
   char* newstr = new char[len1 + len2 + strlen(str3) + 1];
   if (!newstr) {
-    return 0;
+    return KWSYS_NULLPTR;
   }
   strcpy(newstr, str1);
   strcat(newstr + len1, str2);
@@ -1593,7 +1594,7 @@ size_t SystemTools::CountChar(const char* str, char c)
 char* SystemTools::RemoveChars(const char* str, const char* toremove)
 {
   if (!str) {
-    return NULL;
+    return KWSYS_NULLPTR;
   }
   char* clean_str = new char[strlen(str) + 1];
   char* ptr = clean_str;
@@ -1615,7 +1616,7 @@ char* SystemTools::RemoveChars(const char* str, const char* toremove)
 char* SystemTools::RemoveCharsButUpperHex(const char* str)
 {
   if (!str) {
-    return 0;
+    return KWSYS_NULLPTR;
   }
   char* clean_str = new char[strlen(str) + 1];
   char* ptr = clean_str;
@@ -1696,7 +1697,7 @@ bool SystemTools::StringEndsWith(const std::string& str1, const char* str2)
 const char* SystemTools::FindLastString(const char* str1, const char* str2)
 {
   if (!str1 || !str2) {
-    return NULL;
+    return KWSYS_NULLPTR;
   }
 
   size_t len1 = strlen(str1), len2 = strlen(str2);
@@ -1709,7 +1710,7 @@ const char* SystemTools::FindLastString(const char* str1, const char* str2)
     } while (ptr-- != str1);
   }
 
-  return NULL;
+  return KWSYS_NULLPTR;
 }
 
 // Duplicate string
@@ -1719,7 +1720,7 @@ char* SystemTools::DuplicateString(const char* str)
     char* newstr = new char[strlen(str) + 1];
     return strcpy(newstr, str);
   }
-  return NULL;
+  return KWSYS_NULLPTR;
 }
 
 // Return a cropped string
@@ -3100,7 +3101,7 @@ bool SystemTools::FindProgramPath(const char* argv0, std::string& pathOut,
 
 std::string SystemTools::CollapseFullPath(const std::string& in_relative)
 {
-  return SystemTools::CollapseFullPath(in_relative, 0);
+  return SystemTools::CollapseFullPath(in_relative, KWSYS_NULLPTR);
 }
 
 void SystemTools::AddTranslationPath(const std::string& a,
@@ -3326,7 +3327,7 @@ std::string SystemTools::RelativePath(const std::string& local,
   unsigned int sameCount = 0;
   while (((sameCount <= (localSplit.size() - 1)) &&
           (sameCount <= (remoteSplit.size() - 1))) &&
-// for windows and apple do a case insensitive string compare
+// for Windows and Apple do a case insensitive string compare
 #if defined(_WIN32) || defined(__APPLE__)
          SystemTools::Strucmp(localSplit[sameCount].c_str(),
                               remoteSplit[sameCount].c_str()) == 0

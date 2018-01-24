@@ -83,7 +83,9 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3 FATAL_ERROR)
 FOREACH(p
+    CMP0022 # CMake 2.8, Define link interface - required by android_mk export
     CMP0025 # CMake 3.0, Compiler id for Apple Clang is now AppleClang.
+    CMP0042 # CMake 3.0, MACOSX_RPATH is enabled by default.
     CMP0048 # CMake 3.0, Let the project command manage version variables.
     CMP0056 # CMake 3.2, Honor link flags in try_compile() source-file signature.
     CMP0063 # CMake 3.3, Honor visibility properties for all target types.
@@ -494,6 +496,14 @@ IF(KWSYS_USE_SystemTools)
     KWSYS_CXX_STAT_HAS_ST_MTIM=${KWSYS_CXX_STAT_HAS_ST_MTIM}
     KWSYS_CXX_STAT_HAS_ST_MTIMESPEC=${KWSYS_CXX_STAT_HAS_ST_MTIMESPEC}
     )
+
+  # Disable getpwnam for static linux builds since it depends on shared glibc
+  GET_PROPERTY(SHARED_LIBS_SUPPORTED GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
+  IF(CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT SHARED_LIBS_SUPPORTED)
+    SET_PROPERTY(SOURCE SystemTools.cxx APPEND PROPERTY COMPILE_DEFINITIONS
+      HAVE_GETPWNAM=0
+      )
+  ENDIF()
 ENDIF()
 
 IF(KWSYS_USE_SystemInformation)
@@ -576,7 +586,7 @@ IF(KWSYS_USE_SystemInformation)
     CHECK_INCLUDE_FILE_CXX("execinfo.h" KWSYS_CXX_HAS_EXECINFOH)
     IF (KWSYS_CXX_HAS_EXECINFOH)
       # we have the backtrace header check if it
-      # can be used  with this compiler
+      # can be used with this compiler
       SET(KWSYS_PLATFORM_CXX_TEST_LINK_LIBRARIES ${EXECINFO_LIB})
       KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_BACKTRACE
          "Checking whether backtrace works with this C++ compiler" DIRECT)
@@ -1012,11 +1022,11 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 
     # C tests
     SET(KWSYS_C_TESTS
-      testEncode
-      testTerminal
+      testEncode.c
+      testTerminal.c
       )
     IF(KWSYS_STANDALONE)
-      SET(KWSYS_C_TESTS ${KWSYS_C_TESTS} testFail)
+      SET(KWSYS_C_TESTS ${KWSYS_C_TESTS} testFail.c)
     ENDIF()
     CREATE_TEST_SOURCELIST(
       KWSYS_C_TEST_SRCS ${KWSYS_NAMESPACE}TestsC.c
@@ -1025,7 +1035,8 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     ADD_EXECUTABLE(${KWSYS_NAMESPACE}TestsC ${KWSYS_C_TEST_SRCS})
     SET_PROPERTY(TARGET ${KWSYS_NAMESPACE}TestsC PROPERTY LABELS ${KWSYS_LABELS_EXE})
     TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE}TestsC ${KWSYS_TARGET_C_LINK})
-    FOREACH(test ${KWSYS_C_TESTS})
+    FOREACH(testfile ${KWSYS_C_TESTS})
+      get_filename_component(test "${testfile}" NAME_WE)
       ADD_TEST(kwsys.${test} ${EXEC_DIR}/${KWSYS_NAMESPACE}TestsC ${test} ${KWSYS_TEST_ARGS_${test}})
       SET_PROPERTY(TEST kwsys.${test} PROPERTY LABELS ${KWSYS_LABELS_TEST})
     ENDFOREACH()
@@ -1033,24 +1044,24 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     # C++ tests
     IF(NOT WATCOM AND NOT CMake_SOURCE_DIR)
       SET(KWSYS_CXX_TESTS
-        testHashSTL
+        testHashSTL.cxx
         )
     ENDIF()
     SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
-      testConfigure
-      testSystemTools
-      testCommandLineArguments
-      testCommandLineArguments1
-      testDirectory
+      testConfigure.cxx
+      testSystemTools.cxx
+      testCommandLineArguments.cxx
+      testCommandLineArguments1.cxx
+      testDirectory.cxx
       )
     IF(KWSYS_STL_HAS_WSTRING)
       SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
-        testEncoding
+        testEncoding.cxx
         )
     ENDIF()
     IF(KWSYS_USE_FStream)
       SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
-        testFStream
+        testFStream.cxx
         )
     ENDIF()
     IF(KWSYS_USE_ConsoleBuf)
@@ -1062,7 +1073,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       SET_PROPERTY(TARGET testConsoleBufChild PROPERTY LABELS ${KWSYS_LABELS_EXE})
       TARGET_LINK_LIBRARIES(testConsoleBufChild ${KWSYS_TARGET_LINK})
       SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
-        testConsoleBuf
+        testConsoleBuf.cxx
         )
       IF("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC" AND
          CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "19.0.23506")
@@ -1072,10 +1083,10 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
         KWSYS_ENCODING_DEFAULT_CODEPAGE=${KWSYS_ENCODING_DEFAULT_CODEPAGE})
     ENDIF()
     IF(KWSYS_USE_SystemInformation)
-      SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS} testSystemInformation)
+      SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS} testSystemInformation.cxx)
     ENDIF()
     IF(KWSYS_USE_DynamicLoader)
-      SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS} testDynamicLoader)
+      SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS} testDynamicLoader.cxx)
       # If kwsys contains the DynamicLoader, need extra library
       ADD_LIBRARY(${KWSYS_NAMESPACE}TestDynload MODULE testDynload.c)
       SET_PROPERTY(TARGET ${KWSYS_NAMESPACE}TestDynload PROPERTY LABELS ${KWSYS_LABELS_LIB})
@@ -1134,7 +1145,8 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       -p
       some junk at the end
       )
-    FOREACH(test ${KWSYS_CXX_TESTS})
+    FOREACH(testfile ${KWSYS_CXX_TESTS})
+      get_filename_component(test "${testfile}" NAME_WE)
       ADD_TEST(kwsys.${test} ${EXEC_DIR}/${KWSYS_NAMESPACE}TestsCxx ${test} ${KWSYS_TEST_ARGS_${test}})
       SET_PROPERTY(TEST kwsys.${test} PROPERTY LABELS ${KWSYS_LABELS_TEST})
     ENDFOREACH()

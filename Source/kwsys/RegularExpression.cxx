@@ -37,18 +37,18 @@ namespace KWSYS_NAMESPACE {
 RegularExpression::RegularExpression(const RegularExpression& rxp)
 {
   if (!rxp.program) {
-    this->program = 0;
+    this->program = KWSYS_NULLPTR;
     return;
   }
   int ind;
   this->progsize = rxp.progsize;            // Copy regular expression size
   this->program = new char[this->progsize]; // Allocate storage
-  for (ind = this->progsize; ind-- != 0;)   // Copy regular expresion
+  for (ind = this->progsize; ind-- != 0;)   // Copy regular expression
     this->program[ind] = rxp.program[ind];
   // Copy pointers into last successful "find" operation
   this->regmatch = rxp.regmatch;
   this->regmust = rxp.regmust; // Copy field
-  if (rxp.regmust != 0) {
+  if (rxp.regmust != KWSYS_NULLPTR) {
     char* dum = rxp.program;
     ind = 0;
     while (dum != rxp.regmust) {
@@ -69,19 +69,19 @@ RegularExpression& RegularExpression::operator=(const RegularExpression& rxp)
     return *this;
   }
   if (!rxp.program) {
-    this->program = 0;
+    this->program = KWSYS_NULLPTR;
     return *this;
   }
   int ind;
   this->progsize = rxp.progsize; // Copy regular expression size
   delete[] this->program;
   this->program = new char[this->progsize]; // Allocate storage
-  for (ind = this->progsize; ind-- != 0;)   // Copy regular expresion
+  for (ind = this->progsize; ind-- != 0;)   // Copy regular expression
     this->program[ind] = rxp.program[ind];
   // Copy pointers into last successful "find" operation
   this->regmatch = rxp.regmatch;
   this->regmust = rxp.regmust; // Copy field
-  if (rxp.regmust != 0) {
+  if (rxp.regmust != KWSYS_NULLPTR) {
     char* dum = rxp.program;
     ind = 0;
     while (dum != rxp.regmust) {
@@ -128,8 +128,8 @@ bool RegularExpression::deep_equal(const RegularExpression& rxp) const
           this->regmatch.end() == rxp.regmatch.end());
 }
 
-// The remaining code in this file is derived from the  regular expression code
-// whose  copyright statement appears  below.  It has been  changed to work
+// The remaining code in this file is derived from the regular expression code
+// whose copyright statement appears below.  It has been changed to work
 // with the class concepts of C++ and COOL.
 
 /*
@@ -335,7 +335,7 @@ bool RegularExpression::compile(const char* exp)
   size_t len;
   int flags;
 
-  if (exp == 0) {
+  if (exp == KWSYS_NULLPTR) {
     // RAISE Error, SYM(RegularExpression), SYM(No_Expr),
     printf("RegularExpression::compile(): No expression supplied.\n");
     return false;
@@ -363,13 +363,13 @@ bool RegularExpression::compile(const char* exp)
 
   // Allocate space.
   //#ifndef _WIN32
-  if (this->program != 0)
+  if (this->program != KWSYS_NULLPTR)
     delete[] this->program;
   //#endif
   this->program = new char[comp.regsize];
   this->progsize = static_cast<int>(comp.regsize);
 
-  if (this->program == 0) {
+  if (this->program == KWSYS_NULLPTR) {
     // RAISE Error, SYM(RegularExpression), SYM(Out_Of_Memory),
     printf("RegularExpression::compile(): Out of memory.\n");
     return false;
@@ -385,7 +385,7 @@ bool RegularExpression::compile(const char* exp)
   // Dig out information for optimizations.
   this->regstart = '\0'; // Worst-case defaults.
   this->reganch = 0;
-  this->regmust = 0;
+  this->regmust = KWSYS_NULLPTR;
   this->regmlen = 0;
   scan = this->program + 1;       // First BRANCH.
   if (OP(regnext(scan)) == END) { // Only one top-level choice.
@@ -406,9 +406,9 @@ bool RegularExpression::compile(const char* exp)
     // absence of others.
     //
     if (flags & SPSTART) {
-      longest = 0;
+      longest = KWSYS_NULLPTR;
       len = 0;
-      for (; scan != 0; scan = regnext(scan))
+      for (; scan != KWSYS_NULLPTR; scan = regnext(scan))
         if (OP(scan) == EXACTLY && strlen(OPERAND(scan)) >= len) {
           longest = OPERAND(scan);
           len = strlen(OPERAND(scan));
@@ -444,19 +444,19 @@ char* RegExpCompile::reg(int paren, int* flagp)
     if (regnpar >= RegularExpressionMatch::NSUBEXP) {
       // RAISE Error, SYM(RegularExpression), SYM(Too_Many_Parens),
       printf("RegularExpression::compile(): Too many parentheses.\n");
-      return 0;
+      return KWSYS_NULLPTR;
     }
     parno = regnpar;
     regnpar++;
     ret = regnode(static_cast<char>(OPEN + parno));
   } else
-    ret = 0;
+    ret = KWSYS_NULLPTR;
 
   // Pick up the branches, linking them together.
   br = regbranch(&flags);
-  if (br == 0)
-    return (0);
-  if (ret != 0)
+  if (br == KWSYS_NULLPTR)
+    return (KWSYS_NULLPTR);
+  if (ret != KWSYS_NULLPTR)
     regtail(ret, br); // OPEN -> first.
   else
     ret = br;
@@ -466,8 +466,8 @@ char* RegExpCompile::reg(int paren, int* flagp)
   while (*regparse == '|') {
     regparse++;
     br = regbranch(&flags);
-    if (br == 0)
-      return (0);
+    if (br == KWSYS_NULLPTR)
+      return (KWSYS_NULLPTR);
     regtail(ret, br); // BRANCH -> BRANCH.
     if (!(flags & HASWIDTH))
       *flagp &= ~HASWIDTH;
@@ -479,23 +479,23 @@ char* RegExpCompile::reg(int paren, int* flagp)
   regtail(ret, ender);
 
   // Hook the tails of the branches to the closing node.
-  for (br = ret; br != 0; br = regnext(br))
+  for (br = ret; br != KWSYS_NULLPTR; br = regnext(br))
     regoptail(br, ender);
 
   // Check for proper termination.
   if (paren && *regparse++ != ')') {
     // RAISE Error, SYM(RegularExpression), SYM(Unmatched_Parens),
     printf("RegularExpression::compile(): Unmatched parentheses.\n");
-    return 0;
+    return KWSYS_NULLPTR;
   } else if (!paren && *regparse != '\0') {
     if (*regparse == ')') {
       // RAISE Error, SYM(RegularExpression), SYM(Unmatched_Parens),
       printf("RegularExpression::compile(): Unmatched parentheses.\n");
-      return 0;
+      return KWSYS_NULLPTR;
     } else {
       // RAISE Error, SYM(RegularExpression), SYM(Internal_Error),
       printf("RegularExpression::compile(): Internal error.\n");
-      return 0;
+      return KWSYS_NULLPTR;
     }
     // NOTREACHED
   }
@@ -517,19 +517,19 @@ char* RegExpCompile::regbranch(int* flagp)
   *flagp = WORST; // Tentatively.
 
   ret = regnode(BRANCH);
-  chain = 0;
+  chain = KWSYS_NULLPTR;
   while (*regparse != '\0' && *regparse != '|' && *regparse != ')') {
     latest = regpiece(&flags);
-    if (latest == 0)
-      return (0);
+    if (latest == KWSYS_NULLPTR)
+      return (KWSYS_NULLPTR);
     *flagp |= flags & HASWIDTH;
-    if (chain == 0) // First piece.
+    if (chain == KWSYS_NULLPTR) // First piece.
       *flagp |= flags & SPSTART;
     else
       regtail(chain, latest);
     chain = latest;
   }
-  if (chain == 0) // Loop ran zero times.
+  if (chain == KWSYS_NULLPTR) // Loop ran zero times.
     regnode(NOTHING);
 
   return (ret);
@@ -552,8 +552,8 @@ char* RegExpCompile::regpiece(int* flagp)
   int flags;
 
   ret = regatom(&flags);
-  if (ret == 0)
-    return (0);
+  if (ret == KWSYS_NULLPTR)
+    return (KWSYS_NULLPTR);
 
   op = *regparse;
   if (!ISMULT(op)) {
@@ -564,7 +564,7 @@ char* RegExpCompile::regpiece(int* flagp)
   if (!(flags & HASWIDTH) && op != '?') {
     // RAISE Error, SYM(RegularExpression), SYM(Empty_Operand),
     printf("RegularExpression::compile() : *+ operand could be empty.\n");
-    return 0;
+    return KWSYS_NULLPTR;
   }
   *flagp = (op != '+') ? (WORST | SPSTART) : (WORST | HASWIDTH);
 
@@ -598,7 +598,7 @@ char* RegExpCompile::regpiece(int* flagp)
   if (ISMULT(*regparse)) {
     // RAISE Error, SYM(RegularExpression), SYM(Nested_Operand),
     printf("RegularExpression::compile(): Nested *?+.\n");
-    return 0;
+    return KWSYS_NULLPTR;
   }
   return (ret);
 }
@@ -651,7 +651,7 @@ char* RegExpCompile::regatom(int* flagp)
             if (rxpclass > rxpclassend + 1) {
               // RAISE Error, SYM(RegularExpression), SYM(Invalid_Range),
               printf("RegularExpression::compile(): Invalid range in [].\n");
-              return 0;
+              return KWSYS_NULLPTR;
             }
             for (; rxpclass <= rxpclassend; rxpclass++)
               regc(static_cast<char>(rxpclass));
@@ -664,15 +664,15 @@ char* RegExpCompile::regatom(int* flagp)
       if (*regparse != ']') {
         // RAISE Error, SYM(RegularExpression), SYM(Unmatched_Bracket),
         printf("RegularExpression::compile(): Unmatched [].\n");
-        return 0;
+        return KWSYS_NULLPTR;
       }
       regparse++;
       *flagp |= HASWIDTH | SIMPLE;
     } break;
     case '(':
       ret = reg(1, &flags);
-      if (ret == 0)
-        return (0);
+      if (ret == KWSYS_NULLPTR)
+        return (KWSYS_NULLPTR);
       *flagp |= flags & (HASWIDTH | SPSTART);
       break;
     case '\0':
@@ -680,18 +680,18 @@ char* RegExpCompile::regatom(int* flagp)
     case ')':
       // RAISE Error, SYM(RegularExpression), SYM(Internal_Error),
       printf("RegularExpression::compile(): Internal error.\n"); // Never here
-      return 0;
+      return KWSYS_NULLPTR;
     case '?':
     case '+':
     case '*':
       // RAISE Error, SYM(RegularExpression), SYM(No_Operand),
       printf("RegularExpression::compile(): ?+* follows nothing.\n");
-      return 0;
+      return KWSYS_NULLPTR;
     case '\\':
       if (*regparse == '\0') {
         // RAISE Error, SYM(RegularExpression), SYM(Trailing_Backslash),
         printf("RegularExpression::compile(): Trailing backslash.\n");
-        return 0;
+        return KWSYS_NULLPTR;
       }
       ret = regnode(EXACTLY);
       regc(*regparse++);
@@ -707,7 +707,7 @@ char* RegExpCompile::regatom(int* flagp)
       if (len <= 0) {
         // RAISE Error, SYM(RegularExpression), SYM(Internal_Error),
         printf("RegularExpression::compile(): Internal error.\n");
-        return 0;
+        return KWSYS_NULLPTR;
       }
       ender = *(regparse + len);
       if (len > 1 && ISMULT(ender))
@@ -805,7 +805,7 @@ void RegExpCompile::regtail(char* p, const char* val)
   scan = p;
   for (;;) {
     temp = regnext(scan);
-    if (temp == 0)
+    if (temp == KWSYS_NULLPTR)
       break;
     scan = temp;
   }
@@ -824,7 +824,7 @@ void RegExpCompile::regtail(char* p, const char* val)
 void RegExpCompile::regoptail(char* p, const char* val)
 {
   // "Operandless" and "op != BRANCH" are synonymous in practice.
-  if (p == 0 || p == regdummyptr || OP(p) != BRANCH)
+  if (p == KWSYS_NULLPTR || p == regdummyptr || OP(p) != BRANCH)
     return;
   regtail(OPERAND(p), val);
 }
@@ -874,14 +874,14 @@ bool RegularExpression::find(char const* string,
   }
 
   // If there is a "must appear" string, look for it.
-  if (this->regmust != 0) {
+  if (this->regmust != KWSYS_NULLPTR) {
     s = string;
-    while ((s = strchr(s, this->regmust[0])) != 0) {
+    while ((s = strchr(s, this->regmust[0])) != KWSYS_NULLPTR) {
       if (strncmp(s, this->regmust, this->regmlen) == 0)
         break; // Found it.
       s++;
     }
-    if (s == 0) // Not present.
+    if (s == KWSYS_NULLPTR) // Not present.
       return false;
   }
 
@@ -899,7 +899,7 @@ bool RegularExpression::find(char const* string,
   s = string;
   if (this->regstart != '\0')
     // We know what char it must start with.
-    while ((s = strchr(s, this->regstart)) != 0) {
+    while ((s = strchr(s, this->regstart)) != KWSYS_NULLPTR) {
       if (regFind.regtry(s, rmatch.startp, rmatch.endp, this->program))
         return true;
       s++;
@@ -933,8 +933,8 @@ int RegExpFind::regtry(const char* string, const char** start,
   sp1 = start;
   ep = end;
   for (i = RegularExpressionMatch::NSUBEXP; i > 0; i--) {
-    *sp1++ = 0;
-    *ep++ = 0;
+    *sp1++ = KWSYS_NULLPTR;
+    *ep++ = KWSYS_NULLPTR;
   }
   if (regmatch(prog + 1)) {
     start[0] = string;
@@ -962,7 +962,7 @@ int RegExpFind::regmatch(const char* prog)
 
   scan = prog;
 
-  while (scan != 0) {
+  while (scan != KWSYS_NULLPTR) {
 
     next = regnext(scan);
 
@@ -994,12 +994,14 @@ int RegExpFind::regmatch(const char* prog)
         reginput += len;
       } break;
       case ANYOF:
-        if (*reginput == '\0' || strchr(OPERAND(scan), *reginput) == 0)
+        if (*reginput == '\0' ||
+            strchr(OPERAND(scan), *reginput) == KWSYS_NULLPTR)
           return (0);
         reginput++;
         break;
       case ANYBUT:
-        if (*reginput == '\0' || strchr(OPERAND(scan), *reginput) != 0)
+        if (*reginput == '\0' ||
+            strchr(OPERAND(scan), *reginput) != KWSYS_NULLPTR)
           return (0);
         reginput++;
         break;
@@ -1028,7 +1030,7 @@ int RegExpFind::regmatch(const char* prog)
           // Don't set startp if some later invocation of the
           // same parentheses already has.
           //
-          if (regstartp[no] == 0)
+          if (regstartp[no] == KWSYS_NULLPTR)
             regstartp[no] = save;
           return (1);
         } else
@@ -1056,7 +1058,7 @@ int RegExpFind::regmatch(const char* prog)
           // Don't set endp if some later invocation of the
           // same parentheses already has.
           //
-          if (regendp[no] == 0)
+          if (regendp[no] == KWSYS_NULLPTR)
             regendp[no] = save;
           return (1);
         } else
@@ -1076,7 +1078,7 @@ int RegExpFind::regmatch(const char* prog)
               return (1);
             reginput = save;
             scan = regnext(scan);
-          } while (scan != 0 && OP(scan) == BRANCH);
+          } while (scan != KWSYS_NULLPTR && OP(scan) == BRANCH);
           return (0);
           // NOTREACHED
         }
@@ -1154,13 +1156,13 @@ int RegExpFind::regrepeat(const char* p)
       }
       break;
     case ANYOF:
-      while (*scan != '\0' && strchr(opnd, *scan) != 0) {
+      while (*scan != '\0' && strchr(opnd, *scan) != KWSYS_NULLPTR) {
         count++;
         scan++;
       }
       break;
     case ANYBUT:
-      while (*scan != '\0' && strchr(opnd, *scan) == 0) {
+      while (*scan != '\0' && strchr(opnd, *scan) == KWSYS_NULLPTR) {
         count++;
         scan++;
       }
@@ -1182,11 +1184,11 @@ static const char* regnext(const char* p)
   int offset;
 
   if (p == regdummyptr)
-    return (0);
+    return (KWSYS_NULLPTR);
 
   offset = NEXT(p);
   if (offset == 0)
-    return (0);
+    return (KWSYS_NULLPTR);
 
   if (OP(p) == BACK)
     return (p - offset);
@@ -1199,11 +1201,11 @@ static char* regnext(char* p)
   int offset;
 
   if (p == regdummyptr)
-    return (0);
+    return (KWSYS_NULLPTR);
 
   offset = NEXT(p);
   if (offset == 0)
-    return (0);
+    return (KWSYS_NULLPTR);
 
   if (OP(p) == BACK)
     return (p - offset);

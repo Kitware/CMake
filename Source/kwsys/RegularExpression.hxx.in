@@ -202,7 +202,7 @@ inline std::string RegularExpressionMatch::match(int n) const
  *
  *  ?        Matches preceding pattern zero or once only
  *
- * ()        Saves a matched expression and uses it in a  later match
+ * ()        Saves a matched expression and uses it in a later match
  *
  * Note that more than one of these metacharacters can be  used
  * in  a  single  regular expression in order to create complex
