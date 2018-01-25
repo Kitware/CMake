@@ -73,6 +73,13 @@ Merge the ``release-$ver`` branch to ``master``:
   git pull
   git merge --no-ff release-$ver
 
+Review new ancestry to ensure nothing unexpected was merged to either branch:
+
+.. code-block:: shell
+
+  git log --graph --boundary origin/master..master
+  git log --graph --boundary origin/release..release-$ver
+
 Publish both ``master`` and ``release`` simultaneously:
 
 .. code-block:: shell
