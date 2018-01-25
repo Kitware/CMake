@@ -743,6 +743,11 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   if (const char* cflags = sf->GetProperty(COMPILE_FLAGS)) {
     lg->AppendFlags(flags, genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
   }
+  const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
+  if (const char* coptions = sf->GetProperty(COMPILE_OPTIONS)) {
+    lg->AppendCompileOptions(
+      flags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
+  }
 
   // Add per-source definitions.
   BuildObjectListOrString flagsBuild(this, false);
@@ -758,6 +763,16 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     }
     flags += flagsBuild.GetString();
   }
+
+  // Add per-source include directories.
+  std::vector<std::string> includes;
+  const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
+  if (const char* cincludes = sf->GetProperty(INCLUDE_DIRECTORIES)) {
+    lg->AppendIncludeDirectories(
+      includes, genexInterpreter.Evaluate(cincludes, INCLUDE_DIRECTORIES),
+      *sf);
+  }
+  lg->AppendFlags(flags, lg->GetIncludeFlags(includes, gtgt, lang, true));
 
   cmXCodeObject* buildFile =
     this->CreateXCodeSourceFileFromPath(sf->GetFullPath(), gtgt, lang, sf);
@@ -3521,7 +3536,7 @@ void cmGlobalXCodeGenerator::AppendDefines(
 }
 
 void cmGlobalXCodeGenerator::AppendFlag(std::string& flags,
-                                        std::string const& flag)
+                                        std::string const& flag) const
 {
   // Short-circuit for an empty flag.
   if (flag.empty()) {

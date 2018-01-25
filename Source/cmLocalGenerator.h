@@ -118,10 +118,11 @@ public:
                                   cmGeneratorTarget const* target,
                                   const std::string& lang);
   ///! Append flags to a string.
-  virtual void AppendFlags(std::string& flags, const std::string& newFlags);
-  virtual void AppendFlags(std::string& flags, const char* newFlags);
+  virtual void AppendFlags(std::string& flags,
+                           const std::string& newFlags) const;
+  virtual void AppendFlags(std::string& flags, const char* newFlags) const;
   virtual void AppendFlagEscape(std::string& flags,
-                                const std::string& rawFlag);
+                                const std::string& rawFlag) const;
   void AppendIPOLinkerFlags(std::string& flags, cmGeneratorTarget* target,
                             const std::string& config,
                             const std::string& lang);
@@ -152,6 +153,23 @@ public:
   cmGeneratorTarget* FindGeneratorTargetToUse(const std::string& name) const;
 
   /**
+   * Process a list of include directories
+   */
+  void AppendIncludeDirectories(std::vector<std::string>& includes,
+                                const char* includes_list,
+                                const cmSourceFile& sourceFile) const;
+  void AppendIncludeDirectories(std::vector<std::string>& includes,
+                                std::string const& includes_list,
+                                const cmSourceFile& sourceFile) const
+  {
+    this->AppendIncludeDirectories(includes, includes_list.c_str(),
+                                   sourceFile);
+  }
+  void AppendIncludeDirectories(std::vector<std::string>& includes,
+                                const std::vector<std::string>& includes_vec,
+                                const cmSourceFile& sourceFile) const;
+
+  /**
    * Encode a list of preprocessor definitions for the compiler
    * command line.
    */
@@ -164,6 +182,22 @@ public:
   }
   void AppendDefines(std::set<std::string>& defines,
                      const std::vector<std::string>& defines_vec) const;
+
+  /**
+   * Encode a list of compile options for the compiler
+   * command line.
+   */
+  void AppendCompileOptions(std::string& options, const char* options_list,
+                            const char* regex = nullptr) const;
+  void AppendCompileOptions(std::string& options,
+                            std::string const& options_list,
+                            const char* regex = nullptr) const
+  {
+    this->AppendCompileOptions(options, options_list.c_str(), regex);
+  }
+  void AppendCompileOptions(std::string& options,
+                            const std::vector<std::string>& options_vec,
+                            const char* regex = nullptr) const;
 
   /**
    * Join a set of defines into a definesString with a space separator.

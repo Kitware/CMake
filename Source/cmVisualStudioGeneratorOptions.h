@@ -86,6 +86,10 @@ public:
   void OutputPreprocessorDefinitions(std::ostream& fout, const char* prefix,
                                      const char* suffix,
                                      const std::string& lang);
+  void OutputAdditionalIncludeDirectories(std::ostream& fout,
+                                          const char* prefix,
+                                          const char* suffix,
+                                          const std::string& lang);
   void OutputFlagMap(std::ostream& fout, const char* indent);
   void SetConfiguration(const char* config);
 

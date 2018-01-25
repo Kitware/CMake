@@ -708,9 +708,31 @@ static Json::Value DumpSourceFilesList(
         lg->AppendFlags(compileFlags,
                         genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
       }
+      const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
+      if (const char* coptions = file->GetProperty(COMPILE_OPTIONS)) {
+        lg->AppendCompileOptions(
+          compileFlags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
+      }
       fileData.Flags = compileFlags;
 
-      fileData.IncludePathList = ld.IncludePathList;
+      // Add include directories from source file properties.
+      std::vector<std::string> includes;
+
+      const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
+      if (const char* cincludes = file->GetProperty(INCLUDE_DIRECTORIES)) {
+        const char* evaluatedIncludes =
+          genexInterpreter.Evaluate(cincludes, INCLUDE_DIRECTORIES);
+        lg->AppendIncludeDirectories(includes, evaluatedIncludes, *file);
+
+        for (const auto& include : includes) {
+          fileData.IncludePathList.push_back(std::make_pair(
+            include, target->IsSystemIncludeDirectory(include, config)));
+        }
+      }
+
+      fileData.IncludePathList.insert(fileData.IncludePathList.end(),
+                                      ld.IncludePathList.begin(),
+                                      ld.IncludePathList.end());
 
       const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
       std::set<std::string> defines;

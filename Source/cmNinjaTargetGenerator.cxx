@@ -135,14 +135,21 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   }
 
   // Add source file specific flags.
+  cmGeneratorExpressionInterpreter genexInterpreter(
+    this->LocalGenerator, this->GeneratorTarget,
+    this->LocalGenerator->GetConfigName(), this->GeneratorTarget->GetName(),
+    language);
+
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
   if (const char* cflags = source->GetProperty(COMPILE_FLAGS)) {
-    cmGeneratorExpressionInterpreter genexInterpreter(
-      this->LocalGenerator, this->GeneratorTarget,
-      this->LocalGenerator->GetConfigName(), this->GeneratorTarget->GetName(),
-      language);
     this->LocalGenerator->AppendFlags(
       flags, genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
+  }
+
+  const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
+  if (const char* coptions = source->GetProperty(COMPILE_OPTIONS)) {
+    this->LocalGenerator->AppendCompileOptions(
+      flags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
   }
 
   return flags;
@@ -202,6 +209,30 @@ std::string cmNinjaTargetGenerator::ComputeDefines(cmSourceFile const* source,
   this->LocalGenerator->JoinDefines(defines, definesString, language);
 
   return definesString;
+}
+
+std::string cmNinjaTargetGenerator::ComputeIncludes(
+  cmSourceFile const* source, const std::string& language)
+{
+  std::vector<std::string> includes;
+  const std::string config = this->LocalGenerator->GetConfigName();
+  cmGeneratorExpressionInterpreter genexInterpreter(
+    this->LocalGenerator, this->GeneratorTarget, config,
+    this->GeneratorTarget->GetName(), language);
+
+  const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
+  if (const char* cincludes = source->GetProperty(INCLUDE_DIRECTORIES)) {
+    this->LocalGenerator->AppendIncludeDirectories(
+      includes, genexInterpreter.Evaluate(cincludes, INCLUDE_DIRECTORIES),
+      *source);
+  }
+
+  std::string includesString = this->LocalGenerator->GetIncludeFlags(
+    includes, this->GeneratorTarget, language, true, false, config);
+  this->LocalGenerator->AppendFlags(includesString,
+                                    this->GetIncludes(language));
+
+  return includesString;
 }
 
 cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
@@ -818,7 +849,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   cmNinjaVars vars;
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
-  vars["INCLUDES"] = this->GetIncludes(language);
+  vars["INCLUDES"] = this->ComputeIncludes(source, language);
   if (!this->NeedDepTypeMSVC(language)) {
     vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
       objectFileName + ".d", cmOutputConverter::SHELL);

@@ -114,22 +114,6 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
 
 cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
 {
-  for (OptionsMap::iterator i = this->ClOptions.begin();
-       i != this->ClOptions.end(); ++i) {
-    delete i->second;
-  }
-  for (OptionsMap::iterator i = this->LinkOptions.begin();
-       i != this->LinkOptions.end(); ++i) {
-    delete i->second;
-  }
-  for (OptionsMap::iterator i = this->CudaOptions.begin();
-       i != this->CudaOptions.end(); ++i) {
-    delete i->second;
-  }
-  for (OptionsMap::iterator i = this->CudaLinkOptions.begin();
-       i != this->CudaLinkOptions.end(); ++i) {
-    delete i->second;
-  }
   if (!this->BuildFileStream) {
     return;
   }
@@ -2036,17 +2020,31 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   }
   std::string flags;
   bool configDependentFlags = false;
+  std::string options;
+  bool configDependentOptions = false;
   std::string defines;
   bool configDependentDefines = false;
+  std::string includes;
+  bool configDependentIncludes = false;
   if (const char* cflags = sf.GetProperty("COMPILE_FLAGS")) {
     configDependentFlags =
       cmGeneratorExpression::Find(cflags) != std::string::npos;
     flags += cflags;
   }
+  if (const char* coptions = sf.GetProperty("COMPILE_OPTIONS")) {
+    configDependentOptions =
+      cmGeneratorExpression::Find(coptions) != std::string::npos;
+    options += coptions;
+  }
   if (const char* cdefs = sf.GetProperty("COMPILE_DEFINITIONS")) {
     configDependentDefines =
       cmGeneratorExpression::Find(cdefs) != std::string::npos;
     defines += cdefs;
+  }
+  if (const char* cincludes = sf.GetProperty("INCLUDE_DIRECTORIES")) {
+    configDependentIncludes =
+      cmGeneratorExpression::Find(cincludes) != std::string::npos;
+    includes += cincludes;
   }
   std::string lang =
     this->GlobalGenerator->GetLanguageFromExtension(sf.GetExtension().c_str());
@@ -2099,7 +2097,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     }
     // if we have flags or defines for this config then
     // use them
-    if (!flags.empty() || !configDefines.empty() || compileAs || noWinRT) {
+    if (!flags.empty() || !options.empty() || !configDefines.empty() ||
+        !includes.empty() || compileAs || noWinRT) {
       (*this->BuildFileStream) << firstString;
       firstString = ""; // only do firstString once
       hasFlags = true;
@@ -2137,9 +2136,16 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       } else {
         clOptions.Parse(flags.c_str());
       }
-      if (clOptions.HasFlag("AdditionalIncludeDirectories")) {
-        clOptions.AppendFlag("AdditionalIncludeDirectories",
-                             "%(AdditionalIncludeDirectories)");
+      if (!options.empty()) {
+        std::string expandedOptions;
+        if (configDependentOptions) {
+          this->LocalGenerator->AppendCompileOptions(
+            expandedOptions,
+            genexInterpreter.Evaluate(options, "COMPILE_OPTIONS"));
+        } else {
+          this->LocalGenerator->AppendCompileOptions(expandedOptions, options);
+        }
+        clOptions.Parse(expandedOptions.c_str());
       }
       if (clOptions.HasFlag("DisableSpecificWarnings")) {
         clOptions.AppendFlag("DisableSpecificWarnings",
@@ -2151,9 +2157,21 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       } else {
         clOptions.AddDefines(configDefines.c_str());
       }
+      std::vector<std::string> includeList;
+      if (configDependentIncludes) {
+        this->LocalGenerator->AppendIncludeDirectories(
+          includeList,
+          genexInterpreter.Evaluate(includes, "INCLUDE_DIRECTORIES"), *source);
+      } else {
+        this->LocalGenerator->AppendIncludeDirectories(includeList, includes,
+                                                       *source);
+      }
+      clOptions.AddIncludes(includeList);
       clOptions.SetConfiguration(config.c_str());
       clOptions.PrependInheritedString("AdditionalOptions");
       clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+      clOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
+                                                   "      ", "\n", lang);
       clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                               "\n", lang);
     }
@@ -2446,6 +2464,13 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       break;
   }
   clOptions.AddDefines(targetDefines);
+
+  // Get includes for this target
+  if (!this->LangForClCompile.empty()) {
+    clOptions.AddIncludes(
+      this->GetIncludes(configName, this->LangForClCompile));
+  }
+
   if (this->MSTools) {
     clOptions.SetVerboseMakefile(
       this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
@@ -2497,7 +2522,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     }
   }
 
-  this->ClOptions[configName] = pOptions.release();
+  this->ClOptions[configName] = std::move(pOptions);
   return true;
 }
 
@@ -2510,14 +2535,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   }
   this->WriteString("<ClCompile>\n", 2);
   clOptions.PrependInheritedString("AdditionalOptions");
-  if (!this->LangForClCompile.empty()) {
-    std::vector<std::string> const includes =
-      this->GetIncludes(configName, this->LangForClCompile);
-    clOptions.AppendFlag("AdditionalIncludeDirectories", includes);
-  }
-  clOptions.AppendFlag("AdditionalIncludeDirectories",
-                       "%(AdditionalIncludeDirectories)");
   clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+  clOptions.OutputAdditionalIncludeDirectories(
+    *this->BuildFileStream, "      ", "\n", this->LangForClCompile);
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", this->LangForClCompile);
 
@@ -2595,7 +2615,10 @@ bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
   Options& clOptions = *(this->ClOptions[configName]);
   rcOptions.AddDefines(clOptions.GetDefines());
 
-  this->RcOptions[configName] = pOptions.release();
+  // Get includes for this target
+  rcOptions.AddIncludes(this->GetIncludes(configName, "RC"));
+
+  this->RcOptions[configName] = std::move(pOptions);
   return true;
 }
 
@@ -2610,11 +2633,8 @@ void cmVisualStudio10TargetGenerator::WriteRCOptions(
   Options& rcOptions = *(this->RcOptions[configName]);
   rcOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "RC");
-  std::vector<std::string> const includes =
-    this->GetIncludes(configName, "RC");
-  rcOptions.AppendFlag("AdditionalIncludeDirectories", includes);
-  rcOptions.AppendFlag("AdditionalIncludeDirectories",
-                       "%(AdditionalIncludeDirectories)");
+  rcOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
+                                               "      ", "\n", "RC");
   rcOptions.PrependInheritedString("AdditionalOptions");
   rcOptions.OutputFlagMap(*this->BuildFileStream, "      ");
 
@@ -2728,7 +2748,10 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
     cudaOptions.AddDefine(exportMacro);
   }
 
-  this->CudaOptions[configName] = pOptions.release();
+  // Get includes for this target
+  cudaOptions.AddIncludes(this->GetIncludes(configName, "CUDA"));
+
+  this->CudaOptions[configName] = std::move(pOptions);
   return true;
 }
 
@@ -2741,10 +2764,8 @@ void cmVisualStudio10TargetGenerator::WriteCudaOptions(
   this->WriteString("<CudaCompile>\n", 2);
 
   Options& cudaOptions = *(this->CudaOptions[configName]);
-  std::vector<std::string> const includes =
-    this->GetIncludes(configName, "CUDA");
-  cudaOptions.AppendFlag("Include", includes);
-  cudaOptions.AppendFlag("Include", "%(Include)");
+  cudaOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
+                                                 "      ", "\n", "CUDA");
   cudaOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                             "\n", "CUDA");
   cudaOptions.PrependInheritedString("AdditionalOptions");
@@ -2801,7 +2822,7 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
                                      "-Wno-deprecated-gpu-targets");
   }
 
-  this->CudaLinkOptions[configName] = pOptions.release();
+  this->CudaLinkOptions[configName] = std::move(pOptions);
   return true;
 }
 
@@ -2852,7 +2873,11 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
     std::string(this->Makefile->GetSafeDefinition(configFlagsVar));
 
   masmOptions.Parse(flags.c_str());
-  this->MasmOptions[configName] = pOptions.release();
+
+  // Get includes for this target
+  masmOptions.AddIncludes(this->GetIncludes(configName, "ASM_MASM"));
+
+  this->MasmOptions[configName] = std::move(pOptions);
   return true;
 }
 
@@ -2870,10 +2895,8 @@ void cmVisualStudio10TargetGenerator::WriteMasmOptions(
                                           "\n", "ASM_MASM");
 
   Options& masmOptions = *(this->MasmOptions[configName]);
-  std::vector<std::string> const includes =
-    this->GetIncludes(configName, "ASM_MASM");
-  masmOptions.AppendFlag("IncludePaths", includes);
-  masmOptions.AppendFlag("IncludePaths", "%(IncludePaths)");
+  masmOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
+                                                 "      ", "\n", "ASM_MASM");
   masmOptions.PrependInheritedString("AdditionalOptions");
   masmOptions.OutputFlagMap(*this->BuildFileStream, "      ");
 
@@ -2911,7 +2934,11 @@ bool cmVisualStudio10TargetGenerator::ComputeNasmOptions(
     std::string(" ") +
     std::string(this->Makefile->GetSafeDefinition(configFlagsVar));
   nasmOptions.Parse(flags.c_str());
-  this->NasmOptions[configName] = pOptions.release();
+
+  // Get includes for this target
+  nasmOptions.AddIncludes(this->GetIncludes(configName, "ASM_NASM"));
+
+  this->NasmOptions[configName] = std::move(pOptions);
   return true;
 }
 
@@ -2926,12 +2953,8 @@ void cmVisualStudio10TargetGenerator::WriteNasmOptions(
   std::vector<std::string> includes =
     this->GetIncludes(configName, "ASM_NASM");
   Options& nasmOptions = *(this->NasmOptions[configName]);
-  for (size_t i = 0; i < includes.size(); i++) {
-    includes[i] += "\\";
-  }
-
-  nasmOptions.AppendFlag("IncludePaths", includes);
-  nasmOptions.AppendFlag("IncludePaths", "%(IncludePaths)");
+  nasmOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
+                                                 "      ", "\n", "ASM_NASM");
   nasmOptions.OutputFlagMap(*this->BuildFileStream, "      ");
   nasmOptions.PrependInheritedString("AdditionalOptions");
   nasmOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
@@ -3357,7 +3380,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     }
   }
 
-  this->LinkOptions[config] = pOptions.release();
+  this->LinkOptions[config] = std::move(pOptions);
   return true;
 }
 
@@ -3523,7 +3546,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
   if (this->ProjectType == csproj) {
     return;
   }
-  for (std::string const& i : this->Configurations) {
+  for (const auto& i : this->Configurations) {
     this->WritePlatformConfigTag("ItemDefinitionGroup", i, 1);
     *this->BuildFileStream << "\n";
     //    output cl compile flags <ClCompile></ClCompile>

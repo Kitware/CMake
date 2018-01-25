@@ -31,7 +31,7 @@ public:
   std::string GetTargetDirectory(
     cmGeneratorTarget const* target) const override;
   void AppendFlagEscape(std::string& flags,
-                        const std::string& rawFlag) override;
+                        const std::string& rawFlag) const override;
   void Generate() override;
   virtual void GenerateInstallRules();
   void ComputeObjectFilenames(

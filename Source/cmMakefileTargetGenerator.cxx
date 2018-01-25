@@ -445,10 +445,35 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
                           << "\n";
   }
 
+  const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
+  if (const char* coptions = source.GetProperty(COMPILE_OPTIONS)) {
+    const char* evaluatedOptions =
+      genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS);
+    this->LocalGenerator->AppendCompileOptions(flags, evaluatedOptions);
+    *this->FlagFileStream << "# Custom options: " << relativeObj
+                          << "_OPTIONS = " << evaluatedOptions << "\n"
+                          << "\n";
+  }
+
+  // Add include directories from source file properties.
+  std::vector<std::string> includes;
+
+  const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
+  if (const char* cincludes = source.GetProperty(INCLUDE_DIRECTORIES)) {
+    const char* evaluatedIncludes =
+      genexInterpreter.Evaluate(cincludes, INCLUDE_DIRECTORIES);
+    this->LocalGenerator->AppendIncludeDirectories(includes, evaluatedIncludes,
+                                                   source);
+    *this->FlagFileStream << "# Custom include directories: " << relativeObj
+                          << "_INCLUDE_DIRECTORIES = " << evaluatedIncludes
+                          << "\n"
+                          << "\n";
+  }
+
   // Add language-specific defines.
   std::set<std::string> defines;
 
-  // Add source-sepcific preprocessor definitions.
+  // Add source-specific preprocessor definitions.
   const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
   if (const char* compile_defs = source.GetProperty(COMPILE_DEFINITIONS)) {
     const char* evaluatedDefs =
@@ -565,7 +590,10 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
 
   vars.Defines = definesString.c_str();
 
-  std::string const includesString = "$(" + lang + "_INCLUDES)";
+  std::string includesString = this->LocalGenerator->GetIncludeFlags(
+    includes, this->GeneratorTarget, lang, true, false, config);
+  this->LocalGenerator->AppendFlags(includesString,
+                                    "$(" + lang + "_INCLUDES)");
   vars.Includes = includesString.c_str();
 
   // At the moment, it is assumed that C, C++, Fortran, and CUDA have both
