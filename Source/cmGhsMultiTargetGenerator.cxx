@@ -486,7 +486,7 @@ void cmGhsMultiTargetGenerator::WriteSources(
   for (std::vector<cmSourceFile*>::const_iterator si = objectSources.begin();
        si != objectSources.end(); ++si) {
     std::vector<cmSourceGroup> sourceGroups(this->Makefile->GetSourceGroups());
-    char const* sourceFullPath = (*si)->GetFullPath().c_str();
+    std::string const& sourceFullPath = (*si)->GetFullPath();
     cmSourceGroup* sourceGroup =
       this->Makefile->FindSourceGroup(sourceFullPath, sourceGroups);
     std::string sgPath = sourceGroup->GetFullName();
@@ -604,7 +604,7 @@ std::string cmGhsMultiTargetGenerator::ComputeLongestObjectDirectory(
   dir_max += "/";
   std::vector<cmSourceGroup> sourceGroups(
     localGhsMultiGenerator->GetMakefile()->GetSourceGroups());
-  char const* const sourceFullPath = sourceFile->GetFullPath().c_str();
+  std::string const& sourceFullPath = sourceFile->GetFullPath();
   cmSourceGroup* sourceGroup =
     localGhsMultiGenerator->GetMakefile()->FindSourceGroup(sourceFullPath,
                                                            sourceGroups);

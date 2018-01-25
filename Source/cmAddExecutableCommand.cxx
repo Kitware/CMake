@@ -164,7 +164,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
 
   std::vector<std::string> srclists(s, args.end());
   cmTarget* tgt =
-    this->Makefile->AddExecutable(exename.c_str(), srclists, excludeFromAll);
+    this->Makefile->AddExecutable(exename, srclists, excludeFromAll);
   if (use_win32) {
     tgt->SetProperty("WIN32_EXECUTABLE", "ON");
   }
