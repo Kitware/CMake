@@ -606,12 +606,7 @@ function (_MPI_interrogate_compiler LANG)
     foreach(_MPI_LIB_NAME IN LISTS MPI_LIBNAMES)
       string(REGEX REPLACE "^ ?${CMAKE_LINK_LIBRARY_FLAG}" "" _MPI_LIB_NAME "${_MPI_LIB_NAME}")
       string(REPLACE "\"" "" _MPI_LIB_NAME "${_MPI_LIB_NAME}")
-      get_filename_component(_MPI_LIB_PATH "${_MPI_LIB_NAME}" DIRECTORY)
-      if(NOT "${_MPI_LIB_PATH}" STREQUAL "")
-        list(APPEND MPI_LIB_FULLPATHS_WORK "${_MPI_LIB_NAME}")
-      else()
-        list(APPEND MPI_LIB_NAMES_WORK "${_MPI_LIB_NAME}")
-      endif()
+      list(APPEND MPI_LIB_NAMES_WORK "${_MPI_LIB_NAME}")
     endforeach()
   endif()
 
@@ -641,6 +636,9 @@ function (_MPI_interrogate_compiler LANG)
     endif()
   endforeach()
 
+  # Save the explicitly given link directories
+  set(MPI_LINK_DIRECTORIES_LEFTOVER "${MPI_LINK_DIRECTORIES_WORK}")
+
   # An MPI compiler wrapper could have its MPI libraries in the implictly
   # linked directories of the compiler itself.
   if(DEFINED CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES)
@@ -659,6 +657,20 @@ function (_MPI_interrogate_compiler LANG)
       DOC "Location of the ${_MPI_PLAIN_LIB_NAME} library for MPI"
     )
     mark_as_advanced(MPI_${_MPI_PLAIN_LIB_NAME}_LIBRARY)
+    # Remove the directory from the remainder list.
+    if(MPI_${_MPI_PLAIN_LIB_NAME}_LIBRARY)
+      get_filename_component(_MPI_TAKEN_DIRECTORY "${MPI_${_MPI_PLAIN_LIB_NAME}_LIBRARY}" DIRECTORY)
+      list(REMOVE_ITEM MPI_LINK_DIRECTORIES_LEFTOVER "${_MPI_TAKEN_DIRECTORY}")
+    endif()
+  endforeach()
+
+  # Add the link directories given explicitly that we haven't used back as linker directories.
+  foreach(_MPI_LINK_DIRECTORY IN LISTS MPI_LINK_DIRECTORIES_LEFTOVER)
+    if(MPI_LINK_FLAGS_WORK)
+      string(APPEND MPI_LINK_FLAGS_WORK " ${CMAKE_LIBRARY_PATH_FLAG}${_MPI_LINK_DIRECTORY}")
+    else()
+      set(MPI_LINK_FLAGS_WORK "${CMAKE_LIBRARY_PATH_FLAG}${_MPI_LINK_DIRECTORY}")
+    endif()
   endforeach()
 
   # Deal with the libraries given with full path next
