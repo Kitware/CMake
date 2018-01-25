@@ -416,7 +416,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
   // C/C++ source files,
   // replacing the file name extension with ".h" and checks whether such a
   // file exists. If it does, it is inserted into the map of files.
-  // A very similar version of that code exists also in the kdevelop
+  // A very similar version of that code exists also in the CodeLite
   // project generator.
   for (std::string const& fileName : cFiles) {
     std::string headerBasename = cmSystemTools::GetFilenamePath(fileName);

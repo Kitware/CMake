@@ -102,12 +102,6 @@ if(NOT "@CMAKE_GENERATOR@" MATCHES "Xcode")
     )
 endif ()
 
-if(NOT "@CMAKE_GENERATOR@" MATCHES "KDevelop")
-  list(APPEND CTEST_CUSTOM_COVERAGE_EXCLUDE
-    "Kdevelop"
-    )
-endif ()
-
 list(APPEND CTEST_CUSTOM_COVERAGE_EXCLUDE
   # Exclude kwsys files from coverage results. They are reported
   # (with better coverage results) on kwsys dashboards...
