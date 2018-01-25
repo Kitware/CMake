@@ -462,6 +462,8 @@ public:
   void GenerateSubprojectsOutput(cmXMLWriter& xml);
   std::vector<std::string> GetLabelsForSubprojects();
 
+  void SetRunCurrentScript(bool value);
+
 private:
   int RepeatTests;
   bool RepeatUntilFail;

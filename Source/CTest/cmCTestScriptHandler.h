@@ -106,6 +106,8 @@ public:
   void CreateCMake();
   cmake* GetCMake() { return this->CMake; }
 
+  void SetRunCurrentScript(bool value);
+
 private:
   // reads in a script
   int ReadInScript(const std::string& total_script_arg);
@@ -135,6 +137,8 @@ private:
 
   std::vector<std::string> ConfigurationScripts;
   std::vector<bool> ScriptProcessScope;
+
+  bool ShouldRunCurrentScript;
 
   bool Backup;
   bool EmptyBinDir;

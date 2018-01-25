@@ -343,6 +343,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->Makefile->AddDefinition("CMAKE_EXECUTABLE_NAME",
                                 cmSystemTools::GetCMakeCommand().c_str());
   this->Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", true);
+  this->SetRunCurrentScript(true);
   this->UpdateElapsedTime();
 
   // add the script arg if defined
@@ -524,7 +525,8 @@ int cmCTestScriptHandler::RunConfigurationScript(
   }
 
   // only run the curent script if we should
-  if (this->Makefile && this->Makefile->IsOn("CTEST_RUN_CURRENT_SCRIPT")) {
+  if (this->Makefile && this->Makefile->IsOn("CTEST_RUN_CURRENT_SCRIPT") &&
+      this->ShouldRunCurrentScript) {
     return this->RunCurrentScript();
   }
   return result;
@@ -535,7 +537,7 @@ int cmCTestScriptHandler::RunCurrentScript()
   int result;
 
   // do not run twice
-  this->Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", false);
+  this->SetRunCurrentScript(false);
 
   // no popup widows
   cmSystemTools::SetRunCommandHideConsole(true);
@@ -977,4 +979,9 @@ std::chrono::duration<double> cmCTestScriptHandler::GetRemainingTimeAllowed()
   auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(
     std::chrono::steady_clock::now() - this->ScriptStartTime);
   return (timelimit - duration);
+}
+
+void cmCTestScriptHandler::SetRunCurrentScript(bool value)
+{
+  this->ShouldRunCurrentScript = value;
 }
