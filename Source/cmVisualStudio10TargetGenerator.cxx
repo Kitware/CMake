@@ -2563,11 +2563,12 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     }
 
     // If not in debug mode, write the DebugInformationFormat field
-    // without value so PDBs don't get generated uselessly.
+    // without value so PDBs don't get generated uselessly. Each tag
+    // goes on its own line because Visual Studio corrects it this
+    // way when saving the project after CMake generates it.
     if (!clOptions.IsDebug()) {
-      this->WriteString("<DebugInformationFormat>"
-                        "</DebugInformationFormat>\n",
-                        3);
+      this->WriteString("<DebugInformationFormat>\n", 3);
+      this->WriteString("</DebugInformationFormat>\n", 3);
     }
 
     // Specify the compiler program database file if configured.
