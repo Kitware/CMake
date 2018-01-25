@@ -2293,9 +2293,8 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
     singleLine.push_back(cmakeCfgIntDir);
   }
   singleLine.push_back("--config");
-  std::string relConfigFile = "./CPackConfig.cmake";
-  singleLine.push_back(relConfigFile);
-  gti.CommandLines.push_back(singleLine);
+  singleLine.push_back("./CPackConfig.cmake");
+  gti.CommandLines.push_back(std::move(singleLine));
   if (this->GetPreinstallTargetName()) {
     gti.Depends.push_back(this->GetPreinstallTargetName());
   } else {
@@ -2305,7 +2304,7 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
       gti.Depends.push_back(this->GetAllTargetName());
     }
   }
-  targets.push_back(gti);
+  targets.push_back(std::move(gti));
 }
 
 void cmGlobalGenerator::AddGlobalTarget_PackageSource(
@@ -2339,11 +2338,10 @@ void cmGlobalGenerator::AddGlobalTarget_PackageSource(
   cmCustomCommandLine singleLine;
   singleLine.push_back(cmSystemTools::GetCPackCommand());
   singleLine.push_back("--config");
-  std::string relConfigFile = "./CPackSourceConfig.cmake";
-  singleLine.push_back(relConfigFile);
-  singleLine.push_back(configFile);
-  gti.CommandLines.push_back(singleLine);
-  targets.push_back(gti);
+  singleLine.push_back("./CPackSourceConfig.cmake");
+  singleLine.push_back(std::move(configFile));
+  gti.CommandLines.push_back(std::move(singleLine));
+  targets.push_back(std::move(gti));
 }
 
 void cmGlobalGenerator::AddGlobalTarget_Test(
@@ -2378,58 +2376,59 @@ void cmGlobalGenerator::AddGlobalTarget_Test(
   {
     singleLine.push_back("$(ARGS)");
   }
-  gti.CommandLines.push_back(singleLine);
-  targets.push_back(gti);
+  gti.CommandLines.push_back(std::move(singleLine));
+  targets.push_back(std::move(gti));
 }
 
 void cmGlobalGenerator::AddGlobalTarget_EditCache(
   std::vector<GlobalTargetInfo>& targets)
 {
   const char* editCacheTargetName = this->GetEditCacheTargetName();
-  if (editCacheTargetName) {
-    GlobalTargetInfo gti;
-    gti.Name = editCacheTargetName;
-    cmCustomCommandLine singleLine;
-
-    // Use generator preference for the edit_cache rule if it is defined.
-    std::string edit_cmd = this->GetEditCacheCommand();
-    if (!edit_cmd.empty()) {
-      singleLine.push_back(edit_cmd);
-      singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
-      singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
-      gti.Message = "Running CMake cache editor...";
-      gti.UsesTerminal = true;
-      gti.CommandLines.push_back(singleLine);
-    } else {
-      singleLine.push_back(cmSystemTools::GetCMakeCommand());
-      singleLine.push_back("-E");
-      singleLine.push_back("echo");
-      singleLine.push_back("No interactive CMake dialog available.");
-      gti.Message = "No interactive CMake dialog available...";
-      gti.UsesTerminal = false;
-      gti.CommandLines.push_back(singleLine);
-    }
-
-    targets.push_back(gti);
+  if (!editCacheTargetName) {
+    return;
   }
+  GlobalTargetInfo gti;
+  gti.Name = editCacheTargetName;
+  cmCustomCommandLine singleLine;
+
+  // Use generator preference for the edit_cache rule if it is defined.
+  std::string edit_cmd = this->GetEditCacheCommand();
+  if (!edit_cmd.empty()) {
+    singleLine.push_back(std::move(edit_cmd));
+    singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
+    singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
+    gti.Message = "Running CMake cache editor...";
+    gti.UsesTerminal = true;
+  } else {
+    singleLine.push_back(cmSystemTools::GetCMakeCommand());
+    singleLine.push_back("-E");
+    singleLine.push_back("echo");
+    singleLine.push_back("No interactive CMake dialog available.");
+    gti.Message = "No interactive CMake dialog available...";
+    gti.UsesTerminal = false;
+  }
+  gti.CommandLines.push_back(std::move(singleLine));
+
+  targets.push_back(std::move(gti));
 }
 
 void cmGlobalGenerator::AddGlobalTarget_RebuildCache(
   std::vector<GlobalTargetInfo>& targets)
 {
   const char* rebuildCacheTargetName = this->GetRebuildCacheTargetName();
-  if (rebuildCacheTargetName) {
-    GlobalTargetInfo gti;
-    gti.Name = rebuildCacheTargetName;
-    gti.Message = "Running CMake to regenerate build system...";
-    gti.UsesTerminal = true;
-    cmCustomCommandLine singleLine;
-    singleLine.push_back(cmSystemTools::GetCMakeCommand());
-    singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
-    singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
-    gti.CommandLines.push_back(singleLine);
-    targets.push_back(gti);
+  if (!rebuildCacheTargetName) {
+    return;
   }
+  GlobalTargetInfo gti;
+  gti.Name = rebuildCacheTargetName;
+  gti.Message = "Running CMake to regenerate build system...";
+  gti.UsesTerminal = true;
+  cmCustomCommandLine singleLine;
+  singleLine.push_back(cmSystemTools::GetCMakeCommand());
+  singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
+  singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
+  gti.CommandLines.push_back(std::move(singleLine));
+  targets.push_back(std::move(gti));
 }
 
 void cmGlobalGenerator::AddGlobalTarget_Install(
@@ -2457,7 +2456,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
       gti.Name = "list_install_components";
       gti.Message = ostr.str();
       gti.UsesTerminal = false;
-      targets.push_back(gti);
+      targets.push_back(std::move(gti));
     }
     std::string cmd = cmSystemTools::GetCMakeCommand();
     GlobalTargetInfo gti;
@@ -2511,7 +2510,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
       localCmdLine.insert(localCmdLine.begin() + 1,
                           "-DCMAKE_INSTALL_LOCAL_ONLY=1");
 
-      gti.CommandLines.push_back(localCmdLine);
+      gti.CommandLines.push_back(std::move(localCmdLine));
       targets.push_back(gti);
     }
 
@@ -2527,7 +2526,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
 
       stripCmdLine.insert(stripCmdLine.begin() + 1,
                           "-DCMAKE_INSTALL_DO_STRIP=1");
-      gti.CommandLines.push_back(stripCmdLine);
+      gti.CommandLines.push_back(std::move(stripCmdLine));
       targets.push_back(gti);
     }
   }
@@ -2971,7 +2970,7 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     std::vector<std::string> configs;
     target->Target->GetMakefile()->GetConfigurations(configs);
     if (configs.empty()) {
-      configs.push_back("");
+      configs.emplace_back();
     }
     for (std::string const& c : configs) {
       target->GetSourceFiles(sources, c);

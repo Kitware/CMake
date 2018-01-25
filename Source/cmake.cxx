@@ -912,7 +912,7 @@ void cmake::GetRegisteredGenerators(
       info.name = name;
       info.baseName = name;
       info.isAlias = false;
-      generators.push_back(info);
+      generators.push_back(std::move(info));
     }
   }
 
@@ -928,7 +928,7 @@ void cmake::GetRegisteredGenerators(
       info.supportsPlatform = false;
       info.supportsToolset = false;
       info.isAlias = false;
-      generators.push_back(info);
+      generators.push_back(std::move(info));
     }
     for (std::string const& a : eg->Aliases) {
       GeneratorInfo info;
@@ -940,7 +940,7 @@ void cmake::GetRegisteredGenerators(
       info.supportsPlatform = false;
       info.supportsToolset = false;
       info.isAlias = true;
-      generators.push_back(info);
+      generators.push_back(std::move(info));
     }
   }
 }
@@ -1167,7 +1167,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
         save.help = help;
       }
     }
-    saved.push_back(save);
+    saved.push_back(std::move(save));
   }
 
   // remove the cache
@@ -1807,7 +1807,7 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
   for (cmGlobalGeneratorFactory* g : this->Generators) {
     cmDocumentationEntry e;
     g->GetDocumentation(e);
-    v.push_back(e);
+    v.push_back(std::move(e));
   }
   for (cmExternalMakefileProjectGeneratorFactory* eg : this->ExtraGenerators) {
     const std::string doc = eg->GetDocumentation();
@@ -1818,7 +1818,7 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
       cmDocumentationEntry e;
       e.Name = a;
       e.Brief = doc;
-      v.push_back(e);
+      v.push_back(std::move(e));
     }
 
     // Full names:
@@ -1829,7 +1829,7 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
       e.Name =
         cmExternalMakefileProjectGenerator::CreateFullGeneratorName(g, name);
       e.Brief = doc;
-      v.push_back(e);
+      v.push_back(std::move(e));
     }
   }
 }
@@ -2212,9 +2212,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
     std::vector<std::string> args2;
     args2.push_back(args[0]);
     args2.push_back(destPath);
-    std::string resultArg = "-DRESULT_FILE=";
-    resultArg += resultFile;
-    args2.push_back(resultArg);
+    args2.push_back("-DRESULT_FILE=" + resultFile);
     int res = this->Run(args2, false);
 
     if (res != 0) {

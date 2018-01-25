@@ -213,7 +213,7 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
   if (argc == 1) {
     RequestedHelpItem help;
     help.HelpType = cmDocumentation::Usage;
-    this->RequestedHelpItems.push_back(help);
+    this->RequestedHelpItems.push_back(std::move(help));
     return true;
   }
 
@@ -352,7 +352,7 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
     if (help.HelpType != None) {
       // This is a help option.  See if there is a file name given.
       result = true;
-      this->RequestedHelpItems.push_back(help);
+      this->RequestedHelpItems.push_back(std::move(help));
     }
   }
   return result;

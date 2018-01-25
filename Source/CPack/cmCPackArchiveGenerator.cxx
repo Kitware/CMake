@@ -132,7 +132,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
         }
       }
       // add the generated package to package file names list
-      packageFileNames.push_back(packageFileName);
+      packageFileNames.push_back(std::move(packageFileName));
     }
     // Handle Orphan components (components not belonging to any groups)
     for (auto& comp : this->Components) {
@@ -157,7 +157,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
           addOneComponentToArchive(archive, &(comp.second));
         }
         // add the generated package to package file names list
-        packageFileNames.push_back(packageFileName);
+        packageFileNames.push_back(std::move(packageFileName));
       }
     }
   }
@@ -178,7 +178,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
         addOneComponentToArchive(archive, &(comp.second));
       }
       // add the generated package to package file names list
-      packageFileNames.push_back(packageFileName);
+      packageFileNames.push_back(std::move(packageFileName));
     }
   }
   return 1;
@@ -188,7 +188,7 @@ int cmCPackArchiveGenerator::PackageComponentsAllInOne()
 {
   // reset the package file names
   packageFileNames.clear();
-  packageFileNames.push_back(std::string(toplevel));
+  packageFileNames.emplace_back(toplevel);
   packageFileNames[0] += "/";
 
   if (this->IsSet("CPACK_ARCHIVE_FILE_NAME")) {

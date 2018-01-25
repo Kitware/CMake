@@ -498,8 +498,8 @@ bool cmComputeLinkInformation::Compute()
       cmStateEnums::ArtifactType artifact = implib
         ? cmStateEnums::ImportLibraryArtifact
         : cmStateEnums::RuntimeBinaryArtifact;
-      std::string lib = tgt->GetFullPath(this->Config, artifact, true);
-      this->OldLinkDirItems.push_back(lib);
+      this->OldLinkDirItems.push_back(
+        tgt->GetFullPath(this->Config, artifact, true));
     }
   }
 
@@ -598,13 +598,13 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
 
       std::string exe = tgt->GetFullPath(config, artifact, true);
       linkItem += exe;
-      this->Items.push_back(Item(linkItem, true, tgt));
-      this->Depends.push_back(exe);
+      this->Items.emplace_back(linkItem, true, tgt);
+      this->Depends.push_back(std::move(exe));
     } else if (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       // Add the interface library as an item so it can be considered as part
       // of COMPATIBLE_INTERFACE_ enforcement.  The generators will ignore
       // this for the actual link line.
-      this->Items.push_back(Item(std::string(), false, tgt));
+      this->Items.emplace_back(std::string(), false, tgt);
 
       // Also add the item the interface specifies to be used in its place.
       std::string const& libName = tgt->GetImportedLibName(config);
@@ -950,10 +950,10 @@ void cmComputeLinkInformation::SetCurrentLinkType(LinkType lt)
     if (this->LinkTypeEnabled) {
       switch (this->CurrentLinkType) {
         case LinkStatic:
-          this->Items.push_back(Item(this->StaticLinkTypeFlag, false));
+          this->Items.emplace_back(this->StaticLinkTypeFlag, false);
           break;
         case LinkShared:
-          this->Items.push_back(Item(this->SharedLinkTypeFlag, false));
+          this->Items.emplace_back(this->SharedLinkTypeFlag, false);
           break;
         default:
           break;
@@ -989,7 +989,7 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
 
   // If this platform wants a flag before the full path, add it.
   if (!this->LibLinkFileFlag.empty()) {
-    this->Items.push_back(Item(this->LibLinkFileFlag, false));
+    this->Items.emplace_back(this->LibLinkFileFlag, false);
   }
 
   // For compatibility with CMake 2.4 include the item's directory in
@@ -1001,7 +1001,7 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
   }
 
   // Now add the full path to the library.
-  this->Items.push_back(Item(item, true, target));
+  this->Items.emplace_back(item, true, target);
 }
 
 void cmComputeLinkInformation::AddFullItem(std::string const& item)
@@ -1056,11 +1056,11 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
 
   // If this platform wants a flag before the full path, add it.
   if (!this->LibLinkFileFlag.empty()) {
-    this->Items.push_back(Item(this->LibLinkFileFlag, false));
+    this->Items.emplace_back(this->LibLinkFileFlag, false);
   }
 
   // Now add the full path to the library.
-  this->Items.push_back(Item(item, true));
+  this->Items.emplace_back(item, true);
 }
 
 bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
@@ -1147,7 +1147,7 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item,
     this->SetCurrentLinkType(this->StartLinkType);
 
     // Use the item verbatim.
-    this->Items.push_back(Item(item, false));
+    this->Items.emplace_back(item, false);
     return;
   }
 
@@ -1219,7 +1219,7 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item,
   std::string out = this->LibLinkFlag;
   out += lib;
   out += this->LibLinkSuffix;
-  this->Items.push_back(Item(out, false));
+  this->Items.emplace_back(out, false);
 
   // Here we could try to find the library the linker will find and
   // add a runtime information entry for it.  It would probably not be
@@ -1254,10 +1254,10 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
   this->AddLibraryRuntimeInfo(full_fw);
 
   // Add the item using the -framework option.
-  this->Items.push_back(Item("-framework", false));
+  this->Items.emplace_back("-framework", false);
   cmOutputConverter converter(this->Makefile->GetStateSnapshot());
   fw = converter.EscapeForShell(fw);
-  this->Items.push_back(Item(fw, false));
+  this->Items.emplace_back(fw, false);
 }
 
 void cmComputeLinkInformation::AddDirectoryItem(std::string const& item)
@@ -1742,7 +1742,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
           cmSystemTools::ConvertToUnixSlashes(d);
         }
         if (emitted.insert(d).second) {
-          runtimeDirs.push_back(d);
+          runtimeDirs.push_back(std::move(d));
         }
       } else if (use_link_rpath) {
         // Do not add any path inside the source or build tree.
@@ -1764,7 +1764,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
             cmSystemTools::ConvertToUnixSlashes(d);
           }
           if (emitted.insert(d).second) {
-            runtimeDirs.push_back(d);
+            runtimeDirs.push_back(std::move(d));
           }
         }
       }

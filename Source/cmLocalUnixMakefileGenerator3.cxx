@@ -191,7 +191,7 @@ void cmLocalUnixMakefileGenerator3::GetLocalObjectFiles(
       }
       LocalObjectInfo& info = localObjectFiles[objectName];
       info.HasSourceExtension = hasSourceExtension;
-      info.push_back(LocalObjectEntry(gt, sf->GetLanguage()));
+      info.emplace_back(gt, sf->GetLanguage());
     }
   }
 }
@@ -750,11 +750,11 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsTop(
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   std::string hack = gg->GetEmptyRuleHackDepends();
   if (!hack.empty()) {
-    no_depends.push_back(hack);
+    no_depends.push_back(std::move(hack));
   }
   std::string hack_cmd = gg->GetEmptyRuleHackCommand();
   if (!hack_cmd.empty()) {
-    no_commands.push_back(hack_cmd);
+    no_commands.push_back(std::move(hack_cmd));
   }
 
   // Special symbolic target that never exists to force dependers to
@@ -788,7 +788,7 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsBottom(
 
     std::vector<std::string> no_depends;
     std::vector<std::string> commands;
-    commands.push_back(runRule);
+    commands.push_back(std::move(runRule));
     if (!this->IsRootMakefile()) {
       this->CreateCDCommand(commands, this->GetBinaryDirectory(),
                             this->GetCurrentBinaryDirectory());
@@ -888,7 +888,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomDepend(
     // Lookup the real name of the dependency in case it is a CMake target.
     std::string dep;
     if (this->GetRealDependency(d, this->ConfigName, dep)) {
-      depends.push_back(dep);
+      depends.push_back(std::move(dep));
     }
   }
 }
@@ -1037,7 +1037,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
           cmd = "echo >nul && " + cmd;
         }
       }
-      commands1.push_back(cmd);
+      commands1.push_back(std::move(cmd));
     }
   }
 
@@ -1075,12 +1075,14 @@ void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
     }
     fout << ")\n";
   }
-  std::string remove = "$(CMAKE_COMMAND) -P ";
-  remove += this->ConvertToOutputFormat(
-    this->MaybeConvertToRelativePath(this->GetCurrentBinaryDirectory(),
-                                     cleanfile),
-    cmOutputConverter::SHELL);
-  commands.push_back(remove);
+  {
+    std::string remove = "$(CMAKE_COMMAND) -P ";
+    remove += this->ConvertToOutputFormat(
+      this->MaybeConvertToRelativePath(this->GetCurrentBinaryDirectory(),
+                                       cleanfile),
+      cmOutputConverter::SHELL);
+    commands.push_back(std::move(remove));
+  }
 
   // For the main clean rule add per-language cleaning.
   if (!filename) {
@@ -1158,7 +1160,7 @@ void cmLocalUnixMakefileGenerator3::AppendEcho(
           }
           cmd += this->EscapeForShell(line);
         }
-        commands.push_back(cmd);
+        commands.push_back(std::move(cmd));
       }
 
       // Reset the line to empty.
@@ -1675,13 +1677,15 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   commands.clear();
   std::string cmakefileName = cmake::GetCMakeFilesDirectoryPostSlash();
   cmakefileName += "Makefile.cmake";
-  std::string runRule =
-    "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
-  runRule += " --check-build-system ";
-  runRule +=
-    this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL);
-  runRule += " 1";
-  commands.push_back(runRule);
+  {
+    std::string runRule =
+      "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
+    runRule += " --check-build-system ";
+    runRule +=
+      this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL);
+    runRule += " 1";
+    commands.push_back(std::move(runRule));
+  }
   this->CreateCDCommand(commands, this->GetBinaryDirectory(),
                         this->GetCurrentBinaryDirectory());
   this->WriteMakeRule(ruleFileStream, "clear depends", "depend", depends,
@@ -2066,7 +2070,7 @@ void cmLocalUnixMakefileGenerator3::CreateCDCommand(
     // Change back to the starting directory.
     cmd = cd_cmd;
     cmd += this->ConvertToOutputForExisting(relDir);
-    commands.push_back(cmd);
+    commands.push_back(std::move(cmd));
   } else {
     // On UNIX we must construct a single shell command to change
     // directory and build because make resets the directory between

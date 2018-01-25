@@ -432,7 +432,7 @@ int main(int argc, char const* const* argv)
       cmDocumentationEntry e;
       e.Name = g.first;
       e.Brief = g.second;
-      v.push_back(e);
+      v.push_back(std::move(e));
     }
     doc.SetSection("Generators", v);
 

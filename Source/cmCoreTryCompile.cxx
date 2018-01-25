@@ -631,13 +631,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
             kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES)) {
         vars.erase(kCMAKE_OSX_ARCHITECTURES);
         std::string flag = "-DCMAKE_OSX_ARCHITECTURES=" + std::string(tcArchs);
-        cmakeFlags.push_back(flag);
+        cmakeFlags.push_back(std::move(flag));
       }
 
       for (std::string const& var : vars) {
         if (const char* val = this->Makefile->GetDefinition(var)) {
           std::string flag = "-D" + var + "=" + val;
-          cmakeFlags.push_back(flag);
+          cmakeFlags.push_back(std::move(flag));
         }
       }
     }
@@ -938,7 +938,7 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
   // a list of directories where to search for the compilation result
   // at first directly in the binary dir
   std::vector<std::string> searchDirs;
-  searchDirs.push_back("");
+  searchDirs.emplace_back();
 
   const char* config =
     this->Makefile->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
@@ -946,12 +946,12 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
   if (config && config[0]) {
     std::string tmp = "/";
     tmp += config;
-    searchDirs.push_back(tmp);
+    searchDirs.push_back(std::move(tmp));
   }
   searchDirs.push_back("/Debug");
 #if defined(__APPLE__)
   std::string app = "/Debug/" + targetName + ".app";
-  searchDirs.push_back(app);
+  searchDirs.push_back(std::move(app));
 #endif
   searchDirs.push_back("/Development");
 

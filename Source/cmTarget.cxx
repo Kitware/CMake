@@ -500,7 +500,7 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
   }
   if (!srcFiles.empty()) {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    this->Internal->SourceEntries.push_back(srcFiles);
+    this->Internal->SourceEntries.push_back(std::move(srcFiles));
     this->Internal->SourceBacktraces.push_back(lfbt);
   }
 }
@@ -747,10 +747,12 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
     return;
   }
 
-  cmTarget::LibraryID tmp;
-  tmp.first = lib;
-  tmp.second = llt;
-  this->OriginalLinkLibraries.push_back(tmp);
+  {
+    cmTarget::LibraryID tmp;
+    tmp.first = lib;
+    tmp.second = llt;
+    this->OriginalLinkLibraries.emplace_back(lib, llt);
+  }
 
   // Add the explicit dependency information for this target. This is
   // simply a set of libraries separated by ";". There should always

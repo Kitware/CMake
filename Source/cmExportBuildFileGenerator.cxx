@@ -228,7 +228,7 @@ void cmExportBuildFileGenerator::HandleMissingTarget(
 
       missingTarget += dependee->GetExportName();
       link_libs += missingTarget;
-      missingTargets.push_back(missingTarget);
+      missingTargets.push_back(std::move(missingTarget));
       return;
     }
     // We are not appending, so all exported targets should be

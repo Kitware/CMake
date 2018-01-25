@@ -200,7 +200,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     std::vector<std::string> configs;
     depender->Makefile->GetConfigurations(configs);
     if (configs.empty()) {
-      configs.push_back("");
+      configs.emplace_back();
     }
     for (std::string const& it : configs) {
       std::vector<cmSourceFile const*> objectFiles;
@@ -369,8 +369,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
     int dependee_index = tii->second;
 
     // Add this entry to the dependency graph.
-    this->InitialGraph[depender_index].push_back(
-      cmGraphEdge(dependee_index, !linking));
+    this->InitialGraph[depender_index].emplace_back(dependee_index, !linking);
   }
 }
 
@@ -504,7 +503,7 @@ bool cmComputeTargetDepends::IntraComponent(std::vector<int> const& cmap,
     for (cmGraphEdge const& edge : el) {
       int j = edge;
       if (cmap[j] == c && edge.IsStrong()) {
-        this->FinalGraph[i].push_back(cmGraphEdge(j, true));
+        this->FinalGraph[i].emplace_back(j, true);
         if (!this->IntraComponent(cmap, c, j, head, emitted, visited)) {
           return false;
         }
@@ -513,7 +512,7 @@ bool cmComputeTargetDepends::IntraComponent(std::vector<int> const& cmap,
 
     // Prepend to a linear linked-list of intra-component edges.
     if (*head >= 0) {
-      this->FinalGraph[i].push_back(cmGraphEdge(*head, false));
+      this->FinalGraph[i].emplace_back(*head, false);
     } else {
       this->ComponentTail[c] = i;
     }
@@ -563,8 +562,8 @@ bool cmComputeTargetDepends::ComputeFinalDepends(
     for (cmGraphEdge const& ni : nl) {
       int dependee_component = ni;
       int dependee_component_head = this->ComponentHead[dependee_component];
-      this->FinalGraph[depender_component_tail].push_back(
-        cmGraphEdge(dependee_component_head, ni.IsStrong()));
+      this->FinalGraph[depender_component_tail].emplace_back(
+        dependee_component_head, ni.IsStrong());
     }
   }
   return true;

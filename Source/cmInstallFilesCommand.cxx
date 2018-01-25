@@ -30,8 +30,7 @@ bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& args,
     for (std::vector<std::string>::const_iterator s = args.begin() + 2;
          s != args.end(); ++s) {
       // Find the source location for each file listed.
-      std::string f = this->FindInstallSource(s->c_str());
-      this->Files.push_back(f);
+      this->Files.push_back(this->FindInstallSource(s->c_str()));
     }
     this->CreateInstallGenerator();
   } else {

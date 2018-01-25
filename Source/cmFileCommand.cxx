@@ -1320,7 +1320,7 @@ bool cmFileCopier::CheckValue(std::string const& arg)
       std::string regex = "/";
       regex += cmsys::Glob::PatternToRegex(arg, false);
       regex += "$";
-      this->MatchRules.push_back(MatchRule(regex));
+      this->MatchRules.emplace_back(regex);
       this->CurrentMatchRule = &*(this->MatchRules.end() - 1);
       if (this->CurrentMatchRule->Regex.is_valid()) {
         this->Doing = DoingNone;
@@ -1332,7 +1332,7 @@ bool cmFileCopier::CheckValue(std::string const& arg)
       }
     } break;
     case DoingRegex:
-      this->MatchRules.push_back(MatchRule(arg));
+      this->MatchRules.emplace_back(arg);
       this->CurrentMatchRule = &*(this->MatchRules.end() - 1);
       if (this->CurrentMatchRule->Regex.is_valid()) {
         this->Doing = DoingNone;

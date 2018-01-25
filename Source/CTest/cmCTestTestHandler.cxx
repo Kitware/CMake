@@ -2156,9 +2156,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             std::vector<std::string> lval;
             cmSystemTools::ExpandListArgument(val, lval);
             for (std::string const& cr : lval) {
-              rt.ErrorRegularExpressions.push_back(
-                std::pair<cmsys::RegularExpression, std::string>(
-                  cmsys::RegularExpression(cr.c_str()), std::string(cr)));
+              rt.ErrorRegularExpressions.emplace_back(cr, cr);
             }
           }
           if (key == "PROCESSORS") {
@@ -2204,9 +2202,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             std::vector<std::string> lval;
             cmSystemTools::ExpandListArgument(val, lval);
             for (std::string const& cr : lval) {
-              rt.RequiredRegularExpressions.push_back(
-                std::pair<cmsys::RegularExpression, std::string>(
-                  cmsys::RegularExpression(cr.c_str()), std::string(cr)));
+              rt.RequiredRegularExpressions.emplace_back(cr, cr);
             }
           }
           if (key == "WORKING_DIRECTORY") {
@@ -2225,9 +2221,7 @@ bool cmCTestTestHandler::SetTestsProperties(
               std::vector<std::string> lval;
               cmSystemTools::ExpandListArgument(propArgs[1], lval);
               for (std::string const& cr : lval) {
-                rt.TimeoutRegularExpressions.push_back(
-                  std::pair<cmsys::RegularExpression, std::string>(
-                    cmsys::RegularExpression(cr.c_str()), std::string(cr)));
+                rt.TimeoutRegularExpressions.emplace_back(cr, cr);
               }
             }
           }

@@ -17,6 +17,7 @@
 #include <set>
 #include <stdlib.h>
 #include <string.h>
+#include <utility>
 
 static const char* cmCTestErrorMatches[] = {
   "^[Bb]us [Ee]rror",
@@ -294,7 +295,7 @@ int cmCTestBuildHandler::ProcessHandler()
           cmCTestWarningErrorFileLine[entry].RegularExpressionString)) {
       r.FileIndex = cmCTestWarningErrorFileLine[entry].FileIndex;
       r.LineIndex = cmCTestWarningErrorFileLine[entry].LineIndex;
-      this->ErrorWarningFileLineRegex.push_back(r);
+      this->ErrorWarningFileLineRegex.push_back(std::move(r));
     } else {
       cmCTestLog(
         this->CTest, ERROR_MESSAGE, "Problem Compiling regular expression: "
@@ -894,7 +895,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
         errorwarning.PreContext.clear();
         errorwarning.PostContext.clear();
         errorwarning.Error = false;
-        this->ErrorsAndWarnings.push_back(errorwarning);
+        this->ErrorsAndWarnings.push_back(std::move(errorwarning));
         this->TotalWarnings++;
       }
     }
@@ -917,7 +918,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
     errorwarning.PreContext.clear();
     errorwarning.PostContext.clear();
     errorwarning.Error = true;
-    this->ErrorsAndWarnings.push_back(errorwarning);
+    this->ErrorsAndWarnings.push_back(std::move(errorwarning));
     this->TotalErrors++;
     cmCTestLog(this->CTest, ERROR_MESSAGE, "There was an error: "
                  << cmsysProcess_GetErrorString(cp) << std::endl);
@@ -1009,7 +1010,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
         this->PreContext.clear();
 
         // Store report
-        this->ErrorsAndWarnings.push_back(errorwarning);
+        this->ErrorsAndWarnings.push_back(std::move(errorwarning));
         this->LastErrorOrWarning = this->ErrorsAndWarnings.end() - 1;
         this->PostContextCount = 0;
       } else {

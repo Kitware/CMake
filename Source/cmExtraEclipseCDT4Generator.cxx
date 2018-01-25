@@ -413,7 +413,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
       this->AppendLinkedResource(xml, sourceLinkedResourceName,
                                  this->GetEclipsePath(linkSourceDirectory),
                                  LinkToFolder);
-      this->SrcLinkedResources.push_back(sourceLinkedResourceName);
+      this->SrcLinkedResources.push_back(std::move(sourceLinkedResourceName));
     }
   }
 

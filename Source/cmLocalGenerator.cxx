@@ -207,7 +207,7 @@ void cmLocalGenerator::TraceDependencies()
   std::vector<std::string> configs;
   this->Makefile->GetConfigurations(configs);
   if (configs.empty()) {
-    configs.push_back("");
+    configs.emplace_back();
   }
   for (std::string const& c : configs) {
     this->GlobalGenerator->CreateEvaluationSourceFiles(c);
@@ -602,7 +602,7 @@ void cmLocalGenerator::ComputeTargetManifest()
   std::vector<std::string> configNames;
   this->Makefile->GetConfigurations(configNames);
   if (configNames.empty()) {
-    configNames.push_back("");
+    configNames.emplace_back();
   }
 
   // Add our targets to the manifest for each configuration.
@@ -623,7 +623,7 @@ bool cmLocalGenerator::ComputeTargetCompileFeatures()
   std::vector<std::string> configNames;
   this->Makefile->GetConfigurations(configNames);
   if (configNames.empty()) {
-    configNames.push_back("");
+    configNames.emplace_back();
   }
 
   // Process compile features of all targets.
@@ -906,7 +906,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     for (std::string const& i : impDirVec) {
       std::string d = rootPath + i;
       cmSystemTools::ConvertToUnixSlashes(d);
-      emitted.insert(d);
+      emitted.insert(std::move(d));
       if (!stripImplicitInclDirs) {
         implicitDirs.push_back(i);
       }
@@ -2002,7 +2002,7 @@ void cmLocalGenerator::AppendIncludeDirectories(
     }
 
     if (uniqueIncludes.insert(inc).second) {
-      includes.push_back(inc);
+      includes.push_back(std::move(inc));
     }
   }
 }

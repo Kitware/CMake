@@ -327,7 +327,7 @@ void cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()(
   copyCommand += " ";
   copyCommand += this->Generator->LocalGenerator->ConvertToOutputFormat(
     output, cmOutputConverter::SHELL);
-  commands.push_back(copyCommand);
+  commands.push_back(std::move(copyCommand));
   this->Generator->LocalGenerator->WriteMakeRule(
     *this->Generator->BuildFileStream, nullptr, output, depends, commands,
     false);
@@ -797,7 +797,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       } else {
         std::string cmd = "$(CMAKE_COMMAND) -E cmake_unimplemented_variable ";
         cmd += preprocessRuleVar;
-        commands.push_back(cmd);
+        commands.push_back(std::move(cmd));
       }
 
       this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
@@ -844,7 +844,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       } else {
         std::string cmd = "$(CMAKE_COMMAND) -E cmake_unimplemented_variable ";
         cmd += assemblyRuleVar;
-        commands.push_back(cmd);
+        commands.push_back(std::move(cmd));
       }
 
       this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
@@ -1345,12 +1345,12 @@ void cmMakefileTargetGenerator::AppendObjectDepends(
   std::vector<std::string>& depends)
 {
   // Add dependencies on the compiled object files.
-  std::string relPath = this->LocalGenerator->GetHomeRelativeOutputPath();
-  std::string objTarget;
+  std::string const& relPath =
+    this->LocalGenerator->GetHomeRelativeOutputPath();
   for (std::string const& obj : this->Objects) {
-    objTarget = relPath;
+    std::string objTarget = relPath;
     objTarget += obj;
-    depends.push_back(objTarget);
+    depends.push_back(std::move(objTarget));
   }
 
   // Add dependencies on the external object files.
@@ -1441,8 +1441,8 @@ void cmMakefileTargetGenerator::CreateLinkScript(
       this->LocalGenerator->GetCurrentBinaryDirectory(), linkScriptName),
     cmOutputConverter::SHELL);
   link_command += " --verbose=$(VERBOSE)";
-  makefile_commands.push_back(link_command);
-  makefile_depends.push_back(linkScriptName);
+  makefile_commands.push_back(std::move(link_command));
+  makefile_depends.push_back(std::move(linkScriptName));
 }
 
 bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
@@ -1514,7 +1514,7 @@ std::string cmMakefileTargetGenerator::CreateResponseFile(
 
   // Add a dependency so the target will rebuild when the set of
   // objects changes.
-  makefile_depends.push_back(responseFileNameFull);
+  makefile_depends.push_back(std::move(responseFileNameFull));
 
   // Construct the name to be used on the command line.
   std::string responseFileName = this->TargetBuildDirectory;

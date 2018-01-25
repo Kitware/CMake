@@ -303,7 +303,7 @@ void cmDependsC::ReadCacheFile()
         if (line != "-") {
           entry.QuotedLocation = line;
         }
-        cacheEntry->UnscannedEntries.push_back(entry);
+        cacheEntry->UnscannedEntries.push_back(std::move(entry));
       }
     }
   }

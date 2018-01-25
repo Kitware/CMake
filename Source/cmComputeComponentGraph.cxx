@@ -88,7 +88,7 @@ void cmComputeComponentGraph::TarjanVisit(int i)
   if (this->TarjanEntries[i].Root == i) {
     // Yes.  Create it.
     int c = static_cast<int>(this->Components.size());
-    this->Components.push_back(NodeList());
+    this->Components.emplace_back();
     NodeList& component = this->Components[c];
 
     // Populate the component list.
@@ -125,8 +125,8 @@ void cmComputeComponentGraph::TransferEdges()
       if (i_component != j_component) {
         // We do not attempt to combine duplicate edges, but instead
         // store the inter-component edges with suitable multiplicity.
-        this->ComponentGraph[i_component].push_back(
-          cmGraphEdge(j_component, ni.IsStrong()));
+        this->ComponentGraph[i_component].emplace_back(j_component,
+                                                       ni.IsStrong());
       }
     }
   }

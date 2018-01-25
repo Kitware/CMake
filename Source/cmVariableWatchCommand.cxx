@@ -43,16 +43,14 @@ static void cmVariableWatchCommandVariableAccessed(const std::string& variable,
   std::string stack = makefile->GetProperty("LISTFILE_STACK");
   if (!data->Command.empty()) {
     newLFF.Arguments.clear();
-    newLFF.Arguments.push_back(
-      cmListFileArgument(variable, cmListFileArgument::Quoted, 9999));
-    newLFF.Arguments.push_back(
-      cmListFileArgument(accessString, cmListFileArgument::Quoted, 9999));
-    newLFF.Arguments.push_back(cmListFileArgument(
-      newValue ? newValue : "", cmListFileArgument::Quoted, 9999));
-    newLFF.Arguments.push_back(
-      cmListFileArgument(currentListFile, cmListFileArgument::Quoted, 9999));
-    newLFF.Arguments.push_back(
-      cmListFileArgument(stack, cmListFileArgument::Quoted, 9999));
+    newLFF.Arguments.emplace_back(variable, cmListFileArgument::Quoted, 9999);
+    newLFF.Arguments.emplace_back(accessString, cmListFileArgument::Quoted,
+                                  9999);
+    newLFF.Arguments.emplace_back(newValue ? newValue : "",
+                                  cmListFileArgument::Quoted, 9999);
+    newLFF.Arguments.emplace_back(currentListFile, cmListFileArgument::Quoted,
+                                  9999);
+    newLFF.Arguments.emplace_back(stack, cmListFileArgument::Quoted, 9999);
     newLFF.Name = data->Command;
     newLFF.Line = 9999;
     cmExecutionStatus status;

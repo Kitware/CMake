@@ -115,7 +115,7 @@ int cmCPackNSISGenerator::PackageFiles()
     dstr << "  RMDir \"" << componentOutputDir << "\\" << fileN << "\""
          << std::endl;
     if (!componentName.empty()) {
-      this->Components[componentName].Directories.push_back(fileN);
+      this->Components[componentName].Directories.push_back(std::move(fileN));
     }
   }
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Uninstall Dirs: " << dstr.str()

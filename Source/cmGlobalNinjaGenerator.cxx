@@ -1727,7 +1727,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         info.Requires.push_back(ddi_require.asString());
       }
     }
-    objects.push_back(info);
+    objects.push_back(std::move(info));
   }
 
   // Map from module name to module file path, if known.

@@ -570,7 +570,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
   TestSet alreadySortedTests;
 
   std::list<TestSet> priorityStack;
-  priorityStack.push_back(TestSet());
+  priorityStack.emplace_back();
   TestSet& topLevel = priorityStack.back();
 
   // In parallel test runs add previously failed tests to the front
@@ -592,7 +592,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
   // further dependencies exist.
   while (!priorityStack.back().empty()) {
     TestSet& previousSet = priorityStack.back();
-    priorityStack.push_back(TestSet());
+    priorityStack.emplace_back();
     TestSet& currentSet = priorityStack.back();
 
     for (auto const& i : previousSet) {

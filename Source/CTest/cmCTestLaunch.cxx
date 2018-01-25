@@ -564,7 +564,7 @@ void cmCTestLaunch::LoadScrapeRules(
   std::string line;
   cmsys::RegularExpression rex;
   while (cmSystemTools::GetLineFromStream(fin, line)) {
-    if (rex.compile(line.c_str())) {
+    if (rex.compile(line)) {
       regexps.push_back(rex);
     }
   }

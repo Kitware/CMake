@@ -12,8 +12,7 @@ static void InsertText(const char* upto, const char* c,
                        std::vector<cmGeneratorExpressionToken>& result)
 {
   if (upto != c) {
-    result.push_back(cmGeneratorExpressionToken(
-      cmGeneratorExpressionToken::Text, upto, c - upto));
+    result.emplace_back(cmGeneratorExpressionToken::Text, upto, c - upto);
   }
 }
 
@@ -30,8 +29,8 @@ std::vector<cmGeneratorExpressionToken> cmGeneratorExpressionLexer::Tokenize(
       case '$':
         if (c[1] == '<') {
           InsertText(upto, c, result);
-          result.push_back(cmGeneratorExpressionToken(
-            cmGeneratorExpressionToken::BeginExpression, c, 2));
+          result.emplace_back(cmGeneratorExpressionToken::BeginExpression, c,
+                              2);
           upto = c + 2;
           ++c;
           SawBeginExpression = true;
@@ -39,21 +38,18 @@ std::vector<cmGeneratorExpressionToken> cmGeneratorExpressionLexer::Tokenize(
         break;
       case '>':
         InsertText(upto, c, result);
-        result.push_back(cmGeneratorExpressionToken(
-          cmGeneratorExpressionToken::EndExpression, c, 1));
+        result.emplace_back(cmGeneratorExpressionToken::EndExpression, c, 1);
         upto = c + 1;
         SawGeneratorExpression = SawBeginExpression;
         break;
       case ':':
         InsertText(upto, c, result);
-        result.push_back(cmGeneratorExpressionToken(
-          cmGeneratorExpressionToken::ColonSeparator, c, 1));
+        result.emplace_back(cmGeneratorExpressionToken::ColonSeparator, c, 1);
         upto = c + 1;
         break;
       case ',':
         InsertText(upto, c, result);
-        result.push_back(cmGeneratorExpressionToken(
-          cmGeneratorExpressionToken::CommaSeparator, c, 1));
+        result.emplace_back(cmGeneratorExpressionToken::CommaSeparator, c, 1);
         upto = c + 1;
         break;
       default:

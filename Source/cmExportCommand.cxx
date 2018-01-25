@@ -205,7 +205,7 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
   std::vector<std::string> configurationTypes;
   this->Makefile->GetConfigurations(configurationTypes);
   if (configurationTypes.empty()) {
-    configurationTypes.push_back("");
+    configurationTypes.emplace_back();
   }
   for (std::string const& ct : configurationTypes) {
     ebfg->AddConfiguration(ct);

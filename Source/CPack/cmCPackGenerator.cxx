@@ -313,7 +313,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
     for (std::string const& ifr : ignoreFilesRegexString) {
       cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                     "Create ignore files regex for: " << ifr << std::endl);
-      ignoreFilesRegex.push_back(ifr.c_str());
+      ignoreFilesRegex.emplace_back(ifr);
     }
   }
   const char* installDirectories =
@@ -383,8 +383,8 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           std::string inFileRelative =
             cmSystemTools::RelativePath(top.c_str(), inFile.c_str());
           cmSystemTools::ReadSymlink(inFile, targetFile);
-          symlinkedFiles.push_back(
-            std::pair<std::string, std::string>(targetFile, inFileRelative));
+          symlinkedFiles.emplace_back(std::move(targetFile),
+                                      std::move(inFileRelative));
         }
         /* If it is not a symlink then do a plain copy */
         else if (!(cmSystemTools::CopyFileIfDifferent(inFile.c_str(),

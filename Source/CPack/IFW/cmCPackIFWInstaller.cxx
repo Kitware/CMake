@@ -467,7 +467,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
         std::string name = cmSystemTools::GetFilenameName(this->Resources[i]);
         std::string path = this->Directory + "/resources/" + name;
         cmsys::SystemTools::CopyFileIfDifferent(this->Resources[i], path);
-        resources.push_back(name);
+        resources.push_back(std::move(name));
       } else {
         cmCPackIFWLogger(WARNING, "Can't copy resources from \""
                            << this->Resources[i]

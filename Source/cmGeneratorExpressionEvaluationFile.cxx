@@ -155,7 +155,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
   lg->GetMakefile()->GetConfigurations(allConfigs);
 
   if (allConfigs.empty()) {
-    allConfigs.push_back("");
+    allConfigs.emplace_back();
   }
 
   std::vector<std::string> enabledLanguages;
