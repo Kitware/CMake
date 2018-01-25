@@ -62,7 +62,6 @@ macro(__CrayPrgEnv_setup lang test_src compiler_cmd link_cmd)
 
   # Flags for the Cray wrappers
   set(CMAKE_STATIC_LIBRARY_LINK_${lang}_FLAGS "-static")
-  set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
   set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS "-dynamic")
 
