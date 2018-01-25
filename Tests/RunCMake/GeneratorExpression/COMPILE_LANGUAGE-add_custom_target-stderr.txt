@@ -1,4 +1,4 @@
-CMake Error at COMPILE_LANGUAGE-add_custom_target.cmake:4 \(add_custom_target\):
+CMake Error at COMPILE_LANGUAGE-add_custom_target.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<COMPILE_LANGUAGE>

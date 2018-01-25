@@ -1,4 +1,4 @@
-CMake Error at NonValidTarget-TARGET_PROPERTY.cmake:4 \(add_custom_command\):
+CMake Error at NonValidTarget-TARGET_PROPERTY.cmake:1 \(add_custom_command\):
   Error evaluating generator expression:
 
     \$<TARGET_PROPERTY:NotAProperty>

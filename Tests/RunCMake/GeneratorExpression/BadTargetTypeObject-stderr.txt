@@ -1,4 +1,4 @@
-CMake Error at BadTargetTypeObject.cmake:3 \(add_custom_target\):
+CMake Error at BadTargetTypeObject.cmake:2 \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<TARGET_FILE:objlib>
@@ -7,7 +7,7 @@ CMake Error at BadTargetTypeObject.cmake:3 \(add_custom_target\):
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
-CMake Error at BadTargetTypeObject.cmake:3 \(add_custom_target\):
+CMake Error at BadTargetTypeObject.cmake:2 \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<TARGET_SONAME_FILE:objlib>
@@ -16,7 +16,7 @@ CMake Error at BadTargetTypeObject.cmake:3 \(add_custom_target\):
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
-CMake Error at BadTargetTypeObject.cmake:3 \(add_custom_target\):
+CMake Error at BadTargetTypeObject.cmake:2 \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<TARGET_LINKER_FILE:objlib>
