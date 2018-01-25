@@ -48,10 +48,10 @@ public:
     this->HackSignal.init(this->HackLoop);
     this->HackSignal.start(HackCB, SIGCHLD);
     struct sigaction hack_sa;
-    sigaction(SIGCHLD, NULL, &hack_sa);
+    sigaction(SIGCHLD, nullptr, &hack_sa);
     if (!(hack_sa.sa_flags & SA_RESTART)) {
       hack_sa.sa_flags |= SA_RESTART;
-      sigaction(SIGCHLD, &hack_sa, NULL);
+      sigaction(SIGCHLD, &hack_sa, nullptr);
     }
   }
   ~cmUVSignalHackRAII()
