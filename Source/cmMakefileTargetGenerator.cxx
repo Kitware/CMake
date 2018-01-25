@@ -1653,10 +1653,17 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
   }
 
   if (useResponseFile) {
+    std::string const responseFlagVar =
+      "CMAKE_" + lang + "_RESPONSE_FILE_FLAG";
+    std::string responseFlag =
+      this->Makefile->GetSafeDefinition(responseFlagVar);
+    if (responseFlag.empty()) {
+      responseFlag = "@";
+    }
     std::string name = "includes_";
     name += lang;
     name += ".rsp";
-    std::string arg = "@" +
+    std::string arg = std::move(responseFlag) +
       this->CreateResponseFile(name.c_str(), includeFlags,
                                this->FlagFileDepends[lang]);
     this->LocalGenerator->AppendFlags(flags, arg);

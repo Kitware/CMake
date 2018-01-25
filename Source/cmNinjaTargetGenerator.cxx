@@ -447,14 +447,20 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   std::string flags = "$FLAGS";
   std::string rspfile;
   std::string rspcontent;
-  std::string responseFlag;
 
   bool const lang_supports_response = !(lang == "RC" || lang == "CUDA");
   if (lang_supports_response && this->ForceResponseFile()) {
+    std::string const responseFlagVar =
+      "CMAKE_" + lang + "_RESPONSE_FILE_FLAG";
+    std::string responseFlag =
+      this->Makefile->GetSafeDefinition(responseFlagVar);
+    if (responseFlag.empty()) {
+      responseFlag = "@";
+    }
     rspfile = "$RSP_FILE";
-    responseFlag = "@" + rspfile;
+    responseFlag += rspfile;
     rspcontent = " $DEFINES $INCLUDES $FLAGS";
-    flags = responseFlag;
+    flags = std::move(responseFlag);
     vars.Defines = "";
     vars.Includes = "";
   }
