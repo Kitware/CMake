@@ -103,14 +103,14 @@ public:
   // Retrieve id of the current running process
   LongLong GetProcessId();
 
-  // Retrieve memory information in megabyte.
+  // Retrieve memory information in MiB.
   size_t GetTotalVirtualMemory();
   size_t GetAvailableVirtualMemory();
   size_t GetTotalPhysicalMemory();
   size_t GetAvailablePhysicalMemory();
 
   // returns an informative general description if the installed and
-  // available ram on this system. See the  GetHostMmeoryTotal, and
+  // available ram on this system. See the GetHostMemoryTotal, and
   // Get{Host,Proc}MemoryAvailable methods for more information.
   std::string GetMemoryDescription(const char* hostLimitEnvVarName = NULL,
                                    const char* procLimitEnvVarName = NULL);

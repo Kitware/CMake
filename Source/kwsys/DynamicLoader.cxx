@@ -60,7 +60,7 @@ const char* DynamicLoader::LastError()
 } // namespace KWSYS_NAMESPACE
 
 #elif defined(__hpux)
-// Implementation for HPUX  machines
+// Implementation for HPUX machines
 #include <dl.h>
 #include <errno.h>
 

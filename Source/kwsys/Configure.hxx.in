@@ -20,6 +20,12 @@
 #define @KWSYS_NAMESPACE@__has_cpp_attribute(x) 0
 #endif
 
+#if __cplusplus >= 201103L
+#define @KWSYS_NAMESPACE@_NULLPTR nullptr
+#else
+#define @KWSYS_NAMESPACE@_NULLPTR 0
+#endif
+
 #ifndef @KWSYS_NAMESPACE@_FALLTHROUGH
 #if __cplusplus >= 201703L && @KWSYS_NAMESPACE@__has_cpp_attribute(fallthrough)
 #define @KWSYS_NAMESPACE@_FALLTHROUGH [[fallthrough]]
@@ -48,6 +54,7 @@
 #define KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H                                     \
   @KWSYS_NAMESPACE@_CXX_HAS_EXT_STDIO_FILEBUF_H
 #define KWSYS_FALLTHROUGH @KWSYS_NAMESPACE@_FALLTHROUGH
+#define KWSYS_NULLPTR @KWSYS_NAMESPACE@_NULLPTR
 #endif
 
 #endif

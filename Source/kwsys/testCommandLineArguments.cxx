@@ -76,7 +76,7 @@ int testCommandLineArguments(int argc, char* argv[])
 
   int some_int_variable = 10;
   double some_double_variable = 10.10;
-  char* some_string_variable = 0;
+  char* some_string_variable = KWSYS_NULLPTR;
   std::string some_stl_string_variable = "";
   bool some_bool_variable = false;
   bool some_bool_variable1 = false;
@@ -202,7 +202,7 @@ int testCommandLineArguments(int argc, char* argv[])
 
   for (cc = 0; cc < strings_argument.size(); ++cc) {
     delete[] strings_argument[cc];
-    strings_argument[cc] = 0;
+    strings_argument[cc] = KWSYS_NULLPTR;
   }
   return res;
 }
