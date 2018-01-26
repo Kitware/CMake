@@ -32,7 +32,6 @@
 #include "curl_base64.h"
 #include "strcase.h"
 #include "multiif.h"
-#include "conncache.h"
 #include "url.h"
 #include "connect.h"
 #include "strtoofft.h"
@@ -926,8 +925,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 
   if(stream->bodystarted) {
     /* This is trailer fields. */
-    /* 3 is for ":" and "\r\n". */
-    uint32_t n = (uint32_t)(namelen + valuelen + 3);
+    /* 4 is for ": " and "\r\n". */
+    uint32_t n = (uint32_t)(namelen + valuelen + 4);
 
     DEBUGF(infof(data_s, "h2 trailer: %.*s: %.*s\n", namelen, name, valuelen,
                  value));
@@ -1184,14 +1183,17 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
                                          httpc->local_settings_num);
   if(!binlen) {
     failf(conn->data, "nghttp2 unexpectedly failed on pack_settings_payload");
+    Curl_add_buffer_free(req);
     return CURLE_FAILED_INIT;
   }
   conn->proto.httpc.binlen = binlen;
 
   result = Curl_base64url_encode(conn->data, (const char *)binsettings, binlen,
                                  &base64, &blen);
-  if(result)
+  if(result) {
+    Curl_add_buffer_free(req);
     return result;
+  }
 
   result = Curl_add_bufferf(req,
                             "Connection: Upgrade, HTTP2-Settings\r\n"
@@ -1846,9 +1848,6 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     goto fail;
   }
 
-  hdbuf = end + 1;
-
-  end = line_end;
   nva[2].name = (unsigned char *)":scheme";
   nva[2].namelen = strlen((char *)nva[2].name);
   if(conn->handler->flags & PROTOPT_SSL)
