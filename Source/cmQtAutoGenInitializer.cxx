@@ -6,6 +6,7 @@
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
+#include "cmDuration.h"
 #include "cmFilePathChecksum.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -410,7 +411,7 @@ void cmQtAutoGenInitializer::InitCustomTargets()
       int retVal = 0;
       bool result = cmSystemTools::RunSingleCommand(
         command, &rccStdOut, &rccStdErr, &retVal, nullptr,
-        cmSystemTools::OUTPUT_NONE, 0.0, cmProcessOutput::Auto);
+        cmSystemTools::OUTPUT_NONE, cmDuration::zero(), cmProcessOutput::Auto);
       if (result && retVal == 0 &&
           rccStdOut.find("--list") != std::string::npos) {
         this->RccListOptions.push_back("--list");
@@ -1417,7 +1418,7 @@ bool cmQtAutoGenInitializer::RccListInputs(std::string const& fileName,
       cmd.push_back(fileNameName);
       result = cmSystemTools::RunSingleCommand(
         cmd, &rccStdOut, &rccStdErr, &retVal, fileDir.c_str(),
-        cmSystemTools::OUTPUT_NONE, 0.0, cmProcessOutput::Auto);
+        cmSystemTools::OUTPUT_NONE, cmDuration::zero(), cmProcessOutput::Auto);
     }
     if (!result || retVal) {
       error = "rcc list process failed for:\n  ";

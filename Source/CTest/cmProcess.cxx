@@ -62,8 +62,8 @@ cmProcess::cmProcess(cmCTestRunTest& runner)
   : Runner(runner)
   , Conv(cmProcessOutput::UTF8, CM_PROCESS_BUF_SIZE)
 {
-  this->Timeout = std::chrono::duration<double>::zero();
-  this->TotalTime = std::chrono::duration<double>::zero();
+  this->Timeout = cmDuration::zero();
+  this->TotalTime = cmDuration::zero();
   this->ExitValue = 0;
   this->Id = 0;
   this->StartTime = std::chrono::steady_clock::time_point();
@@ -344,8 +344,8 @@ void cmProcess::OnExit(int64_t exit_status, int term_signal)
   // negative. If someone changed the system clock while the process was
   // running this may be even more. Make sure not to report a negative
   // duration here.
-  if (this->TotalTime <= std::chrono::duration<double>::zero()) {
-    this->TotalTime = std::chrono::duration<double>::zero();
+  if (this->TotalTime <= cmDuration::zero()) {
+    this->TotalTime = cmDuration::zero();
   }
 
   this->ProcessHandleClosed = true;
@@ -360,7 +360,7 @@ cmProcess::State cmProcess::GetProcessStatus()
   return this->ProcessState;
 }
 
-void cmProcess::ChangeTimeout(std::chrono::duration<double> t)
+void cmProcess::ChangeTimeout(cmDuration t)
 {
   this->Timeout = t;
   this->StartTimer();

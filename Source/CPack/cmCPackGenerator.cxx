@@ -12,6 +12,7 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmCryptoHash.h"
+#include "cmDuration.h"
 #include "cmFSPermissions.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
@@ -277,9 +278,9 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
       cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << ic << std::endl);
       std::string output;
       int retVal = 1;
-      bool resB =
-        cmSystemTools::RunSingleCommand(ic.c_str(), &output, &output, &retVal,
-                                        nullptr, this->GeneratorVerbose, 0);
+      bool resB = cmSystemTools::RunSingleCommand(
+        ic.c_str(), &output, &output, &retVal, nullptr, this->GeneratorVerbose,
+        cmDuration::zero());
       if (!resB || retVal) {
         std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
         tmpFile += "/InstallOutput.log";
@@ -601,7 +602,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         int retVal = 1;
         bool resB = cmSystemTools::RunSingleCommand(
           buildCommand.c_str(), &output, &output, &retVal,
-          installDirectory.c_str(), this->GeneratorVerbose, 0);
+          installDirectory.c_str(), this->GeneratorVerbose,
+          cmDuration::zero());
         if (!resB || retVal) {
           std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
           tmpFile += "/PreinstallOutput.log";

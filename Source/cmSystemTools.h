@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCryptoHash.h"
+#include "cmDuration.h"
 #include "cmProcessOutput.h"
 #include "cmsys/Process.h"
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
@@ -225,7 +226,7 @@ public:
                                int* retVal = nullptr,
                                const char* dir = nullptr,
                                OutputOption outputflag = OUTPUT_MERGE,
-                               double timeout = 0.0);
+                               cmDuration timeout = cmDuration::zero());
   /**
    * In this version of RunSingleCommand, command[0] should be
    * the command to run, and each argument to the command should
@@ -237,7 +238,7 @@ public:
                                int* retVal = nullptr,
                                const char* dir = nullptr,
                                OutputOption outputflag = OUTPUT_MERGE,
-                               double timeout = 0.0,
+                               cmDuration timeout = cmDuration::zero(),
                                Encoding encoding = cmProcessOutput::Auto);
 
   static std::string PrintSingleCommand(std::vector<std::string> const&);
@@ -343,7 +344,7 @@ public:
 
   /** a general output handler for cmsysProcess  */
   static int WaitForLine(cmsysProcess* process, std::string& line,
-                         double timeout, std::vector<char>& out,
+                         cmDuration timeout, std::vector<char>& out,
                          std::vector<char>& err);
 
   /** Split a string on its newlines into multiple lines.  Returns

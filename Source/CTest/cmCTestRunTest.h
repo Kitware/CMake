@@ -5,13 +5,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <chrono>
 #include <set>
 #include <stddef.h>
 #include <string>
 #include <vector>
 
 #include "cmCTestTestHandler.h"
+#include "cmDuration.h"
 #include "cmProcess.h" // IWYU pragma: keep (for unique_ptr)
 
 class cmCTest;
@@ -82,8 +82,7 @@ private:
   bool NeedsToRerun();
   void DartProcessing();
   void ExeNotFound(std::string exe);
-  bool ForkProcess(std::chrono::duration<double> testTimeOut,
-                   bool explicitTimeout,
+  bool ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
                    std::vector<std::string>* environment);
   void WriteLogOutputTop(size_t completed, size_t total);
   // Run post processing of the process output for MemCheck

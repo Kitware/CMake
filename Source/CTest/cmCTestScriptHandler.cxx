@@ -27,6 +27,7 @@
 #include "cmCTestTestCommand.h"
 #include "cmCTestUpdateCommand.h"
 #include "cmCTestUploadCommand.h"
+#include "cmDuration.h"
 #include "cmFunctionBlocker.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
@@ -159,9 +160,9 @@ void cmCTestScriptHandler::UpdateElapsedTime()
 {
   if (this->Makefile) {
     // set the current elapsed time
-    auto itime = std::chrono::duration_cast<std::chrono::seconds>(
-      std::chrono::steady_clock::now() - this->ScriptStartTime);
-    auto timeString = std::to_string(itime.count());
+    auto itime = cmDurationTo<unsigned int>(std::chrono::steady_clock::now() -
+                                            this->ScriptStartTime);
+    auto timeString = std::to_string(itime);
     this->Makefile->AddDefinition("CTEST_ELAPSED_TIME", timeString.c_str());
   }
 }
@@ -206,7 +207,8 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   std::vector<char> out;
   std::vector<char> err;
   std::string line;
-  int pipe = cmSystemTools::WaitForLine(cp, line, 100.0, out, err);
+  int pipe =
+    cmSystemTools::WaitForLine(cp, line, std::chrono::seconds(100), out, err);
   while (pipe != cmsysProcess_Pipe_None) {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Output: " << line
                                                                << "\n");
@@ -215,7 +217,8 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
     } else if (pipe == cmsysProcess_Pipe_STDOUT) {
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, line << "\n");
     }
-    pipe = cmSystemTools::WaitForLine(cp, line, 100, out, err);
+    pipe = cmSystemTools::WaitForLine(cp, line, std::chrono::seconds(100), out,
+                                      err);
   }
 
   // Properly handle output of the build command
@@ -558,8 +561,8 @@ int cmCTestScriptHandler::RunCurrentScript()
   // for a continuous, do we ned to run it more than once?
   if (this->ContinuousDuration >= 0) {
     this->UpdateElapsedTime();
-    auto ending_time = std::chrono::steady_clock::now() +
-      std::chrono::duration<double>(this->ContinuousDuration);
+    auto ending_time =
+      std::chrono::steady_clock::now() + cmDuration(this->ContinuousDuration);
     if (this->EmptyBinDirOnce) {
       this->EmptyBinDir = true;
     }
@@ -567,13 +570,11 @@ int cmCTestScriptHandler::RunCurrentScript()
       auto startOfInterval = std::chrono::steady_clock::now();
       result = this->RunConfigurationDashboard();
       auto interval = std::chrono::steady_clock::now() - startOfInterval;
-      auto minimumInterval =
-        std::chrono::duration<double>(this->MinimumInterval);
+      auto minimumInterval = cmDuration(this->MinimumInterval);
       if (interval < minimumInterval) {
-        auto sleepTime = std::chrono::duration_cast<std::chrono::seconds>(
-                           minimumInterval - interval)
-                           .count();
-        this->SleepInSeconds(static_cast<unsigned int>(sleepTime));
+        auto sleepTime =
+          cmDurationTo<unsigned int>(minimumInterval - interval);
+        this->SleepInSeconds(sleepTime);
       }
       if (this->EmptyBinDirOnce) {
         this->EmptyBinDir = false;
@@ -603,7 +604,8 @@ int cmCTestScriptHandler::CheckOutSourceDir()
                "Run cvs: " << this->CVSCheckOut << std::endl);
     res = cmSystemTools::RunSingleCommand(
       this->CVSCheckOut.c_str(), &output, &output, &retVal,
-      this->CTestRoot.c_str(), this->HandlerVerbose, 0 /*this->TimeOut*/);
+      this->CTestRoot.c_str(), this->HandlerVerbose,
+      cmDuration::zero() /*this->TimeOut*/);
     if (!res || retVal != 0) {
       cmSystemTools::Error("Unable to perform cvs checkout:\n",
                            output.c_str());
@@ -670,7 +672,7 @@ int cmCTestScriptHandler::PerformExtraUpdates()
                  "Run Update: " << fullCommand << std::endl);
       res = cmSystemTools::RunSingleCommand(
         fullCommand.c_str(), &output, &output, &retVal, cvsArgs[0].c_str(),
-        this->HandlerVerbose, 0 /*this->TimeOut*/);
+        this->HandlerVerbose, cmDuration::zero() /*this->TimeOut*/);
       if (!res || retVal != 0) {
         cmSystemTools::Error("Unable to perform extra updates:\n", eu.c_str(),
                              "\nWith output:\n", output.c_str());
@@ -774,7 +776,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
                "Run cmake command: " << command << std::endl);
     res = cmSystemTools::RunSingleCommand(
       command.c_str(), &output, &output, &retVal, this->BinaryDir.c_str(),
-      this->HandlerVerbose, 0 /*this->TimeOut*/);
+      this->HandlerVerbose, cmDuration::zero() /*this->TimeOut*/);
 
     if (!this->CMOutFile.empty()) {
       std::string cmakeOutputFile = this->CMOutFile;
@@ -813,7 +815,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
                "Run ctest command: " << command << std::endl);
     res = cmSystemTools::RunSingleCommand(
       command.c_str(), &output, &output, &retVal, this->BinaryDir.c_str(),
-      this->HandlerVerbose, 0 /*this->TimeOut*/);
+      this->HandlerVerbose, cmDuration::zero() /*this->TimeOut*/);
 
     // did something critical fail in ctest
     if (!res || cmakeFailed || retVal & cmCTest::BUILD_ERRORS) {
@@ -960,7 +962,7 @@ bool cmCTestScriptHandler::TryToRemoveBinaryDirectoryOnce(
   return cmSystemTools::RemoveADirectory(directoryPath);
 }
 
-std::chrono::duration<double> cmCTestScriptHandler::GetRemainingTimeAllowed()
+cmDuration cmCTestScriptHandler::GetRemainingTimeAllowed()
 {
   if (!this->Makefile) {
     return cmCTest::MaxDuration();
@@ -972,9 +974,9 @@ std::chrono::duration<double> cmCTestScriptHandler::GetRemainingTimeAllowed()
     return cmCTest::MaxDuration();
   }
 
-  auto timelimit = std::chrono::duration<double>(atof(timelimitS));
+  auto timelimit = cmDuration(atof(timelimitS));
 
-  auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(
+  auto duration = std::chrono::duration_cast<cmDuration>(
     std::chrono::steady_clock::now() - this->ScriptStartTime);
   return (timelimit - duration);
 }

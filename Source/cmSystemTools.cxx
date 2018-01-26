@@ -3,6 +3,7 @@
 #include "cmSystemTools.h"
 
 #include "cmAlgorithms.h"
+#include "cmDuration.h"
 #include "cmProcessOutput.h"
 #include "cm_sys_stat.h"
 
@@ -701,7 +702,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      std::string* captureStdOut,
                                      std::string* captureStdErr, int* retVal,
                                      const char* dir, OutputOption outputflag,
-                                     double timeout, Encoding encoding)
+                                     cmDuration timeout, Encoding encoding)
 {
   std::vector<const char*> argv;
   argv.reserve(command.size() + 1);
@@ -729,7 +730,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
   }
   assert(!captureStdErr || captureStdErr != captureStdOut);
 
-  cmsysProcess_SetTimeout(cp, timeout);
+  cmsysProcess_SetTimeout(cp, timeout.count());
   cmsysProcess_Execute(cp);
 
   std::vector<char> tempStdOut;
@@ -842,7 +843,7 @@ bool cmSystemTools::RunSingleCommand(const char* command,
                                      std::string* captureStdOut,
                                      std::string* captureStdErr, int* retVal,
                                      const char* dir, OutputOption outputflag,
-                                     double timeout)
+                                     cmDuration timeout)
 {
   if (s_DisableRunCommandOutput) {
     outputflag = OUTPUT_NONE;
@@ -1828,7 +1829,7 @@ bool cmSystemTools::ListTar(const char* outFileName, bool verbose)
 }
 
 int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
-                               double timeout, std::vector<char>& out,
+                               cmDuration timeout, std::vector<char>& out,
                                std::vector<char>& err)
 {
   line.clear();
@@ -1876,7 +1877,9 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
     // No newlines found.  Wait for more data from the process.
     int length;
     char* data;
-    int pipe = cmsysProcess_WaitForData(process, &data, &length, &timeout);
+    double timeoutAsDbl = timeout.count();
+    int pipe =
+      cmsysProcess_WaitForData(process, &data, &length, &timeoutAsDbl);
     if (pipe == cmsysProcess_Pipe_Timeout) {
       // Timeout has been exceeded.
       return pipe;

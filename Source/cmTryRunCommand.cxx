@@ -5,6 +5,7 @@
 #include "cmsys/FStream.hxx"
 #include <stdio.h>
 
+#include "cmDuration.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -185,10 +186,9 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
   if (!runArgs.empty()) {
     finalCommand += runArgs;
   }
-  int timeout = 0;
   bool worked = cmSystemTools::RunSingleCommand(
     finalCommand.c_str(), out, out, &retVal, nullptr,
-    cmSystemTools::OUTPUT_NONE, timeout);
+    cmSystemTools::OUTPUT_NONE, cmDuration::zero());
   // set the run var
   char retChar[16];
   const char* retStr;

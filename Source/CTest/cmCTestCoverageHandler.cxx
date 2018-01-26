@@ -3,6 +3,7 @@
 #include "cmCTestCoverageHandler.h"
 
 #include "cmCTest.h"
+#include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmParseBlanketJSCoverage.h"
 #include "cmParseCacheCoverage.h"
@@ -40,7 +41,7 @@ public:
   {
     this->Process = cmsysProcess_New();
     this->PipeState = -1;
-    this->TimeOut = std::chrono::duration<double>(-1);
+    this->TimeOut = cmDuration(-1);
   }
   ~cmCTestRunProcess()
   {
@@ -64,7 +65,7 @@ public:
     }
   }
   void SetWorkingDirectory(const char* dir) { this->WorkingDirectory = dir; }
-  void SetTimeout(std::chrono::duration<double> t) { this->TimeOut = t; }
+  void SetTimeout(cmDuration t) { this->TimeOut = t; }
   bool StartProcess()
   {
     std::vector<const char*> args;
@@ -79,7 +80,7 @@ public:
     }
 
     cmsysProcess_SetOption(this->Process, cmsysProcess_Option_HideWindow, 1);
-    if (this->TimeOut >= std::chrono::duration<double>::zero()) {
+    if (this->TimeOut >= cmDuration::zero()) {
       cmsysProcess_SetTimeout(this->Process, this->TimeOut.count());
     }
     cmsysProcess_Execute(this->Process);
@@ -108,7 +109,7 @@ private:
   cmsysProcess* Process;
   std::vector<std::string> CommandLineStrings;
   std::string WorkingDirectory;
-  std::chrono::duration<double> TimeOut;
+  cmDuration TimeOut;
 };
 
 cmCTestCoverageHandler::cmCTestCoverageHandler()
@@ -1022,9 +1023,9 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     int retVal = 0;
     *cont->OFS << "* Run coverage for: " << fileDir << std::endl;
     *cont->OFS << "  Command: " << command << std::endl;
-    int res = this->CTest->RunCommand(
-      covargs, &output, &errors, &retVal, tempDir.c_str(),
-      std::chrono::duration<double>::zero() /*this->TimeOut*/);
+    int res = this->CTest->RunCommand(covargs, &output, &errors, &retVal,
+                                      tempDir.c_str(),
+                                      cmDuration::zero() /*this->TimeOut*/);
 
     *cont->OFS << "  Output: " << output << std::endl;
     *cont->OFS << "  Errors: " << errors << std::endl;
@@ -1387,9 +1388,9 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     int retVal = 0;
     *cont->OFS << "* Run coverage for: " << fileDir << std::endl;
     *cont->OFS << "  Command: " << command << std::endl;
-    int res = this->CTest->RunCommand(
-      covargs, &output, &errors, &retVal, fileDir.c_str(),
-      std::chrono::duration<double>::zero() /*this->TimeOut*/);
+    int res = this->CTest->RunCommand(covargs, &output, &errors, &retVal,
+                                      fileDir.c_str(),
+                                      cmDuration::zero() /*this->TimeOut*/);
 
     *cont->OFS << "  Output: " << output << std::endl;
     *cont->OFS << "  Errors: " << errors << std::endl;

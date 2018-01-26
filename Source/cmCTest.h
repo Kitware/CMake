@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmDuration.h"
 #include "cmProcessOutput.h"
 #include "cmsys/String.hxx"
 #include <chrono>
@@ -140,13 +141,10 @@ public:
 
   /** what is the configuraiton type, e.g. Debug, Release etc. */
   std::string const& GetConfigType();
-  std::chrono::duration<double> GetTimeOut() { return this->TimeOut; }
-  void SetTimeOut(std::chrono::duration<double> t) { this->TimeOut = t; }
+  cmDuration GetTimeOut() { return this->TimeOut; }
+  void SetTimeOut(cmDuration t) { this->TimeOut = t; }
 
-  std::chrono::duration<double> GetGlobalTimeout()
-  {
-    return this->GlobalTimeout;
-  }
+  cmDuration GetGlobalTimeout() { return this->GlobalTimeout; }
 
   /** how many test to run at the same time */
   int GetParallelLevel() { return this->ParallelLevel; }
@@ -206,9 +204,9 @@ public:
    * seconds if the user has set the variable CTEST_TIME_LIMIT. If that has
    * not been set it returns a very large duration.
    */
-  std::chrono::duration<double> GetRemainingTimeAllowed();
+  cmDuration GetRemainingTimeAllowed();
 
-  static std::chrono::duration<double> MaxDuration();
+  static cmDuration MaxDuration();
 
   /**
    * Open file in the output directory and set the stream
@@ -258,8 +256,7 @@ public:
   bool RunCommand(std::vector<std::string> const& args, std::string* stdOut,
                   std::string* stdErr, int* retVal = nullptr,
                   const char* dir = nullptr,
-                  std::chrono::duration<double> timeout =
-                    std::chrono::duration<double>::zero(),
+                  cmDuration timeout = cmDuration::zero(),
                   Encoding encoding = cmProcessOutput::Auto);
 
   /**
@@ -279,8 +276,7 @@ public:
    * and retVal is return value or exception.
    */
   int RunMakeCommand(const char* command, std::string& output, int* retVal,
-                     const char* dir, std::chrono::duration<double> timeout,
-                     std::ostream& ofs,
+                     const char* dir, cmDuration timeout, std::ostream& ofs,
                      Encoding encoding = cmProcessOutput::Auto);
 
   /** Return the current tag */
@@ -327,7 +323,7 @@ public:
    * environment variables are restored to their previous values.
    */
   int RunTest(std::vector<const char*> args, std::string* output, int* retVal,
-              std::ostream* logfile, std::chrono::duration<double> testTimeOut,
+              std::ostream* logfile, cmDuration testTimeOut,
               std::vector<std::string>* environment,
               Encoding encoding = cmProcessOutput::Auto);
 
@@ -508,9 +504,9 @@ private:
   int TestModel;
   std::string SpecificTrack;
 
-  std::chrono::duration<double> TimeOut;
+  cmDuration TimeOut;
 
-  std::chrono::duration<double> GlobalTimeout;
+  cmDuration GlobalTimeout;
 
   int MaxTestNameWidth;
 

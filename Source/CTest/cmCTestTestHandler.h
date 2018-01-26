@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGenericHandler.h"
+#include "cmDuration.h"
 
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
@@ -123,9 +124,9 @@ public:
     float Cost;
     int PreviousRuns;
     bool RunSerial;
-    std::chrono::duration<double> Timeout;
+    cmDuration Timeout;
     bool ExplicitTimeout;
-    std::chrono::duration<double> AlternateTimeout;
+    cmDuration AlternateTimeout;
     int Index;
     // Requested number of process slots
     int Processors;
@@ -146,7 +147,7 @@ public:
     std::string Path;
     std::string Reason;
     std::string FullCommandLine;
-    std::chrono::duration<double> ExecutionTime;
+    cmDuration ExecutionTime;
     int ReturnValue;
     int Status;
     std::string ExceptionStatus;
@@ -198,7 +199,7 @@ protected:
   //! Clean test output to specified length
   bool CleanTestOutput(std::string& output, size_t length);
 
-  std::chrono::duration<double> ElapsedTestingTime;
+  cmDuration ElapsedTestingTime;
 
   typedef std::vector<cmCTestTestResult> TestResultsVector;
   TestResultsVector TestResults;

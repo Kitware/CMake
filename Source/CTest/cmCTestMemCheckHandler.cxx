@@ -3,6 +3,7 @@
 #include "cmCTestMemCheckHandler.h"
 
 #include "cmCTest.h"
+#include "cmDuration.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
@@ -920,12 +921,11 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
       break; // stop the copy of output if we are full
     }
   }
-  cmCTestOptionalLog(this->CTest, DEBUG, "End test (elapsed: "
-                       << std::chrono::duration_cast<std::chrono::seconds>(
-                            std::chrono::steady_clock::now() - sttime)
-                            .count()
-                       << "s)" << std::endl,
-                     this->Quiet);
+  cmCTestOptionalLog(
+    this->CTest, DEBUG, "End test (elapsed: "
+      << cmDurationTo<unsigned int>(std::chrono::steady_clock::now() - sttime)
+      << "s)" << std::endl,
+    this->Quiet);
   log = ostr.str();
   this->DefectCount += defects;
   return defects == 0;
@@ -966,12 +966,11 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
     results[err]++;
     defects++;
   }
-  cmCTestOptionalLog(this->CTest, DEBUG, "End test (elapsed: "
-                       << std::chrono::duration_cast<std::chrono::seconds>(
-                            std::chrono::steady_clock::now() - sttime)
-                            .count()
-                       << "s)" << std::endl,
-                     this->Quiet);
+  cmCTestOptionalLog(
+    this->CTest, DEBUG, "End test (elapsed: "
+      << cmDurationTo<unsigned int>(std::chrono::steady_clock::now() - sttime)
+      << "s)" << std::endl,
+    this->Quiet);
   if (defects) {
     // only put the output of Bounds Checker if there were
     // errors or leaks detected

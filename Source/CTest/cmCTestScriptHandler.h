@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGenericHandler.h"
+#include "cmDuration.h"
 
 #include <chrono>
 #include <string>
@@ -96,7 +97,7 @@ public:
    * seconds if the user has set the variable CTEST_TIME_LIMIT. If that has
    * not been set it returns a very large value.
    */
-  std::chrono::duration<double> GetRemainingTimeAllowed();
+  cmDuration GetRemainingTimeAllowed();
 
   cmCTestScriptHandler();
   ~cmCTestScriptHandler() override;

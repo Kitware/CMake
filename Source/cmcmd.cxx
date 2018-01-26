@@ -3,6 +3,7 @@
 #include "cmcmd.h"
 
 #include "cmAlgorithms.h"
+#include "cmDuration.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -797,10 +798,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string command =
         cmWrap('"', cmMakeRange(args).advance(3), '"', " ");
       int retval = 0;
-      int timeout = 0;
       if (cmSystemTools::RunSingleCommand(
             command.c_str(), nullptr, nullptr, &retval, directory.c_str(),
-            cmSystemTools::OUTPUT_PASSTHROUGH, timeout)) {
+            cmSystemTools::OUTPUT_PASSTHROUGH, cmDuration::zero())) {
         return retval;
       }
 
