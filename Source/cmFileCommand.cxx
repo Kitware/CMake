@@ -160,6 +160,12 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
   if (subCommand == "TO_NATIVE_PATH") {
     return this->HandleCMakePathCommand(args, true);
   }
+  if (subCommand == "TOUCH") {
+    return this->HandleTouchCommand(args, true);
+  }
+  if (subCommand == "TOUCH_NOCREATE") {
+    return this->HandleTouchCommand(args, false);
+  }
   if (subCommand == "TIMESTAMP") {
     return this->HandleTimestampCommand(args);
   }
@@ -898,6 +904,38 @@ bool cmFileCommand::HandleMakeDirectoryCommand(
     }
     if (!cmSystemTools::MakeDirectory(*cdir)) {
       std::string error = "problem creating directory: " + *cdir;
+      this->SetError(error);
+      return false;
+    }
+  }
+  return true;
+}
+
+bool cmFileCommand::HandleTouchCommand(std::vector<std::string> const& args,
+                                       bool create)
+{
+  // File command has at least one argument
+  assert(args.size() > 1);
+
+  std::vector<std::string>::const_iterator i = args.begin();
+
+  i++; // Get rid of subcommand
+
+  for (; i != args.end(); ++i) {
+    std::string tfile = *i;
+    if (!cmsys::SystemTools::FileIsFullPath(tfile)) {
+      tfile = this->Makefile->GetCurrentSourceDirectory();
+      tfile += "/" + *i;
+    }
+    if (!this->Makefile->CanIWriteThisFile(tfile)) {
+      std::string e =
+        "attempted to touch a file: " + tfile + " in a source directory.";
+      this->SetError(e);
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
+    if (!cmSystemTools::Touch(tfile, create)) {
+      std::string error = "problem touching file: " + tfile;
       this->SetError(error);
       return false;
     }

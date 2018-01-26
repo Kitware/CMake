@@ -39,6 +39,7 @@ protected:
   bool HandleHashCommand(std::vector<std::string> const& args);
   bool HandleStringsCommand(std::vector<std::string> const& args);
   bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse);
+  bool HandleTouchCommand(std::vector<std::string> const& args, bool create);
   bool HandleMakeDirectoryCommand(std::vector<std::string> const& args);
 
   bool HandleRelativePathCommand(std::vector<std::string> const& args);

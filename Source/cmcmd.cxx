@@ -689,8 +689,6 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Touch file
     if (args[1] == "touch_nocreate" && args.size() > 2) {
       for (std::string::size_type cc = 2; cc < args.size(); cc++) {
-        // Complain if the file could not be removed, still exists,
-        // and the -f option was not given.
         if (!cmSystemTools::Touch(args[cc], false)) {
           return 1;
         }
