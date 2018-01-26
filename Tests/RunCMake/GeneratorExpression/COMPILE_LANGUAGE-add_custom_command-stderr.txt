@@ -1,4 +1,4 @@
-CMake Error at COMPILE_LANGUAGE-add_custom_command.cmake:6 \(add_custom_command\):
+CMake Error at COMPILE_LANGUAGE-add_custom_command.cmake:2 \(add_custom_command\):
   Error evaluating generator expression:
 
     \$<COMPILE_LANGUAGE>
