@@ -389,7 +389,7 @@ protected:
   std::vector<cmGeneratorTarget*> GeneratorTargets;
 
   std::set<cmGeneratorTarget const*> WarnCMP0063;
-  std::vector<cmGeneratorTarget*> ImportedGeneratorTargets;
+  GeneratorTargetMap ImportedGeneratorTargets;
   std::vector<cmGeneratorTarget*> OwnedImportedGeneratorTargets;
   std::map<std::string, std::string> AliasTargets;
 
