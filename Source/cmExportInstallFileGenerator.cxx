@@ -439,7 +439,7 @@ void cmExportInstallFileGenerator::HandleMissingTarget(
 
     missingTarget += dependee->GetExportName();
     link_libs += missingTarget;
-    missingTargets.push_back(missingTarget);
+    missingTargets.push_back(std::move(missingTarget));
   } else {
     // All exported targets should be known here and should be unique.
     // This is probably user-error.

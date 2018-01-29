@@ -15,6 +15,7 @@
 #include <iostream>
 #include <sstream>
 #include <string.h>
+#include <utility>
 
 struct CatToErrorType
 {
@@ -546,12 +547,12 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
                        << std::endl);
           return false;
         }
-        std::string suppressions = "--suppressions=" +
-          this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile");
-        this->MemoryTesterOptions.push_back(suppressions);
+        this->MemoryTesterOptions.push_back(
+          "--suppressions=" +
+          this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile"));
       }
-      std::string outputFile = "--log-file=" + this->MemoryTesterOutputFile;
-      this->MemoryTesterDynamicOptions.push_back(outputFile);
+      this->MemoryTesterDynamicOptions.push_back("--log-file=" +
+                                                 this->MemoryTesterOutputFile);
       break;
     }
     case cmCTestMemCheckHandler::PURIFY: {
@@ -589,7 +590,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
         "/Testing/Temporary/MemoryChecker.??.DPbd";
       this->BoundsCheckerDPBDFile = dpbdFile;
       this->MemoryTesterDynamicOptions.push_back("/B");
-      this->MemoryTesterDynamicOptions.push_back(dpbdFile);
+      this->MemoryTesterDynamicOptions.push_back(std::move(dpbdFile));
       this->MemoryTesterDynamicOptions.push_back("/X");
       this->MemoryTesterDynamicOptions.push_back(this->MemoryTesterOutputFile);
       this->MemoryTesterOptions.push_back("/M");
@@ -1097,5 +1098,5 @@ void cmCTestMemCheckHandler::TestOutputFileNames(
     cmCTestLog(this->CTest, ERROR_MESSAGE, log << std::endl);
     ofile.clear();
   }
-  files.push_back(ofile);
+  files.push_back(std::move(ofile));
 }

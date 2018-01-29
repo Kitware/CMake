@@ -22,7 +22,7 @@ struct cmFindProgramHelper
     this->Extensions.push_back(".exe");
 #endif
     // Consider original name with no extensions.
-    this->Extensions.push_back("");
+    this->Extensions.emplace_back();
   }
 
   // List of valid extensions.

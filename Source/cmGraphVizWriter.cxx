@@ -224,11 +224,11 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
                                       ignoreTargetsRegExVector);
     for (std::string const& currentRegexString : ignoreTargetsRegExVector) {
       cmsys::RegularExpression currentRegex;
-      if (!currentRegex.compile(currentRegexString.c_str())) {
+      if (!currentRegex.compile(currentRegexString)) {
         std::cerr << "Could not compile bad regex \"" << currentRegexString
                   << "\"" << std::endl;
       }
-      this->TargetsToIgnoreRegex.push_back(currentRegex);
+      this->TargetsToIgnoreRegex.push_back(std::move(currentRegex));
     }
   }
 }

@@ -159,7 +159,7 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories()
         std::string di = lg->GetCurrentBinaryDirectory();
         di += "/";
         di += lg->GetTargetDirectory(linkee);
-        dirs.push_back(di);
+        dirs.push_back(std::move(di));
       }
     }
   }

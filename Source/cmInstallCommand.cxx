@@ -5,6 +5,7 @@
 #include "cmsys/Glob.hxx"
 #include <sstream>
 #include <stddef.h>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmCommandArgumentsHelper.h"
@@ -1061,7 +1062,7 @@ bool cmInstallCommand::HandleDirectoryMode(
       }
 
       // Store the directory for installation.
-      dirs.push_back(dir);
+      dirs.push_back(std::move(dir));
     } else if (doing == DoingConfigurations) {
       configurations.push_back(args[i]);
     } else if (doing == DoingDestination) {
@@ -1133,7 +1134,7 @@ bool cmInstallCommand::HandleDirectoryMode(
 
   // Support installing an empty directory.
   if (dirs.empty() && destination) {
-    dirs.push_back("");
+    dirs.emplace_back();
   }
 
   // Check if there is something to do.
@@ -1388,7 +1389,7 @@ bool cmInstallCommand::MakeFilesFullPath(
       return false;
     }
     // Store the file for installation.
-    absFiles.push_back(file);
+    absFiles.push_back(std::move(file));
   }
   return true;
 }

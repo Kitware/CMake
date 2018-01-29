@@ -547,8 +547,7 @@ cmELF::DynamicEntryList cmELFInternalImpl<Types>::GetDynamicEntries()
   // Copy into public array
   result.reserve(this->DynamicSectionEntries.size());
   for (ELF_Dyn& dyn : this->DynamicSectionEntries) {
-    result.push_back(
-      std::pair<unsigned long, unsigned long>(dyn.d_tag, dyn.d_un.d_val));
+    result.emplace_back(dyn.d_tag, dyn.d_un.d_val);
   }
 
   return result;

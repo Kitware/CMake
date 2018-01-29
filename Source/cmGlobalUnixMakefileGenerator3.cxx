@@ -420,7 +420,7 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
         std::string tname = lg->GetRelativeTargetDirectory(gtarget);
         tname += "/";
         tname += pass;
-        depends.push_back(tname);
+        depends.push_back(std::move(tname));
       }
     }
   }
@@ -432,7 +432,7 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
     std::string subdir = c.GetDirectory().GetCurrentBinary();
     subdir += "/";
     subdir += pass;
-    depends.push_back(subdir);
+    depends.push_back(std::move(subdir));
   }
 
   // Work-around for makes that drop rules that have no dependencies
@@ -513,7 +513,7 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     tname =
       conv.ConvertToRelativePath(mf->GetState()->GetBinaryDirectory(), tname);
     cmSystemTools::ConvertToOutputSlashes(tname);
-    makeCommand.push_back(tname);
+    makeCommand.push_back(std::move(tname));
     if (this->Makefiles.empty()) {
       delete mf;
     }

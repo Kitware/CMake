@@ -20,7 +20,7 @@
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
-#include "cmExpandedCommandArgument.h"
+#include "cmExpandedCommandArgument.h" // IWYU pragma: keep
 #include "cmFileLockPool.h"
 #include "cmFunctionBlocker.h"
 #include "cmGeneratorExpression.h"
@@ -95,8 +95,7 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
 
   this->ObjectLibrariesSourceGroupIndex = this->SourceGroups.size();
-  this->SourceGroups.push_back(
-    cmSourceGroup("Object Libraries", "^MATCH_NO_SOURCES$"));
+  this->SourceGroups.emplace_back("Object Libraries", "^MATCH_NO_SOURCES$");
 #endif
 }
 
@@ -1032,7 +1031,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
     commandLine.push_back(arg4);
   }
   cmCustomCommandLines commandLines;
-  commandLines.push_back(commandLine);
+  commandLines.push_back(std::move(commandLine));
 
   // Call the real signature of this method.
   return this->AddUtilityCommand(utilityName, origin, excludeFromAll,
@@ -1480,8 +1479,8 @@ void cmMakefile::Configure()
     if (!hasProject) {
       cmListFileFunction project;
       project.Name = "PROJECT";
-      cmListFileArgument prj("Project", cmListFileArgument::Unquoted, 0);
-      project.Arguments.push_back(prj);
+      project.Arguments.emplace_back("Project", cmListFileArgument::Unquoted,
+                                     0);
       listFile.Functions.insert(listFile.Functions.begin(), project);
     }
   }
@@ -3033,7 +3032,7 @@ bool cmMakefile::ExpandArguments(
   for (cmListFileArgument const& i : inArgs) {
     // No expansion in a bracket argument.
     if (i.Delim == cmListFileArgument::Bracket) {
-      outArgs.push_back(cmExpandedCommandArgument(i.Value, true));
+      outArgs.emplace_back(i.Value, true);
       continue;
     }
     // Expand the variables in the argument.
@@ -3044,12 +3043,12 @@ bool cmMakefile::ExpandArguments(
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.
     if (i.Delim == cmListFileArgument::Quoted) {
-      outArgs.push_back(cmExpandedCommandArgument(value, true));
+      outArgs.emplace_back(value, true);
     } else {
       std::vector<std::string> stringArgs;
       cmSystemTools::ExpandListArgument(value, stringArgs);
       for (std::string const& stringArg : stringArgs) {
-        outArgs.push_back(cmExpandedCommandArgument(stringArg, false));
+        outArgs.emplace_back(stringArg, false);
       }
     }
   }

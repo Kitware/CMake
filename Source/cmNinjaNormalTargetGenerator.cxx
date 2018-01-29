@@ -498,13 +498,12 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
         cmakeCommand += " -E __run_co_compile --lwyu=";
         cmGeneratorTarget& gt = *this->GetGeneratorTarget();
         const std::string cfgName = this->GetConfigName();
-        std::string targetOutput = ConvertToNinjaPath(gt.GetFullPath(cfgName));
         std::string targetOutputReal = this->ConvertToNinjaPath(
           gt.GetFullPath(cfgName, cmStateEnums::RuntimeBinaryArtifact,
                          /*realname=*/true));
         cmakeCommand += targetOutputReal;
         cmakeCommand += " || true";
-        linkCmds.push_back(cmakeCommand);
+        linkCmds.push_back(std::move(cmakeCommand));
       }
       return linkCmds;
     }
@@ -978,7 +977,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     std::string obj_list_file = mdi->DefFile + ".objs";
     cmd += this->GetLocalGenerator()->ConvertToOutputFormat(
       obj_list_file, cmOutputConverter::SHELL);
-    preLinkCmdLines.push_back(cmd);
+    preLinkCmdLines.push_back(std::move(cmd));
 
     // create a list of obj files for the -E __create_def to read
     cmGeneratedFileStream fout(obj_list_file.c_str());

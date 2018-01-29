@@ -14,6 +14,7 @@
 
 #include <memory> // IWYU pragma: keep
 #include <stddef.h>
+#include <utility>
 
 cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
                                                    const std::string& config,
@@ -37,10 +38,10 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
         cmSystemTools::ExpandListArgument(parsed_arg, ExpandedArg);
         argv.insert(argv.end(), ExpandedArg.begin(), ExpandedArg.end());
       } else {
-        argv.push_back(parsed_arg);
+        argv.push_back(std::move(parsed_arg));
       }
     }
-    this->CommandLines.push_back(argv);
+    this->CommandLines.push_back(std::move(argv));
   }
 
   std::vector<std::string> depends = this->CC.GetDepends();

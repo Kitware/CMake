@@ -1188,7 +1188,7 @@ void cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
                                                                  output);
 
   // Add as a dependency to the target so that it gets called.
-  this->Generator->ExtraFiles.push_back(output);
+  this->Generator->ExtraFiles.push_back(std::move(output));
 }
 
 void cmNinjaTargetGenerator::addPoolNinjaVariable(

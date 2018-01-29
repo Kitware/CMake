@@ -225,7 +225,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
   std::set<std::string> optionalComponents;
 
   // Always search directly in a generated path.
-  this->SearchPathSuffixes.push_back("");
+  this->SearchPathSuffixes.emplace_back();
 
   // Parse the arguments.
   enum Doing
@@ -523,7 +523,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
 
       config = cmSystemTools::LowerCase(n);
       config += "-config.cmake";
-      this->Configs.push_back(config);
+      this->Configs.push_back(std::move(config));
     }
   }
 
@@ -1484,7 +1484,7 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   ConfigFileInfo configFileInfo;
   configFileInfo.filename = config_file;
   configFileInfo.version = version;
-  this->ConsideredConfigs.push_back(configFileInfo);
+  this->ConsideredConfigs.push_back(std::move(configFileInfo));
 
   return result;
 }

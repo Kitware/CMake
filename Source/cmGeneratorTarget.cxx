@@ -445,7 +445,7 @@ void cmGeneratorTarget::ComputeObjectMapping()
   std::vector<std::string> configs;
   this->Makefile->GetConfigurations(configs);
   if (configs.empty()) {
-    configs.push_back("");
+    configs.emplace_back();
   }
   for (std::string const& c : configs) {
     std::vector<cmSourceFile const*> sourceFiles;
@@ -1101,8 +1101,7 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     }
 
     // Save this classified source file in the result vector.
-    SourceAndKind entry = { sf, kind };
-    files.Sources.push_back(entry);
+    files.Sources.push_back({ sf, kind });
   }
 
   if (!badObjLib.empty()) {
@@ -1143,7 +1142,7 @@ void cmGeneratorTarget::ComputeAllConfigSources() const
         AllConfigSource acs;
         acs.Source = src.Source;
         acs.Kind = src.Kind;
-        this->AllConfigSources.push_back(acs);
+        this->AllConfigSources.push_back(std::move(acs));
         std::map<cmSourceFile const*, size_t>::value_type entry(
           src.Source, this->AllConfigSources.size() - 1);
         mi = index.insert(entry).first;
@@ -2113,7 +2112,7 @@ cmTargetTraceDependencies::cmTargetTraceDependencies(cmGeneratorTarget* target)
     std::vector<std::string> configs;
     this->Makefile->GetConfigurations(configs);
     if (configs.empty()) {
-      configs.push_back("");
+      configs.emplace_back();
     }
     std::set<cmSourceFile*> emitted;
     for (std::string const& c : configs) {
@@ -2306,7 +2305,7 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
   std::set<std::string> emitted;
   this->Makefile->GetConfigurations(configs);
   if (configs.empty()) {
-    configs.push_back("");
+    configs.emplace_back();
   }
   for (std::string const& conf : configs) {
     this->FollowCommandDepends(cc, conf, emitted);
@@ -4201,7 +4200,7 @@ void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
     if (name == this->GetName() || name.empty()) {
       continue;
     }
-    items.push_back(cmLinkItem(name, this->FindTargetToLink(name)));
+    items.emplace_back(name, this->FindTargetToLink(name));
   }
 }
 
@@ -4988,7 +4987,7 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
   std::vector<std::string> configs;
   this->Makefile->GetConfigurations(configs);
   if (configs.empty()) {
-    configs.push_back("");
+    configs.emplace_back();
   }
 
   std::vector<std::string>::const_iterator it = configs.begin();
@@ -5276,8 +5275,8 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       }
 
       // The entry is meant for this configuration.
-      impl.Libraries.push_back(cmLinkImplItem(
-        name, this->FindTargetToLink(name), *btIt, evaluated != *le));
+      impl.Libraries.emplace_back(name, this->FindTargetToLink(name), *btIt,
+                                  evaluated != *le);
     }
 
     std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();
@@ -5304,8 +5303,8 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         continue;
       }
       // Support OLD behavior for CMP0003.
-      impl.WrongConfigLibraries.push_back(
-        cmLinkItem(name, this->FindTargetToLink(name)));
+      impl.WrongConfigLibraries.emplace_back(name,
+                                             this->FindTargetToLink(name));
     }
   }
 }

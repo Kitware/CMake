@@ -51,19 +51,13 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
   args.push_back(cmSystemTools::GetCMakeCommand());
   args.push_back(this->SourceDir);
   if (!this->BuildGenerator.empty()) {
-    std::string generator = "-G";
-    generator += this->BuildGenerator;
-    args.push_back(generator);
+    args.push_back("-G" + this->BuildGenerator);
   }
   if (!this->BuildGeneratorPlatform.empty()) {
-    std::string platform = "-A";
-    platform += this->BuildGeneratorPlatform;
-    args.push_back(platform);
+    args.push_back("-A" + this->BuildGeneratorPlatform);
   }
   if (!this->BuildGeneratorToolset.empty()) {
-    std::string toolset = "-T";
-    toolset += this->BuildGeneratorToolset;
-    args.push_back(toolset);
+    args.push_back("-T" + this->BuildGeneratorToolset);
   }
 
   const char* config = nullptr;
@@ -77,8 +71,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
 #endif
 
   if (config) {
-    std::string btype = "-DCMAKE_BUILD_TYPE:STRING=" + std::string(config);
-    args.push_back(btype);
+    args.push_back("-DCMAKE_BUILD_TYPE:STRING=" + std::string(config));
   }
 
   for (std::string const& opt : this->BuildOptions) {

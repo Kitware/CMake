@@ -617,7 +617,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
         cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
       cmakeCommand += " -E __run_co_compile --lwyu=";
       cmakeCommand += targetOutPathReal;
-      real_link_commands.push_back(cmakeCommand);
+      real_link_commands.push_back(std::move(cmakeCommand));
     }
 
     std::string launcher;
@@ -666,7 +666,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     symlink += targetOutPathReal;
     symlink += " ";
     symlink += targetOutPath;
-    commands1.push_back(symlink);
+    commands1.push_back(std::move(symlink));
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
       this->LocalGenerator->GetBinaryDirectory());

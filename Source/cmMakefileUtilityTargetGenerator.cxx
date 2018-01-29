@@ -4,6 +4,7 @@
 
 #include <ostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmGeneratedFileStream.h"
@@ -90,7 +91,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
   if (depends.empty() && commands.empty()) {
     std::string hack = this->GlobalGenerator->GetEmptyRuleHackDepends();
     if (!hack.empty()) {
-      depends.push_back(hack);
+      depends.push_back(std::move(hack));
     }
   }
 

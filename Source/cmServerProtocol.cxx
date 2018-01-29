@@ -111,16 +111,16 @@ void getCMakeInputs(const cmGlobalGenerator* gg, const std::string& sourceDir,
 
       if (isInternal) {
         if (internalFiles) {
-          internalFiles->push_back(toAdd);
+          internalFiles->push_back(std::move(toAdd));
         }
       } else {
         if (isTemporary) {
           if (tmpFiles) {
-            tmpFiles->push_back(toAdd);
+            tmpFiles->push_back(std::move(toAdd));
           }
         } else {
           if (explicitFiles) {
-            explicitFiles->push_back(toAdd);
+            explicitFiles->push_back(std::move(toAdd));
           }
         }
       }

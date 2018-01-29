@@ -1154,7 +1154,7 @@ void cmSystemTools::Glob(const std::string& directory,
     for (i = 0; i < numf; i++) {
       std::string fname = d.GetFile(i);
       if (reg.find(fname)) {
-        files.push_back(fname);
+        files.push_back(std::move(fname));
       }
     }
   }

@@ -7,6 +7,8 @@
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 
+#include <utility>
+
 class cmExecutionStatus;
 
 // cmQTWrapCPPCommand
@@ -71,7 +73,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
       commandLine.push_back(hname);
 
       cmCustomCommandLines commandLines;
-      commandLines.push_back(commandLine);
+      commandLines.push_back(std::move(commandLine));
 
       std::vector<std::string> depends;
       depends.push_back(moc_exe);

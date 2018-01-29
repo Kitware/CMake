@@ -897,7 +897,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
           std::string cmd = launcher + acc;
           rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                        cmd, vars);
-          real_link_commands.push_back(cmd);
+          real_link_commands.push_back(std::move(cmd));
         }
       }
       // Append to the archive with the other object sets.
@@ -907,7 +907,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
           std::string cmd = launcher + aac;
           rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                        cmd, vars);
-          real_link_commands.push_back(cmd);
+          real_link_commands.push_back(std::move(cmd));
         }
       }
       // Finish the archive.
@@ -918,7 +918,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
                                                      vars);
         // If there is no ranlib the command will be ":".  Skip it.
         if (!cmd.empty() && cmd[0] != ':') {
-          real_link_commands.push_back(cmd);
+          real_link_commands.push_back(std::move(cmd));
         }
       }
     } else {
@@ -931,7 +931,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
           cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
         cmakeCommand += " -E __run_co_compile --lwyu=";
         cmakeCommand += targetOutPathReal;
-        real_link_commands.push_back(cmakeCommand);
+        real_link_commands.push_back(std::move(cmakeCommand));
       }
 
       // Expand placeholders.
@@ -972,7 +972,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     symlink += targetOutPathSO;
     symlink += " ";
     symlink += targetOutPath;
-    commands1.push_back(symlink);
+    commands1.push_back(std::move(symlink));
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
       this->LocalGenerator->GetBinaryDirectory());

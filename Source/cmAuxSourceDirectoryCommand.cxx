@@ -63,7 +63,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass(
           // depends can be done
           cmSourceFile* sf = this->Makefile->GetOrCreateSource(fullname);
           sf->SetProperty("ABSTRACT", "0");
-          files.push_back(fullname);
+          files.push_back(std::move(fullname));
         }
       }
     }

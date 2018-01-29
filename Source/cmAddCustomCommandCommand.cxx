@@ -3,6 +3,7 @@
 #include "cmAddCustomCommandCommand.h"
 
 #include <sstream>
+#include <utility>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -184,9 +185,7 @@ bool cmAddCustomCommandCommand::InitialPass(
           depends.push_back(dep);
 
           // Add the implicit dependency language and file.
-          cmCustomCommand::ImplicitDependsPair entry(implicit_depends_lang,
-                                                     dep);
-          implicit_depends.push_back(entry);
+          implicit_depends.emplace_back(implicit_depends_lang, dep);
 
           // Switch back to looking for a language.
           doing = doing_implicit_depends_lang;
@@ -200,7 +199,7 @@ bool cmAddCustomCommandCommand::InitialPass(
         case doing_depends: {
           std::string dep = copy;
           cmSystemTools::ConvertToUnixSlashes(dep);
-          depends.push_back(dep);
+          depends.push_back(std::move(dep));
         } break;
         case doing_outputs:
           outputs.push_back(filename);
