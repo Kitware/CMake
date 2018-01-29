@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalCommonGenerator.h"
 
+#include <utility>
 #include <vector>
 
 #include "cmGeneratorTarget.h"
@@ -75,4 +76,18 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
   }
 
   return flags;
+}
+
+void cmLocalCommonGenerator::ComputeObjectFilenames(
+  std::map<cmSourceFile const*, std::string>& mapping,
+  cmGeneratorTarget const* gt)
+{
+  // Determine if these object files should use a custom extension
+  char const* custom_ext = gt->GetCustomObjectExtension();
+  for (auto& si : mapping) {
+    cmSourceFile const* sf = si.first;
+    bool keptSourceExtension;
+    si.second = this->GetObjectFileNameWithoutTarget(
+      *sf, gt->ObjectDirectory, &keptSourceExtension, custom_ext);
+  }
 }

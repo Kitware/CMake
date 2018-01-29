@@ -246,20 +246,6 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusion(std::ostream& os)
   os << "\n";
 }
 
-void cmLocalNinjaGenerator::ComputeObjectFilenames(
-  std::map<cmSourceFile const*, std::string>& mapping,
-  cmGeneratorTarget const* gt)
-{
-  // Determine if these object files should use a custom extension
-  char const* custom_ext = gt->GetCustomObjectExtension();
-  for (auto& si : mapping) {
-    cmSourceFile const* sf = si.first;
-    bool keptSourceExtension;
-    si.second = this->GetObjectFileNameWithoutTarget(
-      *sf, gt->ObjectDirectory, &keptSourceExtension, custom_ext);
-  }
-}
-
 void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
