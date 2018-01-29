@@ -378,6 +378,12 @@ macro(SWIG_ADD_LIBRARY name)
     if (APPLE)
       set_target_properties (${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".bundle")
     endif ()
+  elseif ("${swig_lowercase_language}" STREQUAL "perl")
+    # assume empty prefix because we expect the module to be dynamically loaded
+    set_target_properties (${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
+    if (APPLE)
+      set_target_properties (${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".dylib")
+    endif ()
   else()
     # assume empty prefix because we expect the module to be dynamically loaded
     set_target_properties (${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")

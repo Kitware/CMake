@@ -54,4 +54,3 @@ examplec::delete_Shape($s);
 
 print $examplec::Shape_nshapes," shapes remain\n";
 print "Goodbye\n";
-
