@@ -856,9 +856,25 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
   vars["INCLUDES"] = this->ComputeIncludes(source, language);
+
   if (!this->NeedDepTypeMSVC(language)) {
-    vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-      objectFileName + ".d", cmOutputConverter::SHELL);
+    bool hasExtension(false);
+    std::string dependFileName = this->GetLocalGenerator()->
+      GetObjectFileNameWithoutTarget(*source, objectDir, &hasExtension);
+    if(hasExtension) {
+      // use original code
+      vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+        objectFileName + ".d", cmOutputConverter::SHELL);
+    } else {
+      // Replace the original source file extension with the
+      // depend file extension.
+      std::string::size_type dot_pos = objectFileName.rfind('.');
+      if (dot_pos != std::string::npos) {
+        dependFileName = objectFileName.substr(0, dot_pos) + ".d";
+      }
+      vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+        dependFileName, cmOutputConverter::SHELL);
+    }
   }
 
   this->ExportObjectCompileCommand(
