@@ -275,6 +275,31 @@ static const struct EqualNode : public cmGeneratorExpressionNode
   }
 } equalNode;
 
+static const struct InListNode : public cmGeneratorExpressionNode
+{
+  InListNode() {}
+
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* /*context*/,
+    const GeneratorExpressionContent* /*content*/,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    std::vector<std::string> values;
+    cmSystemTools::ExpandListArgument(parameters[1], values);
+    if (values.empty()) {
+      return "0";
+    }
+
+    return std::find(values.cbegin(), values.cend(), parameters.front()) ==
+        values.cend()
+      ? "0"
+      : "1";
+  }
+} inListNode;
+
 static const struct LowerCaseNode : public cmGeneratorExpressionNode
 {
   LowerCaseNode() {}
@@ -1827,6 +1852,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     nodeMap["TARGET_BUNDLE_CONTENT_DIR"] = &targetBundleContentDirNode;
     nodeMap["STREQUAL"] = &strEqualNode;
     nodeMap["EQUAL"] = &equalNode;
+    nodeMap["IN_LIST"] = &inListNode;
     nodeMap["LOWER_CASE"] = &lowerCaseNode;
     nodeMap["UPPER_CASE"] = &upperCaseNode;
     nodeMap["MAKE_C_IDENTIFIER"] = &makeCIdentifierNode;
