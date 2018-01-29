@@ -11,7 +11,7 @@ else()
   set (perl_env "LD_LIBRARY_PATH=$<TARGET_FILE_DIR:${SWIG_MODULE_example_REAL_NAME}>")
 endif()
 
-add_custom_target (RunPerl
+add_custom_target (RunTest
   COMMAND "${CMAKE_COMMAND}" -E env "${perl_env}"
   "${PERL_EXECUTABLE}" "-I$<TARGET_FILE_DIR:${SWIG_MODULE_example_REAL_NAME}>"
   "${CMAKE_CURRENT_SOURCE_DIR}/runme.pl"
