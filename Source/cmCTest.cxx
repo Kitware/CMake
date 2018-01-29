@@ -2797,6 +2797,14 @@ cmDuration cmCTest::MaxDuration()
   return cmDuration(1.0e7);
 }
 
+void cmCTest::SetRunCurrentScript(bool value)
+{
+  cmCTestScriptHandler* ch =
+    static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+
+  ch->SetRunCurrentScript(value);
+}
+
 void cmCTest::OutputTestErrors(std::vector<char> const& process_output)
 {
   std::string test_outputs("\n*** Test Failed:\n");
