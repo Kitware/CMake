@@ -139,11 +139,6 @@ public:
     return this->GeneratorTargets;
   }
 
-  const std::vector<cmGeneratorTarget*>& GetImportedGeneratorTargets() const
-  {
-    return this->ImportedGeneratorTargets;
-  }
-
   void AddGeneratorTarget(cmGeneratorTarget* gt);
   void AddImportedGeneratorTarget(cmGeneratorTarget* gt);
   void AddOwnedImportedGeneratorTarget(cmGeneratorTarget* gt);
