@@ -458,6 +458,33 @@ function (_MPI_interrogate_compiler LANG)
     _MPI_check_compiler(${LANG} "-showme" MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
   endif()
 
+  if (MPI_COMPILER_RETURN EQUAL 0 AND DEFINED MPI_COMPILE_CMDLINE)
+    # Intel MPI can be run with -compchk or I_MPI_CHECK_COMPILER set to 1.
+    # In this case, -show will be prepended with a line to the compiler checker. This is a script that performs
+    # compatibility checks and returns a non-zero exit code together with an error if something fails.
+    # It has to be called as "compchk.sh <arch> <compiler>". Here, <arch> is one out of 32 (i686), 64 (ia64) or 32e (x86_64).
+    # The compiler is identified by filename, and can be either the MPI compiler or the underlying compiler.
+    # NOTE: It is vital to run this script while the environment variables are set up, otherwise it can check the wrong compiler.
+    if("${MPI_COMPILE_CMDLINE}" MATCHES "^([^\" ]+/compchk.sh|\"[^\"]+/compchk.sh\") +([^ ]+)")
+      # Now CMAKE_MATCH_1 contains the path to the compchk.sh file and CMAKE_MATCH_2 the architecture flag.
+      unset(COMPILER_CHECKER_OUTPUT)
+      execute_process(
+      COMMAND ${CMAKE_MATCH_1} ${CMAKE_MATCH_2} ${MPI_${LANG}_COMPILER}
+      OUTPUT_VARIABLE  COMPILER_CHECKER_OUTPUT OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_VARIABLE   COMPILER_CHECKER_OUTPUT ERROR_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE  MPI_COMPILER_RETURN)
+      # If it returned a non-zero value, the check below will fail and cause the interrogation to be aborted.
+      if(NOT MPI_COMPILER_RETURN EQUAL 0)
+        if(NOT MPI_FIND_QUIETLY)
+          message(STATUS "Intel MPI compiler check failed: ${COMPILER_CHECKER_OUTPUT}")
+        endif()
+      else()
+        # Since the check passed, we can remove the compchk.sh script.
+        string(REGEX REPLACE "^([^\" ]+|\"[^\"]+\")/compchk.sh.*\n" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
+      endif()
+    endif()
+  endif()
+
   # Revert changes to the environment made previously
   if("${LANG}" STREQUAL "C")
     _MPI_env_unset_ifnot(I_MPI_CC)
