@@ -176,7 +176,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
   std::string versionFile;
   {
     std::string out;
-    std::string::size_type pos;
+    std::string::size_type pos = 0;
     if (cmSystemTools::RunSingleCommand("xcode-select --print-path", &out,
                                         nullptr, nullptr, nullptr,
                                         cmSystemTools::OUTPUT_NONE) &&
