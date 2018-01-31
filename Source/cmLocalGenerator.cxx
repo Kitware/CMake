@@ -553,14 +553,13 @@ void cmLocalGenerator::GenerateInstallRules()
 void cmLocalGenerator::AddGeneratorTarget(cmGeneratorTarget* gt)
 {
   this->GeneratorTargets.push_back(gt);
-  this->GeneratorTargetSearchIndex.insert(
-    std::pair<std::string, cmGeneratorTarget*>(gt->GetName(), gt));
+  this->GeneratorTargetSearchIndex.emplace(gt->GetName(), gt);
   this->GlobalGenerator->IndexGeneratorTarget(gt);
 }
 
 void cmLocalGenerator::AddImportedGeneratorTarget(cmGeneratorTarget* gt)
 {
-  this->ImportedGeneratorTargets.push_back(gt);
+  this->ImportedGeneratorTargets.emplace(gt->GetName(), gt);
   this->GlobalGenerator->IndexGeneratorTarget(gt);
 }
 
@@ -568,22 +567,6 @@ void cmLocalGenerator::AddOwnedImportedGeneratorTarget(cmGeneratorTarget* gt)
 {
   this->OwnedImportedGeneratorTargets.push_back(gt);
 }
-
-struct NamedGeneratorTargetFinder
-{
-  NamedGeneratorTargetFinder(std::string const& name)
-    : Name(name)
-  {
-  }
-
-  bool operator()(cmGeneratorTarget* tgt)
-  {
-    return tgt->GetName() == this->Name;
-  }
-
-private:
-  std::string Name;
-};
 
 cmGeneratorTarget* cmLocalGenerator::FindLocalNonAliasGeneratorTarget(
   const std::string& name) const
@@ -1395,11 +1378,10 @@ void cmLocalGenerator::AddLanguageFlagsForLinking(
 cmGeneratorTarget* cmLocalGenerator::FindGeneratorTargetToUse(
   const std::string& name) const
 {
-  std::vector<cmGeneratorTarget*>::const_iterator imported = std::find_if(
-    this->ImportedGeneratorTargets.begin(),
-    this->ImportedGeneratorTargets.end(), NamedGeneratorTargetFinder(name));
+  GeneratorTargetMap::const_iterator imported =
+    this->ImportedGeneratorTargets.find(name);
   if (imported != this->ImportedGeneratorTargets.end()) {
-    return *imported;
+    return imported->second;
   }
 
   if (cmGeneratorTarget* t = this->FindLocalNonAliasGeneratorTarget(name)) {

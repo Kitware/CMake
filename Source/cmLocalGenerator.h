@@ -139,11 +139,6 @@ public:
     return this->GeneratorTargets;
   }
 
-  const std::vector<cmGeneratorTarget*>& GetImportedGeneratorTargets() const
-  {
-    return this->ImportedGeneratorTargets;
-  }
-
   void AddGeneratorTarget(cmGeneratorTarget* gt);
   void AddImportedGeneratorTarget(cmGeneratorTarget* gt);
   void AddOwnedImportedGeneratorTarget(cmGeneratorTarget* gt);
@@ -394,7 +389,7 @@ protected:
   std::vector<cmGeneratorTarget*> GeneratorTargets;
 
   std::set<cmGeneratorTarget const*> WarnCMP0063;
-  std::vector<cmGeneratorTarget*> ImportedGeneratorTargets;
+  GeneratorTargetMap ImportedGeneratorTargets;
   std::vector<cmGeneratorTarget*> OwnedImportedGeneratorTargets;
   std::map<std::string, std::string> AliasTargets;
 
