@@ -2169,9 +2169,9 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       clOptions.AddIncludes(includeList);
       clOptions.SetConfiguration(config.c_str());
       clOptions.PrependInheritedString("AdditionalOptions");
-      clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
       clOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
                                                    "      ", "\n", lang);
+      clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
       clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                               "\n", lang);
     }
@@ -2535,9 +2535,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   }
   this->WriteString("<ClCompile>\n", 2);
   clOptions.PrependInheritedString("AdditionalOptions");
-  clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
   clOptions.OutputAdditionalIncludeDirectories(
     *this->BuildFileStream, "      ", "\n", this->LangForClCompile);
+  clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", this->LangForClCompile);
 
