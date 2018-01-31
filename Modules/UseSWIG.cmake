@@ -59,8 +59,8 @@ Some variables can be set to specify special behavior of SWIG:
   Specify where to write the language specific files (swig ``-outdir`` option).
 
 ``SWIG_OUTFILE_DIR``
-  Specify where to write the output file (swig ``-o`` option).
-  If not specified, ``CMAKE_SWIG_OUTDIR`` is used.
+  Specify an output directory name where the generated source file will be
+  placed.  If not specified, ``CMAKE_SWIG_OUTDIR`` is used.
 
 ``SWIG_MODULE_<name>_EXTRA_DEPS``
   Specify extra dependencies for the generated module for ``<name>``.
