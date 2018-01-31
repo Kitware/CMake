@@ -672,19 +672,24 @@ void cmQtAutoGeneratorMocUic::JobMocT::Process(WorkerT& wrk)
 {
   // Compute build file name
   if (!IncludeString.empty()) {
-    BuildFile = wrk.Base().AutogenIncludeDirAbs;
+    BuildFile = wrk.Base().AutogenIncludeDir;
+    BuildFile += '/';
     BuildFile += IncludeString;
   } else {
-    std::string buildRel = wrk.Base().FilePathChecksum.getPart(SourceFile);
-    buildRel += '/';
-    buildRel += "moc_";
-    buildRel += cmSystemTools::GetFilenameWithoutLastExtension(SourceFile);
-    if (wrk.Base().MultiConfig != MultiConfigT::SINGLE) {
-      buildRel += wrk.Base().ConfigSuffix;
+    std::string rel = wrk.Base().FilePathChecksum.getPart(SourceFile);
+    rel += "/moc_";
+    rel += cmSystemTools::GetFilenameWithoutLastExtension(SourceFile);
+    rel += ".cpp";
+    // Register relative file path
+    wrk.Gen().ParallelMocAutoRegister(rel);
+    // Absolute build path
+    if (wrk.Base().MultiConfig) {
+      BuildFile = wrk.Base().AutogenIncludeDir;
+      BuildFile += '/';
+      BuildFile += rel;
+    } else {
+      BuildFile = wrk.Base().AbsoluteBuildPath(rel);
     }
-    buildRel += ".cpp";
-    wrk.Gen().ParallelMocAutoRegister(buildRel);
-    BuildFile = wrk.Base().AbsoluteBuildPath(buildRel);
   }
 
   if (UpdateRequired(wrk)) {
@@ -871,7 +876,8 @@ void cmQtAutoGeneratorMocUic::JobMocT::GenerateMoc(WorkerT& wrk)
 void cmQtAutoGeneratorMocUic::JobUicT::Process(WorkerT& wrk)
 {
   // Compute build file name
-  BuildFile = wrk.Base().AutogenIncludeDirAbs;
+  BuildFile = wrk.Base().AutogenIncludeDir;
+  BuildFile += '/';
   BuildFile += IncludeString;
 
   if (UpdateRequired(wrk)) {
@@ -1208,20 +1214,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
   }
 
   // -- Meta
-  Base_.MultiConfig = MultiConfigType(InfoGet("AM_MULTI_CONFIG"));
-
-  Base_.ConfigSuffix = InfoGetConfig("AM_CONFIG_SUFFIX");
-  if (Base_.ConfigSuffix.empty()) {
-    Base_.ConfigSuffix = "_";
-    Base_.ConfigSuffix += InfoConfig();
-  }
-
-  SettingsFile_ = InfoGetConfig("AM_SETTINGS_FILE");
-  if (SettingsFile_.empty()) {
-    Log().ErrorFile(GeneratorT::GEN, InfoFile(), "Settings file name missing");
-    return false;
-  }
-
+  Base_.MultiConfig = InfoGetBool("AM_MULTI_CONFIG");
   {
     unsigned long num = Base_.NumThreads;
     if (cmSystemTools::StringToULong(InfoGet("AM_PARALLEL"), &num)) {
@@ -1242,6 +1235,23 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
   if (Base_.AutogenBuildDir.empty()) {
     Log().ErrorFile(GeneratorT::GEN, InfoFile(),
                     "Autogen build directory missing");
+    return false;
+  }
+  // include directory
+  {
+    std::string dirRel = InfoGetConfig("AM_INCLUDE_DIR");
+    if (dirRel.empty()) {
+      Log().ErrorFile(GeneratorT::GEN, InfoFile(),
+                      "Autogen include directory missing");
+      return false;
+    }
+    Base_.AutogenIncludeDir = Base_.AbsoluteBuildPath(dirRel);
+  }
+
+  // - Files
+  SettingsFile_ = InfoGetConfig("AM_SETTINGS_FILE");
+  if (SettingsFile_.empty()) {
+    Log().ErrorFile(GeneratorT::GEN, InfoFile(), "Settings file name missing");
     return false;
   }
 
@@ -1438,30 +1448,17 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
     Base().CurrentSourceDir, Base().CurrentBinaryDir, Base().ProjectSourceDir,
     Base().ProjectBinaryDir);
 
-  // include directory
-  Base_.AutogenIncludeDirRel = "include";
-  if (Base().MultiConfig != MultiConfigT::SINGLE) {
-    Base_.AutogenIncludeDirRel += Base().ConfigSuffix;
-  }
-  Base_.AutogenIncludeDirRel += "/";
-  Base_.AutogenIncludeDirAbs =
-    Base_.AbsoluteBuildPath(Base().AutogenIncludeDirRel);
-
   // Moc variables
   if (Moc().Enabled) {
     // Mocs compilation file
-    Moc_.CompFileRel = "mocs_compilation";
-    if (Base_.MultiConfig == MultiConfigT::MULTI) {
-      Moc_.CompFileRel += Base().ConfigSuffix;
-    }
-    Moc_.CompFileRel += ".cpp";
-    Moc_.CompFileAbs = Base_.AbsoluteBuildPath(Moc().CompFileRel);
+    Moc_.CompFileAbs = Base().AbsoluteBuildPath("mocs_compilation.cpp");
 
     // Moc predefs file
     if (!Moc_.PredefsCmd.empty()) {
       Moc_.PredefsFileRel = "moc_predefs";
-      if (Base_.MultiConfig != MultiConfigT::SINGLE) {
-        Moc_.PredefsFileRel += Base().ConfigSuffix;
+      if (Base_.MultiConfig) {
+        Moc_.PredefsFileRel += '_';
+        Moc_.PredefsFileRel += InfoConfig();
       }
       Moc_.PredefsFileRel += ".h";
       Moc_.PredefsFileAbs = Base_.AbsoluteBuildPath(Moc().PredefsFileRel);
@@ -1731,7 +1728,7 @@ void cmQtAutoGeneratorMocUic::SettingsFileWrite()
 void cmQtAutoGeneratorMocUic::CreateDirectories()
 {
   // Create AUTOGEN include directory
-  if (!FileSys().MakeDirectory(GeneratorT::GEN, Base().AutogenIncludeDirAbs)) {
+  if (!FileSys().MakeDirectory(GeneratorT::GEN, Base().AutogenIncludeDir)) {
     RegisterJobError();
   }
 }
@@ -1980,9 +1977,10 @@ void cmQtAutoGeneratorMocUic::ParallelMocAutoUpdated()
 void cmQtAutoGeneratorMocUic::MocGenerateCompilation()
 {
   std::lock_guard<std::mutex> mocLock(JobsMutex_);
-  if (!JobThreadsAbort_ && Moc().Enabled) {
-    // Compose mocs compilation file content
+  if (!JobError_ && Moc().Enabled) {
+    // Write mocs compilation build file
     {
+      // Compose mocs compilation file content
       std::string content =
         "// This file is autogenerated. Changes will be overwritten.\n";
       if (MocAutoFiles_.empty()) {
@@ -1992,19 +1990,22 @@ void cmQtAutoGeneratorMocUic::MocGenerateCompilation()
         content += "enum some_compilers { need_more_than_nothing };\n";
       } else {
         // Valid content
+        char const sbeg = Base().MultiConfig ? '<' : '"';
+        char const send = Base().MultiConfig ? '>' : '"';
         for (std::string const& mocfile : MocAutoFiles_) {
-          content += "#include \"";
+          content += "#include ";
+          content += sbeg;
           content += mocfile;
-          content += "\"\n";
+          content += send;
+          content += '\n';
         }
       }
 
-      std::string const& compRel = Moc().CompFileRel;
       std::string const& compAbs = Moc().CompFileAbs;
       if (FileSys().FileDiffers(compAbs, content)) {
         // Actually write mocs compilation file
         if (Log().Verbose()) {
-          Log().Info(GeneratorT::MOC, "Generating MOC compilation " + compRel);
+          Log().Info(GeneratorT::MOC, "Generating MOC compilation " + compAbs);
         }
         if (!FileSys().FileWrite(GeneratorT::MOC, compAbs, content)) {
           Log().ErrorFile(GeneratorT::MOC, compAbs,
@@ -2015,10 +2016,13 @@ void cmQtAutoGeneratorMocUic::MocGenerateCompilation()
       } else if (MocAutoFileUpdated_) {
         // Only touch mocs compilation file
         if (Log().Verbose()) {
-          Log().Info(GeneratorT::MOC, "Touching mocs compilation " + compRel);
+          Log().Info(GeneratorT::MOC, "Touching mocs compilation " + compAbs);
         }
         FileSys().Touch(compAbs);
       }
+    }
+    // Write mocs compilation wrapper file
+    if (Base().MultiConfig) {
     }
   }
 }

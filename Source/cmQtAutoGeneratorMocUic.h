@@ -68,7 +68,7 @@ public:
   public:
     // -- Volatile methods
     BaseSettingsT(FileSystem* fileSystem)
-      : MultiConfig(MultiConfigT::WRAPPER)
+      : MultiConfig(false)
       , IncludeProjectDirsBefore(false)
       , QtVersionMajor(4)
       , NumThreads(1)
@@ -83,8 +83,7 @@ public:
 
     // -- Attributes
     // - Config
-    std::string ConfigSuffix;
-    MultiConfigT MultiConfig;
+    bool MultiConfig;
     bool IncludeProjectDirsBefore;
     unsigned int QtVersionMajor;
     unsigned int NumThreads;
@@ -94,8 +93,7 @@ public:
     std::string CurrentSourceDir;
     std::string CurrentBinaryDir;
     std::string AutogenBuildDir;
-    std::string AutogenIncludeDirRel;
-    std::string AutogenIncludeDirAbs;
+    std::string AutogenIncludeDir;
     // - Files
     cmFilePathChecksum FilePathChecksum;
     std::vector<std::string> HeaderExtensions;
@@ -128,7 +126,6 @@ public:
     bool SettingsChanged = false;
     bool RelaxedMode = false;
     std::string Executable;
-    std::string CompFileRel;
     std::string CompFileAbs;
     std::string PredefsFileRel;
     std::string PredefsFileAbs;

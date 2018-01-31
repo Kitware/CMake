@@ -28,24 +28,11 @@ public:
     RCC
   };
 
-  /// @brief Multiconfiguration type
-  enum class MultiConfigT
-  {
-    SINGLE,  // Single configuration
-    WRAPPER, // Multi configuration using wrapper files
-    MULTI    // Multi configuration using per config sources
-  };
-
 public:
   /// @brief Returns the generator name
   static std::string const& GeneratorName(GeneratorT genType);
   /// @brief Returns the generator name in upper case
   static std::string GeneratorNameUpper(GeneratorT genType);
-
-  /// @brief Returns the multi configuration name string
-  static std::string const& MultiConfigName(MultiConfigT config);
-  /// @brief Returns the multi configuration type
-  static MultiConfigT MultiConfigType(std::string const& name);
 
   /// @brief Returns a the string escaped and enclosed in quotes
   static std::string Quoted(std::string const& text);
