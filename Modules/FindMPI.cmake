@@ -521,6 +521,10 @@ function (_MPI_interrogate_compiler LANG)
   # We'll normalize this to the - syntax we use for CMake purposes anyways.
   if(MSVC)
     foreach(_MPI_VARIABLE IN ITEMS COMPILE LINK)
+      # The Intel MPI wrappers on Windows prefix their output with some copyright boilerplate.
+      # To prevent possible problems, we discard this text before proceeding with any further matching.
+      string(REGEX REPLACE "^[^ ]+ for the Intel\\(R\\) MPI Library [^\n]+ for Windows\\*\nCopyright\\(C\\) [^\n]+, Intel Corporation\\. All rights reserved\\.\n\n" ""
+        MPI_${_MPI_VARIABLE}_CMDLINE "${MPI_${_MPI_VARIABLE}_CMDLINE}")
       string(REGEX REPLACE "(^| )/" "\\1-" MPI_${_MPI_VARIABLE}_CMDLINE "${MPI_${_MPI_VARIABLE}_CMDLINE}")
       string(REPLACE "-libpath:" "-LIBPATH:" MPI_${_MPI_VARIABLE}_CMDLINE "${MPI_${_MPI_VARIABLE}_CMDLINE}")
     endforeach()
