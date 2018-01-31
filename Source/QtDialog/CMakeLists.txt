@@ -166,6 +166,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_executable(cmake-gui WIN32 MACOSX_BUNDLE ${SRCS} ${MANIFEST_FILE})
 target_link_libraries(cmake-gui CMakeLib ${QT_QTMAIN_LIBRARY} ${CMake_QT_LIBRARIES})
 
+if(WIN32)
+  target_sources(cmake-gui PRIVATE $<TARGET_OBJECTS:CMakeVersion>)
+endif()
+
 # cmake-gui has not been updated for `include-what-you-use`.
 # Block the tool until this is done.
 set_target_properties(cmake-gui PROPERTIES
