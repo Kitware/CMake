@@ -1,22 +1,18 @@
 
 #include <iostream>
 
-int static_func(int);
-int file1_sq_func(int);
+int cpp_sq_func(int);
+int cu1_sq_func(int);
+int cu2_sq_func(int);
 
-int test_functions()
+bool test_functions()
 {
-  return file1_sq_func(static_func(42));
+  return (cu1_sq_func(42) == cpp_sq_func(42)) &&
+    (cu2_sq_func(42) == cpp_sq_func(42));
 }
 
 int main(int argc, char** argv)
 {
-  if (test_functions() == 1) {
-    return 1;
-  }
-  std::cout
-    << "this executable doesn't use cuda code, just call methods defined"
-    << std::endl;
-  std::cout << "in object files that have cuda code" << std::endl;
-  return 0;
+  int result = test_functions() ? 0 : 1;
+  return result;
 }

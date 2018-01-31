@@ -3,7 +3,7 @@
 #include <cuda_runtime.h>
 #include <iostream>
 
-int __host__ cu1_sq_func(int x)
+int __host__ cu2_sq_func(int x)
 {
   cudaError_t err;
   int nDevices = 0;
