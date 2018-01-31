@@ -870,7 +870,7 @@ std::string const& cmGlobalNinjaGenerator::ConvertToNinjaPath(
 
   cmLocalNinjaGenerator* ng =
     static_cast<cmLocalNinjaGenerator*>(this->LocalGenerators[0]);
-  const char* bin_dir = ng->GetState()->GetBinaryDirectory();
+  std::string const& bin_dir = ng->GetState()->GetBinaryDirectory();
   std::string convPath = ng->ConvertToRelativePath(bin_dir, path);
   convPath = this->NinjaOutputPath(convPath);
 #ifdef _WIN32
@@ -902,7 +902,7 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
   }
 
   std::string sourceFileName = sourceFile;
-  if (!cmSystemTools::FileIsFullPath(sourceFileName.c_str())) {
+  if (!cmSystemTools::FileIsFullPath(sourceFileName)) {
     sourceFileName = cmSystemTools::CollapseFullPath(
       sourceFileName, this->GetCMakeInstance()->GetHomeOutputDirectory());
   }

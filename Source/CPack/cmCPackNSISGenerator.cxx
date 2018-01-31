@@ -62,8 +62,7 @@ int cmCPackNSISGenerator::PackageFiles()
   std::ostringstream str;
   for (std::string const& file : files) {
     std::string outputDir = "$INSTDIR";
-    std::string fileN =
-      cmSystemTools::RelativePath(toplevel.c_str(), file.c_str());
+    std::string fileN = cmSystemTools::RelativePath(toplevel, file);
     if (!this->Components.empty()) {
       const std::string::size_type pos = fileN.find('/');
 
@@ -90,8 +89,7 @@ int cmCPackNSISGenerator::PackageFiles()
   std::ostringstream dstr;
   for (std::string const& dir : dirs) {
     std::string componentName;
-    std::string fileN =
-      cmSystemTools::RelativePath(toplevel.c_str(), dir.c_str());
+    std::string fileN = cmSystemTools::RelativePath(toplevel, dir);
     if (fileN.empty()) {
       continue;
     }
@@ -669,8 +667,8 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
       uploadDirectory = this->GetOption("CPACK_PACKAGE_DIRECTORY");
       uploadDirectory += "/CPackUploads";
     }
-    if (!cmSystemTools::FileExists(uploadDirectory.c_str())) {
-      if (!cmSystemTools::MakeDirectory(uploadDirectory.c_str())) {
+    if (!cmSystemTools::FileExists(uploadDirectory)) {
+      if (!cmSystemTools::MakeDirectory(uploadDirectory)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Unable to create NSIS upload directory "
                         << uploadDirectory << std::endl);
@@ -683,7 +681,7 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "-   Building downloaded component archive: " << archiveFile
                                                                 << std::endl);
-    if (cmSystemTools::FileExists(archiveFile.c_str(), true)) {
+    if (cmSystemTools::FileExists(archiveFile, true)) {
       if (!cmSystemTools::RemoveFile(archiveFile)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR, "Unable to remove archive file "
                         << archiveFile << std::endl);

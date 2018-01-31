@@ -327,7 +327,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     script_arg = total_script_arg.substr(comma_pos + 1);
   }
   // make sure the file exists
-  if (!cmSystemTools::FileExists(script.c_str())) {
+  if (!cmSystemTools::FileExists(script)) {
     cmSystemTools::Error("Cannot find file: ", script.c_str());
     return 1;
   }
@@ -598,7 +598,7 @@ int cmCTestScriptHandler::CheckOutSourceDir()
   int retVal;
   bool res;
 
-  if (!cmSystemTools::FileExists(this->SourceDir.c_str()) &&
+  if (!cmSystemTools::FileExists(this->SourceDir) &&
       !this->CVSCheckOut.empty()) {
     // we must now checkout the src dir
     output.clear();
@@ -630,10 +630,10 @@ int cmCTestScriptHandler::BackupDirectories()
   // backup the binary and src directories if requested
   if (this->Backup) {
     // if for some reason those directories exist then first delete them
-    if (cmSystemTools::FileExists(this->BackupSourceDir.c_str())) {
+    if (cmSystemTools::FileExists(this->BackupSourceDir)) {
       cmSystemTools::RemoveADirectory(this->BackupSourceDir);
     }
-    if (cmSystemTools::FileExists(this->BackupBinaryDir.c_str())) {
+    if (cmSystemTools::FileExists(this->BackupBinaryDir)) {
       cmSystemTools::RemoveADirectory(this->BackupBinaryDir);
     }
 
@@ -716,9 +716,9 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   }
 
   // make sure the binary directory exists if it isn't the srcdir
-  if (!cmSystemTools::FileExists(this->BinaryDir.c_str()) &&
+  if (!cmSystemTools::FileExists(this->BinaryDir) &&
       this->SourceDir != this->BinaryDir) {
-    if (!cmSystemTools::MakeDirectory(this->BinaryDir.c_str())) {
+    if (!cmSystemTools::MakeDirectory(this->BinaryDir)) {
       cmSystemTools::Error("Unable to create the binary directory:\n",
                            this->BinaryDir.c_str());
       this->RestoreBackupDirectories();
@@ -782,7 +782,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
 
     if (!this->CMOutFile.empty()) {
       std::string cmakeOutputFile = this->CMOutFile;
-      if (!cmSystemTools::FileIsFullPath(cmakeOutputFile.c_str())) {
+      if (!cmSystemTools::FileIsFullPath(cmakeOutputFile)) {
         cmakeOutputFile = this->BinaryDir + "/" + cmakeOutputFile;
       }
 
@@ -876,10 +876,10 @@ void cmCTestScriptHandler::RestoreBackupDirectories()
   // the backed up dirs
   if (this->Backup) {
     // if for some reason those directories exist then first delete them
-    if (cmSystemTools::FileExists(this->SourceDir.c_str())) {
+    if (cmSystemTools::FileExists(this->SourceDir)) {
       cmSystemTools::RemoveADirectory(this->SourceDir);
     }
-    if (cmSystemTools::FileExists(this->BinaryDir.c_str())) {
+    if (cmSystemTools::FileExists(this->BinaryDir)) {
       cmSystemTools::RemoveADirectory(this->BinaryDir);
     }
     // rename the src and binary directories
@@ -918,7 +918,7 @@ bool cmCTestScriptHandler::EmptyBinaryDirectory(const char* sname)
   std::string check = sname;
   check += "/CMakeCache.txt";
 
-  if (!cmSystemTools::FileExists(check.c_str())) {
+  if (!cmSystemTools::FileExists(check)) {
     return false;
   }
 

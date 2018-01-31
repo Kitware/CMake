@@ -709,7 +709,7 @@ cmCTestBuildHandler::LaunchHelper::LaunchHelper(cmCTestBuildHandler* handler)
 
     if (this->Handler->UseCTestLaunch) {
       // Enable launcher fragments.
-      cmSystemTools::MakeDirectory(launchDir.c_str());
+      cmSystemTools::MakeDirectory(launchDir);
       this->WriteLauncherConfig();
       std::string launchEnv = "CTEST_LAUNCH_LOGS=";
       launchEnv += launchDir;

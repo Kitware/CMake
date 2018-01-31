@@ -108,12 +108,12 @@ const char* CCONV cmGetProjectName(void* arg)
 const char* CCONV cmGetHomeDirectory(void* arg)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  return mf->GetHomeDirectory();
+  return mf->GetHomeDirectory().c_str();
 }
 const char* CCONV cmGetHomeOutputDirectory(void* arg)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  return mf->GetHomeOutputDirectory();
+  return mf->GetHomeOutputDirectory().c_str();
 }
 const char* CCONV cmGetStartDirectory(void* arg)
 {

@@ -17,14 +17,14 @@ bool cmFortranParser_s::FindIncludeFile(const char* dir,
   // If the file is a full path, include it directly.
   if (cmSystemTools::FileIsFullPath(includeName)) {
     fileName = includeName;
-    return cmSystemTools::FileExists(fileName.c_str(), true);
+    return cmSystemTools::FileExists(fileName, true);
   }
   // Check for the file in the directory containing the including
   // file.
   std::string fullName = dir;
   fullName += "/";
   fullName += includeName;
-  if (cmSystemTools::FileExists(fullName.c_str(), true)) {
+  if (cmSystemTools::FileExists(fullName, true)) {
     fileName = fullName;
     return true;
   }
@@ -34,7 +34,7 @@ bool cmFortranParser_s::FindIncludeFile(const char* dir,
     fullName = i;
     fullName += "/";
     fullName += includeName;
-    if (cmSystemTools::FileExists(fullName.c_str(), true)) {
+    if (cmSystemTools::FileExists(fullName, true)) {
       fileName = fullName;
       return true;
     }

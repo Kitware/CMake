@@ -206,7 +206,7 @@ bool cmGetPropertyCommand::HandleDirectoryMode()
     // Construct the directory name.  Interpret relative paths with
     // respect to the current directory.
     std::string dir = this->Name;
-    if (!cmSystemTools::FileIsFullPath(dir.c_str())) {
+    if (!cmSystemTools::FileIsFullPath(dir)) {
       dir = this->Makefile->GetCurrentSourceDirectory();
       dir += "/";
       dir += this->Name;

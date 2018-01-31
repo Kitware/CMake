@@ -28,7 +28,7 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv,
   // if They specified clean then we clean up what we can
   if (this->SrcFileSignature) {
     if (!this->Makefile->GetCMakeInstance()->GetDebugTryCompile()) {
-      this->CleanupFiles(this->BinaryDirectory.c_str());
+      this->CleanupFiles(this->BinaryDirectory);
     }
   }
   return true;

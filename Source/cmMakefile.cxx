@@ -1104,9 +1104,9 @@ cmTarget* cmMakefile::AddUtilityCommand(
   return target;
 }
 
-void cmMakefile::AddDefineFlag(const char* flag)
+void cmMakefile::AddDefineFlag(std::string const& flag)
 {
-  if (!flag) {
+  if (flag.empty()) {
     return;
   }
 
@@ -1122,7 +1122,7 @@ void cmMakefile::AddDefineFlag(const char* flag)
   this->AddDefineFlag(flag, this->DefineFlags);
 }
 
-void cmMakefile::AddDefineFlag(const char* flag, std::string& dflags)
+void cmMakefile::AddDefineFlag(std::string const& flag, std::string& dflags)
 {
   // remove any \n\r
   std::string::size_type initSize = dflags.size();
@@ -1132,14 +1132,13 @@ void cmMakefile::AddDefineFlag(const char* flag, std::string& dflags)
   std::replace(flagStart, dflags.end(), '\r', ' ');
 }
 
-void cmMakefile::RemoveDefineFlag(const char* flag)
+void cmMakefile::RemoveDefineFlag(std::string const& flag)
 {
   // Check the length of the flag to remove.
-  std::string::size_type len = strlen(flag);
-  if (len < 1) {
+  if (flag.empty()) {
     return;
   }
-
+  std::string::size_type const len = flag.length();
   // Update the string used for the old DEFINITIONS property.
   this->RemoveDefineFlag(flag, len, this->DefineFlagsOrig);
 
@@ -1152,7 +1151,8 @@ void cmMakefile::RemoveDefineFlag(const char* flag)
   this->RemoveDefineFlag(flag, len, this->DefineFlags);
 }
 
-void cmMakefile::RemoveDefineFlag(const char* flag, std::string::size_type len,
+void cmMakefile::RemoveDefineFlag(std::string const& flag,
+                                  std::string::size_type len,
                                   std::string& dflags)
 {
   // Remove all instances of the flag that are surrounded by
@@ -1169,9 +1169,9 @@ void cmMakefile::RemoveDefineFlag(const char* flag, std::string::size_type len,
   }
 }
 
-void cmMakefile::AddCompileOption(const char* option)
+void cmMakefile::AddCompileOption(std::string const& option)
 {
-  this->AppendProperty("COMPILE_OPTIONS", option);
+  this->AppendProperty("COMPILE_OPTIONS", option.c_str());
 }
 
 bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
@@ -2292,7 +2292,7 @@ const char* cmMakefile::GetSONameFlag(const std::string& language) const
   return GetDefinition(name);
 }
 
-bool cmMakefile::CanIWriteThisFile(const char* fileName) const
+bool cmMakefile::CanIWriteThisFile(std::string const& fileName) const
 {
   if (!this->IsOn("CMAKE_DISABLE_SOURCE_CHANGES")) {
     return true;
@@ -3105,19 +3105,19 @@ std::unique_ptr<cmFunctionBlocker> cmMakefile::RemoveFunctionBlocker(
   return std::unique_ptr<cmFunctionBlocker>();
 }
 
-const char* cmMakefile::GetHomeDirectory() const
+std::string const& cmMakefile::GetHomeDirectory() const
 {
   return this->GetCMakeInstance()->GetHomeDirectory();
 }
 
-const char* cmMakefile::GetHomeOutputDirectory() const
+std::string const& cmMakefile::GetHomeOutputDirectory() const
 {
   return this->GetCMakeInstance()->GetHomeOutputDirectory();
 }
 
-void cmMakefile::SetScriptModeFile(const char* scriptfile)
+void cmMakefile::SetScriptModeFile(std::string const& scriptfile)
 {
-  this->AddDefinition("CMAKE_SCRIPT_MODE_FILE", scriptfile);
+  this->AddDefinition("CMAKE_SCRIPT_MODE_FILE", scriptfile.c_str());
 }
 
 void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)

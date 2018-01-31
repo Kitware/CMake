@@ -51,7 +51,7 @@ bool cmCTestUploadCommand::CheckArgumentValue(std::string const& arg)
     return true;
   }
   if (this->ArgumentDoing == ArgumentDoingFiles) {
-    if (cmSystemTools::FileExists(arg.c_str())) {
+    if (cmSystemTools::FileExists(arg)) {
       this->Files.insert(arg);
       return true;
     }

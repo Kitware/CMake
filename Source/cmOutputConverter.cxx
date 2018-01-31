@@ -29,7 +29,7 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
   // space.
   if (this->GetState()->UseWindowsShell() &&
       remote.find(' ') != std::string::npos &&
-      cmSystemTools::FileExists(remote.c_str())) {
+      cmSystemTools::FileExists(remote)) {
     std::string tmp;
     if (cmSystemTools::GetShortPath(remote, tmp)) {
       return this->ConvertToOutputFormat(tmp, format);
@@ -125,7 +125,7 @@ std::string cmOutputConverter::ForceToRelativePath(
   assert(local_path.empty() || local_path[local_path.size() - 1] != '/');
 
   // If the path is already relative then just return the path.
-  if (!cmSystemTools::FileIsFullPath(remote_path.c_str())) {
+  if (!cmSystemTools::FileIsFullPath(remote_path)) {
     return remote_path;
   }
 

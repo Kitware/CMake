@@ -493,7 +493,7 @@ void cmGhsMultiTargetGenerator::WriteSources(
     cmSystemTools::ConvertToUnixSlashes(sgPath);
     cmGlobalGhsMultiGenerator::AddFilesUpToPath(
       this->GetFolderBuildStreams(), &this->FolderBuildStreams,
-      this->LocalGenerator->GetBinaryDirectory(), sgPath,
+      this->LocalGenerator->GetBinaryDirectory().c_str(), sgPath,
       GhsMultiGpj::SUBPROJECT, this->RelBuildFilePath);
 
     std::string fullSourcePath((*si)->GetFullPath());

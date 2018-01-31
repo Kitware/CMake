@@ -877,7 +877,7 @@ bool cmSystemTools::DoesFileExistWithExtensions(
     hname = name;
     hname += ".";
     hname += headerExt;
-    if (cmSystemTools::FileExists(hname.c_str())) {
+    if (cmSystemTools::FileExists(hname)) {
       return true;
     }
   }
@@ -895,7 +895,7 @@ std::string cmSystemTools::FileExistsInParentDirectories(const char* fname,
   std::string prevDir;
   while (dir != prevDir) {
     std::string path = dir + "/" + file;
-    if (cmSystemTools::FileExists(path.c_str())) {
+    if (cmSystemTools::FileExists(path)) {
       return path;
     }
     if (dir.size() < strlen(toplevel)) {
@@ -1371,7 +1371,7 @@ bool cmSystemTools::Split(const char* s, std::vector<std::string>& l)
   return res;
 }
 
-std::string cmSystemTools::ConvertToOutputPath(const char* path)
+std::string cmSystemTools::ConvertToOutputPath(std::string const& path)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   if (s_ForceUnixPaths) {
@@ -1408,15 +1408,16 @@ std::string cmSystemTools::ConvertToRunCommandPath(const char* path)
 }
 
 // compute the relative path from here to there
-std::string cmSystemTools::RelativePath(const char* local, const char* remote)
+std::string cmSystemTools::RelativePath(std::string const& local,
+                                        std::string const& remote)
 {
   if (!cmSystemTools::FileIsFullPath(local)) {
     cmSystemTools::Error("RelativePath must be passed a full path to local: ",
-                         local);
+                         local.c_str());
   }
   if (!cmSystemTools::FileIsFullPath(remote)) {
     cmSystemTools::Error("RelativePath must be passed a full path to remote: ",
-                         remote);
+                         remote.c_str());
   }
   return cmsys::SystemTools::RelativePath(local, remote);
 }
@@ -1570,9 +1571,9 @@ bool cmSystemTools::CreateTar(const char* outFileName,
   a.SetMTime(mtime);
   a.SetVerbose(verbose);
   for (auto path : files) {
-    if (cmSystemTools::FileIsFullPath(path.c_str())) {
+    if (cmSystemTools::FileIsFullPath(path)) {
       // Get the relative path to the file.
-      path = cmSystemTools::RelativePath(cwd.c_str(), path.c_str());
+      path = cmSystemTools::RelativePath(cwd, path);
     }
     if (!a.Add(path)) {
       break;
@@ -2177,19 +2178,19 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   cmSystemToolsCMakeGUICommand = exe_dir;
   cmSystemToolsCMakeGUICommand += "/cmake-gui";
   cmSystemToolsCMakeGUICommand += cmSystemTools::GetExecutableExtension();
-  if (!cmSystemTools::FileExists(cmSystemToolsCMakeGUICommand.c_str())) {
+  if (!cmSystemTools::FileExists(cmSystemToolsCMakeGUICommand)) {
     cmSystemToolsCMakeGUICommand.clear();
   }
   cmSystemToolsCMakeCursesCommand = exe_dir;
   cmSystemToolsCMakeCursesCommand += "/ccmake";
   cmSystemToolsCMakeCursesCommand += cmSystemTools::GetExecutableExtension();
-  if (!cmSystemTools::FileExists(cmSystemToolsCMakeCursesCommand.c_str())) {
+  if (!cmSystemTools::FileExists(cmSystemToolsCMakeCursesCommand)) {
     cmSystemToolsCMakeCursesCommand.clear();
   }
   cmSystemToolsCMClDepsCommand = exe_dir;
   cmSystemToolsCMClDepsCommand += "/cmcldeps";
   cmSystemToolsCMClDepsCommand += cmSystemTools::GetExecutableExtension();
-  if (!cmSystemTools::FileExists(cmSystemToolsCMClDepsCommand.c_str())) {
+  if (!cmSystemTools::FileExists(cmSystemToolsCMClDepsCommand)) {
     cmSystemToolsCMClDepsCommand.clear();
   }
 
@@ -2204,7 +2205,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   }
   if (cmSystemToolsCMakeRoot.empty() ||
       !cmSystemTools::FileExists(
-        (cmSystemToolsCMakeRoot + "/Modules/CMake.cmake").c_str())) {
+        (cmSystemToolsCMakeRoot + "/Modules/CMake.cmake"))) {
     // Build tree has "<build>/bin[/<config>]/cmake" and
     // "<build>/CMakeFiles/CMakeSourceDir.txt".
     std::string dir = cmSystemTools::GetFilenamePath(exe_dir);

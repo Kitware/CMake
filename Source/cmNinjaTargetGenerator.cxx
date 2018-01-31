@@ -1083,7 +1083,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
 
   std::string escapedSourceFileName = sourceFileName;
 
-  if (!cmSystemTools::FileIsFullPath(sourceFileName.c_str())) {
+  if (!cmSystemTools::FileIsFullPath(sourceFileName)) {
     escapedSourceFileName = cmSystemTools::CollapseFullPath(
       escapedSourceFileName, this->GetGlobalGenerator()
                                ->GetCMakeInstance()
@@ -1143,8 +1143,8 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
 void cmNinjaTargetGenerator::EnsureDirectoryExists(
   const std::string& path) const
 {
-  if (cmSystemTools::FileIsFullPath(path.c_str())) {
-    cmSystemTools::MakeDirectory(path.c_str());
+  if (cmSystemTools::FileIsFullPath(path)) {
+    cmSystemTools::MakeDirectory(path);
   } else {
     cmGlobalNinjaGenerator* gg = this->GetGlobalGenerator();
     std::string fullPath =
@@ -1152,7 +1152,7 @@ void cmNinjaTargetGenerator::EnsureDirectoryExists(
     // Also ensures their is a trailing slash.
     gg->StripNinjaOutputPathPrefixAsSuffix(fullPath);
     fullPath += path;
-    cmSystemTools::MakeDirectory(fullPath.c_str());
+    cmSystemTools::MakeDirectory(fullPath);
   }
 }
 

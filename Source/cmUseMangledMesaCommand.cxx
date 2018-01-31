@@ -23,7 +23,7 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
   std::string glh = inputDir;
   glh += "/";
   glh += "gl.h";
-  if (!cmSystemTools::FileExists(glh.c_str())) {
+  if (!cmSystemTools::FileExists(glh)) {
     std::string e = "Bad path to Mesa, could not find: ";
     e += glh;
     e += " ";

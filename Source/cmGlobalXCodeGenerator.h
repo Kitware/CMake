@@ -119,7 +119,7 @@ private:
   std::string XCodeEscapePath(const std::string& p);
   std::string RelativeToSource(const char* p);
   std::string RelativeToBinary(const char* p);
-  std::string ConvertToRelativeForMake(const char* p);
+  std::string ConvertToRelativeForMake(std::string const& p);
   void CreateCustomCommands(cmXCodeObject* buildPhases,
                             cmXCodeObject* sourceBuildPhase,
                             cmXCodeObject* headerBuildPhase,

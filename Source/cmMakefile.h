@@ -166,9 +166,9 @@ public:
   /**
    * Add a define flag to the build.
    */
-  void AddDefineFlag(const char* definition);
-  void RemoveDefineFlag(const char* definition);
-  void AddCompileOption(const char* option);
+  void AddDefineFlag(std::string const& definition);
+  void RemoveDefineFlag(std::string const& definition);
+  void AddCompileOption(std::string const& option);
 
   /** Create a new imported target with the name and type given.  */
   cmTarget* AddImportedTarget(const std::string& name,
@@ -309,13 +309,13 @@ public:
 
   bool IgnoreErrorsCMP0061() const;
 
-  const char* GetHomeDirectory() const;
-  const char* GetHomeOutputDirectory() const;
+  std::string const& GetHomeDirectory() const;
+  std::string const& GetHomeOutputDirectory() const;
 
   /**
    * Set CMAKE_SCRIPT_MODE_FILE variable when running a -P script.
    */
-  void SetScriptModeFile(const char* scriptfile);
+  void SetScriptModeFile(std::string const& scriptfile);
 
   /**
    * Set CMAKE_ARGC, CMAKE_ARGV0 ... variables.
@@ -473,7 +473,7 @@ public:
   /**
    * Make sure CMake can write this file
    */
-  bool CanIWriteThisFile(const char* fileName) const;
+  bool CanIWriteThisFile(std::string const& fileName) const;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /**
@@ -878,8 +878,9 @@ protected:
   std::string DefineFlags;
 
   // Track the value of the computed DEFINITIONS property.
-  void AddDefineFlag(const char*, std::string&);
-  void RemoveDefineFlag(const char*, std::string::size_type, std::string&);
+  void AddDefineFlag(std::string const& flag, std::string&);
+  void RemoveDefineFlag(std::string const& flag, std::string::size_type,
+                        std::string&);
   std::string DefineFlagsOrig;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)

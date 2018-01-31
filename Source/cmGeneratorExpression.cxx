@@ -203,7 +203,7 @@ static void prefixItems(const std::string& content, std::string& result,
   for (std::string const& e : entries) {
     result += sep;
     sep = ";";
-    if (!cmSystemTools::FileIsFullPath(e.c_str()) &&
+    if (!cmSystemTools::FileIsFullPath(e) &&
         cmGeneratorExpression::Find(e) != 0) {
       result += prefix;
     }

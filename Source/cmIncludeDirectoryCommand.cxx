@@ -123,7 +123,7 @@ void cmIncludeDirectoryCommand::NormalizeInclude(std::string& inc)
   if (!cmSystemTools::IsOff(inc.c_str())) {
     cmSystemTools::ConvertToUnixSlashes(inc);
 
-    if (!cmSystemTools::FileIsFullPath(inc.c_str())) {
+    if (!cmSystemTools::FileIsFullPath(inc)) {
       if (!StartsWithGeneratorExpression(inc)) {
         std::string tmp = this->Makefile->GetCurrentSourceDirectory();
         tmp += "/";

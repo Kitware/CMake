@@ -260,7 +260,7 @@ int main(int argc, char const* const* argv)
       globalMF.AddDefinition("CPACK_BUILD_CONFIG", cpackBuildConfig.c_str());
     }
 
-    if (cmSystemTools::FileExists(cpackConfigFile.c_str())) {
+    if (cmSystemTools::FileExists(cpackConfigFile)) {
       cpackConfigFile = cmSystemTools::CollapseFullPath(cpackConfigFile);
       cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
                   "Read CPack configuration file: " << cpackConfigFile

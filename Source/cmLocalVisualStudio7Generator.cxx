@@ -115,8 +115,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
 void cmLocalVisualStudio7Generator::WriteProjectFiles()
 {
   // If not an in source build, then create the output directory
-  if (strcmp(this->GetCurrentBinaryDirectory(), this->GetSourceDirectory()) !=
-      0) {
+  if (this->GetCurrentBinaryDirectory() != this->GetSourceDirectory()) {
     if (!cmSystemTools::MakeDirectory(this->GetCurrentBinaryDirectory())) {
       cmSystemTools::Error("Error creating directory ",
                            this->GetCurrentBinaryDirectory());

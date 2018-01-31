@@ -81,12 +81,12 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
   const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   const std::string makeArgs =
     mf->GetSafeDefinition("CMAKE_KATE_MAKE_ARGUMENTS");
-  const char* homeOutputDir = lg->GetBinaryDirectory();
+  std::string const& homeOutputDir = lg->GetBinaryDirectory();
 
   /* clang-format off */
   fout <<
   "\t\"build\": {\n"
-  "\t\t\"directory\": \"" << lg->GetBinaryDirectory() << "\",\n"
+  "\t\t\"directory\": \"" << homeOutputDir << "\",\n"
   "\t\t\"default_target\": \"all\",\n"
   "\t\t\"clean_target\": \"clean\",\n";
   /* clang-format on */
@@ -195,13 +195,13 @@ void cmExtraKateGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                         const std::string& make,
                                         const std::string& makeArgs,
                                         const std::string& path,
-                                        const char* homeOutputDir) const
+                                        const std::string& homeOutputDir) const
 {
   static char JsonSep = ' ';
 
   fout << "\t\t\t" << JsonSep << "{\"name\":\"" << target << "\", "
                                                              "\"build_cmd\":\""
-       << make << " -C \\\"" << (this->UseNinja ? homeOutputDir : path.c_str())
+       << make << " -C \\\"" << (this->UseNinja ? homeOutputDir : path)
        << "\\\" " << makeArgs << " " << target << "\"}\n";
 
   JsonSep = ',';
@@ -228,14 +228,14 @@ std::string cmExtraKateGenerator::GenerateFilesString(
 {
   std::string s = lg->GetSourceDirectory();
   s += "/.git";
-  if (cmSystemTools::FileExists(s.c_str())) {
-    return std::string("\"git\": 1 ");
+  if (cmSystemTools::FileExists(s)) {
+    return "\"git\": 1 ";
   }
 
   s = lg->GetSourceDirectory();
   s += "/.svn";
-  if (cmSystemTools::FileExists(s.c_str())) {
-    return std::string("\"svn\": 1 ");
+  if (cmSystemTools::FileExists(s)) {
+    return "\"svn\": 1 ";
   }
 
   s = lg->GetSourceDirectory();

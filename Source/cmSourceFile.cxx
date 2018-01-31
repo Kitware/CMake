@@ -192,7 +192,7 @@ bool cmSourceFile::TryFullPath(const std::string& path, const std::string& ext)
     tryPath += ".";
     tryPath += ext;
   }
-  if (cmSystemTools::FileExists(tryPath.c_str())) {
+  if (cmSystemTools::FileExists(tryPath)) {
     this->FullPath = tryPath;
     return true;
   }

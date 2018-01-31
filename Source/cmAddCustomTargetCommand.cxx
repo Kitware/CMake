@@ -117,7 +117,7 @@ bool cmAddCustomTargetCommand::InitialPass(
           break;
         case doing_byproducts: {
           std::string filename;
-          if (!cmSystemTools::FileIsFullPath(copy.c_str())) {
+          if (!cmSystemTools::FileIsFullPath(copy)) {
             filename = this->Makefile->GetCurrentBinaryDirectory();
             filename += "/";
           }

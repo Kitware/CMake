@@ -16,7 +16,7 @@ bool cmAddDefinitionsCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   for (std::string const& i : args) {
-    this->Makefile->AddDefineFlag(i.c_str());
+    this->Makefile->AddDefineFlag(i);
   }
   return true;
 }

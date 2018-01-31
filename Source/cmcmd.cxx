@@ -641,7 +641,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       // If error occurs we want to continue copying next files.
       bool return_value = false;
       for (std::string::size_type cc = 2; cc < args.size(); cc++) {
-        if (!cmSystemTools::MakeDirectory(args[cc].c_str())) {
+        if (!cmSystemTools::MakeDirectory(args[cc])) {
           std::cerr << "Error creating directory \"" << args[cc] << "\".\n";
           return_value = true;
         }
@@ -668,7 +668,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           // Complain if the file could not be removed, still exists,
           // and the -f option was not given.
           if (!cmSystemTools::RemoveFile(args[cc]) && !force &&
-              cmSystemTools::FileExists(args[cc].c_str())) {
+              cmSystemTools::FileExists(args[cc])) {
             return 1;
           }
         }
@@ -789,7 +789,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Command to change directory and run a program.
     if (args[1] == "chdir" && args.size() >= 4) {
       std::string const& directory = args[2];
-      if (!cmSystemTools::FileExists(directory.c_str())) {
+      if (!cmSystemTools::FileExists(directory)) {
         cmSystemTools::Error("Directory does not exist for chdir command: ",
                              args[2].c_str());
         return 1;
@@ -826,7 +826,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         count = atoi(args[3].c_str());
       }
       if (count) {
-        cmSystemTools::MakeDirectory(dirName.c_str());
+        cmSystemTools::MakeDirectory(dirName);
         // write the count into the directory
         std::string fName = dirName;
         fName += "/count.txt";
@@ -1274,8 +1274,7 @@ int cmcmd::SymlinkExecutable(std::vector<std::string>& args)
 
 bool cmcmd::SymlinkInternal(std::string const& file, std::string const& link)
 {
-  if (cmSystemTools::FileExists(link.c_str()) ||
-      cmSystemTools::FileIsSymlink(link)) {
+  if (cmSystemTools::FileExists(link) || cmSystemTools::FileIsSymlink(link)) {
     cmSystemTools::RemoveFile(link);
   }
 #if defined(_WIN32) && !defined(__CYGWIN__)

@@ -138,9 +138,9 @@ public:
   const char* GetGlobalProperty(const std::string& prop);
   bool GetGlobalPropertyAsBool(const std::string& prop);
 
-  const char* GetSourceDirectory() const;
+  std::string const& GetSourceDirectory() const;
   void SetSourceDirectory(std::string const& sourceDirectory);
-  const char* GetBinaryDirectory() const;
+  std::string const& GetBinaryDirectory() const;
   void SetBinaryDirectory(std::string const& binaryDirectory);
 
   void SetWindowsShell(bool windowsShell);

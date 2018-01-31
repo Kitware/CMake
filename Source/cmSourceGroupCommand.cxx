@@ -28,7 +28,7 @@ std::string getFullFilePath(const std::string& currentPath,
 {
   std::string fullPath = path;
 
-  if (!cmSystemTools::FileIsFullPath(path.c_str())) {
+  if (!cmSystemTools::FileIsFullPath(path)) {
     fullPath = currentPath;
     fullPath += "/";
     fullPath += path;
@@ -234,7 +234,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
       parsedArguments[kFilesOptionName];
     for (auto const& filesArg : filesArguments) {
       std::string src = filesArg;
-      if (!cmSystemTools::FileIsFullPath(src.c_str())) {
+      if (!cmSystemTools::FileIsFullPath(src)) {
         src = this->Makefile->GetCurrentSourceDirectory();
         src += "/";
         src += filesArg;

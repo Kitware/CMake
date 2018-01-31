@@ -413,7 +413,7 @@ void cmCTestMultiProcessHandler::UpdateCostData()
 
   PropertiesMap temp = this->Properties;
 
-  if (cmSystemTools::FileExists(fname.c_str())) {
+  if (cmSystemTools::FileExists(fname)) {
     cmsys::ifstream fin;
     fin.open(fname.c_str());
 
@@ -466,7 +466,7 @@ void cmCTestMultiProcessHandler::ReadCostData()
 {
   std::string fname = this->CTest->GetCostDataFile();
 
-  if (cmSystemTools::FileExists(fname.c_str(), true)) {
+  if (cmSystemTools::FileExists(fname, true)) {
     cmsys::ifstream fin;
     fin.open(fname.c_str());
     std::string line;
@@ -741,7 +741,7 @@ void cmCTestMultiProcessHandler::CheckResume()
   std::string fname =
     this->CTest->GetBinaryDir() + "/Testing/Temporary/CTestCheckpoint.txt";
   if (this->CTest->GetFailover()) {
-    if (cmSystemTools::FileExists(fname.c_str(), true)) {
+    if (cmSystemTools::FileExists(fname, true)) {
       *this->TestHandler->LogFile
         << "Resuming previously interrupted test set" << std::endl
         << "----------------------------------------------------------"
@@ -756,7 +756,7 @@ void cmCTestMultiProcessHandler::CheckResume()
       }
       fin.close();
     }
-  } else if (cmSystemTools::FileExists(fname.c_str(), true)) {
+  } else if (cmSystemTools::FileExists(fname, true)) {
     cmSystemTools::RemoveFile(fname);
   }
 }

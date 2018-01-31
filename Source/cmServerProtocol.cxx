@@ -103,7 +103,7 @@ void getCMakeInputs(const cmGlobalGenerator* gg, const std::string& sourceDir,
       std::string toAdd = lf;
       if (!sourceDir.empty()) {
         const std::string& relative =
-          cmSystemTools::RelativePath(sourceDir.c_str(), lf.c_str());
+          cmSystemTools::RelativePath(sourceDir, lf);
         if (toAdd.size() > relative.size()) {
           toAdd = relative;
         }
@@ -548,8 +548,8 @@ cmServerResponse cmServerProtocol1::ProcessCMakeInputs(
   const cmake* cm = this->CMakeInstance();
   const cmGlobalGenerator* gg = cm->GetGlobalGenerator();
   const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot();
-  const std::string buildDir = cm->GetHomeOutputDirectory();
-  const std::string sourceDir = cm->GetHomeDirectory();
+  const std::string& buildDir = cm->GetHomeOutputDirectory();
+  const std::string& sourceDir = cm->GetHomeDirectory();
 
   Json::Value result = Json::objectValue;
   result[kSOURCE_DIRECTORY_KEY] = sourceDir;
@@ -675,8 +675,7 @@ static Json::Value DumpSourceFileGroup(const LanguageData& data,
 
   Json::Value sourcesValue = Json::arrayValue;
   for (auto const& i : files) {
-    const std::string relPath =
-      cmSystemTools::RelativePath(baseDir.c_str(), i.c_str());
+    const std::string relPath = cmSystemTools::RelativePath(baseDir, i);
     sourcesValue.append(relPath.size() < i.size() ? relPath : i);
   }
 
@@ -922,7 +921,7 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
         auto dest = installTargetGenerator->GetDestination(config);
 
         std::string installPath;
-        if (!dest.empty() && cmSystemTools::FileIsFullPath(dest.c_str())) {
+        if (!dest.empty() && cmSystemTools::FileIsFullPath(dest)) {
           installPath = dest;
         } else {
           std::string installPrefix =

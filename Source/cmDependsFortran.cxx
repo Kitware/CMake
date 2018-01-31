@@ -312,13 +312,13 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
   // Write the include dependencies to the output stream.
   std::string binDir = this->LocalGenerator->GetBinaryDirectory();
   std::string obj_i = this->MaybeConvertToRelativePath(binDir, obj);
-  std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i.c_str());
+  std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i);
   internalDepends << obj_i << std::endl;
   internalDepends << " " << src << std::endl;
   for (std::string const& i : info.Includes) {
     makeDepends << obj_m << ": "
                 << cmSystemTools::ConvertToOutputPath(
-                     this->MaybeConvertToRelativePath(binDir, i).c_str())
+                     this->MaybeConvertToRelativePath(binDir, i))
                 << std::endl;
     internalDepends << " " << i << std::endl;
   }
@@ -341,7 +341,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
     if (!required->second.empty()) {
       // This module is known.  Depend on its timestamp file.
       std::string stampFile = cmSystemTools::ConvertToOutputPath(
-        this->MaybeConvertToRelativePath(binDir, required->second).c_str());
+        this->MaybeConvertToRelativePath(binDir, required->second));
       makeDepends << obj_m << ": " << stampFile << "\n";
     } else {
       // This module is not known to CMake.  Try to locate it where
@@ -349,7 +349,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       std::string module;
       if (this->FindModule(i, module)) {
         module = cmSystemTools::ConvertToOutputPath(
-          this->MaybeConvertToRelativePath(binDir, module).c_str());
+          this->MaybeConvertToRelativePath(binDir, module));
         makeDepends << obj_m << ": " << module << "\n";
       }
     }
@@ -382,7 +382,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
         this->LocalGenerator->ConvertToOutputFormat(stampFile,
                                                     cmOutputConverter::SHELL);
       std::string const stampFileForMake =
-        cmSystemTools::ConvertToOutputPath(stampFile.c_str());
+        cmSystemTools::ConvertToOutputPath(stampFile);
 
       makeDepends << obj_m << ".provides.build"
                   << ": " << stampFileForMake << "\n";
@@ -413,7 +413,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
     std::string driver = this->TargetDirectory;
     driver += "/build";
     driver = cmSystemTools::ConvertToOutputPath(
-      this->MaybeConvertToRelativePath(binDir, driver).c_str());
+      this->MaybeConvertToRelativePath(binDir, driver));
     makeDepends << driver << ": " << obj_m << ".provides.build\n";
   }
 
@@ -435,7 +435,7 @@ bool cmDependsFortran::FindModule(std::string const& name, std::string& module)
     fullName = ip;
     fullName += "/";
     fullName += mod_lower;
-    if (cmSystemTools::FileExists(fullName.c_str(), true)) {
+    if (cmSystemTools::FileExists(fullName, true)) {
       module = fullName;
       return true;
     }
@@ -444,7 +444,7 @@ bool cmDependsFortran::FindModule(std::string const& name, std::string& module)
     fullName = ip;
     fullName += "/";
     fullName += mod_upper;
-    if (cmSystemTools::FileExists(fullName.c_str(), true)) {
+    if (cmSystemTools::FileExists(fullName, true)) {
       module = fullName;
       return true;
     }
@@ -481,7 +481,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
   mod += ".mod";
   mod_upper += ".mod";
   mod_lower += ".mod";
-  if (cmSystemTools::FileExists(mod_upper.c_str(), true)) {
+  if (cmSystemTools::FileExists(mod_upper, true)) {
     if (cmDependsFortran::ModulesDiffer(mod_upper.c_str(), stamp.c_str(),
                                         compilerId.c_str())) {
       if (!cmSystemTools::CopyFileAlways(mod_upper, stamp)) {
@@ -492,7 +492,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
     }
     return true;
   }
-  if (cmSystemTools::FileExists(mod_lower.c_str(), true)) {
+  if (cmSystemTools::FileExists(mod_lower, true)) {
     if (cmDependsFortran::ModulesDiffer(mod_lower.c_str(), stamp.c_str(),
                                         compilerId.c_str())) {
       if (!cmSystemTools::CopyFileAlways(mod_lower, stamp)) {

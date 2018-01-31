@@ -172,7 +172,7 @@ void cmLocalUnixMakefileGenerator3::GetLocalObjectFiles(
       bool hasSourceExtension = true;
       std::string objectName =
         this->GetObjectFileNameWithoutTarget(*sf, dir, &hasSourceExtension);
-      if (cmSystemTools::FileIsFullPath(objectName.c_str())) {
+      if (cmSystemTools::FileIsFullPath(objectName)) {
         objectName = cmSystemTools::GetFilenameName(objectName);
       }
       LocalObjectInfo& info = localObjectFiles[objectName];
@@ -525,8 +525,7 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
 
   // Construct the left hand side of the rule.
   std::string tgt = cmSystemTools::ConvertToOutputPath(
-    this->MaybeConvertToRelativePath(this->GetBinaryDirectory(), target)
-      .c_str());
+    this->MaybeConvertToRelativePath(this->GetBinaryDirectory(), target));
 
   const char* space = "";
   if (tgt.size() == 1) {
@@ -554,7 +553,7 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
     for (std::string const& depend : depends) {
       replace = depend;
       replace = cmSystemTools::ConvertToOutputPath(
-        this->MaybeConvertToRelativePath(binDir, replace).c_str());
+        this->MaybeConvertToRelativePath(binDir, replace));
       os << cmMakeSafe(tgt) << space << ": " << cmMakeSafe(replace) << "\n";
     }
   }
@@ -574,7 +573,7 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
 std::string cmLocalUnixMakefileGenerator3::MaybeConvertWatcomShellCommand(
   std::string const& cmd)
 {
-  if (this->IsWatcomWMake() && cmSystemTools::FileIsFullPath(cmd.c_str()) &&
+  if (this->IsWatcomWMake() && cmSystemTools::FileIsFullPath(cmd) &&
       cmd.find_first_of("( )") != std::string::npos) {
     // On Watcom WMake use the windows short path for the command
     // name.  This is needed to avoid funny quoting problems on
@@ -1028,7 +1027,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
   }
 
   // Setup the proper working directory for the commands.
-  this->CreateCDCommand(commands1, dir.c_str(), relative);
+  this->CreateCDCommand(commands1, dir, relative);
 
   // push back the custom commands
   commands.insert(commands.end(), commands1.begin(), commands1.end());
@@ -1476,8 +1475,8 @@ void cmLocalUnixMakefileGenerator3::CheckMultipleOutputs(bool verbose)
 
     // If the depender is missing then delete the dependee to make
     // sure both will be regenerated.
-    if (cmSystemTools::FileExists(dependee.c_str()) &&
-        !cmSystemTools::FileExists(depender.c_str())) {
+    if (cmSystemTools::FileExists(dependee) &&
+        !cmSystemTools::FileExists(depender)) {
       if (verbose) {
         std::ostringstream msg;
         msg << "Deleting primary custom command output \"" << dependee
@@ -1828,7 +1827,7 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
     this->GetIncludeDirectories(includes, target, implicitLang.first, config);
     std::string binaryDir = this->GetState()->GetBinaryDirectory();
     if (this->Makefile->IsOn("CMAKE_DEPENDS_IN_PROJECT_ONLY")) {
-      const char* sourceDir = this->GetState()->GetSourceDirectory();
+      std::string const& sourceDir = this->GetState()->GetSourceDirectory();
       cmEraseIf(includes, ::NotInProjectDir(sourceDir, binaryDir));
     }
     for (std::string const& include : includes) {
@@ -2029,7 +2028,7 @@ void cmLocalUnixMakefileGenerator3::AddImplicitDepends(
 }
 
 void cmLocalUnixMakefileGenerator3::CreateCDCommand(
-  std::vector<std::string>& commands, const char* tgtDir,
+  std::vector<std::string>& commands, std::string const& tgtDir,
   std::string const& relDir)
 {
   // do we need to cd?
