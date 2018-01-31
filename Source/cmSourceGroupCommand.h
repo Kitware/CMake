@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -34,10 +35,24 @@ public:
                    cmExecutionStatus& status) override;
 
 private:
-  bool processTree(const std::vector<std::string>& args,
-                   std::string& errorMsg);
-  bool checkTreeArgumentsPreconditions(const std::vector<std::string>& args,
-                                       std::string& errorMsg) const;
+  typedef std::map<std::string, std::vector<std::string>> ParsedArguments;
+  typedef std::vector<std::string> ExpectedOptions;
+
+  ExpectedOptions getExpectedOptions() const;
+
+  bool isExpectedOption(const std::string& argument,
+                        const ExpectedOptions& expectedOptions);
+
+  void parseArguments(const std::vector<std::string>& args,
+                      cmSourceGroupCommand::ParsedArguments& parsedArguments);
+
+  bool processTree(ParsedArguments& parsedArguments, std::string& errorMsg);
+
+  bool checkArgumentsPreconditions(const ParsedArguments& parsedArguments,
+                                   std::string& errorMsg) const;
+  bool checkSingleParameterArgumentPreconditions(
+    const std::string& argument, const ParsedArguments& parsedArguments,
+    std::string& errorMsg) const;
 };
 
 #endif
