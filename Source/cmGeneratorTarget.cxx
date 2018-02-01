@@ -3616,13 +3616,13 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
   const cmComputeLinkInformation::ItemVector& deps = info->GetItems();
 
   std::set<std::string> emittedBools;
-  static std::string strBool = "COMPATIBLE_INTERFACE_BOOL";
+  static const std::string strBool = "COMPATIBLE_INTERFACE_BOOL";
   std::set<std::string> emittedStrings;
-  static std::string strString = "COMPATIBLE_INTERFACE_STRING";
+  static const std::string strString = "COMPATIBLE_INTERFACE_STRING";
   std::set<std::string> emittedMinNumbers;
-  static std::string strNumMin = "COMPATIBLE_INTERFACE_NUMBER_MIN";
+  static const std::string strNumMin = "COMPATIBLE_INTERFACE_NUMBER_MIN";
   std::set<std::string> emittedMaxNumbers;
-  static std::string strNumMax = "COMPATIBLE_INTERFACE_NUMBER_MAX";
+  static const std::string strNumMax = "COMPATIBLE_INTERFACE_NUMBER_MAX";
 
   for (auto const& dep : deps) {
     if (!dep.Target) {

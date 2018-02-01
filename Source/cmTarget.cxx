@@ -861,39 +861,53 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
         this->Makefile->GetBacktrace())) {
     return;
   }
-  if (prop == "MANUALLY_ADDED_DEPENDENCIES") {
+#define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
+  MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
+  MAKE_STATIC_PROP(COMPILE_FEATURES);
+  MAKE_STATIC_PROP(COMPILE_OPTIONS);
+  MAKE_STATIC_PROP(CUDA_PTX_COMPILATION);
+  MAKE_STATIC_PROP(EXPORT_NAME);
+  MAKE_STATIC_PROP(IMPORTED_GLOBAL);
+  MAKE_STATIC_PROP(INCLUDE_DIRECTORIES);
+  MAKE_STATIC_PROP(LINK_LIBRARIES);
+  MAKE_STATIC_PROP(MANUALLY_ADDED_DEPENDENCIES);
+  MAKE_STATIC_PROP(NAME);
+  MAKE_STATIC_PROP(SOURCES);
+  MAKE_STATIC_PROP(TYPE);
+#undef MAKE_STATIC_PROP
+  if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
     std::ostringstream e;
     e << "MANUALLY_ADDED_DEPENDENCIES property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
-  if (prop == "NAME") {
+  if (prop == propNAME) {
     std::ostringstream e;
     e << "NAME property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
-  if (prop == "TYPE") {
+  if (prop == propTYPE) {
     std::ostringstream e;
     e << "TYPE property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
-  if (prop == "EXPORT_NAME" && this->IsImported()) {
+  if (prop == propEXPORT_NAME && this->IsImported()) {
     std::ostringstream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
       << this->Name << "\")\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
-  if (prop == "SOURCES" && this->IsImported()) {
+  if (prop == propSOURCES && this->IsImported()) {
     std::ostringstream e;
     e << "SOURCES property can't be set on imported targets (\"" << this->Name
       << "\")\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
-  if (prop == "IMPORTED_GLOBAL" && !this->IsImported()) {
+  if (prop == propIMPORTED_GLOBAL && !this->IsImported()) {
     std::ostringstream e;
     e << "IMPORTED_GLOBAL property can't be set on non-imported targets (\""
       << this->Name << "\")\n";
@@ -901,7 +915,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     return;
   }
 
-  if (prop == "INCLUDE_DIRECTORIES") {
+  if (prop == propINCLUDE_DIRECTORIES) {
     this->Internal->IncludeDirectoriesEntries.clear();
     this->Internal->IncludeDirectoriesBacktraces.clear();
     if (value) {
@@ -909,7 +923,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->IncludeDirectoriesBacktraces.push_back(lfbt);
     }
-  } else if (prop == "COMPILE_OPTIONS") {
+  } else if (prop == propCOMPILE_OPTIONS) {
     this->Internal->CompileOptionsEntries.clear();
     this->Internal->CompileOptionsBacktraces.clear();
     if (value) {
@@ -917,7 +931,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileOptionsBacktraces.push_back(lfbt);
     }
-  } else if (prop == "COMPILE_FEATURES") {
+  } else if (prop == propCOMPILE_FEATURES) {
     this->Internal->CompileFeaturesEntries.clear();
     this->Internal->CompileFeaturesBacktraces.clear();
     if (value) {
@@ -925,7 +939,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileFeaturesBacktraces.push_back(lfbt);
     }
-  } else if (prop == "COMPILE_DEFINITIONS") {
+  } else if (prop == propCOMPILE_DEFINITIONS) {
     this->Internal->CompileDefinitionsEntries.clear();
     this->Internal->CompileDefinitionsBacktraces.clear();
     if (value) {
@@ -933,7 +947,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
     }
-  } else if (prop == "LINK_LIBRARIES") {
+  } else if (prop == propLINK_LIBRARIES) {
     this->Internal->LinkImplementationPropertyEntries.clear();
     this->Internal->LinkImplementationPropertyBacktraces.clear();
     if (value) {
@@ -941,7 +955,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       this->Internal->LinkImplementationPropertyEntries.push_back(value);
       this->Internal->LinkImplementationPropertyBacktraces.push_back(lfbt);
     }
-  } else if (prop == "SOURCES") {
+  } else if (prop == propSOURCES) {
     this->Internal->SourceEntries.clear();
     this->Internal->SourceBacktraces.clear();
     if (value) {
@@ -949,7 +963,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       this->Internal->SourceEntries.push_back(value);
       this->Internal->SourceBacktraces.push_back(lfbt);
     }
-  } else if (prop == "IMPORTED_GLOBAL") {
+  } else if (prop == propIMPORTED_GLOBAL) {
     if (!cmSystemTools::IsOn(value)) {
       std::ostringstream e;
       e << "IMPORTED_GLOBAL property can't be set to FALSE on targets (\""
@@ -965,7 +979,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME") &&
              !this->CheckImportedLibName(prop, value ? value : "")) {
     /* error was reported by check method */
-  } else if (prop == "CUDA_PTX_COMPILATION" &&
+  } else if (prop == propCUDA_PTX_COMPILATION &&
              this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
     std::ostringstream e;
     e << "CUDA_PTX_COMPILATION property can only be applied to OBJECT "
