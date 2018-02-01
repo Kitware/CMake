@@ -565,6 +565,9 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         # mkl >= 10.3
         list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
           "libiomp5md mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
+		    # mkl >= 2017
+        list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
+          "mkl_tbb_thread${BLAS_mkl_DLL_SUFFIX} mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
       endif()
 
       # Cartesian product of the above
@@ -628,6 +631,9 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         # mkl >= 10.3
         list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
           "libiomp5md mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
+		    # mkl >= 2017
+        list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
+          "mkl_tbb_thread${BLAS_mkl_DLL_SUFFIX} mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
       endif()
       if (BLA_VENDOR MATCHES "_seq$" OR BLA_VENDOR STREQUAL "All")
         list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
