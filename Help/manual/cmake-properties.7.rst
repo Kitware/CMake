@@ -84,6 +84,7 @@ Properties on Directories
    /prop_dir/RULE_LAUNCH_LINK
    /prop_dir/SOURCE_DIR
    /prop_dir/SUBDIRECTORIES
+   /prop_dir/TESTS
    /prop_dir/TEST_INCLUDE_FILES
    /prop_dir/VARIABLES
    /prop_dir/VS_GLOBAL_SECTION_POST_section

@@ -3641,6 +3641,20 @@ void cmMakefile::AppendProperty(const std::string& prop, const char* value,
 
 const char* cmMakefile::GetProperty(const std::string& prop) const
 {
+  // Check for computed properties.
+  static std::string output;
+  if (prop == "TESTS") {
+    std::vector<std::string> keys;
+    // get list of keys
+    std::transform(this->Tests.begin(), this->Tests.end(),
+                   std::back_inserter(keys),
+                   [](decltype(this->Tests)::value_type const& pair) {
+                     return pair.first;
+                   });
+    output = cmJoin(keys, ";");
+    return output.c_str();
+  }
+
   return this->StateSnapshot.GetDirectory().GetProperty(prop);
 }
 

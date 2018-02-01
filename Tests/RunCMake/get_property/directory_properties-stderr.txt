@@ -19,4 +19,12 @@ get_property: -->[^<;]*/Tests/RunCMake/get_property<--
 get_directory_property: -->[^<;]*/Tests/RunCMake/get_property/directory_properties-build/directory_properties<--
 get_property: -->[^<;]*/Tests/RunCMake/get_property/directory_properties-build/directory_properties<--
 get_directory_property: -->[^<;]*/Tests/RunCMake/get_property/directory_properties<--
-get_property: -->[^<;]*/Tests/RunCMake/get_property/directory_properties<--$
+get_property: -->[^<;]*/Tests/RunCMake/get_property/directory_properties<--
+get_directory_property: --><--
+get_property: --><--
+get_directory_property: -->test1;test2<--
+get_property: -->test1;test2<--
+get_directory_property: -->test1;test2;test3<--
+get_property: -->test1;test2;test3<--
+get_directory_property: -->Sub/test1;Sub/test2<--
+get_property: -->Sub/test1;Sub/test2<--$
