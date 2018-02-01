@@ -204,7 +204,7 @@ bool cmAddCustomCommandCommand::InitialPass(
           break;
       }
 
-      if (cmSystemTools::FileIsFullPath(filename.c_str())) {
+      if (cmSystemTools::FileIsFullPath(filename)) {
         filename = cmSystemTools::CollapseFullPath(filename);
       }
       switch (doing) {
@@ -405,7 +405,7 @@ bool cmAddCustomCommandCommand::CheckOutputs(
   for (std::string const& o : outputs) {
     // Make sure the file will not be generated into the source
     // directory during an out of source build.
-    if (!this->Makefile->CanIWriteThisFile(o.c_str())) {
+    if (!this->Makefile->CanIWriteThisFile(o)) {
       std::string e = "attempted to have a file \"" + o +
         "\" in a source directory as an output of custom command.";
       this->SetError(e);

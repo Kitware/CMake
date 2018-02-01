@@ -239,8 +239,7 @@ int cmCPackArchiveGenerator::PackageFiles()
   cmWorkingDirectory workdir(toplevel);
   for (std::string const& file : files) {
     // Get the relative path to the file
-    std::string rp =
-      cmSystemTools::RelativePath(toplevel.c_str(), file.c_str());
+    std::string rp = cmSystemTools::RelativePath(toplevel, file);
     archive.Add(rp, 0, nullptr, false);
     if (!archive) {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem while adding file< "

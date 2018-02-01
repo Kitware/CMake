@@ -467,7 +467,7 @@ bool cmCTestRunTest::StartTest(size_t total)
 
   // Check if all required files exist
   for (std::string const& file : this->TestProperties->RequiredFiles) {
-    if (!cmSystemTools::FileExists(file.c_str())) {
+    if (!cmSystemTools::FileExists(file)) {
       // Required file was not found
       this->TestProcess = cm::make_unique<cmProcess>(*this);
       *this->TestHandler->LogFile << "Unable to find required file: " << file
@@ -537,7 +537,7 @@ void cmCTestRunTest::ComputeArguments()
     ++j; // skip the executable (it will be actualCommand)
   }
   std::string testCommand =
-    cmSystemTools::ConvertToOutputPath(this->ActualCommand.c_str());
+    cmSystemTools::ConvertToOutputPath(this->ActualCommand);
 
   // Prepends memcheck args to our command string
   this->TestHandler->GenerateTestCommand(this->Arguments, this->Index);

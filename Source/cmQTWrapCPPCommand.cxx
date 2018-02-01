@@ -47,7 +47,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
 
       // Compute the name of the header from which to generate the file.
       std::string hname;
-      if (cmSystemTools::FileIsFullPath(j->c_str())) {
+      if (cmSystemTools::FileIsFullPath(*j)) {
         hname = *j;
       } else {
         if (curr && curr->GetPropertyAsBool("GENERATED")) {

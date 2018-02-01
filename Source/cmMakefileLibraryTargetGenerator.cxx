@@ -525,30 +525,30 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     outpath = this->Makefile->GetCurrentBinaryDirectory();
     outpath += cmake::GetCMakeFilesDirectory();
     outpath += "/CMakeRelink.dir";
-    cmSystemTools::MakeDirectory(outpath.c_str());
+    cmSystemTools::MakeDirectory(outpath);
     outpath += "/";
     if (!targetNameImport.empty()) {
       outpathImp = outpath;
     }
   } else {
     outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
-    cmSystemTools::MakeDirectory(outpath.c_str());
+    cmSystemTools::MakeDirectory(outpath);
     outpath += "/";
     if (!targetNameImport.empty()) {
       outpathImp = this->GeneratorTarget->GetDirectory(
         this->ConfigName, cmStateEnums::ImportLibraryArtifact);
-      cmSystemTools::MakeDirectory(outpathImp.c_str());
+      cmSystemTools::MakeDirectory(outpathImp);
       outpathImp += "/";
     }
   }
 
   std::string compilePdbOutputPath =
     this->GeneratorTarget->GetCompilePDBDirectory(this->ConfigName);
-  cmSystemTools::MakeDirectory(compilePdbOutputPath.c_str());
+  cmSystemTools::MakeDirectory(compilePdbOutputPath);
 
   std::string pdbOutputPath =
     this->GeneratorTarget->GetPDBDirectory(this->ConfigName);
-  cmSystemTools::MakeDirectory(pdbOutputPath.c_str());
+  cmSystemTools::MakeDirectory(pdbOutputPath);
   pdbOutputPath += "/";
 
   std::string targetFullPath = outpath + targetName;

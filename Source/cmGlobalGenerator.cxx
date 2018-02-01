@@ -510,7 +510,7 @@ void cmGlobalGenerator::EnableLanguage(
   bool const readCMakeSystem = !mf->GetDefinition("CMAKE_SYSTEM_LOADED");
   if (readCMakeSystem) {
     fpath += "/CMakeSystem.cmake";
-    if (cmSystemTools::FileExists(fpath.c_str())) {
+    if (cmSystemTools::FileExists(fpath)) {
       mf->ReadListFile(fpath.c_str());
     }
   }
@@ -623,7 +623,7 @@ void cmGlobalGenerator::EnableLanguage(
       // If the existing build tree was already configured with this
       // version of CMake then try to load the configured file first
       // to avoid duplicate compiler tests.
-      if (cmSystemTools::FileExists(fpath.c_str())) {
+      if (cmSystemTools::FileExists(fpath)) {
         if (!mf->ReadListFile(fpath.c_str())) {
           cmSystemTools::Error("Could not find cmake module file: ",
                                fpath.c_str());
@@ -842,7 +842,7 @@ void cmGlobalGenerator::EnableLanguage(
   projectCompatibility += "/Modules/";
   projectCompatibility += mf->GetSafeDefinition("PROJECT_NAME");
   projectCompatibility += "Compatibility.cmake";
-  if (cmSystemTools::FileExists(projectCompatibility.c_str())) {
+  if (cmSystemTools::FileExists(projectCompatibility)) {
     mf->ReadListFile(projectCompatibility.c_str());
   }
   // Inform any extra generator of the new language.
@@ -1205,7 +1205,7 @@ void cmGlobalGenerator::Configure()
         f += this->CMakeInstance->GetCMakeFilesDirectory();
         f += "/";
         f += *log;
-        if (cmSystemTools::FileExists(f.c_str())) {
+        if (cmSystemTools::FileExists(f)) {
           msg << "\nSee also \"" << f << "\".";
         }
       }
@@ -1901,7 +1901,7 @@ std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
   const std::string& native, bool ignoreErrors)
 {
   std::string makeCommand = cmSystemTools::GetCMakeCommand();
-  makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
+  makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand);
   makeCommand += " --build .";
   if (!config.empty()) {
     makeCommand += " --config \"";
@@ -2269,7 +2269,7 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
   cmMakefile* mf = this->Makefiles[0];
   std::string configFile = mf->GetCurrentBinaryDirectory();
   configFile += "/CPackConfig.cmake";
-  if (!cmSystemTools::FileExists(configFile.c_str())) {
+  if (!cmSystemTools::FileExists(configFile)) {
     return;
   }
 
@@ -2319,7 +2319,7 @@ void cmGlobalGenerator::AddGlobalTarget_PackageSource(
   cmMakefile* mf = this->Makefiles[0];
   std::string configFile = mf->GetCurrentBinaryDirectory();
   configFile += "/CPackSourceConfig.cmake";
-  if (!cmSystemTools::FileExists(configFile.c_str())) {
+  if (!cmSystemTools::FileExists(configFile)) {
     return;
   }
 
@@ -2854,7 +2854,7 @@ void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
       // that if the feature is turned back on and the rule has
       // changed the file is still rebuilt.
       std::string fpath = cmSystemTools::CollapseFullPath(fname, home.c_str());
-      if (cmSystemTools::FileExists(fpath.c_str())) {
+      if (cmSystemTools::FileExists(fpath)) {
         RuleHash hash;
         strncpy(hash.Data, line.c_str(), 32);
         this->RuleHashes[fname] = hash;
@@ -2920,7 +2920,7 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     Json::Value& lj_target_labels = lj_target["labels"] = Json::arrayValue;
     Json::Value& lj_sources = lj_root["sources"] = Json::arrayValue;
 
-    cmSystemTools::MakeDirectory(dir.c_str());
+    cmSystemTools::MakeDirectory(dir);
     cmGeneratedFileStream fout(file.c_str());
 
     std::vector<std::string> labels;
@@ -3066,7 +3066,7 @@ bool cmGlobalGenerator::GenerateCPackPropertiesFile()
   std::string path = this->CMakeInstance->GetHomeOutputDirectory();
   path += "/CPackProperties.cmake";
 
-  if (!cmSystemTools::FileExists(path.c_str()) && installedFiles.empty()) {
+  if (!cmSystemTools::FileExists(path) && installedFiles.empty()) {
     return true;
   }
 

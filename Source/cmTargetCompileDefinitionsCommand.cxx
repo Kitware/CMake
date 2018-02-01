@@ -33,7 +33,7 @@ std::string cmTargetCompileDefinitionsCommand::Join(
   std::string defs;
   std::string sep;
   for (std::string const& it : content) {
-    if (cmHasLiteralPrefix(it.c_str(), "-D")) {
+    if (cmHasLiteralPrefix(it, "-D")) {
       defs += sep + it.substr(2);
     } else {
       defs += sep + it;

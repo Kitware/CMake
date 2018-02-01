@@ -287,8 +287,8 @@ public:
 
   cmake* GetCMakeInstance() const;
 
-  const char* GetSourceDirectory() const;
-  const char* GetBinaryDirectory() const;
+  std::string const& GetSourceDirectory() const;
+  std::string const& GetBinaryDirectory() const;
 
   const char* GetCurrentBinaryDirectory() const;
   const char* GetCurrentSourceDirectory() const;

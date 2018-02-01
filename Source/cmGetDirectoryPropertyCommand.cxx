@@ -34,7 +34,7 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
     }
     std::string sd = *i;
     // make sure the start dir is a full path
-    if (!cmSystemTools::FileIsFullPath(sd.c_str())) {
+    if (!cmSystemTools::FileIsFullPath(sd)) {
       sd = this->Makefile->GetCurrentSourceDirectory();
       sd += "/";
       sd += *i;

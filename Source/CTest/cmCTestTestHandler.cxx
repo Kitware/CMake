@@ -70,7 +70,7 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
   for (std::string const& arg : args) {
     std::string fname;
 
-    if (cmSystemTools::FileIsFullPath(arg.c_str())) {
+    if (cmSystemTools::FileIsFullPath(arg)) {
       fname = arg;
     } else {
       fname = cwd;
@@ -145,7 +145,7 @@ bool cmCTestAddSubdirectoryCommand::InitialPass(
   fname += "/";
   fname += args[0];
 
-  if (!cmSystemTools::FileExists(fname.c_str())) {
+  if (!cmSystemTools::FileExists(fname)) {
     // No subdirectory? So what...
     return true;
   }
@@ -1576,7 +1576,7 @@ std::string cmCTestTestHandler::FindExecutable(
   // now look in the paths we specified above
   for (unsigned int ai = 0; ai < attempted.size() && fullPath.empty(); ++ai) {
     // first check without exe extension
-    if (cmSystemTools::FileExists(attempted[ai].c_str()) &&
+    if (cmSystemTools::FileExists(attempted[ai]) &&
         !cmSystemTools::FileIsDirectory(attempted[ai])) {
       fullPath = cmSystemTools::CollapseFullPath(attempted[ai]);
       resultingConfig = attemptedConfigs[ai];
@@ -1586,7 +1586,7 @@ std::string cmCTestTestHandler::FindExecutable(
       failed.push_back(attempted[ai]);
       tempPath = attempted[ai];
       tempPath += cmSystemTools::GetExecutableExtension();
-      if (cmSystemTools::FileExists(tempPath.c_str()) &&
+      if (cmSystemTools::FileExists(tempPath) &&
           !cmSystemTools::FileIsDirectory(tempPath)) {
         fullPath = cmSystemTools::CollapseFullPath(tempPath);
         resultingConfig = attemptedConfigs[ai];
@@ -1822,7 +1822,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   std::string lastTestsFailedLog =
     this->CTest->GetBinaryDir() + "/Testing/Temporary/" + logName;
 
-  if (!cmSystemTools::FileExists(lastTestsFailedLog.c_str())) {
+  if (!cmSystemTools::FileExists(lastTestsFailedLog)) {
     if (!this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels()) {
       cmCTestLog(this->CTest, ERROR_MESSAGE, lastTestsFailedLog
                    << " does not exist!" << std::endl);
@@ -1935,7 +1935,7 @@ void cmCTestTestHandler::GenerateRegressionImages(cmXMLWriter& xml,
     } else if (measurementfile.find(cxml)) {
       const std::string& filename =
         cmCTest::CleanString(measurementfile.match(5));
-      if (cmSystemTools::FileExists(filename.c_str())) {
+      if (cmSystemTools::FileExists(filename)) {
         long len = cmSystemTools::FileLength(filename);
         if (len == 0) {
           std::string k1 = measurementfile.match(1);

@@ -43,7 +43,7 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
   if (internal) {
     this->Cache.clear();
   }
-  if (!cmSystemTools::FileExists(cacheFile.c_str())) {
+  if (!cmSystemTools::FileExists(cacheFile)) {
     this->CleanCMakeFiles(path);
     return false;
   }
@@ -358,7 +358,7 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
   fout.Close();
   std::string checkCacheFile = path;
   checkCacheFile += cmake::GetCMakeFilesDirectory();
-  cmSystemTools::MakeDirectory(checkCacheFile.c_str());
+  cmSystemTools::MakeDirectory(checkCacheFile);
   checkCacheFile += "/cmake.check_cache";
   cmsys::ofstream checkCache(checkCacheFile.c_str());
   if (!checkCache) {
@@ -377,7 +377,7 @@ bool cmCacheManager::DeleteCache(const std::string& path)
   cmSystemTools::ConvertToUnixSlashes(cacheFile);
   std::string cmakeFiles = cacheFile;
   cacheFile += "/CMakeCache.txt";
-  if (cmSystemTools::FileExists(cacheFile.c_str())) {
+  if (cmSystemTools::FileExists(cacheFile)) {
     cmSystemTools::RemoveFile(cacheFile);
     // now remove the files in the CMakeFiles directory
     // this cleans up language cache files

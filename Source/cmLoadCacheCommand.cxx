@@ -82,7 +82,7 @@ bool cmLoadCacheCommand::ReadWithPrefix(std::vector<std::string> const& args)
 
   // Make sure the cache file exists.
   std::string cacheFile = args[0] + "/CMakeCache.txt";
-  if (!cmSystemTools::FileExists(cacheFile.c_str())) {
+  if (!cmSystemTools::FileExists(cacheFile)) {
     std::string e = "Cannot load cache file from " + cacheFile;
     this->SetError(e);
     return false;

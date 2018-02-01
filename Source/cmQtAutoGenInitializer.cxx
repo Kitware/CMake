@@ -169,9 +169,9 @@ static std::string FileProjectRelativePath(cmMakefile* makefile,
   std::string res;
   {
     std::string pSource = cmSystemTools::RelativePath(
-      makefile->GetCurrentSourceDirectory(), fileName.c_str());
+      makefile->GetCurrentSourceDirectory(), fileName);
     std::string pBinary = cmSystemTools::RelativePath(
-      makefile->GetCurrentBinaryDirectory(), fileName.c_str());
+      makefile->GetCurrentBinaryDirectory(), fileName);
     if (pSource.size() < pBinary.size()) {
       res = std::move(pSource);
     } else if (pBinary.size() < fileName.size()) {
@@ -1387,7 +1387,7 @@ bool cmQtAutoGenInitializer::RccListInputs(std::string const& fileName,
                                            std::vector<std::string>& files,
                                            std::string& error)
 {
-  if (!cmSystemTools::FileExists(fileName.c_str())) {
+  if (!cmSystemTools::FileExists(fileName)) {
     error = "rcc resource file does not exist:\n  ";
     error += Quoted(fileName);
     error += "\n";

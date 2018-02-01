@@ -64,8 +64,8 @@ void cmExtraCodeLiteGenerator::Generate()
     const cmMakefile* mf = it.second[0]->GetMakefile();
     this->ConfigName = GetConfigurationName(mf);
 
-    if (strcmp(it.second[0]->GetCurrentBinaryDirectory(),
-               it.second[0]->GetBinaryDirectory()) == 0) {
+    if (it.second[0]->GetCurrentBinaryDirectory() ==
+        it.second[0]->GetBinaryDirectory()) {
       workspaceOutputDir = it.second[0]->GetCurrentBinaryDirectory();
       workspaceProjectName = it.second[0]->GetProjectName();
       workspaceSourcePath = it.second[0]->GetSourceDirectory();
@@ -127,8 +127,8 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
       std::string filename = outputDir + "/" + targetName + ".project";
       retval.push_back(targetName);
       // Make the project file relative to the workspace
-      std::string relafilename = cmSystemTools::RelativePath(
-        this->WorkspacePath.c_str(), filename.c_str());
+      std::string relafilename =
+        cmSystemTools::RelativePath(this->WorkspacePath, filename);
       std::string visualname = targetName;
       switch (type) {
         case cmStateEnums::SHARED_LIBRARY:
@@ -167,8 +167,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByProjectMaps(
     std::string filename = outputDir + "/" + projectName + ".project";
 
     // Make the project file relative to the workspace
-    filename = cmSystemTools::RelativePath(this->WorkspacePath.c_str(),
-                                           filename.c_str());
+    filename = cmSystemTools::RelativePath(this->WorkspacePath, filename);
 
     // create a project file
     this->CreateProjectFile(it.second);
@@ -318,7 +317,7 @@ void cmExtraCodeLiteGenerator::FindMatchingHeaderfiles(
         break;
       }
 
-      if (cmSystemTools::FileExists(hname.c_str())) {
+      if (cmSystemTools::FileExists(hname)) {
         otherFiles.insert(hname);
         break;
       }
@@ -335,8 +334,7 @@ void cmExtraCodeLiteGenerator::CreateFoldersAndFiles(
   size_t numOfEndEl = 0;
 
   for (std::string const& cFile : cFiles) {
-    std::string frelapath =
-      cmSystemTools::RelativePath(projectPath.c_str(), cFile.c_str());
+    std::string frelapath = cmSystemTools::RelativePath(projectPath, cFile);
     cmsys::SystemTools::SplitPath(frelapath, components, false);
     components.pop_back(); // erase last member -> it is file, not folder
     components.erase(components.begin()); // erase "root"
@@ -474,8 +472,7 @@ void cmExtraCodeLiteGenerator::CreateProjectSourceEntries(
   std::string outputPath = mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
   std::string relapath;
   if (!outputPath.empty()) {
-    relapath = cmSystemTools::RelativePath(this->WorkspacePath.c_str(),
-                                           outputPath.c_str());
+    relapath = cmSystemTools::RelativePath(this->WorkspacePath, outputPath);
     xml.Attribute("OutputFile", relapath + "/$(ProjectName)");
   } else {
     xml.Attribute("OutputFile", "$(IntermediateDirectory)/$(ProjectName)");

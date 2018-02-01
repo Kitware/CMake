@@ -31,10 +31,10 @@ cmSourceFileLocation::cmSourceFileLocation(cmMakefile const* mf,
                                            cmSourceFileLocationKind kind)
   : Makefile(mf)
 {
-  this->AmbiguousDirectory = !cmSystemTools::FileIsFullPath(name.c_str());
+  this->AmbiguousDirectory = !cmSystemTools::FileIsFullPath(name);
   this->AmbiguousExtension = true;
   this->Directory = cmSystemTools::GetFilenamePath(name);
-  if (cmSystemTools::FileIsFullPath(this->Directory.c_str())) {
+  if (cmSystemTools::FileIsFullPath(this->Directory)) {
     this->Directory = cmSystemTools::CollapseFullPath(this->Directory);
   }
   this->Name = cmSystemTools::GetFilenameName(name);
@@ -112,7 +112,7 @@ void cmSourceFileLocation::UpdateExtension(const std::string& name)
       tryPath += "/";
     }
     tryPath += this->Name;
-    if (cmSystemTools::FileExists(tryPath.c_str(), true)) {
+    if (cmSystemTools::FileExists(tryPath, true)) {
       // We found a source file named by the user on disk.  Trust it's
       // extension.
       this->Name = cmSystemTools::GetFilenameName(name);

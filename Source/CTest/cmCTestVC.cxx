@@ -47,7 +47,7 @@ bool cmCTestVC::InitialCheckout(const char* command)
   std::string parent = cmSystemTools::GetFilenamePath(this->SourceDirectory);
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   Perform checkout in directory: " << parent << "\n");
-  if (!cmSystemTools::MakeDirectory(parent.c_str())) {
+  if (!cmSystemTools::MakeDirectory(parent)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot create directory: " << parent << std::endl);
     return false;

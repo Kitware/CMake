@@ -842,7 +842,7 @@ static bool processSources(
         return contextDependent;
       }
 
-      if (!targetName.empty() && !cmSystemTools::FileIsFullPath(src.c_str())) {
+      if (!targetName.empty() && !cmSystemTools::FileIsFullPath(src)) {
         std::ostringstream err;
         if (!targetName.empty()) {
           err << "Target \"" << targetName
@@ -2237,7 +2237,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
     // If we find the target and the dep was given as a full path,
     // then make sure it was not a full path to something else, and
     // the fact that the name matched a target was just a coincidence.
-    if (cmSystemTools::FileIsFullPath(dep.c_str())) {
+    if (cmSystemTools::FileIsFullPath(dep)) {
       if (t->GetType() >= cmStateEnums::EXECUTABLE &&
           t->GetType() <= cmStateEnums::MODULE_LIBRARY) {
         // This is really only for compatibility so we do not need to
@@ -2437,7 +2437,7 @@ static void processIncludeDirectories(
 
     std::string usedIncludes;
     for (std::string& entryInclude : entryIncludes) {
-      if (fromImported && !cmSystemTools::FileExists(entryInclude.c_str())) {
+      if (fromImported && !cmSystemTools::FileExists(entryInclude)) {
         std::ostringstream e;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
         if (checkCMP0027) {
@@ -2469,7 +2469,7 @@ static void processIncludeDirectories(
         return;
       }
 
-      if (!cmSystemTools::FileIsFullPath(entryInclude.c_str())) {
+      if (!cmSystemTools::FileIsFullPath(entryInclude)) {
         std::ostringstream e;
         bool noMessage = false;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
@@ -3540,7 +3540,7 @@ void checkPropertyConsistency(cmGeneratorTarget const* depender,
   for (std::string const& p : props) {
     std::string pname = cmSystemTools::HelpFileName(p);
     std::string pfile = pdir + pname + ".rst";
-    if (cmSystemTools::FileExists(pfile.c_str(), true)) {
+    if (cmSystemTools::FileExists(pfile, true)) {
       std::ostringstream e;
       e << "Target \"" << dependee->GetName() << "\" has property \"" << p
         << "\" listed in its " << propName

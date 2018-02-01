@@ -1075,8 +1075,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(POPULATE_INTERFACE_PROPERTY_NAME)
     // Note that the above macro terminates with an else
-    /* else */ if (cmHasLiteralPrefix(propertyName.c_str(),
-                                      "COMPILE_DEFINITIONS_")) {
+    /* else */ if (cmHasLiteralPrefix(propertyName, "COMPILE_DEFINITIONS_")) {
       cmPolicies::PolicyStatus polSt =
         context->LG->GetPolicyStatus(cmPolicies::CMP0043);
       if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {

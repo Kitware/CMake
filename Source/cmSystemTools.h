@@ -354,7 +354,7 @@ public:
   static bool GetForceUnixPaths() { return s_ForceUnixPaths; }
 
   // ConvertToOutputPath use s_ForceUnixPaths
-  static std::string ConvertToOutputPath(const char* path);
+  static std::string ConvertToOutputPath(std::string const& path);
   static void ConvertToOutputSlashes(std::string& path);
 
   // ConvertToRunCommandPath does not use s_ForceUnixPaths and should
@@ -370,7 +370,8 @@ public:
       /a/b/c/d to /a/b/c1/d1 -> ../../c1/d1
       from /usr/src to /usr/src/test/blah/foo.cpp -> test/blah/foo.cpp
   */
-  static std::string RelativePath(const char* local, const char* remote);
+  static std::string RelativePath(std::string const& local,
+                                  std::string const& remote);
 
   /** Joins two paths while collapsing x/../ parts
    * For example CollapseCombinedPath("a/b/c", "../../d") results in "a/d"

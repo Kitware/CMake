@@ -147,7 +147,7 @@ void cmGeneratedFileStreamBase::Open(const char* name)
   cmSystemTools::RemoveFile(this->TempName);
 
   std::string dir = cmSystemTools::GetFilenamePath(this->TempName);
-  cmSystemTools::MakeDirectory(dir.c_str());
+  cmSystemTools::MakeDirectory(dir);
 }
 
 bool cmGeneratedFileStreamBase::Close()

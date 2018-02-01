@@ -38,7 +38,7 @@ std::string cmTargetIncludeDirectoriesCommand::Join(
   std::string prefix =
     this->Makefile->GetCurrentSourceDirectory() + std::string("/");
   for (std::string const& it : content) {
-    if (cmSystemTools::FileIsFullPath(it.c_str()) ||
+    if (cmSystemTools::FileIsFullPath(it) ||
         cmGeneratorExpression::Find(it) == 0) {
       dirs += sep + it;
     } else {
@@ -60,7 +60,7 @@ bool cmTargetIncludeDirectoriesCommand::HandleDirectContent(
       this->Makefile->GetCurrentSourceDirectory() + std::string("/");
     std::set<std::string> sdirs;
     for (std::string const& it : content) {
-      if (cmSystemTools::FileIsFullPath(it.c_str()) ||
+      if (cmSystemTools::FileIsFullPath(it) ||
           cmGeneratorExpression::Find(it) == 0) {
         sdirs.insert(it);
       } else {

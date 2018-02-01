@@ -187,7 +187,7 @@ int cmCPackGenerator::InstallProject()
 
   const char* tempInstallDirectory = tempInstallDirectoryStr.c_str();
   int res = 1;
-  if (!cmsys::SystemTools::MakeDirectory(bareTempInstallDirectory.c_str())) {
+  if (!cmsys::SystemTools::MakeDirectory(bareTempInstallDirectory)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Problem creating temporary directory: "
                     << (tempInstallDirectory ? tempInstallDirectory : "(NULL)")
@@ -374,15 +374,14 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           continue;
         }
         std::string filePath = tempDir;
-        filePath += "/" + subdir + "/" +
-          cmSystemTools::RelativePath(top.c_str(), gf.c_str());
+        filePath += "/" + subdir + "/" + cmSystemTools::RelativePath(top, gf);
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy file: "
                         << inFile << " -> " << filePath << std::endl);
         /* If the file is a symlink we will have to re-create it */
         if (cmSystemTools::FileIsSymlink(inFile)) {
           std::string targetFile;
           std::string inFileRelative =
-            cmSystemTools::RelativePath(top.c_str(), inFile.c_str());
+            cmSystemTools::RelativePath(top, inFile);
           cmSystemTools::ReadSymlink(inFile, targetFile);
           symlinkedFiles.emplace_back(std::move(targetFile),
                                       std::move(inFileRelative));
@@ -772,9 +771,9 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         }
         // Remember the list of files before installation
         // of the current component (if we are in component install)
-        const char* InstallPrefix = tempInstallDirectory.c_str();
+        std::string const& InstallPrefix = tempInstallDirectory;
         std::vector<std::string> filesBefore;
-        std::string findExpr(InstallPrefix);
+        std::string findExpr = tempInstallDirectory;
         if (componentInstall) {
           cmsys::Glob glB;
           findExpr += "/*";
@@ -829,8 +828,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           std::string localFileName;
           // Populate the File field of each component
           for (fit = result.begin(); fit != diff; ++fit) {
-            localFileName =
-              cmSystemTools::RelativePath(InstallPrefix, fit->c_str());
+            localFileName = cmSystemTools::RelativePath(InstallPrefix, *fit);
             localFileName =
               localFileName.substr(localFileName.find_first_not_of('/'));
             Components[installComponent].Files.push_back(localFileName);

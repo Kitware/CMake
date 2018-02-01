@@ -51,7 +51,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
     cmSystemTools::ExpandListArgument(cge->Evaluate(this->LG, this->Config),
                                       result);
     for (std::string& it : result) {
-      if (cmSystemTools::FileIsFullPath(it.c_str())) {
+      if (cmSystemTools::FileIsFullPath(it)) {
         it = cmSystemTools::CollapseFullPath(it);
       }
     }

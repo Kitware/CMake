@@ -188,8 +188,7 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
         case cmStateEnums::GLOBAL_TARGET: {
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
-          if (strcmp(lg->GetCurrentBinaryDirectory(),
-                     lg->GetBinaryDirectory()) == 0) {
+          if (lg->GetCurrentBinaryDirectory() == lg->GetBinaryDirectory()) {
             this->AppendTarget(fout, targetName, lg, nullptr, make.c_str(),
                                makefile, compiler.c_str(), sourceFileFlags,
                                false);

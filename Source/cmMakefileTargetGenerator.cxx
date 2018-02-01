@@ -89,7 +89,7 @@ void cmMakefileTargetGenerator::CreateRuleFile()
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   this->TargetBuildDirectoryFull =
     this->LocalGenerator->ConvertToFullPath(this->TargetBuildDirectory);
-  cmSystemTools::MakeDirectory(this->TargetBuildDirectoryFull.c_str());
+  cmSystemTools::MakeDirectory(this->TargetBuildDirectoryFull);
 
   // Construct the rule file name.
   this->BuildFileName = this->TargetBuildDirectory;
@@ -200,10 +200,8 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
     << "# Include any dependencies generated for this target.\n"
     << this->GlobalGenerator->IncludeDirective << " " << root
     << cmSystemTools::ConvertToOutputPath(
-         this->LocalGenerator
-           ->MaybeConvertToRelativePath(
-             this->LocalGenerator->GetBinaryDirectory(), dependFileNameFull)
-           .c_str())
+         this->LocalGenerator->MaybeConvertToRelativePath(
+           this->LocalGenerator->GetBinaryDirectory(), dependFileNameFull))
     << "\n\n";
 
   if (!this->NoRuleMessages) {
@@ -212,16 +210,14 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
       << "# Include the progress variables for this target.\n"
       << this->GlobalGenerator->IncludeDirective << " " << root
       << cmSystemTools::ConvertToOutputPath(
-           this->LocalGenerator
-             ->MaybeConvertToRelativePath(
-               this->LocalGenerator->GetBinaryDirectory(),
-               this->ProgressFileNameFull)
-             .c_str())
+           this->LocalGenerator->MaybeConvertToRelativePath(
+             this->LocalGenerator->GetBinaryDirectory(),
+             this->ProgressFileNameFull))
       << "\n\n";
   }
 
   // make sure the depend file exists
-  if (!cmSystemTools::FileExists(dependFileNameFull.c_str())) {
+  if (!cmSystemTools::FileExists(dependFileNameFull)) {
     // Write an empty dependency file.
     cmGeneratedFileStream depFileStream(
       dependFileNameFull.c_str(), false,
@@ -250,11 +246,8 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
     << "# Include the compile flags for this target's objects.\n"
     << this->GlobalGenerator->IncludeDirective << " " << root
     << cmSystemTools::ConvertToOutputPath(
-         this->LocalGenerator
-           ->MaybeConvertToRelativePath(
-             this->LocalGenerator->GetBinaryDirectory(),
-             this->FlagFileNameFull)
-           .c_str())
+         this->LocalGenerator->MaybeConvertToRelativePath(
+           this->LocalGenerator->GetBinaryDirectory(), this->FlagFileNameFull))
     << "\n\n";
 }
 
@@ -368,8 +361,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   // Create the directory containing the object file.  This may be a
   // subdirectory under the target's directory.
   std::string dir = cmSystemTools::GetFilenamePath(obj);
-  cmSystemTools::MakeDirectory(
-    this->LocalGenerator->ConvertToFullPath(dir).c_str());
+  cmSystemTools::MakeDirectory(this->LocalGenerator->ConvertToFullPath(dir));
 
   // Save this in the target's list of object files.
   this->Objects.push_back(obj);

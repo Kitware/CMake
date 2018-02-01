@@ -198,7 +198,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
       return false;
     }
 
-    const char* aliasedName = s->c_str();
+    std::string const& aliasedName = *s;
     if (this->Makefile->IsAlias(aliasedName)) {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << libName << "\" because target \""

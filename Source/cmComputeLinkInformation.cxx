@@ -632,7 +632,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
     }
   } else {
     // This is not a CMake target.  Use the name given.
-    if (cmSystemTools::FileIsFullPath(item.c_str())) {
+    if (cmSystemTools::FileIsFullPath(item)) {
       if (cmSystemTools::FileIsDirectory(item)) {
         // This is a directory.
         this->AddDirectoryItem(item);
@@ -668,13 +668,13 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
   } else {
     // Skip items that are not full paths.  We will not be able to
     // reliably specify them.
-    if (!cmSystemTools::FileIsFullPath(item.c_str())) {
+    if (!cmSystemTools::FileIsFullPath(item)) {
       return;
     }
 
     // Get the name of the library from the file name.
     std::string file = cmSystemTools::GetFilenameName(item);
-    if (!this->ExtractSharedLibraryName.find(file.c_str())) {
+    if (!this->ExtractSharedLibraryName.find(file)) {
       // This is not the name of a shared library.
       return;
     }
@@ -1746,8 +1746,9 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
         }
       } else if (use_link_rpath) {
         // Do not add any path inside the source or build tree.
-        const char* topSourceDir = this->CMakeInstance->GetHomeDirectory();
-        const char* topBinaryDir =
+        std::string const& topSourceDir =
+          this->CMakeInstance->GetHomeDirectory();
+        std::string const& topBinaryDir =
           this->CMakeInstance->GetHomeOutputDirectory();
         if (!cmSystemTools::ComparePath(ri, topSourceDir) &&
             !cmSystemTools::ComparePath(ri, topBinaryDir) &&

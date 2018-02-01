@@ -3442,7 +3442,8 @@ void cmGlobalXCodeGenerator::GetDocumentation(cmDocumentationEntry& entry)
   entry.Brief = "Generate Xcode project files.";
 }
 
-std::string cmGlobalXCodeGenerator::ConvertToRelativeForMake(const char* p)
+std::string cmGlobalXCodeGenerator::ConvertToRelativeForMake(
+  std::string const& p)
 {
   return cmSystemTools::ConvertToOutputPath(p);
 }

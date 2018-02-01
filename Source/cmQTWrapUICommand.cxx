@@ -55,7 +55,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args,
 
       // Compute the name of the ui file from which to generate others.
       std::string uiName;
-      if (cmSystemTools::FileIsFullPath(j->c_str())) {
+      if (cmSystemTools::FileIsFullPath(*j)) {
         uiName = *j;
       } else {
         if (curr && curr->GetPropertyAsBool("GENERATED")) {

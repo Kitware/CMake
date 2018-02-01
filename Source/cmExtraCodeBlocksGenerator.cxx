@@ -5,7 +5,6 @@
 #include <map>
 #include <ostream>
 #include <set>
-#include <string.h>
 #include <utility>
 
 #include "cmAlgorithms.h"
@@ -225,7 +224,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
       }
 
       const std::string& relative = cmSystemTools::RelativePath(
-        it.second[0]->GetSourceDirectory(), listFile.c_str());
+        it.second[0]->GetSourceDirectory(), listFile);
       std::vector<std::string> splitted;
       cmSystemTools::SplitPath(relative, splitted, false);
       // Split filename from path
@@ -296,8 +295,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
         case cmStateEnums::GLOBAL_TARGET: {
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
-          if (strcmp(lg->GetCurrentBinaryDirectory(),
-                     lg->GetBinaryDirectory()) == 0) {
+          if (lg->GetCurrentBinaryDirectory() == lg->GetBinaryDirectory()) {
             this->AppendTarget(xml, targetName, nullptr, make.c_str(), lg,
                                compiler.c_str(), makeArgs);
           }
@@ -382,12 +380,12 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
             std::string const& fullPath = s->GetFullPath();
 
             // Check file position relative to project root dir.
-            const std::string& relative = cmSystemTools::RelativePath(
-              (*lg).GetSourceDirectory(), fullPath.c_str());
+            const std::string& relative =
+              cmSystemTools::RelativePath(lg->GetSourceDirectory(), fullPath);
             // Do not add this file if it has ".." in relative path and
             // if CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES variable is on.
             const bool excludeExternal =
-              cmSystemTools::IsOn((*lg).GetMakefile()->GetSafeDefinition(
+              cmSystemTools::IsOn(lg->GetMakefile()->GetSafeDefinition(
                 "CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES"));
             if (excludeExternal &&
                 (relative.find("..") != std::string::npos)) {
@@ -433,7 +431,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
         break;
       }
 
-      if (cmSystemTools::FileExists(hname.c_str())) {
+      if (cmSystemTools::FileExists(hname)) {
         allFiles[hname].Targets = allFiles[fileName].Targets;
         break;
       }

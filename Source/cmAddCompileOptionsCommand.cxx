@@ -14,7 +14,7 @@ bool cmAddCompileOptionsCommand::InitialPass(
   }
 
   for (std::string const& i : args) {
-    this->Makefile->AddCompileOption(i.c_str());
+    this->Makefile->AddCompileOption(i);
   }
   return true;
 }

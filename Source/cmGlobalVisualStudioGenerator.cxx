@@ -916,7 +916,7 @@ bool cmGlobalVisualStudioGenerator::Open(const std::string& bindir,
                                          const std::string& projectName,
                                          bool dryRun)
 {
-  std::string buildDir = cmSystemTools::ConvertToOutputPath(bindir.c_str());
+  std::string buildDir = cmSystemTools::ConvertToOutputPath(bindir);
   std::string sln = buildDir + "\\" + projectName + ".sln";
 
   if (dryRun) {

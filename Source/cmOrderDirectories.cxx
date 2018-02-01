@@ -118,7 +118,7 @@ bool cmOrderDirectoriesConstraint::FileMayConflict(std::string const& dir,
   std::string file = dir;
   file += "/";
   file += name;
-  if (cmSystemTools::FileExists(file.c_str(), true)) {
+  if (cmSystemTools::FileExists(file, true)) {
     // The file conflicts only if it is not the same as the original
     // file due to a symlink or hardlink.
     return !cmSystemTools::SameFile(this->FullPath, file);

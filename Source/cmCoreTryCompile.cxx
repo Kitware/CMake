@@ -391,7 +391,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     }
   }
   // make sure the binary directory exists
-  cmSystemTools::MakeDirectory(this->BinaryDirectory.c_str());
+  cmSystemTools::MakeDirectory(this->BinaryDirectory);
 
   // do not allow recursive try Compiles
   if (this->BinaryDirectory == this->Makefile->GetHomeOutputDirectory()) {
@@ -864,18 +864,17 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   return res;
 }
 
-void cmCoreTryCompile::CleanupFiles(const char* binDir)
+void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
 {
-  if (!binDir) {
+  if (binDir.empty()) {
     return;
   }
 
-  std::string bdir = binDir;
-  if (bdir.find("CMakeTmp") == std::string::npos) {
+  if (binDir.find("CMakeTmp") == std::string::npos) {
     cmSystemTools::Error(
       "TRY_COMPILE attempt to remove -rf directory that does not contain "
       "CMakeTmp:",
-      binDir);
+      binDir.c_str());
     return;
   }
 
@@ -889,7 +888,7 @@ void cmCoreTryCompile::CleanupFiles(const char* binDir)
         std::string const fullPath =
           std::string(binDir).append("/").append(fileName);
         if (cmSystemTools::FileIsDirectory(fullPath)) {
-          this->CleanupFiles(fullPath.c_str());
+          this->CleanupFiles(fullPath);
           cmSystemTools::RemoveADirectory(fullPath);
         } else {
 #ifdef _WIN32
@@ -897,9 +896,8 @@ void cmCoreTryCompile::CleanupFiles(const char* binDir)
           // cannot delete them immediately.  Try a few times.
           cmSystemTools::WindowsFileRetry retry =
             cmSystemTools::GetWindowsFileRetry();
-          while (!cmSystemTools::RemoveFile(fullPath.c_str()) &&
-                 --retry.Count &&
-                 cmSystemTools::FileExists(fullPath.c_str())) {
+          while (!cmSystemTools::RemoveFile(fullPath) && --retry.Count &&
+                 cmSystemTools::FileExists(fullPath)) {
             cmSystemTools::Delay(retry.Delay);
           }
           if (retry.Count == 0)
@@ -959,7 +957,7 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
     std::string command = this->BinaryDirectory;
     command += sdir;
     command += tmpOutputFile;
-    if (cmSystemTools::FileExists(command.c_str())) {
+    if (cmSystemTools::FileExists(command)) {
       this->OutputFile = cmSystemTools::CollapseFullPath(command);
       return;
     }
