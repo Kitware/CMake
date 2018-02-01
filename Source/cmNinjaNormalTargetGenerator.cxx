@@ -685,16 +685,11 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
     }
   }
 
-  cmNinjaDeps byproducts;
-
   if (!this->TargetNameImport.empty()) {
     const std::string impLibPath = localGen.ConvertToOutputFormat(
       targetOutputImplib, cmOutputConverter::SHELL);
     vars["TARGET_IMPLIB"] = impLibPath;
     EnsureParentDirectoryExists(impLibPath);
-    if (genTarget.HasImportLibrary()) {
-      byproducts.push_back(targetOutputImplib);
-    }
   }
 
   const std::string objPath = GetGeneratorTarget()->GetSupportDirectory();
@@ -710,29 +705,6 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
     std::replace(linkLibraries.begin(), linkLibraries.end(), '\\', '/');
     std::string& link_path = vars["LINK_PATH"];
     std::replace(link_path.begin(), link_path.end(), '\\', '/');
-  }
-
-  const std::vector<cmCustomCommand>* cmdLists[3] = {
-    &genTarget.GetPreBuildCommands(), &genTarget.GetPreLinkCommands(),
-    &genTarget.GetPostBuildCommands()
-  };
-
-  std::vector<std::string> preLinkCmdLines, postBuildCmdLines;
-  vars["PRE_LINK"] = localGen.BuildCommandLine(preLinkCmdLines);
-  vars["POST_BUILD"] = localGen.BuildCommandLine(postBuildCmdLines);
-
-  std::vector<std::string>* cmdLineLists[3] = { &preLinkCmdLines,
-                                                &preLinkCmdLines,
-                                                &postBuildCmdLines };
-
-  for (unsigned i = 0; i != 3; ++i) {
-    for (cmCustomCommand const& cc : *cmdLists[i]) {
-      cmCustomCommandGenerator ccg(cc, cfgName, this->GetLocalGenerator());
-      localGen.AppendCustomCommandLines(ccg, *cmdLineLists[i]);
-      std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
-      std::transform(ccByproducts.begin(), ccByproducts.end(),
-                     std::back_inserter(byproducts), MapToNinjaPath());
-    }
   }
 
   cmGlobalNinjaGenerator& globalGen = *this->GetGlobalGenerator();
