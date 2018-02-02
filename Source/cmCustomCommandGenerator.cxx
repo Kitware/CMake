@@ -8,7 +8,6 @@
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmOutputConverter.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 
@@ -167,8 +166,7 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
     if (this->OldStyle) {
       cmd += escapeForShellOldStyle(arg);
     } else {
-      cmOutputConverter converter(this->LG->GetStateSnapshot());
-      cmd += converter.EscapeForShell(arg, this->MakeVars);
+      cmd += this->LG->EscapeForShell(arg, this->MakeVars);
     }
   }
 }
