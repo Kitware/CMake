@@ -49,6 +49,11 @@ int main(int argc, char** argv)
 {
   bool* has_debug;
   cudaError_t err = cudaMallocManaged(&has_debug, sizeof(bool));
+  if (err != cudaSuccess) {
+    std::cerr << "cudaMallocManaged failed:\n"
+              << "  " << cudaGetErrorString(err) << std::endl;
+    return 1;
+  }
 
   debug_kernel<<<1, 1>>>(has_debug);
   err = cudaDeviceSynchronize();
