@@ -217,19 +217,16 @@ enabling :prop_sf:`SKIP_AUTORCC` or the broader :prop_sf:`SKIP_AUTOGEN`.
 Visual Studio Generators
 ========================
 
-When using the :manual:`Visual Studio generators <cmake-generators(7)>`
-CMake tries to use a ``PRE_BUILD``
-:command:`custom command <add_custom_command>` instead
-of a :command:`custom target <add_custom_target>` for autogen.
-``PRE_BUILD`` can't be used when the autogen target depends on files.
+When using the :manual:`Visual Studio generators <cmake-generators(7)>`,
+CMake uses a ``PRE_BUILD`` :command:`custom command <add_custom_command>` for
+:prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC`.
+If the :prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC` processing depends on files,
+a :command:`custom target <add_custom_target>` is used instead.
 This happens when
 
-- :prop_tgt:`AUTOMOC` or :prop_tgt:`AUTOUIC` is enabled and the origin target
-  depends on :prop_sf:`GENERATED` files which aren't excluded from autogen by
-  :prop_sf:`SKIP_AUTOMOC`, :prop_sf:`SKIP_AUTOUIC`, :prop_sf:`SKIP_AUTOGEN`
-  or :policy:`CMP0071`
-- :prop_tgt:`AUTORCC` is enabled and a ``.qrc`` file is listed in
-  the origin target sources
+- The origin target depends on :prop_sf:`GENERATED` files which aren't excluded
+  from :prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC` by :prop_sf:`SKIP_AUTOMOC`,
+  :prop_sf:`SKIP_AUTOUIC`, :prop_sf:`SKIP_AUTOGEN` or :policy:`CMP0071`
 - :prop_tgt:`AUTOGEN_TARGET_DEPENDS` lists a source file
 
 qtmain.lib on Windows
