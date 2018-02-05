@@ -68,43 +68,6 @@ static std::size_t GetParallelCPUCount()
   return count;
 }
 
-static void AddDefinitionEscaped(cmMakefile* makefile, const char* key,
-                                 std::string const& value)
-{
-  makefile->AddDefinition(key,
-                          cmOutputConverter::EscapeForCMake(value).c_str());
-}
-
-static void AddDefinitionEscaped(cmMakefile* makefile, const char* key,
-                                 const std::vector<std::string>& values)
-{
-  makefile->AddDefinition(
-    key, cmOutputConverter::EscapeForCMake(cmJoin(values, ";")).c_str());
-}
-
-static void AddDefinitionEscaped(cmMakefile* makefile, const char* key,
-                                 const std::set<std::string>& values)
-{
-  makefile->AddDefinition(
-    key, cmOutputConverter::EscapeForCMake(cmJoin(values, ";")).c_str());
-}
-
-static void AddDefinitionEscaped(
-  cmMakefile* makefile, const char* key,
-  const std::vector<std::vector<std::string>>& lists)
-{
-  std::vector<std::string> seplist;
-  for (const std::vector<std::string>& list : lists) {
-    std::string blist = "{";
-    blist += cmJoin(list, ";");
-    blist += "}";
-    seplist.push_back(std::move(blist));
-  }
-  makefile->AddDefinition(key, cmOutputConverter::EscapeForCMake(
-                                 cmJoin(seplist, cmQtAutoGen::ListSep))
-                                 .c_str());
-}
-
 static bool AddToSourceGroup(cmMakefile* makefile, std::string const& fileName,
                              cmQtAutoGen::GeneratorT genType)
 {
@@ -234,8 +197,8 @@ cmQtAutoGenInitializer::cmQtAutoGenInitializer(
   , MocEnabled(mocEnabled)
   , UicEnabled(uicEnabled)
   , RccEnabled(rccEnabled)
+  , MultiConfig(false)
   , QtVersionMajor(qtVersionMajor)
-  , MultiConfig(MultiConfigT::WRAPPER)
 {
   this->QtVersionMinor =
     cmQtAutoGenInitializer::GetQtMinorVersion(target, this->QtVersionMajor);
@@ -248,28 +211,10 @@ void cmQtAutoGenInitializer::InitCustomTargets()
   cmGlobalGenerator* globalGen = localGen->GetGlobalGenerator();
 
   // Configurations
+  this->MultiConfig = globalGen->IsMultiConfig();
   this->ConfigDefault = makefile->GetConfigurations(this->ConfigsList);
   if (this->ConfigsList.empty()) {
     this->ConfigsList.push_back(this->ConfigDefault);
-  }
-
-  // Multi configuration
-  {
-    if (!globalGen->IsMultiConfig()) {
-      this->MultiConfig = MultiConfigT::SINGLE;
-    }
-
-    // FIXME: Xcode does not support per-config sources, yet.
-    //        (EXCLUDED_SOURCE_FILE_NAMES)
-    // if (globalGen->GetName().find("Xcode") != std::string::npos) {
-    //  return MultiConfigT::MULTI;
-    //}
-
-    // FIXME: Visual Studio does not support per-config sources, yet.
-    //        (EXCLUDED_SOURCE_FILE_NAMES)
-    // if (globalGen->GetName().find("Visual Studio") != std::string::npos) {
-    //  return MultiConfigT::MULTI;
-    //}
   }
 
   // Autogen target name
@@ -285,7 +230,7 @@ void cmQtAutoGenInitializer::InitCustomTargets()
     // Autogen info dir
     this->DirInfo = cbd;
     this->DirInfo += makefile->GetCMakeInstance()->GetCMakeFilesDirectory();
-    this->DirInfo += "/";
+    this->DirInfo += '/';
     this->DirInfo += this->AutogenTargetName;
     this->DirInfo += ".dir";
     cmSystemTools::ConvertToUnixSlashes(this->DirInfo);
@@ -294,7 +239,7 @@ void cmQtAutoGenInitializer::InitCustomTargets()
     this->DirBuild = GetSafeProperty(this->Target, "AUTOGEN_BUILD_DIR");
     if (this->DirBuild.empty()) {
       this->DirBuild = cbd;
-      this->DirBuild += "/";
+      this->DirBuild += '/';
       this->DirBuild += this->AutogenTargetName;
     }
     cmSystemTools::ConvertToUnixSlashes(this->DirBuild);
@@ -340,32 +285,32 @@ void cmQtAutoGenInitializer::InitCustomTargets()
   {
     std::string base = this->DirInfo;
     base += "/AutogenOldSettings";
-    if (this->MultiConfig == MultiConfigT::SINGLE) {
-      AddCleanFile(makefile, base.append(".cmake"));
-    } else {
+    if (this->MultiConfig) {
       for (std::string const& cfg : this->ConfigsList) {
         std::string filename = base;
-        filename += "_";
+        filename += '_';
         filename += cfg;
         filename += ".cmake";
         AddCleanFile(makefile, filename);
       }
+    } else {
+      AddCleanFile(makefile, base.append(".cmake"));
     }
   }
 
   // Add moc compilation to generated files list
   if (this->MocEnabled) {
-    std::string const mocsComp = this->DirBuild + "/mocs_compilation.cpp";
-    auto files = this->AddGeneratedSource(mocsComp, GeneratorT::MOC);
-    for (std::string& file : files) {
-      autogenProvides.push_back(std::move(file));
-    }
+    std::string mocsComp = this->DirBuild + "/mocs_compilation.cpp";
+    this->AddGeneratedSource(mocsComp, GeneratorT::MOC);
+    autogenProvides.push_back(std::move(mocsComp));
   }
 
   // Add autogen includes directory to the origin target INCLUDE_DIRECTORIES
-  if (this->MocEnabled || this->UicEnabled) {
-    std::string includeDir = this->DirBuild + "/include";
-    if (this->MultiConfig != MultiConfigT::SINGLE) {
+  if (this->MocEnabled || this->UicEnabled ||
+      (this->RccEnabled && this->MultiConfig)) {
+    std::string includeDir = this->DirBuild;
+    includeDir += "/include";
+    if (this->MultiConfig) {
       includeDir += "_$<CONFIG>";
     }
     this->Target->AddIncludeDirectory(includeDir, true);
@@ -674,9 +619,10 @@ void cmQtAutoGenInitializer::InitCustomTargets()
     }
     for (Qrc& qrc : this->Qrcs) {
       // Register file at target
-      std::vector<std::string> const ccOutput =
-        this->AddGeneratedSource(qrc.RccFile, GeneratorT::RCC);
+      this->AddGeneratedSource(qrc.RccFile, GeneratorT::RCC);
 
+      std::vector<std::string> ccOutput;
+      ccOutput.push_back(qrc.RccFile);
       cmCustomCommandLines commandLines;
       {
         cmCustomCommandLine currentLine;
@@ -905,51 +851,6 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
 {
   cmMakefile* makefile = this->Target->Target->GetMakefile();
 
-  // forget the variables added here afterwards again:
-  cmMakefile::ScopePushPop varScope(makefile);
-  static_cast<void>(varScope);
-
-  // Configuration suffixes
-  std::map<std::string, std::string> configSuffixes;
-  for (std::string const& cfg : this->ConfigsList) {
-    std::string& suffix = configSuffixes[cfg];
-    suffix = "_";
-    suffix += cfg;
-  }
-
-  // Basic setup
-  AddDefinitionEscaped(makefile, "_multi_config",
-                       MultiConfigName(this->MultiConfig));
-  AddDefinitionEscaped(makefile, "_build_dir", this->DirBuild);
-  {
-    std::string parallel = GetSafeProperty(this->Target, "AUTOGEN_PARALLEL");
-    // Autodetect number of CPUs
-    if (parallel.empty() || (parallel == "AUTO")) {
-      parallel = std::to_string(GetParallelCPUCount());
-    }
-    AddDefinitionEscaped(makefile, "_parallel", parallel);
-  }
-
-  if (this->MocEnabled || this->UicEnabled) {
-    AddDefinitionEscaped(makefile, "_qt_version_major", this->QtVersionMajor);
-    AddDefinitionEscaped(makefile, "_settings_file",
-                         this->AutogenSettingsFile);
-    AddDefinitionEscaped(makefile, "_sources", this->Sources);
-    AddDefinitionEscaped(makefile, "_headers", this->Headers);
-
-    if (this->MocEnabled) {
-      this->SetupCustomTargetsMoc();
-    }
-    if (this->UicEnabled) {
-      this->SetupCustomTargetsUic();
-    }
-  }
-  if (this->RccEnabled) {
-    AddDefinitionEscaped(makefile, "_qt_rcc_executable", this->RccExecutable);
-    AddDefinitionEscaped(makefile, "_qt_rcc_list_options",
-                         this->RccListOptions);
-  }
-
   // Create info directory on demand
   if (!cmSystemTools::MakeDirectory(this->DirInfo)) {
     std::string emsg = ("Could not create directory: ");
@@ -957,21 +858,33 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
     cmSystemTools::Error(emsg.c_str());
   }
 
-  auto ReOpenInfoFile = [](cmsys::ofstream& ofs,
-                           std::string const& fileName) -> bool {
+  // Configuration include directories
+  std::string includeDir = "include";
+  std::map<std::string, std::string> includeDirs;
+  for (std::string const& cfg : this->ConfigsList) {
+    std::string& dir = includeDirs[cfg];
+    dir = "include_";
+    dir += cfg;
+  }
+
+  auto OpenInfoFile = [](cmsys::ofstream& ofs,
+                         std::string const& fileName) -> bool {
     // Ensure we have write permission
-    mode_t perm = 0;
+    if (cmSystemTools::FileExists(fileName)) {
+      mode_t perm = 0;
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    mode_t mode_write = S_IWRITE;
+      mode_t mode_write = S_IWRITE;
 #else
-    mode_t mode_write = S_IWUSR;
+      mode_t mode_write = S_IWUSR;
 #endif
-    cmSystemTools::GetPermissions(fileName, perm);
-    if (!(perm & mode_write)) {
-      cmSystemTools::SetPermissions(fileName, perm | mode_write);
+      cmSystemTools::GetPermissions(fileName, perm);
+      if (!(perm & mode_write)) {
+        cmSystemTools::SetPermissions(fileName, perm | mode_write);
+      }
     }
 
-    ofs.open(fileName.c_str(), std::ios::app);
+    ofs.open(fileName.c_str(),
+             (std::ios::out | std::ios::binary | std::ios::trunc));
     if (!ofs) {
       // File open error
       std::string error = "Internal CMake error when trying to open file: ";
@@ -984,88 +897,177 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
 
   // Generate autogen target info file
   if (this->MocEnabled || this->UicEnabled) {
-    {
-      std::string infoFileIn = cmSystemTools::GetCMakeRoot();
-      infoFileIn += "/Modules/AutogenInfo.cmake.in";
-      makefile->ConfigureFile(
-        infoFileIn.c_str(), this->AutogenInfoFile.c_str(), false, true, false);
+    if (this->MocEnabled) {
+      this->SetupCustomTargetsMoc();
+    }
+    if (this->UicEnabled) {
+      this->SetupCustomTargetsUic();
     }
 
-    // Append custom definitions to info file
-    // --------------------------------------
+    // Parallel processing
+    this->Parallel = GetSafeProperty(this->Target, "AUTOGEN_PARALLEL");
+    if (this->Parallel.empty() || (this->Parallel == "AUTO")) {
+      // Autodetect number of CPUs
+      this->Parallel = std::to_string(GetParallelCPUCount());
+    }
+
     cmsys::ofstream ofs;
-    if (ReOpenInfoFile(ofs, this->AutogenInfoFile)) {
-      auto OfsWriteMap = [&ofs](
-        const char* key, std::map<std::string, std::string> const& map) {
+    if (OpenInfoFile(ofs, this->AutogenInfoFile)) {
+      // Utility lambdas
+      auto CWrite = [&ofs](const char* key, std::string const& value) {
+        ofs << "set(" << key << " " << cmOutputConverter::EscapeForCMake(value)
+            << ")\n";
+      };
+      auto CWriteList = [&CWrite](const char* key,
+                                  std::vector<std::string> const& list) {
+        CWrite(key, cmJoin(list, ";"));
+      };
+      auto CWriteNestedLists = [&CWrite](
+        const char* key, std::vector<std::vector<std::string>> const& lists) {
+        std::vector<std::string> seplist;
+        for (const std::vector<std::string>& list : lists) {
+          std::string blist = "{";
+          blist += cmJoin(list, ";");
+          blist += "}";
+          seplist.push_back(std::move(blist));
+        }
+        CWrite(key, cmJoin(seplist, cmQtAutoGen::ListSep));
+      };
+      auto CWriteSet = [&CWrite](const char* key,
+                                 std::set<std::string> const& list) {
+        CWrite(key, cmJoin(list, ";"));
+      };
+      auto CWriteMap = [&ofs](const char* key,
+                              std::map<std::string, std::string> const& map) {
         for (auto const& item : map) {
           ofs << "set(" << key << "_" << item.first << " "
               << cmOutputConverter::EscapeForCMake(item.second) << ")\n";
         }
       };
-      ofs << "# Configurations options\n";
-      OfsWriteMap("AM_CONFIG_SUFFIX", configSuffixes);
-      OfsWriteMap("AM_MOC_DEFINITIONS", this->ConfigMocDefines);
-      OfsWriteMap("AM_MOC_INCLUDES", this->ConfigMocIncludes);
-      OfsWriteMap("AM_UIC_TARGET_OPTIONS", this->ConfigUicOptions);
-      // Settings files (only require for multi configuration generators)
-      if (this->MultiConfig != MultiConfigT::SINGLE) {
+      auto MfDef = [makefile](const char* key) {
+        return std::string(makefile->GetSafeDefinition(key));
+      };
+
+      // Write
+      ofs << "# Meta\n";
+      CWrite("AM_MULTI_CONFIG", this->MultiConfig ? "TRUE" : "FALSE");
+      CWrite("AM_PARALLEL", this->Parallel);
+
+      ofs << "# Directories\n";
+      CWrite("AM_CMAKE_SOURCE_DIR", MfDef("CMAKE_SOURCE_DIR"));
+      CWrite("AM_CMAKE_BINARY_DIR", MfDef("CMAKE_BINARY_DIR"));
+      CWrite("AM_CMAKE_CURRENT_SOURCE_DIR", MfDef("CMAKE_CURRENT_SOURCE_DIR"));
+      CWrite("AM_CMAKE_CURRENT_BINARY_DIR", MfDef("CMAKE_CURRENT_BINARY_DIR"));
+      CWrite("AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE",
+             MfDef("CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE"));
+      CWrite("AM_BUILD_DIR", this->DirBuild);
+      if (this->MultiConfig) {
+        CWriteMap("AM_INCLUDE_DIR", includeDirs);
+      } else {
+        CWrite("AM_INCLUDE_DIR", includeDir);
+      }
+
+      ofs << "# Files\n";
+      CWriteList("AM_SOURCES", this->Sources);
+      CWriteList("AM_HEADERS", this->Headers);
+      if (this->MultiConfig) {
         std::map<std::string, std::string> settingsFiles;
         for (std::string const& cfg : this->ConfigsList) {
           settingsFiles[cfg] =
             AppendFilenameSuffix(this->AutogenSettingsFile, "_" + cfg);
         }
-        OfsWriteMap("AM_SETTINGS_FILE", settingsFiles);
+        CWriteMap("AM_SETTINGS_FILE", settingsFiles);
+      } else {
+        CWrite("AM_SETTINGS_FILE", this->AutogenSettingsFile);
+      }
+
+      ofs << "# Qt\n";
+      CWrite("AM_QT_VERSION_MAJOR", this->QtVersionMajor);
+      CWrite("AM_QT_MOC_EXECUTABLE", this->MocExecutable);
+      CWrite("AM_QT_UIC_EXECUTABLE", this->UicExecutable);
+
+      if (this->MocEnabled) {
+        ofs << "# MOC settings\n";
+        CWriteSet("AM_MOC_SKIP", this->MocSkip);
+        CWrite("AM_MOC_DEFINITIONS", this->MocDefines);
+        CWriteMap("AM_MOC_DEFINITIONS", this->MocDefinesConfig);
+        CWrite("AM_MOC_INCLUDES", this->MocIncludes);
+        CWriteMap("AM_MOC_INCLUDES", this->MocIncludesConfig);
+        CWrite("AM_MOC_OPTIONS",
+               GetSafeProperty(this->Target, "AUTOMOC_MOC_OPTIONS"));
+        CWrite("AM_MOC_RELAXED_MODE", MfDef("CMAKE_AUTOMOC_RELAXED_MODE"));
+        CWrite("AM_MOC_MACRO_NAMES",
+               GetSafeProperty(this->Target, "AUTOMOC_MACRO_NAMES"));
+        CWrite("AM_MOC_DEPEND_FILTERS",
+               GetSafeProperty(this->Target, "AUTOMOC_DEPEND_FILTERS"));
+        CWrite("AM_MOC_PREDEFS_CMD", this->MocPredefsCmd);
+      }
+
+      if (this->UicEnabled) {
+        ofs << "# UIC settings\n";
+        CWriteSet("AM_UIC_SKIP", this->UicSkip);
+        CWrite("AM_UIC_TARGET_OPTIONS", this->UicOptions);
+        CWriteMap("AM_UIC_TARGET_OPTIONS", this->UicOptionsConfig);
+        CWriteList("AM_UIC_OPTIONS_FILES", this->UicFileFiles);
+        CWriteNestedLists("AM_UIC_OPTIONS_OPTIONS", this->UicFileOptions);
+        CWriteList("AM_UIC_SEARCH_PATHS", this->UicSearchPaths);
       }
     }
   }
 
   // Generate auto RCC info files
   if (this->RccEnabled) {
-    std::string infoFileIn = cmSystemTools::GetCMakeRoot();
-    infoFileIn += "/Modules/AutoRccInfo.cmake.in";
     for (Qrc const& qrc : this->Qrcs) {
-      // Configure info file
-      makefile->ConfigureFile(infoFileIn.c_str(), qrc.InfoFile.c_str(), false,
-                              true, false);
-
-      // Append custom definitions to info file
-      // --------------------------------------
       cmsys::ofstream ofs;
-      if (ReOpenInfoFile(ofs, qrc.InfoFile)) {
-        {
-          ofs << "# Job\n";
-          auto OfsWrite = [&ofs](const char* key, std::string const& value) {
-            ofs << "set(" << key << " "
-                << cmOutputConverter::EscapeForCMake(value) << ")\n";
-
-          };
-          OfsWrite("ARCC_SETTINGS_FILE", qrc.SettingsFile);
-          OfsWrite("ARCC_SOURCE", qrc.QrcFile);
-          OfsWrite("ARCC_OUTPUT", qrc.RccFile);
-          OfsWrite("ARCC_OPTIONS", cmJoin(qrc.Options, ";"));
-          OfsWrite("ARCC_INPUTS", cmJoin(qrc.Resources, ";"));
-        }
-        {
-          ofs << "# Configurations options\n";
-          auto OfsWriteMap = [&ofs](
-            const char* key, std::map<std::string, std::string> const& map) {
-            for (auto const& item : map) {
-              ofs << "set(" << key << "_" << item.first << " "
-                  << cmOutputConverter::EscapeForCMake(item.second) << ")\n";
-            }
-          };
-          OfsWriteMap("ARCC_CONFIG_SUFFIX", configSuffixes);
-
-          // Settings files (only require for multi configuration generators)
-          if (this->MultiConfig != MultiConfigT::SINGLE) {
-            std::map<std::string, std::string> settingsFiles;
-            for (std::string const& cfg : this->ConfigsList) {
-              settingsFiles[cfg] =
-                AppendFilenameSuffix(qrc.SettingsFile, "_" + cfg);
-            }
-            OfsWriteMap("ARCC_SETTINGS_FILE", settingsFiles);
+      if (OpenInfoFile(ofs, qrc.InfoFile)) {
+        // Utility lambdas
+        auto CWrite = [&ofs](const char* key, std::string const& value) {
+          ofs << "set(" << key << " "
+              << cmOutputConverter::EscapeForCMake(value) << ")\n";
+        };
+        auto CWriteMap = [&ofs](
+          const char* key, std::map<std::string, std::string> const& map) {
+          for (auto const& item : map) {
+            ofs << "set(" << key << "_" << item.first << " "
+                << cmOutputConverter::EscapeForCMake(item.second) << ")\n";
           }
+        };
+
+        // Write
+        ofs << "# Configurations\n";
+        CWrite("ARCC_MULTI_CONFIG", this->MultiConfig ? "TRUE" : "FALSE");
+
+        ofs << "# Settings file\n";
+        if (this->MultiConfig) {
+          std::map<std::string, std::string> settingsFiles;
+          for (std::string const& cfg : this->ConfigsList) {
+            settingsFiles[cfg] =
+              AppendFilenameSuffix(qrc.SettingsFile, "_" + cfg);
+          }
+          CWriteMap("ARCC_SETTINGS_FILE", settingsFiles);
+        } else {
+          CWrite("ARCC_SETTINGS_FILE", qrc.SettingsFile);
         }
+
+        ofs << "# Directories\n";
+        CWrite("ARCC_BUILD_DIR", this->DirBuild);
+        if (this->MultiConfig) {
+          CWriteMap("ARCC_INCLUDE_DIR", includeDirs);
+        } else {
+          CWrite("ARCC_INCLUDE_DIR", includeDir);
+        }
+
+        ofs << "# Rcc executable\n";
+        CWrite("ARCC_RCC_EXECUTABLE", this->RccExecutable);
+        CWrite("ARCC_RCC_LIST_OPTIONS", cmJoin(this->RccListOptions, ";"));
+
+        ofs << "# Rcc job\n";
+        CWrite("ARCC_SOURCE", qrc.QrcFile);
+        CWrite("ARCC_OUTPUT_CHECKSUM", qrc.PathChecksum);
+        CWrite("ARCC_OUTPUT_NAME",
+               cmSystemTools::GetFilenameName(qrc.RccFile));
+        CWrite("ARCC_OPTIONS", cmJoin(qrc.Options, ";"));
+        CWrite("ARCC_INPUTS", cmJoin(qrc.Resources, ";"));
       } else {
         break;
       }
@@ -1078,25 +1080,13 @@ void cmQtAutoGenInitializer::SetupCustomTargetsMoc()
   cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
   cmMakefile* makefile = this->Target->Target->GetMakefile();
 
-  AddDefinitionEscaped(makefile, "_moc_skip", this->MocSkip);
-  AddDefinitionEscaped(makefile, "_moc_options",
-                       GetSafeProperty(this->Target, "AUTOMOC_MOC_OPTIONS"));
-  AddDefinitionEscaped(makefile, "_moc_relaxed_mode",
-                       makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE") ? "TRUE"
-                                                                    : "FALSE");
-  AddDefinitionEscaped(makefile, "_moc_macro_names",
-                       GetSafeProperty(this->Target, "AUTOMOC_MACRO_NAMES"));
-  AddDefinitionEscaped(
-    makefile, "_moc_depend_filters",
-    GetSafeProperty(this->Target, "AUTOMOC_DEPEND_FILTERS"));
-
-  // Compiler predefines
+  // Moc predefs command
   if (this->Target->GetPropertyAsBool("AUTOMOC_COMPILER_PREDEFINES") &&
       this->QtVersionGreaterOrEqual(5, 8)) {
-    AddDefinitionEscaped(
-      makefile, "_moc_predefs_cmd",
-      makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_PREDEFINES_COMMAND"));
+    this->MocPredefsCmd =
+      makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_PREDEFINES_COMMAND");
   }
+
   // Moc includes and compile definitions
   {
     auto GetIncludeDirs = [this,
@@ -1117,25 +1107,23 @@ void cmQtAutoGenInitializer::SetupCustomTargetsMoc()
     };
 
     // Default configuration settings
-    std::string const includeDirs = GetIncludeDirs(this->ConfigDefault);
-    std::string const compileDefs = GetCompileDefinitions(this->ConfigDefault);
+    this->MocIncludes = GetIncludeDirs(this->ConfigDefault);
+    this->MocDefines = GetCompileDefinitions(this->ConfigDefault);
     // Other configuration settings
     for (std::string const& cfg : this->ConfigsList) {
       {
         std::string const configIncludeDirs = GetIncludeDirs(cfg);
-        if (configIncludeDirs != includeDirs) {
-          this->ConfigMocIncludes[cfg] = configIncludeDirs;
+        if (configIncludeDirs != this->MocIncludes) {
+          this->MocIncludesConfig[cfg] = configIncludeDirs;
         }
       }
       {
         std::string const configCompileDefs = GetCompileDefinitions(cfg);
-        if (configCompileDefs != compileDefs) {
-          this->ConfigMocDefines[cfg] = configCompileDefs;
+        if (configCompileDefs != this->MocDefines) {
+          this->MocDefinesConfig[cfg] = configCompileDefs;
         }
       }
     }
-    AddDefinitionEscaped(makefile, "_moc_include_dirs", includeDirs);
-    AddDefinitionEscaped(makefile, "_moc_compile_defs", compileDefs);
   }
 
   // Moc executable
@@ -1162,7 +1150,7 @@ void cmQtAutoGenInitializer::SetupCustomTargetsMoc()
     }
 
     if (err.empty()) {
-      AddDefinitionEscaped(makefile, "_qt_moc_executable", mocExec);
+      this->MocExecutable = mocExec;
     } else {
       err += " (";
       err += this->Target->GetName();
@@ -1178,19 +1166,15 @@ void cmQtAutoGenInitializer::SetupCustomTargetsUic()
 
   // Uic search paths
   {
-    std::vector<std::string> uicSearchPaths;
-    {
-      std::string const usp =
-        GetSafeProperty(this->Target, "AUTOUIC_SEARCH_PATHS");
-      if (!usp.empty()) {
-        cmSystemTools::ExpandListArgument(usp, uicSearchPaths);
-        std::string const srcDir = makefile->GetCurrentSourceDirectory();
-        for (std::string& path : uicSearchPaths) {
-          path = cmSystemTools::CollapseFullPath(path, srcDir);
-        }
+    std::string const usp =
+      GetSafeProperty(this->Target, "AUTOUIC_SEARCH_PATHS");
+    if (!usp.empty()) {
+      cmSystemTools::ExpandListArgument(usp, this->UicSearchPaths);
+      std::string const srcDir = makefile->GetCurrentSourceDirectory();
+      for (std::string& path : this->UicSearchPaths) {
+        path = cmSystemTools::CollapseFullPath(path, srcDir);
       }
     }
-    AddDefinitionEscaped(makefile, "_uic_search_paths", uicSearchPaths);
   }
   // Uic target options
   {
@@ -1201,59 +1185,50 @@ void cmQtAutoGenInitializer::SetupCustomTargetsUic()
     };
 
     // Default settings
-    std::string const uicOpts = UicGetOpts(this->ConfigDefault);
-    AddDefinitionEscaped(makefile, "_uic_target_options", uicOpts);
+    this->UicOptions = UicGetOpts(this->ConfigDefault);
 
     // Configuration specific settings
     for (std::string const& cfg : this->ConfigsList) {
       std::string const configUicOpts = UicGetOpts(cfg);
-      if (configUicOpts != uicOpts) {
-        this->ConfigUicOptions[cfg] = configUicOpts;
+      if (configUicOpts != this->UicOptions) {
+        this->UicOptionsConfig[cfg] = configUicOpts;
       }
     }
   }
   // .ui files skip and options
   {
-    std::vector<std::string> uiFileFiles;
-    std::vector<std::vector<std::string>> uiFileOptions;
-    {
-      std::string const uiExt = "ui";
-      std::string pathError;
-      for (cmSourceFile* sf : makefile->GetSourceFiles()) {
-        // sf->GetExtension() is only valid after sf->GetFullPath() ...
-        // Since we're iterating over source files that might be not in the
-        // target we need to check for path errors (not existing files).
-        std::string const& fPath = sf->GetFullPath(&pathError);
-        if (!pathError.empty()) {
-          pathError.clear();
-          continue;
+    std::string const uiExt = "ui";
+    std::string pathError;
+    for (cmSourceFile* sf : makefile->GetSourceFiles()) {
+      // sf->GetExtension() is only valid after sf->GetFullPath() ...
+      // Since we're iterating over source files that might be not in the
+      // target we need to check for path errors (not existing files).
+      std::string const& fPath = sf->GetFullPath(&pathError);
+      if (!pathError.empty()) {
+        pathError.clear();
+        continue;
+      }
+      if (sf->GetExtension() == uiExt) {
+        std::string const absFile = cmSystemTools::GetRealPath(fPath);
+        // Check if the .ui file should be skipped
+        if (sf->GetPropertyAsBool("SKIP_AUTOUIC") ||
+            sf->GetPropertyAsBool("SKIP_AUTOGEN")) {
+          this->UicSkip.insert(absFile);
         }
-        if (sf->GetExtension() == uiExt) {
-          std::string const absFile = cmSystemTools::GetRealPath(fPath);
-          // Check if the .ui file should be skipped
-          if (sf->GetPropertyAsBool("SKIP_AUTOUIC") ||
-              sf->GetPropertyAsBool("SKIP_AUTOGEN")) {
-            this->UicSkip.insert(absFile);
-          }
-          // Check if the .ui file has uic options
-          std::string const uicOpts = GetSafeProperty(sf, "AUTOUIC_OPTIONS");
-          if (!uicOpts.empty()) {
-            // Check if file isn't skipped
-            if (this->UicSkip.count(absFile) == 0) {
-              uiFileFiles.push_back(absFile);
-              std::vector<std::string> optsVec;
-              cmSystemTools::ExpandListArgument(uicOpts, optsVec);
-              uiFileOptions.push_back(std::move(optsVec));
-            }
+        // Check if the .ui file has uic options
+        std::string const uicOpts = GetSafeProperty(sf, "AUTOUIC_OPTIONS");
+        if (!uicOpts.empty()) {
+          // Check if file isn't skipped
+          if (this->UicSkip.count(absFile) == 0) {
+            this->UicFileFiles.push_back(absFile);
+            std::vector<std::string> optsVec;
+            cmSystemTools::ExpandListArgument(uicOpts, optsVec);
+            this->UicFileOptions.push_back(std::move(optsVec));
           }
         }
       }
     }
-    AddDefinitionEscaped(makefile, "_qt_uic_options_files", uiFileFiles);
-    AddDefinitionEscaped(makefile, "_qt_uic_options_options", uiFileOptions);
   }
-
-  AddDefinitionEscaped(makefile, "_uic_skip", this->UicSkip);
 
   // Uic executable
   {
@@ -1280,7 +1255,7 @@ void cmQtAutoGenInitializer::SetupCustomTargetsUic()
     }
 
     if (err.empty()) {
-      AddDefinitionEscaped(makefile, "_qt_uic_executable", uicExec);
+      this->UicExecutable = uicExec;
     } else {
       err += " (";
       err += this->Target->GetName();
@@ -1290,45 +1265,22 @@ void cmQtAutoGenInitializer::SetupCustomTargetsUic()
   }
 }
 
-std::vector<std::string> cmQtAutoGenInitializer::AddGeneratedSource(
-  std::string const& filename, GeneratorT genType)
+void cmQtAutoGenInitializer::AddGeneratedSource(std::string const& filename,
+                                                GeneratorT genType)
 {
-  std::vector<std::string> genFiles;
-  // Register source file in makefile and source group
-  if (this->MultiConfig != MultiConfigT::MULTI) {
-    genFiles.push_back(filename);
-  } else {
-    for (std::string const& cfg : this->ConfigsList) {
-      genFiles.push_back(AppendFilenameSuffix(filename, "_" + cfg));
-    }
-  }
+  // Register source file in makefile
+  cmMakefile* makefile = this->Target->Target->GetMakefile();
   {
-    cmMakefile* makefile = this->Target->Target->GetMakefile();
-    for (std::string const& genFile : genFiles) {
-      {
-        cmSourceFile* gFile = makefile->GetOrCreateSource(genFile, true);
-        gFile->SetProperty("GENERATED", "1");
-        gFile->SetProperty("SKIP_AUTOGEN", "On");
-      }
-      AddToSourceGroup(makefile, genFile, genType);
-    }
+    cmSourceFile* gFile = makefile->GetOrCreateSource(filename, true);
+    gFile->SetProperty("GENERATED", "1");
+    gFile->SetProperty("SKIP_AUTOGEN", "On");
   }
+
+  // Add source file to source group
+  AddToSourceGroup(makefile, filename, genType);
 
   // Add source file to target
-  if (this->MultiConfig != MultiConfigT::MULTI) {
-    this->Target->AddSource(filename);
-  } else {
-    for (std::string const& cfg : this->ConfigsList) {
-      std::string src = "$<$<CONFIG:";
-      src += cfg;
-      src += ">:";
-      src += AppendFilenameSuffix(filename, "_" + cfg);
-      src += ">";
-      this->Target->AddSource(src);
-    }
-  }
-
-  return genFiles;
+  this->Target->AddSource(filename);
 }
 
 std::string cmQtAutoGenInitializer::GetQtMajorVersion(
@@ -1400,7 +1352,8 @@ bool cmQtAutoGenInitializer::RccListInputs(std::string const& fileName,
       return false;
     }
 
-    // Run rcc list command in the directory of the qrc file with the pathless
+    // Run rcc list command in the directory of the qrc file with the
+    // pathless
     // qrc file name argument. This way rcc prints relative paths.
     // This avoids issues on Windows when the qrc file is in a path that
     // contains non-ASCII characters.

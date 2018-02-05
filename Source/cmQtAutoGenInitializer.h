@@ -21,6 +21,7 @@ public:
   static std::string GetQtMinorVersion(cmGeneratorTarget const* target,
                                        std::string const& qtVersionMajor);
 
+  /// @brief Rcc job information
   class Qrc
   {
   public:
@@ -55,8 +56,7 @@ private:
   void SetupCustomTargetsMoc();
   void SetupCustomTargetsUic();
 
-  std::vector<std::string> AddGeneratedSource(std::string const& filename,
-                                              GeneratorT genType);
+  void AddGeneratedSource(std::string const& filename, GeneratorT genType);
 
   bool QtVersionGreaterOrEqual(unsigned long requestMajor,
                                unsigned long requestMinor) const;
@@ -70,15 +70,18 @@ private:
   bool MocEnabled;
   bool UicEnabled;
   bool RccEnabled;
+  bool MultiConfig;
   // Qt
   std::string QtVersionMajor;
   std::string QtVersionMinor;
+  std::string MocExecutable;
+  std::string UicExecutable;
   std::string RccExecutable;
   std::vector<std::string> RccListOptions;
   // Configurations
   std::string ConfigDefault;
   std::vector<std::string> ConfigsList;
-  MultiConfigT MultiConfig;
+  std::string Parallel;
   // Names
   std::string AutogenTargetName;
   std::string AutogenFolder;
@@ -91,11 +94,21 @@ private:
   // Sources
   std::vector<std::string> Headers;
   std::vector<std::string> Sources;
+  // Moc
+  std::string MocPredefsCmd;
   std::set<std::string> MocSkip;
+  std::string MocIncludes;
+  std::map<std::string, std::string> MocIncludesConfig;
+  std::string MocDefines;
+  std::map<std::string, std::string> MocDefinesConfig;
+  // Uic
   std::set<std::string> UicSkip;
-  std::map<std::string, std::string> ConfigMocIncludes;
-  std::map<std::string, std::string> ConfigMocDefines;
-  std::map<std::string, std::string> ConfigUicOptions;
+  std::vector<std::string> UicSearchPaths;
+  std::string UicOptions;
+  std::map<std::string, std::string> UicOptionsConfig;
+  std::vector<std::string> UicFileFiles;
+  std::vector<std::vector<std::string>> UicFileOptions;
+  // Rcc
   std::vector<Qrc> Qrcs;
 };
 

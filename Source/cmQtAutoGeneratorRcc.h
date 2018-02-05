@@ -5,7 +5,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
 #include "cm_uv.h"
 
@@ -26,7 +25,7 @@ private:
   // -- Types
 
   /// @brief Processing stage
-  enum class StageT
+  enum class StageT : unsigned char
   {
     SETTINGS_READ,
     TEST_QRC_RCC_FILES,
@@ -62,17 +61,18 @@ private:
   void GenerateWrapper();
 
   // -- Utility
+  bool IsMultiConfig() const { return MultiConfig_; }
+  std::string MultiConfigOutput() const;
   bool StartProcess(std::string const& workingDirectory,
                     std::vector<std::string> const& command,
                     bool mergedOutput);
 
 private:
   // -- Config settings
-  bool SettingsChanged_;
-  std::string ConfigSuffix_;
-  MultiConfigT MultiConfig_;
+  bool MultiConfig_;
   // -- Directories
   std::string AutogenBuildDir_;
+  std::string IncludeDir_;
   // -- Qt environment
   std::string RccExecutable_;
   std::vector<std::string> RccListOptions_;
@@ -80,9 +80,10 @@ private:
   std::string QrcFile_;
   std::string QrcFileName_;
   std::string QrcFileDir_;
-  std::string RccFile_;
-  std::string RccFileWrapper_;
-  std::string RccFileBuild_;
+  std::string RccPathChecksum_;
+  std::string RccFileName_;
+  std::string RccFileOutput_;
+  std::string RccFilePublic_;
   std::vector<std::string> Options_;
   std::vector<std::string> Inputs_;
   // -- Subprocess
@@ -91,6 +92,7 @@ private:
   // -- Settings file
   std::string SettingsFile_;
   std::string SettingsString_;
+  bool SettingsChanged_;
   // -- libuv loop
   StageT Stage_;
   bool Error_;

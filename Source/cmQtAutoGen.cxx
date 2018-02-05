@@ -17,10 +17,6 @@ std::string const genNameMoc = "AutoMoc";
 std::string const genNameUic = "AutoUic";
 std::string const genNameRcc = "AutoRcc";
 
-std::string const mcNameSingle = "SINGLE";
-std::string const mcNameWrapper = "WRAPPER";
-std::string const mcNameMulti = "MULTI";
-
 // - Static functions
 
 /// @brief Merges newOpts into baseOpts
@@ -100,30 +96,6 @@ std::string const& cmQtAutoGen::GeneratorName(GeneratorT type)
 std::string cmQtAutoGen::GeneratorNameUpper(GeneratorT genType)
 {
   return cmSystemTools::UpperCase(cmQtAutoGen::GeneratorName(genType));
-}
-
-std::string const& cmQtAutoGen::MultiConfigName(MultiConfigT config)
-{
-  switch (config) {
-    case MultiConfigT::SINGLE:
-      return mcNameSingle;
-    case MultiConfigT::WRAPPER:
-      return mcNameWrapper;
-    case MultiConfigT::MULTI:
-      return mcNameMulti;
-  }
-  return mcNameWrapper;
-}
-
-cmQtAutoGen::MultiConfigT cmQtAutoGen::MultiConfigType(std::string const& name)
-{
-  if (name == mcNameSingle) {
-    return MultiConfigT::SINGLE;
-  }
-  if (name == mcNameMulti) {
-    return MultiConfigT::MULTI;
-  }
-  return MultiConfigT::WRAPPER;
 }
 
 std::string cmQtAutoGen::Quoted(std::string const& text)
