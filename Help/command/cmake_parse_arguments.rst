@@ -62,7 +62,7 @@ as the real :command:`install` command:
 
 .. code-block:: cmake
 
-   function(MY_INSTALL)
+   macro(my_install)
        set(options OPTIONAL FAST)
        set(oneValueArgs DESTINATION RENAME)
        set(multiValueArgs TARGETS CONFIGURATIONS)
