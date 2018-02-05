@@ -18,6 +18,8 @@
 #include <iterator>
 #include <memory> // IWYU pragma: keep
 
+static void ConvertToWindowsSlash(std::string& s);
+
 static std::string cmVS10EscapeXML(std::string arg)
 {
   cmSystemTools::ReplaceString(arg, "&", "&amp;");
@@ -482,7 +484,7 @@ void cmVisualStudio10TargetGenerator::Generate()
     std::string propsLocal;
     propsLocal += this->DefaultArtifactDir;
     propsLocal += "\\nasm.props";
-    this->ConvertToWindowsSlash(propsLocal);
+    ConvertToWindowsSlash(propsLocal);
     this->Makefile->ConfigureFile(propsTemplate.c_str(), propsLocal.c_str(),
                                   false, true, true);
     std::string import = std::string("<Import Project=\"") +
@@ -505,7 +507,7 @@ void cmVisualStudio10TargetGenerator::Generate()
       props = p;
     }
     if (!props.empty()) {
-      this->ConvertToWindowsSlash(props);
+      ConvertToWindowsSlash(props);
       this->WriteString("", 2);
       (*this->BuildFileStream)
         << "<Import Project=\"" << cmVS10EscapeXML(props) << "\""
@@ -604,7 +606,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
                                ->GetCurrentSourceDirectory()) +
             "/" + path;
         }
-        this->ConvertToWindowsSlash(path);
+        ConvertToWindowsSlash(path);
         hintReferences.push_back(HintReference(name, path));
       }
     }
@@ -617,7 +619,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
       if (cmsys::SystemTools::FileExists(ri, true)) {
         std::string name = cmsys::SystemTools::GetFilenameWithoutExtension(ri);
         std::string path = ri;
-        this->ConvertToWindowsSlash(path);
+        ConvertToWindowsSlash(path);
         hintReferences.push_back(HintReference(name, path));
       } else {
         this->WriteDotNetReference(ri, "");
@@ -691,11 +693,11 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
   if (!resxObjs.empty()) {
     this->WriteString("<ItemGroup>\n", 1);
     std::string srcDir = this->Makefile->GetCurrentSourceDirectory();
-    this->ConvertToWindowsSlash(srcDir);
+    ConvertToWindowsSlash(srcDir);
     for (cmSourceFile const* oi : resxObjs) {
       std::string obj = oi->GetFullPath();
       this->WriteString("<EmbeddedResource Include=\"", 2);
-      this->ConvertToWindowsSlash(obj);
+      ConvertToWindowsSlash(obj);
       bool useRelativePath = false;
       if (this->ProjectType == csproj && this->InSourceBuild) {
         // If we do an in-source build and the resource file is in a
@@ -704,7 +706,7 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
         // visual studio does not show the file in the IDE. Sorry.
         if (obj.find(srcDir) == 0) {
           obj = this->ConvertPath(obj, true);
-          this->ConvertToWindowsSlash(obj);
+          ConvertToWindowsSlash(obj);
           useRelativePath = true;
         }
       }
@@ -728,7 +730,7 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
         }
       } else {
         std::string binDir = this->Makefile->GetCurrentBinaryDirectory();
-        this->ConvertToWindowsSlash(binDir);
+        ConvertToWindowsSlash(binDir);
         // If the resource was NOT added using a relative path (which should
         // be the default), we have to provide a link here
         if (!useRelativePath) {
@@ -767,7 +769,7 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
               designerResource =
                 cmsys::SystemTools::GetFilenameName(designerResource);
             }
-            this->ConvertToWindowsSlash(designerResource);
+            ConvertToWindowsSlash(designerResource);
             this->WriteString("<LastGenOutput>", 3);
             (*this->BuildFileStream) << designerResource
                                      << "</LastGenOutput>\n";
@@ -827,7 +829,7 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup()
           link = cmsys::SystemTools::GetFilenameName(obj);
         }
         if (!link.empty()) {
-          this->ConvertToWindowsSlash(link);
+          ConvertToWindowsSlash(link);
           this->WriteString("<Link>", 3);
           (*this->BuildFileStream) << link << "</Link>\n";
         }
@@ -1055,7 +1057,7 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
   }
 
   std::string outDir = this->GeneratorTarget->GetDirectory(config) + "/";
-  this->ConvertToWindowsSlash(outDir);
+  ConvertToWindowsSlash(outDir);
   this->WriteString("<OutputPath>", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(outDir) << "</OutputPath>\n";
 
@@ -1235,7 +1237,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
          d != ccg.GetDepends().end(); ++d) {
       std::string dep;
       if (this->LocalGenerator->GetRealDependency(*d, *i, dep)) {
-        this->ConvertToWindowsSlash(dep);
+        ConvertToWindowsSlash(dep);
         inputs << ";" << cmVS10EscapeXML(dep);
       }
     }
@@ -1245,7 +1247,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     for (std::vector<std::string>::const_iterator o = ccg.GetOutputs().begin();
          o != ccg.GetOutputs().end(); ++o) {
       std::string out = *o;
-      this->ConvertToWindowsSlash(out);
+      ConvertToWindowsSlash(out);
       outputs << sep << cmVS10EscapeXML(out);
       sep = ";";
     }
@@ -1323,7 +1325,7 @@ std::string cmVisualStudio10TargetGenerator::ConvertPath(
     : path.c_str();
 }
 
-void cmVisualStudio10TargetGenerator::ConvertToWindowsSlash(std::string& s)
+static void ConvertToWindowsSlash(std::string& s)
 {
   // first convert all of the slashes
   std::string::size_type pos = 0;
@@ -1424,7 +1426,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     for (cmSourceFile const* oi : resxObjs) {
       std::string obj = oi->GetFullPath();
       this->WriteString("<EmbeddedResource Include=\"", 2);
-      this->ConvertToWindowsSlash(obj);
+      ConvertToWindowsSlash(obj);
       (*this->BuildFileStream) << cmVS10EscapeXML(obj) << "\">\n";
       this->WriteString("<Filter>Resource Files</Filter>\n", 3);
       this->WriteString("</EmbeddedResource>\n", 2);
@@ -1526,7 +1528,7 @@ void cmVisualStudio10TargetGenerator::WriteGroupSources(
     std::string const& filter = sourceGroup->GetFullName();
     this->WriteString("<", 2);
     std::string path = this->ConvertPath(source, s.RelativePath);
-    this->ConvertToWindowsSlash(path);
+    ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << name << " Include=\"" << cmVS10EscapeXML(path);
     if (!filter.empty()) {
       (*this->BuildFileStream) << "\">\n";
@@ -1599,7 +1601,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
         sourceLink = cmsys::SystemTools::GetFilenameName(fullFileName);
       }
       if (!sourceLink.empty()) {
-        this->ConvertToWindowsSlash(sourceLink);
+        ConvertToWindowsSlash(sourceLink);
       }
     }
   }
@@ -1871,7 +1873,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(std::string const& tool,
       this->GlobalGenerator->PathTooLong(this->GeneratorTarget, sf, sourceRel);
     }
   }
-  this->ConvertToWindowsSlash(sourceFile);
+  ConvertToWindowsSlash(sourceFile);
   this->WriteString("<", 2);
   (*this->BuildFileStream) << tool << " Include=\""
                            << cmVS10EscapeXML(sourceFile) << "\""
@@ -2262,8 +2264,8 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
         outDir = this->GeneratorTarget->GetDirectory(config) + "/";
         targetNameFull = this->GeneratorTarget->GetFullName(config);
       }
-      this->ConvertToWindowsSlash(intermediateDir);
-      this->ConvertToWindowsSlash(outDir);
+      ConvertToWindowsSlash(intermediateDir);
+      ConvertToWindowsSlash(outDir);
 
       this->WritePlatformConfigTag("OutDir", config, 2);
       *this->BuildFileStream << cmVS10EscapeXML(outDir) << "</OutDir>\n";
@@ -2350,7 +2352,7 @@ std::vector<std::string> cmVisualStudio10TargetGenerator::GetIncludes(
   this->LocalGenerator->GetIncludeDirectories(includes, this->GeneratorTarget,
                                               lang, config);
   for (std::string& i : includes) {
-    this->ConvertToWindowsSlash(i);
+    ConvertToWindowsSlash(i);
   }
   return includes;
 }
@@ -2580,7 +2582,7 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     // Specify the compiler program database file if configured.
     std::string pdb = this->GeneratorTarget->GetCompilePDBPath(configName);
     if (!pdb.empty()) {
-      this->ConvertToWindowsSlash(pdb);
+      ConvertToWindowsSlash(pdb);
       this->WriteString("<ProgramDataBaseFileName>", 3);
       *this->BuildFileStream << cmVS10EscapeXML(pdb)
                              << "</ProgramDataBaseFileName>\n";
@@ -3032,7 +3034,7 @@ void cmVisualStudio10TargetGenerator::WriteManifestOptions(
     this->WriteString("<AdditionalManifestFiles>", 3);
     for (cmSourceFile const* mi : manifest_srcs) {
       std::string m = this->ConvertPath(mi->GetFullPath(), false);
-      this->ConvertToWindowsSlash(m);
+      ConvertToWindowsSlash(m);
       (*this->BuildFileStream) << m << ";";
     }
     (*this->BuildFileStream) << "</AdditionalManifestFiles>\n";
@@ -3063,7 +3065,7 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
     std::string antBuildPath = rootDir;
     this->WriteString("<AntBuild>\n", 2);
     this->WriteString("<AntBuildPath>", 3);
-    this->ConvertToWindowsSlash(antBuildPath);
+    ConvertToWindowsSlash(antBuildPath);
     (*this->BuildFileStream) << cmVS10EscapeXML(antBuildPath)
                              << "</AntBuildPath>\n";
   }
@@ -3150,7 +3152,7 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
 
   {
     std::string manifest_xml = rootDir + "/AndroidManifest.xml";
-    this->ConvertToWindowsSlash(manifest_xml);
+    ConvertToWindowsSlash(manifest_xml);
     this->WriteString("<AndroidManifestLocation>", 3);
     (*this->BuildFileStream) << cmVS10EscapeXML(manifest_xml)
                              << "</AndroidManifestLocation>\n";
@@ -3429,7 +3431,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLibOptions(
     if (l.IsPath && cmVS10IsTargetsFile(l.Value)) {
       std::string path =
         this->LocalGenerator->ConvertToRelativePath(currentBinDir, l.Value);
-      this->ConvertToWindowsSlash(path);
+      ConvertToWindowsSlash(path);
       this->AddTargetsFileAndConfigPair(path, config);
     }
   }
@@ -3475,7 +3477,7 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
     if (l.IsPath) {
       std::string path =
         this->LocalGenerator->ConvertToRelativePath(currentBinDir, l.Value);
-      this->ConvertToWindowsSlash(path);
+      ConvertToWindowsSlash(path);
       if (cmVS10IsTargetsFile(l.Value)) {
         vsTargetVec.push_back(path);
       } else {
@@ -3694,7 +3696,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
       path += dt->GetName();
       path += computeProjectFileExtension(dt, *this->Configurations.begin());
     }
-    this->ConvertToWindowsSlash(path);
+    ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << cmVS10EscapeXML(path) << "\">\n";
     this->WriteString("<Project>", 3);
     (*this->BuildFileStream) << "{" << this->GlobalGenerator->GetGUID(name)
@@ -3825,7 +3827,7 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile()
     this->GeneratorTarget->GetCertificates(certificates, "");
     for (cmSourceFile const* si : certificates) {
       pfxFile = this->ConvertPath(si->GetFullPath(), false);
-      this->ConvertToWindowsSlash(pfxFile);
+      ConvertToWindowsSlash(pfxFile);
       break;
     }
 
@@ -3835,7 +3837,7 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile()
       // Move the manifest to a project directory to avoid clashes
       std::string artifactDir =
         this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-      this->ConvertToWindowsSlash(artifactDir);
+      ConvertToWindowsSlash(artifactDir);
       this->WriteString("<PropertyGroup>\n", 1);
       this->WriteString("<AppxPackageArtifactsDir>", 2);
       (*this->BuildFileStream) << cmVS10EscapeXML(artifactDir)
@@ -3843,7 +3845,7 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile()
       this->WriteString("<ProjectPriFullPath>", 2);
       std::string resourcePriFile =
         this->DefaultArtifactDir + "/resources.pri";
-      this->ConvertToWindowsSlash(resourcePriFile);
+      ConvertToWindowsSlash(resourcePriFile);
       (*this->BuildFileStream) << resourcePriFile << "</ProjectPriFullPath>\n";
 
       // If we are missing files and we don't have a certificate and
@@ -3854,7 +3856,7 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile()
         pfxFile = this->DefaultArtifactDir + "/Windows_TemporaryKey.pfx";
         cmSystemTools::CopyAFile(templateFolder + "/Windows_TemporaryKey.pfx",
                                  pfxFile, false);
-        this->ConvertToWindowsSlash(pfxFile);
+        ConvertToWindowsSlash(pfxFile);
         this->AddedFiles.push_back(pfxFile);
       }
 
@@ -4098,7 +4100,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80()
     std::string("/WMAppManifest.xml");
   std::string artifactDir =
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-  this->ConvertToWindowsSlash(artifactDir);
+  ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
   std::string targetNameXML =
     cmVS10EscapeXML(this->GeneratorTarget->GetName());
@@ -4145,7 +4147,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80()
   /* clang-format on */
 
   std::string sourceFile = this->ConvertPath(manifestFile, false);
-  this->ConvertToWindowsSlash(sourceFile);
+  ConvertToWindowsSlash(sourceFile);
   this->WriteString("<Xml Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(sourceFile) << "\">\n";
   this->WriteString("<SubType>Designer</SubType>\n", 3);
@@ -4155,14 +4157,14 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80()
   std::string smallLogo = this->DefaultArtifactDir + "/SmallLogo.png";
   cmSystemTools::CopyAFile(templateFolder + "/SmallLogo.png", smallLogo,
                            false);
-  this->ConvertToWindowsSlash(smallLogo);
+  ConvertToWindowsSlash(smallLogo);
   this->WriteString("<Image Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(smallLogo) << "\" />\n";
   this->AddedFiles.push_back(smallLogo);
 
   std::string logo = this->DefaultArtifactDir + "/Logo.png";
   cmSystemTools::CopyAFile(templateFolder + "/Logo.png", logo, false);
-  this->ConvertToWindowsSlash(logo);
+  ConvertToWindowsSlash(logo);
   this->WriteString("<Image Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(logo) << "\" />\n";
   this->AddedFiles.push_back(logo);
@@ -4171,7 +4173,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80()
     this->DefaultArtifactDir + "/ApplicationIcon.png";
   cmSystemTools::CopyAFile(templateFolder + "/ApplicationIcon.png",
                            applicationIcon, false);
-  this->ConvertToWindowsSlash(applicationIcon);
+  ConvertToWindowsSlash(applicationIcon);
   this->WriteString("<Image Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(applicationIcon) << "\" />\n";
   this->AddedFiles.push_back(applicationIcon);
@@ -4183,7 +4185,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP81()
     this->DefaultArtifactDir + "/package.appxManifest";
   std::string artifactDir =
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-  this->ConvertToWindowsSlash(artifactDir);
+  ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
   std::string targetNameXML =
     cmVS10EscapeXML(this->GeneratorTarget->GetName());
@@ -4246,7 +4248,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS80()
     this->DefaultArtifactDir + "/package.appxManifest";
   std::string artifactDir =
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-  this->ConvertToWindowsSlash(artifactDir);
+  ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
   std::string targetNameXML =
     cmVS10EscapeXML(this->GeneratorTarget->GetName());
@@ -4301,7 +4303,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS81()
     this->DefaultArtifactDir + "/package.appxManifest";
   std::string artifactDir =
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-  this->ConvertToWindowsSlash(artifactDir);
+  ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
   std::string targetNameXML =
     cmVS10EscapeXML(this->GeneratorTarget->GetName());
@@ -4361,7 +4363,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS10_0()
     this->DefaultArtifactDir + "/package.appxManifest";
   std::string artifactDir =
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-  this->ConvertToWindowsSlash(artifactDir);
+  ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
   std::string targetNameXML =
     cmVS10EscapeXML(this->GeneratorTarget->GetName());
@@ -4423,7 +4425,7 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
     cmSystemTools::GetCMakeRoot() + "/Templates/Windows";
 
   std::string sourceFile = this->ConvertPath(manifestFile, false);
-  this->ConvertToWindowsSlash(sourceFile);
+  ConvertToWindowsSlash(sourceFile);
   this->WriteString("<AppxManifest Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(sourceFile) << "\">\n";
   this->WriteString("<SubType>Designer</SubType>\n", 3);
@@ -4433,7 +4435,7 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
   std::string smallLogo = this->DefaultArtifactDir + "/SmallLogo.png";
   cmSystemTools::CopyAFile(templateFolder + "/SmallLogo.png", smallLogo,
                            false);
-  this->ConvertToWindowsSlash(smallLogo);
+  ConvertToWindowsSlash(smallLogo);
   this->WriteString("<Image Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(smallLogo) << "\" />\n";
   this->AddedFiles.push_back(smallLogo);
@@ -4441,14 +4443,14 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
   std::string smallLogo44 = this->DefaultArtifactDir + "/SmallLogo44x44.png";
   cmSystemTools::CopyAFile(templateFolder + "/SmallLogo44x44.png", smallLogo44,
                            false);
-  this->ConvertToWindowsSlash(smallLogo44);
+  ConvertToWindowsSlash(smallLogo44);
   this->WriteString("<Image Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(smallLogo44) << "\" />\n";
   this->AddedFiles.push_back(smallLogo44);
 
   std::string logo = this->DefaultArtifactDir + "/Logo.png";
   cmSystemTools::CopyAFile(templateFolder + "/Logo.png", logo, false);
-  this->ConvertToWindowsSlash(logo);
+  ConvertToWindowsSlash(logo);
   this->WriteString("<Image Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(logo) << "\" />\n";
   this->AddedFiles.push_back(logo);
@@ -4456,7 +4458,7 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
   std::string storeLogo = this->DefaultArtifactDir + "/StoreLogo.png";
   cmSystemTools::CopyAFile(templateFolder + "/StoreLogo.png", storeLogo,
                            false);
-  this->ConvertToWindowsSlash(storeLogo);
+  ConvertToWindowsSlash(storeLogo);
   this->WriteString("<Image Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(storeLogo) << "\" />\n";
   this->AddedFiles.push_back(storeLogo);
@@ -4464,14 +4466,14 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
   std::string splashScreen = this->DefaultArtifactDir + "/SplashScreen.png";
   cmSystemTools::CopyAFile(templateFolder + "/SplashScreen.png", splashScreen,
                            false);
-  this->ConvertToWindowsSlash(splashScreen);
+  ConvertToWindowsSlash(splashScreen);
   this->WriteString("<Image Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(splashScreen) << "\" />\n";
   this->AddedFiles.push_back(splashScreen);
 
   // This file has already been added to the build so don't copy it
   std::string keyFile = this->DefaultArtifactDir + "/Windows_TemporaryKey.pfx";
-  this->ConvertToWindowsSlash(keyFile);
+  ConvertToWindowsSlash(keyFile);
   this->WriteString("<None Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(keyFile) << "\" />\n";
 }
@@ -4542,7 +4544,7 @@ void cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
       if (const char* l = sf->GetProperty("VS_CSHARP_Link")) {
         link = l;
       }
-      this->ConvertToWindowsSlash(link);
+      ConvertToWindowsSlash(link);
     }
   }
 }
@@ -4553,7 +4555,7 @@ std::string cmVisualStudio10TargetGenerator::GetCMakeFilePath(
   // Always search in the standard modules location.
   std::string path = cmSystemTools::GetCMakeRoot() + "/";
   path += relativeFilePath;
-  this->ConvertToWindowsSlash(path);
+  ConvertToWindowsSlash(path);
 
   return path;
 }
