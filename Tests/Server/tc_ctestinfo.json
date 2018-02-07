@@ -1,0 +1,23 @@
+[
+  { "message": "Testing ctestInfo" },
+
+{ "handshake": {"major": 2, "sourceDirectory":"buildsystem1","buildDirectory":"buildsystem1"} },
+
+{ "message": "Configure:" },
+{ "send": { "type": "configure", "cookie":"CONFIG" } },
+{ "reply": { "type": "configure", "cookie":"CONFIG", "skipProgress":true } },
+
+{ "message": "Compute:" },
+{ "send": { "type": "compute", "cookie":"COMPUTE" } },
+{ "reply": { "type": "compute", "cookie":"COMPUTE", "skipProgress":true } },
+
+{ "message": "Codemodel:" },
+{ "send": { "type": "codemodel", "cookie":"CODEMODEL" } },
+{ "reply": { "type": "codemodel", "cookie":"CODEMODEL", "skipProgress":true } },
+
+{ "message": "TestInfo:" },
+{ "send": { "type": "ctestInfo", "cookie":"ctestInfo" } },
+{ "validateTestInfo": { "hasTests": true, "hasTraces" :  true, "expectedTest": "dummytest" } },
+
+{ "message": "Everything ok." }
+]

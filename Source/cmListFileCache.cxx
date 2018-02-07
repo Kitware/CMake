@@ -278,6 +278,20 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
   return true;
 }
 
+std::map<size_t, cmListFileContext> s_idToFrameMap;
+std::map<cmListFileContext, size_t> s_frameToIdMap;
+
+size_t ComputeFrameId(cmListFileContext const& frame)
+{
+  auto it = s_frameToIdMap.find(frame);
+  if (it == s_frameToIdMap.end()) {
+    // Zero is a special id indicating not found. Always start at 1
+    it = s_frameToIdMap.emplace(frame, s_frameToIdMap.size() + 1).first;
+    s_idToFrameMap.emplace(it->second, it->first);
+  }
+  return it->second;
+}
+
 struct cmListFileBacktrace::Entry : public cmListFileContext
 {
   Entry(cmListFileContext const& lfc, Entry* up)
@@ -450,6 +464,37 @@ size_t cmListFileBacktrace::Depth() const
   }
   return depth;
 }
+
+std::vector<size_t> const & cmListFileBacktrace::GetFrameIds() const
+{
+  bool inTryCompile = this->Bottom.GetState()->GetIsInTryCompile();
+  auto & frameIds = inTryCompile ? this->CompilingFrameIds : this->NonCompilingFrameIds;
+  if (this->Cur != nullptr && frameIds.empty()) {
+      cmOutputConverter converter(this->Bottom);
+      for (Entry* i = this->Cur; i; i = i->Up) {
+        cmListFileContext lfc = *i;
+        if (inTryCompile) {
+          lfc.FilePath = converter.ConvertToRelativePath(
+            this->Bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
+        }
+        frameIds.emplace_back(ComputeFrameId(lfc));
+      }
+    }
+  return frameIds;
+}
+
+std::vector<std::pair<size_t, cmListFileContext>> cmListFileBacktrace::ConvertFrameIds(std::unordered_set<size_t> const & frameIds)
+{
+  std::vector<std::pair<size_t, cmListFileContext>> results;
+  for (auto id : frameIds) {
+    auto it = s_idToFrameMap.find(id);
+    if (it != s_idToFrameMap.end()) {
+      results.push_back(std::make_pair(it->first, it->second));
+    }
+  }
+  return std::move(results);
+}
+
 
 std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
 {

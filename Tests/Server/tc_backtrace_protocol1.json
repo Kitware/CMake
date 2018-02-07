@@ -1,0 +1,19 @@
+[
+  { "message": "Testing backtraces protocol1" },
+
+{ "handshake": {"major": 1, "sourceDirectory":"buildsystem1","buildDirectory":"buildsystem1"} },
+
+{ "message": "Configure:" },
+{ "send": { "type": "configure", "cookie":"CONFIG" } },
+{ "reply": { "type": "configure", "cookie":"CONFIG", "skipProgress":true } },
+
+{ "message": "Compute:" },
+{ "send": { "type": "compute", "cookie":"COMPUTE" } },
+{ "reply": { "type": "compute", "cookie":"COMPUTE", "skipProgress":true } },
+
+{ "message": "Codemodel:" },
+{ "send": { "type": "codemodel", "cookie":"CODEMODEL" } },
+{ "validateCodemodel": { "hasTraces": false } },
+
+{ "message": "Everything ok." }
+]

@@ -95,6 +95,15 @@ for communicationMethod in cmakelib.communicationMethods:
             data = obj['validateCache']
             if not 'isEmpty' in data: data['isEmpty'] = false
             cmakelib.validateCache(proc, data)
+        elif 'validateCodemodel' in obj:
+            data = obj['validateCodemodel']
+            if not 'hasTraces' in data: data['hasTraces'] = false
+            cmakelib.validateCodemodel(proc, data)
+        elif 'validateTestInfo' in obj:
+            data = obj['validateTestInfo']
+            if not 'hasTraces' in data: data['hasTraces'] = false
+            if not 'hasTests' in data: data['hasTests'] = false
+            cmakelib.validateTestInfo(proc, data)
         elif 'reconnect' in obj:
             cmakelib.exitProc(proc)
             proc = cmakelib.initServerProc(cmakeCommand, communicationMethod)

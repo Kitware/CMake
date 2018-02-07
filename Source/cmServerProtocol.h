@@ -114,16 +114,17 @@ private:
 
   void HandleCMakeFileChanges(const std::string& path, int event, int status);
 
+protected:
   // Handle requests:
-  cmServerResponse ProcessCache(const cmServerRequest& request);
-  cmServerResponse ProcessCMakeInputs(const cmServerRequest& request);
-  cmServerResponse ProcessCodeModel(const cmServerRequest& request);
-  cmServerResponse ProcessCompute(const cmServerRequest& request);
-  cmServerResponse ProcessConfigure(const cmServerRequest& request);
-  cmServerResponse ProcessGlobalSettings(const cmServerRequest& request);
-  cmServerResponse ProcessSetGlobalSettings(const cmServerRequest& request);
-  cmServerResponse ProcessFileSystemWatchers(const cmServerRequest& request);
-  cmServerResponse ProcessCTests(const cmServerRequest& request);
+  virtual cmServerResponse ProcessCache(const cmServerRequest& request);
+  virtual cmServerResponse ProcessCMakeInputs(const cmServerRequest& request);
+  virtual cmServerResponse ProcessCodeModel(const cmServerRequest& request);
+  virtual cmServerResponse ProcessCompute(const cmServerRequest& request);
+  virtual cmServerResponse ProcessConfigure(const cmServerRequest& request);
+  virtual cmServerResponse ProcessGlobalSettings(const cmServerRequest& request);
+  virtual cmServerResponse ProcessSetGlobalSettings(const cmServerRequest& request);
+  virtual cmServerResponse ProcessFileSystemWatchers(const cmServerRequest& request);
+  virtual cmServerResponse ProcessCTests(const cmServerRequest& request);
 
   enum State
   {
@@ -159,4 +160,16 @@ private:
   };
 
   GeneratorInformation GeneratorInfo;
+};
+
+class cmServerProtocol2 : public cmServerProtocol1
+{
+public:
+  std::pair<int, int> ProtocolVersion() const override;
+
+protected:
+  // Handle requests:
+  virtual cmServerResponse ProcessCodeModel(const cmServerRequest& request) override ;
+  virtual cmServerResponse ProcessCTests(const cmServerRequest& request) override ;
+
 };

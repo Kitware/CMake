@@ -440,6 +440,22 @@ The "codemodel" request can be used after a project was "compute"d successfully.
 
 It will list the complete project structure as it is known to cmake.
 
+If the optional parameter "includeTraces" is set to true, traces will be added
+to responses and a "referenceTraces" key will also be included in the reply. 
+Reference traces contain an id to file/line/name location mapping for converting
+embedded backtraces in other data to actual file/line/name locations.
+
+Example:
+
+    "referencedTraces": [
+        {
+            "id": 1
+            "line": 3,
+            "name": "add_library",
+            "path": "D:/src/CMakeLists.txt"
+        }
+     ]
+
 The reply will contain a key "configurations", which will contain a list of
 configuration objects. Configuration objects are used to destinquish between
 different configurations the build directory might have enabled. While most
@@ -558,7 +574,7 @@ CMakeLists.txt file.
 Example::
 
   [== "CMake Server" ==[
-  {"type":"codemodel"}
+  {"type":"codemodel", "includeTraces" : "true"}
   ]== "CMake Server" ==]
 
 CMake will reply::
@@ -593,27 +609,15 @@ CMake will reply::
                 "sourceDirectory": "/home/code/src/cmake/Source/CursesDialog/form",
                 "type": "STATIC_LIBRARY",
                 "crossReferences": {
-                   "backtrace": [
-                      {
-                         "line": 7,
-                         "name": "add_executable",
-                         "path": "C:/full/path/CMakeLists.txt"
-                      },
-                      {
-                         "path": "c:/full/path/CMakeLists.txt"
-                      }
+                   "backtrace": [ 
+                      1, 
+                      2
                    ],
                    "relatedStatements": [
                       {
                          "backtrace": [
-                            {
-                               "line": 8,
-                               "name": "target_link_libraries",
-                               "path": "c:/full/path/CMakeLists.txt"
-                            },
-                            {
-                               "path": "c:/full/path/CMakeLists.txt"
-                            }
+                           3,
+                           4,
                          ],
                          "type": "target_link_libraries"
                       }
@@ -626,6 +630,18 @@ CMake will reply::
         ]
       }
     ],
+    "referencedTraces": [
+        {
+            "id" : 1
+            "line": 3,
+            "name": "add_library",
+            "path": "F:/CMake/HelloWorldWithLib/Lib/CMakeLists.txt"
+        },
+        {
+            "id" : 2
+            "path": "F:/CMake/HelloWorldWithLib/Lib/CMakeLists.txt"
+        },
+    ] 
     "cookie": "",
     "inReplyTo": "codemodel",
     "type": "reply"

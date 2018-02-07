@@ -16,7 +16,7 @@ macro(do_test bsname file type)
     )
 
   if (NOT test_result EQUAL 0)
-    message(SEND_ERROR "TEST FAILED: ${test_result}")
+    message(SEND_ERROR "TEST FAILED: ${bsname} with result ${test_result}")
   endif()
 endmacro()
 
@@ -24,5 +24,8 @@ do_test("test_cache" "tc_cache.json" "server")
 do_test("test_handshake" "tc_handshake.json" "server")
 do_test("test_globalSettings" "tc_globalSettings.json" "server")
 do_test("test_buildsystem1" "tc_buildsystem1.json" "server")
+do_test("test_backtrace_protocol1" "tc_backtrace_protocol1.json" "server")
+do_test("test_backtrace_protocol2" "tc_backtrace_protocol2.json" "server")
+do_test("test_ctestinfo" "tc_ctestinfo.json" "server")
 
 add_executable(Server empty.cpp)

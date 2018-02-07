@@ -309,6 +309,46 @@ def validateCache(cmakeCommand, data):
     print('No CMAKE_HOME_DIRECTORY found in cache.')
     sys.exit(1)
 
+def validateTraces(packet, shouldHaveTraces):
+  hasTraces = ('referencedTraces' in packet) or ('\'backtrace\'' in str(packet))
+
+  if (hasTraces and not shouldHaveTraces):
+    print('Traces when not expected')
+    sys.exit(1)
+  elif (not hasTraces and shouldHaveTraces):
+    print('Traces not available when should be')
+    sys.exit(2)
+  return;
+
+def validateCodemodel(cmakeCommand, data):
+  packet = waitForReply(cmakeCommand, 'codemodel', 'CODEMODEL', False)
+  validateTraces(packet, data['hasTraces'])
+  return;
+
+def validateTestInfo(cmakeCommand, data):
+  packet = waitForReply(cmakeCommand, 'ctestInfo', 'ctestInfo', False)
+  validateTraces(packet, data['hasTraces'])
+
+  shouldHaveTests = (data['hasTests'])
+  hasTests = 'ctestName' in str(packet)
+
+  if (hasTests and not shouldHaveTests):
+    print('Tests when not expected')
+    sys.exit(1)
+  elif (not hasTests and shouldHaveTests):
+    print('Tests not available when should be')
+    sys.exit(2)
+
+  hasExpectedTest = 'expectedTest' in data
+  if (hasExpectedTest):
+    searchStr = 'ctestName\': \'' + str(data['expectedTest'])
+    foundTest = searchStr in str(packet)
+    if (not foundTest):
+      print('Test ' + data['expectedTest'] + ' not found')
+      sys.exit(1)
+  return;
+
+  
 def handleBasicMessage(proc, obj, debug):
   if 'sendRaw' in obj:
     data = obj['sendRaw']
