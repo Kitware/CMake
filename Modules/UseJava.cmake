@@ -36,7 +36,7 @@
 # The default OUTPUT_DIR can also be changed by setting the variable
 # CMAKE_JAVA_TARGET_OUTPUT_DIR.
 #
-# Optionaly, using option GENERATE_NATIVE_HEADERS, native header files can be generated
+# Optionally, using option GENERATE_NATIVE_HEADERS, native header files can be generated
 # for methods declared as native. These files provide the connective glue that allow your
 # Java and C code to interact. An INTERFACE target will be created for an easy usage
 # of generated files. Sub-option DESTINATION can be used to specify output directory for

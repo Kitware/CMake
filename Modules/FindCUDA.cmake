@@ -175,7 +175,7 @@
 #   -- Same as CUDA_ADD_EXECUTABLE except that a library is created.
 #
 #   CUDA_BUILD_CLEAN_TARGET()
-#   -- Creates a convience target that deletes all the dependency files
+#   -- Creates a convenience target that deletes all the dependency files
 #      generated.  You should make clean after running this target to ensure the
 #      dependency files get regenerated.
 #
@@ -1564,7 +1564,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
       # Bring in the dependencies.  Creates a variable CUDA_NVCC_DEPEND #######
       cuda_include_nvcc_dependencies(${cmake_dependency_file})
 
-      # Convience string for output ###########################################
+      # Convenience string for output #########################################
       if(CUDA_BUILD_EMULATION)
         set(cuda_build_type "Emulation")
       else()
@@ -1975,9 +1975,9 @@ endmacro()
 ###############################################################################
 ###############################################################################
 macro(CUDA_BUILD_CLEAN_TARGET)
-  # Call this after you add all your CUDA targets, and you will get a convience
-  # target.  You should also make clean after running this target to get the
-  # build system to generate all the code again.
+  # Call this after you add all your CUDA targets, and you will get a
+  # convenience target.  You should also make clean after running this target
+  # to get the build system to generate all the code again.
 
   set(cuda_clean_target_name clean_cuda_depends)
   if (CMAKE_GENERATOR MATCHES "Visual Studio")

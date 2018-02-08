@@ -225,8 +225,8 @@ void cmFindBase::FillCMakeVariablePath()
 {
   cmSearchPath& paths = this->LabeledPaths[PathLabel::CMake];
 
-  // Add CMake varibles of the same name as the previous environment
-  // varibles CMAKE_*_PATH to be used most of the time with -D
+  // Add CMake variables of the same name as the previous environment
+  // variables CMAKE_*_PATH to be used most of the time with -D
   // command line options
   std::string var = "CMAKE_";
   var += this->CMakePathName;

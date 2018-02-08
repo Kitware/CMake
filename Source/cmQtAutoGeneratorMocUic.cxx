@@ -434,7 +434,7 @@ bool cmQtAutoGeneratorMocUic::JobParseT::ParseMocSource(WorkerT& wrk,
     JobHandleT jobHandle(new JobMocT(std::move(jobPre.SourceFile), FileName,
                                      std::move(jobPre.IncludeString)));
     if (jobPre.self) {
-      // Read depdendencies from this source
+      // Read dependencies from this source
       static_cast<JobMocT&>(*jobHandle).FindDependencies(wrk, meta.Content);
     }
     if (!wrk.Gen().ParallelJobPushMoc(jobHandle)) {
@@ -452,7 +452,7 @@ bool cmQtAutoGeneratorMocUic::JobParseT::ParseMocHeader(WorkerT& wrk,
   if (!macroName.empty()) {
     JobHandleT jobHandle(
       new JobMocT(std::string(FileName), std::string(), std::string()));
-    // Read depdendencies from this source
+    // Read dependencies from this source
     static_cast<JobMocT&>(*jobHandle).FindDependencies(wrk, meta.Content);
     success = wrk.Gen().ParallelJobPushMoc(jobHandle);
   }
@@ -1373,7 +1373,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
       // Compare list sizes
       if (sources.size() != options.size()) {
         std::ostringstream ost;
-        ost << "files/options lists sizes missmatch (" << sources.size() << "/"
+        ost << "files/options lists sizes mismatch (" << sources.size() << "/"
             << options.size() << ")";
         Log().ErrorFile(GeneratorT::UIC, InfoFile(), ost.str());
         return false;
