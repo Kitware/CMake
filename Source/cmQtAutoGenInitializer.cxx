@@ -8,6 +8,7 @@
 #include "cmCustomCommandLines.h"
 #include "cmDuration.h"
 #include "cmFilePathChecksum.h"
+#include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
@@ -22,7 +23,6 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cm_sys_stat.h"
 #include "cmake.h"
 #include "cmsys/FStream.hxx"
 #include "cmsys/SystemInformation.hxx"
@@ -867,34 +867,6 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
     dir += cfg;
   }
 
-  auto OpenInfoFile = [](cmsys::ofstream& ofs,
-                         std::string const& fileName) -> bool {
-    // Ensure we have write permission
-    if (cmSystemTools::FileExists(fileName)) {
-      mode_t perm = 0;
-#if defined(_WIN32) && !defined(__CYGWIN__)
-      mode_t mode_write = S_IWRITE;
-#else
-      mode_t mode_write = S_IWUSR;
-#endif
-      cmSystemTools::GetPermissions(fileName, perm);
-      if (!(perm & mode_write)) {
-        cmSystemTools::SetPermissions(fileName, perm | mode_write);
-      }
-    }
-
-    ofs.open(fileName.c_str(),
-             (std::ios::out | std::ios::binary | std::ios::trunc));
-    if (!ofs) {
-      // File open error
-      std::string error = "Internal CMake error when trying to open file: ";
-      error += Quoted(fileName);
-      error += " for writing.";
-      cmSystemTools::Error(error.c_str());
-    }
-    return static_cast<bool>(ofs);
-  };
-
   // Generate autogen target info file
   if (this->MocEnabled || this->UicEnabled) {
     if (this->MocEnabled) {
@@ -911,8 +883,10 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
       this->Parallel = std::to_string(GetParallelCPUCount());
     }
 
-    cmsys::ofstream ofs;
-    if (OpenInfoFile(ofs, this->AutogenInfoFile)) {
+    cmGeneratedFileStream ofs;
+    ofs.SetCopyIfDifferent(true);
+    ofs.Open(this->AutogenInfoFile.c_str(), false, true);
+    if (ofs) {
       // Utility lambdas
       auto CWrite = [&ofs](const char* key, std::string const& value) {
         ofs << "set(" << key << " " << cmOutputConverter::EscapeForCMake(value)
@@ -1012,14 +986,18 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
         CWriteNestedLists("AM_UIC_OPTIONS_OPTIONS", this->UicFileOptions);
         CWriteList("AM_UIC_SEARCH_PATHS", this->UicSearchPaths);
       }
+    } else {
+      return;
     }
   }
 
   // Generate auto RCC info files
   if (this->RccEnabled) {
     for (Qrc const& qrc : this->Qrcs) {
-      cmsys::ofstream ofs;
-      if (OpenInfoFile(ofs, qrc.InfoFile)) {
+      cmGeneratedFileStream ofs;
+      ofs.SetCopyIfDifferent(true);
+      ofs.Open(qrc.InfoFile.c_str(), false, true);
+      if (ofs) {
         // Utility lambdas
         auto CWrite = [&ofs](const char* key, std::string const& value) {
           ofs << "set(" << key << " "
@@ -1069,7 +1047,7 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
         CWrite("ARCC_OPTIONS", cmJoin(qrc.Options, ";"));
         CWrite("ARCC_INPUTS", cmJoin(qrc.Resources, ";"));
       } else {
-        break;
+        return;
       }
     }
   }
