@@ -757,9 +757,10 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     }
   }
 
-  std::string output;
+  std::ostringstream outputStream;
   bool first = true;
-  for (; i != args.end(); ++i) {
+  bool warnFollowedSymlinks = false;
+  while (i != args.end()) {
     if (*i == "LIST_DIRECTORIES") {
       ++i;
       if (i != args.end()) {
@@ -777,103 +778,109 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         this->SetError("LIST_DIRECTORIES missing bool value.");
         return false;
       }
-      continue;
-    }
-
-    if (recurse && (*i == "FOLLOW_SYMLINKS")) {
+      ++i;
+      if (i == args.end()) {
+        this->SetError("GLOB requires a glob expression after the bool.");
+        return false;
+      }
+    } else if (*i == "FOLLOW_SYMLINKS") {
+      if (!recurse) {
+        this->SetError("FOLLOW_SYMLINKS is not a valid parameter for GLOB.");
+        return false;
+      }
       explicitFollowSymlinks = true;
       g.RecurseThroughSymlinksOn();
       ++i;
       if (i == args.end()) {
         this->SetError(
-          "GLOB_RECURSE requires a glob expression after FOLLOW_SYMLINKS");
+          "GLOB_RECURSE requires a glob expression after FOLLOW_SYMLINKS.");
         return false;
       }
-    }
-
-    if (*i == "RELATIVE") {
+    } else if (*i == "RELATIVE") {
       ++i; // skip RELATIVE
       if (i == args.end()) {
-        this->SetError("GLOB requires a directory after the RELATIVE tag");
+        this->SetError("GLOB requires a directory after the RELATIVE tag.");
         return false;
       }
       g.SetRelative(i->c_str());
       ++i;
       if (i == args.end()) {
-        this->SetError("GLOB requires a glob expression after the directory");
+        this->SetError("GLOB requires a glob expression after the directory.");
         return false;
-      }
-    }
-
-    cmsys::Glob::GlobMessages globMessages;
-    if (!cmsys::SystemTools::FileIsFullPath(*i)) {
-      std::string expr = this->Makefile->GetCurrentSourceDirectory();
-      // Handle script mode
-      if (!expr.empty()) {
-        expr += "/" + *i;
-        g.FindFiles(expr, &globMessages);
-      } else {
-        g.FindFiles(*i, &globMessages);
       }
     } else {
-      g.FindFiles(*i, &globMessages);
-    }
-
-    if (!globMessages.empty()) {
-      bool shouldExit = false;
-      for (cmsys::Glob::Message const& globMessage : globMessages) {
-        if (globMessage.type == cmsys::Glob::cyclicRecursion) {
-          this->Makefile->IssueMessage(
-            cmake::AUTHOR_WARNING,
-            "Cyclic recursion detected while globbing for '" + *i + "':\n" +
-              globMessage.content);
+      std::string expr = *i;
+      if (!cmsys::SystemTools::FileIsFullPath(*i)) {
+        expr = this->Makefile->GetCurrentSourceDirectory();
+        // Handle script mode
+        if (!expr.empty()) {
+          expr += "/" + *i;
         } else {
-          this->Makefile->IssueMessage(
-            cmake::FATAL_ERROR, "Error has occurred while globbing for '" +
-              *i + "' - " + globMessage.content);
-          shouldExit = true;
+          expr = *i;
         }
       }
-      if (shouldExit) {
-        return false;
-      }
-    }
 
-    std::vector<std::string>::size_type cc;
-    std::vector<std::string>& files = g.GetFiles();
-    std::sort(files.begin(), files.end());
-    for (cc = 0; cc < files.size(); cc++) {
-      if (!first) {
-        output += ";";
+      cmsys::Glob::GlobMessages globMessages;
+      g.FindFiles(expr, &globMessages);
+
+      if (!globMessages.empty()) {
+        bool shouldExit = false;
+        for (cmsys::Glob::Message const& globMessage : globMessages) {
+          if (globMessage.type == cmsys::Glob::cyclicRecursion) {
+            this->Makefile->IssueMessage(
+              cmake::AUTHOR_WARNING,
+              "Cyclic recursion detected while globbing for '" + *i + "':\n" +
+                globMessage.content);
+          } else {
+            this->Makefile->IssueMessage(
+              cmake::FATAL_ERROR, "Error has occurred while globbing for '" +
+                *i + "' - " + globMessage.content);
+            shouldExit = true;
+          }
+        }
+        if (shouldExit) {
+          return false;
+        }
       }
-      output += files[cc];
-      first = false;
+
+      if (recurse && !explicitFollowSymlinks &&
+          g.GetFollowedSymlinkCount() != 0) {
+        warnFollowedSymlinks = true;
+      }
+
+      std::vector<std::string>& files = g.GetFiles();
+      std::sort(files.begin(), files.end());
+      for (std::string const& file : files) {
+        if (!first) {
+          outputStream << ";";
+        }
+        outputStream << file;
+        first = false;
+      }
+      ++i;
     }
   }
 
-  if (recurse && !explicitFollowSymlinks) {
-    switch (status) {
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::NEW:
-        // Correct behavior, yay!
-        break;
-      case cmPolicies::OLD:
-      // Probably not really the expected behavior, but the author explicitly
-      // asked for the old behavior... no warning.
-      case cmPolicies::WARN:
-        // Possibly unexpected old behavior *and* we actually traversed
-        // symlinks without being explicitly asked to: warn the author.
-        if (g.GetFollowedSymlinkCount() != 0) {
-          this->Makefile->IssueMessage(
-            cmake::AUTHOR_WARNING,
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0009));
-        }
-        break;
-    }
+  switch (status) {
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      // Correct behavior, yay!
+      break;
+    case cmPolicies::OLD:
+    // Probably not really the expected behavior, but the author explicitly
+    // asked for the old behavior... no warning.
+    case cmPolicies::WARN:
+      // Possibly unexpected old behavior *and* we actually traversed
+      // symlinks without being explicitly asked to: warn the author.
+      if (warnFollowedSymlinks) {
+        this->Makefile->IssueMessage(
+          cmake::AUTHOR_WARNING,
+          cmPolicies::GetPolicyWarning(cmPolicies::CMP0009));
+      }
+      break;
   }
-
-  this->Makefile->AddDefinition(variable, output.c_str());
+  this->Makefile->AddDefinition(variable, outputStream.str().c_str());
   return true;
 }
 
