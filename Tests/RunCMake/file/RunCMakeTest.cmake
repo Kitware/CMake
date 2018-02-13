@@ -35,11 +35,15 @@ run_cmake(LOCK-lowercase)
 run_cmake(READ_ELF)
 run_cmake(GLOB)
 run_cmake(GLOB_RECURSE)
-# test is valid both for GLOB and GLOB_RECURSE
+run_cmake(GLOB_RECURSE-noexp-FOLLOW_SYMLINKS)
+
+# tests are valid both for GLOB and GLOB_RECURSE
+run_cmake(GLOB-error-FOLLOW_SYMLINKS)
 run_cmake(GLOB-error-LIST_DIRECTORIES-not-boolean)
-# test is valid both for GLOB and GLOB_RECURSE
 run_cmake(GLOB-error-LIST_DIRECTORIES-no-arg)
+run_cmake(GLOB-error-RELATIVE-no-arg)
 run_cmake(GLOB-noexp-LIST_DIRECTORIES)
+run_cmake(GLOB-noexp-RELATIVE)
 
 if(NOT WIN32 OR CYGWIN)
   run_cmake(GLOB_RECURSE-cyclic-recursion)
