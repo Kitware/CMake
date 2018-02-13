@@ -3138,6 +3138,14 @@ void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 cmSourceFile* cmMakefile::GetSource(const std::string& sourceName,
                                     cmSourceFileLocationKind kind) const
 {
+  // First check "Known" paths (avoids the creation of cmSourceFileLocation)
+  if (kind == cmSourceFileLocationKind::Known) {
+    auto sfsi = this->KnownFileSearchIndex.find(sourceName);
+    if (sfsi != this->KnownFileSearchIndex.end()) {
+      return sfsi->second;
+    }
+  }
+
   cmSourceFileLocation sfl(this, sourceName, kind);
   auto name = this->GetCMakeInstance()->StripExtension(sfl.GetName());
 #if defined(_WIN32) || defined(__APPLE__)
@@ -3170,6 +3178,10 @@ cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
   name = cmSystemTools::LowerCase(name);
 #endif
   this->SourceFileSearchIndex[name].push_back(sf);
+  // for "Known" paths add direct lookup (used for faster lookup in GetSource)
+  if (kind == cmSourceFileLocationKind::Known) {
+    this->KnownFileSearchIndex[sourceName] = sf;
+  }
 
   return sf;
 }

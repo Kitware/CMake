@@ -861,6 +861,9 @@ protected:
   typedef std::unordered_map<std::string, SourceFileVec> SourceFileMap;
   SourceFileMap SourceFileSearchIndex;
 
+  // For "Known" paths we can store a direct filename to cmSourceFile map
+  std::unordered_map<std::string, cmSourceFile*> KnownFileSearchIndex;
+
   // Tests
   std::map<std::string, cmTest*> Tests;
 
