@@ -206,7 +206,7 @@ foreach(component ${ImageMagick_FIND_COMPONENTS}
     list(APPEND ImageMagick_REQUIRED_VARS ImageMagick_Magick++_LIBRARY)
   elseif(component STREQUAL "MagickWand")
     FIND_IMAGEMAGICK_API(MagickWand "wand/MagickWand.h;MagickWand/MagickWand.h"
-      Wand MagickWand CORE_RL_wand_
+      Wand MagickWand CORE_RL_wand_ CORE_RL_MagickWand_
       MagickWand-6 MagickWand-7
       MagickWand-Q16 MagickWand-Q8 MagickWand-Q16HDRI MagickWand-Q8HDRI
       MagickWand-6.Q64 MagickWand-6.Q32 MagickWand-6.Q64HDRI MagickWand-6.Q32HDRI
@@ -217,7 +217,7 @@ foreach(component ${ImageMagick_FIND_COMPONENTS}
     list(APPEND ImageMagick_REQUIRED_VARS ImageMagick_MagickWand_LIBRARY)
   elseif(component STREQUAL "MagickCore")
     FIND_IMAGEMAGICK_API(MagickCore "magick/MagickCore.h;MagickCore/MagickCore.h"
-      Magick MagickCore CORE_RL_magick_
+      Magick MagickCore CORE_RL_magick_ CORE_RL_MagickCore_
       MagickCore-6 MagickCore-7
       MagickCore-Q16 MagickCore-Q8 MagickCore-Q16HDRI MagickCore-Q8HDRI
       MagickCore-6.Q64 MagickCore-6.Q32 MagickCore-6.Q64HDRI MagickCore-6.Q32HDRI
