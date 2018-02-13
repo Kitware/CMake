@@ -129,11 +129,13 @@ void cmTargetPropCommandBase::HandleInterfaceContent(
   if (prepend) {
     const std::string propName = std::string("INTERFACE_") + this->Property;
     const char* propValue = tgt->GetProperty(propName);
+    auto & backtrace = tgt->GetPropertyBacktrace(propName);
     const std::string totalContent = this->Join(content) +
       (propValue ? std::string(";") + propValue : std::string());
-    tgt->SetProperty(propName, totalContent.c_str());
+    tgt->SetProperty(propName, totalContent.c_str(), backtrace);
   } else {
     tgt->AppendProperty("INTERFACE_" + this->Property,
-                        this->Join(content).c_str());
+                        this->Join(content).c_str(),
+                        this->GetBacktrace());
   }
 }

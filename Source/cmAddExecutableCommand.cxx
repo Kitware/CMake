@@ -166,10 +166,10 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
   cmTarget* tgt =
     this->Makefile->AddExecutable(exename.c_str(), srclists, excludeFromAll);
   if (use_win32) {
-    tgt->SetProperty("WIN32_EXECUTABLE", "ON");
+    tgt->SetProperty("WIN32_EXECUTABLE", "ON", tgt->GetBacktrace());
   }
   if (use_macbundle) {
-    tgt->SetProperty("MACOSX_BUNDLE", "ON");
+    tgt->SetProperty("MACOSX_BUNDLE", "ON", tgt->GetBacktrace());
   }
 
   return true;

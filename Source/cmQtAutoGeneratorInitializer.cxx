@@ -693,7 +693,7 @@ void cmQtAutoGeneratorInitializer::InitCustomTargets()
 
           // Set FOLDER property in autogen target
           if (!this->AutogenFolder.empty()) {
-            autoRccTarget->SetProperty("FOLDER", this->AutogenFolder.c_str());
+            autoRccTarget->SetProperty("FOLDER", this->AutogenFolder.c_str(), autoRccTarget->GetBacktrace());
           }
         }
         // Add autogen target to the origin target dependencies
@@ -871,7 +871,7 @@ void cmQtAutoGeneratorInitializer::InitCustomTargets()
 
       // Set FOLDER property in autogen target
       if (!this->AutogenFolder.empty()) {
-        autogenTarget->SetProperty("FOLDER", this->AutogenFolder.c_str());
+        autogenTarget->SetProperty("FOLDER", this->AutogenFolder.c_str(), autogenTarget->GetBacktrace());
       }
 
       // Add autogen target to the origin target dependencies

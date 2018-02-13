@@ -257,12 +257,12 @@ bool cmServerProtocol::DoActivate(const cmServerRequest& /*request*/,
 
 std::pair<int, int> cmServerProtocol1::ProtocolVersion() const
 {
-  return std::make_pair(1, 2);
+  return std::make_pair(1, 3);
 }
 
 std::pair<int, int> cmServerProtocol2::ProtocolVersion() const
 {
-  return std::make_pair(2, 0);
+  return std::make_pair(2, 1);
 }
 
 static void setErrorMessage(std::string* errorMessage, const std::string& text)
@@ -750,14 +750,14 @@ static Json::Value DumpBacktrace_Protocol1(const cmListFileBacktrace& backtrace)
   Json::Value result = Json::arrayValue;
 
   cmListFileBacktrace backtraceCopy = backtrace;
-  while (!backtraceCopy.Top().FilePath.empty()) {
+  while (backtraceCopy.Top().HasFilePath()) {
     Json::Value entry = Json::objectValue;
-    entry[kPATH_KEY] = backtraceCopy.Top().FilePath;
+    entry[kPATH_KEY] = backtraceCopy.Top().FilePath();
     if (backtraceCopy.Top().Line) {
       entry[kLINE_NUMBER_KEY] = static_cast<int>(backtraceCopy.Top().Line);
     }
-    if (!backtraceCopy.Top().Name.empty()) {
-      entry[kNAME_KEY] = backtraceCopy.Top().Name;
+    if (backtraceCopy.Top().HasName()) {
+      entry[kNAME_KEY] = backtraceCopy.Top().Name();
     }
     result.append(entry);
     backtraceCopy = backtraceCopy.Pop();
@@ -912,6 +912,7 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
                               const std::string& config,
                               std::unordered_set<size_t> * seenTraceIds = nullptr)
 {
+  cmGlobalGenerator* g = target->GetGlobalGenerator();
   cmLocalGenerator* lg = target->GetLocalGenerator();
   const cmState* state = lg->GetState();
 
@@ -991,6 +992,18 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
     result[kTARGET_CROSS_REFERENCES_KEY] = std::move(crossRefs);
   }
 
+
+  if (seenTraceIds != nullptr) {
+    cmGlobalGenerator::TargetDependSet const& tgtdeps = g->GetTargetDirectDepends(target);
+    Json::Value dependencies = Json::arrayValue;
+    for (auto const & depend : tgtdeps) {
+      Json::Value obj = Json::objectValue;
+      obj[kNAME_KEY] = depend->GetFullName(config);
+      obj[kBACKTRACE_KEY] = DumpBacktrace(depend.Backtrace(), seenTraceIds);
+      dependencies.append(obj);
+    }
+    result[KTARGET_DEPENDENCIES_KEY] = dependencies;
+  }
 
   if (target->HaveWellDefinedOutputFiles()) {
     Json::Value artifacts = Json::arrayValue;
@@ -1167,12 +1180,12 @@ static Json::Value DumpFrame(size_t id, const cmListFileContext & frame)
   Json::Value entry = Json::objectValue;
 
   entry[kID_KEY] = id;
-  entry[kPATH_KEY] = frame.FilePath;
+  entry[kPATH_KEY] = frame.FilePath();
   if (frame.Line) {
     entry[kLINE_NUMBER_KEY] = static_cast<int>(frame.Line);
   }
-  if (!frame.Name.empty()) {
-    entry[kNAME_KEY] = frame.Name;
+  if (frame.HasName()) {
+    entry[kNAME_KEY] = frame.Name();
   }
 
   return entry;
@@ -1453,11 +1466,14 @@ cmServerResponse cmServerProtocol2::ProcessCTests(
     return request.ReportError("This instance was not yet computed.");
   }
 
+  auto includeTraces = request.Data[kINCLUDE_TRACES_KEY].asBool();
   Json::Value result = Json::objectValue;
   std::unordered_set<size_t> seenTraceIds;
   result[kCONFIGURATIONS_KEY] =
-    DumpCTestConfigurationsList(this->CMakeInstance(), &seenTraceIds);
-  result[KREFERENCED_TRACES_KEY] = DumpReferencedTraces(seenTraceIds);
+    DumpCTestConfigurationsList(this->CMakeInstance(), includeTraces ? &seenTraceIds : nullptr);
+  if (includeTraces) {
+    result[KREFERENCED_TRACES_KEY] = DumpReferencedTraces(seenTraceIds);
+  }
   return request.Reply(result);
 }
 

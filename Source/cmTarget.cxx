@@ -378,7 +378,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
   if (this->TargetTypeValue == cmStateEnums::SHARED_LIBRARY ||
       this->TargetTypeValue == cmStateEnums::MODULE_LIBRARY) {
-    this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
+    this->SetProperty("POSITION_INDEPENDENT_CODE", "True", this->Backtrace);
   }
   if (this->TargetTypeValue == cmStateEnums::SHARED_LIBRARY ||
       this->TargetTypeValue == cmStateEnums::EXECUTABLE) {
@@ -713,15 +713,16 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
   for (auto const& cmd : this->TLLCommands) {
     if (cmd.first == sig) {
       cmListFileContext lfc = cmd.second;
-      lfc.FilePath = converter.ConvertToRelativePath(
-        this->Makefile->GetState()->GetSourceDirectory(), lfc.FilePath);
+      lfc.UpdateFilePath(converter.ConvertToRelativePath(
+        this->Makefile->GetState()->GetSourceDirectory(), lfc.FilePath()));
       s << " * " << lfc << std::endl;
     }
   }
 }
 
 void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
-                              cmTargetLinkLibraryType llt)
+                              cmTargetLinkLibraryType llt,
+                              const cmListFileBacktrace & bt)
 {
   cmTarget* tgt = this->Makefile->FindTargetToUse(lib);
   {
@@ -733,7 +734,8 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
       : lib;
     this->AppendProperty(
       "LINK_LIBRARIES",
-      this->GetDebugGeneratorExpressions(libName, llt).c_str());
+      this->GetDebugGeneratorExpressions(libName, llt).c_str(),
+      bt);
   }
 
   if (cmGeneratorExpression::Find(lib) != std::string::npos ||
@@ -847,7 +849,7 @@ cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
   return cmMakeRange(this->Internal->LinkImplementationPropertyBacktraces);
 }
 
-void cmTarget::SetProperty(const std::string& prop, const char* value)
+void cmTarget::SetProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace)
 {
   if (!cmTargetPropertyComputer::PassesWhitelist(
         this->GetType(), prop, this->Makefile->GetMessenger(),
@@ -899,48 +901,42 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     this->Internal->IncludeDirectoriesBacktraces.clear();
     if (value) {
       this->Internal->IncludeDirectoriesEntries.push_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      this->Internal->IncludeDirectoriesBacktraces.push_back(lfbt);
+      this->Internal->IncludeDirectoriesBacktraces.push_back(backtrace);
     }
   } else if (prop == "COMPILE_OPTIONS") {
     this->Internal->CompileOptionsEntries.clear();
     this->Internal->CompileOptionsBacktraces.clear();
     if (value) {
       this->Internal->CompileOptionsEntries.push_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      this->Internal->CompileOptionsBacktraces.push_back(lfbt);
+      this->Internal->CompileOptionsBacktraces.push_back(backtrace);
     }
   } else if (prop == "COMPILE_FEATURES") {
     this->Internal->CompileFeaturesEntries.clear();
     this->Internal->CompileFeaturesBacktraces.clear();
     if (value) {
       this->Internal->CompileFeaturesEntries.push_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      this->Internal->CompileFeaturesBacktraces.push_back(lfbt);
+      this->Internal->CompileFeaturesBacktraces.push_back(backtrace);
     }
   } else if (prop == "COMPILE_DEFINITIONS") {
     this->Internal->CompileDefinitionsEntries.clear();
     this->Internal->CompileDefinitionsBacktraces.clear();
     if (value) {
       this->Internal->CompileDefinitionsEntries.push_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
+      this->Internal->CompileDefinitionsBacktraces.push_back(backtrace);
     }
   } else if (prop == "LINK_LIBRARIES") {
     this->Internal->LinkImplementationPropertyEntries.clear();
     this->Internal->LinkImplementationPropertyBacktraces.clear();
     if (value) {
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->LinkImplementationPropertyEntries.push_back(value);
-      this->Internal->LinkImplementationPropertyBacktraces.push_back(lfbt);
+      this->Internal->LinkImplementationPropertyBacktraces.push_back(backtrace);
     }
   } else if (prop == "SOURCES") {
     this->Internal->SourceEntries.clear();
     this->Internal->SourceBacktraces.clear();
     if (value) {
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->SourceEntries.push_back(value);
-      this->Internal->SourceBacktraces.push_back(lfbt);
+      this->Internal->SourceBacktraces.push_back(backtrace);
     }
   } else if (prop == "IMPORTED_GLOBAL") {
     if (!cmSystemTools::IsOn(value)) {
@@ -967,16 +963,16 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   } else {
-    this->Properties.SetProperty(prop, value);
+    this->Properties.SetProperty(prop, value, backtrace);
   }
 }
 
-void cmTarget::AppendProperty(const std::string& prop, const char* value,
+void cmTarget::AppendProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace,
                               bool asString)
 {
   if (!cmTargetPropertyComputer::PassesWhitelist(
         this->GetType(), prop, this->Makefile->GetMessenger(),
-        this->Makefile->GetBacktrace())) {
+        backtrace)) {
     return;
   }
   if (prop == "NAME") {
@@ -1010,42 +1006,36 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
   if (prop == "INCLUDE_DIRECTORIES") {
     if (value && *value) {
       this->Internal->IncludeDirectoriesEntries.push_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      this->Internal->IncludeDirectoriesBacktraces.push_back(lfbt);
+      this->Internal->IncludeDirectoriesBacktraces.push_back(backtrace);
     }
   } else if (prop == "COMPILE_OPTIONS") {
     if (value && *value) {
       this->Internal->CompileOptionsEntries.push_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      this->Internal->CompileOptionsBacktraces.push_back(lfbt);
+      this->Internal->CompileOptionsBacktraces.push_back(backtrace);
     }
   } else if (prop == "COMPILE_FEATURES") {
     if (value && *value) {
       this->Internal->CompileFeaturesEntries.push_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      this->Internal->CompileFeaturesBacktraces.push_back(lfbt);
+      this->Internal->CompileFeaturesBacktraces.push_back(backtrace);
     }
   } else if (prop == "COMPILE_DEFINITIONS") {
     if (value && *value) {
       this->Internal->CompileDefinitionsEntries.push_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-      this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
+      this->Internal->CompileDefinitionsBacktraces.push_back(backtrace);
     }
   } else if (prop == "LINK_LIBRARIES") {
     if (value && *value) {
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->LinkImplementationPropertyEntries.push_back(value);
-      this->Internal->LinkImplementationPropertyBacktraces.push_back(lfbt);
+      this->Internal->LinkImplementationPropertyBacktraces.push_back(backtrace);
     }
   } else if (prop == "SOURCES") {
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
     this->Internal->SourceEntries.push_back(value);
-    this->Internal->SourceBacktraces.push_back(lfbt);
+    this->Internal->SourceBacktraces.push_back(backtrace);
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME")) {
     this->Makefile->IssueMessage(cmake::FATAL_ERROR,
                                  prop + " property may not be APPENDed.");
   } else {
-    this->Properties.AppendProperty(prop, value, asString);
+    this->Properties.AppendProperty(prop, value, backtrace, asString);
   }
 }
 
@@ -1070,7 +1060,8 @@ void cmTarget::AppendBuildInterfaceIncludes()
       std::string(binDir ? ";" : "") + std::string(srcDir ? srcDir : "");
     if (!dirs.empty()) {
       this->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                           ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
+                           ("$<BUILD_INTERFACE:" + dirs + ">").c_str(),
+                           this->GetPropertyBacktrace("INTERFACE_INCLUDE_DIRECTORIES"));
     }
   }
 }
@@ -1348,6 +1339,23 @@ const char* cmTarget::GetProperty(const std::string& prop) const
   return retVal;
 }
 
+const cmListFileBacktrace & cmTarget::GetPropertyBacktrace(const std::string & prop) const
+{
+  bool haveProperty = this->Properties.HasProperty(prop);
+  if (!haveProperty) {
+    const bool chain = this->GetMakefile()->GetState()->IsPropertyChained(
+      prop, cmProperty::TARGET);
+    if (chain) {
+      return this->Makefile->GetStateSnapshot().GetDirectory().GetPropertyBacktrace(
+        prop);
+    } else {
+      return Backtrace;
+    }
+  } else {
+    return this->Properties.GetPropertyBacktrace(prop);
+  }
+}
+
 bool cmTarget::GetPropertyAsBool(const std::string& prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
@@ -1502,9 +1510,9 @@ void cmTarget::SetPropertyDefault(const std::string& property,
   var += property;
 
   if (const char* value = this->Makefile->GetDefinition(var)) {
-    this->SetProperty(property, value);
+    this->SetProperty(property, value, this->Backtrace);
   } else if (default_value) {
-    this->SetProperty(property, default_value);
+    this->SetProperty(property, default_value, this->Backtrace);
   }
 }
 

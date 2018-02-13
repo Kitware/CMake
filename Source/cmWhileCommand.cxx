@@ -51,7 +51,7 @@ bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
 
       cmCommandContext commandContext;
       commandContext.Line = execContext.Line;
-      commandContext.Name = execContext.Name;
+      commandContext.Name = execContext.Name();
 
       cmConditionEvaluator conditionEvaluator(mf, this->GetStartingContext(),
                                               mf.GetBacktrace(commandContext));

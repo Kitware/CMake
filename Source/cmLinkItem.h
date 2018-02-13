@@ -25,14 +25,23 @@ public:
   cmLinkItem()
     : std_string()
     , Target(nullptr)
+    , Backtrace()
   {
   }
   cmLinkItem(const std_string& n, cmGeneratorTarget const* t)
+      : std_string(n)
+      , Target(t)
+      , Backtrace()
+  {
+  }
+  cmLinkItem(const std_string& n, cmGeneratorTarget const* t, cmListFileBacktrace const & bt)
     : std_string(n)
     , Target(t)
+    , Backtrace(bt)
   {
   }
   cmGeneratorTarget const* Target;
+  cmListFileBacktrace Backtrace;
 };
 
 class cmLinkImplItem : public cmLinkItem
@@ -40,18 +49,15 @@ class cmLinkImplItem : public cmLinkItem
 public:
   cmLinkImplItem()
     : cmLinkItem()
-    , Backtrace()
     , FromGenex(false)
   {
   }
   cmLinkImplItem(std::string const& n, cmGeneratorTarget const* t,
                  cmListFileBacktrace const& bt, bool fromGenex)
-    : cmLinkItem(n, t)
-    , Backtrace(bt)
+    : cmLinkItem(n, t, bt)
     , FromGenex(fromGenex)
   {
   }
-  cmListFileBacktrace Backtrace;
   bool FromGenex;
 };
 

@@ -28,7 +28,7 @@ std::vector<std::string> cmPropertyMap::GetPropertyList() const
   return keyList;
 }
 
-void cmPropertyMap::SetProperty(const std::string& name, const char* value)
+void cmPropertyMap::SetProperty(const std::string& name, const char* value, const cmListFileBacktrace & backtrace)
 {
   if (!value) {
     this->erase(name);
@@ -36,10 +36,10 @@ void cmPropertyMap::SetProperty(const std::string& name, const char* value)
   }
 
   cmProperty* prop = this->GetOrCreateProperty(name);
-  prop->Set(value);
+  prop->Set(value, backtrace);
 }
 
-void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
+void cmPropertyMap::AppendProperty(const std::string& name, const char* value, const cmListFileBacktrace & backtrace,
                                    bool asString)
 {
   // Skip if nothing to append.
@@ -48,7 +48,7 @@ void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
   }
 
   cmProperty* prop = this->GetOrCreateProperty(name);
-  prop->Append(value, asString);
+  prop->Append(value, backtrace, asString);
 }
 
 const char* cmPropertyMap::GetPropertyValue(const std::string& name) const
@@ -60,4 +60,24 @@ const char* cmPropertyMap::GetPropertyValue(const std::string& name) const
     return nullptr;
   }
   return it->second.GetValue();
+}
+
+const cmListFileBacktrace & cmPropertyMap::GetPropertyBacktrace(const std::string & name) const
+{
+  assert(!name.empty());
+
+  cmPropertyMap::const_iterator it = this->find(name);
+  if (it == this->end()) {
+    return cmListFileBacktrace::Empty();
+  }
+  return it->second.GetBacktrace();
+}
+
+
+bool cmPropertyMap::HasProperty(const std::string & name) const
+{
+  assert(!name.empty());
+
+  auto it = this->find(name);
+  return it != this->end();
 }

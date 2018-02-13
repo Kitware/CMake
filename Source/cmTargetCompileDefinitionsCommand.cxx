@@ -46,6 +46,6 @@ std::string cmTargetCompileDefinitionsCommand::Join(
 bool cmTargetCompileDefinitionsCommand::HandleDirectContent(
   cmTarget* tgt, const std::vector<std::string>& content, bool, bool)
 {
-  tgt->AppendProperty("COMPILE_DEFINITIONS", this->Join(content).c_str());
+  tgt->AppendProperty("COMPILE_DEFINITIONS", this->Join(content).c_str(), this->GetBacktrace());
   return true; // Successfully handled.
 }

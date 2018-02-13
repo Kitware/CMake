@@ -1096,7 +1096,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
         // Print the warning at most once for this item.
         std::string const& wid = "CMP0060-WARNING-GIVEN-" + item;
         if (!this->CMakeInstance->GetPropertyAsBool(wid)) {
-          this->CMakeInstance->SetProperty(wid, "1");
+          this->CMakeInstance->SetProperty(wid, "1", this->Target->GetBacktrace());
           this->CMP0060WarnItems.insert(item);
         }
       }
@@ -1374,7 +1374,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
       std::string wid = "CMP0008-WARNING-GIVEN-";
       wid += item;
       if (!this->CMakeInstance->GetState()->GetGlobalPropertyAsBool(wid)) {
-        this->CMakeInstance->GetState()->SetGlobalProperty(wid, "1");
+        this->CMakeInstance->GetState()->SetGlobalProperty(wid, "1", this->Target->GetBacktrace());
         std::ostringstream w;
         /* clang-format off */
         w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0008) << "\n"
@@ -1421,7 +1421,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
       if (!this->CMakeInstance->GetState()->GetGlobalPropertyAsBool(
             "CMP0003-WARNING-GIVEN")) {
         this->CMakeInstance->GetState()->SetGlobalProperty(
-          "CMP0003-WARNING-GIVEN", "1");
+          "CMP0003-WARNING-GIVEN", "1", this->Target->GetBacktrace());
         std::ostringstream w;
         this->PrintLinkPolicyDiagnosis(w);
         this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),

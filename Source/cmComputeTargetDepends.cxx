@@ -152,6 +152,7 @@ void cmComputeTargetDepends::GetTargetDirectDepends(cmGeneratorTarget const* t,
     cmGeneratorTarget const* dep = this->Targets[ni];
     cmTargetDependSet::iterator di = deps.insert(dep).first;
     di->SetType(ni.IsStrong());
+    di->SetBacktrace(ni.Backtrace());
   }
 }
 
@@ -342,13 +343,14 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
   }
 
   if (dependee) {
-    this->AddTargetDepend(depender_index, dependee, linking);
+    this->AddTargetDepend(depender_index, dependee, linking, dependee_name.Backtrace);
   }
 }
 
 void cmComputeTargetDepends::AddTargetDepend(int depender_index,
                                              const cmGeneratorTarget* dependee,
-                                             bool linking)
+                                             bool linking,
+                                             cmListFileBacktrace const & dependee_backtrace)
 {
   if (dependee->IsImported() ||
       dependee->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
@@ -357,7 +359,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
     std::set<cmLinkItem> const& utils = dependee->GetUtilityItems();
     for (cmLinkItem const& i : utils) {
       if (cmGeneratorTarget const* transitive_dependee = i.Target) {
-        this->AddTargetDepend(depender_index, transitive_dependee, false);
+        this->AddTargetDepend(depender_index, transitive_dependee, false, dependee_backtrace);
       }
     }
   } else {
@@ -370,7 +372,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
 
     // Add this entry to the dependency graph.
     this->InitialGraph[depender_index].push_back(
-      cmGraphEdge(dependee_index, !linking));
+      cmGraphEdge(dependee_index, !linking, &dependee_backtrace));
   }
 }
 
@@ -504,7 +506,7 @@ bool cmComputeTargetDepends::IntraComponent(std::vector<int> const& cmap,
     for (cmGraphEdge const& edge : el) {
       int j = edge;
       if (cmap[j] == c && edge.IsStrong()) {
-        this->FinalGraph[i].push_back(cmGraphEdge(j, true));
+        this->FinalGraph[i].push_back(cmGraphEdge(j, true, &edge.Backtrace()));
         if (!this->IntraComponent(cmap, c, j, head, emitted, visited)) {
           return false;
         }
@@ -513,7 +515,7 @@ bool cmComputeTargetDepends::IntraComponent(std::vector<int> const& cmap,
 
     // Prepend to a linear linked-list of intra-component edges.
     if (*head >= 0) {
-      this->FinalGraph[i].push_back(cmGraphEdge(*head, false));
+      this->FinalGraph[i].push_back(cmGraphEdge(*head, false, nullptr));
     } else {
       this->ComponentTail[c] = i;
     }
@@ -564,7 +566,7 @@ bool cmComputeTargetDepends::ComputeFinalDepends(
       int dependee_component = ni;
       int dependee_component_head = this->ComponentHead[dependee_component];
       this->FinalGraph[depender_component_tail].push_back(
-        cmGraphEdge(dependee_component_head, ni.IsStrong()));
+        cmGraphEdge(dependee_component_head, ni.IsStrong(), &ni.Backtrace()));
     }
   }
   return true;

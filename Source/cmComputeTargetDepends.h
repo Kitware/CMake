@@ -47,7 +47,7 @@ private:
   void AddTargetDepend(int depender_index, cmLinkItem const& dependee_name,
                        bool linking);
   void AddTargetDepend(int depender_index, cmGeneratorTarget const* dependee,
-                       bool linking);
+                       bool linking, cmListFileBacktrace const & dependee_backtrace);
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
   void AddInterfaceDepends(int depender_index, cmLinkItem const& dependee_name,
                            const std::string& config,

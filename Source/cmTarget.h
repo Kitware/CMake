@@ -140,7 +140,8 @@ public:
   void ClearDependencyInformation(cmMakefile& mf, const std::string& target);
 
   void AddLinkLibrary(cmMakefile& mf, const std::string& lib,
-                      cmTargetLinkLibraryType llt);
+                      cmTargetLinkLibraryType llt,
+                      const cmListFileBacktrace & bt);
   enum TLLSignature
   {
     KeywordTLLSignature,
@@ -196,8 +197,8 @@ public:
   cmListFileBacktrace const* GetUtilityBacktrace(const std::string& u) const;
 
   ///! Set/Get a property of this target file
-  void SetProperty(const std::string& prop, const char* value);
-  void AppendProperty(const std::string& prop, const char* value,
+  void SetProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace);
+  void AppendProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace,
                       bool asString = false);
   const char* GetProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
@@ -205,6 +206,7 @@ public:
   const char* GetComputedProperty(const std::string& prop,
                                   cmMessenger* messenger,
                                   cmListFileBacktrace const& context) const;
+  const cmListFileBacktrace & GetPropertyBacktrace(const std::string & prop) const;
 
   bool IsImported() const { return this->IsImportedTarget; }
   bool IsImportedGloballyVisible() const

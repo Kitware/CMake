@@ -411,6 +411,10 @@ void cmState::AddScriptedCommand(std::string const& name, cmCommand* command)
       delete pos->second;
       this->ScriptedCommands.erase(pos);
     }
+    cmCommand * clone = oldCmd->Clone();
+    clone->SetMakefile(oldCmd->GetMakefile());
+    clone->SetBacktrace(oldCmd->GetBacktrace());
+
     this->ScriptedCommands.insert(std::make_pair(newName, oldCmd->Clone()));
   }
 
@@ -462,35 +466,35 @@ void cmState::RemoveUserDefinedCommands()
   this->ScriptedCommands.clear();
 }
 
-void cmState::SetGlobalProperty(const std::string& prop, const char* value)
+void cmState::SetGlobalProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace)
 {
-  this->GlobalProperties.SetProperty(prop, value);
+  this->GlobalProperties.SetProperty(prop, value, backtrace);
 }
 
-void cmState::AppendGlobalProperty(const std::string& prop, const char* value,
+void cmState::AppendGlobalProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace,
                                    bool asString)
 {
-  this->GlobalProperties.AppendProperty(prop, value, asString);
+  this->GlobalProperties.AppendProperty(prop, value, backtrace, asString);
 }
 
 const char* cmState::GetGlobalProperty(const std::string& prop)
 {
   if (prop == "CACHE_VARIABLES") {
     std::vector<std::string> cacheKeys = this->GetCacheEntryKeys();
-    this->SetGlobalProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";").c_str());
+    this->SetGlobalProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";").c_str(), cmListFileBacktrace::Empty());
   } else if (prop == "COMMANDS") {
     std::vector<std::string> commands = this->GetCommandNames();
-    this->SetGlobalProperty("COMMANDS", cmJoin(commands, ";").c_str());
+    this->SetGlobalProperty("COMMANDS", cmJoin(commands, ";").c_str(), cmListFileBacktrace::Empty());
   } else if (prop == "IN_TRY_COMPILE") {
     this->SetGlobalProperty("IN_TRY_COMPILE",
-                            this->IsInTryCompile ? "1" : "0");
+                            this->IsInTryCompile ? "1" : "0", cmListFileBacktrace::Empty());
   } else if (prop == "GENERATOR_IS_MULTI_CONFIG") {
     this->SetGlobalProperty("GENERATOR_IS_MULTI_CONFIG",
-                            this->IsGeneratorMultiConfig ? "1" : "0");
+                            this->IsGeneratorMultiConfig ? "1" : "0", cmListFileBacktrace::Empty());
   } else if (prop == "ENABLED_LANGUAGES") {
     std::string langs;
     langs = cmJoin(this->EnabledLanguages, ";");
-    this->SetGlobalProperty("ENABLED_LANGUAGES", langs.c_str());
+    this->SetGlobalProperty("ENABLED_LANGUAGES", langs.c_str(), cmListFileBacktrace::Empty());
   }
 #define STRING_LIST_ELEMENT(F) ";" #F
   if (prop == "CMAKE_C_KNOWN_FEATURES") {

@@ -185,7 +185,7 @@ void CCONV cmAddExecutable(void* arg, const char* exename, int numSrcs,
   }
   cmTarget* tg = mf->AddExecutable(exename, srcs2);
   if (win32) {
-    tg->SetProperty("WIN32_EXECUTABLE", "ON");
+    tg->SetProperty("WIN32_EXECUTABLE", "ON", tg->GetBacktrace());
   }
 }
 
@@ -365,7 +365,7 @@ static void addLinkLibrary(cmMakefile* mf, std::string const& target,
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
   }
 
-  t->AddLinkLibrary(*mf, lib, llt);
+  t->AddLinkLibrary(*mf, lib, llt, mf->GetBacktrace());
 }
 
 void CCONV cmAddLinkLibraryForTarget(void* arg, const char* tgt,
@@ -618,7 +618,7 @@ void CCONV cmSourceFileSetProperty(void* arg, const char* prop,
     if (!value) {
       value = "NOTFOUND";
     }
-    sf->Properties.SetProperty(prop, value);
+    sf->Properties.SetProperty(prop, value, cmListFileBacktrace::Empty());
   }
 }
 
@@ -737,7 +737,7 @@ void CCONV cmSourceFileSetName2(void* arg, const char* name, const char* dir,
 
   // Implement the old SetName method code here.
   if (headerFileOnly) {
-    sf->Properties.SetProperty("HEADER_FILE_ONLY", "1");
+    sf->Properties.SetProperty("HEADER_FILE_ONLY", "1", cmListFileBacktrace::Empty());
   }
   sf->SourceName = name;
   std::string fname = sf->SourceName;

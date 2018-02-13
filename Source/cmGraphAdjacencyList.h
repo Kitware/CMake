@@ -4,6 +4,7 @@
 #define cmGraphAdjacencyList_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
+#include "cmListFileCache.h"
 
 #include <vector>
 
@@ -15,17 +16,42 @@
 class cmGraphEdge
 {
 public:
-  cmGraphEdge(int n = 0, bool s = true)
+  cmGraphEdge(int n, bool s, cmListFileBacktrace const * pbt)
     : Dest(n)
     , Strong(s)
+    , backtrace()
   {
+    if (pbt != nullptr) {
+      backtrace = *pbt;
+    }
   }
+
+  // Graph edges may be copied and assigned as values.
+  cmGraphEdge(cmGraphEdge const& r)
+     : Dest(r.Dest)
+     , Strong(r.Strong)
+     , backtrace(r.backtrace)
+  {
+     
+  }
+  cmGraphEdge& operator=(cmGraphEdge const& r)
+  {
+      this->Dest = r.Dest;
+      this->Strong = r.Strong;
+      this->backtrace = r.backtrace;
+      return *this;
+  }
+
   operator int() const { return this->Dest; }
 
   bool IsStrong() const { return this->Strong; }
+
+  cmListFileBacktrace const& Backtrace() const { return this->backtrace; }
+
 private:
   int Dest;
   bool Strong;
+  cmListFileBacktrace backtrace;
 };
 struct cmGraphEdgeList : public std::vector<cmGraphEdge>
 {

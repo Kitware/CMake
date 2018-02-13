@@ -114,6 +114,11 @@ public:
       return !(*this == other);
     }
 
+    bool operator<(iterator other) const
+    {
+      return StrictWeakOrdered(other);
+    }
+
     bool IsValid() const
     {
       if (!this->Tree) {

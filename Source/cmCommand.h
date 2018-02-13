@@ -4,6 +4,7 @@
 #define cmCommand_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
+#include "cmListFileCache.h"
 
 #include <string>
 #include <vector>
@@ -45,6 +46,12 @@ public:
    */
   void SetMakefile(cmMakefile* m) { this->Makefile = m; }
   cmMakefile* GetMakefile() { return this->Makefile; }
+
+  /**
+   * Save the backtrace for the creation of the command
+   */
+  void SetBacktrace(const cmListFileBacktrace & bt) { this->backTrace = bt; }
+  const cmListFileBacktrace & GetBacktrace() const { return this->backTrace; }
 
   /**
    * This is called by the cmMakefile when the command is first
@@ -91,6 +98,7 @@ public:
 
 protected:
   cmMakefile* Makefile;
+  cmListFileBacktrace backTrace;
 
 private:
   std::string Error;

@@ -66,25 +66,32 @@ struct cmListFileArgument
 class cmListFileContext
 {
 public:
-  std::string Name;
-  std::string FilePath;
+  const std::string & Name() const;
+  const std::string & FilePath() const;
   long Line;
   cmListFileContext()
-    : Name()
-    , FilePath()
+    : NameId(0)
+    , FilePathId(0)
     , Line(0)
   {
   }
+  cmListFileContext(const std::string & name, const std::string & file, long line);
+  cmListFileContext(const std::string & file, long line);
 
   static cmListFileContext FromCommandContext(cmCommandContext const& lfcc,
-                                              std::string const& fileName)
-  {
-    cmListFileContext lfc;
-    lfc.FilePath = fileName;
-    lfc.Line = lfcc.Line;
-    lfc.Name = lfcc.Name;
-    return lfc;
-  }
+    std::string const& fileName);
+
+  void UpdateFilePath(const std::string & newFile);
+
+  bool HasName() const { return NameId != 0; }
+  bool HasFilePath() const { return FilePathId != 0; }
+
+  friend bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs);
+  friend bool operator==(const cmListFileContext& lhs, const cmListFileContext& rhs);
+
+private:
+  size_t NameId;
+  size_t FilePathId;
 };
 
 std::ostream& operator<<(std::ostream&, cmListFileContext const&);
@@ -149,6 +156,9 @@ public:
   // Convert a list of frame ids into their actual representation
   static std::vector<std::pair<size_t, cmListFileContext>> ConvertFrameIds(std::unordered_set<size_t> const & frameIds);
 
+  // Returns an empty backfile trace for when a callstack isn't practical to find.
+  static const cmListFileBacktrace & Empty();
+
 private:
   struct Entry;
 
@@ -158,8 +168,7 @@ private:
                       cmListFileContext const& lfc);
   cmListFileBacktrace(cmStateSnapshot const& bottom, Entry* cur);
   
-  std::vector<size_t> mutable NonCompilingFrameIds;
-  std::vector<size_t> mutable CompilingFrameIds;
+  std::vector<size_t> mutable FrameIds;
 };
 
 struct cmListFile

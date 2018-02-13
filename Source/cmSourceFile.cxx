@@ -238,13 +238,15 @@ bool cmSourceFile::Matches(cmSourceFileLocation const& loc)
 
 void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 {
-  this->Properties.SetProperty(prop, value);
+  cmMakefile const* mf = this->Location.GetMakefile();
+  this->Properties.SetProperty(prop, value, mf->GetBacktrace());
 }
 
 void cmSourceFile::AppendProperty(const std::string& prop, const char* value,
                                   bool asString)
 {
-  this->Properties.AppendProperty(prop, value, asString);
+  cmMakefile const* mf = this->Location.GetMakefile();
+  this->Properties.AppendProperty(prop, value, mf->GetBacktrace(), asString);
 }
 
 const char* cmSourceFile::GetPropertyForUser(const std::string& prop)

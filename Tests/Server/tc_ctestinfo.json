@@ -17,6 +17,10 @@
 
 { "message": "TestInfo:" },
 { "send": { "type": "ctestInfo", "cookie":"ctestInfo" } },
+{ "validateTestInfo": { "hasTests": true, "hasTraces" :  false, "expectedTest": "dummytest" } },
+
+{ "message": "TestInfo with traces:" },
+{ "send": { "type": "ctestInfo", "cookie":"ctestInfo", "includeTraces" :  true } },
 { "validateTestInfo": { "hasTests": true, "hasTraces" :  true, "expectedTest": "dummytest" } },
 
 { "message": "Everything ok." }

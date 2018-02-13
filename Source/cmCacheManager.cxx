@@ -577,7 +577,7 @@ void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
   } else if (prop == "VALUE") {
     this->Value = value ? value : "";
   } else {
-    this->Properties.SetProperty(prop, value);
+    this->Properties.SetProperty(prop, value, cmListFileBacktrace::Empty());
   }
 }
 
@@ -595,7 +595,7 @@ void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
       this->Value += value;
     }
   } else {
-    this->Properties.AppendProperty(prop, value, asString);
+    this->Properties.AppendProperty(prop, value, cmListFileBacktrace::Empty(), asString);
   }
 }
 

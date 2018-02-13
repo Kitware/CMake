@@ -82,14 +82,14 @@ bool cmIncludeExternalMSProjectCommand::InitialPass(
     cmTarget* target = this->Makefile->AddNewTarget(cmStateEnums::UTILITY,
                                                     utility_name.c_str());
 
-    target->SetProperty("GENERATOR_FILE_NAME", utility_name.c_str());
-    target->SetProperty("EXTERNAL_MSPROJECT", path.c_str());
-    target->SetProperty("EXCLUDE_FROM_ALL", "FALSE");
+    target->SetProperty("GENERATOR_FILE_NAME", utility_name.c_str(), target->GetBacktrace());
+    target->SetProperty("EXTERNAL_MSPROJECT", path.c_str(), target->GetBacktrace());
+    target->SetProperty("EXCLUDE_FROM_ALL", "FALSE", target->GetBacktrace());
 
     if (!customType.empty())
-      target->SetProperty("VS_PROJECT_TYPE", customType.c_str());
+      target->SetProperty("VS_PROJECT_TYPE", customType.c_str(), target->GetBacktrace());
     if (!platformMapping.empty())
-      target->SetProperty("VS_PLATFORM_MAPPING", platformMapping.c_str());
+      target->SetProperty("VS_PLATFORM_MAPPING", platformMapping.c_str(), target->GetBacktrace());
 
     for (std::string const& d : depends) {
       target->AddUtility(d.c_str());

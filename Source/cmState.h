@@ -131,8 +131,8 @@ public:
   void RemoveUserDefinedCommands();
   std::vector<std::string> GetCommandNames() const;
 
-  void SetGlobalProperty(const std::string& prop, const char* value);
-  void AppendGlobalProperty(const std::string& prop, const char* value,
+  void SetGlobalProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace);
+  void AppendGlobalProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace,
                             bool asString = false);
   const char* GetGlobalProperty(const std::string& prop);
   bool GetGlobalPropertyAsBool(const std::string& prop);

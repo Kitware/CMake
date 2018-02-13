@@ -126,7 +126,7 @@ void cmComputeComponentGraph::TransferEdges()
         // We do not attempt to combine duplicate edges, but instead
         // store the inter-component edges with suitable multiplicity.
         this->ComponentGraph[i_component].push_back(
-          cmGraphEdge(j_component, ni.IsStrong()));
+          cmGraphEdge(j_component, ni.IsStrong(), &ni.Backtrace()));
       }
     }
   }

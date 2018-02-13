@@ -210,9 +210,12 @@ void cmVisualStudio10TargetGenerator::Generate()
   }
   // Tell the global generator the name of the project file
   this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME",
-                                             this->Name.c_str());
-  this->GeneratorTarget->Target->SetProperty(
-    "GENERATOR_FILE_NAME_EXT", this->ProjectFileExtension.c_str());
+                                             this->Name.c_str(),
+                                             this->GeneratorTarget->Target->GetBacktrace());
+  this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
+                                             this->ProjectFileExtension.c_str(),
+                                             this->GeneratorTarget->Target->GetBacktrace());
+
   if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
     if (!this->ComputeClOptions()) {
       return;

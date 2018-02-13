@@ -663,6 +663,7 @@ public:
   const char* GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
+  const cmListFileBacktrace & GetPropertyBacktrace(const std::string & prop) const;
 
   ///! Initialize a makefile from its parent
   void InitializeFromParent(cmMakefile* parent);

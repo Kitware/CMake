@@ -104,7 +104,7 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
 
             cmListFileContext conditionContext =
               cmListFileContext::FromCommandContext(
-                func, this->GetStartingContext().FilePath);
+                func, this->GetStartingContext().FilePath());
 
             cmConditionEvaluator conditionEvaluator(mf, conditionContext,
                                                     mf.GetBacktrace(func));

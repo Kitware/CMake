@@ -235,7 +235,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   // Organize in the "predefined targets" folder:
   //
   if (this->UseFolderProperty()) {
-    tgt->SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
+    tgt->SetProperty("FOLDER", this->GetPredefinedTargetsFolder(), tgt->GetBacktrace());
   }
 
   // Create a list of all stamp files for this project.

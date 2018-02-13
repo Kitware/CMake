@@ -79,7 +79,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
       // Organize in the "predefined targets" folder:
       //
       if (this->UseFolderProperty()) {
-        allBuild->SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
+        allBuild->SetProperty("FOLDER", this->GetPredefinedTargetsFolder(), gt->Target->GetBacktrace());
       }
 
       // Now make all targets depend on the ALL_BUILD target

@@ -144,9 +144,9 @@ bool cmSetPropertyCommand::HandleGlobalMode()
     value = nullptr;
   }
   if (this->AppendMode) {
-    cm->AppendProperty(name, value ? value : "", this->AppendAsString);
+    cm->AppendProperty(name, value ? value : "", this->Makefile->GetBacktrace(), this->AppendAsString);
   } else {
-    cm->SetProperty(name, value);
+    cm->SetProperty(name, value, this->Makefile->GetBacktrace());
   }
 
   return true;
@@ -234,9 +234,9 @@ bool cmSetPropertyCommand::HandleTarget(cmTarget* target)
     value = nullptr;
   }
   if (this->AppendMode) {
-    target->AppendProperty(name, value, this->AppendAsString);
+    target->AppendProperty(name, value, this->GetBacktrace(), this->AppendAsString);
   } else {
-    target->SetProperty(name, value);
+    target->SetProperty(name, value, this->GetBacktrace());
   }
 
   // Check the resulting value.

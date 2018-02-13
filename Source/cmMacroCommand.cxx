@@ -170,7 +170,7 @@ bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       cmMacroHelperCommand* f = new cmMacroHelperCommand();
       f->Args = this->Args;
       f->Functions = this->Functions;
-      f->FilePath = this->GetStartingContext().FilePath;
+      f->FilePath = this->GetStartingContext().FilePath();
       mf.RecordPolicies(f->Policies);
       mf.GetState()->AddScriptedCommand(this->Args[0], f);
       // remove the function blocker now that the macro is defined
@@ -193,7 +193,7 @@ bool cmMacroFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
   if (!cmSystemTools::Strucmp(lff.Name.c_str(), "endmacro")) {
     std::vector<std::string> expandedArguments;
     mf.ExpandArguments(lff.Arguments, expandedArguments,
-                       this->GetStartingContext().FilePath.c_str());
+                       this->GetStartingContext().FilePath().c_str());
     // if the endmacro has arguments make sure they
     // match the arguments of the macro
     if ((expandedArguments.empty() ||

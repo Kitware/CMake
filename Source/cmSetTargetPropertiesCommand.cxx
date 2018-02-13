@@ -68,7 +68,7 @@ bool cmSetTargetPropertiesCommand::SetOneTarget(
     // now loop through all the props and set them
     unsigned int k;
     for (k = 0; k < propertyPairs.size(); k = k + 2) {
-      target->SetProperty(propertyPairs[k], propertyPairs[k + 1].c_str());
+      target->SetProperty(propertyPairs[k], propertyPairs[k + 1].c_str(), target->GetBacktrace());
       target->CheckProperty(propertyPairs[k], mf);
     }
   }

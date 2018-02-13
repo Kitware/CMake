@@ -344,7 +344,7 @@ void cmStateSnapshot::SetDefaultDefinitions()
 
   // Setup the default include file regular expression (match everything).
   this->Position->BuildSystemDirectory->Properties.SetProperty(
-    "INCLUDE_REGULAR_EXPRESSION", "^.*$");
+    "INCLUDE_REGULAR_EXPRESSION", "^.*$", cmListFileBacktrace::Empty());
 }
 
 void cmStateSnapshot::SetDirectoryDefinitions()
@@ -434,4 +434,9 @@ bool operator==(const cmStateSnapshot& lhs, const cmStateSnapshot& rhs)
 bool operator!=(const cmStateSnapshot& lhs, const cmStateSnapshot& rhs)
 {
   return lhs.Position != rhs.Position;
+}
+
+bool operator<(const cmStateSnapshot& lhs, const cmStateSnapshot& rhs)
+{
+  return lhs.Position < rhs.Position;
 }
