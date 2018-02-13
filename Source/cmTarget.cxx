@@ -509,7 +509,7 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
 {
   std::string src = s;
 
-  // For backwards compatibility replace varibles in source names.
+  // For backwards compatibility replace variables in source names.
   // This should eventually be removed.
   this->Makefile->ExpandVariablesInString(src);
   if (src != s) {

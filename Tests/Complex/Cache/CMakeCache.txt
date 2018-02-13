@@ -5,7 +5,7 @@
 # If you do want to change a value, simply edit, save, and exit the editor.
 # The syntax for the file is as follows:
 # KEY:TYPE=VALUE
-# KEY is the name of a varible in the cache.
+# KEY is the name of a variable in the cache.
 # TYPE is a hint to GUI's for the type of VALUE, DO NOT EDIT TYPE!.
 # VALUE is the current value for the KEY.
 
