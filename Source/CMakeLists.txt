@@ -246,6 +246,8 @@ set(SRCS
   cmGlobalGeneratorFactory.h
   cmGlobalUnixMakefileGenerator3.cxx
   cmGlobalUnixMakefileGenerator3.h
+  cmGlobVerificationManager.cxx
+  cmGlobVerificationManager.h
   cmGraphAdjacencyList.h
   cmGraphVizWriter.cxx
   cmGraphVizWriter.h

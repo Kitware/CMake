@@ -1434,6 +1434,7 @@ int cmake::ActualConfigure()
 
   // only save the cache if there were no fatal errors
   if (this->GetWorkingMode() == NORMAL_MODE) {
+    this->State->SaveVerificationScript(this->GetHomeOutputDirectory());
     this->SaveCache(this->GetHomeOutputDirectory());
   }
   if (cmSystemTools::GetErrorOccuredFlag()) {
@@ -1647,6 +1648,33 @@ void cmake::AddCacheEntry(const std::string& key, const char* value,
   this->State->AddCacheEntry(key, value, helpString,
                              cmStateEnums::CacheEntryType(type));
   this->UnwatchUnusedCli(key);
+}
+
+bool cmake::DoWriteGlobVerifyTarget() const
+{
+  return this->State->DoWriteGlobVerifyTarget();
+}
+
+std::string const& cmake::GetGlobVerifyScript() const
+{
+  return this->State->GetGlobVerifyScript();
+}
+
+std::string const& cmake::GetGlobVerifyStamp() const
+{
+  return this->State->GetGlobVerifyStamp();
+}
+
+void cmake::AddGlobCacheEntry(bool recurse, bool listDirectories,
+                              bool followSymlinks, const std::string& relative,
+                              const std::string& expression,
+                              const std::vector<std::string>& files,
+                              const std::string& variable,
+                              cmListFileBacktrace const& backtrace)
+{
+  this->State->AddGlobCacheEntry(recurse, listDirectories, followSymlinks,
+                                 relative, expression, files, variable,
+                                 backtrace);
 }
 
 std::string cmake::StripExtension(const std::string& file) const

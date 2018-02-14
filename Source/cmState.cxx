@@ -13,6 +13,7 @@
 #include "cmCommand.h"
 #include "cmDefinitions.h"
 #include "cmDisallowedCommand.h"
+#include "cmGlobVerificationManager.h"
 #include "cmListFileCache.h"
 #include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
@@ -31,11 +32,13 @@ cmState::cmState()
   , MSYSShell(false)
 {
   this->CacheManager = new cmCacheManager;
+  this->GlobVerificationManager = new cmGlobVerificationManager;
 }
 
 cmState::~cmState()
 {
   delete this->CacheManager;
+  delete this->GlobVerificationManager;
   cmDeleteAll(this->BuiltinCommands);
   cmDeleteAll(this->ScriptedCommands);
 }
@@ -205,6 +208,39 @@ void cmState::AddCacheEntry(const std::string& key, const char* value,
                             cmStateEnums::CacheEntryType type)
 {
   this->CacheManager->AddCacheEntry(key, value, helpString, type);
+}
+
+bool cmState::DoWriteGlobVerifyTarget() const
+{
+  return this->GlobVerificationManager->DoWriteVerifyTarget();
+}
+
+std::string const& cmState::GetGlobVerifyScript() const
+{
+  return this->GlobVerificationManager->GetVerifyScript();
+}
+
+std::string const& cmState::GetGlobVerifyStamp() const
+{
+  return this->GlobVerificationManager->GetVerifyStamp();
+}
+
+bool cmState::SaveVerificationScript(const std::string& path)
+{
+  return this->GlobVerificationManager->SaveVerificationScript(path);
+}
+
+void cmState::AddGlobCacheEntry(bool recurse, bool listDirectories,
+                                bool followSymlinks,
+                                const std::string& relative,
+                                const std::string& expression,
+                                const std::vector<std::string>& files,
+                                const std::string& variable,
+                                cmListFileBacktrace const& backtrace)
+{
+  this->GlobVerificationManager->AddCacheEntry(
+    recurse, listDirectories, followSymlinks, relative, expression, files,
+    variable, backtrace);
 }
 
 void cmState::RemoveCacheEntry(std::string const& key)

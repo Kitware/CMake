@@ -12,6 +12,7 @@
 
 #include "cmDefinitions.h"
 #include "cmLinkedTree.h"
+#include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmPropertyDefinitionMap.h"
@@ -21,6 +22,7 @@
 
 class cmCacheManager;
 class cmCommand;
+class cmGlobVerificationManager;
 class cmPropertyDefinition;
 class cmStateSnapshot;
 class cmMessenger;
@@ -165,12 +167,24 @@ private:
                      const char* helpString,
                      cmStateEnums::CacheEntryType type);
 
+  bool DoWriteGlobVerifyTarget() const;
+  std::string const& GetGlobVerifyScript() const;
+  std::string const& GetGlobVerifyStamp() const;
+  bool SaveVerificationScript(const std::string& path);
+  void AddGlobCacheEntry(bool recurse, bool listDirectories,
+                         bool followSymlinks, const std::string& relative,
+                         const std::string& expression,
+                         const std::vector<std::string>& files,
+                         const std::string& variable,
+                         cmListFileBacktrace const& bt);
+
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
   std::map<std::string, cmCommand*> BuiltinCommands;
   std::map<std::string, cmCommand*> ScriptedCommands;
   cmPropertyMap GlobalProperties;
   cmCacheManager* CacheManager;
+  cmGlobVerificationManager* GlobVerificationManager;
 
   cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>
     BuildsystemDirectory;
