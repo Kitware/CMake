@@ -98,10 +98,10 @@ command.
 ::
 
   file(GLOB <variable>
-       [LIST_DIRECTORIES true|false] [RELATIVE <path>]
+       [LIST_DIRECTORIES true|false] [RELATIVE <path>] [CONFIGURE_DEPENDS]
        [<globbing-expressions>...])
   file(GLOB_RECURSE <variable> [FOLLOW_SYMLINKS]
-       [LIST_DIRECTORIES true|false] [RELATIVE <path>]
+       [LIST_DIRECTORIES true|false] [RELATIVE <path>] [CONFIGURE_DEPENDS]
        [<globbing-expressions>...])
 
 Generate a list of files that match the ``<globbing-expressions>`` and
@@ -109,6 +109,11 @@ store it into the ``<variable>``.  Globbing expressions are similar to
 regular expressions, but much simpler.  If ``RELATIVE`` flag is
 specified, the results will be returned as relative paths to the given
 path.  The results will be ordered lexicographically.
+
+If the ``CONFIGURE_DEPENDS`` flag is specified, CMake will add logic
+to the main build system check target to rerun the flagged ``GLOB`` commands
+at build time. If any of the outputs change, CMake will regenerate the build
+system.
 
 By default ``GLOB`` lists directories - directories are omitted in result if
 ``LIST_DIRECTORIES`` is set to false.
@@ -118,6 +123,10 @@ By default ``GLOB`` lists directories - directories are omitted in result if
   your source tree.  If no CMakeLists.txt file changes when a source is
   added or removed then the generated build system cannot know when to
   ask CMake to regenerate.
+  The ``CONFIGURE_DEPENDS`` flag may not work reliably on all generators, or if
+  a new generator is added in the future that cannot support it, projects using
+  it will be stuck. Even if ``CONFIGURE_DEPENDS`` works reliably, there is
+  still a cost to perform the check on every rebuild.
 
 Examples of globbing expressions include::
 
