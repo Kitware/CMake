@@ -2465,37 +2465,49 @@ int cmake::Build(const std::string& dir, const std::string& target,
     cmGlobalVisualStudio8Generator::GetGenerateStampList();
 
   // Note that the stampList file only exists for VS generators.
-  if (cmSystemTools::FileExists(stampList) &&
-      !cmakeCheckStampList(stampList.c_str(), false)) {
+  if (cmSystemTools::FileExists(stampList)) {
 
-    // Correctly initialize the home (=source) and home output (=binary)
-    // directories, which is required for running the generation step.
-    std::string homeOrig = this->GetHomeDirectory();
-    std::string homeOutputOrig = this->GetHomeOutputDirectory();
-    this->SetDirectoriesFromFile(cachePath.c_str());
-
+    // Check if running for Visual Studio 9 - we need to explicitly run
+    // the glob verification script before starting the build
     this->AddScriptingCommands();
-    this->AddProjectCommands();
-
-    int ret = this->Configure();
-    if (ret) {
-      cmSystemTools::Message("CMake Configure step failed.  "
-                             "Build files cannot be regenerated correctly.");
-      return ret;
+    if (this->GlobalGenerator->MatchesGeneratorName("Visual Studio 9 2008")) {
+      std::string const globVerifyScript = cachePath + "/" +
+        GetCMakeFilesDirectoryPostSlash() + "VerifyGlobs.cmake";
+      if (cmSystemTools::FileExists(globVerifyScript)) {
+        std::vector<std::string> args;
+        this->ReadListFile(args, globVerifyScript.c_str());
+      }
     }
-    ret = this->Generate();
-    if (ret) {
-      cmSystemTools::Message("CMake Generate step failed.  "
-                             "Build files cannot be regenerated correctly.");
-      return ret;
-    }
-    std::string message = "Build files have been written to: ";
-    message += this->GetHomeOutputDirectory();
-    this->UpdateProgress(message.c_str(), -1);
 
-    // Restore the previously set directories to their original value.
-    this->SetHomeDirectory(homeOrig);
-    this->SetHomeOutputDirectory(homeOutputOrig);
+    if (!cmakeCheckStampList(stampList.c_str(), false)) {
+      // Correctly initialize the home (=source) and home output (=binary)
+      // directories, which is required for running the generation step.
+      std::string homeOrig = this->GetHomeDirectory();
+      std::string homeOutputOrig = this->GetHomeOutputDirectory();
+      this->SetDirectoriesFromFile(cachePath.c_str());
+
+      this->AddProjectCommands();
+
+      int ret = this->Configure();
+      if (ret) {
+        cmSystemTools::Message("CMake Configure step failed.  "
+                               "Build files cannot be regenerated correctly.");
+        return ret;
+      }
+      ret = this->Generate();
+      if (ret) {
+        cmSystemTools::Message("CMake Generate step failed.  "
+                               "Build files cannot be regenerated correctly.");
+        return ret;
+      }
+      std::string message = "Build files have been written to: ";
+      message += this->GetHomeOutputDirectory();
+      this->UpdateProgress(message.c_str(), -1);
+
+      // Restore the previously set directories to their original value.
+      this->SetHomeDirectory(homeOrig);
+      this->SetHomeOutputDirectory(homeOutputOrig);
+    }
   }
 #endif
 

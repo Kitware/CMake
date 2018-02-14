@@ -537,6 +537,12 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
   std::vector<std::string>::iterator new_end =
     std::unique(lfiles.begin(), lfiles.end());
   lfiles.erase(new_end, lfiles.end());
+
+  cmake* cm = this->GetCMakeInstance();
+  if (cm->DoWriteGlobVerifyTarget()) {
+    lfiles.emplace_back(cm->GetGlobVerifyStamp());
+  }
+
   this->CurrentReRunCMakeMakefile = root->GetCurrentBinaryDirectory();
   this->CurrentReRunCMakeMakefile += "/CMakeScripts";
   cmSystemTools::MakeDirectory(this->CurrentReRunCMakeMakefile.c_str());
@@ -555,14 +561,28 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
     makefileStream << "TARGETS += $(subst $(space),$(spaceplus),$(wildcard "
                    << this->ConvertToRelativeForMake(lfile) << "))\n";
   }
+  makefileStream << "\n";
 
   std::string checkCache = root->GetBinaryDirectory();
   checkCache += "/";
   checkCache += cmake::GetCMakeFilesDirectoryPostSlash();
   checkCache += "cmake.check_cache";
 
-  makefileStream << "\n"
-                 << this->ConvertToRelativeForMake(checkCache)
+  if (cm->DoWriteGlobVerifyTarget()) {
+    makefileStream << ".NOTPARALLEL:\n\n";
+    makefileStream << ".PHONY: all VERIFY_GLOBS\n\n";
+    makefileStream << "all: VERIFY_GLOBS "
+                   << this->ConvertToRelativeForMake(checkCache) << "\n\n";
+    makefileStream << "VERIFY_GLOBS:\n";
+    makefileStream << "\t"
+                   << this->ConvertToRelativeForMake(
+                        cmSystemTools::GetCMakeCommand())
+                   << " -P "
+                   << this->ConvertToRelativeForMake(cm->GetGlobVerifyScript())
+                   << "\n\n";
+  }
+
+  makefileStream << this->ConvertToRelativeForMake(checkCache)
                  << ": $(TARGETS)\n";
   makefileStream << "\t"
                  << this->ConvertToRelativeForMake(

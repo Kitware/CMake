@@ -160,10 +160,21 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
   depName += ".depend";
   cmsys::ofstream depFile(depName.c_str());
   depFile << "# CMake generation dependency list for this directory.\n";
-  std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
-  for (std::vector<std::string>::const_iterator lf = listFiles.begin();
-       lf != listFiles.end(); ++lf) {
-    depFile << *lf << std::endl;
+
+  std::vector<std::string> listFiles(this->Makefile->GetListFiles());
+  cmake* cm = this->GlobalGenerator->GetCMakeInstance();
+  if (cm->DoWriteGlobVerifyTarget()) {
+    listFiles.push_back(cm->GetGlobVerifyStamp());
+  }
+
+  // Sort the list of input files and remove duplicates.
+  std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
+  std::vector<std::string>::iterator new_end =
+    std::unique(listFiles.begin(), listFiles.end());
+  listFiles.erase(new_end, listFiles.end());
+
+  for (const std::string& lf : listFiles) {
+    depFile << lf << "\n";
   }
 }
 
@@ -228,6 +239,18 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     return nullptr;
   }
 
+  std::vector<std::string> listFiles = this->Makefile->GetListFiles();
+  cmake* cm = this->GlobalGenerator->GetCMakeInstance();
+  if (cm->DoWriteGlobVerifyTarget()) {
+    listFiles.push_back(cm->GetGlobVerifyStamp());
+  }
+
+  // Sort the list of input files and remove duplicates.
+  std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
+  std::vector<std::string>::iterator new_end =
+    std::unique(listFiles.begin(), listFiles.end());
+  listFiles.erase(new_end, listFiles.end());
+
   std::string stampName = this->GetCurrentBinaryDirectory();
   stampName += "/";
   stampName += cmake::GetCMakeFilesDirectoryPostSlash();
@@ -245,17 +268,14 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   commandLine.push_back(args);
   commandLine.push_back("--check-stamp-file");
   commandLine.push_back(stampName);
-
-  std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
-
   cmCustomCommandLines commandLines;
   commandLines.push_back(commandLine);
   const char* no_working_directory = 0;
   std::string fullpathStampName =
     cmSystemTools::CollapseFullPath(stampName.c_str());
   this->Makefile->AddCustomCommandToOutput(
-    fullpathStampName.c_str(), listFiles, makefileIn.c_str(), commandLines,
-    comment.c_str(), no_working_directory, true, false);
+    fullpathStampName, listFiles, makefileIn, commandLines, comment.c_str(),
+    no_working_directory, true, false);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str())) {
     // Finalize the source file path now since we're adding this after
     // the generator validated all project-named sources.
