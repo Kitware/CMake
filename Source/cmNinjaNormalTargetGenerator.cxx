@@ -976,8 +976,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     preLinkCmdLines.push_back("cd " + homeOutDir);
   }
 
-  vars["PRE_LINK"] = localGen.BuildCommandLine(preLinkCmdLines);
-  std::string postBuildCmdLine = localGen.BuildCommandLine(postBuildCmdLines);
+  vars["PRE_LINK"] = localGen.BuildCommandLine(preLinkCmdLines, "pre-link",
+                                               this->GeneratorTarget);
+  std::string postBuildCmdLine = localGen.BuildCommandLine(
+    postBuildCmdLines, "post-build", this->GeneratorTarget);
 
   cmNinjaVars symlinkVars;
   bool const symlinkNeeded =
