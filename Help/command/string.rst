@@ -282,6 +282,18 @@ CONFIGURE
 
 Transform a string like :command:`configure_file` transforms a file.
 
+MAKE_C_IDENTIFIER
+"""""""""""""""""
+
+::
+
+  string(MAKE_C_IDENTIFIER <input string> <output variable>)
+
+Convert each non-alphanumeric character in the ``<input string>`` to an
+underscore and store the result in the ``<output variable>``.  If the first
+character of the string is a digit, an underscore will also be prepended to
+the result.
+
 RANDOM
 """"""
 
@@ -345,13 +357,6 @@ If no explicit ``<format string>`` is given it will default to:
 
    %Y-%m-%dT%H:%M:%S    for local time.
    %Y-%m-%dT%H:%M:%SZ   for UTC.
-
-
-::
-
-  string(MAKE_C_IDENTIFIER <input string> <output variable>)
-
-Write a string which can be used as an identifier in C.
 
 .. note::
 

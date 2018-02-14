@@ -289,7 +289,8 @@ Available output expressions are:
 ``$<UPPER_CASE:...>``
   Content of ``...`` converted to upper case.
 ``$<MAKE_C_IDENTIFIER:...>``
-  Content of ``...`` converted to a C identifier.
+  Content of ``...`` converted to a C identifier.  The conversion follows the
+  same behavior as :command:`string(MAKE_C_IDENTIFIER)`.
 ``$<TARGET_OBJECTS:objLib>``
   List of objects resulting from build of ``objLib``. ``objLib`` must be an
   object of type ``OBJECT_LIBRARY``.
