@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
@@ -104,10 +105,12 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
         // evaluate any generator expressions with the current
         // build type of the makefile
         cmGeneratorExpression ge;
+        cmGeneratorExpressionDAGChecker dagChecker(
+          target->GetName(), "INTERFACE_LINK_LIBRARIES", nullptr, nullptr);
         std::unique_ptr<cmCompiledGeneratorExpression> cge =
           ge.Parse(property.second);
-        std::string evaluated =
-          cge->Evaluate(target->GetLocalGenerator(), config);
+        std::string evaluated = cge->Evaluate(
+          target->GetLocalGenerator(), config, false, target, &dagChecker);
         // need to look at list in pi->second and see if static or shared
         // FindTargetToLink
         // target->GetLocalGenerator()->FindGeneratorTargetToUse()
