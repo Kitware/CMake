@@ -262,7 +262,7 @@ std::pair<int, int> cmServerProtocol1::ProtocolVersion() const
 
 std::pair<int, int> cmServerProtocol2::ProtocolVersion() const
 {
-  return std::make_pair(2, 1);
+  return std::make_pair(2, 2); 
 }
 
 static void setErrorMessage(std::string* errorMessage, const std::string& text)
@@ -603,6 +603,7 @@ public:
   std::string Flags;
   std::vector<std::string> Defines;
   std::vector<std::pair<std::string, bool>> IncludePathList;
+  std::string SourceGroup;
 };
 
 bool LanguageData::operator==(const LanguageData& other) const
@@ -650,6 +651,7 @@ struct hash<LanguageData>
 
 static Json::Value DumpSourceFileGroup(const LanguageData& data,
                                        const std::vector<std::string>& files,
+                                       const std::vector<std::string>& sourceGroups,
                                        const std::string& baseDir)
 {
   Json::Value result = Json::objectValue;
@@ -679,26 +681,42 @@ static Json::Value DumpSourceFileGroup(const LanguageData& data,
   result[kIS_GENERATED_KEY] = data.IsGenerated;
 
   Json::Value sourcesValue = Json::arrayValue;
-  for (auto const& i : files) {
+  for (auto const& file : files) {
     const std::string relPath =
-      cmSystemTools::RelativePath(baseDir.c_str(), i.c_str());
-    sourcesValue.append(relPath.size() < i.size() ? relPath : i);
+      cmSystemTools::RelativePath(baseDir.c_str(), file.c_str());
+    sourcesValue.append(relPath.size() < file.size() ? relPath : file);
   }
 
   result[kSOURCES_KEY] = sourcesValue;
+
+  // Source groups are optional, check we have the data. 
+  // In order to be backwards compatible, the source group is a parallel array and not part of each file.
+  if (!sourceGroups.empty()) {
+    Json::Value sourcesGroupsValue = Json::arrayValue;
+    for (auto const& groupPath : sourceGroups) {
+      sourcesGroupsValue.append(groupPath);
+    }
+
+    result[KSOURCE_GROUPS_KEY] = sourcesGroupsValue;
+  }
   return result;
 }
 
 static Json::Value DumpSourceFilesList(
   cmGeneratorTarget* target, const std::string& config,
-  const std::map<std::string, LanguageData>& languageDataMap)
+  const std::map<std::string, LanguageData>& languageDataMap,
+  bool includeSourceGroups)
 {
   // Collect sourcefile groups:
 
   std::vector<cmSourceFile*> files;
   target->GetSourceFiles(files, config);
 
-  std::unordered_map<LanguageData, std::vector<std::string>> fileGroups;
+  // Apply source groups to each file if necessary
+  std::vector<cmSourceGroup> sourceGroups = target->Makefile->GetSourceGroups();
+
+
+  std::unordered_map<LanguageData, std::pair<std::vector<std::string>, std::vector<std::string>>> fileGroups;
   for (cmSourceFile* file : files) {
     LanguageData fileData;
     fileData.Language = file->GetLanguage();
@@ -729,14 +747,30 @@ static Json::Value DumpSourceFilesList(
     }
 
     fileData.IsGenerated = file->GetPropertyAsBool("GENERATED");
-    std::vector<std::string>& groupFileList = fileGroups[fileData];
-    groupFileList.push_back(file->GetFullPath());
+    auto & groupFileList = fileGroups[fileData];
+    const std::string & filePath = file->GetFullPath();
+    groupFileList.first.push_back(filePath);
+
+    if (includeSourceGroups) {
+      cmSourceGroup* sourceGroup =
+        target->Makefile->FindSourceGroup(filePath.c_str(), sourceGroups);
+      if (sourceGroup != nullptr) {
+        groupFileList.second.push_back(sourceGroup->GetFullName());
+      }
+      else
+      {
+        // Don't forget the empty placeholder
+        groupFileList.second.push_back("");
+      }
+
+    }
+
   }
 
   const std::string baseDir = target->Makefile->GetCurrentSourceDirectory();
   Json::Value result = Json::arrayValue;
   for (auto const& it : fileGroups) {
-    Json::Value group = DumpSourceFileGroup(it.first, it.second, baseDir);
+    Json::Value group = DumpSourceFileGroup(it.first, it.second.first, it.second.second, baseDir);
     if (!group.isNull()) {
       result.append(group);
     }
@@ -910,7 +944,8 @@ static Json::Value DumpCTestConfigurationsList(const cmake* cm, std::unordered_s
 
 static Json::Value DumpTarget(cmGeneratorTarget* target,
                               const std::string& config,
-                              std::unordered_set<size_t> * seenTraceIds = nullptr)
+                              std::unordered_set<size_t> * seenTraceIds,
+                              bool includeSourceGroups)
 {
   cmGlobalGenerator* g = target->GetGlobalGenerator();
   cmLocalGenerator* lg = target->GetLocalGenerator();
@@ -1078,17 +1113,19 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
     }
   }
 
-  Json::Value sourceGroupsValue =
-    DumpSourceFilesList(target, config, languageDataMap);
-  if (!sourceGroupsValue.empty()) {
-    result[kFILE_GROUPS_KEY] = sourceGroupsValue;
+  Json::Value fileGroupsValue =
+    DumpSourceFilesList(target, config, languageDataMap, includeSourceGroups);
+  if (!fileGroupsValue.empty()) {
+    result[kFILE_GROUPS_KEY] = fileGroupsValue;
   }
 
   return result;
 }
 
-static Json::Value DumpTargetsList(
-  const std::vector<cmLocalGenerator*>& generators, const std::string& config, std::unordered_set<size_t> * seenTraceIds)
+static Json::Value DumpTargetsList(const std::vector<cmLocalGenerator*>& generators, 
+                                   const std::string& config, 
+                                   std::unordered_set<size_t> * seenTraceIds, 
+                                   bool includeSourceGroups)
 {
   Json::Value result = Json::arrayValue;
 
@@ -1100,7 +1137,7 @@ static Json::Value DumpTargetsList(
   std::sort(targetList.begin(), targetList.end());
 
   for (cmGeneratorTarget* target : targetList) {
-    Json::Value tmp = DumpTarget(target, config, seenTraceIds);
+    Json::Value tmp = DumpTarget(target, config, seenTraceIds, includeSourceGroups);
     if (!tmp.isNull()) {
       result.append(tmp);
     }
@@ -1109,7 +1146,10 @@ static Json::Value DumpTargetsList(
   return result;
 }
 
-static Json::Value DumpProjectList(const cmake* cm, std::string const& config, std::unordered_set<size_t> * seenTraceIds)
+static Json::Value DumpProjectList(const cmake* cm, 
+                                   std::string const& config, 
+                                   std::unordered_set<size_t> * seenTraceIds,
+                                   bool includeSourceGroups)
 {
   Json::Value result = Json::arrayValue;
 
@@ -1130,7 +1170,7 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config, s
 	pObj[kMINIMUM_CMAKE_VERSION] = minVersion ? minVersion : "";
     pObj[kSOURCE_DIRECTORY_KEY] = mf->GetCurrentSourceDirectory();
     pObj[kBUILD_DIRECTORY_KEY] = mf->GetCurrentBinaryDirectory();
-    pObj[kTARGETS_KEY] = DumpTargetsList(projectIt.second, config, seenTraceIds);
+    pObj[kTARGETS_KEY] = DumpTargetsList(projectIt.second, config, seenTraceIds, includeSourceGroups);
 
     // For a project-level install rule it might be defined in any of its
     // associated generators.
@@ -1154,22 +1194,25 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config, s
 
 static Json::Value DumpConfiguration(const cmake* cm,
                                      const std::string& config,
-                                     std::unordered_set<size_t> * seenTraceIds)
+                                     std::unordered_set<size_t> * seenTraceIds,
+                                     bool includeSourceGroups)
 {
   Json::Value result = Json::objectValue;
   result[kNAME_KEY] = config;
 
-  result[kPROJECTS_KEY] = DumpProjectList(cm, config, seenTraceIds);
+  result[kPROJECTS_KEY] = DumpProjectList(cm, config, seenTraceIds, includeSourceGroups);
 
   return result;
 }
 
-static Json::Value DumpConfigurationsList(const cmake* cm, std::unordered_set<size_t> * seenTraceIds)
+static Json::Value DumpConfigurationsList(const cmake* cm, 
+                                          std::unordered_set<size_t> * seenTraceIds,
+                                          bool includeSourceGroups)
 {
   Json::Value result = Json::arrayValue;
 
   for (std::string const& c : getConfigurations(cm)) {
-    result.append(DumpConfiguration(cm, c, seenTraceIds));
+    result.append(DumpConfiguration(cm, c, seenTraceIds, includeSourceGroups));
   }
 
   return result;
@@ -1212,7 +1255,7 @@ cmServerResponse cmServerProtocol1::ProcessCodeModel(
   }
 
   Json::Value result = Json::objectValue;
-  result[kCONFIGURATIONS_KEY] = DumpConfigurationsList(this->CMakeInstance(), nullptr);
+  result[kCONFIGURATIONS_KEY] = DumpConfigurationsList(this->CMakeInstance(), nullptr, false);
   return request.Reply(result);
 }
 
@@ -1224,9 +1267,11 @@ cmServerResponse cmServerProtocol2::ProcessCodeModel(
   }
 
   auto includeTraces = request.Data[kINCLUDE_TRACES_KEY].asBool();
+  auto includeSourceGroups = request.Data[KINCLUDE_SOURCE_GROUPS_KEY].asBool();
   std::unordered_set<size_t> seenTraceIds;
   Json::Value result = Json::objectValue;
-  result[kCONFIGURATIONS_KEY] = DumpConfigurationsList(this->CMakeInstance(), includeTraces ? &seenTraceIds : nullptr);
+  result[kCONFIGURATIONS_KEY] = DumpConfigurationsList(
+    this->CMakeInstance(), includeTraces ? &seenTraceIds : nullptr, includeSourceGroups);
   if (includeTraces) {
     result[KREFERENCED_TRACES_KEY] = DumpReferencedTraces(seenTraceIds);
   }

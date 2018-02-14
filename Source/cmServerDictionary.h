@@ -103,6 +103,8 @@ static const std::string KREFERENCED_TRACES_KEY = "referencedTraces";
 static const std::string kID_KEY = "id";
 static const std::string kINCLUDE_TRACES_KEY = "includeTraces";
 static const std::string KTARGET_DEPENDENCIES_KEY = "dependencies";
+static const std::string KINCLUDE_SOURCE_GROUPS_KEY = "includeSourceGroups";
+static const std::string KSOURCE_GROUPS_KEY = "sourceGroups";
 
 static const std::string kSTART_MAGIC = "[== \"CMake Server\" ==[";
 static const std::string kEND_MAGIC = "]== \"CMake Server\" ==]";
