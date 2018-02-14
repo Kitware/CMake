@@ -101,12 +101,19 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
         os << "LOCAL_CPP_FEATURES += ";
         os << (property.second) << "\n";
       } else if (property.first == "INTERFACE_LINK_LIBRARIES") {
+        // evaluate any generator expressions with the current
+        // build type of the makefile
+        cmGeneratorExpression ge;
+        std::unique_ptr<cmCompiledGeneratorExpression> cge =
+          ge.Parse(property.second);
+        std::string evaluated =
+          cge->Evaluate(target->GetLocalGenerator(), config);
         // need to look at list in pi->second and see if static or shared
         // FindTargetToLink
         // target->GetLocalGenerator()->FindGeneratorTargetToUse()
         // then add to LOCAL_CPPFLAGS
         std::vector<std::string> libraries;
-        cmSystemTools::ExpandListArgument(property.second, libraries);
+        cmSystemTools::ExpandListArgument(evaluated, libraries);
         std::string staticLibs;
         std::string sharedLibs;
         std::string ldlibs;
@@ -122,12 +129,6 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
               staticLibs += " " + lib;
             }
           } else {
-            // evaluate any generator expressions with the current
-            // build type of the makefile
-            cmGeneratorExpression ge;
-            std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(lib);
-            std::string evaluated =
-              cge->Evaluate(target->GetLocalGenerator(), config);
             bool relpath = false;
             if (type == cmExportBuildAndroidMKGenerator::INSTALL) {
               relpath = lib.substr(0, 3) == "../";
@@ -135,12 +136,12 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
             // check for full path or if it already has a -l, or
             // in the case of an install check for relative paths
             // if it is full or a link library then use string directly
-            if (cmSystemTools::FileIsFullPath(evaluated) ||
-                evaluated.substr(0, 2) == "-l" || relpath) {
-              ldlibs += " " + evaluated;
+            if (cmSystemTools::FileIsFullPath(lib) ||
+                lib.substr(0, 2) == "-l" || relpath) {
+              ldlibs += " " + lib;
               // if it is not a path and does not have a -l then add -l
-            } else if (!evaluated.empty()) {
-              ldlibs += " -l" + evaluated;
+            } else if (!lib.empty()) {
+              ldlibs += " -l" + lib;
             }
           }
         }
