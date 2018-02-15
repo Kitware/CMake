@@ -1384,8 +1384,14 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
                    /*explicitDeps=*/cmNinjaDeps(), implicitDeps,
                    /*orderOnlyDeps=*/cmNinjaDeps(), variables);
 
+  cmNinjaDeps missingInputs;
+  std::set_difference(std::make_move_iterator(implicitDeps.begin()),
+                      std::make_move_iterator(implicitDeps.end()),
+                      CustomCommandOutputs.begin(), CustomCommandOutputs.end(),
+                      std::back_inserter(missingInputs));
+
   this->WritePhonyBuild(os, "A missing CMake input file is not an error.",
-                        implicitDeps, cmNinjaDeps());
+                        missingInputs, cmNinjaDeps());
 }
 
 std::string cmGlobalNinjaGenerator::ninjaCmd() const
