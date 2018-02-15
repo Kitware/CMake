@@ -67,4 +67,3 @@ delete_Shape $s
 
 puts "$Shape_nshapes shapes remain"
 puts "Goodbye"
-
