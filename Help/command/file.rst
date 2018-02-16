@@ -285,6 +285,23 @@ If neither ``TLS`` option is given CMake will check variables
 
 ::
 
+  file(TOUCH [<files>...])
+  file(TOUCH_NOCREATE [<files>...])
+
+Create a file with no content if it does not yet exist. If the file already
+exists, its access and/or modification will be updated to the time when the
+function call is executed.
+
+Use TOUCH_NOCREATE to touch a file if it exists but not create it. If a file
+does not exist it will be silently ignored.
+
+With TOUCH and TOUCH_NOCREATE the contents of an existing file will not be
+modified.
+
+------------------------------------------------------------------------------
+
+::
+
   file(TIMESTAMP <filename> <variable> [<format>] [UTC])
 
 Compute a string representation of the modification time of ``<filename>``
