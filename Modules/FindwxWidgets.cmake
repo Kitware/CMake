@@ -837,7 +837,7 @@ else()
         # extract linkdirs (-L) for rpath (i.e., LINK_DIRECTORIES)
         string(REGEX MATCHALL "-L[^;]+"
           wxWidgets_LIBRARY_DIRS "${wxWidgets_LIBRARIES}")
-        string(REPLACE "-L" ""
+        string(REGEX REPLACE "-L([^;]+)" "\\1"
           wxWidgets_LIBRARY_DIRS "${wxWidgets_LIBRARY_DIRS}")
 
         DBG_MSG_V("wxWidgets_LIBRARIES=${wxWidgets_LIBRARIES}")
