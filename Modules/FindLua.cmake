@@ -122,6 +122,7 @@ endif ()
 if (NOT LUA_VERSION_STRING)
     foreach (subdir IN LISTS _lua_include_subdirs)
         unset(LUA_INCLUDE_PREFIX CACHE)
+        unset(LUA_INCLUDE_PREFIX)
         find_path(LUA_INCLUDE_PREFIX ${subdir}/lua.h
           HINTS
             ENV LUA_DIR
