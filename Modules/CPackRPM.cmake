@@ -1984,7 +1984,7 @@ function(cpack_rpm_generate_package)
     endif()
 
     if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
-      # Prefix can be replaced by Prefixes but the old version stil works so we'll ignore it for now
+      # Prefix can be replaced by Prefixes but the old version still works so we'll ignore it for now
       # Requires* is a special case because it gets transformed to Requires(pre/post/preun/postun)
       # Auto* is a special case because the tags can not be queried by querytags rpmbuild flag
       set(special_case_tags_ PREFIX REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN AUTOPROV AUTOREQ AUTOREQPROV)
