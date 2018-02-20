@@ -151,6 +151,16 @@ CONCAT
 Concatenate all the input arguments together and store
 the result in the named output variable.
 
+JOIN
+""""
+
+::
+
+  string(JOIN <glue> <output variable> [<input>...])
+
+Join all the input arguments together using the glue
+string and store the result in the named output variable.
+
 TOLOWER
 """""""
 

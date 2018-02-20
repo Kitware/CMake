@@ -68,6 +68,9 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args,
   if (subCommand == "CONCAT") {
     return this->HandleConcatCommand(args);
   }
+  if (subCommand == "JOIN") {
+    return this->HandleJoinCommand(args);
+  }
   if (subCommand == "SUBSTRING") {
     return this->HandleSubstringCommand(args);
   }
@@ -677,8 +680,26 @@ bool cmStringCommand::HandleConcatCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  std::string const& variableName = args[1];
-  std::string value = cmJoin(cmMakeRange(args).advance(2), std::string());
+  return this->joinImpl(args, std::string(), 1);
+}
+
+bool cmStringCommand::HandleJoinCommand(std::vector<std::string> const& args)
+{
+  if (args.size() < 3) {
+    this->SetError("sub-command JOIN requires at least two arguments.");
+    return false;
+  }
+
+  return this->joinImpl(args, args[1], 2);
+}
+
+bool cmStringCommand::joinImpl(std::vector<std::string> const& args,
+                               std::string const& glue, const size_t varIdx)
+{
+  std::string const& variableName = args[varIdx];
+  // NOTE Items to concat/join placed right after the variable for
+  // both `CONCAT` and `JOIN` sub-commands.
+  std::string value = cmJoin(cmMakeRange(args).advance(varIdx + 1), glue);
 
   this->Makefile->AddDefinition(variableName, value.c_str());
   return true;
