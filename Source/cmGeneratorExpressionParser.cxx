@@ -6,6 +6,7 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <utility>
 
 cmGeneratorExpressionParser::cmGeneratorExpressionParser(
   const std::vector<cmGeneratorExpressionToken>& tokens)
@@ -92,7 +93,7 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
     assert(this->it != this->Tokens.end());
     ++this->it;
     --this->NestingLevel;
-    content->SetIdentifier(identifier);
+    content->SetIdentifier(std::move(identifier));
     result.push_back(content);
     return;
   }
@@ -198,8 +199,8 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
     ((this->it - 1)->Content - startToken->Content) + (this->it - 1)->Length;
   GeneratorExpressionContent* content =
     new GeneratorExpressionContent(startToken->Content, contentLength);
-  content->SetIdentifier(identifier);
-  content->SetParameters(parameters);
+  content->SetIdentifier(std::move(identifier));
+  content->SetParameters(std::move(parameters));
   result.push_back(content);
 }
 
