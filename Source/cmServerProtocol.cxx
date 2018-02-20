@@ -257,12 +257,16 @@ bool cmServerProtocol::DoActivate(const cmServerRequest& /*request*/,
 
 std::pair<int, int> cmServerProtocol1::ProtocolVersion() const
 {
-  return std::make_pair(1, 3);
+  return std::make_pair(1, 4);
 }
 
 std::pair<int, int> cmServerProtocol2::ProtocolVersion() const
 {
-  return std::make_pair(2, 2); 
+  // Revision history
+  // 2, 1 - simplified backtraces
+  // 2, 2 - direct dependencies of targets
+  // 2, 3 - target properties, global properties
+  return std::make_pair(2, 3); 
 }
 
 static void setErrorMessage(std::string* errorMessage, const std::string& text)
@@ -1040,6 +1044,22 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
     result[KTARGET_DEPENDENCIES_KEY] = dependencies;
   }
 
+  // Build up the list of properties that may have been specified
+  cmGeneratorExpression ge;
+  Json::Value properties = Json::arrayValue;
+  for (auto& prop : target->Target->GetProperties()) {
+    Json::Value entry = Json::objectValue;
+    entry[kKEY_KEY] = prop.first;
+
+    // Remove config variables from the value too.
+    auto cge_value = ge.Parse(prop.second.GetValue());
+    const char* processed_value = cge_value->Evaluate(lg, config);
+    entry[kVALUE_KEY] = processed_value;
+    properties.append(entry);
+  }
+  result[kPROPERTIES_KEY] = properties;
+
+
   if (target->HaveWellDefinedOutputFiles()) {
     Json::Value artifacts = Json::arrayValue;
     artifacts.append(
@@ -1427,6 +1447,17 @@ cmServerResponse cmServerProtocol1::ProcessGlobalSettings(
   // Currently used generator:
   obj[kGENERATOR_KEY] = this->GeneratorInfo.GeneratorName;
   obj[kEXTRA_GENERATOR_KEY] = this->GeneratorInfo.ExtraGeneratorName;
+
+  // Global properties
+  Json::Value properties = Json::arrayValue;
+  for (const auto& prop : cm->GetState()->GetGlobalProperties()) {
+    Json::Value entry = Json::objectValue;
+    entry[kKEY_KEY] = prop.first;
+    entry[kVALUE_KEY] = prop.second.GetValue();
+    properties.append(entry);
+  }
+  obj[kPROPERTIES_KEY] = properties;
+
 
   return request.Reply(obj);
 }

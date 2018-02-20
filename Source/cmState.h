@@ -136,6 +136,7 @@ public:
                             bool asString = false);
   const char* GetGlobalProperty(const std::string& prop);
   bool GetGlobalPropertyAsBool(const std::string& prop);
+  const cmPropertyMap& GetGlobalProperties() const { return this->GlobalProperties; }
 
   const char* GetSourceDirectory() const;
   void SetSourceDirectory(std::string const& sourceDirectory);
