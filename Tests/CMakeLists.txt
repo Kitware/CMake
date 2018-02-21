@@ -1445,6 +1445,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProject")
   set_tests_properties(ExternalProject PROPERTIES
+    RUN_SERIAL 1
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
 
   add_test(NAME ExternalProjectSubdir
@@ -1484,6 +1485,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectLocal")
   set_tests_properties(ExternalProjectLocal PROPERTIES
+    RUN_SERIAL 1
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
 
   add_test(ExternalProjectUpdateSetup ${CMAKE_CTEST_COMMAND}
@@ -1499,6 +1501,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate")
   set_tests_properties(ExternalProjectUpdateSetup PROPERTIES
+    RUN_SERIAL 1
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
 
   add_test(NAME ExternalProjectUpdate
@@ -1513,6 +1516,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate")
   set_tests_properties(ExternalProjectUpdate PROPERTIES
+    RUN_SERIAL 1
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT}
     WORKING_DIRECTORY ${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate
     DEPENDS ExternalProjectUpdateSetup )
