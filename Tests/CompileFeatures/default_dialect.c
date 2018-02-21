@@ -1,6 +1,6 @@
 
 #if DEFAULT_C11
-#if __STDC_VERSION__ != 201112L
+#if __STDC_VERSION__ < 201112L
 #error Unexpected value for __STDC_VERSION__.
 #endif
 #elif DEFAULT_C99
