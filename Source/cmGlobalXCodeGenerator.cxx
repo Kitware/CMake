@@ -459,7 +459,11 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
 
   // Add ZERO_CHECK
   bool regenerate = !mf->IsOn("CMAKE_SUPPRESS_REGENERATION");
-  if (regenerate) {
+  bool generateTopLevelProjectOnly =
+    mf->IsOn("CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY");
+  bool isTopLevel =
+    !root->GetStateSnapshot().GetBuildsystemDirectoryParent().IsValid();
+  if (regenerate && (isTopLevel || !generateTopLevelProjectOnly)) {
     this->CreateReRunCMakeFile(root, gens);
     std::string file =
       this->ConvertToRelativeForMake(this->CurrentReRunCMakeMakefile.c_str());
