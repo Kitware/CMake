@@ -1,21 +1,27 @@
 AUTOMOC_DEPEND_FILTERS
 ----------------------
 
-Filter definitions used by :prop_tgt:`AUTOMOC` to extract file names from
-source code as additional dependencies for the ``moc`` file.
-
-This property is only used if the :prop_tgt:`AUTOMOC` property is ``ON``
-for this target.
+Filter definitions used by :prop_tgt:`AUTOMOC` to extract file names from a
+source file that are registered as additional dependencies for the
+``moc`` file of the source file.
 
 Filters are defined as ``KEYWORD;REGULAR_EXPRESSION`` pairs. First the file
 content is searched for ``KEYWORD``. If it is found at least once, then file
 names are extracted by successively searching for ``REGULAR_EXPRESSION`` and
 taking the first match group.
 
-Consider a filter extracts the file name ``DEP`` from the content of a file
-``FOO``. If ``DEP`` changes, then the ``moc`` file for ``FOO`` gets rebuilt.
-The file ``DEP`` is searched for first in the vicinity
-of ``FOO`` and afterwards in the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
+The file name found in the first match group is searched for
+
+- first in the vicinity of the source file
+- and afterwards in the target's :prop_tgt:`INCLUDE_DIRECTORIES`.
+
+If any of the extracted files changes, then the ``moc`` file for the source
+file gets rebuilt even when the source file itself doesn't change.
+
+If any of the extracted files is :prop_sf:`GENERATED` or if it is not in the
+target's sources, then it might be necessary to add it to the
+``_autogen`` target  dependencies.
+See :prop_tgt:`AUTOGEN_TARGET_DEPENDS` for reference.
 
 By default :prop_tgt:`AUTOMOC_DEPEND_FILTERS` is initialized from
 :variable:`CMAKE_AUTOMOC_DEPEND_FILTERS`, which is empty by default.
@@ -24,22 +30,75 @@ See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
 
 
-Example
-^^^^^^^
+Example 1
+^^^^^^^^^
 
-Consider a file ``FOO.hpp`` holds a custom macro ``OBJ_JSON_FILE`` and we
-want the ``moc`` file to depend on the macro`s file name argument::
+A header file ``my_class.hpp`` uses a custom macro ``JSON_FILE_MACRO`` which
+is defined in an other header ``macros.hpp``.
+We want the ``moc`` file of ``my_class.hpp`` to depend on the file name
+argument of ``JSON_FILE_MACRO``::
 
+  // my_class.hpp
   class My_Class : public QObject
   {
     Q_OBJECT
-    OBJ_JSON_FILE ( "DEP.json" )
+    JSON_FILE_MACRO ( "info.json" )
   ...
   };
 
-Then we might use :variable:`CMAKE_AUTOMOC_DEPEND_FILTERS` to
-define a filter like this::
+In ``CMakeLists.txt`` we add a filter to
+:variable:`CMAKE_AUTOMOC_DEPEND_FILTERS` like this::
 
-  set(CMAKE_AUTOMOC_DEPEND_FILTERS
-    "OBJ_JSON_FILE" "[\n][ \t]*OBJ_JSON_FILE[ \t]*\\([ \t]*\"([^\"]+)\""
+  list( APPEND CMAKE_AUTOMOC_DEPEND_FILTERS
+    "JSON_FILE_MACRO"
+    "[\n][ \t]*JSON_FILE_MACRO[ \t]*\\([ \t]*\"([^\"]+)\""
   )
+
+We assume ``info.json`` is a plain (not :prop_sf:`GENERATED`) file that is
+listed in the target's source.  Therefore we do not need to add it to
+:prop_tgt:`AUTOGEN_TARGET_DEPENDS`.
+
+Example 2
+^^^^^^^^^
+
+In the target ``my_target`` a header file ``complex_class.hpp`` uses a
+custom macro ``JSON_BASED_CLASS`` which is defined in an other header
+``macros.hpp``::
+
+  // macros.hpp
+  ...
+  #define JSON_BASED_CLASS(name, json) \
+  class name : public QObject \
+  { \
+    Q_OBJECT \
+    Q_PLUGIN_METADATA(IID "demo" FILE json) \
+    name() {} \
+  };
+  ...
+
+::
+
+  // complex_class.hpp
+  #pragma once
+  JSON_BASED_CLASS(Complex_Class, "meta.json")
+  // end of file
+
+Since ``complex_class.hpp`` doesn't contain a ``Q_OBJECT`` macro it would be
+ignored by :prop_tgt:`AUTOMOC`.  We change this by adding ``JSON_BASED_CLASS``
+to :variable:`CMAKE_AUTOMOC_MACRO_NAMES`::
+
+  list(APPEND CMAKE_AUTOMOC_MACRO_NAMES "JSON_BASED_CLASS")
+
+We want the ``moc`` file of ``complex_class.hpp`` to depend on
+``meta.json``.  So we add a filter to
+:variable:`CMAKE_AUTOMOC_DEPEND_FILTERS`::
+
+  list(APPEND CMAKE_AUTOMOC_DEPEND_FILTERS
+    "JSON_BASED_CLASS"
+    "[\n^][ \t]*JSON_BASED_CLASS[ \t]*\\([^,]*,[ \t]*\"([^\"]+)\""
+  )
+
+Additionally we assume ``meta.json`` is :prop_sf:`GENERATED` which is
+why we have to add it to :prop_tgt:`AUTOGEN_TARGET_DEPENDS`::
+
+  set_property(TARGET my_target APPEND PROPERTY AUTOGEN_TARGET_DEPENDS "meta.json")
