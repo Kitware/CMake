@@ -856,10 +856,7 @@ void cmVisualStudio10TargetGenerator::WriteTargetSpecificReferences()
 
 void cmVisualStudio10TargetGenerator::WriteTargetsFileReferences()
 {
-  for (std::vector<TargetsFileAndConfigs>::iterator i =
-         this->TargetsFileAndConfigsVec.begin();
-       i != this->TargetsFileAndConfigsVec.end(); ++i) {
-    TargetsFileAndConfigs const& tac = *i;
+  for (TargetsFileAndConfigs const& tac : this->TargetsFileAndConfigsVec) {
     this->WriteString("<Import Project=\"", 3);
     (*this->BuildFileStream) << tac.File << "\" ";
     (*this->BuildFileStream) << "Condition=\"";
@@ -894,10 +891,9 @@ void cmVisualStudio10TargetGenerator::WriteWinRTReferences()
   }
   if (!references.empty()) {
     this->WriteString("<ItemGroup>\n", 1);
-    for (std::vector<std::string>::iterator ri = references.begin();
-         ri != references.end(); ++ri) {
+    for (std::string const& ri : references) {
       this->WriteString("<Reference Include=\"", 2);
-      (*this->BuildFileStream) << cmVS10EscapeXML(*ri) << "\">\n";
+      (*this->BuildFileStream) << cmVS10EscapeXML(ri) << "\">\n";
       this->WriteString("<IsWinMDFile>true</IsWinMDFile>\n", 3);
       this->WriteString("</Reference>\n", 2);
     }
@@ -910,13 +906,11 @@ void cmVisualStudio10TargetGenerator::WriteWinRTReferences()
 void cmVisualStudio10TargetGenerator::WriteProjectConfigurations()
 {
   this->WriteString("<ItemGroup Label=\"ProjectConfigurations\">\n", 1);
-  for (std::vector<std::string>::const_iterator i =
-         this->Configurations.begin();
-       i != this->Configurations.end(); ++i) {
+  for (std::string const& c : this->Configurations) {
     this->WriteString("<ProjectConfiguration Include=\"", 2);
-    (*this->BuildFileStream) << *i << "|" << this->Platform << "\">\n";
+    (*this->BuildFileStream) << c << "|" << this->Platform << "\">\n";
     this->WriteString("<Configuration>", 3);
-    (*this->BuildFileStream) << *i << "</Configuration>\n";
+    (*this->BuildFileStream) << c << "</Configuration>\n";
     this->WriteString("<Platform>", 3);
     (*this->BuildFileStream) << cmVS10EscapeXML(this->Platform)
                              << "</Platform>\n";
@@ -927,10 +921,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurations()
 
 void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 {
-  for (std::vector<std::string>::const_iterator i =
-         this->Configurations.begin();
-       i != this->Configurations.end(); ++i) {
-    this->WritePlatformConfigTag("PropertyGroup", *i, 1,
+  for (std::string const& c : this->Configurations) {
+    this->WritePlatformConfigTag("PropertyGroup", c, 1,
                                  " Label=\"Configuration\"", "\n");
 
     if (this->ProjectType != csproj) {
@@ -977,12 +969,12 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 
     if (this->MSTools) {
       if (!this->Managed) {
-        this->WriteMSToolConfigurationValues(*i);
+        this->WriteMSToolConfigurationValues(c);
       } else {
-        this->WriteMSToolConfigurationValuesManaged(*i);
+        this->WriteMSToolConfigurationValuesManaged(c);
       }
     } else if (this->NsightTegra) {
-      this->WriteNsightTegraConfigurationValues(*i);
+      this->WriteNsightTegraConfigurationValues(c);
     }
 
     this->WriteString("</PropertyGroup>\n", 1);
@@ -1132,10 +1124,8 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommands()
   this->CSharpCustomCommandNames.clear();
   std::vector<cmSourceFile const*> customCommands;
   this->GeneratorTarget->GetCustomCommands(customCommands, "");
-  for (std::vector<cmSourceFile const*>::const_iterator si =
-         customCommands.begin();
-       si != customCommands.end(); ++si) {
-    this->WriteCustomCommand(*si);
+  for (cmSourceFile const* si : customCommands) {
+    this->WriteCustomCommand(si);
   }
 
   // Add CMakeLists.txt file with rule to re-run CMake for user convenience.
@@ -1154,9 +1144,8 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommand(
   if (this->SourcesVisited.insert(sf).second) {
     if (std::vector<cmSourceFile*> const* depends =
           this->GeneratorTarget->GetSourceDepends(sf)) {
-      for (std::vector<cmSourceFile*>::const_iterator di = depends->begin();
-           di != depends->end(); ++di) {
-        this->WriteCustomCommand(*di);
+      for (cmSourceFile const* di : *depends) {
+        this->WriteCustomCommand(di);
       }
     }
     if (cmCustomCommand const* command = sf->GetCustomCommand()) {
@@ -1179,10 +1168,10 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
   // VS 10 will always rebuild a custom command attached to a .rule
   // file that doesn't exist so create the file explicitly.
   if (source->GetPropertyAsBool("__CMAKE_RULE")) {
-    if (!cmSystemTools::FileExists(sourcePath.c_str())) {
+    if (!cmSystemTools::FileExists(sourcePath)) {
       // Make sure the path exists for the file
       std::string path = cmSystemTools::GetFilenamePath(sourcePath);
-      cmSystemTools::MakeDirectory(path.c_str());
+      cmSystemTools::MakeDirectory(path);
       cmsys::ofstream fout(sourcePath.c_str());
       if (fout) {
         fout << "# generated from CMake\n";
@@ -1216,20 +1205,17 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     this->WriteString("</None>\n", 2);
     this->WriteString("</ItemGroup>\n", 1);
   }
-  for (std::vector<std::string>::const_iterator i =
-         this->Configurations.begin();
-       i != this->Configurations.end(); ++i) {
-    cmCustomCommandGenerator ccg(command, *i, lg);
+  for (std::string const& c : this->Configurations) {
+    cmCustomCommandGenerator ccg(command, c, lg);
     std::string comment = lg->ConstructComment(ccg);
     comment = cmVS10EscapeComment(comment);
     std::string script = cmVS10EscapeXML(lg->ConstructScript(ccg));
     // input files for custom command
     std::stringstream inputs;
     inputs << cmVS10EscapeXML(source->GetFullPath());
-    for (std::vector<std::string>::const_iterator d = ccg.GetDepends().begin();
-         d != ccg.GetDepends().end(); ++d) {
+    for (std::string const& d : ccg.GetDepends()) {
       std::string dep;
-      if (lg->GetRealDependency(*d, *i, dep)) {
+      if (lg->GetRealDependency(d, c, dep)) {
         ConvertToWindowsSlash(dep);
         inputs << ";" << cmVS10EscapeXML(dep);
       }
@@ -1237,15 +1223,14 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     // output files for custom command
     std::stringstream outputs;
     const char* sep = "";
-    for (std::vector<std::string>::const_iterator o = ccg.GetOutputs().begin();
-         o != ccg.GetOutputs().end(); ++o) {
-      std::string out = *o;
+    for (std::string const& o : ccg.GetOutputs()) {
+      std::string out = o;
       ConvertToWindowsSlash(out);
       outputs << sep << cmVS10EscapeXML(out);
       sep = ";";
     }
     if (this->ProjectType == csproj) {
-      std::string name = "CustomCommand_" + *i + "_" +
+      std::string name = "CustomCommand_" + c + "_" +
         cmSystemTools::ComputeStringMD5(sourcePath);
       std::string inputs_s = inputs.str();
       std::string outputs_s = outputs.str();
@@ -1253,10 +1238,10 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
       script = cmVS10EscapeQuotes(script);
       inputs_s = cmVS10EscapeQuotes(inputs_s);
       outputs_s = cmVS10EscapeQuotes(outputs_s);
-      this->WriteCustomRuleCSharp(*i, name, script, inputs_s, outputs_s,
+      this->WriteCustomRuleCSharp(c, name, script, inputs_s, outputs_s,
                                   comment);
     } else {
-      this->WriteCustomRuleCpp(*i, script, inputs.str(), outputs.str(),
+      this->WriteCustomRuleCpp(c, script, inputs.str(), outputs.str(),
                                comment);
     }
   }
@@ -1314,8 +1299,8 @@ std::string cmVisualStudio10TargetGenerator::ConvertPath(
 {
   return forceRelative
     ? cmSystemTools::RelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), path.c_str())
-    : path.c_str();
+        this->LocalGenerator->GetCurrentBinaryDirectory(), path)
+    : path;
 }
 
 static void ConvertToWindowsSlash(std::string& s)
@@ -1341,10 +1326,8 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     this->GeneratorTarget->GetAllConfigSources();
 
   std::set<cmSourceGroup*> groupsUsed;
-  for (std::vector<cmGeneratorTarget::AllConfigSource>::const_iterator si =
-         sources.begin();
-       si != sources.end(); ++si) {
-    std::string const& source = si->Source->GetFullPath();
+  for (cmGeneratorTarget::AllConfigSource const& si : sources) {
+    std::string const& source = si.Source->GetFullPath();
     cmSourceGroup* sourceGroup =
       this->Makefile->FindSourceGroup(source, sourceGroups);
     groupsUsed.insert(sourceGroup);
@@ -1376,9 +1359,8 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     "xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n");
   this->WriteString(project_defaults.c_str(), 0);
 
-  for (ToolSourceMap::const_iterator ti = this->Tools.begin();
-       ti != this->Tools.end(); ++ti) {
-    this->WriteGroupSources(ti->first.c_str(), ti->second, sourceGroups);
+  for (auto const& ti : this->Tools) {
+    this->WriteGroupSources(ti.first.c_str(), ti.second, sourceGroups);
   }
 
   // Added files are images and the manifest.
@@ -1510,7 +1492,7 @@ void cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
 }
 
 void cmVisualStudio10TargetGenerator::WriteGroupSources(
-  const char* name, ToolSources const& sources,
+  std::string const& name, ToolSources const& sources,
   std::vector<cmSourceGroup>& sourceGroups)
 {
   this->WriteString("<ItemGroup>\n", 1);
@@ -1847,7 +1829,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(std::string const& tool,
   std::string sourceFile = this->ConvertPath(sf->GetFullPath(), forceRelative);
   if (this->LocalGenerator->GetVersion() ==
         cmGlobalVisualStudioGenerator::VS10 &&
-      cmSystemTools::FileIsFullPath(sourceFile.c_str())) {
+      cmSystemTools::FileIsFullPath(sourceFile)) {
     // Normal path conversion resulted in a full path.  VS 10 (but not 11)
     // refuses to show the property page in the IDE for a source file with a
     // full path (not starting in a '.' or '/' AFAICT).  CMake <= 2.8.4 used a
@@ -2168,7 +2150,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
                                                        *source);
       }
       clOptions.AddIncludes(includeList);
-      clOptions.SetConfiguration(config.c_str());
+      clOptions.SetConfiguration(config);
       clOptions.PrependInheritedString("AdditionalOptions");
       clOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
                                                    "      ", "\n", lang);

@@ -152,9 +152,8 @@ bool cmVisualStudioGeneratorOptions::IsManaged() const
 bool cmVisualStudioGeneratorOptions::UsingUnicode() const
 {
   // Look for the a _UNICODE definition.
-  for (std::vector<std::string>::const_iterator di = this->Defines.begin();
-       di != this->Defines.end(); ++di) {
-    if (*di == "_UNICODE") {
+  for (std::string const& di : this->Defines) {
+    if (di == "_UNICODE") {
       return true;
     }
   }
@@ -163,9 +162,8 @@ bool cmVisualStudioGeneratorOptions::UsingUnicode() const
 bool cmVisualStudioGeneratorOptions::UsingSBCS() const
 {
   // Look for the a _SBCS definition.
-  for (std::vector<std::string>::const_iterator di = this->Defines.begin();
-       di != this->Defines.end(); ++di) {
-    if (*di == "_SBCS") {
+  for (std::string const& di : this->Defines) {
+    if (di == "_SBCS") {
       return true;
     }
   }
@@ -227,7 +225,7 @@ void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
       // It translates to -arch=<virtual> -code=<real>.
       cmSystemTools::ReplaceString(arch_name, "sm_", "compute_");
     }
-    for (auto const& c : codes) {
+    for (std::string const& c : codes) {
       std::string entry = arch_name + "," + c;
       result.push_back(entry);
     }
@@ -237,7 +235,7 @@ void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
   // -gencode=<arch>,<code>
   // -gencode=<arch>,[<code1>,<code2>]
   // -gencode=<arch>,"<code1>,<code2>"
-  for (auto const& e : gencode) {
+  for (std::string const& e : gencode) {
     std::string entry = e;
     cmSystemTools::ReplaceString(entry, "arch=", "");
     cmSystemTools::ReplaceString(entry, "code=", "");
@@ -285,7 +283,7 @@ void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
   uacExecuteLevelMap["highestAvailable"] = "HighestAvailable";
   uacExecuteLevelMap["requireAdministrator"] = "RequireAdministrator";
 
-  for (auto const& subopt : subOptions) {
+  for (std::string const& subopt : subOptions) {
     std::vector<std::string> keyValue;
     cmsys::SystemTools::Split(subopt, keyValue, '=');
     if (keyValue.size() != 2 || (uacMap.find(keyValue[0]) == uacMap.end())) {
@@ -332,9 +330,8 @@ void cmVisualStudioGeneratorOptions::Parse(const char* flags)
 
   // Process flags that need to be represented specially in the IDE
   // project file.
-  for (std::vector<std::string>::iterator ai = args.begin(); ai != args.end();
-       ++ai) {
-    this->HandleFlag(ai->c_str());
+  for (std::string const& ai : args) {
+    this->HandleFlag(ai.c_str());
   }
 }
 
@@ -437,7 +434,8 @@ cmIDEOptions::FlagValue cmVisualStudioGeneratorOptions::TakeFlag(
   return value;
 }
 
-void cmVisualStudioGeneratorOptions::SetConfiguration(const char* config)
+void cmVisualStudioGeneratorOptions::SetConfiguration(
+  const std::string& config)
 {
   this->Configuration = config;
 }
@@ -566,31 +564,27 @@ void cmVisualStudioGeneratorOptions::OutputFlagMap(std::ostream& fout,
                                                    const char* indent)
 {
   if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-    for (std::map<std::string, FlagValue>::iterator m = this->FlagMap.begin();
-         m != this->FlagMap.end(); ++m) {
+    for (auto const& m : this->FlagMap) {
       fout << indent;
       if (!this->Configuration.empty()) {
         this->TargetGenerator->WritePlatformConfigTag(
-          m->first.c_str(), this->Configuration.c_str(), 0, 0, 0, &fout);
+          m.first.c_str(), this->Configuration.c_str(), 0, 0, 0, &fout);
       } else {
-        fout << "<" << m->first << ">";
+        fout << "<" << m.first << ">";
       }
       const char* sep = "";
-      for (std::vector<std::string>::iterator i = m->second.begin();
-           i != m->second.end(); ++i) {
-        fout << sep << cmVisualStudio10GeneratorOptionsEscapeForXML(*i);
+      for (std::string const& i : m.second) {
+        fout << sep << cmVisualStudio10GeneratorOptionsEscapeForXML(i);
         sep = ";";
       }
-      fout << "</" << m->first << ">\n";
+      fout << "</" << m.first << ">\n";
     }
   } else {
-    for (std::map<std::string, FlagValue>::iterator m = this->FlagMap.begin();
-         m != this->FlagMap.end(); ++m) {
-      fout << indent << m->first << "=\"";
+    for (auto const& m : this->FlagMap) {
+      fout << indent << m.first << "=\"";
       const char* sep = "";
-      for (std::vector<std::string>::iterator i = m->second.begin();
-           i != m->second.end(); ++i) {
-        fout << sep << cmVisualStudioGeneratorOptionsEscapeForXML(*i);
+      for (std::string const& i : m.second) {
+        fout << sep << cmVisualStudioGeneratorOptionsEscapeForXML(i);
         sep = ";";
       }
       fout << "\"\n";
