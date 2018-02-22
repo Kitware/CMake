@@ -310,6 +310,8 @@ endmacro()
 # Simply to improve readability of the main script.
 #-----------------------------------------------------------------------
 macro (CMAKE_BUILD_UTILITIES)
+  find_package(Threads)
+
   #---------------------------------------------------------------------
   # Create the kwsys library for CMake.
   set(KWSYS_NAMESPACE cmsys)
