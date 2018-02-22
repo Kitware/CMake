@@ -2387,17 +2387,17 @@ int cmake::Build(const std::string& dir, const std::string& target,
     std::cerr << "Error: could not find CMAKE_GENERATOR in Cache\n";
     return 1;
   }
-  std::unique_ptr<cmGlobalGenerator> gen(
-    this->CreateGlobalGenerator(cachedGenerator));
-  if (!gen.get()) {
+  cmGlobalGenerator* gen = this->CreateGlobalGenerator(cachedGenerator);
+  if (!gen) {
     std::cerr << "Error: could create CMAKE_GENERATOR \"" << cachedGenerator
               << "\"\n";
     return 1;
   }
+  this->SetGlobalGenerator(gen);
   const char* cachedGeneratorInstance =
     this->State->GetCacheEntryValue("CMAKE_GENERATOR_INSTANCE");
   if (cachedGeneratorInstance) {
-    cmMakefile mf(gen.get(), this->GetCurrentSnapshot());
+    cmMakefile mf(gen, this->GetCurrentSnapshot());
     if (!gen->SetGeneratorInstance(cachedGeneratorInstance, &mf)) {
       return 1;
     }
