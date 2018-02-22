@@ -653,6 +653,17 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
   }
 
+  // See if we need to use a compiler launcher like ccache or distcc
+  std::string compilerLauncher;
+  if (!compileCmds.empty() &&
+      (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA")) {
+    std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
+    const char* clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
+    if (clauncher && *clauncher) {
+      compilerLauncher = clauncher;
+    }
+  }
+
   // Maybe insert an include-what-you-use runner.
   if (!compileCmds.empty() && (lang == "C" || lang == "CXX")) {
     std::string const iwyu_prop = lang + "_INCLUDE_WHAT_YOU_USE";
@@ -668,6 +679,13 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
       std::string run_iwyu = this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
       run_iwyu += " -E __run_co_compile";
+      if (!compilerLauncher.empty()) {
+        // In __run_co_compile case the launcher command is supplied
+        // via --launcher=<maybe-list> and consumed
+        run_iwyu += " --launcher=";
+        run_iwyu += this->LocalGenerator->EscapeForShell(compilerLauncher);
+        compilerLauncher.clear();
+      }
       if (iwyu && *iwyu) {
         run_iwyu += " --iwyu=";
         run_iwyu += this->GetLocalGenerator()->EscapeForShell(iwyu);
@@ -693,20 +711,15 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     }
   }
 
-  // Maybe insert a compiler launcher like ccache or distcc
-  if (!compileCmds.empty() &&
-      (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA")) {
-    std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
-    const char* clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
-    if (clauncher && *clauncher) {
-      std::vector<std::string> launcher_cmd;
-      cmSystemTools::ExpandListArgument(clauncher, launcher_cmd, true);
-      for (std::string& i : launcher_cmd) {
-        i = this->LocalGenerator->EscapeForShell(i);
-      }
-      std::string const& run_launcher = cmJoin(launcher_cmd, " ") + " ";
-      compileCmds.front().insert(0, run_launcher);
+  // If compiler launcher was specified and not consumed above, it
+  // goes to the beginning of the command line.
+  if (!compileCmds.empty() && !compilerLauncher.empty()) {
+    std::vector<std::string> args;
+    cmSystemTools::ExpandListArgument(compilerLauncher, args, true);
+    for (std::string& i : args) {
+      i = this->LocalGenerator->EscapeForShell(i);
     }
+    compileCmds.front().insert(0, cmJoin(args, " ") + " ");
   }
 
   if (!compileCmds.empty()) {
