@@ -1223,11 +1223,13 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
     for (std::string const& file : files) {
       knownDependencies.insert(this->ConvertToNinjaPath(file));
     }
-    // get list files which are implicit dependencies as well and will be phony
-    // for rebuild manifest
-    std::vector<std::string> const& lf = lg->GetMakefile()->GetListFiles();
-    for (std::string const& j : lf) {
-      knownDependencies.insert(this->ConvertToNinjaPath(j));
+    if (!this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION")) {
+      // get list files which are implicit dependencies as well and will be
+      // phony for rebuild manifest
+      std::vector<std::string> const& lf = lg->GetMakefile()->GetListFiles();
+      for (std::string const& j : lf) {
+        knownDependencies.insert(this->ConvertToNinjaPath(j));
+      }
     }
     std::vector<cmGeneratorExpressionEvaluationFile*> const& ef =
       lg->GetMakefile()->GetEvaluationFiles();
@@ -1335,6 +1337,9 @@ void cmGlobalNinjaGenerator::WriteTargetAll(std::ostream& os)
 
 void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
 {
+  if (this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION")) {
+    return;
+  }
   cmLocalGenerator* lg = this->LocalGenerators[0];
 
   std::ostringstream cmd;

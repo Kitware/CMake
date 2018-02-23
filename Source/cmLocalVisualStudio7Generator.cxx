@@ -210,7 +210,8 @@ void cmLocalVisualStudio7Generator::CreateSingleVCProj(
 
 cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 {
-  if (this->Makefile->IsOn("CMAKE_SUPPRESS_REGENERATION")) {
+  if (this->GlobalGenerator->GlobalSettingIsOn(
+        "CMAKE_SUPPRESS_REGENERATION")) {
     return nullptr;
   }
 

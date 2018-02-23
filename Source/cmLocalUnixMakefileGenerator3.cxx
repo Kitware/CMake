@@ -760,7 +760,8 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsBottom(
 
   // Write special "cmake_check_build_system" target to run cmake with
   // the --check-build-system flag.
-  {
+  if (!this->GlobalGenerator->GlobalSettingIsOn(
+        "CMAKE_SUPPRESS_REGENERATION")) {
     // Build command to run CMake to check if anything needs regenerating.
     std::string cmakefileName = cmake::GetCMakeFilesDirectoryPostSlash();
     cmakefileName += "Makefile.cmake";
@@ -1580,7 +1581,11 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   std::string recursiveTarget = this->GetCurrentBinaryDirectory();
   recursiveTarget += "/all";
 
-  depends.push_back("cmake_check_build_system");
+  bool regenerate =
+    !this->GlobalGenerator->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION");
+  if (regenerate) {
+    depends.push_back("cmake_check_build_system");
+  }
 
   std::string progressDir = this->GetBinaryDirectory();
   progressDir += cmake::GetCMakeFilesDirectory();
@@ -1643,7 +1648,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   if (!noall || cmSystemTools::IsOff(noall)) {
     // Drive the build before installing.
     depends.push_back("all");
-  } else {
+  } else if (regenerate) {
     // At least make sure the build system is up to date.
     depends.push_back("cmake_check_build_system");
   }
@@ -1657,24 +1662,26 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   this->WriteMakeRule(ruleFileStream, "Prepare targets for installation.",
                       "preinstall/fast", depends, commands, true);
 
-  // write the depend rule, really a recompute depends rule
-  depends.clear();
-  commands.clear();
-  std::string cmakefileName = cmake::GetCMakeFilesDirectoryPostSlash();
-  cmakefileName += "Makefile.cmake";
-  {
-    std::string runRule =
-      "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
-    runRule += " --check-build-system ";
-    runRule +=
-      this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL);
-    runRule += " 1";
-    commands.push_back(std::move(runRule));
+  if (regenerate) {
+    // write the depend rule, really a recompute depends rule
+    depends.clear();
+    commands.clear();
+    std::string cmakefileName = cmake::GetCMakeFilesDirectoryPostSlash();
+    cmakefileName += "Makefile.cmake";
+    {
+      std::string runRule =
+        "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
+      runRule += " --check-build-system ";
+      runRule +=
+        this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL);
+      runRule += " 1";
+      commands.push_back(std::move(runRule));
+    }
+    this->CreateCDCommand(commands, this->GetBinaryDirectory(),
+                          this->GetCurrentBinaryDirectory());
+    this->WriteMakeRule(ruleFileStream, "clear depends", "depend", depends,
+                        commands, true);
   }
-  this->CreateCDCommand(commands, this->GetBinaryDirectory(),
-                        this->GetCurrentBinaryDirectory());
-  this->WriteMakeRule(ruleFileStream, "clear depends", "depend", depends,
-                      commands, true);
 }
 
 void cmLocalUnixMakefileGenerator3::ClearDependencies(cmMakefile* mf,
