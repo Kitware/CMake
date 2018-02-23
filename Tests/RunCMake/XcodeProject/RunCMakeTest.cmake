@@ -236,3 +236,17 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 8)
     deploymeny_target_test(${SDK})
   endforeach()
 endif()
+
+function(XcodeDependOnZeroCheck)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeDependOnZeroCheck-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake(XcodeDependOnZeroCheck)
+  run_cmake_command(XcodeDependOnZeroCheck-build ${CMAKE_COMMAND} --build . --target parentdirlib)
+  run_cmake_command(XcodeDependOnZeroCheck-build ${CMAKE_COMMAND} --build . --target subdirlib)
+endfunction()
+
+XcodeDependOnZeroCheck()
