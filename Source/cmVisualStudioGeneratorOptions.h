@@ -91,7 +91,7 @@ public:
                                           const char* suffix,
                                           const std::string& lang);
   void OutputFlagMap(std::ostream& fout, const char* indent);
-  void SetConfiguration(const char* config);
+  void SetConfiguration(const std::string& config);
 
 private:
   cmLocalVisualStudioGenerator* LocalGenerator;
