@@ -178,6 +178,7 @@ Variables that Change Behavior
    /variable/CMAKE_STAGING_PREFIX
    /variable/CMAKE_SUBLIME_TEXT_2_ENV_SETTINGS
    /variable/CMAKE_SUBLIME_TEXT_2_EXCLUDE_BUILD_TREE
+   /variable/CMAKE_SUPPRESS_REGENERATION
    /variable/CMAKE_SYSROOT
    /variable/CMAKE_SYSROOT_COMPILE
    /variable/CMAKE_SYSROOT_LINK

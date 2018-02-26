@@ -256,6 +256,10 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
 
 void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
 {
+  if (this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION")) {
+    return;
+  }
+
   // Open the output file.  This should not be copy-if-different
   // because the check-build-system step compares the makefile time to
   // see if the build system must be regenerated.
@@ -525,7 +529,10 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(
   std::vector<std::string> depends;
   std::vector<std::string> commands;
 
-  depends.push_back("cmake_check_build_system");
+  bool regenerate = !this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION");
+  if (regenerate) {
+    depends.push_back("cmake_check_build_system");
+  }
 
   // write the target convenience rules
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
@@ -558,7 +565,9 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(
         tmp += "Makefile2";
         commands.push_back(lg->GetRecursiveMakeCall(tmp.c_str(), name));
         depends.clear();
-        depends.push_back("cmake_check_build_system");
+        if (regenerate) {
+          depends.push_back("cmake_check_build_system");
+        }
         lg->WriteMakeRule(ruleFileStream, "Build rule for target.", name,
                           depends, commands, true);
 
@@ -609,7 +618,10 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
   // write the directory level rules for this local gen
   this->WriteDirectoryRules2(ruleFileStream, lg);
 
-  depends.push_back("cmake_check_build_system");
+  bool regenerate = !this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION");
+  if (regenerate) {
+    depends.push_back("cmake_check_build_system");
+  }
 
   // for each target Generate the rule files for each target.
   const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
@@ -715,7 +727,9 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
         commands.push_back(progCmd.str());
       }
       depends.clear();
-      depends.push_back("cmake_check_build_system");
+      if (regenerate) {
+        depends.push_back("cmake_check_build_system");
+      }
       localName = lg->GetRelativeTargetDirectory(gtarget);
       localName += "/rule";
       lg->WriteMakeRule(ruleFileStream,
@@ -898,7 +912,9 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule(
                            "for this Makefile:");
   lg->AppendEcho(commands, "... all (the default if no target is provided)");
   lg->AppendEcho(commands, "... clean");
-  lg->AppendEcho(commands, "... depend");
+  if (!this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION")) {
+    lg->AppendEcho(commands, "... depend");
+  }
 
   // Keep track of targets already listed.
   std::set<std::string> emittedTargets;

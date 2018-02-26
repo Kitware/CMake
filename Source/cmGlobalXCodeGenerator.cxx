@@ -458,7 +458,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   makeHelper.push_back(""); // placeholder, see below
 
   // Add ZERO_CHECK
-  bool regenerate = !mf->IsOn("CMAKE_SUPPRESS_REGENERATION");
+  bool regenerate = !this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION");
   bool generateTopLevelProjectOnly =
     mf->IsOn("CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY");
   bool isTopLevel =

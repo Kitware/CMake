@@ -217,7 +217,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   cmMakefile* mf = lg->GetMakefile();
 
   // Skip the target if no regeneration is to be done.
-  if (mf->IsOn("CMAKE_SUPPRESS_REGENERATION")) {
+  if (this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION")) {
     return false;
   }
 
