@@ -30,6 +30,7 @@
 find_path(GIF_INCLUDE_DIR gif_lib.h
   HINTS
     ENV GIF_DIR
+  PATH_SUFFIXES include
 )
 
 # the gif library can have many names :-/
@@ -39,6 +40,7 @@ find_library(GIF_LIBRARY
   NAMES ${POTENTIAL_GIF_LIBS}
   HINTS
     ENV GIF_DIR
+  PATH_SUFFIXES lib
 )
 
 # see readme.txt
