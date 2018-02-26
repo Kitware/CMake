@@ -117,11 +117,7 @@ public:
 private:
   cmState* GetState() const;
 
-  static int Shell__CharIsWhitespace(char c);
-  static int Shell__CharNeedsQuotesOnUnix(char c);
-  static int Shell__CharNeedsQuotesOnWindows(char c);
   static int Shell__CharNeedsQuotes(char c, int flags);
-  static int Shell__CharIsMakeVariableName(char c);
   static const char* Shell__SkipMakeVariables(const char* c);
   static int Shell__ArgumentNeedsQuotes(const char* in, int flags);
   static std::string Shell__GetArgument(const char* in, int flags);
