@@ -3433,6 +3433,17 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
   std::string currentBinDir =
     this->LocalGenerator->GetCurrentBinaryDirectory();
   for (cmComputeLinkInformation::Item const& l : libs) {
+    // Do not allow C# targets to be added to the LIB listing. LIB files are
+    // used for linking C++ dependencies. C# libraries do not have lib files.
+    // Instead, they compile down to C# reference libraries (DLL files). The
+    // `<ProjectReference>` elements added to the vcxproj are enough for the
+    // IDE to deduce the DLL file required by other C# projects that need its
+    // reference library.
+    if (l.Target &&
+        cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(l.Target)) {
+      continue;
+    }
+
     if (l.IsPath) {
       std::string path =
         this->LocalGenerator->ConvertToRelativePath(currentBinDir, l.Value);
