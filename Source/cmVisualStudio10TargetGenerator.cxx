@@ -2138,7 +2138,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         clOptions.AddDefines(
           genexInterpreter.Evaluate(configDefines, "COMPILE_DEFINITIONS"));
       } else {
-        clOptions.AddDefines(configDefines.c_str());
+        clOptions.AddDefines(configDefines);
       }
       std::vector<std::string> includeList;
       if (configDependentIncludes) {

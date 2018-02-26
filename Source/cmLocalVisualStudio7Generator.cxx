@@ -1678,8 +1678,8 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
             }
             Options fileOptions(this, tool, table, gg->ExtraFlagTable);
             fileOptions.Parse(fc.CompileFlags.c_str());
-            fileOptions.AddDefines(fc.CompileDefs.c_str());
-            fileOptions.AddDefines(fc.CompileDefsConfig.c_str());
+            fileOptions.AddDefines(fc.CompileDefs);
+            fileOptions.AddDefines(fc.CompileDefsConfig);
             // validate source level include directories
             std::vector<std::string> includes;
             this->AppendIncludeDirectories(includes, fc.IncludeDirs, **sf);
