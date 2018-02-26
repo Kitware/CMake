@@ -185,11 +185,19 @@
 # :prop_tgt:`CXX_VISIBILITY_PRESET <<LANG>_VISIBILITY_PRESET>` and
 # :prop_tgt:`VISIBILITY_INLINES_HIDDEN` instead.
 
+include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 
 # TODO: Install this macro separately?
 macro(_check_cxx_compiler_attribute _ATTRIBUTE _RESULT)
   check_cxx_source_compiles("${_ATTRIBUTE} int somefunc() { return 0; }
+    int main() { return somefunc();}" ${_RESULT}
+  )
+endmacro()
+
+# TODO: Install this macro separately?
+macro(_check_c_compiler_attribute _ATTRIBUTE _RESULT)
+  check_c_source_compiles("${_ATTRIBUTE} int somefunc() { return 0; }
     int main() { return somefunc();}" ${_RESULT}
   )
 endmacro()
@@ -213,9 +221,15 @@ macro(_test_compiler_hidden_visibility)
       AND NOT CMAKE_CXX_COMPILER_ID MATCHES XL
       AND NOT CMAKE_CXX_COMPILER_ID MATCHES PGI
       AND NOT CMAKE_CXX_COMPILER_ID MATCHES Watcom)
-    check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
-    check_cxx_compiler_flag(-fvisibility-inlines-hidden
-      COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
+    if (CMAKE_CXX_COMPILER_LOADED)
+      check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
+      check_cxx_compiler_flag(-fvisibility-inlines-hidden
+        COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
+    else()
+      check_c_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
+      check_c_compiler_flag(-fvisibility-inlines-hidden
+        COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
+    endif()
   endif()
 endmacro()
 
@@ -232,14 +246,27 @@ macro(_test_compiler_has_deprecated)
     set(COMPILER_HAS_DEPRECATED "" CACHE INTERNAL
       "Compiler support for a deprecated attribute")
   else()
-    _check_cxx_compiler_attribute("__attribute__((__deprecated__))"
-      COMPILER_HAS_DEPRECATED_ATTR)
-    if(COMPILER_HAS_DEPRECATED_ATTR)
-      set(COMPILER_HAS_DEPRECATED "${COMPILER_HAS_DEPRECATED_ATTR}"
-        CACHE INTERNAL "Compiler support for a deprecated attribute")
+    if (CMAKE_CXX_COMPILER_LOADED)
+      _check_cxx_compiler_attribute("__attribute__((__deprecated__))"
+        COMPILER_HAS_DEPRECATED_ATTR)
+      if(COMPILER_HAS_DEPRECATED_ATTR)
+        set(COMPILER_HAS_DEPRECATED "${COMPILER_HAS_DEPRECATED_ATTR}"
+          CACHE INTERNAL "Compiler support for a deprecated attribute")
+      else()
+        _check_cxx_compiler_attribute("__declspec(deprecated)"
+          COMPILER_HAS_DEPRECATED)
+      endif()
     else()
-      _check_cxx_compiler_attribute("__declspec(deprecated)"
-        COMPILER_HAS_DEPRECATED)
+      _check_c_compiler_attribute("__attribute__((__deprecated__))"
+        COMPILER_HAS_DEPRECATED_ATTR)
+      if(COMPILER_HAS_DEPRECATED_ATTR)
+        set(COMPILER_HAS_DEPRECATED "${COMPILER_HAS_DEPRECATED_ATTR}"
+          CACHE INTERNAL "Compiler support for a deprecated attribute")
+      else()
+        _check_c_compiler_attribute("__declspec(deprecated)"
+          COMPILER_HAS_DEPRECATED)
+      endif()
+
     endif()
   endif()
 endmacro()
