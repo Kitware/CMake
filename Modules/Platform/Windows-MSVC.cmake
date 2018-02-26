@@ -293,6 +293,34 @@ macro(__windows_compiler_msvc lang)
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "${_CMAKE_VS_LINK_EXE}<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /out:<TARGET> /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES>${CMAKE_END_TEMP_FILE}")
 
+  if("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xMSVC")
+    set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
+    set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
+
+    set(CMAKE_${lang}_COMPILE_OPTIONS_IPO "/GL")
+    set(CMAKE_${lang}_LINK_OPTIONS_IPO "/INCREMENTAL:NO" "/LTCG")
+    string(REPLACE "<LINK_FLAGS> " "/LTCG <LINK_FLAGS> "
+      CMAKE_${lang}_CREATE_STATIC_LIBRARY_IPO "${CMAKE_${lang}_CREATE_STATIC_LIBRARY}")
+  elseif("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xClang" OR
+         "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xFlang")
+    set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
+    set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
+
+    # '-flto=thin' available since Clang 3.9 and Xcode 8
+    # * http://clang.llvm.org/docs/ThinLTO.html#clang-llvm
+    # * https://trac.macports.org/wiki/XcodeVersionInfo
+    set(_CMAKE_LTO_THIN TRUE)
+    if(CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.9)
+      set(_CMAKE_LTO_THIN FALSE)
+    endif()
+
+    if(_CMAKE_LTO_THIN)
+      set(CMAKE_${lang}_COMPILE_OPTIONS_IPO "-flto=thin")
+    else()
+      set(CMAKE_${lang}_COMPILE_OPTIONS_IPO "-flto")
+    endif()
+  endif()
+
   if("x${lang}" STREQUAL "xC" OR
       "x${lang}" STREQUAL "xCXX")
     if(CMAKE_VS_PLATFORM_TOOLSET MATCHES "v[0-9]+_clang_.*")
