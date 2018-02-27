@@ -47,7 +47,7 @@ set(TIMESTAMP-AllSpecifiers-STDERR "~[0-9]+(;[0-9]+)*~")
 set(TIMESTAMP-MonthWeekNames-RESULT 0)
 set(TIMESTAMP-MonthWeekNames-STDERR "~[^%]+;[^%]+~")
 set(TIMESTAMP-UnixTime-RESULT 0)
-set(TIMESTAMP-UnixTime-STDERR "~[1-9][0-9]+~")
+set(TIMESTAMP-UnixTime-STDERR "~[0-9]+~")
 
 include("@CMAKE_CURRENT_SOURCE_DIR@/CheckCMakeTest.cmake")
 check_cmake_test(String
