@@ -331,7 +331,7 @@ void cmVisualStudioGeneratorOptions::Parse(const char* flags)
   // Process flags that need to be represented specially in the IDE
   // project file.
   for (std::string const& ai : args) {
-    this->HandleFlag(ai.c_str());
+    this->HandleFlag(ai);
   }
 }
 
@@ -393,23 +393,23 @@ void cmVisualStudioGeneratorOptions::Reparse(std::string const& key)
   this->Parse(original.c_str());
 }
 
-void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
+void cmVisualStudioGeneratorOptions::StoreUnknownFlag(std::string const& flag)
 {
   // Look for Intel Fortran flags that do not map well in the flag table.
   if (this->CurrentTool == FortranCompiler) {
-    if (strcmp(flag, "/dbglibs") == 0) {
+    if (flag == "/dbglibs") {
       this->FortranRuntimeDebug = true;
       return;
     }
-    if (strcmp(flag, "/threads") == 0) {
+    if (flag == "/threads") {
       this->FortranRuntimeMT = true;
       return;
     }
-    if (strcmp(flag, "/libs:dll") == 0) {
+    if (flag == "/libs:dll") {
       this->FortranRuntimeDLL = true;
       return;
     }
-    if (strcmp(flag, "/libs:static") == 0) {
+    if (flag == "/libs:static") {
       this->FortranRuntimeDLL = false;
       return;
     }
@@ -417,7 +417,7 @@ void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
 
   // This option is not known.  Store it in the output flags.
   std::string const opts = cmOutputConverter::EscapeWindowsShellArgument(
-    flag, cmOutputConverter::Shell_Flag_AllowMakeVariables |
+    flag.c_str(), cmOutputConverter::Shell_Flag_AllowMakeVariables |
       cmOutputConverter::Shell_Flag_VSIDE);
   this->AppendFlagString(this->UnknownFlagField, opts);
 }
