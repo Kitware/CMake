@@ -359,7 +359,8 @@ struct CoCompileJob
 int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
 {
   std::vector<CoCompileJob> jobs;
-  std::string sourceFile; // store --source=
+  std::string sourceFile;             // store --source=
+  std::vector<std::string> launchers; // store --launcher=
 
   // Default is to run the original command found after -- if the option
   // does not need to do that, it should be specified here, currently only
@@ -390,15 +391,17 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
           }
         }
       }
-      if (cmHasLiteralPrefix(arg, "--source=")) {
-        sourceFile = arg.substr(9);
-        optionFound = true;
-      }
-      // if it was not a co-compiler or --source then error
       if (!optionFound) {
-        std::cerr << "__run_co_compile given unknown argument: " << arg
-                  << "\n";
-        return 1;
+        if (cmHasLiteralPrefix(arg, "--source=")) {
+          sourceFile = arg.substr(9);
+        } else if (cmHasLiteralPrefix(arg, "--launcher=")) {
+          cmSystemTools::ExpandListArgument(arg.substr(11), launchers, true);
+        } else {
+          // if it was not a co-compiler or --source/--launcher then error
+          std::cerr << "__run_co_compile given unknown argument: " << arg
+                    << "\n";
+          return 1;
+        }
       }
     } else { // if not doing_options then push to orig_cmd
       orig_cmd.push_back(arg);
@@ -434,6 +437,11 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
   // if there is no original command to run return now
   if (!runOriginalCmd) {
     return 0;
+  }
+
+  // Prepend launcher argument(s), if any
+  if (!launchers.empty()) {
+    orig_cmd.insert(orig_cmd.begin(), launchers.begin(), launchers.end());
   }
 
   // Now run the real compiler command and return its result value
