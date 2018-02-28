@@ -112,6 +112,8 @@ function(run_cmake test)
     "|clang[^:]*: warning: the object size sanitizer has no effect at -O0, but is explicitly enabled:"
     "|Error kstat returned"
     "|Hit xcodebuild bug"
+    "|ld: 0711-224 WARNING: Duplicate symbol: .__init_aix_libgcc_cxa_atexit"
+    "|ld: 0711-345 Use the -bloadmap or -bnoquiet option to obtain more information"
     "|[^\n]*is a member of multiple groups"
     "|[^\n]*from Time Machine by path"
     "|[^\n]*Bullseye Testing Technology"
