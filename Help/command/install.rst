@@ -183,6 +183,11 @@ export called ``<export-name>``.  It must appear before any ``RUNTIME``,
 ``LIBRARY``, ``ARCHIVE``, or ``OBJECTS`` options.  To actually install the
 export file itself, call ``install(EXPORT)``, documented below.
 
+:ref:`Interface Libraries` may be listed among the targets to install.
+They install no artifacts but will be included in an associated ``EXPORT``.
+If :ref:`Object Libraries` are listed but given no destination for their
+object files, they will be exported as :ref:`Interface Libraries`.
+
 Installing a target with the :prop_tgt:`EXCLUDE_FROM_ALL` target property
 set to ``TRUE`` has undefined behavior.
 

@@ -360,17 +360,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         this->SetError(e.str());
         return false;
       }
-      if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-        std::string reason;
-        if (!this->Makefile->GetGlobalGenerator()->HasKnownObjectFileLocation(
-              &reason)) {
-          std::ostringstream e;
-          e << "TARGETS given OBJECT library \"" << tgt
-            << "\" which may not be installed" << reason << ".";
-          this->SetError(e.str());
-          return false;
-        }
-      }
       // Store the target in the list to be installed.
       targets.push_back(target);
     } else {
@@ -534,15 +523,23 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       case cmStateEnums::OBJECT_LIBRARY: {
         // Objects use OBJECT properties.
         if (!objectArgs.GetDestination().empty()) {
+          // Verify that we know where the objects are to install them.
+          std::string reason;
+          if (!this->Makefile->GetGlobalGenerator()
+                 ->HasKnownObjectFileLocation(&reason)) {
+            std::ostringstream e;
+            e << "TARGETS given OBJECT library \"" << target.GetName()
+              << "\" whose objects may not be installed" << reason << ".";
+            this->SetError(e.str());
+            return false;
+          }
+
           objectGenerator =
             CreateInstallTargetGenerator(target, objectArgs, false);
         } else {
-          std::ostringstream e;
-          e << "TARGETS given no OBJECTS DESTINATION for object library "
-               "target \""
-            << target.GetName() << "\".";
-          this->SetError(e.str());
-          return false;
+          // Installing an OBJECT library without a destination transforms
+          // it to an INTERFACE library.  It installs no files but can be
+          // exported.
         }
       } break;
       case cmStateEnums::EXECUTABLE: {

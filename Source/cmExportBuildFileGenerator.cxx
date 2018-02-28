@@ -59,7 +59,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
           this->LG->GetMakefile()->GetBacktrace());
         return false;
       }
-      if (te->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+      if (this->GetExportTargetType(te) == cmStateEnums::INTERFACE_LIBRARY) {
         this->GenerateRequiredCMakeVersion(os, "3.0.0");
       }
     }
@@ -71,7 +71,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 
   // Create all the imported targets.
   for (cmGeneratorTarget* gte : this->Exports) {
-    this->GenerateImportTargetCode(os, gte);
+    this->GenerateImportTargetCode(os, gte, this->GetExportTargetType(gte));
 
     gte->Target->AppendBuildInterfaceIncludes();
 
@@ -128,12 +128,13 @@ void cmExportBuildFileGenerator::GenerateImportTargetsConfig(
     // Collect import properties for this target.
     ImportPropertyMap properties;
 
-    if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+    if (this->GetExportTargetType(target) != cmStateEnums::INTERFACE_LIBRARY) {
       this->SetImportLocationProperty(config, suffix, target, properties);
     }
     if (!properties.empty()) {
       // Get the rest of the target details.
-      if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+      if (this->GetExportTargetType(target) !=
+          cmStateEnums::INTERFACE_LIBRARY) {
         this->SetImportDetailProperties(config, suffix, target, properties,
                                         missingTargets);
         this->SetImportLinkInterface(config, suffix,
@@ -151,6 +152,19 @@ void cmExportBuildFileGenerator::GenerateImportTargetsConfig(
       this->GenerateImportPropertyCode(os, config, target, properties);
     }
   }
+}
+
+cmStateEnums::TargetType cmExportBuildFileGenerator::GetExportTargetType(
+  cmGeneratorTarget const* target) const
+{
+  cmStateEnums::TargetType targetType = target->GetType();
+  // An object library exports as an interface library if we cannot
+  // tell clients where to find the objects.
+  if (targetType == cmStateEnums::OBJECT_LIBRARY &&
+      !this->LG->GetGlobalGenerator()->HasKnownObjectFileLocation(nullptr)) {
+    targetType = cmStateEnums::INTERFACE_LIBRARY;
+  }
+  return targetType;
 }
 
 void cmExportBuildFileGenerator::SetExportSet(cmExportSet* exportSet)

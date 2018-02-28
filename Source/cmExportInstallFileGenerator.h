@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmExportFileGenerator.h"
+#include "cmStateTypes.h"
 
 #include <iosfwd>
 #include <map>
@@ -17,6 +18,7 @@ class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmInstallExportGenerator;
 class cmInstallTargetGenerator;
+class cmTargetExport;
 
 /** \class cmExportInstallFileGenerator
  * \brief Generate a file exporting targets from an install tree.
@@ -57,6 +59,8 @@ protected:
   void GenerateImportTargetsConfig(
     std::ostream& os, const std::string& config, std::string const& suffix,
     std::vector<std::string>& missingTargets) override;
+  cmStateEnums::TargetType GetExportTargetType(
+    cmTargetExport const* targetExport) const;
   void HandleMissingTarget(std::string& link_libs,
                            std::vector<std::string>& missingTargets,
                            cmGeneratorTarget* depender,

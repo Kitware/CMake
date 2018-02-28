@@ -901,8 +901,10 @@ void cmExportFileGenerator::GenerateExpectedTargetsCode(
         "\n\n";
   /* clang-format on */
 }
+
 void cmExportFileGenerator::GenerateImportTargetCode(
-  std::ostream& os, const cmGeneratorTarget* target)
+  std::ostream& os, cmGeneratorTarget const* target,
+  cmStateEnums::TargetType targetType)
 {
   // Construct the imported target name.
   std::string targetName = this->Namespace;
@@ -911,7 +913,7 @@ void cmExportFileGenerator::GenerateImportTargetCode(
 
   // Create the imported target.
   os << "# Create imported target " << targetName << "\n";
-  switch (target->GetType()) {
+  switch (targetType) {
     case cmStateEnums::EXECUTABLE:
       os << "add_executable(" << targetName << " IMPORTED)\n";
       break;
