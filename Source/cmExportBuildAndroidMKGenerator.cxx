@@ -41,7 +41,8 @@ void cmExportBuildAndroidMKGenerator::GenerateExpectedTargetsCode(
 }
 
 void cmExportBuildAndroidMKGenerator::GenerateImportTargetCode(
-  std::ostream& os, const cmGeneratorTarget* target)
+  std::ostream& os, cmGeneratorTarget const* target,
+  cmStateEnums::TargetType /*targetType*/)
 {
   std::string targetName = this->Namespace;
   targetName += target->GetExportName();

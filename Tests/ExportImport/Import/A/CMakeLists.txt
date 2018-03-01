@@ -229,6 +229,8 @@ add_library(imp_lib1b STATIC imp_lib1.c)
 target_link_libraries(imp_lib1b bld_testLib2)
 
 if(NOT CMAKE_GENERATOR STREQUAL "Xcode" OR NOT CMAKE_OSX_ARCHITECTURES MATCHES "[;$]")
+  set(bld_objlib_type OBJECT_LIBRARY)
+
   # Create a executable that is using objects imported from the install tree
   add_executable(imp_testLib8 imp_testLib8.c $<TARGET_OBJECTS:exp_testLib8>)
 
@@ -236,6 +238,18 @@ if(NOT CMAKE_GENERATOR STREQUAL "Xcode" OR NOT CMAKE_OSX_ARCHITECTURES MATCHES "
     # Create a executable that is using objects imported from the build tree
     add_executable(imp_testLib8b imp_testLib8.c $<TARGET_OBJECTS:bld_testLib8>)
   endif()
+else()
+  set(bld_objlib_type INTERFACE_LIBRARY)
+endif()
+
+# Check that object libraries were transformed on export as expected.
+get_property(type TARGET exp_testLib9Obj PROPERTY TYPE)
+if(NOT type STREQUAL INTERFACE_LIBRARY)
+  message(FATAL_ERROR "exp_testLib9Obj type is '${type}', not 'INTERFACE_LIBRARY'")
+endif()
+get_property(type TARGET bld_testLib9Obj PROPERTY TYPE)
+if(NOT type STREQUAL "${bld_objlib_type}")
+  message(FATAL_ERROR "bld_testLib9Obj type is '${type}', not '${bld_objlib_type}'")
 endif()
 
 #-----------------------------------------------------------------------------

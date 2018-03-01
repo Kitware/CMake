@@ -83,10 +83,12 @@ set_property(TARGET testLib7 PROPERTY OUTPUT_NAME testLib7-$<CONFIG>)
 add_library(testLib8 OBJECT testLib8A.c testLib8B.c sub/testLib8C.c)
 
 if(NOT CMAKE_GENERATOR STREQUAL "Xcode" OR NOT CMAKE_OSX_ARCHITECTURES MATCHES "[;$]")
-  set(maybe_testLib8 testLib8)
+  set(maybe_OBJECTS_DESTINATION OBJECTS DESTINATION $<1:lib>)
 else()
-  set(maybe_testLib8 "")
+  set(maybe_OBJECTS_DESTINATION "")
 endif()
+
+add_library(testLib9Obj OBJECT testLib9Obj.c)
 
 # Test using the target_link_libraries command to set the
 # LINK_INTERFACE_LIBRARIES* properties.  We construct two libraries
@@ -483,7 +485,7 @@ install(
   TARGETS
   testExe1 testLib1 testLib2 testExe2 testLib3 testLib4 testExe3 testExe4
   testExe2lib testLib4lib testLib4libdbg testLib4libopt
-  testLib6 testLib7 ${maybe_testLib8}
+  testLib6 testLib7 testLib8
   testLibCycleA testLibCycleB
   testLibNoSONAME
   cmp0022NEW cmp0022OLD
@@ -492,9 +494,14 @@ install(
   RUNTIME DESTINATION $<1:bin>
   LIBRARY DESTINATION $<1:lib> NAMELINK_SKIP
   ARCHIVE DESTINATION $<1:lib>
-  OBJECTS DESTINATION $<1:lib>
+  ${maybe_OBJECTS_DESTINATION}
   FRAMEWORK DESTINATION Frameworks
   BUNDLE DESTINATION Applications
+  )
+install(
+  TARGETS
+  testLib9Obj
+  EXPORT exp
   )
 if (APPLE)
   file(COPY testLib4.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/testLib4.framework/Headers)
@@ -545,7 +552,8 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
   FILE ExportBuildTree.cmake
   )
 export(TARGETS testExe2 testLib4 testLib5 testLib6 testLib7 testExe3 testExe4 testExe2lib
-  ${maybe_testLib8}
+  testLib8
+  testLib9Obj
   testLib4lib testLib4libdbg testLib4libopt
   testLibCycleA testLibCycleB
   testLibNoSONAME

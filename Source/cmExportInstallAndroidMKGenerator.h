@@ -12,6 +12,7 @@
 
 #include "cmExportFileGenerator.h"
 #include "cmExportInstallFileGenerator.h"
+#include "cmStateTypes.h"
 
 class cmGeneratorTarget;
 class cmInstallExportGenerator;
@@ -41,8 +42,9 @@ protected:
   void GenerateImportHeaderCode(std::ostream& os,
                                 const std::string& config = "") override;
   void GenerateImportFooterCode(std::ostream& os) override;
-  void GenerateImportTargetCode(std::ostream& os,
-                                const cmGeneratorTarget* target) override;
+  void GenerateImportTargetCode(
+    std::ostream& os, cmGeneratorTarget const* target,
+    cmStateEnums::TargetType /*targetType*/) override;
   void GenerateExpectedTargetsCode(
     std::ostream& os, const std::string& expectedTargets) override;
   void GenerateImportPropertyCode(
