@@ -88,7 +88,17 @@ else()
   set(maybe_OBJECTS_DESTINATION "")
 endif()
 
-add_library(testLib9Obj OBJECT testLib9Obj.c)
+cmake_policy(PUSH)
+cmake_policy(SET CMP0022 NEW)
+add_library(testLib9ObjPub OBJECT testLib9ObjPub.c)
+target_compile_definitions(testLib9ObjPub INTERFACE testLib9ObjPub_USED)
+add_library(testLib9ObjPriv OBJECT testLib9ObjPriv.c)
+target_compile_definitions(testLib9ObjPriv INTERFACE testLib9ObjPriv_USED)
+add_library(testLib9ObjIface OBJECT testLib9ObjIface.c)
+target_compile_definitions(testLib9ObjIface INTERFACE testLib9ObjIface_USED)
+add_library(testLib9 STATIC testLib9.c)
+target_link_libraries(testLib9 INTERFACE testLib9ObjIface PUBLIC testLib9ObjPub PRIVATE testLib9ObjPriv)
+cmake_policy(POP)
 
 # Test using the target_link_libraries command to set the
 # LINK_INTERFACE_LIBRARIES* properties.  We construct two libraries
@@ -486,6 +496,7 @@ install(
   testExe1 testLib1 testLib2 testExe2 testLib3 testLib4 testExe3 testExe4
   testExe2lib testLib4lib testLib4libdbg testLib4libopt
   testLib6 testLib7 testLib8
+  testLib9
   testLibCycleA testLibCycleB
   testLibNoSONAME
   cmp0022NEW cmp0022OLD
@@ -500,7 +511,7 @@ install(
   )
 install(
   TARGETS
-  testLib9Obj
+  testLib9ObjPub testLib9ObjPriv testLib9ObjIface
   EXPORT exp
   )
 if (APPLE)
@@ -553,7 +564,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
   )
 export(TARGETS testExe2 testLib4 testLib5 testLib6 testLib7 testExe3 testExe4 testExe2lib
   testLib8
-  testLib9Obj
+  testLib9 testLib9ObjPub testLib9ObjPriv testLib9ObjIface
   testLib4lib testLib4libdbg testLib4libopt
   testLibCycleA testLibCycleB
   testLibNoSONAME

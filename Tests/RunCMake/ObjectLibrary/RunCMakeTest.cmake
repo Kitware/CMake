@@ -11,6 +11,8 @@ if(RunCMake_GENERATOR STREQUAL "Xcode" AND "$ENV{CMAKE_OSX_ARCHITECTURES}" MATCH
 else()
   run_cmake(Import)
   run_cmake(Install)
+  run_cmake(InstallLinkedObj1)
+  run_cmake(InstallLinkedObj2)
 endif()
 run_cmake(Export)
 
