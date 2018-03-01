@@ -110,10 +110,10 @@ along with those compiled from their own sources.  Object libraries
 may contain only sources that compile, header files, and other files
 that would not affect linking of a normal library (e.g. ``.txt``).
 They may contain custom commands generating such sources, but not
-``PRE_BUILD``, ``PRE_LINK``, or ``POST_BUILD`` commands.  Object libraries
-cannot be linked.  Some native build systems (such as Xcode) may not like
-targets that have only object files, so consider adding at least one real
-source file to any target that references ``$<TARGET_OBJECTS:objlib>``.
+``PRE_BUILD``, ``PRE_LINK``, or ``POST_BUILD`` commands.  Some native build
+systems (such as Xcode) may not like targets that have only object files, so
+consider adding at least one real source file to any target that references
+``$<TARGET_OBJECTS:objlib>``.
 
 Alias Libraries
 ^^^^^^^^^^^^^^^

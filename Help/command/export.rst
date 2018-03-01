@@ -45,7 +45,9 @@ unspecified.
   :ref:`Object Libraries` under :generator:`Xcode` have special handling if
   multiple architectures are listed in :variable:`CMAKE_OSX_ARCHITECTURES`.
   In this case they will be exported as :ref:`Interface Libraries` with
-  no object files available to clients.
+  no object files available to clients.  This is sufficient to satisfy
+  transitive usage requirements of other targets that link to the
+  object libraries in their implementation.
 
 ::
 

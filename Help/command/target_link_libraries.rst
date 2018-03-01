@@ -183,6 +183,70 @@ is not ``NEW``, they are also appended to the
 ``general`` (or without any keyword) are treated as if specified for both
 ``debug`` and ``optimized``.
 
+Linking Object Libraries
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+:ref:`Object Libraries` may be used as the ``<target>`` (first) argument
+of ``target_link_libraries`` to specify dependencies of their sources
+on other libraries.  For example, the code
+
+.. code-block:: cmake
+
+  add_library(A SHARED a.c)
+  target_compile_definitions(A PUBLIC A)
+
+  add_library(obj OBJECT obj.c)
+  target_compile_definitions(obj PUBLIC OBJ)
+  target_link_libraries(obj PUBLIC A)
+
+compiles ``obj.c`` with ``-DA -DOBJ`` and establishes usage requirements
+for ``obj`` that propagate to its dependents.
+
+Normal libraries and executables may link to :ref:`Object Libraries`
+to get their objects and usage requirements.  Continuing the above
+example, the code
+
+.. code-block:: cmake
+
+  add_library(B SHARED b.c)
+  target_link_libraries(B PUBLIC obj)
+
+compiles ``b.c`` with ``-DA -DOBJ``, creates shared library ``B``
+with object files from ``b.c`` and ``obj.c``, and links ``B`` to ``A``.
+Furthermore, the code
+
+.. code-block:: cmake
+
+  add_executable(main main.c)
+  target_link_libraries(main B)
+
+compiles ``main.c`` with ``-DA -DOBJ`` and links executable ``main``
+to ``B`` and ``A``.  The object library's usage requirements are
+propagated transitively through ``B``, but its object files are not.
+
+:ref:`Object Libraries` may "link" to other object libraries to get
+usage requirements, but since they do not have a link step nothing
+is done with their object files.  Continuing from the above example,
+the code:
+
+.. code-block:: cmake
+
+  add_library(obj2 OBJECT obj2.c)
+  target_link_libraries(obj2 PUBLIC obj)
+
+  add_executable(main2 main2.c)
+  target_link_libraries(main2 obj2)
+
+compiles ``obj2.c`` with ``-DA -DOBJ``, creates executable ``main2``
+with object files from ``main2.c`` and ``obj2.c``, and links ``main2``
+to ``A``.
+
+In other words, when :ref:`Object Libraries` appear in a target's
+:prop_tgt:`INTERFACE_LINK_LIBRARIES` property they will be
+treated as :ref:`Interface Libraries`, but when they appear in
+a target's :prop_tgt:`LINK_LIBRARIES` property their object files
+will be included in the link too.
+
 Cyclic Dependencies of Static Libraries
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
