@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestMultiProcessHandler.h"
 
+#include "cmAffinity.h"
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestScriptHandler.h"
@@ -53,6 +54,8 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
   this->TestLoad = 0;
   this->Completed = 0;
   this->RunningCount = 0;
+  this->ProcessorsAvailable = cmAffinity::GetProcessorsAvailable();
+  this->HaveAffinity = this->ProcessorsAvailable.size();
   this->StopTimePassed = false;
   this->HasCycles = false;
   this->SerialTestRunning = false;
@@ -127,6 +130,21 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
     return false;
   }
 
+  if (this->HaveAffinity && this->Properties[test]->WantAffinity) {
+    size_t needProcessors = this->GetProcessorsUsed(test);
+    if (needProcessors > this->ProcessorsAvailable.size()) {
+      return false;
+    }
+    std::vector<size_t> affinity;
+    affinity.reserve(needProcessors);
+    for (size_t i = 0; i < needProcessors; ++i) {
+      auto p = this->ProcessorsAvailable.begin();
+      affinity.push_back(*p);
+      this->ProcessorsAvailable.erase(p);
+    }
+    this->Properties[test]->Affinity = std::move(affinity);
+  }
+
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "test " << test << "\n", this->Quiet);
   this->TestRunningMap[test] = true; // mark the test as running
@@ -199,6 +217,11 @@ inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
   // setting, we default to using all of the process slots.
   if (processors > this->ParallelLevel) {
     processors = this->ParallelLevel;
+  }
+  // Cap tests that want affinity to the maximum affinity available.
+  if (this->HaveAffinity && processors > this->HaveAffinity &&
+      this->Properties[test]->WantAffinity) {
+    processors = this->HaveAffinity;
   }
   return processors;
 }
@@ -397,6 +420,11 @@ void cmCTestMultiProcessHandler::FinishTestProcess(cmCTestRunTest* runner,
   this->WriteCheckpoint(test);
   this->UnlockResources(test);
   this->RunningCount -= GetProcessorsUsed(test);
+
+  for (auto p : properties->Affinity) {
+    this->ProcessorsAvailable.insert(p);
+  }
+  properties->Affinity.clear();
 
   delete runner;
   if (started) {

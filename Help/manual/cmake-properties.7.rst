@@ -348,6 +348,7 @@ Properties on Tests
    /prop_test/LABELS
    /prop_test/MEASUREMENT
    /prop_test/PASS_REGULAR_EXPRESSION
+   /prop_test/PROCESSOR_AFFINITY
    /prop_test/PROCESSORS
    /prop_test/REQUIRED_FILES
    /prop_test/RESOURCE_LOCK

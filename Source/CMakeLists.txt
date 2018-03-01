@@ -131,6 +131,8 @@ set(SRCS
   LexerParser/cmListFileLexer.c
   LexerParser/cmListFileLexer.in.l
 
+  cmAffinity.cxx
+  cmAffinity.h
   cmArchiveWrite.cxx
   cmBase32.cxx
   cmCacheManager.cxx

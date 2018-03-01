@@ -83,7 +83,7 @@ void cmProcess::SetCommandArguments(std::vector<std::string> const& args)
   this->Arguments = args;
 }
 
-bool cmProcess::StartProcess(uv_loop_t& loop)
+bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
 {
   this->ProcessState = cmProcess::State::Error;
   if (this->Command.empty()) {
@@ -138,6 +138,22 @@ bool cmProcess::StartProcess(uv_loop_t& loop)
   options.stdio_count = 3; // in, out and err
   options.exit_cb = &cmProcess::OnExitCB;
   options.stdio = stdio;
+#if !defined(CMAKE_USE_SYSTEM_LIBUV)
+  std::vector<char> cpumask;
+  if (affinity && !affinity->empty()) {
+    cpumask.resize(static_cast<size_t>(uv_cpumask_size()), 0);
+    for (auto p : *affinity) {
+      cpumask[p] = 1;
+    }
+    options.cpumask = cpumask.data();
+    options.cpumask_size = cpumask.size();
+  } else {
+    options.cpumask = nullptr;
+    options.cpumask_size = 0;
+  }
+#else
+  static_cast<void>(affinity);
+#endif
 
   status =
     uv_read_start(pipe_reader, &cmProcess::OnAllocateCB, &cmProcess::OnReadCB);

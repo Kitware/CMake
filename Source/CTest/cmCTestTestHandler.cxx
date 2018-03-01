@@ -2165,6 +2165,9 @@ bool cmCTestTestHandler::SetTestsProperties(
               rt.Processors = 1;
             }
           }
+          if (key == "PROCESSOR_AFFINITY") {
+            rt.WantAffinity = cmSystemTools::IsOn(val.c_str());
+          }
           if (key == "SKIP_RETURN_CODE") {
             rt.SkipReturnCode = atoi(val.c_str());
             if (rt.SkipReturnCode < 0 || rt.SkipReturnCode > 255) {
@@ -2336,6 +2339,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.ExplicitTimeout = false;
   test.Cost = 0;
   test.Processors = 1;
+  test.WantAffinity = false;
   test.SkipReturnCode = -1;
   test.PreviousRuns = 0;
   if (this->UseIncludeRegExpFlag &&
