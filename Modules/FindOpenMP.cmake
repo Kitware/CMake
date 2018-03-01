@@ -163,7 +163,7 @@ function(_OPENMP_WRITE_SOURCE_FILE LANG SRC_FILE_CONTENT_VAR SRC_FILE_NAME SRC_F
   set(${SRC_FILE_FULLPATH} "${SRC_FILE}" PARENT_SCOPE)
 endfunction()
 
-include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseImplicitLinkInfo.cmake)
 
 function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
   _OPENMP_FLAG_CANDIDATES("${LANG}")
@@ -423,6 +423,8 @@ endif()
 
 unset(_OpenMP_MIN_VERSION)
 
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
 foreach(LANG IN LISTS OpenMP_FINDLIST)
   if(CMAKE_${LANG}_COMPILER_LOADED)
     if (NOT OpenMP_${LANG}_SPEC_DATE AND OpenMP_${LANG}_FLAGS)
@@ -431,8 +433,6 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
         INTERNAL "${LANG} compiler's OpenMP specification date")
       _OPENMP_SET_VERSION_BY_SPEC_DATE("${LANG}")
     endif()
-
-    include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
     set(OpenMP_${LANG}_FIND_QUIETLY ${OpenMP_FIND_QUIETLY})
     set(OpenMP_${LANG}_FIND_REQUIRED ${OpenMP_FIND_REQUIRED})
