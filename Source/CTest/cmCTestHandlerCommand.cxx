@@ -9,6 +9,7 @@
 #include "cmWorkingDirectory.h"
 #include "cmake.h"
 
+#include <cstring>
 #include <sstream>
 #include <stdlib.h>
 
@@ -218,6 +219,21 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   }
   cmWorkingDirectory workdir(
     this->CTest->GetCTestConfiguration("BuildDirectory"));
+  if (workdir.Failed()) {
+    this->SetError("failed to change directory to " +
+                   this->CTest->GetCTestConfiguration("BuildDirectory") +
+                   " : " + std::strerror(workdir.GetLastResult()));
+    if (capureCMakeError) {
+      this->Makefile->AddDefinition(this->Values[ct_CAPTURE_CMAKE_ERROR],
+                                    "-1");
+      cmCTestLog(this->CTest, ERROR_MESSAGE, this->GetName()
+                   << " " << this->GetError() << "\n");
+      // return success because failure is recorded in CAPTURE_CMAKE_ERROR
+      return true;
+    }
+    return false;
+  }
+
   int res = handler->ProcessHandler();
   if (this->Values[ct_RETURN_VALUE] && *this->Values[ct_RETURN_VALUE]) {
     std::ostringstream str;

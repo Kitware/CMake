@@ -6,12 +6,12 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <cstring>
 #include <ctype.h>
 #include <iterator>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdlib.h>
-#include <string.h>
 #include <utility>
 
 #include "cmAlgorithms.h"
@@ -3250,6 +3250,14 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   // change to the tests directory and run cmake
   // use the cmake object instead of calling cmake
   cmWorkingDirectory workdir(bindir);
+  if (workdir.Failed()) {
+    this->IssueMessage(cmake::FATAL_ERROR,
+                       "Failed to set working directory to " + bindir + " : " +
+                         std::strerror(workdir.GetLastResult()));
+    cmSystemTools::SetFatalErrorOccured();
+    this->IsSourceFileTryCompile = false;
+    return 1;
+  }
 
   // make sure the same generator is used
   // use this program as the cmake to be run, it should not

@@ -74,6 +74,8 @@ public:
 
   bool StartAgain();
 
+  void StartFailure(std::string const& output);
+
   cmCTest* GetCTest() const { return this->CTest; }
 
   void FinalizeTest();

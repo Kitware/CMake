@@ -6,6 +6,7 @@
 #include <cmsys/Base64.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/RegularExpression.hxx>
+#include <cstring>
 #include <functional>
 #include <iomanip>
 #include <iterator>
@@ -14,7 +15,6 @@
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 
 #include "cmAlgorithms.h"
@@ -85,6 +85,11 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
     bool readit = false;
     {
       cmWorkingDirectory workdir(fname);
+      if (workdir.Failed()) {
+        this->SetError("Failed to change directory to " + fname + " : " +
+                       std::strerror(workdir.GetLastResult()));
+        return false;
+      }
       const char* testFilename;
       if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
         // does the CTestTestfile.cmake exist ?
