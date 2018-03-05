@@ -231,26 +231,41 @@ target_link_libraries(imp_lib1b bld_testLib2)
 if(NOT CMAKE_GENERATOR STREQUAL "Xcode" OR NOT CMAKE_OSX_ARCHITECTURES MATCHES "[;$]")
   set(bld_objlib_type OBJECT_LIBRARY)
 
-  # Create a executable that is using objects imported from the install tree
-  add_executable(imp_testLib8 imp_testLib8.c $<TARGET_OBJECTS:exp_testLib8>)
+  # Create executables using objects imported from the install tree
+  add_executable(imp_testLib8_src imp_testLib8.c $<TARGET_OBJECTS:exp_testLib8>)
+  add_executable(imp_testLib8_link imp_testLib8.c)
+  target_link_libraries(imp_testLib8_link exp_testLib8)
 
   if(NOT CMAKE_GENERATOR STREQUAL "Xcode" OR NOT XCODE_VERSION VERSION_LESS 5)
-    # Create a executable that is using objects imported from the build tree
-    add_executable(imp_testLib8b imp_testLib8.c $<TARGET_OBJECTS:bld_testLib8>)
+    # Create executables using objects imported from the build tree
+    add_executable(imp_testLib8b_src imp_testLib8.c $<TARGET_OBJECTS:bld_testLib8>)
+    add_executable(imp_testLib8b_link imp_testLib8.c)
+    target_link_libraries(imp_testLib8b_link bld_testLib8)
   endif()
 else()
   set(bld_objlib_type INTERFACE_LIBRARY)
 endif()
 
+# Create an executable that uses a library imported from the install tree
+# that itself was built using an object library.  Verify we get the usage
+# requirements.
+add_executable(imp_testLib9 imp_testLib9.c)
+target_link_libraries(imp_testLib9 exp_testLib9)
+# Similarly for importing from the build tree.
+add_executable(imp_testLib9b imp_testLib9.c)
+target_link_libraries(imp_testLib9b bld_testLib9)
+
 # Check that object libraries were transformed on export as expected.
-get_property(type TARGET exp_testLib9Obj PROPERTY TYPE)
-if(NOT type STREQUAL INTERFACE_LIBRARY)
-  message(FATAL_ERROR "exp_testLib9Obj type is '${type}', not 'INTERFACE_LIBRARY'")
-endif()
-get_property(type TARGET bld_testLib9Obj PROPERTY TYPE)
-if(NOT type STREQUAL "${bld_objlib_type}")
-  message(FATAL_ERROR "bld_testLib9Obj type is '${type}', not '${bld_objlib_type}'")
-endif()
+foreach(vis Pub Priv Iface)
+  get_property(type TARGET exp_testLib9Obj${vis} PROPERTY TYPE)
+  if(NOT type STREQUAL INTERFACE_LIBRARY)
+    message(FATAL_ERROR "exp_testLib9Obj${vis} type is '${type}', not 'INTERFACE_LIBRARY'")
+  endif()
+  get_property(type TARGET bld_testLib9Obj${vis} PROPERTY TYPE)
+  if(NOT type STREQUAL "${bld_objlib_type}")
+    message(FATAL_ERROR "bld_testLib9Obj${vis} type is '${type}', not '${bld_objlib_type}'")
+  endif()
+endforeach()
 
 #-----------------------------------------------------------------------------
 # Test that handling imported targets, including transitive dependencies,

@@ -240,13 +240,16 @@ const char* cmGeneratorTarget::GetOutputTargetType(
     case cmStateEnums::MODULE_LIBRARY:
       switch (artifact) {
         case cmStateEnums::RuntimeBinaryArtifact:
-          // Module import libraries are treated as archive targets.
+          // Module libraries are always treated as library targets.
           return "LIBRARY";
         case cmStateEnums::ImportLibraryArtifact:
-          // Module libraries are always treated as library targets.
+          // Module import libraries are treated as archive targets.
           return "ARCHIVE";
       }
       break;
+    case cmStateEnums::OBJECT_LIBRARY:
+      // Object libraries are always treated as object targets.
+      return "OBJECT";
     case cmStateEnums::EXECUTABLE:
       switch (artifact) {
         case cmStateEnums::RuntimeBinaryArtifact:
@@ -806,6 +809,26 @@ static void AddInterfaceEntries(
   }
 }
 
+static void AddObjectEntries(
+  cmGeneratorTarget const* thisTarget, std::string const& config,
+  std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries)
+{
+  if (cmLinkImplementationLibraries const* impl =
+        thisTarget->GetLinkImplementationLibraries(config)) {
+    for (cmLinkImplItem const& lib : impl->Libraries) {
+      if (lib.Target &&
+          lib.Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+        std::string genex = "$<TARGET_OBJECTS:" + lib + ">";
+        cmGeneratorExpression ge(lib.Backtrace);
+        std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
+        cge->SetEvaluateForBuildsystem(true);
+        entries.push_back(
+          new cmGeneratorTarget::TargetPropertyEntry(std::move(cge), lib));
+      }
+    }
+  }
+}
+
 static bool processSources(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
@@ -846,13 +869,10 @@ static bool processSources(
         std::ostringstream err;
         if (!targetName.empty()) {
           err << "Target \"" << targetName
-              << "\" contains relative "
-                 "path in its INTERFACE_SOURCES:\n"
-                 "  \""
+              << "\" contains relative path in its INTERFACE_SOURCES:\n  \""
               << src << "\"";
         } else {
-          err << "Found relative path while evaluating sources of "
-                 "\""
+          err << "Found relative path while evaluating sources of \""
               << tgt->GetName() << "\":\n  \"" << src << "\"\n";
         }
         tgt->GetLocalGenerator()->IssueMessage(cmake::FATAL_ERROR, err.str());
@@ -929,23 +949,32 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<std::string>& files,
     processSources(this, this->SourceEntries, files, uniqueSrcs, &dagChecker,
                    config, debugSources);
 
+  // Collect INTERFACE_SOURCES of all direct link-dependencies.
   std::vector<cmGeneratorTarget::TargetPropertyEntry*>
     linkInterfaceSourcesEntries;
-
   AddInterfaceEntries(this, config, "INTERFACE_SOURCES",
                       linkInterfaceSourcesEntries);
-
   std::vector<std::string>::size_type numFilesBefore = files.size();
   bool contextDependentInterfaceSources =
     processSources(this, linkInterfaceSourcesEntries, files, uniqueSrcs,
                    &dagChecker, config, debugSources);
 
+  // Collect TARGET_OBJECTS of direct object link-dependencies.
+  std::vector<cmGeneratorTarget::TargetPropertyEntry*> linkObjectsEntries;
+  AddObjectEntries(this, config, linkObjectsEntries);
+  std::vector<std::string>::size_type numFilesBefore2 = files.size();
+  bool contextDependentObjects =
+    processSources(this, linkObjectsEntries, files, uniqueSrcs, &dagChecker,
+                   config, debugSources);
+
   if (!contextDependentDirectSources &&
-      !(contextDependentInterfaceSources && numFilesBefore < files.size())) {
+      !(contextDependentInterfaceSources && numFilesBefore < files.size()) &&
+      !(contextDependentObjects && numFilesBefore2 < files.size())) {
     this->LinkImplementationLanguageIsContextDependent = false;
   }
 
   cmDeleteAll(linkInterfaceSourcesEntries);
+  cmDeleteAll(linkObjectsEntries);
 }
 
 void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*>& files,
@@ -1051,9 +1080,6 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
       kind = SourceKindHeader;
     } else if (sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {
       kind = SourceKindExternalObject;
-      if (this->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-        badObjLib.push_back(sf);
-      }
     } else if (!sf->GetLanguage().empty()) {
       kind = SourceKindObjectSource;
     } else if (ext == "def") {
@@ -1671,6 +1697,7 @@ bool cmGeneratorTarget::HaveWellDefinedOutputFiles() const
   return this->GetType() == cmStateEnums::STATIC_LIBRARY ||
     this->GetType() == cmStateEnums::SHARED_LIBRARY ||
     this->GetType() == cmStateEnums::MODULE_LIBRARY ||
+    this->GetType() == cmStateEnums::OBJECT_LIBRARY ||
     this->GetType() == cmStateEnums::EXECUTABLE;
 }
 
@@ -5328,20 +5355,6 @@ cmGeneratorTarget* cmGeneratorTarget::FindTargetToLink(
     tgt = nullptr;
   }
 
-  if (tgt && tgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-    std::ostringstream e;
-    e << "Target \"" << this->GetName() << "\" links to "
-                                           "OBJECT library \""
-      << tgt->GetName()
-      << "\" but this is not "
-         "allowed.  "
-         "One may link only to STATIC or SHARED libraries, or to executables "
-         "with the ENABLE_EXPORTS property set.";
-    cmake* cm = this->LocalGenerator->GetCMakeInstance();
-    cm->IssueMessage(cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
-    tgt = nullptr;
-  }
-
   return tgt;
 }
 
@@ -5405,6 +5418,7 @@ bool cmGeneratorTarget::IsLinkable() const
           this->GetType() == cmStateEnums::SHARED_LIBRARY ||
           this->GetType() == cmStateEnums::MODULE_LIBRARY ||
           this->GetType() == cmStateEnums::UNKNOWN_LIBRARY ||
+          this->GetType() == cmStateEnums::OBJECT_LIBRARY ||
           this->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
           this->IsExecutableWithExports());
 }

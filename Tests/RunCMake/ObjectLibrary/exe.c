@@ -1,13 +1,13 @@
 #if defined(_WIN32) && defined(COMPILE_FOR_SHARED_LIB)
-#define EXPORT __declspec(dllexport)
+#define IMPORT __declspec(dllimport)
 #else
-#define EXPORT
+#define IMPORT
 #endif
 
-extern int a(void);
-EXPORT int b()
+extern IMPORT int b(void);
+int main()
 {
-  return a();
+  return b();
 }
 #ifndef REQUIRED
 #error "REQUIRED needs to be defined"

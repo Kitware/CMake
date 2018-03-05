@@ -114,15 +114,12 @@ const char* cmTargetPropertyComputer::GetSources<cmTarget>(
         }
         if (!noMessage) {
           e << "Target \"" << tgt->GetName()
-            << "\" contains "
-               "$<TARGET_OBJECTS> generator expression in its sources "
-               "list.  "
-               "This content was not previously part of the SOURCES "
-               "property "
-               "when that property was read at configure time.  Code "
-               "reading "
-               "that property needs to be adapted to ignore the generator "
-               "expression using the string(GENEX_STRIP) command.";
+            << "\" contains $<TARGET_OBJECTS> generator expression in its "
+               "sources list.  This content was not previously part of the "
+               "SOURCES property when that property was read at configure "
+               "time.  Code reading that property needs to be adapted to "
+               "ignore the generator expression using the string(GENEX_STRIP) "
+               "command.";
           messenger->IssueMessage(messageType, e.str(), context);
         }
         if (addContent) {
@@ -742,7 +739,8 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
   }
 
   if (cmGeneratorExpression::Find(lib) != std::string::npos ||
-      (tgt && tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) ||
+      (tgt && (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+               tgt->GetType() == cmStateEnums::OBJECT_LIBRARY)) ||
       (this->Name == lib)) {
     return;
   }

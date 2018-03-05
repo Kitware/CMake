@@ -611,6 +611,9 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       if (!libName.empty()) {
         this->AddItem(libName, nullptr);
       }
+    } else if (tgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+      // Ignore object library!
+      // Its object-files should already have been extracted for linking.
     } else {
       // Decide whether to use an import library.
       bool implib =
