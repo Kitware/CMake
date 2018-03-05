@@ -45,6 +45,7 @@ extern char **environ;
 # include <grp.h>
 #endif
 
+#ifndef CMAKE_BOOTSTRAP
 #if defined(__linux__)
 # define uv__cpu_set_t cpu_set_t
 #elif defined(__FreeBSD__)
@@ -52,6 +53,7 @@ extern char **environ;
 # include <sys/cpuset.h>
 # include <pthread_np.h>
 # define uv__cpu_set_t cpuset_t
+#endif
 #endif
 
 static void uv__chld(uv_signal_t* handle, int signum) {
@@ -294,11 +296,13 @@ static void uv__process_child_init(const uv_process_options_t* options,
   int err;
   int fd;
   int n;
+#ifndef CMAKE_BOOTSTRAP
 #if defined(__linux__) || defined(__FreeBSD__)
   int r;
   int i;
   int cpumask_size;
   uv__cpu_set_t cpuset;
+#endif
 #endif
 
   if (options->flags & UV_PROCESS_DETACHED)
@@ -390,6 +394,7 @@ static void uv__process_child_init(const uv_process_options_t* options,
     _exit(127);
   }
 
+#ifndef CMAKE_BOOTSTRAP
 #if defined(__linux__) || defined(__FreeBSD__)
   if (options->cpumask != NULL) {
     cpumask_size = uv_cpumask_size();
@@ -408,6 +413,7 @@ static void uv__process_child_init(const uv_process_options_t* options,
       _exit(127);
     }
   }
+#endif
 #endif
 
   if (options->env != NULL) {
@@ -465,10 +471,14 @@ int uv_spawn(uv_loop_t* loop,
   int status;
 
   if (options->cpumask != NULL) {
+#ifndef CMAKE_BOOTSTRAP
 #if defined(__linux__) || defined(__FreeBSD__)
     if (options->cpumask_size < (size_t)uv_cpumask_size()) {
       return UV_EINVAL;
     }
+#else
+    return UV_ENOTSUP;
+#endif
 #else
     return UV_ENOTSUP;
 #endif
