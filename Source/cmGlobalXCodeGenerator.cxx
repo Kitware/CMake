@@ -466,7 +466,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   if (regenerate && (isTopLevel || !generateTopLevelProjectOnly)) {
     this->CreateReRunCMakeFile(root, gens);
     std::string file =
-      this->ConvertToRelativeForMake(this->CurrentReRunCMakeMakefile.c_str());
+      this->ConvertToRelativeForMake(this->CurrentReRunCMakeMakefile);
     cmSystemTools::ReplaceString(file, "\\ ", " ");
     cmTarget* check = mf->AddUtilityCommand(
       CMAKE_CHECK_BUILD_SYSTEM_TARGET, cmMakefile::TargetOrigin::Generator,
@@ -553,7 +553,7 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
 
   for (const auto& lfile : lfiles) {
     makefileStream << "TARGETS += $(subst $(space),$(spaceplus),$(wildcard "
-                   << this->ConvertToRelativeForMake(lfile.c_str()) << "))\n";
+                   << this->ConvertToRelativeForMake(lfile) << "))\n";
   }
 
   std::string checkCache = root->GetBinaryDirectory();
@@ -562,11 +562,11 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
   checkCache += "cmake.check_cache";
 
   makefileStream << "\n"
-                 << this->ConvertToRelativeForMake(checkCache.c_str())
+                 << this->ConvertToRelativeForMake(checkCache)
                  << ": $(TARGETS)\n";
   makefileStream << "\t"
                  << this->ConvertToRelativeForMake(
-                      cmSystemTools::GetCMakeCommand().c_str())
+                      cmSystemTools::GetCMakeCommand())
                  << " -H"
                  << this->ConvertToRelativeForMake(root->GetSourceDirectory())
                  << " -B"
@@ -1571,12 +1571,11 @@ void cmGlobalXCodeGenerator::AddCommandsToBuildPhase(
   }
 
   std::string cdir = this->CurrentLocalGenerator->GetCurrentBinaryDirectory();
-  cdir = this->ConvertToRelativeForMake(cdir.c_str());
+  cdir = this->ConvertToRelativeForMake(cdir);
   std::string makecmd = "make -C ";
   makecmd += cdir;
   makecmd += " -f ";
-  makecmd +=
-    this->ConvertToRelativeForMake((makefile + "$CONFIGURATION").c_str());
+  makecmd += this->ConvertToRelativeForMake((makefile + "$CONFIGURATION"));
   makecmd += " all";
   buildphase->AddAttribute("shellScript", this->CreateString(makecmd));
   buildphase->AddAttribute("showEnvVarsInLog", this->CreateString("0"));
@@ -1611,8 +1610,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
       const std::vector<std::string>& outputs = ccg.GetOutputs();
       if (!outputs.empty()) {
         for (auto const& output : outputs) {
-          makefileStream << "\\\n\t"
-                         << this->ConvertToRelativeForMake(output.c_str());
+          makefileStream << "\\\n\t" << this->ConvertToRelativeForMake(output);
         }
       } else {
         std::ostringstream str;
@@ -1633,8 +1631,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         // There is at least one output, start the rule for it
         const char* sep = "";
         for (auto const& output : outputs) {
-          makefileStream << sep
-                         << this->ConvertToRelativeForMake(output.c_str());
+          makefileStream << sep << this->ConvertToRelativeForMake(output);
           sep = " ";
         }
         makefileStream << ": ";
@@ -1646,8 +1643,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         std::string dep;
         if (this->CurrentLocalGenerator->GetRealDependency(d, configName,
                                                            dep)) {
-          makefileStream << "\\\n"
-                         << this->ConvertToRelativeForMake(dep.c_str());
+          makefileStream << "\\\n" << this->ConvertToRelativeForMake(dep);
         }
       }
       makefileStream << "\n";
@@ -1664,12 +1660,12 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         // Build the command line in a single string.
         std::string cmd2 = ccg.GetCommand(c);
         cmSystemTools::ReplaceString(cmd2, "/./", "/");
-        cmd2 = this->ConvertToRelativeForMake(cmd2.c_str());
+        cmd2 = this->ConvertToRelativeForMake(cmd2);
         std::string cmd;
         std::string wd = ccg.GetWorkingDirectory();
         if (!wd.empty()) {
           cmd += "cd ";
-          cmd += this->ConvertToRelativeForMake(wd.c_str());
+          cmd += this->ConvertToRelativeForMake(wd);
           cmd += " && ";
         }
         cmd += cmd2;
@@ -3190,7 +3186,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
           gt->GetType() == cmStateEnums::SHARED_LIBRARY ||
           gt->GetType() == cmStateEnums::MODULE_LIBRARY) {
         std::string tfull = gt->GetFullPath(configName);
-        std::string trel = this->ConvertToRelativeForMake(tfull.c_str());
+        std::string trel = this->ConvertToRelativeForMake(tfull);
 
         // Add this target to the post-build phases of its dependencies.
         std::map<std::string, cmXCodeObject::StringVec>::const_iterator y =
@@ -3218,7 +3214,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
           target->GetDependLibraries().find(configName);
         if (x != target->GetDependLibraries().end()) {
           for (auto const& deplib : x->second) {
-            std::string file = this->ConvertToRelativeForMake(deplib.c_str());
+            std::string file = this->ConvertToRelativeForMake(deplib);
             makefileStream << "\\\n\t" << file;
             dummyRules.insert(file);
           }
@@ -3233,7 +3229,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
           d += objLibName;
           d += ".a";
 
-          std::string dependency = this->ConvertToRelativeForMake(d.c_str());
+          std::string dependency = this->ConvertToRelativeForMake(d);
           makefileStream << "\\\n\t" << dependency;
           dummyRules.insert(dependency);
         }
@@ -3241,8 +3237,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         // Write the action to remove the target if it is out of date.
         makefileStream << "\n";
         makefileStream << "\t/bin/rm -f "
-                       << this->ConvertToRelativeForMake(tfull.c_str())
-                       << "\n";
+                       << this->ConvertToRelativeForMake(tfull) << "\n";
         // if building for more than one architecture
         // then remove those executables as well
         if (this->Architectures.size() > 1) {
@@ -3254,8 +3249,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
             universalFile += "/";
             universalFile += gt->GetFullName(configName);
             makefileStream << "\t/bin/rm -f "
-                           << this->ConvertToRelativeForMake(
-                                universalFile.c_str())
+                           << this->ConvertToRelativeForMake(universalFile)
                            << "\n";
           }
         }

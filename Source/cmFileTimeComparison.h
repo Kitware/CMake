@@ -8,9 +8,9 @@
 class cmFileTimeComparisonInternal;
 
 /** \class cmFileTimeComparison
- * \brief Helper class for performing globbing searches.
+ * \brief Helper class for comparing file modification times.
  *
- * Finds all files that match a given globbing expression.
+ * Compare file modification times or test if file modification times differ.
  */
 class cmFileTimeComparison
 {
