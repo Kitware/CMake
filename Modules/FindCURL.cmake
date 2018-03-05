@@ -7,6 +7,12 @@
 #
 # Find curl
 #
+# IMPORTED Targets
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines :prop_tgt:`IMPORTED` target ``CURL::CURL``, if
+# curl has been found.
+#
 # Find the native CURL headers and libraries.
 #
 # ::
@@ -52,4 +58,10 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(CURL
 if(CURL_FOUND)
   set(CURL_LIBRARIES ${CURL_LIBRARY})
   set(CURL_INCLUDE_DIRS ${CURL_INCLUDE_DIR})
+
+  if(NOT TARGET CURL::CURL)
+    add_library(CURL::CURL UNKNOWN IMPORTED)
+    set_target_properties(CURL::CURL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}")
+    set_property(TARGET CURL::CURL APPEND PROPERTY IMPORTED_LOCATION "${CURL_LIBRARY}")
+  endif()
 endif()
