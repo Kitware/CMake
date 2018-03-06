@@ -737,7 +737,9 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
   // and we removing one instance will break the link line. Duplicates
   // will be appropriately eliminated at emit time.
   if (this->TargetTypeValue >= cmStateEnums::STATIC_LIBRARY &&
-      this->TargetTypeValue <= cmStateEnums::MODULE_LIBRARY) {
+      this->TargetTypeValue <= cmStateEnums::MODULE_LIBRARY &&
+      (this->GetPolicyStatusCMP0073() == cmPolicies::OLD ||
+       this->GetPolicyStatusCMP0073() == cmPolicies::WARN)) {
     std::string targetEntry = this->Name;
     targetEntry += "_LIB_DEPENDS";
     std::string dependencies;
