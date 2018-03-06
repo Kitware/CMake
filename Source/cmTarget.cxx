@@ -635,12 +635,11 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories() const
   return this->LinkDirectories;
 }
 
-void cmTarget::ClearDependencyInformation(cmMakefile& mf,
-                                          const std::string& target)
+void cmTarget::ClearDependencyInformation(cmMakefile& mf)
 {
   // Clear the dependencies. The cache variable must exist iff we are
   // recording dependency information for this target.
-  std::string depname = target;
+  std::string depname = this->GetName();
   depname += "_LIB_DEPENDS";
   if (this->RecordDependencies) {
     mf.AddCacheDefinition(depname, "", "Dependencies for target",
@@ -648,7 +647,7 @@ void cmTarget::ClearDependencyInformation(cmMakefile& mf,
   } else {
     if (mf.GetDefinition(depname)) {
       std::string message = "Target ";
-      message += target;
+      message += this->GetName();
       message += " has dependency information when it shouldn't.\n";
       message += "Your cache is probably stale. Please remove the entry\n  ";
       message += depname;

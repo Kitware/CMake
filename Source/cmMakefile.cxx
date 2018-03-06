@@ -1867,7 +1867,7 @@ cmTarget* cmMakefile::AddLibrary(const std::string& lname,
   // Clear its dependencies. Otherwise, dependencies might persist
   // over changes in CMakeLists.txt, making the information stale and
   // hence useless.
-  target->ClearDependencyInformation(*this, lname);
+  target->ClearDependencyInformation(*this);
   if (excludeFromAll) {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }

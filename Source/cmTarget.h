@@ -137,7 +137,7 @@ public:
   /**
    * Clear the dependency information recorded for this target, if any.
    */
-  void ClearDependencyInformation(cmMakefile& mf, const std::string& target);
+  void ClearDependencyInformation(cmMakefile& mf);
 
   void AddLinkLibrary(cmMakefile& mf, const std::string& lib,
                       cmTargetLinkLibraryType llt);
