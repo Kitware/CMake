@@ -190,25 +190,32 @@ bool cmQtAutoGenerator::FileSystem::FileRead(std::string& content,
   bool success = false;
   {
     std::lock_guard<std::mutex> lock(Mutex_);
-    if (cmSystemTools::FileExists(filename)) {
+    if (cmSystemTools::FileExists(filename, true)) {
       std::size_t const length = cmSystemTools::FileLength(filename);
       cmsys::ifstream ifs(filename.c_str(), (std::ios::in | std::ios::binary));
       if (ifs) {
-        content.resize(length);
-        ifs.read(&content.front(), content.size());
-        if (ifs) {
-          success = true;
-        } else {
-          content.clear();
-          if (error != nullptr) {
-            error->append("Reading from the file failed.");
+        if (length > 0) {
+          content.resize(length);
+          ifs.read(&content.front(), content.size());
+          if (ifs) {
+            success = true;
+          } else {
+            content.clear();
+            if (error != nullptr) {
+              error->append("Reading from the file failed.");
+            }
           }
+        } else {
+          // Readable but empty file
+          content.clear();
+          success = true;
         }
       } else if (error != nullptr) {
         error->append("Opening the file for reading failed.");
       }
     } else if (error != nullptr) {
-      error->append("The file does not exist.");
+      error->append(
+        "The file does not exist, is not readable or is a directory.");
     }
   }
   return success;
@@ -539,8 +546,8 @@ void cmQtAutoGenerator::ReadOnlyProcessT::UVExit(uv_process_t* handle,
 void cmQtAutoGenerator::ReadOnlyProcessT::UVTryFinish()
 {
   // There still might be data in the pipes after the process has finished.
-  // Therefore check if the process is finished AND all pipes are closed before
-  // signaling the worker thread to continue.
+  // Therefore check if the process is finished AND all pipes are closed
+  // before signaling the worker thread to continue.
   if (UVProcess_.get() == nullptr) {
     if (UVPipeOut_.uv_pipe() == nullptr) {
       if (UVPipeErr_.uv_pipe() == nullptr) {
