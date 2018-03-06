@@ -527,7 +527,7 @@ int cmCTestScriptHandler::RunConfigurationScript(
     return result;
   }
 
-  // only run the curent script if we should
+  // only run the current script if we should
   if (this->Makefile && this->Makefile->IsOn("CTEST_RUN_CURRENT_SCRIPT") &&
       this->ShouldRunCurrentScript) {
     return this->RunCurrentScript();
