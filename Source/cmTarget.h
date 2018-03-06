@@ -310,7 +310,6 @@ private:
   cmTargetInternalPointer Internal;
   cmStateEnums::TargetType TargetTypeValue;
   bool HaveInstallRule;
-  bool RecordDependencies;
   bool DLLPlatform;
   bool IsAndroid;
   bool IsImportedTarget;
