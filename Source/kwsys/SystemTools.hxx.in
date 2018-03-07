@@ -988,6 +988,7 @@ private:
    */
   static SystemToolsTranslationMap* TranslationMap;
 #ifdef _WIN32
+  static std::string GetActualCaseForPathCached(std::string const& path);
   static SystemToolsPathCaseMap* PathCaseMap;
   static SystemToolsEnvMap* EnvMap;
 #endif
