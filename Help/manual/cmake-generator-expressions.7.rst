@@ -59,6 +59,8 @@ Available logical expressions are:
   ``1`` if ``a`` is EQUAL ``b`` in a numeric comparison, else ``0``
 ``$<IN_LIST:a,b>``
   ``1`` if ``a`` is IN_LIST ``b``, else ``0``
+``$<TARGET_EXISTS:tgt>``
+  ``1`` if ``tgt`` is an existed target name, else ``0``.
 ``$<CONFIG:cfg>``
   ``1`` if config is ``cfg``, else ``0``. This is a case-insensitive comparison.
   The mapping in :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by
