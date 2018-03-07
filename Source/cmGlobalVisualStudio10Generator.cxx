@@ -636,126 +636,89 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
     cmsys::ofstream fout(vcxprojAbs.c_str());
     cmXMLWriter xw(fout);
 
-    /* clang-format off */
-    xw.StartDocument();
-    xw.StartElement("Project");
-     xw.Attribute("DefaultTargets", "Build");
-     xw.Attribute("ToolsVersion", "4.0");
-     xw.Attribute("xmlns",
-                  "http://schemas.microsoft.com/developer/msbuild/2003");
-     if (this->IsNsightTegra()) {
-       xw.StartElement("PropertyGroup");
-        xw.Attribute("Label", "NsightTegraProject");
-        xw.StartElement("NsightTegraProjectRevisionNumber");
-         xw.Content("6");
-        xw.EndElement(); // NsightTegraProjectRevisionNumber
-       xw.EndElement(); // PropertyGroup
-     }
-     xw.StartElement("ItemGroup");
-      xw.Attribute("Label", "ProjectConfigurations");
-      xw.StartElement("ProjectConfiguration");
-       xw.Attribute("Include", "Debug|" + this->GetPlatformName());
-       xw.StartElement("Configuration");
-        xw.Content("Debug");
-       xw.EndElement(); // Configuration
-       xw.StartElement("Platform");
-        xw.Content(this->GetPlatformName());
-       xw.EndElement(); // Platform
-      xw.EndElement(); // ProjectConfiguration
-     xw.EndElement(); // ItemGroup
-    xw.StartElement("PropertyGroup");
-     xw.Attribute("Label", "Globals");
-     xw.StartElement("ProjectGuid");
-      xw.Content("{F3FC6D86-508D-3FB1-96D2-995F08B142EC}");
-     xw.EndElement(); // ProjectGuid
-     xw.StartElement("Keyword");
-      xw.Content("Win32Proj");
-     xw.EndElement(); // Keyword
-     xw.StartElement("Platform");
-      xw.Content(this->GetPlatformName());
-     xw.EndElement(); // Platform
-     if (this->GetSystemName() == "WindowsPhone") {
-       xw.StartElement("ApplicationType");
-        xw.Content("Windows Phone");
-       xw.EndElement(); // ApplicationType
-       xw.StartElement("ApplicationTypeRevision");
-        xw.Content(this->GetSystemVersion());
-       xw.EndElement(); // ApplicationTypeRevision
-     } else if (this->GetSystemName() == "WindowsStore") {
-       xw.StartElement("ApplicationType");
-        xw.Content("Windows Store");
-       xw.EndElement(); // ApplicationType
-       xw.StartElement("ApplicationTypeRevision");
-        xw.Content(this->GetSystemVersion());
-       xw.EndElement(); // ApplicationTypeRevision
-     }
-     if (!this->WindowsTargetPlatformVersion.empty()) {
-       xw.StartElement("WindowsTargetPlatformVersion");
-        xw.Content(this->WindowsTargetPlatformVersion);
-       xw.EndElement(); // WindowsTargetPlatformVersion
-     }
-     if (this->GetPlatformName() == "ARM64") {
-       xw.StartElement("WindowsSDKDesktopARM64Support");
-        xw.Content("true");
-       xw.EndElement(); // WindowsSDK64DesktopARMSupport
-     }
-     else if (this->GetPlatformName() == "ARM") {
-       xw.StartElement("WindowsSDKDesktopARMSupport");
-        xw.Content("true");
-       xw.EndElement(); // WindowsSDKDesktopARMSupport
-     }
-    xw.EndElement(); // PropertyGroup
-    xw.StartElement("Import");
-     xw.Attribute("Project",
-                  "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
-    xw.EndElement(); // Import
-    if (!this->GeneratorToolsetHostArchitecture.empty()) {
-      xw.StartElement("PropertyGroup");
-       xw.StartElement("PreferredToolArchitecture");
-        xw.Content(this->GeneratorToolsetHostArchitecture);
-       xw.EndElement(); // PreferredToolArchitecture
-      xw.EndElement(); // PropertyGroup
+    cmXMLDocument doc(xw);
+    cmXMLElement eprj(doc, "Project");
+    eprj.Attribute("DefaultTargets", "Build");
+    eprj.Attribute("ToolsVersion", "4.0");
+    eprj.Attribute("xmlns",
+                   "http://schemas.microsoft.com/developer/msbuild/2003");
+    if (this->IsNsightTegra()) {
+      cmXMLElement epg(eprj, "PropertyGroup");
+      epg.Attribute("Label", "NsightTegraProject");
+      cmXMLElement(epg, "NsightTegraProjectRevisionNumber").Content("6");
     }
-    xw.StartElement("PropertyGroup");
-     xw.Attribute("Label", "Configuration");
-     xw.StartElement("ConfigurationType");
-      if (this->IsNsightTegra()) {
-        // Tegra-Android platform does not understand "Utility".
-        xw.Content("StaticLibrary");
-      } else {
-        xw.Content("Utility");
+    {
+      cmXMLElement eig(eprj, "ItemGroup");
+      eig.Attribute("Label", "ProjectConfigurations");
+      cmXMLElement epc(eig, "ProjectConfiguration");
+      epc.Attribute("Include", "Debug|" + this->GetPlatformName());
+      cmXMLElement(epc, "Configuration").Content("Debug");
+      cmXMLElement(epc, "Platform").Content(this->GetPlatformName());
+    }
+    {
+      cmXMLElement epg(eprj, "PropertyGroup");
+      epg.Attribute("Label", "Globals");
+      cmXMLElement(epg, "ProjectGuid")
+        .Content("{F3FC6D86-508D-3FB1-96D2-995F08B142EC}");
+      cmXMLElement(epg, "Keyword").Content("Win32Proj");
+      cmXMLElement(epg, "Platform").Content(this->GetPlatformName());
+      if (this->GetSystemName() == "WindowsPhone") {
+        cmXMLElement(epg, "ApplicationType").Content("Windows Phone");
+        cmXMLElement(epg, "ApplicationTypeRevision")
+          .Content(this->GetSystemVersion());
+      } else if (this->GetSystemName() == "WindowsStore") {
+        cmXMLElement(epg, "ApplicationType").Content("Windows Store");
+        cmXMLElement(epg, "ApplicationTypeRevision")
+          .Content(this->GetSystemVersion());
       }
-     xw.EndElement(); // ConfigurationType
-     xw.StartElement("CharacterSet");
-      xw.Content("MultiByte");
-     xw.EndElement(); // CharacterSet
-     if (this->IsNsightTegra()) {
-       xw.StartElement("NdkToolchainVersion");
-       xw.Content(this->GetPlatformToolsetString());
-       xw.EndElement(); // NdkToolchainVersion
-     } else {
-       xw.StartElement("PlatformToolset");
-       xw.Content(this->GetPlatformToolsetString());
-       xw.EndElement(); // PlatformToolset
-     }
-    xw.EndElement(); // PropertyGroup
-    xw.StartElement("Import");
-     xw.Attribute("Project", "$(VCTargetsPath)\\Microsoft.Cpp.props");
-    xw.EndElement(); // Import
-    xw.StartElement("ItemDefinitionGroup");
-     xw.StartElement("PostBuildEvent");
-      xw.StartElement("Command");
-       xw.Content("echo VCTargetsPath=$(VCTargetsPath)");
-      xw.EndElement(); // Command
-     xw.EndElement(); // PostBuildEvent
-    xw.EndElement(); // ItemDefinitionGroup
-    xw.StartElement("Import");
-     xw.Attribute("Project",
-                  "$(VCTargetsPath)\\Microsoft.Cpp.targets");
-    xw.EndElement(); // Import
-    xw.EndElement(); // Project
-    xw.EndDocument();
-    /* clang-format on */
+      if (!this->WindowsTargetPlatformVersion.empty()) {
+        cmXMLElement(epg, "WindowsTargetPlatformVersion")
+          .Content(this->WindowsTargetPlatformVersion);
+      }
+      if (this->GetPlatformName() == "ARM64") {
+        cmXMLElement(epg, "WindowsSDKDesktopARM64Support").Content("true");
+      } else if (this->GetPlatformName() == "ARM") {
+        cmXMLElement(epg, "WindowsSDKDesktopARMSupport").Content("true");
+      }
+    }
+    cmXMLElement(eprj, "Import")
+      .Attribute("Project", "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
+    if (!this->GeneratorToolsetHostArchitecture.empty()) {
+      cmXMLElement epg(eprj, "PropertyGroup");
+      cmXMLElement(epg, "PreferredToolArchitecture")
+        .Content(this->GeneratorToolsetHostArchitecture);
+    }
+    {
+      cmXMLElement epg(eprj, "PropertyGroup");
+      epg.Attribute("Label", "Configuration");
+      {
+        cmXMLElement ect(epg, "ConfigurationType");
+        if (this->IsNsightTegra()) {
+          // Tegra-Android platform does not understand "Utility".
+          ect.Content("StaticLibrary");
+        } else {
+          ect.Content("Utility");
+        }
+      }
+      cmXMLElement(epg, "CharacterSet").Content("MultiByte");
+      if (this->IsNsightTegra()) {
+        cmXMLElement(epg, "NdkToolchainVersion")
+          .Content(this->GetPlatformToolsetString());
+      } else {
+        cmXMLElement(epg, "PlatformToolset")
+          .Content(this->GetPlatformToolsetString());
+      }
+    }
+    cmXMLElement(eprj, "Import")
+      .Attribute("Project", "$(VCTargetsPath)\\Microsoft.Cpp.props");
+    {
+      cmXMLElement eidg(eprj, "ItemDefinitionGroup");
+      cmXMLElement epbe(eidg, "PostBuildEvent");
+      cmXMLElement(epbe, "Command")
+        .Content("echo VCTargetsPath=$(VCTargetsPath)");
+    }
+    cmXMLElement(eprj, "Import")
+      .Attribute("Project", "$(VCTargetsPath)\\Microsoft.Cpp.targets");
   }
 
   std::vector<std::string> cmd;

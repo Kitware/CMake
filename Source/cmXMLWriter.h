@@ -157,12 +157,12 @@ public:
   {
     xmlwr.StartElement(tag);
   }
-  cmXMLElement(cmXMLElement const& par, const char* tag)
+  cmXMLElement(cmXMLElement& par, const char* tag)
     : xmlwr(par.xmlwr)
   {
     xmlwr.StartElement(tag);
   }
-  cmXMLElement(cmXMLDocument const& doc, const char* tag)
+  cmXMLElement(cmXMLDocument& doc, const char* tag)
     : xmlwr(doc.xmlwr)
   {
     xmlwr.StartElement(tag);
