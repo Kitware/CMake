@@ -515,7 +515,8 @@ bool cmCTestRunTest::StartTest(size_t total)
   }
 
   return this->ForkProcess(timeout, this->TestProperties->ExplicitTimeout,
-                           &this->TestProperties->Environment);
+                           &this->TestProperties->Environment,
+                           &this->TestProperties->Affinity);
 }
 
 void cmCTestRunTest::ComputeArguments()
@@ -591,7 +592,8 @@ void cmCTestRunTest::DartProcessing()
 }
 
 bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
-                                 std::vector<std::string>* environment)
+                                 std::vector<std::string>* environment,
+                                 std::vector<size_t>* affinity)
 {
   this->TestProcess = cm::make_unique<cmProcess>(*this);
   this->TestProcess->SetId(this->Index);
@@ -637,7 +639,8 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
     cmSystemTools::AppendEnv(*environment);
   }
 
-  return this->TestProcess->StartProcess(this->MultiTestHandler.Loop);
+  return this->TestProcess->StartProcess(this->MultiTestHandler.Loop,
+                                         affinity);
 }
 
 void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)

@@ -119,6 +119,8 @@ protected:
   // Number of tests that are complete
   size_t Completed;
   size_t RunningCount;
+  std::set<size_t> ProcessorsAvailable;
+  size_t HaveAffinity;
   bool StopTimePassed;
   // list of test properties (indices concurrent to the test map)
   PropertiesMap Properties;

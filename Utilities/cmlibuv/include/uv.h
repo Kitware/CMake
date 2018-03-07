@@ -925,6 +925,19 @@ typedef struct uv_process_options_s {
    */
   uv_uid_t uid;
   uv_gid_t gid;
+  /*
+    Libuv can set the child process' CPU affinity mask.  This happens when
+    `cpumask` is non-NULL.  It must point to an array of char values
+    of length `cpumask_size`, whose value must be at least that returned by
+    uv_cpumask_size().  Each byte in the mask can be either zero (false)
+    or non-zero (true) to indicate whether the corresponding processor at
+    that index is included.
+
+    If enabled on an unsupported platform, uv_spawn() will fail with
+    UV_ENOTSUP.
+   */
+  char* cpumask;
+  size_t cpumask_size;
 } uv_process_options_t;
 
 /*
@@ -1094,6 +1107,7 @@ UV_EXTERN uv_pid_t uv_os_getppid(void);
 
 UV_EXTERN int uv_cpu_info(uv_cpu_info_t** cpu_infos, int* count);
 UV_EXTERN void uv_free_cpu_info(uv_cpu_info_t* cpu_infos, int count);
+UV_EXTERN int uv_cpumask_size(void);
 
 UV_EXTERN int uv_interface_addresses(uv_interface_address_t** addresses,
                                      int* count);
