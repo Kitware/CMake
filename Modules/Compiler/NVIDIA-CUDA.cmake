@@ -33,3 +33,9 @@ else()
   endif()
 
 endif()
+
+# FIXME: investigate use of --options-file.
+# Tell Makefile generator that nvcc does not support @<rspfile> syntax.
+set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES 0)
+set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_LIBRARIES 0)
+set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_OBJECTS 0)
