@@ -306,13 +306,13 @@ endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   add_RunCMake_test(include_external_msproject)
-  if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([89]|10)" AND NOT CMAKE_VS_DEVENV_COMMAND)
+  if("${CMAKE_GENERATOR}" MATCHES "Visual Studio (9|10)" AND NOT CMAKE_VS_DEVENV_COMMAND)
     set(NO_USE_FOLDERS 1)
   endif()
   add_RunCMake_test(VSSolution -DNO_USE_FOLDERS=${NO_USE_FOLDERS})
 endif()
 
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^89]|[89][0-9])")
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^9]|9[0-9])")
   add_RunCMake_test(VS10Project)
 endif()
 
@@ -434,6 +434,6 @@ if(CMake_TEST_ANDROID_NDK OR CMake_TEST_ANDROID_STANDALONE_TOOLCHAIN)
   set_property(TEST RunCMake.Android PROPERTY TIMEOUT ${CMake_TEST_ANDROID_TIMEOUT})
 endif()
 
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^89]|[89][0-9])")
+if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^9]|9[0-9])")
   add_RunCMake_test(CSharpCustomCommand)
 endif()

@@ -78,13 +78,6 @@ if(RunCMake_GENERATOR STREQUAL "Ninja")
   unset(RunCMake_TEST_NO_CLEAN)
 endif()
 
-if(RunCMake_GENERATOR MATCHES "^Visual Studio 8 2005")
-  set(RunCMake_WARN_VS8 1)
-  run_cmake(DeprecateVS8-WARN-ON)
-  unset(RunCMake_WARN_VS8)
-  run_cmake(DeprecateVS8-WARN-OFF)
-endif()
-
 if(UNIX)
   run_cmake_command(E_create_symlink-no-arg
     ${CMAKE_COMMAND} -E create_symlink

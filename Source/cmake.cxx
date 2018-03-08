@@ -55,7 +55,6 @@
 #include "cmGlobalVisualStudio12Generator.h"
 #include "cmGlobalVisualStudio14Generator.h"
 #include "cmGlobalVisualStudio15Generator.h"
-#include "cmGlobalVisualStudio8Generator.h"
 #include "cmGlobalVisualStudio9Generator.h"
 #include "cmVSSetupHelper.h"
 
@@ -1464,8 +1463,7 @@ void cmake::CreateDefaultGlobalGenerator()
     { "12.0", "Visual Studio 12 2013" }, //
     { "11.0", "Visual Studio 11 2012" }, //
     { "10.0", "Visual Studio 10 2010" }, //
-    { "9.0", "Visual Studio 9 2008" },   //
-    { "8.0", "Visual Studio 8 2005" }
+    { "9.0", "Visual Studio 9 2008" }
   };
   static const char* const vsEntries[] = {
     "\\Setup\\VC;ProductDir", //
@@ -1689,7 +1687,6 @@ void cmake::AddDefaultGenerators()
   this->Generators.push_back(cmGlobalVisualStudio11Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio10Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio9Generator::NewFactory());
-  this->Generators.push_back(cmGlobalVisualStudio8Generator::NewFactory());
   this->Generators.push_back(cmGlobalBorlandMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalNMakeMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalJOMMakefileGenerator::NewFactory());
@@ -2434,7 +2431,7 @@ int cmake::Build(const std::string& dir, const std::string& target,
   // to limitations of the underlying build system.
   std::string const stampList = cachePath + "/" +
     GetCMakeFilesDirectoryPostSlash() +
-    cmGlobalVisualStudio8Generator::GetGenerateStampList();
+    cmGlobalVisualStudio9Generator::GetGenerateStampList();
 
   // Note that the stampList file only exists for VS generators.
   if (cmSystemTools::FileExists(stampList) &&

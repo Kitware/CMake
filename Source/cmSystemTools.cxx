@@ -1509,7 +1509,7 @@ cmSystemTools::SaveRestoreEnvironment::~SaveRestoreEnvironment()
 void cmSystemTools::EnableVSConsoleOutput()
 {
 #ifdef _WIN32
-  // Visual Studio 8 2005 (devenv.exe or VCExpress.exe) will not
+  // Visual Studio tools like devenv may not
   // display output to the console unless this environment variable is
   // set.  We need it to capture the output of these build tools.
   // Note for future work that one could pass "/out \\.\pipe\NAME" to
