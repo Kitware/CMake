@@ -186,14 +186,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   this->ImportedGloballyVisible = vis == VisibilityImportedGlobally;
   this->BuildInterfaceIncludesAppended = false;
 
-  // only add dependency information for library targets
-  if (this->TargetTypeValue >= cmStateEnums::STATIC_LIBRARY &&
-      this->TargetTypeValue <= cmStateEnums::MODULE_LIBRARY) {
-    this->RecordDependencies = true;
-  } else {
-    this->RecordDependencies = false;
-  }
-
   // Check whether this is a DLL platform.
   this->DLLPlatform =
     (this->Makefile->IsOn("WIN32") || this->Makefile->IsOn("CYGWIN") ||
@@ -635,27 +627,11 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories() const
   return this->LinkDirectories;
 }
 
-void cmTarget::ClearDependencyInformation(cmMakefile& mf,
-                                          const std::string& target)
+void cmTarget::ClearDependencyInformation(cmMakefile& mf)
 {
-  // Clear the dependencies. The cache variable must exist iff we are
-  // recording dependency information for this target.
-  std::string depname = target;
+  std::string depname = this->GetName();
   depname += "_LIB_DEPENDS";
-  if (this->RecordDependencies) {
-    mf.AddCacheDefinition(depname, "", "Dependencies for target",
-                          cmStateEnums::STATIC);
-  } else {
-    if (mf.GetDefinition(depname)) {
-      std::string message = "Target ";
-      message += target;
-      message += " has dependency information when it shouldn't.\n";
-      message += "Your cache is probably stale. Please remove the entry\n  ";
-      message += depname;
-      message += "\nfrom the cache.";
-      cmSystemTools::Error(message.c_str());
-    }
-  }
+  mf.RemoveCacheDefinition(depname);
 }
 
 std::string cmTarget::GetDebugGeneratorExpressions(
@@ -752,7 +728,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
     this->OriginalLinkLibraries.emplace_back(lib, llt);
   }
 
-  // Add the explicit dependency information for this target. This is
+  // Add the explicit dependency information for libraries. This is
   // simply a set of libraries separated by ";". There should always
   // be a trailing ";". These library names are not canonical, in that
   // they may be "-framework x", "-ly", "/path/libz.a", etc.
@@ -760,7 +736,10 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
   // may be purposefully duplicated to handle recursive dependencies,
   // and we removing one instance will break the link line. Duplicates
   // will be appropriately eliminated at emit time.
-  if (this->RecordDependencies) {
+  if (this->TargetTypeValue >= cmStateEnums::STATIC_LIBRARY &&
+      this->TargetTypeValue <= cmStateEnums::MODULE_LIBRARY &&
+      (this->GetPolicyStatusCMP0073() == cmPolicies::OLD ||
+       this->GetPolicyStatusCMP0073() == cmPolicies::WARN)) {
     std::string targetEntry = this->Name;
     targetEntry += "_LIB_DEPENDS";
     std::string dependencies;

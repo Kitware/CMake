@@ -1,5 +1,7 @@
 include(RunCMake)
 
+run_cmake(CMP0073)
+
 run_cmake(INTERFACEwithNoSources)
 run_cmake(OBJECTwithNoSources)
 run_cmake(STATICwithNoSources)

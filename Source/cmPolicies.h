@@ -214,6 +214,9 @@ class cmMakefile;
          3, 10, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0072,                                                     \
          "FindOpenGL prefers GLVND by default when available.", 3, 11, 0,     \
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0073,                                                     \
+         "Do not produce legacy _LIB_DEPENDS cache entries.", 3, 12, 0,       \
          cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
@@ -238,7 +241,8 @@ class cmMakefile;
   F(CMP0063)                                                                  \
   F(CMP0065)                                                                  \
   F(CMP0068)                                                                  \
-  F(CMP0069)
+  F(CMP0069)                                                                  \
+  F(CMP0073)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies
