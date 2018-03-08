@@ -121,7 +121,11 @@ typedef int siginfo_t;
 #if defined(KWSYS_SYS_HAS_IFADDRS_H)
 #include <ifaddrs.h>
 #include <net/if.h>
-#if !defined(__LSB_VERSION__) /* LSB has no getifaddrs */
+#if defined(__LSB_VERSION__)
+/* LSB has no getifaddrs */
+#elif defined(__ANDROID_API__) && __ANDROID_API__ < 24
+/* Android has no getifaddrs prior to API 24.  */
+#else
 #define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
 #endif
 #endif
