@@ -3,9 +3,11 @@
 #include "cmProjectCommand.h"
 
 #include "cmsys/RegularExpression.hxx"
+#include <functional>
 #include <sstream>
 #include <stdio.h>
 
+#include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
@@ -69,6 +71,10 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
   std::string version;
   std::string description;
   std::vector<std::string> languages;
+  std::function<void()> missedValueReporter;
+  auto resetReporter = [&missedValueReporter]() {
+    missedValueReporter = std::function<void()>();
+  };
   enum Doing
   {
     DoingDescription,
@@ -85,7 +91,18 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
         return true;
       }
       haveLanguages = true;
+      if (missedValueReporter) {
+        missedValueReporter();
+      }
       doing = DoingLanguages;
+      if (!languages.empty()) {
+        std::string msg =
+          "the following parameters must be specified after LANGUAGES "
+          "keyword: ";
+        msg += cmJoin(languages, ", ");
+        msg += '.';
+        this->Makefile->IssueMessage(cmake::WARNING, msg);
+      }
     } else if (args[i] == "VERSION") {
       if (haveVersion) {
         this->Makefile->IssueMessage(cmake::FATAL_ERROR,
@@ -94,7 +111,17 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
         return true;
       }
       haveVersion = true;
+      if (missedValueReporter) {
+        missedValueReporter();
+      }
       doing = DoingVersion;
+      missedValueReporter = [this, &resetReporter]() {
+        this->Makefile->IssueMessage(
+          cmake::WARNING,
+          "VERSION keyword not followed by a value or was followed by a "
+          "value that expanded to nothing.");
+        resetReporter();
+      };
     } else if (args[i] == "DESCRIPTION") {
       if (haveDescription) {
         this->Makefile->IssueMessage(
@@ -103,23 +130,41 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
         return true;
       }
       haveDescription = true;
+      if (missedValueReporter) {
+        missedValueReporter();
+      }
       doing = DoingDescription;
+      missedValueReporter = [this, &resetReporter]() {
+        this->Makefile->IssueMessage(
+          cmake::WARNING,
+          "DESCRIPTION keyword not followed by a value or was followed "
+          "by a value that expanded to nothing.");
+        resetReporter();
+      };
     } else if (doing == DoingVersion) {
       doing = DoingLanguages;
       version = args[i];
+      resetReporter();
     } else if (doing == DoingDescription) {
       doing = DoingLanguages;
       description = args[i];
+      resetReporter();
     } else // doing == DoingLanguages
     {
       languages.push_back(args[i]);
     }
   }
 
-  if (haveVersion && !haveLanguages && !languages.empty()) {
+  if (missedValueReporter) {
+    missedValueReporter();
+  }
+
+  if ((haveVersion || haveDescription) && !haveLanguages &&
+      !languages.empty()) {
     this->Makefile->IssueMessage(
       cmake::FATAL_ERROR,
-      "project with VERSION must use LANGUAGES before language names.");
+      "project with VERSION or DESCRIPTION must use LANGUAGES before "
+      "language names.");
     cmSystemTools::SetFatalErrorOccured();
     return true;
   }
