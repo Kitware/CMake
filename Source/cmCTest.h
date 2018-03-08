@@ -347,7 +347,7 @@ public:
                                               const std::string& cmake_var,
                                               bool suppress = false);
 
-  /** Make string safe to be send as an URL */
+  /** Make string safe to be sent as a URL */
   static std::string MakeURLSafe(const std::string&);
 
   /** Decode a URL to the original string.  */
