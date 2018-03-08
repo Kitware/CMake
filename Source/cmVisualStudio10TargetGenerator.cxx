@@ -18,6 +18,22 @@
 #include <iterator>
 #include <memory> // IWYU pragma: keep
 
+inline void cmVisualStudio10TargetGenerator::WriteElem(const char* tag,
+                                                       const char* val,
+                                                       int indentLevel)
+{
+  this->WriteString("<", indentLevel);
+  (*this->BuildFileStream) << tag << ">" << val << "</" << tag << ">\n";
+}
+
+inline void cmVisualStudio10TargetGenerator::WriteElem(const char* tag,
+                                                       std::string const& val,
+                                                       int indentLevel)
+{
+  this->WriteString("<", indentLevel);
+  (*this->BuildFileStream) << tag << ">" << val << "</" << tag << ">\n";
+}
+
 static void ConvertToWindowsSlash(std::string& s);
 
 static std::string cmVS10EscapeXML(std::string arg)
@@ -26,6 +42,12 @@ static std::string cmVS10EscapeXML(std::string arg)
   cmSystemTools::ReplaceString(arg, "<", "&lt;");
   cmSystemTools::ReplaceString(arg, ">", "&gt;");
   return arg;
+}
+
+inline void cmVisualStudio10TargetGenerator::WriteElemEscapeXML(
+  const char* tag, std::string const& val, int indentLevel)
+{
+  this->WriteElem(tag, cmVS10EscapeXML(val), indentLevel);
 }
 
 static std::string cmVS10EscapeQuotes(std::string arg)
@@ -265,16 +287,10 @@ void cmVisualStudio10TargetGenerator::Generate()
       }
       (*this->BuildFileStream) << "</NsightTegraProjectRevisionNumber>\n";
       // Tell newer versions to upgrade silently when loading.
-      this->WriteString("<NsightTegraUpgradeOnceWithoutPrompt>"
-                        "true"
-                        "</NsightTegraUpgradeOnceWithoutPrompt>\n",
-                        2);
+      this->WriteElem("NsightTegraUpgradeOnceWithoutPrompt", "true", 2);
     } else {
       // Require Nsight Tegra 1.6 for JCompile support.
-      this->WriteString("<NsightTegraProjectRevisionNumber>"
-                        "7"
-                        "</NsightTegraProjectRevisionNumber>\n",
-                        2);
+      this->WriteElem("NsightTegraProjectRevisionNumber", "7", 2);
     }
     this->WriteString("</PropertyGroup>\n", 1);
   }
@@ -282,9 +298,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   if (const char* hostArch =
         this->GlobalGenerator->GetPlatformToolsetHostArchitecture()) {
     this->WriteString("<PropertyGroup>\n", 1);
-    this->WriteString("<PreferredToolArchitecture>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(hostArch)
-                             << "</PreferredToolArchitecture>\n";
+    this->WriteElemEscapeXML("PreferredToolArchitecture", hostArch, 2);
     this->WriteString("</PropertyGroup>\n", 1);
   }
 
@@ -292,8 +306,7 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->WriteProjectConfigurations();
   }
   this->WriteString("<PropertyGroup Label=\"Globals\">\n", 1);
-  this->WriteString("<ProjectGuid>", 2);
-  (*this->BuildFileStream) << "{" << this->GUID << "}</ProjectGuid>\n";
+  this->WriteElem("ProjectGuid", "{" + this->GUID + "}", 2);
 
   if (this->MSTools &&
       this->GeneratorTarget->GetType() <= cmStateEnums::GLOBAL_TARGET) {
@@ -322,61 +335,45 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->GeneratorTarget->GetProperty("VS_SCC_PROVIDER");
 
   if (vsProjectName && vsLocalPath && vsProvider) {
-    this->WriteString("<SccProjectName>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(vsProjectName)
-                             << "</SccProjectName>\n";
-    this->WriteString("<SccLocalPath>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(vsLocalPath)
-                             << "</SccLocalPath>\n";
-    this->WriteString("<SccProvider>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(vsProvider)
-                             << "</SccProvider>\n";
+    this->WriteElemEscapeXML("SccProjectName", vsProjectName, 2);
+    this->WriteElemEscapeXML("SccLocalPath", vsLocalPath, 2);
+    this->WriteElemEscapeXML("SccProvider", vsProvider, 2);
 
     const char* vsAuxPath =
       this->GeneratorTarget->GetProperty("VS_SCC_AUXPATH");
     if (vsAuxPath) {
-      this->WriteString("<SccAuxPath>", 2);
-      (*this->BuildFileStream) << cmVS10EscapeXML(vsAuxPath)
-                               << "</SccAuxPath>\n";
+      this->WriteElemEscapeXML("SccAuxPath", vsAuxPath, 2);
     }
   }
 
   if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT")) {
-    this->WriteString("<WinMDAssembly>true</WinMDAssembly>\n", 2);
+    this->WriteElem("WinMDAssembly", "true", 2);
   }
 
   const char* vsGlobalKeyword =
     this->GeneratorTarget->GetProperty("VS_GLOBAL_KEYWORD");
   if (!vsGlobalKeyword) {
-    this->WriteString("<Keyword>Win32Proj</Keyword>\n", 2);
+    this->WriteElem("Keyword", "Win32Proj", 2);
   } else {
-    this->WriteString("<Keyword>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(vsGlobalKeyword)
-                             << "</Keyword>\n";
+    this->WriteElemEscapeXML("Keyword", vsGlobalKeyword, 2);
   }
 
   const char* vsGlobalRootNamespace =
     this->GeneratorTarget->GetProperty("VS_GLOBAL_ROOTNAMESPACE");
   if (vsGlobalRootNamespace) {
-    this->WriteString("<RootNamespace>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(vsGlobalRootNamespace)
-                             << "</RootNamespace>\n";
+    this->WriteElemEscapeXML("RootNamespace", vsGlobalRootNamespace, 2);
   }
 
-  this->WriteString("<Platform>", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(this->Platform)
-                           << "</Platform>\n";
+  this->WriteElemEscapeXML("Platform", this->Platform, 2);
   const char* projLabel = this->GeneratorTarget->GetProperty("PROJECT_LABEL");
   if (!projLabel) {
     projLabel = this->Name.c_str();
   }
-  this->WriteString("<ProjectName>", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(projLabel) << "</ProjectName>\n";
+  this->WriteElemEscapeXML("ProjectName", projLabel, 2);
   if (const char* targetFrameworkVersion = this->GeneratorTarget->GetProperty(
         "VS_DOTNET_TARGET_FRAMEWORK_VERSION")) {
-    this->WriteString("<TargetFrameworkVersion>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(targetFrameworkVersion)
-                             << "</TargetFrameworkVersion>\n";
+    this->WriteElemEscapeXML("TargetFrameworkVersion", targetFrameworkVersion,
+                             2);
   }
 
   // Disable the project upgrade prompt that is displayed the first time a
@@ -384,9 +381,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   // the IDE (respected by VS 2013 and above).
   if (this->GlobalGenerator->GetVersion() >=
       cmGlobalVisualStudioGenerator::VS12) {
-    this->WriteString("<VCProjectUpgraderObjectName>NoUpgrade"
-                      "</VCProjectUpgraderObjectName>\n",
-                      2);
+    this->WriteElem("VCProjectUpgraderObjectName", "NoUpgrade", 2);
   }
 
   std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
@@ -437,8 +432,7 @@ void cmVisualStudio10TargetGenerator::Generate()
     }
     outputType += "</OutputType>\n";
     this->WriteString(outputType.c_str(), 2);
-    this->WriteString("<AppDesignerFolder>Properties</AppDesignerFolder>\n",
-                      2);
+    this->WriteElem("AppDesignerFolder", "Properties", 2);
   }
 
   this->WriteString("</PropertyGroup>\n", 1);
@@ -635,12 +629,8 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReference(
 {
   this->WriteString("<Reference Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(ref) << "\">\n";
-  this->WriteString("<CopyLocalSatelliteAssemblies>true"
-                    "</CopyLocalSatelliteAssemblies>\n",
-                    3);
-  this->WriteString("<ReferenceOutputAssembly>true"
-                    "</ReferenceOutputAssembly>\n",
-                    3);
+  this->WriteElem("CopyLocalSatelliteAssemblies", "true", 3);
+  this->WriteElem("ReferenceOutputAssembly", "true", 3);
   if (!hint.empty()) {
     const char* privateReference = "True";
     if (const char* value = this->GeneratorTarget->GetProperty(
@@ -649,10 +639,8 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReference(
         privateReference = "False";
       }
     }
-    this->WriteString("<Private>", 3);
-    (*this->BuildFileStream) << privateReference << "</Private>\n";
-    this->WriteString("<HintPath>", 3);
-    (*this->BuildFileStream) << hint << "</HintPath>\n";
+    this->WriteElem("Private", privateReference, 3);
+    this->WriteElem("HintPath", hint, 3);
   }
   this->WriteDotNetReferenceCustomTags(ref);
   this->WriteString("</Reference>\n", 2);
@@ -711,9 +699,8 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
       (*this->BuildFileStream) << obj << "\">\n";
 
       if (this->ProjectType != csproj) {
-        this->WriteString("<DependentUpon>", 3);
         std::string hFileName = obj.substr(0, obj.find_last_of(".")) + ".h";
-        (*this->BuildFileStream) << hFileName << "</DependentUpon>\n";
+        this->WriteElem("DependentUpon", hFileName, 3);
 
         for (std::string const& i : this->Configurations) {
           this->WritePlatformConfigTag("LogicalName", i, 3);
@@ -741,8 +728,7 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
             link = cmsys::SystemTools::GetFilenameName(obj);
           }
           if (!link.empty()) {
-            this->WriteString("<Link>", 3);
-            (*this->BuildFileStream) << link << "</Link>\n";
+            this->WriteElem("Link", link, 3);
           }
         }
         // Determine if this is a generated resource from a .Designer.cs file
@@ -756,9 +742,7 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
             generator = g;
           }
           if (!generator.empty()) {
-            this->WriteString("<Generator>", 3);
-            (*this->BuildFileStream) << cmVS10EscapeXML(generator)
-                                     << "</Generator>\n";
+            this->WriteElemEscapeXML("Generator", generator, 3);
             if (designerResource.find(srcDir) == 0) {
               designerResource = designerResource.substr(srcDir.length() + 1);
             } else if (designerResource.find(binDir) == 0) {
@@ -768,9 +752,7 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
                 cmsys::SystemTools::GetFilenameName(designerResource);
             }
             ConvertToWindowsSlash(designerResource);
-            this->WriteString("<LastGenOutput>", 3);
-            (*this->BuildFileStream) << designerResource
-                                     << "</LastGenOutput>\n";
+            this->WriteElem("LastGenOutput", designerResource, 3);
           }
         }
         const cmPropertyMap& props = oi->GetProperties();
@@ -828,11 +810,10 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup()
         }
         if (!link.empty()) {
           ConvertToWindowsSlash(link);
-          this->WriteString("<Link>", 3);
-          (*this->BuildFileStream) << link << "</Link>\n";
+          this->WriteElem("Link", link, 3);
         }
       }
-      this->WriteString("<SubType>Designer</SubType>\n", 3);
+      this->WriteElem("SubType", "Designer", 3);
       this->WriteString("</", 2);
       (*this->BuildFileStream) << xamlType << ">\n";
     }
@@ -894,7 +875,7 @@ void cmVisualStudio10TargetGenerator::WriteWinRTReferences()
     for (std::string const& ri : references) {
       this->WriteString("<Reference Include=\"", 2);
       (*this->BuildFileStream) << cmVS10EscapeXML(ri) << "\">\n";
-      this->WriteString("<IsWinMDFile>true</IsWinMDFile>\n", 3);
+      this->WriteElem("IsWinMDFile", "true", 3);
       this->WriteString("</Reference>\n", 2);
     }
     this->WriteString("</ItemGroup>\n", 1);
@@ -909,11 +890,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurations()
   for (std::string const& c : this->Configurations) {
     this->WriteString("<ProjectConfiguration Include=\"", 2);
     (*this->BuildFileStream) << c << "|" << this->Platform << "\">\n";
-    this->WriteString("<Configuration>", 3);
-    (*this->BuildFileStream) << c << "</Configuration>\n";
-    this->WriteString("<Platform>", 3);
-    (*this->BuildFileStream) << cmVS10EscapeXML(this->Platform)
-                             << "</Platform>\n";
+    this->WriteElem("Configuration", c, 3);
+    this->WriteElemEscapeXML("Platform", this->Platform, 3);
     this->WriteString("</ProjectConfiguration>\n", 2);
   }
   this->WriteString("</ItemGroup>\n", 1);
@@ -997,9 +975,7 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
         useOfMfcValue = "Dynamic";
       }
     }
-    std::string mfcLine = "<UseOfMfc>";
-    mfcLine += useOfMfcValue + "</UseOfMfc>\n";
-    this->WriteString(mfcLine.c_str(), 2);
+    this->WriteElem("UseOfMfc", useOfMfcValue, 2);
   }
 
   if ((this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY &&
@@ -1008,25 +984,20 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
       this->GlobalGenerator->TargetsWindowsPhone() ||
       this->GlobalGenerator->TargetsWindowsStore() ||
       this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_EXTENSIONS")) {
-    this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
+    this->WriteElem("CharacterSet", "Unicode", 2);
   } else if (this->GeneratorTarget->GetType() <=
                cmStateEnums::MODULE_LIBRARY &&
              this->ClOptions[config]->UsingSBCS()) {
-    this->WriteString("<CharacterSet>NotSet</CharacterSet>\n", 2);
+    this->WriteElem("CharacterSet", "NotSet", 2);
   } else {
-    this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
+    this->WriteElem("CharacterSet", "MultiByte", 2);
   }
   if (const char* toolset = gg->GetPlatformToolset()) {
-    std::string pts = "<PlatformToolset>";
-    pts += toolset;
-    pts += "</PlatformToolset>\n";
-    this->WriteString(pts.c_str(), 2);
+    this->WriteElem("PlatformToolset", toolset, 2);
   }
   if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT") ||
       this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_EXTENSIONS")) {
-    this->WriteString("<WindowsAppContainer>true"
-                      "</WindowsAppContainer>\n",
-                      2);
+    this->WriteElem("WindowsAppContainer", "true", 2);
   }
 }
 
@@ -1038,26 +1009,21 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
   Options& o = *(this->ClOptions[config]);
 
   if (o.IsDebug()) {
-    this->WriteString("<DebugSymbols>true</DebugSymbols>\n", 2);
-    this->WriteString("<DefineDebug>true</DefineDebug>\n", 2);
+    this->WriteElem("DebugSymbols", "true", 2);
+    this->WriteElem("DefineDebug", "true", 2);
   }
 
   std::string outDir = this->GeneratorTarget->GetDirectory(config) + "/";
   ConvertToWindowsSlash(outDir);
-  this->WriteString("<OutputPath>", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(outDir) << "</OutputPath>\n";
+  this->WriteElemEscapeXML("OutputPath", outDir, 2);
 
   if (o.HasFlag("Platform")) {
-    this->WriteString("<PlatformTarget>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(o.GetFlag("Platform"))
-                             << "</PlatformTarget>\n";
+    this->WriteElemEscapeXML("PlatformTarget", o.GetFlag("Platform"), 2);
     o.RemoveFlag("Platform");
   }
 
   if (const char* toolset = gg->GetPlatformToolset()) {
-    this->WriteString("<PlatformToolset>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(toolset)
-                             << "</PlatformToolset>\n";
+    this->WriteElemEscapeXML("PlatformToolset", toolset, 2);
   }
 
   std::string postfixName = cmSystemTools::UpperCase(config);
@@ -1067,12 +1033,10 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
   if (const char* postfix = this->GeneratorTarget->GetProperty(postfixName)) {
     assemblyName += postfix;
   }
-  this->WriteString("<AssemblyName>", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(assemblyName)
-                           << "</AssemblyName>\n";
+  this->WriteElemEscapeXML("AssemblyName", assemblyName, 2);
 
   if (cmStateEnums::EXECUTABLE == this->GeneratorTarget->GetType()) {
-    this->WriteString("<StartAction>Program</StartAction>\n", 2);
+    this->WriteElem("StartAction", "Program", 2);
     this->WriteString("<StartProgram>", 2);
     (*this->BuildFileStream) << cmVS10EscapeXML(outDir)
                              << cmVS10EscapeXML(assemblyName)
@@ -1094,27 +1058,20 @@ void cmVisualStudio10TargetGenerator::WriteNsightTegraConfigurationValues(
   this->WriteString(ntv.c_str(), 2);
   if (const char* minApi =
         this->GeneratorTarget->GetProperty("ANDROID_API_MIN")) {
-    this->WriteString("<AndroidMinAPI>", 2);
-    (*this->BuildFileStream) << "android-" << cmVS10EscapeXML(minApi)
-                             << "</AndroidMinAPI>\n";
+    this->WriteElem("AndroidMinAPI", "android-" + cmVS10EscapeXML(minApi), 2);
   }
   if (const char* api = this->GeneratorTarget->GetProperty("ANDROID_API")) {
-    this->WriteString("<AndroidTargetAPI>", 2);
-    (*this->BuildFileStream) << "android-" << cmVS10EscapeXML(api)
-                             << "</AndroidTargetAPI>\n";
+    this->WriteElem("AndroidTargetAPI", "android-" + cmVS10EscapeXML(api), 2);
   }
 
   if (const char* cpuArch =
         this->GeneratorTarget->GetProperty("ANDROID_ARCH")) {
-    this->WriteString("<AndroidArch>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(cpuArch) << "</AndroidArch>\n";
+    this->WriteElemEscapeXML("AndroidArch", cpuArch, 2);
   }
 
   if (const char* stlType =
         this->GeneratorTarget->GetProperty("ANDROID_STL_TYPE")) {
-    this->WriteString("<AndroidStlType>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(stlType)
-                             << "</AndroidStlType>\n";
+    this->WriteElemEscapeXML("AndroidStlType", stlType, 2);
   }
 }
 
@@ -1199,8 +1156,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     this->GetCSharpSourceLink(source, link);
     this->WriteSource("None", source, ">\n");
     if (!link.empty()) {
-      this->WriteString("<Link>", 3);
-      (*this->BuildFileStream) << link << "</Link>\n";
+      this->WriteElem("Link", link, 3);
     }
     this->WriteString("</None>\n", 2);
     this->WriteString("</ItemGroup>\n", 1);
@@ -1372,23 +1328,23 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       if (fileName == "wmappmanifest.xml") {
         this->WriteString("<XML Include=\"", 2);
         (*this->BuildFileStream) << oi << "\">\n";
-        this->WriteString("<Filter>Resource Files</Filter>\n", 3);
+        this->WriteElem("Filter", "Resource Files", 3);
         this->WriteString("</XML>\n", 2);
       } else if (cmSystemTools::GetFilenameExtension(fileName) ==
                  ".appxmanifest") {
         this->WriteString("<AppxManifest Include=\"", 2);
         (*this->BuildFileStream) << oi << "\">\n";
-        this->WriteString("<Filter>Resource Files</Filter>\n", 3);
+        this->WriteElem("Filter", "Resource Files", 3);
         this->WriteString("</AppxManifest>\n", 2);
       } else if (cmSystemTools::GetFilenameExtension(fileName) == ".pfx") {
         this->WriteString("<None Include=\"", 2);
         (*this->BuildFileStream) << oi << "\">\n";
-        this->WriteString("<Filter>Resource Files</Filter>\n", 3);
+        this->WriteElem("Filter", "Resource Files", 3);
         this->WriteString("</None>\n", 2);
       } else {
         this->WriteString("<Image Include=\"", 2);
         (*this->BuildFileStream) << oi << "\">\n";
-        this->WriteString("<Filter>Resource Files</Filter>\n", 3);
+        this->WriteElem("Filter", "Resource Files", 3);
         this->WriteString("</Image>\n", 2);
       }
     }
@@ -1404,7 +1360,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       this->WriteString("<EmbeddedResource Include=\"", 2);
       ConvertToWindowsSlash(obj);
       (*this->BuildFileStream) << cmVS10EscapeXML(obj) << "\">\n";
-      this->WriteString("<Filter>Resource Files</Filter>\n", 3);
+      this->WriteElem("Filter", "Resource Files", 3);
       this->WriteString("</EmbeddedResource>\n", 2);
     }
     this->WriteString("</ItemGroup>\n", 1);
@@ -1423,10 +1379,8 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       (*this->BuildFileStream) << name << "\">\n";
       std::string guidName = "SG_Filter_";
       guidName += name;
-      this->WriteString("<UniqueIdentifier>", 3);
       std::string guid = this->GlobalGenerator->GetGUID(guidName);
-      (*this->BuildFileStream) << "{" << guid << "}"
-                               << "</UniqueIdentifier>\n";
+      this->WriteElem("UniqueIdentifier", "{" + guid + "}", 3);
       this->WriteString("</Filter>\n", 2);
     }
   }
@@ -1434,10 +1388,8 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   if (!resxObjs.empty() || !this->AddedFiles.empty()) {
     this->WriteString("<Filter Include=\"Resource Files\">\n", 2);
     std::string guidName = "SG_Filter_Resource Files";
-    this->WriteString("<UniqueIdentifier>", 3);
     std::string guid = this->GlobalGenerator->GetGUID(guidName);
-    (*this->BuildFileStream) << "{" << guid << "}"
-                             << "</UniqueIdentifier>\n";
+    this->WriteElem("UniqueIdentifier", "{" + guid + "}", 3);
     this->WriteString("<Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;", 3);
     (*this->BuildFileStream) << "gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;";
     (*this->BuildFileStream) << "mfcribbon-ms</Extensions>\n";
@@ -1508,8 +1460,7 @@ void cmVisualStudio10TargetGenerator::WriteGroupSources(
     (*this->BuildFileStream) << name << " Include=\"" << cmVS10EscapeXML(path);
     if (!filter.empty()) {
       (*this->BuildFileStream) << "\">\n";
-      this->WriteString("<Filter>", 3);
-      (*this->BuildFileStream) << filter << "</Filter>\n";
+      this->WriteElem("Filter", filter, 3);
       this->WriteString("</", 2);
       (*this->BuildFileStream) << name << ">\n";
     } else {
@@ -1524,13 +1475,12 @@ void cmVisualStudio10TargetGenerator::WriteHeaderSource(cmSourceFile const* sf)
   std::string const& fileName = sf->GetFullPath();
   if (this->IsResxHeader(fileName)) {
     this->WriteSource("ClInclude", sf, ">\n");
-    this->WriteString("<FileType>CppForm</FileType>\n", 3);
+    this->WriteElem("FileType", "CppForm", 3);
     this->WriteString("</ClInclude>\n", 2);
   } else if (this->IsXamlHeader(fileName)) {
     this->WriteSource("ClInclude", sf, ">\n");
-    this->WriteString("<DependentUpon>", 3);
     std::string xamlFileName = fileName.substr(0, fileName.find_last_of("."));
-    (*this->BuildFileStream) << xamlFileName << "</DependentUpon>\n";
+    this->WriteElem("DependentUpon", xamlFileName, 3);
     this->WriteString("</ClInclude>\n", 2);
   } else {
     this->WriteSource("ClInclude", sf);
@@ -1725,19 +1675,13 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
       }
     }
     if (!shaderType.empty()) {
-      this->WriteString("<ShaderType>", 3);
-      (*this->BuildFileStream) << cmVS10EscapeXML(shaderType)
-                               << "</ShaderType>\n";
+      this->WriteElemEscapeXML("ShaderType", shaderType, 3);
     }
     if (!shaderEntryPoint.empty()) {
-      this->WriteString("<EntryPointName>", 3);
-      (*this->BuildFileStream) << cmVS10EscapeXML(shaderEntryPoint)
-                               << "</EntryPointName>\n";
+      this->WriteElemEscapeXML("EntryPointName", shaderEntryPoint, 3);
     }
     if (!shaderModel.empty()) {
-      this->WriteString("<ShaderModel>", 3);
-      (*this->BuildFileStream) << cmVS10EscapeXML(shaderModel)
-                               << "</ShaderModel>\n";
+      this->WriteElemEscapeXML("ShaderModel", shaderModel, 3);
     }
     if (!outputHeaderFile.empty()) {
       for (size_t i = 0; i != this->Configurations.size(); ++i) {
@@ -1762,47 +1706,33 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
       }
     }
     if (!shaderEnableDebug.empty()) {
-      this->WriteString("<EnableDebuggingInformation>", 3);
-      (*this->BuildFileStream) << cmVS10EscapeXML(shaderEnableDebug)
-                               << "</EnableDebuggingInformation>\n";
+      this->WriteElemEscapeXML("EnableDebuggingInformation", shaderEnableDebug,
+                               3);
     }
     if (!shaderDisableOptimizations.empty()) {
-      this->WriteString("<DisableOptimizations>", 3);
-      (*this->BuildFileStream) << cmVS10EscapeXML(shaderDisableOptimizations)
-                               << "</DisableOptimizations>\n";
+      this->WriteElemEscapeXML("DisableOptimizations",
+                               shaderDisableOptimizations, 3);
     }
     if (!shaderAdditionalFlags.empty()) {
-      this->WriteString("<AdditionalOptions>", 3);
-      (*this->BuildFileStream) << cmVS10EscapeXML(shaderAdditionalFlags)
-                               << "</AdditionalOptions>\n";
+      this->WriteElemEscapeXML("AdditionalOptions", shaderAdditionalFlags, 3);
     }
     if (!settingsGenerator.empty()) {
-      this->WriteString("<Generator>", 3);
-      (*this->BuildFileStream) << cmVS10EscapeXML(settingsGenerator)
-                               << "</Generator>\n";
+      this->WriteElemEscapeXML("Generator", settingsGenerator, 3);
     }
     if (!settingsLastGenOutput.empty()) {
-      this->WriteString("<LastGenOutput>", 3);
-      (*this->BuildFileStream) << cmVS10EscapeXML(settingsLastGenOutput)
-                               << "</LastGenOutput>\n";
+      this->WriteElemEscapeXML("LastGenOutput", settingsLastGenOutput, 3);
     }
     if (!sourceLink.empty()) {
-      this->WriteString("<Link>", 3);
-      (*this->BuildFileStream) << cmVS10EscapeXML(sourceLink) << "</Link>\n";
+      this->WriteElemEscapeXML("Link", sourceLink, 3);
     }
     if (!subType.empty()) {
-      this->WriteString("<SubType>", 3);
-      (*this->BuildFileStream) << cmVS10EscapeXML(subType) << "</SubType>\n";
+      this->WriteElemEscapeXML("SubType", subType, 3);
     }
     if (!copyToOutDir.empty()) {
-      this->WriteString("<CopyToOutputDirectory>", 3);
-      (*this->BuildFileStream) << cmVS10EscapeXML(copyToOutDir)
-                               << "</CopyToOutputDirectory>\n";
+      this->WriteElemEscapeXML("CopyToOutputDirectory", copyToOutDir, 3);
     }
     if (!includeInVsix.empty()) {
-      this->WriteString("<IncludeInVSIX>", 3);
-      (*this->BuildFileStream) << cmVS10EscapeXML(includeInVsix)
-                               << "</IncludeInVSIX>\n";
+      this->WriteElemEscapeXML("IncludeInVSIX", includeInVsix, 3);
     }
     // write source file specific tags
     this->WriteCSharpSourceProperties(sourceFileTags);
@@ -2057,13 +1987,9 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     firstString = "";
     hasFlags = true;
     if (lang == "CUDA") {
-      this->WriteString("<CompileOut>", 3);
-      (*this->BuildFileStream) << "$(IntDir)/" << objectName
-                               << "</CompileOut>\n";
+      this->WriteElem("CompileOut", "$(IntDir)/" + objectName, 3);
     } else {
-      this->WriteString("<ObjectFileName>", 3);
-      (*this->BuildFileStream) << "$(IntDir)/" << objectName
-                               << "</ObjectFileName>\n";
+      this->WriteElem("ObjectFileName", "$(IntDir)/" + objectName, 3);
     }
   }
   for (std::string const& config : this->Configurations) {
@@ -2163,10 +2089,9 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     (*this->BuildFileStream) << firstString;
     firstString = ""; // only do firstString once
     hasFlags = true;
-    this->WriteString("<DependentUpon>", 3);
     const std::string& fileName = source->GetFullPath();
     std::string xamlFileName = fileName.substr(0, fileName.find_last_of("."));
-    (*this->BuildFileStream) << xamlFileName << "</DependentUpon>\n";
+    this->WriteElem("DependentUpon", xamlFileName, 3);
   }
   if (this->ProjectType == csproj) {
     std::string f = source->GetFullPath();
@@ -2214,9 +2139,7 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
   }
 
   this->WriteString("<PropertyGroup>\n", 1);
-  this->WriteString("<_ProjectFileVersion>10.0.20506.1"
-                    "</_ProjectFileVersion>\n",
-                    2);
+  this->WriteElem("_ProjectFileVersion", "10.0.20506.1", 2);
   for (std::string const& config : this->Configurations) {
     if (ttype >= cmStateEnums::UTILITY) {
       this->WritePlatformConfigTag("IntDir", config, 2);
@@ -2521,9 +2444,7 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   if (this->NsightTegra) {
     if (const char* processMax =
           this->GeneratorTarget->GetProperty("ANDROID_PROCESS_MAX")) {
-      this->WriteString("<ProcessMax>", 3);
-      *this->BuildFileStream << cmVS10EscapeXML(processMax)
-                             << "</ProcessMax>\n";
+      this->WriteElemEscapeXML("ProcessMax", processMax, 3);
     }
   }
 
@@ -2531,12 +2452,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     cmsys::RegularExpression clangToolset("v[0-9]+_clang_.*");
     const char* toolset = this->GlobalGenerator->GetPlatformToolset();
     if (toolset && clangToolset.find(toolset)) {
-      this->WriteString("<ObjectFileName>"
-                        "$(IntDir)%(filename).obj"
-                        "</ObjectFileName>\n",
-                        3);
+      this->WriteElem("ObjectFileName", "$(IntDir)%(filename).obj", 3);
     } else {
-      this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
+      this->WriteElem("ObjectFileName", "$(IntDir)", 3);
     }
 
     // If not in debug mode, write the DebugInformationFormat field
@@ -2552,9 +2470,7 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     std::string pdb = this->GeneratorTarget->GetCompilePDBPath(configName);
     if (!pdb.empty()) {
       ConvertToWindowsSlash(pdb);
-      this->WriteString("<ProgramDataBaseFileName>", 3);
-      *this->BuildFileStream << cmVS10EscapeXML(pdb)
-                             << "</ProgramDataBaseFileName>\n";
+      this->WriteElemEscapeXML("ProgramDataBaseFileName", pdb, 3);
     }
   }
 
@@ -2973,9 +2889,7 @@ void cmVisualStudio10TargetGenerator::WriteLibOptions(
   if (this->GlobalGenerator->TargetsWindowsPhone() ||
       this->GlobalGenerator->TargetsWindowsStore()) {
     this->WriteString("<Link>\n", 2);
-    this->WriteString("<GenerateWindowsMetadata>false"
-                      "</GenerateWindowsMetadata>\n",
-                      3);
+    this->WriteElem("GenerateWindowsMetadata", "false", 3);
     this->WriteString("</Link>\n", 2);
   }
 }
@@ -3026,32 +2940,28 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
   {
     std::string antBuildPath = rootDir;
     this->WriteString("<AntBuild>\n", 2);
-    this->WriteString("<AntBuildPath>", 3);
     ConvertToWindowsSlash(antBuildPath);
-    (*this->BuildFileStream) << cmVS10EscapeXML(antBuildPath)
-                             << "</AntBuildPath>\n";
+    this->WriteElemEscapeXML("AntBuildPath", antBuildPath, 3);
   }
 
   if (this->GeneratorTarget->GetPropertyAsBool("ANDROID_SKIP_ANT_STEP")) {
-    this->WriteString("<SkipAntStep>true</SkipAntStep>\n", 3);
+    this->WriteElem("SkipAntStep", "true", 3);
   }
 
   if (this->GeneratorTarget->GetPropertyAsBool("ANDROID_PROGUARD")) {
-    this->WriteString("<EnableProGuard>true</EnableProGuard>\n", 3);
+    this->WriteElem("EnableProGuard", "true", 3);
   }
 
   if (const char* proGuardConfigLocation =
         this->GeneratorTarget->GetProperty("ANDROID_PROGUARD_CONFIG_PATH")) {
-    this->WriteString("<ProGuardConfigLocation>", 3);
-    (*this->BuildFileStream) << cmVS10EscapeXML(proGuardConfigLocation)
-                             << "</ProGuardConfigLocation>\n";
+    this->WriteElemEscapeXML("ProGuardConfigLocation", proGuardConfigLocation,
+                             3);
   }
 
   if (const char* securePropertiesLocation =
         this->GeneratorTarget->GetProperty("ANDROID_SECURE_PROPS_PATH")) {
-    this->WriteString("<SecurePropertiesLocation>", 3);
-    (*this->BuildFileStream) << cmVS10EscapeXML(securePropertiesLocation)
-                             << "</SecurePropertiesLocation>\n";
+    this->WriteElemEscapeXML("SecurePropertiesLocation",
+                             securePropertiesLocation, 3);
   }
 
   if (const char* nativeLibDirectoriesExpression =
@@ -3061,9 +2971,7 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
       ge.Parse(nativeLibDirectoriesExpression);
     std::string nativeLibDirs =
       cge->Evaluate(this->LocalGenerator, configName);
-    this->WriteString("<NativeLibDirectories>", 3);
-    (*this->BuildFileStream) << cmVS10EscapeXML(nativeLibDirs)
-                             << "</NativeLibDirectories>\n";
+    this->WriteElemEscapeXML("NativeLibDirectories", nativeLibDirs, 3);
   }
 
   if (const char* nativeLibDependenciesExpression =
@@ -3074,16 +2982,12 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
       ge.Parse(nativeLibDependenciesExpression);
     std::string nativeLibDeps =
       cge->Evaluate(this->LocalGenerator, configName);
-    this->WriteString("<NativeLibDependencies>", 3);
-    (*this->BuildFileStream) << cmVS10EscapeXML(nativeLibDeps)
-                             << "</NativeLibDependencies>\n";
+    this->WriteElemEscapeXML("NativeLibDependencies", nativeLibDeps, 3);
   }
 
   if (const char* javaSourceDir =
         this->GeneratorTarget->GetProperty("ANDROID_JAVA_SOURCE_DIR")) {
-    this->WriteString("<JavaSourceDir>", 3);
-    (*this->BuildFileStream) << cmVS10EscapeXML(javaSourceDir)
-                             << "</JavaSourceDir>\n";
+    this->WriteElemEscapeXML("JavaSourceDir", javaSourceDir, 3);
   }
 
   if (const char* jarDirectoriesExpression =
@@ -3093,31 +2997,23 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
       ge.Parse(jarDirectoriesExpression);
     std::string jarDirectories =
       cge->Evaluate(this->LocalGenerator, configName);
-    this->WriteString("<JarDirectories>", 3);
-    (*this->BuildFileStream) << cmVS10EscapeXML(jarDirectories)
-                             << "</JarDirectories>\n";
+    this->WriteElemEscapeXML("JarDirectories", jarDirectories, 3);
   }
 
   if (const char* jarDeps =
         this->GeneratorTarget->GetProperty("ANDROID_JAR_DEPENDENCIES")) {
-    this->WriteString("<JarDependencies>", 3);
-    (*this->BuildFileStream) << cmVS10EscapeXML(jarDeps)
-                             << "</JarDependencies>\n";
+    this->WriteElemEscapeXML("JarDependencies", jarDeps, 3);
   }
 
   if (const char* assetsDirectories =
         this->GeneratorTarget->GetProperty("ANDROID_ASSETS_DIRECTORIES")) {
-    this->WriteString("<AssetsDirectories>", 3);
-    (*this->BuildFileStream) << cmVS10EscapeXML(assetsDirectories)
-                             << "</AssetsDirectories>\n";
+    this->WriteElemEscapeXML("AssetsDirectories", assetsDirectories, 3);
   }
 
   {
     std::string manifest_xml = rootDir + "/AndroidManifest.xml";
     ConvertToWindowsSlash(manifest_xml);
-    this->WriteString("<AndroidManifestLocation>", 3);
-    (*this->BuildFileStream) << cmVS10EscapeXML(manifest_xml)
-                             << "</AndroidManifestLocation>\n";
+    this->WriteElemEscapeXML("AndroidManifestLocation", manifest_xml, 3);
   }
 
   if (const char* antAdditionalOptions =
@@ -3335,7 +3231,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
       this->GeneratorTarget->GetModuleDefinitionInfo(config);
     if (mdi && !mdi->DefFile.empty()) {
-      linkOptions.AddFlag("ModuleDefinitionFile", mdi->DefFile.c_str());
+      linkOptions.AddFlag("ModuleDefinitionFile", mdi->DefFile);
     }
     linkOptions.AppendFlag("IgnoreSpecificDefaultLibraries",
                            "%(IgnoreSpecificDefaultLibraries)");
@@ -3418,8 +3314,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(
   if (!this->GlobalGenerator->NeedLinkLibraryDependencies(
         this->GeneratorTarget)) {
     this->WriteString("<ProjectReference>\n", 2);
-    this->WriteString(
-      "<LinkLibraryDependencies>false</LinkLibraryDependencies>\n", 3);
+    this->WriteElem("LinkLibraryDependencies", "false", 3);
     this->WriteString("</ProjectReference>\n", 2);
   }
 }
@@ -3513,15 +3408,11 @@ void cmVisualStudio10TargetGenerator::WriteMidlOptions(
   this->WriteString("%(AdditionalIncludeDirectories)"
                     "</AdditionalIncludeDirectories>\n",
                     0);
-  this->WriteString("<OutputDirectory>$(ProjectDir)/$(IntDir)"
-                    "</OutputDirectory>\n",
-                    3);
-  this->WriteString("<HeaderFileName>%(Filename).h</HeaderFileName>\n", 3);
-  this->WriteString("<TypeLibraryName>%(Filename).tlb</TypeLibraryName>\n", 3);
-  this->WriteString("<InterfaceIdentifierFileName>"
-                    "%(Filename)_i.c</InterfaceIdentifierFileName>\n",
-                    3);
-  this->WriteString("<ProxyFileName>%(Filename)_p.c</ProxyFileName>\n", 3);
+  this->WriteElem("OutputDirectory", "$(ProjectDir)/$(IntDir)", 3);
+  this->WriteElem("HeaderFileName", "%(Filename).h", 3);
+  this->WriteElem("TypeLibraryName", "%(Filename).tlb", 3);
+  this->WriteElem("InterfaceIdentifierFileName", "%(Filename)_i.c", 3);
+  this->WriteElem("ProxyFileName", "%(Filename)_p.c", 3);
   this->WriteString("</Midl>\n", 2);
 }
 
@@ -3613,8 +3504,7 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
   }
   comment = cmVS10EscapeComment(comment);
   if (this->ProjectType != csproj) {
-    this->WriteString("<Message>", 3);
-    (*this->BuildFileStream) << cmVS10EscapeXML(comment) << "</Message>\n";
+    this->WriteElemEscapeXML("Message", comment, 3);
     this->WriteString("<Command>", 3);
   } else {
     std::string strippedComment = comment;
@@ -3667,17 +3557,13 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
     }
     ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << cmVS10EscapeXML(path) << "\">\n";
-    this->WriteString("<Project>", 3);
-    (*this->BuildFileStream) << "{" << this->GlobalGenerator->GetGUID(name)
-                             << "}";
-    (*this->BuildFileStream) << "</Project>\n";
-    this->WriteString("<Name>", 3);
-    (*this->BuildFileStream) << name << "</Name>\n";
+    this->WriteElem("Project",
+                    "{" + this->GlobalGenerator->GetGUID(name) + "}", 3);
+    this->WriteElem("Name", name, 3);
     this->WriteDotNetReferenceCustomTags(name);
     if (csproj == this->ProjectType) {
       if (!this->GlobalGenerator->TargetCanBeReferenced(dt)) {
-        this->WriteString(
-          "<ReferenceOutputAssembly>false</ReferenceOutputAssembly>\n", 3);
+        this->WriteElem("ReferenceOutputAssembly", "false", 3);
       }
     }
     this->WriteString("</ProjectReference>\n", 2);
@@ -3807,14 +3693,12 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile()
         this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
       ConvertToWindowsSlash(artifactDir);
       this->WriteString("<PropertyGroup>\n", 1);
-      this->WriteString("<AppxPackageArtifactsDir>", 2);
-      (*this->BuildFileStream) << cmVS10EscapeXML(artifactDir)
-                               << "\\</AppxPackageArtifactsDir>\n";
-      this->WriteString("<ProjectPriFullPath>", 2);
+      this->WriteElemEscapeXML("AppxPackageArtifactsDir", artifactDir + "\\",
+                               2);
       std::string resourcePriFile =
         this->DefaultArtifactDir + "/resources.pri";
       ConvertToWindowsSlash(resourcePriFile);
-      (*this->BuildFileStream) << resourcePriFile << "</ProjectPriFullPath>\n";
+      this->WriteElem("ProjectPriFullPath", resourcePriFile, 2);
 
       // If we are missing files and we don't have a certificate and
       // aren't targeting WP8.0, add a default certificate
@@ -3828,26 +3712,18 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile()
         this->AddedFiles.push_back(pfxFile);
       }
 
-      this->WriteString("<", 2);
-      (*this->BuildFileStream) << "PackageCertificateKeyFile>" << pfxFile
-                               << "</PackageCertificateKeyFile>\n";
+      this->WriteElem("PackageCertificateKeyFile", pfxFile, 2);
       std::string thumb = cmSystemTools::ComputeCertificateThumbprint(pfxFile);
       if (!thumb.empty()) {
-        this->WriteString("<PackageCertificateThumbprint>", 2);
-        (*this->BuildFileStream) << thumb
-                                 << "</PackageCertificateThumbprint>\n";
+        this->WriteElem("PackageCertificateThumbprint", thumb, 2);
       }
       this->WriteString("</PropertyGroup>\n", 1);
     } else if (!pfxFile.empty()) {
       this->WriteString("<PropertyGroup>\n", 1);
-      this->WriteString("<", 2);
-      (*this->BuildFileStream) << "PackageCertificateKeyFile>" << pfxFile
-                               << "</PackageCertificateKeyFile>\n";
+      this->WriteElem("PackageCertificateKeyFile", pfxFile, 2);
       std::string thumb = cmSystemTools::ComputeCertificateThumbprint(pfxFile);
       if (!thumb.empty()) {
-        this->WriteString("<PackageCertificateThumbprint>", 2);
-        (*this->BuildFileStream) << thumb
-                                 << "</PackageCertificateThumbprint>\n";
+        this->WriteElem("PackageCertificateThumbprint", thumb, 2);
       }
       this->WriteString("</PropertyGroup>\n", 1);
     }
@@ -3895,45 +3771,29 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
   bool const isWindowsStore = this->GlobalGenerator->TargetsWindowsStore();
   std::string const& v = this->GlobalGenerator->GetSystemVersion();
   if (isWindowsPhone || isWindowsStore) {
-    this->WriteString("<ApplicationType>", 2);
-    (*this->BuildFileStream)
-      << (isWindowsPhone ? "Windows Phone" : "Windows Store")
-      << "</ApplicationType>\n";
-    this->WriteString("<DefaultLanguage>en-US"
-                      "</DefaultLanguage>\n",
-                      2);
+    this->WriteElem("ApplicationType",
+                    (isWindowsPhone ? "Windows Phone" : "Windows Store"), 2);
+    this->WriteElem("DefaultLanguage", "en-US", 2);
     if (cmHasLiteralPrefix(v, "10.0")) {
-      this->WriteString("<ApplicationTypeRevision>", 2);
-      (*this->BuildFileStream) << cmVS10EscapeXML("10.0")
-                               << "</ApplicationTypeRevision>\n";
+      this->WriteElemEscapeXML("ApplicationTypeRevision", "10.0", 2);
       // Visual Studio 14.0 is necessary for building 10.0 apps
-      this->WriteString("<MinimumVisualStudioVersion>14.0"
-                        "</MinimumVisualStudioVersion>\n",
-                        2);
+      this->WriteElem("MinimumVisualStudioVersion", "14.0", 2);
 
       if (this->GeneratorTarget->GetType() < cmStateEnums::UTILITY) {
         isAppContainer = true;
       }
     } else if (v == "8.1") {
-      this->WriteString("<ApplicationTypeRevision>", 2);
-      (*this->BuildFileStream) << cmVS10EscapeXML(v)
-                               << "</ApplicationTypeRevision>\n";
+      this->WriteElemEscapeXML("ApplicationTypeRevision", v, 2);
       // Visual Studio 12.0 is necessary for building 8.1 apps
-      this->WriteString("<MinimumVisualStudioVersion>12.0"
-                        "</MinimumVisualStudioVersion>\n",
-                        2);
+      this->WriteElem("MinimumVisualStudioVersion", "12.0", 2);
 
       if (this->GeneratorTarget->GetType() < cmStateEnums::UTILITY) {
         isAppContainer = true;
       }
     } else if (v == "8.0") {
-      this->WriteString("<ApplicationTypeRevision>", 2);
-      (*this->BuildFileStream) << cmVS10EscapeXML(v)
-                               << "</ApplicationTypeRevision>\n";
+      this->WriteElemEscapeXML("ApplicationTypeRevision", v, 2);
       // Visual Studio 11.0 is necessary for building 8.0 apps
-      this->WriteString("<MinimumVisualStudioVersion>11.0"
-                        "</MinimumVisualStudioVersion>\n",
-                        2);
+      this->WriteElem("MinimumVisualStudioVersion", "11.0", 2);
 
       if (isWindowsStore &&
           this->GeneratorTarget->GetType() < cmStateEnums::UTILITY) {
@@ -3941,52 +3801,42 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
       } else if (isWindowsPhone &&
                  this->GeneratorTarget->GetType() ==
                    cmStateEnums::EXECUTABLE) {
-        this->WriteString("<XapOutputs>true</XapOutputs>\n", 2);
-        this->WriteString("<XapFilename>", 2);
-        (*this->BuildFileStream)
-          << cmVS10EscapeXML(this->Name)
-          << "_$(Configuration)_$(Platform).xap</XapFilename>\n";
+        this->WriteElem("XapOutputs", "true", 2);
+        this->WriteElem("XapFilename", cmVS10EscapeXML(this->Name) +
+                          "_$(Configuration)_$(Platform).xap",
+                        2);
       }
     }
   }
   if (isAppContainer) {
-    this->WriteString("<AppContainerApplication>true"
-                      "</AppContainerApplication>\n",
-                      2);
+    this->WriteElem("AppContainerApplication", "true", 2);
   } else if (this->Platform == "ARM64") {
-    this->WriteString("<WindowsSDKDesktopARM64Support>true"
-                      "</WindowsSDKDesktopARM64Support>\n",
-                      2);
+    this->WriteElem("WindowsSDKDesktopARM64Support", "true", 2);
   } else if (this->Platform == "ARM") {
-    this->WriteString("<WindowsSDKDesktopARMSupport>true"
-                      "</WindowsSDKDesktopARMSupport>\n",
-                      2);
+    this->WriteElem("WindowsSDKDesktopARMSupport", "true", 2);
   }
   std::string const& targetPlatformVersion =
     gg->GetWindowsTargetPlatformVersion();
   if (!targetPlatformVersion.empty()) {
-    this->WriteString("<WindowsTargetPlatformVersion>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(targetPlatformVersion)
-                             << "</WindowsTargetPlatformVersion>\n";
+    this->WriteElemEscapeXML("WindowsTargetPlatformVersion",
+                             targetPlatformVersion, 2);
   }
   const char* targetPlatformMinVersion = this->GeneratorTarget->GetProperty(
     "VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION");
   if (targetPlatformMinVersion) {
-    this->WriteString("<WindowsTargetPlatformMinVersion>", 2);
-    (*this->BuildFileStream) << cmVS10EscapeXML(targetPlatformMinVersion)
-                             << "</WindowsTargetPlatformMinVersion>\n";
+    this->WriteElemEscapeXML("WindowsTargetPlatformMinVersion",
+                             targetPlatformMinVersion, 2);
   } else if (isWindowsStore && cmHasLiteralPrefix(v, "10.0")) {
     // If the min version is not set, then use the TargetPlatformVersion
     if (!targetPlatformVersion.empty()) {
-      this->WriteString("<WindowsTargetPlatformMinVersion>", 2);
-      (*this->BuildFileStream) << cmVS10EscapeXML(targetPlatformVersion)
-                               << "</WindowsTargetPlatformMinVersion>\n";
+      this->WriteElemEscapeXML("WindowsTargetPlatformMinVersion",
+                               targetPlatformVersion, 2);
     }
   }
 
   // Added IoT Startup Task support
   if (this->GeneratorTarget->GetPropertyAsBool("VS_IOT_STARTUP_TASK")) {
-    this->WriteString("<ContainsStartupTask>true</ContainsStartupTask>\n", 2);
+    this->WriteElem("ContainsStartupTask", "true", 2);
   }
 }
 
@@ -4117,7 +3967,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80()
   ConvertToWindowsSlash(sourceFile);
   this->WriteString("<Xml Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(sourceFile) << "\">\n";
-  this->WriteString("<SubType>Designer</SubType>\n", 3);
+  this->WriteElem("SubType", "Designer", 3);
   this->WriteString("</Xml>\n", 2);
   this->AddedFiles.push_back(sourceFile);
 
@@ -4395,7 +4245,7 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
   ConvertToWindowsSlash(sourceFile);
   this->WriteString("<AppxManifest Include=\"", 2);
   (*this->BuildFileStream) << cmVS10EscapeXML(sourceFile) << "\">\n";
-  this->WriteString("<SubType>Designer</SubType>\n", 3);
+  this->WriteElem("SubType", "Designer", 3);
   this->WriteString("</AppxManifest>\n", 2);
   this->AddedFiles.push_back(sourceFile);
 

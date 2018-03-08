@@ -55,6 +55,10 @@ private:
 
   std::string ConvertPath(std::string const& path, bool forceRelative);
   void WriteString(const char* line, int indentLevel);
+  void WriteElem(const char* tag, const char* val, int indentLevel);
+  void WriteElem(const char* tag, std::string const& val, int indentLevel);
+  void WriteElemEscapeXML(const char* tag, std::string const& val,
+                          int indentLevel);
   void WriteProjectConfigurations();
   void WriteProjectConfigurationValues();
   void WriteMSToolConfigurationValues(std::string const& config);
