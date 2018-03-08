@@ -11,6 +11,8 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
+#include "cmPropertyMap.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -1096,4 +1098,42 @@ void cmExportFileGenerator::GenerateImportedFileChecksCode(
   }
 
   os << ")\n\n";
+}
+
+bool cmExportFileGenerator::PopulateExportProperties(
+  cmGeneratorTarget* gte, ImportPropertyMap& properties,
+  std::string& errorMessage)
+{
+  auto& targetProperties = gte->Target->GetProperties();
+  const auto& exportProperties = targetProperties.find("EXPORT_PROPERTIES");
+  if (exportProperties != targetProperties.end()) {
+    std::vector<std::string> propsToExport;
+    cmSystemTools::ExpandListArgument(exportProperties->second.GetValue(),
+                                      propsToExport);
+    for (auto& prop : propsToExport) {
+      /* Black list reserved properties */
+      if (cmSystemTools::StringStartsWith(prop, "IMPORTED_") ||
+          cmSystemTools::StringStartsWith(prop, "INTERFACE_")) {
+        std::ostringstream e;
+        e << "Target \"" << gte->Target->GetName() << "\" contains property \""
+          << prop << "\" in EXPORT_PROPERTIES but IMPORTED_* and INTERFACE_* "
+          << "properties are reserved.";
+        errorMessage = e.str();
+        return false;
+      }
+      auto propertyValue = targetProperties.GetPropertyValue(prop);
+      std::string evaluatedValue = cmGeneratorExpression::Preprocess(
+        propertyValue, cmGeneratorExpression::StripAllGeneratorExpressions);
+      if (evaluatedValue != propertyValue) {
+        std::ostringstream e;
+        e << "Target \"" << gte->Target->GetName() << "\" contains property \""
+          << prop << "\" in EXPORT_PROPERTIES but this property contains a "
+          << "generator expression. This is not allowed.";
+        errorMessage = e.str();
+        return false;
+      }
+      properties[prop] = propertyValue;
+    }
+  }
+  return true;
 }
