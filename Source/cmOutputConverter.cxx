@@ -342,13 +342,12 @@ use the caret character itself (^), use two in a row (^^).
 */
 
 /* Some helpers to identify character classes */
-namespace {
-inline int Shell__CharIsWhitespace(char c)
+static int Shell__CharIsWhitespace(char c)
 {
   return ((c == ' ') || (c == '\t'));
 }
 
-inline int Shell__CharNeedsQuotesOnUnix(char c)
+static int Shell__CharNeedsQuotesOnUnix(char c)
 {
   return ((c == '\'') || (c == '`') || (c == ';') || (c == '#') ||
           (c == '&') || (c == '$') || (c == '(') || (c == ')') || (c == '~') ||
@@ -356,16 +355,15 @@ inline int Shell__CharNeedsQuotesOnUnix(char c)
           (c == '\\'));
 }
 
-inline int Shell__CharNeedsQuotesOnWindows(char c)
+static int Shell__CharNeedsQuotesOnWindows(char c)
 {
   return ((c == '\'') || (c == '#') || (c == '&') || (c == '<') ||
           (c == '>') || (c == '|') || (c == '^'));
 }
 
-inline int Shell__CharIsMakeVariableName(char c)
+static int Shell__CharIsMakeVariableName(char c)
 {
   return c && (c == '_' || isalpha((static_cast<int>(c))));
-}
 }
 
 int cmOutputConverter::Shell__CharNeedsQuotes(char c, int flags)
