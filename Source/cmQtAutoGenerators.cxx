@@ -80,15 +80,21 @@ static bool ReadFile(std::string& content, std::string const& filename,
     std::size_t const length = cmSystemTools::FileLength(filename);
     cmsys::ifstream ifs(filename.c_str(), (std::ios::in | std::ios::binary));
     if (ifs) {
-      content.resize(length);
-      ifs.read(&content.front(), content.size());
-      if (ifs) {
-        success = true;
-      } else {
-        content.clear();
-        if (error != nullptr) {
-          error->append("Reading from the file failed.");
+      if (length > 0) {
+        content.resize(length);
+        ifs.read(&content.front(), content.size());
+        if (ifs) {
+          success = true;
+        } else {
+          content.clear();
+          if (error != nullptr) {
+            error->append("Reading from the file failed.");
+          }
         }
+      } else {
+        // Readable but empty file
+        content.clear();
+        success = true;
       }
     } else if (error != nullptr) {
       error->append("Opening the file for reading failed.");
