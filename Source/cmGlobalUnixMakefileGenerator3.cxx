@@ -241,6 +241,10 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
   lg->WriteMakeRule(makefileStream, "The main recursive preinstall target",
                     "preinstall", depends, no_commands, true);
 
+  // Write an empty clean:
+  lg->WriteMakeRule(makefileStream, "The main recursive clean target", "clean",
+                    depends, no_commands, true);
+
   // Write out the "special" stuff
   lg->WriteSpecialTargetsTop(makefileStream);
 
