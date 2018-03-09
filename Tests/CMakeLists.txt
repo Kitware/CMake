@@ -1371,6 +1371,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindLibUV)
   endif()
 
+  if(CMake_TEST_FindLibXml2)
+    add_subdirectory(FindLibXml2)
+  endif()
+
   if(CMake_TEST_FindLTTngUST)
     add_subdirectory(FindLTTngUST)
   endif()
