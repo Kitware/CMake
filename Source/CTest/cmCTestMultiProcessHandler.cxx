@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstring>
 #include <iomanip>
 #include <list>
 #include <math.h>
@@ -169,13 +170,19 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
     }
   }
 
-  cmWorkingDirectory workdir(this->Properties[test]->Directory);
-
-  // Lock the resources we'll be using
+  // Always lock the resources we'll be using, even if we fail to set the
+  // working directory because FinishTestProcess() will try to unlock them
   this->LockResources(test);
 
-  if (testRun->StartTest(this->Total)) {
-    return true;
+  cmWorkingDirectory workdir(this->Properties[test]->Directory);
+  if (workdir.Failed()) {
+    testRun->StartFailure("Failed to change working directory to " +
+                          this->Properties[test]->Directory + " : " +
+                          std::strerror(workdir.GetLastResult()));
+  } else {
+    if (testRun->StartTest(this->Total)) {
+      return true;
+    }
   }
 
   this->FinishTestProcess(testRun, false);
@@ -694,6 +701,8 @@ void cmCTestMultiProcessHandler::PrintTestList()
     count++;
     cmCTestTestHandler::cmCTestTestProperties& p = *it.second;
 
+    // Don't worry if this fails, we are only showing the test list, not
+    // running the tests
     cmWorkingDirectory workdir(p.Directory);
 
     cmCTestRunTest testRun(*this);

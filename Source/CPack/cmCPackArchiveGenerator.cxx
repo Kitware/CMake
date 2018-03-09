@@ -9,6 +9,7 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
+#include <cstring>
 #include <ostream>
 #include <utility>
 #include <vector>
@@ -51,6 +52,7 @@ int cmCPackArchiveGenerator::InitializeInternal()
   this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "1");
   return this->Superclass::InitializeInternal();
 }
+
 int cmCPackArchiveGenerator::addOneComponentToArchive(
   cmArchiveWrite& archive, cmCPackComponent* component)
 {
@@ -61,6 +63,13 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
   localToplevel += "/" + component->Name;
   // Change to local toplevel
   cmWorkingDirectory workdir(localToplevel);
+  if (workdir.Failed()) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Failed to change working directory to "
+                    << localToplevel << " : "
+                    << std::strerror(workdir.GetLastResult()) << std::endl);
+    return 0;
+  }
   std::string filePrefix;
   if (this->IsOn("CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY")) {
     filePrefix = this->GetOption("CPACK_PACKAGE_FILE_NAME");
@@ -237,6 +246,13 @@ int cmCPackArchiveGenerator::PackageFiles()
   // CASE 3 : NON COMPONENT package.
   DECLARE_AND_OPEN_ARCHIVE(packageFileNames[0], archive);
   cmWorkingDirectory workdir(toplevel);
+  if (workdir.Failed()) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Failed to change working directory to "
+                    << toplevel << " : "
+                    << std::strerror(workdir.GetLastResult()) << std::endl);
+    return 0;
+  }
   for (std::string const& file : files) {
     // Get the relative path to the file
     std::string rp = cmSystemTools::RelativePath(toplevel, file);

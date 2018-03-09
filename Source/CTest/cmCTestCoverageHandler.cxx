@@ -23,6 +23,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <chrono>
+#include <cstring>
 #include <iomanip>
 #include <iterator>
 #include <sstream>
@@ -975,7 +976,12 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
   std::string testingDir = this->CTest->GetBinaryDir() + "/Testing";
   std::string tempDir = testingDir + "/CoverageInfo";
-  cmSystemTools::MakeDirectory(tempDir);
+  if (!cmSystemTools::MakeDirectory(tempDir)) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Unable to make directory: " << tempDir << std::endl);
+    cont->Error++;
+    return 0;
+  }
   cmWorkingDirectory workdir(tempDir);
 
   int gcovStyle = 0;
@@ -1376,6 +1382,14 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
                        this->Quiet);
     std::string fileDir = cmSystemTools::GetFilenamePath(f);
     cmWorkingDirectory workdir(fileDir);
+    if (workdir.Failed()) {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "Unable to change working directory to "
+                   << fileDir << " : "
+                   << std::strerror(workdir.GetLastResult()) << std::endl);
+      cont->Error++;
+      continue;
+    }
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "Current coverage dir: " << fileDir << std::endl,
@@ -1600,6 +1614,12 @@ bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
   gl.RecurseThroughSymlinksOff();
   std::string buildDir = this->CTest->GetCTestConfiguration("BuildDirectory");
   cmWorkingDirectory workdir(buildDir);
+  if (workdir.Failed()) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Unable to change working directory to " << buildDir
+                                                        << std::endl);
+    return false;
+  }
 
   // Run profmerge to merge all *.dyn files into dpi files
   if (!cmSystemTools::RunSingleCommand("profmerge")) {

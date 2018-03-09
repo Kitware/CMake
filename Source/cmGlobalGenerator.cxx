@@ -6,11 +6,11 @@
 #include "cmsys/FStream.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <cstring>
 #include <iterator>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
@@ -1806,6 +1806,8 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
                              cmSystemTools::OutputOption outputflag,
                              std::vector<std::string> const& nativeOptions)
 {
+  bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
+
   /**
    * Run an executable command and put the stdout in output.
    */
@@ -1813,9 +1815,17 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
   output += "Change Dir: ";
   output += bindir;
   output += "\n";
+  if (workdir.Failed()) {
+    cmSystemTools::SetRunCommandHideConsole(hideconsole);
+    cmSystemTools::Error("Failed to change directory: ",
+                         std::strerror(workdir.GetLastResult()));
+    output += "Failed to change directory: ";
+    output += std::strerror(workdir.GetLastResult());
+    output += "\n";
+    return 1;
+  }
 
   int retVal;
-  bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
   cmSystemTools::SetRunCommandHideConsole(true);
   std::string outputBuffer;
   std::string* outputPtr = &outputBuffer;

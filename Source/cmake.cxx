@@ -98,13 +98,13 @@
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 #include <iterator>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <utility>
 
 namespace {
@@ -2209,6 +2209,15 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   {
     // now run cmake on the CMakeLists file
     cmWorkingDirectory workdir(destPath);
+    if (workdir.Failed()) {
+      // We created the directory and we were able to copy the CMakeLists.txt
+      // file to it, so we wouldn't expect to get here unless the default
+      // permissions are questionable or some other process has deleted the
+      // directory
+      std::cerr << "Failed to change to directory " << destPath << " : "
+                << std::strerror(workdir.GetLastResult()) << std::endl;
+      return 1;
+    }
     std::vector<std::string> args2;
     args2.push_back(args[0]);
     args2.push_back(destPath);

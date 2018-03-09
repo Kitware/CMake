@@ -7,6 +7,7 @@
 #include "cm_jsoncpp_value.h"
 #include "cmsys/Process.h"
 #include <chrono>
+#include <cstring>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1532,6 +1533,15 @@ int cmCTestSubmitHandler::ProcessHandler()
     // change to the build directory so that we can uses a relative path
     // on windows since scp doesn't support "c:" a drive in the path
     cmWorkingDirectory workdir(buildDirectory);
+    if (workdir.Failed()) {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "   Failed to change directory to "
+                   << buildDirectory << " : "
+                   << std::strerror(workdir.GetLastResult()) << std::endl);
+      ofs << "   Failed to change directory to " << buildDirectory << " : "
+          << std::strerror(workdir.GetLastResult()) << std::endl;
+      return -1;
+    }
 
     if (!this->SubmitUsingSCP(this->CTest->GetCTestConfiguration("ScpCommand"),
                               "Testing/" + this->CTest->GetCurrentTag(), files,
@@ -1551,6 +1561,15 @@ int cmCTestSubmitHandler::ProcessHandler()
     // change to the build directory so that we can uses a relative path
     // on windows since scp doesn't support "c:" a drive in the path
     cmWorkingDirectory workdir(buildDirectory);
+    if (workdir.Failed()) {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "   Failed to change directory to "
+                   << buildDirectory << " : "
+                   << std::strerror(workdir.GetLastResult()) << std::endl);
+      ofs << "   Failed to change directory to " << buildDirectory << " : "
+          << std::strerror(workdir.GetLastResult()) << std::endl;
+      return -1;
+    }
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "   Change directory: " << buildDirectory << std::endl,
                        this->Quiet);

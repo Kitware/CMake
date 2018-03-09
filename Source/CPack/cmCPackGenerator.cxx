@@ -6,6 +6,7 @@
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
+#include <cstring>
 #include <memory> // IWYU pragma: keep
 #include <utility>
 
@@ -404,6 +405,13 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Change dir to: " << goToDir
                                                                << std::endl);
         cmWorkingDirectory workdir(goToDir);
+        if (workdir.Failed()) {
+          cmCPackLogger(
+            cmCPackLog::LOG_ERROR, "Failed to change working directory to "
+              << goToDir << " : " << std::strerror(workdir.GetLastResult())
+              << std::endl);
+          return 0;
+        }
         for (auto const& symlinked : symlinkedFiles) {
           cmCPackLogger(cmCPackLog::LOG_DEBUG, "Will create a symlink: "
                           << symlinked.second << "--> " << symlinked.first
