@@ -32,7 +32,12 @@ endif()
 # components in the RC file are 16-bit integers so we may have to
 # split the patch component.
 if(CMake_VERSION_PATCH MATCHES "^([0-9]+)([0-9][0-9][0-9][0-9])$")
-  set(CMake_RCVERSION ${CMake_VERSION_MAJOR},${CMake_VERSION_MINOR},${CMAKE_MATCH_1},${CMAKE_MATCH_2})
+  set(CMake_RCVERSION_YEAR "${CMAKE_MATCH_1}")
+  set(CMake_RCVERSION_MONTH_DAY "${CMAKE_MATCH_2}")
+  string(REGEX REPLACE "^0+" "" CMake_RCVERSION_MONTH_DAY "${CMake_RCVERSION_MONTH_DAY}")
+  set(CMake_RCVERSION ${CMake_VERSION_MAJOR},${CMake_VERSION_MINOR},${CMake_RCVERSION_YEAR},${CMake_RCVERSION_MONTH_DAY})
+  unset(CMake_RCVERSION_MONTH_DAY)
+  unset(CMake_RCVERSION_YEAR)
 else()
   set(CMake_RCVERSION ${CMake_VERSION_MAJOR},${CMake_VERSION_MINOR},${CMake_VERSION_PATCH})
 endif()
