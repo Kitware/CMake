@@ -757,8 +757,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     }
   }
 
-  std::ostringstream outputStream;
-  bool first = true;
+  std::vector<std::string> files;
   bool warnFollowedSymlinks = false;
   while (i != args.end()) {
     if (*i == "LIST_DIRECTORIES") {
@@ -848,15 +847,8 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         warnFollowedSymlinks = true;
       }
 
-      std::vector<std::string>& files = g.GetFiles();
-      std::sort(files.begin(), files.end());
-      for (std::string const& file : files) {
-        if (!first) {
-          outputStream << ";";
-        }
-        outputStream << file;
-        first = false;
-      }
+      std::vector<std::string>& foundFiles = g.GetFiles();
+      files.insert(files.end(), foundFiles.begin(), foundFiles.end());
       ++i;
     }
   }
@@ -880,7 +872,10 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
       }
       break;
   }
-  this->Makefile->AddDefinition(variable, outputStream.str().c_str());
+
+  std::sort(files.begin(), files.end());
+  files.erase(std::unique(files.begin(), files.end()), files.end());
+  this->Makefile->AddDefinition(variable, cmJoin(files, ";").c_str());
   return true;
 }
 
