@@ -8,4 +8,5 @@ ExternalProject_Add(FOO TMP_DIR "${CMAKE_CURRENT_BINARY_DIR}/tmp"
                         DOWNLOAD_COMMAND ""
                         CMAKE_CACHE_ARGS
                             "-DFOO:STRING=$<1:BAR>$<0:BAD>"
-                            "-DTEST_LIST:STRING=A;B;C")
+                            "-DTEST_LIST:STRING=A;B;C"
+                            "-DTEST_OPTIONAL:FILEPATH=TEST_OPTIONAL-NOTFOUND")
