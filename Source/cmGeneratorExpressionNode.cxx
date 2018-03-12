@@ -300,6 +300,37 @@ static const struct InListNode : public cmGeneratorExpressionNode
   }
 } inListNode;
 
+static const struct TargetExistsNode : public cmGeneratorExpressionNode
+{
+  TargetExistsNode() {}
+
+  int NumExpectedParameters() const override { return 1; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    if (parameters.size() != 1) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<TARGET_EXISTS:...> expression requires one parameter");
+      return std::string();
+    }
+
+    std::string targetName = parameters.front();
+    if (targetName.empty() ||
+        !cmGeneratorExpression::IsValidTargetName(targetName)) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<TARGET_EXISTS:tgt> expression requires a non-empty "
+                  "valid target name.");
+      return std::string();
+    }
+
+    return context->LG->GetMakefile()->FindTargetToUse(targetName) ? "1" : "0";
+  }
+} targetExistsNode;
+
 static const struct LowerCaseNode : public cmGeneratorExpressionNode
 {
   LowerCaseNode() {}
@@ -1865,6 +1896,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     nodeMap["TARGET_NAME"] = &targetNameNode;
     nodeMap["TARGET_OBJECTS"] = &targetObjectsNode;
     nodeMap["TARGET_POLICY"] = &targetPolicyNode;
+    nodeMap["TARGET_EXISTS"] = &targetExistsNode;
     nodeMap["BUILD_INTERFACE"] = &buildInterfaceNode;
     nodeMap["INSTALL_INTERFACE"] = &installInterfaceNode;
     nodeMap["INSTALL_PREFIX"] = &installPrefixNode;
