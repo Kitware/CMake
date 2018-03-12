@@ -2180,6 +2180,13 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
                                << "</LocalDebuggerWorkingDirectory>\n";
       }
 
+      if (const char* debuggerCommand =
+            this->GeneratorTarget->GetProperty("VS_DEBUGGER_COMMAND")) {
+        this->WritePlatformConfigTag("LocalDebuggerCommand", config, 2);
+        *this->BuildFileStream << cmVS10EscapeXML(debuggerCommand)
+                               << "</LocalDebuggerCommand>\n";
+      }
+
       std::string name =
         cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
       this->WritePlatformConfigTag("TargetName", config, 2);
