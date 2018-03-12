@@ -718,7 +718,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
       if (emitted.insert(frameworkDir).second) {
         if (sysFwSearchFlag && target &&
-            target->IsSystemIncludeDirectory(i, config)) {
+            target->IsSystemIncludeDirectory(i, config, lang)) {
           includeFlags << sysFwSearchFlag;
         } else {
           includeFlags << fwSearchFlag;
@@ -731,7 +731,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
 
     if (!flagUsed || repeatFlag) {
       if (sysIncludeFlag && target &&
-          target->IsSystemIncludeDirectory(i, config)) {
+          target->IsSystemIncludeDirectory(i, config, lang)) {
         includeFlags << sysIncludeFlag;
       } else {
         includeFlags << includeFlag;
