@@ -5,6 +5,7 @@
 #include "cmsys/Glob.hxx"
 #include <sstream>
 #include <stddef.h>
+#include <string.h>
 #include <utility>
 
 #include "cmAlgorithms.h"
@@ -334,8 +335,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 
   // Check whether this is a DLL platform.
   bool dll_platform =
-    (this->Makefile->IsOn("WIN32") || this->Makefile->IsOn("CYGWIN") ||
-     this->Makefile->IsOn("MINGW"));
+    strcmp(this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"),
+           "") != 0;
 
   for (std::string const& tgt : targetList.GetVector()) {
 

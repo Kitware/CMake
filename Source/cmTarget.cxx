@@ -188,8 +188,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   // Check whether this is a DLL platform.
   this->DLLPlatform =
-    (this->Makefile->IsOn("WIN32") || this->Makefile->IsOn("CYGWIN") ||
-     this->Makefile->IsOn("MINGW"));
+    strcmp(this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"),
+           "") != 0;
 
   // Check whether we are targeting an Android platform.
   this->IsAndroid =
