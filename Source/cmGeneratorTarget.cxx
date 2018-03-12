@@ -2622,13 +2622,20 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
   return includes;
 }
 
+enum class OptionsParse
+{
+  None,
+  Shell
+};
+
 static void processCompileOptionsInternal(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<std::string>& options,
   std::unordered_set<std::string>& uniqueOptions,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
-  bool debugOptions, const char* logName, std::string const& language)
+  bool debugOptions, const char* logName, std::string const& language,
+  OptionsParse parse)
 {
   for (cmGeneratorTarget::TargetPropertyEntry* entry : entries) {
     std::vector<std::string> entryOptions;
@@ -2639,7 +2646,12 @@ static void processCompileOptionsInternal(
     std::string usedOptions;
     for (std::string const& opt : entryOptions) {
       if (uniqueOptions.insert(opt).second) {
-        options.push_back(opt);
+        if (parse == OptionsParse::Shell &&
+            cmHasLiteralPrefix(opt, "SHELL:")) {
+          cmSystemTools::ParseUnixCommandLine(opt.c_str() + 6, options);
+        } else {
+          options.push_back(opt);
+        }
         if (debugOptions) {
           usedOptions += " * " + opt + "\n";
         }
@@ -2664,7 +2676,7 @@ static void processCompileOptions(
 {
   processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
                                 dagChecker, config, debugOptions, "options",
-                                language);
+                                language, OptionsParse::Shell);
 }
 
 void cmGeneratorTarget::GetCompileOptions(std::vector<std::string>& result,
@@ -2718,7 +2730,7 @@ static void processCompileFeatures(
 {
   processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
                                 dagChecker, config, debugOptions, "features",
-                                std::string());
+                                std::string(), OptionsParse::None);
 }
 
 void cmGeneratorTarget::GetCompileFeatures(std::vector<std::string>& result,
@@ -2768,7 +2780,7 @@ static void processCompileDefinitions(
 {
   processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
                                 dagChecker, config, debugOptions,
-                                "definitions", language);
+                                "definitions", language, OptionsParse::None);
 }
 
 void cmGeneratorTarget::GetCompileDefinitions(
