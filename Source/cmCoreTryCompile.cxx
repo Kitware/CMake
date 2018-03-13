@@ -580,7 +580,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
 
     if (!targets.empty()) {
       std::string fname = "/" + std::string(targetName) + "Targets.cmake";
-      cmExportTryCompileFileGenerator tcfg(gg, targets, this->Makefile);
+      cmExportTryCompileFileGenerator tcfg(gg, targets, this->Makefile,
+                                           testLangs);
       tcfg.SetExportFile((this->BinaryDirectory + fname).c_str());
       tcfg.SetConfig(tcConfig);
 

@@ -725,8 +725,9 @@ static Json::Value DumpSourceFilesList(
         lg->AppendIncludeDirectories(includes, evaluatedIncludes, *file);
 
         for (const auto& include : includes) {
-          fileData.IncludePathList.push_back(std::make_pair(
-            include, target->IsSystemIncludeDirectory(include, config)));
+          fileData.IncludePathList.push_back(
+            std::make_pair(include, target->IsSystemIncludeDirectory(
+                                      include, config, fileData.Language)));
         }
       }
 
@@ -1005,7 +1006,7 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
     lg->GetIncludeDirectories(includePathList, target, lang, config, true);
     for (std::string const& i : includePathList) {
       ld.IncludePathList.push_back(
-        std::make_pair(i, target->IsSystemIncludeDirectory(i, config)));
+        std::make_pair(i, target->IsSystemIncludeDirectory(i, config, lang)));
     }
   }
 
