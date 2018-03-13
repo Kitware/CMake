@@ -384,14 +384,15 @@ static void handleSystemIncludesDep(
   cmLocalGenerator* lg, cmGeneratorTarget const* depTgt,
   const std::string& config, cmGeneratorTarget const* headTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
-  std::vector<std::string>& result, bool excludeImported)
+  std::vector<std::string>& result, bool excludeImported,
+  std::string const& language)
 {
   if (const char* dirs =
         depTgt->GetProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES")) {
     cmGeneratorExpression ge;
     cmSystemTools::ExpandListArgument(
       ge.Parse(dirs)->Evaluate(lg, config, false, headTarget, depTgt,
-                               dagChecker),
+                               dagChecker, language),
       result);
   }
   if (!depTgt->IsImported() || excludeImported) {
@@ -403,7 +404,7 @@ static void handleSystemIncludesDep(
     cmGeneratorExpression ge;
     cmSystemTools::ExpandListArgument(
       ge.Parse(dirs)->Evaluate(lg, config, false, headTarget, depTgt,
-                               dagChecker),
+                               dagChecker, language),
       result);
   }
 }
@@ -735,7 +736,8 @@ const char* cmGeneratorTarget::GetLocationForBuild() const
 }
 
 bool cmGeneratorTarget::IsSystemIncludeDirectory(
-  const std::string& dir, const std::string& config) const
+  const std::string& dir, const std::string& config,
+  const std::string& language) const
 {
   assert(this->GetType() != cmStateEnums::INTERFACE_LIBRARY);
   std::string config_upper;
@@ -758,7 +760,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
       cmGeneratorExpression ge;
       cmSystemTools::ExpandListArgument(
         ge.Parse(it)->Evaluate(this->LocalGenerator, config, false, this,
-                               &dagChecker),
+                               &dagChecker, language),
         result);
     }
 
@@ -766,7 +768,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
       this->GetLinkImplementationClosure(config);
     for (cmGeneratorTarget const* dep : deps) {
       handleSystemIncludesDep(this->LocalGenerator, dep, config, this,
-                              &dagChecker, result, excludeImported);
+                              &dagChecker, result, excludeImported, language);
     }
 
     std::for_each(result.begin(), result.end(),

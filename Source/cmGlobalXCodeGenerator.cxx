@@ -2035,7 +2035,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       if (emitted.insert(frameworkDir).second) {
         std::string incpath = this->XCodeEscapePath(frameworkDir);
         if (emitSystemIncludes &&
-            gtgt->IsSystemIncludeDirectory(frameworkDir, configName)) {
+            gtgt->IsSystemIncludeDirectory(frameworkDir, configName,
+                                           langForPreprocessor)) {
           sysfdirs.Add(incpath);
         } else {
           fdirs.Add(incpath);
@@ -2044,7 +2045,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     } else {
       std::string incpath = this->XCodeEscapePath(include);
       if (emitSystemIncludes &&
-          gtgt->IsSystemIncludeDirectory(include, configName)) {
+          gtgt->IsSystemIncludeDirectory(include, configName,
+                                         langForPreprocessor)) {
         sysdirs.Add(incpath);
       } else {
         dirs.Add(incpath);
@@ -2057,7 +2059,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       if (emitted.insert(fwDir).second) {
         std::string incpath = this->XCodeEscapePath(fwDir);
         if (emitSystemIncludes &&
-            gtgt->IsSystemIncludeDirectory(fwDir, configName)) {
+            gtgt->IsSystemIncludeDirectory(fwDir, configName,
+                                           langForPreprocessor)) {
           sysfdirs.Add(incpath);
         } else {
           fdirs.Add(incpath);
