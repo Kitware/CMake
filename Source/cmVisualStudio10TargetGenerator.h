@@ -53,6 +53,8 @@ private:
     std::vector<std::string> Configs;
   };
 
+  struct Elem;
+
   std::string ConvertPath(std::string const& path, bool forceRelative);
   void WriteString(const char* line, int indentLevel);
   void WriteElem(const char* tag, const char* val, int indentLevel);
@@ -66,9 +68,9 @@ private:
   void WriteHeaderSource(cmSourceFile const* sf);
   void WriteExtraSource(cmSourceFile const* sf);
   void WriteNsightTegraConfigurationValues(std::string const& config);
-  void WriteSource(std::string const& tool, cmSourceFile const* sf,
-                   const char* end = 0);
-  void WriteExcludeFromBuild(std::vector<size_t> const& exclude_configs);
+  void WriteSource(std::string const& tool, cmSourceFile const* sf);
+  void WriteExcludeFromBuild(Elem&,
+                             std::vector<size_t> const& exclude_configs);
   void WriteAllSources();
   void WriteDotNetReferences();
   void WriteDotNetReference(std::string const& ref, std::string const& hint);
@@ -145,7 +147,7 @@ private:
   void WriteGroups();
   void WriteProjectReferences();
   void WriteApplicationTypeSettings();
-  bool OutputSourceSpecificFlags(cmSourceFile const* source);
+  void OutputSourceSpecificFlags(Elem&, cmSourceFile const* source);
   void AddLibraries(cmComputeLinkInformation& cli,
                     std::vector<std::string>& libVec,
                     std::vector<std::string>& vsTargetVec);
