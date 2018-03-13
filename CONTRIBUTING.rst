@@ -29,6 +29,8 @@ To contribute patches:
 #. Base all new work on the upstream ``master`` branch.
    Base work on the upstream ``release`` branch only if it fixes a
    regression or bug in a feature new to that release.
+   If in doubt, prefer ``master``.  Reviewers may simply ask for
+   a rebase if deemed appropriate in particular cases.
 #. Create commits making incremental, distinct, logically complete changes
    with appropriate `commit messages`_.
 #. Push a topic branch to a personal repository fork on GitLab.
