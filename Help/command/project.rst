@@ -1,7 +1,7 @@
 project
 -------
 
-Set a name, version, and enable languages for the entire project.
+Sets project details such as name, version, etc. and enables languages.
 
 .. code-block:: cmake
 
@@ -63,7 +63,10 @@ The top-level ``CMakeLists.txt`` file for a project must contain a
 literal, direct call to the :command:`project` command; loading one
 through the :command:`include` command is not sufficient.  If no such
 call exists CMake will implicitly add one to the top that enables the
-default languages (``C`` and ``CXX``).
+default languages (``C`` and ``CXX``).  The name of the project set in
+the top level CMakeLists.txt file is available from the
+:variable:`CMAKE_PROJECT_NAME` variable and its description from
+:variable:`CMAKE_PROJECT_DESCRIPTION`.
 
 .. note::
   Call the :command:`cmake_minimum_required` command at the beginning
