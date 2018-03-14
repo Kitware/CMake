@@ -139,7 +139,8 @@ Modules
   This is robust against unusual ways of labeling tests, provides much better
   support for advanced features such as parameterized tests, and does not
   require re-running CMake to discover added or removed tests within a test
-  executable.
+  executable.  Note that a breaking change was made in CMake 3.10.3 to address
+  an ambiguity of the ``TIMEOUT`` keyword (see :ref:`Release Notes 3.10.3`).
 
 * The :module:`InstallRequiredSystemLibraries` module gained support
   for installing Intel compiler runtimes.
@@ -267,3 +268,17 @@ Changes made since CMake 3.10.0 include the following.
 * The :manual:`cmake-server(7)` ``codemodel`` response ``crossReferences``
   field added by 3.10.0 has been dropped due to excessive memory usage.
   Another approach will be needed to provide backtrace information.
+
+.. _`Release Notes 3.10.3`:
+
+3.10.3
+------
+
+* CMake 3.10.1 added a ``TIMEOUT`` option to :command:`gtest_discover_tests`
+  from the :module:`GoogleTest` module.  That keyword clashed with the
+  ``TIMEOUT`` test property, which is one of the common properties that
+  would be set with the command's ``PROPERTIES`` keyword, usually leading
+  to legal but unintended behavior.  The keyword was changed to
+  ``DISCOVERY_TIMEOUT`` in CMake 3.10.3 to address this problem.  The
+  ambiguous behavior of the :command:`gtest_discover_tests` command's
+  ``TIMEOUT`` keyword in 3.10.1 and 3.10.2 has not been preserved.
