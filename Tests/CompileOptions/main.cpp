@@ -12,6 +12,28 @@
 #endif
 #endif
 
+#ifndef NO_DEF_TESTS
+#ifndef DEF_A
+#error Expected definition DEF_A
+#endif
+
+#ifndef DEF_B
+#error Expected definition DEF_B
+#endif
+
+#ifndef DEF_C
+#error Expected definition DEF_C
+#endif
+
+#ifndef DEF_D
+#error Expected definition DEF_D
+#endif
+
+#ifndef DEF_STR
+#error Expected definition DEF_STR
+#endif
+#endif
+
 #include <string.h>
 
 int main()
@@ -19,6 +41,9 @@ int main()
   return (strcmp(NEEDS_ESCAPE, "E$CAPE") == 0
 #ifdef TEST_OCTOTHORPE
           && strcmp(TEST_OCTOTHORPE, "#") == 0
+#endif
+#ifndef NO_DEF_TESTS
+          && strcmp(DEF_STR, "string with spaces") == 0
 #endif
           &&
           strcmp(EXPECTED_C_COMPILER_VERSION, TEST_C_COMPILER_VERSION) == 0 &&
