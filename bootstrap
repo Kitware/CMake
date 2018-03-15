@@ -1116,8 +1116,10 @@ done
 rm -f "${TMPFILE}.cxx"
 
 if [ -z "${cmake_cxx_compiler}" ]; then
-cmake_error 7 "Cannot find a C++ compiler supporting C++11 on this system.
+cmake_error 7 "Cannot find a C++ compiler that supports both C++11 and the specified C++ flags.
 Please specify one using environment variable CXX.
+The C++ flags are \"$cmake_cxx_flags\".
+They can be changed using the environment variable CXXFLAGS.
 See cmake_bootstrap.log for compilers attempted."
 fi
 echo "C++ compiler on this system is: ${cmake_cxx_compiler} ${cmake_cxx_flags}"
