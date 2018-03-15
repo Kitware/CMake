@@ -1,5 +1,5 @@
+# (includer selects CMP0074)
 cmake_policy(SET CMP0057 NEW)
-cmake_policy(SET CMP0074 NEW)
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/PackageRoot)
 set(PackageRoot_BASE ${CMAKE_CURRENT_SOURCE_DIR}/PackageRoot)
 
@@ -40,14 +40,7 @@ macro(RunPackageRootTest)
   message("")
 endmacro()
 
-RunPackageRootTest()
-
-set(Foo_ROOT      ${PackageRoot_BASE}/foo/cmake_root)
-RunPackageRootTest()
-
-set(ENV{Foo_ROOT} ${PackageRoot_BASE}/foo/env_root)
-RunPackageRootTest()
-
 set(Foo_ROOT      ${PackageRoot_BASE}/foo/cmake_root)
 set(ENV{Foo_ROOT} ${PackageRoot_BASE}/foo/env_root)
 RunPackageRootTest()
+message("----------")

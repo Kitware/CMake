@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.12
 .. toctree::
    :maxdepth: 1
 
+   CMP0074: find_package uses PackageName_ROOT variables. </policy/CMP0074>
    CMP0073: Do not produce legacy _LIB_DEPENDS cache entries. </policy/CMP0073>
 
 Policies Introduced by CMake 3.11

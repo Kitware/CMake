@@ -217,7 +217,9 @@ class cmMakefile;
          cmPolicies::WARN)                                                    \
   SELECT(POLICY, CMP0073,                                                     \
          "Do not produce legacy _LIB_DEPENDS cache entries.", 3, 12, 0,       \
-         cmPolicies::WARN)
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0074, "find_package uses PackageName_ROOT variables.", 3, \
+         12, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

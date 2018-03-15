@@ -84,9 +84,6 @@ protected:
   /** Compute final search path list (reroot + trailing slash).  */
   void ComputeFinalPaths();
 
-  /** Decide whether to enable the PACKAGE_ROOT search entries.  */
-  void SelectDefaultNoPackageRootPath();
-
   /** Compute the current default root path mode.  */
   void SelectDefaultRootPathMode();
 
