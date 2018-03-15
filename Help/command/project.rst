@@ -9,6 +9,7 @@ Sets project details such as name, version, etc. and enables languages.
  project(<PROJECT-NAME>
          [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
          [DESCRIPTION <project-description-string>]
+         [HOMEPAGE_URL <url-string>]
          [LANGUAGES <language-name>...])
 
 Sets the name of the project and stores the name in the
@@ -46,6 +47,14 @@ and :variable:`<PROJECT-NAME>_DESCRIPTION` will be set to its argument.
 The description is expected to be a relatively short string, usually no more
 than a few words.
 
+The optional ``HOMEPAGE_URL`` sets the analogous variables
+:variable:`PROJECT_HOMEPAGE_URL` and :variable:`<PROJECT-NAME>_HOMEPAGE_URL`.
+When this option is given, the URL provided should be the canonical home for
+the project.
+
+Note that the description and homepage URL may be used as defaults for
+things like packaging meta-data, documentation, etc.
+
 Optionally you can specify which languages your project supports.
 Example languages include ``C``, ``CXX`` (i.e.  C++), ``CUDA``,
 ``Fortran``, and ``ASM``.
@@ -65,9 +74,10 @@ literal, direct call to the :command:`project` command; loading one
 through the :command:`include` command is not sufficient.  If no such
 call exists CMake will implicitly add one to the top that enables the
 default languages (``C`` and ``CXX``).  The name of the project set in
-the top level CMakeLists.txt file is available from the
-:variable:`CMAKE_PROJECT_NAME` variable and its description from
-:variable:`CMAKE_PROJECT_DESCRIPTION`.
+the top level ``CMakeLists.txt`` file is available from the
+:variable:`CMAKE_PROJECT_NAME` variable, its description from
+:variable:`CMAKE_PROJECT_DESCRIPTION` and its homepage URL from
+:variable:`CMAKE_PROJECT_HOMEPAGE_URL`.
 
 .. note::
   Call the :command:`cmake_minimum_required` command at the beginning
