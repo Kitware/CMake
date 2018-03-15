@@ -41,9 +41,10 @@ in variables
 Variables corresponding to unspecified versions are set to the empty string
 (if policy :policy:`CMP0048` is set to ``NEW``).
 
-If optional ``DESCRIPTION`` is given, then additional :variable:`PROJECT_DESCRIPTION`
-variable will be set to its argument. The argument must be a string with short
-description of the project (only a few words).
+If the optional ``DESCRIPTION`` is given, then :variable:`PROJECT_DESCRIPTION`
+and :variable:`<PROJECT-NAME>_DESCRIPTION` will be set to its argument.
+The description is expected to be a relatively short string, usually no more
+than a few words.
 
 Optionally you can specify which languages your project supports.
 Example languages include ``C``, ``CXX`` (i.e.  C++), ``CUDA``,

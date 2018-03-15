@@ -261,6 +261,8 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
 
   if (haveDescription) {
     this->Makefile->AddDefinition("PROJECT_DESCRIPTION", description.c_str());
+    this->Makefile->AddDefinition(projectName + "_DESCRIPTION",
+                                  description.c_str());
     // Set the CMAKE_PROJECT_DESCRIPTION variable to be the highest-level
     // project name in the tree. If there are two project commands
     // in the same CMakeLists.txt file, and it is the top level

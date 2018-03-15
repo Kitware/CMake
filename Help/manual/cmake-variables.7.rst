@@ -97,6 +97,7 @@ Variables that Provide Information
    /variable/CMAKE_XCODE_GENERATE_SCHEME
    /variable/CMAKE_XCODE_PLATFORM_TOOLSET
    /variable/PROJECT-NAME_BINARY_DIR
+   /variable/PROJECT-NAME_DESCRIPTION
    /variable/PROJECT-NAME_SOURCE_DIR
    /variable/PROJECT-NAME_VERSION
    /variable/PROJECT-NAME_VERSION_MAJOR
