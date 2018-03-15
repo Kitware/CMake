@@ -406,7 +406,7 @@ cmComputeLinkInformation::~cmComputeLinkInformation()
 }
 
 cmComputeLinkInformation::ItemVector const&
-cmComputeLinkInformation::GetItems()
+cmComputeLinkInformation::GetItems() const
 {
   return this->Items;
 }
