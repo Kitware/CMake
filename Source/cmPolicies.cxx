@@ -156,22 +156,16 @@ static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
 bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
                                     std::string const& version_min)
 {
-  std::string ver = "2.4.0";
-
-  if (!version_min.empty()) {
-    ver = version_min;
-  }
-
   unsigned int majorVer = 2;
   unsigned int minorVer = 0;
   unsigned int patchVer = 0;
   unsigned int tweakVer = 0;
 
   // parse the string
-  if (sscanf(ver.c_str(), "%u.%u.%u.%u", &majorVer, &minorVer, &patchVer,
-             &tweakVer) < 2) {
+  if (sscanf(version_min.c_str(), "%u.%u.%u.%u", &majorVer, &minorVer,
+             &patchVer, &tweakVer) < 2) {
     std::ostringstream e;
-    e << "Invalid policy version value \"" << ver << "\".  "
+    e << "Invalid policy version value \"" << version_min << "\".  "
       << "A numeric major.minor[.patch[.tweak]] must be given.";
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
