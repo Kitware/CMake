@@ -31,11 +31,6 @@ set(_cmake_feature_test_cxx_aggregate_default_initializers "${Intel16_CXX14}")
 set(_cmake_feature_test_cxx_contextual_conversions "${Intel16_CXX14}")
 set(_cmake_feature_test_cxx_generic_lambdas "__cpp_generic_lambdas >= 201304")
 set(_cmake_feature_test_cxx_digit_separators "${Intel16_CXX14}")
-# This test is supposed to work in Intel 14 but the compiler has a bug
-# in versions 14 and 15::
-# https://software.intel.com/en-us/forums/intel-c-compiler/topic/600514
-# It also appears to fail with an internal compiler error on Intel 16 and 17.
-#set(_cmake_feature_test_cxx_generalized_initializers "${Intel16_CXX14}")
 unset(Intel16_CXX14)
 
 set(Intel15 "__INTEL_COMPILER >= 1500")
@@ -75,6 +70,7 @@ set(_cmake_feature_test_cxx_override "${Intel14_CXX11}")
 set(_cmake_feature_test_cxx_final "${Intel14_CXX11}")
 set(_cmake_feature_test_cxx_noexcept "${Intel14_CXX11}")
 set(_cmake_feature_test_cxx_defaulted_move_initializers "${Intel14_CXX11}")
+set(_cmake_feature_test_cxx_generalized_initializers "${Intel14_CXX11}")
 unset(Intel14_CXX11)
 
 set(Intel13_CXX11 "__INTEL_COMPILER >= 1300 && ${DETECT_CXX11}")
