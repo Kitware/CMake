@@ -19,12 +19,19 @@ function(run_GoogleTest)
     --target fake_gtest
   )
 
-  set(RunCMake_TEST_OUTPUT_MERGE 1)
-  run_cmake_command(GoogleTest-timeout
+  run_cmake_command(GoogleTest-property-timeout-exe
     ${CMAKE_COMMAND}
     --build .
     --config Debug
-    --target timeout_test
+    --target property_timeout_test
+  )
+
+  set(RunCMake_TEST_OUTPUT_MERGE 1)
+  run_cmake_command(GoogleTest-discovery-timeout
+    ${CMAKE_COMMAND}
+    --build .
+    --config Debug
+    --target discovery_timeout_test
   )
   set(RunCMake_TEST_OUTPUT_MERGE 0)
 
@@ -45,7 +52,21 @@ function(run_GoogleTest)
   run_cmake_command(GoogleTest-test-missing
     ${CMAKE_CTEST_COMMAND}
     -C Debug
-    -R timeout
+    -R no_tests_defined
+    --no-label-summary
+  )
+
+  run_cmake_command(GoogleTest-property-timeout1
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    -R property_timeout\\.case_no_discovery
+    --no-label-summary
+  )
+
+  run_cmake_command(GoogleTest-property-timeout2
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    -R property_timeout\\.case_with_discovery
     --no-label-summary
   )
 endfunction()
