@@ -154,7 +154,8 @@ static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
 }
 
 bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
-                                    std::string const& version_min)
+                                    std::string const& version_min,
+                                    std::string const& version_max)
 {
   // Parse components of the minimum version.
   unsigned int minMajor = 2;
@@ -205,6 +206,42 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
   unsigned int polMajor = minMajor;
   unsigned int polMinor = minMinor;
   unsigned int polPatch = minPatch;
+
+  if (!version_max.empty()) {
+    // Parse components of the maximum version.
+    unsigned int maxMajor = 0;
+    unsigned int maxMinor = 0;
+    unsigned int maxPatch = 0;
+    unsigned int maxTweak = 0;
+    if (sscanf(version_max.c_str(), "%u.%u.%u.%u", &maxMajor, &maxMinor,
+               &maxPatch, &maxTweak) < 2) {
+      std::ostringstream e;
+      e << "Invalid policy max version value \"" << version_max << "\".  "
+        << "A numeric major.minor[.patch[.tweak]] must be given.";
+      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return false;
+    }
+
+    // It is an error if the min version is greater than the max version.
+    if (minMajor > maxMajor || (minMajor == maxMajor && minMinor > maxMinor) ||
+        (minMajor == maxMajor && minMinor == maxMinor &&
+         minPatch > maxPatch) ||
+        (minMajor == maxMajor && minMinor == maxMinor &&
+         minPatch == maxPatch && minTweak > maxTweak)) {
+      std::ostringstream e;
+      e << "Policy VERSION range \"" << version_min << "..." << version_max
+        << "\""
+        << " specifies a larger minimum than maximum.";
+      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return false;
+    }
+
+    // Use the max version as the policy version.
+    polMajor = maxMajor;
+    polMinor = maxMinor;
+    polPatch = maxPatch;
+  }
+
   return cmPolicies::ApplyPolicyVersion(mf, polMajor, polMinor, polPatch);
 }
 

@@ -289,7 +289,8 @@ public:
 
   ///! Set a policy level for this listfile
   static bool ApplyPolicyVersion(cmMakefile* mf,
-                                 std::string const& version_min);
+                                 std::string const& version_min,
+                                 std::string const& version_max);
   static bool ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
                                  unsigned int minorVer, unsigned int patchVer);
 

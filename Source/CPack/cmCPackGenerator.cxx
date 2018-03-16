@@ -1002,7 +1002,8 @@ int cmCPackGenerator::DoPackage()
   { // scope that enables package generators to run internal scripts with
     // latest CMake policies enabled
     cmMakefile::ScopePushPop pp{ this->MakefileMap };
-    this->MakefileMap->SetPolicyVersion(cmVersion::GetCMakeVersion());
+    this->MakefileMap->SetPolicyVersion(cmVersion::GetCMakeVersion(),
+                                        std::string());
 
     if (!this->PackageFiles() || cmSystemTools::GetErrorOccuredFlag()) {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem compressing the directory"
