@@ -65,6 +65,18 @@ Returns a string joining all list's elements using the glue string.
 To join multiple strings, which are not part of a list, use ``JOIN`` operator
 from :command:`string` command.
 
+SUBLIST
+"""""""
+
+::
+
+  list(SUBLIST <list> <begin> <length> <output variable>)
+
+Returns a sublist of the given list.
+If ``<length>`` is 0, an empty list will be returned.
+If ``<length>`` is -1 or the list is smaller than ``<begin>+<length>`` then
+the remaining elements of the list starting at ``<begin>`` will be returned.
+
 Search
 ^^^^^^
 
