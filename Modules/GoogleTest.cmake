@@ -150,6 +150,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
                          [NO_PRETTY_TYPES] [NO_PRETTY_VALUES]
                          [PROPERTIES name1 value1...]
                          [TEST_LIST var]
+                         [DISCOVERY_TIMEOUT seconds]
     )
 
   ``gtest_discover_tests`` sets up a post-build command on the test executable
@@ -217,13 +218,23 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     executable is being used in multiple calls to ``gtest_discover_tests()``.
     Note that this variable is only available in CTest.
 
-  ``TIMEOUT num``
+  ``DISCOVERY_TIMEOUT num``
     Specifies how long (in seconds) CMake will wait for the test to enumerate
     available tests.  If the test takes longer than this, discovery (and your
     build) will fail.  Most test executables will enumerate their tests very
     quickly, but under some exceptional circumstances, a test may require a
     longer timeout.  The default is 5.  See also the ``TIMEOUT`` option of
     :command:`execute_process`.
+
+    .. note::
+
+      In CMake versions 3.10.1 and 3.10.2, this option was called ``TIMEOUT``.
+      This clashed with the ``TIMEOUT`` test property, which is one of the
+      common properties that would be set with the ``PROPERTIES`` keyword,
+      usually leading to legal but unintended behavior.  The keyword was
+      changed to ``DISCOVERY_TIMEOUT`` in CMake 3.10.3 to address this
+      problem.  The ambiguous behavior of the ``TIMEOUT`` keyword in 3.10.1
+      and 3.10.2 has not been preserved.
 
 #]=======================================================================]
 
@@ -357,7 +368,7 @@ function(gtest_discover_tests TARGET)
   cmake_parse_arguments(
     ""
     "NO_PRETTY_TYPES;NO_PRETTY_VALUES"
-    "TEST_PREFIX;TEST_SUFFIX;WORKING_DIRECTORY;TEST_LIST;TIMEOUT"
+    "TEST_PREFIX;TEST_SUFFIX;WORKING_DIRECTORY;TEST_LIST;DISCOVERY_TIMEOUT"
     "EXTRA_ARGS;PROPERTIES"
     ${ARGN}
   )
@@ -368,8 +379,8 @@ function(gtest_discover_tests TARGET)
   if(NOT _TEST_LIST)
     set(_TEST_LIST ${TARGET}_TESTS)
   endif()
-  if(NOT _TIMEOUT)
-    set(_TIMEOUT 5)
+  if(NOT _DISCOVERY_TIMEOUT)
+    set(_DISCOVERY_TIMEOUT 5)
   endif()
 
   get_property(
@@ -418,7 +429,7 @@ function(gtest_discover_tests TARGET)
             -D "NO_PRETTY_VALUES=${_NO_PRETTY_VALUES}"
             -D "TEST_LIST=${_TEST_LIST}"
             -D "CTEST_FILE=${ctest_tests_file}"
-            -D "TEST_DISCOVERY_TIMEOUT=${_TIMEOUT}"
+            -D "TEST_DISCOVERY_TIMEOUT=${_DISCOVERY_TIMEOUT}"
             -P "${_GOOGLETEST_DISCOVER_TESTS_SCRIPT}"
     VERBATIM
   )
