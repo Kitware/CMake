@@ -153,12 +153,13 @@ static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
   return true;
 }
 
-bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, const char* version)
+bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
+                                    std::string const& version_min)
 {
   std::string ver = "2.4.0";
 
-  if (version && strlen(version) > 0) {
-    ver = version;
+  if (!version_min.empty()) {
+    ver = version_min;
   }
 
   unsigned int majorVer = 2;
@@ -200,7 +201,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, const char* version)
        tweakVer > cmVersion::GetTweakVersion())) {
     std::ostringstream e;
     e << "An attempt was made to set the policy version of CMake to \""
-      << version << "\" which is greater than this version of CMake.  "
+      << version_min << "\" which is greater than this version of CMake.  "
       << "This is not allowed because the greater version may have new "
       << "policies not known to this CMake.  "
       << "You may need a newer CMake version to build this project.";

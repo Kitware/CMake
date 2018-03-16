@@ -4149,9 +4149,9 @@ void cmMakefile::PopSnapshot(bool reportError)
   assert(this->StateSnapshot.IsValid());
 }
 
-bool cmMakefile::SetPolicyVersion(const char* version)
+bool cmMakefile::SetPolicyVersion(std::string const& version_min)
 {
-  return cmPolicies::ApplyPolicyVersion(this, version);
+  return cmPolicies::ApplyPolicyVersion(this, version_min);
 }
 
 bool cmMakefile::HasCMP0054AlreadyBeenReported(
