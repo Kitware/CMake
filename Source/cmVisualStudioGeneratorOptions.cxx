@@ -6,10 +6,14 @@
 #include "cmSystemTools.h"
 #include "cmVisualStudio10TargetGenerator.h"
 
+static void cmVS10EscapeForMSBuild(std::string& ret)
+{
+  cmSystemTools::ReplaceString(ret, ";", "%3B");
+}
+
 static std::string cmVisualStudio10GeneratorOptionsEscapeForXML(
   std::string ret)
 {
-  cmSystemTools::ReplaceString(ret, ";", "%3B");
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
   cmSystemTools::ReplaceString(ret, ">", "&gt;");
@@ -440,6 +444,30 @@ void cmVisualStudioGeneratorOptions::SetConfiguration(
   this->Configuration = config;
 }
 
+void cmVisualStudioGeneratorOptions::OutputFlag(std::ostream& fout,
+                                                const char* indent,
+                                                const char* tag,
+                                                const std::string& content)
+{
+  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+    if (!this->Configuration.empty()) {
+      // if there are configuration specific flags, then
+      // use the configuration specific tag for PreprocessorDefinitions
+      fout << indent;
+      this->TargetGenerator->WritePlatformConfigTag(tag, this->Configuration,
+                                                    0, 0, 0, &fout);
+    } else {
+      fout << indent << "<" << tag << ">";
+    }
+    fout << cmVisualStudio10GeneratorOptionsEscapeForXML(content);
+    fout << "</" << tag << ">";
+  } else {
+    fout << indent << tag << "=\"";
+    fout << cmVisualStudioGeneratorOptionsEscapeForXML(content);
+    fout << "\"";
+  }
+}
+
 void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   std::ostream& fout, const char* prefix, const char* suffix,
   const std::string& lang)
@@ -451,19 +479,8 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   if (lang == "CUDA") {
     tag = "Defines";
   }
-  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-    // if there are configuration specific flags, then
-    // use the configuration specific tag for PreprocessorDefinitions
-    if (!this->Configuration.empty()) {
-      fout << prefix;
-      this->TargetGenerator->WritePlatformConfigTag(
-        tag, this->Configuration.c_str(), 0, 0, 0, &fout);
-    } else {
-      fout << prefix << "<" << tag << ">";
-    }
-  } else {
-    fout << prefix << tag << "=\"";
-  }
+
+  std::ostringstream oss;
   const char* sep = "";
   std::vector<std::string>::const_iterator de =
     cmRemoveDuplicates(this->Defines);
@@ -472,29 +489,27 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
     // Escape the definition for the compiler.
     std::string define;
     if (this->Version < cmGlobalVisualStudioGenerator::VS10) {
-      define = this->LocalGenerator->EscapeForShell(di->c_str(), true);
+      define = this->LocalGenerator->EscapeForShell(*di, true);
     } else {
       define = *di;
     }
-    // Escape this flag for the IDE.
+    // Escape this flag for the MSBuild.
     if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-      define = cmVisualStudio10GeneratorOptionsEscapeForXML(define);
-
+      cmVS10EscapeForMSBuild(define);
       if (lang == "RC") {
         cmSystemTools::ReplaceString(define, "\"", "\\\"");
       }
-    } else {
-      define = cmVisualStudioGeneratorOptionsEscapeForXML(define);
     }
     // Store the flag in the project file.
-    fout << sep << define;
+    oss << sep << define;
     sep = ";";
   }
   if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-    fout << ";%(" << tag << ")</" << tag << ">" << suffix;
-  } else {
-    fout << "\"" << suffix;
+    oss << ";%(" << tag << ")";
   }
+
+  this->OutputFlag(fout, prefix, tag, oss.str());
+  fout << suffix;
 }
 
 void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
@@ -512,20 +527,7 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
     tag = "IncludePaths";
   }
 
-  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-    // if there are configuration specific flags, then
-    // use the configuration specific tag for PreprocessorDefinitions
-    if (!this->Configuration.empty()) {
-      fout << prefix;
-      this->TargetGenerator->WritePlatformConfigTag(
-        tag, this->Configuration.c_str(), 0, 0, 0, &fout);
-    } else {
-      fout << prefix << "<" << tag << ">";
-    }
-  } else {
-    fout << prefix << tag << "=\"";
-  }
-
+  std::ostringstream oss;
   const char* sep = "";
   for (std::string include : this->Includes) {
     // first convert all of the slashes
@@ -539,55 +541,42 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
       include += "\\";
     }
 
-    // Escape this include for the IDE.
-    fout << sep << (this->Version >= cmGlobalVisualStudioGenerator::VS10
-                      ? cmVisualStudio10GeneratorOptionsEscapeForXML(include)
-                      : cmVisualStudioGeneratorOptionsEscapeForXML(include));
+    // Escape this include for the MSBuild.
+    if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+      cmVS10EscapeForMSBuild(include);
+    }
+    oss << sep << include;
     sep = ";";
 
     if (lang == "Fortran") {
       include += "/$(ConfigurationName)";
-      fout << sep << (this->Version >= cmGlobalVisualStudioGenerator::VS10
-                        ? cmVisualStudio10GeneratorOptionsEscapeForXML(include)
-                        : cmVisualStudioGeneratorOptionsEscapeForXML(include));
+      oss << sep << include;
     }
   }
 
   if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-    fout << sep << "%(" << tag << ")</" << tag << ">" << suffix;
-  } else {
-    fout << "\"" << suffix;
+    oss << sep << "%(" << tag << ")";
   }
+
+  this->OutputFlag(fout, prefix, tag, oss.str());
+  fout << suffix;
 }
 
 void cmVisualStudioGeneratorOptions::OutputFlagMap(std::ostream& fout,
                                                    const char* indent)
 {
-  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-    for (auto const& m : this->FlagMap) {
-      fout << indent;
-      if (!this->Configuration.empty()) {
-        this->TargetGenerator->WritePlatformConfigTag(
-          m.first.c_str(), this->Configuration.c_str(), 0, 0, 0, &fout);
-      } else {
-        fout << "<" << m.first << ">";
+  for (auto const& m : this->FlagMap) {
+    std::ostringstream oss;
+    const char* sep = "";
+    for (std::string i : m.second) {
+      if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+        cmVS10EscapeForMSBuild(i);
       }
-      const char* sep = "";
-      for (std::string const& i : m.second) {
-        fout << sep << cmVisualStudio10GeneratorOptionsEscapeForXML(i);
-        sep = ";";
-      }
-      fout << "</" << m.first << ">\n";
+      oss << sep << i;
+      sep = ";";
     }
-  } else {
-    for (auto const& m : this->FlagMap) {
-      fout << indent << m.first << "=\"";
-      const char* sep = "";
-      for (std::string const& i : m.second) {
-        fout << sep << cmVisualStudioGeneratorOptionsEscapeForXML(i);
-        sep = ";";
-      }
-      fout << "\"\n";
-    }
+
+    this->OutputFlag(fout, indent, m.first.c_str(), oss.str());
+    fout << "\n";
   }
 }
