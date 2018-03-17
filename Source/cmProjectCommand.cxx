@@ -68,8 +68,10 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
   bool haveVersion = false;
   bool haveLanguages = false;
   bool haveDescription = false;
+  bool haveHomepage = false;
   std::string version;
   std::string description;
+  std::string homepage;
   std::vector<std::string> languages;
   std::function<void()> missedValueReporter;
   auto resetReporter = [&missedValueReporter]() {
@@ -78,6 +80,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
   enum Doing
   {
     DoingDescription,
+    DoingHomepage,
     DoingLanguages,
     DoingVersion
   };
@@ -141,6 +144,22 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
           "by a value that expanded to nothing.");
         resetReporter();
       };
+    } else if (args[i] == "HOMEPAGE_URL") {
+      if (haveHomepage) {
+        this->Makefile->IssueMessage(
+          cmake::FATAL_ERROR, "HOMEPAGE_URL may be specified at most once.");
+        cmSystemTools::SetFatalErrorOccured();
+        return true;
+      }
+      haveHomepage = true;
+      doing = DoingHomepage;
+      missedValueReporter = [this, &resetReporter]() {
+        this->Makefile->IssueMessage(
+          cmake::WARNING,
+          "HOMEPAGE_URL keyword not followed by a value or was followed "
+          "by a value that expanded to nothing.");
+        resetReporter();
+      };
     } else if (doing == DoingVersion) {
       doing = DoingLanguages;
       version = args[i];
@@ -148,6 +167,10 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     } else if (doing == DoingDescription) {
       doing = DoingLanguages;
       description = args[i];
+      resetReporter();
+    } else if (doing == DoingHomepage) {
+      doing = DoingLanguages;
+      homepage = args[i];
       resetReporter();
     } else // doing == DoingLanguages
     {
@@ -159,12 +182,12 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     missedValueReporter();
   }
 
-  if ((haveVersion || haveDescription) && !haveLanguages &&
+  if ((haveVersion || haveDescription || haveHomepage) && !haveLanguages &&
       !languages.empty()) {
     this->Makefile->IssueMessage(
       cmake::FATAL_ERROR,
-      "project with VERSION or DESCRIPTION must use LANGUAGES before "
-      "language names.");
+      "project with VERSION, DESCRIPTION or HOMEPAGE_URL must "
+      "use LANGUAGES before language names.");
     cmSystemTools::SetFatalErrorOccured();
     return true;
   }
@@ -261,6 +284,8 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
 
   if (haveDescription) {
     this->Makefile->AddDefinition("PROJECT_DESCRIPTION", description.c_str());
+    this->Makefile->AddDefinition(projectName + "_DESCRIPTION",
+                                  description.c_str());
     // Set the CMAKE_PROJECT_DESCRIPTION variable to be the highest-level
     // project name in the tree. If there are two project commands
     // in the same CMakeLists.txt file, and it is the top level
@@ -271,6 +296,24 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
                                     description.c_str());
       this->Makefile->AddCacheDefinition(
         "CMAKE_PROJECT_DESCRIPTION", description.c_str(),
+        "Value Computed by CMake", cmStateEnums::STATIC);
+    }
+  }
+
+  if (haveHomepage) {
+    this->Makefile->AddDefinition("PROJECT_HOMEPAGE_URL", homepage.c_str());
+    this->Makefile->AddDefinition(projectName + "_HOMEPAGE_URL",
+                                  homepage.c_str());
+    // Set the CMAKE_PROJECT_HOMEPAGE_URL variable to be the highest-level
+    // project name in the tree. If there are two project commands
+    // in the same CMakeLists.txt file, and it is the top level
+    // CMakeLists.txt file, then go with the last one.
+    if (!this->Makefile->GetDefinition("CMAKE_PROJECT_HOMEPAGE_URL") ||
+        (this->Makefile->IsRootMakefile())) {
+      this->Makefile->AddDefinition("CMAKE_PROJECT_HOMEPAGE_URL",
+                                    homepage.c_str());
+      this->Makefile->AddCacheDefinition(
+        "CMAKE_PROJECT_HOMEPAGE_URL", homepage.c_str(),
         "Value Computed by CMake", cmStateEnums::STATIC);
     }
   }

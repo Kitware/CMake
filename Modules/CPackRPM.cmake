@@ -191,7 +191,7 @@
 #  The projects URL.
 #
 #  * Mandatory : NO
-#  * Default   : -
+#  * Default   : :variable:`CMAKE_PROJECT_HOMEPAGE_URL`
 #
 # .. variable:: CPACK_RPM_PACKAGE_DESCRIPTION
 #               CPACK_RPM_<component>_PACKAGE_DESCRIPTION
@@ -1785,6 +1785,10 @@ function(cpack_rpm_generate_package)
       # if neither var is defined lets use the name as summary
       string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_RPM_PACKAGE_SUMMARY)
     endif()
+  endif()
+
+  if(NOT CPACK_RPM_PACKAGE_URL AND CMAKE_PROJECT_HOMEPAGE_URL)
+    set(CPACK_RPM_PACKAGE_URL "${CMAKE_PROJECT_HOMEPAGE_URL}")
   endif()
 
   # CPACK_RPM_PACKAGE_NAME (mandatory)

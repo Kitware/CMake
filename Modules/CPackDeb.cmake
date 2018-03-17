@@ -254,7 +254,7 @@
 #  upstream documentation or information may be found.
 #
 #  * Mandatory : NO
-#  * Default   : -
+#  * Default   : :variable:`CMAKE_PROJECT_HOMEPAGE_URL`
 #
 #  .. note::
 #
@@ -912,6 +912,11 @@ function(cpack_deb_prepare_package_vars)
       endif()
       set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
     endif()
+  endif()
+
+  # Homepage: (optional)
+  if(NOT CPACK_DEBIAN_PACKAGE_HOMEPAGE AND CMAKE_PROJECT_HOMEPAGE_URL)
+    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "${CMAKE_PROJECT_HOMEPAGE_URL}")
   endif()
 
   # Section: (recommended)

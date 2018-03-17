@@ -7,7 +7,7 @@ This variable holds the description of the project as specified in the top
 level CMakeLists.txt file by a :command:`project` command.  In the event that
 the top level CMakeLists.txt contains multiple :command:`project` calls,
 the most recently called one from that top level CMakeLists.txt will determine
-the name that ``CMAKE_PROJECT_DESCRIPTION`` contains.  For example, consider
+the value that ``CMAKE_PROJECT_DESCRIPTION`` contains.  For example, consider
 the following top level CMakeLists.txt:
 
 .. code-block:: cmake

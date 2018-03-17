@@ -67,6 +67,7 @@ Variables that Provide Information
    /variable/CMAKE_PARENT_LIST_FILE
    /variable/CMAKE_PATCH_VERSION
    /variable/CMAKE_PROJECT_DESCRIPTION
+   /variable/CMAKE_PROJECT_HOMEPAGE_URL
    /variable/CMAKE_PROJECT_NAME
    /variable/CMAKE_RANLIB
    /variable/CMAKE_ROOT
@@ -97,6 +98,8 @@ Variables that Provide Information
    /variable/CMAKE_XCODE_GENERATE_SCHEME
    /variable/CMAKE_XCODE_PLATFORM_TOOLSET
    /variable/PROJECT-NAME_BINARY_DIR
+   /variable/PROJECT-NAME_DESCRIPTION
+   /variable/PROJECT-NAME_HOMEPAGE_URL
    /variable/PROJECT-NAME_SOURCE_DIR
    /variable/PROJECT-NAME_VERSION
    /variable/PROJECT-NAME_VERSION_MAJOR
@@ -105,6 +108,7 @@ Variables that Provide Information
    /variable/PROJECT-NAME_VERSION_TWEAK
    /variable/PROJECT_BINARY_DIR
    /variable/PROJECT_DESCRIPTION
+   /variable/PROJECT_HOMEPAGE_URL
    /variable/PROJECT_NAME
    /variable/PROJECT_SOURCE_DIR
    /variable/PROJECT_VERSION
