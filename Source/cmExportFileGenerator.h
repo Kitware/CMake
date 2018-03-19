@@ -168,6 +168,10 @@ protected:
   virtual void GenerateRequiredCMakeVersion(std::ostream& os,
                                             const char* versionString);
 
+  bool PopulateExportProperties(cmGeneratorTarget* gte,
+                                ImportPropertyMap& properties,
+                                std::string& errorMessage);
+
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
 

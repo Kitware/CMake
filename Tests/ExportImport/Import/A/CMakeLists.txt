@@ -32,6 +32,20 @@ add_executable(imp_testExe1
   ${Import_BINARY_DIR}/exp_generated4.c
   )
 
+function(checkForProperty _TARGET _PROP _EXPECTED)
+  get_target_property(EXPORTED_PROPERTY ${_TARGET} "${_PROP}")
+  if (NOT EXPORTED_PROPERTY STREQUAL "${_EXPECTED}")
+    message(SEND_ERROR "${_TARGET} was expected to export \"${_PROP}\" with value \"${_EXPECTED}\" but got \"${EXPORTED_PROPERTY}\"")
+  endif()
+endfunction()
+
+checkForProperty(bld_testLib3 "EXPORTED_PROPERTY1"  "EXPORTING_TESTLIB3")
+checkForProperty(exp_testLib3 "EXPORTED_PROPERTY1"  "EXPORTING_TESTLIB3")
+checkForProperty(bld_testLib4 "EXPORTED_PROPERTY2"  "EXPORTING_TESTLIB4_1")
+checkForProperty(exp_testLib4 "EXPORTED_PROPERTY2"  "EXPORTING_TESTLIB4_1")
+checkForProperty(bld_testLib4 "EXPORTED_PROPERTY3"  "EXPORTING_TESTLIB4_2")
+checkForProperty(exp_testLib4 "EXPORTED_PROPERTY3"  "EXPORTING_TESTLIB4_2")
+
 # Try linking to a library imported from the install tree.
 target_link_libraries(imp_testExe1
   exp_testLib2

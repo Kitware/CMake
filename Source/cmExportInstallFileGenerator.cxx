@@ -104,6 +104,12 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
                                     cmGeneratorExpression::InstallInterface,
                                     properties, missingTargets);
 
+    std::string errorMessage;
+    if (!this->PopulateExportProperties(gt, properties, errorMessage)) {
+      cmSystemTools::Error(errorMessage.c_str());
+      return false;
+    }
+
     const bool newCMP0022Behavior =
       gt->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
       gt->GetPolicyStatusCMP0022() != cmPolicies::OLD;

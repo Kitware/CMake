@@ -176,6 +176,7 @@ Properties on Targets
    /prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD_CONFIG
    /prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD
    /prop_tgt/EXPORT_NAME
+   /prop_tgt/EXPORT_PROPERTIES
    /prop_tgt/FOLDER
    /prop_tgt/Fortran_FORMAT
    /prop_tgt/Fortran_MODULE_DIRECTORY

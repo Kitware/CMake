@@ -97,6 +97,15 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
                                     properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE", gte,
                                     properties);
+
+    std::string errorMessage;
+    if (!this->PopulateExportProperties(gte, properties, errorMessage)) {
+      this->LG->GetGlobalGenerator()->GetCMakeInstance()->IssueMessage(
+        cmake::FATAL_ERROR, errorMessage,
+        this->LG->GetMakefile()->GetBacktrace());
+      return false;
+    }
+
     const bool newCMP0022Behavior =
       gte->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
       gte->GetPolicyStatusCMP0022() != cmPolicies::OLD;
