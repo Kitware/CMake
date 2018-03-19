@@ -832,9 +832,11 @@ public:
   void RemoveExportBuildFileGeneratorCMP0024(cmExportBuildFileGenerator* gen);
   void AddExportBuildFileGenerator(cmExportBuildFileGenerator* gen);
 
-  // Maintain a stack of package names to determine the depth of find modules
-  // we are currently being called with
-  std::deque<std::string> FindPackageModuleStack;
+  // Maintain a stack of package roots to allow nested PACKAGE_ROOT_PATH
+  // searches
+  std::deque<std::vector<std::string>> FindPackageRootPathStack;
+
+  void MaybeWarnCMP0074(std::string const& pkg);
 
 protected:
   // add link libraries and directories to the target
@@ -1001,6 +1003,7 @@ private:
   bool WarnUnused;
   bool CheckSystemVars;
   bool CheckCMP0000;
+  std::set<std::string> WarnedCMP0074;
   bool IsSourceFileTryCompile;
   mutable bool SuppressWatches;
 };

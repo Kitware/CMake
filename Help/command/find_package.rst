@@ -64,6 +64,7 @@ The complete Config mode command signature is::
                [PATHS path1 [path2 ... ]]
                [PATH_SUFFIXES suffix1 [suffix2 ...]]
                [NO_DEFAULT_PATH]
+               [NO_PACKAGE_ROOT_PATH]
                [NO_CMAKE_PATH]
                [NO_CMAKE_ENVIRONMENT_PATH]
                [NO_SYSTEM_ENVIRONMENT_PATH]
@@ -249,7 +250,14 @@ The set of installation prefixes is constructed using the following
 steps.  If ``NO_DEFAULT_PATH`` is specified all ``NO_*`` options are
 enabled.
 
-1. Search paths specified in cmake-specific cache variables.  These
+1. Search paths specified in the ``PackageName_ROOT`` CMake and environment
+   variables.  The package root variables are maintained as a stack so if
+   called from within a find module, root paths from the parent's find
+   module will also be searched after paths for the current package.
+   This can be skipped if ``NO_PACKAGE_ROOT_PATH`` is passed.
+   See policy :policy:`CMP0074`.
+
+2. Search paths specified in cmake-specific cache variables.  These
    are intended to be used on the command line with a ``-DVAR=value``.
    The values are interpreted as :ref:`;-lists <CMake Language Lists>`.
    This can be skipped if ``NO_CMAKE_PATH`` is passed::
@@ -258,7 +266,7 @@ enabled.
      CMAKE_FRAMEWORK_PATH
      CMAKE_APPBUNDLE_PATH
 
-2. Search paths specified in cmake-specific environment variables.
+3. Search paths specified in cmake-specific environment variables.
    These are intended to be set in the user's shell configuration,
    and therefore use the host's native path separator
    (``;`` on Windows and ``:`` on UNIX).
@@ -269,26 +277,26 @@ enabled.
      CMAKE_FRAMEWORK_PATH
      CMAKE_APPBUNDLE_PATH
 
-3. Search paths specified by the ``HINTS`` option.  These should be paths
+4. Search paths specified by the ``HINTS`` option.  These should be paths
    computed by system introspection, such as a hint provided by the
    location of another item already found.  Hard-coded guesses should
    be specified with the ``PATHS`` option.
 
-4. Search the standard system environment variables.  This can be
+5. Search the standard system environment variables.  This can be
    skipped if ``NO_SYSTEM_ENVIRONMENT_PATH`` is passed.  Path entries
    ending in ``/bin`` or ``/sbin`` are automatically converted to their
    parent directories::
 
      PATH
 
-5. Search paths stored in the CMake :ref:`User Package Registry`.
+6. Search paths stored in the CMake :ref:`User Package Registry`.
    This can be skipped if ``NO_CMAKE_PACKAGE_REGISTRY`` is passed or by
    setting the :variable:`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`
    to ``TRUE``.
    See the :manual:`cmake-packages(7)` manual for details on the user
    package registry.
 
-6. Search cmake variables defined in the Platform files for the
+7. Search cmake variables defined in the Platform files for the
    current system.  This can be skipped if ``NO_CMAKE_SYSTEM_PATH`` is
    passed::
 
@@ -296,14 +304,14 @@ enabled.
      CMAKE_SYSTEM_FRAMEWORK_PATH
      CMAKE_SYSTEM_APPBUNDLE_PATH
 
-7. Search paths stored in the CMake :ref:`System Package Registry`.
+8. Search paths stored in the CMake :ref:`System Package Registry`.
    This can be skipped if ``NO_CMAKE_SYSTEM_PACKAGE_REGISTRY`` is passed
    or by setting the
    :variable:`CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY` to ``TRUE``.
    See the :manual:`cmake-packages(7)` manual for details on the system
    package registry.
 
-8. Search paths specified by the ``PATHS`` option.  These are typically
+9. Search paths specified by the ``PATHS`` option.  These are typically
    hard-coded guesses.
 
 .. |FIND_XXX| replace:: find_package

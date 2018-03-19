@@ -67,8 +67,6 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   }
   this->AlreadyInCache = false;
 
-  this->SelectDefaultNoPackageRootPath();
-
   // Find the current root path mode.
   this->SelectDefaultRootPathMode();
 
@@ -206,16 +204,12 @@ void cmFindBase::FillPackageRootPath()
 {
   cmSearchPath& paths = this->LabeledPaths[PathLabel::PackageRoot];
 
-  // Add package specific search prefixes
-  // NOTE: This should be using const_reverse_iterator but HP aCC and
-  //       Oracle sunCC both currently have standard library issues
-  //       with the reverse iterator APIs.
-  for (std::deque<std::string>::reverse_iterator pkg =
-         this->Makefile->FindPackageModuleStack.rbegin();
-       pkg != this->Makefile->FindPackageModuleStack.rend(); ++pkg) {
-    std::string varName = *pkg + "_ROOT";
-    paths.AddCMakePrefixPath(varName);
-    paths.AddEnvPrefixPath(varName);
+  // Add the PACKAGE_ROOT_PATH from each enclosing find_package call.
+  for (std::deque<std::vector<std::string>>::const_reverse_iterator pkgPaths =
+         this->Makefile->FindPackageRootPathStack.rbegin();
+       pkgPaths != this->Makefile->FindPackageRootPathStack.rend();
+       ++pkgPaths) {
+    paths.AddPrefixPaths(*pkgPaths);
   }
 
   paths.AddSuffixes(this->SearchPathSuffixes);

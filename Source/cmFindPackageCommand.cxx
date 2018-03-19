@@ -21,6 +21,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmPolicies.h"
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -208,8 +209,6 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
         this->Makefile->GetDefinition("CMAKE_FIND_PACKAGE_SORT_DIRECTION")) {
     this->SortDirection = strcmp(sd, "ASC") == 0 ? Asc : Dec;
   }
-
-  this->SelectDefaultNoPackageRootPath();
 
   // Find the current root path mode.
   this->SelectDefaultRootPathMode();
@@ -454,6 +453,38 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
     return true;
   }
 
+  {
+    // Allocate a PACKAGE_ROOT_PATH for the current find_package call.
+    this->Makefile->FindPackageRootPathStack.emplace_back();
+    std::vector<std::string>& rootPaths =
+      *this->Makefile->FindPackageRootPathStack.rbegin();
+
+    // Add root paths from <PackageName>_ROOT CMake and environment variables,
+    // subject to CMP0074.
+    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0074)) {
+      case cmPolicies::WARN:
+        this->Makefile->MaybeWarnCMP0074(this->Name);
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        // OLD behavior is to ignore the <pkg>_ROOT variables.
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        this->Makefile->IssueMessage(
+          cmake::FATAL_ERROR,
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0074));
+        break;
+      case cmPolicies::NEW: {
+        // NEW behavior is to honor the <pkg>_ROOT variables.
+        std::string const rootVar = this->Name + "_ROOT";
+        if (const char* pkgRoot = this->Makefile->GetDefinition(rootVar)) {
+          cmSystemTools::ExpandListArgument(pkgRoot, rootPaths, false);
+        }
+        cmSystemTools::GetPath(rootPaths, rootVar.c_str());
+      } break;
+    }
+  }
+
   this->SetModuleVariables(components);
 
   // See if there is a Find<package>.cmake module.
@@ -589,9 +620,6 @@ void cmFindPackageCommand::SetModuleVariables(const std::string& components)
     exact += "_FIND_VERSION_EXACT";
     this->AddFindDefinition(exact, this->VersionExact ? "1" : "0");
   }
-
-  // Push on to the package stack
-  this->Makefile->FindPackageModuleStack.push_back(this->Name);
 }
 
 void cmFindPackageCommand::AddFindDefinition(const std::string& var,
@@ -1076,7 +1104,7 @@ void cmFindPackageCommand::AppendSuccessInformation()
   this->RestoreFindDefinitions();
 
   // Pop the package stack
-  this->Makefile->FindPackageModuleStack.pop_back();
+  this->Makefile->FindPackageRootPathStack.pop_back();
 }
 
 void cmFindPackageCommand::ComputePrefixes()
@@ -1116,16 +1144,14 @@ void cmFindPackageCommand::FillPrefixesPackageRoot()
 {
   cmSearchPath& paths = this->LabeledPaths[PathLabel::PackageRoot];
 
-  // Add package specific search prefixes
-  // NOTE: This should be using const_reverse_iterator but HP aCC and
-  //       Oracle sunCC both currently have standard library issues
-  //       with the reverse iterator APIs.
-  for (std::deque<std::string>::reverse_iterator pkg =
-         this->Makefile->FindPackageModuleStack.rbegin();
-       pkg != this->Makefile->FindPackageModuleStack.rend(); ++pkg) {
-    std::string varName = *pkg + "_ROOT";
-    paths.AddCMakePath(varName);
-    paths.AddEnvPath(varName);
+  // Add the PACKAGE_ROOT_PATH from each enclosing find_package call.
+  for (std::deque<std::vector<std::string>>::const_reverse_iterator pkgPaths =
+         this->Makefile->FindPackageRootPathStack.rbegin();
+       pkgPaths != this->Makefile->FindPackageRootPathStack.rend();
+       ++pkgPaths) {
+    for (std::string const& path : *pkgPaths) {
+      paths.AddPath(path);
+    }
   }
 }
 

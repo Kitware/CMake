@@ -158,6 +158,26 @@ bool cmMakefile::CheckCMP0037(std::string const& targetName,
   return true;
 }
 
+void cmMakefile::MaybeWarnCMP0074(std::string const& pkg)
+{
+  // Warn if a <pkg>_ROOT variable we may use is set.
+  std::string const varName = pkg + "_ROOT";
+  bool const haveVar = this->GetDefinition(varName) != nullptr;
+  bool const haveEnv = cmSystemTools::HasEnv(varName);
+  if ((haveVar || haveEnv) && this->WarnedCMP0074.insert(varName).second) {
+    std::ostringstream w;
+    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0074) << "\n";
+    if (haveVar) {
+      w << "CMake variable " << varName << " is set.\n";
+    }
+    if (haveEnv) {
+      w << "Environment variable " << varName << " is set.\n";
+    }
+    w << "For compatibility, CMake is ignoring the variable.";
+    this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+  }
+}
+
 cmStringRange cmMakefile::GetIncludeDirectoriesEntries() const
 {
   return this->StateSnapshot.GetDirectory().GetIncludeDirectoriesEntries();
