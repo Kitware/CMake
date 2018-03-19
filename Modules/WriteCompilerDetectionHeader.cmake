@@ -557,7 +557,18 @@ template<> struct ${prefix_arg}StaticAssert<true>{};
 #  endif
 \n")
       endif()
-      _simpledefine(cxx_nullptr NULLPTR nullptr 0)
+      if (feature STREQUAL cxx_nullptr)
+        set(def_value "${prefix_arg}_NULLPTR")
+        string(APPEND file_content "
+#  if defined(${def_name}) && ${def_name}
+#    define ${def_value} nullptr
+#  elif ${prefix_arg}_COMPILER_IS_GNU
+#    define ${def_value} __null
+#  else
+#    define ${def_value} 0
+#  endif
+\n")
+      endif()
       if (feature STREQUAL cxx_thread_local)
         set(def_value "${prefix_arg}_THREAD_LOCAL")
         string(APPEND file_content "
