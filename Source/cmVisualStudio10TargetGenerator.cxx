@@ -2395,6 +2395,22 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       clOptions.AddFlag("AssemblerListingLocation", asmLocation);
     }
   }
+
+  // check for managed C++ assembly compiler flag. This overrides any
+  // /clr* compiler flags which may be defined in the flags variable(s).
+  if (this->ProjectType != csproj) {
+    // TODO: add check here, if /clr was defined manually and issue
+    //       warning that this is discouraged.
+    if (auto* clr =
+          this->GeneratorTarget->GetProperty("COMMON_LANGUAGE_RUNTIME")) {
+      std::string clrString = clr;
+      if (!clrString.empty()) {
+        clrString = ":" + clrString;
+      }
+      flags += " /clr" + clrString;
+    }
+  }
+
   clOptions.Parse(flags.c_str());
   clOptions.Parse(defineFlags.c_str());
   std::vector<std::string> targetDefines;
