@@ -11,11 +11,17 @@ class initializer_list
   const _E* __begin_;
   size_t __size_;
 
+#ifdef __INTEL_COMPILER
+  // The Intel compiler internally asserts the constructor overloads, so
+  // reproduce the constructor used in its <initializer_list> header.
+  initializer_list(const _E*, size_t) {}
+#else
 public:
   template <typename T1, typename T2>
   initializer_list(T1, T2)
   {
   }
+#endif
 };
 }
 
