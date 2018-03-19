@@ -18,6 +18,42 @@
 #include <iterator>
 #include <memory> // IWYU pragma: keep
 
+struct cmVisualStudio10TargetGenerator::Elem
+{
+  cmGeneratedFileStream& S;
+  int Indent;
+  bool HasElements = false;
+
+  Elem(cmGeneratedFileStream& s, int i)
+    : S(s)
+    , Indent(i)
+  {
+  }
+  Elem(Elem& par)
+    : S(par.S)
+    , Indent(par.Indent + 1)
+  {
+    par.SetHasElements();
+  }
+  void SetHasElements()
+  {
+    if (!HasElements) {
+      S << ">\n";
+      HasElements = true;
+    }
+  }
+  void WriteEndTag(const char* tag)
+  {
+    if (HasElements) {
+      S.fill(' ');
+      S.width(Indent * 2);
+      S << "</" << tag << ">\n";
+    } else {
+      S << " />\n";
+    }
+  }
+};
+
 inline void cmVisualStudio10TargetGenerator::WriteElem(const char* tag,
                                                        const char* val,
                                                        int indentLevel)
@@ -787,7 +823,7 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup()
     this->WriteString("<ItemGroup>\n", 1);
     for (cmSourceFile const* oi : xamlObjs) {
       std::string obj = oi->GetFullPath();
-      std::string xamlType;
+      const char* xamlType;
       const char* xamlTypeProperty = oi->GetProperty("VS_XAML_TYPE");
       if (xamlTypeProperty) {
         xamlType = xamlTypeProperty;
@@ -795,7 +831,9 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup()
         xamlType = "Page";
       }
 
-      this->WriteSource(xamlType, oi, ">\n");
+      Elem e2(*this->BuildFileStream, 2);
+      this->WriteSource(xamlType, oi);
+      e2.SetHasElements();
       if (this->ProjectType == csproj && !this->InSourceBuild) {
         // add <Link> tag to written XAML source if necessary
         const std::string srcDir = this->Makefile->GetCurrentSourceDirectory();
@@ -814,8 +852,7 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup()
         }
       }
       this->WriteElem("SubType", "Designer", 3);
-      this->WriteString("</", 2);
-      (*this->BuildFileStream) << xamlType << ">\n";
+      e2.WriteEndTag(xamlType);
     }
     this->WriteString("</ItemGroup>\n", 1);
   }
@@ -1148,17 +1185,20 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
   }
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
 
+  Elem e2(*this->BuildFileStream, 2);
   if (this->ProjectType != csproj) {
-    this->WriteSource("CustomBuild", source, ">\n");
+    this->WriteSource("CustomBuild", source);
+    e2.SetHasElements();
   } else {
     this->WriteString("<ItemGroup>\n", 1);
     std::string link;
     this->GetCSharpSourceLink(source, link);
-    this->WriteSource("None", source, ">\n");
+    this->WriteSource("None", source);
+    e2.SetHasElements();
     if (!link.empty()) {
       this->WriteElem("Link", link, 3);
     }
-    this->WriteString("</None>\n", 2);
+    e2.WriteEndTag("None");
     this->WriteString("</ItemGroup>\n", 1);
   }
   for (std::string const& c : this->Configurations) {
@@ -1202,7 +1242,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     }
   }
   if (this->ProjectType != csproj) {
-    this->WriteString("</CustomBuild>\n", 2);
+    e2.WriteEndTag("CustomBuild");
   }
 }
 
@@ -1473,24 +1513,23 @@ void cmVisualStudio10TargetGenerator::WriteGroupSources(
 void cmVisualStudio10TargetGenerator::WriteHeaderSource(cmSourceFile const* sf)
 {
   std::string const& fileName = sf->GetFullPath();
+  Elem e2(*this->BuildFileStream, 2);
+  this->WriteSource("ClInclude", sf);
   if (this->IsResxHeader(fileName)) {
-    this->WriteSource("ClInclude", sf, ">\n");
+    e2.SetHasElements();
     this->WriteElem("FileType", "CppForm", 3);
-    this->WriteString("</ClInclude>\n", 2);
   } else if (this->IsXamlHeader(fileName)) {
-    this->WriteSource("ClInclude", sf, ">\n");
     std::string xamlFileName = fileName.substr(0, fileName.find_last_of("."));
+    e2.SetHasElements();
     this->WriteElem("DependentUpon", xamlFileName, 3);
-    this->WriteString("</ClInclude>\n", 2);
-  } else {
-    this->WriteSource("ClInclude", sf);
   }
+  e2.WriteEndTag("ClInclude");
 }
 
 void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
 {
   bool toolHasSettings = false;
-  std::string tool = "None";
+  const char* tool = "None";
   std::string shaderType;
   std::string shaderEntryPoint;
   std::string shaderModel;
@@ -1640,8 +1679,10 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     }
   }
 
+  Elem e2(*this->BuildFileStream, 2);
+  this->WriteSource(tool, sf);
   if (toolHasSettings) {
-    this->WriteSource(tool, sf, ">\n");
+    e2.SetHasElements();
 
     if (!deployContent.empty()) {
       cmGeneratorExpression ge;
@@ -1736,16 +1777,12 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     }
     // write source file specific tags
     this->WriteCSharpSourceProperties(sourceFileTags);
-    this->WriteString("</", 2);
-    (*this->BuildFileStream) << tool << ">\n";
-  } else {
-    this->WriteSource(tool, sf);
   }
+  e2.WriteEndTag(tool);
 }
 
 void cmVisualStudio10TargetGenerator::WriteSource(std::string const& tool,
-                                                  cmSourceFile const* sf,
-                                                  const char* end)
+                                                  cmSourceFile const* sf)
 {
   // Visual Studio tools append relative paths to the current dir, as in:
   //
@@ -1782,8 +1819,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(std::string const& tool,
   ConvertToWindowsSlash(sourceFile);
   this->WriteString("<", 2);
   (*this->BuildFileStream) << tool << " Include=\""
-                           << cmVS10EscapeXML(sourceFile) << "\""
-                           << (end ? end : " />\n");
+                           << cmVS10EscapeXML(sourceFile) << "\"";
 
   ToolSource toolSource = { sf, forceRelative };
   this->Tools[tool].push_back(toolSource);
@@ -1805,7 +1841,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
     this->GeneratorTarget->GetAllConfigSources();
 
   for (cmGeneratorTarget::AllConfigSource const& si : sources) {
-    std::string tool;
+    const char* tool = nullptr;
     switch (si.Kind) {
       case cmGeneratorTarget::SourceKindAppManifest:
         tool = "AppxManifest";
@@ -1874,7 +1910,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
         break;
     }
 
-    if (!tool.empty()) {
+    if (tool) {
       // Compute set of configurations to exclude, if any.
       std::vector<size_t> const& include_configs = si.Configs;
       std::vector<size_t> exclude_configs;
@@ -1882,31 +1918,15 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
                           include_configs.begin(), include_configs.end(),
                           std::back_inserter(exclude_configs));
 
+      Elem e2(*this->BuildFileStream, 2);
+      this->WriteSource(tool, si.Source);
       if (si.Kind == cmGeneratorTarget::SourceKindObjectSource) {
-        // FIXME: refactor generation to avoid tracking XML syntax state.
-        this->WriteSource(tool, si.Source, "");
-        bool have_nested = this->OutputSourceSpecificFlags(si.Source);
-        if (!exclude_configs.empty()) {
-          if (!have_nested) {
-            (*this->BuildFileStream) << ">\n";
-          }
-          this->WriteExcludeFromBuild(exclude_configs);
-          have_nested = true;
-        }
-        if (have_nested) {
-          this->WriteString("</", 2);
-          (*this->BuildFileStream) << tool << ">\n";
-        } else {
-          (*this->BuildFileStream) << " />\n";
-        }
-      } else if (!exclude_configs.empty()) {
-        this->WriteSource(tool, si.Source, ">\n");
-        this->WriteExcludeFromBuild(exclude_configs);
-        this->WriteString("</", 2);
-        (*this->BuildFileStream) << tool << ">\n";
-      } else {
-        this->WriteSource(tool, si.Source);
+        this->OutputSourceSpecificFlags(e2, si.Source);
       }
+      if (!exclude_configs.empty()) {
+        this->WriteExcludeFromBuild(e2, exclude_configs);
+      }
+      e2.WriteEndTag(tool);
     }
   }
 
@@ -1917,8 +1937,8 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
   this->WriteString("</ItemGroup>\n", 1);
 }
 
-bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
-  cmSourceFile const* source)
+void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
+  Elem& e2, cmSourceFile const* source)
 {
   cmSourceFile const& sf = *source;
 
@@ -1978,14 +1998,10 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     }
   }
   bool noWinRT = this->TargetCompileAsWinRT && lang == "C";
-  bool hasFlags = false;
   // for the first time we need a new line if there is something
   // produced here.
-  const char* firstString = ">\n";
   if (!objectName.empty()) {
-    (*this->BuildFileStream) << firstString;
-    firstString = "";
-    hasFlags = true;
+    e2.SetHasElements();
     if (lang == "CUDA") {
       this->WriteElem("CompileOut", "$(IntDir)/" + objectName, 3);
     } else {
@@ -2009,9 +2025,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     // use them
     if (!flags.empty() || !options.empty() || !configDefines.empty() ||
         !includes.empty() || compileAs || noWinRT) {
-      (*this->BuildFileStream) << firstString;
-      firstString = ""; // only do firstString once
-      hasFlags = true;
+      e2.SetHasElements();
       cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
       cmIDEFlagTable const* flagtable = nullptr;
       const std::string& srclang = source->GetLanguage();
@@ -2086,9 +2100,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     }
   }
   if (this->IsXamlSource(source->GetFullPath())) {
-    (*this->BuildFileStream) << firstString;
-    firstString = ""; // only do firstString once
-    hasFlags = true;
+    e2.SetHasElements();
     const std::string& fileName = source->GetFullPath();
     std::string xamlFileName = fileName.substr(0, fileName.find_last_of("."));
     this->WriteElem("DependentUpon", xamlFileName, 3);
@@ -2106,19 +2118,16 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     this->GetCSharpSourceProperties(&sf, sourceFileTags);
     // write source file specific tags
     if (!sourceFileTags.empty()) {
-      hasFlags = true;
-      (*this->BuildFileStream) << firstString;
-      firstString = "";
+      e2.SetHasElements();
       this->WriteCSharpSourceProperties(sourceFileTags);
     }
   }
-
-  return hasFlags;
 }
 
 void cmVisualStudio10TargetGenerator::WriteExcludeFromBuild(
-  std::vector<size_t> const& exclude_configs)
+  Elem& e2, std::vector<size_t> const& exclude_configs)
 {
+  e2.SetHasElements();
   for (size_t ci : exclude_configs) {
     this->WriteString("", 3);
     (*this->BuildFileStream)
