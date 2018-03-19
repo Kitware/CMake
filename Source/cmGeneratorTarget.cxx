@@ -5195,6 +5195,18 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
   }
 }
 
+bool cmGeneratorTarget::HasLanguage(std::string const& language,
+                                    std::string const& config,
+                                    bool exclusive) const
+{
+  std::set<std::string> languages;
+  this->GetLanguages(languages, config);
+  // add linker language (if it is different from compiler languages)
+  languages.insert(this->GetLinkerLanguage(config));
+  return (languages.size() == 1 || !exclusive) &&
+    languages.count(language) > 0;
+}
+
 void cmGeneratorTarget::ComputeLinkImplementationLanguages(
   const std::string& config, cmOptionalLinkImplementation& impl) const
 {
