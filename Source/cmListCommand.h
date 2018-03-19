@@ -37,6 +37,7 @@ protected:
   bool HandleAppendCommand(std::vector<std::string> const& args);
   bool HandleFindCommand(std::vector<std::string> const& args);
   bool HandleInsertCommand(std::vector<std::string> const& args);
+  bool HandleJoinCommand(std::vector<std::string> const& args);
   bool HandleRemoveAtCommand(std::vector<std::string> const& args);
   bool HandleRemoveItemCommand(std::vector<std::string> const& args);
   bool HandleRemoveDuplicatesCommand(std::vector<std::string> const& args);

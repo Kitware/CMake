@@ -161,6 +161,10 @@ JOIN
 Join all the input arguments together using the glue
 string and store the result in the named output variable.
 
+To join list's elements, use preferably the ``JOIN`` operator
+from :command:`list` command. This allows for the elements to have
+special characters like ``;`` in them.
+
 TOLOWER
 """""""
 

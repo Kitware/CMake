@@ -42,6 +42,9 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args,
   if (subCommand == "INSERT") {
     return this->HandleInsertCommand(args);
   }
+  if (subCommand == "JOIN") {
+    return this->HandleJoinCommand(args);
+  }
   if (subCommand == "REMOVE_AT") {
     return this->HandleRemoveAtCommand(args);
   }
@@ -291,6 +294,34 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
 
   std::string value = cmJoin(varArgsExpanded, ";");
   this->Makefile->AddDefinition(listName, value.c_str());
+  return true;
+}
+
+bool cmListCommand::HandleJoinCommand(std::vector<std::string> const& args)
+{
+  if (args.size() != 4) {
+    std::ostringstream error;
+    error << "sub-command JOIN requires three arguments (" << args.size() - 1
+          << " found).";
+    this->SetError(error.str());
+    return false;
+  }
+
+  const std::string& listName = args[1];
+  const std::string& glue = args[2];
+  const std::string& variableName = args[3];
+
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  if (!this->GetList(varArgsExpanded, listName)) {
+    this->Makefile->AddDefinition(variableName, "");
+    return true;
+  }
+
+  std::string value =
+    cmJoin(cmMakeRange(varArgsExpanded.begin(), varArgsExpanded.end()), glue);
+
+  this->Makefile->AddDefinition(variableName, value.c_str());
   return true;
 }
 

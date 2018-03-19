@@ -54,6 +54,17 @@ GET
 
 Returns the list of elements specified by indices from the list.
 
+JOIN
+""""
+
+::
+
+  list(JOIN <list> <glue> <output variable>)
+
+Returns a string joining all list's elements using the glue string.
+To join multiple strings, which are not part of a list, use ``JOIN`` operator
+from :command:`string` command.
+
 Search
 ^^^^^^
 
