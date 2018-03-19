@@ -408,7 +408,6 @@ void cmExtraCodeLiteGenerator::CreateProjectSourceEntries(
   const std::string& projectPath, const cmMakefile* mf,
   const std::string& projectType, const std::string& targetName)
 {
-
   cmXMLWriter& xml(*_xml);
   FindMatchingHeaderfiles(cFiles, otherFiles);
   // Create 2 virtual folders: src and include
@@ -469,10 +468,14 @@ void cmExtraCodeLiteGenerator::CreateProjectSourceEntries(
   xml.EndElement(); // ResourceCompiler
 
   xml.StartElement("General");
-  std::string outputPath = mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+  std::string outputPath =
+    mf->GetSafeDefinition("CMAKE_RUNTIME_OUTPUT_DIRECTORY");
+  if (outputPath.empty()) {
+    outputPath = mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+  }
   std::string relapath;
   if (!outputPath.empty()) {
-    relapath = cmSystemTools::RelativePath(this->WorkspacePath, outputPath);
+    relapath = cmSystemTools::RelativePath(projectPath, outputPath);
     xml.Attribute("OutputFile", relapath + "/$(ProjectName)");
   } else {
     xml.Attribute("OutputFile", "$(IntermediateDirectory)/$(ProjectName)");
@@ -635,7 +638,7 @@ std::string cmExtraCodeLiteGenerator::GetBuildCommand(
   if (generator == "NMake Makefiles" || generator == "Ninja") {
     ss << make;
   } else if (generator == "MinGW Makefiles" || generator == "Unix Makefiles") {
-    ss << make << " -j " << this->CpuCount;
+    ss << make << " -f$(ProjectPath)/Makefile -j " << this->CpuCount;
   }
   if (!targetName.empty()) {
     ss << " " << targetName;
