@@ -734,33 +734,10 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   return false;
 }
 
-bool cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(
-  cmGeneratorTarget const* gt)
-{
-  // C# targets can be defined with add_library() (using SHARED or STATIC) and
-  // also using add_executable(). We do not treat imported C# targets the same
-  // (these come in as UTILITY)
-  if (gt->GetType() != cmStateEnums::SHARED_LIBRARY &&
-      gt->GetType() != cmStateEnums::STATIC_LIBRARY &&
-      gt->GetType() != cmStateEnums::EXECUTABLE) {
-    return false;
-  }
-
-  // Issue diagnostic if the source files depend on the config.
-  std::vector<cmSourceFile*> sources;
-  if (!gt->GetConfigCommonSourceFiles(sources)) {
-    return false;
-  }
-
-  std::set<std::string> languages;
-  gt->GetLanguages(languages, "");
-  return languages.size() == 1 && languages.count("CSharp") > 0;
-}
-
 bool cmGlobalVisualStudioGenerator::TargetCanBeReferenced(
   cmGeneratorTarget const* gt)
 {
-  if (this->TargetIsCSharpOnly(gt)) {
+  if (gt->GetManagedType("") != cmGeneratorTarget::ManagedType::Native) {
     return true;
   }
   if (gt->GetType() != cmStateEnums::SHARED_LIBRARY &&

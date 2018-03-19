@@ -188,9 +188,7 @@ static std::string computeProjectFileExtension(cmGeneratorTarget const* t,
 {
   std::string res;
   res = ".vcxproj";
-  std::string lang = t->GetLinkerLanguage(config);
-  if (cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(t) ||
-      lang == "CSharp") {
+  if (t->HasLanguage("CSharp", config)) {
     res = ".csproj";
   }
   return res;
@@ -3483,15 +3481,17 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
   std::string currentBinDir =
     this->LocalGenerator->GetCurrentBinaryDirectory();
   for (cmComputeLinkInformation::Item const& l : libs) {
-    // Do not allow C# targets to be added to the LIB listing. LIB files are
-    // used for linking C++ dependencies. C# libraries do not have lib files.
-    // Instead, they compile down to C# reference libraries (DLL files). The
-    // `<ProjectReference>` elements added to the vcxproj are enough for the
-    // IDE to deduce the DLL file required by other C# projects that need its
-    // reference library.
-    if (l.Target &&
-        cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(l.Target)) {
-      continue;
+    if (l.Target) {
+      auto managedType = l.Target->GetManagedType("");
+      // Do not allow C# targets to be added to the LIB listing. LIB files are
+      // used for linking C++ dependencies. C# libraries do not have lib files.
+      // Instead, they compile down to C# reference libraries (DLL files). The
+      // `<ProjectReference>` elements added to the vcxproj are enough for the
+      // IDE to deduce the DLL file required by other C# projects that need its
+      // reference library.
+      if (managedType == cmGeneratorTarget::ManagedType::Managed) {
+        continue;
+      }
     }
 
     if (l.IsPath) {
