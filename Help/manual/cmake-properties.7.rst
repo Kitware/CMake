@@ -296,6 +296,7 @@ Properties on Targets
    /prop_tgt/VISIBILITY_INLINES_HIDDEN
    /prop_tgt/VS_CONFIGURATION_TYPE
    /prop_tgt/VS_DEBUGGER_WORKING_DIRECTORY
+   /prop_tgt/VS_DEBUGGER_COMMAND
    /prop_tgt/VS_DESKTOP_EXTENSIONS_VERSION
    /prop_tgt/VS_DOTNET_REFERENCE_refname
    /prop_tgt/VS_DOTNET_REFERENCEPROP_refname_TAG_tagname
