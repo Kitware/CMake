@@ -2550,10 +2550,15 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   if (this->ProjectType != csproj && clOptions.IsManaged()) {
     this->Managed = true;
     std::string managedType = clOptions.GetFlag("CompileAsManaged");
-    if (managedType == "Safe") {
+    if (managedType == "Safe" || managedType == "Pure") {
       // force empty calling convention if safe clr is used
       clOptions.AddFlag("CallingConvention", "");
     }
+    // The default values of these flags are incompatible to
+    // managed assemblies. We have to force valid values if
+    // the target is a managed C++ target.
+    clOptions.AddFlag("ExceptionHandling", "Async");
+    clOptions.AddFlag("BasicRuntimeChecks", "Default");
   }
   if (this->ProjectType == csproj) {
     // /nowin32manifest overrides /win32manifest: parameter
