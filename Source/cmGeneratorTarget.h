@@ -603,6 +603,19 @@ public:
   /** Return whether this target is a CFBundle (plugin) on Apple.  */
   bool IsCFBundleOnApple() const;
 
+  /** Assembly types. The order of the values of this enum is relevant
+      because of smaller/larger comparison operations! */
+  enum ManagedType
+  {
+    Undefined = 0, // target is no lib or executable
+    Native,        // target compiles to unmanaged binary.
+    Mixed,         // target compiles to mixed (managed and unmanaged) binary.
+    Managed        // target compiles to managed binary.
+  };
+
+  /** Return the type of assembly this target compiles to. */
+  ManagedType GetManagedType(const std::string& config) const;
+
   struct SourceFileFlags GetTargetSourceFileFlags(
     const cmSourceFile* sf) const;
 
@@ -747,10 +760,12 @@ private:
   {
     ImportInfo()
       : NoSOName(false)
+      , Managed(Native)
       , Multiplicity(0)
     {
     }
     bool NoSOName;
+    ManagedType Managed;
     unsigned int Multiplicity;
     std::string Location;
     std::string SOName;
@@ -843,6 +858,8 @@ private:
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;
+
+  ManagedType CheckManagedType(std::string const& propval) const;
 
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(
