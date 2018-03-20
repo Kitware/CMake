@@ -29,6 +29,7 @@ struct cmVisualStudio10TargetGenerator::Elem
     , Indent(i)
   {
   }
+  Elem(const Elem&) = delete;
   Elem(Elem& par)
     : S(par.S)
     , Indent(par.Indent + 1)
@@ -47,6 +48,8 @@ struct cmVisualStudio10TargetGenerator::Elem
     if (HasElements) {
       S.fill(' ');
       S.width(Indent * 2);
+      // write an empty string to get the fill level indent to print
+      S << "";
       S << "</" << tag << ">\n";
     } else {
       S << " />\n";
