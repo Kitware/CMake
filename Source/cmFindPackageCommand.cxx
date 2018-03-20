@@ -2065,7 +2065,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   common.push_back("lib");
   common.push_back("share");
 
-  //  PREFIX/(lib/ARCH|lib|share)/cmake/(Foo|foo|FOO).*/
+  //  PREFIX/(lib/ARCH|lib*|share)/cmake/(Foo|foo|FOO).*/
   {
     cmFindPackageFileList lister(this);
     lister / cmFileListGeneratorFixed(prefix) /
@@ -2078,7 +2078,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     }
   }
 
-  //  PREFIX/(lib/ARCH|lib|share)/(Foo|foo|FOO).*/
+  //  PREFIX/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/
   {
     cmFindPackageFileList lister(this);
     lister / cmFileListGeneratorFixed(prefix) /
@@ -2090,7 +2090,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     }
   }
 
-  //  PREFIX/(lib/ARCH|lib|share)/(Foo|foo|FOO).*/(cmake|CMake)/
+  //  PREFIX/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/(cmake|CMake)/
   {
     cmFindPackageFileList lister(this);
     lister / cmFileListGeneratorFixed(prefix) /
@@ -2103,7 +2103,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     }
   }
 
-  // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib|share)/cmake/(Foo|foo|FOO).*/
+  // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib*|share)/cmake/(Foo|foo|FOO).*/
   {
     cmFindPackageFileList lister(this);
     lister / cmFileListGeneratorFixed(prefix) /
@@ -2118,7 +2118,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     }
   }
 
-  // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib|share)/(Foo|foo|FOO).*/
+  // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/
   {
     cmFindPackageFileList lister(this);
     lister / cmFileListGeneratorFixed(prefix) /
@@ -2132,7 +2132,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     }
   }
 
-  // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib|share)/(Foo|foo|FOO).*/(cmake|CMake)/
+  // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/(cmake|CMake)/
   {
     cmFindPackageFileList lister(this);
     lister / cmFileListGeneratorFixed(prefix) /
