@@ -96,9 +96,16 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   std::set<std::string> dependencies;
   bool haveDeps = false;
 
+  std::string binDir = this->LocalGenerator->GetBinaryDirectory();
+
+  // Compute a path to the object file to write to the internal depend file.
+  // Any existing content of the internal depend file has already been
+  // loaded in ValidDeps with this path as a key.
+  std::string obj_i = this->LocalGenerator->ConvertToRelativePath(binDir, obj);
+
   if (this->ValidDeps != nullptr) {
     std::map<std::string, DependencyVector>::const_iterator tmpIt =
-      this->ValidDeps->find(obj);
+      this->ValidDeps->find(obj_i);
     if (tmpIt != this->ValidDeps->end()) {
       dependencies.insert(tmpIt->second.begin(), tmpIt->second.end());
       haveDeps = true;
@@ -222,8 +229,6 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // written by the original local generator for this directory
   // convert the dependencies to paths relative to the home output
   // directory.  We must do the same here.
-  std::string binDir = this->LocalGenerator->GetBinaryDirectory();
-  std::string obj_i = this->LocalGenerator->ConvertToRelativePath(binDir, obj);
   std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i);
   internalDepends << obj_i << std::endl;
 
