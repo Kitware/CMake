@@ -72,7 +72,8 @@ private:
                              std::vector<size_t> const& exclude_configs);
   void WriteAllSources();
   void WriteDotNetReferences();
-  void WriteDotNetReference(std::string const& ref, std::string const& hint);
+  void WriteDotNetReference(std::string const& ref, std::string const& hint,
+                            std::string const& config);
   void WriteDotNetReferenceCustomTags(std::string const& ref);
   void WriteEmbeddedResourceGroup();
   void WriteWinRTReferences();
@@ -147,9 +148,10 @@ private:
   void WriteProjectReferences();
   void WriteApplicationTypeSettings();
   void OutputSourceSpecificFlags(Elem&, cmSourceFile const* source);
-  void AddLibraries(cmComputeLinkInformation& cli,
+  void AddLibraries(const cmComputeLinkInformation& cli,
                     std::vector<std::string>& libVec,
-                    std::vector<std::string>& vsTargetVec);
+                    std::vector<std::string>& vsTargetVec,
+                    const std::string& config);
   void AddTargetsFileAndConfigPair(std::string const& targetsFile,
                                    std::string const& config);
   void WriteLibOptions(std::string const& config);

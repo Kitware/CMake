@@ -711,21 +711,29 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
         ConvertToWindowsSlash(path);
         hintReferences.push_back(HintReference(name, path));
       } else {
-        this->WriteDotNetReference(ri, "");
+        this->WriteDotNetReference(ri, "", "");
       }
     }
     for (const auto& i : hintReferences) {
-      this->WriteDotNetReference(i.first, i.second);
+      this->WriteDotNetReference(i.first, i.second, "");
     }
     this->WriteString("</ItemGroup>\n", 1);
   }
 }
 
 void cmVisualStudio10TargetGenerator::WriteDotNetReference(
-  std::string const& ref, std::string const& hint)
+  std::string const& ref, std::string const& hint, std::string const& config)
 {
-  this->WriteString("<Reference Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeAttr(ref) << "\">\n";
+  std::string attr = " Include=\"" + cmVS10EscapeAttr(ref) + "\"";
+  // If 'config' is not empty, the reference is only added for the given
+  // configuration. This is used when referencing imported managed assemblies.
+  // See also cmVisualStudio10TargetGenerator::AddLibraries().
+  if (!config.empty()) {
+    this->WritePlatformConfigTag("Reference", config, 2, attr.c_str());
+  } else {
+    this->WriteString("<Reference ", 2);
+    (*this->BuildFileStream) << attr << ">\n";
+  }
   this->WriteElem("CopyLocalSatelliteAssemblies", "true", 3);
   this->WriteElem("ReferenceOutputAssembly", "true", 3);
   if (!hint.empty()) {
@@ -3262,7 +3270,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
 
   std::vector<std::string> libVec;
   std::vector<std::string> vsTargetVec;
-  this->AddLibraries(cli, libVec, vsTargetVec);
+  this->AddLibraries(cli, libVec, vsTargetVec, config);
   if (std::find(linkClosure->Languages.begin(), linkClosure->Languages.end(),
                 "CUDA") != linkClosure->Languages.end()) {
     switch (this->CudaOptions[config]->GetCudaRuntime()) {
@@ -3478,8 +3486,8 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(
 }
 
 void cmVisualStudio10TargetGenerator::AddLibraries(
-  cmComputeLinkInformation& cli, std::vector<std::string>& libVec,
-  std::vector<std::string>& vsTargetVec)
+  const cmComputeLinkInformation& cli, std::vector<std::string>& libVec,
+  std::vector<std::string>& vsTargetVec, const std::string& config)
 {
   typedef cmComputeLinkInformation::ItemVector ItemVector;
   ItemVector const& libs = cli.GetItems();
@@ -3487,7 +3495,7 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
     this->LocalGenerator->GetCurrentBinaryDirectory();
   for (cmComputeLinkInformation::Item const& l : libs) {
     if (l.Target) {
-      auto managedType = l.Target->GetManagedType("");
+      auto managedType = l.Target->GetManagedType(config);
       // Do not allow C# targets to be added to the LIB listing. LIB files are
       // used for linking C++ dependencies. C# libraries do not have lib files.
       // Instead, they compile down to C# reference libraries (DLL files). The
