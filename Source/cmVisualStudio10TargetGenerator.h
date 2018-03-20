@@ -216,6 +216,15 @@ private:
   bool IsMissingFiles;
   std::vector<std::string> AddedFiles;
   std::string DefaultArtifactDir;
+  // managed C++/C# relevant members
+  typedef std::pair<std::string, std::string> DotNetHintReference;
+  typedef std::vector<DotNetHintReference> DotNetHintReferenceList;
+  typedef std::map<std::string, DotNetHintReferenceList>
+    DotNetHintReferenceMap;
+  DotNetHintReferenceMap DotNetHintReferences;
+  typedef std::set<std::string> UsingDirectories;
+  typedef std::map<std::string, UsingDirectories> UsingDirectoriesMap;
+  UsingDirectoriesMap AdditionalUsingDirectories;
 
   typedef std::map<std::string, ToolSources> ToolSourceMap;
   ToolSourceMap Tools;

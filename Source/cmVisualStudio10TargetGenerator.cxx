@@ -319,6 +319,8 @@ void cmVisualStudio10TargetGenerator::Generate()
                                              this->Name.c_str());
   this->GeneratorTarget->Target->SetProperty(
     "GENERATOR_FILE_NAME_EXT", this->ProjectFileExtension.c_str());
+  this->DotNetHintReferences.clear();
+  this->AdditionalUsingDirectories.clear();
   if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
     if (!this->ComputeClOptions()) {
       return;
@@ -679,8 +681,6 @@ void cmVisualStudio10TargetGenerator::Generate()
 void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
 {
   std::vector<std::string> references;
-  typedef std::pair<std::string, std::string> HintReference;
-  std::vector<HintReference> hintReferences;
   if (const char* vsDotNetReferences =
         this->GeneratorTarget->GetProperty("VS_DOTNET_REFERENCES")) {
     cmSystemTools::ExpandListArgument(vsDotNetReferences, references);
@@ -696,11 +696,12 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
             "/" + path;
         }
         ConvertToWindowsSlash(path);
-        hintReferences.push_back(HintReference(name, path));
+        this->DotNetHintReferences[""].push_back(
+          DotNetHintReference(name, path));
       }
     }
   }
-  if (!references.empty() || !hintReferences.empty()) {
+  if (!references.empty() || !this->DotNetHintReferences.empty()) {
     this->WriteString("<ItemGroup>\n", 1);
     for (std::string const& ri : references) {
       // if the entry from VS_DOTNET_REFERENCES is an existing file, generate
@@ -709,13 +710,18 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
         std::string name = cmsys::SystemTools::GetFilenameWithoutExtension(ri);
         std::string path = ri;
         ConvertToWindowsSlash(path);
-        hintReferences.push_back(HintReference(name, path));
+        this->DotNetHintReferences[""].push_back(
+          DotNetHintReference(name, path));
       } else {
         this->WriteDotNetReference(ri, "", "");
       }
     }
-    for (const auto& i : hintReferences) {
-      this->WriteDotNetReference(i.first, i.second, "");
+    for (const auto& h : this->DotNetHintReferences) {
+      // DotNetHintReferences is also populated from AddLibraries().
+      // The configuration specific hint references are added there.
+      for (const auto& i : h.second) {
+        this->WriteDotNetReference(i.first, i.second, h.first);
+      }
     }
     this->WriteString("</ItemGroup>\n", 1);
   }
@@ -2625,6 +2631,18 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
       ConvertToWindowsSlash(pdb);
       this->WriteElemEscapeXML("ProgramDataBaseFileName", pdb, 3);
     }
+
+    // add AdditionalUsingDirectories
+    if (this->AdditionalUsingDirectories.count(configName) > 0) {
+      std::string dirs;
+      for (auto u : this->AdditionalUsingDirectories[configName]) {
+        if (!dirs.empty()) {
+          dirs.append(";");
+        }
+        dirs.append(u);
+      }
+      this->WriteElemEscapeXML("AdditionalUsingDirectories", dirs, 3);
+    }
   }
 
   this->WriteString("</ClCompile>\n", 2);
@@ -3496,6 +3514,32 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
   for (cmComputeLinkInformation::Item const& l : libs) {
     if (l.Target) {
       auto managedType = l.Target->GetManagedType(config);
+      if (managedType != cmGeneratorTarget::ManagedType::Native &&
+          this->GeneratorTarget->GetManagedType(config) !=
+            cmGeneratorTarget::ManagedType::Native &&
+          l.Target->IsImported()) {
+        auto location = l.Target->GetFullPath(config);
+        if (!location.empty()) {
+          ConvertToWindowsSlash(location);
+          switch (this->ProjectType) {
+            case csproj:
+              // If the target we want to "link" to is an imported managed
+              // target and this is a C# project, we add a hint reference. This
+              // reference is written to project file in
+              // WriteDotNetReferences().
+              this->DotNetHintReferences[config].push_back(
+                DotNetHintReference(l.Target->GetName(), location));
+              break;
+            case vcxproj:
+              // Add path of assembly to list of using-directories, so the
+              // managed assembly can be used by '#using <assembly.dll>' in
+              // code.
+              this->AdditionalUsingDirectories[config].insert(
+                cmSystemTools::GetFilenamePath(location));
+              break;
+          }
+        }
+      }
       // Do not allow C# targets to be added to the LIB listing. LIB files are
       // used for linking C++ dependencies. C# libraries do not have lib files.
       // Instead, they compile down to C# reference libraries (DLL files). The
