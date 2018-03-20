@@ -507,15 +507,18 @@ function(SWIG_ADD_LIBRARY name)
   elseif (swig_lowercase_language STREQUAL "go")
     set_target_properties(${name} PROPERTIES PREFIX "")
   elseif (swig_lowercase_language STREQUAL "java")
+    # In java you want:
+    #      System.loadLibrary("LIBRARY");
+    # then JNI will look for a library whose name is platform dependent, namely
+    #   MacOS  : libLIBRARY.jnilib
+    #   Windows: LIBRARY.dll
+    #   Linux  : libLIBRARY.so
     if (APPLE)
-        # In java you want:
-        #      System.loadLibrary("LIBRARY");
-        # then JNI will look for a library whose name is platform dependent, namely
-        #   MacOS  : libLIBRARY.jnilib
-        #   Windows: LIBRARY.dll
-        #   Linux  : libLIBRARY.so
-        set_target_properties (${name} PROPERTIES SUFFIX ".jnilib")
-      endif ()
+      set_target_properties (${name} PROPERTIES SUFFIX ".jnilib")
+    endif()
+    if ((WIN32 AND MINGW) OR CYGWIN OR CMAKE_SYSTEM_NAME STREQUAL MSYS)
+      set_target_properties(${name} PROPERTIES PREFIX "")
+    endif()
   elseif (swig_lowercase_language STREQUAL "lua")
     if(_SAM_TYPE STREQUAL "MODULE")
       set_target_properties(${name} PROPERTIES PREFIX "")
@@ -560,11 +563,16 @@ function(SWIG_ADD_LIBRARY name)
   # target property SWIG_SUPPORT_FILES lists proxy support files
   if (NOT SWIG_MODULE_${name}_NOPROXY)
     string(TOUPPER "${_SAM_LANGUAGE}" swig_uppercase_language)
+    set(swig_all_support_files)
     foreach (swig_it IN LISTS SWIG_${swig_uppercase_language}_EXTRA_FILE_EXTENSIONS)
       set (swig_support_files ${swig_generated_sources})
       list (FILTER swig_support_files INCLUDE REGEX ".*${swig_it}$")
-      set_property (TARGET ${name} APPEND PROPERTY SWIG_SUPPORT_FILES ${swig_support_files})
+      list(APPEND swig_all_support_files ${swig_support_files})
     endforeach()
+    if (swig_all_support_files)
+      list(REMOVE_DUPLICATES swig_all_support_files)
+    endif()
+    set_property (TARGET ${name} APPEND PROPERTY SWIG_SUPPORT_FILES ${swig_all_support_files})
   endif()
 
   # to ensure legacy behavior, export some variables
