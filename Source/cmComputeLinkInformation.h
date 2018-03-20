@@ -48,7 +48,7 @@ public:
     cmGeneratorTarget const* Target;
   };
   typedef std::vector<Item> ItemVector;
-  ItemVector const& GetItems();
+  ItemVector const& GetItems() const;
   std::vector<std::string> const& GetDirectories();
   std::vector<std::string> const& GetDepends();
   std::vector<std::string> const& GetFrameworkPaths();
