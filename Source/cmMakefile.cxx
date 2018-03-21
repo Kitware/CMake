@@ -162,16 +162,22 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& pkg)
 {
   // Warn if a <pkg>_ROOT variable we may use is set.
   std::string const varName = pkg + "_ROOT";
-  bool const haveVar = this->GetDefinition(varName) != nullptr;
-  bool const haveEnv = cmSystemTools::HasEnv(varName);
+  const char* var = this->GetDefinition(varName);
+  std::string env;
+  cmSystemTools::GetEnv(varName, env);
+
+  bool const haveVar = var && *var;
+  bool const haveEnv = !env.empty();
   if ((haveVar || haveEnv) && this->WarnedCMP0074.insert(varName).second) {
     std::ostringstream w;
     w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0074) << "\n";
     if (haveVar) {
-      w << "CMake variable " << varName << " is set.\n";
+      w << "CMake variable " << varName << " is set to:\n"
+        << "  " << var << "\n";
     }
     if (haveEnv) {
-      w << "Environment variable " << varName << " is set.\n";
+      w << "Environment variable " << varName << " is set to:\n"
+        << "  " << env << "\n";
     }
     w << "For compatibility, CMake is ignoring the variable.";
     this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
