@@ -335,7 +335,7 @@ versions specified for each:
 * ``Clang``: Clang compiler versions 2.9 through 3.4.
 * ``GNU``: GNU compiler versions 4.4 through 5.0.
 * ``MSVC``: Microsoft Visual Studio versions 2010 through 2017.
-* ``SunPro``: Oracle SolarisStudio versions 12.4 through 12.5.
+* ``SunPro``: Oracle SolarisStudio versions 12.4 through 12.6.
 * ``Intel``: Intel compiler versions 12.1 through 17.0.
 
 CMake is currently aware of the :prop_tgt:`C standards <C_STANDARD>`
