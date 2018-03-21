@@ -71,6 +71,31 @@ if(NOT MSVC_VERSION)
     message(FATAL_ERROR "MSVC compiler version not detected properly: ${_compiler_version}")
   endif()
 
+  if(MSVC_VERSION GREATER_EQUAL 1910)
+    # VS 2017 or greater
+    set(MSVC_TOOLSET_VERSION 141)
+  elseif(MSVC_VERSION EQUAL 1900)
+    # VS 2015
+    set(MSVC_TOOLSET_VERSION 140)
+  elseif(MSVC_VERSION EQUAL 1800)
+    # VS 2013
+    set(MSVC_TOOLSET_VERSION 120)
+  elseif(MSVC_VERSION EQUAL 1700)
+    # VS 2012
+    set(MSVC_TOOLSET_VERSION 110)
+  elseif(MSVC_VERSION EQUAL 1600)
+    # VS 2010
+    set(MSVC_TOOLSET_VERSION 100)
+  elseif(MSVC_VERSION EQUAL 1500)
+    # VS 2008
+    set(MSVC_TOOLSET_VERSION 90)
+  elseif(MSVC_VERSION EQUAL 1400)
+    # VS 2005
+    set(MSVC_TOOLSET_VERSION 80)
+  else()
+    # We don't support MSVC_TOOLSET_VERSION for earlier compiler.
+  endif()
+
   set(MSVC10)
   set(MSVC11)
   set(MSVC12)
