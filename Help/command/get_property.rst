@@ -50,7 +50,10 @@ be one of the following:
 
 The required ``PROPERTY`` option is immediately followed by the name of
 the property to get.  If the property is not set an empty value is
-returned.  If the ``SET`` option is given the variable is set to a boolean
+returned, although some properties support inheriting from a parent scope
+if defined to behave that way (see :command:`define_property`).
+
+If the ``SET`` option is given the variable is set to a boolean
 value indicating whether the property has been set.  If the ``DEFINED``
 option is given the variable is set to a boolean value indicating
 whether the property has been defined such as with the
