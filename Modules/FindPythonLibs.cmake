@@ -7,6 +7,10 @@
 #
 # Find python libraries
 #
+# .. deprecated:: 3.12
+#
+#   Use :module:`FindPython3`, :module:`FindPython2` or :module:`FindPython` instead.
+#
 # This module finds if Python is installed and determines where the
 # include files and libraries are.  It also determines what the name of
 # the library is.  This code sets the following variables:

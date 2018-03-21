@@ -1427,6 +1427,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindXercesC)
   endif()
 
+  if(CMake_TEST_FindPython)
+    add_subdirectory(FindPython)
+  endif()
+
   add_subdirectory(FindThreads)
 
   # Matlab module

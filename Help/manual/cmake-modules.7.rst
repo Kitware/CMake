@@ -196,6 +196,9 @@ All Modules
    /module/FindPostgreSQL
    /module/FindProducer
    /module/FindProtobuf
+   /module/FindPython
+   /module/FindPython2
+   /module/FindPython3
    /module/FindPythonInterp
    /module/FindPythonLibs
    /module/FindQt3

@@ -5,5 +5,5 @@ include (BasicConfiguration.cmake)
 
 add_custom_target (RunTest
   COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:example>"
-  "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runme.py"
+  "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runme.py"
   DEPENDS example)
