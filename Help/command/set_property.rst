@@ -59,11 +59,17 @@ be one of the following:
 
 The required ``PROPERTY`` option is immediately followed by the name of
 the property to set.  Remaining arguments are used to compose the
-property value in the form of a semicolon-separated list.  If the
-``APPEND`` option is given the list is appended to any existing property
-value.  If the ``APPEND_STRING`` option is given the string is append to any
-existing property value as string, i.e.  it results in a longer string
-and not a list of strings.
+property value in the form of a semicolon-separated list.
+
+If the ``APPEND`` option is given the list is appended to any existing
+property value.  If the ``APPEND_STRING`` option is given the string is
+appended to any existing property value as string, i.e. it results in a
+longer string and not a list of strings.  When using ``APPEND`` or
+``APPEND_STRING`` with a property defined to support ``INHERITED``
+behavior (see :command:`define_property`), no inheriting occurs when
+finding the initial value to append to.  If the property is not already
+directly set in the nominated scope, the command will behave as though
+``APPEND`` or ``APPEND_STRING`` had not been given.
 
 See the :manual:`cmake-properties(7)` manual for a list of properties
 in each scope.
