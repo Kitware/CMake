@@ -18,6 +18,16 @@
 #include <iterator>
 #include <memory> // IWYU pragma: keep
 
+static void ConvertToWindowsSlash(std::string& s);
+
+static std::string cmVS10EscapeXML(std::string arg)
+{
+  cmSystemTools::ReplaceString(arg, "&", "&amp;");
+  cmSystemTools::ReplaceString(arg, "<", "&lt;");
+  cmSystemTools::ReplaceString(arg, ">", "&gt;");
+  return arg;
+}
+
 struct cmVisualStudio10TargetGenerator::Elem
 {
   cmGeneratedFileStream& S;
@@ -57,6 +67,37 @@ struct cmVisualStudio10TargetGenerator::Elem
   }
 };
 
+class cmVS10GeneratorOptions : public cmVisualStudioGeneratorOptions
+{
+public:
+  cmVS10GeneratorOptions(cmLocalVisualStudioGenerator* lg, Tool tool,
+                         cmVS7FlagTable const* table,
+                         cmVisualStudio10TargetGenerator* g = nullptr)
+    : cmVisualStudioGeneratorOptions(lg, tool, table)
+    , TargetGenerator(g)
+  {
+  }
+
+  void OutputFlag(std::ostream& fout, const char* indent, const char* tag,
+                  const std::string& content) override
+  {
+    if (!this->GetConfiguration().empty()) {
+      // if there are configuration specific flags, then
+      // use the configuration specific tag for PreprocessorDefinitions
+      fout << indent;
+      this->TargetGenerator->WritePlatformConfigTag(
+        tag, this->GetConfiguration(), 0, 0, 0, &fout);
+    } else {
+      fout << indent << "<" << tag << ">";
+    }
+    fout << cmVS10EscapeXML(content);
+    fout << "</" << tag << ">";
+  }
+
+private:
+  cmVisualStudio10TargetGenerator* TargetGenerator;
+};
+
 inline void cmVisualStudio10TargetGenerator::WriteElem(const char* tag,
                                                        const char* val,
                                                        int indentLevel)
@@ -71,16 +112,6 @@ inline void cmVisualStudio10TargetGenerator::WriteElem(const char* tag,
 {
   this->WriteString("<", indentLevel);
   (*this->BuildFileStream) << tag << ">" << val << "</" << tag << ">\n";
-}
-
-static void ConvertToWindowsSlash(std::string& s);
-
-static std::string cmVS10EscapeXML(std::string arg)
-{
-  cmSystemTools::ReplaceString(arg, "&", "&amp;");
-  cmSystemTools::ReplaceString(arg, "<", "&lt;");
-  cmSystemTools::ReplaceString(arg, ">", "&gt;");
-  return arg;
 }
 
 inline void cmVisualStudio10TargetGenerator::WriteElemEscapeXML(
@@ -2048,9 +2079,9 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       cmGeneratorExpressionInterpreter genexInterpreter(
         this->LocalGenerator, this->GeneratorTarget, config,
         this->GeneratorTarget->GetName(), lang);
-      cmVisualStudioGeneratorOptions clOptions(
+      cmVS10GeneratorOptions clOptions(
         this->LocalGenerator, cmVisualStudioGeneratorOptions::Compiler,
-        flagtable, 0, this);
+        flagtable, this);
       if (compileAs) {
         clOptions.AddFlag("CompileAs", compileAs);
       }
@@ -2893,9 +2924,9 @@ void cmVisualStudio10TargetGenerator::WriteLibOptions(
   if (!libflags.empty()) {
     this->WriteString("<Lib>\n", 2);
     cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
-    cmVisualStudioGeneratorOptions libOptions(
-      this->LocalGenerator, cmVisualStudioGeneratorOptions::Linker,
-      gg->GetLibFlagTable(), 0, this);
+    cmVS10GeneratorOptions libOptions(this->LocalGenerator,
+                                      cmVisualStudioGeneratorOptions::Linker,
+                                      gg->GetLibFlagTable(), this);
     libOptions.Parse(libflags.c_str());
     libOptions.PrependInheritedString("AdditionalOptions");
     libOptions.OutputFlagMap(*this->BuildFileStream, "      ");
@@ -3063,9 +3094,8 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   std::string const& config)
 {
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
-  auto pOptions =
-    cm::make_unique<Options>(this->LocalGenerator, Options::Linker,
-                             gg->GetLinkFlagTable(), nullptr, this);
+  auto pOptions = cm::make_unique<Options>(
+    this->LocalGenerator, Options::Linker, gg->GetLinkFlagTable(), this);
   Options& linkOptions = *pOptions;
 
   cmGeneratorTarget::LinkClosure const* linkClosure =

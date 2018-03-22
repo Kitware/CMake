@@ -16,8 +16,6 @@ class cmLocalVisualStudioGenerator;
 
 typedef cmIDEFlagTable cmVS7FlagTable;
 
-class cmVisualStudio10TargetGenerator;
-
 class cmVisualStudioGeneratorOptions : public cmIDEOptions
 {
 public:
@@ -34,12 +32,8 @@ public:
     CSharpCompiler
   };
   cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg, Tool tool,
-                                 cmVS7FlagTable const* table,
-                                 cmVS7FlagTable const* extraTable = 0,
-                                 cmVisualStudio10TargetGenerator* g = 0);
-
-  cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg, Tool tool,
-                                 cmVisualStudio10TargetGenerator* g = 0);
+                                 cmVS7FlagTable const* table = nullptr,
+                                 cmVS7FlagTable const* extraTable = nullptr);
 
   // Add a table of flags.
   void AddTable(cmVS7FlagTable const* table);
@@ -92,10 +86,11 @@ public:
                                           const std::string& lang);
   void OutputFlagMap(std::ostream& fout, const char* indent);
   void SetConfiguration(const std::string& config);
+  const std::string& GetConfiguration() const;
 
-private:
-  void OutputFlag(std::ostream& fout, const char* indent, const char* tag,
-                  const std::string& content);
+protected:
+  virtual void OutputFlag(std::ostream& fout, const char* indent,
+                          const char* tag, const std::string& content) = 0;
 
 private:
   cmLocalVisualStudioGenerator* LocalGenerator;
@@ -103,7 +98,6 @@ private:
 
   std::string Configuration;
   Tool CurrentTool;
-  cmVisualStudio10TargetGenerator* TargetGenerator;
 
   bool FortranRuntimeDebug;
   bool FortranRuntimeDLL;
