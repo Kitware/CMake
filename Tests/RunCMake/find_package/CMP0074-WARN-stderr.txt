@@ -7,9 +7,13 @@ CMake Warning \(dev\) at CMP0074-common.cmake:[0-9]+ \(find_package\):
   Run "cmake --help-policy CMP0074" for policy details.  Use the cmake_policy
   command to set the policy and suppress this warning.
 
-  CMake variable Foo_ROOT is set.
+  CMake variable Foo_ROOT is set to:
 
-  Environment variable Foo_ROOT is set.
+    .*/Tests/RunCMake/find_package/PackageRoot/foo/cmake_root
+
+  Environment variable Foo_ROOT is set to:
+
+    .*/Tests/RunCMake/find_package/PackageRoot/foo/env_root
 
   For compatibility, CMake is ignoring the variable.
 Call Stack \(most recent call first\):
