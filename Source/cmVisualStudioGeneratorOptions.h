@@ -94,6 +94,10 @@ public:
   void SetConfiguration(const std::string& config);
 
 private:
+  void OutputFlag(std::ostream& fout, const char* indent, const char* tag,
+                  const std::string& content);
+
+private:
   cmLocalVisualStudioGenerator* LocalGenerator;
   cmGlobalVisualStudioGenerator::VSVersion Version;
 
