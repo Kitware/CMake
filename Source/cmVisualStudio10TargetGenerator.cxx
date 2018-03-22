@@ -2490,8 +2490,20 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // check for managed C++ assembly compiler flag. This overrides any
   // /clr* compiler flags which may be defined in the flags variable(s).
   if (this->ProjectType != csproj) {
-    // TODO: add check here, if /clr was defined manually and issue
-    //       warning that this is discouraged.
+    // Warn if /clr was added manually. This should not be done
+    // anymore, because cmGeneratorTarget may not be aware that the
+    // target uses C++/CLI.
+    if (flags.find("/clr") != std::string::npos ||
+        defineFlags.find("/clr") != std::string::npos) {
+      if (configName == this->Configurations[0]) {
+        std::string message = "For the target \"" +
+          this->GeneratorTarget->GetName() +
+          "\" the /clr compiler flag was added manually. " +
+          "Set usage of C++/CLI by setting COMMON_LANGUAGE_RUNTIME "
+          "target property.";
+        this->Makefile->IssueMessage(cmake::MessageType::WARNING, message);
+      }
+    }
     if (auto* clr =
           this->GeneratorTarget->GetProperty("COMMON_LANGUAGE_RUNTIME")) {
       std::string clrString = clr;
