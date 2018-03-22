@@ -57,6 +57,9 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args,
   if (subCommand == "SORT") {
     return this->HandleSortCommand(args);
   }
+  if (subCommand == "SUBLIST") {
+    return this->HandleSublistCommand(args);
+  }
   if (subCommand == "REVERSE") {
     return this->HandleReverseCommand(args);
   }
@@ -424,6 +427,55 @@ bool cmListCommand::HandleSortCommand(std::vector<std::string> const& args)
 
   std::string value = cmJoin(varArgsExpanded, ";");
   this->Makefile->AddDefinition(listName, value.c_str());
+  return true;
+}
+
+bool cmListCommand::HandleSublistCommand(std::vector<std::string> const& args)
+{
+  if (args.size() != 5) {
+    std::ostringstream error;
+    error << "sub-command SUBLIST requires four arguments (" << args.size() - 1
+          << " found).";
+    this->SetError(error.str());
+    return false;
+  }
+
+  const std::string& listName = args[1];
+  const std::string& variableName = args[args.size() - 1];
+
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  if (!this->GetList(varArgsExpanded, listName) || varArgsExpanded.empty()) {
+    this->Makefile->AddDefinition(variableName, "");
+    return true;
+  }
+
+  const int start = atoi(args[2].c_str());
+  const int length = atoi(args[3].c_str());
+
+  using size_type = decltype(varArgsExpanded)::size_type;
+
+  if (start < 0 || size_type(start) >= varArgsExpanded.size()) {
+    std::ostringstream error;
+    error << "begin index: " << start << " is out of range 0 - "
+          << varArgsExpanded.size() - 1;
+    this->SetError(error.str());
+    return false;
+  }
+  if (length < -1) {
+    std::ostringstream error;
+    error << "length: " << length << " should be -1 or greater";
+    this->SetError(error.str());
+    return false;
+  }
+
+  const size_type end =
+    (length == -1 || size_type(start + length) > varArgsExpanded.size())
+    ? varArgsExpanded.size()
+    : size_type(start + length);
+  std::vector<std::string> sublist(varArgsExpanded.begin() + start,
+                                   varArgsExpanded.begin() + end);
+  this->Makefile->AddDefinition(variableName, cmJoin(sublist, ";").c_str());
   return true;
 }
 

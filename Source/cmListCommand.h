@@ -42,6 +42,7 @@ protected:
   bool HandleRemoveItemCommand(std::vector<std::string> const& args);
   bool HandleRemoveDuplicatesCommand(std::vector<std::string> const& args);
   bool HandleSortCommand(std::vector<std::string> const& args);
+  bool HandleSublistCommand(std::vector<std::string> const& args);
   bool HandleReverseCommand(std::vector<std::string> const& args);
   bool HandleFilterCommand(std::vector<std::string> const& args);
   bool FilterRegex(std::vector<std::string> const& args, bool includeMatches,
