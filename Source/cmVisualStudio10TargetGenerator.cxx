@@ -3773,7 +3773,10 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
                     "{" + this->GlobalGenerator->GetGUID(name) + "}", 3);
     this->WriteElem("Name", name, 3);
     this->WriteDotNetReferenceCustomTags(name);
-    if (!this->GlobalGenerator->TargetCanBeReferenced(dt)) {
+    // If the target is not compiled with any /clr flag, there is
+    // no assembly to reference.
+    if (this->Managed &&
+        dt->GetManagedType("") < cmGeneratorTarget::ManagedType::Mixed) {
       this->WriteElem("ReferenceOutputAssembly", "false", 3);
     }
     this->WriteString("</ProjectReference>\n", 2);

@@ -734,19 +734,6 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   return false;
 }
 
-bool cmGlobalVisualStudioGenerator::TargetCanBeReferenced(
-  cmGeneratorTarget const* gt)
-{
-  if (gt->GetManagedType("") != cmGeneratorTarget::ManagedType::Native) {
-    return true;
-  }
-  if (gt->GetType() != cmStateEnums::SHARED_LIBRARY &&
-      gt->GetType() != cmStateEnums::EXECUTABLE) {
-    return false;
-  }
-  return true;
-}
-
 bool cmGlobalVisualStudioGenerator::TargetCompare::operator()(
   cmGeneratorTarget const* l, cmGeneratorTarget const* r) const
 {
