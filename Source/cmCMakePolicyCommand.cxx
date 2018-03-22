@@ -156,6 +156,23 @@ bool cmCMakePolicyCommand::HandleVersionMode(
     this->SetError("VERSION given too many arguments");
     return false;
   }
-  this->Makefile->SetPolicyVersion(args[1].c_str());
+  std::string const& version_string = args[1];
+
+  // Separate the <min> version and any trailing ...<max> component.
+  std::string::size_type const dd = version_string.find("...");
+  std::string const version_min = version_string.substr(0, dd);
+  std::string const version_max = dd != std::string::npos
+    ? version_string.substr(dd + 3, std::string::npos)
+    : std::string();
+  if (dd != std::string::npos &&
+      (version_min.empty() || version_max.empty())) {
+    std::ostringstream e;
+    e << "VERSION \"" << version_string
+      << "\" does not have a version on both sides of \"...\".";
+    this->SetError(e.str());
+    return false;
+  }
+
+  this->Makefile->SetPolicyVersion(version_min, version_max);
   return true;
 }

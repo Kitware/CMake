@@ -45,9 +45,24 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,
     return this->EnforceUnknownArguments();
   }
 
+  // Separate the <min> version and any trailing ...<max> component.
+  std::string::size_type const dd = version_string.find("...");
+  std::string const version_min = version_string.substr(0, dd);
+  std::string const version_max = dd != std::string::npos
+    ? version_string.substr(dd + 3, std::string::npos)
+    : std::string();
+  if (dd != std::string::npos &&
+      (version_min.empty() || version_max.empty())) {
+    std::ostringstream e;
+    e << "VERSION \"" << version_string
+      << "\" does not have a version on both sides of \"...\".";
+    this->SetError(e.str());
+    return false;
+  }
+
   // Save the required version string.
   this->Makefile->AddDefinition("CMAKE_MINIMUM_REQUIRED_VERSION",
-                                version_string.c_str());
+                                version_min.c_str());
 
   // Get the current version number.
   unsigned int current_major = cmVersion::GetMajorVersion();
@@ -61,10 +76,10 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,
   unsigned int required_minor = 0;
   unsigned int required_patch = 0;
   unsigned int required_tweak = 0;
-  if (sscanf(version_string.c_str(), "%u.%u.%u.%u", &required_major,
+  if (sscanf(version_min.c_str(), "%u.%u.%u.%u", &required_major,
              &required_minor, &required_patch, &required_tweak) < 2) {
     std::ostringstream e;
-    e << "could not parse VERSION \"" << version_string << "\".";
+    e << "could not parse VERSION \"" << version_min << "\".";
     this->SetError(e.str());
     return false;
   }
@@ -78,7 +93,7 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,
        current_patch == required_patch && current_tweak < required_tweak)) {
     // The current version is too low.
     std::ostringstream e;
-    e << "CMake " << version_string
+    e << "CMake " << version_min
       << " or higher is required.  You are running version "
       << cmVersion::GetCMakeVersion();
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -95,9 +110,9 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,
     this->Makefile->IssueMessage(
       cmake::AUTHOR_WARNING,
       "Compatibility with CMake < 2.4 is not supported by CMake >= 3.0.");
-    this->Makefile->SetPolicyVersion("2.4");
+    this->Makefile->SetPolicyVersion("2.4", version_max);
   } else {
-    this->Makefile->SetPolicyVersion(version_string.c_str());
+    this->Makefile->SetPolicyVersion(version_min, version_max);
   }
 
   return true;
