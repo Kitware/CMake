@@ -143,6 +143,7 @@ Properties on Targets
    /prop_tgt/C_EXTENSIONS
    /prop_tgt/C_STANDARD
    /prop_tgt/C_STANDARD_REQUIRED
+   /prop_tgt/COMMON_LANGUAGE_RUNTIME
    /prop_tgt/COMPATIBLE_INTERFACE_BOOL
    /prop_tgt/COMPATIBLE_INTERFACE_NUMBER_MAX
    /prop_tgt/COMPATIBLE_INTERFACE_NUMBER_MIN
@@ -186,6 +187,7 @@ Properties on Targets
    /prop_tgt/GNUtoMS
    /prop_tgt/HAS_CXX
    /prop_tgt/IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
+   /prop_tgt/IMPORTED_COMMON_LANGUAGE_RUNTIME
    /prop_tgt/IMPORTED_CONFIGURATIONS
    /prop_tgt/IMPORTED_GLOBAL
    /prop_tgt/IMPORTED_IMPLIB_CONFIG
