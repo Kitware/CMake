@@ -209,7 +209,6 @@ private:
   cmGlobalVisualStudio10Generator* const GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;
   cmLocalVisualStudio10Generator* const LocalGenerator;
-  std::set<cmSourceFile const*> SourcesVisited;
   std::set<std::string> CSharpCustomCommandNames;
   bool IsMissingFiles;
   std::vector<std::string> AddedFiles;

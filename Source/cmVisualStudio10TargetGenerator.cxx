@@ -1178,7 +1178,6 @@ void cmVisualStudio10TargetGenerator::WriteNsightTegraConfigurationValues(
 
 void cmVisualStudio10TargetGenerator::WriteCustomCommands()
 {
-  this->SourcesVisited.clear();
   this->CSharpCustomCommandNames.clear();
   std::vector<cmSourceFile const*> customCommands;
   this->GeneratorTarget->GetCustomCommands(customCommands, "");
@@ -1199,7 +1198,9 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommands()
 void cmVisualStudio10TargetGenerator::WriteCustomCommand(
   cmSourceFile const* sf)
 {
-  if (this->SourcesVisited.insert(sf).second) {
+  if (this->LocalGenerator->GetSourcesVisited(this->GeneratorTarget)
+        .insert(sf)
+        .second) {
     if (std::vector<cmSourceFile*> const* depends =
           this->GeneratorTarget->GetSourceDepends(sf)) {
       for (cmSourceFile const* di : *depends) {
