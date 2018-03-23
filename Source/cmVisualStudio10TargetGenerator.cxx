@@ -8,7 +8,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalVisualStudio10Generator.h"
-#include "cmLocalVisualStudio7Generator.h"
+#include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
@@ -204,7 +204,8 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
   , Name(target->GetName())
   , GUID(gg->GetGUID(this->Name))
   , GlobalGenerator(gg)
-  , LocalGenerator((cmLocalVisualStudio7Generator*)target->GetLocalGenerator())
+  , LocalGenerator(
+      (cmLocalVisualStudio10Generator*)target->GetLocalGenerator())
 {
   this->Makefile->GetConfigurations(this->Configurations);
   this->NsightTegra = gg->IsNsightTegra();

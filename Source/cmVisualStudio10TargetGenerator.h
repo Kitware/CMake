@@ -17,7 +17,7 @@ class cmCustomCommand;
 class cmGeneratedFileStream;
 class cmGeneratorTarget;
 class cmGlobalVisualStudio10Generator;
-class cmLocalVisualStudio7Generator;
+class cmLocalVisualStudio10Generator;
 class cmMakefile;
 class cmSourceFile;
 class cmSourceGroup;
@@ -208,7 +208,7 @@ private:
   bool TargetCompileAsWinRT;
   cmGlobalVisualStudio10Generator* const GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;
-  cmLocalVisualStudio7Generator* const LocalGenerator;
+  cmLocalVisualStudio10Generator* const LocalGenerator;
   std::set<cmSourceFile const*> SourcesVisited;
   std::set<std::string> CSharpCustomCommandNames;
   bool IsMissingFiles;
