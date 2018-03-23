@@ -209,12 +209,12 @@ Each entry is meant for installation trees following Windows (W), UNIX
   <prefix>/(cmake|CMake)/                                         (W)
   <prefix>/<name>*/                                               (W)
   <prefix>/<name>*/(cmake|CMake)/                                 (W)
-  <prefix>/(lib/<arch>|lib|share)/cmake/<name>*/                  (U)
-  <prefix>/(lib/<arch>|lib|share)/<name>*/                        (U)
-  <prefix>/(lib/<arch>|lib|share)/<name>*/(cmake|CMake)/          (U)
-  <prefix>/<name>*/(lib/<arch>|lib|share)/cmake/<name>*/          (W/U)
-  <prefix>/<name>*/(lib/<arch>|lib|share)/<name>*/                (W/U)
-  <prefix>/<name>*/(lib/<arch>|lib|share)/<name>*/(cmake|CMake)/  (W/U)
+  <prefix>/(lib/<arch>|lib*|share)/cmake/<name>*/                 (U)
+  <prefix>/(lib/<arch>|lib*|share)/<name>*/                       (U)
+  <prefix>/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/         (U)
+  <prefix>/<name>*/(lib/<arch>|lib*|share)/cmake/<name>*/         (W/U)
+  <prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/               (W/U)
+  <prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/ (W/U)
 
 On systems supporting OS X Frameworks and Application Bundles the
 following directories are searched for frameworks or bundles
@@ -229,10 +229,22 @@ containing a configuration file::
 
 In all cases the ``<name>`` is treated as case-insensitive and corresponds
 to any of the names specified (``<package>`` or names given by ``NAMES``).
+
 Paths with ``lib/<arch>`` are enabled if the
-:variable:`CMAKE_LIBRARY_ARCHITECTURE` variable is set.  If ``PATH_SUFFIXES``
-is specified the suffixes are appended to each (W) or (U) directory entry
-one-by-one.
+:variable:`CMAKE_LIBRARY_ARCHITECTURE` variable is set. ``lib*`` includes one
+or more of the values ``lib64``, ``lib32``, ``libx32`` or ``lib`` (searched in
+that order).
+
+* Paths with ``lib64`` are searched on 64 bit platforms if the
+  :prop_gbl:`FIND_LIBRARY_USE_LIB64_PATHS` property is set to ``TRUE``.
+* Paths with ``lib32`` are searched on 32 bit platforms if the
+  :prop_gbl:`FIND_LIBRARY_USE_LIB32_PATHS` property is set to ``TRUE``.
+* Paths with ``libx32`` are searched on platforms using the x32 ABI
+  if the :prop_gbl:`FIND_LIBRARY_USE_LIBX32_PATHS` property is set to ``TRUE``.
+* The ``lib`` path is always searched.
+
+If ``PATH_SUFFIXES`` is specified, the suffixes are appended to each
+(W) or (U) directory entry one-by-one.
 
 This set of directories is intended to work in cooperation with
 projects that provide configuration files in their installation trees.
