@@ -280,6 +280,7 @@ if (CMAKE_CXX_COMPILE_FEATURES)
     if (std_flag_idx EQUAL -1)
       add_executable(default_dialect default_dialect.cpp)
       target_compile_definitions(default_dialect PRIVATE
+        DEFAULT_CXX20=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},20>
         DEFAULT_CXX17=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},17>
         DEFAULT_CXX14=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},14>
         DEFAULT_CXX11=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},11>
@@ -434,6 +435,7 @@ else()
       HAVE_CXX_STD_11=$<COMPILE_FEATURES:cxx_std_11>
       HAVE_CXX_STD_14=$<COMPILE_FEATURES:cxx_std_14>
       HAVE_CXX_STD_17=$<COMPILE_FEATURES:cxx_std_17>
+      HAVE_CXX_STD_20=$<COMPILE_FEATURES:cxx_std_20>
     )
   endif()
 

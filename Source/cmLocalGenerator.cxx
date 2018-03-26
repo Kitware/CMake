@@ -1564,6 +1564,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
   static std::map<std::string, std::vector<std::string>> langStdMap;
   if (langStdMap.empty()) {
     // Maintain sorted order, most recent first.
+    langStdMap["CXX"].push_back("20");
     langStdMap["CXX"].push_back("17");
     langStdMap["CXX"].push_back("14");
     langStdMap["CXX"].push_back("11");
