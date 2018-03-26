@@ -45,6 +45,9 @@ the way the check is run:
 
 include_guard(GLOBAL)
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
+
 macro(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
   if(CMAKE_C_COMPILER_LOADED)
     __CHECK_SYMBOL_EXISTS_IMPL("${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckSymbolExists.c" "${SYMBOL}" "${FILES}" "${VARIABLE}" )
@@ -116,3 +119,5 @@ macro(__CHECK_SYMBOL_EXISTS_IMPL SOURCEFILE SYMBOL FILES VARIABLE)
     endif()
   endif()
 endmacro()
+
+cmake_policy(POP)
