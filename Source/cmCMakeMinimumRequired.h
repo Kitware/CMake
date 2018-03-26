@@ -34,7 +34,7 @@ public:
 
 private:
   std::vector<std::string> UnknownArguments;
-  bool EnforceUnknownArguments();
+  bool EnforceUnknownArguments(std::string const& version_max);
 };
 
 #endif

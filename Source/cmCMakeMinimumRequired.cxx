@@ -42,7 +42,7 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,
 
   // Make sure there was a version to check.
   if (version_string.empty()) {
-    return this->EnforceUnknownArguments();
+    return this->EnforceUnknownArguments(std::string());
   }
 
   // Separate the <min> version and any trailing ...<max> component.
@@ -102,7 +102,7 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,
   }
 
   // The version is not from the future, so enforce unknown arguments.
-  if (!this->EnforceUnknownArguments()) {
+  if (!this->EnforceUnknownArguments(version_max)) {
     return false;
   }
 
@@ -118,14 +118,39 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,
   return true;
 }
 
-bool cmCMakeMinimumRequired::EnforceUnknownArguments()
+bool cmCMakeMinimumRequired::EnforceUnknownArguments(
+  std::string const& version_max)
 {
-  if (!this->UnknownArguments.empty()) {
-    std::ostringstream e;
-    e << "called with unknown argument \"" << this->UnknownArguments[0]
-      << "\".";
-    this->SetError(e.str());
-    return false;
+  if (this->UnknownArguments.empty()) {
+    return true;
   }
-  return true;
+
+  // Consider the max version if at least two components were given.
+  unsigned int max_major = 0;
+  unsigned int max_minor = 0;
+  unsigned int max_patch = 0;
+  unsigned int max_tweak = 0;
+  if (sscanf(version_max.c_str(), "%u.%u.%u.%u", &max_major, &max_minor,
+             &max_patch, &max_tweak) >= 2) {
+    unsigned int current_major = cmVersion::GetMajorVersion();
+    unsigned int current_minor = cmVersion::GetMinorVersion();
+    unsigned int current_patch = cmVersion::GetPatchVersion();
+    unsigned int current_tweak = cmVersion::GetTweakVersion();
+
+    if ((current_major < max_major) ||
+        (current_major == max_major && current_minor < max_minor) ||
+        (current_major == max_major && current_minor == max_minor &&
+         current_patch < max_patch) ||
+        (current_major == max_major && current_minor == max_minor &&
+         current_patch == max_patch && current_tweak < max_tweak)) {
+      // A ...<max> version was given that is larger than the current
+      // version of CMake, so tolerate unknown arguments.
+      return true;
+    }
+  }
+
+  std::ostringstream e;
+  e << "called with unknown argument \"" << this->UnknownArguments[0] << "\".";
+  this->SetError(e.str());
+  return false;
 }
