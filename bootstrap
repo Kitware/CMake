@@ -821,6 +821,11 @@ while test $# != 0; do
   --version) cmake_version_display ; exit 2 ;;
   --verbose) cmake_verbose=TRUE ;;
   --enable-ccache) cmake_ccache_enabled=TRUE ;;
+  CC=*) CC=`cmake_arg "$1"` ;;
+  CXX=*) CXX=`cmake_arg "$1"` ;;
+  CFLAGS=*) CFLAGS=`cmake_arg "$1"` ;;
+  CXXFLAGS=*) CXXFLAGS=`cmake_arg "$1"` ;;
+  LDFLAGS=*) LDFLAGS=`cmake_arg "$1"` ;;
   --) shift; break ;;
   *) die "Unknown option: $1" ;;
   esac
@@ -1535,6 +1540,9 @@ MAKE="${cmake_make_processor}"
 export CC
 export CXX
 export MAKE
+export CFLAGS
+export CXXFLAGS
+export LDFLAGS
 
 # Run bootstrap CMake to configure real CMake
 cmake_options="-DCMAKE_BOOTSTRAP=1"
