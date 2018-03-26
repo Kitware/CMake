@@ -22,6 +22,10 @@ if ((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.0.24215.1 AND
     set(CMAKE_CXX17_STANDARD_COMPILE_OPTION "-std:c++latest")
     set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std:c++latest")
   endif()
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.12.25835)
+    set(CMAKE_CXX20_STANDARD_COMPILE_OPTION "-std:c++latest")
+    set(CMAKE_CXX20_EXTENSION_COMPILE_OPTION "-std:c++latest")
+  endif()
 
   __compiler_check_default_language_standard(CXX 19.0 14)
 
