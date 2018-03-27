@@ -187,7 +187,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(bool useResponseFile)
     std::string responseFlag;
     if (!useResponseFile) {
       vars.Objects = "$in";
-      vars.LinkLibraries = "$LINK_LIBRARIES";
+      vars.LinkLibraries = "$LINK_PATH $LINK_LIBRARIES";
     } else {
       std::string cmakeVarLang = "CMAKE_";
       cmakeVarLang += this->TargetLinkLanguage;
