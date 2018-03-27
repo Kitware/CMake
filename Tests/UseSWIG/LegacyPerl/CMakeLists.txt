@@ -1,7 +1,12 @@
+cmake_minimum_required(VERSION 3.1)
+
+project(TestLegacyPerl CXX)
+
+include(CTest)
 
 set(language "perl")
 
-include (LegacyConfiguration.cmake)
+include (../LegacyConfiguration.cmake)
 
 if (WIN32)
   file (TO_CMAKE_PATH "$ENV{PATH}" perl_path)
@@ -11,8 +16,7 @@ else()
   set (perl_env "LD_LIBRARY_PATH=$<TARGET_FILE_DIR:${SWIG_MODULE_example_REAL_NAME}>")
 endif()
 
-add_custom_target (RunTest
+add_test (NAME LegacyPerl
   COMMAND "${CMAKE_COMMAND}" -E env "${perl_env}"
   "${PERL_EXECUTABLE}" "-I$<TARGET_FILE_DIR:${SWIG_MODULE_example_REAL_NAME}>"
-  "${CMAKE_CURRENT_SOURCE_DIR}/runme.pl"
-  DEPENDS ${SWIG_MODULE_example_REAL_NAME})
+  "${CMAKE_CURRENT_SOURCE_DIR}/../runme.pl")

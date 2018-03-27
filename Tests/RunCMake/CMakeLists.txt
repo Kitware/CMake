@@ -362,11 +362,6 @@ if(CMake_TEST_FindMatlab)
   add_RunCMake_test(FindMatlab)
 endif()
 
-# UseSWIG related tests
-if(CMake_TEST_UseSWIG)
-  add_RunCMake_test(UseSWIG)
-endif()
-
 add_executable(pseudo_emulator pseudo_emulator.c)
 add_executable(pseudo_emulator_custom_command pseudo_emulator_custom_command.c)
 add_RunCMake_test(CrosscompilingEmulator
