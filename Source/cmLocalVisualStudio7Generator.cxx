@@ -2065,6 +2065,15 @@ std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPathSingle(
   return ret;
 }
 
+void cmVS7GeneratorOptions::OutputFlag(std::ostream& fout, const char* indent,
+                                       const char* tag,
+                                       const std::string& content)
+{
+  fout << indent << tag << "=\"";
+  fout << cmLocalVisualStudio7GeneratorEscapeForXML(content);
+  fout << "\"";
+}
+
 // This class is used to parse an existing vs 7 project
 // and extract the GUID
 class cmVS7XMLParser : public cmXMLParser

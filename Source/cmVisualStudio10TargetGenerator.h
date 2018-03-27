@@ -21,7 +21,7 @@ class cmLocalVisualStudio7Generator;
 class cmMakefile;
 class cmSourceFile;
 class cmSourceGroup;
-class cmVisualStudioGeneratorOptions;
+class cmVS10GeneratorOptions;
 
 class cmVisualStudio10TargetGenerator
 {
@@ -176,7 +176,7 @@ private:
   void GetCSharpSourceLink(cmSourceFile const* sf, std::string& link);
 
 private:
-  typedef cmVisualStudioGeneratorOptions Options;
+  typedef cmVS10GeneratorOptions Options;
   typedef std::map<std::string, std::unique_ptr<Options>> OptionsMap;
   OptionsMap ClOptions;
   OptionsMap RcOptions;

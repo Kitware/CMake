@@ -4,47 +4,19 @@
 #include "cmLocalVisualStudioGenerator.h"
 #include "cmOutputConverter.h"
 #include "cmSystemTools.h"
-#include "cmVisualStudio10TargetGenerator.h"
 
 static void cmVS10EscapeForMSBuild(std::string& ret)
 {
   cmSystemTools::ReplaceString(ret, ";", "%3B");
 }
 
-static std::string cmVisualStudio10GeneratorOptionsEscapeForXML(
-  std::string ret)
-{
-  cmSystemTools::ReplaceString(ret, "&", "&amp;");
-  cmSystemTools::ReplaceString(ret, "<", "&lt;");
-  cmSystemTools::ReplaceString(ret, ">", "&gt;");
-  return ret;
-}
-
-static std::string cmVisualStudioGeneratorOptionsEscapeForXML(std::string ret)
-{
-  cmSystemTools::ReplaceString(ret, "&", "&amp;");
-  cmSystemTools::ReplaceString(ret, "\"", "&quot;");
-  cmSystemTools::ReplaceString(ret, "<", "&lt;");
-  cmSystemTools::ReplaceString(ret, ">", "&gt;");
-  cmSystemTools::ReplaceString(ret, "\n", "&#x0D;&#x0A;");
-  return ret;
-}
-
-cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
-  cmLocalVisualStudioGenerator* lg, Tool tool,
-  cmVisualStudio10TargetGenerator* g)
-  : cmVisualStudioGeneratorOptions(lg, tool, nullptr, nullptr, g)
-{
-}
-
 cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
   cmLocalVisualStudioGenerator* lg, Tool tool, cmVS7FlagTable const* table,
-  cmVS7FlagTable const* extraTable, cmVisualStudio10TargetGenerator* g)
+  cmVS7FlagTable const* extraTable)
   : cmIDEOptions()
   , LocalGenerator(lg)
   , Version(lg->GetVersion())
   , CurrentTool(tool)
-  , TargetGenerator(g)
 {
   // Store the given flag tables.
   this->AddTable(table);
@@ -444,28 +416,9 @@ void cmVisualStudioGeneratorOptions::SetConfiguration(
   this->Configuration = config;
 }
 
-void cmVisualStudioGeneratorOptions::OutputFlag(std::ostream& fout,
-                                                const char* indent,
-                                                const char* tag,
-                                                const std::string& content)
+const std::string& cmVisualStudioGeneratorOptions::GetConfiguration() const
 {
-  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-    if (!this->Configuration.empty()) {
-      // if there are configuration specific flags, then
-      // use the configuration specific tag for PreprocessorDefinitions
-      fout << indent;
-      this->TargetGenerator->WritePlatformConfigTag(tag, this->Configuration,
-                                                    0, 0, 0, &fout);
-    } else {
-      fout << indent << "<" << tag << ">";
-    }
-    fout << cmVisualStudio10GeneratorOptionsEscapeForXML(content);
-    fout << "</" << tag << ">";
-  } else {
-    fout << indent << tag << "=\"";
-    fout << cmVisualStudioGeneratorOptionsEscapeForXML(content);
-    fout << "\"";
-  }
+  return this->Configuration;
 }
 
 void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
