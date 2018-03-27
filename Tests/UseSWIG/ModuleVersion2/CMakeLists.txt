@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestMultiplePython CXX)
+project(TestModuleVersion2 CXX)
 
 include(CTest)
 
@@ -10,6 +10,7 @@ include(${SWIG_USE_FILE})
 find_package(Python2 REQUIRED COMPONENTS Interpreter Development)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
+set (UseSWIG_MODULE_VERSION 2)
 unset(CMAKE_SWIG_FLAGS)
 
 set_property(SOURCE "../example.i" PROPERTY CPLUSPLUS ON)
@@ -20,7 +21,6 @@ set_property(SOURCE "../example.i"
 
 swig_add_library(example1
                  LANGUAGE python
-                 OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/Python2"
                  SOURCES ../example.i ../example.cxx)
 set_target_properties (example1 PROPERTIES
   OUTPUT_NAME example
@@ -32,7 +32,6 @@ target_link_libraries(example1 PRIVATE Python2::Python)
 # re-use sample interface file for another plugin
 swig_add_library(example2
                  LANGUAGE python
-                 OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/Python3"
                  SOURCES ../example.i ../example.cxx)
 set_target_properties (example2 PROPERTIES
   OUTPUT_NAME example
@@ -42,11 +41,16 @@ set_target_properties (example2 PROPERTIES
 target_link_libraries(example2 PRIVATE Python3::Python)
 
 
+if (WIN32)
+  set (PS $<SEMICOLON>)
+else()
+  set (PS ":")
+endif()
 
-add_test (NAME MultiplePython.example1
-  COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:example1>"
+add_test (NAME ModuleVersion2.example1
+  COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_PROPERTY:example1,SWIG_SUPPORT_FILES_DIRECTORY>${PS}$<TARGET_FILE_DIR:example1>"
   "${Python2_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/../runme.py")
 
-add_test (NAME MultiplePython.example2
-  COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:example2>"
+add_test (NAME ModuleVersion2.example2
+  COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_PROPERTY:example2,SWIG_SUPPORT_FILES_DIRECTORY>${PS}$<TARGET_FILE_DIR:example2>"
   "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/../runme.py")

@@ -5,7 +5,10 @@
 UseSWIG
 -------
 
-Defines the following command for use with SWIG:
+This file provides support for ``SWIG``. It is assumed that :module:`FindSWIG`
+module has already been loaded.
+
+Defines the following command for use with ``SWIG``:
 
 .. command:: swig_add_library
 
@@ -20,17 +23,19 @@ Defines the following command for use with SWIG:
                      SOURCES <file>...
                     )
 
-  Targets created with command ``swig_add_library`` have the same capabilities as targets
-  created with command :command:`add_library`, so can be used with any command accepting a target
-  especially command :command:`target_link_libraries`.
+  Targets created with the ``swig_add_library`` command have the same
+  capabilities as targets created with the :command:`add_library` command, so
+  those targets can be used with any command expecting a target (e.g.
+  :command:`target_link_libraries`).
 
   The arguments are:
 
   ``TYPE``
-    ``SHARED``, ``MODULE`` and ``STATIC`` have same semantic as command :command:`add_library`.
-    if ``USE_BUILD_SHARED_LIBS`` is specified, library type will be ``STATIC`` or ``SHARED``
-    based on whether the current value of the variable :variable:`BUILD_SHARED_LIBS` is ``ON``.
-    If none is specified, ``MODULE`` will be used.
+    ``SHARED``, ``MODULE`` and ``STATIC`` have the same semantic as for the
+    :command:`add_library` command. If ``USE_BUILD_SHARED_LIBS`` is specified,
+    the library type will be ``STATIC`` or ``SHARED`` based on whether the
+    current value of the :variable:`BUILD_SHARED_LIBS` variable is ``ON``. If
+    no type is specified, ``MODULE`` will be used.
 
   ``LANGUAGE``
     Specify the target language.
@@ -39,22 +44,40 @@ Defines the following command for use with SWIG:
     Prevent the generation of the wrapper layer (swig ``-noproxy`` option).
 
   ``OUTPUT_DIR``
-    Specify where to write the language specific files (swig ``-outdir`` option).
-    If not specified, variable ``CMAKE_SWIG_OUTDIR`` will be used. If none is specified,
-    :variable:`CMAKE_CURRENT_BINARY_DIR` is used.
+    Specify where to write the language specific files (swig ``-outdir``
+    option). If not given, the ``CMAKE_SWIG_OUTDIR`` variable will be used.
+    If neither is specified, the default depends on the value of the
+    ``UseSWIG_MODULE_VERSION`` variable as follows:
+
+    * If ``UseSWIG_MODULE_VERSION`` is 1 or is undefined, output is written to
+      the :variable:`CMAKE_CURRENT_BINARY_DIR` directory.
+    * If ``UseSWIG_MODULE_VERSION`` is 2, a dedicated directory will be used.
+      The path of this directory can be retrieved from the
+      ``SWIG_SUPPORT_FILES_DIRECTORY`` target property.
 
   ``OUTFILE_DIR``
-    Specify an output directory name where the generated source file will be placed
-    (swig -o option). If not specified, variable ``SWIG_OUTFILE_DIR`` will be used.
-    If none is specified, option ``OUTPUT_DIR`` or variable ``CMAKE_SWIG_OUTDIR`` is used.
+    Specify an output directory name where the generated source file will be
+    placed (swig -o option). If not specified, the ``SWIG_OUTFILE_DIR`` variable
+    will be used. If neither is specified, ``OUTPUT_DIR`` or
+    ``CMAKE_SWIG_OUTDIR`` is used instead.
 
   ``SOURCES``
-    List of sources for the library. Files with extension ``.i`` will be identified as sources
-    for ``SWIG`` tool. Other files will be handled in the standard way.
+    List of sources for the library. Files with extension ``.i`` will be
+    identified as sources for the ``SWIG`` tool. Other files will be handled in
+    the standard way.
 
-Source files properties on module files **must** be set before the invocation
-of the ``swig_add_library`` command to specify special behavior of SWIG and ensure
-generated files will receive required settings.
+.. note::
+
+  If ``UseSWIG_MODULE_VERSION`` is set to 2, it is **strongly** recommended
+  to use a dedicated directory unique to the target when either the
+  ``OUTPUT_DIR`` option or the ``CMAKE_SWIG_OUTDIR`` variable are specified.
+  The output directory contents are erased as part of the target build, so
+  to prevent interference between targets or losing other important files, each
+  target should have its own dedicated output directory.
+
+Source file properties on module files **must** be set before the invocation
+of the ``swig_add_library`` command to specify special behavior of SWIG and
+ensure generated files will receive the required settings.
 
 ``CPLUSPLUS``
   Call SWIG in c++ mode.  For example:
@@ -66,7 +89,8 @@ generated files will receive required settings.
 
 ``INCLUDE_DIRECTORIES``, ``COMPILE_DEFINITIONS`` and ``COMPILE_OPTIONS``
   Add custom flags to SWIG compiler and have same semantic as properties
-  :prop_sf:`INCLUDE_DIRECTORIES`, :prop_sf:`COMPILE_DEFINITIONS` and :prop_sf:`COMPILE_OPTIONS`.
+  :prop_sf:`INCLUDE_DIRECTORIES`, :prop_sf:`COMPILE_DEFINITIONS` and
+  :prop_sf:`COMPILE_OPTIONS`.
 
 ``GENERATED_INCLUDE_DIRECTORIES``, ``GENERATED_COMPILE_DEFINITIONS`` and ``GENERATED_COMPILE_OPTIONS``
   Add custom flags to the C/C++ generated source. They will fill, respectively,
@@ -85,12 +109,13 @@ generated files will receive required settings.
 
     set_property(SOURCE mymod.i PROPERTY SWIG_MODULE_NAME mymod_realname)
 
-Target library properties can be set to apply same configuration to all SWIG input files.
+Target library properties can be set to apply same configuration to all SWIG
+input files.
 
 ``SWIG_INCLUDE_DIRECTORIES``, ``SWIG_COMPILE_DEFINITIONS`` and ``SWIG_COMPILE_OPTIONS``
-  These properties will be applied to all SWIG input files and have same semantic as
-  target properties :prop_tgt:`INCLUDE_DIRECTORIES`, :prop_tgt:`COMPILE_DEFINITIONS` and
-  :prop_tgt:`COMPILE_OPTIONS`.
+  These properties will be applied to all SWIG input files and have same
+  semantic as target properties :prop_tgt:`INCLUDE_DIRECTORIES`,
+  :prop_tgt:`COMPILE_DEFINITIONS` and :prop_tgt:`COMPILE_OPTIONS`.
 
   .. code-block:: cmake
 
@@ -99,11 +124,15 @@ Target library properties can be set to apply same configuration to all SWIG inp
     set_property(TARGET mymod PROPERTY SWIG_COMPILE_OPTIONS -bla -blb)
 
 ``SWIG_GENERATED_INCLUDE_DIRECTORIES``, ``SWIG_GENERATED_COMPILE_DEFINITIONS`` and ``SWIG_GENERATED_COMPILE_OPTIONS``
-  These properties will populate, respectively, properties :prop_sf:`INCLUDE_DIRECTORIES`,
-  :prop_sf:`COMPILE_DEFINITIONS` and :prop_sf:`COMPILE_FLAGS` of all generated C/C++ files.
+  These properties will populate, respectively, properties
+  :prop_sf:`INCLUDE_DIRECTORIES`, :prop_sf:`COMPILE_DEFINITIONS` and
+  :prop_sf:`COMPILE_FLAGS` of all generated C/C++ files.
 
 ``SWIG_DEPENDS``
   Add dependencies to all SWIG input files.
+
+The following target properties are output properties and can be used to get
+information about support files generated by ``SWIG`` interface compilation.
 
 ``SWIG_SUPPORT_FILES``
   This output property list of wrapper files generated during SWIG compilation.
@@ -113,7 +142,26 @@ Target library properties can be set to apply same configuration to all SWIG inp
     swig_add_library(mymod LANGUAGE python SOURCES mymod.i)
     get_property(support_files TARGET mymod PROPERTY SWIG_SUPPORT_FILES)
 
-Some variables can be set to specify special behavior of SWIG:
+  .. note::
+
+    Only most principal support files are listed. In case some advanced
+    features of ``SWIG`` are used (for example ``%template``), associated
+    support files may not be listed. Prefer to use the
+    ``SWIG_SUPPORT_FILES_DIRECTORY`` property to handle support files.
+
+``SWIG_SUPPORT_FILES_DIRECTORY``
+  This output property specifies the directory where support files will be
+  generated.
+
+Some variables can be set to customize the behavior of ``swig_add_library``
+as well as ``SWIG``:
+
+``UseSWIG_MODULE_VERSION``
+  Specify different behaviors for ``UseSWIG`` module.
+
+  * Set to 1 or undefined: Legacy behavior is applied.
+  * Set to 2: A new strategy is applied regarding support files: the output
+    directory of support files is erased before ``SWIG`` interface compilation.
 
 ``CMAKE_SWIG_FLAGS``
   Add flags to all swig calls.
@@ -158,7 +206,6 @@ macro(SWIG_MODULE_INITIALIZE name language)
   string(TOUPPER "${language}" SWIG_MODULE_${name}_LANGUAGE)
   string(TOLOWER "${language}" SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG)
 
-  set(SWIG_MODULE_${name}_NAME "${name}")
   set(SWIG_MODULE_${name}_EXTRA_FLAGS)
   if (NOT DEFINED SWIG_MODULE_${name}_NOPROXY)
     set (SWIG_MODULE_${name}_NOPROXY FALSE)
@@ -172,11 +219,6 @@ macro(SWIG_MODULE_INITIALIZE name language)
   endif()
   if(SWIG_MODULE_${name}_LANGUAGE STREQUAL "UNKNOWN")
     message(FATAL_ERROR "SWIG Error: Language \"${language}\" not found")
-  elseif(SWIG_MODULE_${name}_LANGUAGE STREQUAL "PYTHON" AND NOT SWIG_MODULE_${name}_NOPROXY)
-    # swig will produce a module.py containing an 'import _modulename' statement,
-    # which implies having a corresponding _modulename.so (*NIX), _modulename.pyd (Win32),
-    # unless the -noproxy flag is used
-    set(SWIG_MODULE_${name}_NAME "_${name}")
   elseif(SWIG_MODULE_${name}_LANGUAGE STREQUAL "PERL")
     list(APPEND SWIG_MODULE_${name}_EXTRA_FLAGS "-shadow")
   endif()
@@ -332,6 +374,14 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     list (APPEND swig_dependencies ${file_depends})
   endif()
 
+  if (UseSWIG_MODULE_VERSION VERSION_EQUAL 2)
+    # as part of custom command, start by removing old generated files
+    # to ensure obsolete files do not stay
+    set (swig_cleanup_command COMMAND "${CMAKE_COMMAND}" -E remove_directory "${outdir}")
+  else()
+    unset (swig_cleanup_command)
+  endif()
+
   # IMPLICIT_DEPENDS below can not handle situations where a dependent file is
   # removed. We need an extra step with timestamp and custom target, see #16830
   # As this is needed only for Makefile generator do it conditionally
@@ -352,10 +402,11 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   add_custom_command(
     OUTPUT ${swig_custom_output}
     ${swig_custom_products}
+    ${swig_cleanup_command}
     # Let's create the ${outdir} at execution time, in case dir contains $(OutDir)
     COMMAND "${CMAKE_COMMAND}" -E make_directory ${outdir} ${outfiledir}
     ${swig_timestamp_command}
-    COMMAND "${SWIG_EXECUTABLE}"
+    COMMAND "${CMAKE_COMMAND}" -E env "SWIG_LIB=${SWIG_DIR}" "${SWIG_EXECUTABLE}"
     "-${SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG}"
     "${swig_source_file_flags}"
     -outdir "${outdir}"
@@ -434,6 +485,12 @@ function(SWIG_ADD_LIBRARY name)
     unset(_SAM_TYPE)
   endif()
 
+  if (NOT DEFINED UseSWIG_MODULE_VERSION)
+    set (UseSWIG_MODULE_VERSION 1)
+  elseif (NOT UseSWIG_MODULE_VERSION MATCHES "^(1|2)$")
+    message (FATAL_ERROR "UseSWIG_MODULE_VERSION: ${UseSWIG_MODULE_VERSION}: invalid value. 1 or 2 is expected.")
+  endif()
+
   set (workingdir "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${name}.dir")
   # set special variable to pass extra information to command SWIG_ADD_SOURCE_TO_MODULE
   # which cannot be changed due to legacy compatibility
@@ -444,7 +501,11 @@ function(SWIG_ADD_LIBRARY name)
     if (CMAKE_SWIG_OUTDIR)
       set (outputdir "${CMAKE_SWIG_OUTDIR}")
     else()
-      set (outputdir "${CMAKE_CURRENT_BINARY_DIR}")
+      if (UseSWIG_MODULE_VERSION VERSION_EQUAL 2)
+        set (outputdir "${workingdir}/${_SAM_LANGUAGE}.files")
+      else()
+        set (outputdir "${CMAKE_CURRENT_BINARY_DIR}")
+      endif()
     endif()
   endif()
 
@@ -470,6 +531,9 @@ function(SWIG_ADD_LIBRARY name)
 
   set(swig_dot_i_sources ${_SAM_SOURCES})
   list(FILTER swig_dot_i_sources INCLUDE REGEX "\\.i$")
+  if (NOT swig_dot_i_sources)
+    message(FATAL_ERROR "SWIG_ADD_LIBRARY: no SWIG interface files specified")
+  endif()
   set(swig_other_sources ${_SAM_SOURCES})
   list(REMOVE_ITEM swig_other_sources ${swig_dot_i_sources})
 
@@ -486,12 +550,14 @@ function(SWIG_ADD_LIBRARY name)
   endforeach()
   set_property (DIRECTORY APPEND PROPERTY
     ADDITIONAL_MAKE_CLEAN_FILES ${swig_generated_sources} ${swig_generated_timestamps})
+  if (UseSWIG_MODULE_VERSION VERSION_EQUAL 2)
+    set_property (DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${outputdir}")
+  endif()
 
   add_library(${name}
     ${_SAM_TYPE}
     ${swig_generated_sources}
     ${swig_other_sources})
-  set_target_properties(${name} PROPERTIES OUTPUT_NAME "${SWIG_MODULE_${name}_NAME}")
   if(CMAKE_GENERATOR MATCHES "Make")
     # see IMPLICIT_DEPENDS above
     add_custom_target(${name}_swig_compilation DEPENDS ${swig_generated_timestamps})
@@ -524,8 +590,14 @@ function(SWIG_ADD_LIBRARY name)
       set_target_properties(${name} PROPERTIES PREFIX "")
     endif()
   elseif (swig_lowercase_language STREQUAL "python")
-    # this is only needed for the python case where a _modulename.so is generated
-    set_target_properties(${name} PROPERTIES PREFIX "")
+    if (SWIG_MODULE_${name}_NOPROXY)
+      set_target_properties(${name} PROPERTIES PREFIX "")
+    else()
+      # swig will produce a module.py containing an 'import _modulename' statement,
+      # which implies having a corresponding _modulename.so (*NIX), _modulename.pyd (Win32),
+      # unless the -noproxy flag is used
+      set_target_properties(${name} PROPERTIES PREFIX "_")
+    endif()
     # Python extension modules on Windows must have the extension ".pyd"
     # instead of ".dll" as of Python 2.5.  Older python versions do support
     # this suffix.
@@ -560,7 +632,10 @@ function(SWIG_ADD_LIBRARY name)
     # assume empty prefix because we expect the module to be dynamically loaded
     set_target_properties (${name} PROPERTIES PREFIX "")
   endif ()
-  # target property SWIG_SUPPORT_FILES lists proxy support files
+
+  # target property SWIG_SUPPORT_FILES_DIRECTORY specify output directory of support files
+  set_property (TARGET ${name} PROPERTY SWIG_SUPPORT_FILES_DIRECTORY "${outputdir}")
+  # target property SWIG_SUPPORT_FILES lists principal proxy support files
   if (NOT SWIG_MODULE_${name}_NOPROXY)
     string(TOUPPER "${_SAM_LANGUAGE}" swig_uppercase_language)
     set(swig_all_support_files)
@@ -572,7 +647,7 @@ function(SWIG_ADD_LIBRARY name)
     if (swig_all_support_files)
       list(REMOVE_DUPLICATES swig_all_support_files)
     endif()
-    set_property (TARGET ${name} APPEND PROPERTY SWIG_SUPPORT_FILES ${swig_all_support_files})
+    set_property (TARGET ${name} PROPERTY SWIG_SUPPORT_FILES ${swig_all_support_files})
   endif()
 
   # to ensure legacy behavior, export some variables
