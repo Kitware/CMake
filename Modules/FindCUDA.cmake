@@ -733,16 +733,20 @@ endif()
 
 
 # CUDA_NVCC_EXECUTABLE
-cuda_find_host_program(CUDA_NVCC_EXECUTABLE
-  NAMES nvcc
-  PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
-  ENV CUDA_PATH
-  ENV CUDA_BIN_PATH
-  PATH_SUFFIXES bin bin64
-  NO_DEFAULT_PATH
-  )
-# Search default search paths, after we search our own set of paths.
-cuda_find_host_program(CUDA_NVCC_EXECUTABLE nvcc)
+if(DEFINED ENV{CUDA_NVCC_EXECUTABLE})
+  set(CUDA_NVCC_EXECUTABLE "$ENV{CUDA_NVCC_EXECUTABLE}" CACHE FILEPATH "The CUDA compiler")
+else()
+  cuda_find_host_program(CUDA_NVCC_EXECUTABLE
+    NAMES nvcc
+    PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
+    ENV CUDA_PATH
+    ENV CUDA_BIN_PATH
+    PATH_SUFFIXES bin bin64
+    NO_DEFAULT_PATH
+    )
+  # Search default search paths, after we search our own set of paths.
+  cuda_find_host_program(CUDA_NVCC_EXECUTABLE nvcc)
+endif()
 mark_as_advanced(CUDA_NVCC_EXECUTABLE)
 
 if(CUDA_NVCC_EXECUTABLE AND NOT CUDA_VERSION)
