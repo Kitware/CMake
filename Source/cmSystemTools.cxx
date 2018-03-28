@@ -550,12 +550,13 @@ std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
 
   bool win_path = false;
 
-  if ((command[0] != '/' && command[1] == ':' && command[2] == '\\') ||
-      (command[0] == '\"' && command[1] != '/' && command[2] == ':' &&
-       command[3] == '\\') ||
-      (command[0] == '\'' && command[1] != '/' && command[2] == ':' &&
-       command[3] == '\\') ||
-      (command[0] == '\\' && command[1] == '\\')) {
+  if (command[0] && command[1] &&
+      ((command[0] != '/' && command[1] == ':' && command[2] == '\\') ||
+       (command[0] == '\"' && command[1] != '/' && command[2] == ':' &&
+        command[3] == '\\') ||
+       (command[0] == '\'' && command[1] != '/' && command[2] == ':' &&
+        command[3] == '\\') ||
+       (command[0] == '\\' && command[1] == '\\'))) {
     win_path = true;
   }
   // Split the command into an argv array.
