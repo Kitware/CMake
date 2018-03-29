@@ -34,8 +34,7 @@ public:
   void Generate();
   // used by cmVisualStudioGeneratorOptions
   void WritePlatformConfigTag(const char* tag, const std::string& config,
-                              int indentLevel, const char* attribute = 0,
-                              const char* end = 0, std::ostream* strm = 0);
+                              int indentLevel, const char* attribute = 0);
 
 private:
   struct ToolSource

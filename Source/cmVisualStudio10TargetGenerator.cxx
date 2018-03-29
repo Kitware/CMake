@@ -86,12 +86,12 @@ public:
       // use the configuration specific tag for PreprocessorDefinitions
       fout << indent;
       this->TargetGenerator->WritePlatformConfigTag(
-        tag, this->GetConfiguration(), 0, 0, 0, &fout);
+        tag, this->GetConfiguration(), 0);
     } else {
       fout << indent << "<" << tag << ">";
     }
     fout << cmVS10EscapeXML(content);
-    fout << "</" << tag << ">";
+    fout << "</" << tag << ">\n";
   }
 
 private:
@@ -218,12 +218,10 @@ cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
 
 void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
   const char* tag, const std::string& config, int indentLevel,
-  const char* attribute, const char* end, std::ostream* stream)
+  const char* attribute)
 
 {
-  if (!stream) {
-    stream = this->BuildFileStream;
-  }
+  std::ostream* stream = this->BuildFileStream;
   stream->fill(' ');
   stream->width(indentLevel * 2);
   (*stream) << ""; // applies indentation
@@ -244,8 +242,8 @@ void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
   }
   // close the tag
   (*stream) << ">";
-  if (end) {
-    (*stream) << end;
+  if (attribute) {
+    (*stream) << "\n";
   }
 }
 
@@ -972,7 +970,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 {
   for (std::string const& c : this->Configurations) {
     this->WritePlatformConfigTag("PropertyGroup", c, 1,
-                                 " Label=\"Configuration\"", "\n");
+                                 " Label=\"Configuration\"");
 
     if (this->ProjectType != csproj) {
       std::string configType = "<ConfigurationType>";
@@ -1312,8 +1310,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCSharp(
   attributes << "\n    Name=\"" << name << "\"";
   attributes << "\n    Inputs=\"" << inputs << "\"";
   attributes << "\n    Outputs=\"" << outputs << "\"";
-  this->WritePlatformConfigTag("Target", config, 1, attributes.str().c_str(),
-                               "\n");
+  this->WritePlatformConfigTag("Target", config, 1, attributes.str().c_str());
   if (!comment.empty()) {
     this->WriteString("<Exec Command=\"", 2);
     (*this->BuildFileStream) << "echo " << cmVS10EscapeXML(comment)
@@ -2127,10 +2124,10 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       clOptions.SetConfiguration(config);
       clOptions.PrependInheritedString("AdditionalOptions");
       clOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
-                                                   "      ", "\n", lang);
+                                                   "      ", lang);
       clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
       clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                              "\n", lang);
+                                              lang);
     }
   }
   if (this->IsXamlSource(source->GetFullPath())) {
@@ -2486,10 +2483,10 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   this->WriteString("<ClCompile>\n", 2);
   clOptions.PrependInheritedString("AdditionalOptions");
   clOptions.OutputAdditionalIncludeDirectories(
-    *this->BuildFileStream, "      ", "\n", this->LangForClCompile);
+    *this->BuildFileStream, "      ", this->LangForClCompile);
   clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                          "\n", this->LangForClCompile);
+                                          this->LangForClCompile);
 
   if (this->NsightTegra) {
     if (const char* processMax =
@@ -2575,9 +2572,9 @@ void cmVisualStudio10TargetGenerator::WriteRCOptions(
 
   Options& rcOptions = *(this->RcOptions[configName]);
   rcOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                          "\n", "RC");
+                                          "RC");
   rcOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
-                                               "      ", "\n", "RC");
+                                               "      ", "RC");
   rcOptions.PrependInheritedString("AdditionalOptions");
   rcOptions.OutputFlagMap(*this->BuildFileStream, "      ");
 
@@ -2711,9 +2708,9 @@ void cmVisualStudio10TargetGenerator::WriteCudaOptions(
 
   Options& cudaOptions = *(this->CudaOptions[configName]);
   cudaOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
-                                                 "      ", "\n", "CUDA");
+                                                 "      ", "CUDA");
   cudaOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                            "\n", "CUDA");
+                                            "CUDA");
   cudaOptions.PrependInheritedString("AdditionalOptions");
   cudaOptions.OutputFlagMap(*this->BuildFileStream, "      ");
 
@@ -2836,11 +2833,11 @@ void cmVisualStudio10TargetGenerator::WriteMasmOptions(
   // Preprocessor definitions and includes are shared with clOptions.
   Options& clOptions = *(this->ClOptions[configName]);
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                          "\n", "ASM_MASM");
+                                          "ASM_MASM");
 
   Options& masmOptions = *(this->MasmOptions[configName]);
   masmOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
-                                                 "      ", "\n", "ASM_MASM");
+                                                 "      ", "ASM_MASM");
   masmOptions.PrependInheritedString("AdditionalOptions");
   masmOptions.OutputFlagMap(*this->BuildFileStream, "      ");
 
@@ -2897,16 +2894,16 @@ void cmVisualStudio10TargetGenerator::WriteNasmOptions(
     this->GetIncludes(configName, "ASM_NASM");
   Options& nasmOptions = *(this->NasmOptions[configName]);
   nasmOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
-                                                 "      ", "\n", "ASM_NASM");
+                                                 "      ", "ASM_NASM");
   nasmOptions.OutputFlagMap(*this->BuildFileStream, "      ");
   nasmOptions.PrependInheritedString("AdditionalOptions");
   nasmOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                            "\n", "ASM_NASM");
+                                            "ASM_NASM");
 
   // Preprocessor definitions and includes are shared with clOptions.
   Options& clOptions = *(this->ClOptions[configName]);
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                          "\n", "ASM_NASM");
+                                          "ASM_NASM");
 
   this->WriteString("</NASM>\n", 2);
 }
