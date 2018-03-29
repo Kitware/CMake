@@ -721,12 +721,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
     return;
   }
 
-  {
-    cmTarget::LibraryID tmp;
-    tmp.first = lib;
-    tmp.second = llt;
-    this->OriginalLinkLibraries.emplace_back(lib, llt);
-  }
+  this->OriginalLinkLibraries.emplace_back(lib, llt);
 
   // Add the explicit dependency information for libraries. This is
   // simply a set of libraries separated by ";". There should always
