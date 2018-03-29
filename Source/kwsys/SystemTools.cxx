@@ -3344,14 +3344,19 @@ std::string SystemTools::RelativePath(const std::string& local,
 static std::string GetCasePathName(std::string const& pathIn)
 {
   std::string casePath;
-  std::vector<std::string> path_components;
-  SystemTools::SplitPath(pathIn, path_components);
-  if (path_components[0].empty()) // First component always exists.
-  {
-    // Relative paths cannot be converted.
+
+  // First check if the file is relative. We don't fix relative paths since the
+  // real case depends on the root directory and the given path fragment may
+  // have meaning elsewhere in the project.
+  if (!SystemTools::FileIsFullPath(pathIn)) {
+    // This looks unnecessary, but it allows for the return value optimization
+    // since all return paths return the same local variable.
     casePath = pathIn;
     return casePath;
   }
+
+  std::vector<std::string> path_components;
+  SystemTools::SplitPath(pathIn, path_components);
 
   // Start with root component.
   std::vector<std::string>::size_type idx = 0;
