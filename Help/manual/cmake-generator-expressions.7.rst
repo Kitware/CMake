@@ -274,6 +274,9 @@ Available output expressions are:
   Marks ``...`` as being the name of a target.  This is required if exporting
   targets to multiple dependent export sets.  The ``...`` must be a literal
   name of a target- it may not contain generator expressions.
+``$<TARGET_NAME_IF_EXISTS:...>``
+  Expands to the ``...`` if the given target exists, an empty string
+  otherwise.
 ``$<LINK_ONLY:...>``
   Content of ``...`` except when evaluated in a link interface while
   propagating :ref:`Target Usage Requirements`, in which case it is the
