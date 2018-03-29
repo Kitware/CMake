@@ -738,29 +738,29 @@ static bool CheckGetPath()
 #endif
   const char* registryPath = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MyApp; MyKey]";
 
-  std::vector<std::string> originalPathes;
-  originalPathes.push_back(registryPath);
+  std::vector<std::string> originalPaths;
+  originalPaths.push_back(registryPath);
 
-  std::vector<std::string> expectedPathes;
-  expectedPathes.push_back(registryPath);
+  std::vector<std::string> expectedPaths;
+  expectedPaths.push_back(registryPath);
 #ifdef _WIN32
-  expectedPathes.push_back("C:/Somewhere/something");
-  expectedPathes.push_back("D:/Temp");
+  expectedPaths.push_back("C:/Somewhere/something");
+  expectedPaths.push_back("D:/Temp");
 #else
-  expectedPathes.push_back("/Somewhere/something");
-  expectedPathes.push_back("/tmp");
+  expectedPaths.push_back("/Somewhere/something");
+  expectedPaths.push_back("/tmp");
 #endif
 
   bool res = true;
   res &= CheckPutEnv(std::string(envName) + "=" + envValue, envName, envValue);
 
-  std::vector<std::string> pathes = originalPathes;
-  kwsys::SystemTools::GetPath(pathes, envName);
+  std::vector<std::string> paths = originalPaths;
+  kwsys::SystemTools::GetPath(paths, envName);
 
-  if (pathes != expectedPathes) {
-    std::cerr << "GetPath(" << StringVectorToString(originalPathes) << ", "
-              << envName << ")  yielded " << StringVectorToString(pathes)
-              << " instead of " << StringVectorToString(expectedPathes)
+  if (paths != expectedPaths) {
+    std::cerr << "GetPath(" << StringVectorToString(originalPaths) << ", "
+              << envName << ")  yielded " << StringVectorToString(paths)
+              << " instead of " << StringVectorToString(expectedPaths)
               << std::endl;
     res = false;
   }
