@@ -447,8 +447,8 @@ void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
           this->TargetFolderBuildStreams.find(folderName)) {
         this->AddFilesUpToPath(
           GetBuildFileStream(), &this->TargetFolderBuildStreams,
-          this->GetCMakeInstance()->GetHomeOutputDirectory(), folderName,
-          GhsMultiGpj::PROJECT);
+          this->GetCMakeInstance()->GetHomeOutputDirectory().c_str(),
+          folderName, GhsMultiGpj::PROJECT);
       }
       std::vector<cmsys::String> splitPath = cmSystemTools::SplitString(
         cmGhsMultiTargetGenerator::GetRelBuildFileName(tgt));

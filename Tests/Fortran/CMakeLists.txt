@@ -123,7 +123,7 @@ else()
   message("Fortran = ${CMAKE_Fortran_COMPILER_ID}")
   message("C = ${CMAKE_C_COMPILER_ID}")
   # hack to make g77 work after CL has been enabled
-  # as a languge, cmake needs language specific versions
+  # as a language, cmake needs language specific versions
   # of these variables....
   if(WIN32 AND CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CREATE_CONSOLE_EXE )

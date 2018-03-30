@@ -132,8 +132,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
     if (this->ImportLibrary) {
       std::string from1 = fromDirConfig + targetNameImport;
       std::string to1 = toDir + targetNameImport;
-      filesFrom.push_back(from1);
-      filesTo.push_back(to1);
+      filesFrom.push_back(std::move(from1));
+      filesTo.push_back(std::move(to1));
       std::string targetNameImportLib;
       if (this->Target->GetImplibGNUtoMS(targetNameImport,
                                          targetNameImportLib)) {
@@ -167,7 +167,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
         to1 += ".";
         to1 += ext;
         to1 += "/";
-        if (!mf->PlatformIsAppleIos()) {
+        if (!mf->PlatformIsAppleEmbedded()) {
           to1 += "Contents/MacOS/";
         }
         to1 += targetName;
@@ -176,13 +176,13 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
         if (targetNameReal != targetName) {
           std::string from2 = fromDirConfig + targetNameReal;
           std::string to2 = toDir += targetNameReal;
-          filesFrom.push_back(from2);
-          filesTo.push_back(to2);
+          filesFrom.push_back(std::move(from2));
+          filesTo.push_back(std::move(to2));
         }
       }
 
-      filesFrom.push_back(from1);
-      filesTo.push_back(to1);
+      filesFrom.push_back(std::move(from1));
+      filesTo.push_back(std::move(to1));
     }
   } else {
     std::string targetName;
@@ -198,8 +198,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
 
       std::string from1 = fromDirConfig + targetNameImport;
       std::string to1 = toDir + targetNameImport;
-      filesFrom.push_back(from1);
-      filesTo.push_back(to1);
+      filesFrom.push_back(std::move(from1));
+      filesTo.push_back(std::move(to1));
       std::string targetNameImportLib;
       if (this->Target->GetImplibGNUtoMS(targetNameImport,
                                          targetNameImportLib)) {
@@ -223,8 +223,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       // Tweaks apply to the binary inside the bundle.
       std::string to1 = toDir + targetNameReal;
 
-      filesFrom.push_back(from1);
-      filesTo.push_back(to1);
+      filesFrom.push_back(std::move(from1));
+      filesTo.push_back(std::move(to1));
     } else if (this->Target->IsCFBundleOnApple()) {
       // Install the whole app bundle directory.
       type = cmInstallType_DIRECTORY;
@@ -235,8 +235,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       std::string from1 = fromDirConfig + targetNameBase;
       std::string to1 = toDir + targetName;
 
-      filesFrom.push_back(from1);
-      filesTo.push_back(to1);
+      filesFrom.push_back(std::move(from1));
+      filesTo.push_back(std::move(to1));
     } else {
       bool haveNamelink = false;
 
@@ -796,7 +796,7 @@ void cmInstallTargetGenerator::AddUniversalInstallRule(
 {
   cmMakefile const* mf = this->Target->Target->GetMakefile();
 
-  if (!mf->PlatformIsAppleIos() || !mf->IsOn("XCODE")) {
+  if (!mf->PlatformIsAppleEmbedded() || !mf->IsOn("XCODE")) {
     return;
   }
 

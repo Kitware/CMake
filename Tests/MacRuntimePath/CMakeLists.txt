@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.9)
 project(MacRuntimePath)
 if(NOT DEFINED CMake_TEST_NESTED_MAKE_PROGRAM AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   set(CMake_TEST_NESTED_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM}")
@@ -18,7 +18,8 @@ set_property(
 configure_file(${MacRuntimePath_SOURCE_DIR}/InitialCache.cmake.in
                ${MacRuntimePath_BINARY_DIR}/InitialCache.cmake @ONLY)
 
-if(CMAKE_CONFIGURATION_TYPES)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_isMultiConfig)
   set(NESTED_CONFIG_TYPE -C "${CMAKE_CFG_INTDIR}")
 else()
   if(CMAKE_BUILD_TYPE)

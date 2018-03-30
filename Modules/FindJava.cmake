@@ -237,10 +237,18 @@ if(Java_FIND_COMPONENTS)
       endif()
     elseif(component STREQUAL "Development")
       list(APPEND _JAVA_REQUIRED_VARS Java_JAVA_EXECUTABLE Java_JAVAC_EXECUTABLE
-                                      Java_JAVAH_EXECUTABLE Java_JAVADOC_EXECUTABLE)
-      if(Java_JAVA_EXECUTABLE AND Java_JAVAC_EXECUTABLE
-          AND Java_JAVAH_EXECUTABLE AND Java_JAVADOC_EXECUTABLE)
-        set(Java_Development_FOUND TRUE)
+                                      Java_JAVADOC_EXECUTABLE)
+      if(Java_VERSION VERSION_LESS "1.10")
+        list(APPEND _JAVA_REQUIRED_VARS Java_JAVAH_EXECUTABLE)
+        if(Java_JAVA_EXECUTABLE AND Java_JAVAC_EXECUTABLE
+            AND Java_JAVAH_EXECUTABLE AND Java_JAVADOC_EXECUTABLE)
+          set(Java_Development_FOUND TRUE)
+        endif()
+      else()
+        if(Java_JAVA_EXECUTABLE AND Java_JAVAC_EXECUTABLE
+            AND Java_JAVADOC_EXECUTABLE)
+          set(Java_Development_FOUND TRUE)
+        endif()
       endif()
     elseif(component STREQUAL "IdlJ")
       list(APPEND _JAVA_REQUIRED_VARS Java_IDLJ_EXECUTABLE)
@@ -268,11 +276,19 @@ if(Java_FIND_COMPONENTS)
   endif()
 else()
   # Check for Development
-  find_package_handle_standard_args(Java
-    REQUIRED_VARS Java_JAVA_EXECUTABLE Java_JAR_EXECUTABLE Java_JAVAC_EXECUTABLE
-                  Java_JAVAH_EXECUTABLE Java_JAVADOC_EXECUTABLE
-    VERSION_VAR Java_VERSION_STRING
-    )
+  if(Java_VERSION VERSION_LESS "1.10")
+    find_package_handle_standard_args(Java
+      REQUIRED_VARS Java_JAVA_EXECUTABLE Java_JAR_EXECUTABLE Java_JAVAC_EXECUTABLE
+                    Java_JAVAH_EXECUTABLE Java_JAVADOC_EXECUTABLE
+      VERSION_VAR Java_VERSION_STRING
+      )
+  else()
+    find_package_handle_standard_args(Java
+      REQUIRED_VARS Java_JAVA_EXECUTABLE Java_JAR_EXECUTABLE Java_JAVAC_EXECUTABLE
+                    Java_JAVADOC_EXECUTABLE
+      VERSION_VAR Java_VERSION_STRING
+      )
+  endif()
 endif()
 
 

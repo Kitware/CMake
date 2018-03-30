@@ -4,6 +4,7 @@
 
 #include <sstream>
 #include <stdio.h>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
@@ -131,7 +132,7 @@ bool cmMacroHelperCommand::InvokeInitialPass(
       }
       arg.Delim = k.Delim;
       arg.Line = k.Line;
-      newLFF.Arguments.push_back(arg);
+      newLFF.Arguments.push_back(std::move(arg));
     }
     cmExecutionStatus status;
     if (!this->Makefile->ExecuteCommand(newLFF, status) ||

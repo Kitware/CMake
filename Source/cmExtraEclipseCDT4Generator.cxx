@@ -413,7 +413,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
       this->AppendLinkedResource(xml, sourceLinkedResourceName,
                                  this->GetEclipsePath(linkSourceDirectory),
                                  LinkToFolder);
-      this->SrcLinkedResources.push_back(sourceLinkedResourceName);
+      this->SrcLinkedResources.push_back(std::move(sourceLinkedResourceName));
     }
   }
 
@@ -498,7 +498,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
             // Add the file to the list of sources.
             std::string const& source = sf->GetFullPath();
             cmSourceGroup* sourceGroup =
-              makefile->FindSourceGroup(source.c_str(), sourceGroups);
+              makefile->FindSourceGroup(source, sourceGroups);
             sourceGroup->AssignSource(sf);
           }
 

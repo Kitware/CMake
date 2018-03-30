@@ -83,9 +83,8 @@ public:
 
     std::set<std::string> installedSDKs =
       cmGlobalVisualStudio11Generator::GetInstalledWindowsCESDKs();
-    for (std::set<std::string>::const_iterator i = installedSDKs.begin();
-         i != installedSDKs.end(); ++i) {
-      names.push_back(std::string(vs11generatorName) + " " + *i);
+    for (std::string const& i : installedSDKs) {
+      names.push_back(std::string(vs11generatorName) + " " + i);
     }
   }
 
@@ -224,18 +223,17 @@ cmGlobalVisualStudio11Generator::GetInstalledWindowsCESDKs()
                                     cmSystemTools::KeyWOW64_32);
 
   std::set<std::string> ret;
-  for (std::vector<std::string>::const_iterator i = subkeys.begin();
-       i != subkeys.end(); ++i) {
+  for (std::string const& i : subkeys) {
     std::string key = sdksKey;
     key += '\\';
-    key += *i;
+    key += i;
     key += ';';
 
     std::string path;
-    if (cmSystemTools::ReadRegistryValue(key.c_str(), path,
+    if (cmSystemTools::ReadRegistryValue(key, path,
                                          cmSystemTools::KeyWOW64_32) &&
         !path.empty()) {
-      ret.insert(*i);
+      ret.insert(i);
     }
   }
 

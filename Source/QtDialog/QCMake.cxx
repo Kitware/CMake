@@ -39,15 +39,6 @@ QCMake::QCMake(QObject* p)
 
   std::vector<cmake::GeneratorInfo>::const_iterator it;
   for (it = generators.begin(); it != generators.end(); ++it) {
-    // Skip the generator "KDevelop3", since there is also
-    // "KDevelop3 - Unix Makefiles", which is the full and official name.
-    // The short name is actually only still there since this was the name
-    // in CMake 2.4, to keep "command line argument compatibility", but
-    // this is not necessary in the GUI.
-    if (it->name == "KDevelop3") {
-      continue;
-    }
-
     this->AvailableGenerators.push_back(*it);
   }
 }

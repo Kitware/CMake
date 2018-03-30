@@ -8,12 +8,12 @@
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmOutputConverter.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 
 #include <memory> // IWYU pragma: keep
 #include <stddef.h>
+#include <utility>
 
 cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
                                                    const std::string& config,
@@ -37,10 +37,10 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
         cmSystemTools::ExpandListArgument(parsed_arg, ExpandedArg);
         argv.insert(argv.end(), ExpandedArg.begin(), ExpandedArg.end());
       } else {
-        argv.push_back(parsed_arg);
+        argv.push_back(std::move(parsed_arg));
       }
     }
-    this->CommandLines.push_back(argv);
+    this->CommandLines.push_back(std::move(argv));
   }
 
   std::vector<std::string> depends = this->CC.GetDepends();
@@ -50,7 +50,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
     cmSystemTools::ExpandListArgument(cge->Evaluate(this->LG, this->Config),
                                       result);
     for (std::string& it : result) {
-      if (cmSystemTools::FileIsFullPath(it.c_str())) {
+      if (cmSystemTools::FileIsFullPath(it)) {
         it = cmSystemTools::CollapseFullPath(it);
       }
     }
@@ -166,8 +166,7 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
     if (this->OldStyle) {
       cmd += escapeForShellOldStyle(arg);
     } else {
-      cmOutputConverter converter(this->LG->GetStateSnapshot());
-      cmd += converter.EscapeForShell(arg, this->MakeVars);
+      cmd += this->LG->EscapeForShell(arg, this->MakeVars);
     }
   }
 }

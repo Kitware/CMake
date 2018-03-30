@@ -16,6 +16,7 @@
 #include "cmCTestScriptHandler.h"
 #include "cmCryptoHash.h"
 #include "cmCurl.h"
+#include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmProcessOutput.h"
 #include "cmState.h"
@@ -193,13 +194,13 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
       ::curl_easy_setopt(curl, CURLOPT_UPLOAD, 1);
 
       std::string local_file = file;
-      if (!cmSystemTools::FileExists(local_file.c_str())) {
+      if (!cmSystemTools::FileExists(local_file)) {
         local_file = localprefix + "/" + file;
       }
       std::string upload_as =
         url + "/" + remoteprefix + cmSystemTools::GetFilenameName(file);
 
-      if (!cmSystemTools::FileExists(local_file.c_str())) {
+      if (!cmSystemTools::FileExists(local_file)) {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
                    "   Cannot find file: " << local_file << std::endl);
         ::curl_easy_cleanup(curl);
@@ -386,7 +387,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
       std::string local_file = file;
-      if (!cmSystemTools::FileExists(local_file.c_str())) {
+      if (!cmSystemTools::FileExists(local_file)) {
         local_file = localprefix + "/" + file;
       }
       std::string remote_file =
@@ -428,7 +429,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
           cmSystemTools::ComputeFileHash(local_file, cmCryptoHash::AlgoMD5);
       }
 
-      if (!cmSystemTools::FileExists(local_file.c_str())) {
+      if (!cmSystemTools::FileExists(local_file)) {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
                    "   Cannot find file: " << local_file << std::endl);
         ::curl_easy_cleanup(curl);
@@ -497,7 +498,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
           ? ""
           : this->GetOption("RetryCount");
 
-        auto delay = std::chrono::duration<double>(
+        auto delay = cmDuration(
           retryDelay.empty()
             ? atoi(this->CTest->GetCTestConfiguration("CTestSubmitRetryDelay")
                      .c_str())
@@ -771,7 +772,7 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
     std::string lfname = localprefix;
     cmSystemTools::ConvertToUnixSlashes(lfname);
     lfname += "/" + file;
-    lfname = cmSystemTools::ConvertToOutputPath(lfname.c_str());
+    lfname = cmSystemTools::ConvertToOutputPath(lfname);
     argv[1] = lfname.c_str();
     std::string rfname = url + "/" + remoteprefix + file;
     argv[2] = rfname.c_str();
@@ -897,7 +898,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
     xmlrpc_value* result;
 
     std::string local_file = file;
-    if (!cmSystemTools::FileExists(local_file.c_str())) {
+    if (!cmSystemTools::FileExists(local_file)) {
       local_file = localprefix + "/" + file;
     }
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,

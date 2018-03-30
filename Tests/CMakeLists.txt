@@ -38,9 +38,21 @@ set(ENV{HOME} \"${TEST_HOME}\")
 ")
 endif()
 
+# 3.9 or later provides a definitive answer to whether we are multi-config
+# through a global property. Prior to 3.9, CMAKE_CONFIGURATION_TYPES being set
+# is assumed to mean multi-config, but developers might modify it so it is
+# technically not as reliable.
+if(NOT CMAKE_VERSION VERSION_LESS 3.9)
+  get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+elseif(CMAKE_CONFIGURATION_TYPES)
+  set(_isMultiConfig True)
+else()
+  set(_isMultiConfig False)
+endif()
+
 # Choose a default configuration for CTest tests.
 set(CTestTest_CONFIG Debug)
-if(NOT CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)
+if(NOT _isMultiConfig AND CMAKE_BUILD_TYPE)
   set(CTestTest_CONFIG ${CMAKE_BUILD_TYPE})
 endif()
 
@@ -149,9 +161,7 @@ if(BUILD_TESTING)
   if(NOT CMake_TEST_EXTERNAL_CMAKE)
     add_subdirectory(CMakeLib)
 
-    if(CMake_TEST_SERVER_MODE)
-      add_subdirectory(CMakeServerLib)
-    endif()
+    add_subdirectory(CMakeServerLib)
   endif()
   add_subdirectory(CMakeOnly)
   add_subdirectory(RunCMake)
@@ -380,6 +390,9 @@ if(BUILD_TESTING)
   endif()
   ADD_TEST_MACRO(SourcesProperty SourcesProperty)
   ADD_TEST_MACRO(SourceFileProperty SourceFileProperty)
+  if (NOT CMAKE_GENERATOR STREQUAL "Xcode")
+    ADD_TEST_MACRO(SourceFileIncludeDirProperty SourceFileIncludeDirProperty)
+  endif()
   if(CMAKE_CXX_COMPILER_ID STREQUAL GNU
       AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
     set(runCxxDialectTest 1)
@@ -614,7 +627,6 @@ if(BUILD_TESTING)
       "CodeLite"
       "Eclipse CDT4"
       "Kate"
-      "KDevelop3"
       "Sublime Text 2")
 
     foreach(extraGenerator ${extraGenerators})
@@ -1244,20 +1256,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomocNoQt")
 
-  # On Windows there is no RPATH, so while Qt might be available for building,
-  # the required dlls may not be in the PATH, so we can't run the executables
-  # on that platform.
-  if(WIN32)
-    set(run_autogen_test ${CMAKE_CTEST_COMMAND} -V)
-    set(run_autouic_test ${CMAKE_CTEST_COMMAND} -V)
-  else()
-    set(run_autogen_test complex/QtAutogen)
-    set(run_autouic_test QtAutoUicInterface)
-  endif()
-  if(NOT CMAKE_CONFIGURATION_TYPES)
-    set(QtAutogen_BUILD_OPTIONS -DCMAKE_BUILD_TYPE=$<CONFIGURATION>)
-  endif()
-
   if(NOT DEFINED CMake_TEST_Qt5)
     set(CMake_TEST_Qt5 1)
   endif()
@@ -1265,97 +1263,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     find_package(Qt5Widgets QUIET NO_MODULE)
   endif()
   if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
-    add_test(NAME Qt5Autogen COMMAND ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/QtAutogen"
-      "${CMake_BINARY_DIR}/Tests/Qt5Autogen"
-      ${build_generator_args}
-      --build-project QtAutogen
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt5Autogen"
-      --force-new-ctest-process
-      --build-options ${build_options}
-        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
-        -DQT_TEST_VERSION=5
-        ${QtAutogen_BUILD_OPTIONS}
-      --test-command ${run_autogen_test}
-      )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt5Autogen")
-
-    add_test(NAME Qt5AutogenRerun COMMAND ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/QtAutogenRerun"
-      "${CMake_BINARY_DIR}/Tests/Qt5AutogenRerun"
-      ${build_generator_args}
-      --build-project QtAutogenRerun
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt5AutogenRerun"
-      --force-new-ctest-process
-      --build-options ${build_options}
-        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
-        -DQT_TEST_VERSION=5
-        ${QtAutogen_BUILD_OPTIONS}
-      )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt5AutogenRerun")
-
-    add_test(Qt5AutoUicInterface ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/QtAutoUicInterface"
-      "${CMake_BINARY_DIR}/Tests/Qt5AutoUicInterface"
-      ${build_generator_args}
-      --build-project QtAutoUicInterface
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt5AutoUicInterface"
-      --force-new-ctest-process
-      --build-options ${build_options}
-        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE} -DQT_TEST_VERSION=5
-      --test-command ${run_autouic_test}
-      )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt5AutoUicInterface")
+    add_subdirectory(Qt5Autogen)
   endif()
   if(QT4_WORKS AND QT_QTGUI_FOUND)
-    add_test(NAME Qt4Autogen COMMAND ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/QtAutogen"
-      "${CMake_BINARY_DIR}/Tests/Qt4Autogen"
-      ${build_generator_args}
-      --build-project QtAutogen
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4Autogen"
-      --force-new-ctest-process
-      --build-options ${build_options}
-        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
-        -DQT_TEST_VERSION=4
-        ${QtAutogen_BUILD_OPTIONS}
-      --test-command ${run_autogen_test}
-      )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Autogen")
-
-    add_test(NAME Qt4AutogenRerun COMMAND ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/QtAutogenRerun"
-      "${CMake_BINARY_DIR}/Tests/Qt4AutogenRerun"
-      ${build_generator_args}
-      --build-project QtAutogenRerun
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4AutogenRerun"
-      --force-new-ctest-process
-      --build-options ${build_options}
-        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
-        -DQT_TEST_VERSION=4
-        ${QtAutogen_BUILD_OPTIONS}
-      )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4AutogenRerun")
-
-    add_test(Qt4AutoUicInterface ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/QtAutoUicInterface"
-      "${CMake_BINARY_DIR}/Tests/Qt4AutoUicInterface"
-      ${build_generator_args}
-      --build-project QtAutoUicInterface
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4AutoUicInterface"
-      --force-new-ctest-process
-      --build-options ${build_options}
-        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
-        -DQT_TEST_VERSION=4
-      --test-command ${run_autouic_test}
-      )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4AutoUicInterface")
+    add_subdirectory(Qt4Autogen)
 
     add_test(Qt4Targets ${CMAKE_CTEST_COMMAND}
       --build-and-test
@@ -1431,6 +1342,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   if(CMake_TEST_FindGTest)
     add_subdirectory(FindGTest)
     add_subdirectory(GoogleTest)
+  endif()
+
+  if(CMake_TEST_FindIconv)
+    add_subdirectory(FindIconv)
   endif()
 
   if(CMake_TEST_FindICU)
@@ -3067,8 +2982,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
   add_test(CTestTestShowOnly ${CMAKE_CTEST_COMMAND} -N)
 
-  add_test(CTestBatchTest ${CMAKE_CTEST_COMMAND} -B)
-
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestFdSetSize/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestFdSetSize/test.cmake"
@@ -3284,36 +3197,58 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
           --test-command ${JAVA_RUNTIME} -classpath hello3.jar HelloWorld)
         list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJarSourceListAndOutput")
 
-        # For next test, java tool must have same architecture as toolchain
+        # For next tests, java tool must have same architecture as toolchain
         math(EXPR _object_mode "${CMAKE_SIZEOF_VOID_P} * 8")
         execute_process(
           COMMAND "${Java_JAVA_EXECUTABLE}" -d${_object_mode} -version
           OUTPUT_QUIET ERROR_QUIET RESULT_VARIABLE _result
           )
         if(_result EQUAL 0)
-          if(CMAKE_CONFIGURATION_TYPES)
-            set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah/$<CONFIGURATION>)
-          else()
-            set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah)
+          ## next test is valid only if Java version is less than 1.10
+          if ("${Java_VERSION}" VERSION_LESS 1.10)
+            if(_isMultiConfig)
+              set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah/$<CONFIGURATION>)
+            else()
+              set (JAVAH_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaJavah)
+            endif()
+            add_test(NAME Java.Javah COMMAND ${CMAKE_CTEST_COMMAND}
+              --build-and-test
+              "${CMake_SOURCE_DIR}/Tests/JavaJavah"
+              "${CMake_BINARY_DIR}/Tests/JavaJavah"
+              ${build_generator_args}
+              --build-project helloJavah
+              --build-two-config
+              --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJavah/"
+              --build-options ${build_options}
+              --test-command ${JAVA_RUNTIME} -Djava.library.path=${JAVAH_LIBRARY_PATH} -classpath hello3.jar HelloWorld2)
+            list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJavah")
           endif()
-          add_test(NAME Java.Javah COMMAND ${CMAKE_CTEST_COMMAND}
-            --build-and-test
-            "${CMake_SOURCE_DIR}/Tests/JavaJavah"
-            "${CMake_BINARY_DIR}/Tests/JavaJavah"
-            ${build_generator_args}
-            --build-project helloJavah
-            --build-two-config
-            --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJavah/"
-            --build-options ${build_options}
-            --test-command ${JAVA_RUNTIME} -Djava.library.path=${JAVAH_LIBRARY_PATH} -classpath hello3.jar HelloWorld2)
-          list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJavah")
+          ## next test is valid only if Java is, at least, version 1.8
+          if (NOT "${Java_VERSION}" VERSION_LESS 1.8)
+            if(_isMultiConfig)
+              set (JAVANATIVEHEADERS_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/$<CONFIGURATION>)
+            else()
+              set (JAVANATIVEHEADERS_LIBRARY_PATH ${CMake_BINARY_DIR}/Tests/JavaNativeHeaders)
+            endif()
+            add_test(NAME Java.NativeHeaders COMMAND ${CMAKE_CTEST_COMMAND}
+              --build-and-test
+              "${CMake_SOURCE_DIR}/Tests/JavaNativeHeaders"
+              "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders"
+              ${build_generator_args}
+              --build-project helloJavaNativeHeaders
+              --build-two-config
+              --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/"
+              --build-options ${build_options}
+              --test-command ${JAVA_RUNTIME} -Djava.library.path=${JAVANATIVEHEADERS_LIBRARY_PATH} -classpath hello4.jar HelloWorld3)
+            list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders")
+          endif()
         endif()
       endif()
     endif()
   endif()
 
   # add some cross compiler tests, for now only with makefile based generators
-  if(CMAKE_GENERATOR MATCHES "Makefiles" OR CMAKE_GENERATOR MATCHES "KDevelop")
+  if(CMAKE_GENERATOR MATCHES "Makefiles")
 
     # if sdcc is found, build the SimpleCOnly project with sdcc
     find_program(SDCC_EXECUTABLE sdcc)

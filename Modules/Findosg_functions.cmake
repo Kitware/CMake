@@ -28,6 +28,7 @@ function(OSG_FIND_PATH module header)
             ENV OSG_ROOT
             ${${module_uc}_DIR}
             ${OSG_DIR}
+       PATH_SUFFIXES include
    )
 endfunction()
 
@@ -47,6 +48,7 @@ function(OSG_FIND_LIBRARY module library)
             ENV OSG_ROOT
             ${${module_uc}_DIR}
             ${OSG_DIR}
+       PATH_SUFFIXES lib
    )
 
    find_library(${module_uc}_LIBRARY_DEBUG
@@ -58,6 +60,7 @@ function(OSG_FIND_LIBRARY module library)
             ENV OSG_ROOT
             ${${module_uc}_DIR}
             ${OSG_DIR}
+       PATH_SUFFIXES lib
     )
 
    if(NOT ${module_uc}_LIBRARY_DEBUG)

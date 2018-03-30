@@ -20,21 +20,26 @@ public:
   cmIDEOptions();
   virtual ~cmIDEOptions();
 
-  // Store definitions and flags.
+  // Store definitions, includes and flags.
   void AddDefine(const std::string& define);
   void AddDefines(const char* defines);
   void AddDefines(const std::vector<std::string>& defines);
   std::vector<std::string> const& GetDefines() const;
 
-  void AddFlag(const char* flag, const char* value);
-  void AddFlag(const char* flag, std::vector<std::string> const& value);
+  void AddInclude(const std::string& includes);
+  void AddIncludes(const char* includes);
+  void AddIncludes(const std::vector<std::string>& includes);
+  std::vector<std::string> const& GetIncludes() const;
+
+  void AddFlag(std::string const& flag, std::string const& value);
+  void AddFlag(std::string const& flag, std::vector<std::string> const& value);
   void AppendFlag(std::string const& flag, std::string const& value);
   void AppendFlag(std::string const& flag,
                   std::vector<std::string> const& value);
   void AppendFlagString(std::string const& flag, std::string const& value);
-  void RemoveFlag(const char* flag);
+  void RemoveFlag(std::string const& flag);
   bool HasFlag(std::string const& flag) const;
-  const char* GetFlag(const char* flag);
+  const char* GetFlag(std::string const& flag) const;
 
 protected:
   // create a map of xml tags to the values they should have in the output
@@ -76,8 +81,13 @@ protected:
   // Preprocessor definitions.
   std::vector<std::string> Defines;
 
+  // Include directories.
+  std::vector<std::string> Includes;
+
   bool DoingDefine;
   bool AllowDefine;
+  bool DoingInclude;
+  bool AllowInclude;
   bool AllowSlash;
   cmIDEFlagTable const* DoingFollowing;
   enum

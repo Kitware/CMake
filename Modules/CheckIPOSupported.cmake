@@ -26,7 +26,7 @@ property.
     Set ``<output>`` variable with details about any error.
   ``LANGUAGES <lang>...``
     Specify languages whose compilers to check.
-    Languages ``C`` and ``CXX`` are supported.
+    Languages ``C``, ``CXX``, and ``Fortran`` are supported.
 
 It makes no sense to use this module when :policy:`CMP0069` is set to ``OLD`` so
 module will return error in this case. See policy :policy:`CMP0069` for details.

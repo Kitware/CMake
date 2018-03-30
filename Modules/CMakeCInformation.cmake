@@ -102,30 +102,7 @@ endif()
 
 set(CMAKE_C_FLAGS_INIT "$ENV{CFLAGS} ${CMAKE_C_FLAGS_INIT}")
 
-foreach(c "" _DEBUG _RELEASE _MINSIZEREL _RELWITHDEBINFO)
-  string(STRIP "${CMAKE_C_FLAGS${c}_INIT}" CMAKE_C_FLAGS${c}_INIT)
-endforeach()
-
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT}" CACHE STRING
-     "Flags used by the compiler during all build types.")
-
-if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
-  get_property(_GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-  # default build type is none
-  if(NOT _GENERATOR_IS_MULTI_CONFIG AND NOT CMAKE_NO_BUILD_TYPE)
-    set (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_INIT} CACHE STRING
-      "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
-  endif()
-  unset(_GENERATOR_IS_MULTI_CONFIG)
-  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG_INIT}" CACHE STRING
-    "Flags used by the compiler during debug builds.")
-  set (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL_INIT}" CACHE STRING
-    "Flags used by the compiler during release builds for minimum size.")
-  set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE_INIT}" CACHE STRING
-    "Flags used by the compiler during release builds.")
-  set (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
-    "Flags used by the compiler during release builds with debug info.")
-endif()
+cmake_initialize_per_config_variable(CMAKE_C_FLAGS "Flags used by the C compiler")
 
 if(CMAKE_C_STANDARD_LIBRARIES_INIT)
   set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES_INIT}"
@@ -208,13 +185,6 @@ if(NOT CMAKE_EXECUTABLE_RPATH_LINK_C_FLAG)
   set(CMAKE_EXECUTABLE_RPATH_LINK_C_FLAG ${CMAKE_SHARED_LIBRARY_RPATH_LINK_C_FLAG})
 endif()
 
-mark_as_advanced(
-CMAKE_C_FLAGS
-CMAKE_C_FLAGS_DEBUG
-CMAKE_C_FLAGS_MINSIZEREL
-CMAKE_C_FLAGS_RELEASE
-CMAKE_C_FLAGS_RELWITHDEBINFO
-)
 set(CMAKE_C_INFORMATION_LOADED 1)
 
 

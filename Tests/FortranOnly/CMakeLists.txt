@@ -28,7 +28,7 @@ add_custom_target(checktestf2 ALL
   COMMAND ${CMAKE_COMMAND}
   -P ${FortranOnly_SOURCE_DIR}/checktestf2.cmake)
 
-# create a custom target that runs FortranOnly1 exectuable and creates
+# create a custom target that runs FortranOnly1 executable and creates
 # a file out.txt that should have hello world in it.
 add_custom_target(sayhello ALL
   COMMAND FortranOnly1 > out.txt
@@ -38,7 +38,7 @@ add_dependencies(checktestf2 FortranOnly2)
 add_dependencies(sayhello FortranOnly1)
 add_dependencies(FortranOnly2 FortranOnly1)
 
-# add a custom target that checkes that out.txt has the correct
+# add a custom target that checks that out.txt has the correct
 # content
 add_custom_target(checksayhello ALL
   COMMAND ${CMAKE_COMMAND} -P ${FortranOnly_SOURCE_DIR}/checksayhello.cmake

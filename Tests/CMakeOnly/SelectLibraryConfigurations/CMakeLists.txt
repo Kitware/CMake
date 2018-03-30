@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.9)
 
 project(SelectLibraryConfigurations NONE)
 
@@ -15,7 +15,8 @@ macro(check_slc basename expect)
   endif ()
 endmacro(check_slc)
 
-if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if (NOT _isMultiConfig AND NOT CMAKE_BUILD_TYPE)
   set(NOTYPE_RELONLY_LIBRARY_RELEASE "opt")
   check_slc(NOTYPE_RELONLY "opt")
 

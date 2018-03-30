@@ -184,7 +184,7 @@ int cmCTest::HTTPRequest(std::string url, HTTPMethod method,
       ::curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fields.c_str());
       break;
     case cmCTest::HTTP_PUT:
-      if (!cmSystemTools::FileExists(putFile.c_str())) {
+      if (!cmSystemTools::FileExists(putFile)) {
         response = "Error: File ";
         response += putFile + " does not exist.\n";
         return -1;
@@ -260,7 +260,6 @@ cmCTest::cmCTest()
   this->TestLoad = 0;
   this->SubmitIndex = 0;
   this->Failover = false;
-  this->BatchJobs = false;
   this->ForceNewCTestProcess = false;
   this->TomorrowTag = false;
   this->Verbose = false;
@@ -278,13 +277,10 @@ cmCTest::cmCTest()
   this->TestModel = cmCTest::EXPERIMENTAL;
   this->MaxTestNameWidth = 30;
   this->InteractiveDebugMode = true;
-  this->TimeOut = 0;
-  this->GlobalTimeout = 0;
-  this->LastStopTimeout = 24 * 60 * 60;
+  this->TimeOut = cmDuration::zero();
+  this->GlobalTimeout = cmDuration::zero();
   this->CompressXMLFiles = false;
   this->ScheduleType.clear();
-  this->StopTime.clear();
-  this->NextDayStopTime = false;
   this->OutputLogFile = nullptr;
   this->OutputLogFileLastTag = -1;
   this->SuppressUpdatingCTestConfiguration = false;
@@ -433,7 +429,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
     // Verify "Testing" directory exists:
     //
     std::string testingDir = this->BinaryDir + "/Testing";
-    if (cmSystemTools::FileExists(testingDir.c_str())) {
+    if (cmSystemTools::FileExists(testingDir)) {
       if (!cmSystemTools::FileIsDirectory(testingDir)) {
         cmCTestLog(this, ERROR_MESSAGE, "File "
                      << testingDir
@@ -442,7 +438,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
         return 0;
       }
     } else {
-      if (!cmSystemTools::MakeDirectory(testingDir.c_str())) {
+      if (!cmSystemTools::MakeDirectory(testingDir)) {
         cmCTestLog(this, ERROR_MESSAGE, "Cannot create directory "
                      << testingDir << std::endl);
         return 0;
@@ -560,9 +556,9 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
   bld_dir_fname += "/CTestConfig.cmake";
   cmSystemTools::ConvertToUnixSlashes(bld_dir_fname);
 
-  if (cmSystemTools::FileExists(bld_dir_fname.c_str())) {
+  if (cmSystemTools::FileExists(bld_dir_fname)) {
     fname = bld_dir_fname;
-  } else if (cmSystemTools::FileExists(src_dir_fname.c_str())) {
+  } else if (cmSystemTools::FileExists(src_dir_fname)) {
     fname = src_dir_fname;
   }
 
@@ -623,12 +619,12 @@ bool cmCTest::UpdateCTestConfiguration()
     return true;
   }
   std::string fileName = this->BinaryDir + "/CTestConfiguration.ini";
-  if (!cmSystemTools::FileExists(fileName.c_str())) {
+  if (!cmSystemTools::FileExists(fileName)) {
     fileName = this->BinaryDir + "/DartConfiguration.tcl";
   }
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
              "UpdateCTestConfiguration  from :" << fileName << "\n");
-  if (!cmSystemTools::FileExists(fileName.c_str())) {
+  if (!cmSystemTools::FileExists(fileName)) {
     // No need to exit if we are not producing XML
     if (this->ProduceXML) {
       cmCTestLog(this, ERROR_MESSAGE, "Cannot find file: " << fileName
@@ -678,7 +674,8 @@ bool cmCTest::UpdateCTestConfiguration()
     this->BinaryDir = this->GetCTestConfiguration("BuildDirectory");
     cmSystemTools::ChangeDirectory(this->BinaryDir);
   }
-  this->TimeOut = atoi(this->GetCTestConfiguration("TimeOut").c_str());
+  this->TimeOut =
+    std::chrono::seconds(atoi(this->GetCTestConfiguration("TimeOut").c_str()));
   std::string const& testLoad = this->GetCTestConfiguration("TestLoad");
   if (!testLoad.empty()) {
     unsigned long load;
@@ -744,7 +741,7 @@ bool cmCTest::OpenOutputFile(const std::string& path, const std::string& name,
   if (!path.empty()) {
     testingDir += "/" + path;
   }
-  if (cmSystemTools::FileExists(testingDir.c_str())) {
+  if (cmSystemTools::FileExists(testingDir)) {
     if (!cmSystemTools::FileIsDirectory(testingDir)) {
       cmCTestLog(this, ERROR_MESSAGE, "File "
                    << testingDir << " is in the place of the testing directory"
@@ -752,7 +749,7 @@ bool cmCTest::OpenOutputFile(const std::string& path, const std::string& name,
       return false;
     }
   } else {
-    if (!cmSystemTools::MakeDirectory(testingDir.c_str())) {
+    if (!cmSystemTools::MakeDirectory(testingDir)) {
       cmCTestLog(this, ERROR_MESSAGE, "Cannot create directory " << testingDir
                                                                  << std::endl);
       return false;
@@ -793,7 +790,7 @@ bool cmCTest::CTestFileExists(const std::string& filename)
 {
   std::string testingDir =
     this->BinaryDir + "/Testing/" + this->CurrentTag + "/" + filename;
-  return cmSystemTools::FileExists(testingDir.c_str());
+  return cmSystemTools::FileExists(testingDir);
 }
 
 cmCTestGenericHandler* cmCTest::GetInitializedHandler(const char* handler)
@@ -836,7 +833,8 @@ int cmCTest::ProcessSteps()
   for (Part p = PartStart; notest && p != PartCount; p = Part(p + 1)) {
     notest = !this->Parts[p];
   }
-  if (this->Parts[PartUpdate] && (this->GetRemainingTimeAllowed() - 120 > 0)) {
+  if (this->Parts[PartUpdate] &&
+      (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     cmCTestGenericHandler* uphandler = this->GetHandler("update");
     uphandler->SetPersistentOption(
       "SourceDirectory",
@@ -850,33 +848,34 @@ int cmCTest::ProcessSteps()
     return 0;
   }
   if (this->Parts[PartConfigure] &&
-      (this->GetRemainingTimeAllowed() - 120 > 0)) {
+      (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     if (this->GetHandler("configure")->ProcessHandler() < 0) {
       res |= cmCTest::CONFIGURE_ERRORS;
     }
   }
-  if (this->Parts[PartBuild] && (this->GetRemainingTimeAllowed() - 120 > 0)) {
+  if (this->Parts[PartBuild] &&
+      (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("build")->ProcessHandler() < 0) {
       res |= cmCTest::BUILD_ERRORS;
     }
   }
   if ((this->Parts[PartTest] || notest) &&
-      (this->GetRemainingTimeAllowed() - 120 > 0)) {
+      (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("test")->ProcessHandler() < 0) {
       res |= cmCTest::TEST_ERRORS;
     }
   }
   if (this->Parts[PartCoverage] &&
-      (this->GetRemainingTimeAllowed() - 120 > 0)) {
+      (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("coverage")->ProcessHandler() < 0) {
       res |= cmCTest::COVERAGE_ERRORS;
     }
   }
   if (this->Parts[PartMemCheck] &&
-      (this->GetRemainingTimeAllowed() - 120 > 0)) {
+      (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("memcheck")->ProcessHandler() < 0) {
       res |= cmCTest::MEMORY_ERRORS;
@@ -891,7 +890,7 @@ int cmCTest::ProcessSteps()
       for (kk = 0; kk < d.GetNumberOfFiles(); kk++) {
         const char* file = d.GetFile(kk);
         std::string fullname = notes_dir + "/" + file;
-        if (cmSystemTools::FileExists(fullname.c_str()) &&
+        if (cmSystemTools::FileExists(fullname) &&
             !cmSystemTools::FileIsDirectory(fullname)) {
           if (!this->NotesFiles.empty()) {
             this->NotesFiles += ";";
@@ -940,10 +939,10 @@ int cmCTest::GetTestModelFromString(const char* str)
     return cmCTest::EXPERIMENTAL;
   }
   std::string rstr = cmSystemTools::LowerCase(str);
-  if (cmHasLiteralPrefix(rstr.c_str(), "cont")) {
+  if (cmHasLiteralPrefix(rstr, "cont")) {
     return cmCTest::CONTINUOUS;
   }
-  if (cmHasLiteralPrefix(rstr.c_str(), "nigh")) {
+  if (cmHasLiteralPrefix(rstr, "nigh")) {
     return cmCTest::NIGHTLY;
   }
   return cmCTest::EXPERIMENTAL;
@@ -955,7 +954,7 @@ int cmCTest::GetTestModelFromString(const char* str)
 //######################################################################
 
 int cmCTest::RunMakeCommand(const char* command, std::string& output,
-                            int* retVal, const char* dir, int timeout,
+                            int* retVal, const char* dir, cmDuration timeout,
                             std::ostream& ofs, Encoding encoding)
 {
   // First generate the command and arguments
@@ -987,7 +986,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
   cmsysProcess_SetCommand(cp, &*argv.begin());
   cmsysProcess_SetWorkingDirectory(cp, dir);
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
-  cmsysProcess_SetTimeout(cp, timeout);
+  cmsysProcess_SetTimeout(cp, timeout.count());
   cmsysProcess_Execute(cp);
 
   // Initialize tick's
@@ -1071,26 +1070,33 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
 //######################################################################
 
 int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
-                     int* retVal, std::ostream* log, double testTimeOut,
+                     int* retVal, std::ostream* log, cmDuration testTimeOut,
                      std::vector<std::string>* environment, Encoding encoding)
 {
   bool modifyEnv = (environment && !environment->empty());
 
   // determine how much time we have
-  double timeout = this->GetRemainingTimeAllowed() - 120;
-  if (this->TimeOut > 0 && this->TimeOut < timeout) {
+  cmDuration timeout = this->GetRemainingTimeAllowed();
+  if (timeout != cmCTest::MaxDuration()) {
+    timeout -= std::chrono::minutes(2);
+  }
+  if (this->TimeOut > cmDuration::zero() && this->TimeOut < timeout) {
     timeout = this->TimeOut;
   }
-  if (testTimeOut > 0 && testTimeOut < this->GetRemainingTimeAllowed()) {
+  if (testTimeOut > cmDuration::zero() &&
+      testTimeOut < this->GetRemainingTimeAllowed()) {
     timeout = testTimeOut;
   }
 
   // always have at least 1 second if we got to here
-  if (timeout <= 0) {
-    timeout = 1;
+  if (timeout <= cmDuration::zero()) {
+    timeout = std::chrono::seconds(1);
   }
-  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-             "Test timeout computed to be: " << timeout << "\n");
+  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Test timeout computed to be: "
+               << (timeout == cmCTest::MaxDuration()
+                     ? std::string("infinite")
+                     : std::to_string(cmDurationTo<unsigned int>(timeout)))
+               << "\n");
   if (cmSystemTools::SameFile(argv[0], cmSystemTools::GetCTestCommand()) &&
       !this->ForceNewCTestProcess) {
     cmCTest inst;
@@ -1107,10 +1113,12 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
         // make sure we pass the timeout in for any build and test
         // invocations. Since --build-generator is required this is a
         // good place to check for it, and to add the arguments in
-        if (strcmp(i, "--build-generator") == 0 && timeout > 0) {
+        if (strcmp(i, "--build-generator") == 0 &&
+            timeout != cmCTest::MaxDuration() &&
+            timeout > cmDuration::zero()) {
           args.push_back("--test-timeout");
           std::ostringstream msg;
-          msg << timeout;
+          msg << cmDurationTo<unsigned int>(timeout);
           args.push_back(msg.str());
         }
         args.push_back(i);
@@ -1160,7 +1168,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   }
 
-  cmsysProcess_SetTimeout(cp, timeout);
+  cmsysProcess_SetTimeout(cp, timeout.count());
   cmsysProcess_Execute(cp);
 
   char* data;
@@ -1515,7 +1523,7 @@ std::string cmCTest::Base64EncodeFile(std::string const& file)
 bool cmCTest::SubmitExtraFiles(const VectorOfStrings& files)
 {
   for (cmsys::String const& file : files) {
-    if (!cmSystemTools::FileExists(file.c_str())) {
+    if (!cmSystemTools::FileExists(file)) {
       cmCTestLog(this, ERROR_MESSAGE, "Cannot find extra file: "
                    << file << " to submit." << std::endl;);
       return false;
@@ -1757,7 +1765,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
 
   if (this->CheckArgument(arg, "--timeout") && i < args.size() - 1) {
     i++;
-    double timeout = atof(args[i].c_str());
+    auto timeout = cmDuration(atof(args[i].c_str()));
     this->GlobalTimeout = timeout;
   }
 
@@ -1794,9 +1802,6 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   }
   if (this->CheckArgument(arg, "-V", "--verbose")) {
     this->Verbose = true;
-  }
-  if (this->CheckArgument(arg, "-B")) {
-    this->BatchJobs = true;
   }
   if (this->CheckArgument(arg, "-VV", "--extra-verbose")) {
     this->ExtraVerbose = true;
@@ -2254,10 +2259,41 @@ void cmCTest::SetNotesFiles(const char* notes)
   this->NotesFiles = notes;
 }
 
-void cmCTest::SetStopTime(std::string const& time)
+void cmCTest::SetStopTime(std::string const& time_str)
 {
-  this->StopTime = time;
-  this->DetermineNextDayStop();
+
+  struct tm* lctime;
+  time_t current_time = time(nullptr);
+  lctime = gmtime(&current_time);
+  int gm_hour = lctime->tm_hour;
+  time_t gm_time = mktime(lctime);
+  lctime = localtime(&current_time);
+  int local_hour = lctime->tm_hour;
+
+  int tzone_offset = local_hour - gm_hour;
+  if (gm_time > current_time && gm_hour < local_hour) {
+    // this means gm_time is on the next day
+    tzone_offset -= 24;
+  } else if (gm_time < current_time && gm_hour > local_hour) {
+    // this means gm_time is on the previous day
+    tzone_offset += 24;
+  }
+
+  tzone_offset *= 100;
+  char buf[1024];
+  sprintf(buf, "%d%02d%02d %s %+05i", lctime->tm_year + 1900,
+          lctime->tm_mon + 1, lctime->tm_mday, time_str.c_str(), tzone_offset);
+
+  time_t stop_time = curl_getdate(buf, &current_time);
+  if (stop_time == -1) {
+    this->StopTime = std::chrono::system_clock::time_point();
+    return;
+  }
+  this->StopTime = std::chrono::system_clock::from_time_t(stop_time);
+
+  if (stop_time < current_time) {
+    this->StopTime += std::chrono::hours(24);
+  }
 }
 
 int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
@@ -2271,7 +2307,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
   std::string fname = dir;
   fname += "/CTestCustom.cmake";
   cmCTestLog(this, DEBUG, "* Check for file: " << fname << std::endl);
-  if (cmSystemTools::FileExists(fname.c_str())) {
+  if (cmSystemTools::FileExists(fname)) {
     cmCTestLog(this, DEBUG, "* Read custom CTest configuration file: "
                  << fname << std::endl);
     bool erroroc = cmSystemTools::GetErrorOccuredFlag();
@@ -2291,7 +2327,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
   std::string rexpr = dir;
   rexpr += "/CTestCustom.ctest";
   cmCTestLog(this, DEBUG, "* Check for file: " << rexpr << std::endl);
-  if (!found && cmSystemTools::FileExists(rexpr.c_str())) {
+  if (!found && cmSystemTools::FileExists(rexpr)) {
     cmsys::Glob gl;
     gl.RecurseOn();
     gl.FindFiles(rexpr);
@@ -2358,10 +2394,8 @@ std::string cmCTest::GetShortPathToFile(const char* cfname)
   std::string fname = cmSystemTools::CollapseFullPath(cfname);
 
   // Find relative paths to both directories
-  std::string srcRelpath =
-    cmSystemTools::RelativePath(sourceDir.c_str(), fname.c_str());
-  std::string bldRelpath =
-    cmSystemTools::RelativePath(buildDir.c_str(), fname.c_str());
+  std::string srcRelpath = cmSystemTools::RelativePath(sourceDir, fname);
+  std::string bldRelpath = cmSystemTools::RelativePath(buildDir, fname);
 
   // If any contains "." it is not parent directory
   bool inSrc = srcRelpath.find("..") == std::string::npos;
@@ -2413,38 +2447,6 @@ std::string cmCTest::GetCTestConfiguration(const std::string& name)
 void cmCTest::EmptyCTestConfiguration()
 {
   this->CTestConfiguration.clear();
-}
-
-void cmCTest::DetermineNextDayStop()
-{
-  struct tm* lctime;
-  time_t current_time = time(nullptr);
-  lctime = gmtime(&current_time);
-  int gm_hour = lctime->tm_hour;
-  time_t gm_time = mktime(lctime);
-  lctime = localtime(&current_time);
-  int local_hour = lctime->tm_hour;
-
-  int tzone_offset = local_hour - gm_hour;
-  if (gm_time > current_time && gm_hour < local_hour) {
-    // this means gm_time is on the next day
-    tzone_offset -= 24;
-  } else if (gm_time < current_time && gm_hour > local_hour) {
-    // this means gm_time is on the previous day
-    tzone_offset += 24;
-  }
-
-  tzone_offset *= 100;
-  char buf[1024];
-  sprintf(buf, "%d%02d%02d %s %+05i", lctime->tm_year + 1900,
-          lctime->tm_mon + 1, lctime->tm_mday, this->StopTime.c_str(),
-          tzone_offset);
-
-  time_t stop_time = curl_getdate(buf, &current_time);
-
-  if (stop_time < current_time) {
-    this->NextDayStopTime = true;
-  }
 }
 
 void cmCTest::SetCTestConfiguration(const char* name, const char* value,
@@ -2564,7 +2566,8 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(
 
 bool cmCTest::RunCommand(std::vector<std::string> const& args,
                          std::string* stdOut, std::string* stdErr, int* retVal,
-                         const char* dir, double timeout, Encoding encoding)
+                         const char* dir, cmDuration timeout,
+                         Encoding encoding)
 {
   std::vector<const char*> argv;
   argv.reserve(args.size() + 1);
@@ -2582,7 +2585,7 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
   if (cmSystemTools::GetRunCommandHideConsole()) {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   }
-  cmsysProcess_SetTimeout(cp, timeout);
+  cmsysProcess_SetTimeout(cp, timeout.count());
   cmsysProcess_Execute(cp);
 
   std::vector<char> tempOutput;
@@ -2775,16 +2778,29 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
   }
 }
 
-double cmCTest::GetRemainingTimeAllowed()
+cmDuration cmCTest::GetRemainingTimeAllowed()
 {
   if (!this->GetHandler("script")) {
-    return 1.0e7;
+    return cmCTest::MaxDuration();
   }
 
   cmCTestScriptHandler* ch =
     static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
 
   return ch->GetRemainingTimeAllowed();
+}
+
+cmDuration cmCTest::MaxDuration()
+{
+  return cmDuration(1.0e7);
+}
+
+void cmCTest::SetRunCurrentScript(bool value)
+{
+  cmCTestScriptHandler* ch =
+    static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+
+  ch->SetRunCurrentScript(value);
 }
 
 void cmCTest::OutputTestErrors(std::vector<char> const& process_output)

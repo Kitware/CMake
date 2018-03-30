@@ -7,6 +7,7 @@
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
 #include "cmDocumentationFormatter.h"
+#include "cmDuration.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileTimeComparison.h"
 #include "cmGeneratorTarget.h"
@@ -32,14 +33,6 @@
 #include "cmGraphVizWriter.h"
 #include "cmVariableWatch.h"
 #include <unordered_map>
-#endif
-
-// only build kdevelop generator on non-windows platforms
-// when not bootstrapping cmake
-#if !defined(_WIN32)
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#define CMAKE_USE_KDEVELOP
-#endif
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -86,10 +79,6 @@
 #endif
 #include "cmExtraKateGenerator.h"
 #include "cmExtraSublimeTextGenerator.h"
-
-#ifdef CMAKE_USE_KDEVELOP
-#include "cmGlobalKdevelopGenerator.h"
-#endif
 
 #ifdef CMAKE_USE_ECLIPSE
 #include "cmExtraEclipseCDT4Generator.h"
@@ -197,6 +186,7 @@ cmake::cmake(Role role)
   this->SourceFileExtensions.push_back("cc");
   this->SourceFileExtensions.push_back("cpp");
   this->SourceFileExtensions.push_back("cxx");
+  this->SourceFileExtensions.push_back("cu");
   this->SourceFileExtensions.push_back("m");
   this->SourceFileExtensions.push_back("M");
   this->SourceFileExtensions.push_back("mm");
@@ -498,7 +488,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     if (this->GetWorkingMode() != NORMAL_MODE) {
       std::string file(cmSystemTools::CollapseFullPath(path));
       cmSystemTools::ConvertToUnixSlashes(file);
-      mf.SetScriptModeFile(file.c_str());
+      mf.SetScriptModeFile(file);
 
       mf.SetArgcArgv(args);
     }
@@ -756,8 +746,13 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       }
       cmGlobalGenerator* gen = this->CreateGlobalGenerator(value);
       if (!gen) {
+        const char* kdevError = nullptr;
+        if (value.find("KDevelop3", 0) != std::string::npos) {
+          kdevError = "\nThe KDevelop3 generator is not supported anymore.";
+        }
+
         cmSystemTools::Error("Could not create named generator ",
-                             value.c_str());
+                             value.c_str(), kdevError);
         this->PrintGeneratorList();
       } else {
         this->SetGlobalGenerator(gen);
@@ -789,10 +784,10 @@ void cmake::SetDirectoriesFromFile(const char* arg)
     cacheFile += "/CMakeCache.txt";
     std::string listFile = path;
     listFile += "/CMakeLists.txt";
-    if (cmSystemTools::FileExists(cacheFile.c_str())) {
+    if (cmSystemTools::FileExists(cacheFile)) {
       cachePath = path;
     }
-    if (cmSystemTools::FileExists(listFile.c_str())) {
+    if (cmSystemTools::FileExists(listFile)) {
       listPath = path;
     }
   } else if (cmSystemTools::FileExists(arg)) {
@@ -875,7 +870,7 @@ int cmake::AddCMakePaths()
     "Path to cpack program executable.", cmStateEnums::INTERNAL);
 #endif
   if (!cmSystemTools::FileExists(
-        (cmSystemTools::GetCMakeRoot() + "/Modules/CMake.cmake").c_str())) {
+        (cmSystemTools::GetCMakeRoot() + "/Modules/CMake.cmake"))) {
     // couldn't find modules
     cmSystemTools::Error(
       "Could not find CMAKE_ROOT !!!\n"
@@ -902,9 +897,6 @@ void cmake::AddDefaultExtraGenerators()
   this->ExtraGenerators.push_back(cmExtraEclipseCDT4Generator::GetFactory());
 #endif
 
-#ifdef CMAKE_USE_KDEVELOP
-  this->ExtraGenerators.push_back(cmGlobalKdevelopGenerator::GetFactory());
-#endif
 #endif
 }
 
@@ -922,7 +914,7 @@ void cmake::GetRegisteredGenerators(
       info.name = name;
       info.baseName = name;
       info.isAlias = false;
-      generators.push_back(info);
+      generators.push_back(std::move(info));
     }
   }
 
@@ -938,7 +930,7 @@ void cmake::GetRegisteredGenerators(
       info.supportsPlatform = false;
       info.supportsToolset = false;
       info.isAlias = false;
-      generators.push_back(info);
+      generators.push_back(std::move(info));
     }
     for (std::string const& a : eg->Aliases) {
       GeneratorInfo info;
@@ -950,7 +942,7 @@ void cmake::GetRegisteredGenerators(
       info.supportsPlatform = false;
       info.supportsToolset = false;
       info.isAlias = true;
-      generators.push_back(info);
+      generators.push_back(std::move(info));
     }
   }
 }
@@ -1012,7 +1004,7 @@ void cmake::SetHomeDirectory(const std::string& dir)
   }
 }
 
-const char* cmake::GetHomeDirectory() const
+std::string const& cmake::GetHomeDirectory() const
 {
   return this->State->GetSourceDirectory();
 }
@@ -1025,7 +1017,7 @@ void cmake::SetHomeOutputDirectory(const std::string& dir)
   }
 }
 
-const char* cmake::GetHomeOutputDirectory() const
+std::string const& cmake::GetHomeOutputDirectory() const
 {
   return this->State->GetBinaryDirectory();
 }
@@ -1036,11 +1028,11 @@ std::string cmake::FindCacheFile(const std::string& binaryDir)
   cmSystemTools::ConvertToUnixSlashes(cachePath);
   std::string cacheFile = cachePath;
   cacheFile += "/CMakeCache.txt";
-  if (!cmSystemTools::FileExists(cacheFile.c_str())) {
+  if (!cmSystemTools::FileExists(cacheFile)) {
     // search in parent directories for cache
     std::string cmakeFiles = cachePath;
     cmakeFiles += "/CMakeFiles";
-    if (cmSystemTools::FileExists(cmakeFiles.c_str())) {
+    if (cmSystemTools::FileExists(cmakeFiles)) {
       std::string cachePathFound =
         cmSystemTools::FileExistsInParentDirectories("CMakeCache.txt",
                                                      cachePath.c_str(), "/");
@@ -1096,7 +1088,7 @@ int cmake::DoPreConfigureChecks()
   // Make sure the Source directory contains a CMakeLists.txt file.
   std::string srcList = this->GetHomeDirectory();
   srcList += "/CMakeLists.txt";
-  if (!cmSystemTools::FileExists(srcList.c_str())) {
+  if (!cmSystemTools::FileExists(srcList)) {
     std::ostringstream err;
     if (cmSystemTools::FileIsDirectory(this->GetHomeDirectory())) {
       err << "The source directory \"" << this->GetHomeDirectory()
@@ -1177,7 +1169,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
         save.help = help;
       }
     }
-    saved.push_back(save);
+    saved.push_back(std::move(save));
   }
 
   // remove the cache
@@ -1281,7 +1273,7 @@ int cmake::ActualConfigure()
   }
   if (!res) {
     this->AddCacheEntry(
-      "CMAKE_HOME_DIRECTORY", this->GetHomeDirectory(),
+      "CMAKE_HOME_DIRECTORY", this->GetHomeDirectory().c_str(),
       "Source directory with the top level CMakeLists.txt file for this "
       "project",
       cmStateEnums::INTERNAL);
@@ -1518,14 +1510,14 @@ void cmake::PreLoadCMakeFiles()
   std::string pre_load = this->GetHomeDirectory();
   if (!pre_load.empty()) {
     pre_load += "/PreLoad.cmake";
-    if (cmSystemTools::FileExists(pre_load.c_str())) {
+    if (cmSystemTools::FileExists(pre_load)) {
       this->ReadListFile(args, pre_load.c_str());
     }
   }
   pre_load = this->GetHomeOutputDirectory();
   if (!pre_load.empty()) {
     pre_load += "/PreLoad.cmake";
-    if (cmSystemTools::FileExists(pre_load.c_str())) {
+    if (cmSystemTools::FileExists(pre_load)) {
       this->ReadListFile(args, pre_load.c_str());
     }
   }
@@ -1733,7 +1725,7 @@ int cmake::LoadCache()
     // if it does exist, but isn't readable then warn the user
     std::string cacheFile = this->GetHomeOutputDirectory();
     cacheFile += "/CMakeCache.txt";
-    if (cmSystemTools::FileExists(cacheFile.c_str())) {
+    if (cmSystemTools::FileExists(cacheFile)) {
       cmSystemTools::Error(
         "There is a CMakeCache.txt file for the current binary tree but "
         "cmake does not have permission to read it. Please check the "
@@ -1771,7 +1763,7 @@ bool cmake::LoadCache(const std::string& path, bool internal,
 
 bool cmake::SaveCache(const std::string& path)
 {
-  bool result = this->State->SaveCache(path);
+  bool result = this->State->SaveCache(path, this->GetMessenger());
   static const char* entries[] = { "CMAKE_CACHE_MAJOR_VERSION",
                                    "CMAKE_CACHE_MINOR_VERSION",
                                    "CMAKE_CACHE_PATCH_VERSION",
@@ -1817,7 +1809,7 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
   for (cmGlobalGeneratorFactory* g : this->Generators) {
     cmDocumentationEntry e;
     g->GetDocumentation(e);
-    v.push_back(e);
+    v.push_back(std::move(e));
   }
   for (cmExternalMakefileProjectGeneratorFactory* eg : this->ExtraGenerators) {
     const std::string doc = eg->GetDocumentation();
@@ -1828,7 +1820,7 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
       cmDocumentationEntry e;
       e.Name = a;
       e.Brief = doc;
-      v.push_back(e);
+      v.push_back(std::move(e));
     }
 
     // Full names:
@@ -1839,7 +1831,7 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
       e.Name =
         cmExternalMakefileProjectGenerator::CreateFullGeneratorName(g, name);
       e.Brief = doc;
-      v.push_back(e);
+      v.push_back(std::move(e));
     }
   }
 }
@@ -1900,7 +1892,7 @@ int cmake::CheckBuildSystem()
   }
 
   // If the file provided does not exist, we have to rerun.
-  if (!cmSystemTools::FileExists(this->CheckBuildSystemArgument.c_str())) {
+  if (!cmSystemTools::FileExists(this->CheckBuildSystemArgument)) {
     if (verbose) {
       std::ostringstream msg;
       msg << "Re-run cmake missing file: " << this->CheckBuildSystemArgument
@@ -1954,8 +1946,7 @@ int cmake::CheckBuildSystem()
     cmSystemTools::ExpandListArgument(productStr, products);
   }
   for (std::string const& p : products) {
-    if (!(cmSystemTools::FileExists(p.c_str()) ||
-          cmSystemTools::FileIsSymlink(p))) {
+    if (!(cmSystemTools::FileExists(p) || cmSystemTools::FileIsSymlink(p))) {
       if (verbose) {
         std::ostringstream msg;
         msg << "Re-run cmake, missing byproduct: " << p << "\n";
@@ -2153,7 +2144,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   std::string destPath = cwd + "/__cmake_systeminformation";
   cmSystemTools::RemoveADirectory(destPath);
-  if (!cmSystemTools::MakeDirectory(destPath.c_str())) {
+  if (!cmSystemTools::MakeDirectory(destPath)) {
     std::cerr << "Error: --system-information must be run from a "
                  "writable directory!\n";
     return 1;
@@ -2185,7 +2176,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
     }
     // no option assume it is the output file
     else {
-      if (!cmSystemTools::FileIsFullPath(arg.c_str())) {
+      if (!cmSystemTools::FileIsFullPath(arg)) {
         resultFile = cwd;
         resultFile += "/";
       }
@@ -2222,9 +2213,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
     std::vector<std::string> args2;
     args2.push_back(args[0]);
     args2.push_back(destPath);
-    std::string resultArg = "-DRESULT_FILE=";
-    resultArg += resultFile;
-    args2.push_back(resultArg);
+    args2.push_back("-DRESULT_FILE=" + resultFile);
     int res = this->Run(args2, false);
 
     if (res != 0) {
@@ -2440,7 +2429,7 @@ int cmake::Build(const std::string& dir, const std::string& target,
     cmGlobalVisualStudio8Generator::GetGenerateStampList();
 
   // Note that the stampList file only exists for VS generators.
-  if (cmSystemTools::FileExists(stampList.c_str()) &&
+  if (cmSystemTools::FileExists(stampList) &&
       !cmakeCheckStampList(stampList.c_str(), false)) {
 
     // Correctly initialize the home (=source) and home output (=binary)
@@ -2475,8 +2464,8 @@ int cmake::Build(const std::string& dir, const std::string& target,
 #endif
 
   return gen->Build("", dir, projName, target, output, "", config, clean,
-                    false, verbose, 0, cmSystemTools::OUTPUT_PASSTHROUGH,
-                    nativeOptions);
+                    false, verbose, cmDuration::zero(),
+                    cmSystemTools::OUTPUT_PASSTHROUGH, nativeOptions);
 }
 
 bool cmake::Open(const std::string& dir, bool dryRun)

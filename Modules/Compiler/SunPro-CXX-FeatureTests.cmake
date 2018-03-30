@@ -1,9 +1,13 @@
 
 # Based on GNU 4.8.2
-# http://docs.oracle.com/cd/E37069_01/html/E37071/gncix.html
+# https://docs.oracle.com/cd/E37069_01/html/E37071/gncix.html
+# https://docs.oracle.com/cd/E77782_01/html/E77784/gkeza.html
 # Reference: http://gcc.gnu.org/projects/cxx0x.html
 
 set(_cmake_oldestSupported "__SUNPRO_CC >= 0x5130")
+
+set(SolarisStudio126_CXX11 "(__SUNPRO_CC >= 0x5150) && __cplusplus >= 201103L")
+set(_cmake_feature_test_cxx_decltype_auto "${SolarisStudio126_CXX11}")
 
 set(SolarisStudio125_CXX11 "(__SUNPRO_CC >= 0x5140) && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_binary_literals "${SolarisStudio125_CXX11}")

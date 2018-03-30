@@ -27,7 +27,11 @@ passTest(two)           # 6
 passTest(cleanupBar)    # 7
 passTest(three)         # 8
 failTest(setupFails)    # 9
-passTest(wontRun)       # 10
+
+# Special case, test executable always missing to verify fixture dependencies
+# are checked before existence of test executable to be run
+add_test(NAME wontRun COMMAND iDoNotExist)  # 10
+
 passTest(cyclicSetup)   # 11
 passTest(cyclicCleanup) # 12
 passTest(cleanupUnused) # 13

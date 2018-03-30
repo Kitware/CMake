@@ -3,6 +3,8 @@
 #include "cmAddCustomCommandCommand.h"
 
 #include <sstream>
+#include <unordered_set>
+#include <utility>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -68,57 +70,106 @@ bool cmAddCustomCommandCommand::InitialPass(
 
   tdoing doing = doing_nothing;
 
-  for (std::string const& copy : args) {
-    if (copy == "SOURCE") {
-      doing = doing_source;
-    } else if (copy == "COMMAND") {
-      doing = doing_command;
+#define MAKE_STATIC_KEYWORD(KEYWORD)                                          \
+  static const std::string key##KEYWORD = #KEYWORD
+  MAKE_STATIC_KEYWORD(APPEND);
+  MAKE_STATIC_KEYWORD(ARGS);
+  MAKE_STATIC_KEYWORD(BYPRODUCTS);
+  MAKE_STATIC_KEYWORD(COMMAND);
+  MAKE_STATIC_KEYWORD(COMMAND_EXPAND_LISTS);
+  MAKE_STATIC_KEYWORD(COMMENT);
+  MAKE_STATIC_KEYWORD(DEPENDS);
+  MAKE_STATIC_KEYWORD(DEPFILE);
+  MAKE_STATIC_KEYWORD(IMPLICIT_DEPENDS);
+  MAKE_STATIC_KEYWORD(MAIN_DEPENDENCY);
+  MAKE_STATIC_KEYWORD(OUTPUT);
+  MAKE_STATIC_KEYWORD(OUTPUTS);
+  MAKE_STATIC_KEYWORD(POST_BUILD);
+  MAKE_STATIC_KEYWORD(PRE_BUILD);
+  MAKE_STATIC_KEYWORD(PRE_LINK);
+  MAKE_STATIC_KEYWORD(SOURCE);
+  MAKE_STATIC_KEYWORD(TARGET);
+  MAKE_STATIC_KEYWORD(USES_TERMINAL);
+  MAKE_STATIC_KEYWORD(VERBATIM);
+  MAKE_STATIC_KEYWORD(WORKING_DIRECTORY);
+#undef MAKE_STATIC_KEYWORD
+  static std::unordered_set<std::string> keywords;
+  if (keywords.empty()) {
+    keywords.insert(keyAPPEND);
+    keywords.insert(keyARGS);
+    keywords.insert(keyBYPRODUCTS);
+    keywords.insert(keyCOMMAND);
+    keywords.insert(keyCOMMAND_EXPAND_LISTS);
+    keywords.insert(keyCOMMENT);
+    keywords.insert(keyDEPENDS);
+    keywords.insert(keyDEPFILE);
+    keywords.insert(keyIMPLICIT_DEPENDS);
+    keywords.insert(keyMAIN_DEPENDENCY);
+    keywords.insert(keyOUTPUT);
+    keywords.insert(keyOUTPUTS);
+    keywords.insert(keyPOST_BUILD);
+    keywords.insert(keyPRE_BUILD);
+    keywords.insert(keyPRE_LINK);
+    keywords.insert(keySOURCE);
+    keywords.insert(keyTARGET);
+    keywords.insert(keyUSES_TERMINAL);
+    keywords.insert(keyVERBATIM);
+    keywords.insert(keyWORKING_DIRECTORY);
+  }
 
-      // Save the current command before starting the next command.
-      if (!currentLine.empty()) {
-        commandLines.push_back(currentLine);
-        currentLine.clear();
-      }
-    } else if (copy == "PRE_BUILD") {
-      cctype = cmTarget::PRE_BUILD;
-    } else if (copy == "PRE_LINK") {
-      cctype = cmTarget::PRE_LINK;
-    } else if (copy == "POST_BUILD") {
-      cctype = cmTarget::POST_BUILD;
-    } else if (copy == "VERBATIM") {
-      verbatim = true;
-    } else if (copy == "APPEND") {
-      append = true;
-    } else if (copy == "USES_TERMINAL") {
-      uses_terminal = true;
-    } else if (copy == "COMMAND_EXPAND_LISTS") {
-      command_expand_lists = true;
-    } else if (copy == "TARGET") {
-      doing = doing_target;
-    } else if (copy == "ARGS") {
-      // Ignore this old keyword.
-    } else if (copy == "DEPENDS") {
-      doing = doing_depends;
-    } else if (copy == "OUTPUTS") {
-      doing = doing_outputs;
-    } else if (copy == "OUTPUT") {
-      doing = doing_output;
-    } else if (copy == "BYPRODUCTS") {
-      doing = doing_byproducts;
-    } else if (copy == "WORKING_DIRECTORY") {
-      doing = doing_working_directory;
-    } else if (copy == "MAIN_DEPENDENCY") {
-      doing = doing_main_dependency;
-    } else if (copy == "IMPLICIT_DEPENDS") {
-      doing = doing_implicit_depends_lang;
-    } else if (copy == "COMMENT") {
-      doing = doing_comment;
-    } else if (copy == "DEPFILE") {
-      doing = doing_depfile;
-      if (this->Makefile->GetGlobalGenerator()->GetName() != "Ninja") {
-        this->SetError("Option DEPFILE not supported by " +
-                       this->Makefile->GetGlobalGenerator()->GetName());
-        return false;
+  for (std::string const& copy : args) {
+    if (keywords.count(copy)) {
+      if (copy == keySOURCE) {
+        doing = doing_source;
+      } else if (copy == keyCOMMAND) {
+        doing = doing_command;
+
+        // Save the current command before starting the next command.
+        if (!currentLine.empty()) {
+          commandLines.push_back(currentLine);
+          currentLine.clear();
+        }
+      } else if (copy == keyPRE_BUILD) {
+        cctype = cmTarget::PRE_BUILD;
+      } else if (copy == keyPRE_LINK) {
+        cctype = cmTarget::PRE_LINK;
+      } else if (copy == keyPOST_BUILD) {
+        cctype = cmTarget::POST_BUILD;
+      } else if (copy == keyVERBATIM) {
+        verbatim = true;
+      } else if (copy == keyAPPEND) {
+        append = true;
+      } else if (copy == keyUSES_TERMINAL) {
+        uses_terminal = true;
+      } else if (copy == keyCOMMAND_EXPAND_LISTS) {
+        command_expand_lists = true;
+      } else if (copy == keyTARGET) {
+        doing = doing_target;
+      } else if (copy == keyARGS) {
+        // Ignore this old keyword.
+      } else if (copy == keyDEPENDS) {
+        doing = doing_depends;
+      } else if (copy == keyOUTPUTS) {
+        doing = doing_outputs;
+      } else if (copy == keyOUTPUT) {
+        doing = doing_output;
+      } else if (copy == keyBYPRODUCTS) {
+        doing = doing_byproducts;
+      } else if (copy == keyWORKING_DIRECTORY) {
+        doing = doing_working_directory;
+      } else if (copy == keyMAIN_DEPENDENCY) {
+        doing = doing_main_dependency;
+      } else if (copy == keyIMPLICIT_DEPENDS) {
+        doing = doing_implicit_depends_lang;
+      } else if (copy == keyCOMMENT) {
+        doing = doing_comment;
+      } else if (copy == keyDEPFILE) {
+        doing = doing_depfile;
+        if (this->Makefile->GetGlobalGenerator()->GetName() != "Ninja") {
+          this->SetError("Option DEPFILE not supported by " +
+                         this->Makefile->GetGlobalGenerator()->GetName());
+          return false;
+        }
       }
     } else {
       std::string filename;
@@ -126,7 +177,7 @@ bool cmAddCustomCommandCommand::InitialPass(
         case doing_output:
         case doing_outputs:
         case doing_byproducts:
-          if (!cmSystemTools::FileIsFullPath(copy.c_str())) {
+          if (!cmSystemTools::FileIsFullPath(copy)) {
             // This is an output to be generated, so it should be
             // under the build tree.  CMake 2.4 placed this under the
             // source tree.  However the only case that this change
@@ -153,7 +204,7 @@ bool cmAddCustomCommandCommand::InitialPass(
           break;
       }
 
-      if (cmSystemTools::FileIsFullPath(filename.c_str())) {
+      if (cmSystemTools::FileIsFullPath(filename)) {
         filename = cmSystemTools::CollapseFullPath(filename);
       }
       switch (doing) {
@@ -184,9 +235,7 @@ bool cmAddCustomCommandCommand::InitialPass(
           depends.push_back(dep);
 
           // Add the implicit dependency language and file.
-          cmCustomCommand::ImplicitDependsPair entry(implicit_depends_lang,
-                                                     dep);
-          implicit_depends.push_back(entry);
+          implicit_depends.emplace_back(implicit_depends_lang, dep);
 
           // Switch back to looking for a language.
           doing = doing_implicit_depends_lang;
@@ -200,7 +249,7 @@ bool cmAddCustomCommandCommand::InitialPass(
         case doing_depends: {
           std::string dep = copy;
           cmSystemTools::ConvertToUnixSlashes(dep);
-          depends.push_back(dep);
+          depends.push_back(std::move(dep));
         } break;
         case doing_outputs:
           outputs.push_back(filename);
@@ -356,7 +405,7 @@ bool cmAddCustomCommandCommand::CheckOutputs(
   for (std::string const& o : outputs) {
     // Make sure the file will not be generated into the source
     // directory during an out of source build.
-    if (!this->Makefile->CanIWriteThisFile(o.c_str())) {
+    if (!this->Makefile->CanIWriteThisFile(o)) {
       std::string e = "attempted to have a file \"" + o +
         "\" in a source directory as an output of custom command.";
       this->SetError(e);

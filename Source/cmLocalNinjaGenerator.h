@@ -23,7 +23,6 @@ class cmGlobalGenerator;
 class cmGlobalNinjaGenerator;
 class cmMakefile;
 class cmRulePlaceholderExpander;
-class cmSourceFile;
 class cmake;
 
 /**
@@ -73,10 +72,6 @@ public:
                                 std::vector<std::string>& cmdLines);
   void AppendCustomCommandDeps(cmCustomCommandGenerator const& ccg,
                                cmNinjaDeps& ninjaDeps);
-
-  void ComputeObjectFilenames(
-    std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* gt = nullptr) override;
 
 protected:
   std::string ConvertToIncludeReference(

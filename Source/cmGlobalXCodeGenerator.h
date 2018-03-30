@@ -104,7 +104,7 @@ public:
   bool ShouldStripResourcePath(cmMakefile*) const override;
 
   bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf) override;
-  void AppendFlag(std::string& flags, std::string const& flag);
+  void AppendFlag(std::string& flags, std::string const& flag) const;
 
 protected:
   void AddExtraIDETargets() override;
@@ -119,7 +119,7 @@ private:
   std::string XCodeEscapePath(const std::string& p);
   std::string RelativeToSource(const char* p);
   std::string RelativeToBinary(const char* p);
-  std::string ConvertToRelativeForMake(const char* p);
+  std::string ConvertToRelativeForMake(std::string const& p);
   void CreateCustomCommands(cmXCodeObject* buildPhases,
                             cmXCodeObject* sourceBuildPhase,
                             cmXCodeObject* headerBuildPhase,
@@ -253,6 +253,8 @@ private:
   std::string GetObjectsNormalDirectory(const std::string& projName,
                                         const std::string& configName,
                                         const cmGeneratorTarget* t) const;
+
+  static std::string GetDeploymentPlatform(const cmMakefile* mf);
 
   void ComputeArchitectures(cmMakefile* mf);
   void ComputeObjectDirArch(cmMakefile* mf);

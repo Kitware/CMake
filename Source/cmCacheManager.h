@@ -15,7 +15,7 @@
 #include "cmPropertyMap.h"
 #include "cmStateTypes.h"
 
-class cmake;
+class cmMessenger;
 
 /** \class cmCacheManager
  * \brief Control class for cmake's cache
@@ -108,7 +108,7 @@ public:
                  std::set<std::string>& includes);
 
   ///! Save cache for given makefile.  Saves to output path/CMakeCache.txt
-  bool SaveCache(const std::string& path);
+  bool SaveCache(const std::string& path, cmMessenger* messenger);
 
   ///! Delete the cache given
   bool DeleteCache(const std::string& path);
@@ -218,16 +218,25 @@ protected:
   unsigned int CacheMinorVersion;
 
 private:
-  cmake* CMakeInstance;
   typedef std::map<std::string, CacheEntry> CacheEntryMap;
   static void OutputHelpString(std::ostream& fout,
                                const std::string& helpString);
+  static void OutputWarningComment(std::ostream& fout,
+                                   std::string const& message,
+                                   bool wrapSpaces);
+  static void OutputNewlineTruncationWarning(std::ostream& fout,
+                                             std::string const& key,
+                                             std::string const& value,
+                                             cmMessenger* messenger);
   static void OutputKey(std::ostream& fout, std::string const& key);
   static void OutputValue(std::ostream& fout, std::string const& value);
+  static void OutputValueNoNewlines(std::ostream& fout,
+                                    std::string const& value);
 
   static const char* PersistentProperties[];
   bool ReadPropertyEntry(std::string const& key, CacheEntry& e);
-  void WritePropertyEntries(std::ostream& os, CacheIterator i);
+  void WritePropertyEntries(std::ostream& os, CacheIterator i,
+                            cmMessenger* messenger);
 
   CacheEntryMap Cache;
   // Only cmake and cmState should be able to add cache values

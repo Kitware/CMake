@@ -24,15 +24,15 @@ public:
                                   const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
-  virtual bool MatchesGeneratorName(const std::string& name) const;
+  bool MatchesGeneratorName(const std::string& name) const override;
 
-  virtual void WriteSLNHeader(std::ostream& fout);
+  void WriteSLNHeader(std::ostream& fout) override;
 
 protected:
-  virtual bool InitializeWindowsPhone(cmMakefile* mf);
-  virtual bool InitializeWindowsStore(cmMakefile* mf);
-  virtual bool SelectWindowsPhoneToolset(std::string& toolset) const;
-  virtual bool SelectWindowsStoreToolset(std::string& toolset) const;
+  bool InitializeWindowsPhone(cmMakefile* mf) override;
+  bool InitializeWindowsStore(cmMakefile* mf) override;
+  bool SelectWindowsPhoneToolset(std::string& toolset) const override;
+  bool SelectWindowsStoreToolset(std::string& toolset) const override;
 
   // Used to verify that the Desktop toolset for the current generator is
   // installed on the machine.
@@ -43,12 +43,12 @@ protected:
   bool IsWindowsPhoneToolsetInstalled() const;
   bool IsWindowsStoreToolsetInstalled() const;
 
-  virtual const char* GetIDEVersion() { return "11.0"; }
+  const char* GetIDEVersion() override { return "11.0"; }
   bool UseFolderProperty();
   static std::set<std::string> GetInstalledWindowsCESDKs();
 
   /** Return true if the configuration needs to be deployed */
-  virtual bool NeedsDeploy(cmStateEnums::TargetType type) const;
+  bool NeedsDeploy(cmStateEnums::TargetType type) const override;
 
 private:
   class Factory;

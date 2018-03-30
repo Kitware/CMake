@@ -14,7 +14,18 @@ if(CMake_TEST_INSTALL)
   set(CMake_TEST_INSTALL_PREFIX ${CMake_BINARY_DIR}/Tests/CMakeInstall)
   set(CMAKE_INSTALL_PREFIX "${CMake_TEST_INSTALL_PREFIX}")
 
-  if(CMAKE_CONFIGURATION_TYPES)
+  # 3.9 or later provides a definitive answer to whether we are multi-config
+  # through a global property. Prior to 3.9, CMAKE_CONFIGURATION_TYPES being set
+  # is assumed to mean multi-config, but developers might modify it so it is
+  # technically not as reliable.
+  if(NOT CMAKE_VERSION VERSION_LESS 3.9)
+    get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+  elseif(CMAKE_CONFIGURATION_TYPES)
+    set(_isMultiConfig True)
+  else()
+    set(_isMultiConfig False)
+  endif()
+  if(_isMultiConfig)
     # There are multiple configurations.  Make sure the tested
     # configuration is the one that is installed.
     set(CMake_TEST_INSTALL_CONFIG --config $<CONFIGURATION>)

@@ -8,6 +8,16 @@ add_test(NAME FindDoxygen.SimpleTest COMMAND
   --build-options ${build_options}
 )
 
+add_test(NAME FindDoxygen.QuotingTest COMMAND
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+  --build-and-test
+  "${CMake_SOURCE_DIR}/Tests/FindDoxygen/QuotingTest"
+  "${CMake_BINARY_DIR}/Tests/FindDoxygen/QuotingTest"
+  --build-target allDocTargets
+  ${build_generator_args}
+  --build-options ${build_options}
+)
+
 if(CMake_TEST_FindDoxygen_Dot)
   add_test(NAME FindDoxygen.DotComponentTest COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>

@@ -3,13 +3,13 @@
 #include "cmCTestConfigureHandler.h"
 
 #include "cmCTest.h"
+#include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmXMLWriter.h"
 
 #include <chrono>
 #include <ostream>
 #include <string>
-#include <type_traits>
 
 cmCTestConfigureHandler::cmCTestConfigureHandler()
 {
@@ -64,7 +64,8 @@ int cmCTestConfigureHandler::ProcessHandler()
                        "Configure with command: " << cCommand << std::endl,
                        this->Quiet);
     res = this->CTest->RunMakeCommand(cCommand.c_str(), output, &retVal,
-                                      buildDirectory.c_str(), 0, ofs);
+                                      buildDirectory.c_str(),
+                                      cmDuration::zero(), ofs);
 
     if (ofs) {
       ofs.close();

@@ -3,6 +3,7 @@
 
 #include "cmTargetPropertyComputer.h"
 
+#include <cctype>
 #include <sstream>
 #include <unordered_set>
 
@@ -47,6 +48,12 @@ bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
   const std::string& prop)
 {
   if (cmHasLiteralPrefix(prop, "INTERFACE_")) {
+    return true;
+  }
+  if (cmHasLiteralPrefix(prop, "_")) {
+    return true;
+  }
+  if (std::islower(prop[0])) {
     return true;
   }
   static std::unordered_set<std::string> builtIns;

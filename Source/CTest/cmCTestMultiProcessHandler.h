@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "cm_uv.h"
+
 class cmCTest;
 class cmCTestRunTest;
 
@@ -23,6 +25,7 @@ class cmCTestRunTest;
 class cmCTestMultiProcessHandler
 {
   friend class TestComparator;
+  friend class cmCTestRunTest;
 
 public:
   struct TestSet : public std::set<int>
@@ -75,7 +78,7 @@ protected:
   // Start the next test or tests as many as are allowed by
   // ParallelLevel
   void StartNextTests();
-  void StartTestProcess(int test);
+  bool StartTestProcess(int test);
   bool StartTest(int test);
   // Mark the checkpoint for the given test
   void WriteCheckpoint(int index);
@@ -95,9 +98,8 @@ protected:
   // Removes the checkpoint file
   void MarkFinished();
   void EraseTest(int index);
-  // Return true if there are still tests running
-  // check all running processes for output and exit case
-  bool CheckOutput();
+  void FinishTestProcess(cmCTestRunTest* runner, bool started);
+
   void RemoveTest(int index);
   // Check if we need to resume an interrupted test set
   void CheckResume();
@@ -130,7 +132,7 @@ protected:
   std::vector<cmCTestTestHandler::cmCTestTestResult>* TestResults;
   size_t ParallelLevel; // max number of process that can be run at once
   unsigned long TestLoad;
-  std::set<cmCTestRunTest*> RunningTests; // current running tests
+  uv_loop_t Loop;
   cmCTestTestHandler* TestHandler;
   cmCTest* CTest;
   bool HasCycles;

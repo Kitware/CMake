@@ -88,7 +88,7 @@ void cmComputeComponentGraph::TarjanVisit(int i)
   if (this->TarjanEntries[i].Root == i) {
     // Yes.  Create it.
     int c = static_cast<int>(this->Components.size());
-    this->Components.push_back(NodeList());
+    this->Components.emplace_back();
     NodeList& component = this->Components[c];
 
     // Populate the component list.

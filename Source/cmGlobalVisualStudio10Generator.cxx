@@ -478,12 +478,11 @@ void cmGlobalVisualStudio10Generator::Generate()
 void cmGlobalVisualStudio10Generator::EnableLanguage(
   std::vector<std::string> const& lang, cmMakefile* mf, bool optional)
 {
-  for (std::vector<std::string>::const_iterator it = lang.begin();
-       it != lang.end(); ++it) {
-    if (*it == "ASM_NASM") {
+  for (std::string const& it : lang) {
+    if (it == "ASM_NASM") {
       this->NasmEnabled = true;
     }
-    if (*it == "CUDA") {
+    if (it == "CUDA") {
       this->CudaEnabled = true;
     }
   }
@@ -829,8 +828,9 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     if (parser.ParseFile(slnFile, slnData,
                          cmVisualStudioSlnParser::DataGroupProjects)) {
       std::vector<cmSlnProjectEntry> slnProjects = slnData.GetProjects();
-      for (std::vector<cmSlnProjectEntry>::iterator i = slnProjects.begin();
-           !useDevEnv && i != slnProjects.end(); ++i) {
+      for (std::vector<cmSlnProjectEntry>::const_iterator i =
+             slnProjects.cbegin();
+           !useDevEnv && i != slnProjects.cend(); ++i) {
         std::string proj = i->GetRelativePath();
         if (proj.size() > 7 && proj.substr(proj.size() - 7) == ".vfproj") {
           useDevEnv = true;
@@ -949,6 +949,11 @@ void cmGlobalVisualStudio10Generator::PathTooLong(cmGeneratorTarget* target,
     this->LongestSource.SourceFile = sf;
     this->LongestSource.SourceRel = sfRel;
   }
+}
+
+std::string cmGlobalVisualStudio10Generator::Encoding()
+{
+  return "utf-8";
 }
 
 bool cmGlobalVisualStudio10Generator::IsNsightTegra() const

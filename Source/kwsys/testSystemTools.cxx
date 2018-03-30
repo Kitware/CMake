@@ -39,20 +39,20 @@ typedef unsigned short mode_t;
 static const char* toUnixPaths[][2] = {
   { "/usr/local/bin/passwd", "/usr/local/bin/passwd" },
   { "/usr/lo cal/bin/pa sswd", "/usr/lo cal/bin/pa sswd" },
-  { "/usr/lo\\ cal/bin/pa\\ sswd", "/usr/lo\\ cal/bin/pa\\ sswd" },
+  { "/usr/lo\\ cal/bin/pa\\ sswd", "/usr/lo/ cal/bin/pa/ sswd" },
   { "c:/usr/local/bin/passwd", "c:/usr/local/bin/passwd" },
   { "c:/usr/lo cal/bin/pa sswd", "c:/usr/lo cal/bin/pa sswd" },
-  { "c:/usr/lo\\ cal/bin/pa\\ sswd", "c:/usr/lo\\ cal/bin/pa\\ sswd" },
+  { "c:/usr/lo\\ cal/bin/pa\\ sswd", "c:/usr/lo/ cal/bin/pa/ sswd" },
   { "\\usr\\local\\bin\\passwd", "/usr/local/bin/passwd" },
   { "\\usr\\lo cal\\bin\\pa sswd", "/usr/lo cal/bin/pa sswd" },
-  { "\\usr\\lo\\ cal\\bin\\pa\\ sswd", "/usr/lo\\ cal/bin/pa\\ sswd" },
+  { "\\usr\\lo\\ cal\\bin\\pa\\ sswd", "/usr/lo/ cal/bin/pa/ sswd" },
   { "c:\\usr\\local\\bin\\passwd", "c:/usr/local/bin/passwd" },
   { "c:\\usr\\lo cal\\bin\\pa sswd", "c:/usr/lo cal/bin/pa sswd" },
-  { "c:\\usr\\lo\\ cal\\bin\\pa\\ sswd", "c:/usr/lo\\ cal/bin/pa\\ sswd" },
+  { "c:\\usr\\lo\\ cal\\bin\\pa\\ sswd", "c:/usr/lo/ cal/bin/pa/ sswd" },
   { "\\\\usr\\local\\bin\\passwd", "//usr/local/bin/passwd" },
   { "\\\\usr\\lo cal\\bin\\pa sswd", "//usr/lo cal/bin/pa sswd" },
-  { "\\\\usr\\lo\\ cal\\bin\\pa\\ sswd", "//usr/lo\\ cal/bin/pa\\ sswd" },
-  { 0, 0 }
+  { "\\\\usr\\lo\\ cal\\bin\\pa\\ sswd", "//usr/lo/ cal/bin/pa/ sswd" },
+  { KWSYS_NULLPTR, KWSYS_NULLPTR }
 };
 
 static bool CheckConvertToUnixSlashes(std::string const& input,
@@ -68,10 +68,11 @@ static bool CheckConvertToUnixSlashes(std::string const& input,
   return true;
 }
 
-static const char* checkEscapeChars[][4] = { { "1 foo 2 bar 2", "12", "\\",
-                                               "\\1 foo \\2 bar \\2" },
-                                             { " {} ", "{}", "#", " #{#} " },
-                                             { 0, 0, 0, 0 } };
+static const char* checkEscapeChars[][4] = {
+  { "1 foo 2 bar 2", "12", "\\", "\\1 foo \\2 bar \\2" },
+  { " {} ", "{}", "#", " #{#} " },
+  { KWSYS_NULLPTR, KWSYS_NULLPTR, KWSYS_NULLPTR, KWSYS_NULLPTR }
+};
 
 static bool CheckEscapeChars(std::string const& input,
                              const char* chars_to_escape, char escape_char,
@@ -159,7 +160,7 @@ static bool CheckFileOperations()
     res = false;
   }
   // calling with 0 pointer should return false
-  if (kwsys::SystemTools::MakeDirectory(0)) {
+  if (kwsys::SystemTools::MakeDirectory(KWSYS_NULLPTR)) {
     std::cerr << "Problem with MakeDirectory(0)" << std::endl;
     res = false;
   }
@@ -217,11 +218,11 @@ static bool CheckFileOperations()
   }
 
   // calling with 0 pointer should return false
-  if (kwsys::SystemTools::FileExists(0)) {
+  if (kwsys::SystemTools::FileExists(KWSYS_NULLPTR)) {
     std::cerr << "Problem with FileExists(0)" << std::endl;
     res = false;
   }
-  if (kwsys::SystemTools::FileExists(0, true)) {
+  if (kwsys::SystemTools::FileExists(KWSYS_NULLPTR, true)) {
     std::cerr << "Problem with FileExists(0) as file" << std::endl;
     res = false;
   }
@@ -699,6 +700,16 @@ static bool CheckCollapsePath()
   bool res = true;
   res &= CheckCollapsePath("/usr/share/*", "/usr/share/*");
   res &= CheckCollapsePath("C:/Windows/*", "C:/Windows/*");
+  res &= CheckCollapsePath("/usr/share/../lib", "/usr/lib");
+  res &= CheckCollapsePath("/usr/share/./lib", "/usr/share/lib");
+  res &= CheckCollapsePath("/usr/share/../../lib", "/lib");
+  res &= CheckCollapsePath("/usr/share/.././../lib", "/lib");
+  res &= CheckCollapsePath("/../lib", "/lib");
+  res &= CheckCollapsePath("/../lib/", "/lib");
+  res &= CheckCollapsePath("/", "/");
+  res &= CheckCollapsePath("C:/", "C:/");
+  res &= CheckCollapsePath("C:/../", "C:/");
+  res &= CheckCollapsePath("C:/../../", "C:/");
   return res;
 }
 
@@ -763,20 +774,26 @@ static bool CheckGetFilenameName()
   const char* windowsFilepath = "C:\\somewhere\\something";
   const char* unixFilepath = "/somewhere/something";
 
-  std::string expectedFilename = "something";
+#if defined(_WIN32) || defined(KWSYS_SYSTEMTOOLS_SUPPORT_WINDOWS_SLASHES)
+  std::string expectedWindowsFilename = "something";
+#else
+  std::string expectedWindowsFilename = "C:\\somewhere\\something";
+#endif
+  std::string expectedUnixFilename = "something";
 
   bool res = true;
   std::string filename = kwsys::SystemTools::GetFilenameName(windowsFilepath);
-  if (filename != expectedFilename) {
+  if (filename != expectedWindowsFilename) {
     std::cerr << "GetFilenameName(" << windowsFilepath << ") yielded "
-              << filename << " instead of " << expectedFilename << std::endl;
+              << filename << " instead of " << expectedWindowsFilename
+              << std::endl;
     res = false;
   }
 
   filename = kwsys::SystemTools::GetFilenameName(unixFilepath);
-  if (filename != expectedFilename) {
+  if (filename != expectedUnixFilename) {
     std::cerr << "GetFilenameName(" << unixFilepath << ") yielded " << filename
-              << " instead of " << expectedFilename << std::endl;
+              << " instead of " << expectedUnixFilename << std::endl;
     res = false;
   }
   return res;
@@ -807,6 +824,39 @@ static bool CheckFind()
         .empty()) {
     std::cerr << "Problem with FindFile with system paths for: "
               << testFindFileName << std::endl;
+    res = false;
+  }
+
+  return res;
+}
+
+static bool CheckIsSubDirectory()
+{
+  bool res = true;
+
+  if (kwsys::SystemTools::IsSubDirectory("/foo", "/") == false) {
+    std::cerr << "Problem with IsSubDirectory (root - unix): " << std::endl;
+    res = false;
+  }
+  if (kwsys::SystemTools::IsSubDirectory("c:/foo", "c:/") == false) {
+    std::cerr << "Problem with IsSubDirectory (root - dos): " << std::endl;
+    res = false;
+  }
+  if (kwsys::SystemTools::IsSubDirectory("/foo/bar", "/foo") == false) {
+    std::cerr << "Problem with IsSubDirectory (deep): " << std::endl;
+    res = false;
+  }
+  if (kwsys::SystemTools::IsSubDirectory("/foo", "/foo") == true) {
+    std::cerr << "Problem with IsSubDirectory (identity): " << std::endl;
+    res = false;
+  }
+  if (kwsys::SystemTools::IsSubDirectory("/fooo", "/foo") == true) {
+    std::cerr << "Problem with IsSubDirectory (substring): " << std::endl;
+    res = false;
+  }
+  if (kwsys::SystemTools::IsSubDirectory("/foo/", "/foo") == true) {
+    std::cerr << "Problem with IsSubDirectory (prepended slash): "
+              << std::endl;
     res = false;
   }
 
@@ -896,6 +946,8 @@ int testSystemTools(int, char* [])
   res &= CheckGetPath();
 
   res &= CheckFind();
+
+  res &= CheckIsSubDirectory();
 
   res &= CheckGetLineFromStream();
 

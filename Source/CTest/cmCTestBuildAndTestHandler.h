@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCTestGenericHandler.h"
+#include "cmDuration.h"
 
 #include <sstream>
 #include <stddef.h>
@@ -67,7 +68,7 @@ protected:
   std::vector<std::string> TestCommandArgs;
   std::vector<std::string> BuildTargets;
   bool BuildNoCMake;
-  double Timeout;
+  cmDuration Timeout;
 };
 
 #endif

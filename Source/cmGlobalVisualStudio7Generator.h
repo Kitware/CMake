@@ -26,11 +26,11 @@ public:
   std::string const& GetPlatformName() const;
 
   ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf);
+  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
-  virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
+  bool SetSystemName(std::string const& s, cmMakefile* mf) override;
 
-  virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
+  bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
 
   /**
    * Utilized by the generator factory to determine if this generator
@@ -48,19 +48,21 @@ public:
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string> const& languages,
-                              cmMakefile*, bool optional);
+  void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
+                      bool optional) override;
 
   /**
    * Try running cmake and building a file. This is used for dynamically
    * loaded commands, not as part of the usual build process.
    */
-  virtual void GenerateBuildCommand(
-    std::vector<std::string>& makeCommand, const std::string& makeProgram,
-    const std::string& projectName, const std::string& projectDir,
-    const std::string& targetName, const std::string& config, bool fast,
-    bool verbose,
-    std::vector<std::string> const& makeOptions = std::vector<std::string>());
+  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
+                            const std::string& makeProgram,
+                            const std::string& projectName,
+                            const std::string& projectDir,
+                            const std::string& targetName,
+                            const std::string& config, bool fast, bool verbose,
+                            std::vector<std::string> const& makeOptions =
+                              std::vector<std::string>()) override;
 
   /**
    * Generate the DSW workspace file.
@@ -71,13 +73,13 @@ public:
   std::string GetGUID(std::string const& name);
 
   /** Append the subdirectory for the given configuration.  */
-  virtual void AppendDirectoryForConfig(const std::string& prefix,
-                                        const std::string& config,
-                                        const std::string& suffix,
-                                        std::string& dir);
+  void AppendDirectoryForConfig(const std::string& prefix,
+                                const std::string& config,
+                                const std::string& suffix,
+                                std::string& dir) override;
 
   ///! What is the configurations directory variable called?
-  virtual const char* GetCMakeCFGIntDir() const
+  const char* GetCMakeCFGIntDir() const override
   {
     return "$(ConfigurationName)";
   }
@@ -103,7 +105,7 @@ public:
   cmIDEFlagTable const* ExtraFlagTable;
 
 protected:
-  virtual void Generate();
+  void Generate() override;
   virtual const char* GetIDEVersion() = 0;
 
   std::string const& GetDevEnvCommand();
@@ -129,7 +131,7 @@ protected:
                                       cmLocalGenerator* root);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout) = 0;
-  virtual std::string WriteUtilityDepend(const cmGeneratorTarget* target);
+  std::string WriteUtilityDepend(const cmGeneratorTarget* target) override;
 
   virtual void WriteTargetsToSolution(
     std::ostream& fout, cmLocalGenerator* root,
@@ -170,7 +172,7 @@ private:
   char* IntelProjectVersion;
   std::string DevEnvCommand;
   bool DevEnvCommandInitialized;
-  virtual std::string GetVSMakeProgram() { return this->GetDevEnvCommand(); }
+  std::string GetVSMakeProgram() override { return this->GetDevEnvCommand(); }
 };
 
 #define CMAKE_CHECK_BUILD_SYSTEM_TARGET "ZERO_CHECK"

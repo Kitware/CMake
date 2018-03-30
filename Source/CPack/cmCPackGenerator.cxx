@@ -12,11 +12,13 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmCryptoHash.h"
+#include "cmDuration.h"
 #include "cmFSPermissions.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateSnapshot.h"
+#include "cmVersion.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLSafe.h"
 #include "cmake.h"
@@ -185,7 +187,7 @@ int cmCPackGenerator::InstallProject()
 
   const char* tempInstallDirectory = tempInstallDirectoryStr.c_str();
   int res = 1;
-  if (!cmsys::SystemTools::MakeDirectory(bareTempInstallDirectory.c_str())) {
+  if (!cmsys::SystemTools::MakeDirectory(bareTempInstallDirectory)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Problem creating temporary directory: "
                     << (tempInstallDirectory ? tempInstallDirectory : "(NULL)")
@@ -276,9 +278,9 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
       cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << ic << std::endl);
       std::string output;
       int retVal = 1;
-      bool resB =
-        cmSystemTools::RunSingleCommand(ic.c_str(), &output, &output, &retVal,
-                                        nullptr, this->GeneratorVerbose, 0);
+      bool resB = cmSystemTools::RunSingleCommand(
+        ic.c_str(), &output, &output, &retVal, nullptr, this->GeneratorVerbose,
+        cmDuration::zero());
       if (!resB || retVal) {
         std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
         tmpFile += "/InstallOutput.log";
@@ -312,7 +314,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
     for (std::string const& ifr : ignoreFilesRegexString) {
       cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                     "Create ignore files regex for: " << ifr << std::endl);
-      ignoreFilesRegex.push_back(ifr.c_str());
+      ignoreFilesRegex.emplace_back(ifr);
     }
   }
   const char* installDirectories =
@@ -372,18 +374,17 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           continue;
         }
         std::string filePath = tempDir;
-        filePath += "/" + subdir + "/" +
-          cmSystemTools::RelativePath(top.c_str(), gf.c_str());
+        filePath += "/" + subdir + "/" + cmSystemTools::RelativePath(top, gf);
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy file: "
                         << inFile << " -> " << filePath << std::endl);
         /* If the file is a symlink we will have to re-create it */
         if (cmSystemTools::FileIsSymlink(inFile)) {
           std::string targetFile;
           std::string inFileRelative =
-            cmSystemTools::RelativePath(top.c_str(), inFile.c_str());
+            cmSystemTools::RelativePath(top, inFile);
           cmSystemTools::ReadSymlink(inFile, targetFile);
-          symlinkedFiles.push_back(
-            std::pair<std::string, std::string>(targetFile, inFileRelative));
+          symlinkedFiles.emplace_back(std::move(targetFile),
+                                      std::move(inFileRelative));
         }
         /* If it is not a symlink then do a plain copy */
         else if (!(cmSystemTools::CopyFileIfDifferent(inFile.c_str(),
@@ -600,7 +601,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         int retVal = 1;
         bool resB = cmSystemTools::RunSingleCommand(
           buildCommand.c_str(), &output, &output, &retVal,
-          installDirectory.c_str(), this->GeneratorVerbose, 0);
+          installDirectory.c_str(), this->GeneratorVerbose,
+          cmDuration::zero());
         if (!resB || retVal) {
           std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
           tmpFile += "/PreinstallOutput.log";
@@ -636,6 +638,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         cm.GetCurrentSnapshot().SetDefaultDefinitions();
         cm.AddCMakePaths();
         cm.SetProgressCallback(cmCPackGeneratorProgress, this);
+        cm.SetTrace(this->Trace);
+        cm.SetTraceExpand(this->TraceExpand);
         cmGlobalGenerator gg(&cm);
         cmMakefile mf(&gg, cm.GetCurrentSnapshot());
         if (!installSubDirectory.empty() && installSubDirectory != "/" &&
@@ -767,9 +771,9 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         }
         // Remember the list of files before installation
         // of the current component (if we are in component install)
-        const char* InstallPrefix = tempInstallDirectory.c_str();
+        std::string const& InstallPrefix = tempInstallDirectory;
         std::vector<std::string> filesBefore;
-        std::string findExpr(InstallPrefix);
+        std::string findExpr = tempInstallDirectory;
         if (componentInstall) {
           cmsys::Glob glB;
           findExpr += "/*";
@@ -824,8 +828,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           std::string localFileName;
           // Populate the File field of each component
           for (fit = result.begin(); fit != diff; ++fit) {
-            localFileName =
-              cmSystemTools::RelativePath(InstallPrefix, fit->c_str());
+            localFileName = cmSystemTools::RelativePath(InstallPrefix, *fit);
             localFileName =
               localFileName.substr(localFileName.find_first_not_of('/'));
             Components[installComponent].Files.push_back(localFileName);
@@ -988,10 +991,16 @@ int cmCPackGenerator::DoPackage()
    */
   packageFileNames.push_back(tempPackageFileName ? tempPackageFileName : "");
   toplevel = tempDirectory;
-  if (!this->PackageFiles() || cmSystemTools::GetErrorOccuredFlag()) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem compressing the directory"
-                    << std::endl);
-    return 0;
+  { // scope that enables package generators to run internal scripts with
+    // latest CMake policies enabled
+    cmMakefile::ScopePushPop pp{ this->MakefileMap };
+    this->MakefileMap->SetPolicyVersion(cmVersion::GetCMakeVersion());
+
+    if (!this->PackageFiles() || cmSystemTools::GetErrorOccuredFlag()) {
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem compressing the directory"
+                      << std::endl);
+      return 0;
+    }
   }
 
   /* Prepare checksum algorithm*/

@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "cmDuration.h"
 #include "cmSystemTools.h"
 
 // This is a wrapper program for xcodebuild
@@ -27,7 +28,8 @@ int RunXCode(std::vector<const char*>& argv, bool& hitbug)
   std::vector<char> out;
   std::vector<char> err;
   std::string line;
-  int pipe = cmSystemTools::WaitForLine(cp, line, 100.0, out, err);
+  int pipe =
+    cmSystemTools::WaitForLine(cp, line, std::chrono::seconds(100), out, err);
   while (pipe != cmsysProcess_Pipe_None) {
     if (line.find("/bin/sh: bad interpreter: Text file busy") !=
         std::string::npos) {
@@ -45,7 +47,8 @@ int RunXCode(std::vector<const char*>& argv, bool& hitbug)
         std::cout << line << "\n";
       }
     }
-    pipe = cmSystemTools::WaitForLine(cp, line, 100, out, err);
+    pipe = cmSystemTools::WaitForLine(cp, line, std::chrono::seconds(100), out,
+                                      err);
   }
   cmsysProcess_WaitForExit(cp, nullptr);
   if (cmsysProcess_GetState(cp) == cmsysProcess_State_Exited) {

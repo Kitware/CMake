@@ -1,4 +1,4 @@
-CMake Error at NonValidTarget-CXX_COMPILER_ID.cmake:4 \(add_custom_command\):
+CMake Error at NonValidTarget-CXX_COMPILER_ID.cmake:1 \(add_custom_command\):
   Error evaluating generator expression:
 
     \$<CXX_COMPILER_ID>

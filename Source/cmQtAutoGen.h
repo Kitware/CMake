@@ -9,14 +9,18 @@
 #include <vector>
 
 /** \class cmQtAutoGen
- * \brief Class used as namespace for QtAutogen related types  and functions
+ * \brief Common base class for QtAutoGen classes
  */
 class cmQtAutoGen
 {
 public:
-  static std::string const listSep;
+  /// @brief Nested lists separator
+  static std::string const ListSep;
+  /// @brief Maximum number of parallel threads/processes in a generator
+  static unsigned int const ParallelMax;
 
-  enum Generator
+  /// @brief AutoGen generator type
+  enum class GeneratorT
   {
     GEN, // General
     MOC,
@@ -24,26 +28,19 @@ public:
     RCC
   };
 
-  enum MultiConfig
-  {
-    SINGLE, // Single configuration
-    WRAP,   // Multi configuration using wrapper files
-    FULL    // Full multi configuration using per config sources
-  };
-
 public:
   /// @brief Returns the generator name
-  static std::string const& GeneratorName(Generator genType);
+  static std::string const& GeneratorName(GeneratorT genType);
   /// @brief Returns the generator name in upper case
-  static std::string GeneratorNameUpper(Generator genType);
-
-  /// @brief Returns the multi configuration name string
-  static std::string const& MultiConfigName(MultiConfig config);
-  /// @brief Returns the multi configuration type
-  static MultiConfig MultiConfigType(std::string const& name);
+  static std::string GeneratorNameUpper(GeneratorT genType);
 
   /// @brief Returns a the string escaped and enclosed in quotes
   static std::string Quoted(std::string const& text);
+
+  static std::string QuotedCommand(std::vector<std::string> const& command);
+
+  /// @brief Returns the parent directory of the file with a "/" suffix
+  static std::string SubDirPrefix(std::string const& filename);
 
   /// @brief Appends the suffix to the filename before the last dot
   static std::string AppendFilenameSuffix(std::string const& filename,
@@ -59,14 +56,21 @@ public:
                               std::vector<std::string> const& newOpts,
                               bool isQt5);
 
-  /// @brief Reads the resource files list from from a .qrc file
-  /// @arg fileName Must be the absolute path of the .qrc file
-  /// @return True if the rcc file was successfully read
-  static bool RccListInputs(std::string const& rccCommand,
-                            std::vector<std::string> const& rccListOptions,
-                            std::string const& fileName,
-                            std::vector<std::string>& files,
-                            std::string* errorMessage = nullptr);
+  /// @brief Parses the content of a qrc file
+  ///
+  /// Use when rcc does not support the "--list" option
+  static void RccListParseContent(std::string const& content,
+                                  std::vector<std::string>& files);
+
+  /// @brief Parses the output of the "rcc --list ..." command
+  static bool RccListParseOutput(std::string const& rccStdOut,
+                                 std::string const& rccStdErr,
+                                 std::vector<std::string>& files,
+                                 std::string& error);
+
+  /// @brief Converts relative qrc entry paths to full paths
+  static void RccListConvertFullPath(std::string const& qrcFileDir,
+                                     std::vector<std::string>& files);
 };
 
 #endif

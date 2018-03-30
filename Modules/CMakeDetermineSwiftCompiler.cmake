@@ -34,7 +34,9 @@ if (NOT _CMAKE_TOOLCHAIN_LOCATION)
   get_filename_component(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_Swift_COMPILER}" PATH)
 endif ()
 
+set(_CMAKE_PROCESSING_LANGUAGE "Swift")
 include(CMakeFindBinUtils)
+unset(_CMAKE_PROCESSING_LANGUAGE)
 
 # configure variables set in this file for fast reload later on
 configure_file(${CMAKE_ROOT}/Modules/CMakeSwiftCompiler.cmake.in

@@ -81,7 +81,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
   std::string output;
   bool result = true;
   if (args.size() - count == 2) {
-    cmSystemTools::MakeDirectory(args[1].c_str());
+    cmSystemTools::MakeDirectory(args[1]);
     result = cmExecProgramCommand::RunCommand(command.c_str(), output, retVal,
                                               args[1].c_str(), verbose);
   } else {
@@ -149,7 +149,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
       if (quoted.find(command)) {
         std::string cmd = quoted.match(1);
         std::string args = quoted.match(2);
-        if (!cmSystemTools::FileExists(cmd.c_str())) {
+        if (!cmSystemTools::FileExists(cmd)) {
           shortCmd = cmd;
         } else if (!cmSystemTools::GetShortPath(cmd.c_str(), shortCmd)) {
           cmSystemTools::Error("GetShortPath failed for ", cmd.c_str());

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.9)
 
 project(Qt4Deploy)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install)
@@ -10,7 +10,8 @@ add_executable(testdeploy MACOSX_BUNDLE testdeploy.cpp)
 target_link_libraries(testdeploy ${QT_LIBRARIES})
 set_target_properties(testdeploy PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}")
 
-if(CMAKE_CONFIGURATION_TYPES AND QT_QTCORE_LIBRARY_RELEASE AND QT_QTCORE_LIBRARY_DEBUG)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_isMultiConfig AND QT_QTCORE_LIBRARY_RELEASE AND QT_QTCORE_LIBRARY_DEBUG)
   # note: installing debug Qt libraries from a Qt installation configured with
   # -debug-and-release not yet supported (very low priority).
   install(CODE "
@@ -58,7 +59,7 @@ if(QT_QSQLITE_PLUGIN_DEBUG OR QT_QSQLITE_PLUGIN_RELEASE)
   endif()
 
   # custom target to install and test the installation at build time
-  if(CMAKE_CONFIGURATION_TYPES)
+  if(_isMultiConfig)
     set(install_config "-DCMAKE_INSTALL_CONFIG_NAME=${CMAKE_CFG_INTDIR}")
   endif()
 

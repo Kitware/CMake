@@ -9,6 +9,7 @@
 #include "cmCPackIFWPackage.h"
 #include "cmCPackIFWRepository.h"
 #include "cmCPackLog.h" // IWYU pragma: keep
+#include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
@@ -61,7 +62,7 @@ int cmCPackIFWGenerator::PackageFiles()
         }
       } else {
         cmCPackIFWLogger(WARNING, "The \"CPACK_IFW_REPOSITORIES_DIRECTORIES\" "
-                           << "variable is set, but content will be skiped, "
+                           << "variable is set, but content will be skipped, "
                            << "because this feature available only since "
                            << "QtIFW 3.1. Please update your QtIFW instance."
                            << std::endl);
@@ -84,9 +85,9 @@ int cmCPackIFWGenerator::PackageFiles()
     std::string output;
     int retVal = 1;
     cmCPackIFWLogger(OUTPUT, "- Generate repository" << std::endl);
-    bool res = cmSystemTools::RunSingleCommand(ifwCmd.c_str(), &output,
-                                               &output, &retVal, nullptr,
-                                               this->GeneratorVerbose, 0);
+    bool res = cmSystemTools::RunSingleCommand(
+      ifwCmd.c_str(), &output, &output, &retVal, nullptr,
+      this->GeneratorVerbose, cmDuration::zero());
     if (!res || retVal) {
       cmGeneratedFileStream ofs(ifwTmpFile.c_str());
       ofs << "# Run command: " << ifwCmd << std::endl
@@ -194,9 +195,9 @@ int cmCPackIFWGenerator::PackageFiles()
     std::string output;
     int retVal = 1;
     cmCPackIFWLogger(OUTPUT, "- Generate package" << std::endl);
-    bool res = cmSystemTools::RunSingleCommand(ifwCmd.c_str(), &output,
-                                               &output, &retVal, nullptr,
-                                               this->GeneratorVerbose, 0);
+    bool res = cmSystemTools::RunSingleCommand(
+      ifwCmd.c_str(), &output, &output, &retVal, nullptr,
+      this->GeneratorVerbose, cmDuration::zero());
     if (!res || retVal) {
       cmGeneratedFileStream ofs(ifwTmpFile.c_str());
       ofs << "# Run command: " << ifwCmd << std::endl

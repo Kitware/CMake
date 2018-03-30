@@ -1,5 +1,8 @@
 # See adjacent README.rst for documentation of this test infrastructure.
 
+# Note that the _isMultiConfig variable is set in the parent directory's
+# CMakeLists.txt (slightly complex logic to support CMake versions before 3.9)
+
 macro(add_RunCMake_test test)
   set(TEST_ARGS ${ARGN})
   if ("${ARGV1}" STREQUAL "TEST_DIR")
@@ -14,6 +17,7 @@ macro(add_RunCMake_test test)
   endif()
   add_test(NAME RunCMake.${test} COMMAND ${CMAKE_CMAKE_COMMAND}
     -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
+    -DRunCMake_GENERATOR_IS_MULTI_CONFIG=${_isMultiConfig}
     -DRunCMake_GENERATOR=${CMAKE_GENERATOR}
     -DRunCMake_GENERATOR_INSTANCE=${CMAKE_GENERATOR_INSTANCE}
     -DRunCMake_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
@@ -47,6 +51,7 @@ function(add_RunCMake_test_group test types)
       add_test(NAME RunCMake.${test}_${type} COMMAND ${CMAKE_CMAKE_COMMAND}
         -DTEST_TYPE=${type}
         -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
+        -DRunCMake_GENERATOR_IS_MULTI_CONFIG=${_isMultiConfig}
         -DRunCMake_GENERATOR=${CMAKE_GENERATOR}
         -DRunCMake_GENERATOR_INSTANCE=${CMAKE_GENERATOR_INSTANCE}
         -DRunCMake_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
@@ -171,6 +176,7 @@ add_RunCMake_test(CompileDefinitions)
 add_RunCMake_test(CompileFeatures)
 add_RunCMake_test(PolicyScope)
 add_RunCMake_test(WriteCompilerDetectionHeader)
+add_RunCMake_test(SourceProperties)
 if(NOT WIN32)
   add_RunCMake_test(PositionIndependentCode)
 endif()
@@ -334,6 +340,7 @@ add_RunCMake_test(CPackInstallProperties)
 add_RunCMake_test(ExternalProject)
 add_RunCMake_test(FetchContent)
 add_RunCMake_test(CTestCommandLine)
+add_RunCMake_test(CacheNewline)
 # Only run this test on unix platforms that support
 # symbolic links
 if(UNIX)
@@ -345,8 +352,6 @@ add_RunCMake_test(IfacePaths_INCLUDE_DIRECTORIES TEST_DIR IfacePaths)
 
 set(IfacePaths_SOURCES_ARGS -DTEST_PROP=SOURCES)
 add_RunCMake_test(IfacePaths_SOURCES TEST_DIR IfacePaths)
-
-add_RunCMake_test(COMPILE_LANGUAGE-genex)
 
 # Matlab module related tests
 if(CMake_TEST_FindMatlab)
@@ -384,6 +389,9 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
     )
   if(DEFINED CMake_TEST_CUDA)
     list(APPEND CompilerLauncher_ARGS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+  endif()
+  if(CMAKE_Fortran_COMPILER)
+    list(APPEND CompilerLauncher_ARGS -DCMake_TEST_Fortran=1)
   endif()
   add_RunCMake_test(CompilerLauncher)
   add_RunCMake_test(ctest_labels_for_subprojects)

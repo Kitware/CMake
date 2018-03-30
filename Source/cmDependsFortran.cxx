@@ -312,13 +312,13 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
   // Write the include dependencies to the output stream.
   std::string binDir = this->LocalGenerator->GetBinaryDirectory();
   std::string obj_i = this->MaybeConvertToRelativePath(binDir, obj);
-  std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i.c_str());
+  std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i);
   internalDepends << obj_i << std::endl;
   internalDepends << " " << src << std::endl;
   for (std::string const& i : info.Includes) {
     makeDepends << obj_m << ": "
                 << cmSystemTools::ConvertToOutputPath(
-                     this->MaybeConvertToRelativePath(binDir, i).c_str())
+                     this->MaybeConvertToRelativePath(binDir, i))
                 << std::endl;
     internalDepends << " " << i << std::endl;
   }
@@ -331,24 +331,6 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       continue;
     }
 
-    // If the module is provided in this target special handling is
-    // needed.
-    if (this->Internal->TargetProvides.find(i) !=
-        this->Internal->TargetProvides.end()) {
-      // The module is provided by a different source in the same
-      // target.  Add the proxy dependency to make sure the other
-      // source builds first.
-      std::string proxy = stamp_dir;
-      proxy += "/";
-      proxy += i;
-      proxy += ".mod.proxy";
-      proxy = cmSystemTools::ConvertToOutputPath(
-        this->MaybeConvertToRelativePath(binDir, proxy).c_str());
-
-      // since we require some things add them to our list of requirements
-      makeDepends << obj_m << ".requires: " << proxy << std::endl;
-    }
-
     // The object file should depend on timestamped files for the
     // modules it uses.
     TargetRequiresMap::const_iterator required =
@@ -359,7 +341,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
     if (!required->second.empty()) {
       // This module is known.  Depend on its timestamp file.
       std::string stampFile = cmSystemTools::ConvertToOutputPath(
-        this->MaybeConvertToRelativePath(binDir, required->second).c_str());
+        this->MaybeConvertToRelativePath(binDir, required->second));
       makeDepends << obj_m << ": " << stampFile << "\n";
     } else {
       // This module is not known to CMake.  Try to locate it where
@@ -367,28 +349,16 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       std::string module;
       if (this->FindModule(i, module)) {
         module = cmSystemTools::ConvertToOutputPath(
-          this->MaybeConvertToRelativePath(binDir, module).c_str());
+          this->MaybeConvertToRelativePath(binDir, module));
         makeDepends << obj_m << ": " << module << "\n";
       }
     }
-  }
-
-  // Write provided modules to the output stream.
-  for (std::string const& i : info.Provides) {
-    std::string proxy = stamp_dir;
-    proxy += "/";
-    proxy += i;
-    proxy += ".mod.proxy";
-    proxy = cmSystemTools::ConvertToOutputPath(
-      this->MaybeConvertToRelativePath(binDir, proxy).c_str());
-    makeDepends << proxy << ": " << obj_m << ".provides" << std::endl;
   }
 
   // If any modules are provided then they must be converted to stamp files.
   if (!info.Provides.empty()) {
     // Create a target to copy the module after the object file
     // changes.
-    makeDepends << obj_m << ".provides.build:\n";
     for (std::string const& i : info.Provides) {
       // Include this module in the set provided by this target.
       this->Internal->TargetProvides.insert(i);
@@ -407,11 +377,25 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       stampFile += "/";
       stampFile += m;
       stampFile += ".mod.stamp";
-      stampFile = this->LocalGenerator->ConvertToOutputFormat(
-        this->MaybeConvertToRelativePath(binDir, stampFile),
-        cmOutputConverter::SHELL);
+      stampFile = this->MaybeConvertToRelativePath(binDir, stampFile);
+      std::string const stampFileForShell =
+        this->LocalGenerator->ConvertToOutputFormat(stampFile,
+                                                    cmOutputConverter::SHELL);
+      std::string const stampFileForMake =
+        cmSystemTools::ConvertToOutputPath(stampFile);
+
+      makeDepends << obj_m << ".provides.build"
+                  << ": " << stampFileForMake << "\n";
+      // Note that when cmake_copy_f90_mod finds that a module file
+      // and the corresponding stamp file have no differences, the stamp
+      // file is not updated. In such case the stamp file will be always
+      // older than its prerequisite and trigger cmake_copy_f90_mod
+      // on each new build. This is expected behavior for incremental
+      // builds and can not be changed without preforming recursive make
+      // calls that would considerably slow down the building process.
+      makeDepends << stampFileForMake << ": " << obj_m << "\n";
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod " << modFile
-                  << " " << stampFile;
+                  << " " << stampFileForShell;
       cmMakefile* mf = this->LocalGenerator->GetMakefile();
       const char* cid = mf->GetDefinition("CMAKE_Fortran_COMPILER_ID");
       if (cid && *cid) {
@@ -419,8 +403,8 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       }
       makeDepends << "\n";
     }
-    // After copying the modules update the timestamp file so that
-    // copying will not be done again until the source rebuilds.
+    makeDepends << obj_m << ".provides.build:\n";
+    // After copying the modules update the timestamp file.
     makeDepends << "\t$(CMAKE_COMMAND) -E touch " << obj_m
                 << ".provides.build\n";
 
@@ -429,7 +413,7 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
     std::string driver = this->TargetDirectory;
     driver += "/build";
     driver = cmSystemTools::ConvertToOutputPath(
-      this->MaybeConvertToRelativePath(binDir, driver).c_str());
+      this->MaybeConvertToRelativePath(binDir, driver));
     makeDepends << driver << ": " << obj_m << ".provides.build\n";
   }
 
@@ -451,7 +435,7 @@ bool cmDependsFortran::FindModule(std::string const& name, std::string& module)
     fullName = ip;
     fullName += "/";
     fullName += mod_lower;
-    if (cmSystemTools::FileExists(fullName.c_str(), true)) {
+    if (cmSystemTools::FileExists(fullName, true)) {
       module = fullName;
       return true;
     }
@@ -460,7 +444,7 @@ bool cmDependsFortran::FindModule(std::string const& name, std::string& module)
     fullName = ip;
     fullName += "/";
     fullName += mod_upper;
-    if (cmSystemTools::FileExists(fullName.c_str(), true)) {
+    if (cmSystemTools::FileExists(fullName, true)) {
       module = fullName;
       return true;
     }
@@ -497,7 +481,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
   mod += ".mod";
   mod_upper += ".mod";
   mod_lower += ".mod";
-  if (cmSystemTools::FileExists(mod_upper.c_str(), true)) {
+  if (cmSystemTools::FileExists(mod_upper, true)) {
     if (cmDependsFortran::ModulesDiffer(mod_upper.c_str(), stamp.c_str(),
                                         compilerId.c_str())) {
       if (!cmSystemTools::CopyFileAlways(mod_upper, stamp)) {
@@ -508,7 +492,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
     }
     return true;
   }
-  if (cmSystemTools::FileExists(mod_lower.c_str(), true)) {
+  if (cmSystemTools::FileExists(mod_lower, true)) {
     if (cmDependsFortran::ModulesDiffer(mod_lower.c_str(), stamp.c_str(),
                                         compilerId.c_str())) {
       if (!cmSystemTools::CopyFileAlways(mod_lower, stamp)) {
@@ -599,7 +583,7 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
     A mod file is a binary file.
     However, looking into both generated bar.mod files with a hex editor
     shows that they differ only before a sequence linefeed-zero (0x0A 0x00)
-    which is located some bytes in front of the absoulte path to the source
+    which is located some bytes in front of the absolute path to the source
     file.
 
   sun:

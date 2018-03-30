@@ -4,6 +4,8 @@
 
 #include "cmSystemTools.h"
 
+#include <utility>
+
 // Table of valid permissions.
 const char* cmInstallCommandArguments::PermissionsTable[] = {
   "OWNER_READ",    "OWNER_WRITE",   "OWNER_EXECUTE", "GROUP_READ",
@@ -200,6 +202,6 @@ void cmInstallCommandIncludesArgument::Parse(
   for (; it != args->end(); ++it) {
     std::string dir = *it;
     cmSystemTools::ConvertToUnixSlashes(dir);
-    this->IncludeDirs.push_back(dir);
+    this->IncludeDirs.push_back(std::move(dir));
   }
 }

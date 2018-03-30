@@ -23,6 +23,7 @@ class cmCacheManager;
 class cmCommand;
 class cmPropertyDefinition;
 class cmStateSnapshot;
+class cmMessenger;
 
 class cmState
 {
@@ -59,7 +60,7 @@ public:
                  std::set<std::string>& excludes,
                  std::set<std::string>& includes);
 
-  bool SaveCache(const std::string& path);
+  bool SaveCache(const std::string& path, cmMessenger* messenger);
 
   bool DeleteCache(const std::string& path);
 
@@ -138,9 +139,9 @@ public:
   bool GetGlobalPropertyAsBool(const std::string& prop);
   const cmPropertyMap& GetGlobalProperties() const { return this->GlobalProperties; }
 
-  const char* GetSourceDirectory() const;
+  std::string const& GetSourceDirectory() const;
   void SetSourceDirectory(std::string const& sourceDirectory);
-  const char* GetBinaryDirectory() const;
+  std::string const& GetBinaryDirectory() const;
   void SetBinaryDirectory(std::string const& binaryDirectory);
 
   void SetWindowsShell(bool windowsShell);

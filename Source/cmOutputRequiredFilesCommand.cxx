@@ -173,7 +173,7 @@ protected:
 
     std::string line;
     while (cmSystemTools::GetLineFromStream(fin, line)) {
-      if (cmHasLiteralPrefix(line.c_str(), "#include")) {
+      if (cmHasLiteralPrefix(line, "#include")) {
         // if it is an include line then create a string class
         size_t qstart = line.find('\"', 8);
         size_t qend;
@@ -213,51 +213,51 @@ protected:
           cxxFile = root + ".cxx";
           bool found = false;
           // try jumping to .cxx .cpp and .c in order
-          if (cmSystemTools::FileExists(cxxFile.c_str())) {
+          if (cmSystemTools::FileExists(cxxFile)) {
             found = true;
           }
           for (std::string path : this->IncludeDirectories) {
             path = path + "/";
             path = path + cxxFile;
-            if (cmSystemTools::FileExists(path.c_str())) {
+            if (cmSystemTools::FileExists(path)) {
               found = true;
             }
           }
           if (!found) {
             cxxFile = root + ".cpp";
-            if (cmSystemTools::FileExists(cxxFile.c_str())) {
+            if (cmSystemTools::FileExists(cxxFile)) {
               found = true;
             }
             for (std::string path : this->IncludeDirectories) {
               path = path + "/";
               path = path + cxxFile;
-              if (cmSystemTools::FileExists(path.c_str())) {
+              if (cmSystemTools::FileExists(path)) {
                 found = true;
               }
             }
           }
           if (!found) {
             cxxFile = root + ".c";
-            if (cmSystemTools::FileExists(cxxFile.c_str())) {
+            if (cmSystemTools::FileExists(cxxFile)) {
               found = true;
             }
             for (std::string path : this->IncludeDirectories) {
               path = path + "/";
               path = path + cxxFile;
-              if (cmSystemTools::FileExists(path.c_str())) {
+              if (cmSystemTools::FileExists(path)) {
                 found = true;
               }
             }
           }
           if (!found) {
             cxxFile = root + ".txx";
-            if (cmSystemTools::FileExists(cxxFile.c_str())) {
+            if (cmSystemTools::FileExists(cxxFile)) {
               found = true;
             }
             for (std::string path : this->IncludeDirectories) {
               path = path + "/";
               path = path + cxxFile;
-              if (cmSystemTools::FileExists(path.c_str())) {
+              if (cmSystemTools::FileExists(path)) {
                 found = true;
               }
             }
@@ -426,7 +426,7 @@ protected:
         path = path + "/";
       }
       path = path + fname;
-      if (cmSystemTools::FileExists(path.c_str(), true) &&
+      if (cmSystemTools::FileExists(path, true) &&
           !cmSystemTools::FileIsDirectory(path)) {
         std::string fp = cmSystemTools::CollapseFullPath(path);
         this->DirectoryToFileToPathMap[extraPath ? extraPath : ""][fname] = fp;
@@ -440,7 +440,7 @@ protected:
         path = path + "/";
       }
       path = path + fname;
-      if (cmSystemTools::FileExists(path.c_str(), true) &&
+      if (cmSystemTools::FileExists(path, true) &&
           !cmSystemTools::FileIsDirectory(path)) {
         std::string fp = cmSystemTools::CollapseFullPath(path);
         this->DirectoryToFileToPathMap[extraPath][fname] = fp;

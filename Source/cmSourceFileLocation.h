@@ -7,6 +7,8 @@
 
 #include <string>
 
+#include "cmSourceFileLocationKind.h"
+
 class cmMakefile;
 
 /** \class cmSourceFileLocation
@@ -26,7 +28,9 @@ public:
    * Construct for a source file created in a given cmMakefile
    * instance with an initial name.
    */
-  cmSourceFileLocation(cmMakefile const* mf, const std::string& name);
+  cmSourceFileLocation(
+    cmMakefile const* mf, const std::string& name,
+    cmSourceFileLocationKind kind = cmSourceFileLocationKind::Ambiguous);
   cmSourceFileLocation();
   cmSourceFileLocation(const cmSourceFileLocation& loc);
 
@@ -38,12 +42,12 @@ public:
   bool Matches(cmSourceFileLocation const& loc);
 
   /**
-   * Explicity state that the source file is located in the source tree.
+   * Explicitly state that the source file is located in the source tree.
    */
   void DirectoryUseSource();
 
   /**
-   * Explicity state that the source file is located in the build tree.
+   * Explicitly state that the source file is located in the build tree.
    */
   void DirectoryUseBinary();
 

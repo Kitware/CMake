@@ -1,6 +1,6 @@
 int file1_sq_func(int);
 
-int static_func(int x)
+int cpp_sq_func(int x)
 {
-  return file1_sq_func(x);
+  return x * x;
 }

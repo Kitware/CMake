@@ -7,6 +7,7 @@
 
 #include "cmCTestGenericHandler.h"
 
+#include "cmDuration.h"
 #include "cmProcessOutput.h"
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
@@ -87,8 +88,7 @@ private:
   void GenerateXMLHeader(cmXMLWriter& xml);
   void GenerateXMLLaunched(cmXMLWriter& xml);
   void GenerateXMLLogScraped(cmXMLWriter& xml);
-  void GenerateXMLFooter(cmXMLWriter& xml,
-                         std::chrono::duration<double> elapsed_build_time);
+  void GenerateXMLFooter(cmXMLWriter& xml, cmDuration elapsed_build_time);
   bool IsLaunchedErrorFile(const char* fname);
   bool IsLaunchedWarningFile(const char* fname);
 

@@ -155,7 +155,7 @@ void cmSearchPath::AddSuffixes(const std::vector<std::string>& suffixes)
     }
 
     // And now the original w/o any suffix
-    this->Paths.push_back(inPath);
+    this->Paths.push_back(std::move(inPath));
   }
 }
 
@@ -212,6 +212,6 @@ void cmSearchPath::AddPathInternal(const std::string& path, const char* base)
 
   // Insert the path if has not already been emitted.
   if (this->FC->SearchPathsEmitted.insert(collapsed).second) {
-    this->Paths.push_back(collapsed);
+    this->Paths.push_back(std::move(collapsed));
   }
 }

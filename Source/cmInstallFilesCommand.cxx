@@ -30,8 +30,7 @@ bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& args,
     for (std::vector<std::string>::const_iterator s = args.begin() + 2;
          s != args.end(); ++s) {
       // Find the source location for each file listed.
-      std::string f = this->FindInstallSource(s->c_str());
-      this->Files.push_back(f);
+      this->Files.push_back(this->FindInstallSource(s->c_str()));
     }
     this->CreateInstallGenerator();
   } else {
@@ -138,11 +137,11 @@ std::string cmInstallFilesCommand::FindInstallSource(const char* name) const
   ts += "/";
   ts += name;
 
-  if (cmSystemTools::FileExists(tb.c_str())) {
+  if (cmSystemTools::FileExists(tb)) {
     // The file exists in the binary tree.  Use it.
     return tb;
   }
-  if (cmSystemTools::FileExists(ts.c_str())) {
+  if (cmSystemTools::FileExists(ts)) {
     // The file exists in the source tree.  Use it.
     return ts;
   }

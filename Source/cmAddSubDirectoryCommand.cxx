@@ -44,7 +44,7 @@ bool cmAddSubDirectoryCommand::InitialPass(
   // Compute the full path to the specified source directory.
   // Interpret a relative path with respect to the current source directory.
   std::string srcPath;
-  if (cmSystemTools::FileIsFullPath(srcArg.c_str())) {
+  if (cmSystemTools::FileIsFullPath(srcArg)) {
     srcPath = srcArg;
   } else {
     srcPath = this->Makefile->GetCurrentSourceDirectory();
@@ -94,7 +94,7 @@ bool cmAddSubDirectoryCommand::InitialPass(
   } else {
     // Use the binary directory specified.
     // Interpret a relative path with respect to the current binary directory.
-    if (cmSystemTools::FileIsFullPath(binArg.c_str())) {
+    if (cmSystemTools::FileIsFullPath(binArg)) {
       binPath = binArg;
     } else {
       binPath = this->Makefile->GetCurrentBinaryDirectory();

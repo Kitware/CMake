@@ -99,7 +99,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
       return false;
     }
 
-    const char* aliasedName = s->c_str();
+    std::string const& aliasedName = *s;
     if (this->Makefile->IsAlias(aliasedName)) {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename << "\" because target \""
@@ -164,7 +164,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
 
   std::vector<std::string> srclists(s, args.end());
   cmTarget* tgt =
-    this->Makefile->AddExecutable(exename.c_str(), srclists, excludeFromAll);
+    this->Makefile->AddExecutable(exename, srclists, excludeFromAll);
   if (use_win32) {
     tgt->SetProperty("WIN32_EXECUTABLE", "ON", tgt->GetBacktrace());
   }

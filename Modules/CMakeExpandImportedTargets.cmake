@@ -50,6 +50,10 @@ function(CMAKE_EXPAND_IMPORTED_TARGETS _RESULT )
    endif()
 
    if(NOT CEIT_CONFIGURATION)
+      # Would be better to test GENERATOR_IS_MULTI_CONFIG global property,
+      # but the documented behavior specifically says we check
+      # CMAKE_CONFIGURATION_TYPES and fall back to CMAKE_BUILD_TYPE if no
+      # config types are defined.
       if(CMAKE_CONFIGURATION_TYPES)
          list(GET CMAKE_CONFIGURATION_TYPES 0 CEIT_CONFIGURATION)
       else()

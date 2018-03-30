@@ -23,8 +23,11 @@
   # HACK: check whether this can be removed with next iwyu release.
   { include: [ "<bits/shared_ptr.h>", private, "<memory>", public ] },
   { include: [ "<bits/std_function.h>", private, "<functional>", public ] },
+  { include: [ "<bits/stdint-intn.h>", private, "<stdint.h>", public ] },
+  { include: [ "<bits/stdint-uintn.h>", private, "<stdint.h>", public ] },
   { include: [ "<bits/time.h>", private, "<time.h>", public ] },
   { include: [ "<bits/types/clock_t.h>", private, "<time.h>", public ] },
+  { include: [ "<bits/types/mbstate_t.h>", private, "<wchar.h>", public ] },
   { include: [ "<bits/types/struct_timespec.h>", private, "<time.h>", public ] },
   { include: [ "<bits/types/struct_timeval.h>", private, "<time.h>", public ] },
   { include: [ "<bits/types/struct_tm.h>", private, "<time.h>", public ] },
@@ -63,6 +66,11 @@
   { symbol: [ "std::__decay_and_strip<const std::basic_string<char> &>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<cmFindPackageCommand::PathLabel &>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<__gnu_cxx::__normal_iterator<const cmCTestTestHandler::cmCTestTestProperties *, std::vector<cmCTestTestHandler::cmCTestTestProperties, std::allocator<cmCTestTestHandler::cmCTestTestProperties> > > &>::__type", private, "\"cmConfigure.h\"", public ] },
+  { symbol: [ "std::__success_type<std::chrono::duration<double, std::ratio<1, 1> > >::type", private, "\"cmConfigure.h\"", public ] },
+  { symbol: [ "std::__success_type<std::chrono::duration<long, std::ratio<1, 1000000000> > >::type", private, "\"cmConfigure.h\"", public ] },
+  { symbol: [ "std::enable_if<true, std::chrono::duration<long, std::ratio<1, 1> > >::type", private, "\"cmConfigure.h\"", public ] },
+  { symbol: [ "std::enable_if<true, std::chrono::duration<long, std::ratio<60, 1> > >::type", private, "\"cmConfigure.h\"", public ] },
+  { symbol: [ "std::enable_if<true, std::chrono::duration<long, std::ratio<1, 1000> > >::type", private, "\"cmConfigure.h\"", public ] },
 
   # KWIML
   { include: [ "<stdint.h>", public, "\"cm_kwiml.h\"", public ] },

@@ -76,6 +76,7 @@ find_path(OpenCL_INCLUDE_DIR
     ENV NVSDKCOMPUTE_ROOT
     ENV CUDA_PATH
     ENV ATISTREAMSDKROOT
+    ENV OCL_ROOT
   PATH_SUFFIXES
     include
     OpenCL/common/inc
@@ -94,6 +95,7 @@ if(WIN32)
         ENV CUDA_PATH
         ENV NVSDKCOMPUTE_ROOT
         ENV ATISTREAMSDKROOT
+        ENV OCL_ROOT
       PATH_SUFFIXES
         "AMD APP/lib/x86"
         lib/x86
@@ -109,6 +111,7 @@ if(WIN32)
         ENV CUDA_PATH
         ENV NVSDKCOMPUTE_ROOT
         ENV ATISTREAMSDKROOT
+        ENV OCL_ROOT
       PATH_SUFFIXES
         "AMD APP/lib/x86_64"
         lib/x86_64

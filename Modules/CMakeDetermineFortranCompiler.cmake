@@ -258,8 +258,8 @@ if (CMAKE_CROSSCOMPILING  AND NOT _CMAKE_TOOLCHAIN_PREFIX)
 
 endif ()
 
-include(CMakeFindBinUtils)
 set(_CMAKE_PROCESSING_LANGUAGE "Fortran")
+include(CMakeFindBinUtils)
 include(Compiler/${CMAKE_Fortran_COMPILER_ID}-FindBinUtils OPTIONAL)
 unset(_CMAKE_PROCESSING_LANGUAGE)
 

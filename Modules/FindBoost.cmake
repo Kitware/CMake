@@ -10,9 +10,12 @@
 # Use this module by invoking find_package with the form::
 #
 #   find_package(Boost
-#     [version] [EXACT]      # Minimum or EXACT version e.g. 1.36.0
+#     [version] [EXACT]      # Minimum or EXACT version e.g. 1.67.0
 #     [REQUIRED]             # Fail with error if Boost is not found
 #     [COMPONENTS <libs>...] # Boost libraries by their canonical name
+#                            # e.g. "date_time" for "libboost_date_time"
+#     [OPTIONAL_COMPONENTS <libs>...]
+#                            # Optional Boost libraries by their canonical name)
 #     )                      # e.g. "date_time" for "libboost_date_time"
 #
 # This module finds headers and requested component libraries OR a CMake
@@ -36,6 +39,15 @@
 #                          - Pass to add_definitions() to have diagnostic
 #                            information about Boost's automatic linking
 #                            displayed during compilation
+#
+# Note that Boost Python components require a Python version suffix
+# (Boost 1.67 and later), e.g. ``python36`` or ``python27`` for the
+# versions built against Python 3.6 and 2.7, respectively.  This also
+# applies to additional components using Python including
+# ``mpi_python`` and ``numpy``.  Earlier Boost releases may use
+# distribution-specific suffixes such as ``2``, ``3`` or ``2.7``.
+# These may also be used as suffixes, but note that they are not
+# portable.
 #
 # This module reads hints about search locations from variables::
 #
@@ -153,7 +165,7 @@
 #   Boost_REALPATH           - Set to ON to resolve symlinks for discovered
 #                              libraries to assist with packaging.  For example,
 #                              the "system" component library may be resolved to
-#                              "/usr/lib/libboost_system.so.1.42.0" instead of
+#                              "/usr/lib/libboost_system.so.1.67.0" instead of
 #                              "/usr/lib/libboost_system.so".  This does not
 #                              affect linking and should not be enabled unless
 #                              the user needs this information.
@@ -187,6 +199,13 @@
 #   target_link_libraries(foo Boost::date_time Boost::filesystem
 #                             Boost::iostreams)
 #
+# Example to find Boost Python 3.6 libraries and use imported targets::
+#
+#   find_package(Boost 1.67 REQUIRED COMPONENTS
+#                python36 numpy36)
+#   add_executable(foo foo.cc)
+#   target_link_libraries(foo Boost::python36 Boost::numpy36)
+#
 # Example to find Boost headers and some *static* (release only) libraries::
 #
 #   set(Boost_USE_STATIC_LIBS        ON)  # only find static libs
@@ -194,7 +213,7 @@
 #   set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
 #   set(Boost_USE_MULTITHREADED      ON)
 #   set(Boost_USE_STATIC_RUNTIME    OFF)
-#   find_package(Boost 1.36.0 COMPONENTS date_time filesystem system ...)
+#   find_package(Boost 1.66.0 COMPONENTS date_time filesystem system ...)
 #   if(Boost_FOUND)
 #     include_directories(${Boost_INCLUDE_DIRS})
 #     add_executable(foo foo.cc)
@@ -275,13 +294,14 @@ endif()
 macro(_Boost_ADJUST_LIB_VARS basename)
   if(Boost_INCLUDE_DIR )
     if(Boost_${basename}_LIBRARY_DEBUG AND Boost_${basename}_LIBRARY_RELEASE)
-      # if the generator supports configuration types then set
-      # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
-      if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+      # if the generator is multi-config or if CMAKE_BUILD_TYPE is set for
+      # single-config generators, set optimized and debug libraries
+      get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+      if(_isMultiConfig OR CMAKE_BUILD_TYPE)
         set(Boost_${basename}_LIBRARY optimized ${Boost_${basename}_LIBRARY_RELEASE} debug ${Boost_${basename}_LIBRARY_DEBUG})
       else()
-        # if there are no configuration types and CMAKE_BUILD_TYPE has no value
-        # then just use the release libraries
+        # For single-config generators where CMAKE_BUILD_TYPE has no value,
+        # just use the release libraries
         set(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY_RELEASE} )
       endif()
       # FIXME: This probably should be set for both cases
@@ -429,9 +449,7 @@ endfunction()
 # Guesses Boost's compiler prefix used in built library names
 # Returns the guess by setting the variable pointed to by _ret
 function(_Boost_GUESS_COMPILER_PREFIX _ret)
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "Intel"
-      OR CMAKE_CXX_COMPILER MATCHES "icl"
-      OR CMAKE_CXX_COMPILER MATCHES "icpc")
+  if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xIntel")
     if(WIN32)
       set (_boost_COMPILER "-iw")
     else()
@@ -557,6 +575,13 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
   # required only if the BoostScanDeps.cmake script logic is changed.
   # The addition of a new release should only require it to be run
   # against the new release.
+
+  # Handle Python version suffixes
+  if(component MATCHES "^(python|mpi_python|numpy)([0-9][0-9]?|[0-9]\\.[0-9])\$")
+    set(component "${CMAKE_MATCH_1}")
+    set(component_python_version "${CMAKE_MATCH_2}")
+  endif()
+
   set(_Boost_IMPORTED_TARGETS TRUE)
   if(Boost_VERSION VERSION_LESS 103300)
     message(WARNING "Imported targets and dependency information not available for Boost version ${Boost_VERSION} (all versions older than 1.33)")
@@ -774,8 +799,7 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
     set(_Boost_THREAD_DEPENDENCIES chrono system date_time atomic)
     set(_Boost_WAVE_DEPENDENCIES filesystem system serialization thread chrono date_time atomic)
     set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
-  else()
-    if(NOT Boost_VERSION VERSION_LESS 106500)
+  elseif(NOT Boost_VERSION VERSION_LESS 106500 AND Boost_VERSION VERSION_LESS 106700)
       set(_Boost_CHRONO_DEPENDENCIES system)
       set(_Boost_CONTEXT_DEPENDENCIES thread chrono system date_time)
       set(_Boost_COROUTINE_DEPENDENCIES context system)
@@ -789,12 +813,30 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
       set(_Boost_NUMPY_DEPENDENCIES python)
       set(_Boost_RANDOM_DEPENDENCIES system)
       set(_Boost_THREAD_DEPENDENCIES chrono system date_time atomic)
+      set(_Boost_TIMER_DEPENDENCIES chrono system)
+      set(_Boost_WAVE_DEPENDENCIES filesystem system serialization thread chrono date_time atomic)
+      set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
+  else()
+    if(NOT Boost_VERSION VERSION_LESS 106700)
+      set(_Boost_CHRONO_DEPENDENCIES system)
+      set(_Boost_CONTEXT_DEPENDENCIES thread chrono system date_time)
+      set(_Boost_COROUTINE_DEPENDENCIES context system)
+      set(_Boost_FIBER_DEPENDENCIES context thread chrono system date_time)
+      set(_Boost_FILESYSTEM_DEPENDENCIES system)
+      set(_Boost_IOSTREAMS_DEPENDENCIES regex)
+      set(_Boost_LOG_DEPENDENCIES date_time log_setup system filesystem thread regex chrono atomic)
+      set(_Boost_MATH_DEPENDENCIES math_c99 math_c99f math_c99l math_tr1 math_tr1f math_tr1l atomic)
+      set(_Boost_MPI_DEPENDENCIES serialization)
+      set(_Boost_MPI_PYTHON_DEPENDENCIES python${component_python_version} mpi serialization)
+      set(_Boost_NUMPY_DEPENDENCIES python${component_python_version})
+      set(_Boost_RANDOM_DEPENDENCIES system)
+      set(_Boost_THREAD_DEPENDENCIES chrono system date_time atomic)
+      set(_Boost_TIMER_DEPENDENCIES chrono system)
       set(_Boost_WAVE_DEPENDENCIES filesystem system serialization thread chrono date_time atomic)
       set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
     endif()
-    if(NOT Boost_VERSION VERSION_LESS 106600)
+    if(NOT Boost_VERSION VERSION_LESS 106800)
       message(WARNING "New Boost version may have incorrect or missing dependencies and imported targets")
-      set(_Boost_IMPORTED_TARGETS FALSE)
     endif()
   endif()
 
@@ -819,6 +861,12 @@ endfunction()
 # _hdrs
 #
 function(_Boost_COMPONENT_HEADERS component _hdrs)
+  # Handle Python version suffixes
+  if(component MATCHES "^(python|mpi_python|numpy)([0-9][0-9]?|[0-9]\\.[0-9])\$")
+    set(component "${CMAKE_MATCH_1}")
+    set(component_python_version "${CMAKE_MATCH_2}")
+  endif()
+
   # Note: new boost components will require adding here.  The header
   # must be present in all versions of Boost providing a library.
   set(_Boost_ATOMIC_HEADERS              "boost/atomic.hpp")
@@ -826,8 +874,8 @@ function(_Boost_COMPONENT_HEADERS component _hdrs)
   set(_Boost_CONTAINER_HEADERS           "boost/container/container_fwd.hpp")
   set(_Boost_CONTEXT_HEADERS             "boost/context/all.hpp")
   set(_Boost_COROUTINE_HEADERS           "boost/coroutine/all.hpp")
-  set(_Boost_EXCEPTION_HEADERS           "boost/exception/exception.hpp")
   set(_Boost_DATE_TIME_HEADERS           "boost/date_time/date.hpp")
+  set(_Boost_EXCEPTION_HEADERS           "boost/exception/exception.hpp")
   set(_Boost_FIBER_HEADERS               "boost/fiber/all.hpp")
   set(_Boost_FILESYSTEM_HEADERS          "boost/filesystem/path.hpp")
   set(_Boost_GRAPH_HEADERS               "boost/graph/adjacency_list.hpp")
@@ -926,8 +974,8 @@ endfunction()
 # `${Boost_ROOT}/libs/fiber/build/Jamfile.v2`.
 #
 function(_Boost_COMPILER_FEATURES component _ret)
-  # Boost >= 1.62 and < 1.65
-  if(NOT Boost_VERSION VERSION_LESS 106200 AND Boost_VERSION VERSION_LESS 106500)
+  # Boost >= 1.62 and < 1.67
+  if(NOT Boost_VERSION VERSION_LESS 106200 AND Boost_VERSION VERSION_LESS 106700)
     set(_Boost_FIBER_COMPILER_FEATURES
         cxx_alias_templates
         cxx_auto_type
@@ -1033,7 +1081,7 @@ else()
   # _Boost_COMPONENT_HEADERS.  See the instructions at the top of
   # _Boost_COMPONENT_DEPENDENCIES.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
-    "1.65.1" "1.65.0" "1.65"
+    "1.67.0" "1.67" "1.66.0" "1.66" "1.65.1" "1.65.0" "1.65"
     "1.64.0" "1.64" "1.63.0" "1.63" "1.62.0" "1.62" "1.61.0" "1.61" "1.60.0" "1.60"
     "1.59.0" "1.59" "1.58.0" "1.58" "1.57.0" "1.57" "1.56.0" "1.56" "1.55.0" "1.55"
     "1.54.0" "1.54" "1.53.0" "1.53" "1.52.0" "1.52" "1.51.0" "1.51"
@@ -1380,8 +1428,11 @@ if(Boost_DEBUG)
 endif()
 
 #======================
-# Systematically build up the Boost ABI tag
-# http://boost.org/doc/libs/1_41_0/more/getting_started/windows.html#library-naming
+# Systematically build up the Boost ABI tag for the 'tagged' and 'versioned' layouts
+# http://boost.org/doc/libs/1_66_0/more/getting_started/windows.html#library-naming
+# http://boost.org/doc/libs/1_66_0/boost/config/auto_link.hpp
+# http://boost.org/doc/libs/1_66_0/tools/build/src/tools/common.jam
+# http://boost.org/doc/libs/1_66_0/boostcpp.jam
 set( _boost_RELEASE_ABI_TAG "-")
 set( _boost_DEBUG_ABI_TAG   "-")
 # Key       Use this library when:
@@ -1395,8 +1446,8 @@ endif()
 #           support libraries
 if(WIN32 AND Boost_USE_DEBUG_RUNTIME)
   if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC"
-          OR "${CMAKE_CXX_COMPILER}" MATCHES "icl"
-          OR "${CMAKE_CXX_COMPILER}" MATCHES "icpc")
+          OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xClang"
+          OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xIntel")
     string(APPEND _boost_DEBUG_ABI_TAG "g")
   endif()
 endif()
@@ -1413,9 +1464,38 @@ if(Boost_USE_STLPORT)
   string(APPEND _boost_DEBUG_ABI_TAG "p")
 endif()
 #  n        using the STLport deprecated "native iostreams" feature
+#           removed from the documentation in 1.43.0 but still present in
+#           boost/config/auto_link.hpp
 if(Boost_USE_STLPORT_DEPRECATED_NATIVE_IOSTREAMS)
   string(APPEND _boost_RELEASE_ABI_TAG "n")
   string(APPEND _boost_DEBUG_ABI_TAG "n")
+endif()
+
+#  -x86     Architecture and address model tag
+#           First character is the architecture, then word-size, either 32 or 64
+#           Only used in 'versioned' layout, added in Boost 1.66.0
+set(_boost_ARCHITECTURE_TAG "")
+# {CMAKE_CXX_COMPILER_ARCHITECTURE_ID} is not currently set for all compilers
+if(NOT "x${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "x" AND NOT Boost_VERSION VERSION_LESS 106600)
+  string(APPEND _boost_ARCHITECTURE_TAG "-")
+  # This needs to be kept in-sync with the section of CMakePlatformId.h.in
+  # inside 'defined(_WIN32) && defined(_MSC_VER)'
+  if(${CMAKE_CXX_COMPILER_ARCHITECTURE_ID} STREQUAL "IA64")
+    string(APPEND _boost_ARCHITECTURE_TAG "i")
+  elseif(${CMAKE_CXX_COMPILER_ARCHITECTURE_ID} STREQUAL "X86"
+            OR ${CMAKE_CXX_COMPILER_ARCHITECTURE_ID} STREQUAL "x64")
+    string(APPEND _boost_ARCHITECTURE_TAG "x")
+  elseif(${CMAKE_CXX_COMPILER_ARCHITECTURE_ID} MATCHES "^ARM")
+    string(APPEND _boost_ARCHITECTURE_TAG "a")
+  elseif(${CMAKE_CXX_COMPILER_ARCHITECTURE_ID} STREQUAL "MIPS")
+    string(APPEND _boost_ARCHITECTURE_TAG "m")
+  endif()
+
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    string(APPEND _boost_ARCHITECTURE_TAG "64")
+  else()
+    string(APPEND _boost_ARCHITECTURE_TAG "32")
+  endif()
 endif()
 
 if(Boost_DEBUG)
@@ -1465,6 +1545,7 @@ foreach(c DEBUG RELEASE)
       ${Boost_INCLUDE_DIR}/stage/lib
       )
     _Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS(_boost_LIBRARY_SEARCH_DIRS_${c} "${Boost_INCLUDE_DIR}/..")
+    _Boost_UPDATE_WINDOWS_LIBRARY_SEARCH_DIRS_WITH_PREBUILT_PATHS(_boost_LIBRARY_SEARCH_DIRS_${c} "${Boost_INCLUDE_DIR}")
     if( Boost_NO_SYSTEM_PATHS )
       list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
     else()
@@ -1579,7 +1660,44 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
     endforeach()
   endif()
 
+  # Handle Python version suffixes
+  unset(COMPONENT_PYTHON_VERSION_MAJOR)
+  unset(COMPONENT_PYTHON_VERSION_MINOR)
+  if(${COMPONENT} MATCHES "^(python|mpi_python|numpy)([0-9])\$")
+    set(COMPONENT_UNVERSIONED "${CMAKE_MATCH_1}")
+    set(COMPONENT_PYTHON_VERSION_MAJOR "${CMAKE_MATCH_2}")
+  elseif(${COMPONENT} MATCHES "^(python|mpi_python|numpy)([0-9])\\.?([0-9])\$")
+    set(COMPONENT_UNVERSIONED "${CMAKE_MATCH_1}")
+    set(COMPONENT_PYTHON_VERSION_MAJOR "${CMAKE_MATCH_2}")
+    set(COMPONENT_PYTHON_VERSION_MINOR "${CMAKE_MATCH_3}")
+  endif()
+
+  unset(_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME)
+  if (COMPONENT_PYTHON_VERSION_MINOR)
+    # Boost >= 1.67
+    list(APPEND _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME "${COMPONENT_UNVERSIONED}${COMPONENT_PYTHON_VERSION_MAJOR}${COMPONENT_PYTHON_VERSION_MINOR}")
+    # Debian/Ubuntu (Some versions omit the 2 and/or 3 from the suffix)
+    list(APPEND _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME "${COMPONENT_UNVERSIONED}${COMPONENT_PYTHON_VERSION_MAJOR}-py${COMPONENT_PYTHON_VERSION_MAJOR}${COMPONENT_PYTHON_VERSION_MINOR}")
+    list(APPEND _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME "${COMPONENT_UNVERSIONED}-py${COMPONENT_PYTHON_VERSION_MAJOR}${COMPONENT_PYTHON_VERSION_MINOR}")
+    # Gentoo
+    list(APPEND _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME "${COMPONENT_UNVERSIONED}-${COMPONENT_PYTHON_VERSION_MAJOR}${COMPONENT_PYTHON_VERSION_MINOR}")
+    # RPMs
+    list(APPEND _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME "${COMPONENT_UNVERSIONED}-${COMPONENT_PYTHON_VERSION_MAJOR}${COMPONENT_PYTHON_VERSION_MINOR}")
+  endif()
+  if (COMPONENT_PYTHON_VERSION_MAJOR AND NOT COMPONENT_PYTHON_VERSION_MINOR)
+    # Boost < 1.67
+    list(APPEND _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME "${COMPONENT_UNVERSIONED}${COMPONENT_PYTHON_VERSION_MAJOR}")
+  endif()
+
   # Consolidate and report component-specific hints.
+  if(_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME)
+    list(REMOVE_DUPLICATES _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME)
+    if(Boost_DEBUG)
+      message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+        "Component-specific library search names for ${COMPONENT_NAME}: "
+        "${_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME}")
+    endif()
+  endif()
   if(_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT)
     list(REMOVE_DUPLICATES _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT)
     if(Boost_DEBUG)
@@ -1609,28 +1727,30 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   # Find RELEASE libraries
   #
   unset(_boost_RELEASE_NAMES)
-  foreach(compiler IN LISTS _boost_COMPILER)
-    list(APPEND _boost_RELEASE_NAMES
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}-${Boost_LIB_VERSION}
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG} )
-  endforeach()
-  list(APPEND _boost_RELEASE_NAMES
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}-${Boost_LIB_VERSION}
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT} )
-  if(_boost_STATIC_RUNTIME_WORKAROUND)
-    set(_boost_RELEASE_STATIC_ABI_TAG "-s${_boost_RELEASE_ABI_TAG}")
+  foreach(component IN LISTS _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME COMPONENT)
     foreach(compiler IN LISTS _boost_COMPILER)
       list(APPEND _boost_RELEASE_NAMES
-        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
-        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG} )
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG} )
     endforeach()
     list(APPEND _boost_RELEASE_NAMES
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG} )
-  endif()
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component} )
+    if(_boost_STATIC_RUNTIME_WORKAROUND)
+      set(_boost_RELEASE_STATIC_ABI_TAG "-s${_boost_RELEASE_ABI_TAG}")
+      foreach(compiler IN LISTS _boost_COMPILER)
+        list(APPEND _boost_RELEASE_NAMES
+          ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
+          ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${compiler}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG} )
+      endforeach()
+      list(APPEND _boost_RELEASE_NAMES
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG} )
+    endif()
+  endforeach()
   if(Boost_THREADAPI AND ${COMPONENT} STREQUAL "thread")
-     _Boost_PREPEND_LIST_WITH_THREADAPI(_boost_RELEASE_NAMES ${_boost_RELEASE_NAMES})
+    _Boost_PREPEND_LIST_WITH_THREADAPI(_boost_RELEASE_NAMES ${_boost_RELEASE_NAMES})
   endif()
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
@@ -1659,27 +1779,29 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   # Find DEBUG libraries
   #
   unset(_boost_DEBUG_NAMES)
-  foreach(compiler IN LISTS _boost_COMPILER)
-    list(APPEND _boost_DEBUG_NAMES
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}-${Boost_LIB_VERSION}
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG} )
-  endforeach()
-  list(APPEND _boost_DEBUG_NAMES
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}-${Boost_LIB_VERSION}
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}
-    ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT} )
-  if(_boost_STATIC_RUNTIME_WORKAROUND)
-    set(_boost_DEBUG_STATIC_ABI_TAG "-s${_boost_DEBUG_ABI_TAG}")
+  foreach(component IN LISTS _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME COMPONENT)
     foreach(compiler IN LISTS _boost_COMPILER)
       list(APPEND _boost_DEBUG_NAMES
-        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
-        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG} )
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG} )
     endforeach()
     list(APPEND _boost_DEBUG_NAMES
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
-      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG} )
-  endif()
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${_boost_MULTITHREADED}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component} )
+    if(_boost_STATIC_RUNTIME_WORKAROUND)
+      set(_boost_DEBUG_STATIC_ABI_TAG "-s${_boost_DEBUG_ABI_TAG}")
+      foreach(compiler IN LISTS _boost_COMPILER)
+        list(APPEND _boost_DEBUG_NAMES
+          ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
+          ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${compiler}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG} )
+      endforeach()
+      list(APPEND _boost_DEBUG_NAMES
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG} )
+    endif()
+  endforeach()
   if(Boost_THREADAPI AND ${COMPONENT} STREQUAL "thread")
      _Boost_PREPEND_LIST_WITH_THREADAPI(_boost_DEBUG_NAMES ${_boost_DEBUG_NAMES})
   endif()
@@ -1746,10 +1868,9 @@ if(Boost_FOUND)
   set(_boost_CHECKED_COMPONENT FALSE)
   set(_Boost_MISSING_COMPONENTS "")
   foreach(COMPONENT ${Boost_FIND_COMPONENTS})
-    string(TOUPPER ${COMPONENT} COMPONENT)
+    string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
     set(_boost_CHECKED_COMPONENT TRUE)
-    if(NOT Boost_${COMPONENT}_FOUND)
-      string(TOLOWER ${COMPONENT} COMPONENT)
+    if(NOT Boost_${UPPERCOMPONENT}_FOUND AND Boost_FIND_REQUIRED_${COMPONENT})
       list(APPEND _Boost_MISSING_COMPONENTS ${COMPONENT})
     endif()
   endforeach()

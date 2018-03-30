@@ -26,7 +26,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass(
   std::string sourceListValue;
   std::string const& templateDirectory = args[0];
   std::string tdir;
-  if (!cmSystemTools::FileIsFullPath(templateDirectory.c_str())) {
+  if (!cmSystemTools::FileIsFullPath(templateDirectory)) {
     tdir = this->Makefile->GetCurrentSourceDirectory();
     tdir += "/";
     tdir += templateDirectory;
@@ -63,7 +63,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass(
           // depends can be done
           cmSourceFile* sf = this->Makefile->GetOrCreateSource(fullname);
           sf->SetProperty("ABSTRACT", "0");
-          files.push_back(fullname);
+          files.push_back(std::move(fullname));
         }
       }
     }

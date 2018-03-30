@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <utility>
 
 int cmDependsJava_yyparse(yyscan_t yyscanner);
 
@@ -22,7 +23,7 @@ cmDependsJavaParserHelper::cmDependsJavaParserHelper()
 
   CurrentClass tl;
   tl.Name = "*";
-  this->ClassStack.push_back(tl);
+  this->ClassStack.push_back(std::move(tl));
 }
 
 cmDependsJavaParserHelper::~cmDependsJavaParserHelper()
@@ -175,7 +176,7 @@ void cmDependsJavaParserHelper::StartClass(const char* cls)
 {
   CurrentClass cl;
   cl.Name = cls;
-  this->ClassStack.push_back(cl);
+  this->ClassStack.push_back(std::move(cl));
 
   this->CurrentDepth++;
 }

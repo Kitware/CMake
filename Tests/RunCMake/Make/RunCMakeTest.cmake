@@ -17,3 +17,4 @@ run_TargetMessages(VAR-ON -DCMAKE_TARGET_MESSAGES=ON)
 run_TargetMessages(VAR-OFF -DCMAKE_TARGET_MESSAGES=OFF)
 
 run_cmake(CustomCommandDepfile-ERROR)
+run_cmake(IncludeRegexSubdir)

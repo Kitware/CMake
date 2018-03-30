@@ -7,6 +7,8 @@
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 
+#include <utility>
+
 class cmExecutionStatus;
 
 // cmQTWrapUICommand
@@ -53,7 +55,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args,
 
       // Compute the name of the ui file from which to generate others.
       std::string uiName;
-      if (cmSystemTools::FileIsFullPath(j->c_str())) {
+      if (cmSystemTools::FileIsFullPath(*j)) {
         uiName = *j;
       } else {
         if (curr && curr->GetPropertyAsBool("GENERATED")) {
@@ -86,7 +88,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args,
       hCommand.push_back(hName);
       hCommand.push_back(uiName);
       cmCustomCommandLines hCommandLines;
-      hCommandLines.push_back(hCommand);
+      hCommandLines.push_back(std::move(hCommand));
 
       cmCustomCommandLine cxxCommand;
       cxxCommand.push_back(uic_exe);
@@ -96,7 +98,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args,
       cxxCommand.push_back(cxxName);
       cxxCommand.push_back(uiName);
       cmCustomCommandLines cxxCommandLines;
-      cxxCommandLines.push_back(cxxCommand);
+      cxxCommandLines.push_back(std::move(cxxCommand));
 
       cmCustomCommandLine mocCommand;
       mocCommand.push_back(moc_exe);
@@ -104,7 +106,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args,
       mocCommand.push_back(mocName);
       mocCommand.push_back(hName);
       cmCustomCommandLines mocCommandLines;
-      mocCommandLines.push_back(mocCommand);
+      mocCommandLines.push_back(std::move(mocCommand));
 
       std::vector<std::string> depends;
       depends.push_back(uiName);

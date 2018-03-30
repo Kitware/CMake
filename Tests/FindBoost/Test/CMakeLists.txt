@@ -2,7 +2,16 @@ cmake_minimum_required(VERSION 3.1)
 project(TestFindBoost CXX)
 include(CTest)
 
-find_package(Boost REQUIRED COMPONENTS filesystem thread)
+find_package(Boost REQUIRED COMPONENTS filesystem thread
+                   OPTIONAL_COMPONENTS program_options foobar)
+
+if(Boost_FOOBAR_FOUND)
+  message(FATAL_ERROR "Optional inexistent Boost component \"foobar\" found which is unexpected")
+endif(Boost_FOOBAR_FOUND)
+
+if(NOT Boost_PROGRAM_OPTIONS_FOUND)
+  message(FATAL_ERROR "Optional Boost component \"program_options\" not found which is unexpected")
+endif(NOT Boost_PROGRAM_OPTIONS_FOUND)
 
 add_executable(test_boost_tgt main.cxx)
 target_link_libraries(test_boost_tgt

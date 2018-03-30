@@ -89,7 +89,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
   packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   packageFileName += "/";
   packageFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
-  packageFileNames.push_back(packageFileName);
+  packageFileNames.push_back(std::move(packageFileName));
   return retval;
 }
 
@@ -206,7 +206,7 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
   packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   packageFileName += "/";
   packageFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
-  packageFileNames.push_back(packageFileName);
+  packageFileNames.push_back(std::move(packageFileName));
   return retval;
 }
 

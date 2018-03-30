@@ -5,6 +5,7 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
+#include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
@@ -61,8 +62,7 @@ int cmCPackNSISGenerator::PackageFiles()
   std::ostringstream str;
   for (std::string const& file : files) {
     std::string outputDir = "$INSTDIR";
-    std::string fileN =
-      cmSystemTools::RelativePath(toplevel.c_str(), file.c_str());
+    std::string fileN = cmSystemTools::RelativePath(toplevel, file);
     if (!this->Components.empty()) {
       const std::string::size_type pos = fileN.find('/');
 
@@ -89,8 +89,7 @@ int cmCPackNSISGenerator::PackageFiles()
   std::ostringstream dstr;
   for (std::string const& dir : dirs) {
     std::string componentName;
-    std::string fileN =
-      cmSystemTools::RelativePath(toplevel.c_str(), dir.c_str());
+    std::string fileN = cmSystemTools::RelativePath(toplevel, dir);
     if (fileN.empty()) {
       continue;
     }
@@ -115,7 +114,7 @@ int cmCPackNSISGenerator::PackageFiles()
     dstr << "  RMDir \"" << componentOutputDir << "\\" << fileN << "\""
          << std::endl;
     if (!componentName.empty()) {
-      this->Components[componentName].Directories.push_back(fileN);
+      this->Components[componentName].Directories.push_back(std::move(fileN));
     }
   }
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Uninstall Dirs: " << dstr.str()
@@ -301,9 +300,9 @@ int cmCPackNSISGenerator::PackageFiles()
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << nsisCmd << std::endl);
   std::string output;
   int retVal = 1;
-  bool res =
-    cmSystemTools::RunSingleCommand(nsisCmd.c_str(), &output, &output, &retVal,
-                                    nullptr, this->GeneratorVerbose, 0);
+  bool res = cmSystemTools::RunSingleCommand(
+    nsisCmd.c_str(), &output, &output, &retVal, nullptr,
+    this->GeneratorVerbose, cmDuration::zero());
   if (!res || retVal) {
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Run command: " << nsisCmd << std::endl
@@ -400,9 +399,9 @@ int cmCPackNSISGenerator::InitializeInternal()
                                                                << std::endl);
   std::string output;
   int retVal = 1;
-  bool resS =
-    cmSystemTools::RunSingleCommand(nsisCmd.c_str(), &output, &output, &retVal,
-                                    nullptr, this->GeneratorVerbose, 0);
+  bool resS = cmSystemTools::RunSingleCommand(
+    nsisCmd.c_str(), &output, &output, &retVal, nullptr,
+    this->GeneratorVerbose, cmDuration::zero());
   cmsys::RegularExpression versionRex("v([0-9]+.[0-9]+)");
   cmsys::RegularExpression versionRexCVS("v(.*)\\.cvs");
   if (!resS || retVal ||
@@ -668,8 +667,8 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
       uploadDirectory = this->GetOption("CPACK_PACKAGE_DIRECTORY");
       uploadDirectory += "/CPackUploads";
     }
-    if (!cmSystemTools::FileExists(uploadDirectory.c_str())) {
-      if (!cmSystemTools::MakeDirectory(uploadDirectory.c_str())) {
+    if (!cmSystemTools::FileExists(uploadDirectory)) {
+      if (!cmSystemTools::MakeDirectory(uploadDirectory)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Unable to create NSIS upload directory "
                         << uploadDirectory << std::endl);
@@ -682,7 +681,7 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "-   Building downloaded component archive: " << archiveFile
                                                                 << std::endl);
-    if (cmSystemTools::FileExists(archiveFile.c_str(), true)) {
+    if (cmSystemTools::FileExists(archiveFile, true)) {
       if (!cmSystemTools::RemoveFile(archiveFile)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR, "Unable to remove archive file "
                         << archiveFile << std::endl);
@@ -737,9 +736,9 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
                                       zipListFileName.c_str());
     std::string output;
     int retVal = -1;
-    int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &output,
-                                              &retVal, dirName.c_str(),
-                                              cmSystemTools::OUTPUT_NONE, 0);
+    int res = cmSystemTools::RunSingleCommand(
+      cmd.c_str(), &output, &output, &retVal, dirName.c_str(),
+      cmSystemTools::OUTPUT_NONE, cmDuration::zero());
     if (!res || retVal) {
       std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
       tmpFile += "/CompressZip.log";

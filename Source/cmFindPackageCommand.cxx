@@ -225,7 +225,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
   std::set<std::string> optionalComponents;
 
   // Always search directly in a generated path.
-  this->SearchPathSuffixes.push_back("");
+  this->SearchPathSuffixes.emplace_back();
 
   // Parse the arguments.
   enum Doing
@@ -523,7 +523,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
 
       config = cmSystemTools::LowerCase(n);
       config += "-config.cmake";
-      this->Configs.push_back(config);
+      this->Configs.push_back(std::move(config));
     }
   }
 
@@ -660,7 +660,7 @@ bool cmFindPackageCommand::HandlePackageMode()
       cmSystemTools::ConvertToUnixSlashes(dir);
 
       // Treat relative paths with respect to the current source dir.
-      if (!cmSystemTools::FileIsFullPath(dir.c_str())) {
+      if (!cmSystemTools::FileIsFullPath(dir)) {
         dir = "/" + dir;
         dir = this->Makefile->GetCurrentSourceDirectory() + dir;
       }
@@ -1346,10 +1346,10 @@ bool cmFindPackageCommand::CheckPackageRegistryEntry(const std::string& fname,
                                                      cmSearchPath& outPaths)
 {
   // Parse the content of one package registry entry.
-  if (cmSystemTools::FileIsFullPath(fname.c_str())) {
+  if (cmSystemTools::FileIsFullPath(fname)) {
     // The first line in the stream is the full path to a file or
     // directory containing the package.
-    if (cmSystemTools::FileExists(fname.c_str())) {
+    if (cmSystemTools::FileExists(fname)) {
       // The path exists.  Look for the package here.
       if (!cmSystemTools::FileIsDirectory(fname)) {
         outPaths.AddPath(cmSystemTools::GetFilenamePath(fname));
@@ -1442,8 +1442,7 @@ bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
     if (this->DebugMode) {
       fprintf(stderr, "Checking file [%s]\n", file.c_str());
     }
-    if (cmSystemTools::FileExists(file.c_str(), true) &&
-        this->CheckVersion(file)) {
+    if (cmSystemTools::FileExists(file, true) && this->CheckVersion(file)) {
       return true;
     }
   }
@@ -1463,7 +1462,7 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   // Look for foo-config-version.cmake
   std::string version_file = version_file_base;
   version_file += "-version.cmake";
-  if (!haveResult && cmSystemTools::FileExists(version_file.c_str(), true)) {
+  if (!haveResult && cmSystemTools::FileExists(version_file, true)) {
     result = this->CheckVersionFile(version_file, version);
     haveResult = true;
   }
@@ -1471,7 +1470,7 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   // Look for fooConfigVersion.cmake
   version_file = version_file_base;
   version_file += "Version.cmake";
-  if (!haveResult && cmSystemTools::FileExists(version_file.c_str(), true)) {
+  if (!haveResult && cmSystemTools::FileExists(version_file, true)) {
     result = this->CheckVersionFile(version_file, version);
     haveResult = true;
   }
@@ -1484,7 +1483,7 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   ConfigFileInfo configFileInfo;
   configFileInfo.filename = config_file;
   configFileInfo.version = version;
-  this->ConsideredConfigs.push_back(configFileInfo);
+  this->ConsideredConfigs.push_back(std::move(configFileInfo));
 
   return result;
 }

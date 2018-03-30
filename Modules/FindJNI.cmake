@@ -47,7 +47,10 @@ macro(java_append_library_directories _var)
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^mips")
         # mips* machines are bi-endian mostly so processor does not tell
         # endianness of the underlying system.
-        set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "mips" "mipsel" "mipseb" "mips64" "mips64el" "mipsn32" "mipsn32el")
+        set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}"
+            "mips" "mipsel" "mipseb" "mipsr6" "mipsr6el"
+            "mips64" "mips64el" "mips64r6" "mips64r6el"
+            "mipsn32" "mipsn32el" "mipsn32r6" "mipsn32r6el")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64le")
         set(_java_libarch "ppc64" "ppc64le")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64")

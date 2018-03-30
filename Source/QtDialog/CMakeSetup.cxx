@@ -55,6 +55,7 @@ int main(int argc, char** argv)
   int argc2 = encoding_args.argc();
   char const* const* argv2 = encoding_args.argv();
 
+  cmSystemTools::InitializeLibUV();
   cmSystemTools::FindCMakeResources(argv2[0]);
   // check docs first so that X is not need to get docs
   // do docs, if args were given

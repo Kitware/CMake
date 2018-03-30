@@ -43,7 +43,7 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
   out += "/";
   out += this->GT->GetAppBundleDirectory(this->ConfigName,
                                          cmGeneratorTarget::FullLevel);
-  cmSystemTools::MakeDirectory(out.c_str());
+  cmSystemTools::MakeDirectory(out);
   this->Makefile->AddCMakeOutputFile(out);
 
   // Configure the Info.plist file.  Note that it needs the executable name
@@ -82,7 +82,7 @@ void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
 
   // Configure the Info.plist file
   std::string plist = newoutpath;
-  if (!this->Makefile->PlatformIsAppleIos()) {
+  if (!this->Makefile->PlatformIsAppleEmbedded()) {
     // Put the Info.plist file into the Resources directory.
     this->MacContentFolders->insert("Resources");
     plist += "/Resources";
@@ -93,7 +93,7 @@ void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
                                                    plist.c_str());
 
   // Generate Versions directory only for MacOSX frameworks
-  if (this->Makefile->PlatformIsAppleIos()) {
+  if (this->Makefile->PlatformIsAppleEmbedded()) {
     return;
   }
 
@@ -105,10 +105,10 @@ void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
   // Make foo.framework/Versions
   std::string versions = contentdir;
   versions += "Versions";
-  cmSystemTools::MakeDirectory(versions.c_str());
+  cmSystemTools::MakeDirectory(versions);
 
   // Make foo.framework/Versions/version
-  cmSystemTools::MakeDirectory(newoutpath.c_str());
+  cmSystemTools::MakeDirectory(newoutpath);
 
   // Current -> version
   oldName = frameworkVersion;
@@ -173,7 +173,7 @@ void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
   out += "/";
   out += this->GT->GetCFBundleDirectory(this->ConfigName,
                                         cmGeneratorTarget::FullLevel);
-  cmSystemTools::MakeDirectory(out.c_str());
+  cmSystemTools::MakeDirectory(out);
   this->Makefile->AddCMakeOutputFile(out);
 
   // Configure the Info.plist file.  Note that it needs the executable name
@@ -213,7 +213,7 @@ std::string cmOSXBundleGenerator::InitMacOSXContentDirectory(
     this->ConfigName, cmStateEnums::RuntimeBinaryArtifact);
   macdir += "/";
   macdir += pkgloc;
-  cmSystemTools::MakeDirectory(macdir.c_str());
+  cmSystemTools::MakeDirectory(macdir);
 
   // Record use of this content location.  Only the first level
   // directory is needed.

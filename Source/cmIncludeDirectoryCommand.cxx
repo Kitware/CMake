@@ -97,7 +97,7 @@ void cmIncludeDirectoryCommand::GetIncludes(const std::string& arg,
       std::string inc = arg.substr(lastPos, pos);
       this->NormalizeInclude(inc);
       if (!inc.empty()) {
-        incs.push_back(inc);
+        incs.push_back(std::move(inc));
       }
     }
     lastPos = pos + 1;
@@ -105,7 +105,7 @@ void cmIncludeDirectoryCommand::GetIncludes(const std::string& arg,
   std::string inc = arg.substr(lastPos);
   this->NormalizeInclude(inc);
   if (!inc.empty()) {
-    incs.push_back(inc);
+    incs.push_back(std::move(inc));
   }
 }
 
@@ -123,7 +123,7 @@ void cmIncludeDirectoryCommand::NormalizeInclude(std::string& inc)
   if (!cmSystemTools::IsOff(inc.c_str())) {
     cmSystemTools::ConvertToUnixSlashes(inc);
 
-    if (!cmSystemTools::FileIsFullPath(inc.c_str())) {
+    if (!cmSystemTools::FileIsFullPath(inc)) {
       if (!StartsWithGeneratorExpression(inc)) {
         std::string tmp = this->Makefile->GetCurrentSourceDirectory();
         tmp += "/";

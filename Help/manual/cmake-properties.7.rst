@@ -121,6 +121,7 @@ Properties on Targets
    /prop_tgt/ARCHIVE_OUTPUT_NAME_CONFIG
    /prop_tgt/ARCHIVE_OUTPUT_NAME
    /prop_tgt/AUTOGEN_BUILD_DIR
+   /prop_tgt/AUTOGEN_PARALLEL
    /prop_tgt/AUTOGEN_TARGET_DEPENDS
    /prop_tgt/AUTOMOC_COMPILER_PREDEFINES
    /prop_tgt/AUTOMOC_DEPEND_FILTERS
@@ -369,10 +370,12 @@ Properties on Source Files
    /prop_sf/AUTORCC_OPTIONS
    /prop_sf/COMPILE_DEFINITIONS
    /prop_sf/COMPILE_FLAGS
+   /prop_sf/COMPILE_OPTIONS
    /prop_sf/EXTERNAL_OBJECT
    /prop_sf/Fortran_FORMAT
    /prop_sf/GENERATED
    /prop_sf/HEADER_FILE_ONLY
+   /prop_sf/INCLUDE_DIRECTORIES
    /prop_sf/KEEP_EXTENSION
    /prop_sf/LABELS
    /prop_sf/LANGUAGE

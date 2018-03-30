@@ -26,7 +26,7 @@ void cmEventBasedConnection::on_alloc_buffer(uv_handle_t* handle,
 void cmEventBasedConnection::on_read(uv_stream_t* stream, ssize_t nread,
                                      const uv_buf_t* buf)
 {
-  auto conn = reinterpret_cast<cmEventBasedConnection*>(stream->data);
+  auto conn = static_cast<cmEventBasedConnection*>(stream->data);
   if (conn) {
     if (nread >= 0) {
       conn->ReadData(std::string(buf->base, buf->base + nread));
@@ -55,7 +55,7 @@ void cmEventBasedConnection::on_write(uv_write_t* req, int status)
 void cmEventBasedConnection::on_new_connection(uv_stream_t* stream, int status)
 {
   (void)(status);
-  auto conn = reinterpret_cast<cmEventBasedConnection*>(stream->data);
+  auto conn = static_cast<cmEventBasedConnection*>(stream->data);
 
   if (conn) {
     conn->Connect(stream);
@@ -76,7 +76,7 @@ void cmEventBasedConnection::WriteData(const std::string& _data)
 #endif
 
   auto data = _data;
-  assert(this->WriteStream);
+  assert(this->WriteStream.get());
   if (BufferStrategy) {
     data = BufferStrategy->BufferOutMessage(data);
   }
@@ -87,8 +87,7 @@ void cmEventBasedConnection::WriteData(const std::string& _data)
   req->req.data = this;
   req->buf = uv_buf_init(new char[ds], static_cast<unsigned int>(ds));
   memcpy(req->buf.base, data.c_str(), ds);
-  uv_write(reinterpret_cast<uv_write_t*>(req),
-           static_cast<uv_stream_t*>(this->WriteStream), &req->buf, 1,
+  uv_write(reinterpret_cast<uv_write_t*>(req), this->WriteStream, &req->buf, 1,
            on_write);
 }
 
@@ -156,13 +155,11 @@ bool cmConnection::OnServeStart(std::string* errString)
 
 bool cmEventBasedConnection::OnConnectionShuttingDown()
 {
-  if (this->WriteStream) {
+  if (this->WriteStream.get()) {
     this->WriteStream->data = nullptr;
   }
-  if (this->ReadStream) {
-    this->ReadStream->data = nullptr;
-  }
-  this->ReadStream = nullptr;
-  this->WriteStream = nullptr;
+
+  WriteStream.reset();
+
   return true;
 }

@@ -11,6 +11,8 @@ run_ctest_start(StartQuiet Experimental QUIET)
 
 run_ctest_start(ConfigInSource Experimental)
 
+run_ctest_start(FunctionScope Experimental QUIET)
+
 function(run_ConfigInBuild)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ConfigInBuild-build)
   set(RunCMake_TEST_NO_CLEAN 1)

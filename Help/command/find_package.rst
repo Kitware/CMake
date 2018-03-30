@@ -176,7 +176,7 @@ claim compatibility with the version requested it is unspecified which
 one is chosen: unless the variable :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER`
 is set no attempt is made to choose a highest or closest version number.
 
-To control the order in which ``find_package`` checks for compatibiliy use
+To control the order in which ``find_package`` checks for compatibility use
 the two variables :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER` and
 :variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION`.
 For instance in order to select the highest version one can set::

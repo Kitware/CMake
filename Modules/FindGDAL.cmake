@@ -49,6 +49,7 @@ find_path(GDAL_INCLUDE_DIR gdal.h
   PATH_SUFFIXES
      include/gdal
      include/GDAL
+     include
 )
 
 if(UNIX)
@@ -60,6 +61,7 @@ if(UNIX)
         HINTS
           ENV GDAL_DIR
           ENV GDAL_ROOT
+        PATH_SUFFIXES bin
     )
 
     if(GDAL_CONFIG)
@@ -79,6 +81,7 @@ find_library(GDAL_LIBRARY
      ENV GDAL_DIR
      ENV GDAL_ROOT
      ${_gdal_libpath}
+  PATH_SUFFIXES lib
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)

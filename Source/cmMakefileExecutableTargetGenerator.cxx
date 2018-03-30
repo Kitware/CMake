@@ -69,9 +69,6 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
     this->WriteExecutableRule(true);
   }
 
-  // Write the requires target.
-  this->WriteTargetRequiresRules();
-
   // Write clean target
   this->WriteTargetCleanRules();
 
@@ -329,28 +326,28 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     outpath = this->Makefile->GetCurrentBinaryDirectory();
     outpath += cmake::GetCMakeFilesDirectory();
     outpath += "/CMakeRelink.dir";
-    cmSystemTools::MakeDirectory(outpath.c_str());
+    cmSystemTools::MakeDirectory(outpath);
     outpath += "/";
     if (!targetNameImport.empty()) {
       outpathImp = outpath;
     }
   } else {
-    cmSystemTools::MakeDirectory(outpath.c_str());
+    cmSystemTools::MakeDirectory(outpath);
     if (!targetNameImport.empty()) {
       outpathImp = this->GeneratorTarget->GetDirectory(
         this->ConfigName, cmStateEnums::ImportLibraryArtifact);
-      cmSystemTools::MakeDirectory(outpathImp.c_str());
+      cmSystemTools::MakeDirectory(outpathImp);
       outpathImp += "/";
     }
   }
 
   std::string compilePdbOutputPath =
     this->GeneratorTarget->GetCompilePDBDirectory(this->ConfigName);
-  cmSystemTools::MakeDirectory(compilePdbOutputPath.c_str());
+  cmSystemTools::MakeDirectory(compilePdbOutputPath);
 
   std::string pdbOutputPath =
     this->GeneratorTarget->GetPDBDirectory(this->ConfigName);
-  cmSystemTools::MakeDirectory(pdbOutputPath.c_str());
+  cmSystemTools::MakeDirectory(pdbOutputPath);
   pdbOutputPath += "/";
 
   std::string targetFullPath = outpath + targetName;
@@ -620,7 +617,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
         cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
       cmakeCommand += " -E __run_co_compile --lwyu=";
       cmakeCommand += targetOutPathReal;
-      real_link_commands.push_back(cmakeCommand);
+      real_link_commands.push_back(std::move(cmakeCommand));
     }
 
     std::string launcher;
@@ -669,7 +666,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     symlink += targetOutPathReal;
     symlink += " ";
     symlink += targetOutPath;
-    commands1.push_back(symlink);
+    commands1.push_back(std::move(symlink));
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
       this->LocalGenerator->GetBinaryDirectory());

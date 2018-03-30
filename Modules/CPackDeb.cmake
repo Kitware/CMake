@@ -470,7 +470,7 @@
 #  Usage::
 #
 #   set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
-#       "${CMAKE_CURRENT_SOURCE_DIR/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
+#       "${CMAKE_CURRENT_SOURCE_DIR}/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
 #
 #  .. note::
 #
@@ -610,12 +610,7 @@ function(cpack_deb_prepare_package_vars)
 
   if(CPACK_DEBIAN_PACKAGE_SHLIBDEPS OR CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS)
     # Generating binary list - Get type of all install files
-    cmake_policy(PUSH)
-      # Tell file(GLOB_RECURSE) not to follow directory symlinks
-      # even if the project does not set this policy to NEW.
-      cmake_policy(SET CMP0009 NEW)
-      file(GLOB_RECURSE FILE_PATHS_ LIST_DIRECTORIES false RELATIVE "${WDIR}" "${WDIR}/*")
-    cmake_policy(POP)
+    file(GLOB_RECURSE FILE_PATHS_ LIST_DIRECTORIES false RELATIVE "${WDIR}" "${WDIR}/*")
 
     find_program(FILE_EXECUTABLE file)
     if(NOT FILE_EXECUTABLE)
@@ -931,13 +926,10 @@ function(cpack_deb_prepare_package_vars)
 
   if(CPACK_DEBIAN_ARCHIVE_TYPE)
     set(archive_types_ "paxr;gnutar")
-    cmake_policy(PUSH)
-      cmake_policy(SET CMP0057 NEW)
-      if(NOT CPACK_DEBIAN_ARCHIVE_TYPE IN_LIST archive_types_)
-        message(FATAL_ERROR "CPACK_DEBIAN_ARCHIVE_TYPE set to unsupported"
-          "type ${CPACK_DEBIAN_ARCHIVE_TYPE}")
-      endif()
-    cmake_policy(POP)
+    if(NOT CPACK_DEBIAN_ARCHIVE_TYPE IN_LIST archive_types_)
+      message(FATAL_ERROR "CPACK_DEBIAN_ARCHIVE_TYPE set to unsupported"
+        "type ${CPACK_DEBIAN_ARCHIVE_TYPE}")
+    endif()
   else()
     set(CPACK_DEBIAN_ARCHIVE_TYPE "paxr")
   endif()
@@ -962,7 +954,7 @@ function(cpack_deb_prepare_package_vars)
   # - prerm
   # Usage:
   # set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
-  #    "${CMAKE_CURRENT_SOURCE_DIR/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
+  #    "${CMAKE_CURRENT_SOURCE_DIR}/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
 
   # Are we packaging components ?
   if(CPACK_DEB_PACKAGE_COMPONENT)
@@ -1039,13 +1031,9 @@ function(cpack_deb_prepare_package_vars)
       set(CPACK_OUTPUT_FILE_NAME
         "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
     else()
-      cmake_policy(PUSH)
-        cmake_policy(SET CMP0010 NEW)
-        if(NOT CPACK_DEBIAN_FILE_NAME MATCHES ".*\\.(deb|ipk)")
-      cmake_policy(POP)
-          message(FATAL_ERROR "'${CPACK_DEBIAN_FILE_NAME}' is not a valid DEB package file name as it must end with '.deb' or '.ipk'!")
-        endif()
-      cmake_policy(POP)
+      if(NOT CPACK_DEBIAN_FILE_NAME MATCHES ".*\\.(deb|ipk)")
+        message(FATAL_ERROR "'${CPACK_DEBIAN_FILE_NAME}' is not a valid DEB package file name as it must end with '.deb' or '.ipk'!")
+      endif()
 
       set(CPACK_OUTPUT_FILE_NAME "${CPACK_DEBIAN_FILE_NAME}")
     endif()

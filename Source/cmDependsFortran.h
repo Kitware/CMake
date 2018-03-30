@@ -64,7 +64,7 @@ protected:
                          const std::string& file, std::ostream& makeDepends,
                          std::ostream& internalDepends) override;
 
-  // Actually write the depenencies to the streams.
+  // Actually write the dependencies to the streams.
   bool WriteDependenciesReal(const char* obj, cmFortranSourceInfo const& info,
                              std::string const& mod_dir, const char* stamp_dir,
                              std::ostream& makeDepends,

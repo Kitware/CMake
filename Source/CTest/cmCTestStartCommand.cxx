@@ -126,7 +126,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
-  this->Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", "OFF");
+  this->CTest->SetRunCurrentScript(false);
   this->CTest->SetSuppressUpdatingCTestConfiguration(true);
   int model = this->CTest->GetTestModelFromString(smodel);
   this->CTest->SetTestModel(model);

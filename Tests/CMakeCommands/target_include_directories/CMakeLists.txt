@@ -42,17 +42,17 @@ add_executable(consumer
   "${CMAKE_CURRENT_SOURCE_DIR}/consumer.cpp"
 )
 
-if (CMAKE_GENERATOR MATCHES "Makefiles" OR CMAKE_GENERATOR MATCHES "Ninja")
-  target_sources(consumer PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/consumer.c"
-  )
-  target_include_directories(consumer
-    PRIVATE
-      $<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/cxx_only>
-      $<$<COMPILE_LANGUAGE:C>:${CMAKE_CURRENT_SOURCE_DIR}/c_only>
-  )
+target_sources(consumer PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/consumer.c"
+)
+target_include_directories(consumer
+  PRIVATE
+    $<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/cxx_only>
+    $<$<COMPILE_LANGUAGE:C>:${CMAKE_CURRENT_SOURCE_DIR}/c_only>
+)
+if(CMAKE_GENERATOR MATCHES "Visual Studio|Xcode")
   target_compile_definitions(consumer
-    PRIVATE -DTEST_LANG_DEFINES
+    PRIVATE TEST_LANG_DEFINES_FOR_VISUAL_STUDIO_OR_XCODE
   )
 endif()
 

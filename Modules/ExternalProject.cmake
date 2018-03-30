@@ -714,8 +714,9 @@ control needed to implement such step-level capabilities.
   The command line, comment, working directory and byproducts of every
   standard and custom step are processed to replace the tokens
   ``<SOURCE_DIR>``, ``<SOURCE_SUBDIR>``, ``<BINARY_DIR>``, ``<INSTALL_DIR>``
-  and ``<TMP_DIR>`` with their corresponding property values defined in the
-  original call to :command:`ExternalProject_Add`.
+  ``<TMP_DIR>``, ``<DOWNLOAD_DIR>`` and ``<DOWNLOADED_FILE>`` with their
+  corresponding property values defined in the original call to
+  :command:`ExternalProject_Add`.
 
 .. command:: ExternalProject_Add_StepTargets
 
@@ -1075,7 +1076,7 @@ foreach(config IN LISTS git_config)
   list(APPEND git_clone_options --config \${config})
 endforeach()
 
-# try the clone 3 times incase there is an odd git clone issue
+# try the clone 3 times in case there is an odd git clone issue
 set(error_code 1)
 set(number_of_tries 0)
 while(error_code AND number_of_tries LESS 3)
@@ -1665,7 +1666,7 @@ macro(_ep_replace_location_tags target_name)
   set(vars ${ARGN})
   foreach(var ${vars})
     if(${var})
-      foreach(dir SOURCE_DIR SOURCE_SUBDIR BINARY_DIR INSTALL_DIR TMP_DIR DOWNLOADED_FILE)
+      foreach(dir SOURCE_DIR SOURCE_SUBDIR BINARY_DIR INSTALL_DIR TMP_DIR DOWNLOAD_DIR DOWNLOADED_FILE)
         get_property(val TARGET ${target_name} PROPERTY _EP_${dir})
         string(REPLACE "<${dir}>" "${val}" ${var} "${${var}}")
       endforeach()
@@ -1706,7 +1707,7 @@ function(_ep_command_line_to_initial_cache var args force)
     endif()
   endforeach()
   # Catch the final line of the args
-  if(setArg)
+  if(NOT "${setArg}" STREQUAL "")
     string(APPEND setArg "${accumulator}\" CACHE ${type} \"Initial cache\" ${forceArg})")
     string(APPEND script_initial_cache "\n${setArg}")
   endif()
@@ -1789,7 +1790,8 @@ function(_ep_get_build_command name step cmd_var)
         set(cmd "${CMAKE_COMMAND}")
       endif()
       set(args --build ".")
-      if(CMAKE_CONFIGURATION_TYPES)
+      get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+      if(_isMultiConfig)
         if (CMAKE_CFG_INTDIR AND
             NOT CMAKE_CFG_INTDIR STREQUAL "." AND
             NOT CMAKE_CFG_INTDIR MATCHES "\\$")
@@ -1814,7 +1816,7 @@ function(_ep_get_build_command name step cmd_var)
       if("x${step}x" STREQUAL "xTESTx")
         string(REGEX REPLACE "^(.*/)cmake([^/]*)$" "\\1ctest\\2" cmd "${cmd}")
         set(args "")
-        if(CMAKE_CONFIGURATION_TYPES)
+        if(_isMultiConfig)
           list(APPEND args -C ${config})
         endif()
       endif()
@@ -1954,7 +1956,8 @@ endfunction()
 #
 function(_ep_get_configuration_subdir_suffix suffix_var)
   set(suffix "")
-  if(CMAKE_CONFIGURATION_TYPES)
+  get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+  if(_isMultiConfig)
     set(suffix "/${CMAKE_CFG_INTDIR}")
   endif()
   set(${suffix_var} "${suffix}" PARENT_SCOPE)
@@ -2084,7 +2087,8 @@ function(ExternalProject_Add_Step name step)
     set_property(SOURCE ${stamp_file} PROPERTY SYMBOLIC 1)
     set(touch)
     # Remove any existing stamp in case the option changed in an existing tree.
-    if(CMAKE_CONFIGURATION_TYPES)
+    get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+    if(_isMultiConfig)
       foreach(cfg ${CMAKE_CONFIGURATION_TYPES})
         string(REPLACE "/${CMAKE_CFG_INTDIR}" "/${cfg}" stamp_file_config "${stamp_file}")
         file(REMOVE ${stamp_file_config})
@@ -2746,12 +2750,22 @@ function(_ep_extract_configure_command var name)
     get_property(cmake_cache_args TARGET ${name} PROPERTY _EP_CMAKE_CACHE_ARGS)
     get_property(cmake_cache_default_args TARGET ${name} PROPERTY _EP_CMAKE_CACHE_DEFAULT_ARGS)
 
-    if(cmake_cache_args OR cmake_cache_default_args)
+    set(has_cmake_cache_args 0)
+    if(NOT "${cmake_cache_args}" STREQUAL "")
+      set(has_cmake_cache_args 1)
+    endif()
+
+    set(has_cmake_cache_default_args 0)
+    if(NOT "${cmake_cache_default_args}" STREQUAL "")
+      set(has_cmake_cache_default_args 1)
+    endif()
+
+    if(has_cmake_cache_args OR has_cmake_cache_default_args)
       set(_ep_cache_args_script "<TMP_DIR>/${name}-cache-$<CONFIG>.cmake")
-      if(cmake_cache_args)
+      if(has_cmake_cache_args)
         _ep_command_line_to_initial_cache(script_initial_cache_force "${cmake_cache_args}" 1)
       endif()
-      if(cmake_cache_default_args)
+      if(has_cmake_cache_default_args)
         _ep_command_line_to_initial_cache(script_initial_cache_default "${cmake_cache_default_args}" 0)
       endif()
       _ep_write_initial_cache(${name} "${_ep_cache_args_script}" "${script_initial_cache_force}${script_initial_cache_default}")

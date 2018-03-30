@@ -24,6 +24,11 @@ bool cmExpandedCommandArgument::WasQuoted() const
   return this->Quoted;
 }
 
+bool cmExpandedCommandArgument::operator==(const char* value) const
+{
+  return this->Value == value;
+}
+
 bool cmExpandedCommandArgument::operator==(std::string const& value) const
 {
   return this->Value == value;

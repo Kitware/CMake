@@ -2,19 +2,19 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 set( CURSES_SRCS
-              CursesDialog/cmCursesOptionsWidget
-              CursesDialog/cmCursesBoolWidget
-              CursesDialog/cmCursesCacheEntryComposite
-              CursesDialog/cmCursesDummyWidget
-              CursesDialog/cmCursesFilePathWidget
-              CursesDialog/cmCursesForm
-              CursesDialog/cmCursesLabelWidget
-              CursesDialog/cmCursesLongMessageForm
-              CursesDialog/cmCursesMainForm
-              CursesDialog/cmCursesPathWidget
-              CursesDialog/cmCursesStringWidget
-              CursesDialog/cmCursesWidget
-              CursesDialog/ccmake
+              CursesDialog/cmCursesOptionsWidget.cxx
+              CursesDialog/cmCursesBoolWidget.cxx
+              CursesDialog/cmCursesCacheEntryComposite.cxx
+              CursesDialog/cmCursesDummyWidget.cxx
+              CursesDialog/cmCursesFilePathWidget.cxx
+              CursesDialog/cmCursesForm.cxx
+              CursesDialog/cmCursesLabelWidget.cxx
+              CursesDialog/cmCursesLongMessageForm.cxx
+              CursesDialog/cmCursesMainForm.cxx
+              CursesDialog/cmCursesPathWidget.cxx
+              CursesDialog/cmCursesStringWidget.cxx
+              CursesDialog/cmCursesWidget.cxx
+              CursesDialog/ccmake.cxx
    )
 
 include_directories(${CURSES_INCLUDE_PATH})

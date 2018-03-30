@@ -65,7 +65,7 @@ Encoding::CommandLineArguments::CommandLineArguments(int ac,
   for (int i = 0; i < ac; i++) {
     this->argv_[i] = strdup(av[i]);
   }
-  this->argv_[ac] = 0;
+  this->argv_[ac] = KWSYS_NULLPTR;
 }
 
 Encoding::CommandLineArguments::CommandLineArguments(int ac,
@@ -75,7 +75,7 @@ Encoding::CommandLineArguments::CommandLineArguments(int ac,
   for (int i = 0; i < ac; i++) {
     this->argv_[i] = kwsysEncoding_DupToNarrow(av[i]);
   }
-  this->argv_[ac] = 0;
+  this->argv_[ac] = KWSYS_NULLPTR;
 }
 
 Encoding::CommandLineArguments::~CommandLineArguments()
@@ -90,7 +90,7 @@ Encoding::CommandLineArguments::CommandLineArguments(
 {
   this->argv_.resize(other.argv_.size());
   for (size_t i = 0; i < this->argv_.size(); i++) {
-    this->argv_[i] = other.argv_[i] ? strdup(other.argv_[i]) : 0;
+    this->argv_[i] = other.argv_[i] ? strdup(other.argv_[i]) : KWSYS_NULLPTR;
   }
 }
 
@@ -105,7 +105,7 @@ Encoding::CommandLineArguments& Encoding::CommandLineArguments::operator=(
 
     this->argv_.resize(other.argv_.size());
     for (i = 0; i < this->argv_.size(); i++) {
-      this->argv_[i] = other.argv_[i] ? strdup(other.argv_[i]) : 0;
+      this->argv_[i] = other.argv_[i] ? strdup(other.argv_[i]) : KWSYS_NULLPTR;
     }
   }
 
@@ -193,7 +193,7 @@ std::string Encoding::ToNarrow(const std::wstring& str)
 std::wstring Encoding::ToWide(const char* cstr)
 {
   std::wstring wstr;
-  size_t length = kwsysEncoding_mbstowcs(0, cstr, 0) + 1;
+  size_t length = kwsysEncoding_mbstowcs(KWSYS_NULLPTR, cstr, 0) + 1;
   if (length > 0) {
     std::vector<wchar_t> wchars(length);
     if (kwsysEncoding_mbstowcs(&wchars[0], cstr, length) > 0) {
@@ -206,7 +206,7 @@ std::wstring Encoding::ToWide(const char* cstr)
 std::string Encoding::ToNarrow(const wchar_t* wcstr)
 {
   std::string str;
-  size_t length = kwsysEncoding_wcstombs(0, wcstr, 0) + 1;
+  size_t length = kwsysEncoding_wcstombs(KWSYS_NULLPTR, wcstr, 0) + 1;
   if (length > 0) {
     std::vector<char> chars(length);
     if (kwsysEncoding_wcstombs(&chars[0], wcstr, length) > 0) {

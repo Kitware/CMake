@@ -98,11 +98,12 @@
 #   CUDA_HOST_COMPILATION_CPP (Default ON)
 #   -- Set to OFF for C compilation of host code.
 #
-#   CUDA_HOST_COMPILER (Default CMAKE_C_COMPILER, $(VCInstallDir)/bin for VS)
+#   CUDA_HOST_COMPILER (Default CMAKE_C_COMPILER)
 #   -- Set the host compiler to be used by nvcc.  Ignored if -ccbin or
 #      --compiler-bindir is already present in the CUDA_NVCC_FLAGS or
-#      CUDA_NVCC_FLAGS_<CONFIG> variables.  For Visual Studio targets
-#      $(VCInstallDir)/bin is a special value that expands out to the path when
+#      CUDA_NVCC_FLAGS_<CONFIG> variables.  For Visual Studio targets,
+#      the host compiler is constructed with one or more visual studio macros
+#      such as $(VCInstallDir), that expands out to the path when
 #      the command is run from within VS.
 #
 #   CUDA_NVCC_FLAGS
@@ -524,10 +525,16 @@ set(CUDA_GENERATED_OUTPUT_DIR "" CACHE PATH "Directory to put all the output fil
 option(CUDA_HOST_COMPILATION_CPP "Generated file extension" ON)
 
 # Extra user settable flags
-set(CUDA_NVCC_FLAGS "" CACHE STRING "Semi-colon delimit multiple arguments.")
+cmake_initialize_per_config_variable(CUDA_NVCC_FLAGS "Semi-colon delimit multiple arguments.")
 
 if(CMAKE_GENERATOR MATCHES "Visual Studio")
-  set(CUDA_HOST_COMPILER "$(VCInstallDir)bin" CACHE FILEPATH "Host side compiler used by NVCC")
+  set(_CUDA_MSVC_HOST_COMPILER "$(VCInstallDir)Tools/MSVC/$(VCToolsVersion)/bin/Host$(Platform)/$(PlatformTarget)")
+  if(MSVC_VERSION LESS 1910)
+   set(_CUDA_MSVC_HOST_COMPILER "$(VCInstallDir)bin")
+  endif()
+
+  set(CUDA_HOST_COMPILER "${_CUDA_MSVC_HOST_COMPILER}" CACHE FILEPATH "Host side compiler used by NVCC")
+
 else()
   if(APPLE
       AND "${CMAKE_C_COMPILER_ID}" MATCHES "Clang"
@@ -578,19 +585,17 @@ mark_as_advanced(
   CUDA_SEPARABLE_COMPILATION
   )
 
-# Makefile and similar generators don't define CMAKE_CONFIGURATION_TYPES, so we
-# need to add another entry for the CMAKE_BUILD_TYPE.  We also need to add the
-# standerd set of 4 build types (Debug, MinSizeRel, Release, and RelWithDebInfo)
-# for completeness.  We need run this loop in order to accommodate the addition
-# of extra configuration types.  Duplicate entries will be removed by
-# REMOVE_DUPLICATES.
+# Single config generators like Makefiles or Ninja don't usually have
+# CMAKE_CONFIGURATION_TYPES defined (but note that it can be defined if set by
+# projects or developers). Even CMAKE_BUILD_TYPE might not be defined for
+# single config generators (and should not be defined for multi-config
+# generators). To ensure we get a complete superset of all possible
+# configurations, we combine CMAKE_CONFIGURATION_TYPES, CMAKE_BUILD_TYPE and
+# all of the standard configurations, then weed out duplicates with
+# list(REMOVE_DUPLICATES). Looping over the unique set then ensures we have
+# each configuration-specific set of nvcc flags defined and marked as advanced.
 set(CUDA_configuration_types ${CMAKE_CONFIGURATION_TYPES} ${CMAKE_BUILD_TYPE} Debug MinSizeRel Release RelWithDebInfo)
 list(REMOVE_DUPLICATES CUDA_configuration_types)
-foreach(config ${CUDA_configuration_types})
-    string(TOUPPER ${config} config_upper)
-    set(CUDA_NVCC_FLAGS_${config_upper} "" CACHE STRING "Semi-colon delimit multiple arguments.")
-    mark_as_advanced(CUDA_NVCC_FLAGS_${config_upper})
-endforeach()
 
 ###############################################################################
 ###############################################################################
@@ -977,7 +982,7 @@ if(NOT CUDA_VERSION VERSION_LESS "9.0")
   find_cuda_helper_libs(npps)
   set(CUDA_npp_LIBRARY "${CUDA_nppc_LIBRARY};${CUDA_nppial_LIBRARY};${CUDA_nppicc_LIBRARY};${CUDA_nppicom_LIBRARY};${CUDA_nppidei_LIBRARY};${CUDA_nppif_LIBRARY};${CUDA_nppig_LIBRARY};${CUDA_nppim_LIBRARY};${CUDA_nppist_LIBRARY};${CUDA_nppisu_LIBRARY};${CUDA_nppitc_LIBRARY};${CUDA_npps_LIBRARY}")
 elseif(CUDA_VERSION VERSION_GREATER "5.0")
-  # In CUDA 5.5 NPP was splitted onto 3 separate libraries.
+  # In CUDA 5.5 NPP was split into 3 separate libraries.
   find_cuda_helper_libs(nppc)
   find_cuda_helper_libs(nppi)
   find_cuda_helper_libs(npps)
@@ -1315,11 +1320,11 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   endif()
 
   # This needs to be passed in at this stage, because VS needs to fill out the
-  # value of VCInstallDir from within VS.  Note that CCBIN is only used if
+  # various macros from within VS.  Note that CCBIN is only used if
   # -ccbin or --compiler-bindir isn't used and CUDA_HOST_COMPILER matches
-  # $(VCInstallDir)/bin.
+  # _CUDA_MSVC_HOST_COMPILER
   if(CMAKE_GENERATOR MATCHES "Visual Studio")
-    set(ccbin_flags -D "\"CCBIN:PATH=$(VCInstallDir)bin\"" )
+    set(ccbin_flags -D "\"CCBIN:PATH=${_CUDA_MSVC_HOST_COMPILER}\"" )
   else()
     set(ccbin_flags)
   endif()
@@ -1438,7 +1443,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   if( "${_cuda_host_flags}" MATCHES "-std=c\\+\\+11")
     # Add the c++11 flag to nvcc if it isn't already present.  Note that we only look at
     # the main flag instead of the configuration specific flags.
-    if( NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std;c\\+\\+11" )
+    if( NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std=c\\+\\+11" )
       list(APPEND nvcc_flags --std c++11)
     endif()
     string(REGEX REPLACE "[-]+std=c\\+\\+11" "" _cuda_host_flags "${_cuda_host_flags}")
@@ -1755,7 +1760,7 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
       add_custom_command(
         OUTPUT ${output_file}
         DEPENDS ${object_files}
-        COMMAND ${CUDA_NVCC_EXECUTABLE} ${nvcc_flags} -dlink ${object_files} -o ${output_file}
+        COMMAND ${CUDA_NVCC_EXECUTABLE} ${nvcc_flags} -dlink ${object_files} ${CUDA_cublas_device_LIBRARY} -o ${output_file}
         ${flags}
         COMMENT "Building NVCC intermediate link file ${output_file_relative_path}"
         COMMAND_EXPAND_LISTS
@@ -1768,7 +1773,7 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
         PRE_LINK
         COMMAND ${CMAKE_COMMAND} -E echo "Building NVCC intermediate link file ${output_file_relative_path}"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${output_file_dir}"
-        COMMAND ${CUDA_NVCC_EXECUTABLE} ${nvcc_flags} ${flags} -dlink ${object_files} -o "${output_file}"
+        COMMAND ${CUDA_NVCC_EXECUTABLE} ${nvcc_flags} ${flags} -dlink ${object_files} ${CUDA_cublas_device_LIBRARY} -o "${output_file}"
         COMMAND_EXPAND_LISTS
         ${_verbatim}
         )

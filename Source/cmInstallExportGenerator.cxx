@@ -132,7 +132,7 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
 
   // Create the temporary directory in which to store the files.
   this->ComputeTempDir();
-  cmSystemTools::MakeDirectory(this->TempDir.c_str());
+  cmSystemTools::MakeDirectory(this->TempDir);
 
   // Construct a temporary location for the file.
   this->MainImportFile = this->TempDir;
