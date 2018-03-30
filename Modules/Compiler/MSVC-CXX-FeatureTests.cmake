@@ -1,15 +1,20 @@
-
-# Reference: http://msdn.microsoft.com/en-us/library/vstudio/hh567368.aspx
-# http://blogs.msdn.com/b/vcblog/archive/2013/06/28/c-11-14-stl-features-fixes-and-breaking-changes-in-vs-2013.aspx
-# http://blogs.msdn.com/b/vcblog/archive/2014/11/17/c-11-14-17-features-in-vs-2015-preview.aspx
-# http://www.visualstudio.com/en-us/news/vs2015-preview-vs.aspx
-# http://blogs.msdn.com/b/vcblog/archive/2015/04/29/c-11-14-17-features-in-vs-2015-rc.aspx
-# http://blogs.msdn.com/b/vcblog/archive/2015/06/19/c-11-14-17-features-in-vs-2015-rtm.aspx
-
+# Reference: https://docs.microsoft.com/en-us/cpp/visual-cpp-language-conformance
+# https://blogs.msdn.microsoft.com/vcblog/2015/06/19/c111417-features-in-vs-2015-rtm/
+# https://blogs.msdn.microsoft.com/vcblog/2013/12/02/c1114-core-language-features-in-vs-2013-and-the-nov-2013-ctp/
+# https://blogs.msdn.microsoft.com/vcblog/2011/09/12/c11-features-in-visual-c-11/
 
 set(_cmake_oldestSupported "_MSC_VER >= 1600")
 
-# VS version 15 (not 2015) introduces support for aggregate initializers.
+# VS 2017 v15.3 fixes support for incomplete decltypes
+# https://docs.microsoft.com/en-us/cpp/cpp-conformance-improvements-2017#update_153
+set(_cmake_feature_test_cxx_decltype_incomplete_return_types "_MSC_VER >= 1911")
+
+set(MSVC_2017 "_MSC_VER >= 1910")
+# VS 2017 introduces support for "N3652 Extended constexpr"
+# but as of v15.6 there are still bugs in the implementation
+#set(_cmake_feature_test_cxx_relaxed_constexpr "${MSVC_2017}")
+
+# VS 2017 Preview introduces support for aggregate initializers.
 set(_cmake_feature_test_cxx_aggregate_default_initializers "_MSC_FULL_VER >= 190024406")
 
 # VS 2015 Update 2 introduces support for variable templates.
@@ -48,7 +53,6 @@ set(_cmake_feature_test_cxx_reference_qualified_functions "${MSVC_2015}")
 # lists this as 'partial' in 2013
 set(_cmake_feature_test_cxx_deleted_functions "${MSVC_2015}")
 
-set(MSVC_2013_v30723 "_MSC_FULL_VER >= 180030723")
 # http://blogs.msdn.com/b/vcblog/archive/2014/11/17/c-11-14-17-features-in-vs-2015-preview.aspx
 # Note 1. While previous version of VisualStudio said they supported these
 # they silently produced bad code, and are now marked as having partial
@@ -56,7 +60,7 @@ set(MSVC_2013_v30723 "_MSC_FULL_VER >= 180030723")
 # in MSVC 2015, so support the feature for that version, assuming that is true.
 # The blog post also says that VS 2013 Update 3 generates an error in cases
 # that previously produced bad code.
-set(_cmake_feature_test_cxx_generalized_initializers "${MSVC_2013_v30723}")
+set(_cmake_feature_test_cxx_generalized_initializers "_MSC_FULL_VER >= 180030723")
 
 set(MSVC_2013 "_MSC_VER >= 1800")
 set(_cmake_feature_test_cxx_alias_templates "${MSVC_2013}")
@@ -98,20 +102,10 @@ set(_cmake_feature_test_cxx_template_template_parameters "${MSVC_2010}")
 set(_cmake_feature_test_cxx_trailing_return_types "${MSVC_2010}")
 set(_cmake_feature_test_cxx_variadic_macros "${MSVC_2010}")
 
-# Currently unsupported:
-# set(_cmake_feature_test_cxx_relaxed_constexpr )
-# 'NSDMIs for aggregates'
-# set(_cmake_feature_test_cxx_aggregate_default_initializers )
-
-# In theory decltype incomplete return types was added in 2012
-# but without support for decltype_auto and return type deduction this
-# feature is unusable.  This remains so as of VS 2015 Preview.
-# set(_cmake_feature_test_cxx_decltype_incomplete_return_types )
-
 # Unset all the variables that we don't need exposed.
 # _cmake_oldestSupported is required by WriteCompilerDetectionHeader
+set(MSVC_2017)
 set(MSVC_2015)
-set(MSVC_2013_v30723)
 set(MSVC_2013)
 set(MSVC_2012)
 set(MSVC_2010)
