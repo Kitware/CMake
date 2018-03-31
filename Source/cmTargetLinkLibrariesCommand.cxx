@@ -412,18 +412,16 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     }
 
-      this->Target->AddLinkLibrary(*this->Makefile, lib, llt, this->GetBacktrace());
-    }
+    this->Target->AddLinkLibrary(*this->Makefile, lib, llt, this->GetBacktrace());
+  }
 
-    if (this->CurrentProcessingState == ProcessingLinkLibraries) {
-      this->Target->AppendProperty(
-        "INTERFACE_LINK_LIBRARIES",
-        this->Target->GetDebugGeneratorExpressions(lib, llt).c_str(),
-        this->GetBacktrace());
-      return true;
-    }
-    if (this->CurrentProcessingState != ProcessingKeywordPublicInterface &&
-        this->CurrentProcessingState != ProcessingPlainPublicInterface) {
+  // Handle (additional) case where the command was called with PRIVATE /
+  // LINK_PRIVATE and stop its processing. (The "INTERFACE_LINK_LIBRARIES"
+  // property of the target on the LHS shall only be populated if it is a
+  // STATIC library.)
+  if (this->CurrentProcessingState == ProcessingKeywordPrivateInterface ||
+      this->CurrentProcessingState == ProcessingPlainPrivateInterface) {
+
       if (this->Target->GetType() == cmStateEnums::STATIC_LIBRARY) {
         std::string configLib =
           this->Target->GetDebugGeneratorExpressions(lib, llt);
@@ -439,7 +437,6 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       // property.
       return true;
     }
-  }
 
   // Handle general case where the command was called with another keyword than
   // PRIVATE / LINK_PRIVATE or none at all. (The "INTERFACE_LINK_LIBRARIES"
@@ -494,6 +491,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       prop += dc;
       if (!this->Target->GetProperty(prop)) {
         this->Target->SetProperty(prop, "", this->GetBacktrace());
+		}
       }
     }
   }

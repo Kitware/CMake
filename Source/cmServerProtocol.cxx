@@ -812,6 +812,9 @@ static Json::Value DumpSourceFilesList(
     }
   }
 
+  return result;
+}
+
 static Json::Value DumpBacktrace_Protocol1(const cmListFileBacktrace& backtrace)
 {
   Json::Value result = Json::arrayValue;
