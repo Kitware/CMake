@@ -4546,13 +4546,15 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
     // Ensure the C++ language level is high enough to support
     // the needed C++ features.
     if (!existingCxxLevel || existingCxxLevel < needCxxLevel) {
-      target->SetProperty("CXX_STANDARD", *needCxxLevel);
+      target->SetProperty(
+        "CXX_STANDARD", *needCxxLevel, target->GetBacktrace());
     }
 
     // Ensure the CUDA language level is high enough to support
     // the needed C++ features.
     if (!existingCudaLevel || existingCudaLevel < needCxxLevel) {
-      target->SetProperty("CUDA_STANDARD", *needCxxLevel);
+      target->SetProperty(
+        "CUDA_STANDARD", *needCxxLevel, target->GetBacktrace());
     }
   }
 
