@@ -3,12 +3,12 @@
 
 
 # This module is shared by multiple languages; use include blocker.
-if(__DARWIN_COMPILER_INTEL)
+if(__APPLE_COMPILER_INTEL)
   return()
 endif()
-set(__DARWIN_COMPILER_INTEL 1)
+set(__APPLE_COMPILER_INTEL 1)
 
-macro(__darwin_compiler_intel lang)
+macro(__apple_compiler_intel lang)
   set(CMAKE_${lang}_VERBOSE_FLAG "-v -Wl,-v") # also tell linker to print verbose output
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-dynamiclib -Wl,-headerpad_max_install_names")
   set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS "-bundle -Wl,-headerpad_max_install_names")

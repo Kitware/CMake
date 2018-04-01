@@ -11,6 +11,11 @@
 #
 # It is useful to share the same aforementioned configuration files and
 # avoids duplicating them in case of tightly related platforms.
+#
+# An example are the platforms supported by Xcode (macOS, iOS, tvOS,
+# and watchOS). For all of those the CMAKE_EFFECTIVE_SYSTEM_NAME is
+# set to Apple which results in using
+# Platfom/Apple-AppleClang-CXX.cmake for the Apple C++ compiler.
 set(CMAKE_EFFECTIVE_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}")
 
 include(Platform/${CMAKE_SYSTEM_NAME}-Initialize OPTIONAL)
