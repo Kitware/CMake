@@ -17,9 +17,9 @@ endif()
 if(CMAKE_CUDA_COMPILER_ID)
   # load a hardware specific file, mostly useful for embedded compilers
   if(CMAKE_SYSTEM_PROCESSOR)
-    include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_CUDA_COMPILER_ID}-CUDA-${CMAKE_SYSTEM_PROCESSOR} OPTIONAL)
+    include(Platform/${CMAKE_EFFECTIVE_SYSTEM_NAME}-${CMAKE_CUDA_COMPILER_ID}-CUDA-${CMAKE_SYSTEM_PROCESSOR} OPTIONAL)
   endif()
-  include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_CUDA_COMPILER_ID}-CUDA OPTIONAL)
+  include(Platform/${CMAKE_EFFECTIVE_SYSTEM_NAME}-${CMAKE_CUDA_COMPILER_ID}-CUDA OPTIONAL)
 endif()
 
 
