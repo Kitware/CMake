@@ -8,7 +8,7 @@
 #error EXPECT_C_RESTRICT not defined
 #endif
 
-#if !EXPECT_C_STATIC_ASSERT
+#if !HAVE_C_STATIC_ASSERT
 #if EXPECT_C_STATIC_ASSERT
 #error "Expect c_static_assert feature"
 #endif
@@ -18,11 +18,17 @@
 #endif
 #endif
 
-#if !EXPECT_C_FUNCTION_PROTOTYPES
+#if !HAVE_C_FUNCTION_PROTOTYPES
+#if EXPECT_C_FUNCTION_PROTOTYPES
 #error Expect c_function_prototypes support
 #endif
+#else
+#if !EXPECT_C_FUNCTION_PROTOTYPES
+#error Expect no c_function_prototypes support
+#endif
+#endif
 
-#if !EXPECT_C_RESTRICT
+#if !HAVE_C_RESTRICT
 #if EXPECT_C_RESTRICT
 #error Expect c_restrict support
 #endif

@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
-cmake_policy(SET CMP0057 NEW)
+cmake_minimum_required(VERSION 3.3)
 project(target_compile_features)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -19,7 +18,8 @@ if (c_restrict IN_LIST CMAKE_C_COMPILE_FEATURES)
   target_link_libraries(c_restrict_user_specific c_lib_restrict_specific)
 endif()
 
-if (c_std_99 IN_LIST CMAKE_C_COMPILE_FEATURES)
+if (c_std_99 IN_LIST CMAKE_C_COMPILE_FEATURES AND
+    NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
   add_executable(c_target_compile_features_meta main.c)
   target_compile_features(c_target_compile_features_meta
     PRIVATE c_std_99

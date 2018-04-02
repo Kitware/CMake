@@ -227,43 +227,58 @@ if (C_expected_features)
   if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
       list(APPEND expected_defs
+        EXPECT_C_RESTRICT=1
         EXPECT_C_STATIC_ASSERT=1
       )
     else()
       list(APPEND expected_defs
+        EXPECT_C_RESTRICT=1
         EXPECT_C_STATIC_ASSERT=0
       )
     endif()
   elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang"
       OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
     list(APPEND expected_defs
+      EXPECT_C_RESTRICT=1
       EXPECT_C_STATIC_ASSERT=1
     )
   elseif (CMAKE_C_COMPILER_ID STREQUAL "Intel")
     if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 15)
       list(APPEND expected_defs
+        EXPECT_C_RESTRICT=1
         EXPECT_C_STATIC_ASSERT=1
         )
     else()
       list(APPEND expected_defs
+        EXPECT_C_RESTRICT=1
         EXPECT_C_STATIC_ASSERT=0
         )
     endif()
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    list(APPEND expected_defs
+      EXPECT_C_RESTRICT=0
+      EXPECT_C_STATIC_ASSERT=0
+      )
   elseif (CMAKE_C_COMPILER_ID STREQUAL "SunPro")
     if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.13)
       list(APPEND expected_defs
+        EXPECT_C_RESTRICT=1
         EXPECT_C_STATIC_ASSERT=1
         )
     else()
       list(APPEND expected_defs
+        EXPECT_C_RESTRICT=1
         EXPECT_C_STATIC_ASSERT=0
         )
     endif()
+  else()
+    list(APPEND expected_defs
+      EXPECT_C_RESTRICT=1
+      )
   endif()
 
   list(APPEND expected_defs
     EXPECT_C_FUNCTION_PROTOTYPES=1
-    EXPECT_C_RESTRICT=1
   )
 
   target_compile_definitions(CompileFeaturesGenex_C PRIVATE
