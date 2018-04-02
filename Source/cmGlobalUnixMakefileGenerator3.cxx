@@ -21,7 +21,6 @@
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cmake.h"
 
@@ -421,7 +420,7 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
         std::string tname = lg->GetRelativeTargetDirectory(gtarget);
         tname += "/";
         tname += pass;
-        depends.push_back(tname);
+        depends.push_back(std::move(tname));
       }
     }
   }
@@ -433,7 +432,7 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
     std::string subdir = c.GetDirectory().GetCurrentBinary();
     subdir += "/";
     subdir += pass;
-    depends.push_back(subdir);
+    depends.push_back(std::move(subdir));
   }
 
   // Work-around for makes that drop rules that have no dependencies
@@ -460,10 +459,9 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
   }
 
   // Begin the directory-level rules section.
-  std::string dir = cmSystemTools::ConvertToOutputPath(
-    lg->ConvertToRelativePath(lg->GetBinaryDirectory(),
-                              lg->GetCurrentBinaryDirectory())
-      .c_str());
+  std::string dir =
+    cmSystemTools::ConvertToOutputPath(lg->ConvertToRelativePath(
+      lg->GetBinaryDirectory(), lg->GetCurrentBinaryDirectory()));
   lg->WriteDivider(ruleFileStream);
   ruleFileStream << "# Directory level rules for directory " << dir << "\n\n";
 
@@ -514,7 +512,7 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     tname =
       conv.ConvertToRelativePath(mf->GetState()->GetBinaryDirectory(), tname);
     cmSystemTools::ConvertToOutputSlashes(tname);
-    makeCommand.push_back(tname);
+    makeCommand.push_back(std::move(tname));
     if (this->Makefiles.empty()) {
       delete mf;
     }
@@ -630,8 +628,6 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       makefileName = localName;
       makefileName += "/build.make";
 
-      bool needRequiresStep = this->NeedRequiresStep(gtarget);
-
       lg->WriteDivider(ruleFileStream);
       ruleFileStream << "# Target rules for target " << localName << "\n\n";
 
@@ -641,13 +637,6 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       commands.push_back(
         lg->GetRecursiveMakeCall(makefileName.c_str(), makeTargetName));
 
-      // add requires if we need it for this generator
-      if (needRequiresStep) {
-        makeTargetName = localName;
-        makeTargetName += "/requires";
-        commands.push_back(
-          lg->GetRecursiveMakeCall(makefileName.c_str(), makeTargetName));
-      }
       makeTargetName = localName;
       makeTargetName += "/build";
       commands.push_back(
@@ -951,22 +940,4 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule(
   lg->WriteMakeRule(ruleFileStream, "Help Target", "help", no_depends,
                     commands, true);
   ruleFileStream << "\n\n";
-}
-
-bool cmGlobalUnixMakefileGenerator3::NeedRequiresStep(
-  const cmGeneratorTarget* target)
-{
-  std::set<std::string> languages;
-  target->GetLanguages(
-    languages,
-    target->Target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE"));
-  for (std::string const& l : languages) {
-    std::string var = "CMAKE_NEEDS_REQUIRES_STEP_";
-    var += l;
-    var += "_FLAG";
-    if (target->Target->GetMakefile()->GetDefinition(var)) {
-      return true;
-    }
-  }
-  return false;
 }

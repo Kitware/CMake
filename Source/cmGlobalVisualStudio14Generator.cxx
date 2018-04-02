@@ -257,9 +257,8 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
 
   std::vector<std::string> sdks;
   // Grab the paths of the different SDKs that are installed
-  for (std::vector<std::string>::iterator i = win10Roots.begin();
-       i != win10Roots.end(); ++i) {
-    std::string path = *i + "/Include/*";
+  for (std::string const& i : win10Roots) {
+    std::string path = i + "/Include/*";
     cmSystemTools::GlobDirs(path, sdks);
   }
 
@@ -269,19 +268,17 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
 
   if (!sdks.empty()) {
     // Only use the filename, which will be the SDK version.
-    for (std::vector<std::string>::iterator i = sdks.begin(); i != sdks.end();
-         ++i) {
-      *i = cmSystemTools::GetFilenameName(*i);
+    for (std::string& i : sdks) {
+      i = cmSystemTools::GetFilenameName(i);
     }
 
     // Sort the results to make sure we select the most recent one.
     std::sort(sdks.begin(), sdks.end(), cmSystemTools::VersionCompareGreater);
 
     // Look for a SDK exactly matching the requested target version.
-    for (std::vector<std::string>::iterator i = sdks.begin(); i != sdks.end();
-         ++i) {
-      if (cmSystemTools::VersionCompareEqual(*i, this->SystemVersion)) {
-        return *i;
+    for (std::string const& i : sdks) {
+      if (cmSystemTools::VersionCompareEqual(i, this->SystemVersion)) {
+        return i;
       }
     }
 

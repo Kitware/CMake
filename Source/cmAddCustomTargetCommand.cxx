@@ -3,6 +3,7 @@
 #include "cmAddCustomTargetCommand.h"
 
 #include <sstream>
+#include <utility>
 
 #include "cmCustomCommandLines.h"
 #include "cmGeneratorExpression.h"
@@ -116,7 +117,7 @@ bool cmAddCustomTargetCommand::InitialPass(
           break;
         case doing_byproducts: {
           std::string filename;
-          if (!cmSystemTools::FileIsFullPath(copy.c_str())) {
+          if (!cmSystemTools::FileIsFullPath(copy)) {
             filename = this->Makefile->GetCurrentBinaryDirectory();
             filename += "/";
           }
@@ -127,7 +128,7 @@ bool cmAddCustomTargetCommand::InitialPass(
         case doing_depends: {
           std::string dep = copy;
           cmSystemTools::ConvertToUnixSlashes(dep);
-          depends.push_back(dep);
+          depends.push_back(std::move(dep));
         } break;
         case doing_comment:
           comment_buffer = copy;

@@ -60,6 +60,7 @@ Check if given C source compiles and links into an executable.
 
 #]=======================================================================]
 
+include_guard(GLOBAL)
 
 macro(CHECK_C_SOURCE_COMPILES SOURCE VAR)
   if(NOT DEFINED "${VAR}")

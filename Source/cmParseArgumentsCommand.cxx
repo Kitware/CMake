@@ -71,8 +71,8 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
   typedef std::map<std::string, std::string> single_map;
   typedef std::map<std::string, std::vector<std::string>> multi_map;
   options_map options;
-  single_map single;
-  multi_map multi;
+  single_map singleValArgs;
+  multi_map multiValArgs;
 
   // anything else is put into a vector of unparsed strings
   std::vector<std::string> unparsed;
@@ -98,7 +98,7 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
     if (!used_keywords.insert(iter).second) {
       this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + iter);
     }
-    single[iter]; // default initialize
+    singleValArgs[iter]; // default initialize
   }
 
   // the fourth argument is a (cmake) list of multi argument options
@@ -108,7 +108,7 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
     if (!used_keywords.insert(iter).second) {
       this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + iter);
     }
-    multi[iter]; // default initialize
+    multiValArgs[iter]; // default initialize
   }
 
   enum insideValues
@@ -161,15 +161,15 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
       continue;
     }
 
-    const single_map::iterator singleIter = single.find(arg);
-    if (singleIter != single.end()) {
+    const single_map::iterator singleIter = singleValArgs.find(arg);
+    if (singleIter != singleValArgs.end()) {
       insideValues = SINGLE;
       currentArgName = arg;
       continue;
     }
 
-    const multi_map::iterator multiIter = multi.find(arg);
-    if (multiIter != multi.end()) {
+    const multi_map::iterator multiIter = multiValArgs.find(arg);
+    if (multiIter != multiValArgs.end()) {
       insideValues = MULTI;
       currentArgName = arg;
       continue;
@@ -177,14 +177,14 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
 
     switch (insideValues) {
       case SINGLE:
-        single[currentArgName] = arg;
+        singleValArgs[currentArgName] = arg;
         insideValues = NONE;
         break;
       case MULTI:
         if (parseFromArgV) {
-          multi[currentArgName].push_back(escape_arg(arg));
+          multiValArgs[currentArgName].push_back(escape_arg(arg));
         } else {
-          multi[currentArgName].push_back(arg);
+          multiValArgs[currentArgName].push_back(arg);
         }
         break;
       default:
@@ -204,7 +204,7 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
     this->Makefile->AddDefinition(prefix + iter.first,
                                   iter.second ? "TRUE" : "FALSE");
   }
-  for (auto const& iter : single) {
+  for (auto const& iter : singleValArgs) {
     if (!iter.second.empty()) {
       this->Makefile->AddDefinition(prefix + iter.first, iter.second.c_str());
     } else {
@@ -212,7 +212,7 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
 
-  for (auto const& iter : multi) {
+  for (auto const& iter : multiValArgs) {
     if (!iter.second.empty()) {
       this->Makefile->AddDefinition(
         prefix + iter.first, cmJoin(cmMakeRange(iter.second), ";").c_str());

@@ -1,6 +1,3 @@
-
-enable_language(C)
-
-add_custom_target(empty
+add_custom_target(drive
   COMMAND ${CMAKE_COMMAND} -E echo $<COMPILE_LANGUAGE>
 )

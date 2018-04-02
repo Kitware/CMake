@@ -27,12 +27,16 @@
 #   list of macros to define (-DFOO=bar)
 # ``CMAKE_REQUIRED_INCLUDES``
 #   list of include directories
+# ``CMAKE_REQUIRED_LIBRARIES``
+#   list of libraries to link
 # ``CMAKE_REQUIRED_QUIET``
 #   execute quietly without messages
 #
 # See the :module:`CheckIncludeFiles` module to check for multiple headers
 # at once.  See the :module:`CheckIncludeFileCXX` module to check for headers
 # using the ``CXX`` language.
+
+include_guard(GLOBAL)
 
 macro(CHECK_INCLUDE_FILE INCLUDE VARIABLE)
   if(NOT DEFINED "${VARIABLE}")
@@ -57,6 +61,7 @@ macro(CHECK_INCLUDE_FILE INCLUDE VARIABLE)
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.c
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
+      LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
       CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_INCLUDE_FILE_FLAGS}
       "${CHECK_INCLUDE_FILE_C_INCLUDE_DIRS}"

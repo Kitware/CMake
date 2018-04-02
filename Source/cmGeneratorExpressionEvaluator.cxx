@@ -132,9 +132,8 @@ std::string GeneratorExpressionContent::EvaluateParameters(
     int counter = 1;
     for (; pit != pend; ++pit, ++counter) {
       if (acceptsArbitraryContent && counter == numExpected) {
-        std::string lastParam = this->ProcessArbitraryContent(
-          node, identifier, context, dagChecker, pit);
-        parameters.push_back(lastParam);
+        parameters.push_back(this->ProcessArbitraryContent(
+          node, identifier, context, dagChecker, pit));
         return std::string();
       }
       std::string parameter;
@@ -148,7 +147,7 @@ std::string GeneratorExpressionContent::EvaluateParameters(
           return std::string();
         }
       }
-      parameters.push_back(parameter);
+      parameters.push_back(std::move(parameter));
     }
   }
 

@@ -56,10 +56,13 @@
 #   Specify the :command:`install(PROGRAMS)` command ``COMPONENT``
 #   option.  If not specified, no such option will be used.
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
+
 set(_IRSL_HAVE_Intel FALSE)
 set(_IRSL_HAVE_MSVC FALSE)
 foreach(LANG IN ITEMS C CXX Fortran)
-  if(CMAKE_${LANG}_COMPILER_ID STREQUAL Intel)
+  if("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "Intel")
     if(NOT _IRSL_HAVE_Intel)
       get_filename_component(_Intel_basedir "${CMAKE_${LANG}_COMPILER}" PATH)
       if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -81,7 +84,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
       endif()
       set(_IRSL_HAVE_Intel TRUE)
     endif()
-  elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL MSVC)
+  elseif("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "MSVC")
     set(_IRSL_HAVE_MSVC TRUE)
   endif()
 endforeach()
@@ -600,11 +603,14 @@ if(_IRSL_HAVE_Intel)
     if(_Intel_compiler_ver VERSION_LESS 18)
       list(APPEND __install_dirs "${_Intel_redistdir}/irml" "${_Intel_redistdir}/irml_c")
     endif()
-    foreach(__Intel_lib IN ITEMS cilkrts20.dll libchkp.dll libgfxoffload.dll libioffload_host.dll libirngmd.dll
+    foreach(__Intel_lib IN ITEMS cilkrts20.dll libchkp.dll libioffload_host.dll libirngmd.dll
       libmmd.dll libmmdd.dll libmpx.dll liboffload.dll svml_dispmd.dll)
 
       list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
     endforeach()
+    if(CMAKE_C_COMPILER_ID STREQUAL Intel OR CMAKE_CXX_COMPILER_ID STREQUAL Intel)
+      list(APPEND __install_libs "${_Intel_redistdir}/libgfxoffload.dll")
+    endif()
     if(CMAKE_Fortran_COMPILER_ID STREQUAL Intel)
       foreach(__Intel_lib IN ITEMS ifdlg100.dll libicaf.dll libifcoremd.dll libifcoremdd.dll libifcorert.dll libifcorertd.dll libifportmd.dll)
 
@@ -637,10 +643,10 @@ if(_IRSL_HAVE_Intel)
       endforeach()
     endif()
     if(_Intel_compiler_ver VERSION_GREATER_EQUAL 15)
-      foreach(__Intel_lib IN ITEMS libgfxoffload.so libistrconv.so)
-
-        list(APPEND __install_libs "${_Intel_redistdir}/${__Intel_lib}")
-      endforeach()
+      list(APPEND __install_libs "${_Intel_redistdir}/libistrconv.so")
+      if(CMAKE_C_COMPILER_ID STREQUAL Intel OR CMAKE_CXX_COMPILER_ID STREQUAL Intel)
+        list(APPEND __install_libs "${_Intel_redistdir}/libgfxoffload.so")
+      endif()
     endif()
     if(_Intel_compiler_ver VERSION_GREATER_EQUAL 16)
       foreach(__Intel_lib IN ITEMS libioffload_host.so libioffload_host.so.5 libioffload_target.so libioffload_target.so.5 libmpx.so offload_main)
@@ -743,3 +749,5 @@ if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
       )
   endif()
 endif()
+
+cmake_policy(POP)

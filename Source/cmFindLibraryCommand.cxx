@@ -150,7 +150,7 @@ void cmFindLibraryCommand::AddArchitecturePath(
 
     if (use_dirX) {
       dirX += "/";
-      this->SearchPaths.push_back(dirX);
+      this->SearchPaths.push_back(std::move(dirX));
     }
 
     if (use_dir) {
@@ -323,7 +323,7 @@ void cmFindLibraryHelper::AddName(std::string const& name)
   }
   regex += "$";
   entry.Regex.compile(regex.c_str());
-  this->Names.push_back(entry);
+  this->Names.push_back(std::move(entry));
 }
 
 void cmFindLibraryHelper::SetName(std::string const& name)
@@ -353,7 +353,7 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
   if (name.TryRaw) {
     this->TestPath = path;
     this->TestPath += name.Raw;
-    if (cmSystemTools::FileExists(this->TestPath.c_str(), true)) {
+    if (cmSystemTools::FileExists(this->TestPath, true)) {
       this->BestPath = cmSystemTools::CollapseFullPath(this->TestPath);
       cmSystemTools::ConvertToUnixSlashes(this->BestPath);
       return true;

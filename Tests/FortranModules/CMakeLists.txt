@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.9)
 project(FortranModules Fortran)
 
 if(NOT DEFINED CMake_TEST_NESTED_MAKE_PROGRAM AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
@@ -56,7 +56,8 @@ add_executable(test_non_pp_include test_non_pp_include_main.f90)
 
 # Build the external project separately using a custom target.
 # Make sure it uses the same build configuration as this test.
-if(CMAKE_CONFIGURATION_TYPES)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_isMultiConfig)
   set(External_CONFIG_TYPE -C "${CMAKE_CFG_INTDIR}")
   set(External_BUILD_TYPE)
 else()

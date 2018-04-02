@@ -58,7 +58,7 @@ static char* lowercase(const char* string)
 int main(int ac, char* av[])
 {
   int i, testNum = 0, partial_match;
-  char *arg, *test_name;
+  char *arg;
   int testToRun = -1;
 
   @CMAKE_TESTDRIVER_ARGVC_FUNCTION@
@@ -99,7 +99,7 @@ int main(int ac, char* av[])
     arg = lowercase(av[1 + partial_match]);
   }
   for (i = 0; i < NumTests && testToRun == -1; ++i) {
-    test_name = lowercase(cmakeGeneratedFunctionMapEntries[i].name);
+    char *test_name = lowercase(cmakeGeneratedFunctionMapEntries[i].name);
     if (partial_match != 0 && strstr(test_name, arg) != NULL) { /* NOLINT */
       testToRun = i;
       ac -= 2;

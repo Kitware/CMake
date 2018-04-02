@@ -27,10 +27,17 @@
 #     to link against to use BLAS95 interface
 #   BLAS95_FOUND - set to true if a library implementing the BLAS f95 interface
 #     is found
+#
+# The following variables can be used to control this module:
+#
+# ::
+#
 #   BLA_STATIC  if set on this determines what kind of linkage we do (static)
 #   BLA_VENDOR  if set checks only the specified vendor, if not set checks
 #      all the possibilities
 #   BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
+#   BLA_PREFER_PKGCONFIG  if set pkg-config will be used to search for a BLAS
+#      library first and if one is found that is preferred
 #
 # List of vendors (BLA_VENDOR) valid in this module:
 #
@@ -63,6 +70,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 cmake_push_check_state()
 set(CMAKE_REQUIRED_QUIET ${BLAS_FIND_QUIETLY})
 
@@ -74,6 +82,18 @@ if( NOT (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_C
     message(FATAL_ERROR "FindBLAS requires Fortran, C, or C++ to be enabled.")
   else()
     message(STATUS "Looking for BLAS... - NOT found (Unsupported languages)")
+    return()
+  endif()
+endif()
+
+if(BLA_PREFER_PKGCONFIG)
+  find_package(PkgConfig)
+  pkg_check_modules(PKGC_BLAS IMPORTED_TARGET blas)
+  if(PKGC_BLAS_FOUND)
+    set(BLAS_LIBRARIES PkgConfig::PKGC_BLAS)
+    find_package_handle_standard_args(BLAS
+                                      REQUIRED_VARS BLAS_LIBRARIES
+                                      VERSION_VAR PKGC_BLAS_VERSION)
     return()
   endif()
 endif()
@@ -660,8 +680,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
   foreach (IT ${BLAS_SEARCH_LIBS})
     string(REPLACE " " ";" SEARCH_LIBS ${IT})
-    if (${_LIBRARIES})
-    else ()
+    if (NOT ${_LIBRARIES})
       check_fortran_libraries(
         ${_LIBRARIES}
         BLAS
@@ -676,51 +695,14 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
  endif ()
 endif ()
 
-
 if(BLA_F95)
- if(BLAS95_LIBRARIES)
-    set(BLAS95_FOUND TRUE)
-  else()
-    set(BLAS95_FOUND FALSE)
+  find_package_handle_standard_args(BLAS REQUIRED_VARS BLAS95_LIBRARIES)
+  set(BLAS95_FOUND ${BLAS_FOUND})
+  if(BLAS_FOUND)
+    set(BLAS_LIBRARIES "${BLAS95_LIBRARIES}")
   endif()
-
-  if(NOT BLAS_FIND_QUIETLY)
-    if(BLAS95_FOUND)
-      message(STATUS "A library with BLAS95 API found.")
-    else()
-      if(BLAS_FIND_REQUIRED)
-        message(FATAL_ERROR
-        "A required library with BLAS95 API not found. Please specify library location.")
-      else()
-        message(STATUS
-        "A library with BLAS95 API not found. Please specify library location.")
-      endif()
-    endif()
-  endif()
-  set(BLAS_FOUND TRUE)
-  set(BLAS_LIBRARIES "${BLAS95_LIBRARIES}")
 else()
-  if(BLAS_LIBRARIES)
-    set(BLAS_FOUND TRUE)
-  else()
-    set(BLAS_FOUND FALSE)
-  endif()
-
-  if(NOT BLAS_FIND_QUIETLY)
-    if(BLAS_FOUND)
-      message(STATUS "A library with BLAS API found.")
-    else()
-      if(BLAS_FIND_REQUIRED)
-        message(FATAL_ERROR
-        "A required library with BLAS API not found. Please specify library location."
-        )
-      else()
-        message(STATUS
-        "A library with BLAS API not found. Please specify library location."
-        )
-      endif()
-    endif()
-  endif()
+  find_package_handle_standard_args(BLAS REQUIRED_VARS BLAS_LIBRARIES)
 endif()
 
 cmake_pop_check_state()

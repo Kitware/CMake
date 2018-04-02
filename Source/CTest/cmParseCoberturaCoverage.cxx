@@ -83,7 +83,7 @@ protected:
             // binary directories.
             for (std::string const& filePath : FilePaths) {
               finalpath = filePath + "/" + filename;
-              if (cmSystemTools::FileExists(finalpath.c_str())) {
+              if (cmSystemTools::FileExists(finalpath)) {
                 this->CurFileName = finalpath;
                 break;
               }

@@ -108,7 +108,7 @@ private:
    * It would be tempting to convert a time_point to number of seconds by
    * using time_since_epoch(). Unfortunately the C++11 standard does not
    * specify what the epoch of the system_clock must be.
-   * Therefore we must assume it is an arbitary point in time. Instead of this
+   * Therefore we must assume it is an arbitrary point in time. Instead of this
    * method, it is recommended to convert it by means of the to_time_t method.
    */
   static std::time_t SafeContent(

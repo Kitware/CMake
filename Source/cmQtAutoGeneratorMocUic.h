@@ -8,188 +8,431 @@
 #include "cmFilePathChecksum.h"
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
+#include "cmUVHandlePtr.h"
+#include "cm_uv.h"
 #include "cmsys/RegularExpression.hxx"
 
+#include <algorithm>
+#include <condition_variable>
+#include <cstddef>
+#include <deque>
 #include <map>
 #include <memory> // IWYU pragma: keep
+#include <mutex>
 #include <set>
 #include <string>
+#include <thread>
 #include <vector>
 
 class cmMakefile;
 
+// @brief AUTOMOC and AUTOUIC generator
 class cmQtAutoGeneratorMocUic : public cmQtAutoGenerator
 {
   CM_DISABLE_COPY(cmQtAutoGeneratorMocUic)
 public:
   cmQtAutoGeneratorMocUic();
+  ~cmQtAutoGeneratorMocUic() override;
 
-private:
+public:
   // -- Types
+  class WorkerT;
 
   /// @brief Search key plus regular expression pair
-  struct KeyRegExp
+  ///
+  struct KeyExpT
   {
-    KeyRegExp() = default;
+    KeyExpT() = default;
 
-    KeyRegExp(const char* key, const char* regExp)
+    KeyExpT(const char* key, const char* exp)
       : Key(key)
-      , RegExp(regExp)
+      , Exp(exp)
     {
     }
 
-    KeyRegExp(std::string const& key, std::string const& regExp)
+    KeyExpT(std::string const& key, std::string const& exp)
       : Key(key)
-      , RegExp(regExp)
+      , Exp(exp)
     {
     }
 
     std::string Key;
-    cmsys::RegularExpression RegExp;
+    cmsys::RegularExpression Exp;
   };
 
-  /// @brief Source file job
-  struct SourceJob
+  /// @brief Common settings
+  ///
+  class BaseSettingsT
   {
-    bool Moc = false;
-    bool Uic = false;
+    CM_DISABLE_COPY(BaseSettingsT)
+  public:
+    // -- Volatile methods
+    BaseSettingsT(FileSystem* fileSystem)
+      : MultiConfig(false)
+      , IncludeProjectDirsBefore(false)
+      , QtVersionMajor(4)
+      , NumThreads(1)
+      , FileSys(fileSystem)
+    {
+    }
+
+    // -- Const methods
+    std::string AbsoluteBuildPath(std::string const& relativePath) const;
+    bool FindHeader(std::string& header,
+                    std::string const& testBasePath) const;
+
+    // -- Attributes
+    // - Config
+    bool MultiConfig;
+    bool IncludeProjectDirsBefore;
+    unsigned int QtVersionMajor;
+    unsigned int NumThreads;
+    // - Directories
+    std::string ProjectSourceDir;
+    std::string ProjectBinaryDir;
+    std::string CurrentSourceDir;
+    std::string CurrentBinaryDir;
+    std::string AutogenBuildDir;
+    std::string AutogenIncludeDir;
+    // - Files
+    cmFilePathChecksum FilePathChecksum;
+    std::vector<std::string> HeaderExtensions;
+    // - File system
+    FileSystem* FileSys;
   };
 
-  /// @brief MOC job
-  struct MocJobAuto
+  /// @brief Moc settings
+  ///
+  class MocSettingsT
   {
+    CM_DISABLE_COPY(MocSettingsT)
+  public:
+    MocSettingsT(FileSystem* fileSys)
+      : FileSys(fileSys)
+    {
+    }
+
+    // -- Const methods
+    bool skipped(std::string const& fileName) const;
+    std::string FindMacro(std::string const& content) const;
+    std::string MacrosString() const;
+    std::string FindIncludedFile(std::string const& sourcePath,
+                                 std::string const& includeString) const;
+    void FindDependencies(std::string const& content,
+                          std::set<std::string>& depends) const;
+
+    // -- Attributes
+    bool Enabled = false;
+    bool SettingsChanged = false;
+    bool RelaxedMode = false;
+    std::string Executable;
+    std::string CompFileAbs;
+    std::string PredefsFileRel;
+    std::string PredefsFileAbs;
+    std::set<std::string> SkipList;
+    std::vector<std::string> IncludePaths;
+    std::vector<std::string> Includes;
+    std::vector<std::string> Definitions;
+    std::vector<std::string> Options;
+    std::vector<std::string> AllOptions;
+    std::vector<std::string> PredefsCmd;
+    std::vector<KeyExpT> DependFilters;
+    std::vector<KeyExpT> MacroFilters;
+    cmsys::RegularExpression RegExpInclude;
+    // - File system
+    FileSystem* FileSys;
+  };
+
+  /// @brief Uic settings
+  ///
+  class UicSettingsT
+  {
+    CM_DISABLE_COPY(UicSettingsT)
+  public:
+    UicSettingsT() = default;
+    // -- Const methods
+    bool skipped(std::string const& fileName) const;
+
+    // -- Attributes
+    bool Enabled = false;
+    bool SettingsChanged = false;
+    std::string Executable;
+    std::set<std::string> SkipList;
+    std::vector<std::string> TargetOptions;
+    std::map<std::string, std::vector<std::string>> Options;
+    std::vector<std::string> SearchPaths;
+    cmsys::RegularExpression RegExpInclude;
+  };
+
+  /// @brief Abstract job class for threaded processing
+  ///
+  class JobT
+  {
+    CM_DISABLE_COPY(JobT)
+  public:
+    JobT() = default;
+    virtual ~JobT() = default;
+    // -- Abstract processing interface
+    virtual void Process(WorkerT& wrk) = 0;
+  };
+
+  /// @brief Deleter for classes derived from Job
+  ///
+  struct JobDeleterT
+  {
+    void operator()(JobT* job);
+  };
+
+  // Job management types
+  typedef std::unique_ptr<JobT, JobDeleterT> JobHandleT;
+  typedef std::deque<JobHandleT> JobQueueT;
+
+  /// @brief Parse source job
+  ///
+  class JobParseT : public JobT
+  {
+  public:
+    JobParseT(std::string&& fileName, bool moc, bool uic, bool header = false)
+      : FileName(std::move(fileName))
+      , AutoMoc(moc)
+      , AutoUic(uic)
+      , Header(header)
+    {
+    }
+
+  private:
+    struct MetaT
+    {
+      std::string Content;
+      std::string FileDir;
+      std::string FileBase;
+    };
+
+    void Process(WorkerT& wrk) override;
+    bool ParseMocSource(WorkerT& wrk, MetaT const& meta);
+    bool ParseMocHeader(WorkerT& wrk, MetaT const& meta);
+    std::string MocStringHeaders(WorkerT& wrk,
+                                 std::string const& fileBase) const;
+    std::string MocFindIncludedHeader(WorkerT& wrk,
+                                      std::string const& includerDir,
+                                      std::string const& includeBase);
+    bool ParseUic(WorkerT& wrk, MetaT const& meta);
+    bool ParseUicInclude(WorkerT& wrk, MetaT const& meta,
+                         std::string&& includeString);
+    std::string UicFindIncludedFile(WorkerT& wrk, MetaT const& meta,
+                                    std::string const& includeString);
+
+  private:
+    std::string FileName;
+    bool AutoMoc = false;
+    bool AutoUic = false;
+    bool Header = false;
+  };
+
+  /// @brief Generate moc_predefs
+  ///
+  class JobMocPredefsT : public JobT
+  {
+  private:
+    void Process(WorkerT& wrk) override;
+  };
+
+  /// @brief Moc a file job
+  ///
+  class JobMocT : public JobT
+  {
+  public:
+    JobMocT(std::string&& sourceFile, std::string const& includerFile,
+            std::string&& includeString)
+      : SourceFile(std::move(sourceFile))
+      , IncluderFile(includerFile)
+      , IncludeString(std::move(includeString))
+    {
+    }
+
+    void FindDependencies(WorkerT& wrk, std::string const& content);
+
+  private:
+    void Process(WorkerT& wrk) override;
+    bool UpdateRequired(WorkerT& wrk);
+    void GenerateMoc(WorkerT& wrk);
+
+  public:
     std::string SourceFile;
-    std::string BuildFileRel;
+    std::string IncluderFile;
+    std::string IncludeString;
+    std::string BuildFile;
+    bool DependsValid = false;
     std::set<std::string> Depends;
   };
 
-  /// @brief MOC job
-  struct MocJobIncluded : MocJobAuto
+  /// @brief Uic a file job
+  ///
+  class JobUicT : public JobT
   {
-    bool DependsValid = false;
-    std::string Includer;
-    std::string IncludeString;
-  };
+  public:
+    JobUicT(std::string&& sourceFile, std::string const& includerFile,
+            std::string&& includeString)
+      : SourceFile(std::move(sourceFile))
+      , IncluderFile(includerFile)
+      , IncludeString(std::move(includeString))
+    {
+    }
 
-  /// @brief UIC job
-  struct UicJob
-  {
+  private:
+    void Process(WorkerT& wrk) override;
+    bool UpdateRequired(WorkerT& wrk);
+    void GenerateUic(WorkerT& wrk);
+
+  public:
     std::string SourceFile;
-    std::string BuildFileRel;
-    std::string Includer;
+    std::string IncluderFile;
     std::string IncludeString;
+    std::string BuildFile;
   };
 
-  // -- Initialization
-  bool InitInfoFile(cmMakefile* makefile);
-
-  // -- Settings file
-  void SettingsFileRead(cmMakefile* makefile);
-  bool SettingsFileWrite();
-  bool SettingsChanged() const
+  /// @brief Worker Thread
+  ///
+  class WorkerT
   {
-    return (this->MocSettingsChanged || this->UicSettingsChanged);
-  }
+    CM_DISABLE_COPY(WorkerT)
+  public:
+    WorkerT(cmQtAutoGeneratorMocUic* gen, uv_loop_t* uvLoop);
+    ~WorkerT();
 
-  // -- Central processing
-  bool Process(cmMakefile* makefile) override;
+    // -- Const accessors
+    cmQtAutoGeneratorMocUic& Gen() const { return *Gen_; }
+    Logger& Log() const { return Gen_->Log(); }
+    FileSystem& FileSys() const { return Gen_->FileSys(); }
+    const BaseSettingsT& Base() const { return Gen_->Base(); }
+    const MocSettingsT& Moc() const { return Gen_->Moc(); }
+    const UicSettingsT& Uic() const { return Gen_->Uic(); }
 
-  // -- Source parsing
-  bool ParseSourceFile(std::string const& absFilename, const SourceJob& job);
-  bool ParseHeaderFile(std::string const& absFilename, const SourceJob& job);
-  bool ParsePostprocess();
+    // -- Log info
+    void LogInfo(GeneratorT genType, std::string const& message) const;
+    // -- Log warning
+    void LogWarning(GeneratorT genType, std::string const& message) const;
+    void LogFileWarning(GeneratorT genType, std::string const& filename,
+                        std::string const& message) const;
+    // -- Log error
+    void LogError(GeneratorT genType, std::string const& message) const;
+    void LogFileError(GeneratorT genType, std::string const& filename,
+                      std::string const& message) const;
+    void LogCommandError(GeneratorT genType, std::string const& message,
+                         std::vector<std::string> const& command,
+                         std::string const& output) const;
 
-  // -- Moc
-  bool MocEnabled() const { return !this->MocExecutable.empty(); }
-  bool MocSkip(std::string const& absFilename) const;
-  bool MocRequired(std::string const& contentText,
-                   std::string* macroName = nullptr);
-  // Moc strings
-  std::string MocStringMacros() const;
-  std::string MocStringHeaders(std::string const& fileBase) const;
-  std::string MocFindIncludedHeader(std::string const& sourcePath,
-                                    std::string const& includeBase) const;
-  bool MocFindIncludedFile(std::string& absFile, std::string const& sourceFile,
-                           std::string const& includeString) const;
-  // Moc depends
-  bool MocDependFilterPush(std::string const& key, std::string const& regExp);
-  void MocFindDepends(std::string const& absFilename,
-                      std::string const& contentText,
-                      std::set<std::string>& depends);
-  // Moc
-  bool MocParseSourceContent(std::string const& absFilename,
-                             std::string const& contentText);
-  void MocParseHeaderContent(std::string const& absFilename,
-                             std::string const& contentText);
+    // -- External processes
+    /// @brief Verbose logging version
+    bool RunProcess(GeneratorT genType, ProcessResultT& result,
+                    std::vector<std::string> const& command);
 
-  bool MocGenerateAll();
-  bool MocGenerateFile(const MocJobAuto& mocJob, bool* generated = nullptr);
+  private:
+    /// @brief Thread main loop
+    void Loop();
 
-  // -- Uic
-  bool UicEnabled() const { return !this->UicExecutable.empty(); }
-  bool UicSkip(std::string const& absFilename) const;
-  bool UicParseContent(std::string const& fileName,
-                       std::string const& contentText);
-  bool UicFindIncludedFile(std::string& absFile, std::string const& sourceFile,
-                           std::string const& includeString);
-  bool UicGenerateAll();
-  bool UicGenerateFile(const UicJob& uicJob);
+    // -- Libuv callbacks
+    static void UVProcessStart(uv_async_t* handle);
+    void UVProcessFinished();
 
-  // -- Utility
-  bool FindHeader(std::string& header, std::string const& testBasePath) const;
+  private:
+    // -- Generator
+    cmQtAutoGeneratorMocUic* Gen_;
+    // -- Job handle
+    JobHandleT JobHandle_;
+    // -- Process management
+    std::mutex ProcessMutex_;
+    cm::uv_async_ptr ProcessRequest_;
+    std::condition_variable ProcessCondition_;
+    std::unique_ptr<ReadOnlyProcessT> Process_;
+    // -- System thread
+    std::thread Thread_;
+  };
 
-  // -- Meta
-  std::string ConfigSuffix;
-  cmQtAutoGen::MultiConfig MultiConfig;
+  /// @brief Processing stage
+  enum class StageT
+  {
+    SETTINGS_READ,
+    CREATE_DIRECTORIES,
+    PARSE_SOURCES,
+    PARSE_HEADERS,
+    MOC_PREDEFS,
+    MOC_PROCESS,
+    MOCS_COMPILATION,
+    UIC_PROCESS,
+    SETTINGS_WRITE,
+    FINISH,
+    END
+  };
+
+  // -- Const settings interface
+  const BaseSettingsT& Base() const { return this->Base_; }
+  const MocSettingsT& Moc() const { return this->Moc_; }
+  const UicSettingsT& Uic() const { return this->Uic_; }
+
+  // -- Worker thread interface
+  void WorkerSwapJob(JobHandleT& jobHandle);
+  // -- Parallel job processing interface
+  void ParallelRegisterJobError();
+  bool ParallelJobPushMoc(JobHandleT& jobHandle);
+  bool ParallelJobPushUic(JobHandleT& jobHandle);
+  bool ParallelMocIncluded(std::string const& sourceFile);
+  void ParallelMocAutoRegister(std::string const& mocFile);
+  void ParallelMocAutoUpdated();
+
+private:
+  // -- Abstract processing interface
+  bool Init(cmMakefile* makefile) override;
+  bool Process() override;
+  // -- Process stage
+  static void UVPollStage(uv_async_t* handle);
+  void PollStage();
+  void SetStage(StageT stage);
+  // -- Settings file
+  void SettingsFileRead();
+  void SettingsFileWrite();
+  // -- Thread processing
+  bool ThreadsStartJobs(JobQueueT& queue);
+  bool ThreadsJobsDone();
+  void ThreadsStop();
+  void RegisterJobError();
+  // -- Generation
+  void CreateDirectories();
+  void MocGenerateCompilation();
+
+private:
   // -- Settings
-  bool IncludeProjectDirsBefore;
-  std::string SettingsFile;
-  std::string SettingsStringMoc;
-  std::string SettingsStringUic;
-  // -- Directories
-  std::string ProjectSourceDir;
-  std::string ProjectBinaryDir;
-  std::string CurrentSourceDir;
-  std::string CurrentBinaryDir;
-  std::string AutogenBuildDir;
-  std::string AutogenIncludeDir;
-  // -- Qt environment
-  unsigned long QtVersionMajor;
-  std::string MocExecutable;
-  std::string UicExecutable;
-  // -- File lists
-  std::map<std::string, SourceJob> HeaderJobs;
-  std::map<std::string, SourceJob> SourceJobs;
-  std::vector<std::string> HeaderExtensions;
-  cmFilePathChecksum FilePathChecksum;
-  // -- Moc
-  bool MocSettingsChanged;
-  bool MocPredefsChanged;
-  bool MocRelaxedMode;
-  std::string MocCompFileRel;
-  std::string MocCompFileAbs;
-  std::string MocPredefsFileRel;
-  std::string MocPredefsFileAbs;
-  std::vector<std::string> MocSkipList;
-  std::vector<std::string> MocIncludePaths;
-  std::vector<std::string> MocIncludes;
-  std::vector<std::string> MocDefinitions;
-  std::vector<std::string> MocOptions;
-  std::vector<std::string> MocAllOptions;
-  std::vector<std::string> MocPredefsCmd;
-  std::vector<KeyRegExp> MocDependFilters;
-  std::vector<KeyRegExp> MocMacroFilters;
-  cmsys::RegularExpression MocRegExpInclude;
-  std::vector<std::unique_ptr<MocJobIncluded>> MocJobsIncluded;
-  std::vector<std::unique_ptr<MocJobAuto>> MocJobsAuto;
-  // -- Uic
-  bool UicSettingsChanged;
-  std::vector<std::string> UicSkipList;
-  std::vector<std::string> UicTargetOptions;
-  std::map<std::string, std::vector<std::string>> UicOptions;
-  std::vector<std::string> UicSearchPaths;
-  cmsys::RegularExpression UicRegExpInclude;
-  std::vector<std::unique_ptr<UicJob>> UicJobs;
+  BaseSettingsT Base_;
+  MocSettingsT Moc_;
+  UicSettingsT Uic_;
+  // -- Progress
+  StageT Stage_;
+  // -- Job queues
+  std::mutex JobsMutex_;
+  struct
+  {
+    JobQueueT Sources;
+    JobQueueT Headers;
+    JobQueueT MocPredefs;
+    JobQueueT Moc;
+    JobQueueT Uic;
+  } JobQueues_;
+  JobQueueT JobQueue_;
+  std::size_t volatile JobsRemain_;
+  bool volatile JobError_;
+  bool volatile JobThreadsAbort_;
+  std::condition_variable JobsConditionRead_;
+  // -- Moc meta
+  std::set<std::string> MocIncludedStrings_;
+  std::set<std::string> MocIncludedFiles_;
+  std::set<std::string> MocAutoFiles_;
+  bool volatile MocAutoFileUpdated_;
+  // -- Settings file
+  std::string SettingsFile_;
+  std::string SettingsStringMoc_;
+  std::string SettingsStringUic_;
+  // -- Threads and loops
+  std::vector<std::unique_ptr<WorkerT>> Workers_;
 };
 
 #endif

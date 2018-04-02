@@ -32,7 +32,9 @@ target_link_libraries(consumer upstream config_specific)
 target_compile_options(consumer PRIVATE -Werror=unused-variable)
 
 add_library(iface IMPORTED INTERFACE)
-set_property(TARGET iface PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/systemlib_header_only")
+set_property(TARGET iface PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+  "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/systemlib_header_only>"
+  )
 
 add_library(imported_consumer imported_consumer.cpp)
 target_link_libraries(imported_consumer iface)

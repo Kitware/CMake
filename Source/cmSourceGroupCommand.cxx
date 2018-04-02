@@ -2,19 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceGroupCommand.h"
 
+#include <algorithm>
 #include <set>
-#include <sstream>
 #include <stddef.h>
+#include <utility>
 
 #include "cmMakefile.h"
 #include "cmSourceGroup.h"
 #include "cmSystemTools.h"
 
 namespace {
-const size_t RootIndex = 1;
-const size_t FilesWithoutPrefixKeywordIndex = 2;
-const size_t FilesWithPrefixKeywordIndex = 4;
-const size_t PrefixKeywordIndex = 2;
+const std::string kTreeOptionName = "TREE";
+const std::string kPrefixOptionName = "PREFIX";
+const std::string kFilesOptionName = "FILES";
+const std::string kRegexOptionName = "REGULAR_EXPRESSION";
+const std::string kSourceGroupOptionName = "<sg_name>";
 
 std::vector<std::string> tokenizePath(const std::string& path)
 {
@@ -26,7 +28,7 @@ std::string getFullFilePath(const std::string& currentPath,
 {
   std::string fullPath = path;
 
-  if (!cmSystemTools::FileIsFullPath(path.c_str())) {
+  if (!cmSystemTools::FileIsFullPath(path)) {
     fullPath = currentPath;
     fullPath += "/";
     fullPath += path;
@@ -71,14 +73,13 @@ std::string prepareFilePathForTree(const std::string& path,
 }
 
 std::vector<std::string> prepareFilesPathsForTree(
-  std::vector<std::string>::const_iterator begin,
-  std::vector<std::string>::const_iterator end,
+  const std::vector<std::string>& filesPaths,
   const std::string& currentSourceDir)
 {
   std::vector<std::string> prepared;
 
-  for (; begin != end; ++begin) {
-    prepared.push_back(prepareFilePathForTree(*begin, currentSourceDir));
+  for (auto const& filePath : filesPaths) {
+    prepared.push_back(prepareFilePathForTree(filePath, currentSourceDir));
   }
 
   return prepared;
@@ -121,6 +122,57 @@ bool addFilesToItsSourceGroups(const std::string& root,
 class cmExecutionStatus;
 
 // cmSourceGroupCommand
+cmSourceGroupCommand::ExpectedOptions
+cmSourceGroupCommand::getExpectedOptions() const
+{
+  ExpectedOptions options;
+
+  options.push_back(kTreeOptionName);
+  options.push_back(kPrefixOptionName);
+  options.push_back(kFilesOptionName);
+  options.push_back(kRegexOptionName);
+
+  return options;
+}
+
+bool cmSourceGroupCommand::isExpectedOption(
+  const std::string& argument, const ExpectedOptions& expectedOptions)
+{
+  return std::find(expectedOptions.begin(), expectedOptions.end(), argument) !=
+    expectedOptions.end();
+}
+
+void cmSourceGroupCommand::parseArguments(
+  const std::vector<std::string>& args,
+  cmSourceGroupCommand::ParsedArguments& parsedArguments)
+{
+  const ExpectedOptions expectedOptions = getExpectedOptions();
+  size_t i = 0;
+
+  // at this point we know that args vector is not empty
+
+  // if first argument is not one of expected options it's source group name
+  if (!isExpectedOption(args[0], expectedOptions)) {
+    // get source group name and go to next argument
+    parsedArguments[kSourceGroupOptionName].push_back(args[0]);
+    ++i;
+  }
+
+  for (; i < args.size();) {
+    // get current option and increment index to go to next argument
+    const std::string& currentOption = args[i++];
+
+    // create current option entry in parsed arguments
+    std::vector<std::string>& currentOptionArguments =
+      parsedArguments[currentOption];
+
+    // collect option arguments while we won't find another expected option
+    while (i < args.size() && !isExpectedOption(args[i], expectedOptions)) {
+      currentOptionArguments.push_back(args[i++]);
+    }
+  }
+}
+
 bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus&)
 {
@@ -129,114 +181,98 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
-  if (args[0] == "TREE") {
-    std::string error;
-
-    if (!processTree(args, error)) {
-      this->SetError(error);
-      return false;
-    }
-
-    return true;
-  }
-
-  cmSourceGroup* sg = this->Makefile->GetOrCreateSourceGroup(args[0]);
-
-  if (!sg) {
-    this->SetError("Could not create or find source group");
-    return false;
-  }
   // If only two arguments are given, the pre-1.8 version of the
   // command is being invoked.
   if (args.size() == 2 && args[1] != "FILES") {
+    cmSourceGroup* sg = this->Makefile->GetOrCreateSourceGroup(args[0]);
+
+    if (!sg) {
+      this->SetError("Could not create or find source group");
+      return false;
+    }
+
     sg->SetGroupRegex(args[1].c_str());
     return true;
   }
 
-  // Process arguments.
-  bool doingFiles = false;
-  for (unsigned int i = 1; i < args.size(); ++i) {
-    if (args[i] == "REGULAR_EXPRESSION") {
-      // Next argument must specify the regex.
-      if (i + 1 < args.size()) {
-        ++i;
-        sg->SetGroupRegex(args[i].c_str());
-      } else {
-        this->SetError("REGULAR_EXPRESSION argument given without a regex.");
-        return false;
-      }
-      doingFiles = false;
-    } else if (args[i] == "FILES") {
-      // Next arguments will specify files.
-      doingFiles = true;
-    } else if (doingFiles) {
-      // Convert name to full path and add to the group's list.
-      std::string src = args[i];
-      if (!cmSystemTools::FileIsFullPath(src.c_str())) {
+  ParsedArguments parsedArguments;
+  std::string errorMsg;
+
+  parseArguments(args, parsedArguments);
+
+  if (!checkArgumentsPreconditions(parsedArguments, errorMsg)) {
+    return false;
+  }
+
+  if (parsedArguments.find(kTreeOptionName) != parsedArguments.end()) {
+    if (!processTree(parsedArguments, errorMsg)) {
+      this->SetError(errorMsg);
+      return false;
+    }
+  } else {
+    if (parsedArguments.find(kSourceGroupOptionName) ==
+        parsedArguments.end()) {
+      this->SetError("Missing source group name.");
+      return false;
+    }
+
+    cmSourceGroup* sg = this->Makefile->GetOrCreateSourceGroup(args[0]);
+
+    if (!sg) {
+      this->SetError("Could not create or find source group");
+      return false;
+    }
+
+    // handle regex
+    if (parsedArguments.find(kRegexOptionName) != parsedArguments.end()) {
+      const std::string& sgRegex = parsedArguments[kRegexOptionName].front();
+      sg->SetGroupRegex(sgRegex.c_str());
+    }
+
+    // handle files
+    const std::vector<std::string>& filesArguments =
+      parsedArguments[kFilesOptionName];
+    for (auto const& filesArg : filesArguments) {
+      std::string src = filesArg;
+      if (!cmSystemTools::FileIsFullPath(src)) {
         src = this->Makefile->GetCurrentSourceDirectory();
         src += "/";
-        src += args[i];
+        src += filesArg;
       }
       src = cmSystemTools::CollapseFullPath(src);
       sg->AddGroupFile(src);
-    } else {
-      std::ostringstream err;
-      err << "Unknown argument \"" << args[i] << "\".  "
-          << "Perhaps the FILES keyword is missing.\n";
-      this->SetError(err.str());
-      return false;
     }
   }
 
   return true;
 }
 
-bool cmSourceGroupCommand::checkTreeArgumentsPreconditions(
-  const std::vector<std::string>& args, std::string& errorMsg) const
+bool cmSourceGroupCommand::checkArgumentsPreconditions(
+  const ParsedArguments& parsedArguments, std::string& errorMsg) const
 {
-  if (args.size() == 1) {
-    errorMsg = "TREE argument given without a root.";
-    return false;
-  }
-
-  if (args.size() < 3) {
-    errorMsg = "Missing FILES arguments.";
-    return false;
-  }
-
-  if (args[FilesWithoutPrefixKeywordIndex] != "FILES" &&
-      args[PrefixKeywordIndex] != "PREFIX") {
-    errorMsg = "Unknown argument \"" + args[2] +
-      "\". Perhaps the FILES keyword is missing.\n";
-    return false;
-  }
-
-  if (args[PrefixKeywordIndex] == "PREFIX" &&
-      (args.size() < 5 || args[FilesWithPrefixKeywordIndex] != "FILES")) {
-    errorMsg = "Missing FILES arguments.";
+  if (!checkSingleParameterArgumentPreconditions(kPrefixOptionName,
+                                                 parsedArguments, errorMsg) ||
+      !checkSingleParameterArgumentPreconditions(kTreeOptionName,
+                                                 parsedArguments, errorMsg) ||
+      !checkSingleParameterArgumentPreconditions(kRegexOptionName,
+                                                 parsedArguments, errorMsg)) {
     return false;
   }
 
   return true;
 }
 
-bool cmSourceGroupCommand::processTree(const std::vector<std::string>& args,
+bool cmSourceGroupCommand::processTree(ParsedArguments& parsedArguments,
                                        std::string& errorMsg)
 {
-  if (!checkTreeArgumentsPreconditions(args, errorMsg)) {
-    return false;
-  }
-
-  const std::string root = cmSystemTools::CollapseFullPath(args[RootIndex]);
-  std::string prefix;
-  size_t filesBegin = FilesWithoutPrefixKeywordIndex + 1;
-  if (args[PrefixKeywordIndex] == "PREFIX") {
-    prefix = args[PrefixKeywordIndex + 1];
-    filesBegin = FilesWithPrefixKeywordIndex + 1;
-  }
+  const std::string root =
+    cmSystemTools::CollapseFullPath(parsedArguments[kTreeOptionName].front());
+  std::string prefix = parsedArguments[kPrefixOptionName].empty()
+    ? ""
+    : parsedArguments[kPrefixOptionName].front();
 
   const std::vector<std::string> filesVector =
-    prepareFilesPathsForTree(args.begin() + filesBegin, args.end(),
+    prepareFilesPathsForTree(parsedArguments[kFilesOptionName],
                              this->Makefile->GetCurrentSourceDirectory());
 
   if (!rootIsPrefix(root, filesVector, errorMsg)) {
@@ -249,6 +285,28 @@ bool cmSourceGroupCommand::processTree(const std::vector<std::string>& args,
   if (!addFilesToItsSourceGroups(root, sourceGroupPaths, prefix,
                                  *(this->Makefile), errorMsg)) {
     return false;
+  }
+
+  return true;
+}
+
+bool cmSourceGroupCommand::checkSingleParameterArgumentPreconditions(
+  const std::string& argument, const ParsedArguments& parsedArguments,
+  std::string& errorMsg) const
+{
+  ParsedArguments::const_iterator foundArgument =
+    parsedArguments.find(argument);
+  if (foundArgument != parsedArguments.end()) {
+    const std::vector<std::string>& optionArguments = foundArgument->second;
+
+    if (optionArguments.empty()) {
+      errorMsg = argument + " argument given without an argument.";
+      return false;
+    }
+    if (optionArguments.size() > 1) {
+      errorMsg = "too many arguments passed to " + argument + ".";
+      return false;
+    }
   }
 
   return true;

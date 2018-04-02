@@ -831,12 +831,11 @@ Imported Targets
 
 An :prop_tgt:`IMPORTED` target represents a pre-existing dependency.  Usually
 such targets are defined by an upstream package and should be treated as
-immutable.  It is not possible to use an :prop_tgt:`IMPORTED` target in the
-left-hand-side of the :command:`target_compile_definitions`,
-:command:`target_include_directories`, :command:`target_compile_options` or
-:command:`target_link_libraries` commands, as that would be an attempt to
-modify it.  :prop_tgt:`IMPORTED` targets are designed to be used only in the
-right-hand-side of those commands.
+immutable. After declaring an :prop_tgt:`IMPORTED` target one can adjust its
+target properties by using the customary commands such as
+:command:`target_compile_definitions`, :command:`target_include_directories`,
+:command:`target_compile_options` or :command:`target_link_libraries` just like
+with any other regular target.
 
 :prop_tgt:`IMPORTED` targets may have the same usage requirement properties
 populated as binary targets, such as

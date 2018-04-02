@@ -36,6 +36,16 @@ public:
   }
 
   /**
+   * Put underlying cmake scripts in trace mode.
+   */
+  void SetTrace(bool val) { this->Trace = val; }
+
+  /**
+   * Put underlying cmake scripts in expanded trace mode.
+   */
+  void SetTraceExpand(bool val) { this->TraceExpand = val; }
+
+  /**
    * Returns true if the generator may work on this system.
    * Rational:
    * Some CPack generator may run on some host and may not on others
@@ -295,6 +305,8 @@ protected:
   ComponentPackageMethod componentPackageMethod;
 
   cmCPackLog* Logger;
+  bool Trace;
+  bool TraceExpand;
 
 private:
   cmMakefile* MakefileMap;

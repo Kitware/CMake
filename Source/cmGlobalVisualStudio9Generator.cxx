@@ -68,10 +68,8 @@ public:
     parser.ParseVersion("9.0");
     const std::vector<std::string>& availablePlatforms =
       parser.GetAvailablePlatforms();
-    for (std::vector<std::string>::const_iterator i =
-           availablePlatforms.begin();
-         i != availablePlatforms.end(); ++i) {
-      names.push_back("Visual Studio 9 2008 " + *i);
+    for (std::string const& i : availablePlatforms) {
+      names.push_back("Visual Studio 9 2008 " + i);
     }
   }
 

@@ -137,6 +137,7 @@ int main(int argc, char const* const* argv)
 
   cmSystemTools::DoNotInheritStdPipes();
   cmSystemTools::EnableMSVCDebugHook();
+  cmSystemTools::InitializeLibUV();
   cmSystemTools::FindCMakeResources(argv[0]);
 
   // Dispatch 'ctest --launch' mode directly.

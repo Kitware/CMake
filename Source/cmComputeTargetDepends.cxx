@@ -201,7 +201,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     std::vector<std::string> configs;
     depender->Makefile->GetConfigurations(configs);
     if (configs.empty()) {
-      configs.push_back("");
+      configs.emplace_back();
     }
     for (std::string const& it : configs) {
       std::vector<cmSourceFile const*> objectFiles;

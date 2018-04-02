@@ -9,6 +9,7 @@
 #include "assert.h"
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpressionContext.h"
+#include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
 #include "cmGeneratorExpressionParser.h"
@@ -202,7 +203,7 @@ static void prefixItems(const std::string& content, std::string& result,
   for (std::string const& e : entries) {
     result += sep;
     sep = ";";
-    if (!cmSystemTools::FileIsFullPath(e.c_str()) &&
+    if (!cmSystemTools::FileIsFullPath(e) &&
         cmGeneratorExpression::Find(e) != 0) {
       result += prefix;
     }
@@ -384,4 +385,19 @@ void cmCompiledGeneratorExpression::GetMaxLanguageStandard(
   if (it != this->MaxLanguageStandard.end()) {
     mapping = it->second;
   }
+}
+
+const char* cmGeneratorExpressionInterpreter::Evaluate(
+  const char* expression, const std::string& property)
+{
+  if (this->Target.empty()) {
+    return this->EvaluateExpression(expression);
+  }
+
+  // Specify COMPILE_OPTIONS to DAGchecker, same semantic as COMPILE_FLAGS
+  cmGeneratorExpressionDAGChecker dagChecker(
+    this->Target, property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property,
+    nullptr, nullptr);
+
+  return this->EvaluateExpression(expression, &dagChecker);
 }

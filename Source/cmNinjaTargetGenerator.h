@@ -82,6 +82,9 @@ protected:
   std::string ComputeDefines(cmSourceFile const* source,
                              const std::string& language);
 
+  std::string ComputeIncludes(cmSourceFile const* source,
+                              const std::string& language);
+
   std::string ConvertToNinjaPath(const std::string& path) const
   {
     return this->GetGlobalGenerator()->ConvertToNinjaPath(path);

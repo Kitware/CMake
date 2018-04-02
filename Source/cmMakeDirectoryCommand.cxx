@@ -15,13 +15,13 @@ bool cmMakeDirectoryCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError("called with incorrect number of arguments");
     return false;
   }
-  if (!this->Makefile->CanIWriteThisFile(args[0].c_str())) {
+  if (!this->Makefile->CanIWriteThisFile(args[0])) {
     std::string e = "attempted to create a directory: " + args[0] +
       " into a source directory.";
     this->SetError(e);
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
-  cmSystemTools::MakeDirectory(args[0].c_str());
+  cmSystemTools::MakeDirectory(args[0]);
   return true;
 }

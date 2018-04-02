@@ -23,6 +23,7 @@
 #include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
+#include "cmSourceFileLocationKind.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
@@ -239,12 +240,14 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("COMPILE_PDB_OUTPUT_DIRECTORY", nullptr);
     this->SetPropertyDefault("Fortran_FORMAT", nullptr);
     this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", nullptr);
+    this->SetPropertyDefault("Fortran_COMPILER_LAUNCHER", nullptr);
     this->SetPropertyDefault("GNUtoMS", nullptr);
     this->SetPropertyDefault("OSX_ARCHITECTURES", nullptr);
     this->SetPropertyDefault("IOS_INSTALL_COMBINED", nullptr);
     this->SetPropertyDefault("AUTOMOC", nullptr);
     this->SetPropertyDefault("AUTOUIC", nullptr);
     this->SetPropertyDefault("AUTORCC", nullptr);
+    this->SetPropertyDefault("AUTOGEN_PARALLEL", nullptr);
     this->SetPropertyDefault("AUTOMOC_COMPILER_PREDEFINES", nullptr);
     this->SetPropertyDefault("AUTOMOC_DEPEND_FILTERS", nullptr);
     this->SetPropertyDefault("AUTOMOC_MACRO_NAMES", nullptr);
@@ -497,7 +500,7 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
   }
   if (!srcFiles.empty()) {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    this->Internal->SourceEntries.push_back(srcFiles);
+    this->Internal->SourceEntries.push_back(std::move(srcFiles));
     this->Internal->SourceBacktraces.push_back(lfbt);
   }
 }
@@ -605,7 +608,8 @@ public:
 
 cmSourceFile* cmTarget::AddSource(const std::string& src)
 {
-  cmSourceFileLocation sfl(this->Makefile, src);
+  cmSourceFileLocation sfl(this->Makefile, src,
+                           cmSourceFileLocationKind::Known);
   if (std::find_if(this->Internal->SourceEntries.begin(),
                    this->Internal->SourceEntries.end(),
                    TargetPropertyEntryFinder(sfl)) ==
@@ -617,7 +621,8 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
   if (cmGeneratorExpression::Find(src) != std::string::npos) {
     return nullptr;
   }
-  return this->Makefile->GetOrCreateSource(src);
+  return this->Makefile->GetOrCreateSource(src, false,
+                                           cmSourceFileLocationKind::Known);
 }
 
 void cmTarget::AddLinkDirectory(const std::string& d)
@@ -744,10 +749,12 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
     return;
   }
 
-  cmTarget::LibraryID tmp;
-  tmp.first = lib;
-  tmp.second = llt;
-  this->OriginalLinkLibraries.push_back(tmp);
+  {
+    cmTarget::LibraryID tmp;
+    tmp.first = lib;
+    tmp.second = llt;
+    this->OriginalLinkLibraries.emplace_back(lib, llt);
+  }
 
   // Add the explicit dependency information for this target. This is
   // simply a set of libraries separated by ";". There should always
@@ -856,39 +863,53 @@ void cmTarget::SetProperty(const std::string& prop, const char* value, const cmL
         this->Makefile->GetBacktrace())) {
     return;
   }
-  if (prop == "MANUALLY_ADDED_DEPENDENCIES") {
+#define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
+  MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
+  MAKE_STATIC_PROP(COMPILE_FEATURES);
+  MAKE_STATIC_PROP(COMPILE_OPTIONS);
+  MAKE_STATIC_PROP(CUDA_PTX_COMPILATION);
+  MAKE_STATIC_PROP(EXPORT_NAME);
+  MAKE_STATIC_PROP(IMPORTED_GLOBAL);
+  MAKE_STATIC_PROP(INCLUDE_DIRECTORIES);
+  MAKE_STATIC_PROP(LINK_LIBRARIES);
+  MAKE_STATIC_PROP(MANUALLY_ADDED_DEPENDENCIES);
+  MAKE_STATIC_PROP(NAME);
+  MAKE_STATIC_PROP(SOURCES);
+  MAKE_STATIC_PROP(TYPE);
+#undef MAKE_STATIC_PROP
+  if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
     std::ostringstream e;
     e << "MANUALLY_ADDED_DEPENDENCIES property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
-  if (prop == "NAME") {
+  if (prop == propNAME) {
     std::ostringstream e;
     e << "NAME property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
-  if (prop == "TYPE") {
+  if (prop == propTYPE) {
     std::ostringstream e;
     e << "TYPE property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
-  if (prop == "EXPORT_NAME" && this->IsImported()) {
+  if (prop == propEXPORT_NAME && this->IsImported()) {
     std::ostringstream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
       << this->Name << "\")\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
-  if (prop == "SOURCES" && this->IsImported()) {
+  if (prop == propSOURCES && this->IsImported()) {
     std::ostringstream e;
     e << "SOURCES property can't be set on imported targets (\"" << this->Name
       << "\")\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
   }
-  if (prop == "IMPORTED_GLOBAL" && !this->IsImported()) {
+  if (prop == propIMPORTED_GLOBAL && !this->IsImported()) {
     std::ostringstream e;
     e << "IMPORTED_GLOBAL property can't be set on non-imported targets (\""
       << this->Name << "\")\n";
@@ -896,49 +917,49 @@ void cmTarget::SetProperty(const std::string& prop, const char* value, const cmL
     return;
   }
 
-  if (prop == "INCLUDE_DIRECTORIES") {
+  if (prop == propINCLUDE_DIRECTORIES) {
     this->Internal->IncludeDirectoriesEntries.clear();
     this->Internal->IncludeDirectoriesBacktraces.clear();
     if (value) {
       this->Internal->IncludeDirectoriesEntries.push_back(value);
       this->Internal->IncludeDirectoriesBacktraces.push_back(backtrace);
     }
-  } else if (prop == "COMPILE_OPTIONS") {
+  } else if (prop == propCOMPILE_OPTIONS) {
     this->Internal->CompileOptionsEntries.clear();
     this->Internal->CompileOptionsBacktraces.clear();
     if (value) {
       this->Internal->CompileOptionsEntries.push_back(value);
       this->Internal->CompileOptionsBacktraces.push_back(backtrace);
     }
-  } else if (prop == "COMPILE_FEATURES") {
+  } else if (prop == propCOMPILE_FEATURES) {
     this->Internal->CompileFeaturesEntries.clear();
     this->Internal->CompileFeaturesBacktraces.clear();
     if (value) {
       this->Internal->CompileFeaturesEntries.push_back(value);
       this->Internal->CompileFeaturesBacktraces.push_back(backtrace);
     }
-  } else if (prop == "COMPILE_DEFINITIONS") {
+  } else if (prop == propCOMPILE_DEFINITIONS) {
     this->Internal->CompileDefinitionsEntries.clear();
     this->Internal->CompileDefinitionsBacktraces.clear();
     if (value) {
       this->Internal->CompileDefinitionsEntries.push_back(value);
       this->Internal->CompileDefinitionsBacktraces.push_back(backtrace);
     }
-  } else if (prop == "LINK_LIBRARIES") {
+  } else if (prop == propLINK_LIBRARIES) {
     this->Internal->LinkImplementationPropertyEntries.clear();
     this->Internal->LinkImplementationPropertyBacktraces.clear();
     if (value) {
       this->Internal->LinkImplementationPropertyEntries.push_back(value);
       this->Internal->LinkImplementationPropertyBacktraces.push_back(backtrace);
     }
-  } else if (prop == "SOURCES") {
+  } else if (prop == propSOURCES) {
     this->Internal->SourceEntries.clear();
     this->Internal->SourceBacktraces.clear();
     if (value) {
       this->Internal->SourceEntries.push_back(value);
       this->Internal->SourceBacktraces.push_back(backtrace);
     }
-  } else if (prop == "IMPORTED_GLOBAL") {
+  } else if (prop == propIMPORTED_GLOBAL) {
     if (!cmSystemTools::IsOn(value)) {
       std::ostringstream e;
       e << "IMPORTED_GLOBAL property can't be set to FALSE on targets (\""
@@ -954,7 +975,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value, const cmL
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME") &&
              !this->CheckImportedLibName(prop, value ? value : "")) {
     /* error was reported by check method */
-  } else if (prop == "CUDA_PTX_COMPILATION" &&
+  } else if (prop == propCUDA_PTX_COMPILATION &&
              this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
     std::ostringstream e;
     e << "CUDA_PTX_COMPILATION property can only be applied to OBJECT "

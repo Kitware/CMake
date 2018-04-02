@@ -93,6 +93,15 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     }
   }
 
+  // RemoveTargetDir
+  if (this->IsSetToOff("CPACK_IFW_PACKAGE_REMOVE_TARGET_DIR")) {
+    this->RemoveTargetDir = "false";
+  } else if (this->IsOn("CPACK_IFW_PACKAGE_REMOVE_TARGET_DIR")) {
+    this->RemoveTargetDir = "true";
+  } else {
+    this->RemoveTargetDir.clear();
+  }
+
   // Logo
   if (const char* option = this->GetOption("CPACK_IFW_PACKAGE_LOGO")) {
     if (cmSystemTools::FileExists(option)) {
@@ -422,6 +431,10 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     xout.Element("MaintenanceToolIniFile", this->MaintenanceToolIniFile);
   }
 
+  if (!this->RemoveTargetDir.empty()) {
+    xout.Element("RemoveTargetDir", this->RemoveTargetDir);
+  }
+
   // Different allows
   if (this->IsVersionLess("2.0")) {
     // CPack IFW default policy
@@ -454,7 +467,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
         std::string name = cmSystemTools::GetFilenameName(this->Resources[i]);
         std::string path = this->Directory + "/resources/" + name;
         cmsys::SystemTools::CopyFileIfDifferent(this->Resources[i], path);
-        resources.push_back(name);
+        resources.push_back(std::move(name));
       } else {
         cmCPackIFWLogger(WARNING, "Can't copy resources from \""
                            << this->Resources[i]

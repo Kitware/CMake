@@ -13,6 +13,11 @@ as target sources at build time and invoke ``rcc`` accordingly.
 This property is initialized by the value of the :variable:`CMAKE_AUTORCC`
 variable if it is set when a target is created.
 
+By default :prop_tgt:`AUTORCC` is processed inside a
+:command:`custom command <add_custom_command>`.
+If the ``.qrc`` file is :prop_sf:`GENERATED` though, a
+:command:`custom target <add_custom_target>` is used instead.
+
 Additional command line options for rcc can be set via the
 :prop_sf:`AUTORCC_OPTIONS` source file property on the ``.qrc`` file.
 

@@ -79,6 +79,7 @@ protected:
   bool GenerateForStaticLibs;
   bool GenerateForSharedLibs;
   bool GenerateForModuleLibs;
+  bool GenerateForInterface;
   bool GenerateForExternals;
   bool GeneratePerTarget;
   bool GenerateDependers;

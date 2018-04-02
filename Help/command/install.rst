@@ -38,7 +38,21 @@ signatures that specify them.  The common options are:
 
 ``CONFIGURATIONS``
   Specify a list of build configurations for which the install rule
-  applies (Debug, Release, etc.).
+  applies (Debug, Release, etc.). Note that the values specified for
+  this option only apply to options listed AFTER the ``CONFIGURATIONS``
+  option. For example, to set separate install paths for the Debug and
+  Release configurations, do the following:
+
+  .. code-block:: cmake
+
+    install(TARGETS target
+            CONFIGURATIONS Debug
+            RUNTIME DESTINATION Debug/bin)
+    install(TARGETS target
+            CONFIGURATIONS Release
+            RUNTIME DESTINATION Release/bin)
+
+  Note that ``CONFIGURATIONS`` appears BEFORE ``RUNTIME DESTINATION``.
 
 ``COMPONENT``
   Specify an installation component name with which the install rule
@@ -347,7 +361,7 @@ included in the export but a target to which it links is not included
 the behavior is unspecified.
 
 In addition to cmake language files, the ``EXPORT_ANDROID_MK`` option maybe
-used to specifiy an export to the android ndk build system.  The Android
+used to specify an export to the android ndk build system.  The Android
 NDK supports the use of prebuilt libraries, both static and shared. This
 allows cmake to build the libraries of a project and make them available
 to an ndk build system complete with transitive dependencies, include flags

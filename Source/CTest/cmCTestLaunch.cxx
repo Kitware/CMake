@@ -377,11 +377,10 @@ void cmCTestLaunch::WriteXMLAction(cmXMLWriter& xml)
     cmSystemTools::ConvertToUnixSlashes(source);
 
     // If file is in source tree use its relative location.
-    if (cmSystemTools::FileIsFullPath(this->SourceDir.c_str()) &&
-        cmSystemTools::FileIsFullPath(source.c_str()) &&
+    if (cmSystemTools::FileIsFullPath(this->SourceDir) &&
+        cmSystemTools::FileIsFullPath(source) &&
         cmSystemTools::IsSubDirectory(source, this->SourceDir)) {
-      source =
-        cmSystemTools::RelativePath(this->SourceDir.c_str(), source.c_str());
+      source = cmSystemTools::RelativePath(this->SourceDir, source);
     }
 
     xml.Element("SourceFile", source);
@@ -564,7 +563,7 @@ void cmCTestLaunch::LoadScrapeRules(
   std::string line;
   cmsys::RegularExpression rex;
   while (cmSystemTools::GetLineFromStream(fin, line)) {
-    if (rex.compile(line.c_str())) {
+    if (rex.compile(line)) {
       regexps.push_back(rex);
     }
   }
@@ -629,8 +628,7 @@ void cmCTestLaunch::LoadConfig()
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
   std::string fname = this->LogDir;
   fname += "CTestLaunchConfig.cmake";
-  if (cmSystemTools::FileExists(fname.c_str()) &&
-      mf.ReadListFile(fname.c_str())) {
+  if (cmSystemTools::FileExists(fname) && mf.ReadListFile(fname.c_str())) {
     this->SourceDir = mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
     cmSystemTools::ConvertToUnixSlashes(this->SourceDir);
   }

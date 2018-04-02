@@ -93,7 +93,7 @@ cmStateEnums::CacheEntryType cmState::StringToCacheEntryType(const char* s)
 bool cmState::IsCacheEntryType(std::string const& key)
 {
   for (int i = 0; cmCacheEntryTypes[i]; ++i) {
-    if (strcmp(key.c_str(), cmCacheEntryTypes[i]) == 0) {
+    if (key == cmCacheEntryTypes[i]) {
       return true;
     }
   }
@@ -107,9 +107,9 @@ bool cmState::LoadCache(const std::string& path, bool internal,
   return this->CacheManager->LoadCache(path, internal, excludes, includes);
 }
 
-bool cmState::SaveCache(const std::string& path)
+bool cmState::SaveCache(const std::string& path, cmMessenger* messenger)
 {
-  return this->CacheManager->SaveCache(path);
+  return this->CacheManager->SaveCache(path, messenger);
 }
 
 bool cmState::DeleteCache(const std::string& path)
@@ -518,9 +518,9 @@ void cmState::SetSourceDirectory(std::string const& sourceDirectory)
   cmSystemTools::ConvertToUnixSlashes(this->SourceDirectory);
 }
 
-const char* cmState::GetSourceDirectory() const
+std::string const& cmState::GetSourceDirectory() const
 {
-  return this->SourceDirectory.c_str();
+  return this->SourceDirectory;
 }
 
 void cmState::SetBinaryDirectory(std::string const& binaryDirectory)
@@ -599,9 +599,9 @@ unsigned int cmState::GetCacheMinorVersion() const
   return this->CacheManager->GetCacheMinorVersion();
 }
 
-const char* cmState::GetBinaryDirectory() const
+std::string const& cmState::GetBinaryDirectory() const
 {
-  return this->BinaryDirectory.c_str();
+  return this->BinaryDirectory;
 }
 
 cmStateSnapshot cmState::CreateBaseSnapshot()

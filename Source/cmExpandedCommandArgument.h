@@ -24,6 +24,7 @@ public:
 
   bool WasQuoted() const;
 
+  bool operator==(const char* value) const;
   bool operator==(std::string const& value) const;
 
   bool empty() const;

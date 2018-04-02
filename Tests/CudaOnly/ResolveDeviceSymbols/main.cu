@@ -62,17 +62,8 @@ int main(int argc, char** argv)
     return 0;
   }
 
-  cudaError_t err;
-  file2_launch_kernel(42);
-  err = cudaGetLastError();
-  if (err != cudaSuccess) {
-    std::cerr << "file2_launch_kernel: kernel launch failed: "
-              << cudaGetErrorString(err) << std::endl;
-    return 1;
-  }
-
   main_launch_kernel(1);
-  err = cudaGetLastError();
+  cudaError_t err = cudaGetLastError();
   if (err == cudaSuccess) {
     // This kernel launch should fail as the file2_func was device linked
     // into the static library and is not usable by the executable

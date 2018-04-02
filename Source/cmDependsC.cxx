@@ -131,14 +131,12 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
 
       // If not a full path, find the file in the include path.
       std::string fullName;
-      if ((srcFiles > 0) ||
-          cmSystemTools::FileIsFullPath(current.FileName.c_str())) {
-        if (cmSystemTools::FileExists(current.FileName.c_str(), true)) {
+      if ((srcFiles > 0) || cmSystemTools::FileIsFullPath(current.FileName)) {
+        if (cmSystemTools::FileExists(current.FileName, true)) {
           fullName = current.FileName;
         }
       } else if (!current.QuotedLocation.empty() &&
-                 cmSystemTools::FileExists(current.QuotedLocation.c_str(),
-                                           true)) {
+                 cmSystemTools::FileExists(current.QuotedLocation, true)) {
         // The include statement producing this entry was a double-quote
         // include and the included file is present in the directory of
         // the source containing the include statement.
@@ -157,7 +155,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
               cmSystemTools::CollapseCombinedPath(i, current.FileName);
 
             // Look for the file in this location.
-            if (cmSystemTools::FileExists(tempPathStr.c_str(), true)) {
+            if (cmSystemTools::FileExists(tempPathStr, true)) {
               fullName = tempPathStr;
               HeaderLocationCache[current.FileName] = fullName;
               break;
@@ -226,15 +224,14 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // directory.  We must do the same here.
   std::string binDir = this->LocalGenerator->GetBinaryDirectory();
   std::string obj_i = this->LocalGenerator->ConvertToRelativePath(binDir, obj);
-  std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i.c_str());
+  std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i);
   internalDepends << obj_i << std::endl;
 
   for (std::string const& dep : dependencies) {
-    makeDepends
-      << obj_m << ": "
-      << cmSystemTools::ConvertToOutputPath(
-           this->LocalGenerator->ConvertToRelativePath(binDir, dep).c_str())
-      << std::endl;
+    makeDepends << obj_m << ": "
+                << cmSystemTools::ConvertToOutputPath(
+                     this->LocalGenerator->ConvertToRelativePath(binDir, dep))
+                << std::endl;
     internalDepends << " " << dep << std::endl;
   }
   makeDepends << std::endl;
@@ -303,7 +300,7 @@ void cmDependsC::ReadCacheFile()
         if (line != "-") {
           entry.QuotedLocation = line;
         }
-        cacheEntry->UnscannedEntries.push_back(entry);
+        cacheEntry->UnscannedEntries.push_back(std::move(entry));
       }
     }
   }
@@ -363,7 +360,7 @@ void cmDependsC::Scan(std::istream& is, const char* directory,
       entry.FileName = this->IncludeRegexLine.match(2);
       cmSystemTools::ConvertToUnixSlashes(entry.FileName);
       if (this->IncludeRegexLine.match(3) == "\"" &&
-          !cmSystemTools::FileIsFullPath(entry.FileName.c_str())) {
+          !cmSystemTools::FileIsFullPath(entry.FileName)) {
         // This was a double-quoted include with a relative path.  We
         // must check for the file in the directory containing the
         // file we are scanning.

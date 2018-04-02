@@ -475,7 +475,7 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
       strncpy(bar + curFieldLen + 2, help, width - curFieldLen - 2);
       if (curFieldLen + helpLen + 2 < width) {
         memset(bar + curFieldLen + helpLen + 2, ' ',
-               width - curFieldLen + helpLen + 2);
+               width - (curFieldLen + helpLen + 2));
       }
     }
   }

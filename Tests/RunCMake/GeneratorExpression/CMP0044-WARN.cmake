@@ -1,5 +1,5 @@
 
-project(CMP0044-WARN)
+enable_language(C)
 
 string(TOLOWER ${CMAKE_C_COMPILER_ID} lc_test)
 if (lc_test STREQUAL CMAKE_C_COMPILER_ID)

@@ -4,6 +4,7 @@
 
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
+#include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
@@ -242,9 +243,9 @@ bool cmCPackDragNDropGenerator::RunCommand(std::ostringstream& command,
 {
   int exit_code = 1;
 
-  bool result = cmSystemTools::RunSingleCommand(command.str().c_str(), output,
-                                                output, &exit_code, nullptr,
-                                                this->GeneratorVerbose, 0);
+  bool result = cmSystemTools::RunSingleCommand(
+    command.str().c_str(), output, output, &exit_code, nullptr,
+    this->GeneratorVerbose, cmDuration::zero());
 
   if (!result || exit_code) {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Error executing: " << command.str()

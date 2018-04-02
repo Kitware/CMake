@@ -39,9 +39,15 @@ set(tree_files_without_prefix ${root}/sub1/tree_bar.c
 set(tree_files_with_prefix ${root}/tree_prefix_foo.c
                            tree_prefix_bar.c)
 
+set(tree_files_with_empty_prefix ${root}/tree_empty_prefix_foo.c
+                                 tree_empty_prefix_bar.c)
+
 source_group(TREE ${root} FILES ${tree_files_without_prefix})
 
-source_group(TREE ${root} PREFIX tree_root/subgroup FILES ${tree_files_with_prefix})
+source_group(FILES ${tree_files_with_prefix} PREFIX tree_root/subgroup TREE ${root})
+
+source_group(PREFIX "" FILES ${tree_files_with_empty_prefix} TREE ${root})
 
 add_executable(SourceGroups main.c bar.c foo.c sub1/foo.c sub1/foobar.c baz.c
-                            ${tree_files_with_prefix} ${tree_files_without_prefix} README.txt)
+                            ${tree_files_with_prefix} ${tree_files_without_prefix}
+                            ${tree_files_with_empty_prefix} README.txt)

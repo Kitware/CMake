@@ -805,7 +805,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
     const std::vector<std::string>& parameters,
     cmGeneratorExpressionContext* context,
     const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
     if (context->Language.empty()) {
       reportError(
@@ -827,33 +827,14 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
       return std::string();
     }
     std::string genName = gg->GetName();
-    if (genName.find("Visual Studio") != std::string::npos) {
-      if (dagChecker && (dagChecker->EvaluatingCompileDefinitions() ||
-                         dagChecker->EvaluatingIncludeDirectories())) {
-        reportError(
-          context, content->GetOriginalExpression(),
-          "$<COMPILE_LANGUAGE:...> may only be used for COMPILE_OPTIONS "
-          "and file(GENERATE) with the Visual Studio generator.");
-        return std::string();
-      }
-    } else if (genName.find("Xcode") != std::string::npos) {
-      if (dagChecker && (dagChecker->EvaluatingCompileDefinitions() ||
-                         dagChecker->EvaluatingIncludeDirectories())) {
-        reportError(
-          context, content->GetOriginalExpression(),
-          "$<COMPILE_LANGUAGE:...> may only be used for COMPILE_OPTIONS "
-          "and file(GENERATE) with the Xcode generator.");
-        return std::string();
-      }
-    } else {
-      if (genName.find("Makefiles") == std::string::npos &&
-          genName.find("Ninja") == std::string::npos &&
-          genName.find("Watcom WMake") == std::string::npos) {
-        reportError(
-          context, content->GetOriginalExpression(),
-          "$<COMPILE_LANGUAGE:...> not supported for this generator.");
-        return std::string();
-      }
+    if (genName.find("Makefiles") == std::string::npos &&
+        genName.find("Ninja") == std::string::npos &&
+        genName.find("Visual Studio") == std::string::npos &&
+        genName.find("Xcode") == std::string::npos &&
+        genName.find("Watcom WMake") == std::string::npos) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<COMPILE_LANGUAGE:...> not supported for this generator.");
+      return std::string();
     }
     if (parameters.empty()) {
       return context->Language;
@@ -966,7 +947,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                       "Target name not supported.");
         return std::string();
       }
-      if (propertyName == "ALIASED_TARGET") {
+      static const std::string propALIASED_TARGET = "ALIASED_TARGET";
+      if (propertyName == propALIASED_TARGET) {
         if (context->LG->GetMakefile()->IsAlias(targetName)) {
           if (cmGeneratorTarget* tgt =
                 context->LG->FindGeneratorTargetToUse(targetName)) {
@@ -1093,8 +1075,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(POPULATE_INTERFACE_PROPERTY_NAME)
     // Note that the above macro terminates with an else
-    /* else */ if (cmHasLiteralPrefix(propertyName.c_str(),
-                                      "COMPILE_DEFINITIONS_")) {
+    /* else */ if (cmHasLiteralPrefix(propertyName, "COMPILE_DEFINITIONS_")) {
       cmPolicies::PolicyStatus polSt =
         context->LG->GetPolicyStatus(cmPolicies::CMP0043);
       if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {

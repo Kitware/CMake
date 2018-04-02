@@ -16,10 +16,6 @@
 #include "cmDynamicLoader.h"
 #endif
 
-#ifdef _WIN32
-#include <fcntl.h>  /* _O_TEXT */
-#include <stdlib.h> /* _set_fmode, _fmode */
-#endif
 #include "cm_uv.h"
 
 #include "cmsys/Encoding.hxx"
@@ -185,19 +181,8 @@ int main(int ac, char const* const* av)
   ac = args.argc();
   av = args.argv();
 
-#if defined(_WIN32)
-  // Perform libuv one-time initialization now, and then un-do its
-  // global _fmode setting so that using libuv does not change the
-  // default file text/binary mode.  See libuv issue 840.
-  uv_loop_close(uv_default_loop());
-#ifdef _MSC_VER
-  _set_fmode(_O_TEXT);
-#else
-  _fmode = _O_TEXT;
-#endif
-#endif
-
   cmSystemTools::EnableMSVCDebugHook();
+  cmSystemTools::InitializeLibUV();
   cmSystemTools::FindCMakeResources(av[0]);
   if (ac > 1) {
     if (strcmp(av[1], "--build") == 0) {

@@ -35,12 +35,12 @@ public:
 
   virtual ~cmLocalVisualStudio7Generator();
 
-  virtual void AddHelperCommands();
+  void AddHelperCommands() override;
 
   /**
    * Generate the makefile for this directory.
    */
-  virtual void Generate();
+  void Generate() override;
 
   enum BuildType
   {
@@ -56,12 +56,12 @@ public:
    */
   void SetBuildType(BuildType, const std::string& name);
 
-  virtual std::string GetTargetDirectory(
-    cmGeneratorTarget const* target) const;
+  std::string GetTargetDirectory(
+    cmGeneratorTarget const* target) const override;
   cmSourceFile* CreateVCProjBuildRule();
   void WriteStampFiles();
-  virtual std::string ComputeLongestObjectDirectory(
-    cmGeneratorTarget const*) const;
+  std::string ComputeLongestObjectDirectory(
+    cmGeneratorTarget const*) const override;
 
   virtual void ReadAndStoreExternalGUID(const std::string& name,
                                         const char* path);

@@ -80,10 +80,10 @@ else()
     # include the math library for Unix
     if(UNIX AND NOT APPLE)
       find_library(MATH_LIBRARY_FOR_LUA m)
-      set( LUA_LIBRARIES "${LUA_LIBRARY_lualib};${LUA_LIBRARY_lua};${MATH_LIBRARY_FOR_LUA}" CACHE STRING "This is the concatentation of lua and lualib libraries")
+      set( LUA_LIBRARIES "${LUA_LIBRARY_lualib};${LUA_LIBRARY_lua};${MATH_LIBRARY_FOR_LUA}" CACHE STRING "This is the concatenation of lua and lualib libraries")
     # For Windows and Mac, don't need to explicitly include the math library
     else()
-      set( LUA_LIBRARIES "${LUA_LIBRARY_lualib};${LUA_LIBRARY_lua}" CACHE STRING "This is the concatentation of lua and lualib libraries")
+      set( LUA_LIBRARIES "${LUA_LIBRARY_lualib};${LUA_LIBRARY_lua}" CACHE STRING "This is the concatenation of lua and lualib libraries")
     endif()
   endif()
 endif()

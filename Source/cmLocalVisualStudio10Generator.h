@@ -29,13 +29,13 @@ public:
   /**
    * Generate the makefile for this directory.
    */
-  virtual void Generate();
-  virtual void ReadAndStoreExternalGUID(const std::string& name,
-                                        const char* path);
+  void Generate() override;
+  void ReadAndStoreExternalGUID(const std::string& name,
+                                const char* path) override;
 
 protected:
-  virtual const char* ReportErrorLabel() const;
-  virtual bool CustomCommandUseLocal() const { return true; }
+  const char* ReportErrorLabel() const override;
+  bool CustomCommandUseLocal() const override { return true; }
 
 private:
 };

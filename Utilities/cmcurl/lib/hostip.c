@@ -25,6 +25,9 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#ifdef HAVE_NETINET_IN6_H
+#include <netinet/in6.h>
+#endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -688,8 +691,8 @@ clean_up:
      the time we spent until now! */
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
-    unsigned long elapsed_secs = (unsigned long) (Curl_tvdiff(Curl_tvnow(),
-                                   conn->created) / 1000);
+    timediff_t elapsed_secs = Curl_timediff(Curl_now(),
+                                            conn->created) / 1000;
 
     /* the alarm period is counted in even number of seconds */
     unsigned long alarm_set = prev_alarm - elapsed_secs;
@@ -778,7 +781,6 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 {
   struct curl_slist *hostp;
   char hostname[256];
-  char address[256];
   int port;
 
   for(hostp = data->change.resolve; hostp; hostp = hostp->next) {
@@ -820,12 +822,24 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       Curl_addrinfo *addr;
       char *entry_id;
       size_t entry_len;
+      char buffer[256];
+      char *address = &buffer[0];
 
       if(3 != sscanf(hostp->data, "%255[^:]:%d:%255s", hostname, &port,
                      address)) {
         infof(data, "Couldn't parse CURLOPT_RESOLVE entry '%s'!\n",
               hostp->data);
         continue;
+      }
+
+      /* allow IP(v6) address within [brackets] */
+      if(address[0] == '[') {
+        size_t alen = strlen(address);
+        if(address[alen-1] != ']')
+          /* it needs to also end with ] to be valid */
+          continue;
+        address[alen-1] = 0; /* zero terminate there */
+        address++; /* pass the open bracket */
       }
 
       addr = Curl_str2addr(address, port);
@@ -863,9 +877,12 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
           dns->inuse--;
         }
       }
-      else
+      else {
         /* this is a duplicate, free it again */
+        infof(data, "RESOLVE %s:%d is already cached, %s not stored!\n",
+              hostname, port, address);
         Curl_freeaddrinfo(addr);
+      }
 
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);

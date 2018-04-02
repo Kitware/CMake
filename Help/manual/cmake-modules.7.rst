@@ -130,6 +130,7 @@ All Modules
    /module/FindIcotool
    /module/FindICU
    /module/FindImageMagick
+   /module/FindIconv
    /module/FindIntl
    /module/FindITK
    /module/FindJasper

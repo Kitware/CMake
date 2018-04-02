@@ -334,9 +334,8 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(
 // output the SLN file
 void cmGlobalVisualStudio7Generator::OutputSLNFile()
 {
-  std::map<std::string, std::vector<cmLocalGenerator*>>::iterator it;
-  for (it = this->ProjectMap.begin(); it != this->ProjectMap.end(); ++it) {
-    this->OutputSLNFile(it->second[0], it->second);
+  for (auto& it : this->ProjectMap) {
+    this->OutputSLNFile(it.second[0], it.second);
   }
 }
 
@@ -346,9 +345,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
 {
   // loop over again and write out configurations for each target
   // in the solution
-  for (OrderedTargetDependSet::const_iterator tt = projectTargets.begin();
-       tt != projectTargets.end(); ++tt) {
-    cmGeneratorTarget const* target = *tt;
+  for (cmGeneratorTarget const* target : projectTargets) {
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
@@ -378,9 +375,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
   VisualStudioFolders.clear();
 
   std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
-  for (OrderedTargetDependSet::const_iterator tt = projectTargets.begin();
-       tt != projectTargets.end(); ++tt) {
-    cmGeneratorTarget const* target = *tt;
+  for (cmGeneratorTarget const* target : projectTargets) {
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
@@ -420,19 +415,18 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
 
         std::string cumulativePath;
 
-        for (std::vector<cmsys::String>::iterator iter = tokens.begin();
-             iter != tokens.end(); ++iter) {
-          if (!iter->size()) {
+        for (cmsys::String const& iter : tokens) {
+          if (!iter.size()) {
             continue;
           }
 
           if (cumulativePath.empty()) {
-            cumulativePath = "CMAKE_FOLDER_GUID_" + *iter;
+            cumulativePath = "CMAKE_FOLDER_GUID_" + iter;
           } else {
             VisualStudioFolders[cumulativePath].insert(cumulativePath + "/" +
-                                                       *iter);
+                                                       iter);
 
-            cumulativePath = cumulativePath + "/" + *iter;
+            cumulativePath = cumulativePath + "/" + iter;
           }
         }
 
@@ -447,9 +441,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
 void cmGlobalVisualStudio7Generator::WriteTargetDepends(
   std::ostream& fout, OrderedTargetDependSet const& projectTargets)
 {
-  for (OrderedTargetDependSet::const_iterator tt = projectTargets.begin();
-       tt != projectTargets.end(); ++tt) {
-    cmGeneratorTarget const* target = *tt;
+  for (cmGeneratorTarget const* target : projectTargets) {
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
@@ -467,11 +459,9 @@ void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
   const char* prefix = "CMAKE_FOLDER_GUID_";
   const std::string::size_type skip_prefix = strlen(prefix);
   std::string guidProjectTypeFolder = "2150E333-8FDC-42A3-9474-1A3956D46DE8";
-  for (std::map<std::string, std::set<std::string>>::iterator iter =
-         VisualStudioFolders.begin();
-       iter != VisualStudioFolders.end(); ++iter) {
-    std::string fullName = iter->first;
-    std::string guid = this->GetGUID(fullName.c_str());
+  for (auto const& iter : VisualStudioFolders) {
+    std::string fullName = iter.first;
+    std::string guid = this->GetGUID(fullName);
 
     std::replace(fullName.begin(), fullName.end(), '/', '\\');
     if (cmSystemTools::StringStartsWith(fullName.c_str(), prefix)) {
@@ -487,16 +477,13 @@ void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
 
 void cmGlobalVisualStudio7Generator::WriteFoldersContent(std::ostream& fout)
 {
-  for (std::map<std::string, std::set<std::string>>::iterator iter =
-         VisualStudioFolders.begin();
-       iter != VisualStudioFolders.end(); ++iter) {
-    std::string key(iter->first);
-    std::string guidParent(this->GetGUID(key.c_str()));
+  for (auto const& iter : VisualStudioFolders) {
+    std::string key(iter.first);
+    std::string guidParent(this->GetGUID(key));
 
-    for (std::set<std::string>::iterator it = iter->second.begin();
-         it != iter->second.end(); ++it) {
-      std::string value(*it);
-      std::string guid(this->GetGUID(value.c_str()));
+    for (std::string const& it : iter.second) {
+      std::string value(it);
+      std::string guid(this->GetGUID(value));
 
       fout << "\t\t{" << guid << "} = {" << guidParent << "}\n";
     }
@@ -525,11 +512,10 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
   bool extensibilityAddInsOverridden = false;
   const std::vector<std::string> propKeys =
     root->GetMakefile()->GetPropertyKeys();
-  for (std::vector<std::string>::const_iterator it = propKeys.begin();
-       it != propKeys.end(); ++it) {
-    if (it->find("VS_GLOBAL_SECTION_") == 0) {
+  for (std::string const& it : propKeys) {
+    if (it.find("VS_GLOBAL_SECTION_") == 0) {
       std::string sectionType;
-      std::string name = it->substr(18);
+      std::string name = it.substr(18);
       if (name.find("PRE_") == 0) {
         name = name.substr(4);
         sectionType = "preSolution";
@@ -549,17 +535,15 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
         }
         fout << "\tGlobalSection(" << name << ") = " << sectionType << "\n";
         std::vector<std::string> keyValuePairs;
-        cmSystemTools::ExpandListArgument(
-          root->GetMakefile()->GetProperty(it->c_str()), keyValuePairs);
-        for (std::vector<std::string>::const_iterator itPair =
-               keyValuePairs.begin();
-             itPair != keyValuePairs.end(); ++itPair) {
-          const std::string::size_type posEqual = itPair->find('=');
+        cmSystemTools::ExpandListArgument(root->GetMakefile()->GetProperty(it),
+                                          keyValuePairs);
+        for (std::string const& itPair : keyValuePairs) {
+          const std::string::size_type posEqual = itPair.find('=');
           if (posEqual != std::string::npos) {
             const std::string key =
-              cmSystemTools::TrimWhitespace(itPair->substr(0, posEqual));
+              cmSystemTools::TrimWhitespace(itPair.substr(0, posEqual));
             const std::string value =
-              cmSystemTools::TrimWhitespace(itPair->substr(posEqual + 1));
+              cmSystemTools::TrimWhitespace(itPair.substr(posEqual + 1));
             fout << "\t\t" << key << " = " << value << "\n";
             if (key == "SolutionGuid") {
               addGuid = false;
@@ -618,14 +602,13 @@ std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
     "\t<Configurations>\n"
     ;
   /* clang-format on */
-  for (std::vector<std::string>::iterator i = configs.begin();
-       i != configs.end(); ++i) {
+  for (std::string const& i : configs) {
     /* clang-format off */
     fout <<
       "\t\t<Configuration\n"
-      "\t\t\tName=\"" << *i << "|Win32\"\n"
-      "\t\t\tOutputDirectory=\"" << *i << "\"\n"
-      "\t\t\tIntermediateDirectory=\"" << pname << ".dir\\" << *i << "\"\n"
+      "\t\t\tName=\"" << i << "|Win32\"\n"
+      "\t\t\tOutputDirectory=\"" << i << "\"\n"
+      "\t\t\tIntermediateDirectory=\"" << pname << ".dir\\" << i << "\"\n"
       "\t\t\tConfigurationType=\"10\"\n"
       "\t\t\tUseOfMFC=\"0\"\n"
       "\t\t\tATLMinimizesCRunTimeLibraryUsage=\"FALSE\"\n"
@@ -696,23 +679,21 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
     std::vector<std::string> targetNames;
     targetNames.push_back("INSTALL");
     targetNames.push_back("PACKAGE");
-    for (std::vector<std::string>::const_iterator t = targetNames.begin();
-         t != targetNames.end(); ++t) {
-      // check if target <*t> is part of default build
-      if (target->GetName() == *t) {
+    for (std::string const& t : targetNames) {
+      // check if target <t> is part of default build
+      if (target->GetName() == t) {
         const std::string propertyName =
-          "CMAKE_VS_INCLUDE_" + *t + "_TO_DEFAULT_BUILD";
-        // inspect CMAKE_VS_INCLUDE_<*t>_TO_DEFAULT_BUILD properties
-        for (std::vector<std::string>::const_iterator i = configs.begin();
-             i != configs.end(); ++i) {
+          "CMAKE_VS_INCLUDE_" + t + "_TO_DEFAULT_BUILD";
+        // inspect CMAKE_VS_INCLUDE_<t>_TO_DEFAULT_BUILD properties
+        for (std::string const& i : configs) {
           const char* propertyValue =
             target->Target->GetMakefile()->GetDefinition(propertyName);
           cmGeneratorExpression ge;
           std::unique_ptr<cmCompiledGeneratorExpression> cge =
             ge.Parse(propertyValue);
           if (cmSystemTools::IsOn(
-                cge->Evaluate(target->GetLocalGenerator(), *i))) {
-            activeConfigs.insert(*i);
+                cge->Evaluate(target->GetLocalGenerator(), i))) {
+            activeConfigs.insert(i);
           }
         }
       }
@@ -724,12 +705,11 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
     return activeConfigs;
   }
   // inspect EXCLUDE_FROM_DEFAULT_BUILD[_<CONFIG>] properties
-  for (std::vector<std::string>::const_iterator i = configs.begin();
-       i != configs.end(); ++i) {
+  for (std::string const& i : configs) {
     const char* propertyValue =
-      target->GetFeature("EXCLUDE_FROM_DEFAULT_BUILD", i->c_str());
+      target->GetFeature("EXCLUDE_FROM_DEFAULT_BUILD", i);
     if (cmSystemTools::IsOff(propertyValue)) {
-      activeConfigs.insert(*i);
+      activeConfigs.insert(i);
     }
   }
   return activeConfigs;
@@ -738,9 +718,8 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
 bool cmGlobalVisualStudio7Generator::IsDependedOn(
   OrderedTargetDependSet const& projectTargets, cmGeneratorTarget const* gtIn)
 {
-  for (OrderedTargetDependSet::const_iterator l = projectTargets.begin();
-       l != projectTargets.end(); ++l) {
-    TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(*l);
+  for (cmTargetDepend const& l : projectTargets) {
+    TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(l);
     if (tgtdeps.count(gtIn)) {
       return true;
     }

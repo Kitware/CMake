@@ -28,7 +28,7 @@
 #include <string.h>
 namespace KWSYS_NAMESPACE {
 #if defined(_WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
-// On Windows and apple, no difference between lower and upper case
+// On Windows and Apple, no difference between lower and upper case
 #define KWSYS_GLOB_CASE_INDEPENDENT
 #endif
 
@@ -81,13 +81,13 @@ std::string Glob::PatternToRegex(const std::string& pattern,
     int c = *i;
     if (c == '*') {
       // A '*' (not between brackets) matches any string.
-      // We modify this to not match slashes since the orignal glob
+      // We modify this to not match slashes since the original glob
       // pattern documentation was meant for matching file name
       // components separated by slashes.
       regex += "[^/]*";
     } else if (c == '?') {
       // A '?' (not between brackets) matches any single character.
-      // We modify this to not match slashes since the orignal glob
+      // We modify this to not match slashes since the original glob
       // pattern documentation was meant for matching file name
       // components separated by slashes.
       regex += "[^/]";
@@ -201,7 +201,7 @@ bool Glob::RecurseDirectory(std::string::size_type start,
     }
 
 #if defined(KWSYS_GLOB_CASE_INDEPENDENT)
-    // On Windows and apple, no difference between lower and upper case
+    // On Windows and Apple, no difference between lower and upper case
     fname = kwsys::SystemTools::LowerCase(fname);
 #endif
 
@@ -430,7 +430,7 @@ void Glob::SetRelative(const char* dir)
 const char* Glob::GetRelative()
 {
   if (this->Relative.empty()) {
-    return 0;
+    return KWSYS_NULLPTR;
   }
   return this->Relative.c_str();
 }

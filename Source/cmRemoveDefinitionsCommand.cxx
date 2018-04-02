@@ -16,7 +16,7 @@ bool cmRemoveDefinitionsCommand::InitialPass(
   }
 
   for (std::string const& i : args) {
-    this->Makefile->RemoveDefineFlag(i.c_str());
+    this->Makefile->RemoveDefineFlag(i);
   }
   return true;
 }

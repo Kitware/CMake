@@ -413,7 +413,8 @@ public:
                              const std::string& language) const;
 
   bool IsSystemIncludeDirectory(const std::string& dir,
-                                const std::string& config) const;
+                                const std::string& config,
+                                const std::string& language) const;
 
   /** Add the target output files to the global generator manifest.  */
   void ComputeTargetManifest(const std::string& config) const;

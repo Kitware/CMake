@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 3.9)
 project(TestMissingInstall)
 
 set(CMAKE_SKIP_INSTALL_RULES ON)
@@ -8,11 +8,7 @@ set(CMAKE_SKIP_INSTALL_RULES ON)
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY 1)
 set(CMAKE_SKIP_PACKAGE_ALL_DEPENDENCY 1)
 
-if(CMAKE_CONFIGURATION_TYPES)
-  set(MULTI_CONFIG ON)
-else()
-  set(MULTI_CONFIG OFF)
-endif()
+get_property(MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 
 add_executable(mybin mybin.cpp)
 install(TARGETS mybin RUNTIME DESTINATION bin)

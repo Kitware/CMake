@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "cmCustomCommandLines.h"
+#include "cmDuration.h"
 #include "cmExportSetMap.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
@@ -32,7 +33,7 @@ class cmLinkLineComputer;
 class cmLocalGenerator;
 class cmMakefile;
 class cmOutputConverter;
-class cmQtAutoGeneratorInitializer;
+class cmQtAutoGenInitializer;
 class cmSourceFile;
 class cmStateDirectory;
 class cmake;
@@ -160,8 +161,8 @@ public:
             const std::string& projectName, const std::string& targetName,
             std::string& output, const std::string& makeProgram,
             const std::string& config, bool clean, bool fast, bool verbose,
-            double timeout, cmSystemTools::OutputOption outputflag =
-                              cmSystemTools::OUTPUT_NONE,
+            cmDuration timeout, cmSystemTools::OutputOption outputflag =
+                                  cmSystemTools::OUTPUT_NONE,
             std::vector<std::string> const& nativeOptions =
               std::vector<std::string>());
 
@@ -233,7 +234,7 @@ public:
 
   void EnableInstallTarget();
 
-  int TryCompileTimeout;
+  cmDuration TryCompileTimeout;
 
   bool GetForceUnixPaths() const { return this->ForceUnixPaths; }
   bool GetToolSupportsColor() const { return this->ToolSupportsColor; }
@@ -358,6 +359,10 @@ public:
 
   virtual bool IsIPOSupported() const { return false; }
 
+  /** Return whether the generator can import external visual studio project
+      using INCLUDE_EXTERNAL_MSPROJECT */
+  virtual bool IsIncludeExternalMSProjectSupported() const { return false; }
+
   /** Return whether the generator should use EFFECTIVE_PLATFORM_NAME. This is
       relevant for mixed macOS and iOS builds. */
   virtual bool UseEffectivePlatformName(cmMakefile*) const { return false; }
@@ -433,7 +438,7 @@ protected:
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
   // Qt auto generators
-  std::vector<std::unique_ptr<cmQtAutoGeneratorInitializer>>
+  std::vector<std::unique_ptr<cmQtAutoGenInitializer>>
   CreateQtAutoGenInitializers();
 
   std::string SelectMakeProgram(const std::string& makeProgram,

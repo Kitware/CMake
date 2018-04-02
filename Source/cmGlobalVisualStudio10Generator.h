@@ -18,29 +18,31 @@ public:
                                   const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
-  virtual bool MatchesGeneratorName(const std::string& name) const;
+  bool MatchesGeneratorName(const std::string& name) const override;
 
-  virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
-  virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
-  virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
+  bool SetSystemName(std::string const& s, cmMakefile* mf) override;
+  bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
+  bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf) override;
 
-  virtual void GenerateBuildCommand(
-    std::vector<std::string>& makeCommand, const std::string& makeProgram,
-    const std::string& projectName, const std::string& projectDir,
-    const std::string& targetName, const std::string& config, bool fast,
-    bool verbose,
-    std::vector<std::string> const& makeOptions = std::vector<std::string>());
+  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
+                            const std::string& makeProgram,
+                            const std::string& projectName,
+                            const std::string& projectDir,
+                            const std::string& targetName,
+                            const std::string& config, bool fast, bool verbose,
+                            std::vector<std::string> const& makeOptions =
+                              std::vector<std::string>()) override;
 
   ///! create the correct local generator
-  virtual cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf);
+  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
   /**
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string> const& languages,
-                              cmMakefile*, bool optional);
-  virtual void WriteSLNHeader(std::ostream& fout);
+  void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
+                      bool optional) override;
+  void WriteSLNHeader(std::ostream& fout) override;
 
   bool IsCudaEnabled() const { return this->CudaEnabled; }
 
@@ -87,15 +89,16 @@ public:
   /** Return true if building for WindowsStore */
   bool TargetsWindowsStore() const { return this->SystemIsWindowsStore; }
 
-  virtual const char* GetCMakeCFGIntDir() const { return "$(Configuration)"; }
+  const char* GetCMakeCFGIntDir() const override { return "$(Configuration)"; }
   bool Find64BitTools(cmMakefile* mf);
 
   /** Generate an <output>.rule file path for a given command output.  */
-  virtual std::string GenerateRuleFile(std::string const& output) const;
+  std::string GenerateRuleFile(std::string const& output) const override;
 
   void PathTooLong(cmGeneratorTarget* target, cmSourceFile const* sf,
                    std::string const& sfRel);
 
+  std::string Encoding() override;
   virtual const char* GetToolsVersion() { return "4.0"; }
 
   bool FindMakeProgram(cmMakefile* mf) override;
@@ -113,7 +116,7 @@ public:
   cmIDEFlagTable const* GetNasmFlagTable() const;
 
 protected:
-  virtual void Generate();
+  void Generate() override;
   virtual bool InitializeSystem(cmMakefile* mf);
   virtual bool InitializeWindows(cmMakefile* mf);
   virtual bool InitializeWindowsCE(cmMakefile* mf);
@@ -127,7 +130,7 @@ protected:
   virtual bool SelectWindowsPhoneToolset(std::string& toolset) const;
   virtual bool SelectWindowsStoreToolset(std::string& toolset) const;
 
-  virtual const char* GetIDEVersion() { return "10.0"; }
+  const char* GetIDEVersion() override { return "10.0"; }
 
   std::string const& GetMSBuildCommand();
 
@@ -173,8 +176,8 @@ private:
   bool MSBuildCommandInitialized;
   cmVisualStudio10ToolsetOptions ToolsetOptions;
   virtual std::string FindMSBuildCommand();
-  virtual std::string FindDevEnvCommand();
-  virtual std::string GetVSMakeProgram() { return this->GetMSBuildCommand(); }
+  std::string FindDevEnvCommand() override;
+  std::string GetVSMakeProgram() override { return this->GetMSBuildCommand(); }
 
   bool PlatformToolsetNeedsDebugEnum;
 
@@ -186,6 +189,6 @@ private:
   bool CudaEnabled;
 
   // We do not use the reload macros for VS >= 10.
-  virtual std::string GetUserMacrosDirectory() { return ""; }
+  std::string GetUserMacrosDirectory() override { return ""; }
 };
 #endif

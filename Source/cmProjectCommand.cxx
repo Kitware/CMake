@@ -98,7 +98,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     } else if (args[i] == "DESCRIPTION") {
       if (haveDescription) {
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR, "DESCRITPION may be specified at most once.");
+          cmake::FATAL_ERROR, "DESCRIPTION may be specified at most once.");
         cmSystemTools::SetFatalErrorOccured();
         return true;
       }

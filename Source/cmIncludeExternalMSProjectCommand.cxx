@@ -3,6 +3,7 @@
 #include "cmIncludeExternalMSProjectCommand.h"
 
 #ifdef _WIN32
+#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
@@ -22,7 +23,9 @@ bool cmIncludeExternalMSProjectCommand::InitialPass(
   }
 // only compile this for win32 to avoid coverage errors
 #ifdef _WIN32
-  if (this->Makefile->GetDefinition("WIN32")) {
+  if (this->Makefile->GetDefinition("WIN32") ||
+      this->Makefile->GetGlobalGenerator()
+        ->IsIncludeExternalMSProjectSupported()) {
     enum Doing
     {
       DoingNone,

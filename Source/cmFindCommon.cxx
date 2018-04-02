@@ -314,7 +314,7 @@ void cmFindCommon::AddPathSuffix(std::string const& arg)
   }
 
   // Store the suffix.
-  this->SearchPathSuffixes.push_back(suffix);
+  this->SearchPathSuffixes.push_back(std::move(suffix));
 }
 
 void AddTrailingSlash(std::string& s)

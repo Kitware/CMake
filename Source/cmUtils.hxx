@@ -7,7 +7,7 @@
 
 // Use the make system's VERBOSE environment variable to enable
 // verbose output. This can be skipped by also setting CMAKE_NO_VERBOSE
-// (which is set by the Eclipse and KDevelop generators).
+// (which is set by the Eclipse generator).
 inline bool isCMakeVerbose()
 {
   return (cmSystemTools::HasEnv("VERBOSE") &&

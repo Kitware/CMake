@@ -19,7 +19,6 @@ class cmCustomCommandGenerator;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
-class cmSourceFile;
 
 /** \class cmLocalUnixMakefileGenerator3
  * \brief Write a LocalUnix makefiles.
@@ -88,8 +87,9 @@ public:
                                    const std::string& tgt);
 
   // append flags to a string
-  void AppendFlags(std::string& flags, const std::string& newFlags) override;
-  void AppendFlags(std::string& flags, const char* newFlags) override;
+  void AppendFlags(std::string& flags,
+                   const std::string& newFlags) const override;
+  void AppendFlags(std::string& flags, const char* newFlags) const override;
 
   // append an echo command
   enum EchoColor
@@ -117,7 +117,8 @@ public:
 
   // create a command that cds to the start dir then runs the commands
   void CreateCDCommand(std::vector<std::string>& commands,
-                       const char* targetDir, std::string const& relDir);
+                       std::string const& targetDir,
+                       std::string const& relDir);
 
   static std::string ConvertToQuotedOutputPath(const char* p,
                                                bool useWatcomQuote);
@@ -250,10 +251,6 @@ protected:
 
 private:
   std::string MaybeConvertWatcomShellCommand(std::string const& cmd);
-
-  void ComputeObjectFilenames(
-    std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* gt = nullptr) override;
 
   friend class cmMakefileTargetGenerator;
   friend class cmMakefileExecutableTargetGenerator;

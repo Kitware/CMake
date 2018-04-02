@@ -20,7 +20,6 @@
 #include <chrono>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
-#include <type_traits>
 
 static const char* cmCTestUpdateHandlerUpdateStrings[] = {
   "Unknown", "CVS", "SVN", "BZR", "GIT", "HG", "P4"
@@ -258,37 +257,37 @@ int cmCTestUpdateHandler::DetectVCS(const char* dir)
                      "Check directory: " << sourceDirectory << std::endl,
                      this->Quiet);
   sourceDirectory += "/.svn";
-  if (cmSystemTools::FileExists(sourceDirectory.c_str())) {
+  if (cmSystemTools::FileExists(sourceDirectory)) {
     return cmCTestUpdateHandler::e_SVN;
   }
   sourceDirectory = dir;
   sourceDirectory += "/CVS";
-  if (cmSystemTools::FileExists(sourceDirectory.c_str())) {
+  if (cmSystemTools::FileExists(sourceDirectory)) {
     return cmCTestUpdateHandler::e_CVS;
   }
   sourceDirectory = dir;
   sourceDirectory += "/.bzr";
-  if (cmSystemTools::FileExists(sourceDirectory.c_str())) {
+  if (cmSystemTools::FileExists(sourceDirectory)) {
     return cmCTestUpdateHandler::e_BZR;
   }
   sourceDirectory = dir;
   sourceDirectory += "/.git";
-  if (cmSystemTools::FileExists(sourceDirectory.c_str())) {
+  if (cmSystemTools::FileExists(sourceDirectory)) {
     return cmCTestUpdateHandler::e_GIT;
   }
   sourceDirectory = dir;
   sourceDirectory += "/.hg";
-  if (cmSystemTools::FileExists(sourceDirectory.c_str())) {
+  if (cmSystemTools::FileExists(sourceDirectory)) {
     return cmCTestUpdateHandler::e_HG;
   }
   sourceDirectory = dir;
   sourceDirectory += "/.p4";
-  if (cmSystemTools::FileExists(sourceDirectory.c_str())) {
+  if (cmSystemTools::FileExists(sourceDirectory)) {
     return cmCTestUpdateHandler::e_P4;
   }
   sourceDirectory = dir;
   sourceDirectory += "/.p4config";
-  if (cmSystemTools::FileExists(sourceDirectory.c_str())) {
+  if (cmSystemTools::FileExists(sourceDirectory)) {
     return cmCTestUpdateHandler::e_P4;
   }
   return cmCTestUpdateHandler::e_UNKNOWN;

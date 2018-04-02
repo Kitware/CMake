@@ -207,6 +207,9 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
 
   const char* jobpools =
     this->GetCMakeInstance()->GetState()->GetGlobalProperty("JOB_POOLS");
+  if (!jobpools) {
+    jobpools = this->GetMakefile()->GetDefinition("CMAKE_JOB_POOLS");
+  }
   if (jobpools) {
     cmGlobalNinjaGenerator::WriteComment(
       os, "Pools defined by global property JOB_POOLS");
@@ -241,20 +244,6 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusion(std::ostream& os)
   cmGlobalNinjaGenerator::WriteInclude(os, rulesFilePath,
                                        "Include rules file.");
   os << "\n";
-}
-
-void cmLocalNinjaGenerator::ComputeObjectFilenames(
-  std::map<cmSourceFile const*, std::string>& mapping,
-  cmGeneratorTarget const* gt)
-{
-  // Determine if these object files should use a custom extension
-  char const* custom_ext = gt->GetCustomObjectExtension();
-  for (auto& si : mapping) {
-    cmSourceFile const* sf = si.first;
-    bool keptSourceExtension;
-    si.second = this->GetObjectFileNameWithoutTarget(
-      *sf, gt->ObjectDirectory, &keptSourceExtension, custom_ext);
-  }
 }
 
 void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)

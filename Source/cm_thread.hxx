@@ -7,36 +7,11 @@
 #include "cm_uv.h"
 
 namespace cm {
-class mutex
-{
-  uv_mutex_t _M_;
-
-public:
-  mutex() { uv_mutex_init(&_M_); }
-  ~mutex() { uv_mutex_destroy(&_M_); }
-
-  void lock() { uv_mutex_lock(&_M_); }
-
-  void unlock() { uv_mutex_unlock(&_M_); }
-};
-
-template <typename T>
-class lock_guard
-{
-  T& _mutex;
-
-public:
-  lock_guard(T& m)
-    : _mutex(m)
-  {
-    _mutex.lock();
-  }
-  ~lock_guard() { _mutex.unlock(); }
-};
 
 class shared_mutex
 {
   uv_rwlock_t _M_;
+  CM_DISABLE_COPY(shared_mutex)
 
 public:
   shared_mutex() { uv_rwlock_init(&_M_); }
@@ -55,6 +30,7 @@ template <typename T>
 class shared_lock
 {
   T& _mutex;
+  CM_DISABLE_COPY(shared_lock)
 
 public:
   shared_lock(T& m)
@@ -63,16 +39,6 @@ public:
     _mutex.lock_shared();
   }
   ~shared_lock() { _mutex.unlock_shared(); }
-};
-
-template <typename T>
-class unique_lock : public lock_guard<T>
-{
-public:
-  unique_lock(T& m)
-    : lock_guard<T>(m)
-  {
-  }
 };
 }
 #endif

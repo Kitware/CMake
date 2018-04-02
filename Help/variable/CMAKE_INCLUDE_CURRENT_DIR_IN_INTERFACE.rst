@@ -1,7 +1,7 @@
 CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE
 --------------------------------------
 
-Automatically add the current source- and build directories to the
+Automatically add the current source and build directories to the
 :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target property.
 
 If this variable is enabled, CMake automatically adds for each shared

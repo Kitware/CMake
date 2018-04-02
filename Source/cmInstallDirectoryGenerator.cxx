@@ -72,7 +72,7 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
   // Make sure all dirs have absolute paths.
   cmMakefile const& mf = *this->LocalGenerator->GetMakefile();
   for (std::string& d : dirs) {
-    if (!cmSystemTools::FileIsFullPath(d.c_str())) {
+    if (!cmSystemTools::FileIsFullPath(d)) {
       d = std::string(mf.GetCurrentSourceDirectory()) + "/" + d;
     }
   }

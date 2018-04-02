@@ -4,6 +4,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
+#include "cmDuration.h"
 #include "cmFileTimeComparison.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
@@ -17,7 +18,7 @@
 #include <set>
 #include <stdlib.h>
 #include <string.h>
-#include <type_traits>
+#include <utility>
 
 static const char* cmCTestErrorMatches[] = {
   "^[Bb]us [Ee]rror",
@@ -283,7 +284,7 @@ int cmCTestBuildHandler::ProcessHandler()
                      this->Quiet);
 
   // do we have time for this
-  if (this->CTest->GetRemainingTimeAllowed() < 120) {
+  if (this->CTest->GetRemainingTimeAllowed() < std::chrono::minutes(2)) {
     return 0;
   }
 
@@ -295,7 +296,7 @@ int cmCTestBuildHandler::ProcessHandler()
           cmCTestWarningErrorFileLine[entry].RegularExpressionString)) {
       r.FileIndex = cmCTestWarningErrorFileLine[entry].FileIndex;
       r.LineIndex = cmCTestWarningErrorFileLine[entry].LineIndex;
-      this->ErrorWarningFileLineRegex.push_back(r);
+      this->ErrorWarningFileLineRegex.push_back(std::move(r));
     } else {
       cmCTestLog(
         this->CTest, ERROR_MESSAGE, "Problem Compiling regular expression: "
@@ -634,8 +635,8 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
   }
 }
 
-void cmCTestBuildHandler::GenerateXMLFooter(
-  cmXMLWriter& xml, std::chrono::duration<double> elapsed_build_time)
+void cmCTestBuildHandler::GenerateXMLFooter(cmXMLWriter& xml,
+                                            cmDuration elapsed_build_time)
 {
   xml.StartElement("Log");
   xml.Attribute("Encoding", "base64");
@@ -708,7 +709,7 @@ cmCTestBuildHandler::LaunchHelper::LaunchHelper(cmCTestBuildHandler* handler)
 
     if (this->Handler->UseCTestLaunch) {
       // Enable launcher fragments.
-      cmSystemTools::MakeDirectory(launchDir.c_str());
+      cmSystemTools::MakeDirectory(launchDir);
       this->WriteLauncherConfig();
       std::string launchEnv = "CTEST_LAUNCH_LOGS=";
       launchEnv += launchDir;
@@ -895,7 +896,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
         errorwarning.PreContext.clear();
         errorwarning.PostContext.clear();
         errorwarning.Error = false;
-        this->ErrorsAndWarnings.push_back(errorwarning);
+        this->ErrorsAndWarnings.push_back(std::move(errorwarning));
         this->TotalWarnings++;
       }
     }
@@ -918,7 +919,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
     errorwarning.PreContext.clear();
     errorwarning.PostContext.clear();
     errorwarning.Error = true;
-    this->ErrorsAndWarnings.push_back(errorwarning);
+    this->ErrorsAndWarnings.push_back(std::move(errorwarning));
     this->TotalErrors++;
     cmCTestLog(this->CTest, ERROR_MESSAGE, "There was an error: "
                  << cmsysProcess_GetErrorString(cp) << std::endl);
@@ -1010,7 +1011,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
         this->PreContext.clear();
 
         // Store report
-        this->ErrorsAndWarnings.push_back(errorwarning);
+        this->ErrorsAndWarnings.push_back(std::move(errorwarning));
         this->LastErrorOrWarning = this->ErrorsAndWarnings.end() - 1;
         this->PostContextCount = 0;
       } else {

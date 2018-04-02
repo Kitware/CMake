@@ -53,7 +53,16 @@ endif()
 
 add_subdirectory(lib_shared_and_static)
 
-add_compiler_export_flags()
+if(CMAKE_SYSTEM_NAME MATCHES "AIX" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
+   AND CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY)
+  # With GNU 7 on AIX, passing -fvisibility=hidden when driving the
+  # linker for a shared library drops the so init/destruct symbols.
+  # Just use the modern approach instead of testing the macro.
+  set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+  set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+else()
+  add_compiler_export_flags()
+endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR})
@@ -76,6 +85,7 @@ macro_add_test_library(libshared)
 macro_add_test_library(libstatic)
 
 add_subdirectory(nodeprecated)
+add_subdirectory(includeguard)
 if(NOT BORLAND)
   add_subdirectory(c_identifier)
 endif()

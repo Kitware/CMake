@@ -6,38 +6,48 @@
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmMakefile.h"
-#include "cmOutputConverter.h"
 #include "cmSystemTools.h"
+#include "cmUVHandlePtr.h"
 
-// -- Static variables
-
-static const char* SettingsKeyRcc = "ARCC_SETTINGS_HASH";
+#include <functional>
 
 // -- Class methods
 
 cmQtAutoGeneratorRcc::cmQtAutoGeneratorRcc()
-  : MultiConfig(cmQtAutoGen::WRAP)
-  , SettingsChanged(false)
+  : MultiConfig_(false)
+  , SettingsChanged_(false)
+  , Stage_(StageT::SETTINGS_READ)
+  , Error_(false)
+  , Generate_(false)
+  , BuildFileChanged_(false)
+{
+  // Initialize libuv asynchronous iteration request
+  UVRequest().init(*UVLoop(), &cmQtAutoGeneratorRcc::UVPollStage, this);
+}
+
+cmQtAutoGeneratorRcc::~cmQtAutoGeneratorRcc()
 {
 }
 
-bool cmQtAutoGeneratorRcc::InfoFileRead(cmMakefile* makefile)
+bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
 {
-  // Utility lambdas
-  auto InfoGet = [makefile](const char* key) {
+  // -- Utility lambdas
+  auto InfoGet = [makefile](std::string const& key) {
     return makefile->GetSafeDefinition(key);
   };
-  auto InfoGetList = [makefile](const char* key) -> std::vector<std::string> {
+  auto InfoGetList =
+    [makefile](std::string const& key) -> std::vector<std::string> {
     std::vector<std::string> list;
     cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition(key), list);
     return list;
   };
-  auto InfoGetConfig = [makefile, this](const char* key) -> std::string {
+  auto InfoGetConfig = [makefile,
+                        this](std::string const& key) -> std::string {
     const char* valueConf = nullptr;
     {
       std::string keyConf = key;
       keyConf += '_';
-      keyConf += this->GetInfoConfig();
+      keyConf += InfoConfig();
       valueConf = makefile->GetDefinition(keyConf);
     }
     if (valueConf == nullptr) {
@@ -46,86 +56,203 @@ bool cmQtAutoGeneratorRcc::InfoFileRead(cmMakefile* makefile)
     return std::string(valueConf);
   };
   auto InfoGetConfigList =
-    [&InfoGetConfig](const char* key) -> std::vector<std::string> {
+    [&InfoGetConfig](std::string const& key) -> std::vector<std::string> {
     std::vector<std::string> list;
     cmSystemTools::ExpandListArgument(InfoGetConfig(key), list);
     return list;
   };
 
   // -- Read info file
-  if (!makefile->ReadListFile(this->GetInfoFile().c_str())) {
-    this->LogFileError(cmQtAutoGen::RCC, this->GetInfoFile(),
-                       "File processing failed");
+  if (!makefile->ReadListFile(InfoFile().c_str())) {
+    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "File processing failed");
     return false;
   }
 
-  // -- Meta
-  this->MultiConfig =
-    cmQtAutoGen::MultiConfigType(InfoGet("ARCC_MULTI_CONFIG"));
-  this->ConfigSuffix = InfoGetConfig("ARCC_CONFIG_SUFFIX");
-  if (this->ConfigSuffix.empty()) {
-    this->ConfigSuffix = "_";
-    this->ConfigSuffix += this->GetInfoConfig();
+  // - Configurations
+  MultiConfig_ = makefile->IsOn("ARCC_MULTI_CONFIG");
+
+  // - Directories
+  AutogenBuildDir_ = InfoGet("ARCC_BUILD_DIR");
+  if (AutogenBuildDir_.empty()) {
+    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "Build directory empty");
+    return false;
   }
 
-  this->SettingsFile = InfoGetConfig("ARCC_SETTINGS_FILE");
+  IncludeDir_ = InfoGetConfig("ARCC_INCLUDE_DIR");
+  if (IncludeDir_.empty()) {
+    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "Include directory empty");
+    return false;
+  }
 
-  // - Files and directories
-  this->ProjectSourceDir = InfoGet("ARCC_CMAKE_SOURCE_DIR");
-  this->ProjectBinaryDir = InfoGet("ARCC_CMAKE_BINARY_DIR");
-  this->CurrentSourceDir = InfoGet("ARCC_CMAKE_CURRENT_SOURCE_DIR");
-  this->CurrentBinaryDir = InfoGet("ARCC_CMAKE_CURRENT_BINARY_DIR");
-  this->AutogenBuildDir = InfoGet("ARCC_BUILD_DIR");
-
-  // - Qt environment
-  this->RccExecutable = InfoGet("ARCC_RCC_EXECUTABLE");
-  this->RccListOptions = InfoGetList("ARCC_RCC_LIST_OPTIONS");
+  // - Rcc executable
+  RccExecutable_ = InfoGet("ARCC_RCC_EXECUTABLE");
+  RccListOptions_ = InfoGetList("ARCC_RCC_LIST_OPTIONS");
 
   // - Job
-  this->QrcFile = InfoGet("ARCC_SOURCE");
-  this->RccFile = InfoGet("ARCC_OUTPUT");
-  this->Options = InfoGetConfigList("ARCC_OPTIONS");
-  this->Inputs = InfoGetList("ARCC_INPUTS");
+  QrcFile_ = InfoGet("ARCC_SOURCE");
+  QrcFileName_ = cmSystemTools::GetFilenameName(QrcFile_);
+  QrcFileDir_ = cmSystemTools::GetFilenamePath(QrcFile_);
+  RccPathChecksum_ = InfoGet("ARCC_OUTPUT_CHECKSUM");
+  RccFileName_ = InfoGet("ARCC_OUTPUT_NAME");
+  Options_ = InfoGetConfigList("ARCC_OPTIONS");
+  Inputs_ = InfoGetList("ARCC_INPUTS");
+
+  // - Settings file
+  SettingsFile_ = InfoGetConfig("ARCC_SETTINGS_FILE");
 
   // - Validity checks
-  if (this->SettingsFile.empty()) {
-    this->LogFileError(cmQtAutoGen::RCC, this->GetInfoFile(),
-                       "Settings file name missing");
+  if (SettingsFile_.empty()) {
+    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "Settings file name missing");
     return false;
   }
-  if (this->AutogenBuildDir.empty()) {
-    this->LogFileError(cmQtAutoGen::RCC, this->GetInfoFile(),
-                       "Autogen build directory missing");
+  if (AutogenBuildDir_.empty()) {
+    Log().ErrorFile(GeneratorT::RCC, InfoFile(),
+                    "Autogen build directory missing");
     return false;
   }
-  if (this->RccExecutable.empty()) {
-    this->LogFileError(cmQtAutoGen::RCC, this->GetInfoFile(),
-                       "rcc executable missing");
+  if (RccExecutable_.empty()) {
+    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "rcc executable missing");
     return false;
   }
-  if (this->QrcFile.empty()) {
-    this->LogFileError(cmQtAutoGen::RCC, this->GetInfoFile(),
-                       "rcc input file missing");
+  if (QrcFile_.empty()) {
+    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "rcc input file missing");
     return false;
   }
-  if (this->RccFile.empty()) {
-    this->LogFileError(cmQtAutoGen::RCC, this->GetInfoFile(),
-                       "rcc output file missing");
+  if (RccFileName_.empty()) {
+    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "rcc output file missing");
     return false;
   }
 
   // Init derived information
   // ------------------------
 
-  // Init file path checksum generator
-  this->FilePathChecksum.setupParentDirs(
-    this->CurrentSourceDir, this->CurrentBinaryDir, this->ProjectSourceDir,
-    this->ProjectBinaryDir);
+  RccFilePublic_ = AutogenBuildDir_;
+  RccFilePublic_ += '/';
+  RccFilePublic_ += RccPathChecksum_;
+  RccFilePublic_ += '/';
+  RccFilePublic_ += RccFileName_;
+
+  // Compute rcc output file name
+  if (IsMultiConfig()) {
+    RccFileOutput_ = AutogenBuildDir_;
+    RccFileOutput_ += '/';
+    RccFileOutput_ += IncludeDir_;
+    RccFileOutput_ += '/';
+    RccFileOutput_ += MultiConfigOutput();
+  } else {
+    RccFileOutput_ = RccFilePublic_;
+  }
 
   return true;
 }
 
-void cmQtAutoGeneratorRcc::SettingsFileRead(cmMakefile* makefile)
+bool cmQtAutoGeneratorRcc::Process()
+{
+  // Run libuv event loop
+  UVRequest().send();
+  if (uv_run(UVLoop(), UV_RUN_DEFAULT) == 0) {
+    if (Error_) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+  return true;
+}
+
+void cmQtAutoGeneratorRcc::UVPollStage(uv_async_t* handle)
+{
+  reinterpret_cast<cmQtAutoGeneratorRcc*>(handle->data)->PollStage();
+}
+
+void cmQtAutoGeneratorRcc::PollStage()
+{
+  switch (Stage_) {
+    // -- Initialize
+    case StageT::SETTINGS_READ:
+      SettingsFileRead();
+      SetStage(StageT::TEST_QRC_RCC_FILES);
+      break;
+
+    // -- Change detection
+    case StageT::TEST_QRC_RCC_FILES:
+      if (TestQrcRccFiles()) {
+        SetStage(StageT::GENERATE);
+      } else {
+        SetStage(StageT::TEST_RESOURCES_READ);
+      }
+      break;
+    case StageT::TEST_RESOURCES_READ:
+      if (TestResourcesRead()) {
+        SetStage(StageT::TEST_RESOURCES);
+      }
+      break;
+    case StageT::TEST_RESOURCES:
+      if (TestResources()) {
+        SetStage(StageT::GENERATE);
+      } else {
+        SetStage(StageT::TEST_INFO_FILE);
+      }
+      break;
+    case StageT::TEST_INFO_FILE:
+      TestInfoFile();
+      SetStage(StageT::GENERATE_WRAPPER);
+      break;
+
+    // -- Generation
+    case StageT::GENERATE:
+      GenerateParentDir();
+      SetStage(StageT::GENERATE_RCC);
+      break;
+    case StageT::GENERATE_RCC:
+      if (GenerateRcc()) {
+        SetStage(StageT::GENERATE_WRAPPER);
+      }
+      break;
+    case StageT::GENERATE_WRAPPER:
+      GenerateWrapper();
+      SetStage(StageT::SETTINGS_WRITE);
+      break;
+
+    // -- Finalize
+    case StageT::SETTINGS_WRITE:
+      SettingsFileWrite();
+      SetStage(StageT::FINISH);
+      break;
+    case StageT::FINISH:
+      // Clear all libuv handles
+      UVRequest().reset();
+      // Set highest END stage manually
+      Stage_ = StageT::END;
+      break;
+    case StageT::END:
+      break;
+  }
+}
+
+void cmQtAutoGeneratorRcc::SetStage(StageT stage)
+{
+  if (Error_) {
+    stage = StageT::FINISH;
+  }
+  // Only allow to increase the stage
+  if (Stage_ < stage) {
+    Stage_ = stage;
+    UVRequest().send();
+  }
+}
+
+std::string cmQtAutoGeneratorRcc::MultiConfigOutput() const
+{
+  static std::string const suffix = "_CMAKE_";
+  std::string res;
+  res += RccPathChecksum_;
+  res += '/';
+  res += AppendFilenameSuffix(RccFileName_, suffix);
+  return res;
+}
+
+void cmQtAutoGeneratorRcc::SettingsFileRead()
 {
   // Compose current settings strings
   {
@@ -133,293 +260,379 @@ void cmQtAutoGeneratorRcc::SettingsFileRead(cmMakefile* makefile)
     std::string const sep(" ~~~ ");
     {
       std::string str;
-      str += this->RccExecutable;
+      str += RccExecutable_;
       str += sep;
-      str += cmJoin(this->RccListOptions, ";");
+      str += cmJoin(RccListOptions_, ";");
       str += sep;
-      str += this->QrcFile;
+      str += QrcFile_;
       str += sep;
-      str += this->RccFile;
+      str += RccPathChecksum_;
       str += sep;
-      str += cmJoin(this->Options, ";");
+      str += RccFileName_;
       str += sep;
-      str += cmJoin(this->Inputs, ";");
+      str += cmJoin(Options_, ";");
       str += sep;
-      this->SettingsString = crypt.HashString(str);
+      str += cmJoin(Inputs_, ";");
+      str += sep;
+      SettingsString_ = crypt.HashString(str);
     }
   }
 
   // Read old settings
-  if (makefile->ReadListFile(this->SettingsFile.c_str())) {
-    {
-      auto SMatch = [makefile](const char* key, std::string const& value) {
-        return (value == makefile->GetSafeDefinition(key));
-      };
-      if (!SMatch(SettingsKeyRcc, this->SettingsString)) {
-        this->SettingsChanged = true;
+  {
+    std::string content;
+    if (FileSys().FileRead(content, SettingsFile_)) {
+      SettingsChanged_ = (SettingsString_ != SettingsFind(content, "rcc"));
+      // In case any setting changed remove the old settings file.
+      // This triggers a full rebuild on the next run if the current
+      // build is aborted before writing the current settings in the end.
+      if (SettingsChanged_) {
+        FileSys().FileRemove(SettingsFile_);
       }
+    } else {
+      SettingsChanged_ = true;
     }
-    // In case any setting changed remove the old settings file.
-    // This triggers a full rebuild on the next run if the current
-    // build is aborted before writing the current settings in the end.
-    if (this->SettingsChanged) {
-      cmSystemTools::RemoveFile(this->SettingsFile);
-    }
-  } else {
-    // If the file could not be read re-generate everythiung.
-    this->SettingsChanged = true;
   }
 }
 
-bool cmQtAutoGeneratorRcc::SettingsFileWrite()
+void cmQtAutoGeneratorRcc::SettingsFileWrite()
 {
-  bool success = true;
   // Only write if any setting changed
-  if (this->SettingsChanged) {
-    if (this->GetVerbose()) {
-      this->LogInfo(cmQtAutoGen::RCC, "Writing settings file " +
-                      cmQtAutoGen::Quoted(this->SettingsFile));
-    }
-    // Compose settings file content
-    std::string settings;
-    {
-      auto SettingAppend = [&settings](const char* key,
-                                       std::string const& value) {
-        settings += "set(";
-        settings += key;
-        settings += " ";
-        settings += cmOutputConverter::EscapeForCMake(value);
-        settings += ")\n";
-      };
-      SettingAppend(SettingsKeyRcc, this->SettingsString);
+  if (SettingsChanged_) {
+    if (Log().Verbose()) {
+      Log().Info(GeneratorT::RCC,
+                 "Writing settings file " + Quoted(SettingsFile_));
     }
     // Write settings file
-    if (!this->FileWrite(cmQtAutoGen::RCC, this->SettingsFile, settings)) {
-      this->LogFileError(cmQtAutoGen::RCC, this->SettingsFile,
-                         "Settings file writing failed");
+    std::string content = "rcc:";
+    content += SettingsString_;
+    content += '\n';
+    if (!FileSys().FileWrite(GeneratorT::RCC, SettingsFile_, content)) {
+      Log().ErrorFile(GeneratorT::RCC, SettingsFile_,
+                      "Settings file writing failed");
       // Remove old settings file to trigger a full rebuild on the next run
-      cmSystemTools::RemoveFile(this->SettingsFile);
-      success = false;
+      FileSys().FileRemove(SettingsFile_);
+      Error_ = true;
     }
   }
-  return success;
 }
 
-bool cmQtAutoGeneratorRcc::Process(cmMakefile* makefile)
+bool cmQtAutoGeneratorRcc::TestQrcRccFiles()
 {
-  // Read info file
-  if (!this->InfoFileRead(makefile)) {
-    return false;
+  // Do basic checks if rcc generation is required
+
+  // Test if the rcc output file exists
+  if (!FileSys().FileExists(RccFileOutput_)) {
+    if (Log().Verbose()) {
+      std::string reason = "Generating ";
+      reason += Quoted(RccFileOutput_);
+      reason += " from its source file ";
+      reason += Quoted(QrcFile_);
+      reason += " because it doesn't exist";
+      Log().Info(GeneratorT::RCC, reason);
+    }
+    Generate_ = true;
+    return Generate_;
   }
-  // Read latest settings
-  this->SettingsFileRead(makefile);
-  // Generate rcc file
-  if (!this->RccGenerate()) {
-    return false;
+
+  // Test if the settings changed
+  if (SettingsChanged_) {
+    if (Log().Verbose()) {
+      std::string reason = "Generating ";
+      reason += Quoted(RccFileOutput_);
+      reason += " from ";
+      reason += Quoted(QrcFile_);
+      reason += " because the RCC settings changed";
+      Log().Info(GeneratorT::RCC, reason);
+    }
+    Generate_ = true;
+    return Generate_;
   }
-  // Write latest settings
-  if (!this->SettingsFileWrite()) {
-    return false;
+
+  // Test if the rcc output file is older than the .qrc file
+  {
+    bool isOlder = false;
+    {
+      std::string error;
+      isOlder = FileSys().FileIsOlderThan(RccFileOutput_, QrcFile_, &error);
+      if (!error.empty()) {
+        Log().ErrorFile(GeneratorT::RCC, QrcFile_, error);
+        Error_ = true;
+      }
+    }
+    if (isOlder) {
+      if (Log().Verbose()) {
+        std::string reason = "Generating ";
+        reason += Quoted(RccFileOutput_);
+        reason += " because it is older than ";
+        reason += Quoted(QrcFile_);
+        Log().Info(GeneratorT::RCC, reason);
+      }
+      Generate_ = true;
+    }
   }
+
+  return Generate_;
+}
+
+bool cmQtAutoGeneratorRcc::TestResourcesRead()
+{
+  if (!Inputs_.empty()) {
+    // Inputs are known already
+    return true;
+  }
+
+  if (!RccListOptions_.empty()) {
+    // Start a rcc list process and parse the output
+    if (Process_) {
+      // Process is running already
+      if (Process_->IsFinished()) {
+        // Process is finished
+        if (!ProcessResult_.error()) {
+          // Process success
+          std::string parseError;
+          if (!RccListParseOutput(ProcessResult_.StdOut, ProcessResult_.StdErr,
+                                  Inputs_, parseError)) {
+            Log().ErrorFile(GeneratorT::RCC, QrcFile_, parseError);
+            Error_ = true;
+          }
+        } else {
+          Log().ErrorFile(GeneratorT::RCC, QrcFile_,
+                          ProcessResult_.ErrorMessage);
+          Error_ = true;
+        }
+        // Clean up
+        Process_.reset();
+        ProcessResult_.reset();
+      } else {
+        // Process is not finished, yet.
+        return false;
+      }
+    } else {
+      // Start a new process
+      // rcc prints relative entry paths when started in the directory of the
+      // qrc file with a pathless qrc file name argument.
+      // This is important because on Windows absolute paths returned by rcc
+      // might contain bad multibyte characters when the qrc file path
+      // contains non-ASCII pcharacters.
+      std::vector<std::string> cmd;
+      cmd.push_back(RccExecutable_);
+      cmd.insert(cmd.end(), RccListOptions_.begin(), RccListOptions_.end());
+      cmd.push_back(QrcFileName_);
+      // We're done here if the process fails to start
+      return !StartProcess(QrcFileDir_, cmd, false);
+    }
+  } else {
+    // rcc does not support the --list command.
+    // Read the qrc file content and parse it.
+    std::string qrcContent;
+    if (FileSys().FileRead(GeneratorT::RCC, qrcContent, QrcFile_)) {
+      RccListParseContent(qrcContent, Inputs_);
+    }
+  }
+
+  if (!Inputs_.empty()) {
+    // Convert relative paths to absolute paths
+    RccListConvertFullPath(QrcFileDir_, Inputs_);
+  }
+
   return true;
 }
 
-/**
- * @return True on success
- */
-bool cmQtAutoGeneratorRcc::RccGenerate()
+bool cmQtAutoGeneratorRcc::TestResources()
 {
-  bool success = true;
-  bool rccGenerated = false;
-
-  std::string rccFileAbs;
+  if (Inputs_.empty()) {
+    return true;
+  }
   {
-    std::string suffix;
-    switch (this->MultiConfig) {
-      case cmQtAutoGen::SINGLE:
-        break;
-      case cmQtAutoGen::WRAP:
-        suffix = "_CMAKE";
-        suffix += this->ConfigSuffix;
-        suffix += "_";
-        break;
-      case cmQtAutoGen::FULL:
-        suffix = this->ConfigSuffix;
-        break;
-    }
-    rccFileAbs = cmQtAutoGen::AppendFilenameSuffix(this->RccFile, suffix);
-  }
-  std::string const rccFileRel = cmSystemTools::RelativePath(
-    this->AutogenBuildDir.c_str(), rccFileAbs.c_str());
-
-  // Check if regeneration is required
-  bool generate = false;
-  std::string generateReason;
-  if (!cmSystemTools::FileExists(this->QrcFile)) {
-    {
-      std::string error = "Could not find the file\n  ";
-      error += cmQtAutoGen::Quoted(this->QrcFile);
-      this->LogError(cmQtAutoGen::RCC, error);
-    }
-    success = false;
-  }
-  if (success && !generate && !cmSystemTools::FileExists(rccFileAbs.c_str())) {
-    if (this->GetVerbose()) {
-      generateReason = "Generating ";
-      generateReason += cmQtAutoGen::Quoted(rccFileAbs);
-      generateReason += " from its source file ";
-      generateReason += cmQtAutoGen::Quoted(this->QrcFile);
-      generateReason += " because it doesn't exist";
-    }
-    generate = true;
-  }
-  if (success && !generate && this->SettingsChanged) {
-    if (this->GetVerbose()) {
-      generateReason = "Generating ";
-      generateReason += cmQtAutoGen::Quoted(rccFileAbs);
-      generateReason += " from ";
-      generateReason += cmQtAutoGen::Quoted(this->QrcFile);
-      generateReason += " because the RCC settings changed";
-    }
-    generate = true;
-  }
-  if (success && !generate) {
     std::string error;
-    if (FileIsOlderThan(rccFileAbs, this->QrcFile, &error)) {
-      if (this->GetVerbose()) {
-        generateReason = "Generating ";
-        generateReason += cmQtAutoGen::Quoted(rccFileAbs);
-        generateReason += " because it is older than ";
-        generateReason += cmQtAutoGen::Quoted(this->QrcFile);
+    for (std::string const& resFile : Inputs_) {
+      // Check if the resource file exists
+      if (!FileSys().FileExists(resFile)) {
+        error = "Could not find the resource file\n  ";
+        error += Quoted(resFile);
+        error += '\n';
+        Log().ErrorFile(GeneratorT::RCC, QrcFile_, error);
+        Error_ = true;
+        break;
       }
-      generate = true;
-    } else {
+      // Check if the resource file is newer than the build file
+      if (FileSys().FileIsOlderThan(RccFileOutput_, resFile, &error)) {
+        if (Log().Verbose()) {
+          std::string reason = "Generating ";
+          reason += Quoted(RccFileOutput_);
+          reason += " from ";
+          reason += Quoted(QrcFile_);
+          reason += " because it is older than ";
+          reason += Quoted(resFile);
+          Log().Info(GeneratorT::RCC, reason);
+        }
+        Generate_ = true;
+        break;
+      }
+      // Print error and break on demand
       if (!error.empty()) {
-        this->LogError(cmQtAutoGen::RCC, error);
-        success = false;
+        Log().ErrorFile(GeneratorT::RCC, QrcFile_, error);
+        Error_ = true;
+        break;
       }
     }
   }
-  if (success && !generate) {
-    // Acquire input file list
-    std::vector<std::string> readFiles;
-    std::vector<std::string> const* files = nullptr;
-    if (!this->Inputs.empty()) {
-      files = &this->Inputs;
-    } else {
-      // Read input file list from qrc file
+
+  return Generate_;
+}
+
+void cmQtAutoGeneratorRcc::TestInfoFile()
+{
+  // Test if the rcc output file is older than the info file
+  {
+    bool isOlder = false;
+    {
       std::string error;
-      if (cmQtAutoGen::RccListInputs(this->RccExecutable, this->RccListOptions,
-                                     this->QrcFile, readFiles, &error)) {
-        files = &readFiles;
-      } else {
-        this->LogFileError(cmQtAutoGen::RCC, this->QrcFile, error);
-        success = false;
+      isOlder = FileSys().FileIsOlderThan(RccFileOutput_, InfoFile(), &error);
+      if (!error.empty()) {
+        Log().ErrorFile(GeneratorT::RCC, QrcFile_, error);
+        Error_ = true;
       }
     }
-    // Test if any input file is newer than the build file
-    if (files != nullptr) {
-      std::string error;
-      for (std::string const& resFile : *files) {
-        if (!cmSystemTools::FileExists(resFile.c_str())) {
-          error = "Could not find the file\n  ";
-          error += cmQtAutoGen::Quoted(resFile);
-          error += "\nwhich is listed in\n  ";
-          error += cmQtAutoGen::Quoted(this->QrcFile);
-          break;
-        }
-        if (FileIsOlderThan(rccFileAbs, resFile, &error)) {
-          if (this->GetVerbose()) {
-            generateReason = "Generating ";
-            generateReason += cmQtAutoGen::Quoted(rccFileAbs);
-            generateReason += " from ";
-            generateReason += cmQtAutoGen::Quoted(this->QrcFile);
-            generateReason += " because it is older than ";
-            generateReason += cmQtAutoGen::Quoted(resFile);
-          }
-          generate = true;
-          break;
-        }
-        if (!error.empty()) {
-          break;
-        }
+    if (isOlder) {
+      if (Log().Verbose()) {
+        std::string reason = "Touching ";
+        reason += Quoted(RccFileOutput_);
+        reason += " because it is older than ";
+        reason += Quoted(InfoFile());
+        Log().Info(GeneratorT::RCC, reason);
       }
-      // Print error
-      if (!error.empty()) {
-        this->LogError(cmQtAutoGen::RCC, error);
-        success = false;
-      }
+      // Touch build file
+      FileSys().Touch(RccFileOutput_);
+      BuildFileChanged_ = true;
     }
   }
-  // Regenerate on demand
-  if (generate) {
-    // Log
-    if (this->GetVerbose()) {
-      this->LogBold("Generating RCC source " + rccFileRel);
-      this->LogInfo(cmQtAutoGen::RCC, generateReason);
-    }
+}
 
-    // Make sure the parent directory exists
-    if (this->MakeParentDirectory(cmQtAutoGen::RCC, rccFileAbs)) {
-      // Compose rcc command
-      std::vector<std::string> cmd;
-      cmd.push_back(this->RccExecutable);
-      cmd.insert(cmd.end(), this->Options.begin(), this->Options.end());
-      cmd.push_back("-o");
-      cmd.push_back(rccFileAbs);
-      cmd.push_back(this->QrcFile);
+void cmQtAutoGeneratorRcc::GenerateParentDir()
+{
+  // Make sure the parent directory exists
+  if (!FileSys().MakeParentDirectory(GeneratorT::RCC, RccFileOutput_)) {
+    Error_ = true;
+  }
+}
 
-      std::string output;
-      if (this->RunCommand(cmd, output)) {
-        // Success
-        rccGenerated = true;
+/**
+ * @return True when finished
+ */
+bool cmQtAutoGeneratorRcc::GenerateRcc()
+{
+  if (!Generate_) {
+    // Nothing to do
+    return true;
+  }
+
+  if (Process_) {
+    // Process is running already
+    if (Process_->IsFinished()) {
+      // Process is finished
+      if (!ProcessResult_.error()) {
+        // Process success
+        BuildFileChanged_ = true;
       } else {
+        // Process failed
         {
-          std::string emsg = "rcc failed for\n  ";
-          emsg += cmQtAutoGen::Quoted(this->QrcFile);
-          this->LogCommandError(cmQtAutoGen::RCC, emsg, cmd, output);
+          std::string emsg = "The rcc process failed to compile\n  ";
+          emsg += Quoted(QrcFile_);
+          emsg += "\ninto\n  ";
+          emsg += Quoted(RccFileOutput_);
+          if (ProcessResult_.error()) {
+            emsg += "\n";
+            emsg += ProcessResult_.ErrorMessage;
+          }
+          Log().ErrorCommand(GeneratorT::RCC, emsg, Process_->Setup().Command,
+                             ProcessResult_.StdOut);
         }
-        cmSystemTools::RemoveFile(rccFileAbs);
-        success = false;
+        FileSys().FileRemove(RccFileOutput_);
+        Error_ = true;
       }
+      // Clean up
+      Process_.reset();
+      ProcessResult_.reset();
     } else {
-      // Parent directory creation failed
-      success = false;
+      // Process is not finished, yet.
+      return false;
     }
+  } else {
+    // Start a rcc process
+    std::vector<std::string> cmd;
+    cmd.push_back(RccExecutable_);
+    cmd.insert(cmd.end(), Options_.begin(), Options_.end());
+    cmd.push_back("-o");
+    cmd.push_back(RccFileOutput_);
+    cmd.push_back(QrcFile_);
+    // We're done here if the process fails to start
+    return !StartProcess(AutogenBuildDir_, cmd, true);
   }
 
+  return true;
+}
+
+void cmQtAutoGeneratorRcc::GenerateWrapper()
+{
   // Generate a wrapper source file on demand
-  if (success && (this->MultiConfig == cmQtAutoGen::WRAP)) {
-    // Wrapper file name
-    std::string const& wrapperFileAbs = this->RccFile;
-    std::string const wrapperFileRel = cmSystemTools::RelativePath(
-      this->AutogenBuildDir.c_str(), wrapperFileAbs.c_str());
+  if (IsMultiConfig()) {
     // Wrapper file content
-    std::string content = "// This is an autogenerated configuration "
-                          "wrapper file. Changes will be overwritten.\n"
-                          "#include \"";
-    content += cmSystemTools::GetFilenameName(rccFileRel);
-    content += "\"\n";
+    std::string content;
+    content += "// This is an autogenerated configuration wrapper file.\n";
+    content += "// Changes will be overwritten.\n";
+    content += "#include <";
+    content += MultiConfigOutput();
+    content += ">\n";
+
     // Write content to file
-    if (this->FileDiffers(wrapperFileAbs, content)) {
+    if (FileSys().FileDiffers(RccFilePublic_, content)) {
       // Write new wrapper file
-      if (this->GetVerbose()) {
-        this->LogBold("Generating RCC wrapper " + wrapperFileRel);
+      if (Log().Verbose()) {
+        Log().Info(GeneratorT::RCC,
+                   "Generating RCC wrapper file " + RccFilePublic_);
       }
-      if (!this->FileWrite(cmQtAutoGen::RCC, wrapperFileAbs, content)) {
-        this->LogFileError(cmQtAutoGen::RCC, wrapperFileAbs,
-                           "rcc wrapper file writing failed");
-        success = false;
+      if (!FileSys().FileWrite(GeneratorT::RCC, RccFilePublic_, content)) {
+        Log().ErrorFile(GeneratorT::RCC, RccFilePublic_,
+                        "RCC wrapper file writing failed");
+        Error_ = true;
       }
-    } else if (rccGenerated) {
+    } else if (BuildFileChanged_) {
       // Just touch the wrapper file
-      if (this->GetVerbose()) {
-        this->LogInfo(cmQtAutoGen::RCC,
-                      "Touching RCC wrapper " + wrapperFileRel);
+      if (Log().Verbose()) {
+        Log().Info(GeneratorT::RCC,
+                   "Touching RCC wrapper file " + RccFilePublic_);
       }
-      cmSystemTools::Touch(wrapperFileAbs, false);
+      FileSys().Touch(RccFilePublic_);
     }
   }
+}
 
-  return success;
+bool cmQtAutoGeneratorRcc::StartProcess(
+  std::string const& workingDirectory, std::vector<std::string> const& command,
+  bool mergedOutput)
+{
+  // Log command
+  if (Log().Verbose()) {
+    std::string msg = "Running command:\n";
+    msg += QuotedCommand(command);
+    msg += '\n';
+    Log().Info(GeneratorT::RCC, msg);
+  }
+
+  // Create process handler
+  Process_ = cm::make_unique<ReadOnlyProcessT>();
+  Process_->setup(&ProcessResult_, mergedOutput, command, workingDirectory);
+  // Start process
+  if (!Process_->start(UVLoop(),
+                       std::bind(&cm::uv_async_ptr::send, &UVRequest()))) {
+    Log().ErrorFile(GeneratorT::RCC, QrcFile_, ProcessResult_.ErrorMessage);
+    Error_ = true;
+    // Clean up
+    Process_.reset();
+    ProcessResult_.reset();
+    return false;
+  }
+  return true;
 }

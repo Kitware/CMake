@@ -9,7 +9,8 @@ project (CudaOnlySeparateCompilation CUDA)
 #and executables.
 #We complicate the matter by also testing that multiple static libraries
 #all containing cuda separable compilation code links properly
-string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=compute_30")
+string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=\\\"compute_30,sm_30,sm_35\\\"")
+string(APPEND CMAKE_CUDA_FLAGS " --generate-code=arch=compute_50,code=[compute_50,sm_50,sm_52]")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CUDA_STANDARD 11)
 

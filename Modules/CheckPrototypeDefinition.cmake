@@ -5,7 +5,7 @@
 # CheckPrototypeDefinition
 # ------------------------
 #
-# Check if the protoype we expect is correct.
+# Check if the prototype we expect is correct.
 #
 # check_prototype_definition(FUNCTION PROTOTYPE RETURN HEADER VARIABLE)
 #
@@ -41,9 +41,9 @@
 
 #
 
-
 get_filename_component(__check_proto_def_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
+include_guard(GLOBAL)
 
 function(CHECK_PROTOTYPE_DEFINITION _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIABLE)
 

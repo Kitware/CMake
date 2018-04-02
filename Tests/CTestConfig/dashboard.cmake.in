@@ -1,4 +1,4 @@
-set(CMAKE_CONFIGURATION_TYPES "@CMAKE_CONFIGURATION_TYPES@")
+set(_isMultiConfig "@_isMultiConfig@")
 set(CTEST_SOURCE_DIRECTORY "@CMake_SOURCE_DIR@/Tests/CTestConfig")
 set(CTEST_BINARY_DIRECTORY "@CMake_BINARY_DIR@/Tests/CTestConfig/@cfg@-dashboard")
 
@@ -11,7 +11,7 @@ message("CMAKE_COMMAND='${CMAKE_COMMAND}'")
 message("CMAKE_CTEST_COMMAND='${CMAKE_CTEST_COMMAND}'")
 
 set(arg "")
-if(NOT CMAKE_CONFIGURATION_TYPES)
+if(NOT _isMultiConfig)
   set(arg "-DCMAKE_BUILD_TYPE:STRING=@cfg@")
 endif()
 

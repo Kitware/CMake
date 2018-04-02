@@ -146,8 +146,10 @@ The options are:
   Specify the primary input source file to the command.  This is
   treated just like any value given to the ``DEPENDS`` option
   but also suggests to Visual Studio generators where to hang
-  the custom command.  At most one custom command may specify a
-  given source file as its main dependency.
+  the custom command. Each source file may have at most one command
+  specifying it as its main dependency. A compile command (i.e. for a
+  library or an executable) counts as an implicit main dependency which
+  gets silently overwritten by a custom command specification.
 
 ``OUTPUT``
   Specify the output files the command is expected to produce.

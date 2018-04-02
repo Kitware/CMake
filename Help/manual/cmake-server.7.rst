@@ -162,7 +162,7 @@ When the server is busy for a long time, it is polite to send back replies of
 type "progress" to the client. These will contain a "progressMessage" with a
 string describing the action currently taking place as well as
 "progressMinimum", "progressMaximum" and "progressCurrent" with integer values
-describing the range of progess.
+describing the range of progress.
 
 Messages of type "progress" will be followed by more "progress" messages or with
 a message of type "reply" or "error" that complete the request.
@@ -289,6 +289,10 @@ Protocol version 1.0 requires the following attributes to be set:
   * "extraGenerator" (optional!) with the extra generator to be used
   * "platform" with the generator platform (if supported by the generator)
   * "toolset" with the generator toolset (if supported by the generator)
+
+Protocol version 1.2 makes all but the build directory optional, provided
+there is a valid cache in the build directory that contains all the other
+information already.
 
 Example::
 
@@ -533,7 +537,7 @@ Each target object can have the following keys:
   with the sysroot path.
 "fileGroups"
   contains the source files making up the target.
-"crossReferences"
+  "crossReferences"
   contains the location of the target in the corresponding CMakeLists.txt
   file and the locations of the related statements like "target_link_libraries"
 

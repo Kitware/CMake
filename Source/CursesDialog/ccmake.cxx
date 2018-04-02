@@ -75,6 +75,7 @@ int main(int argc, char const* const* argv)
   argc = encoding_args.argc();
   argv = encoding_args.argv();
 
+  cmSystemTools::InitializeLibUV();
   cmSystemTools::FindCMakeResources(argv[0]);
   cmDocumentation doc;
   doc.addCMakeStandardDocSections();

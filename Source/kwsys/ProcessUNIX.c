@@ -231,7 +231,7 @@ struct kwsysProcess_s
      when reaping PIDs or modifying this array to avoid race conditions.  */
   volatile pid_t* volatile ForkPIDs;
 
-  /* Flag for whether the children were terminated by a faild select.  */
+  /* Flag for whether the children were terminated by a failed select.  */
   int SelectError;
 
   /* The timeout length.  */

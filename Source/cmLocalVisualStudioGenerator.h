@@ -44,9 +44,9 @@ public:
   virtual std::string ComputeLongestObjectDirectory(
     cmGeneratorTarget const*) const = 0;
 
-  virtual void ComputeObjectFilenames(
+  void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* = 0);
+    cmGeneratorTarget const* = 0) override;
 
 protected:
   virtual const char* ReportErrorLabel() const;

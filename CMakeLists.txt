@@ -2,7 +2,11 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideC.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideCXX.cmake)
 project(CMake)
+unset(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX)
+unset(CMAKE_USER_MAKE_RULES_OVERRIDE_C)
 
 # Make sure we can find internal find_package modules only used for
 # building CMake and not for shipping externally
@@ -60,11 +64,20 @@ if(NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMake_NO_CXX_STANDARD)
   if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.14)
     set(CMAKE_CXX_STANDARD 98)
   else()
-    include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx14_cstdio.cmake)
-    if(NOT CMake_CXX14_CSTDIO_BROKEN)
-      set(CMAKE_CXX_STANDARD 14)
+    if(NOT CMAKE_VERSION VERSION_LESS 3.8)
+      include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx17_check.cmake)
     else()
-      set(CMAKE_CXX_STANDARD 11)
+      set(CMake_CXX17_BROKEN 1)
+    endif()
+    if(NOT CMake_CXX17_BROKEN)
+      set(CMAKE_CXX_STANDARD 17)
+    else()
+      include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx14_check.cmake)
+      if(NOT CMake_CXX14_BROKEN)
+        set(CMAKE_CXX_STANDARD 14)
+      else()
+        set(CMAKE_CXX_STANDARD 11)
+      endif()
     endif()
   endif()
 endif()
@@ -297,6 +310,8 @@ endmacro()
 # Simply to improve readability of the main script.
 #-----------------------------------------------------------------------
 macro (CMAKE_BUILD_UTILITIES)
+  find_package(Threads)
+
   #---------------------------------------------------------------------
   # Create the kwsys library for CMake.
   set(KWSYS_NAMESPACE cmsys)

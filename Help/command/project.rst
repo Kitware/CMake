@@ -46,10 +46,14 @@ variable will be set to its argument. The argument must be a string with short
 description of the project (only a few words).
 
 Optionally you can specify which languages your project supports.
-Example languages are ``C``, ``CXX`` (i.e.  C++), ``Fortran``, etc.
+Example languages include ``C``, ``CXX`` (i.e.  C++), ``CUDA``,
+``Fortran``, and ``ASM``.
 By default ``C`` and ``CXX`` are enabled if no language options are
 given.  Specify language ``NONE``, or use the ``LANGUAGES`` keyword
 and list no languages, to skip enabling any languages.
+
+If enabling ``ASM``, list it last so that CMake can check whether
+compilers for other languages like ``C`` work for assembly too.
 
 If a variable exists called :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`,
 the file pointed to by that variable will be included as the last step of the

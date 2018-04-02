@@ -31,10 +31,10 @@ std::string cmLocalXCodeGenerator::GetTargetDirectory(
 }
 
 void cmLocalXCodeGenerator::AppendFlagEscape(std::string& flags,
-                                             const std::string& rawFlag)
+                                             const std::string& rawFlag) const
 {
-  cmGlobalXCodeGenerator* gg =
-    static_cast<cmGlobalXCodeGenerator*>(this->GlobalGenerator);
+  const cmGlobalXCodeGenerator* gg =
+    static_cast<const cmGlobalXCodeGenerator*>(this->GlobalGenerator);
   gg->AppendFlag(flags, rawFlag);
 }
 

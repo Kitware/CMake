@@ -765,7 +765,7 @@ endfunction()
 #   ``WORKING_DIRECTORY``
 #     This will be the working directory for the test. If specified it will
 #     also be the output directory used for the log file of the test run.
-#     If not specifed the temporary directory ``${CMAKE_BINARY_DIR}/Matlab`` will
+#     If not specified the temporary directory ``${CMAKE_BINARY_DIR}/Matlab`` will
 #     be used as the working directory and the log location.
 #
 function(matlab_add_unit_test)

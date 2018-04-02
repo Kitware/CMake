@@ -8,6 +8,10 @@ endif()
 
 set(CMAKE_BUILD_TYPE Debug)
 
+# for rpm packages execute flag must be set for shared libs if debuginfo
+# packages are generated
+set(CPACK_RPM_INSTALL_WITH_EXEC TRUE)
+
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test_lib.hpp"
     "int test_lib();\n")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test_lib.cpp"

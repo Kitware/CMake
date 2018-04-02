@@ -167,7 +167,7 @@ this step and must contain
   variable does not need to be set as it is implicitly set to package generator
   specific prefix.
 
-Optional verification phase is generator specific and is optionaly executed.
+Optional verification phase is generator specific and is optionally executed.
 This phase is executed if '<test_name>/VerifyResult.cmake' script exists.
 
 VerifyResult.cmake script also automatically prints out standard output and

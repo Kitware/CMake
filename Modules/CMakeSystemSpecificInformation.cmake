@@ -37,7 +37,6 @@ if(NOT _INCLUDED_SYSTEM_INFO_FILE)
    endif()
 endif()
 
-
 # optionally include a file which can do extra-generator specific things, e.g.
 # CMakeFindEclipseCDT4.cmake asks gcc for the system include dirs for the Eclipse CDT4 generator
 if(CMAKE_EXTRA_GENERATOR)

@@ -118,10 +118,11 @@ public:
                                   cmGeneratorTarget const* target,
                                   const std::string& lang);
   ///! Append flags to a string.
-  virtual void AppendFlags(std::string& flags, const std::string& newFlags);
-  virtual void AppendFlags(std::string& flags, const char* newFlags);
+  virtual void AppendFlags(std::string& flags,
+                           const std::string& newFlags) const;
+  virtual void AppendFlags(std::string& flags, const char* newFlags) const;
   virtual void AppendFlagEscape(std::string& flags,
-                                const std::string& rawFlag);
+                                const std::string& rawFlag) const;
   void AppendIPOLinkerFlags(std::string& flags, cmGeneratorTarget* target,
                             const std::string& config,
                             const std::string& lang);
@@ -138,11 +139,6 @@ public:
     return this->GeneratorTargets;
   }
 
-  const std::vector<cmGeneratorTarget*>& GetImportedGeneratorTargets() const
-  {
-    return this->ImportedGeneratorTargets;
-  }
-
   void AddGeneratorTarget(cmGeneratorTarget* gt);
   void AddImportedGeneratorTarget(cmGeneratorTarget* gt);
   void AddOwnedImportedGeneratorTarget(cmGeneratorTarget* gt);
@@ -150,6 +146,23 @@ public:
   cmGeneratorTarget* FindLocalNonAliasGeneratorTarget(
     const std::string& name) const;
   cmGeneratorTarget* FindGeneratorTargetToUse(const std::string& name) const;
+
+  /**
+   * Process a list of include directories
+   */
+  void AppendIncludeDirectories(std::vector<std::string>& includes,
+                                const char* includes_list,
+                                const cmSourceFile& sourceFile) const;
+  void AppendIncludeDirectories(std::vector<std::string>& includes,
+                                std::string const& includes_list,
+                                const cmSourceFile& sourceFile) const
+  {
+    this->AppendIncludeDirectories(includes, includes_list.c_str(),
+                                   sourceFile);
+  }
+  void AppendIncludeDirectories(std::vector<std::string>& includes,
+                                const std::vector<std::string>& includes_vec,
+                                const cmSourceFile& sourceFile) const;
 
   /**
    * Encode a list of preprocessor definitions for the compiler
@@ -164,6 +177,22 @@ public:
   }
   void AppendDefines(std::set<std::string>& defines,
                      const std::vector<std::string>& defines_vec) const;
+
+  /**
+   * Encode a list of compile options for the compiler
+   * command line.
+   */
+  void AppendCompileOptions(std::string& options, const char* options_list,
+                            const char* regex = nullptr) const;
+  void AppendCompileOptions(std::string& options,
+                            std::string const& options_list,
+                            const char* regex = nullptr) const
+  {
+    this->AppendCompileOptions(options, options_list.c_str(), regex);
+  }
+  void AppendCompileOptions(std::string& options,
+                            const std::vector<std::string>& options_vec,
+                            const char* regex = nullptr) const;
 
   /**
    * Join a set of defines into a definesString with a space separator.
@@ -258,8 +287,8 @@ public:
 
   cmake* GetCMakeInstance() const;
 
-  const char* GetSourceDirectory() const;
-  const char* GetBinaryDirectory() const;
+  std::string const& GetSourceDirectory() const;
+  std::string const& GetBinaryDirectory() const;
 
   const char* GetCurrentBinaryDirectory() const;
   const char* GetCurrentSourceDirectory() const;
@@ -360,7 +389,7 @@ protected:
   std::vector<cmGeneratorTarget*> GeneratorTargets;
 
   std::set<cmGeneratorTarget const*> WarnCMP0063;
-  std::vector<cmGeneratorTarget*> ImportedGeneratorTargets;
+  GeneratorTargetMap ImportedGeneratorTargets;
   std::vector<cmGeneratorTarget*> OwnedImportedGeneratorTargets;
   std::map<std::string, std::string> AliasTargets;
 

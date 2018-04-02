@@ -66,14 +66,14 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
   utilitySource = utilitySource + "/" + relativeSource;
 
   // If the directory doesn't exist, the source has not been included.
-  if (!cmSystemTools::FileExists(utilitySource.c_str())) {
+  if (!cmSystemTools::FileExists(utilitySource)) {
     return true;
   }
 
   // Make sure all the files exist in the source directory.
   while (arg != args.end()) {
     std::string file = utilitySource + "/" + *arg++;
-    if (!cmSystemTools::FileExists(file.c_str())) {
+    if (!cmSystemTools::FileExists(file)) {
       return true;
     }
   }

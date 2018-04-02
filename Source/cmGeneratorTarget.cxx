@@ -384,14 +384,15 @@ static void handleSystemIncludesDep(
   cmLocalGenerator* lg, cmGeneratorTarget const* depTgt,
   const std::string& config, cmGeneratorTarget const* headTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
-  std::vector<std::string>& result, bool excludeImported)
+  std::vector<std::string>& result, bool excludeImported,
+  std::string const& language)
 {
   if (const char* dirs =
         depTgt->GetProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES")) {
     cmGeneratorExpression ge;
     cmSystemTools::ExpandListArgument(
       ge.Parse(dirs)->Evaluate(lg, config, false, headTarget, depTgt,
-                               dagChecker),
+                               dagChecker, language),
       result);
   }
   if (!depTgt->IsImported() || excludeImported) {
@@ -403,7 +404,7 @@ static void handleSystemIncludesDep(
     cmGeneratorExpression ge;
     cmSystemTools::ExpandListArgument(
       ge.Parse(dirs)->Evaluate(lg, config, false, headTarget, depTgt,
-                               dagChecker),
+                               dagChecker, language),
       result);
   }
 }
@@ -445,7 +446,7 @@ void cmGeneratorTarget::ComputeObjectMapping()
   std::vector<std::string> configs;
   this->Makefile->GetConfigurations(configs);
   if (configs.empty()) {
-    configs.push_back("");
+    configs.emplace_back();
   }
   for (std::string const& c : configs) {
     std::vector<cmSourceFile const*> sourceFiles;
@@ -735,7 +736,8 @@ const char* cmGeneratorTarget::GetLocationForBuild() const
 }
 
 bool cmGeneratorTarget::IsSystemIncludeDirectory(
-  const std::string& dir, const std::string& config) const
+  const std::string& dir, const std::string& config,
+  const std::string& language) const
 {
   assert(this->GetType() != cmStateEnums::INTERFACE_LIBRARY);
   std::string config_upper;
@@ -758,7 +760,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
       cmGeneratorExpression ge;
       cmSystemTools::ExpandListArgument(
         ge.Parse(it)->Evaluate(this->LocalGenerator, config, false, this,
-                               &dagChecker),
+                               &dagChecker, language),
         result);
     }
 
@@ -766,7 +768,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
       this->GetLinkImplementationClosure(config);
     for (cmGeneratorTarget const* dep : deps) {
       handleSystemIncludesDep(this->LocalGenerator, dep, config, this,
-                              &dagChecker, result, excludeImported);
+                              &dagChecker, result, excludeImported, language);
     }
 
     std::for_each(result.begin(), result.end(),
@@ -842,7 +844,7 @@ static bool processSources(
         return contextDependent;
       }
 
-      if (!targetName.empty() && !cmSystemTools::FileIsFullPath(src.c_str())) {
+      if (!targetName.empty() && !cmSystemTools::FileIsFullPath(src)) {
         std::ostringstream err;
         if (!targetName.empty()) {
           err << "Target \"" << targetName
@@ -1101,8 +1103,7 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     }
 
     // Save this classified source file in the result vector.
-    SourceAndKind entry = { sf, kind };
-    files.Sources.push_back(entry);
+    files.Sources.push_back({ sf, kind });
   }
 
   if (!badObjLib.empty()) {
@@ -1143,7 +1144,7 @@ void cmGeneratorTarget::ComputeAllConfigSources() const
         AllConfigSource acs;
         acs.Source = src.Source;
         acs.Kind = src.Kind;
-        this->AllConfigSources.push_back(acs);
+        this->AllConfigSources.push_back(std::move(acs));
         std::map<cmSourceFile const*, size_t>::value_type entry(
           src.Source, this->AllConfigSources.size() - 1);
         mi = index.insert(entry).first;
@@ -1529,7 +1530,8 @@ std::string cmGeneratorTarget::GetAppBundleDirectory(
     ext = "app";
   }
   fpath += ext;
-  if (shouldAddContentLevel(level) && !this->Makefile->PlatformIsAppleIos()) {
+  if (shouldAddContentLevel(level) &&
+      !this->Makefile->PlatformIsAppleEmbedded()) {
     fpath += "/Contents";
     if (shouldAddFullLevel(level)) {
       fpath += "/MacOS";
@@ -1559,7 +1561,8 @@ std::string cmGeneratorTarget::GetCFBundleDirectory(
     }
   }
   fpath += ext;
-  if (shouldAddContentLevel(level) && !this->Makefile->PlatformIsAppleIos()) {
+  if (shouldAddContentLevel(level) &&
+      !this->Makefile->PlatformIsAppleEmbedded()) {
     fpath += "/Contents";
     if (shouldAddFullLevel(level)) {
       fpath += "/MacOS";
@@ -1579,7 +1582,8 @@ std::string cmGeneratorTarget::GetFrameworkDirectory(
     ext = "framework";
   }
   fpath += ext;
-  if (shouldAddFullLevel(level) && !this->Makefile->PlatformIsAppleIos()) {
+  if (shouldAddFullLevel(level) &&
+      !this->Makefile->PlatformIsAppleEmbedded()) {
     fpath += "/Versions/";
     fpath += this->GetFrameworkVersion();
   }
@@ -2110,7 +2114,7 @@ cmTargetTraceDependencies::cmTargetTraceDependencies(cmGeneratorTarget* target)
     std::vector<std::string> configs;
     this->Makefile->GetConfigurations(configs);
     if (configs.empty()) {
-      configs.push_back("");
+      configs.emplace_back();
     }
     std::set<cmSourceFile*> emitted;
     for (std::string const& c : configs) {
@@ -2166,7 +2170,7 @@ void cmTargetTraceDependencies::Trace()
     // Queue the source needed to generate this file, if any.
     this->FollowName(sf->GetFullPath());
 
-    // Queue dependencies added programatically by commands.
+    // Queue dependencies added programmatically by commands.
     this->FollowNames(sf->GetDepends());
 
     // Queue custom command dependencies.
@@ -2235,7 +2239,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
     // If we find the target and the dep was given as a full path,
     // then make sure it was not a full path to something else, and
     // the fact that the name matched a target was just a coincidence.
-    if (cmSystemTools::FileIsFullPath(dep.c_str())) {
+    if (cmSystemTools::FileIsFullPath(dep)) {
       if (t->GetType() >= cmStateEnums::EXECUTABLE &&
           t->GetType() <= cmStateEnums::MODULE_LIBRARY) {
         // This is really only for compatibility so we do not need to
@@ -2303,7 +2307,7 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
   std::set<std::string> emitted;
   this->Makefile->GetConfigurations(configs);
   if (configs.empty()) {
-    configs.push_back("");
+    configs.emplace_back();
   }
   for (std::string const& conf : configs) {
     this->FollowCommandDepends(cc, conf, emitted);
@@ -2435,7 +2439,7 @@ static void processIncludeDirectories(
 
     std::string usedIncludes;
     for (std::string& entryInclude : entryIncludes) {
-      if (fromImported && !cmSystemTools::FileExists(entryInclude.c_str())) {
+      if (fromImported && !cmSystemTools::FileExists(entryInclude)) {
         std::ostringstream e;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
         if (checkCMP0027) {
@@ -2467,7 +2471,7 @@ static void processIncludeDirectories(
         return;
       }
 
-      if (!cmSystemTools::FileIsFullPath(entryInclude.c_str())) {
+      if (!cmSystemTools::FileIsFullPath(entryInclude)) {
         std::ostringstream e;
         bool noMessage = false;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
@@ -3004,7 +3008,7 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name, std::string& soName,
 
   if (this->IsFrameworkOnApple()) {
     realName = prefix;
-    if (!this->Makefile->PlatformIsAppleIos()) {
+    if (!this->Makefile->PlatformIsAppleEmbedded()) {
       realName += "Versions/";
       realName += this->GetFrameworkVersion();
       realName += "/";
@@ -3538,7 +3542,7 @@ void checkPropertyConsistency(cmGeneratorTarget const* depender,
   for (std::string const& p : props) {
     std::string pname = cmSystemTools::HelpFileName(p);
     std::string pfile = pdir + pname + ".rst";
-    if (cmSystemTools::FileExists(pfile.c_str(), true)) {
+    if (cmSystemTools::FileExists(pfile, true)) {
       std::ostringstream e;
       e << "Target \"" << dependee->GetName() << "\" has property \"" << p
         << "\" listed in its " << propName
@@ -3614,13 +3618,13 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
   const cmComputeLinkInformation::ItemVector& deps = info->GetItems();
 
   std::set<std::string> emittedBools;
-  static std::string strBool = "COMPATIBLE_INTERFACE_BOOL";
+  static const std::string strBool = "COMPATIBLE_INTERFACE_BOOL";
   std::set<std::string> emittedStrings;
-  static std::string strString = "COMPATIBLE_INTERFACE_STRING";
+  static const std::string strString = "COMPATIBLE_INTERFACE_STRING";
   std::set<std::string> emittedMinNumbers;
-  static std::string strNumMin = "COMPATIBLE_INTERFACE_NUMBER_MIN";
+  static const std::string strNumMin = "COMPATIBLE_INTERFACE_NUMBER_MIN";
   std::set<std::string> emittedMaxNumbers;
-  static std::string strNumMax = "COMPATIBLE_INTERFACE_NUMBER_MAX";
+  static const std::string strNumMax = "COMPATIBLE_INTERFACE_NUMBER_MAX";
 
   for (auto const& dep : deps) {
     if (!dep.Target) {
@@ -4198,7 +4202,7 @@ void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
     if (name == this->GetName() || name.empty()) {
       continue;
     }
-    items.push_back(cmLinkItem(name, this->FindTargetToLink(name)));
+    items.emplace_back(name, this->FindTargetToLink(name));
   }
 }
 
@@ -4985,7 +4989,7 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
   std::vector<std::string> configs;
   this->Makefile->GetConfigurations(configs);
   if (configs.empty()) {
-    configs.push_back("");
+    configs.emplace_back();
   }
 
   std::vector<std::string>::const_iterator it = configs.begin();
@@ -5133,7 +5137,12 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
       std::string objLib = extObj->GetObjectLibrary();
       if (cmGeneratorTarget* tgt =
             this->LocalGenerator->FindGeneratorTargetToUse(objLib)) {
-        objectLibraries.push_back(tgt);
+        auto const objLibIt =
+          std::find_if(objectLibraries.cbegin(), objectLibraries.cend(),
+                       [tgt](cmGeneratorTarget* t) { return t == tgt; });
+        if (objectLibraries.cend() == objLibIt) {
+          objectLibraries.push_back(tgt);
+        }
       }
     }
   }
@@ -5149,7 +5158,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLanguages(
   std::set<std::string> languages;
   // Get languages used in our source files.
   this->GetLanguages(languages, config);
-  // Copy the set of langauges to the link implementation.
+  // Copy the set of languages to the link implementation.
   impl.Languages.insert(impl.Languages.begin(), languages.begin(),
                         languages.end());
 }
@@ -5268,8 +5277,8 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       }
 
       // The entry is meant for this configuration.
-      impl.Libraries.push_back(cmLinkImplItem(
-        name, this->FindTargetToLink(name), *btIt, evaluated != *le));
+      impl.Libraries.emplace_back(name, this->FindTargetToLink(name), *btIt,
+                                  evaluated != *le);
     }
 
     std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();
@@ -5296,8 +5305,8 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         continue;
       }
       // Support OLD behavior for CMP0003.
-      impl.WrongConfigLibraries.push_back(
-        cmLinkItem(name, this->FindTargetToLink(name)));
+      impl.WrongConfigLibraries.emplace_back(name,
+                                             this->FindTargetToLink(name));
     }
   }
 }

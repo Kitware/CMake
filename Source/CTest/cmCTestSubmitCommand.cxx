@@ -229,7 +229,7 @@ bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
   }
 
   if (this->ArgumentDoing == ArgumentDoingFiles) {
-    if (cmSystemTools::FileExists(arg.c_str())) {
+    if (cmSystemTools::FileExists(arg)) {
       this->Files.insert(arg);
     } else {
       std::ostringstream e;

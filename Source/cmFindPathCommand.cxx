@@ -94,7 +94,7 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
       std::string intPath = fpath;
       intPath += "/Headers/";
       intPath += fileName;
-      if (cmSystemTools::FileExists(intPath.c_str())) {
+      if (cmSystemTools::FileExists(intPath)) {
         if (this->IncludeFileInPath) {
           return intPath;
         }
@@ -128,7 +128,7 @@ std::string cmFindPathCommand::FindNormalHeader()
     for (std::string const& sp : this->SearchPaths) {
       tryPath = sp;
       tryPath += n;
-      if (cmSystemTools::FileExists(tryPath.c_str())) {
+      if (cmSystemTools::FileExists(tryPath)) {
         if (this->IncludeFileInPath) {
           return tryPath;
         }

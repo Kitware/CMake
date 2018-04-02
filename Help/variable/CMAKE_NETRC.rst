@@ -2,7 +2,7 @@ CMAKE_NETRC
 -----------
 
 This variable is used to initialize the ``NETRC`` option for
-:command:`file(DOWNLOAD)` and :command:`file(DOWNLOAD)` commands and the
+:command:`file(DOWNLOAD)` and :command:`file(UPLOAD)` commands and the
 module :module:`ExternalProject`. See those commands for additional
 information.
 
