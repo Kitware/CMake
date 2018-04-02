@@ -32,7 +32,12 @@ if(NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
     set(CMAKE_CXX14_EXTENSION_COMPILE_OPTION "-std=gnu++1y")
   endif()
 
-  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
+  set(_clang_version_std17 5.0)
+  if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+    set(_clang_version_std17 6.0)
+  endif()
+
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "${_clang_version_std17}")
     set(CMAKE_CXX17_STANDARD_COMPILE_OPTION "-std=c++17")
     set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std=gnu++17")
   elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5)
@@ -40,10 +45,12 @@ if(NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
     set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std=gnu++1z")
   endif()
 
-  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "${_clang_version_std17}")
     set(CMAKE_CXX20_STANDARD_COMPILE_OPTION "-std=c++2a")
     set(CMAKE_CXX20_EXTENSION_COMPILE_OPTION "-std=gnu++2a")
   endif()
+
+  unset(_clang_version_std17)
 else()
   # clang-cl does not know these options because it behaves like cl.exe
   set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "")
