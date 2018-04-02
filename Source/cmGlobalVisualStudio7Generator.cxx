@@ -294,19 +294,6 @@ void cmGlobalVisualStudio7Generator::Generate()
   if (!cmSystemTools::GetErrorOccuredFlag()) {
     this->CallVisualStudioMacro(MacroReload);
   }
-
-  if (this->Version == VS8 && !this->CMakeInstance->GetIsInTryCompile()) {
-    const char* cmakeWarnVS8 =
-      this->CMakeInstance->GetState()->GetCacheEntryValue("CMAKE_WARN_VS8");
-    if (!cmakeWarnVS8 || !cmSystemTools::IsOff(cmakeWarnVS8)) {
-      this->CMakeInstance->IssueMessage(
-        cmake::WARNING,
-        "The \"Visual Studio 8 2005\" generator is deprecated "
-        "and will be removed in a future version of CMake."
-        "\n"
-        "Add CMAKE_WARN_VS8=OFF to the cache to disable this warning.");
-    }
-  }
 }
 
 void cmGlobalVisualStudio7Generator::OutputSLNFile(

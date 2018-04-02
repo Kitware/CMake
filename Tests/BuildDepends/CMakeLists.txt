@@ -42,7 +42,7 @@ list(APPEND _cmake_options "-DTEST_LINK_DEPENDS=${TEST_LINK_DEPENDS}")
 
 list(APPEND _cmake_options "-DCMAKE_FORCE_DEPFILES=1")
 
-if(NOT CMAKE_GENERATOR MATCHES "Visual Studio ([^89]|[89][0-9])")
+if(NOT CMAKE_GENERATOR MATCHES "Visual Studio ([^9]|9[0-9])")
   set(TEST_MULTI3 1)
   list(APPEND _cmake_options "-DTEST_MULTI3=1")
 endif()

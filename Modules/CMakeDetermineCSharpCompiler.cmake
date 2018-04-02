@@ -1,7 +1,7 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-if(NOT ${CMAKE_GENERATOR} MATCHES "Visual Studio ([^89]|[89][0-9])")
+if(NOT ${CMAKE_GENERATOR} MATCHES "Visual Studio ([^9]|[9][0-9])")
    message(FATAL_ERROR
     "C# is currently only supported for Microsoft Visual Studio 2010 and later.")
 endif()

@@ -12,7 +12,7 @@ Example values:
 
 ::
 
-  $(ConfigurationName) = Visual Studio 8, 9
+  $(ConfigurationName) = Visual Studio 9
   $(Configuration)     = Visual Studio 10
   $(CONFIGURATION)     = Xcode
   .                    = Make-based tools

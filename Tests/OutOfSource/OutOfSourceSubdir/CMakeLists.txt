@@ -16,11 +16,11 @@ if ("${PROJECT_SOURCE_DIR}" STREQUAL "${ANOTHER_PROJ_SOURCE_DIR}")
   # Use a separate variable for computation.
   set(MAXPATH "${CMAKE_OBJECT_PATH_MAX}")
 
-  # VS8 adds "OutOfSource/SubDir/OutOfSourceSubdir/../../../" to the
+  # VS adds "OutOfSource/SubDir/OutOfSourceSubdir/../../../" to the
   # path of the source file for no good reason.  Reduce the length
   # limit by 46 characters to account for it.  It should still be long
   # enough to require special object file name conversion.
-  if(${CMAKE_GENERATOR} MATCHES "Visual Studio (8|10)")
+  if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
     math(EXPR MAXPATH "${MAXPATH} - 46")
   endif()
 
