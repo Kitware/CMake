@@ -4223,7 +4223,7 @@ static const char* const CXX_FEATURES[] = { nullptr FOR_EACH_CXX_FEATURE(
 #undef FEATURE_STRING
 
 static const char* const C_STANDARDS[] = { "90", "99", "11" };
-static const char* const CXX_STANDARDS[] = { "98", "11", "14", "17" };
+static const char* const CXX_STANDARDS[] = { "98", "11", "14", "17", "20" };
 
 bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
                                           const std::string& feature,
@@ -4473,8 +4473,9 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
   bool needCxx11 = false;
   bool needCxx14 = false;
   bool needCxx17 = false;
+  bool needCxx20 = false;
   this->CheckNeededCxxLanguage(feature, needCxx98, needCxx11, needCxx14,
-                               needCxx17);
+                               needCxx17, needCxx20);
 
   const char* existingCxxStandard = target->GetProperty("CXX_STANDARD");
   if (!existingCxxStandard) {
@@ -4494,7 +4495,8 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
 
   /* clang-format off */
   const char* const* needCxxLevel =
-    needCxx17 ? &CXX_STANDARDS[3]
+    needCxx20 ? &CXX_STANDARDS[4]
+    : needCxx17 ? &CXX_STANDARDS[3]
     : needCxx14 ? &CXX_STANDARDS[2]
     : needCxx11 ? &CXX_STANDARDS[1]
     : needCxx98 ? &CXX_STANDARDS[0]
@@ -4506,7 +4508,8 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
 
 void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
                                         bool& needCxx98, bool& needCxx11,
-                                        bool& needCxx14, bool& needCxx17) const
+                                        bool& needCxx14, bool& needCxx17,
+                                        bool& needCxx20) const
 {
   if (const char* propCxx98 =
         this->GetDefinition("CMAKE_CXX98_COMPILE_FEATURES")) {
@@ -4532,6 +4535,12 @@ void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
     cmSystemTools::ExpandListArgument(propCxx17, props);
     needCxx17 = std::find(props.begin(), props.end(), feature) != props.end();
   }
+  if (const char* propCxx20 =
+        this->GetDefinition("CMAKE_CXX20_COMPILE_FEATURES")) {
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(propCxx20, props);
+    needCxx20 = std::find(props.begin(), props.end(), feature) != props.end();
+  }
 }
 
 bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
@@ -4542,9 +4551,10 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
   bool needCxx11 = false;
   bool needCxx14 = false;
   bool needCxx17 = false;
+  bool needCxx20 = false;
 
   this->CheckNeededCxxLanguage(feature, needCxx98, needCxx11, needCxx14,
-                               needCxx17);
+                               needCxx17, needCxx20);
 
   const char* existingCxxStandard = target->GetProperty("CXX_STANDARD");
   const char* const* existingCxxLevel = nullptr;
@@ -4589,7 +4599,8 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
 
   /* clang-format off */
   const char* const* needCxxLevel =
-    needCxx17 ? &CXX_STANDARDS[3]
+    needCxx20 ? &CXX_STANDARDS[4]
+    : needCxx17 ? &CXX_STANDARDS[3]
     : needCxx14 ? &CXX_STANDARDS[2]
     : needCxx11 ? &CXX_STANDARDS[1]
     : needCxx98 ? &CXX_STANDARDS[0]

@@ -991,7 +991,7 @@ private:
                             bool& needC99, bool& needC11) const;
   void CheckNeededCxxLanguage(const std::string& feature, bool& needCxx98,
                               bool& needCxx11, bool& needCxx14,
-                              bool& needCxx17) const;
+                              bool& needCxx17, bool& needCxx20) const;
 
   bool HaveCStandardAvailable(cmTarget const* target,
                               const std::string& feature) const;

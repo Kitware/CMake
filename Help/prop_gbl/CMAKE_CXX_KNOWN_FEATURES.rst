@@ -26,6 +26,9 @@ The features known to this version of CMake are:
 ``cxx_std_17``
   Compiler mode is aware of C++ 17.
 
+``cxx_std_20``
+  Compiler mode is aware of C++ 20.
+
 ``cxx_aggregate_default_initializers``
   Aggregate default initializers, as defined in N3605_.
 

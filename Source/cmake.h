@@ -574,6 +574,7 @@ private:
   F(cxx_std_11)                                                               \
   F(cxx_std_14)                                                               \
   F(cxx_std_17)                                                               \
+  F(cxx_std_20)                                                               \
   F(cxx_aggregate_default_initializers)                                       \
   F(cxx_alias_templates)                                                      \
   F(cxx_alignas)                                                              \
