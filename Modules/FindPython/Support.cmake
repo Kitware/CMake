@@ -162,12 +162,14 @@ unset (${_PYTHON_PREFIX}_VERSION_MINOR)
 unset (${_PYTHON_PREFIX}_VERSION_PATCH)
 
 unset (_${_PYTHON_PREFIX}_REQUIRED_VARS)
+unset (_${_PYTHON_PREFIX}_CACHED_VARS)
 
 
 # first step, search for the interpreter
 if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   if (${_PYTHON_PREFIX}_FIND_REQUIRED_Interpreter)
     list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_EXECUTABLE)
+    list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS ${_PYTHON_PREFIX}_EXECUTABLE)
   endif()
 
   set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
@@ -305,6 +307,7 @@ endif()
 if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   if (${_PYTHON_PREFIX}_FIND_REQUIRED_Compiler)
     list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_COMPILER)
+    list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS ${_PYTHON_PREFIX}_COMPILER)
   endif()
 
   # IronPython specific artifacts
@@ -393,6 +396,12 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
   if (${_PYTHON_PREFIX}_FIND_REQUIRED_Development)
     list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_LIBRARY
                                                   ${_PYTHON_PREFIX}_INCLUDE_DIR)
+    list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS ${_PYTHON_PREFIX}_LIBRARY
+                                                ${_PYTHON_PREFIX}_LIBRARY_RELEASE
+                                                ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
+                                                ${_PYTHON_PREFIX}_LIBRARY_DEBUG
+                                                ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
+                                                ${_PYTHON_PREFIX}_INCLUDE_DIR)
   endif()
 
   # Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
