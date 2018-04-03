@@ -1,6 +1,7 @@
 # <ndk>/sources/cxx-stl/llvm-libc++/Android.mk
 set(_ANDROID_STL_RTTI 1)
 set(_ANDROID_STL_EXCEPTIONS 1)
+set(_ANDROID_STL_NOSTDLIBXX 1)
 macro(__android_stl_cxx lang filename)
   # Add the include directory.
   if(EXISTS "${CMAKE_ANDROID_NDK}/sources/cxx-stl/llvm-libc++/libcxx/include/cstddef")
