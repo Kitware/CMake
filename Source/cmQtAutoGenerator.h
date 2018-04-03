@@ -68,8 +68,17 @@ public:
     {
     }
 
+    /// @brief Logger
     Logger* Log() const { return Log_; }
-    std::string RealPath(std::string const& filename);
+
+    // -- Paths
+    /// @brief Wrapper for cmSystemTools::GetRealPath
+    std::string GetRealPath(std::string const& filename);
+    /// @brief Wrapper for cmSystemTools::CollapseCombinedPath
+    std::string CollapseCombinedPath(std::string const& dir,
+                                     std::string const& file);
+
+    // -- File access
     bool FileExists(std::string const& filename);
     bool FileIsOlderThan(std::string const& buildFile,
                          std::string const& sourceFile,
@@ -92,6 +101,7 @@ public:
     bool FileRemove(std::string const& filename);
     bool Touch(std::string const& filename);
 
+    // -- Directory access
     bool MakeDirectory(std::string const& dirname);
     /// @brief Error logging version
     bool MakeDirectory(GeneratorT genType, std::string const& dirname);

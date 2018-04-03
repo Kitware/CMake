@@ -26,7 +26,7 @@
 std::string cmQtAutoGeneratorMocUic::BaseSettingsT::AbsoluteBuildPath(
   std::string const& relativePath) const
 {
-  return cmSystemTools::CollapseCombinedPath(AutogenBuildDir, relativePath);
+  return FileSys->CollapseCombinedPath(AutogenBuildDir, relativePath);
 }
 
 /**
@@ -106,7 +106,7 @@ std::string cmQtAutoGeneratorMocUic::MocSettingsT::FindIncludedFile(
     std::string testPath = sourcePath;
     testPath += includeString;
     if (FileSys->FileExists(testPath)) {
-      return FileSys->RealPath(testPath);
+      return FileSys->GetRealPath(testPath);
     }
   }
   // Search in include directories
@@ -115,7 +115,7 @@ std::string cmQtAutoGeneratorMocUic::MocSettingsT::FindIncludedFile(
     fullPath.push_back('/');
     fullPath += includeString;
     if (FileSys->FileExists(fullPath)) {
-      return FileSys->RealPath(fullPath);
+      return FileSys->GetRealPath(fullPath);
     }
   }
   // Return empty string
@@ -487,7 +487,7 @@ std::string cmQtAutoGeneratorMocUic::JobParseT::MocFindIncludedHeader(
   }
   // Sanitize
   if (!header.empty()) {
-    header = wrk.FileSys().RealPath(header);
+    header = wrk.FileSys().GetRealPath(header);
   }
   return header;
 }
@@ -569,7 +569,7 @@ std::string cmQtAutoGeneratorMocUic::JobParseT::UicFindIncludedFile(
   // Search for the .ui file!
   for (std::string const& testFile : testFiles) {
     if (wrk.FileSys().FileExists(testFile)) {
-      res = wrk.FileSys().RealPath(testFile);
+      res = wrk.FileSys().GetRealPath(testFile);
       break;
     }
   }

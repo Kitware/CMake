@@ -146,11 +146,18 @@ void cmQtAutoGenerator::Logger::ErrorCommand(
   }
 }
 
-std::string cmQtAutoGenerator::FileSystem::RealPath(
+std::string cmQtAutoGenerator::FileSystem::GetRealPath(
   std::string const& filename)
 {
   std::lock_guard<std::mutex> lock(Mutex_);
   return cmSystemTools::GetRealPath(filename);
+}
+
+std::string cmQtAutoGenerator::FileSystem::CollapseCombinedPath(
+  std::string const& dir, std::string const& file)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::CollapseCombinedPath(dir, file);
 }
 
 bool cmQtAutoGenerator::FileSystem::FileExists(std::string const& filename)
