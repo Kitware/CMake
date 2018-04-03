@@ -400,6 +400,7 @@ CMAKE_CXX_SOURCES="\
   cmState \
   cmStateDirectory \
   cmStateSnapshot \
+  cmStringReplaceHelper \
   cmStringCommand \
   cmSubdirCommand \
   cmSystemTools \
