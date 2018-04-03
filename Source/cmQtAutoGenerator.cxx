@@ -219,6 +219,20 @@ bool cmQtAutoGenerator::FileSystem::FileExists(std::string const& filename)
   return cmSystemTools::FileExists(filename);
 }
 
+bool cmQtAutoGenerator::FileSystem::FileExists(std::string const& filename,
+                                               bool isFile)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::FileExists(filename, isFile);
+}
+
+unsigned long cmQtAutoGenerator::FileSystem::FileLength(
+  std::string const& filename)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::FileLength(filename);
+}
+
 bool cmQtAutoGenerator::FileSystem::FileIsOlderThan(
   std::string const& buildFile, std::string const& sourceFile,
   std::string* error)
@@ -248,35 +262,30 @@ bool cmQtAutoGenerator::FileSystem::FileRead(std::string& content,
                                              std::string* error)
 {
   bool success = false;
-  {
-    std::lock_guard<std::mutex> lock(Mutex_);
-    if (cmSystemTools::FileExists(filename, true)) {
-      std::size_t const length = cmSystemTools::FileLength(filename);
+  if (FileExists(filename, true)) {
+    unsigned long const length = FileLength(filename);
+    {
+      std::lock_guard<std::mutex> lock(Mutex_);
       cmsys::ifstream ifs(filename.c_str(), (std::ios::in | std::ios::binary));
       if (ifs) {
-        if (length > 0) {
-          content.resize(length);
-          ifs.read(&content.front(), content.size());
-          if (ifs) {
-            success = true;
-          } else {
-            content.clear();
-            if (error != nullptr) {
-              error->append("Reading from the file failed.");
-            }
-          }
-        } else {
-          // Readable but empty file
-          content.clear();
+        content.reserve(length);
+        content.assign(std::istreambuf_iterator<char>{ ifs },
+                       std::istreambuf_iterator<char>{});
+        if (ifs) {
           success = true;
+        } else {
+          content.clear();
+          if (error != nullptr) {
+            error->append("Reading from the file failed.");
+          }
         }
       } else if (error != nullptr) {
         error->append("Opening the file for reading failed.");
       }
-    } else if (error != nullptr) {
-      error->append(
-        "The file does not exist, is not readable or is a directory.");
     }
+  } else if (error != nullptr) {
+    error->append(
+      "The file does not exist, is not readable or is a directory.");
   }
   return success;
 }

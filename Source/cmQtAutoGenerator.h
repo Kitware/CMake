@@ -99,7 +99,12 @@ public:
     std::string GetFilePathChecksum(std::string const& filename);
 
     // -- File access
+    /// @brief Wrapper for cmSystemTools::FileExists
     bool FileExists(std::string const& filename);
+    /// @brief Wrapper for cmSystemTools::FileExists
+    bool FileExists(std::string const& filename, bool isFile);
+    /// @brief Wrapper for cmSystemTools::FileLength
+    unsigned long FileLength(std::string const& filename);
     bool FileIsOlderThan(std::string const& buildFile,
                          std::string const& sourceFile,
                          std::string* error = nullptr);
