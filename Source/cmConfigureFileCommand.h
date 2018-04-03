@@ -32,9 +32,9 @@ private:
 
   std::string InputFile;
   std::string OutputFile;
-  bool CopyOnly;
-  bool EscapeQuotes;
-  bool AtOnly;
+  bool CopyOnly = false;
+  bool EscapeQuotes = false;
+  bool AtOnly = false;
 };
 
 #endif
