@@ -213,7 +213,7 @@
 
 set(_FindMatlab_SELF_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 include(CheckCXXCompilerFlag)
 include(CheckCCompilerFlag)
 
