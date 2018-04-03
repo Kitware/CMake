@@ -67,7 +67,7 @@ public:
   void SetIndentationElement(std::string const& element);
 
 private:
-  void ConditionalLineBreak(bool condition, std::size_t indent);
+  void ConditionalLineBreak(bool condition);
 
   void PreAttribute();
   void PreContent();
@@ -128,6 +128,7 @@ private:
   std::stack<std::string, std::vector<std::string>> Elements;
   std::string IndentationElement;
   std::size_t Level;
+  std::size_t Indent;
   bool ElementOpen;
   bool BreakAttrib;
   bool IsContent;
