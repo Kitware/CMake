@@ -402,6 +402,7 @@ CMAKE_CXX_SOURCES="\
   cmStringCommand \
   cmSubdirCommand \
   cmSystemTools \
+  cmStringTable \
   cmTarget \
   cmTargetCompileDefinitionsCommand \
   cmTargetCompileFeaturesCommand \
