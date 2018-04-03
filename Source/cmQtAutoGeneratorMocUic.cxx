@@ -853,8 +853,12 @@ void cmQtAutoGeneratorMocUic::JobMocT::GenerateMoc(WorkerT& wrk)
     ProcessResultT result;
     if (wrk.RunProcess(GeneratorT::MOC, result, cmd)) {
       // Moc command success
+      // Print moc output
+      if (!result.StdOut.empty()) {
+        wrk.LogInfo(GeneratorT::MOC, result.StdOut);
+      }
+      // Notify the generator that a not included file changed (on demand)
       if (IncludeString.empty()) {
-        // Notify the generator that a not included file changed
         wrk.Gen().ParallelMocAutoUpdated();
       }
     } else {
@@ -963,9 +967,13 @@ void cmQtAutoGeneratorMocUic::JobUicT::GenerateUic(WorkerT& wrk)
 
     ProcessResultT result;
     if (wrk.RunProcess(GeneratorT::UIC, result, cmd)) {
-      // Success
+      // Uic command success
+      // Print uic output
+      if (!result.StdOut.empty()) {
+        wrk.LogInfo(GeneratorT::UIC, result.StdOut);
+      }
     } else {
-      // Command failed
+      // Uic command failed
       {
         std::string emsg = "The uic process failed to compile\n  ";
         emsg += Quoted(SourceFile);
