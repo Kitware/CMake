@@ -166,7 +166,7 @@ void cmQtAutoGeneratorMocUic::JobParseT::Process(WorkerT& wrk)
     MetaT meta;
     if (wrk.FileSys().FileRead(meta.Content, FileName, &error)) {
       if (!meta.Content.empty()) {
-        meta.FileDir = SubDirPrefix(FileName);
+        meta.FileDir = wrk.FileSys().SubDirPrefix(FileName);
         meta.FileBase =
           wrk.FileSys().GetFilenameWithoutLastExtension(FileName);
 
@@ -222,7 +222,7 @@ bool cmQtAutoGeneratorMocUic::JobParseT::ParseMocSource(WorkerT& wrk,
       cmsys::RegularExpressionMatch match;
       while (wrk.Moc().RegExpInclude.find(contentChars, match)) {
         std::string incString = match.match(2);
-        std::string incDir(SubDirPrefix(incString));
+        std::string incDir(wrk.FileSys().SubDirPrefix(incString));
         std::string incBase =
           wrk.FileSys().GetFilenameWithoutLastExtension(incString);
         if (cmHasLiteralPrefix(incBase, "moc_")) {
@@ -538,7 +538,7 @@ std::string cmQtAutoGeneratorMocUic::JobParseT::UicFindIncludedFile(
   // Collect search paths list
   std::deque<std::string> testFiles;
   {
-    std::string const searchPath = SubDirPrefix(includeString);
+    std::string const searchPath = wrk.FileSys().SubDirPrefix(includeString);
 
     std::string searchFileFull;
     if (!searchPath.empty()) {
@@ -798,7 +798,7 @@ bool cmQtAutoGeneratorMocUic::JobMocT::UpdateRequired(WorkerT& wrk)
     }
     // Check dependency timestamps
     std::string error;
-    std::string sourceDir = SubDirPrefix(SourceFile);
+    std::string sourceDir = wrk.FileSys().SubDirPrefix(SourceFile);
     for (std::string const& depFileRel : Depends) {
       std::string depFileAbs =
         wrk.Moc().FindIncludedFile(sourceDir, depFileRel);
@@ -1416,7 +1416,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
         // Search for the default header file and a private header
         {
           std::array<std::string, 2> bases;
-          bases[0] = SubDirPrefix(src);
+          bases[0] = FileSys().SubDirPrefix(src);
           bases[0] += FileSys().GetFilenameWithoutLastExtension(src);
           bases[1] = bases[0];
           bases[1] += "_p";

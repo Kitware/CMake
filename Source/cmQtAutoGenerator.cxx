@@ -190,6 +190,13 @@ std::string cmQtAutoGenerator::FileSystem::GetFilenameWithoutLastExtension(
   return cmSystemTools::GetFilenameWithoutLastExtension(filename);
 }
 
+std::string cmQtAutoGenerator::FileSystem::SubDirPrefix(
+  std::string const& filename)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmQtAutoGen::SubDirPrefix(filename);
+}
+
 bool cmQtAutoGenerator::FileSystem::FileExists(std::string const& filename)
 {
   std::lock_guard<std::mutex> lock(Mutex_);

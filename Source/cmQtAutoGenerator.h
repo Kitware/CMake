@@ -87,6 +87,8 @@ public:
                          std::vector<std::string>::const_iterator last);
     /// @brief Wrapper for cmSystemTools::GetFilenameWithoutLastExtension
     std::string GetFilenameWithoutLastExtension(const std::string& filename);
+    /// @brief Wrapper for cmQtAutoGen::SubDirPrefix
+    std::string SubDirPrefix(std::string const& filename);
 
     // -- File access
     bool FileExists(std::string const& filename);
