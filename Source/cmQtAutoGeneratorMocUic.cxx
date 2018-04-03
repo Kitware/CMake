@@ -168,7 +168,7 @@ void cmQtAutoGeneratorMocUic::JobParseT::Process(WorkerT& wrk)
       if (!meta.Content.empty()) {
         meta.FileDir = SubDirPrefix(FileName);
         meta.FileBase =
-          cmSystemTools::GetFilenameWithoutLastExtension(FileName);
+          wrk.FileSys().GetFilenameWithoutLastExtension(FileName);
 
         bool success = true;
         if (AutoMoc) {
@@ -224,7 +224,7 @@ bool cmQtAutoGeneratorMocUic::JobParseT::ParseMocSource(WorkerT& wrk,
         std::string incString = match.match(2);
         std::string incDir(SubDirPrefix(incString));
         std::string incBase =
-          cmSystemTools::GetFilenameWithoutLastExtension(incString);
+          wrk.FileSys().GetFilenameWithoutLastExtension(incString);
         if (cmHasLiteralPrefix(incBase, "moc_")) {
           // moc_<BASE>.cxx
           // Remove the moc_ part from the base name
@@ -533,7 +533,7 @@ std::string cmQtAutoGeneratorMocUic::JobParseT::UicFindIncludedFile(
 {
   std::string res;
   std::string searchFile =
-    cmSystemTools::GetFilenameWithoutLastExtension(includeString).substr(3);
+    wrk.FileSys().GetFilenameWithoutLastExtension(includeString).substr(3);
   searchFile += ".ui";
   // Collect search paths list
   std::deque<std::string> testFiles;
@@ -678,7 +678,7 @@ void cmQtAutoGeneratorMocUic::JobMocT::Process(WorkerT& wrk)
   } else {
     std::string rel = wrk.Base().FilePathChecksum.getPart(SourceFile);
     rel += "/moc_";
-    rel += cmSystemTools::GetFilenameWithoutLastExtension(SourceFile);
+    rel += wrk.FileSys().GetFilenameWithoutLastExtension(SourceFile);
     rel += ".cpp";
     // Register relative file path
     wrk.Gen().ParallelMocAutoRegister(rel);
@@ -1417,7 +1417,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
         {
           std::array<std::string, 2> bases;
           bases[0] = SubDirPrefix(src);
-          bases[0] += cmSystemTools::GetFilenameWithoutLastExtension(src);
+          bases[0] += FileSys().GetFilenameWithoutLastExtension(src);
           bases[1] = bases[0];
           bases[1] += "_p";
           for (std::string const& headerBase : bases) {

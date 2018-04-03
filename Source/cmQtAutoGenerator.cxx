@@ -183,6 +183,13 @@ std::string cmQtAutoGenerator::FileSystem::JoinPath(
   return cmSystemTools::JoinPath(first, last);
 }
 
+std::string cmQtAutoGenerator::FileSystem::GetFilenameWithoutLastExtension(
+  const std::string& filename)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::GetFilenameWithoutLastExtension(filename);
+}
+
 bool cmQtAutoGenerator::FileSystem::FileExists(std::string const& filename)
 {
   std::lock_guard<std::mutex> lock(Mutex_);

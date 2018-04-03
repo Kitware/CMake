@@ -85,6 +85,8 @@ public:
     /// @brief Wrapper for cmSystemTools::JoinPath
     std::string JoinPath(std::vector<std::string>::const_iterator first,
                          std::vector<std::string>::const_iterator last);
+    /// @brief Wrapper for cmSystemTools::GetFilenameWithoutLastExtension
+    std::string GetFilenameWithoutLastExtension(const std::string& filename);
 
     // -- File access
     bool FileExists(std::string const& filename);
