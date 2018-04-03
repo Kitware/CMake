@@ -77,6 +77,14 @@ public:
     /// @brief Wrapper for cmSystemTools::CollapseCombinedPath
     std::string CollapseCombinedPath(std::string const& dir,
                                      std::string const& file);
+    /// @brief Wrapper for cmSystemTools::SplitPath
+    void SplitPath(const std::string& p, std::vector<std::string>& components,
+                   bool expand_home_dir = true);
+    /// @brief Wrapper for cmSystemTools::JoinPath
+    std::string JoinPath(const std::vector<std::string>& components);
+    /// @brief Wrapper for cmSystemTools::JoinPath
+    std::string JoinPath(std::vector<std::string>::const_iterator first,
+                         std::vector<std::string>::const_iterator last);
 
     // -- File access
     bool FileExists(std::string const& filename);

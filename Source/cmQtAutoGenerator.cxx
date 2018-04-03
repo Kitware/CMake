@@ -160,6 +160,29 @@ std::string cmQtAutoGenerator::FileSystem::CollapseCombinedPath(
   return cmSystemTools::CollapseCombinedPath(dir, file);
 }
 
+void cmQtAutoGenerator::FileSystem::SplitPath(
+  const std::string& p, std::vector<std::string>& components,
+  bool expand_home_dir)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  cmSystemTools::SplitPath(p, components, expand_home_dir);
+}
+
+std::string cmQtAutoGenerator::FileSystem::JoinPath(
+  const std::vector<std::string>& components)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::JoinPath(components);
+}
+
+std::string cmQtAutoGenerator::FileSystem::JoinPath(
+  std::vector<std::string>::const_iterator first,
+  std::vector<std::string>::const_iterator last)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::JoinPath(first, last);
+}
+
 bool cmQtAutoGenerator::FileSystem::FileExists(std::string const& filename)
 {
   std::lock_guard<std::mutex> lock(Mutex_);

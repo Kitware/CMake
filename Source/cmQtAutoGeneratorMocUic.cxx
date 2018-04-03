@@ -1503,8 +1503,8 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
         if (cmHasLiteralSuffix(path, ".framework/Headers")) {
           // Go up twice to get to the framework root
           std::vector<std::string> pathComponents;
-          cmSystemTools::SplitPath(path, pathComponents);
-          std::string frameworkPath = cmSystemTools::JoinPath(
+          FileSys().SplitPath(path, pathComponents);
+          std::string frameworkPath = FileSys().JoinPath(
             pathComponents.begin(), pathComponents.end() - 2);
           frameworkPaths.insert(frameworkPath);
         }
