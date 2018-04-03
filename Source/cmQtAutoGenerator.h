@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmFilePathChecksum.h"
 #include "cmQtAutoGen.h"
 #include "cmUVHandlePtr.h"
 #include "cmUVSignalHackRAII.h" // IWYU pragma: keep
@@ -89,6 +90,13 @@ public:
     std::string GetFilenameWithoutLastExtension(const std::string& filename);
     /// @brief Wrapper for cmQtAutoGen::SubDirPrefix
     std::string SubDirPrefix(std::string const& filename);
+    /// @brief Wrapper for cmFilePathChecksum::setupParentDirs
+    void setupFilePathChecksum(std::string const& currentSrcDir,
+                               std::string const& currentBinDir,
+                               std::string const& projectSrcDir,
+                               std::string const& projectBinDir);
+    /// @brief Wrapper for cmFilePathChecksum::getPart
+    std::string GetFilePathChecksum(std::string const& filename);
 
     // -- File access
     bool FileExists(std::string const& filename);
@@ -124,6 +132,7 @@ public:
 
   private:
     std::mutex Mutex_;
+    cmFilePathChecksum FilePathChecksum_;
     Logger* Log_;
   };
 

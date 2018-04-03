@@ -676,7 +676,7 @@ void cmQtAutoGeneratorMocUic::JobMocT::Process(WorkerT& wrk)
     BuildFile += '/';
     BuildFile += IncludeString;
   } else {
-    std::string rel = wrk.Base().FilePathChecksum.getPart(SourceFile);
+    std::string rel = wrk.FileSys().GetFilePathChecksum(SourceFile);
     rel += "/moc_";
     rel += wrk.FileSys().GetFilenameWithoutLastExtension(SourceFile);
     rel += ".cpp";
@@ -1444,7 +1444,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
   // ------------------------
 
   // Init file path checksum generator
-  Base_.FilePathChecksum.setupParentDirs(
+  FileSys().setupFilePathChecksum(
     Base().CurrentSourceDir, Base().CurrentBinaryDir, Base().ProjectSourceDir,
     Base().ProjectBinaryDir);
 

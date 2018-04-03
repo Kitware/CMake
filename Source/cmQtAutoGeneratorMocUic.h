@@ -5,7 +5,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmFilePathChecksum.h"
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
 #include "cmUVHandlePtr.h"
@@ -95,7 +94,6 @@ public:
     std::string AutogenBuildDir;
     std::string AutogenIncludeDir;
     // - Files
-    cmFilePathChecksum FilePathChecksum;
     std::vector<std::string> HeaderExtensions;
     // - File system
     FileSystem* FileSys;

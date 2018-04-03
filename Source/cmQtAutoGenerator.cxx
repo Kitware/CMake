@@ -197,6 +197,22 @@ std::string cmQtAutoGenerator::FileSystem::SubDirPrefix(
   return cmQtAutoGen::SubDirPrefix(filename);
 }
 
+void cmQtAutoGenerator::FileSystem::setupFilePathChecksum(
+  std::string const& currentSrcDir, std::string const& currentBinDir,
+  std::string const& projectSrcDir, std::string const& projectBinDir)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  FilePathChecksum_.setupParentDirs(currentSrcDir, currentBinDir,
+                                    projectSrcDir, projectBinDir);
+}
+
+std::string cmQtAutoGenerator::FileSystem::GetFilePathChecksum(
+  std::string const& filename)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return FilePathChecksum_.getPart(filename);
+}
+
 bool cmQtAutoGenerator::FileSystem::FileExists(std::string const& filename)
 {
   std::lock_guard<std::mutex> lock(Mutex_);
