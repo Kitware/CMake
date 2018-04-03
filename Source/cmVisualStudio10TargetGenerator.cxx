@@ -342,8 +342,8 @@ void cmVisualStudio10TargetGenerator::Generate()
 
   if (this->NsightTegra) {
     this->WriteString("<PropertyGroup Label=\"NsightTegraProject\">\n", 1);
-    const int nsightTegraMajorVersion = this->NsightTegraVersion[0];
-    const int nsightTegraMinorVersion = this->NsightTegraVersion[1];
+    const unsigned int nsightTegraMajorVersion = this->NsightTegraVersion[0];
+    const unsigned int nsightTegraMinorVersion = this->NsightTegraVersion[1];
     if (nsightTegraMajorVersion >= 2) {
       this->WriteString("<NsightTegraProjectRevisionNumber>", 2);
       if (nsightTegraMajorVersion > 3 ||
