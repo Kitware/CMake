@@ -5432,7 +5432,10 @@ bool cmGeneratorTarget::HasImportLibrary(std::string const& config) const
 {
   return (this->IsDLLPlatform() &&
           (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
-           this->IsExecutableWithExports()));
+           this->IsExecutableWithExports()) &&
+          // Assemblies which have only managed code do not have
+          // import libraries.
+          this->GetManagedType(config) != ManagedType::Managed);
 }
 
 std::string cmGeneratorTarget::GetSupportDirectory() const
