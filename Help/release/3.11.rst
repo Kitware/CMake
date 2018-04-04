@@ -127,15 +127,6 @@ Properties
 Modules
 -------
 
-* The :module:`CheckIncludeFile` module ``check_include_file`` macro
-  learned to honor the ``CMAKE_REQUIRED_LIBRARIES`` variable.
-
-* The :module:`CheckIncludeFileCXX` module ``check_include_file_cxx`` macro
-  learned to honor the ``CMAKE_REQUIRED_LIBRARIES`` variable.
-
-* The :module:`CheckIncludeFiles` module ``check_include_files`` macro
-  learned to honor the ``CMAKE_REQUIRED_LIBRARIES`` variable.
-
 * The :module:`CheckIncludeFiles` module :command:`CHECK_INCLUDE_FILES`
   command gained a ``LANGUAGE`` option to specify whether to check using the
   ``C`` or ``CXX`` compiler.
@@ -276,3 +267,19 @@ Other Changes
   values containing newlines are now truncated before writing to the file.
   In addition, a warning comment is written to the cache file, and a warning
   message is displayed to the user on the console.
+
+Updates
+=======
+
+Changes made since CMake 3.11.0 include the following.
+
+3.11.1
+------
+
+* The :module:`CheckIncludeFile` module ``check_include_file`` macro,
+  :module:`CheckIncludeFileCXX` module ``check_include_file_cxx`` macro,
+  and :module:`CheckIncludeFiles` module ``check_include_files`` macro
+  were taught to honor the ``CMAKE_REQUIRED_LIBRARIES`` variable in
+  CMake 3.11.0.  This has been reverted due to changing behavior of
+  checks for existing projects.  It may be restored in the future
+  with a policy for compatibility.
