@@ -144,18 +144,19 @@ else()
   set (Python_FIND_QUIETLY TRUE)
   set (Python_FIND_REQUIRED FALSE)
 
-  foreach (_Python_REQUIRED_VERSION_MAJOR IN ITEMS 3 2)
+  set (_Python_REQUIRED_VERSIONS 3 2)
+  set (_Python_REQUIRED_VERSION_LAST 2)
+
+  foreach (_Python_REQUIRED_VERSION_MAJOR IN LISTS _Python_REQUIRED_VERSIONS)
     set (Python_FIND_VERSION ${_Python_REQUIRED_VERSION_MAJOR})
     include (${CMAKE_CURRENT_LIST_DIR}/FindPython/Support.cmake)
-    if (Python_FOUND)
+    if (Python_FOUND OR
+        _Python_REQUIRED_VERSION_MAJOR EQUAL _Python_REQUIRED_VERSION_LAST)
       break()
     endif()
     # clean-up some CACHE variables to ensure look-up restart from scratch
-    foreach (_Python_ITEM IN ITEMS EXECUTABLE COMPILER
-                                   LIBRARY_RELEASE RUNTIME_LIBRARY_RELEASE
-                                   LIBRARY_DEBUG RUNTIME_LIBRARY_DEBUG
-                                   INCLUDE_DIR)
-      unset (Python_${_Python_ITEM} CACHE)
+    foreach (_Python_ITEM IN LISTS _Python_CACHED_VARS)
+      unset (${_Python_ITEM} CACHE)
     endforeach()
   endforeach()
 
