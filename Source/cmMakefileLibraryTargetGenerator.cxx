@@ -641,8 +641,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       this->LocalGenerator->GetCurrentBinaryDirectory(),
       targetFullPathImport));
     std::string implib;
-    if (this->GeneratorTarget->GetImplibGNUtoMS(targetFullPathImport,
-                                                implib)) {
+    if (this->GeneratorTarget->GetImplibGNUtoMS(
+          this->ConfigName, targetFullPathImport, implib)) {
       libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
         this->LocalGenerator->GetCurrentBinaryDirectory(), implib));
     }

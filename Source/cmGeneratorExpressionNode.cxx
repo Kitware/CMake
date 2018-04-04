@@ -1675,7 +1675,8 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
                     "executables with ENABLE_EXPORTS.");
       return std::string();
     }
-    cmStateEnums::ArtifactType artifact = target->HasImportLibrary()
+    cmStateEnums::ArtifactType artifact =
+      target->HasImportLibrary(context->Config)
       ? cmStateEnums::ImportLibraryArtifact
       : cmStateEnums::RuntimeBinaryArtifact;
     return target->GetFullPath(context->Config, artifact);

@@ -572,17 +572,17 @@ public:
   std::string GetLinkerLanguage(const std::string& config) const;
 
   /** Does this target have a GNU implib to convert to MS format?  */
-  bool HasImplibGNUtoMS() const;
+  bool HasImplibGNUtoMS(std::string const& config) const;
 
   /** Convert the given GNU import library name (.dll.a) to a name with a new
       extension (.lib or ${CMAKE_IMPORT_LIBRARY_SUFFIX}).  */
-  bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
-                        const char* newExt = nullptr) const;
+  bool GetImplibGNUtoMS(std::string const& config, std::string const& gnuName,
+                        std::string& out, const char* newExt = nullptr) const;
 
   bool IsExecutableWithExports() const;
 
   /** Return whether or not the target has a DLL import library.  */
-  bool HasImportLibrary() const;
+  bool HasImportLibrary(std::string const& config) const;
 
   /** Get a build-tree directory in which to place target support files.  */
   std::string GetSupportDirectory() const;

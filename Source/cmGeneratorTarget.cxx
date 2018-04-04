@@ -5403,16 +5403,17 @@ std::string cmGeneratorTarget::GetPDBDirectory(const std::string& config) const
   return "";
 }
 
-bool cmGeneratorTarget::HasImplibGNUtoMS() const
+bool cmGeneratorTarget::HasImplibGNUtoMS(std::string const& config) const
 {
-  return this->HasImportLibrary() && this->GetPropertyAsBool("GNUtoMS");
+  return this->HasImportLibrary(config) && this->GetPropertyAsBool("GNUtoMS");
 }
 
-bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& gnuName,
+bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& config,
+                                         std::string const& gnuName,
                                          std::string& out,
                                          const char* newExt) const
 {
-  if (this->HasImplibGNUtoMS() && gnuName.size() > 6 &&
+  if (this->HasImplibGNUtoMS(config) && gnuName.size() > 6 &&
       gnuName.substr(gnuName.size() - 6) == ".dll.a") {
     out = gnuName.substr(0, gnuName.size() - 6);
     out += newExt ? newExt : ".lib";
@@ -5427,7 +5428,7 @@ bool cmGeneratorTarget::IsExecutableWithExports() const
           this->GetPropertyAsBool("ENABLE_EXPORTS"));
 }
 
-bool cmGeneratorTarget::HasImportLibrary() const
+bool cmGeneratorTarget::HasImportLibrary(std::string const& config) const
 {
   return (this->IsDLLPlatform() &&
           (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
