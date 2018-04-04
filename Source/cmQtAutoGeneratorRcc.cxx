@@ -533,10 +533,14 @@ bool cmQtAutoGeneratorRcc::GenerateRcc()
     if (Process_->IsFinished()) {
       // Process is finished
       if (!ProcessResult_.error()) {
-        // Process success
+        // Rcc process success
+        // Print rcc output
+        if (!ProcessResult_.StdOut.empty()) {
+          Log().Info(GeneratorT::RCC, ProcessResult_.StdOut);
+        }
         BuildFileChanged_ = true;
       } else {
-        // Process failed
+        // Rcc process failed
         {
           std::string emsg = "The rcc process failed to compile\n  ";
           emsg += Quoted(QrcFile_);
