@@ -51,10 +51,11 @@ unset(CMAKE_SWIG_FLAGS)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
-set_source_files_properties(example.i PROPERTIES CPLUSPLUS ON)
-set_source_files_properties(example.i PROPERTIES SWIG_FLAGS "-includeall")
+set_source_files_properties("${CMAKE_CURRENT_LIST_DIR}/example.i" PROPERTIES CPLUSPLUS ON)
+set_source_files_properties("${CMAKE_CURRENT_LIST_DIR}/example.i" PROPERTIES SWIG_FLAGS "-includeall")
 SWIG_ADD_LIBRARY(example
                  LANGUAGE "${language}"
                  ${SWIG_LANG_TYPE}
-                 SOURCES example.i example.cxx)
+                 SOURCES "${CMAKE_CURRENT_LIST_DIR}/example.i"
+                         "${CMAKE_CURRENT_LIST_DIR}/example.cxx")
 SWIG_LINK_LIBRARIES(example ${SWIG_LANG_LIBRARIES})
