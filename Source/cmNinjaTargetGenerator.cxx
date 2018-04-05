@@ -445,24 +445,16 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   cmMakefile* mf = this->GetMakefile();
 
   std::string flags = "$FLAGS";
-  std::string rspfile;
-  std::string rspcontent;
 
+  std::string responseFlag;
   bool const lang_supports_response = !(lang == "RC" || lang == "CUDA");
   if (lang_supports_response && this->ForceResponseFile()) {
     std::string const responseFlagVar =
       "CMAKE_" + lang + "_RESPONSE_FILE_FLAG";
-    std::string responseFlag =
-      this->Makefile->GetSafeDefinition(responseFlagVar);
+    responseFlag = this->Makefile->GetSafeDefinition(responseFlagVar);
     if (responseFlag.empty()) {
       responseFlag = "@";
     }
-    rspfile = "$RSP_FILE";
-    responseFlag += rspfile;
-    rspcontent = " $DEFINES $INCLUDES $FLAGS";
-    flags = std::move(responseFlag);
-    vars.Defines = "";
-    vars.Includes = "";
   }
 
   std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
@@ -514,6 +506,18 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     // compilation rule still needs them for the INCLUDE directive.
     ppVars.Includes = vars.Includes;
 
+    // If using a response file, move defines, includes, and flags into it.
+    std::string ppRspFile;
+    std::string ppRspContent;
+    if (!responseFlag.empty()) {
+      ppRspFile = "$RSP_FILE";
+      ppRspContent = std::string(" ") + ppVars.Defines + " " +
+        ppVars.Includes + " " + ppFlags;
+      ppFlags = responseFlag + ppRspFile;
+      ppVars.Defines = "";
+      ppVars.Includes = "";
+    }
+
     ppVars.Flags = ppFlags.c_str();
 
     // Rule for preprocessing source file.
@@ -544,13 +548,11 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     ppComment << "Rule for preprocessing " << lang << " files.";
     std::ostringstream ppDesc;
     ppDesc << "Building " << lang << " preprocessed $out";
-    this->GetGlobalGenerator()->AddRule(this->LanguagePreprocessRule(lang),
-                                        ppCmdLine, ppDesc.str(),
-                                        ppComment.str(), ppDepfile, ppDeptype,
-                                        /*rspfile*/ "",
-                                        /*rspcontent*/ "",
-                                        /*restat*/ "",
-                                        /*generator*/ false);
+    this->GetGlobalGenerator()->AddRule(
+      this->LanguagePreprocessRule(lang), ppCmdLine, ppDesc.str(),
+      ppComment.str(), ppDepfile, ppDeptype, ppRspFile, ppRspContent,
+      /*restat*/ "",
+      /*generator*/ false);
   }
 
   if (needDyndep) {
@@ -585,6 +587,18 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
       /*deps*/ "", ddRspFile, ddRspContent,
       /*restat*/ "",
       /*generator*/ false);
+  }
+
+  // If using a response file, move defines, includes, and flags into it.
+  std::string rspfile;
+  std::string rspcontent;
+  if (!responseFlag.empty()) {
+    rspfile = "$RSP_FILE";
+    rspcontent =
+      std::string(" ") + vars.Defines + " " + vars.Includes + " " + flags;
+    flags = responseFlag + rspfile;
+    vars.Defines = "";
+    vars.Includes = "";
   }
 
   // Tell ninja dependency format so all deps can be loaded into a database
@@ -1019,9 +1033,12 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
                                ppVars);
 
+    std::string const ppRspFile = ppFileName + ".rsp";
+
     this->GetGlobalGenerator()->WriteBuild(
       this->GetBuildFileStream(), ppComment, ppRule, ppOutputs, ppImplicitOuts,
-      ppExplicitDeps, ppImplicitDeps, ppOrderOnlyDeps, ppVars);
+      ppExplicitDeps, ppImplicitDeps, ppOrderOnlyDeps, ppVars, ppRspFile,
+      commandLineLengthLimit);
   }
   if (needDyndep) {
     std::string const dyndep = this->GetDyndepFilePath(language);
