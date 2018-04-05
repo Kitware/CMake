@@ -239,6 +239,7 @@ Variables that Describe the System
    /variable/MSVC80
    /variable/MSVC90
    /variable/MSVC_IDE
+   /variable/MSVC_TOOLSET_VERSION
    /variable/MSVC_VERSION
    /variable/UNIX
    /variable/WIN32
