@@ -10,6 +10,13 @@ include(${SWIG_USE_FILE})
 find_package(Python2 REQUIRED COMPONENTS Interpreter Development)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
+# Path separator
+if (WIN32)
+  set (PS "$<SEMICOLON>")
+else()
+  set (PS ":")
+endif()
+
 unset(CMAKE_SWIG_FLAGS)
 
 set_property(SOURCE "../example.i" PROPERTY CPLUSPLUS ON)
@@ -44,9 +51,9 @@ target_link_libraries(example2 PRIVATE Python3::Python)
 
 
 add_test (NAME MultiplePython.example1
-  COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:example1>"
+  COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/Python2${PS}$<TARGET_FILE_DIR:example1>"
   "${Python2_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/../runme.py")
 
 add_test (NAME MultiplePython.example2
-  COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:example2>"
+  COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/Python3${PS}$<TARGET_FILE_DIR:example2>"
   "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/../runme.py")

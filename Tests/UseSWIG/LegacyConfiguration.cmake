@@ -5,6 +5,13 @@ set (CMAKE_WARN_DEPRECATED FALSE)
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
+# Path separator
+if (WIN32)
+  set (PS "$<SEMICOLON>")
+else()
+  set (PS ":")
+endif()
+
 unset(SWIG_LANG_TYPE)
 if(${language} MATCHES python)
   find_package(PythonInterp REQUIRED)

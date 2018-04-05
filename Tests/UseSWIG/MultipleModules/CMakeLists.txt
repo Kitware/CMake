@@ -12,6 +12,13 @@ find_package(Python REQUIRED COMPONENTS Interpreter Development)
 find_package(Perl REQUIRED)
 find_package(PerlLibs REQUIRED)
 
+# Path separator
+if (WIN32)
+  set (PS "$<SEMICOLON>")
+else()
+  set (PS ":")
+endif()
+
 unset(CMAKE_SWIG_FLAGS)
 
 set_property(SOURCE "../example.i" PROPERTY CPLUSPLUS ON)
@@ -51,19 +58,11 @@ target_link_libraries(example2 PRIVATE ${PERL_LIBRARY})
 
 
 add_test (NAME MultipleModules.Python
-  COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:example1>"
+  COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/Python${PS}$<TARGET_FILE_DIR:example1>"
   "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/../runme.py")
 
 
-if (WIN32)
-  file (TO_CMAKE_PATH "$ENV{PATH}" perl_path)
-  string (REPLACE ";" "$<SEMICOLON>" perl_path "${perl_path}")
-  set (perl_env "PATH=$<TARGET_FILE_DIR:example2>$<SEMICOLON>${perl_path}")
-else()
-  set (perl_env "LD_LIBRARY_PATH=$<TARGET_FILE_DIR:example2>")
-endif()
-
 add_test (NAME MultipleModules.Perl
-  COMMAND "${CMAKE_COMMAND}" -E env "${perl_env}"
-  "${PERL_EXECUTABLE}" "-I$<TARGET_FILE_DIR:example2>"
+  COMMAND "${PERL_EXECUTABLE}" "-I${CMAKE_CURRENT_BINARY_DIR}/Perl"
+                               "-I$<TARGET_FILE_DIR:example2>"
   "${CMAKE_CURRENT_SOURCE_DIR}/../runme.pl")

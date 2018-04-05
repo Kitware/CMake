@@ -10,6 +10,12 @@ include(${SWIG_USE_FILE})
 find_package(Python2 REQUIRED COMPONENTS Interpreter Development)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
+if (WIN32)
+  set (PS $<SEMICOLON>)
+else()
+  set (PS ":")
+endif()
+
 set (UseSWIG_MODULE_VERSION 2)
 unset(CMAKE_SWIG_FLAGS)
 
@@ -40,12 +46,6 @@ set_target_properties (example2 PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Python3")
 target_link_libraries(example2 PRIVATE Python3::Python)
 
-
-if (WIN32)
-  set (PS $<SEMICOLON>)
-else()
-  set (PS ":")
-endif()
 
 add_test (NAME ModuleVersion2.example1
   COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_PROPERTY:example1,SWIG_SUPPORT_FILES_DIRECTORY>${PS}$<TARGET_FILE_DIR:example1>"
