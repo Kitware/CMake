@@ -33,8 +33,6 @@
 #   list of macros to define (-DFOO=bar)
 # ``CMAKE_REQUIRED_INCLUDES``
 #   list of include directories
-# ``CMAKE_REQUIRED_LIBRARIES``
-#   list of libraries to link
 # ``CMAKE_REQUIRED_QUIET``
 #   execute quietly without messages
 #
@@ -104,7 +102,6 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
       ${CMAKE_BINARY_DIR}
       ${src}
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
-      LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
       CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_INCLUDE_FILES_FLAGS}
       "${CHECK_INCLUDE_FILES_INCLUDE_DIRS}"
