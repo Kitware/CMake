@@ -465,52 +465,6 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     vars.Includes = "";
   }
 
-  // Tell ninja dependency format so all deps can be loaded into a database
-  std::string deptype;
-  std::string depfile;
-  std::string cldeps;
-  if (explicitPP) {
-    // The explicit preprocessing step will handle dependency scanning.
-  } else if (this->NeedDepTypeMSVC(lang)) {
-    deptype = "msvc";
-    depfile.clear();
-    flags += " /showIncludes";
-  } else if (mf->IsOn("CMAKE_NINJA_CMCLDEPS_" + lang)) {
-    // For the MS resource compiler we need cmcldeps, but skip dependencies
-    // for source-file try_compile cases because they are always fresh.
-    if (!mf->GetIsSourceFileTryCompile()) {
-      deptype = "gcc";
-      depfile = "$DEP_FILE";
-      const std::string cl = mf->GetDefinition("CMAKE_C_COMPILER")
-        ? mf->GetSafeDefinition("CMAKE_C_COMPILER")
-        : mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
-      cldeps = "\"";
-      cldeps += cmSystemTools::GetCMClDepsCommand();
-      cldeps += "\" " + lang + " " + vars.Source + " $DEP_FILE $out \"";
-      cldeps += mf->GetSafeDefinition("CMAKE_CL_SHOWINCLUDES_PREFIX");
-      cldeps += "\" \"" + cl + "\" ";
-    }
-  } else {
-    deptype = "gcc";
-    const char* langdeptype = mf->GetDefinition("CMAKE_NINJA_DEPTYPE_" + lang);
-    if (langdeptype) {
-      deptype = langdeptype;
-    }
-    depfile = "$DEP_FILE";
-    const std::string flagsName = "CMAKE_DEPFILE_FLAGS_" + lang;
-    std::string depfileFlags = mf->GetSafeDefinition(flagsName);
-    if (!depfileFlags.empty()) {
-      cmSystemTools::ReplaceString(depfileFlags, "<DEPFILE>", "$DEP_FILE");
-      cmSystemTools::ReplaceString(depfileFlags, "<OBJECT>", "$out");
-      cmSystemTools::ReplaceString(depfileFlags, "<CMAKE_C_COMPILER>",
-                                   mf->GetDefinition("CMAKE_C_COMPILER"));
-      flags += " " + depfileFlags;
-    }
-  }
-
-  vars.Flags = flags.c_str();
-  vars.DependencyFile = depfile.c_str();
-
   std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
     this->GetLocalGenerator()->CreateRulePlaceholderExpander());
 
@@ -550,7 +504,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     vars.Source = "$in";
 
     // Preprocessing and compilation use the same flags.
-    ppVars.Flags = vars.Flags;
+    std::string ppFlags = flags;
 
     // Move preprocessor definitions to the preprocessor rule.
     ppVars.Defines = vars.Defines;
@@ -559,6 +513,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     // Copy include directories to the preprocessor rule.  The Fortran
     // compilation rule still needs them for the INCLUDE directive.
     ppVars.Includes = vars.Includes;
+
+    ppVars.Flags = ppFlags.c_str();
 
     // Rule for preprocessing source file.
     std::vector<std::string> ppCmds;
@@ -630,6 +586,52 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
       /*restat*/ "",
       /*generator*/ false);
   }
+
+  // Tell ninja dependency format so all deps can be loaded into a database
+  std::string deptype;
+  std::string depfile;
+  std::string cldeps;
+  if (explicitPP) {
+    // The explicit preprocessing step will handle dependency scanning.
+  } else if (this->NeedDepTypeMSVC(lang)) {
+    deptype = "msvc";
+    depfile.clear();
+    flags += " /showIncludes";
+  } else if (mf->IsOn("CMAKE_NINJA_CMCLDEPS_" + lang)) {
+    // For the MS resource compiler we need cmcldeps, but skip dependencies
+    // for source-file try_compile cases because they are always fresh.
+    if (!mf->GetIsSourceFileTryCompile()) {
+      deptype = "gcc";
+      depfile = "$DEP_FILE";
+      const std::string cl = mf->GetDefinition("CMAKE_C_COMPILER")
+        ? mf->GetSafeDefinition("CMAKE_C_COMPILER")
+        : mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
+      cldeps = "\"";
+      cldeps += cmSystemTools::GetCMClDepsCommand();
+      cldeps += "\" " + lang + " " + vars.Source + " $DEP_FILE $out \"";
+      cldeps += mf->GetSafeDefinition("CMAKE_CL_SHOWINCLUDES_PREFIX");
+      cldeps += "\" \"" + cl + "\" ";
+    }
+  } else {
+    deptype = "gcc";
+    const char* langdeptype = mf->GetDefinition("CMAKE_NINJA_DEPTYPE_" + lang);
+    if (langdeptype) {
+      deptype = langdeptype;
+    }
+    depfile = "$DEP_FILE";
+    const std::string flagsName = "CMAKE_DEPFILE_FLAGS_" + lang;
+    std::string depfileFlags = mf->GetSafeDefinition(flagsName);
+    if (!depfileFlags.empty()) {
+      cmSystemTools::ReplaceString(depfileFlags, "<DEPFILE>", "$DEP_FILE");
+      cmSystemTools::ReplaceString(depfileFlags, "<OBJECT>", "$out");
+      cmSystemTools::ReplaceString(depfileFlags, "<CMAKE_C_COMPILER>",
+                                   mf->GetDefinition("CMAKE_C_COMPILER"));
+      flags += " " + depfileFlags;
+    }
+  }
+
+  vars.Flags = flags.c_str();
+  vars.DependencyFile = depfile.c_str();
 
   // Rule for compiling object file.
   std::vector<std::string> compileCmds;
