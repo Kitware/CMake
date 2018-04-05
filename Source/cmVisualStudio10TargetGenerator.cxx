@@ -33,6 +33,7 @@ struct cmVisualStudio10TargetGenerator::Elem
   cmGeneratedFileStream& S;
   int Indent;
   bool HasElements = false;
+  const char* Tag = nullptr;
 
   Elem(cmGeneratedFileStream& s, int i)
     : S(s)
@@ -46,25 +47,45 @@ struct cmVisualStudio10TargetGenerator::Elem
   {
     par.SetHasElements();
   }
+  Elem(Elem& par, const char* tag)
+    : S(par.S)
+    , Indent(par.Indent + 1)
+  {
+    par.SetHasElements();
+    this->StartElement(tag);
+  }
   void SetHasElements()
   {
     if (!HasElements) {
-      S << ">\n";
+      this->S << ">\n";
       HasElements = true;
     }
+  }
+  cmGeneratedFileStream& WriteString(const char* line);
+  void StartElement(const char* tag)
+  {
+    this->Tag = tag;
+    this->WriteString("<") << tag;
+  }
+  template <typename T>
+  void WriteElem(const char* tag, const T& val)
+  {
+    this->WriteString("<") << tag << ">" << val << "</" << tag << ">\n";
+  }
+  template <typename T>
+  void Attr(const char* an, const T& av)
+  {
+    this->S << " " << an << "=\"" << av << "\"";
   }
   void WriteEndTag(const char* tag)
   {
     if (HasElements) {
-      S.fill(' ');
-      S.width(Indent * 2);
-      // write an empty string to get the fill level indent to print
-      S << "";
-      S << "</" << tag << ">\n";
+      this->WriteString("</") << tag << ">\n";
     } else {
-      S << " />\n";
+      this->S << " />\n";
     }
   }
+  void EndElement() { this->WriteEndTag(this->Tag); }
 };
 
 class cmVS10GeneratorOptions : public cmVisualStudioGeneratorOptions
@@ -102,16 +123,14 @@ inline void cmVisualStudio10TargetGenerator::WriteElem(const char* tag,
                                                        const char* val,
                                                        int indentLevel)
 {
-  this->WriteString("<", indentLevel);
-  (*this->BuildFileStream) << tag << ">" << val << "</" << tag << ">\n";
+  Elem(*this->BuildFileStream, indentLevel).WriteElem(tag, val);
 }
 
 inline void cmVisualStudio10TargetGenerator::WriteElem(const char* tag,
                                                        std::string const& val,
                                                        int indentLevel)
 {
-  this->WriteString("<", indentLevel);
-  (*this->BuildFileStream) << tag << ">" << val << "</" << tag << ">\n";
+  Elem(*this->BuildFileStream, indentLevel).WriteElem(tag, val);
 }
 
 inline void cmVisualStudio10TargetGenerator::WriteElemEscapeXML(
@@ -247,14 +266,21 @@ void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
   }
 }
 
+cmGeneratedFileStream& cmVisualStudio10TargetGenerator::Elem::WriteString(
+  const char* line)
+{
+  this->S.fill(' ');
+  this->S.width(this->Indent * 2);
+  // write an empty string to get the fill level indent to print
+  this->S << "";
+  this->S << line;
+  return this->S;
+}
+
 void cmVisualStudio10TargetGenerator::WriteString(const char* line,
                                                   int indentLevel)
 {
-  this->BuildFileStream->fill(' ');
-  this->BuildFileStream->width(indentLevel * 2);
-  // write an empty string to get the fill level indent to print
-  (*this->BuildFileStream) << "";
-  (*this->BuildFileStream) << line;
+  Elem(*this->BuildFileStream, indentLevel).WriteString(line);
 }
 
 #define VS10_CXX_DEFAULT_PROPS "$(VCTargetsPath)\\Microsoft.Cpp.Default.props"
@@ -1373,71 +1399,72 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   fout.SetCopyIfDifferent(true);
   char magic[] = { char(0xEF), char(0xBB), char(0xBF) };
   fout.write(magic, 3);
-  cmGeneratedFileStream* save = this->BuildFileStream;
-  this->BuildFileStream = &fout;
 
   // get the tools version to use
   const std::string toolsVer(this->GlobalGenerator->GetToolsVersion());
-  std::string project_defaults = "<?xml version=\"1.0\" encoding=\"" +
-    this->GlobalGenerator->Encoding() + "\"?>\n";
-  project_defaults.append("<Project ToolsVersion=\"");
-  project_defaults.append(toolsVer + "\" ");
-  project_defaults.append(
-    "xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n");
-  this->WriteString(project_defaults.c_str(), 0);
+  fout << "<?xml version=\"1.0\" encoding=\""
+       << this->GlobalGenerator->Encoding() << "\"?>\n";
+
+  Elem e0(fout, 0);
+  e0.StartElement("Project");
+  e0.Attr("ToolsVersion", toolsVer);
+  e0.Attr("xmlns", "http://schemas.microsoft.com/developer/msbuild/2003");
+  e0.SetHasElements();
 
   for (auto const& ti : this->Tools) {
-    this->WriteGroupSources(ti.first.c_str(), ti.second, sourceGroups);
+    this->WriteGroupSources(e0, ti.first, ti.second, sourceGroups);
   }
 
   // Added files are images and the manifest.
   if (!this->AddedFiles.empty()) {
-    this->WriteString("<ItemGroup>\n", 1);
+    Elem e1(e0, "ItemGroup");
+    e1.SetHasElements();
     for (std::string const& oi : this->AddedFiles) {
       std::string fileName =
         cmSystemTools::LowerCase(cmSystemTools::GetFilenameName(oi));
       if (fileName == "wmappmanifest.xml") {
-        this->WriteString("<XML Include=\"", 2);
-        (*this->BuildFileStream) << oi << "\">\n";
-        this->WriteElem("Filter", "Resource Files", 3);
-        this->WriteString("</XML>\n", 2);
+        Elem e2(e1, "XML");
+        e2.Attr("Include", oi);
+        Elem(e2).WriteElem("Filter", "Resource Files");
+        e2.EndElement();
       } else if (cmSystemTools::GetFilenameExtension(fileName) ==
                  ".appxmanifest") {
-        this->WriteString("<AppxManifest Include=\"", 2);
-        (*this->BuildFileStream) << oi << "\">\n";
-        this->WriteElem("Filter", "Resource Files", 3);
-        this->WriteString("</AppxManifest>\n", 2);
+        Elem e2(e1, "AppxManifest");
+        e2.Attr("Include", oi);
+        Elem(e2).WriteElem("Filter", "Resource Files");
+        e2.EndElement();
       } else if (cmSystemTools::GetFilenameExtension(fileName) == ".pfx") {
-        this->WriteString("<None Include=\"", 2);
-        (*this->BuildFileStream) << oi << "\">\n";
-        this->WriteElem("Filter", "Resource Files", 3);
-        this->WriteString("</None>\n", 2);
+        Elem e2(e1, "None");
+        e2.Attr("Include", oi);
+        Elem(e2).WriteElem("Filter", "Resource Files");
+        e2.EndElement();
       } else {
-        this->WriteString("<Image Include=\"", 2);
-        (*this->BuildFileStream) << oi << "\">\n";
-        this->WriteElem("Filter", "Resource Files", 3);
-        this->WriteString("</Image>\n", 2);
+        Elem e2(e1, "Image");
+        e2.Attr("Include", oi);
+        Elem(e2).WriteElem("Filter", "Resource Files");
+        e2.EndElement();
       }
     }
-    this->WriteString("</ItemGroup>\n", 1);
+    e1.EndElement();
   }
 
   std::vector<cmSourceFile const*> resxObjs;
   this->GeneratorTarget->GetResxSources(resxObjs, "");
   if (!resxObjs.empty()) {
-    this->WriteString("<ItemGroup>\n", 1);
+    Elem e1(e0, "ItemGroup");
     for (cmSourceFile const* oi : resxObjs) {
       std::string obj = oi->GetFullPath();
-      this->WriteString("<EmbeddedResource Include=\"", 2);
       ConvertToWindowsSlash(obj);
-      (*this->BuildFileStream) << cmVS10EscapeXML(obj) << "\">\n";
-      this->WriteElem("Filter", "Resource Files", 3);
-      this->WriteString("</EmbeddedResource>\n", 2);
+      Elem e2(e1, "EmbeddedResource");
+      e2.Attr("Include", cmVS10EscapeXML(obj));
+      Elem(e2).WriteElem("Filter", "Resource Files");
+      e2.EndElement();
     }
-    this->WriteString("</ItemGroup>\n", 1);
+    e1.EndElement();
   }
 
-  this->WriteString("<ItemGroup>\n", 1);
+  Elem e1(e0, "ItemGroup");
+  e1.SetHasElements();
   std::vector<cmSourceGroup*> groupsVec(groupsUsed.begin(), groupsUsed.end());
   std::sort(groupsVec.begin(), groupsVec.end(),
             [](cmSourceGroup* l, cmSourceGroup* r) {
@@ -1446,31 +1473,29 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   for (cmSourceGroup* sg : groupsVec) {
     std::string const& name = sg->GetFullName();
     if (!name.empty()) {
-      this->WriteString("<Filter Include=\"", 2);
-      (*this->BuildFileStream) << name << "\">\n";
-      std::string guidName = "SG_Filter_";
-      guidName += name;
+      std::string guidName = "SG_Filter_" + name;
       std::string guid = this->GlobalGenerator->GetGUID(guidName);
-      this->WriteElem("UniqueIdentifier", "{" + guid + "}", 3);
-      this->WriteString("</Filter>\n", 2);
+      Elem e2(e1, "Filter");
+      e2.Attr("Include", name);
+      Elem(e2).WriteElem("UniqueIdentifier", "{" + guid + "}");
+      e2.EndElement();
     }
   }
 
   if (!resxObjs.empty() || !this->AddedFiles.empty()) {
-    this->WriteString("<Filter Include=\"Resource Files\">\n", 2);
     std::string guidName = "SG_Filter_Resource Files";
     std::string guid = this->GlobalGenerator->GetGUID(guidName);
-    this->WriteElem("UniqueIdentifier", "{" + guid + "}", 3);
-    this->WriteString("<Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;", 3);
-    (*this->BuildFileStream) << "gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;";
-    (*this->BuildFileStream) << "mfcribbon-ms</Extensions>\n";
-    this->WriteString("</Filter>\n", 2);
+    Elem e2(e1, "Filter");
+    e2.Attr("Include", "Resource Files");
+    Elem(e2).WriteElem("UniqueIdentifier", "{" + guid + "}");
+    Elem(e2).WriteElem("Extensions",
+                       "rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;"
+                       "gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms");
+    e2.EndElement();
   }
 
-  this->WriteString("</ItemGroup>\n", 1);
-  this->WriteString("</Project>\n", 0);
-  // restore stream pointer
-  this->BuildFileStream = save;
+  e1.EndElement();
+  e0.EndElement();
 
   if (fout.Close()) {
     this->GlobalGenerator->FileReplacedDuringGenerate(path);
@@ -1515,30 +1540,27 @@ void cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
 }
 
 void cmVisualStudio10TargetGenerator::WriteGroupSources(
-  std::string const& name, ToolSources const& sources,
+  Elem& e0, std::string const& name, ToolSources const& sources,
   std::vector<cmSourceGroup>& sourceGroups)
 {
-  this->WriteString("<ItemGroup>\n", 1);
+  Elem e1(e0, "ItemGroup");
+  e1.SetHasElements();
   for (ToolSource const& s : sources) {
     cmSourceFile const* sf = s.SourceFile;
     std::string const& source = sf->GetFullPath();
     cmSourceGroup* sourceGroup =
       this->Makefile->FindSourceGroup(source, sourceGroups);
     std::string const& filter = sourceGroup->GetFullName();
-    this->WriteString("<", 2);
     std::string path = this->ConvertPath(source, s.RelativePath);
     ConvertToWindowsSlash(path);
-    (*this->BuildFileStream) << name << " Include=\"" << cmVS10EscapeXML(path);
+    Elem e2(e1, name.c_str());
+    e2.Attr("Include", cmVS10EscapeXML(path));
     if (!filter.empty()) {
-      (*this->BuildFileStream) << "\">\n";
-      this->WriteElem("Filter", filter, 3);
-      this->WriteString("</", 2);
-      (*this->BuildFileStream) << name << ">\n";
-    } else {
-      (*this->BuildFileStream) << "\" />\n";
+      Elem(e2).WriteElem("Filter", filter);
     }
+    e2.EndElement();
   }
-  this->WriteString("</ItemGroup>\n", 1);
+  e1.EndElement();
 }
 
 void cmVisualStudio10TargetGenerator::WriteHeaderSource(cmSourceFile const* sf)
