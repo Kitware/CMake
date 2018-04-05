@@ -867,6 +867,11 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   std::string const objectFileDir =
     cmSystemTools::GetFilenamePath(objectFileName);
 
+  bool const lang_supports_response =
+    !(language == "RC" || language == "CUDA");
+  int const commandLineLengthLimit =
+    ((lang_supports_response && this->ForceResponseFile())) ? -1 : 0;
+
   cmNinjaVars vars;
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
@@ -1036,10 +1041,6 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   this->SetMsvcTargetPdbVariable(vars);
 
-  bool const lang_supports_response =
-    !(language == "RC" || language == "CUDA");
-  int const commandLineLengthLimit =
-    ((lang_supports_response && this->ForceResponseFile())) ? -1 : 0;
   std::string const rspfile = objectFileName + ".rsp";
 
   this->GetGlobalGenerator()->WriteBuild(
