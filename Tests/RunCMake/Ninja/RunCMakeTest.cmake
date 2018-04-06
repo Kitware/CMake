@@ -40,6 +40,12 @@ run_CMP0058(NEW-by)
 
 run_cmake(CustomCommandDepfile)
 
+run_cmake(RspFileC)
+run_cmake(RspFileCXX)
+if(TEST_Fortran)
+  run_cmake(RspFileFortran)
+endif()
+
 function(run_CommandConcat)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CommandConcat-build)
   set(RunCMake_TEST_NO_CLEAN 1)
