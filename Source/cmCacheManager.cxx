@@ -8,6 +8,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
+#include <string>
 
 #include "cmGeneratedFileStream.h"
 #include "cmMessenger.h"
@@ -243,19 +244,18 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
   }
   // before writing the cache, update the version numbers
   // to the
-  char temp[1024];
-  sprintf(temp, "%d", cmVersion::GetMinorVersion());
-  this->AddCacheEntry("CMAKE_CACHE_MINOR_VERSION", temp,
-                      "Minor version of cmake used to create the "
-                      "current loaded cache",
-                      cmStateEnums::INTERNAL);
-  sprintf(temp, "%d", cmVersion::GetMajorVersion());
-  this->AddCacheEntry("CMAKE_CACHE_MAJOR_VERSION", temp,
+  this->AddCacheEntry("CMAKE_CACHE_MAJOR_VERSION",
+                      std::to_string(cmVersion::GetMajorVersion()).c_str(),
                       "Major version of cmake used to create the "
                       "current loaded cache",
                       cmStateEnums::INTERNAL);
-  sprintf(temp, "%d", cmVersion::GetPatchVersion());
-  this->AddCacheEntry("CMAKE_CACHE_PATCH_VERSION", temp,
+  this->AddCacheEntry("CMAKE_CACHE_MINOR_VERSION",
+                      std::to_string(cmVersion::GetMinorVersion()).c_str(),
+                      "Minor version of cmake used to create the "
+                      "current loaded cache",
+                      cmStateEnums::INTERNAL);
+  this->AddCacheEntry("CMAKE_CACHE_PATCH_VERSION",
+                      std::to_string(cmVersion::GetPatchVersion()).c_str(),
                       "Patch version of cmake used to create the "
                       "current loaded cache",
                       cmStateEnums::INTERNAL);

@@ -93,7 +93,7 @@ bool cmMacroHelperCommand::InvokeInitialPass(
   argVs.reserve(expandedArgs.size());
   char argvName[60];
   for (unsigned int j = 0; j < expandedArgs.size(); ++j) {
-    sprintf(argvName, "${ARGV%i}", j);
+    sprintf(argvName, "${ARGV%u}", j);
     argVs.push_back(argvName);
   }
   // Invoke all the functions that were collected in the block.

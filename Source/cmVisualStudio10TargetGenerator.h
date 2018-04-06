@@ -204,7 +204,7 @@ private:
   bool MSTools;
   bool Managed;
   bool NsightTegra;
-  int NsightTegraVersion[4];
+  unsigned int NsightTegraVersion[4];
   bool TargetCompileAsWinRT;
   cmGlobalVisualStudio10Generator* const GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;

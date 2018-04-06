@@ -62,7 +62,7 @@ protected:
   ///! Contains the names of the global generators support by this generator.
   std::vector<std::string> SupportedGlobalGenerators;
   ///! the global generator which creates the makefiles
-  const cmGlobalGenerator* GlobalGenerator;
+  const cmGlobalGenerator* GlobalGenerator = nullptr;
 
   std::string Name;
 };

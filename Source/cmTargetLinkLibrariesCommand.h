@@ -43,7 +43,7 @@ private:
   void LinkLibraryTypeSpecifierWarning(int left, int right);
   static const char* LinkLibraryTypeNames[3];
 
-  cmTarget* Target;
+  cmTarget* Target = nullptr;
   enum ProcessingState
   {
     ProcessingLinkLibraries,
@@ -55,7 +55,7 @@ private:
     ProcessingKeywordPrivateInterface
   };
 
-  ProcessingState CurrentProcessingState;
+  ProcessingState CurrentProcessingState = ProcessingLinkLibraries;
 
   bool HandleLibrary(const std::string& lib, cmTargetLinkLibraryType llt);
 };

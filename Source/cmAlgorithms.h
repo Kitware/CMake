@@ -311,7 +311,7 @@ struct RemoveDuplicatesAPI<Range, T*>
 template <typename Range>
 typename Range::const_iterator cmRemoveDuplicates(Range& r)
 {
-  typedef typename ContainerAlgorithms::RemoveDuplicatesAPI<Range> API;
+  typedef ContainerAlgorithms::RemoveDuplicatesAPI<Range> API;
   typedef typename API::value_type T;
   std::vector<T> unique;
   unique.reserve(r.size());
