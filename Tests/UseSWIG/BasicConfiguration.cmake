@@ -2,6 +2,13 @@
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
+# Path separator
+if (WIN32)
+  set (PS "$<SEMICOLON>")
+else()
+  set (PS ":")
+endif()
+
 unset(SWIG_LANG_TYPE)
 unset(SWIG_LANG_INCLUDE_DIRECTORIES)
 unset(SWIG_LANG_DEFINITIONS)
