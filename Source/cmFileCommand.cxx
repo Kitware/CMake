@@ -758,7 +758,11 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
   }
 
   std::vector<std::string> files;
+  bool configureDepends = false;
+  bool warnConfigureLate = false;
   bool warnFollowedSymlinks = false;
+  const cmake::WorkingMode workingMode =
+    this->Makefile->GetCMakeInstance()->GetWorkingMode();
   while (i != args.end()) {
     if (*i == "LIST_DIRECTORIES") {
       ++i;
@@ -807,6 +811,27 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         this->SetError("GLOB requires a glob expression after the directory.");
         return false;
       }
+    } else if (*i == "CONFIGURE_DEPENDS") {
+      // Generated build system depends on glob results
+      if (!configureDepends && warnConfigureLate) {
+        this->Makefile->IssueMessage(
+          cmake::AUTHOR_WARNING,
+          "CONFIGURE_DEPENDS flag was given after a glob expression was "
+          "already evaluated.");
+      }
+      if (workingMode != cmake::NORMAL_MODE) {
+        this->Makefile->IssueMessage(
+          cmake::FATAL_ERROR,
+          "CONFIGURE_DEPENDS is invalid for script and find package modes.");
+        return false;
+      }
+      configureDepends = true;
+      ++i;
+      if (i == args.end()) {
+        this->SetError(
+          "GLOB requires a glob expression after CONFIGURE_DEPENDS.");
+        return false;
+      }
     } else {
       std::string expr = *i;
       if (!cmsys::SystemTools::FileIsFullPath(*i)) {
@@ -849,6 +874,19 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
 
       std::vector<std::string>& foundFiles = g.GetFiles();
       files.insert(files.end(), foundFiles.begin(), foundFiles.end());
+
+      if (configureDepends) {
+        std::sort(foundFiles.begin(), foundFiles.end());
+        foundFiles.erase(std::unique(foundFiles.begin(), foundFiles.end()),
+                         foundFiles.end());
+        this->Makefile->GetCMakeInstance()->AddGlobCacheEntry(
+          recurse, (recurse ? g.GetRecurseListDirs() : g.GetListDirs()),
+          (recurse ? g.GetRecurseThroughSymlinks() : false),
+          (g.GetRelative() ? g.GetRelative() : ""), expr, foundFiles, variable,
+          this->Makefile->GetBacktrace());
+      } else {
+        warnConfigureLate = true;
+      }
       ++i;
     }
   }

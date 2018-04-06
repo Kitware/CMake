@@ -346,8 +346,10 @@ public:
   static std::string RequiredNinjaVersion() { return "1.3"; }
   static std::string RequiredNinjaVersionForConsolePool() { return "1.5"; }
   static std::string RequiredNinjaVersionForImplicitOuts() { return "1.7"; }
+  static std::string RequiredNinjaVersionForManifestRestat() { return "1.8"; }
   bool SupportsConsolePool() const;
   bool SupportsImplicitOuts() const;
+  bool SupportsManifestRestat() const;
 
   std::string NinjaOutputPath(std::string const& path) const;
   bool HasOutputPathPrefix() const { return !this->OutputPathPrefix.empty(); }
@@ -460,6 +462,7 @@ private:
   std::string NinjaVersion;
   bool NinjaSupportsConsolePool;
   bool NinjaSupportsImplicitOuts;
+  bool NinjaSupportsManifestRestat;
   unsigned long NinjaSupportsDyndeps;
 
 private:

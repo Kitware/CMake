@@ -197,6 +197,16 @@ void cmLocalNinjaGenerator::WriteNinjaRequiredVersion(std::ostream& os)
       this->GetGlobalNinjaGenerator()->RequiredNinjaVersionForConsolePool();
   }
 
+  // The Ninja generator writes rules which require support for restat
+  // when rebuilding build.ninja manifest (>= 1.8)
+  if (this->GetGlobalNinjaGenerator()->SupportsManifestRestat() &&
+      this->GetCMakeInstance()->DoWriteGlobVerifyTarget() &&
+      !this->GetGlobalNinjaGenerator()->GlobalSettingIsOn(
+        "CMAKE_SUPPRESS_REGENERATION")) {
+    requiredVersion =
+      this->GetGlobalNinjaGenerator()->RequiredNinjaVersionForManifestRestat();
+  }
+
   cmGlobalNinjaGenerator::WriteComment(
     os, "Minimal version of Ninja required by this file");
   os << "ninja_required_version = " << requiredVersion << std::endl

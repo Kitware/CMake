@@ -763,6 +763,14 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsBottom(
   if (!this->GlobalGenerator->GlobalSettingIsOn(
         "CMAKE_SUPPRESS_REGENERATION")) {
     // Build command to run CMake to check if anything needs regenerating.
+    std::vector<std::string> commands;
+    cmake* cm = this->GlobalGenerator->GetCMakeInstance();
+    if (cm->DoWriteGlobVerifyTarget()) {
+      std::string rescanRule = "$(CMAKE_COMMAND) -P ";
+      rescanRule += this->ConvertToOutputFormat(cm->GetGlobVerifyScript(),
+                                                cmOutputConverter::SHELL);
+      commands.push_back(rescanRule);
+    }
     std::string cmakefileName = cmake::GetCMakeFilesDirectoryPostSlash();
     cmakefileName += "Makefile.cmake";
     std::string runRule =
@@ -773,7 +781,6 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsBottom(
     runRule += " 0";
 
     std::vector<std::string> no_depends;
-    std::vector<std::string> commands;
     commands.push_back(std::move(runRule));
     if (!this->IsRootMakefile()) {
       this->CreateCDCommand(commands, this->GetBinaryDirectory(),
@@ -1666,6 +1673,13 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
     // write the depend rule, really a recompute depends rule
     depends.clear();
     commands.clear();
+    cmake* cm = this->GlobalGenerator->GetCMakeInstance();
+    if (cm->DoWriteGlobVerifyTarget()) {
+      std::string rescanRule = "$(CMAKE_COMMAND) -P ";
+      rescanRule += this->ConvertToOutputFormat(cm->GetGlobVerifyScript(),
+                                                cmOutputConverter::SHELL);
+      commands.push_back(rescanRule);
+    }
     std::string cmakefileName = cmake::GetCMakeFilesDirectoryPostSlash();
     cmakefileName += "Makefile.cmake";
     {

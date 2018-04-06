@@ -255,6 +255,16 @@ public:
   void AddCacheEntry(const std::string& key, const char* value,
                      const char* helpString, int type);
 
+  bool DoWriteGlobVerifyTarget() const;
+  std::string const& GetGlobVerifyScript() const;
+  std::string const& GetGlobVerifyStamp() const;
+  void AddGlobCacheEntry(bool recurse, bool listDirectories,
+                         bool followSymlinks, const std::string& relative,
+                         const std::string& expression,
+                         const std::vector<std::string>& files,
+                         const std::string& variable,
+                         cmListFileBacktrace const& bt);
+
   /**
    * Get the system information and write it to the file specified
    */

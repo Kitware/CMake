@@ -475,6 +475,7 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
   , PolicyCMP0058(cmPolicies::WARN)
   , NinjaSupportsConsolePool(false)
   , NinjaSupportsImplicitOuts(false)
+  , NinjaSupportsManifestRestat(false)
   , NinjaSupportsDyndeps(0)
 {
 #ifdef _WIN32
@@ -597,6 +598,9 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
   this->NinjaSupportsImplicitOuts = !cmSystemTools::VersionCompare(
     cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
     this->RequiredNinjaVersionForImplicitOuts().c_str());
+  this->NinjaSupportsManifestRestat = !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+    RequiredNinjaVersionForManifestRestat().c_str());
   {
     // Our ninja branch adds ".dyndep-#" to its version number,
     // where '#' is a feature-specific version number.  Extract it.
@@ -1361,6 +1365,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
             /*generator=*/true);
 
   cmNinjaDeps implicitDeps;
+  cmNinjaDeps explicitDeps;
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
     std::vector<std::string> const& lf =
       localGen->GetMakefile()->GetListFiles();
@@ -1370,10 +1375,6 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   }
   implicitDeps.push_back(this->CMakeCacheFile);
 
-  std::sort(implicitDeps.begin(), implicitDeps.end());
-  implicitDeps.erase(std::unique(implicitDeps.begin(), implicitDeps.end()),
-                     implicitDeps.end());
-
   cmNinjaVars variables;
   // Use 'console' pool to get non buffered output of the CMake re-run call
   // Available since Ninja 1.5
@@ -1381,12 +1382,71 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
     variables["pool"] = "console";
   }
 
+  cmake* cm = this->GetCMakeInstance();
+  if (this->SupportsManifestRestat() && cm->DoWriteGlobVerifyTarget()) {
+    std::ostringstream verify_cmd;
+    verify_cmd << lg->ConvertToOutputFormat(cmSystemTools::GetCMakeCommand(),
+                                            cmOutputConverter::SHELL)
+               << " -P "
+               << lg->ConvertToOutputFormat(cm->GetGlobVerifyScript(),
+                                            cmOutputConverter::SHELL);
+
+    WriteRule(*this->RulesFileStream, "VERIFY_GLOBS", verify_cmd.str(),
+              "Re-checking globbed directories...",
+              "Rule for re-checking globbed directories.",
+              /*depfile=*/"",
+              /*deptype=*/"",
+              /*rspfile=*/"",
+              /*rspcontent*/ "",
+              /*restat=*/"",
+              /*generator=*/true);
+
+    std::string verifyForce = cm->GetGlobVerifyScript() + "_force";
+    cmNinjaDeps verifyForceDeps(1, this->NinjaOutputPath(verifyForce));
+
+    this->WritePhonyBuild(os, "Phony target to force glob verification run.",
+                          verifyForceDeps, cmNinjaDeps());
+
+    variables["restat"] = "1";
+    std::string const verifyScriptFile =
+      this->NinjaOutputPath(cm->GetGlobVerifyScript());
+    std::string const verifyStampFile =
+      this->NinjaOutputPath(cm->GetGlobVerifyStamp());
+    this->WriteBuild(os,
+                     "Re-run CMake to check if globbed directories changed.",
+                     "VERIFY_GLOBS",
+                     /*outputs=*/cmNinjaDeps(1, verifyStampFile),
+                     /*implicitOuts=*/cmNinjaDeps(),
+                     /*explicitDeps=*/cmNinjaDeps(),
+                     /*implicitDeps=*/verifyForceDeps,
+                     /*orderOnlyDeps=*/cmNinjaDeps(), variables);
+
+    variables.erase("restat");
+    implicitDeps.push_back(verifyScriptFile);
+    explicitDeps.push_back(verifyStampFile);
+  } else if (!this->SupportsManifestRestat() &&
+             cm->DoWriteGlobVerifyTarget()) {
+    std::ostringstream msg;
+    msg << "The detected version of Ninja:\n"
+        << "  " << this->NinjaVersion << "\n"
+        << "is less than the version of Ninja required by CMake for adding "
+           "restat dependencies to the build.ninja manifest regeneration "
+           "target:\n"
+        << "  " << this->RequiredNinjaVersionForManifestRestat() << "\n";
+    msg << "Any pre-check scripts, such as those generated for file(GLOB "
+           "CONFIGURE_DEPENDS), will not be run by Ninja.";
+    this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
+  }
+
+  std::sort(implicitDeps.begin(), implicitDeps.end());
+  implicitDeps.erase(std::unique(implicitDeps.begin(), implicitDeps.end()),
+                     implicitDeps.end());
+
   std::string const ninjaBuildFile = this->NinjaOutputPath(NINJA_BUILD_FILE);
   this->WriteBuild(os, "Re-run CMake if any of its inputs changed.",
                    "RERUN_CMAKE",
                    /*outputs=*/cmNinjaDeps(1, ninjaBuildFile),
-                   /*implicitOuts=*/cmNinjaDeps(),
-                   /*explicitDeps=*/cmNinjaDeps(), implicitDeps,
+                   /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps,
                    /*orderOnlyDeps=*/cmNinjaDeps(), variables);
 
   cmNinjaDeps missingInputs;
@@ -1417,6 +1477,11 @@ bool cmGlobalNinjaGenerator::SupportsConsolePool() const
 bool cmGlobalNinjaGenerator::SupportsImplicitOuts() const
 {
   return this->NinjaSupportsImplicitOuts;
+}
+
+bool cmGlobalNinjaGenerator::SupportsManifestRestat() const
+{
+  return this->NinjaSupportsManifestRestat;
 }
 
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)

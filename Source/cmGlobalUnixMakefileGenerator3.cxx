@@ -301,6 +301,13 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     lfiles.insert(lfiles.end(), lg->GetMakefile()->GetListFiles().begin(),
                   lg->GetMakefile()->GetListFiles().end());
   }
+
+  cmake* cm = this->GetCMakeInstance();
+  if (cm->DoWriteGlobVerifyTarget()) {
+    lfiles.push_back(cm->GetGlobVerifyScript());
+    lfiles.push_back(cm->GetGlobVerifyStamp());
+  }
+
   // Sort the list and remove duplicates.
   std::sort(lfiles.begin(), lfiles.end(), std::less<std::string>());
 #if !defined(__VMS) // The Compaq STL on VMS crashes, so accept duplicates.
