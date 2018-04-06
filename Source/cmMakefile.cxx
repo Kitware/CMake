@@ -1836,12 +1836,10 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
     std::vector<std::string> linkDirs;
     cmSystemTools::ExpandListArgument(linkDirsProp, linkDirs);
 
-    for (std::string const& linkDir : linkDirs) {
-      std::string newdir = linkDir;
-      // remove trailing slashes
-      if (*linkDir.rbegin() == '/') {
-        newdir = linkDir.substr(0, linkDir.size() - 1);
-      }
+    for (std::string& linkDir : linkDirs) {
+      // Sanitize the path the same way the link_directories command does
+      // in case projects set the LINK_DIRECTORIES property directly.
+      cmSystemTools::ConvertToUnixSlashes(linkDir);
       target.AddLinkDirectory(linkDir);
     }
   }
