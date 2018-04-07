@@ -53,6 +53,27 @@ if(NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
   unset(_clang_version_std17)
 
   __compiler_check_default_language_standard(CXX 2.1 98)
+elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 3.9
+    AND CMAKE_CXX_SIMULATE_VERSION VERSION_GREATER_EQUAL 19.0)
+  # This version of clang-cl and the MSVC version it simulates have
+  # support for -std: flags.
+  set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "")
+  set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION "")
+  set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "")
+  set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "")
+  set(CMAKE_CXX14_STANDARD_COMPILE_OPTION "-std:c++14")
+  set(CMAKE_CXX14_EXTENSION_COMPILE_OPTION "-std:c++14")
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 6.0)
+    set(CMAKE_CXX17_STANDARD_COMPILE_OPTION "-std:c++17")
+    set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std:c++17")
+    set(CMAKE_CXX20_STANDARD_COMPILE_OPTION "-std:c++latest")
+    set(CMAKE_CXX20_EXTENSION_COMPILE_OPTION "-std:c++latest")
+  else()
+    set(CMAKE_CXX17_STANDARD_COMPILE_OPTION "-std:c++latest")
+    set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std:c++latest")
+  endif()
+
+  __compiler_check_default_language_standard(CXX 3.9 14)
 else()
   # This version of clang-cl, or the MSVC version it simulates, does not have
   # language standards.  Set these options as empty strings so the feature
