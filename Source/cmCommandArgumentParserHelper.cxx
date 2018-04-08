@@ -101,10 +101,11 @@ const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     // not been "cleared"/initialized with a set(foo ) call
     if (this->WarnUninitialized && !this->Makefile->VariableInitialized(var)) {
       if (this->CheckSystemVars ||
-          cmSystemTools::IsSubDirectory(this->FileName,
-                                        this->Makefile->GetHomeDirectory()) ||
-          cmSystemTools::IsSubDirectory(
-            this->FileName, this->Makefile->GetHomeOutputDirectory())) {
+          (this->FileName &&
+           (cmSystemTools::IsSubDirectory(
+              this->FileName, this->Makefile->GetHomeDirectory()) ||
+            cmSystemTools::IsSubDirectory(
+              this->FileName, this->Makefile->GetHomeOutputDirectory())))) {
         std::ostringstream msg;
         msg << "uninitialized variable \'" << var << "\'";
         this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, msg.str());

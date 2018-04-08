@@ -2679,10 +2679,11 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
             if (this->GetCMakeInstance()->GetWarnUninitialized() &&
                 !this->VariableInitialized(lookup)) {
               if (this->CheckSystemVars ||
-                  cmSystemTools::IsSubDirectory(filename,
-                                                this->GetHomeDirectory()) ||
-                  cmSystemTools::IsSubDirectory(
-                    filename, this->GetHomeOutputDirectory())) {
+                  (filename &&
+                   (cmSystemTools::IsSubDirectory(filename,
+                                                  this->GetHomeDirectory()) ||
+                    cmSystemTools::IsSubDirectory(
+                      filename, this->GetHomeOutputDirectory())))) {
                 std::ostringstream msg;
                 msg << "uninitialized variable \'" << lookup << "\'";
                 this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
