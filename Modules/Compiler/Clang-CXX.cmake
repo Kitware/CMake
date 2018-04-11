@@ -51,8 +51,12 @@ if(NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
   endif()
 
   unset(_clang_version_std17)
+
+  __compiler_check_default_language_standard(CXX 2.1 98)
 else()
-  # clang-cl does not know these options because it behaves like cl.exe
+  # This version of clang-cl, or the MSVC version it simulates, does not have
+  # language standards.  Set these options as empty strings so the feature
+  # test infrastructure can at least check to see if they are defined.
   set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "")
   set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION "")
   set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "")
@@ -63,10 +67,7 @@ else()
   set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "")
   set(CMAKE_CXX20_STANDARD_COMPILE_OPTION "")
   set(CMAKE_CXX20_EXTENSION_COMPILE_OPTION "")
-endif()
 
-if(NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
-  __compiler_check_default_language_standard(CXX 2.1 98)
-else()
+  # There is no meaningful default for this
   set(CMAKE_CXX_STANDARD_DEFAULT "")
 endif()
