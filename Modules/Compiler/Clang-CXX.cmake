@@ -70,4 +70,19 @@ else()
 
   # There is no meaningful default for this
   set(CMAKE_CXX_STANDARD_DEFAULT "")
+
+  # There are no compiler modes so we only need to test features once.
+  # Override the default macro for this special case.  Pretend that
+  # all language standards are available so that at least compilation
+  # can be attempted.
+  macro(cmake_record_cxx_compile_features)
+    list(APPEND CMAKE_CXX_COMPILE_FEATURES
+      cxx_std_98
+      cxx_std_11
+      cxx_std_14
+      cxx_std_17
+      cxx_std_20
+      )
+    _record_compiler_features(CXX "" CMAKE_CXX_COMPILE_FEATURES)
+  endmacro()
 endif()
