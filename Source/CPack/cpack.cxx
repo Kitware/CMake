@@ -350,15 +350,15 @@ int main(int argc, char const* const* argv)
         }
         if (parsed) {
           cpackGenerator = generators.NewGenerator(gen);
-          if (!cpackGenerator) {
+          if (cpackGenerator) {
+            cpackGenerator->SetTrace(trace);
+            cpackGenerator->SetTraceExpand(traceExpand);
+          } else {
             cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                         "Cannot initialize CPack generator: " << gen
                                                               << std::endl);
             parsed = 0;
           }
-
-          cpackGenerator->SetTrace(trace);
-          cpackGenerator->SetTraceExpand(traceExpand);
 
           if (parsed && !cpackGenerator->Initialize(gen, mf)) {
             cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
