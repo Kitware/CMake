@@ -24,11 +24,12 @@ matlab_add_mex(
 
 matlab_add_unit_test(
     NAME ${PROJECT_NAME}_matlabtest-1
-    TIMEOUT 90
+    TIMEOUT 300
     UNITTEST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../cmake_matlab_unit_tests1.m
     ADDITIONAL_PATH $<TARGET_FILE_DIR:cmake_matlab_test_wrapper1>
     )
 
+# timeout tests, TIMEOUT set to very short on purpose
 matlab_add_unit_test(
     NAME ${PROJECT_NAME}_matlabtest-2
     TIMEOUT 15
@@ -41,7 +42,7 @@ set_tests_properties(${PROJECT_NAME}_matlabtest-2 PROPERTIES WILL_FAIL TRUE)
 # testing the test without the unittest framework of Matlab
 matlab_add_unit_test(
     NAME ${PROJECT_NAME}_matlabtest-3
-    TIMEOUT 30
+    TIMEOUT 300
     NO_UNITTEST_FRAMEWORK
     UNITTEST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../cmake_matlab_unit_tests2.m
     ADDITIONAL_PATH $<TARGET_FILE_DIR:cmake_matlab_test_wrapper1>
@@ -49,7 +50,7 @@ matlab_add_unit_test(
 
 matlab_add_unit_test(
     NAME ${PROJECT_NAME}_matlabtest-4
-    TIMEOUT 30
+    TIMEOUT 300
     NO_UNITTEST_FRAMEWORK
     UNITTEST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../cmake_matlab_unit_tests3.m
     ADDITIONAL_PATH $<TARGET_FILE_DIR:cmake_matlab_test_wrapper1>
