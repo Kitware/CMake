@@ -139,8 +139,11 @@ inline void cmVisualStudio10TargetGenerator::WriteElemEscapeXML(
   this->WriteElem(tag, cmVS10EscapeXML(val), indentLevel);
 }
 
-static std::string cmVS10EscapeQuotes(std::string arg)
+static std::string cmVS10EscapeAttr(std::string arg)
 {
+  cmSystemTools::ReplaceString(arg, "&", "&amp;");
+  cmSystemTools::ReplaceString(arg, "<", "&lt;");
+  cmSystemTools::ReplaceString(arg, ">", "&gt;");
   cmSystemTools::ReplaceString(arg, "\"", "&quot;");
   return arg;
 }
@@ -555,7 +558,8 @@ void cmVisualStudio10TargetGenerator::Generate()
                       "BuildCustomizations\\CUDA ",
                       2);
     (*this->BuildFileStream)
-      << cmVS10EscapeXML(this->GlobalGenerator->GetPlatformToolsetCudaString())
+      << cmVS10EscapeAttr(
+           this->GlobalGenerator->GetPlatformToolsetCudaString())
       << ".props\" />\n";
   }
   if (this->GlobalGenerator->IsMasmEnabled()) {
@@ -575,7 +579,7 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->Makefile->ConfigureFile(propsTemplate.c_str(), propsLocal.c_str(),
                                   false, true, true);
     std::string import = std::string("<Import Project=\"") +
-      cmVS10EscapeXML(propsLocal) + "\" />\n";
+      cmVS10EscapeAttr(propsLocal) + "\" />\n";
     this->WriteString(import.c_str(), 2);
   }
   this->WriteString("</ImportGroup>\n", 1);
@@ -597,8 +601,8 @@ void cmVisualStudio10TargetGenerator::Generate()
       ConvertToWindowsSlash(props);
       this->WriteString("", 2);
       (*this->BuildFileStream)
-        << "<Import Project=\"" << cmVS10EscapeXML(props) << "\""
-        << " Condition=\"exists('" << cmVS10EscapeXML(props) << "')\""
+        << "<Import Project=\"" << cmVS10EscapeAttr(props) << "\""
+        << " Condition=\"exists('" << cmVS10EscapeAttr(props) << "')\""
         << " Label=\"LocalAppDataPlatform\" />\n";
     }
   }
@@ -633,7 +637,8 @@ void cmVisualStudio10TargetGenerator::Generate()
                       "BuildCustomizations\\CUDA ",
                       2);
     (*this->BuildFileStream)
-      << cmVS10EscapeXML(this->GlobalGenerator->GetPlatformToolsetCudaString())
+      << cmVS10EscapeAttr(
+           this->GlobalGenerator->GetPlatformToolsetCudaString())
       << ".targets\" />\n";
   }
   if (this->GlobalGenerator->IsMasmEnabled()) {
@@ -645,7 +650,7 @@ void cmVisualStudio10TargetGenerator::Generate()
     std::string nasmTargets =
       GetCMakeFilePath("Templates/MSBuild/nasm.targets");
     std::string import = "<Import Project=\"";
-    import += cmVS10EscapeXML(nasmTargets) + "\" />\n";
+    import += cmVS10EscapeAttr(nasmTargets) + "\" />\n";
     this->WriteString(import.c_str(), 2);
   }
   this->WriteString("</ImportGroup>\n", 1);
@@ -722,7 +727,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReference(
   std::string const& ref, std::string const& hint)
 {
   this->WriteString("<Reference Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(ref) << "\">\n";
+  (*this->BuildFileStream) << cmVS10EscapeAttr(ref) << "\">\n";
   this->WriteElem("CopyLocalSatelliteAssemblies", "true", 3);
   this->WriteElem("ReferenceOutputAssembly", "true", 3);
   if (!hint.empty()) {
@@ -969,7 +974,7 @@ void cmVisualStudio10TargetGenerator::WriteWinRTReferences()
     this->WriteString("<ItemGroup>\n", 1);
     for (std::string const& ri : references) {
       this->WriteString("<Reference Include=\"", 2);
-      (*this->BuildFileStream) << cmVS10EscapeXML(ri) << "\">\n";
+      (*this->BuildFileStream) << cmVS10EscapeAttr(ri) << "\">\n";
       this->WriteElem("IsWinMDFile", "true", 3);
       this->WriteString("</Reference>\n", 2);
     }
@@ -1263,15 +1268,15 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     cmCustomCommandGenerator ccg(command, c, lg);
     std::string comment = lg->ConstructComment(ccg);
     comment = cmVS10EscapeComment(comment);
-    std::string script = cmVS10EscapeXML(lg->ConstructScript(ccg));
+    std::string script = lg->ConstructScript(ccg);
     // input files for custom command
     std::stringstream inputs;
-    inputs << cmVS10EscapeXML(source->GetFullPath());
+    inputs << source->GetFullPath();
     for (std::string const& d : ccg.GetDepends()) {
       std::string dep;
       if (lg->GetRealDependency(d, c, dep)) {
         ConvertToWindowsSlash(dep);
-        inputs << ";" << cmVS10EscapeXML(dep);
+        inputs << ";" << dep;
       }
     }
     // output files for custom command
@@ -1280,19 +1285,13 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     for (std::string const& o : ccg.GetOutputs()) {
       std::string out = o;
       ConvertToWindowsSlash(out);
-      outputs << sep << cmVS10EscapeXML(out);
+      outputs << sep << out;
       sep = ";";
     }
     if (this->ProjectType == csproj) {
       std::string name = "CustomCommand_" + c + "_" +
         cmSystemTools::ComputeStringMD5(sourcePath);
-      std::string inputs_s = inputs.str();
-      std::string outputs_s = outputs.str();
-      comment = cmVS10EscapeQuotes(comment);
-      script = cmVS10EscapeQuotes(script);
-      inputs_s = cmVS10EscapeQuotes(inputs_s);
-      outputs_s = cmVS10EscapeQuotes(outputs_s);
-      this->WriteCustomRuleCSharp(c, name, script, inputs_s, outputs_s,
+      this->WriteCustomRuleCSharp(c, name, script, inputs.str(), outputs.str(),
                                   comment);
     } else {
       this->WriteCustomRuleCpp(c, script, inputs.str(), outputs.str(),
@@ -1312,17 +1311,19 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
   this->WritePlatformConfigTag("Message", config, 3);
   (*this->BuildFileStream) << cmVS10EscapeXML(comment) << "</Message>\n";
   this->WritePlatformConfigTag("Command", config, 3);
-  (*this->BuildFileStream) << script << "</Command>\n";
+  (*this->BuildFileStream) << cmVS10EscapeXML(script) << "</Command>\n";
   this->WritePlatformConfigTag("AdditionalInputs", config, 3);
-  (*this->BuildFileStream) << inputs;
-  (*this->BuildFileStream) << ";%(AdditionalInputs)</AdditionalInputs>\n";
+  (*this->BuildFileStream) << cmVS10EscapeXML(inputs);
+  (*this->BuildFileStream) << ";%(AdditionalInputs)"
+                              "</AdditionalInputs>\n";
   this->WritePlatformConfigTag("Outputs", config, 3);
-  (*this->BuildFileStream) << outputs << "</Outputs>\n";
+  (*this->BuildFileStream) << cmVS10EscapeXML(outputs) << "</Outputs>\n";
   if (this->LocalGenerator->GetVersion() >
       cmGlobalVisualStudioGenerator::VS10) {
     // VS >= 11 let us turn off linking of custom command outputs.
     this->WritePlatformConfigTag("LinkObjects", config, 3);
-    (*this->BuildFileStream) << "false</LinkObjects>\n";
+    (*this->BuildFileStream) << "false"
+                                "</LinkObjects>\n";
   }
 }
 
@@ -1334,16 +1335,16 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCSharp(
   this->CSharpCustomCommandNames.insert(name);
   std::stringstream attributes;
   attributes << "\n    Name=\"" << name << "\"";
-  attributes << "\n    Inputs=\"" << inputs << "\"";
-  attributes << "\n    Outputs=\"" << outputs << "\"";
+  attributes << "\n    Inputs=\"" << cmVS10EscapeAttr(inputs) << "\"";
+  attributes << "\n    Outputs=\"" << cmVS10EscapeAttr(outputs) << "\"";
   this->WritePlatformConfigTag("Target", config, 1, attributes.str().c_str());
   if (!comment.empty()) {
     this->WriteString("<Exec Command=\"", 2);
-    (*this->BuildFileStream) << "echo " << cmVS10EscapeXML(comment)
+    (*this->BuildFileStream) << "echo " << cmVS10EscapeAttr(comment)
                              << "\" />\n";
   }
   this->WriteString("<Exec Command=\"", 2);
-  (*this->BuildFileStream) << script << "\" />\n";
+  (*this->BuildFileStream) << cmVS10EscapeAttr(script) << "\" />\n";
   this->WriteString("</Target>\n", 1);
 }
 
@@ -1456,7 +1457,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       std::string obj = oi->GetFullPath();
       ConvertToWindowsSlash(obj);
       Elem e2(e1, "EmbeddedResource");
-      e2.Attr("Include", cmVS10EscapeXML(obj));
+      e2.Attr("Include", cmVS10EscapeAttr(obj));
       Elem(e2).WriteElem("Filter", "Resource Files");
       e2.EndElement();
     }
@@ -1554,7 +1555,7 @@ void cmVisualStudio10TargetGenerator::WriteGroupSources(
     std::string path = this->ConvertPath(source, s.RelativePath);
     ConvertToWindowsSlash(path);
     Elem e2(e1, name.c_str());
-    e2.Attr("Include", cmVS10EscapeXML(path));
+    e2.Attr("Include", cmVS10EscapeAttr(path));
     if (!filter.empty()) {
       Elem(e2).WriteElem("Filter", filter);
     }
@@ -1872,7 +1873,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(std::string const& tool,
   ConvertToWindowsSlash(sourceFile);
   this->WriteString("<", 2);
   (*this->BuildFileStream) << tool << " Include=\""
-                           << cmVS10EscapeXML(sourceFile) << "\"";
+                           << cmVS10EscapeAttr(sourceFile) << "\"";
 
   ToolSource toolSource = { sf, forceRelative };
   this->Tools[tool].push_back(toolSource);
@@ -2185,8 +2186,8 @@ void cmVisualStudio10TargetGenerator::WriteExcludeFromBuild(
     this->WriteString("", 3);
     (*this->BuildFileStream)
       << "<ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='"
-      << cmVS10EscapeXML(this->Configurations[ci]) << "|"
-      << cmVS10EscapeXML(this->Platform) << "'\">true</ExcludedFromBuild>\n";
+      << cmVS10EscapeAttr(this->Configurations[ci]) << "|"
+      << cmVS10EscapeAttr(this->Platform) << "'\">true</ExcludedFromBuild>\n";
   }
 }
 
@@ -3624,7 +3625,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
       path += computeProjectFileExtension(dt, *this->Configurations.begin());
     }
     ConvertToWindowsSlash(path);
-    (*this->BuildFileStream) << cmVS10EscapeXML(path) << "\">\n";
+    (*this->BuildFileStream) << cmVS10EscapeAttr(path) << "\">\n";
     this->WriteElem("Project",
                     "{" + this->GlobalGenerator->GetGUID(name) + "}", 3);
     this->WriteElem("Name", name, 3);
@@ -3692,7 +3693,7 @@ void cmVisualStudio10TargetGenerator::WriteSDKReferences()
     hasWrittenItemGroup = true;
     for (std::string const& ri : sdkReferences) {
       this->WriteString("<SDKReference Include=\"", 2);
-      (*this->BuildFileStream) << cmVS10EscapeXML(ri) << "\"/>\n";
+      (*this->BuildFileStream) << cmVS10EscapeAttr(ri) << "\"/>\n";
     }
   }
 
@@ -4034,7 +4035,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80()
   std::string sourceFile = this->ConvertPath(manifestFile, false);
   ConvertToWindowsSlash(sourceFile);
   this->WriteString("<Xml Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(sourceFile) << "\">\n";
+  (*this->BuildFileStream) << cmVS10EscapeAttr(sourceFile) << "\">\n";
   this->WriteElem("SubType", "Designer", 3);
   this->WriteString("</Xml>\n", 2);
   this->AddedFiles.push_back(sourceFile);
@@ -4044,14 +4045,14 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80()
                            false);
   ConvertToWindowsSlash(smallLogo);
   this->WriteString("<Image Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(smallLogo) << "\" />\n";
+  (*this->BuildFileStream) << cmVS10EscapeAttr(smallLogo) << "\" />\n";
   this->AddedFiles.push_back(smallLogo);
 
   std::string logo = this->DefaultArtifactDir + "/Logo.png";
   cmSystemTools::CopyAFile(templateFolder + "/Logo.png", logo, false);
   ConvertToWindowsSlash(logo);
   this->WriteString("<Image Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(logo) << "\" />\n";
+  (*this->BuildFileStream) << cmVS10EscapeAttr(logo) << "\" />\n";
   this->AddedFiles.push_back(logo);
 
   std::string applicationIcon =
@@ -4060,7 +4061,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80()
                            applicationIcon, false);
   ConvertToWindowsSlash(applicationIcon);
   this->WriteString("<Image Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(applicationIcon) << "\" />\n";
+  (*this->BuildFileStream) << cmVS10EscapeAttr(applicationIcon) << "\" />\n";
   this->AddedFiles.push_back(applicationIcon);
 }
 
@@ -4312,7 +4313,7 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
   std::string sourceFile = this->ConvertPath(manifestFile, false);
   ConvertToWindowsSlash(sourceFile);
   this->WriteString("<AppxManifest Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(sourceFile) << "\">\n";
+  (*this->BuildFileStream) << cmVS10EscapeAttr(sourceFile) << "\">\n";
   this->WriteElem("SubType", "Designer", 3);
   this->WriteString("</AppxManifest>\n", 2);
   this->AddedFiles.push_back(sourceFile);
@@ -4322,7 +4323,7 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
                            false);
   ConvertToWindowsSlash(smallLogo);
   this->WriteString("<Image Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(smallLogo) << "\" />\n";
+  (*this->BuildFileStream) << cmVS10EscapeAttr(smallLogo) << "\" />\n";
   this->AddedFiles.push_back(smallLogo);
 
   std::string smallLogo44 = this->DefaultArtifactDir + "/SmallLogo44x44.png";
@@ -4330,14 +4331,14 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
                            false);
   ConvertToWindowsSlash(smallLogo44);
   this->WriteString("<Image Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(smallLogo44) << "\" />\n";
+  (*this->BuildFileStream) << cmVS10EscapeAttr(smallLogo44) << "\" />\n";
   this->AddedFiles.push_back(smallLogo44);
 
   std::string logo = this->DefaultArtifactDir + "/Logo.png";
   cmSystemTools::CopyAFile(templateFolder + "/Logo.png", logo, false);
   ConvertToWindowsSlash(logo);
   this->WriteString("<Image Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(logo) << "\" />\n";
+  (*this->BuildFileStream) << cmVS10EscapeAttr(logo) << "\" />\n";
   this->AddedFiles.push_back(logo);
 
   std::string storeLogo = this->DefaultArtifactDir + "/StoreLogo.png";
@@ -4345,7 +4346,7 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
                            false);
   ConvertToWindowsSlash(storeLogo);
   this->WriteString("<Image Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(storeLogo) << "\" />\n";
+  (*this->BuildFileStream) << cmVS10EscapeAttr(storeLogo) << "\" />\n";
   this->AddedFiles.push_back(storeLogo);
 
   std::string splashScreen = this->DefaultArtifactDir + "/SplashScreen.png";
@@ -4353,14 +4354,14 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
                            false);
   ConvertToWindowsSlash(splashScreen);
   this->WriteString("<Image Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(splashScreen) << "\" />\n";
+  (*this->BuildFileStream) << cmVS10EscapeAttr(splashScreen) << "\" />\n";
   this->AddedFiles.push_back(splashScreen);
 
   // This file has already been added to the build so don't copy it
   std::string keyFile = this->DefaultArtifactDir + "/Windows_TemporaryKey.pfx";
   ConvertToWindowsSlash(keyFile);
   this->WriteString("<None Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeXML(keyFile) << "\" />\n";
+  (*this->BuildFileStream) << cmVS10EscapeAttr(keyFile) << "\" />\n";
 }
 
 bool cmVisualStudio10TargetGenerator::ForceOld(const std::string& source) const
