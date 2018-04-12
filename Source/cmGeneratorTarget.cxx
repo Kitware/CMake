@@ -4978,6 +4978,16 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
     }
   }
 
+  // Get information if target is managed assembly.
+  {
+    std::string linkProp = "IMPORTED_COMMON_LANGUAGE_RUNTIME";
+    if (auto pc = this->GetProperty(linkProp + suffix)) {
+      info.Managed = this->CheckManagedType(pc);
+    } else if (auto p = this->GetProperty(linkProp)) {
+      info.Managed = this->CheckManagedType(p);
+    }
+  }
+
   // Get the cyclic repetition count.
   if (this->GetType() == cmStateEnums::STATIC_LIBRARY) {
     std::string linkProp = "IMPORTED_LINK_INTERFACE_MULTIPLICITY";
@@ -5195,6 +5205,18 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
   }
 }
 
+bool cmGeneratorTarget::HasLanguage(std::string const& language,
+                                    std::string const& config,
+                                    bool exclusive) const
+{
+  std::set<std::string> languages;
+  this->GetLanguages(languages, config);
+  // add linker language (if it is different from compiler languages)
+  languages.insert(this->GetLinkerLanguage(config));
+  return (languages.size() == 1 || !exclusive) &&
+    languages.count(language) > 0;
+}
+
 void cmGeneratorTarget::ComputeLinkImplementationLanguages(
   const std::string& config, cmOptionalLinkImplementation& impl) const
 {
@@ -5381,16 +5403,17 @@ std::string cmGeneratorTarget::GetPDBDirectory(const std::string& config) const
   return "";
 }
 
-bool cmGeneratorTarget::HasImplibGNUtoMS() const
+bool cmGeneratorTarget::HasImplibGNUtoMS(std::string const& config) const
 {
-  return this->HasImportLibrary() && this->GetPropertyAsBool("GNUtoMS");
+  return this->HasImportLibrary(config) && this->GetPropertyAsBool("GNUtoMS");
 }
 
-bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& gnuName,
+bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& config,
+                                         std::string const& gnuName,
                                          std::string& out,
                                          const char* newExt) const
 {
-  if (this->HasImplibGNUtoMS() && gnuName.size() > 6 &&
+  if (this->HasImplibGNUtoMS(config) && gnuName.size() > 6 &&
       gnuName.substr(gnuName.size() - 6) == ".dll.a") {
     out = gnuName.substr(0, gnuName.size() - 6);
     out += newExt ? newExt : ".lib";
@@ -5405,11 +5428,14 @@ bool cmGeneratorTarget::IsExecutableWithExports() const
           this->GetPropertyAsBool("ENABLE_EXPORTS"));
 }
 
-bool cmGeneratorTarget::HasImportLibrary() const
+bool cmGeneratorTarget::HasImportLibrary(std::string const& config) const
 {
   return (this->IsDLLPlatform() &&
           (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
-           this->IsExecutableWithExports()));
+           this->IsExecutableWithExports()) &&
+          // Assemblies which have only managed code do not have
+          // import libraries.
+          this->GetManagedType(config) != ManagedType::Managed);
 }
 
 std::string cmGeneratorTarget::GetSupportDirectory() const
@@ -5461,4 +5487,50 @@ bool cmGeneratorTarget::IsCFBundleOnApple() const
 {
   return (this->GetType() == cmStateEnums::MODULE_LIBRARY &&
           this->Makefile->IsOn("APPLE") && this->GetPropertyAsBool("BUNDLE"));
+}
+
+cmGeneratorTarget::ManagedType cmGeneratorTarget::CheckManagedType(
+  std::string const& propval) const
+{
+  // The type of the managed assembly (mixed unmanaged C++ and C++/CLI,
+  // or only C++/CLI) does only depend on whether the property is an empty
+  // string or contains any value at all. In Visual Studio generators
+  // this propval is prepended with /clr[:] which results in:
+  //
+  // 1. propval does not exist: no /clr flag, unmanaged target, has import
+  //                            lib
+  // 2. empty propval:          add /clr as flag, mixed unmanaged/managed
+  //                            target, has import lib
+  // 3. any value (safe,pure):  add /clr:[propval] as flag, target with
+  //                            managed code only, no import lib
+  return propval.empty() ? ManagedType::Mixed : ManagedType::Managed;
+}
+
+cmGeneratorTarget::ManagedType cmGeneratorTarget::GetManagedType(
+  const std::string& config) const
+{
+  // Only libraries and executables can be managed targets.
+  if (this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GetType() != cmStateEnums::STATIC_LIBRARY &&
+      this->GetType() != cmStateEnums::EXECUTABLE) {
+    return ManagedType::Undefined;
+  }
+
+  // Check imported target.
+  if (this->IsImported()) {
+    if (cmGeneratorTarget::ImportInfo const* info =
+          this->GetImportInfo(config)) {
+      return info->Managed;
+    }
+    return ManagedType::Undefined;
+  }
+
+  // Check for explicitly set clr target property.
+  if (auto* clr = this->GetProperty("COMMON_LANGUAGE_RUNTIME")) {
+    return this->CheckManagedType(clr);
+  }
+
+  // TODO: need to check if target is a CSharp target here.
+  //       If yes: return ManagedType::Managed.
+  return ManagedType::Native;
 }

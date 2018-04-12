@@ -777,6 +777,20 @@ void cmExportFileGenerator::SetImportDetailProperties(
       properties[prop] = m.str();
     }
   }
+
+  // Add information if this target is a managed target
+  if (target->GetManagedType(config) !=
+      cmGeneratorTarget::ManagedType::Native) {
+    std::string prop = "IMPORTED_COMMON_LANGUAGE_RUNTIME";
+    prop += suffix;
+    std::string propval;
+    if (auto* p = target->GetProperty("COMMON_LANGUAGE_RUNTIME")) {
+      propval = p;
+    }
+    // TODO: make sure propval is set to non-empty string for
+    //       CSharp targets (i.e. force ManagedType::Managed).
+    properties[prop] = propval;
+  }
 }
 
 template <typename T>

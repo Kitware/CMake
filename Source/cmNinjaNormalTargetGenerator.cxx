@@ -482,7 +482,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
     const char* linkCmd = mf->GetDefinition(linkCmdVar);
     if (linkCmd) {
       std::string linkCmdStr = linkCmd;
-      if (this->GetGeneratorTarget()->HasImplibGNUtoMS()) {
+      if (this->GetGeneratorTarget()->HasImplibGNUtoMS(this->ConfigName)) {
         std::string ruleVar = "CMAKE_";
         ruleVar += this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
         ruleVar += "_GNUtoMS_RULE";
@@ -881,7 +881,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       targetOutputImplib, cmOutputConverter::SHELL);
     vars["TARGET_IMPLIB"] = impLibPath;
     EnsureParentDirectoryExists(impLibPath);
-    if (genTarget.HasImportLibrary()) {
+    if (genTarget.HasImportLibrary(cfgName)) {
       byproducts.push_back(targetOutputImplib);
     }
   }
