@@ -3839,7 +3839,16 @@ void cmMakefile::RaiseScope(const std::string& var, const char* varDef)
     std::ostringstream m;
     m << "Cannot set \"" << var << "\": current scope has no parent.";
     this->IssueMessage(cmake::AUTHOR_WARNING, m.str());
+    return;
   }
+
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  cmVariableWatch* vv = this->GetVariableWatch();
+  if (vv) {
+    vv->VariableAccessed(var, cmVariableWatch::VARIABLE_MODIFIED_ACCESS,
+                         varDef, this);
+  }
+#endif
 }
 
 cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
