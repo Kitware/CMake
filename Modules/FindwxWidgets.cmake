@@ -925,14 +925,16 @@ unset(_wx_lib_missing)
 
 # Check if a specific version was requested by find_package().
 if(wxWidgets_FOUND)
-  find_file(_filename wx/version.h PATHS ${wxWidgets_INCLUDE_DIRS} NO_DEFAULT_PATH)
-  dbg_msg("_filename:  ${_filename}")
+  unset(_wx_filename)
+  find_file(_wx_filename wx/version.h PATHS ${wxWidgets_INCLUDE_DIRS} NO_DEFAULT_PATH)
+  dbg_msg("_wx_filename:  ${_wx_filename}")
 
-  if(NOT _filename)
+  if(NOT _wx_filename)
     message(FATAL_ERROR "wxWidgets wx/version.h file not found in ${wxWidgets_INCLUDE_DIRS}.")
   endif()
 
-  file(READ ${_filename} _wx_version_h)
+  file(READ "${_wx_filename}" _wx_version_h)
+  unset(_wx_filename CACHE)
 
   string(REGEX REPLACE "^(.*\n)?#define +wxMAJOR_VERSION +([0-9]+).*"
     "\\2" wxWidgets_VERSION_MAJOR "${_wx_version_h}" )
