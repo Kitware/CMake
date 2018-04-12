@@ -36,6 +36,7 @@ To contribute patches:
 #. Push a topic branch to a personal repository fork on GitLab.
 #. Create a GitLab Merge Request targeting the upstream ``master`` branch
    (even if the change is intended for merge to the ``release`` branch).
+   Check the box to allow edits from maintainers.
 
 The merge request will enter the `CMake Review Process`_ for consideration.
 
