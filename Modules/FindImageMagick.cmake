@@ -104,6 +104,7 @@ function(FIND_IMAGEMAGICK_API component header)
     PATH_SUFFIXES
       ImageMagick ImageMagick-6 ImageMagick-7
     DOC "Path to the ImageMagick arch-independent include dir."
+    NO_DEFAULT_PATH
     )
   find_path(ImageMagick_${component}_ARCH_INCLUDE_DIR
     NAMES magick/magick-baseconfig.h
@@ -116,6 +117,7 @@ function(FIND_IMAGEMAGICK_API component header)
     PATH_SUFFIXES
       ImageMagick ImageMagick-6 ImageMagick-7
     DOC "Path to the ImageMagick arch-specific include dir."
+    NO_DEFAULT_PATH
     )
   find_library(ImageMagick_${component}_LIBRARY
     NAMES ${ARGN}
@@ -125,6 +127,7 @@ function(FIND_IMAGEMAGICK_API component header)
     PATHS
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ImageMagick\\Current;BinPath]/lib"
     DOC "Path to the ImageMagick Magick++ library."
+    NO_DEFAULT_PATH
     )
 
   # old version have only indep dir
