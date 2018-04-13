@@ -198,6 +198,8 @@ private:
                                           cmGeneratorTarget* target);
   cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, cmSourceFile* sf,
                                        cmGeneratorTarget* gtgt);
+  void AddXCodeProjBuildRule(cmGeneratorTarget* target,
+                             std::vector<cmSourceFile*>& sources) const;
   bool CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&);
   bool IsHeaderFile(cmSourceFile*);
   void AddDependTarget(cmXCodeObject* target, cmXCodeObject* dependTarget);
