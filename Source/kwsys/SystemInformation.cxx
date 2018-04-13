@@ -94,7 +94,6 @@ typedef int siginfo_t;
 #endif
 
 #ifdef __APPLE__
-#include <fenv.h>
 #include <mach/host_info.h>
 #include <mach/mach.h>
 #include <mach/mach_types.h>
@@ -114,7 +113,6 @@ typedef int siginfo_t;
 #endif
 
 #if defined(__linux) || defined(__sun) || defined(_SCO_DS)
-#include <fenv.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
