@@ -1898,7 +1898,14 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
   std::vector<cmGeneratorTarget::AllConfigSource> const& sources =
     this->GeneratorTarget->GetAllConfigSources();
 
+  cmSourceFile const* srcCMakeLists =
+    this->LocalGenerator->CreateVCProjBuildRule();
+
   for (cmGeneratorTarget::AllConfigSource const& si : sources) {
+    if (si.Source == srcCMakeLists) {
+      // Skip explicit reference to CMakeLists.txt source.
+      continue;
+    }
     std::string tool;
     switch (si.Kind) {
       case cmGeneratorTarget::SourceKindAppManifest:

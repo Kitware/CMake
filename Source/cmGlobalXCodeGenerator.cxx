@@ -821,6 +821,19 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   return buildFile;
 }
 
+void cmGlobalXCodeGenerator::AddXCodeProjBuildRule(
+  cmGeneratorTarget* target, std::vector<cmSourceFile*>& sources) const
+{
+  std::string listfile =
+    target->GetLocalGenerator()->GetCurrentSourceDirectory();
+  listfile += "/CMakeLists.txt";
+  cmSourceFile* srcCMakeLists = target->Makefile->GetOrCreateSource(listfile);
+  if (std::find(sources.begin(), sources.end(), srcCMakeLists) ==
+      sources.end()) {
+    sources.push_back(srcCMakeLists);
+  }
+}
+
 std::string GetSourcecodeValueFromFileExtension(const std::string& _ext,
                                                 const std::string& lang,
                                                 bool& keepLastKnownFileType)
@@ -1043,10 +1056,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
     }
 
     // Add CMakeLists.txt file for user convenience.
-    std::string listfile =
-      gtgt->GetLocalGenerator()->GetCurrentSourceDirectory();
-    listfile += "/CMakeLists.txt";
-    classes.push_back(gtgt->Makefile->GetOrCreateSource(listfile));
+    this->AddXCodeProjBuildRule(gtgt, classes);
 
     std::sort(classes.begin(), classes.end(), cmSourceFilePathCompare());
 
@@ -2343,10 +2353,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
     }
 
     // Add CMakeLists.txt file for user convenience.
-    std::string listfile =
-      gtgt->GetLocalGenerator()->GetCurrentSourceDirectory();
-    listfile += "/CMakeLists.txt";
-    sources.push_back(gtgt->Makefile->GetOrCreateSource(listfile));
+    this->AddXCodeProjBuildRule(gtgt, sources);
 
     for (auto sourceFile : sources) {
       if (!sourceFile->GetPropertyAsBool("GENERATED")) {

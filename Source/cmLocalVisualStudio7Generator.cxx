@@ -1347,7 +1347,18 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
       for (size_t ci = 0; ci < configs.size(); ++ci) {
         acs.Configs.push_back(ci);
       }
-      sources.Sources.emplace_back(std::move(acs));
+      bool haveCMakeLists = false;
+      for (cmGeneratorTarget::AllConfigSource& si : sources.Sources) {
+        if (si.Source == sf) {
+          haveCMakeLists = true;
+          // Replace the explicit source reference with our generated one.
+          si = acs;
+          break;
+        }
+      }
+      if (!haveCMakeLists) {
+        sources.Sources.emplace_back(std::move(acs));
+      }
     }
   }
 
