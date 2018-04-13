@@ -365,6 +365,113 @@ static const struct TargetNameIfExistsNode : public cmGeneratorExpressionNode
   }
 } targetNameIfExistsNode;
 
+struct GenexEvaluator : public cmGeneratorExpressionNode
+{
+  GenexEvaluator() {}
+
+protected:
+  std::string EvaluateExpression(
+    const std::string& genexOperator, const std::string& expression,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagCheckerParent) const
+  {
+    if (context->HeadTarget) {
+      cmGeneratorExpressionDAGChecker dagChecker(
+        context->Backtrace, context->HeadTarget->GetName(), genexOperator,
+        content, dagCheckerParent);
+      switch (dagChecker.Check()) {
+        case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
+        case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE: {
+          dagChecker.ReportError(context, content->GetOriginalExpression());
+          return std::string();
+        }
+        case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
+        case cmGeneratorExpressionDAGChecker::DAG:
+          break;
+      }
+
+      return this->EvaluateDependentExpression(
+        expression, context->LG, context, context->HeadTarget,
+        context->CurrentTarget, &dagChecker);
+    }
+
+    return this->EvaluateDependentExpression(
+      expression, context->LG, context, context->HeadTarget,
+      context->CurrentTarget, dagCheckerParent);
+  }
+};
+
+static const struct TargetGenexEvalNode : public GenexEvaluator
+{
+  TargetGenexEvalNode() {}
+
+  int NumExpectedParameters() const override { return 2; }
+
+  bool AcceptsArbitraryContentParameter() const override { return true; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagCheckerParent) const override
+  {
+    const std::string& targetName = parameters.front();
+    if (targetName.empty() ||
+        !cmGeneratorExpression::IsValidTargetName(targetName)) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<TARGET_GENEX_EVAL:tgt, ...> expression requires a "
+                  "non-empty valid target name.");
+      return std::string();
+    }
+
+    const auto* target = context->LG->FindGeneratorTargetToUse(targetName);
+    if (!target) {
+      std::ostringstream e;
+      e << "$<TARGET_GENEX_EVAL:tgt, ...> target \"" << targetName
+        << "\" not found.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return std::string();
+    }
+
+    const std::string& expression = parameters[1];
+    if (expression.empty()) {
+      return expression;
+    }
+
+    cmGeneratorExpressionContext targetContext(
+      context->LG, context->Config, context->Quiet, target, target,
+      context->EvaluateForBuildsystem, context->Backtrace, context->Language);
+
+    return this->EvaluateExpression("TARGET_GENEX_EVAL", expression,
+                                    &targetContext, content, dagCheckerParent);
+  }
+} targetGenexEvalNode;
+
+static const struct GenexEvalNode : public GenexEvaluator
+{
+  GenexEvalNode() {}
+
+  int NumExpectedParameters() const override { return 1; }
+
+  bool AcceptsArbitraryContentParameter() const override { return true; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagCheckerParent) const override
+  {
+    const std::string& expression = parameters[0];
+    if (expression.empty()) {
+      return expression;
+    }
+
+    return this->EvaluateExpression("GENEX_EVAL", expression, context, content,
+                                    dagCheckerParent);
+  }
+} genexEvalNode;
+
 static const struct LowerCaseNode : public cmGeneratorExpressionNode
 {
   LowerCaseNode() {}
@@ -1124,7 +1231,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     const char* prop = target->GetProperty(propertyName);
 
     if (dagCheckerParent) {
-      if (dagCheckerParent->EvaluatingLinkLibraries()) {
+      if (dagCheckerParent->EvaluatingGenexExpression()) {
+        // No check required.
+      } else if (dagCheckerParent->EvaluatingLinkLibraries()) {
 #define TRANSITIVE_PROPERTY_COMPARE(PROPERTY)                                 \
   (#PROPERTY == propertyName || "INTERFACE_" #PROPERTY == propertyName) ||
         if (CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(
@@ -1933,6 +2042,8 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     nodeMap["TARGET_POLICY"] = &targetPolicyNode;
     nodeMap["TARGET_EXISTS"] = &targetExistsNode;
     nodeMap["TARGET_NAME_IF_EXISTS"] = &targetNameIfExistsNode;
+    nodeMap["TARGET_GENEX_EVAL"] = &targetGenexEvalNode;
+    nodeMap["GENEX_EVAL"] = &genexEvalNode;
     nodeMap["BUILD_INTERFACE"] = &buildInterfaceNode;
     nodeMap["INSTALL_INTERFACE"] = &installInterfaceNode;
     nodeMap["INSTALL_PREFIX"] = &installPrefixNode;
