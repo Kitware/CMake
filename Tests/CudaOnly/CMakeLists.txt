@@ -6,3 +6,7 @@ ADD_TEST_MACRO(CudaOnly.LinkSystemDeviceLibraries CudaOnlyLinkSystemDeviceLibrar
 ADD_TEST_MACRO(CudaOnly.ResolveDeviceSymbols CudaOnlyResolveDeviceSymbols)
 ADD_TEST_MACRO(CudaOnly.SeparateCompilation CudaOnlySeparateCompilation)
 ADD_TEST_MACRO(CudaOnly.WithDefs CudaOnlyWithDefs)
+
+if(MSVC)
+  ADD_TEST_MACRO(CudaOnly.PDB CudaOnlyPDB)
+endif()

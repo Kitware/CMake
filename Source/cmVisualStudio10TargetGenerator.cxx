@@ -2690,6 +2690,20 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
     cudaOptions.AppendFlagString("AdditionalOptions", "-x cu");
   }
 
+  // Specify the compiler program database file if configured.
+  std::string pdb = this->GeneratorTarget->GetCompilePDBPath(configName);
+  if (!pdb.empty()) {
+    // CUDA does not have a field for this and does not honor the
+    // ProgramDataBaseFileName field in ClCompile.  Work around this
+    // limitation by creating the directory and passing the flag ourselves.
+    std::string const pdbDir = cmSystemTools::GetFilenamePath(pdb);
+    cmSystemTools::MakeDirectory(pdbDir);
+    pdb = this->ConvertPath(pdb, true);
+    ConvertToWindowsSlash(pdb);
+    std::string const clFd = "-Xcompiler=\"-Fd\\\"" + pdb + "\\\"\"";
+    cudaOptions.AppendFlagString("AdditionalOptions", clFd);
+  }
+
   // CUDA automatically passes the proper '--machine' flag to nvcc
   // for the current architecture, but does not reflect this default
   // in the user-visible IDE settings.  Set it explicitly.
