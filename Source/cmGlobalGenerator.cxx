@@ -1741,7 +1741,7 @@ void cmGlobalGenerator::CheckTargetProperties()
   }
 }
 
-int cmGlobalGenerator::TryCompile(const std::string& srcdir,
+int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
                                   const std::string& bindir,
                                   const std::string& projectName,
                                   const std::string& target, bool fast,
@@ -1782,7 +1782,7 @@ int cmGlobalGenerator::TryCompile(const std::string& srcdir,
   }
   std::string config =
     mf->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
-  return this->Build(srcdir, bindir, projectName, newTarget, output, "",
+  return this->Build(jobs, srcdir, bindir, projectName, newTarget, output, "",
                      config, false, fast, false, this->TryCompileTimeout);
 }
 
@@ -1790,13 +1790,21 @@ void cmGlobalGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string& /*unused*/,
   const std::string& /*unused*/, const std::string& /*unused*/,
   const std::string& /*unused*/, const std::string& /*unused*/,
-  bool /*unused*/, bool /*unused*/, std::vector<std::string> const& /*unused*/)
+  bool /*unused*/, int /*unused*/, bool /*unused*/,
+  std::vector<std::string> const& /*unused*/)
 {
   makeCommand.push_back(
     "cmGlobalGenerator::GenerateBuildCommand not implemented");
 }
 
-int cmGlobalGenerator::Build(const std::string& /*unused*/,
+void cmGlobalGenerator::PrintBuildCommandAdvice(std::ostream& /*os*/,
+                                                int /*jobs*/) const
+{
+  // Subclasses override this method if they e.g want to give a warning that
+  // they do not support certain build command line options
+}
+
+int cmGlobalGenerator::Build(int jobs, const std::string& /*unused*/,
                              const std::string& bindir,
                              const std::string& projectName,
                              const std::string& target, std::string& output,
@@ -1832,7 +1840,8 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
 
   std::vector<std::string> makeCommand;
   this->GenerateBuildCommand(makeCommand, makeCommandCSTR, projectName, bindir,
-                             target, config, fast, verbose, nativeOptions);
+                             target, config, fast, jobs, verbose,
+                             nativeOptions);
 
   // Workaround to convince VCExpress.exe to produce output.
   if (outputflag == cmSystemTools::OUTPUT_PASSTHROUGH &&
@@ -1846,7 +1855,7 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
   if (clean) {
     std::vector<std::string> cleanCommand;
     this->GenerateBuildCommand(cleanCommand, makeCommandCSTR, projectName,
-                               bindir, "clean", config, fast, verbose);
+                               bindir, "clean", config, fast, jobs, verbose);
     output += "\nRun Clean Command:";
     output += cmSystemTools::PrintSingleCommand(cleanCommand);
     output += "\n";

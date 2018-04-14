@@ -7,7 +7,6 @@
 #include <sstream>
 #include <utility>
 
-#include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -494,31 +493,33 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string& makeProgram,
   const std::string& /*projectName*/, const std::string& /*projectDir*/,
   const std::string& targetName, const std::string& /*config*/, bool fast,
-  bool /*verbose*/, std::vector<std::string> const& makeOptions)
+  int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
 {
+  cmMakefile* mf;
+  if (!this->Makefiles.empty()) {
+    mf = this->Makefiles[0];
+  } else {
+    cmStateSnapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
+    snapshot.GetDirectory().SetCurrentSource(
+      this->CMakeInstance->GetHomeDirectory());
+    snapshot.GetDirectory().SetCurrentBinary(
+      this->CMakeInstance->GetHomeOutputDirectory());
+    snapshot.SetDefaultDefinitions();
+    mf = new cmMakefile(this, snapshot);
+  }
+
   makeCommand.push_back(this->SelectMakeProgram(makeProgram));
 
-  // Since we have full control over the invocation of nmake, let us
-  // make it quiet.
-  if (cmHasLiteralPrefix(this->GetName(), "NMake Makefiles")) {
-    makeCommand.push_back("/NOLOGO");
+  if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
+    makeCommand.push_back("-j");
+    if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
+      makeCommand.push_back(std::to_string(jobs));
+    }
   }
+
   makeCommand.insert(makeCommand.end(), makeOptions.begin(),
                      makeOptions.end());
   if (!targetName.empty()) {
-    cmMakefile* mf;
-    if (!this->Makefiles.empty()) {
-      mf = this->Makefiles[0];
-    } else {
-      cmStateSnapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
-      snapshot.GetDirectory().SetCurrentSource(
-        this->CMakeInstance->GetHomeDirectory());
-      snapshot.GetDirectory().SetCurrentBinary(
-        this->CMakeInstance->GetHomeOutputDirectory());
-      snapshot.SetDefaultDefinitions();
-      mf = new cmMakefile(this, snapshot);
-    }
-
     std::string tname = targetName;
     if (fast) {
       tname += "/fast";
@@ -528,9 +529,9 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
       conv.ConvertToRelativePath(mf->GetState()->GetBinaryDirectory(), tname);
     cmSystemTools::ConvertToOutputSlashes(tname);
     makeCommand.push_back(std::move(tname));
-    if (this->Makefiles.empty()) {
-      delete mf;
-    }
+  }
+  if (this->Makefiles.empty()) {
+    delete mf;
   }
 }
 

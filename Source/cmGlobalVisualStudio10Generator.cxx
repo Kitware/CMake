@@ -764,7 +764,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string& makeProgram,
   const std::string& projectName, const std::string& projectDir,
   const std::string& targetName, const std::string& config, bool fast,
-  bool verbose, std::vector<std::string> const& makeOptions)
+  int jobs, bool verbose, std::vector<std::string> const& makeOptions)
 {
   // Select the caller- or user-preferred make program, else MSBuild.
   std::string makeProgramSelected =
@@ -805,7 +805,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     // Use devenv to build solutions containing Intel Fortran projects.
     cmGlobalVisualStudio7Generator::GenerateBuildCommand(
       makeCommand, makeProgram, projectName, projectDir, targetName, config,
-      fast, verbose, makeOptions);
+      fast, jobs, verbose, makeOptions);
     return;
   }
 
@@ -813,6 +813,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
 
   std::string realTarget = targetName;
   // msbuild.exe CxxOnly.sln /t:Build /p:Configuration=Debug /target:ALL_BUILD
+  //                         /m
   if (realTarget.empty()) {
     realTarget = "ALL_BUILD";
   }
@@ -841,6 +842,17 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   makeCommand.push_back(configArg);
   makeCommand.push_back(std::string("/p:VisualStudioVersion=") +
                         this->GetIDEVersion());
+
+  if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
+    if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
+      makeCommand.push_back("/m");
+    } else {
+      makeCommand.push_back(std::string("/m:") + std::to_string(jobs));
+    }
+    // Having msbuild.exe and cl.exe using multiple jobs is discouraged
+    makeCommand.push_back("/p:CL_MPCount=1");
+  }
+
   makeCommand.insert(makeCommand.end(), makeOptions.begin(),
                      makeOptions.end());
 }

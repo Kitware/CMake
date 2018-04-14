@@ -119,6 +119,9 @@ public:
 
   typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
 
+  static const int NO_BUILD_PARALLEL_LEVEL = -1;
+  static const int DEFAULT_BUILD_PARALLEL_LEVEL = 0;
+
   /// Default constructor
   cmake(Role role);
   /// Destructor
@@ -430,7 +433,7 @@ public:
     cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
 
   ///! run the --build option
-  int Build(const std::string& dir, const std::string& target,
+  int Build(int jobs, const std::string& dir, const std::string& target,
             const std::string& config,
             const std::vector<std::string>& nativeOptions, bool clean);
 

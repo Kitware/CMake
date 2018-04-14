@@ -3269,7 +3269,7 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const& lang,
 int cmMakefile::TryCompile(const std::string& srcdir,
                            const std::string& bindir,
                            const std::string& projectName,
-                           const std::string& targetName, bool fast,
+                           const std::string& targetName, bool fast, int jobs,
                            const std::vector<std::string>* cmakeArgs,
                            std::string& output)
 {
@@ -3381,7 +3381,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
 
   // finally call the generator to actually build the resulting project
   int ret = this->GetGlobalGenerator()->TryCompile(
-    srcdir, bindir, projectName, targetName, fast, output, this);
+    jobs, srcdir, bindir, projectName, targetName, fast, output, this);
 
   this->IsSourceFileTryCompile = false;
   return ret;

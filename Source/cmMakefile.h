@@ -102,7 +102,8 @@ public:
    */
   int TryCompile(const std::string& srcdir, const std::string& bindir,
                  const std::string& projectName, const std::string& targetName,
-                 bool fast, const std::vector<std::string>* cmakeArgs,
+                 bool fast, int jobs,
+                 const std::vector<std::string>* cmakeArgs,
                  std::string& output);
 
   bool GetIsSourceFileTryCompile() const;

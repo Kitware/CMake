@@ -253,9 +253,9 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       config = "Debug";
     }
     int retVal = cm.GetGlobalGenerator()->Build(
-      this->SourceDir, this->BinaryDir, this->BuildProject, tar, output,
-      this->BuildMakeProgram, config, !this->BuildNoClean, false, false,
-      remainingTime);
+      cmake::NO_BUILD_PARALLEL_LEVEL, this->SourceDir, this->BinaryDir,
+      this->BuildProject, tar, output, this->BuildMakeProgram, config,
+      !this->BuildNoClean, false, false, remainingTime);
     out << output;
     // if the build failed then return
     if (retVal) {
