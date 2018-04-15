@@ -2,10 +2,7 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 # This module is shared by multiple languages; use include blocker.
-if(__APPLE_COMPILER_PGI)
-  return()
-endif()
-set(__APPLE_COMPILER_PGI 1)
+include_guard()
 
 macro(__apple_compiler_pgi lang)
   set(CMAKE_${lang}_OSX_COMPATIBILITY_VERSION_FLAG "-Wl,-compatibility_version,")

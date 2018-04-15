@@ -3,10 +3,7 @@
 
 
 # This module is shared by multiple languages; use include blocker.
-if(__APPLE_COMPILER_CLANG)
-  return()
-endif()
-set(__APPLE_COMPILER_CLANG 1)
+include_guard()
 
 macro(__apple_compiler_clang lang)
   set(CMAKE_${lang}_VERBOSE_FLAG "-v -Wl,-v") # also tell linker to print verbose output
