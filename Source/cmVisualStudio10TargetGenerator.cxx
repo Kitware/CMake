@@ -2235,6 +2235,55 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
       *this->BuildFileStream << cmVS10EscapeXML(intermediateDir)
                              << "</IntDir>\n";
 
+      if (const char* sdkExecutableDirectories = this->Makefile->GetDefinition(
+            "CMAKE_VS_SDK_EXECUTABLE_DIRECTORIES")) {
+        this->WritePlatformConfigTag("ExecutablePath", config, 2);
+        *this->BuildFileStream << cmVS10EscapeXML(sdkExecutableDirectories)
+                               << "</ExecutablePath>\n";
+      }
+
+      if (const char* sdkIncludeDirectories = this->Makefile->GetDefinition(
+            "CMAKE_VS_SDK_INCLUDE_DIRECTORIES")) {
+        this->WritePlatformConfigTag("IncludePath", config, 2);
+        *this->BuildFileStream << cmVS10EscapeXML(sdkIncludeDirectories)
+                               << "</IncludePath>\n";
+      }
+
+      if (const char* sdkReferenceDirectories = this->Makefile->GetDefinition(
+            "CMAKE_VS_SDK_REFERENCE_DIRECTORIES")) {
+        this->WritePlatformConfigTag("ReferencePath", config, 2);
+        *this->BuildFileStream << cmVS10EscapeXML(sdkReferenceDirectories)
+                               << "</ReferencePath>\n";
+      }
+
+      if (const char* sdkLibraryDirectories = this->Makefile->GetDefinition(
+            "CMAKE_VS_SDK_LIBRARY_DIRECTORIES")) {
+        this->WritePlatformConfigTag("LibraryPath", config, 2);
+        *this->BuildFileStream << cmVS10EscapeXML(sdkLibraryDirectories)
+                               << "</LibraryPath>\n";
+      }
+
+      if (const char* sdkLibraryWDirectories = this->Makefile->GetDefinition(
+            "CMAKE_VS_SDK_LIBRARY_WINRT_DIRECTORIES")) {
+        this->WritePlatformConfigTag("LibraryWPath", config, 2);
+        *this->BuildFileStream << cmVS10EscapeXML(sdkLibraryWDirectories)
+                               << "</LibraryWPath>\n";
+      }
+
+      if (const char* sdkSourceDirectories =
+            this->Makefile->GetDefinition("CMAKE_VS_SDK_SOURCE_DIRECTORIES")) {
+        this->WritePlatformConfigTag("SourcePath", config, 2);
+        *this->BuildFileStream << cmVS10EscapeXML(sdkSourceDirectories)
+                               << "</SourcePath>\n";
+      }
+
+      if (const char* sdkExcludeDirectories = this->Makefile->GetDefinition(
+            "CMAKE_VS_SDK_EXCLUDE_DIRECTORIES")) {
+        this->WritePlatformConfigTag("ExcludePath", config, 2);
+        *this->BuildFileStream << cmVS10EscapeXML(sdkExcludeDirectories)
+                               << "</ExcludePath>\n";
+      }
+
       if (const char* workingDir = this->GeneratorTarget->GetProperty(
             "VS_DEBUGGER_WORKING_DIRECTORY")) {
         this->WritePlatformConfigTag("LocalDebuggerWorkingDirectory", config,
