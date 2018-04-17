@@ -105,6 +105,14 @@
 #  if DESCRIPTION has given to the project() call or
 #  CMake generated string with PROJECT_NAME otherwise.
 #
+# .. variable:: CPACK_PACKAGE_HOMEPAGE_URL
+#
+#  Project homepage URL. Default value is::
+#
+#    ${CMAKE_PROJECT_HOMEPAGE_URL}
+#
+#  if HOMEPAGE_URL has given to the project().
+#
 # .. variable:: CPACK_PACKAGE_FILE_NAME
 #
 #  The name of the package file to generate, not including the
@@ -372,6 +380,10 @@ if(CMAKE_PROJECT_DESCRIPTION)
 else()
   _cpack_set_default(CPACK_PACKAGE_DESCRIPTION_SUMMARY
     "${CMAKE_PROJECT_NAME} built using CMake")
+endif()
+if(CMAKE_PROJECT_HOMEPAGE_URL)
+  _cpack_set_default(CPACK_PACKAGE_HOMEPAGE_URL
+    "${CMAKE_PROJECT_HOMEPAGE_URL}")
 endif()
 
 _cpack_set_default(CPACK_PACKAGE_DESCRIPTION_FILE
