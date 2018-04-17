@@ -100,7 +100,7 @@
 #
 #  Short description of the project (only a few words). Default value is::
 #
-#    ${PROJECT_DESCRIPTION}
+#    ${CMAKE_PROJECT_DESCRIPTION}
 #
 #  if DESCRIPTION has given to the project() call or
 #  CMake generated string with PROJECT_NAME otherwise.
