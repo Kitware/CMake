@@ -557,6 +557,7 @@ set(SRCS
   cmSiteNameCommand.h
   cmSourceGroupCommand.cxx
   cmSourceGroupCommand.h
+  cmStringReplaceHelper.cxx
   cmStringCommand.cxx
   cmStringCommand.h
   cmSubdirCommand.cxx
