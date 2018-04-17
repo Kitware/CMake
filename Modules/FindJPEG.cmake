@@ -5,21 +5,27 @@
 # FindJPEG
 # --------
 #
-# Find JPEG
+# Find the JPEG library (libjpeg)
 #
-# Find the native JPEG includes and library This module defines
+# Result variables
+# ^^^^^^^^^^^^^^^^
 #
-# ::
+# This module will set the following variables in your project:
 #
-#   JPEG_INCLUDE_DIR, where to find jpeglib.h, etc.
-#   JPEG_LIBRARIES, the libraries needed to use JPEG.
-#   JPEG_FOUND, If false, do not try to use JPEG.
+# ``JPEG_FOUND``
+#   If false, do not try to use JPEG.
+# ``JPEG_INCLUDE_DIR``
+#   where to find jpeglib.h, etc.
+# ``JPEG_LIBRARIES``
+#   the libraries needed to use JPEG.
 #
-# also defined, but not for general use are
+# Cache variables
+# ^^^^^^^^^^^^^^^
 #
-# ::
+# The following cache variables may also be set:
 #
-#   JPEG_LIBRARY, where to find the JPEG library.
+# ``JPEG_LIBRARY``
+#   where to find the JPEG library.
 
 find_path(JPEG_INCLUDE_DIR jpeglib.h)
 
