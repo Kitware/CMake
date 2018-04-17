@@ -213,7 +213,7 @@ The ``<SELECTOR>`` may be one of:
 
   list(TRANSFORM <list> <ACTION> AT <index> [<index> ...] ...)
 
-``FOR``: Specify a range with, optionaly, an incerment used to iterate over
+``FOR``: Specify a range with, optionaly, an increment used to iterate over
 the range. ::
 
   list(TRANSFORM <list> <ACTION> FOR <start> <stop> [<step>] ...)
