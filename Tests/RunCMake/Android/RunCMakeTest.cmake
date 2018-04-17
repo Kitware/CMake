@@ -88,12 +88,14 @@ foreach(ndk IN LISTS TEST_ANDROID_NDK)
     -DCMAKE_ANDROID_ARM_MODE=0
     )
   run_cmake(ndk-badarm)
-  set(RunCMake_TEST_OPTIONS
-    -DCMAKE_SYSTEM_NAME=Android
-    -DCMAKE_ANDROID_NDK=${ndk}
-    -DCMAKE_ANDROID_ARM_NEON=0
-    )
-  run_cmake(ndk-badneon)
+  if("armeabi" IN_LIST _abis_)
+    set(RunCMake_TEST_OPTIONS
+      -DCMAKE_SYSTEM_NAME=Android
+      -DCMAKE_ANDROID_NDK=${ndk}
+      -DCMAKE_ANDROID_ARM_NEON=0
+      )
+    run_cmake(ndk-badneon)
+  endif()
   set(RunCMake_TEST_OPTIONS
     -DCMAKE_SYSTEM_NAME=Android
     -DCMAKE_ANDROID_NDK=${ndk}
