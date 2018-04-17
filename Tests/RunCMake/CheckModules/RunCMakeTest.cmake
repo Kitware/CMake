@@ -1,5 +1,7 @@
 include(RunCMake)
 
+run_cmake(CMP0075)
+
 run_cmake(CheckStructHasMemberOk)
 run_cmake(CheckStructHasMemberUnknownLanguage)
 run_cmake(CheckStructHasMemberMissingLanguage)

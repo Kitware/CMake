@@ -27,6 +27,8 @@
 #   list of macros to define (-DFOO=bar)
 # ``CMAKE_REQUIRED_INCLUDES``
 #   list of include directories
+# ``CMAKE_REQUIRED_LIBRARIES``
+#   A list of libraries to link.  See policy :policy:`CMP0075`.
 # ``CMAKE_REQUIRED_QUIET``
 #   execute quietly without messages
 #
@@ -54,14 +56,39 @@ macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
       string(APPEND CMAKE_CXX_FLAGS " ${ARGV2}")
     endif()
 
+    set(_CIF_LINK_LIBRARIES "")
+    if(CMAKE_REQUIRED_LIBRARIES)
+      cmake_policy(GET CMP0075 _CIF_CMP0075
+        PARENT_SCOPE # undocumented, do not use outside of CMake
+        )
+      if("x${_CIF_CMP0075}x" STREQUAL "xNEWx")
+        set(_CIF_LINK_LIBRARIES LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
+      elseif("x${_CIF_CMP0075}x" STREQUAL "xOLDx")
+      elseif(NOT _CIF_CMP0075_WARNED)
+        set(_CIF_CMP0075_WARNED 1)
+        message(AUTHOR_WARNING
+          "Policy CMP0075 is not set: Include file check macros honor CMAKE_REQUIRED_LIBRARIES.  "
+          "Run \"cmake --help-policy CMP0075\" for policy details.  "
+          "Use the cmake_policy command to set the policy and suppress this warning."
+          "\n"
+          "CMAKE_REQUIRED_LIBRARIES is set to:\n"
+          "  ${CMAKE_REQUIRED_LIBRARIES}\n"
+          "For compatibility with CMake 3.11 and below this check is ignoring it."
+          )
+      endif()
+      unset(_CIF_CMP0075)
+    endif()
+
     try_compile(${VARIABLE}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
+      ${_CIF_LINK_LIBRARIES}
       CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_INCLUDE_FILE_FLAGS}
       "${CHECK_INCLUDE_FILE_CXX_INCLUDE_DIRS}"
       OUTPUT_VARIABLE OUTPUT)
+    unset(_CIF_LINK_LIBRARIES)
 
     if(${ARGC} EQUAL 3)
       set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_SAVE})
