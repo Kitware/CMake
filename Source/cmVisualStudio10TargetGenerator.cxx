@@ -3667,10 +3667,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
                     "{" + this->GlobalGenerator->GetGUID(name) + "}", 3);
     this->WriteElem("Name", name, 3);
     this->WriteDotNetReferenceCustomTags(name);
-    if (csproj == this->ProjectType) {
-      if (!this->GlobalGenerator->TargetCanBeReferenced(dt)) {
-        this->WriteElem("ReferenceOutputAssembly", "false", 3);
-      }
+    if (!this->GlobalGenerator->TargetCanBeReferenced(dt)) {
+      this->WriteElem("ReferenceOutputAssembly", "false", 3);
     }
     this->WriteString("</ProjectReference>\n", 2);
   }
