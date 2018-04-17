@@ -24,19 +24,19 @@
 find_path(JPEG_INCLUDE_DIR jpeglib.h)
 
 set(JPEG_NAMES ${JPEG_NAMES} jpeg libjpeg)
-find_library(JPEG_LIBRARY NAMES ${JPEG_NAMES} )
+find_library(JPEG_LIBRARY NAMES ${JPEG_NAMES})
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(JPEG DEFAULT_MSG JPEG_LIBRARY JPEG_INCLUDE_DIR)
+find_package_handle_standard_args(JPEG DEFAULT_MSG JPEG_LIBRARY JPEG_INCLUDE_DIR)
 
 if(JPEG_FOUND)
   set(JPEG_LIBRARIES ${JPEG_LIBRARY})
 endif()
 
 # Deprecated declarations.
-set (NATIVE_JPEG_INCLUDE_PATH ${JPEG_INCLUDE_DIR} )
+set(NATIVE_JPEG_INCLUDE_PATH ${JPEG_INCLUDE_DIR})
 if(JPEG_LIBRARY)
-  get_filename_component (NATIVE_JPEG_LIB_PATH ${JPEG_LIBRARY} PATH)
+  get_filename_component(NATIVE_JPEG_LIB_PATH ${JPEG_LIBRARY} PATH)
 endif()
 
-mark_as_advanced(JPEG_LIBRARY JPEG_INCLUDE_DIR )
+mark_as_advanced(JPEG_LIBRARY JPEG_INCLUDE_DIR)
