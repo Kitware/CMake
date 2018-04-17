@@ -54,6 +54,45 @@ function (_PYTHON_GET_FRAMEWORKS _PYTHON_PGF_FRAMEWORK_PATHS _PYTHON_VERSION)
 endfunction()
 
 
+function (_PYTHON_VALIDATE_INTERPRETER)
+  if (NOT ${_PYTHON_PREFIX}_EXECUTABLE)
+    return()
+  endif()
+
+  if (${_PYTHON_PREFIX}_EXECUTABLE MATCHES "python${CMAKE_EXECUTABLE_SUFFIX}$")
+    # executable found do not have version in name
+    # ensure major version is OK
+    execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
+                             "import sys; sys.stdout.write(str(sys.version_info[0]))"
+                     RESULT_VARIABLE result
+                     OUTPUT_VARIABLE version
+                     ERROR_QUIET
+                     OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (result OR NOT version EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
+      # interpreter not usable or has wrong major version
+      set (${_PYTHON_PREFIX}_EXECUTABLE ${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND CACHE INTERNAL "" FORCE)
+      return()
+    endif()
+  endif()
+
+  if (CMAKE_SIZEOF_VOID_P AND "Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
+      AND NOT CMAKE_CROSSCOMPILING)
+    # In this case, interpreter must have same architecture as environment
+    execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
+                             "import sys, struct; sys.stdout.write(str(struct.calcsize(\"P\")))"
+                     RESULT_VARIABLE result
+                     OUTPUT_VARIABLE size
+                     ERROR_QUIET
+                     OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (result OR NOT size EQUAL CMAKE_SIZEOF_VOID_P)
+      # interpreter not usable or has wrong architecture
+      set (${_PYTHON_PREFIX}_EXECUTABLE ${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND CACHE INTERNAL "" FORCE)
+      return()
+    endif()
+  endif()
+endfunction()
+
+
 function (_PYTHON_FIND_RUNTIME_LIBRARY _PYTHON_LIB)
   string (REPLACE "_RUNTIME" "" _PYTHON_LIB "${_PYTHON_LIB}")
   # look at runtime part on systems supporting it
@@ -211,17 +250,22 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     find_program (${_PYTHON_PREFIX}_EXECUTABLE
                   NAMES python${_${_PYTHON_PREFIX}_VERSION})
 
+    _python_validate_interpreter ()
     if (${_PYTHON_PREFIX}_EXECUTABLE)
       break()
     endif()
   endforeach()
 
   # try more generic names
-  find_program (${_PYTHON_PREFIX}_EXECUTABLE
-                NAMES python${${_PYTHON_PREFIX}_VERSION_MAJOR} python
-                      ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
-                HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                PATH_SUFFIXES bin)
+  if (NOT ${_PYTHON_PREFIX}_EXECUTABLE)
+    find_program (${_PYTHON_PREFIX}_EXECUTABLE
+                  NAMES python${${_PYTHON_PREFIX}_VERSION_MAJOR} python
+                        ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
+                  HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                  PATH_SUFFIXES bin)
+
+    _python_validate_interpreter ()
+  endif()
 
   # retrieve exact version of executable found
   if (${_PYTHON_PREFIX}_EXECUTABLE)
@@ -531,6 +575,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
       _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION})
 
+      # search first in known locations
       find_library (${_PYTHON_PREFIX}_LIBRARY_RELEASE
                     NAMES python${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}
                           python${_${_PYTHON_PREFIX}_VERSION}mu
@@ -544,6 +589,22 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                           [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+                    PATH_SUFFIXES lib/${CMAKE_LIBRARY_ARCHITECTURE} lib libs
+                                  lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}mu
+                                  lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}m
+                                  lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}u
+                                  lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}
+                                  lib/python${_${_PYTHON_PREFIX}_VERSION}/config
+                    NO_SYSTEM_ENVIRONMENT_PATH
+                    NO_CMAKE_SYSTEM_PATH)
+      # search in all default paths
+      find_library (${_PYTHON_PREFIX}_LIBRARY_RELEASE
+                    NAMES python${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}
+                          python${_${_PYTHON_PREFIX}_VERSION}mu
+                          python${_${_PYTHON_PREFIX}_VERSION}m
+                          python${_${_PYTHON_PREFIX}_VERSION}u
+                          python${_${_PYTHON_PREFIX}_VERSION}
+                    NAMES_PER_DIR
                     PATH_SUFFIXES lib/${CMAKE_LIBRARY_ARCHITECTURE} lib libs
                                   lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}mu
                                   lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}m
@@ -580,6 +641,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                       HINTS "${_${_PYTHON_PREFIX}_PATH}" ${_${_PYTHON_PREFIX}_HINTS}
                       NO_DEFAULT_PATH)
         else()
+          # search first in known locations
           find_library (${_PYTHON_PREFIX}_LIBRARY_DEBUG
                         NAMES python${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}_d
                         NAMES_PER_DIR
@@ -588,6 +650,13 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                               [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                               [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
                               [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+                        PATH_SUFFIXES lib libs
+                        NO_SYSTEM_ENVIRONMENT_PATH
+                        NO_CMAKE_SYSTEM_PATH)
+          # search in all default paths
+          find_library (${_PYTHON_PREFIX}_LIBRARY_DEBUG
+                        NAMES python${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}_d
+                        NAMES_PER_DIR
                         PATH_SUFFIXES lib libs)
         endif()
         if (${_PYTHON_PREFIX}_LIBRARY_DEBUG)
