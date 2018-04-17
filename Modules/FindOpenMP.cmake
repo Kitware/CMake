@@ -242,19 +242,10 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
         endforeach()
         set("${OPENMP_LIB_NAMES_VAR}" "${_OPENMP_LIB_NAMES}" PARENT_SCOPE)
       else()
-        # The Intel compiler on windows has no verbose mode, so we need to treat it explicitly
-        if("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "Intel" AND "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-          set("${OPENMP_LIB_NAMES_VAR}" "libiomp5md" PARENT_SCOPE)
-          find_library(OpenMP_libiomp5md_LIBRARY
-            NAMES "libiomp5md"
-            HINTS ${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES}
-            CMAKE_FIND_ROOT_PATH_BOTH
-            NO_DEFAULT_PATH
-          )
-          mark_as_advanced(OpenMP_libiomp5md_LIBRARY)
-        else()
-          set("${OPENMP_LIB_NAMES_VAR}" "" PARENT_SCOPE)
-        endif()
+        # We do not know how to extract implicit OpenMP libraries for this compiler.
+        # Assume that it handles them automatically, e.g. the Intel Compiler on
+        # Windows should put the dependency in its object files.
+        set("${OPENMP_LIB_NAMES_VAR}" "" PARENT_SCOPE)
       endif()
       break()
     elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL "AppleClang"
