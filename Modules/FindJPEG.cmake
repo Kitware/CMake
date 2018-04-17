@@ -7,6 +7,14 @@
 #
 # Find the JPEG library (libjpeg)
 #
+# Imported targets
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines the following :prop_tgt:`IMPORTED` targets:
+#
+# ``JPEG::JPEG``
+#   The JPEG library, if found.
+#
 # Result variables
 # ^^^^^^^^^^^^^^^^
 #
@@ -14,7 +22,7 @@
 #
 # ``JPEG_FOUND``
 #   If false, do not try to use JPEG.
-# ``JPEG_INCLUDE_DIR``
+# ``JPEG_INCLUDE_DIRS``
 #   where to find jpeglib.h, etc.
 # ``JPEG_LIBRARIES``
 #   the libraries needed to use JPEG.
@@ -26,7 +34,7 @@
 #
 # The following cache variables may also be set:
 #
-# ``JPEG_INCLUDE_DIR``
+# ``JPEG_INCLUDE_DIRS``
 #   where to find jpeglib.h, etc.
 # ``JPEG_LIBRARY_RELEASE``
 #   where to find the JPEG library (optimized).
@@ -36,6 +44,8 @@
 # Obsolete variables
 # ^^^^^^^^^^^^^^^^^^
 #
+# ``JPEG_INCLUDE_DIR``
+#   where to find jpeglib.h, etc. (same as JPEG_INCLUDE_DIRS)
 # ``JPEG_LIBRARY``
 #   where to find the JPEG library.
 
@@ -82,6 +92,34 @@ find_package_handle_standard_args(JPEG
 
 if(JPEG_FOUND)
   set(JPEG_LIBRARIES ${JPEG_LIBRARY})
+  set(JPEG_INCLUDE_DIRS "${JPEG_INCLUDE_DIR}")
+
+  if(NOT TARGET JPEG::JPEG)
+    add_library(JPEG::JPEG UNKNOWN IMPORTED)
+    if(JPEG_INCLUDE_DIRS)
+      set_target_properties(JPEG::JPEG PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${JPEG_INCLUDE_DIRS}")
+    endif()
+    if(EXISTS "${JPEG_LIBRARY}")
+      set_target_properties(JPEG::JPEG PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        IMPORTED_LOCATION "${JPEG_LIBRARY}")
+    endif()
+    if(EXISTS "${JPEG_LIBRARY_RELEASE}")
+      set_property(TARGET JPEG::JPEG APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS RELEASE)
+      set_target_properties(JPEG::JPEG PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
+        IMPORTED_LOCATION_RELEASE "${JPEG_LIBRARY_RELEASE}")
+    endif()
+    if(EXISTS "${JPEG_LIBRARY_DEBUG}")
+      set_property(TARGET JPEG::JPEG APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG)
+      set_target_properties(JPEG::JPEG PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
+        IMPORTED_LOCATION_DEBUG "${JPEG_LIBRARY_DEBUG}")
+    endif()
+  endif()
 endif()
 
 # Deprecated declarations.
