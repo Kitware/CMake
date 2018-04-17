@@ -28,13 +28,33 @@
 #
 # ``JPEG_INCLUDE_DIR``
 #   where to find jpeglib.h, etc.
+# ``JPEG_LIBRARY_RELEASE``
+#   where to find the JPEG library (optimized).
+# ``JPEG_LIBRARY_DEBUG``
+#   where to find the JPEG library (debug).
+#
+# Obsolete variables
+# ^^^^^^^^^^^^^^^^^^
+#
 # ``JPEG_LIBRARY``
 #   where to find the JPEG library.
 
 find_path(JPEG_INCLUDE_DIR jpeglib.h)
 
-set(JPEG_NAMES ${JPEG_NAMES} jpeg libjpeg)
-find_library(JPEG_LIBRARY NAMES ${JPEG_NAMES})
+set(jpeg_names ${JPEG_NAMES} jpeg libjpeg)
+foreach(name ${JPEG_NAMES})
+  list(APPEND jpeg_names_debug "${name}d")
+endforeach()
+
+if(NOT JPEG_LIBRARY)
+  find_library(JPEG_LIBRARY_RELEASE NAMES ${jpeg_names})
+  find_library(JPEG_LIBRARY_DEBUG NAMES ${jpeg_names_debug})
+  include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+  select_library_configurations(JPEG)
+  mark_as_advanced(JPEG_LIBRARY_RELEASE JPEG_LIBRARY_DEBUG)
+endif()
+unset(jpeg_names)
+unset(jpeg_names_debug)
 
 if(JPEG_INCLUDE_DIR AND EXISTS "${JPEG_INCLUDE_DIR}/jpeglib.h")
   file(STRINGS "${JPEG_INCLUDE_DIR}/jpeglib.h"
