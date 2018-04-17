@@ -95,7 +95,11 @@ bool cmCMakePolicyCommand::HandleSetMode(std::vector<std::string> const& args)
 
 bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
 {
-  if (args.size() != 3) {
+  bool parent_scope = false;
+  if (args.size() == 4 && args[3] == "PARENT_SCOPE") {
+    // Undocumented PARENT_SCOPE option for use within CMake.
+    parent_scope = true;
+  } else if (args.size() != 3) {
     this->SetError("GET must be given exactly 2 additional arguments.");
     return false;
   }
@@ -115,7 +119,8 @@ bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
   }
 
   // Lookup the policy setting.
-  cmPolicies::PolicyStatus status = this->Makefile->GetPolicyStatus(pid);
+  cmPolicies::PolicyStatus status =
+    this->Makefile->GetPolicyStatus(pid, parent_scope);
   switch (status) {
     case cmPolicies::OLD:
       // Report that the policy is set to OLD.

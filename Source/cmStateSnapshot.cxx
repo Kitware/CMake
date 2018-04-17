@@ -160,8 +160,8 @@ void cmStateSnapshot::SetPolicy(cmPolicies::PolicyID id,
   }
 }
 
-cmPolicies::PolicyStatus cmStateSnapshot::GetPolicy(
-  cmPolicies::PolicyID id) const
+cmPolicies::PolicyStatus cmStateSnapshot::GetPolicy(cmPolicies::PolicyID id,
+                                                    bool parent_scope) const
 {
   cmPolicies::PolicyStatus status = cmPolicies::GetPolicyStatus(id);
 
@@ -180,6 +180,10 @@ cmPolicies::PolicyStatus cmStateSnapshot::GetPolicy(
     cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator root =
       dir->DirectoryEnd->PolicyRoot;
     for (; leaf != root; ++leaf) {
+      if (parent_scope) {
+        parent_scope = false;
+        continue;
+      }
       if (leaf->IsDefined(id)) {
         status = leaf->Get(id);
         return status;
