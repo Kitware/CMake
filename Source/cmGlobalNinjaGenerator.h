@@ -73,7 +73,6 @@ public:
   static void WriteDivider(std::ostream& os);
 
   static std::string EncodeRuleName(std::string const& name);
-  static std::string EncodeIdent(const std::string& ident, std::ostream& vars);
   static std::string EncodeLiteral(const std::string& lit);
   std::string EncodePath(const std::string& path);
 

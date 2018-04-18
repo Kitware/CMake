@@ -101,31 +101,6 @@ std::string cmGlobalNinjaGenerator::EncodeRuleName(std::string const& name)
   return encoded;
 }
 
-static bool IsIdentChar(char c)
-{
-  return ('a' <= c && c <= 'z') ||
-    ('+' <= c && c <= '9') || // +,-./ and numbers
-    ('A' <= c && c <= 'Z') || (c == '_') || (c == '$') || (c == '\\') ||
-    (c == ' ') || (c == ':');
-}
-
-std::string cmGlobalNinjaGenerator::EncodeIdent(const std::string& ident,
-                                                std::ostream& vars)
-{
-  if (std::find_if(ident.begin(), ident.end(),
-                   [](char c) { return !IsIdentChar(c); }) != ident.end()) {
-    static unsigned VarNum = 0;
-    std::ostringstream names;
-    names << "ident" << VarNum++;
-    vars << names.str() << " = " << ident << "\n";
-    return "$" + names.str();
-  }
-  std::string result = ident;
-  cmSystemTools::ReplaceString(result, " ", "$ ");
-  cmSystemTools::ReplaceString(result, ":", "$:");
-  return result;
-}
-
 std::string cmGlobalNinjaGenerator::EncodeLiteral(const std::string& lit)
 {
   std::string result = lit;
@@ -143,7 +118,10 @@ std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
   else
     std::replace(result.begin(), result.end(), '/', '\\');
 #endif
-  return EncodeLiteral(result);
+  result = EncodeLiteral(result);
+  cmSystemTools::ReplaceString(result, " ", "$ ");
+  cmSystemTools::ReplaceString(result, ":", "$:");
+  return result;
 }
 
 void cmGlobalNinjaGenerator::WriteBuild(
@@ -177,14 +155,14 @@ void cmGlobalNinjaGenerator::WriteBuild(
 
   // Write explicit dependencies.
   for (std::string const& explicitDep : explicitDeps) {
-    arguments += " " + EncodeIdent(EncodePath(explicitDep), os);
+    arguments += " " + EncodePath(explicitDep);
   }
 
   // Write implicit dependencies.
   if (!implicitDeps.empty()) {
     arguments += " |";
     for (std::string const& implicitDep : implicitDeps) {
-      arguments += " " + EncodeIdent(EncodePath(implicitDep), os);
+      arguments += " " + EncodePath(implicitDep);
     }
   }
 
@@ -192,7 +170,7 @@ void cmGlobalNinjaGenerator::WriteBuild(
   if (!orderOnlyDeps.empty()) {
     arguments += " ||";
     for (std::string const& orderOnlyDep : orderOnlyDeps) {
-      arguments += " " + EncodeIdent(EncodePath(orderOnlyDep), os);
+      arguments += " " + EncodePath(orderOnlyDep);
     }
   }
 
@@ -203,7 +181,7 @@ void cmGlobalNinjaGenerator::WriteBuild(
   // Write outputs files.
   build += "build";
   for (std::string const& output : outputs) {
-    build += " " + EncodeIdent(EncodePath(output), os);
+    build += " " + EncodePath(output);
     if (this->ComputingUnknownDependencies) {
       this->CombinedBuildOutputs.insert(output);
     }
@@ -211,7 +189,7 @@ void cmGlobalNinjaGenerator::WriteBuild(
   if (!implicitOuts.empty()) {
     build += " |";
     for (std::string const& implicitOut : implicitOuts) {
-      build += " " + EncodeIdent(EncodePath(implicitOut), os);
+      build += " " + EncodePath(implicitOut);
     }
   }
   build += ":";

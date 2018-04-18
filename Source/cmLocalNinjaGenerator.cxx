@@ -251,8 +251,7 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusion(std::ostream& os)
   cmGlobalNinjaGenerator* ng = this->GetGlobalNinjaGenerator();
   std::string const ninjaRulesFile =
     ng->NinjaOutputPath(cmGlobalNinjaGenerator::NINJA_RULES_FILE);
-  std::string const rulesFilePath =
-    ng->EncodeIdent(ng->EncodePath(ninjaRulesFile), os);
+  std::string const rulesFilePath = ng->EncodePath(ninjaRulesFile);
   cmGlobalNinjaGenerator::WriteInclude(os, rulesFilePath,
                                        "Include rules file.");
   os << "\n";
