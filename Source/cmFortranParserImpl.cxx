@@ -168,11 +168,16 @@ void cmFortranParser_Error(cmFortranParser* parser, const char* msg)
   parser->Error = msg ? msg : "unknown error";
 }
 
-void cmFortranParser_RuleUse(cmFortranParser* parser, const char* name)
+void cmFortranParser_RuleUse(cmFortranParser* parser, const char* module_name)
 {
-  if (!parser->InPPFalseBranch) {
-    parser->Info.Requires.insert(cmSystemTools::LowerCase(name));
+  if (parser->InPPFalseBranch) {
+    return;
   }
+
+  // syntax:   "use module_name"
+  // requires: "module_name.mod"
+  std::string const& mod_name = cmSystemTools::LowerCase(module_name);
+  parser->Info.Requires.insert(mod_name + ".mod");
 }
 
 void cmFortranParser_RuleLineDirective(cmFortranParser* parser,
@@ -225,10 +230,18 @@ void cmFortranParser_RuleInclude(cmFortranParser* parser, const char* name)
   }
 }
 
-void cmFortranParser_RuleModule(cmFortranParser* parser, const char* name)
+void cmFortranParser_RuleModule(cmFortranParser* parser,
+                                const char* module_name)
 {
-  if (!parser->InPPFalseBranch && !parser->InInterface) {
-    parser->Info.Provides.insert(cmSystemTools::LowerCase(name));
+  if (parser->InPPFalseBranch) {
+    return;
+  }
+
+  if (!parser->InInterface) {
+    // syntax:   "module module_name"
+    // provides: "module_name.mod"
+    std::string const& mod_name = cmSystemTools::LowerCase(module_name);
+    parser->Info.Provides.insert(mod_name + ".mod");
   }
 }
 
