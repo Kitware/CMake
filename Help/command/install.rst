@@ -103,6 +103,7 @@ Installing Targets
            [PERMISSIONS permissions...]
            [CONFIGURATIONS [Debug|Release|...]]
            [COMPONENT <component>]
+           [NAMELINK_COMPONENT <component>]
            [OPTIONAL] [EXCLUDE_FROM_ALL]
            [NAMELINK_ONLY|NAMELINK_SKIP]
           ] [...]
@@ -167,7 +168,7 @@ just a DLL or just an import library.)
 In addition to the common options listed above, each target can accept
 the following additional arguments:
 
-``NAMELINK_ONLY``
+``NAMELINK_COMPONENT``
   On some platforms a versioned shared library has a symbolic link such
   as::
 
@@ -175,13 +176,51 @@ the following additional arguments:
 
   where ``lib<name>.so.1`` is the soname of the library and ``lib<name>.so``
   is a "namelink" allowing linkers to find the library when given
-  ``-l<name>``. The ``NAMELINK_ONLY`` option causes the installation of only
-  the namelink when a library target is installed. On platforms where
-  versioned shared libraries do not have namelinks or when a library is not
-  versioned, the ``NAMELINK_ONLY`` option installs nothing. It is an error to
-  use this parameter outside of a ``LIBRARY`` block. See the
-  :prop_tgt:`VERSION` and :prop_tgt:`SOVERSION` target properties for details
-  on creating versioned shared libraries.
+  ``-l<name>``. The ``NAMELINK_COMPONENT`` option is similar to the
+  ``COMPONENT`` option, but it changes the installation component of a shared
+  library namelink if one is generated. If not specified, this defaults to the
+  value of ``COMPONENT``. It is an error to use this parameter outside of a
+  ``LIBRARY`` block.
+
+  Consider the following example:
+
+  .. code-block:: cmake
+
+    install(TARGETS mylib
+            LIBRARY
+              DESTINATION lib
+              COMPONENT Libraries
+              NAMELINK_COMPONENT Development
+            PUBLIC_HEADER
+              DESTINATION include
+              COMPONENT Development
+           )
+
+  In this scenario, if you choose to install only the ``Development``
+  component, both the headers and namelink will be installed without the
+  library. (If you don't also install the ``Libraries`` component, the
+  namelink will be a dangling symlink, and projects that link to the library
+  will have build errors.) If you install only the ``Libraries`` component,
+  only the library will be installed, without the headers and namelink.
+
+  This option is typically used for package managers that have separate
+  runtime and development packages. For example, on Debian systems, the
+  library is expected to be in the runtime package, and the headers and
+  namelink are expected to be in the development package.
+
+  See the :prop_tgt:`VERSION` and :prop_tgt:`SOVERSION` target properties for
+  details on creating versioned shared libraries.
+
+``NAMELINK_ONLY``
+  This option causes the installation of only the namelink when a library
+  target is installed. On platforms where versioned shared libraries do not
+  have namelinks or when a library is not versioned, the ``NAMELINK_ONLY``
+  option installs nothing. It is an error to use this parameter outside of a
+  ``LIBRARY`` block.
+
+  When ``NAMELINK_ONLY`` is given, either ``NAMELINK_COMPONENT`` or
+  ``COMPONENT`` may be used to specify the installation component of the
+  namelink, but ``COMPONENT`` should generally be preferred.
 
 ``NAMELINK_SKIP``
   Similar to ``NAMELINK_ONLY``, but it has the opposite effect: it causes the
@@ -191,6 +230,10 @@ the following additional arguments:
   do not have symlinks or when a library is not versioned, ``NAMELINK_SKIP``
   installs the library. It is an error to use this parameter outside of a
   ``LIBRARY`` block.
+
+  If ``NAMELINK_SKIP`` is specified, ``NAMELINK_COMPONENT`` has no effect. It
+  is not recommended to use ``NAMELINK_SKIP`` in conjunction with
+  ``NAMELINK_COMPONENT``.
 
 The ``install(TARGETS)`` command can also accept the following options at the
 top level:
