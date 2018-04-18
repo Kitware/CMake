@@ -481,6 +481,10 @@ if(MSVC)
         if("${v}" LESS 12 OR EXISTS "${MSVC_MFC_DIR}/mfc${v}d.dll")
           set(__install__libs ${__install__libs}
             "${MSVC_MFC_DIR}/mfc${v}d.dll"
+          )
+        endif()
+        if("${v}" LESS 12 OR EXISTS "${MSVC_MFC_DIR}/mfcm${v}d.dll")
+          set(__install__libs ${__install__libs}
             "${MSVC_MFC_DIR}/mfcm${v}d.dll"
           )
         endif()
@@ -495,6 +499,10 @@ if(MSVC)
         if("${v}" LESS 12 OR EXISTS "${MSVC_MFC_DIR}/mfc${v}.dll")
           set(__install__libs ${__install__libs}
             "${MSVC_MFC_DIR}/mfc${v}.dll"
+          )
+        endif()
+        if("${v}" LESS 12 OR EXISTS "${MSVC_MFC_DIR}/mfcm${v}.dll")
+          set(__install__libs ${__install__libs}
             "${MSVC_MFC_DIR}/mfcm${v}.dll"
           )
         endif()
