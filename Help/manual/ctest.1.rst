@@ -13,7 +13,7 @@ Synopsis
  ctest [<options>]
  ctest <path-to-source> <path-to-build> --build-generator <generator>
        [<options>...] [-- <build-options>...] [--test-command <test>]
- ctest (-D <dashboard> | -M <model> -T <action> | -S <script> | -SP <script>)
+ ctest {-D <dashboard> | -M <model> -T <action> | -S <script> | -SP <script>}
        [-- <dashboard-options>...]
 
 Description
