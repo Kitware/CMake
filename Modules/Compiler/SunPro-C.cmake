@@ -18,6 +18,8 @@ string(APPEND CMAKE_C_FLAGS_MINSIZEREL_INIT " -xO2 -xspace -DNDEBUG")
 string(APPEND CMAKE_C_FLAGS_RELEASE_INIT " -xO3 -DNDEBUG")
 string(APPEND CMAKE_C_FLAGS_RELWITHDEBINFO_INIT " -g -xO2 -DNDEBUG")
 
+set(CMAKE_DEPFILE_FLAGS_C "-xMD -xMF <DEPFILE>")
+
 # Initialize C link type selection flags.  These flags are used when
 # building a shared library, shared module, or executable that links
 # to other libraries to select whether to use the static or shared
