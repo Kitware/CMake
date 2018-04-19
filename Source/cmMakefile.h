@@ -284,7 +284,8 @@ public:
      */
   bool SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
   bool SetPolicy(const char* id, cmPolicies::PolicyStatus status);
-  cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id) const;
+  cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id,
+                                           bool parent_scope = false) const;
   bool SetPolicyVersion(std::string const& version_min,
                         std::string const& version_max);
   void RecordPolicies(cmPolicies::PolicyMap& pm);

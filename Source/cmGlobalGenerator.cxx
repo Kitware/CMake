@@ -1893,6 +1893,13 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
     retVal = 1;
   }
 
+  // The OpenWatcom tools do not return an error code when a link
+  // library is not found!
+  if (this->CMakeInstance->GetState()->UseWatcomWMake() && retVal == 0 &&
+      output.find("W1008: cannot open") != std::string::npos) {
+    retVal = 1;
+  }
+
   return retVal;
 }
 

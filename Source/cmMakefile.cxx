@@ -4089,10 +4089,10 @@ const char* cmMakefile::GetDefineFlagsCMP0059() const
   return this->DefineFlagsOrig.c_str();
 }
 
-cmPolicies::PolicyStatus cmMakefile::GetPolicyStatus(
-  cmPolicies::PolicyID id) const
+cmPolicies::PolicyStatus cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id,
+                                                     bool parent_scope) const
 {
-  return this->StateSnapshot.GetPolicy(id);
+  return this->StateSnapshot.GetPolicy(id, parent_scope);
 }
 
 bool cmMakefile::PolicyOptionalWarningEnabled(std::string const& var)

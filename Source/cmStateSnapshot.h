@@ -43,7 +43,8 @@ public:
   cmStateEnums::SnapshotType GetType() const;
 
   void SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
-  cmPolicies::PolicyStatus GetPolicy(cmPolicies::PolicyID id) const;
+  cmPolicies::PolicyStatus GetPolicy(cmPolicies::PolicyID id,
+                                     bool parent_scope = false) const;
   bool HasDefinedPolicyCMP0011();
   void PushPolicy(cmPolicies::PolicyMap const& entry, bool weak);
   bool PopPolicy();
