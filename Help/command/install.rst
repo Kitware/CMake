@@ -110,63 +110,102 @@ Installing Targets
           )
 
 The ``TARGETS`` form specifies rules for installing targets from a
-project.  There are six kinds of target files that may be installed:
-``ARCHIVE``, ``LIBRARY``, ``RUNTIME``, ``OBJECTS``, ``FRAMEWORK``, and
-``BUNDLE``. Executables are treated as ``RUNTIME`` targets, except that
-those marked with the ``MACOSX_BUNDLE`` property are treated as ``BUNDLE``
-targets on OS X.  Static libraries are treated as ``ARCHIVE`` targets,
-except that those marked with the ``FRAMEWORK`` property are treated
-as ``FRAMEWORK`` targets on OS X.
-Module libraries are always treated as ``LIBRARY`` targets.
-For non-DLL platforms shared libraries are treated as ``LIBRARY``
-targets, except that those marked with the ``FRAMEWORK`` property are
-treated as ``FRAMEWORK`` targets on OS X.  For DLL platforms the DLL
-part of a shared library is treated as a ``RUNTIME`` target and the
-corresponding import library is treated as an ``ARCHIVE`` target.
-All Windows-based systems including Cygwin are DLL platforms. Object
-libraries are always treated as ``OBJECTS`` targets.
-The ``ARCHIVE``, ``LIBRARY``, ``RUNTIME``, ``OBJECTS``, and ``FRAMEWORK``
-arguments change the type of target to which the subsequent properties
-apply. If none is given the installation properties apply to all target
-types.  If only one is given then only targets of that type will be
-installed (which can be used to install just a DLL or just an import
-library).
+project.  There are several kinds of target files that may be installed:
 
-The ``PRIVATE_HEADER``, ``PUBLIC_HEADER``, and ``RESOURCE`` arguments
-cause subsequent properties to be applied to installing a ``FRAMEWORK``
-shared library target's associated files on non-Apple platforms.  Rules
-defined by these arguments are ignored on Apple platforms because the
-associated files are installed into the appropriate locations inside
-the framework folder.  See documentation of the
-:prop_tgt:`PRIVATE_HEADER`, :prop_tgt:`PUBLIC_HEADER`, and
-:prop_tgt:`RESOURCE` target properties for details.
+``ARCHIVE``
+  Static libraries are treated as ``ARCHIVE`` targets, except those
+  marked with the ``FRAMEWORK`` property on OS X (see ``FRAMEWORK``
+  below.) For DLL platforms (all Windows-based systems including
+  Cygwin), the DLL import library is treated as an ``ARCHIVE`` target.
 
-Either ``NAMELINK_ONLY`` or ``NAMELINK_SKIP`` may be specified as a
-``LIBRARY`` option.  On some platforms a versioned shared library
-has a symbolic link such as::
+``LIBRARY``
+  Module libraries are always treated as ``LIBRARY`` targets. For non-
+  DLL platforms shared libraries are treated as ``LIBRARY`` targets,
+  except those marked with the ``FRAMEWORK`` property on OS X (see
+  ``FRAMEWORK`` below.)
 
-  lib<name>.so -> lib<name>.so.1
+``RUNTIME``
+  Executables are treated as ``RUNTIME`` objects, except those marked
+  with the ``MACOSX_BUNDLE`` property on OS X (see ``BUNDLE`` below.)
+  For DLL platforms (all Windows-based systems including Cygwin), the
+  DLL part of a shared library is treated as a ``RUNTIME`` target.
 
-where ``lib<name>.so.1`` is the soname of the library and ``lib<name>.so``
-is a "namelink" allowing linkers to find the library when given
-``-l<name>``.  The ``NAMELINK_ONLY`` option causes installation of only the
-namelink when a library target is installed.  The ``NAMELINK_SKIP`` option
-causes installation of library files other than the namelink when a
-library target is installed.  When neither option is given both
-portions are installed.  On platforms where versioned shared libraries
-do not have namelinks or when a library is not versioned the
-``NAMELINK_SKIP`` option installs the library and the ``NAMELINK_ONLY``
-option installs nothing.  See the :prop_tgt:`VERSION` and
-:prop_tgt:`SOVERSION` target properties for details on creating versioned
-shared libraries.
+``OBJECTS``
+  Object libraries (a simple group of object files) are always treated
+  as ``OBJECTS`` targets.
 
-The ``INCLUDES DESTINATION`` specifies a list of directories
-which will be added to the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
-target property of the ``<targets>`` when exported by the
-:command:`install(EXPORT)` command.  If a relative path is
-specified, it is treated as relative to the ``$<INSTALL_PREFIX>``.
-This is independent of the rest of the argument groups and does
-not actually install anything.
+``FRAMEWORK``
+  Both static and shared libraries marked with the ``FRAMEWORK``
+  property are treated as ``FRAMEWORK`` targets on OS X.
+
+``BUNDLE``
+  Executables marked with the ``MACOSX_BUNDLE`` property are treated as
+  ``BUNDLE`` targets on OS X.
+
+``PUBLIC_HEADER``
+  Any ``PUBLIC_HEADER`` files associated with a library are installed in
+  the destination specified by the ``PUBLIC_HEADER`` argument on non-Apple
+  platforms. Rules defined by this argument are ignored for ``FRAMEWORK``
+  libraries on Apple platforms because the associated files are installed
+  into the appropriate locations inside the framework folder. See
+  :prop_tgt:`PUBLIC_HEADER` for details.
+
+``PRIVATE_HEADER``
+  Similar to ``PUBLIC_HEADER``, but for ``PRIVATE_HEADER`` files. See
+  :prop_tgt:`PRIVATE_HEADER` for details.
+
+``RESOURCE``
+  Similar to ``PUBLIC_HEADER`` and ``PRIVATE_HEADER``, but for
+  ``RESOURCE`` files. See :prop_tgt:`RESOURCE` for details.
+
+For each of these arguments given, the arguments following them only apply
+to the target or file type specified in the argument. If none is given, the
+installation properties apply to all target types. If only one is given then
+only targets of that type will be installed (which can be used to install
+just a DLL or just an import library.)
+
+In addition to the common options listed above, each target can accept
+the following additional arguments:
+
+``NAMELINK_ONLY``
+  On some platforms a versioned shared library has a symbolic link such
+  as::
+
+    lib<name>.so -> lib<name>.so.1
+
+  where ``lib<name>.so.1`` is the soname of the library and ``lib<name>.so``
+  is a "namelink" allowing linkers to find the library when given
+  ``-l<name>``. The ``NAMELINK_ONLY`` option causes the installation of only
+  the namelink when a library target is installed. On platforms where
+  versioned shared libraries do not have namelinks or when a library is not
+  versioned, the ``NAMELINK_ONLY`` option installs nothing. It is an error to
+  use this parameter outside of a ``LIBRARY`` block. See the
+  :prop_tgt:`VERSION` and :prop_tgt:`SOVERSION` target properties for details
+  on creating versioned shared libraries.
+
+``NAMELINK_SKIP``
+  Similar to ``NAMELINK_ONLY``, but it has the opposite effect: it causes the
+  installation of library files other than the namelink when a library target
+  is installed. When neither ``NAMELINK_ONLY`` or ``NAMELINK_SKIP`` are given,
+  both portions are installed. On platforms where versioned shared libraries
+  do not have symlinks or when a library is not versioned, ``NAMELINK_SKIP``
+  installs the library. It is an error to use this parameter outside of a
+  ``LIBRARY`` block.
+
+The ``install(TARGETS)`` command can also accept the following options at the
+top level:
+
+``EXPORT``
+  This option associates the installed target files with an export called
+  ``<export-name>``.  It must appear before any target options.  To actually
+  install the export file itself, call ``install(EXPORT)``, documented below.
+
+``INCLUDES DESTINATION``
+  This option specifies a list of directories which will be added to the
+  :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target property of the
+  ``<targets>`` when exported by the :command:`install(EXPORT)` command. If a
+  relative path is specified, it is treated as relative to the
+  ``$<INSTALL_PREFIX>``.
 
 One or more groups of properties may be specified in a single call to
 the ``TARGETS`` form of this command.  A target may be installed more than
@@ -187,11 +226,6 @@ installed to ``<prefix>/lib`` and ``/some/full/path``.  On DLL platforms
 the ``mySharedLib`` DLL will be installed to ``<prefix>/bin`` and
 ``/some/full/path`` and its import library will be installed to
 ``<prefix>/lib/static`` and ``/some/full/path``.
-
-The ``EXPORT`` option associates the installed target files with an
-export called ``<export-name>``.  It must appear before any ``RUNTIME``,
-``LIBRARY``, ``ARCHIVE``, or ``OBJECTS`` options.  To actually install the
-export file itself, call ``install(EXPORT)``, documented below.
 
 :ref:`Interface Libraries` may be listed among the targets to install.
 They install no artifacts but will be included in an associated ``EXPORT``.
