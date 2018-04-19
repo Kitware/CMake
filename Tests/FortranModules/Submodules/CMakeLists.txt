@@ -8,6 +8,8 @@
 #    child   sibling
 #      |
 #  grandchild
+#      |
+#  GreatGrandChild
 #
 # where the parent node is a module and all other nodes are submodules.
 
@@ -16,5 +18,6 @@ add_executable(submod
   parent.f90
   child.f90
   grandchild.f90
+  greatgrandchild.f90
   sibling.f90
   )
