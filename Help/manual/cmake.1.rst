@@ -8,8 +8,8 @@ Synopsis
 
 .. parsed-literal::
 
- cmake [<options>] (<path-to-source> | <path-to-existing-build>)
- cmake [(-D <var>=<value>)...] -P <cmake-script-file>
+ cmake [<options>] {<path-to-source> | <path-to-existing-build>}
+ cmake [{-D <var>=<value>}...] -P <cmake-script-file>
  cmake --build <dir> [<options>...] [-- <build-tool-options>...]
  cmake --open <dir>
  cmake -E <command> [<options>...]

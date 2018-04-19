@@ -8,7 +8,7 @@ Synopsis
 
 .. parsed-literal::
 
- ccmake [<options>] (<path-to-source> | <path-to-existing-build>)
+ ccmake [<options>] {<path-to-source> | <path-to-existing-build>}
 
 Description
 ===========
