@@ -1359,6 +1359,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindICU)
   endif()
 
+  if(CMake_TEST_FindJPEG)
+    add_subdirectory(FindJPEG)
+  endif()
+
   if(CMake_TEST_FindJsonCpp)
     add_subdirectory(FindJsonCpp)
   endif()
