@@ -4,6 +4,7 @@
 #include "cmPolicies.h"
 #include "cmState.h"
 
+#include "cmAddCompileDefinitionsCommand.h"
 #include "cmAddCustomCommandCommand.h"
 #include "cmAddCustomTargetCommand.h"
 #include "cmAddDefinitionsCommand.h"
@@ -253,6 +254,8 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("try_run", new cmTryRunCommand);
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+  state->AddBuiltinCommand("add_compile_definitions",
+                           new cmAddCompileDefinitionsCommand);
   state->AddBuiltinCommand("add_compile_options",
                            new cmAddCompileOptionsCommand);
   state->AddBuiltinCommand("aux_source_directory",

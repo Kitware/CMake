@@ -70,6 +70,7 @@ These commands are available only in CMake projects.
 .. toctree::
    :maxdepth: 1
 
+   /command/add_compile_definitions
    /command/add_compile_options
    /command/add_custom_command
    /command/add_custom_target

@@ -1195,6 +1195,11 @@ void cmMakefile::RemoveDefineFlag(std::string const& flag,
   }
 }
 
+void cmMakefile::AddCompileDefinition(std::string const& option)
+{
+  this->AppendProperty("COMPILE_DEFINITIONS", option.c_str());
+}
+
 void cmMakefile::AddCompileOption(std::string const& option)
 {
   this->AppendProperty("COMPILE_OPTIONS", option.c_str());

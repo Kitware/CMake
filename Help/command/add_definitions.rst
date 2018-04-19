@@ -10,8 +10,16 @@ Adds -D define flags to the compilation of source files.
 Adds definitions to the compiler command line for targets in the current
 directory and below (whether added before or after this command is invoked).
 This command can be used to add any flags, but it is intended to add
-preprocessor definitions (see the :command:`add_compile_options` command
-to add other flags).
+preprocessor definitions.
+
+.. note::
+
+  This command has been superseded by alternatives:
+
+  * Use :command:`add_compile_definitions` to add preprocessor definitions.
+  * Use :command:`include_directories` to add include directories.
+  * Use :command:`add_compile_options` to add other options.
+
 Flags beginning in -D or /D that look like preprocessor definitions are
 automatically added to the :prop_dir:`COMPILE_DEFINITIONS` directory
 property for the current directory.  Definitions with non-trivial values

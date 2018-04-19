@@ -168,6 +168,7 @@ public:
    */
   void AddDefineFlag(std::string const& definition);
   void RemoveDefineFlag(std::string const& definition);
+  void AddCompileDefinition(std::string const& definition);
   void AddCompileOption(std::string const& option);
 
   /** Create a new imported target with the name and type given.  */
