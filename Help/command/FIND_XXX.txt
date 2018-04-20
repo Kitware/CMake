@@ -80,7 +80,7 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
    current package being found.  Specifically look in the ``PackageName_ROOT``
    CMake and environment variables.  The package root variables are maintained
    as a stack so if called from nested find modules, root paths from the
-   parent's find module will be searchd after paths from the current module,
+   parent's find module will be searched after paths from the current module,
    i.e. ``CurrentPackage_ROOT``, ``ENV{CurrentPackage_ROOT}``,
    ``ParentPackage_ROOT``, ``ENV{ParentPacakge_ROOT}``, etc.
    This can be skipped if ``NO_PACKAGE_ROOT_PATH`` is passed.

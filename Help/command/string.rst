@@ -386,7 +386,7 @@ UUID
   string(UUID <output variable> NAMESPACE <namespace> NAME <name>
          TYPE <MD5|SHA1> [UPPER])
 
-Create a univerally unique identifier (aka GUID) as per RFC4122
+Create a universally unique identifier (aka GUID) as per RFC4122
 based on the hash of the combined values of ``<namespace>``
 (which itself has to be a valid UUID) and ``<name>``.
 The hash algorithm can be either ``MD5`` (Version 3 UUID) or
