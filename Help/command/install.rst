@@ -456,11 +456,24 @@ generated import file will reference only the matching target
 configurations.  The ``EXPORT_LINK_INTERFACE_LIBRARIES`` keyword, if
 present, causes the contents of the properties matching
 ``(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?`` to be exported, when
-policy :policy:`CMP0022` is ``NEW``.  If a ``COMPONENT`` option is
-specified that does not match that given to the targets associated with
-``<export-name>`` the behavior is undefined.  If a library target is
-included in the export but a target to which it links is not included
-the behavior is unspecified.
+policy :policy:`CMP0022` is ``NEW``.
+
+When a ``COMPONENT`` option is given, the listed ``<component>`` implicitly
+depends on all components mentioned in the export set. The exported
+``<name>.cmake`` file will require each of the exported components to be
+present in order for dependent projects to build properly. For example, a
+project may define components ``Runtime`` and ``Development``, with shared
+libraries going into the ``Runtime`` component and static libraries and
+headers going into the ``Development`` component. The export set would also
+typically be part of the ``Development`` component, but it would export
+targets from both the ``Runtime`` and ``Development`` components. Therefore,
+the ``Runtime`` component would need to be installed if the ``Development``
+component was installed, but not vice versa. If the ``Development`` component
+was installed without the ``Runtime`` component, dependent projects that try
+to link against it would have build errors. Package managers, such as APT and
+RPM, typically handle this by listing the ``Runtime`` component as a dependency
+of the ``Development`` component in the package metadata, ensuring that the
+library is always installed if the headers and CMake export file are present.
 
 In addition to cmake language files, the ``EXPORT_ANDROID_MK`` mode maybe
 used to specify an export to the android ndk build system.  This mode
