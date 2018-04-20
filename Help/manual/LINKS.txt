@@ -5,15 +5,11 @@ Home Page
 
  The primary starting point for learning about CMake.
 
-Frequently Asked Questions
- https://cmake.org/Wiki/CMake_FAQ
-
- A Wiki is provided containing answers to frequently asked questions.
-
-Online Documentation
+Online Documentation and Community Resources
  https://cmake.org/documentation
 
- Links to available documentation may be found on this web page.
+ Links to available documentation and community resources may be
+ found on this web page.
 
 Mailing List
  https://cmake.org/mailing-lists
