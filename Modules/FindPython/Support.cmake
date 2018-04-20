@@ -436,10 +436,16 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     string (REPLACE "." "" _${_PYTHON_PREFIX}_VERSION_NO_DOTS ${_${_PYTHON_PREFIX}_VERSION})
 
     # try to use pythonX.Y-config tool
+    set (_${_PYTHON_PREFIX}_CONFIG_NAMES)
+    if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
+      set (_${_PYTHON_PREFIX}_CONFIG_NAMES "${CMAKE_LIBRARY_ARCHITECTURE}-python${_${_PYTHON_PREFIX}_VERSION}-config")
+    endif()
+    list (APPEND _${_PYTHON_PREFIX}_CONFIG_NAMES "python${_${_PYTHON_PREFIX}_VERSION}-config")
     find_program (_${_PYTHON_PREFIX}_CONFIG
-                  NAMES python${_${_PYTHON_PREFIX}_VERSION}-config
+                  NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
                   HINTS ${_${_PYTHON_PREFIX}_HINTS}
                   PATH_SUFFIXES bin)
+    unset (_${_PYTHON_PREFIX}_CONFIG_NAMES)
 
     if (NOT _${_PYTHON_PREFIX}_CONFIG)
       continue()
@@ -481,17 +487,17 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                     PATH_SUFFIXES lib
                     NO_SYSTEM_ENVIRONMENT_PATH
                     NO_CMAKE_SYSTEM_PATH)
-       # retrieve runtime library
-       if (${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-         get_filename_component (_${_PYTHON_PREFIX}_PATH "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
-         _python_find_runtime_library (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
-                                       NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
-                                       NAMES_PER_DIR
-                                       HINTS ${_${_PYTHON_PREFIX}_PATH} ${_${_PYTHON_PREFIX}_HINTS}
-                                       PATH_SUFFIXES bin
-                                       NO_SYSTEM_ENVIRONMENT_PATH
-                                       NO_CMAKE_SYSTEM_PATH)
-       endif()
+      # retrieve runtime library
+      if (${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+        get_filename_component (_${_PYTHON_PREFIX}_PATH "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
+        _python_find_runtime_library (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
+                                      NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                                      NAMES_PER_DIR
+                                      HINTS ${_${_PYTHON_PREFIX}_PATH} ${_${_PYTHON_PREFIX}_HINTS}
+                                      PATH_SUFFIXES bin
+                                      NO_SYSTEM_ENVIRONMENT_PATH
+                                      NO_CMAKE_SYSTEM_PATH)
+      endif()
     endif()
 
     # retrieve include directory
@@ -538,7 +544,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                           [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
-                    PATH_SUFFIXES lib libs
+                    PATH_SUFFIXES lib/${CMAKE_LIBRARY_ARCHITECTURE} lib libs
                                   lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}mu
                                   lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}m
                                   lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}u
@@ -546,7 +552,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                                   lib/python${_${_PYTHON_PREFIX}_VERSION}/config)
       # retrieve runtime library
       if (${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-         get_filename_component (_${_PYTHON_PREFIX}_PATH "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
+        get_filename_component (_${_PYTHON_PREFIX}_PATH "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
         _python_find_runtime_library (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
                                       NAMES python${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}
                                             python${_${_PYTHON_PREFIX}_VERSION}mu
@@ -585,7 +591,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                         PATH_SUFFIXES lib libs)
         endif()
         if (${_PYTHON_PREFIX}_LIBRARY_DEBUG)
-         get_filename_component (_${_PYTHON_PREFIX}_PATH "${${_PYTHON_PREFIX}_LIBRARY_DEBUG}" DIRECTORY)
+          get_filename_component (_${_PYTHON_PREFIX}_PATH "${${_PYTHON_PREFIX}_LIBRARY_DEBUG}" DIRECTORY)
           _python_find_runtime_library (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
                                         NAMES python${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}_d
                                         NAMES_PER_DIR
@@ -607,6 +613,8 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
             if (${_${_PYTHON_PREFIX}_LIB} MATCHES "^(.+/Frameworks/Python.framework/Versions/[0-9.]+)")
               list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${CMAKE_MATCH_1}")
             elseif (${_${_PYTHON_PREFIX}_LIB} MATCHES "^(.+)/lib(64|32)?/python[0-9.]+/config")
+              list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${CMAKE_MATCH_1}")
+            elseif (DEFINED CMAKE_LIBRARY_ARCHITECTURE AND ${_${_PYTHON_PREFIX}_LIB} MATCHES "^(.+)/lib/${CMAKE_LIBRARY_ARCHITECTURE}")
               list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${CMAKE_MATCH_1}")
             else()
               # assume library is in a directory under root
