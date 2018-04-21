@@ -47,6 +47,22 @@
 #  Specify a specific keychain to search for the signing identity.
 #
 #
+# .. variable:: CPACK_PREFLIGHT_<COMP>_SCRIPT
+#
+#  Full path to a file that will be used as the ``preinstall`` script for the
+#  named ``<COMP>`` component's package, where ``<COMP>`` is the uppercased
+#  component name.  No ``preinstall`` script is added if this variable is not
+#  defined for a given component.
+#
+#
+# .. variable:: CPACK_POSTFLIGHT_<COMP>_SCRIPT
+#
+#  Full path to a file that will be used as the ``postinstall`` script for the
+#  named ``<COMP>`` component's package, where ``<COMP>`` is the uppercased
+#  component name.  No ``postinstall`` script is added if this variable is not
+#  defined for a given component.
+#
+#
 # .. variable:: CPACK_PRODUCTBUILD_RESOURCES_DIR
 #
 #  If specified the productbuild generator copies files from this directory
