@@ -1884,7 +1884,7 @@ bool cmQtAutoGeneratorMocUic::ParallelJobPushMoc(JobHandleT& jobHandle)
               error += Quoted(mocJob.IncluderFile);
               error += " and\n  ";
               error += Quoted(otherJob.IncluderFile);
-              error += "\ncontain the the same moc include string ";
+              error += "\ncontain the same moc include string ";
               error += Quoted(mocJob.IncludeString);
               error += "\nbut the moc file would be generated from different "
                        "source files\n  ";
@@ -1933,7 +1933,7 @@ bool cmQtAutoGeneratorMocUic::ParallelJobPushUic(JobHandleT& jobHandle)
           error += Quoted(uicJob.IncluderFile);
           error += " and\n  ";
           error += Quoted(otherJob.IncluderFile);
-          error += "\ncontain the the same uic include string ";
+          error += "\ncontain the same uic include string ";
           error += Quoted(uicJob.IncludeString);
           error += "\nbut the uic file would be generated from different "
                    "source files\n  ";

@@ -793,7 +793,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
   }
 }
 
-// Build a map that contains a the set of targets used by each local
+// Build a map that contains the set of targets used by each local
 // generator directory level.
 void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
 {
