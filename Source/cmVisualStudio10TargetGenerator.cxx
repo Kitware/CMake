@@ -1590,6 +1590,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
   std::string shaderAdditionalFlags;
   std::string shaderDisableOptimizations;
   std::string shaderEnableDebug;
+  std::string shaderObjectFileName;
   std::string outputHeaderFile;
   std::string variableName;
   std::string settingsGenerator;
@@ -1664,6 +1665,10 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     // Figure out if optimizations should be disabled
     if (const char* sdo = sf->GetProperty("VS_SHADER_DISABLE_OPTIMIZATIONS")) {
       shaderDisableOptimizations = cmSystemTools::IsOn(sdo) ? "true" : "false";
+      toolHasSettings = true;
+    }
+    if (const char* sofn = sf->GetProperty("VS_SHADER_OBJECT_FILE_NAME")) {
+      shaderObjectFileName = sofn;
       toolHasSettings = true;
     }
   } else if (ext == "jpg" || ext == "png") {
@@ -1807,6 +1812,9 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     if (!shaderDisableOptimizations.empty()) {
       this->WriteElemEscapeXML("DisableOptimizations",
                                shaderDisableOptimizations, 3);
+    }
+    if (!shaderObjectFileName.empty()) {
+      this->WriteElemEscapeXML("ObjectFileOutput", shaderObjectFileName, 3);
     }
     if (!shaderAdditionalFlags.empty()) {
       this->WriteElemEscapeXML("AdditionalOptions", shaderAdditionalFlags, 3);
