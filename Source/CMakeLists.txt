@@ -375,6 +375,8 @@ set(SRCS
   cmCommand.h
   cmCommands.cxx
   cmCommands.h
+  cmAddCompileDefinitionsCommand.cxx
+  cmAddCompileDefinitionsCommand.h
   cmAddCompileOptionsCommand.cxx
   cmAddCompileOptionsCommand.h
   cmAddCustomCommandCommand.cxx

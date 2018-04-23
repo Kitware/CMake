@@ -19,8 +19,8 @@ instead of being appended.
 
 This command can be used to add any options, but
 alternative commands exist to add preprocessor definitions
-(:command:`target_compile_definitions` and :command:`add_definitions`) or
-include directories (:command:`target_include_directories` and
+(:command:`target_compile_definitions` and :command:`add_compile_definitions`)
+or include directories (:command:`target_include_directories` and
 :command:`include_directories`).  See documentation of the
 :prop_dir:`directory <COMPILE_OPTIONS>` and
 :prop_tgt:`target <COMPILE_OPTIONS>` ``COMPILE_OPTIONS`` properties.

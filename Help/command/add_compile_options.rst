@@ -14,7 +14,7 @@ See documentation of the :prop_dir:`directory <COMPILE_OPTIONS>` and
 
 This command can be used to add any options, but alternative commands
 exist to add preprocessor definitions (:command:`target_compile_definitions`
-and :command:`add_definitions`) or include directories
+and :command:`add_compile_definitions`) or include directories
 (:command:`target_include_directories` and :command:`include_directories`).
 
 Arguments to ``add_compile_options`` may use "generator expressions" with

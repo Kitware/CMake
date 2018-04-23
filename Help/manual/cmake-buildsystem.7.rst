@@ -821,7 +821,7 @@ Directory-Scoped Commands
 The :command:`target_include_directories`,
 :command:`target_compile_definitions` and
 :command:`target_compile_options` commands have an effect on only one
-target at a time.  The commands :command:`add_definitions`,
+target at a time.  The commands :command:`add_compile_definitions`,
 :command:`add_compile_options` and :command:`include_directories` have
 a similar function, but operate at directory scope instead of target
 scope for convenience.
