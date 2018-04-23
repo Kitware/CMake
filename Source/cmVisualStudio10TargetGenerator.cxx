@@ -3773,11 +3773,24 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
                     "{" + this->GlobalGenerator->GetGUID(name) + "}", 3);
     this->WriteElem("Name", name, 3);
     this->WriteDotNetReferenceCustomTags(name);
-    // If the target is not compiled with any /clr flag, there is
-    // no assembly to reference.
-    if (this->Managed &&
-        dt->GetManagedType("") < cmGeneratorTarget::ManagedType::Mixed) {
-      this->WriteElem("ReferenceOutputAssembly", "false", 3);
+    if (this->Managed) {
+      // If the dependency target is not managed (compiled with /clr or
+      // C# target) we cannot reference it and have to set
+      // 'ReferenceOutputAssembly' to false.
+      cmGeneratorTarget::ManagedType check =
+        cmGeneratorTarget::ManagedType::Mixed;
+      // FIXME: These (5) lines should be removed. They are here to allow
+      //        manual setting of the /clr flag in compiler options. Setting
+      //        /clr manually makes cmGeneratorTarget::GetManagedType() return
+      //        'Native' instead of 'Mixed' or 'Managed'.
+      check = cmGeneratorTarget::ManagedType::Native;
+      bool unmanagedStatic = false;
+      if (dt->GetType() == cmStateEnums::STATIC_LIBRARY) {
+        unmanagedStatic = !dt->HasLanguage("CSharp", "");
+      }
+      if (dt->GetManagedType("") < check || unmanagedStatic) {
+        this->WriteElem("ReferenceOutputAssembly", "false", 3);
+      }
     }
     this->WriteString("</ProjectReference>\n", 2);
   }
