@@ -127,7 +127,7 @@ bool cmVisualStudioGeneratorOptions::IsManaged() const
 
 bool cmVisualStudioGeneratorOptions::UsingUnicode() const
 {
-  // Look for the a _UNICODE definition.
+  // Look for a _UNICODE definition.
   for (std::string const& di : this->Defines) {
     if (di == "_UNICODE") {
       return true;
@@ -137,7 +137,7 @@ bool cmVisualStudioGeneratorOptions::UsingUnicode() const
 }
 bool cmVisualStudioGeneratorOptions::UsingSBCS() const
 {
-  // Look for the a _SBCS definition.
+  // Look for a _SBCS definition.
   for (std::string const& di : this->Defines) {
     if (di == "_SBCS") {
       return true;

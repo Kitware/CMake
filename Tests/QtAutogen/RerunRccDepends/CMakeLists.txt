@@ -62,7 +62,7 @@ if (NOT rdGenAfter GREATER rdGenBefore)
 endif()
 
 
-message("Changing a the .qrc file")
+message("Changing the .qrc file")
 # - Acquire binary timestamps before the build
 file(TIMESTAMP "${rccDepBinPlain}" rdPlainBefore "${timeformat}")
 file(TIMESTAMP "${rccDepBinGen}" rdGenBefore "${timeformat}")
