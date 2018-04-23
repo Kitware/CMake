@@ -1812,7 +1812,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   Json::Value tm = Json::objectValue;
   for (cmFortranObjectInfo const& object : objects) {
     for (std::string const& p : object.Provides) {
-      std::string const mod = module_dir + p + ".mod";
+      std::string const mod = module_dir + p;
       mod_files[p] = mod;
       tm[p] = mod;
     }
