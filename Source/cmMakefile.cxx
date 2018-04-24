@@ -2304,7 +2304,8 @@ bool cmMakefile::CanIWriteThisFile(std::string const& fileName) const
   }
 
   return !cmSystemTools::IsSubDirectory(fileName, this->GetHomeDirectory()) ||
-    cmSystemTools::IsSubDirectory(fileName, this->GetHomeOutputDirectory());
+    cmSystemTools::IsSubDirectory(fileName, this->GetHomeOutputDirectory()) ||
+    cmSystemTools::SameFile(fileName, this->GetHomeOutputDirectory());
 }
 
 const char* cmMakefile::GetRequiredDefinition(const std::string& name) const
