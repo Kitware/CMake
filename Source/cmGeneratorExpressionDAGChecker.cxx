@@ -154,6 +154,18 @@ bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnly()
   return top->TransitivePropertiesOnly;
 }
 
+bool cmGeneratorExpressionDAGChecker::EvaluatingGenexExpression()
+{
+  const cmGeneratorExpressionDAGChecker* top = this;
+  const cmGeneratorExpressionDAGChecker* parent = this->Parent;
+  while (parent) {
+    top = parent;
+    parent = parent->Parent;
+  }
+
+  return top->Property == "TARGET_GENEX_EVAL" || top->Property == "GENEX_EVAL";
+}
+
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(const char* tgt)
 {
   const cmGeneratorExpressionDAGChecker* top = this;
