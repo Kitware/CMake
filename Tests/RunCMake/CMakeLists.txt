@@ -362,8 +362,16 @@ set(IfacePaths_SOURCES_ARGS -DTEST_PROP=SOURCES)
 add_RunCMake_test(IfacePaths_SOURCES TEST_DIR IfacePaths)
 
 # Matlab module related tests
-if(CMake_TEST_FindMatlab)
-  add_RunCMake_test(FindMatlab)
+if(CMake_TEST_FindMatlab OR CMake_TEST_FindMatlab_MCR OR (NOT "${CMake_TEST_FindMatlab_MCR_ROOT_DIR}" STREQUAL ""))
+    set(FindMatlab_additional_test_options )
+    if(CMake_TEST_FindMatlab_MCR OR NOT "${CMake_TEST_FindMatlab_MCR_ROOT_DIR}" STREQUAL "")
+      set(FindMatlab_additional_test_options -DIS_MCR=TRUE)
+    endif()
+    if(NOT "${CMake_TEST_FindMatlab_MCR_ROOT_DIR}" STREQUAL "")
+      set(FindMatlab_additional_test_options ${FindMatlab_additional_test_options} "-DMCR_ROOT:FILEPATH=${CMake_TEST_FindMatlab_MCR_ROOT_DIR}")
+    endif()
+
+  add_RunCMake_test(FindMatlab ${FindMatlab_additional_test_options})
 endif()
 
 add_executable(pseudo_emulator pseudo_emulator.c)
