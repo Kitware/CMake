@@ -1696,12 +1696,12 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     }
     // Figure out if debug information should be generated
     if (const char* sed = sf->GetProperty("VS_SHADER_ENABLE_DEBUG")) {
-      shaderEnableDebug = cmSystemTools::IsOn(sed) ? "true" : "false";
+      shaderEnableDebug = sed;
       toolHasSettings = true;
     }
     // Figure out if optimizations should be disabled
     if (const char* sdo = sf->GetProperty("VS_SHADER_DISABLE_OPTIMIZATIONS")) {
-      shaderDisableOptimizations = cmSystemTools::IsOn(sdo) ? "true" : "false";
+      shaderDisableOptimizations = sdo;
       toolHasSettings = true;
     }
     if (const char* sofn = sf->GetProperty("VS_SHADER_OBJECT_FILE_NAME")) {
@@ -1843,12 +1843,39 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
       }
     }
     if (!shaderEnableDebug.empty()) {
-      this->WriteElemEscapeXML("EnableDebuggingInformation", shaderEnableDebug,
-                               3);
+      cmGeneratorExpression ge;
+      std::unique_ptr<cmCompiledGeneratorExpression> cge =
+        ge.Parse(shaderEnableDebug);
+
+      for (size_t i = 0; i != this->Configurations.size(); ++i) {
+        const char* enableDebug =
+          cge->Evaluate(this->LocalGenerator, this->Configurations[i]);
+        if (strlen(enableDebug) > 0) {
+          Elem el(*this->BuildFileStream, 3);
+          el.StartElement("EnableDebuggingInformation");
+          el.Attribute("Condition", "'$(Configuration)|$(Platform)'=='" +
+                         this->Configurations[i] + "|" + this->Platform + "'");
+          el.Content(cmSystemTools::IsOn(enableDebug) ? "true" : "false");
+        }
+      }
     }
     if (!shaderDisableOptimizations.empty()) {
-      this->WriteElemEscapeXML("DisableOptimizations",
-                               shaderDisableOptimizations, 3);
+      cmGeneratorExpression ge;
+      std::unique_ptr<cmCompiledGeneratorExpression> cge =
+        ge.Parse(shaderDisableOptimizations);
+
+      for (size_t i = 0; i != this->Configurations.size(); ++i) {
+        const char* disableOptimizations =
+          cge->Evaluate(this->LocalGenerator, this->Configurations[i]);
+        if (strlen(disableOptimizations) > 0) {
+          Elem el(*this->BuildFileStream, 3);
+          el.StartElement("DisableOptimizations");
+          el.Attribute("Condition", "'$(Configuration)|$(Platform)'=='" +
+                         this->Configurations[i] + "|" + this->Platform + "'");
+          el.Content(cmSystemTools::IsOn(disableOptimizations) ? "true"
+                                                               : "false");
+        }
+      }
     }
     if (!shaderObjectFileName.empty()) {
       this->WriteElemEscapeXML("ObjectFileOutput", shaderObjectFileName, 3);
