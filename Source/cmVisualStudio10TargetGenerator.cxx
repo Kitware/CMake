@@ -71,10 +71,11 @@ struct cmVisualStudio10TargetGenerator::Elem
     }
   }
   std::ostream& WriteString(const char* line);
-  void StartElement(const char* tag)
+  Elem& StartElement(const char* tag)
   {
     this->Tag = tag;
     this->WriteString("<") << tag;
+    return *this;
   }
   template <typename T>
   void WriteElem(const char* tag, const T& val)
@@ -94,6 +95,13 @@ struct cmVisualStudio10TargetGenerator::Elem
   {
     Attr(an, cmVS10EscapeAttr(av));
     return *this;
+  }
+  // This method for now assumes that this->Tag has been set, e.g. by calling
+  // StartElement(). Also, it finishes the element so it should be the last
+  // one called
+  void Content(const std::string& val)
+  {
+    S << ">" << cmVS10EscapeXML(val) << "</" << this->Tag << ">\n";
   }
   void WriteEndTag(const char* tag)
   {
@@ -1311,7 +1319,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
       this->WriteCustomRuleCSharp(c, name, script, inputs.str(), outputs.str(),
                                   comment);
     } else {
-      this->WriteCustomRuleCpp(c, script, inputs.str(), outputs.str(),
+      this->WriteCustomRuleCpp(e2, c, script, inputs.str(), outputs.str(),
                                comment);
     }
   }
@@ -1321,26 +1329,21 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
 }
 
 void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
-  std::string const& config, std::string const& script,
+  Elem& e2, std::string const& config, std::string const& script,
   std::string const& inputs, std::string const& outputs,
   std::string const& comment)
 {
-  this->WritePlatformConfigTag("Message", config, 3);
-  (*this->BuildFileStream) << cmVS10EscapeXML(comment) << "</Message>\n";
-  this->WritePlatformConfigTag("Command", config, 3);
-  (*this->BuildFileStream) << cmVS10EscapeXML(script) << "</Command>\n";
-  this->WritePlatformConfigTag("AdditionalInputs", config, 3);
-  (*this->BuildFileStream) << cmVS10EscapeXML(inputs);
-  (*this->BuildFileStream) << ";%(AdditionalInputs)"
-                              "</AdditionalInputs>\n";
-  this->WritePlatformConfigTag("Outputs", config, 3);
-  (*this->BuildFileStream) << cmVS10EscapeXML(outputs) << "</Outputs>\n";
+  const std::string cond = this->CalcCondition(config);
+  Elem(e2, "Message").Attribute("Condition", cond).Content(comment);
+  Elem(e2, "Command").Attribute("Condition", cond).Content(script);
+  Elem(e2, "AdditionalInputs")
+    .Attribute("Condition", cond)
+    .Content(inputs + ";%(AdditionalInputs)");
+  Elem(e2, "Outputs").Attribute("Condition", cond).Content(outputs);
   if (this->LocalGenerator->GetVersion() >
       cmGlobalVisualStudioGenerator::VS10) {
     // VS >= 11 let us turn off linking of custom command outputs.
-    this->WritePlatformConfigTag("LinkObjects", config, 3);
-    (*this->BuildFileStream) << "false"
-                                "</LinkObjects>\n";
+    Elem(e2, "LinkObjects").Attribute("Condition", cond).Content("false");
   }
 }
 
