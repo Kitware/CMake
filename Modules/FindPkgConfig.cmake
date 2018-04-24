@@ -222,7 +222,6 @@ function(_pkg_create_imp_target _prefix _no_cmake_path _no_cmake_environment_pat
       AND ( ${_prefix}_INCLUDE_DIRS OR _libs OR ${_prefix}_CFLAGS_OTHER ))
     add_library(PkgConfig::${_prefix} INTERFACE IMPORTED)
 
-    unset(_props)
     if(${_prefix}_INCLUDE_DIRS)
       set_property(TARGET PkgConfig::${_prefix} PROPERTY
                    INTERFACE_INCLUDE_DIRECTORIES "${${_prefix}_INCLUDE_DIRS}")
