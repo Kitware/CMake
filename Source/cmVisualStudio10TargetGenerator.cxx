@@ -28,14 +28,23 @@ static std::string cmVS10EscapeXML(std::string arg)
   return arg;
 }
 
+static std::string cmVS10EscapeAttr(std::string arg)
+{
+  cmSystemTools::ReplaceString(arg, "&", "&amp;");
+  cmSystemTools::ReplaceString(arg, "<", "&lt;");
+  cmSystemTools::ReplaceString(arg, ">", "&gt;");
+  cmSystemTools::ReplaceString(arg, "\"", "&quot;");
+  return arg;
+}
+
 struct cmVisualStudio10TargetGenerator::Elem
 {
-  cmGeneratedFileStream& S;
+  std::ostream& S;
   int Indent;
   bool HasElements = false;
   const char* Tag = nullptr;
 
-  Elem(cmGeneratedFileStream& s, int i)
+  Elem(std::ostream& s, int i)
     : S(s)
     , Indent(i)
   {
@@ -61,7 +70,7 @@ struct cmVisualStudio10TargetGenerator::Elem
       HasElements = true;
     }
   }
-  cmGeneratedFileStream& WriteString(const char* line);
+  std::ostream& WriteString(const char* line);
   void StartElement(const char* tag)
   {
     this->Tag = tag;
@@ -72,10 +81,19 @@ struct cmVisualStudio10TargetGenerator::Elem
   {
     this->WriteString("<") << tag << ">" << val << "</" << tag << ">\n";
   }
+  void Element(const char* tag, const std::string& val)
+  {
+    Elem(*this).WriteElem(tag, cmVS10EscapeXML(val));
+  }
   template <typename T>
   void Attr(const char* an, const T& av)
   {
     this->S << " " << an << "=\"" << av << "\"";
+  }
+  Elem& Attribute(const char* an, const std::string& av)
+  {
+    Attr(an, cmVS10EscapeAttr(av));
+    return *this;
   }
   void WriteEndTag(const char* tag)
   {
@@ -137,15 +155,6 @@ inline void cmVisualStudio10TargetGenerator::WriteElemEscapeXML(
   const char* tag, std::string const& val, int indentLevel)
 {
   this->WriteElem(tag, cmVS10EscapeXML(val), indentLevel);
-}
-
-static std::string cmVS10EscapeAttr(std::string arg)
-{
-  cmSystemTools::ReplaceString(arg, "&", "&amp;");
-  cmSystemTools::ReplaceString(arg, "<", "&lt;");
-  cmSystemTools::ReplaceString(arg, ">", "&gt;");
-  cmSystemTools::ReplaceString(arg, "\"", "&quot;");
-  return arg;
 }
 
 static std::string cmVS10EscapeComment(std::string comment)
@@ -238,38 +247,46 @@ cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
   delete this->BuildFileStream;
 }
 
+std::string cmVisualStudio10TargetGenerator::CalcCondition(
+  const std::string& config) const
+{
+  std::ostringstream oss;
+  oss << "'$(Configuration)|$(Platform)'=='";
+  oss << config << "|" << this->Platform;
+  oss << "'";
+  // handle special case for 32 bit C# targets
+  if (this->ProjectType == csproj && this->Platform == "Win32") {
+    oss << " Or ";
+    oss << "'$(Configuration)|$(Platform)'=='";
+    oss << config << "|x86";
+    oss << "'";
+  }
+  return oss.str();
+}
+
 void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
   const char* tag, const std::string& config, int indentLevel,
   const char* attribute)
 
 {
-  std::ostream* stream = this->BuildFileStream;
-  stream->fill(' ');
-  stream->width(indentLevel * 2);
-  (*stream) << ""; // applies indentation
-  (*stream) << "<" << tag << " Condition=\"";
-  (*stream) << "'$(Configuration)|$(Platform)'=='";
-  (*stream) << config << "|" << this->Platform;
-  (*stream) << "'";
-  // handle special case for 32 bit C# targets
-  if (this->ProjectType == csproj && this->Platform == "Win32") {
-    (*stream) << " Or ";
-    (*stream) << "'$(Configuration)|$(Platform)'=='";
-    (*stream) << config << "|x86";
-    (*stream) << "'";
-  }
-  (*stream) << "\"";
+  std::ostream& stream = *this->BuildFileStream;
+  stream.fill(' ');
+  stream.width(indentLevel * 2);
+  stream << ""; // applies indentation
+  stream << "<" << tag << " Condition=\"";
+  stream << this->CalcCondition(config);
+  stream << "\"";
   if (attribute) {
-    (*stream) << attribute;
+    stream << attribute;
   }
   // close the tag
-  (*stream) << ">";
+  stream << ">";
   if (attribute) {
-    (*stream) << "\n";
+    stream << "\n";
   }
 }
 
-cmGeneratedFileStream& cmVisualStudio10TargetGenerator::Elem::WriteString(
+std::ostream& cmVisualStudio10TargetGenerator::Elem::WriteString(
   const char* line)
 {
   this->S.fill(' ');

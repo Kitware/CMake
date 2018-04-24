@@ -33,6 +33,7 @@ public:
   ~cmVisualStudio10TargetGenerator();
   void Generate();
   // used by cmVisualStudioGeneratorOptions
+  std::string CalcCondition(const std::string& config) const;
   void WritePlatformConfigTag(const char* tag, const std::string& config,
                               int indentLevel, const char* attribute = 0);
 
