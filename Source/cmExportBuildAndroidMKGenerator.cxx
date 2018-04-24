@@ -7,6 +7,7 @@
 #include <sstream>
 #include <utility>
 
+#include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorTarget.h"
@@ -169,6 +170,11 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
           end = "\\\n";
         }
         os << "\n";
+      } else if (property.first == "INTERFACE_LINK_OPTIONS") {
+        os << "LOCAL_EXPORT_LDFLAGS := ";
+        std::vector<std::string> linkFlagsList;
+        cmSystemTools::ExpandListArgument(property.second, linkFlagsList);
+        os << cmJoin(linkFlagsList, " ") << "\n";
       } else {
         os << "# " << property.first << " " << (property.second) << "\n";
       }

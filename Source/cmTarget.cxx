@@ -166,6 +166,8 @@ public:
   std::vector<cmListFileBacktrace> CompileDefinitionsBacktraces;
   std::vector<std::string> SourceEntries;
   std::vector<cmListFileBacktrace> SourceBacktraces;
+  std::vector<std::string> LinkOptionsEntries;
+  std::vector<cmListFileBacktrace> LinkOptionsBacktraces;
   std::vector<std::string> LinkImplementationPropertyEntries;
   std::vector<cmListFileBacktrace> LinkImplementationPropertyBacktraces;
 };
@@ -343,17 +345,29 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SystemIncludeDirectories.insert(parentSystemIncludes.begin(),
                                           parentSystemIncludes.end());
 
-    const cmStringRange parentOptions =
+    const cmStringRange parentCompileOptions =
       this->Makefile->GetCompileOptionsEntries();
-    const cmBacktraceRange parentOptionsBts =
+    const cmBacktraceRange parentCompileOptionsBts =
       this->Makefile->GetCompileOptionsBacktraces();
 
     this->Internal->CompileOptionsEntries.insert(
-      this->Internal->CompileOptionsEntries.end(), parentOptions.begin(),
-      parentOptions.end());
+      this->Internal->CompileOptionsEntries.end(),
+      parentCompileOptions.begin(), parentCompileOptions.end());
     this->Internal->CompileOptionsBacktraces.insert(
-      this->Internal->CompileOptionsBacktraces.end(), parentOptionsBts.begin(),
-      parentOptionsBts.end());
+      this->Internal->CompileOptionsBacktraces.end(),
+      parentCompileOptionsBts.begin(), parentCompileOptionsBts.end());
+
+    const cmStringRange parentLinkOptions =
+      this->Makefile->GetLinkOptionsEntries();
+    const cmBacktraceRange parentLinkOptionsBts =
+      this->Makefile->GetLinkOptionsBacktraces();
+
+    this->Internal->LinkOptionsEntries.insert(
+      this->Internal->LinkOptionsEntries.end(), parentLinkOptions.begin(),
+      parentLinkOptions.end());
+    this->Internal->LinkOptionsBacktraces.insert(
+      this->Internal->LinkOptionsBacktraces.end(),
+      parentLinkOptionsBts.begin(), parentLinkOptionsBts.end());
   }
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
@@ -822,6 +836,16 @@ cmBacktraceRange cmTarget::GetSourceBacktraces() const
   return cmMakeRange(this->Internal->SourceBacktraces);
 }
 
+cmStringRange cmTarget::GetLinkOptionsEntries() const
+{
+  return cmMakeRange(this->Internal->LinkOptionsEntries);
+}
+
+cmBacktraceRange cmTarget::GetLinkOptionsBacktraces() const
+{
+  return cmMakeRange(this->Internal->LinkOptionsBacktraces);
+}
+
 cmStringRange cmTarget::GetLinkImplementationEntries() const
 {
   return cmMakeRange(this->Internal->LinkImplementationPropertyEntries);
@@ -847,6 +871,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   MAKE_STATIC_PROP(EXPORT_NAME);
   MAKE_STATIC_PROP(IMPORTED_GLOBAL);
   MAKE_STATIC_PROP(INCLUDE_DIRECTORIES);
+  MAKE_STATIC_PROP(LINK_OPTIONS);
   MAKE_STATIC_PROP(LINK_LIBRARIES);
   MAKE_STATIC_PROP(MANUALLY_ADDED_DEPENDENCIES);
   MAKE_STATIC_PROP(NAME);
@@ -924,6 +949,14 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       this->Internal->CompileDefinitionsEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
+    }
+  } else if (prop == propLINK_OPTIONS) {
+    this->Internal->LinkOptionsEntries.clear();
+    this->Internal->LinkOptionsBacktraces.clear();
+    if (value) {
+      this->Internal->LinkOptionsEntries.push_back(value);
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      this->Internal->LinkOptionsBacktraces.push_back(lfbt);
     }
   } else if (prop == propLINK_LIBRARIES) {
     this->Internal->LinkImplementationPropertyEntries.clear();
@@ -1030,6 +1063,12 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->CompileDefinitionsBacktraces.push_back(lfbt);
     }
+  } else if (prop == "LINK_OPTIONS") {
+    if (value && *value) {
+      this->Internal->LinkOptionsEntries.push_back(value);
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      this->Internal->LinkOptionsBacktraces.push_back(lfbt);
+    }
   } else if (prop == "LINK_LIBRARIES") {
     if (value && *value) {
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
@@ -1109,6 +1148,21 @@ void cmTarget::InsertCompileDefinition(std::string const& entry,
 {
   this->Internal->CompileDefinitionsEntries.push_back(entry);
   this->Internal->CompileDefinitionsBacktraces.push_back(bt);
+}
+
+void cmTarget::InsertLinkOption(std::string const& entry,
+                                cmListFileBacktrace const& bt, bool before)
+{
+  std::vector<std::string>::iterator position = before
+    ? this->Internal->LinkOptionsEntries.begin()
+    : this->Internal->LinkOptionsEntries.end();
+
+  std::vector<cmListFileBacktrace>::iterator btPosition = before
+    ? this->Internal->LinkOptionsBacktraces.begin()
+    : this->Internal->LinkOptionsBacktraces.end();
+
+  this->Internal->LinkOptionsEntries.insert(position, entry);
+  this->Internal->LinkOptionsBacktraces.insert(btPosition, bt);
 }
 
 static void cmTargetCheckLINK_INTERFACE_LIBRARIES(const std::string& prop,
@@ -1230,6 +1284,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
   MAKE_STATIC_PROP(COMPILE_FEATURES);
   MAKE_STATIC_PROP(COMPILE_OPTIONS);
   MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
+  MAKE_STATIC_PROP(LINK_OPTIONS);
   MAKE_STATIC_PROP(IMPORTED);
   MAKE_STATIC_PROP(IMPORTED_GLOBAL);
   MAKE_STATIC_PROP(MANUALLY_ADDED_DEPENDENCIES);
@@ -1245,6 +1300,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     specialProps.insert(propCOMPILE_FEATURES);
     specialProps.insert(propCOMPILE_OPTIONS);
     specialProps.insert(propCOMPILE_DEFINITIONS);
+    specialProps.insert(propLINK_OPTIONS);
     specialProps.insert(propIMPORTED);
     specialProps.insert(propIMPORTED_GLOBAL);
     specialProps.insert(propMANUALLY_ADDED_DEPENDENCIES);
@@ -1301,6 +1357,15 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(this->Internal->CompileDefinitionsEntries, ";");
+      return output.c_str();
+    }
+    if (prop == propLINK_OPTIONS) {
+      if (this->Internal->LinkOptionsEntries.empty()) {
+        return nullptr;
+      }
+
+      static std::string output;
+      output = cmJoin(this->Internal->LinkOptionsEntries, ";");
       return output.c_str();
     }
     if (prop == propMANUALLY_ADDED_DEPENDENCIES) {

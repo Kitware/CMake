@@ -1042,6 +1042,10 @@ void cmLocalGenerator::GetTargetFlags(
           linkFlags += " ";
         }
       }
+      std::vector<std::string> opts;
+      target->GetLinkOptions(opts, config, linkLanguage);
+      // LINK_OPTIONS are escaped.
+      this->AppendCompileOptions(linkFlags, opts);
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                   frameworkPath, linkPath);
@@ -1113,6 +1117,10 @@ void cmLocalGenerator::GetTargetFlags(
           linkFlags += " ";
         }
       }
+      std::vector<std::string> opts;
+      target->GetLinkOptions(opts, config, linkLanguage);
+      // LINK_OPTIONS are escaped.
+      this->AppendCompileOptions(linkFlags, opts);
     } break;
     default:
       break;

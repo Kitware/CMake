@@ -418,6 +418,10 @@ public:
                              const std::string& config,
                              const std::string& language) const;
 
+  void GetLinkOptions(std::vector<std::string>& result,
+                      const std::string& config,
+                      const std::string& language) const;
+
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config,
                                 const std::string& language) const;
@@ -803,6 +807,7 @@ private:
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;
   std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
+  std::vector<TargetPropertyEntry*> LinkOptionsEntries;
   std::vector<TargetPropertyEntry*> SourceEntries;
   mutable std::set<std::string> LinkImplicitNullProperties;
 
@@ -851,6 +856,7 @@ private:
   mutable bool DebugCompileOptionsDone;
   mutable bool DebugCompileFeaturesDone;
   mutable bool DebugCompileDefinitionsDone;
+  mutable bool DebugLinkOptionsDone;
   mutable bool DebugSourcesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
   mutable bool UtilityItemsDone;

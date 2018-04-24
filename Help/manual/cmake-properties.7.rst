@@ -77,6 +77,7 @@ Properties on Directories
    /prop_dir/INTERPROCEDURAL_OPTIMIZATION
    /prop_dir/LABELS
    /prop_dir/LINK_DIRECTORIES
+   /prop_dir/LINK_OPTIONS
    /prop_dir/LISTFILE_STACK
    /prop_dir/MACROS
    /prop_dir/PARENT_DIRECTORY
@@ -225,6 +226,7 @@ Properties on Targets
    /prop_tgt/INTERFACE_COMPILE_OPTIONS
    /prop_tgt/INTERFACE_INCLUDE_DIRECTORIES
    /prop_tgt/INTERFACE_LINK_LIBRARIES
+   /prop_tgt/INTERFACE_LINK_OPTIONS
    /prop_tgt/INTERFACE_POSITION_INDEPENDENT_CODE
    /prop_tgt/INTERFACE_SOURCES
    /prop_tgt/INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
@@ -254,6 +256,7 @@ Properties on Targets
    /prop_tgt/LINK_INTERFACE_MULTIPLICITY_CONFIG
    /prop_tgt/LINK_INTERFACE_MULTIPLICITY
    /prop_tgt/LINK_LIBRARIES
+   /prop_tgt/LINK_OPTIONS
    /prop_tgt/LINK_SEARCH_END_STATIC
    /prop_tgt/LINK_SEARCH_START_STATIC
    /prop_tgt/LINK_WHAT_YOU_USE

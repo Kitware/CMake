@@ -171,6 +171,7 @@ public:
   void RemoveDefineFlag(std::string const& definition);
   void AddCompileDefinition(std::string const& definition);
   void AddCompileOption(std::string const& option);
+  void AddLinkOption(std::string const& option);
 
   /** Create a new imported target with the name and type given.  */
   cmTarget* AddImportedTarget(const std::string& name,
@@ -788,6 +789,8 @@ public:
   cmBacktraceRange GetCompileOptionsBacktraces() const;
   cmStringRange GetCompileDefinitionsEntries() const;
   cmBacktraceRange GetCompileDefinitionsBacktraces() const;
+  cmStringRange GetLinkOptionsEntries() const;
+  cmBacktraceRange GetLinkOptionsBacktraces() const;
 
   std::set<std::string> const& GetSystemIncludeDirectories() const
   {

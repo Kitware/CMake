@@ -216,6 +216,16 @@ cmBacktraceRange cmMakefile::GetCompileDefinitionsBacktraces() const
     .GetCompileDefinitionsEntryBacktraces();
 }
 
+cmStringRange cmMakefile::GetLinkOptionsEntries() const
+{
+  return this->StateSnapshot.GetDirectory().GetLinkOptionsEntries();
+}
+
+cmBacktraceRange cmMakefile::GetLinkOptionsBacktraces() const
+{
+  return this->StateSnapshot.GetDirectory().GetLinkOptionsEntryBacktraces();
+}
+
 cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
   return this->Backtrace;
@@ -1203,6 +1213,11 @@ void cmMakefile::AddCompileDefinition(std::string const& option)
 void cmMakefile::AddCompileOption(std::string const& option)
 {
   this->AppendProperty("COMPILE_OPTIONS", option.c_str());
+}
+
+void cmMakefile::AddLinkOption(std::string const& option)
+{
+  this->AppendProperty("LINK_OPTIONS", option.c_str());
 }
 
 bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)

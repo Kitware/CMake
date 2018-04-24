@@ -78,6 +78,7 @@ These commands are available only in CMake projects.
    /command/add_dependencies
    /command/add_executable
    /command/add_library
+   /command/add_link_options
    /command/add_subdirectory
    /command/add_test
    /command/aux_source_directory
@@ -111,6 +112,7 @@ These commands are available only in CMake projects.
    /command/target_compile_options
    /command/target_include_directories
    /command/target_link_libraries
+   /command/target_link_options
    /command/target_sources
    /command/try_compile
    /command/try_run

@@ -379,6 +379,8 @@ set(SRCS
   cmAddCompileDefinitionsCommand.h
   cmAddCompileOptionsCommand.cxx
   cmAddCompileOptionsCommand.h
+  cmAddLinkOptionsCommand.cxx
+  cmAddLinkOptionsCommand.h
   cmAddCustomCommandCommand.cxx
   cmAddCustomCommandCommand.h
   cmAddCustomTargetCommand.cxx
@@ -574,6 +576,8 @@ set(SRCS
   cmTargetCompileOptionsCommand.h
   cmTargetIncludeDirectoriesCommand.cxx
   cmTargetIncludeDirectoriesCommand.h
+  cmTargetLinkOptionsCommand.cxx
+  cmTargetLinkOptionsCommand.h
   cmTargetLinkLibrariesCommand.cxx
   cmTargetLinkLibrariesCommand.h
   cmTargetPropCommandBase.cxx

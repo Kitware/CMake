@@ -70,7 +70,8 @@ Each ``<item>`` may be:
 
   Link flags specified here are inserted into the link command in the same
   place as the link libraries. This might not be correct, depending on
-  the linker. Use the :prop_tgt:`LINK_FLAGS` target property to add link
+  the linker. Use the :prop_tgt:`LINK_OPTIONS` target property or
+  :command:`target_link_options` command to add link
   flags explicitly. The flags will then be placed at the toolchain-defined
   flag position in the link command.
 

@@ -58,6 +58,13 @@ public:
                          cmListFileBacktrace const& lfbt);
   void ClearCompileOptions();
 
+  cmStringRange GetLinkOptionsEntries() const;
+  cmBacktraceRange GetLinkOptionsEntryBacktraces() const;
+  void AppendLinkOptionsEntry(std::string const& vec,
+                              cmListFileBacktrace const& lfbt);
+  void SetLinkOptions(std::string const& vec, cmListFileBacktrace const& lfbt);
+  void ClearLinkOptions();
+
   void SetProperty(const std::string& prop, const char* value,
                    cmListFileBacktrace const& lfbt);
   void AppendProperty(const std::string& prop, const char* value,
