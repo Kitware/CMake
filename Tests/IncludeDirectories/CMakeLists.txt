@@ -65,6 +65,10 @@ else()
     PROPERTIES COMPILE_FLAGS "-ITarProp")
 endif()
 
+add_library(ordertest ordertest.cpp)
+target_include_directories(ordertest SYSTEM PUBLIC SystemIncludeDirectories/systemlib)
+target_include_directories(ordertest PUBLIC SystemIncludeDirectories/userlib)
+
 add_subdirectory(StandardIncludeDirectories)
 add_subdirectory(TargetIncludeDirectories)
 
