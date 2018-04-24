@@ -1,6 +1,13 @@
 CMAKE_<LANG>_CLANG_TIDY
 -----------------------
 
-Default value for :prop_tgt:`<LANG>_CLANG_TIDY` target property.
+Default value for :prop_tgt:`<LANG>_CLANG_TIDY` target property
+when ``<LANG>`` is ``C`` or ``CXX``.
+
 This variable is used to initialize the property on each target as it is
-created.  This is done only when ``<LANG>`` is ``C`` or ``CXX``.
+created.  For example:
+
+.. code-block:: cmake
+
+  set(CMAKE_CXX_CLANG_TIDY clang-tidy checks=-*,readability-*)
+  add_executable(foo foo.cxx)
