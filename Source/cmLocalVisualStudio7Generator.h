@@ -30,7 +30,7 @@ public:
     : cmVisualStudioGeneratorOptions(lg, tool, table, extraTable)
   {
   }
-  void OutputFlag(std::ostream& fout, const char* indent, const char* tag,
+  void OutputFlag(std::ostream& fout, int indent, const char* tag,
                   const std::string& content) override;
 };
 

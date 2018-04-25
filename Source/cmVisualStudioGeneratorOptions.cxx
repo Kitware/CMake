@@ -422,7 +422,7 @@ const std::string& cmVisualStudioGeneratorOptions::GetConfiguration() const
 }
 
 void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
-  std::ostream& fout, const char* prefix, const std::string& lang)
+  std::ostream& fout, int indent, const std::string& lang)
 {
   if (this->Defines.empty()) {
     return;
@@ -460,11 +460,11 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
     oss << ";%(" << tag << ")";
   }
 
-  this->OutputFlag(fout, prefix, tag, oss.str());
+  this->OutputFlag(fout, indent, tag, oss.str());
 }
 
 void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
-  std::ostream& fout, const char* prefix, const std::string& lang)
+  std::ostream& fout, int indent, const std::string& lang)
 {
   if (this->Includes.empty()) {
     return;
@@ -508,11 +508,11 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
     oss << sep << "%(" << tag << ")";
   }
 
-  this->OutputFlag(fout, prefix, tag, oss.str());
+  this->OutputFlag(fout, indent, tag, oss.str());
 }
 
 void cmVisualStudioGeneratorOptions::OutputFlagMap(std::ostream& fout,
-                                                   const char* indent)
+                                                   int indent)
 {
   for (auto const& m : this->FlagMap) {
     std::ostringstream oss;

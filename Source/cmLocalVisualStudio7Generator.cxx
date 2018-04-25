@@ -812,10 +812,9 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
          << "\\$(ConfigurationName)\"\n";
   }
   targetOptions.OutputAdditionalIncludeDirectories(
-    fout, "\t\t\t\t", this->FortranProject ? "Fortran" : langForClCompile);
-  targetOptions.OutputFlagMap(fout, "\t\t\t\t");
-  targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t",
-                                              langForClCompile);
+    fout, 4, this->FortranProject ? "Fortran" : langForClCompile);
+  targetOptions.OutputFlagMap(fout, 4);
+  targetOptions.OutputPreprocessorDefinitions(fout, 4, langForClCompile);
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
   if (target->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
     // Specify the compiler program database file if configured.
@@ -834,11 +833,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
       "\t\t\t\tName=\"MASM\"\n"
       ;
     /* clang-format on */
-    targetOptions.OutputAdditionalIncludeDirectories(fout, "\t\t\t\t",
-                                                     "ASM_MASM");
+    targetOptions.OutputAdditionalIncludeDirectories(fout, 4, "ASM_MASM");
     // Use same preprocessor definitions as VCCLCompilerTool.
-    targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "ASM_MASM");
-    masmOptions.OutputFlagMap(fout, "\t\t\t\t");
+    targetOptions.OutputPreprocessorDefinitions(fout, 4, "ASM_MASM");
+    masmOptions.OutputFlagMap(fout, 4);
     /* clang-format off */
     fout <<
       "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n"
@@ -855,16 +853,16 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     tool = "VFResourceCompilerTool";
   }
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"\n";
-  targetOptions.OutputAdditionalIncludeDirectories(fout, "\t\t\t\t", "RC");
+  targetOptions.OutputAdditionalIncludeDirectories(fout, 4, "RC");
   // add the -D flags to the RC tool
-  targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "RC");
+  targetOptions.OutputPreprocessorDefinitions(fout, 4, "RC");
   fout << "\t\t\t/>\n";
   tool = "VCMIDLTool";
   if (this->FortranProject) {
     tool = "VFMIDLTool";
   }
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"\n";
-  targetOptions.OutputAdditionalIncludeDirectories(fout, "\t\t\t\t", "MIDL");
+  targetOptions.OutputAdditionalIncludeDirectories(fout, 4, "MIDL");
   fout << "\t\t\t\tMkTypLibCompatible=\"false\"\n";
   if (gg->GetPlatformName() == "x64") {
     fout << "\t\t\t\tTargetEnvironment=\"3\"\n";
@@ -1089,7 +1087,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       fout << "\t\t\t\tOutputFile=\""
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       this->WriteTargetVersionAttribute(fout, target);
-      linkOptions.OutputFlagMap(fout, "\t\t\t\t");
+      linkOptions.OutputFlagMap(fout, 4);
       fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
       this->OutputLibraryDirectories(fout, cli.GetDirectories());
       fout << "\"\n";
@@ -1174,7 +1172,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       fout << "\t\t\t\tOutputFile=\""
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       this->WriteTargetVersionAttribute(fout, target);
-      linkOptions.OutputFlagMap(fout, "\t\t\t\t");
+      linkOptions.OutputFlagMap(fout, 4);
       fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
       this->OutputLibraryDirectories(fout, cli.GetDirectories());
       fout << "\"\n";
@@ -1711,12 +1709,11 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
             std::vector<std::string> includes;
             this->AppendIncludeDirectories(includes, fc.IncludeDirs, **sf);
             fileOptions.AddIncludes(includes);
-            fileOptions.OutputFlagMap(fout, "\t\t\t\t\t");
+            fileOptions.OutputFlagMap(fout, 5);
             fileOptions.OutputAdditionalIncludeDirectories(
-              fout, "\t\t\t\t\t",
+              fout, 5,
               ppLang == "CXX" && this->FortranProject ? "Fortran" : ppLang);
-            fileOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t\t",
-                                                      ppLang);
+            fileOptions.OutputPreprocessorDefinitions(fout, 5, ppLang);
           }
           if (!fc.AdditionalDeps.empty()) {
             fout << "\t\t\t\t\tAdditionalDependencies=\"" << fc.AdditionalDeps
@@ -2092,11 +2089,15 @@ std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPathSingle(
   return ret;
 }
 
-void cmVS7GeneratorOptions::OutputFlag(std::ostream& fout, const char* indent,
-                                       const char* tag,
+void cmVS7GeneratorOptions::OutputFlag(std::ostream& fout, int indent,
+                                       const char* flag,
                                        const std::string& content)
 {
-  fout << indent << tag << "=\"";
+  fout.fill('\t');
+  fout.width(indent);
+  // write an empty string to get the fill level indent to print
+  fout << "";
+  fout << flag << "=\"";
   fout << cmLocalVisualStudio7GeneratorEscapeForXML(content);
   fout << "\"\n";
 }

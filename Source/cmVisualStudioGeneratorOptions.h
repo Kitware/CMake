@@ -77,18 +77,17 @@ public:
   bool IsWinRt() const;
   bool IsManaged() const;
   // Write options to output.
-  void OutputPreprocessorDefinitions(std::ostream& fout, const char* prefix,
+  void OutputPreprocessorDefinitions(std::ostream& fout, int indent,
                                      const std::string& lang);
-  void OutputAdditionalIncludeDirectories(std::ostream& fout,
-                                          const char* prefix,
+  void OutputAdditionalIncludeDirectories(std::ostream& fout, int indent,
                                           const std::string& lang);
-  void OutputFlagMap(std::ostream& fout, const char* indent);
+  void OutputFlagMap(std::ostream& fout, int indent);
   void SetConfiguration(const std::string& config);
   const std::string& GetConfiguration() const;
 
 protected:
-  virtual void OutputFlag(std::ostream& fout, const char* indent,
-                          const char* tag, const std::string& content) = 0;
+  virtual void OutputFlag(std::ostream& fout, int indent, const char* tag,
+                          const std::string& content) = 0;
 
 private:
   cmLocalVisualStudioGenerator* LocalGenerator;
