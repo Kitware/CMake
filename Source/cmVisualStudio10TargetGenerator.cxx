@@ -8,7 +8,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalVisualStudio10Generator.h"
-#include "cmLocalVisualStudio7Generator.h"
+#include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
@@ -204,7 +204,8 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
   , Name(target->GetName())
   , GUID(gg->GetGUID(this->Name))
   , GlobalGenerator(gg)
-  , LocalGenerator((cmLocalVisualStudio7Generator*)target->GetLocalGenerator())
+  , LocalGenerator(
+      (cmLocalVisualStudio10Generator*)target->GetLocalGenerator())
 {
   this->Makefile->GetConfigurations(this->Configurations);
   this->NsightTegra = gg->IsNsightTegra();
@@ -1177,7 +1178,6 @@ void cmVisualStudio10TargetGenerator::WriteNsightTegraConfigurationValues(
 
 void cmVisualStudio10TargetGenerator::WriteCustomCommands()
 {
-  this->SourcesVisited.clear();
   this->CSharpCustomCommandNames.clear();
   std::vector<cmSourceFile const*> customCommands;
   this->GeneratorTarget->GetCustomCommands(customCommands, "");
@@ -1198,7 +1198,9 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommands()
 void cmVisualStudio10TargetGenerator::WriteCustomCommand(
   cmSourceFile const* sf)
 {
-  if (this->SourcesVisited.insert(sf).second) {
+  if (this->LocalGenerator->GetSourcesVisited(this->GeneratorTarget)
+        .insert(sf)
+        .second) {
     if (std::vector<cmSourceFile*> const* depends =
           this->GeneratorTarget->GetSourceDepends(sf)) {
       for (cmSourceFile const* di : *depends) {
