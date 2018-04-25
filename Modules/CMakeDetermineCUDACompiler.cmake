@@ -40,7 +40,6 @@ else()
 endif()
 
 #Allow the user to specify a host compiler
-set(CMAKE_CUDA_HOST_COMPILER "" CACHE FILEPATH "Host compiler to be used by nvcc")
 if(NOT $ENV{CUDAHOSTCXX} STREQUAL "")
   get_filename_component(CMAKE_CUDA_HOST_COMPILER $ENV{CUDAHOSTCXX} PROGRAM)
   if(NOT EXISTS ${CMAKE_CUDA_HOST_COMPILER})
