@@ -1129,14 +1129,26 @@ protected:
     if (permissions) {
 #ifdef WIN32
       if (Makefile->IsOn("CMAKE_CROSSCOMPILING")) {
+        // Store the mode in an NTFS alternate stream.
         std::string mode_t_adt_filename =
           std::string(toFile) + ":cmake_mode_t";
+
+        // Writing to an NTFS alternate stream changes the modification
+        // time, so we need to save and restore its original value.
+        cmSystemToolsFileTime* file_time_orig = cmSystemTools::FileTimeNew();
+        cmSystemTools::FileTimeGet(toFile, file_time_orig);
 
         cmsys::ofstream permissionStream(mode_t_adt_filename.c_str());
 
         if (permissionStream) {
           permissionStream << std::oct << permissions << std::endl;
         }
+
+        permissionStream.close();
+
+        cmSystemTools::FileTimeSet(toFile, file_time_orig);
+
+        cmSystemTools::FileTimeDelete(file_time_orig);
       }
 #endif
 
