@@ -896,7 +896,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // (either attached to this source file or another one), assume that one of
   // the target dependencies, OBJECT_DEPENDS or header file custom commands
   // will rebuild the file.
-  if (source->GetPropertyAsBool("GENERATED") && !source->GetCustomCommand() &&
+  if (source->GetPropertyAsBool("GENERATED") &&
+      !source->GetPropertyAsBool("__CMAKE_GENERATED_BY_CMAKE") &&
+      !source->GetCustomCommand() &&
       !this->GetGlobalGenerator()->HasCustomCommandOutput(sourceFileName)) {
     this->GetGlobalGenerator()->AddAssumedSourceDependencies(sourceFileName,
                                                              orderOnlyDeps);

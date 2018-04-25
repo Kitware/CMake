@@ -105,7 +105,13 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
       lg, config, false, nullptr, nullptr, nullptr, le);
     cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(
       name, false, cmSourceFileLocationKind::Known);
+    // Tell TraceDependencies that the file is not expected to exist
+    // on disk yet.  We generate it after that runs.
     sf->SetProperty("GENERATED", "1");
+
+    // Tell the build system generators that there is no build rule
+    // to generate the file.
+    sf->SetProperty("__CMAKE_GENERATED_BY_CMAKE", "1");
 
     gg->SetFilenameTargetDepends(
       sf, this->OutputFileExpr->GetSourceSensitiveTargets());
