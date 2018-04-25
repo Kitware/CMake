@@ -14,6 +14,8 @@
 #   TEST_BIG_ENDIAN(VARIABLE)
 #   VARIABLE - variable to store the result to
 
+include(CheckTypeSize)
+
 macro(TEST_BIG_ENDIAN VARIABLE)
   if(NOT DEFINED HAVE_${VARIABLE})
     message(STATUS "Check if the system is big endian")
@@ -26,8 +28,6 @@ macro(TEST_BIG_ENDIAN VARIABLE)
     else()
       message(FATAL_ERROR "TEST_BIG_ENDIAN needs either C or CXX language enabled")
     endif()
-
-    include(CheckTypeSize)
 
     CHECK_TYPE_SIZE("unsigned short" CMAKE_SIZEOF_UNSIGNED_SHORT LANGUAGE ${_test_language})
     if(CMAKE_SIZEOF_UNSIGNED_SHORT EQUAL 2)
