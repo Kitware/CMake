@@ -77,8 +77,25 @@ set(_JAVA_HINTS)
 if(_JAVA_HOME)
   list(APPEND _JAVA_HINTS ${_JAVA_HOME}/bin)
 endif()
-list(APPEND _JAVA_HINTS
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\2.0;JavaHome]/bin"
+if (WIN32)
+  macro (_JAVA_GET_INSTALLED_VERSIONS _KIND)
+    execute_process(COMMAND REG QUERY HKLM\\SOFTWARE\\JavaSoft\\${_KIND} /f "." /k
+      RESULT_VARIABLE _JAVA_RESULT
+      OUTPUT_VARIABLE _JAVA_VERSIONS
+      ERROR_QUIET)
+    if (NOT  _JAVA_RESULT)
+      string (REGEX MATCHALL "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\JavaSoft\\\\${_KIND}\\\\[0-9\.]+" _JAVA_VERSIONS "${_JAVA_VERSIONS}")
+      foreach (_JAVA_HINT IN LISTS _JAVA_VERSIONS)
+        list(APPEND _JAVA_HINTS "[${_JAVA_HINT}\\MSI;INSTALLDIR]/bin")
+      endforeach()
+    endif()
+  endmacro()
+
+  # search for installed versions for version 9 and upper
+  _JAVA_GET_INSTALLED_VERSIONS("JDK")
+  _JAVA_GET_INSTALLED_VERSIONS("JRE")
+
+  list(APPEND _JAVA_HINTS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.9;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.8;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.7;JavaHome]/bin"
@@ -86,7 +103,6 @@ list(APPEND _JAVA_HINTS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.5;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\2.0;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\1.9;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\1.8;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\1.7;JavaHome]/bin"
@@ -95,6 +111,8 @@ list(APPEND _JAVA_HINTS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\1.4;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\1.3;JavaHome]/bin"
   )
+endif()
+
 # Hard-coded guesses should still go in PATHS. This ensures that the user
 # environment can always override hard guesses.
 set(_JAVA_PATHS
@@ -139,15 +157,31 @@ if(Java_JAVA_EXECUTABLE)
         # Sun, GCJ, older OpenJDK
         set(Java_VERSION_STRING "${CMAKE_MATCH_1}")
         set(Java_VERSION_MAJOR "${CMAKE_MATCH_2}")
+        if (CMAKE_MATCH_4)
         set(Java_VERSION_MINOR "${CMAKE_MATCH_4}")
+        else()
+          set(Java_VERSION_MINOR 0)
+        endif()
+        if (CMAKE_MATCH_6)
         set(Java_VERSION_PATCH "${CMAKE_MATCH_6}")
+        else()
+          set(Java_VERSION_PATCH 0)
+        endif()
         set(Java_VERSION_TWEAK "${CMAKE_MATCH_8}")
       elseif(var MATCHES "openjdk version \"${_java_version_regex}\"")
         # OpenJDK
         set(Java_VERSION_STRING "${CMAKE_MATCH_1}")
         set(Java_VERSION_MAJOR "${CMAKE_MATCH_2}")
+        if (CMAKE_MATCH_4)
         set(Java_VERSION_MINOR "${CMAKE_MATCH_4}")
+        else()
+          set(Java_VERSION_MINOR 0)
+        endif()
+        if (CMAKE_MATCH_6)
         set(Java_VERSION_PATCH "${CMAKE_MATCH_6}")
+        else()
+          set(Java_VERSION_PATCH 0)
+        endif()
         set(Java_VERSION_TWEAK "${CMAKE_MATCH_8}")
       elseif(var MATCHES "openjdk version \"([0-9]+)-[A-Za-z]+\"")
         # OpenJDK 9 early access builds or locally built
@@ -238,7 +272,7 @@ if(Java_FIND_COMPONENTS)
     elseif(component STREQUAL "Development")
       list(APPEND _JAVA_REQUIRED_VARS Java_JAVA_EXECUTABLE Java_JAVAC_EXECUTABLE
                                       Java_JAVADOC_EXECUTABLE)
-      if(Java_VERSION VERSION_LESS "1.10")
+      if(Java_VERSION VERSION_LESS "10")
         list(APPEND _JAVA_REQUIRED_VARS Java_JAVAH_EXECUTABLE)
         if(Java_JAVA_EXECUTABLE AND Java_JAVAC_EXECUTABLE
             AND Java_JAVAH_EXECUTABLE AND Java_JAVADOC_EXECUTABLE)
@@ -276,7 +310,7 @@ if(Java_FIND_COMPONENTS)
   endif()
 else()
   # Check for Development
-  if(Java_VERSION VERSION_LESS "1.10")
+  if(Java_VERSION VERSION_LESS "10")
     find_package_handle_standard_args(Java
       REQUIRED_VARS Java_JAVA_EXECUTABLE Java_JAR_EXECUTABLE Java_JAVAC_EXECUTABLE
                     Java_JAVAH_EXECUTABLE Java_JAVADOC_EXECUTABLE
