@@ -821,6 +821,19 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   orderOnlyDeps.erase(std::unique(orderOnlyDeps.begin(), orderOnlyDeps.end()),
                       orderOnlyDeps.end());
 
+  // The phony target must depend on at least one input or ninja will explain
+  // that "output ... of phony edge with no inputs doesn't exist" and consider
+  // the phony output "dirty".
+  if (orderOnlyDeps.empty()) {
+    // Any path that always exists will work here.  It would be nice to
+    // use just "." but that is not supported by Ninja < 1.7.
+    std::string tgtDir;
+    tgtDir += this->LocalGenerator->GetCurrentBinaryDirectory();
+    tgtDir += "/";
+    tgtDir += this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+    orderOnlyDeps.push_back(this->ConvertToNinjaPath(tgtDir));
+  }
+
   {
     cmNinjaDeps orderOnlyTarget;
     orderOnlyTarget.push_back(this->OrderDependsTargetForTarget());
