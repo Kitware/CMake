@@ -120,14 +120,39 @@ if(_JAVA_HOME)
     ${_JAVA_HOME}
     )
 endif()
-get_filename_component(java_install_version
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit;CurrentVersion]" NAME)
 
-list(APPEND JAVA_AWT_LIBRARY_DIRECTORIES
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/lib"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/lib"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/lib"
-  )
+if (WIN32)
+  set (_JNI_HINTS)
+  execute_process(COMMAND REG QUERY HKLM\\SOFTWARE\\JavaSoft\\JDK /f "." /k
+    RESULT_VARIABLE _JNI_RESULT
+    OUTPUT_VARIABLE _JNI_VERSIONS
+    ERROR_QUIET)
+  if (NOT  _JNI_RESULT)
+    string (REGEX MATCHALL "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\JavaSoft\\\\JDK\\\\[0-9\.]+" _JNI_VERSIONS "${_JNI_VERSIONS}")
+    foreach (_JNI_HINT IN LISTS _JNI_VERSIONS)
+      list(APPEND _JNI_HINTS "[${_JNI_HINT}\\MSI;INSTALLDIR]")
+    endforeach()
+  endif()
+
+  foreach (_JNI_HINT IN LISTS _JNI_HINTS)
+    list(APPEND JAVA_AWT_LIBRARY_DIRECTORIES "${_JNI_HINT}/lib")
+  endforeach()
+
+  get_filename_component(java_install_version
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit;CurrentVersion]" NAME)
+
+  list(APPEND JAVA_AWT_LIBRARY_DIRECTORIES
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.9;JavaHome]/lib"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.8;JavaHome]/lib"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.7;JavaHome]/lib"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.6;JavaHome]/lib"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.5;JavaHome]/lib"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/lib"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/lib"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/lib"
+    )
+endif()
+
 JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib/jvm/java/lib
   /usr/lib/java/jre/lib/{libarch}
@@ -179,11 +204,21 @@ set(JAVA_AWT_INCLUDE_DIRECTORIES)
 if(_JAVA_HOME)
   list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES ${_JAVA_HOME}/include)
 endif()
-list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/include"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/include"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/include"
-)
+if (WIN32)
+  foreach (_JNI_HINT IN LISTS _JNI_HINTS)
+    list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES "${_JNI_HINT}/include")
+  endforeach()
+  list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.9;JavaHome]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.8;JavaHome]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.7;JavaHome]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.6;JavaHome]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.5;JavaHome]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/include"
+    )
+endif()
 
 JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_INCLUDE_DIRECTORIES
   /usr/lib/java/include
@@ -330,4 +365,3 @@ set(JNI_INCLUDE_DIRS
   ${JAVA_INCLUDE_PATH2}
   ${JAVA_AWT_INCLUDE_PATH}
 )
-
