@@ -99,17 +99,20 @@ public:
   {
   }
 
-  void OutputFlag(std::ostream& fout, const char* indent, const char* tag,
+  void OutputFlag(std::ostream& fout, int indent, const char* tag,
                   const std::string& content) override
   {
     if (!this->GetConfiguration().empty()) {
       // if there are configuration specific flags, then
       // use the configuration specific tag for PreprocessorDefinitions
-      fout << indent;
       this->TargetGenerator->WritePlatformConfigTag(
-        tag, this->GetConfiguration(), 0);
+        tag, this->GetConfiguration(), indent);
     } else {
-      fout << indent << "<" << tag << ">";
+      fout.fill(' ');
+      fout.width(indent * 2);
+      // write an empty string to get the fill level indent to print
+      fout << "";
+      fout << "<" << tag << ">";
     }
     fout << cmVS10EscapeXML(content);
     fout << "</" << tag << ">\n";
@@ -1144,7 +1147,7 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
                              << ".exe</StartProgram>\n";
   }
 
-  o.OutputFlagMap(*this->BuildFileStream, "    ");
+  o.OutputFlagMap(*this->BuildFileStream, 2);
 }
 
 //----------------------------------------------------------------------------
@@ -2163,11 +2166,10 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       clOptions.AddIncludes(includeList);
       clOptions.SetConfiguration(config);
       clOptions.PrependInheritedString("AdditionalOptions");
-      clOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
-                                                   "      ", lang);
-      clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
-      clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                              lang);
+      clOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream, 3,
+                                                   lang);
+      clOptions.OutputFlagMap(*this->BuildFileStream, 3);
+      clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, 3, lang);
     }
   }
   if (this->IsXamlSource(source->GetFullPath())) {
@@ -2587,10 +2589,10 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   }
   this->WriteString("<ClCompile>\n", 2);
   clOptions.PrependInheritedString("AdditionalOptions");
-  clOptions.OutputAdditionalIncludeDirectories(
-    *this->BuildFileStream, "      ", this->LangForClCompile);
-  clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
-  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
+  clOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream, 3,
+                                               this->LangForClCompile);
+  clOptions.OutputFlagMap(*this->BuildFileStream, 3);
+  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, 3,
                                           this->LangForClCompile);
 
   if (this->NsightTegra) {
@@ -2676,12 +2678,11 @@ void cmVisualStudio10TargetGenerator::WriteRCOptions(
   this->WriteString("<ResourceCompile>\n", 2);
 
   Options& rcOptions = *(this->RcOptions[configName]);
-  rcOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                          "RC");
-  rcOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
-                                               "      ", "RC");
+  rcOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, 3, "RC");
+  rcOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream, 3,
+                                               "RC");
   rcOptions.PrependInheritedString("AdditionalOptions");
-  rcOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+  rcOptions.OutputFlagMap(*this->BuildFileStream, 3);
 
   this->WriteString("</ResourceCompile>\n", 2);
 }
@@ -2826,12 +2827,11 @@ void cmVisualStudio10TargetGenerator::WriteCudaOptions(
   this->WriteString("<CudaCompile>\n", 2);
 
   Options& cudaOptions = *(this->CudaOptions[configName]);
-  cudaOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
-                                                 "      ", "CUDA");
-  cudaOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                            "CUDA");
+  cudaOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream, 3,
+                                                 "CUDA");
+  cudaOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, 3, "CUDA");
   cudaOptions.PrependInheritedString("AdditionalOptions");
-  cudaOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+  cudaOptions.OutputFlagMap(*this->BuildFileStream, 3);
 
   this->WriteString("</CudaCompile>\n", 2);
 }
@@ -2900,7 +2900,7 @@ void cmVisualStudio10TargetGenerator::WriteCudaLinkOptions(
 
   this->WriteString("<CudaLink>\n", 2);
   Options& cudaLinkOptions = *(this->CudaLinkOptions[configName]);
-  cudaLinkOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+  cudaLinkOptions.OutputFlagMap(*this->BuildFileStream, 3);
   this->WriteString("</CudaLink>\n", 2);
 }
 
@@ -2951,14 +2951,14 @@ void cmVisualStudio10TargetGenerator::WriteMasmOptions(
 
   // Preprocessor definitions and includes are shared with clOptions.
   Options& clOptions = *(this->ClOptions[configName]);
-  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
+  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, 3,
                                           "ASM_MASM");
 
   Options& masmOptions = *(this->MasmOptions[configName]);
-  masmOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
-                                                 "      ", "ASM_MASM");
+  masmOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream, 3,
+                                                 "ASM_MASM");
   masmOptions.PrependInheritedString("AdditionalOptions");
-  masmOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+  masmOptions.OutputFlagMap(*this->BuildFileStream, 3);
 
   this->WriteString("</MASM>\n", 2);
 }
@@ -3012,16 +3012,16 @@ void cmVisualStudio10TargetGenerator::WriteNasmOptions(
   std::vector<std::string> includes =
     this->GetIncludes(configName, "ASM_NASM");
   Options& nasmOptions = *(this->NasmOptions[configName]);
-  nasmOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream,
-                                                 "      ", "ASM_NASM");
-  nasmOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+  nasmOptions.OutputAdditionalIncludeDirectories(*this->BuildFileStream, 3,
+                                                 "ASM_NASM");
+  nasmOptions.OutputFlagMap(*this->BuildFileStream, 3);
   nasmOptions.PrependInheritedString("AdditionalOptions");
-  nasmOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
+  nasmOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, 3,
                                             "ASM_NASM");
 
   // Preprocessor definitions and includes are shared with clOptions.
   Options& clOptions = *(this->ClOptions[configName]);
-  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
+  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, 3,
                                           "ASM_NASM");
 
   this->WriteString("</NASM>\n", 2);
@@ -3045,7 +3045,7 @@ void cmVisualStudio10TargetGenerator::WriteLibOptions(
                                       gg->GetLibFlagTable(), this);
     libOptions.Parse(libflags.c_str());
     libOptions.PrependInheritedString("AdditionalOptions");
-    libOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+    libOptions.OutputFlagMap(*this->BuildFileStream, 3);
     this->WriteString("</Lib>\n", 2);
   }
 
@@ -3473,7 +3473,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(
   this->WriteString("<Link>\n", 2);
 
   linkOptions.PrependInheritedString("AdditionalOptions");
-  linkOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+  linkOptions.OutputFlagMap(*this->BuildFileStream, 3);
 
   this->WriteString("</Link>\n", 2);
   if (!this->GlobalGenerator->NeedLinkLibraryDependencies(
