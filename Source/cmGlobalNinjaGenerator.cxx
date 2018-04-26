@@ -931,12 +931,14 @@ void cmGlobalNinjaGenerator::AddDependencyToAll(const std::string& input)
 void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
 {
   for (auto const& asd : this->AssumedSourceDependencies) {
-    cmNinjaDeps deps;
-    std::copy(asd.second.begin(), asd.second.end(), std::back_inserter(deps));
+    cmNinjaDeps orderOnlyDeps;
+    std::copy(asd.second.begin(), asd.second.end(),
+              std::back_inserter(orderOnlyDeps));
     WriteCustomCommandBuild(/*command=*/"", /*description=*/"",
                             "Assume dependencies for generated source file.",
                             /*depfile*/ "", /*uses_terminal*/ false,
-                            /*restat*/ true, cmNinjaDeps(1, asd.first), deps);
+                            /*restat*/ true, cmNinjaDeps(1, asd.first),
+                            cmNinjaDeps(), orderOnlyDeps);
   }
 }
 
