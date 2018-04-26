@@ -28,14 +28,23 @@ static std::string cmVS10EscapeXML(std::string arg)
   return arg;
 }
 
+static std::string cmVS10EscapeAttr(std::string arg)
+{
+  cmSystemTools::ReplaceString(arg, "&", "&amp;");
+  cmSystemTools::ReplaceString(arg, "<", "&lt;");
+  cmSystemTools::ReplaceString(arg, ">", "&gt;");
+  cmSystemTools::ReplaceString(arg, "\"", "&quot;");
+  return arg;
+}
+
 struct cmVisualStudio10TargetGenerator::Elem
 {
-  cmGeneratedFileStream& S;
+  std::ostream& S;
   int Indent;
   bool HasElements = false;
   const char* Tag = nullptr;
 
-  Elem(cmGeneratedFileStream& s, int i)
+  Elem(std::ostream& s, int i)
     : S(s)
     , Indent(i)
   {
@@ -61,21 +70,38 @@ struct cmVisualStudio10TargetGenerator::Elem
       HasElements = true;
     }
   }
-  cmGeneratedFileStream& WriteString(const char* line);
-  void StartElement(const char* tag)
+  std::ostream& WriteString(const char* line);
+  Elem& StartElement(const char* tag)
   {
     this->Tag = tag;
     this->WriteString("<") << tag;
+    return *this;
   }
   template <typename T>
   void WriteElem(const char* tag, const T& val)
   {
     this->WriteString("<") << tag << ">" << val << "</" << tag << ">\n";
   }
+  void Element(const char* tag, const std::string& val)
+  {
+    Elem(*this).WriteElem(tag, cmVS10EscapeXML(val));
+  }
   template <typename T>
   void Attr(const char* an, const T& av)
   {
     this->S << " " << an << "=\"" << av << "\"";
+  }
+  Elem& Attribute(const char* an, const std::string& av)
+  {
+    Attr(an, cmVS10EscapeAttr(av));
+    return *this;
+  }
+  // This method for now assumes that this->Tag has been set, e.g. by calling
+  // StartElement(). Also, it finishes the element so it should be the last
+  // one called
+  void Content(const std::string& val)
+  {
+    S << ">" << cmVS10EscapeXML(val) << "</" << this->Tag << ">\n";
   }
   void WriteEndTag(const char* tag)
   {
@@ -140,15 +166,6 @@ inline void cmVisualStudio10TargetGenerator::WriteElemEscapeXML(
   const char* tag, std::string const& val, int indentLevel)
 {
   this->WriteElem(tag, cmVS10EscapeXML(val), indentLevel);
-}
-
-static std::string cmVS10EscapeAttr(std::string arg)
-{
-  cmSystemTools::ReplaceString(arg, "&", "&amp;");
-  cmSystemTools::ReplaceString(arg, "<", "&lt;");
-  cmSystemTools::ReplaceString(arg, ">", "&gt;");
-  cmSystemTools::ReplaceString(arg, "\"", "&quot;");
-  return arg;
 }
 
 static std::string cmVS10EscapeComment(std::string comment)
@@ -242,38 +259,46 @@ cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
   delete this->BuildFileStream;
 }
 
+std::string cmVisualStudio10TargetGenerator::CalcCondition(
+  const std::string& config) const
+{
+  std::ostringstream oss;
+  oss << "'$(Configuration)|$(Platform)'=='";
+  oss << config << "|" << this->Platform;
+  oss << "'";
+  // handle special case for 32 bit C# targets
+  if (this->ProjectType == csproj && this->Platform == "Win32") {
+    oss << " Or ";
+    oss << "'$(Configuration)|$(Platform)'=='";
+    oss << config << "|x86";
+    oss << "'";
+  }
+  return oss.str();
+}
+
 void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
   const char* tag, const std::string& config, int indentLevel,
   const char* attribute)
 
 {
-  std::ostream* stream = this->BuildFileStream;
-  stream->fill(' ');
-  stream->width(indentLevel * 2);
-  (*stream) << ""; // applies indentation
-  (*stream) << "<" << tag << " Condition=\"";
-  (*stream) << "'$(Configuration)|$(Platform)'=='";
-  (*stream) << config << "|" << this->Platform;
-  (*stream) << "'";
-  // handle special case for 32 bit C# targets
-  if (this->ProjectType == csproj && this->Platform == "Win32") {
-    (*stream) << " Or ";
-    (*stream) << "'$(Configuration)|$(Platform)'=='";
-    (*stream) << config << "|x86";
-    (*stream) << "'";
-  }
-  (*stream) << "\"";
+  std::ostream& stream = *this->BuildFileStream;
+  stream.fill(' ');
+  stream.width(indentLevel * 2);
+  stream << ""; // applies indentation
+  stream << "<" << tag << " Condition=\"";
+  stream << this->CalcCondition(config);
+  stream << "\"";
   if (attribute) {
-    (*stream) << attribute;
+    stream << attribute;
   }
   // close the tag
-  (*stream) << ">";
+  stream << ">";
   if (attribute) {
-    (*stream) << "\n";
+    stream << "\n";
   }
 }
 
-cmGeneratedFileStream& cmVisualStudio10TargetGenerator::Elem::WriteString(
+std::ostream& cmVisualStudio10TargetGenerator::Elem::WriteString(
   const char* line)
 {
   this->S.fill(' ');
@@ -1299,7 +1324,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
       this->WriteCustomRuleCSharp(c, name, script, inputs.str(), outputs.str(),
                                   comment);
     } else {
-      this->WriteCustomRuleCpp(c, script, inputs.str(), outputs.str(),
+      this->WriteCustomRuleCpp(e2, c, script, inputs.str(), outputs.str(),
                                comment);
     }
   }
@@ -1309,26 +1334,21 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
 }
 
 void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
-  std::string const& config, std::string const& script,
+  Elem& e2, std::string const& config, std::string const& script,
   std::string const& inputs, std::string const& outputs,
   std::string const& comment)
 {
-  this->WritePlatformConfigTag("Message", config, 3);
-  (*this->BuildFileStream) << cmVS10EscapeXML(comment) << "</Message>\n";
-  this->WritePlatformConfigTag("Command", config, 3);
-  (*this->BuildFileStream) << cmVS10EscapeXML(script) << "</Command>\n";
-  this->WritePlatformConfigTag("AdditionalInputs", config, 3);
-  (*this->BuildFileStream) << cmVS10EscapeXML(inputs);
-  (*this->BuildFileStream) << ";%(AdditionalInputs)"
-                              "</AdditionalInputs>\n";
-  this->WritePlatformConfigTag("Outputs", config, 3);
-  (*this->BuildFileStream) << cmVS10EscapeXML(outputs) << "</Outputs>\n";
+  const std::string cond = this->CalcCondition(config);
+  Elem(e2, "Message").Attribute("Condition", cond).Content(comment);
+  Elem(e2, "Command").Attribute("Condition", cond).Content(script);
+  Elem(e2, "AdditionalInputs")
+    .Attribute("Condition", cond)
+    .Content(inputs + ";%(AdditionalInputs)");
+  Elem(e2, "Outputs").Attribute("Condition", cond).Content(outputs);
   if (this->LocalGenerator->GetVersion() >
       cmGlobalVisualStudioGenerator::VS10) {
     // VS >= 11 let us turn off linking of custom command outputs.
-    this->WritePlatformConfigTag("LinkObjects", config, 3);
-    (*this->BuildFileStream) << "false"
-                                "</LinkObjects>\n";
+    Elem(e2, "LinkObjects").Attribute("Condition", cond).Content("false");
   }
 }
 
