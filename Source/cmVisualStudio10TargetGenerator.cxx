@@ -3414,6 +3414,15 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     }
   }
 
+  // Managed code cannot be linked with /DEBUG:FASTLINK
+  if (this->Managed) {
+    if (const char* debug = linkOptions.GetFlag("GenerateDebugInformation")) {
+      if (strcmp(debug, "DebugFastLink") == 0) {
+        linkOptions.AddFlag("GenerateDebugInformation", "Debug");
+      }
+    }
+  }
+
   this->LinkOptions[config] = std::move(pOptions);
   return true;
 }
