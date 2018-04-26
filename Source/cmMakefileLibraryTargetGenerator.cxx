@@ -137,10 +137,7 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
     this->GeneratorTarget->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
   if (hasCUDA && resolveDeviceSymbols) {
     std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_LIBRARY";
-    std::string extraFlags;
-    this->LocalGenerator->AppendFlags(
-      extraFlags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
-    this->WriteDeviceLibraryRules(linkRuleVar, extraFlags, false);
+    this->WriteDeviceLibraryRules(linkRuleVar, false);
   }
 
   std::string linkLanguage =
@@ -173,10 +170,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
                  cuda_lang) != closure->Languages.end());
     if (hasCUDA) {
       std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_LIBRARY";
-      std::string extraFlags;
-      this->LocalGenerator->AppendFlags(
-        extraFlags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
-      this->WriteDeviceLibraryRules(linkRuleVar, extraFlags, relink);
+      this->WriteDeviceLibraryRules(linkRuleVar, relink);
     }
   }
 
@@ -187,13 +181,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   linkRuleVar += "_CREATE_SHARED_LIBRARY";
 
   std::string extraFlags;
-  this->LocalGenerator->AppendFlags(
-    extraFlags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
-  std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
-  this->LocalGenerator->AppendFlags(
-    extraFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
-
+  this->GetTargetLinkFlags(extraFlags);
   this->LocalGenerator->AddConfigVariableFlags(
     extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->ConfigName);
 
@@ -223,10 +211,7 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
                  cuda_lang) != closure->Languages.end());
     if (hasCUDA) {
       std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_LIBRARY";
-      std::string extraFlags;
-      this->LocalGenerator->AppendFlags(
-        extraFlags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
-      this->WriteDeviceLibraryRules(linkRuleVar, extraFlags, relink);
+      this->WriteDeviceLibraryRules(linkRuleVar, relink);
     }
   }
 
@@ -237,12 +222,7 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
   linkRuleVar += "_CREATE_SHARED_MODULE";
 
   std::string extraFlags;
-  this->LocalGenerator->AppendFlags(
-    extraFlags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
-  std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
-  this->LocalGenerator->AppendFlags(
-    extraFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
+  this->GetTargetLinkFlags(extraFlags);
   this->LocalGenerator->AddConfigVariableFlags(
     extraFlags, "CMAKE_MODULE_LINKER_FLAGS", this->ConfigName);
 
@@ -265,12 +245,7 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
   linkRuleVar += "_CREATE_MACOSX_FRAMEWORK";
 
   std::string extraFlags;
-  this->LocalGenerator->AppendFlags(
-    extraFlags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
-  std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
-  this->LocalGenerator->AppendFlags(
-    extraFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
+  this->GetTargetLinkFlags(extraFlags);
   this->LocalGenerator->AddConfigVariableFlags(
     extraFlags, "CMAKE_MACOSX_FRAMEWORK_LINKER_FLAGS", this->ConfigName);
 
@@ -278,7 +253,7 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 }
 
 void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
-  const std::string& linkRuleVar, const std::string& extraFlags, bool relink)
+  const std::string& linkRuleVar, bool relink)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // TODO: Merge the methods that call this method to avoid
@@ -296,7 +271,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
 
   // Create set of linking flags.
   std::string linkFlags;
-  this->LocalGenerator->AppendFlags(linkFlags, extraFlags);
+  this->GetTargetLinkFlags(linkFlags);
 
   // Get the name of the device object to generate.
   std::string const targetOutputReal =
@@ -458,7 +433,6 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
   this->WriteTargetDriverRule(targetOutputReal, relink);
 #else
   static_cast<void>(linkRuleVar);
-  static_cast<void>(extraFlags);
   static_cast<void>(relink);
 #endif
 }

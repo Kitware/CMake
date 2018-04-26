@@ -154,12 +154,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
                                              linkLanguage, this->ConfigName);
 
   // Add target-specific linker flags.
-  this->LocalGenerator->AppendFlags(
-    linkFlags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
-  std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
-  this->LocalGenerator->AppendFlags(
-    linkFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
+  this->GetTargetLinkFlags(linkFlags);
 
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
@@ -437,12 +432,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                                              linkLanguage, this->ConfigName);
 
   // Add target-specific linker flags.
-  this->LocalGenerator->AppendFlags(
-    linkFlags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
-  std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
-  this->LocalGenerator->AppendFlags(
-    linkFlags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
+  this->GetTargetLinkFlags(linkFlags);
 
   {
     std::unique_ptr<cmLinkLineComputer> linkLineComputer(

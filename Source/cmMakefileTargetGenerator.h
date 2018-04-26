@@ -52,6 +52,8 @@ public:
   cmGeneratorTarget* GetGeneratorTarget() { return this->GeneratorTarget; }
 
 protected:
+  void GetTargetLinkFlags(std::string& flags);
+
   // create the file and directory etc
   void CreateRuleFile();
 

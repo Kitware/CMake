@@ -82,6 +82,17 @@ cmMakefileTargetGenerator* cmMakefileTargetGenerator::New(
   return result;
 }
 
+void cmMakefileTargetGenerator::GetTargetLinkFlags(std::string& flags)
+{
+  this->LocalGenerator->AppendFlags(
+    flags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
+
+  std::string linkFlagsConfig = "LINK_FLAGS_";
+  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
+  this->LocalGenerator->AppendFlags(
+    flags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
+}
+
 void cmMakefileTargetGenerator::CreateRuleFile()
 {
   // Create a directory for this target.
