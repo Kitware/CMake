@@ -42,7 +42,7 @@ struct cmVisualStudio10TargetGenerator::Elem
   std::ostream& S;
   int Indent;
   bool HasElements = false;
-  const char* Tag = nullptr;
+  std::string Tag;
 
   Elem(std::ostream& s, int i)
     : S(s)
@@ -71,7 +71,7 @@ struct cmVisualStudio10TargetGenerator::Elem
     }
   }
   std::ostream& WriteString(const char* line);
-  Elem& StartElement(const char* tag)
+  Elem& StartElement(const std::string& tag)
   {
     this->Tag = tag;
     this->WriteString("<") << tag;
@@ -103,7 +103,7 @@ struct cmVisualStudio10TargetGenerator::Elem
   {
     S << ">" << cmVS10EscapeXML(val) << "</" << this->Tag << ">\n";
   }
-  void WriteEndTag(const char* tag)
+  void WriteEndTag(const std::string& tag)
   {
     if (HasElements) {
       this->WriteString("</") << tag << ">\n";
@@ -277,7 +277,6 @@ std::string cmVisualStudio10TargetGenerator::CalcCondition(
 void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
   const char* tag, const std::string& config, int indentLevel,
   const char* attribute)
-
 {
   std::ostream& stream = *this->BuildFileStream;
   stream.fill(' ');
@@ -924,7 +923,8 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup()
   std::vector<cmSourceFile const*> xamlObjs;
   this->GeneratorTarget->GetXamlSources(xamlObjs, "");
   if (!xamlObjs.empty()) {
-    this->WriteString("<ItemGroup>\n", 1);
+    Elem e1(*this->BuildFileStream, 1);
+    e1.StartElement("ItemGroup");
     for (cmSourceFile const* oi : xamlObjs) {
       std::string obj = oi->GetFullPath();
       const char* xamlType;
@@ -935,8 +935,8 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup()
         xamlType = "Page";
       }
 
-      Elem e2(*this->BuildFileStream, 2);
-      this->WriteSource(xamlType, oi);
+      Elem e2(e1);
+      this->WriteSource(e2, xamlType, oi);
       e2.SetHasElements();
       if (this->ProjectType == csproj && !this->InSourceBuild) {
         // add <Link> tag to written XAML source if necessary
@@ -952,13 +952,13 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup()
         }
         if (!link.empty()) {
           ConvertToWindowsSlash(link);
-          this->WriteElem("Link", link, 3);
+          e2.Element("Link", link);
         }
       }
-      this->WriteElem("SubType", "Designer", 3);
-      e2.WriteEndTag(xamlType);
+      e2.Element("SubType", "Designer");
+      e2.EndElement();
     }
-    this->WriteString("</ItemGroup>\n", 1);
+    e1.EndElement();
   }
 }
 
@@ -1249,13 +1249,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommand(
     }
     if (cmCustomCommand const* command = sf->GetCustomCommand()) {
       // C# projects write their <Target> within WriteCustomRule()
-      if (this->ProjectType != csproj) {
-        this->WriteString("<ItemGroup>\n", 1);
-      }
       this->WriteCustomRule(sf, *command);
-      if (this->ProjectType != csproj) {
-        this->WriteString("</ItemGroup>\n", 1);
-      }
     }
   }
 }
@@ -1290,21 +1284,22 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
   }
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
 
-  Elem e2(*this->BuildFileStream, 2);
+  Elem e1(*this->BuildFileStream, 1);
+  e1.StartElement("ItemGroup");
+  Elem e2(e1);
   if (this->ProjectType != csproj) {
-    this->WriteSource("CustomBuild", source);
+    this->WriteSource(e2, "CustomBuild", source);
     e2.SetHasElements();
   } else {
-    this->WriteString("<ItemGroup>\n", 1);
     std::string link;
     this->GetCSharpSourceLink(source, link);
-    this->WriteSource("None", source);
+    this->WriteSource(e2, "None", source);
     e2.SetHasElements();
     if (!link.empty()) {
-      this->WriteElem("Link", link, 3);
+      e2.Element("Link", link);
     }
-    e2.WriteEndTag("None");
-    this->WriteString("</ItemGroup>\n", 1);
+    e2.EndElement();
+    e1.EndElement();
   }
   for (std::string const& c : this->Configurations) {
     cmCustomCommandGenerator ccg(command, c, lg);
@@ -1341,7 +1336,8 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     }
   }
   if (this->ProjectType != csproj) {
-    e2.WriteEndTag("CustomBuild");
+    e2.EndElement();
+    e1.EndElement();
   }
 }
 
@@ -1370,19 +1366,20 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCSharp(
   std::string const& outputs, std::string const& comment)
 {
   this->CSharpCustomCommandNames.insert(name);
-  std::stringstream attributes;
-  attributes << "\n    Name=\"" << name << "\"";
-  attributes << "\n    Inputs=\"" << cmVS10EscapeAttr(inputs) << "\"";
-  attributes << "\n    Outputs=\"" << cmVS10EscapeAttr(outputs) << "\"";
-  this->WritePlatformConfigTag("Target", config, 1, attributes.str().c_str());
+  Elem e1(*this->BuildFileStream, 1);
+  e1.StartElement("Target");
+  e1.Attribute("Condition", this->CalcCondition(config));
+  e1.S << "\n    Name=\"" << name << "\"";
+  e1.S << "\n    Inputs=\"" << cmVS10EscapeAttr(inputs) << "\"";
+  e1.S << "\n    Outputs=\"" << cmVS10EscapeAttr(outputs) << "\"";
   if (!comment.empty()) {
-    this->WriteString("<Exec Command=\"", 2);
-    (*this->BuildFileStream) << "echo " << cmVS10EscapeAttr(comment)
-                             << "\" />\n";
+    Elem(e1)
+      .StartElement("Exec")
+      .Attribute("Command", "echo " + comment)
+      .EndElement();
   }
-  this->WriteString("<Exec Command=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeAttr(script) << "\" />\n";
-  this->WriteString("</Target>\n", 1);
+  Elem(e1).StartElement("Exec").Attribute("Command", script).EndElement();
+  e1.EndElement();
 }
 
 std::string cmVisualStudio10TargetGenerator::ConvertPath(
@@ -1605,16 +1602,14 @@ void cmVisualStudio10TargetGenerator::WriteHeaderSource(cmSourceFile const* sf)
 {
   std::string const& fileName = sf->GetFullPath();
   Elem e2(*this->BuildFileStream, 2);
-  this->WriteSource("ClInclude", sf);
+  this->WriteSource(e2, "ClInclude", sf);
   if (this->IsResxHeader(fileName)) {
-    e2.SetHasElements();
-    this->WriteElem("FileType", "CppForm", 3);
+    e2.Element("FileType", "CppForm");
   } else if (this->IsXamlHeader(fileName)) {
     std::string xamlFileName = fileName.substr(0, fileName.find_last_of("."));
-    e2.SetHasElements();
-    this->WriteElem("DependentUpon", xamlFileName, 3);
+    e2.Element("DependentUpon", xamlFileName);
   }
-  e2.WriteEndTag("ClInclude");
+  e2.EndElement();
 }
 
 void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
@@ -1776,7 +1771,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
   }
 
   Elem e2(*this->BuildFileStream, 2);
-  this->WriteSource(tool, sf);
+  this->WriteSource(e2, tool, sf);
   if (toolHasSettings) {
     e2.SetHasElements();
 
@@ -1880,7 +1875,8 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
   e2.WriteEndTag(tool);
 }
 
-void cmVisualStudio10TargetGenerator::WriteSource(std::string const& tool,
+void cmVisualStudio10TargetGenerator::WriteSource(Elem& e2,
+                                                  std::string const& tool,
                                                   cmSourceFile const* sf)
 {
   // Visual Studio tools append relative paths to the current dir, as in:
@@ -1916,9 +1912,8 @@ void cmVisualStudio10TargetGenerator::WriteSource(std::string const& tool,
     }
   }
   ConvertToWindowsSlash(sourceFile);
-  this->WriteString("<", 2);
-  (*this->BuildFileStream) << tool << " Include=\""
-                           << cmVS10EscapeAttr(sourceFile) << "\"";
+  e2.StartElement(tool.c_str());
+  e2.Attribute("Include", sourceFile);
 
   ToolSource toolSource = { sf, forceRelative };
   this->Tools[tool].push_back(toolSource);
@@ -2025,14 +2020,14 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
                           std::back_inserter(exclude_configs));
 
       Elem e2(*this->BuildFileStream, 2);
-      this->WriteSource(tool, si.Source);
+      this->WriteSource(e2, tool, si.Source);
       if (si.Kind == cmGeneratorTarget::SourceKindObjectSource) {
         this->OutputSourceSpecificFlags(e2, si.Source);
       }
       if (!exclude_configs.empty()) {
         this->WriteExcludeFromBuild(e2, exclude_configs);
       }
-      e2.WriteEndTag(tool);
+      e2.EndElement();
     }
   }
 
@@ -2232,13 +2227,11 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
 void cmVisualStudio10TargetGenerator::WriteExcludeFromBuild(
   Elem& e2, std::vector<size_t> const& exclude_configs)
 {
-  e2.SetHasElements();
   for (size_t ci : exclude_configs) {
-    this->WriteString("", 3);
-    (*this->BuildFileStream)
-      << "<ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='"
-      << cmVS10EscapeAttr(this->Configurations[ci]) << "|"
-      << cmVS10EscapeAttr(this->Platform) << "'\">true</ExcludedFromBuild>\n";
+    Elem e3(e2, "ExcludedFromBuild");
+    e3.Attribute("Condition", "'$(Configuration)|$(Platform)'=='" +
+                   this->Configurations[ci] + "|" + this->Platform + "'");
+    e3.Content("true");
   }
 }
 
