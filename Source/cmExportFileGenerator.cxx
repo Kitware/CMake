@@ -786,9 +786,14 @@ void cmExportFileGenerator::SetImportDetailProperties(
     std::string propval;
     if (auto* p = target->GetProperty("COMMON_LANGUAGE_RUNTIME")) {
       propval = p;
+    } else if (target->HasLanguage("CSharp", config)) {
+      // C# projects do not have the /clr flag, so we set the property
+      // here to mark the target as (only) managed (i.e. no .lib file
+      // to link to). Otherwise the  COMMON_LANGUAGE_RUNTIME target
+      // property would have to be set manually for C# targets to make
+      // exporting/importing work.
+      propval = "CSharp";
     }
-    // TODO: make sure propval is set to non-empty string for
-    //       CSharp targets (i.e. force ManagedType::Managed).
     properties[prop] = propval;
   }
 }

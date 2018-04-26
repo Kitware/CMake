@@ -73,7 +73,8 @@ private:
                              std::vector<size_t> const& exclude_configs);
   void WriteAllSources();
   void WriteDotNetReferences();
-  void WriteDotNetReference(std::string const& ref, std::string const& hint);
+  void WriteDotNetReference(std::string const& ref, std::string const& hint,
+                            std::string const& config);
   void WriteDotNetReferenceCustomTags(std::string const& ref);
   void WriteEmbeddedResourceGroup();
   void WriteWinRTReferences();
@@ -148,9 +149,10 @@ private:
   void WriteProjectReferences();
   void WriteApplicationTypeSettings();
   void OutputSourceSpecificFlags(Elem&, cmSourceFile const* source);
-  void AddLibraries(cmComputeLinkInformation& cli,
+  void AddLibraries(const cmComputeLinkInformation& cli,
                     std::vector<std::string>& libVec,
-                    std::vector<std::string>& vsTargetVec);
+                    std::vector<std::string>& vsTargetVec,
+                    const std::string& config);
   void AddTargetsFileAndConfigPair(std::string const& targetsFile,
                                    std::string const& config);
   void WriteLibOptions(std::string const& config);
@@ -214,6 +216,15 @@ private:
   bool IsMissingFiles;
   std::vector<std::string> AddedFiles;
   std::string DefaultArtifactDir;
+  // managed C++/C# relevant members
+  typedef std::pair<std::string, std::string> DotNetHintReference;
+  typedef std::vector<DotNetHintReference> DotNetHintReferenceList;
+  typedef std::map<std::string, DotNetHintReferenceList>
+    DotNetHintReferenceMap;
+  DotNetHintReferenceMap DotNetHintReferences;
+  typedef std::set<std::string> UsingDirectories;
+  typedef std::map<std::string, UsingDirectories> UsingDirectoriesMap;
+  UsingDirectoriesMap AdditionalUsingDirectories;
 
   typedef std::map<std::string, ToolSources> ToolSourceMap;
   ToolSourceMap Tools;

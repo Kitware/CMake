@@ -208,9 +208,7 @@ static std::string computeProjectFileExtension(cmGeneratorTarget const* t,
 {
   std::string res;
   res = ".vcxproj";
-  std::string lang = t->GetLinkerLanguage(config);
-  if (cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(t) ||
-      lang == "CSharp") {
+  if (t->HasLanguage("CSharp", config)) {
     res = ".csproj";
   }
   return res;
@@ -350,6 +348,8 @@ void cmVisualStudio10TargetGenerator::Generate()
                                              this->Name.c_str());
   this->GeneratorTarget->Target->SetProperty(
     "GENERATOR_FILE_NAME_EXT", this->ProjectFileExtension.c_str());
+  this->DotNetHintReferences.clear();
+  this->AdditionalUsingDirectories.clear();
   if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
     if (!this->ComputeClOptions()) {
       return;
@@ -710,8 +710,6 @@ void cmVisualStudio10TargetGenerator::Generate()
 void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
 {
   std::vector<std::string> references;
-  typedef std::pair<std::string, std::string> HintReference;
-  std::vector<HintReference> hintReferences;
   if (const char* vsDotNetReferences =
         this->GeneratorTarget->GetProperty("VS_DOTNET_REFERENCES")) {
     cmSystemTools::ExpandListArgument(vsDotNetReferences, references);
@@ -727,11 +725,12 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
             "/" + path;
         }
         ConvertToWindowsSlash(path);
-        hintReferences.push_back(HintReference(name, path));
+        this->DotNetHintReferences[""].push_back(
+          DotNetHintReference(name, path));
       }
     }
   }
-  if (!references.empty() || !hintReferences.empty()) {
+  if (!references.empty() || !this->DotNetHintReferences.empty()) {
     this->WriteString("<ItemGroup>\n", 1);
     for (std::string const& ri : references) {
       // if the entry from VS_DOTNET_REFERENCES is an existing file, generate
@@ -740,23 +739,36 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
         std::string name = cmsys::SystemTools::GetFilenameWithoutExtension(ri);
         std::string path = ri;
         ConvertToWindowsSlash(path);
-        hintReferences.push_back(HintReference(name, path));
+        this->DotNetHintReferences[""].push_back(
+          DotNetHintReference(name, path));
       } else {
-        this->WriteDotNetReference(ri, "");
+        this->WriteDotNetReference(ri, "", "");
       }
     }
-    for (const auto& i : hintReferences) {
-      this->WriteDotNetReference(i.first, i.second);
+    for (const auto& h : this->DotNetHintReferences) {
+      // DotNetHintReferences is also populated from AddLibraries().
+      // The configuration specific hint references are added there.
+      for (const auto& i : h.second) {
+        this->WriteDotNetReference(i.first, i.second, h.first);
+      }
     }
     this->WriteString("</ItemGroup>\n", 1);
   }
 }
 
 void cmVisualStudio10TargetGenerator::WriteDotNetReference(
-  std::string const& ref, std::string const& hint)
+  std::string const& ref, std::string const& hint, std::string const& config)
 {
-  this->WriteString("<Reference Include=\"", 2);
-  (*this->BuildFileStream) << cmVS10EscapeAttr(ref) << "\">\n";
+  std::string attr = " Include=\"" + cmVS10EscapeAttr(ref) + "\"";
+  // If 'config' is not empty, the reference is only added for the given
+  // configuration. This is used when referencing imported managed assemblies.
+  // See also cmVisualStudio10TargetGenerator::AddLibraries().
+  if (!config.empty()) {
+    this->WritePlatformConfigTag("Reference", config, 2, attr.c_str());
+  } else {
+    this->WriteString("<Reference ", 2);
+    (*this->BuildFileStream) << attr << ">\n";
+  }
   this->WriteElem("CopyLocalSatelliteAssemblies", "true", 3);
   this->WriteElem("ReferenceOutputAssembly", "true", 3);
   if (!hint.empty()) {
@@ -2510,8 +2522,20 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // check for managed C++ assembly compiler flag. This overrides any
   // /clr* compiler flags which may be defined in the flags variable(s).
   if (this->ProjectType != csproj) {
-    // TODO: add check here, if /clr was defined manually and issue
-    //       warning that this is discouraged.
+    // Warn if /clr was added manually. This should not be done
+    // anymore, because cmGeneratorTarget may not be aware that the
+    // target uses C++/CLI.
+    if (flags.find("/clr") != std::string::npos ||
+        defineFlags.find("/clr") != std::string::npos) {
+      if (configName == this->Configurations[0]) {
+        std::string message = "For the target \"" +
+          this->GeneratorTarget->GetName() +
+          "\" the /clr compiler flag was added manually. " +
+          "Set usage of C++/CLI by setting COMMON_LANGUAGE_RUNTIME "
+          "target property.";
+        this->Makefile->IssueMessage(cmake::MessageType::WARNING, message);
+      }
+    }
     if (auto* clr =
           this->GeneratorTarget->GetProperty("COMMON_LANGUAGE_RUNTIME")) {
       std::string clrString = clr;
@@ -2584,10 +2608,15 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   if (this->ProjectType != csproj && clOptions.IsManaged()) {
     this->Managed = true;
     std::string managedType = clOptions.GetFlag("CompileAsManaged");
-    if (managedType == "Safe") {
+    if (managedType == "Safe" || managedType == "Pure") {
       // force empty calling convention if safe clr is used
       clOptions.AddFlag("CallingConvention", "");
     }
+    // The default values of these flags are incompatible to
+    // managed assemblies. We have to force valid values if
+    // the target is a managed C++ target.
+    clOptions.AddFlag("ExceptionHandling", "Async");
+    clOptions.AddFlag("BasicRuntimeChecks", "Default");
   }
   if (this->ProjectType == csproj) {
     // /nowin32manifest overrides /win32manifest: parameter
@@ -2645,6 +2674,18 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     if (!pdb.empty()) {
       ConvertToWindowsSlash(pdb);
       this->WriteElemEscapeXML("ProgramDataBaseFileName", pdb, 3);
+    }
+
+    // add AdditionalUsingDirectories
+    if (this->AdditionalUsingDirectories.count(configName) > 0) {
+      std::string dirs;
+      for (auto u : this->AdditionalUsingDirectories[configName]) {
+        if (!dirs.empty()) {
+          dirs.append(";");
+        }
+        dirs.append(u);
+      }
+      this->WriteElemEscapeXML("AdditionalUsingDirectories", dirs, 3);
     }
   }
 
@@ -3289,7 +3330,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
 
   std::vector<std::string> libVec;
   std::vector<std::string> vsTargetVec;
-  this->AddLibraries(cli, libVec, vsTargetVec);
+  this->AddLibraries(cli, libVec, vsTargetVec, config);
   if (std::find(linkClosure->Languages.begin(), linkClosure->Languages.end(),
                 "CUDA") != linkClosure->Languages.end()) {
     switch (this->CudaOptions[config]->GetCudaRuntime()) {
@@ -3505,23 +3546,51 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(
 }
 
 void cmVisualStudio10TargetGenerator::AddLibraries(
-  cmComputeLinkInformation& cli, std::vector<std::string>& libVec,
-  std::vector<std::string>& vsTargetVec)
+  const cmComputeLinkInformation& cli, std::vector<std::string>& libVec,
+  std::vector<std::string>& vsTargetVec, const std::string& config)
 {
   typedef cmComputeLinkInformation::ItemVector ItemVector;
   ItemVector const& libs = cli.GetItems();
   std::string currentBinDir =
     this->LocalGenerator->GetCurrentBinaryDirectory();
   for (cmComputeLinkInformation::Item const& l : libs) {
-    // Do not allow C# targets to be added to the LIB listing. LIB files are
-    // used for linking C++ dependencies. C# libraries do not have lib files.
-    // Instead, they compile down to C# reference libraries (DLL files). The
-    // `<ProjectReference>` elements added to the vcxproj are enough for the
-    // IDE to deduce the DLL file required by other C# projects that need its
-    // reference library.
-    if (l.Target &&
-        cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(l.Target)) {
-      continue;
+    if (l.Target) {
+      auto managedType = l.Target->GetManagedType(config);
+      if (managedType != cmGeneratorTarget::ManagedType::Native &&
+          this->GeneratorTarget->GetManagedType(config) !=
+            cmGeneratorTarget::ManagedType::Native &&
+          l.Target->IsImported()) {
+        auto location = l.Target->GetFullPath(config);
+        if (!location.empty()) {
+          ConvertToWindowsSlash(location);
+          switch (this->ProjectType) {
+            case csproj:
+              // If the target we want to "link" to is an imported managed
+              // target and this is a C# project, we add a hint reference. This
+              // reference is written to project file in
+              // WriteDotNetReferences().
+              this->DotNetHintReferences[config].push_back(
+                DotNetHintReference(l.Target->GetName(), location));
+              break;
+            case vcxproj:
+              // Add path of assembly to list of using-directories, so the
+              // managed assembly can be used by '#using <assembly.dll>' in
+              // code.
+              this->AdditionalUsingDirectories[config].insert(
+                cmSystemTools::GetFilenamePath(location));
+              break;
+          }
+        }
+      }
+      // Do not allow C# targets to be added to the LIB listing. LIB files are
+      // used for linking C++ dependencies. C# libraries do not have lib files.
+      // Instead, they compile down to C# reference libraries (DLL files). The
+      // `<ProjectReference>` elements added to the vcxproj are enough for the
+      // IDE to deduce the DLL file required by other C# projects that need its
+      // reference library.
+      if (managedType == cmGeneratorTarget::ManagedType::Managed) {
+        continue;
+      }
     }
 
     if (l.IsPath) {
@@ -3746,8 +3815,24 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
                     "{" + this->GlobalGenerator->GetGUID(name) + "}", 3);
     this->WriteElem("Name", name, 3);
     this->WriteDotNetReferenceCustomTags(name);
-    if (!this->GlobalGenerator->TargetCanBeReferenced(dt)) {
-      this->WriteElem("ReferenceOutputAssembly", "false", 3);
+    if (this->Managed) {
+      // If the dependency target is not managed (compiled with /clr or
+      // C# target) we cannot reference it and have to set
+      // 'ReferenceOutputAssembly' to false.
+      cmGeneratorTarget::ManagedType check =
+        cmGeneratorTarget::ManagedType::Mixed;
+      // FIXME: These (5) lines should be removed. They are here to allow
+      //        manual setting of the /clr flag in compiler options. Setting
+      //        /clr manually makes cmGeneratorTarget::GetManagedType() return
+      //        'Native' instead of 'Mixed' or 'Managed'.
+      check = cmGeneratorTarget::ManagedType::Native;
+      bool unmanagedStatic = false;
+      if (dt->GetType() == cmStateEnums::STATIC_LIBRARY) {
+        unmanagedStatic = !dt->HasLanguage("CSharp", "");
+      }
+      if (dt->GetManagedType("") < check || unmanagedStatic) {
+        this->WriteElem("ReferenceOutputAssembly", "false", 3);
+      }
     }
     this->WriteString("</ProjectReference>\n", 2);
   }

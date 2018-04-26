@@ -5530,7 +5530,9 @@ cmGeneratorTarget::ManagedType cmGeneratorTarget::GetManagedType(
     return this->CheckManagedType(clr);
   }
 
-  // TODO: need to check if target is a CSharp target here.
-  //       If yes: return ManagedType::Managed.
-  return ManagedType::Native;
+  // C# targets are always managed. This language specific check
+  // is added to avoid that the COMMON_LANGUAGE_RUNTIME target property
+  // has to be set manually for C# targets.
+  return this->HasLanguage("CSharp", config) ? ManagedType::Managed
+                                             : ManagedType::Native;
 }
