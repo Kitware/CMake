@@ -2412,12 +2412,13 @@ std::vector<std::string> cmMakefile::GetDefinitions() const
   return res;
 }
 
-const char* cmMakefile::ExpandVariablesInString(std::string& source) const
+const std::string& cmMakefile::ExpandVariablesInString(
+  std::string& source) const
 {
   return this->ExpandVariablesInString(source, false, false);
 }
 
-const char* cmMakefile::ExpandVariablesInString(
+const std::string& cmMakefile::ExpandVariablesInString(
   std::string& source, bool escapeQuotes, bool noEscapes, bool atOnly,
   const char* filename, long line, bool removeEmpty, bool replaceAt) const
 {
@@ -2433,7 +2434,7 @@ const char* cmMakefile::ExpandVariablesInString(
     this->IssueMessage(cmake::INTERNAL_ERROR,
                        "ExpandVariablesInString @ONLY called "
                        "on something with escapes.");
-    return source.c_str();
+    return source;
   }
 
   // Variables used in the WARN case.
@@ -2515,7 +2516,7 @@ const char* cmMakefile::ExpandVariablesInString(
     this->IssueMessage(cmake::AUTHOR_WARNING, msg);
   }
 
-  return source.c_str();
+  return source;
 }
 
 cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
