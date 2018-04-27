@@ -3823,6 +3823,11 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
           }
         }
       }
+      // Workaround for static library C# targets
+      if (referenceNotManaged &&
+          dt->GetType() == cmStateEnums::STATIC_LIBRARY) {
+        referenceNotManaged = !dt->HasLanguage("CSharp", "");
+      }
       if (referenceNotManaged) {
         e2.Element("ReferenceOutputAssembly", "false");
       }
