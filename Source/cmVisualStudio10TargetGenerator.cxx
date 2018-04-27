@@ -333,6 +333,14 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->ProjectType = vcxproj;
     this->Managed = false;
   } else if (this->ProjectFileExtension == ".csproj") {
+    if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
+      std::string message = "The C# target \"" +
+        this->GeneratorTarget->GetName() +
+        "\" is of type STATIC_LIBRARY. This is discouraged (and may be "
+        "disabled in future). Make it a SHARED library instead.";
+      this->Makefile->IssueMessage(cmake::MessageType::DEPRECATION_WARNING,
+                                   message);
+    }
     this->ProjectType = csproj;
     this->Managed = true;
   }
