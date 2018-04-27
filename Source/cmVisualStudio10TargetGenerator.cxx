@@ -3811,18 +3811,9 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
       // If the dependency target is not managed (compiled with /clr or
       // C# target) we cannot reference it and have to set
       // 'ReferenceOutputAssembly' to false.
-      cmGeneratorTarget::ManagedType check =
-        cmGeneratorTarget::ManagedType::Mixed;
-      // FIXME: These (5) lines should be removed. They are here to allow
-      //        manual setting of the /clr flag in compiler options. Setting
-      //        /clr manually makes cmGeneratorTarget::GetManagedType() return
-      //        'Native' instead of 'Mixed' or 'Managed'.
-      check = cmGeneratorTarget::ManagedType::Native;
-      bool unmanagedStatic = false;
-      if (dt->GetType() == cmStateEnums::STATIC_LIBRARY) {
-        unmanagedStatic = !dt->HasLanguage("CSharp", "");
-      }
-      if (dt->GetManagedType("") < check || unmanagedStatic) {
+      auto referenceNotManaged =
+        dt->GetManagedType("") < cmGeneratorTarget::ManagedType::Mixed;
+      if (referenceNotManaged) {
         e2.Element("ReferenceOutputAssembly", "false");
       }
     }
