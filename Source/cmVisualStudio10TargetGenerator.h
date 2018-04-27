@@ -68,7 +68,7 @@ private:
   void WriteHeaderSource(cmSourceFile const* sf);
   void WriteExtraSource(cmSourceFile const* sf);
   void WriteNsightTegraConfigurationValues(std::string const& config);
-  void WriteSource(std::string const& tool, cmSourceFile const* sf);
+  void WriteSource(Elem& e2, std::string const& tool, cmSourceFile const* sf);
   void WriteExcludeFromBuild(Elem&,
                              std::vector<size_t> const& exclude_configs);
   void WriteAllSources();
