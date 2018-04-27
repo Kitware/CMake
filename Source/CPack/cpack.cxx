@@ -33,23 +33,25 @@ static const char* cmDocumentationName[][2] = {
 };
 
 static const char* cmDocumentationUsage[][2] = {
-  { nullptr, "  cpack -G <generator> [options]" },
+  // clang-format off
+  { nullptr, "  cpack [options]" },
   { nullptr, nullptr }
+  // clang-format on
 };
 
 static const char* cmDocumentationOptions[][2] = {
-  { "-G <generator>", "Use the specified generator to generate package." },
+  { "-G <generators>", "Override/define CPACK_GENERATOR" },
   { "-C <Configuration>", "Specify the project configuration" },
   { "-D <var>=<value>", "Set a CPack variable." },
-  { "--config <config file>", "Specify the config file." },
-  { "--verbose,-V", "enable verbose output" },
+  { "--config <configFile>", "Specify the config file." },
+  { "--verbose,-V", "Enable verbose output" },
   { "--trace", "Put underlying cmake scripts in trace mode." },
   { "--trace-expand", "Put underlying cmake scripts in expanded trace mode." },
-  { "--debug", "enable debug output (for CPack developers)" },
-  { "-P <package name>", "override/define CPACK_PACKAGE_NAME" },
-  { "-R <package version>", "override/define CPACK_PACKAGE_VERSION" },
-  { "-B <package directory>", "override/define CPACK_PACKAGE_DIRECTORY" },
-  { "--vendor <vendor name>", "override/define CPACK_PACKAGE_VENDOR" },
+  { "--debug", "Enable debug output (for CPack developers)" },
+  { "-P <packageName>", "Override/define CPACK_PACKAGE_NAME" },
+  { "-R <packageVersion>", "Override/define CPACK_PACKAGE_VERSION" },
+  { "-B <packageDirectory>", "Override/define CPACK_PACKAGE_DIRECTORY" },
+  { "--vendor <vendorName>", "Override/define CPACK_PACKAGE_VENDOR" },
   { nullptr, nullptr }
 };
 
