@@ -3813,6 +3813,16 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
       // 'ReferenceOutputAssembly' to false.
       auto referenceNotManaged =
         dt->GetManagedType("") < cmGeneratorTarget::ManagedType::Mixed;
+      // Workaround to check for manually set /clr flags.
+      if (referenceNotManaged) {
+        if (const auto* flags = dt->GetProperty("COMPILE_OPTIONS")) {
+          std::string flagsStr = flags;
+          if (flagsStr.find("clr") != std::string::npos) {
+            // There is a warning already issued when building the flags.
+            referenceNotManaged = false;
+          }
+        }
+      }
       if (referenceNotManaged) {
         e2.Element("ReferenceOutputAssembly", "false");
       }
