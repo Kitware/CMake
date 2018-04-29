@@ -76,8 +76,9 @@ call exists CMake will implicitly add one to the top that enables the
 default languages (``C`` and ``CXX``).  The name of the project set in
 the top level ``CMakeLists.txt`` file is available from the
 :variable:`CMAKE_PROJECT_NAME` variable, its description from
-:variable:`CMAKE_PROJECT_DESCRIPTION` and its homepage URL from
-:variable:`CMAKE_PROJECT_HOMEPAGE_URL`.
+:variable:`CMAKE_PROJECT_DESCRIPTION`, its homepage URL from
+:variable:`CMAKE_PROJECT_HOMEPAGE_URL` and its version from
+:variable:`CMAKE_PROJECT_VERSION`.
 
 .. note::
   Call the :command:`cmake_minimum_required` command at the beginning

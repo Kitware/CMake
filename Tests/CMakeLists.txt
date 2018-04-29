@@ -951,6 +951,44 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endif()
   endif()
 
+  if(CTEST_TEST_CPACK)
+    add_test(CPackUseDefaultVersion ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackUseDefaultVersion"
+      "${CMake_BINARY_DIR}/Tests/CPackUseDefaultVersion"
+      ${build_generator_args}
+      --build-project CPackUseDefaultVersion
+      --build-two-config
+      --build-options ${build_options}
+        ${CPackUseDefaultVersion_BUILD_OPTIONS})
+    set_tests_properties(CPackUseDefaultVersion PROPERTIES PASS_REGULAR_EXPRESSION "CPACK_PACKAGE_VERSION=0\\.1\\.1")
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackUseDefaultVersion")
+
+    add_test(CPackUseProjectVersion ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackUseProjectVersion"
+      "${CMake_BINARY_DIR}/Tests/CPackUseProjectVersion"
+      ${build_generator_args}
+      --build-project CPackUseProjectVersion
+      --build-two-config
+      --build-options ${build_options}
+        ${CPackUseProjectVersion_BUILD_OPTIONS})
+    set_tests_properties(CPackUseProjectVersion PROPERTIES PASS_REGULAR_EXPRESSION "CPACK_PACKAGE_VERSION=1\\.2\\.3")
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackUseProjectVersion")
+
+    add_test(CPackUseShortProjectVersion ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackUseShortProjectVersion"
+      "${CMake_BINARY_DIR}/Tests/CPackUseShortProjectVersion"
+      ${build_generator_args}
+      --build-project CPackUseShortProjectVersion
+      --build-two-config
+      --build-options ${build_options}
+        ${CPackUseProjectVersion_BUILD_OPTIONS})
+    set_tests_properties(CPackUseShortProjectVersion PROPERTIES PASS_REGULAR_EXPRESSION "CPACK_PACKAGE_VERSION=2")
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackUseShortProjectVersion")
+  endif()
+
   if(CTEST_RUN_CPackComponents)
     set(CPackComponents_BUILD_OPTIONS)
     if(APPLE)

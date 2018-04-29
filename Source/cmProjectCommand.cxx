@@ -249,6 +249,12 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     vv = projectName + "_VERSION_TWEAK";
     this->Makefile->AddDefinition("PROJECT_VERSION_TWEAK", vb[3]);
     this->Makefile->AddDefinition(vv, vb[3]);
+    // Also, try set top level variables
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION", vs.c_str());
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_MAJOR", vb[0]);
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_MINOR", vb[1]);
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_PATCH", vb[2]);
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_TWEAK", vb[3]);
   } else if (cmp0048 != cmPolicies::OLD) {
     // Set project VERSION variables to empty
     std::vector<std::string> vv;
@@ -262,6 +268,13 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     vv.push_back(projectName + "_VERSION_MINOR");
     vv.push_back(projectName + "_VERSION_PATCH");
     vv.push_back(projectName + "_VERSION_TWEAK");
+    if (this->Makefile->IsRootMakefile()) {
+      vv.push_back("CMAKE_PROJECT_VERSION");
+      vv.push_back("CMAKE_PROJECT_VERSION_MAJOR");
+      vv.push_back("CMAKE_PROJECT_VERSION_MINOR");
+      vv.push_back("CMAKE_PROJECT_VERSION_PATCH");
+      vv.push_back("CMAKE_PROJECT_VERSION_TWEAK");
+    }
     std::string vw;
     for (std::string const& i : vv) {
       const char* v = this->Makefile->GetDefinition(i);
@@ -286,36 +299,14 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     this->Makefile->AddDefinition("PROJECT_DESCRIPTION", description.c_str());
     this->Makefile->AddDefinition(projectName + "_DESCRIPTION",
                                   description.c_str());
-    // Set the CMAKE_PROJECT_DESCRIPTION variable to be the highest-level
-    // project name in the tree. If there are two project commands
-    // in the same CMakeLists.txt file, and it is the top level
-    // CMakeLists.txt file, then go with the last one.
-    if (!this->Makefile->GetDefinition("CMAKE_PROJECT_DESCRIPTION") ||
-        (this->Makefile->IsRootMakefile())) {
-      this->Makefile->AddDefinition("CMAKE_PROJECT_DESCRIPTION",
-                                    description.c_str());
-      this->Makefile->AddCacheDefinition(
-        "CMAKE_PROJECT_DESCRIPTION", description.c_str(),
-        "Value Computed by CMake", cmStateEnums::STATIC);
-    }
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_DESCRIPTION", description.c_str());
   }
 
   if (haveHomepage) {
     this->Makefile->AddDefinition("PROJECT_HOMEPAGE_URL", homepage.c_str());
     this->Makefile->AddDefinition(projectName + "_HOMEPAGE_URL",
                                   homepage.c_str());
-    // Set the CMAKE_PROJECT_HOMEPAGE_URL variable to be the highest-level
-    // project name in the tree. If there are two project commands
-    // in the same CMakeLists.txt file, and it is the top level
-    // CMakeLists.txt file, then go with the last one.
-    if (!this->Makefile->GetDefinition("CMAKE_PROJECT_HOMEPAGE_URL") ||
-        (this->Makefile->IsRootMakefile())) {
-      this->Makefile->AddDefinition("CMAKE_PROJECT_HOMEPAGE_URL",
-                                    homepage.c_str());
-      this->Makefile->AddCacheDefinition(
-        "CMAKE_PROJECT_HOMEPAGE_URL", homepage.c_str(),
-        "Value Computed by CMake", cmStateEnums::STATIC);
-    }
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_HOMEPAGE_URL", homepage.c_str());
   }
 
   if (languages.empty()) {
@@ -337,4 +328,19 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
   return true;
+}
+
+void cmProjectCommand::TopLevelCMakeVarCondSet(const char* const name,
+                                               const char* const value)
+{
+  // Set the CMAKE_PROJECT_XXX variable to be the highest-level
+  // project name in the tree. If there are two project commands
+  // in the same CMakeLists.txt file, and it is the top level
+  // CMakeLists.txt file, then go with the last one.
+  if (!this->Makefile->GetDefinition(name) ||
+      (this->Makefile->IsRootMakefile())) {
+    this->Makefile->AddDefinition(name, value);
+    this->Makefile->AddCacheDefinition(name, value, "Value Computed by CMake",
+                                       cmStateEnums::STATIC);
+  }
 }

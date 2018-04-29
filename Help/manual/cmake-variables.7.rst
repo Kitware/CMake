@@ -69,6 +69,11 @@ Variables that Provide Information
    /variable/CMAKE_PROJECT_DESCRIPTION
    /variable/CMAKE_PROJECT_HOMEPAGE_URL
    /variable/CMAKE_PROJECT_NAME
+   /variable/CMAKE_PROJECT_VERSION
+   /variable/CMAKE_PROJECT_VERSION_MAJOR
+   /variable/CMAKE_PROJECT_VERSION_MINOR
+   /variable/CMAKE_PROJECT_VERSION_PATCH
+   /variable/CMAKE_PROJECT_VERSION_TWEAK
    /variable/CMAKE_RANLIB
    /variable/CMAKE_ROOT
    /variable/CMAKE_SCRIPT_MODE_FILE
