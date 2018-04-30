@@ -885,9 +885,6 @@ protected:
   std::string DefineFlags;
 
   // Track the value of the computed DEFINITIONS property.
-  void AddDefineFlag(std::string const& flag, std::string&);
-  void RemoveDefineFlag(std::string const& flag, std::string::size_type,
-                        std::string&);
   std::string DefineFlagsOrig;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
