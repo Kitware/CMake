@@ -7,6 +7,14 @@ install
 
 Specify rules to run at install time.
 
+This command accepts several signatures:
+
+* :ref:`install(TARGETS) <install-targets>`
+* :ref:`install(FILES|PROGRAMS) <install-files>`
+* :ref:`install(DIRECTORY) <install-directory>`
+* :ref:`install(SCRIPT|CODE) <install-script>`
+* :ref:`install(EXPORT|EXPORT_ANDROID_MK) <install-export>`
+
 Introduction
 ^^^^^^^^^^^^
 
@@ -80,6 +88,8 @@ signatures that specify them.  The common options are:
 Command signatures that install files may print messages during
 installation.  Use the :variable:`CMAKE_INSTALL_MESSAGE` variable
 to control which messages are printed.
+
+.. _install-targets:
 
 Installing Targets
 ^^^^^^^^^^^^^^^^^^
@@ -197,6 +207,8 @@ The install destination given to the target install ``DESTINATION`` may
 use "generator expressions" with the syntax ``$<...>``.  See the
 :manual:`cmake-generator-expressions(7)` manual for available expressions.
 
+.. _install-files:
+
 Installing Files
 ^^^^^^^^^^^^^^^^
 
@@ -229,6 +241,8 @@ to a full path.
 The install destination given to the files install ``DESTINATION`` may
 use "generator expressions" with the syntax ``$<...>``.  See the
 :manual:`cmake-generator-expressions(7)` manual for available expressions.
+
+.. _install-directory:
 
 Installing Directories
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -311,6 +325,8 @@ given to the directory install ``DESTINATION`` may use "generator expressions"
 with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.
 
+.. _install-script:
+
 Custom Installation Logic
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -331,6 +347,8 @@ example, the code
   install(CODE "MESSAGE(\"Sample install message.\")")
 
 will print a message during installation.
+
+.. _install-export:
 
 Installing Exports
 ^^^^^^^^^^^^^^^^^^
