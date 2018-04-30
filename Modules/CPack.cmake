@@ -43,9 +43,9 @@
 #
 # * cpack runs
 # * it includes CPackConfig.cmake
-# * it iterates over the generators listed in that file's
-#   CPACK_GENERATOR list variable (unless told to use just a
-#   specific one via -G on the command line...)
+# * it iterates over the generators given by the ``-G`` command line option,
+#   or if no such option was specified, over the list of generators given by
+#   the CPACK_GENERATOR variable set in the CPackConfig.cmake input file.
 # * foreach generator, it then
 #
 #   - sets CPACK_GENERATOR to the one currently being iterated
@@ -182,12 +182,11 @@
 #
 # .. variable:: CPACK_GENERATOR
 #
-#  List of CPack generators to use. If not specified, CPack will create a
+#  List of CPack generators to use.  If not specified, CPack will create a
 #  set of options CPACK_BINARY_<GENNAME> (e.g., CPACK_BINARY_NSIS) allowing
-#  the user to enable/disable individual generators. This variable may be
-#  used on the command line as well as in::
-#
-#   cpack -D CPACK_GENERATOR="ZIP;TGZ" /path/to/build/tree
+#  the user to enable/disable individual generators.  If the ``-G`` option
+#  is given on the :manual:`cpack <cpack(1)>` command line, it will override
+#  this variable and any CPACK_BINARY_<GENNAME> options.
 #
 # .. variable:: CPACK_OUTPUT_CONFIG_FILE
 #
