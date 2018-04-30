@@ -2861,7 +2861,8 @@ void cmGeneratorTarget::GetCompileDefinitions(
   cmDeleteAll(linkInterfaceCompileDefinitionsEntries);
 }
 
-static void processLinkOptions(
+namespace {
+void processLinkOptions(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<std::string>& options,
@@ -2872,6 +2873,7 @@ static void processLinkOptions(
   processOptionsInternal(tgt, entries, options, uniqueOptions, dagChecker,
                          config, debugOptions, "link options", language,
                          OptionsParse::Shell);
+}
 }
 
 void cmGeneratorTarget::GetLinkOptions(std::vector<std::string>& result,
@@ -2912,6 +2914,98 @@ void cmGeneratorTarget::GetLinkOptions(std::vector<std::string>& result,
                      language);
 
   cmDeleteAll(linkInterfaceLinkOptionsEntries);
+
+  // Last step: replace "LINKER:" prefixed elements by
+  // actual linker wrapper
+  const std::string wrapper(this->Makefile->GetSafeDefinition(
+    "CMAKE_" + language + "_LINKER_WRAPPER_FLAG"));
+  std::vector<std::string> wrapperFlag;
+  cmSystemTools::ExpandListArgument(wrapper, wrapperFlag);
+  const std::string wrapperSep(this->Makefile->GetSafeDefinition(
+    "CMAKE_" + language + "_LINKER_WRAPPER_FLAG_SEP"));
+  bool concatFlagAndArgs = true;
+  if (!wrapperFlag.empty() && wrapperFlag.back() == " ") {
+    concatFlagAndArgs = false;
+    wrapperFlag.pop_back();
+  }
+
+  const std::string LINKER{ "LINKER:" };
+  const std::string SHELL{ "SHELL:" };
+  const std::string LINKER_SHELL = LINKER + SHELL;
+
+  std::vector<std::string>::iterator entry;
+  while ((entry = std::find_if(result.begin(), result.end(),
+                               [&LINKER](const std::string& item) -> bool {
+                                 return item.compare(0, LINKER.length(),
+                                                     LINKER) == 0;
+                               })) != result.end()) {
+    std::vector<std::string> linkerOptions;
+    if (entry->compare(0, LINKER_SHELL.length(), LINKER_SHELL) == 0) {
+      cmSystemTools::ParseUnixCommandLine(
+        entry->c_str() + LINKER_SHELL.length(), linkerOptions);
+    } else {
+      linkerOptions =
+        cmSystemTools::tokenize(entry->substr(LINKER.length()), ",");
+    }
+    entry = result.erase(entry);
+
+    if (linkerOptions.empty() ||
+        (linkerOptions.size() == 1 && linkerOptions.front().empty())) {
+      continue;
+    }
+
+    // for now, raise an error if prefix SHELL: is part of arguments
+    if (std::find_if(linkerOptions.begin(), linkerOptions.end(),
+                     [&SHELL](const std::string& item) -> bool {
+                       return item.find(SHELL) != std::string::npos;
+                     }) != linkerOptions.end()) {
+      this->LocalGenerator->GetCMakeInstance()->IssueMessage(
+        cmake::FATAL_ERROR,
+        "'SHELL:' prefix is not supported as part of 'LINKER:' arguments.",
+        this->GetBacktrace());
+      return;
+    }
+
+    if (wrapperFlag.empty()) {
+      // nothing specified, insert elements as is
+      result.insert(entry, linkerOptions.begin(), linkerOptions.end());
+    } else {
+      std::vector<std::string> options;
+
+      if (!wrapperSep.empty()) {
+        if (concatFlagAndArgs) {
+          // insert flag elements except last one
+          options.insert(options.end(), wrapperFlag.begin(),
+                         wrapperFlag.end() - 1);
+          // concatenate last flag element and all LINKER list values
+          // in one option
+          options.push_back(wrapperFlag.back() +
+                            cmJoin(linkerOptions, wrapperSep));
+        } else {
+          options.insert(options.end(), wrapperFlag.begin(),
+                         wrapperFlag.end());
+          // concatenate all LINKER list values in one option
+          options.push_back(cmJoin(linkerOptions, wrapperSep));
+        }
+      } else {
+        // prefix each element of LINKER list with wrapper
+        if (concatFlagAndArgs) {
+          std::transform(
+            linkerOptions.begin(), linkerOptions.end(), linkerOptions.begin(),
+            [&wrapperFlag](const std::string& value) -> std::string {
+              return wrapperFlag.back() + value;
+            });
+        }
+        for (const auto& value : linkerOptions) {
+          options.insert(options.end(), wrapperFlag.begin(),
+                         concatFlagAndArgs ? wrapperFlag.end() - 1
+                                           : wrapperFlag.end());
+          options.push_back(value);
+        }
+      }
+      result.insert(entry, options.begin(), options.end());
+    }
+  }
 }
 
 void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const

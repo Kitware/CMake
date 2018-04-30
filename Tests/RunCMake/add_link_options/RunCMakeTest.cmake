@@ -26,3 +26,13 @@ if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
   unset(RunCMake_TEST_OPTIONS)
   unset(RunCMake_TEST_OUTPUT_MERGE)
 endif()
+
+run_cmake(bad_SHELL_usage)
+
+if(RunCMake_GENERATOR MATCHES "(Ninja|Makefile)")
+  run_cmake(LINKER_expansion)
+  run_cmake_target(LINKER_expansion build all)
+
+  run_cmake(LINKER_SHELL_expansion)
+  run_cmake_target(LINKER_SHELL_expansion build all)
+endif()

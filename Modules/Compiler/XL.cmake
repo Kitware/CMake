@@ -23,6 +23,9 @@ macro(__compiler_xl lang)
   set(CMAKE_${lang}_RESPONSE_FILE_FLAG "-qoptfile=")
   set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "-qoptfile=")
 
+  set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
+  set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
+
   string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -g")
   string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O")
   string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -O")

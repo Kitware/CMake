@@ -29,34 +29,11 @@ if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
   unset(RunCMake_TEST_OUTPUT_MERGE)
 endif()
 
+run_cmake(bad_SHELL_usage)
 
-# include(RunCMake)
+if(RunCMake_GENERATOR MATCHES "(Ninja|Makefile)")
+  run_cmake(LINKER_expansion)
 
-# macro(run_cmake_build test)
-#   run_cmake(${test})
-
-#   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
-#   set(RunCMake_TEST_NO_CLEAN 1)
-#   run_cmake_command(${test}-build ${CMAKE_COMMAND} --build . ${ARGN})
-
-#   unset(RunCMake_TEST_BINARY_DIR)
-#   unset(RunCMake_TEST_NO_CLEAN)
-# endmacro()
-
-# if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
-#   # Intel compiler does not reject bad flags or objects!
-#   set(RunCMake_TEST_OUTPUT_MERGE TRUE)
-
-#   run_cmake_build(LINK_OPTIONS)
-#   run_cmake_build(INTERFACE_LINK_OPTIONS)
-
-#   if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
-#     set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Release)
-#   endif()
-#   run_cmake_build(LINK_OPTIONS_shared --config Release)
-#   run_cmake_build(LINK_OPTIONS_mod --config Release)
-#   run_cmake_build(LINK_OPTIONS_exe --config Release)
-#   unset(RunCMake_TEST_OPTIONS)
-
-#   unset(RunCMake_TEST_OUTPUT_MERGE)
-# endif()
+  run_cmake_target(LINKER_expansion LINKER linker)
+  run_cmake_target(LINKER_expansion LINKER_SHELL linker_shell)
+endif()

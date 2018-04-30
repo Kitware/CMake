@@ -30,6 +30,8 @@ else()
       set(CMAKE_${lang}_COMPILE_OPTIONS_TARGET "--target=")
       set(CMAKE_${lang}_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN "--gcc-toolchain=")
     endif()
+    set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Xlinker" " ")
+    set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP)
 
     set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
     set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
