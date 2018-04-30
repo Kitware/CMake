@@ -40,8 +40,8 @@
 # Here are some CPackRPM wiki resources that are here for historic reasons and
 # are no longer maintained but may still prove useful:
 #
-#  - https://cmake.org/Wiki/CMake:CPackConfiguration
-#  - https://cmake.org/Wiki/CMake:CPackPackageGenerators#RPM_.28Unix_Only.29
+#  - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/Configuration
+#  - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators#rpm-unix-only
 #
 # List of CPackRPM specific variables:
 #

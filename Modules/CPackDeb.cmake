@@ -29,8 +29,8 @@
 # Here are some CPackDeb wiki resources that are here for historic reasons and
 # are no longer maintained but may still prove useful:
 #
-#  - https://cmake.org/Wiki/CMake:CPackConfiguration
-#  - https://cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29
+#  - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/Configuration
+#  - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators#deb-unix-only
 #
 # List of CPackDEB specific variables:
 #
@@ -278,7 +278,7 @@
 #    You may need set :variable:`CMAKE_INSTALL_RPATH` to an appropriate value
 #    if you use this feature, because if you don't :code:`dpkg-shlibdeps`
 #    may fail to find your own shared libs.
-#    See https://cmake.org/Wiki/CMake_RPATH_handling.
+#    See https://gitlab.kitware.com/cmake/community/wikis/doc/cmake/RPATH-handling
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_DEBUG
 #
