@@ -29,10 +29,10 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
                                                  cmMakefile& mf,
                                                  cmExecutionStatus& inStatus)
 {
-  if (!cmSystemTools::Strucmp(lff.Name.c_str(), "foreach")) {
+  if (lff.Name.Lower == "foreach") {
     // record the number of nested foreach commands
     this->Depth++;
-  } else if (!cmSystemTools::Strucmp(lff.Name.c_str(), "endforeach")) {
+  } else if (lff.Name.Lower == "endforeach") {
     // if this is the endofreach for this statement
     if (!this->Depth) {
       // Remove the function blocker for this scope or bail.
@@ -97,7 +97,7 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
 bool cmForEachFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
                                             cmMakefile& mf)
 {
-  if (!cmSystemTools::Strucmp(lff.Name.c_str(), "endforeach")) {
+  if (lff.Name.Lower == "endforeach") {
     std::vector<std::string> expandedArguments;
     mf.ExpandArguments(lff.Arguments, expandedArguments);
     // if the endforeach has arguments then make sure

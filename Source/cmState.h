@@ -125,7 +125,11 @@ public:
   bool GetIsGeneratorMultiConfig() const;
   void SetIsGeneratorMultiConfig(bool b);
 
+  // Returns a command from its name, case insensitive, or nullptr
   cmCommand* GetCommand(std::string const& name) const;
+  // Returns a command from its name, or nullptr
+  cmCommand* GetCommandByExactName(std::string const& name) const;
+
   void AddBuiltinCommand(std::string const& name, cmCommand* command);
   void AddDisallowedCommand(std::string const& name, cmCommand* command,
                             cmPolicies::PolicyID policy, const char* message);

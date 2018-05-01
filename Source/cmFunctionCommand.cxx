@@ -9,7 +9,6 @@
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmState.h"
-#include "cmSystemTools.h"
 
 // define the class for function commands
 class cmFunctionHelperCommand : public cmCommand
@@ -128,9 +127,9 @@ bool cmFunctionFunctionBlocker::IsFunctionBlocked(
 {
   // record commands until we hit the ENDFUNCTION
   // at the ENDFUNCTION call we shift gears and start looking for invocations
-  if (!cmSystemTools::Strucmp(lff.Name.c_str(), "function")) {
+  if (lff.Name.Lower == "function") {
     this->Depth++;
-  } else if (!cmSystemTools::Strucmp(lff.Name.c_str(), "endfunction")) {
+  } else if (lff.Name.Lower == "endfunction") {
     // if this is the endfunction for this function then execute
     if (!this->Depth) {
       // create a new command and add it to cmake
@@ -157,7 +156,7 @@ bool cmFunctionFunctionBlocker::IsFunctionBlocked(
 bool cmFunctionFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
                                              cmMakefile& mf)
 {
-  if (!cmSystemTools::Strucmp(lff.Name.c_str(), "endfunction")) {
+  if (lff.Name.Lower == "endfunction") {
     std::vector<std::string> expandedArguments;
     mf.ExpandArguments(lff.Arguments, expandedArguments,
                        this->GetStartingContext().FilePath.c_str());

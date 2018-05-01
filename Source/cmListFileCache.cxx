@@ -13,6 +13,14 @@
 #include <assert.h>
 #include <sstream>
 
+cmCommandContext::cmCommandName& cmCommandContext::cmCommandName::operator=(
+  std::string const& name)
+{
+  this->Original = name;
+  this->Lower = cmSystemTools::LowerCase(name);
+  return *this;
+}
+
 struct cmListFileParser
 {
   cmListFileParser(cmListFile* lf, cmListFileBacktrace const& lfbt,
