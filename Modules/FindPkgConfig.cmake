@@ -200,9 +200,7 @@ function(_pkg_create_imp_target _prefix _no_cmake_path _no_cmake_environment_pat
   unset(_search_paths)
   foreach (flag IN LISTS ${_prefix}_LDFLAGS)
     if (flag MATCHES "^-L(.*)")
-      # only look into the given paths from now on
       list(APPEND _search_paths ${CMAKE_MATCH_1})
-      set(_find_opts HINTS ${_search_paths} NO_DEFAULT_PATH)
       continue()
     endif()
     if (flag MATCHES "^-l(.*)")
@@ -211,6 +209,12 @@ function(_pkg_create_imp_target _prefix _no_cmake_path _no_cmake_environment_pat
       continue()
     endif()
 
+    if(_search_paths)
+        # Firstly search in -L paths
+        find_library(pkgcfg_lib_${_prefix}_${_pkg_search}
+                     NAMES ${_pkg_search}
+                     HINTS ${_search_paths} NO_DEFAULT_PATH)
+    endif()
     find_library(pkgcfg_lib_${_prefix}_${_pkg_search}
                  NAMES ${_pkg_search}
                  ${_find_opts})
