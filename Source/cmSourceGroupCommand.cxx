@@ -101,8 +101,12 @@ bool addFilesToItsSourceGroups(const std::string& root,
       tokenizedPath = tokenizePath(sgFilesPath);
     }
 
-    if (tokenizedPath.size() > 1) {
+    if (!tokenizedPath.empty()) {
       tokenizedPath.pop_back();
+
+      if (tokenizedPath.empty()) {
+        tokenizedPath.push_back("");
+      }
 
       sg = makefile.GetOrCreateSourceGroup(tokenizedPath);
 
