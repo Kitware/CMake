@@ -252,9 +252,7 @@ class cmMakefile;
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies
  *
- * See the cmake wiki section on
- * <a href="https://cmake.org/Wiki/CMake/Policies">policies</a>
- * for an overview of this class's purpose
+ * See the cmake-policies(7) manual for an overview of this class's purpose.
  */
 class cmPolicies
 {
