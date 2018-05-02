@@ -1130,6 +1130,17 @@ cmTarget* cmMakefile::AddUtilityCommand(
   return target;
 }
 
+static void s_AddDefineFlag(std::string const& flag, std::string& dflags)
+{
+  // remove any \n\r
+  std::string::size_type initSize = dflags.size();
+  dflags += ' ';
+  dflags += flag;
+  std::string::iterator flagStart = dflags.begin() + initSize + 1;
+  std::replace(flagStart, dflags.end(), '\n', ' ');
+  std::replace(flagStart, dflags.end(), '\r', ' ');
+}
+
 void cmMakefile::AddDefineFlag(std::string const& flag)
 {
   if (flag.empty()) {
@@ -1137,7 +1148,7 @@ void cmMakefile::AddDefineFlag(std::string const& flag)
   }
 
   // Update the string used for the old DEFINITIONS property.
-  this->AddDefineFlag(flag, this->DefineFlagsOrig);
+  s_AddDefineFlag(flag, this->DefineFlagsOrig);
 
   // If this is really a definition, update COMPILE_DEFINITIONS.
   if (this->ParseDefineFlag(flag, false)) {
@@ -1145,42 +1156,12 @@ void cmMakefile::AddDefineFlag(std::string const& flag)
   }
 
   // Add this flag that does not look like a definition.
-  this->AddDefineFlag(flag, this->DefineFlags);
+  s_AddDefineFlag(flag, this->DefineFlags);
 }
 
-void cmMakefile::AddDefineFlag(std::string const& flag, std::string& dflags)
+static void s_RemoveDefineFlag(std::string const& flag, std::string& dflags)
 {
-  // remove any \n\r
-  std::string::size_type initSize = dflags.size();
-  dflags += std::string(" ") + flag;
-  std::string::iterator flagStart = dflags.begin() + initSize + 1;
-  std::replace(flagStart, dflags.end(), '\n', ' ');
-  std::replace(flagStart, dflags.end(), '\r', ' ');
-}
-
-void cmMakefile::RemoveDefineFlag(std::string const& flag)
-{
-  // Check the length of the flag to remove.
-  if (flag.empty()) {
-    return;
-  }
   std::string::size_type const len = flag.length();
-  // Update the string used for the old DEFINITIONS property.
-  this->RemoveDefineFlag(flag, len, this->DefineFlagsOrig);
-
-  // If this is really a definition, update COMPILE_DEFINITIONS.
-  if (this->ParseDefineFlag(flag, true)) {
-    return;
-  }
-
-  // Remove this flag that does not look like a definition.
-  this->RemoveDefineFlag(flag, len, this->DefineFlags);
-}
-
-void cmMakefile::RemoveDefineFlag(std::string const& flag,
-                                  std::string::size_type len,
-                                  std::string& dflags)
-{
   // Remove all instances of the flag that are surrounded by
   // whitespace or the beginning/end of the string.
   for (std::string::size_type lpos = dflags.find(flag, 0);
@@ -1193,6 +1174,25 @@ void cmMakefile::RemoveDefineFlag(std::string const& flag,
       ++lpos;
     }
   }
+}
+
+void cmMakefile::RemoveDefineFlag(std::string const& flag)
+{
+  // Check the length of the flag to remove.
+  if (flag.empty()) {
+    return;
+  }
+
+  // Update the string used for the old DEFINITIONS property.
+  s_RemoveDefineFlag(flag, this->DefineFlagsOrig);
+
+  // If this is really a definition, update COMPILE_DEFINITIONS.
+  if (this->ParseDefineFlag(flag, true)) {
+    return;
+  }
+
+  // Remove this flag that does not look like a definition.
+  s_RemoveDefineFlag(flag, this->DefineFlags);
 }
 
 void cmMakefile::AddCompileDefinition(std::string const& option)
@@ -2412,12 +2412,13 @@ std::vector<std::string> cmMakefile::GetDefinitions() const
   return res;
 }
 
-const char* cmMakefile::ExpandVariablesInString(std::string& source) const
+const std::string& cmMakefile::ExpandVariablesInString(
+  std::string& source) const
 {
   return this->ExpandVariablesInString(source, false, false);
 }
 
-const char* cmMakefile::ExpandVariablesInString(
+const std::string& cmMakefile::ExpandVariablesInString(
   std::string& source, bool escapeQuotes, bool noEscapes, bool atOnly,
   const char* filename, long line, bool removeEmpty, bool replaceAt) const
 {
@@ -2433,7 +2434,7 @@ const char* cmMakefile::ExpandVariablesInString(
     this->IssueMessage(cmake::INTERNAL_ERROR,
                        "ExpandVariablesInString @ONLY called "
                        "on something with escapes.");
-    return source.c_str();
+    return source;
   }
 
   // Variables used in the WARN case.
@@ -2515,7 +2516,7 @@ const char* cmMakefile::ExpandVariablesInString(
     this->IssueMessage(cmake::AUTHOR_WARNING, msg);
   }
 
-  return source.c_str();
+  return source;
 }
 
 cmake::MessageType cmMakefile::ExpandVariablesInStringOld(

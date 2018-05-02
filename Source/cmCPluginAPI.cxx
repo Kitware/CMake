@@ -405,7 +405,8 @@ char CCONV* cmExpandVariablesInString(void* arg, const char* source,
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
   std::string barf = source;
-  std::string result = mf->ExpandVariablesInString(barf, escapeQuotes, atOnly);
+  std::string const& result =
+    mf->ExpandVariablesInString(barf, escapeQuotes, atOnly);
   return strdup(result.c_str());
 }
 
@@ -664,7 +665,7 @@ void CCONV cmSourceFileSetName(void* arg, const char* name, const char* dir,
   // First try and see whether the listed file can be found
   // as is without extensions added on.
   std::string hname = pathname;
-  if (cmSystemTools::FileExists(hname.c_str())) {
+  if (cmSystemTools::FileExists(hname)) {
     sf->SourceName = cmSystemTools::GetFilenamePath(name);
     if (!sf->SourceName.empty()) {
       sf->SourceName += "/";
@@ -691,7 +692,7 @@ void CCONV cmSourceFileSetName(void* arg, const char* name, const char* dir,
     hname = pathname;
     hname += ".";
     hname += *ext;
-    if (cmSystemTools::FileExists(hname.c_str())) {
+    if (cmSystemTools::FileExists(hname)) {
       sf->SourceExtension = *ext;
       sf->FullPath = hname;
       return;
@@ -704,7 +705,7 @@ void CCONV cmSourceFileSetName(void* arg, const char* name, const char* dir,
     hname = pathname;
     hname += ".";
     hname += *ext;
-    if (cmSystemTools::FileExists(hname.c_str())) {
+    if (cmSystemTools::FileExists(hname)) {
       sf->SourceExtension = *ext;
       sf->FullPath = hname;
       return;

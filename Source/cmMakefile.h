@@ -565,12 +565,11 @@ public:
    * entry in the this->Definitions map.  Also \@var\@ is
    * expanded to match autoconf style expansions.
    */
-  const char* ExpandVariablesInString(std::string& source) const;
-  const char* ExpandVariablesInString(std::string& source, bool escapeQuotes,
-                                      bool noEscapes, bool atOnly = false,
-                                      const char* filename = nullptr,
-                                      long line = -1, bool removeEmpty = false,
-                                      bool replaceAt = false) const;
+  const std::string& ExpandVariablesInString(std::string& source) const;
+  const std::string& ExpandVariablesInString(
+    std::string& source, bool escapeQuotes, bool noEscapes,
+    bool atOnly = false, const char* filename = nullptr, long line = -1,
+    bool removeEmpty = false, bool replaceAt = false) const;
 
   /**
    * Remove any remaining variables in the string. Anything with ${var} or
@@ -886,9 +885,6 @@ protected:
   std::string DefineFlags;
 
   // Track the value of the computed DEFINITIONS property.
-  void AddDefineFlag(std::string const& flag, std::string&);
-  void RemoveDefineFlag(std::string const& flag, std::string::size_type,
-                        std::string&);
   std::string DefineFlagsOrig;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
