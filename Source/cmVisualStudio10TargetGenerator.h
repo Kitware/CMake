@@ -35,7 +35,7 @@ public:
   // used by cmVisualStudioGeneratorOptions
   std::string CalcCondition(const std::string& config) const;
   void WritePlatformConfigTag(const char* tag, const std::string& config,
-                              int indentLevel, const char* attribute = 0);
+                              int indentLevel, const std::string& content);
 
 private:
   struct ToolSource
@@ -61,93 +61,96 @@ private:
   void WriteElem(const char* tag, std::string const& val, int indentLevel);
   void WriteElemEscapeXML(const char* tag, std::string const& val,
                           int indentLevel);
-  void WriteProjectConfigurations();
-  void WriteProjectConfigurationValues();
-  void WriteMSToolConfigurationValues(std::string const& config);
-  void WriteMSToolConfigurationValuesManaged(std::string const& config);
-  void WriteHeaderSource(cmSourceFile const* sf);
-  void WriteExtraSource(cmSourceFile const* sf);
-  void WriteNsightTegraConfigurationValues(std::string const& config);
+  void WriteProjectConfigurations(Elem& e0);
+  void WriteProjectConfigurationValues(Elem& e0);
+  void WriteMSToolConfigurationValues(Elem& e1, std::string const& config);
+  void WriteMSToolConfigurationValuesManaged(Elem& e1,
+                                             std::string const& config);
+  void WriteHeaderSource(Elem& e1, cmSourceFile const* sf);
+  void WriteExtraSource(Elem& e1, cmSourceFile const* sf);
+  void WriteNsightTegraConfigurationValues(Elem& e1,
+                                           std::string const& config);
   void WriteSource(Elem& e2, std::string const& tool, cmSourceFile const* sf);
-  void WriteExcludeFromBuild(Elem&,
+  void WriteExcludeFromBuild(Elem& e2,
                              std::vector<size_t> const& exclude_configs);
-  void WriteAllSources();
-  void WriteDotNetReferences();
-  void WriteDotNetReference(std::string const& ref, std::string const& hint,
+  void WriteAllSources(Elem& e0);
+  void WriteDotNetReferences(Elem& e0);
+  void WriteDotNetReference(Elem& e1, std::string const& ref,
+                            std::string const& hint,
                             std::string const& config);
-  void WriteDotNetReferenceCustomTags(std::string const& ref);
-  void WriteEmbeddedResourceGroup();
-  void WriteWinRTReferences();
-  void WriteWinRTPackageCertificateKeyFile();
-  void WriteXamlFilesGroup();
-  void WritePathAndIncrementalLinkOptions();
-  void WriteItemDefinitionGroups();
+  void WriteDotNetReferenceCustomTags(Elem& e2, std::string const& ref);
+  void WriteEmbeddedResourceGroup(Elem& e0);
+  void WriteWinRTReferences(Elem& e0);
+  void WriteWinRTPackageCertificateKeyFile(Elem& e0);
+  void WriteXamlFilesGroup(Elem& e0);
+  void WritePathAndIncrementalLinkOptions(Elem& e0);
+  void WriteItemDefinitionGroups(Elem& e0);
   void VerifyNecessaryFiles();
-  void WriteMissingFiles();
-  void WriteMissingFilesWP80();
-  void WriteMissingFilesWP81();
-  void WriteMissingFilesWS80();
-  void WriteMissingFilesWS81();
-  void WriteMissingFilesWS10_0();
-  void WritePlatformExtensions();
-  void WriteSinglePlatformExtension(std::string const& extension,
+  void WriteMissingFiles(Elem& e1);
+  void WriteMissingFilesWP80(Elem& e1);
+  void WriteMissingFilesWP81(Elem& e1);
+  void WriteMissingFilesWS80(Elem& e1);
+  void WriteMissingFilesWS81(Elem& e1);
+  void WriteMissingFilesWS10_0(Elem& e1);
+  void WritePlatformExtensions(Elem& e1);
+  void WriteSinglePlatformExtension(Elem& e1, std::string const& extension,
                                     std::string const& version);
-  void WriteSDKReferences();
-  void WriteSingleSDKReference(std::string const& extension,
+  void WriteSDKReferences(Elem& e0);
+  void WriteSingleSDKReference(Elem& e1, std::string const& extension,
                                std::string const& version);
-  void WriteCommonMissingFiles(const std::string& manifestFile);
-  void WriteTargetSpecificReferences();
-  void WriteTargetsFileReferences();
+  void WriteCommonMissingFiles(Elem& e1, const std::string& manifestFile);
+  void WriteTargetSpecificReferences(Elem& e0);
+  void WriteTargetsFileReferences(Elem& e1);
 
   std::vector<std::string> GetIncludes(std::string const& config,
                                        std::string const& lang) const;
 
   bool ComputeClOptions();
   bool ComputeClOptions(std::string const& configName);
-  void WriteClOptions(std::string const& config);
+  void WriteClOptions(Elem& e1, std::string const& config);
   bool ComputeRcOptions();
   bool ComputeRcOptions(std::string const& config);
-  void WriteRCOptions(std::string const& config);
+  void WriteRCOptions(Elem& e1, std::string const& config);
   bool ComputeCudaOptions();
   bool ComputeCudaOptions(std::string const& config);
-  void WriteCudaOptions(std::string const& config);
+  void WriteCudaOptions(Elem& e1, std::string const& config);
 
   bool ComputeCudaLinkOptions();
   bool ComputeCudaLinkOptions(std::string const& config);
-  void WriteCudaLinkOptions(std::string const& config);
+  void WriteCudaLinkOptions(Elem& e1, std::string const& config);
 
   bool ComputeMasmOptions();
   bool ComputeMasmOptions(std::string const& config);
-  void WriteMasmOptions(std::string const& config);
+  void WriteMasmOptions(Elem& e1, std::string const& config);
   bool ComputeNasmOptions();
   bool ComputeNasmOptions(std::string const& config);
-  void WriteNasmOptions(std::string const& config);
+  void WriteNasmOptions(Elem& e1, std::string const& config);
 
   bool ComputeLinkOptions();
   bool ComputeLinkOptions(std::string const& config);
   bool ComputeLibOptions();
   bool ComputeLibOptions(std::string const& config);
-  void WriteLinkOptions(std::string const& config);
-  void WriteMidlOptions(std::string const& config);
-  void WriteAntBuildOptions(std::string const& config);
-  void OutputLinkIncremental(std::string const& configName);
-  void WriteCustomRule(cmSourceFile const* source,
+  void WriteLinkOptions(Elem& e1, std::string const& config);
+  void WriteMidlOptions(Elem& e1, std::string const& config);
+  void WriteAntBuildOptions(Elem& e1, std::string const& config);
+  void OutputLinkIncremental(Elem& e1, std::string const& configName);
+  void WriteCustomRule(Elem& e0, cmSourceFile const* source,
                        cmCustomCommand const& command);
   void WriteCustomRuleCpp(Elem& e2, std::string const& config,
                           std::string const& script, std::string const& inputs,
                           std::string const& outputs,
                           std::string const& comment);
-  void WriteCustomRuleCSharp(std::string const& config,
+  void WriteCustomRuleCSharp(Elem& e0, std::string const& config,
                              std::string const& commandName,
                              std::string const& script,
                              std::string const& inputs,
                              std::string const& outputs,
                              std::string const& comment);
-  void WriteCustomCommands();
-  void WriteCustomCommand(cmSourceFile const* sf);
+  void WriteCustomCommands(Elem& e0);
+  void WriteCustomCommand(Elem& e0, cmSourceFile const* sf);
   void WriteGroups();
-  void WriteProjectReferences();
-  void WriteApplicationTypeSettings();
+  void WriteProjectReferences(Elem& e0);
+  void WriteApplicationTypeSettings(Elem& e1);
   void OutputSourceSpecificFlags(Elem&, cmSourceFile const* source);
   void AddLibraries(const cmComputeLinkInformation& cli,
                     std::vector<std::string>& libVec,
@@ -155,10 +158,10 @@ private:
                     const std::string& config);
   void AddTargetsFileAndConfigPair(std::string const& targetsFile,
                                    std::string const& config);
-  void WriteLibOptions(std::string const& config);
-  void WriteManifestOptions(std::string const& config);
-  void WriteEvents(std::string const& configName);
-  void WriteEvent(const char* name,
+  void WriteLibOptions(Elem& e1, std::string const& config);
+  void WriteManifestOptions(Elem& e1, std::string const& config);
+  void WriteEvents(Elem& e1, std::string const& configName);
+  void WriteEvent(Elem& e1, const char* name,
                   std::vector<cmCustomCommand> const& commands,
                   std::string const& configName);
   void WriteGroupSources(Elem& e0, std::string const& name,
@@ -175,7 +178,7 @@ private:
   void GetCSharpSourceProperties(cmSourceFile const* sf,
                                  std::map<std::string, std::string>& tags);
   void WriteCSharpSourceProperties(
-    const std::map<std::string, std::string>& tags);
+    Elem& e2, const std::map<std::string, std::string>& tags);
   void GetCSharpSourceLink(cmSourceFile const* sf, std::string& link);
 
 private:
