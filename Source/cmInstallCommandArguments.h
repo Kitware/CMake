@@ -26,6 +26,7 @@ public:
 
   const std::string& GetDestination() const;
   const std::string& GetComponent() const;
+  const std::string& GetNamelinkComponent() const;
   bool GetExcludeFromAll() const;
   const std::string& GetRename() const;
   const std::string& GetPermissions() const;
@@ -33,6 +34,7 @@ public:
   bool GetOptional() const;
   bool GetNamelinkOnly() const;
   bool GetNamelinkSkip() const;
+  bool HasNamelinkComponent() const;
 
   // once HandleDirectoryMode() is also switched to using
   // cmInstallCommandArguments then these two functions can become non-static
@@ -45,6 +47,7 @@ private:
   cmInstallCommandArguments(); // disabled
   cmCAString Destination;
   cmCAString Component;
+  cmCAString NamelinkComponent;
   cmCAEnabler ExcludeFromAll;
   cmCAString Rename;
   cmCAStringVector Permissions;
