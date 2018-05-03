@@ -474,11 +474,13 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
             day != lctime->tm_mday) {
           tag.clear();
         }
-        std::string tagmode;
-        if (cmSystemTools::GetLineFromStream(tfin, tagmode)) {
-          if (tagmode.size() > 4 && !this->Parts[PartStart]) {
-            this->TestModel = cmCTest::GetTestModelFromString(tagmode.c_str());
-          }
+        std::string track;
+        if (cmSystemTools::GetLineFromStream(tfin, track)) {
+          this->SpecificTrack = track;
+        }
+        std::string model;
+        if (cmSystemTools::GetLineFromStream(tfin, model)) {
+          this->TestModel = GetTestModelFromString(model.c_str());
         }
         tfin.close();
       }
@@ -502,6 +504,17 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
         if (ofs) {
           ofs << tag << std::endl;
           ofs << this->GetTestModelString() << std::endl;
+          switch (this->TestModel) {
+            case cmCTest::EXPERIMENTAL:
+              ofs << "Experimental" << std::endl;
+              break;
+            case cmCTest::NIGHTLY:
+              ofs << "Nightly" << std::endl;
+              break;
+            case cmCTest::CONTINUOUS:
+              ofs << "Continuous" << std::endl;
+              break;
+          }
         }
         ofs.close();
         if (nullptr == command) {
@@ -512,8 +525,16 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
         }
       }
     } else {
+      std::string track;
+      std::string modelStr;
+      int model = cmCTest::UNKNOWN;
+
       if (tfin) {
         cmSystemTools::GetLineFromStream(tfin, tag);
+        cmSystemTools::GetLineFromStream(tfin, track);
+        if (cmSystemTools::GetLineFromStream(tfin, modelStr)) {
+          model = GetTestModelFromString(modelStr.c_str());
+        }
         tfin.close();
       }
 
@@ -521,6 +542,35 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
         cmCTestLog(this, ERROR_MESSAGE, "Cannot read existing TAG file in "
                      << testingDir << std::endl);
         return 0;
+      }
+
+      if (this->TestModel == cmCTest::UNKNOWN) {
+        if (model == cmCTest::UNKNOWN) {
+          cmCTestLog(this, ERROR_MESSAGE,
+                     "TAG file does not contain model and "
+                     "no model specified in start command"
+                       << std::endl);
+          return 0;
+        }
+
+        this->SetTestModel(model);
+      }
+
+      if (model != this->TestModel && model != cmCTest::UNKNOWN &&
+          this->TestModel != cmCTest::UNKNOWN) {
+        cmCTestOptionalLog(this, WARNING, "Model given in TAG does not match "
+                                          "model given in ctest_start()"
+                             << std::endl,
+                           quiet);
+      }
+
+      if (!this->SpecificTrack.empty() && track != this->SpecificTrack) {
+        cmCTestOptionalLog(this, WARNING, "Track given in TAG does not match "
+                                          "track given in ctest_start()"
+                             << std::endl,
+                           quiet);
+      } else {
+        this->SpecificTrack = track;
       }
 
       cmCTestOptionalLog(this, OUTPUT, "  Use existing tag: "
