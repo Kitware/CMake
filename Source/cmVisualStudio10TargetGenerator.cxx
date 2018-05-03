@@ -3816,6 +3816,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
       }
       if (dt->GetManagedType("") < check || unmanagedStatic) {
         e2.Element("ReferenceOutputAssembly", "false");
+        e2.Element("CopyToOutputDirectory", "Never");
       }
     }
     e2.EndElement();
