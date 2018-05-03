@@ -16,6 +16,8 @@ Variable ``<PLACEHOLDER>_VARIABLE`` with leading placeholder.
 Variable ``VARIABLE_<PLACEHOLDER>`` with trailing placeholder.
 Variable ``<PLACEHOLDER>_VARIABLE`` with leading placeholder and target.
 Variable ``VARIABLE_<PLACEHOLDER>`` with trailing placeholder and target.
+Environment variable ``SOME_ENV_VAR``.
+Environment variable ``some env var`` with space and target.
 Generator ``Some Generator`` with space.
 
 First TOC entry.
