@@ -481,10 +481,17 @@ void cmVisualStudio10TargetGenerator::Generate()
       projLabel = this->Name.c_str();
     }
     e1.Element("ProjectName", projLabel);
-    if (const char* targetFrameworkVersion =
-          this->GeneratorTarget->GetProperty(
-            "VS_DOTNET_TARGET_FRAMEWORK_VERSION")) {
-      e1.Element("TargetFrameworkVersion", targetFrameworkVersion);
+    {
+      // TODO: add deprecation warning for VS_* property?
+      const char* targetFrameworkVersion = this->GeneratorTarget->GetProperty(
+        "VS_DOTNET_TARGET_FRAMEWORK_VERSION");
+      if (!targetFrameworkVersion) {
+        targetFrameworkVersion = this->GeneratorTarget->GetProperty(
+          "DOTNET_TARGET_FRAMEWORK_VERSION");
+      }
+      if (targetFrameworkVersion) {
+        e1.Element("TargetFrameworkVersion", targetFrameworkVersion);
+      }
     }
 
     // Disable the project upgrade prompt that is displayed the first time a
