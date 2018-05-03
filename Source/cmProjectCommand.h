@@ -34,6 +34,9 @@ public:
    */
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;
+
+private:
+  void TopLevelCMakeVarCondSet(const char* name, const char* value);
 };
 
 #endif

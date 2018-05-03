@@ -80,15 +80,35 @@
 #
 # .. variable:: CPACK_PACKAGE_VERSION_MAJOR
 #
-#  Package major Version. Default value is 0.
+#  Package major version.  This variable will always be set, but its default
+#  value depends on whether or not version details were given to the
+#  :command:`project` command in the top level CMakeLists.txt file.  If version
+#  details were given, the default value will be
+#  :variable:`CMAKE_PROJECT_VERSION_MAJOR`.  If no version details were given,
+#  a default version of 0.1.1 will be assumed, leading to
+#  ``CPACK_PACKAGE_VERSION_MAJOR`` having a default value of 0.
 #
 # .. variable:: CPACK_PACKAGE_VERSION_MINOR
 #
-#  Package minor Version. Default value is 1.
+#  Package minor version.  The default value is determined based on whether or
+#  not version details were given to the :command:`project` command in the top
+#  level CMakeLists.txt file.  If version details were given, the default
+#  value will be :variable:`CMAKE_PROJECT_VERSION_MINOR`, but if no minor
+#  version component was specified then ``CPACK_PACKAGE_VERSION_MINOR`` will be
+#  left unset.  If no project version was given at all, a default version of
+#  0.1.1 will be assumed, leading to ``CPACK_PACKAGE_VERSION_MINOR`` having a
+#  default value of 1.
 #
 # .. variable:: CPACK_PACKAGE_VERSION_PATCH
 #
-#  Package patch Version. Default value is 1.
+#  Package patch version.  The default value is determined based on whether or
+#  not version details were given to the :command:`project` command in the top
+#  level CMakeLists.txt file.  If version details were given, the default
+#  value will be :variable:`CMAKE_PROJECT_VERSION_PATCH`, but if no patch
+#  version component was specified then ``CPACK_PACKAGE_VERSION_PATCH`` will be
+#  left unset.  If no project version was given at all, a default version of
+#  0.1.1 will be assumed, leading to ``CPACK_PACKAGE_VERSION_PATCH`` having a
+#  default value of 1.
 #
 # .. variable:: CPACK_PACKAGE_DESCRIPTION_FILE
 #
@@ -367,11 +387,28 @@ endfunction()
 
 # Set the package name
 _cpack_set_default(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
-_cpack_set_default(CPACK_PACKAGE_VERSION_MAJOR "0")
-_cpack_set_default(CPACK_PACKAGE_VERSION_MINOR "1")
-_cpack_set_default(CPACK_PACKAGE_VERSION_PATCH "1")
-_cpack_set_default(CPACK_PACKAGE_VERSION
-  "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+if(CMAKE_PROJECT_VERSION_MAJOR)
+    _cpack_set_default(CPACK_PACKAGE_VERSION_MAJOR "${CMAKE_PROJECT_VERSION_MAJOR}")
+    if(CMAKE_PROJECT_VERSION_MINOR)
+        _cpack_set_default(CPACK_PACKAGE_VERSION_MINOR "${CMAKE_PROJECT_VERSION_MINOR}")
+        if(CMAKE_PROJECT_VERSION_PATCH)
+            _cpack_set_default(CPACK_PACKAGE_VERSION_PATCH "${CMAKE_PROJECT_VERSION_PATCH}")
+            _cpack_set_default(CPACK_PACKAGE_VERSION
+                "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+        else()
+            _cpack_set_default(CPACK_PACKAGE_VERSION
+            "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
+        endif()
+    else()
+        _cpack_set_default(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}")
+    endif()
+else()
+    _cpack_set_default(CPACK_PACKAGE_VERSION_MAJOR "0")
+    _cpack_set_default(CPACK_PACKAGE_VERSION_MINOR "1")
+    _cpack_set_default(CPACK_PACKAGE_VERSION_PATCH "1")
+    _cpack_set_default(CPACK_PACKAGE_VERSION
+        "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+endif()
 _cpack_set_default(CPACK_PACKAGE_VENDOR "Humanity")
 if(CMAKE_PROJECT_DESCRIPTION)
   _cpack_set_default(CPACK_PACKAGE_DESCRIPTION_SUMMARY
