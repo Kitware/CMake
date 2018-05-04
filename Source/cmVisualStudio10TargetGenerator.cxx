@@ -3964,6 +3964,7 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile(
                                  pfxFile, false);
         ConvertToWindowsSlash(pfxFile);
         this->AddedFiles.push_back(pfxFile);
+        this->AddedDefaultCertificate = true;
       }
 
       e1.Element("PackageCertificateKeyFile", pfxFile);
@@ -4530,10 +4531,13 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
   Elem(e1, "Image").Attribute("Include", splashScreen).EndElement();
   this->AddedFiles.push_back(splashScreen);
 
-  // This file has already been added to the build so don't copy it
-  std::string keyFile = this->DefaultArtifactDir + "/Windows_TemporaryKey.pfx";
-  ConvertToWindowsSlash(keyFile);
-  Elem(e1, "None").Attribute("Include", keyFile).EndElement();
+  if (this->AddedDefaultCertificate) {
+    // This file has already been added to the build so don't copy it
+    std::string keyFile =
+      this->DefaultArtifactDir + "/Windows_TemporaryKey.pfx";
+    ConvertToWindowsSlash(keyFile);
+    Elem(e1, "None").Attribute("Include", keyFile).EndElement();
+  }
 }
 
 bool cmVisualStudio10TargetGenerator::ForceOld(const std::string& source) const
