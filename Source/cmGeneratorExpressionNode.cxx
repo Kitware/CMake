@@ -1013,16 +1013,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    std::vector<std::string> enabledLanguages;
     cmGlobalGenerator* gg = context->LG->GetGlobalGenerator();
-    gg->GetEnabledLanguages(enabledLanguages);
-    if (!parameters.empty() &&
-        std::find(enabledLanguages.begin(), enabledLanguages.end(),
-                  parameters.front()) == enabledLanguages.end()) {
-      reportError(context, content->GetOriginalExpression(),
-                  "$<COMPILE_LANGUAGE:...> Unknown language.");
-      return std::string();
-    }
     std::string genName = gg->GetName();
     if (genName.find("Makefiles") == std::string::npos &&
         genName.find("Ninja") == std::string::npos &&
