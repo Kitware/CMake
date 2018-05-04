@@ -308,13 +308,11 @@ message("=======================================================================
 if("$ENV{DASHBOARD_TEST_FROM_CTEST}" STREQUAL "")
 
   # developers are allowed to have local additions and modifications...
-  set(is_dashboard 0)
   message("interactive test run")
   message("")
 
 else()
 
-  set(is_dashboard 1)
   message("dashboard test run")
   message("")
 
@@ -341,7 +339,7 @@ endif()
 # Not even developers.
 #
 if(nonadditions)
-  if(in_source_build AND is_dashboard)
+  if(in_source_build)
     message("
 warning: test results confounded because this is an 'in-source' build - cannot
 distinguish between non-added files that are in-source build products and
