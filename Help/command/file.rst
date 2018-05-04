@@ -7,22 +7,6 @@ File manipulation command.
 
 ::
 
-  file(WRITE <filename> <content>...)
-  file(APPEND <filename> <content>...)
-
-Write ``<content>`` into a file called ``<filename>``.  If the file does
-not exist, it will be created.  If the file already exists, ``WRITE``
-mode will overwrite it and ``APPEND`` mode will append to the end.
-Any directories in the path specified by ``<filename>`` that do not
-exist will be created.
-
-If the file is a build input, use the :command:`configure_file` command
-to update the file only when its content changes.
-
-------------------------------------------------------------------------------
-
-::
-
   file(READ <filename> <variable>
        [OFFSET <offset>] [LIMIT <max-in>] [HEX])
 
@@ -92,6 +76,98 @@ Compute a cryptographic hash of the content of ``<filename>`` and
 store it in a ``<variable>``.  The supported ``<HASH>`` algorithm names
 are those listed by the :ref:`string(\<HASH\>) <Supported Hash Algorithms>`
 command.
+
+------------------------------------------------------------------------------
+
+::
+
+  file(TIMESTAMP <filename> <variable> [<format>] [UTC])
+
+Compute a string representation of the modification time of ``<filename>``
+and store it in ``<variable>``.  Should the command be unable to obtain a
+timestamp variable will be set to the empty string ("").
+
+See the :command:`string(TIMESTAMP)` command for documentation of
+the ``<format>`` and ``UTC`` options.
+
+------------------------------------------------------------------------------
+
+::
+
+  file(WRITE <filename> <content>...)
+  file(APPEND <filename> <content>...)
+
+Write ``<content>`` into a file called ``<filename>``.  If the file does
+not exist, it will be created.  If the file already exists, ``WRITE``
+mode will overwrite it and ``APPEND`` mode will append to the end.
+Any directories in the path specified by ``<filename>`` that do not
+exist will be created.
+
+If the file is a build input, use the :command:`configure_file` command
+to update the file only when its content changes.
+
+------------------------------------------------------------------------------
+
+::
+
+  file(TOUCH [<files>...])
+  file(TOUCH_NOCREATE [<files>...])
+
+Create a file with no content if it does not yet exist. If the file already
+exists, its access and/or modification will be updated to the time when the
+function call is executed.
+
+Use TOUCH_NOCREATE to touch a file if it exists but not create it. If a file
+does not exist it will be silently ignored.
+
+With TOUCH and TOUCH_NOCREATE the contents of an existing file will not be
+modified.
+
+------------------------------------------------------------------------------
+
+::
+
+  file(GENERATE OUTPUT output-file
+       <INPUT input-file|CONTENT content>
+       [CONDITION expression])
+
+Generate an output file for each build configuration supported by the current
+:manual:`CMake Generator <cmake-generators(7)>`.  Evaluate
+:manual:`generator expressions <cmake-generator-expressions(7)>`
+from the input content to produce the output content.  The options are:
+
+``CONDITION <condition>``
+  Generate the output file for a particular configuration only if
+  the condition is true.  The condition must be either ``0`` or ``1``
+  after evaluating generator expressions.
+
+``CONTENT <content>``
+  Use the content given explicitly as input.
+
+``INPUT <input-file>``
+  Use the content from a given file as input.
+  A relative path is treated with respect to the value of
+  :variable:`CMAKE_CURRENT_SOURCE_DIR`.  See policy :policy:`CMP0070`.
+
+``OUTPUT <output-file>``
+  Specify the output file name to generate.  Use generator expressions
+  such as ``$<CONFIG>`` to specify a configuration-specific output file
+  name.  Multiple configurations may generate the same output file only
+  if the generated content is identical.  Otherwise, the ``<output-file>``
+  must evaluate to an unique name for each configuration.
+  A relative path (after evaluating generator expressions) is treated
+  with respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
+  See policy :policy:`CMP0070`.
+
+Exactly one ``CONTENT`` or ``INPUT`` option must be given.  A specific
+``OUTPUT`` file may be named by at most one invocation of ``file(GENERATE)``.
+Generated files are modified and their timestamp updated on subsequent cmake
+runs only if their content is changed.
+
+Note also that ``file(GENERATE)`` does not create the output file until the
+generation phase. The output file will not yet have been written when the
+``file(GENERATE)`` command returns, it is written only after processing all
+of a project's ``CMakeLists.txt`` files.
 
 ------------------------------------------------------------------------------
 
@@ -175,6 +251,39 @@ given file does not exist.
   file(MAKE_DIRECTORY [<directories>...])
 
 Create the given directories and their parents as needed.
+
+------------------------------------------------------------------------------
+
+::
+
+  file(<COPY|INSTALL> <files>... DESTINATION <dir>
+       [FILE_PERMISSIONS <permissions>...]
+       [DIRECTORY_PERMISSIONS <permissions>...]
+       [NO_SOURCE_PERMISSIONS] [USE_SOURCE_PERMISSIONS]
+       [FILES_MATCHING]
+       [[PATTERN <pattern> | REGEX <regex>]
+        [EXCLUDE] [PERMISSIONS <permissions>...]] [...])
+
+The ``COPY`` signature copies files, directories, and symlinks to a
+destination folder.  Relative input paths are evaluated with respect
+to the current source directory, and a relative destination is
+evaluated with respect to the current build directory.  Copying
+preserves input file timestamps, and optimizes out a file if it exists
+at the destination with the same timestamp.  Copying preserves input
+permissions unless explicit permissions or ``NO_SOURCE_PERMISSIONS``
+are given (default is ``USE_SOURCE_PERMISSIONS``).
+
+See the :command:`install(DIRECTORY)` command for documentation of
+permissions, ``FILES_MATCHING``, ``PATTERN``, ``REGEX``, and
+``EXCLUDE`` options.  Copying directories preserves the structure
+of their content even if options are used to select a subset of
+files.
+
+The ``INSTALL`` signature differs slightly from ``COPY``: it prints
+status messages (subject to the :variable:`CMAKE_INSTALL_MESSAGE` variable),
+and ``NO_SOURCE_PERMISSIONS`` is default.
+Installation scripts generated by the :command:`install` command
+use this signature (with some undocumented options for internal use).
 
 ------------------------------------------------------------------------------
 
@@ -289,115 +398,6 @@ certificates are not checked by default.  Set ``TLS_VERIFY`` to ``ON`` to
 check certificates and/or use ``EXPECTED_HASH`` to verify downloaded content.
 If neither ``TLS`` option is given CMake will check variables
 ``CMAKE_TLS_VERIFY`` and ``CMAKE_TLS_CAINFO``, respectively.
-
-------------------------------------------------------------------------------
-
-::
-
-  file(TOUCH [<files>...])
-  file(TOUCH_NOCREATE [<files>...])
-
-Create a file with no content if it does not yet exist. If the file already
-exists, its access and/or modification will be updated to the time when the
-function call is executed.
-
-Use TOUCH_NOCREATE to touch a file if it exists but not create it. If a file
-does not exist it will be silently ignored.
-
-With TOUCH and TOUCH_NOCREATE the contents of an existing file will not be
-modified.
-
-------------------------------------------------------------------------------
-
-::
-
-  file(TIMESTAMP <filename> <variable> [<format>] [UTC])
-
-Compute a string representation of the modification time of ``<filename>``
-and store it in ``<variable>``.  Should the command be unable to obtain a
-timestamp variable will be set to the empty string ("").
-
-See the :command:`string(TIMESTAMP)` command for documentation of
-the ``<format>`` and ``UTC`` options.
-
-------------------------------------------------------------------------------
-
-::
-
-  file(GENERATE OUTPUT output-file
-       <INPUT input-file|CONTENT content>
-       [CONDITION expression])
-
-Generate an output file for each build configuration supported by the current
-:manual:`CMake Generator <cmake-generators(7)>`.  Evaluate
-:manual:`generator expressions <cmake-generator-expressions(7)>`
-from the input content to produce the output content.  The options are:
-
-``CONDITION <condition>``
-  Generate the output file for a particular configuration only if
-  the condition is true.  The condition must be either ``0`` or ``1``
-  after evaluating generator expressions.
-
-``CONTENT <content>``
-  Use the content given explicitly as input.
-
-``INPUT <input-file>``
-  Use the content from a given file as input.
-  A relative path is treated with respect to the value of
-  :variable:`CMAKE_CURRENT_SOURCE_DIR`.  See policy :policy:`CMP0070`.
-
-``OUTPUT <output-file>``
-  Specify the output file name to generate.  Use generator expressions
-  such as ``$<CONFIG>`` to specify a configuration-specific output file
-  name.  Multiple configurations may generate the same output file only
-  if the generated content is identical.  Otherwise, the ``<output-file>``
-  must evaluate to an unique name for each configuration.
-  A relative path (after evaluating generator expressions) is treated
-  with respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
-  See policy :policy:`CMP0070`.
-
-Exactly one ``CONTENT`` or ``INPUT`` option must be given.  A specific
-``OUTPUT`` file may be named by at most one invocation of ``file(GENERATE)``.
-Generated files are modified and their timestamp updated on subsequent cmake
-runs only if their content is changed.
-
-Note also that ``file(GENERATE)`` does not create the output file until the
-generation phase. The output file will not yet have been written when the
-``file(GENERATE)`` command returns, it is written only after processing all
-of a project's ``CMakeLists.txt`` files.
-
-------------------------------------------------------------------------------
-
-::
-
-  file(<COPY|INSTALL> <files>... DESTINATION <dir>
-       [FILE_PERMISSIONS <permissions>...]
-       [DIRECTORY_PERMISSIONS <permissions>...]
-       [NO_SOURCE_PERMISSIONS] [USE_SOURCE_PERMISSIONS]
-       [FILES_MATCHING]
-       [[PATTERN <pattern> | REGEX <regex>]
-        [EXCLUDE] [PERMISSIONS <permissions>...]] [...])
-
-The ``COPY`` signature copies files, directories, and symlinks to a
-destination folder.  Relative input paths are evaluated with respect
-to the current source directory, and a relative destination is
-evaluated with respect to the current build directory.  Copying
-preserves input file timestamps, and optimizes out a file if it exists
-at the destination with the same timestamp.  Copying preserves input
-permissions unless explicit permissions or ``NO_SOURCE_PERMISSIONS``
-are given (default is ``USE_SOURCE_PERMISSIONS``).
-
-See the :command:`install(DIRECTORY)` command for documentation of
-permissions, ``FILES_MATCHING``, ``PATTERN``, ``REGEX``, and
-``EXCLUDE`` options.  Copying directories preserves the structure
-of their content even if options are used to select a subset of
-files.
-
-The ``INSTALL`` signature differs slightly from ``COPY``: it prints
-status messages (subject to the :variable:`CMAKE_INSTALL_MESSAGE` variable),
-and ``NO_SOURCE_PERMISSIONS`` is default.
-Installation scripts generated by the :command:`install` command
-use this signature (with some undocumented options for internal use).
 
 ------------------------------------------------------------------------------
 
