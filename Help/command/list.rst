@@ -1,11 +1,37 @@
 list
 ----
 
-.. only:: html
-
-   .. contents::
-
 List operations.
+
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `Reading`_
+    list(`LENGTH`_ <list> <out-var>)
+    list(`GET`_ <list> <element index> [<index> ...] <out-var>)
+    list(`JOIN`_ <list> <glue> <out-var>)
+    list(`SUBLIST`_ <list> <begin> <length> <out-var>)
+
+  `Search`_
+    list(`FIND`_ <list> <value> <out-var>)
+
+  `Modification`_
+    list(`APPEND`_ <list> [<element>...])
+    list(`FILTER`_ <list> {INCLUDE | EXCLUDE} REGEX <regex>)
+    list(`INSERT`_ <list> <index> [<element>...])
+    list(`REMOVE_ITEM`_ <list> <value>...)
+    list(`REMOVE_AT`_ <list> <index>...)
+    list(`REMOVE_DUPLICATES`_ <list>)
+    list(`TRANSFORM`_ <list> <ACTION> [...])
+
+  `Ordering`_
+    list(`REVERSE`_ <list>)
+    list(`SORT`_ <list>)
+
+Introduction
+^^^^^^^^^^^^
 
 The list subcommands ``APPEND``, ``INSERT``, ``FILTER``, ``REMOVE_AT``,
 ``REMOVE_ITEM``, ``REMOVE_DUPLICATES``, ``REVERSE`` and ``SORT`` may create
@@ -36,8 +62,7 @@ scope.  To propagate the results of these operations upwards, use
 Reading
 ^^^^^^^
 
-LENGTH
-""""""
+.. _LENGTH:
 
 ::
 
@@ -45,8 +70,7 @@ LENGTH
 
 Returns the list's length.
 
-GET
-"""
+.. _GET:
 
 ::
 
@@ -54,8 +78,7 @@ GET
 
 Returns the list of elements specified by indices from the list.
 
-JOIN
-""""
+.. _JOIN:
 
 ::
 
@@ -65,8 +88,7 @@ Returns a string joining all list's elements using the glue string.
 To join multiple strings, which are not part of a list, use ``JOIN`` operator
 from :command:`string` command.
 
-SUBLIST
-"""""""
+.. _SUBLIST:
 
 ::
 
@@ -80,8 +102,7 @@ the remaining elements of the list starting at ``<begin>`` will be returned.
 Search
 ^^^^^^
 
-FIND
-""""
+.. _FIND:
 
 ::
 
@@ -93,8 +114,7 @@ if it wasn't found.
 Modification
 ^^^^^^^^^^^^
 
-APPEND
-""""""
+.. _APPEND:
 
 ::
 
@@ -102,8 +122,7 @@ APPEND
 
 Appends elements to the list.
 
-FILTER
-""""""
+.. _FILTER:
 
 ::
 
@@ -115,8 +134,7 @@ In ``REGEX`` mode, items will be matched against the given regular expression.
 For more information on regular expressions see also the
 :command:`string` command.
 
-INSERT
-""""""
+.. _INSERT:
 
 ::
 
@@ -124,8 +142,7 @@ INSERT
 
 Inserts elements to the list to the specified location.
 
-REMOVE_ITEM
-"""""""""""
+.. _REMOVE_ITEM:
 
 ::
 
@@ -133,8 +150,7 @@ REMOVE_ITEM
 
 Removes the given items from the list.
 
-REMOVE_AT
-"""""""""
+.. _REMOVE_AT:
 
 ::
 
@@ -142,8 +158,7 @@ REMOVE_AT
 
 Removes items at given indices from the list.
 
-REMOVE_DUPLICATES
-"""""""""""""""""
+.. _REMOVE_DUPLICATES:
 
 ::
 
@@ -151,8 +166,7 @@ REMOVE_DUPLICATES
 
 Removes duplicated items in the list.
 
-TRANSFORM
-"""""""""
+.. _TRANSFORM:
 
 ::
 
@@ -224,11 +238,10 @@ expression will be transformed. ::
   list(TRANSFORM <list> <ACTION> REGEX <regular_expression> ...)
 
 
-Sorting
-^^^^^^^
+Ordering
+^^^^^^^^
 
-REVERSE
-"""""""
+.. _REVERSE:
 
 ::
 
@@ -236,8 +249,7 @@ REVERSE
 
 Reverses the contents of the list in-place.
 
-SORT
-""""
+.. _SORT:
 
 ::
 
