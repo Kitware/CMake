@@ -77,23 +77,14 @@ struct cmVisualStudio10TargetGenerator::Elem
     this->WriteString("<") << tag;
     return *this;
   }
-  template <typename T>
-  void WriteElem(const char* tag, const T& val)
-  {
-    this->WriteString("<") << tag << ">" << val << "</" << tag << ">\n";
-  }
   void Element(const char* tag, const std::string& val)
   {
-    Elem(*this).WriteElem(tag, cmVS10EscapeXML(val));
-  }
-  template <typename T>
-  void Attr(const char* an, const T& av)
-  {
-    this->S << " " << an << "=\"" << av << "\"";
+    Elem(*this).WriteString("<") << tag << ">" << cmVS10EscapeXML(val) << "</"
+                                 << tag << ">\n";
   }
   Elem& Attribute(const char* an, const std::string& av)
   {
-    Attr(an, cmVS10EscapeAttr(av));
+    this->S << " " << an << "=\"" << cmVS10EscapeAttr(av) << "\"";
     return *this;
   }
   // This method for now assumes that this->Tag has been set, e.g. by calling
@@ -117,6 +108,7 @@ struct cmVisualStudio10TargetGenerator::Elem
 class cmVS10GeneratorOptions : public cmVisualStudioGeneratorOptions
 {
 public:
+  typedef cmVisualStudio10TargetGenerator::Elem Elem;
   cmVS10GeneratorOptions(cmLocalVisualStudioGenerator* lg, Tool tool,
                          cmVS7FlagTable const* table,
                          cmVisualStudio10TargetGenerator* g = nullptr)
@@ -125,48 +117,50 @@ public:
   {
   }
 
-  void OutputFlag(std::ostream& fout, int indent, const char* tag,
+  void OutputFlag(std::ostream& /*fout*/, int /*indent*/, const char* tag,
                   const std::string& content) override
   {
     if (!this->GetConfiguration().empty()) {
       // if there are configuration specific flags, then
       // use the configuration specific tag for PreprocessorDefinitions
       this->TargetGenerator->WritePlatformConfigTag(
-        tag, this->GetConfiguration(), indent, content);
+        tag, this->GetConfiguration(), *Parent, content);
     } else {
-      fout.fill(' ');
-      fout.width(indent * 2);
-      // write an empty string to get the fill level indent to print
-      fout << "";
-      fout << "<" << tag << ">";
-      fout << cmVS10EscapeXML(content);
-      fout << "</" << tag << ">\n";
+      Parent->Element(tag, content);
     }
   }
 
 private:
-  cmVisualStudio10TargetGenerator* TargetGenerator;
+  cmVisualStudio10TargetGenerator* const TargetGenerator;
+  Elem* Parent = nullptr;
+  friend cmVisualStudio10TargetGenerator::OptionsHelper;
 };
 
-inline void cmVisualStudio10TargetGenerator::WriteElem(const char* tag,
-                                                       const char* val,
-                                                       int indentLevel)
+struct cmVisualStudio10TargetGenerator::OptionsHelper
 {
-  Elem(*this->BuildFileStream, indentLevel).WriteElem(tag, val);
-}
+  cmVS10GeneratorOptions& O;
+  OptionsHelper(cmVS10GeneratorOptions& o, Elem& e)
+    : O(o)
+  {
+    O.Parent = &e;
+  }
+  ~OptionsHelper() { O.Parent = nullptr; }
 
-inline void cmVisualStudio10TargetGenerator::WriteElem(const char* tag,
-                                                       std::string const& val,
-                                                       int indentLevel)
-{
-  Elem(*this->BuildFileStream, indentLevel).WriteElem(tag, val);
-}
-
-inline void cmVisualStudio10TargetGenerator::WriteElemEscapeXML(
-  const char* tag, std::string const& val, int indentLevel)
-{
-  this->WriteElem(tag, cmVS10EscapeXML(val), indentLevel);
-}
+  void OutputPreprocessorDefinitions(const std::string& lang)
+  {
+    O.OutputPreprocessorDefinitions(O.Parent->S, O.Parent->Indent + 1, lang);
+  }
+  void OutputAdditionalIncludeDirectories(const std::string& lang)
+  {
+    O.OutputAdditionalIncludeDirectories(O.Parent->S, O.Parent->Indent + 1,
+                                         lang);
+  }
+  void OutputFlagMap() { O.OutputFlagMap(O.Parent->S, O.Parent->Indent + 1); }
+  void PrependInheritedString(std::string const& key)
+  {
+    O.PrependInheritedString(key);
+  }
+};
 
 static std::string cmVS10EscapeComment(std::string comment)
 {
@@ -275,18 +269,12 @@ std::string cmVisualStudio10TargetGenerator::CalcCondition(
 }
 
 void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
-  const char* tag, const std::string& config, int indentLevel,
+  const char* tag, const std::string& config, Elem& parent,
   const std::string& content)
 {
-  std::ostream& stream = *this->BuildFileStream;
-  stream.fill(' ');
-  stream.width(indentLevel * 2);
-  stream << ""; // applies indentation
-  stream << "<" << tag << " Condition=\"";
-  stream << this->CalcCondition(config);
-  stream << "\"";
-  stream << ">" << cmVS10EscapeXML(content);
-  stream << "</" << tag << ">\n";
+  Elem(parent, tag)
+    .Attribute("Condition", this->CalcCondition(config))
+    .Content(content);
 }
 
 std::ostream& cmVisualStudio10TargetGenerator::Elem::WriteString(
@@ -847,7 +835,7 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
             s = "$(RootNamespace).";
           }
           s += "%(Filename).resources";
-          this->WritePlatformConfigTag("LogicalName", i, e2.Indent + 1, s);
+          this->WritePlatformConfigTag("LogicalName", i, e2, s);
         }
       } else {
         std::string binDir = this->Makefile->GetCurrentBinaryDirectory();
@@ -1179,7 +1167,8 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
     e1.Element("StartProgram", outDir + assemblyName + ".exe");
   }
 
-  o.OutputFlagMap(e1.S, e1.Indent + 1);
+  OptionsHelper oh(o, e1);
+  oh.OutputFlagMap();
 }
 
 //----------------------------------------------------------------------------
@@ -2127,7 +2116,6 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     // use them
     if (!flags.empty() || !options.empty() || !configDefines.empty() ||
         !includes.empty() || compileAs || noWinRT) {
-      e2.SetHasElements();
       cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
       cmIDEFlagTable const* flagtable = nullptr;
       const std::string& srclang = source->GetLanguage();
@@ -2193,10 +2181,11 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       }
       clOptions.AddIncludes(includeList);
       clOptions.SetConfiguration(config);
-      clOptions.PrependInheritedString("AdditionalOptions");
-      clOptions.OutputAdditionalIncludeDirectories(e2.S, e2.Indent + 1, lang);
-      clOptions.OutputFlagMap(e2.S, e2.Indent + 1);
-      clOptions.OutputPreprocessorDefinitions(e2.S, e2.Indent + 1, lang);
+      OptionsHelper oh(clOptions, e2);
+      oh.PrependInheritedString("AdditionalOptions");
+      oh.OutputAdditionalIncludeDirectories(lang);
+      oh.OutputFlagMap();
+      oh.OutputPreprocessorDefinitions(lang);
     }
   }
   if (this->IsXamlSource(source->GetFullPath())) {
@@ -2250,7 +2239,7 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
   for (std::string const& config : this->Configurations) {
     if (ttype >= cmStateEnums::UTILITY) {
       this->WritePlatformConfigTag(
-        "IntDir", config, e1.Indent + 1,
+        "IntDir", config, e1,
         "$(Platform)\\$(Configuration)\\$(ProjectName)\\");
     } else {
       std::string intermediateDir =
@@ -2271,68 +2260,67 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
       ConvertToWindowsSlash(intermediateDir);
       ConvertToWindowsSlash(outDir);
 
-      this->WritePlatformConfigTag("OutDir", config, e1.Indent + 1, outDir);
+      this->WritePlatformConfigTag("OutDir", config, e1, outDir);
 
-      this->WritePlatformConfigTag("IntDir", config, e1.Indent + 1,
-                                   intermediateDir);
+      this->WritePlatformConfigTag("IntDir", config, e1, intermediateDir);
 
       if (const char* sdkExecutableDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_EXECUTABLE_DIRECTORIES")) {
-        this->WritePlatformConfigTag("ExecutablePath", config, e1.Indent + 1,
+        this->WritePlatformConfigTag("ExecutablePath", config, e1,
                                      sdkExecutableDirectories);
       }
 
       if (const char* sdkIncludeDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_INCLUDE_DIRECTORIES")) {
-        this->WritePlatformConfigTag("IncludePath", config, e1.Indent + 1,
+        this->WritePlatformConfigTag("IncludePath", config, e1,
                                      sdkIncludeDirectories);
       }
 
       if (const char* sdkReferenceDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_REFERENCE_DIRECTORIES")) {
-        this->WritePlatformConfigTag("ReferencePath", config, e1.Indent + 1,
+        this->WritePlatformConfigTag("ReferencePath", config, e1,
                                      sdkReferenceDirectories);
       }
 
       if (const char* sdkLibraryDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_LIBRARY_DIRECTORIES")) {
-        this->WritePlatformConfigTag("LibraryPath", config, e1.Indent + 1,
+        this->WritePlatformConfigTag("LibraryPath", config, e1,
                                      sdkLibraryDirectories);
       }
 
       if (const char* sdkLibraryWDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_LIBRARY_WINRT_DIRECTORIES")) {
-        this->WritePlatformConfigTag("LibraryWPath", config, e1.Indent + 1,
+        this->WritePlatformConfigTag("LibraryWPath", config, e1,
                                      sdkLibraryWDirectories);
       }
 
       if (const char* sdkSourceDirectories =
             this->Makefile->GetDefinition("CMAKE_VS_SDK_SOURCE_DIRECTORIES")) {
-        this->WritePlatformConfigTag("SourcePath", config, e1.Indent + 1,
+        this->WritePlatformConfigTag("SourcePath", config, e1,
                                      sdkSourceDirectories);
       }
 
       if (const char* sdkExcludeDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_EXCLUDE_DIRECTORIES")) {
-        this->WritePlatformConfigTag("ExcludePath", config, e1.Indent + 1,
+        this->WritePlatformConfigTag("ExcludePath", config, e1,
                                      sdkExcludeDirectories);
       }
 
       if (const char* workingDir = this->GeneratorTarget->GetProperty(
             "VS_DEBUGGER_WORKING_DIRECTORY")) {
         this->WritePlatformConfigTag("LocalDebuggerWorkingDirectory", config,
-                                     e1.Indent + 1, workingDir);
+                                     e1, workingDir);
       }
 
       if (const char* debuggerCommand =
             this->GeneratorTarget->GetProperty("VS_DEBUGGER_COMMAND")) {
-        this->WritePlatformConfigTag("LocalDebuggerCommand", config,
-                                     e1.Indent + 1, debuggerCommand);
+        this->WritePlatformConfigTag("LocalDebuggerCommand", config, e1,
+                                     debuggerCommand);
       }
 
       std::string name =
         cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
-      this->WritePlatformConfigTag("TargetName", config, e1.Indent + 1, name);
+      this->WritePlatformConfigTag("TargetName", config, e1, name);
 
       std::string ext =
         cmSystemTools::GetFilenameLastExtension(targetNameFull);
@@ -2341,7 +2329,7 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
         // A single "." appears to be treated as an empty extension.
         ext = ".";
       }
-      this->WritePlatformConfigTag("TargetExt", config, e1.Indent + 1, ext);
+      this->WritePlatformConfigTag("TargetExt", config, e1, ext);
 
       this->OutputLinkIncremental(e1, config);
     }
@@ -2367,12 +2355,12 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
   Options& linkOptions = *(this->LinkOptions[configName]);
 
   const char* incremental = linkOptions.GetFlag("LinkIncremental");
-  this->WritePlatformConfigTag("LinkIncremental", configName, e1.Indent + 1,
+  this->WritePlatformConfigTag("LinkIncremental", configName, e1,
                                (incremental ? incremental : "true"));
   linkOptions.RemoveFlag("LinkIncremental");
 
   const char* manifest = linkOptions.GetFlag("GenerateManifest");
-  this->WritePlatformConfigTag("GenerateManifest", configName, e1.Indent + 1,
+  this->WritePlatformConfigTag("GenerateManifest", configName, e1,
                                (manifest ? manifest : "true"));
   linkOptions.RemoveFlag("GenerateManifest");
 
@@ -2382,7 +2370,7 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
   for (const char** f = flags; *f; ++f) {
     const char* flag = *f;
     if (const char* value = linkOptions.GetFlag(flag)) {
-      this->WritePlatformConfigTag(flag, configName, e1.Indent + 1, value);
+      this->WritePlatformConfigTag(flag, configName, e1, value);
       linkOptions.RemoveFlag(flag);
     }
   }
@@ -2612,13 +2600,11 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     return;
   }
   Elem e2(e1, "ClCompile");
-  e2.SetHasElements();
-  clOptions.PrependInheritedString("AdditionalOptions");
-  clOptions.OutputAdditionalIncludeDirectories(e2.S, e2.Indent + 1,
-                                               this->LangForClCompile);
-  clOptions.OutputFlagMap(e2.S, e2.Indent + 1);
-  clOptions.OutputPreprocessorDefinitions(e2.S, e2.Indent + 1,
-                                          this->LangForClCompile);
+  OptionsHelper oh(clOptions, e2);
+  oh.PrependInheritedString("AdditionalOptions");
+  oh.OutputAdditionalIncludeDirectories(this->LangForClCompile);
+  oh.OutputFlagMap();
+  oh.OutputPreprocessorDefinitions(this->LangForClCompile);
 
   if (this->NsightTegra) {
     if (const char* processMax =
@@ -2714,13 +2700,12 @@ void cmVisualStudio10TargetGenerator::WriteRCOptions(
     return;
   }
   Elem e2(e1, "ResourceCompile");
-  e2.SetHasElements();
 
-  Options& rcOptions = *(this->RcOptions[configName]);
-  rcOptions.OutputPreprocessorDefinitions(e2.S, e2.Indent + 1, "RC");
-  rcOptions.OutputAdditionalIncludeDirectories(e2.S, e2.Indent + 1, "RC");
+  OptionsHelper rcOptions(*(this->RcOptions[configName]), e2);
+  rcOptions.OutputPreprocessorDefinitions("RC");
+  rcOptions.OutputAdditionalIncludeDirectories("RC");
   rcOptions.PrependInheritedString("AdditionalOptions");
-  rcOptions.OutputFlagMap(e2.S, e2.Indent + 1);
+  rcOptions.OutputFlagMap();
 
   e2.EndElement();
 }
@@ -2863,13 +2848,12 @@ void cmVisualStudio10TargetGenerator::WriteCudaOptions(
     return;
   }
   Elem e2(e1, "CudaCompile");
-  e2.SetHasElements();
 
-  Options& cudaOptions = *(this->CudaOptions[configName]);
-  cudaOptions.OutputAdditionalIncludeDirectories(e2.S, e2.Indent + 1, "CUDA");
-  cudaOptions.OutputPreprocessorDefinitions(e2.S, e2.Indent + 1, "CUDA");
+  OptionsHelper cudaOptions(*(this->CudaOptions[configName]), e2);
+  cudaOptions.OutputAdditionalIncludeDirectories("CUDA");
+  cudaOptions.OutputPreprocessorDefinitions("CUDA");
   cudaOptions.PrependInheritedString("AdditionalOptions");
-  cudaOptions.OutputFlagMap(e2.S, e2.Indent + 1);
+  cudaOptions.OutputFlagMap();
 
   e2.EndElement();
 }
@@ -2937,9 +2921,8 @@ void cmVisualStudio10TargetGenerator::WriteCudaLinkOptions(
   }
 
   Elem e2(e1, "CudaLink");
-  e2.SetHasElements();
-  Options& cudaLinkOptions = *(this->CudaLinkOptions[configName]);
-  cudaLinkOptions.OutputFlagMap(e2.S, e2.Indent + 1);
+  OptionsHelper cudaLinkOptions(*(this->CudaLinkOptions[configName]), e2);
+  cudaLinkOptions.OutputFlagMap();
   e2.EndElement();
 }
 
@@ -2987,17 +2970,15 @@ void cmVisualStudio10TargetGenerator::WriteMasmOptions(
     return;
   }
   Elem e2(e1, "MASM");
-  e2.SetHasElements();
 
   // Preprocessor definitions and includes are shared with clOptions.
-  Options& clOptions = *(this->ClOptions[configName]);
-  clOptions.OutputPreprocessorDefinitions(e2.S, e2.Indent + 1, "ASM_MASM");
+  OptionsHelper clOptions(*(this->ClOptions[configName]), e2);
+  clOptions.OutputPreprocessorDefinitions("ASM_MASM");
 
-  Options& masmOptions = *(this->MasmOptions[configName]);
-  masmOptions.OutputAdditionalIncludeDirectories(e2.S, e2.Indent + 1,
-                                                 "ASM_MASM");
+  OptionsHelper masmOptions(*(this->MasmOptions[configName]), e2);
+  masmOptions.OutputAdditionalIncludeDirectories("ASM_MASM");
   masmOptions.PrependInheritedString("AdditionalOptions");
-  masmOptions.OutputFlagMap(e2.S, e2.Indent + 1);
+  masmOptions.OutputFlagMap();
 
   e2.EndElement();
 }
@@ -3047,20 +3028,18 @@ void cmVisualStudio10TargetGenerator::WriteNasmOptions(
     return;
   }
   Elem e2(e1, "NASM");
-  e2.SetHasElements();
 
   std::vector<std::string> includes =
     this->GetIncludes(configName, "ASM_NASM");
-  Options& nasmOptions = *(this->NasmOptions[configName]);
-  nasmOptions.OutputAdditionalIncludeDirectories(e2.S, e2.Indent + 1,
-                                                 "ASM_NASM");
-  nasmOptions.OutputFlagMap(e2.S, e2.Indent + 1);
+  OptionsHelper nasmOptions(*(this->NasmOptions[configName]), e2);
+  nasmOptions.OutputAdditionalIncludeDirectories("ASM_NASM");
+  nasmOptions.OutputFlagMap();
   nasmOptions.PrependInheritedString("AdditionalOptions");
-  nasmOptions.OutputPreprocessorDefinitions(e2.S, e2.Indent + 1, "ASM_NASM");
+  nasmOptions.OutputPreprocessorDefinitions("ASM_NASM");
 
   // Preprocessor definitions and includes are shared with clOptions.
-  Options& clOptions = *(this->ClOptions[configName]);
-  clOptions.OutputPreprocessorDefinitions(e2.S, e2.Indent + 1, "ASM_NASM");
+  OptionsHelper clOptions(*(this->ClOptions[configName]), e2);
+  clOptions.OutputPreprocessorDefinitions("ASM_NASM");
 
   e2.EndElement();
 }
@@ -3077,14 +3056,14 @@ void cmVisualStudio10TargetGenerator::WriteLibOptions(
     libflags, cmSystemTools::UpperCase(config), this->GeneratorTarget);
   if (!libflags.empty()) {
     Elem e2(e1, "Lib");
-    e2.SetHasElements();
     cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
     cmVS10GeneratorOptions libOptions(this->LocalGenerator,
                                       cmVisualStudioGeneratorOptions::Linker,
                                       gg->GetLibFlagTable(), this);
     libOptions.Parse(libflags.c_str());
-    libOptions.PrependInheritedString("AdditionalOptions");
-    libOptions.OutputFlagMap(e2.S, e2.Indent + 1);
+    OptionsHelper oh(libOptions, e2);
+    oh.PrependInheritedString("AdditionalOptions");
+    oh.OutputFlagMap();
     e2.EndElement();
   }
 
@@ -3514,13 +3493,12 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(
   if (this->ProjectType == csproj) {
     return;
   }
-  Options& linkOptions = *(this->LinkOptions[config]);
 
   {
     Elem e2(e1, "Link");
-    e2.SetHasElements();
+    OptionsHelper linkOptions(*(this->LinkOptions[config]), e2);
     linkOptions.PrependInheritedString("AdditionalOptions");
-    linkOptions.OutputFlagMap(e2.S, e2.Indent + 1);
+    linkOptions.OutputFlagMap();
     e2.EndElement();
   }
 

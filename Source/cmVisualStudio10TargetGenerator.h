@@ -32,10 +32,6 @@ public:
                                   cmGlobalVisualStudio10Generator* gg);
   ~cmVisualStudio10TargetGenerator();
   void Generate();
-  // used by cmVisualStudioGeneratorOptions
-  std::string CalcCondition(const std::string& config) const;
-  void WritePlatformConfigTag(const char* tag, const std::string& config,
-                              int indentLevel, const std::string& content);
 
 private:
   struct ToolSource
@@ -54,13 +50,13 @@ private:
   };
 
   struct Elem;
+  struct OptionsHelper;
 
   std::string ConvertPath(std::string const& path, bool forceRelative);
   void WriteString(const char* line, int indentLevel);
-  void WriteElem(const char* tag, const char* val, int indentLevel);
-  void WriteElem(const char* tag, std::string const& val, int indentLevel);
-  void WriteElemEscapeXML(const char* tag, std::string const& val,
-                          int indentLevel);
+  std::string CalcCondition(const std::string& config) const;
+  void WritePlatformConfigTag(const char* tag, const std::string& config,
+                              Elem& parent, const std::string& content);
   void WriteProjectConfigurations(Elem& e0);
   void WriteProjectConfigurationValues(Elem& e0);
   void WriteMSToolConfigurationValues(Elem& e1, std::string const& config);
@@ -182,6 +178,7 @@ private:
   void GetCSharpSourceLink(cmSourceFile const* sf, std::string& link);
 
 private:
+  friend class cmVS10GeneratorOptions;
   typedef cmVS10GeneratorOptions Options;
   typedef std::map<std::string, std::unique_ptr<Options>> OptionsMap;
   OptionsMap ClOptions;
