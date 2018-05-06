@@ -145,8 +145,7 @@ if(BUILD_TESTING)
     set(CPACK_BINARY_RPM OFF)
   endif()
 
-  # Look for rpmbuild to use for tests.
-  # The tool does not work with spaces in the path.
+  # Look for dpkg to use for tests.
   find_program(DPKG_EXECUTABLE NAMES dpkg)
 
   if(DPKG_EXECUTABLE)
