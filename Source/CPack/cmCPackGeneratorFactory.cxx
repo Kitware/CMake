@@ -15,6 +15,7 @@
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmCPackNSISGenerator.h"
+#include "cmCPackNuGetGenerator.h"
 #include "cmCPackSTGZGenerator.h"
 #include "cmCPackTGZGenerator.h"
 #include "cmCPackTXZGenerator.h"
@@ -104,6 +105,10 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
   if (cmCPackDebGenerator::CanGenerate()) {
     this->RegisterGenerator("DEB", "Debian packages",
                             cmCPackDebGenerator::CreateGenerator);
+  }
+  if (cmCPackNuGetGenerator::CanGenerate()) {
+    this->RegisterGenerator("NuGet", "NuGet packages",
+                            cmCPackNuGetGenerator::CreateGenerator);
   }
 #ifdef __APPLE__
   if (cmCPackDragNDropGenerator::CanGenerate()) {

@@ -544,10 +544,11 @@ if(NOT CPACK_GENERATOR)
       option(CPACK_BINARY_TXZ  "Enable to build TXZ packages"     OFF)
     endif()
   else()
-    option(CPACK_BINARY_7Z   "Enable to build 7-Zip packages" OFF)
-    option(CPACK_BINARY_NSIS "Enable to build NSIS packages" ON)
-    option(CPACK_BINARY_WIX  "Enable to build WiX packages" OFF)
-    option(CPACK_BINARY_ZIP  "Enable to build ZIP packages" OFF)
+    option(CPACK_BINARY_7Z    "Enable to build 7-Zip packages" OFF)
+    option(CPACK_BINARY_NSIS  "Enable to build NSIS packages" ON)
+    option(CPACK_BINARY_NUGET "Enable to build NuGet packages" OFF)
+    option(CPACK_BINARY_WIX   "Enable to build WiX packages" OFF)
+    option(CPACK_BINARY_ZIP   "Enable to build ZIP packages" OFF)
   endif()
   option(CPACK_BINARY_IFW "Enable to build IFW packages" OFF)
 
@@ -559,6 +560,7 @@ if(NOT CPACK_GENERATOR)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_FREEBSD      FREEBSD)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_IFW          IFW)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NSIS         NSIS)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NUGET        NuGet)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_OSXX11       OSXX11)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PACKAGEMAKER PackageMaker)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PRODUCTBUILD productbuild)
@@ -611,6 +613,7 @@ mark_as_advanced(
   CPACK_BINARY_FREEBSD
   CPACK_BINARY_IFW
   CPACK_BINARY_NSIS
+  CPACK_BINARY_NUGET
   CPACK_BINARY_OSXX11
   CPACK_BINARY_PACKAGEMAKER
   CPACK_BINARY_PRODUCTBUILD

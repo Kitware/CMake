@@ -154,6 +154,15 @@ if(BUILD_TESTING)
     set(CPACK_BINARY_DEB OFF)
   endif()
 
+  # Look for NuGet to use for tests.
+  find_program(NUGET_EXECUTABLE NAMES NuGet nuget)
+
+  if(NUGET_EXECUTABLE)
+    set(CPACK_BINARY_NUGET ON)
+  else()
+    set(CPACK_BINARY_NUGET OFF)
+  endif()
+
   #---------------------------------------------------------------------------
   # Add tests below here.
 
@@ -1032,6 +1041,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     if(CPACK_BINARY_DEB)
       list(APPEND ACTIVE_CPACK_GENERATORS DEB)
     endif()
+    # Check whether if NuGet command is found
+    # before adding NuGet tests
+    if(CPACK_BINARY_NUGET)
+      list(APPEND ACTIVE_CPACK_GENERATORS NUGET)
+      set(CPACK_GENERATOR_STRING_NUGET NuGet)
+    endif()
 
     # ACTIVE_CPACK_GENERATORS variable
     # now contains the list of 'active generators'
@@ -1051,7 +1066,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     list(APPEND CWAYLST "IgnoreGroup")
     list(APPEND CWAYLST "AllInOne")
     foreach(CPackGen IN LISTS ACTIVE_CPACK_GENERATORS)
-      set(CPackRun_CPackGen  "-DCPackGen=${CPackGen}")
+      if(NOT DEFINED CPACK_GENERATOR_STRING_${CPackGen})
+        set(CPACK_GENERATOR_STRING_${CPackGen} ${CPackGen})
+      endif()
+      set(CPackRun_CPackGen  "-DCPackGen=${CPACK_GENERATOR_STRING_${CPackGen}}")
       foreach(CPackComponentWay ${CWAYLST})
         set(CPackRun_CPackComponentWay "-DCPackComponentWay=${CPackComponentWay}")
         add_test(CPackComponentsForAll-${CPackGen}-${CPackComponentWay}
@@ -1062,7 +1080,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
           ${build_generator_args}
           --build-project CPackComponentsForAll
           --build-options ${build_options}
-             -DCPACK_GENERATOR:STRING=${CPackGen}
+             -DCPACK_GENERATOR:STRING=${CPACK_GENERATOR_STRING_${CPackGen}}
              -DCPACK_BINARY_${CPackGen}:BOOL=ON
              ${CPackRun_CPackComponentWay}
              ${CPackComponentsForAll_BUILD_OPTIONS}
