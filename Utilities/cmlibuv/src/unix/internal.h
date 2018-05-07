@@ -185,7 +185,7 @@ struct uv__stream_queued_fds_s {
     defined(__DragonFly__) || \
     defined(__FreeBSD__) || \
     defined(__FreeBSD_kernel__) || \
-    (defined(__linux__) && !defined(__sparc__)) || \
+    defined(__linux__) || \
     defined(__OpenBSD__) || \
     defined(__NetBSD__)
 #define uv__cloexec uv__cloexec_ioctl
