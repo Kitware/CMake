@@ -33,8 +33,8 @@ scope.  To propagate the results of these operations upwards, use
   Be careful when counting with negative indices: they do not start from
   0.  -0 is equivalent to 0, the first list element.
 
-Capacity and Element access
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Reading
+^^^^^^^
 
 LENGTH
 """"""
