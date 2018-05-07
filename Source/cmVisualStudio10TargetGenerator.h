@@ -219,6 +219,7 @@ private:
   bool IsMissingFiles;
   std::vector<std::string> AddedFiles;
   std::string DefaultArtifactDir;
+  bool AddedDefaultCertificate = false;
   // managed C++/C# relevant members
   typedef std::pair<std::string, std::string> DotNetHintReference;
   typedef std::vector<DotNetHintReference> DotNetHintReferenceList;
