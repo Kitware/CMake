@@ -110,11 +110,19 @@ installers.  The most commonly-used variables are:
  0.1.1 will be assumed, leading to ``CPACK_PACKAGE_VERSION_PATCH`` having a
  default value of 1.
 
+.. variable:: CPACK_PACKAGE_DESCRIPTION
+
+  A description of the project, used in places such as the introduction
+  screen of CPack-generated Windows installers.  If not set, the value of
+  this variable is populated from the file named by
+  ``CPACK_PACKAGE_DESCRIPTION_FILE``.
+
 .. variable:: CPACK_PACKAGE_DESCRIPTION_FILE
 
- A text file used to describe the project. Used, for example, the
- introduction screen of a CPack-generated Windows installer to describe
- the project.
+  A text file used to describe the project when
+  ``CPACK_PACKAGE_DESCRIPTION`` is not explicitly set.  The default
+  value for ``CPACK_PACKAGE_DESCRIPTION_FILE`` points to a built-in template
+  file ``Templates/CPack.GenericDescription.txt``.
 
 .. variable:: CPACK_PACKAGE_DESCRIPTION_SUMMARY
 
