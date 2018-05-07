@@ -1,19 +1,19 @@
 install
 -------
 
-.. only:: html
-
-   .. contents::
-
 Specify rules to run at install time.
 
-This command accepts several signatures:
+Synopsis
+^^^^^^^^
 
-* :ref:`install(TARGETS) <install-targets>`
-* :ref:`install(FILES|PROGRAMS) <install-files>`
-* :ref:`install(DIRECTORY) <install-directory>`
-* :ref:`install(SCRIPT|CODE) <install-script>`
-* :ref:`install(EXPORT|EXPORT_ANDROID_MK) <install-export>`
+.. parsed-literal::
+
+  install(`TARGETS`_ <target>... [...])
+  install({`FILES`_ | `PROGRAMS`_} <file>... DESTINATION <dir> [...])
+  install(`DIRECTORY`_ <dir>... DESTINATION <dir> [...])
+  install(`SCRIPT`_ <file> [...])
+  install(`CODE`_ <code> [...])
+  install(`EXPORT`_ <export-name> DESTINATION <dir> [...])
 
 Introduction
 ^^^^^^^^^^^^
@@ -89,10 +89,10 @@ Command signatures that install files may print messages during
 installation.  Use the :variable:`CMAKE_INSTALL_MESSAGE` variable
 to control which messages are printed.
 
-.. _install-targets:
-
 Installing Targets
 ^^^^^^^^^^^^^^^^^^
+
+.. _TARGETS:
 
 ::
 
@@ -284,10 +284,11 @@ The install destination given to the target install ``DESTINATION`` may
 use "generator expressions" with the syntax ``$<...>``.  See the
 :manual:`cmake-generator-expressions(7)` manual for available expressions.
 
-.. _install-files:
-
 Installing Files
 ^^^^^^^^^^^^^^^^
+
+.. _FILES:
+.. _PROGRAMS:
 
 ::
 
@@ -319,10 +320,10 @@ The install destination given to the files install ``DESTINATION`` may
 use "generator expressions" with the syntax ``$<...>``.  See the
 :manual:`cmake-generator-expressions(7)` manual for available expressions.
 
-.. _install-directory:
-
 Installing Directories
 ^^^^^^^^^^^^^^^^^^^^^^
+
+.. _DIRECTORY:
 
 ::
 
@@ -402,10 +403,11 @@ given to the directory install ``DESTINATION`` may use "generator expressions"
 with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.
 
-.. _install-script:
-
 Custom Installation Logic
 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _CODE:
+.. _SCRIPT:
 
 ::
 
@@ -425,10 +427,10 @@ example, the code
 
 will print a message during installation.
 
-.. _install-export:
-
 Installing Exports
 ^^^^^^^^^^^^^^^^^^
+
+.. _EXPORT:
 
 ::
 
