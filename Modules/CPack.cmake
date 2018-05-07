@@ -321,6 +321,13 @@ The following variables are for advanced uses of CPack:
  List of desktop links to create.
  Each desktop link requires a corresponding start menu shortcut
  as created by :variable:`CPACK_PACKAGE_EXECUTABLES`.
+
+.. variable:: CPACK_BINARY_<GENNAME>
+
+ CPack generated options for binary generators. The CPack.cmake module
+ generates (when CPACK_GENERATOR is not set) a set of CMake options (see
+ CMake option command) which may then be used to select the CPack
+ generator(s) to be used when launching the package target.
 #]=======================================================================]
 
 # Define this var in order to avoid (or warn) concerning multiple inclusion
@@ -502,16 +509,9 @@ macro(cpack_optional_append _list _cond _item)
   endif()
 endmacro()
 
-#.rst:
-# .. variable:: CPACK_BINARY_<GENNAME>
-#
-#  CPack generated options for binary generators. The CPack.cmake module
-#  generates (when CPACK_GENERATOR is not set) a set of CMake options (see
-#  CMake option command) which may then be used to select the CPack
-#  generator(s) to be used when launching the package target.
-#
-#  Provide options to choose generators we might check here if the required
-#  tools for the generates exist and set the defaults according to the results
+# Provide options to choose generators we might check here if the required
+# tools for the generators exist and set the defaults according to the
+# results.
 if(NOT CPACK_GENERATOR)
   if(UNIX)
     if(CYGWIN)
