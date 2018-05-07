@@ -137,7 +137,7 @@ int uv__make_socketpair(int fds[2], int flags) {
    * Anything else is a genuine error.
    */
   if (errno != EINVAL)
-    return -errno;
+    return UV__ERR(errno);
 
   no_cloexec = 1;
 
@@ -145,7 +145,7 @@ skip:
 #endif
 
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds))
-    return -errno;
+    return UV__ERR(errno);
 
   uv__cloexec(fds[0], 1);
   uv__cloexec(fds[1], 1);
@@ -170,7 +170,7 @@ int uv__make_pipe(int fds[2], int flags) {
     return 0;
 
   if (errno != ENOSYS)
-    return -errno;
+    return UV__ERR(errno);
 
   no_pipe2 = 1;
 
@@ -178,7 +178,7 @@ skip:
 #endif
 
   if (pipe(fds))
-    return -errno;
+    return UV__ERR(errno);
 
   uv__cloexec(fds[0], 1);
   uv__cloexec(fds[1], 1);
@@ -209,7 +209,7 @@ static int uv__process_init_stdio(uv_stdio_container_t* container, int fds[2]) {
   case UV_CREATE_PIPE:
     assert(container->data.stream != NULL);
     if (container->data.stream->type != UV_NAMED_PIPE)
-      return -EINVAL;
+      return UV_EINVAL;
     else
       return uv__make_socketpair(fds, 0);
 
@@ -221,21 +221,20 @@ static int uv__process_init_stdio(uv_stdio_container_t* container, int fds[2]) {
       fd = uv__stream_fd(container->data.stream);
 
     if (fd == -1)
-      return -EINVAL;
+      return UV_EINVAL;
 
     fds[1] = fd;
     return 0;
 
   default:
     assert(0 && "Unexpected flags");
-    return -EINVAL;
+    return UV_EINVAL;
   }
 }
 
 
 static int uv__process_open_stream(uv_stdio_container_t* container,
-                                   int pipefds[2],
-                                   int writable) {
+                                   int pipefds[2]) {
   int flags;
   int err;
 
@@ -249,13 +248,11 @@ static int uv__process_open_stream(uv_stdio_container_t* container,
   pipefds[1] = -1;
   uv__nonblock(pipefds[0], 1);
 
-  if (container->data.stream->type == UV_NAMED_PIPE &&
-      ((uv_pipe_t*)container->data.stream)->ipc)
-    flags = UV_STREAM_READABLE | UV_STREAM_WRITABLE;
-  else if (writable)
-    flags = UV_STREAM_WRITABLE;
-  else
-    flags = UV_STREAM_READABLE;
+  flags = 0;
+  if (container->flags & UV_WRITABLE_PIPE)
+    flags |= UV_STREAM_READABLE;
+  if (container->flags & UV_READABLE_PIPE)
+    flags |= UV_STREAM_WRITABLE;
 
   return uv__stream_open(container->data.stream, pipefds[0], flags);
 }
@@ -318,7 +315,7 @@ static void uv__process_child_init(const uv_process_options_t* options,
       continue;
     pipes[fd][1] = fcntl(use_fd, F_DUPFD, stdio_count);
     if (pipes[fd][1] == -1) {
-      uv__write_int(error_fd, -errno);
+      uv__write_int(error_fd, UV__ERR(errno));
       _exit(127);
     }
   }
@@ -338,7 +335,7 @@ static void uv__process_child_init(const uv_process_options_t* options,
         close_fd = use_fd;
 
         if (use_fd == -1) {
-          uv__write_int(error_fd, -errno);
+          uv__write_int(error_fd, UV__ERR(errno));
           _exit(127);
         }
       }
@@ -350,7 +347,7 @@ static void uv__process_child_init(const uv_process_options_t* options,
       fd = dup2(use_fd, fd);
 
     if (fd == -1) {
-      uv__write_int(error_fd, -errno);
+      uv__write_int(error_fd, UV__ERR(errno));
       _exit(127);
     }
 
@@ -369,7 +366,7 @@ static void uv__process_child_init(const uv_process_options_t* options,
   }
 
   if (options->cwd != NULL && chdir(options->cwd)) {
-    uv__write_int(error_fd, -errno);
+    uv__write_int(error_fd, UV__ERR(errno));
     _exit(127);
   }
 
@@ -385,12 +382,12 @@ static void uv__process_child_init(const uv_process_options_t* options,
   }
 
   if ((options->flags & UV_PROCESS_SETGID) && setgid(options->gid)) {
-    uv__write_int(error_fd, -errno);
+    uv__write_int(error_fd, UV__ERR(errno));
     _exit(127);
   }
 
   if ((options->flags & UV_PROCESS_SETUID) && setuid(options->uid)) {
-    uv__write_int(error_fd, -errno);
+    uv__write_int(error_fd, UV__ERR(errno));
     _exit(127);
   }
 
@@ -432,7 +429,7 @@ static void uv__process_child_init(const uv_process_options_t* options,
     if (SIG_ERR != signal(n, SIG_DFL))
       continue;
 
-    uv__write_int(error_fd, -errno);
+    uv__write_int(error_fd, UV__ERR(errno));
     _exit(127);
   }
 
@@ -441,12 +438,12 @@ static void uv__process_child_init(const uv_process_options_t* options,
   err = pthread_sigmask(SIG_SETMASK, &set, NULL);
 
   if (err != 0) {
-    uv__write_int(error_fd, -err);
+    uv__write_int(error_fd, UV__ERR(err));
     _exit(127);
   }
 
   execvp(options->file, options->args);
-  uv__write_int(error_fd, -errno);
+  uv__write_int(error_fd, UV__ERR(errno));
   _exit(127);
 }
 #endif
@@ -457,7 +454,7 @@ int uv_spawn(uv_loop_t* loop,
              const uv_process_options_t* options) {
 #if defined(__APPLE__) && (TARGET_OS_TV || TARGET_OS_WATCH)
   /* fork is marked __WATCHOS_PROHIBITED __TVOS_PROHIBITED. */
-  return -ENOSYS;
+  return UV_ENOSYS;
 #else
   int signal_pipe[2] = { -1, -1 };
   int pipes_storage[8][2];
@@ -498,7 +495,7 @@ int uv_spawn(uv_loop_t* loop,
   if (stdio_count < 3)
     stdio_count = 3;
 
-  err = -ENOMEM;
+  err = UV_ENOMEM;
   pipes = pipes_storage;
   if (stdio_count > (int) ARRAY_SIZE(pipes_storage))
     pipes = uv__malloc(stdio_count * sizeof(*pipes));
@@ -548,7 +545,7 @@ int uv_spawn(uv_loop_t* loop,
   pid = fork();
 
   if (pid == -1) {
-    err = -errno;
+    err = UV__ERR(errno);
     uv_rwlock_wrunlock(&loop->cloexec_lock);
     uv__close(signal_pipe[0]);
     uv__close(signal_pipe[1]);
@@ -588,7 +585,7 @@ int uv_spawn(uv_loop_t* loop,
   uv__close_nocheckstdio(signal_pipe[0]);
 
   for (i = 0; i < options->stdio_count; i++) {
-    err = uv__process_open_stream(options->stdio + i, pipes[i], i == 0);
+    err = uv__process_open_stream(options->stdio + i, pipes[i]);
     if (err == 0)
       continue;
 
@@ -640,7 +637,7 @@ int uv_process_kill(uv_process_t* process, int signum) {
 
 int uv_kill(int pid, int signum) {
   if (kill(pid, signum))
-    return -errno;
+    return UV__ERR(errno);
   else
     return 0;
 }
