@@ -128,7 +128,7 @@ if (WIN32)
     OUTPUT_VARIABLE _JNI_VERSIONS
     ERROR_QUIET)
   if (NOT  _JNI_RESULT)
-    string (REGEX MATCHALL "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\JavaSoft\\\\JDK\\\\[0-9\.]+" _JNI_VERSIONS "${_JNI_VERSIONS}")
+    string (REGEX MATCHALL "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\JavaSoft\\\\JDK\\\\[0-9.]+" _JNI_VERSIONS "${_JNI_VERSIONS}")
     if (_JNI_VERSIONS)
       # sort versions. Most recent first
       ## handle version 9 apart from other versions to get correct ordering
@@ -141,7 +141,7 @@ if (WIN32)
       list (REVERSE _JNI_V9)
       list (APPEND _JNI_VERSIONS ${_JNI_V9})
       foreach (_JNI_HINT IN LISTS _JNI_VERSIONS)
-        list(APPEND _JNI_HINTS "[${_JNI_HINT}\\MSI;INSTALLDIR]")
+        list(APPEND _JNI_HINTS "[${_JNI_HINT};JavaHome]")
       endforeach()
     endif()
   endif()
