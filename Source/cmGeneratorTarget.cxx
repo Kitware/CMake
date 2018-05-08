@@ -5510,10 +5510,12 @@ cmGeneratorTarget::ManagedType cmGeneratorTarget::GetManagedType(
   const std::string& config) const
 {
   // Only libraries and executables can be managed targets.
-  if (this->GetType() != cmStateEnums::SHARED_LIBRARY &&
-      this->GetType() != cmStateEnums::STATIC_LIBRARY &&
-      this->GetType() != cmStateEnums::EXECUTABLE) {
+  if (this->GetType() > cmStateEnums::SHARED_LIBRARY) {
     return ManagedType::Undefined;
+  }
+
+  if (this->GetType() == cmStateEnums::STATIC_LIBRARY) {
+    return ManagedType::Native;
   }
 
   // Check imported target.

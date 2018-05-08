@@ -333,6 +333,14 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->ProjectType = vcxproj;
     this->Managed = false;
   } else if (this->ProjectFileExtension == ".csproj") {
+    if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
+      std::string message = "The C# target \"" +
+        this->GeneratorTarget->GetName() +
+        "\" is of type STATIC_LIBRARY. This is discouraged (and may be "
+        "disabled in future). Make it a SHARED library instead.";
+      this->Makefile->IssueMessage(cmake::MessageType::DEPRECATION_WARNING,
+                                   message);
+    }
     this->ProjectType = csproj;
     this->Managed = true;
   }
@@ -3803,18 +3811,24 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
       // If the dependency target is not managed (compiled with /clr or
       // C# target) we cannot reference it and have to set
       // 'ReferenceOutputAssembly' to false.
-      cmGeneratorTarget::ManagedType check =
-        cmGeneratorTarget::ManagedType::Mixed;
-      // FIXME: These (5) lines should be removed. They are here to allow
-      //        manual setting of the /clr flag in compiler options. Setting
-      //        /clr manually makes cmGeneratorTarget::GetManagedType() return
-      //        'Native' instead of 'Mixed' or 'Managed'.
-      check = cmGeneratorTarget::ManagedType::Native;
-      bool unmanagedStatic = false;
-      if (dt->GetType() == cmStateEnums::STATIC_LIBRARY) {
-        unmanagedStatic = !dt->HasLanguage("CSharp", "");
+      auto referenceNotManaged =
+        dt->GetManagedType("") < cmGeneratorTarget::ManagedType::Mixed;
+      // Workaround to check for manually set /clr flags.
+      if (referenceNotManaged) {
+        if (const auto* flags = dt->GetProperty("COMPILE_OPTIONS")) {
+          std::string flagsStr = flags;
+          if (flagsStr.find("clr") != std::string::npos) {
+            // There is a warning already issued when building the flags.
+            referenceNotManaged = false;
+          }
+        }
       }
-      if (dt->GetManagedType("") < check || unmanagedStatic) {
+      // Workaround for static library C# targets
+      if (referenceNotManaged &&
+          dt->GetType() == cmStateEnums::STATIC_LIBRARY) {
+        referenceNotManaged = !dt->HasLanguage("CSharp", "");
+      }
+      if (referenceNotManaged) {
         e2.Element("ReferenceOutputAssembly", "false");
       }
     }
