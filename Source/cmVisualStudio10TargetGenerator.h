@@ -53,10 +53,7 @@ private:
   struct OptionsHelper;
 
   std::string ConvertPath(std::string const& path, bool forceRelative);
-  void WriteString(const char* line, int indentLevel);
   std::string CalcCondition(const std::string& config) const;
-  void WritePlatformConfigTag(const char* tag, const std::string& config,
-                              Elem& parent, const std::string& content);
   void WriteProjectConfigurations(Elem& e0);
   void WriteProjectConfigurationValues(Elem& e0);
   void WriteMSToolConfigurationValues(Elem& e1, std::string const& config);
