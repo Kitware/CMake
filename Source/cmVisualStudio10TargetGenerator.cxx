@@ -667,7 +667,8 @@ void cmVisualStudio10TargetGenerator::Generate()
       Elem(e1, "Import")
         .Attribute("Project", "$(VCTargetsPath)\\BuildCustomizations\\CUDA " +
                      this->GlobalGenerator->GetPlatformToolsetCudaString() +
-                     ".targets");
+                     ".targets")
+        .EndElement();
     }
     if (this->GlobalGenerator->IsMasmEnabled()) {
       Elem(e1, "Import")
