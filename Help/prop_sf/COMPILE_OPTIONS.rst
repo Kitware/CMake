@@ -15,3 +15,7 @@ for available expressions.  However, :generator:`Xcode`
 does not support per-config per-source settings, so expressions
 that depend on the build configuration are not allowed with that
 generator.
+
+.. note::
+
+  This property should be preferred over the :prop_sf:`COMPILE_FLAGS` property.
