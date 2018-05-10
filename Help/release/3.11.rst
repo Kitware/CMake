@@ -283,3 +283,12 @@ Changes made since CMake 3.11.0 include the following.
   CMake 3.11.0.  This has been reverted due to changing behavior of
   checks for existing projects.  It may be restored in the future
   with a policy for compatibility.
+
+3.11.2
+------
+
+* Calling :command:`add_library` to create an alias of an imported
+  target that is not globally visible now causes an error again as
+  it did prior to 3.11.0.  This diagnostic was accidentally dropped
+  from CMake 3.11.0 and 3.11.1 by the change to allow globally visible
+  imported targets to be aliased.
