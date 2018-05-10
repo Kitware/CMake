@@ -547,15 +547,11 @@ if (QT_QMAKE_EXECUTABLE AND
     if(NOT WIN32)
       string(REPLACE ":" ";" qt_mkspecs_dirs "${qt_mkspecs_dirs}")
     endif()
-    set(qt_cross_paths)
-    foreach(qt_cross_path ${CMAKE_FIND_ROOT_PATH})
-      set(qt_cross_paths ${qt_cross_paths} "${qt_cross_path}/mkspecs")
-    endforeach()
-    set(QT_MKSPECS_DIR NOTFOUND)
+
     find_path(QT_MKSPECS_DIR NAMES qconfig.pri
-      HINTS ${qt_cross_paths} ${qt_mkspecs_dirs}
-      DOC "The location of the Qt mkspecs containing qconfig.pri"
-      NO_CMAKE_FIND_ROOT_PATH)
+      HINTS ${qt_mkspecs_dirs}
+      PATH_SUFFIXES mkspecs share/qt4/mkspecs
+      DOC "The location of the Qt mkspecs containing qconfig.pri")
   endif()
 
   if(EXISTS "${QT_MKSPECS_DIR}/qconfig.pri")
@@ -709,14 +705,15 @@ if (QT_QMAKE_EXECUTABLE AND
   # ask qmake for the plugins directory
   if (QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR  OR  QT_QMAKE_CHANGED)
     _qt4_query_qmake(QT_INSTALL_PLUGINS qt_plugins_dir)
-    set(QT_PLUGINS_DIR NOTFOUND)
-    foreach(qt_cross_path ${CMAKE_FIND_ROOT_PATH})
-      set(qt_cross_paths ${qt_cross_paths} "${qt_cross_path}/plugins")
-    endforeach()
-    find_path(QT_PLUGINS_DIR NAMES accessible imageformats sqldrivers codecs designer
-      HINTS ${qt_cross_paths} ${qt_plugins_dir}
-      DOC "The location of the Qt plugins"
-      NO_CMAKE_FIND_ROOT_PATH)
+    if(CMAKE_CROSSCOMPILING OR NOT qt_plugins_dir)
+      find_path(QT_PLUGINS_DIR
+        NAMES accessible bearer codecs designer graphicssystems iconengines imageformats inputmethods qmltooling script sqldrivers
+        HINTS ${qt_plugins_dir}
+        PATH_SUFFIXES plugins lib/qt4/plugins
+        DOC "The location of the Qt plugins")
+    else()
+      set(QT_PLUGINS_DIR ${qt_plugins_dir} CACHE PATH "The location of the Qt plugins")
+    endif()
   endif ()
 
   # ask qmake for the translations directory
@@ -728,18 +725,13 @@ if (QT_QMAKE_EXECUTABLE AND
   # ask qmake for the imports directory
   if (QT_LIBRARY_DIR AND NOT QT_IMPORTS_DIR OR QT_QMAKE_CHANGED)
     _qt4_query_qmake(QT_INSTALL_IMPORTS qt_imports_dir)
-    if(qt_imports_dir)
-      set(QT_IMPORTS_DIR NOTFOUND)
-      foreach(qt_cross_path ${CMAKE_FIND_ROOT_PATH})
-        set(qt_cross_paths ${qt_cross_paths} "${qt_cross_path}/imports")
-      endforeach()
+    if(CMAKE_CROSSCOMPILING OR NOT qt_imports_dir)
       find_path(QT_IMPORTS_DIR NAMES Qt
-        HINTS ${qt_cross_paths} ${qt_imports_dir}
-        DOC "The location of the Qt imports"
-        NO_CMAKE_FIND_ROOT_PATH
-        NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH NO_SYSTEM_ENVIRONMENT_PATH
-        NO_CMAKE_SYSTEM_PATH)
-      mark_as_advanced(QT_IMPORTS_DIR)
+        HINTS ${qt_imports_dir}
+        PATH_SUFFIXES imports lib/qt4/imports
+        DOC "The location of the Qt imports")
+    else()
+      set(QT_IMPORTS_DIR ${qt_imports_dir} CACHE PATH "The location of the Qt imports")
     endif()
   endif ()
 
