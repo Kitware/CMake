@@ -295,9 +295,10 @@ public:
 
   enum
   {
-    EXPERIMENTAL,
-    NIGHTLY,
-    CONTINUOUS
+    UNKNOWN = -1,
+    EXPERIMENTAL = 0,
+    NIGHTLY = 1,
+    CONTINUOUS = 2,
   };
 
   /** provide some more detailed info on the return code for ctest */
