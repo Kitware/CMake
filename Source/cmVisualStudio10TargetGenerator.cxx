@@ -103,6 +103,9 @@ struct cmVisualStudio10TargetGenerator::Elem
     }
   }
   void EndElement() { this->WriteEndTag(this->Tag); }
+
+  void WritePlatformConfigTag(const char* tag, const std::string& cond,
+                              const std::string& content);
 };
 
 class cmVS10GeneratorOptions : public cmVisualStudioGeneratorOptions
@@ -123,10 +126,11 @@ public:
     if (!this->GetConfiguration().empty()) {
       // if there are configuration specific flags, then
       // use the configuration specific tag for PreprocessorDefinitions
-      this->TargetGenerator->WritePlatformConfigTag(
-        tag, this->GetConfiguration(), *Parent, content);
+      const std::string cond =
+        this->TargetGenerator->CalcCondition(this->GetConfiguration());
+      this->Parent->WritePlatformConfigTag(tag, cond, content);
     } else {
-      Parent->Element(tag, content);
+      this->Parent->Element(tag, content);
     }
   }
 
@@ -268,13 +272,10 @@ std::string cmVisualStudio10TargetGenerator::CalcCondition(
   return oss.str();
 }
 
-void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
-  const char* tag, const std::string& config, Elem& parent,
-  const std::string& content)
+void cmVisualStudio10TargetGenerator::Elem::WritePlatformConfigTag(
+  const char* tag, const std::string& cond, const std::string& content)
 {
-  Elem(parent, tag)
-    .Attribute("Condition", this->CalcCondition(config))
-    .Content(content);
+  Elem(*this, tag).Attribute("Condition", cond).Content(content);
 }
 
 std::ostream& cmVisualStudio10TargetGenerator::Elem::WriteString(
@@ -286,12 +287,6 @@ std::ostream& cmVisualStudio10TargetGenerator::Elem::WriteString(
   this->S << "";
   this->S << line;
   return this->S;
-}
-
-void cmVisualStudio10TargetGenerator::WriteString(const char* line,
-                                                  int indentLevel)
-{
-  Elem(*this->BuildFileStream, indentLevel).WriteString(line);
 }
 
 #define VS10_CXX_DEFAULT_PROPS "$(VCTargetsPath)\\Microsoft.Cpp.Default.props"
@@ -689,17 +684,19 @@ void cmVisualStudio10TargetGenerator::Generate()
     }
     // make sure custom commands are executed before build (if necessary)
     Elem e1(e0, "PropertyGroup");
-    e1.SetHasElements();
-    this->WriteString("<BuildDependsOn>\n", 2);
-    for (std::string const& i : this->CSharpCustomCommandNames) {
-      this->WriteString(i.c_str(), 3);
-      (*this->BuildFileStream) << ";\n";
+    {
+      std::ostringstream oss;
+      oss << "\n";
+      for (std::string const& i : this->CSharpCustomCommandNames) {
+        oss << "      " << i << ";\n";
+      }
+      oss << "      "
+          << "$(BuildDependsOn)\n";
+      e1.Element("BuildDependsOn", oss.str());
     }
-    this->WriteString("$(BuildDependsOn)\n", 3);
-    this->WriteString("</BuildDependsOn>\n", 2);
     e1.EndElement();
   }
-  this->WriteString("</Project>", 0);
+  e0.WriteString("</Project>");
   // The groups are stored in a separate file for VS 10
   this->WriteGroups();
 }
@@ -844,7 +841,7 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
             s = "$(RootNamespace).";
           }
           s += "%(Filename).resources";
-          this->WritePlatformConfigTag("LogicalName", i, e2, s);
+          e2.WritePlatformConfigTag("LogicalName", CalcCondition(i), s);
         }
       } else {
         std::string binDir = this->Makefile->GetCurrentBinaryDirectory();
@@ -1336,16 +1333,15 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
   std::string const& comment)
 {
   const std::string cond = this->CalcCondition(config);
-  Elem(e2, "Message").Attribute("Condition", cond).Content(comment);
-  Elem(e2, "Command").Attribute("Condition", cond).Content(script);
-  Elem(e2, "AdditionalInputs")
-    .Attribute("Condition", cond)
-    .Content(inputs + ";%(AdditionalInputs)");
-  Elem(e2, "Outputs").Attribute("Condition", cond).Content(outputs);
+  e2.WritePlatformConfigTag("Message", cond, comment);
+  e2.WritePlatformConfigTag("Command", cond, script);
+  e2.WritePlatformConfigTag("AdditionalInputs", cond,
+                            inputs + ";%(AdditionalInputs)");
+  e2.WritePlatformConfigTag("Outputs", cond, outputs);
   if (this->LocalGenerator->GetVersion() >
       cmGlobalVisualStudioGenerator::VS10) {
     // VS >= 11 let us turn off linking of custom command outputs.
-    Elem(e2, "LinkObjects").Attribute("Condition", cond).Content("false");
+    e2.WritePlatformConfigTag("LinkObjects", cond, "false");
   }
 }
 
@@ -1774,15 +1770,15 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
         if (0 == strcmp(cge->Evaluate(this->LocalGenerator,
                                       this->Configurations[i]),
                         "1")) {
-          Elem e3(e2, "DeploymentContent");
-          e3.Attribute("Condition", "'$(Configuration)|$(Platform)'=='" +
-                         this->Configurations[i] + "|" + this->Platform + "'");
-          e3.Content("true");
+          e2.WritePlatformConfigTag(
+            "DeploymentContent", "'$(Configuration)|$(Platform)'=='" +
+              this->Configurations[i] + "|" + this->Platform + "'",
+            "true");
         } else {
-          Elem e3(e2, "ExcludedFromBuild");
-          e3.Attribute("Condition", "'$(Configuration)|$(Platform)'=='" +
-                         this->Configurations[i] + "|" + this->Platform + "'");
-          e3.Content("true");
+          e2.WritePlatformConfigTag(
+            "ExcludedFromBuild", "'$(Configuration)|$(Platform)'=='" +
+              this->Configurations[i] + "|" + this->Platform + "'",
+            "true");
         }
       }
     }
@@ -1797,18 +1793,18 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
     }
     if (!outputHeaderFile.empty()) {
       for (size_t i = 0; i != this->Configurations.size(); ++i) {
-        Elem e3(e2, "HeaderFileOutput");
-        e3.Attribute("Condition", "'$(Configuration)|$(Platform)'=='" +
-                       this->Configurations[i] + "|" + this->Platform + "'");
-        e3.Content(outputHeaderFile);
+        e2.WritePlatformConfigTag(
+          "HeaderFileOutput", "'$(Configuration)|$(Platform)'=='" +
+            this->Configurations[i] + "|" + this->Platform + "'",
+          outputHeaderFile);
       }
     }
     if (!variableName.empty()) {
       for (size_t i = 0; i != this->Configurations.size(); ++i) {
-        Elem e3(e2, "VariableName");
-        e3.Attribute("Condition", "'$(Configuration)|$(Platform)'=='" +
-                       this->Configurations[i] + "|" + this->Platform + "'");
-        e3.Content(variableName);
+        e2.WritePlatformConfigTag(
+          "VariableName", "'$(Configuration)|$(Platform)'=='" +
+            this->Configurations[i] + "|" + this->Platform + "'",
+          variableName);
       }
     }
     if (!shaderEnableDebug.empty()) {
@@ -1820,10 +1816,10 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
         const char* enableDebug =
           cge->Evaluate(this->LocalGenerator, this->Configurations[i]);
         if (strlen(enableDebug) > 0) {
-          Elem e3(e2, "EnableDebuggingInformation");
-          e3.Attribute("Condition", "'$(Configuration)|$(Platform)'=='" +
-                         this->Configurations[i] + "|" + this->Platform + "'");
-          e3.Content(cmSystemTools::IsOn(enableDebug) ? "true" : "false");
+          e2.WritePlatformConfigTag(
+            "EnableDebuggingInformation", "'$(Configuration)|$(Platform)'=='" +
+              this->Configurations[i] + "|" + this->Platform + "'",
+            cmSystemTools::IsOn(enableDebug) ? "true" : "false");
         }
       }
     }
@@ -1836,11 +1832,10 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
         const char* disableOptimizations =
           cge->Evaluate(this->LocalGenerator, this->Configurations[i]);
         if (strlen(disableOptimizations) > 0) {
-          Elem e3(e2, "DisableOptimizations");
-          e3.Attribute("Condition", "'$(Configuration)|$(Platform)'=='" +
-                         this->Configurations[i] + "|" + this->Platform + "'");
-          e3.Content(cmSystemTools::IsOn(disableOptimizations) ? "true"
-                                                               : "false");
+          e2.WritePlatformConfigTag(
+            "DisableOptimizations", "'$(Configuration)|$(Platform)'=='" +
+              this->Configurations[i] + "|" + this->Platform + "'",
+            (cmSystemTools::IsOn(disableOptimizations) ? "true" : "false"));
         }
       }
     }
@@ -2225,10 +2220,10 @@ void cmVisualStudio10TargetGenerator::WriteExcludeFromBuild(
   Elem& e2, std::vector<size_t> const& exclude_configs)
 {
   for (size_t ci : exclude_configs) {
-    Elem e3(e2, "ExcludedFromBuild");
-    e3.Attribute("Condition", "'$(Configuration)|$(Platform)'=='" +
-                   this->Configurations[ci] + "|" + this->Platform + "'");
-    e3.Content("true");
+    e2.WritePlatformConfigTag(
+      "ExcludedFromBuild", "'$(Configuration)|$(Platform)'=='" +
+        this->Configurations[ci] + "|" + this->Platform + "'",
+      "true");
   }
 }
 
@@ -2246,10 +2241,10 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
   Elem e1(e0, "PropertyGroup");
   e1.Element("_ProjectFileVersion", "10.0.20506.1");
   for (std::string const& config : this->Configurations) {
+    const std::string cond = this->CalcCondition(config);
     if (ttype >= cmStateEnums::UTILITY) {
-      this->WritePlatformConfigTag(
-        "IntDir", config, e1,
-        "$(Platform)\\$(Configuration)\\$(ProjectName)\\");
+      e1.WritePlatformConfigTag(
+        "IntDir", cond, "$(Platform)\\$(Configuration)\\$(ProjectName)\\");
     } else {
       std::string intermediateDir =
         this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
@@ -2269,67 +2264,63 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
       ConvertToWindowsSlash(intermediateDir);
       ConvertToWindowsSlash(outDir);
 
-      this->WritePlatformConfigTag("OutDir", config, e1, outDir);
+      e1.WritePlatformConfigTag("OutDir", cond, outDir);
 
-      this->WritePlatformConfigTag("IntDir", config, e1, intermediateDir);
+      e1.WritePlatformConfigTag("IntDir", cond, intermediateDir);
 
       if (const char* sdkExecutableDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_EXECUTABLE_DIRECTORIES")) {
-        this->WritePlatformConfigTag("ExecutablePath", config, e1,
-                                     sdkExecutableDirectories);
+        e1.WritePlatformConfigTag("ExecutablePath", cond,
+                                  sdkExecutableDirectories);
       }
 
       if (const char* sdkIncludeDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_INCLUDE_DIRECTORIES")) {
-        this->WritePlatformConfigTag("IncludePath", config, e1,
-                                     sdkIncludeDirectories);
+        e1.WritePlatformConfigTag("IncludePath", cond, sdkIncludeDirectories);
       }
 
       if (const char* sdkReferenceDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_REFERENCE_DIRECTORIES")) {
-        this->WritePlatformConfigTag("ReferencePath", config, e1,
-                                     sdkReferenceDirectories);
+        e1.WritePlatformConfigTag("ReferencePath", cond,
+                                  sdkReferenceDirectories);
       }
 
       if (const char* sdkLibraryDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_LIBRARY_DIRECTORIES")) {
-        this->WritePlatformConfigTag("LibraryPath", config, e1,
-                                     sdkLibraryDirectories);
+        e1.WritePlatformConfigTag("LibraryPath", cond, sdkLibraryDirectories);
       }
 
       if (const char* sdkLibraryWDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_LIBRARY_WINRT_DIRECTORIES")) {
-        this->WritePlatformConfigTag("LibraryWPath", config, e1,
-                                     sdkLibraryWDirectories);
+        e1.WritePlatformConfigTag("LibraryWPath", cond,
+                                  sdkLibraryWDirectories);
       }
 
       if (const char* sdkSourceDirectories =
             this->Makefile->GetDefinition("CMAKE_VS_SDK_SOURCE_DIRECTORIES")) {
-        this->WritePlatformConfigTag("SourcePath", config, e1,
-                                     sdkSourceDirectories);
+        e1.WritePlatformConfigTag("SourcePath", cond, sdkSourceDirectories);
       }
 
       if (const char* sdkExcludeDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_EXCLUDE_DIRECTORIES")) {
-        this->WritePlatformConfigTag("ExcludePath", config, e1,
-                                     sdkExcludeDirectories);
+        e1.WritePlatformConfigTag("ExcludePath", cond, sdkExcludeDirectories);
       }
 
       if (const char* workingDir = this->GeneratorTarget->GetProperty(
             "VS_DEBUGGER_WORKING_DIRECTORY")) {
-        this->WritePlatformConfigTag("LocalDebuggerWorkingDirectory", config,
-                                     e1, workingDir);
+        e1.WritePlatformConfigTag("LocalDebuggerWorkingDirectory", cond,
+                                  workingDir);
       }
 
       if (const char* debuggerCommand =
             this->GeneratorTarget->GetProperty("VS_DEBUGGER_COMMAND")) {
-        this->WritePlatformConfigTag("LocalDebuggerCommand", config, e1,
-                                     debuggerCommand);
+        e1.WritePlatformConfigTag("LocalDebuggerCommand", cond,
+                                  debuggerCommand);
       }
 
       std::string name =
         cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
-      this->WritePlatformConfigTag("TargetName", config, e1, name);
+      e1.WritePlatformConfigTag("TargetName", cond, name);
 
       std::string ext =
         cmSystemTools::GetFilenameLastExtension(targetNameFull);
@@ -2338,7 +2329,7 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
         // A single "." appears to be treated as an empty extension.
         ext = ".";
       }
-      this->WritePlatformConfigTag("TargetExt", config, e1, ext);
+      e1.WritePlatformConfigTag("TargetExt", cond, ext);
 
       this->OutputLinkIncremental(e1, config);
     }
@@ -2362,15 +2353,16 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
     return;
   }
   Options& linkOptions = *(this->LinkOptions[configName]);
+  const std::string cond = this->CalcCondition(configName);
 
   const char* incremental = linkOptions.GetFlag("LinkIncremental");
-  this->WritePlatformConfigTag("LinkIncremental", configName, e1,
-                               (incremental ? incremental : "true"));
+  e1.WritePlatformConfigTag("LinkIncremental", cond,
+                            (incremental ? incremental : "true"));
   linkOptions.RemoveFlag("LinkIncremental");
 
   const char* manifest = linkOptions.GetFlag("GenerateManifest");
-  this->WritePlatformConfigTag("GenerateManifest", configName, e1,
-                               (manifest ? manifest : "true"));
+  e1.WritePlatformConfigTag("GenerateManifest", cond,
+                            (manifest ? manifest : "true"));
   linkOptions.RemoveFlag("GenerateManifest");
 
   // Some link options belong here.  Use them now and remove them so that
@@ -2379,7 +2371,7 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
   for (const char** f = flags; *f; ++f) {
     const char* flag = *f;
     if (const char* value = linkOptions.GetFlag(flag)) {
-      this->WritePlatformConfigTag(flag, configName, e1, value);
+      e1.WritePlatformConfigTag(flag, cond, value);
       linkOptions.RemoveFlag(flag);
     }
   }
@@ -3840,24 +3832,17 @@ void cmVisualStudio10TargetGenerator::WritePlatformExtensions(Elem& e1)
 void cmVisualStudio10TargetGenerator::WriteSinglePlatformExtension(
   Elem& e1, std::string const& extension, std::string const& version)
 {
+  const std::string s = "$([Microsoft.Build.Utilities.ToolLocationHelper]"
+                        "::GetPlatformExtensionSDKLocation(`" +
+    extension + ", Version=" + version +
+    "`, $(TargetPlatformIdentifier), $(TargetPlatformVersion), null, "
+    "$(ExtensionSDKDirectoryRoot), null))"
+    "\\DesignTime\\CommonConfiguration\\Neutral\\" +
+    extension + ".props";
+
   Elem e2(e1, "Import");
-  e2.Attribute(
-    "Project", "$([Microsoft.Build.Utilities.ToolLocationHelper]"
-               "::GetPlatformExtensionSDKLocation(`" +
-      extension + ", Version=" + version +
-      "`, $(TargetPlatformIdentifier), $(TargetPlatformVersion), null, "
-      "$(ExtensionSDKDirectoryRoot), null))"
-      "\\DesignTime\\CommonConfiguration\\Neutral\\" +
-      extension + ".props");
-  e2.Attribute(
-    "Condition", "exists('$("
-                 "[Microsoft.Build.Utilities.ToolLocationHelper]"
-                 "::GetPlatformExtensionSDKLocation(`" +
-      extension + ", Version=" + version +
-      "`, $(TargetPlatformIdentifier), $(TargetPlatformVersion), null, "
-      "$(ExtensionSDKDirectoryRoot), null))"
-      "\\DesignTime\\CommonConfiguration\\Neutral\\" +
-      extension + ".props')");
+  e2.Attribute("Project", s);
+  e2.Attribute("Condition", "exists('" + s + "')");
   e2.EndElement();
 }
 
