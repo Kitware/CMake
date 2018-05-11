@@ -152,6 +152,7 @@ macro (QT4_GENERATE_MOC infile outfile )
    endif()
    QT4_CREATE_MOC_COMMAND(${abs_infile} ${_outfile} "${moc_flags}" "" "${moc_target}")
    set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
+   set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
 endmacro ()
 
 
@@ -166,6 +167,8 @@ macro (QT4_WRAP_CPP outfiles )
     get_filename_component(it ${it} ABSOLUTE)
     QT4_MAKE_OUTPUT_FILE(${it} moc_ cxx outfile)
     QT4_CREATE_MOC_COMMAND(${it} ${outfile} "${moc_flags}" "${moc_options}" "${moc_target}")
+    set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
+    set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
     set(${outfiles} ${${outfiles}} ${outfile})
   endforeach()
 
@@ -185,6 +188,8 @@ macro (QT4_WRAP_UI outfiles )
       COMMAND Qt4::uic
       ARGS ${ui_options} -o ${outfile} ${infile}
       MAIN_DEPENDENCY ${infile} VERBATIM)
+    set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
+    set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
     set(${outfiles} ${${outfiles}} ${outfile})
   endforeach ()
 
@@ -233,6 +238,8 @@ macro (QT4_ADD_RESOURCES outfiles )
       ARGS ${rcc_options} -name ${outfilename} -o ${outfile} ${infile}
       MAIN_DEPENDENCY ${infile}
       DEPENDS ${_RC_DEPENDS} "${out_depends}" VERBATIM)
+    set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
+    set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
     set(${outfiles} ${${outfiles}} ${outfile})
   endforeach ()
 
@@ -267,6 +274,7 @@ macro(QT4_ADD_DBUS_INTERFACE _sources _interface _basename)
       DEPENDS ${_infile} VERBATIM)
 
   set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
+  set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
 
   QT4_GENERATE_MOC("${_header}" "${_moc}")
 
@@ -351,6 +359,7 @@ macro(QT4_ADD_DBUS_ADAPTOR _sources _xml_file _include _parentClass) # _optional
 
   QT4_GENERATE_MOC("${_header}" "${_moc}")
   set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
+  set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
   MACRO_ADD_FILE_DEPENDENCIES("${_impl}" "${_moc}")
 
   list(APPEND ${_sources} "${_impl}" "${_header}" "${_moc}")
