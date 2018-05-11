@@ -1270,7 +1270,7 @@ public:
   long GetLineNumber() const { return this->LineNumber; }
 
   // Description:
-  // Set the address where the biinary image is mapped
+  // Set the address where the binary image is mapped
   // into memory.
   void SetBinaryBaseAddress(void* address)
   {
@@ -4061,7 +4061,7 @@ bool SystemInformationImplementation::QueryLinuxMemory()
 
   if (linuxMajor >= 3 || ((linuxMajor >= 2) && (linuxMinor >= 6))) {
     // new /proc/meminfo format since kernel 2.6.x
-    // Rigorously, this test should check from the developping version 2.5.x
+    // Rigorously, this test should check from the developing version 2.5.x
     // that introduced the new format...
 
     enum
