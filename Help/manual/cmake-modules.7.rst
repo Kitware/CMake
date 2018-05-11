@@ -156,6 +156,7 @@ All Modules
    /module/FindMPEG2
    /module/FindMPEG
    /module/FindMPI
+   /module/FindODBC
    /module/FindOpenACC
    /module/FindOpenAL
    /module/FindOpenCL
