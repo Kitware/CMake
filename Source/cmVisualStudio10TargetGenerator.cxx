@@ -3809,6 +3809,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
       }
       if (referenceNotManaged) {
         e2.Element("ReferenceOutputAssembly", "false");
+        e2.Element("CopyToOutputDirectory", "Never");
       }
     }
     e2.EndElement();
