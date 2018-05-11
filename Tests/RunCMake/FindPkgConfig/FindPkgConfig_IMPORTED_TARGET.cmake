@@ -85,3 +85,15 @@ pkg_check_modules(FakePackage2 REQUIRED QUIET IMPORTED_TARGET cmakeinternalfakep
 if (NOT TARGET PkgConfig::FakePackage2)
   message(FATAL_ERROR "No import target for fake package 2 with prefix path")
 endif()
+
+# check that the full library path is also returned
+if (NOT FakePackage2_LINK_LIBRARIES STREQUAL "${fakePkgDir}/lib/libcmakeinternalfakepackage2.a")
+  message(FATAL_ERROR "FakePackage2_LINK_LIBRARIES has bad content on first run: ${FakePackage2_LINK_LIBRARIES}")
+endif()
+
+# the information in *_LINK_LIBRARIES is not cached, so ensure is also is present on second run
+unset(FakePackage2_LINK_LIBRARIES)
+pkg_check_modules(FakePackage2 REQUIRED QUIET IMPORTED_TARGET cmakeinternalfakepackage2)
+if (NOT FakePackage2_LINK_LIBRARIES STREQUAL "${fakePkgDir}/lib/libcmakeinternalfakepackage2.a")
+  message(FATAL_ERROR "FakePackage2_LINK_LIBRARIES has bad content on second run: ${FakePackage2_LINK_LIBRARIES}")
+endif()

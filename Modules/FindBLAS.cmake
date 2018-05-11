@@ -88,16 +88,9 @@ endif()
 
 if(BLA_PREFER_PKGCONFIG)
   find_package(PkgConfig)
-  pkg_check_modules(PKGC_BLAS IMPORTED_TARGET blas)
+  pkg_check_modules(PKGC_BLAS blas)
   if(PKGC_BLAS_FOUND)
-    # FIXME: We should not interpret the INTERFACE_LINK_LIBRARIES property
-    # because it could have generator expressions and such.  This is a
-    # workaround for pkg_check_modules not providing a first-class way to
-    # get the list of libraries.
-    get_property(BLAS_LIBRARIES TARGET PkgConfig::PKGC_BLAS PROPERTY INTERFACE_LINK_LIBRARIES)
-    find_package_handle_standard_args(BLAS
-                                      REQUIRED_VARS BLAS_LIBRARIES
-                                      VERSION_VAR PKGC_BLAS_VERSION)
+    set(BLAS_LIBRARIES "${PKGC_BLAS_LINK_LIBRARIES}")
     return()
   endif()
 endif()
