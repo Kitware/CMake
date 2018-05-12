@@ -994,6 +994,9 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
   // Generate auto RCC info files
   if (this->RccEnabled) {
     for (Qrc const& qrc : this->Qrcs) {
+      // Register rcc info file as generated
+      makefile->AddCMakeOutputFile(qrc.InfoFile);
+
       cmGeneratedFileStream ofs;
       ofs.SetCopyIfDifferent(true);
       ofs.Open(qrc.InfoFile.c_str(), false, true);
