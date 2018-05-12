@@ -410,17 +410,17 @@
 #
 # .. variable:: CPACK_RPM_SPEC_INSTALL_POST
 #
-#  Deprecated - use :variable:`CPACK_RPM_POST_INSTALL_SCRIPT_FILE` instead.
+#  Deprecated - use :variable:`CPACK_RPM_SPEC_MORE_DEFINE` instead.
 #
 #  * Mandatory : NO
 #  * Default   : -
 #  * Deprecated: YES
 #
-#  This way of specifying post-install script is deprecated, use
-#  :variable:`CPACK_RPM_POST_INSTALL_SCRIPT_FILE`.
-#  May be used to set an RPM post-install command inside the spec file.
-#  For example setting it to ``/bin/true`` may be used to prevent
-#  rpmbuild to strip binaries.
+#  May be used to override the ``__spec_install_post`` section within the
+#  generated spec file.  This affects the install step during package creation,
+#  not during package installation.  For adding operations to be performed
+#  during package installation, use
+#  :variable:`CPACK_RPM_POST_INSTALL_SCRIPT_FILE` instead.
 #
 # .. variable:: CPACK_RPM_SPEC_MORE_DEFINE
 #
@@ -429,7 +429,11 @@
 #  * Mandatory : NO
 #  * Default   : -
 #
-#  May be used to add any ``%define`` lines to the generated spec file.
+#  May be used to add any ``%define`` lines to the generated spec file.  An
+#  example of its use is to prevent stripping of executables (but note that
+#  this may also disable other default post install processing)::
+#
+#    set(CPACK_RPM_SPEC_MORE_DEFINE "%define __spec_install_post /bin/true")
 #
 # .. variable:: CPACK_RPM_PACKAGE_DEBUG
 #
