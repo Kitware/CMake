@@ -877,9 +877,9 @@
 # variable while usually using :variable:`CPACK_INSTALLED_DIRECTORIES` variable
 # to provide directory containing CMakeLists.txt and source files.
 #
-# For CMake projects SRPM package would be product by executing:
+# For CMake projects SRPM package would be produced by executing::
 #
-# ``cpack -G RPM --config ./CPackSourceConfig.cmake``
+#   cpack -G RPM --config ./CPackSourceConfig.cmake
 #
 # .. note::
 #
@@ -892,10 +892,10 @@
 #
 # Once the SRPM package is generated it can be used to generate binary packages
 # by creating a directory structure for rpm generation and executing rpmbuild
-# tool:
+# tool::
 #
-# ``mkdir -p build_dir/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}``
-# ``rpmbuild --define "_topdir <path_to_build_dir>" --rebuild <SRPM_file_name>``
+#   mkdir -p build_dir/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+#   rpmbuild --define "_topdir <path_to_build_dir>" --rebuild <SRPM_file_name>
 #
 # Generated packages will be located in build_dir/RPMS directory or its sub
 # directories.
