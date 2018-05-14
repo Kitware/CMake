@@ -3290,9 +3290,11 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
                 "CUDA") != linkClosure->Languages.end()) {
     switch (this->CudaOptions[config]->GetCudaRuntime()) {
       case cmVisualStudioGeneratorOptions::CudaRuntimeStatic:
+        libVec.push_back("cudadevrt.lib");
         libVec.push_back("cudart_static.lib");
         break;
       case cmVisualStudioGeneratorOptions::CudaRuntimeShared:
+        libVec.push_back("cudadevrt.lib");
         libVec.push_back("cudart.lib");
         break;
       case cmVisualStudioGeneratorOptions::CudaRuntimeNone:
