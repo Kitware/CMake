@@ -51,7 +51,7 @@
 
 find_path(JPEG_INCLUDE_DIR jpeglib.h)
 
-set(jpeg_names ${JPEG_NAMES} jpeg libjpeg)
+set(jpeg_names ${JPEG_NAMES} jpeg jpeg-static libjpeg libjpeg-static)
 foreach(name ${JPEG_NAMES})
   list(APPEND jpeg_names_debug "${name}d")
 endforeach()
