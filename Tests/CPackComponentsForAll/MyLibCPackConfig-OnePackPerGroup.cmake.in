@@ -18,6 +18,10 @@ if(CPACK_GENERATOR MATCHES "DragNDrop")
    set(CPACK_COMPONENTS_GROUPING "ONE_PER_GROUP")
 endif()
 
+if(CPACK_GENERATOR MATCHES "NuGet")
+   set(CPACK_NUGET_COMPONENT_INSTALL "ON")
+endif()
+
 #
 # Choose grouping way
 #

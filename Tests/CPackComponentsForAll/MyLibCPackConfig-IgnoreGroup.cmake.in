@@ -52,6 +52,10 @@ if(CPACK_GENERATOR MATCHES "DEB")
    set(CPACK_DEB_COMPONENT_INSTALL "ON")
 endif()
 
+if(CPACK_GENERATOR MATCHES "NuGet")
+   set(CPACK_NUGET_COMPONENT_INSTALL "ON")
+endif()
+
 #
 # Choose grouping way
 #
