@@ -181,6 +181,12 @@ public:
   {
     xmlwr.Content(content);
   }
+  template <typename T>
+  void Element(std::string const& name, T const& value)
+  {
+    xmlwr.Element(name, value);
+  }
+  void Comment(const char* comment) { xmlwr.Comment(comment); }
 
 private:
   cmXMLWriter& xmlwr;
