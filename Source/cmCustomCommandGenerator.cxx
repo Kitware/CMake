@@ -40,6 +40,14 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
         argv.push_back(std::move(parsed_arg));
       }
     }
+
+    // Later code assumes at least one entry exists, but expanding
+    // lists on an empty command may have left this empty.
+    // FIXME: Should we define behavior for removing empty commands?
+    if (argv.empty()) {
+      argv.push_back(std::string());
+    }
+
     this->CommandLines.push_back(std::move(argv));
   }
 
