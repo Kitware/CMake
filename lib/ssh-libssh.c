@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2017 Red Hat, Inc.
+ * Copyright (C) 2017 - 2018 Red Hat, Inc.
  *
  * Authors: Nikos Mavrogiannopoulos, Tomas Mraz, Stanislav Zidek,
  *          Robert Kolcun, Andreas Schneider
@@ -383,8 +383,10 @@ static int myssh_is_known(struct connectdata *conn)
     }
 
     /* we don't have anything equivalent to knownkey. Always NULL */
+    Curl_set_in_callback(data, true);
     rc = func(data, NULL, &foundkey, /* from the remote host */
               keymatch, data->set.ssh_keyfunc_userp);
+    Curl_set_in_callback(data, false);
 
     switch(rc) {
       case CURLKHSTAT_FINE_ADD_TO_FILE:
@@ -1046,7 +1048,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 
       attrs = sftp_stat(sshc->sftp_session, protop->path);
       if(attrs != 0) {
-        data->info.filetime = (long)attrs->mtime;
+        data->info.filetime = attrs->mtime;
         sftp_attributes_free(attrs);
       }
 
@@ -1128,8 +1130,10 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
       if(data->state.resume_from > 0) {
         /* Let's read off the proper amount of bytes from the input. */
         if(conn->seek_func) {
+          Curl_set_in_callback(data, true);
           seekerr = conn->seek_func(conn->seek_client, data->state.resume_from,
                                     SEEK_SET);
+          Curl_set_in_callback(data, false);
         }
 
         if(seekerr != CURL_SEEKFUNC_OK) {
@@ -2421,8 +2425,7 @@ static ssize_t sftp_recv(struct connectdata *conn, int sockindex,
   ssize_t nread;
   (void)sockindex;
 
-  if(len >= (size_t)1<<32)
-    len = (size_t)(1<<31)-1;
+  DEBUGASSERT(len < CURL_MAX_READ_SIZE);
 
   switch(conn->proto.sshc.sftp_recv_state) {
     case 0:

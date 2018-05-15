@@ -488,25 +488,33 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->socks5_gssapi_nec = FALSE;
 #endif
 
-  /* This is our preferred CA cert bundle/path since install time */
+  /* Set the default CA cert bundle/path detected/specified at build time.
+   *
+   * If Schannel (WinSSL) is the selected SSL backend then these locations
+   * are ignored. We allow setting CA location for schannel only when
+   * explicitly specified by the user via CURLOPT_CAINFO / --cacert.
+   */
+  if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
 #if defined(CURL_CA_BUNDLE)
-  result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_ORIG], CURL_CA_BUNDLE);
-  if(result)
-    return result;
+    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_ORIG], CURL_CA_BUNDLE);
+    if(result)
+      return result;
 
-  result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY], CURL_CA_BUNDLE);
-  if(result)
-    return result;
+    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
+                            CURL_CA_BUNDLE);
+    if(result)
+      return result;
 #endif
 #if defined(CURL_CA_PATH)
-  result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_ORIG], CURL_CA_PATH);
-  if(result)
-    return result;
+    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_ORIG], CURL_CA_PATH);
+    if(result)
+      return result;
 
-  result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
-  if(result)
-    return result;
+    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
+    if(result)
+      return result;
 #endif
+  }
 
   set->wildcard_enabled = FALSE;
   set->chunk_bgn      = ZERO_NULL;
@@ -527,6 +535,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->expect_100_timeout = 1000L; /* Wait for a second by default. */
   set->sep_headers = TRUE; /* separated header lists by default */
   set->buffer_size = READBUFFER_SIZE;
+  set->happy_eyeballs_timeout = CURL_HET_DEFAULT;
 
   Curl_http2_init_userset(set);
   return result;
@@ -2066,15 +2075,6 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       return CURLE_URL_MALFORMAT;
     }
 
-    if(url_has_scheme && path[0] == '/' && path[1] == '/' &&
-       path[2] == '/' && path[3] == '/') {
-      /* This appears to be a UNC string (usually indicating a SMB share).
-       * We don't do SMB in file: URLs. (TODO?)
-       */
-      failf(data, "SMB shares are not supported in file: URLs.");
-      return CURLE_URL_MALFORMAT;
-    }
-
     /* Extra handling URLs with an authority component (i.e. that start with
      * "file://")
      *
@@ -2112,25 +2112,6 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
         }
         ptr += 9; /* now points to the slash after the host */
       }
-
-      /*
-       * RFC 8089, Appendix D, Section D.1, says:
-       *
-       * > In a POSIX file system, the root of the file system is represented
-       * > as a directory with a zero-length name, usually written as "/"; the
-       * > presence of this root in a file URI can be taken as given by the
-       * > initial slash in the "path-absolute" rule.
-       *
-       * i.e. the first slash is part of the path.
-       *
-       * However in RFC 1738 the "/" between the host (or port) and the
-       * URL-path was NOT part of the URL-path.  Any agent that followed the
-       * older spec strictly, and wanted to refer to a file with an absolute
-       * path, would have included a second slash.  So if there are two
-       * slashes, swallow one.
-       */
-      if('/' == ptr[1]) /* note: the only way ptr[0]!='/' is if ptr[1]==':' */
-        ptr++;
 
       /* This cannot be done with strcpy, as the memory chunks overlap! */
       memmove(path, ptr, strlen(ptr) + 1);
@@ -2573,7 +2554,15 @@ static bool check_noproxy(const char *name, const char *no_proxy)
     /* NO_PROXY was specified and it wasn't just an asterisk */
 
     no_proxy_len = strlen(no_proxy);
-    endptr = strchr(name, ':');
+    if(name[0] == '[') {
+      /* IPv6 numerical address */
+      endptr = strchr(name, ']');
+      if(!endptr)
+        return FALSE;
+      name++;
+    }
+    else
+      endptr = strchr(name, ':');
     if(endptr)
       namelen = endptr - name;
     else
@@ -2681,13 +2670,20 @@ static char *detect_proxy(struct connectdata *conn)
     prox = curl_getenv(proxy_env);
   }
 
-  if(prox)
+  envp = proxy_env;
+  if(prox) {
     proxy = prox; /* use this */
-  else {
-    proxy = curl_getenv("all_proxy"); /* default proxy to use */
-    if(!proxy)
-      proxy = curl_getenv("ALL_PROXY");
   }
+  else {
+    envp = (char *)"all_proxy";
+    proxy = curl_getenv(envp); /* default proxy to use */
+    if(!proxy) {
+      envp = (char *)"ALL_PROXY";
+      proxy = curl_getenv(envp);
+    }
+  }
+  if(proxy)
+    infof(conn->data, "Uses proxy env variable %s == '%s'\n", envp, proxy);
 
   return proxy;
 }
@@ -2744,7 +2740,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     proxyptr = proxy; /* No xxx:// head: It's a HTTP proxy */
 
 #ifdef USE_SSL
-  if(!Curl_ssl->support_https_proxy)
+  if(!(Curl_ssl->supports & SSLSUPP_HTTPS_PROXY))
 #endif
     if(proxytype == CURLPROXY_HTTPS) {
       failf(data, "Unsupported proxy \'%s\', libcurl is built without the "
@@ -2972,9 +2968,15 @@ static CURLcode create_conn_helper_init_proxy(struct connectdata *conn)
   }
 
   if(!data->set.str[STRING_NOPROXY]) {
-    no_proxy = curl_getenv("no_proxy");
-    if(!no_proxy)
-      no_proxy = curl_getenv("NO_PROXY");
+    const char *p = "no_proxy";
+    no_proxy = curl_getenv(p);
+    if(!no_proxy) {
+      p = "NO_PROXY";
+      no_proxy = curl_getenv(p);
+    }
+    if(no_proxy) {
+      infof(conn->data, "Uses proxy env variable %s == '%s'\n", p, no_proxy);
+    }
   }
 
   if(check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY] ?
@@ -3417,7 +3419,7 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
        * stripped off. It would be better to work directly from the original
        * URL and simply replace the port part of it.
        */
-      url = aprintf("%s://%s%s%s:%hu%s%s%s", conn->given->scheme,
+      url = aprintf("%s://%s%s%s:%d%s%s%s", conn->given->scheme,
                     conn->bits.ipv6_ip?"[":"", conn->host.name,
                     conn->bits.ipv6_ip?"]":"", conn->remote_port,
                     data->state.slash_removed?"/":"", data->state.path,
@@ -4116,7 +4118,7 @@ static CURLcode create_conn(struct Curl_easy *data,
    *************************************************************/
   if(prot_missing) {
     /* We're guessing prefixes here and if we're told to use a proxy or if
-       we're gonna follow a Location: later or... then we need the protocol
+       we're going to follow a Location: later or... then we need the protocol
        part added so that we have a valid URL. */
     char *reurl;
     char *ch_lower;
