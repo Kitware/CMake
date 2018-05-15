@@ -292,3 +292,9 @@ Changes made since CMake 3.11.0 include the following.
   it did prior to 3.11.0.  This diagnostic was accidentally dropped
   from CMake 3.11.0 and 3.11.1 by the change to allow globally visible
   imported targets to be aliased.
+
+* The :module:`FindQt4` module ``qt4_wrap_cpp``, ``qt4_wrap_ui`` and
+  ``qt4_add_resources`` macros now set :prop_sf:`SKIP_AUTOMOC` and
+  :prop_sf:`SKIP_AUTOUIC` on their generated files.  These files never
+  need to be processed by moc or uic, and we must say so explicitly to
+  account for policy :policy:`CMP0071`.
