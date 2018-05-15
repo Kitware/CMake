@@ -232,6 +232,14 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   }
   std::string message = cmJoin(cmMakeRange(i, args.end()), std::string());
   file << message;
+  if (!file) {
+    std::string error = "write failed (";
+    error += cmSystemTools::GetLastSystemError();
+    error += "):\n  ";
+    error += fileName;
+    this->SetError(error);
+    return false;
+  }
   file.close();
   if (mode) {
     cmSystemTools::SetPermissions(fileName.c_str(), mode);
