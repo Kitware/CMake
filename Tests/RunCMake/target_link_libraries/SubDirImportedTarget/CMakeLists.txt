@@ -1,0 +1,13 @@
+add_executable(subexeUnknownImportedGlobal IMPORTED GLOBAL)
+add_library(sublibUnknownImportedGlobal UNKNOWN IMPORTED GLOBAL)
+add_library(sublib ../empty.c)
+
+target_link_libraries(mainexeUnknownImportedGlobal INTERFACE mainlib)
+target_link_libraries(mainexeUnknownImportedGlobal INTERFACE sublib)
+get_property(mainexeUnknownImportedGlobal_libs TARGET mainexeUnknownImportedGlobal PROPERTY INTERFACE_LINK_LIBRARIES)
+message(STATUS "mainexeUnknownImportedGlobal: ${mainexeUnknownImportedGlobal_libs}")
+
+target_link_libraries(mainlibUnknownImportedGlobal INTERFACE mainlib)
+target_link_libraries(mainlibUnknownImportedGlobal INTERFACE sublib)
+get_property(mainlibUnknownImportedGlobal_libs TARGET mainlibUnknownImportedGlobal PROPERTY INTERFACE_LINK_LIBRARIES)
+message(STATUS "mainlibUnknownImportedGlobal: ${mainlibUnknownImportedGlobal_libs}")

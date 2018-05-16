@@ -1,0 +1,4 @@
+-- mainexeUnknownImportedGlobal: mainlib;sublib
+-- mainlibUnknownImportedGlobal: mainlib;sublib
+-- subexeUnknownImportedGlobal: mainlib;sublib
+-- sublibUnknownImportedGlobal: mainlib;sublib
