@@ -238,7 +238,6 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
   this->MSTools = !this->NsightTegra;
   this->Managed = false;
   this->TargetCompileAsWinRT = false;
-  this->BuildFileStream = 0;
   this->IsMissingFiles = false;
   this->DefaultArtifactDir =
     this->LocalGenerator->GetCurrentBinaryDirectory() + std::string("/") +
@@ -250,13 +249,6 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
 
 cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
 {
-  if (!this->BuildFileStream) {
-    return;
-  }
-  if (this->BuildFileStream->Close()) {
-    this->GlobalGenerator->FileReplacedDuringGenerate(this->PathToProjectFile);
-  }
-  delete this->BuildFileStream;
 }
 
 std::string cmVisualStudio10TargetGenerator::CalcCondition(
@@ -314,12 +306,12 @@ void cmVisualStudio10TargetGenerator::Generate()
       this->GeneratorTarget->GetProperty("EXTERNAL_MSPROJECT")) {
     return;
   }
-  this->ProjectFileExtension = computeProjectFileExtension(
+  const std::string ProjectFileExtension = computeProjectFileExtension(
     this->GeneratorTarget, *this->Configurations.begin());
-  if (this->ProjectFileExtension == ".vcxproj") {
+  if (ProjectFileExtension == ".vcxproj") {
     this->ProjectType = vcxproj;
     this->Managed = false;
-  } else if (this->ProjectFileExtension == ".csproj") {
+  } else if (ProjectFileExtension == ".csproj") {
     if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
       std::string message = "The C# target \"" +
         this->GeneratorTarget->GetName() +
@@ -334,8 +326,8 @@ void cmVisualStudio10TargetGenerator::Generate()
   // Tell the global generator the name of the project file
   this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME",
                                              this->Name.c_str());
-  this->GeneratorTarget->Target->SetProperty(
-    "GENERATOR_FILE_NAME_EXT", this->ProjectFileExtension.c_str());
+  this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
+                                             ProjectFileExtension.c_str());
   this->DotNetHintReferences.clear();
   this->AdditionalUsingDirectories.clear();
   if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
@@ -367,344 +359,354 @@ void cmVisualStudio10TargetGenerator::Generate()
   std::string path = this->LocalGenerator->GetCurrentBinaryDirectory();
   path += "/";
   path += this->Name;
-  path += this->ProjectFileExtension;
-  this->BuildFileStream = new cmGeneratedFileStream(path.c_str());
-  this->PathToProjectFile = path;
-  this->BuildFileStream->SetCopyIfDifferent(true);
+  path += ProjectFileExtension;
+  cmGeneratedFileStream BuildFileStream(path.c_str());
+  const std::string PathToProjectFile = path;
+  BuildFileStream.SetCopyIfDifferent(true);
 
   // Write the encoding header into the file
   char magic[] = { char(0xEF), char(0xBB), char(0xBF) };
-  this->BuildFileStream->write(magic, 3);
-  (*this->BuildFileStream) << "<?xml version=\"1.0\" encoding=\"" +
-      this->GlobalGenerator->Encoding() + "\"?>\n";
+  BuildFileStream.write(magic, 3);
+  BuildFileStream << "<?xml version=\"1.0\" encoding=\""
+                  << this->GlobalGenerator->Encoding() << "\"?>"
+                  << "\n";
+  {
+    Elem e0(BuildFileStream);
+    e0.StartElement("Project");
+    e0.Attribute("DefaultTargets", "Build");
+    e0.Attribute("ToolsVersion", this->GlobalGenerator->GetToolsVersion());
+    e0.Attribute("xmlns",
+                 "http://schemas.microsoft.com/developer/msbuild/2003");
 
-  Elem e0(*this->BuildFileStream);
-  e0.StartElement("Project");
-  e0.Attribute("DefaultTargets", "Build");
-  e0.Attribute("ToolsVersion", this->GlobalGenerator->GetToolsVersion());
-  e0.Attribute("xmlns", "http://schemas.microsoft.com/developer/msbuild/2003");
-
-  if (this->NsightTegra) {
-    Elem e1(e0, "PropertyGroup");
-    e1.Attribute("Label", "NsightTegraProject");
-    const unsigned int nsightTegraMajorVersion = this->NsightTegraVersion[0];
-    const unsigned int nsightTegraMinorVersion = this->NsightTegraVersion[1];
-    if (nsightTegraMajorVersion >= 2) {
-      if (nsightTegraMajorVersion > 3 ||
-          (nsightTegraMajorVersion == 3 && nsightTegraMinorVersion >= 1)) {
-        e1.Element("NsightTegraProjectRevisionNumber", "11");
+    if (this->NsightTegra) {
+      Elem e1(e0, "PropertyGroup");
+      e1.Attribute("Label", "NsightTegraProject");
+      const unsigned int nsightTegraMajorVersion = this->NsightTegraVersion[0];
+      const unsigned int nsightTegraMinorVersion = this->NsightTegraVersion[1];
+      if (nsightTegraMajorVersion >= 2) {
+        if (nsightTegraMajorVersion > 3 ||
+            (nsightTegraMajorVersion == 3 && nsightTegraMinorVersion >= 1)) {
+          e1.Element("NsightTegraProjectRevisionNumber", "11");
+        } else {
+          // Nsight Tegra 2.0 uses project revision 9.
+          e1.Element("NsightTegraProjectRevisionNumber", "9");
+        }
+        // Tell newer versions to upgrade silently when loading.
+        e1.Element("NsightTegraUpgradeOnceWithoutPrompt", "true");
       } else {
-        // Nsight Tegra 2.0 uses project revision 9.
-        e1.Element("NsightTegraProjectRevisionNumber", "9");
+        // Require Nsight Tegra 1.6 for JCompile support.
+        e1.Element("NsightTegraProjectRevisionNumber", "7");
       }
-      // Tell newer versions to upgrade silently when loading.
-      e1.Element("NsightTegraUpgradeOnceWithoutPrompt", "true");
-    } else {
-      // Require Nsight Tegra 1.6 for JCompile support.
-      e1.Element("NsightTegraProjectRevisionNumber", "7");
-    }
-    e1.EndElement();
-  }
-
-  if (const char* hostArch =
-        this->GlobalGenerator->GetPlatformToolsetHostArchitecture()) {
-    Elem e1(e0, "PropertyGroup");
-    e1.Element("PreferredToolArchitecture", hostArch);
-    e1.EndElement();
-  }
-
-  if (this->ProjectType != csproj) {
-    this->WriteProjectConfigurations(e0);
-  }
-
-  {
-    Elem e1(e0, "PropertyGroup");
-    e1.Attribute("Label", "Globals");
-    e1.Element("ProjectGuid", "{" + this->GUID + "}");
-
-    if (this->MSTools &&
-        this->GeneratorTarget->GetType() <= cmStateEnums::GLOBAL_TARGET) {
-      this->WriteApplicationTypeSettings(e1);
-      this->VerifyNecessaryFiles();
+      e1.EndElement();
     }
 
-    const char* vsProjectTypes =
-      this->GeneratorTarget->GetProperty("VS_GLOBAL_PROJECT_TYPES");
-    if (vsProjectTypes) {
-      const char* tagName = "ProjectTypes";
-      if (this->ProjectType == csproj) {
-        tagName = "ProjectTypeGuids";
-      }
-      e1.Element(tagName, vsProjectTypes);
+    if (const char* hostArch =
+          this->GlobalGenerator->GetPlatformToolsetHostArchitecture()) {
+      Elem e1(e0, "PropertyGroup");
+      e1.Element("PreferredToolArchitecture", hostArch);
+      e1.EndElement();
     }
 
-    const char* vsProjectName =
-      this->GeneratorTarget->GetProperty("VS_SCC_PROJECTNAME");
-    const char* vsLocalPath =
-      this->GeneratorTarget->GetProperty("VS_SCC_LOCALPATH");
-    const char* vsProvider =
-      this->GeneratorTarget->GetProperty("VS_SCC_PROVIDER");
-
-    if (vsProjectName && vsLocalPath && vsProvider) {
-      e1.Element("SccProjectName", vsProjectName);
-      e1.Element("SccLocalPath", vsLocalPath);
-      e1.Element("SccProvider", vsProvider);
-
-      const char* vsAuxPath =
-        this->GeneratorTarget->GetProperty("VS_SCC_AUXPATH");
-      if (vsAuxPath) {
-        e1.Element("SccAuxPath", vsAuxPath);
-      }
+    if (this->ProjectType != csproj) {
+      this->WriteProjectConfigurations(e0);
     }
 
-    if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT")) {
-      e1.Element("WinMDAssembly", "true");
-    }
-
-    const char* vsGlobalKeyword =
-      this->GeneratorTarget->GetProperty("VS_GLOBAL_KEYWORD");
-    if (!vsGlobalKeyword) {
-      e1.Element("Keyword", "Win32Proj");
-    } else {
-      e1.Element("Keyword", vsGlobalKeyword);
-    }
-
-    const char* vsGlobalRootNamespace =
-      this->GeneratorTarget->GetProperty("VS_GLOBAL_ROOTNAMESPACE");
-    if (vsGlobalRootNamespace) {
-      e1.Element("RootNamespace", vsGlobalRootNamespace);
-    }
-
-    e1.Element("Platform", this->Platform);
-    const char* projLabel =
-      this->GeneratorTarget->GetProperty("PROJECT_LABEL");
-    if (!projLabel) {
-      projLabel = this->Name.c_str();
-    }
-    e1.Element("ProjectName", projLabel);
     {
-      // TODO: add deprecation warning for VS_* property?
-      const char* targetFrameworkVersion = this->GeneratorTarget->GetProperty(
-        "VS_DOTNET_TARGET_FRAMEWORK_VERSION");
-      if (!targetFrameworkVersion) {
-        targetFrameworkVersion = this->GeneratorTarget->GetProperty(
-          "DOTNET_TARGET_FRAMEWORK_VERSION");
+      Elem e1(e0, "PropertyGroup");
+      e1.Attribute("Label", "Globals");
+      e1.Element("ProjectGuid", "{" + this->GUID + "}");
+
+      if (this->MSTools &&
+          this->GeneratorTarget->GetType() <= cmStateEnums::GLOBAL_TARGET) {
+        this->WriteApplicationTypeSettings(e1);
+        this->VerifyNecessaryFiles();
       }
-      if (targetFrameworkVersion) {
-        e1.Element("TargetFrameworkVersion", targetFrameworkVersion);
+
+      const char* vsProjectTypes =
+        this->GeneratorTarget->GetProperty("VS_GLOBAL_PROJECT_TYPES");
+      if (vsProjectTypes) {
+        const char* tagName = "ProjectTypes";
+        if (this->ProjectType == csproj) {
+          tagName = "ProjectTypeGuids";
+        }
+        e1.Element(tagName, vsProjectTypes);
       }
-    }
 
-    // Disable the project upgrade prompt that is displayed the first time a
-    // project using an older toolset version is opened in a newer version of
-    // the IDE (respected by VS 2013 and above).
-    if (this->GlobalGenerator->GetVersion() >=
-        cmGlobalVisualStudioGenerator::VS12) {
-      e1.Element("VCProjectUpgraderObjectName", "NoUpgrade");
-    }
+      const char* vsProjectName =
+        this->GeneratorTarget->GetProperty("VS_SCC_PROJECTNAME");
+      const char* vsLocalPath =
+        this->GeneratorTarget->GetProperty("VS_SCC_LOCALPATH");
+      const char* vsProvider =
+        this->GeneratorTarget->GetProperty("VS_SCC_PROVIDER");
 
-    std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
-    for (std::string const& keyIt : keys) {
-      static const char* prefix = "VS_GLOBAL_";
-      if (keyIt.find(prefix) != 0)
-        continue;
-      std::string globalKey = keyIt.substr(strlen(prefix));
-      // Skip invalid or separately-handled properties.
-      if (globalKey.empty() || globalKey == "PROJECT_TYPES" ||
-          globalKey == "ROOTNAMESPACE" || globalKey == "KEYWORD") {
-        continue;
+      if (vsProjectName && vsLocalPath && vsProvider) {
+        e1.Element("SccProjectName", vsProjectName);
+        e1.Element("SccLocalPath", vsLocalPath);
+        e1.Element("SccProvider", vsProvider);
+
+        const char* vsAuxPath =
+          this->GeneratorTarget->GetProperty("VS_SCC_AUXPATH");
+        if (vsAuxPath) {
+          e1.Element("SccAuxPath", vsAuxPath);
+        }
       }
-      const char* value = this->GeneratorTarget->GetProperty(keyIt);
-      if (!value)
-        continue;
-      e1.Element(globalKey.c_str(), value);
-    }
 
-    if (this->Managed) {
-      std::string outputType;
-      switch (this->GeneratorTarget->GetType()) {
-        case cmStateEnums::OBJECT_LIBRARY:
-        case cmStateEnums::STATIC_LIBRARY:
-        case cmStateEnums::SHARED_LIBRARY:
-          outputType = "Library";
-          break;
-        case cmStateEnums::MODULE_LIBRARY:
-          outputType = "Module";
-          break;
-        case cmStateEnums::EXECUTABLE:
-          if (this->GeneratorTarget->Target->GetPropertyAsBool(
-                "WIN32_EXECUTABLE")) {
-            outputType = "WinExe";
-          } else {
-            outputType = "Exe";
-          }
-          break;
-        case cmStateEnums::UTILITY:
-        case cmStateEnums::GLOBAL_TARGET:
-          outputType = "Utility";
-          break;
-        case cmStateEnums::UNKNOWN_LIBRARY:
-        case cmStateEnums::INTERFACE_LIBRARY:
-          break;
+      if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT")) {
+        e1.Element("WinMDAssembly", "true");
       }
-      e1.Element("OutputType", outputType);
-      e1.Element("AppDesignerFolder", "Properties");
+
+      const char* vsGlobalKeyword =
+        this->GeneratorTarget->GetProperty("VS_GLOBAL_KEYWORD");
+      if (!vsGlobalKeyword) {
+        e1.Element("Keyword", "Win32Proj");
+      } else {
+        e1.Element("Keyword", vsGlobalKeyword);
+      }
+
+      const char* vsGlobalRootNamespace =
+        this->GeneratorTarget->GetProperty("VS_GLOBAL_ROOTNAMESPACE");
+      if (vsGlobalRootNamespace) {
+        e1.Element("RootNamespace", vsGlobalRootNamespace);
+      }
+
+      e1.Element("Platform", this->Platform);
+      const char* projLabel =
+        this->GeneratorTarget->GetProperty("PROJECT_LABEL");
+      if (!projLabel) {
+        projLabel = this->Name.c_str();
+      }
+      e1.Element("ProjectName", projLabel);
+      {
+        // TODO: add deprecation warning for VS_* property?
+        const char* targetFrameworkVersion =
+          this->GeneratorTarget->GetProperty(
+            "VS_DOTNET_TARGET_FRAMEWORK_VERSION");
+        if (!targetFrameworkVersion) {
+          targetFrameworkVersion = this->GeneratorTarget->GetProperty(
+            "DOTNET_TARGET_FRAMEWORK_VERSION");
+        }
+        if (targetFrameworkVersion) {
+          e1.Element("TargetFrameworkVersion", targetFrameworkVersion);
+        }
+      }
+
+      // Disable the project upgrade prompt that is displayed the first time a
+      // project using an older toolset version is opened in a newer version of
+      // the IDE (respected by VS 2013 and above).
+      if (this->GlobalGenerator->GetVersion() >=
+          cmGlobalVisualStudioGenerator::VS12) {
+        e1.Element("VCProjectUpgraderObjectName", "NoUpgrade");
+      }
+
+      std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
+      for (std::string const& keyIt : keys) {
+        static const char* prefix = "VS_GLOBAL_";
+        if (keyIt.find(prefix) != 0)
+          continue;
+        std::string globalKey = keyIt.substr(strlen(prefix));
+        // Skip invalid or separately-handled properties.
+        if (globalKey.empty() || globalKey == "PROJECT_TYPES" ||
+            globalKey == "ROOTNAMESPACE" || globalKey == "KEYWORD") {
+          continue;
+        }
+        const char* value = this->GeneratorTarget->GetProperty(keyIt);
+        if (!value)
+          continue;
+        e1.Element(globalKey.c_str(), value);
+      }
+
+      if (this->Managed) {
+        std::string outputType;
+        switch (this->GeneratorTarget->GetType()) {
+          case cmStateEnums::OBJECT_LIBRARY:
+          case cmStateEnums::STATIC_LIBRARY:
+          case cmStateEnums::SHARED_LIBRARY:
+            outputType = "Library";
+            break;
+          case cmStateEnums::MODULE_LIBRARY:
+            outputType = "Module";
+            break;
+          case cmStateEnums::EXECUTABLE:
+            if (this->GeneratorTarget->Target->GetPropertyAsBool(
+                  "WIN32_EXECUTABLE")) {
+              outputType = "WinExe";
+            } else {
+              outputType = "Exe";
+            }
+            break;
+          case cmStateEnums::UTILITY:
+          case cmStateEnums::GLOBAL_TARGET:
+            outputType = "Utility";
+            break;
+          case cmStateEnums::UNKNOWN_LIBRARY:
+          case cmStateEnums::INTERFACE_LIBRARY:
+            break;
+        }
+        e1.Element("OutputType", outputType);
+        e1.Element("AppDesignerFolder", "Properties");
+      }
+
+      e1.EndElement();
     }
 
-    e1.EndElement();
-  }
-
-  switch (this->ProjectType) {
-    case vcxproj:
-      Elem(e0, "Import")
-        .Attribute("Project", VS10_CXX_DEFAULT_PROPS)
-        .EndElement();
-      break;
-    case csproj:
-      Elem(e0, "Import")
-        .Attribute("Project", VS10_CSharp_DEFAULT_PROPS)
-        .Attribute("Condition", "Exists('" VS10_CSharp_DEFAULT_PROPS "')")
-        .EndElement();
-      break;
-  }
-
-  this->WriteProjectConfigurationValues(e0);
-
-  if (this->ProjectType == vcxproj) {
-    Elem(e0, "Import").Attribute("Project", VS10_CXX_PROPS).EndElement();
-  }
-  {
-    Elem e1(e0, "ImportGroup");
-    e1.Attribute("Label", "ExtensionSettings");
-    e1.SetHasElements();
-
-    if (this->GlobalGenerator->IsCudaEnabled()) {
-      Elem(e1, "Import")
-        .Attribute("Project", "$(VCTargetsPath)\\BuildCustomizations\\CUDA " +
-                     this->GlobalGenerator->GetPlatformToolsetCudaString() +
-                     ".props")
-        .EndElement();
-    }
-    if (this->GlobalGenerator->IsMasmEnabled()) {
-      Elem(e1, "Import")
-        .Attribute("Project",
-                   "$(VCTargetsPath)\\BuildCustomizations\\masm.props")
-        .EndElement();
-    }
-    if (this->GlobalGenerator->IsNasmEnabled()) {
-      // Always search in the standard modules location.
-      std::string propsTemplate =
-        GetCMakeFilePath("Templates/MSBuild/nasm.props.in");
-
-      std::string propsLocal;
-      propsLocal += this->DefaultArtifactDir;
-      propsLocal += "\\nasm.props";
-      ConvertToWindowsSlash(propsLocal);
-      this->Makefile->ConfigureFile(propsTemplate.c_str(), propsLocal.c_str(),
-                                    false, true, true);
-      Elem(e1, "Import").Attribute("Project", propsLocal).EndElement();
-    }
-    e1.EndElement();
-  }
-  {
-    Elem e1(e0, "ImportGroup");
-    e1.Attribute("Label", "PropertySheets");
-    std::string props;
     switch (this->ProjectType) {
       case vcxproj:
-        props = VS10_CXX_USER_PROPS;
+        Elem(e0, "Import")
+          .Attribute("Project", VS10_CXX_DEFAULT_PROPS)
+          .EndElement();
         break;
       case csproj:
-        props = VS10_CSharp_USER_PROPS;
+        Elem(e0, "Import")
+          .Attribute("Project", VS10_CSharp_DEFAULT_PROPS)
+          .Attribute("Condition", "Exists('" VS10_CSharp_DEFAULT_PROPS "')")
+          .EndElement();
         break;
     }
-    if (const char* p = this->GeneratorTarget->GetProperty("VS_USER_PROPS")) {
-      props = p;
-    }
-    if (!props.empty()) {
-      ConvertToWindowsSlash(props);
-      Elem(e1, "Import")
-        .Attribute("Project", props)
-        .Attribute("Condition", "exists('" + props + "')")
-        .Attribute("Label", "LocalAppDataPlatform")
-        .EndElement();
-    }
 
-    this->WritePlatformExtensions(e1);
-    e1.EndElement();
-  }
-  Elem(e0, "PropertyGroup").Attribute("Label", "UserMacros").EndElement();
-  this->WriteWinRTPackageCertificateKeyFile(e0);
-  this->WritePathAndIncrementalLinkOptions(e0);
-  this->WriteItemDefinitionGroups(e0);
-  this->WriteCustomCommands(e0);
-  this->WriteAllSources(e0);
-  this->WriteDotNetReferences(e0);
-  this->WriteEmbeddedResourceGroup(e0);
-  this->WriteXamlFilesGroup(e0);
-  this->WriteWinRTReferences(e0);
-  this->WriteProjectReferences(e0);
-  this->WriteSDKReferences(e0);
-  switch (this->ProjectType) {
-    case vcxproj:
-      Elem(e0, "Import").Attribute("Project", VS10_CXX_TARGETS).EndElement();
-      break;
-    case csproj:
-      Elem(e0, "Import")
-        .Attribute("Project", VS10_CSharp_TARGETS)
-        .EndElement();
-      break;
-  }
+    this->WriteProjectConfigurationValues(e0);
 
-  this->WriteTargetSpecificReferences(e0);
-  {
-    Elem e1(e0, "ImportGroup");
-    e1.Attribute("Label", "ExtensionTargets");
-    e1.SetHasElements();
-    this->WriteTargetsFileReferences(e1);
-    if (this->GlobalGenerator->IsCudaEnabled()) {
-      Elem(e1, "Import")
-        .Attribute("Project", "$(VCTargetsPath)\\BuildCustomizations\\CUDA " +
-                     this->GlobalGenerator->GetPlatformToolsetCudaString() +
-                     ".targets")
-        .EndElement();
+    if (this->ProjectType == vcxproj) {
+      Elem(e0, "Import").Attribute("Project", VS10_CXX_PROPS).EndElement();
     }
-    if (this->GlobalGenerator->IsMasmEnabled()) {
-      Elem(e1, "Import")
-        .Attribute("Project",
-                   "$(VCTargetsPath)\\BuildCustomizations\\masm.targets")
-        .EndElement();
-    }
-    if (this->GlobalGenerator->IsNasmEnabled()) {
-      std::string nasmTargets =
-        GetCMakeFilePath("Templates/MSBuild/nasm.targets");
-      Elem(e1, "Import").Attribute("Project", nasmTargets).EndElement();
-    }
-    e1.EndElement();
-  }
-  if (this->ProjectType == csproj) {
-    for (std::string const& c : this->Configurations) {
-      Elem e1(e0, "PropertyGroup");
-      e1.Attribute("Condition", "'$(Configuration)' == '" + c + "'");
-      e1.SetHasElements();
-      this->WriteEvents(e1, c);
-      e1.EndElement();
-    }
-    // make sure custom commands are executed before build (if necessary)
     {
-      Elem e1(e0, "PropertyGroup");
-      std::ostringstream oss;
-      oss << "\n";
-      for (std::string const& i : this->CSharpCustomCommandNames) {
-        oss << "      " << i << ";\n";
+      Elem e1(e0, "ImportGroup");
+      e1.Attribute("Label", "ExtensionSettings");
+      e1.SetHasElements();
+
+      if (this->GlobalGenerator->IsCudaEnabled()) {
+        Elem(e1, "Import")
+          .Attribute(
+            "Project", "$(VCTargetsPath)\\BuildCustomizations\\CUDA " +
+              this->GlobalGenerator->GetPlatformToolsetCudaString() + ".props")
+          .EndElement();
       }
-      oss << "      "
-          << "$(BuildDependsOn)\n";
-      e1.Element("BuildDependsOn", oss.str());
+      if (this->GlobalGenerator->IsMasmEnabled()) {
+        Elem(e1, "Import")
+          .Attribute("Project",
+                     "$(VCTargetsPath)\\BuildCustomizations\\masm.props")
+          .EndElement();
+      }
+      if (this->GlobalGenerator->IsNasmEnabled()) {
+        // Always search in the standard modules location.
+        std::string propsTemplate =
+          GetCMakeFilePath("Templates/MSBuild/nasm.props.in");
+
+        std::string propsLocal;
+        propsLocal += this->DefaultArtifactDir;
+        propsLocal += "\\nasm.props";
+        ConvertToWindowsSlash(propsLocal);
+        this->Makefile->ConfigureFile(propsTemplate.c_str(),
+                                      propsLocal.c_str(), false, true, true);
+        Elem(e1, "Import").Attribute("Project", propsLocal).EndElement();
+      }
       e1.EndElement();
     }
+    {
+      Elem e1(e0, "ImportGroup");
+      e1.Attribute("Label", "PropertySheets");
+      std::string props;
+      switch (this->ProjectType) {
+        case vcxproj:
+          props = VS10_CXX_USER_PROPS;
+          break;
+        case csproj:
+          props = VS10_CSharp_USER_PROPS;
+          break;
+      }
+      if (const char* p =
+            this->GeneratorTarget->GetProperty("VS_USER_PROPS")) {
+        props = p;
+      }
+      if (!props.empty()) {
+        ConvertToWindowsSlash(props);
+        Elem(e1, "Import")
+          .Attribute("Project", props)
+          .Attribute("Condition", "exists('" + props + "')")
+          .Attribute("Label", "LocalAppDataPlatform")
+          .EndElement();
+      }
+
+      this->WritePlatformExtensions(e1);
+      e1.EndElement();
+    }
+    Elem(e0, "PropertyGroup").Attribute("Label", "UserMacros").EndElement();
+    this->WriteWinRTPackageCertificateKeyFile(e0);
+    this->WritePathAndIncrementalLinkOptions(e0);
+    this->WriteItemDefinitionGroups(e0);
+    this->WriteCustomCommands(e0);
+    this->WriteAllSources(e0);
+    this->WriteDotNetReferences(e0);
+    this->WriteEmbeddedResourceGroup(e0);
+    this->WriteXamlFilesGroup(e0);
+    this->WriteWinRTReferences(e0);
+    this->WriteProjectReferences(e0);
+    this->WriteSDKReferences(e0);
+    switch (this->ProjectType) {
+      case vcxproj:
+        Elem(e0, "Import").Attribute("Project", VS10_CXX_TARGETS).EndElement();
+        break;
+      case csproj:
+        Elem(e0, "Import")
+          .Attribute("Project", VS10_CSharp_TARGETS)
+          .EndElement();
+        break;
+    }
+
+    this->WriteTargetSpecificReferences(e0);
+    {
+      Elem e1(e0, "ImportGroup");
+      e1.Attribute("Label", "ExtensionTargets");
+      e1.SetHasElements();
+      this->WriteTargetsFileReferences(e1);
+      if (this->GlobalGenerator->IsCudaEnabled()) {
+        Elem(e1, "Import")
+          .Attribute("Project",
+                     "$(VCTargetsPath)\\BuildCustomizations\\CUDA " +
+                       this->GlobalGenerator->GetPlatformToolsetCudaString() +
+                       ".targets")
+          .EndElement();
+      }
+      if (this->GlobalGenerator->IsMasmEnabled()) {
+        Elem(e1, "Import")
+          .Attribute("Project",
+                     "$(VCTargetsPath)\\BuildCustomizations\\masm.targets")
+          .EndElement();
+      }
+      if (this->GlobalGenerator->IsNasmEnabled()) {
+        std::string nasmTargets =
+          GetCMakeFilePath("Templates/MSBuild/nasm.targets");
+        Elem(e1, "Import").Attribute("Project", nasmTargets).EndElement();
+      }
+      e1.EndElement();
+    }
+    if (this->ProjectType == csproj) {
+      for (std::string const& c : this->Configurations) {
+        Elem e1(e0, "PropertyGroup");
+        e1.Attribute("Condition", "'$(Configuration)' == '" + c + "'");
+        e1.SetHasElements();
+        this->WriteEvents(e1, c);
+        e1.EndElement();
+      }
+      // make sure custom commands are executed before build (if necessary)
+      {
+        Elem e1(e0, "PropertyGroup");
+        std::ostringstream oss;
+        oss << "\n";
+        for (std::string const& i : this->CSharpCustomCommandNames) {
+          oss << "      " << i << ";\n";
+        }
+        oss << "      "
+            << "$(BuildDependsOn)\n";
+        e1.Element("BuildDependsOn", oss.str());
+        e1.EndElement();
+      }
+    }
+    e0.EndElement();
   }
-  e0.EndElement();
+
+  if (BuildFileStream.Close()) {
+    this->GlobalGenerator->FileReplacedDuringGenerate(PathToProjectFile);
+  }
 
   // The groups are stored in a separate file for VS 10
   this->WriteGroups();
@@ -1424,98 +1426,103 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   fout.write(magic, 3);
 
   fout << "<?xml version=\"1.0\" encoding=\""
-       << this->GlobalGenerator->Encoding() << "\"?>\n";
+       << this->GlobalGenerator->Encoding() << "\"?>"
+       << "\n";
+  {
+    Elem e0(fout);
+    e0.StartElement("Project");
+    e0.Attribute("ToolsVersion", this->GlobalGenerator->GetToolsVersion());
+    e0.Attribute("xmlns",
+                 "http://schemas.microsoft.com/developer/msbuild/2003");
 
-  Elem e0(fout);
-  e0.StartElement("Project");
-  e0.Attribute("ToolsVersion", this->GlobalGenerator->GetToolsVersion());
-  e0.Attribute("xmlns", "http://schemas.microsoft.com/developer/msbuild/2003");
+    for (auto const& ti : this->Tools) {
+      this->WriteGroupSources(e0, ti.first, ti.second, sourceGroups);
+    }
 
-  for (auto const& ti : this->Tools) {
-    this->WriteGroupSources(e0, ti.first, ti.second, sourceGroups);
-  }
+    // Added files are images and the manifest.
+    if (!this->AddedFiles.empty()) {
+      Elem e1(e0, "ItemGroup");
+      e1.SetHasElements();
+      for (std::string const& oi : this->AddedFiles) {
+        std::string fileName =
+          cmSystemTools::LowerCase(cmSystemTools::GetFilenameName(oi));
+        if (fileName == "wmappmanifest.xml") {
+          Elem e2(e1, "XML");
+          e2.Attribute("Include", oi);
+          e2.Element("Filter", "Resource Files");
+          e2.EndElement();
+        } else if (cmSystemTools::GetFilenameExtension(fileName) ==
+                   ".appxmanifest") {
+          Elem e2(e1, "AppxManifest");
+          e2.Attribute("Include", oi);
+          e2.Element("Filter", "Resource Files");
+          e2.EndElement();
+        } else if (cmSystemTools::GetFilenameExtension(fileName) == ".pfx") {
+          Elem e2(e1, "None");
+          e2.Attribute("Include", oi);
+          e2.Element("Filter", "Resource Files");
+          e2.EndElement();
+        } else {
+          Elem e2(e1, "Image");
+          e2.Attribute("Include", oi);
+          e2.Element("Filter", "Resource Files");
+          e2.EndElement();
+        }
+      }
+      e1.EndElement();
+    }
 
-  // Added files are images and the manifest.
-  if (!this->AddedFiles.empty()) {
-    Elem e1(e0, "ItemGroup");
-    e1.SetHasElements();
-    for (std::string const& oi : this->AddedFiles) {
-      std::string fileName =
-        cmSystemTools::LowerCase(cmSystemTools::GetFilenameName(oi));
-      if (fileName == "wmappmanifest.xml") {
-        Elem e2(e1, "XML");
-        e2.Attribute("Include", oi);
-        e2.Element("Filter", "Resource Files");
-        e2.EndElement();
-      } else if (cmSystemTools::GetFilenameExtension(fileName) ==
-                 ".appxmanifest") {
-        Elem e2(e1, "AppxManifest");
-        e2.Attribute("Include", oi);
-        e2.Element("Filter", "Resource Files");
-        e2.EndElement();
-      } else if (cmSystemTools::GetFilenameExtension(fileName) == ".pfx") {
-        Elem e2(e1, "None");
-        e2.Attribute("Include", oi);
-        e2.Element("Filter", "Resource Files");
-        e2.EndElement();
-      } else {
-        Elem e2(e1, "Image");
-        e2.Attribute("Include", oi);
+    std::vector<cmSourceFile const*> resxObjs;
+    this->GeneratorTarget->GetResxSources(resxObjs, "");
+    if (!resxObjs.empty()) {
+      Elem e1(e0, "ItemGroup");
+      for (cmSourceFile const* oi : resxObjs) {
+        std::string obj = oi->GetFullPath();
+        ConvertToWindowsSlash(obj);
+        Elem e2(e1, "EmbeddedResource");
+        e2.Attribute("Include", obj);
         e2.Element("Filter", "Resource Files");
         e2.EndElement();
       }
+      e1.EndElement();
     }
-    e1.EndElement();
-  }
+    {
+      Elem e1(e0, "ItemGroup");
+      e1.SetHasElements();
+      std::vector<cmSourceGroup*> groupsVec(groupsUsed.begin(),
+                                            groupsUsed.end());
+      std::sort(groupsVec.begin(), groupsVec.end(),
+                [](cmSourceGroup* l, cmSourceGroup* r) {
+                  return l->GetFullName() < r->GetFullName();
+                });
+      for (cmSourceGroup* sg : groupsVec) {
+        std::string const& name = sg->GetFullName();
+        if (!name.empty()) {
+          std::string guidName = "SG_Filter_" + name;
+          std::string guid = this->GlobalGenerator->GetGUID(guidName);
+          Elem e2(e1, "Filter");
+          e2.Attribute("Include", name);
+          e2.Element("UniqueIdentifier", "{" + guid + "}");
+          e2.EndElement();
+        }
+      }
 
-  std::vector<cmSourceFile const*> resxObjs;
-  this->GeneratorTarget->GetResxSources(resxObjs, "");
-  if (!resxObjs.empty()) {
-    Elem e1(e0, "ItemGroup");
-    for (cmSourceFile const* oi : resxObjs) {
-      std::string obj = oi->GetFullPath();
-      ConvertToWindowsSlash(obj);
-      Elem e2(e1, "EmbeddedResource");
-      e2.Attribute("Include", obj);
-      e2.Element("Filter", "Resource Files");
-      e2.EndElement();
+      if (!resxObjs.empty() || !this->AddedFiles.empty()) {
+        std::string guidName = "SG_Filter_Resource Files";
+        std::string guid = this->GlobalGenerator->GetGUID(guidName);
+        Elem e2(e1, "Filter");
+        e2.Attribute("Include", "Resource Files");
+        e2.Element("UniqueIdentifier", "{" + guid + "}");
+        e2.Element("Extensions",
+                   "rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;"
+                   "gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms");
+        e2.EndElement();
+      }
+
+      e1.EndElement();
     }
-    e1.EndElement();
+    e0.EndElement();
   }
-
-  Elem e1(e0, "ItemGroup");
-  e1.SetHasElements();
-  std::vector<cmSourceGroup*> groupsVec(groupsUsed.begin(), groupsUsed.end());
-  std::sort(groupsVec.begin(), groupsVec.end(),
-            [](cmSourceGroup* l, cmSourceGroup* r) {
-              return l->GetFullName() < r->GetFullName();
-            });
-  for (cmSourceGroup* sg : groupsVec) {
-    std::string const& name = sg->GetFullName();
-    if (!name.empty()) {
-      std::string guidName = "SG_Filter_" + name;
-      std::string guid = this->GlobalGenerator->GetGUID(guidName);
-      Elem e2(e1, "Filter");
-      e2.Attribute("Include", name);
-      e2.Element("UniqueIdentifier", "{" + guid + "}");
-      e2.EndElement();
-    }
-  }
-
-  if (!resxObjs.empty() || !this->AddedFiles.empty()) {
-    std::string guidName = "SG_Filter_Resource Files";
-    std::string guid = this->GlobalGenerator->GetGUID(guidName);
-    Elem e2(e1, "Filter");
-    e2.Attribute("Include", "Resource Files");
-    e2.Element("UniqueIdentifier", "{" + guid + "}");
-    e2.Element("Extensions",
-               "rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;"
-               "gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms");
-    e2.EndElement();
-  }
-
-  e1.EndElement();
-  e0.EndElement();
   fout << '\n';
 
   if (fout.Close()) {

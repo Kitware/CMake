@@ -186,8 +186,6 @@ private:
   OptionsMap NasmOptions;
   OptionsMap LinkOptions;
   std::string LangForClCompile;
-  std::string PathToProjectFile;
-  std::string ProjectFileExtension;
   enum VsProjectType
   {
     vcxproj,
@@ -207,7 +205,6 @@ private:
   unsigned int NsightTegraVersion[4];
   bool TargetCompileAsWinRT;
   cmGlobalVisualStudio10Generator* const GlobalGenerator;
-  cmGeneratedFileStream* BuildFileStream;
   cmLocalVisualStudio10Generator* const LocalGenerator;
   std::set<std::string> CSharpCustomCommandNames;
   bool IsMissingFiles;
