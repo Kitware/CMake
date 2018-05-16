@@ -34,6 +34,7 @@ Variables that Provide Information
    /variable/CMAKE_CURRENT_SOURCE_DIR
    /variable/CMAKE_DIRECTORY_LABELS
    /variable/CMAKE_DL_LIBS
+   /variable/CMAKE_DOTNET_TARGET_FRAMEWORK_VERSION
    /variable/CMAKE_EDIT_COMMAND
    /variable/CMAKE_EXECUTABLE_SUFFIX
    /variable/CMAKE_EXTRA_GENERATOR

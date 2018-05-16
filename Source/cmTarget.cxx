@@ -399,6 +399,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("JOB_POOL_COMPILE", nullptr);
     this->SetPropertyDefault("JOB_POOL_LINK", nullptr);
   }
+
+  if (this->TargetTypeValue <= cmStateEnums::UTILITY) {
+    this->SetPropertyDefault("DOTNET_TARGET_FRAMEWORK_VERSION", nullptr);
+  }
 }
 
 cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
