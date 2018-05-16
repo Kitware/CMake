@@ -144,7 +144,7 @@ private:
   void WriteGroups();
   void WriteProjectReferences(Elem& e0);
   void WriteApplicationTypeSettings(Elem& e1);
-  void OutputSourceSpecificFlags(Elem&, cmSourceFile const* source);
+  void OutputSourceSpecificFlags(Elem& e2, cmSourceFile const* source);
   void AddLibraries(const cmComputeLinkInformation& cli,
                     std::vector<std::string>& libVec,
                     std::vector<std::string>& vsTargetVec,
