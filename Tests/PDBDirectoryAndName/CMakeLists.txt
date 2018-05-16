@@ -19,7 +19,7 @@ set(my_targets "")
 add_library(mylibA SHARED mylibA.c)
 set_target_properties(mylibA PROPERTIES
     PDB_NAME "mylibA_Special"
-    PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/mylibA_PDB"
+    PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/mylibA_PDB/$<CONFIG>"
 )
 list(APPEND my_targets mylibA)
 
@@ -87,7 +87,13 @@ foreach(t ${my_targets})
   if(NOT pdb_dir)
     set(pdb_dir ${CMAKE_CURRENT_BINARY_DIR})
   endif()
-  list(APPEND pdbs ${pdb_dir}/${CMAKE_CFG_INTDIR}/${pdb_name}.pdb)
+  if (pdb_dir MATCHES "\\$<.*>")
+    # Skip per-configuration subdirectory if the value contained
+    # a generator expression.
+    list(APPEND pdbs ${pdb_dir}/${pdb_name}.pdb)
+  else()
+    list(APPEND pdbs ${pdb_dir}/${CMAKE_CFG_INTDIR}/${pdb_name}.pdb)
+  endif()
 endforeach()
 add_custom_target(check_pdbs ALL VERBATIM
   COMMAND ${CMAKE_COMMAND} -Dconfig=$<CONFIGURATION> "-Dpdbs=${pdbs}"
