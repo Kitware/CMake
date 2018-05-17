@@ -1,5 +1,5 @@
 ---
-# This configuration requires clang-format 3.8 or higher.
+# This configuration requires clang-format version 3.8 exactly.
 BasedOnStyle: Mozilla
 AlignOperands: false
 AlwaysBreakAfterReturnType: None
