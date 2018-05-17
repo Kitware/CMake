@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
+#include <stddef.h>
 #include <vector>
 
 #include "cmGeneratedFileStream.h"
@@ -732,10 +733,14 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     // Archiving rules never use a response file.
     useResponseFileForObjects = false;
 
-    // Limit the length of individual object lists to less than the
-    // 32K command line length limit on Windows.  We could make this a
-    // platform file variable but this should work everywhere.
-    archiveCommandLimit = 30000;
+    // Limit the length of individual object lists to less than half of
+    // the command line length limit (leaving half for other flags).
+    // This may result in several calls to the archiver.
+    if (size_t limit = cmSystemTools::CalculateCommandLineLengthLimit()) {
+      archiveCommandLimit = limit / 2;
+    } else {
+      archiveCommandLimit = 8000;
+    }
   }
 
   // Expand the rule variables.
