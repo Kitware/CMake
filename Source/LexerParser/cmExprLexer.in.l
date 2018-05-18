@@ -43,6 +43,7 @@ Modify cmExprLexer.cxx:
 [ \t]  {}
 
 [0-9][0-9]* { yylvalp->Number = std::stoll(yytext, nullptr, 10); return exp_NUMBER; }
+0[xX][0-9a-fA-F][0-9a-fA-F]* {  yylvalp->Number = std::stoll(yytext, nullptr, 16); return exp_NUMBER; }
 
 "+" { return exp_PLUS; }
 "-" { return exp_MINUS; }

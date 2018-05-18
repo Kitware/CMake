@@ -7,3 +7,6 @@ endmacro()
 
 
 math_test("100 * 10" 1000)
+math_test("100 * 10" 1000 OUTPUT_FORMAT DECIMAL)
+math_test("100 * 0xA" 1000 OUTPUT_FORMAT DECIMAL)
+math_test("100 * 0xA" 0x3e8 OUTPUT_FORMAT HEXADECIMAL)
