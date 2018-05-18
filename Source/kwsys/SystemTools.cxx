@@ -4032,22 +4032,15 @@ std::string SystemTools::MakeCidentifier(const std::string& s)
   return str;
 }
 
-// Due to a buggy stream library on the HP and another on Mac OS X, we
-// need this very carefully written version of getline.  Returns true
+// Convenience function around std::getline which removes a trailing carriage
+// return and can truncate the buffer as needed.  Returns true
 // if any data were read before the end-of-file was reached.
 bool SystemTools::GetLineFromStream(std::istream& is, std::string& line,
                                     bool* has_newline /* = 0 */,
                                     long sizeLimit /* = -1 */)
 {
-  const int bufferSize = 1024;
-  char buffer[bufferSize];
-  bool haveData = false;
-  bool haveNewline = false;
-
   // Start with an empty line.
   line = "";
-
-  long leftToRead = sizeLimit;
 
   // Early short circuit return if stream is no good. Just return
   // false and the empty line. (Probably means caller tried to
@@ -4060,44 +4053,23 @@ bool SystemTools::GetLineFromStream(std::istream& is, std::string& line,
     return false;
   }
 
-  // If no characters are read from the stream, the end of file has
-  // been reached.  Clear the fail bit just before reading.
-  while (!haveNewline && leftToRead != 0 &&
-         (static_cast<void>(is.clear(is.rdstate() & ~std::ios::failbit)),
-          static_cast<void>(is.getline(buffer, bufferSize)),
-          is.gcount() > 0)) {
-    // We have read at least one byte.
-    haveData = true;
-
-    // If newline character was read the gcount includes the character
-    // but the buffer does not: the end of line has been reached.
-    size_t length = strlen(buffer);
-    if (length < static_cast<size_t>(is.gcount())) {
-      haveNewline = true;
-    }
-
+  std::getline(is, line);
+  bool haveData = !line.empty() || !is.eof();
+  if (!line.empty()) {
     // Avoid storing a carriage return character.
-    if (length > 0 && buffer[length - 1] == '\r') {
-      buffer[length - 1] = 0;
+    if (*line.rbegin() == '\r') {
+      line.resize(line.size() - 1);
     }
 
     // if we read too much then truncate the buffer
-    if (leftToRead > 0) {
-      if (static_cast<long>(length) > leftToRead) {
-        buffer[leftToRead] = 0;
-        leftToRead = 0;
-      } else {
-        leftToRead -= static_cast<long>(length);
-      }
+    if (sizeLimit >= 0 && line.size() >= static_cast<size_t>(sizeLimit)) {
+      line.resize(sizeLimit);
     }
-
-    // Append the data read to the line.
-    line.append(buffer);
   }
 
   // Return the results.
   if (has_newline) {
-    *has_newline = haveNewline;
+    *has_newline = !is.eof();
   }
   return haveData;
 }
