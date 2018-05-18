@@ -51,10 +51,6 @@
 #endif
 
 
-#define FILE_CONTENTTYPE_DEFAULT        "application/octet-stream"
-#define MULTIPART_CONTENTTYPE_DEFAULT   "multipart/mixed"
-#define DISPOSITION_DEFAULT             "attachment"
-
 #define READ_ERROR                      ((size_t) -1)
 
 /* Encoders. */
@@ -245,7 +241,7 @@ static FILE * vmsfopenread(const char *file, const char *mode)
 static char *Curl_basename(char *path)
 {
   /* Ignore all the details above for now and make a quick and simple
-     implementaion here */
+     implementation here */
   char *s1;
   char *s2;
 
@@ -1197,7 +1193,10 @@ CURLcode Curl_mime_duppart(curl_mimepart *dst, const curl_mimepart *src)
   }
 
   /* Duplicate other fields. */
-  dst->encoder = src->encoder;
+  if(dst != NULL)
+    dst->encoder = src->encoder;
+  else
+    res = CURLE_WRITE_ERROR;
   if(!res)
     res = curl_mime_type(dst, src->mimetype);
   if(!res)
@@ -1206,7 +1205,7 @@ CURLcode Curl_mime_duppart(curl_mimepart *dst, const curl_mimepart *src)
     res = curl_mime_filename(dst, src->filename);
 
   /* If an error occurred, rollback. */
-  if(res)
+  if(res && dst)
     Curl_mime_cleanpart(dst);
 
   return res;
@@ -1642,8 +1641,7 @@ static CURLcode add_content_type(struct curl_slist **slp,
                               boundary? boundary: "");
 }
 
-
-static const char *ContentTypeForFilename(const char *filename)
+const char *Curl_mime_contenttype(const char *filename)
 {
   unsigned int i;
 
@@ -1715,14 +1713,14 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
       contenttype = MULTIPART_CONTENTTYPE_DEFAULT;
       break;
     case MIMEKIND_FILE:
-      contenttype = ContentTypeForFilename(part->filename);
+      contenttype = Curl_mime_contenttype(part->filename);
       if(!contenttype)
-        contenttype = ContentTypeForFilename(part->data);
+        contenttype = Curl_mime_contenttype(part->data);
       if(!contenttype && part->filename)
         contenttype = FILE_CONTENTTYPE_DEFAULT;
       break;
     default:
-      contenttype = ContentTypeForFilename(part->filename);
+      contenttype = Curl_mime_contenttype(part->filename);
       break;
     }
   }

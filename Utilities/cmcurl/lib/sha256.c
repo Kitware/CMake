@@ -29,9 +29,17 @@
 
 #if defined(USE_OPENSSL)
 
+#include <openssl/opensslv.h>
+
+#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL)
+#define USE_OPENSSL_SHA256
+#endif
+
+#endif
+
+#ifdef USE_OPENSSL_SHA256
 /* When OpenSSL is available we use the SHA256-function from OpenSSL */
 #include <openssl/sha.h>
-
 #else
 
 /* When no other crypto library is available we use this code segment */
@@ -234,7 +242,7 @@ static int SHA256_Final(unsigned char *out,
     sha256_compress(md, md->buf);
     md->curlen = 0;
   }
-  /* pad upto 56 bytes of zeroes */
+  /* pad up to 56 bytes of zeroes */
   while(md->curlen < 56) {
     md->buf[md->curlen++] = (unsigned char)0;
   }

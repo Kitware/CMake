@@ -709,14 +709,21 @@ static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
 }
 
 /*
- * Convert a timestamp from the Windows world (100 nsec units from
- * 1 Jan 1601) to Posix time.
+ * Convert a timestamp from the Windows world (100 nsec units from 1 Jan 1601)
+ * to Posix time. Cap the output to fit within a time_t.
  */
-static void get_posix_time(long *out, curl_off_t timestamp)
+static void get_posix_time(time_t *out, curl_off_t timestamp)
 {
   timestamp -= 116444736000000000;
   timestamp /= 10000000;
-  *out = (long) timestamp;
+#if SIZEOF_TIME_T < SIZEOF_CURL_OFF_T
+  if(timestamp > TIME_T_MAX)
+    *out = TIME_T_MAX;
+  else if(timestamp < TIME_T_MIN)
+    *out = TIME_T_MIN;
+  else
+#endif
+    *out = (time_t) timestamp;
 }
 
 static CURLcode smb_request_state(struct connectdata *conn, bool *done)
@@ -783,10 +790,16 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
     else {
       smb_m = (const struct smb_nt_create_response*) msg;
       conn->data->req.size = smb_swap64(smb_m->end_of_file);
-      Curl_pgrsSetDownloadSize(conn->data, conn->data->req.size);
-      if(conn->data->set.get_filetime)
-        get_posix_time(&conn->data->info.filetime, smb_m->last_change_time);
-      next_state = SMB_DOWNLOAD;
+      if(conn->data->req.size < 0) {
+        req->result = CURLE_WEIRD_SERVER_REPLY;
+        next_state = SMB_CLOSE;
+      }
+      else {
+        Curl_pgrsSetDownloadSize(conn->data, conn->data->req.size);
+        if(conn->data->set.get_filetime)
+          get_posix_time(&conn->data->info.filetime, smb_m->last_change_time);
+        next_state = SMB_DOWNLOAD;
+      }
     }
     break;
 
