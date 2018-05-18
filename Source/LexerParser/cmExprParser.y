@@ -18,6 +18,7 @@ Modify cmExprParser.cxx:
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdexcept>
 
 /*-------------------------------------------------------------------------*/
 #define YYDEBUG 1
@@ -129,6 +130,9 @@ term:
     $<Number>$ = $<Number>1 * $<Number>3;
   }
 | term exp_DIVIDE unary {
+    if (yyvsp[0].Number == 0) {
+      throw std::overflow_error("divide by zero");
+    }
     $<Number>$ = $<Number>1 / $<Number>3;
   }
 | term exp_MOD unary {
