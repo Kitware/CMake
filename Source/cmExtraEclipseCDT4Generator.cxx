@@ -1001,6 +1001,13 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   xml.EndElement(); // project
 
   xml.EndElement(); // storageModule
+
+  // Append additional cproject contents without applying any XML formatting
+  if (const char* extraCProjectContents =
+        mf->GetState()->GetGlobalProperty("ECLIPSE_EXTRA_CPROJECT_CONTENTS")) {
+    fout << extraCProjectContents;
+  }
+
   xml.EndElement(); // cproject
 }
 
