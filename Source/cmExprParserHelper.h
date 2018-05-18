@@ -5,6 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cm_kwiml.h"
+
 #include <string>
 #include <vector>
 
@@ -13,7 +15,7 @@ class cmExprParserHelper
 public:
   struct ParserType
   {
-    int Number;
+    KWIML_INT_int64_t Number;
   };
 
   cmExprParserHelper();
@@ -24,9 +26,9 @@ public:
   int LexInput(char* buf, int maxlen);
   void Error(const char* str);
 
-  void SetResult(int value);
+  void SetResult(KWIML_INT_int64_t value);
 
-  int GetResult() { return this->Result; }
+  KWIML_INT_int64_t GetResult() { return this->Result; }
 
   const char* GetError() { return this->ErrorString.c_str(); }
 
@@ -41,7 +43,7 @@ private:
 
   void CleanupParser();
 
-  int Result;
+  KWIML_INT_int64_t Result;
   const char* FileName;
   long FileLine;
   std::string ErrorString;

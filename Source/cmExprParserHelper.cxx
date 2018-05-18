@@ -13,6 +13,7 @@ cmExprParserHelper::cmExprParserHelper()
 {
   this->FileLine = -1;
   this->FileName = nullptr;
+  this->Result = 0;
 }
 
 cmExprParserHelper::~cmExprParserHelper()
@@ -85,7 +86,7 @@ void cmExprParserHelper::Error(const char* str)
   this->ErrorString = ostr.str();
 }
 
-void cmExprParserHelper::SetResult(int value)
+void cmExprParserHelper::SetResult(KWIML_INT_int64_t value)
 {
   this->Result = value;
 }

@@ -2,10 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMathCommand.h"
 
-#include <stdio.h>
-
 #include "cmExprParserHelper.h"
 #include "cmMakefile.h"
+#include "cm_kwiml.h"
+
+#include <stdio.h>
 
 class cmExecutionStatus;
 
@@ -44,7 +45,7 @@ bool cmMathCommand::HandleExprCommand(std::vector<std::string> const& args)
   }
 
   char buffer[1024];
-  sprintf(buffer, "%d", helper.GetResult());
+  sprintf(buffer, "%" KWIML_INT_PRId64, helper.GetResult());
 
   this->Makefile->AddDefinition(outputVariable, buffer);
   return true;
