@@ -36,11 +36,11 @@ bool cmMathCommand::HandleExprCommand(std::vector<std::string> const& args)
   const std::string& outputVariable = args[1];
   const std::string& expression = args[2];
 
+  this->Makefile->AddDefinition(outputVariable, "ERROR");
+
   cmExprParserHelper helper;
   if (!helper.ParseString(expression.c_str(), 0)) {
-    std::string e = "cannot parse the expression: \"" + expression + "\": ";
-    e += helper.GetError();
-    this->SetError(e);
+    this->SetError(helper.GetError());
     return false;
   }
 
