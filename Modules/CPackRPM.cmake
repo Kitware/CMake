@@ -410,17 +410,17 @@
 #
 # .. variable:: CPACK_RPM_SPEC_INSTALL_POST
 #
-#  Deprecated - use :variable:`CPACK_RPM_POST_INSTALL_SCRIPT_FILE` instead.
+#  Deprecated - use :variable:`CPACK_RPM_SPEC_MORE_DEFINE` instead.
 #
 #  * Mandatory : NO
 #  * Default   : -
 #  * Deprecated: YES
 #
-#  This way of specifying post-install script is deprecated, use
-#  :variable:`CPACK_RPM_POST_INSTALL_SCRIPT_FILE`.
-#  May be used to set an RPM post-install command inside the spec file.
-#  For example setting it to ``/bin/true`` may be used to prevent
-#  rpmbuild to strip binaries.
+#  May be used to override the ``__spec_install_post`` section within the
+#  generated spec file.  This affects the install step during package creation,
+#  not during package installation.  For adding operations to be performed
+#  during package installation, use
+#  :variable:`CPACK_RPM_POST_INSTALL_SCRIPT_FILE` instead.
 #
 # .. variable:: CPACK_RPM_SPEC_MORE_DEFINE
 #
@@ -429,7 +429,11 @@
 #  * Mandatory : NO
 #  * Default   : -
 #
-#  May be used to add any ``%define`` lines to the generated spec file.
+#  May be used to add any ``%define`` lines to the generated spec file.  An
+#  example of its use is to prevent stripping of executables (but note that
+#  this may also disable other default post install processing)::
+#
+#    set(CPACK_RPM_SPEC_MORE_DEFINE "%define __spec_install_post /bin/true")
 #
 # .. variable:: CPACK_RPM_PACKAGE_DEBUG
 #
@@ -877,9 +881,9 @@
 # variable while usually using :variable:`CPACK_INSTALLED_DIRECTORIES` variable
 # to provide directory containing CMakeLists.txt and source files.
 #
-# For CMake projects SRPM package would be product by executing:
+# For CMake projects SRPM package would be produced by executing::
 #
-# ``cpack -G RPM --config ./CPackSourceConfig.cmake``
+#   cpack -G RPM --config ./CPackSourceConfig.cmake
 #
 # .. note::
 #
@@ -892,10 +896,10 @@
 #
 # Once the SRPM package is generated it can be used to generate binary packages
 # by creating a directory structure for rpm generation and executing rpmbuild
-# tool:
+# tool::
 #
-# ``mkdir -p build_dir/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}``
-# ``rpmbuild --define "_topdir <path_to_build_dir>" --rebuild <SRPM_file_name>``
+#   mkdir -p build_dir/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+#   rpmbuild --define "_topdir <path_to_build_dir>" --rebuild <SRPM_file_name>
 #
 # Generated packages will be located in build_dir/RPMS directory or its sub
 # directories.
