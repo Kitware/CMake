@@ -1696,7 +1696,8 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
   fflush(out);
 }
 
-long copy_data(struct archive* ar, struct archive* aw)
+// Return 'true' on success
+bool copy_data(struct archive* ar, struct archive* aw)
 {
   long r;
   const void* buff;
@@ -1708,22 +1709,28 @@ long copy_data(struct archive* ar, struct archive* aw)
 #endif
 
   for (;;) {
+    // Return value:
+    // * ARCHIVE_OK - read succeed
+    // * ARCHIVE_EOF - no more data to read left
     r = archive_read_data_block(ar, &buff, &size, &offset);
     if (r == ARCHIVE_EOF) {
-      return (ARCHIVE_OK);
+      return true;
     }
     if (r != ARCHIVE_OK) {
-      return (r);
+      return false;
     }
-    r = archive_write_data_block(aw, buff, size, offset);
-    if (r != ARCHIVE_OK) {
+    // Return value:
+    // * >= ARCHIVE_OK - write succeed
+    // * < ARCHIVE_OK - write failed
+    const la_ssize_t w_size = archive_write_data_block(aw, buff, size, offset);
+    if (w_size < ARCHIVE_OK) {
       cmSystemTools::Message("archive_write_data_block()",
                              archive_error_string(aw));
-      return (r);
+      return false;
     }
   }
 #if !defined(__clang__) && !defined(__HP_aCC)
-  return r; /* this should not happen but it quiets some compilers */
+  return false; /* this should not happen but it quiets some compilers */
 #endif
 }
 
@@ -1776,7 +1783,10 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
 
       r = archive_write_header(ext, entry);
       if (r == ARCHIVE_OK) {
-        copy_data(a, ext);
+        if (!copy_data(a, ext)) {
+          cmSystemTools::Error("Problem with copy_data");
+          break;
+        }
         r = archive_write_finish_entry(ext);
         if (r != ARCHIVE_OK) {
           cmSystemTools::Error("Problem with archive_write_finish_entry(): ",
