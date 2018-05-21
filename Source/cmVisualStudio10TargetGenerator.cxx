@@ -96,6 +96,11 @@ struct cmVisualStudio10TargetGenerator::Elem
   }
   void EndElement()
   {
+    // Do not emit element which has not been started
+    if (Tag.empty()) {
+      return;
+    }
+
     if (HasElements) {
       this->WriteString("</") << this->Tag << ">";
       if (this->Indent > 0) {
@@ -1280,12 +1285,16 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
   }
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
 
-  Elem e1(e0, "ItemGroup");
-  Elem e2(e1);
+  std::unique_ptr<Elem> spe1;
+  std::unique_ptr<Elem> spe2;
   if (this->ProjectType != csproj) {
-    this->WriteSource(e2, "CustomBuild", source);
-    e2.SetHasElements();
+    spe1 = cm::make_unique<Elem>(e0, "ItemGroup");
+    spe2 = cm::make_unique<Elem>(*spe1);
+    this->WriteSource(*spe2, "CustomBuild", source);
+    spe2->SetHasElements();
   } else {
+    Elem e1(e0, "ItemGroup");
+    Elem e2(e1);
     std::string link;
     this->GetCSharpSourceLink(source, link);
     this->WriteSource(e2, "None", source);
@@ -1326,13 +1335,13 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
       this->WriteCustomRuleCSharp(e0, c, name, script, inputs.str(),
                                   outputs.str(), comment);
     } else {
-      this->WriteCustomRuleCpp(e2, c, script, inputs.str(), outputs.str(),
+      this->WriteCustomRuleCpp(*spe2, c, script, inputs.str(), outputs.str(),
                                comment);
     }
   }
   if (this->ProjectType != csproj) {
-    e2.EndElement();
-    e1.EndElement();
+    spe2->EndElement();
+    spe1->EndElement();
   }
 }
 
@@ -3887,7 +3896,6 @@ void cmVisualStudio10TargetGenerator::WriteSDKReferences(Elem& e0)
         iotExtensionsVersion) {
       if (!hasWrittenItemGroup) {
         e1.StartElement("ItemGroup");
-        hasWrittenItemGroup = true;
       }
       if (desktopExtensionsVersion) {
         this->WriteSingleSDKReference(e1, "WindowsDesktop",
@@ -3903,9 +3911,7 @@ void cmVisualStudio10TargetGenerator::WriteSDKReferences(Elem& e0)
     }
   }
 
-  if (hasWrittenItemGroup) {
-    e1.EndElement();
-  }
+  e1.EndElement();
 }
 
 void cmVisualStudio10TargetGenerator::WriteSingleSDKReference(
@@ -4207,10 +4213,12 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80(Elem& e1)
 
   std::string sourceFile = this->ConvertPath(manifestFile, false);
   ConvertToWindowsSlash(sourceFile);
-  Elem e2(e1, "Xml");
-  e2.Attribute("Include", sourceFile);
-  e2.Element("SubType", "Designer");
-  e2.EndElement();
+  {
+    Elem e2(e1, "Xml");
+    e2.Attribute("Include", sourceFile);
+    e2.Element("SubType", "Designer");
+    e2.EndElement();
+  }
   this->AddedFiles.push_back(sourceFile);
 
   std::string smallLogo = this->DefaultArtifactDir + "/SmallLogo.png";
@@ -4482,10 +4490,12 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
 
   std::string sourceFile = this->ConvertPath(manifestFile, false);
   ConvertToWindowsSlash(sourceFile);
-  Elem e2(e1, "AppxManifest");
-  e2.Attribute("Include", sourceFile);
-  e2.Element("SubType", "Designer");
-  e2.EndElement();
+  {
+    Elem e2(e1, "AppxManifest");
+    e2.Attribute("Include", sourceFile);
+    e2.Element("SubType", "Designer");
+    e2.EndElement();
+  }
   this->AddedFiles.push_back(sourceFile);
 
   std::string smallLogo = this->DefaultArtifactDir + "/SmallLogo.png";
