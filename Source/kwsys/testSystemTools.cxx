@@ -912,6 +912,78 @@ static bool CheckGetLineFromStream()
   return ret;
 }
 
+static bool CheckGetLineFromStreamLongLine()
+{
+  const std::string fileWithLongLine("longlines.txt");
+  std::string firstLine, secondLine;
+  // First line: large buffer, containing a carriage return for some reason.
+  firstLine.assign(2050, ' ');
+  firstLine += "\rfirst";
+  secondLine.assign(2050, 'y');
+  secondLine += "second";
+
+  // Create file with long lines.
+  {
+    kwsys::ofstream out(fileWithLongLine.c_str(), std::ios::binary);
+    if (!out) {
+      std::cerr << "Problem opening for write: " << fileWithLongLine
+                << std::endl;
+      return false;
+    }
+    out << firstLine << "\r\n\n" << secondLine << "\n";
+  }
+
+  kwsys::ifstream file(fileWithLongLine.c_str(), std::ios::binary);
+  if (!file) {
+    std::cerr << "Problem opening: " << fileWithLongLine << std::endl;
+    return false;
+  }
+
+  std::string line;
+  bool has_newline = false;
+  bool result;
+
+  // Read first line.
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  if (!result || line != firstLine) {
+    std::cerr << "First line does not match, expected " << firstLine.size()
+              << " characters, got " << line.size() << std::endl;
+    return false;
+  }
+  if (!has_newline) {
+    std::cerr << "Expected new line to be read from first line" << std::endl;
+    return false;
+  }
+
+  // Read empty line.
+  has_newline = false;
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  if (!result || !line.empty()) {
+    std::cerr << "Expected successful read with an empty line, got "
+              << line.size() << " characters" << std::endl;
+    return false;
+  }
+  if (!has_newline) {
+    std::cerr << "Expected new line to be read for an empty line" << std::endl;
+    return false;
+  }
+
+  // Read second line.
+  has_newline = false;
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  if (!result || line != secondLine) {
+    std::cerr << "Second line does not match, expected " << secondLine.size()
+              << " characters, got " << line.size() << std::endl;
+    return false;
+  }
+  if (!has_newline) {
+    std::cerr << "Expected new line to be read from second line" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 int testSystemTools(int, char* [])
 {
   bool res = true;
@@ -950,6 +1022,8 @@ int testSystemTools(int, char* [])
   res &= CheckIsSubDirectory();
 
   res &= CheckGetLineFromStream();
+
+  res &= CheckGetLineFromStreamLongLine();
 
   res &= CheckGetFilenameName();
 
