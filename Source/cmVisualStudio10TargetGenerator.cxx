@@ -42,6 +42,7 @@ struct cmVisualStudio10TargetGenerator::Elem
   std::ostream& S;
   const int Indent;
   bool HasElements = false;
+  bool HasContent = false;
   std::string Tag;
 
   Elem(std::ostream& s)
@@ -79,8 +80,7 @@ struct cmVisualStudio10TargetGenerator::Elem
   }
   void Element(const char* tag, const std::string& val)
   {
-    Elem(*this).WriteString("<") << tag << ">" << cmVS10EscapeXML(val) << "</"
-                                 << tag << ">\n";
+    Elem(*this, tag).Content(val);
   }
   Elem& Attribute(const char* an, const std::string& av)
   {
@@ -88,13 +88,17 @@ struct cmVisualStudio10TargetGenerator::Elem
     return *this;
   }
   // This method for now assumes that this->Tag has been set, e.g. by calling
-  // StartElement(). Also, it finishes the element so it should be the last
-  // one called
+  // StartElement().
   void Content(const std::string& val)
   {
-    S << ">" << cmVS10EscapeXML(val) << "</" << this->Tag << ">\n";
+    if (!this->HasContent) {
+      this->S << ">";
+      this->HasContent = true;
+    }
+    this->S << cmVS10EscapeXML(val);
   }
-  void EndElement()
+  void EndElement() {}
+  ~Elem()
   {
     // Do not emit element which has not been started
     if (Tag.empty()) {
@@ -108,6 +112,8 @@ struct cmVisualStudio10TargetGenerator::Elem
       } else {
         // special case: don't print EOL at EOF
       }
+    } else if (HasContent) {
+      this->S << "</" << this->Tag << ">\n";
     } else {
       this->S << " />\n";
     }
