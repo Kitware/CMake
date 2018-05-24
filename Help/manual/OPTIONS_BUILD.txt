@@ -11,7 +11,7 @@
  cache-format file.
 
 ``-D <var>:<type>=<value>, -D <var>=<value>``
- Create a cmake cache entry.
+ Create or update a cmake cache entry.
 
  When cmake is first run in an empty build tree, it creates a
  CMakeCache.txt file and populates it with customizable settings for
