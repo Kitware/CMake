@@ -28,6 +28,7 @@ if(WIN32)
     NAME)
   set(PERL_POSSIBLE_BIN_PATHS ${PERL_POSSIBLE_BIN_PATHS}
     "C:/Perl/bin"
+    "C:/Strawberry/perl/bin"
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActivePerl\\${ActivePerl_CurrentVersion}]/bin
     )
 endif()
