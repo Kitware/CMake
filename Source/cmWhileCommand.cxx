@@ -28,10 +28,10 @@ bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
                                                cmExecutionStatus& inStatus)
 {
   // at end of for each execute recorded commands
-  if (!cmSystemTools::Strucmp(lff.Name.c_str(), "while")) {
+  if (lff.Name.Lower == "while") {
     // record the number of while commands past this one
     this->Depth++;
-  } else if (!cmSystemTools::Strucmp(lff.Name.c_str(), "endwhile")) {
+  } else if (lff.Name.Lower == "endwhile") {
     // if this is the endwhile for this while loop then execute
     if (!this->Depth) {
       // Remove the function blocker for this scope or bail.
@@ -117,7 +117,7 @@ bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
 bool cmWhileFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
                                           cmMakefile&)
 {
-  if (!cmSystemTools::Strucmp(lff.Name.c_str(), "endwhile")) {
+  if (lff.Name.Lower == "endwhile") {
     // if the endwhile has arguments, then make sure
     // they match the arguments of the matching while
     if (lff.Arguments.empty() || lff.Arguments == this->Args) {

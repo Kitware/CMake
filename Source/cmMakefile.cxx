@@ -224,7 +224,7 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
 cmListFileBacktrace cmMakefile::GetBacktrace(cmCommandContext const& cc) const
 {
   cmListFileContext lfc;
-  lfc.Name = cc.Name;
+  lfc.Name = cc.Name.Original;
   lfc.Line = cc.Line;
   lfc.FilePath = this->StateSnapshot.GetExecutionListFile();
   return this->Backtrace.Push(lfc);
@@ -265,7 +265,7 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 
   std::ostringstream msg;
   msg << full_path << "(" << lff.Line << "):  ";
-  msg << lff.Name << "(";
+  msg << lff.Name.Original << "(";
   bool expand = this->GetCMakeInstance()->GetTraceExpand();
   std::string temp;
   for (cmListFileArgument const& arg : lff.Arguments) {
@@ -317,14 +317,13 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
     return result;
   }
 
-  std::string name = lff.Name;
-
   // Place this call on the call stack.
   cmMakefileCall stack_manager(this, lff, status);
   static_cast<void>(stack_manager);
 
   // Lookup the command prototype.
-  if (cmCommand* proto = this->GetState()->GetCommand(name)) {
+  if (cmCommand* proto =
+        this->GetState()->GetCommandByExactName(lff.Name.Lower)) {
     // Clone the prototype.
     std::unique_ptr<cmCommand> pcmd(proto->Clone());
     pcmd->SetMakefile(this);
@@ -341,7 +340,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
       if (!invokeSucceeded || hadNestedError) {
         if (!hadNestedError) {
           // The command invocation requested that we report an error.
-          std::string const error = name + " " + pcmd->GetError();
+          std::string const error =
+            std::string(lff.Name.Original) + " " + pcmd->GetError();
           this->IssueMessage(cmake::FATAL_ERROR, error);
         }
         result = false;
@@ -356,7 +356,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   } else {
     if (!cmSystemTools::GetFatalErrorOccured()) {
       std::string error = "Unknown CMake command \"";
-      error += lff.Name;
+      error += lff.Name.Original;
       error += "\".";
       this->IssueMessage(cmake::FATAL_ERROR, error);
       result = false;
@@ -1454,7 +1454,7 @@ void cmMakefile::Configure()
     bool hasVersion = false;
     // search for the right policy command
     for (cmListFileFunction const& func : listFile.Functions) {
-      if (cmSystemTools::LowerCase(func.Name) == "cmake_minimum_required") {
+      if (func.Name.Lower == "cmake_minimum_required") {
         hasVersion = true;
         break;
       }
@@ -1481,8 +1481,7 @@ void cmMakefile::Configure()
         allowedCommands.insert("message");
         isProblem = false;
         for (cmListFileFunction const& func : listFile.Functions) {
-          std::string name = cmSystemTools::LowerCase(func.Name);
-          if (allowedCommands.find(name) == allowedCommands.end()) {
+          if (allowedCommands.find(func.Name.Lower) == allowedCommands.end()) {
             isProblem = true;
             break;
           }
@@ -1501,7 +1500,7 @@ void cmMakefile::Configure()
     bool hasProject = false;
     // search for a project command
     for (cmListFileFunction const& func : listFile.Functions) {
-      if (cmSystemTools::LowerCase(func.Name) == "project") {
+      if (func.Name.Lower == "project") {
         hasProject = true;
         break;
       }
@@ -1509,7 +1508,7 @@ void cmMakefile::Configure()
     // if no project command is found, add one
     if (!hasProject) {
       cmListFileFunction project;
-      project.Name = "PROJECT";
+      project.Name.Lower = "project";
       project.Arguments.emplace_back("Project", cmListFileArgument::Unquoted,
                                      0);
       listFile.Functions.insert(listFile.Functions.begin(), project);

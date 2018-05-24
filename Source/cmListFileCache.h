@@ -23,11 +23,22 @@ class cmMessenger;
 
 struct cmCommandContext
 {
-  std::string Name;
+  struct cmCommandName
+  {
+    std::string Lower;
+    std::string Original;
+    cmCommandName() {}
+    cmCommandName(std::string const& name) { *this = name; }
+    cmCommandName& operator=(std::string const& name);
+  } Name;
   long Line;
   cmCommandContext()
-    : Name()
-    , Line(0)
+    : Line(0)
+  {
+  }
+  cmCommandContext(const char* name, int line)
+    : Name(name)
+    , Line(line)
   {
   }
 };
@@ -81,7 +92,7 @@ public:
     cmListFileContext lfc;
     lfc.FilePath = fileName;
     lfc.Line = lfcc.Line;
-    lfc.Name = lfcc.Name;
+    lfc.Name = lfcc.Name.Original;
     return lfc;
   }
 };

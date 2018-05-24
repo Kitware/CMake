@@ -462,13 +462,17 @@ void cmState::AddScriptedCommand(std::string const& name, cmCommand* command)
 
 cmCommand* cmState::GetCommand(std::string const& name) const
 {
-  std::string sName = cmSystemTools::LowerCase(name);
+  return GetCommandByExactName(cmSystemTools::LowerCase(name));
+}
+
+cmCommand* cmState::GetCommandByExactName(std::string const& name) const
+{
   std::map<std::string, cmCommand*>::const_iterator pos;
-  pos = this->ScriptedCommands.find(sName);
+  pos = this->ScriptedCommands.find(name);
   if (pos != this->ScriptedCommands.end()) {
     return pos->second;
   }
-  pos = this->BuiltinCommands.find(sName);
+  pos = this->BuiltinCommands.find(name);
   if (pos != this->BuiltinCommands.end()) {
     return pos->second;
   }
