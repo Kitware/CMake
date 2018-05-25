@@ -1438,6 +1438,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindLTTngUST)
   endif()
 
+  if(CMake_TEST_FindODBC)
+    add_subdirectory(FindODBC)
+  endif()
+
   if(CMake_TEST_FindOpenCL)
     add_subdirectory(FindOpenCL)
   endif()
