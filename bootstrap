@@ -1250,6 +1250,12 @@ else
   echo "${cmake_cxx_compiler} does not have <ext/stdio_filebuf.h>"
 fi
 
+if [ -n "${cmake_ccache_enabled}" ]; then
+  echo "Building CMake with ccache"
+  cmake_c_compiler="ccache ${cmake_c_compiler}"
+  cmake_cxx_compiler="ccache ${cmake_cxx_compiler}"
+fi
+
 # Just to be safe, let us store compiler and flags to the header file
 
 cmake_bootstrap_version='$Revision$'
@@ -1536,10 +1542,6 @@ cd "${cmake_binary_dir}"
 # build with same compiler and make
 CC="${cmake_c_compiler}"
 CXX="${cmake_cxx_compiler}"
-if [ -n "${cmake_ccache_enabled}" ]; then
-  CC="ccache ${CC}"
-  CXX="ccache ${CXX}"
-fi
 MAKE="${cmake_make_processor}"
 export CC
 export CXX
