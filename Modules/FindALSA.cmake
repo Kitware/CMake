@@ -18,20 +18,27 @@
 # Result Variables
 # ^^^^^^^^^^^^^^^^
 #
-# ::
+# This module defines the following variables:
 #
-#   This module defines the following variables:
-#      ALSA_FOUND       - True if ALSA_INCLUDE_DIR & ALSA_LIBRARY are found
-#      ALSA_LIBRARIES   - Set when ALSA_LIBRARY is found
-#      ALSA_INCLUDE_DIRS - Set when ALSA_INCLUDE_DIR is found
+# ``ALSA_FOUND``
+#   True if ALSA_INCLUDE_DIR & ALSA_LIBRARY are found
 #
+# ``ALSA_LIBRARIES``
+#   List of libraries when using ALSA.
 #
+# ``ALSA_INCLUDE_DIRS``
+#   Where to find the ALSA headers.
 #
-# ::
+# Cache variables
+# ^^^^^^^^^^^^^^^
 #
-#      ALSA_INCLUDE_DIR - where to find asoundlib.h, etc.
-#      ALSA_LIBRARY     - the asound library
-#      ALSA_VERSION_STRING - the version of alsa found (since CMake 2.8.8)
+# The following cache variables may also be set:
+#
+# ``ALSA_INCLUDE_DIR``
+#   the ALSA include directory
+#
+# ``ALSA_LIBRARY``
+#   the absolute path of the asound library
 
 find_path(ALSA_INCLUDE_DIR NAMES alsa/asoundlib.h
           DOC "The ALSA (asound) include directory"
