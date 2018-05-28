@@ -9,6 +9,15 @@
 #
 # Find the alsa libraries (asound)
 #
+# IMPORTED Targets
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines :prop_tgt:`IMPORTED` target ``ALSA::ALSA``, if
+# ALSA has been found.
+#
+# Result Variables
+# ^^^^^^^^^^^^^^^^
+#
 # ::
 #
 #   This module defines the following variables:
@@ -47,6 +56,11 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(ALSA
 if(ALSA_FOUND)
   set( ALSA_LIBRARIES ${ALSA_LIBRARY} )
   set( ALSA_INCLUDE_DIRS ${ALSA_INCLUDE_DIR} )
+  if(NOT TARGET ALSA::ALSA)
+    add_library(ALSA::ALSA UNKNOWN IMPORTED)
+    set_target_properties(ALSA::ALSA PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${ALSA_INCLUDE_DIRS}")
+    set_property(TARGET ALSA::ALSA APPEND PROPERTY IMPORTED_LOCATION "${ALSA_LIBRARY}")
+  endif()
 endif()
 
 mark_as_advanced(ALSA_INCLUDE_DIR ALSA_LIBRARY)
