@@ -65,6 +65,8 @@ run_cmake(CMP0062-NEW)
 run_cmake(CMP0062-WARN)
 run_cmake(TARGETS-NAMELINK_COMPONENT-bad-all)
 run_cmake(TARGETS-NAMELINK_COMPONENT-bad-exc)
+run_cmake(CODE-genex)
+run_cmake(CODE-genex-bad)
 
 if(NOT RunCMake_GENERATOR STREQUAL "Xcode" OR NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" MATCHES "[;$]")
   run_install_test(FILES-TARGET_OBJECTS)

@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallScriptGenerator.h"
 
+#include "cmGeneratorExpression.h"
 #include "cmScriptGenerator.h"
 
 #include <ostream>
@@ -16,24 +17,47 @@ cmInstallScriptGenerator::cmInstallScriptGenerator(const char* script,
   , Script(script)
   , Code(code)
 {
+  // We need per-config actions if the script has generator expressions.
+  if (cmGeneratorExpression::Find(Script) != std::string::npos) {
+    this->ActionsPerConfig = true;
+  }
 }
 
 cmInstallScriptGenerator::~cmInstallScriptGenerator()
 {
 }
 
-void cmInstallScriptGenerator::GenerateScript(std::ostream& os)
+void cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
 {
-  Indent indent;
-  std::string component_test =
-    this->CreateComponentTest(this->Component.c_str(), this->ExcludeFromAll);
-  os << indent << "if(" << component_test << ")\n";
+  this->LocalGenerator = lg;
+}
 
+void cmInstallScriptGenerator::AddScriptInstallRule(std::ostream& os,
+                                                    Indent indent,
+                                                    std::string const& script)
+{
   if (this->Code) {
-    os << indent.Next() << this->Script << "\n";
+    os << indent.Next() << script << "\n";
   } else {
-    os << indent.Next() << "include(\"" << this->Script << "\")\n";
+    os << indent.Next() << "include(\"" << script << "\")\n";
   }
+}
 
-  os << indent << "endif()\n\n";
+void cmInstallScriptGenerator::GenerateScriptActions(std::ostream& os,
+                                                     Indent indent)
+{
+  if (this->ActionsPerConfig) {
+    this->cmInstallGenerator::GenerateScriptActions(os, indent);
+  } else {
+    this->AddScriptInstallRule(os, indent, this->Script);
+  }
+}
+
+void cmInstallScriptGenerator::GenerateScriptForConfig(
+  std::ostream& os, const std::string& config, Indent indent)
+{
+  cmGeneratorExpression ge;
+  std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(this->Script);
+  this->AddScriptInstallRule(os, indent,
+                             cge->Evaluate(this->LocalGenerator, config));
 }
