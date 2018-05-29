@@ -159,6 +159,13 @@ following options:
 ``--build <dir>``
   Project binary directory to be built.  This is required and must be first.
 
+``-j [<jobs>], --parallel [<jobs>]``
+  The maximum number of concurrent processes to use when building.
+  If ``<jobs>`` is omitted the native build tool's default number is used.
+
+  The :envvar:`CMAKE_BUILD_PARALLEL_LEVEL` environment variable, if set,
+  specifies a default parallel level when this option is not given.
+
 ``--target <tgt>``
   Build ``<tgt>`` instead of default targets.  May only be specified once.
 

@@ -674,12 +674,18 @@ void cmGlobalNinjaGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string& makeProgram,
   const std::string& /*projectName*/, const std::string& /*projectDir*/,
   const std::string& targetName, const std::string& /*config*/, bool /*fast*/,
-  bool verbose, std::vector<std::string> const& makeOptions)
+  int jobs, bool verbose, std::vector<std::string> const& makeOptions)
 {
   makeCommand.push_back(this->SelectMakeProgram(makeProgram));
 
   if (verbose) {
     makeCommand.push_back("-v");
+  }
+
+  if ((jobs != cmake::NO_BUILD_PARALLEL_LEVEL) &&
+      (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL)) {
+    makeCommand.push_back("-j");
+    makeCommand.push_back(std::to_string(jobs));
   }
 
   makeCommand.insert(makeCommand.end(), makeOptions.begin(),

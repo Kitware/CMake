@@ -818,7 +818,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   // actually do the try compile now that everything is setup
   int res = this->Makefile->TryCompile(
     sourceDirectory, this->BinaryDirectory, projectName, targetName,
-    this->SrcFileSignature, &cmakeFlags, output);
+    this->SrcFileSignature, cmake::NO_BUILD_PARALLEL_LEVEL, &cmakeFlags,
+    output);
   if (erroroc) {
     cmSystemTools::SetErrorOccured();
   }

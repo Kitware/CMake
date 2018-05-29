@@ -325,7 +325,7 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string& makeProgram,
   const std::string& projectName, const std::string& /*projectDir*/,
   const std::string& targetName, const std::string& config, bool /*fast*/,
-  bool /*verbose*/, std::vector<std::string> const& makeOptions)
+  int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
 {
   // now build the test
   makeCommand.push_back(
@@ -356,6 +356,14 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
   }
   makeCommand.push_back("-configuration");
   makeCommand.push_back(!config.empty() ? config : "Debug");
+
+  if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
+    makeCommand.push_back("-jobs");
+    if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
+      makeCommand.push_back(std::to_string(jobs));
+    }
+  }
+
   makeCommand.insert(makeCommand.end(), makeOptions.begin(),
                      makeOptions.end());
 }

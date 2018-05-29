@@ -147,9 +147,10 @@ public:
    * Try running cmake and building a file. This is used for dynamically
    * loaded commands, not as part of the usual build process.
    */
-  int TryCompile(const std::string& srcdir, const std::string& bindir,
-                 const std::string& projectName, const std::string& targetName,
-                 bool fast, std::string& output, cmMakefile* mf);
+  int TryCompile(int jobs, const std::string& srcdir,
+                 const std::string& bindir, const std::string& projectName,
+                 const std::string& targetName, bool fast, std::string& output,
+                 cmMakefile* mf);
 
   /**
    * Build a file given the following information. This is a more direct call
@@ -157,7 +158,7 @@ public:
    * empty then all is assumed. clean indicates if a "make clean" should be
    * done first.
    */
-  int Build(const std::string& srcdir, const std::string& bindir,
+  int Build(int jobs, const std::string& srcdir, const std::string& bindir,
             const std::string& projectName, const std::string& targetName,
             std::string& output, const std::string& makeProgram,
             const std::string& config, bool clean, bool fast, bool verbose,
@@ -176,8 +177,10 @@ public:
     std::vector<std::string>& makeCommand, const std::string& makeProgram,
     const std::string& projectName, const std::string& projectDir,
     const std::string& targetName, const std::string& config, bool fast,
-    bool verbose,
+    int jobs, bool verbose,
     std::vector<std::string> const& makeOptions = std::vector<std::string>());
+
+  virtual void PrintBuildCommandAdvice(std::ostream& os, int jobs) const;
 
   /** Generate a "cmake --build" call for a given target and config.  */
   std::string GenerateCMakeBuildCommand(const std::string& target,
