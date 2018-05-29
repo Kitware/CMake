@@ -298,3 +298,10 @@ Changes made since CMake 3.11.0 include the following.
   :prop_sf:`SKIP_AUTOUIC` on their generated files.  These files never
   need to be processed by moc or uic, and we must say so explicitly to
   account for policy :policy:`CMP0071`.
+
+3.11.3
+------
+
+* CMake 3.11.0 introduced support for resolving symbolic links on
+  Windows in code paths that typically do so on UNIX.  This has been
+  reverted due to breakage on ``subst`` drives.
