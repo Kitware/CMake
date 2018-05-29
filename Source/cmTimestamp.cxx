@@ -33,7 +33,8 @@ std::string cmTimestamp::FileModificationTime(const char* path,
                                               const std::string& formatString,
                                               bool utcFlag)
 {
-  std::string real_path = cmSystemTools::GetRealPath(path);
+  std::string real_path =
+    cmSystemTools::GetRealPathResolvingWindowsSubst(path);
 
   if (!cmsys::SystemTools::FileExists(real_path)) {
     return std::string();
