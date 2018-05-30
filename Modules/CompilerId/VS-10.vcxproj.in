@@ -15,6 +15,7 @@
     @id_WindowsTargetPlatformVersion@
     @id_WindowsSDKDesktopARMSupport@
   </PropertyGroup>
+  @id_toolset_version_props@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup>
     @id_PreferredToolArchitecture@

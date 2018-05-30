@@ -52,6 +52,10 @@ public:
   const char* GetPlatformToolset() const;
   std::string const& GetPlatformToolsetString() const;
 
+  /** The toolset version.  */
+  const char* GetPlatformToolsetVersion() const;
+  std::string const& GetPlatformToolsetVersionString() const;
+
   /** The toolset host architecture name (e.g. x64 for 64-bit host tools).  */
   const char* GetPlatformToolsetHostArchitecture() const;
 
@@ -99,6 +103,8 @@ public:
   std::string Encoding() override;
   virtual const char* GetToolsVersion() { return "4.0"; }
 
+  virtual std::string GetAuxiliaryToolset() const;
+
   bool FindMakeProgram(cmMakefile* mf) override;
 
   static std::string GetInstalledNsightTegraVersion();
@@ -133,6 +139,7 @@ protected:
   std::string const& GetMSBuildCommand();
 
   std::string GeneratorToolset;
+  std::string GeneratorToolsetVersion;
   std::string GeneratorToolsetHostArchitecture;
   std::string GeneratorToolsetCuda;
   std::string DefaultPlatformToolset;

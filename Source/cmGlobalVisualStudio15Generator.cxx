@@ -158,6 +158,25 @@ bool cmGlobalVisualStudio15Generator::GetVSInstance(std::string& dir) const
   return vsSetupAPIHelper.GetVSInstanceInfo(dir);
 }
 
+std::string cmGlobalVisualStudio15Generator::GetAuxiliaryToolset() const
+{
+  const char* version = this->GetPlatformToolsetVersion();
+  if (version) {
+    std::string instancePath;
+    GetVSInstance(instancePath);
+    std::stringstream path;
+    path << instancePath;
+    path << "/VC/Auxiliary/Build/";
+    path << version;
+    path << "/Microsoft.VCToolsVersion." << version << ".props";
+
+    std::string toolsetPath = path.str();
+    cmSystemTools::ConvertToUnixSlashes(toolsetPath);
+    return toolsetPath;
+  }
+  return {};
+}
+
 bool cmGlobalVisualStudio15Generator::InitializeWindows(cmMakefile* mf)
 {
   // If the Win 8.1 SDK is installed then we can select a SDK matching

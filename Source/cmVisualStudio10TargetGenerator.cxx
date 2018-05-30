@@ -557,6 +557,11 @@ void cmVisualStudio10TargetGenerator::Generate()
 
     switch (this->ProjectType) {
       case vcxproj:
+        if (this->GlobalGenerator->GetPlatformToolsetVersion()) {
+          Elem(e0, "Import")
+            .Attribute("Project",
+                       this->GlobalGenerator->GetAuxiliaryToolset());
+        }
         Elem(e0, "Import").Attribute("Project", VS10_CXX_DEFAULT_PROPS);
         break;
       case csproj:
