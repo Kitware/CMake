@@ -124,7 +124,7 @@ public:
     bool FileDiffers(std::string const& filename, std::string const& content);
 
     bool FileRemove(std::string const& filename);
-    bool Touch(std::string const& filename);
+    bool Touch(std::string const& filename, bool create = false);
 
     // -- Directory access
     bool MakeDirectory(std::string const& dirname);

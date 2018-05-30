@@ -588,8 +588,13 @@ void cmQtAutoGenInitializer::InitCustomTargets()
           if (!qrc.Unique) {
             base += qrc.PathChecksum;
           }
+
+          qrc.LockFile = base;
+          qrc.LockFile += ".lock";
+
           qrc.InfoFile = base;
           qrc.InfoFile += "Info.cmake";
+
           qrc.SettingsFile = base;
           qrc.SettingsFile += "Settings.txt";
         }
@@ -1043,6 +1048,7 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
         CWrite("ARCC_RCC_LIST_OPTIONS", cmJoin(this->RccListOptions, ";"));
 
         ofs << "# Rcc job\n";
+        CWrite("ARCC_LOCK_FILE", qrc.LockFile);
         CWrite("ARCC_SOURCE", qrc.QrcFile);
         CWrite("ARCC_OUTPUT_CHECKSUM", qrc.PathChecksum);
         CWrite("ARCC_OUTPUT_NAME",
