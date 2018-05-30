@@ -628,14 +628,26 @@ void cmQtAutoGenInitializer::InitCustomTargets()
 
       std::vector<std::string> ccOutput;
       ccOutput.push_back(qrc.RccFile);
+
       cmCustomCommandLines commandLines;
-      {
+      if (this->MultiConfig) {
+        // Build for all configurations
+        for (std::string const& config : this->ConfigsList) {
+          cmCustomCommandLine currentLine;
+          currentLine.push_back(cmSystemTools::GetCMakeCommand());
+          currentLine.push_back("-E");
+          currentLine.push_back("cmake_autorcc");
+          currentLine.push_back(qrc.InfoFile);
+          currentLine.push_back(config);
+          commandLines.push_back(std::move(currentLine));
+        }
+      } else {
         cmCustomCommandLine currentLine;
         currentLine.push_back(cmSystemTools::GetCMakeCommand());
         currentLine.push_back("-E");
         currentLine.push_back("cmake_autorcc");
         currentLine.push_back(qrc.InfoFile);
-        currentLine.push_back("$<CONFIGURATION>");
+        currentLine.push_back("$<CONFIG>");
         commandLines.push_back(std::move(currentLine));
       }
       std::string ccComment = "Automatic RCC for ";
