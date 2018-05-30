@@ -949,8 +949,8 @@ if(CYGWIN)
 endif()
 if(WIN32 OR (CYGWIN AND LibUUID_FOUND))
   set(CPACK_SRCS ${CPACK_SRCS}
-    CPack/Wix/cmCMakeToWixPath.cxx
-    CPack/Wix/cmCMakeToWixPath.h
+    CPack/WiX/cmCMakeToWixPath.cxx
+    CPack/WiX/cmCMakeToWixPath.h
     CPack/WiX/cmCPackWIXGenerator.cxx
     CPack/WiX/cmCPackWIXGenerator.h
     CPack/WiX/cmWIXAccessControlList.cxx
