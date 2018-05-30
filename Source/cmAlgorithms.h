@@ -13,6 +13,7 @@
 #include <sstream>
 #include <string.h>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -275,55 +276,19 @@ typename Range::const_iterator cmRemoveMatching(Range& r, MatchRange const& m)
                         ContainerAlgorithms::BinarySearcher<MatchRange>(m));
 }
 
-namespace ContainerAlgorithms {
-
-template <typename Range, typename T = typename Range::value_type>
-struct RemoveDuplicatesAPI
-{
-  typedef typename Range::const_iterator const_iterator;
-  typedef typename Range::const_iterator value_type;
-
-  static bool lessThan(value_type a, value_type b) { return *a < *b; }
-  static value_type uniqueValue(const_iterator a) { return a; }
-  template <typename It>
-  static bool valueCompare(It it, const_iterator it2)
-  {
-    return **it != *it2;
-  }
-};
-
-template <typename Range, typename T>
-struct RemoveDuplicatesAPI<Range, T*>
-{
-  typedef typename Range::const_iterator const_iterator;
-  typedef T* value_type;
-
-  static bool lessThan(value_type a, value_type b) { return a < b; }
-  static value_type uniqueValue(const_iterator a) { return *a; }
-  template <typename It>
-  static bool valueCompare(It it, const_iterator it2)
-  {
-    return *it != *it2;
-  }
-};
-}
-
 template <typename Range>
 typename Range::const_iterator cmRemoveDuplicates(Range& r)
 {
-  typedef ContainerAlgorithms::RemoveDuplicatesAPI<Range> API;
-  typedef typename API::value_type T;
-  std::vector<T> unique;
-  unique.reserve(r.size());
+  typedef typename Range::value_type T;
+  std::unordered_set<T> unique;
   std::vector<size_t> indices;
   size_t count = 0;
   const typename Range::const_iterator end = r.end();
   for (typename Range::const_iterator it = r.begin(); it != end;
        ++it, ++count) {
-    const typename std::vector<T>::iterator low = std::lower_bound(
-      unique.begin(), unique.end(), API::uniqueValue(it), API::lessThan);
-    if (low == unique.end() || API::valueCompare(low, it)) {
-      unique.insert(low, API::uniqueValue(it));
+    const typename std::unordered_set<T>::iterator occur = unique.find(*it);
+    if (occur == unique.end()) {
+      unique.insert(*it);
     } else {
       indices.push_back(count);
     }
