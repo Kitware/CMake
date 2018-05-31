@@ -2,10 +2,11 @@
 /* Size of a pointer-to-data in bytes.  */
 #define SIZEOF_DPTR (sizeof(void*))
 const char info_sizeof_dptr[] = {
+  /* clang-format off */
   'I', 'N', 'F', 'O', ':', 's', 'i', 'z', 'e', 'o', 'f', '_', 'd', 'p', 't',
   'r', '[', ('0' + ((SIZEOF_DPTR / 10) % 10)), ('0' + (SIZEOF_DPTR % 10)), ']',
   '\0'
-  /* clang-format needs this comment to break after the opening brace */
+  /* clang-format on */
 };
 
 /* Application Binary Interface.  */
