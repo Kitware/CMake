@@ -949,10 +949,12 @@ cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsFileRetry()
   }
   return retry;
 }
+#endif
 
-std::string cmSystemTools::GetRealPath(const std::string& path,
-                                       std::string* errorMessage)
+std::string cmSystemTools::GetRealPathResolvingWindowsSubst(
+  const std::string& path, std::string* errorMessage)
 {
+#ifdef _WIN32
   // uv_fs_realpath uses Windows Vista API so fallback to kwsys if not found
   std::string resolved_path;
   uv_fs_t req;
@@ -981,8 +983,10 @@ std::string cmSystemTools::GetRealPath(const std::string& path,
     resolved_path = path;
   }
   return resolved_path;
-}
+#else
+  return cmsys::SystemTools::GetRealPath(path, errorMessage);
 #endif
+}
 
 void cmSystemTools::InitializeLibUV()
 {
