@@ -6,13 +6,13 @@
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
-#include "Encoding.h.in"
+#  include "Encoding.h.in"
 #endif
 
 #include <stdlib.h>
 
 #ifdef _WIN32
-#include <windows.h>
+#  include <windows.h>
 #endif
 
 size_t kwsysEncoding_mbstowcs(wchar_t* dest, const char* str, size_t n)

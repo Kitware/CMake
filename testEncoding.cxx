@@ -3,7 +3,7 @@
 #include "kwsysPrivate.h"
 
 #if defined(_MSC_VER)
-#pragma warning(disable : 4786)
+#  pragma warning(disable : 4786)
 #endif
 
 #include KWSYS_HEADER(Encoding.hxx)
@@ -18,8 +18,8 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "Encoding.h.in"
-#include "Encoding.hxx.in"
+#  include "Encoding.h.in"
+#  include "Encoding.hxx.in"
 #endif
 
 static const unsigned char helloWorldStrings[][32] = {

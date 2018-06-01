@@ -17,7 +17,7 @@
 #include <sys/stat.h>
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
-#include <unistd.h> // For access permissions for use with access()
+#  include <unistd.h> // For access permissions for use with access()
 #endif
 
 // Required for va_list
@@ -318,11 +318,11 @@ public:
  * Cross platform wrapper for stat struct
  */
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#if defined(__BORLANDC__)
+#  if defined(__BORLANDC__)
   typedef struct stati64 Stat_t;
-#else
+#  else
   typedef struct _stat64 Stat_t;
-#endif
+#  endif
 #else
   typedef struct stat Stat_t;
 #endif

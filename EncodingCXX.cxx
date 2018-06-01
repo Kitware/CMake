@@ -1,9 +1,9 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 #ifdef __osf__
-#define _OSF_SOURCE
-#define _POSIX_C_SOURCE 199506L
-#define _XOPEN_SOURCE_EXTENDED
+#  define _OSF_SOURCE
+#  define _POSIX_C_SOURCE 199506L
+#  define _XOPEN_SOURCE_EXTENDED
 #endif
 
 #include "kwsysPrivate.h"
@@ -13,8 +13,8 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "Encoding.h.in"
-#include "Encoding.hxx.in"
+#  include "Encoding.h.in"
+#  include "Encoding.hxx.in"
 #endif
 
 #include <stdlib.h>
@@ -22,15 +22,15 @@
 #include <vector>
 
 #ifdef _MSC_VER
-#pragma warning(disable : 4786)
+#  pragma warning(disable : 4786)
 #endif
 
 // Windows API.
 #if defined(_WIN32)
-#include <windows.h>
+#  include <windows.h>
 
-#include <ctype.h>
-#include <shellapi.h>
+#  include <ctype.h>
+#  include <shellapi.h>
 #endif
 
 namespace KWSYS_NAMESPACE {
@@ -127,7 +127,7 @@ char const* const* Encoding::CommandLineArguments::argv() const
 std::wstring Encoding::ToWide(const std::string& str)
 {
   std::wstring wstr;
-#if defined(_WIN32)
+#  if defined(_WIN32)
   const int wlength = MultiByteToWideChar(
     KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(), int(str.size()), NULL, 0);
   if (wlength > 0) {
@@ -139,7 +139,7 @@ std::wstring Encoding::ToWide(const std::string& str)
     }
     delete[] wdata;
   }
-#else
+#  else
   size_t pos = 0;
   size_t nullPos = 0;
   do {
@@ -152,14 +152,14 @@ std::wstring Encoding::ToWide(const std::string& str)
       wstr += wchar_t('\0');
     }
   } while (nullPos != std::string::npos);
-#endif
+#  endif
   return wstr;
 }
 
 std::string Encoding::ToNarrow(const std::wstring& str)
 {
   std::string nstr;
-#if defined(_WIN32)
+#  if defined(_WIN32)
   int length =
     WideCharToMultiByte(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.c_str(),
                         int(str.size()), NULL, 0, NULL, NULL);
@@ -173,7 +173,7 @@ std::string Encoding::ToNarrow(const std::wstring& str)
     }
     delete[] data;
   }
-#else
+#  else
   size_t pos = 0;
   size_t nullPos = 0;
   do {
@@ -186,7 +186,7 @@ std::string Encoding::ToNarrow(const std::wstring& str)
       nstr += '\0';
     }
   } while (nullPos != std::string::npos);
-#endif
+#  endif
   return nstr;
 }
 
@@ -216,7 +216,7 @@ std::string Encoding::ToNarrow(const wchar_t* wcstr)
   return str;
 }
 
-#if defined(_WIN32)
+#  if defined(_WIN32)
 // Convert local paths to UNC style paths
 std::wstring Encoding::ToWindowsExtendedPath(std::string const& source)
 {
@@ -270,7 +270,7 @@ std::wstring Encoding::ToWindowsExtendedPath(std::string const& source)
   // unchanged
   return Encoding::ToWide(source);
 }
-#endif
+#  endif
 
 #endif // KWSYS_STL_HAS_WSTRING
 

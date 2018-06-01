@@ -10,21 +10,21 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "Configure.hxx.in"
-#include "IOStream.hxx.in"
+#  include "Configure.hxx.in"
+#  include "IOStream.hxx.in"
 #endif
 
 // Implement the rest of this file only if it is needed.
 #if KWSYS_IOS_NEED_OPERATORS_LL
 
-#include <stdio.h>  // sscanf, sprintf
-#include <string.h> // memchr
+#  include <stdio.h>  // sscanf, sprintf
+#  include <string.h> // memchr
 
-#if defined(_MAX_INT_DIG)
-#define KWSYS_IOS_INT64_MAX_DIG _MAX_INT_DIG
-#else
-#define KWSYS_IOS_INT64_MAX_DIG 32
-#endif
+#  if defined(_MAX_INT_DIG)
+#    define KWSYS_IOS_INT64_MAX_DIG _MAX_INT_DIG
+#  else
+#    define KWSYS_IOS_INT64_MAX_DIG 32
+#  endif
 
 namespace KWSYS_NAMESPACE {
 
@@ -118,13 +118,13 @@ std::istream& IOStreamScanTemplate(std::istream& is, T& value, char type)
     try {
       // Copy the string to a buffer and construct the format string.
       char buffer[KWSYS_IOS_INT64_MAX_DIG];
-#if defined(_MSC_VER)
+#  if defined(_MSC_VER)
       char format[] = "%I64_";
       const int typeIndex = 4;
-#else
+#  else
       char format[] = "%ll_";
       const int typeIndex = 3;
-#endif
+#  endif
       switch (IOStreamScanStream(is, buffer)) {
         case 8:
           format[typeIndex] = 'o';
@@ -177,14 +177,14 @@ std::ostream& IOStreamPrintTemplate(std::ostream& os, T value, char type)
       if (os.flags() & std::ios_base::showbase) {
         *f++ = '#';
       }
-#if defined(_MSC_VER)
+#  if defined(_MSC_VER)
       *f++ = 'I';
       *f++ = '6';
       *f++ = '4';
-#else
+#  else
       *f++ = 'l';
       *f++ = 'l';
-#endif
+#  endif
       long bflags = os.flags() & std::ios_base::basefield;
       if (bflags == std::ios_base::oct) {
         *f++ = 'o';
@@ -209,7 +209,7 @@ std::ostream& IOStreamPrintTemplate(std::ostream& os, T value, char type)
   return os;
 }
 
-#if !KWSYS_IOS_HAS_ISTREAM_LONG_LONG
+#  if !KWSYS_IOS_HAS_ISTREAM_LONG_LONG
 // Implement input stream operator for IOStreamSLL.
 std::istream& IOStreamScan(std::istream& is, IOStreamSLL& value)
 {
@@ -221,9 +221,9 @@ std::istream& IOStreamScan(std::istream& is, IOStreamULL& value)
 {
   return IOStreamScanTemplate(is, value, 'u');
 }
-#endif
+#  endif
 
-#if !KWSYS_IOS_HAS_OSTREAM_LONG_LONG
+#  if !KWSYS_IOS_HAS_OSTREAM_LONG_LONG
 // Implement output stream operator for IOStreamSLL.
 std::ostream& IOStreamPrint(std::ostream& os, IOStreamSLL value)
 {
@@ -235,7 +235,7 @@ std::ostream& IOStreamPrint(std::ostream& os, IOStreamULL value)
 {
   return IOStreamPrintTemplate(os, value, 'u');
 }
-#endif
+#  endif
 
 } // namespace KWSYS_NAMESPACE
 

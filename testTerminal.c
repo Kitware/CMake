@@ -6,7 +6,7 @@
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
-#include "Terminal.h.in"
+#  include "Terminal.h.in"
 #endif
 
 int testTerminal(int argc, char* argv[])

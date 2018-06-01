@@ -25,7 +25,7 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "RegularExpression.hxx.in"
+#  include "RegularExpression.hxx.in"
 #endif
 
 #include <stdio.h>
@@ -194,24 +194,29 @@ bool RegularExpression::deep_equal(const RegularExpression& rxp) const
  */
 
 // definition   number  opnd?   meaning
-#define END 0     // no   End of program.
-#define BOL 1     // no   Match "" at beginning of line.
-#define EOL 2     // no   Match "" at end of line.
-#define ANY 3     // no   Match any one character.
-#define ANYOF 4   // str  Match any character in this string.
-#define ANYBUT 5  // str  Match any character not in this
-                  // string.
-#define BRANCH 6  // node Match this alternative, or the
+#define END 0   // no   End of program.
+#define BOL 1   // no   Match "" at beginning of line.
+#define EOL 2   // no   Match "" at end of line.
+#define ANY 3   // no   Match any one character.
+#define ANYOF 4 // str  Match any character in this string.
+#define ANYBUT                                                                \
+  5 // str  Match any character not in this
+    // string.
+#define BRANCH                                                                \
+  6               // node Match this alternative, or the
                   // next...
 #define BACK 7    // no   Match "", "next" ptr points backward.
 #define EXACTLY 8 // str  Match this string.
 #define NOTHING 9 // no   Match empty string.
-#define STAR 10   // node Match this (simple) thing 0 or more
-                  // times.
-#define PLUS 11   // node Match this (simple) thing 1 or more
-                  // times.
-#define OPEN 20   // no   Mark this point in input as start of
-                  // #n.
+#define STAR                                                                  \
+  10 // node Match this (simple) thing 0 or more
+     // times.
+#define PLUS                                                                  \
+  11 // node Match this (simple) thing 1 or more
+     // times.
+#define OPEN                                                                  \
+  20 // no   Mark this point in input as start of
+     // #n.
 // OPEN+1 is number 1, etc.
 #define CLOSE 30 // no   Analogous to OPEN.
 
