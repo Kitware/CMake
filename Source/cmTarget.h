@@ -36,6 +36,7 @@ public:
   cmTargetInternalPointer& operator=(cmTargetInternalPointer const& r);
   cmTargetInternals* operator->() const { return this->Pointer; }
   cmTargetInternals* Get() const { return this->Pointer; }
+
 private:
   cmTargetInternals* Pointer;
 };
@@ -181,8 +182,8 @@ public:
   void SetHaveInstallRule(bool h) { this->HaveInstallRule = h; }
 
   /**
-  * Get/Set whether this target was auto-created by a generator.
-  */
+   * Get/Set whether this target was auto-created by a generator.
+   */
   bool GetIsGeneratorProvided() const { return this->IsGeneratorProvided; }
   void SetIsGeneratorProvided(bool igp) { this->IsGeneratorProvided = igp; }
 

@@ -9,7 +9,7 @@
 #include <string>
 
 #if !defined(CMAKE_USE_MACH_PARSER)
-#error "This file may be included only if CMAKE_USE_MACH_PARSER is enabled."
+#  error "This file may be included only if CMAKE_USE_MACH_PARSER is enabled."
 #endif
 
 class cmMachOInternal;

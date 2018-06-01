@@ -19,9 +19,9 @@ extern "C" {
 #endif
 
 #ifdef __WATCOMC__
-#define CCONV __cdecl
+#  define CCONV __cdecl
 #else
-#define CCONV
+#  define CCONV
 #endif
 /*=========================================================================
 this is the structure of function entry points that a plugin may call. This
@@ -161,9 +161,9 @@ typedef struct
 CM_PLUGIN_EXPORT should be used by plugins
 =========================================================================*/
 #ifdef _WIN32
-#define CM_PLUGIN_EXPORT __declspec(dllexport)
+#  define CM_PLUGIN_EXPORT __declspec(dllexport)
 #else
-#define CM_PLUGIN_EXPORT
+#  define CM_PLUGIN_EXPORT
 #endif
 
 /*=========================================================================

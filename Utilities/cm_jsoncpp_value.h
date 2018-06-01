@@ -6,9 +6,9 @@
 /* Use the jsoncpp library configured for CMake.  */
 #include "cmThirdParty.h"
 #ifdef CMAKE_USE_SYSTEM_JSONCPP
-#include <json/value.h>
+#  include <json/value.h>
 #else
-#include <cmjsoncpp/include/json/value.h>
+#  include <cmjsoncpp/include/json/value.h>
 #endif
 
 #endif

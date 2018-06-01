@@ -23,6 +23,7 @@ public:
   operator int() const { return this->Dest; }
 
   bool IsStrong() const { return this->Strong; }
+
 private:
   int Dest;
   bool Strong;

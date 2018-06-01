@@ -348,8 +348,8 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
   cmStringReplaceHelper replaceHelper(regex, replace, this->Makefile);
 
   if (!replaceHelper.IsReplaceExpressionValid()) {
-    this->SetError("sub-command REGEX, mode REPLACE: " +
-                   replaceHelper.GetError() + ".");
+    this->SetError(
+      "sub-command REGEX, mode REPLACE: " + replaceHelper.GetError() + ".");
     return false;
   }
 
@@ -369,8 +369,8 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
   std::string output;
 
   if (!replaceHelper.Replace(input, output)) {
-    this->SetError("sub-command REGEX, mode REPLACE: " +
-                   replaceHelper.GetError() + ".");
+    this->SetError(
+      "sub-command REGEX, mode REPLACE: " + replaceHelper.GetError() + ".");
     return false;
   }
 

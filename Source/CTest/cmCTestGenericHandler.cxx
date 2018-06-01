@@ -100,8 +100,9 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
   }
   if (!this->CTest->OpenOutputFile(this->CTest->GetCurrentTag(), ostr.str(),
                                    xofs, true)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create resulting XML file: "
-                 << ostr.str() << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Cannot create resulting XML file: " << ostr.str()
+                                                    << std::endl);
     return false;
   }
   this->CTest->AddSubmitFile(part, ostr.str().c_str());

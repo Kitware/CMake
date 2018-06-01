@@ -6,7 +6,9 @@
 
 #include "myinterface.h"
 
-class MyWrapObject : public QObject, MyInterface
+class MyWrapObject
+  : public QObject
+  , MyInterface
 {
   Q_OBJECT
   Q_INTERFACES(MyInterface)

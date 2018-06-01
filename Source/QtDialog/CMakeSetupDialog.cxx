@@ -842,7 +842,7 @@ void CMakeSetupDialog::doAbout()
     "Qt is licensed under terms of the GNU LGPLv" USE_LGPL ", available at:\n"
     " \"%3\""
 #endif
-    );
+  );
   msg = msg.arg(cmVersion::GetCMakeVersion());
   msg = msg.arg(qVersion());
 #ifdef USE_LGPL
@@ -989,8 +989,9 @@ void CMakeSetupDialog::removeSelectedCacheEntries()
 void CMakeSetupDialog::selectionChanged()
 {
   QModelIndexList idxs = this->CacheValues->selectionModel()->selectedRows();
-  if (idxs.count() && (this->CurrentState == ReadyConfigure ||
-                       this->CurrentState == ReadyGenerate)) {
+  if (idxs.count() &&
+      (this->CurrentState == ReadyConfigure ||
+       this->CurrentState == ReadyGenerate)) {
     this->RemoveEntry->setEnabled(true);
   } else {
     this->RemoveEntry->setEnabled(false);

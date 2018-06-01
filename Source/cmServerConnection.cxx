@@ -9,9 +9,9 @@
 
 #include <algorithm>
 #ifdef _WIN32
-#include "io.h"
+#  include "io.h"
 #else
-#include <unistd.h>
+#  include <unistd.h>
 #endif
 #include <cassert>
 

@@ -266,10 +266,12 @@ static bool checkInterfaceDirs(const std::string& prepro,
               s << "Directory:\n    \"" << li
                 << "\"\nin "
                    "INTERFACE_INCLUDE_DIRECTORIES of target \""
-                << target->GetName() << "\" is a subdirectory of the install "
-                                        "directory:\n    \""
-                << installDir << "\"\nhowever it is also "
-                                 "a subdirectory of the "
+                << target->GetName()
+                << "\" is a subdirectory of the install "
+                   "directory:\n    \""
+                << installDir
+                << "\"\nhowever it is also "
+                   "a subdirectory of the "
                 << (inBinary ? "build" : "source") << " tree:\n    \""
                 << (inBinary ? topBinaryDir : topSourceDir) << "\""
                 << std::endl;

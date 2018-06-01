@@ -1,7 +1,7 @@
 #ifdef _WIN32
-#define JUMP_IMPORT __declspec(dllimport)
+#  define JUMP_IMPORT __declspec(dllimport)
 #else
-#define JUMP_IMPORT extern
+#  define JUMP_IMPORT extern
 #endif
 
 extern int jumpStatic();

@@ -5,7 +5,7 @@
 #include "compile_tests.h"
 
 #ifdef TEST_COMPILER_C_STATIC_ASSERT
-#error Expect no C features defined
+#  error Expect no C features defined
 #endif
 
 TEST_STATIC_ASSERT(true);

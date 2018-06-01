@@ -393,7 +393,8 @@ void cmVisualStudioGeneratorOptions::StoreUnknownFlag(std::string const& flag)
 
   // This option is not known.  Store it in the output flags.
   std::string const opts = cmOutputConverter::EscapeWindowsShellArgument(
-    flag.c_str(), cmOutputConverter::Shell_Flag_AllowMakeVariables |
+    flag.c_str(),
+    cmOutputConverter::Shell_Flag_AllowMakeVariables |
       cmOutputConverter::Shell_Flag_VSIDE);
   this->AppendFlagString(this->UnknownFlagField, opts);
 }

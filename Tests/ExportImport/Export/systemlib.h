@@ -3,9 +3,9 @@
 #define SYSTEMLIB_H
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-#define systemlib_EXPORT __declspec(dllexport)
+#  define systemlib_EXPORT __declspec(dllexport)
 #else
-#define systemlib_EXPORT
+#  define systemlib_EXPORT
 #endif
 
 struct systemlib_EXPORT SystemStruct

@@ -22,7 +22,9 @@
  *
  * http://qt-project.org/doc/qtinstallerframework/index.html
  */
-class cmCPackIFWGenerator : public cmCPackGenerator, public cmCPackIFWCommon
+class cmCPackIFWGenerator
+  : public cmCPackGenerator
+  , public cmCPackIFWCommon
 {
 public:
   cmCPackTypeMacro(cmCPackIFWGenerator, cmCPackGenerator);

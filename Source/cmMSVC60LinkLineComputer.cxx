@@ -4,7 +4,7 @@
 #include "cmMSVC60LinkLineComputer.h"
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#include "cmSystemTools.h"
+#  include "cmSystemTools.h"
 #endif
 
 class cmOutputConverter;

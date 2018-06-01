@@ -645,8 +645,9 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
 
     // See if we need to use a compiler launcher like ccache or distcc
     std::string compilerLauncher;
-    if (!compileCommands.empty() && (lang == "C" || lang == "CXX" ||
-                                     lang == "Fortran" || lang == "CUDA")) {
+    if (!compileCommands.empty() &&
+        (lang == "C" || lang == "CXX" || lang == "Fortran" ||
+         lang == "CUDA")) {
       std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
       const char* clauncher =
         this->GeneratorTarget->GetProperty(clauncher_prop);
@@ -1027,10 +1028,11 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   // paths.  Make sure PWD is set to the original name of the home
   // output directory to help cmSystemTools to create the same
   // translation table for the dependency scanning process.
-  depCmd << "cd " << (this->LocalGenerator->ConvertToOutputFormat(
-                       cmSystemTools::CollapseFullPath(
-                         this->LocalGenerator->GetBinaryDirectory()),
-                       cmOutputConverter::SHELL))
+  depCmd << "cd "
+         << (this->LocalGenerator->ConvertToOutputFormat(
+              cmSystemTools::CollapseFullPath(
+                this->LocalGenerator->GetBinaryDirectory()),
+              cmOutputConverter::SHELL))
          << " && ";
 #endif
   // Generate a call this signature:

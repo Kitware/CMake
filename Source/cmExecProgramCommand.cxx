@@ -194,9 +194,9 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
   } else {
     commandInDir = command;
   }
-#ifndef __VMS
+#  ifndef __VMS
   commandInDir += " 2>&1";
-#endif
+#  endif
   command = commandInDir.c_str();
   if (verbose) {
     cmSystemTools::Stdout("running ");

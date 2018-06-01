@@ -303,14 +303,17 @@ bool cmPolicies::GetPolicyID(const char* id, cmPolicies::PolicyID& pid)
 std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 {
   std::ostringstream msg;
-  msg << "Policy " << idToString(id) << " is not set: "
-                                        ""
-      << idToShortDescription(id) << "  "
-                                     "Run \"cmake --help-policy "
-      << idToString(id) << "\" for "
-                           "policy details.  "
-                           "Use the cmake_policy command to set the policy "
-                           "and suppress this warning.";
+  msg << "Policy " << idToString(id)
+      << " is not set: "
+         ""
+      << idToShortDescription(id)
+      << "  "
+         "Run \"cmake --help-policy "
+      << idToString(id)
+      << "\" for "
+         "policy details.  "
+         "Use the cmake_policy command to set the policy "
+         "and suppress this warning.";
   return msg.str();
 }
 
@@ -334,19 +337,22 @@ std::string cmPolicies::GetPolicyDeprecatedWarning(cmPolicies::PolicyID id)
 std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 {
   std::ostringstream error;
-  error << "Policy " << idToString(id) << " is not set to NEW: "
-                                          ""
-        << idToShortDescription(id) << "  "
-                                       "Run \"cmake --help-policy "
+  error << "Policy " << idToString(id)
+        << " is not set to NEW: "
+           ""
+        << idToShortDescription(id)
+        << "  "
+           "Run \"cmake --help-policy "
         << idToString(id)
         << "\" for "
            "policy details.  "
            "CMake now requires this policy to be set to NEW by the project.  "
            "The policy may be set explicitly using the code\n"
            "  cmake_policy(SET "
-        << idToString(id) << " NEW)\n"
-                             "or by upgrading all policies with the code\n"
-                             "  cmake_policy(VERSION "
+        << idToString(id)
+        << " NEW)\n"
+           "or by upgrading all policies with the code\n"
+           "  cmake_policy(VERSION "
         << idToVersion(id)
         << ") # or later\n"
            "Run \"cmake --help-command cmake_policy\" for more information.";

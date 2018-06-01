@@ -12,7 +12,9 @@
 class QString;
 class QWidget;
 
-class RegexExplorer : public QDialog, public Ui::RegexExplorer
+class RegexExplorer
+  : public QDialog
+  , public Ui::RegexExplorer
 {
   Q_OBJECT
 public:

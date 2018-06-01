@@ -30,8 +30,8 @@ int cmCTestUploadHandler::ProcessHandler()
   cmGeneratedFileStream ofs;
   if (!this->CTest->OpenOutputFile(this->CTest->GetCurrentTag(), "Upload.xml",
                                    ofs)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open Upload.xml file"
-                 << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Cannot open Upload.xml file" << std::endl);
     return -1;
   }
   std::string buildname =
@@ -45,7 +45,8 @@ int cmCTestUploadHandler::ProcessHandler()
                             "<file:///Dart/Source/Server/XSL/Build.xsl> \"");
   xml.StartElement("Site");
   xml.Attribute("BuildName", buildname);
-  xml.Attribute("BuildStamp", this->CTest->GetCurrentTag() + "-" +
+  xml.Attribute("BuildStamp",
+                this->CTest->GetCurrentTag() + "-" +
                   this->CTest->GetTestModelString());
   xml.Attribute("Name", this->CTest->GetCTestConfiguration("Site"));
   xml.Attribute("Generator",

@@ -7,8 +7,8 @@
 #include "cmSystemTools.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cm_codecvt.hxx"
-#include "cm_zlib.h"
+#  include "cm_codecvt.hxx"
+#  include "cm_zlib.h"
 #endif
 
 cmGeneratedFileStream::cmGeneratedFileStream(Encoding encoding)

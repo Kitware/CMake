@@ -17,9 +17,9 @@ extern "C" int example_exe_function()
 }
 
 #ifdef CMAKE_INTDIR
-#define CONFIG_DIR "/" CMAKE_INTDIR
+#  define CONFIG_DIR "/" CMAKE_INTDIR
 #else
-#define CONFIG_DIR ""
+#  define CONFIG_DIR ""
 #endif
 
 int main()

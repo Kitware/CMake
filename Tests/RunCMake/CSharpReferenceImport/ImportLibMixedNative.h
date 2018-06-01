@@ -1,9 +1,9 @@
 #pragma once
 
 #ifdef ImportLibMixed_EXPORTS
-#define mixedAPI __declspec(dllexport)
+#  define mixedAPI __declspec(dllexport)
 #else
-#define mixedAPI __declspec(dllimport)
+#  define mixedAPI __declspec(dllimport)
 #endif
 
 class mixedAPI ImportLibMixedNative

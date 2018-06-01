@@ -98,6 +98,7 @@ public:
   /** Is there a keyword which should be skipped in
   the arguments (e.g. ARGS for ADD_CUSTOM_COMMAND) ? */
   void SetIgnore(const char* ignore) { this->Ignore = ignore; }
+
 private:
   std::vector<std::string> Vector;
   unsigned int DataStart;
@@ -118,6 +119,7 @@ public:
   /// Return the string
   const std::string& GetString() const { return this->String; }
   const char* GetCString() const { return this->String.c_str(); }
+
 private:
   std::string String;
   unsigned int DataStart;
@@ -136,6 +138,7 @@ public:
 
   /// Has it been enabled ?
   bool IsEnabled() const { return this->Enabled; }
+
 private:
   bool Enabled;
   bool DoConsume(const std::string& arg, unsigned int index) override;
@@ -153,6 +156,7 @@ public:
 
   /// Is it still enabled ?
   bool IsEnabled() const { return this->Enabled; }
+
 private:
   bool Enabled;
   bool DoConsume(const std::string& arg, unsigned int index) override;

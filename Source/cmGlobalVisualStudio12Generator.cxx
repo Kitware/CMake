@@ -125,8 +125,9 @@ bool cmGlobalVisualStudio12Generator::InitializeWindowsPhone(cmMakefile* mf)
   if (!this->SelectWindowsPhoneToolset(this->DefaultPlatformToolset)) {
     std::ostringstream e;
     if (this->DefaultPlatformToolset.empty()) {
-      e << this->GetName() << " supports Windows Phone '8.0' and '8.1', but "
-                              "not '"
+      e << this->GetName()
+        << " supports Windows Phone '8.0' and '8.1', but "
+           "not '"
         << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
     } else {
       e << "A Windows Phone component with CMake requires both the Windows "
@@ -144,8 +145,9 @@ bool cmGlobalVisualStudio12Generator::InitializeWindowsStore(cmMakefile* mf)
   if (!this->SelectWindowsStoreToolset(this->DefaultPlatformToolset)) {
     std::ostringstream e;
     if (this->DefaultPlatformToolset.empty()) {
-      e << this->GetName() << " supports Windows Store '8.0' and '8.1', but "
-                              "not '"
+      e << this->GetName()
+        << " supports Windows Store '8.0' and '8.1', but "
+           "not '"
         << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
     } else {
       e << "A Windows Store component with CMake requires both the Windows "

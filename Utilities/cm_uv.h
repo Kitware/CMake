@@ -6,9 +6,9 @@
 /* Use the libuv library configured for CMake.  */
 #include "cmThirdParty.h"
 #ifdef CMAKE_USE_SYSTEM_LIBUV
-#include <uv.h>
+#  include <uv.h>
 #else
-#include <cmlibuv/include/uv.h>
+#  include <cmlibuv/include/uv.h>
 #endif
 
 #endif

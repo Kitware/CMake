@@ -81,30 +81,30 @@
 #include "cmWhileCommand.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmAddCompileOptionsCommand.h"
-#include "cmAuxSourceDirectoryCommand.h"
-#include "cmBuildNameCommand.h"
-#include "cmCMakeHostSystemInformationCommand.h"
-#include "cmExportCommand.h"
-#include "cmExportLibraryDependenciesCommand.h"
-#include "cmFLTKWrapUICommand.h"
-#include "cmIncludeExternalMSProjectCommand.h"
-#include "cmInstallProgramsCommand.h"
-#include "cmLinkLibrariesCommand.h"
-#include "cmLoadCacheCommand.h"
-#include "cmLoadCommandCommand.h"
-#include "cmOutputRequiredFilesCommand.h"
-#include "cmQTWrapCPPCommand.h"
-#include "cmQTWrapUICommand.h"
-#include "cmRemoveCommand.h"
-#include "cmRemoveDefinitionsCommand.h"
-#include "cmSourceGroupCommand.h"
-#include "cmSubdirDependsCommand.h"
-#include "cmUseMangledMesaCommand.h"
-#include "cmUtilitySourceCommand.h"
-#include "cmVariableRequiresCommand.h"
-#include "cmVariableWatchCommand.h"
-#include "cmWriteFileCommand.h"
+#  include "cmAddCompileOptionsCommand.h"
+#  include "cmAuxSourceDirectoryCommand.h"
+#  include "cmBuildNameCommand.h"
+#  include "cmCMakeHostSystemInformationCommand.h"
+#  include "cmExportCommand.h"
+#  include "cmExportLibraryDependenciesCommand.h"
+#  include "cmFLTKWrapUICommand.h"
+#  include "cmIncludeExternalMSProjectCommand.h"
+#  include "cmInstallProgramsCommand.h"
+#  include "cmLinkLibrariesCommand.h"
+#  include "cmLoadCacheCommand.h"
+#  include "cmLoadCommandCommand.h"
+#  include "cmOutputRequiredFilesCommand.h"
+#  include "cmQTWrapCPPCommand.h"
+#  include "cmQTWrapUICommand.h"
+#  include "cmRemoveCommand.h"
+#  include "cmRemoveDefinitionsCommand.h"
+#  include "cmSourceGroupCommand.h"
+#  include "cmSubdirDependsCommand.h"
+#  include "cmUseMangledMesaCommand.h"
+#  include "cmUtilitySourceCommand.h"
+#  include "cmVariableRequiresCommand.h"
+#  include "cmVariableWatchCommand.h"
+#  include "cmWriteFileCommand.h"
 #endif
 
 void GetScriptingCommands(cmState* state)
@@ -155,32 +155,39 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("while", new cmWhileCommand);
 
   state->AddUnexpectedCommand(
-    "else", "An ELSE command was found outside of a proper "
-            "IF ENDIF structure. Or its arguments did not match "
-            "the opening IF command.");
+    "else",
+    "An ELSE command was found outside of a proper "
+    "IF ENDIF structure. Or its arguments did not match "
+    "the opening IF command.");
   state->AddUnexpectedCommand(
-    "elseif", "An ELSEIF command was found outside of a proper "
-              "IF ENDIF structure.");
+    "elseif",
+    "An ELSEIF command was found outside of a proper "
+    "IF ENDIF structure.");
   state->AddUnexpectedCommand(
-    "endforeach", "An ENDFOREACH command was found outside of a proper "
-                  "FOREACH ENDFOREACH structure. Or its arguments did "
-                  "not match the opening FOREACH command.");
+    "endforeach",
+    "An ENDFOREACH command was found outside of a proper "
+    "FOREACH ENDFOREACH structure. Or its arguments did "
+    "not match the opening FOREACH command.");
   state->AddUnexpectedCommand(
-    "endfunction", "An ENDFUNCTION command was found outside of a proper "
-                   "FUNCTION ENDFUNCTION structure. Or its arguments did not "
-                   "match the opening FUNCTION command.");
+    "endfunction",
+    "An ENDFUNCTION command was found outside of a proper "
+    "FUNCTION ENDFUNCTION structure. Or its arguments did not "
+    "match the opening FUNCTION command.");
   state->AddUnexpectedCommand(
-    "endif", "An ENDIF command was found outside of a proper "
-             "IF ENDIF structure. Or its arguments did not match "
-             "the opening IF command.");
+    "endif",
+    "An ENDIF command was found outside of a proper "
+    "IF ENDIF structure. Or its arguments did not match "
+    "the opening IF command.");
   state->AddUnexpectedCommand(
-    "endmacro", "An ENDMACRO command was found outside of a proper "
-                "MACRO ENDMACRO structure. Or its arguments did not "
-                "match the opening MACRO command.");
+    "endmacro",
+    "An ENDMACRO command was found outside of a proper "
+    "MACRO ENDMACRO structure. Or its arguments did not "
+    "match the opening MACRO command.");
   state->AddUnexpectedCommand(
-    "endwhile", "An ENDWHILE command was found outside of a proper "
-                "WHILE ENDWHILE structure. Or its arguments did not "
-                "match the opening WHILE command.");
+    "endwhile",
+    "An ENDWHILE command was found outside of a proper "
+    "WHILE ENDWHILE structure. Or its arguments did not "
+    "match the opening WHILE command.");
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   state->AddBuiltinCommand("cmake_host_system_information",

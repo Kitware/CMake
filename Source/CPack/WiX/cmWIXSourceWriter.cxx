@@ -32,7 +32,8 @@ cmWIXSourceWriter::cmWIXSourceWriter(cmCPackLog* logger,
 cmWIXSourceWriter::~cmWIXSourceWriter()
 {
   if (Elements.size() > 1) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, Elements.size() - 1
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  Elements.size() - 1
                     << " WiX elements were still open when closing '"
                     << SourceFilename << "'" << std::endl);
     return;
@@ -65,7 +66,8 @@ void cmWIXSourceWriter::EndElement(std::string const& name)
   }
 
   if (Elements.back() != name) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "WiX element <"
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "WiX element <"
                     << Elements.back() << "> can not be closed by </" << name
                     << "> in '" << SourceFilename << "'" << std::endl);
     return;

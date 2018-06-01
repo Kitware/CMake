@@ -6,9 +6,9 @@
 /* Use the bzip2 library configured for CMake.  */
 #include "cmThirdParty.h"
 #ifdef CMAKE_USE_SYSTEM_BZIP2
-#include <bzlib.h>
+#  include <bzlib.h>
 #else
-#include <cmbzip2/bzlib.h>
+#  include <cmbzip2/bzlib.h>
 #endif
 
 #endif

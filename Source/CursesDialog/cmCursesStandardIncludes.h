@@ -7,12 +7,12 @@
 
 // Record whether __attribute__ is currently defined.  See purpose below.
 #ifndef __attribute__
-#define cm_no__attribute__
+#  define cm_no__attribute__
 #endif
 
 #if defined(__hpux)
-#define _BOOL_DEFINED
-#include <sys/time.h>
+#  define _BOOL_DEFINED
+#  include <sys/time.h>
 #endif
 
 #include <form.h>
@@ -38,7 +38,7 @@ inline void curses_clear()
 // define __attribute__ as a macro.  This breaks C++ headers
 // in some cases, so undefine it now.
 #if defined(cm_no__attribute__) && defined(__attribute__)
-#undef __attribute__
+#  undef __attribute__
 #endif
 #undef cm_no__attribute__
 

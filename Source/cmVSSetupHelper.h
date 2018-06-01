@@ -4,7 +4,7 @@
 #define cmVSSetupHelper_h
 
 #ifndef NOMINMAX
-#define NOMINMAX // Undefine min and max defined by windows.h
+#  define NOMINMAX // Undefine min and max defined by windows.h
 #endif
 
 // Published by Visual Studio Setup team
@@ -97,6 +97,7 @@ public:
   operator BSTR() const { return str; }
   BSTR* operator&() throw() { return &str; }
   ~SmartBSTR() throw() { ::SysFreeString(str); }
+
 private:
   BSTR str;
 };

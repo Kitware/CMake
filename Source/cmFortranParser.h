@@ -4,11 +4,11 @@
 #define cmFortranParser_h
 
 #if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
-#include "cmConfigure.h" // IWYU pragma: keep
+#  include "cmConfigure.h" // IWYU pragma: keep
 
-#include <set>
-#include <string>
-#include <vector>
+#  include <set>
+#  include <string>
+#  include <vector>
 #endif
 
 #include <stddef.h> /* size_t */
@@ -73,20 +73,20 @@ struct cmFortran_yystype
 #define YYSTYPE cmFortran_yystype
 #define YYSTYPE_IS_DECLARED 1
 #if !defined(cmFortranLexer_cxx)
-#define YY_NO_UNISTD_H
-#include "cmFortranLexer.h"
+#  define YY_NO_UNISTD_H
+#  include "cmFortranLexer.h"
 #endif
 #if !defined(cmFortranLexer_cxx)
-#if !defined(cmFortranParser_cxx)
-#undef YY_EXTRA_TYPE
-#undef YY_DECL
-#undef YYSTYPE
-#undef YYSTYPE_IS_DECLARED
-#endif
+#  if !defined(cmFortranParser_cxx)
+#    undef YY_EXTRA_TYPE
+#    undef YY_DECL
+#    undef YYSTYPE
+#    undef YYSTYPE_IS_DECLARED
+#  endif
 #endif
 
 #if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
-#include <stack>
+#  include <stack>
 
 // Information about a single source file.
 class cmFortranSourceInfo

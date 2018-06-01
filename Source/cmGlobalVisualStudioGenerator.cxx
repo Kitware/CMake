@@ -458,9 +458,9 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
     lastWriteTime.dwHighDateTime = 0;
     lastWriteTime.dwLowDateTime = 0;
 
-    while (ERROR_SUCCESS == RegEnumKeyExW(hkey, index, subkeyname,
-                                          &cch_subkeyname, 0, keyclass,
-                                          &cch_keyclass, &lastWriteTime)) {
+    while (ERROR_SUCCESS ==
+           RegEnumKeyExW(hkey, index, subkeyname, &cch_subkeyname, 0, keyclass,
+                         &cch_keyclass, &lastWriteTime)) {
       // Open the subkey and query the values of interest:
       HKEY hsubkey = NULL;
       result = RegOpenKeyExW(hkey, subkeyname, 0, KEY_READ, &hsubkey);

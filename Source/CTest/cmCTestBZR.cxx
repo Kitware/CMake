@@ -155,8 +155,9 @@ bool cmCTestBZR::NoteOldRevision()
 {
   this->OldRevision = this->LoadInfo();
   this->Log << "Revision before update: " << this->OldRevision << "\n";
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Old revision of repository is: "
-               << this->OldRevision << "\n");
+  cmCTestLog(this->CTest, HANDLER_OUTPUT,
+             "   Old revision of repository is: " << this->OldRevision
+                                                  << "\n");
   this->PriorRev.Rev = this->OldRevision;
   return true;
 }
@@ -165,14 +166,16 @@ bool cmCTestBZR::NoteNewRevision()
 {
   this->NewRevision = this->LoadInfo();
   this->Log << "Revision after update: " << this->NewRevision << "\n";
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   New revision of repository is: "
-               << this->NewRevision << "\n");
+  cmCTestLog(this->CTest, HANDLER_OUTPUT,
+             "   New revision of repository is: " << this->NewRevision
+                                                  << "\n");
   this->Log << "URL = " << this->URL << "\n";
   return true;
 }
 
-class cmCTestBZR::LogParser : public cmCTestVC::OutputLogger,
-                              private cmXMLParser
+class cmCTestBZR::LogParser
+  : public cmCTestVC::OutputLogger
+  , private cmXMLParser
 {
 public:
   LogParser(cmCTestBZR* bzr, const char* prefix)

@@ -720,8 +720,9 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
   }
 
   if (cmGeneratorExpression::Find(lib) != std::string::npos ||
-      (tgt && (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-               tgt->GetType() == cmStateEnums::OBJECT_LIBRARY)) ||
+      (tgt &&
+       (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+        tgt->GetType() == cmStateEnums::OBJECT_LIBRARY)) ||
       (this->Name == lib)) {
     return;
   }
@@ -1512,22 +1513,24 @@ bool cmTarget::CheckImportedLibName(std::string const& prop,
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY ||
       !this->IsImported()) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR, prop +
+      cmake::FATAL_ERROR,
+      prop +
         " property may be set only on imported INTERFACE library targets.");
     return false;
   }
   if (!value.empty()) {
     if (value[0] == '-') {
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, prop +
-                                     " property value\n  " + value +
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+                                   prop + " property value\n  " + value +
                                      "\nmay not start with '-'.");
       return false;
     }
     std::string::size_type bad = value.find_first_of(":/\\;");
     if (bad != std::string::npos) {
-      this->Makefile->IssueMessage(
-        cmake::FATAL_ERROR, prop + " property value\n  " + value +
-          "\nmay not contain '" + value.substr(bad, 1) + "'.");
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+                                   prop + " property value\n  " + value +
+                                     "\nmay not contain '" +
+                                     value.substr(bad, 1) + "'.");
       return false;
     }
   }

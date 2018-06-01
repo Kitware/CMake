@@ -2,7 +2,7 @@
 #include <QObject>
 
 #ifdef QT_GUI_LIB
-#include <QTextDocument>
+#  include <QTextDocument>
 
 class SomeDocument : public QTextDocument
 {

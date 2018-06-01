@@ -13,7 +13,7 @@
 #include <stdlib.h>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#include <windows.h>
+#  include <windows.h>
 #endif
 
 #include "cmAlgorithms.h"
@@ -44,13 +44,13 @@
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmCryptoHash.h"
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
+#  include "cmCryptoHash.h"
+#  include "cm_jsoncpp_value.h"
+#  include "cm_jsoncpp_writer.h"
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1800
-#define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+#  define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 #endif
 
 const std::string kCMAKE_PLATFORM_INFO_INITIALIZED =
@@ -442,8 +442,9 @@ void cmGlobalGenerator::EnableLanguage(
   for (std::string const& li : cur_languages) {
     if (!this->LanguagesInProgress.insert(li).second) {
       std::ostringstream e;
-      e << "Language '" << li << "' is currently being enabled.  "
-                                 "Recursive call not allowed.";
+      e << "Language '" << li
+        << "' is currently being enabled.  "
+           "Recursive call not allowed.";
       mf->IssueMessage(cmake::FATAL_ERROR, e.str());
       cmSystemTools::SetFatalErrorOccured();
       return;
@@ -523,14 +524,14 @@ void cmGlobalGenerator::EnableLanguage(
     ZeroMemory(&osviex, sizeof(osviex));
     osviex.dwOSVersionInfoSize = sizeof(osviex);
 
-#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#pragma warning(push)
-#pragma warning(disable : 4996)
-#endif
+#  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+#    pragma warning(push)
+#    pragma warning(disable : 4996)
+#  endif
     GetVersionExW((OSVERSIONINFOW*)&osviex);
-#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#pragma warning(pop)
-#endif
+#  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+#    pragma warning(pop)
+#  endif
     std::ostringstream windowsVersionString;
     windowsVersionString << osviex.dwMajorVersion << "."
                          << osviex.dwMinorVersion << "."
@@ -1403,7 +1404,8 @@ void cmGlobalGenerator::Generate()
     }
     this->LocalGenerators[i]->GenerateTestFiles();
     this->CMakeInstance->UpdateProgress(
-      "Generating", (static_cast<float>(i) + 1.0f) /
+      "Generating",
+      (static_cast<float>(i) + 1.0f) /
         static_cast<float>(this->LocalGenerators.size()));
   }
   this->SetCurrentMakefile(nullptr);
@@ -1560,8 +1562,8 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
 
       cmBacktraceRange::const_iterator btIt =
         noconfig_compile_definitions_bts.begin();
-      for (cmStringRange::const_iterator
-             it = noconfig_compile_definitions.begin();
+      for (cmStringRange::const_iterator it =
+             noconfig_compile_definitions.begin();
            it != noconfig_compile_definitions.end(); ++it, ++btIt) {
         t->InsertCompileDefinition(*it, *btIt);
       }
@@ -1721,7 +1723,8 @@ void cmGlobalGenerator::CheckTargetProperties()
       }
     }
     this->CMakeInstance->UpdateProgress(
-      "Configuring", 0.9f +
+      "Configuring",
+      0.9f +
         0.1f * (static_cast<float>(i) + 1.0f) /
           static_cast<float>(this->Makefiles.size()));
   }
@@ -1769,7 +1772,7 @@ int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
   if (!target.empty()) {
     newTarget += target;
 #if 0
-#if defined(_WIN32) || defined(__CYGWIN__)
+#  if defined(_WIN32) || defined(__CYGWIN__)
     std::string tmp = target;
     // if the target does not already end in . something
     // then assume .exe
@@ -1777,7 +1780,7 @@ int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
       {
       newTarget += ".exe";
       }
-#endif // WIN32
+#  endif // WIN32
 #endif
   }
   std::string config =
@@ -2466,8 +2469,9 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
   bool skipInstallRules = mf->IsOn("CMAKE_SKIP_INSTALL_RULES");
   if (this->InstallTargetEnabled && skipInstallRules) {
     this->CMakeInstance->IssueMessage(
-      cmake::WARNING, "CMAKE_SKIP_INSTALL_RULES was enabled even though "
-                      "installation rules have been specified",
+      cmake::WARNING,
+      "CMAKE_SKIP_INSTALL_RULES was enabled even though "
+      "installation rules have been specified",
       mf->GetBacktrace());
   } else if (this->InstallTargetEnabled && !skipInstallRules) {
     if (!cmakeCfgIntDir || !*cmakeCfgIntDir || cmakeCfgIntDir[0] == '.') {

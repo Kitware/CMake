@@ -6,9 +6,9 @@
 /* Use the curl library configured for CMake.  */
 #include "cmThirdParty.h"
 #ifdef CMAKE_USE_SYSTEM_CURL
-#include <curl/curl.h>
+#  include <curl/curl.h>
 #else
-#include <cmcurl/include/curl/curl.h>
+#  include <cmcurl/include/curl/curl.h>
 #endif
 
 #endif

@@ -5,7 +5,7 @@
 #include "foo.h"
 
 #ifndef TEST_DEF
-#error Expected TEST_DEF definition
+#  error Expected TEST_DEF definition
 #endif
 
 int main(int, char**)

@@ -1742,18 +1742,21 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
         e2.Element("Link", deployLocation + "\\%(FileName)%(Extension)");
       }
       for (size_t i = 0; i != this->Configurations.size(); ++i) {
-        if (0 == strcmp(cge->Evaluate(this->LocalGenerator,
-                                      this->Configurations[i]),
-                        "1")) {
-          e2.WritePlatformConfigTag(
-            "DeploymentContent", "'$(Configuration)|$(Platform)'=='" +
-              this->Configurations[i] + "|" + this->Platform + "'",
-            "true");
+        if (0 ==
+            strcmp(
+              cge->Evaluate(this->LocalGenerator, this->Configurations[i]),
+              "1")) {
+          e2.WritePlatformConfigTag("DeploymentContent",
+                                    "'$(Configuration)|$(Platform)'=='" +
+                                      this->Configurations[i] + "|" +
+                                      this->Platform + "'",
+                                    "true");
         } else {
-          e2.WritePlatformConfigTag(
-            "ExcludedFromBuild", "'$(Configuration)|$(Platform)'=='" +
-              this->Configurations[i] + "|" + this->Platform + "'",
-            "true");
+          e2.WritePlatformConfigTag("ExcludedFromBuild",
+                                    "'$(Configuration)|$(Platform)'=='" +
+                                      this->Configurations[i] + "|" +
+                                      this->Platform + "'",
+                                    "true");
         }
       }
     }
@@ -1768,18 +1771,20 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
     }
     if (!outputHeaderFile.empty()) {
       for (size_t i = 0; i != this->Configurations.size(); ++i) {
-        e2.WritePlatformConfigTag(
-          "HeaderFileOutput", "'$(Configuration)|$(Platform)'=='" +
-            this->Configurations[i] + "|" + this->Platform + "'",
-          outputHeaderFile);
+        e2.WritePlatformConfigTag("HeaderFileOutput",
+                                  "'$(Configuration)|$(Platform)'=='" +
+                                    this->Configurations[i] + "|" +
+                                    this->Platform + "'",
+                                  outputHeaderFile);
       }
     }
     if (!variableName.empty()) {
       for (size_t i = 0; i != this->Configurations.size(); ++i) {
-        e2.WritePlatformConfigTag(
-          "VariableName", "'$(Configuration)|$(Platform)'=='" +
-            this->Configurations[i] + "|" + this->Platform + "'",
-          variableName);
+        e2.WritePlatformConfigTag("VariableName",
+                                  "'$(Configuration)|$(Platform)'=='" +
+                                    this->Configurations[i] + "|" +
+                                    this->Platform + "'",
+                                  variableName);
       }
     }
     if (!shaderEnableDebug.empty()) {
@@ -1792,8 +1797,9 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
           cge->Evaluate(this->LocalGenerator, this->Configurations[i]);
         if (strlen(enableDebug) > 0) {
           e2.WritePlatformConfigTag(
-            "EnableDebuggingInformation", "'$(Configuration)|$(Platform)'=='" +
-              this->Configurations[i] + "|" + this->Platform + "'",
+            "EnableDebuggingInformation",
+            "'$(Configuration)|$(Platform)'=='" + this->Configurations[i] +
+              "|" + this->Platform + "'",
             cmSystemTools::IsOn(enableDebug) ? "true" : "false");
         }
       }
@@ -1808,8 +1814,9 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
           cge->Evaluate(this->LocalGenerator, this->Configurations[i]);
         if (strlen(disableOptimizations) > 0) {
           e2.WritePlatformConfigTag(
-            "DisableOptimizations", "'$(Configuration)|$(Platform)'=='" +
-              this->Configurations[i] + "|" + this->Platform + "'",
+            "DisableOptimizations",
+            "'$(Configuration)|$(Platform)'=='" + this->Configurations[i] +
+              "|" + this->Platform + "'",
             (cmSystemTools::IsOn(disableOptimizations) ? "true" : "false"));
         }
       }
@@ -2190,10 +2197,11 @@ void cmVisualStudio10TargetGenerator::WriteExcludeFromBuild(
   Elem& e2, std::vector<size_t> const& exclude_configs)
 {
   for (size_t ci : exclude_configs) {
-    e2.WritePlatformConfigTag(
-      "ExcludedFromBuild", "'$(Configuration)|$(Platform)'=='" +
-        this->Configurations[ci] + "|" + this->Platform + "'",
-      "true");
+    e2.WritePlatformConfigTag("ExcludedFromBuild",
+                              "'$(Configuration)|$(Platform)'=='" +
+                                this->Configurations[ci] + "|" +
+                                this->Platform + "'",
+                              "true");
   }
 }
 
@@ -2968,8 +2976,9 @@ bool cmVisualStudio10TargetGenerator::ComputeNasmOptions(
   std::string configFlagsVar = std::string("CMAKE_ASM_NASM_FLAGS_") + CONFIG;
   std::string flags =
     std::string(this->Makefile->GetSafeDefinition("CMAKE_ASM_NASM_FLAGS")) +
-    std::string(" -f") + std::string(this->Makefile->GetSafeDefinition(
-                           "CMAKE_ASM_NASM_OBJECT_FORMAT")) +
+    std::string(" -f") +
+    std::string(
+      this->Makefile->GetSafeDefinition("CMAKE_ASM_NASM_OBJECT_FORMAT")) +
     std::string(" ") +
     std::string(this->Makefile->GetSafeDefinition(configFlagsVar));
   nasmOptions.Parse(flags.c_str());

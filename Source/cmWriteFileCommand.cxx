@@ -54,7 +54,7 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args,
 #else
                                   mode | S_IWUSR | S_IWGRP
 #endif
-                                  );
+    );
   }
   // If GetPermissions fails, pretend like it is ok. File open will fail if
   // the file is not writable

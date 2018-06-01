@@ -98,14 +98,16 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
                                      this->Quiet);
 
   if (smodel) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Run dashboard with model "
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                       "Run dashboard with model "
                          << smodel << std::endl
                          << "   Source directory: " << src_dir << std::endl
                          << "   Build directory: " << bld_dir << std::endl,
                        this->Quiet);
   } else {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Run dashboard with "
-                                                    "to-be-determined model"
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                       "Run dashboard with "
+                       "to-be-determined model"
                          << std::endl
                          << "   Source directory: " << src_dir << std::endl
                          << "   Build directory: " << bld_dir << std::endl,

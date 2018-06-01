@@ -566,7 +566,8 @@ void cmCacheManager::AddCacheEntry(const std::string& key, const char* value,
       cmSystemTools::ConvertToUnixSlashes(e.Value);
     }
   }
-  e.SetProperty("HELPSTRING", helpString
+  e.SetProperty("HELPSTRING",
+                helpString
                   ? helpString
                   : "(This variable does not exist and should not be used)");
 }

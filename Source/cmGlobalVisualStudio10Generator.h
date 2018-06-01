@@ -24,11 +24,14 @@ public:
   bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
   bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf) override;
 
-  void GenerateBuildCommand(
-    std::vector<std::string>& makeCommand, const std::string& makeProgram,
-    const std::string& projectName, const std::string& projectDir,
-    const std::string& targetName, const std::string& config, bool fast,
-    int jobs, bool verbose, std::vector<std::string> const& makeOptions =
+  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
+                            const std::string& makeProgram,
+                            const std::string& projectName,
+                            const std::string& projectDir,
+                            const std::string& targetName,
+                            const std::string& config, bool fast, int jobs,
+                            bool verbose,
+                            std::vector<std::string> const& makeOptions =
                               std::vector<std::string>()) override;
 
   ///! create the correct local generator

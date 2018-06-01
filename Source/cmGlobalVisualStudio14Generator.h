@@ -27,6 +27,7 @@ public:
   void WriteSLNHeader(std::ostream& fout) override;
 
   const char* GetToolsVersion() override { return "14.0"; }
+
 protected:
   bool InitializeWindows(cmMakefile* mf) override;
   bool InitializeWindowsStore(cmMakefile* mf) override;

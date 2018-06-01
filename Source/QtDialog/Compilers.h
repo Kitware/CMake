@@ -9,7 +9,9 @@
 
 #include <ui_Compilers.h>
 
-class Compilers : public QWidget, public Ui::Compilers
+class Compilers
+  : public QWidget
+  , public Ui::Compilers
 {
   Q_OBJECT
 public:

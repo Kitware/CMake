@@ -4,9 +4,9 @@
 #include "stdio.h"
 
 #if defined(WIN32)
-#include <windows.h>
+#  include <windows.h>
 #else
-#include "dlfcn.h"
+#  include "dlfcn.h"
 #endif
 
 int main(int, char**)

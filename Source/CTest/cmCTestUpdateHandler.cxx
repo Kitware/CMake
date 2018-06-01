@@ -47,7 +47,8 @@ void cmCTestUpdateHandler::Initialize()
 
 int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
 {
-  cmCTestOptionalLog(this->CTest, DEBUG, "Determine update type from command: "
+  cmCTestOptionalLog(this->CTest, DEBUG,
+                     "Determine update type from command: "
                        << cmd << " and type: " << type << std::endl,
                      this->Quiet);
   if (type && *type) {
@@ -130,7 +131,8 @@ int cmCTestUpdateHandler::ProcessHandler()
     return -1;
   }
 
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "   Use "
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                     "   Use "
                        << cmCTestUpdateHandlerUpdateToString(this->UpdateType)
                        << " repository type" << std::endl;
                      , this->Quiet);
@@ -171,8 +173,8 @@ int cmCTestUpdateHandler::ProcessHandler()
   //
   cmGeneratedFileStream os;
   if (!this->StartResultingXML(cmCTest::PartUpdate, "Update", os)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open log file"
-                 << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Cannot open log file" << std::endl);
     return -1;
   }
   std::string start_time = this->CTest->CurrentTime();
@@ -191,7 +193,8 @@ int cmCTestUpdateHandler::ProcessHandler()
                 std::string("ctest-") + cmVersion::GetCMakeVersion());
   xml.Element("Site", this->CTest->GetCTestConfiguration("Site"));
   xml.Element("BuildName", buildname);
-  xml.Element("BuildStamp", this->CTest->GetCurrentTag() + "-" +
+  xml.Element("BuildStamp",
+              this->CTest->GetCurrentTag() + "-" +
                 this->CTest->GetTestModelString());
   xml.Element("StartDateTime", start_time);
   xml.Element("StartTime", start_time_time);
@@ -209,9 +212,9 @@ int cmCTestUpdateHandler::ProcessHandler()
                        this->Quiet);
   }
   if (int numModified = vc->GetPathCount(cmCTestVC::PathModified)) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "   Found "
-                         << numModified << " locally modified files\n",
-                       this->Quiet);
+    cmCTestOptionalLog(
+      this->CTest, HANDLER_OUTPUT,
+      "   Found " << numModified << " locally modified files\n", this->Quiet);
     localModifications += numModified;
   }
   if (int numConflicting = vc->GetPathCount(cmCTestVC::PathConflicting)) {
@@ -241,8 +244,9 @@ int cmCTestUpdateHandler::ProcessHandler()
   if (!updated) {
     xml.Content("Update command failed:\n");
     xml.Content(vc->GetUpdateCommandLine());
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Update command failed: "
-                 << vc->GetUpdateCommandLine() << "\n");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               "   Update command failed: " << vc->GetUpdateCommandLine()
+                                            << "\n");
   }
   xml.EndElement(); // UpdateReturnStatus
   xml.EndElement(); // Update

@@ -155,8 +155,9 @@ class cmMakefile;
          3, 0, 0, cmPolicies::WARN)                                           \
   SELECT(POLICY, CMP0051, "List TARGET_OBJECTS in SOURCES target property.",  \
          3, 1, 0, cmPolicies::WARN)                                           \
-  SELECT(POLICY, CMP0052, "Reject source and build dirs in installed "        \
-                          "INTERFACE_INCLUDE_DIRECTORIES.",                   \
+  SELECT(POLICY, CMP0052,                                                     \
+         "Reject source and build dirs in installed "                         \
+         "INTERFACE_INCLUDE_DIRECTORIES.",                                    \
          3, 1, 0, cmPolicies::WARN)                                           \
   SELECT(POLICY, CMP0053,                                                     \
          "Simplify variable reference and escape sequence evaluation.", 3, 1, \

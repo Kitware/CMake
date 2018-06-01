@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmQtAutoGen.h"
 #include "cmQtAutoGenInitializer.h"
+#include "cmQtAutoGen.h"
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
@@ -913,17 +913,18 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
                                   std::vector<std::string> const& list) {
         CWrite(key, cmJoin(list, ";"));
       };
-      auto CWriteNestedLists = [&CWrite](
-        const char* key, std::vector<std::vector<std::string>> const& lists) {
-        std::vector<std::string> seplist;
-        for (const std::vector<std::string>& list : lists) {
-          std::string blist = "{";
-          blist += cmJoin(list, ";");
-          blist += "}";
-          seplist.push_back(std::move(blist));
-        }
-        CWrite(key, cmJoin(seplist, cmQtAutoGen::ListSep));
-      };
+      auto CWriteNestedLists =
+        [&CWrite](const char* key,
+                  std::vector<std::vector<std::string>> const& lists) {
+          std::vector<std::string> seplist;
+          for (const std::vector<std::string>& list : lists) {
+            std::string blist = "{";
+            blist += cmJoin(list, ";");
+            blist += "}";
+            seplist.push_back(std::move(blist));
+          }
+          CWrite(key, cmJoin(seplist, cmQtAutoGen::ListSep));
+        };
       auto CWriteSet = [&CWrite](const char* key,
                                  std::set<std::string> const& list) {
         CWrite(key, cmJoin(list, ";"));
@@ -1023,13 +1024,14 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
           ofs << "set(" << key << " "
               << cmOutputConverter::EscapeForCMake(value) << ")\n";
         };
-        auto CWriteMap = [&ofs](
-          const char* key, std::map<std::string, std::string> const& map) {
-          for (auto const& item : map) {
-            ofs << "set(" << key << "_" << item.first << " "
-                << cmOutputConverter::EscapeForCMake(item.second) << ")\n";
-          }
-        };
+        auto CWriteMap =
+          [&ofs](const char* key,
+                 std::map<std::string, std::string> const& map) {
+            for (auto const& item : map) {
+              ofs << "set(" << key << "_" << item.first << " "
+                  << cmOutputConverter::EscapeForCMake(item.second) << ")\n";
+            }
+          };
 
         // Write
         ofs << "# Configurations\n";

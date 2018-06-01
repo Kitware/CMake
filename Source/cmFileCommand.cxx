@@ -36,17 +36,17 @@
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmCurl.h"
-#include "cmFileLockResult.h"
-#include "cm_curl.h"
+#  include "cmCurl.h"
+#  include "cmFileLockResult.h"
+#  include "cm_curl.h"
 #endif
 
 #if defined(CMAKE_USE_ELF_PARSER)
-#include "cmELF.h"
+#  include "cmELF.h"
 #endif
 
 #if defined(_WIN32)
-#include <windows.h>
+#  include <windows.h>
 #endif
 
 class cmSystemToolsFileTime;
@@ -216,7 +216,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
 #else
                                   mode | S_IWUSR | S_IWGRP
 #endif
-                                  );
+    );
   }
   // If GetPermissions fails, pretend like it is ok. File open will fail if
   // the file is not writable
@@ -282,7 +282,8 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
 // Open the specified file.
 #if defined(_WIN32) || defined(__CYGWIN__)
   cmsys::ifstream file(
-    fileName.c_str(), std::ios::in |
+    fileName.c_str(),
+    std::ios::in |
       (hexOutputArg.IsEnabled() ? std::ios::binary : std::ios::in));
 #else
   cmsys::ifstream file(fileName.c_str());
@@ -327,8 +328,9 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
   } else {
     std::string line;
     bool has_newline = false;
-    while (sizeLimit != 0 && cmSystemTools::GetLineFromStream(
-                               file, line, &has_newline, sizeLimit)) {
+    while (
+      sizeLimit != 0 &&
+      cmSystemTools::GetLineFromStream(file, line, &has_newline, sizeLimit)) {
       if (sizeLimit > 0) {
         sizeLimit = sizeLimit - static_cast<long>(line.size());
         if (has_newline) {
@@ -616,7 +618,9 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
     } else if (encoding == encoding_utf8) {
       // Check for UTF-8 encoded string (up to 4 octets)
       static const unsigned char utf8_check_table[3][2] = {
-        { 0xE0, 0xC0 }, { 0xF0, 0xE0 }, { 0xF8, 0xF0 },
+        { 0xE0, 0xC0 },
+        { 0xF0, 0xE0 },
+        { 0xF8, 0xF0 },
       };
 
       // how many octets are there?
@@ -865,8 +869,9 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
                 globMessage.content);
           } else {
             this->Makefile->IssueMessage(
-              cmake::FATAL_ERROR, "Error has occurred while globbing for '" +
-                *i + "' - " + globMessage.content);
+              cmake::FATAL_ERROR,
+              "Error has occurred while globbing for '" + *i + "' - " +
+                globMessage.content);
             shouldExit = true;
           }
         }
@@ -2866,9 +2871,9 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     return false;
   }
 
-#if defined(_WIN32)
+#  if defined(_WIN32)
   url = fix_file_url_windows(url);
-#endif
+#  endif
 
   ::CURL* curl;
   ::curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -3155,9 +3160,9 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
 
   unsigned long file_size = cmsys::SystemTools::FileLength(filename);
 
-#if defined(_WIN32)
+#  if defined(_WIN32)
   url = fix_file_url_windows(url);
-#endif
+#  endif
 
   ::CURL* curl;
   ::curl_global_init(CURL_GLOBAL_DEFAULT);

@@ -400,8 +400,9 @@ std::string cmExtraSublimeTextGenerator::ComputeDefines(
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += cmSystemTools::UpperCase(config);
   if (const char* config_compile_defs = source->GetProperty(defPropName)) {
-    lg->AppendDefines(defines, genexInterpreter.Evaluate(config_compile_defs,
-                                                         COMPILE_DEFINITIONS));
+    lg->AppendDefines(
+      defines,
+      genexInterpreter.Evaluate(config_compile_defs, COMPILE_DEFINITIONS));
   }
 
   std::string definesString;

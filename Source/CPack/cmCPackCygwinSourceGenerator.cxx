@@ -15,8 +15,8 @@
 // system tools because it is not implemented robustly enough to move
 // files across directories.
 #ifdef _WIN32
-#include "cm_sys_stat.h"
-#include <windows.h>
+#  include "cm_sys_stat.h"
+#  include <windows.h>
 #endif
 
 cmCPackCygwinSourceGenerator::cmCPackCygwinSourceGenerator()
@@ -73,7 +73,8 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   if (!cmSystemTools::CopyFileAlways(
         this->GetOption("CPACK_CYGWIN_PATCH_FILE"),
         this->GetOption("CPACK_TOPLEVEL_DIRECTORY"))) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "problem copying: ["
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "problem copying: ["
                     << this->GetOption("CPACK_CYGWIN_PATCH_FILE") << "]\nto\n["
                     << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "]\n");
     return 0;
@@ -87,7 +88,8 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   if (!cmSystemTools::CopyFileAlways(
         this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT"),
         this->GetOption("CPACK_TOPLEVEL_DIRECTORY"))) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "problem copying: "
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "problem copying: "
                     << this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT") << "\nto\n"
                     << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "]\n");
     return 0;
@@ -96,7 +98,8 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   outerTarFile += "-";
   const char* patch = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
   if (!patch) {
-    cmCPackLogger(cmCPackLog::LOG_WARNING, "CPACK_CYGWIN_PATCH_NUMBER"
+    cmCPackLogger(cmCPackLog::LOG_WARNING,
+                  "CPACK_CYGWIN_PATCH_NUMBER"
                     << " not specified, defaulting to 1\n");
     patch = "1";
   }
@@ -147,7 +150,8 @@ const char* cmCPackCygwinSourceGenerator::GetOutputExtension()
   this->OutputExtension = "-";
   const char* patch = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
   if (!patch) {
-    cmCPackLogger(cmCPackLog::LOG_WARNING, "CPACK_CYGWIN_PATCH_NUMBER"
+    cmCPackLogger(cmCPackLog::LOG_WARNING,
+                  "CPACK_CYGWIN_PATCH_NUMBER"
                     << " not specified, defaulting to 1\n");
     patch = "1";
   }

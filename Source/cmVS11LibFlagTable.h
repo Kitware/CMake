@@ -49,11 +49,11 @@ static cmVS7FlagTable cmVS11LibFlagTable[] = {
 
   // String List Properties
   // Skip [AdditionalDependencies] - no command line Switch.
-  { "AdditionalLibraryDirectories", "LIBPATH:",
-    "Additional Library Directories", "",
+  { "AdditionalLibraryDirectories",
+    "LIBPATH:", "Additional Library Directories", "",
     cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
-  { "IgnoreSpecificDefaultLibraries", "NODEFAULTLIB:",
-    "Ignore Specific Default Libraries", "",
+  { "IgnoreSpecificDefaultLibraries",
+    "NODEFAULTLIB:", "Ignore Specific Default Libraries", "",
     cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
   { "ExportNamedFunctions", "EXPORT:", "Export Named Functions", "",
     cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },

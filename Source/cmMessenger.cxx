@@ -8,7 +8,7 @@
 #include "cmSystemTools.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmsys/SystemInformation.hxx"
+#  include "cmsys/SystemInformation.hxx"
 #endif
 
 #include <sstream>

@@ -27,7 +27,7 @@
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmSourceGroup.h"
+#  include "cmSourceGroup.h"
 #endif
 
 class cmCommand;
@@ -282,8 +282,8 @@ public:
 
   //@{
   /**
-     * Set, Push, Pop policy values for CMake.
-     */
+   * Set, Push, Pop policy values for CMake.
+   */
   bool SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
   bool SetPolicy(const char* id, cmPolicies::PolicyStatus status);
   cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id,
@@ -724,6 +724,7 @@ public:
     ~FunctionPushPop();
 
     void Quiet() { this->ReportError = false; }
+
   private:
     cmMakefile* Makefile;
     bool ReportError;
@@ -737,6 +738,7 @@ public:
     ~MacroPushPop();
 
     void Quiet() { this->ReportError = false; }
+
   private:
     cmMakefile* Makefile;
     bool ReportError;
@@ -767,6 +769,7 @@ public:
       this->Makefile->PushScope();
     }
     ~ScopePushPop() { this->Makefile->PopScope(); }
+
   private:
     cmMakefile* Makefile;
   };

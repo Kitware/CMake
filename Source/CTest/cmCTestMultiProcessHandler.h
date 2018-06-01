@@ -74,6 +74,7 @@ public:
   cmCTestTestHandler* GetTestHandler() { return this->TestHandler; }
 
   void SetQuiet(bool b) { this->Quiet = b; }
+
 protected:
   // Start the next test or tests as many as are allowed by
   // ParallelLevel

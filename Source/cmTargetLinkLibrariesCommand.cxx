@@ -342,8 +342,9 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       // form must be the plain form.
       const char* existingSig =
         (sig == cmTarget::KeywordTLLSignature ? "plain" : "keyword");
-      e << "The " << existingSig << " signature for target_link_libraries has "
-                                    "already been used with the target \""
+      e << "The " << existingSig
+        << " signature for target_link_libraries has "
+           "already been used with the target \""
         << this->Target->GetName()
         << "\".  All uses of target_link_libraries with a target " << modal
         << " be either all-keyword or all-plain.\n";

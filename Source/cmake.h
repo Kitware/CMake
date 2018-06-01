@@ -17,7 +17,7 @@
 #include "cmStateTypes.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cm_jsoncpp_value.h"
+#  include "cm_jsoncpp_value.h"
 #endif
 
 class cmExternalMakefileProjectGeneratorFactory;
@@ -566,11 +566,13 @@ private:
     { "-Wno-error=dev", "Make developer warnings not errors." },              \
     { "-Wdeprecated", "Enable deprecation warnings." },                       \
     { "-Wno-deprecated", "Suppress deprecation warnings." },                  \
-    { "-Werror=deprecated", "Make deprecated macro and function warnings "    \
-                            "errors." },                                      \
+    { "-Werror=deprecated",                                                   \
+      "Make deprecated macro and function warnings "                          \
+      "errors." },                                                            \
   {                                                                           \
-    "-Wno-error=deprecated", "Make deprecated macro and function warnings "   \
-                             "not errors."                                    \
+    "-Wno-error=deprecated",                                                  \
+      "Make deprecated macro and function warnings "                          \
+      "not errors."                                                           \
   }
 
 #define FOR_EACH_C_FEATURE(F)                                                 \

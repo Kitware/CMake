@@ -36,12 +36,12 @@
 struct cmLinkImplementation;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE) && defined(__APPLE__)
-#define HAVE_APPLICATION_SERVICES
-#include <ApplicationServices/ApplicationServices.h>
+#  define HAVE_APPLICATION_SERVICES
+#  include <ApplicationServices/ApplicationServices.h>
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmXMLParser.h"
+#  include "cmXMLParser.h"
 
 // parse the xml file storing the installed version of Xcode on
 // the machine
