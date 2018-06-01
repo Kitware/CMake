@@ -6,7 +6,7 @@
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
-#include "System.h.in"
+#  include "System.h.in"
 #endif
 
 #include <ctype.h>  /* isspace */

@@ -5,13 +5,13 @@
 #include KWSYS_HEADER(DynamicLoader.hxx)
 
 #if defined(__BEOS__) || defined(__HAIKU__)
-#include <be/kernel/OS.h> /* disable_debugger() API. */
+#  include <be/kernel/OS.h> /* disable_debugger() API. */
 #endif
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "DynamicLoader.hxx.in"
+#  include "DynamicLoader.hxx.in"
 #endif
 
 #include <iostream>

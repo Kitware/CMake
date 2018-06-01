@@ -3,7 +3,7 @@
 #include "kwsysPrivate.h"
 
 #if defined(_MSC_VER)
-#pragma warning(disable : 4786)
+#  pragma warning(disable : 4786)
 #endif
 
 #include KWSYS_HEADER(FStream.hxx)
@@ -12,8 +12,8 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "FStream.hxx.in"
-#include "SystemTools.hxx.in"
+#  include "FStream.hxx.in"
+#  include "SystemTools.hxx.in"
 #endif
 
 // Include with <> instead of "" to avoid getting any in-source copy
@@ -25,10 +25,10 @@
 #include <stdlib.h> /* free */
 #include <string.h> /* strcmp */
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#include <io.h> /* _umask (MSVC) / umask (Borland) */
-#ifdef _MSC_VER
-#define umask _umask // Note this is still umask on Borland
-#endif
+#  include <io.h> /* _umask (MSVC) / umask (Borland) */
+#  ifdef _MSC_VER
+#    define umask _umask // Note this is still umask on Borland
+#  endif
 #endif
 #include <sys/stat.h> /* umask (POSIX), _S_I* constants (Windows) */
 // Visual C++ does not define mode_t (note that Borland does, however).

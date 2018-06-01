@@ -3,19 +3,19 @@
 #include "kwsysPrivate.h"
 
 #if defined(_MSC_VER)
-#pragma warning(disable : 4786)
+#  pragma warning(disable : 4786)
 #endif
 
 #include KWSYS_HEADER(FStream.hxx)
 #include <string.h>
 #ifdef __BORLANDC__
-#include <mem.h> /* memcmp */
+#  include <mem.h> /* memcmp */
 #endif
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "FStream.hxx.in"
+#  include "FStream.hxx.in"
 #endif
 
 #include <iostream>

@@ -35,14 +35,14 @@
 #include <functional> // equal_to
 
 #if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4284)
-#pragma warning(disable : 4786)
+#  pragma warning(push)
+#  pragma warning(disable : 4284)
+#  pragma warning(disable : 4786)
 #endif
 
 #if defined(__sgi) && !defined(__GNUC__) && (_MIPS_SIM != _MIPS_SIM_ABI32)
-#pragma set woff 1174
-#pragma set woff 1375
+#  pragma set woff 1174
+#  pragma set woff 1375
 #endif
 
 namespace @KWSYS_NAMESPACE@ {
@@ -381,12 +381,12 @@ inline void swap(hash_multiset<_Val, _HashFcn, _EqualKey, _Alloc>& __hs1,
 } // namespace @KWSYS_NAMESPACE@
 
 #if defined(__sgi) && !defined(__GNUC__) && (_MIPS_SIM != _MIPS_SIM_ABI32)
-#pragma reset woff 1174
-#pragma reset woff 1375
+#  pragma reset woff 1174
+#  pragma reset woff 1375
 #endif
 
 #if defined(_MSC_VER)
-#pragma warning(pop)
+#  pragma warning(pop)
 #endif
 
 #endif

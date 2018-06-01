@@ -12,12 +12,12 @@
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
 #if !defined(KWSYS_NAMESPACE)
-#define kwsys_ns(x) @KWSYS_NAMESPACE@##x
-#define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
+#  define kwsys_ns(x) @KWSYS_NAMESPACE@##x
+#  define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
 #endif
 #if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-#define kwsysString_strcasecmp kwsys_ns(String_strcasecmp)
-#define kwsysString_strncasecmp kwsys_ns(String_strncasecmp)
+#  define kwsysString_strcasecmp kwsys_ns(String_strcasecmp)
+#  define kwsysString_strncasecmp kwsys_ns(String_strncasecmp)
 #endif
 
 #if defined(__cplusplus)
@@ -46,12 +46,12 @@ kwsysEXPORT int kwsysString_strncasecmp(const char* lhs, const char* rhs,
 /* If we are building a kwsys .c or .cxx file, let it use these macros.
    Otherwise, undefine them to keep the namespace clean.  */
 #if !defined(KWSYS_NAMESPACE)
-#undef kwsys_ns
-#undef kwsysEXPORT
-#if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-#undef kwsysString_strcasecmp
-#undef kwsysString_strncasecmp
-#endif
+#  undef kwsys_ns
+#  undef kwsysEXPORT
+#  if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+#    undef kwsysString_strcasecmp
+#    undef kwsysString_strncasecmp
+#  endif
 #endif
 
 #endif
