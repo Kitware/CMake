@@ -14,6 +14,9 @@
 #  ifndef __LA_INT64_T
 #    define __LA_INT64_T la_int64_t
 #  endif
+#  ifndef __LA_SSIZE_T
+#    define __LA_SSIZE_T la_ssize_t
+#  endif
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -1726,7 +1729,8 @@ bool copy_data(struct archive* ar, struct archive* aw)
     // Return value:
     // * >= ARCHIVE_OK - write succeed
     // * < ARCHIVE_OK - write failed
-    const la_ssize_t w_size = archive_write_data_block(aw, buff, size, offset);
+    const __LA_SSIZE_T w_size =
+      archive_write_data_block(aw, buff, size, offset);
     if (w_size < ARCHIVE_OK) {
       cmSystemTools::Message("archive_write_data_block()",
                              archive_error_string(aw));
