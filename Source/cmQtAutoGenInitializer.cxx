@@ -588,8 +588,13 @@ void cmQtAutoGenInitializer::InitCustomTargets()
           if (!qrc.Unique) {
             base += qrc.PathChecksum;
           }
+
+          qrc.LockFile = base;
+          qrc.LockFile += ".lock";
+
           qrc.InfoFile = base;
           qrc.InfoFile += "Info.cmake";
+
           qrc.SettingsFile = base;
           qrc.SettingsFile += "Settings.txt";
         }
@@ -623,14 +628,26 @@ void cmQtAutoGenInitializer::InitCustomTargets()
 
       std::vector<std::string> ccOutput;
       ccOutput.push_back(qrc.RccFile);
+
       cmCustomCommandLines commandLines;
-      {
+      if (this->MultiConfig) {
+        // Build for all configurations
+        for (std::string const& config : this->ConfigsList) {
+          cmCustomCommandLine currentLine;
+          currentLine.push_back(cmSystemTools::GetCMakeCommand());
+          currentLine.push_back("-E");
+          currentLine.push_back("cmake_autorcc");
+          currentLine.push_back(qrc.InfoFile);
+          currentLine.push_back(config);
+          commandLines.push_back(std::move(currentLine));
+        }
+      } else {
         cmCustomCommandLine currentLine;
         currentLine.push_back(cmSystemTools::GetCMakeCommand());
         currentLine.push_back("-E");
         currentLine.push_back("cmake_autorcc");
         currentLine.push_back(qrc.InfoFile);
-        currentLine.push_back("$<CONFIGURATION>");
+        currentLine.push_back("$<CONFIG>");
         commandLines.push_back(std::move(currentLine));
       }
       std::string ccComment = "Automatic RCC for ";
@@ -1043,6 +1060,7 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
         CWrite("ARCC_RCC_LIST_OPTIONS", cmJoin(this->RccListOptions, ";"));
 
         ofs << "# Rcc job\n";
+        CWrite("ARCC_LOCK_FILE", qrc.LockFile);
         CWrite("ARCC_SOURCE", qrc.QrcFile);
         CWrite("ARCC_OUTPUT_CHECKSUM", qrc.PathChecksum);
         CWrite("ARCC_OUTPUT_NAME",

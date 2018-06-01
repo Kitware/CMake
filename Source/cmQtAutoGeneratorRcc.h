@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmFileLock.h"
 #include "cmQtAutoGenerator.h"
 #include "cm_uv.h"
 
@@ -48,7 +49,7 @@ private:
   void PollStage();
   void SetStage(StageT stage);
   // -- Settings file
-  void SettingsFileRead();
+  bool SettingsFileRead();
   void SettingsFileWrite();
   // -- Tests
   bool TestQrcRccFiles();
@@ -77,6 +78,8 @@ private:
   std::string RccExecutable_;
   std::vector<std::string> RccListOptions_;
   // -- Job
+  std::string LockFile_;
+  cmFileLock LockFileLock_;
   std::string QrcFile_;
   std::string QrcFileName_;
   std::string QrcFileDir_;

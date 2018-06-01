@@ -367,10 +367,11 @@ bool cmQtAutoGenerator::FileSystem::FileRemove(std::string const& filename)
   return cmSystemTools::RemoveFile(filename);
 }
 
-bool cmQtAutoGenerator::FileSystem::Touch(std::string const& filename)
+bool cmQtAutoGenerator::FileSystem::Touch(std::string const& filename,
+                                          bool create)
 {
   std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::Touch(filename, false);
+  return cmSystemTools::Touch(filename, create);
 }
 
 bool cmQtAutoGenerator::FileSystem::MakeDirectory(std::string const& dirname)

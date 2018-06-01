@@ -32,6 +32,7 @@ public:
     }
 
   public:
+    std::string LockFile;
     std::string QrcFile;
     std::string QrcName;
     std::string PathChecksum;
