@@ -241,13 +241,12 @@ because this need be done only for shared libraries without soname-s.
 cmComputeLinkInformation::cmComputeLinkInformation(
   const cmGeneratorTarget* target, const std::string& config)
   // Store context information.
-  : Target(target),
-    Makefile(target->Target->GetMakefile()),
-    GlobalGenerator(target->GetLocalGenerator()->GetGlobalGenerator()),
-    CMakeInstance(this->GlobalGenerator->GetCMakeInstance())
-    // The configuration being linked.
-    ,
-    Config(config)
+  : Target(target)
+  , Makefile(target->Target->GetMakefile())
+  , GlobalGenerator(target->GetLocalGenerator()->GetGlobalGenerator())
+  , CMakeInstance(this->GlobalGenerator->GetCMakeInstance())
+  // The configuration being linked.
+  , Config(config)
 {
   // Check whether to recognize OpenBSD-style library versioned names.
   this->OpenBSD = this->Makefile->GetState()->GetGlobalPropertyAsBool(

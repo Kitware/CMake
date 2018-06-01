@@ -100,10 +100,11 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
   std::string line;
   std::vector<std::string> separateLine;
   if (!cmSystemTools::GetLineFromStream(in, line)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Empty file : "
-                 << file << "  referenced in this line of cmcov data:\n"
-                            "["
-                 << line << "]\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Empty file : " << file
+                               << "  referenced in this line of cmcov data:\n"
+                                  "["
+                               << line << "]\n");
     return false;
   }
   separateLine.clear();
@@ -112,8 +113,9 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
       separateLine[1] != "Line" || separateLine[2] != "RtnLine" ||
       separateLine[3] != "Code") {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Bad first line of cmcov file : " << file << "  line:\n"
-                                                            "["
+               "Bad first line of cmcov file : " << file
+                                                 << "  line:\n"
+                                                    "["
                                                  << line << "]\n");
   }
   std::string routine;
@@ -128,8 +130,9 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
     if (separateLine.size() < 4) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Bad line of cmcov file expected at least 4 found: "
-                   << separateLine.size() << " " << file << "  line:\n"
-                                                            "["
+                   << separateLine.size() << " " << file
+                   << "  line:\n"
+                      "["
                    << line << "]\n");
       for (std::string::size_type i = 0; i < separateLine.size(); ++i) {
         cmCTestLog(this->CTest, ERROR_MESSAGE, "" << separateLine[1] << " ");

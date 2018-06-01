@@ -300,7 +300,8 @@ static bool getOrTestValue(cmState* state, const std::string& key,
     value = cachedValue;
   }
   if (!cachedValue.empty() && cachedValue != value) {
-    setErrorMessage(errorMessage, std::string("\"") + key +
+    setErrorMessage(errorMessage,
+                    std::string("\"") + key +
                       "\" is set but incompatible with configured " +
                       keyDescription + " value.");
     return false;
@@ -320,7 +321,8 @@ bool cmServerProtocol1::DoActivate(const cmServerRequest& request,
   std::string platform = request.Data[kPLATFORM_KEY].asString();
 
   if (buildDirectory.empty()) {
-    setErrorMessage(errorMessage, std::string("\"") + kBUILD_DIRECTORY_KEY +
+    setErrorMessage(errorMessage,
+                    std::string("\"") + kBUILD_DIRECTORY_KEY +
                       "\" is missing.");
     return false;
   }
@@ -328,7 +330,8 @@ bool cmServerProtocol1::DoActivate(const cmServerRequest& request,
   cmake* cm = CMakeInstance();
   if (cmSystemTools::PathExists(buildDirectory)) {
     if (!cmSystemTools::FileIsDirectory(buildDirectory)) {
-      setErrorMessage(errorMessage, std::string("\"") + kBUILD_DIRECTORY_KEY +
+      setErrorMessage(errorMessage,
+                      std::string("\"") + kBUILD_DIRECTORY_KEY +
                         "\" exists but is not a directory.");
       return false;
     }
@@ -369,17 +372,20 @@ bool cmServerProtocol1::DoActivate(const cmServerRequest& request,
   }
 
   if (sourceDirectory.empty()) {
-    setErrorMessage(errorMessage, std::string("\"") + kSOURCE_DIRECTORY_KEY +
+    setErrorMessage(errorMessage,
+                    std::string("\"") + kSOURCE_DIRECTORY_KEY +
                       "\" is unset but required.");
     return false;
   }
   if (!cmSystemTools::FileIsDirectory(sourceDirectory)) {
-    setErrorMessage(errorMessage, std::string("\"") + kSOURCE_DIRECTORY_KEY +
+    setErrorMessage(errorMessage,
+                    std::string("\"") + kSOURCE_DIRECTORY_KEY +
                       "\" is not a directory.");
     return false;
   }
   if (generator.empty()) {
-    setErrorMessage(errorMessage, std::string("\"") + kGENERATOR_KEY +
+    setErrorMessage(errorMessage,
+                    std::string("\"") + kGENERATOR_KEY +
                       "\" is unset but required.");
     return false;
   }
@@ -391,7 +397,8 @@ bool cmServerProtocol1::DoActivate(const cmServerRequest& request,
                                return info.name == generator;
                              });
   if (baseIt == generators.end()) {
-    setErrorMessage(errorMessage, std::string("Generator \"") + generator +
+    setErrorMessage(errorMessage,
+                    std::string("Generator \"") + generator +
                       "\" not supported.");
     return false;
   }
@@ -629,8 +636,9 @@ struct hash<LanguageData>
     size_t result =
       hash<std::string>()(in.Language) ^ hash<std::string>()(in.Flags);
     for (auto const& i : in.IncludePathList) {
-      result = result ^ (hash<std::string>()(i.first) ^
-                         (i.second ? std::numeric_limits<size_t>::max() : 0));
+      result = result ^
+        (hash<std::string>()(i.first) ^
+         (i.second ? std::numeric_limits<size_t>::max() : 0));
     }
     for (auto const& i : in.Defines) {
       result = result ^ hash<std::string>()(i);
@@ -726,8 +734,9 @@ static Json::Value DumpSourceFilesList(
 
         for (const auto& include : includes) {
           fileData.IncludePathList.push_back(
-            std::make_pair(include, target->IsSystemIncludeDirectory(
-                                      include, config, fileData.Language)));
+            std::make_pair(include,
+                           target->IsSystemIncludeDirectory(
+                             include, config, fileData.Language)));
         }
       }
 
@@ -745,8 +754,9 @@ static Json::Value DumpSourceFilesList(
       const std::string defPropName =
         "COMPILE_DEFINITIONS_" + cmSystemTools::UpperCase(config);
       if (const char* config_defs = file->GetProperty(defPropName)) {
-        lg->AppendDefines(defines, genexInterpreter.Evaluate(
-                                     config_defs, COMPILE_DEFINITIONS));
+        lg->AppendDefines(
+          defines,
+          genexInterpreter.Evaluate(config_defs, COMPILE_DEFINITIONS));
       }
 
       defines.insert(ld.Defines.begin(), ld.Defines.end());

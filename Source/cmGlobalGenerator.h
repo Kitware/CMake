@@ -23,7 +23,7 @@
 #include "cm_codecvt.hxx"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmFileLockPool.h"
+#  include "cmFileLockPool.h"
 #endif
 
 class cmExportBuildFileGenerator;
@@ -158,14 +158,15 @@ public:
    * empty then all is assumed. clean indicates if a "make clean" should be
    * done first.
    */
-  int Build(int jobs, const std::string& srcdir, const std::string& bindir,
-            const std::string& projectName, const std::string& targetName,
-            std::string& output, const std::string& makeProgram,
-            const std::string& config, bool clean, bool fast, bool verbose,
-            cmDuration timeout, cmSystemTools::OutputOption outputflag =
-                                  cmSystemTools::OUTPUT_NONE,
-            std::vector<std::string> const& nativeOptions =
-              std::vector<std::string>());
+  int Build(
+    int jobs, const std::string& srcdir, const std::string& bindir,
+    const std::string& projectName, const std::string& targetName,
+    std::string& output, const std::string& makeProgram,
+    const std::string& config, bool clean, bool fast, bool verbose,
+    cmDuration timeout,
+    cmSystemTools::OutputOption outputflag = cmSystemTools::OUTPUT_NONE,
+    std::vector<std::string> const& nativeOptions =
+      std::vector<std::string>());
 
   /**
    * Open a generated IDE project given the following information.

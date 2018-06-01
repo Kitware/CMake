@@ -375,9 +375,9 @@ using std::size;
 
 // std::size backport from C++17.
 template <class C>
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
+#  if !defined(_MSC_VER) || _MSC_VER >= 1900
 constexpr
-#endif
+#  endif
   auto
   size(C const& c) -> decltype(c.size())
 {
@@ -385,9 +385,9 @@ constexpr
 }
 
 template <typename T, size_t N>
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
+#  if !defined(_MSC_VER) || _MSC_VER >= 1900
 constexpr
-#endif
+#  endif
   std::size_t
   size(const T (&)[N]) throw()
 {
@@ -405,22 +405,22 @@ using std::cend;
 
 // std::c{begin,end} backport from C++14
 template <class C>
-#if defined(_MSC_VER) && _MSC_VER < 1900
+#  if defined(_MSC_VER) && _MSC_VER < 1900
 auto cbegin(C const& c)
-#else
+#  else
 constexpr auto cbegin(C const& c) noexcept(noexcept(std::begin(c)))
-#endif
+#  endif
   -> decltype(std::begin(c))
 {
   return std::begin(c);
 }
 
 template <class C>
-#if defined(_MSC_VER) && _MSC_VER < 1900
+#  if defined(_MSC_VER) && _MSC_VER < 1900
 auto cend(C const& c)
-#else
+#  else
 constexpr auto cend(C const& c) noexcept(noexcept(std::end(c)))
-#endif
+#  endif
   -> decltype(std::end(c))
 {
   return std::end(c);

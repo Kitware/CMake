@@ -534,10 +534,12 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     std::string const cmake = this->GetLocalGenerator()->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
     ppCmds.push_back(
-      cmake + " -E cmake_ninja_depends"
-              " --tdi=" +
-      tdi + " --pp=$out"
-            " --dep=$DEP_FILE" +
+      cmake +
+      " -E cmake_ninja_depends"
+      " --tdi=" +
+      tdi +
+      " --pp=$out"
+      " --dep=$DEP_FILE" +
       (needDyndep ? " --obj=$OBJ_FILE --ddi=$DYNDEP_INTERMEDIATE_FILE" : ""));
 
     std::string const ppCmdLine =
@@ -568,10 +570,12 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     // Run CMake dependency scanner on preprocessed output.
     std::string const cmake = this->GetLocalGenerator()->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
-    ddCmds.push_back(cmake + " -E cmake_ninja_dyndep"
-                             " --tdi=" +
-                     tdi + " --dd=$out"
-                           " " +
+    ddCmds.push_back(cmake +
+                     " -E cmake_ninja_dyndep"
+                     " --tdi=" +
+                     tdi +
+                     " --dd=$out"
+                     " " +
                      ddInput);
 
     std::string const ddCmdLine =
@@ -1150,10 +1154,11 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   std::string escapedSourceFileName = sourceFileName;
 
   if (!cmSystemTools::FileIsFullPath(sourceFileName)) {
-    escapedSourceFileName = cmSystemTools::CollapseFullPath(
-      escapedSourceFileName, this->GetGlobalGenerator()
-                               ->GetCMakeInstance()
-                               ->GetHomeOutputDirectory());
+    escapedSourceFileName =
+      cmSystemTools::CollapseFullPath(escapedSourceFileName,
+                                      this->GetGlobalGenerator()
+                                        ->GetCMakeInstance()
+                                        ->GetHomeOutputDirectory());
   }
 
   escapedSourceFileName = this->LocalGenerator->ConvertToOutputFormat(

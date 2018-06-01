@@ -153,7 +153,8 @@ bool cmParsePHPCoverage::ReadFileInformation(std::istream& in)
     delete[] s;
     // read close quote
     if (in.get(c) && c != '"') {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, "failed to read close quote\n"
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "failed to read close quote\n"
                    << "read [" << c << "]\n");
       return false;
     }
@@ -184,8 +185,8 @@ bool cmParsePHPCoverage::ReadPHPData(const char* file)
   }
   for (int i = 0; i < size; i++) {
     if (!this->ReadFileInformation(in)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, "Failed to read file #" << i
-                                                                     << "\n");
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "Failed to read file #" << i << "\n");
       return false;
     }
     in.get(c);

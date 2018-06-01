@@ -61,7 +61,8 @@ int cmCPackIFWGenerator::PackageFiles()
           ifwCmd += " --repository " + rd;
         }
       } else {
-        cmCPackIFWLogger(WARNING, "The \"CPACK_IFW_REPOSITORIES_DIRECTORIES\" "
+        cmCPackIFWLogger(WARNING,
+                         "The \"CPACK_IFW_REPOSITORIES_DIRECTORIES\" "
                            << "variable is set, but content will be skipped, "
                            << "because this feature available only since "
                            << "QtIFW 3.1. Please update your QtIFW instance."
@@ -93,7 +94,8 @@ int cmCPackIFWGenerator::PackageFiles()
       ofs << "# Run command: " << ifwCmd << std::endl
           << "# Output:" << std::endl
           << output << std::endl;
-      cmCPackIFWLogger(ERROR, "Problem running IFW command: "
+      cmCPackIFWLogger(ERROR,
+                       "Problem running IFW command: "
                          << ifwCmd << std::endl
                          << "Please check " << ifwTmpFile << " for errors"
                          << std::endl);
@@ -102,15 +104,16 @@ int cmCPackIFWGenerator::PackageFiles()
 
     if (!this->Repository.RepositoryUpdate.empty() &&
         !this->Repository.PatchUpdatesXml()) {
-      cmCPackIFWLogger(WARNING, "Problem patch IFW \"Updates\" "
+      cmCPackIFWLogger(WARNING,
+                       "Problem patch IFW \"Updates\" "
                          << "file: "
                          << this->toplevel + "/repository/Updates.xml"
                          << std::endl);
     }
 
-    cmCPackIFWLogger(OUTPUT, "- repository: " << this->toplevel
-                                              << "/repository generated"
-                                              << std::endl);
+    cmCPackIFWLogger(OUTPUT,
+                     "- repository: " << this->toplevel
+                                      << "/repository generated" << std::endl);
   }
 
   // Run binary creator
@@ -145,7 +148,8 @@ int cmCPackIFWGenerator::PackageFiles()
           ifwCmd += " --repository " + rd;
         }
       } else {
-        cmCPackIFWLogger(WARNING, "The \"CPACK_IFW_REPOSITORIES_DIRECTORIES\" "
+        cmCPackIFWLogger(WARNING,
+                         "The \"CPACK_IFW_REPOSITORIES_DIRECTORIES\" "
                            << "variable is set, but content will be skipped, "
                            << "because this feature available only since "
                            << "QtIFW 3.1. Please update your QtIFW instance."
@@ -203,7 +207,8 @@ int cmCPackIFWGenerator::PackageFiles()
       ofs << "# Run command: " << ifwCmd << std::endl
           << "# Output:" << std::endl
           << output << std::endl;
-      cmCPackIFWLogger(ERROR, "Problem running IFW command: "
+      cmCPackIFWLogger(ERROR,
+                       "Problem running IFW command: "
                          << ifwCmd << std::endl
                          << "Please check " << ifwTmpFile << " for errors"
                          << std::endl);
@@ -257,8 +262,9 @@ int cmCPackIFWGenerator::InitializeInternal()
   }
 
   if (this->BinCreator.empty()) {
-    cmCPackIFWLogger(ERROR, "Cannot find QtIFW compiler \"binarycreator\": "
-                            "likely it is not installed, or not in your PATH"
+    cmCPackIFWLogger(ERROR,
+                     "Cannot find QtIFW compiler \"binarycreator\": "
+                     "likely it is not installed, or not in your PATH"
                        << std::endl);
     return 0;
   }
@@ -415,7 +421,8 @@ cmCPackComponent* cmCPackIFWGenerator::GetComponent(
     }
   } else {
     this->Packages.erase(name);
-    cmCPackIFWLogger(ERROR, "Cannot configure package \""
+    cmCPackIFWLogger(ERROR,
+                     "Cannot configure package \""
                        << name << "\" for component \"" << component->Name
                        << "\"" << std::endl);
   }
@@ -450,7 +457,8 @@ cmCPackComponentGroup* cmCPackIFWGenerator::GetComponentGroup(
     this->BinaryPackages.insert(package);
   } else {
     this->Packages.erase(name);
-    cmCPackIFWLogger(ERROR, "Cannot configure package \""
+    cmCPackIFWLogger(ERROR,
+                     "Cannot configure package \""
                        << name << "\" for component group \"" << group->Name
                        << "\"" << std::endl);
   }
@@ -596,7 +604,8 @@ cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
   } else {
     this->Repositories.erase(repositoryName);
     repository = nullptr;
-    cmCPackIFWLogger(WARNING, "Invalid repository \""
+    cmCPackIFWLogger(WARNING,
+                     "Invalid repository \""
                        << repositoryName << "\""
                        << " configuration. Repository will be skipped."
                        << std::endl);

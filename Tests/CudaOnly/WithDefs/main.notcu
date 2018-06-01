@@ -4,39 +4,39 @@
 
 #include <inc_cuda.h>
 #ifndef INC_CUDA
-#error "INC_CUDA not defined!"
+#  error "INC_CUDA not defined!"
 #endif
 
 #ifndef HOST_DEFINE
-#error "HOST_DEFINE not defined!"
+#  error "HOST_DEFINE not defined!"
 #endif
 
 #ifndef PACKED_DEFINE
-#error "PACKED_DEFINE not defined!"
+#  error "PACKED_DEFINE not defined!"
 #endif
 
 #ifndef FLAG_COMPILE_LANG_CUDA
-#error "FLAG_COMPILE_LANG_CUDA not defined!"
+#  error "FLAG_COMPILE_LANG_CUDA not defined!"
 #endif
 
 #ifndef FLAG_LANG_IS_CUDA
-#error "FLAG_LANG_IS_CUDA not defined!"
+#  error "FLAG_LANG_IS_CUDA not defined!"
 #endif
 
 #if !FLAG_LANG_IS_CUDA
-#error "Expected FLAG_LANG_IS_CUDA"
+#  error "Expected FLAG_LANG_IS_CUDA"
 #endif
 
 #ifndef DEF_COMPILE_LANG_CUDA
-#error "DEF_COMPILE_LANG_CUDA not defined!"
+#  error "DEF_COMPILE_LANG_CUDA not defined!"
 #endif
 
 #ifndef DEF_LANG_IS_CUDA
-#error "DEF_LANG_IS_CUDA not defined!"
+#  error "DEF_LANG_IS_CUDA not defined!"
 #endif
 
 #if !DEF_LANG_IS_CUDA
-#error "Expected DEF_LANG_IS_CUDA"
+#  error "Expected DEF_LANG_IS_CUDA"
 #endif
 
 static __global__ void DetermineIfValidCudaDevice()
@@ -44,20 +44,20 @@ static __global__ void DetermineIfValidCudaDevice()
 }
 
 #ifdef _MSC_VER
-#pragma pack(push, 1)
-#undef PACKED_DEFINE
-#define PACKED_DEFINE
+#  pragma pack(push, 1)
+#  undef PACKED_DEFINE
+#  define PACKED_DEFINE
 #endif
 struct PACKED_DEFINE result_type
 {
   bool valid;
   int value;
 #if defined(NDEBUG) && !defined(DEFREL)
-#error missing DEFREL flag
+#  error missing DEFREL flag
 #endif
 };
 #ifdef _MSC_VER
-#pragma pack(pop)
+#  pragma pack(pop)
 #endif
 
 result_type can_launch_kernel()

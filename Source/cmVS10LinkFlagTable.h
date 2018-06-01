@@ -176,17 +176,17 @@ static cmVS7FlagTable cmVS10LinkFlagTable[] = {
     cmVS7FlagTable::UserValueRequired },
 
   // String List Properties
-  { "AdditionalLibraryDirectories", "LIBPATH:",
-    "Additional Library Directories", "",
+  { "AdditionalLibraryDirectories",
+    "LIBPATH:", "Additional Library Directories", "",
     cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
   // Skip [AdditionalDependencies] - no command line Switch.
-  { "IgnoreSpecificDefaultLibraries", "NODEFAULTLIB:",
-    "Ignore Specific Default Libraries", "",
+  { "IgnoreSpecificDefaultLibraries",
+    "NODEFAULTLIB:", "Ignore Specific Default Libraries", "",
     cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
   { "AddModuleNamesToAssembly", "ASSEMBLYMODULE:", "Add Module to Assembly",
     "", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
-  { "EmbedManagedResourceFile", "ASSEMBLYRESOURCE:",
-    "Embed Managed Resource File", "",
+  { "EmbedManagedResourceFile",
+    "ASSEMBLYRESOURCE:", "Embed Managed Resource File", "",
     cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
   { "ForceSymbolReferences", "INCLUDE:", "Force Symbol References", "",
     cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
@@ -194,8 +194,8 @@ static cmVS7FlagTable cmVS10LinkFlagTable[] = {
     cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
   { "AssemblyLinkResource", "ASSEMBLYLINKRESOURCE:", "Assembly Link Resource",
     "", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
-  { "AdditionalManifestDependencies", "MANIFESTDEPENDENCY:",
-    "Additional Manifest Dependencies", "",
+  { "AdditionalManifestDependencies",
+    "MANIFESTDEPENDENCY:", "Additional Manifest Dependencies", "",
     cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable },
 
   // String Properties

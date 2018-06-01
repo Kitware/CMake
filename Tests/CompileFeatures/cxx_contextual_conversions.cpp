@@ -17,6 +17,7 @@ public:
   }
   operator T&() { return val; }
   operator T() const { return val; }
+
 private:
   T val;
 };

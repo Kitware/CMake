@@ -4,5 +4,5 @@ int required()
   return 0;
 }
 #else
-#error "REQUIRED not defined"
+#  error "REQUIRED not defined"
 #endif

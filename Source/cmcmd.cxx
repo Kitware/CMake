@@ -17,17 +17,17 @@
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
-#include "cmServer.h"
-#include "cmServerConnection.h"
+#  include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
+#  include "cmServer.h"
+#  include "cmServerConnection.h"
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32)
-#include "bindexplib.h"
+#  include "bindexplib.h"
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32) && !defined(__CYGWIN__)
-#include "cmVisualStudioWCEPlatformParser.h"
+#  include "cmVisualStudioWCEPlatformParser.h"
 #endif
 
 #include "cmsys/Directory.hxx"
@@ -1775,8 +1775,9 @@ int cmVSLink::LinkIncremental()
     if (!fout) {
       return -1;
     }
-    fout << this->Type << " /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ "
-                          "24 /* RT_MANIFEST */ \""
+    fout << this->Type
+         << " /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ "
+            "24 /* RT_MANIFEST */ \""
          << absManifestFile << "\"";
   }
 

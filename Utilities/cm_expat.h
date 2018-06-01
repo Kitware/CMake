@@ -6,9 +6,9 @@
 /* Use the expat library configured for CMake.  */
 #include "cmThirdParty.h"
 #ifdef CMAKE_USE_SYSTEM_EXPAT
-#include <expat.h>
+#  include <expat.h>
 #else
-#include <cmexpat/lib/expat.h>
+#  include <cmexpat/lib/expat.h>
 #endif
 
 #endif

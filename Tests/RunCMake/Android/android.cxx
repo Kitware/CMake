@@ -1,19 +1,19 @@
 #include "android.h"
 
 #ifndef STL_NONE
-#include <cmath>
-#include <cstdio>
-#ifndef STL_SYSTEM
-#include <exception>
-#include <typeinfo>
-#ifndef STL_STLPORT
-#include <cxxabi.h>
-#endif
-#ifndef STL_GABI
-#include <iostream>
-#include <string>
-#endif
-#endif
+#  include <cmath>
+#  include <cstdio>
+#  ifndef STL_SYSTEM
+#    include <exception>
+#    include <typeinfo>
+#    ifndef STL_STLPORT
+#      include <cxxabi.h>
+#    endif
+#    ifndef STL_GABI
+#      include <iostream>
+#      include <string>
+#    endif
+#  endif
 #endif
 
 int main()
@@ -30,19 +30,19 @@ int main()
   try {
     delete (new int);
   } catch (std::exception const& e) {
-#if defined(STL_GABI)
+#  if defined(STL_GABI)
     e.what();
     typeid(e).name();
-#else
+#  else
     std::cerr << e.what() << std::endl;
     std::cerr << typeid(e).name() << std::endl;
-#endif
+#  endif
   }
-#if defined(STL_GABI)
+#  if defined(STL_GABI)
   return 0;
-#else
+#  else
   std::string s;
   return static_cast<int>(s.size());
-#endif
+#  endif
 #endif
 }

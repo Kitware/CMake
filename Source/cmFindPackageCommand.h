@@ -22,7 +22,7 @@ namespace std {
 }
 /* clang-format on */
 #else
-#include <functional>
+#  include <functional>
 #endif
 
 #include "cmFindCommon.h"

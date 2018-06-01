@@ -4,9 +4,9 @@
 #include "file2.h"
 
 #ifdef _WIN32
-#define IMPORT __declspec(dllimport)
+#  define IMPORT __declspec(dllimport)
 #else
-#define IMPORT
+#  define IMPORT
 #endif
 
 IMPORT int choose_cuda_device();

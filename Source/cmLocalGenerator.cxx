@@ -27,8 +27,8 @@
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#define CM_LG_ENCODE_OBJECT_NAMES
-#include "cmCryptoHash.h"
+#  define CM_LG_ENCODE_OBJECT_NAMES
+#  include "cmCryptoHash.h"
 #endif
 
 #include "cmsys/RegularExpression.hxx"
@@ -42,8 +42,8 @@
 #include <utility>
 
 #if defined(__HAIKU__)
-#include <FindDirectory.h>
-#include <StorageDefs.h>
+#  include <FindDirectory.h>
+#  include <StorageDefs.h>
 #endif
 
 // List of variables that are replaced when
@@ -1562,8 +1562,9 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
       target->Target->GetMakefile()->GetDefinition(option_flag);
     if (!opt) {
       std::ostringstream e;
-      e << "Target \"" << target->GetName() << "\" requires the language "
-                                               "dialect \""
+      e << "Target \"" << target->GetName()
+        << "\" requires the language "
+           "dialect \""
         << lang << standardProp << "\" "
         << (ext ? "(with compiler extensions)" : "")
         << ", but CMake "

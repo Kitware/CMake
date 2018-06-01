@@ -76,8 +76,8 @@ void cmLocalNinjaGenerator::Generate()
     if (!showIncludesPrefix.empty()) {
       cmGlobalNinjaGenerator::WriteComment(this->GetRulesFileStream(),
                                            "localized /showIncludes string");
-      this->GetRulesFileStream() << "msvc_deps_prefix = " << showIncludesPrefix
-                                 << "\n\n";
+      this->GetRulesFileStream()
+        << "msvc_deps_prefix = " << showIncludesPrefix << "\n\n";
     }
   }
 
@@ -465,7 +465,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   }
 
 #if 0
-#error TODO: Once CC in an ExternalProject target must provide the \
+#  error TODO: Once CC in an ExternalProject target must provide the \
     file of each imported target that has an add_dependencies pointing \
     at us.  How to know which ExternalProject step actually provides it?
 #endif

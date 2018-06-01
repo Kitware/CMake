@@ -3,7 +3,9 @@
 
 #include "myinterface.h"
 
-class MyObject : public QObject, MyInterface
+class MyObject
+  : public QObject
+  , MyInterface
 {
   Q_OBJECT
   Q_INTERFACES(MyInterface)

@@ -6,9 +6,9 @@
 /* Use the LibRHash library configured for CMake.  */
 #include "cmThirdParty.h"
 #ifdef CMAKE_USE_SYSTEM_LIBRHASH
-#include <rhash.h>
+#  include <rhash.h>
 #else
-#include <cmlibrhash/librhash/rhash.h>
+#  include <cmlibrhash/librhash/rhash.h>
 #endif
 
 #endif

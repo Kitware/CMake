@@ -640,12 +640,13 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
   for (cmGeneratorTarget* gtarget : targets) {
     int type = gtarget->GetType();
     std::string name = gtarget->GetName();
-    if (!name.empty() && ((type == cmStateEnums::EXECUTABLE) ||
-                          (type == cmStateEnums::STATIC_LIBRARY) ||
-                          (type == cmStateEnums::SHARED_LIBRARY) ||
-                          (type == cmStateEnums::MODULE_LIBRARY) ||
-                          (type == cmStateEnums::OBJECT_LIBRARY) ||
-                          (type == cmStateEnums::UTILITY))) {
+    if (!name.empty() &&
+        ((type == cmStateEnums::EXECUTABLE) ||
+         (type == cmStateEnums::STATIC_LIBRARY) ||
+         (type == cmStateEnums::SHARED_LIBRARY) ||
+         (type == cmStateEnums::MODULE_LIBRARY) ||
+         (type == cmStateEnums::OBJECT_LIBRARY) ||
+         (type == cmStateEnums::UTILITY))) {
       std::string makefileName;
       // Add a rule to build the target by name.
       localName = lg->GetRelativeTargetDirectory(gtarget);
@@ -920,8 +921,9 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule(
   std::string path;
   std::vector<std::string> no_depends;
   std::vector<std::string> commands;
-  lg->AppendEcho(commands, "The following are some of the valid targets "
-                           "for this Makefile:");
+  lg->AppendEcho(commands,
+                 "The following are some of the valid targets "
+                 "for this Makefile:");
   lg->AppendEcho(commands, "... all (the default if no target is provided)");
   lg->AppendEcho(commands, "... clean");
   if (!this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION")) {

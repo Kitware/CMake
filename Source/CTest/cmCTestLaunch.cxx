@@ -21,9 +21,9 @@
 #include "cmake.h"
 
 #ifdef _WIN32
-#include <fcntl.h> // for _O_BINARY
-#include <io.h>    // for _setmode
-#include <stdio.h> // for std{out,err} and fileno
+#  include <fcntl.h> // for _O_BINARY
+#  include <io.h>    // for _setmode
+#  include <stdio.h> // for std{out,err} and fileno
 #endif
 
 cmCTestLaunch::cmCTestLaunch(int argc, const char* const* argv)

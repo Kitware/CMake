@@ -1,19 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef _WIN32
-#include <io.h>
+#  include <io.h>
 #else
-#include <unistd.h>
+#  include <unistd.h>
 #endif
 
 // return true if the file exists
 int FileExists(const char* filename)
 {
 #ifdef _MSC_VER
-#define access _access
+#  define access _access
 #endif
 #ifndef F_OK
-#define F_OK 0
+#  define F_OK 0
 #endif
   if (access(filename, F_OK) != 0) {
     return false;

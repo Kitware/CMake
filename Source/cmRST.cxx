@@ -154,8 +154,9 @@ void cmRST::ProcessLine(std::string const& line)
   this->LastLineEndedInColonColon = false;
 
   // A line starting in .. is an explicit markup start.
-  if (line == ".." || (line.size() >= 3 && line[0] == '.' && line[1] == '.' &&
-                       isspace(line[2]))) {
+  if (line == ".." ||
+      (line.size() >= 3 && line[0] == '.' && line[1] == '.' &&
+       isspace(line[2]))) {
     this->Reset();
     this->Markup =
       (line.find_first_not_of(" \t", 2) == std::string::npos ? MarkupEmpty

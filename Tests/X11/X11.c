@@ -1,8 +1,8 @@
 #include "stdio.h"
 #ifdef CMAKE_HAS_X
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
+#  include <X11/Xlib.h>
+#  include <X11/Xutil.h>
 
 int main()
 {

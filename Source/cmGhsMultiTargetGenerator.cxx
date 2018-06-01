@@ -118,8 +118,8 @@ void cmGhsMultiTargetGenerator::Generate()
     config = cmSystemTools::UpperCase(config);
     this->DynamicDownload = this->DetermineIfDynamicDownload(config, language);
     if (this->DynamicDownload) {
-      *this->GetFolderBuildStreams() << "#component integrity_dynamic_download"
-                                     << std::endl;
+      *this->GetFolderBuildStreams()
+        << "#component integrity_dynamic_download" << std::endl;
     }
     GhsMultiGpj::WriteGpjTag(this->GetGpjTag(), this->GetFolderBuildStreams());
     cmGlobalGhsMultiGenerator::WriteDisclaimer(this->GetFolderBuildStreams());
@@ -198,9 +198,9 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string& config,
   if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
     std::string const static_library_suffix =
       this->Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
-    *this->GetFolderBuildStreams() << "    -o \"" << outputDir
-                                   << outputFilename << static_library_suffix
-                                   << "\"" << std::endl;
+    *this->GetFolderBuildStreams()
+      << "    -o \"" << outputDir << outputFilename << static_library_suffix
+      << "\"" << std::endl;
   } else if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
     if (notKernel && !this->IsTargetGroup()) {
       *this->GetFolderBuildStreams() << "    -relprog" << std::endl;
@@ -208,15 +208,15 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string& config,
     if (this->IsTargetGroup()) {
       *this->GetFolderBuildStreams()
         << "    -o \"" << outputDir << outputFilename << ".elf\"" << std::endl;
-      *this->GetFolderBuildStreams() << "    :extraOutputFile=\"" << outputDir
-                                     << outputFilename << ".elf.ael\""
-                                     << std::endl;
+      *this->GetFolderBuildStreams()
+        << "    :extraOutputFile=\"" << outputDir << outputFilename
+        << ".elf.ael\"" << std::endl;
     } else {
       std::string const executable_suffix =
         this->Makefile->GetSafeDefinition("CMAKE_EXECUTABLE_SUFFIX");
-      *this->GetFolderBuildStreams() << "    -o \"" << outputDir
-                                     << outputFilename << executable_suffix
-                                     << "\"" << std::endl;
+      *this->GetFolderBuildStreams()
+        << "    -o \"" << outputDir << outputFilename << executable_suffix
+        << "\"" << std::endl;
     }
   }
 }
@@ -293,8 +293,8 @@ void cmGhsMultiTargetGenerator::WriteCompilerFlags(std::string const&,
     this->FlagsByLanguage.find(language);
   if (flagsByLangI != this->FlagsByLanguage.end()) {
     if (!flagsByLangI->second.empty()) {
-      *this->GetFolderBuildStreams() << "    " << flagsByLangI->second
-                                     << std::endl;
+      *this->GetFolderBuildStreams()
+        << "    " << flagsByLangI->second << std::endl;
     }
   }
 }
@@ -321,8 +321,8 @@ void cmGhsMultiTargetGenerator::WriteIncludes(const std::string& config,
 
   for (std::vector<std::string>::const_iterator includes_i = includes.begin();
        includes_i != includes.end(); ++includes_i) {
-    *this->GetFolderBuildStreams() << "    -I\"" << *includes_i << "\""
-                                   << std::endl;
+    *this->GetFolderBuildStreams()
+      << "    -I\"" << *includes_i << "\"" << std::endl;
   }
 }
 
@@ -335,8 +335,8 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries(
   for (cmTargetDependSet::iterator tdsI = tds.begin(); tdsI != tds.end();
        ++tdsI) {
     const cmGeneratorTarget* tg = *tdsI;
-    *this->GetFolderBuildStreams() << "    -L\"" << GetAbsBuildFilePath(tg)
-                                   << "\"" << std::endl;
+    *this->GetFolderBuildStreams()
+      << "    -L\"" << GetAbsBuildFilePath(tg) << "\"" << std::endl;
   }
   // library targets
   cmTarget::LinkLibraryVectorType llv =
@@ -349,8 +349,8 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries(
     if (NULL != tg) {
       libName = tg->GetName() + ".a";
     }
-    *this->GetFolderBuildStreams() << "    -l\"" << libName << "\""
-                                   << std::endl;
+    *this->GetFolderBuildStreams()
+      << "    -l\"" << libName << "\"" << std::endl;
   }
 
   if (!this->TargetGroup) {

@@ -6,5 +6,5 @@ int main()
 }
 
 #if 1
-#error "This target should not be compiled by ALL."
+#  error "This target should not be compiled by ALL."
 #endif

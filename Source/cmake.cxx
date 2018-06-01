@@ -28,69 +28,69 @@
 #include "cm_sys_stat.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cm_jsoncpp_writer.h"
+#  include "cm_jsoncpp_writer.h"
 
-#include "cmGraphVizWriter.h"
-#include "cmVariableWatch.h"
-#include <unordered_map>
+#  include "cmGraphVizWriter.h"
+#  include "cmVariableWatch.h"
+#  include <unordered_map>
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#define CMAKE_USE_ECLIPSE
+#  define CMAKE_USE_ECLIPSE
 #endif
 
 #if defined(__MINGW32__) && !defined(CMAKE_BUILD_WITH_CMAKE)
-#define CMAKE_BOOT_MINGW
+#  define CMAKE_BOOT_MINGW
 #endif
 
 // include the generator
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#if !defined(CMAKE_BOOT_MINGW)
-#include "cmGlobalBorlandMakefileGenerator.h"
-#include "cmGlobalGhsMultiGenerator.h"
-#include "cmGlobalJOMMakefileGenerator.h"
-#include "cmGlobalNMakeMakefileGenerator.h"
-#include "cmGlobalVisualStudio10Generator.h"
-#include "cmGlobalVisualStudio11Generator.h"
-#include "cmGlobalVisualStudio12Generator.h"
-#include "cmGlobalVisualStudio14Generator.h"
-#include "cmGlobalVisualStudio15Generator.h"
-#include "cmGlobalVisualStudio9Generator.h"
-#include "cmVSSetupHelper.h"
+#  if !defined(CMAKE_BOOT_MINGW)
+#    include "cmGlobalBorlandMakefileGenerator.h"
+#    include "cmGlobalGhsMultiGenerator.h"
+#    include "cmGlobalJOMMakefileGenerator.h"
+#    include "cmGlobalNMakeMakefileGenerator.h"
+#    include "cmGlobalVisualStudio10Generator.h"
+#    include "cmGlobalVisualStudio11Generator.h"
+#    include "cmGlobalVisualStudio12Generator.h"
+#    include "cmGlobalVisualStudio14Generator.h"
+#    include "cmGlobalVisualStudio15Generator.h"
+#    include "cmGlobalVisualStudio9Generator.h"
+#    include "cmVSSetupHelper.h"
 
-#define CMAKE_HAVE_VS_GENERATORS
-#endif
-#include "cmGlobalMSYSMakefileGenerator.h"
-#include "cmGlobalMinGWMakefileGenerator.h"
+#    define CMAKE_HAVE_VS_GENERATORS
+#  endif
+#  include "cmGlobalMSYSMakefileGenerator.h"
+#  include "cmGlobalMinGWMakefileGenerator.h"
 #else
 #endif
 #if defined(CMAKE_USE_WMAKE)
-#include "cmGlobalWatcomWMakeGenerator.h"
+#  include "cmGlobalWatcomWMakeGenerator.h"
 #endif
 #include "cmGlobalUnixMakefileGenerator3.h"
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmGlobalNinjaGenerator.h"
+#  include "cmGlobalNinjaGenerator.h"
 #endif
 #include "cmExtraCodeLiteGenerator.h"
 
 #if !defined(CMAKE_BOOT_MINGW)
-#include "cmExtraCodeBlocksGenerator.h"
+#  include "cmExtraCodeBlocksGenerator.h"
 #endif
 #include "cmExtraKateGenerator.h"
 #include "cmExtraSublimeTextGenerator.h"
 
 #ifdef CMAKE_USE_ECLIPSE
-#include "cmExtraEclipseCDT4Generator.h"
+#  include "cmExtraEclipseCDT4Generator.h"
 #endif
 
 #if defined(__APPLE__)
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmGlobalXCodeGenerator.h"
+#  if defined(CMAKE_BUILD_WITH_CMAKE)
+#    include "cmGlobalXCodeGenerator.h"
 
-#define CMAKE_USE_XCODE 1
-#endif
-#include <sys/resource.h>
-#include <sys/time.h>
+#    define CMAKE_USE_XCODE 1
+#  endif
+#  include <sys/resource.h>
+#  include <sys/time.h>
 #endif
 
 #include "cmsys/FStream.hxx"
@@ -891,9 +891,9 @@ void cmake::AddDefaultExtraGenerators()
   this->ExtraGenerators.push_back(cmExtraSublimeTextGenerator::GetFactory());
   this->ExtraGenerators.push_back(cmExtraKateGenerator::GetFactory());
 
-#ifdef CMAKE_USE_ECLIPSE
+#  ifdef CMAKE_USE_ECLIPSE
   this->ExtraGenerators.push_back(cmExtraEclipseCDT4Generator::GetFactory());
-#endif
+#  endif
 
 #endif
 }
@@ -1708,7 +1708,7 @@ void cmake::AddProjectCommands()
 void cmake::AddDefaultGenerators()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#if !defined(CMAKE_BOOT_MINGW)
+#  if !defined(CMAKE_BOOT_MINGW)
   this->Generators.push_back(cmGlobalVisualStudio15Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio14Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio12Generator::NewFactory());
@@ -1719,7 +1719,7 @@ void cmake::AddDefaultGenerators()
   this->Generators.push_back(cmGlobalNMakeMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalJOMMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalGhsMultiGenerator::NewFactory());
-#endif
+#  endif
   this->Generators.push_back(cmGlobalMSYSMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalMinGWMakefileGenerator::NewFactory());
 #endif

@@ -63,7 +63,9 @@ private:
 };
 
 //! the page that gives basic options for native compilers
-class NativeCompilerSetup : public QWizardPage, protected Ui::Compilers
+class NativeCompilerSetup
+  : public QWizardPage
+  , protected Ui::Compilers
 {
   Q_OBJECT
 public:
@@ -83,7 +85,9 @@ public:
 };
 
 //! the page that gives options for cross compilers
-class CrossCompilerSetup : public QWizardPage, protected Ui::CrossCompiler
+class CrossCompilerSetup
+  : public QWizardPage
+  , protected Ui::CrossCompiler
 {
   Q_OBJECT
 public:

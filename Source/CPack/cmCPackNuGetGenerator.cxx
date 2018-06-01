@@ -92,7 +92,8 @@ void cmCPackNuGetGenerator::SetupGroupComponentVariables(bool ignoreGroup)
       // Does the component belong to a group?
       if (comp.second.Group == nullptr) {
         cmCPackLogger(
-          cmCPackLog::LOG_VERBOSE, "Component <"
+          cmCPackLog::LOG_VERBOSE,
+          "Component <"
             << comp.second.Name
             << "> does not belong to any group, package it separately."
             << std::endl);

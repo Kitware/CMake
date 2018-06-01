@@ -91,8 +91,9 @@ void cmLocalVisualStudio10Generator::GenerateTargetsDepthFirst(
     this->CreateSingleVCProj(target->GetName(), target);
   } else {
     cmVisualStudio10TargetGenerator tg(
-      target, static_cast<cmGlobalVisualStudio10Generator*>(
-                this->GetGlobalGenerator()));
+      target,
+      static_cast<cmGlobalVisualStudio10Generator*>(
+        this->GetGlobalGenerator()));
     tg.Generate();
   }
 }

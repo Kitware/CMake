@@ -7,7 +7,7 @@
 #include "cmSystemTools.h"
 
 #if defined(_MSC_VER)
-#define HAVE_COMDEF_H
+#  define HAVE_COMDEF_H
 #endif
 
 // Just for this file:
@@ -16,39 +16,39 @@ static bool LogErrorsAsMessages;
 
 #if defined(HAVE_COMDEF_H)
 
-#include <comdef.h>
+#  include <comdef.h>
 
 // Copied from a correct comdef.h to avoid problems with deficient versions
 // of comdef.h that exist in the wild... Fixes issue #7533.
 //
-#ifdef _NATIVE_WCHAR_T_DEFINED
-#ifdef _DEBUG
-#pragma comment(lib, "comsuppwd.lib")
-#else
-#pragma comment(lib, "comsuppw.lib")
-#endif
-#else
-#ifdef _DEBUG
-#pragma comment(lib, "comsuppd.lib")
-#else
-#pragma comment(lib, "comsupp.lib")
-#endif
-#endif
+#  ifdef _NATIVE_WCHAR_T_DEFINED
+#    ifdef _DEBUG
+#      pragma comment(lib, "comsuppwd.lib")
+#    else
+#      pragma comment(lib, "comsuppw.lib")
+#    endif
+#  else
+#    ifdef _DEBUG
+#      pragma comment(lib, "comsuppd.lib")
+#    else
+#      pragma comment(lib, "comsupp.lib")
+#    endif
+#  endif
 
 ///! Use ReportHRESULT to make a cmSystemTools::Message after calling
 ///! a COM method that may have failed.
-#define ReportHRESULT(hr, context)                                            \
-  if (FAILED(hr)) {                                                           \
-    if (LogErrorsAsMessages) {                                                \
-      std::ostringstream _hresult_oss;                                        \
-      _hresult_oss.flags(std::ios::hex);                                      \
-      _hresult_oss << context << " failed HRESULT, hr = 0x" << hr             \
-                   << std::endl;                                              \
-      _hresult_oss.flags(std::ios::dec);                                      \
-      _hresult_oss << __FILE__ << "(" << __LINE__ << ")";                     \
-      cmSystemTools::Message(_hresult_oss.str().c_str());                     \
-    }                                                                         \
-  }
+#  define ReportHRESULT(hr, context)                                          \
+    if (FAILED(hr)) {                                                         \
+      if (LogErrorsAsMessages) {                                              \
+        std::ostringstream _hresult_oss;                                      \
+        _hresult_oss.flags(std::ios::hex);                                    \
+        _hresult_oss << context << " failed HRESULT, hr = 0x" << hr           \
+                     << std::endl;                                            \
+        _hresult_oss.flags(std::ios::dec);                                    \
+        _hresult_oss << __FILE__ << "(" << __LINE__ << ")";                   \
+        cmSystemTools::Message(_hresult_oss.str().c_str());                   \
+      }                                                                       \
+    }
 
 ///! Using the given instance of Visual Studio, call the named macro
 HRESULT InstanceCallMacro(IDispatch* vsIDE, const std::string& macro,

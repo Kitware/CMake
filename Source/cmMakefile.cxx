@@ -43,7 +43,7 @@
 #include "cmake.h"
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-#include "cmVariableWatch.h"
+#  include "cmVariableWatch.h"
 #endif
 
 class cmMessenger;
@@ -1705,8 +1705,9 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
   // must be outside the following if() to keep it alive long enough
   std::string nvalue;
 
-  if (existingValue && (this->GetState()->GetCacheEntryType(name) ==
-                        cmStateEnums::UNINITIALIZED)) {
+  if (existingValue &&
+      (this->GetState()->GetCacheEntryType(name) ==
+       cmStateEnums::UNINITIALIZED)) {
     // if this is not a force, then use the value from the cache
     // if it is a force, then use the value being passed in
     if (!force) {
@@ -2374,10 +2375,11 @@ const char* cmMakefile::GetDefinition(const std::string& name) const
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if (vv && !this->SuppressWatches) {
-    bool const watch_function_executed = vv->VariableAccessed(
-      name, def ? cmVariableWatch::VARIABLE_READ_ACCESS
-                : cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS,
-      def, this);
+    bool const watch_function_executed =
+      vv->VariableAccessed(name,
+                           def ? cmVariableWatch::VARIABLE_READ_ACCESS
+                               : cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS,
+                           def, this);
 
     if (watch_function_executed) {
       // A callback was executed and may have caused re-allocation of the
@@ -2630,7 +2632,12 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
   return mtype;
 }
 
-typedef enum { NORMAL, ENVIRONMENT, CACHE } t_domain;
+typedef enum
+{
+  NORMAL,
+  ENVIRONMENT,
+  CACHE
+} t_domain;
 struct t_lookup
 {
   t_lookup()
@@ -2819,9 +2826,11 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
           const char* nextAt = strchr(in + 1, '@');
           if (nextAt && nextAt != in + 1 &&
               nextAt ==
-                in + 1 + strspn(in + 1, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                        "abcdefghijklmnopqrstuvwxyz"
-                                        "0123456789/_.+-")) {
+                in + 1 +
+                  strspn(in + 1,
+                         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                         "abcdefghijklmnopqrstuvwxyz"
+                         "0123456789/_.+-")) {
             std::string variable(in + 1, nextAt - in - 1);
             std::string varresult = this->GetSafeDefinition(variable);
             if (escapeQuotes) {
@@ -3298,7 +3307,8 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   cmGlobalGenerator* gg =
     cm.CreateGlobalGenerator(this->GetGlobalGenerator()->GetName());
   if (!gg) {
-    this->IssueMessage(cmake::INTERNAL_ERROR, "Global generator '" +
+    this->IssueMessage(cmake::INTERNAL_ERROR,
+                       "Global generator '" +
                          this->GetGlobalGenerator()->GetName() +
                          "' could not be created.");
     cmSystemTools::SetFatalErrorOccured();
@@ -3863,8 +3873,9 @@ cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
 {
   // Create the target.
   std::unique_ptr<cmTarget> target(
-    new cmTarget(name, type, global ? cmTarget::VisibilityImportedGlobally
-                                    : cmTarget::VisibilityImported,
+    new cmTarget(name, type,
+                 global ? cmTarget::VisibilityImportedGlobally
+                        : cmTarget::VisibilityImported,
                  this));
 
   // Add to the set of available imported targets.
@@ -4311,8 +4322,9 @@ bool cmMakefile::CompileFeatureKnown(cmTarget const* target,
   } else {
     e << "Specified";
   }
-  e << " unknown feature \"" << feature << "\" for "
-                                           "target \""
+  e << " unknown feature \"" << feature
+    << "\" for "
+       "target \""
     << target->GetName() << "\".";
   if (error) {
     *error = e.str();

@@ -13,39 +13,39 @@
 
 // Include the ELF format information system header.
 #if defined(__OpenBSD__)
-#include <elf_abi.h>
-#include <stdint.h>
+#  include <elf_abi.h>
+#  include <stdint.h>
 #elif defined(__HAIKU__)
-#include <elf32.h>
-#include <elf64.h>
+#  include <elf32.h>
+#  include <elf64.h>
 typedef struct Elf32_Ehdr Elf32_Ehdr;
 typedef struct Elf32_Shdr Elf32_Shdr;
 typedef struct Elf32_Sym Elf32_Sym;
 typedef struct Elf32_Rel Elf32_Rel;
 typedef struct Elf32_Rela Elf32_Rela;
-#define ELFMAG0 0x7F
-#define ELFMAG1 'E'
-#define ELFMAG2 'L'
-#define ELFMAG3 'F'
-#define ET_NONE 0
-#define ET_REL 1
-#define ET_EXEC 2
-#define ET_DYN 3
-#define ET_CORE 4
-#define EM_386 3
-#define EM_SPARC 2
-#define EM_PPC 20
+#  define ELFMAG0 0x7F
+#  define ELFMAG1 'E'
+#  define ELFMAG2 'L'
+#  define ELFMAG3 'F'
+#  define ET_NONE 0
+#  define ET_REL 1
+#  define ET_EXEC 2
+#  define ET_DYN 3
+#  define ET_CORE 4
+#  define EM_386 3
+#  define EM_SPARC 2
+#  define EM_PPC 20
 #else
-#include <elf.h>
+#  include <elf.h>
 #endif
 #if defined(__sun)
-#include <sys/link.h> // For dynamic section information
+#  include <sys/link.h> // For dynamic section information
 #endif
 #ifdef _SCO_DS
-#include <link.h> // For DT_SONAME etc.
+#  include <link.h> // For DT_SONAME etc.
 #endif
 #ifndef DT_RUNPATH
-#define DT_RUNPATH 29
+#  define DT_RUNPATH 29
 #endif
 
 // Low-level byte swapping implementation.
@@ -162,6 +162,7 @@ public:
 
   // Return the recorded ELF type.
   cmELF::FileType GetFileType() const { return this->ELFType; }
+
 protected:
   // Data common to all ELF class implementations.
 

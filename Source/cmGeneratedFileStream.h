@@ -67,8 +67,9 @@ protected:
  * contents have changed to prevent the file modification time from
  * being updated.
  */
-class cmGeneratedFileStream : private cmGeneratedFileStreamBase,
-                              public cmsys::ofstream
+class cmGeneratedFileStream
+  : private cmGeneratedFileStreamBase
+  , public cmsys::ofstream
 {
 public:
   typedef cmsys::ofstream Stream;

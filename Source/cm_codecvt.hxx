@@ -52,13 +52,13 @@ private:
   };
 
   bool m_noconv;
-#if defined(_WIN32)
+#  if defined(_WIN32)
   unsigned int m_codepage;
   result Decode(mbstate_t& state, int need, const char*& from_next,
                 char*& to_next, char* to_end) const;
   result DecodePartial(mbstate_t& state, char*& to_next, char* to_end) const;
   void BufferPartial(mbstate_t& state, int need, const char*& from_next) const;
-#endif
+#  endif
 
 #endif
 };

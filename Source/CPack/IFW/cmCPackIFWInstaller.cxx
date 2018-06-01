@@ -24,7 +24,8 @@ void cmCPackIFWInstaller::printSkippedOptionWarning(
   const std::string& optionName, const std::string& optionValue)
 {
   cmCPackIFWLogger(
-    WARNING, "Option "
+    WARNING,
+    "Option "
       << optionName << " is set to \"" << optionValue
       << "\" but will be skipped because the specified file does not exist."
       << std::endl);
@@ -146,7 +147,8 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     if (this->WizardStyle != "Modern" && this->WizardStyle != "Aero" &&
         this->WizardStyle != "Mac" && this->WizardStyle != "Classic") {
       cmCPackIFWLogger(
-        WARNING, "Option CPACK_IFW_PACKAGE_WIZARD_STYLE has unknown value \""
+        WARNING,
+        "Option CPACK_IFW_PACKAGE_WIZARD_STYLE has unknown value \""
           << option << "\". Expected values are: Modern, Aero, Mac, Classic."
           << std::endl);
     }
@@ -469,7 +471,8 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
         cmsys::SystemTools::CopyFileIfDifferent(this->Resources[i], path);
         resources.push_back(std::move(name));
       } else {
-        cmCPackIFWLogger(WARNING, "Can't copy resources from \""
+        cmCPackIFWLogger(WARNING,
+                         "Can't copy resources from \""
                            << this->Resources[i]
                            << "\". Resource will be skipped." << std::endl);
       }

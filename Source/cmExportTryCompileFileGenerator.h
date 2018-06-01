@@ -26,6 +26,7 @@ public:
 
   /** Set the list of targets to export.  */
   void SetConfig(const std::string& config) { this->Config = config; }
+
 protected:
   // Implement virtual methods from the superclass.
   bool GenerateMainFile(std::ostream& os) override;

@@ -2,7 +2,7 @@
 #include <QApplication>
 
 #ifndef QT_QAXSERVER_LIB
-#error Expected QT_QAXSERVER_LIB
+#  error Expected QT_QAXSERVER_LIB
 #endif
 
 #include <QAxFactory>

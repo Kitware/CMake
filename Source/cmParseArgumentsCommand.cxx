@@ -54,8 +54,8 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
     parseFromArgV = true;
     argIter++; // move past PARSE_ARGV
     if (!cmSystemTools::StringToULong(argIter->c_str(), &argvStart)) {
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, "PARSE_ARGV index '" +
-                                     *argIter +
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+                                   "PARSE_ARGV index '" + *argIter +
                                      "' is not an unsigned integer");
       cmSystemTools::SetFatalErrorOccured();
       return true;

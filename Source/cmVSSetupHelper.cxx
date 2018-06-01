@@ -7,7 +7,7 @@
 #include "cmsys/FStream.hxx"
 
 #ifndef VSSetupConstants
-#define VSSetupConstants
+#  define VSSetupConstants
 /* clang-format off */
 const IID IID_ISetupConfiguration = {
   0x42843719, 0xDB4C, 0x46C2,

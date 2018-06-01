@@ -13,7 +13,7 @@
 #include <vector>
 
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmsys/ConsoleBuf.hxx"
+#  include "cmsys/ConsoleBuf.hxx"
 #endif
 
 #include "cmCPackGenerator.h"
@@ -82,8 +82,9 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
   std::string key = value.substr(0, pos);
   value = value.c_str() + pos + 1;
   def->Map[key] = value;
-  cmCPack_Log(def->Log, cmCPackLog::LOG_DEBUG, "Set CPack variable: "
-                << key << " to \"" << value << "\"" << std::endl);
+  cmCPack_Log(def->Log, cmCPackLog::LOG_DEBUG,
+              "Set CPack variable: " << key << " to \"" << value << "\""
+                                     << std::endl);
   return 1;
 }
 
@@ -320,8 +321,8 @@ int main(int argc, char const* const* argv)
     }
     const char* genList = globalMF.GetDefinition("CPACK_GENERATOR");
     if (!genList) {
-      cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "CPack generator not specified"
-                    << std::endl);
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+                  "CPack generator not specified" << std::endl);
     } else {
       std::vector<std::string> generatorsVector;
       cmSystemTools::ExpandListArgument(genList, generatorsVector);
@@ -384,8 +385,9 @@ int main(int argc, char const* const* argv)
           }
           if (parsed) {
             const char* projName = mf->GetDefinition("CPACK_PACKAGE_NAME");
-            cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "Use generator: "
-                          << cpackGenerator->GetNameOfClass() << std::endl);
+            cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
+                        "Use generator: " << cpackGenerator->GetNameOfClass()
+                                          << std::endl);
             cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
                         "For project: " << projName << std::endl);
 

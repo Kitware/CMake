@@ -55,8 +55,9 @@ void MergeOptions(std::vector<std::string>& baseOpts,
           }
         }
         // Test if this is a value option and change the existing value
-        if (!optName.empty() && (std::find(valueOpts.begin(), valueOpts.end(),
-                                           optName) != valueOpts.end())) {
+        if (!optName.empty() &&
+            (std::find(valueOpts.begin(), valueOpts.end(), optName) !=
+             valueOpts.end())) {
           const Iter existItNext(existIt + 1);
           const CIter fitNext(fit + 1);
           if ((existItNext != baseOpts.end()) && (fitNext != fitEnd)) {

@@ -18,7 +18,7 @@
 class cmExecutionStatus;
 
 #ifdef __QNX__
-#include <malloc.h> /* for malloc/free on QNX */
+#  include <malloc.h> /* for malloc/free on QNX */
 #endif
 
 extern "C" void TrapsForSignalsCFunction(int sig);

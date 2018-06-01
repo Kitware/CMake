@@ -29,8 +29,8 @@
 #include "cmake.h"
 
 #if defined(__HAIKU__)
-#include <FindDirectory.h>
-#include <StorageDefs.h>
+#  include <FindDirectory.h>
+#  include <StorageDefs.h>
 #endif
 
 class cmExecutionStatus;
@@ -525,10 +525,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
            "Add NO_MODULE to exclusively request Config mode and search for a "
            "package configuration file provided by "
         << this->Name << " (" << this->Name << "Config.cmake or "
-        << cmSystemTools::LowerCase(this->Name) << "-config.cmake).  "
-                                                   "Otherwise make Find"
-        << this->Name << ".cmake available in "
-                         "CMAKE_MODULE_PATH.";
+        << cmSystemTools::LowerCase(this->Name)
+        << "-config.cmake).  "
+           "Otherwise make Find"
+        << this->Name
+        << ".cmake available in "
+           "CMAKE_MODULE_PATH.";
     }
     aw << "\n"
           "(Variable CMAKE_FIND_PACKAGE_WARN_NO_MODULE enabled this warning.)";
@@ -764,8 +766,9 @@ bool cmFindPackageCommand::HandlePackageMode()
   if (result && !found) {
     // warn if package required or neither quiet nor in config mode
     if (this->Required ||
-        !(this->Quiet || (this->UseConfigFiles && !this->UseFindModules &&
-                          this->ConsideredConfigs.empty()))) {
+        !(this->Quiet ||
+          (this->UseConfigFiles && !this->UseFindModules &&
+           this->ConsideredConfigs.empty()))) {
       // The variable is not set.
       std::ostringstream e;
       std::ostringstream aw;
@@ -810,8 +813,9 @@ bool cmFindPackageCommand::HandlePackageMode()
               << ".cmake\" in "
                  "CMAKE_MODULE_PATH this project has asked CMake to find a "
                  "package configuration file provided by \""
-              << this->Name << "\", "
-                               "but CMake did not find one.\n";
+              << this->Name
+              << "\", "
+                 "but CMake did not find one.\n";
           }
 
           if (this->Configs.size() == 1) {
@@ -832,8 +836,9 @@ bool cmFindPackageCommand::HandlePackageMode()
             << "\" to a "
                "directory containing one of the above files. "
                "If \""
-            << this->Name << "\" provides a separate development "
-                             "package or SDK, be sure it has been installed.";
+            << this->Name
+            << "\" provides a separate development "
+               "package or SDK, be sure it has been installed.";
         } else // if(!this->UseFindModules && !this->UseConfigFiles)
         {
           e << "No \"Find" << this->Name << ".cmake\" found in "
@@ -1234,14 +1239,14 @@ void cmFindPackageCommand::FillPrefixesSystemRegistry()
 }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#include <windows.h>
+#  include <windows.h>
 // http://msdn.microsoft.com/en-us/library/aa384253%28v=vs.85%29.aspx
-#if !defined(KEY_WOW64_32KEY)
-#define KEY_WOW64_32KEY 0x0200
-#endif
-#if !defined(KEY_WOW64_64KEY)
-#define KEY_WOW64_64KEY 0x0100
-#endif
+#  if !defined(KEY_WOW64_32KEY)
+#    define KEY_WOW64_32KEY 0x0200
+#  endif
+#  if !defined(KEY_WOW64_64KEY)
+#    define KEY_WOW64_64KEY 0x0100
+#  endif
 void cmFindPackageCommand::LoadPackageRegistryWinUser()
 {
   // HKEY_CURRENT_USER\\Software shares 32-bit and 64-bit views.

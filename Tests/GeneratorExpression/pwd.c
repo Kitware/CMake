@@ -3,11 +3,11 @@
 #include <stdlib.h>
 
 #ifdef _WIN32
-#include <direct.h>
-#define getcurdir _getcwd
+#  include <direct.h>
+#  define getcurdir _getcwd
 #else
-#include <unistd.h>
-#define getcurdir getcwd
+#  include <unistd.h>
+#  define getcurdir getcwd
 #endif
 
 int main(int argc, char* argv[])

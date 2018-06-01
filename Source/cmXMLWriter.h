@@ -145,6 +145,7 @@ public:
     xmlwr.StartDocument();
   }
   ~cmXMLDocument() { xmlwr.EndDocument(); }
+
 private:
   friend class cmXMLElement;
   cmXMLWriter& xmlwr;

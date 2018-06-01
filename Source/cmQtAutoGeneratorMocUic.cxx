@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmQtAutoGen.h"
 #include "cmQtAutoGeneratorMocUic.h"
+#include "cmQtAutoGen.h"
 
 #include <algorithm>
 #include <array>
@@ -18,7 +18,7 @@
 #include "cmake.h"
 
 #if defined(__APPLE__)
-#include <unistd.h>
+#  include <unistd.h>
 #endif
 
 // -- Class methods
@@ -1330,8 +1330,9 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
       std::string error;
       // Insert default filter for Q_PLUGIN_METADATA
       if (Base().QtVersionMajor != 4) {
-        pushFilter("Q_PLUGIN_METADATA", "[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\("
-                                        "[^\\)]*FILE[ \t]*\"([^\"]+)\"",
+        pushFilter("Q_PLUGIN_METADATA",
+                   "[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\("
+                   "[^\\)]*FILE[ \t]*\"([^\"]+)\"",
                    error);
       }
       // Insert user defined dependency filters

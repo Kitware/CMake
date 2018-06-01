@@ -555,9 +555,10 @@ bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
     if (!cmSystemTools::RunSingleCommand(command, &version, &error, nullptr,
                                          nullptr,
                                          cmSystemTools::OUTPUT_NONE)) {
-      mf->IssueMessage(cmake::FATAL_ERROR, "Running\n '" +
-                         cmJoin(command, "' '") + "'\n"
-                                                  "failed with:\n " +
+      mf->IssueMessage(cmake::FATAL_ERROR,
+                       "Running\n '" + cmJoin(command, "' '") +
+                         "'\n"
+                         "failed with:\n " +
                          error);
       cmSystemTools::SetFatalErrorOccured();
       return false;

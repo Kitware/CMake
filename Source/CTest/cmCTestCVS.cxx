@@ -134,8 +134,9 @@ private:
 
   bool ProcessLine() override
   {
-    if (this->Line == ("======================================="
-                       "======================================")) {
+    if (this->Line ==
+        ("======================================="
+         "======================================")) {
       // This line ends the revision list.
       if (this->Section == SectionRevisions) {
         this->FinishRevision();

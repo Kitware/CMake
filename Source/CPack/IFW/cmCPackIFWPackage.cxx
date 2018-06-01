@@ -226,7 +226,8 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
   if (const char* option = this->GetOption(prefix + "PRIORITY")) {
     this->SortingPriority = option;
     cmCPackIFWLogger(
-      WARNING, "The \"PRIORITY\" option is set "
+      WARNING,
+      "The \"PRIORITY\" option is set "
         << "for component \"" << component->Name << "\", but there option is "
         << "deprecated. Please use \"SORTING_PRIORITY\" option instead."
         << std::endl);
@@ -303,7 +304,8 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
   if (const char* option = this->GetOption(prefix + "PRIORITY")) {
     this->SortingPriority = option;
     cmCPackIFWLogger(
-      WARNING, "The \"PRIORITY\" option is set "
+      WARNING,
+      "The \"PRIORITY\" option is set "
         << "for component group \"" << group->Name
         << "\", but there option is "
         << "deprecated. Please use \"SORTING_PRIORITY\" option instead."

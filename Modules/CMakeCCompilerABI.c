@@ -1,9 +1,9 @@
 #ifdef __cplusplus
-#error "A C++ compiler has been selected for C."
+#  error "A C++ compiler has been selected for C."
 #endif
 
 #ifdef __CLASSIC_C__
-#define const
+#  define const
 #endif
 
 #include "CMakeCompilerABI.h"

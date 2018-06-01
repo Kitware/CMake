@@ -614,23 +614,27 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
   xml.StartElement("MakeCommands");
 
   xml.StartElement("Build");
-  xml.Attribute("command", this->BuildMakeCommand(make, makefileName.c_str(),
-                                                  targetName, makeFlags));
+  xml.Attribute(
+    "command",
+    this->BuildMakeCommand(make, makefileName.c_str(), targetName, makeFlags));
   xml.EndElement();
 
   xml.StartElement("CompileFile");
-  xml.Attribute("command", this->BuildMakeCommand(make, makefileName.c_str(),
-                                                  "\"$file\"", makeFlags));
+  xml.Attribute("command",
+                this->BuildMakeCommand(make, makefileName.c_str(), "\"$file\"",
+                                       makeFlags));
   xml.EndElement();
 
   xml.StartElement("Clean");
-  xml.Attribute("command", this->BuildMakeCommand(make, makefileName.c_str(),
-                                                  "clean", makeFlags));
+  xml.Attribute(
+    "command",
+    this->BuildMakeCommand(make, makefileName.c_str(), "clean", makeFlags));
   xml.EndElement();
 
   xml.StartElement("DistClean");
-  xml.Attribute("command", this->BuildMakeCommand(make, makefileName.c_str(),
-                                                  "clean", makeFlags));
+  xml.Attribute(
+    "command",
+    this->BuildMakeCommand(make, makefileName.c_str(), "clean", makeFlags));
   xml.EndElement();
 
   xml.EndElement(); // MakeCommands

@@ -3,7 +3,7 @@
 #include <string.h>
 
 #ifndef BUILD_CONFIG_NAME
-#error "BUILD_CONFIG_NAME not defined!"
+#  error "BUILD_CONFIG_NAME not defined!"
 #endif
 
 int main()

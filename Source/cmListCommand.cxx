@@ -686,8 +686,8 @@ bool cmListCommand::HandleTransformCommand(
   // Build a set of supported actions.
   std::set<ActionDescriptor,
            std::function<bool(const std::string&, const std::string&)>>
-  descriptors(
-    [](const std::string& x, const std::string& y) { return x < y; });
+    descriptors(
+      [](const std::string& x, const std::string& y) { return x < y; });
   descriptors = { { "APPEND", 1,
                     [&command](const std::string& s) -> std::string {
                       if (command.Selector->InSelection(s)) {

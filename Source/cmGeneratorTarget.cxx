@@ -46,8 +46,9 @@ const char* cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
 }
 
 template <>
-const char* cmTargetPropertyComputer::ComputeLocationForBuild<
-  cmGeneratorTarget>(cmGeneratorTarget const* tgt)
+const char*
+cmTargetPropertyComputer::ComputeLocationForBuild<cmGeneratorTarget>(
+  cmGeneratorTarget const* tgt)
 {
   return tgt->GetLocation("");
 }
@@ -893,8 +894,9 @@ static bool processSources(
     }
     if (!usedSources.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-        cmake::LOG, std::string("Used sources for target ") + tgt->GetName() +
-          ":\n" + usedSources,
+        cmake::LOG,
+        std::string("Used sources for target ") + tgt->GetName() + ":\n" +
+          usedSources,
         entry->ge->GetBacktrace());
     }
   }
@@ -2553,8 +2555,9 @@ static void processIncludeDirectories(
     }
     if (!usedIncludes.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-        cmake::LOG, std::string("Used includes for target ") + tgt->GetName() +
-          ":\n" + usedIncludes,
+        cmake::LOG,
+        std::string("Used includes for target ") + tgt->GetName() + ":\n" +
+          usedIncludes,
         entry->ge->GetBacktrace());
     }
   }
@@ -2661,8 +2664,9 @@ static void processCompileOptionsInternal(
     }
     if (!usedOptions.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-        cmake::LOG, std::string("Used compile ") + logName +
-          std::string(" for target ") + tgt->GetName() + ":\n" + usedOptions,
+        cmake::LOG,
+        std::string("Used compile ") + logName + std::string(" for target ") +
+          tgt->GetName() + ":\n" + usedOptions,
         entry->ge->GetBacktrace());
     }
   }
@@ -3958,8 +3962,9 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
           e << "Property " << p << " on target \"" << tgt->GetName()
             << "\" does\nnot match the "
                "INTERFACE_"
-            << p << " property requirement\nof "
-                    "dependency \""
+            << p
+            << " property requirement\nof "
+               "dependency \""
             << theTarget->GetName() << "\".\n";
           cmSystemTools::Error(e.str().c_str());
           break;

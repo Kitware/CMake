@@ -111,8 +111,9 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   os << cmOutputConverter::EscapeForCMake(exe);
   for (std::vector<std::string>::const_iterator ci = command.begin() + 1;
        ci != command.end(); ++ci) {
-    os << " " << cmOutputConverter::EscapeForCMake(
-                   ge.Parse(*ci)->Evaluate(this->LG, config));
+    os << " "
+       << cmOutputConverter::EscapeForCMake(
+            ge.Parse(*ci)->Evaluate(this->LG, config));
   }
 
   // Finish the test command.

@@ -17,7 +17,7 @@
 #include <stdlib.h>
 
 #ifdef __QNX__
-#include <malloc.h> /* for malloc/free on QNX */
+#  include <malloc.h> /* for malloc/free on QNX */
 #endif
 
 extern "C" {
@@ -395,9 +395,10 @@ void CCONV cmAddLibrary(void* arg, const char* libname, int shared,
   for (i = 0; i < numSrcs; ++i) {
     srcs2.push_back(srcs[i]);
   }
-  mf->AddLibrary(libname, (shared ? cmStateEnums::SHARED_LIBRARY
-                                  : cmStateEnums::STATIC_LIBRARY),
-                 srcs2);
+  mf->AddLibrary(
+    libname,
+    (shared ? cmStateEnums::SHARED_LIBRARY : cmStateEnums::STATIC_LIBRARY),
+    srcs2);
 }
 
 char CCONV* cmExpandVariablesInString(void* arg, const char* source,

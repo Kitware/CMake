@@ -260,12 +260,12 @@ public:
                                    BundleDirectoryLevel level) const;
 
   /** Return the install name directory for the target in the
-    * build tree.  For example: "\@rpath/", "\@loader_path/",
-    * or "/full/path/to/library".  */
+   * build tree.  For example: "\@rpath/", "\@loader_path/",
+   * or "/full/path/to/library".  */
   std::string GetInstallNameDirForBuildTree(const std::string& config) const;
 
   /** Return the install name directory for the target in the
-    * install tree.  For example: "\@rpath/" or "\@loader_path/". */
+   * install tree.  For example: "\@rpath/" or "\@loader_path/". */
   std::string GetInstallNameDirForInstallTree() const;
 
   cmListFileBacktrace GetBacktrace() const;
@@ -499,8 +499,8 @@ public:
                             cmStateEnums::ArtifactType artifact) const;
 
   /** Clears cached meta data for local and external source files.
-    * The meta data will be recomputed on demand.
-    */
+   * The meta data will be recomputed on demand.
+   */
   void ClearSourcesCache();
 
   void AddSource(const std::string& src);

@@ -299,7 +299,8 @@ int cmCTestBuildHandler::ProcessHandler()
       this->ErrorWarningFileLineRegex.push_back(std::move(r));
     } else {
       cmCTestLog(
-        this->CTest, ERROR_MESSAGE, "Problem Compiling regular expression: "
+        this->CTest, ERROR_MESSAGE,
+        "Problem Compiling regular expression: "
           << cmCTestWarningErrorFileLine[entry].RegularExpressionString
           << std::endl);
     }
@@ -331,8 +332,8 @@ int cmCTestBuildHandler::ProcessHandler()
   cmGeneratedFileStream ofs;
   auto elapsed_time_start = std::chrono::steady_clock::now();
   if (!this->StartLogFile("Build", ofs)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create build log file"
-                 << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Cannot create build log file" << std::endl);
   }
 
   // Create lists of regular expression strings for errors, error exceptions,
@@ -352,7 +353,7 @@ int cmCTestBuildHandler::ProcessHandler()
     this->CustomWarningExceptions.push_back(cmCTestWarningExceptions[cc]);
   }
 
-// Pre-compile regular expressions objects for all regular expressions
+  // Pre-compile regular expressions objects for all regular expressions
 
 #define cmCTestBuildHandlerPopulateRegexVector(strings, regexes)              \
   regexes.clear();                                                            \
@@ -452,8 +453,8 @@ int cmCTestBuildHandler::ProcessHandler()
   // Generate XML output
   cmGeneratedFileStream xofs;
   if (!this->StartResultingXML(cmCTest::PartBuild, "Build", xofs)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create build XML file"
-                 << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Cannot create build XML file" << std::endl);
     return -1;
   }
   cmXMLWriter xml(xofs);
@@ -466,19 +467,20 @@ int cmCTestBuildHandler::ProcessHandler()
   this->GenerateXMLFooter(xml, elapsed_build_time);
 
   if (res != cmsysProcess_State_Exited || retVal || this->TotalErrors > 0) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error(s) when building project"
-                 << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Error(s) when building project" << std::endl);
   }
 
   // Display message about number of errors and warnings
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   "
-               << this->TotalErrors
-               << (this->TotalErrors >= this->MaxErrors ? " or more" : "")
-               << " Compiler errors" << std::endl);
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   "
-               << this->TotalWarnings
-               << (this->TotalWarnings >= this->MaxWarnings ? " or more" : "")
-               << " Compiler warnings" << std::endl);
+  cmCTestLog(this->CTest, HANDLER_OUTPUT,
+             "   " << this->TotalErrors
+                   << (this->TotalErrors >= this->MaxErrors ? " or more" : "")
+                   << " Compiler errors" << std::endl);
+  cmCTestLog(
+    this->CTest, HANDLER_OUTPUT,
+    "   " << this->TotalWarnings
+          << (this->TotalWarnings >= this->MaxWarnings ? " or more" : "")
+          << " Compiler warnings" << std::endl);
 
   return retVal;
 }
@@ -779,8 +781,8 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
   }
   argv.push_back(nullptr);
 
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run command:",
-                     this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                     "Run command:", this->Quiet);
   for (char const* arg : argv) {
     if (!arg) {
       break;
@@ -812,7 +814,8 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
   cmProcessOutput processOutput(encoding);
   std::string strdata;
   cmCTestOptionalLog(
-    this->CTest, HANDLER_PROGRESS_OUTPUT, "   Each symbol represents "
+    this->CTest, HANDLER_PROGRESS_OUTPUT,
+    "   Each symbol represents "
       << tick_len << " bytes of output." << std::endl
       << (this->UseCTestLaunch
             ? ""
@@ -868,7 +871,8 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
                       &this->BuildProcessingQueue);
   this->ProcessBuffer(nullptr, 0, tick, tick_len, ofs,
                       &this->BuildProcessingErrorQueue);
-  cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT, " Size of output: "
+  cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT,
+                     " Size of output: "
                        << ((this->BuildOutputLogSize + 512) / 1024) << "K"
                        << std::endl,
                      this->Quiet);
@@ -921,8 +925,9 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
     errorwarning.Error = true;
     this->ErrorsAndWarnings.push_back(std::move(errorwarning));
     this->TotalErrors++;
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "There was an error: "
-                 << cmsysProcess_GetErrorString(cp) << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "There was an error: " << cmsysProcess_GetErrorString(cp)
+                                      << std::endl);
   }
 
   cmsysProcess_Delete(cp);
@@ -1049,7 +1054,8 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
                        this->LastTickChar, this->Quiet);
     tickDisplayed = true;
     if (tick % tick_line_len == 0 && tick > 0) {
-      cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT, "  Size: "
+      cmCTestOptionalLog(this->CTest, HANDLER_PROGRESS_OUTPUT,
+                         "  Size: "
                            << ((this->BuildOutputLogSize + 512) / 1024) << "K"
                            << std::endl
                            << "    ",
@@ -1103,7 +1109,8 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
     for (cmsys::RegularExpression& rx : this->ErrorExceptionRegex) {
       if (rx.find(data)) {
         errorLine = 0;
-        cmCTestOptionalLog(this->CTest, DEBUG, "  Not an error Line: "
+        cmCTestOptionalLog(this->CTest, DEBUG,
+                           "  Not an error Line: "
                              << data << " (matches: "
                              << this->CustomErrorExceptions[wrxCnt] << ")"
                              << std::endl,
@@ -1119,7 +1126,8 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
     for (cmsys::RegularExpression& rx : this->WarningMatchRegex) {
       if (rx.find(data)) {
         warningLine = 1;
-        cmCTestOptionalLog(this->CTest, DEBUG, "  Warning Line: "
+        cmCTestOptionalLog(this->CTest, DEBUG,
+                           "  Warning Line: "
                              << data << " (matches: "
                              << this->CustomWarningMatches[wrxCnt] << ")"
                              << std::endl,
@@ -1134,7 +1142,8 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
     for (cmsys::RegularExpression& rx : this->WarningExceptionRegex) {
       if (rx.find(data)) {
         warningLine = 0;
-        cmCTestOptionalLog(this->CTest, DEBUG, "  Not a warning Line: "
+        cmCTestOptionalLog(this->CTest, DEBUG,
+                           "  Not a warning Line: "
                              << data << " (matches: "
                              << this->CustomWarningExceptions[wrxCnt] << ")"
                              << std::endl,

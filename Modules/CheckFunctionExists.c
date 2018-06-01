@@ -1,19 +1,19 @@
 #ifdef CHECK_FUNCTION_EXISTS
 
-#ifdef __cplusplus
+#  ifdef __cplusplus
 extern "C"
-#endif
+#  endif
   char
   CHECK_FUNCTION_EXISTS(void);
-#ifdef __CLASSIC_C__
+#  ifdef __CLASSIC_C__
 int main()
 {
   int ac;
   char* av[];
-#else
+#  else
 int main(int ac, char* av[])
 {
-#endif
+#  endif
   CHECK_FUNCTION_EXISTS();
   if (ac > 1000) {
     return *av[0];
@@ -23,6 +23,6 @@ int main(int ac, char* av[])
 
 #else /* CHECK_FUNCTION_EXISTS */
 
-#error "CHECK_FUNCTION_EXISTS has to specify the function"
+#  error "CHECK_FUNCTION_EXISTS has to specify the function"
 
 #endif /* CHECK_FUNCTION_EXISTS */

@@ -1,5 +1,5 @@
 #ifndef TESTDEF
-#error "TESTDEF should be defined!"
+#  error "TESTDEF should be defined!"
 #endif
 int main(void)
 {

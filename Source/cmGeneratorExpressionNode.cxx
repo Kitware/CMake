@@ -1421,8 +1421,9 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
         std::ostringstream e;
         e << "The evaluation of the TARGET_OBJECTS generator expression "
              "is only suitable for consumption by CMake (limited"
-          << reason << ").  "
-                       "It is not suitable for writing out elsewhere.";
+          << reason
+          << ").  "
+             "It is not suitable for writing out elsewhere.";
         reportError(context, content->GetOriginalExpression(), e.str());
         return std::string();
       }
@@ -1649,7 +1650,7 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
       CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_LIST_ITEM)
 
 #undef TARGET_POLICY_LIST_ITEM
-        );
+    );
     return std::string();
   }
 
@@ -1904,13 +1905,15 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
     }
     if (target->GetType() >= cmStateEnums::OBJECT_LIBRARY &&
         target->GetType() != cmStateEnums::UNKNOWN_LIBRARY) {
-      ::reportError(context, content->GetOriginalExpression(), "Target \"" +
-                      name + "\" is not an executable or library.");
+      ::reportError(context, content->GetOriginalExpression(),
+                    "Target \"" + name +
+                      "\" is not an executable or library.");
       return std::string();
     }
-    if (dagChecker && (dagChecker->EvaluatingLinkLibraries(name.c_str()) ||
-                       (dagChecker->EvaluatingSources() &&
-                        name == dagChecker->TopTarget()))) {
+    if (dagChecker &&
+        (dagChecker->EvaluatingLinkLibraries(name.c_str()) ||
+         (dagChecker->EvaluatingSources() &&
+          name == dagChecker->TopTarget()))) {
       ::reportError(context, content->GetOriginalExpression(),
                     "Expressions which require the linker language may not "
                     "be used while evaluating link libraries");

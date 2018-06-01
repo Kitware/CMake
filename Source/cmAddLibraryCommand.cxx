@@ -211,8 +211,9 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
     if (!aliasedTarget) {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << libName << "\" because target \""
-        << aliasedName << "\" does not already "
-                          "exist.";
+        << aliasedName
+        << "\" does not already "
+           "exist.";
       this->SetError(e.str());
       return false;
     }

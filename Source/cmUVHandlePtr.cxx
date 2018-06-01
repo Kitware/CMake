@@ -87,16 +87,16 @@ template <>
 struct uv_handle_deleter<uv_async_t>
 {
   /***
-  * Wile uv_async_send is itself thread-safe, there are
-  * no strong guarantees that close hasn't already been
-  * called on the handle; and that it might be deleted
-  * as the send call goes through. This mutex guards
-  * against that.
-  *
-  * The shared_ptr here is to allow for copy construction
-  * which is mandated by the standard for Deleter on
-  * shared_ptrs.
-  */
+   * Wile uv_async_send is itself thread-safe, there are
+   * no strong guarantees that close hasn't already been
+   * called on the handle; and that it might be deleted
+   * as the send call goes through. This mutex guards
+   * against that.
+   *
+   * The shared_ptr here is to allow for copy construction
+   * which is mandated by the standard for Deleter on
+   * shared_ptrs.
+   */
   std::shared_ptr<std::mutex> handleMutex;
 
   uv_handle_deleter()

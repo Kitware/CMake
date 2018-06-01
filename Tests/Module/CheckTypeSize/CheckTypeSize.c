@@ -2,13 +2,13 @@
 #include "somestruct.h"
 
 #ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#  include <sys/types.h>
 #endif
 #ifdef HAVE_STDINT_H
-#include <stdint.h>
+#  include <stdint.h>
 #endif
 #ifdef HAVE_STDDEF_H
-#include <stddef.h>
+#  include <stddef.h>
 #endif
 
 #include <stdio.h>
@@ -86,17 +86,17 @@ int main()
 /* long long */
 #if defined(SIZEOF_LONG_LONG)
   CHECK(long long, SIZEOF_LONG_LONG);
-#if !defined(HAVE_SIZEOF_LONG_LONG)
+#  if !defined(HAVE_SIZEOF_LONG_LONG)
   NODEF(HAVE_SIZEOF_LONG_LONG);
-#endif
+#  endif
 #endif
 
 /* __int64 */
 #if defined(SIZEOF___INT64)
   CHECK(__int64, SIZEOF___INT64);
-#if !defined(HAVE_SIZEOF___INT64)
+#  if !defined(HAVE_SIZEOF___INT64)
   NODEF(HAVE_SIZEOF___INT64);
-#endif
+#  endif
 #elif defined(HAVE_SIZEOF___INT64)
   NODEF(SIZEOF___INT64);
 #endif
@@ -114,9 +114,9 @@ int main()
 /* ssize_t */
 #if defined(SIZEOF_SSIZE_T)
   CHECK(ssize_t, SIZEOF_SSIZE_T);
-#if !defined(HAVE_SIZEOF_SSIZE_T)
+#  if !defined(HAVE_SIZEOF_SSIZE_T)
   NODEF(HAVE_SIZEOF_SSIZE_T);
-#endif
+#  endif
 #elif defined(HAVE_SIZEOF_SSIZE_T)
   NODEF(SIZEOF_SSIZE_T);
 #endif
@@ -125,9 +125,9 @@ int main()
 #if defined(SIZEOF_STRUCTMEMBER_INT)
   CHECK(x.someint, SIZEOF_STRUCTMEMBER_INT);
   CHECK(x.someint, SIZEOF_INT);
-#if !defined(HAVE_SIZEOF_STRUCTMEMBER_INT)
+#  if !defined(HAVE_SIZEOF_STRUCTMEMBER_INT)
   NODEF(HAVE_SIZEOF_STRUCTMEMBER_INT);
-#endif
+#  endif
 #elif defined(HAVE_SIZEOF_STRUCTMEMBER_INT)
   NODEF(SIZEOF_STRUCTMEMBER_INT);
 #endif
@@ -136,9 +136,9 @@ int main()
 #if defined(SIZEOF_STRUCTMEMBER_PTR)
   CHECK(x.someptr, SIZEOF_STRUCTMEMBER_PTR);
   CHECK(x.someptr, SIZEOF_DATA_PTR);
-#if !defined(HAVE_SIZEOF_STRUCTMEMBER_PTR)
+#  if !defined(HAVE_SIZEOF_STRUCTMEMBER_PTR)
   NODEF(HAVE_SIZEOF_STRUCTMEMBER_PTR);
-#endif
+#  endif
 #elif defined(HAVE_SIZEOF_STRUCTMEMBER_PTR)
   NODEF(SIZEOF_STRUCTMEMBER_PTR);
 #endif
@@ -147,9 +147,9 @@ int main()
 #if defined(SIZEOF_STRUCTMEMBER_CHAR)
   CHECK(x.somechar, SIZEOF_STRUCTMEMBER_CHAR);
   CHECK(x.somechar, SIZEOF_CHAR);
-#if !defined(HAVE_SIZEOF_STRUCTMEMBER_CHAR)
+#  if !defined(HAVE_SIZEOF_STRUCTMEMBER_CHAR)
   NODEF(HAVE_SIZEOF_STRUCTMEMBER_CHAR);
-#endif
+#  endif
 #elif defined(HAVE_SIZEOF_STRUCTMEMBER_CHAR)
   NODEF(SIZEOF_STRUCTMEMBER_CHAR);
 #endif

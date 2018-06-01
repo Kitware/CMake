@@ -12,7 +12,9 @@
 /**
  * Dialog window for setting the warning message related options.
  */
-class WarningMessagesDialog : public QDialog, public Ui_MessagesDialog
+class WarningMessagesDialog
+  : public QDialog
+  , public Ui_MessagesDialog
 {
   Q_OBJECT
 

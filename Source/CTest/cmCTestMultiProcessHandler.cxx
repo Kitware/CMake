@@ -124,8 +124,9 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   std::chrono::system_clock::time_point stop_time = this->CTest->GetStopTime();
   if (stop_time != std::chrono::system_clock::time_point() &&
       stop_time <= std::chrono::system_clock::now()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "The stop time has been passed. "
-                                           "Stopping all tests."
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "The stop time has been passed. "
+               "Stopping all tests."
                  << std::endl);
     this->StopTimePassed = true;
     return false;
@@ -330,10 +331,10 @@ void cmCTestMultiProcessHandler::StartNextTests()
     bool testLoadOk = true;
     if (this->TestLoad > 0) {
       if (processors <= spareLoad) {
-        cmCTestLog(this->CTest, DEBUG, "OK to run "
-                     << GetName(test) << ", it requires " << processors
-                     << " procs & system load is: " << systemLoad
-                     << std::endl);
+        cmCTestLog(this->CTest, DEBUG,
+                   "OK to run " << GetName(test) << ", it requires "
+                                << processors << " procs & system load is: "
+                                << systemLoad << std::endl);
         allTestsFailedTestLoadCheck = false;
       } else {
         testLoadOk = false;
@@ -712,8 +713,8 @@ void cmCTestMultiProcessHandler::PrintTestList()
 
     if (!p.Labels.empty()) // print the labels
     {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Labels:",
-                         this->Quiet);
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                         "Labels:", this->Quiet);
     }
     for (std::string const& label : p.Labels) {
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, " " << label,
@@ -747,7 +748,8 @@ void cmCTestMultiProcessHandler::PrintTestList()
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, std::endl, this->Quiet);
   }
 
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, std::endl
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                     std::endl
                        << "Total Tests: " << this->Total << std::endl,
                      this->Quiet);
 }

@@ -19,11 +19,11 @@
 #include "cmake.h"
 
 #if !defined(_WIN32)
-#include <sys/utsname.h>
+#  include <sys/utsname.h>
 #endif
 
 #if defined(__CYGWIN__)
-#include "cmSystemTools.h"
+#  include "cmSystemTools.h"
 #endif
 
 cmStateSnapshot::cmStateSnapshot(cmState* state)

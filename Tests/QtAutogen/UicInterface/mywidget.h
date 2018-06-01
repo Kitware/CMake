@@ -6,7 +6,7 @@
 #include <memory>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 3, 0)
-#include <klocalizedstring.h>
+#  include <klocalizedstring.h>
 #endif
 
 #include "ui_mywidget.h"

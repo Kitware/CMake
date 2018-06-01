@@ -7,8 +7,8 @@
 
 #if defined(CMAKE_USE_SYSTEM_LIBUV) && !defined(_WIN32) &&                    \
   UV_VERSION_MAJOR == 1 && UV_VERSION_MINOR < 19
-#define CMAKE_UV_SIGNAL_HACK
-#include "cmUVHandlePtr.h"
+#  define CMAKE_UV_SIGNAL_HACK
+#  include "cmUVHandlePtr.h"
 /*
    libuv does not use SA_RESTART on its signal handler, but C++ streams
    depend on it for reliable i/o operations.  This RAII helper convinces
@@ -22,6 +22,7 @@ class cmUVSignalHackRAII
   uv_loop_t HackLoop;
   cm::uv_signal_ptr HackSignal;
   static void HackCB(uv_signal_t*, int) {}
+
 public:
   cmUVSignalHackRAII()
   {
