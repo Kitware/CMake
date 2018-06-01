@@ -20,8 +20,8 @@
 
 /* Create map.  */
 
-typedef int (*MainFuncPointer)(int, char* []);
-typedef struct
+typedef int (*MainFuncPointer)(int, char* []); /* NOLINT */
+typedef struct /* NOLINT */
 {
   const char* name;
   MainFuncPointer func;
