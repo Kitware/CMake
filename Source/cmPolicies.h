@@ -223,7 +223,10 @@ class cmMakefile;
          12, 0, cmPolicies::WARN)                                             \
   SELECT(POLICY, CMP0075,                                                     \
          "Include file check macros honor CMAKE_REQUIRED_LIBRARIES.", 3, 12,  \
-         0, cmPolicies::WARN)
+         0, cmPolicies::WARN)                                                 \
+  SELECT(POLICY, CMP0076,                                                     \
+         "target_sources() command converts relative paths to absolute.", 3,  \
+         13, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -248,7 +251,8 @@ class cmMakefile;
   F(CMP0065)                                                                  \
   F(CMP0068)                                                                  \
   F(CMP0069)                                                                  \
-  F(CMP0073)
+  F(CMP0073)                                                                  \
+  F(CMP0076)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies

@@ -2839,6 +2839,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   ADD_TEST_MACRO(CMakeCommands.target_include_directories target_include_directories)
   ADD_TEST_MACRO(CMakeCommands.target_compile_definitions target_compile_definitions)
   ADD_TEST_MACRO(CMakeCommands.target_compile_options target_compile_options)
+  ADD_TEST_MACRO(CMakeCommands.target_sources target_sources)
 
   # The cmake server-mode test requires python for a simple client.
   find_package(PythonInterp QUIET)
