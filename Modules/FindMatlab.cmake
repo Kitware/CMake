@@ -591,7 +591,7 @@ function(matlab_get_mex_suffix matlab_root mex_suffix)
     set(devnull INPUT_FILE NUL)
   endif()
 
-  # this is the prefered way. If this does not work properly (eg. MCR on Windows), then we use our own knowledge
+  # this is the preferred way. If this does not work properly (eg. MCR on Windows), then we use our own knowledge
   execute_process(
     COMMAND ${Matlab_MEXEXTENSIONS_PROG}
     OUTPUT_VARIABLE _matlab_mex_extension

@@ -139,7 +139,7 @@ public:
    */
   int TestDirectory(bool memcheck);
 
-  /** what is the configuraiton type, e.g. Debug, Release etc. */
+  /** what is the configuration type, e.g. Debug, Release etc. */
   std::string const& GetConfigType();
   cmDuration GetTimeOut() { return this->TimeOut; }
   void SetTimeOut(cmDuration t) { this->TimeOut = t; }
@@ -561,7 +561,7 @@ private:
   bool HandleCommandLineArguments(size_t& i, std::vector<std::string>& args,
                                   std::string& errormsg);
 
-  /** hande the -S -SP and -SR arguments */
+  /** handle the -S -SP and -SR arguments */
   void HandleScriptArguments(size_t& i, std::vector<std::string>& args,
                              bool& SRArgumentSpecified);
 

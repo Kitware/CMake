@@ -1031,7 +1031,7 @@ function(cpack_deb_prepare_package_vars)
     "CPACK_DEBIAN_FILE_NAME")
   if(CPACK_DEBIAN_FILE_NAME)
     if(CPACK_DEBIAN_FILE_NAME STREQUAL "DEB-DEFAULT")
-      # Patch package file name to be in corrent debian format:
+      # Patch package file name to be in correct debian format:
       # <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
       set(CPACK_OUTPUT_FILE_NAME
         "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")

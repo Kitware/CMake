@@ -41,7 +41,7 @@ public:
       files.  */
   cmExportInstallFileGenerator(cmInstallExportGenerator* iegen);
 
-  /** Get the per-config file generated for each configuraiton.  This
+  /** Get the per-config file generated for each configuration.  This
       maps from the configuration name to the file temporary location
       for installation.  */
   std::map<std::string, std::string> const& GetConfigImportFiles()

@@ -390,7 +390,7 @@ bool bindexplib::AddDefinitionFile(const char* filename)
   }
   std::string str;
   while (std::getline(infile, str)) {
-    // skip the LIBRAY and EXPORTS lines (if any)
+    // skip the LIBRARY and EXPORTS lines (if any)
     if ((str.compare(0, 7, "LIBRARY") == 0) ||
         (str.compare(0, 7, "EXPORTS") == 0)) {
       continue;

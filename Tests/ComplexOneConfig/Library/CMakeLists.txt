@@ -48,7 +48,7 @@ add_library(CMakeTestCLibraryShared SHARED testConly.c)
 define_property(
   TARGET PROPERTY FOO
   BRIEF_DOCS "a test property"
-  FULL_DOCS "A simple etst proerty that means nothign and is used for nothing"
+  FULL_DOCS "A simple test property that means nothing and is used for nothing"
   )
 set_target_properties(CMakeTestCLibraryShared PROPERTIES FOO BAR)
 if(NOT BEOS AND NOT WIN32 AND NOT HAIKU)  # No libm on BeOS.

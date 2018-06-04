@@ -109,7 +109,7 @@ public:
   /**
    * Close the output file.  This should be used only with an open
    * stream.  The temporary file is atomically renamed to the
-   * destionation file if the stream is still valid when this method
+   * destination file if the stream is still valid when this method
    * is called.
    */
   bool Close();

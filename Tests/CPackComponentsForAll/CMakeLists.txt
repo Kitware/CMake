@@ -169,7 +169,7 @@ set(CPACK_RPM_RELOCATION_PATHS "${CMAKE_INSTALL_INCLUDEDIR}"
 set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
 
 # set some tags for NuGet packages
-# 1. all in one pacakge
+# 1. all in one package
 set(CPACK_NUGET_PACKAGE_TAGS "nuget" "unit" "test" "all-in-one")
 # 2. per component packages
 set(CPACK_NUGET_APPLICATIONS_PACKAGE_TAGS "nuget" "unit" "test" "applications")

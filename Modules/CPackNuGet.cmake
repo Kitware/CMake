@@ -5,7 +5,7 @@
 CPackNuGet
 ----------
 
-When build a NuGet pacakge there is no direct way to control an output
+When build a NuGet package there is no direct way to control an output
 filename due a lack of the corresponding CLI option of NuGet, so there
 is no ``CPACK_NUGET_PACKAGE_FILENAME`` variable. To form the output filename
 NuGet uses the package name and the version according to its built-in rules.
@@ -509,7 +509,7 @@ else()
     if(CPACK_NUGET_GROUPS)
         _cpack_nuget_debug("---[Making grouped component(s) package(s)]---")
         foreach(_group IN LISTS CPACK_NUGET_GROUPS)
-            _cpack_nuget_debug("Starting to make the pacakge for group `${_group}`")
+            _cpack_nuget_debug("Starting to make the package for group `${_group}`")
             string(MAKE_C_IDENTIFIER "${_group}" _group_up)
             string(TOUPPER "${_group_up}" _group_up)
 
@@ -531,11 +531,11 @@ else()
     if(CPACK_NUGET_COMPONENTS)
         _cpack_nuget_debug("---[Making single-component(s) package(s)]---")
         foreach(_comp IN LISTS CPACK_NUGET_COMPONENTS)
-            _cpack_nuget_debug("Starting to make the pacakge for component `${_comp}`")
+            _cpack_nuget_debug("Starting to make the package for component `${_comp}`")
             # Render a spec file which includes only given component
             unset(_CPACK_NUGET_FILES_TAG)
             _cpack_nuget_make_files_tag(${_comp})
-            # Temporary set `CPACK_NUGET_PACKAGE_COMPONENT` to the the current
+            # Temporary set `CPACK_NUGET_PACKAGE_COMPONENT` to the current
             # component name to properly collect various per group settings
             set(CPACK_NUGET_PACKAGE_COMPONENT ${_comp})
             _cpack_nuget_render_spec()

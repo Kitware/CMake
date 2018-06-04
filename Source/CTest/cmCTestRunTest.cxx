@@ -558,7 +558,7 @@ bool cmCTestRunTest::StartTest(size_t total)
 
 void cmCTestRunTest::ComputeArguments()
 {
-  this->Arguments.clear(); // reset becaue this might be a rerun
+  this->Arguments.clear(); // reset because this might be a rerun
   std::vector<std::string>::const_iterator j =
     this->TestProperties->Args.begin();
   ++j; // skip test name
