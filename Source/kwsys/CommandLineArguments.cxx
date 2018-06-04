@@ -9,9 +9,9 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "CommandLineArguments.hxx.in"
-#include "Configure.hxx.in"
-#include "String.hxx.in"
+#  include "CommandLineArguments.hxx.in"
+#  include "Configure.hxx.in"
+#  include "String.hxx.in"
 #endif
 
 #include <iostream>
@@ -25,18 +25,18 @@
 #include <string.h>
 
 #ifdef _MSC_VER
-#pragma warning(disable : 4786)
+#  pragma warning(disable : 4786)
 #endif
 
 #if defined(__sgi) && !defined(__GNUC__)
-#pragma set woff 1375 /* base class destructor not virtual */
+#  pragma set woff 1375 /* base class destructor not virtual */
 #endif
 
 #if 0
-#define CommandLineArguments_DEBUG(x)                                         \
-  std::cout << __LINE__ << " CLA: " << x << std::endl
+#  define CommandLineArguments_DEBUG(x)                                       \
+    std::cout << __LINE__ << " CLA: " << x << std::endl
 #else
-#define CommandLineArguments_DEBUG(x)
+#  define CommandLineArguments_DEBUG(x)
 #endif
 
 namespace KWSYS_NAMESPACE {

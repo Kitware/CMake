@@ -8,23 +8,23 @@ directory that use the stl string cause the compiler to load this
 source to try to get the definition of the string template.  This
 condition blocks the compiler from seeing the symbols defined here.
 */
-#include "kwsysPrivate.h"
-#include KWSYS_HEADER(String.h)
+#  include "kwsysPrivate.h"
+#  include KWSYS_HEADER(String.h)
 
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
-#if 0
-#include "String.h.in"
-#endif
+#  if 0
+#    include "String.h.in"
+#  endif
 
 /* Select an implementation for strcasecmp.  */
-#if defined(_MSC_VER)
-#define KWSYS_STRING_USE_STRICMP
-#include <string.h>
-#elif defined(__GNUC__)
-#define KWSYS_STRING_USE_STRCASECMP
-#include <strings.h>
-#else
+#  if defined(_MSC_VER)
+#    define KWSYS_STRING_USE_STRICMP
+#    include <string.h>
+#  elif defined(__GNUC__)
+#    define KWSYS_STRING_USE_STRCASECMP
+#    include <strings.h>
+#  else
 /* Table to convert upper case letters to lower case and leave all
    other characters alone.  */
 static char kwsysString_strcasecmp_tolower[] = {
@@ -58,16 +58,16 @@ static char kwsysString_strcasecmp_tolower[] = {
   '\363', '\364', '\365', '\366', '\367', '\370', '\371', '\372', '\373',
   '\374', '\375', '\376', '\377'
 };
-#endif
+#  endif
 
 /*--------------------------------------------------------------------------*/
 int kwsysString_strcasecmp(const char* lhs, const char* rhs)
 {
-#if defined(KWSYS_STRING_USE_STRICMP)
+#  if defined(KWSYS_STRING_USE_STRICMP)
   return _stricmp(lhs, rhs);
-#elif defined(KWSYS_STRING_USE_STRCASECMP)
+#  elif defined(KWSYS_STRING_USE_STRCASECMP)
   return strcasecmp(lhs, rhs);
-#else
+#  else
   const char* const lower = kwsysString_strcasecmp_tolower;
   unsigned char const* us1 = (unsigned char const*)lhs;
   unsigned char const* us2 = (unsigned char const*)rhs;
@@ -75,17 +75,17 @@ int kwsysString_strcasecmp(const char* lhs, const char* rhs)
   while ((result = lower[*us1] - lower[*us2++], result == 0) && *us1++) {
   }
   return result;
-#endif
+#  endif
 }
 
 /*--------------------------------------------------------------------------*/
 int kwsysString_strncasecmp(const char* lhs, const char* rhs, size_t n)
 {
-#if defined(KWSYS_STRING_USE_STRICMP)
+#  if defined(KWSYS_STRING_USE_STRICMP)
   return _strnicmp(lhs, rhs, n);
-#elif defined(KWSYS_STRING_USE_STRCASECMP)
+#  elif defined(KWSYS_STRING_USE_STRCASECMP)
   return strncasecmp(lhs, rhs, n);
-#else
+#  else
   const char* const lower = kwsysString_strcasecmp_tolower;
   unsigned char const* us1 = (unsigned char const*)lhs;
   unsigned char const* us2 = (unsigned char const*)rhs;
@@ -94,7 +94,7 @@ int kwsysString_strncasecmp(const char* lhs, const char* rhs, size_t n)
     --n;
   }
   return result;
-#endif
+#  endif
 }
 
 #endif /* KWSYS_STRING_C */

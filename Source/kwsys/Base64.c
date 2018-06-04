@@ -6,7 +6,7 @@
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
-#include "Base64.h.in"
+#  include "Base64.h.in"
 #endif
 
 static const unsigned char kwsysBase64EncodeTable[65] =

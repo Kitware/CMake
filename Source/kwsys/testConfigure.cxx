@@ -6,7 +6,7 @@ file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "Configure.hxx.in"
+#  include "Configure.hxx.in"
 #endif
 
 static bool testFallthrough(int n)

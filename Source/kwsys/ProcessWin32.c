@@ -7,8 +7,8 @@
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
-#include "Encoding.h.in"
-#include "Process.h.in"
+#  include "Encoding.h.in"
+#  include "Process.h.in"
 #endif
 
 /*
@@ -22,35 +22,35 @@ a UNIX-style select system call.
 */
 
 #ifdef _MSC_VER
-#pragma warning(push, 1)
+#  pragma warning(push, 1)
 #endif
 #include <windows.h> /* Windows API */
 #if defined(_MSC_VER) && _MSC_VER >= 1800
-#define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+#  define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 #endif
 #include <io.h>     /* _unlink */
 #include <stdio.h>  /* sprintf */
 #include <string.h> /* strlen, strdup */
 #ifdef __WATCOMC__
-#define _unlink unlink
+#  define _unlink unlink
 #endif
 
 #ifndef _MAX_FNAME
-#define _MAX_FNAME 4096
+#  define _MAX_FNAME 4096
 #endif
 #ifndef _MAX_PATH
-#define _MAX_PATH 4096
+#  define _MAX_PATH 4096
 #endif
 
 #ifdef _MSC_VER
-#pragma warning(pop)
-#pragma warning(disable : 4514)
-#pragma warning(disable : 4706)
+#  pragma warning(pop)
+#  pragma warning(disable : 4514)
+#  pragma warning(disable : 4706)
 #endif
 
 #if defined(__BORLANDC__)
-#pragma warn - 8004 /* assigned a value that is never used  */
-#pragma warn - 8060 /* Assignment inside if() condition.  */
+#  pragma warn - 8004 /* assigned a value that is never used  */
+#  pragma warn - 8060 /* Assignment inside if() condition.  */
 #endif
 
 /* There are pipes for the process pipeline's stdout and stderr.  */
@@ -63,14 +63,14 @@ a UNIX-style select system call.
 
 /* Debug output macro.  */
 #if 0
-#define KWSYSPE_DEBUG(x)                                                      \
-  ((void*)cp == (void*)0x00226DE0                                             \
-     ? (fprintf(stderr, "%d/%p/%d ", (int)GetCurrentProcessId(), cp,          \
-                __LINE__),                                                    \
-        fprintf x, fflush(stderr), 1)                                         \
-     : (1))
+#  define KWSYSPE_DEBUG(x)                                                    \
+    ((void*)cp == (void*)0x00226DE0                                           \
+       ? (fprintf(stderr, "%d/%p/%d ", (int)GetCurrentProcessId(), cp,        \
+                  __LINE__),                                                  \
+          fprintf x, fflush(stderr), 1)                                       \
+       : (1))
 #else
-#define KWSYSPE_DEBUG(x) (void)1
+#  define KWSYSPE_DEBUG(x) (void)1
 #endif
 
 typedef LARGE_INTEGER kwsysProcessTime;
@@ -355,16 +355,16 @@ kwsysProcess* kwsysProcess_New(void)
   ZeroMemory(&osv, sizeof(osv));
   osv.dwOSVersionInfoSize = sizeof(osv);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#pragma warning(push)
-#ifdef __INTEL_COMPILER
-#pragma warning(disable : 1478)
-#else
-#pragma warning(disable : 4996)
-#endif
+#  pragma warning(push)
+#  ifdef __INTEL_COMPILER
+#    pragma warning(disable : 1478)
+#  else
+#    pragma warning(disable : 4996)
+#  endif
 #endif
   GetVersionEx(&osv);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#pragma warning(pop)
+#  pragma warning(pop)
 #endif
   if (osv.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
     /* Win9x no longer supported.  */
@@ -2266,16 +2266,16 @@ static kwsysProcess_List* kwsysProcess_List_New(void)
   ZeroMemory(&osv, sizeof(osv));
   osv.dwOSVersionInfoSize = sizeof(osv);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#pragma warning(push)
-#ifdef __INTEL_COMPILER
-#pragma warning(disable : 1478)
-#else
-#pragma warning(disable : 4996)
-#endif
+#  pragma warning(push)
+#  ifdef __INTEL_COMPILER
+#    pragma warning(disable : 1478)
+#  else
+#    pragma warning(disable : 4996)
+#  endif
 #endif
   GetVersionEx(&osv);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#pragma warning(pop)
+#  pragma warning(pop)
 #endif
   self->NT4 =
     (osv.dwPlatformId == VER_PLATFORM_WIN32_NT && osv.dwMajorVersion < 5) ? 1

@@ -20,7 +20,7 @@ class @KWSYS_NAMESPACE@_EXPORT SystemInformation
 #elif @KWSYS_USE___INT64@
   typedef __int64 LongLong;
 #else
-#error "No Long Long"
+#  error "No Long Long"
 #endif
   friend class SystemInformationImplementation;
   SystemInformationImplementation* Implementation;

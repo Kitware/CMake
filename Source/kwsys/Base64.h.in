@@ -12,17 +12,17 @@
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
 #if !defined(KWSYS_NAMESPACE)
-#define kwsys_ns(x) @KWSYS_NAMESPACE@##x
-#define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
+#  define kwsys_ns(x) @KWSYS_NAMESPACE@##x
+#  define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
 #endif
 #if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-#define kwsysBase64 kwsys_ns(Base64)
-#define kwsysBase64_Decode kwsys_ns(Base64_Decode)
-#define kwsysBase64_Decode3 kwsys_ns(Base64_Decode3)
-#define kwsysBase64_Encode kwsys_ns(Base64_Encode)
-#define kwsysBase64_Encode1 kwsys_ns(Base64_Encode1)
-#define kwsysBase64_Encode2 kwsys_ns(Base64_Encode2)
-#define kwsysBase64_Encode3 kwsys_ns(Base64_Encode3)
+#  define kwsysBase64 kwsys_ns(Base64)
+#  define kwsysBase64_Decode kwsys_ns(Base64_Decode)
+#  define kwsysBase64_Decode3 kwsys_ns(Base64_Decode3)
+#  define kwsysBase64_Encode kwsys_ns(Base64_Encode)
+#  define kwsysBase64_Encode1 kwsys_ns(Base64_Encode1)
+#  define kwsysBase64_Encode2 kwsys_ns(Base64_Encode2)
+#  define kwsysBase64_Encode3 kwsys_ns(Base64_Encode3)
 #endif
 
 #if defined(__cplusplus)
@@ -94,17 +94,17 @@ kwsysEXPORT size_t kwsysBase64_Decode(const unsigned char* input,
 /* If we are building a kwsys .c or .cxx file, let it use these macros.
    Otherwise, undefine them to keep the namespace clean.  */
 #if !defined(KWSYS_NAMESPACE)
-#undef kwsys_ns
-#undef kwsysEXPORT
-#if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-#undef kwsysBase64
-#undef kwsysBase64_Decode
-#undef kwsysBase64_Decode3
-#undef kwsysBase64_Encode
-#undef kwsysBase64_Encode1
-#undef kwsysBase64_Encode2
-#undef kwsysBase64_Encode3
-#endif
+#  undef kwsys_ns
+#  undef kwsysEXPORT
+#  if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+#    undef kwsysBase64
+#    undef kwsysBase64_Decode
+#    undef kwsysBase64_Decode3
+#    undef kwsysBase64_Encode
+#    undef kwsysBase64_Encode1
+#    undef kwsysBase64_Encode2
+#    undef kwsysBase64_Encode3
+#  endif
 #endif
 
 #endif
