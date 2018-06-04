@@ -63,8 +63,8 @@ List of CPackNuGet specific variables:
     - ``CPACK_COMPONENT_GROUP_<groupName>_DESCRIPTION``,
     - :variable:`CPACK_PACKAGE_DESCRIPTION`
 
- .. variable:: CPACK_NUGET_PACKAGE_AUTHORS
-               CPACK_NUGET_<compName>_PACKAGE_AUTHORS
+.. variable:: CPACK_NUGET_PACKAGE_AUTHORS
+              CPACK_NUGET_<compName>_PACKAGE_AUTHORS
 
  A comma-separated list of packages authors, matching the profile names
  on nuget.org_. These are displayed in the NuGet Gallery on
