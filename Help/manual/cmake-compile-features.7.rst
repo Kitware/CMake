@@ -361,6 +361,7 @@ following :variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>` as of the
 versions specified for each:
 
 * all compilers and versions listed above with only meta-features for C++.
+* ``TI``: Texas Instruments compiler.
 
 CMake is currently aware of the :prop_tgt:`CUDA standards <CUDA_STANDARD>`
 from the following :variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>` as of the
