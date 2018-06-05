@@ -24,7 +24,7 @@ set(DETECT_CXX14 "((__cplusplus >= 201300L) || ((__cplusplus == 201103L) && !def
 unset(DETECT_BUGGY_ICC15)
 
 set(Intel17_CXX14 "__INTEL_COMPILER >= 1700 && ${DETECT_CXX14}")
-set(_cmake_feature_test_cxx_relaxed_constexpr "__cpp_constexpr >= 201304 || (${Intel17_CXX14} && !defined(_MSC_VER))")
+set(_cmake_feature_test_cxx_relaxed_constexpr "__cpp_constexpr >= 201304 || (${Intel17_CXX14} && __INTEL_COMPILER != 1800 && !defined(_MSC_VER))")
 
 set(Intel16_CXX14 "__INTEL_COMPILER >= 1600 && ${DETECT_CXX14}")
 set(_cmake_feature_test_cxx_aggregate_default_initializers "${Intel16_CXX14}")
