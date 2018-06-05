@@ -333,7 +333,7 @@ public:
   static FileFormat GetFileFormat(const char* ext);
 
   /** Windows if this is true, the CreateProcess in RunCommand will
-   *  not show new consol windows when running programs.
+   *  not show new console windows when running programs.
    */
   static void SetRunCommandHideConsole(bool v) { s_RunCommandHideConsole = v; }
   static bool GetRunCommandHideConsole() { return s_RunCommandHideConsole; }

@@ -290,7 +290,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   if (${_PYTHON_PREFIX}_EXECUTABLE
       AND ${_PYTHON_PREFIX}_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
     set (${_PYTHON_PREFIX}_Interpreter_FOUND TRUE)
-    # Use interpreter version for future searchs to ensure consistency
+    # Use interpreter version for future searches to ensure consistency
     set (_${_PYTHON_PREFIX}_FIND_VERSIONS ${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR})
   endif()
 
@@ -418,7 +418,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endif()
     elseif (${_PYTHON_PREFIX}_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
       set (${_PYTHON_PREFIX}_Compiler_FOUND TRUE)
-    # Use compiler version for future searchs to ensure consistency
+    # Use compiler version for future searches to ensure consistency
     set (_${_PYTHON_PREFIX}_FIND_VERSIONS ${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR})
     endif()
   endif()
@@ -774,7 +774,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
   if ((${_PYTHON_PREFIX}_LIBRARY_RELEASE OR ${_PYTHON_PREFIX}_LIBRARY_DEBUG)
       AND ${_PYTHON_PREFIX}_INCLUDE_DIR)
     if (${_PYTHON_PREFIX}_Interpreter_FOUND OR ${_PYTHON_PREFIX}_Compiler_FOUND)
-      # devlopment environment must be compatible with interpreter/compiler
+      # development environment must be compatible with interpreter/compiler
       if (${_${_PYTHON_PREFIX}_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_VERSION_MINOR} VERSION_EQUAL ${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR})
         set (${_PYTHON_PREFIX}_Development_FOUND TRUE)
       endif()

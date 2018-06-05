@@ -279,7 +279,7 @@ class CMakeXRefRole(XRefRole):
     # We cannot insert index nodes using the result_nodes method
     # because CMakeXRefRole is processed before substitution_reference
     # nodes are evaluated so target nodes (with 'ids' fields) would be
-    # duplicated in each evaluted substitution replacement.  The
+    # duplicated in each evaluated substitution replacement.  The
     # docutils substitution transform does not allow this.  Instead we
     # use our own CMakeXRefTransform below to add index entries after
     # substitutions are completed.

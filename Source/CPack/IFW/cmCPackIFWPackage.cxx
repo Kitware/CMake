@@ -126,10 +126,10 @@ void cmCPackIFWPackage::DefaultConfiguration()
   this->RequiresAdminRights.clear();
 }
 
-// Defaul configuration (all in one package)
+// Default configuration (all in one package)
 int cmCPackIFWPackage::ConfigureFromOptions()
 {
-  // Restore defaul configuration
+  // Restore default configuration
   this->DefaultConfiguration();
 
   // Name
@@ -168,7 +168,7 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
     return 0;
   }
 
-  // Restore defaul configuration
+  // Restore default configuration
   this->DefaultConfiguration();
 
   std::string prefix = "CPACK_IFW_COMPONENT_" +
@@ -256,7 +256,7 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
     return 0;
   }
 
-  // Restore defaul configuration
+  // Restore default configuration
   this->DefaultConfiguration();
 
   std::string prefix = "CPACK_IFW_COMPONENT_GROUP_" +

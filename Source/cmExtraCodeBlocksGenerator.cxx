@@ -337,7 +337,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
   xml.EndElement(); // Build
 
   // Collect all used source files in the project.
-  // Keep a list of C/C++ source files which might have an acompanying header
+  // Keep a list of C/C++ source files which might have an accompanying header
   // that should be looked for.
   typedef std::map<std::string, CbpUnit> all_files_map_t;
   all_files_map_t allFiles;

@@ -347,7 +347,7 @@ void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
                                    cmGeneratorExpression::InstallInterface,
                                    gtgt, properties, missingTargets);
 
-      // TOOD: PUBLIC_HEADER_LOCATION
+      // TODO: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff
       // is done.  Then this can be a propagated include directory.
       // this->GenerateImportProperty(config, te->HeaderGenerator,

@@ -125,7 +125,7 @@ protected:
   std::vector<cmCursesCacheEntryComposite*>* Entries;
   // Errors produced during last run of cmake
   std::vector<std::string> Errors;
-  // Command line argumens to be passed to cmake each time
+  // Command line arguments to be passed to cmake each time
   // it is run
   std::vector<std::string> Args;
   // Message displayed when user presses 'h'

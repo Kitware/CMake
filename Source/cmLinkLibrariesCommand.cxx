@@ -13,7 +13,7 @@ bool cmLinkLibrariesCommand::InitialPass(std::vector<std::string> const& args,
   if (args.empty()) {
     return true;
   }
-  // add libraries, nothe that there is an optional prefix
+  // add libraries, note that there is an optional prefix
   // of debug and optimized than can be used
   for (std::vector<std::string>::const_iterator i = args.begin();
        i != args.end(); ++i) {

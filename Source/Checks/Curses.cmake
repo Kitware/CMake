@@ -26,7 +26,7 @@ try_compile(CMakeCheckCurses_COMPILED
   OUTPUT_VARIABLE CMakeCheckCurses_OUTPUT
   )
 
-# Covnert result from cache entry to normal variable.
+# Convert result from cache entry to normal variable.
 set(CMakeCheckCurses_COMPILED "${CMakeCheckCurses_COMPILED}")
 unset(CMakeCheckCurses_COMPILED CACHE)
 

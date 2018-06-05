@@ -265,7 +265,7 @@ void cmExtraCodeLiteGenerator::CreateNewProjectFile(
 
   // Collect all used source files in the project
   // Sort them into two containers, one for C/C++ implementation files
-  // which may have an acompanying header, one for all other files
+  // which may have an accompanying header, one for all other files
   std::map<std::string, cmSourceFile*> cFiles;
   std::set<std::string> otherFiles;
 
@@ -571,7 +571,7 @@ void cmExtraCodeLiteGenerator::CreateNewProjectFile(
 
   // Collect all used source files in the project
   // Sort them into two containers, one for C/C++ implementation files
-  // which may have an acompanying header, one for all other files
+  // which may have an accompanying header, one for all other files
   std::string projectType;
 
   std::map<std::string, cmSourceFile*> cFiles;

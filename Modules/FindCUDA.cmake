@@ -569,7 +569,7 @@ else()
 endif()
 
 # Propagate the host flags to the host compiler via -Xcompiler
-option(CUDA_PROPAGATE_HOST_FLAGS "Propage C/CXX_FLAGS and friends to the host compiler via -Xcompile" ON)
+option(CUDA_PROPAGATE_HOST_FLAGS "Propagate C/CXX_FLAGS and friends to the host compiler via -Xcompile" ON)
 
 # Enable CUDA_SEPARABLE_COMPILATION
 option(CUDA_SEPARABLE_COMPILATION "Compile CUDA objects with separable compilation enabled.  Requires CUDA 5.0+" OFF)
