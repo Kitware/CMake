@@ -1686,7 +1686,7 @@ function(_ep_command_line_to_initial_cache var args force)
   foreach(line ${args})
     if("${line}" MATCHES "^-D(.*)")
       set(line "${CMAKE_MATCH_1}")
-      if(setArg)
+      if(NOT "${setArg}" STREQUAL "")
         # This is required to build up lists in variables, or complete an entry
         string(APPEND setArg "${accumulator}\" CACHE ${type} \"Initial cache\" ${forceArg})")
         string(APPEND script_initial_cache "\n${setArg}")
