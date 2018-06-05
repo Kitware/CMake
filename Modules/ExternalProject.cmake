@@ -133,9 +133,9 @@ External Project Definition
         is determined by inspecting the actual content rather than using logic
         based on the file extension.
 
-      ``URL_HASH ALGO=<value>``
-        Hash of the archive file to be downloaded. The ``<value>`` should be of
-        the form ``algo=hashValue`` where ``algo`` can be any of the hashing
+      ``URL_HASH <algo>=<hashValue>``
+        Hash of the archive file to be downloaded. The argument should be of
+        the form ``<algo>=<hashValue>`` where ``algo`` can be any of the hashing
         algorithms supported by the :command:`file()` command. Specifying this
         option is strongly recommended for URL downloads, as it ensures the
         integrity of the downloaded content. It is also used as a check for a
