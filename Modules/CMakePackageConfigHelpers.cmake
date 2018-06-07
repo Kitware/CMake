@@ -102,13 +102,15 @@
 # into the ``FooConfig.cmake`` file.
 #
 # ``check_required_components(<package_name>)`` should be called at the end of
-# the ``FooConfig.cmake`` file if the package supports components.  This macro
-# checks whether all requested, non-optional components have been found, and if
-# this is not the case, sets the ``Foo_FOUND`` variable to ``FALSE``, so that
-# the package is considered to be not found.  It does that by testing the
-# ``Foo_<Component>_FOUND`` variables for all requested required components.
-# When using the ``NO_CHECK_REQUIRED_COMPONENTS_MACRO`` option, this macro is
-# not generated into the ``FooConfig.cmake`` file.
+# the ``FooConfig.cmake`` file. This macro checks whether all requested,
+# non-optional components have been found, and if this is not the case, sets
+# the ``Foo_FOUND`` variable to ``FALSE``, so that the package is considered to
+# be not found.  It does that by testing the ``Foo_<Component>_FOUND``
+# variables for all requested required components.  This macro should be
+# called even if the package doesn't provide any components to make sure
+# users are not specifying components erroneously.  When using the
+# ``NO_CHECK_REQUIRED_COMPONENTS_MACRO`` option, this macro is not generated
+# into the ``FooConfig.cmake`` file.
 #
 # For an example see below the documentation for
 # :command:`write_basic_package_version_file()`.
