@@ -886,6 +886,8 @@ include_directories(
 set(CPACK_SRCS
   CPack/cmCPackArchiveGenerator.cxx
   CPack/cmCPackComponentGroup.cxx
+  CPack/cmCPackDebGenerator.cxx
+  CPack/cmCPackExtGenerator.cxx
   CPack/cmCPackGeneratorFactory.cxx
   CPack/cmCPackGenerator.cxx
   CPack/cmCPackLog.cxx
@@ -898,7 +900,6 @@ set(CPACK_SRCS
   CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackZIPGenerator.cxx
   CPack/cmCPack7zGenerator.cxx
-  CPack/cmCPackDebGenerator.cxx
   )
 # CPack IFW generator
 set(CPACK_SRCS ${CPACK_SRCS}
