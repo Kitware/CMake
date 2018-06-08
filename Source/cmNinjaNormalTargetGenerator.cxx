@@ -719,9 +719,9 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
     static_cast<int>(cmSystemTools::CalculateCommandLineLengthLimit()) -
     globalGen.GetRuleCmdLength(this->LanguageLinkerDeviceRule());
 
-  const std::string rspfile =
+  const std::string rspfile = this->ConvertToNinjaPath(
     std::string(cmake::GetCMakeFilesDirectoryPostSlash()) +
-    genTarget.GetName() + ".rsp";
+    genTarget.GetName() + ".rsp");
 
   // Gather order-only dependencies.
   cmNinjaDeps orderOnlyDeps;
@@ -1005,9 +1005,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       globalGen.GetRuleCmdLength(this->LanguageLinkerRule());
   }
 
-  const std::string rspfile =
+  const std::string rspfile = this->ConvertToNinjaPath(
     std::string(cmake::GetCMakeFilesDirectoryPostSlash()) + gt.GetName() +
-    ".rsp";
+    ".rsp");
 
   // Gather order-only dependencies.
   cmNinjaDeps orderOnlyDeps;
