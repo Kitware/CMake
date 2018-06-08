@@ -82,6 +82,7 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  include "cmAddCompileOptionsCommand.h"
+#  include "cmAddLinkOptionsCommand.h"
 #  include "cmAuxSourceDirectoryCommand.h"
 #  include "cmBuildNameCommand.h"
 #  include "cmCMakeHostSystemInformationCommand.h"
@@ -100,6 +101,7 @@
 #  include "cmRemoveDefinitionsCommand.h"
 #  include "cmSourceGroupCommand.h"
 #  include "cmSubdirDependsCommand.h"
+#  include "cmTargetLinkOptionsCommand.h"
 #  include "cmUseMangledMesaCommand.h"
 #  include "cmUtilitySourceCommand.h"
 #  include "cmVariableRequiresCommand.h"
@@ -272,7 +274,10 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("include_external_msproject",
                            new cmIncludeExternalMSProjectCommand);
   state->AddBuiltinCommand("install_programs", new cmInstallProgramsCommand);
+  state->AddBuiltinCommand("add_link_options", new cmAddLinkOptionsCommand);
   state->AddBuiltinCommand("link_libraries", new cmLinkLibrariesCommand);
+  state->AddBuiltinCommand("target_link_options",
+                           new cmTargetLinkOptionsCommand);
   state->AddBuiltinCommand("load_cache", new cmLoadCacheCommand);
   state->AddBuiltinCommand("qt_wrap_cpp", new cmQTWrapCPPCommand);
   state->AddBuiltinCommand("qt_wrap_ui", new cmQTWrapUICommand);

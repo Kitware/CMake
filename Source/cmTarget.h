@@ -239,6 +239,8 @@ public:
                            cmListFileBacktrace const& bt, bool before = false);
   void InsertCompileDefinition(std::string const& entry,
                                cmListFileBacktrace const& bt);
+  void InsertLinkOption(std::string const& entry,
+                        cmListFileBacktrace const& bt, bool before = false);
 
   void AppendBuildInterfaceIncludes();
 
@@ -265,6 +267,10 @@ public:
 
   cmStringRange GetSourceEntries() const;
   cmBacktraceRange GetSourceBacktraces() const;
+
+  cmStringRange GetLinkOptionsEntries() const;
+  cmBacktraceRange GetLinkOptionsBacktraces() const;
+
   cmStringRange GetLinkImplementationEntries() const;
   cmBacktraceRange GetLinkImplementationBacktraces() const;
 

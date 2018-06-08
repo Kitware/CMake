@@ -1,4 +1,4 @@
-The final set of compile options used for a target is constructed by
+The final set of compile or link options used for a target is constructed by
 accumulating options from the current target and the usage requirements of
 it dependencies.  The set of options is de-duplicated to avoid repetition.
 While beneficial for individual options, the de-duplication step can break

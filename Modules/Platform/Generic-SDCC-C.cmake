@@ -37,6 +37,8 @@ if(NOT DEFINED CMAKE_EXE_LINKER_FLAGS_INIT)
   set (CMAKE_EXE_LINKER_FLAGS_INIT --model-small)
 endif()
 
+set(CMAKE_C_LINKER_WRAPPER_FLAG "-Wl" ",")
+
 # compile a C file into an object file
 set(CMAKE_C_COMPILE_OBJECT  "<CMAKE_C_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")
 
@@ -51,4 +53,3 @@ set(CMAKE_C_CREATE_STATIC_LIBRARY
 # not supported by sdcc
 set(CMAKE_C_CREATE_SHARED_LIBRARY "")
 set(CMAKE_C_CREATE_MODULE_LIBRARY "")
-

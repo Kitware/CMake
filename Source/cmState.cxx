@@ -280,6 +280,8 @@ cmStateSnapshot cmState::Reset()
     it->CompileDefinitionsBacktraces.clear();
     it->CompileOptions.clear();
     it->CompileOptionsBacktraces.clear();
+    it->LinkOptions.clear();
+    it->LinkOptionsBacktraces.clear();
     it->DirectoryEnd = pos;
     it->NormalTargetNames.clear();
     it->Properties.clear();

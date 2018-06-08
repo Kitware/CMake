@@ -82,6 +82,23 @@ cmMakefileTargetGenerator* cmMakefileTargetGenerator::New(
   return result;
 }
 
+void cmMakefileTargetGenerator::GetTargetLinkFlags(
+  std::string& flags, const std::string& linkLanguage)
+{
+  this->LocalGenerator->AppendFlags(
+    flags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
+
+  std::string linkFlagsConfig = "LINK_FLAGS_";
+  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
+  this->LocalGenerator->AppendFlags(
+    flags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
+
+  std::vector<std::string> opts;
+  this->GeneratorTarget->GetLinkOptions(opts, this->ConfigName, linkLanguage);
+  // LINK_OPTIONS are escaped.
+  this->LocalGenerator->AppendCompileOptions(flags, opts);
+}
+
 void cmMakefileTargetGenerator::CreateRuleFile()
 {
   // Create a directory for this target.

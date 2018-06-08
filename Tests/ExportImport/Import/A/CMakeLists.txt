@@ -472,3 +472,8 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
     endif()
   endif()
 endif()
+
+#---------------------------------------------------------------------------------
+# check that imported libraries have the expected INTERFACE_LINK_OPTIONS property
+checkForProperty(bld_testLinkOptions "INTERFACE_LINK_OPTIONS" "INTERFACE_FLAG")
+checkForProperty(Req::testLinkOptions "INTERFACE_LINK_OPTIONS" "INTERFACE_FLAG")

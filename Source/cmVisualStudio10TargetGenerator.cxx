@@ -3234,6 +3234,11 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     flags += flagsConfig;
   }
 
+  std::vector<std::string> opts;
+  this->GeneratorTarget->GetLinkOptions(opts, config, linkLanguage);
+  // LINK_OPTIONS are escaped.
+  this->LocalGenerator->AppendCompileOptions(flags, opts);
+
   cmComputeLinkInformation* pcli =
     this->GeneratorTarget->GetLinkInformation(config);
   if (!pcli) {

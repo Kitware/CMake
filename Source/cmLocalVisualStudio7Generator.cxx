@@ -977,6 +977,13 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
     extraLinkOptions += " ";
     extraLinkOptions += targetLinkFlags;
   }
+
+  std::vector<std::string> opts;
+  target->GetLinkOptions(opts, configName,
+                         target->GetLinkerLanguage(configName));
+  // LINK_OPTIONS are escaped.
+  this->AppendCompileOptions(extraLinkOptions, opts);
+
   Options linkOptions(this, Options::Linker);
   if (this->FortranProject) {
     linkOptions.AddTable(cmLocalVisualStudio7GeneratorFortranLinkFlagTable);

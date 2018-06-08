@@ -5,7 +5,9 @@ add_library(car foo.cxx)
 add_library(bar bar.c)
 add_library(dog  foo.cxx)
 target_link_libraries(foo PRIVATE car bar dog debug -lm)
-export(TARGETS bar dog car foo  ANDROID_MK
+add_library(foo2  foo.cxx)
+target_link_options(foo2 INTERFACE -lm)
+export(TARGETS bar dog car foo foo2 ANDROID_MK
   ${build_BINARY_DIR}/Android.mk)
-install(TARGETS bar dog car foo DESTINATION lib EXPORT myexp)
+install(TARGETS bar dog car foo foo2 DESTINATION lib EXPORT myexp)
 install(EXPORT_ANDROID_MK myexp DESTINATION share/ndk-modules)

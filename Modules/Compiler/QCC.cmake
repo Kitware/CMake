@@ -13,6 +13,9 @@ macro(__compiler_qcc lang)
   set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-Wp,-isystem,")
   set(CMAKE_DEPFILE_FLAGS_${lang} "-Wc,-MD,<DEPFILE>,-MT,<OBJECT>,-MF,<DEPFILE>")
 
+  set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
+  set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
+
   set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE NO)
   set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER NO)
 

@@ -15,4 +15,7 @@ macro(__compiler_sco lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_DLL -belf)
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-Kpic -belf")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-belf -Wl,-Bexport")
+
+  set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
+  set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
 endmacro()

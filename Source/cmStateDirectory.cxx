@@ -360,6 +360,42 @@ void cmStateDirectory::ClearCompileOptions()
                this->Snapshot_.Position->CompileOptionsPosition);
 }
 
+cmStringRange cmStateDirectory::GetLinkOptionsEntries() const
+{
+  return GetPropertyContent(this->DirectoryState->LinkOptions,
+                            this->Snapshot_.Position->LinkOptionsPosition);
+}
+
+cmBacktraceRange cmStateDirectory::GetLinkOptionsEntryBacktraces() const
+{
+  return GetPropertyBacktraces(this->DirectoryState->LinkOptions,
+                               this->DirectoryState->LinkOptionsBacktraces,
+                               this->Snapshot_.Position->LinkOptionsPosition);
+}
+
+void cmStateDirectory::AppendLinkOptionsEntry(const std::string& vec,
+                                              const cmListFileBacktrace& lfbt)
+{
+  AppendEntry(this->DirectoryState->LinkOptions,
+              this->DirectoryState->LinkOptionsBacktraces,
+              this->Snapshot_.Position->LinkOptionsPosition, vec, lfbt);
+}
+
+void cmStateDirectory::SetLinkOptions(const std::string& vec,
+                                      const cmListFileBacktrace& lfbt)
+{
+  SetContent(this->DirectoryState->LinkOptions,
+             this->DirectoryState->LinkOptionsBacktraces,
+             this->Snapshot_.Position->LinkOptionsPosition, vec, lfbt);
+}
+
+void cmStateDirectory::ClearLinkOptions()
+{
+  ClearContent(this->DirectoryState->LinkOptions,
+               this->DirectoryState->LinkOptionsBacktraces,
+               this->Snapshot_.Position->LinkOptionsPosition);
+}
+
 void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
                                    cmListFileBacktrace const& lfbt)
 {
@@ -387,6 +423,14 @@ void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
     this->SetCompileDefinitions(value, lfbt);
     return;
   }
+  if (prop == "LINK_OPTIONS") {
+    if (!value) {
+      this->ClearLinkOptions();
+      return;
+    }
+    this->SetLinkOptions(value, lfbt);
+    return;
+  }
 
   this->DirectoryState->Properties.SetProperty(prop, value);
 }
@@ -405,6 +449,10 @@ void cmStateDirectory::AppendProperty(const std::string& prop,
   }
   if (prop == "COMPILE_DEFINITIONS") {
     this->AppendCompileDefinitionsEntry(value, lfbt);
+    return;
+  }
+  if (prop == "LINK_OPTIONS") {
+    this->AppendLinkOptionsEntry(value, lfbt);
     return;
   }
 
@@ -488,6 +536,10 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
   }
   if (prop == "COMPILE_DEFINITIONS") {
     output = cmJoin(this->GetCompileDefinitionsEntries(), ";");
+    return output.c_str();
+  }
+  if (prop == "LINK_OPTIONS") {
+    output = cmJoin(this->GetLinkOptionsEntries(), ";");
     return output.c_str();
   }
 
