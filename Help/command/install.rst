@@ -427,6 +427,10 @@ example, the code
 
 will print a message during installation.
 
+The contents of ``SCRIPT`` or ``CODE`` may use "generator expressions" with
+the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
+manual for available expressions.
+
 Installing Exports
 ^^^^^^^^^^^^^^^^^^
 

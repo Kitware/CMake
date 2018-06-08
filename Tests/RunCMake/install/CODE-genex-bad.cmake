@@ -1,0 +1,1 @@
+install(CODE "message(\"$<NOTAGENEX>\")")
