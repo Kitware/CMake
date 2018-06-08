@@ -545,9 +545,13 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       ++it;
       std::string installProjectName = *it;
       ++it;
-      std::string installComponent = *it;
+      cmCPackInstallCMakeProject project;
+
+      project.Directory = installDirectory;
+      project.ProjectName = installProjectName;
+      project.Component = *it;
       ++it;
-      std::string installSubDirectory = *it;
+      project.SubDirectory = *it;
 
       std::vector<std::string> componentsVector;
 
@@ -562,30 +566,32 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           !(this->IsOn("CPACK_MONOLITHIC_INSTALL"))) {
         // Determine the installation types for this project (if provided).
         std::string installTypesVar = "CPACK_" +
-          cmSystemTools::UpperCase(installComponent) + "_INSTALL_TYPES";
+          cmSystemTools::UpperCase(project.Component) + "_INSTALL_TYPES";
         const char* installTypes = this->GetOption(installTypesVar);
         if (installTypes && *installTypes) {
           std::vector<std::string> installTypesVector;
           cmSystemTools::ExpandListArgument(installTypes, installTypesVector);
           for (std::string const& installType : installTypesVector) {
-            this->GetInstallationType(installProjectName, installType);
+            project.InstallationTypes.push_back(
+              this->GetInstallationType(project.ProjectName, installType));
           }
         }
 
         // Determine the set of components that will be used in this project
         std::string componentsVar =
-          "CPACK_COMPONENTS_" + cmSystemTools::UpperCase(installComponent);
+          "CPACK_COMPONENTS_" + cmSystemTools::UpperCase(project.Component);
         const char* components = this->GetOption(componentsVar);
         if (components && *components) {
           cmSystemTools::ExpandListArgument(components, componentsVector);
           for (std::string const& comp : componentsVector) {
-            GetComponent(installProjectName, comp);
+            project.Components.push_back(
+              this->GetComponent(project.ProjectName, comp));
           }
           componentInstall = true;
         }
       }
       if (componentsVector.empty()) {
-        componentsVector.push_back(installComponent);
+        componentsVector.push_back(project.Component);
       }
 
       const char* buildConfigCstr = this->GetOption("CPACK_BUILD_CONFIG");
@@ -605,7 +611,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       // on windows.
       cmSystemTools::SetForceUnixPaths(globalGenerator->GetForceUnixPaths());
 
-      if (!this->RunPreinstallTarget(installProjectName, installDirectory,
+      if (!this->RunPreinstallTarget(project.ProjectName, project.Directory,
                                      globalGenerator, buildConfig)) {
         return 0;
       }
@@ -613,17 +619,19 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       delete globalGenerator;
 
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
-                    "- Install project: " << installProjectName << std::endl);
+                    "- Install project: " << project.ProjectName << std::endl);
 
       // Run the installation for each component
       for (std::string const& component : componentsVector) {
         if (!this->InstallCMakeProject(
-              setDestDir, installDirectory, baseTempInstallDirectory,
+              setDestDir, project.Directory, baseTempInstallDirectory,
               default_dir_mode, component, componentInstall,
-              installSubDirectory, buildConfig, absoluteDestFiles)) {
+              project.SubDirectory, buildConfig, absoluteDestFiles)) {
           return 0;
         }
       }
+
+      this->CMakeProjects.push_back(project);
     }
   }
   this->SetOption("CPACK_ABSOLUTE_DESTINATION_FILES",

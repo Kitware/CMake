@@ -283,6 +283,7 @@ protected:
    */
   std::vector<std::string> files;
 
+  std::vector<cmCPackInstallCMakeProject> CMakeProjects;
   std::map<std::string, cmCPackInstallationType> InstallationTypes;
   /**
    * The set of components.
