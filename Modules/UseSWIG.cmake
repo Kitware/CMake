@@ -189,6 +189,7 @@ set(SWIG_EXTRA_LIBRARIES "")
 
 set(SWIG_PYTHON_EXTRA_FILE_EXTENSIONS ".py")
 set(SWIG_JAVA_EXTRA_FILE_EXTENSIONS ".java" "JNI.java")
+set(SWIG_CSHARP_EXTRA_FILE_EXTENSIONS ".cs" "PINVOKE.cs")
 
 ##
 ## PRIVATE functions
@@ -263,10 +264,14 @@ function(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
   endif()
   foreach(it ${SWIG_${language}_EXTRA_FILE_EXTENSIONS})
     set(extra_file "${generatedpath}/${module_basename}${it}")
+    if (extra_file MATCHES "\\.cs$")
+      set_source_files_properties(${extra_file} PROPERTIES LANGUAGE "CSharp")
+    else()
+      # Treat extra outputs as plain files regardless of language.
+      set_source_files_properties(${extra_file} PROPERTIES LANGUAGE "")
+    endif()
     list(APPEND files "${extra_file}")
   endforeach()
-    # Treat extra outputs as plain files regardless of language.
-  set_source_files_properties(${files} PROPERTIES LANGUAGE "")
 
   set (${outfiles} ${files} PARENT_SCOPE)
 endfunction()

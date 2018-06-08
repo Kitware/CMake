@@ -15,6 +15,9 @@ unset(SWIG_LANG_DEFINITIONS)
 unset(SWIG_LANG_OPTIONS)
 unset(SWIG_LANG_LIBRARIES)
 
+if(${language} MATCHES csharp)
+  set(SWIG_LANG_TYPE TYPE SHARED)
+endif()
 if(${language} MATCHES python)
   find_package(Python REQUIRED COMPONENTS Interpreter Development)
   set(SWIG_LANG_INCLUDE_DIRECTORIES ${Python_INCLUDE_DIRS})
@@ -76,4 +79,5 @@ SWIG_ADD_LIBRARY(example
                  ${SWIG_LANG_TYPE}
                  SOURCES "${CMAKE_CURRENT_LIST_DIR}/example.i"
                          "${CMAKE_CURRENT_LIST_DIR}/example.cxx")
+TARGET_INCLUDE_DIRECTORIES(example PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 TARGET_LINK_LIBRARIES(example PRIVATE ${SWIG_LANG_LIBRARIES})
