@@ -372,6 +372,9 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
     }
   }
 
+  if (this->XcodeVersion >= 70) {
+    makeCommand.add("-hideShellScriptEnvironment");
+  }
   makeCommand.add(makeOptions.begin(), makeOptions.end());
 }
 
