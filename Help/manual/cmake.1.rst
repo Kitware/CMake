@@ -353,11 +353,6 @@ Available commands are:
   Touch a file if it exists but do not create it.  If a file does
   not exist it will be silently ignored.
 
-UNIX-specific Command-Line Tools
---------------------------------
-
-The following ``cmake -E`` commands are available only on UNIX:
-
 ``create_symlink <old> <new>``
   Create a symbolic link ``<new>`` naming ``<old>``.
 
