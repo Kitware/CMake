@@ -422,7 +422,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   add_RunCMake_test(ctest_labels_for_subprojects)
 endif()
 
-add_RunCMake_test_group(CPack "DEB;RPM;7Z;TBZ2;TGZ;TXZ;TZ;ZIP;STGZ")
+add_RunCMake_test_group(CPack "DEB;RPM;7Z;TBZ2;TGZ;TXZ;TZ;ZIP;STGZ;Ext")
 # add a test to make sure symbols are exported from a shared library
 # for MSVC compilers CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS property is used
 add_RunCMake_test(AutoExportDll)
