@@ -2117,7 +2117,8 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   wchar_t modulepath[_MAX_PATH];
   ::GetModuleFileNameW(NULL, modulepath, sizeof(modulepath));
   std::string path = cmsys::Encoding::ToNarrow(modulepath);
-  std::string realPath = cmSystemTools::GetRealPath(path, NULL);
+  std::string realPath =
+    cmSystemTools::GetRealPathResolvingWindowsSubst(path, NULL);
   if (realPath.empty()) {
     realPath = path;
   }
