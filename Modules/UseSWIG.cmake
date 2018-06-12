@@ -182,7 +182,7 @@ as well as ``SWIG``:
 #]=======================================================================]
 
 
-cmake_policy (VERSION 3.11)
+cmake_policy (VERSION 3.12)
 
 set(SWIG_CXX_EXTENSION "cxx")
 set(SWIG_EXTRA_LIBRARIES "")
@@ -304,16 +304,16 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     list (APPEND swig_source_file_flags "$<$<BOOL:${include_directories}>:-I$<JOIN:${include_directories},$<SEMICOLON>-I>>")
   endif()
   set (property "$<TARGET_PROPERTY:${name},SWIG_INCLUDE_DIRECTORIES>")
-  list (APPEND swig_source_file_flags "$<$<BOOL:${property}>:-I$<JOIN:${property},$<SEMICOLON>-I>>")
+  list (APPEND swig_source_file_flags "$<$<BOOL:${property}>:-I$<JOIN:$<TARGET_GENEX_EVAL:${name},${property}>,$<SEMICOLON>-I>>")
 
   set (property "$<TARGET_PROPERTY:${name},SWIG_COMPILE_DEFINITIONS>")
-  list (APPEND swig_source_file_flags "$<$<BOOL:${property}>:-D$<JOIN:${property},$<SEMICOLON>-D>>")
+  list (APPEND swig_source_file_flags "$<$<BOOL:${property}>:-D$<JOIN:$<TARGET_GENEX_EVAL:${name},${property}>,$<SEMICOLON>-D>>")
   get_source_file_property (compile_definitions "${infile}" COMPILE_DEFINITIONS)
   if (compile_definitions)
     list (APPEND swig_source_file_flags "$<$<BOOL:${compile_definitions}>:-D$<JOIN:${compile_definitions},$<SEMICOLON>-D>>")
   endif()
 
-  list (APPEND swig_source_file_flags "$<TARGET_PROPERTY:${name},SWIG_COMPILE_OPTIONS>")
+  list (APPEND swig_source_file_flags "$<TARGET_GENEX_EVAL:${name},$<TARGET_PROPERTY:${name},SWIG_COMPILE_OPTIONS>>")
   get_source_file_property (compile_options "${infile}" COMPILE_OPTIONS)
   if (compile_options)
     list (APPEND swig_source_file_flags ${compile_options})
@@ -429,13 +429,13 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
 
   ## add all properties for generated file to various properties
   get_property (include_directories SOURCE "${infile}" PROPERTY GENERATED_INCLUDE_DIRECTORIES)
-  set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY INCLUDE_DIRECTORIES ${include_directories} $<TARGET_PROPERTY:${name},SWIG_GENERATED_INCLUDE_DIRECTORIES>)
+  set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY INCLUDE_DIRECTORIES ${include_directories} $<TARGET_GENEX_EVAL:${name},$<TARGET_PROPERTY:${name},SWIG_GENERATED_INCLUDE_DIRECTORIES>>)
 
   get_property (compile_definitions SOURCE "${infile}" PROPERTY GENERATED_COMPILE_DEFINITIONS)
-  set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY COMPILE_DEFINITIONS $<TARGET_PROPERTY:${name},SWIG_GENERATED_COMPILE_DEFINITIONS> ${compile_definitions})
+  set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY COMPILE_DEFINITIONS $<TARGET_GENEX_EVAL:${name},$<TARGET_PROPERTY:${name},SWIG_GENERATED_COMPILE_DEFINITIONS>> ${compile_definitions})
 
   get_property (compile_options SOURCE "${infile}" PROPERTY GENERATED_COMPILE_OPTIONS)
-  set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY COMPILE_OPTIONS $<TARGET_PROPERTY:${name},SWIG_GENERATED_COMPILE_OPTIONS> ${compile_options})
+  set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY COMPILE_OPTIONS $<TARGET_GENEX_EVAL:${name},$<TARGET_PROPERTY:${name},SWIG_GENERATED_COMPILE_OPTIONS>> ${compile_options})
 
   set(${outfiles} "${swig_generated_file_fullname}" ${swig_extra_generated_files} PARENT_SCOPE)
 
