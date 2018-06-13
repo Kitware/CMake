@@ -237,7 +237,7 @@ function(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
   set(files)
   get_source_file_property(module_basename
     "${infile}" SWIG_MODULE_NAME)
-  if(NOT swig_module_basename)
+  if(NOT module_basename)
 
     # try to get module name from "%module foo" syntax
     if ( EXISTS "${infile}" )
