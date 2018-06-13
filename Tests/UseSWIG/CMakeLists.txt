@@ -19,6 +19,20 @@ add_test(NAME UseSWIG.LegacyPerl COMMAND
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
 
+include(CheckLanguage)
+check_language(CSharp)
+if (CMAKE_CSharp_COMPILER)
+  add_test(NAME UseSWIG.BasicCsharp COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/UseSWIG/BasicCsharp"
+    "${CMake_BINARY_DIR}/Tests/UseSWIG/BasicCsharp"
+    ${build_generator_args}
+    --build-project TestBasicCsharp
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+endif()
 
 add_test(NAME UseSWIG.BasicPython COMMAND
   ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
