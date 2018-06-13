@@ -189,6 +189,9 @@ Modules
   ``UseSWIG_MODULE_VERSION`` variable to ensure legacy support as well as more
   robust handling of ``SWIG`` advanced features (like ``%template``).
 
+* The :module:`UseSWIG` module learned to support CSHARP variant
+  wrapper files.
+
 * The :module:`WriteCompilerDetectionHeader` module gained a ``BARE_FEATURES``
   option to add a compatibility define for the exact keyword of a new language
   feature.
