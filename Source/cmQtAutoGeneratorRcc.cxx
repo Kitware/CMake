@@ -70,6 +70,7 @@ bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
   }
 
   // - Configurations
+  Log().RaiseVerbosity(InfoGet("ARCC_VERBOSITY"));
   MultiConfig_ = makefile->IsOn("ARCC_MULTI_CONFIG");
 
   // - Directories
