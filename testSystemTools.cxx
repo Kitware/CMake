@@ -206,7 +206,7 @@ static bool CheckFileOperations()
     res = false;
   }
 
-  if (!kwsys::SystemTools::Touch(testNewFile.c_str(), true)) {
+  if (!kwsys::SystemTools::Touch(testNewFile, true)) {
     std::cerr << "Problem with Touch for: " << testNewFile << std::endl;
     res = false;
   }
@@ -415,7 +415,7 @@ static bool CheckFileOperations()
     res = false;
   }
 
-  kwsys::SystemTools::Touch(testNewFile.c_str(), true);
+  kwsys::SystemTools::Touch(testNewFile, true);
   if (!kwsys::SystemTools::RemoveADirectory(testNewDir)) {
     std::cerr << "Problem with RemoveADirectory for: " << testNewDir
               << std::endl;
@@ -806,7 +806,7 @@ static bool CheckFind()
   const std::string testFindFile(TEST_SYSTEMTOOLS_BINARY_DIR "/" +
                                  testFindFileName);
 
-  if (!kwsys::SystemTools::Touch(testFindFile.c_str(), true)) {
+  if (!kwsys::SystemTools::Touch(testFindFile, true)) {
     std::cerr << "Problem with Touch for: " << testFindFile << std::endl;
     // abort here as the existence of the file only makes the test meaningful
     return false;
