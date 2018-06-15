@@ -703,7 +703,7 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
 
     // Find a ZIP program
     if (!this->IsSet("ZIP_EXECUTABLE")) {
-      this->ReadListFile("CPackZIP.cmake");
+      this->ReadListFile("Internal/CPack/CPackZIP.cmake");
 
       if (!this->IsSet("ZIP_EXECUTABLE")) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,

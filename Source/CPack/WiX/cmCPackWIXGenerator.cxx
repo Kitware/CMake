@@ -148,7 +148,7 @@ int cmCPackWIXGenerator::PackageFiles()
 
 bool cmCPackWIXGenerator::InitializeWiXConfiguration()
 {
-  if (!ReadListFile("CPackWIX.cmake")) {
+  if (!ReadListFile("Internal/CPack/CPackWIX.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while executing CPackWIX.cmake" << std::endl);
     return false;

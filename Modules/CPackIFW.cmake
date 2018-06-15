@@ -319,6 +319,14 @@ The module defines the following commands:
 
 #]=======================================================================]
 
+# TODO:
+# All of the internal implementation CMake modules for other CPack generators
+# have been moved into the Internal/CPack directory. This one has not, because
+# it contains user-facing macros which would be lost if it were moved. At some
+# point, this module should be split into user-facing macros (which would live
+# in this module) and internal implementation details (which would live in
+# Internal/CPack/CPackIFW.cmake).
+
 #=============================================================================
 # Search Qt Installer Framework tools
 #=============================================================================

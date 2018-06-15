@@ -61,7 +61,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
   component_path += packageName;
   this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
                   component_path.c_str());
-  if (!this->ReadListFile("CPackDeb.cmake")) {
+  if (!this->ReadListFile("Internal/CPack/CPackDeb.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while execution CPackDeb.cmake" << std::endl);
     retval = 0;
@@ -179,7 +179,7 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
     this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
                     component_path.c_str());
   }
-  if (!this->ReadListFile("CPackDeb.cmake")) {
+  if (!this->ReadListFile("Internal/CPack/CPackDeb.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while execution CPackDeb.cmake" << std::endl);
     retval = 0;
