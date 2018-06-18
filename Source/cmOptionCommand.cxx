@@ -14,19 +14,7 @@ class cmExecutionStatus;
 bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
                                   cmExecutionStatus&)
 {
-  bool argError = false;
-  if (args.size() < 2) {
-    argError = true;
-  }
-  // for VTK 4.0 we have to support the option command with more than 3
-  // arguments if CMAKE_MINIMUM_REQUIRED_VERSION is not defined, if
-  // CMAKE_MINIMUM_REQUIRED_VERSION is defined, then we can have stricter
-  // checking.
-  if (this->Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION")) {
-    if (args.size() > 3) {
-      argError = true;
-    }
-  }
+  const bool argError = (args.size() < 2) || (args.size() > 3);
   if (argError) {
     std::string m = "called with incorrect number of arguments: ";
     m += cmJoin(args, " ");
