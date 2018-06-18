@@ -280,6 +280,14 @@ targets that link to the object libraries in their implementation.
 Installing a target with the :prop_tgt:`EXCLUDE_FROM_ALL` target property
 set to ``TRUE`` has undefined behavior.
 
+:command:`install(TARGETS)` can install targets that were created in
+other directories.  When using such cross-directory install rules, running
+``make install`` (or similar) from a subdirectory will not guarantee that
+targets from other directories are up-to-date.  You can use
+:command:`target_link_libraries` or :command:`add_dependencies`
+to ensure that such out-of-directory targets are built before the
+subdirectory-specific install rules are run.
+
 The install destination given to the target install ``DESTINATION`` may
 use "generator expressions" with the syntax ``$<...>``.  See the
 :manual:`cmake-generator-expressions(7)` manual for available expressions.

@@ -362,7 +362,12 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       return false;
     }
     // Lookup this target in the current directory.
-    if (cmTarget* target = this->Makefile->FindLocalNonAliasTarget(tgt)) {
+    cmTarget* target = this->Makefile->FindLocalNonAliasTarget(tgt);
+    if (!target) {
+      // If no local target has been found, find it in the global scope.
+      target = this->Makefile->GetGlobalGenerator()->FindTarget(tgt, true);
+    }
+    if (target) {
       // Found the target.  Check its type.
       if (target->GetType() != cmStateEnums::EXECUTABLE &&
           target->GetType() != cmStateEnums::STATIC_LIBRARY &&
@@ -381,8 +386,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     } else {
       // Did not find the target.
       std::ostringstream e;
-      e << "TARGETS given target \"" << tgt
-        << "\" which does not exist in this directory.";
+      e << "TARGETS given target \"" << tgt << "\" which does not exist.";
       this->SetError(e.str());
       return false;
     }
