@@ -58,7 +58,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo \"GCC_VERSION=$GCC_VERSION\" ; echo \"CURRENT_ARCH=$CURRENT_ARCH\"";
+			shellScript = "echo \"GCC_VERSION=$GCC_VERSION\" ; echo \"ARCHS=$ARCHS\"";
 			showEnvVarsInLog = 0;
 		};
 		2C18F0B515DC1DCE00593670 = {
