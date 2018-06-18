@@ -96,6 +96,13 @@ ensure generated files will receive the required settings.
   :prop_sf:`INCLUDE_DIRECTORIES`, :prop_sf:`COMPILE_DEFINITIONS` and
   :prop_sf:`COMPILE_OPTIONS`.
 
+``USE_TARGET_INCLUDE_DIRECTORIES``
+  If set to ``TRUE``, contents of target property
+  :prop_tgt:`INCLUDE_DIRECTORIES` will be forwarded to ``SWIG`` compiler.
+  If set to ``FALSE`` target property :prop_tgt:`INCLUDE_DIRECTORIES` will be
+  ignored. If not set, target property ``SWIG_USE_TARGT_INCLUDE_DIRECTORIES``
+  will be considered.
+
 ``GENERATED_INCLUDE_DIRECTORIES``, ``GENERATED_COMPILE_DEFINITIONS`` and ``GENERATED_COMPILE_OPTIONS``
   Add custom flags to the C/C++ generated source. They will fill, respectively,
   properties :prop_sf:`INCLUDE_DIRECTORIES`, :prop_sf:`COMPILE_DEFINITIONS` and
@@ -126,6 +133,13 @@ input files.
     swig_add_library(mymod LANGUAGE python SOURCES mymod.i)
     set_property(TARGET mymod PROPERTY SWIG_COMPILE_DEFINITIONS MY_DEF1 MY_DEF2)
     set_property(TARGET mymod PROPERTY SWIG_COMPILE_OPTIONS -bla -blb)
+
+``SWIG_USE_TARGET_INCLUDE_DIRECTORIES``
+  If set to ``TRUE``, contents of target property
+  :prop_tgt:`INCLUDE_DIRECTORIES` will be forwarded to ``SWIG`` compiler.
+  If set to ``FALSE`` or not defined, target property
+  :prop_tgt:`INCLUDE_DIRECTORIES` will be ignored. This behavior can be
+  overridden by specifying source property ``USE_TARGET_INCLUDE_DIRECTORIES``.
 
 ``SWIG_GENERATED_INCLUDE_DIRECTORIES``, ``SWIG_GENERATED_COMPILE_DEFINITIONS`` and ``SWIG_GENERATED_COMPILE_OPTIONS``
   These properties will populate, respectively, properties
@@ -310,6 +324,14 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   endif()
   set (property "$<TARGET_PROPERTY:${name},SWIG_INCLUDE_DIRECTORIES>")
   list (APPEND swig_source_file_flags "$<$<BOOL:${property}>:-I$<JOIN:$<TARGET_GENEX_EVAL:${name},${property}>,$<SEMICOLON>-I>>")
+  set (property "$<TARGET_PROPERTY:${name},INCLUDE_DIRECTORIES>")
+  get_source_file_property(use_target_include_dirs "${infile}" USE_TARGET_INCLUDE_DIRECTORIES)
+  if (use_target_include_dirs)
+    list (APPEND swig_source_file_flags "$<$<BOOL:${property}>:-I$<JOIN:${property},$<SEMICOLON>-I>>")
+  elseif(use_target_include_dirs STREQUAL "NOTFOUND")
+    # not defined at source level, rely on target level
+    list (APPEND swig_source_file_flags "$<$<AND:$<BOOL:$<TARGET_PROPERTY:${name},SWIG_USE_TARGET_INCLUDE_DIRECTORIES>>,$<BOOL:${property}>>:-I$<JOIN:${property},$<SEMICOLON>-I>>")
+  endif()
 
   set (property "$<TARGET_PROPERTY:${name},SWIG_COMPILE_DEFINITIONS>")
   list (APPEND swig_source_file_flags "$<$<BOOL:${property}>:-D$<JOIN:$<TARGET_GENEX_EVAL:${name},${property}>,$<SEMICOLON>-D>>")
