@@ -4,6 +4,7 @@ if(NOT _isMultiConfig)   # Set in Tests/CMakeLists.txt
   list(APPEND Autogen_BUILD_OPTIONS "-DCMAKE_BUILD_TYPE=$<CONFIGURATION>")
 endif()
 list(APPEND Autogen_BUILD_OPTIONS
+    "-DCMAKE_AUTOGEN_VERBOSE=1"
     "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
 )
 
