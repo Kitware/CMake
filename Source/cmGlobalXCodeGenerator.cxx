@@ -3156,8 +3156,13 @@ void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
   if (this->Architectures.empty()) {
     // With no ARCHS we use ONLY_ACTIVE_ARCH.
     // Look up the arch that Xcode chooses in this case.
-    if (const char* arch = mf->GetDefinition("CMAKE_XCODE_CURRENT_ARCH")) {
+    if (const char* arch = mf->GetDefinition("CMAKE_XCODE_ARCHS")) {
       this->ObjectDirArchDefault = arch;
+      // We expect only one arch but choose the first just in case.
+      std::string::size_type pos = this->ObjectDirArchDefault.find(';');
+      if (pos != std::string::npos) {
+        this->ObjectDirArchDefault = this->ObjectDirArchDefault.substr(0, pos);
+      }
     }
   }
 
