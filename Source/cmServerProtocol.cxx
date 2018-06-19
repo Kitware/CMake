@@ -22,6 +22,7 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cmsys/Directory.hxx"
 #include "cmTarget.h"
 #include "cmTest.h"
 #include "cm_uv.h"
@@ -815,6 +816,89 @@ static Json::Value DumpSourceFilesList(
   return result;
 }
 
+struct CaseInsensitiveHash
+{
+  size_t operator()(const std::string& keyVal) const
+  {
+    return std::hash<std::string>()(cmsys::SystemTools::LowerCase(keyVal));
+  }
+};
+
+struct CaseInsensitiveEqual
+{
+  bool operator()(const std::string& left, const std::string& right) const
+  {
+    return cmsys::SystemTools::LowerCase(left) == cmsys::SystemTools::LowerCase(right);
+  }
+};
+
+static Json::Value DumpSourceFilesListForInterfaceTarget(
+  cmGeneratorTarget* target,
+  const std::string& config)
+{
+  std::unordered_set<std::string, CaseInsensitiveHash, CaseInsensitiveEqual>
+    sources;
+  
+  cmLocalGenerator* lg = target->GetLocalGenerator();
+  // Leave language unspecified in the evaluator. If it's ever needed we
+  // have to compute it for each file based on its file type.
+  cmGeneratorExpressionInterpreter genexInterpreter(
+    lg, target, config, target->GetName(), "");
+  
+  // First see if there are any INTERFACE_SOURCES defined for this target.
+  auto targetProp = target->Target->GetProperty("INTERFACE_SOURCES");
+  if (targetProp != nullptr) {
+    const char* evaluatedSources =
+      genexInterpreter.Evaluate(targetProp, "INTERFACE_SOURCES");
+    auto components = cmsys::SystemTools::SplitString(evaluatedSources, ';');
+    if (!components.empty()) {
+      sources.insert(components.begin(), components.end());
+    }
+  }
+
+  // Next pick up directories from INTERFACE_INCLUDE_DIRECTORIES and
+  // INTERFACE_SYSTEM_INCLUDE_DIRECTORIES if defined for this target.
+  // Note that we send back the directory names rather than expanding 
+  // them here.
+  targetProp = target->Target->GetProperty("INTERFACE_INCLUDE_DIRECTORIES");
+  if (targetProp != nullptr) {
+    const char* evaluatedIncludes =
+      genexInterpreter.Evaluate(targetProp, "INTERFACE_INCLUDE_DIRECTORIES");
+    auto components = cmsys::SystemTools::SplitString(evaluatedIncludes, ';');
+    if (!components.empty()) {
+      sources.insert(components.begin(), components.end());
+    }
+  }
+  targetProp = target->Target->GetProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES");
+  if (targetProp != nullptr) {
+    const char* evaluatedIncludes =
+      genexInterpreter.Evaluate(targetProp, "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES");
+    auto components = cmsys::SystemTools::SplitString(evaluatedIncludes, ';');
+    if (!components.empty()) {
+      sources.insert(components.begin(), components.end());
+    }
+  }
+
+  Json::Value result = Json::arrayValue;
+  
+  if (!sources.empty()) {
+    const std::string baseDir = target->Makefile->GetCurrentSourceDirectory();
+	
+	Json::Value sourcesValue = Json::arrayValue;
+    for (auto file : sources) {
+      const std::string relPath =
+        cmSystemTools::RelativePath(baseDir.c_str(), file.c_str());
+      sourcesValue.append(relPath.size() < file.size() ? relPath : file);
+    }
+
+	Json::Value fileGroup = Json::objectValue;
+    fileGroup[kSOURCES_KEY] = sourcesValue;
+    result.append(fileGroup);
+  }
+  
+  return result;
+}
+
 static Json::Value DumpBacktrace_Protocol1(const cmListFileBacktrace& backtrace)
 {
   Json::Value result = Json::arrayValue;
@@ -1012,6 +1096,10 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
   result[kBUILD_DIRECTORY_KEY] = lg->GetCurrentBinaryDirectory();
 
   if (type == cmStateEnums::INTERFACE_LIBRARY) {
+    Json::Value fileGroupsValue = DumpSourceFilesListForInterfaceTarget(target, config);
+    if (!fileGroupsValue.empty()) {
+      result[kFILE_GROUPS_KEY] = fileGroupsValue;
+    }
     return result;
   }
 
