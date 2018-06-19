@@ -72,6 +72,8 @@ if(NOT RunCMake_GENERATOR STREQUAL "Xcode" OR NOT "$ENV{CMAKE_OSX_ARCHITECTURES}
   run_install_test(FILES-TARGET_OBJECTS)
 endif()
 
+run_install_test(TARGETS-InstallFromSubDir)
+
 set(run_install_test_components 1)
 run_install_test(FILES-EXCLUDE_FROM_ALL)
 run_install_test(TARGETS-EXCLUDE_FROM_ALL)
