@@ -182,9 +182,11 @@ private:
                           std::vector<cmLocalGenerator*>& generators);
   void OutputXCodeProject(cmLocalGenerator* root,
                           std::vector<cmLocalGenerator*>& generators);
+  bool IsGeneratingScheme(cmLocalGenerator* root) const;
   // Write shared scheme files for all the native targets
   void OutputXCodeSharedSchemes(const std::string& xcProjDir);
-  void OutputXCodeWorkspaceSettings(const std::string& xcProjDir);
+  void OutputXCodeWorkspaceSettings(const std::string& xcProjDir,
+                                    cmLocalGenerator* root);
   void WriteXCodePBXProj(std::ostream& fout, cmLocalGenerator* root,
                          std::vector<cmLocalGenerator*>& generators);
   cmXCodeObject* CreateXCodeFileReferenceFromPath(const std::string& fullpath,
