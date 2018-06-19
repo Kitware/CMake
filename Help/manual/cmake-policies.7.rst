@@ -51,6 +51,14 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.13
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0076: target_sources() command converts relative paths to absolute. </policy/CMP0076>
+
 Policies Introduced by CMake 3.12
 =================================
 

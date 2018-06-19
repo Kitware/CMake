@@ -1,7 +1,8 @@
 cmake_policy(SET CMP0076 NEW)
 
 add_library(iface INTERFACE)
-target_sources(iface INTERFACE empty_1.cpp)
+
+add_subdirectory(RelativePathInSubdirInterface)
 
 get_property(iface_sources TARGET iface PROPERTY INTERFACE_SOURCES)
 message(STATUS "iface: ${iface_sources}")

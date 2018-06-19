@@ -1,4 +1,4 @@
-cmake_policy(SET CMP0076 NEW)
+cmake_policy(SET CMP0076 OLD)
 
 add_library(iface INTERFACE)
 target_sources(iface INTERFACE empty_1.cpp)
