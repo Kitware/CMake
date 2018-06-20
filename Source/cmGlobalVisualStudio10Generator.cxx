@@ -263,25 +263,32 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
       this->GeneratorToolsetVersion.clear();
     }
 
-    std::string const toolsetPath = this->GetAuxiliaryToolset();
-    if (!toolsetPath.empty() && !cmSystemTools::FileExists(toolsetPath)) {
-
-      std::ostringstream e;
-      /* clang-format off */
-      e <<
-        "Generator\n"
-        "  " << this->GetName() << "\n"
-        "given toolset and version specification\n"
-        "  " << this->GetPlatformToolsetString() << ",version=" <<
-        this->GeneratorToolsetVersion << "\n"
-        "does not seem to be installed at\n" <<
-        "  " << toolsetPath;
-      ;
-      /* clang-format on */
-      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
-
-      // Clear the configured tool-set
+    bool const isDefaultToolset =
+      this->IsDefaultToolset(this->GeneratorToolsetVersion);
+    if (isDefaultToolset) {
+      // If the given version is the default toolset, remove the setting
       this->GeneratorToolsetVersion.clear();
+    } else {
+      std::string const toolsetPath = this->GetAuxiliaryToolset();
+      if (!toolsetPath.empty() && !cmSystemTools::FileExists(toolsetPath)) {
+
+        std::ostringstream e;
+        /* clang-format off */
+        e <<
+          "Generator\n"
+          "  " << this->GetName() << "\n"
+          "given toolset and version specification\n"
+          "  " << this->GetPlatformToolsetString() << ",version=" <<
+          this->GeneratorToolsetVersion << "\n"
+          "does not seem to be installed at\n" <<
+          "  " << toolsetPath;
+        ;
+        /* clang-format on */
+        mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+
+        // Clear the configured tool-set
+        this->GeneratorToolsetVersion.clear();
+      }
     }
   }
 
@@ -613,6 +620,12 @@ std::string const&
 cmGlobalVisualStudio10Generator::GetPlatformToolsetCudaString() const
 {
   return this->GeneratorToolsetCuda;
+}
+
+bool cmGlobalVisualStudio10Generator::IsDefaultToolset(
+  const std::string&) const
+{
+  return true;
 }
 
 std::string cmGlobalVisualStudio10Generator::GetAuxiliaryToolset() const

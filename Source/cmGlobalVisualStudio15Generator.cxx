@@ -158,6 +158,27 @@ bool cmGlobalVisualStudio15Generator::GetVSInstance(std::string& dir) const
   return vsSetupAPIHelper.GetVSInstanceInfo(dir);
 }
 
+bool cmGlobalVisualStudio15Generator::IsDefaultToolset(
+  const std::string& version) const
+{
+  if (version.empty()) {
+    return true;
+  }
+
+  std::string vcToolsetVersion;
+  if (this->vsSetupAPIHelper.GetVCToolsetVersion(vcToolsetVersion)) {
+
+    cmsys::RegularExpression regex("[0-9][0-9]\\.[0-9]+");
+    if (regex.find(version) && regex.find(vcToolsetVersion)) {
+      const auto majorMinorEnd = vcToolsetVersion.find('.', 3);
+      const auto majorMinor = vcToolsetVersion.substr(0, majorMinorEnd);
+      return version == majorMinor;
+    }
+  }
+
+  return false;
+}
+
 std::string cmGlobalVisualStudio15Generator::GetAuxiliaryToolset() const
 {
   const char* version = this->GetPlatformToolsetVersion();

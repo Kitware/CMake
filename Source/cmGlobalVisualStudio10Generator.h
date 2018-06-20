@@ -106,6 +106,7 @@ public:
   std::string Encoding() override;
   virtual const char* GetToolsVersion() { return "4.0"; }
 
+  virtual bool IsDefaultToolset(const std::string& version) const;
   virtual std::string GetAuxiliaryToolset() const;
 
   bool FindMakeProgram(cmMakefile* mf) override;
