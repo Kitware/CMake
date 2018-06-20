@@ -122,10 +122,4 @@ if(JPEG_FOUND)
   endif()
 endif()
 
-# Deprecated declarations.
-set(NATIVE_JPEG_INCLUDE_PATH ${JPEG_INCLUDE_DIR})
-if(JPEG_LIBRARY)
-  get_filename_component(NATIVE_JPEG_LIB_PATH ${JPEG_LIBRARY} PATH)
-endif()
-
 mark_as_advanced(JPEG_LIBRARY JPEG_INCLUDE_DIR)
