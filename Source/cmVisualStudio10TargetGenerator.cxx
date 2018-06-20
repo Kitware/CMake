@@ -2809,6 +2809,7 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
 
   // Get includes for this target
   cudaOptions.AddIncludes(this->GetIncludes(configName, "CUDA"));
+  cudaOptions.AddFlag("UseHostInclude", "false");
 
   this->CudaOptions[configName] = std::move(pOptions);
   return true;
