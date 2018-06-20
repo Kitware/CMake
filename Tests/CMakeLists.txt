@@ -252,6 +252,10 @@ if(BUILD_TESTING)
         set(CMake_TEST_XCODE_VERSION "${CMAKE_MATCH_1}")
       endif()
     endif()
+    if(NOT CMake_TEST_XCODE_VERSION VERSION_LESS 10)
+      # Since Xcode 10 we do not have two supported architectures for the host.
+      set(CTEST_TEST_OSX_ARCH 0)
+    endif()
     if(CMAKE_OSX_SYSROOT)
       execute_process(
         COMMAND xcodebuild -sdk ${CMAKE_OSX_SYSROOT} -version ProductName

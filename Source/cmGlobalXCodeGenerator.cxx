@@ -3342,15 +3342,10 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
   }
   this->WriteXCodePBXProj(fout, root, generators);
 
-  // Since the lowest available Xcode version for testing was 6.4,
-  // I'm setting this as a limit then
-  if (this->XcodeVersion >= 64) {
-    if (root->GetMakefile()->GetCMakeInstance()->GetIsInTryCompile() ||
-        root->GetMakefile()->IsOn("CMAKE_XCODE_GENERATE_SCHEME")) {
-      this->OutputXCodeSharedSchemes(xcodeDir);
-      this->OutputXCodeWorkspaceSettings(xcodeDir);
-    }
+  if (this->IsGeneratingScheme(root)) {
+    this->OutputXCodeSharedSchemes(xcodeDir);
   }
+  this->OutputXCodeWorkspaceSettings(xcodeDir, root);
 
   this->ClearXCodeObjects();
 
@@ -3358,6 +3353,15 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
   //
   root->GetMakefile()->GetCMakeInstance()->SaveCache(
     root->GetBinaryDirectory());
+}
+
+bool cmGlobalXCodeGenerator::IsGeneratingScheme(cmLocalGenerator* root) const
+{
+  // Since the lowest available Xcode version for testing was 6.4,
+  // I'm setting this as a limit then
+  return this->XcodeVersion >= 64 &&
+    (root->GetMakefile()->GetCMakeInstance()->GetIsInTryCompile() ||
+     root->GetMakefile()->IsOn("CMAKE_XCODE_GENERATE_SCHEME"));
 }
 
 void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
@@ -3399,7 +3403,7 @@ void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
 }
 
 void cmGlobalXCodeGenerator::OutputXCodeWorkspaceSettings(
-  const std::string& xcProjDir)
+  const std::string& xcProjDir, cmLocalGenerator* root)
 {
   std::string xcodeSharedDataDir = xcProjDir;
   xcodeSharedDataDir += "/project.xcworkspace/xcshareddata";
@@ -3421,8 +3425,15 @@ void cmGlobalXCodeGenerator::OutputXCodeWorkspaceSettings(
   xout.StartElement("plist");
   xout.Attribute("version", "1.0");
   xout.StartElement("dict");
-  xout.Element("key", "IDEWorkspaceSharedSettings_AutocreateContextsIfNeeded");
-  xout.Element("false");
+  if (this->XcodeVersion >= 100) {
+    xout.Element("key", "BuildSystemType");
+    xout.Element("string", "Original");
+  }
+  if (this->IsGeneratingScheme(root)) {
+    xout.Element("key",
+                 "IDEWorkspaceSharedSettings_AutocreateContextsIfNeeded");
+    xout.Element("false");
+  }
   xout.EndElement(); // dict
   xout.EndElement(); // plist
   xout.EndDocument();

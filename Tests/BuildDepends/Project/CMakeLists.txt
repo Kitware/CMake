@@ -1,30 +1,30 @@
 cmake_minimum_required(VERSION 2.6)
 project(testRebuild)
 
-function(test_for_xcode4 result_var)
-  set(${result_var} 0 PARENT_SCOPE)
-  if(APPLE)
-    execute_process(COMMAND xcodebuild -version
-      OUTPUT_VARIABLE ov RESULT_VARIABLE rv
+if(APPLE)
+  set(CMake_TEST_XCODE_VERSION 0)
+  if(XCODE_VERSION)
+    set(CMake_TEST_XCODE_VERSION "${XCODE_VERSION}")
+  else()
+    execute_process(
+      COMMAND xcodebuild -version
+      OUTPUT_VARIABLE _version ERROR_VARIABLE _version
       )
-    if("${rv}" STREQUAL "0" AND ov MATCHES "^Xcode ([0-9]+)\\.")
-      if(NOT CMAKE_MATCH_1 VERSION_LESS 4)
-        set(${result_var} 1 PARENT_SCOPE)
-      endif()
+    if(_version MATCHES "^Xcode ([0-9]+(\\.[0-9]+)*)")
+      set(CMake_TEST_XCODE_VERSION "${CMAKE_MATCH_1}")
     endif()
   endif()
-endfunction()
-
-if(APPLE)
   # only use multi-arch if the sysroot exists on this machine
   # Ninja needs -M which could not be used with multiple -arch flags
   if(EXISTS "${CMAKE_OSX_SYSROOT}" AND NOT "${CMAKE_GENERATOR}" MATCHES "Ninja")
-    set(CMAKE_OSX_ARCHITECTURES "ppc;i386")
-    test_for_xcode4(is_xcode4)
-    if(is_xcode4)
-      # Xcode 4, use modern architectures as defaults
-      # Arch 'ppc' no longer works: tools no longer available starting with Xcode 4
+    if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 10)
+      # Arch 'i386' no longer works in Xcode 10.
+      set(CMAKE_OSX_ARCHITECTURES x86_64)
+    elseif(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 4)
+      # Arch 'ppc' no longer works in Xcode 4.
       set(CMAKE_OSX_ARCHITECTURES i386 x86_64)
+    else()
+      set(CMAKE_OSX_ARCHITECTURES ppc i386)
     endif()
   endif()
 endif()
