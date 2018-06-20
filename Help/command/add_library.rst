@@ -150,6 +150,7 @@ the interface target using the commands:
 
 * :command:`set_property`,
 * :command:`target_link_libraries(INTERFACE)`,
+* :command:`target_link_options(INTERFACE)`,
 * :command:`target_include_directories(INTERFACE)`,
 * :command:`target_compile_options(INTERFACE)`,
 * :command:`target_compile_definitions(INTERFACE)`, and
