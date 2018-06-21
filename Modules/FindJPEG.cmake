@@ -52,7 +52,7 @@
 find_path(JPEG_INCLUDE_DIR jpeglib.h)
 
 set(jpeg_names ${JPEG_NAMES} jpeg jpeg-static libjpeg libjpeg-static)
-foreach(name ${JPEG_NAMES})
+foreach(name ${jpeg_names})
   list(APPEND jpeg_names_debug "${name}d")
 endforeach()
 
@@ -120,12 +120,6 @@ if(JPEG_FOUND)
         IMPORTED_LOCATION_DEBUG "${JPEG_LIBRARY_DEBUG}")
     endif()
   endif()
-endif()
-
-# Deprecated declarations.
-set(NATIVE_JPEG_INCLUDE_PATH ${JPEG_INCLUDE_DIR})
-if(JPEG_LIBRARY)
-  get_filename_component(NATIVE_JPEG_LIB_PATH ${JPEG_LIBRARY} PATH)
 endif()
 
 mark_as_advanced(JPEG_LIBRARY JPEG_INCLUDE_DIR)
