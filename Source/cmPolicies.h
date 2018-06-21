@@ -226,7 +226,9 @@ class cmMakefile;
          0, cmPolicies::WARN)                                                 \
   SELECT(POLICY, CMP0076,                                                     \
          "target_sources() command converts relative paths to absolute.", 3,  \
-         13, 0, cmPolicies::WARN)
+         13, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0077, "option() honors normal variables.", 3, 13, 0,      \
+         cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
