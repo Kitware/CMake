@@ -784,7 +784,7 @@ A *library* output artifact of a buildsystem target may be:
   with the ``MODULE`` option.
 
 * On non-DLL platforms: the shared library file (e.g. ``.so`` or ``.dylib``)
-  of a shared shared library target created by the :command:`add_library`
+  of a shared library target created by the :command:`add_library`
   command with the ``SHARED`` option.
 
 The :prop_tgt:`LIBRARY_OUTPUT_DIRECTORY` and :prop_tgt:`LIBRARY_OUTPUT_NAME`
