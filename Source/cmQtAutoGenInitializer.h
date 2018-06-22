@@ -83,6 +83,7 @@ private:
   std::string ConfigDefault;
   std::vector<std::string> ConfigsList;
   std::string Parallel;
+  std::string Verbosity;
   // Names
   std::string AutogenTargetName;
   std::string AutogenFolder;

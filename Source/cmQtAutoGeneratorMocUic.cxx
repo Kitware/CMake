@@ -1222,6 +1222,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
   }
 
   // -- Meta
+  Log().RaiseVerbosity(InfoGet("AM_VERBOSITY"));
   Base_.MultiConfig = InfoGetBool("AM_MULTI_CONFIG");
   {
     unsigned long num = Base_.NumThreads;

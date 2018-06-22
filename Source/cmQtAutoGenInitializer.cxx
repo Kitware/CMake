@@ -210,6 +210,19 @@ void cmQtAutoGenInitializer::InitCustomTargets()
   cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
   cmGlobalGenerator* globalGen = localGen->GetGlobalGenerator();
 
+  // Verbosity
+  {
+    this->Verbosity = makefile->GetSafeDefinition("CMAKE_AUTOGEN_VERBOSE");
+    if (!this->Verbosity.empty()) {
+      unsigned long iVerb = 0;
+      if (!cmSystemTools::StringToULong(this->Verbosity.c_str(), &iVerb)) {
+        // Non numeric verbosity
+        this->Verbosity =
+          cmSystemTools::IsOn(this->Verbosity.c_str()) ? "1" : "0";
+      }
+    }
+  }
+
   // Configurations
   this->MultiConfig = globalGen->IsMultiConfig();
   this->ConfigDefault = makefile->GetConfigurations(this->ConfigsList);
@@ -944,6 +957,7 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
       ofs << "# Meta\n";
       CWrite("AM_MULTI_CONFIG", this->MultiConfig ? "TRUE" : "FALSE");
       CWrite("AM_PARALLEL", this->Parallel);
+      CWrite("AM_VERBOSITY", this->Verbosity);
 
       ofs << "# Directories\n";
       CWrite("AM_CMAKE_SOURCE_DIR", MfDef("CMAKE_SOURCE_DIR"));
@@ -1036,7 +1050,7 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
         // Write
         ofs << "# Configurations\n";
         CWrite("ARCC_MULTI_CONFIG", this->MultiConfig ? "TRUE" : "FALSE");
-
+        CWrite("ARCC_VERBOSITY", this->Verbosity);
         ofs << "# Settings file\n";
         if (this->MultiConfig) {
           std::map<std::string, std::string> settingsFiles;
