@@ -777,7 +777,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     this->Makefile->GetCMakeInstance()->GetWorkingMode();
   while (i != args.end()) {
     if (*i == "LIST_DIRECTORIES") {
-      ++i;
+      ++i; // skip LIST_DIRECTORIES
       if (i != args.end()) {
         if (cmSystemTools::IsOn(i->c_str())) {
           g.SetListDirs(true);
@@ -789,27 +789,21 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
           this->SetError("LIST_DIRECTORIES missing bool value.");
           return false;
         }
+        ++i;
       } else {
         this->SetError("LIST_DIRECTORIES missing bool value.");
         return false;
       }
-      ++i;
-      if (i == args.end()) {
-        this->SetError("GLOB requires a glob expression after the bool.");
-        return false;
-      }
     } else if (*i == "FOLLOW_SYMLINKS") {
-      if (!recurse) {
-        this->SetError("FOLLOW_SYMLINKS is not a valid parameter for GLOB.");
-        return false;
-      }
-      explicitFollowSymlinks = true;
-      g.RecurseThroughSymlinksOn();
-      ++i;
-      if (i == args.end()) {
-        this->SetError(
-          "GLOB_RECURSE requires a glob expression after FOLLOW_SYMLINKS.");
-        return false;
+      ++i; // skip FOLLOW_SYMLINKS
+      if (recurse) {
+        explicitFollowSymlinks = true;
+        g.RecurseThroughSymlinksOn();
+        if (i == args.end()) {
+          this->SetError(
+            "GLOB_RECURSE requires a glob expression after FOLLOW_SYMLINKS.");
+          return false;
+        }
       }
     } else if (*i == "RELATIVE") {
       ++i; // skip RELATIVE

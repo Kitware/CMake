@@ -1,4 +1,0 @@
-^CMake Error at GLOB-error-FOLLOW_SYMLINKS\.cmake:[0-9]+ \(file\):
-  file FOLLOW_SYMLINKS is not a valid parameter for GLOB\.
-Call Stack \(most recent call first\):
-  CMakeLists\.txt:[0-9]+ \(include\)$
