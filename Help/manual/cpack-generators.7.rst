@@ -18,6 +18,7 @@ Generators
    /cpack_gen/cygwin
    /cpack_gen/deb
    /cpack_gen/dmg
+   /cpack_gen/external
    /cpack_gen/freebsd
    /cpack_gen/ifw
    /cpack_gen/nsis
