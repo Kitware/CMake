@@ -116,11 +116,16 @@
 #      dependent counterparts (e.g. CMAKE_C_FLAGS_DEBUG) automatically to the
 #      host compiler through nvcc's -Xcompiler flag.  This helps make the
 #      generated host code match the rest of the system better.  Sometimes
-#      certain flags give nvcc problems, and this will help you turn the flag
-#      propagation off.  This does not affect the flags supplied directly to nvcc
+#      certain flags give nvcc problems, so you can set this to OFF to stop the
+#      flag propagation or set CUDA_PROPAGATE_HOST_FLAGS_BLACKLIST to filter out
+#      specific flags.  This does not affect the flags supplied directly to nvcc
 #      via CUDA_NVCC_FLAGS or through the OPTION flags specified through
 #      CUDA_ADD_LIBRARY, CUDA_ADD_EXECUTABLE, or CUDA_WRAP_SRCS.  Flags used for
 #      shared library compilation are not affected by this flag.
+#
+#   CUDA_PROPAGATE_HOST_FLAGS_BLACKLIST (Default "")
+#   -- A list containing the host flags that should not be propagated when
+#      CUDA_PROPAGATE_HOST_FLAGS is ON.
 #
 #   CUDA_SEPARABLE_COMPILATION (Default OFF)
 #   -- If set this will enable separable compilation for all CUDA runtime object
@@ -571,6 +576,9 @@ endif()
 # Propagate the host flags to the host compiler via -Xcompiler
 option(CUDA_PROPAGATE_HOST_FLAGS "Propagate C/CXX_FLAGS and friends to the host compiler via -Xcompile" ON)
 
+# Blacklisted flags to prevent propagation
+set(CUDA_PROPAGATE_HOST_FLAGS_BLACKLIST "" CACHE STRING "Blacklisted host flags to prevent propagation when CUDA_PROPAGATE_HOST_FLAGS is ON")
+
 # Enable CUDA_SEPARABLE_COMPILATION
 option(CUDA_SEPARABLE_COMPILATION "Compile CUDA objects with separable compilation enabled.  Requires CUDA 5.0+" OFF)
 
@@ -584,6 +592,7 @@ mark_as_advanced(
   CUDA_HOST_COMPILATION_CPP
   CUDA_NVCC_FLAGS
   CUDA_PROPAGATE_HOST_FLAGS
+  CUDA_PROPAGATE_HOST_FLAGS_BLACKLIST
   CUDA_BUILD_CUBIN
   CUDA_BUILD_EMULATION
   CUDA_VERBOSE_BUILD
@@ -1403,10 +1412,22 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   else()
     set(CUDA_HOST_SHARED_FLAGS)
   endif()
+
+  # Removes all instances of blacklisted flags from list CUDA_FLAGS in-place
+  macro(_filter_blacklisted_host_flags CUDA_FLAGS)
+    string(REGEX REPLACE "[ \t]+" ";" ${CUDA_FLAGS} "${${CUDA_FLAGS}}")
+    foreach(_blacklisted ${CUDA_PROPAGATE_HOST_FLAGS_BLACKLIST})
+      list(REMOVE_ITEM ${CUDA_FLAGS} "${_blacklisted}")
+    endforeach()
+    string(REPLACE ";" " " ${CUDA_FLAGS} "${${CUDA_FLAGS}}")
+  endmacro()
+
   # Only add the CMAKE_{C,CXX}_FLAGS if we are propagating host flags.  We
   # always need to set the SHARED_FLAGS, though.
   if(CUDA_PROPAGATE_HOST_FLAGS)
-    set(_cuda_host_flags "set(CMAKE_HOST_FLAGS ${CMAKE_${CUDA_C_OR_CXX}_FLAGS} ${CUDA_HOST_SHARED_FLAGS})")
+    set(_cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS}")
+    _filter_blacklisted_host_flags(_cuda_C_FLAGS)
+    set(_cuda_host_flags "set(CMAKE_HOST_FLAGS ${_cuda_C_FLAGS} ${CUDA_HOST_SHARED_FLAGS})")
   else()
     set(_cuda_host_flags "set(CMAKE_HOST_FLAGS ${CUDA_HOST_SHARED_FLAGS})")
   endif()
@@ -1430,10 +1451,10 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
           set(_cuda_fix_g3 TRUE)
         endif()
       endif()
+      set(_cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
+      _filter_blacklisted_host_flags(_cuda_C_FLAGS)
       if(_cuda_fix_g3)
-        string(REPLACE "-g3" "-g" _cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
-      else()
-        set(_cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
+        string(REPLACE "-g3" "-g" _cuda_C_FLAGS "${_cuda_C_FLAGS}")
       endif()
 
       string(APPEND _cuda_host_flags "\nset(CMAKE_HOST_FLAGS_${config_upper} ${_cuda_C_FLAGS})")
