@@ -9,7 +9,6 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/Process.h"
-#include "cmsys/String.hxx"
 #include "cmsys/SystemInformation.hxx"
 #include <algorithm>
 #include <chrono>
@@ -1491,7 +1490,7 @@ int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
   this->AddSiteProperties(xml);
   xml.StartElement("Notes");
 
-  for (cmsys::String const& file : files) {
+  for (std::string const& file : files) {
     cmCTestLog(this, OUTPUT, "\tAdd file: " << file << std::endl);
     std::string note_time = this->CurrentTime();
     xml.StartElement("Note");
@@ -1595,7 +1594,7 @@ std::string cmCTest::Base64EncodeFile(std::string const& file)
 
 bool cmCTest::SubmitExtraFiles(const VectorOfStrings& files)
 {
-  for (cmsys::String const& file : files) {
+  for (std::string const& file : files) {
     if (!cmSystemTools::FileExists(file)) {
       cmCTestLog(this, ERROR_MESSAGE,
                  "Cannot find extra file: " << file << " to submit."

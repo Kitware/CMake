@@ -397,12 +397,12 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     if (written && this->UseFolderProperty()) {
       const std::string targetFolder = target->GetEffectiveFolderName();
       if (!targetFolder.empty()) {
-        std::vector<cmsys::String> tokens =
+        std::vector<std::string> tokens =
           cmSystemTools::SplitString(targetFolder, '/', false);
 
         std::string cumulativePath;
 
-        for (cmsys::String const& iter : tokens) {
+        for (std::string const& iter : tokens) {
           if (!iter.size()) {
             continue;
           }

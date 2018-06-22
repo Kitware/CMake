@@ -7,7 +7,7 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
-#include "cmsys/String.hxx"
+
 #include <algorithm>
 #include <assert.h>
 #include <memory> // IWYU pragma: keep
@@ -2490,11 +2490,11 @@ bool cmFileCommand::HandleCMakePathCommand(
 #else
   char pathSep = ':';
 #endif
-  std::vector<cmsys::String> path = cmSystemTools::SplitString(*i, pathSep);
+  std::vector<std::string> path = cmSystemTools::SplitString(*i, pathSep);
   i++;
   const char* var = i->c_str();
   std::string value;
-  for (std::vector<cmsys::String>::iterator j = path.begin(); j != path.end();
+  for (std::vector<std::string>::iterator j = path.begin(); j != path.end();
        ++j) {
     if (j != path.begin()) {
       value += ";";
@@ -2504,7 +2504,7 @@ bool cmFileCommand::HandleCMakePathCommand(
     } else {
       *j = cmSystemTools::ConvertToOutputPath(*j);
       // remove double quotes in the path
-      cmsys::String& s = *j;
+      std::string& s = *j;
 
       if (s.size() > 1 && s[0] == '\"' && s[s.size() - 1] == '\"') {
         s = s.substr(1, s.size() - 2);

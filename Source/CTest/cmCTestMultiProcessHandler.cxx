@@ -15,7 +15,6 @@
 #include "cmUVSignalHackRAII.h" // IWYU pragma: keep
 
 #include "cmsys/FStream.hxx"
-#include "cmsys/String.hxx"
 #include "cmsys/SystemInformation.hxx"
 
 #include <algorithm>
@@ -458,7 +457,7 @@ void cmCTestMultiProcessHandler::UpdateCostData()
       if (line == "---") {
         break;
       }
-      std::vector<cmsys::String> parts = cmSystemTools::SplitString(line, ' ');
+      std::vector<std::string> parts = cmSystemTools::SplitString(line, ' ');
       // Format: <name> <previous_runs> <avg_cost>
       if (parts.size() < 3) {
         break;
@@ -511,7 +510,7 @@ void cmCTestMultiProcessHandler::ReadCostData()
         break;
       }
 
-      std::vector<cmsys::String> parts = cmSystemTools::SplitString(line, ' ');
+      std::vector<std::string> parts = cmSystemTools::SplitString(line, ' ');
 
       // Probably an older version of the file, will be fixed next run
       if (parts.size() < 3) {

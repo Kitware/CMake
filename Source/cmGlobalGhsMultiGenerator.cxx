@@ -348,16 +348,14 @@ void cmGlobalGhsMultiGenerator::AddFilesUpToPath(
 {
   std::string workingPath(path);
   cmSystemTools::ConvertToUnixSlashes(workingPath);
-  std::vector<cmsys::String> splitPath =
-    cmSystemTools::SplitString(workingPath);
+  std::vector<std::string> splitPath = cmSystemTools::SplitString(workingPath);
   std::string workingRelPath(relPath);
   cmSystemTools::ConvertToUnixSlashes(workingRelPath);
   if (!workingRelPath.empty()) {
     workingRelPath += "/";
   }
   std::string pathUpTo;
-  for (std::vector<cmsys::String>::const_iterator splitPathI =
-         splitPath.begin();
+  for (std::vector<std::string>::const_iterator splitPathI = splitPath.begin();
        splitPath.end() != splitPathI; ++splitPathI) {
     pathUpTo += *splitPathI;
     if (targetFolderBuildStreams->end() ==
@@ -415,11 +413,11 @@ void cmGlobalGhsMultiGenerator::AddFilesUpToPathNewBuildFile(
 void cmGlobalGhsMultiGenerator::AddFilesUpToPathAppendNextFile(
   std::map<std::string, cmGeneratedFileStream*>* targetFolderBuildStreams,
   std::string const& pathUpTo,
-  std::vector<cmsys::String>::const_iterator splitPathI,
-  std::vector<cmsys::String>::const_iterator end,
+  std::vector<std::string>::const_iterator splitPathI,
+  std::vector<std::string>::const_iterator end,
   GhsMultiGpj::Types const projType)
 {
-  std::vector<cmsys::String>::const_iterator splitPathNextI = splitPathI + 1;
+  std::vector<std::string>::const_iterator splitPathNextI = splitPathI + 1;
   if (end != splitPathNextI &&
       targetFolderBuildStreams->end() ==
         targetFolderBuildStreams->find(pathUpTo + "/" + *splitPathNextI)) {
@@ -436,7 +434,7 @@ std::string cmGlobalGhsMultiGenerator::GetFileNameFromPath(
   std::string output(path);
   if (!path.empty()) {
     cmSystemTools::ConvertToUnixSlashes(output);
-    std::vector<cmsys::String> splitPath = cmSystemTools::SplitString(output);
+    std::vector<std::string> splitPath = cmSystemTools::SplitString(output);
     output += "/" + splitPath.back() + FILE_EXTENSION;
   }
   return output;
@@ -457,7 +455,7 @@ void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
           this->GetCMakeInstance()->GetHomeOutputDirectory().c_str(),
           folderName, GhsMultiGpj::PROJECT);
       }
-      std::vector<cmsys::String> splitPath = cmSystemTools::SplitString(
+      std::vector<std::string> splitPath = cmSystemTools::SplitString(
         cmGhsMultiTargetGenerator::GetRelBuildFileName(tgt));
       std::string foldNameRelBuildFile(*(splitPath.end() - 2) + "/" +
                                        splitPath.back());
