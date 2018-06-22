@@ -1752,11 +1752,11 @@ std::string SystemTools::CropString(const std::string& s, size_t max_len)
   return n;
 }
 
-std::vector<kwsys::String> SystemTools::SplitString(const std::string& p,
-                                                    char sep, bool isPath)
+std::vector<std::string> SystemTools::SplitString(const std::string& p,
+                                                  char sep, bool isPath)
 {
   std::string path = p;
-  std::vector<kwsys::String> paths;
+  std::vector<std::string> paths;
   if (path.empty()) {
     return paths;
   }
@@ -3279,13 +3279,12 @@ std::string SystemTools::RelativePath(const std::string& local,
   std::string r = SystemTools::CollapseFullPath(remote);
 
   // split up both paths into arrays of strings using / as a separator
-  std::vector<kwsys::String> localSplit =
-    SystemTools::SplitString(l, '/', true);
-  std::vector<kwsys::String> remoteSplit =
+  std::vector<std::string> localSplit = SystemTools::SplitString(l, '/', true);
+  std::vector<std::string> remoteSplit =
     SystemTools::SplitString(r, '/', true);
-  std::vector<kwsys::String>
+  std::vector<std::string>
     commonPath; // store shared parts of path in this array
-  std::vector<kwsys::String> finalPath; // store the final relative path here
+  std::vector<std::string> finalPath; // store the final relative path here
   // count up how many matching directory names there are from the start
   unsigned int sameCount = 0;
   while (((sameCount <= (localSplit.size() - 1)) &&
@@ -3325,7 +3324,7 @@ std::string SystemTools::RelativePath(const std::string& local,
   }
   // for each entry that is not common in the remote path add it
   // to the final path.
-  for (std::vector<String>::iterator vit = remoteSplit.begin();
+  for (std::vector<std::string>::iterator vit = remoteSplit.begin();
        vit != remoteSplit.end(); ++vit) {
     if (!vit->empty()) {
       finalPath.push_back(*vit);
@@ -3334,7 +3333,7 @@ std::string SystemTools::RelativePath(const std::string& local,
   std::string relativePath; // result string
   // now turn the array of directories into a unix path by puttint /
   // between each entry that does not already have one
-  for (std::vector<String>::iterator vit1 = finalPath.begin();
+  for (std::vector<std::string>::iterator vit1 = finalPath.begin();
        vit1 != finalPath.end(); ++vit1) {
     if (!relativePath.empty() && *relativePath.rbegin() != '/') {
       relativePath += "/";
