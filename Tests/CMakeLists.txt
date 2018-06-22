@@ -3441,10 +3441,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       )
   endif()
 
-  add_test(NAME CMakeWizardTest COMMAND cmake -i)
-  set_property(TEST CMakeWizardTest PROPERTY PASS_REGULAR_EXPRESSION
-    "The \"cmake -i\" wizard mode is no longer supported.")
-
   # Define a set of "contract" tests, each activated by a cache entry
   # named "CMake_TEST_CONTRACT_<project>".  For each Contract test,
   # the project should provide a directory with a CMakeLists.txt file
