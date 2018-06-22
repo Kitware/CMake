@@ -28,4 +28,3 @@ if(NOT ZIP_EXECUTABLE)
     set(CPACK_ZIP_NEED_QUOTES FALSE)
   endif()
 endif()
-

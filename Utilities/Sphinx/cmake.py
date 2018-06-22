@@ -144,6 +144,7 @@ class _cmake_index_entry:
 
 _cmake_index_objs = {
     'command':    _cmake_index_entry('command'),
+    'cpack_gen':  _cmake_index_entry('cpack generator'),
     'envvar':     _cmake_index_entry('envvar'),
     'generator':  _cmake_index_entry('generator'),
     'manual':     _cmake_index_entry('manual'),
@@ -325,6 +326,7 @@ class CMakeDomain(Domain):
     label = 'CMake'
     object_types = {
         'command':    ObjType('command',    'command'),
+        'cpack_gen':  ObjType('cpack_gen',  'cpack_gen'),
         'envvar':     ObjType('envvar',     'envvar'),
         'generator':  ObjType('generator',  'generator'),
         'variable':   ObjType('variable',   'variable'),
@@ -358,6 +360,7 @@ class CMakeDomain(Domain):
     }
     roles = {
         'command':    CMakeXRefRole(fix_parens = True, lowercase = True),
+        'cpack_gen':  CMakeXRefRole(),
         'envvar':     CMakeXRefRole(),
         'generator':  CMakeXRefRole(),
         'variable':   CMakeXRefRole(),

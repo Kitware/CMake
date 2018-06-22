@@ -298,7 +298,7 @@ static bool has_suffix(const std::string& str, const std::string& suffix)
 
 int cmCPackFreeBSDGenerator::PackageFiles()
 {
-  if (!this->ReadListFile("CPackFreeBSD.cmake")) {
+  if (!this->ReadListFile("Internal/CPack/CPackFreeBSD.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while execution CPackFreeBSD.cmake" << std::endl);
     return 0;
