@@ -39,12 +39,12 @@ run_cmake(GLOB_RECURSE-noexp-FOLLOW_SYMLINKS)
 
 # tests are valid both for GLOB and GLOB_RECURSE
 run_cmake(GLOB-sort-dedup)
-run_cmake(GLOB-error-FOLLOW_SYMLINKS)
 run_cmake(GLOB-error-LIST_DIRECTORIES-not-boolean)
 run_cmake(GLOB-error-LIST_DIRECTORIES-no-arg)
 run_cmake(GLOB-error-RELATIVE-no-arg)
 run_cmake(GLOB-error-CONFIGURE_DEPENDS-modified)
 run_cmake(GLOB-noexp-CONFIGURE_DEPENDS)
+run_cmake(GLOB-noexp-FOLLOW_SYMLINKS)
 run_cmake(GLOB-noexp-LIST_DIRECTORIES)
 run_cmake(GLOB-noexp-RELATIVE)
 run_cmake_command(GLOB-error-CONFIGURE_DEPENDS-SCRIPT_MODE ${CMAKE_COMMAND} -P
