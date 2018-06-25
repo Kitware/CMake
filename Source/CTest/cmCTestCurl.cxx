@@ -148,7 +148,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
     ::curl_slist_append(nullptr, "Content-Type: text/xml");
   // Add any additional headers that the user specified.
   for (std::string const& h : this->HttpHeaders) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+    cmCTestOptionalLog(this->CTest, DEBUG,
                        "   Add HTTP Header: \"" << h << "\"" << std::endl,
                        this->Quiet);
     headers = ::curl_slist_append(headers, h.c_str());
@@ -216,7 +216,7 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
   struct curl_slist* headers = nullptr;
   if (!this->HttpHeaders.empty()) {
     for (std::string const& h : this->HttpHeaders) {
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+      cmCTestOptionalLog(this->CTest, DEBUG,
                          "   Add HTTP Header: \"" << h << "\"" << std::endl,
                          this->Quiet);
       headers = ::curl_slist_append(headers, h.c_str());
