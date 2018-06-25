@@ -112,9 +112,8 @@ private:
   static void AddFilesUpToPathAppendNextFile(
     std::map<std::string, cmGeneratedFileStream*>* targetFolderBuildStreams,
     std::string const& pathUpTo,
-    std::vector<cmsys::String>::const_iterator splitPathI,
-    std::vector<cmsys::String>::const_iterator end,
-    GhsMultiGpj::Types projType);
+    std::vector<std::string>::const_iterator splitPathI,
+    std::vector<std::string>::const_iterator end, GhsMultiGpj::Types projType);
   static std::string GetFileNameFromPath(std::string const& path);
   void UpdateBuildFiles(const std::vector<cmGeneratorTarget*>& tgts);
   bool IsTgtForBuild(const cmGeneratorTarget* tgt);

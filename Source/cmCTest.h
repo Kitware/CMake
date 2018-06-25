@@ -7,7 +7,7 @@
 
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
-#include "cmsys/String.hxx"
+
 #include <chrono>
 #include <map>
 #include <set>
@@ -93,7 +93,7 @@ public:
       if the string does not name a valid part.  */
   Part GetPartFromName(const char* name);
 
-  typedef std::vector<cmsys::String> VectorOfStrings;
+  typedef std::vector<std::string> VectorOfStrings;
   typedef std::set<std::string> SetOfStrings;
 
   /** Process Command line arguments */

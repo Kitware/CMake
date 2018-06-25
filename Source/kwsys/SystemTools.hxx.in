@@ -10,8 +10,6 @@
 #include <string>
 #include <vector>
 
-#include <@KWSYS_NAMESPACE@/String.hxx>
-
 #include <sys/types.h>
 // include sys/stat.h after sys/types.h
 #include <sys/stat.h>
@@ -197,9 +195,9 @@ public:
       s starts with a / then the first element of the returned array will
       be /, so /foo/bar will be [/, foo, bar]
   */
-  static std::vector<String> SplitString(const std::string& s,
-                                         char separator = '/',
-                                         bool isPath = false);
+  static std::vector<std::string> SplitString(const std::string& s,
+                                              char separator = '/',
+                                              bool isPath = false);
   /**
    * Perform a case-independent string comparison
    */
