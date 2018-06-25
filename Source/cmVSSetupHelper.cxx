@@ -199,6 +199,7 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
     if (!cmSystemTools::FileIsDirectory(vcToolsDir)) {
       return false;
     }
+    vsInstanceInfo.VCToolsetVersion = vcToolsVersion;
   }
 
   // Reboot may have been required before the product package was registered
@@ -252,6 +253,18 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(std::string& vsInstallLocation)
   }
 
   return isInstalled;
+}
+
+bool cmVSSetupAPIHelper::GetVCToolsetVersion(std::string& vsToolsetVersion)
+{
+  vsToolsetVersion.clear();
+  bool isInstalled = this->EnumerateAndChooseVSInstance();
+
+  if (isInstalled) {
+    vsToolsetVersion = chosenInstanceInfo.VCToolsetVersion;
+  }
+
+  return isInstalled && !vsToolsetVersion.empty();
 }
 
 bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
