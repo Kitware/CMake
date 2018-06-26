@@ -260,14 +260,14 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
   // code duplication.
   std::vector<std::string> commands;
 
-  // Build list of dependencies.
-  std::vector<std::string> depends;
-  this->AppendLinkDepends(depends);
-
   // Get the language to use for linking this library.
   std::string linkLanguage = "CUDA";
   std::string const objExt =
     this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
+
+  // Build list of dependencies.
+  std::vector<std::string> depends;
+  this->AppendLinkDepends(depends, linkLanguage);
 
   // Create set of linking flags.
   std::string linkFlags;
@@ -444,13 +444,6 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // code duplication.
   std::vector<std::string> commands;
 
-  // Build list of dependencies.
-  std::vector<std::string> depends;
-  this->AppendLinkDepends(depends);
-  if (!this->DeviceLinkObject.empty()) {
-    depends.push_back(this->DeviceLinkObject);
-  }
-
   // Get the language to use for linking this library.
   std::string linkLanguage =
     this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
@@ -460,6 +453,13 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     cmSystemTools::Error("Cannot determine link language for target \"",
                          this->GeneratorTarget->GetName().c_str(), "\".");
     return;
+  }
+
+  // Build list of dependencies.
+  std::vector<std::string> depends;
+  this->AppendLinkDepends(depends, linkLanguage);
+  if (!this->DeviceLinkObject.empty()) {
+    depends.push_back(this->DeviceLinkObject);
   }
 
   // Create set of linking flags.

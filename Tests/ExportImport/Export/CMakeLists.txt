@@ -607,3 +607,17 @@ target_link_options(testLinkOptions INTERFACE INTERFACE_FLAG)
 install(TARGETS testLinkOptions
         EXPORT RequiredExp DESTINATION lib)
 export(TARGETS testLinkOptions NAMESPACE bld_ APPEND FILE ExportBuildTree.cmake)
+
+
+#------------------------------------------------------------------------------
+# test export of INTERFACE_LINK_DEPENDS
+if(CMAKE_GENERATOR MATCHES "Make|Ninja")
+  add_library(testLinkDepends INTERFACE)
+  set_property(TARGET testLinkDepends PROPERTY INTERFACE_LINK_DEPENDS
+    $<BUILD_INTERFACE:BUILD_LINK_DEPENDS>
+    $<INSTALL_INTERFACE:INSTALL_LINK_DEPENDS>)
+
+  install(TARGETS testLinkDepends
+    EXPORT RequiredExp DESTINATION lib)
+  export(TARGETS testLinkDepends NAMESPACE bld_ APPEND FILE ExportBuildTree.cmake)
+endif()

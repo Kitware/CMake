@@ -26,7 +26,8 @@ struct cmGeneratorExpressionContext;
   SELECT(F, EvaluatingAutoUicOptions, AUTOUIC_OPTIONS)                        \
   SELECT(F, EvaluatingSources, SOURCES)                                       \
   SELECT(F, EvaluatingCompileFeatures, COMPILE_FEATURES)                      \
-  SELECT(F, EvaluatingLinkOptions, LINK_OPTIONS)
+  SELECT(F, EvaluatingLinkOptions, LINK_OPTIONS)                              \
+  SELECT(F, EvaluatingLinkDepends, LINK_DEPENDS)
 
 #define CM_FOR_EACH_TRANSITIVE_PROPERTY(F)                                    \
   CM_FOR_EACH_TRANSITIVE_PROPERTY_IMPL(F, CM_SELECT_BOTH)

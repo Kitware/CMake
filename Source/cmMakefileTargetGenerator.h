@@ -128,7 +128,8 @@ protected:
   void AppendObjectDepends(std::vector<std::string>& depends);
 
   // Append link rule dependencies (objects, etc.).
-  void AppendLinkDepends(std::vector<std::string>& depends);
+  void AppendLinkDepends(std::vector<std::string>& depends,
+                         const std::string& linkLanguage);
 
   // Lookup the link rule for this target.
   std::string GetLinkRule(const std::string& linkRuleVar);

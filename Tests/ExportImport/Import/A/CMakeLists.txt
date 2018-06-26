@@ -477,3 +477,10 @@ endif()
 # check that imported libraries have the expected INTERFACE_LINK_OPTIONS property
 checkForProperty(bld_testLinkOptions "INTERFACE_LINK_OPTIONS" "INTERFACE_FLAG")
 checkForProperty(Req::testLinkOptions "INTERFACE_LINK_OPTIONS" "INTERFACE_FLAG")
+
+#---------------------------------------------------------------------------------
+# check that imported libraries have the expected INTERFACE_LINK_DEPENDS property
+if(CMAKE_GENERATOR MATCHES "Make|Ninja")
+  checkForProperty(bld_testLinkDepends "INTERFACE_LINK_DEPENDS" "BUILD_LINK_DEPENDS")
+  checkForProperty(Req::testLinkDepends "INTERFACE_LINK_DEPENDS" "${CMAKE_INSTALL_PREFIX}/INSTALL_LINK_DEPENDS")
+endif()
