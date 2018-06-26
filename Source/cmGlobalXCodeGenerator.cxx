@@ -348,11 +348,13 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
   makeCommand.add(
     this->SelectMakeProgram(makeProgram, this->GetXcodeBuildCommand()));
 
-  makeCommand.add("-project");
-  std::string projectArg = projectName;
-  projectArg += ".xcode";
-  projectArg += "proj";
-  makeCommand.add(projectArg);
+  if (!projectName.empty()) {
+    makeCommand.add("-project");
+    std::string projectArg = projectName;
+    projectArg += ".xcode";
+    projectArg += "proj";
+    makeCommand.add(projectArg);
+  }
 
   bool clean = false;
   std::string realTarget = targetName;
