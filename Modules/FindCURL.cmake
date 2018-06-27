@@ -69,7 +69,9 @@ if(CURL_FOUND)
 
   if(NOT TARGET CURL::libcurl)
     add_library(CURL::libcurl UNKNOWN IMPORTED)
-    set_target_properties(CURL::libcurl PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}")
-    set_property(TARGET CURL::libcurl APPEND PROPERTY IMPORTED_LOCATION "${CURL_LIBRARY}")
+    set_target_properties(CURL::libcurl PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}")
+    set_property(TARGET CURL::libcurl PROPERTY
+      IMPORTED_LOCATION "${CURL_LIBRARY}")
   endif()
 endif()
