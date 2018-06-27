@@ -126,7 +126,7 @@ set(OpenMP_C_CXX_TEST_SOURCE
 #include <omp.h>
 int main() {
 #ifdef _OPENMP
-  int n = omp_get_max_threads();
+  omp_get_max_threads();
   return 0;
 #else
   breaks_on_purpose
