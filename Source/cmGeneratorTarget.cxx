@@ -3027,15 +3027,21 @@ void cmGeneratorTarget::GetLinkDepends(std::vector<std::string>& result,
                                        const std::string& config,
                                        const std::string& language) const
 {
-  if (const char* linkDepends = this->GetProperty("LINK_DEPENDS")) {
-    cmSystemTools::ExpandListArgument(linkDepends, result);
-  }
-
-  std::unordered_set<std::string> uniqueOptions;
   std::vector<cmGeneratorTarget::TargetPropertyEntry*> linkDependsEntries;
+  std::unordered_set<std::string> uniqueOptions;
   cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), "LINK_DEPENDS",
                                              nullptr, nullptr);
 
+  if (const char* linkDepends = this->GetProperty("LINK_DEPENDS")) {
+    std::vector<std::string> depends;
+    cmGeneratorExpression ge;
+    cmSystemTools::ExpandListArgument(linkDepends, depends);
+    for (const auto& depend : depends) {
+      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(depend);
+      linkDependsEntries.push_back(
+        new cmGeneratorTarget::TargetPropertyEntry(std::move(cge)));
+    }
+  }
   AddInterfaceEntries(this, config, "INTERFACE_LINK_DEPENDS",
                       linkDependsEntries);
   processLinkDepends(this, linkDependsEntries, result, uniqueOptions,

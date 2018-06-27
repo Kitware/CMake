@@ -106,7 +106,7 @@ set_property(
 
 if(TEST_LINK_DEPENDS)
   add_executable(linkdep linkdep.cxx)
-  set_property(TARGET linkdep PROPERTY LINK_DEPENDS ${TEST_LINK_DEPENDS})
+  set_property(TARGET linkdep PROPERTY LINK_DEPENDS $<1:${TEST_LINK_DEPENDS}>)
 
   add_library(foo_interface INTERFACE)
   set_property(TARGET foo_interface PROPERTY INTERFACE_LINK_DEPENDS $<1:${TEST_LINK_DEPENDS}>)
