@@ -1233,6 +1233,18 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
   }
 }
 
+static std::string cmLocalVisualStudio7GeneratorEscapeForXML(
+  const std::string& s)
+{
+  std::string ret = s;
+  cmSystemTools::ReplaceString(ret, "&", "&amp;");
+  cmSystemTools::ReplaceString(ret, "\"", "&quot;");
+  cmSystemTools::ReplaceString(ret, "<", "&lt;");
+  cmSystemTools::ReplaceString(ret, ">", "&gt;");
+  cmSystemTools::ReplaceString(ret, "\n", "&#x0D;&#x0A;");
+  return ret;
+}
+
 void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
   std::ostream& fout, std::string const& config, cmGeneratorTarget* target)
 {
@@ -2054,17 +2066,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFooter(
 
   fout << "\t</Globals>\n"
        << "</VisualStudioProject>\n";
-}
-
-std::string cmLocalVisualStudio7GeneratorEscapeForXML(const std::string& s)
-{
-  std::string ret = s;
-  cmSystemTools::ReplaceString(ret, "&", "&amp;");
-  cmSystemTools::ReplaceString(ret, "\"", "&quot;");
-  cmSystemTools::ReplaceString(ret, "<", "&lt;");
-  cmSystemTools::ReplaceString(ret, ">", "&gt;");
-  cmSystemTools::ReplaceString(ret, "\n", "&#x0D;&#x0A;");
-  return ret;
 }
 
 std::string cmLocalVisualStudio7Generator::EscapeForXML(const std::string& s)
