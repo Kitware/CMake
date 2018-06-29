@@ -170,6 +170,9 @@ Modules
 
 * The :module:`FindLibXml2` module now provides imported targets.
 
+* The :module:`FindMatlab` module now supports the Matlab Runtime
+  Compiler (MCR) for compiling and linking matlab extensions.
+
 * A :module:`FindODBC` module was added to find an Open Database Connectivity
   (ODBC) library.
 
