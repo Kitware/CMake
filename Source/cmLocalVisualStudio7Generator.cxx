@@ -1245,30 +1245,44 @@ static std::string cmLocalVisualStudio7GeneratorEscapeForXML(
   return ret;
 }
 
+static std::string GetEscapedPropertyIfValueNotNULL(const char* propertyValue)
+{
+  return propertyValue == nullptr
+    ? std::string()
+    : cmLocalVisualStudio7GeneratorEscapeForXML(propertyValue);
+}
+
 void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
   std::ostream& fout, std::string const& config, cmGeneratorTarget* target)
 {
   if (this->WindowsCEProject) {
-    if (const char* dir = target->GetProperty("DEPLOYMENT_REMOTE_DIRECTORY")) {
-      /* clang-format off */
-      fout <<
-        "\t\t\t<DeploymentTool\n"
-        "\t\t\t\tForceDirty=\"-1\"\n"
-        "\t\t\t\tRemoteDirectory=\"" << this->EscapeForXML(dir) << "\"\n"
-        "\t\t\t\tRegisterOutput=\"0\"\n"
-        "\t\t\t\tAdditionalFiles=\"\"/>\n"
-        ;
-      /* clang-format on */
+    const char* dir = target->GetProperty("DEPLOYMENT_REMOTE_DIRECTORY");
+    const char* additionalFiles =
+      target->GetProperty("DEPLOYMENT_ADDITIONAL_FILES");
+
+    if (dir == nullptr && additionalFiles == nullptr) {
+      return;
+    }
+
+    fout << "\t\t\t<DeploymentTool\n"
+            "\t\t\t\tForceDirty=\"-1\"\n"
+            "\t\t\t\tRemoteDirectory=\""
+         << GetEscapedPropertyIfValueNotNULL(dir)
+         << "\"\n"
+            "\t\t\t\tRegisterOutput=\"0\"\n"
+            "\t\t\t\tAdditionalFiles=\""
+         << GetEscapedPropertyIfValueNotNULL(additionalFiles) << "\"/>\n";
+
+    if (dir != nullptr) {
       std::string const exe =
         dir + std::string("\\") + target->GetFullName(config);
-      /* clang-format off */
-      fout <<
-        "\t\t\t<DebuggerTool\n"
-        "\t\t\t\tRemoteExecutable=\"" << this->EscapeForXML(exe) << "\"\n"
-        "\t\t\t\tArguments=\"\"\n"
-        "\t\t\t/>\n"
-        ;
-      /* clang-format on */
+
+      fout << "\t\t\t<DebuggerTool\n"
+              "\t\t\t\tRemoteExecutable=\""
+           << this->EscapeForXML(exe)
+           << "\"\n"
+              "\t\t\t\tArguments=\"\"\n"
+              "\t\t\t/>\n";
     }
   }
 }
