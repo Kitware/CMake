@@ -4523,14 +4523,17 @@ void cmVisualStudio10TargetGenerator::WriteCSharpSourceProperties(
 void cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
   cmSourceFile const* sf, std::string& link)
 {
-  std::string f = sf->GetFullPath();
-  if (!this->InSourceBuild) {
+  std::string const& sourceFilePath = sf->GetFullPath();
+  std::string const& binaryDir = LocalGenerator->GetCurrentBinaryDirectory();
+
+  if (!cmSystemTools::IsSubDirectory(sourceFilePath, binaryDir)) {
     const std::string stripFromPath =
       this->Makefile->GetCurrentSourceDirectory();
-    if (f.find(stripFromPath) != std::string::npos) {
-      link = f.substr(stripFromPath.length() + 1);
+    if (sourceFilePath.find(stripFromPath) == 0) {
       if (const char* l = sf->GetProperty("VS_CSHARP_Link")) {
         link = l;
+      } else {
+        link = sourceFilePath.substr(stripFromPath.length() + 1);
       }
       ConvertToWindowsSlash(link);
     }
