@@ -30,7 +30,10 @@ encourage projects to set policies based on CMake versions::
 ``major.minor[.patch[.tweak]]``, and the ``...`` is literal.  The ``<min>``
 version must be at least ``2.4`` and at most the running version of CMake.
 The ``<max>`` version, if specified, must be at least the ``<min>`` version
-but may exceed the running version of CMake.
+but may exceed the running version of CMake.  If the running version of
+CMake is older than 3.12, the extra ``...`` dots will be seen as version
+component separators, resulting in the ``...<max>`` part being ignored and
+preserving the pre-3.12 behavior of basing policies on ``<min>``.
 
 This specifies that the current CMake code is written for the given
 range of CMake versions.  All policies known to the running version of CMake
