@@ -13,6 +13,10 @@ If the running version of CMake is lower than the ``<min>`` required
 version it will stop processing the project and report an error.
 The optional ``<max>`` version, if specified, must be at least the
 ``<min>`` version and affects policy settings as described below.
+If the running version of CMake is older than 3.12, the extra ``...``
+dots will be seen as version component separators, resulting in the
+``...<max>`` part being ignored and preserving the pre-3.12 behavior
+of basing policies on ``<min>``.
 
 The ``FATAL_ERROR`` option is accepted but ignored by CMake 2.6 and
 higher.  It should be specified so CMake versions 2.4 and lower fail
