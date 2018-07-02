@@ -42,18 +42,6 @@ inline static const char* SafeString(const char* value)
   return (value != nullptr) ? value : "";
 }
 
-inline static std::string GetSafeProperty(cmGeneratorTarget const* target,
-                                          const char* key)
-{
-  return std::string(SafeString(target->GetProperty(key)));
-}
-
-inline static std::string GetSafeProperty(cmSourceFile const* sf,
-                                          const char* key)
-{
-  return std::string(SafeString(sf->GetProperty(key)));
-}
-
 static std::size_t GetParallelCPUCount()
 {
   static std::size_t count = 0;
@@ -249,7 +237,7 @@ void cmQtAutoGenInitializer::InitCustomTargets()
     cmSystemTools::ConvertToUnixSlashes(this->DirInfo);
 
     // Autogen build dir
-    this->DirBuild = GetSafeProperty(this->Target, "AUTOGEN_BUILD_DIR");
+    this->DirBuild = this->Target->GetSafeProperty("AUTOGEN_BUILD_DIR");
     if (this->DirBuild.empty()) {
       this->DirBuild = cbd;
       this->DirBuild += '/';
@@ -281,7 +269,7 @@ void cmQtAutoGenInitializer::InitCustomTargets()
     }
     // Inherit FOLDER property from target (#13688)
     if (folder == nullptr) {
-      folder = SafeString(this->Target->Target->GetProperty("FOLDER"));
+      folder = this->Target->GetProperty("FOLDER");
     }
     if (folder != nullptr) {
       this->AutogenFolder = folder;
@@ -432,7 +420,7 @@ void cmQtAutoGenInitializer::InitCustomTargets()
           qrc.Generated = sf->GetPropertyAsBool("GENERATED");
           // RCC options
           {
-            std::string const opts = GetSafeProperty(sf, "AUTORCC_OPTIONS");
+            std::string const opts = sf->GetSafeProperty("AUTORCC_OPTIONS");
             if (!opts.empty()) {
               cmSystemTools::ExpandListArgument(opts, qrc.Options);
             }
@@ -568,7 +556,7 @@ void cmQtAutoGenInitializer::InitCustomTargets()
     // Target rcc options
     std::vector<std::string> optionsTarget;
     cmSystemTools::ExpandListArgument(
-      GetSafeProperty(this->Target, "AUTORCC_OPTIONS"), optionsTarget);
+      this->Target->GetSafeProperty("AUTORCC_OPTIONS"), optionsTarget);
 
     // Check if file name is unique
     for (Qrc& qrc : this->Qrcs) {
@@ -734,7 +722,7 @@ void cmQtAutoGenInitializer::InitCustomTargets()
     // Add user defined autogen target dependencies
     {
       std::string const deps =
-        GetSafeProperty(this->Target, "AUTOGEN_TARGET_DEPENDS");
+        this->Target->GetSafeProperty("AUTOGEN_TARGET_DEPENDS");
       if (!deps.empty()) {
         std::vector<std::string> extraDeps;
         cmSystemTools::ExpandListArgument(deps, extraDeps);
@@ -907,7 +895,7 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
     }
 
     // Parallel processing
-    this->Parallel = GetSafeProperty(this->Target, "AUTOGEN_PARALLEL");
+    this->Parallel = this->Target->GetSafeProperty("AUTOGEN_PARALLEL");
     if (this->Parallel.empty() || (this->Parallel == "AUTO")) {
       // Autodetect number of CPUs
       this->Parallel = std::to_string(GetParallelCPUCount());
@@ -1000,12 +988,12 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
         CWrite("AM_MOC_INCLUDES", this->MocIncludes);
         CWriteMap("AM_MOC_INCLUDES", this->MocIncludesConfig);
         CWrite("AM_MOC_OPTIONS",
-               GetSafeProperty(this->Target, "AUTOMOC_MOC_OPTIONS"));
+               this->Target->GetSafeProperty("AUTOMOC_MOC_OPTIONS"));
         CWrite("AM_MOC_RELAXED_MODE", MfDef("CMAKE_AUTOMOC_RELAXED_MODE"));
         CWrite("AM_MOC_MACRO_NAMES",
-               GetSafeProperty(this->Target, "AUTOMOC_MACRO_NAMES"));
+               this->Target->GetSafeProperty("AUTOMOC_MACRO_NAMES"));
         CWrite("AM_MOC_DEPEND_FILTERS",
-               GetSafeProperty(this->Target, "AUTOMOC_DEPEND_FILTERS"));
+               this->Target->GetSafeProperty("AUTOMOC_DEPEND_FILTERS"));
         CWrite("AM_MOC_PREDEFS_CMD", this->MocPredefsCmd);
       }
 
@@ -1182,7 +1170,7 @@ void cmQtAutoGenInitializer::SetupCustomTargetsUic()
   // Uic search paths
   {
     std::string const usp =
-      GetSafeProperty(this->Target, "AUTOUIC_SEARCH_PATHS");
+      this->Target->GetSafeProperty("AUTOUIC_SEARCH_PATHS");
     if (!usp.empty()) {
       cmSystemTools::ExpandListArgument(usp, this->UicSearchPaths);
       std::string const srcDir = makefile->GetCurrentSourceDirectory();
@@ -1231,7 +1219,7 @@ void cmQtAutoGenInitializer::SetupCustomTargetsUic()
           this->UicSkip.insert(absFile);
         }
         // Check if the .ui file has uic options
-        std::string const uicOpts = GetSafeProperty(sf, "AUTOUIC_OPTIONS");
+        std::string const uicOpts = sf->GetSafeProperty("AUTOUIC_OPTIONS");
         if (!uicOpts.empty()) {
           // Check if file isn't skipped
           if (this->UicSkip.count(absFile) == 0) {
