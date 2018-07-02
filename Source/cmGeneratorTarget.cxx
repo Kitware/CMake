@@ -221,6 +221,15 @@ const char* cmGeneratorTarget::GetProperty(const std::string& prop) const
   return this->Target->GetProperty(prop);
 }
 
+const char* cmGeneratorTarget::GetSafeProperty(const std::string& prop) const
+{
+  const char* ret = this->GetProperty(prop);
+  if (!ret) {
+    return "";
+  }
+  return ret;
+}
+
 const char* cmGeneratorTarget::GetOutputTargetType(
   cmStateEnums::ArtifactType artifact) const
 {

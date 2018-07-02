@@ -200,7 +200,10 @@ public:
   void SetProperty(const std::string& prop, const char* value);
   void AppendProperty(const std::string& prop, const char* value,
                       bool asString = false);
+  ///! Might return a nullptr if the property is not set or invalid
   const char* GetProperty(const std::string& prop) const;
+  ///! Always returns a valid pointer
+  const char* GetSafeProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
   const char* GetComputedProperty(const std::string& prop,
