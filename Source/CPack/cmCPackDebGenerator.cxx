@@ -664,6 +664,12 @@ int cmCPackDebGenerator::createDeb()
   cmGeneratedFileStream debStream;
   debStream.Open(outputPath.c_str(), false, true);
   cmArchiveWrite deb(debStream, cmArchiveWrite::CompressNone, "arbsd");
+
+  // uid/gid should be the one of the root user, and this root user has
+  // always uid/gid equal to 0.
+  deb.SetUIDAndGID(0u, 0u);
+  deb.SetUNAMEAndGNAME("root", "root");
+
   if (!deb.Add(tlDir + "debian-binary", tlDir.length()) ||
       !deb.Add(tlDir + "control.tar.gz", tlDir.length()) ||
       !deb.Add(tlDir + "data.tar" + compression_suffix, tlDir.length())) {
