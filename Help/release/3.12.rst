@@ -81,9 +81,6 @@ Commands
   :ref:`Object Libraries`.  Linking to an object library uses its object
   files in direct dependents and also propagates usage requirements.
 
-* The :command:`target_link_libraries` command may now be called
-  to modify targets created outside the current directory.
-
 Variables
 ---------
 
