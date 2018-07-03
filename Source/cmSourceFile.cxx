@@ -296,6 +296,15 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
   return retVal;
 }
 
+const char* cmSourceFile::GetSafeProperty(const std::string& prop) const
+{
+  const char* ret = this->GetProperty(prop);
+  if (!ret) {
+    return "";
+  }
+  return ret;
+}
+
 bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
