@@ -625,7 +625,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
   outputs.push_back(targetOutputReal);
   // Compute specific libraries to link with.
   cmNinjaDeps explicitDeps = this->GetObjects();
-  cmNinjaDeps implicitDeps = this->ComputeLinkDeps();
+  cmNinjaDeps implicitDeps = this->ComputeLinkDeps(this->TargetLinkLanguage);
 
   std::string frameworkPath;
   std::string linkPath;
@@ -794,7 +794,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   // Compute specific libraries to link with.
   cmNinjaDeps explicitDeps = this->GetObjects();
-  cmNinjaDeps implicitDeps = this->ComputeLinkDeps();
+  cmNinjaDeps implicitDeps = this->ComputeLinkDeps(this->TargetLinkLanguage);
 
   if (!this->DeviceLinkObject.empty()) {
     explicitDeps.push_back(this->DeviceLinkObject);

@@ -420,6 +420,37 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   }
 }
 
+void cmExportFileGenerator::PopulateLinkDependsInterface(
+  cmTargetExport* tei, cmGeneratorExpression::PreprocessContext preprocessRule,
+  ImportPropertyMap& properties, std::vector<std::string>& missingTargets)
+{
+  cmGeneratorTarget* gt = tei->Target;
+  assert(preprocessRule == cmGeneratorExpression::InstallInterface);
+
+  const char* propName = "INTERFACE_LINK_DEPENDS";
+  const char* input = gt->GetProperty(propName);
+
+  if (!input) {
+    return;
+  }
+
+  if (!*input) {
+    properties[propName].clear();
+    return;
+  }
+
+  std::string prepro =
+    cmGeneratorExpression::Preprocess(input, preprocessRule, true);
+  if (!prepro.empty()) {
+    this->ResolveTargetsInGeneratorExpressions(prepro, gt, missingTargets);
+
+    if (!checkInterfaceDirs(prepro, gt, propName)) {
+      return;
+    }
+    properties[propName] = prepro;
+  }
+}
+
 void cmExportFileGenerator::PopulateInterfaceProperty(
   const std::string& propName, cmGeneratorTarget* target,
   cmGeneratorExpression::PreprocessContext preprocessRule,

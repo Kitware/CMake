@@ -97,14 +97,14 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
 
   std::vector<std::string> commands;
 
-  // Build list of dependencies.
-  std::vector<std::string> depends;
-  this->AppendLinkDepends(depends);
-
   // Get the language to use for linking this library.
   std::string linkLanguage = "CUDA";
   std::string const objExt =
     this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
+
+  // Build list of dependencies.
+  std::vector<std::string> depends;
+  this->AppendLinkDepends(depends, linkLanguage);
 
   // Get the name of the device object to generate.
   std::string const targetOutputReal =
@@ -294,13 +294,6 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 {
   std::vector<std::string> commands;
 
-  // Build list of dependencies.
-  std::vector<std::string> depends;
-  this->AppendLinkDepends(depends);
-  if (!this->DeviceLinkObject.empty()) {
-    depends.push_back(this->DeviceLinkObject);
-  }
-
   // Get the name of the executable to generate.
   std::string targetName;
   std::string targetNameReal;
@@ -376,6 +369,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     cmSystemTools::Error("Cannot determine link language for target \"",
                          this->GeneratorTarget->GetName().c_str(), "\".");
     return;
+  }
+
+  // Build list of dependencies.
+  std::vector<std::string> depends;
+  this->AppendLinkDepends(depends, linkLanguage);
+  if (!this->DeviceLinkObject.empty()) {
+    depends.push_back(this->DeviceLinkObject);
   }
 
   this->NumberOfProgressActions++;

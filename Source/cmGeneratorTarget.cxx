@@ -3008,6 +3008,48 @@ void cmGeneratorTarget::GetLinkOptions(std::vector<std::string>& result,
   }
 }
 
+namespace {
+void processLinkDepends(
+  cmGeneratorTarget const* tgt,
+  const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
+  std::vector<std::string>& options,
+  std::unordered_set<std::string>& uniqueOptions,
+  cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
+  std::string const& language)
+{
+  processOptionsInternal(tgt, entries, options, uniqueOptions, dagChecker,
+                         config, false, "link depends", language,
+                         OptionsParse::None);
+}
+}
+
+void cmGeneratorTarget::GetLinkDepends(std::vector<std::string>& result,
+                                       const std::string& config,
+                                       const std::string& language) const
+{
+  std::vector<cmGeneratorTarget::TargetPropertyEntry*> linkDependsEntries;
+  std::unordered_set<std::string> uniqueOptions;
+  cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), "LINK_DEPENDS",
+                                             nullptr, nullptr);
+
+  if (const char* linkDepends = this->GetProperty("LINK_DEPENDS")) {
+    std::vector<std::string> depends;
+    cmGeneratorExpression ge;
+    cmSystemTools::ExpandListArgument(linkDepends, depends);
+    for (const auto& depend : depends) {
+      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(depend);
+      linkDependsEntries.push_back(
+        new cmGeneratorTarget::TargetPropertyEntry(std::move(cge)));
+    }
+  }
+  AddInterfaceEntries(this, config, "INTERFACE_LINK_DEPENDS",
+                      linkDependsEntries);
+  processLinkDepends(this, linkDependsEntries, result, uniqueOptions,
+                     &dagChecker, config, language);
+
+  cmDeleteAll(linkDependsEntries);
+}
+
 void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
 {
   if (this->IsImported()) {

@@ -1387,7 +1387,7 @@ void cmMakefileTargetGenerator::AppendObjectDepends(
 }
 
 void cmMakefileTargetGenerator::AppendLinkDepends(
-  std::vector<std::string>& depends)
+  std::vector<std::string>& depends, const std::string& linkLanguage)
 {
   this->AppendObjectDepends(depends);
 
@@ -1411,10 +1411,8 @@ void cmMakefileTargetGenerator::AppendLinkDepends(
   }
 
   // Add user-specified dependencies.
-  if (const char* linkDepends =
-        this->GeneratorTarget->GetProperty("LINK_DEPENDS")) {
-    cmSystemTools::ExpandListArgument(linkDepends, depends);
-  }
+  this->GeneratorTarget->GetLinkDepends(depends, this->ConfigName,
+                                        linkLanguage);
 }
 
 std::string cmMakefileTargetGenerator::GetLinkRule(

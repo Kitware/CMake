@@ -235,7 +235,8 @@ std::string cmNinjaTargetGenerator::ComputeIncludes(
   return includesString;
 }
 
-cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
+cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps(
+  const std::string& linkLanguage) const
 {
   // Static libraries never depend on other targets for linking.
   if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY ||
@@ -270,13 +271,11 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
   }
 
   // Add user-specified dependencies.
-  if (const char* linkDepends =
-        this->GeneratorTarget->GetProperty("LINK_DEPENDS")) {
-    std::vector<std::string> linkDeps;
-    cmSystemTools::ExpandListArgument(linkDepends, linkDeps);
-    std::transform(linkDeps.begin(), linkDeps.end(),
-                   std::back_inserter(result), MapToNinjaPath());
-  }
+  std::vector<std::string> linkDeps;
+  this->GeneratorTarget->GetLinkDepends(linkDeps, this->ConfigName,
+                                        linkLanguage);
+  std::transform(linkDeps.begin(), linkDeps.end(), std::back_inserter(result),
+                 MapToNinjaPath());
 
   return result;
 }
