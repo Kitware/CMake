@@ -1,2 +1,0 @@
--- mainexe: mainlib;sublib
--- subexe: mainlib;sublib
