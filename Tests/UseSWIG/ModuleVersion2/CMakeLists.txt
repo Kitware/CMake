@@ -16,6 +16,7 @@ else()
   set (PS ":")
 endif()
 
+set(UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
 set (UseSWIG_MODULE_VERSION 2)
 unset(CMAKE_SWIG_FLAGS)
 
