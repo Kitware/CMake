@@ -9,6 +9,7 @@ include(${SWIG_USE_FILE})
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
+set(UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
 unset(CMAKE_SWIG_FLAGS)
 
 set_property(SOURCE "example.i" PROPERTY CPLUSPLUS ON)
