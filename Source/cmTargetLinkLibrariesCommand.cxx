@@ -365,7 +365,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
   if (this->CurrentProcessingState != ProcessingKeywordLinkInterface &&
       this->CurrentProcessingState != ProcessingPlainLinkInterface) {
 
-    // Find target on the LHS locally
+    // Assure that the target on the LHS was created in the current directory.
     cmTarget* t =
       this->Makefile->FindLocalNonAliasTarget(this->Target->GetName());
     if (!t) {
@@ -378,18 +378,11 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
         }
       }
     }
-
-    // If no local target has been found, find it in the global scope
-    if (!t) {
-      t = this->Makefile->GetGlobalGenerator()->FindTarget(
-        this->Target->GetName(), true);
-    }
-
     if (!t) {
       std::ostringstream e;
       e << "Attempt to add link library \"" << lib << "\" to target \""
         << this->Target->GetName()
-        << "\" which does not exist or is an alias target.";
+        << "\" which is not built in this directory.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return false;
     }

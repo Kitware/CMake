@@ -1,2 +1,0 @@
--- mainexe: mainlibUnknownImportedGlobal;sublibUnknownImportedGlobal
--- subexe: mainlibUnknownImportedGlobal;sublibUnknownImportedGlobal
