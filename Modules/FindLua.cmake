@@ -36,6 +36,9 @@
 # This is because, the lua location is not standardized and may exist in
 # locations other than lua/
 
+cmake_policy(PUSH)  # Policies apply to functions at definition-time
+cmake_policy(SET CMP0012 NEW)  # For while(TRUE)
+
 unset(_lua_include_subdirs)
 unset(_lua_library_names)
 unset(_lua_append_versions)
@@ -236,3 +239,5 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua
                                   VERSION_VAR LUA_VERSION_STRING)
 
 mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARY LUA_MATH_LIBRARY)
+
+cmake_policy(POP)
