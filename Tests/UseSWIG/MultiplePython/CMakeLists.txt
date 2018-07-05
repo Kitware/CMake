@@ -17,6 +17,7 @@ else()
   set (PS ":")
 endif()
 
+set(UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
 unset(CMAKE_SWIG_FLAGS)
 
 set_property(SOURCE "../example.i" PROPERTY CPLUSPLUS ON)
