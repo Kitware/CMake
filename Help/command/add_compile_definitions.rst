@@ -8,9 +8,9 @@ Adds preprocessor definitions to the compilation of source files.
   add_compile_definitions(<definition> ...)
 
 Adds preprocessor definitions to the compiler command line for targets in the
-current directory and below that are added after this command is invoked.
-See documentation of the :prop_dir:`directory <COMPILE_DEFINITIONS>` and
-:prop_tgt:`target <COMPILE_DEFINITIONS>` ``COMPILE_DEFINITIONS`` properties.
+current directory and below (whether added before or after this command is
+invoked). See documentation of the :prop_dir:`directory <COMPILE_DEFINITIONS>`
+and :prop_tgt:`target <COMPILE_DEFINITIONS>` ``COMPILE_DEFINITIONS`` properties.
 
 Definitions are specified using the syntax ``VAR`` or ``VAR=value``.
 Function-style definitions are not supported. CMake will automatically
