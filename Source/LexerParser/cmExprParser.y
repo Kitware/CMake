@@ -18,6 +18,7 @@ Modify cmExprParser.cxx:
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdexcept>
 
 /*-------------------------------------------------------------------------*/
 #define YYDEBUG 1
@@ -63,6 +64,7 @@ static void cmExpr_yyerror(yyscan_t yyscanner, const char* message);
 %token exp_XOR;
 %token exp_NOT;
 %token exp_NUMBER;
+%token exp_UNEXPECTED "character";
 
 /*-------------------------------------------------------------------------*/
 /* grammar */
@@ -128,6 +130,9 @@ term:
     $<Number>$ = $<Number>1 * $<Number>3;
   }
 | term exp_DIVIDE unary {
+    if (yyvsp[0].Number == 0) {
+      throw std::overflow_error("divide by zero");
+    }
     $<Number>$ = $<Number>1 / $<Number>3;
   }
 | term exp_MOD unary {

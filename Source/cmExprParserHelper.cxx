@@ -6,6 +6,8 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
+#include <utility>
 
 int cmExpr_yyparse(yyscan_t yyscanner);
 //
@@ -13,6 +15,7 @@ cmExprParserHelper::cmExprParserHelper()
 {
   this->FileLine = -1;
   this->FileName = nullptr;
+  this->Result = 0;
 }
 
 cmExprParserHelper::~cmExprParserHelper()
@@ -37,7 +40,33 @@ int cmExprParserHelper::ParseString(const char* str, int verb)
   yyscan_t yyscanner;
   cmExpr_yylex_init(&yyscanner);
   cmExpr_yyset_extra(this, yyscanner);
-  int res = cmExpr_yyparse(yyscanner);
+  int res;
+
+  try {
+    res = cmExpr_yyparse(yyscanner);
+    if (res != 0) {
+      std::string e = "cannot parse the expression: \"" + InputBuffer + "\": ";
+      e += ErrorString;
+      e += ".";
+      this->SetError(std::move(e));
+    }
+  } catch (std::runtime_error const& fail) {
+    std::string e =
+      "cannot evaluate the expression: \"" + InputBuffer + "\": ";
+    e += fail.what();
+    e += ".";
+    this->SetError(std::move(e));
+    res = 1;
+  } catch (std::out_of_range const&) {
+    std::string e = "cannot evaluate the expression: \"" + InputBuffer +
+      "\": a numeric value is out of range.";
+    this->SetError(std::move(e));
+    res = 1;
+  } catch (...) {
+    std::string e = "cannot parse the expression: \"" + InputBuffer + "\".";
+    this->SetError(std::move(e));
+    res = 1;
+  }
   cmExpr_yylex_destroy(yyscanner);
   if (res != 0) {
     // str << "CAL_Parser returned: " << res << std::endl;
@@ -85,7 +114,12 @@ void cmExprParserHelper::Error(const char* str)
   this->ErrorString = ostr.str();
 }
 
-void cmExprParserHelper::SetResult(int value)
+void cmExprParserHelper::SetResult(KWIML_INT_int64_t value)
 {
   this->Result = value;
+}
+
+void cmExprParserHelper::SetError(std::string errorString)
+{
+  this->ErrorString = std::move(errorString);
 }
