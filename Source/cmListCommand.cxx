@@ -289,12 +289,10 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
     if (item < 0) {
       item = static_cast<int>(nitem) + item;
     }
-    if (item < 0 || nitem <= static_cast<size_t>(item)) {
+    if (item < 0 || nitem < static_cast<size_t>(item)) {
       std::ostringstream str;
       str << "index: " << item << " out of range (-" << varArgsExpanded.size()
-          << ", "
-          << (varArgsExpanded.empty() ? 0 : (varArgsExpanded.size() - 1))
-          << ")";
+          << ", " << varArgsExpanded.size() << ")";
       this->SetError(str.str());
       return false;
     }
