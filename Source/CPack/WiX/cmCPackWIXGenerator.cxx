@@ -100,6 +100,10 @@ bool cmCPackWIXGenerator::RunCandleCommand(std::string const& sourceFile,
     command << " -ext " << QuotePath(ext);
   }
 
+  if (sourceFile.rfind(this->CPackTopLevel, 0) != 0) {
+    command << " " << QuotePath("-I" + this->CPackTopLevel);
+  }
+
   AddCustomFlags("CPACK_WIX_CANDLE_EXTRA_FLAGS", command);
 
   command << " " << QuotePath(sourceFile);
