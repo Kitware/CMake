@@ -55,7 +55,7 @@ set the path with these commands:
       (* (or (not (any space "()#\\\n")) (and ?\\ nonl)))))
 (defconst cmake-regex-token
   (rx-to-string `(group (or (regexp ,cmake-regex-comment)
-                            ?( ?)
+                            ?\( ?\)
                             (regexp ,cmake-regex-argument-unquoted)
                             (regexp ,cmake-regex-argument-quoted)))))
 (defconst cmake-regex-indented
