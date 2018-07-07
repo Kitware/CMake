@@ -33,7 +33,6 @@ if (NOT GHS_INT_DIRECTORY)
 endif ()
 
 set(GHS_OS_DIR ${GHS_INT_DIRECTORY} CACHE PATH "OS directory")
-set(GHS_PRIMARY_TARGET "arm_integrity.tgt" CACHE STRING "target for compilation")
 set(GHS_BSP_NAME "simarm" CACHE STRING "BSP name")
 set(GHS_CUSTOMIZATION "" CACHE FILEPATH "optional GHS customization")
 mark_as_advanced(GHS_CUSTOMIZATION)

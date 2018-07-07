@@ -335,8 +335,26 @@ void cmGlobalGhsMultiGenerator::WriteMacros()
 
 void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives()
 {
-  *this->GetBuildFileStream()
-    << "primaryTarget=arm_integrity.tgt" << std::endl;
+  /* set primary target */
+  std::string tgt;
+  const char* t =
+    this->GetCMakeInstance()->GetCacheDefinition("GHS_PRIMARY_TARGET");
+  if (t) {
+    tgt = t;
+    this->GetCMakeInstance()->MarkCliAsUsed("GHS_PRIMARY_TARGET");
+  } else {
+    const char* a =
+      this->GetCMakeInstance()->GetCacheDefinition("CMAKE_GENERATOR_PLATFORM");
+    const char* p =
+      this->GetCMakeInstance()->GetCacheDefinition("GHS_TARGET_PLATFORM");
+    tgt = (a ? a : "");
+    tgt += "_";
+    tgt += (p ? p : "");
+    tgt += ".tgt";
+  }
+
+  *this->GetBuildFileStream() << "primaryTarget=" << tgt << std::endl;
+
   char const* const customization =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_CUSTOMIZATION");
   if (NULL != customization && strlen(customization) > 0) {

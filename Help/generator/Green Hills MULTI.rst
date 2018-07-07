@@ -19,6 +19,11 @@ Default to ``integrity``.
 Usual values are ``integrity``, ``threadx``, ``uvelosity``,
 ``velosity``, ``vxworks``, ``standalone``.
 
+* ``GHS_PRIMARY_TARGET``
+
+Sets ``primaryTarget`` field in project file.
+Defaults to ``<arch>_<GHS_TARGET_PLATFORM>.tgt``.
+
 * ``GHS_TOOLSET_ROOT``
 
 Default to ``C:/ghs``.  Root path for ``toolset``.

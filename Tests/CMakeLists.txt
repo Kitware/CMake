@@ -2256,7 +2256,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         --build-generator "Green Hills MULTI"
         --build-project ReturnNum
         --build-config $<CONFIGURATION>
-        --build-options -DGHS_PRIMARY_TARGET="arm_integrity.tgt"
+        --build-options -DGHS_PRIMARY_TARGET=arm_integrity.tgt
         -DGHS_BSP_NAME="simarm"
         )
   endif ()
