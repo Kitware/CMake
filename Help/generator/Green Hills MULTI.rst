@@ -28,12 +28,20 @@ Defaults to ``<arch>_<GHS_TARGET_PLATFORM>.tgt``.
 
 Default to ``C:/ghs``.  Root path for ``toolset``.
 
+* ``GHS_OS_ROOT``
+
+Default to ``C:/ghs``.  Root path for RTOS searches.
+
+* ``GHS_OS_DIR``
+
+Default to latest platform OS installation at ``GHS_OS_ROOT``.  Set this value if
+a specific RTOS is to be used.
+
 Customizations are available through the following cache variables:
 
 * ``GHS_BSP_NAME``
 * ``GHS_CUSTOMIZATION``
 * ``GHS_GPJ_MACROS``
-* ``GHS_OS_DIR``
 
 .. note::
   This generator is deemed experimental as of CMake |release|
