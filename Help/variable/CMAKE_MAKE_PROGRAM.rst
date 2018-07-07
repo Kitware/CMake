@@ -55,9 +55,11 @@ to configure the project:
   the CMake cache then CMake will use the specified value if
   possible.
 
-* The :generator:`Green Hills MULTI` generator sets this to ``gbuild``.
-  If a user or project explicitly adds ``CMAKE_MAKE_PROGRAM`` to
-  the CMake cache then CMake will use the specified value.
+* The :generator:`Green Hills MULTI` generator sets this to the full
+  path to ``gbuild.exe`` based upon the toolset being used.
+
+  Once the generator has initialized a particular value for this
+  variable, changing the value has undefined behavior.
 
 The ``CMAKE_MAKE_PROGRAM`` variable is set for use by project code.
 The value is also used by the :manual:`cmake(1)` ``--build`` and
