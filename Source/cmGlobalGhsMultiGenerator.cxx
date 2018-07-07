@@ -127,6 +127,16 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
                            cmStateEnums::INTERNAL);
   }
 
+  const char* tgtPlatform = mf->GetDefinition("GHS_TARGET_PLATFORM");
+  if (tgtPlatform == nullptr) {
+    tgtPlatform = "integrity";
+  }
+
+  /* store the platform name for later use */
+  mf->AddCacheDefinition("GHS_TARGET_PLATFORM", tgtPlatform,
+                         "Name of GHS target platform.",
+                         cmStateEnums::INTERNAL);
+
   return true;
 }
 

@@ -13,6 +13,11 @@ The ``-T <toolset>`` can be supplied for setting the toolset to be used.
 All toolsets are expected to be located at ``GHS_TOOLSET_ROOT``.
 If the toolset is not specified then the latest toolset will be used.
 
+* ``GHS_TARGET_PLATFORM``
+
+Default to ``integrity``.
+Usual values are ``integrity``, ``threadx``, ``uvelosity``,
+``velosity``, ``vxworks``, ``standalone``.
 
 * ``GHS_TOOLSET_ROOT``
 
