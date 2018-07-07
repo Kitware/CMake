@@ -41,11 +41,29 @@ void cmGlobalGhsMultiGenerator::GetDocumentation(cmDocumentationEntry& entry)
     "Generates Green Hills MULTI files (experimental, work-in-progress).";
 }
 
+bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
+                                                     cmMakefile* mf)
+{
+  if (p == "") {
+    cmSystemTools::Message(
+      "Green Hills MULTI: -A <arch> not specified; defaulting to \"arm\"");
+    std::string arch = "arm";
+
+    /* store the platform name for later use
+     * -- already done if -A<arch> was specified
+     */
+    mf->AddCacheDefinition("CMAKE_GENERATOR_PLATFORM", arch.c_str(),
+                           "Name of generator platform.",
+                           cmStateEnums::INTERNAL);
+  }
+
+  return true;
+}
+
 void cmGlobalGhsMultiGenerator::EnableLanguage(
   std::vector<std::string> const& l, cmMakefile* mf, bool optional)
 {
   mf->AddDefinition("CMAKE_SYSTEM_NAME", "GHS-MULTI");
-  mf->AddDefinition("CMAKE_SYSTEM_PROCESSOR", "ARM");
 
   const std::string ghsCompRoot(GetCompRoot());
   mf->AddDefinition("GHS_COMP_ROOT", ghsCompRoot.c_str());
