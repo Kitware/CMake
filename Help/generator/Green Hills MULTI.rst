@@ -37,9 +37,12 @@ Default to ``C:/ghs``.  Root path for RTOS searches.
 Default to latest platform OS installation at ``GHS_OS_ROOT``.  Set this value if
 a specific RTOS is to be used.
 
+* ``GHS_BSP_NAME``
+
+Defaults to ``sim<arch>`` if not set by user.
+
 Customizations are available through the following cache variables:
 
-* ``GHS_BSP_NAME``
 * ``GHS_CUSTOMIZATION``
 * ``GHS_GPJ_MACROS``
 

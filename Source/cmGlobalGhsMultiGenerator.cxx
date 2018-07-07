@@ -236,25 +236,28 @@ void cmGlobalGhsMultiGenerator::OpenBuildFileStream()
     this->OSDirRelative = true;
   }
 
-  char const* bspName =
+  std::string bspName;
+  char const* bspCache =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_BSP_NAME");
-  if (NULL == bspName) {
-    bspName = "";
-    cmSystemTools::Error("GHS_BSP_NAME cache variable must be set");
-  } else {
+  if (bspCache) {
+    bspName = bspCache;
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_BSP_NAME");
   }
-  std::string fBspName(this->trimQuotes(bspName));
-  std::replace(fBspName.begin(), fBspName.end(), '\\', '/');
+  if (bspName.empty() || bspName.compare("IGNORE") == 0) {
+    const char* a =
+      this->GetCMakeInstance()->GetCacheDefinition("CMAKE_GENERATOR_PLATFORM");
+    bspName = "sim";
+    bspName += (a ? a : "");
+  }
+
   this->WriteMacros();
   this->WriteHighLevelDirectives();
 
   GhsMultiGpj::WriteGpjTag(GhsMultiGpj::PROJECT, this->GetBuildFileStream());
   this->WriteDisclaimer(this->GetBuildFileStream());
   *this->GetBuildFileStream() << "# Top Level Project File" << std::endl;
-  if (!fBspName.empty()) {
-    *this->GetBuildFileStream() << "    -bsp " << fBspName << std::endl;
-  }
+  *this->GetBuildFileStream() << "    -bsp " << bspName << std::endl;
+
   this->WriteCompilerOptions(fOSDir);
 }
 

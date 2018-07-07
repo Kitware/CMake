@@ -37,7 +37,8 @@ if ( NOT GHS_OS_DIR )
   endif ()
 endif ()
 
-set(GHS_BSP_NAME "simarm" CACHE STRING "BSP name")
+set(GHS_BSP_NAME "IGNORE" CACHE STRING "BSP name")
+
 set(GHS_CUSTOMIZATION "" CACHE FILEPATH "optional GHS customization")
 mark_as_advanced(GHS_CUSTOMIZATION)
 set(GHS_GPJ_MACROS "" CACHE STRING "optional GHS macros generated in the .gpjs for legacy reasons")
