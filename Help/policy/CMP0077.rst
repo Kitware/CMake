@@ -1,0 +1,16 @@
+CMP0077
+-------
+
+:command:`option` honors normal variables.
+
+The ``OLD`` behavior for this policy is to clear any existing normal variables
+with the same name.  The ``NEW`` behavior for this policy is to not create
+a cache entry or modify any existing normal variables if a normal variable
+with the same name already exists.
+
+This policy was introduced in CMake version 3.13.  CMake version
+|release| warns when the policy is not set and uses ``OLD`` behavior.
+Use the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW``
+explicitly.
+
+.. include:: DEPRECATED.txt
