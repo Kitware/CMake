@@ -1940,6 +1940,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
           message(STATUS
             ".vcproj file association indicates VCExpress, avoiding MFC test")
           set(CTEST_RUN_MFC OFF)
+        elseif( NOT ov )
+          message(STATUS
+            ".vcproj has no file association, avoiding MFC test")
+          set(CTEST_RUN_MFC OFF)
         endif()
       endif()
 
