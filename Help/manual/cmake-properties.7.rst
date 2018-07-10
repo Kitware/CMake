@@ -173,6 +173,7 @@ Properties on Targets
    /prop_tgt/DEBUG_POSTFIX
    /prop_tgt/DEFINE_SYMBOL
    /prop_tgt/DEPLOYMENT_REMOTE_DIRECTORY
+   /prop_tgt/DEPLOYMENT_ADDITIONAL_FILES
    /prop_tgt/DOTNET_TARGET_FRAMEWORK_VERSION
    /prop_tgt/EchoString
    /prop_tgt/ENABLE_EXPORTS
