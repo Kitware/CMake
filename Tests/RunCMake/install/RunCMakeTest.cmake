@@ -81,6 +81,8 @@ set(RunCMake_TEST_OPTIONS "-DCMAKE_BUILD_TYPE:STRING=Debug")
 run_install_test(TARGETS-OUTPUT_NAME)
 unset(RunCMake_TEST_OPTIONS)
 
+run_install_test(Deprecated)
+
 set(run_install_test_components 1)
 run_install_test(FILES-EXCLUDE_FROM_ALL)
 run_install_test(TARGETS-EXCLUDE_FROM_ALL)
