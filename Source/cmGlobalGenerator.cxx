@@ -1318,7 +1318,9 @@ bool cmGlobalGenerator::Compute()
   // the AUTOMOC, AUTOUIC or AUTORCC property set
   auto autogenInits = this->CreateQtAutoGenInitializers();
   for (auto& autoGen : autogenInits) {
-    autoGen->InitCustomTargets();
+    if (!autoGen->InitCustomTargets()) {
+      return false;
+    }
   }
 #endif
 
@@ -1341,7 +1343,9 @@ bool cmGlobalGenerator::Compute()
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   for (auto& autoGen : autogenInits) {
-    autoGen->SetupCustomTargets();
+    if (!autoGen->SetupCustomTargets()) {
+      return false;
+    }
     autoGen.reset(nullptr);
   }
   autogenInits.clear();

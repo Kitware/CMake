@@ -50,17 +50,21 @@ public:
                          bool uicEnabled, bool rccEnabled,
                          std::string const& qtVersionMajor);
 
-  void InitCustomTargets();
-  void SetupCustomTargets();
+  bool InitCustomTargets();
+  bool SetupCustomTargets();
 
 private:
-  void SetupCustomTargetsMoc();
-  void SetupCustomTargetsUic();
+  bool SetupCustomTargetsMoc();
+  bool SetupCustomTargetsUic();
 
   void AddGeneratedSource(std::string const& filename, GeneratorT genType);
 
   bool QtVersionGreaterOrEqual(unsigned long requestMajor,
                                unsigned long requestMinor) const;
+
+  bool GetMocExecutable();
+  bool GetUicExecutable();
+  bool GetRccExecutable();
 
   bool RccListInputs(std::string const& fileName,
                      std::vector<std::string>& files,
