@@ -82,6 +82,7 @@ run_install_test(TARGETS-OUTPUT_NAME)
 unset(RunCMake_TEST_OPTIONS)
 
 run_install_test(Deprecated)
+run_install_test(PRE_POST_INSTALL_SCRIPT)
 
 set(run_install_test_components 1)
 run_install_test(FILES-EXCLUDE_FROM_ALL)
