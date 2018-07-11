@@ -1193,13 +1193,17 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     # Some Apple compilers produce bad optimizations in this source.
     IF(APPLE AND CMAKE_C_COMPILER_ID MATCHES "^(GNU|LLVM)$")
       SET(testProcess_COMPILE_FLAGS "${testProcess_COMPILE_FLAGS} -O0")
-    ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "XL" AND
-           NOT (CMAKE_SYSTEM MATCHES "Linux.*ppc64le" AND
-                NOT CMAKE_C_COMPILER_VERSION VERSION_LESS "13.1.1"))
+    ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "XL")
       # Tell IBM XL not to warn about our test infinite loop
-      # v13.1.1 and newer on Linux ppc64le is clang based and does not accept
-      # the -qsuppress option
-      SET(testProcess_COMPILE_FLAGS "${testProcess_COMPILE_FLAGS} -qsuppress=1500-010")
+      IF(CMAKE_SYSTEM MATCHES "Linux.*ppc64le"
+         AND CMAKE_C_COMPILER_VERSION VERSION_LESS "16.1.0"
+         AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS "13.1.1")
+        # v13.1.[1-6] on Linux ppc64le is clang based and does not accept
+        # the -qsuppress option, so just suppress all warnings.
+        SET(testProcess_COMPILE_FLAGS "${testProcess_COMPILE_FLAGS} -w")
+      ELSE()
+        SET(testProcess_COMPILE_FLAGS "${testProcess_COMPILE_FLAGS} -qsuppress=1500-010")
+      ENDIF()
     ENDIF()
     IF(CMAKE_C_FLAGS MATCHES "-fsanitize=")
       SET(testProcess_COMPILE_FLAGS "${testProcess_COMPILE_FLAGS} -DCRASH_USING_ABORT")
