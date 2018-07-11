@@ -37,11 +37,6 @@
 #include <utility>
 #include <vector>
 
-inline static const char* SafeString(const char* value)
-{
-  return (value != nullptr) ? value : "";
-}
-
 static std::size_t GetParallelCPUCount()
 {
   static std::size_t count = 0;
@@ -1268,7 +1263,7 @@ bool cmQtAutoGenInitializer::GetMocExecutable()
       cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
       cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse(targetName);
       if (tgt != nullptr) {
-        this->Moc.Executable = SafeString(tgt->ImportedGetLocation(""));
+        this->Moc.Executable = tgt->ImportedGetLocation("");
       } else {
         err = "Could not find target " + targetName;
       }
@@ -1329,7 +1324,7 @@ bool cmQtAutoGenInitializer::GetUicExecutable()
       cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
       cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse(targetName);
       if (tgt != nullptr) {
-        this->Uic.Executable = SafeString(tgt->ImportedGetLocation(""));
+        this->Uic.Executable = tgt->ImportedGetLocation("");
       } else {
         if (this->QtVersionMajor == "5") {
           // Project does not use Qt5Widgets, but has AUTOUIC ON anyway
@@ -1394,7 +1389,7 @@ bool cmQtAutoGenInitializer::GetRccExecutable()
       cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
       cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse(targetName);
       if (tgt != nullptr) {
-        this->Rcc.Executable = SafeString(tgt->ImportedGetLocation(""));
+        this->Rcc.Executable = tgt->ImportedGetLocation("");
       } else {
         err = "Could not find target " + targetName;
       }

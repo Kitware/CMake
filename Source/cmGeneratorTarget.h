@@ -658,7 +658,7 @@ public:
       no soname at all.  */
   bool IsImportedSharedLibWithoutSOName(const std::string& config) const;
 
-  const char* ImportedGetLocation(const std::string& config) const;
+  std::string ImportedGetLocation(const std::string& config) const;
 
   /** Get the target major and minor version numbers interpreted from
       the VERSION property.  Version 0 is returned if the property is
