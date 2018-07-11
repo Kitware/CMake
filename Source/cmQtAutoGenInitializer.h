@@ -72,17 +72,10 @@ private:
 
 private:
   cmGeneratorTarget* Target;
-  bool MocEnabled;
-  bool UicEnabled;
-  bool RccEnabled;
   bool MultiConfig;
   // Qt
   std::string QtVersionMajor;
   std::string QtVersionMinor;
-  std::string MocExecutable;
-  std::string UicExecutable;
-  std::string RccExecutable;
-  std::vector<std::string> RccListOptions;
   // Configurations
   std::string ConfigDefault;
   std::vector<std::string> ConfigsList;
@@ -101,21 +94,37 @@ private:
   std::vector<std::string> Headers;
   std::vector<std::string> Sources;
   // Moc
-  std::string MocPredefsCmd;
-  std::set<std::string> MocSkip;
-  std::string MocIncludes;
-  std::map<std::string, std::string> MocIncludesConfig;
-  std::string MocDefines;
-  std::map<std::string, std::string> MocDefinesConfig;
+  struct
+  {
+    bool Enabled;
+    std::string Executable;
+    std::string PredefsCmd;
+    std::set<std::string> Skip;
+    std::string Includes;
+    std::map<std::string, std::string> ConfigIncludes;
+    std::string Defines;
+    std::map<std::string, std::string> ConfigDefines;
+  } Moc;
   // Uic
-  std::set<std::string> UicSkip;
-  std::vector<std::string> UicSearchPaths;
-  std::string UicOptions;
-  std::map<std::string, std::string> UicOptionsConfig;
-  std::vector<std::string> UicFileFiles;
-  std::vector<std::vector<std::string>> UicFileOptions;
+  struct
+  {
+    bool Enabled;
+    std::string Executable;
+    std::set<std::string> Skip;
+    std::vector<std::string> SearchPaths;
+    std::string Options;
+    std::map<std::string, std::string> ConfigOptions;
+    std::vector<std::string> FileFiles;
+    std::vector<std::vector<std::string>> FileOptions;
+  } Uic;
   // Rcc
-  std::vector<Qrc> Qrcs;
+  struct
+  {
+    bool Enabled;
+    std::string Executable;
+    std::vector<std::string> ListOptions;
+    std::vector<Qrc> Qrcs;
+  } Rcc;
 };
 
 #endif
