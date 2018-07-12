@@ -28,32 +28,28 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // Determine the state of the option policy
-  auto status = this->Makefile->GetPolicyStatus(cmPolicies::CMP0077);
-  const char* exists =
-    this->Makefile->GetStateSnapshot().GetDefinition(args[0]);
-  switch (status) {
-    case cmPolicies::WARN:
-      if (exists) {
-        std::ostringstream w;
-        w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0077)
-          << "\n"
-             "For compatibility with older versions of CMake, option "
-             "is clearing the normal variable '"
-          << args[0] << "'.";
-        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
-      }
-    case cmPolicies::OLD:
-      // OLD behavior does not warn.
-      break;
-    case cmPolicies::REQUIRED_ALWAYS:
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::NEW: {
-      // See if a local variable with this name already exists.
-      // If so we ignore the option command.
-      if (exists) {
-        return true;
-      }
-    } break;
+  bool checkAndWarn = false;
+  {
+    auto status = this->Makefile->GetPolicyStatus(cmPolicies::CMP0077);
+    const char* existsBeforeSet =
+      this->Makefile->GetStateSnapshot().GetDefinition(args[0]);
+    switch (status) {
+      case cmPolicies::WARN:
+        checkAndWarn = (existsBeforeSet != nullptr);
+        break;
+      case cmPolicies::OLD:
+        // OLD behavior does not warn.
+        break;
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::NEW: {
+        // See if a local variable with this name already exists.
+        // If so we ignore the option command.
+        if (existsBeforeSet) {
+          return true;
+        }
+      } break;
+    }
   }
 
   // See if a cache variable with this name already exists
@@ -74,5 +70,19 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
   bool init = cmSystemTools::IsOn(initialValue.c_str());
   this->Makefile->AddCacheDefinition(args[0], init ? "ON" : "OFF",
                                      args[1].c_str(), cmStateEnums::BOOL);
+
+  if (checkAndWarn) {
+    const char* existsAfterSet =
+      this->Makefile->GetStateSnapshot().GetDefinition(args[0]);
+    if (!existsAfterSet) {
+      std::ostringstream w;
+      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0077)
+        << "\n"
+           "For compatibility with older versions of CMake, option "
+           "is clearing the normal variable '"
+        << args[0] << "'.";
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+    }
+  }
   return true;
 }
