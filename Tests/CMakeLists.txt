@@ -869,33 +869,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BuildDepends")
 
-  set(SimpleInstallInstallDir
-    "${CMake_BINARY_DIR}/Tests/SimpleInstall/InstallDirectory")
-  add_test(SimpleInstall ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/SimpleInstall"
-    "${CMake_BINARY_DIR}/Tests/SimpleInstall"
-    ${build_generator_args}
-    --build-project TestSimpleInstall
-    --build-two-config
-    --build-options ${build_options}
-    "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
-    "-DCTEST_TEST_CPACK:BOOL=${CTEST_TEST_CPACK}"
-    --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstExe)
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/SimpleInstall")
-  add_test(SimpleInstall-Stage2 ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/SimpleInstallS2"
-    "${CMake_BINARY_DIR}/Tests/SimpleInstallS2"
-    ${build_generator_args}
-    --build-project TestSimpleInstall
-    --build-two-config
-    --build-options ${build_options}
-    "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
-    "-DSTAGE2:BOOL=1"
-    --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstExeS2)
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/SimpleInstallS2")
-
   set(MissingInstallInstallDir
     "${CMake_BINARY_DIR}/Tests/MissingInstall/InstallDirectory")
   add_test(MissingInstall ${CMAKE_CTEST_COMMAND}
@@ -1821,7 +1794,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   set_tests_properties ( testdriver2 PROPERTIES DEPENDS testdriver1)
   set_tests_properties ( testdriver3 PROPERTIES DEPENDS testdriver2)
   set_tests_properties ( linkorder2 PROPERTIES DEPENDS linkorder1)
-  set_tests_properties ( SimpleInstall-Stage2 PROPERTIES DEPENDS SimpleInstall)
 
   # Test static linking on toolchains known to support it.
   if(CMAKE_C_COMPILER_ID STREQUAL "GNU"
