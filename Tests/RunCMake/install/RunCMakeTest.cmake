@@ -87,6 +87,7 @@ run_install_test(SCRIPT)
 run_install_test(TARGETS-CONFIGURATIONS)
 run_install_test(DIRECTORY-PATTERN)
 run_install_test(TARGETS-Parts)
+run_install_test(FILES-PERMISSIONS)
 
 set(run_install_test_components 1)
 run_install_test(FILES-EXCLUDE_FROM_ALL)
