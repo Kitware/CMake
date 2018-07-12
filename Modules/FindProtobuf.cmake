@@ -245,6 +245,10 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
     set(_append_arg APPEND_PATH)
   endif()
 
+  if(DEFINED PROTOBUF_IMPORT_DIRS AND NOT DEFINED Protobuf_IMPORT_DIRS)
+    set(Protobuf_IMPORT_DIRS "${PROTOBUF_IMPORT_DIRS}")
+  endif()
+
   if(DEFINED Protobuf_IMPORT_DIRS)
     set(_import_arg IMPORT_DIRS ${Protobuf_IMPORT_DIRS})
   endif()
@@ -273,6 +277,10 @@ function(PROTOBUF_GENERATE_PYTHON SRCS)
 
   if(PROTOBUF_GENERATE_CPP_APPEND_PATH)
     set(_append_arg APPEND_PATH)
+  endif()
+
+  if(DEFINED PROTOBUF_IMPORT_DIRS AND NOT DEFINED Protobuf_IMPORT_DIRS)
+    set(Protobuf_IMPORT_DIRS "${PROTOBUF_IMPORT_DIRS}")
   endif()
 
   if(DEFINED Protobuf_IMPORT_DIRS)
