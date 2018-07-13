@@ -89,6 +89,7 @@ run_install_test(DIRECTORY-PATTERN)
 run_install_test(TARGETS-Parts)
 run_install_test(FILES-PERMISSIONS)
 run_install_test(TARGETS-RPATH)
+run_install_test(InstallRequiredSystemLibraries)
 
 set(run_install_test_components 1)
 run_install_test(FILES-EXCLUDE_FROM_ALL)
