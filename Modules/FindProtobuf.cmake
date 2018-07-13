@@ -122,7 +122,7 @@
 function(protobuf_generate)
   include(CMakeParseArguments)
 
-  set(_options APPEND_PATH)
+  set(_options APPEND_PATH DESCRIPTORS)
   set(_singleargs LANGUAGE OUT_VAR EXPORT_MACRO PROTOC_OUT_DIR)
   if(COMMAND target_sources)
     list(APPEND _singleargs TARGET)
@@ -212,12 +212,18 @@ function(protobuf_generate)
     foreach(_ext ${protobuf_generate_GENERATE_EXTENSIONS})
       list(APPEND _generated_srcs "${protobuf_generate_PROTOC_OUT_DIR}/${_rel_dir}/${_basename}${_ext}")
     endforeach()
+
+    if(protobuf_generate_DESCRIPTORS AND protobuf_generate_LANGUAGE STREQUAL cpp)
+      set(_descriptor_file "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.desc")
+      set(_dll_desc_out "--descriptor_set_out=${_descriptor_file}")
+      list(APPEND _generated_srcs ${_descriptor_file})
+    endif()
     list(APPEND _generated_srcs_all ${_generated_srcs})
 
     add_custom_command(
       OUTPUT ${_generated_srcs}
       COMMAND  protobuf::protoc
-      ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR}/${_rel_dir} ${_protobuf_include_path} ${_abs_file}
+      ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR}/${_rel_dir} ${_dll_desc_out} ${_protobuf_include_path} ${_abs_file}
       DEPENDS ${_abs_file} protobuf::protoc
       COMMENT "Running ${protobuf_generate_LANGUAGE} protocol buffer compiler on ${_proto}"
       VERBATIM )
@@ -233,7 +239,7 @@ function(protobuf_generate)
 endfunction()
 
 function(PROTOBUF_GENERATE_CPP SRCS HDRS)
-  cmake_parse_arguments(protobuf_generate_cpp "" "EXPORT_MACRO" "" ${ARGN})
+  cmake_parse_arguments(protobuf_generate_cpp "" "EXPORT_MACRO;DESCRIPTORS" "" ${ARGN})
 
   set(_proto_files "${protobuf_generate_cpp_UNPARSED_ARGUMENTS}")
   if(NOT _proto_files)
@@ -245,6 +251,10 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
     set(_append_arg APPEND_PATH)
   endif()
 
+  if(protobuf_generate_cpp_DESCRIPTORS)
+    set(_descriptors DESCRIPTORS)
+  endif()
+
   if(DEFINED PROTOBUF_IMPORT_DIRS AND NOT DEFINED Protobuf_IMPORT_DIRS)
     set(Protobuf_IMPORT_DIRS "${PROTOBUF_IMPORT_DIRS}")
   endif()
@@ -254,19 +264,28 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
   endif()
 
   set(_outvar)
-  protobuf_generate(${_append_arg} LANGUAGE cpp EXPORT_MACRO ${protobuf_generate_cpp_EXPORT_MACRO} OUT_VAR _outvar ${_import_arg} PROTOS ${_proto_files})
+  protobuf_generate(${_append_arg} ${_descriptors} LANGUAGE cpp EXPORT_MACRO ${protobuf_generate_cpp_EXPORT_MACRO} OUT_VAR _outvar ${_import_arg} PROTOS ${_proto_files})
 
   set(${SRCS})
   set(${HDRS})
+  if(protobuf_generate_cpp_DESCRIPTORS)
+    set(${protobuf_generate_cpp_DESCRIPTORS})
+  endif()
+
   foreach(_file ${_outvar})
     if(_file MATCHES "cc$")
       list(APPEND ${SRCS} ${_file})
+    elseif(_file MATCHES "desc$")
+      list(APPEND ${protobuf_generate_cpp_DESCRIPTORS} ${_file})
     else()
       list(APPEND ${HDRS} ${_file})
     endif()
   endforeach()
   set(${SRCS} ${${SRCS}} PARENT_SCOPE)
   set(${HDRS} ${${HDRS}} PARENT_SCOPE)
+  if(protobuf_generate_cpp_DESCRIPTORS)
+    set(${protobuf_generate_cpp_DESCRIPTORS} "${${protobuf_generate_cpp_DESCRIPTORS}}" PARENT_SCOPE)
+  endif()
 endfunction()
 
 function(PROTOBUF_GENERATE_PYTHON SRCS)
