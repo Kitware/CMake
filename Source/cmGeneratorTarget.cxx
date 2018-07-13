@@ -3358,14 +3358,12 @@ std::string cmGeneratorTarget::GetFullNameInternal(
   return prefix + base + suffix;
 }
 
-const char* cmGeneratorTarget::ImportedGetLocation(
+std::string cmGeneratorTarget::ImportedGetLocation(
   const std::string& config) const
 {
-  static std::string location;
   assert(this->IsImported());
-  location = this->Target->ImportedGetFullPath(
+  return this->Target->ImportedGetFullPath(
     config, cmStateEnums::RuntimeBinaryArtifact);
-  return location.c_str();
 }
 
 std::string cmGeneratorTarget::GetFullNameImported(
