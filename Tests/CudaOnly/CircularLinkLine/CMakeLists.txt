@@ -16,8 +16,7 @@ add_executable(CudaOnlyCircularLinkLine main.cu)
 
 target_link_libraries(CUDACircularDeviceLinking1 PUBLIC CUDACircularDeviceLinking2)
 target_link_libraries(CUDACircularDeviceLinking2 PUBLIC CUDACircularDeviceLinking3)
-#FIXME: complete the loop once supported
-#target_link_libraries(CUDACircularDeviceLinking3 PUBLIC CUDACircularDeviceLinking1)
+target_link_libraries(CUDACircularDeviceLinking3 PUBLIC CUDACircularDeviceLinking1)
 
 target_link_libraries(CudaOnlyCircularLinkLine PRIVATE CUDACircularDeviceLinking3)
 
