@@ -1351,8 +1351,8 @@ static void cmcmdProgressReport(std::string const& dir, std::string const& num)
 int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
 {
   // The arguments are
-  //   argv[0] == <cmake-executable>
-  //   argv[1] == cmake_echo_color
+  //   args[0] == <cmake-executable>
+  //   args[1] == cmake_echo_color
 
   bool enabled = true;
   int color = cmsysTerminal_Color_Normal;
@@ -1409,10 +1409,10 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
 int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
 {
   // The arguments are
-  //   argv[0] == <cmake-executable>
-  //   argv[1] == cmake_link_script
-  //   argv[2] == <link-script-name>
-  //   argv[3] == --verbose=?
+  //   args[0] == <cmake-executable>
+  //   args[1] == cmake_link_script
+  //   args[2] == <link-script-name>
+  //   args[3] == --verbose=?
   bool verbose = false;
   if (args.size() >= 4) {
     if (args[3].find("--verbose=") == 0) {
