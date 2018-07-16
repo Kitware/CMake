@@ -83,8 +83,11 @@ about the imported library are specified by setting properties whose names
 begin in ``IMPORTED_`` and ``INTERFACE_``.  The most important such
 property is :prop_tgt:`IMPORTED_LOCATION` (and its per-configuration
 variant :prop_tgt:`IMPORTED_LOCATION_<CONFIG>`) which specifies the
-location of the main library file on disk.  See documentation of the
-``IMPORTED_*`` and ``INTERFACE_*`` properties for more information.
+location of the main library file on disk.  Or, for object libraries,
+:prop_tgt:`IMPORTED_OBJECTS` (and :prop_tgt:`IMPORTED_OBJECTS_<CONFIG>`)
+specifies the locations of object files on disk.
+See documentation of the ``IMPORTED_*`` and ``INTERFACE_*`` properties
+for more information.
 
 Object Libraries
 ^^^^^^^^^^^^^^^^
