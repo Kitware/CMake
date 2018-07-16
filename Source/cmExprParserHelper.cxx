@@ -20,7 +20,6 @@ cmExprParserHelper::cmExprParserHelper()
 
 cmExprParserHelper::~cmExprParserHelper()
 {
-  this->CleanupParser();
 }
 
 int cmExprParserHelper::ParseString(const char* str, int verb)
@@ -69,22 +68,14 @@ int cmExprParserHelper::ParseString(const char* str, int verb)
   }
   cmExpr_yylex_destroy(yyscanner);
   if (res != 0) {
-    // str << "CAL_Parser returned: " << res << std::endl;
-    // std::cerr << "When parsing: [" << str << "]" << std::endl;
     return 0;
   }
-
-  this->CleanupParser();
 
   if (Verbose) {
     std::cerr << "Expanding [" << str << "] produced: [" << this->Result << "]"
               << std::endl;
   }
   return 1;
-}
-
-void cmExprParserHelper::CleanupParser()
-{
 }
 
 int cmExprParserHelper::LexInput(char* buf, int maxlen)

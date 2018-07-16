@@ -41,7 +41,6 @@ private:
 
   void Print(const char* place, const char* str);
 
-  void CleanupParser();
   void SetError(std::string errorString);
 
   KWIML_INT_int64_t Result;
