@@ -101,6 +101,15 @@ void cmExprParserHelper::Error(const char* str)
   this->ErrorString = ostr.str();
 }
 
+void cmExprParserHelper::UnexpectedChar(char c)
+{
+  unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
+  std::ostringstream ostr;
+  ostr << "Unexpected character in expression at position " << pos << ": " << c
+       << "\n";
+  this->WarningString += ostr.str();
+}
+
 void cmExprParserHelper::SetResult(KWIML_INT_int64_t value)
 {
   this->Result = value;

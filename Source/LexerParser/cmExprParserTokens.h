@@ -58,8 +58,7 @@ extern int cmExpr_yydebug;
     exp_AND = 268,
     exp_XOR = 269,
     exp_NOT = 270,
-    exp_NUMBER = 271,
-    exp_UNEXPECTED = 272
+    exp_NUMBER = 271
   };
 #endif
 /* Tokens.  */
@@ -77,7 +76,6 @@ extern int cmExpr_yydebug;
 #define exp_XOR 269
 #define exp_NOT 270
 #define exp_NUMBER 271
-#define exp_UNEXPECTED 272
 
 /* Value type.  */
 

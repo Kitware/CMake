@@ -5,6 +5,7 @@
 #include "cmExprParserHelper.h"
 #include "cmMakefile.h"
 #include "cm_kwiml.h"
+#include "cmake.h"
 
 #include <stdio.h>
 
@@ -100,6 +101,11 @@ bool cmMathCommand::HandleExprCommand(std::vector<std::string> const& args)
       break;
   }
   sprintf(buffer, fmt, helper.GetResult());
+
+  std::string const& w = helper.GetWarning();
+  if (!w.empty()) {
+    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w);
+  }
 
   this->Makefile->AddDefinition(outputVariable, buffer);
   return true;

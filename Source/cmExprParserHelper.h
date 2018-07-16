@@ -32,6 +32,10 @@ public:
 
   const char* GetError() { return this->ErrorString.c_str(); }
 
+  void UnexpectedChar(char c);
+
+  std::string const& GetWarning() const { return this->WarningString; }
+
 private:
   std::string::size_type InputBufferPos;
   std::string InputBuffer;
@@ -47,6 +51,7 @@ private:
   const char* FileName;
   long FileLine;
   std::string ErrorString;
+  std::string WarningString;
 };
 
 #define YYSTYPE cmExprParserHelper::ParserType

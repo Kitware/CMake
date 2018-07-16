@@ -1050,7 +1050,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-{return exp_UNEXPECTED;}
+{ yyextra->UnexpectedChar(yytext[0]); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
