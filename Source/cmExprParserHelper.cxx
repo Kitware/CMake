@@ -39,10 +39,9 @@ int cmExprParserHelper::ParseString(const char* str, int verb)
   yyscan_t yyscanner;
   cmExpr_yylex_init(&yyscanner);
   cmExpr_yyset_extra(this, yyscanner);
-  int res;
 
   try {
-    res = cmExpr_yyparse(yyscanner);
+    int res = cmExpr_yyparse(yyscanner);
     if (res != 0) {
       std::string e = "cannot parse the expression: \"" + InputBuffer + "\": ";
       e += ErrorString;
@@ -55,19 +54,16 @@ int cmExprParserHelper::ParseString(const char* str, int verb)
     e += fail.what();
     e += ".";
     this->SetError(std::move(e));
-    res = 1;
   } catch (std::out_of_range const&) {
     std::string e = "cannot evaluate the expression: \"" + InputBuffer +
       "\": a numeric value is out of range.";
     this->SetError(std::move(e));
-    res = 1;
   } catch (...) {
     std::string e = "cannot parse the expression: \"" + InputBuffer + "\".";
     this->SetError(std::move(e));
-    res = 1;
   }
   cmExpr_yylex_destroy(yyscanner);
-  if (res != 0) {
+  if (!this->ErrorString.empty()) {
     return 0;
   }
 
