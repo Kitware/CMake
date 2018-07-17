@@ -64,7 +64,6 @@ static void cmExpr_yyerror(yyscan_t yyscanner, const char* message);
 %token exp_XOR;
 %token exp_NOT;
 %token exp_NUMBER;
-%token exp_UNEXPECTED "character";
 
 /*-------------------------------------------------------------------------*/
 /* grammar */

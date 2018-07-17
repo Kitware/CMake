@@ -20,7 +20,6 @@ cmExprParserHelper::cmExprParserHelper()
 
 cmExprParserHelper::~cmExprParserHelper()
 {
-  this->CleanupParser();
 }
 
 int cmExprParserHelper::ParseString(const char* str, int verb)
@@ -40,10 +39,9 @@ int cmExprParserHelper::ParseString(const char* str, int verb)
   yyscan_t yyscanner;
   cmExpr_yylex_init(&yyscanner);
   cmExpr_yyset_extra(this, yyscanner);
-  int res;
 
   try {
-    res = cmExpr_yyparse(yyscanner);
+    int res = cmExpr_yyparse(yyscanner);
     if (res != 0) {
       std::string e = "cannot parse the expression: \"" + InputBuffer + "\": ";
       e += ErrorString;
@@ -56,35 +54,24 @@ int cmExprParserHelper::ParseString(const char* str, int verb)
     e += fail.what();
     e += ".";
     this->SetError(std::move(e));
-    res = 1;
   } catch (std::out_of_range const&) {
     std::string e = "cannot evaluate the expression: \"" + InputBuffer +
       "\": a numeric value is out of range.";
     this->SetError(std::move(e));
-    res = 1;
   } catch (...) {
     std::string e = "cannot parse the expression: \"" + InputBuffer + "\".";
     this->SetError(std::move(e));
-    res = 1;
   }
   cmExpr_yylex_destroy(yyscanner);
-  if (res != 0) {
-    // str << "CAL_Parser returned: " << res << std::endl;
-    // std::cerr << "When parsing: [" << str << "]" << std::endl;
+  if (!this->ErrorString.empty()) {
     return 0;
   }
-
-  this->CleanupParser();
 
   if (Verbose) {
     std::cerr << "Expanding [" << str << "] produced: [" << this->Result << "]"
               << std::endl;
   }
   return 1;
-}
-
-void cmExprParserHelper::CleanupParser()
-{
 }
 
 int cmExprParserHelper::LexInput(char* buf, int maxlen)
@@ -112,6 +99,15 @@ void cmExprParserHelper::Error(const char* str)
   std::ostringstream ostr;
   ostr << str << " (" << pos << ")";
   this->ErrorString = ostr.str();
+}
+
+void cmExprParserHelper::UnexpectedChar(char c)
+{
+  unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
+  std::ostringstream ostr;
+  ostr << "Unexpected character in expression at position " << pos << ": " << c
+       << "\n";
+  this->WarningString += ostr.str();
 }
 
 void cmExprParserHelper::SetResult(KWIML_INT_int64_t value)

@@ -32,6 +32,10 @@ public:
 
   const char* GetError() { return this->ErrorString.c_str(); }
 
+  void UnexpectedChar(char c);
+
+  std::string const& GetWarning() const { return this->WarningString; }
+
 private:
   std::string::size_type InputBufferPos;
   std::string InputBuffer;
@@ -41,13 +45,13 @@ private:
 
   void Print(const char* place, const char* str);
 
-  void CleanupParser();
   void SetError(std::string errorString);
 
   KWIML_INT_int64_t Result;
   const char* FileName;
   long FileLine;
   std::string ErrorString;
+  std::string WarningString;
 };
 
 #define YYSTYPE cmExprParserHelper::ParserType

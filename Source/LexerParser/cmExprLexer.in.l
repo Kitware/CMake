@@ -58,6 +58,6 @@ Modify cmExprLexer.cxx:
 ">>" { return exp_SHIFTRIGHT; }
 "(" { return exp_OPENPARENT; }
 ")" { return exp_CLOSEPARENT; }
-. {return exp_UNEXPECTED;}
+. { yyextra->UnexpectedChar(yytext[0]); }
 
 %%
