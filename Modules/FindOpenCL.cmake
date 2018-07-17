@@ -119,16 +119,27 @@ if(WIN32)
         OpenCL/common/lib/x64)
   endif()
 else()
-  find_library(OpenCL_LIBRARY
-    NAMES OpenCL
-    PATHS
-      ENV AMDAPPSDKROOT
-      ENV CUDA_PATH
-    PATH_SUFFIXES
-      lib/x86_64
-      lib/x64
-      lib
-      lib64)
+  if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    find_library(OpenCL_LIBRARY
+      NAMES OpenCL
+      PATHS
+        ENV AMDAPPSDKROOT
+        ENV CUDA_PATH
+      PATH_SUFFIXES
+        lib/x86
+        lib)
+  elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    find_library(OpenCL_LIBRARY
+      NAMES OpenCL
+      PATHS
+        ENV AMDAPPSDKROOT
+        ENV CUDA_PATH
+      PATH_SUFFIXES
+        lib/x86_64
+        lib/x64
+        lib
+        lib64)
+  endif()
 endif()
 
 set(OpenCL_LIBRARIES ${OpenCL_LIBRARY})
