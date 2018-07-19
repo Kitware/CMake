@@ -20,6 +20,7 @@ Environment Variables that Control the Build
    /envvar/DESTDIR
    /envvar/LDFLAGS
    /envvar/MACOSX_DEPLOYMENT_TARGET
+   /envvar/PackageName_ROOT
 
 Environment Variables for Languages
 ===================================

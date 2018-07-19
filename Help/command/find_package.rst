@@ -262,8 +262,10 @@ The set of installation prefixes is constructed using the following
 steps.  If ``NO_DEFAULT_PATH`` is specified all ``NO_*`` options are
 enabled.
 
-1. Search paths specified in the ``PackageName_ROOT`` CMake and environment
-   variables.  The package root variables are maintained as a stack so if
+1. Search paths specified in the :variable:`<PackageName>_ROOT` CMake
+   variable and the :envvar:`<PackageName>_ROOT` environment variable,
+   where ``<PackageName>`` is the package to be found.
+   The package root variables are maintained as a stack so if
    called from within a find module, root paths from the parent's find
    module will also be searched after paths for the current package.
    This can be skipped if ``NO_PACKAGE_ROOT_PATH`` is passed.
