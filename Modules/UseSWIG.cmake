@@ -308,7 +308,7 @@ function(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
   endif()
   foreach(it ${SWIG_${language}_EXTRA_FILE_EXTENSIONS})
     set(extra_file "${generatedpath}/${module_basename}${it}")
-    if (extra_file MATCHES "\\.cs$")
+    if (extra_file MATCHES "\\.cs$" AND CMAKE_CSharp_COMPILER_LOADED)
       set_source_files_properties(${extra_file} PROPERTIES LANGUAGE "CSharp")
     else()
       # Treat extra outputs as plain files regardless of language.
