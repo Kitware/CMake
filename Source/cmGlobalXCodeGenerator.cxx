@@ -1065,15 +1065,17 @@ struct cmSourceFilePathCompare
 
 struct cmCompareTargets
 {
-  bool operator()(std::string const& a, std::string const& b) const
+  bool operator()(cmXCodeObject* l, cmXCodeObject* r) const
   {
+    std::string const& a = l->GetTarget()->GetName();
+    std::string const& b = r->GetTarget()->GetName();
     if (a == "ALL_BUILD") {
       return true;
     }
     if (b == "ALL_BUILD") {
       return false;
     }
-    return strcmp(a.c_str(), b.c_str()) < 0;
+    return a < b;
   }
 };
 
@@ -1081,18 +1083,14 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
   cmLocalGenerator* gen, std::vector<cmXCodeObject*>& targets)
 {
   this->SetCurrentLocalGenerator(gen);
-  typedef std::map<std::string, cmGeneratorTarget*, cmCompareTargets>
-    cmSortedTargets;
-  cmSortedTargets sortedTargets;
-  for (auto tgt : this->CurrentLocalGenerator->GetGeneratorTargets()) {
-    sortedTargets[tgt->GetName()] = tgt;
-  }
-  for (auto& sortedTarget : sortedTargets) {
-    cmGeneratorTarget* gtgt = sortedTarget.second;
+  std::vector<cmGeneratorTarget*> const& gts =
+    this->CurrentLocalGenerator->GetGeneratorTargets();
+  for (auto gtgt : gts) {
     if (!this->CreateXCodeTarget(gtgt, targets)) {
       return false;
     }
   }
+  std::sort(targets.begin(), targets.end(), cmCompareTargets());
   return true;
 }
 
