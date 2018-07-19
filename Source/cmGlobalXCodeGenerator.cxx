@@ -1089,266 +1089,271 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
   }
   for (auto& sortedTarget : sortedTargets) {
     cmGeneratorTarget* gtgt = sortedTarget.second;
-
-    std::string targetName = gtgt->GetName();
-
-    // make sure ALL_BUILD, INSTALL, etc are only done once
-    if (this->SpecialTargetEmitted(targetName)) {
-      continue;
-    }
-
-    if (gtgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-      continue;
-    }
-
-    if (gtgt->GetType() == cmStateEnums::UTILITY ||
-        gtgt->GetType() == cmStateEnums::GLOBAL_TARGET) {
-      cmXCodeObject* t = this->CreateUtilityTarget(gtgt);
-      if (!t) {
-        return false;
-      }
-      targets.push_back(t);
-      continue;
-    }
-
-    // organize the sources
-    std::vector<cmSourceFile*> classes;
-    if (!gtgt->GetConfigCommonSourceFiles(classes)) {
+    if (!this->CreateXCodeTarget(gtgt, targets)) {
       return false;
     }
+  }
+  return true;
+}
 
-    // Add CMakeLists.txt file for user convenience.
-    this->AddXCodeProjBuildRule(gtgt, classes);
+bool cmGlobalXCodeGenerator::CreateXCodeTarget(
+  cmGeneratorTarget* gtgt, std::vector<cmXCodeObject*>& targets)
+{
+  std::string targetName = gtgt->GetName();
 
-    std::sort(classes.begin(), classes.end(), cmSourceFilePathCompare());
+  // make sure ALL_BUILD, INSTALL, etc are only done once
+  if (this->SpecialTargetEmitted(targetName)) {
+    return true;
+  }
 
-    gtgt->ComputeObjectMapping();
+  if (gtgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    return true;
+  }
 
-    std::vector<cmXCodeObject*> externalObjFiles;
-    std::vector<cmXCodeObject*> headerFiles;
-    std::vector<cmXCodeObject*> resourceFiles;
-    std::vector<cmXCodeObject*> sourceFiles;
-    for (auto sourceFile : classes) {
-      cmXCodeObject* xsf = this->CreateXCodeSourceFile(
-        this->CurrentLocalGenerator, sourceFile, gtgt);
-      cmXCodeObject* fr = xsf->GetObject("fileRef");
-      cmXCodeObject* filetype = fr->GetObject()->GetObject("explicitFileType");
-
-      cmGeneratorTarget::SourceFileFlags tsFlags =
-        gtgt->GetTargetSourceFileFlags(sourceFile);
-
-      if (filetype && filetype->GetString() == "compiled.mach-o.objfile") {
-        if (sourceFile->GetObjectLibrary().empty()) {
-          externalObjFiles.push_back(xsf);
-        }
-      } else if (this->IsHeaderFile(sourceFile) ||
-                 (tsFlags.Type ==
-                  cmGeneratorTarget::SourceFileTypePrivateHeader) ||
-                 (tsFlags.Type ==
-                  cmGeneratorTarget::SourceFileTypePublicHeader)) {
-        headerFiles.push_back(xsf);
-      } else if (tsFlags.Type == cmGeneratorTarget::SourceFileTypeResource) {
-        resourceFiles.push_back(xsf);
-      } else if (!sourceFile->GetPropertyAsBool("HEADER_FILE_ONLY")) {
-        // Include this file in the build if it has a known language
-        // and has not been listed as an ignored extension for this
-        // generator.
-        if (!this->CurrentLocalGenerator->GetSourceFileLanguage(*sourceFile)
-               .empty() &&
-            !this->IgnoreFile(sourceFile->GetExtension().c_str())) {
-          sourceFiles.push_back(xsf);
-        }
-      }
+  if (gtgt->GetType() == cmStateEnums::UTILITY ||
+      gtgt->GetType() == cmStateEnums::GLOBAL_TARGET) {
+    cmXCodeObject* t = this->CreateUtilityTarget(gtgt);
+    if (!t) {
+      return false;
     }
+    targets.push_back(t);
+    return true;
+  }
 
-    if (this->XcodeVersion < 50) {
-      // Add object library contents as external objects. (Equivalent to
-      // the externalObjFiles above, except each one is not a cmSourceFile
-      // within the target.)
-      std::vector<cmSourceFile const*> objs;
-      gtgt->GetExternalObjects(objs, "");
-      for (auto sourceFile : objs) {
-        if (sourceFile->GetObjectLibrary().empty()) {
-          continue;
-        }
-        std::string const& obj = sourceFile->GetFullPath();
-        cmXCodeObject* xsf =
-          this->CreateXCodeSourceFileFromPath(obj, gtgt, "", nullptr);
+  // organize the sources
+  std::vector<cmSourceFile*> classes;
+  if (!gtgt->GetConfigCommonSourceFiles(classes)) {
+    return false;
+  }
+
+  // Add CMakeLists.txt file for user convenience.
+  this->AddXCodeProjBuildRule(gtgt, classes);
+
+  std::sort(classes.begin(), classes.end(), cmSourceFilePathCompare());
+
+  gtgt->ComputeObjectMapping();
+
+  std::vector<cmXCodeObject*> externalObjFiles;
+  std::vector<cmXCodeObject*> headerFiles;
+  std::vector<cmXCodeObject*> resourceFiles;
+  std::vector<cmXCodeObject*> sourceFiles;
+  for (auto sourceFile : classes) {
+    cmXCodeObject* xsf = this->CreateXCodeSourceFile(
+      this->CurrentLocalGenerator, sourceFile, gtgt);
+    cmXCodeObject* fr = xsf->GetObject("fileRef");
+    cmXCodeObject* filetype = fr->GetObject()->GetObject("explicitFileType");
+
+    cmGeneratorTarget::SourceFileFlags tsFlags =
+      gtgt->GetTargetSourceFileFlags(sourceFile);
+
+    if (filetype && filetype->GetString() == "compiled.mach-o.objfile") {
+      if (sourceFile->GetObjectLibrary().empty()) {
         externalObjFiles.push_back(xsf);
       }
-    }
-
-    // some build phases only apply to bundles and/or frameworks
-    bool isFrameworkTarget = gtgt->IsFrameworkOnApple();
-    bool isBundleTarget = gtgt->GetPropertyAsBool("MACOSX_BUNDLE");
-    bool isCFBundleTarget = gtgt->IsCFBundleOnApple();
-
-    cmXCodeObject* buildFiles = nullptr;
-
-    // create source build phase
-    cmXCodeObject* sourceBuildPhase = nullptr;
-    if (!sourceFiles.empty()) {
-      sourceBuildPhase =
-        this->CreateObject(cmXCodeObject::PBXSourcesBuildPhase);
-      sourceBuildPhase->SetComment("Sources");
-      sourceBuildPhase->AddAttribute("buildActionMask",
-                                     this->CreateString("2147483647"));
-      buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-      for (auto& sourceFile : sourceFiles) {
-        buildFiles->AddObject(sourceFile);
-      }
-      sourceBuildPhase->AddAttribute("files", buildFiles);
-      sourceBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
-                                     this->CreateString("0"));
-    }
-
-    // create header build phase - only for framework targets
-    cmXCodeObject* headerBuildPhase = nullptr;
-    if (!headerFiles.empty() && isFrameworkTarget) {
-      headerBuildPhase =
-        this->CreateObject(cmXCodeObject::PBXHeadersBuildPhase);
-      headerBuildPhase->SetComment("Headers");
-      headerBuildPhase->AddAttribute("buildActionMask",
-                                     this->CreateString("2147483647"));
-      buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-      for (auto& headerFile : headerFiles) {
-        buildFiles->AddObject(headerFile);
-      }
-      headerBuildPhase->AddAttribute("files", buildFiles);
-      headerBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
-                                     this->CreateString("0"));
-    }
-
-    // create resource build phase - only for framework or bundle targets
-    cmXCodeObject* resourceBuildPhase = nullptr;
-    if (!resourceFiles.empty() &&
-        (isFrameworkTarget || isBundleTarget || isCFBundleTarget)) {
-      resourceBuildPhase =
-        this->CreateObject(cmXCodeObject::PBXResourcesBuildPhase);
-      resourceBuildPhase->SetComment("Resources");
-      resourceBuildPhase->AddAttribute("buildActionMask",
-                                       this->CreateString("2147483647"));
-      buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-      for (auto& resourceFile : resourceFiles) {
-        buildFiles->AddObject(resourceFile);
-      }
-      resourceBuildPhase->AddAttribute("files", buildFiles);
-      resourceBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
-                                       this->CreateString("0"));
-    }
-
-    // create vector of "non-resource content file" build phases - only for
-    // framework or bundle targets
-    std::vector<cmXCodeObject*> contentBuildPhases;
-    if (isFrameworkTarget || isBundleTarget || isCFBundleTarget) {
-      typedef std::map<std::string, std::vector<cmSourceFile*>>
-        mapOfVectorOfSourceFiles;
-      mapOfVectorOfSourceFiles bundleFiles;
-      for (auto sourceFile : classes) {
-        cmGeneratorTarget::SourceFileFlags tsFlags =
-          gtgt->GetTargetSourceFileFlags(sourceFile);
-        if (tsFlags.Type == cmGeneratorTarget::SourceFileTypeMacContent) {
-          bundleFiles[tsFlags.MacFolder].push_back(sourceFile);
-        }
-      }
-      for (auto keySources : bundleFiles) {
-        cmXCodeObject* copyFilesBuildPhase =
-          this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
-        copyFilesBuildPhase->SetComment("Copy files");
-        copyFilesBuildPhase->AddAttribute("buildActionMask",
-                                          this->CreateString("2147483647"));
-        copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
-                                          this->CreateString("6"));
-        std::ostringstream ostr;
-        if (gtgt->IsFrameworkOnApple()) {
-          // dstPath in frameworks is relative to Versions/<version>
-          ostr << keySources.first;
-        } else if (keySources.first != "MacOS") {
-          if (gtgt->Target->GetMakefile()->PlatformIsAppleEmbedded()) {
-            ostr << keySources.first;
-          } else {
-            // dstPath in bundles is relative to Contents/MacOS
-            ostr << "../" << keySources.first;
-          }
-        }
-        copyFilesBuildPhase->AddAttribute("dstPath",
-                                          this->CreateString(ostr.str()));
-        copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
-                                          this->CreateString("0"));
-        buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-        copyFilesBuildPhase->AddAttribute("files", buildFiles);
-        for (auto sourceFile : keySources.second) {
-          cmXCodeObject* xsf = this->CreateXCodeSourceFile(
-            this->CurrentLocalGenerator, sourceFile, gtgt);
-          buildFiles->AddObject(xsf);
-        }
-        contentBuildPhases.push_back(copyFilesBuildPhase);
+    } else if (this->IsHeaderFile(sourceFile) ||
+               (tsFlags.Type ==
+                cmGeneratorTarget::SourceFileTypePrivateHeader) ||
+               (tsFlags.Type ==
+                cmGeneratorTarget::SourceFileTypePublicHeader)) {
+      headerFiles.push_back(xsf);
+    } else if (tsFlags.Type == cmGeneratorTarget::SourceFileTypeResource) {
+      resourceFiles.push_back(xsf);
+    } else if (!sourceFile->GetPropertyAsBool("HEADER_FILE_ONLY")) {
+      // Include this file in the build if it has a known language
+      // and has not been listed as an ignored extension for this
+      // generator.
+      if (!this->CurrentLocalGenerator->GetSourceFileLanguage(*sourceFile)
+             .empty() &&
+          !this->IgnoreFile(sourceFile->GetExtension().c_str())) {
+        sourceFiles.push_back(xsf);
       }
     }
-
-    // create vector of "resource content file" build phases - only for
-    // framework or bundle targets
-    if (isFrameworkTarget || isBundleTarget || isCFBundleTarget) {
-      typedef std::map<std::string, std::vector<cmSourceFile*>>
-        mapOfVectorOfSourceFiles;
-      mapOfVectorOfSourceFiles bundleFiles;
-      for (auto sourceFile : classes) {
-        cmGeneratorTarget::SourceFileFlags tsFlags =
-          gtgt->GetTargetSourceFileFlags(sourceFile);
-        if (tsFlags.Type == cmGeneratorTarget::SourceFileTypeDeepResource) {
-          bundleFiles[tsFlags.MacFolder].push_back(sourceFile);
-        }
-      }
-      for (auto keySources : bundleFiles) {
-        cmXCodeObject* copyFilesBuildPhase =
-          this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
-        copyFilesBuildPhase->SetComment("Copy files");
-        copyFilesBuildPhase->AddAttribute("buildActionMask",
-                                          this->CreateString("2147483647"));
-        copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
-                                          this->CreateString("7"));
-        copyFilesBuildPhase->AddAttribute(
-          "dstPath", this->CreateString(keySources.first));
-        copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
-                                          this->CreateString("0"));
-        buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-        copyFilesBuildPhase->AddAttribute("files", buildFiles);
-        for (auto sourceFile : keySources.second) {
-          cmXCodeObject* xsf = this->CreateXCodeSourceFile(
-            this->CurrentLocalGenerator, sourceFile, gtgt);
-          buildFiles->AddObject(xsf);
-        }
-        contentBuildPhases.push_back(copyFilesBuildPhase);
-      }
-    }
-
-    // create framework build phase
-    cmXCodeObject* frameworkBuildPhase = nullptr;
-    if (!externalObjFiles.empty()) {
-      frameworkBuildPhase =
-        this->CreateObject(cmXCodeObject::PBXFrameworksBuildPhase);
-      frameworkBuildPhase->SetComment("Frameworks");
-      frameworkBuildPhase->AddAttribute("buildActionMask",
-                                        this->CreateString("2147483647"));
-      buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-      frameworkBuildPhase->AddAttribute("files", buildFiles);
-      for (auto& externalObjFile : externalObjFiles) {
-        buildFiles->AddObject(externalObjFile);
-      }
-      frameworkBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
-                                        this->CreateString("0"));
-    }
-
-    // create list of build phases and create the Xcode target
-    cmXCodeObject* buildPhases =
-      this->CreateObject(cmXCodeObject::OBJECT_LIST);
-
-    this->CreateCustomCommands(buildPhases, sourceBuildPhase, headerBuildPhase,
-                               resourceBuildPhase, contentBuildPhases,
-                               frameworkBuildPhase, gtgt);
-
-    targets.push_back(this->CreateXCodeTarget(gtgt, buildPhases));
   }
+
+  if (this->XcodeVersion < 50) {
+    // Add object library contents as external objects. (Equivalent to
+    // the externalObjFiles above, except each one is not a cmSourceFile
+    // within the target.)
+    std::vector<cmSourceFile const*> objs;
+    gtgt->GetExternalObjects(objs, "");
+    for (auto sourceFile : objs) {
+      if (sourceFile->GetObjectLibrary().empty()) {
+        continue;
+      }
+      std::string const& obj = sourceFile->GetFullPath();
+      cmXCodeObject* xsf =
+        this->CreateXCodeSourceFileFromPath(obj, gtgt, "", nullptr);
+      externalObjFiles.push_back(xsf);
+    }
+  }
+
+  // some build phases only apply to bundles and/or frameworks
+  bool isFrameworkTarget = gtgt->IsFrameworkOnApple();
+  bool isBundleTarget = gtgt->GetPropertyAsBool("MACOSX_BUNDLE");
+  bool isCFBundleTarget = gtgt->IsCFBundleOnApple();
+
+  cmXCodeObject* buildFiles = nullptr;
+
+  // create source build phase
+  cmXCodeObject* sourceBuildPhase = nullptr;
+  if (!sourceFiles.empty()) {
+    sourceBuildPhase = this->CreateObject(cmXCodeObject::PBXSourcesBuildPhase);
+    sourceBuildPhase->SetComment("Sources");
+    sourceBuildPhase->AddAttribute("buildActionMask",
+                                   this->CreateString("2147483647"));
+    buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+    for (auto& sourceFile : sourceFiles) {
+      buildFiles->AddObject(sourceFile);
+    }
+    sourceBuildPhase->AddAttribute("files", buildFiles);
+    sourceBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
+                                   this->CreateString("0"));
+  }
+
+  // create header build phase - only for framework targets
+  cmXCodeObject* headerBuildPhase = nullptr;
+  if (!headerFiles.empty() && isFrameworkTarget) {
+    headerBuildPhase = this->CreateObject(cmXCodeObject::PBXHeadersBuildPhase);
+    headerBuildPhase->SetComment("Headers");
+    headerBuildPhase->AddAttribute("buildActionMask",
+                                   this->CreateString("2147483647"));
+    buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+    for (auto& headerFile : headerFiles) {
+      buildFiles->AddObject(headerFile);
+    }
+    headerBuildPhase->AddAttribute("files", buildFiles);
+    headerBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
+                                   this->CreateString("0"));
+  }
+
+  // create resource build phase - only for framework or bundle targets
+  cmXCodeObject* resourceBuildPhase = nullptr;
+  if (!resourceFiles.empty() &&
+      (isFrameworkTarget || isBundleTarget || isCFBundleTarget)) {
+    resourceBuildPhase =
+      this->CreateObject(cmXCodeObject::PBXResourcesBuildPhase);
+    resourceBuildPhase->SetComment("Resources");
+    resourceBuildPhase->AddAttribute("buildActionMask",
+                                     this->CreateString("2147483647"));
+    buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+    for (auto& resourceFile : resourceFiles) {
+      buildFiles->AddObject(resourceFile);
+    }
+    resourceBuildPhase->AddAttribute("files", buildFiles);
+    resourceBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
+                                     this->CreateString("0"));
+  }
+
+  // create vector of "non-resource content file" build phases - only for
+  // framework or bundle targets
+  std::vector<cmXCodeObject*> contentBuildPhases;
+  if (isFrameworkTarget || isBundleTarget || isCFBundleTarget) {
+    typedef std::map<std::string, std::vector<cmSourceFile*>>
+      mapOfVectorOfSourceFiles;
+    mapOfVectorOfSourceFiles bundleFiles;
+    for (auto sourceFile : classes) {
+      cmGeneratorTarget::SourceFileFlags tsFlags =
+        gtgt->GetTargetSourceFileFlags(sourceFile);
+      if (tsFlags.Type == cmGeneratorTarget::SourceFileTypeMacContent) {
+        bundleFiles[tsFlags.MacFolder].push_back(sourceFile);
+      }
+    }
+    for (auto keySources : bundleFiles) {
+      cmXCodeObject* copyFilesBuildPhase =
+        this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
+      copyFilesBuildPhase->SetComment("Copy files");
+      copyFilesBuildPhase->AddAttribute("buildActionMask",
+                                        this->CreateString("2147483647"));
+      copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
+                                        this->CreateString("6"));
+      std::ostringstream ostr;
+      if (gtgt->IsFrameworkOnApple()) {
+        // dstPath in frameworks is relative to Versions/<version>
+        ostr << keySources.first;
+      } else if (keySources.first != "MacOS") {
+        if (gtgt->Target->GetMakefile()->PlatformIsAppleEmbedded()) {
+          ostr << keySources.first;
+        } else {
+          // dstPath in bundles is relative to Contents/MacOS
+          ostr << "../" << keySources.first;
+        }
+      }
+      copyFilesBuildPhase->AddAttribute("dstPath",
+                                        this->CreateString(ostr.str()));
+      copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
+                                        this->CreateString("0"));
+      buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+      copyFilesBuildPhase->AddAttribute("files", buildFiles);
+      for (auto sourceFile : keySources.second) {
+        cmXCodeObject* xsf = this->CreateXCodeSourceFile(
+          this->CurrentLocalGenerator, sourceFile, gtgt);
+        buildFiles->AddObject(xsf);
+      }
+      contentBuildPhases.push_back(copyFilesBuildPhase);
+    }
+  }
+
+  // create vector of "resource content file" build phases - only for
+  // framework or bundle targets
+  if (isFrameworkTarget || isBundleTarget || isCFBundleTarget) {
+    typedef std::map<std::string, std::vector<cmSourceFile*>>
+      mapOfVectorOfSourceFiles;
+    mapOfVectorOfSourceFiles bundleFiles;
+    for (auto sourceFile : classes) {
+      cmGeneratorTarget::SourceFileFlags tsFlags =
+        gtgt->GetTargetSourceFileFlags(sourceFile);
+      if (tsFlags.Type == cmGeneratorTarget::SourceFileTypeDeepResource) {
+        bundleFiles[tsFlags.MacFolder].push_back(sourceFile);
+      }
+    }
+    for (auto keySources : bundleFiles) {
+      cmXCodeObject* copyFilesBuildPhase =
+        this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
+      copyFilesBuildPhase->SetComment("Copy files");
+      copyFilesBuildPhase->AddAttribute("buildActionMask",
+                                        this->CreateString("2147483647"));
+      copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
+                                        this->CreateString("7"));
+      copyFilesBuildPhase->AddAttribute("dstPath",
+                                        this->CreateString(keySources.first));
+      copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
+                                        this->CreateString("0"));
+      buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+      copyFilesBuildPhase->AddAttribute("files", buildFiles);
+      for (auto sourceFile : keySources.second) {
+        cmXCodeObject* xsf = this->CreateXCodeSourceFile(
+          this->CurrentLocalGenerator, sourceFile, gtgt);
+        buildFiles->AddObject(xsf);
+      }
+      contentBuildPhases.push_back(copyFilesBuildPhase);
+    }
+  }
+
+  // create framework build phase
+  cmXCodeObject* frameworkBuildPhase = nullptr;
+  if (!externalObjFiles.empty()) {
+    frameworkBuildPhase =
+      this->CreateObject(cmXCodeObject::PBXFrameworksBuildPhase);
+    frameworkBuildPhase->SetComment("Frameworks");
+    frameworkBuildPhase->AddAttribute("buildActionMask",
+                                      this->CreateString("2147483647"));
+    buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+    frameworkBuildPhase->AddAttribute("files", buildFiles);
+    for (auto& externalObjFile : externalObjFiles) {
+      buildFiles->AddObject(externalObjFile);
+    }
+    frameworkBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
+                                      this->CreateString("0"));
+  }
+
+  // create list of build phases and create the Xcode target
+  cmXCodeObject* buildPhases = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+
+  this->CreateCustomCommands(buildPhases, sourceBuildPhase, headerBuildPhase,
+                             resourceBuildPhase, contentBuildPhases,
+                             frameworkBuildPhase, gtgt);
+
+  targets.push_back(this->CreateXCodeTarget(gtgt, buildPhases));
   return true;
 }
 

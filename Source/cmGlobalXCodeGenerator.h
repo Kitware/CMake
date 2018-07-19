@@ -206,6 +206,8 @@ private:
   void AddXCodeProjBuildRule(cmGeneratorTarget* target,
                              std::vector<cmSourceFile*>& sources) const;
   bool CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&);
+  bool CreateXCodeTarget(cmGeneratorTarget* gtgt,
+                         std::vector<cmXCodeObject*>&);
   bool IsHeaderFile(cmSourceFile*);
   void AddDependTarget(cmXCodeObject* target, cmXCodeObject* dependTarget);
   void CreateXCodeDependHackTarget(std::vector<cmXCodeObject*>& targets);
