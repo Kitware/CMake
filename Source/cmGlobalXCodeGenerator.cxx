@@ -1083,8 +1083,12 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
   cmLocalGenerator* gen, std::vector<cmXCodeObject*>& targets)
 {
   this->SetCurrentLocalGenerator(gen);
-  std::vector<cmGeneratorTarget*> const& gts =
+  std::vector<cmGeneratorTarget*> gts =
     this->CurrentLocalGenerator->GetGeneratorTargets();
+  std::sort(gts.begin(), gts.end(),
+            [this](cmGeneratorTarget const* l, cmGeneratorTarget const* r) {
+              return this->TargetOrderIndex[l] < this->TargetOrderIndex[r];
+            });
   for (auto gtgt : gts) {
     if (!this->CreateXCodeTarget(gtgt, targets)) {
       return false;
