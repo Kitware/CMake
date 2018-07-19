@@ -109,6 +109,8 @@ public:
 
 protected:
   void AddExtraIDETargets() override;
+  void ComputeTargetOrder();
+  void ComputeTargetOrder(cmGeneratorTarget const* gt, size_t& index);
   void Generate() override;
 
 private:
@@ -286,6 +288,7 @@ private:
   std::string ObjectDirArchDefault;
   std::string ObjectDirArch;
   std::string GeneratorToolset;
+  std::map<cmGeneratorTarget const*, size_t> TargetOrderIndex;
 };
 
 #endif

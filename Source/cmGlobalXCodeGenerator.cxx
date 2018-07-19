@@ -386,12 +386,46 @@ void cmGlobalXCodeGenerator::AddExtraIDETargets()
   }
 }
 
+void cmGlobalXCodeGenerator::ComputeTargetOrder()
+{
+  size_t index = 0;
+  auto const& lgens = this->GetLocalGenerators();
+  for (cmLocalGenerator* lgen : lgens) {
+    auto const& targets = lgen->GetGeneratorTargets();
+    for (cmGeneratorTarget const* gt : targets) {
+      this->ComputeTargetOrder(gt, index);
+    }
+  }
+  assert(index == this->TargetOrderIndex.size());
+}
+
+void cmGlobalXCodeGenerator::ComputeTargetOrder(cmGeneratorTarget const* gt,
+                                                size_t& index)
+{
+  std::map<cmGeneratorTarget const*, size_t>::value_type value(gt, 0);
+  auto insertion = this->TargetOrderIndex.insert(value);
+  if (!insertion.second) {
+    return;
+  }
+  auto entry = insertion.first;
+
+  auto& deps = this->GetTargetDirectDepends(gt);
+  for (auto& d : deps) {
+    this->ComputeTargetOrder(d, index);
+  }
+
+  entry->second = index++;
+}
+
 void cmGlobalXCodeGenerator::Generate()
 {
   this->cmGlobalGenerator::Generate();
   if (cmSystemTools::GetErrorOccuredFlag()) {
     return;
   }
+
+  this->ComputeTargetOrder();
+
   for (auto keyVal : this->ProjectMap) {
     cmLocalGenerator* root = keyVal.second[0];
 
