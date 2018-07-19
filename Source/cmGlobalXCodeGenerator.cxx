@@ -3319,13 +3319,6 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
   if (generators.empty()) {
     return;
   }
-  // Skip local generators that are excluded from this project.
-  for (auto generator : generators) {
-    if (this->IsExcluded(root, generator)) {
-      continue;
-    }
-  }
-
   if (!this->CreateXCodeObjects(root, generators)) {
     return;
   }
