@@ -527,3 +527,11 @@ alternate data stream (ADT) is used.
 
 When a filesystem without ADT support is used only owner read/write
 permissions can be preserved.
+
+Reproducible packages
+^^^^^^^^^^^^^^^^^^^^^
+
+The environment variable ``SOURCE_DATE_EPOCH`` may be set to a UNIX
+timestamp, defined as the number of seconds, excluding leap seconds,
+since 01 Jan 1970 00:00:00 UTC.  If set, the CPack Deb generator will
+use its value for timestamps in the package.

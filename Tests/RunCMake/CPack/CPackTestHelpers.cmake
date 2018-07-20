@@ -78,8 +78,12 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source PACK
     endif()
 
     # execute cpack
+    set(SETENV)
+    if(ENVIRONMENT)
+      set(SETENV ${CMAKE_COMMAND} -E env "${ENVIRONMENT}")
+    endif()
     execute_process(
-      COMMAND ${cpack_command_}
+      COMMAND ${SETENV} ${cpack_command_}
       WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
       RESULT_VARIABLE "result_"
       OUTPUT_FILE "${RunCMake_TEST_BINARY_DIR}/test_output.txt"
