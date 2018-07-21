@@ -196,10 +196,6 @@ endif()
 set (CMAKE_FIND_FRAMEWORK LAST)
 
 
-unset (${_PYTHON_PREFIX}_VERSION_MAJOR)
-unset (${_PYTHON_PREFIX}_VERSION_MINOR)
-unset (${_PYTHON_PREFIX}_VERSION_PATCH)
-
 unset (_${_PYTHON_PREFIX}_REQUIRED_VARS)
 unset (_${_PYTHON_PREFIX}_CACHED_VARS)
 
@@ -259,7 +255,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   # try more generic names
   if (NOT ${_PYTHON_PREFIX}_EXECUTABLE)
     find_program (${_PYTHON_PREFIX}_EXECUTABLE
-                  NAMES python${${_PYTHON_PREFIX}_VERSION_MAJOR} python
+                  NAMES python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} python
                         ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                   HINTS ${_${_PYTHON_PREFIX}_HINTS}
                   PATH_SUFFIXES bin)
