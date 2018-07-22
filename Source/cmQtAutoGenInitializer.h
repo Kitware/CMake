@@ -12,6 +12,7 @@
 #include <vector>
 
 class cmGeneratorTarget;
+class cmTarget;
 
 /// @brief Initializes the QtAutoGen generators
 class cmQtAutoGenInitializer : public cmQtAutoGen
@@ -38,6 +39,7 @@ public:
     std::string PathChecksum;
     std::string InfoFile;
     std::string SettingsFile;
+    std::map<std::string, std::string> ConfigSettingsFile;
     std::string RccFile;
     bool Generated;
     bool Unique;
@@ -54,9 +56,13 @@ public:
   bool SetupCustomTargets();
 
 private:
-  bool InitCustomTargetsMoc();
-  bool InitCustomTargetsUic();
-  bool InitCustomTargetsRcc();
+  bool InitMoc();
+  bool InitUic();
+  bool InitRcc();
+
+  bool InitScanFiles();
+  bool InitAutogenTarget();
+  bool InitRccTargets();
 
   bool SetupWriteAutogenInfo();
   bool SetupWriteRccInfo();
@@ -90,15 +96,24 @@ private:
   std::string AutogenFolder;
   std::string AutogenInfoFile;
   std::string AutogenSettingsFile;
+  std::map<std::string, std::string> AutogenConfigSettingsFile;
+  std::set<std::string> AutogenDependFiles;
+  std::set<cmTarget*> AutogenDependTargets;
   // Directories
   std::string DirInfo;
   std::string DirBuild;
   std::string DirWork;
   std::string DirInclude;
   std::map<std::string, std::string> DirConfigInclude;
-  // Sources
-  std::vector<std::string> Headers;
-  std::vector<std::string> Sources;
+  // Moc and UIC
+  struct
+  {
+    // Sources
+    std::vector<std::string> Headers;
+    std::vector<std::string> Sources;
+    std::vector<std::string> HeadersGenerated;
+    std::vector<std::string> SourcesGenerated;
+  } MocUic;
   // Moc
   struct
   {
