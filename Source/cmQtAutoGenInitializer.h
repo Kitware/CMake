@@ -57,6 +57,9 @@ private:
   bool SetupCustomTargetsMoc();
   bool SetupCustomTargetsUic();
 
+  bool SetupWriteAutogenInfo();
+  bool SetupWriteRccInfo();
+
   void AddGeneratedSource(std::string const& filename, GeneratorT genType);
 
   bool QtVersionGreaterOrEqual(unsigned long requestMajor,
