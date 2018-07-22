@@ -244,6 +244,21 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     // Working directory
     this->DirWork = cbd;
     cmSystemTools::ConvertToUnixSlashes(this->DirWork);
+
+    // Include directory
+    this->DirInclude = this->DirBuild;
+    this->DirInclude += "/include";
+    if (this->MultiConfig) {
+      this->DirInclude += "_$<CONFIG>";
+    }
+    if (this->MultiConfig) {
+      for (std::string const& cfg : this->ConfigsList) {
+        std::string& dir = this->DirConfigInclude[cfg];
+        dir = this->DirBuild;
+        dir += "/include_";
+        dir += cfg;
+      }
+    }
   }
 
   // Autogen files
@@ -305,12 +320,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
   // Add autogen includes directory to the origin target INCLUDE_DIRECTORIES
   if (this->Moc.Enabled || this->Uic.Enabled ||
       (this->Rcc.Enabled && this->MultiConfig)) {
-    std::string includeDir = this->DirBuild;
-    includeDir += "/include";
-    if (this->MultiConfig) {
-      includeDir += "_$<CONFIG>";
-    }
-    this->Target->AddIncludeDirectory(includeDir, true);
+    this->Target->AddIncludeDirectory(this->DirInclude, true);
   }
 
   // Acquire rcc executable and features
@@ -833,15 +843,6 @@ bool cmQtAutoGenInitializer::SetupCustomTargets()
     return false;
   }
 
-  // Configuration include directories
-  std::string includeDir = "include";
-  std::map<std::string, std::string> includeDirs;
-  for (std::string const& cfg : this->ConfigsList) {
-    std::string& dir = includeDirs[cfg];
-    dir = "include_";
-    dir += cfg;
-  }
-
   // Generate autogen target info file
   if (this->Moc.Enabled || this->Uic.Enabled) {
     if (this->Moc.Enabled) {
@@ -913,9 +914,9 @@ bool cmQtAutoGenInitializer::SetupCustomTargets()
              MfDef("CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE"));
       CWrite("AM_BUILD_DIR", this->DirBuild);
       if (this->MultiConfig) {
-        CWriteMap("AM_INCLUDE_DIR", includeDirs);
+        CWriteMap("AM_INCLUDE_DIR", this->DirConfigInclude);
       } else {
-        CWrite("AM_INCLUDE_DIR", includeDir);
+        CWrite("AM_INCLUDE_DIR", this->DirInclude);
       }
 
       ofs << "# Files\n";
@@ -1014,9 +1015,9 @@ bool cmQtAutoGenInitializer::SetupCustomTargets()
         ofs << "# Directories\n";
         CWrite("ARCC_BUILD_DIR", this->DirBuild);
         if (this->MultiConfig) {
-          CWriteMap("ARCC_INCLUDE_DIR", includeDirs);
+          CWriteMap("ARCC_INCLUDE_DIR", this->DirConfigInclude);
         } else {
-          CWrite("ARCC_INCLUDE_DIR", includeDir);
+          CWrite("ARCC_INCLUDE_DIR", this->DirInclude);
         }
 
         ofs << "# Rcc executable\n";

@@ -90,6 +90,8 @@ private:
   std::string DirInfo;
   std::string DirBuild;
   std::string DirWork;
+  std::string DirInclude;
+  std::map<std::string, std::string> DirConfigInclude;
   // Sources
   std::vector<std::string> Headers;
   std::vector<std::string> Sources;

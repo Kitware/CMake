@@ -141,9 +141,7 @@ bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
 
   // Compute rcc output file name
   if (IsMultiConfig()) {
-    RccFileOutput_ = AutogenBuildDir_;
-    RccFileOutput_ += '/';
-    RccFileOutput_ += IncludeDir_;
+    RccFileOutput_ = IncludeDir_;
     RccFileOutput_ += '/';
     RccFileOutput_ += MultiConfigOutput();
   } else {

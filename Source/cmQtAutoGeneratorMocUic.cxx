@@ -1247,14 +1247,11 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
     return false;
   }
   // include directory
-  {
-    std::string dirRel = InfoGetConfig("AM_INCLUDE_DIR");
-    if (dirRel.empty()) {
-      Log().ErrorFile(GeneratorT::GEN, InfoFile(),
-                      "Autogen include directory missing");
-      return false;
-    }
-    Base_.AutogenIncludeDir = Base_.AbsoluteBuildPath(dirRel);
+  Base_.AutogenIncludeDir = InfoGetConfig("AM_INCLUDE_DIR");
+  if (Base_.AutogenIncludeDir.empty()) {
+    Log().ErrorFile(GeneratorT::GEN, InfoFile(),
+                    "Autogen include directory missing");
+    return false;
   }
 
   // - Files
