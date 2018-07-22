@@ -54,8 +54,9 @@ public:
   bool SetupCustomTargets();
 
 private:
-  bool SetupCustomTargetsMoc();
-  bool SetupCustomTargetsUic();
+  bool InitCustomTargetsMoc();
+  bool InitCustomTargetsUic();
+  bool InitCustomTargetsRcc();
 
   bool SetupWriteAutogenInfo();
   bool SetupWriteRccInfo();
@@ -75,7 +76,7 @@ private:
 
 private:
   cmGeneratorTarget* Target;
-  bool MultiConfig;
+  bool MultiConfig = false;
   // Qt
   std::string QtVersionMajor;
   std::string QtVersionMinor;
@@ -101,7 +102,7 @@ private:
   // Moc
   struct
   {
-    bool Enabled;
+    bool Enabled = false;
     std::string Executable;
     std::string PredefsCmd;
     std::set<std::string> Skip;
@@ -109,11 +110,12 @@ private:
     std::map<std::string, std::string> ConfigIncludes;
     std::string Defines;
     std::map<std::string, std::string> ConfigDefines;
+    std::string MocsCompilation;
   } Moc;
   // Uic
   struct
   {
-    bool Enabled;
+    bool Enabled = false;
     std::string Executable;
     std::set<std::string> Skip;
     std::vector<std::string> SearchPaths;
@@ -125,7 +127,7 @@ private:
   // Rcc
   struct
   {
-    bool Enabled;
+    bool Enabled = false;
     std::string Executable;
     std::vector<std::string> ListOptions;
     std::vector<Qrc> Qrcs;

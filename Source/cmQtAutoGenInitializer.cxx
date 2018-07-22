@@ -317,11 +317,21 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     }
   }
 
-  // Add moc compilation to generated files list
-  if (this->Moc.Enabled) {
-    std::string mocsComp = this->DirBuild + "/mocs_compilation.cpp";
-    this->AddGeneratedSource(mocsComp, GeneratorT::MOC);
-    autogenProvides.push_back(std::move(mocsComp));
+  if (this->Moc.Enabled && !InitCustomTargetsMoc()) {
+    return false;
+  }
+  if (this->Uic.Enabled && !InitCustomTargetsUic()) {
+    return false;
+  }
+  if (this->Uic.Enabled && !InitCustomTargetsRcc()) {
+    return false;
+  }
+
+  // Acquire rcc executable and features
+  if (this->Rcc.Enabled) {
+    if (!GetRccExecutable()) {
+      return false;
+    }
   }
 
   // Add autogen includes directory to the origin target INCLUDE_DIRECTORIES
@@ -330,11 +340,9 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     this->Target->AddIncludeDirectory(this->DirInclude, true);
   }
 
-  // Acquire rcc executable and features
-  if (this->Rcc.Enabled) {
-    if (!GetRccExecutable()) {
-      return false;
-    }
+  if (this->Moc.Enabled) {
+    this->AddGeneratedSource(this->Moc.MocsCompilation, GeneratorT::MOC);
+    autogenProvides.push_back(this->Moc.MocsCompilation);
   }
 
   // Extract relevant source files
@@ -838,6 +846,159 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
   return true;
 }
 
+bool cmQtAutoGenInitializer::InitCustomTargetsMoc()
+{
+  cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
+  cmMakefile* makefile = this->Target->Target->GetMakefile();
+
+  // Add moc compilation to generated files list
+
+  this->Moc.MocsCompilation = this->DirBuild;
+  this->Moc.MocsCompilation += "/mocs_compilation.cpp";
+
+  // Moc predefs command
+  if (this->Target->GetPropertyAsBool("AUTOMOC_COMPILER_PREDEFINES") &&
+      this->QtVersionGreaterOrEqual(5, 8)) {
+    this->Moc.PredefsCmd =
+      makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_PREDEFINES_COMMAND");
+  }
+
+  // Moc includes and compile definitions
+  {
+    auto GetIncludeDirs = [this,
+                           localGen](std::string const& cfg) -> std::string {
+      // Get the include dirs for this target, without stripping the implicit
+      // include dirs off, see
+      // https://gitlab.kitware.com/cmake/cmake/issues/13667
+      std::vector<std::string> dirs;
+      localGen->GetIncludeDirectories(dirs, this->Target, "CXX", cfg, false);
+      return cmJoin(dirs, ";");
+    };
+
+    // Default configuration include directories
+    this->Moc.Includes = GetIncludeDirs(this->ConfigDefault);
+    // Other configuration settings
+    for (std::string const& cfg : this->ConfigsList) {
+      std::string configIncludeDirs = GetIncludeDirs(cfg);
+      if (configIncludeDirs != this->Moc.Includes) {
+        this->Moc.ConfigIncludes[cfg] = std::move(configIncludeDirs);
+      }
+    }
+  }
+
+  // Moc compile definitions
+  {
+    auto GetCompileDefinitions =
+      [this, localGen](std::string const& cfg) -> std::string {
+      std::set<std::string> defines;
+      localGen->AddCompileDefinitions(defines, this->Target, cfg, "CXX");
+      return cmJoin(defines, ";");
+    };
+
+    // Default configuration defines
+    this->Moc.Defines = GetCompileDefinitions(this->ConfigDefault);
+    // Other configuration defines
+    for (std::string const& cfg : this->ConfigsList) {
+      std::string configCompileDefs = GetCompileDefinitions(cfg);
+      if (configCompileDefs != this->Moc.Defines) {
+        this->Moc.ConfigDefines[cfg] = std::move(configCompileDefs);
+      }
+    }
+  }
+
+  // Moc executable
+  if (!GetMocExecutable()) {
+    return false;
+  }
+
+  return true;
+}
+
+bool cmQtAutoGenInitializer::InitCustomTargetsUic()
+{
+  cmMakefile* makefile = this->Target->Target->GetMakefile();
+
+  // Uic search paths
+  {
+    std::string const usp =
+      this->Target->GetSafeProperty("AUTOUIC_SEARCH_PATHS");
+    if (!usp.empty()) {
+      cmSystemTools::ExpandListArgument(usp, this->Uic.SearchPaths);
+      std::string const srcDir = makefile->GetCurrentSourceDirectory();
+      for (std::string& path : this->Uic.SearchPaths) {
+        path = cmSystemTools::CollapseFullPath(path, srcDir);
+      }
+    }
+  }
+  // Uic target options
+  {
+    auto UicGetOpts = [this](std::string const& cfg) -> std::string {
+      std::vector<std::string> opts;
+      this->Target->GetAutoUicOptions(opts, cfg);
+      return cmJoin(opts, ";");
+    };
+
+    // Default settings
+    this->Uic.Options = UicGetOpts(this->ConfigDefault);
+
+    // Configuration specific settings
+    for (std::string const& cfg : this->ConfigsList) {
+      std::string const configUicOpts = UicGetOpts(cfg);
+      if (configUicOpts != this->Uic.Options) {
+        this->Uic.ConfigOptions[cfg] = configUicOpts;
+      }
+    }
+  }
+  // .ui files skip and options
+  {
+    std::string const uiExt = "ui";
+    std::string pathError;
+    for (cmSourceFile* sf : makefile->GetSourceFiles()) {
+      // sf->GetExtension() is only valid after sf->GetFullPath() ...
+      // Since we're iterating over source files that might be not in the
+      // target we need to check for path errors (not existing files).
+      std::string const& fPath = sf->GetFullPath(&pathError);
+      if (!pathError.empty()) {
+        pathError.clear();
+        continue;
+      }
+      if (sf->GetExtension() == uiExt) {
+        std::string const absFile = cmSystemTools::GetRealPath(fPath);
+        // Check if the .ui file should be skipped
+        if (sf->GetPropertyAsBool("SKIP_AUTOUIC") ||
+            sf->GetPropertyAsBool("SKIP_AUTOGEN")) {
+          this->Uic.Skip.insert(absFile);
+        }
+        // Check if the .ui file has uic options
+        std::string const uicOpts = sf->GetSafeProperty("AUTOUIC_OPTIONS");
+        if (!uicOpts.empty()) {
+          // Check if file isn't skipped
+          if (this->Uic.Skip.count(absFile) == 0) {
+            this->Uic.FileFiles.push_back(absFile);
+            std::vector<std::string> optsVec;
+            cmSystemTools::ExpandListArgument(uicOpts, optsVec);
+            this->Uic.FileOptions.push_back(std::move(optsVec));
+          }
+        }
+      }
+    }
+  }
+
+  if (!GetUicExecutable()) {
+    return false;
+  }
+
+  return true;
+}
+
+bool cmQtAutoGenInitializer::InitCustomTargetsRcc()
+{
+  if (!GetRccExecutable()) {
+    return false;
+  }
+  return true;
+}
+
 bool cmQtAutoGenInitializer::SetupCustomTargets()
 {
   // Create info directory on demand
@@ -850,12 +1011,6 @@ bool cmQtAutoGenInitializer::SetupCustomTargets()
 
   // Generate autogen target info file
   if (this->Moc.Enabled || this->Uic.Enabled) {
-    if (this->Moc.Enabled) {
-      this->SetupCustomTargetsMoc();
-    }
-    if (this->Uic.Enabled) {
-      this->SetupCustomTargetsUic();
-    }
     // Write autogen target info files
     if (!this->SetupWriteAutogenInfo()) {
       return false;
@@ -1055,146 +1210,6 @@ bool cmQtAutoGenInitializer::SetupWriteRccInfo()
       cmSystemTools::Error(err.c_str());
       return false;
     }
-  }
-
-  return true;
-}
-
-bool cmQtAutoGenInitializer::SetupCustomTargetsMoc()
-{
-  cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
-  cmMakefile* makefile = this->Target->Target->GetMakefile();
-
-  // Moc predefs command
-  if (this->Target->GetPropertyAsBool("AUTOMOC_COMPILER_PREDEFINES") &&
-      this->QtVersionGreaterOrEqual(5, 8)) {
-    this->Moc.PredefsCmd =
-      makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_PREDEFINES_COMMAND");
-  }
-
-  // Moc includes and compile definitions
-  {
-    auto GetIncludeDirs = [this,
-                           localGen](std::string const& cfg) -> std::string {
-      // Get the include dirs for this target, without stripping the implicit
-      // include dirs off, see
-      // https://gitlab.kitware.com/cmake/cmake/issues/13667
-      std::vector<std::string> dirs;
-      localGen->GetIncludeDirectories(dirs, this->Target, "CXX", cfg, false);
-      return cmJoin(dirs, ";");
-    };
-
-    // Default configuration include directories
-    this->Moc.Includes = GetIncludeDirs(this->ConfigDefault);
-    // Other configuration settings
-    for (std::string const& cfg : this->ConfigsList) {
-      std::string configIncludeDirs = GetIncludeDirs(cfg);
-      if (configIncludeDirs != this->Moc.Includes) {
-        this->Moc.ConfigIncludes[cfg] = std::move(configIncludeDirs);
-      }
-    }
-  }
-
-  // Moc compile definitions
-  {
-    auto GetCompileDefinitions =
-      [this, localGen](std::string const& cfg) -> std::string {
-      std::set<std::string> defines;
-      localGen->AddCompileDefinitions(defines, this->Target, cfg, "CXX");
-      return cmJoin(defines, ";");
-    };
-
-    // Default configuration defines
-    this->Moc.Defines = GetCompileDefinitions(this->ConfigDefault);
-    // Other configuration defines
-    for (std::string const& cfg : this->ConfigsList) {
-      std::string configCompileDefs = GetCompileDefinitions(cfg);
-      if (configCompileDefs != this->Moc.Defines) {
-        this->Moc.ConfigDefines[cfg] = std::move(configCompileDefs);
-      }
-    }
-  }
-
-  // Moc executable
-  if (!GetMocExecutable()) {
-    return false;
-  }
-
-  return true;
-}
-
-bool cmQtAutoGenInitializer::SetupCustomTargetsUic()
-{
-  cmMakefile* makefile = this->Target->Target->GetMakefile();
-
-  // Uic search paths
-  {
-    std::string const usp =
-      this->Target->GetSafeProperty("AUTOUIC_SEARCH_PATHS");
-    if (!usp.empty()) {
-      cmSystemTools::ExpandListArgument(usp, this->Uic.SearchPaths);
-      std::string const srcDir = makefile->GetCurrentSourceDirectory();
-      for (std::string& path : this->Uic.SearchPaths) {
-        path = cmSystemTools::CollapseFullPath(path, srcDir);
-      }
-    }
-  }
-  // Uic target options
-  {
-    auto UicGetOpts = [this](std::string const& cfg) -> std::string {
-      std::vector<std::string> opts;
-      this->Target->GetAutoUicOptions(opts, cfg);
-      return cmJoin(opts, ";");
-    };
-
-    // Default settings
-    this->Uic.Options = UicGetOpts(this->ConfigDefault);
-
-    // Configuration specific settings
-    for (std::string const& cfg : this->ConfigsList) {
-      std::string const configUicOpts = UicGetOpts(cfg);
-      if (configUicOpts != this->Uic.Options) {
-        this->Uic.ConfigOptions[cfg] = configUicOpts;
-      }
-    }
-  }
-  // .ui files skip and options
-  {
-    std::string const uiExt = "ui";
-    std::string pathError;
-    for (cmSourceFile* sf : makefile->GetSourceFiles()) {
-      // sf->GetExtension() is only valid after sf->GetFullPath() ...
-      // Since we're iterating over source files that might be not in the
-      // target we need to check for path errors (not existing files).
-      std::string const& fPath = sf->GetFullPath(&pathError);
-      if (!pathError.empty()) {
-        pathError.clear();
-        continue;
-      }
-      if (sf->GetExtension() == uiExt) {
-        std::string const absFile = cmSystemTools::GetRealPath(fPath);
-        // Check if the .ui file should be skipped
-        if (sf->GetPropertyAsBool("SKIP_AUTOUIC") ||
-            sf->GetPropertyAsBool("SKIP_AUTOGEN")) {
-          this->Uic.Skip.insert(absFile);
-        }
-        // Check if the .ui file has uic options
-        std::string const uicOpts = sf->GetSafeProperty("AUTOUIC_OPTIONS");
-        if (!uicOpts.empty()) {
-          // Check if file isn't skipped
-          if (this->Uic.Skip.count(absFile) == 0) {
-            this->Uic.FileFiles.push_back(absFile);
-            std::vector<std::string> optsVec;
-            cmSystemTools::ExpandListArgument(uicOpts, optsVec);
-            this->Uic.FileOptions.push_back(std::move(optsVec));
-          }
-        }
-      }
-    }
-  }
-
-  if (!GetUicExecutable()) {
-    return false;
   }
 
   return true;
