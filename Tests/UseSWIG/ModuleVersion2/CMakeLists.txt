@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.1...3.13)
 
 project(TestModuleVersion2 CXX)
 
@@ -16,7 +16,6 @@ else()
   set (PS ":")
 endif()
 
-set(UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
 set (UseSWIG_MODULE_VERSION 2)
 unset(CMAKE_SWIG_FLAGS)
 
