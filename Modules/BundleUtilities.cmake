@@ -421,7 +421,12 @@ function(get_item_rpaths item rpaths_var)
     execute_process(
       COMMAND "${otool_cmd}" -l "${item}"
       OUTPUT_VARIABLE load_cmds_ov
+      RESULT_VARIABLE otool_rv
+      ERROR_VARIABLE otool_ev
       )
+    if(NOT otool_rv STREQUAL "0")
+      message(FATAL_ERROR "otool -l failed: ${otool_rv}\n${otool_ev}")
+    endif()
     string(REGEX REPLACE "[^\n]+cmd LC_RPATH\n[^\n]+\n[^\n]+path ([^\n]+) \\(offset[^\n]+\n" "rpath \\1\n" load_cmds_ov "${load_cmds_ov}")
     string(REGEX MATCHALL "rpath [^\n]+" load_cmds_ov "${load_cmds_ov}")
     string(REGEX REPLACE "rpath " "" load_cmds_ov "${load_cmds_ov}")
