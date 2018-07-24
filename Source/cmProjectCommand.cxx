@@ -69,6 +69,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
   bool haveLanguages = false;
   bool haveDescription = false;
   bool haveHomepage = false;
+  bool injectedProjectCommand = false;
   std::string version;
   std::string description;
   std::string homepage;
@@ -160,6 +161,8 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
           "by a value that expanded to nothing.");
         resetReporter();
       };
+    } else if (i == 1 && args[i] == "__CMAKE_INJECTED_PROJECT_COMMAND__") {
+      injectedProjectCommand = true;
     } else if (doing == DoingVersion) {
       doing = DoingLanguages;
       version = args[i];
@@ -280,8 +283,10 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
       const char* v = this->Makefile->GetDefinition(i);
       if (v && *v) {
         if (cmp0048 == cmPolicies::WARN) {
-          vw += "\n  ";
-          vw += i;
+          if (!injectedProjectCommand) {
+            vw += "\n  ";
+            vw += i;
+          }
         } else {
           this->Makefile->AddDefinition(i, "");
         }
