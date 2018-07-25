@@ -1526,6 +1526,8 @@ void cmMakefile::Configure()
       project.Name.Lower = "project";
       project.Arguments.emplace_back("Project", cmListFileArgument::Unquoted,
                                      0);
+      project.Arguments.emplace_back("__CMAKE_INJECTED_PROJECT_COMMAND__",
+                                     cmListFileArgument::Unquoted, 0);
       listFile.Functions.insert(listFile.Functions.begin(), project);
     }
   }
