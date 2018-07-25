@@ -879,28 +879,31 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     return;
   }
 
-  std::string rootPath;
-  if (const char* sysrootCompile =
-        this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE")) {
-    rootPath = sysrootCompile;
-  } else {
-    rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
-  }
-
+  // Implicit include directories
   std::vector<std::string> implicitDirs;
-  // Load implicit include directories for this language.
-  std::string impDirVar = "CMAKE_";
-  impDirVar += lang;
-  impDirVar += "_IMPLICIT_INCLUDE_DIRECTORIES";
-  if (const char* value = this->Makefile->GetDefinition(impDirVar)) {
-    std::vector<std::string> impDirVec;
-    cmSystemTools::ExpandListArgument(value, impDirVec);
-    for (std::string const& i : impDirVec) {
-      std::string d = rootPath + i;
-      cmSystemTools::ConvertToUnixSlashes(d);
-      emitted.insert(std::move(d));
-      if (!stripImplicitInclDirs) {
-        implicitDirs.push_back(i);
+  {
+    std::string rootPath;
+    if (const char* sysrootCompile =
+          this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE")) {
+      rootPath = sysrootCompile;
+    } else {
+      rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+    }
+
+    // Load implicit include directories for this language.
+    std::string key = "CMAKE_";
+    key += lang;
+    key += "_IMPLICIT_INCLUDE_DIRECTORIES";
+    if (const char* value = this->Makefile->GetDefinition(key)) {
+      std::vector<std::string> impDirVec;
+      cmSystemTools::ExpandListArgument(value, impDirVec);
+      for (std::string const& i : impDirVec) {
+        std::string d = rootPath + i;
+        cmSystemTools::ConvertToUnixSlashes(d);
+        emitted.insert(std::move(d));
+        if (!stripImplicitInclDirs) {
+          implicitDirs.push_back(i);
+        }
       }
     }
   }
