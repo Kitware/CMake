@@ -909,9 +909,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   }
 
   // Get the target-specific include directories.
-  std::vector<std::string> includes;
-
-  includes = target->GetIncludeDirectories(config, lang);
+  std::vector<std::string> includes =
+    target->GetIncludeDirectories(config, lang);
 
   // Support putting all the in-project include directories first if
   // it is requested by the project.
@@ -942,17 +941,21 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   this->MoveSystemIncludesToEnd(dirs, config, lang, target);
 
   // Add standard include directories for this language.
-  // We do not filter out implicit directories here.
-  std::string const standardIncludesVar =
-    "CMAKE_" + lang + "_STANDARD_INCLUDE_DIRECTORIES";
-  std::string const standardIncludes =
-    this->Makefile->GetSafeDefinition(standardIncludesVar);
-  std::vector<std::string>::size_type const before = includes.size();
-  cmSystemTools::ExpandListArgument(standardIncludes, includes);
-  for (std::vector<std::string>::iterator i = includes.begin() + before;
-       i != includes.end(); ++i) {
-    cmSystemTools::ConvertToUnixSlashes(*i);
-    dirs.push_back(*i);
+  {
+    std::vector<std::string>::size_type const before = includes.size();
+    {
+      std::string key = "CMAKE_";
+      key += lang;
+      key += "_STANDARD_INCLUDE_DIRECTORIES";
+      std::string const value = this->Makefile->GetSafeDefinition(key);
+      cmSystemTools::ExpandListArgument(value, includes);
+    }
+    for (std::vector<std::string>::iterator i = includes.begin() + before,
+                                            ie = includes.end();
+         i != ie; ++i) {
+      cmSystemTools::ConvertToUnixSlashes(*i);
+      dirs.push_back(*i);
+    }
   }
 
   for (std::string const& i : implicitDirs) {
