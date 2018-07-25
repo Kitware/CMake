@@ -846,10 +846,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              const std::string& config,
                                              bool stripImplicitInclDirs) const
 {
-  // Need to decide whether to automatically include the source and
-  // binary directories at the beginning of the include path.
-  bool includeSourceDir = false;
-  bool includeBinaryDir = false;
+  // Do not repeat an include path.
+  std::set<std::string> emitted;
 
   // When automatic include directories are requested for a build then
   // include the source and binary directories at the beginning of the
@@ -859,26 +857,21 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   // cannot fix this because not all native build tools support
   // per-source-file include paths.
   if (this->Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR")) {
-    includeSourceDir = true;
-    includeBinaryDir = true;
-  }
-
-  // Do not repeat an include path.
-  std::set<std::string> emitted;
-
-  // Store the automatic include paths.
-  if (includeBinaryDir) {
-    std::string binDir = this->StateSnapshot.GetDirectory().GetCurrentBinary();
-    if (emitted.find(binDir) == emitted.end()) {
-      dirs.push_back(binDir);
-      emitted.insert(binDir);
+    // Current binary directory
+    {
+      std::string binDir =
+        this->StateSnapshot.GetDirectory().GetCurrentBinary();
+      if (emitted.insert(binDir).second) {
+        dirs.push_back(std::move(binDir));
+      }
     }
-  }
-  if (includeSourceDir) {
-    std::string srcDir = this->StateSnapshot.GetDirectory().GetCurrentSource();
-    if (emitted.find(srcDir) == emitted.end()) {
-      dirs.push_back(srcDir);
-      emitted.insert(srcDir);
+    // Current source directory
+    {
+      std::string srcDir =
+        this->StateSnapshot.GetDirectory().GetCurrentSource();
+      if (emitted.insert(srcDir).second) {
+        dirs.push_back(std::move(srcDir));
+      }
     }
   }
 
