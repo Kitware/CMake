@@ -909,7 +909,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   }
 
   // Get the target-specific include directories.
-  std::vector<std::string> includes =
+  std::vector<std::string> userDirs =
     target->GetIncludeDirectories(config, lang);
 
   // Support putting all the in-project include directories first if
@@ -917,7 +917,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   if (this->Makefile->IsOn("CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE")) {
     std::string const &topSourceDir = this->GetState()->GetSourceDirectory(),
                       &topBinaryDir = this->GetState()->GetBinaryDirectory();
-    for (std::string const& i : includes) {
+    for (std::string const& i : userDirs) {
       // Emit this directory only if it is a subdirectory of the
       // top-level source or binary tree.
       if (cmSystemTools::ComparePath(i, topSourceDir) ||
@@ -932,7 +932,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   }
 
   // Construct the final ordered include directory list.
-  for (std::string const& i : includes) {
+  for (std::string const& i : userDirs) {
     if (emitted.insert(i).second) {
       dirs.push_back(i);
     }
@@ -942,16 +942,16 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
 
   // Add standard include directories for this language.
   {
-    std::vector<std::string>::size_type const before = includes.size();
+    std::vector<std::string>::size_type const before = userDirs.size();
     {
       std::string key = "CMAKE_";
       key += lang;
       key += "_STANDARD_INCLUDE_DIRECTORIES";
       std::string const value = this->Makefile->GetSafeDefinition(key);
-      cmSystemTools::ExpandListArgument(value, includes);
+      cmSystemTools::ExpandListArgument(value, userDirs);
     }
-    for (std::vector<std::string>::iterator i = includes.begin() + before,
-                                            ie = includes.end();
+    for (std::vector<std::string>::iterator i = userDirs.begin() + before,
+                                            ie = userDirs.end();
          i != ie; ++i) {
       cmSystemTools::ConvertToUnixSlashes(*i);
       dirs.push_back(*i);
@@ -959,7 +959,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   }
 
   for (std::string const& i : implicitDirs) {
-    if (std::find(includes.begin(), includes.end(), i) != includes.end()) {
+    if (std::find(userDirs.begin(), userDirs.end(), i) != userDirs.end()) {
       dirs.push_back(i);
     }
   }
