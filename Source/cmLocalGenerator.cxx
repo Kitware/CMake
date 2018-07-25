@@ -844,7 +844,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              cmGeneratorTarget const* target,
                                              const std::string& lang,
                                              const std::string& config,
-                                             bool stripImplicitInclDirs) const
+                                             bool stripImplicitDirs,
+                                             bool appendAllImplicitDirs) const
 {
   // Do not repeat an include path.
   std::set<std::string> emitted;
@@ -898,12 +899,12 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
       std::vector<std::string> impDirVec;
       cmSystemTools::ExpandListArgument(value, impDirVec);
       for (std::string const& i : impDirVec) {
-        std::string d = rootPath + i;
-        cmSystemTools::ConvertToUnixSlashes(d);
-        emitted.insert(std::move(d));
-        if (!stripImplicitInclDirs) {
-          implicitDirs.push_back(i);
+        {
+          std::string d = rootPath + i;
+          cmSystemTools::ConvertToUnixSlashes(d);
+          emitted.insert(std::move(d));
         }
+        implicitDirs.push_back(i);
       }
     }
   }
@@ -958,9 +959,21 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     }
   }
 
-  for (std::string const& i : implicitDirs) {
-    if (std::find(userDirs.begin(), userDirs.end(), i) != userDirs.end()) {
-      dirs.push_back(i);
+  if (!stripImplicitDirs) {
+    if (!appendAllImplicitDirs) {
+      // Append only those implicit directories that were requested by the user
+      for (std::string const& i : implicitDirs) {
+        if (std::find(userDirs.begin(), userDirs.end(), i) != userDirs.end()) {
+          dirs.push_back(i);
+        }
+      }
+    } else {
+      // Append all implicit directories
+      for (std::string const& i : implicitDirs) {
+        if (std::find(dirs.begin(), dirs.end(), i) == dirs.end()) {
+          dirs.push_back(i);
+        }
+      }
     }
   }
 }
