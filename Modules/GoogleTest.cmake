@@ -238,6 +238,10 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
 
 #]=======================================================================]
 
+# Save project's policies
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 #------------------------------------------------------------------------------
 function(gtest_add_tests)
 
@@ -454,3 +458,6 @@ endfunction()
 set(_GOOGLETEST_DISCOVER_TESTS_SCRIPT
   ${CMAKE_CURRENT_LIST_DIR}/GoogleTestAddTests.cmake
 )
+
+# Restore project's policies
+cmake_policy(POP)
