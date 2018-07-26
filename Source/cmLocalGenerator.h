@@ -237,12 +237,18 @@ public:
     return true;
   }
 
-  /** Get the include flags for the current makefile and language.  */
+  /** @brief Get the include directories for the current makefile and language.
+   * @arg stripImplicitDirs Strip all directories found in
+   *      CMAKE_<LANG>_IMPLICIT_INCLUDE_DIRECTORIES from the result.
+   * @arg appendAllImplicitDirs Append all directories found in
+   *      CMAKE_<LANG>_IMPLICIT_INCLUDE_DIRECTORIES to the result.
+   */
   void GetIncludeDirectories(std::vector<std::string>& dirs,
                              cmGeneratorTarget const* target,
                              const std::string& lang = "C",
                              const std::string& config = "",
-                             bool stripImplicitInclDirs = true) const;
+                             bool stripImplicitDirs = true,
+                             bool appendAllImplicitDirs = false) const;
   void AddCompileOptions(std::string& flags, cmGeneratorTarget* target,
                          const std::string& lang, const std::string& config);
   void AddCompileDefinitions(std::set<std::string>& defines,
