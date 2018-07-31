@@ -2890,7 +2890,7 @@ void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
       std::string fpath = cmSystemTools::CollapseFullPath(fname, home.c_str());
       if (cmSystemTools::FileExists(fpath)) {
         RuleHash hash;
-        strncpy(hash.Data, line.c_str(), 32);
+        memcpy(hash.Data, line.c_str(), 32);
         this->RuleHashes[fname] = hash;
       }
     }
