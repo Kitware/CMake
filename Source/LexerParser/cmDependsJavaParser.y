@@ -44,6 +44,9 @@ static void cmDependsJava_yyerror(yyscan_t yyscanner, const char* message);
 # pragma warning (disable: 4102) /* Unused goto label.  */
 # pragma warning (disable: 4065) /* Switch statement contains default but no case. */
 #endif
+#if defined(__GNUC__) && __GNUC__ >= 8
+# pragma GCC diagnostic ignored "-Wconversion"
+#endif
 %}
 
 /* Generate a reentrant parser object.  */
