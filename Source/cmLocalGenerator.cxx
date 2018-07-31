@@ -960,15 +960,14 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   }
 
   if (!stripImplicitDirs) {
-    if (!appendAllImplicitDirs) {
-      // Append only those implicit directories that were requested by the user
-      for (std::string const& i : implicitDirs) {
-        if (std::find(userDirs.begin(), userDirs.end(), i) != userDirs.end()) {
-          dirs.push_back(i);
-        }
+    // Append only implicit directories that were requested by the user
+    for (std::string const& i : implicitDirs) {
+      if (std::find(userDirs.begin(), userDirs.end(), i) != userDirs.end()) {
+        dirs.push_back(i);
       }
-    } else {
-      // Append all implicit directories
+    }
+    // Append remaining implicit directories on demand
+    if (appendAllImplicitDirs) {
       for (std::string const& i : implicitDirs) {
         if (std::find(dirs.begin(), dirs.end(), i) == dirs.end()) {
           dirs.push_back(i);

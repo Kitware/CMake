@@ -12,6 +12,7 @@
 #include <vector>
 
 class cmGeneratorTarget;
+class cmTarget;
 
 /// @brief Initializes the QtAutoGen generators
 class cmQtAutoGenInitializer : public cmQtAutoGen
@@ -38,6 +39,7 @@ public:
     std::string PathChecksum;
     std::string InfoFile;
     std::string SettingsFile;
+    std::map<std::string, std::string> ConfigSettingsFile;
     std::string RccFile;
     bool Generated;
     bool Unique;
@@ -54,8 +56,16 @@ public:
   bool SetupCustomTargets();
 
 private:
-  bool SetupCustomTargetsMoc();
-  bool SetupCustomTargetsUic();
+  bool InitMoc();
+  bool InitUic();
+  bool InitRcc();
+
+  bool InitScanFiles();
+  bool InitAutogenTarget();
+  bool InitRccTargets();
+
+  bool SetupWriteAutogenInfo();
+  bool SetupWriteRccInfo();
 
   void AddGeneratedSource(std::string const& filename, GeneratorT genType);
 
@@ -72,7 +82,7 @@ private:
 
 private:
   cmGeneratorTarget* Target;
-  bool MultiConfig;
+  bool MultiConfig = false;
   // Qt
   std::string QtVersionMajor;
   std::string QtVersionMinor;
@@ -86,17 +96,28 @@ private:
   std::string AutogenFolder;
   std::string AutogenInfoFile;
   std::string AutogenSettingsFile;
+  std::map<std::string, std::string> AutogenConfigSettingsFile;
+  std::set<std::string> AutogenDependFiles;
+  std::set<cmTarget*> AutogenDependTargets;
   // Directories
   std::string DirInfo;
   std::string DirBuild;
   std::string DirWork;
-  // Sources
-  std::vector<std::string> Headers;
-  std::vector<std::string> Sources;
+  std::string DirInclude;
+  std::map<std::string, std::string> DirConfigInclude;
+  // Moc and UIC
+  struct
+  {
+    // Sources
+    std::vector<std::string> Headers;
+    std::vector<std::string> Sources;
+    std::vector<std::string> HeadersGenerated;
+    std::vector<std::string> SourcesGenerated;
+  } MocUic;
   // Moc
   struct
   {
-    bool Enabled;
+    bool Enabled = false;
     std::string Executable;
     std::string PredefsCmd;
     std::set<std::string> Skip;
@@ -104,11 +125,12 @@ private:
     std::map<std::string, std::string> ConfigIncludes;
     std::string Defines;
     std::map<std::string, std::string> ConfigDefines;
+    std::string MocsCompilation;
   } Moc;
   // Uic
   struct
   {
-    bool Enabled;
+    bool Enabled = false;
     std::string Executable;
     std::set<std::string> Skip;
     std::vector<std::string> SearchPaths;
@@ -120,7 +142,7 @@ private:
   // Rcc
   struct
   {
-    bool Enabled;
+    bool Enabled = false;
     std::string Executable;
     std::vector<std::string> ListOptions;
     std::vector<Qrc> Qrcs;
