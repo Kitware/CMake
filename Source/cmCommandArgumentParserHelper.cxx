@@ -172,7 +172,7 @@ void cmCommandArgumentParserHelper::AllocateParserType(
     return;
   }
   char* out = new char[len + 1];
-  strncpy(out, str, len);
+  memcpy(out, str, len);
   out[len] = 0;
   pt->str = out;
   this->Variables.push_back(out);

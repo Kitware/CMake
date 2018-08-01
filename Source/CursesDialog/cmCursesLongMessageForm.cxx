@@ -43,7 +43,7 @@ void cmCursesLongMessageForm::UpdateStatusBar()
   getmaxyx(stdscr, y, x);
 
   char bar[cmCursesMainForm::MAX_WIDTH];
-  size_t size = strlen(this->Title.c_str());
+  size_t size = this->Title.size();
   if (size >= cmCursesMainForm::MAX_WIDTH) {
     size = cmCursesMainForm::MAX_WIDTH - 1;
   }
