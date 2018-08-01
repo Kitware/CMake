@@ -47,6 +47,20 @@ The merge request will enter the `CMake Review Process`_ for consideration.
 .. _`commit messages`: Help/dev/review.rst#commit-messages
 .. _`CMake Review Process`: Help/dev/review.rst
 
+CMake Dashboard Client
+======================
+
+The *integration testing* step of the `CMake Review Process`_ uses a set of
+testing machines that follow an integration branch on their own schedule to
+drive testing and submit results to the `CMake CDash Page`_.  Anyone is
+welcome to provide testing machines in order to help keep support for their
+platforms working.
+
+See documentation on `CMake Testing Process`_ for more information.
+
+.. _`CMake CDash Page`: https://open.cdash.org/index.php?project=CMake
+.. _`CMake Testing Process`: Help/dev/testing.rst
+
 License
 =======
 
