@@ -117,6 +117,14 @@ Hints
   * If set to TRUE, search **only** for static libraries.
   * If set to FALSE, search **only** for shared libraries.
 
+``CMAKE_FIND_FRAMEWORK``
+  On OS X the :variable:`CMAKE_FIND_FRAMEWORK` variable determine the order of
+  preference between Apple-style and unix-style package components.
+
+  .. note::
+
+    Value ``ONLY`` is not supported so ``FIRST`` will be used instead.
+
 Commands
 ^^^^^^^^
 

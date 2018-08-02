@@ -44,9 +44,28 @@ macro (_PYTHON_DISPLAY_FAILURE _PYTHON_MSG)
 endmacro()
 
 
+macro (_PYTHON_FIND_FRAMEWORKS)
+  set (${_PYTHON_PREFIX}_FRAMEWORKS)
+  if (APPLE)
+    set (_pff_frameworks ${CMAKE_FRAMEWORK_PATH}
+                    $ENV{CMAKE_FRAMEWORK_PATH}
+                    ~/Library/Frameworks
+                    /usr/local/Frameworks
+                    ${CMAKE_SYSTEM_FRAMEWORK_PATH})
+    list (REMOVE_DUPLICATES _pff_frameworks)
+    foreach (_pff_framework IN LISTS _pff_frameworks)
+      if (EXISTS ${_pff_framework}/Python.framework)
+        list (APPEND ${_PYTHON_PREFIX}_FRAMEWORKS ${_pff_framework}/Python.framework)
+      endif()
+    endforeach()
+    unset (_pff_frameworks)
+    unset (_pff_framework)
+  endif()
+endmacro()
+
 function (_PYTHON_GET_FRAMEWORKS _PYTHON_PGF_FRAMEWORK_PATHS _PYTHON_VERSION)
   set (_PYTHON_FRAMEWORK_PATHS)
-  foreach (_PYTHON_FRAMEWORK IN LISTS Python_FRAMEWORKS)
+  foreach (_PYTHON_FRAMEWORK IN LISTS ${_PYTHON_PREFIX}_FRAMEWORKS)
     list (APPEND _PYTHON_FRAMEWORK_PATHS
           "${_PYTHON_FRAMEWORK}/Versions/${_PYTHON_VERSION}")
   endforeach()
@@ -59,19 +78,42 @@ function (_PYTHON_VALIDATE_INTERPRETER)
     return()
   endif()
 
-  if (${_PYTHON_PREFIX}_EXECUTABLE MATCHES "python${CMAKE_EXECUTABLE_SUFFIX}$")
-    # executable found do not have version in name
-    # ensure major version is OK
+  if (ARGC EQUAL 1)
+    set (expected_version ${ARGV0})
+  else()
+    unset (expected_version)
+  endif()
+
+  get_filename_component (python_name "${${_PYTHON_PREFIX}_EXECUTABLE}" NAME)
+
+  if (expected_version AND NOT python_name STREQUAL "python${expected_version}${CMAKE_EXECUTABLE_SUFFIX}")
+    # executable found must have a specific version
     execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                             "import sys; sys.stdout.write(str(sys.version_info[0]))"
+                             "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:2]]))"
                      RESULT_VARIABLE result
                      OUTPUT_VARIABLE version
                      ERROR_QUIET
                      OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (result OR NOT version EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
+    if (result OR NOT version EQUAL expected_version)
       # interpreter not usable or has wrong major version
       set (${_PYTHON_PREFIX}_EXECUTABLE ${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND CACHE INTERNAL "" FORCE)
       return()
+    endif()
+  else()
+    if (python_name STREQUAL "python${CMAKE_EXECUTABLE_SUFFIX}")
+      # executable found do not have version in name
+      # ensure major version is OK
+      execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
+                               "import sys; sys.stdout.write(str(sys.version_info[0]))"
+                       RESULT_VARIABLE result
+                       OUTPUT_VARIABLE version
+                       ERROR_QUIET
+                       OUTPUT_STRIP_TRAILING_WHITESPACE)
+      if (result OR NOT version EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
+        # interpreter not usable or has wrong major version
+        set (${_PYTHON_PREFIX}_EXECUTABLE ${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND CACHE INTERNAL "" FORCE)
+        return()
+      endif()
     endif()
   endif()
 
@@ -183,17 +225,32 @@ else()
 endif()
 
 # Apple frameworks handling
-include (${CMAKE_CURRENT_LIST_DIR}/../CMakeFindFrameworks.cmake)
-cmake_find_frameworks (Python)
+_python_find_frameworks ()
+
+# Save CMAKE_FIND_APPBUNDLE
+if (DEFINED CMAKE_FIND_APPBUNDLE)
+  set (_${_PYTHON_PREFIX}_CMAKE_FIND_APPBUNDLE ${CMAKE_FIND_APPBUNDLE})
+else()
+  unset (_${_PYTHON_PREFIX}_CMAKE_FIND_APPBUNDLE)
+endif()
+# To avoid app bundle lookup
+set (CMAKE_FIND_APPBUNDLE "NEVER")
 
 # Save CMAKE_FIND_FRAMEWORK
 if (DEFINED CMAKE_FIND_FRAMEWORK)
   set (_${_PYTHON_PREFIX}_CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK})
+  if (CMAKE_FIND_FRAMEWORK STREQUAL "ONLY")
+    message (AUTHOR_WARNING "Find${_PYTHON_PREFIX}: CMAKE_FIND_FRAMEWORK: 'ONLY' value is not supported. 'FIRST' will be used instead.")
+    set (_${_PYTHON_PREFIX}_FIND_FRAMEWORK "FIRST")
+  else()
+    set (_${_PYTHON_PREFIX}_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK})
+  endif()
 else()
   unset (_${_PYTHON_PREFIX}_CMAKE_FIND_FRAMEWORK)
+  set (_${_PYTHON_PREFIX}_FIND_FRAMEWORK "FIRST")
 endif()
-# To avoid picking up the system elements pre-maturely.
-set (CMAKE_FIND_FRAMEWORK LAST)
+# To avoid framework lookup
+set (CMAKE_FIND_FRAMEWORK "NEVER")
 
 
 unset (_${_PYTHON_PREFIX}_REQUIRED_VARS)
@@ -215,19 +272,36 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
 
     _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION})
 
+    # Apple frameworks handling
+    if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+      find_program (${_PYTHON_PREFIX}_EXECUTABLE
+                    NAMES python${_${_PYTHON_PREFIX}_VERSION}
+                          python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
+                    NAMES_PER_DIR
+                    PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                    PATH_SUFFIXES bin
+                    NO_CMAKE_PATH
+                    NO_CMAKE_ENVIRONMENT_PATH
+                    NO_SYSTEM_ENVIRONMENT_PATH
+                    NO_CMAKE_SYSTEM_PATH)
+    endif()
+
     # try using HINTS
     find_program (${_PYTHON_PREFIX}_EXECUTABLE
                   NAMES python${_${_PYTHON_PREFIX}_VERSION}
+                        python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
                   NAMES_PER_DIR
                   HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                  PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
                   PATH_SUFFIXES bin
                   NO_SYSTEM_ENVIRONMENT_PATH
                   NO_CMAKE_SYSTEM_PATH)
+
     # try using registry
     if (WIN32)
       find_program (${_PYTHON_PREFIX}_EXECUTABLE
-                    NAMES python${_${_PYTHON_PREFIX}_VERSION} python
+                    NAMES python${_${_PYTHON_PREFIX}_VERSION}
+                          python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
+                          python
                           ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                     NAMES_PER_DIR
                     HINTS ${_${_PYTHON_PREFIX}_HINTS}
@@ -242,12 +316,24 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                     NO_SYSTEM_ENVIRONMENT_PATH
                     NO_CMAKE_SYSTEM_PATH)
     endif()
+
     # try in standard paths
     find_program (${_PYTHON_PREFIX}_EXECUTABLE
                   NAMES python${_${_PYTHON_PREFIX}_VERSION}
                   NAMES_PER_DIR)
 
-    _python_validate_interpreter ()
+    # Apple frameworks handling
+    if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+      find_program (${_PYTHON_PREFIX}_EXECUTABLE
+                    NAMES python${_${_PYTHON_PREFIX}_VERSION}
+                          python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
+                    NAMES_PER_DIR
+                    PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                    PATH_SUFFIXES bin
+                    NO_DEFAULT_PATH)
+    endif()
+
+    _python_validate_interpreter (${_${_PYTHON_PREFIX}_VERSION})
     if (${_PYTHON_PREFIX}_EXECUTABLE)
       break()
     endif()
@@ -578,6 +664,27 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
       _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION})
 
+      if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+        find_library (${_PYTHON_PREFIX}_LIBRARY_RELEASE
+                      NAMES python${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}
+                            python${_${_PYTHON_PREFIX}_VERSION}mu
+                            python${_${_PYTHON_PREFIX}_VERSION}m
+                            python${_${_PYTHON_PREFIX}_VERSION}u
+                            python${_${_PYTHON_PREFIX}_VERSION}
+                      NAMES_PER_DIR
+                      PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                      PATH_SUFFIXES lib/${CMAKE_LIBRARY_ARCHITECTURE} lib libs
+                                    lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}mu
+                                    lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}m
+                                    lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}u
+                                    lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}
+                                    lib/python${_${_PYTHON_PREFIX}_VERSION}/config
+                      NO_CMAKE_PATH
+                      NO_CMAKE_ENVIRONMENT_PATH
+                      NO_SYSTEM_ENVIRONMENT_PATH
+                      NO_CMAKE_SYSTEM_PATH)
+      endif()
+
       # search first in known locations
       find_library (${_PYTHON_PREFIX}_LIBRARY_RELEASE
                     NAMES python${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}
@@ -587,8 +694,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                           python${_${_PYTHON_PREFIX}_VERSION}
                     NAMES_PER_DIR
                     HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                    PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
-                          [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
+                    PATHS [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
                           [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
@@ -600,6 +706,13 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                                   lib/python${_${_PYTHON_PREFIX}_VERSION}/config
                     NO_SYSTEM_ENVIRONMENT_PATH
                     NO_CMAKE_SYSTEM_PATH)
+
+      if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+        set (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS})
+      else()
+        unset (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
+      endif()
+
       # search in all default paths
       find_library (${_PYTHON_PREFIX}_LIBRARY_RELEASE
                     NAMES python${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}
@@ -608,6 +721,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                           python${_${_PYTHON_PREFIX}_VERSION}u
                           python${_${_PYTHON_PREFIX}_VERSION}
                     NAMES_PER_DIR
+                    PATHS ${__${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
                     PATH_SUFFIXES lib/${CMAKE_LIBRARY_ARCHITECTURE} lib libs
                                   lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}mu
                                   lib/python${_${_PYTHON_PREFIX}_VERSION}/config-${_${_PYTHON_PREFIX}_VERSION}m
@@ -625,8 +739,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                                             python${_${_PYTHON_PREFIX}_VERSION}
                                       NAMES_PER_DIR
                                       HINTS "${_${_PYTHON_PREFIX}_PATH}" ${_${_PYTHON_PREFIX}_HINTS}
-                                      PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
-                                            [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
+                                      PATHS [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
                                             [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                                             [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
                                             [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
@@ -697,6 +810,25 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
           endif()
         endforeach()
         list (REMOVE_DUPLICATES _${_PYTHON_PREFIX}_INCLUDE_HINTS)
+
+        if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+          find_path (${_PYTHON_PREFIX}_INCLUDE_DIR
+                     NAMES Python.h
+                     HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                     PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                     PATH_SUFFIXES include/python${_${_PYTHON_PREFIX}_VERSION}mu
+                                   include/python${_${_PYTHON_PREFIX}_VERSION}m
+                                   include/python${_${_PYTHON_PREFIX}_VERSION}u
+                                   include/python${_${_PYTHON_PREFIX}_VERSION}
+                                   include
+                     NO_CMAKE_PATH
+                     NO_CMAKE_ENVIRONMENT_PATH
+                     NO_SYSTEM_ENVIRONMENT_PATH
+                     NO_CMAKE_SYSTEM_PATH)
+        endif()
+        if (NOT _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+          unset (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
+        endif()
 
         find_path (${_PYTHON_PREFIX}_INCLUDE_DIR
                    NAMES Python.h
@@ -921,6 +1053,13 @@ endif()
 
 # final clean-up
 
+# Restore CMAKE_FIND_APPBUNDLE
+if (DEFINED _${_PYTHON_PREFIX}_CMAKE_FIND_APPBUNDLE)
+  set (CMAKE_FIND_APPBUNDLE ${_${_PYTHON_PREFIX}_CMAKE_FIND_APPBUNDLE})
+  unset (_${_PYTHON_PREFIX}_CMAKE_FIND_APPBUNDLE)
+else()
+  unset (CMAKE_FIND_APPBUNDLE)
+endif()
 # Restore CMAKE_FIND_FRAMEWORK
 if (DEFINED _${_PYTHON_PREFIX}_CMAKE_FIND_FRAMEWORK)
   set (CMAKE_FIND_FRAMEWORK ${_${_PYTHON_PREFIX}_CMAKE_FIND_FRAMEWORK})
