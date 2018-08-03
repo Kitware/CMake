@@ -1313,16 +1313,10 @@ bool cmGlobalGenerator::Compute()
   // so create the map from project name to vector of local generators
   this->FillProjectMap();
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  // Iterate through all targets and set up automoc for those which have
-  // the AUTOMOC, AUTOUIC or AUTORCC property set
-  auto autogenInits = this->CreateQtAutoGenInitializers();
-  for (auto& autoGen : autogenInits) {
-    if (!autoGen->InitCustomTargets()) {
-      return false;
-    }
+  // Iterate through all targets and set up AUTOMOC, AUTOUIC and AUTORCC
+  if (!this->QtAutoGen()) {
+    return false;
   }
-#endif
 
   // Add generator specific helper commands
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
@@ -1340,16 +1334,6 @@ bool cmGlobalGenerator::Compute()
       return false;
     }
   }
-
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  for (auto& autoGen : autogenInits) {
-    if (!autoGen->SetupCustomTargets()) {
-      return false;
-    }
-    autoGen.reset(nullptr);
-  }
-  autogenInits.clear();
-#endif
 
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
     cmMakefile* mf = localGen->GetMakefile();
@@ -1480,12 +1464,11 @@ bool cmGlobalGenerator::ComputeTargetDepends()
   return true;
 }
 
-std::vector<std::unique_ptr<cmQtAutoGenInitializer>>
-cmGlobalGenerator::CreateQtAutoGenInitializers()
+bool cmGlobalGenerator::QtAutoGen()
 {
+#ifdef CMAKE_BUILD_WITH_CMAKE
   std::vector<std::unique_ptr<cmQtAutoGenInitializer>> autogenInits;
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
     const std::vector<cmGeneratorTarget*>& targets =
       localGen->GetGeneratorTargets();
@@ -1519,12 +1502,30 @@ cmGlobalGenerator::CreateQtAutoGenInitializers()
         continue;
       }
 
-      autogenInits.emplace_back(new cmQtAutoGenInitializer(
+      autogenInits.emplace_back(cm::make_unique<cmQtAutoGenInitializer>(
         target, mocEnabled, uicEnabled, rccEnabled, qtVersionMajor));
     }
   }
+
+  if (!autogenInits.empty()) {
+    // Initialize custom targets
+    for (auto& autoGen : autogenInits) {
+      if (!autoGen->InitCustomTargets()) {
+        return false;
+      }
+    }
+
+    // Setup custom targets
+    for (auto& autoGen : autogenInits) {
+      if (!autoGen->SetupCustomTargets()) {
+        return false;
+      }
+      autoGen.reset(nullptr);
+    }
+  }
 #endif
-  return autogenInits;
+
+  return true;
 }
 
 cmLinkLineComputer* cmGlobalGenerator::CreateLinkLineComputer(

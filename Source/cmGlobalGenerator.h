@@ -33,7 +33,6 @@ class cmLinkLineComputer;
 class cmLocalGenerator;
 class cmMakefile;
 class cmOutputConverter;
-class cmQtAutoGenInitializer;
 class cmSourceFile;
 class cmStateDirectory;
 class cmake;
@@ -441,9 +440,9 @@ protected:
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
-  // Qt auto generators
-  std::vector<std::unique_ptr<cmQtAutoGenInitializer>>
-  CreateQtAutoGenInitializers();
+  /// @brief Qt AUTOMOC/UIC/RCC target generation
+  /// @return true on success
+  bool QtAutoGen();
 
   std::string SelectMakeProgram(const std::string& makeProgram,
                                 const std::string& makeDefault = "") const;
