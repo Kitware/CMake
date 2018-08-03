@@ -170,11 +170,18 @@ int main(int ac, char const* const* av)
 #endif
 
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
-  // Replace streambuf so we can output Unicode to console
+  // Replace streambuf so we can output Unicode to console. The only time we
+  // want to stick with the default encoding is if we are running the VS
+  // linker. This is because the VS linker operates in the console code page.
   cmsys::ConsoleBuf::Manager consoleOut(std::cout);
-  consoleOut.SetUTF8Pipes();
   cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
-  consoleErr.SetUTF8Pipes();
+  bool isRunningVSLinkerCommand = (ac > 2) && (strcmp(av[1], "-E") == 0) &&
+    ((strcmp(av[2], "vs_link_exe") == 0) ||
+     (strcmp(av[2], "vs_link_dll") == 0));
+  if (!isRunningVSLinkerCommand) {
+    consoleOut.SetUTF8Pipes();
+    consoleErr.SetUTF8Pipes();
+  }
 #endif
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(ac, av);

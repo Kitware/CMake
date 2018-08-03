@@ -1769,6 +1769,8 @@ int cmVSLink::LinkIncremental()
     if (!fout) {
       return -1;
     }
+	// Insert a pragma statement to specify utf-8 encoding.
+    fout << "#pragma code_page(65001)";
     fout << this->Type << " /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ "
                           "24 /* RT_MANIFEST */ \""
          << absManifestFile << "\"";
