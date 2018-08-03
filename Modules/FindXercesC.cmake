@@ -73,6 +73,10 @@ find_path(XercesC_INCLUDE_DIR
           DOC "Xerces-C++ include directory")
 mark_as_advanced(XercesC_INCLUDE_DIR)
 
+if(XercesC_INCLUDE_DIR)
+  _XercesC_GET_VERSION("${XercesC_INCLUDE_DIR}/xercesc/util/XercesVersion.hpp")
+endif()
+
 if(NOT XercesC_LIBRARY)
   # Find all XercesC libraries
   find_library(XercesC_LIBRARY_RELEASE
@@ -89,10 +93,6 @@ endif()
 unset(XercesC_VERSION_MAJOR)
 unset(XercesC_VERSION_MINOR)
 unset(XercesC_VERSION_PATCH)
-
-if(XercesC_INCLUDE_DIR)
-  _XercesC_GET_VERSION("${XercesC_INCLUDE_DIR}/xercesc/util/XercesVersion.hpp")
-endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(XercesC
