@@ -15,6 +15,12 @@ a target platform name optionally at the end of this generator name:
 ``Visual Studio 14 2015 ARM``
   Specify target platform ``ARM``.
 
+Project Types
+^^^^^^^^^^^^^
+
+Only Visual C++ and C# projects may be generated.  Other types of
+projects (JavaScript, Powershell, Python, etc.) are not supported.
+
 Toolset Selection
 ^^^^^^^^^^^^^^^^^
 
