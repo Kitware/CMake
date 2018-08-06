@@ -278,6 +278,31 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("LINK_SEARCH_START_STATIC", nullptr);
     this->SetPropertyDefault("LINK_SEARCH_END_STATIC", nullptr);
     this->SetPropertyDefault("FOLDER", nullptr);
+#ifdef __APPLE__
+    if (this->GetGlobalGenerator()->IsXcode()) {
+      this->SetPropertyDefault("XCODE_SCHEME_ADDRESS_SANITIZER", nullptr);
+      this->SetPropertyDefault(
+        "XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN", nullptr);
+      this->SetPropertyDefault("XCODE_SCHEME_THREAD_SANITIZER", nullptr);
+      this->SetPropertyDefault("XCODE_SCHEME_THREAD_SANITIZER_STOP", nullptr);
+      this->SetPropertyDefault("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER",
+                               nullptr);
+      this->SetPropertyDefault(
+        "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP", nullptr);
+      this->SetPropertyDefault("XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER",
+                               nullptr);
+      this->SetPropertyDefault("XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP",
+                               nullptr);
+      this->SetPropertyDefault("XCODE_SCHEME_MALLOC_SCRIBBLE", nullptr);
+      this->SetPropertyDefault("XCODE_SCHEME_MALLOC_GUARD_EDGES", nullptr);
+      this->SetPropertyDefault("XCODE_SCHEME_GUARD_MALLOC", nullptr);
+      this->SetPropertyDefault("XCODE_SCHEME_ZOMBIE_OBJECTS", nullptr);
+      this->SetPropertyDefault("XCODE_SCHEME_MALLOC_STACK", nullptr);
+      this->SetPropertyDefault("XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE",
+                               nullptr);
+      this->SetPropertyDefault("XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS", nullptr);
+    }
+#endif
   }
 
   // Collect the set of configuration types.

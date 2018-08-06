@@ -96,6 +96,8 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   bool IsMultiConfig() const override;
 
+  bool IsXcode() const override { return true; }
+
   bool HasKnownObjectFileLocation(std::string* reason) const override;
 
   bool IsIPOSupported() const override { return true; }
