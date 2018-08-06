@@ -25,6 +25,7 @@
 #   available on the MCR version, and will yield an error if the MCR is found
 #   instead of the regular Matlab installation.
 # * ``MEX_COMPILER`` the MEX compiler.
+# * ``MCC_COMPILER`` the MCC compiler, included with the Matlab Compiler add-on.
 # * ``SIMULINK`` the Simulink environment.
 #
 # .. note::
@@ -110,7 +111,10 @@
 #   the whole set of libraries of Matlab
 # ``Matlab_MEX_COMPILER``
 #   the mex compiler of Matlab. Currently not used.
-#   Available only if the component ``MEX_COMPILER`` is asked
+#   Available only if the component ``MEX_COMPILER`` is requested.
+# ``Matlab_MCC_COMPILER``
+#   the mcc compiler of Matlab. Included with the Matlab Compiler add-on.
+#   Available only if the component ``MCC_COMPILER`` is requested.
 #
 # Cached variables
 # """"""""""""""""
@@ -1420,6 +1424,7 @@ if(DEFINED Matlab_ROOT_DIR_LAST_CACHED)
         Matlab_INCLUDE_DIRS
         Matlab_MEX_LIBRARY
         Matlab_MEX_COMPILER
+        Matlab_MCC_COMPILER
         Matlab_MAIN_PROGRAM
         Matlab_MX_LIBRARY
         Matlab_ENG_LIBRARY
@@ -1659,6 +1664,22 @@ if(_matlab_find_simulink GREATER -1)
   endif()
 endif()
 unset(_matlab_find_simulink)
+
+# component MCC Compiler
+list(FIND Matlab_FIND_COMPONENTS MCC_COMPILER _matlab_find_mcc_compiler)
+if(_matlab_find_mcc_compiler GREATER -1)
+  find_program(
+    Matlab_MCC_COMPILER
+    "mcc"
+    PATHS ${Matlab_BINARIES_DIR}
+    DOC "Matlab MCC compiler"
+    NO_DEFAULT_PATH
+  )
+  if(Matlab_MCC_COMPILER)
+    set(Matlab_MCC_COMPILER_FOUND TRUE)
+  endif()
+endif()
+unset(_matlab_find_mcc_compiler)
 
 unset(_matlab_lib_dir_for_search)
 
