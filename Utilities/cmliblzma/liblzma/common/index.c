@@ -230,7 +230,6 @@ index_tree_end(index_tree *tree, lzma_allocator *allocator,
 static void
 index_tree_append(index_tree *tree, index_tree_node *node)
 {
-	uint32_t up;
 	node->parent = tree->rightmost;
 	node->left = NULL;
 	node->right = NULL;
@@ -259,10 +258,8 @@ index_tree_append(index_tree *tree, index_tree_node *node)
 	// and thus know the state of the tree just by looking at the node
 	// count. From the node count we can calculate how many steps to go
 	// up in the tree to find the rotation root.
-	up = tree->count ^ (UINT32_C(1) << bsr32(tree->count));
+	uint32_t up = tree->count ^ (UINT32_C(1) << bsr32(tree->count));
 	if (up != 0) {
-		index_tree_node *pivot;
-
 		// Locate the root node for the rotation.
 		up = ctz32(tree->count) + 2;
 		do {
@@ -270,7 +267,7 @@ index_tree_append(index_tree *tree, index_tree_node *node)
 		} while (--up > 0);
 
 		// Rotate left using node as the rotation root.
-		pivot = node->right;
+		index_tree_node *pivot = node->right;
 
 		if (node->parent == NULL) {
 			tree->root = pivot;
@@ -400,13 +397,11 @@ index_init_plain(lzma_allocator *allocator)
 extern LZMA_API(lzma_index *)
 lzma_index_init(lzma_allocator *allocator)
 {
-	index_stream *s;
-
 	lzma_index *i = index_init_plain(allocator);
 	if (i == NULL)
 		return NULL;
 
-	s = index_stream_init(0, 0, 1, 0, allocator);
+	index_stream *s = index_stream_init(0, 0, 1, 0, allocator);
 	if (s == NULL) {
 		lzma_free(i, allocator);
 		return NULL;
@@ -605,8 +600,6 @@ lzma_index_padding_size(const lzma_index *i)
 extern LZMA_API(lzma_ret)
 lzma_index_stream_flags(lzma_index *i, const lzma_stream_flags *stream_flags)
 {
-	index_stream *s;
-
 	if (i == NULL || stream_flags == NULL)
 		return LZMA_PROG_ERROR;
 
@@ -614,7 +607,7 @@ lzma_index_stream_flags(lzma_index *i, const lzma_stream_flags *stream_flags)
 	return_if_error(lzma_stream_flags_compare(
 			stream_flags, stream_flags));
 
-	s = (index_stream *)(i->streams.rightmost);
+	index_stream *s = (index_stream *)(i->streams.rightmost);
 	s->stream_flags = *stream_flags;
 
 	return LZMA_OK;
@@ -624,17 +617,14 @@ lzma_index_stream_flags(lzma_index *i, const lzma_stream_flags *stream_flags)
 extern LZMA_API(lzma_ret)
 lzma_index_stream_padding(lzma_index *i, lzma_vli stream_padding)
 {
-	index_stream *s;
-	lzma_vli old_stream_padding;
-
 	if (i == NULL || stream_padding > LZMA_VLI_MAX
 			|| (stream_padding & 3) != 0)
 		return LZMA_PROG_ERROR;
 
-	s = (index_stream *)(i->streams.rightmost);
+	index_stream *s = (index_stream *)(i->streams.rightmost);
 
 	// Check that the new value won't make the file grow too big.
-	old_stream_padding = s->stream_padding;
+	const lzma_vli old_stream_padding = s->stream_padding;
 	s->stream_padding = 0;
 	if (lzma_index_file_size(i) + stream_padding > LZMA_VLI_MAX) {
 		s->stream_padding = old_stream_padding;
@@ -650,26 +640,20 @@ extern LZMA_API(lzma_ret)
 lzma_index_append(lzma_index *i, lzma_allocator *allocator,
 		lzma_vli unpadded_size, lzma_vli uncompressed_size)
 {
-	index_stream *s;
-	index_group *g;
-	lzma_vli compressed_base;
-	lzma_vli uncompressed_base;
-	uint32_t index_list_size_add;
-
 	// Validate.
 	if (i == NULL || unpadded_size < UNPADDED_SIZE_MIN
 			|| unpadded_size > UNPADDED_SIZE_MAX
 			|| uncompressed_size > LZMA_VLI_MAX)
 		return LZMA_PROG_ERROR;
 
-	s = (index_stream *)(i->streams.rightmost);
-	g = (index_group *)(s->groups.rightmost);
+	index_stream *s = (index_stream *)(i->streams.rightmost);
+	index_group *g = (index_group *)(s->groups.rightmost);
 
-	compressed_base = g == NULL ? 0
+	const lzma_vli compressed_base = g == NULL ? 0
 			: vli_ceil4(g->records[g->last].unpadded_sum);
-	uncompressed_base = g == NULL ? 0
+	const lzma_vli uncompressed_base = g == NULL ? 0
 			: g->records[g->last].uncompressed_sum;
-	index_list_size_add = lzma_vli_size(unpadded_size)
+	const uint32_t index_list_size_add = lzma_vli_size(unpadded_size)
 			+ lzma_vli_size(uncompressed_size);
 
 	// Check that the file size will stay within limits.
@@ -783,7 +767,6 @@ extern LZMA_API(lzma_ret)
 lzma_index_cat(lzma_index *restrict dest, lzma_index *restrict src,
 		lzma_allocator *allocator)
 {
-	index_cat_info info;
 	const lzma_vli dest_file_size = lzma_index_file_size(dest);
 
 	// Check that we don't exceed the file size limits.
@@ -813,12 +796,10 @@ lzma_index_cat(lzma_index *restrict dest, lzma_index *restrict src,
 		index_stream *s = (index_stream *)(dest->streams.rightmost);
 		index_group *g = (index_group *)(s->groups.rightmost);
 		if (g != NULL && g->last + 1 < g->allocated) {
-			index_group *newg;
-
 			assert(g->node.left == NULL);
 			assert(g->node.right == NULL);
 
-			newg = lzma_alloc(sizeof(index_group)
+			index_group *newg = lzma_alloc(sizeof(index_group)
 					+ (g->last + 1)
 					* sizeof(index_record),
 					allocator);
@@ -853,12 +834,13 @@ lzma_index_cat(lzma_index *restrict dest, lzma_index *restrict src,
 
 	// Add all the Streams from src to dest. Update the base offsets
 	// of each Stream from src.
-	info.uncompressed_size = dest->uncompressed_size;
-	info.file_size = dest_file_size;
-	info.stream_number_add = dest->streams.count;
-	info.block_number_add = dest->record_count;
-	info.streams = &dest->streams;
-
+	const index_cat_info info = {
+		.uncompressed_size = dest->uncompressed_size,
+		.file_size = dest_file_size,
+		.stream_number_add = dest->streams.count,
+		.block_number_add = dest->record_count,
+		.streams = &dest->streams,
+	};
 	index_cat_helper(&info, (index_stream *)(src->streams.root));
 
 	// Update info about all the combined Streams.
@@ -879,17 +861,12 @@ lzma_index_cat(lzma_index *restrict dest, lzma_index *restrict src,
 static index_stream *
 index_dup_stream(const index_stream *src, lzma_allocator *allocator)
 {
-	index_stream *dest;
-	index_group *destg;
-	index_group *srcg;
-	size_t i = 0;
-
 	// Catch a somewhat theoretical integer overflow.
 	if (src->record_count > PREALLOC_MAX)
 		return NULL;
 
 	// Allocate and initialize a new Stream.
-	dest = index_stream_init(src->node.compressed_base,
+	index_stream *dest = index_stream_init(src->node.compressed_base,
 			src->node.uncompressed_base, src->number,
 			src->block_number_base, allocator);
 
@@ -907,7 +884,7 @@ index_dup_stream(const index_stream *src, lzma_allocator *allocator)
 	// Allocate memory for the Records. We put all the Records into
 	// a single group. It's simplest and also tends to make
 	// lzma_index_locate() a little bit faster with very big Indexes.
-	destg = lzma_alloc(sizeof(index_group)
+	index_group *destg = lzma_alloc(sizeof(index_group)
 			+ src->record_count * sizeof(index_record),
 			allocator);
 	if (destg == NULL) {
@@ -923,7 +900,8 @@ index_dup_stream(const index_stream *src, lzma_allocator *allocator)
 	destg->last = src->record_count - 1;
 
 	// Go through all the groups in src and copy the Records into destg.
-	srcg = (index_group *)(src->groups.leftmost);
+	const index_group *srcg = (const index_group *)(src->groups.leftmost);
+	size_t i = 0;
 	do {
 		memcpy(destg->records + i, srcg->records,
 				(srcg->last + 1) * sizeof(index_record));
@@ -943,9 +921,6 @@ index_dup_stream(const index_stream *src, lzma_allocator *allocator)
 extern LZMA_API(lzma_index *)
 lzma_index_dup(const lzma_index *src, lzma_allocator *allocator)
 {
-	index_stream *srcstream;
-	index_stream *deststream;
-
 	// Allocate the base structure (no initial Stream).
 	lzma_index *dest = index_init_plain(allocator);
 	if (dest == NULL)
@@ -958,9 +933,11 @@ lzma_index_dup(const lzma_index *src, lzma_allocator *allocator)
 	dest->index_list_size = src->index_list_size;
 
 	// Copy the Streams and the groups in them.
-	srcstream = (index_stream *)(src->streams.leftmost);
+	const index_stream *srcstream
+			= (const index_stream *)(src->streams.leftmost);
 	do {
-		deststream = index_dup_stream(srcstream, allocator);
+		index_stream *deststream = index_dup_stream(
+				srcstream, allocator);
 		if (deststream == NULL) {
 			lzma_index_end(dest, allocator);
 			return NULL;
@@ -1119,19 +1096,14 @@ lzma_index_iter_rewind(lzma_index_iter *iter)
 extern LZMA_API(lzma_bool)
 lzma_index_iter_next(lzma_index_iter *iter, lzma_index_iter_mode mode)
 {
-	const lzma_index *i;
-	const index_stream *stream;
-	const index_group *group;
-	size_t record;
-
 	// Catch unsupported mode values.
 	if ((unsigned int)(mode) > LZMA_INDEX_ITER_NONEMPTY_BLOCK)
 		return true;
 
-	i = iter->internal[ITER_INDEX].p;
-	stream = iter->internal[ITER_STREAM].p;
-	group = NULL;
-	record = iter->internal[ITER_RECORD].s;
+	const lzma_index *i = iter->internal[ITER_INDEX].p;
+	const index_stream *stream = iter->internal[ITER_STREAM].p;
+	const index_group *group = NULL;
+	size_t record = iter->internal[ITER_RECORD].s;
 
 	// If we are being asked for the next Stream, leave group to NULL
 	// so that the rest of the this function thinks that this Stream
@@ -1231,10 +1203,6 @@ again:
 extern LZMA_API(lzma_bool)
 lzma_index_iter_locate(lzma_index_iter *iter, lzma_vli target)
 {
-	const index_stream *stream;
-	const index_group *group;
-	size_t left, right;
-
 	const lzma_index *i = iter->internal[ITER_INDEX].p;
 
 	// If the target is past the end of the file, return immediately.
@@ -1242,12 +1210,12 @@ lzma_index_iter_locate(lzma_index_iter *iter, lzma_vli target)
 		return true;
 
 	// Locate the Stream containing the target offset.
-	stream = index_tree_locate(&i->streams, target);
+	const index_stream *stream = index_tree_locate(&i->streams, target);
 	assert(stream != NULL);
 	target -= stream->node.uncompressed_base;
 
 	// Locate the group containing the target offset.
-	group = index_tree_locate(&stream->groups, target);
+	const index_group *group = index_tree_locate(&stream->groups, target);
 	assert(group != NULL);
 
 	// Use binary search to locate the exact Record. It is the first
@@ -1255,8 +1223,8 @@ lzma_index_iter_locate(lzma_index_iter *iter, lzma_vli target)
 	// This is because we want the rightmost Record that fullfills the
 	// search criterion. It is possible that there are empty Blocks;
 	// we don't want to return them.
-	left = 0;
-	right = group->last;
+	size_t left = 0;
+	size_t right = group->last;
 
 	while (left < right) {
 		const size_t pos = left + (right - left) / 2;
