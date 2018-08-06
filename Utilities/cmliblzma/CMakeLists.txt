@@ -6,22 +6,6 @@ include(CheckSymbolExists)
 include(CheckTypeSize)
 include(TestBigEndian)
 
-CHECK_C_SOURCE_COMPILES(
-  "int test (void *restrict x);\nint main (void) {return 0;}"
-  HAVE_RESTRICT)
-
-CHECK_C_SOURCE_COMPILES(
-"typedef struct abc *d;\nint test (d __restrict x);\nint main (void) {return 0;}"
-  HAVE___RESTRICT)
-
-CHECK_C_SOURCE_COMPILES(
-  "static inline int test (void) {return 0;}\nint main (void) {return test();}"
-  HAVE_INLINE)
-
-CHECK_C_SOURCE_COMPILES (
-  "static __inline int test (void) {return 0;}\nint main (void) {return test();}"
-  HAVE___INLINE)
-
 CHECK_INCLUDE_FILE(byteswap.h HAVE_BYTESWAP_H)
 CHECK_INCLUDE_FILE(inttypes.h HAVE_INTTYPES_H)
 CHECK_INCLUDE_FILE(limits.h HAVE_LIMITS_H)

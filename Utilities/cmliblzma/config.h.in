@@ -180,30 +180,6 @@ typedef uint64_t uintmax_t;
 
 #cmakedefine uintptr_t @uintptr_t@
 
-
-#cmakedefine HAVE_RESTRICT
-#cmakedefine HAVE___RESTRICT
-
-#cmakedefine HAVE_INLINE
-#cmakedefine HAVE___INLINE
-
-#ifndef HAVE_RESTRICT
-#  ifdef HAVE___RESTRICT
-#    define restrict __restrict
-#  else
-#    define restrict
-#  endif
-#endif /* HAVE_RESTRICT */
-
-#ifndef HAVE_INLINE
-#  ifdef HAVE___INLINE
-#    define inline __inline
-#  else
-#    define inline
-#  endif
-#endif /* HAVE_INLINE */
-
-
 #cmakedefine WORDS_BIGENDIAN 1
 
 #cmakedefine HAVE_BYTESWAP_H 1
