@@ -20,6 +20,7 @@ macro(__compiler_xl lang)
   # Feature flags.
   set(CMAKE_${lang}_VERBOSE_FLAG "-V")
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "-qpic")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "-qpic")
   set(CMAKE_${lang}_RESPONSE_FILE_FLAG "-qoptfile=")
   set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "-qoptfile=")
 
