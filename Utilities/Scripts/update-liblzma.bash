@@ -8,7 +8,7 @@ readonly name="liblzma"
 readonly ownership="liblzma upstream <xz-devel@tukaani.org>"
 readonly subtree="Utilities/cmliblzma"
 readonly repo="https://git.tukaani.org/xz.git"
-readonly tag="v5.0.8"
+readonly tag="v5.2.4"
 readonly shortlog=false
 readonly paths="
   COPYING
@@ -26,6 +26,8 @@ extract_source () {
     rmdir src
     rm liblzma/Makefile.*
     rm liblzma/*/Makefile.*
+    rm liblzma/liblzma.map
+    rm liblzma/validate_map.sh
     popd
 }
 
