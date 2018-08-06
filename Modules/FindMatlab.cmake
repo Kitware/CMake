@@ -1369,7 +1369,7 @@ else()
   # if the user does not specify the possible installation root, we look for
   # one installation using the appropriate heuristics.
   # There is apparently no standard way on Linux.
-  if(WIN32)
+  if(CMAKE_HOST_WIN32)
     _Matlab_find_instances_win32(_matlab_possible_roots_win32)
     list(APPEND _matlab_possible_roots ${_matlab_possible_roots_win32})
   elseif(APPLE)
