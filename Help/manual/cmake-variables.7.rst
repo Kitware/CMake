@@ -230,6 +230,7 @@ Variables that Describe the System
    /variable/ANDROID
    /variable/APPLE
    /variable/BORLAND
+   /variable/CACHE
    /variable/CMAKE_CL_64
    /variable/CMAKE_COMPILER_2005
    /variable/CMAKE_HOST_APPLE
