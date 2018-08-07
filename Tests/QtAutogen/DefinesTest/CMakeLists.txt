@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(DefinesTest)
 
 # Qt4 only definitions test
-if(NOT QT_TEST_VERSION STREQUAL 4)
+if(NOT QT_TEST_VERSION EQUAL 4)
   message(ERROR "Invalid Qt test version. This test is for Qt4 only.")
 endif()
 
