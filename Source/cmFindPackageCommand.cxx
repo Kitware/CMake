@@ -337,7 +337,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
         return false;
       }
       this->Configs.push_back(args[i]);
-    } else if (!haveVersion && version.find(args[i].c_str())) {
+    } else if (!haveVersion && version.find(args[i])) {
       haveVersion = true;
       this->Version = args[i];
     } else {

@@ -1139,7 +1139,7 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
       std::string cppFileName = xaml + ".cpp";
       files.ExpectedXamlHeaders.insert(hFileName);
       files.ExpectedXamlSources.insert(cppFileName);
-    } else if (header_regex.find(sf->GetFullPath().c_str())) {
+    } else if (header_regex.find(sf->GetFullPath())) {
       kind = SourceKindHeader;
     } else {
       kind = SourceKindExtra;

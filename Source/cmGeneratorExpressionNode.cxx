@@ -1126,7 +1126,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       std::string targetName = parameters.front();
       propertyName = parameters[1];
       if (!cmGeneratorExpression::IsValidTargetName(targetName)) {
-        if (!propertyNameValidator.find(propertyName.c_str())) {
+        if (!propertyNameValidator.find(propertyName)) {
           ::reportError(context, content->GetOriginalExpression(),
                         "Target name and property name not supported.");
           return std::string();

@@ -584,7 +584,7 @@ bool cmCTestLaunch::Match(std::string const& line,
                           std::vector<cmsys::RegularExpression>& regexps)
 {
   for (cmsys::RegularExpression& r : regexps) {
-    if (r.find(line.c_str())) {
+    if (r.find(line)) {
       return true;
     }
   }

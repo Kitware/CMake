@@ -98,7 +98,7 @@ void cmExtraEclipseCDT4Generator::Generate()
 
   std::string eclipseVersion = mf->GetSafeDefinition("CMAKE_ECLIPSE_VERSION");
   cmsys::RegularExpression regex(".*([0-9]+\\.[0-9]+).*");
-  if (regex.find(eclipseVersion.c_str())) {
+  if (regex.find(eclipseVersion)) {
     unsigned int majorVersion = 0;
     unsigned int minorVersion = 0;
     int res =
@@ -555,7 +555,7 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
       // Frameworks/ part has to be stripped
       //   /System/Library/Frameworks/GLUT.framework/Headers
       cmsys::RegularExpression frameworkRx("(.+/Frameworks)/.+\\.framework/");
-      if (frameworkRx.find(dir.c_str())) {
+      if (frameworkRx.find(dir)) {
         dir = frameworkRx.match(1);
       }
 

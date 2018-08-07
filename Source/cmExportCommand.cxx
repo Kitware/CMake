@@ -237,7 +237,7 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
   }
   const char* packageExpr = "^[A-Za-z0-9_.-]+$";
   cmsys::RegularExpression packageRegex(packageExpr);
-  if (!packageRegex.find(package.c_str())) {
+  if (!packageRegex.find(package)) {
     std::ostringstream e;
     e << "PACKAGE given invalid package name \"" << package << "\".  "
       << "Package names must match \"" << packageExpr << "\".";
