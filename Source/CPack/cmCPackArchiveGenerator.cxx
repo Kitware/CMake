@@ -103,7 +103,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
  */
 #define DECLARE_AND_OPEN_ARCHIVE(filename, archive)                           \
   cmGeneratedFileStream gf;                                                   \
-  gf.Open((filename).c_str(), false, true);                                   \
+  gf.Open((filename), false, true);                                           \
   if (!GenerateHeader(&gf)) {                                                 \
     cmCPackLogger(cmCPackLog::LOG_ERROR,                                      \
                   "Problem to generate Header for archive <"                  \

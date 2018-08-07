@@ -91,7 +91,7 @@ void cmExtraSublimeTextGenerator::CreateNewProjectFile(
 {
   const cmMakefile* mf = lgs[0]->GetMakefile();
 
-  cmGeneratedFileStream fout(filename.c_str());
+  cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
   }

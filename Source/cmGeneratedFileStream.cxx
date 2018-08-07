@@ -168,12 +168,12 @@ bool cmGeneratedFileStreamBase::Close()
     // destination atomically.
     if (this->Compress) {
       std::string gzname = this->TempName + ".temp.gz";
-      if (this->CompressFile(this->TempName.c_str(), gzname.c_str())) {
-        this->RenameFile(gzname.c_str(), resname.c_str());
+      if (this->CompressFile(this->TempName, gzname)) {
+        this->RenameFile(gzname, resname);
       }
       cmSystemTools::RemoveFile(gzname);
     } else {
-      this->RenameFile(this->TempName.c_str(), resname.c_str());
+      this->RenameFile(this->TempName, resname);
     }
 
     replaced = true;

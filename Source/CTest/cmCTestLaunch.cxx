@@ -345,7 +345,7 @@ void cmCTestLaunch::WriteXML()
   logXML += ".xml";
 
   // Use cmGeneratedFileStream to atomically create the report file.
-  cmGeneratedFileStream fxml(logXML.c_str());
+  cmGeneratedFileStream fxml(logXML);
   cmXMLWriter xml(fxml, 2);
   cmXMLElement e2(xml, "Failure");
   e2.Attribute("type", this->IsError() ? "Error" : "Warning");

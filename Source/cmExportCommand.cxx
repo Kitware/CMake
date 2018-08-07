@@ -339,7 +339,7 @@ void cmExportCommand::StorePackageRegistryDir(std::string const& package,
   fname += "/";
   fname += hash;
   if (!cmSystemTools::FileExists(fname)) {
-    cmGeneratedFileStream entry(fname.c_str(), true);
+    cmGeneratedFileStream entry(fname, true);
     if (entry) {
       entry << content << "\n";
     } else {

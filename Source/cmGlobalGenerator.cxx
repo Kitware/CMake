@@ -2904,7 +2904,7 @@ void cmGlobalGenerator::WriteRuleHashes(std::string const& pfile)
   if (this->RuleHashes.empty()) {
     cmSystemTools::RemoveFile(pfile);
   } else {
-    cmGeneratedFileStream fout(pfile.c_str());
+    cmGeneratedFileStream fout(pfile);
     fout << "# Hashes of file build rules.\n";
     for (auto const& rh : this->RuleHashes) {
       fout.write(rh.second.Data, 32);
@@ -2919,7 +2919,7 @@ void cmGlobalGenerator::WriteSummary()
   std::string fname = this->CMakeInstance->GetHomeOutputDirectory();
   fname += cmake::GetCMakeFilesDirectory();
   fname += "/TargetDirectories.txt";
-  cmGeneratedFileStream fout(fname.c_str());
+  cmGeneratedFileStream fout(fname);
 
   for (cmLocalGenerator* lg : this->LocalGenerators) {
     const std::vector<cmGeneratorTarget*>& tgts = lg->GetGeneratorTargets();
@@ -2956,7 +2956,7 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     Json::Value& lj_sources = lj_root["sources"] = Json::arrayValue;
 
     cmSystemTools::MakeDirectory(dir);
-    cmGeneratedFileStream fout(file.c_str());
+    cmGeneratedFileStream fout(file);
 
     std::vector<std::string> labels;
 
@@ -3030,7 +3030,7 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
         }
       }
     }
-    cmGeneratedFileStream json_fout(json_file.c_str());
+    cmGeneratedFileStream json_fout(json_file);
     json_fout << lj_root;
   } else
 #endif
@@ -3105,7 +3105,7 @@ bool cmGlobalGenerator::GenerateCPackPropertiesFile()
     return true;
   }
 
-  cmGeneratedFileStream file(path.c_str());
+  cmGeneratedFileStream file(path);
   file << "# CPack properties\n";
 
   for (auto const& i : installedFiles) {

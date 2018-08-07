@@ -1133,7 +1133,7 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang)
   }
 
   std::string const tdin = this->GetTargetDependInfoPath(lang);
-  cmGeneratedFileStream tdif(tdin.c_str());
+  cmGeneratedFileStream tdif(tdin);
   tdif << tdi;
 }
 

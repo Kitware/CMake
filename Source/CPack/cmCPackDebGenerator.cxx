@@ -238,7 +238,7 @@ int cmCPackDebGenerator::createDeb()
   const std::string strGenWDIR(this->GetOption("GEN_WDIR"));
   const std::string dbfilename = strGenWDIR + "/debian-binary";
   { // the scope is needed for cmGeneratedFileStream
-    cmGeneratedFileStream out(dbfilename.c_str());
+    cmGeneratedFileStream out(dbfilename);
     out << "2.0";
     out << std::endl; // required for valid debian package
   }
@@ -287,7 +287,7 @@ int cmCPackDebGenerator::createDeb()
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SOURCE");
 
   { // the scope is needed for cmGeneratedFileStream
-    cmGeneratedFileStream out(ctlfilename.c_str());
+    cmGeneratedFileStream out(ctlfilename);
     out << "Package: " << debian_pkg_name << "\n";
     out << "Version: " << debian_pkg_version << "\n";
     out << "Section: " << debian_pkg_section << "\n";
@@ -347,7 +347,7 @@ int cmCPackDebGenerator::createDeb()
   const bool gen_shibs = this->IsOn("CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS") &&
     debian_pkg_shlibs && *debian_pkg_shlibs;
   if (gen_shibs) {
-    cmGeneratedFileStream out(shlibsfilename.c_str());
+    cmGeneratedFileStream out(shlibsfilename);
     out << debian_pkg_shlibs;
     out << std::endl;
   }
@@ -355,7 +355,7 @@ int cmCPackDebGenerator::createDeb()
   const std::string postinst = strGenWDIR + "/postinst";
   const std::string postrm = strGenWDIR + "/postrm";
   if (this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST")) {
-    cmGeneratedFileStream out(postinst.c_str());
+    cmGeneratedFileStream out(postinst);
     out << "#!/bin/sh\n\n"
            "set -e\n\n"
            "if [ \"$1\" = \"configure\" ]; then\n"
@@ -363,7 +363,7 @@ int cmCPackDebGenerator::createDeb()
            "fi\n";
   }
   if (this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTRM")) {
-    cmGeneratedFileStream out(postrm.c_str());
+    cmGeneratedFileStream out(postrm);
     out << "#!/bin/sh\n\n"
            "set -e\n\n"
            "if [ \"$1\" = \"remove\" ]; then\n"
@@ -412,7 +412,7 @@ int cmCPackDebGenerator::createDeb()
   // atomic file generation for data.tar
   {
     cmGeneratedFileStream fileStream_data_tar;
-    fileStream_data_tar.Open(filename_data_tar.c_str(), false, true);
+    fileStream_data_tar.Open(filename_data_tar, false, true);
     if (!fileStream_data_tar) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Error opening the file \""
@@ -493,7 +493,7 @@ int cmCPackDebGenerator::createDeb()
   std::string md5filename = strGenWDIR + "/md5sums";
   {
     // the scope is needed for cmGeneratedFileStream
-    cmGeneratedFileStream out(md5filename.c_str());
+    cmGeneratedFileStream out(md5filename);
 
     std::string topLevelWithTrailingSlash =
       this->GetOption("CPACK_TEMPORARY_DIRECTORY");
@@ -528,7 +528,7 @@ int cmCPackDebGenerator::createDeb()
   // atomic file generation for control.tar
   {
     cmGeneratedFileStream fileStream_control_tar;
-    fileStream_control_tar.Open(filename_control_tar.c_str(), false, true);
+    fileStream_control_tar.Open(filename_control_tar, false, true);
     if (!fileStream_control_tar) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Error opening the file \"" << filename_control_tar
@@ -662,7 +662,7 @@ int cmCPackDebGenerator::createDeb()
   std::string const outputPath = outputDir + "/" + outputName;
   std::string const tlDir = strGenWDIR + "/";
   cmGeneratedFileStream debStream;
-  debStream.Open(outputPath.c_str(), false, true);
+  debStream.Open(outputPath, false, true);
   cmArchiveWrite deb(debStream, cmArchiveWrite::CompressNone, "arbsd");
 
   // uid/gid should be the one of the root user, and this root user has
