@@ -1197,9 +1197,27 @@ bool SystemTools::FileExists(const std::string& filename)
   }
   return access(filename.c_str(), R_OK) == 0;
 #elif defined(_WIN32)
-  return (
-    GetFileAttributesW(Encoding::ToWindowsExtendedPath(filename).c_str()) !=
-    INVALID_FILE_ATTRIBUTES);
+  DWORD attr =
+    GetFileAttributesW(Encoding::ToWindowsExtendedPath(filename).c_str());
+  if (attr == INVALID_FILE_ATTRIBUTES) {
+    return false;
+  }
+
+  if (attr & FILE_ATTRIBUTE_REPARSE_POINT) {
+    // Using 0 instead of GENERIC_READ as it allows reading of file attributes
+    // even if we do not have permission to read the file itself
+    HANDLE handle =
+      CreateFileW(Encoding::ToWindowsExtendedPath(filename).c_str(), 0, 0,
+                  NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+
+    if (handle == INVALID_HANDLE_VALUE) {
+      return false;
+    }
+
+    CloseHandle(handle);
+  }
+
+  return true;
 #else
 // SCO OpenServer 5.0.7/3.2's command has 711 permission.
 #  if defined(_SCO_DS)
