@@ -52,6 +52,8 @@ protected:
                           std::string& absoluteDestFiles) override;
 
 private:
+  bool StagingEnabled() const;
+
   class cmCPackExtVersionGenerator
   {
   public:

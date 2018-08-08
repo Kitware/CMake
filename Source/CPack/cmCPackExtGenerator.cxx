@@ -5,6 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 
 #include "cm_jsoncpp_value.h"
@@ -56,6 +57,23 @@ int cmCPackExtGenerator::PackageFiles()
     return 0;
   }
 
+  const char* packageScript = this->GetOption("CPACK_EXT_PACKAGE_SCRIPT");
+  if (packageScript && *packageScript) {
+    if (!cmSystemTools::FileIsFullPath(packageScript)) {
+      cmCPackLogger(
+        cmCPackLog::LOG_ERROR,
+        "CPACK_EXT_PACKAGE_SCRIPT does not contain a full file path"
+          << std::endl);
+      return 0;
+    }
+
+    int res = this->MakefileMap->ReadListFile(packageScript);
+
+    if (cmSystemTools::GetErrorOccuredFlag() || !res) {
+      return 0;
+    }
+  }
+
   return 1;
 }
 
@@ -67,16 +85,22 @@ bool cmCPackExtGenerator::SupportsComponentInstallation() const
 int cmCPackExtGenerator::InstallProjectViaInstallCommands(
   bool setDestDir, const std::string& tempInstallDirectory)
 {
-  (void)setDestDir;
-  (void)tempInstallDirectory;
+  if (this->StagingEnabled()) {
+    return cmCPackGenerator::InstallProjectViaInstallCommands(
+      setDestDir, tempInstallDirectory);
+  }
+
   return 1;
 }
 
 int cmCPackExtGenerator::InstallProjectViaInstallScript(
   bool setDestDir, const std::string& tempInstallDirectory)
 {
-  (void)setDestDir;
-  (void)tempInstallDirectory;
+  if (this->StagingEnabled()) {
+    return cmCPackGenerator::InstallProjectViaInstallScript(
+      setDestDir, tempInstallDirectory);
+  }
+
   return 1;
 }
 
@@ -84,9 +108,11 @@ int cmCPackExtGenerator::InstallProjectViaInstalledDirectories(
   bool setDestDir, const std::string& tempInstallDirectory,
   const mode_t* default_dir_mode)
 {
-  (void)setDestDir;
-  (void)tempInstallDirectory;
-  (void)default_dir_mode;
+  if (this->StagingEnabled()) {
+    return cmCPackGenerator::InstallProjectViaInstalledDirectories(
+      setDestDir, tempInstallDirectory, default_dir_mode);
+  }
+
   return 1;
 }
 
@@ -94,10 +120,11 @@ int cmCPackExtGenerator::RunPreinstallTarget(
   const std::string& installProjectName, const std::string& installDirectory,
   cmGlobalGenerator* globalGenerator, const std::string& buildConfig)
 {
-  (void)installProjectName;
-  (void)installDirectory;
-  (void)globalGenerator;
-  (void)buildConfig;
+  if (this->StagingEnabled()) {
+    return cmCPackGenerator::RunPreinstallTarget(
+      installProjectName, installDirectory, globalGenerator, buildConfig);
+  }
+
   return 1;
 }
 
@@ -108,16 +135,19 @@ int cmCPackExtGenerator::InstallCMakeProject(
   const std::string& installSubDirectory, const std::string& buildConfig,
   std::string& absoluteDestFiles)
 {
-  (void)setDestDir;
-  (void)installDirectory;
-  (void)baseTempInstallDirectory;
-  (void)default_dir_mode;
-  (void)component;
-  (void)componentInstall;
-  (void)installSubDirectory;
-  (void)buildConfig;
-  (void)absoluteDestFiles;
+  if (this->StagingEnabled()) {
+    return cmCPackGenerator::InstallCMakeProject(
+      setDestDir, installDirectory, baseTempInstallDirectory, default_dir_mode,
+      component, componentInstall, installSubDirectory, buildConfig,
+      absoluteDestFiles);
+  }
+
   return 1;
+}
+
+bool cmCPackExtGenerator::StagingEnabled() const
+{
+  return !cmSystemTools::IsOff(this->GetOption("CPACK_EXT_ENABLE_STAGING"));
 }
 
 cmCPackExtGenerator::cmCPackExtVersionGenerator::cmCPackExtVersionGenerator(

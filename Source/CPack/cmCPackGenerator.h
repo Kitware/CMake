@@ -321,7 +321,6 @@ protected:
   bool Trace;
   bool TraceExpand;
 
-private:
   cmMakefile* MakefileMap;
 };
 
