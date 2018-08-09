@@ -10,6 +10,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "lzma_encoder_private.h"
+#include "memcmplen.h"
 
 
 #define change_pair(small_dist, big_dist) \
@@ -17,17 +18,10 @@
 
 
 extern void
-lzma_lzma_optimum_fast(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT mf,
-		uint32_t *LZMA_RESTRICT back_res, uint32_t *LZMA_RESTRICT len_res)
+lzma_lzma_optimum_fast(lzma_lzma1_encoder *restrict coder,
+		lzma_mf *restrict mf,
+		uint32_t *restrict back_res, uint32_t *restrict len_res)
 {
-	const uint8_t *buf;
-	uint32_t buf_avail;
-	uint32_t i;
-	uint32_t rep_len = 0;
-	uint32_t rep_index = 0;
-	uint32_t back_main = 0;
-	uint32_t limit;
-
 	const uint32_t nice_len = mf->nice_len;
 
 	uint32_t len_main;
@@ -40,8 +34,8 @@ lzma_lzma_optimum_fast(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT m
 		matches_count = coder->matches_count;
 	}
 
-	buf = mf_ptr(mf) - 1;
-	buf_avail = my_min(mf_avail(mf) + 1, MATCH_LEN_MAX);
+	const uint8_t *buf = mf_ptr(mf) - 1;
+	const uint32_t buf_avail = my_min(mf_avail(mf) + 1, MATCH_LEN_MAX);
 
 	if (buf_avail < 2) {
 		// There's not enough input left to encode a match.
@@ -51,9 +45,10 @@ lzma_lzma_optimum_fast(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT m
 	}
 
 	// Look for repeated matches; scan the previous four match distances
-	for (i = 0; i < REP_DISTANCES; ++i) {
-		uint32_t len;
+	uint32_t rep_len = 0;
+	uint32_t rep_index = 0;
 
+	for (uint32_t i = 0; i < REPS; ++i) {
 		// Pointer to the beginning of the match candidate
 		const uint8_t *const buf_back = buf - coder->reps[i] - 1;
 
@@ -64,8 +59,8 @@ lzma_lzma_optimum_fast(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT m
 
 		// The first two bytes matched.
 		// Calculate the length of the match.
-		for (len = 2; len < buf_avail
-				&& buf[len] == buf_back[len]; ++len) ;
+		const uint32_t len = lzma_memcmplen(
+				buf, buf_back, 2, buf_avail);
 
 		// If we have found a repeated match that is at least
 		// nice_len long, return it immediately.
@@ -85,13 +80,13 @@ lzma_lzma_optimum_fast(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT m
 	// We didn't find a long enough repeated match. Encode it as a normal
 	// match if the match length is at least nice_len.
 	if (len_main >= nice_len) {
-		*back_res = coder->matches[matches_count - 1].dist
-				+ REP_DISTANCES;
+		*back_res = coder->matches[matches_count - 1].dist + REPS;
 		*len_res = len_main;
 		mf_skip(mf, len_main - 1);
 		return;
 	}
 
+	uint32_t back_main = 0;
 	if (len_main >= 2) {
 		back_main = coder->matches[matches_count - 1].dist;
 
@@ -158,27 +153,17 @@ lzma_lzma_optimum_fast(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT m
 	// the old buf pointer instead of recalculating it with mf_ptr().
 	++buf;
 
-	limit = len_main - 1;
+	const uint32_t limit = my_max(2, len_main - 1);
 
-	for (i = 0; i < REP_DISTANCES; ++i) {
-		uint32_t len;
-
-		const uint8_t *const buf_back = buf - coder->reps[i] - 1;
-
-		if (not_equal_16(buf, buf_back))
-			continue;
-
-		for (len = 2; len < limit
-				&& buf[len] == buf_back[len]; ++len) ;
-
-		if (len >= limit) {
+	for (uint32_t i = 0; i < REPS; ++i) {
+		if (memcmp(buf, buf - coder->reps[i] - 1, limit) == 0) {
 			*back_res = UINT32_MAX;
 			*len_res = 1;
 			return;
 		}
 	}
 
-	*back_res = back_main + REP_DISTANCES;
+	*back_res = back_main + REPS;
 	*len_res = len_main;
 	mf_skip(mf, len_main - 2);
 	return;

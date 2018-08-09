@@ -15,7 +15,7 @@
 
 
 static size_t
-armthumb_code(lzma_simple *simple lzma_attribute((__unused__)),
+armthumb_code(void *simple lzma_attribute((__unused__)),
 		uint32_t now_pos, bool is_encoder,
 		uint8_t *buffer, size_t size)
 {
@@ -23,7 +23,6 @@ armthumb_code(lzma_simple *simple lzma_attribute((__unused__)),
 	for (i = 0; i + 4 <= size; i += 2) {
 		if ((buffer[i + 1] & 0xF8) == 0xF0
 				&& (buffer[i + 3] & 0xF8) == 0xF8) {
-			uint32_t dest;
 			uint32_t src = ((buffer[i + 1] & 0x7) << 19)
 					| (buffer[i + 0] << 11)
 					| ((buffer[i + 3] & 0x7) << 8)
@@ -31,6 +30,7 @@ armthumb_code(lzma_simple *simple lzma_attribute((__unused__)),
 
 			src <<= 1;
 
+			uint32_t dest;
 			if (is_encoder)
 				dest = now_pos + (uint32_t)(i) + 4 + src;
 			else
@@ -50,7 +50,7 @@ armthumb_code(lzma_simple *simple lzma_attribute((__unused__)),
 
 
 static lzma_ret
-armthumb_coder_init(lzma_next_coder *next, lzma_allocator *allocator,
+armthumb_coder_init(lzma_next_coder *next, const lzma_allocator *allocator,
 		const lzma_filter_info *filters, bool is_encoder)
 {
 	return lzma_simple_coder_init(next, allocator, filters,
@@ -60,7 +60,8 @@ armthumb_coder_init(lzma_next_coder *next, lzma_allocator *allocator,
 
 extern lzma_ret
 lzma_simple_armthumb_encoder_init(lzma_next_coder *next,
-		lzma_allocator *allocator, const lzma_filter_info *filters)
+		const lzma_allocator *allocator,
+		const lzma_filter_info *filters)
 {
 	return armthumb_coder_init(next, allocator, filters, true);
 }
@@ -68,7 +69,8 @@ lzma_simple_armthumb_encoder_init(lzma_next_coder *next,
 
 extern lzma_ret
 lzma_simple_armthumb_decoder_init(lzma_next_coder *next,
-		lzma_allocator *allocator, const lzma_filter_info *filters)
+		const lzma_allocator *allocator,
+		const lzma_filter_info *filters)
 {
 	return armthumb_coder_init(next, allocator, filters, false);
 }

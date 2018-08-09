@@ -14,29 +14,27 @@
 
 
 extern LZMA_API(lzma_ret)
-lzma_raw_buffer_encode(const lzma_filter *filters, lzma_allocator *allocator,
-		const uint8_t *in, size_t in_size, uint8_t *out,
-		size_t *out_pos, size_t out_size)
+lzma_raw_buffer_encode(
+		const lzma_filter *filters, const lzma_allocator *allocator,
+		const uint8_t *in, size_t in_size,
+		uint8_t *out, size_t *out_pos, size_t out_size)
 {
-	lzma_next_coder next = LZMA_NEXT_CODER_INIT;
-	size_t out_start;
-	size_t in_pos = 0;
-	lzma_ret ret;
-
 	// Validate what isn't validated later in filter_common.c.
 	if ((in == NULL && in_size != 0) || out == NULL
 			|| out_pos == NULL || *out_pos > out_size)
 		return LZMA_PROG_ERROR;
 
 	// Initialize the encoder
+	lzma_next_coder next = LZMA_NEXT_CODER_INIT;
 	return_if_error(lzma_raw_encoder_init(&next, allocator, filters));
 
 	// Store the output position so that we can restore it if
 	// something goes wrong.
-	out_start = *out_pos;
+	const size_t out_start = *out_pos;
 
 	// Do the actual encoding and free coder's memory.
-	ret = next.code(next.coder, allocator, in, &in_pos, in_size,
+	size_t in_pos = 0;
+	lzma_ret ret = next.code(next.coder, allocator, in, &in_pos, in_size,
 			out, out_pos, out_size, LZMA_FINISH);
 	lzma_next_end(&next, allocator);
 
