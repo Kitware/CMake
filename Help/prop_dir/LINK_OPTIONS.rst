@@ -1,7 +1,8 @@
 LINK_OPTIONS
 ------------
 
-List of options to use for the link step.
+List of options to use for the link step of shared library, module
+and executable targets.
 
 This property holds a :ref:`;-list <CMake Language Lists>` of options
 given so far to the :command:`add_link_options` command.
