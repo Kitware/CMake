@@ -369,7 +369,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           inFile += '/';
         }
         for (cmsys::RegularExpression& reg : ignoreFilesRegex) {
-          if (reg.find(inFile.c_str())) {
+          if (reg.find(inFile)) {
             cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                           "Ignore file: " << inFile << std::endl);
             skip = true;

@@ -49,7 +49,7 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
   // Check for TIMEOUT_AFTER_MATCH property.
   if (!this->TestProperties->TimeoutRegularExpressions.empty()) {
     for (auto& reg : this->TestProperties->TimeoutRegularExpressions) {
-      if (reg.first.find(this->ProcessOutput.c_str())) {
+      if (reg.first.find(this->ProcessOutput)) {
         cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                    this->GetIndex()
                      << ": "
@@ -148,7 +148,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       this->FailedDependencies.empty()) {
     bool found = false;
     for (auto& pass : this->TestProperties->RequiredRegularExpressions) {
-      if (pass.first.find(this->ProcessOutput.c_str())) {
+      if (pass.first.find(this->ProcessOutput)) {
         found = true;
         reason = "Required regular expression found.";
         break;
@@ -168,7 +168,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   if (!this->TestProperties->ErrorRegularExpressions.empty() &&
       this->FailedDependencies.empty()) {
     for (auto& pass : this->TestProperties->ErrorRegularExpressions) {
-      if (pass.first.find(this->ProcessOutput.c_str())) {
+      if (pass.first.find(this->ProcessOutput)) {
         reason = "Error regular expression found in output.";
         reason += " Regex=[";
         reason += pass.second;
@@ -616,10 +616,10 @@ void cmCTestRunTest::DartProcessing()
 {
   if (!this->ProcessOutput.empty() &&
       this->ProcessOutput.find("<DartMeasurement") != std::string::npos) {
-    if (this->TestHandler->DartStuff.find(this->ProcessOutput.c_str())) {
+    if (this->TestHandler->DartStuff.find(this->ProcessOutput)) {
       this->TestResult.DartString = this->TestHandler->DartStuff.match(1);
       // keep searching and replacing until none are left
-      while (this->TestHandler->DartStuff1.find(this->ProcessOutput.c_str())) {
+      while (this->TestHandler->DartStuff1.find(this->ProcessOutput)) {
         // replace the exact match for the string
         cmSystemTools::ReplaceString(
           this->ProcessOutput, this->TestHandler->DartStuff1.match(1).c_str(),

@@ -2310,7 +2310,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
                      this->Quiet);
 
   if (this->UseExcludeRegExpFlag && this->UseExcludeRegExpFirst &&
-      this->ExcludeTestsRegularExpression.find(testname.c_str())) {
+      this->ExcludeTestsRegularExpression.find(testname)) {
     return true;
   }
   if (this->MemCheck) {
@@ -2365,10 +2365,10 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.SkipReturnCode = -1;
   test.PreviousRuns = 0;
   if (this->UseIncludeRegExpFlag &&
-      !this->IncludeTestsRegularExpression.find(testname.c_str())) {
+      !this->IncludeTestsRegularExpression.find(testname)) {
     test.IsInBasedOnREOptions = false;
   } else if (this->UseExcludeRegExpFlag && !this->UseExcludeRegExpFirst &&
-             this->ExcludeTestsRegularExpression.find(testname.c_str())) {
+             this->ExcludeTestsRegularExpression.find(testname)) {
     test.IsInBasedOnREOptions = false;
   }
   this->TestList.push_back(test);

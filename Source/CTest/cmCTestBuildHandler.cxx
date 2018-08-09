@@ -589,7 +589,7 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
       for (cmCTestCompileErrorWarningRex& rit :
            this->ErrorWarningFileLineRegex) {
         cmsys::RegularExpression* re = &rit.RegularExpression;
-        if (re->find(cm->Text.c_str())) {
+        if (re->find(cm->Text)) {
           cm->SourceFile = re->match(rit.FileIndex);
           // At this point we need to make this->SourceFile relative to
           // the source root of the project, so cvs links will work

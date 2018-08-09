@@ -663,7 +663,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // The current line has been terminated.  Check if the current
       // string matches the requirements.  The length may now be as
       // low as zero since blank lines are allowed.
-      if (s.length() >= minlen && (!have_regex || regex.find(s.c_str()))) {
+      if (s.length() >= minlen && (!have_regex || regex.find(s))) {
         output_size += static_cast<int>(s.size()) + 1;
         if (limit_output >= 0 && output_size >= limit_output) {
           s.clear();
@@ -679,7 +679,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // string matches the requirements.  We require that the length
       // be at least one no matter what the user specified.
       if (s.length() >= minlen && !s.empty() &&
-          (!have_regex || regex.find(s.c_str()))) {
+          (!have_regex || regex.find(s))) {
         output_size += static_cast<int>(s.size()) + 1;
         if (limit_output >= 0 && output_size >= limit_output) {
           s.clear();
@@ -696,7 +696,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
 
     if (maxlen > 0 && s.size() == maxlen) {
       // Terminate a string if the maximum length is reached.
-      if (s.length() >= minlen && (!have_regex || regex.find(s.c_str()))) {
+      if (s.length() >= minlen && (!have_regex || regex.find(s))) {
         output_size += static_cast<int>(s.size()) + 1;
         if (limit_output >= 0 && output_size >= limit_output) {
           s.clear();
@@ -712,7 +712,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   // input file or the input size limit.  Check if the current string
   // matches the requirements.
   if ((!limit_count || strings.size() < limit_count) && !s.empty() &&
-      s.length() >= minlen && (!have_regex || regex.find(s.c_str()))) {
+      s.length() >= minlen && (!have_regex || regex.find(s))) {
     output_size += static_cast<int>(s.size()) + 1;
     if (limit_output < 0 || output_size < limit_output) {
       strings.push_back(s);

@@ -407,7 +407,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       for (std::string const& ck : cacheKeys) {
         cmStateEnums::CacheEntryType t = this->State->GetCacheEntryType(ck);
         if (t != cmStateEnums::STATIC) {
-          if (regex.find(ck.c_str())) {
+          if (regex.find(ck)) {
             entriesToDelete.push_back(ck);
           }
         }

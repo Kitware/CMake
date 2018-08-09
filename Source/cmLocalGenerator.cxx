@@ -1971,7 +1971,7 @@ void cmLocalGenerator::AppendCompileOptions(
     cmsys::RegularExpression r(regex);
 
     for (std::string const& opt : options_vec) {
-      if (r.find(opt.c_str())) {
+      if (r.find(opt)) {
         this->AppendFlagEscape(options, opt);
       }
     }

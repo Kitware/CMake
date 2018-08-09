@@ -1075,7 +1075,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
       if (line.empty()) {
         // Ignore empty line; probably style 2
-      } else if (st1re1.find(line.c_str())) {
+      } else if (st1re1.find(line)) {
         if (gcovStyle == 0) {
           gcovStyle = 1;
         }
@@ -1088,7 +1088,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
         actualSourceFile.clear();
         sourceFile = st1re1.match(2);
-      } else if (st1re2.find(line.c_str())) {
+      } else if (st1re2.find(line)) {
         if (gcovStyle == 0) {
           gcovStyle = 1;
         }
@@ -1100,7 +1100,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
         }
 
         gcovFile = st1re2.match(1);
-      } else if (st2re1.find(line.c_str())) {
+      } else if (st2re1.find(line)) {
         if (gcovStyle == 0) {
           gcovStyle = 2;
         }
@@ -1113,7 +1113,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
         actualSourceFile.clear();
         sourceFile = st2re1.match(1);
-      } else if (st2re2.find(line.c_str())) {
+      } else if (st2re2.find(line)) {
         if (gcovStyle == 0) {
           gcovStyle = 2;
         }
@@ -1123,7 +1123,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           cont->Error++;
           break;
         }
-      } else if (st2re3.find(line.c_str())) {
+      } else if (st2re3.find(line)) {
         if (gcovStyle == 0) {
           gcovStyle = 2;
         }
@@ -1135,7 +1135,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
         }
 
         gcovFile = st2re3.match(2);
-      } else if (st2re4.find(line.c_str())) {
+      } else if (st2re4.find(line)) {
         if (gcovStyle == 0) {
           gcovStyle = 2;
         }
@@ -1150,7 +1150,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
                            "Warning: " << st2re4.match(1)
                                        << " had unexpected EOF" << std::endl,
                            this->Quiet);
-      } else if (st2re5.find(line.c_str())) {
+      } else if (st2re5.find(line)) {
         if (gcovStyle == 0) {
           gcovStyle = 2;
         }
@@ -1165,7 +1165,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
                            "Warning: Cannot open file: " << st2re5.match(1)
                                                          << std::endl,
                            this->Quiet);
-      } else if (st2re6.find(line.c_str())) {
+      } else if (st2re6.find(line)) {
         if (gcovStyle == 0) {
           gcovStyle = 2;
         }
