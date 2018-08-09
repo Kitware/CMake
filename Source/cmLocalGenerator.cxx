@@ -2524,12 +2524,12 @@ std::string const& cmLocalGenerator::GetBinaryDirectory() const
 
 const char* cmLocalGenerator::GetCurrentBinaryDirectory() const
 {
-  return this->StateSnapshot.GetDirectory().GetCurrentBinary();
+  return this->StateSnapshot.GetDirectory().GetCurrentBinary().c_str();
 }
 
 const char* cmLocalGenerator::GetCurrentSourceDirectory() const
 {
-  return this->StateSnapshot.GetDirectory().GetCurrentSource();
+  return this->StateSnapshot.GetDirectory().GetCurrentSource().c_str();
 }
 
 std::string cmLocalGenerator::GetTargetDirectory(

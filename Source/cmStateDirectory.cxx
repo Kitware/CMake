@@ -84,9 +84,9 @@ void cmStateDirectory::ComputeRelativePathTopBinary()
   }
 }
 
-const char* cmStateDirectory::GetCurrentSource() const
+std::string const& cmStateDirectory::GetCurrentSource() const
 {
-  return this->DirectoryState->Location.c_str();
+  return this->DirectoryState->Location;
 }
 
 void cmStateDirectory::SetCurrentSource(std::string const& dir)
@@ -101,9 +101,9 @@ void cmStateDirectory::SetCurrentSource(std::string const& dir)
   this->Snapshot_.SetDefinition("CMAKE_CURRENT_SOURCE_DIR", loc);
 }
 
-const char* cmStateDirectory::GetCurrentBinary() const
+std::string const& cmStateDirectory::GetCurrentBinary() const
 {
-  return this->DirectoryState->OutputLocation.c_str();
+  return this->DirectoryState->OutputLocation;
 }
 
 void cmStateDirectory::SetCurrentBinary(std::string const& dir)
@@ -118,14 +118,14 @@ void cmStateDirectory::SetCurrentBinary(std::string const& dir)
   this->Snapshot_.SetDefinition("CMAKE_CURRENT_BINARY_DIR", loc);
 }
 
-const char* cmStateDirectory::GetRelativePathTopSource() const
+std::string const& cmStateDirectory::GetRelativePathTopSource() const
 {
-  return this->DirectoryState->RelativePathTopSource.c_str();
+  return this->DirectoryState->RelativePathTopSource;
 }
 
-const char* cmStateDirectory::GetRelativePathTopBinary() const
+std::string const& cmStateDirectory::GetRelativePathTopBinary() const
 {
-  return this->DirectoryState->RelativePathTopBinary.c_str();
+  return this->DirectoryState->RelativePathTopBinary;
 }
 
 void cmStateDirectory::SetRelativePathTopSource(const char* dir)
@@ -474,7 +474,7 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
   if (prop == "PARENT_DIRECTORY") {
     cmStateSnapshot parent = this->Snapshot_.GetBuildsystemDirectoryParent();
     if (parent.IsValid()) {
-      return parent.GetDirectory().GetCurrentSource();
+      return parent.GetDirectory().GetCurrentSource().c_str();
     }
     return "";
   }
