@@ -1112,6 +1112,12 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
       continue;
     }
 
+    // Don't write alias if there is a already a custom command with
+    // matching output
+    if (this->HasCustomCommandOutput(ta.first)) {
+      continue;
+    }
+
     cmNinjaDeps deps;
     this->AppendTargetOutputs(ta.second, deps);
 
