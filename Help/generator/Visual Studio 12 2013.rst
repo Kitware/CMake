@@ -18,6 +18,12 @@ a target platform name optionally at the end of this generator name:
 For compatibility with CMake versions prior to 3.0, one may specify this
 generator using the name "Visual Studio 12" without the year component.
 
+Project Types
+^^^^^^^^^^^^^
+
+Only Visual C++ and C# projects may be generated.  Other types of
+projects (JavaScript, Powershell, Python, etc.) are not supported.
+
 Toolset Selection
 ^^^^^^^^^^^^^^^^^
 
