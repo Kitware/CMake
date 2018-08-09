@@ -797,9 +797,8 @@ static Json::Value DumpCTestInfo(cmLocalGenerator* lg, cmTest* testInfo,
 
   // Remove any config specific variables from the output.
   cmGeneratorExpression ge;
-  auto cge = ge.Parse(command.c_str());
-  const char* processed = cge->Evaluate(lg, config);
-
+  auto cge = ge.Parse(command);
+  const std::string& processed = cge->Evaluate(lg, config);
   result[kCTEST_COMMAND] = processed;
 
   // Build up the list of properties that may have been specified
@@ -810,7 +809,7 @@ static Json::Value DumpCTestInfo(cmLocalGenerator* lg, cmTest* testInfo,
 
     // Remove config variables from the value too.
     auto cge_value = ge.Parse(prop.second.GetValue());
-    const char* processed_value = cge_value->Evaluate(lg, config);
+    const std::string& processed_value = cge_value->Evaluate(lg, config);
     entry[kVALUE_KEY] = processed_value;
     properties.append(entry);
   }

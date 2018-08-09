@@ -5519,7 +5519,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       this->GetName(), "LINK_LIBRARIES", nullptr, nullptr);
     cmGeneratorExpression ge(*btIt);
     std::unique_ptr<cmCompiledGeneratorExpression> const cge = ge.Parse(*le);
-    std::string const evaluated =
+    std::string const& evaluated =
       cge->Evaluate(this->LocalGenerator, config, false, head, &dagChecker);
     cmSystemTools::ExpandListArgument(evaluated, llibs);
     if (cge->GetHadHeadSensitiveCondition()) {

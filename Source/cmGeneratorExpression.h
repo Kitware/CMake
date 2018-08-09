@@ -72,16 +72,17 @@ class cmCompiledGeneratorExpression
   CM_DISABLE_COPY(cmCompiledGeneratorExpression)
 
 public:
-  const char* Evaluate(cmLocalGenerator* lg, const std::string& config,
-                       bool quiet = false,
-                       cmGeneratorTarget const* headTarget = nullptr,
-                       cmGeneratorTarget const* currentTarget = nullptr,
-                       cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
-                       std::string const& language = std::string()) const;
-  const char* Evaluate(cmLocalGenerator* lg, const std::string& config,
-                       bool quiet, cmGeneratorTarget const* headTarget,
-                       cmGeneratorExpressionDAGChecker* dagChecker,
-                       std::string const& language = std::string()) const;
+  const std::string& Evaluate(
+    cmLocalGenerator* lg, const std::string& config, bool quiet = false,
+    cmGeneratorTarget const* headTarget = nullptr,
+    cmGeneratorTarget const* currentTarget = nullptr,
+    cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
+    std::string const& language = std::string()) const;
+  const std::string& Evaluate(
+    cmLocalGenerator* lg, const std::string& config, bool quiet,
+    cmGeneratorTarget const* headTarget,
+    cmGeneratorExpressionDAGChecker* dagChecker,
+    std::string const& language = std::string()) const;
 
   /** Get set of targets found during evaluations.  */
   std::set<cmGeneratorTarget*> const& GetTargets() const
@@ -126,7 +127,7 @@ public:
                               std::map<std::string, std::string>& mapping);
 
 private:
-  const char* EvaluateWithContext(
+  const std::string& EvaluateWithContext(
     cmGeneratorExpressionContext& context,
     cmGeneratorExpressionDAGChecker* dagChecker) const;
 
@@ -219,13 +220,16 @@ protected:
       this->GeneratorExpression.Parse(expression);
 
     if (dagChecker == nullptr) {
-      return this->CompiledGeneratorExpression->Evaluate(
-        this->LocalGenerator, this->Config, false, this->GeneratorTarget);
+      return this->CompiledGeneratorExpression
+        ->Evaluate(this->LocalGenerator, this->Config, false,
+                   this->GeneratorTarget)
+        .c_str();
     }
 
-    return this->CompiledGeneratorExpression->Evaluate(
-      this->LocalGenerator, this->Config, false, this->GeneratorTarget,
-      dagChecker, this->Language);
+    return this->CompiledGeneratorExpression
+      ->Evaluate(this->LocalGenerator, this->Config, false,
+                 this->GeneratorTarget, dagChecker, this->Language)
+      .c_str();
   }
 
 private:
