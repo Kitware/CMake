@@ -956,7 +956,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     preLinkCmdLines.push_back(std::move(cmd));
 
     // create a list of obj files for the -E __create_def to read
-    cmGeneratedFileStream fout(obj_list_file.c_str());
+    cmGeneratedFileStream fout(obj_list_file);
 
     if (mdi->WindowsExportAllSymbols) {
       cmNinjaDeps objs = this->GetObjects();

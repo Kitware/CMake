@@ -75,7 +75,7 @@ bool cmExportFileGenerator::GenerateImportFile()
   } else {
     // Generate atomically and with copy-if-different.
     std::unique_ptr<cmGeneratedFileStream> ap(
-      new cmGeneratedFileStream(this->MainImportFile.c_str(), true));
+      new cmGeneratedFileStream(this->MainImportFile, true));
     ap->SetCopyIfDifferent(true);
     foutPtr = std::move(ap);
   }

@@ -77,7 +77,7 @@ void cmExtraCodeLiteGenerator::Generate()
     }
   }
 
-  cmGeneratedFileStream fout(workspaceFileName.c_str());
+  cmGeneratedFileStream fout(workspaceFileName);
   cmXMLWriter xml(fout);
 
   xml.StartDocument("utf-8");
@@ -249,7 +249,7 @@ void cmExtraCodeLiteGenerator::CreateNewProjectFile(
   const std::vector<cmLocalGenerator*>& lgs, const std::string& filename)
 {
   const cmMakefile* mf = lgs[0]->GetMakefile();
-  cmGeneratedFileStream fout(filename.c_str());
+  cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
   }
@@ -547,7 +547,7 @@ void cmExtraCodeLiteGenerator::CreateNewProjectFile(
   const cmGeneratorTarget* gt, const std::string& filename)
 {
   const cmMakefile* mf = gt->Makefile;
-  cmGeneratedFileStream fout(filename.c_str());
+  cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
   }

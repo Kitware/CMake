@@ -818,7 +818,7 @@ bool cmCTest::OpenOutputFile(const std::string& path, const std::string& name,
     }
   }
   std::string filename = testingDir + "/" + name;
-  stream.Open(filename.c_str());
+  stream.Open(filename);
   if (!stream) {
     cmCTestLog(this, ERROR_MESSAGE,
                "Problem opening file: " << filename << std::endl);

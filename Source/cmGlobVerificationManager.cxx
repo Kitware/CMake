@@ -23,7 +23,7 @@ bool cmGlobVerificationManager::SaveVerificationScript(const std::string& path)
   cmSystemTools::MakeDirectory(scriptFile);
   scriptFile += "/VerifyGlobs.cmake";
   stampFile += "/cmake.verify_globs";
-  cmGeneratedFileStream verifyScriptFile(scriptFile.c_str());
+  cmGeneratedFileStream verifyScriptFile(scriptFile);
   verifyScriptFile.SetCopyIfDifferent(true);
   if (!verifyScriptFile) {
     cmSystemTools::Error("Unable to open verification script file for save. ",

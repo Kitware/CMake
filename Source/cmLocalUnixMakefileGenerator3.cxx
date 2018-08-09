@@ -211,8 +211,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   // rules may depend on this file itself.
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
   cmGeneratedFileStream ruleFileStream(
-    ruleFileNameFull.c_str(), false,
-    this->GlobalGenerator->GetMakefileEncoding());
+    ruleFileNameFull, false, this->GlobalGenerator->GetMakefileEncoding());
   if (!ruleFileStream) {
     return;
   }
@@ -433,7 +432,7 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
   infoFileName += "/CMakeDirectoryInformation.cmake";
 
   // Open the output file.
-  cmGeneratedFileStream infoFileStream(infoFileName.c_str());
+  cmGeneratedFileStream infoFileStream(infoFileName);
   if (!infoFileStream) {
     return;
   }
@@ -1403,8 +1402,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   std::string ruleFileNameFull = dir;
   ruleFileNameFull += "/depend.make";
   cmGeneratedFileStream ruleFileStream(
-    ruleFileNameFull.c_str(), false,
-    this->GlobalGenerator->GetMakefileEncoding());
+    ruleFileNameFull, false, this->GlobalGenerator->GetMakefileEncoding());
   ruleFileStream.SetCopyIfDifferent(true);
   if (!ruleFileStream) {
     return false;
@@ -1416,7 +1414,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   std::string internalRuleFileNameFull = dir;
   internalRuleFileNameFull += "/depend.internal";
   cmGeneratedFileStream internalRuleFileStream(
-    internalRuleFileNameFull.c_str(), false,
+    internalRuleFileNameFull, false,
     this->GlobalGenerator->GetMakefileEncoding());
   if (!internalRuleFileStream) {
     return false;

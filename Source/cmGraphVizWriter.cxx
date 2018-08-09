@@ -257,7 +257,7 @@ void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
     currentFilename += ptr.first;
     currentFilename += ".dependers";
 
-    cmGeneratedFileStream str(currentFilename.c_str());
+    cmGeneratedFileStream str(currentFilename);
     if (!str) {
       return;
     }
@@ -300,7 +300,7 @@ void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
     std::string currentFilename = fileName;
     currentFilename += ".";
     currentFilename += ptr.first;
-    cmGeneratedFileStream str(currentFilename.c_str());
+    cmGeneratedFileStream str(currentFilename);
     if (!str) {
       return;
     }

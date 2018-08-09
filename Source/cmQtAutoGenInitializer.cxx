@@ -1076,7 +1076,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
 
   cmGeneratedFileStream ofs;
   ofs.SetCopyIfDifferent(true);
-  ofs.Open(this->AutogenInfoFile.c_str(), false, true);
+  ofs.Open(this->AutogenInfoFile, false, true);
   if (ofs) {
     // Utility lambdas
     auto CWrite = [&ofs](const char* key, std::string const& value) {
@@ -1183,7 +1183,7 @@ bool cmQtAutoGenInitializer::SetupWriteRccInfo()
   for (Qrc const& qrc : this->Rcc.Qrcs) {
     cmGeneratedFileStream ofs;
     ofs.SetCopyIfDifferent(true);
-    ofs.Open(qrc.InfoFile.c_str(), false, true);
+    ofs.Open(qrc.InfoFile, false, true);
     if (ofs) {
       // Utility lambdas
       auto CWrite = [&ofs](const char* key, std::string const& value) {

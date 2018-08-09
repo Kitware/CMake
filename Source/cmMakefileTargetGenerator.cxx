@@ -124,7 +124,7 @@ void cmMakefileTargetGenerator::CreateRuleFile()
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
   this->BuildFileStream =
-    new cmGeneratedFileStream(this->BuildFileNameFull.c_str(), false,
+    new cmGeneratedFileStream(this->BuildFileNameFull, false,
                               this->GlobalGenerator->GetMakefileEncoding());
   this->BuildFileStream->SetCopyIfDifferent(true);
   if (!this->BuildFileStream) {
@@ -237,8 +237,7 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
   if (!cmSystemTools::FileExists(dependFileNameFull)) {
     // Write an empty dependency file.
     cmGeneratedFileStream depFileStream(
-      dependFileNameFull.c_str(), false,
-      this->GlobalGenerator->GetMakefileEncoding());
+      dependFileNameFull, false, this->GlobalGenerator->GetMakefileEncoding());
     depFileStream << "# Empty dependencies file for "
                   << this->GeneratorTarget->GetName() << ".\n"
                   << "# This may be replaced when dependencies are built."
@@ -250,7 +249,7 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
   this->FlagFileNameFull = this->TargetBuildDirectoryFull;
   this->FlagFileNameFull += "/flags.make";
   this->FlagFileStream =
-    new cmGeneratedFileStream(this->FlagFileNameFull.c_str(), false,
+    new cmGeneratedFileStream(this->FlagFileNameFull, false,
                               this->GlobalGenerator->GetMakefileEncoding());
   this->FlagFileStream->SetCopyIfDifferent(true);
   if (!this->FlagFileStream) {
@@ -974,8 +973,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   this->InfoFileNameFull += "/DependInfo.cmake";
   this->InfoFileNameFull =
     this->LocalGenerator->ConvertToFullPath(this->InfoFileNameFull);
-  this->InfoFileStream =
-    new cmGeneratedFileStream(this->InfoFileNameFull.c_str());
+  this->InfoFileStream = new cmGeneratedFileStream(this->InfoFileNameFull);
   this->InfoFileStream->SetCopyIfDifferent(true);
   if (!*this->InfoFileStream) {
     return;
@@ -1446,7 +1444,7 @@ void cmMakefileTargetGenerator::CreateLinkScript(
   std::string linkScriptName = this->TargetBuildDirectoryFull;
   linkScriptName += "/";
   linkScriptName += name;
-  cmGeneratedFileStream linkScriptStream(linkScriptName.c_str());
+  cmGeneratedFileStream linkScriptStream(linkScriptName);
   linkScriptStream.SetCopyIfDifferent(true);
   for (std::string const& link_command : link_commands) {
     // Do not write out empty commands or commands beginning in the
@@ -1530,7 +1528,7 @@ std::string cmMakefileTargetGenerator::CreateResponseFile(
   std::string responseFileNameFull = this->TargetBuildDirectoryFull;
   responseFileNameFull += "/";
   responseFileNameFull += name;
-  cmGeneratedFileStream responseStream(responseFileNameFull.c_str());
+  cmGeneratedFileStream responseStream(responseFileNameFull);
   responseStream.SetCopyIfDifferent(true);
   responseStream << options << "\n";
 
@@ -1718,7 +1716,7 @@ void cmMakefileTargetGenerator::GenDefFile(
     cmOutputConverter::SHELL);
   real_link_commands.insert(real_link_commands.begin(), cmd);
   // create a list of obj files for the -E __create_def to read
-  cmGeneratedFileStream fout(objlist_file.c_str());
+  cmGeneratedFileStream fout(objlist_file);
 
   if (mdi->WindowsExportAllSymbols) {
     for (std::string const& obj : this->Objects) {

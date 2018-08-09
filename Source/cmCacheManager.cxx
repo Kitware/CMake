@@ -234,7 +234,7 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
 {
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
-  cmGeneratedFileStream fout(cacheFile.c_str());
+  cmGeneratedFileStream fout(cacheFile);
   fout.SetCopyIfDifferent(true);
   if (!fout) {
     cmSystemTools::Error("Unable to open cache file for save. ",

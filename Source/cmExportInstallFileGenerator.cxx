@@ -288,7 +288,7 @@ bool cmExportInstallFileGenerator::GenerateImportFileConfig(
   fileName += this->FileExt;
 
   // Open the output file to generate it.
-  cmGeneratedFileStream exportFileStream(fileName.c_str(), true);
+  cmGeneratedFileStream exportFileStream(fileName, true);
   if (!exportFileStream) {
     std::string se = cmSystemTools::GetLastSystemError();
     std::ostringstream e;
