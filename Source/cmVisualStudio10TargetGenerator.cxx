@@ -2128,7 +2128,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       if (configDependentFlags) {
         clOptions.Parse(genexInterpreter.Evaluate(flags, "COMPILE_FLAGS"));
       } else {
-        clOptions.Parse(flags.c_str());
+        clOptions.Parse(flags);
       }
       if (!options.empty()) {
         std::string expandedOptions;
@@ -2139,7 +2139,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         } else {
           this->LocalGenerator->AppendCompileOptions(expandedOptions, options);
         }
-        clOptions.Parse(expandedOptions.c_str());
+        clOptions.Parse(expandedOptions);
       }
       if (clOptions.HasFlag("DisableSpecificWarnings")) {
         clOptions.AppendFlag("DisableSpecificWarnings",
@@ -2523,8 +2523,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     }
   }
 
-  clOptions.Parse(flags.c_str());
-  clOptions.Parse(defineFlags.c_str());
+  clOptions.Parse(flags);
+  clOptions.Parse(defineFlags);
   std::vector<std::string> targetDefines;
   switch (this->ProjectType) {
     case vcxproj:
@@ -2691,7 +2691,7 @@ bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
     std::string(" ") +
     std::string(this->Makefile->GetSafeDefinition(rcConfigFlagsVar));
 
-  rcOptions.Parse(flags.c_str());
+  rcOptions.Parse(flags);
 
   // For historical reasons, add the C preprocessor defines to RC.
   Options& clOptions = *(this->ClOptions[configName]);
@@ -2753,8 +2753,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Makefile->GetDefineFlags();
 
-  cudaOptions.Parse(flags.c_str());
-  cudaOptions.Parse(defineFlags.c_str());
+  cudaOptions.Parse(flags);
+  cudaOptions.Parse(defineFlags);
   cudaOptions.ParseFinish();
 
   // If we haven't explicitly enabled GPU debug information
@@ -2961,7 +2961,7 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
     std::string(" ") +
     std::string(this->Makefile->GetSafeDefinition(configFlagsVar));
 
-  masmOptions.Parse(flags.c_str());
+  masmOptions.Parse(flags);
 
   // Get includes for this target
   masmOptions.AddIncludes(this->GetIncludes(configName, "ASM_MASM"));
@@ -3018,7 +3018,7 @@ bool cmVisualStudio10TargetGenerator::ComputeNasmOptions(
       this->Makefile->GetSafeDefinition("CMAKE_ASM_NASM_OBJECT_FORMAT")) +
     std::string(" ") +
     std::string(this->Makefile->GetSafeDefinition(configFlagsVar));
-  nasmOptions.Parse(flags.c_str());
+  nasmOptions.Parse(flags);
 
   // Get includes for this target
   nasmOptions.AddIncludes(this->GetIncludes(configName, "ASM_NASM"));
@@ -3064,7 +3064,7 @@ void cmVisualStudio10TargetGenerator::WriteLibOptions(
     cmVS10GeneratorOptions libOptions(this->LocalGenerator,
                                       cmVisualStudioGeneratorOptions::Linker,
                                       gg->GetLibFlagTable(), this);
-    libOptions.Parse(libflags.c_str());
+    libOptions.Parse(libflags);
     OptionsHelper oh(libOptions, e2);
     oh.PrependInheritedString("AdditionalOptions");
     oh.OutputFlagMap();
@@ -3410,7 +3410,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     linkOptions.AddFlag("SoName", targetNameSO);
   }
 
-  linkOptions.Parse(flags.c_str());
+  linkOptions.Parse(flags);
   linkOptions.FixManifestUACFlags();
 
   if (this->MSTools) {

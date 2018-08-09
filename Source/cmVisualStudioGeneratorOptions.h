@@ -42,7 +42,7 @@ public:
   void ClearTables();
 
   // Store options from command line flags.
-  void Parse(const char* flags);
+  void Parse(const std::string& flags);
   void ParseFinish();
 
   void PrependInheritedString(std::string const& key);
