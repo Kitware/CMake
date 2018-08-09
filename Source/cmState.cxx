@@ -267,6 +267,7 @@ cmStateSnapshot cmState::Reset()
 {
   this->GlobalProperties.clear();
   this->PropertyDefinitions.clear();
+  this->GlobVerificationManager->Reset();
 
   cmStateDetail::PositionType pos = this->SnapshotData.Truncate();
   this->ExecutionListFiles.Truncate();
