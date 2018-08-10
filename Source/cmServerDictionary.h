@@ -96,6 +96,7 @@ static const std::string kCTEST_COMMAND = "ctestCommand";
 static const std::string kCTEST_INFO = "ctestInfo";
 static const std::string kMINIMUM_CMAKE_VERSION = "minimumCMakeVersion";
 static const std::string kIS_GENERATOR_PROVIDED_KEY = "isGeneratorProvided";
+static const std::string kIS_INTERFACE_SOURCES_KEY = "isInterfaceSources";
 
 static const std::string kSTART_MAGIC = "[== \"CMake Server\" ==[";
 static const std::string kEND_MAGIC = "]== \"CMake Server\" ==]";
