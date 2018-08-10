@@ -24,6 +24,7 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32)
 #  include "bindexplib.h"
+#  include "cmsys/ConsoleBuf.hxx"
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32) && !defined(__CYGWIN__)
@@ -1545,6 +1546,15 @@ private:
 // still works.
 int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type)
 {
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+  // Replace streambuf so we output in the system codepage. CMake is set up
+  // to output in Unicode (see SetUTF8Pipes) but the Visual Studio linker
+  // outputs using the system codepage so we need to change behavior when
+  // we run the link command.
+  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
+  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
+#endif
+
   if (args.size() < 2) {
     return -1;
   }
@@ -1775,6 +1785,8 @@ int cmVSLink::LinkIncremental()
     if (!fout) {
       return -1;
     }
+    // Insert a pragma statement to specify utf-8 encoding.
+    fout << "#pragma code_page(65001)\n";
     fout << this->Type
          << " /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ "
             "24 /* RT_MANIFEST */ \""
