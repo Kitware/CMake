@@ -5,12 +5,12 @@ Load settings for an external project.
 
 ::
 
-  find_package(<package> [version] [EXACT] [QUIET] [MODULE]
+  find_package(<PackageName> [version] [EXACT] [QUIET] [MODULE]
                [REQUIRED] [[COMPONENTS] [components...]]
                [OPTIONAL_COMPONENTS components...]
                [NO_POLICY_SCOPE])
 
-Finds and loads settings from an external project.  ``<package>_FOUND``
+Finds and loads settings from an external project.  ``<PackageName>_FOUND``
 will be set to indicate whether the package was found.  When the
 package is found package-specific information is provided through
 variables and :ref:`Imported Targets` documented by the package itself.  The
@@ -44,7 +44,7 @@ are encouraged to read on.
 The command has two modes by which it searches for packages: "Module"
 mode and "Config" mode.  Module mode is available when the command is
 invoked with the above reduced signature.  CMake searches for a file
-called ``Find<package>.cmake`` in the :variable:`CMAKE_MODULE_PATH`
+called ``Find<PackageName>.cmake`` in the :variable:`CMAKE_MODULE_PATH`
 followed by the CMake installation.  If the file is found, it is read
 and processed by CMake.  It is responsible for finding the package,
 checking the version, and producing any needed messages.  Many
@@ -54,7 +54,7 @@ option is not given the command proceeds to Config mode.
 
 The complete Config mode command signature is::
 
-  find_package(<package> [version] [EXACT] [QUIET]
+  find_package(<PackageName> [version] [EXACT] [QUIET]
                [REQUIRED] [[COMPONENTS] [components...]]
                [CONFIG|NO_MODULE]
                [NO_POLICY_SCOPE]
@@ -82,29 +82,29 @@ mode is also implied by use of options not specified in the reduced
 signature.
 
 Config mode attempts to locate a configuration file provided by the
-package to be found.  A cache entry called ``<package>_DIR`` is created to
+package to be found.  A cache entry called ``<PackageName>_DIR`` is created to
 hold the directory containing the file.  By default the command
-searches for a package with the name ``<package>``.  If the ``NAMES`` option
-is given the names following it are used instead of ``<package>``.  The
-command searches for a file called ``<name>Config.cmake`` or
-``<lower-case-name>-config.cmake`` for each name specified.  A
-replacement set of possible configuration file names may be given
+searches for a package with the name ``<PackageName>``.  If the ``NAMES`` option
+is given the names following it are used instead of ``<PackageName>``.
+The command searches for a file called ``<PackageName>Config.cmake`` or
+``<lower-case-package-name>-config.cmake`` for each name specified.
+A replacement set of possible configuration file names may be given
 using the ``CONFIGS`` option.  The search procedure is specified below.
 Once found, the configuration file is read and processed by CMake.
 Since the file is provided by the package it already knows the
 location of package contents.  The full path to the configuration file
-is stored in the cmake variable ``<package>_CONFIG``.
+is stored in the cmake variable ``<PackageName>_CONFIG``.
 
 All configuration files which have been considered by CMake while
 searching for an installation of the package with an appropriate
-version are stored in the cmake variable ``<package>_CONSIDERED_CONFIGS``,
-the associated versions in ``<package>_CONSIDERED_VERSIONS``.
+version are stored in the cmake variable ``<PackageName>_CONSIDERED_CONFIGS``,
+the associated versions in ``<PackageName>_CONSIDERED_VERSIONS``.
 
 If the package configuration file cannot be found CMake will generate
 an error describing the problem unless the ``QUIET`` argument is
 specified.  If ``REQUIRED`` is specified and the package is not found a
 fatal error is generated and the configure step stops executing.  If
-``<package>_DIR`` has been set to a directory not containing a
+``<PackageName>_DIR`` has been set to a directory not containing a
 configuration file CMake will ignore it and search from scratch.
 
 When the ``[version]`` argument is given Config mode will only find a
@@ -127,7 +127,7 @@ version file is loaded in a nested scope in which the following
 variables have been defined:
 
 ``PACKAGE_FIND_NAME``
-  the ``<package>`` name
+  the ``<PackageName>``
 ``PACKAGE_FIND_VERSION``
   full requested version string
 ``PACKAGE_FIND_VERSION_MAJOR``
@@ -158,17 +158,17 @@ whether the configuration file provides an acceptable version.  They
 are not available after the find_package call returns.  If the version
 is acceptable the following variables are set:
 
-``<package>_VERSION``
+``<PackageName>_VERSION``
   full provided version string
-``<package>_VERSION_MAJOR``
+``<PackageName>_VERSION_MAJOR``
   major version if provided, else 0
-``<package>_VERSION_MINOR``
+``<PackageName>_VERSION_MINOR``
   minor version if provided, else 0
-``<package>_VERSION_PATCH``
+``<PackageName>_VERSION_PATCH``
   patch version if provided, else 0
-``<package>_VERSION_TWEAK``
+``<PackageName>_VERSION_TWEAK``
   tweak version if provided, else 0
-``<package>_VERSION_COUNT``
+``<PackageName>_VERSION_COUNT``
   number of version components, 0 to 4
 
 and the corresponding package configuration file is loaded.
@@ -192,7 +192,7 @@ Much of the interface is provided for completeness and for use
 internally by find-modules loaded by Module mode.  Most user code
 should simply call::
 
-  find_package(<package> [major[.minor]] [EXACT] [REQUIRED|QUIET])
+  find_package(<PackageName> [major[.minor]] [EXACT] [REQUIRED|QUIET])
 
 in order to find a package.  Package maintainers providing CMake
 package configuration files are encouraged to name and install them
@@ -228,7 +228,7 @@ containing a configuration file::
   <prefix>/<name>.app/Contents/Resources/CMake/           (A)
 
 In all cases the ``<name>`` is treated as case-insensitive and corresponds
-to any of the names specified (``<package>`` or names given by ``NAMES``).
+to any of the names specified (``<PackageName>`` or names given by ``NAMES``).
 
 Paths with ``lib/<arch>`` are enabled if the
 :variable:`CMAKE_LIBRARY_ARCHITECTURE` variable is set. ``lib*`` includes one
@@ -286,7 +286,7 @@ enabled.
    (``;`` on Windows and ``:`` on UNIX).
    This can be skipped if ``NO_CMAKE_ENVIRONMENT_PATH`` is passed::
 
-     <package>_DIR
+     <PackageName>_DIR
      CMAKE_PREFIX_PATH
      CMAKE_FRAMEWORK_PATH
      CMAKE_APPBUNDLE_PATH
@@ -329,7 +329,7 @@ enabled.
    hard-coded guesses.
 
 .. |FIND_XXX| replace:: find_package
-.. |FIND_ARGS_XXX| replace:: <package>
+.. |FIND_ARGS_XXX| replace:: <PackageName>
 .. |CMAKE_FIND_ROOT_PATH_MODE_XXX| replace::
    :variable:`CMAKE_FIND_ROOT_PATH_MODE_PACKAGE`
 
@@ -344,28 +344,28 @@ defines variables to provide information about the call arguments (and
 restores their original state before returning):
 
 ``CMAKE_FIND_PACKAGE_NAME``
-  the ``<package>`` name which is searched for
-``<package>_FIND_REQUIRED``
+  the ``<PackageName>`` which is searched for
+``<PackageName>_FIND_REQUIRED``
   true if ``REQUIRED`` option was given
-``<package>_FIND_QUIETLY``
+``<PackageName>_FIND_QUIETLY``
   true if ``QUIET`` option was given
-``<package>_FIND_VERSION``
+``<PackageName>_FIND_VERSION``
   full requested version string
-``<package>_FIND_VERSION_MAJOR``
+``<PackageName>_FIND_VERSION_MAJOR``
   major version if requested, else 0
-``<package>_FIND_VERSION_MINOR``
+``<PackageName>_FIND_VERSION_MINOR``
   minor version if requested, else 0
-``<package>_FIND_VERSION_PATCH``
+``<PackageName>_FIND_VERSION_PATCH``
   patch version if requested, else 0
-``<package>_FIND_VERSION_TWEAK``
+``<PackageName>_FIND_VERSION_TWEAK``
   tweak version if requested, else 0
-``<package>_FIND_VERSION_COUNT``
+``<PackageName>_FIND_VERSION_COUNT``
   number of version components, 0 to 4
-``<package>_FIND_VERSION_EXACT``
+``<PackageName>_FIND_VERSION_EXACT``
   true if ``EXACT`` option was given
-``<package>_FIND_COMPONENTS``
+``<PackageName>_FIND_COMPONENTS``
   list of requested components
-``<package>_FIND_REQUIRED_<c>``
+``<PackageName>_FIND_REQUIRED_<c>``
   true if component ``<c>`` is required,
   false if component ``<c>`` is optional
 
@@ -375,7 +375,7 @@ In Config mode ``find_package`` handles ``REQUIRED``, ``QUIET``, and
 ``[version]`` options automatically but leaves it to the package
 configuration file to handle components in a way that makes sense
 for the package.  The package configuration file may set
-``<package>_FOUND`` to false to tell ``find_package`` that component
+``<PackageName>_FOUND`` to false to tell ``find_package`` that component
 requirements are not satisfied.
 
 See the :command:`cmake_policy` command documentation for discussion

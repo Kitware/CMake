@@ -214,8 +214,8 @@ Windows using WiX.
 
  If this variable is set the generated installer will create
  an entry in the windows registry key
- ``HKEY_LOCAL_MACHINE\Software\Kitware\CMake\Packages\<package>``
- The value for ``<package>`` is provided by this variable.
+ ``HKEY_LOCAL_MACHINE\Software\Kitware\CMake\Packages\<PackageName>``
+ The value for ``<PackageName>`` is provided by this variable.
 
  Assuming you also install a CMake configuration file this will
  allow other CMake projects to find your package with

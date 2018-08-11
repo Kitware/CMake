@@ -14,7 +14,7 @@ CMakeFindDependencyMacro
 
   It is designed to be used in a
   :ref:`Package Configuration File <Config File Packages>`
-  (``<package>Config.cmake``).  ``find_dependency`` forwards the correct
+  (``<PackageName>Config.cmake``).  ``find_dependency`` forwards the correct
   parameters for ``QUIET`` and ``REQUIRED`` which were passed to
   the original :command:`find_package` call.  Any additional arguments
   specified are forwarded to :command:`find_package`.

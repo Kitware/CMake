@@ -145,7 +145,7 @@ endmacro()
 
 # internal helper macro to generate the failure message when used in CONFIG_MODE:
 macro(_FPHSA_HANDLE_FAILURE_CONFIG_MODE)
-  # <name>_CONFIG is set, but FOUND is false, this means that some other of the REQUIRED_VARS was not found:
+  # <PackageName>_CONFIG is set, but FOUND is false, this means that some other of the REQUIRED_VARS was not found:
   if(${_NAME}_CONFIG)
     _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: missing:${MISSING_VARS} (found ${${_NAME}_CONFIG} ${VERSION_MSG})")
   else()
@@ -199,7 +199,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       set(FPHSA_FAIL_MESSAGE  "DEFAULT_MSG")
     endif()
 
-    # In config-mode, we rely on the variable <package>_CONFIG, which is set by find_package()
+    # In config-mode, we rely on the variable <PackageName>_CONFIG, which is set by find_package()
     # when it successfully found the config-file, including version checking:
     if(FPHSA_CONFIG_MODE)
       list(INSERT FPHSA_REQUIRED_VARS 0 ${_NAME}_CONFIG)
