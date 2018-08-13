@@ -82,39 +82,49 @@ private:
 
 private:
   cmGeneratorTarget* Target;
-  bool MultiConfig = false;
+
   // Qt
   std::string QtVersionMajor;
   std::string QtVersionMinor;
-  // Configurations
+
+  // Configuration
+  bool MultiConfig = false;
   std::string ConfigDefault;
   std::vector<std::string> ConfigsList;
-  std::string Parallel;
   std::string Verbosity;
-  // Names
-  std::string AutogenTargetName;
-  std::string AutogenFolder;
-  std::string AutogenInfoFile;
-  std::string AutogenSettingsFile;
-  std::map<std::string, std::string> AutogenConfigSettingsFile;
-  std::set<std::string> AutogenDependFiles;
-  std::set<cmTarget*> AutogenDependTargets;
-  // Directories
-  std::string DirInfo;
-  std::string DirBuild;
-  std::string DirWork;
-  std::string DirInclude;
-  std::map<std::string, std::string> DirConfigInclude;
-  // Moc and UIC
+  std::string TargetsFolder;
+
+  /// @brief Common directories
   struct
   {
-    // Sources
+    std::string Info;
+    std::string Build;
+    std::string Work;
+    std::string Include;
+    std::map<std::string, std::string> ConfigInclude;
+  } Dir;
+
+  /// @brief Autogen target variables
+  struct
+  {
+    std::string Name;
+    // Settings
+    std::string Parallel;
+    // Configuration files
+    std::string InfoFile;
+    std::string SettingsFile;
+    std::map<std::string, std::string> ConfigSettingsFile;
+    // Dependencies
+    std::set<std::string> DependFiles;
+    std::set<cmTarget*> DependTargets;
+    // Sources to process
     std::vector<std::string> Headers;
     std::vector<std::string> Sources;
     std::vector<std::string> HeadersGenerated;
     std::vector<std::string> SourcesGenerated;
-  } MocUic;
-  // Moc
+  } AutogenTarget;
+
+  /// @brief Moc only variables
   struct
   {
     bool Enabled = false;
@@ -127,7 +137,8 @@ private:
     std::map<std::string, std::string> ConfigDefines;
     std::string MocsCompilation;
   } Moc;
-  // Uic
+
+  ///@brief Uic only variables
   struct
   {
     bool Enabled = false;
@@ -139,7 +150,8 @@ private:
     std::vector<std::string> FileFiles;
     std::vector<std::vector<std::string>> FileOptions;
   } Uic;
-  // Rcc
+
+  /// @brief Rcc only variables
   struct
   {
     bool Enabled = false;
