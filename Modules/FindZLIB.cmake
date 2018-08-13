@@ -58,10 +58,12 @@ if(ZLIB_ROOT)
 endif()
 
 # Normal search.
+set(_ZLIB_x86 "(x86)")
 set(_ZLIB_SEARCH_NORMAL
-  PATHS "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Zlib;InstallPath]"
-        "$ENV{PROGRAMFILES}/zlib"
-  )
+    PATHS "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Zlib;InstallPath]"
+          "$ENV{ProgramFiles}/zlib"
+          "$ENV{ProgramFiles${_ZLIB_x86}}/zlib")
+unset(_ZLIB_x86)
 list(APPEND _ZLIB_SEARCHES _ZLIB_SEARCH_NORMAL)
 
 set(ZLIB_NAMES z zlib zdll zlib1)
