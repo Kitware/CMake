@@ -1742,10 +1742,8 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
         e2.Element("Link", deployLocation + "\\%(FileName)%(Extension)");
       }
       for (size_t i = 0; i != this->Configurations.size(); ++i) {
-        if (0 ==
-            strcmp(
-              cge->Evaluate(this->LocalGenerator, this->Configurations[i]),
-              "1")) {
+        if (cge->Evaluate(this->LocalGenerator, this->Configurations[i]) ==
+            "1") {
           e2.WritePlatformConfigTag("DeploymentContent",
                                     "'$(Configuration)|$(Platform)'=='" +
                                       this->Configurations[i] + "|" +
@@ -1793,14 +1791,14 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
         ge.Parse(shaderEnableDebug);
 
       for (size_t i = 0; i != this->Configurations.size(); ++i) {
-        const char* enableDebug =
+        const std::string& enableDebug =
           cge->Evaluate(this->LocalGenerator, this->Configurations[i]);
-        if (strlen(enableDebug) > 0) {
+        if (!enableDebug.empty()) {
           e2.WritePlatformConfigTag(
             "EnableDebuggingInformation",
             "'$(Configuration)|$(Platform)'=='" + this->Configurations[i] +
               "|" + this->Platform + "'",
-            cmSystemTools::IsOn(enableDebug) ? "true" : "false");
+            cmSystemTools::IsOn(enableDebug.c_str()) ? "true" : "false");
         }
       }
     }
@@ -1810,14 +1808,15 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
         ge.Parse(shaderDisableOptimizations);
 
       for (size_t i = 0; i != this->Configurations.size(); ++i) {
-        const char* disableOptimizations =
+        const std::string& disableOptimizations =
           cge->Evaluate(this->LocalGenerator, this->Configurations[i]);
-        if (strlen(disableOptimizations) > 0) {
+        if (!disableOptimizations.empty()) {
           e2.WritePlatformConfigTag(
             "DisableOptimizations",
             "'$(Configuration)|$(Platform)'=='" + this->Configurations[i] +
               "|" + this->Platform + "'",
-            (cmSystemTools::IsOn(disableOptimizations) ? "true" : "false"));
+            (cmSystemTools::IsOn(disableOptimizations.c_str()) ? "true"
+                                                               : "false"));
         }
       }
     }

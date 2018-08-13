@@ -55,7 +55,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(
 
   std::string outputFileName = this->OutputFileExpr->Evaluate(
     lg, config, false, nullptr, nullptr, nullptr, lang);
-  const std::string outputContent = inputExpression->Evaluate(
+  const std::string& outputContent = inputExpression->Evaluate(
     lg, config, false, nullptr, nullptr, nullptr, lang);
 
   if (cmSystemTools::FileIsFullPath(outputFileName)) {

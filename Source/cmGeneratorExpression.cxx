@@ -38,7 +38,7 @@ cmGeneratorExpression::~cmGeneratorExpression()
 {
 }
 
-const char* cmCompiledGeneratorExpression::Evaluate(
+const std::string& cmCompiledGeneratorExpression::Evaluate(
   cmLocalGenerator* lg, const std::string& config, bool quiet,
   const cmGeneratorTarget* headTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
@@ -48,7 +48,7 @@ const char* cmCompiledGeneratorExpression::Evaluate(
                         language);
 }
 
-const char* cmCompiledGeneratorExpression::Evaluate(
+const std::string& cmCompiledGeneratorExpression::Evaluate(
   cmLocalGenerator* lg, const std::string& config, bool quiet,
   const cmGeneratorTarget* headTarget, const cmGeneratorTarget* currentTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
@@ -61,12 +61,12 @@ const char* cmCompiledGeneratorExpression::Evaluate(
   return this->EvaluateWithContext(context, dagChecker);
 }
 
-const char* cmCompiledGeneratorExpression::EvaluateWithContext(
+const std::string& cmCompiledGeneratorExpression::EvaluateWithContext(
   cmGeneratorExpressionContext& context,
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
   if (!this->NeedsEvaluation) {
-    return this->Input.c_str();
+    return this->Input;
   }
 
   this->Output.clear();
@@ -97,8 +97,7 @@ const char* cmCompiledGeneratorExpression::EvaluateWithContext(
 
   this->DependTargets = context.DependTargets;
   this->AllTargetsSeen = context.AllTargets;
-  // TODO: Return a std::string from here instead?
-  return this->Output.c_str();
+  return this->Output;
 }
 
 cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(

@@ -103,7 +103,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     }
   } else {
     // Use the command name given.
-    exe = ge.Parse(exe.c_str())->Evaluate(this->LG, config);
+    exe = ge.Parse(exe)->Evaluate(this->LG, config);
     cmSystemTools::ConvertToUnixSlashes(exe);
   }
 
