@@ -22,13 +22,13 @@ class cmStateDirectory
     cmStateSnapshot const& snapshot);
 
 public:
-  const char* GetCurrentSource() const;
+  std::string const& GetCurrentSource() const;
   void SetCurrentSource(std::string const& dir);
-  const char* GetCurrentBinary() const;
+  std::string const& GetCurrentBinary() const;
   void SetCurrentBinary(std::string const& dir);
 
-  const char* GetRelativePathTopSource() const;
-  const char* GetRelativePathTopBinary() const;
+  std::string const& GetRelativePathTopSource() const;
+  std::string const& GetRelativePathTopBinary() const;
   void SetRelativePathTopSource(const char* dir);
   void SetRelativePathTopBinary(const char* dir);
 

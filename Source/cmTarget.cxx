@@ -1415,13 +1415,15 @@ const char* cmTarget::GetProperty(const std::string& prop) const
       return this->GetMakefile()
         ->GetStateSnapshot()
         .GetDirectory()
-        .GetCurrentBinary();
+        .GetCurrentBinary()
+        .c_str();
     }
     if (prop == propSOURCE_DIR) {
       return this->GetMakefile()
         ->GetStateSnapshot()
         .GetDirectory()
-        .GetCurrentSource();
+        .GetCurrentSource()
+        .c_str();
     }
   }
 
