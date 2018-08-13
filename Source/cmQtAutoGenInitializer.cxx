@@ -173,18 +173,17 @@ static bool StaticLibraryCycle(cmGeneratorTarget const* targetOrigin,
   return cycle;
 }
 
-cmQtAutoGenInitializer::cmQtAutoGenInitializer(
-  cmGeneratorTarget* target, bool mocEnabled, bool uicEnabled, bool rccEnabled,
-  std::string const& qtVersionMajor)
+cmQtAutoGenInitializer::cmQtAutoGenInitializer(cmGeneratorTarget* target,
+                                               bool mocEnabled,
+                                               bool uicEnabled,
+                                               bool rccEnabled,
+                                               IntegerVersion const& qtVersion)
   : Target(target)
-  , QtVersionMajor(qtVersionMajor)
+  , QtVersion(qtVersion)
 {
   Moc.Enabled = mocEnabled;
   Uic.Enabled = uicEnabled;
   Rcc.Enabled = rccEnabled;
-
-  this->QtVersionMinor =
-    cmQtAutoGenInitializer::GetQtMinorVersion(target, this->QtVersionMajor);
 }
 
 bool cmQtAutoGenInitializer::InitCustomTargets()
@@ -381,14 +380,14 @@ bool cmQtAutoGenInitializer::InitMoc()
 
   // Moc predefs command
   if (this->Target->GetPropertyAsBool("AUTOMOC_COMPILER_PREDEFINES") &&
-      this->QtVersionGreaterOrEqual(5, 8)) {
+      (this->QtVersion >= IntegerVersion(5, 8))) {
     this->Moc.PredefsCmd =
       makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_PREDEFINES_COMMAND");
   }
 
   // Moc includes
   {
-    bool const appendImplicit = (this->QtVersionMajor == "5");
+    bool const appendImplicit = (this->QtVersion.Major == 5);
     auto GetIncludeDirs =
       [this, localGen, appendImplicit](std::string const& cfg) -> std::string {
       // Get the include dirs for this target, without stripping the implicit
@@ -725,7 +724,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
 
   // Process qrc files
   if (!this->Rcc.Qrcs.empty()) {
-    const bool QtV5 = (this->QtVersionMajor == "5");
+    const bool QtV5 = (this->QtVersion.Major == 5);
     // Target rcc options
     std::vector<std::string> optionsTarget;
     cmSystemTools::ExpandListArgument(
@@ -1097,6 +1096,9 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
       ofs << "set(" << key << " " << cmOutputConverter::EscapeForCMake(value)
           << ")\n";
     };
+    auto CWriteUInt = [&ofs](const char* key, unsigned int value) {
+      ofs << "set(" << key << " " << value << ")\n";
+    };
     auto CWriteList = [&CWrite](const char* key,
                                 std::vector<std::string> const& list) {
       CWrite(key, cmJoin(list, ";"));
@@ -1152,7 +1154,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     CWriteMap("AM_SETTINGS_FILE", this->AutogenTarget.ConfigSettingsFile);
 
     ofs << "# Qt\n";
-    CWrite("AM_QT_VERSION_MAJOR", this->QtVersionMajor);
+    CWriteUInt("AM_QT_VERSION_MAJOR", this->QtVersion.Major);
     CWrite("AM_QT_MOC_EXECUTABLE", this->Moc.Executable);
     CWrite("AM_QT_UIC_EXECUTABLE", this->Uic.Executable);
 
@@ -1265,53 +1267,56 @@ void cmQtAutoGenInitializer::AddGeneratedSource(std::string const& filename,
   this->Target->AddSource(filename);
 }
 
-std::string cmQtAutoGenInitializer::GetQtMajorVersion(
+cmQtAutoGenInitializer::IntegerVersion cmQtAutoGenInitializer::GetQtVersion(
   cmGeneratorTarget const* target)
 {
+  cmQtAutoGenInitializer::IntegerVersion res;
   cmMakefile* makefile = target->Target->GetMakefile();
+
+  // -- Major version
   std::string qtMajor = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
   if (qtMajor.empty()) {
     qtMajor = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
   }
-  const char* targetQtVersion =
-    target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", "");
-  if (targetQtVersion != nullptr) {
-    qtMajor = targetQtVersion;
+  {
+    const char* targetQtVersion =
+      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", "");
+    if (targetQtVersion != nullptr) {
+      qtMajor = targetQtVersion;
+    }
   }
-  return qtMajor;
-}
 
-std::string cmQtAutoGenInitializer::GetQtMinorVersion(
-  cmGeneratorTarget const* target, std::string const& qtVersionMajor)
-{
-  cmMakefile* makefile = target->Target->GetMakefile();
+  // -- Minor version
   std::string qtMinor;
-  if (qtVersionMajor == "5") {
-    qtMinor = makefile->GetSafeDefinition("Qt5Core_VERSION_MINOR");
-  }
-  if (qtMinor.empty()) {
-    qtMinor = makefile->GetSafeDefinition("QT_VERSION_MINOR");
+  if (!qtMajor.empty()) {
+    if (qtMajor == "5") {
+      qtMinor = makefile->GetSafeDefinition("Qt5Core_VERSION_MINOR");
+    }
+    if (qtMinor.empty()) {
+      qtMinor = makefile->GetSafeDefinition("QT_VERSION_MINOR");
+    }
+    {
+      const char* targetQtVersion =
+        target->GetLinkInterfaceDependentStringProperty("QT_MINOR_VERSION",
+                                                        "");
+      if (targetQtVersion != nullptr) {
+        qtMinor = targetQtVersion;
+      }
+    }
   }
 
-  const char* targetQtVersion =
-    target->GetLinkInterfaceDependentStringProperty("QT_MINOR_VERSION", "");
-  if (targetQtVersion != nullptr) {
-    qtMinor = targetQtVersion;
+  // -- Convert to integer
+  if (!qtMajor.empty() && !qtMinor.empty()) {
+    unsigned long majorUL(0);
+    unsigned long minorUL(0);
+    if (cmSystemTools::StringToULong(qtMajor.c_str(), &majorUL) &&
+        cmSystemTools::StringToULong(qtMinor.c_str(), &minorUL)) {
+      res.Major = static_cast<unsigned int>(majorUL);
+      res.Minor = static_cast<unsigned int>(minorUL);
+    }
   }
-  return qtMinor;
-}
 
-bool cmQtAutoGenInitializer::QtVersionGreaterOrEqual(
-  unsigned long requestMajor, unsigned long requestMinor) const
-{
-  unsigned long majorUL(0);
-  unsigned long minorUL(0);
-  if (cmSystemTools::StringToULong(this->QtVersionMajor.c_str(), &majorUL) &&
-      cmSystemTools::StringToULong(this->QtVersionMinor.c_str(), &minorUL)) {
-    return (majorUL > requestMajor) ||
-      (majorUL == requestMajor && minorUL >= requestMinor);
-  }
-  return false;
+  return res;
 }
 
 bool cmQtAutoGenInitializer::GetMocExecutable()
@@ -1321,9 +1326,9 @@ bool cmQtAutoGenInitializer::GetMocExecutable()
   // Find moc executable
   {
     std::string targetName;
-    if (this->QtVersionMajor == "5") {
+    if (this->QtVersion.Major == 5) {
       targetName = "Qt5::moc";
-    } else if (QtVersionMajor == "4") {
+    } else if (this->QtVersion.Major == 4) {
       targetName = "Qt4::moc";
     } else {
       err = "The AUTOMOC feature supports only Qt 4 and Qt 5";
@@ -1382,9 +1387,9 @@ bool cmQtAutoGenInitializer::GetUicExecutable()
   // Find uic executable
   {
     std::string targetName;
-    if (this->QtVersionMajor == "5") {
+    if (this->QtVersion.Major == 5) {
       targetName = "Qt5::uic";
-    } else if (QtVersionMajor == "4") {
+    } else if (this->QtVersion.Major == 4) {
       targetName = "Qt4::uic";
     } else {
       err = "The AUTOUIC feature supports only Qt 4 and Qt 5";
@@ -1395,7 +1400,7 @@ bool cmQtAutoGenInitializer::GetUicExecutable()
       if (tgt != nullptr) {
         this->Uic.Executable = tgt->ImportedGetLocation("");
       } else {
-        if (this->QtVersionMajor == "5") {
+        if (this->QtVersion.Major == 5) {
           // Project does not use Qt5Widgets, but has AUTOUIC ON anyway
         } else {
           err = "Could not find target " + targetName;
@@ -1447,9 +1452,9 @@ bool cmQtAutoGenInitializer::GetRccExecutable()
   // Find rcc executable
   {
     std::string targetName;
-    if (this->QtVersionMajor == "5") {
+    if (this->QtVersion.Major == 5) {
       targetName = "Qt5::rcc";
-    } else if (QtVersionMajor == "4") {
+    } else if (this->QtVersion.Major == 4) {
       targetName = "Qt4::rcc";
     } else {
       err = "The AUTORCC feature supports only Qt 4 and Qt 5";
@@ -1479,7 +1484,7 @@ bool cmQtAutoGenInitializer::GetRccExecutable()
         cmSystemTools::OUTPUT_NONE, cmDuration::zero(), cmProcessOutput::Auto);
       if (result) {
         // Detect if rcc supports (-)-list
-        if (this->QtVersionMajor == "5") {
+        if (this->QtVersion.Major == 5) {
           if (stdOut.find("--list") != std::string::npos) {
             this->Rcc.ListOptions.push_back("--list");
           } else {

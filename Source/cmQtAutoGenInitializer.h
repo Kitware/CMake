@@ -18,10 +18,6 @@ class cmTarget;
 class cmQtAutoGenInitializer : public cmQtAutoGen
 {
 public:
-  static std::string GetQtMajorVersion(cmGeneratorTarget const* target);
-  static std::string GetQtMinorVersion(cmGeneratorTarget const* target,
-                                       std::string const& qtVersionMajor);
-
   /// @brief Rcc job information
   class Qrc
   {
@@ -48,9 +44,11 @@ public:
   };
 
 public:
+  static IntegerVersion GetQtVersion(cmGeneratorTarget const* target);
+
   cmQtAutoGenInitializer(cmGeneratorTarget* target, bool mocEnabled,
                          bool uicEnabled, bool rccEnabled,
-                         std::string const& qtVersionMajor);
+                         IntegerVersion const& qtVersion);
 
   bool InitCustomTargets();
   bool SetupCustomTargets();
@@ -69,9 +67,6 @@ private:
 
   void AddGeneratedSource(std::string const& filename, GeneratorT genType);
 
-  bool QtVersionGreaterOrEqual(unsigned long requestMajor,
-                               unsigned long requestMinor) const;
-
   bool GetMocExecutable();
   bool GetUicExecutable();
   bool GetRccExecutable();
@@ -83,11 +78,8 @@ private:
 private:
   cmGeneratorTarget* Target;
 
-  // Qt
-  std::string QtVersionMajor;
-  std::string QtVersionMinor;
-
   // Configuration
+  IntegerVersion QtVersion;
   bool MultiConfig = false;
   std::string ConfigDefault;
   std::vector<std::string> ConfigsList;

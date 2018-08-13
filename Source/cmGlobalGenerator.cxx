@@ -34,6 +34,7 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmQtAutoGen.h"
 #include "cmQtAutoGenInitializer.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
@@ -1495,15 +1496,14 @@ bool cmGlobalGenerator::QtAutoGen()
         continue;
       }
 
-      std::string qtVersionMajor =
-        cmQtAutoGenInitializer::GetQtMajorVersion(target);
+      auto qtVersion = cmQtAutoGenInitializer::GetQtVersion(target);
       // don't do anything if there is no Qt4 or Qt5Core (which contains moc)
-      if (qtVersionMajor != "4" && qtVersionMajor != "5") {
+      if (qtVersion.Major != 4 && qtVersion.Major != 5) {
         continue;
       }
 
       autogenInits.emplace_back(cm::make_unique<cmQtAutoGenInitializer>(
-        target, mocEnabled, uicEnabled, rccEnabled, qtVersionMajor));
+        target, mocEnabled, uicEnabled, rccEnabled, qtVersion));
     }
   }
 
