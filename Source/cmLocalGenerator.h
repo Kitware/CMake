@@ -323,6 +323,7 @@ public:
 
   /** Fill out the static linker flags for the given target.  */
   void GetStaticLibraryFlags(std::string& flags, std::string const& config,
+                             std::string const& linkLanguage,
                              cmGeneratorTarget* target);
 
   /** Fill out these strings for the given target.  Libraries to link,

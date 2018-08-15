@@ -979,6 +979,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
 
 void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
                                              std::string const& config,
+                                             std::string const& linkLanguage,
                                              cmGeneratorTarget* target)
 {
   this->AppendFlags(
@@ -992,6 +993,11 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
     std::string name = "STATIC_LIBRARY_FLAGS_" + config;
     this->AppendFlags(flags, target->GetProperty(name));
   }
+
+  std::vector<std::string> options;
+  target->GetStaticLibraryLinkOptions(options, config, linkLanguage);
+  // STATIC_LIBRARY_OPTIONS are escaped.
+  this->AppendCompileOptions(flags, options);
 }
 
 void cmLocalGenerator::GetTargetFlags(
@@ -1009,7 +1015,7 @@ void cmLocalGenerator::GetTargetFlags(
 
   switch (target->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
-      this->GetStaticLibraryFlags(linkFlags, buildType, target);
+      this->GetStaticLibraryFlags(linkFlags, buildType, linkLanguage, target);
       break;
     case cmStateEnums::MODULE_LIBRARY:
       libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";

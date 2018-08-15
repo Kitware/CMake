@@ -148,7 +148,7 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 
   std::string extraFlags;
   this->LocalGenerator->GetStaticLibraryFlags(
-    extraFlags, cmSystemTools::UpperCase(this->ConfigName),
+    extraFlags, cmSystemTools::UpperCase(this->ConfigName), linkLanguage,
     this->GeneratorTarget);
   this->WriteLibraryRules(linkRuleVar, extraFlags, false);
 }
