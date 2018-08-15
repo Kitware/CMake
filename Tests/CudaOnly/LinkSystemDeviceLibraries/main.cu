@@ -3,6 +3,9 @@
 #include <cuda_runtime.h>
 #include <iostream>
 
+// this test only makes sense for versions of CUDA that ships
+// static libraries that have separable compilation device symbols
+#if __CUDACC_VER_MAJOR__ <= 9
 __global__ void deviceCublasSgemm(int n, float alpha, float beta,
                                   const float* d_A, const float* d_B,
                                   float* d_C)
@@ -22,6 +25,7 @@ __global__ void deviceCublasSgemm(int n, float alpha, float beta,
 
   cublasDestroy(cnpHandle);
 }
+#endif
 
 int choose_cuda_device()
 {
@@ -63,6 +67,7 @@ int main(int argc, char** argv)
     return 0;
   }
 
+#if __CUDACC_VER_MAJOR__ <= 9
   // initial values that will make sure that the cublasSgemm won't actually
   // do any work
   int n = 0;
@@ -72,6 +77,7 @@ int main(int argc, char** argv)
   float* d_B = nullptr;
   float* d_C = nullptr;
   deviceCublasSgemm<<<1, 1>>>(n, alpha, beta, d_A, d_B, d_C);
+#endif
 
   return 0;
 }
