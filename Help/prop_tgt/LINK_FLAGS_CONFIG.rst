@@ -1,9 +1,9 @@
 LINK_FLAGS_<CONFIG>
 -------------------
 
-Per-configuration linker flags for a target.
+Per-configuration linker flags for a shared library, module or executable target.
 
-This is the configuration-specific version of LINK_FLAGS.
+This is the configuration-specific version of :prop_tgt:`LINK_FLAGS`.
 
 .. note::
 

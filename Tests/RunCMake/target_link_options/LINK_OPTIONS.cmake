@@ -22,6 +22,13 @@ add_executable(LinkOptions_consumer LinkOptionsExe.c)
 target_link_libraries(LinkOptions_consumer PRIVATE LinkOptions_producer)
 
 
+# static library with generator expression
+add_library(LinkOptions_static STATIC LinkOptionsLib.c)
+target_link_options(LinkOptions_static PRIVATE $<$<CONFIG:Release>:${pre}BADFLAG_RELEASE${obj}>
+  "SHELL:" # produces no options
+  )
+
+
 # shared library with generator expression
 add_library(LinkOptions_shared SHARED LinkOptionsLib.c)
 target_link_options(LinkOptions_shared PRIVATE $<$<CONFIG:Release>:${pre}BADFLAG_RELEASE${obj}>

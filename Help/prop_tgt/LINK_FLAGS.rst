@@ -1,7 +1,9 @@
 LINK_FLAGS
 ----------
 
-Additional flags to use when linking this target.
+Additional flags to use when linking this target if it is a shared library,
+module library, or an executable. Static libraries need to use
+:prop_tgt:`STATIC_LIBRARY_FLAGS`.
 
 The LINK_FLAGS property, managed as a string, can be used to add extra flags
 to the link step of a target.  :prop_tgt:`LINK_FLAGS_<CONFIG>` will add to the

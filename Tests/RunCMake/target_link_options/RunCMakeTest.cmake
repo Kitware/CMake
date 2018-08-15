@@ -21,6 +21,7 @@ if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
 
   run_cmake_target(LINK_OPTIONS basic LinkOptions)
   run_cmake_target(LINK_OPTIONS interface LinkOptions_consumer)
+  run_cmake_target(LINK_OPTIONS static LinkOptions_static --config Release)
   run_cmake_target(LINK_OPTIONS shared LinkOptions_shared --config Release)
   run_cmake_target(LINK_OPTIONS mod LinkOptions_mod --config Release)
   run_cmake_target(LINK_OPTIONS exe LinkOptions_exe --config Release)

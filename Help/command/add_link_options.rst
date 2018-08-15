@@ -1,7 +1,7 @@
 add_link_options
 ----------------
 
-Adds options to the link of targets.
+Adds options to the link of shared library, module and executable targets.
 
 ::
 
