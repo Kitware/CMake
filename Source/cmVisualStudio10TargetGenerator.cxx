@@ -338,7 +338,7 @@ void cmVisualStudio10TargetGenerator::Generate()
                                              this->Name.c_str(),
                                              this->GeneratorTarget->Target->GetBacktrace());
   this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
-                                             this->ProjectFileExtension.c_str(),
+                                             ProjectFileExtension.c_str(),
                                              this->GeneratorTarget->Target->GetBacktrace());
 
   if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {

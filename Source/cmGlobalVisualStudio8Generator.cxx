@@ -164,7 +164,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 
       // Ensure ZERO_CHECK always runs in Visual Studio using MSBuild,
       // otherwise the prebuild command will not be run.
-      tgt->SetProperty("VS_GLOBAL_DisableFastUpToDateCheck", "true");
+      tgt->SetProperty("VS_GLOBAL_DisableFastUpToDateCheck", "true",
+                       tgt->GetBacktrace());
       listFiles.push_back(cm->GetGlobVerifyStamp());
     }
 
