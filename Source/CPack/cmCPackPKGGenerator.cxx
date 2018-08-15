@@ -26,8 +26,8 @@ bool cmCPackPKGGenerator::SupportsComponentInstallation() const
 
 int cmCPackPKGGenerator::InitializeInternal()
 {
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "cmCPackPKGGenerator::Initialize()"
-                  << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                "cmCPackPKGGenerator::Initialize()" << std::endl);
 
   return this->Superclass::InitializeInternal();
 }
@@ -52,8 +52,9 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
   std::string distributionTemplate =
     this->FindTemplate("CPack.distribution.dist.in");
   if (distributionTemplate.empty()) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find input file: "
-                    << distributionTemplate << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Cannot find input file: " << distributionTemplate
+                                             << std::endl);
     return;
   }
 
@@ -270,23 +271,26 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
   std::string cpackVar = "CPACK_RESOURCE_FILE_" + uname;
   const char* inFileName = this->GetOption(cpackVar);
   if (!inFileName) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "CPack option: "
-                    << cpackVar.c_str()
-                    << " not specified. It should point to "
-                    << (!name.empty() ? name : "<empty>") << ".rtf, " << name
-                    << ".html, or " << name << ".txt file" << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "CPack option: " << cpackVar.c_str()
+                                   << " not specified. It should point to "
+                                   << (!name.empty() ? name : "<empty>")
+                                   << ".rtf, " << name << ".html, or " << name
+                                   << ".txt file" << std::endl);
     return false;
   }
   if (!cmSystemTools::FileExists(inFileName)) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find "
-                    << (!name.empty() ? name : "<empty>")
-                    << " resource file: " << inFileName << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Cannot find " << (!name.empty() ? name : "<empty>")
+                                 << " resource file: " << inFileName
+                                 << std::endl);
     return false;
   }
   std::string ext = cmSystemTools::GetFilenameLastExtension(inFileName);
   if (ext != ".rtfd" && ext != ".rtf" && ext != ".html" && ext != ".txt") {
     cmCPackLogger(
-      cmCPackLog::LOG_ERROR, "Bad file extension specified: "
+      cmCPackLog::LOG_ERROR,
+      "Bad file extension specified: "
         << ext
         << ". Currently only .rtfd, .rtf, .html, and .txt files allowed."
         << std::endl);
@@ -330,8 +334,9 @@ bool cmCPackPKGGenerator::CopyResourcePlistFile(const std::string& name,
   destFileName += "/";
   destFileName += outName;
 
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: "
-                  << inFileName << " to " << destFileName << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                "Configure file: " << inFileName << " to " << destFileName
+                                   << std::endl);
   this->ConfigureFile(inFileName.c_str(), destFileName.c_str());
   return true;
 }

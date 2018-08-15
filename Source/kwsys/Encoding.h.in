@@ -12,15 +12,15 @@
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
 #if !defined(KWSYS_NAMESPACE)
-#define kwsys_ns(x) @KWSYS_NAMESPACE@##x
-#define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
+#  define kwsys_ns(x) @KWSYS_NAMESPACE@##x
+#  define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
 #endif
 #if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-#define kwsysEncoding kwsys_ns(Encoding)
-#define kwsysEncoding_mbstowcs kwsys_ns(Encoding_mbstowcs)
-#define kwsysEncoding_DupToWide kwsys_ns(Encoding_DupToWide)
-#define kwsysEncoding_wcstombs kwsys_ns(Encoding_wcstombs)
-#define kwsysEncoding_DupToNarrow kwsys_ns(Encoding_DupToNarrow)
+#  define kwsysEncoding kwsys_ns(Encoding)
+#  define kwsysEncoding_mbstowcs kwsys_ns(Encoding_mbstowcs)
+#  define kwsysEncoding_DupToWide kwsys_ns(Encoding_DupToWide)
+#  define kwsysEncoding_wcstombs kwsys_ns(Encoding_wcstombs)
+#  define kwsysEncoding_DupToNarrow kwsys_ns(Encoding_DupToNarrow)
 #endif
 
 #if defined(__cplusplus)
@@ -55,15 +55,15 @@ kwsysEXPORT char* kwsysEncoding_DupToNarrow(const wchar_t* str);
 /* If we are building a kwsys .c or .cxx file, let it use these macros.
    Otherwise, undefine them to keep the namespace clean.  */
 #if !defined(KWSYS_NAMESPACE)
-#undef kwsys_ns
-#undef kwsysEXPORT
-#if !defined(KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-#undef kwsysEncoding
-#undef kwsysEncoding_mbstowcs
-#undef kwsysEncoding_DupToWide
-#undef kwsysEncoding_wcstombs
-#undef kwsysEncoding_DupToNarrow
-#endif
+#  undef kwsys_ns
+#  undef kwsysEXPORT
+#  if !defined(KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+#    undef kwsysEncoding
+#    undef kwsysEncoding_mbstowcs
+#    undef kwsysEncoding_DupToWide
+#    undef kwsysEncoding_wcstombs
+#    undef kwsysEncoding_DupToNarrow
+#  endif
 #endif
 
 #endif

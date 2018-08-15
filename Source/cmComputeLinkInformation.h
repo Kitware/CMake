@@ -48,23 +48,24 @@ public:
     cmGeneratorTarget const* Target;
   };
   typedef std::vector<Item> ItemVector;
-  ItemVector const& GetItems();
-  std::vector<std::string> const& GetDirectories();
-  std::vector<std::string> const& GetDepends();
-  std::vector<std::string> const& GetFrameworkPaths();
+  ItemVector const& GetItems() const;
+  std::vector<std::string> const& GetDirectories() const;
+  std::vector<std::string> const& GetDepends() const;
+  std::vector<std::string> const& GetFrameworkPaths() const;
   std::string GetLinkLanguage() const { return this->LinkLanguage; }
-  std::vector<std::string> const& GetRuntimeSearchPath();
+  std::vector<std::string> const& GetRuntimeSearchPath() const;
   std::string const& GetRuntimeFlag() const { return this->RuntimeFlag; }
   std::string const& GetRuntimeSep() const { return this->RuntimeSep; }
-  void GetRPath(std::vector<std::string>& runtimeDirs, bool for_install);
-  std::string GetRPathString(bool for_install);
-  std::string GetChrpathString();
-  std::set<cmGeneratorTarget const*> const& GetSharedLibrariesLinked();
+  void GetRPath(std::vector<std::string>& runtimeDirs, bool for_install) const;
+  std::string GetRPathString(bool for_install) const;
+  std::string GetChrpathString() const;
+  std::set<cmGeneratorTarget const*> const& GetSharedLibrariesLinked() const;
 
   std::string const& GetRPathLinkFlag() const { return this->RPathLinkFlag; }
-  std::string GetRPathLinkString();
+  std::string GetRPathLinkString() const;
 
   std::string GetConfig() const { return this->Config; }
+
 private:
   void AddItem(std::string const& item, const cmGeneratorTarget* tgt);
   void AddSharedDepItem(std::string const& item, cmGeneratorTarget const* tgt);
@@ -78,13 +79,13 @@ private:
   std::set<cmGeneratorTarget const*> SharedLibrariesLinked;
 
   // Context information.
-  cmGeneratorTarget const* Target;
-  cmMakefile* Makefile;
-  cmGlobalGenerator* GlobalGenerator;
-  cmake* CMakeInstance;
+  cmGeneratorTarget const* const Target;
+  cmMakefile* const Makefile;
+  cmGlobalGenerator* const GlobalGenerator;
+  cmake* const CMakeInstance;
 
   // Configuration information.
-  std::string Config;
+  std::string const Config;
   std::string LinkLanguage;
 
   // Modes for dealing with dependent shared libraries.

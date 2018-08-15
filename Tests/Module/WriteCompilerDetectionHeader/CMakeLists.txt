@@ -190,7 +190,7 @@ write_compiler_detection_header(
   ALLOW_UNKNOWN_COMPILERS
 )
 
-# intentionally abuse the TEST_NULLPR variable: this will only work
+# intentionally abuse the TEST_NULLPTR variable: this will only work
 # with the fallback code.
 check_cxx_source_compiles("#include \"${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection_allow_unknown.h\"
 int main() {\n int i = TEST_NULLPTR;\n return 0; }\n"
@@ -199,3 +199,16 @@ int main() {\n int i = TEST_NULLPTR;\n return 0; }\n"
 if (NOT file_include_works_allow_unknown)
   message(SEND_ERROR "Inclusion of ${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection_allow_unknown.h was expected to work, but did not.")
 endif()
+
+# test for BARE_FEATURES
+
+write_compiler_detection_header(
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection_bare_features.h"
+  PREFIX TEST
+  COMPILERS GNU Clang AppleClang MSVC SunPro Intel
+  VERSION 3.1
+  BARE_FEATURES cxx_nullptr cxx_override cxx_noexcept cxx_final
+)
+
+add_executable(WriteCompilerDetectionHeaderBareFeatures main_bare.cpp)
+set_property(TARGET WriteCompilerDetectionHeaderBareFeatures PROPERTY CXX_STANDARD 11)

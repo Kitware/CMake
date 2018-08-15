@@ -78,8 +78,8 @@ test "$#" = 0 || die "$usage"
 
 # Find a default tool.
 tools='
+  clang-format-6.0
   clang-format
-  clang-format-3.8
 '
 if test "x$clang_format" = "x"; then
     for tool in $tools; do
@@ -93,6 +93,11 @@ fi
 # Verify that we have a tool.
 if ! type -p "$clang_format" >/dev/null; then
     echo "Unable to locate a 'clang-format' tool."
+    exit 1
+fi
+
+if ! "$clang_format" --version | grep 'clang-format version 6\.0' >/dev/null 2>/dev/null; then
+    echo "clang-format version 6.0 is required (exactly)"
     exit 1
 fi
 
@@ -110,8 +115,8 @@ esac
 $git_ls |
 
   # Select sources with our attribute.
-  git check-attr --stdin format.clang-format |
-  grep -e ': format\.clang-format: set$'     |
+  git check-attr --stdin format.clang-format-6.0 |
+  grep -e ': format\.clang-format-6\.0: set$'     |
   sed -n 's/:[^:]*:[^:]*$//p'                |
 
   # Update sources in-place.

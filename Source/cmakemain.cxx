@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#include "cmake.h"
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
@@ -9,19 +8,22 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 #include "cmcmd.h"
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-#include "cmDocumentation.h"
-#include "cmDynamicLoader.h"
+#  include "cmDocumentation.h"
+#  include "cmDynamicLoader.h"
 #endif
 
 #include "cm_uv.h"
 
 #include "cmsys/Encoding.hxx"
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmsys/ConsoleBuf.hxx"
+#  include "cmsys/ConsoleBuf.hxx"
 #endif
+
+#include <ctype.h>
 #include <iostream>
 #include <string.h>
 #include <string>
@@ -34,11 +36,13 @@ static const char* cmDocumentationName[][2] = {
 };
 
 static const char* cmDocumentationUsage[][2] = {
-  { nullptr, "  cmake [options] <path-to-source>\n"
-             "  cmake [options] <path-to-existing-build>" },
-  { nullptr, "Specify a source directory to (re-)generate a build system for "
-             "it in the current working directory.  Specify an existing build "
-             "directory to re-generate its build system." },
+  { nullptr,
+    "  cmake [options] <path-to-source>\n"
+    "  cmake [options] <path-to-existing-build>" },
+  { nullptr,
+    "Specify a source directory to (re-)generate a build system for "
+    "it in the current working directory.  Specify an existing build "
+    "directory to re-generate its build system." },
   { nullptr, nullptr }
 };
 
@@ -47,15 +51,23 @@ static const char* cmDocumentationUsageNote[][2] = {
   { nullptr, nullptr }
 };
 
-#define CMAKE_BUILD_OPTIONS                                                   \
-  "  <dir>          = Project binary directory to be built.\n"                \
-  "  --target <tgt> = Build <tgt> instead of default targets.\n"              \
-  "                   May only be specified once.\n"                          \
-  "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"         \
-  "  --clean-first  = Build target 'clean' first, then build.\n"              \
-  "                   (To clean only, use --target 'clean'.)\n"               \
-  "  --use-stderr   = Ignored.  Behavior is default in CMake >= 3.0.\n"       \
-  "  --             = Pass remaining options to the native tool.\n"
+#  define CMAKE_BUILD_OPTIONS                                                 \
+    "  <dir>          = Project binary directory to be built.\n"              \
+    "  -j [<jobs>] --parallel [<jobs>] = Build in parallel using\n"           \
+    "                   the given number of jobs. If <jobs> is omitted\n"     \
+    "                   the native build tool's default number is used.\n"    \
+    "                   The CMAKE_BUILD_PARALLEL_LEVEL environment "          \
+    "variable\n"                                                              \
+    "                   specifies a default parallel level when this "        \
+    "option\n"                                                                \
+    "                   is not given.\n"                                      \
+    "  --target <tgt> = Build <tgt> instead of default targets.\n"            \
+    "                   May only be specified once.\n"                        \
+    "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"       \
+    "  --clean-first  = Build target 'clean' first, then build.\n"            \
+    "                   (To clean only, use --target 'clean'.)\n"             \
+    "  --use-stderr   = Ignored.  Behavior is default in CMake >= 3.0.\n"     \
+    "  --             = Pass remaining options to the native tool.\n"
 
 static const char* cmDocumentationOptions[][2] = {
   CMAKE_STANDARD_OPTIONS_TABLE,
@@ -66,11 +78,13 @@ static const char* cmDocumentationOptions[][2] = {
   { "-N", "View mode only." },
   { "-P <file>", "Process script mode." },
   { "--find-package", "Run in pkg-config like mode." },
-  { "--graphviz=[file]", "Generate graphviz of dependencies, see "
-                         "CMakeGraphVizOptions.cmake for more." },
+  { "--graphviz=[file]",
+    "Generate graphviz of dependencies, see "
+    "CMakeGraphVizOptions.cmake for more." },
   { "--system-information [file]", "Dump information about this system." },
-  { "--debug-trycompile", "Do not delete the try_compile build tree. Only "
-                          "useful on one try_compile at a time." },
+  { "--debug-trycompile",
+    "Do not delete the try_compile build tree. Only "
+    "useful on one try_compile at a time." },
   { "--debug-output", "Put cmake in a debug mode." },
   { "--trace", "Put cmake in trace mode." },
   { "--trace-expand", "Put cmake in trace mode with variable expansion." },
@@ -79,8 +93,9 @@ static const char* cmDocumentationOptions[][2] = {
   { "--warn-uninitialized", "Warn about uninitialized values." },
   { "--warn-unused-vars", "Warn about unused variables." },
   { "--no-warn-unused-cli", "Don't warn about command line options." },
-  { "--check-system-vars", "Find problems with variable usage in system "
-                           "files." },
+  { "--check-system-vars",
+    "Find problems with variable usage in system "
+    "files." },
   { nullptr, nullptr }
 };
 
@@ -360,6 +375,7 @@ static int do_build(int ac, char const* const* av)
   std::cerr << "This cmake does not support --build\n";
   return -1;
 #else
+  int jobs = cmake::NO_BUILD_PARALLEL_LEVEL;
   std::string target;
   std::string config = "Debug";
   std::string dir;
@@ -370,6 +386,7 @@ static int do_build(int ac, char const* const* av)
   enum Doing
   {
     DoingNone,
+    DoingJobs,
     DoingDir,
     DoingTarget,
     DoingConfig,
@@ -379,6 +396,13 @@ static int do_build(int ac, char const* const* av)
   for (int i = 2; i < ac; ++i) {
     if (doing == DoingNative) {
       nativeOptions.push_back(av[i]);
+    } else if ((strcmp(av[i], "-j") == 0) ||
+               (strcmp(av[i], "--parallel") == 0)) {
+      jobs = cmake::DEFAULT_BUILD_PARALLEL_LEVEL;
+      /* does the next argument start with a number? */
+      if ((i + 1 < ac) && (isdigit(*av[i + 1]))) {
+        doing = DoingJobs;
+      }
     } else if (strcmp(av[i], "--target") == 0) {
       if (!hasTarget) {
         doing = DoingTarget;
@@ -399,6 +423,18 @@ static int do_build(int ac, char const* const* av)
       doing = DoingNative;
     } else {
       switch (doing) {
+        case DoingJobs: {
+          unsigned long numJobs = 0;
+          if (cmSystemTools::StringToULong(av[i], &numJobs)) {
+            jobs = int(numJobs);
+            doing = DoingNone;
+          } else {
+            std::cerr << "'" << av[i - 1] << "' invalid number '" << av[i]
+                      << "' given.\n\n";
+            dir.clear();
+            break;
+          }
+        } break;
         case DoingDir:
           dir = cmSystemTools::CollapseFullPath(av[i]);
           doing = DoingNone;
@@ -418,6 +454,25 @@ static int do_build(int ac, char const* const* av)
       }
     }
   }
+
+  if (jobs == cmake::NO_BUILD_PARALLEL_LEVEL) {
+    std::string parallel;
+    if (cmSystemTools::GetEnv("CMAKE_BUILD_PARALLEL_LEVEL", parallel)) {
+      if (parallel.empty()) {
+        jobs = cmake::DEFAULT_BUILD_PARALLEL_LEVEL;
+      } else {
+        unsigned long numJobs = 0;
+        if (cmSystemTools::StringToULong(parallel.c_str(), &numJobs)) {
+          jobs = int(numJobs);
+        } else {
+          std::cerr << "'CMAKE_BUILD_PARALLEL_LEVEL' environment variable\n"
+                    << "invalid number '" << parallel << "' given.\n\n";
+          dir.clear();
+        }
+      }
+    }
+  }
+
   if (dir.empty()) {
     /* clang-format off */
     std::cerr <<
@@ -432,7 +487,7 @@ static int do_build(int ac, char const* const* av)
   cmake cm(cmake::RoleInternal);
   cmSystemTools::SetMessageCallback(cmakemainMessageCallback, &cm);
   cm.SetProgressCallback(cmakemainProgressCallback, &cm);
-  return cm.Build(dir, target, config, nativeOptions, clean);
+  return cm.Build(jobs, dir, target, config, nativeOptions, clean);
 #endif
 }
 

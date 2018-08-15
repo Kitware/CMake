@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <set>
-#include <sstream>
+#include <string.h>
 #include <vector>
 
 #include "cmAlgorithms.h"
@@ -341,12 +341,13 @@ redirection character (for example, ^>, ^<, or ^| ). If you need to
 use the caret character itself (^), use two in a row (^^).
 */
 
-int cmOutputConverter::Shell__CharIsWhitespace(char c)
+/* Some helpers to identify character classes */
+static int Shell__CharIsWhitespace(char c)
 {
   return ((c == ' ') || (c == '\t'));
 }
 
-int cmOutputConverter::Shell__CharNeedsQuotesOnUnix(char c)
+static int Shell__CharNeedsQuotesOnUnix(char c)
 {
   return ((c == '\'') || (c == '`') || (c == ';') || (c == '#') ||
           (c == '&') || (c == '$') || (c == '(') || (c == ')') || (c == '~') ||
@@ -354,10 +355,15 @@ int cmOutputConverter::Shell__CharNeedsQuotesOnUnix(char c)
           (c == '\\'));
 }
 
-int cmOutputConverter::Shell__CharNeedsQuotesOnWindows(char c)
+static int Shell__CharNeedsQuotesOnWindows(char c)
 {
   return ((c == '\'') || (c == '#') || (c == '&') || (c == '<') ||
           (c == '>') || (c == '|') || (c == '^'));
+}
+
+static int Shell__CharIsMakeVariableName(char c)
+{
+  return c && (c == '_' || isalpha((static_cast<int>(c))));
 }
 
 int cmOutputConverter::Shell__CharNeedsQuotes(char c, int flags)
@@ -384,11 +390,6 @@ int cmOutputConverter::Shell__CharNeedsQuotes(char c, int flags)
     }
   }
   return 0;
-}
-
-int cmOutputConverter::Shell__CharIsMakeVariableName(char c)
-{
-  return c && (c == '_' || isalpha((static_cast<int>(c))));
 }
 
 const char* cmOutputConverter::Shell__SkipMakeVariables(const char* c)
@@ -481,7 +482,9 @@ int cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in, int flags)
 
 std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
 {
-  std::ostringstream out;
+  /* Output will be at least as long as input string.  */
+  std::string out;
+  out.reserve(strlen(in));
 
   /* String iterator.  */
   const char* c;
@@ -495,11 +498,11 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
     /* Add the opening quote for this argument.  */
     if (flags & Shell_Flag_WatcomQuote) {
       if (flags & Shell_Flag_IsUnix) {
-        out << '"';
+        out += '"';
       }
-      out << '\'';
+      out += '\'';
     } else {
-      out << '"';
+      out += '"';
     }
   }
 
@@ -511,7 +514,7 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
       if (skip != c) {
         /* Copy to the end of the make variable references.  */
         while (c != skip) {
-          out << *c++;
+          out += *c++;
         }
 
         /* The make variable reference eliminates any escaping needed
@@ -531,7 +534,7 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
          quoted argument.  */
       if (*c == '\\' || *c == '"' || *c == '`' || *c == '$') {
         /* This character needs a backslash to escape it.  */
-        out << '\\';
+        out += '\\';
       }
     } else if (flags & Shell_Flag_EchoWindows) {
       /* On Windows the built-in command shell echo never needs escaping.  */
@@ -545,11 +548,11 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
            backslashes.  */
         while (windows_backslashes > 0) {
           --windows_backslashes;
-          out << '\\';
+          out += '\\';
         }
 
         /* Add the backslash to escape the double-quote.  */
-        out << '\\';
+        out += '\\';
       } else {
         /* We encountered a normal character.  This eliminates any
            escaping needed for preceding backslashes.  */
@@ -562,7 +565,7 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
       if (flags & Shell_Flag_Make) {
         /* In Makefiles a dollar is written $$.  The make tool will
            replace it with just $ before passing it to the shell.  */
-        out << "$$";
+        out += "$$";
       } else if (flags & Shell_Flag_VSIDE) {
         /* In a VS IDE a dollar is written "$".  If this is written in
            an un-quoted argument it starts a quoted segment, inserts
@@ -570,30 +573,30 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
            argument it ends quoting, inserts the $ and restarts
            quoting.  Either way the $ is isolated from surrounding
            text to avoid looking like a variable reference.  */
-        out << "\"$\"";
+        out += "\"$\"";
       } else {
         /* Otherwise a dollar is written just $. */
-        out << '$';
+        out += '$';
       }
     } else if (*c == '#') {
       if ((flags & Shell_Flag_Make) && (flags & Shell_Flag_WatcomWMake)) {
         /* In Watcom WMake makefiles a pound is written $#.  The make
            tool will replace it with just # before passing it to the
            shell.  */
-        out << "$#";
+        out += "$#";
       } else {
         /* Otherwise a pound is written just #. */
-        out << '#';
+        out += '#';
       }
     } else if (*c == '%') {
       if ((flags & Shell_Flag_VSIDE) ||
           ((flags & Shell_Flag_Make) &&
            ((flags & Shell_Flag_MinGWMake) || (flags & Shell_Flag_NMake)))) {
         /* In the VS IDE, NMake, or MinGW make a percent is written %%.  */
-        out << "%%";
+        out += "%%";
       } else {
         /* Otherwise a percent is written just %. */
-        out << '%';
+        out += '%';
       }
     } else if (*c == ';') {
       if (flags & Shell_Flag_VSIDE) {
@@ -602,14 +605,14 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
            inserts the ; and ends the segment.  If it is written in a
            quoted argument it ends quoting, inserts the ; and restarts
            quoting.  Either way the ; is isolated.  */
-        out << "\";\"";
+        out += "\";\"";
       } else {
         /* Otherwise a semicolon is written just ;. */
-        out << ';';
+        out += ';';
       }
     } else {
       /* Store this character.  */
-      out << *c;
+      out += *c;
     }
   }
 
@@ -617,19 +620,19 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
     /* Add enough backslashes to escape any trailing ones.  */
     while (windows_backslashes > 0) {
       --windows_backslashes;
-      out << '\\';
+      out += '\\';
     }
 
     /* Add the closing quote for this argument.  */
     if (flags & Shell_Flag_WatcomQuote) {
-      out << '\'';
+      out += '\'';
       if (flags & Shell_Flag_IsUnix) {
-        out << '"';
+        out += '"';
       }
     } else {
-      out << '"';
+      out += '"';
     }
   }
 
-  return out.str();
+  return out;
 }

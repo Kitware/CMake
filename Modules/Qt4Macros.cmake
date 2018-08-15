@@ -151,7 +151,8 @@ macro (QT4_GENERATE_MOC infile outfile )
       set(moc_target ${ARGV3})
    endif()
    QT4_CREATE_MOC_COMMAND(${abs_infile} ${_outfile} "${moc_flags}" "" "${moc_target}")
-   set_source_files_properties(${outfile} PROPERTIES SKIP_AUTOMOC TRUE)  # don't run automoc on this file
+   set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
+   set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
 endmacro ()
 
 
@@ -166,6 +167,8 @@ macro (QT4_WRAP_CPP outfiles )
     get_filename_component(it ${it} ABSOLUTE)
     QT4_MAKE_OUTPUT_FILE(${it} moc_ cxx outfile)
     QT4_CREATE_MOC_COMMAND(${it} ${outfile} "${moc_flags}" "${moc_options}" "${moc_target}")
+    set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
+    set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
     set(${outfiles} ${${outfiles}} ${outfile})
   endforeach()
 
@@ -185,6 +188,8 @@ macro (QT4_WRAP_UI outfiles )
       COMMAND Qt4::uic
       ARGS ${ui_options} -o ${outfile} ${infile}
       MAIN_DEPENDENCY ${infile} VERBATIM)
+    set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
+    set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
     set(${outfiles} ${${outfiles}} ${outfile})
   endforeach ()
 
@@ -233,6 +238,8 @@ macro (QT4_ADD_RESOURCES outfiles )
       ARGS ${rcc_options} -name ${outfilename} -o ${outfile} ${infile}
       MAIN_DEPENDENCY ${infile}
       DEPENDS ${_RC_DEPENDS} "${out_depends}" VERBATIM)
+    set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
+    set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
     set(${outfiles} ${${outfiles}} ${outfile})
   endforeach ()
 
@@ -245,19 +252,19 @@ macro(QT4_ADD_DBUS_INTERFACE _sources _interface _basename)
   set(_impl   "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.cpp")
   set(_moc    "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.moc")
 
-  get_source_file_property(_nonamespace ${_interface} NO_NAMESPACE)
+  get_property(_nonamespace SOURCE ${_interface} PROPERTY NO_NAMESPACE)
   if(_nonamespace)
     set(_params -N -m)
   else()
     set(_params -m)
   endif()
 
-  get_source_file_property(_classname ${_interface} CLASSNAME)
+  get_property(_classname SOURCE ${_interface} PROPERTY CLASSNAME)
   if(_classname)
     set(_params ${_params} -c ${_classname})
   endif()
 
-  get_source_file_property(_include ${_interface} INCLUDE)
+  get_property(_include SOURCE ${_interface} PROPERTY INCLUDE)
   if(_include)
     set(_params ${_params} -i ${_include})
   endif()
@@ -266,7 +273,8 @@ macro(QT4_ADD_DBUS_INTERFACE _sources _interface _basename)
       COMMAND Qt4::qdbusxml2cpp ${_params} -p ${_basename} ${_infile}
       DEPENDS ${_infile} VERBATIM)
 
-  set_source_files_properties("${_impl}" PROPERTIES SKIP_AUTOMOC TRUE)
+  set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
+  set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
 
   QT4_GENERATE_MOC("${_header}" "${_moc}")
 
@@ -350,7 +358,8 @@ macro(QT4_ADD_DBUS_ADAPTOR _sources _xml_file _include _parentClass) # _optional
   endif()
 
   QT4_GENERATE_MOC("${_header}" "${_moc}")
-  set_source_files_properties("${_impl}" PROPERTIES SKIP_AUTOMOC TRUE)
+  set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
+  set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
   MACRO_ADD_FILE_DEPENDENCIES("${_impl}" "${_moc}")
 
   list(APPEND ${_sources} "${_impl}" "${_header}" "${_moc}")
@@ -374,7 +383,7 @@ macro(QT4_AUTOMOC)
     # cmake is run for the very first time on them -> however the .cpp files might
     # exist at a later run. at that time we need to skip them, so that we don't add two
     # different rules for the same moc file
-    get_source_file_property(_skip ${_abs_FILE} SKIP_AUTOMOC)
+    get_property(_skip SOURCE ${_abs_FILE} PROPERTY SKIP_AUTOMOC)
 
     if ( NOT _skip AND EXISTS ${_abs_FILE} )
 
@@ -454,7 +463,7 @@ macro(QT4_ADD_TRANSLATION _qm_files)
   foreach (_current_FILE ${ARGN})
     get_filename_component(_abs_FILE ${_current_FILE} ABSOLUTE)
     get_filename_component(qm ${_abs_FILE} NAME_WE)
-    get_source_file_property(output_location ${_abs_FILE} OUTPUT_LOCATION)
+    get_property(output_location SOURCE ${_abs_FILE} PROPERTY OUTPUT_LOCATION)
     if(output_location)
       file(MAKE_DIRECTORY "${output_location}")
       set(qm "${output_location}/${qm}.qm")

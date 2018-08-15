@@ -73,7 +73,6 @@ public:
   static void WriteDivider(std::ostream& os);
 
   static std::string EncodeRuleName(std::string const& name);
-  static std::string EncodeIdent(const std::string& ident, std::ostream& vars);
   static std::string EncodeLiteral(const std::string& lit);
   std::string EncodePath(const std::string& path);
 
@@ -208,7 +207,8 @@ public:
                             const std::string& projectName,
                             const std::string& projectDir,
                             const std::string& targetName,
-                            const std::string& config, bool fast, bool verbose,
+                            const std::string& config, bool fast, int jobs,
+                            bool verbose,
                             std::vector<std::string> const& makeOptions =
                               std::vector<std::string>()) override;
 
@@ -346,8 +346,10 @@ public:
   static std::string RequiredNinjaVersion() { return "1.3"; }
   static std::string RequiredNinjaVersionForConsolePool() { return "1.5"; }
   static std::string RequiredNinjaVersionForImplicitOuts() { return "1.7"; }
+  static std::string RequiredNinjaVersionForManifestRestat() { return "1.8"; }
   bool SupportsConsolePool() const;
   bool SupportsImplicitOuts() const;
+  bool SupportsManifestRestat() const;
 
   std::string NinjaOutputPath(std::string const& path) const;
   bool HasOutputPathPrefix() const { return !this->OutputPathPrefix.empty(); }
@@ -460,6 +462,7 @@ private:
   std::string NinjaVersion;
   bool NinjaSupportsConsolePool;
   bool NinjaSupportsImplicitOuts;
+  bool NinjaSupportsManifestRestat;
   unsigned long NinjaSupportsDyndeps;
 
 private:

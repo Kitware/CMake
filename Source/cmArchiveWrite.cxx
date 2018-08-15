@@ -14,7 +14,7 @@
 #include <time.h>
 
 #ifndef __LA_SSIZE_T
-#define __LA_SSIZE_T la_ssize_t
+#  define __LA_SSIZE_T la_ssize_t
 #endif
 
 static std::string cm_archive_error_string(struct archive* a)

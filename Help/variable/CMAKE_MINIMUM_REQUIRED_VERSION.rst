@@ -1,7 +1,5 @@
 CMAKE_MINIMUM_REQUIRED_VERSION
 ------------------------------
 
-Version specified to :command:`cmake_minimum_required` command
-
-Variable containing the ``VERSION`` component specified in the
-:command:`cmake_minimum_required` command.
+The ``<min>`` version of CMake given to the most recent call to the
+:command:`cmake_minimum_required(VERSION)` command.

@@ -240,20 +240,17 @@ because this need be done only for shared libraries without soname-s.
 
 cmComputeLinkInformation::cmComputeLinkInformation(
   const cmGeneratorTarget* target, const std::string& config)
-{
   // Store context information.
-  this->Target = target;
-  this->Makefile = this->Target->Target->GetMakefile();
-  this->GlobalGenerator =
-    this->Target->GetLocalGenerator()->GetGlobalGenerator();
-  this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
-
+  : Target(target)
+  , Makefile(target->Target->GetMakefile())
+  , GlobalGenerator(target->GetLocalGenerator()->GetGlobalGenerator())
+  , CMakeInstance(this->GlobalGenerator->GetCMakeInstance())
+  // The configuration being linked.
+  , Config(config)
+{
   // Check whether to recognize OpenBSD-style library versioned names.
   this->OpenBSD = this->Makefile->GetState()->GetGlobalPropertyAsBool(
     "FIND_LIBRARY_USE_OPENBSD_VERSIONING");
-
-  // The configuration being linked.
-  this->Config = config;
 
   // Allocate internals.
   this->OrderLinkerSearchPath = new cmOrderDirectories(
@@ -406,17 +403,18 @@ cmComputeLinkInformation::~cmComputeLinkInformation()
 }
 
 cmComputeLinkInformation::ItemVector const&
-cmComputeLinkInformation::GetItems()
+cmComputeLinkInformation::GetItems() const
 {
   return this->Items;
 }
 
 std::vector<std::string> const& cmComputeLinkInformation::GetDirectories()
+  const
 {
   return this->OrderLinkerSearchPath->GetOrderedDirectories();
 }
 
-std::string cmComputeLinkInformation::GetRPathLinkString()
+std::string cmComputeLinkInformation::GetRPathLinkString() const
 {
   // If there is no separate linker runtime search flag (-rpath-link)
   // there is no reason to compute a string.
@@ -428,18 +426,19 @@ std::string cmComputeLinkInformation::GetRPathLinkString()
   return cmJoin(this->OrderDependentRPath->GetOrderedDirectories(), ":");
 }
 
-std::vector<std::string> const& cmComputeLinkInformation::GetDepends()
+std::vector<std::string> const& cmComputeLinkInformation::GetDepends() const
 {
   return this->Depends;
 }
 
 std::vector<std::string> const& cmComputeLinkInformation::GetFrameworkPaths()
+  const
 {
   return this->FrameworkPaths;
 }
 
 const std::set<const cmGeneratorTarget*>&
-cmComputeLinkInformation::GetSharedLibrariesLinked()
+cmComputeLinkInformation::GetSharedLibrariesLinked() const
 {
   return this->SharedLibrariesLinked;
 }
@@ -611,6 +610,9 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       if (!libName.empty()) {
         this->AddItem(libName, nullptr);
       }
+    } else if (tgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+      // Ignore object library!
+      // Its object-files should already have been extracted for linking.
     } else {
       // Decide whether to use an import library.
       bool implib =
@@ -1023,7 +1025,7 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
       (generator.find("Visual Studio") != std::string::npos ||
        generator.find("Xcode") != std::string::npos)) {
     std::string file = cmSystemTools::GetFilenameName(item);
-    if (!this->ExtractAnyLibraryName.find(file.c_str())) {
+    if (!this->ExtractAnyLibraryName.find(file)) {
       this->HandleBadFullItem(item, file);
       return;
     }
@@ -1230,7 +1232,7 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item,
 void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
 {
   // Try to separate the framework name and path.
-  if (!this->SplitFramework.find(item.c_str())) {
+  if (!this->SplitFramework.find(item)) {
     std::ostringstream e;
     e << "Could not parse framework path \"" << item << "\" "
       << "linked by target " << this->Target->GetName() << ".";
@@ -1569,7 +1571,7 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
 }
 
 std::vector<std::string> const&
-cmComputeLinkInformation::GetRuntimeSearchPath()
+cmComputeLinkInformation::GetRuntimeSearchPath() const
 {
   return this->OrderRuntimeSearchPath->GetOrderedDirectories();
 }
@@ -1635,7 +1637,7 @@ void cmComputeLinkInformation::AddLibraryRuntimeInfo(
   if (!is_shared_library) {
     // On some platforms (AIX) a shared library may look static.
     if (this->ArchivesMayBeShared) {
-      if (this->ExtractStaticLibraryName.find(file.c_str())) {
+      if (this->ExtractStaticLibraryName.find(file)) {
         // This is the name of a shared library or archive.
         is_shared_library = true;
       }
@@ -1680,7 +1682,7 @@ static void cmCLI_ExpandListUnique(const char* str,
 }
 
 void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
-                                        bool for_install)
+                                        bool for_install) const
 {
   // Select whether to generate runtime search directories.
   bool outputRuntime =
@@ -1794,7 +1796,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
   cmCLI_ExpandListUnique(this->RuntimeAlways.c_str(), runtimeDirs, emitted);
 }
 
-std::string cmComputeLinkInformation::GetRPathString(bool for_install)
+std::string cmComputeLinkInformation::GetRPathString(bool for_install) const
 {
   // Get the directories to use.
   std::vector<std::string> runtimeDirs;
@@ -1822,7 +1824,7 @@ std::string cmComputeLinkInformation::GetRPathString(bool for_install)
   return rpath;
 }
 
-std::string cmComputeLinkInformation::GetChrpathString()
+std::string cmComputeLinkInformation::GetChrpathString() const
 {
   if (!this->RuntimeUseChrpath) {
     return "";

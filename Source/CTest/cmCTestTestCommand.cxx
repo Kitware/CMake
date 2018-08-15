@@ -112,14 +112,16 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     if (!cmSystemTools::StringToULong(this->Values[ctt_TEST_LOAD],
                                       &testLoad)) {
       testLoad = 0;
-      cmCTestLog(this->CTest, WARNING, "Invalid value for 'TEST_LOAD' : "
+      cmCTestLog(this->CTest, WARNING,
+                 "Invalid value for 'TEST_LOAD' : "
                    << this->Values[ctt_TEST_LOAD] << std::endl);
     }
   } else if (ctestTestLoad && *ctestTestLoad) {
     if (!cmSystemTools::StringToULong(ctestTestLoad, &testLoad)) {
       testLoad = 0;
-      cmCTestLog(this->CTest, WARNING, "Invalid value for 'CTEST_TEST_LOAD' : "
-                   << ctestTestLoad << std::endl);
+      cmCTestLog(this->CTest, WARNING,
+                 "Invalid value for 'CTEST_TEST_LOAD' : " << ctestTestLoad
+                                                          << std::endl);
     }
   } else {
     testLoad = this->CTest->GetTestLoad();

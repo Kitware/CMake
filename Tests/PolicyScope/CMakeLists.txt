@@ -52,6 +52,10 @@ if(1)
     # CMP0002 should be changed when this function is invoked
     cmake_policy(GET CMP0002 cmp)
     check(CMP0002 "OLD" "${cmp}")
+
+    # The undocumented PARENT_SCOPE option sees the caller's setting.
+    cmake_policy(GET CMP0002 cmp PARENT_SCOPE)
+    check(CMP0002 "NEW" "${cmp}")
   endfunction()
 
   # Unset CMP0002
@@ -60,6 +64,10 @@ if(1)
     # CMP0002 should be unset when this macro is invoked
     cmake_policy(GET CMP0002 cmp)
     check(CMP0002 "" "${cmp}")
+
+    # The undocumented PARENT_SCOPE option sees the caller's setting.
+    cmake_policy(GET CMP0002 cmp PARENT_SCOPE)
+    check(CMP0002 "NEW" "${cmp}")
 
     # Setting the policy should work here and also in the caller.
     cmake_policy(SET CMP0002 OLD)

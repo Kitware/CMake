@@ -75,11 +75,12 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
   // Create all the imported targets.
   for (cmTargetExport* te : allTargets) {
     cmGeneratorTarget* gt = te->Target;
+    cmStateEnums::TargetType targetType = this->GetExportTargetType(te);
 
     requiresConfigFiles =
-      requiresConfigFiles || gt->GetType() != cmStateEnums::INTERFACE_LIBRARY;
+      requiresConfigFiles || targetType != cmStateEnums::INTERFACE_LIBRARY;
 
-    this->GenerateImportTargetCode(os, gt);
+    this->GenerateImportTargetCode(os, gt, targetType);
 
     ImportPropertyMap properties;
 
@@ -103,6 +104,12 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
                                     cmGeneratorExpression::InstallInterface,
                                     properties, missingTargets);
 
+    std::string errorMessage;
+    if (!this->PopulateExportProperties(gt, properties, errorMessage)) {
+      cmSystemTools::Error(errorMessage.c_str());
+      return false;
+    }
+
     const bool newCMP0022Behavior =
       gt->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
       gt->GetPolicyStatusCMP0022() != cmPolicies::OLD;
@@ -114,7 +121,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         require2_8_12 = true;
       }
     }
-    if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (targetType == cmStateEnums::INTERFACE_LIBRARY) {
       require3_0_0 = true;
     }
     if (gt->GetProperty("INTERFACE_SOURCES")) {
@@ -308,7 +315,7 @@ void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
   // Add each target in the set to the export.
   for (cmTargetExport* te : *this->IEGen->GetExportSet()->GetTargetExports()) {
     // Collect import properties for this target.
-    if (te->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (this->GetExportTargetType(te) == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
 
@@ -340,7 +347,7 @@ void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
                                    cmGeneratorExpression::InstallInterface,
                                    gtgt, properties, missingTargets);
 
-      // TOOD: PUBLIC_HEADER_LOCATION
+      // TODO: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff
       // is done.  Then this can be a propagated include directory.
       // this->GenerateImportProperty(config, te->HeaderGenerator,
@@ -424,6 +431,19 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
     properties[prop] = value;
     importedLocations.insert(prop);
   }
+}
+
+cmStateEnums::TargetType cmExportInstallFileGenerator::GetExportTargetType(
+  cmTargetExport const* targetExport) const
+{
+  cmStateEnums::TargetType targetType = targetExport->Target->GetType();
+  // An OBJECT library installed with no OBJECTS DESTINATION
+  // is transformed to an INTERFACE library.
+  if (targetType == cmStateEnums::OBJECT_LIBRARY &&
+      targetExport->ObjectsGenerator == nullptr) {
+    targetType = cmStateEnums::INTERFACE_LIBRARY;
+  }
+  return targetType;
 }
 
 void cmExportInstallFileGenerator::HandleMissingTarget(

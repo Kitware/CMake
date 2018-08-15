@@ -4,6 +4,8 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 9)
   set(IOS_DEPLOYMENT_TARGET "-DCMAKE_XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET=10")
 endif()
 
+run_cmake(ExplicitCMakeLists)
+
 run_cmake(XcodeFileType)
 run_cmake(XcodeAttributeLocation)
 run_cmake(XcodeAttributeGenex)

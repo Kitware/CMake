@@ -5,22 +5,25 @@
 # FindMatlab
 # ----------
 #
-# Finds Matlab installations and provides Matlab tools and libraries to cmake.
+# Finds Matlab or Matlab Compiler Runtime (MCR) and provides Matlab tools,
+# libraries and compilers to CMake.
 #
-# This package first intention is to find the libraries associated with Matlab
-# in order to be able to build Matlab extensions (mex files). It can also be
-# used:
+# This package primary purpose is to find the libraries associated with Matlab
+# or the MCR in order to be able to build Matlab extensions (mex files). It
+# can also be used:
 #
-# * run specific commands in Matlab
-# * declare Matlab unit test
-# * retrieve various information from Matlab (mex extensions, versions and
+# * to run specific commands in Matlab in case Matlab is available
+# * for declaring Matlab unit test
+# * to retrieve various information from Matlab (mex extensions, versions and
 #   release queries, ...)
 #
 # The module supports the following components:
 #
-# * ``MX_LIBRARY``, ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the MX,
-#   ENG and MAT libraries of Matlab
-# * ``MAIN_PROGRAM`` the Matlab binary program.
+# * ``MX_LIBRARY``, ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the ``MX``,
+#   ``ENG`` and ``MAT`` libraries of Matlab
+# * ``MAIN_PROGRAM`` the Matlab binary program. Note that this component is not
+#   available on the MCR version, and will yield an error if the MCR is found
+#   instead of the regular Matlab installation.
 # * ``MEX_COMPILER`` the MEX compiler.
 # * ``SIMULINK`` the Simulink environment.
 #
@@ -30,24 +33,26 @@
 #   **version**, which should not be confused with the Matlab *release* name
 #   (eg. `R2014`).
 #   The :command:`matlab_get_version_from_release_name` and
-#   :command:`matlab_get_release_name_from_version` allow a mapping
-#   from the release name to the version.
+#   :command:`matlab_get_release_name_from_version` provide a mapping
+#   between the release name and the version.
 #
 # The variable :variable:`Matlab_ROOT_DIR` may be specified in order to give
 # the path of the desired Matlab version. Otherwise, the behaviour is platform
 # specific:
 #
-# * Windows: The installed versions of Matlab are retrieved from the
+# * Windows: The installed versions of Matlab/MCR are retrieved from the
 #   Windows registry
-# * OS X: The installed versions of Matlab are given by the MATLAB
-#   paths in ``/Application``. If no such application is found, it falls back
-#   to the one that might be accessible from the PATH.
-# * Unix: The desired Matlab should be accessible from the PATH.
+# * OS X: The installed versions of Matlab/MCR are given by the MATLAB
+#   default installation paths in ``/Application``. If no such application is
+#   found, it falls back to the one that might be accessible from the ``PATH``.
+# * Unix: The desired Matlab should be accessible from the ``PATH``. This does
+#   not work for MCR installation and :variable:`Matlab_ROOT_DIR` should be
+#   specified on this platform.
 #
 # Additional information is provided when :variable:`MATLAB_FIND_DEBUG` is set.
-# When a Matlab binary is found automatically and the ``MATLAB_VERSION``
-# is not given, the version is queried from Matlab directly.
-# On Windows, it can make a window running Matlab appear.
+# When a Matlab/MCR installation is found automatically and the ``MATLAB_VERSION``
+# is not given, the version is queried from Matlab directly (on Windows this
+# may pop up a Matlab window) or from the MCR installation.
 #
 # The mapping of the release names and the version of Matlab is performed by
 # defining pairs (name, version).  The variable
@@ -135,15 +140,15 @@
 #   parses the registry for all Matlab versions. Available on Windows only.
 #   The part of the registry parsed is dependent on the host processor
 # :command:`matlab_get_all_valid_matlab_roots_from_registry`
-#   returns all the possible Matlab paths, according to a previously
+#   returns all the possible Matlab or MCR paths, according to a previously
 #   given list. Only the existing/accessible paths are kept. This is mainly
 #   useful for the searching all possible Matlab installation.
 # :command:`matlab_get_mex_suffix`
 #   returns the suffix to be used for the mex files
 #   (platform/architecture dependent)
 # :command:`matlab_get_version_from_matlab_run`
-#   returns the version of Matlab, given the full directory of the Matlab
-#   program.
+#   returns the version of Matlab/MCR, given the full directory of the Matlab/MCR
+#   installation path.
 #
 #
 # Known issues
@@ -213,7 +218,7 @@
 
 set(_FindMatlab_SELF_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 include(CheckCXXCompilerFlag)
 include(CheckCCompilerFlag)
 
@@ -256,7 +261,7 @@ endif()
 # .. command:: matlab_get_version_from_release_name
 #
 #   Returns the version of Matlab (17.58) from a release name (R2017k)
-macro (matlab_get_version_from_release_name release_name version_name)
+macro(matlab_get_version_from_release_name release_name version_name)
 
   string(REGEX MATCHALL "${release_name}=([0-9]+\\.?[0-9]*)" _matched ${MATLAB_VERSIONS_MAPPING})
 
@@ -264,7 +269,7 @@ macro (matlab_get_version_from_release_name release_name version_name)
   if(NOT _matched STREQUAL "")
     set(${version_name} ${CMAKE_MATCH_1})
   else()
-    message(WARNING "The release name ${release_name} is not registered")
+    message(WARNING "[MATLAB] The release name ${release_name} is not registered")
   endif()
   unset(_matched)
 
@@ -278,7 +283,7 @@ endmacro()
 # .. command:: matlab_get_release_name_from_version
 #
 #   Returns the release name (R2017k) from the version of Matlab (17.58)
-macro (matlab_get_release_name_from_version version release_name)
+macro(matlab_get_release_name_from_version version release_name)
 
   set(${release_name} "")
   foreach(_var IN LISTS MATLAB_VERSIONS_MAPPING)
@@ -292,7 +297,7 @@ macro (matlab_get_release_name_from_version version release_name)
   unset(_var)
   unset(_matched)
   if(${release_name} STREQUAL "")
-    message(WARNING "The version ${version} is not registered")
+    message(WARNING "[MATLAB] The version ${version} is not registered")
   endif()
 
 endmacro()
@@ -341,8 +346,9 @@ endmacro()
 #   installed. The found versions are returned in `matlab_versions`.
 #   Set `win64` to `TRUE` if the 64 bit version of Matlab should be looked for
 #   The returned list contains all versions under
-#   ``HKLM\\SOFTWARE\\Mathworks\\MATLAB`` or an empty list in case an error
-#   occurred (or nothing found).
+#   ``HKLM\\SOFTWARE\\Mathworks\\MATLAB`` and
+#   ``HKLM\\SOFTWARE\\Mathworks\\MATLAB Runtime`` or an empty list in case an
+#   error occurred (or nothing found).
 #
 #   .. note::
 #
@@ -352,9 +358,8 @@ endmacro()
 function(matlab_extract_all_installed_versions_from_registry win64 matlab_versions)
 
   if(NOT CMAKE_HOST_WIN32)
-    message(FATAL_ERROR "This macro can only be called by a windows host (call to reg.exe")
+    message(FATAL_ERROR "[MATLAB] This macro can only be called by a windows host (call to reg.exe)")
   endif()
-
 
   if(${win64} AND CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "64")
     set(APPEND_REG "/reg:64")
@@ -362,41 +367,45 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
     set(APPEND_REG "/reg:32")
   endif()
 
-  # /reg:64 should be added on 64 bits capable OSs in order to enable the
-  # redirection of 64 bits applications
-  execute_process(
-    COMMAND reg query HKEY_LOCAL_MACHINE\\SOFTWARE\\Mathworks\\MATLAB /f * /k ${APPEND_REG}
-    RESULT_VARIABLE resultMatlab
-    OUTPUT_VARIABLE varMatlab
-    ERROR_VARIABLE errMatlab
-    INPUT_FILE NUL
-    )
-
-
   set(matlabs_from_registry)
-  if(${resultMatlab} EQUAL 0)
 
-    string(
-      REGEX MATCHALL "MATLAB\\\\([0-9]+(\\.[0-9]+)?)"
-      matlab_versions_regex ${varMatlab})
+  foreach(_installation_type IN ITEMS "MATLAB" "MATLAB Runtime")
 
-    foreach(match IN LISTS matlab_versions_regex)
+    # /reg:64 should be added on 64 bits capable OSs in order to enable the
+    # redirection of 64 bits applications
+    execute_process(
+      COMMAND reg query HKEY_LOCAL_MACHINE\\SOFTWARE\\Mathworks\\${_installation_type} /f * /k ${APPEND_REG}
+      RESULT_VARIABLE resultMatlab
+      OUTPUT_VARIABLE varMatlab
+      ERROR_VARIABLE errMatlab
+      INPUT_FILE NUL
+      )
+
+
+    if(${resultMatlab} EQUAL 0)
+
       string(
-        REGEX MATCH "MATLAB\\\\(([0-9]+)(\\.([0-9]+))?)"
-        current_match ${match})
+        REGEX MATCHALL "MATLAB\\\\([0-9]+(\\.[0-9]+)?)"
+        matlab_versions_regex ${varMatlab})
 
-      set(_matlab_current_version ${CMAKE_MATCH_1})
-      set(current_matlab_version_major ${CMAKE_MATCH_2})
-      set(current_matlab_version_minor ${CMAKE_MATCH_4})
-      if(NOT current_matlab_version_minor)
-        set(current_matlab_version_minor "0")
-      endif()
+      foreach(match IN LISTS matlab_versions_regex)
+        string(
+          REGEX MATCH "MATLAB\\\\(([0-9]+)(\\.([0-9]+))?)"
+          current_match ${match})
 
-      list(APPEND matlabs_from_registry ${_matlab_current_version})
-      unset(_matlab_current_version)
-    endforeach(match)
+        set(_matlab_current_version ${CMAKE_MATCH_1})
+        set(current_matlab_version_major ${CMAKE_MATCH_2})
+        set(current_matlab_version_minor ${CMAKE_MATCH_4})
+        if(NOT current_matlab_version_minor)
+          set(current_matlab_version_minor "0")
+        endif()
 
-  endif()
+        list(APPEND matlabs_from_registry ${_matlab_current_version})
+        unset(_matlab_current_version)
+      endforeach()
+
+    endif()
+  endforeach()
 
   if(matlabs_from_registry)
     list(REMOVE_DUPLICATES matlabs_from_registry)
@@ -441,7 +450,6 @@ macro(extract_matlab_versions_from_registry_brute_force matlab_versions)
     # list(APPEND matlab_supported_versions MATLAB_ADDITIONAL_VERSIONS)
   # endif()
 
-
   # we order from more recent to older
   if(matlab_supported_versions)
     list(REMOVE_DUPLICATES matlab_supported_versions)
@@ -449,10 +457,7 @@ macro(extract_matlab_versions_from_registry_brute_force matlab_versions)
     list(REVERSE matlab_supported_versions)
   endif()
 
-
   set(${matlab_versions} ${matlab_supported_versions})
-
-
 endmacro()
 
 
@@ -461,9 +466,11 @@ endmacro()
 #.rst:
 # .. command:: matlab_get_all_valid_matlab_roots_from_registry
 #
-#   Populates the Matlab root with valid versions of Matlab.
-#   The returned matlab_roots is organized in pairs
-#   ``(version_number,matlab_root_path)``.
+#   Populates the Matlab root with valid versions of Matlab or
+#   Matlab Runtime (MCR).
+#   The returned matlab_roots is organized in triplets
+#   ``(type,version_number,matlab_root_path)``, where ``type``
+#   indicates either ``MATLAB`` or ``MCR``.
 #
 #   ::
 #
@@ -472,17 +479,17 @@ endmacro()
 #         matlab_roots)
 #
 #   ``matlab_versions``
-#     the versions of each of the Matlab installations
+#     the versions of each of the Matlab or MCR installations
 #   ``matlab_roots``
-#     the location of each of the Matlab installations
+#     the location of each of the Matlab or MCR installations
 function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_roots)
 
   # The matlab_versions comes either from
   # extract_matlab_versions_from_registry_brute_force or
   # matlab_extract_all_installed_versions_from_registry.
 
-
   set(_matlab_roots_list )
+  # check for Matlab installations
   foreach(_matlab_current_version ${matlab_versions})
     get_filename_component(
       current_MATLAB_ROOT
@@ -490,13 +497,27 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
       ABSOLUTE)
 
     if(EXISTS ${current_MATLAB_ROOT})
-      list(APPEND _matlab_roots_list ${_matlab_current_version} ${current_MATLAB_ROOT})
+      list(APPEND _matlab_roots_list "MATLAB" ${_matlab_current_version} ${current_MATLAB_ROOT})
     endif()
 
-  endforeach(_matlab_current_version)
-  unset(_matlab_current_version)
+  endforeach()
+
+  # Check for MCR installations
+  foreach(_matlab_current_version ${matlab_versions})
+    get_filename_component(
+      current_MATLAB_ROOT
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MathWorks\\MATLAB Runtime\\${_matlab_current_version};MATLABROOT]"
+      ABSOLUTE)
+
+    # remove the dot
+    string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
+
+    if(EXISTS ${current_MATLAB_ROOT})
+      list(APPEND _matlab_roots_list "MCR" ${_matlab_current_version} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
+    endif()
+
+  endforeach()
   set(${matlab_roots} ${_matlab_roots_list} PARENT_SCOPE)
-  unset(_matlab_roots_list)
 endfunction()
 
 #.rst:
@@ -513,7 +534,7 @@ endfunction()
 #         mex_suffix)
 #
 #   ``matlab_root``
-#     the root of the Matlab installation
+#     the root of the Matlab/MCR installation
 #   ``mex_suffix``
 #     the variable name in which the suffix will be returned.
 function(matlab_get_mex_suffix matlab_root mex_suffix)
@@ -548,7 +569,9 @@ function(matlab_get_mex_suffix matlab_root mex_suffix)
       )
     endif()
   endforeach(current_mexext_suffix)
-
+  if(MATLAB_FIND_DEBUG)
+    message(STATUS "[MATLAB] Determining mex files extensions from '${matlab_root}/bin' with program '${Matlab_MEXEXTENSIONS_PROG}'")
+  endif()
 
   # the program has been found?
   if((NOT Matlab_MEXEXTENSIONS_PROG) OR (NOT EXISTS ${Matlab_MEXEXTENSIONS_PROG}))
@@ -568,12 +591,29 @@ function(matlab_get_mex_suffix matlab_root mex_suffix)
     set(devnull INPUT_FILE NUL)
   endif()
 
+  # this is the preferred way. If this does not work properly (eg. MCR on Windows), then we use our own knowledge
   execute_process(
     COMMAND ${Matlab_MEXEXTENSIONS_PROG}
     OUTPUT_VARIABLE _matlab_mex_extension
+    #RESULT_VARIABLE _matlab_mex_extension_call
     ERROR_VARIABLE _matlab_mex_extension_error
     ${devnull})
-  string(STRIP ${_matlab_mex_extension} _matlab_mex_extension)
+
+  if(NOT "${_matlab_mex_extension_error}" STREQUAL "")
+    if(WIN32)
+      # this is only for intel architecture
+      if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(_matlab_mex_extension "mexw64")
+      else()
+        set(_matlab_mex_extension "mexw32")
+      endif()
+    endif()
+  endif()
+
+  string(STRIP "${_matlab_mex_extension}"  _matlab_mex_extension)
+  if(MATLAB_FIND_DEBUG)
+    message(STATUS "[MATLAB] '${Matlab_MEXEXTENSIONS_PROG}' : returned '${_matlab_mex_extension_call}', determined extension '${_matlab_mex_extension}' and error string is '${_matlab_mex_extension_error}'")
+  endif()
 
   unset(Matlab_MEXEXTENSIONS_PROG CACHE)
   set(${mex_suffix} ${_matlab_mex_extension} PARENT_SCOPE)
@@ -586,7 +626,8 @@ endfunction()
 # .. command:: matlab_get_version_from_matlab_run
 #
 #   This function runs Matlab program specified on arguments and extracts its
-#   version.
+#   version. If the path provided for the Matlab installation points to an MCR
+#   installation, the version is extracted from the installed files.
 #
 #   ::
 #
@@ -601,7 +642,6 @@ endfunction()
 function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_versions)
 
   set(${matlab_list_versions} "" PARENT_SCOPE)
-
 
   if(MATLAB_FIND_DEBUG)
     message(STATUS "[MATLAB] Determining the version of Matlab from ${matlab_binary_program}")
@@ -704,7 +744,9 @@ endfunction()
 # .. command:: matlab_add_unit_test
 #
 #   Adds a Matlab unit test to the test set of cmake/ctest.
-#   This command requires the component ``MAIN_PROGRAM``.
+#   This command requires the component ``MAIN_PROGRAM`` and hence is not
+#   available for an MCR installation.
+#
 #   The unit test uses the Matlab unittest framework (default, available
 #   starting Matlab 2013b+) except if the option ``NO_UNITTEST_FRAMEWORK``
 #   is given.
@@ -929,7 +971,7 @@ function(matlab_add_mex)
       TARGET ${${prefix}_NAME}
       PRE_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy_if_different ${${prefix}_DOCUMENTATION} $<TARGET_FILE_DIR:${${prefix}_NAME}>/${output_name}.m
-      COMMENT "Copy ${${prefix}_NAME} documentation file into the output folder"
+      COMMENT "[MATLAB] Copy ${${prefix}_NAME} documentation file into the output folder"
     )
   endif() # documentation
 
@@ -1005,10 +1047,10 @@ endfunction()
 # (internal)
 # Used to get the version of matlab, using caching. This basically transforms the
 # output of the root list, with possible unknown version, to a version
-#
-function(_Matlab_get_version_from_root matlab_root matlab_known_version matlab_final_version)
+# This can possibly run Matlab for extracting the version.
+function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_version matlab_final_version)
 
-  # if the version is not trivial, we query matlab for that
+  # if the version is not trivial, we query matlab (if not MCR) for that
   # we keep track of the location of matlab that induced this version
   #if(NOT DEFINED Matlab_PROG_VERSION_STRING_AUTO_DETECT)
   #  set(Matlab_PROG_VERSION_STRING_AUTO_DETECT "" CACHE INTERNAL "internal matlab location for the discovered version")
@@ -1021,188 +1063,230 @@ function(_Matlab_get_version_from_root matlab_root matlab_known_version matlab_f
     return()
   endif()
 
-  #
-  set(_matlab_current_program ${Matlab_MAIN_PROGRAM})
-
-  # do we already have a matlab program?
-  if(NOT _matlab_current_program)
-
-    set(_find_matlab_options)
-    if(matlab_root AND EXISTS ${matlab_root})
-      set(_find_matlab_options PATHS ${matlab_root} ${matlab_root}/bin NO_DEFAULT_PATH)
+  if("${matlab_or_mcr}" STREQUAL "UNKNOWN")
+    if(MATLAB_FIND_DEBUG)
+      message(WARNING "[MATLAB] Determining Matlab or MCR")
     endif()
 
-    find_program(
-        _matlab_current_program
-        matlab
-        ${_find_matlab_options}
-        DOC "Matlab main program"
-      )
+    if(EXISTS "${matlab_root}/appdata/version.xml")
+      # we inspect the application version.xml file that contains the product information
+      file(STRINGS "${matlab_root}/appdata/version.xml" productinfo_string NEWLINE_CONSUME)
+      string(REGEX MATCH "<installedProductData.*displayedString=\"([a-zA-Z ]+)\".*/>"
+             product_reg_match
+             ${productinfo_string}
+            )
+
+      # default fallback to Matlab
+      set(matlab_or_mcr "MATLAB")
+      if(NOT "${CMAKE_MATCH_1}" STREQUAL "")
+        string(TOLOWER "${CMAKE_MATCH_1}" product_reg_match)
+
+        if("${product_reg_match}" STREQUAL "matlab runtime")
+          set(matlab_or_mcr "MCR")
+        endif()
+      endif()
+    endif()
+
+    if(MATLAB_FIND_DEBUG)
+      message(WARNING "[MATLAB] '${matlab_root}' contains the '${matlab_or_mcr}'")
+    endif()
   endif()
 
-  if(NOT _matlab_current_program OR NOT EXISTS ${_matlab_current_program})
-    # if not found, clear the dependent variables
-    if(MATLAB_FIND_DEBUG)
-      message(WARNING "[MATLAB] Cannot find the main matlab program under ${matlab_root}")
+  # UNKNOWN is the default behaviour in case we
+  # - have an erroneous matlab_root
+  # - have an initial 'UNKNOWN'
+  if("${matlab_or_mcr}" STREQUAL "MATLAB" OR "${matlab_or_mcr}" STREQUAL "UNKNOWN")
+    # MATLAB versions
+    set(_matlab_current_program ${Matlab_MAIN_PROGRAM})
+
+    # do we already have a matlab program?
+    if(NOT _matlab_current_program)
+
+      set(_find_matlab_options)
+      if(matlab_root AND EXISTS ${matlab_root})
+        set(_find_matlab_options PATHS ${matlab_root} ${matlab_root}/bin NO_DEFAULT_PATH)
+      endif()
+
+      find_program(
+          _matlab_current_program
+          matlab
+          ${_find_matlab_options}
+          DOC "Matlab main program"
+        )
     endif()
-    set(Matlab_PROG_VERSION_STRING_AUTO_DETECT "" CACHE INTERNAL "internal matlab location for the discovered version" FORCE)
-    set(Matlab_VERSION_STRING_INTERNAL "" CACHE INTERNAL "internal matlab location for the discovered version" FORCE)
+
+    if(NOT _matlab_current_program OR NOT EXISTS ${_matlab_current_program})
+      # if not found, clear the dependent variables
+      if(MATLAB_FIND_DEBUG)
+        message(WARNING "[MATLAB] Cannot find the main matlab program under ${matlab_root}")
+      endif()
+      set(Matlab_PROG_VERSION_STRING_AUTO_DETECT "" CACHE INTERNAL "internal matlab location for the discovered version" FORCE)
+      set(Matlab_VERSION_STRING_INTERNAL "" CACHE INTERNAL "internal matlab location for the discovered version" FORCE)
+      unset(_matlab_current_program)
+      unset(_matlab_current_program CACHE)
+      return()
+    endif()
+
+    # full real path for path comparison
+    get_filename_component(_matlab_main_real_path_tmp "${_matlab_current_program}" REALPATH)
     unset(_matlab_current_program)
     unset(_matlab_current_program CACHE)
-    return()
-  endif()
 
-  # full real path for path comparison
-  get_filename_component(_matlab_main_real_path_tmp "${_matlab_current_program}" REALPATH)
-  unset(_matlab_current_program)
-  unset(_matlab_current_program CACHE)
+    # is it the same as the previous one?
+    if(_matlab_main_real_path_tmp STREQUAL Matlab_PROG_VERSION_STRING_AUTO_DETECT)
+      set(${matlab_final_version} ${Matlab_VERSION_STRING_INTERNAL} PARENT_SCOPE)
+      return()
+    endif()
 
-  # is it the same as the previous one?
-  if(_matlab_main_real_path_tmp STREQUAL Matlab_PROG_VERSION_STRING_AUTO_DETECT)
+    # update the location of the program
+    set(Matlab_PROG_VERSION_STRING_AUTO_DETECT
+        ${_matlab_main_real_path_tmp}
+        CACHE INTERNAL "internal matlab location for the discovered version" FORCE)
+
+    set(matlab_list_of_all_versions)
+    matlab_get_version_from_matlab_run("${Matlab_PROG_VERSION_STRING_AUTO_DETECT}" matlab_list_of_all_versions)
+
+    list(LENGTH matlab_list_of_all_versions list_of_all_versions_length)
+    if(${list_of_all_versions_length} GREATER 0)
+      list(GET matlab_list_of_all_versions 0 _matlab_version_tmp)
+    else()
+      set(_matlab_version_tmp "unknown")
+    endif()
+
+    # set the version into the cache
+    set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)" FORCE)
+
+    # warning, just in case several versions found (should not happen)
+    if((${list_of_all_versions_length} GREATER 1) AND MATLAB_FIND_DEBUG)
+      message(WARNING "[MATLAB] Found several versions, taking the first one (versions found ${matlab_list_of_all_versions})")
+    endif()
+
+    # return the updated value
     set(${matlab_final_version} ${Matlab_VERSION_STRING_INTERNAL} PARENT_SCOPE)
-    return()
-  endif()
-
-  # update the location of the program
-  set(Matlab_PROG_VERSION_STRING_AUTO_DETECT ${_matlab_main_real_path_tmp} CACHE INTERNAL "internal matlab location for the discovered version" FORCE)
-
-  set(matlab_list_of_all_versions)
-  matlab_get_version_from_matlab_run("${Matlab_PROG_VERSION_STRING_AUTO_DETECT}" matlab_list_of_all_versions)
-
-  list(LENGTH matlab_list_of_all_versions list_of_all_versions_length)
-  if(${list_of_all_versions_length} GREATER 0)
-    list(GET matlab_list_of_all_versions 0 _matlab_version_tmp)
   else()
+    # MCR
+    # we cannot run anything in order to extract the version. We assume that the file
+    # VersionInfo.xml exists under the MatlabRoot, we look for it and extract the version from there
     set(_matlab_version_tmp "unknown")
-  endif()
+    file(STRINGS "${matlab_root}/VersionInfo.xml" versioninfo_string NEWLINE_CONSUME)
+    # parses "<version>9.2.0.538062</version>"
+    string(REGEX MATCH "<version>(.*)</version>"
+           version_reg_match
+           ${versioninfo_string}
+          )
 
-  # set the version into the cache
-  set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)" FORCE)
+    if(NOT "${version_reg_match}" STREQUAL "")
+      if("${CMAKE_MATCH_1}" MATCHES "(([0-9])\\.([0-9]))[\\.0-9]*")
+        set(_matlab_version_tmp "${CMAKE_MATCH_1}")
+      endif()
+    endif()
+    set(${matlab_final_version} "${_matlab_version_tmp}" PARENT_SCOPE)
+    set(Matlab_VERSION_STRING_INTERNAL
+        "${_matlab_version_tmp}"
+        CACHE INTERNAL "Matlab (MCR) version (automatically determined)"
+        FORCE)
 
-  # warning, just in case several versions found (should not happen)
-  if((${list_of_all_versions_length} GREATER 1) AND MATLAB_FIND_DEBUG)
-    message(WARNING "[MATLAB] Found several versions, taking the first one (versions found ${matlab_list_of_all_versions})")
-  endif()
-
-  # return the updated value
-  set(${matlab_final_version} ${Matlab_VERSION_STRING_INTERNAL} PARENT_SCOPE)
+    endif() # Matlab or MCR
 
 endfunction()
 
 
+# Utility function for finding Matlab or MCR on Win32
+function(_Matlab_find_instances_win32 matlab_roots)
+  # On WIN32, we look for Matlab installation in the registry
+  # if unsuccessful, we look for all known revision and filter the existing
+  # ones.
 
+  # testing if we are able to extract the needed information from the registry
+  set(_matlab_versions_from_registry)
 
-
-
-
-# ###################################
-# Exploring the possible Matlab_ROOTS
-
-# this variable will get all Matlab installations found in the current system.
-set(_matlab_possible_roots)
-
-
-
-if(Matlab_ROOT_DIR)
-  # if the user specifies a possible root, we keep this one
-
-  if(NOT EXISTS ${Matlab_ROOT_DIR})
-    # if Matlab_ROOT_DIR specified but erroneous
-    if(MATLAB_FIND_DEBUG)
-      message(WARNING "[MATLAB] the specified path for Matlab_ROOT_DIR does not exist (${Matlab_ROOT_DIR})")
-    endif()
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(_matlab_win64 ON)
   else()
-    # NOTFOUND indicates the code below to search for the version automatically
-    if("${Matlab_VERSION_STRING_INTERNAL}" STREQUAL "")
-      list(APPEND _matlab_possible_roots "NOTFOUND" ${Matlab_ROOT_DIR}) # empty version
-    else()
-      list(APPEND _matlab_possible_roots ${Matlab_VERSION_STRING_INTERNAL} ${Matlab_ROOT_DIR}) # cached version
-    endif()
+    set(_matlab_win64 OFF)
   endif()
 
+  matlab_extract_all_installed_versions_from_registry(_matlab_win64 _matlab_versions_from_registry)
 
-else()
-
-  # if the user does not specify the possible installation root, we look for
-  # one installation using the appropriate heuristics
-
-  if(WIN32)
-
-    # On WIN32, we look for Matlab installation in the registry
-    # if unsuccessful, we look for all known revision and filter the existing
-    # ones.
-
-    # testing if we are able to extract the needed information from the registry
-    set(_matlab_versions_from_registry)
-
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-      set(_matlab_win64 ON)
-    else()
-      set(_matlab_win64 OFF)
-    endif()
-
-    matlab_extract_all_installed_versions_from_registry(_matlab_win64 _matlab_versions_from_registry)
-
-    # the returned list is empty, doing the search on all known versions
-    if(NOT _matlab_versions_from_registry)
-
-      if(MATLAB_FIND_DEBUG)
-        message(STATUS "[MATLAB] Search for Matlab from the registry unsuccessful, testing all supported versions")
-      endif()
-
-      extract_matlab_versions_from_registry_brute_force(_matlab_versions_from_registry)
-    endif()
-
-    # filtering the results with the registry keys
-    matlab_get_all_valid_matlab_roots_from_registry("${_matlab_versions_from_registry}" _matlab_possible_roots)
-    unset(_matlab_versions_from_registry)
-
-  elseif(APPLE)
-
-    # on mac, we look for the /Application paths
-    # this corresponds to the behaviour on Windows. On Linux, we do not have
-    # any other guess.
-    matlab_get_supported_releases(_matlab_releases)
+  # the returned list is empty, doing the search on all known versions
+  if(NOT _matlab_versions_from_registry)
     if(MATLAB_FIND_DEBUG)
-      message(STATUS "[MATLAB] Matlab supported versions ${_matlab_releases}. If more version should be supported "
-                   "the variable MATLAB_ADDITIONAL_VERSIONS can be set according to the documentation")
+      message(STATUS "[MATLAB] Search for Matlab from the registry unsuccessful, testing all supported versions")
     endif()
-
-    foreach(_matlab_current_release IN LISTS _matlab_releases)
-      set(_matlab_full_string "/Applications/MATLAB_${_matlab_current_release}.app")
-      if(EXISTS ${_matlab_full_string})
-        set(_matlab_current_version)
-        matlab_get_version_from_release_name("${_matlab_current_release}" _matlab_current_version)
-        if(MATLAB_FIND_DEBUG)
-          message(STATUS "[MATLAB] Found version ${_matlab_current_release} (${_matlab_current_version}) in ${_matlab_full_string}")
-        endif()
-        list(APPEND _matlab_possible_roots ${_matlab_current_version} ${_matlab_full_string})
-        unset(_matlab_current_version)
-      endif()
-
-      unset(_matlab_full_string)
-    endforeach(_matlab_current_release)
-
-    unset(_matlab_current_release)
-    unset(_matlab_releases)
-
+    extract_matlab_versions_from_registry_brute_force(_matlab_versions_from_registry)
   endif()
 
-endif()
+  # filtering the results with the registry keys
+  matlab_get_all_valid_matlab_roots_from_registry("${_matlab_versions_from_registry}" _matlab_possible_roots)
+  unset(_matlab_versions_from_registry)
 
+  set(_matlab_versions_from_registry)
+  matlab_extract_all_installed_versions_from_registry(CMAKE_CL_64 _matlab_versions_from_registry)
 
+  # the returned list is empty, doing the search on all known versions
+  if(NOT _matlab_versions_from_registry)
+    if(MATLAB_FIND_DEBUG)
+      message(STATUS "[MATLAB] Search for Matlab from the registry unsuccessful, testing all supported versions")
+    endif()
+    extract_matlab_versions_from_registry_brute_force(_matlab_versions_from_registry)
+  endif()
 
-list(LENGTH _matlab_possible_roots _numbers_of_matlab_roots)
-if(_numbers_of_matlab_roots EQUAL 0)
-  # if we have not found anything, we fall back on the PATH
+  # filtering the results with the registry keys
+  matlab_get_all_valid_matlab_roots_from_registry("${_matlab_versions_from_registry}" _matlab_possible_roots)
+  set(${matlab_roots} ${_matlab_possible_roots} PARENT_SCOPE)
 
+endfunction()
+
+# Utility function for finding Matlab or MCR on OSX
+function(_Matlab_find_instances_osx matlab_roots)
+
+  set(_matlab_possible_roots)
+  # on mac, we look for the /Application paths
+  # this corresponds to the behaviour on Windows. On Linux, we do not have
+  # any other guess.
+  matlab_get_supported_releases(_matlab_releases)
+  if(MATLAB_FIND_DEBUG)
+    message(STATUS "[MATLAB] Matlab supported versions ${_matlab_releases}. If more version should be supported "
+                 "the variable MATLAB_ADDITIONAL_VERSIONS can be set according to the documentation")
+  endif()
+
+  foreach(_matlab_current_release IN LISTS _matlab_releases)
+    matlab_get_version_from_release_name("${_matlab_current_release}" _matlab_current_version)
+    string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
+    set(_matlab_base_path "/Applications/MATLAB_${_matlab_current_release}.app")
+
+    # Check Matlab, has precedence over MCR
+    if(EXISTS ${_matlab_base_path})
+      if(MATLAB_FIND_DEBUG)
+        message(STATUS "[MATLAB] Found version ${_matlab_current_release} (${_matlab_current_version}) in ${_matlab_base_path}")
+      endif()
+      list(APPEND _matlab_possible_roots "MATLAB" ${_matlab_current_version} ${_matlab_base_path})
+    endif()
+
+    # Checks MCR
+    set(_mcr_path "/Applications/MATLAB/MATLAB_Runtime/v${_matlab_current_version_without_dot}")
+    if(EXISTS "${_mcr_path}")
+      if(MATLAB_FIND_DEBUG)
+        message(STATUS "[MATLAB] Found MCR version ${_matlab_current_release} (${_matlab_current_version}) in ${_mcr_path}")
+      endif()
+      list(APPEND _matlab_possible_roots "MCR" ${_matlab_current_version} ${_mcr_path})
+    endif()
+
+  endforeach()
+  set(${matlab_roots} ${_matlab_possible_roots} PARENT_SCOPE)
+
+endfunction()
+
+# Utility function for finding Matlab or MCR from the PATH
+function(_Matlab_find_instances_from_path matlab_roots)
+
+  set(_matlab_possible_roots)
 
   # At this point, we have no other choice than trying to find it from PATH.
-  # If set by the user, this won't change
+  # If set by the user, this wont change
   find_program(
     _matlab_main_tmp
     NAMES matlab)
-
 
   if(_matlab_main_tmp)
     # we then populate the list of roots, with empty version
@@ -1218,17 +1302,88 @@ if(_numbers_of_matlab_roots EQUAL 0)
     get_filename_component(_matlab_current_location "${_matlab_current_location}" DIRECTORY)
     get_filename_component(_matlab_current_location "${_matlab_current_location}" DIRECTORY) # Matlab should be in bin
 
-    list(APPEND _matlab_possible_roots "NOTFOUND" ${_matlab_current_location})
+    # We found the Matlab program
+    list(APPEND _matlab_possible_roots "MATLAB" "NOTFOUND" ${_matlab_current_location})
 
-    unset(_matlab_current_location)
+    # we remove this from the CACHE
+    unset(_matlab_main_tmp CACHE)
+  else()
+    find_program(
+      _matlab_mex_tmp
+      NAMES mex)
+    if(_matlab_mex_tmp)
+      # we then populate the list of roots, with empty version
+      if(MATLAB_FIND_DEBUG)
+        message(STATUS "[MATLAB] mex compiler found from PATH: ${_matlab_mex_tmp}")
+      endif()
+
+      # resolve symlinks
+      get_filename_component(_mex_current_location "${_matlab_mex_tmp}" REALPATH)
+
+      # get the directory (the command below has to be run twice)
+      # this will be the matlab root
+      get_filename_component(_mex_current_location "${_mex_current_location}" DIRECTORY)
+      get_filename_component(_mex_current_location "${_mex_current_location}" DIRECTORY) # Matlab Runtime mex compiler should be in bin
+
+      # We found the Matlab program
+      list(APPEND _matlab_possible_roots "MCR" "NOTFOUND" ${_mex_current_location})
+
+      unset(_matlab_mex_tmp CACHE)
+    else()
+      if(MATLAB_FIND_DEBUG)
+        message(STATUS "[MATLAB] mex compiler not found")
+      endif()
+    endif()
+
 
   endif()
-  unset(_matlab_main_tmp CACHE)
 
+  set(${matlab_roots} ${_matlab_possible_roots} PARENT_SCOPE)
+endfunction()
+
+
+# ###################################
+# Exploring the possible Matlab_ROOTS
+
+# this variable will get all Matlab installations found in the current system.
+set(_matlab_possible_roots)
+
+if(Matlab_ROOT_DIR)
+  # if the user specifies a possible root, we keep this one
+
+  if(NOT EXISTS "${Matlab_ROOT_DIR}")
+    # if Matlab_ROOT_DIR specified but erroneous
+    if(MATLAB_FIND_DEBUG)
+      message(WARNING "[MATLAB] the specified path for Matlab_ROOT_DIR does not exist (${Matlab_ROOT_DIR})")
+    endif()
+  else()
+    # NOTFOUND indicates the code below to search for the version automatically
+    if("${Matlab_VERSION_STRING_INTERNAL}" STREQUAL "")
+      list(APPEND _matlab_possible_roots "UNKNOWN" "NOTFOUND" ${Matlab_ROOT_DIR}) # empty version, empty MCR/Matlab indication
+    else()
+      list(APPEND _matlab_possible_roots "UNKNOWN" ${Matlab_VERSION_STRING_INTERNAL} ${Matlab_ROOT_DIR}) # cached version
+    endif()
+  endif()
+else()
+
+  # if the user does not specify the possible installation root, we look for
+  # one installation using the appropriate heuristics.
+  # There is apparently no standard way on Linux.
+  if(WIN32)
+    _Matlab_find_instances_win32(_matlab_possible_roots_win32)
+    list(APPEND _matlab_possible_roots ${_matlab_possible_roots_win32})
+  elseif(APPLE)
+    _Matlab_find_instances_osx(_matlab_possible_roots_osx)
+    list(APPEND _matlab_possible_roots ${_matlab_possible_roots_osx})
+  endif()
 endif()
 
 
-
+list(LENGTH _matlab_possible_roots _numbers_of_matlab_roots)
+if(_numbers_of_matlab_roots EQUAL 0)
+  # if we have not found anything, we fall back on the PATH
+  _Matlab_find_instances_from_path(_matlab_possible_roots)
+endif()
 
 
 if(MATLAB_FIND_DEBUG)
@@ -1242,12 +1397,14 @@ endif()
 # take the first possible Matlab root
 list(LENGTH _matlab_possible_roots _numbers_of_matlab_roots)
 set(Matlab_VERSION_STRING "NOTFOUND")
+set(Matlab_Or_MCR "UNKNOWN")
 if(_numbers_of_matlab_roots GREATER 0)
-  list(GET _matlab_possible_roots 0 Matlab_VERSION_STRING)
-  list(GET _matlab_possible_roots 1 Matlab_ROOT_DIR)
+  list(GET _matlab_possible_roots 0 Matlab_Or_MCR)
+  list(GET _matlab_possible_roots 1 Matlab_VERSION_STRING)
+  list(GET _matlab_possible_roots 2 Matlab_ROOT_DIR)
 
   # adding a warning in case of ambiguity
-  if(_numbers_of_matlab_roots GREATER 2 AND MATLAB_FIND_DEBUG)
+  if(_numbers_of_matlab_roots GREATER 3 AND MATLAB_FIND_DEBUG)
     message(WARNING "[MATLAB] Found several distributions of Matlab. Setting the current version to ${Matlab_VERSION_STRING} (located ${Matlab_ROOT_DIR})."
                     " If this is not the desired behaviour, provide the -DMatlab_ROOT_DIR=... on the command line")
   endif()
@@ -1290,12 +1447,10 @@ set(Matlab_ROOT_DIR ${Matlab_ROOT_DIR} CACHE PATH "Matlab installation root path
 # Fix the version, in case this one is NOTFOUND
 _Matlab_get_version_from_root(
   "${Matlab_ROOT_DIR}"
+  "${Matlab_Or_MCR}"
   ${Matlab_VERSION_STRING}
   Matlab_VERSION_STRING
 )
-
-
-
 
 if(MATLAB_FIND_DEBUG)
   message(STATUS "[MATLAB] Current version is ${Matlab_VERSION_STRING} located ${Matlab_ROOT_DIR}")

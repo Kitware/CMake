@@ -3,7 +3,8 @@
 #ifndef cmListFileLexer_h
 #define cmListFileLexer_h
 
-typedef enum cmListFileLexer_Type_e {
+typedef enum cmListFileLexer_Type_e
+{
   cmListFileLexer_Token_None,
   cmListFileLexer_Token_Space,
   cmListFileLexer_Token_Newline,

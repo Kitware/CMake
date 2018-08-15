@@ -49,10 +49,12 @@ Operation
 Start :manual:`cmake(1)` in the server command mode, supplying the path to
 the build directory to process::
 
-  cmake -E server (--debug|--pipe <NAMED_PIPE>)
+  cmake -E server (--debug|--pipe=<NAMED_PIPE>)
 
 The server will communicate using stdin/stdout (with the ``--debug`` parameter)
-or using a named pipe (with the ``--pipe <NAMED_PIPE>`` parameter).
+or using a named pipe (with the ``--pipe=<NAMED_PIPE>`` parameter).  Note
+that "named pipe" refers to a local domain socket on Unix and to a named pipe
+on Windows.
 
 When connecting to the server (via named pipe or by starting it in ``--debug``
 mode), the server will reply with a hello message::

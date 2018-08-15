@@ -51,6 +51,16 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.12
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0075: Include file check macros honor CMAKE_REQUIRED_LIBRARIES. </policy/CMP0075>
+   CMP0074: find_package uses PackageName_ROOT variables. </policy/CMP0074>
+   CMP0073: Do not produce legacy _LIB_DEPENDS cache entries. </policy/CMP0073>
+
 Policies Introduced by CMake 3.11
 =================================
 

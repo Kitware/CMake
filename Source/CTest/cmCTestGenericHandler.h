@@ -25,7 +25,7 @@ class cmCTestGenericHandler
 {
 public:
   /**
-   * If verbose then more informaiton is printed out
+   * If verbose then more information is printed out
    */
   void SetVerbose(bool val)
   {

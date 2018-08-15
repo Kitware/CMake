@@ -54,7 +54,7 @@ in the ``CTestConfig.cmake`` file.
 option(BUILD_TESTING "Build the testing tree." ON)
 
 # function to turn generator name into a version string
-# like vs8 vs9
+# like vs9 or vs10
 function(GET_VS_VERSION_STRING generator var)
   string(REGEX REPLACE "Visual Studio ([0-9][0-9]?)($|.*)" "\\1"
     NUMBER "${generator}")

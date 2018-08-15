@@ -6,7 +6,7 @@
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
-#include "MD5.h.in"
+#  include "MD5.h.in"
 #endif
 
 #include <stdio.h>

@@ -34,6 +34,7 @@ Variables that Provide Information
    /variable/CMAKE_CURRENT_SOURCE_DIR
    /variable/CMAKE_DIRECTORY_LABELS
    /variable/CMAKE_DL_LIBS
+   /variable/CMAKE_DOTNET_TARGET_FRAMEWORK_VERSION
    /variable/CMAKE_EDIT_COMMAND
    /variable/CMAKE_EXECUTABLE_SUFFIX
    /variable/CMAKE_EXTRA_GENERATOR
@@ -67,7 +68,13 @@ Variables that Provide Information
    /variable/CMAKE_PARENT_LIST_FILE
    /variable/CMAKE_PATCH_VERSION
    /variable/CMAKE_PROJECT_DESCRIPTION
+   /variable/CMAKE_PROJECT_HOMEPAGE_URL
    /variable/CMAKE_PROJECT_NAME
+   /variable/CMAKE_PROJECT_VERSION
+   /variable/CMAKE_PROJECT_VERSION_MAJOR
+   /variable/CMAKE_PROJECT_VERSION_MINOR
+   /variable/CMAKE_PROJECT_VERSION_PATCH
+   /variable/CMAKE_PROJECT_VERSION_TWEAK
    /variable/CMAKE_RANLIB
    /variable/CMAKE_ROOT
    /variable/CMAKE_SCRIPT_MODE_FILE
@@ -93,10 +100,13 @@ Variables that Provide Information
    /variable/CMAKE_VS_PLATFORM_TOOLSET
    /variable/CMAKE_VS_PLATFORM_TOOLSET_CUDA
    /variable/CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE
+   /variable/CMAKE_VS_PLATFORM_TOOLSET_VERSION
    /variable/CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION
    /variable/CMAKE_XCODE_GENERATE_SCHEME
    /variable/CMAKE_XCODE_PLATFORM_TOOLSET
    /variable/PROJECT-NAME_BINARY_DIR
+   /variable/PROJECT-NAME_DESCRIPTION
+   /variable/PROJECT-NAME_HOMEPAGE_URL
    /variable/PROJECT-NAME_SOURCE_DIR
    /variable/PROJECT-NAME_VERSION
    /variable/PROJECT-NAME_VERSION_MAJOR
@@ -105,6 +115,7 @@ Variables that Provide Information
    /variable/PROJECT-NAME_VERSION_TWEAK
    /variable/PROJECT_BINARY_DIR
    /variable/PROJECT_DESCRIPTION
+   /variable/PROJECT_HOMEPAGE_URL
    /variable/PROJECT_NAME
    /variable/PROJECT_SOURCE_DIR
    /variable/PROJECT_VERSION
@@ -178,6 +189,7 @@ Variables that Change Behavior
    /variable/CMAKE_STAGING_PREFIX
    /variable/CMAKE_SUBLIME_TEXT_2_ENV_SETTINGS
    /variable/CMAKE_SUBLIME_TEXT_2_EXCLUDE_BUILD_TREE
+   /variable/CMAKE_SUPPRESS_REGENERATION
    /variable/CMAKE_SYSROOT
    /variable/CMAKE_SYSROOT_COMPILE
    /variable/CMAKE_SYSROOT_LINK
@@ -192,6 +204,7 @@ Variables that Change Behavior
    /variable/CMAKE_WARN_DEPRECATED
    /variable/CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION
    /variable/CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY
+   /variable/PackageName_ROOT
 
 Variables that Describe the System
 ==================================
@@ -234,6 +247,7 @@ Variables that Describe the System
    /variable/MSVC80
    /variable/MSVC90
    /variable/MSVC_IDE
+   /variable/MSVC_TOOLSET_VERSION
    /variable/MSVC_VERSION
    /variable/UNIX
    /variable/WIN32
@@ -300,6 +314,7 @@ Variables that Control the Build
    /variable/CMAKE_EXE_LINKER_FLAGS_CONFIG
    /variable/CMAKE_EXE_LINKER_FLAGS_CONFIG_INIT
    /variable/CMAKE_EXE_LINKER_FLAGS_INIT
+   /variable/CMAKE_FOLDER
    /variable/CMAKE_Fortran_FORMAT
    /variable/CMAKE_Fortran_MODULE_DIRECTORY
    /variable/CMAKE_GNUtoMS
@@ -362,6 +377,13 @@ Variables that Control the Build
    /variable/CMAKE_VISIBILITY_INLINES_HIDDEN
    /variable/CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD
    /variable/CMAKE_VS_INCLUDE_PACKAGE_TO_DEFAULT_BUILD
+   /variable/CMAKE_VS_SDK_EXCLUDE_DIRECTORIES
+   /variable/CMAKE_VS_SDK_EXECUTABLE_DIRECTORIES
+   /variable/CMAKE_VS_SDK_INCLUDE_DIRECTORIES
+   /variable/CMAKE_VS_SDK_LIBRARY_DIRECTORIES
+   /variable/CMAKE_VS_SDK_LIBRARY_WINRT_DIRECTORIES
+   /variable/CMAKE_VS_SDK_REFERENCE_DIRECTORIES
+   /variable/CMAKE_VS_SDK_SOURCE_DIRECTORIES
    /variable/CMAKE_WIN32_EXECUTABLE
    /variable/CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS
    /variable/CMAKE_XCODE_ATTRIBUTE_an-attribute

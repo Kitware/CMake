@@ -148,16 +148,18 @@ std::string cmNinjaNormalTargetGenerator::LanguageLinkerRule() const
 {
   return this->TargetLinkLanguage + "_" +
     cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()) +
-    "_LINKER__" + cmGlobalNinjaGenerator::EncodeRuleName(
-                    this->GetGeneratorTarget()->GetName());
+    "_LINKER__" +
+    cmGlobalNinjaGenerator::EncodeRuleName(
+           this->GetGeneratorTarget()->GetName());
 }
 
 std::string cmNinjaNormalTargetGenerator::LanguageLinkerDeviceRule() const
 {
   return this->TargetLinkLanguage + "_" +
     cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()) +
-    "_DEVICE_LINKER__" + cmGlobalNinjaGenerator::EncodeRuleName(
-                           this->GetGeneratorTarget()->GetName());
+    "_DEVICE_LINKER__" +
+    cmGlobalNinjaGenerator::EncodeRuleName(
+           this->GetGeneratorTarget()->GetName());
 }
 
 struct cmNinjaRemoveNoOpCommands
@@ -187,7 +189,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(bool useResponseFile)
     std::string responseFlag;
     if (!useResponseFile) {
       vars.Objects = "$in";
-      vars.LinkLibraries = "$LINK_LIBRARIES";
+      vars.LinkLibraries = "$LINK_PATH $LINK_LIBRARIES";
     } else {
       std::string cmakeVarLang = "CMAKE_";
       cmakeVarLang += this->TargetLinkLanguage;
@@ -413,8 +415,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
       this->GetGlobalGenerator()->AddRule(
         "CMAKE_SYMLINK_EXECUTABLE",
         this->GetLocalGenerator()->BuildCommandLine(commandLines),
-        "Creating executable symlink $out", "Rule for creating "
-                                            "executable symlink.",
+        "Creating executable symlink $out",
+        "Rule for creating "
+        "executable symlink.",
         /*depfile*/ "",
         /*deptype*/ "",
         /*rspfile*/ "",
@@ -430,8 +433,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
       this->GetGlobalGenerator()->AddRule(
         "CMAKE_SYMLINK_LIBRARY",
         this->GetLocalGenerator()->BuildCommandLine(commandLines),
-        "Creating library symlink $out", "Rule for creating "
-                                         "library symlink.",
+        "Creating library symlink $out",
+        "Rule for creating "
+        "library symlink.",
         /*depfile*/ "",
         /*deptype*/ "",
         /*rspfile*/ "",
@@ -482,7 +486,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
     const char* linkCmd = mf->GetDefinition(linkCmdVar);
     if (linkCmd) {
       std::string linkCmdStr = linkCmd;
-      if (this->GetGeneratorTarget()->HasImplibGNUtoMS()) {
+      if (this->GetGeneratorTarget()->HasImplibGNUtoMS(this->ConfigName)) {
         std::string ruleVar = "CMAKE_";
         ruleVar += this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
         ruleVar += "_GNUtoMS_RULE";
@@ -715,9 +719,9 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
     static_cast<int>(cmSystemTools::CalculateCommandLineLengthLimit()) -
     globalGen.GetRuleCmdLength(this->LanguageLinkerDeviceRule());
 
-  const std::string rspfile =
+  const std::string rspfile = this->ConvertToNinjaPath(
     std::string(cmake::GetCMakeFilesDirectoryPostSlash()) +
-    genTarget.GetName() + ".rsp";
+    genTarget.GetName() + ".rsp");
 
   // Gather order-only dependencies.
   cmNinjaDeps orderOnlyDeps;
@@ -772,9 +776,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   // Write comments.
   cmGlobalNinjaGenerator::WriteDivider(this->GetBuildFileStream());
   const cmStateEnums::TargetType targetType = gt.GetType();
-  this->GetBuildFileStream() << "# Link build statements for "
-                             << cmState::GetTargetTypeName(targetType)
-                             << " target " << this->GetTargetName() << "\n\n";
+  this->GetBuildFileStream()
+    << "# Link build statements for " << cmState::GetTargetTypeName(targetType)
+    << " target " << this->GetTargetName() << "\n\n";
 
   cmNinjaDeps emptyDeps;
   cmNinjaVars vars;
@@ -881,7 +885,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       targetOutputImplib, cmOutputConverter::SHELL);
     vars["TARGET_IMPLIB"] = impLibPath;
     EnsureParentDirectoryExists(impLibPath);
-    if (genTarget.HasImportLibrary()) {
+    if (genTarget.HasImportLibrary(cfgName)) {
       byproducts.push_back(targetOutputImplib);
     }
   }
@@ -976,8 +980,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     preLinkCmdLines.push_back("cd " + homeOutDir);
   }
 
-  vars["PRE_LINK"] = localGen.BuildCommandLine(preLinkCmdLines);
-  std::string postBuildCmdLine = localGen.BuildCommandLine(postBuildCmdLines);
+  vars["PRE_LINK"] = localGen.BuildCommandLine(preLinkCmdLines, "pre-link",
+                                               this->GeneratorTarget);
+  std::string postBuildCmdLine = localGen.BuildCommandLine(
+    postBuildCmdLines, "post-build", this->GeneratorTarget);
 
   cmNinjaVars symlinkVars;
   bool const symlinkNeeded =
@@ -999,9 +1005,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       globalGen.GetRuleCmdLength(this->LanguageLinkerRule());
   }
 
-  const std::string rspfile =
+  const std::string rspfile = this->ConvertToNinjaPath(
     std::string(cmake::GetCMakeFilesDirectoryPostSlash()) + gt.GetName() +
-    ".rsp";
+    ".rsp");
 
   // Gather order-only dependencies.
   cmNinjaDeps orderOnlyDeps;

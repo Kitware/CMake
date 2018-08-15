@@ -243,7 +243,7 @@ protected:
                           cmGeneratorTarget* target,
                           const char* filename = nullptr);
 
-  // Helper methods for dependeny updates.
+  // Helper methods for dependency updates.
   bool ScanDependencies(
     const char* targetDir,
     std::map<std::string, cmDepends::DependencyVector>& validDeps);

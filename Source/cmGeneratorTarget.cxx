@@ -46,8 +46,9 @@ const char* cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
 }
 
 template <>
-const char* cmTargetPropertyComputer::ComputeLocationForBuild<
-  cmGeneratorTarget>(cmGeneratorTarget const* tgt)
+const char*
+cmTargetPropertyComputer::ComputeLocationForBuild<cmGeneratorTarget>(
+  cmGeneratorTarget const* tgt)
 {
   return tgt->GetLocation("");
 }
@@ -132,8 +133,8 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
                                      this->SourceEntries, true);
 
   this->DLLPlatform =
-    (this->Makefile->IsOn("WIN32") || this->Makefile->IsOn("CYGWIN") ||
-     this->Makefile->IsOn("MINGW"));
+    strcmp(this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"),
+           "") != 0;
 
   this->PolicyMap = t->PolicyMap;
 }
@@ -240,13 +241,16 @@ const char* cmGeneratorTarget::GetOutputTargetType(
     case cmStateEnums::MODULE_LIBRARY:
       switch (artifact) {
         case cmStateEnums::RuntimeBinaryArtifact:
-          // Module import libraries are treated as archive targets.
+          // Module libraries are always treated as library targets.
           return "LIBRARY";
         case cmStateEnums::ImportLibraryArtifact:
-          // Module libraries are always treated as library targets.
+          // Module import libraries are treated as archive targets.
           return "ARCHIVE";
       }
       break;
+    case cmStateEnums::OBJECT_LIBRARY:
+      // Object libraries are always treated as object targets.
+      return "OBJECT";
     case cmStateEnums::EXECUTABLE:
       switch (artifact) {
         case cmStateEnums::RuntimeBinaryArtifact:
@@ -808,6 +812,26 @@ static void AddInterfaceEntries(
   }
 }
 
+static void AddObjectEntries(
+  cmGeneratorTarget const* thisTarget, std::string const& config,
+  std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries)
+{
+  if (cmLinkImplementationLibraries const* impl =
+        thisTarget->GetLinkImplementationLibraries(config)) {
+    for (cmLinkImplItem const& lib : impl->Libraries) {
+      if (lib.Target &&
+          lib.Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+        std::string genex = "$<TARGET_OBJECTS:" + lib + ">";
+        cmGeneratorExpression ge(lib.Backtrace);
+        std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
+        cge->SetEvaluateForBuildsystem(true);
+        entries.push_back(
+          new cmGeneratorTarget::TargetPropertyEntry(std::move(cge), lib));
+      }
+    }
+  }
+}
+
 static bool processSources(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
@@ -848,13 +872,10 @@ static bool processSources(
         std::ostringstream err;
         if (!targetName.empty()) {
           err << "Target \"" << targetName
-              << "\" contains relative "
-                 "path in its INTERFACE_SOURCES:\n"
-                 "  \""
+              << "\" contains relative path in its INTERFACE_SOURCES:\n  \""
               << src << "\"";
         } else {
-          err << "Found relative path while evaluating sources of "
-                 "\""
+          err << "Found relative path while evaluating sources of \""
               << tgt->GetName() << "\":\n  \"" << src << "\"\n";
         }
         tgt->GetLocalGenerator()->IssueMessage(cmake::FATAL_ERROR, err.str());
@@ -873,8 +894,9 @@ static bool processSources(
     }
     if (!usedSources.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-        cmake::LOG, std::string("Used sources for target ") + tgt->GetName() +
-          ":\n" + usedSources,
+        cmake::LOG,
+        std::string("Used sources for target ") + tgt->GetName() + ":\n" +
+          usedSources,
         entry->ge->GetBacktrace());
     }
   }
@@ -931,23 +953,32 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<std::string>& files,
     processSources(this, this->SourceEntries, files, uniqueSrcs, &dagChecker,
                    config, debugSources);
 
+  // Collect INTERFACE_SOURCES of all direct link-dependencies.
   std::vector<cmGeneratorTarget::TargetPropertyEntry*>
     linkInterfaceSourcesEntries;
-
   AddInterfaceEntries(this, config, "INTERFACE_SOURCES",
                       linkInterfaceSourcesEntries);
-
   std::vector<std::string>::size_type numFilesBefore = files.size();
   bool contextDependentInterfaceSources =
     processSources(this, linkInterfaceSourcesEntries, files, uniqueSrcs,
                    &dagChecker, config, debugSources);
 
+  // Collect TARGET_OBJECTS of direct object link-dependencies.
+  std::vector<cmGeneratorTarget::TargetPropertyEntry*> linkObjectsEntries;
+  AddObjectEntries(this, config, linkObjectsEntries);
+  std::vector<std::string>::size_type numFilesBefore2 = files.size();
+  bool contextDependentObjects =
+    processSources(this, linkObjectsEntries, files, uniqueSrcs, &dagChecker,
+                   config, debugSources);
+
   if (!contextDependentDirectSources &&
-      !(contextDependentInterfaceSources && numFilesBefore < files.size())) {
+      !(contextDependentInterfaceSources && numFilesBefore < files.size()) &&
+      !(contextDependentObjects && numFilesBefore2 < files.size())) {
     this->LinkImplementationLanguageIsContextDependent = false;
   }
 
   cmDeleteAll(linkInterfaceSourcesEntries);
+  cmDeleteAll(linkObjectsEntries);
 }
 
 void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*>& files,
@@ -1053,9 +1084,6 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
       kind = SourceKindHeader;
     } else if (sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {
       kind = SourceKindExternalObject;
-      if (this->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-        badObjLib.push_back(sf);
-      }
     } else if (!sf->GetLanguage().empty()) {
       kind = SourceKindObjectSource;
     } else if (ext == "def") {
@@ -1673,6 +1701,7 @@ bool cmGeneratorTarget::HaveWellDefinedOutputFiles() const
   return this->GetType() == cmStateEnums::STATIC_LIBRARY ||
     this->GetType() == cmStateEnums::SHARED_LIBRARY ||
     this->GetType() == cmStateEnums::MODULE_LIBRARY ||
+    this->GetType() == cmStateEnums::OBJECT_LIBRARY ||
     this->GetType() == cmStateEnums::EXECUTABLE;
 }
 
@@ -2001,8 +2030,13 @@ void cmGeneratorTarget::ComputeModuleDefinitionInfo(
   info.WindowsExportAllSymbols =
     this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS") &&
     this->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS");
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
   info.DefFileGenerated =
     info.WindowsExportAllSymbols || info.Sources.size() > 1;
+#else
+  // Our __create_def helper is only available on Windows.
+  info.DefFileGenerated = false;
+#endif
   if (info.DefFileGenerated) {
     info.DefFile = this->ObjectDirectory /* has slash */ + "exports.def";
   } else if (!info.Sources.empty()) {
@@ -2521,8 +2555,9 @@ static void processIncludeDirectories(
     }
     if (!usedIncludes.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-        cmake::LOG, std::string("Used includes for target ") + tgt->GetName() +
-          ":\n" + usedIncludes,
+        cmake::LOG,
+        std::string("Used includes for target ") + tgt->GetName() + ":\n" +
+          usedIncludes,
         entry->ge->GetBacktrace());
     }
   }
@@ -2592,13 +2627,20 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
   return includes;
 }
 
+enum class OptionsParse
+{
+  None,
+  Shell
+};
+
 static void processCompileOptionsInternal(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<std::string>& options,
   std::unordered_set<std::string>& uniqueOptions,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
-  bool debugOptions, const char* logName, std::string const& language)
+  bool debugOptions, const char* logName, std::string const& language,
+  OptionsParse parse)
 {
   for (cmGeneratorTarget::TargetPropertyEntry* entry : entries) {
     std::vector<std::string> entryOptions;
@@ -2609,7 +2651,12 @@ static void processCompileOptionsInternal(
     std::string usedOptions;
     for (std::string const& opt : entryOptions) {
       if (uniqueOptions.insert(opt).second) {
-        options.push_back(opt);
+        if (parse == OptionsParse::Shell &&
+            cmHasLiteralPrefix(opt, "SHELL:")) {
+          cmSystemTools::ParseUnixCommandLine(opt.c_str() + 6, options);
+        } else {
+          options.push_back(opt);
+        }
         if (debugOptions) {
           usedOptions += " * " + opt + "\n";
         }
@@ -2617,8 +2664,9 @@ static void processCompileOptionsInternal(
     }
     if (!usedOptions.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-        cmake::LOG, std::string("Used compile ") + logName +
-          std::string(" for target ") + tgt->GetName() + ":\n" + usedOptions,
+        cmake::LOG,
+        std::string("Used compile ") + logName + std::string(" for target ") +
+          tgt->GetName() + ":\n" + usedOptions,
         entry->ge->GetBacktrace());
     }
   }
@@ -2634,7 +2682,7 @@ static void processCompileOptions(
 {
   processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
                                 dagChecker, config, debugOptions, "options",
-                                language);
+                                language, OptionsParse::Shell);
 }
 
 void cmGeneratorTarget::GetCompileOptions(std::vector<std::string>& result,
@@ -2688,7 +2736,7 @@ static void processCompileFeatures(
 {
   processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
                                 dagChecker, config, debugOptions, "features",
-                                std::string());
+                                std::string(), OptionsParse::None);
 }
 
 void cmGeneratorTarget::GetCompileFeatures(std::vector<std::string>& result,
@@ -2738,7 +2786,7 @@ static void processCompileDefinitions(
 {
   processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
                                 dagChecker, config, debugOptions,
-                                "definitions", language);
+                                "definitions", language, OptionsParse::None);
 }
 
 void cmGeneratorTarget::GetCompileDefinitions(
@@ -3914,8 +3962,9 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
           e << "Property " << p << " on target \"" << tgt->GetName()
             << "\" does\nnot match the "
                "INTERFACE_"
-            << p << " property requirement\nof "
-                    "dependency \""
+            << p
+            << " property requirement\nof "
+               "dependency \""
             << theTarget->GetName() << "\".\n";
           cmSystemTools::Error(e.str().c_str());
           break;
@@ -4568,13 +4617,24 @@ bool cmGeneratorTarget::ComputePDBOutputDir(const std::string& kind,
   // Select an output directory.
   if (const char* config_outdir = this->GetProperty(configProp)) {
     // Use the user-specified per-configuration output directory.
-    out = config_outdir;
+    cmGeneratorExpression ge;
+    std::unique_ptr<cmCompiledGeneratorExpression> cge =
+      ge.Parse(config_outdir);
+    out = cge->Evaluate(this->LocalGenerator, config);
 
     // Skip per-configuration subdirectory.
     conf.clear();
   } else if (const char* outdir = this->GetProperty(propertyName)) {
     // Use the user-specified output directory.
-    out = outdir;
+    cmGeneratorExpression ge;
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(outdir);
+    out = cge->Evaluate(this->LocalGenerator, config);
+
+    // Skip per-configuration subdirectory if the value contained a
+    // generator expression.
+    if (out != outdir) {
+      conf.clear();
+    }
   }
   if (out.empty()) {
     return false;
@@ -4934,6 +4994,16 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
     }
   }
 
+  // Get information if target is managed assembly.
+  {
+    std::string linkProp = "IMPORTED_COMMON_LANGUAGE_RUNTIME";
+    if (auto pc = this->GetProperty(linkProp + suffix)) {
+      info.Managed = this->CheckManagedType(pc);
+    } else if (auto p = this->GetProperty(linkProp)) {
+      info.Managed = this->CheckManagedType(p);
+    }
+  }
+
   // Get the cyclic repetition count.
   if (this->GetType() == cmStateEnums::STATIC_LIBRARY) {
     std::string linkProp = "IMPORTED_LINK_INTERFACE_MULTIPLICITY";
@@ -5151,6 +5221,18 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
   }
 }
 
+bool cmGeneratorTarget::HasLanguage(std::string const& language,
+                                    std::string const& config,
+                                    bool exclusive) const
+{
+  std::set<std::string> languages;
+  this->GetLanguages(languages, config);
+  // add linker language (if it is different from compiler languages)
+  languages.insert(this->GetLinkerLanguage(config));
+  return (languages.size() == 1 || !exclusive) &&
+    languages.count(language) > 0;
+}
+
 void cmGeneratorTarget::ComputeLinkImplementationLanguages(
   const std::string& config, cmOptionalLinkImplementation& impl) const
 {
@@ -5325,20 +5407,6 @@ cmGeneratorTarget* cmGeneratorTarget::FindTargetToLink(
     tgt = nullptr;
   }
 
-  if (tgt && tgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-    std::ostringstream e;
-    e << "Target \"" << this->GetName() << "\" links to "
-                                           "OBJECT library \""
-      << tgt->GetName()
-      << "\" but this is not "
-         "allowed.  "
-         "One may link only to STATIC or SHARED libraries, or to executables "
-         "with the ENABLE_EXPORTS property set.";
-    cmake* cm = this->LocalGenerator->GetCMakeInstance();
-    cm->IssueMessage(cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
-    tgt = nullptr;
-  }
-
   return tgt;
 }
 
@@ -5351,16 +5419,17 @@ std::string cmGeneratorTarget::GetPDBDirectory(const std::string& config) const
   return "";
 }
 
-bool cmGeneratorTarget::HasImplibGNUtoMS() const
+bool cmGeneratorTarget::HasImplibGNUtoMS(std::string const& config) const
 {
-  return this->HasImportLibrary() && this->GetPropertyAsBool("GNUtoMS");
+  return this->HasImportLibrary(config) && this->GetPropertyAsBool("GNUtoMS");
 }
 
-bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& gnuName,
+bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& config,
+                                         std::string const& gnuName,
                                          std::string& out,
                                          const char* newExt) const
 {
-  if (this->HasImplibGNUtoMS() && gnuName.size() > 6 &&
+  if (this->HasImplibGNUtoMS(config) && gnuName.size() > 6 &&
       gnuName.substr(gnuName.size() - 6) == ".dll.a") {
     out = gnuName.substr(0, gnuName.size() - 6);
     out += newExt ? newExt : ".lib";
@@ -5375,11 +5444,14 @@ bool cmGeneratorTarget::IsExecutableWithExports() const
           this->GetPropertyAsBool("ENABLE_EXPORTS"));
 }
 
-bool cmGeneratorTarget::HasImportLibrary() const
+bool cmGeneratorTarget::HasImportLibrary(std::string const& config) const
 {
   return (this->IsDLLPlatform() &&
           (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
-           this->IsExecutableWithExports()));
+           this->IsExecutableWithExports()) &&
+          // Assemblies which have only managed code do not have
+          // import libraries.
+          this->GetManagedType(config) != ManagedType::Managed);
 }
 
 std::string cmGeneratorTarget::GetSupportDirectory() const
@@ -5402,6 +5474,7 @@ bool cmGeneratorTarget::IsLinkable() const
           this->GetType() == cmStateEnums::SHARED_LIBRARY ||
           this->GetType() == cmStateEnums::MODULE_LIBRARY ||
           this->GetType() == cmStateEnums::UNKNOWN_LIBRARY ||
+          this->GetType() == cmStateEnums::OBJECT_LIBRARY ||
           this->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
           this->IsExecutableWithExports());
 }
@@ -5430,4 +5503,54 @@ bool cmGeneratorTarget::IsCFBundleOnApple() const
 {
   return (this->GetType() == cmStateEnums::MODULE_LIBRARY &&
           this->Makefile->IsOn("APPLE") && this->GetPropertyAsBool("BUNDLE"));
+}
+
+cmGeneratorTarget::ManagedType cmGeneratorTarget::CheckManagedType(
+  std::string const& propval) const
+{
+  // The type of the managed assembly (mixed unmanaged C++ and C++/CLI,
+  // or only C++/CLI) does only depend on whether the property is an empty
+  // string or contains any value at all. In Visual Studio generators
+  // this propval is prepended with /clr[:] which results in:
+  //
+  // 1. propval does not exist: no /clr flag, unmanaged target, has import
+  //                            lib
+  // 2. empty propval:          add /clr as flag, mixed unmanaged/managed
+  //                            target, has import lib
+  // 3. any value (safe,pure):  add /clr:[propval] as flag, target with
+  //                            managed code only, no import lib
+  return propval.empty() ? ManagedType::Mixed : ManagedType::Managed;
+}
+
+cmGeneratorTarget::ManagedType cmGeneratorTarget::GetManagedType(
+  const std::string& config) const
+{
+  // Only libraries and executables can be managed targets.
+  if (this->GetType() > cmStateEnums::SHARED_LIBRARY) {
+    return ManagedType::Undefined;
+  }
+
+  if (this->GetType() == cmStateEnums::STATIC_LIBRARY) {
+    return ManagedType::Native;
+  }
+
+  // Check imported target.
+  if (this->IsImported()) {
+    if (cmGeneratorTarget::ImportInfo const* info =
+          this->GetImportInfo(config)) {
+      return info->Managed;
+    }
+    return ManagedType::Undefined;
+  }
+
+  // Check for explicitly set clr target property.
+  if (auto* clr = this->GetProperty("COMMON_LANGUAGE_RUNTIME")) {
+    return this->CheckManagedType(clr);
+  }
+
+  // C# targets are always managed. This language specific check
+  // is added to avoid that the COMMON_LANGUAGE_RUNTIME target property
+  // has to be set manually for C# targets.
+  return this->HasLanguage("CSharp", config) ? ManagedType::Managed
+                                             : ManagedType::Native;
 }

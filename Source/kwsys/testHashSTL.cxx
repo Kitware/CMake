@@ -7,18 +7,19 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "hash_map.hxx.in"
-#include "hash_set.hxx.in"
+#  include "hash_map.hxx.in"
+#  include "hash_set.hxx.in"
 #endif
 
 #include <iostream>
 
 #if defined(_MSC_VER)
-#pragma warning(disable : 4786)
+#  pragma warning(disable : 4786)
 #endif
 
 #if defined(__sgi) && !defined(__GNUC__)
-#pragma set woff 1468 /* inline function cannot be explicitly instantiated */
+#  pragma set woff 1468 /* inline function cannot be explicitly instantiated  \
+                         */
 #endif
 
 template class kwsys::hash_map<const char*, int>;

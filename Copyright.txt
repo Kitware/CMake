@@ -78,6 +78,7 @@ The following individuals and institutions are among the Contributors:
 * Nikita Krupen'ko <krnekit@gmail.com>
 * NVIDIA Corporation <www.nvidia.com>
 * OpenGamma Ltd. <opengamma.com>
+* Patrick Stotko <stotko@cs.uni-bonn.de>
 * Per Øyvind Karlsen <peroyvind@mandriva.org>
 * Peter Collingbourne <peter@pcc.me.uk>
 * Petr Gotthard <gotthard@honeywell.com>

@@ -28,83 +28,82 @@
 #include "cm_sys_stat.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cm_jsoncpp_writer.h"
+#  include "cm_jsoncpp_writer.h"
 
-#include "cmGraphVizWriter.h"
-#include "cmVariableWatch.h"
-#include <unordered_map>
+#  include "cmGraphVizWriter.h"
+#  include "cmVariableWatch.h"
+#  include <unordered_map>
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#define CMAKE_USE_ECLIPSE
+#  define CMAKE_USE_ECLIPSE
 #endif
 
 #if defined(__MINGW32__) && !defined(CMAKE_BUILD_WITH_CMAKE)
-#define CMAKE_BOOT_MINGW
+#  define CMAKE_BOOT_MINGW
 #endif
 
 // include the generator
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#if !defined(CMAKE_BOOT_MINGW)
-#include "cmGlobalBorlandMakefileGenerator.h"
-#include "cmGlobalGhsMultiGenerator.h"
-#include "cmGlobalJOMMakefileGenerator.h"
-#include "cmGlobalNMakeMakefileGenerator.h"
-#include "cmGlobalVisualStudio10Generator.h"
-#include "cmGlobalVisualStudio11Generator.h"
-#include "cmGlobalVisualStudio12Generator.h"
-#include "cmGlobalVisualStudio14Generator.h"
-#include "cmGlobalVisualStudio15Generator.h"
-#include "cmGlobalVisualStudio8Generator.h"
-#include "cmGlobalVisualStudio9Generator.h"
-#include "cmVSSetupHelper.h"
+#  if !defined(CMAKE_BOOT_MINGW)
+#    include "cmGlobalBorlandMakefileGenerator.h"
+#    include "cmGlobalGhsMultiGenerator.h"
+#    include "cmGlobalJOMMakefileGenerator.h"
+#    include "cmGlobalNMakeMakefileGenerator.h"
+#    include "cmGlobalVisualStudio10Generator.h"
+#    include "cmGlobalVisualStudio11Generator.h"
+#    include "cmGlobalVisualStudio12Generator.h"
+#    include "cmGlobalVisualStudio14Generator.h"
+#    include "cmGlobalVisualStudio15Generator.h"
+#    include "cmGlobalVisualStudio9Generator.h"
+#    include "cmVSSetupHelper.h"
 
-#define CMAKE_HAVE_VS_GENERATORS
-#endif
-#include "cmGlobalMSYSMakefileGenerator.h"
-#include "cmGlobalMinGWMakefileGenerator.h"
+#    define CMAKE_HAVE_VS_GENERATORS
+#  endif
+#  include "cmGlobalMSYSMakefileGenerator.h"
+#  include "cmGlobalMinGWMakefileGenerator.h"
 #else
 #endif
 #if defined(CMAKE_USE_WMAKE)
-#include "cmGlobalWatcomWMakeGenerator.h"
+#  include "cmGlobalWatcomWMakeGenerator.h"
 #endif
 #include "cmGlobalUnixMakefileGenerator3.h"
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmGlobalNinjaGenerator.h"
+#  include "cmGlobalNinjaGenerator.h"
 #endif
 #include "cmExtraCodeLiteGenerator.h"
 
 #if !defined(CMAKE_BOOT_MINGW)
-#include "cmExtraCodeBlocksGenerator.h"
+#  include "cmExtraCodeBlocksGenerator.h"
 #endif
 #include "cmExtraKateGenerator.h"
 #include "cmExtraSublimeTextGenerator.h"
 
 #ifdef CMAKE_USE_ECLIPSE
-#include "cmExtraEclipseCDT4Generator.h"
+#  include "cmExtraEclipseCDT4Generator.h"
 #endif
 
 #if defined(__APPLE__)
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmGlobalXCodeGenerator.h"
+#  if defined(CMAKE_BUILD_WITH_CMAKE)
+#    include "cmGlobalXCodeGenerator.h"
 
-#define CMAKE_USE_XCODE 1
-#endif
-#include <sys/resource.h>
-#include <sys/time.h>
+#    define CMAKE_USE_XCODE 1
+#  endif
+#  include <sys/resource.h>
+#  include <sys/time.h>
 #endif
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 #include <iterator>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <utility>
 
 namespace {
@@ -893,9 +892,9 @@ void cmake::AddDefaultExtraGenerators()
   this->ExtraGenerators.push_back(cmExtraSublimeTextGenerator::GetFactory());
   this->ExtraGenerators.push_back(cmExtraKateGenerator::GetFactory());
 
-#ifdef CMAKE_USE_ECLIPSE
+#  ifdef CMAKE_USE_ECLIPSE
   this->ExtraGenerators.push_back(cmExtraEclipseCDT4Generator::GetFactory());
-#endif
+#  endif
 
 #endif
 }
@@ -1435,6 +1434,7 @@ int cmake::ActualConfigure()
 
   // only save the cache if there were no fatal errors
   if (this->GetWorkingMode() == NORMAL_MODE) {
+    this->State->SaveVerificationScript(this->GetHomeOutputDirectory());
     this->SaveCache(this->GetHomeOutputDirectory());
   }
   if (cmSystemTools::GetErrorOccuredFlag()) {
@@ -1465,8 +1465,7 @@ void cmake::CreateDefaultGlobalGenerator()
     { "12.0", "Visual Studio 12 2013" }, //
     { "11.0", "Visual Studio 11 2012" }, //
     { "10.0", "Visual Studio 10 2010" }, //
-    { "9.0", "Visual Studio 9 2008" },   //
-    { "8.0", "Visual Studio 8 2005" }
+    { "9.0", "Visual Studio 9 2008" }
   };
   static const char* const vsEntries[] = {
     "\\Setup\\VC;ProductDir", //
@@ -1650,6 +1649,33 @@ void cmake::AddCacheEntry(const std::string& key, const char* value,
   this->UnwatchUnusedCli(key);
 }
 
+bool cmake::DoWriteGlobVerifyTarget() const
+{
+  return this->State->DoWriteGlobVerifyTarget();
+}
+
+std::string const& cmake::GetGlobVerifyScript() const
+{
+  return this->State->GetGlobVerifyScript();
+}
+
+std::string const& cmake::GetGlobVerifyStamp() const
+{
+  return this->State->GetGlobVerifyStamp();
+}
+
+void cmake::AddGlobCacheEntry(bool recurse, bool listDirectories,
+                              bool followSymlinks, const std::string& relative,
+                              const std::string& expression,
+                              const std::vector<std::string>& files,
+                              const std::string& variable,
+                              cmListFileBacktrace const& backtrace)
+{
+  this->State->AddGlobCacheEntry(recurse, listDirectories, followSymlinks,
+                                 relative, expression, files, variable,
+                                 backtrace);
+}
+
 std::string cmake::StripExtension(const std::string& file) const
 {
   auto dotpos = file.rfind('.');
@@ -1683,19 +1709,18 @@ void cmake::AddProjectCommands()
 void cmake::AddDefaultGenerators()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#if !defined(CMAKE_BOOT_MINGW)
+#  if !defined(CMAKE_BOOT_MINGW)
   this->Generators.push_back(cmGlobalVisualStudio15Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio14Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio12Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio11Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio10Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio9Generator::NewFactory());
-  this->Generators.push_back(cmGlobalVisualStudio8Generator::NewFactory());
   this->Generators.push_back(cmGlobalBorlandMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalNMakeMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalJOMMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalGhsMultiGenerator::NewFactory());
-#endif
+#  endif
   this->Generators.push_back(cmGlobalMSYSMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalMinGWMakefileGenerator::NewFactory());
 #endif
@@ -2210,6 +2235,15 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   {
     // now run cmake on the CMakeLists file
     cmWorkingDirectory workdir(destPath);
+    if (workdir.Failed()) {
+      // We created the directory and we were able to copy the CMakeLists.txt
+      // file to it, so we wouldn't expect to get here unless the default
+      // permissions are questionable or some other process has deleted the
+      // directory
+      std::cerr << "Failed to change to directory " << destPath << " : "
+                << std::strerror(workdir.GetLastResult()) << std::endl;
+      return 1;
+    }
     std::vector<std::string> args2;
     args2.push_back(args[0]);
     args2.push_back(destPath);
@@ -2365,7 +2399,7 @@ cmMessenger* cmake::GetMessenger() const
   return this->Messenger;
 }
 
-int cmake::Build(const std::string& dir, const std::string& target,
+int cmake::Build(int jobs, const std::string& dir, const std::string& target,
                  const std::string& config,
                  const std::vector<std::string>& nativeOptions, bool clean)
 {
@@ -2388,17 +2422,17 @@ int cmake::Build(const std::string& dir, const std::string& target,
     std::cerr << "Error: could not find CMAKE_GENERATOR in Cache\n";
     return 1;
   }
-  std::unique_ptr<cmGlobalGenerator> gen(
-    this->CreateGlobalGenerator(cachedGenerator));
-  if (!gen.get()) {
+  cmGlobalGenerator* gen = this->CreateGlobalGenerator(cachedGenerator);
+  if (!gen) {
     std::cerr << "Error: could create CMAKE_GENERATOR \"" << cachedGenerator
               << "\"\n";
     return 1;
   }
+  this->SetGlobalGenerator(gen);
   const char* cachedGeneratorInstance =
     this->State->GetCacheEntryValue("CMAKE_GENERATOR_INSTANCE");
   if (cachedGeneratorInstance) {
-    cmMakefile mf(gen.get(), this->GetCurrentSnapshot());
+    cmMakefile mf(gen, this->GetCurrentSnapshot());
     if (!gen->SetGeneratorInstance(cachedGeneratorInstance, &mf)) {
       return 1;
     }
@@ -2426,44 +2460,58 @@ int cmake::Build(const std::string& dir, const std::string& target,
   // to limitations of the underlying build system.
   std::string const stampList = cachePath + "/" +
     GetCMakeFilesDirectoryPostSlash() +
-    cmGlobalVisualStudio8Generator::GetGenerateStampList();
+    cmGlobalVisualStudio9Generator::GetGenerateStampList();
 
   // Note that the stampList file only exists for VS generators.
-  if (cmSystemTools::FileExists(stampList) &&
-      !cmakeCheckStampList(stampList.c_str(), false)) {
+  if (cmSystemTools::FileExists(stampList)) {
 
-    // Correctly initialize the home (=source) and home output (=binary)
-    // directories, which is required for running the generation step.
-    std::string homeOrig = this->GetHomeDirectory();
-    std::string homeOutputOrig = this->GetHomeOutputDirectory();
-    this->SetDirectoriesFromFile(cachePath.c_str());
-
+    // Check if running for Visual Studio 9 - we need to explicitly run
+    // the glob verification script before starting the build
     this->AddScriptingCommands();
-    this->AddProjectCommands();
-
-    int ret = this->Configure();
-    if (ret) {
-      cmSystemTools::Message("CMake Configure step failed.  "
-                             "Build files cannot be regenerated correctly.");
-      return ret;
+    if (this->GlobalGenerator->MatchesGeneratorName("Visual Studio 9 2008")) {
+      std::string const globVerifyScript = cachePath + "/" +
+        GetCMakeFilesDirectoryPostSlash() + "VerifyGlobs.cmake";
+      if (cmSystemTools::FileExists(globVerifyScript)) {
+        std::vector<std::string> args;
+        this->ReadListFile(args, globVerifyScript.c_str());
+      }
     }
-    ret = this->Generate();
-    if (ret) {
-      cmSystemTools::Message("CMake Generate step failed.  "
-                             "Build files cannot be regenerated correctly.");
-      return ret;
-    }
-    std::string message = "Build files have been written to: ";
-    message += this->GetHomeOutputDirectory();
-    this->UpdateProgress(message.c_str(), -1);
 
-    // Restore the previously set directories to their original value.
-    this->SetHomeDirectory(homeOrig);
-    this->SetHomeOutputDirectory(homeOutputOrig);
+    if (!cmakeCheckStampList(stampList.c_str(), false)) {
+      // Correctly initialize the home (=source) and home output (=binary)
+      // directories, which is required for running the generation step.
+      std::string homeOrig = this->GetHomeDirectory();
+      std::string homeOutputOrig = this->GetHomeOutputDirectory();
+      this->SetDirectoriesFromFile(cachePath.c_str());
+
+      this->AddProjectCommands();
+
+      int ret = this->Configure();
+      if (ret) {
+        cmSystemTools::Message("CMake Configure step failed.  "
+                               "Build files cannot be regenerated correctly.");
+        return ret;
+      }
+      ret = this->Generate();
+      if (ret) {
+        cmSystemTools::Message("CMake Generate step failed.  "
+                               "Build files cannot be regenerated correctly.");
+        return ret;
+      }
+      std::string message = "Build files have been written to: ";
+      message += this->GetHomeOutputDirectory();
+      this->UpdateProgress(message.c_str(), -1);
+
+      // Restore the previously set directories to their original value.
+      this->SetHomeDirectory(homeOrig);
+      this->SetHomeOutputDirectory(homeOutputOrig);
+    }
   }
 #endif
 
-  return gen->Build("", dir, projName, target, output, "", config, clean,
+  gen->PrintBuildCommandAdvice(std::cerr, jobs);
+
+  return gen->Build(jobs, "", dir, projName, target, output, "", config, clean,
                     false, verbose, cmDuration::zero(),
                     cmSystemTools::OUTPUT_PASSTHROUGH, nativeOptions);
 }

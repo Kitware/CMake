@@ -85,6 +85,8 @@ private:
   cmsys::RegularExpression NoteDirective;
   cmsys::RegularExpression ModuleRST;
   cmsys::RegularExpression CMakeRole;
+  cmsys::RegularExpression InlineLink;
+  cmsys::RegularExpression InlineLiteral;
   cmsys::RegularExpression Substitution;
   cmsys::RegularExpression TocTreeLink;
 

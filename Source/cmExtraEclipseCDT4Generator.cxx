@@ -277,10 +277,11 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   xml.StartDocument("UTF-8");
   xml.StartElement("projectDescription");
 
-  xml.Element("name", this->GenerateProjectName(
-                        lg->GetProjectName(),
-                        mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
-                        this->GetPathBasename(this->HomeOutputDirectory)));
+  xml.Element("name",
+              this->GenerateProjectName(
+                lg->GetProjectName(),
+                mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
+                this->GetPathBasename(this->HomeOutputDirectory)));
 
   xml.Element("comment", "");
   xml.Element("projects", "");
@@ -641,7 +642,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       xml.EndElement(); // extension
     } else if (systemName == "Darwin") {
       xml.StartElement("extension");
-      xml.Attribute("id", this->SupportsMachO64Parser
+      xml.Attribute("id",
+                    this->SupportsMachO64Parser
                       ? "org.eclipse.cdt.core.MachO64"
                       : "org.eclipse.cdt.core.MachO");
       xml.Attribute("point", "org.eclipse.cdt.core.BinaryParser");
@@ -1001,6 +1003,13 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   xml.EndElement(); // project
 
   xml.EndElement(); // storageModule
+
+  // Append additional cproject contents without applying any XML formatting
+  if (const char* extraCProjectContents =
+        mf->GetState()->GetGlobalProperty("ECLIPSE_EXTRA_CPROJECT_CONTENTS")) {
+    fout << extraCProjectContents;
+  }
+
   xml.EndElement(); // cproject
 }
 

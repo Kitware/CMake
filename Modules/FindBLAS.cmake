@@ -88,12 +88,9 @@ endif()
 
 if(BLA_PREFER_PKGCONFIG)
   find_package(PkgConfig)
-  pkg_check_modules(PKGC_BLAS IMPORTED_TARGET blas)
+  pkg_check_modules(PKGC_BLAS blas)
   if(PKGC_BLAS_FOUND)
-    set(BLAS_LIBRARIES PkgConfig::PKGC_BLAS)
-    find_package_handle_standard_args(BLAS
-                                      REQUIRED_VARS BLAS_LIBRARIES
-                                      VERSION_VAR PKGC_BLAS_VERSION)
+    set(BLAS_LIBRARIES "${PKGC_BLAS_LINK_LIBRARIES}")
     return()
   endif()
 endif()

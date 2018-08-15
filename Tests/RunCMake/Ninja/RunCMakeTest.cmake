@@ -21,6 +21,15 @@ function(run_NinjaToolMissing)
 endfunction()
 run_NinjaToolMissing()
 
+function(run_NoWorkToDo)
+  run_cmake(NoWorkToDo)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/NoWorkToDo-build)
+  run_cmake_command(NoWorkToDo-build ${CMAKE_COMMAND} --build .)
+  run_cmake_command(NoWorkToDo-nowork ${CMAKE_COMMAND} --build . -- -d explain)
+endfunction()
+run_NoWorkToDo()
+
 function(run_CMP0058 case)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CMP0058-${case}-build)
@@ -39,6 +48,12 @@ run_CMP0058(NEW-no)
 run_CMP0058(NEW-by)
 
 run_cmake(CustomCommandDepfile)
+
+run_cmake(RspFileC)
+run_cmake(RspFileCXX)
+if(TEST_Fortran)
+  run_cmake(RspFileFortran)
+endif()
 
 function(run_CommandConcat)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CommandConcat-build)

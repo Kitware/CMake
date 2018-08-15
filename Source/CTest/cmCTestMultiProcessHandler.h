@@ -74,6 +74,7 @@ public:
   cmCTestTestHandler* GetTestHandler() { return this->TestHandler; }
 
   void SetQuiet(bool b) { this->Quiet = b; }
+
 protected:
   // Start the next test or tests as many as are allowed by
   // ParallelLevel
@@ -119,6 +120,8 @@ protected:
   // Number of tests that are complete
   size_t Completed;
   size_t RunningCount;
+  std::set<size_t> ProcessorsAvailable;
+  size_t HaveAffinity;
   bool StopTimePassed;
   // list of test properties (indices concurrent to the test map)
   PropertiesMap Properties;

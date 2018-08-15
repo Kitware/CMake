@@ -3,5 +3,5 @@
 SetupForDevelopment.sh  export-ignore
 
 # Do not format third-party sources.
-/KWIML/**       -format.clang-format
-/cm*/**         -format.clang-format
+/KWIML/**       -format.clang-format-6.0
+/cm*/**         -format.clang-format-6.0

@@ -51,3 +51,32 @@ void cmGlobalBorlandMakefileGenerator::GetDocumentation(
   entry.Name = cmGlobalBorlandMakefileGenerator::GetActualName();
   entry.Brief = "Generates Borland makefiles.";
 }
+
+void cmGlobalBorlandMakefileGenerator::GenerateBuildCommand(
+  std::vector<std::string>& makeCommand, const std::string& makeProgram,
+  const std::string& projectName, const std::string& projectDir,
+  const std::string& targetName, const std::string& config, bool fast,
+  int /*jobs*/, bool verbose, std::vector<std::string> const& makeOptions)
+{
+  this->cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
+    makeCommand, makeProgram, projectName, projectDir, targetName, config,
+    fast, cmake::NO_BUILD_PARALLEL_LEVEL, verbose, makeOptions);
+}
+
+void cmGlobalBorlandMakefileGenerator::PrintBuildCommandAdvice(
+  std::ostream& os, int jobs) const
+{
+  if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
+    // Borland's make does not support parallel builds
+    // see http://docwiki.embarcadero.com/RADStudio/Tokyo/en/Make
+
+    /* clang-format off */
+    os <<
+      "Warning: Borland's make does not support parallel builds. "
+      "Ignoring parallel build command line option.\n";
+    /* clang-format on */
+  }
+
+  this->cmGlobalUnixMakefileGenerator3::PrintBuildCommandAdvice(
+    os, cmake::NO_BUILD_PARALLEL_LEVEL);
+}

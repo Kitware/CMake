@@ -13,24 +13,24 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "Encoding.hxx.in"
+#  include "Encoding.hxx.in"
 #endif
 
 #if defined(_WIN32)
 
-#include <algorithm>
-#include <iomanip>
-#include <iostream>
-#include <stdexcept>
-#include <string.h>
-#include <wchar.h>
-#include <windows.h>
+#  include <algorithm>
+#  include <iomanip>
+#  include <iostream>
+#  include <stdexcept>
+#  include <string.h>
+#  include <wchar.h>
+#  include <windows.h>
 
-#include "testConsoleBuf.hxx"
+#  include "testConsoleBuf.hxx"
 
-#if defined(_MSC_VER) && _MSC_VER >= 1800
-#define KWSYS_WINDOWS_DEPRECATED_GetVersion
-#endif
+#  if defined(_MSC_VER) && _MSC_VER >= 1800
+#    define KWSYS_WINDOWS_DEPRECATED_GetVersion
+#  endif
 // يونيكود
 static const WCHAR UnicodeInputTestString[] =
   L"\u064A\u0648\u0646\u064A\u0643\u0648\u062F!";
@@ -219,9 +219,9 @@ static void finishFile(HANDLE file)
   }
 }
 
-#ifndef MAPVK_VK_TO_VSC
-#define MAPVK_VK_TO_VSC (0)
-#endif
+#  ifndef MAPVK_VK_TO_VSC
+#    define MAPVK_VK_TO_VSC (0)
+#  endif
 
 static void writeInputKeyEvent(INPUT_RECORD inputBuffer[], WCHAR chr)
 {
@@ -470,9 +470,9 @@ static int testFile()
   return didFail;
 }
 
-#ifndef _WIN32_WINNT_VISTA
-#define _WIN32_WINNT_VISTA 0x0600
-#endif
+#  ifndef _WIN32_WINNT_VISTA
+#    define _WIN32_WINNT_VISTA 0x0600
+#  endif
 
 static int testConsole()
 {
@@ -495,19 +495,19 @@ static int testConsole()
   DWORD FaceNameSize = sizeof(FaceName);
   DWORD FontFamily = TestFontFamily;
   DWORD FontSize = TestFontSize;
-#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersion
-#pragma warning(push)
-#ifdef __INTEL_COMPILER
-#pragma warning(disable : 1478)
-#else
-#pragma warning(disable : 4996)
-#endif
-#endif
+#  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersion
+#    pragma warning(push)
+#    ifdef __INTEL_COMPILER
+#      pragma warning(disable : 1478)
+#    else
+#      pragma warning(disable : 4996)
+#    endif
+#  endif
   const bool isVistaOrGreater =
     LOBYTE(LOWORD(GetVersion())) >= HIBYTE(_WIN32_WINNT_VISTA);
-#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersion
-#pragma warning(pop)
-#endif
+#  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersion
+#    pragma warning(pop)
+#  endif
   if (!isVistaOrGreater) {
     if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Console", 0, KEY_READ | KEY_WRITE,
                       &hConsoleKey) == ERROR_SUCCESS) {
@@ -573,7 +573,7 @@ static int testConsole()
     newConsole = true;
   }
 
-#if _WIN32_WINNT >= _WIN32_WINNT_VISTA
+#  if _WIN32_WINNT >= _WIN32_WINNT_VISTA
   if (isVistaOrGreater) {
     CONSOLE_FONT_INFOEX consoleFont;
     memset(&consoleFont, 0, sizeof(consoleFont));
@@ -603,7 +603,7 @@ static int testConsole()
       std::cerr << "GetCurrentConsoleFontEx failed!" << std::endl;
     }
   } else {
-#endif
+#  endif
     if (restoreConsole &&
         RegOpenKeyExW(HKEY_CURRENT_USER, L"Console", 0, KEY_WRITE,
                       &hConsoleKey) == ERROR_SUCCESS) {
@@ -619,9 +619,9 @@ static int testConsole()
                      sizeof(FontSize));
       RegCloseKey(hConsoleKey);
     }
-#if _WIN32_WINNT >= _WIN32_WINNT_VISTA
+#  if _WIN32_WINNT >= _WIN32_WINNT_VISTA
   }
-#endif
+#  endif
 
   if (createProcess(NULL, NULL, NULL)) {
     try {

@@ -10,9 +10,9 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "Configure.hxx.in"
-#include "Directory.hxx.in"
-#include "Encoding.hxx.in"
+#  include "Configure.hxx.in"
+#  include "Directory.hxx.in"
+#  include "Encoding.hxx.in"
 #endif
 
 #include <string>
@@ -69,37 +69,37 @@ void Directory::Clear()
 // First Windows platforms
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#include <windows.h>
+#  include <windows.h>
 
-#include <ctype.h>
-#include <fcntl.h>
-#include <io.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+#  include <ctype.h>
+#  include <fcntl.h>
+#  include <io.h>
+#  include <stdio.h>
+#  include <stdlib.h>
+#  include <string.h>
+#  include <sys/stat.h>
+#  include <sys/types.h>
 
 // Wide function names can vary depending on compiler:
-#ifdef __BORLANDC__
-#define _wfindfirst_func __wfindfirst
-#define _wfindnext_func __wfindnext
-#else
-#define _wfindfirst_func _wfindfirst
-#define _wfindnext_func _wfindnext
-#endif
+#  ifdef __BORLANDC__
+#    define _wfindfirst_func __wfindfirst
+#    define _wfindnext_func __wfindnext
+#  else
+#    define _wfindfirst_func _wfindfirst
+#    define _wfindnext_func _wfindnext
+#  endif
 
 namespace KWSYS_NAMESPACE {
 
 bool Directory::Load(const std::string& name)
 {
   this->Clear();
-#if (defined(_MSC_VER) && _MSC_VER < 1300) || defined(__BORLANDC__)
+#  if (defined(_MSC_VER) && _MSC_VER < 1300) || defined(__BORLANDC__)
   // Older Visual C++ and Embarcadero compilers.
   long srchHandle;
-#else // Newer Visual C++
+#  else // Newer Visual C++
   intptr_t srchHandle;
-#endif
+#  endif
   char* buf;
   size_t n = name.size();
   if (*name.rbegin() == '/' || *name.rbegin() == '\\') {
@@ -136,12 +136,12 @@ bool Directory::Load(const std::string& name)
 
 unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
 {
-#if (defined(_MSC_VER) && _MSC_VER < 1300) || defined(__BORLANDC__)
+#  if (defined(_MSC_VER) && _MSC_VER < 1300) || defined(__BORLANDC__)
   // Older Visual C++ and Embarcadero compilers.
   long srchHandle;
-#else // Newer Visual C++
+#  else // Newer Visual C++
   intptr_t srchHandle;
-#endif
+#  endif
   char* buf;
   size_t n = name.size();
   if (*name.rbegin() == '/') {
@@ -177,23 +177,23 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
 
 // Now the POSIX style directory access
 
-#include <sys/types.h>
+#  include <sys/types.h>
 
-#include <dirent.h>
+#  include <dirent.h>
 
 // PGI with glibc has trouble with dirent and large file support:
 //  http://www.pgroup.com/userforum/viewtopic.php?
 //  p=1992&sid=f16167f51964f1a68fe5041b8eb213b6
 // Work around the problem by mapping dirent the same way as readdir.
-#if defined(__PGI) && defined(__GLIBC__)
-#define kwsys_dirent_readdir dirent
-#define kwsys_dirent_readdir64 dirent64
-#define kwsys_dirent kwsys_dirent_lookup(readdir)
-#define kwsys_dirent_lookup(x) kwsys_dirent_lookup_delay(x)
-#define kwsys_dirent_lookup_delay(x) kwsys_dirent_##x
-#else
-#define kwsys_dirent dirent
-#endif
+#  if defined(__PGI) && defined(__GLIBC__)
+#    define kwsys_dirent_readdir dirent
+#    define kwsys_dirent_readdir64 dirent64
+#    define kwsys_dirent kwsys_dirent_lookup(readdir)
+#    define kwsys_dirent_lookup(x) kwsys_dirent_lookup_delay(x)
+#    define kwsys_dirent_lookup_delay(x) kwsys_dirent_##x
+#  else
+#    define kwsys_dirent dirent
+#  endif
 
 namespace KWSYS_NAMESPACE {
 

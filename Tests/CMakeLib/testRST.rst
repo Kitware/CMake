@@ -23,7 +23,13 @@ Variable :variable:`<PLACEHOLDER>_VARIABLE` with leading placeholder.
 Variable :variable:`VARIABLE_<PLACEHOLDER>` with trailing placeholder.
 Variable :variable:`<PLACEHOLDER>_VARIABLE <target>` with leading placeholder and target.
 Variable :variable:`VARIABLE_<PLACEHOLDER> <target>` with trailing placeholder and target.
+Environment variable :envvar:`SOME_ENV_VAR`.
+Environment variable :envvar:`some env var <SOME_ENV_VAR>` with space and target.
 Generator :generator:`Some Generator` with space.
+Inline literal ``~!@#$%^&*( )_+-=\\[]{}'":;,<>.?/``.
+Inline link `Link Text <ExternalDest>`_.
+Inline link `Link Text \<With \\-escaped Brackets\> <ExternalDest>`_.
+Inline literal ``__`` followed by inline link `Link Text <InternalDest_>`_.
 
 .. |not replaced| replace:: not replaced through toctree
 .. |not replaced in literal| replace:: replaced in parsed literal

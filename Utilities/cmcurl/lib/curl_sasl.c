@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -265,7 +265,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
-#if defined(USE_KERBEROS5)
+#if defined(USE_KERBEROS5) || defined(USE_NTLM)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
     data->set.str[STRING_SERVICE_NAME] :
     sasl->params->service;
@@ -333,7 +333,10 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       if(force_ir || data->set.sasl_ir)
         result = Curl_auth_create_ntlm_type1_message(data,
                                                      conn->user, conn->passwd,
-                                                     &conn->ntlm, &resp, &len);
+                                                     service,
+                                                     hostname,
+                                                     &conn->ntlm, &resp,
+                                                     &len);
       }
     else
 #endif
@@ -361,15 +364,6 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
                                                        conn->oauth_bearer,
                                                        &resp, &len);
     }
-    else if(enabledmechs & SASL_MECH_LOGIN) {
-      mech = SASL_MECH_STRING_LOGIN;
-      state1 = SASL_LOGIN;
-      state2 = SASL_LOGIN_PASSWD;
-      sasl->authused = SASL_MECH_LOGIN;
-
-      if(force_ir || data->set.sasl_ir)
-        result = Curl_auth_create_login_message(data, conn->user, &resp, &len);
-    }
     else if(enabledmechs & SASL_MECH_PLAIN) {
       mech = SASL_MECH_STRING_PLAIN;
       state1 = SASL_PLAIN;
@@ -378,6 +372,15 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       if(force_ir || data->set.sasl_ir)
         result = Curl_auth_create_plain_message(data, conn->user, conn->passwd,
                                                 &resp, &len);
+    }
+    else if(enabledmechs & SASL_MECH_LOGIN) {
+      mech = SASL_MECH_STRING_LOGIN;
+      state1 = SASL_LOGIN;
+      state2 = SASL_LOGIN_PASSWD;
+      sasl->authused = SASL_MECH_LOGIN;
+
+      if(force_ir || data->set.sasl_ir)
+        result = Curl_auth_create_login_message(data, conn->user, &resp, &len);
     }
   }
 
@@ -419,13 +422,11 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   char *chlg = NULL;
   size_t chlglen = 0;
 #endif
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5)
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
+    defined(USE_NTLM)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
                         data->set.str[STRING_SERVICE_NAME] :
                         sasl->params->service;
-#endif
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
-    defined(USE_NTLM)
   char *serverdata;
 #endif
   size_t len = 0;
@@ -496,6 +497,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     /* Create the type-1 message */
     result = Curl_auth_create_ntlm_type1_message(data,
                                                  conn->user, conn->passwd,
+                                                 service, hostname,
                                                  &conn->ntlm, &resp, &len);
     newstate = SASL_NTLM_TYPE2MSG;
     break;

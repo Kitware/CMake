@@ -130,6 +130,8 @@ public:
     int Index;
     // Requested number of process slots
     int Processors;
+    bool WantAffinity;
+    std::vector<size_t> Affinity;
     // return code of test which will mark test as "not run"
     int SkipReturnCode;
     std::vector<std::string> Environment;

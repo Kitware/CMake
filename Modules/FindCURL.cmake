@@ -5,16 +5,30 @@
 # FindCURL
 # --------
 #
-# Find curl
-#
 # Find the native CURL headers and libraries.
 #
-# ::
+# IMPORTED Targets
+# ^^^^^^^^^^^^^^^^
 #
-#   CURL_INCLUDE_DIRS   - where to find curl/curl.h, etc.
-#   CURL_LIBRARIES      - List of libraries when using curl.
-#   CURL_FOUND          - True if curl found.
-#   CURL_VERSION_STRING - the version of curl found (since CMake 2.8.8)
+# This module defines :prop_tgt:`IMPORTED` target ``CURL::libcurl``, if
+# curl has been found.
+#
+# Result Variables
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines the following variables:
+#
+# ``CURL_FOUND``
+#   True if curl found.
+#
+# ``CURL_INCLUDE_DIRS``
+#   where to find curl/curl.h, etc.
+#
+# ``CURL_LIBRARIES``
+#   List of libraries when using curl.
+#
+# ``CURL_VERSION_STRING``
+#   The version of curl found.
 
 # Look for the header file.
 find_path(CURL_INCLUDE_DIR NAMES curl/curl.h)
@@ -52,4 +66,10 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(CURL
 if(CURL_FOUND)
   set(CURL_LIBRARIES ${CURL_LIBRARY})
   set(CURL_INCLUDE_DIRS ${CURL_INCLUDE_DIR})
+
+  if(NOT TARGET CURL::libcurl)
+    add_library(CURL::libcurl UNKNOWN IMPORTED)
+    set_target_properties(CURL::libcurl PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}")
+    set_property(TARGET CURL::libcurl APPEND PROPERTY IMPORTED_LOCATION "${CURL_LIBRARY}")
+  endif()
 endif()

@@ -1,10 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmQtAutoGen.h"
 #include "cmQtAutoGeneratorRcc.h"
+#include "cmQtAutoGen.h"
 
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
+#include "cmFileLockResult.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmUVHandlePtr.h"
@@ -89,6 +90,7 @@ bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
   RccListOptions_ = InfoGetList("ARCC_RCC_LIST_OPTIONS");
 
   // - Job
+  LockFile_ = InfoGet("ARCC_LOCK_FILE");
   QrcFile_ = InfoGet("ARCC_SOURCE");
   QrcFileName_ = cmSystemTools::GetFilenameName(QrcFile_);
   QrcFileDir_ = cmSystemTools::GetFilenamePath(QrcFile_);
@@ -101,6 +103,10 @@ bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
   SettingsFile_ = InfoGetConfig("ARCC_SETTINGS_FILE");
 
   // - Validity checks
+  if (LockFile_.empty()) {
+    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "Lock file name missing");
+    return false;
+  }
   if (SettingsFile_.empty()) {
     Log().ErrorFile(GeneratorT::RCC, InfoFile(), "Settings file name missing");
     return false;
@@ -170,8 +176,11 @@ void cmQtAutoGeneratorRcc::PollStage()
   switch (Stage_) {
     // -- Initialize
     case StageT::SETTINGS_READ:
-      SettingsFileRead();
-      SetStage(StageT::TEST_QRC_RCC_FILES);
+      if (SettingsFileRead()) {
+        SetStage(StageT::TEST_QRC_RCC_FILES);
+      } else {
+        SetStage(StageT::FINISH);
+      }
       break;
 
     // -- Change detection
@@ -252,7 +261,7 @@ std::string cmQtAutoGeneratorRcc::MultiConfigOutput() const
   return res;
 }
 
-void cmQtAutoGeneratorRcc::SettingsFileRead()
+bool cmQtAutoGeneratorRcc::SettingsFileRead()
 {
   // Compose current settings strings
   {
@@ -278,21 +287,51 @@ void cmQtAutoGeneratorRcc::SettingsFileRead()
     }
   }
 
+  // Make sure the settings file exists
+  if (!FileSys().FileExists(SettingsFile_, true)) {
+    // Touch the settings file to make sure it exists
+    FileSys().Touch(SettingsFile_, true);
+  }
+
+  // Lock the lock file
+  {
+    // Make sure the lock file exists
+    if (!FileSys().FileExists(LockFile_, true)) {
+      if (!FileSys().Touch(LockFile_, true)) {
+        Log().ErrorFile(GeneratorT::RCC, LockFile_,
+                        "Lock file creation failed");
+        Error_ = true;
+        return false;
+      }
+    }
+    // Lock the lock file
+    cmFileLockResult lockResult =
+      LockFileLock_.Lock(LockFile_, static_cast<unsigned long>(-1));
+    if (!lockResult.IsOk()) {
+      Log().ErrorFile(GeneratorT::RCC, LockFile_,
+                      "File lock failed: " + lockResult.GetOutputMessage());
+      Error_ = true;
+      return false;
+    }
+  }
+
   // Read old settings
   {
     std::string content;
     if (FileSys().FileRead(content, SettingsFile_)) {
       SettingsChanged_ = (SettingsString_ != SettingsFind(content, "rcc"));
-      // In case any setting changed remove the old settings file.
+      // In case any setting changed clear the old settings file.
       // This triggers a full rebuild on the next run if the current
       // build is aborted before writing the current settings in the end.
       if (SettingsChanged_) {
-        FileSys().FileRemove(SettingsFile_);
+        FileSys().FileWrite(GeneratorT::RCC, SettingsFile_, "");
       }
     } else {
       SettingsChanged_ = true;
     }
   }
+
+  return true;
 }
 
 void cmQtAutoGeneratorRcc::SettingsFileWrite()
@@ -315,6 +354,9 @@ void cmQtAutoGeneratorRcc::SettingsFileWrite()
       Error_ = true;
     }
   }
+
+  // Unlock the lock file
+  LockFileLock_.Release();
 }
 
 bool cmQtAutoGeneratorRcc::TestQrcRccFiles()
@@ -533,10 +575,14 @@ bool cmQtAutoGeneratorRcc::GenerateRcc()
     if (Process_->IsFinished()) {
       // Process is finished
       if (!ProcessResult_.error()) {
-        // Process success
+        // Rcc process success
+        // Print rcc output
+        if (!ProcessResult_.StdOut.empty()) {
+          Log().Info(GeneratorT::RCC, ProcessResult_.StdOut);
+        }
         BuildFileChanged_ = true;
       } else {
-        // Process failed
+        // Rcc process failed
         {
           std::string emsg = "The rcc process failed to compile\n  ";
           emsg += Quoted(QrcFile_);

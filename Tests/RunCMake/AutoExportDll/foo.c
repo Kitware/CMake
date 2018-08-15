@@ -1,7 +1,7 @@
 #ifdef _MSC_VER
-#include "windows.h"
+#  include "windows.h"
 #else
-#define WINAPI
+#  define WINAPI
 #endif
 
 int WINAPI foo()

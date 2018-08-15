@@ -54,7 +54,7 @@ bool cmFileLock::IsLocked(const std::string& filename) const
 }
 
 #if defined(_WIN32)
-#include "cmFileLockWin32.cxx"
+#  include "cmFileLockWin32.cxx"
 #else
-#include "cmFileLockUnix.cxx"
+#  include "cmFileLockUnix.cxx"
 #endif

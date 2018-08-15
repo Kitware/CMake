@@ -3,11 +3,11 @@
 #include "cm_codecvt.hxx"
 
 #if defined(_WIN32)
-#include <assert.h>
-#include <string.h>
-#include <windows.h>
-#undef max
-#include "cmsys/Encoding.hxx"
+#  include <assert.h>
+#  include <string.h>
+#  include <windows.h>
+#  undef max
+#  include "cmsys/Encoding.hxx"
 #endif
 
 #if defined(_WIN32)

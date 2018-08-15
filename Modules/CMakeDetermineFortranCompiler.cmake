@@ -66,12 +66,20 @@ else()
       #  The order is 95 or newer compilers first, then 90,
       #  then 77 or older compilers, gnu is always last in the group,
       #  so if you paid for a compiler it is picked by default.
-      set(CMAKE_Fortran_COMPILER_LIST
-        ftn
-        ifort ifc af95 af90 efc f95 pathf2003 pathf95 pgf95 pgfortran lf95 xlf95
-        fort flang gfortran gfortran-4 g95 f90 pathf90 pgf90 xlf90 epcf90 fort77
-        frt pgf77 xlf fl32 af77 g77 f77 nag
-        )
+      if(CMAKE_HOST_WIN32)
+        set(CMAKE_Fortran_COMPILER_LIST
+          ifort pgf95 pgfortran lf95 fort
+          flang gfortran gfortran-4 g95 f90 pgf90
+          pgf77 g77 f77 nag
+          )
+      else()
+        set(CMAKE_Fortran_COMPILER_LIST
+          ftn
+          ifort ifc efc pgf95 pgfortran lf95 xlf95 fort
+          flang gfortran gfortran-4 g95 f90 pgf90
+          frt pgf77 xlf g77 f77 nag
+          )
+      endif()
 
       # Vendor-specific compiler names.
       set(_Fortran_COMPILER_NAMES_GNU       gfortran gfortran-4 g95 g77)

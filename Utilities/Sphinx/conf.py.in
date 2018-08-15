@@ -17,6 +17,7 @@ version = '@conf_version@' # feature version
 release = '@conf_release@' # full version string
 
 primary_domain = 'cmake'
+highlight_language = 'none'
 
 exclude_patterns = [
     'dev', # ignore developer-only documentation

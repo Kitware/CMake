@@ -35,6 +35,7 @@ public:
     }
 
     virtual ~OutputParser() {}
+
   protected:
     /** Implement in a subclass to process a chunk of data.  It should
         return true only if it is interested in more data.  */

@@ -9,12 +9,13 @@
 #include "cmAlgorithms.h"
 #include "cmCPack7zGenerator.h"
 #ifdef HAVE_FREEBSD_PKG
-#include "cmCPackFreeBSDGenerator.h"
+#  include "cmCPackFreeBSDGenerator.h"
 #endif
 #include "cmCPackDebGenerator.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmCPackNSISGenerator.h"
+#include "cmCPackNuGetGenerator.h"
 #include "cmCPackSTGZGenerator.h"
 #include "cmCPackTGZGenerator.h"
 #include "cmCPackTXZGenerator.h"
@@ -23,25 +24,25 @@
 #include "cmCPackZIPGenerator.h"
 
 #ifdef __APPLE__
-#include "cmCPackBundleGenerator.h"
-#include "cmCPackDragNDropGenerator.h"
-#include "cmCPackOSXX11Generator.h"
-#include "cmCPackPackageMakerGenerator.h"
-#include "cmCPackProductBuildGenerator.h"
+#  include "cmCPackBundleGenerator.h"
+#  include "cmCPackDragNDropGenerator.h"
+#  include "cmCPackOSXX11Generator.h"
+#  include "cmCPackPackageMakerGenerator.h"
+#  include "cmCPackProductBuildGenerator.h"
 #endif
 
 #ifdef __CYGWIN__
-#include "cmCPackCygwinBinaryGenerator.h"
-#include "cmCPackCygwinSourceGenerator.h"
+#  include "cmCPackCygwinBinaryGenerator.h"
+#  include "cmCPackCygwinSourceGenerator.h"
 #endif
 
 #if !defined(_WIN32) && !defined(__QNXNTO__) && !defined(__BEOS__) &&         \
   !defined(__HAIKU__)
-#include "cmCPackRPMGenerator.h"
+#  include "cmCPackRPMGenerator.h"
 #endif
 
 #if defined(_WIN32) || (defined(__CYGWIN__) && defined(HAVE_LIBUUID))
-#include "WiX/cmCPackWIXGenerator.h"
+#  include "WiX/cmCPackWIXGenerator.h"
 #endif
 
 cmCPackGeneratorFactory::cmCPackGeneratorFactory()
@@ -104,6 +105,10 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
   if (cmCPackDebGenerator::CanGenerate()) {
     this->RegisterGenerator("DEB", "Debian packages",
                             cmCPackDebGenerator::CreateGenerator);
+  }
+  if (cmCPackNuGetGenerator::CanGenerate()) {
+    this->RegisterGenerator("NuGet", "NuGet packages",
+                            cmCPackNuGetGenerator::CreateGenerator);
   }
 #ifdef __APPLE__
   if (cmCPackDragNDropGenerator::CanGenerate()) {

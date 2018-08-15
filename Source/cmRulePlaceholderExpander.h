@@ -24,7 +24,7 @@ public:
     this->TargetImpLib = targetImpLib;
   }
 
-  // Create a struct to hold the varibles passed into
+  // Create a struct to hold the variables passed into
   // ExpandRuleVariables
   struct RuleVariables
   {

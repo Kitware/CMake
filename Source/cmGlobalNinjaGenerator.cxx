@@ -101,31 +101,6 @@ std::string cmGlobalNinjaGenerator::EncodeRuleName(std::string const& name)
   return encoded;
 }
 
-static bool IsIdentChar(char c)
-{
-  return ('a' <= c && c <= 'z') ||
-    ('+' <= c && c <= '9') || // +,-./ and numbers
-    ('A' <= c && c <= 'Z') || (c == '_') || (c == '$') || (c == '\\') ||
-    (c == ' ') || (c == ':');
-}
-
-std::string cmGlobalNinjaGenerator::EncodeIdent(const std::string& ident,
-                                                std::ostream& vars)
-{
-  if (std::find_if(ident.begin(), ident.end(),
-                   [](char c) { return !IsIdentChar(c); }) != ident.end()) {
-    static unsigned VarNum = 0;
-    std::ostringstream names;
-    names << "ident" << VarNum++;
-    vars << names.str() << " = " << ident << "\n";
-    return "$" + names.str();
-  }
-  std::string result = ident;
-  cmSystemTools::ReplaceString(result, " ", "$ ");
-  cmSystemTools::ReplaceString(result, ":", "$:");
-  return result;
-}
-
 std::string cmGlobalNinjaGenerator::EncodeLiteral(const std::string& lit)
 {
   std::string result = lit;
@@ -143,7 +118,10 @@ std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
   else
     std::replace(result.begin(), result.end(), '/', '\\');
 #endif
-  return EncodeLiteral(result);
+  result = EncodeLiteral(result);
+  cmSystemTools::ReplaceString(result, " ", "$ ");
+  cmSystemTools::ReplaceString(result, ":", "$:");
+  return result;
 }
 
 void cmGlobalNinjaGenerator::WriteBuild(
@@ -177,14 +155,14 @@ void cmGlobalNinjaGenerator::WriteBuild(
 
   // Write explicit dependencies.
   for (std::string const& explicitDep : explicitDeps) {
-    arguments += " " + EncodeIdent(EncodePath(explicitDep), os);
+    arguments += " " + EncodePath(explicitDep);
   }
 
   // Write implicit dependencies.
   if (!implicitDeps.empty()) {
     arguments += " |";
     for (std::string const& implicitDep : implicitDeps) {
-      arguments += " " + EncodeIdent(EncodePath(implicitDep), os);
+      arguments += " " + EncodePath(implicitDep);
     }
   }
 
@@ -192,7 +170,7 @@ void cmGlobalNinjaGenerator::WriteBuild(
   if (!orderOnlyDeps.empty()) {
     arguments += " ||";
     for (std::string const& orderOnlyDep : orderOnlyDeps) {
-      arguments += " " + EncodeIdent(EncodePath(orderOnlyDep), os);
+      arguments += " " + EncodePath(orderOnlyDep);
     }
   }
 
@@ -203,7 +181,7 @@ void cmGlobalNinjaGenerator::WriteBuild(
   // Write outputs files.
   build += "build";
   for (std::string const& output : outputs) {
-    build += " " + EncodeIdent(EncodePath(output), os);
+    build += " " + EncodePath(output);
     if (this->ComputingUnknownDependencies) {
       this->CombinedBuildOutputs.insert(output);
     }
@@ -211,7 +189,7 @@ void cmGlobalNinjaGenerator::WriteBuild(
   if (!implicitOuts.empty()) {
     build += " |";
     for (std::string const& implicitOut : implicitOuts) {
-      build += " " + EncodeIdent(EncodePath(implicitOut), os);
+      build += " " + EncodePath(implicitOut);
     }
   }
   build += ":";
@@ -475,6 +453,7 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
   , PolicyCMP0058(cmPolicies::WARN)
   , NinjaSupportsConsolePool(false)
   , NinjaSupportsImplicitOuts(false)
+  , NinjaSupportsManifestRestat(false)
   , NinjaSupportsDyndeps(0)
 {
 #ifdef _WIN32
@@ -576,9 +555,10 @@ bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
     if (!cmSystemTools::RunSingleCommand(command, &version, &error, nullptr,
                                          nullptr,
                                          cmSystemTools::OUTPUT_NONE)) {
-      mf->IssueMessage(cmake::FATAL_ERROR, "Running\n '" +
-                         cmJoin(command, "' '") + "'\n"
-                                                  "failed with:\n " +
+      mf->IssueMessage(cmake::FATAL_ERROR,
+                       "Running\n '" + cmJoin(command, "' '") +
+                         "'\n"
+                         "failed with:\n " +
                          error);
       cmSystemTools::SetFatalErrorOccured();
       return false;
@@ -597,6 +577,9 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
   this->NinjaSupportsImplicitOuts = !cmSystemTools::VersionCompare(
     cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
     this->RequiredNinjaVersionForImplicitOuts().c_str());
+  this->NinjaSupportsManifestRestat = !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+    RequiredNinjaVersionForManifestRestat().c_str());
   {
     // Our ninja branch adds ".dyndep-#" to its version number,
     // where '#' is a feature-specific version number.  Extract it.
@@ -692,12 +675,18 @@ void cmGlobalNinjaGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string& makeProgram,
   const std::string& /*projectName*/, const std::string& /*projectDir*/,
   const std::string& targetName, const std::string& /*config*/, bool /*fast*/,
-  bool verbose, std::vector<std::string> const& makeOptions)
+  int jobs, bool verbose, std::vector<std::string> const& makeOptions)
 {
   makeCommand.push_back(this->SelectMakeProgram(makeProgram));
 
   if (verbose) {
     makeCommand.push_back("-v");
+  }
+
+  if ((jobs != cmake::NO_BUILD_PARALLEL_LEVEL) &&
+      (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL)) {
+    makeCommand.push_back("-j");
+    makeCommand.push_back(std::to_string(jobs));
   }
 
   makeCommand.insert(makeCommand.end(), makeOptions.begin(),
@@ -949,12 +938,14 @@ void cmGlobalNinjaGenerator::AddDependencyToAll(const std::string& input)
 void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
 {
   for (auto const& asd : this->AssumedSourceDependencies) {
-    cmNinjaDeps deps;
-    std::copy(asd.second.begin(), asd.second.end(), std::back_inserter(deps));
+    cmNinjaDeps orderOnlyDeps;
+    std::copy(asd.second.begin(), asd.second.end(),
+              std::back_inserter(orderOnlyDeps));
     WriteCustomCommandBuild(/*command=*/"", /*description=*/"",
                             "Assume dependencies for generated source file.",
                             /*depfile*/ "", /*uses_terminal*/ false,
-                            /*restat*/ true, cmNinjaDeps(1, asd.first), deps);
+                            /*restat*/ true, cmNinjaDeps(1, asd.first),
+                            cmNinjaDeps(), orderOnlyDeps);
   }
 }
 
@@ -1223,11 +1214,13 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
     for (std::string const& file : files) {
       knownDependencies.insert(this->ConvertToNinjaPath(file));
     }
-    // get list files which are implicit dependencies as well and will be phony
-    // for rebuild manifest
-    std::vector<std::string> const& lf = lg->GetMakefile()->GetListFiles();
-    for (std::string const& j : lf) {
-      knownDependencies.insert(this->ConvertToNinjaPath(j));
+    if (!this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION")) {
+      // get list files which are implicit dependencies as well and will be
+      // phony for rebuild manifest
+      std::vector<std::string> const& lf = lg->GetMakefile()->GetListFiles();
+      for (std::string const& j : lf) {
+        knownDependencies.insert(this->ConvertToNinjaPath(j));
+      }
     }
     std::vector<cmGeneratorExpressionEvaluationFile*> const& ef =
       lg->GetMakefile()->GetEvaluationFiles();
@@ -1335,6 +1328,9 @@ void cmGlobalNinjaGenerator::WriteTargetAll(std::ostream& os)
 
 void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
 {
+  if (this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION")) {
+    return;
+  }
   cmLocalGenerator* lg = this->LocalGenerators[0];
 
   std::ostringstream cmd;
@@ -1356,6 +1352,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
             /*generator=*/true);
 
   cmNinjaDeps implicitDeps;
+  cmNinjaDeps explicitDeps;
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
     std::vector<std::string> const& lf =
       localGen->GetMakefile()->GetListFiles();
@@ -1365,10 +1362,6 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   }
   implicitDeps.push_back(this->CMakeCacheFile);
 
-  std::sort(implicitDeps.begin(), implicitDeps.end());
-  implicitDeps.erase(std::unique(implicitDeps.begin(), implicitDeps.end()),
-                     implicitDeps.end());
-
   cmNinjaVars variables;
   // Use 'console' pool to get non buffered output of the CMake re-run call
   // Available since Ninja 1.5
@@ -1376,16 +1369,81 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
     variables["pool"] = "console";
   }
 
+  cmake* cm = this->GetCMakeInstance();
+  if (this->SupportsManifestRestat() && cm->DoWriteGlobVerifyTarget()) {
+    std::ostringstream verify_cmd;
+    verify_cmd << lg->ConvertToOutputFormat(cmSystemTools::GetCMakeCommand(),
+                                            cmOutputConverter::SHELL)
+               << " -P "
+               << lg->ConvertToOutputFormat(cm->GetGlobVerifyScript(),
+                                            cmOutputConverter::SHELL);
+
+    WriteRule(*this->RulesFileStream, "VERIFY_GLOBS", verify_cmd.str(),
+              "Re-checking globbed directories...",
+              "Rule for re-checking globbed directories.",
+              /*depfile=*/"",
+              /*deptype=*/"",
+              /*rspfile=*/"",
+              /*rspcontent*/ "",
+              /*restat=*/"",
+              /*generator=*/true);
+
+    std::string verifyForce = cm->GetGlobVerifyScript() + "_force";
+    cmNinjaDeps verifyForceDeps(1, this->NinjaOutputPath(verifyForce));
+
+    this->WritePhonyBuild(os, "Phony target to force glob verification run.",
+                          verifyForceDeps, cmNinjaDeps());
+
+    variables["restat"] = "1";
+    std::string const verifyScriptFile =
+      this->NinjaOutputPath(cm->GetGlobVerifyScript());
+    std::string const verifyStampFile =
+      this->NinjaOutputPath(cm->GetGlobVerifyStamp());
+    this->WriteBuild(os,
+                     "Re-run CMake to check if globbed directories changed.",
+                     "VERIFY_GLOBS",
+                     /*outputs=*/cmNinjaDeps(1, verifyStampFile),
+                     /*implicitOuts=*/cmNinjaDeps(),
+                     /*explicitDeps=*/cmNinjaDeps(),
+                     /*implicitDeps=*/verifyForceDeps,
+                     /*orderOnlyDeps=*/cmNinjaDeps(), variables);
+
+    variables.erase("restat");
+    implicitDeps.push_back(verifyScriptFile);
+    explicitDeps.push_back(verifyStampFile);
+  } else if (!this->SupportsManifestRestat() &&
+             cm->DoWriteGlobVerifyTarget()) {
+    std::ostringstream msg;
+    msg << "The detected version of Ninja:\n"
+        << "  " << this->NinjaVersion << "\n"
+        << "is less than the version of Ninja required by CMake for adding "
+           "restat dependencies to the build.ninja manifest regeneration "
+           "target:\n"
+        << "  " << this->RequiredNinjaVersionForManifestRestat() << "\n";
+    msg << "Any pre-check scripts, such as those generated for file(GLOB "
+           "CONFIGURE_DEPENDS), will not be run by Ninja.";
+    this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
+  }
+
+  std::sort(implicitDeps.begin(), implicitDeps.end());
+  implicitDeps.erase(std::unique(implicitDeps.begin(), implicitDeps.end()),
+                     implicitDeps.end());
+
   std::string const ninjaBuildFile = this->NinjaOutputPath(NINJA_BUILD_FILE);
   this->WriteBuild(os, "Re-run CMake if any of its inputs changed.",
                    "RERUN_CMAKE",
                    /*outputs=*/cmNinjaDeps(1, ninjaBuildFile),
-                   /*implicitOuts=*/cmNinjaDeps(),
-                   /*explicitDeps=*/cmNinjaDeps(), implicitDeps,
+                   /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps,
                    /*orderOnlyDeps=*/cmNinjaDeps(), variables);
 
+  cmNinjaDeps missingInputs;
+  std::set_difference(std::make_move_iterator(implicitDeps.begin()),
+                      std::make_move_iterator(implicitDeps.end()),
+                      CustomCommandOutputs.begin(), CustomCommandOutputs.end(),
+                      std::back_inserter(missingInputs));
+
   this->WritePhonyBuild(os, "A missing CMake input file is not an error.",
-                        implicitDeps, cmNinjaDeps());
+                        missingInputs, cmNinjaDeps());
 }
 
 std::string cmGlobalNinjaGenerator::ninjaCmd() const
@@ -1406,6 +1464,11 @@ bool cmGlobalNinjaGenerator::SupportsConsolePool() const
 bool cmGlobalNinjaGenerator::SupportsImplicitOuts() const
 {
   return this->NinjaSupportsImplicitOuts;
+}
+
+bool cmGlobalNinjaGenerator::SupportsManifestRestat() const
+{
+  return this->NinjaSupportsManifestRestat;
 }
 
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
@@ -1758,7 +1821,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   Json::Value tm = Json::objectValue;
   for (cmFortranObjectInfo const& object : objects) {
     for (std::string const& p : object.Provides) {
-      std::string const mod = module_dir + p + ".mod";
+      std::string const mod = module_dir + p;
       mod_files[p] = mod;
       tm[p] = mod;
     }

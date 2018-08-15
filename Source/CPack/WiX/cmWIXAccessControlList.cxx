@@ -66,8 +66,9 @@ void cmWIXAccessControlList::CreatePermissionElement(std::string const& entry)
 void cmWIXAccessControlList::ReportError(std::string const& entry,
                                          std::string const& message)
 {
-  cmCPackLogger(cmCPackLog::LOG_ERROR, "Failed processing ACL entry '"
-                  << entry << "': " << message << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_ERROR,
+                "Failed processing ACL entry '" << entry << "': " << message
+                                                << std::endl);
 }
 
 bool cmWIXAccessControlList::IsBooleanAttribute(std::string const& name)

@@ -85,6 +85,8 @@ set(TCLTK_POSSIBLE_LIB_PATHS
 )
 
 set(TCLTK_POSSIBLE_LIB_PATH_SUFFIXES
+  lib/tcl/tcl8.7
+  lib/tcl/tk8.7
   lib/tcl/tcl8.6
   lib/tcl/tk8.6
   lib/tcl/tcl8.5
@@ -116,6 +118,7 @@ find_library(TCL_LIBRARY
   NAMES
   tcl
   tcl${TCL_LIBRARY_VERSION} tcl${TCL_TCLSH_VERSION} tcl${TK_WISH_VERSION}
+  tcl87 tcl8.7 tcl87t tcl8.7t
   tcl86 tcl8.6 tcl86t tcl8.6t
   tcl85 tcl8.5
   tcl84 tcl8.4
@@ -130,6 +133,7 @@ find_library(TK_LIBRARY
   NAMES
   tk
   tk${TK_LIBRARY_VERSION} tk${TCL_TCLSH_VERSION} tk${TK_WISH_VERSION}
+  tk87 tk8.7 tk87t tk8.7t
   tk86 tk8.6 tk86t tk8.6t
   tk85 tk8.5
   tk84 tk8.4
@@ -176,6 +180,8 @@ set(TCLTK_POSSIBLE_INCLUDE_PATHS
 set(TCLTK_POSSIBLE_INCLUDE_PATH_SUFFIXES
   include/tcl${TK_LIBRARY_VERSION}
   include/tcl${TCL_LIBRARY_VERSION}
+  include/tcl8.7
+  include/tk8.7
   include/tcl8.6
   include/tk8.6
   include/tcl8.5

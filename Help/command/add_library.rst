@@ -83,8 +83,11 @@ about the imported library are specified by setting properties whose names
 begin in ``IMPORTED_`` and ``INTERFACE_``.  The most important such
 property is :prop_tgt:`IMPORTED_LOCATION` (and its per-configuration
 variant :prop_tgt:`IMPORTED_LOCATION_<CONFIG>`) which specifies the
-location of the main library file on disk.  See documentation of the
-``IMPORTED_*`` and ``INTERFACE_*`` properties for more information.
+location of the main library file on disk.  Or, for object libraries,
+:prop_tgt:`IMPORTED_OBJECTS` (and :prop_tgt:`IMPORTED_OBJECTS_<CONFIG>`)
+specifies the locations of object files on disk.
+See documentation of the ``IMPORTED_*`` and ``INTERFACE_*`` properties
+for more information.
 
 Object Libraries
 ^^^^^^^^^^^^^^^^
@@ -110,10 +113,10 @@ along with those compiled from their own sources.  Object libraries
 may contain only sources that compile, header files, and other files
 that would not affect linking of a normal library (e.g. ``.txt``).
 They may contain custom commands generating such sources, but not
-``PRE_BUILD``, ``PRE_LINK``, or ``POST_BUILD`` commands.  Object libraries
-cannot be linked.  Some native build systems (such as Xcode) may not like
-targets that have only object files, so consider adding at least one real
-source file to any target that references ``$<TARGET_OBJECTS:objlib>``.
+``PRE_BUILD``, ``PRE_LINK``, or ``POST_BUILD`` commands.  Some native build
+systems (such as Xcode) may not like targets that have only object files, so
+consider adding at least one real source file to any target that references
+``$<TARGET_OBJECTS:objlib>``.
 
 Alias Libraries
 ^^^^^^^^^^^^^^^

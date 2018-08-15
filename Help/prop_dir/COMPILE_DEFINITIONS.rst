@@ -4,7 +4,7 @@ COMPILE_DEFINITIONS
 Preprocessor definitions for compiling a directory's sources.
 
 This property specifies the list of options given so far to the
-:command:`add_definitions` command.
+:command:`add_compile_definitions` (or :command:`add_definitions`) command.
 
 The ``COMPILE_DEFINITIONS`` property may be set to a semicolon-separated
 list of preprocessor definitions using the syntax ``VAR`` or ``VAR=value``.

@@ -251,8 +251,8 @@ int cmCPackPackageMakerGenerator::PackageFiles()
       !this->CopyCreateResourceFile("Welcome", resDir) ||
       !this->CopyResourcePlistFile("Info.plist") ||
       !this->CopyResourcePlistFile("Description.plist")) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the resource files"
-                    << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Problem copying the resource files" << std::endl);
     return 0;
   }
 
@@ -311,7 +311,8 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     ofs << "# Run command: " << dmgCmd.str() << std::endl
         << "# Output:" << std::endl
         << output << std::endl;
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running hdiutil command: "
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Problem running hdiutil command: "
                     << dmgCmd.str() << std::endl
                     << "Please check " << tmpFile << " for errors"
                     << std::endl);
@@ -357,8 +358,8 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   } else {
     pkgPath = cmSystemTools::FindProgram("PackageMaker", paths, false);
     if (pkgPath.empty()) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find PackageMaker compiler"
-                      << std::endl);
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Cannot find PackageMaker compiler" << std::endl);
       return 0;
     }
     this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
@@ -415,12 +416,13 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   }
   this->PackageMakerVersion = atof(rexVersion.match(1).c_str());
   if (this->PackageMakerVersion < 1.0) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Require PackageMaker 1.0 or higher"
-                    << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Require PackageMaker 1.0 or higher" << std::endl);
     return 0;
   }
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "PackageMaker version is: "
-                  << this->PackageMakerVersion << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                "PackageMaker version is: " << this->PackageMakerVersion
+                                            << std::endl);
 
   // Determine the package compatibility version. If it wasn't
   // specified by the user, we define it based on which features the
@@ -448,8 +450,8 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   std::vector<std::string> no_paths;
   pkgPath = cmSystemTools::FindProgram("hdiutil", no_paths, false);
   if (pkgPath.empty()) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find hdiutil compiler"
-                    << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Cannot find hdiutil compiler" << std::endl);
     return 0;
   }
   this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE",
@@ -470,17 +472,18 @@ bool cmCPackPackageMakerGenerator::RunPackageMaker(const char* command,
   bool res = cmSystemTools::RunSingleCommand(
     command, &output, &output, &retVal, nullptr, this->GeneratorVerbose,
     cmDuration::zero());
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Done running package maker"
-                  << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                "Done running package maker" << std::endl);
   if (!res || retVal) {
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Run command: " << command << std::endl
         << "# Output:" << std::endl
         << output << std::endl;
-    cmCPackLogger(
-      cmCPackLog::LOG_ERROR, "Problem running PackageMaker command: "
-        << command << std::endl
-        << "Please check " << tmpFile << " for errors" << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Problem running PackageMaker command: "
+                    << command << std::endl
+                    << "Please check " << tmpFile << " for errors"
+                    << std::endl);
     return false;
   }
   // sometimes the command finishes but the directory is not yet
@@ -505,8 +508,9 @@ bool cmCPackPackageMakerGenerator::GenerateComponentPackage(
   const char* packageFile, const char* packageDir,
   const cmCPackComponent& component)
 {
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "-   Building component package: "
-                  << packageFile << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+                "-   Building component package: " << packageFile
+                                                   << std::endl);
 
   // The command that will be used to run PackageMaker
   std::ostringstream pkgCmd;

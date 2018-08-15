@@ -90,8 +90,8 @@ int cmCPackRPMGenerator::PackageOnePack(std::string const& initialToplevel,
   this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH",
                   component_path.c_str());
   if (!this->ReadListFile("CPackRPM.cmake")) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Error while execution CPackRPM.cmake"
-                    << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Error while execution CPackRPM.cmake" << std::endl);
     retval = 0;
   }
 
@@ -165,7 +165,8 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
     }
 
     if (shouldSet) {
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Setting "
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                    "Setting "
                       << "CPACK_RPM_DEBUGINFO_PACKAGE because "
                       << "CPACK_RPM_DEBUGINFO_SINGLE_PACKAGE is set but "
                       << " none of the "
@@ -203,8 +204,9 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
           continue;
         }
 
-        cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Packaging component group: "
-                        << compGIt->first << std::endl);
+        cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                      "Packaging component group: " << compGIt->first
+                                                    << std::endl);
         retval &= PackageOnePack(initialTopLevel, compGIt->first);
       }
       // Handle Orphan components (components not belonging to any groups)
@@ -226,7 +228,8 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
           }
 
           cmCPackLogger(
-            cmCPackLog::LOG_VERBOSE, "Component <"
+            cmCPackLog::LOG_VERBOSE,
+            "Component <"
               << compIt->second.Name
               << "> does not belong to any group, package it separately."
               << std::endl);
@@ -242,7 +245,8 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
         } else if (mainCompIt != this->Components.end()) {
           retval &= PackageOnePack(initialTopLevel, mainCompIt->first);
         } else {
-          cmCPackLogger(cmCPackLog::LOG_ERROR, "CPACK_RPM_MAIN_COMPONENT set"
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+                        "CPACK_RPM_MAIN_COMPONENT set"
                           << " to non existing component.\n");
           retval = 0;
         }
@@ -276,7 +280,8 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
         if (mainCompIt != this->Components.end()) {
           retval &= PackageOnePack(initialTopLevel, mainCompIt->first);
         } else {
-          cmCPackLogger(cmCPackLog::LOG_ERROR, "CPACK_RPM_MAIN_COMPONENT set"
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+                        "CPACK_RPM_MAIN_COMPONENT set"
                           << " to non existing component.\n");
           retval = 0;
         }
@@ -290,8 +295,9 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
       std::map<std::string, cmCPackComponentGroup>::iterator compGIt;
       for (compGIt = this->ComponentGroups.begin();
            compGIt != this->ComponentGroups.end(); ++compGIt) {
-        cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Packaging component group: "
-                        << compGIt->first << std::endl);
+        cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                      "Packaging component group: " << compGIt->first
+                                                    << std::endl);
         retval &= PackageOnePack(initialTopLevel, compGIt->first);
       }
       // Handle Orphan components (components not belonging to any groups)
@@ -301,7 +307,8 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
         // Does the component belong to a group?
         if (compIt->second.Group == nullptr) {
           cmCPackLogger(
-            cmCPackLog::LOG_VERBOSE, "Component <"
+            cmCPackLog::LOG_VERBOSE,
+            "Component <"
               << compIt->second.Name
               << "> does not belong to any group, package it separately."
               << std::endl);
@@ -320,7 +327,8 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
     }
   } else {
     cmCPackLogger(
-      cmCPackLog::LOG_ERROR, "CPACK_RPM_MAIN_COMPONENT not set but"
+      cmCPackLog::LOG_ERROR,
+      "CPACK_RPM_MAIN_COMPONENT not set but"
         << " it is mandatory with CPACK_RPM_DEBUGINFO_SINGLE_PACKAGE"
         << " being set.\n");
     retval = 0;
@@ -380,8 +388,8 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne(
   if (this->ReadListFile("CPackRPM.cmake")) {
     AddGeneratedPackageNames();
   } else {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Error while execution CPackRPM.cmake"
-                    << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Error while execution CPackRPM.cmake" << std::endl);
     retval = 0;
   }
 

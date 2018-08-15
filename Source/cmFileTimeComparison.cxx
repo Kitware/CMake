@@ -9,12 +9,12 @@
 
 // Use a platform-specific API to get file times efficiently.
 #if !defined(_WIN32) || defined(__CYGWIN__)
-#include "cm_sys_stat.h"
-#define cmFileTimeComparison_Type struct stat
+#  include "cm_sys_stat.h"
+#  define cmFileTimeComparison_Type struct stat
 #else
-#include "cmsys/Encoding.hxx"
-#include <windows.h>
-#define cmFileTimeComparison_Type FILETIME
+#  include "cmsys/Encoding.hxx"
+#  include <windows.h>
+#  define cmFileTimeComparison_Type FILETIME
 #endif
 
 class cmFileTimeComparisonInternal
@@ -98,7 +98,7 @@ int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1,
                                           cmFileTimeComparison_Type* s2)
 {
 #if !defined(_WIN32) || defined(__CYGWIN__)
-#if CMake_STAT_HAS_ST_MTIM
+#  if CMake_STAT_HAS_ST_MTIM
   // Compare using nanosecond resolution.
   if (s1->st_mtim.tv_sec < s2->st_mtim.tv_sec) {
     return -1;
@@ -112,7 +112,7 @@ int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1,
   if (s1->st_mtim.tv_nsec > s2->st_mtim.tv_nsec) {
     return 1;
   }
-#elif CMake_STAT_HAS_ST_MTIMESPEC
+#  elif CMake_STAT_HAS_ST_MTIMESPEC
   // Compare using nanosecond resolution.
   if (s1->st_mtimespec.tv_sec < s2->st_mtimespec.tv_sec) {
     return -1;
@@ -126,7 +126,7 @@ int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1,
   if (s1->st_mtimespec.tv_nsec > s2->st_mtimespec.tv_nsec) {
     return 1;
   }
-#else
+#  else
   // Compare using 1 second resolution.
   if (s1->st_mtime < s2->st_mtime) {
     return -1;
@@ -134,7 +134,7 @@ int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1,
   if (s1->st_mtime > s2->st_mtime) {
     return 1;
   }
-#endif
+#  endif
   // Files have the same time.
   return 0;
 #else
@@ -147,7 +147,7 @@ bool cmFileTimeComparisonInternal::TimesDiffer(cmFileTimeComparison_Type* s1,
                                                cmFileTimeComparison_Type* s2)
 {
 #if !defined(_WIN32) || defined(__CYGWIN__)
-#if CMake_STAT_HAS_ST_MTIM
+#  if CMake_STAT_HAS_ST_MTIM
   // Times are integers in units of 1ns.
   long long bil = 1000000000;
   long long t1 = s1->st_mtim.tv_sec * bil + s1->st_mtim.tv_nsec;
@@ -159,7 +159,7 @@ bool cmFileTimeComparisonInternal::TimesDiffer(cmFileTimeComparison_Type* s1,
     return (t1 - t2) >= bil;
   }
   return false;
-#elif CMake_STAT_HAS_ST_MTIMESPEC
+#  elif CMake_STAT_HAS_ST_MTIMESPEC
   // Times are integers in units of 1ns.
   long long bil = 1000000000;
   long long t1 = s1->st_mtimespec.tv_sec * bil + s1->st_mtimespec.tv_nsec;
@@ -171,7 +171,7 @@ bool cmFileTimeComparisonInternal::TimesDiffer(cmFileTimeComparison_Type* s1,
     return (t1 - t2) >= bil;
   }
   return false;
-#else
+#  else
   // Times are integers in units of 1s.
   if (s1->st_mtime < s2->st_mtime) {
     return (s2->st_mtime - s1->st_mtime) >= 1;
@@ -180,7 +180,7 @@ bool cmFileTimeComparisonInternal::TimesDiffer(cmFileTimeComparison_Type* s1,
     return (s1->st_mtime - s2->st_mtime) >= 1;
   }
   return false;
-#endif
+#  endif
 #else
   // Times are integers in units of 100ns.
   LARGE_INTEGER t1;

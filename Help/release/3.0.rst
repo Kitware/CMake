@@ -224,7 +224,7 @@ Modules
   option to change the ``boost`` prefix on library names.
 
 * The :module:`FindBoost` module learned to control search
-  for libraies with the ``g`` tag (for MS debug runtime) with
+  for libraries with the ``g`` tag (for MS debug runtime) with
   a new ``Boost_USE_DEBUG_RUNTIME`` option.  It is ``ON`` by
   default to preserve existing behavior.
 

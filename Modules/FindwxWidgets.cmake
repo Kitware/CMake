@@ -498,19 +498,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
       set(_WX_TOOL gcc)
     elseif(MSVC)
       set(_WX_TOOL vc)
-      if(MSVC_VERSION EQUAL 1910)
-        set(_WX_TOOLVER 141)
-      elseif(MSVC_VERSION EQUAL 1900)
-        set(_WX_TOOLVER 140)
-      elseif(MSVC_VERSION EQUAL 1800)
-        set(_WX_TOOLVER 120)
-      elseif(MSVC_VERSION EQUAL 1700)
-        set(_WX_TOOLVER 110)
-      elseif(MSVC_VERSION EQUAL 1600)
-        set(_WX_TOOLVER 100)
-      elseif(MSVC_VERSION EQUAL 1500)
-        set(_WX_TOOLVER 90)
-      endif()
+      set(_WX_TOOLVER ${MSVC_TOOLSET_VERSION})
       if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(_WX_ARCH _x64)
       endif()
@@ -837,7 +825,7 @@ else()
         # extract linkdirs (-L) for rpath (i.e., LINK_DIRECTORIES)
         string(REGEX MATCHALL "-L[^;]+"
           wxWidgets_LIBRARY_DIRS "${wxWidgets_LIBRARIES}")
-        string(REPLACE "-L" ""
+        string(REGEX REPLACE "-L([^;]+)" "\\1"
           wxWidgets_LIBRARY_DIRS "${wxWidgets_LIBRARY_DIRS}")
 
         DBG_MSG_V("wxWidgets_LIBRARIES=${wxWidgets_LIBRARIES}")
@@ -875,6 +863,26 @@ else()
         set(wxWidgets_INCLUDE_DIRS ${_tmp_path})
         separate_arguments(wxWidgets_INCLUDE_DIRS)
         list(REMOVE_ITEM wxWidgets_INCLUDE_DIRS "")
+
+        set(_tmp_path "")
+        foreach(_path ${wxWidgets_LIBRARY_DIRS})
+          execute_process(
+            COMMAND cygpath -w ${_path}
+            OUTPUT_VARIABLE _native_path
+            RESULT_VARIABLE _retv
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+            )
+          if(_retv EQUAL 0)
+            file(TO_CMAKE_PATH ${_native_path} _native_path)
+            DBG_MSG_V("Path ${_path} converted to ${_native_path}")
+            string(APPEND _tmp_path " ${_native_path}")
+          endif()
+        endforeach()
+        DBG_MSG("Setting wxWidgets_LIBRARY_DIRS = ${_tmp_path}")
+        set(wxWidgets_LIBRARY_DIRS ${_tmp_path})
+        separate_arguments(wxWidgets_LIBRARY_DIRS)
+        list(REMOVE_ITEM wxWidgets_LIBRARY_DIRS "")
       endif()
       unset(_cygpath_exe CACHE)
     endif()
@@ -917,14 +925,16 @@ unset(_wx_lib_missing)
 
 # Check if a specific version was requested by find_package().
 if(wxWidgets_FOUND)
-  find_file(_filename wx/version.h PATHS ${wxWidgets_INCLUDE_DIRS} NO_DEFAULT_PATH)
-  dbg_msg("_filename:  ${_filename}")
+  unset(_wx_filename)
+  find_file(_wx_filename wx/version.h PATHS ${wxWidgets_INCLUDE_DIRS} NO_DEFAULT_PATH)
+  dbg_msg("_wx_filename:  ${_wx_filename}")
 
-  if(NOT _filename)
+  if(NOT _wx_filename)
     message(FATAL_ERROR "wxWidgets wx/version.h file not found in ${wxWidgets_INCLUDE_DIRS}.")
   endif()
 
-  file(READ ${_filename} _wx_version_h)
+  file(READ "${_wx_filename}" _wx_version_h)
+  unset(_wx_filename CACHE)
 
   string(REGEX REPLACE "^(.*\n)?#define +wxMAJOR_VERSION +([0-9]+).*"
     "\\2" wxWidgets_VERSION_MAJOR "${_wx_version_h}" )

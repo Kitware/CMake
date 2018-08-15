@@ -135,7 +135,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       filesFrom.push_back(std::move(from1));
       filesTo.push_back(std::move(to1));
       std::string targetNameImportLib;
-      if (this->Target->GetImplibGNUtoMS(targetNameImport,
+      if (this->Target->GetImplibGNUtoMS(config, targetNameImport,
                                          targetNameImportLib)) {
         filesFrom.push_back(fromDirConfig + targetNameImportLib);
         filesTo.push_back(toDir + targetNameImportLib);
@@ -201,7 +201,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       filesFrom.push_back(std::move(from1));
       filesTo.push_back(std::move(to1));
       std::string targetNameImportLib;
-      if (this->Target->GetImplibGNUtoMS(targetNameImport,
+      if (this->Target->GetImplibGNUtoMS(config, targetNameImport,
                                          targetNameImportLib)) {
         filesFrom.push_back(fromDirConfig + targetNameImportLib);
         filesTo.push_back(toDir + targetNameImportLib);
@@ -398,7 +398,7 @@ std::string cmInstallTargetGenerator::GetInstallFilename(
                                targetNamePDB, config);
     if (nameType == NameImplib) {
       // Use the import library name.
-      if (!target->GetImplibGNUtoMS(targetNameImport, fname,
+      if (!target->GetImplibGNUtoMS(config, targetNameImport, fname,
                                     "${CMAKE_IMPORT_LIBRARY_SUFFIX}")) {
         fname = targetNameImport;
       }
@@ -419,7 +419,7 @@ std::string cmInstallTargetGenerator::GetInstallFilename(
                             targetNameImport, targetNamePDB, config);
     if (nameType == NameImplib) {
       // Use the import library name.
-      if (!target->GetImplibGNUtoMS(targetNameImport, fname,
+      if (!target->GetImplibGNUtoMS(config, targetNameImport, fname,
                                     "${CMAKE_IMPORT_LIBRARY_SUFFIX}")) {
         fname = targetNameImport;
       }

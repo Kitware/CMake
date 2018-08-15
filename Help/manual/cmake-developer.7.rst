@@ -644,6 +644,8 @@ Documentation`_ section above.
 
 
 
+.. _`CMake Developer Standard Variable Names`:
+
 Standard Variable Names
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -943,7 +945,7 @@ populated:
   endif()
 
 The ``RELEASE`` variant should be listed first in the property
-so that that variant is chosen if the user uses a configuration which is
+so that the variant is chosen if the user uses a configuration which is
 not an exact match for any listed ``IMPORTED_CONFIGURATIONS``.
 
 Most of the cache variables should be hidden in the ``ccmake`` interface unless

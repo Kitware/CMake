@@ -1,9 +1,9 @@
 #include "hello.h"
 #include <stdio.h>
 #ifdef _MSC_VER
-#include "windows.h"
+#  include "windows.h"
 #else
-#define WINAPI
+#  define WINAPI
 #endif
 
 extern "C" {

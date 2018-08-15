@@ -56,7 +56,7 @@ void cmFindCommon::InitializeSearchPathGroups()
 {
   std::vector<PathLabel>* labels;
 
-  // Define the varoius different groups of path types
+  // Define the various different groups of path types
 
   // All search paths
   labels = &this->PathGroupLabelMap[PathGroup::All];
@@ -71,7 +71,7 @@ void cmFindCommon::InitializeSearchPathGroups()
   // Define the search group order
   this->PathGroupOrder.push_back(PathGroup::All);
 
-  // Create the idividual labeld search paths
+  // Create the individual labeled search paths
   this->LabeledPaths.insert(
     std::make_pair(PathLabel::PackageRoot, cmSearchPath(this)));
   this->LabeledPaths.insert(
@@ -86,13 +86,6 @@ void cmFindCommon::InitializeSearchPathGroups()
     std::make_pair(PathLabel::CMakeSystem, cmSearchPath(this)));
   this->LabeledPaths.insert(
     std::make_pair(PathLabel::Guess, cmSearchPath(this)));
-}
-
-void cmFindCommon::SelectDefaultNoPackageRootPath()
-{
-  if (!this->Makefile->IsOn("__UNDOCUMENTED_CMAKE_FIND_PACKAGE_ROOT")) {
-    this->NoPackageRootPath = true;
-  }
 }
 
 void cmFindCommon::SelectDefaultRootPathMode()

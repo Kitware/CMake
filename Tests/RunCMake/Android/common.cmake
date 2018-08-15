@@ -92,6 +92,23 @@ if(CMAKE_ANDROID_ARCH_ABI STREQUAL "armeabi-v7a")
 endif()
 add_executable(android_c android.c)
 add_executable(android_cxx android.cxx)
+add_library(android_cxx_lib SHARED android_lib.cxx)
+
+set(objdump "${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}objdump")
+if(NOT EXISTS "${objdump}")
+  message(FATAL_ERROR "Expected tool missing:\n  ${objdump}")
+endif()
+
+if(NOT CMAKE_ANDROID_STL_TYPE MATCHES "^(system|stlport_static|stlport_shared)$")
+  foreach(tgt android_cxx android_cxx_lib)
+    add_custom_command(TARGET ${tgt} POST_BUILD
+      COMMAND ${CMAKE_COMMAND}
+        -Dobjdump=${objdump}
+        -Dfile=$<TARGET_FILE:${tgt}>
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/check_binary.cmake
+      )
+  endforeach()
+endif()
 
 # Test that an explicit /usr/include is ignored in favor of
 # appearing as a standard include directory at the end.

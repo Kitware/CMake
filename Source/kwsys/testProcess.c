@@ -7,8 +7,8 @@
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
-#include "Encoding.h.in"
-#include "Process.h.in"
+#  include "Encoding.h.in"
+#  include "Process.h.in"
 #endif
 
 #include <assert.h>
@@ -18,21 +18,21 @@
 #include <string.h>
 
 #if defined(_WIN32)
-#include <windows.h>
+#  include <windows.h>
 #else
-#include <signal.h>
-#include <unistd.h>
+#  include <signal.h>
+#  include <unistd.h>
 #endif
 
 #if defined(__BORLANDC__)
-#pragma warn - 8060 /* possibly incorrect assignment */
+#  pragma warn - 8060 /* possibly incorrect assignment */
 #endif
 
 /* Platform-specific sleep functions. */
 
 #if defined(__BEOS__) && !defined(__ZETA__)
 /* BeOS 5 doesn't have usleep(), but it has snooze(), which is identical. */
-#include <be/kernel/OS.h>
+#  include <be/kernel/OS.h>
 static inline void testProcess_usleep(unsigned int usec)
 {
   snooze(usec);
@@ -44,7 +44,7 @@ static void testProcess_usleep(unsigned int usec)
   Sleep(usec / 1000);
 }
 #else
-#define testProcess_usleep usleep
+#  define testProcess_usleep usleep
 #endif
 
 #if defined(_WIN32)
@@ -481,20 +481,23 @@ static int runChild2(kwsysProcess* kp, const char* cmd[], int state,
 
   if (result) {
     if (exception != kwsysProcess_GetExitException(kp)) {
-      fprintf(stderr, "Mismatch in exit exception.  "
-                      "Should have been %d, was %d.\n",
+      fprintf(stderr,
+              "Mismatch in exit exception.  "
+              "Should have been %d, was %d.\n",
               exception, kwsysProcess_GetExitException(kp));
     }
     if (value != kwsysProcess_GetExitValue(kp)) {
-      fprintf(stderr, "Mismatch in exit value.  "
-                      "Should have been %d, was %d.\n",
+      fprintf(stderr,
+              "Mismatch in exit value.  "
+              "Should have been %d, was %d.\n",
               value, kwsysProcess_GetExitValue(kp));
     }
   }
 
   if (kwsysProcess_GetState(kp) != state) {
-    fprintf(stderr, "Mismatch in state.  "
-                    "Should have been %d, was %d.\n",
+    fprintf(stderr,
+            "Mismatch in state.  "
+            "Should have been %d, was %d.\n",
             state, kwsysProcess_GetState(kp));
     result = 1;
   }

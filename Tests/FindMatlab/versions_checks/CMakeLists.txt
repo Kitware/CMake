@@ -7,6 +7,13 @@ set(MATLAB_FIND_DEBUG TRUE)
 set(MATLAB_ADDITIONAL_VERSIONS
     "dummy=14.9")
 
+if(NOT "${MCR_ROOT}" STREQUAL "")
+    set(Matlab_ROOT_DIR "${MCR_ROOT}")
+    if(NOT EXISTS "${MCR_ROOT}")
+        message(FATAL_ERROR "MCR does not exist ${MCR_ROOT}")
+    endif()
+endif()
+
 # the success of the following command is dependent on the current configuration
 # in this case, we are only interested in the version macros
 find_package(Matlab)

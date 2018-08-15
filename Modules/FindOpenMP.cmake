@@ -85,6 +85,7 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
 
     set(OMP_FLAG_GNU "-fopenmp")
     set(OMP_FLAG_Clang "-fopenmp=libomp" "-fopenmp=libiomp5" "-fopenmp")
+    set(OMP_FLAG_AppleClang "-Xclang -fopenmp")
     set(OMP_FLAG_HP "+Oopenmp")
     if(WIN32)
       set(OMP_FLAG_Intel "-Qopenmp")
@@ -125,6 +126,7 @@ set(OpenMP_C_CXX_TEST_SOURCE
 #include <omp.h>
 int main() {
 #ifdef _OPENMP
+  omp_get_max_threads();
   return 0;
 #else
   breaks_on_purpose
@@ -163,7 +165,7 @@ function(_OPENMP_WRITE_SOURCE_FILE LANG SRC_FILE_CONTENT_VAR SRC_FILE_NAME SRC_F
   set(${SRC_FILE_FULLPATH} "${SRC_FILE}" PARENT_SCOPE)
 endfunction()
 
-include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseImplicitLinkInfo.cmake)
 
 function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
   _OPENMP_FLAG_CANDIDATES("${LANG}")
@@ -240,21 +242,34 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
         endforeach()
         set("${OPENMP_LIB_NAMES_VAR}" "${_OPENMP_LIB_NAMES}" PARENT_SCOPE)
       else()
-        # The Intel compiler on windows has no verbose mode, so we need to treat it explicitly
-        if("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "Intel" AND "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-          set("${OPENMP_LIB_NAMES_VAR}" "libiomp5md" PARENT_SCOPE)
-          find_library(OpenMP_libiomp5md_LIBRARY
-            NAMES "libiomp5md"
-            HINTS ${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES}
-            CMAKE_FIND_ROOT_PATH_BOTH
-            NO_DEFAULT_PATH
-          )
-          mark_as_advanced(OpenMP_libiomp5md_LIBRARY)
-        else()
-          set("${OPENMP_LIB_NAMES_VAR}" "" PARENT_SCOPE)
-        endif()
+        # We do not know how to extract implicit OpenMP libraries for this compiler.
+        # Assume that it handles them automatically, e.g. the Intel Compiler on
+        # Windows should put the dependency in its object files.
+        set("${OPENMP_LIB_NAMES_VAR}" "" PARENT_SCOPE)
       endif()
       break()
+    elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL "AppleClang"
+      AND CMAKE_${LANG}_COMPILER_VERSION VERSION_GREATER_EQUAL "7.0")
+
+      # Check for separate OpenMP library on AppleClang 7+
+      find_library(OpenMP_libomp_LIBRARY
+        NAMES omp gomp iomp5
+        HINTS ${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES}
+      )
+      mark_as_advanced(OpenMP_libomp_LIBRARY)
+
+      if(OpenMP_libomp_LIBRARY)
+        try_compile( OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG} ${CMAKE_BINARY_DIR} ${_OPENMP_TEST_SRC}
+          CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OPENMP_FLAGS_TEST}"
+          LINK_LIBRARIES ${CMAKE_${LANG}_VERBOSE_FLAG} ${OpenMP_libomp_LIBRARY}
+          OUTPUT_VARIABLE OpenMP_TRY_COMPILE_OUTPUT
+        )
+        if(OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG})
+          set("${OPENMP_FLAG_VAR}" "${OPENMP_FLAG}" PARENT_SCOPE)
+          set("${OPENMP_LIB_NAMES_VAR}" "libomp" PARENT_SCOPE)
+          break()
+        endif()
+      endif()
     endif()
     set("${OPENMP_LIB_NAMES_VAR}" "NOTFOUND" PARENT_SCOPE)
     set("${OPENMP_FLAG_VAR}" "NOTFOUND" PARENT_SCOPE)
@@ -423,6 +438,8 @@ endif()
 
 unset(_OpenMP_MIN_VERSION)
 
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
 foreach(LANG IN LISTS OpenMP_FINDLIST)
   if(CMAKE_${LANG}_COMPILER_LOADED)
     if (NOT OpenMP_${LANG}_SPEC_DATE AND OpenMP_${LANG}_FLAGS)
@@ -431,8 +448,6 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
         INTERNAL "${LANG} compiler's OpenMP specification date")
       _OPENMP_SET_VERSION_BY_SPEC_DATE("${LANG}")
     endif()
-
-    include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
     set(OpenMP_${LANG}_FIND_QUIETLY ${OpenMP_FIND_QUIETLY})
     set(OpenMP_${LANG}_FIND_REQUIRED ${OpenMP_FIND_REQUIRED})

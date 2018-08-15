@@ -9,6 +9,7 @@
 #include "cmWorkingDirectory.h"
 #include "cmake.h"
 
+#include <cstring>
 #include <sstream>
 #include <stdlib.h>
 
@@ -157,13 +158,14 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
         "BuildDirectory", cmSystemTools::CollapseFullPath(bdir).c_str(),
         this->Quiet);
     } else {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, "CTEST_BINARY_DIRECTORY not set"
-                   << std::endl;);
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "CTEST_BINARY_DIRECTORY not set" << std::endl;);
     }
   }
   if (this->Values[ct_SOURCE]) {
-    cmCTestLog(this->CTest, DEBUG, "Set source directory to: "
-                 << this->Values[ct_SOURCE] << std::endl);
+    cmCTestLog(this->CTest, DEBUG,
+               "Set source directory to: " << this->Values[ct_SOURCE]
+                                           << std::endl);
     this->CTest->SetCTestConfiguration(
       "SourceDirectory",
       cmSystemTools::CollapseFullPath(this->Values[ct_SOURCE]).c_str(),
@@ -185,8 +187,9 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl;);
   cmCTestGenericHandler* handler = this->InitializeHandler();
   if (!handler) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot instantiate test handler "
-                 << this->GetName() << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Cannot instantiate test handler " << this->GetName()
+                                                  << std::endl);
     if (capureCMakeError) {
       this->Makefile->AddDefinition(this->Values[ct_CAPTURE_CMAKE_ERROR],
                                     "-1");
@@ -218,6 +221,21 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   }
   cmWorkingDirectory workdir(
     this->CTest->GetCTestConfiguration("BuildDirectory"));
+  if (workdir.Failed()) {
+    this->SetError("failed to change directory to " +
+                   this->CTest->GetCTestConfiguration("BuildDirectory") +
+                   " : " + std::strerror(workdir.GetLastResult()));
+    if (capureCMakeError) {
+      this->Makefile->AddDefinition(this->Values[ct_CAPTURE_CMAKE_ERROR],
+                                    "-1");
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 this->GetName() << " " << this->GetError() << "\n");
+      // return success because failure is recorded in CAPTURE_CMAKE_ERROR
+      return true;
+    }
+    return false;
+  }
+
   int res = handler->ProcessHandler();
   if (this->Values[ct_RETURN_VALUE] && *this->Values[ct_RETURN_VALUE]) {
     std::ostringstream str;
@@ -287,8 +305,8 @@ bool cmCTestHandlerCommand::CheckArgumentValue(std::string const& arg)
       return true;
     }
     this->Values[k] = arg.c_str();
-    cmCTestLog(this->CTest, DEBUG, "Set " << this->Arguments[k] << " to "
-                                          << arg << "\n");
+    cmCTestLog(this->CTest, DEBUG,
+               "Set " << this->Arguments[k] << " to " << arg << "\n");
     return true;
   }
   return false;

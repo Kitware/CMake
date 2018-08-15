@@ -411,6 +411,10 @@ private:
                                    int targetType);
 
   void ComputeObjectMaxPath();
+  void MoveSystemIncludesToEnd(std::vector<std::string>& includeDirs,
+                               const std::string& config,
+                               const std::string& lang,
+                               cmGeneratorTarget const* target) const;
 };
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)

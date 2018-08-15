@@ -10,7 +10,7 @@
 #include <string>
 
 #if !defined(CMAKE_BUILD_WITH_CMAKE)
-#error "cmArchiveWrite not allowed during bootstrap build!"
+#  error "cmArchiveWrite not allowed during bootstrap build!"
 #endif
 
 template <typename T>
@@ -28,6 +28,7 @@ public:
   void Clear() { this->IsValueSet = false; }
   bool IsSet() const { return this->IsValueSet; }
   T Get() const { return Value; }
+
 private:
   T Value;
   bool IsValueSet;
@@ -41,6 +42,7 @@ class cmArchiveWrite
 {
   typedef void (cmArchiveWrite::*safe_bool)();
   void safe_bool_true() {}
+
 public:
   /** Compression type.  */
   enum Compress

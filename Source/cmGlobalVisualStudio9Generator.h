@@ -38,6 +38,7 @@ public:
 
 protected:
   const char* GetIDEVersion() override { return "9.0"; }
+
 private:
   class Factory;
   friend class Factory;

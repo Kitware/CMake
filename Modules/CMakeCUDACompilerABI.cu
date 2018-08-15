@@ -1,5 +1,5 @@
 #ifndef __CUDACC__
-#error "A C or C++ compiler has been selected for CUDA"
+#  error "A C or C++ compiler has been selected for CUDA"
 #endif
 
 #include "CMakeCompilerABI.h"

@@ -9,7 +9,7 @@
 
 #include "cmsys/Encoding.hxx"
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmsys/ConsoleBuf.hxx"
+#  include "cmsys/ConsoleBuf.hxx"
 #endif
 #include <iostream>
 #include <string.h>
@@ -30,60 +30,76 @@ static const char* cmDocumentationOptions[][2] = {
   { "-V,--verbose", "Enable verbose output from tests." },
   { "-VV,--extra-verbose", "Enable more verbose output from tests." },
   { "--debug", "Displaying more verbose internals of CTest." },
-  { "--output-on-failure", "Output anything outputted by the test program "
-                           "if the test should fail." },
-  { "--test-output-size-passed <size>", "Limit the output for passed tests "
-                                        "to <size> bytes" },
-  { "--test-output-size-failed <size>", "Limit the output for failed tests "
-                                        "to <size> bytes" },
+  { "--output-on-failure",
+    "Output anything outputted by the test program "
+    "if the test should fail." },
+  { "--test-output-size-passed <size>",
+    "Limit the output for passed tests "
+    "to <size> bytes" },
+  { "--test-output-size-failed <size>",
+    "Limit the output for failed tests "
+    "to <size> bytes" },
   { "-F", "Enable failover." },
-  { "-j <jobs>, --parallel <jobs>", "Run the tests in parallel using the "
-                                    "given number of jobs." },
+  { "-j <jobs>, --parallel <jobs>",
+    "Run the tests in parallel using the "
+    "given number of jobs." },
   { "-Q,--quiet", "Make ctest quiet." },
   { "-O <file>, --output-log <file>", "Output to log file" },
   { "-N,--show-only", "Disable actual execution of tests." },
-  { "-L <regex>, --label-regex <regex>", "Run tests with labels matching "
-                                         "regular expression." },
-  { "-R <regex>, --tests-regex <regex>", "Run tests matching regular "
-                                         "expression." },
-  { "-E <regex>, --exclude-regex <regex>", "Exclude tests matching regular "
-                                           "expression." },
-  { "-LE <regex>, --label-exclude <regex>", "Exclude tests with labels "
-                                            "matching regular expression." },
-  { "-FA <regex>, --fixture-exclude-any <regex>", "Do not automatically "
-                                                  "add any tests for "
-                                                  "fixtures matching "
-                                                  "regular expression." },
-  { "-FS <regex>, --fixture-exclude-setup <regex>", "Do not automatically "
-                                                    "add setup tests for "
-                                                    "fixtures matching "
-                                                    "regular expression." },
-  { "-FC <regex>, --fixture-exclude-cleanup <regex>", "Do not automatically "
-                                                      "add cleanup tests for "
-                                                      "fixtures matching "
-                                                      "regular expression." },
+  { "-L <regex>, --label-regex <regex>",
+    "Run tests with labels matching "
+    "regular expression." },
+  { "-R <regex>, --tests-regex <regex>",
+    "Run tests matching regular "
+    "expression." },
+  { "-E <regex>, --exclude-regex <regex>",
+    "Exclude tests matching regular "
+    "expression." },
+  { "-LE <regex>, --label-exclude <regex>",
+    "Exclude tests with labels "
+    "matching regular expression." },
+  { "-FA <regex>, --fixture-exclude-any <regex>",
+    "Do not automatically "
+    "add any tests for "
+    "fixtures matching "
+    "regular expression." },
+  { "-FS <regex>, --fixture-exclude-setup <regex>",
+    "Do not automatically "
+    "add setup tests for "
+    "fixtures matching "
+    "regular expression." },
+  { "-FC <regex>, --fixture-exclude-cleanup <regex>",
+    "Do not automatically "
+    "add cleanup tests for "
+    "fixtures matching "
+    "regular expression." },
   { "-D <dashboard>, --dashboard <dashboard>", "Execute dashboard test" },
   { "-D <var>:<type>=<value>", "Define a variable for script mode" },
   { "-M <model>, --test-model <model>", "Sets the model for a dashboard" },
-  { "-T <action>, --test-action <action>", "Sets the dashboard action to "
-                                           "perform" },
+  { "-T <action>, --test-action <action>",
+    "Sets the dashboard action to "
+    "perform" },
   { "--track <track>", "Specify the track to submit dashboard to" },
-  { "-S <script>, --script <script>", "Execute a dashboard for a "
-                                      "configuration" },
-  { "-SP <script>, --script-new-process <script>", "Execute a dashboard for a "
-                                                   "configuration" },
+  { "-S <script>, --script <script>",
+    "Execute a dashboard for a "
+    "configuration" },
+  { "-SP <script>, --script-new-process <script>",
+    "Execute a dashboard for a "
+    "configuration" },
   { "-A <file>, --add-notes <file>", "Add a notes file with submission" },
   { "-I [Start,End,Stride,test#,test#|Test file], --tests-information",
     "Run a specific number of tests by number." },
   { "-U, --union", "Take the Union of -I and -R" },
   { "--rerun-failed", "Run only the tests that failed previously" },
-  { "--repeat-until-fail <n>", "Require each test to run <n> "
-                               "times without failing in order to pass" },
+  { "--repeat-until-fail <n>",
+    "Require each test to run <n> "
+    "times without failing in order to pass" },
   { "--max-width <width>", "Set the max width for a test name to output" },
   { "--interactive-debug-mode [0|1]", "Set the interactive mode to 0 or 1." },
   { "--no-label-summary", "Disable timing summary information for labels." },
-  { "--no-subproject-summary", "Disable timing summary information for "
-                               "subprojects." },
+  { "--no-subproject-summary",
+    "Disable timing summary information for "
+    "subprojects." },
   { "--build-and-test", "Configure, build and run a test." },
   { "--build-target", "Specify a specific target to build." },
   { "--build-nocmake", "Run the build without running cmake first." },
@@ -161,7 +177,8 @@ int main(int argc, char const* const* argv)
       !(cmSystemTools::FileExists("CTestTestfile.cmake") ||
         cmSystemTools::FileExists("DartTestfile.txt"))) {
     if (argc == 1) {
-      cmCTestLog(&inst, ERROR_MESSAGE, "*********************************"
+      cmCTestLog(&inst, ERROR_MESSAGE,
+                 "*********************************"
                    << std::endl
                    << "No test configuration file found!" << std::endl
                    << "*********************************" << std::endl);

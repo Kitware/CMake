@@ -11,6 +11,7 @@
 
 #include "cmsys/Process.h"
 #include <chrono>
+#include <cstring>
 #include <ratio>
 #include <stdlib.h>
 
@@ -196,6 +197,16 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     cmSystemTools::MakeDirectory(this->BinaryDir);
   }
   cmWorkingDirectory workdir(this->BinaryDir);
+  if (workdir.Failed()) {
+    auto msg = "Failed to change working directory to " + this->BinaryDir +
+      " : " + std::strerror(workdir.GetLastResult()) + "\n";
+    if (outstring) {
+      *outstring = msg;
+    } else {
+      cmCTestLog(this->CTest, ERROR_MESSAGE, msg);
+    }
+    return 1;
+  }
 
   if (this->BuildNoCMake) {
     // Make the generator available for the Build call below.
@@ -242,9 +253,9 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       config = "Debug";
     }
     int retVal = cm.GetGlobalGenerator()->Build(
-      this->SourceDir, this->BinaryDir, this->BuildProject, tar, output,
-      this->BuildMakeProgram, config, !this->BuildNoClean, false, false,
-      remainingTime);
+      cmake::NO_BUILD_PARALLEL_LEVEL, this->SourceDir, this->BinaryDir,
+      this->BuildProject, tar, output, this->BuildMakeProgram, config,
+      !this->BuildNoClean, false, false, remainingTime);
     out << output;
     // if the build failed then return
     if (retVal) {
@@ -307,7 +318,16 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   // run the test from the this->BuildRunDir if set
   if (!this->BuildRunDir.empty()) {
     out << "Run test in directory: " << this->BuildRunDir << "\n";
-    cmSystemTools::ChangeDirectory(this->BuildRunDir);
+    if (!workdir.SetDirectory(this->BuildRunDir)) {
+      out << "Failed to change working directory : "
+          << std::strerror(workdir.GetLastResult()) << "\n";
+      if (outstring) {
+        *outstring = out.str();
+      } else {
+        cmCTestLog(this->CTest, ERROR_MESSAGE, out.str());
+      }
+      return 1;
+    }
   }
   out << "Running test command: \"" << fullPath << "\"";
   for (std::string const& testCommandArg : this->TestCommandArgs) {

@@ -11,15 +11,15 @@
  */
 
 #ifndef MAIN_H
-#define MAIN_H 1
+#  define MAIN_H 1
 
-#include <iostream>
-#include <stdlib.h>
+#  include <iostream>
+#  include <stdlib.h>
 
 /* include the X library headers */
-#include <X11/Xlib.h>
-#include <X11/Xos.h>
-#include <X11/Xutil.h>
+#  include <X11/Xlib.h>
+#  include <X11/Xos.h>
+#  include <X11/Xutil.h>
 
 class Main
 {

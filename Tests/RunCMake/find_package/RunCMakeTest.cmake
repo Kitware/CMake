@@ -1,5 +1,7 @@
 include(RunCMake)
 
+run_cmake(CMP0074-WARN)
+run_cmake(CMP0074-OLD)
 run_cmake(ComponentRequiredAndOptional)
 run_cmake(MissingNormal)
 run_cmake(MissingNormalRequired)

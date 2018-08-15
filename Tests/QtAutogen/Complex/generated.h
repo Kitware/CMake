@@ -7,7 +7,10 @@
 #include "myinterface.h"
 #include "myotherinterface.h"
 
-class Generated : public QObject, MyInterface, MyOtherInterface
+class Generated
+  : public QObject
+  , MyInterface
+  , MyOtherInterface
 {
   Q_OBJECT
   Q_INTERFACES(MyInterface MyOtherInterface)

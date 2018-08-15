@@ -95,7 +95,11 @@ bool cmCMakePolicyCommand::HandleSetMode(std::vector<std::string> const& args)
 
 bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
 {
-  if (args.size() != 3) {
+  bool parent_scope = false;
+  if (args.size() == 4 && args[3] == "PARENT_SCOPE") {
+    // Undocumented PARENT_SCOPE option for use within CMake.
+    parent_scope = true;
+  } else if (args.size() != 3) {
     this->SetError("GET must be given exactly 2 additional arguments.");
     return false;
   }
@@ -115,7 +119,8 @@ bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
   }
 
   // Lookup the policy setting.
-  cmPolicies::PolicyStatus status = this->Makefile->GetPolicyStatus(pid);
+  cmPolicies::PolicyStatus status =
+    this->Makefile->GetPolicyStatus(pid, parent_scope);
   switch (status) {
     case cmPolicies::OLD:
       // Report that the policy is set to OLD.
@@ -156,6 +161,23 @@ bool cmCMakePolicyCommand::HandleVersionMode(
     this->SetError("VERSION given too many arguments");
     return false;
   }
-  this->Makefile->SetPolicyVersion(args[1].c_str());
+  std::string const& version_string = args[1];
+
+  // Separate the <min> version and any trailing ...<max> component.
+  std::string::size_type const dd = version_string.find("...");
+  std::string const version_min = version_string.substr(0, dd);
+  std::string const version_max = dd != std::string::npos
+    ? version_string.substr(dd + 3, std::string::npos)
+    : std::string();
+  if (dd != std::string::npos &&
+      (version_min.empty() || version_max.empty())) {
+    std::ostringstream e;
+    e << "VERSION \"" << version_string
+      << "\" does not have a version on both sides of \"...\".";
+    this->SetError(e.str());
+    return false;
+  }
+
+  this->Makefile->SetPolicyVersion(version_min, version_max);
   return true;
 }

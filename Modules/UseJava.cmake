@@ -36,7 +36,7 @@
 # The default OUTPUT_DIR can also be changed by setting the variable
 # CMAKE_JAVA_TARGET_OUTPUT_DIR.
 #
-# Optionaly, using option GENERATE_NATIVE_HEADERS, native header files can be generated
+# Optionally, using option GENERATE_NATIVE_HEADERS, native header files can be generated
 # for methods declared as native. These files provide the connective glue that allow your
 # Java and C code to interact. An INTERFACE target will be created for an easy usage
 # of generated files. Sub-option DESTINATION can be used to specify output directory for
@@ -384,7 +384,7 @@
 # Create C header files from java classes. These files provide the connective glue
 # that allow your Java and C code to interact.
 #
-# This command will no longer be supported starting with version 1.10 of the JDK due
+# This command will no longer be supported starting with version 10 of the JDK due
 # to the `suppression of javah tool <http://openjdk.java.net/jeps/313>`_.
 # Command ``add_jar(GENERATE_NATIVE_HEADERS)`` must be used instead.
 #
@@ -527,7 +527,7 @@ function(add_jar _TARGET_NAME)
     if (_add_jar_GENERATE_NATIVE_HEADERS)
       # Raise an error if JDK version is less than 1.8 because javac -h is not supported
       # by earlier versions.
-      if ("${Java_VERSION}" VERSION_LESS 1.8)
+      if (Java_VERSION VERSION_LESS 1.8)
         message (FATAL_ERROR "ADD_JAR: GENERATE_NATIVE_HEADERS is not supported with this version of Java.")
       endif()
       cmake_parse_arguments (_add_jar_GENERATE_NATIVE_HEADERS "" "DESTINATION" "" ${_add_jar_GENERATE_NATIVE_HEADERS})
@@ -1312,10 +1312,10 @@ function(create_javadoc _target)
 endfunction()
 
 function (create_javah)
-  if ("${Java_VERSION}" VERSION_GREATER_EQUAL 1.10)
+  if (Java_VERSION VERSION_GREATER_EQUAL 10)
     message (FATAL_ERROR "create_javah: not supported with this Java version. Use add_jar(GENERATE_NATIVE_HEADERS) instead.")
-  elseif ("${Java_VERSION}" VERSION_GREATER_EQUAL 1.8)
-    message (DEPRECATION "create_javah: this command will no longer be supported starting with version 1.10 of JDK. Update your project by using command add_jar(GENERATE_NATIVE_HEADERS) instead.")
+  elseif (Java_VERSION VERSION_GREATER_EQUAL 1.8)
+    message (DEPRECATION "create_javah: this command will no longer be supported starting with version 10 of JDK. Update your project by using command add_jar(GENERATE_NATIVE_HEADERS) instead.")
   endif()
 
     cmake_parse_arguments(_create_javah

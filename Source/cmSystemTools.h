@@ -333,7 +333,7 @@ public:
   static FileFormat GetFileFormat(const char* ext);
 
   /** Windows if this is true, the CreateProcess in RunCommand will
-   *  not show new consol windows when running programs.
+   *  not show new console windows when running programs.
    */
   static void SetRunCommandHideConsole(bool v) { s_RunCommandHideConsole = v; }
   static bool GetRunCommandHideConsole() { return s_RunCommandHideConsole; }
@@ -500,11 +500,13 @@ public:
     unsigned int Delay;
   };
   static WindowsFileRetry GetWindowsFileRetry();
-
-  /** Get the real path for a given path, removing all symlinks. */
-  static std::string GetRealPath(const std::string& path,
-                                 std::string* errorMessage = 0);
 #endif
+
+  /** Get the real path for a given path, removing all symlinks.
+      This variant of GetRealPath also works on Windows but will
+      resolve subst drives too.  */
+  static std::string GetRealPathResolvingWindowsSubst(
+    const std::string& path, std::string* errorMessage = nullptr);
 
   /** Perform one-time initialization of libuv.  */
   static void InitializeLibUV();

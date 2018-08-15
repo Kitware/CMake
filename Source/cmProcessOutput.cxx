@@ -4,7 +4,7 @@
 #include "cmProcessOutput.h"
 
 #if defined(_WIN32)
-#include <windows.h>
+#  include <windows.h>
 unsigned int cmProcessOutput::defaultCodepage =
   KWSYS_ENCODING_DEFAULT_CODEPAGE;
 #endif

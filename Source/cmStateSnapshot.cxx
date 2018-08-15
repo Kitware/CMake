@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <iterator>
-#include <stdio.h>
+#include <string>
 
 #include "cmAlgorithms.h"
 #include "cmDefinitions.h"
@@ -19,11 +19,11 @@
 #include "cmake.h"
 
 #if !defined(_WIN32)
-#include <sys/utsname.h>
+#  include <sys/utsname.h>
 #endif
 
 #if defined(__CYGWIN__)
-#include "cmSystemTools.h"
+#  include "cmSystemTools.h"
 #endif
 
 cmStateSnapshot::cmStateSnapshot(cmState* state)
@@ -160,8 +160,8 @@ void cmStateSnapshot::SetPolicy(cmPolicies::PolicyID id,
   }
 }
 
-cmPolicies::PolicyStatus cmStateSnapshot::GetPolicy(
-  cmPolicies::PolicyID id) const
+cmPolicies::PolicyStatus cmStateSnapshot::GetPolicy(cmPolicies::PolicyID id,
+                                                    bool parent_scope) const
 {
   cmPolicies::PolicyStatus status = cmPolicies::GetPolicyStatus(id);
 
@@ -180,6 +180,10 @@ cmPolicies::PolicyStatus cmStateSnapshot::GetPolicy(
     cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator root =
       dir->DirectoryEnd->PolicyRoot;
     for (; leaf != root; ++leaf) {
+      if (parent_scope) {
+        parent_scope = false;
+        continue;
+      }
       if (leaf->IsDefined(id)) {
         status = leaf->Get(id);
         return status;
@@ -328,15 +332,14 @@ void cmStateSnapshot::SetDefaultDefinitions()
   this->SetDefinition("CMAKE_HOST_SOLARIS", "1");
 #endif
 
-  char temp[1024];
-  sprintf(temp, "%d", cmVersion::GetMinorVersion());
-  this->SetDefinition("CMAKE_MINOR_VERSION", temp);
-  sprintf(temp, "%d", cmVersion::GetMajorVersion());
-  this->SetDefinition("CMAKE_MAJOR_VERSION", temp);
-  sprintf(temp, "%d", cmVersion::GetPatchVersion());
-  this->SetDefinition("CMAKE_PATCH_VERSION", temp);
-  sprintf(temp, "%d", cmVersion::GetTweakVersion());
-  this->SetDefinition("CMAKE_TWEAK_VERSION", temp);
+  this->SetDefinition("CMAKE_MAJOR_VERSION",
+                      std::to_string(cmVersion::GetMajorVersion()));
+  this->SetDefinition("CMAKE_MINOR_VERSION",
+                      std::to_string(cmVersion::GetMinorVersion()));
+  this->SetDefinition("CMAKE_PATCH_VERSION",
+                      std::to_string(cmVersion::GetPatchVersion()));
+  this->SetDefinition("CMAKE_TWEAK_VERSION",
+                      std::to_string(cmVersion::GetTweakVersion()));
   this->SetDefinition("CMAKE_VERSION", cmVersion::GetCMakeVersion());
 
   this->SetDefinition("CMAKE_FILES_DIRECTORY",

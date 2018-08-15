@@ -8,12 +8,12 @@
 #include "cmsys/SystemInformation.hxx"
 
 #if defined(_WIN32)
-#include "cmAlgorithms.h"
-#include "cmGlobalGenerator.h"
-#include "cmGlobalVisualStudio15Generator.h"
-#include "cmSystemTools.h"
-#include "cmVSSetupHelper.h"
-#define HAVE_VS_SETUP_HELPER
+#  include "cmAlgorithms.h"
+#  include "cmGlobalGenerator.h"
+#  include "cmGlobalVisualStudio15Generator.h"
+#  include "cmSystemTools.h"
+#  include "cmVSSetupHelper.h"
+#  define HAVE_VS_SETUP_HELPER
 #endif
 
 class cmExecutionStatus;

@@ -127,7 +127,7 @@ private:
 
   //! Parse Valgrind/Purify/Bounds Checker result out of the output
   // string. After running, log holds the output and results hold the
-  // different memmory errors.
+  // different memory errors.
   bool ProcessMemCheckOutput(const std::string& str, std::string& log,
                              std::vector<int>& results);
   bool ProcessMemCheckValgrindOutput(const std::string& str, std::string& log,

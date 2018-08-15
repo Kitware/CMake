@@ -17,6 +17,7 @@
 #              [OUTPUT_FILES_VAR <output_files_var> OUTPUT_DIR <output_dir>]
 #              COMPILERS <compiler> [...]
 #              FEATURES <feature> [...]
+#              [BARE_FEATURES <feature> [...]]
 #              [VERSION <version>]
 #              [PROLOG <prolog>]
 #              [EPILOG <epilog>]
@@ -83,10 +84,14 @@
 # See the :manual:`cmake-compile-features(7)` manual for information on
 # compile features.
 #
+# ``BARE_FEATURES`` will define the compatibility macros with the name used in
+# newer versions of the language standard, so the code can use the new feature
+# name unconditionally.
+#
 # ``ALLOW_UNKNOWN_COMPILERS`` and ``ALLOW_UNKNOWN_COMPILER_VERSIONS`` cause
 # the module to generate conditions that treat unknown compilers as simply
 # lacking all features.  Without these options the default behavior is to
-# generate a ``#error`` for unknown compilers.
+# generate a ``#error`` for unknown compilers and versions.
 #
 # Feature Test Macros
 # ===================
@@ -148,20 +153,24 @@
 # ``ClimbingStats_CONSTEXPR`` macro will expand to ``constexpr``
 # if ``cxx_constexpr`` is supported.
 #
-# The following features generate corresponding symbol defines:
+# If ``BARE_FEATURES cxx_final`` was given as argument the ``final`` keyword
+# will be defined for old compilers, too.
 #
-# ========================== =================================== =================
-#         Feature                          Define                      Symbol
-# ========================== =================================== =================
-# ``c_restrict``              ``<PREFIX>_RESTRICT``               ``restrict``
-# ``cxx_constexpr``           ``<PREFIX>_CONSTEXPR``              ``constexpr``
+# The following features generate corresponding symbol defines and if they
+# are available as ``BARE_FEATURES``:
+#
+# ========================== =================================== ================= ======
+#         Feature                          Define                      Symbol       bare
+# ========================== =================================== ================= ======
+# ``c_restrict``              ``<PREFIX>_RESTRICT``               ``restrict``      yes
+# ``cxx_constexpr``           ``<PREFIX>_CONSTEXPR``              ``constexpr``     yes
 # ``cxx_deleted_functions``   ``<PREFIX>_DELETED_FUNCTION``       ``= delete``
 # ``cxx_extern_templates``    ``<PREFIX>_EXTERN_TEMPLATE``        ``extern``
-# ``cxx_final``               ``<PREFIX>_FINAL``                  ``final``
-# ``cxx_noexcept``            ``<PREFIX>_NOEXCEPT``               ``noexcept``
+# ``cxx_final``               ``<PREFIX>_FINAL``                  ``final``         yes
+# ``cxx_noexcept``            ``<PREFIX>_NOEXCEPT``               ``noexcept``      yes
 # ``cxx_noexcept``            ``<PREFIX>_NOEXCEPT_EXPR(X)``       ``noexcept(X)``
-# ``cxx_override``            ``<PREFIX>_OVERRIDE``               ``override``
-# ========================== =================================== =================
+# ``cxx_override``            ``<PREFIX>_OVERRIDE``               ``override``      yes
+# ========================== =================================== ================= ======
 #
 # Compatibility Implementation Macros
 # ===================================
@@ -195,18 +204,18 @@
 # decorator or a compiler-specific decorator such as ``__alignof__``
 # used by GNU compilers.
 #
-# ============================= ================================ =====================
-#           Feature                          Define                     Symbol
-# ============================= ================================ =====================
+# ============================= ================================ ===================== ======
+#           Feature                          Define                     Symbol          bare
+# ============================= ================================ ===================== ======
 # ``cxx_alignas``                ``<PREFIX>_ALIGNAS``             ``alignas``
 # ``cxx_alignof``                ``<PREFIX>_ALIGNOF``             ``alignof``
-# ``cxx_nullptr``                ``<PREFIX>_NULLPTR``             ``nullptr``
+# ``cxx_nullptr``                ``<PREFIX>_NULLPTR``             ``nullptr``           yes
 # ``cxx_static_assert``          ``<PREFIX>_STATIC_ASSERT``       ``static_assert``
 # ``cxx_static_assert``          ``<PREFIX>_STATIC_ASSERT_MSG``   ``static_assert``
 # ``cxx_attribute_deprecated``   ``<PREFIX>_DEPRECATED``          ``[[deprecated]]``
 # ``cxx_attribute_deprecated``   ``<PREFIX>_DEPRECATED_MSG``      ``[[deprecated]]``
 # ``cxx_thread_local``           ``<PREFIX>_THREAD_LOCAL``        ``thread_local``
-# ============================= ================================ =====================
+# ============================= ================================ ===================== ======
 #
 # A use-case which arises with such deprecation macros is the deprecation
 # of an entire library.  In that case, all public API in the library may
@@ -252,6 +261,37 @@ macro(_simpledefine FEATURE_NAME FEATURE_TESTNAME FEATURE_STRING FEATURE_DEFAULT
   endif()
 endmacro()
 
+macro(_simplebaredefine FEATURE_NAME FEATURE_STRING FEATURE_DEFAULT_STRING)
+  if (feature STREQUAL "${FEATURE_NAME}")
+        string(APPEND file_content "
+#  if !(defined(${def_name}) && ${def_name})
+#    define ${FEATURE_STRING} ${FEATURE_DEFAULT_STRING}
+#  endif
+\n")
+  endif()
+endmacro()
+
+function(_check_feature_lists C_FEATURE_VAR CXX_FEATURE_VAR)
+  foreach(feature ${ARGN})
+    if (feature MATCHES "^c_std_")
+      # ignored
+    elseif (feature MATCHES "^cxx_std_")
+      # ignored
+    elseif (feature MATCHES "^cxx_")
+      list(APPEND _langs CXX)
+      list(APPEND ${CXX_FEATURE_VAR} ${feature})
+    elseif (feature MATCHES "^c_")
+      list(APPEND _langs C)
+      list(APPEND ${C_FEATURE_VAR} ${feature})
+    else()
+      message(FATAL_ERROR "Unsupported feature ${feature}.")
+    endif()
+  endforeach()
+  set(${C_FEATURE_VAR} ${${C_FEATURE_VAR}} PARENT_SCOPE)
+  set(${CXX_FEATURE_VAR} ${${CXX_FEATURE_VAR}} PARENT_SCOPE)
+  set(_langs ${_langs} PARENT_SCOPE)
+endfunction()
+
 function(write_compiler_detection_header
     file_keyword file_arg
     prefix_keyword prefix_arg
@@ -264,13 +304,13 @@ function(write_compiler_detection_header
   endif()
   set(options ALLOW_UNKNOWN_COMPILERS ALLOW_UNKNOWN_COMPILER_VERSIONS)
   set(oneValueArgs VERSION EPILOG PROLOG OUTPUT_FILES_VAR OUTPUT_DIR)
-  set(multiValueArgs COMPILERS FEATURES)
+  set(multiValueArgs COMPILERS FEATURES BARE_FEATURES)
   cmake_parse_arguments(_WCD "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   if (NOT _WCD_COMPILERS)
     message(FATAL_ERROR "Invalid arguments.  write_compiler_detection_header requires at least one compiler.")
   endif()
-  if (NOT _WCD_FEATURES)
+  if (NOT _WCD_FEATURES AND NOT _WCD_BARE_FEATURES)
     message(FATAL_ERROR "Invalid arguments.  write_compiler_detection_header requires at least one feature.")
   endif()
 
@@ -377,21 +417,8 @@ function(write_compiler_detection_header
     )\n")
   endif()
 
-  foreach(feature ${_WCD_FEATURES})
-    if (feature MATCHES "^c_std_")
-      # ignored
-    elseif (feature MATCHES "^cxx_std_")
-      # ignored
-    elseif (feature MATCHES "^cxx_")
-      list(APPEND _langs CXX)
-      list(APPEND CXX_features ${feature})
-    elseif (feature MATCHES "^c_")
-      list(APPEND _langs C)
-      list(APPEND C_features ${feature})
-    else()
-      message(FATAL_ERROR "Unsupported feature ${feature}.")
-    endif()
-  endforeach()
+  _check_feature_lists(C_features CXX_features ${_WCD_FEATURES})
+  _check_feature_lists(C_bare_features CXX_bare_features ${_WCD_BARE_FEATURES})
   list(REMOVE_DUPLICATES _langs)
 
   if(_WCD_OUTPUT_FILES_VAR)
@@ -557,7 +584,18 @@ template<> struct ${prefix_arg}StaticAssert<true>{};
 #  endif
 \n")
       endif()
-      _simpledefine(cxx_nullptr NULLPTR nullptr 0)
+      if (feature STREQUAL cxx_nullptr)
+        set(def_value "${prefix_arg}_NULLPTR")
+        string(APPEND file_content "
+#  if defined(${def_name}) && ${def_name}
+#    define ${def_value} nullptr
+#  elif ${prefix_arg}_COMPILER_IS_GNU
+#    define ${def_value} __null
+#  else
+#    define ${def_value} 0
+#  endif
+\n")
+      endif()
       if (feature STREQUAL cxx_thread_local)
         set(def_value "${prefix_arg}_THREAD_LOCAL")
         string(APPEND file_content "
@@ -593,6 +631,29 @@ template<> struct ${prefix_arg}StaticAssert<true>{};
 #  endif
 \n")
       endif()
+    endforeach()
+
+    foreach(feature ${${_lang}_bare_features})
+      string(TOUPPER ${feature} feature_upper)
+      set(feature_PP "COMPILER_${feature_upper}")
+      set(def_name ${prefix_arg}_${feature_PP})
+      _simplebaredefine(c_restrict restrict "")
+      _simplebaredefine(cxx_constexpr constexpr "")
+      _simplebaredefine(cxx_final final "")
+      _simplebaredefine(cxx_override override "")
+      if (feature STREQUAL cxx_nullptr)
+        set(def_value "nullptr")
+        string(APPEND file_content "
+#  if !(defined(${def_name}) && ${def_name})
+#    if ${prefix_arg}_COMPILER_IS_GNU
+#      define ${def_value} __null
+#    else
+#      define ${def_value} 0
+#    endif
+#  endif
+\n")
+      endif()
+      _simplebaredefine(cxx_noexcept noexcept "")
     endforeach()
 
     string(APPEND file_content "#endif\n")

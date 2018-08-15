@@ -3,6 +3,7 @@
 #include "cmCTestCurl.h"
 
 #include "cmCTest.h"
+#include "cmCurl.h"
 #include "cmSystemTools.h"
 
 #include <ostream>
@@ -76,6 +77,7 @@ bool cmCTestCurl::InitCurl()
   if (!this->Curl) {
     return false;
   }
+  cmCurlSetCAInfo(this->Curl);
   if (this->VerifyPeerOff) {
     curl_easy_setopt(this->Curl, CURLOPT_SSL_VERIFYPEER, 0);
   }
@@ -146,7 +148,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
     ::curl_slist_append(nullptr, "Content-Type: text/xml");
   // Add any additional headers that the user specified.
   for (std::string const& h : this->HttpHeaders) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+    cmCTestOptionalLog(this->CTest, DEBUG,
                        "   Add HTTP Header: \"" << h << "\"" << std::endl,
                        this->Quiet);
     headers = ::curl_slist_append(headers, h.c_str());
@@ -175,7 +177,8 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
                        "Curl debug: [" << curlDebug << "]\n", this->Quiet);
   }
   if (response.empty()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "No response from server.\n"
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "No response from server.\n"
                  << curlDebug);
     return false;
   }
@@ -186,7 +189,8 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
                               std::string const& fields, std::string& response)
 {
   response.clear();
-  cmCTestOptionalLog(this->CTest, DEBUG, "HttpRequest\n"
+  cmCTestOptionalLog(this->CTest, DEBUG,
+                     "HttpRequest\n"
                        << "url: " << url << "\n"
                        << "fields " << fields << "\n",
                      this->Quiet);
@@ -212,7 +216,7 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
   struct curl_slist* headers = nullptr;
   if (!this->HttpHeaders.empty()) {
     for (std::string const& h : this->HttpHeaders) {
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+      cmCTestOptionalLog(this->CTest, DEBUG,
                          "   Add HTTP Header: \"" << h << "\"" << std::endl,
                          this->Quiet);
       headers = ::curl_slist_append(headers, h.c_str());

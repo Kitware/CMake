@@ -114,15 +114,12 @@ const char* cmTargetPropertyComputer::GetSources<cmTarget>(
         }
         if (!noMessage) {
           e << "Target \"" << tgt->GetName()
-            << "\" contains "
-               "$<TARGET_OBJECTS> generator expression in its sources "
-               "list.  "
-               "This content was not previously part of the SOURCES "
-               "property "
-               "when that property was read at configure time.  Code "
-               "reading "
-               "that property needs to be adapted to ignore the generator "
-               "expression using the string(GENEX_STRIP) command.";
+            << "\" contains $<TARGET_OBJECTS> generator expression in its "
+               "sources list.  This content was not previously part of the "
+               "SOURCES property when that property was read at configure "
+               "time.  Code reading that property needs to be adapted to "
+               "ignore the generator expression using the string(GENEX_STRIP) "
+               "command.";
           messenger->IssueMessage(messageType, e.str(), context);
         }
         if (addContent) {
@@ -189,18 +186,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   this->ImportedGloballyVisible = vis == VisibilityImportedGlobally;
   this->BuildInterfaceIncludesAppended = false;
 
-  // only add dependency information for library targets
-  if (this->TargetTypeValue >= cmStateEnums::STATIC_LIBRARY &&
-      this->TargetTypeValue <= cmStateEnums::MODULE_LIBRARY) {
-    this->RecordDependencies = true;
-  } else {
-    this->RecordDependencies = false;
-  }
-
   // Check whether this is a DLL platform.
   this->DLLPlatform =
-    (this->Makefile->IsOn("WIN32") || this->Makefile->IsOn("CYGWIN") ||
-     this->Makefile->IsOn("MINGW"));
+    strcmp(this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"),
+           "") != 0;
 
   // Check whether we are targeting an Android platform.
   this->IsAndroid =
@@ -286,6 +275,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("CUDA_SEPARABLE_COMPILATION", nullptr);
     this->SetPropertyDefault("LINK_SEARCH_START_STATIC", nullptr);
     this->SetPropertyDefault("LINK_SEARCH_END_STATIC", nullptr);
+    this->SetPropertyDefault("FOLDER", nullptr);
   }
 
   // Collect the set of configuration types.
@@ -409,6 +399,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("JOB_POOL_COMPILE", nullptr);
     this->SetPropertyDefault("JOB_POOL_LINK", nullptr);
   }
+
+  if (this->TargetTypeValue <= cmStateEnums::UTILITY) {
+    this->SetPropertyDefault("DOTNET_TARGET_FRAMEWORK_VERSION", nullptr);
+  }
 }
 
 cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
@@ -509,7 +503,7 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
 {
   std::string src = s;
 
-  // For backwards compatibility replace varibles in source names.
+  // For backwards compatibility replace variables in source names.
   // This should eventually be removed.
   this->Makefile->ExpandVariablesInString(src);
   if (src != s) {
@@ -638,27 +632,11 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories() const
   return this->LinkDirectories;
 }
 
-void cmTarget::ClearDependencyInformation(cmMakefile& mf,
-                                          const std::string& target)
+void cmTarget::ClearDependencyInformation(cmMakefile& mf)
 {
-  // Clear the dependencies. The cache variable must exist iff we are
-  // recording dependency information for this target.
-  std::string depname = target;
+  std::string depname = this->GetName();
   depname += "_LIB_DEPENDS";
-  if (this->RecordDependencies) {
-    mf.AddCacheDefinition(depname, "", "Dependencies for target",
-                          cmStateEnums::STATIC);
-  } else {
-    if (mf.GetDefinition(depname)) {
-      std::string message = "Target ";
-      message += target;
-      message += " has dependency information when it shouldn't.\n";
-      message += "Your cache is probably stale. Please remove the entry\n  ";
-      message += depname;
-      message += "\nfrom the cache.";
-      cmSystemTools::Error(message.c_str());
-    }
-  }
+  mf.RemoveCacheDefinition(depname);
 }
 
 std::string cmTarget::GetDebugGeneratorExpressions(
@@ -744,19 +722,16 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
   }
 
   if (cmGeneratorExpression::Find(lib) != std::string::npos ||
-      (tgt && tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) ||
+      (tgt &&
+       (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+        tgt->GetType() == cmStateEnums::OBJECT_LIBRARY)) ||
       (this->Name == lib)) {
     return;
   }
 
-  {
-    cmTarget::LibraryID tmp;
-    tmp.first = lib;
-    tmp.second = llt;
-    this->OriginalLinkLibraries.emplace_back(lib, llt);
-  }
+  this->OriginalLinkLibraries.emplace_back(lib, llt);
 
-  // Add the explicit dependency information for this target. This is
+  // Add the explicit dependency information for libraries. This is
   // simply a set of libraries separated by ";". There should always
   // be a trailing ";". These library names are not canonical, in that
   // they may be "-framework x", "-ly", "/path/libz.a", etc.
@@ -764,7 +739,10 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
   // may be purposefully duplicated to handle recursive dependencies,
   // and we removing one instance will break the link line. Duplicates
   // will be appropriately eliminated at emit time.
-  if (this->RecordDependencies) {
+  if (this->TargetTypeValue >= cmStateEnums::STATIC_LIBRARY &&
+      this->TargetTypeValue <= cmStateEnums::MODULE_LIBRARY &&
+      (this->GetPolicyStatusCMP0073() == cmPolicies::OLD ||
+       this->GetPolicyStatusCMP0073() == cmPolicies::WARN)) {
     std::string targetEntry = this->Name;
     targetEntry += "_LIB_DEPENDS";
     std::string dependencies;
@@ -1543,22 +1521,24 @@ bool cmTarget::CheckImportedLibName(std::string const& prop,
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY ||
       !this->IsImported()) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR, prop +
+      cmake::FATAL_ERROR,
+      prop +
         " property may be set only on imported INTERFACE library targets.");
     return false;
   }
   if (!value.empty()) {
     if (value[0] == '-') {
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, prop +
-                                     " property value\n  " + value +
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+                                   prop + " property value\n  " + value +
                                      "\nmay not start with '-'.");
       return false;
     }
     std::string::size_type bad = value.find_first_of(":/\\;");
     if (bad != std::string::npos) {
-      this->Makefile->IssueMessage(
-        cmake::FATAL_ERROR, prop + " property value\n  " + value +
-          "\nmay not contain '" + value.substr(bad, 1) + "'.");
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+                                   prop + " property value\n  " + value +
+                                     "\nmay not contain '" +
+                                     value.substr(bad, 1) + "'.");
       return false;
     }
   }

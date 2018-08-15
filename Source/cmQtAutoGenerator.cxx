@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
+#include "cmQtAutoGen.h"
 
 #include "cmsys/FStream.hxx"
 
@@ -146,17 +146,91 @@ void cmQtAutoGenerator::Logger::ErrorCommand(
   }
 }
 
-std::string cmQtAutoGenerator::FileSystem::RealPath(
+std::string cmQtAutoGenerator::FileSystem::GetRealPath(
   std::string const& filename)
 {
   std::lock_guard<std::mutex> lock(Mutex_);
   return cmSystemTools::GetRealPath(filename);
 }
 
+std::string cmQtAutoGenerator::FileSystem::CollapseCombinedPath(
+  std::string const& dir, std::string const& file)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::CollapseCombinedPath(dir, file);
+}
+
+void cmQtAutoGenerator::FileSystem::SplitPath(
+  const std::string& p, std::vector<std::string>& components,
+  bool expand_home_dir)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  cmSystemTools::SplitPath(p, components, expand_home_dir);
+}
+
+std::string cmQtAutoGenerator::FileSystem::JoinPath(
+  const std::vector<std::string>& components)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::JoinPath(components);
+}
+
+std::string cmQtAutoGenerator::FileSystem::JoinPath(
+  std::vector<std::string>::const_iterator first,
+  std::vector<std::string>::const_iterator last)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::JoinPath(first, last);
+}
+
+std::string cmQtAutoGenerator::FileSystem::GetFilenameWithoutLastExtension(
+  const std::string& filename)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::GetFilenameWithoutLastExtension(filename);
+}
+
+std::string cmQtAutoGenerator::FileSystem::SubDirPrefix(
+  std::string const& filename)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmQtAutoGen::SubDirPrefix(filename);
+}
+
+void cmQtAutoGenerator::FileSystem::setupFilePathChecksum(
+  std::string const& currentSrcDir, std::string const& currentBinDir,
+  std::string const& projectSrcDir, std::string const& projectBinDir)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  FilePathChecksum_.setupParentDirs(currentSrcDir, currentBinDir,
+                                    projectSrcDir, projectBinDir);
+}
+
+std::string cmQtAutoGenerator::FileSystem::GetFilePathChecksum(
+  std::string const& filename)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return FilePathChecksum_.getPart(filename);
+}
+
 bool cmQtAutoGenerator::FileSystem::FileExists(std::string const& filename)
 {
   std::lock_guard<std::mutex> lock(Mutex_);
   return cmSystemTools::FileExists(filename);
+}
+
+bool cmQtAutoGenerator::FileSystem::FileExists(std::string const& filename,
+                                               bool isFile)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::FileExists(filename, isFile);
+}
+
+unsigned long cmQtAutoGenerator::FileSystem::FileLength(
+  std::string const& filename)
+{
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmSystemTools::FileLength(filename);
 }
 
 bool cmQtAutoGenerator::FileSystem::FileIsOlderThan(
@@ -188,35 +262,30 @@ bool cmQtAutoGenerator::FileSystem::FileRead(std::string& content,
                                              std::string* error)
 {
   bool success = false;
-  {
-    std::lock_guard<std::mutex> lock(Mutex_);
-    if (cmSystemTools::FileExists(filename, true)) {
-      std::size_t const length = cmSystemTools::FileLength(filename);
+  if (FileExists(filename, true)) {
+    unsigned long const length = FileLength(filename);
+    {
+      std::lock_guard<std::mutex> lock(Mutex_);
       cmsys::ifstream ifs(filename.c_str(), (std::ios::in | std::ios::binary));
       if (ifs) {
-        if (length > 0) {
-          content.resize(length);
-          ifs.read(&content.front(), content.size());
-          if (ifs) {
-            success = true;
-          } else {
-            content.clear();
-            if (error != nullptr) {
-              error->append("Reading from the file failed.");
-            }
-          }
-        } else {
-          // Readable but empty file
-          content.clear();
+        content.reserve(length);
+        content.assign(std::istreambuf_iterator<char>{ ifs },
+                       std::istreambuf_iterator<char>{});
+        if (ifs) {
           success = true;
+        } else {
+          content.clear();
+          if (error != nullptr) {
+            error->append("Reading from the file failed.");
+          }
         }
       } else if (error != nullptr) {
         error->append("Opening the file for reading failed.");
       }
-    } else if (error != nullptr) {
-      error->append(
-        "The file does not exist, is not readable or is a directory.");
     }
+  } else if (error != nullptr) {
+    error->append(
+      "The file does not exist, is not readable or is a directory.");
   }
   return success;
 }
@@ -298,10 +367,11 @@ bool cmQtAutoGenerator::FileSystem::FileRemove(std::string const& filename)
   return cmSystemTools::RemoveFile(filename);
 }
 
-bool cmQtAutoGenerator::FileSystem::Touch(std::string const& filename)
+bool cmQtAutoGenerator::FileSystem::Touch(std::string const& filename,
+                                          bool create)
 {
   std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::Touch(filename, false);
+  return cmSystemTools::Touch(filename, create);
 }
 
 bool cmQtAutoGenerator::FileSystem::MakeDirectory(std::string const& dirname)
@@ -612,7 +682,7 @@ bool cmQtAutoGenerator::Run(std::string const& infoFile,
     auto makefile = cm::make_unique<cmMakefile>(&gg, snapshot);
     // The OLD/WARN behavior for policy CMP0053 caused a speed regression.
     // https://gitlab.kitware.com/cmake/cmake/issues/17570
-    makefile->SetPolicyVersion("3.9");
+    makefile->SetPolicyVersion("3.9", std::string());
     gg.SetCurrentMakefile(makefile.get());
     success = this->Init(makefile.get());
   }

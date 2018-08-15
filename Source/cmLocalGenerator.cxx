@@ -27,8 +27,8 @@
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#define CM_LG_ENCODE_OBJECT_NAMES
-#include "cmCryptoHash.h"
+#  define CM_LG_ENCODE_OBJECT_NAMES
+#  include "cmCryptoHash.h"
 #endif
 
 #include "cmsys/RegularExpression.hxx"
@@ -42,8 +42,8 @@
 #include <utility>
 
 #if defined(__HAIKU__)
-#include <FindDirectory.h>
-#include <StorageDefs.h>
+#  include <FindDirectory.h>
+#  include <StorageDefs.h>
 #endif
 
 // List of variables that are replaced when
@@ -200,6 +200,22 @@ void cmLocalGenerator::ComputeObjectMaxPath()
     }
   }
   this->ObjectMaxPathViolations.clear();
+}
+
+void cmLocalGenerator::MoveSystemIncludesToEnd(
+  std::vector<std::string>& includeDirs, const std::string& config,
+  const std::string& lang, const cmGeneratorTarget* target) const
+{
+  if (!target) {
+    return;
+  }
+
+  std::stable_sort(
+    includeDirs.begin(), includeDirs.end(),
+    [&target, &config, &lang](std::string const& a, std::string const& b) {
+      return !target->IsSystemIncludeDirectory(a, config, lang) &&
+        target->IsSystemIncludeDirectory(b, config, lang);
+    });
 }
 
 void cmLocalGenerator::TraceDependencies()
@@ -651,13 +667,16 @@ std::string cmLocalGenerator::ConvertToIncludeReference(
 }
 
 std::string cmLocalGenerator::GetIncludeFlags(
-  const std::vector<std::string>& includes, cmGeneratorTarget* target,
+  const std::vector<std::string>& includeDirs, cmGeneratorTarget* target,
   const std::string& lang, bool forceFullPaths, bool forResponseFile,
   const std::string& config)
 {
   if (lang.empty()) {
     return "";
   }
+
+  std::vector<std::string> includes = includeDirs;
+  this->MoveSystemIncludesToEnd(includes, config, lang, target);
 
   OutputFormat shellFormat = forResponseFile ? RESPONSE : SHELL;
   std::ostringstream includeFlags;
@@ -923,6 +942,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
       dirs.push_back(i);
     }
   }
+
+  this->MoveSystemIncludesToEnd(dirs, config, lang, target);
 
   // Add standard include directories for this language.
   // We do not filter out implicit directories here.
@@ -1541,8 +1562,9 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
       target->Target->GetMakefile()->GetDefinition(option_flag);
     if (!opt) {
       std::ostringstream e;
-      e << "Target \"" << target->GetName() << "\" requires the language "
-                                               "dialect \""
+      e << "Target \"" << target->GetName()
+        << "\" requires the language "
+           "dialect \""
         << lang << standardProp << "\" "
         << (ext ? "(with compiler extensions)" : "")
         << ", but CMake "
@@ -1561,6 +1583,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
   static std::map<std::string, std::vector<std::string>> langStdMap;
   if (langStdMap.empty()) {
     // Maintain sorted order, most recent first.
+    langStdMap["CXX"].push_back("20");
     langStdMap["CXX"].push_back("17");
     langStdMap["CXX"].push_back("14");
     langStdMap["CXX"].push_back("11");

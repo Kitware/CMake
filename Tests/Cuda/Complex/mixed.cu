@@ -5,11 +5,11 @@
 #include "file2.h"
 
 #ifdef _WIN32
-#define EXPORT __declspec(dllexport)
-#define IMPORT __declspec(dllimport)
+#  define EXPORT __declspec(dllexport)
+#  define IMPORT __declspec(dllimport)
 #else
-#define EXPORT
-#define IMPORT
+#  define EXPORT
+#  define IMPORT
 #endif
 
 result_type __device__ file1_func(int x);

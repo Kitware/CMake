@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmFilePathChecksum.h"
 #include "cmQtAutoGen.h"
 #include "cmUVHandlePtr.h"
 #include "cmUVSignalHackRAII.h" // IWYU pragma: keep
@@ -68,9 +69,42 @@ public:
     {
     }
 
+    /// @brief Logger
     Logger* Log() const { return Log_; }
-    std::string RealPath(std::string const& filename);
+
+    // -- Paths
+    /// @brief Wrapper for cmSystemTools::GetRealPath
+    std::string GetRealPath(std::string const& filename);
+    /// @brief Wrapper for cmSystemTools::CollapseCombinedPath
+    std::string CollapseCombinedPath(std::string const& dir,
+                                     std::string const& file);
+    /// @brief Wrapper for cmSystemTools::SplitPath
+    void SplitPath(const std::string& p, std::vector<std::string>& components,
+                   bool expand_home_dir = true);
+    /// @brief Wrapper for cmSystemTools::JoinPath
+    std::string JoinPath(const std::vector<std::string>& components);
+    /// @brief Wrapper for cmSystemTools::JoinPath
+    std::string JoinPath(std::vector<std::string>::const_iterator first,
+                         std::vector<std::string>::const_iterator last);
+    /// @brief Wrapper for cmSystemTools::GetFilenameWithoutLastExtension
+    std::string GetFilenameWithoutLastExtension(const std::string& filename);
+    /// @brief Wrapper for cmQtAutoGen::SubDirPrefix
+    std::string SubDirPrefix(std::string const& filename);
+    /// @brief Wrapper for cmFilePathChecksum::setupParentDirs
+    void setupFilePathChecksum(std::string const& currentSrcDir,
+                               std::string const& currentBinDir,
+                               std::string const& projectSrcDir,
+                               std::string const& projectBinDir);
+    /// @brief Wrapper for cmFilePathChecksum::getPart
+    std::string GetFilePathChecksum(std::string const& filename);
+
+    // -- File access
+    /// @brief Wrapper for cmSystemTools::FileExists
     bool FileExists(std::string const& filename);
+    /// @brief Wrapper for cmSystemTools::FileExists
+    bool FileExists(std::string const& filename, bool isFile);
+    /// @brief Wrapper for cmSystemTools::FileLength
+    unsigned long FileLength(std::string const& filename);
     bool FileIsOlderThan(std::string const& buildFile,
                          std::string const& sourceFile,
                          std::string* error = nullptr);
@@ -90,8 +124,9 @@ public:
     bool FileDiffers(std::string const& filename, std::string const& content);
 
     bool FileRemove(std::string const& filename);
-    bool Touch(std::string const& filename);
+    bool Touch(std::string const& filename, bool create = false);
 
+    // -- Directory access
     bool MakeDirectory(std::string const& dirname);
     /// @brief Error logging version
     bool MakeDirectory(GeneratorT genType, std::string const& dirname);
@@ -102,6 +137,7 @@ public:
 
   private:
     std::mutex Mutex_;
+    cmFilePathChecksum FilePathChecksum_;
     Logger* Log_;
   };
 

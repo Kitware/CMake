@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmQtAutoGen.h"
 #include "cmQtAutoGenInitializer.h"
+#include "cmQtAutoGen.h"
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
@@ -588,8 +588,13 @@ void cmQtAutoGenInitializer::InitCustomTargets()
           if (!qrc.Unique) {
             base += qrc.PathChecksum;
           }
+
+          qrc.LockFile = base;
+          qrc.LockFile += ".lock";
+
           qrc.InfoFile = base;
           qrc.InfoFile += "Info.cmake";
+
           qrc.SettingsFile = base;
           qrc.SettingsFile += "Settings.txt";
         }
@@ -623,14 +628,26 @@ void cmQtAutoGenInitializer::InitCustomTargets()
 
       std::vector<std::string> ccOutput;
       ccOutput.push_back(qrc.RccFile);
+
       cmCustomCommandLines commandLines;
-      {
+      if (this->MultiConfig) {
+        // Build for all configurations
+        for (std::string const& config : this->ConfigsList) {
+          cmCustomCommandLine currentLine;
+          currentLine.push_back(cmSystemTools::GetCMakeCommand());
+          currentLine.push_back("-E");
+          currentLine.push_back("cmake_autorcc");
+          currentLine.push_back(qrc.InfoFile);
+          currentLine.push_back(config);
+          commandLines.push_back(std::move(currentLine));
+        }
+      } else {
         cmCustomCommandLine currentLine;
         currentLine.push_back(cmSystemTools::GetCMakeCommand());
         currentLine.push_back("-E");
         currentLine.push_back("cmake_autorcc");
         currentLine.push_back(qrc.InfoFile);
-        currentLine.push_back("$<CONFIGURATION>");
+        currentLine.push_back("$<CONFIG>");
         commandLines.push_back(std::move(currentLine));
       }
       std::string ccComment = "Automatic RCC for ";
@@ -896,17 +913,18 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
                                   std::vector<std::string> const& list) {
         CWrite(key, cmJoin(list, ";"));
       };
-      auto CWriteNestedLists = [&CWrite](
-        const char* key, std::vector<std::vector<std::string>> const& lists) {
-        std::vector<std::string> seplist;
-        for (const std::vector<std::string>& list : lists) {
-          std::string blist = "{";
-          blist += cmJoin(list, ";");
-          blist += "}";
-          seplist.push_back(std::move(blist));
-        }
-        CWrite(key, cmJoin(seplist, cmQtAutoGen::ListSep));
-      };
+      auto CWriteNestedLists =
+        [&CWrite](const char* key,
+                  std::vector<std::vector<std::string>> const& lists) {
+          std::vector<std::string> seplist;
+          for (const std::vector<std::string>& list : lists) {
+            std::string blist = "{";
+            blist += cmJoin(list, ";");
+            blist += "}";
+            seplist.push_back(std::move(blist));
+          }
+          CWrite(key, cmJoin(seplist, cmQtAutoGen::ListSep));
+        };
       auto CWriteSet = [&CWrite](const char* key,
                                  std::set<std::string> const& list) {
         CWrite(key, cmJoin(list, ";"));
@@ -994,6 +1012,9 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
   // Generate auto RCC info files
   if (this->RccEnabled) {
     for (Qrc const& qrc : this->Qrcs) {
+      // Register rcc info file as generated
+      makefile->AddCMakeOutputFile(qrc.InfoFile);
+
       cmGeneratedFileStream ofs;
       ofs.SetCopyIfDifferent(true);
       ofs.Open(qrc.InfoFile.c_str(), false, true);
@@ -1003,13 +1024,14 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
           ofs << "set(" << key << " "
               << cmOutputConverter::EscapeForCMake(value) << ")\n";
         };
-        auto CWriteMap = [&ofs](
-          const char* key, std::map<std::string, std::string> const& map) {
-          for (auto const& item : map) {
-            ofs << "set(" << key << "_" << item.first << " "
-                << cmOutputConverter::EscapeForCMake(item.second) << ")\n";
-          }
-        };
+        auto CWriteMap =
+          [&ofs](const char* key,
+                 std::map<std::string, std::string> const& map) {
+            for (auto const& item : map) {
+              ofs << "set(" << key << "_" << item.first << " "
+                  << cmOutputConverter::EscapeForCMake(item.second) << ")\n";
+            }
+          };
 
         // Write
         ofs << "# Configurations\n";
@@ -1040,6 +1062,7 @@ void cmQtAutoGenInitializer::SetupCustomTargets()
         CWrite("ARCC_RCC_LIST_OPTIONS", cmJoin(this->RccListOptions, ";"));
 
         ofs << "# Rcc job\n";
+        CWrite("ARCC_LOCK_FILE", qrc.LockFile);
         CWrite("ARCC_SOURCE", qrc.QrcFile);
         CWrite("ARCC_OUTPUT_CHECKSUM", qrc.PathChecksum);
         CWrite("ARCC_OUTPUT_NAME",

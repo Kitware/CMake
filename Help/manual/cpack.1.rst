@@ -8,92 +8,85 @@ Synopsis
 
 .. parsed-literal::
 
- cpack -G <generator> [<options>]
+ cpack [<options>]
 
 Description
 ===========
 
-The "cpack" executable is the CMake packaging program.
-CMake-generated build trees created for projects that use the
-INSTALL_* commands have packaging support.  This program will generate
-the package.
-
-CMake is a cross-platform build system generator.  Projects specify
-their build process with platform-independent CMake listfiles included
-in each directory of a source tree with the name CMakeLists.txt.
-Users build a project by using CMake to generate a build system for a
-native tool on their platform.
+The ``cpack`` executable is the CMake packaging program.
+CMake projects use :command:`install` commands to define the contents of
+packages which can be generated in various formats by this tool.
+The :module:`CPack` module greatly simplifies the creation of the input file
+used by ``cpack``, allowing most aspects of the packaging configuration to be
+controlled directly from the CMake project's own ``CMakeLists.txt`` files.
 
 Options
 =======
 
-``-G <generator>``
- Use the specified generator to generate package.
-
- CPack may support multiple native packaging systems on certain
- platforms.  A generator is responsible for generating input files
- for particular system and invoking that systems.  Possible generator
- names are specified in the Generators section.
+``-G <generators>``
+  ``<generators>`` is a :ref:`semicolon-separated list <CMake Language Lists>`
+  of generator names.  ``cpack`` will iterate through this list and produce
+  package(s) in that generator's format according to the details provided in
+  the ``CPackConfig.cmake`` configuration file.  A generator is responsible for
+  generating the required inputs for a particular package system and invoking
+  that system's package creation tools.  Possible generator names are specified
+  in the :manual:`Generators <cmake-generators(7)>` section of the manual and
+  the ``--help`` option lists the generators supported for the target platform.
+  If this option is not given, the :variable:`CPACK_GENERATOR` variable
+  determines the default set of generators that will be used.
 
 ``-C <Configuration>``
- Specify the project configuration
-
- This option specifies the configuration that the project was build
- with, for example 'Debug', 'Release'.
+  Specify the project configuration to be packaged (e.g. ``Debug``,
+  ``Release``, etc.).  When the CMake project uses a multi-configuration
+  generator such as Xcode or Visual Studio, this option is needed to tell
+  ``cpack`` which built executables to include in the package.
 
 ``-D <var>=<value>``
- Set a CPack variable.
+  Set a CPack variable.  This will override any value set for ``<var>`` in the
+  input file read by ``cpack``.
 
- Set a variable that can be used by the generator.
-
-``--config <config file>``
- Specify the config file.
-
- Specify the config file to use to create the package.  By default
- CPackConfig.cmake in the current directory will be used.
+``--config <configFile>``
+  Specify the configuration file read by ``cpack`` to provide the packaging
+  details.  By default, ``CPackConfig.cmake`` in the current directory will
+  be used.
 
 ``--verbose,-V``
- enable verbose output
-
- Run cpack with verbose output.
+  Run ``cpack`` with verbose output.  This can be used to show more details
+  from the package generation tools and is suitable for project developers.
 
 ``--debug``
- enable debug output (for CPack developers)
-
- Run cpack with debug output (for CPack developers).
+  Run ``cpack`` with debug output.  This option is intended mainly for the
+  developers of ``cpack`` itself and is not normally needed by project
+  developers.
 
 ``--trace``
- Put underlying cmake scripts in trace mode.
+  Put the underlying cmake scripts in trace mode.
 
 ``--trace-expand``
- Put underlying cmake scripts in expanded trace mode.
+  Put the underlying cmake scripts in expanded trace mode.
 
-``-P <package name>``
- override/define CPACK_PACKAGE_NAME
+``-P <packageName>``
+  Override/define the value of the :variable:`CPACK_PACKAGE_NAME` variable used
+  for packaging.  Any value set for this variable in the ``CPackConfig.cmake``
+  file will then be ignored.
 
- If the package name is not specified on cpack command line
- thenCPack.cmake defines it as CMAKE_PROJECT_NAME
+``-R <packageVersion>``
+  Override/define the value of the :variable:`CPACK_PACKAGE_VERSION`
+  variable used for packaging.  It will override a value set in the
+  ``CPackConfig.cmake`` file or one automatically computed from
+  :variable:`CPACK_PACKAGE_VERSION_MAJOR`,
+  :variable:`CPACK_PACKAGE_VERSION_MINOR` and
+  :variable:`CPACK_PACKAGE_VERSION_PATCH`.
 
-``-R <package version>``
- override/define CPACK_PACKAGE_VERSION
+``-B <packageDirectory>``
+  Override/define :variable:`CPACK_PACKAGE_DIRECTORY`, which controls the
+  directory where CPack will perform its packaging work.  The resultant
+  package(s) will be created at this location by default and a
+  ``_CPack_Packages`` subdirectory will also be created below this directory to
+  use as a working area during package creation.
 
- If version is not specified on cpack command line thenCPack.cmake
- defines it from CPACK_PACKAGE_VERSION_[MAJOR|MINOR|PATCH]look into
- CPack.cmake for detail
-
-``-B <package directory>``
- override/define CPACK_PACKAGE_DIRECTORY
-
- The directory where CPack will be doing its packaging work.The
- resulting package will be found there.  Inside this directoryCPack
- creates '_CPack_Packages' sub-directory which is theCPack temporary
- directory.
-
-``--vendor <vendor name>``
- override/define CPACK_PACKAGE_VENDOR
-
- If vendor is not specified on cpack command line (or inside
- CMakeLists.txt) thenCPack.cmake defines it with a default value
+``--vendor <vendorName>``
+  Override/define :variable:`CPACK_PACKAGE_VENDOR`.
 
 .. include:: OPTIONS_HELP.txt
 

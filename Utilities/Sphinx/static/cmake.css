@@ -6,3 +6,13 @@
 div.sphinxsidebarwrapper {
   word-wrap: break-word;
 }
+
+/* Make links inside parsed-literal blocks more obvious
+   by using a background color and increased line spacing
+   to make them look boxed.  */
+.literal-block {
+  line-height: 1.4;
+}
+.literal-block a.reference.internal {
+  background-color: #dfdfdf;
+}

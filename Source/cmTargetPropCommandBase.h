@@ -28,7 +28,7 @@ public:
 
 protected:
   std::string Property;
-  cmTarget* Target;
+  cmTarget* Target = nullptr;
 
   virtual void HandleInterfaceContent(cmTarget* tgt,
                                       const std::vector<std::string>& content,

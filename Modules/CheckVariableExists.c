@@ -2,15 +2,15 @@
 
 extern int CHECK_VARIABLE_EXISTS;
 
-#ifdef __CLASSIC_C__
+#  ifdef __CLASSIC_C__
 int main()
 {
   int ac;
   char* av[];
-#else
+#  else
 int main(int ac, char* av[])
 {
-#endif
+#  endif
   if (ac > 1000) {
     return *av[0];
   }
@@ -19,6 +19,6 @@ int main(int ac, char* av[])
 
 #else /* CHECK_VARIABLE_EXISTS */
 
-#error "CHECK_VARIABLE_EXISTS has to specify the variable"
+#  error "CHECK_VARIABLE_EXISTS has to specify the variable"
 
 #endif /* CHECK_VARIABLE_EXISTS */

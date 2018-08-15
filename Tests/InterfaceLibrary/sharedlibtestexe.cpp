@@ -1,14 +1,14 @@
 
 #ifndef SHAREDLIB_DEFINE
-#error Expected SHAREDLIB_DEFINE
+#  error Expected SHAREDLIB_DEFINE
 #endif
 
 #ifndef SHAREDDEPENDLIB_DEFINE
-#error Expected SHAREDDEPENDLIB_DEFINE
+#  error Expected SHAREDDEPENDLIB_DEFINE
 #endif
 
-#include "sharedlib.h"
 #include "shareddependlib.h"
+#include "sharedlib.h"
 
 int main(int, char**)
 {

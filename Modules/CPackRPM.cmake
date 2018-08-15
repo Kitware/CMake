@@ -40,8 +40,8 @@
 # Here are some CPackRPM wiki resources that are here for historic reasons and
 # are no longer maintained but may still prove useful:
 #
-#  - https://cmake.org/Wiki/CMake:CPackConfiguration
-#  - https://cmake.org/Wiki/CMake:CPackPackageGenerators#RPM_.28Unix_Only.29
+#  - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/Configuration
+#  - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators#rpm-unix-only
 #
 # List of CPackRPM specific variables:
 #
@@ -191,7 +191,7 @@
 #  The projects URL.
 #
 #  * Mandatory : NO
-#  * Default   : -
+#  * Default   : :variable:`CMAKE_PROJECT_HOMEPAGE_URL`
 #
 # .. variable:: CPACK_RPM_PACKAGE_DESCRIPTION
 #               CPACK_RPM_<component>_PACKAGE_DESCRIPTION
@@ -410,17 +410,17 @@
 #
 # .. variable:: CPACK_RPM_SPEC_INSTALL_POST
 #
-#  Deprecated - use :variable:`CPACK_RPM_POST_INSTALL_SCRIPT_FILE` instead.
+#  Deprecated - use :variable:`CPACK_RPM_SPEC_MORE_DEFINE` instead.
 #
 #  * Mandatory : NO
 #  * Default   : -
 #  * Deprecated: YES
 #
-#  This way of specifying post-install script is deprecated, use
-#  :variable:`CPACK_RPM_POST_INSTALL_SCRIPT_FILE`.
-#  May be used to set an RPM post-install command inside the spec file.
-#  For example setting it to ``/bin/true`` may be used to prevent
-#  rpmbuild to strip binaries.
+#  May be used to override the ``__spec_install_post`` section within the
+#  generated spec file.  This affects the install step during package creation,
+#  not during package installation.  For adding operations to be performed
+#  during package installation, use
+#  :variable:`CPACK_RPM_POST_INSTALL_SCRIPT_FILE` instead.
 #
 # .. variable:: CPACK_RPM_SPEC_MORE_DEFINE
 #
@@ -429,7 +429,11 @@
 #  * Mandatory : NO
 #  * Default   : -
 #
-#  May be used to add any ``%define`` lines to the generated spec file.
+#  May be used to add any ``%define`` lines to the generated spec file.  An
+#  example of its use is to prevent stripping of executables (but note that
+#  this may also disable other default post install processing)::
+#
+#    set(CPACK_RPM_SPEC_MORE_DEFINE "%define __spec_install_post /bin/true")
 #
 # .. variable:: CPACK_RPM_PACKAGE_DEBUG
 #
@@ -877,9 +881,9 @@
 # variable while usually using :variable:`CPACK_INSTALLED_DIRECTORIES` variable
 # to provide directory containing CMakeLists.txt and source files.
 #
-# For CMake projects SRPM package would be product by executing:
+# For CMake projects SRPM package would be produced by executing::
 #
-# ``cpack -G RPM --config ./CPackSourceConfig.cmake``
+#   cpack -G RPM --config ./CPackSourceConfig.cmake
 #
 # .. note::
 #
@@ -892,10 +896,10 @@
 #
 # Once the SRPM package is generated it can be used to generate binary packages
 # by creating a directory structure for rpm generation and executing rpmbuild
-# tool:
+# tool::
 #
-# ``mkdir -p build_dir/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}``
-# ``rpmbuild --define "_topdir <path_to_build_dir>" --rebuild <SRPM_file_name>``
+#   mkdir -p build_dir/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+#   rpmbuild --define "_topdir <path_to_build_dir>" --rebuild <SRPM_file_name>
 #
 # Generated packages will be located in build_dir/RPMS directory or its sub
 # directories.
@@ -1787,6 +1791,10 @@ function(cpack_rpm_generate_package)
     endif()
   endif()
 
+  if(NOT CPACK_RPM_PACKAGE_URL AND CMAKE_PROJECT_HOMEPAGE_URL)
+    set(CPACK_RPM_PACKAGE_URL "${CMAKE_PROJECT_HOMEPAGE_URL}")
+  endif()
+
   # CPACK_RPM_PACKAGE_NAME (mandatory)
   if(NOT CPACK_RPM_PACKAGE_NAME)
     string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_RPM_PACKAGE_NAME)
@@ -1984,7 +1992,7 @@ function(cpack_rpm_generate_package)
     endif()
 
     if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
-      # Prefix can be replaced by Prefixes but the old version stil works so we'll ignore it for now
+      # Prefix can be replaced by Prefixes but the old version still works so we'll ignore it for now
       # Requires* is a special case because it gets transformed to Requires(pre/post/preun/postun)
       # Auto* is a special case because the tags can not be queried by querytags rpmbuild flag
       set(special_case_tags_ PREFIX REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN AUTOPROV AUTOREQ AUTOREQPROV)

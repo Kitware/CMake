@@ -1,7 +1,7 @@
 #ifdef __WATCOMC__
-#define MODULE_CCONV __cdecl
+#  define MODULE_CCONV __cdecl
 #else
-#define MODULE_CCONV
+#  define MODULE_CCONV
 #endif
 
 int __declspec(dllimport) example_exe_function(void);

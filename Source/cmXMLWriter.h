@@ -67,7 +67,7 @@ public:
   void SetIndentationElement(std::string const& element);
 
 private:
-  void ConditionalLineBreak(bool condition, std::size_t indent);
+  void ConditionalLineBreak(bool condition);
 
   void PreAttribute();
   void PreContent();
@@ -128,9 +128,69 @@ private:
   std::stack<std::string, std::vector<std::string>> Elements;
   std::string IndentationElement;
   std::size_t Level;
+  std::size_t Indent;
   bool ElementOpen;
   bool BreakAttrib;
   bool IsContent;
+};
+
+class cmXMLElement; // IWYU pragma: keep
+
+class cmXMLDocument
+{
+public:
+  cmXMLDocument(cmXMLWriter& xml)
+    : xmlwr(xml)
+  {
+    xmlwr.StartDocument();
+  }
+  ~cmXMLDocument() { xmlwr.EndDocument(); }
+
+private:
+  friend class cmXMLElement;
+  cmXMLWriter& xmlwr;
+};
+
+class cmXMLElement
+{
+public:
+  cmXMLElement(cmXMLWriter& xml, const char* tag)
+    : xmlwr(xml)
+  {
+    xmlwr.StartElement(tag);
+  }
+  cmXMLElement(cmXMLElement& par, const char* tag)
+    : xmlwr(par.xmlwr)
+  {
+    xmlwr.StartElement(tag);
+  }
+  cmXMLElement(cmXMLDocument& doc, const char* tag)
+    : xmlwr(doc.xmlwr)
+  {
+    xmlwr.StartElement(tag);
+  }
+  ~cmXMLElement() { xmlwr.EndElement(); }
+
+  template <typename T>
+  cmXMLElement& Attribute(const char* name, T const& value)
+  {
+    xmlwr.Attribute(name, value);
+    return *this;
+  }
+  template <typename T>
+  void Content(T const& content)
+  {
+    xmlwr.Content(content);
+  }
+  template <typename T>
+  void Element(std::string const& name, T const& value)
+  {
+    xmlwr.Element(name, value);
+  }
+  void Comment(const char* comment) { xmlwr.Comment(comment); }
+
+private:
+  cmXMLWriter& xmlwr;
 };
 
 #endif

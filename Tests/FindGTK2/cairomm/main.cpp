@@ -5,7 +5,7 @@
  * et. al.
  */
 #if defined(_MSC_VER)
-#define _USE_MATH_DEFINES
+#  define _USE_MATH_DEFINES
 #endif
 
 #include <cairomm/context.h>

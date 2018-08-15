@@ -30,9 +30,9 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
                                             cmExecutionStatus& inStatus)
 {
   // we start by recording all the functions
-  if (!cmSystemTools::Strucmp(lff.Name.c_str(), "if")) {
+  if (lff.Name.Lower == "if") {
     this->ScopeDepth++;
-  } else if (!cmSystemTools::Strucmp(lff.Name.c_str(), "endif")) {
+  } else if (lff.Name.Lower == "endif") {
     this->ScopeDepth--;
     // if this is the endif for this if statement, then start executing
     if (!this->ScopeDepth) {
@@ -48,15 +48,14 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       int scopeDepth = 0;
       for (cmListFileFunction const& func : this->Functions) {
         // keep track of scope depth
-        if (!cmSystemTools::Strucmp(func.Name.c_str(), "if")) {
+        if (func.Name.Lower == "if") {
           scopeDepth++;
         }
-        if (!cmSystemTools::Strucmp(func.Name.c_str(), "endif")) {
+        if (func.Name.Lower == "endif") {
           scopeDepth--;
         }
         // watch for our state change
-        if (scopeDepth == 0 &&
-            !cmSystemTools::Strucmp(func.Name.c_str(), "else")) {
+        if (scopeDepth == 0 && func.Name.Lower == "else") {
 
           if (this->ElseSeen) {
             cmListFileBacktrace bt = mf.GetBacktrace(func);
@@ -76,8 +75,7 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
           if (!this->IsBlocking && mf.GetCMakeInstance()->GetTrace()) {
             mf.PrintCommandTrace(func);
           }
-        } else if (scopeDepth == 0 &&
-                   !cmSystemTools::Strucmp(func.Name.c_str(), "elseif")) {
+        } else if (scopeDepth == 0 && func.Name.Lower == "elseif") {
           if (this->ElseSeen) {
             cmListFileBacktrace bt = mf.GetBacktrace(func);
             mf.GetCMakeInstance()->IssueMessage(
@@ -163,7 +161,7 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
 bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
                                        cmMakefile&)
 {
-  if (!cmSystemTools::Strucmp(lff.Name.c_str(), "endif")) {
+  if (lff.Name.Lower == "endif") {
     // if the endif has arguments, then make sure
     // they match the arguments of the matching if
     if (lff.Arguments.empty() || lff.Arguments == this->Args) {

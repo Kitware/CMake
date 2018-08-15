@@ -2,9 +2,9 @@
 #include <type_traits>
 
 #ifdef _WIN32
-#define EXPORT __declspec(dllexport)
+#  define EXPORT __declspec(dllexport)
 #else
-#define EXPORT
+#  define EXPORT
 #endif
 
 using tt = std::true_type;

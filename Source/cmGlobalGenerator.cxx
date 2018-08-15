@@ -6,14 +6,14 @@
 #include "cmsys/FStream.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <cstring>
 #include <iterator>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#include <windows.h>
+#  include <windows.h>
 #endif
 
 #include "cmAlgorithms.h"
@@ -44,13 +44,13 @@
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmCryptoHash.h"
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
+#  include "cmCryptoHash.h"
+#  include "cm_jsoncpp_value.h"
+#  include "cm_jsoncpp_writer.h"
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1800
-#define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+#  define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 #endif
 
 const std::string kCMAKE_PLATFORM_INFO_INITIALIZED =
@@ -442,8 +442,9 @@ void cmGlobalGenerator::EnableLanguage(
   for (std::string const& li : cur_languages) {
     if (!this->LanguagesInProgress.insert(li).second) {
       std::ostringstream e;
-      e << "Language '" << li << "' is currently being enabled.  "
-                                 "Recursive call not allowed.";
+      e << "Language '" << li
+        << "' is currently being enabled.  "
+           "Recursive call not allowed.";
       mf->IssueMessage(cmake::FATAL_ERROR, e.str());
       cmSystemTools::SetFatalErrorOccured();
       return;
@@ -523,14 +524,14 @@ void cmGlobalGenerator::EnableLanguage(
     ZeroMemory(&osviex, sizeof(osviex));
     osviex.dwOSVersionInfoSize = sizeof(osviex);
 
-#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#pragma warning(push)
-#pragma warning(disable : 4996)
-#endif
+#  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+#    pragma warning(push)
+#    pragma warning(disable : 4996)
+#  endif
     GetVersionExW((OSVERSIONINFOW*)&osviex);
-#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#pragma warning(pop)
-#endif
+#  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+#    pragma warning(pop)
+#  endif
     std::ostringstream windowsVersionString;
     windowsVersionString << osviex.dwMajorVersion << "."
                          << osviex.dwMinorVersion << "."
@@ -1403,7 +1404,8 @@ void cmGlobalGenerator::Generate()
     }
     this->LocalGenerators[i]->GenerateTestFiles();
     this->CMakeInstance->UpdateProgress(
-      "Generating", (static_cast<float>(i) + 1.0f) /
+      "Generating",
+      (static_cast<float>(i) + 1.0f) /
         static_cast<float>(this->LocalGenerators.size()));
   }
   this->SetCurrentMakefile(nullptr);
@@ -1560,8 +1562,8 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
 
       cmBacktraceRange::const_iterator btIt =
         noconfig_compile_definitions_bts.begin();
-      for (cmStringRange::const_iterator
-             it = noconfig_compile_definitions.begin();
+      for (cmStringRange::const_iterator it =
+             noconfig_compile_definitions.begin();
            it != noconfig_compile_definitions.end(); ++it, ++btIt) {
         t->InsertCompileDefinition(*it, *btIt);
       }
@@ -1721,7 +1723,8 @@ void cmGlobalGenerator::CheckTargetProperties()
       }
     }
     this->CMakeInstance->UpdateProgress(
-      "Configuring", 0.9f +
+      "Configuring",
+      0.9f +
         0.1f * (static_cast<float>(i) + 1.0f) /
           static_cast<float>(this->Makefiles.size()));
   }
@@ -1741,7 +1744,7 @@ void cmGlobalGenerator::CheckTargetProperties()
   }
 }
 
-int cmGlobalGenerator::TryCompile(const std::string& srcdir,
+int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
                                   const std::string& bindir,
                                   const std::string& projectName,
                                   const std::string& target, bool fast,
@@ -1769,7 +1772,7 @@ int cmGlobalGenerator::TryCompile(const std::string& srcdir,
   if (!target.empty()) {
     newTarget += target;
 #if 0
-#if defined(_WIN32) || defined(__CYGWIN__)
+#  if defined(_WIN32) || defined(__CYGWIN__)
     std::string tmp = target;
     // if the target does not already end in . something
     // then assume .exe
@@ -1777,12 +1780,12 @@ int cmGlobalGenerator::TryCompile(const std::string& srcdir,
       {
       newTarget += ".exe";
       }
-#endif // WIN32
+#  endif // WIN32
 #endif
   }
   std::string config =
     mf->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
-  return this->Build(srcdir, bindir, projectName, newTarget, output, "",
+  return this->Build(jobs, srcdir, bindir, projectName, newTarget, output, "",
                      config, false, fast, false, this->TryCompileTimeout);
 }
 
@@ -1790,13 +1793,21 @@ void cmGlobalGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string& /*unused*/,
   const std::string& /*unused*/, const std::string& /*unused*/,
   const std::string& /*unused*/, const std::string& /*unused*/,
-  bool /*unused*/, bool /*unused*/, std::vector<std::string> const& /*unused*/)
+  bool /*unused*/, int /*unused*/, bool /*unused*/,
+  std::vector<std::string> const& /*unused*/)
 {
   makeCommand.push_back(
     "cmGlobalGenerator::GenerateBuildCommand not implemented");
 }
 
-int cmGlobalGenerator::Build(const std::string& /*unused*/,
+void cmGlobalGenerator::PrintBuildCommandAdvice(std::ostream& /*os*/,
+                                                int /*jobs*/) const
+{
+  // Subclasses override this method if they e.g want to give a warning that
+  // they do not support certain build command line options
+}
+
+int cmGlobalGenerator::Build(int jobs, const std::string& /*unused*/,
                              const std::string& bindir,
                              const std::string& projectName,
                              const std::string& target, std::string& output,
@@ -1806,6 +1817,8 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
                              cmSystemTools::OutputOption outputflag,
                              std::vector<std::string> const& nativeOptions)
 {
+  bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
+
   /**
    * Run an executable command and put the stdout in output.
    */
@@ -1813,16 +1826,25 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
   output += "Change Dir: ";
   output += bindir;
   output += "\n";
+  if (workdir.Failed()) {
+    cmSystemTools::SetRunCommandHideConsole(hideconsole);
+    cmSystemTools::Error("Failed to change directory: ",
+                         std::strerror(workdir.GetLastResult()));
+    output += "Failed to change directory: ";
+    output += std::strerror(workdir.GetLastResult());
+    output += "\n";
+    return 1;
+  }
 
   int retVal;
-  bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
   cmSystemTools::SetRunCommandHideConsole(true);
   std::string outputBuffer;
   std::string* outputPtr = &outputBuffer;
 
   std::vector<std::string> makeCommand;
   this->GenerateBuildCommand(makeCommand, makeCommandCSTR, projectName, bindir,
-                             target, config, fast, verbose, nativeOptions);
+                             target, config, fast, jobs, verbose,
+                             nativeOptions);
 
   // Workaround to convince VCExpress.exe to produce output.
   if (outputflag == cmSystemTools::OUTPUT_PASSTHROUGH &&
@@ -1836,7 +1858,7 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
   if (clean) {
     std::vector<std::string> cleanCommand;
     this->GenerateBuildCommand(cleanCommand, makeCommandCSTR, projectName,
-                               bindir, "clean", config, fast, verbose);
+                               bindir, "clean", config, fast, jobs, verbose);
     output += "\nRun Clean Command:";
     output += cmSystemTools::PrintSingleCommand(cleanCommand);
     output += "\n";
@@ -1880,6 +1902,13 @@ int cmGlobalGenerator::Build(const std::string& /*unused*/,
   // the source has a #error in it!  This is a work-around for such
   // compilers.
   if ((retVal == 0) && (output.find("#error") != std::string::npos)) {
+    retVal = 1;
+  }
+
+  // The OpenWatcom tools do not return an error code when a link
+  // library is not found!
+  if (this->CMakeInstance->GetState()->UseWatcomWMake() && retVal == 0 &&
+      output.find("W1008: cannot open") != std::string::npos) {
     retVal = 1;
   }
 
@@ -2440,8 +2469,9 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
   bool skipInstallRules = mf->IsOn("CMAKE_SKIP_INSTALL_RULES");
   if (this->InstallTargetEnabled && skipInstallRules) {
     this->CMakeInstance->IssueMessage(
-      cmake::WARNING, "CMAKE_SKIP_INSTALL_RULES was enabled even though "
-                      "installation rules have been specified",
+      cmake::WARNING,
+      "CMAKE_SKIP_INSTALL_RULES was enabled even though "
+      "installation rules have been specified",
       mf->GetBacktrace());
   } else if (this->InstallTargetEnabled && !skipInstallRules) {
     if (!cmakeCfgIntDir || !*cmakeCfgIntDir || cmakeCfgIntDir[0] == '.') {

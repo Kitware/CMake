@@ -273,10 +273,17 @@ void cmGlobalGhsMultiGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string& makeProgram,
   const std::string& /*projectName*/, const std::string& /*projectDir*/,
   const std::string& targetName, const std::string& /*config*/, bool /*fast*/,
-  bool /*verbose*/, std::vector<std::string> const& makeOptions)
+  int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
 {
   makeCommand.push_back(
     this->SelectMakeProgram(makeProgram, this->GetGhsBuildCommand()));
+
+  if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
+    makeCommand.push_back("-parallel");
+    if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
+      makeCommand.push_back(std::to_string(jobs));
+    }
+  }
 
   makeCommand.insert(makeCommand.end(), makeOptions.begin(),
                      makeOptions.end());
@@ -306,8 +313,8 @@ void cmGlobalGhsMultiGenerator::WriteMacros()
 
 void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives()
 {
-  *this->GetBuildFileStream() << "primaryTarget=arm_integrity.tgt"
-                              << std::endl;
+  *this->GetBuildFileStream()
+    << "primaryTarget=arm_integrity.tgt" << std::endl;
   char const* const customization =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_CUSTOMIZATION");
   if (NULL != customization && strlen(customization) > 0) {
@@ -319,8 +326,8 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives()
 
 void cmGlobalGhsMultiGenerator::WriteCompilerOptions(std::string const& fOSDir)
 {
-  *this->GetBuildFileStream() << "    -os_dir=\"" << fOSDir << "\""
-                              << std::endl;
+  *this->GetBuildFileStream()
+    << "    -os_dir=\"" << fOSDir << "\"" << std::endl;
 }
 
 void cmGlobalGhsMultiGenerator::WriteDisclaimer(std::ostream* os)

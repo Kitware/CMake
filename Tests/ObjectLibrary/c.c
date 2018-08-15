@@ -1,7 +1,7 @@
 #if defined(_WIN32) && defined(Cshared_EXPORTS)
-#define EXPORT_C __declspec(dllexport)
+#  define EXPORT_C __declspec(dllexport)
 #else
-#define EXPORT_C
+#  define EXPORT_C
 #endif
 
 extern int a1(void);

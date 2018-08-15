@@ -1,5 +1,5 @@
 #ifndef __cplusplus
-#error "A C compiler has been selected for C++."
+#  error "A C compiler has been selected for C++."
 #endif
 
 #include "CMakeCompilerABI.h"

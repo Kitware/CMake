@@ -67,8 +67,8 @@ int cmCPackProductBuildGenerator::PackageFiles()
       this->GetOption("CPACK_PRODUCTBUILD_RESOURCES_DIR");
 
     if (!cmSystemTools::CopyADirectory(userResDir, resDir)) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the resource files"
-                      << std::endl);
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Problem copying the resource files" << std::endl);
       return 0;
     }
   }
@@ -121,16 +121,16 @@ int cmCPackProductBuildGenerator::InitializeInternal()
   std::string program =
     cmSystemTools::FindProgram("pkgbuild", no_paths, false);
   if (program.empty()) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find pkgbuild executable"
-                    << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Cannot find pkgbuild executable" << std::endl);
     return 0;
   }
   this->SetOptionIfNotSet("CPACK_COMMAND_PKGBUILD", program.c_str());
 
   program = cmSystemTools::FindProgram("productbuild", no_paths, false);
   if (program.empty()) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find productbuild executable"
-                    << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Cannot find productbuild executable" << std::endl);
     return 0;
   }
   this->SetOptionIfNotSet("CPACK_COMMAND_PRODUCTBUILD", program.c_str());
@@ -172,8 +172,9 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
   packageFile += '/';
   packageFile += packageFileName;
 
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "-   Building component package: "
-                  << packageFile << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+                "-   Building component package: " << packageFile
+                                                   << std::endl);
 
   const char* comp_name = component ? component->Name.c_str() : nullptr;
 

@@ -1,7 +1,7 @@
 #if defined(_WIN32)
-#include <windows.h>
+#  include <windows.h>
 #else
-#include <unistd.h>
+#  include <unistd.h>
 #endif
 
 /* sleeps for n seconds, where n is the argument to the program */

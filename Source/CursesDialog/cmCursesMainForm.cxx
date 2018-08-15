@@ -371,8 +371,9 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
         sprintf(thirdLine, toggleKeyInstruction,
                 this->AdvancedMode ? "On" : "Off");
       }
-      sprintf(secondLine, "Press [h] for help           "
-                          "Press [q] to quit without generating");
+      sprintf(secondLine,
+              "Press [h] for help           "
+              "Press [q] to quit without generating");
     }
 
     curses_move(y - 4, 0);
@@ -412,9 +413,10 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
     curses_clear();
     curses_move(0, 0);
     char fmt[] = "Window is too small. A size of at least %dx%d is required.";
-    printw(fmt, (cmCursesMainForm::MIN_WIDTH < this->InitialWidth
-                   ? this->InitialWidth
-                   : cmCursesMainForm::MIN_WIDTH),
+    printw(fmt,
+           (cmCursesMainForm::MIN_WIDTH < this->InitialWidth
+              ? this->InitialWidth
+              : cmCursesMainForm::MIN_WIDTH),
            cmCursesMainForm::MIN_HEIGHT);
     touchwin(stdscr);
     wrefresh(stdscr);
@@ -568,10 +570,11 @@ int cmCursesMainForm::Configure(int noconfigure)
     }
     int xx, yy;
     getmaxyx(stdscr, yy, xx);
-    cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
-      this->Errors, cmSystemTools::GetErrorOccuredFlag()
-        ? "Errors occurred during the last pass."
-        : "CMake produced the following output.");
+    cmCursesLongMessageForm* msgs =
+      new cmCursesLongMessageForm(this->Errors,
+                                  cmSystemTools::GetErrorOccuredFlag()
+                                    ? "Errors occurred during the last pass."
+                                    : "CMake produced the following output.");
     // reset error condition
     cmSystemTools::ResetErrorOccuredFlag();
     CurrentForm = msgs;

@@ -18,13 +18,24 @@
 #
 # This module defines the following variables:
 #
-# ::
+# ``BZIP2_FOUND``
+#   system has BZip2
+# ``BZIP2_INCLUDE_DIRS``
+#   the BZip2 include directories
+# ``BZIP2_LIBRARIES``
+#   Link these to use BZip2
+# ``BZIP2_NEED_PREFIX``
+#   this is set if the functions are prefixed with ``BZ2_``
+# ``BZIP2_VERSION_STRING``
+#   the version of BZip2 found
 #
-#   BZIP2_FOUND - system has BZip2
-#   BZIP2_INCLUDE_DIR - the BZip2 include directory
-#   BZIP2_LIBRARIES - Link these to use BZip2
-#   BZIP2_NEED_PREFIX - this is set if the functions are prefixed with BZ2_
-#   BZIP2_VERSION_STRING - the version of BZip2 found (since CMake 2.8.8)
+# Cache variables
+# ^^^^^^^^^^^^^^^
+#
+# The following cache variables may also be set:
+#
+# ``BZIP2_INCLUDE_DIR``
+#   the BZip2 include directory
 
 set(_BZIP2_PATHS PATHS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Bzip2;InstallPath]"
@@ -53,6 +64,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2
                                   VERSION_VAR BZIP2_VERSION_STRING)
 
 if (BZIP2_FOUND)
+   set(BZIP2_INCLUDE_DIRS ${BZIP2_INCLUDE_DIR})
    include(${CMAKE_CURRENT_LIST_DIR}/CheckSymbolExists.cmake)
    include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
    cmake_push_check_state()

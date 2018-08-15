@@ -22,11 +22,13 @@ static const char* cmDocumentationName[][2] = {
 };
 
 static const char* cmDocumentationUsage[][2] = {
-  { nullptr, "  ccmake <path-to-source>\n"
-             "  ccmake <path-to-existing-build>" },
-  { nullptr, "Specify a source directory to (re-)generate a build system for "
-             "it in the current working directory.  Specify an existing build "
-             "directory to re-generate its build system." },
+  { nullptr,
+    "  ccmake <path-to-source>\n"
+    "  ccmake <path-to-existing-build>" },
+  { nullptr,
+    "Specify a source directory to (re-)generate a build system for "
+    "it in the current working directory.  Specify an existing build "
+    "directory to re-generate its build system." },
   { nullptr, nullptr }
 };
 
@@ -35,9 +37,10 @@ static const char* cmDocumentationUsageNote[][2] = {
   { nullptr, nullptr }
 };
 
-static const char* cmDocumentationOptions[]
-                                         [2] = { CMAKE_STANDARD_OPTIONS_TABLE,
-                                                 { nullptr, nullptr } };
+static const char* cmDocumentationOptions[][2] = {
+  CMAKE_STANDARD_OPTIONS_TABLE,
+  { nullptr, nullptr }
+};
 
 cmCursesForm* cmCursesForm::CurrentForm = nullptr;
 

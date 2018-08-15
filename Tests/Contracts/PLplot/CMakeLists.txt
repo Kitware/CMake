@@ -9,7 +9,7 @@ if(NOT PLplot_GIT_TAG)
   set(PLplot_GIT_TAG "plplot-5.13.0")
 endif()
 ExternalProject_Add(PLplot
-  GIT_REPOSITORY "https://git.code.sf.net/p/plplot/plplot.git"
+  GIT_REPOSITORY "https://git.code.sf.net/p/plplot/plplot"
   GIT_TAG "${PLplot_GIT_TAG}"
   PREFIX "${PLplot_PREFIX}"
   CMAKE_ARGS

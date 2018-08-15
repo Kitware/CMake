@@ -7,6 +7,7 @@
 
 #include <stddef.h>
 #include <string>
+#include <utility>
 #include <vector>
 
 struct cmGeneratorExpressionContext;
@@ -64,17 +65,16 @@ private:
 struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
 {
   GeneratorExpressionContent(const char* startContent, size_t length);
-  void SetIdentifier(
-    std::vector<cmGeneratorExpressionEvaluator*> const& identifier)
+
+  void SetIdentifier(std::vector<cmGeneratorExpressionEvaluator*> identifier)
   {
-    this->IdentifierChildren = identifier;
+    this->IdentifierChildren = std::move(identifier);
   }
 
   void SetParameters(
-    std::vector<std::vector<cmGeneratorExpressionEvaluator*>> const&
-      parameters)
+    std::vector<std::vector<cmGeneratorExpressionEvaluator*>> parameters)
   {
-    this->ParamChildren = parameters;
+    this->ParamChildren = std::move(parameters);
   }
 
   Type GetType() const override

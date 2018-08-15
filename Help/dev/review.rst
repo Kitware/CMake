@@ -401,11 +401,14 @@ The ``Do: merge`` command accepts the following arguments:
   branch in the constructed merge commit message.
 
 Additionally, ``Do: merge`` extracts configuration from trailing lines
-in the MR description:
+in the MR description (the following have no effect if used in a MR
+comment instead):
 
 * ``Topic-rename: <topic>``: substitute ``<topic>`` for the name of
   the MR topic branch in the constructed merge commit message.
-  The ``-t`` option overrides this.
+  It is also used in merge commits constructed by ``Do: stage``.
+  The ``-t`` option to a ``Do: merge`` command overrides any topic
+  rename set in the MR description.
 
 .. _`CMake GitLab Project Masters`: https://gitlab.kitware.com/cmake/cmake/settings/members
 

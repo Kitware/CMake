@@ -51,9 +51,6 @@ function(run_cmake test)
   if(APPLE)
     list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0025=NEW)
   endif()
-  if(RunCMake_GENERATOR MATCHES "^Visual Studio 8 2005" AND NOT RunCMake_WARN_VS8)
-    list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_WARN_VS8=OFF)
-  endif()
   if(RunCMake_MAKE_PROGRAM)
     list(APPEND RunCMake_TEST_OPTIONS "-DCMAKE_MAKE_PROGRAM=${RunCMake_MAKE_PROGRAM}")
   endif()
@@ -112,6 +109,9 @@ function(run_cmake test)
     "|clang[^:]*: warning: the object size sanitizer has no effect at -O0, but is explicitly enabled:"
     "|Error kstat returned"
     "|Hit xcodebuild bug"
+    "|[^\n]*xcodebuild[^\n]*warning: file type[^\n]*is based on missing file type"
+    "|ld: 0711-224 WARNING: Duplicate symbol: .__init_aix_libgcc_cxa_atexit"
+    "|ld: 0711-345 Use the -bloadmap or -bnoquiet option to obtain more information"
     "|[^\n]*is a member of multiple groups"
     "|[^\n]*from Time Machine by path"
     "|[^\n]*Bullseye Testing Technology"

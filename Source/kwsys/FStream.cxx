@@ -6,7 +6,7 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "FStream.hxx.in"
+#  include "FStream.hxx.in"
 #endif
 
 namespace KWSYS_NAMESPACE {

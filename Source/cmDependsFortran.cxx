@@ -10,6 +10,7 @@
 #include <string.h>
 #include <utility>
 
+#include "cmAlgorithms.h"
 #include "cmFortranParser.h" /* Interface to parser object.  */
 #include "cmGeneratedFileStream.h"
 #include "cmLocalGenerator.h"
@@ -22,6 +23,22 @@
 // TODO: Test compiler for the case of the mod file.  Some always
 // use lower case and some always use upper case.  I do not know if any
 // use the case from the source code.
+
+static void cmFortranModuleAppendUpperLower(std::string const& mod,
+                                            std::string& mod_upper,
+                                            std::string& mod_lower)
+{
+  std::string::size_type ext_len = 0;
+  if (cmHasLiteralSuffix(mod, ".mod")) {
+    ext_len = 4;
+  } else if (cmHasLiteralSuffix(mod, ".smod")) {
+    ext_len = 5;
+  }
+  std::string const& name = mod.substr(0, mod.size() - ext_len);
+  std::string const& ext = mod.substr(mod.size() - ext_len);
+  mod_upper += cmSystemTools::UpperCase(name) + ext;
+  mod_lower += mod;
+}
 
 class cmDependsFortranInternals
 {
@@ -181,16 +198,13 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
     for (std::string const& i : provides) {
       std::string mod_upper = mod_dir;
       mod_upper += "/";
-      mod_upper += cmSystemTools::UpperCase(i);
-      mod_upper += ".mod";
       std::string mod_lower = mod_dir;
       mod_lower += "/";
-      mod_lower += i;
-      mod_lower += ".mod";
+      cmFortranModuleAppendUpperLower(i, mod_upper, mod_lower);
       std::string stamp = stamp_dir;
       stamp += "/";
       stamp += i;
-      stamp += ".mod.stamp";
+      stamp += ".stamp";
       fcStream << "\n";
       fcStream << "  \""
                << this->MaybeConvertToRelativePath(currentBinDir, mod_lower)
@@ -270,7 +284,14 @@ void cmDependsFortran::MatchRemoteModules(std::istream& fin,
 
     if (line[0] == ' ') {
       if (doing_provides) {
-        this->ConsiderModule(line.c_str() + 1, stampDir);
+        std::string mod = line;
+        if (!cmHasLiteralSuffix(mod, ".mod") &&
+            !cmHasLiteralSuffix(mod, ".smod")) {
+          // Support fortran.internal files left by older versions of CMake.
+          // They do not include the ".mod" extension.
+          mod += ".mod";
+        }
+        this->ConsiderModule(mod.c_str() + 1, stampDir);
       }
     } else if (line == "provides") {
       doing_provides = true;
@@ -292,7 +313,7 @@ void cmDependsFortran::ConsiderModule(const char* name, const char* stampDir)
     std::string stampFile = stampDir;
     stampFile += "/";
     stampFile += name;
-    stampFile += ".mod.stamp";
+    stampFile += ".stamp";
     required->second = stampFile;
   }
 }
@@ -366,7 +387,6 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
       // Always use lower case for the mod stamp file name.  The
       // cmake_copy_f90_mod will call back to this class, which will
       // try various cases for the real mod file name.
-      std::string m = cmSystemTools::LowerCase(i);
       std::string modFile = mod_dir;
       modFile += "/";
       modFile += i;
@@ -375,8 +395,8 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
         cmOutputConverter::SHELL);
       std::string stampFile = stamp_dir;
       stampFile += "/";
-      stampFile += m;
-      stampFile += ".mod.stamp";
+      stampFile += i;
+      stampFile += ".stamp";
       stampFile = this->MaybeConvertToRelativePath(binDir, stampFile);
       std::string const stampFileForShell =
         this->LocalGenerator->ConvertToOutputFormat(stampFile,
@@ -423,10 +443,9 @@ bool cmDependsFortran::WriteDependenciesReal(const char* obj,
 bool cmDependsFortran::FindModule(std::string const& name, std::string& module)
 {
   // Construct possible names for the module file.
-  std::string mod_upper = cmSystemTools::UpperCase(name);
-  std::string mod_lower = name;
-  mod_upper += ".mod";
-  mod_lower += ".mod";
+  std::string mod_upper;
+  std::string mod_lower;
+  cmFortranModuleAppendUpperLower(name, mod_upper, mod_lower);
 
   // Search the include path for the module.
   std::string fullName;
@@ -470,17 +489,19 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
   if (args.size() >= 5) {
     compilerId = args[4];
   }
+  if (!cmHasLiteralSuffix(mod, ".mod") && !cmHasLiteralSuffix(mod, ".smod")) {
+    // Support depend.make files left by older versions of CMake.
+    // They do not include the ".mod" extension.
+    mod += ".mod";
+  }
   std::string mod_dir = cmSystemTools::GetFilenamePath(mod);
   if (!mod_dir.empty()) {
     mod_dir += "/";
   }
   std::string mod_upper = mod_dir;
-  mod_upper += cmSystemTools::UpperCase(cmSystemTools::GetFilenameName(mod));
   std::string mod_lower = mod_dir;
-  mod_lower += cmSystemTools::LowerCase(cmSystemTools::GetFilenameName(mod));
-  mod += ".mod";
-  mod_upper += ".mod";
-  mod_lower += ".mod";
+  cmFortranModuleAppendUpperLower(cmSystemTools::GetFilenameName(mod),
+                                  mod_upper, mod_lower);
   if (cmSystemTools::FileExists(mod_upper, true)) {
     if (cmDependsFortran::ModulesDiffer(mod_upper.c_str(), stamp.c_str(),
                                         compilerId.c_str())) {

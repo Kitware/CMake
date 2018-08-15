@@ -32,6 +32,9 @@ public:
 
   bool GetVSInstance(std::string& dir) const;
 
+  bool IsDefaultToolset(const std::string& version) const override;
+  std::string GetAuxiliaryToolset() const override;
+
 protected:
   bool InitializeWindows(cmMakefile* mf) override;
   bool SelectWindowsStoreToolset(std::string& toolset) const override;

@@ -7,6 +7,10 @@
 #
 # Find python libraries
 #
+# .. deprecated:: 3.12
+#
+#   Use :module:`FindPython3`, :module:`FindPython2` or :module:`FindPython` instead.
+#
 # This module finds if Python is installed and determines where the
 # include files and libraries are.  It also determines what the name of
 # the library is.  This code sets the following variables:
@@ -74,7 +78,7 @@ set(CMAKE_FIND_FRAMEWORK LAST)
 
 set(_PYTHON1_VERSIONS 1.6 1.5)
 set(_PYTHON2_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
-set(_PYTHON3_VERSIONS 3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
+set(_PYTHON3_VERSIONS 3.8 3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
 
 if(PythonLibs_FIND_VERSION)
     if(PythonLibs_FIND_VERSION_COUNT GREATER 1)

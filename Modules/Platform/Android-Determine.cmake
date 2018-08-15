@@ -261,7 +261,40 @@ if(NOT CMAKE_ANDROID_ARCH_ABI)
   else()
     # https://developer.android.com/ndk/guides/application_mk.html
     # Default is the oldest ARM ABI.
-    set(CMAKE_ANDROID_ARCH_ABI "armeabi")
+
+    # Lookup the available ABIs among all toolchains.
+    set(_ANDROID_ABIS "")
+    file(GLOB _ANDROID_CONFIG_MKS
+      "${CMAKE_ANDROID_NDK}/build/core/toolchains/*/config.mk"
+      "${CMAKE_ANDROID_NDK}/toolchains/*/config.mk"
+      )
+    foreach(config_mk IN LISTS _ANDROID_CONFIG_MKS)
+      file(STRINGS "${config_mk}" _ANDROID_TOOL_ABIS REGEX "^TOOLCHAIN_ABIS :=")
+      string(REPLACE "TOOLCHAIN_ABIS :=" "" _ANDROID_TOOL_ABIS "${_ANDROID_TOOL_ABIS}")
+      separate_arguments(_ANDROID_TOOL_ABIS UNIX_COMMAND "${_ANDROID_TOOL_ABIS}")
+      list(APPEND _ANDROID_ABIS ${_ANDROID_TOOL_ABIS})
+      unset(_ANDROID_TOOL_ABIS)
+    endforeach()
+    unset(_ANDROID_CONFIG_MKS)
+
+    # Choose the oldest among the available arm ABIs.
+    if(_ANDROID_ABIS)
+      list(REMOVE_DUPLICATES _ANDROID_ABIS)
+      cmake_policy(PUSH)
+      cmake_policy(SET CMP0057 NEW)
+      foreach(abi armeabi armeabi-v7a arm64-v8a)
+        if("${abi}" IN_LIST _ANDROID_ABIS)
+          set(CMAKE_ANDROID_ARCH_ABI "${abi}")
+          break()
+        endif()
+      endforeach()
+      cmake_policy(POP)
+    endif()
+    unset(_ANDROID_ABIS)
+
+    if(NOT CMAKE_ANDROID_ARCH_ABI)
+      set(CMAKE_ANDROID_ARCH_ABI "armeabi")
+    endif()
   endif()
 endif()
 set(CMAKE_ANDROID_ARCH "${_ANDROID_ABI_${CMAKE_ANDROID_ARCH_ABI}_ARCH}")

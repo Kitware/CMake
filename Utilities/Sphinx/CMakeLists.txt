@@ -17,6 +17,7 @@ if(NOT CMake_SOURCE_DIR)
 endif()
 project(CMakeHelp NONE)
 
+option(SPHINX_INFO "Build Info manual with Sphinx" OFF)
 option(SPHINX_MAN "Build man pages with Sphinx" OFF)
 option(SPHINX_HTML "Build html help with Sphinx" OFF)
 option(SPHINX_SINGLEHTML "Build html single page help with Sphinx" OFF)
@@ -32,7 +33,7 @@ separate_arguments(sphinx_flags UNIX_COMMAND "${SPHINX_FLAGS}")
 mark_as_advanced(SPHINX_TEXT)
 mark_as_advanced(SPHINX_FLAGS)
 
-if(NOT SPHINX_MAN AND NOT SPHINX_HTML AND NOT SPHINX_SINGLEHTML AND NOT SPHINX_QTHELP AND NOT SPHINX_TEXT)
+if(NOT SPHINX_INFO AND NOT SPHINX_MAN AND NOT SPHINX_HTML AND NOT SPHINX_SINGLEHTML AND NOT SPHINX_QTHELP AND NOT SPHINX_TEXT)
   return()
 elseif(NOT SPHINX_EXECUTABLE)
   message(FATAL_ERROR "SPHINX_EXECUTABLE (sphinx-build) is not found!")
@@ -65,6 +66,24 @@ if(SPHINX_SINGLEHTML)
 endif()
 if(SPHINX_TEXT)
   list(APPEND doc_formats text)
+endif()
+if(SPHINX_INFO)
+  find_program(MAKEINFO_EXECUTABLE
+    NAMES makeinfo
+    DOC "makeinfo tool"
+    )
+  if (NOT MAKEINFO_EXECUTABLE)
+    message(FATAL_ERROR "MAKEINFO_EXECUTABLE (makeinfo) not found!")
+  endif()
+  list(APPEND doc_formats texinfo)
+
+  # Sphinx texinfo builder supports .info, .txt, .html and .pdf output.
+  # SPHINX_INFO controls the .info output.
+  set(texinfo_extra_commands
+    COMMAND ${MAKEINFO_EXECUTABLE} --no-split -o
+      ${CMAKE_CURRENT_BINARY_DIR}/texinfo/cmake.info
+      ${CMAKE_CURRENT_BINARY_DIR}/texinfo/cmake.texi
+  )
 endif()
 if(SPHINX_QTHELP)
   find_package(PythonInterp REQUIRED)
@@ -141,6 +160,14 @@ if(CMake_SPHINX_DEPEND_ON_EXECUTABLES)
       add_dependencies(documentation ${t})
     endif()
   endforeach()
+endif()
+
+if(SPHINX_INFO)
+  CMake_OPTIONAL_COMPONENT(sphinx-info)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/texinfo/cmake.info
+          DESTINATION ${CMAKE_INFO_DIR}
+          ${COMPONENT}
+          )
 endif()
 
 if(SPHINX_MAN)

@@ -96,8 +96,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
       this->GetBuildFileStream(),
       "Utility command for " + this->GetTargetName(), outputs, deps);
   } else {
-    std::string command =
-      this->GetLocalGenerator()->BuildCommandLine(commands);
+    std::string command = this->GetLocalGenerator()->BuildCommandLine(
+      commands, "utility", this->GeneratorTarget);
     const char* echoStr =
       this->GetGeneratorTarget()->GetProperty("EchoString");
     std::string desc;

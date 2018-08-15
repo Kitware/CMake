@@ -14,6 +14,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
 #include <cmAlgorithms.h>
+#include <cstring>
 #include <iomanip>
 #include <ratio>
 #include <sstream>
@@ -40,8 +41,8 @@ cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler)
 
 void cmCTestRunTest::CheckOutput(std::string const& line)
 {
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex()
-               << ": " << line << std::endl);
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             this->GetIndex() << ": " << line << std::endl);
   this->ProcessOutput += line;
   this->ProcessOutput += "\n";
 
@@ -49,7 +50,8 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
   if (!this->TestProperties->TimeoutRegularExpressions.empty()) {
     for (auto& reg : this->TestProperties->TimeoutRegularExpressions) {
       if (reg.first.find(this->ProcessOutput.c_str())) {
-        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->GetIndex()
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                   this->GetIndex()
                      << ": "
                      << "Test timeout changed to "
                      << std::chrono::duration_cast<std::chrono::seconds>(
@@ -248,11 +250,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     *this->TestHandler->LogFile << "Test time = " << buf << std::endl;
   }
 
-  // Set the working directory to the tests directory to process Dart files.
-  {
-    cmWorkingDirectory workdir(this->TestProperties->Directory);
-    this->DartProcessing();
-  }
+  this->DartProcessing();
 
   // if this is doing MemCheck then all the output needs to be put into
   // Output since that is what is parsed by cmCTestMemCheckHandler
@@ -338,6 +336,13 @@ bool cmCTestRunTest::StartAgain()
   this->RunAgain = false; // reset
   // change to tests directory
   cmWorkingDirectory workdir(this->TestProperties->Directory);
+  if (workdir.Failed()) {
+    this->StartFailure("Failed to change working directory to " +
+                       this->TestProperties->Directory + " : " +
+                       std::strerror(workdir.GetLastResult()));
+    return true;
+  }
+
   this->StartTest(this->TotalNumberOfTests);
   return true;
 }
@@ -376,21 +381,53 @@ void cmCTestRunTest::MemCheckPostProcess()
   if (!this->TestHandler->MemCheck) {
     return;
   }
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
-                       << ": process test output now: "
-                       << this->TestProperties->Name << " "
-                       << this->TestResult.Name << std::endl,
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                     this->Index << ": process test output now: "
+                                 << this->TestProperties->Name << " "
+                                 << this->TestResult.Name << std::endl,
                      this->TestHandler->GetQuiet());
   cmCTestMemCheckHandler* handler =
     static_cast<cmCTestMemCheckHandler*>(this->TestHandler);
   handler->PostProcessTest(this->TestResult, this->Index);
 }
 
+void cmCTestRunTest::StartFailure(std::string const& output)
+{
+  // Still need to log the Start message so the test summary records our
+  // attempt to start this test
+  cmCTestLog(this->CTest, HANDLER_OUTPUT,
+             std::setw(2 * getNumWidth(this->TotalNumberOfTests) + 8)
+               << "Start "
+               << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
+               << this->TestProperties->Index << ": "
+               << this->TestProperties->Name << std::endl);
+
+  this->ProcessOutput.clear();
+  if (!output.empty()) {
+    *this->TestHandler->LogFile << output << std::endl;
+    cmCTestLog(this->CTest, ERROR_MESSAGE, output << std::endl);
+  }
+
+  this->TestResult.Properties = this->TestProperties;
+  this->TestResult.ExecutionTime = cmDuration::zero();
+  this->TestResult.CompressOutput = false;
+  this->TestResult.ReturnValue = -1;
+  this->TestResult.CompletionStatus = "Failed to start";
+  this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+  this->TestResult.TestCount = this->TestProperties->Index;
+  this->TestResult.Name = this->TestProperties->Name;
+  this->TestResult.Path = this->TestProperties->Directory;
+  this->TestResult.Output = output;
+  this->TestResult.FullCommandLine.clear();
+  this->TestProcess = cm::make_unique<cmProcess>(*this);
+}
+
 // Starts the execution of a test.  Returns once it has started
 bool cmCTestRunTest::StartTest(size_t total)
 {
   this->TotalNumberOfTests = total; // save for rerun case
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(2 * getNumWidth(total) + 8)
+  cmCTestLog(this->CTest, HANDLER_OUTPUT,
+             std::setw(2 * getNumWidth(total) + 8)
                << "Start "
                << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
                << this->TestProperties->Index << ": "
@@ -515,12 +552,13 @@ bool cmCTestRunTest::StartTest(size_t total)
   }
 
   return this->ForkProcess(timeout, this->TestProperties->ExplicitTimeout,
-                           &this->TestProperties->Environment);
+                           &this->TestProperties->Environment,
+                           &this->TestProperties->Affinity);
 }
 
 void cmCTestRunTest::ComputeArguments()
 {
-  this->Arguments.clear(); // reset becaue this might be a rerun
+  this->Arguments.clear(); // reset because this might be a rerun
   std::vector<std::string>::const_iterator j =
     this->TestProperties->Args.begin();
   ++j; // skip test name
@@ -556,20 +594,21 @@ void cmCTestRunTest::ComputeArguments()
   this->TestResult.FullCommandLine = testCommand;
 
   // Print the test command in verbose mode
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             std::endl
                << this->Index << ": "
                << (this->TestHandler->MemCheck ? "MemCheck" : "Test")
                << " command: " << testCommand << std::endl);
 
   // Print any test-specific env vars in verbose mode
   if (!this->TestProperties->Environment.empty()) {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
-                 << ": "
-                 << "Environment variables: " << std::endl);
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               this->Index << ": "
+                           << "Environment variables: " << std::endl);
   }
   for (std::string const& env : this->TestProperties->Environment) {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index << ":  " << env
-                                                                << std::endl);
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               this->Index << ":  " << env << std::endl);
   }
 }
 
@@ -591,7 +630,8 @@ void cmCTestRunTest::DartProcessing()
 }
 
 bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
-                                 std::vector<std::string>* environment)
+                                 std::vector<std::string>* environment,
+                                 std::vector<size_t>* affinity)
 {
   this->TestProcess = cm::make_unique<cmProcess>(*this);
   this->TestProcess->SetId(this->Index);
@@ -621,10 +661,11 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
   if (testTimeOut == cmDuration::zero() && explicitTimeout) {
     timeout = cmDuration::zero();
   }
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
-                       << ": "
-                       << "Test timeout computed to be: "
-                       << cmDurationTo<unsigned int>(timeout) << "\n",
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                     this->Index << ": "
+                                 << "Test timeout computed to be: "
+                                 << cmDurationTo<unsigned int>(timeout)
+                                 << "\n",
                      this->TestHandler->GetQuiet());
 
   this->TestProcess->SetTimeout(timeout);
@@ -637,7 +678,8 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
     cmSystemTools::AppendEnv(*environment);
   }
 
-  return this->TestProcess->StartProcess(this->MultiTestHandler.Loop);
+  return this->TestProcess->StartProcess(this->MultiTestHandler.Loop,
+                                         affinity);
 }
 
 void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
@@ -649,20 +691,20 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
   // got for run until pass.  Trick is when this is called we don't
   // yet know if we are passing or failing.
   if (this->NumberOfRunsLeft == 1) {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(getNumWidth(total))
-                 << completed << "/");
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(getNumWidth(total))
-                 << total << " ");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               std::setw(getNumWidth(total)) << completed << "/");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               std::setw(getNumWidth(total)) << total << " ");
   }
   // if this is one of several runs of a test just print blank space
   // to keep things neat
   else {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(getNumWidth(total))
-                 << " "
-                 << " ");
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(getNumWidth(total))
-                 << " "
-                 << " ");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               std::setw(getNumWidth(total)) << " "
+                                             << " ");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               std::setw(getNumWidth(total)) << " "
+                                             << " ");
   }
 
   if (this->TestHandler->MemCheck) {
@@ -708,8 +750,8 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
                               << std::endl;
 
   cmCTestLog(this->CTest, HANDLER_OUTPUT, outname.c_str());
-  cmCTestLog(this->CTest, DEBUG, "Testing " << this->TestProperties->Name
-                                            << " ... ");
+  cmCTestLog(this->CTest, DEBUG,
+             "Testing " << this->TestProperties->Name << " ... ");
 }
 
 void cmCTestRunTest::FinalizeTest()

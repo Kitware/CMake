@@ -4,11 +4,11 @@
 #define cmFortranParser_h
 
 #if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
-#include "cmConfigure.h" // IWYU pragma: keep
+#  include "cmConfigure.h" // IWYU pragma: keep
 
-#include <set>
-#include <string>
-#include <vector>
+#  include <set>
+#  include <string>
+#  include <vector>
 #endif
 
 #include <stddef.h> /* size_t */
@@ -39,11 +39,19 @@ int cmFortranParser_GetOldStartcond(cmFortranParser* parser);
 
 /* Callbacks for parser.  */
 void cmFortranParser_Error(cmFortranParser* parser, const char* message);
-void cmFortranParser_RuleUse(cmFortranParser* parser, const char* name);
+void cmFortranParser_RuleUse(cmFortranParser* parser, const char* module_name);
 void cmFortranParser_RuleLineDirective(cmFortranParser* parser,
                                        const char* filename);
 void cmFortranParser_RuleInclude(cmFortranParser* parser, const char* name);
-void cmFortranParser_RuleModule(cmFortranParser* parser, const char* name);
+void cmFortranParser_RuleModule(cmFortranParser* parser,
+                                const char* module_name);
+void cmFortranParser_RuleSubmodule(cmFortranParser* parser,
+                                   const char* module_name,
+                                   const char* submodule_name);
+void cmFortranParser_RuleSubmoduleNested(cmFortranParser* parser,
+                                         const char* module_name,
+                                         const char* submodule_name,
+                                         const char* nested_submodule_name);
 void cmFortranParser_RuleDefine(cmFortranParser* parser, const char* name);
 void cmFortranParser_RuleUndef(cmFortranParser* parser, const char* name);
 void cmFortranParser_RuleIfdef(cmFortranParser* parser, const char* name);
@@ -65,20 +73,20 @@ struct cmFortran_yystype
 #define YYSTYPE cmFortran_yystype
 #define YYSTYPE_IS_DECLARED 1
 #if !defined(cmFortranLexer_cxx)
-#define YY_NO_UNISTD_H
-#include "cmFortranLexer.h"
+#  define YY_NO_UNISTD_H
+#  include "cmFortranLexer.h"
 #endif
 #if !defined(cmFortranLexer_cxx)
-#if !defined(cmFortranParser_cxx)
-#undef YY_EXTRA_TYPE
-#undef YY_DECL
-#undef YYSTYPE
-#undef YYSTYPE_IS_DECLARED
-#endif
+#  if !defined(cmFortranParser_cxx)
+#    undef YY_EXTRA_TYPE
+#    undef YY_DECL
+#    undef YYSTYPE
+#    undef YYSTYPE_IS_DECLARED
+#  endif
 #endif
 
 #if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
-#include <stack>
+#  include <stack>
 
 // Information about a single source file.
 class cmFortranSourceInfo

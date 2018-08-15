@@ -643,6 +643,19 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         source.GetFullPath(), workingDirectory, compileCommand);
     }
 
+    // See if we need to use a compiler launcher like ccache or distcc
+    std::string compilerLauncher;
+    if (!compileCommands.empty() &&
+        (lang == "C" || lang == "CXX" || lang == "Fortran" ||
+         lang == "CUDA")) {
+      std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
+      const char* clauncher =
+        this->GeneratorTarget->GetProperty(clauncher_prop);
+      if (clauncher && *clauncher) {
+        compilerLauncher = clauncher;
+      }
+    }
+
     // Maybe insert an include-what-you-use runner.
     if (!compileCommands.empty() && (lang == "C" || lang == "CXX")) {
       std::string const iwyu_prop = lang + "_INCLUDE_WHAT_YOU_USE";
@@ -656,6 +669,13 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       if ((iwyu && *iwyu) || (tidy && *tidy) || (cpplint && *cpplint) ||
           (cppcheck && *cppcheck)) {
         std::string run_iwyu = "$(CMAKE_COMMAND) -E __run_co_compile";
+        if (!compilerLauncher.empty()) {
+          // In __run_co_compile case the launcher command is supplied
+          // via --launcher=<maybe-list> and consumed
+          run_iwyu += " --launcher=";
+          run_iwyu += this->LocalGenerator->EscapeForShell(compilerLauncher);
+          compilerLauncher.clear();
+        }
         if (iwyu && *iwyu) {
           run_iwyu += " --iwyu=";
           run_iwyu += this->LocalGenerator->EscapeForShell(iwyu);
@@ -682,21 +702,15 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       }
     }
 
-    // Maybe insert a compiler launcher like ccache or distcc
-    if (!compileCommands.empty() && (lang == "C" || lang == "CXX" ||
-                                     lang == "Fortran" || lang == "CUDA")) {
-      std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
-      const char* clauncher =
-        this->GeneratorTarget->GetProperty(clauncher_prop);
-      if (clauncher && *clauncher) {
-        std::vector<std::string> launcher_cmd;
-        cmSystemTools::ExpandListArgument(clauncher, launcher_cmd, true);
-        for (std::string& i : launcher_cmd) {
-          i = this->LocalGenerator->EscapeForShell(i);
-        }
-        std::string const& run_launcher = cmJoin(launcher_cmd, " ") + " ";
-        compileCommands.front().insert(0, run_launcher);
+    // If compiler launcher was specified and not consumed above, it
+    // goes to the beginning of the command line.
+    if (!compileCommands.empty() && !compilerLauncher.empty()) {
+      std::vector<std::string> args;
+      cmSystemTools::ExpandListArgument(compilerLauncher, args, true);
+      for (std::string& i : args) {
+        i = this->LocalGenerator->EscapeForShell(i);
       }
+      compileCommands.front().insert(0, cmJoin(args, " ") + " ");
     }
 
     std::string launcher;
@@ -1014,10 +1028,11 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   // paths.  Make sure PWD is set to the original name of the home
   // output directory to help cmSystemTools to create the same
   // translation table for the dependency scanning process.
-  depCmd << "cd " << (this->LocalGenerator->ConvertToOutputFormat(
-                       cmSystemTools::CollapseFullPath(
-                         this->LocalGenerator->GetBinaryDirectory()),
-                       cmOutputConverter::SHELL))
+  depCmd << "cd "
+         << (this->LocalGenerator->ConvertToOutputFormat(
+              cmSystemTools::CollapseFullPath(
+                this->LocalGenerator->GetBinaryDirectory()),
+              cmOutputConverter::SHELL))
          << " && ";
 #endif
   // Generate a call this signature:
@@ -1389,7 +1404,7 @@ std::string cmMakefileTargetGenerator::GetLinkRule(
   const std::string& linkRuleVar)
 {
   std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
-  if (this->GeneratorTarget->HasImplibGNUtoMS()) {
+  if (this->GeneratorTarget->HasImplibGNUtoMS(this->ConfigName)) {
     std::string ruleVar = "CMAKE_";
     ruleVar += this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
     ruleVar += "_GNUtoMS_RULE";

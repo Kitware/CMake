@@ -224,54 +224,22 @@ if (C_expected_features)
   add_executable(CompileFeaturesGenex_C genex_test.c)
   set_property(TARGET CompileFeaturesGenex_C PROPERTY C_STANDARD 11)
 
-  if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
-      list(APPEND expected_defs
-        EXPECT_C_STATIC_ASSERT=1
+  foreach(f
+      c_restrict
+      c_static_assert
+      c_function_prototypes
       )
+    if(${f} IN_LIST C_expected_features)
+      set(expect_${f} 1)
     else()
-      list(APPEND expected_defs
-        EXPECT_C_STATIC_ASSERT=0
+      set(expect_${f} 0)
+    endif()
+    string(TOUPPER "${f}" F)
+    target_compile_definitions(CompileFeaturesGenex_C PRIVATE
+      EXPECT_${F}=${expect_${f}}
+      HAVE_${F}=$<COMPILE_FEATURES:${f}>
       )
-    endif()
-  elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang"
-      OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
-    list(APPEND expected_defs
-      EXPECT_C_STATIC_ASSERT=1
-    )
-  elseif (CMAKE_C_COMPILER_ID STREQUAL "Intel")
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 15)
-      list(APPEND expected_defs
-        EXPECT_C_STATIC_ASSERT=1
-        )
-    else()
-      list(APPEND expected_defs
-        EXPECT_C_STATIC_ASSERT=0
-        )
-    endif()
-  elseif (CMAKE_C_COMPILER_ID STREQUAL "SunPro")
-    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.13)
-      list(APPEND expected_defs
-        EXPECT_C_STATIC_ASSERT=1
-        )
-    else()
-      list(APPEND expected_defs
-        EXPECT_C_STATIC_ASSERT=0
-        )
-    endif()
-  endif()
-
-  list(APPEND expected_defs
-    EXPECT_C_FUNCTION_PROTOTYPES=1
-    EXPECT_C_RESTRICT=1
-  )
-
-  target_compile_definitions(CompileFeaturesGenex_C PRIVATE
-    HAVE_C_FUNCTION_PROTOTYPES=$<COMPILE_FEATURES:c_function_prototypes>
-    HAVE_C_RESTRICT=$<COMPILE_FEATURES:c_restrict>
-    HAVE_C_STATIC_ASSERT=$<COMPILE_FEATURES:c_static_assert>
-    ${expected_defs}
-  )
+  endforeach()
 endif()
 
 if (CMAKE_CXX_COMPILE_FEATURES)
@@ -280,6 +248,7 @@ if (CMAKE_CXX_COMPILE_FEATURES)
     if (std_flag_idx EQUAL -1)
       add_executable(default_dialect default_dialect.cpp)
       target_compile_definitions(default_dialect PRIVATE
+        DEFAULT_CXX20=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},20>
         DEFAULT_CXX17=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},17>
         DEFAULT_CXX14=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},14>
         DEFAULT_CXX11=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},11>
@@ -318,144 +287,62 @@ else()
   add_executable(IfaceCompileFeatures main.cpp)
   target_link_libraries(IfaceCompileFeatures iface)
 
-  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
-      add_definitions(
-        -DEXPECT_OVERRIDE_CONTROL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS=1
-        -DEXPECT_FINAL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
+  foreach(f
+      cxx_final
+      cxx_override
+      cxx_auto_type
+      cxx_inheriting_constructors
       )
-    elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
-      add_definitions(
-        -DEXPECT_OVERRIDE_CONTROL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS=0
-        -DEXPECT_FINAL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
-      )
+    if(${f} IN_LIST CXX_expected_features)
+      set(expect_${f} 1)
     else()
-      add_definitions(
-        -DEXPECT_OVERRIDE_CONTROL=0
-        -DEXPECT_INHERITING_CONSTRUCTORS=0
-        -DEXPECT_FINAL=0
-        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
-      )
+      set(expect_${f} 0)
     endif()
-  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    add_definitions(
-      -DEXPECT_OVERRIDE_CONTROL=1
-      -DEXPECT_INHERITING_CONSTRUCTORS=1
-      -DEXPECT_FINAL=1
-      -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
-    )
-  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
-      add_definitions(
-        -DEXPECT_OVERRIDE_CONTROL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS=1
-        -DEXPECT_FINAL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
-      )
-    else()
-      add_definitions(
-        -DEXPECT_OVERRIDE_CONTROL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS=0
-        -DEXPECT_FINAL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
-      )
-    endif()
-  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.0)
-      add_definitions(
-        -DEXPECT_OVERRIDE_CONTROL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS=1
-        -DEXPECT_FINAL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
-      )
-    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17.0)
-      add_definitions(
-        -DEXPECT_OVERRIDE_CONTROL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS=0
-        -DEXPECT_FINAL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
-      )
-    else()
-      add_definitions(
-        -DEXPECT_OVERRIDE_CONTROL=0
-        -DEXPECT_INHERITING_CONSTRUCTORS=0
-        -DEXPECT_FINAL=0
-        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
-      )
-    endif()
-  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
-    add_definitions(
-      -DEXPECT_OVERRIDE_CONTROL=1
-      -DEXPECT_INHERITING_CONSTRUCTORS=1
-      -DEXPECT_FINAL=1
-      -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
-    )
-  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15)
-      add_definitions(
-        -DEXPECT_OVERRIDE_CONTROL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS=1
-        -DEXPECT_FINAL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
-      )
-    elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
-      add_definitions(
-        -DEXPECT_OVERRIDE_CONTROL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS=0
-        -DEXPECT_FINAL=1
-        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
-      )
-    else()
-      add_definitions(
-        -DEXPECT_OVERRIDE_CONTROL=0
-        -DEXPECT_INHERITING_CONSTRUCTORS=0
-        -DEXPECT_FINAL=0
-        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
-      )
-    endif()
+  endforeach()
+
+  if(expect_cxx_final AND expect_cxx_override)
+    set(expect_override_control 1)
+  else()
+    set(expect_override_control 0)
+  endif()
+  if(expect_cxx_inheriting_constructors AND expect_cxx_final)
+    set(expect_inheriting_constructors_and_final 1)
+  else()
+    set(expect_inheriting_constructors_and_final 0)
   endif()
 
-  add_executable(CompileFeaturesGenex genex_test.cpp)
-  set_property(TARGET CompileFeaturesGenex PROPERTY CXX_STANDARD 11)
-  target_compile_definitions(CompileFeaturesGenex PRIVATE
+  set(genex_test_defs
     HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>
     HAVE_AUTO_TYPE=$<COMPILE_FEATURES:cxx_auto_type>
     HAVE_INHERITING_CONSTRUCTORS=$<COMPILE_FEATURES:cxx_inheriting_constructors>
     HAVE_FINAL=$<COMPILE_FEATURES:cxx_final>
     HAVE_INHERITING_CONSTRUCTORS_AND_FINAL=$<COMPILE_FEATURES:cxx_inheriting_constructors,cxx_final>
-  )
+    EXPECT_OVERRIDE_CONTROL=${expect_override_control}
+    EXPECT_INHERITING_CONSTRUCTORS=${expect_cxx_inheriting_constructors}
+    EXPECT_FINAL=${expect_cxx_final}
+    EXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=${expect_inheriting_constructors_and_final}
+    )
   if (CMAKE_CXX_STANDARD_DEFAULT)
-    target_compile_definitions(CompileFeaturesGenex PRIVATE
+    list(APPEND genex_test_defs
       TEST_CXX_STD
       HAVE_CXX_STD_11=$<COMPILE_FEATURES:cxx_std_11>
       HAVE_CXX_STD_14=$<COMPILE_FEATURES:cxx_std_14>
       HAVE_CXX_STD_17=$<COMPILE_FEATURES:cxx_std_17>
+      HAVE_CXX_STD_20=$<COMPILE_FEATURES:cxx_std_20>
     )
   endif()
 
+  add_executable(CompileFeaturesGenex genex_test.cpp)
+  set_property(TARGET CompileFeaturesGenex PROPERTY CXX_STANDARD 11)
+  target_compile_definitions(CompileFeaturesGenex PRIVATE ${genex_test_defs})
+
   add_executable(CompileFeaturesGenex2 genex_test.cpp)
   target_compile_features(CompileFeaturesGenex2 PRIVATE cxx_std_11)
-  target_compile_definitions(CompileFeaturesGenex2 PRIVATE
-    HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>
-    HAVE_AUTO_TYPE=$<COMPILE_FEATURES:cxx_auto_type>
-    HAVE_INHERITING_CONSTRUCTORS=$<COMPILE_FEATURES:cxx_inheriting_constructors>
-    HAVE_FINAL=$<COMPILE_FEATURES:cxx_final>
-    HAVE_INHERITING_CONSTRUCTORS_AND_FINAL=$<COMPILE_FEATURES:cxx_inheriting_constructors,cxx_final>
-  )
+  target_compile_definitions(CompileFeaturesGenex2 PRIVATE ${genex_test_defs})
 
   add_library(std_11_iface INTERFACE)
   target_compile_features(std_11_iface INTERFACE cxx_std_11)
   add_executable(CompileFeaturesGenex3 genex_test.cpp)
   target_link_libraries(CompileFeaturesGenex3 PRIVATE std_11_iface)
-  target_compile_definitions(CompileFeaturesGenex3 PRIVATE
-    HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>
-    HAVE_AUTO_TYPE=$<COMPILE_FEATURES:cxx_auto_type>
-    HAVE_INHERITING_CONSTRUCTORS=$<COMPILE_FEATURES:cxx_inheriting_constructors>
-    HAVE_FINAL=$<COMPILE_FEATURES:cxx_final>
-    HAVE_INHERITING_CONSTRUCTORS_AND_FINAL=$<COMPILE_FEATURES:cxx_inheriting_constructors,cxx_final>
-  )
+  target_compile_definitions(CompileFeaturesGenex3 PRIVATE ${genex_test_defs})
 endif()

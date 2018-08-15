@@ -33,7 +33,7 @@ bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
     this->Exports.pop_back();
     if (emitted.insert(te).second) {
       emittedDeps.insert(te);
-      this->GenerateImportTargetCode(os, te);
+      this->GenerateImportTargetCode(os, te, te->GetType());
 
       ImportPropertyMap properties;
 

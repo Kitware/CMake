@@ -8,8 +8,8 @@
 #include "cmake.h"
 
 #ifdef _MSC_VER
-#pragma warning(disable : 4127)
-#pragma warning(disable : 4512)
+#  pragma warning(disable : 4127)
+#  pragma warning(disable : 4512)
 #endif
 
 #include <vector>

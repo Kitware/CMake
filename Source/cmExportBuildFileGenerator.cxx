@@ -59,7 +59,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
           this->LG->GetMakefile()->GetBacktrace());
         return false;
       }
-      if (te->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+      if (this->GetExportTargetType(te) == cmStateEnums::INTERFACE_LIBRARY) {
         this->GenerateRequiredCMakeVersion(os, "3.0.0");
       }
     }
@@ -71,7 +71,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 
   // Create all the imported targets.
   for (cmGeneratorTarget* gte : this->Exports) {
-    this->GenerateImportTargetCode(os, gte);
+    this->GenerateImportTargetCode(os, gte, this->GetExportTargetType(gte));
 
     gte->Target->AppendBuildInterfaceIncludes();
 
@@ -97,6 +97,15 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
                                     properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE", gte,
                                     properties);
+
+    std::string errorMessage;
+    if (!this->PopulateExportProperties(gte, properties, errorMessage)) {
+      this->LG->GetGlobalGenerator()->GetCMakeInstance()->IssueMessage(
+        cmake::FATAL_ERROR, errorMessage,
+        this->LG->GetMakefile()->GetBacktrace());
+      return false;
+    }
+
     const bool newCMP0022Behavior =
       gte->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
       gte->GetPolicyStatusCMP0022() != cmPolicies::OLD;
@@ -128,12 +137,13 @@ void cmExportBuildFileGenerator::GenerateImportTargetsConfig(
     // Collect import properties for this target.
     ImportPropertyMap properties;
 
-    if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+    if (this->GetExportTargetType(target) != cmStateEnums::INTERFACE_LIBRARY) {
       this->SetImportLocationProperty(config, suffix, target, properties);
     }
     if (!properties.empty()) {
       // Get the rest of the target details.
-      if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+      if (this->GetExportTargetType(target) !=
+          cmStateEnums::INTERFACE_LIBRARY) {
         this->SetImportDetailProperties(config, suffix, target, properties,
                                         missingTargets);
         this->SetImportLinkInterface(config, suffix,
@@ -141,7 +151,7 @@ void cmExportBuildFileGenerator::GenerateImportTargetsConfig(
                                      target, properties, missingTargets);
       }
 
-      // TOOD: PUBLIC_HEADER_LOCATION
+      // TODO: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff
       // is done.  Then this can be a propagated include directory.
       // this->GenerateImportProperty(config, te->HeaderGenerator,
@@ -151,6 +161,21 @@ void cmExportBuildFileGenerator::GenerateImportTargetsConfig(
       this->GenerateImportPropertyCode(os, config, target, properties);
     }
   }
+}
+
+cmStateEnums::TargetType cmExportBuildFileGenerator::GetExportTargetType(
+  cmGeneratorTarget const* target) const
+{
+  cmStateEnums::TargetType targetType = target->GetType();
+  // An object library exports as an interface library if we cannot
+  // tell clients where to find the objects.  This is sufficient
+  // to support transitive usage requirements on other targets that
+  // use the object library.
+  if (targetType == cmStateEnums::OBJECT_LIBRARY &&
+      !this->LG->GetGlobalGenerator()->HasKnownObjectFileLocation(nullptr)) {
+    targetType = cmStateEnums::INTERFACE_LIBRARY;
+  }
+  return targetType;
 }
 
 void cmExportBuildFileGenerator::SetExportSet(cmExportSet* exportSet)
@@ -199,13 +224,14 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
     }
 
     // Add the import library for windows DLLs.
-    if (target->HasImportLibrary() &&
+    if (target->HasImportLibrary(config) &&
         mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
       std::string prop = "IMPORTED_IMPLIB";
       prop += suffix;
       std::string value =
         target->GetFullPath(config, cmStateEnums::ImportLibraryArtifact);
-      target->GetImplibGNUtoMS(value, value, "${CMAKE_IMPORT_LIBRARY_SUFFIX}");
+      target->GetImplibGNUtoMS(config, value, value,
+                               "${CMAKE_IMPORT_LIBRARY_SUFFIX}");
       properties[prop] = value;
     }
   }

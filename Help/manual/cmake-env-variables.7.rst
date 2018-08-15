@@ -13,11 +13,14 @@ Environment Variables that Control the Build
 .. toctree::
    :maxdepth: 1
 
+   /envvar/CMAKE_BUILD_PARALLEL_LEVEL
    /envvar/CMAKE_CONFIG_TYPE
    /envvar/CMAKE_MSVCIDE_RUN_PATH
    /envvar/CMAKE_OSX_ARCHITECTURES
+   /envvar/DESTDIR
    /envvar/LDFLAGS
    /envvar/MACOSX_DEPLOYMENT_TARGET
+   /envvar/PackageName_ROOT
 
 Environment Variables for Languages
 ===================================
