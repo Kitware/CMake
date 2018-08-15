@@ -458,9 +458,9 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
     lastWriteTime.dwHighDateTime = 0;
     lastWriteTime.dwLowDateTime = 0;
 
-    while (ERROR_SUCCESS == RegEnumKeyExW(hkey, index, subkeyname,
-                                          &cch_subkeyname, 0, keyclass,
-                                          &cch_keyclass, &lastWriteTime)) {
+    while (ERROR_SUCCESS ==
+           RegEnumKeyExW(hkey, index, subkeyname, &cch_subkeyname, 0, keyclass,
+                         &cch_keyclass, &lastWriteTime)) {
       // Open the subkey and query the values of interest:
       HKEY hsubkey = NULL;
       result = RegOpenKeyExW(hkey, subkeyname, 0, KEY_READ, &hsubkey);
@@ -732,44 +732,6 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   }
 
   return false;
-}
-
-bool cmGlobalVisualStudioGenerator::TargetIsCSharpOnly(
-  cmGeneratorTarget const* gt)
-{
-  // check to see if this is a C# build
-  std::set<std::string> languages;
-  {
-    // Issue diagnostic if the source files depend on the config.
-    std::vector<cmSourceFile*> sources;
-    if (!gt->GetConfigCommonSourceFiles(sources)) {
-      return false;
-    }
-    // Only "real" targets are allowed to be C# targets.
-    if (gt->Target->GetType() > cmStateEnums::OBJECT_LIBRARY) {
-      return false;
-    }
-  }
-  gt->GetLanguages(languages, "");
-  if (languages.size() == 1) {
-    if (*languages.begin() == "CSharp") {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool cmGlobalVisualStudioGenerator::TargetCanBeReferenced(
-  cmGeneratorTarget const* gt)
-{
-  if (this->TargetIsCSharpOnly(gt)) {
-    return true;
-  }
-  if (gt->GetType() != cmStateEnums::SHARED_LIBRARY &&
-      gt->GetType() != cmStateEnums::EXECUTABLE) {
-    return false;
-  }
-  return true;
 }
 
 bool cmGlobalVisualStudioGenerator::TargetCompare::operator()(

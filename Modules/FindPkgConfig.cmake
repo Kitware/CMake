@@ -183,8 +183,8 @@ endfunction()
 
 # scan the LDFLAGS returned by pkg-config for library directories and
 # libraries, figure out the absolute paths of that libraries in the
-# given directories, and create an imported target from them
-function(_pkg_create_imp_target _prefix _no_cmake_path _no_cmake_environment_path)
+# given directories
+function(_pkg_find_libs _prefix _no_cmake_path _no_cmake_environment_path)
   unset(_libs)
   unset(_find_opts)
 
@@ -200,9 +200,7 @@ function(_pkg_create_imp_target _prefix _no_cmake_path _no_cmake_environment_pat
   unset(_search_paths)
   foreach (flag IN LISTS ${_prefix}_LDFLAGS)
     if (flag MATCHES "^-L(.*)")
-      # only look into the given paths from now on
       list(APPEND _search_paths ${CMAKE_MATCH_1})
-      set(_find_opts HINTS ${_search_paths} NO_DEFAULT_PATH)
       continue()
     endif()
     if (flag MATCHES "^-l(.*)")
@@ -211,25 +209,35 @@ function(_pkg_create_imp_target _prefix _no_cmake_path _no_cmake_environment_pat
       continue()
     endif()
 
+    if(_search_paths)
+        # Firstly search in -L paths
+        find_library(pkgcfg_lib_${_prefix}_${_pkg_search}
+                     NAMES ${_pkg_search}
+                     HINTS ${_search_paths} NO_DEFAULT_PATH)
+    endif()
     find_library(pkgcfg_lib_${_prefix}_${_pkg_search}
                  NAMES ${_pkg_search}
                  ${_find_opts})
     list(APPEND _libs "${pkgcfg_lib_${_prefix}_${_pkg_search}}")
   endforeach()
 
+  set(${_prefix}_LINK_LIBRARIES "${_libs}" PARENT_SCOPE)
+endfunction()
+
+# create an imported target from all the information returned by pkg-config
+function(_pkg_create_imp_target _prefix)
   # only create the target if it is linkable, i.e. no executables
   if (NOT TARGET PkgConfig::${_prefix}
-      AND ( ${_prefix}_INCLUDE_DIRS OR _libs OR ${_prefix}_CFLAGS_OTHER ))
+      AND ( ${_prefix}_INCLUDE_DIRS OR ${_prefix}_LINK_LIBRARIES OR ${_prefix}_CFLAGS_OTHER ))
     add_library(PkgConfig::${_prefix} INTERFACE IMPORTED)
 
-    unset(_props)
     if(${_prefix}_INCLUDE_DIRS)
       set_property(TARGET PkgConfig::${_prefix} PROPERTY
                    INTERFACE_INCLUDE_DIRECTORIES "${${_prefix}_INCLUDE_DIRS}")
     endif()
-    if(_libs)
+    if(${_prefix}_LINK_LIBRARIES)
       set_property(TARGET PkgConfig::${_prefix} PROPERTY
-                   INTERFACE_LINK_LIBRARIES "${_libs}")
+                   INTERFACE_LINK_LIBRARIES "${${_prefix}_LINK_LIBRARIES}")
     endif()
     if(${_prefix}_CFLAGS_OTHER)
       set_property(TARGET PkgConfig::${_prefix} PROPERTY
@@ -237,6 +245,15 @@ function(_pkg_create_imp_target _prefix _no_cmake_path _no_cmake_environment_pat
     endif()
   endif()
 endfunction()
+
+# recalculate the dynamic output
+# this is a macro and not a function so the result of _pkg_find_libs is automatically propagated
+macro(_pkg_recalculate _prefix _no_cmake_path _no_cmake_environment_path _imp_target)
+  _pkg_find_libs(${_prefix} ${_no_cmake_path} ${_no_cmake_environment_path})
+  if(${_imp_target})
+    _pkg_create_imp_target(${_prefix})
+  endif()
+endmacro()
 
 ###
 macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cmake_environment_path _imp_target _prefix)
@@ -457,9 +474,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" CFLAGS              ""        --cflags )
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" CFLAGS_OTHER        ""        --cflags-only-other )
 
-      if (_imp_target)
-        _pkg_create_imp_target("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path})
-      endif()
+      _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target})
     endif()
 
     if(NOT "${_extra_paths}" STREQUAL "")
@@ -522,6 +537,7 @@ endmacro()
 
     <XXX>_FOUND          ... set to 1 if module(s) exist
     <XXX>_LIBRARIES      ... only the libraries (without the '-l')
+    <XXX>_LINK_LIBRARIES ... the libraries and their absolute paths
     <XXX>_LIBRARY_DIRS   ... the paths of the libraries (without the '-L')
     <XXX>_LDFLAGS        ... all required linker flags
     <XXX>_LDFLAGS_OTHER  ... all other linker flags
@@ -589,8 +605,10 @@ macro(pkg_check_modules _prefix _module0)
     if (${_prefix}_FOUND)
       _pkgconfig_set(__pkg_config_arguments_${_prefix} "${_module0};${ARGN}")
     endif()
-  elseif (${_prefix}_FOUND AND ${_imp_target})
-    _pkg_create_imp_target("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path})
+  else()
+    if (${_prefix}_FOUND)
+      _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target})
+    endif()
   endif()
 endmacro()
 
@@ -643,8 +661,8 @@ macro(pkg_search_module _prefix _module0)
     endif()
 
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
-  elseif (${_prefix}_FOUND AND ${_imp_target})
-    _pkg_create_imp_target("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path})
+  elseif (${_prefix}_FOUND)
+    _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target})
   endif()
 endmacro()
 

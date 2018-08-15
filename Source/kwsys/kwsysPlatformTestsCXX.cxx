@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 #ifdef TEST_KWSYS_CXX_HAS_CSTDIO
-#include <cstdio>
+#  include <cstdio>
 int main()
 {
   return 0;
@@ -33,10 +33,10 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_STAT_HAS_ST_MTIM
-#include <sys/types.h>
+#  include <sys/types.h>
 
-#include <sys/stat.h>
-#include <unistd.h>
+#  include <sys/stat.h>
+#  include <unistd.h>
 int main()
 {
   struct stat stat1;
@@ -47,10 +47,10 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_STAT_HAS_ST_MTIMESPEC
-#include <sys/types.h>
+#  include <sys/types.h>
 
-#include <sys/stat.h>
-#include <unistd.h>
+#  include <sys/stat.h>
+#  include <unistd.h>
 int main()
 {
   struct stat stat1;
@@ -85,7 +85,7 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_IOS_HAS_ISTREAM_LONG_LONG
-#include <iostream>
+#  include <iostream>
 int test_istream(std::istream& is, long long& x)
 {
   return (is >> x) ? 1 : 0;
@@ -98,7 +98,7 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_IOS_HAS_OSTREAM_LONG_LONG
-#include <iostream>
+#  include <iostream>
 int test_ostream(std::ostream& os, long long x)
 {
   return (os << x) ? 1 : 0;
@@ -111,7 +111,7 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_IOS_HAS_ISTREAM___INT64
-#include <iostream>
+#  include <iostream>
 int test_istream(std::istream& is, __int64& x)
 {
   return (is >> x) ? 1 : 0;
@@ -124,7 +124,7 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_IOS_HAS_OSTREAM___INT64
-#include <iostream>
+#  include <iostream>
 int test_ostream(std::ostream& os, __int64 x)
 {
   return (os << x) ? 1 : 0;
@@ -138,23 +138,23 @@ int main()
 
 #ifdef TEST_KWSYS_LFS_WORKS
 /* Return 0 when LFS is available and 1 otherwise.  */
-#define _LARGEFILE_SOURCE
-#define _LARGEFILE64_SOURCE
-#define _LARGE_FILES
-#define _FILE_OFFSET_BITS 64
-#include <sys/types.h>
+#  define _LARGEFILE_SOURCE
+#  define _LARGEFILE64_SOURCE
+#  define _LARGE_FILES
+#  define _FILE_OFFSET_BITS 64
+#  include <sys/types.h>
 
-#include <assert.h>
-#include <sys/stat.h>
-#if KWSYS_CXX_HAS_CSTDIO
-#include <cstdio>
-#endif
-#include <stdio.h>
+#  include <assert.h>
+#  include <sys/stat.h>
+#  if KWSYS_CXX_HAS_CSTDIO
+#    include <cstdio>
+#  endif
+#  include <stdio.h>
 
 int main(int, char** argv)
 {
 /* check that off_t can hold 2^63 - 1 and perform basic operations... */
-#define OFF_T_64 (((off_t)1 << 62) - 1 + ((off_t)1 << 62))
+#  define OFF_T_64 (((off_t)1 << 62) - 1 + ((off_t)1 << 62))
   if (OFF_T_64 % 2147483647 != 1)
     return 1;
 
@@ -173,7 +173,7 @@ int main(int, char** argv)
 #endif
 
 #ifdef TEST_KWSYS_CXX_HAS_SETENV
-#include <stdlib.h>
+#  include <stdlib.h>
 int main()
 {
   return setenv("A", "B", 1);
@@ -181,7 +181,7 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_HAS_UNSETENV
-#include <stdlib.h>
+#  include <stdlib.h>
 int main()
 {
   unsetenv("A");
@@ -190,7 +190,7 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H
-#include <stdlib.h>
+#  include <stdlib.h>
 int main()
 {
   char* e = environ[0];
@@ -200,10 +200,10 @@ int main()
 
 #ifdef TEST_KWSYS_CXX_HAS_GETLOADAVG
 // Match feature definitions from SystemInformation.cxx
-#if (defined(__GNUC__) || defined(__PGI)) && !defined(_GNU_SOURCE)
-#define _GNU_SOURCE
-#endif
-#include <stdlib.h>
+#  if (defined(__GNUC__) || defined(__PGI)) && !defined(_GNU_SOURCE)
+#    define _GNU_SOURCE
+#  endif
+#  include <stdlib.h>
 int main()
 {
   double loadavg[3] = { 0.0, 0.0, 0.0 };
@@ -212,13 +212,13 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_HAS_RLIMIT64
-#if defined(KWSYS_HAS_LFS)
-#define _LARGEFILE_SOURCE
-#define _LARGEFILE64_SOURCE
-#define _LARGE_FILES
-#define _FILE_OFFSET_BITS 64
-#endif
-#include <sys/resource.h>
+#  if defined(KWSYS_HAS_LFS)
+#    define _LARGEFILE_SOURCE
+#    define _LARGEFILE64_SOURCE
+#    define _LARGE_FILES
+#    define _FILE_OFFSET_BITS 64
+#  endif
+#  include <sys/resource.h>
 int main()
 {
   struct rlimit64 rlim;
@@ -227,7 +227,7 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_HAS_ATOLL
-#include <stdlib.h>
+#  include <stdlib.h>
 int main()
 {
   const char* str = "1024";
@@ -236,7 +236,7 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_HAS_ATOL
-#include <stdlib.h>
+#  include <stdlib.h>
 int main()
 {
   const char* str = "1024";
@@ -245,7 +245,7 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_HAS__ATOI64
-#include <stdlib.h>
+#  include <stdlib.h>
 int main()
 {
   const char* str = "1024";
@@ -254,7 +254,7 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_HAS_UTIMES
-#include <sys/time.h>
+#  include <sys/time.h>
 int main()
 {
   struct timeval* current_time = 0;
@@ -263,14 +263,14 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_HAS_UTIMENSAT
-#include <fcntl.h>
-#include <sys/stat.h>
-#if defined(__APPLE__)
-#include <AvailabilityMacros.h>
-#if MAC_OS_X_VERSION_MIN_REQUIRED < 101300
-#error "utimensat not available on macOS < 10.13"
-#endif
-#endif
+#  include <fcntl.h>
+#  include <sys/stat.h>
+#  if defined(__APPLE__)
+#    include <AvailabilityMacros.h>
+#    if MAC_OS_X_VERSION_MIN_REQUIRED < 101300
+#      error "utimensat not available on macOS < 10.13"
+#    endif
+#  endif
 int main()
 {
   struct timespec times[2] = { { 0, UTIME_OMIT }, { 0, UTIME_NOW } };
@@ -279,14 +279,14 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_HAS_BACKTRACE
-#if defined(__PATHSCALE__) || defined(__PATHCC__) ||                          \
-  (defined(__LSB_VERSION__) && (__LSB_VERSION__ < 41))
+#  if defined(__PATHSCALE__) || defined(__PATHCC__) ||                        \
+    (defined(__LSB_VERSION__) && (__LSB_VERSION__ < 41))
 backtrace does not work with this compiler or os
-#endif
-#if (defined(__GNUC__) || defined(__PGI)) && !defined(_GNU_SOURCE)
-#define _GNU_SOURCE
-#endif
-#include <execinfo.h>
+#  endif
+#  if (defined(__GNUC__) || defined(__PGI)) && !defined(_GNU_SOURCE)
+#    define _GNU_SOURCE
+#  endif
+#  include <execinfo.h>
 int main()
 {
   void* stackSymbols[256];
@@ -297,10 +297,10 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_HAS_DLADDR
-#if (defined(__GNUC__) || defined(__PGI)) && !defined(_GNU_SOURCE)
-#define _GNU_SOURCE
-#endif
-#include <dlfcn.h>
+#  if (defined(__GNUC__) || defined(__PGI)) && !defined(_GNU_SOURCE)
+#    define _GNU_SOURCE
+#  endif
+#  include <dlfcn.h>
 int main()
 {
   Dl_info info;
@@ -310,14 +310,14 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_HAS_CXXABI
-#if (defined(__GNUC__) || defined(__PGI)) && !defined(_GNU_SOURCE)
-#define _GNU_SOURCE
-#endif
-#if defined(__SUNPRO_CC) && __SUNPRO_CC >= 0x5130 && __linux &&               \
-  __SUNPRO_CC_COMPAT == 'G'
-#include <iostream>
-#endif
-#include <cxxabi.h>
+#  if (defined(__GNUC__) || defined(__PGI)) && !defined(_GNU_SOURCE)
+#    define _GNU_SOURCE
+#  endif
+#  if defined(__SUNPRO_CC) && __SUNPRO_CC >= 0x5130 && __linux &&             \
+    __SUNPRO_CC_COMPAT == 'G'
+#    include <iostream>
+#  endif
+#  include <cxxabi.h>
 int main()
 {
   int status = 0;
@@ -358,7 +358,7 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_STL_HAS_WSTRING
-#include <string>
+#  include <string>
 void f(std::wstring*)
 {
 }
@@ -369,7 +369,7 @@ int main()
 #endif
 
 #ifdef TEST_KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H
-#include <ext/stdio_filebuf.h>
+#  include <ext/stdio_filebuf.h>
 int main()
 {
   return 0;

@@ -144,6 +144,7 @@ class _cmake_index_entry:
 
 _cmake_index_objs = {
     'command':    _cmake_index_entry('command'),
+    'envvar':     _cmake_index_entry('envvar'),
     'generator':  _cmake_index_entry('generator'),
     'manual':     _cmake_index_entry('manual'),
     'module':     _cmake_index_entry('module'),
@@ -278,7 +279,7 @@ class CMakeXRefRole(XRefRole):
     # We cannot insert index nodes using the result_nodes method
     # because CMakeXRefRole is processed before substitution_reference
     # nodes are evaluated so target nodes (with 'ids' fields) would be
-    # duplicated in each evaluted substitution replacement.  The
+    # duplicated in each evaluated substitution replacement.  The
     # docutils substitution transform does not allow this.  Instead we
     # use our own CMakeXRefTransform below to add index entries after
     # substitutions are completed.
@@ -324,6 +325,7 @@ class CMakeDomain(Domain):
     label = 'CMake'
     object_types = {
         'command':    ObjType('command',    'command'),
+        'envvar':     ObjType('envvar',     'envvar'),
         'generator':  ObjType('generator',  'generator'),
         'variable':   ObjType('variable',   'variable'),
         'module':     ObjType('module',     'module'),
@@ -339,6 +341,7 @@ class CMakeDomain(Domain):
     }
     directives = {
         'command':    CMakeObject,
+        'envvar':     CMakeObject,
         'variable':   CMakeObject,
         # Other object types cannot be created except by the CMakeTransform
         # 'generator':  CMakeObject,
@@ -355,6 +358,7 @@ class CMakeDomain(Domain):
     }
     roles = {
         'command':    CMakeXRefRole(fix_parens = True, lowercase = True),
+        'envvar':     CMakeXRefRole(),
         'generator':  CMakeXRefRole(),
         'variable':   CMakeXRefRole(),
         'module':     CMakeXRefRole(),

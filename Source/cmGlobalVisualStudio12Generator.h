@@ -30,6 +30,7 @@ public:
   // from the .Net Framework version and instead made it have it's own
   // version number
   const char* GetToolsVersion() override { return "12.0"; }
+
 protected:
   bool ProcessGeneratorToolsetField(std::string const& key,
                                     std::string const& value) override;
@@ -48,6 +49,7 @@ protected:
   bool IsWindowsPhoneToolsetInstalled() const;
   bool IsWindowsStoreToolsetInstalled() const;
   const char* GetIDEVersion() override { return "12.0"; }
+
 private:
   class Factory;
 };

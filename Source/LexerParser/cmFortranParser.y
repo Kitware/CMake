@@ -118,13 +118,13 @@ stmt:
   }
 | SUBMODULE LPAREN WORD RPAREN WORD other EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
-    cmFortranParser_RuleUse(parser, $3);
+    cmFortranParser_RuleSubmodule(parser, $3, $5);
     free($3);
     free($5);
   }
 | SUBMODULE LPAREN WORD COLON WORD RPAREN WORD other EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
-    cmFortranParser_RuleUse(parser, $3);
+    cmFortranParser_RuleSubmoduleNested(parser, $3, $5, $7);
     free($3);
     free($5);
     free($7);

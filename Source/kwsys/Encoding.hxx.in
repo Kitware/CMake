@@ -41,9 +41,9 @@ public:
     std::vector<char*> argv_;
   };
 
-/**
- * Convert between char and wchar_t
- */
+  /**
+   * Convert between char and wchar_t
+   */
 
 #if @KWSYS_NAMESPACE@_STL_HAS_WSTRING
 
@@ -59,7 +59,7 @@ public:
   static std::string ToNarrow(const std::wstring& str);
   static std::string ToNarrow(const wchar_t* str);
 
-#if defined(_WIN32)
+#  if defined(_WIN32)
   /**
    * Convert the path to an extended length path to avoid MAX_PATH length
    * limitations on Windows. If the input is a local path the result will be
@@ -68,7 +68,7 @@ public:
    * absolute paths with Windows-style backslashes.
    **/
   static std::wstring ToWindowsExtendedPath(std::string const&);
-#endif
+#  endif
 
 #endif // @KWSYS_NAMESPACE@_STL_HAS_WSTRING
 

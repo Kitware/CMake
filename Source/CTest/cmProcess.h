@@ -36,7 +36,7 @@ public:
   void ChangeTimeout(cmDuration t);
   void ResetStartTime();
   // Return true if the process starts
-  bool StartProcess(uv_loop_t& loop);
+  bool StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity);
 
   enum class State
   {

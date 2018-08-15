@@ -113,9 +113,9 @@ and it uniquely identifies the bundle.
 Object Libraries
 ^^^^^^^^^^^^^^^^
 
-The ``OBJECT`` library type is also not linked to. It defines a non-archival
-collection of object files resulting from compiling the given source files.
-The object files collection can be used as source inputs to other targets:
+The ``OBJECT`` library type defines a non-archival collection of object files
+resulting from compiling the given source files.  The object files collection
+may be used as source inputs to other targets:
 
 .. code-block:: cmake
 
@@ -125,22 +125,31 @@ The object files collection can be used as source inputs to other targets:
 
   add_executable(test_exe $<TARGET_OBJECTS:archive> test.cpp)
 
-``OBJECT`` libraries may not be used in the right hand side of
-:command:`target_link_libraries`.  They also may not be used as the ``TARGET``
-in a use of the :command:`add_custom_command(TARGET)` command signature.  They
-may be installed, and will be exported as an INTERFACE library.
+The link (or archiving) step of those other targets will use the object
+files collection in addition to those from their own sources.
 
-Although object libraries may not be named directly in calls to
-the :command:`target_link_libraries` command, they can be "linked"
-indirectly by using an :ref:`Interface Library <Interface Libraries>`
-whose :prop_tgt:`INTERFACE_SOURCES` target property is set to name
-``$<TARGET_OBJECTS:objlib>``.
+Alternatively, object libraries may be linked into other targets:
 
-Although object libraries may not be used as the ``TARGET``
-in a use of the :command:`add_custom_command(TARGET)` command signature,
-the list of objects can be used by :command:`add_custom_command(OUTPUT)` or
-:command:`file(GENERATE)` by using ``$<TARGET_OBJECTS:objlib>``.
+.. code-block:: cmake
 
+  add_library(archive OBJECT archive.cpp zip.cpp lzma.cpp)
+
+  add_library(archiveExtras STATIC extras.cpp)
+  target_link_libraries(archiveExtras PUBLIC archive)
+
+  add_executable(test_exe test.cpp)
+  target_link_libraries(test_exe archive)
+
+The link (or archiving) step of those other targets will use the object
+files from object libraries that are *directly* linked.  Additionally,
+usage requirements of the object libraries will be honored when compiling
+sources in those other targets.  Furthermore, those usage requirements
+will propagate transitively to dependents of those other targets.
+
+Object libraries may not be used as the ``TARGET`` in a use of the
+:command:`add_custom_command(TARGET)` command signature.  However,
+the list of objects can be used by :command:`add_custom_command(OUTPUT)`
+or :command:`file(GENERATE)` by using ``$<TARGET_OBJECTS:objlib>``.
 
 Build Specification and Usage Requirements
 ==========================================
@@ -812,7 +821,7 @@ Directory-Scoped Commands
 The :command:`target_include_directories`,
 :command:`target_compile_definitions` and
 :command:`target_compile_options` commands have an effect on only one
-target at a time.  The commands :command:`add_definitions`,
+target at a time.  The commands :command:`add_compile_definitions`,
 :command:`add_compile_options` and :command:`include_directories` have
 a similar function, but operate at directory scope instead of target
 scope for convenience.

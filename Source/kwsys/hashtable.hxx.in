@@ -26,42 +26,42 @@
  *
  */
 #ifdef __BORLANDC__
-#pragma warn - 8027 /* 'for' not inlined.  */
-#pragma warn - 8026 /* 'exception' not inlined.  */
+#  pragma warn - 8027 /* 'for' not inlined.  */
+#  pragma warn - 8026 /* 'exception' not inlined.  */
 #endif
 
 #ifndef @KWSYS_NAMESPACE@_hashtable_hxx
-#define @KWSYS_NAMESPACE@_hashtable_hxx
+#  define @KWSYS_NAMESPACE@_hashtable_hxx
 
-#include <@KWSYS_NAMESPACE@/Configure.hxx>
+#  include <@KWSYS_NAMESPACE@/Configure.hxx>
 
-#include <algorithm> // lower_bound
-#include <iterator>  // iterator_traits
-#include <memory>    // allocator
-#include <stddef.h>  // size_t
-#include <utility>   // pair
-#include <vector>    // vector
+#  include <algorithm> // lower_bound
+#  include <iterator>  // iterator_traits
+#  include <memory>    // allocator
+#  include <stddef.h>  // size_t
+#  include <utility>   // pair
+#  include <vector>    // vector
 
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4284)
-#pragma warning(disable : 4786)
-#pragma warning(disable : 4512) /* no assignment operator for class */
-#endif
-#if defined(__sgi) && !defined(__GNUC__)
-#pragma set woff 3970 /* pointer to int conversion */ 3321 3968
-#endif
+#  if defined(_MSC_VER)
+#    pragma warning(push)
+#    pragma warning(disable : 4284)
+#    pragma warning(disable : 4786)
+#    pragma warning(disable : 4512) /* no assignment operator for class */
+#  endif
+#  if defined(__sgi) && !defined(__GNUC__)
+#    pragma set woff 3970 /* pointer to int conversion */ 3321 3968
+#  endif
 
 // In C++11, clang will warn about using dynamic exception specifications
 // as they are deprecated.  But as this class is trying to faithfully
 // mimic unordered_set and unordered_map, we want to keep the 'throw()'
 // decorations below.  So we suppress the warning.
-#if defined(__clang__) && defined(__has_warning)
-#if __has_warning("-Wdeprecated")
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated"
-#endif
-#endif
+#  if defined(__clang__) && defined(__has_warning)
+#    if __has_warning("-Wdeprecated")
+#      pragma clang diagnostic push
+#      pragma clang diagnostic ignored "-Wdeprecated"
+#    endif
+#  endif
 
 namespace @KWSYS_NAMESPACE@ {
 
@@ -250,6 +250,7 @@ private:
 public:
   typedef typename _Alloc::template rebind<_Val>::other allocator_type;
   allocator_type get_allocator() const { return _M_node_allocator; }
+
 private:
   typedef
     typename _Alloc::template rebind<_Node>::other _M_node_allocator_type;
@@ -568,7 +569,7 @@ private:
 template <class _Val, class _Key, class _HF, class _ExK, class _EqK,
           class _All>
 _Hashtable_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>&
-  _Hashtable_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>::operator++()
+_Hashtable_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>::operator++()
 {
   const _Node* __old = _M_cur;
   _M_cur = _M_cur->_M_next;
@@ -583,7 +584,7 @@ _Hashtable_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>&
 template <class _Val, class _Key, class _HF, class _ExK, class _EqK,
           class _All>
 inline _Hashtable_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>
-  _Hashtable_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>::operator++(int)
+_Hashtable_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>::operator++(int)
 {
   iterator __tmp = *this;
   ++*this;
@@ -593,7 +594,7 @@ inline _Hashtable_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>
 template <class _Val, class _Key, class _HF, class _ExK, class _EqK,
           class _All>
 _Hashtable_const_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>&
-  _Hashtable_const_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>::operator++()
+_Hashtable_const_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>::operator++()
 {
   const _Node* __old = _M_cur;
   _M_cur = _M_cur->_M_next;
@@ -608,7 +609,7 @@ _Hashtable_const_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>&
 template <class _Val, class _Key, class _HF, class _ExK, class _EqK,
           class _All>
 inline _Hashtable_const_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>
-  _Hashtable_const_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>::operator++(int)
+_Hashtable_const_iterator<_Val, _Key, _HF, _ExK, _EqK, _All>::operator++(int)
 {
   const_iterator __tmp = *this;
   ++*this;
@@ -693,8 +694,9 @@ hashtable<_Val, _Key, _HF, _Ex, _Eq, _All>::insert_equal_noresize(
 }
 
 template <class _Val, class _Key, class _HF, class _Ex, class _Eq, class _All>
-typename hashtable<_Val, _Key, _HF, _Ex, _Eq, _All>::reference hashtable<
-  _Val, _Key, _HF, _Ex, _Eq, _All>::find_or_insert(const value_type& __obj)
+typename hashtable<_Val, _Key, _HF, _Ex, _Eq, _All>::reference
+hashtable<_Val, _Key, _HF, _Ex, _Eq, _All>::find_or_insert(
+  const value_type& __obj)
 {
   resize(_M_num_elements + 1);
 
@@ -962,7 +964,7 @@ void hashtable<_Val, _Key, _HF, _Ex, _Eq, _All>::_M_copy_from(
         _Node* __copy = _M_new_node(__cur->_M_val);
         _M_buckets[__i] = __copy;
 
-        for (_Node *__next = __cur->_M_next; __next;
+        for (_Node* __next = __cur->_M_next; __next;
              __cur = __next, __next = __cur->_M_next) {
           __copy->_M_next = _M_new_node(__next->_M_val);
           __copy = __copy->_M_next;
@@ -979,14 +981,14 @@ void hashtable<_Val, _Key, _HF, _Ex, _Eq, _All>::_M_copy_from(
 } // namespace @KWSYS_NAMESPACE@
 
 // Undo warning suppression.
-#if defined(__clang__) && defined(__has_warning)
-#if __has_warning("-Wdeprecated")
-#pragma clang diagnostic pop
-#endif
-#endif
+#  if defined(__clang__) && defined(__has_warning)
+#    if __has_warning("-Wdeprecated")
+#      pragma clang diagnostic pop
+#    endif
+#  endif
 
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
+#  if defined(_MSC_VER)
+#    pragma warning(pop)
+#  endif
 
 #endif

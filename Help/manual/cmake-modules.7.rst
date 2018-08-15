@@ -64,6 +64,7 @@ All Modules
    /module/CPackIFW
    /module/CPackIFWConfigureFile
    /module/CPackNSIS
+   /module/CPackNuGet
    /module/CPackPackageMaker
    /module/CPackProductBuild
    /module/CPackRPM
@@ -155,6 +156,7 @@ All Modules
    /module/FindMPEG2
    /module/FindMPEG
    /module/FindMPI
+   /module/FindODBC
    /module/FindOpenACC
    /module/FindOpenAL
    /module/FindOpenCL
@@ -196,6 +198,9 @@ All Modules
    /module/FindPostgreSQL
    /module/FindProducer
    /module/FindProtobuf
+   /module/FindPython
+   /module/FindPython2
+   /module/FindPython3
    /module/FindPythonInterp
    /module/FindPythonLibs
    /module/FindQt3

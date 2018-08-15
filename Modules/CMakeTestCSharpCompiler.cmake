@@ -15,7 +15,7 @@ unset(CMAKE_CSharp_COMPILER_WORKS CACHE)
 set(test_compile_file "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCSharpCompiler.cs")
 
 # This file is used by EnableLanguage in cmGlobalGenerator to
-# determine that that selected C# compiler can actually compile
+# determine that the selected C# compiler can actually compile
 # and link the most basic of programs. If not, a fatal error
 # is set and cmake stops processing commands and will not generate
 # any makefiles or projects.

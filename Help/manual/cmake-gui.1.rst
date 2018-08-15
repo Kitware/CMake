@@ -9,7 +9,7 @@ Synopsis
 .. parsed-literal::
 
  cmake-gui [<options>]
- cmake-gui [<options>] (<path-to-source> | <path-to-existing-build>)
+ cmake-gui [<options>] {<path-to-source> | <path-to-existing-build>}
 
 Description
 ===========

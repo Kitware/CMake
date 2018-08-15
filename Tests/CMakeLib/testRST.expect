@@ -16,7 +16,13 @@ Variable ``<PLACEHOLDER>_VARIABLE`` with leading placeholder.
 Variable ``VARIABLE_<PLACEHOLDER>`` with trailing placeholder.
 Variable ``<PLACEHOLDER>_VARIABLE`` with leading placeholder and target.
 Variable ``VARIABLE_<PLACEHOLDER>`` with trailing placeholder and target.
+Environment variable ``SOME_ENV_VAR``.
+Environment variable ``some env var`` with space and target.
 Generator ``Some Generator`` with space.
+Inline literal ``~!@#$%^&*( )_+-=\\[]{}'":;,<>.?/``.
+Inline link Link Text.
+Inline link Link Text <With \-escaped Brackets>.
+Inline literal ``__`` followed by inline link Link Text.
 
 First TOC entry.
 

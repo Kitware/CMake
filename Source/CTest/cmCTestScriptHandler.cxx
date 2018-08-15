@@ -39,9 +39,9 @@
 #include "cmake.h"
 
 #ifdef _WIN32
-#include <windows.h>
+#  include <windows.h>
 #else
-#include <unistd.h>
+#  include <unistd.h>
 #endif
 
 class cmExecutionStatus;
@@ -184,8 +184,9 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   argv.push_back("-SR");
   argv.push_back(total_script_arg.c_str());
 
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Executable for CTest is: "
-               << cmSystemTools::GetCTestCommand() << "\n");
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             "Executable for CTest is: " << cmSystemTools::GetCTestCommand()
+                                         << "\n");
 
   // now pass through all the other arguments
   std::vector<std::string>& initArgs =
@@ -210,8 +211,8 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   int pipe =
     cmSystemTools::WaitForLine(cp, line, std::chrono::seconds(100), out, err);
   while (pipe != cmsysProcess_Pipe_None) {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Output: " << line
-                                                               << "\n");
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               "Output: " << line << "\n");
     if (pipe == cmsysProcess_Pipe_STDERR) {
       cmCTestLog(this->CTest, ERROR_MESSAGE, line << "\n");
     } else if (pipe == cmsysProcess_Pipe_STDOUT) {
@@ -230,17 +231,19 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
     retVal = cmsysProcess_GetExitValue(cp);
   } else if (result == cmsysProcess_State_Exception) {
     retVal = cmsysProcess_GetExitException(cp);
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "\tThere was an exception: "
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "\tThere was an exception: "
                  << cmsysProcess_GetExceptionString(cp) << " " << retVal
                  << std::endl);
     failed = true;
   } else if (result == cmsysProcess_State_Expired) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "\tThere was a timeout"
-                 << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "\tThere was a timeout" << std::endl);
     failed = true;
   } else if (result == cmsysProcess_State_Error) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "\tError executing ctest: "
-                 << cmsysProcess_GetErrorString(cp) << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "\tError executing ctest: " << cmsysProcess_GetErrorString(cp)
+                                           << std::endl);
     failed = true;
   }
   cmsysProcess_Delete(cp);
@@ -253,8 +256,8 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
         message << arg << " ";
       }
     }
-    cmCTestLog(this->CTest, ERROR_MESSAGE, message.str() << argv[0]
-                                                         << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               message.str() << argv[0] << std::endl);
     return -1;
   }
   return retVal;
@@ -372,8 +375,8 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     this->Makefile->GetModulesFile("CTestScriptMode.cmake");
   if (!this->Makefile->ReadListFile(systemFile.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read:" << systemFile
-                                                            << "\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Error in read:" << systemFile << "\n");
     return 2;
   }
 
@@ -527,7 +530,7 @@ int cmCTestScriptHandler::RunConfigurationScript(
     return result;
   }
 
-  // only run the curent script if we should
+  // only run the current script if we should
   if (this->Makefile && this->Makefile->IsOn("CTEST_RUN_CURRENT_SCRIPT") &&
       this->ShouldRunCurrentScript) {
     return this->RunCurrentScript();

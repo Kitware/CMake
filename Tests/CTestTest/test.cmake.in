@@ -62,7 +62,7 @@ COVERAGE_COMMAND:FILEPATH=@COVERAGE_COMMAND@
 set (CTEST_DASHBOARD_ROOT "@CMAKE_CURRENT_BINARY_DIR@/Tests/CTestTest")
 
 
-# set any extra environment varibles here
+# set any extra environment variables here
 set (CTEST_ENVIRONMENT
 )
 

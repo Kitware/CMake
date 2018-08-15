@@ -25,8 +25,7 @@ else()
 
   if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 15.0.0)
     set(CMAKE_C11_STANDARD_COMPILE_OPTION "-std=c11")
-    # todo: there is no gnu11 value supported; figure out what to do
-    set(CMAKE_C11_EXTENSION_COMPILE_OPTION "-std=c11")
+    set(CMAKE_C11_EXTENSION_COMPILE_OPTION "-std=gnu11")
   endif()
 
   if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 12.0)

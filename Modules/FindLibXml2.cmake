@@ -7,6 +7,12 @@
 #
 # Find the XML processing library (libxml2).
 #
+# IMPORTED Targets
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines :prop_tgt:`IMPORTED` target ``LibXml2::LibXml2``, if
+# libxml2 has been found.
+#
 # Result variables
 # ^^^^^^^^^^^^^^^^
 #
@@ -87,3 +93,9 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibXml2
                                   VERSION_VAR LIBXML2_VERSION_STRING)
 
 mark_as_advanced(LIBXML2_INCLUDE_DIR LIBXML2_LIBRARY LIBXML2_XMLLINT_EXECUTABLE)
+
+if(LibXml2_FOUND AND NOT TARGET LibXml2::LibXml2)
+   add_library(LibXml2::LibXml2 UNKNOWN IMPORTED)
+   set_target_properties(LibXml2::LibXml2 PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${LIBXML2_INCLUDE_DIRS}")
+   set_property(TARGET LibXml2::LibXml2 APPEND PROPERTY IMPORTED_LOCATION "${LIBXML2_LIBRARY}")
+endif()

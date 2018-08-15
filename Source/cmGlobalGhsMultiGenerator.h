@@ -49,14 +49,14 @@ public:
   static bool SupportsPlatform() { return false; }
 
   /**
-  * Try to determine system information such as shared library
-  * extension, pthreads, byte order etc.
-  */
+   * Try to determine system information such as shared library
+   * extension, pthreads, byte order etc.
+   */
   virtual void EnableLanguage(std::vector<std::string> const& languages,
                               cmMakefile*, bool optional);
   /*
-  * Determine what program to use for building the project.
-  */
+   * Determine what program to use for building the project.
+   */
   bool FindMakeProgram(cmMakefile* mf) override;
 
   cmGeneratedFileStream* GetBuildFileStream()
@@ -89,7 +89,7 @@ protected:
     std::vector<std::string>& makeCommand, const std::string& makeProgram,
     const std::string& projectName, const std::string& projectDir,
     const std::string& targetName, const std::string& config, bool fast,
-    bool verbose,
+    int jobs, bool verbose,
     std::vector<std::string> const& makeOptions = std::vector<std::string>());
 
 private:

@@ -1,5 +1,5 @@
 ^CMake Error at .*/Modules/Platform/Android/Determine-Compiler-NDK.cmake:[0-9]+ \(message\):
-  Android: No toolchain for ABI 'armeabi' found in the NDK:
+  Android: No toolchain for ABI 'armeabi(-v7a)?' found in the NDK:
 
     .*
 

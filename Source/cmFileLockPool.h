@@ -21,25 +21,25 @@ public:
 
   //@{
   /**
-    * @brief Function scope control.
-    */
+   * @brief Function scope control.
+   */
   void PushFunctionScope();
   void PopFunctionScope();
   //@}
 
   //@{
   /**
-    * @brief File scope control.
-    */
+   * @brief File scope control.
+   */
   void PushFileScope();
   void PopFileScope();
   //@}
 
   //@{
   /**
-    * @brief Lock the file in given scope.
-    * @param timeoutSec Lock timeout. If -1 try until success or fatal error.
-    */
+   * @brief Lock the file in given scope.
+   * @param timeoutSec Lock timeout. If -1 try until success or fatal error.
+   */
   cmFileLockResult LockFunctionScope(const std::string& filename,
                                      unsigned long timeoutSec);
   cmFileLockResult LockFileScope(const std::string& filename,
@@ -49,8 +49,8 @@ public:
   //@}
 
   /**
-    * @brief Unlock the file explicitly.
-    */
+   * @brief Unlock the file explicitly.
+   */
   cmFileLockResult Release(const std::string& filename);
 
 private:

@@ -37,8 +37,9 @@ static CatToErrorType cmCTestMemCheckBoundsChecker[] = {
 static void xmlReportError(int line, const char* msg, void* data)
 {
   cmCTest* ctest = static_cast<cmCTest*>(data);
-  cmCTestLog(ctest, ERROR_MESSAGE, "Error parsing XML in stream at line "
-               << line << ": " << msg << std::endl);
+  cmCTestLog(ctest, ERROR_MESSAGE,
+             "Error parsing XML in stream at line " << line << ": " << msg
+                                                    << std::endl);
 }
 
 // parse the xml file containing the results of last BoundsChecker run
@@ -366,10 +367,10 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
       const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
       std::string outname = result.Name + " ";
       outname.resize(maxTestNameWidth + 4, '.');
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, cc + 1
-                           << "/" << total << " MemCheck: #"
-                           << result.TestCount << ": " << outname
-                           << "   Defects: " << memoryErrors << std::endl,
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                         cc + 1 << "/" << total << " MemCheck: #"
+                                << result.TestCount << ": " << outname
+                                << "   Defects: " << memoryErrors << std::endl,
                          this->Quiet);
     }
     xml.StartElement("Log");
@@ -773,8 +774,9 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
         }
       }
       if (cc == this->ResultStrings.size()) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown Purify memory fault: "
-                     << pfW.match(1) << std::endl);
+        cmCTestLog(this->CTest, ERROR_MESSAGE,
+                   "Unknown Purify memory fault: " << pfW.match(1)
+                                                   << std::endl);
         ostr << "*** Unknown Purify memory fault: " << pfW.match(1)
              << std::endl;
       }
@@ -918,11 +920,12 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
       break; // stop the copy of output if we are full
     }
   }
-  cmCTestOptionalLog(
-    this->CTest, DEBUG, "End test (elapsed: "
-      << cmDurationTo<unsigned int>(std::chrono::steady_clock::now() - sttime)
-      << "s)" << std::endl,
-    this->Quiet);
+  cmCTestOptionalLog(this->CTest, DEBUG,
+                     "End test (elapsed: "
+                       << cmDurationTo<unsigned int>(
+                            std::chrono::steady_clock::now() - sttime)
+                       << "s)" << std::endl,
+                     this->Quiet);
   log = ostr.str();
   this->DefectCount += defects;
   return defects == 0;
@@ -963,11 +966,12 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
     results[err]++;
     defects++;
   }
-  cmCTestOptionalLog(
-    this->CTest, DEBUG, "End test (elapsed: "
-      << cmDurationTo<unsigned int>(std::chrono::steady_clock::now() - sttime)
-      << "s)" << std::endl,
-    this->Quiet);
+  cmCTestOptionalLog(this->CTest, DEBUG,
+                     "End test (elapsed: "
+                       << cmDurationTo<unsigned int>(
+                            std::chrono::steady_clock::now() - sttime)
+                       << "s)" << std::endl,
+                     this->Quiet);
   if (defects) {
     // only put the output of Bounds Checker if there were
     // errors or leaks detected

@@ -21,6 +21,19 @@ class cmMakefile;
 class cmSourceFile;
 class cmSourceGroup;
 
+class cmVS7GeneratorOptions : public cmVisualStudioGeneratorOptions
+{
+public:
+  cmVS7GeneratorOptions(cmLocalVisualStudioGenerator* lg, Tool tool,
+                        cmVS7FlagTable const* table = nullptr,
+                        cmVS7FlagTable const* extraTable = nullptr)
+    : cmVisualStudioGeneratorOptions(lg, tool, table, extraTable)
+  {
+  }
+  void OutputFlag(std::ostream& fout, int indent, const char* tag,
+                  const std::string& content) override;
+};
+
 /** \class cmLocalVisualStudio7Generator
  * \brief Write Visual Studio .NET project files.
  *
@@ -70,7 +83,7 @@ protected:
   void CreateSingleVCProj(const std::string& lname, cmGeneratorTarget* tgt);
 
 private:
-  typedef cmVisualStudioGeneratorOptions Options;
+  typedef cmVS7GeneratorOptions Options;
   typedef cmLocalVisualStudio7GeneratorFCInfo FCInfo;
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
                                       const std::string& configName);

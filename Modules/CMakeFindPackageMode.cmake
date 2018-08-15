@@ -65,6 +65,8 @@ if("${CMAKE_SYSTEM_NAME}" MATCHES Darwin  AND  "${COMPILER_ID}" MATCHES GNU)
   set(CMAKE_${LANGUAGE}_OSX_DEPLOYMENT_TARGET_FLAG "")
 endif()
 
+include(CMakeSystemSpecificInitialize)
+
 # Also load the system specific file, which sets up e.g. the search paths.
 # This makes the FIND_XXX() calls work much better
 include(CMakeSystemSpecificInformation)

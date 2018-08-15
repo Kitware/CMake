@@ -36,12 +36,12 @@
 struct cmLinkImplementation;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE) && defined(__APPLE__)
-#define HAVE_APPLICATION_SERVICES
-#include <ApplicationServices/ApplicationServices.h>
+#  define HAVE_APPLICATION_SERVICES
+#  include <ApplicationServices/ApplicationServices.h>
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmXMLParser.h"
+#  include "cmXMLParser.h"
 
 // parse the xml file storing the installed version of Xcode on
 // the machine
@@ -325,7 +325,7 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string& makeProgram,
   const std::string& projectName, const std::string& /*projectDir*/,
   const std::string& targetName, const std::string& config, bool /*fast*/,
-  bool /*verbose*/, std::vector<std::string> const& makeOptions)
+  int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
 {
   // now build the test
   makeCommand.push_back(
@@ -356,6 +356,14 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
   }
   makeCommand.push_back("-configuration");
   makeCommand.push_back(!config.empty() ? config : "Debug");
+
+  if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
+    makeCommand.push_back("-jobs");
+    if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
+      makeCommand.push_back(std::to_string(jobs));
+    }
+  }
+
   makeCommand.insert(makeCommand.end(), makeOptions.begin(),
                      makeOptions.end());
 }
@@ -458,7 +466,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   makeHelper.push_back(""); // placeholder, see below
 
   // Add ZERO_CHECK
-  bool regenerate = !mf->IsOn("CMAKE_SUPPRESS_REGENERATION");
+  bool regenerate = !this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION");
   bool generateTopLevelProjectOnly =
     mf->IsOn("CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY");
   bool isTopLevel =
@@ -466,7 +474,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   if (regenerate && (isTopLevel || !generateTopLevelProjectOnly)) {
     this->CreateReRunCMakeFile(root, gens);
     std::string file =
-      this->ConvertToRelativeForMake(this->CurrentReRunCMakeMakefile.c_str());
+      this->ConvertToRelativeForMake(this->CurrentReRunCMakeMakefile);
     cmSystemTools::ReplaceString(file, "\\ ", " ");
     cmTarget* check = mf->AddUtilityCommand(
       CMAKE_CHECK_BUILD_SYSTEM_TARGET, cmMakefile::TargetOrigin::Generator,
@@ -537,6 +545,12 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
   std::vector<std::string>::iterator new_end =
     std::unique(lfiles.begin(), lfiles.end());
   lfiles.erase(new_end, lfiles.end());
+
+  cmake* cm = this->GetCMakeInstance();
+  if (cm->DoWriteGlobVerifyTarget()) {
+    lfiles.emplace_back(cm->GetGlobVerifyStamp());
+  }
+
   this->CurrentReRunCMakeMakefile = root->GetCurrentBinaryDirectory();
   this->CurrentReRunCMakeMakefile += "/CMakeScripts";
   cmSystemTools::MakeDirectory(this->CurrentReRunCMakeMakefile.c_str());
@@ -553,20 +567,34 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
 
   for (const auto& lfile : lfiles) {
     makefileStream << "TARGETS += $(subst $(space),$(spaceplus),$(wildcard "
-                   << this->ConvertToRelativeForMake(lfile.c_str()) << "))\n";
+                   << this->ConvertToRelativeForMake(lfile) << "))\n";
   }
+  makefileStream << "\n";
 
   std::string checkCache = root->GetBinaryDirectory();
   checkCache += "/";
   checkCache += cmake::GetCMakeFilesDirectoryPostSlash();
   checkCache += "cmake.check_cache";
 
-  makefileStream << "\n"
-                 << this->ConvertToRelativeForMake(checkCache.c_str())
+  if (cm->DoWriteGlobVerifyTarget()) {
+    makefileStream << ".NOTPARALLEL:\n\n";
+    makefileStream << ".PHONY: all VERIFY_GLOBS\n\n";
+    makefileStream << "all: VERIFY_GLOBS "
+                   << this->ConvertToRelativeForMake(checkCache) << "\n\n";
+    makefileStream << "VERIFY_GLOBS:\n";
+    makefileStream << "\t"
+                   << this->ConvertToRelativeForMake(
+                        cmSystemTools::GetCMakeCommand())
+                   << " -P "
+                   << this->ConvertToRelativeForMake(cm->GetGlobVerifyScript())
+                   << "\n\n";
+  }
+
+  makefileStream << this->ConvertToRelativeForMake(checkCache)
                  << ": $(TARGETS)\n";
   makefileStream << "\t"
                  << this->ConvertToRelativeForMake(
-                      cmSystemTools::GetCMakeCommand().c_str())
+                      cmSystemTools::GetCMakeCommand())
                  << " -H"
                  << this->ConvertToRelativeForMake(root->GetSourceDirectory())
                  << " -B"
@@ -821,6 +849,19 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   return buildFile;
 }
 
+void cmGlobalXCodeGenerator::AddXCodeProjBuildRule(
+  cmGeneratorTarget* target, std::vector<cmSourceFile*>& sources) const
+{
+  std::string listfile =
+    target->GetLocalGenerator()->GetCurrentSourceDirectory();
+  listfile += "/CMakeLists.txt";
+  cmSourceFile* srcCMakeLists = target->Makefile->GetOrCreateSource(listfile);
+  if (std::find(sources.begin(), sources.end(), srcCMakeLists) ==
+      sources.end()) {
+    sources.push_back(srcCMakeLists);
+  }
+}
+
 std::string GetSourcecodeValueFromFileExtension(const std::string& _ext,
                                                 const std::string& lang,
                                                 bool& keepLastKnownFileType)
@@ -1043,10 +1084,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
     }
 
     // Add CMakeLists.txt file for user convenience.
-    std::string listfile =
-      gtgt->GetLocalGenerator()->GetCurrentSourceDirectory();
-    listfile += "/CMakeLists.txt";
-    classes.push_back(gtgt->Makefile->GetOrCreateSource(listfile));
+    this->AddXCodeProjBuildRule(gtgt, classes);
 
     std::sort(classes.begin(), classes.end(), cmSourceFilePathCompare());
 
@@ -1571,12 +1609,11 @@ void cmGlobalXCodeGenerator::AddCommandsToBuildPhase(
   }
 
   std::string cdir = this->CurrentLocalGenerator->GetCurrentBinaryDirectory();
-  cdir = this->ConvertToRelativeForMake(cdir.c_str());
+  cdir = this->ConvertToRelativeForMake(cdir);
   std::string makecmd = "make -C ";
   makecmd += cdir;
   makecmd += " -f ";
-  makecmd +=
-    this->ConvertToRelativeForMake((makefile + "$CONFIGURATION").c_str());
+  makecmd += this->ConvertToRelativeForMake((makefile + "$CONFIGURATION"));
   makecmd += " all";
   buildphase->AddAttribute("shellScript", this->CreateString(makecmd));
   buildphase->AddAttribute("showEnvVarsInLog", this->CreateString("0"));
@@ -1611,8 +1648,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
       const std::vector<std::string>& outputs = ccg.GetOutputs();
       if (!outputs.empty()) {
         for (auto const& output : outputs) {
-          makefileStream << "\\\n\t"
-                         << this->ConvertToRelativeForMake(output.c_str());
+          makefileStream << "\\\n\t" << this->ConvertToRelativeForMake(output);
         }
       } else {
         std::ostringstream str;
@@ -1633,8 +1669,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         // There is at least one output, start the rule for it
         const char* sep = "";
         for (auto const& output : outputs) {
-          makefileStream << sep
-                         << this->ConvertToRelativeForMake(output.c_str());
+          makefileStream << sep << this->ConvertToRelativeForMake(output);
           sep = " ";
         }
         makefileStream << ": ";
@@ -1646,8 +1681,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         std::string dep;
         if (this->CurrentLocalGenerator->GetRealDependency(d, configName,
                                                            dep)) {
-          makefileStream << "\\\n"
-                         << this->ConvertToRelativeForMake(dep.c_str());
+          makefileStream << "\\\n" << this->ConvertToRelativeForMake(dep);
         }
       }
       makefileStream << "\n";
@@ -1664,12 +1698,12 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         // Build the command line in a single string.
         std::string cmd2 = ccg.GetCommand(c);
         cmSystemTools::ReplaceString(cmd2, "/./", "/");
-        cmd2 = this->ConvertToRelativeForMake(cmd2.c_str());
+        cmd2 = this->ConvertToRelativeForMake(cmd2);
         std::string cmd;
         std::string wd = ccg.GetWorkingDirectory();
         if (!wd.empty()) {
           cmd += "cd ";
-          cmd += this->ConvertToRelativeForMake(wd.c_str());
+          cmd += this->ConvertToRelativeForMake(wd);
           cmd += " && ";
         }
         cmd += cmd2;
@@ -2343,10 +2377,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
     }
 
     // Add CMakeLists.txt file for user convenience.
-    std::string listfile =
-      gtgt->GetLocalGenerator()->GetCurrentSourceDirectory();
-    listfile += "/CMakeLists.txt";
-    sources.push_back(gtgt->Makefile->GetOrCreateSource(listfile));
+    this->AddXCodeProjBuildRule(gtgt, sources);
 
     for (auto sourceFile : sources) {
       if (!sourceFile->GetPropertyAsBool("GENERATED")) {
@@ -3125,8 +3156,13 @@ void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
   if (this->Architectures.empty()) {
     // With no ARCHS we use ONLY_ACTIVE_ARCH.
     // Look up the arch that Xcode chooses in this case.
-    if (const char* arch = mf->GetDefinition("CMAKE_XCODE_CURRENT_ARCH")) {
+    if (const char* arch = mf->GetDefinition("CMAKE_XCODE_ARCHS")) {
       this->ObjectDirArchDefault = arch;
+      // We expect only one arch but choose the first just in case.
+      std::string::size_type pos = this->ObjectDirArchDefault.find(';');
+      if (pos != std::string::npos) {
+        this->ObjectDirArchDefault = this->ObjectDirArchDefault.substr(0, pos);
+      }
     }
   }
 
@@ -3193,7 +3229,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
           gt->GetType() == cmStateEnums::SHARED_LIBRARY ||
           gt->GetType() == cmStateEnums::MODULE_LIBRARY) {
         std::string tfull = gt->GetFullPath(configName);
-        std::string trel = this->ConvertToRelativeForMake(tfull.c_str());
+        std::string trel = this->ConvertToRelativeForMake(tfull);
 
         // Add this target to the post-build phases of its dependencies.
         std::map<std::string, cmXCodeObject::StringVec>::const_iterator y =
@@ -3221,7 +3257,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
           target->GetDependLibraries().find(configName);
         if (x != target->GetDependLibraries().end()) {
           for (auto const& deplib : x->second) {
-            std::string file = this->ConvertToRelativeForMake(deplib.c_str());
+            std::string file = this->ConvertToRelativeForMake(deplib);
             makefileStream << "\\\n\t" << file;
             dummyRules.insert(file);
           }
@@ -3236,7 +3272,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
           d += objLibName;
           d += ".a";
 
-          std::string dependency = this->ConvertToRelativeForMake(d.c_str());
+          std::string dependency = this->ConvertToRelativeForMake(d);
           makefileStream << "\\\n\t" << dependency;
           dummyRules.insert(dependency);
         }
@@ -3244,8 +3280,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         // Write the action to remove the target if it is out of date.
         makefileStream << "\n";
         makefileStream << "\t/bin/rm -f "
-                       << this->ConvertToRelativeForMake(tfull.c_str())
-                       << "\n";
+                       << this->ConvertToRelativeForMake(tfull) << "\n";
         // if building for more than one architecture
         // then remove those executables as well
         if (this->Architectures.size() > 1) {
@@ -3257,8 +3292,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
             universalFile += "/";
             universalFile += gt->GetFullName(configName);
             makefileStream << "\t/bin/rm -f "
-                           << this->ConvertToRelativeForMake(
-                                universalFile.c_str())
+                           << this->ConvertToRelativeForMake(universalFile)
                            << "\n";
           }
         }
@@ -3304,15 +3338,10 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
   }
   this->WriteXCodePBXProj(fout, root, generators);
 
-  // Since the lowest available Xcode version for testing was 6.4,
-  // I'm setting this as a limit then
-  if (this->XcodeVersion >= 64) {
-    if (root->GetMakefile()->GetCMakeInstance()->GetIsInTryCompile() ||
-        root->GetMakefile()->IsOn("CMAKE_XCODE_GENERATE_SCHEME")) {
-      this->OutputXCodeSharedSchemes(xcodeDir);
-      this->OutputXCodeWorkspaceSettings(xcodeDir);
-    }
+  if (this->IsGeneratingScheme(root)) {
+    this->OutputXCodeSharedSchemes(xcodeDir);
   }
+  this->OutputXCodeWorkspaceSettings(xcodeDir, root);
 
   this->ClearXCodeObjects();
 
@@ -3320,6 +3349,15 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
   //
   root->GetMakefile()->GetCMakeInstance()->SaveCache(
     root->GetBinaryDirectory());
+}
+
+bool cmGlobalXCodeGenerator::IsGeneratingScheme(cmLocalGenerator* root) const
+{
+  // Since the lowest available Xcode version for testing was 6.4,
+  // I'm setting this as a limit then
+  return this->XcodeVersion >= 64 &&
+    (root->GetMakefile()->GetCMakeInstance()->GetIsInTryCompile() ||
+     root->GetMakefile()->IsOn("CMAKE_XCODE_GENERATE_SCHEME"));
 }
 
 void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
@@ -3361,7 +3399,7 @@ void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
 }
 
 void cmGlobalXCodeGenerator::OutputXCodeWorkspaceSettings(
-  const std::string& xcProjDir)
+  const std::string& xcProjDir, cmLocalGenerator* root)
 {
   std::string xcodeSharedDataDir = xcProjDir;
   xcodeSharedDataDir += "/project.xcworkspace/xcshareddata";
@@ -3383,8 +3421,15 @@ void cmGlobalXCodeGenerator::OutputXCodeWorkspaceSettings(
   xout.StartElement("plist");
   xout.Attribute("version", "1.0");
   xout.StartElement("dict");
-  xout.Element("key", "IDEWorkspaceSharedSettings_AutocreateContextsIfNeeded");
-  xout.Element("false");
+  if (this->XcodeVersion >= 100) {
+    xout.Element("key", "BuildSystemType");
+    xout.Element("string", "Original");
+  }
+  if (this->IsGeneratingScheme(root)) {
+    xout.Element("key",
+                 "IDEWorkspaceSharedSettings_AutocreateContextsIfNeeded");
+    xout.Element("false");
+  }
   xout.EndElement(); // dict
   xout.EndElement(); // plist
   xout.EndDocument();

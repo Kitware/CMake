@@ -9,26 +9,26 @@
 
 #include <fstream>
 #if defined(_WIN32)
-#if !defined(_MSC_VER) && @KWSYS_NAMESPACE@_CXX_HAS_EXT_STDIO_FILEBUF_H
-#include <ext/stdio_filebuf.h>
-#endif
+#  if !defined(_MSC_VER) && @KWSYS_NAMESPACE@_CXX_HAS_EXT_STDIO_FILEBUF_H
+#    include <ext/stdio_filebuf.h>
+#  endif
 #endif
 
 namespace @KWSYS_NAMESPACE@ {
 #if defined(_WIN32) &&                                                        \
   (defined(_MSC_VER) || @KWSYS_NAMESPACE@_CXX_HAS_EXT_STDIO_FILEBUF_H)
-#if defined(_NOEXCEPT)
-#define @KWSYS_NAMESPACE@_FStream_NOEXCEPT _NOEXCEPT
-#else
-#define @KWSYS_NAMESPACE@_FStream_NOEXCEPT
-#endif
+#  if defined(_NOEXCEPT)
+#    define @KWSYS_NAMESPACE@_FStream_NOEXCEPT _NOEXCEPT
+#  else
+#    define @KWSYS_NAMESPACE@_FStream_NOEXCEPT
+#  endif
 
-#if defined(_MSC_VER)
+#  if defined(_MSC_VER)
 
 template <typename CharType, typename Traits>
 class basic_filebuf : public std::basic_filebuf<CharType, Traits>
 {
-#if _MSC_VER >= 1400
+#    if _MSC_VER >= 1400
 public:
   typedef std::basic_filebuf<CharType, Traits> my_base_type;
   basic_filebuf* open(char const* s, std::ios_base::openmode mode)
@@ -36,10 +36,10 @@ public:
     const std::wstring wstr = Encoding::ToWindowsExtendedPath(s);
     return static_cast<basic_filebuf*>(my_base_type::open(wstr.c_str(), mode));
   }
-#endif
+#    endif
 };
 
-#else
+#  else
 
 inline std::wstring getcmode(const std::ios_base::openmode mode)
 {
@@ -67,17 +67,17 @@ inline std::wstring getcmode(const std::ios_base::openmode mode)
   return cmode;
 };
 
-#endif
+#  endif
 
 template <typename CharType, typename Traits = std::char_traits<CharType> >
 class basic_efilebuf
 {
 public:
-#if defined(_MSC_VER)
+#  if defined(_MSC_VER)
   typedef basic_filebuf<CharType, Traits> internal_buffer_type;
-#else
+#  else
   typedef __gnu_cxx::stdio_filebuf<CharType, Traits> internal_buffer_type;
-#endif
+#  endif
 
   basic_efilebuf()
     : file_(0)
@@ -90,9 +90,9 @@ public:
     if (is_open() || file_) {
       return false;
     }
-#if defined(_MSC_VER)
+#  if defined(_MSC_VER)
     const bool success = buf_->open(file_name, mode) != 0;
-#else
+#  else
     const std::wstring wstr = Encoding::ToWindowsExtendedPath(file_name);
     bool success = false;
     std::wstring cmode = getcmode(mode);
@@ -104,7 +104,7 @@ public:
       buf_ = new internal_buffer_type(file_, mode);
       success = true;
     }
-#endif
+#  endif
     return success;
   }
 
@@ -129,12 +129,12 @@ public:
     bool success = false;
     if (buf_) {
       success = buf_->close() != 0;
-#if !defined(_MSC_VER)
+#  if !defined(_MSC_VER)
       if (file_) {
         success = fclose(file_) == 0 ? success : false;
         file_ = 0;
       }
-#endif
+#  endif
     }
     return success;
   }
@@ -142,11 +142,11 @@ public:
   static void _set_state(bool success, std::basic_ios<CharType, Traits>* ios,
                          basic_efilebuf* efilebuf)
   {
-#if !defined(_MSC_VER)
+#  if !defined(_MSC_VER)
     ios->rdbuf(efilebuf->buf_);
-#else
+#  else
     static_cast<void>(efilebuf);
-#endif
+#  endif
     if (!success) {
       ios->setstate(std::ios_base::failbit);
     } else {
@@ -167,8 +167,9 @@ protected:
 };
 
 template <typename CharType, typename Traits = std::char_traits<CharType> >
-class basic_ifstream : public std::basic_istream<CharType, Traits>,
-                       public basic_efilebuf<CharType, Traits>
+class basic_ifstream
+  : public std::basic_istream<CharType, Traits>
+  , public basic_efilebuf<CharType, Traits>
 {
 public:
   typedef typename basic_efilebuf<CharType, Traits>::internal_buffer_type
@@ -207,8 +208,9 @@ public:
 };
 
 template <typename CharType, typename Traits = std::char_traits<CharType> >
-class basic_ofstream : public std::basic_ostream<CharType, Traits>,
-                       public basic_efilebuf<CharType, Traits>
+class basic_ofstream
+  : public std::basic_ostream<CharType, Traits>
+  , public basic_efilebuf<CharType, Traits>
 {
   using basic_efilebuf<CharType, Traits>::is_open;
 
@@ -248,7 +250,7 @@ public:
 typedef basic_ifstream<char> ifstream;
 typedef basic_ofstream<char> ofstream;
 
-#undef @KWSYS_NAMESPACE@_FStream_NOEXCEPT
+#  undef @KWSYS_NAMESPACE@_FStream_NOEXCEPT
 #else
 using std::ofstream;
 using std::ifstream;

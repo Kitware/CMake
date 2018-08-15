@@ -47,5 +47,8 @@ static cmVS7FlagTable cmVS10CudaFlagTable[] = {
   { "HostDebugInfo", "g", "", "true", 0 },
   { "HostDebugInfo", "-debug", "", "true", 0 },
 
+  { "MaxRegCount", "maxrregcount=", "", "", cmVS7FlagTable::UserValue },
+  { "MaxRegCount", "maxrregcount", "", "", cmVS7FlagTable::UserFollowing },
+
   { 0, 0, 0, 0, 0 }
 };

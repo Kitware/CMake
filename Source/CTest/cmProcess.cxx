@@ -13,13 +13,13 @@
 #include <signal.h>
 #include <string>
 #if !defined(_WIN32)
-#include <unistd.h>
+#  include <unistd.h>
 #endif
 
 #define CM_PROCESS_BUF_SIZE 65536
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#include <io.h>
+#  include <io.h>
 
 static int cmProcessGetPipes(int* fds)
 {
@@ -40,7 +40,7 @@ static int cmProcessGetPipes(int* fds)
   return 0;
 }
 #else
-#include <errno.h>
+#  include <errno.h>
 
 static int cmProcessGetPipes(int* fds)
 {
@@ -83,7 +83,7 @@ void cmProcess::SetCommandArguments(std::vector<std::string> const& args)
   this->Arguments = args;
 }
 
-bool cmProcess::StartProcess(uv_loop_t& loop)
+bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
 {
   this->ProcessState = cmProcess::State::Error;
   if (this->Command.empty()) {
@@ -138,6 +138,22 @@ bool cmProcess::StartProcess(uv_loop_t& loop)
   options.stdio_count = 3; // in, out and err
   options.exit_cb = &cmProcess::OnExitCB;
   options.stdio = stdio;
+#if !defined(CMAKE_USE_SYSTEM_LIBUV)
+  std::vector<char> cpumask;
+  if (affinity && !affinity->empty()) {
+    cpumask.resize(static_cast<size_t>(uv_cpumask_size()), 0);
+    for (auto p : *affinity) {
+      cpumask[p] = 1;
+    }
+    options.cpumask = cpumask.data();
+    options.cpumask_size = cpumask.size();
+  } else {
+    options.cpumask = nullptr;
+    options.cpumask_size = 0;
+  }
+#else
+  static_cast<void>(affinity);
+#endif
 
   status =
     uv_read_start(pipe_reader, &cmProcess::OnAllocateCB, &cmProcess::OnReadCB);
@@ -151,8 +167,9 @@ bool cmProcess::StartProcess(uv_loop_t& loop)
 
   status = this->Process.spawn(loop, options, this);
   if (status != 0) {
-    cmCTestLog(this->Runner.GetCTest(), ERROR_MESSAGE, "Process not started\n "
-                 << this->Command << "\n[" << uv_strerror(status) << "]\n");
+    cmCTestLog(this->Runner.GetCTest(), ERROR_MESSAGE,
+               "Process not started\n " << this->Command << "\n["
+                                        << uv_strerror(status) << "]\n");
     return false;
   }
 
@@ -329,7 +346,7 @@ void cmProcess::OnExit(int64_t exit_status, int term_signal)
 #else
       term_signal != 0
 #endif
-      ) {
+    ) {
       this->ProcessState = cmProcess::State::Exception;
     } else {
       this->ProcessState = cmProcess::State::Exited;
@@ -375,7 +392,7 @@ cmProcess::Exception cmProcess::GetExitException()
 {
   auto exception = Exception::None;
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  auto exit_code = (DWORD) this->ExitValue;
+  auto exit_code = (DWORD)this->ExitValue;
   if ((exit_code & 0xF0000000) != 0xC0000000) {
     return exception;
   }
@@ -399,12 +416,12 @@ cmProcess::Exception cmProcess::GetExitException()
       case STATUS_FLOAT_OVERFLOW:
       case STATUS_FLOAT_STACK_CHECK:
       case STATUS_FLOAT_UNDERFLOW:
-#ifdef STATUS_FLOAT_MULTIPLE_FAULTS
+#  ifdef STATUS_FLOAT_MULTIPLE_FAULTS
       case STATUS_FLOAT_MULTIPLE_FAULTS:
-#endif
-#ifdef STATUS_FLOAT_MULTIPLE_TRAPS
+#  endif
+#  ifdef STATUS_FLOAT_MULTIPLE_TRAPS
       case STATUS_FLOAT_MULTIPLE_TRAPS:
-#endif
+#  endif
       case STATUS_INTEGER_DIVIDE_BY_ZERO:
       case STATUS_INTEGER_OVERFLOW:
         exception = Exception::Numerical;
@@ -472,16 +489,16 @@ std::string cmProcess::GetExitExceptionString()
     case STATUS_FLOAT_UNDERFLOW:
       exception_str = "Floating-point underflow";
       break;
-#ifdef STATUS_FLOAT_MULTIPLE_FAULTS
+#  ifdef STATUS_FLOAT_MULTIPLE_FAULTS
     case STATUS_FLOAT_MULTIPLE_FAULTS:
       exception_str = "Floating-point exception (multiple faults)";
       break;
-#endif
-#ifdef STATUS_FLOAT_MULTIPLE_TRAPS
+#  endif
+#  ifdef STATUS_FLOAT_MULTIPLE_TRAPS
     case STATUS_FLOAT_MULTIPLE_TRAPS:
       exception_str = "Floating-point exception (multiple traps)";
       break;
-#endif
+#  endif
     case STATUS_INTEGER_DIVIDE_BY_ZERO:
       exception_str = "Integer divide-by-zero";
       break;
@@ -528,188 +545,188 @@ std::string cmProcess::GetExitExceptionString()
   }
 #else
   switch (this->Signal) {
-#ifdef SIGSEGV
+#  ifdef SIGSEGV
     case SIGSEGV:
       exception_str = "Segmentation fault";
       break;
-#endif
-#ifdef SIGBUS
-#if !defined(SIGSEGV) || SIGBUS != SIGSEGV
+#  endif
+#  ifdef SIGBUS
+#    if !defined(SIGSEGV) || SIGBUS != SIGSEGV
     case SIGBUS:
       exception_str = "Bus error";
       break;
-#endif
-#endif
-#ifdef SIGFPE
+#    endif
+#  endif
+#  ifdef SIGFPE
     case SIGFPE:
       exception_str = "Floating-point exception";
       break;
-#endif
-#ifdef SIGILL
+#  endif
+#  ifdef SIGILL
     case SIGILL:
       exception_str = "Illegal instruction";
       break;
-#endif
-#ifdef SIGINT
+#  endif
+#  ifdef SIGINT
     case SIGINT:
       exception_str = "User interrupt";
       break;
-#endif
-#ifdef SIGABRT
+#  endif
+#  ifdef SIGABRT
     case SIGABRT:
       exception_str = "Child aborted";
       break;
-#endif
-#ifdef SIGKILL
+#  endif
+#  ifdef SIGKILL
     case SIGKILL:
       exception_str = "Child killed";
       break;
-#endif
-#ifdef SIGTERM
+#  endif
+#  ifdef SIGTERM
     case SIGTERM:
       exception_str = "Child terminated";
       break;
-#endif
-#ifdef SIGHUP
+#  endif
+#  ifdef SIGHUP
     case SIGHUP:
       exception_str = "SIGHUP";
       break;
-#endif
-#ifdef SIGQUIT
+#  endif
+#  ifdef SIGQUIT
     case SIGQUIT:
       exception_str = "SIGQUIT";
       break;
-#endif
-#ifdef SIGTRAP
+#  endif
+#  ifdef SIGTRAP
     case SIGTRAP:
       exception_str = "SIGTRAP";
       break;
-#endif
-#ifdef SIGIOT
-#if !defined(SIGABRT) || SIGIOT != SIGABRT
+#  endif
+#  ifdef SIGIOT
+#    if !defined(SIGABRT) || SIGIOT != SIGABRT
     case SIGIOT:
       exception_str = "SIGIOT";
       break;
-#endif
-#endif
-#ifdef SIGUSR1
+#    endif
+#  endif
+#  ifdef SIGUSR1
     case SIGUSR1:
       exception_str = "SIGUSR1";
       break;
-#endif
-#ifdef SIGUSR2
+#  endif
+#  ifdef SIGUSR2
     case SIGUSR2:
       exception_str = "SIGUSR2";
       break;
-#endif
-#ifdef SIGPIPE
+#  endif
+#  ifdef SIGPIPE
     case SIGPIPE:
       exception_str = "SIGPIPE";
       break;
-#endif
-#ifdef SIGALRM
+#  endif
+#  ifdef SIGALRM
     case SIGALRM:
       exception_str = "SIGALRM";
       break;
-#endif
-#ifdef SIGSTKFLT
+#  endif
+#  ifdef SIGSTKFLT
     case SIGSTKFLT:
       exception_str = "SIGSTKFLT";
       break;
-#endif
-#ifdef SIGCHLD
+#  endif
+#  ifdef SIGCHLD
     case SIGCHLD:
       exception_str = "SIGCHLD";
       break;
-#elif defined(SIGCLD)
+#  elif defined(SIGCLD)
     case SIGCLD:
       exception_str = "SIGCLD";
       break;
-#endif
-#ifdef SIGCONT
+#  endif
+#  ifdef SIGCONT
     case SIGCONT:
       exception_str = "SIGCONT";
       break;
-#endif
-#ifdef SIGSTOP
+#  endif
+#  ifdef SIGSTOP
     case SIGSTOP:
       exception_str = "SIGSTOP";
       break;
-#endif
-#ifdef SIGTSTP
+#  endif
+#  ifdef SIGTSTP
     case SIGTSTP:
       exception_str = "SIGTSTP";
       break;
-#endif
-#ifdef SIGTTIN
+#  endif
+#  ifdef SIGTTIN
     case SIGTTIN:
       exception_str = "SIGTTIN";
       break;
-#endif
-#ifdef SIGTTOU
+#  endif
+#  ifdef SIGTTOU
     case SIGTTOU:
       exception_str = "SIGTTOU";
       break;
-#endif
-#ifdef SIGURG
+#  endif
+#  ifdef SIGURG
     case SIGURG:
       exception_str = "SIGURG";
       break;
-#endif
-#ifdef SIGXCPU
+#  endif
+#  ifdef SIGXCPU
     case SIGXCPU:
       exception_str = "SIGXCPU";
       break;
-#endif
-#ifdef SIGXFSZ
+#  endif
+#  ifdef SIGXFSZ
     case SIGXFSZ:
       exception_str = "SIGXFSZ";
       break;
-#endif
-#ifdef SIGVTALRM
+#  endif
+#  ifdef SIGVTALRM
     case SIGVTALRM:
       exception_str = "SIGVTALRM";
       break;
-#endif
-#ifdef SIGPROF
+#  endif
+#  ifdef SIGPROF
     case SIGPROF:
       exception_str = "SIGPROF";
       break;
-#endif
-#ifdef SIGWINCH
+#  endif
+#  ifdef SIGWINCH
     case SIGWINCH:
       exception_str = "SIGWINCH";
       break;
-#endif
-#ifdef SIGPOLL
+#  endif
+#  ifdef SIGPOLL
     case SIGPOLL:
       exception_str = "SIGPOLL";
       break;
-#endif
-#ifdef SIGIO
-#if !defined(SIGPOLL) || SIGIO != SIGPOLL
+#  endif
+#  ifdef SIGIO
+#    if !defined(SIGPOLL) || SIGIO != SIGPOLL
     case SIGIO:
       exception_str = "SIGIO";
       break;
-#endif
-#endif
-#ifdef SIGPWR
+#    endif
+#  endif
+#  ifdef SIGPWR
     case SIGPWR:
       exception_str = "SIGPWR";
       break;
-#endif
-#ifdef SIGSYS
+#  endif
+#  ifdef SIGSYS
     case SIGSYS:
       exception_str = "SIGSYS";
       break;
-#endif
-#ifdef SIGUNUSED
-#if !defined(SIGSYS) || SIGUNUSED != SIGSYS
+#  endif
+#  ifdef SIGUNUSED
+#    if !defined(SIGSYS) || SIGUNUSED != SIGSYS
     case SIGUNUSED:
       exception_str = "SIGUNUSED";
       break;
-#endif
-#endif
+#    endif
+#  endif
     default:
       exception_str = "Signal ";
       exception_str += std::to_string(this->Signal);

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,6 +37,7 @@
 #include "connect.h"
 #include "vtls/vtls.h"
 #include "ssh.h"
+#include "easyif.h"
 #include "multiif.h"
 #include "non-ascii.h"
 #include "strerror.h"
@@ -388,7 +389,7 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
       (WSAEWOULDBLOCK == err)
 #else
       /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
-         due to its inability to send off data without blocking. We therefor
+         due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
       (EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err) ||
       (EINPROGRESS == err)
@@ -455,7 +456,7 @@ ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
       (WSAEWOULDBLOCK == err)
 #else
       /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
-         due to its inability to send off data without blocking. We therefor
+         due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
       (EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err)
 #endif
@@ -540,18 +541,20 @@ static CURLcode pausewrite(struct Curl_easy *data,
 }
 
 
-/* Curl_client_chop_write() writes chunks of data not larger than
- * CURL_MAX_WRITE_SIZE via client write callback(s) and
- * takes care of pause requests from the callbacks.
+/* chop_write() writes chunks of data not larger than CURL_MAX_WRITE_SIZE via
+ * client write callback(s) and takes care of pause requests from the
+ * callbacks.
  */
-CURLcode Curl_client_chop_write(struct connectdata *conn,
-                                int type,
-                                char *ptr,
-                                size_t len)
+static CURLcode chop_write(struct connectdata *conn,
+                           int type,
+                           char *optr,
+                           size_t olen)
 {
   struct Curl_easy *data = conn->data;
   curl_write_callback writeheader = NULL;
   curl_write_callback writebody = NULL;
+  char *ptr = optr;
+  size_t len = olen;
 
   if(!len)
     return CURLE_OK;
@@ -597,23 +600,28 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
       }
     }
 
-    if(writeheader) {
-      size_t wrote = writeheader(ptr, 1, chunklen, data->set.writeheader);
-
-      if(CURL_WRITEFUNC_PAUSE == wrote)
-        /* here we pass in the HEADER bit only since if this was body as well
-           then it was passed already and clearly that didn't trigger the
-           pause, so this is saved for later with the HEADER bit only */
-        return pausewrite(data, CLIENTWRITE_HEADER, ptr, len);
-
-      if(wrote != chunklen) {
-        failf(data, "Failed writing header");
-        return CURLE_WRITE_ERROR;
-      }
-    }
-
     ptr += chunklen;
     len -= chunklen;
+  }
+
+  if(writeheader) {
+    size_t wrote;
+    ptr = optr;
+    len = olen;
+    Curl_set_in_callback(data, true);
+    wrote = writeheader(ptr, 1, len, data->set.writeheader);
+    Curl_set_in_callback(data, false);
+
+    if(CURL_WRITEFUNC_PAUSE == wrote)
+      /* here we pass in the HEADER bit only since if this was body as well
+         then it was passed already and clearly that didn't trigger the
+         pause, so this is saved for later with the HEADER bit only */
+      return pausewrite(data, CLIENTWRITE_HEADER, ptr, len);
+
+    if(wrote != len) {
+      failf(data, "Failed writing header");
+      return CURLE_WRITE_ERROR;
+    }
   }
 
   return CURLE_OK;
@@ -657,7 +665,7 @@ CURLcode Curl_client_write(struct connectdata *conn,
 #endif /* CURL_DO_LINEEND_CONV */
     }
 
-  return Curl_client_chop_write(conn, type, ptr, len);
+  return chop_write(conn, type, ptr, len);
 }
 
 CURLcode Curl_read_plain(curl_socket_t sockfd,
@@ -798,8 +806,11 @@ static int showit(struct Curl_easy *data, curl_infotype type,
   }
 #endif /* CURL_DOES_CONVERSIONS */
 
-  if(data->set.fdebug)
+  if(data->set.fdebug) {
+    Curl_set_in_callback(data, true);
     rc = (*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
+    Curl_set_in_callback(data, false);
+  }
   else {
     switch(type) {
     case CURLINFO_TEXT:

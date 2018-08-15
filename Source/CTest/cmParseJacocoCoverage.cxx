@@ -38,8 +38,9 @@ protected:
 
       if (this->PackagePath.empty()) {
         if (!this->FindPackagePath(fileName)) {
-          cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot find file: "
-                       << this->PackageName << "/" << fileName << std::endl);
+          cmCTestLog(this->CTest, ERROR_MESSAGE,
+                     "Cannot find file: " << this->PackageName << "/"
+                                          << fileName << std::endl);
           this->Coverage.Error++;
           return;
         }

@@ -84,7 +84,7 @@ public:
   bool SetLogOutputFile(const char* fname);
 
   //! Set the various prefixes for the logging. SetPrefix sets the generic
-  // prefix that overwrittes missing ones.
+  // prefix that overwrites missing ones.
   void SetPrefix(std::string const& pfx) { this->Prefix = pfx; }
   void SetOutputPrefix(std::string const& pfx) { this->OutputPrefix = pfx; }
   void SetVerbosePrefix(std::string const& pfx) { this->VerbosePrefix = pfx; }

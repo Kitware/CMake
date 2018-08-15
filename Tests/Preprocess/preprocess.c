@@ -33,117 +33,117 @@ int check_defines_C(void)
     }
   }
 #ifdef NDEBUG
-#ifdef FILE_DEF_DEBUG
+#  ifdef FILE_DEF_DEBUG
   {
     fprintf(stderr, "FILE_DEF_DEBUG should not be defined in C\n");
     result = 0;
   }
-#endif
-#ifdef TARGET_DEF_DEBUG
+#  endif
+#  ifdef TARGET_DEF_DEBUG
   {
     fprintf(stderr, "TARGET_DEF_DEBUG should not be defined in C\n");
     result = 0;
   }
-#endif
-#ifdef DIRECTORY_DEF_DEBUG
+#  endif
+#  ifdef DIRECTORY_DEF_DEBUG
   {
     fprintf(stderr, "DIRECTORY_DEF_DEBUG should not be defined in C\n");
     result = 0;
   }
-#endif
-#ifndef FILE_DEF_RELEASE
-#ifndef PREPROCESS_XCODE
+#  endif
+#  ifndef FILE_DEF_RELEASE
+#    ifndef PREPROCESS_XCODE
   {
     fprintf(stderr, "FILE_DEF_RELEASE should be defined in C\n");
     result = 0;
   }
-#endif
-#endif
-#ifndef TARGET_DEF_RELEASE
+#    endif
+#  endif
+#  ifndef TARGET_DEF_RELEASE
   {
     fprintf(stderr, "TARGET_DEF_RELEASE should be defined in C\n");
     result = 0;
   }
-#endif
-#ifndef DIRECTORY_DEF_RELEASE
+#  endif
+#  ifndef DIRECTORY_DEF_RELEASE
   {
     fprintf(stderr, "DIRECTORY_DEF_RELEASE should be defined in C\n");
     result = 0;
   }
-#endif
+#  endif
 #endif
 #ifdef PREPROCESS_DEBUG
-#ifndef FILE_DEF_DEBUG
-#ifndef PREPROCESS_XCODE
+#  ifndef FILE_DEF_DEBUG
+#    ifndef PREPROCESS_XCODE
   {
     fprintf(stderr, "FILE_DEF_DEBUG should be defined in C\n");
     result = 0;
   }
-#endif
-#endif
-#ifndef TARGET_DEF_DEBUG
+#    endif
+#  endif
+#  ifndef TARGET_DEF_DEBUG
   {
     fprintf(stderr, "TARGET_DEF_DEBUG should be defined in C\n");
     result = 0;
   }
-#endif
-#ifndef DIRECTORY_DEF_DEBUG
+#  endif
+#  ifndef DIRECTORY_DEF_DEBUG
   {
     fprintf(stderr, "DIRECTORY_DEF_DEBUG should be defined in C\n");
     result = 0;
   }
-#endif
-#ifdef FILE_DEF_RELEASE
+#  endif
+#  ifdef FILE_DEF_RELEASE
   {
     fprintf(stderr, "FILE_DEF_RELEASE should not be defined in C\n");
     result = 0;
   }
-#endif
-#ifdef TARGET_DEF_RELEASE
+#  endif
+#  ifdef TARGET_DEF_RELEASE
   {
     fprintf(stderr, "TARGET_DEF_RELEASE should not be defined in C\n");
     result = 0;
   }
-#endif
-#ifdef DIRECTORY_DEF_RELEASE
+#  endif
+#  ifdef DIRECTORY_DEF_RELEASE
   {
     fprintf(stderr, "DIRECTORY_DEF_RELEASE should not be defined in C\n");
     result = 0;
   }
-#endif
+#  endif
 #endif
 #if defined(FILE_DEF_DEBUG) || defined(TARGET_DEF_DEBUG)
-#if !defined(FILE_DEF_DEBUG) || !defined(TARGET_DEF_DEBUG)
-#ifndef PREPROCESS_XCODE
+#  if !defined(FILE_DEF_DEBUG) || !defined(TARGET_DEF_DEBUG)
+#    ifndef PREPROCESS_XCODE
   {
     fprintf(stderr, "FILE_DEF_DEBUG and TARGET_DEF_DEBUG inconsistent in C\n");
     result = 0;
   }
-#endif
-#endif
-#if defined(FILE_DEF_RELEASE) || defined(TARGET_DEF_RELEASE)
+#    endif
+#  endif
+#  if defined(FILE_DEF_RELEASE) || defined(TARGET_DEF_RELEASE)
   {
     fprintf(stderr, "DEBUG and RELEASE definitions inconsistent in C\n");
     result = 0;
   }
-#endif
+#  endif
 #endif
 #if defined(FILE_DEF_RELEASE) || defined(TARGET_DEF_RELEASE)
-#if !defined(FILE_DEF_RELEASE) || !defined(TARGET_DEF_RELEASE)
-#ifndef PREPROCESS_XCODE
+#  if !defined(FILE_DEF_RELEASE) || !defined(TARGET_DEF_RELEASE)
+#    ifndef PREPROCESS_XCODE
   {
     fprintf(stderr,
             "FILE_DEF_RELEASE and TARGET_DEF_RELEASE inconsistent in C\n");
     result = 0;
   }
-#endif
-#endif
-#if defined(FILE_DEF_DEBUG) || defined(TARGET_DEF_DEBUG)
+#    endif
+#  endif
+#  if defined(FILE_DEF_DEBUG) || defined(TARGET_DEF_DEBUG)
   {
     fprintf(stderr, "RELEASE and DEBUG definitions inconsistent in C\n");
     result = 0;
   }
-#endif
+#  endif
 #endif
 #ifndef FILE_PATH_DEF
   {

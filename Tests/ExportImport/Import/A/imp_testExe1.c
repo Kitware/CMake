@@ -14,9 +14,9 @@ extern int testLibPerConfigDest(void);
 /* Switch a symbol between debug and optimized builds to make sure the
    proper library is found from the testLib4 link interface.  */
 #ifdef EXE_DBG
-#define testLib4libcfg testLib4libdbg
+#  define testLib4libcfg testLib4libdbg
 #else
-#define testLib4libcfg testLib4libopt
+#  define testLib4libcfg testLib4libopt
 #endif
 extern testLib4libcfg(void);
 

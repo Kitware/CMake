@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestMultiProcessHandler.h"
 
+#include "cmAffinity.h"
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestScriptHandler.h"
@@ -19,6 +20,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstring>
 #include <iomanip>
 #include <list>
 #include <math.h>
@@ -53,6 +55,8 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
   this->TestLoad = 0;
   this->Completed = 0;
   this->RunningCount = 0;
+  this->ProcessorsAvailable = cmAffinity::GetProcessorsAvailable();
+  this->HaveAffinity = this->ProcessorsAvailable.size();
   this->StopTimePassed = false;
   this->HasCycles = false;
   this->SerialTestRunning = false;
@@ -120,11 +124,27 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   std::chrono::system_clock::time_point stop_time = this->CTest->GetStopTime();
   if (stop_time != std::chrono::system_clock::time_point() &&
       stop_time <= std::chrono::system_clock::now()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "The stop time has been passed. "
-                                           "Stopping all tests."
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "The stop time has been passed. "
+               "Stopping all tests."
                  << std::endl);
     this->StopTimePassed = true;
     return false;
+  }
+
+  if (this->HaveAffinity && this->Properties[test]->WantAffinity) {
+    size_t needProcessors = this->GetProcessorsUsed(test);
+    if (needProcessors > this->ProcessorsAvailable.size()) {
+      return false;
+    }
+    std::vector<size_t> affinity;
+    affinity.reserve(needProcessors);
+    for (size_t i = 0; i < needProcessors; ++i) {
+      auto p = this->ProcessorsAvailable.begin();
+      affinity.push_back(*p);
+      this->ProcessorsAvailable.erase(p);
+    }
+    this->Properties[test]->Affinity = std::move(affinity);
   }
 
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -151,13 +171,19 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
     }
   }
 
-  cmWorkingDirectory workdir(this->Properties[test]->Directory);
-
-  // Lock the resources we'll be using
+  // Always lock the resources we'll be using, even if we fail to set the
+  // working directory because FinishTestProcess() will try to unlock them
   this->LockResources(test);
 
-  if (testRun->StartTest(this->Total)) {
-    return true;
+  cmWorkingDirectory workdir(this->Properties[test]->Directory);
+  if (workdir.Failed()) {
+    testRun->StartFailure("Failed to change working directory to " +
+                          this->Properties[test]->Directory + " : " +
+                          std::strerror(workdir.GetLastResult()));
+  } else {
+    if (testRun->StartTest(this->Total)) {
+      return true;
+    }
   }
 
   this->FinishTestProcess(testRun, false);
@@ -199,6 +225,11 @@ inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
   // setting, we default to using all of the process slots.
   if (processors > this->ParallelLevel) {
     processors = this->ParallelLevel;
+  }
+  // Cap tests that want affinity to the maximum affinity available.
+  if (this->HaveAffinity && processors > this->HaveAffinity &&
+      this->Properties[test]->WantAffinity) {
+    processors = this->HaveAffinity;
   }
   return processors;
 }
@@ -300,10 +331,10 @@ void cmCTestMultiProcessHandler::StartNextTests()
     bool testLoadOk = true;
     if (this->TestLoad > 0) {
       if (processors <= spareLoad) {
-        cmCTestLog(this->CTest, DEBUG, "OK to run "
-                     << GetName(test) << ", it requires " << processors
-                     << " procs & system load is: " << systemLoad
-                     << std::endl);
+        cmCTestLog(this->CTest, DEBUG,
+                   "OK to run " << GetName(test) << ", it requires "
+                                << processors << " procs & system load is: "
+                                << systemLoad << std::endl);
         allTestsFailedTestLoadCheck = false;
       } else {
         testLoadOk = false;
@@ -397,6 +428,11 @@ void cmCTestMultiProcessHandler::FinishTestProcess(cmCTestRunTest* runner,
   this->WriteCheckpoint(test);
   this->UnlockResources(test);
   this->RunningCount -= GetProcessorsUsed(test);
+
+  for (auto p : properties->Affinity) {
+    this->ProcessorsAvailable.insert(p);
+  }
+  properties->Affinity.clear();
 
   delete runner;
   if (started) {
@@ -666,6 +702,8 @@ void cmCTestMultiProcessHandler::PrintTestList()
     count++;
     cmCTestTestHandler::cmCTestTestProperties& p = *it.second;
 
+    // Don't worry if this fails, we are only showing the test list, not
+    // running the tests
     cmWorkingDirectory workdir(p.Directory);
 
     cmCTestRunTest testRun(*this);
@@ -675,8 +713,8 @@ void cmCTestMultiProcessHandler::PrintTestList()
 
     if (!p.Labels.empty()) // print the labels
     {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Labels:",
-                         this->Quiet);
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                         "Labels:", this->Quiet);
     }
     for (std::string const& label : p.Labels) {
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, " " << label,
@@ -710,7 +748,8 @@ void cmCTestMultiProcessHandler::PrintTestList()
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, std::endl, this->Quiet);
   }
 
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, std::endl
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                     std::endl
                        << "Total Tests: " << this->Total << std::endl,
                      this->Quiet);
 }

@@ -74,6 +74,8 @@ public:
 
   bool StartAgain();
 
+  void StartFailure(std::string const& output);
+
   cmCTest* GetCTest() const { return this->CTest; }
 
   void FinalizeTest();
@@ -83,7 +85,8 @@ private:
   void DartProcessing();
   void ExeNotFound(std::string exe);
   bool ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
-                   std::vector<std::string>* environment);
+                   std::vector<std::string>* environment,
+                   std::vector<size_t>* affinity);
   void WriteLogOutputTop(size_t completed, size_t total);
   // Run post processing of the process output for MemCheck
   void MemCheckPostProcess();

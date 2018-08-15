@@ -1,14 +1,14 @@
 #include "foo.h"
 
 #ifdef STAGE_2
-#include <foo/lib1.h>
-#include <foo/lib2renamed.h>
-#include <lib3.h>
-#include <old/lib2.h>
-#include <old/lib3.h>
+#  include <foo/lib1.h>
+#  include <foo/lib2renamed.h>
+#  include <lib3.h>
+#  include <old/lib2.h>
+#  include <old/lib3.h>
 #else
-#include "lib1.h"
-#include "lib2.h"
+#  include "lib1.h"
+#  include "lib2.h"
 #endif
 
 #include "lib4.h"

@@ -21,6 +21,7 @@ cmInstallCommandArguments::cmInstallCommandArguments(
   , ArgumentGroup()
   , Destination(&Parser, "DESTINATION", &ArgumentGroup)
   , Component(&Parser, "COMPONENT", &ArgumentGroup)
+  , NamelinkComponent(&Parser, "NAMELINK_COMPONENT", &ArgumentGroup)
   , ExcludeFromAll(&Parser, "EXCLUDE_FROM_ALL", &ArgumentGroup)
   , Rename(&Parser, "RENAME", &ArgumentGroup)
   , Permissions(&Parser, "PERMISSIONS", &ArgumentGroup)
@@ -57,6 +58,14 @@ const std::string& cmInstallCommandArguments::GetComponent() const
   }
   static std::string unspecifiedComponent = "Unspecified";
   return unspecifiedComponent;
+}
+
+const std::string& cmInstallCommandArguments::GetNamelinkComponent() const
+{
+  if (!this->NamelinkComponent.GetString().empty()) {
+    return this->NamelinkComponent.GetString();
+  }
+  return this->GetComponent();
 }
 
 const std::string& cmInstallCommandArguments::GetRename() const
@@ -121,6 +130,17 @@ bool cmInstallCommandArguments::GetNamelinkSkip() const
   }
   if (this->GenericArguments != nullptr) {
     return this->GenericArguments->GetNamelinkSkip();
+  }
+  return false;
+}
+
+bool cmInstallCommandArguments::HasNamelinkComponent() const
+{
+  if (!this->NamelinkComponent.GetString().empty()) {
+    return true;
+  }
+  if (this->GenericArguments != nullptr) {
+    return this->GenericArguments->HasNamelinkComponent();
   }
   return false;
 }

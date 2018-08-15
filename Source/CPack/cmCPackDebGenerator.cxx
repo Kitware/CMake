@@ -62,8 +62,8 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
   this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
                   component_path.c_str());
   if (!this->ReadListFile("CPackDeb.cmake")) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Error while execution CPackDeb.cmake"
-                    << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Error while execution CPackDeb.cmake" << std::endl);
     retval = 0;
     return retval;
   }
@@ -115,7 +115,8 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
       // Does the component belong to a group?
       if (comp.second.Group == nullptr) {
         cmCPackLogger(
-          cmCPackLog::LOG_VERBOSE, "Component <"
+          cmCPackLog::LOG_VERBOSE,
+          "Component <"
             << comp.second.Name
             << "> does not belong to any group, package it separately."
             << std::endl);
@@ -179,8 +180,8 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
                     component_path.c_str());
   }
   if (!this->ReadListFile("CPackDeb.cmake")) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Error while execution CPackDeb.cmake"
-                    << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Error while execution CPackDeb.cmake" << std::endl);
     retval = 0;
     return retval;
   }
@@ -413,7 +414,8 @@ int cmCPackDebGenerator::createDeb()
     cmGeneratedFileStream fileStream_data_tar;
     fileStream_data_tar.Open(filename_data_tar.c_str(), false, true);
     if (!fileStream_data_tar) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Error opening the file \""
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Error opening the file \""
                       << filename_data_tar << "\" for writing" << std::endl);
       return 0;
     }
@@ -430,9 +432,9 @@ int cmCPackDebGenerator::createDeb()
     // e.g. /opt/bin/foo, /usr/bin/bar and /usr/bin/baz would
     // give /usr and /opt
     size_t topLevelLength = strGenWDIR.length();
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "WDIR: \""
-                    << strGenWDIR << "\", length = " << topLevelLength
-                    << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                  "WDIR: \"" << strGenWDIR << "\", length = " << topLevelLength
+                             << std::endl);
     std::set<std::string> orderedFiles;
 
     // we have to reconstruct the parent folders as well
@@ -448,13 +450,13 @@ int cmCPackDebGenerator::createDeb()
     }
 
     for (std::string const& file : orderedFiles) {
-      cmCPackLogger(cmCPackLog::LOG_DEBUG, "FILEIT: \"" << file << "\""
-                                                        << std::endl);
+      cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                    "FILEIT: \"" << file << "\"" << std::endl);
       std::string::size_type slashPos = file.find('/', topLevelLength + 1);
       std::string relativeDir =
         file.substr(topLevelLength, slashPos - topLevelLength);
-      cmCPackLogger(cmCPackLog::LOG_DEBUG, "RELATIVEDIR: \""
-                      << relativeDir << "\"" << std::endl);
+      cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                    "RELATIVEDIR: \"" << relativeDir << "\"" << std::endl);
 
 #ifdef WIN32
       std::string mode_t_adt_filename = file + ":cmake_mode_t";
@@ -477,7 +479,8 @@ int cmCPackDebGenerator::createDeb()
 
       // do not recurse because the loop will do it
       if (!data_tar.Add(file, topLevelLength, ".", false)) {
-        cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem adding file to tar:"
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+                      "Problem adding file to tar:"
                         << std::endl
                         << "#top level directory: " << strGenWDIR << std::endl
                         << "#file: " << file << std::endl
@@ -505,8 +508,8 @@ int cmCPackDebGenerator::createDeb()
       std::string output =
         cmSystemTools::ComputeFileHash(file, cmCryptoHash::AlgoMD5);
       if (output.empty()) {
-        cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem computing the md5 of "
-                        << file << std::endl);
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+                      "Problem computing the md5 of " << file << std::endl);
       }
 
       output += "  " + file + "\n";
@@ -527,9 +530,10 @@ int cmCPackDebGenerator::createDeb()
     cmGeneratedFileStream fileStream_control_tar;
     fileStream_control_tar.Open(filename_control_tar.c_str(), false, true);
     if (!fileStream_control_tar) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Error opening the file \""
-                      << filename_control_tar << "\" for writing"
-                      << std::endl);
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Error opening the file \"" << filename_control_tar
+                                                << "\" for writing"
+                                                << std::endl);
       return 0;
     }
     cmArchiveWrite control_tar(fileStream_control_tar,
@@ -557,7 +561,8 @@ int cmCPackDebGenerator::createDeb()
     // adds control and md5sums
     if (!control_tar.Add(md5filename, strGenWDIR.length(), ".") ||
         !control_tar.Add(strGenWDIR + "/control", strGenWDIR.length(), ".")) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Error adding file to tar:"
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Error adding file to tar:"
                       << std::endl
                       << "#top level directory: " << strGenWDIR << std::endl
                       << "#file: \"control\" or \"md5sums\"" << std::endl
@@ -568,7 +573,8 @@ int cmCPackDebGenerator::createDeb()
     // adds generated shlibs file
     if (gen_shibs) {
       if (!control_tar.Add(shlibsfilename, strGenWDIR.length(), ".")) {
-        cmCPackLogger(cmCPackLog::LOG_ERROR, "Error adding file to tar:"
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+                      "Error adding file to tar:"
                         << std::endl
                         << "#top level directory: " << strGenWDIR << std::endl
                         << "#file: \"shlibs\"" << std::endl
@@ -581,7 +587,8 @@ int cmCPackDebGenerator::createDeb()
     if (this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST")) {
       control_tar.SetPermissions(permission755);
       if (!control_tar.Add(postinst, strGenWDIR.length(), ".")) {
-        cmCPackLogger(cmCPackLog::LOG_ERROR, "Error adding file to tar:"
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+                      "Error adding file to tar:"
                         << std::endl
                         << "#top level directory: " << strGenWDIR << std::endl
                         << "#file: \"postinst\"" << std::endl
@@ -594,7 +601,8 @@ int cmCPackDebGenerator::createDeb()
     if (this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTRM")) {
       control_tar.SetPermissions(permission755);
       if (!control_tar.Add(postrm, strGenWDIR.length(), ".")) {
-        cmCPackLogger(cmCPackLog::LOG_ERROR, "Error adding file to tar:"
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+                      "Error adding file to tar:"
                         << std::endl
                         << "#top level directory: " << strGenWDIR << std::endl
                         << "#file: \"postinst\"" << std::endl
@@ -656,10 +664,17 @@ int cmCPackDebGenerator::createDeb()
   cmGeneratedFileStream debStream;
   debStream.Open(outputPath.c_str(), false, true);
   cmArchiveWrite deb(debStream, cmArchiveWrite::CompressNone, "arbsd");
+
+  // uid/gid should be the one of the root user, and this root user has
+  // always uid/gid equal to 0.
+  deb.SetUIDAndGID(0u, 0u);
+  deb.SetUNAMEAndGNAME("root", "root");
+
   if (!deb.Add(tlDir + "debian-binary", tlDir.length()) ||
       !deb.Add(tlDir + "control.tar.gz", tlDir.length()) ||
       !deb.Add(tlDir + "data.tar" + compression_suffix, tlDir.length())) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Error creating debian package:"
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Error creating debian package:"
                     << std::endl
                     << "#top level directory: " << outputDir << std::endl
                     << "#file: " << outputName << std::endl

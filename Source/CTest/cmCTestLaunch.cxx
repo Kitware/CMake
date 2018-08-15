@@ -21,9 +21,9 @@
 #include "cmake.h"
 
 #ifdef _WIN32
-#include <fcntl.h> // for _O_BINARY
-#include <io.h>    // for _setmode
-#include <stdio.h> // for std{out,err} and fileno
+#  include <fcntl.h> // for _O_BINARY
+#  include <io.h>    // for _setmode
+#  include <stdio.h> // for std{out,err} and fileno
 #endif
 
 cmCTestLaunch::cmCTestLaunch(int argc, const char* const* argv)
@@ -347,28 +347,27 @@ void cmCTestLaunch::WriteXML()
   // Use cmGeneratedFileStream to atomically create the report file.
   cmGeneratedFileStream fxml(logXML.c_str());
   cmXMLWriter xml(fxml, 2);
-  xml.StartElement("Failure");
-  xml.Attribute("type", this->IsError() ? "Error" : "Warning");
-  this->WriteXMLAction(xml);
-  this->WriteXMLCommand(xml);
-  this->WriteXMLResult(xml);
-  this->WriteXMLLabels(xml);
-  xml.EndElement(); // Failure
+  cmXMLElement e2(xml, "Failure");
+  e2.Attribute("type", this->IsError() ? "Error" : "Warning");
+  this->WriteXMLAction(e2);
+  this->WriteXMLCommand(e2);
+  this->WriteXMLResult(e2);
+  this->WriteXMLLabels(e2);
 }
 
-void cmCTestLaunch::WriteXMLAction(cmXMLWriter& xml)
+void cmCTestLaunch::WriteXMLAction(cmXMLElement& e2)
 {
-  xml.Comment("Meta-information about the build action");
-  xml.StartElement("Action");
+  e2.Comment("Meta-information about the build action");
+  cmXMLElement e3(e2, "Action");
 
   // TargetName
   if (!this->OptionTargetName.empty()) {
-    xml.Element("TargetName", this->OptionTargetName);
+    e3.Element("TargetName", this->OptionTargetName);
   }
 
   // Language
   if (!this->OptionLanguage.empty()) {
-    xml.Element("Language", this->OptionLanguage);
+    e3.Element("Language", this->OptionLanguage);
   }
 
   // SourceFile
@@ -383,12 +382,12 @@ void cmCTestLaunch::WriteXMLAction(cmXMLWriter& xml)
       source = cmSystemTools::RelativePath(this->SourceDir, source);
     }
 
-    xml.Element("SourceFile", source);
+    e3.Element("SourceFile", source);
   }
 
   // OutputFile
   if (!this->OptionOutput.empty()) {
-    xml.Element("OutputFile", this->OptionOutput);
+    e3.Element("OutputFile", this->OptionOutput);
   }
 
   // OutputType
@@ -407,97 +406,88 @@ void cmCTestLaunch::WriteXMLAction(cmXMLWriter& xml)
     outputType = "object file";
   }
   if (outputType) {
-    xml.Element("OutputType", outputType);
+    e3.Element("OutputType", outputType);
   }
-
-  xml.EndElement(); // Action
 }
 
-void cmCTestLaunch::WriteXMLCommand(cmXMLWriter& xml)
+void cmCTestLaunch::WriteXMLCommand(cmXMLElement& e2)
 {
-  xml.Comment("Details of command");
-  xml.StartElement("Command");
+  e2.Comment("Details of command");
+  cmXMLElement e3(e2, "Command");
   if (!this->CWD.empty()) {
-    xml.Element("WorkingDirectory", this->CWD);
+    e3.Element("WorkingDirectory", this->CWD);
   }
   for (std::string const& realArg : this->RealArgs) {
-    xml.Element("Argument", realArg);
+    e3.Element("Argument", realArg);
   }
-  xml.EndElement(); // Command
 }
 
-void cmCTestLaunch::WriteXMLResult(cmXMLWriter& xml)
+void cmCTestLaunch::WriteXMLResult(cmXMLElement& e2)
 {
-  xml.Comment("Result of command");
-  xml.StartElement("Result");
+  e2.Comment("Result of command");
+  cmXMLElement e3(e2, "Result");
 
   // StdOut
-  xml.StartElement("StdOut");
-  this->DumpFileToXML(xml, this->LogOut);
-  xml.EndElement(); // StdOut
+  this->DumpFileToXML(e3, "StdOut", this->LogOut);
 
   // StdErr
-  xml.StartElement("StdErr");
-  this->DumpFileToXML(xml, this->LogErr);
-  xml.EndElement(); // StdErr
+  this->DumpFileToXML(e3, "StdErr", this->LogErr);
 
   // ExitCondition
-  xml.StartElement("ExitCondition");
+  cmXMLElement e4(e3, "ExitCondition");
   cmsysProcess* cp = this->Process;
   switch (cmsysProcess_GetState(cp)) {
     case cmsysProcess_State_Starting:
-      xml.Content("No process has been executed");
+      e4.Content("No process has been executed");
       break;
     case cmsysProcess_State_Executing:
-      xml.Content("The process is still executing");
+      e4.Content("The process is still executing");
       break;
     case cmsysProcess_State_Disowned:
-      xml.Content("Disowned");
+      e4.Content("Disowned");
       break;
     case cmsysProcess_State_Killed:
-      xml.Content("Killed by parent");
+      e4.Content("Killed by parent");
       break;
 
     case cmsysProcess_State_Expired:
-      xml.Content("Killed when timeout expired");
+      e4.Content("Killed when timeout expired");
       break;
     case cmsysProcess_State_Exited:
-      xml.Content(this->ExitCode);
+      e4.Content(this->ExitCode);
       break;
     case cmsysProcess_State_Exception:
-      xml.Content("Terminated abnormally: ");
-      xml.Content(cmsysProcess_GetExceptionString(cp));
+      e4.Content("Terminated abnormally: ");
+      e4.Content(cmsysProcess_GetExceptionString(cp));
       break;
     case cmsysProcess_State_Error:
-      xml.Content("Error administrating child process: ");
-      xml.Content(cmsysProcess_GetErrorString(cp));
+      e4.Content("Error administrating child process: ");
+      e4.Content(cmsysProcess_GetErrorString(cp));
       break;
-  };
-  xml.EndElement(); // ExitCondition
-
-  xml.EndElement(); // Result
-}
-
-void cmCTestLaunch::WriteXMLLabels(cmXMLWriter& xml)
-{
-  this->LoadLabels();
-  if (!this->Labels.empty()) {
-    xml.Comment("Interested parties");
-    xml.StartElement("Labels");
-    for (std::string const& label : this->Labels) {
-      xml.Element("Label", label);
-    }
-    xml.EndElement(); // Labels
   }
 }
 
-void cmCTestLaunch::DumpFileToXML(cmXMLWriter& xml, std::string const& fname)
+void cmCTestLaunch::WriteXMLLabels(cmXMLElement& e2)
+{
+  this->LoadLabels();
+  if (!this->Labels.empty()) {
+    e2.Comment("Interested parties");
+    cmXMLElement e3(e2, "Labels");
+    for (std::string const& label : this->Labels) {
+      e3.Element("Label", label);
+    }
+  }
+}
+
+void cmCTestLaunch::DumpFileToXML(cmXMLElement& e3, const char* tag,
+                                  std::string const& fname)
 {
   cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
 
   std::string line;
   const char* sep = "";
 
+  cmXMLElement e4(e3, tag);
   while (cmSystemTools::GetLineFromStream(fin, line)) {
     if (MatchesFilterPrefix(line)) {
       continue;
@@ -507,8 +497,8 @@ void cmCTestLaunch::DumpFileToXML(cmXMLWriter& xml, std::string const& fname)
     } else if (this->Match(line, this->RegexWarning)) {
       line = "[CTest: warning matched] " + line;
     }
-    xml.Content(sep);
-    xml.Content(line);
+    e4.Content(sep);
+    e4.Content(line);
     sep = "\n";
   }
 }

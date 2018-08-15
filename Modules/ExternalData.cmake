@@ -1133,7 +1133,7 @@ if("${ExternalData_ACTION}" STREQUAL "fetch")
 
   if(file_up_to_date)
     # Touch the file to convince the build system it is up to date.
-    execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${file}")
+    file(TOUCH "${file}")
   else()
     _ExternalData_link_or_copy("${obj}" "${file}")
   endif()

@@ -4,10 +4,12 @@
 
 #include "cmSystemTools.h"
 
+#include <cerrno>
+
 cmWorkingDirectory::cmWorkingDirectory(std::string const& newdir)
 {
   this->OldDir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(newdir);
+  this->SetDirectory(newdir);
 }
 
 cmWorkingDirectory::~cmWorkingDirectory()
@@ -15,10 +17,20 @@ cmWorkingDirectory::~cmWorkingDirectory()
   this->Pop();
 }
 
+bool cmWorkingDirectory::SetDirectory(std::string const& newdir)
+{
+  if (cmSystemTools::ChangeDirectory(newdir) == 0) {
+    this->ResultCode = 0;
+    return true;
+  }
+  this->ResultCode = errno;
+  return false;
+}
+
 void cmWorkingDirectory::Pop()
 {
   if (!this->OldDir.empty()) {
-    cmSystemTools::ChangeDirectory(this->OldDir);
+    this->SetDirectory(this->OldDir);
     this->OldDir.clear();
   }
 }

@@ -3,9 +3,9 @@
 
 #include "cmLinkLineDeviceComputer.h"
 
-#include <set>
 #include <sstream>
 
+#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
@@ -32,38 +32,32 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
   ItemVector const& items = cli.GetItems();
   std::string config = cli.GetConfig();
   for (auto const& item : items) {
-    if (!item.Target) {
-      continue;
-    }
-
-    bool skippable = false;
-    switch (item.Target->GetType()) {
-      case cmStateEnums::SHARED_LIBRARY:
-      case cmStateEnums::MODULE_LIBRARY:
-      case cmStateEnums::INTERFACE_LIBRARY:
-        skippable = true;
-        break;
-      case cmStateEnums::STATIC_LIBRARY:
-        // If a static library is resolving its device linking, it should
-        // be removed for other device linking
-        skippable =
-          item.Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
-        break;
-      default:
-        break;
-    }
-
-    if (skippable) {
-      continue;
-    }
-
-    std::set<std::string> langs;
-    item.Target->GetLanguages(langs, config);
-    if (langs.count("CUDA") == 0) {
-      continue;
+    if (item.Target) {
+      bool skip = false;
+      switch (item.Target->GetType()) {
+        case cmStateEnums::MODULE_LIBRARY:
+        case cmStateEnums::INTERFACE_LIBRARY:
+          skip = true;
+          break;
+        case cmStateEnums::STATIC_LIBRARY:
+          skip = item.Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
+          break;
+        default:
+          break;
+      }
+      if (skip) {
+        continue;
+      }
     }
 
     if (item.IsPath) {
+      // nvcc understands absolute paths to libraries ending in '.a' should
+      // be passed to nvlink.  Other extensions like '.so' or '.dylib' are
+      // rejected by the nvcc front-end even though nvlink knows to ignore
+      // them.  Bypass the front-end via '-Xnvlink'.
+      if (!cmHasLiteralSuffix(item.Value, ".a")) {
+        fout << "-Xnvlink ";
+      }
       fout << this->ConvertToOutputFormat(
         this->ConvertToLinkReference(item.Value));
     } else {

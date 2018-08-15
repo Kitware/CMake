@@ -6,11 +6,11 @@
 /* Use the KWIML library configured for CMake.  */
 #include "cmThirdParty.h"
 #ifdef CMAKE_USE_SYSTEM_KWIML
-#include <kwiml/abi.h>
-#include <kwiml/int.h>
+#  include <kwiml/abi.h>
+#  include <kwiml/int.h>
 #else
-#include "KWIML/include/kwiml/abi.h"
-#include "KWIML/include/kwiml/int.h"
+#  include "KWIML/include/kwiml/abi.h"
+#  include "KWIML/include/kwiml/int.h"
 #endif
 
 #endif

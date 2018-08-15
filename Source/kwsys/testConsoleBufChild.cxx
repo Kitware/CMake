@@ -8,8 +8,8 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "ConsoleBuf.hxx.in"
-#include "Encoding.hxx.in"
+#  include "ConsoleBuf.hxx.in"
+#  include "Encoding.hxx.in"
 #endif
 
 #include <iostream>

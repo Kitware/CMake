@@ -86,4 +86,6 @@ macro(__compiler_gnu lang)
       "\"${CMAKE_${lang}_COMPILER_RANLIB}\" <TARGET>"
     )
   endif()
+
+  set(CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "${CMAKE_${lang}_COMPILER}" "-dM" "-E" "-c" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
 endmacro()

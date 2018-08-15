@@ -28,41 +28,41 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   size_t cnt = 0;
-  const char* smodel = args[cnt].c_str();
+  const char* smodel = nullptr;
   const char* src_dir = nullptr;
   const char* bld_dir = nullptr;
 
-  cnt++;
-
-  this->CTest->SetSpecificTrack(nullptr);
-  if (cnt < args.size() - 1) {
+  while (cnt < args.size()) {
     if (args[cnt] == "TRACK") {
       cnt++;
+      if (cnt >= args.size() || args[cnt] == "APPEND" ||
+          args[cnt] == "QUIET") {
+        this->SetError("TRACK argument missing track name");
+        return false;
+      }
       this->CTest->SetSpecificTrack(args[cnt].c_str());
       cnt++;
-    }
-  }
-
-  if (cnt < args.size()) {
-    if (args[cnt] == "APPEND") {
+    } else if (args[cnt] == "APPEND") {
       cnt++;
       this->CreateNewTag = false;
-    }
-  }
-  if (cnt < args.size()) {
-    if (args[cnt] == "QUIET") {
+    } else if (args[cnt] == "QUIET") {
       cnt++;
       this->Quiet = true;
+    } else if (!smodel) {
+      smodel = args[cnt].c_str();
+      cnt++;
+    } else if (!src_dir) {
+      src_dir = args[cnt].c_str();
+      cnt++;
+    } else if (!bld_dir) {
+      bld_dir = args[cnt].c_str();
+      cnt++;
+    } else {
+      this->SetError("Too many arguments");
+      return false;
     }
   }
 
-  if (cnt < args.size()) {
-    src_dir = args[cnt].c_str();
-    cnt++;
-    if (cnt < args.size()) {
-      bld_dir = args[cnt].c_str();
-    }
-  }
   if (!src_dir) {
     src_dir = this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY");
   }
@@ -79,6 +79,11 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
                    "as an argument or set CTEST_BINARY_DIRECTORY");
     return false;
   }
+  if (!smodel && this->CreateNewTag) {
+    this->SetError("no test model specified and APPEND not specified. Specify "
+                   "either a test model or the APPEND argument");
+    return false;
+  }
 
   cmSystemTools::AddKeepPath(src_dir);
   cmSystemTools::AddKeepPath(bld_dir);
@@ -92,11 +97,22 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   this->CTest->SetCTestConfiguration("BuildDirectory", binaryDir.c_str(),
                                      this->Quiet);
 
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Run dashboard with model "
-                       << smodel << std::endl
-                       << "   Source directory: " << src_dir << std::endl
-                       << "   Build directory: " << bld_dir << std::endl,
-                     this->Quiet);
+  if (smodel) {
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                       "Run dashboard with model "
+                         << smodel << std::endl
+                         << "   Source directory: " << src_dir << std::endl
+                         << "   Build directory: " << bld_dir << std::endl,
+                       this->Quiet);
+  } else {
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                       "Run dashboard with "
+                       "to-be-determined model"
+                         << std::endl
+                         << "   Source directory: " << src_dir << std::endl
+                         << "   Build directory: " << bld_dir << std::endl,
+                       this->Quiet);
+  }
   const char* track = this->CTest->GetSpecificTrack();
   if (track) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
@@ -128,7 +144,12 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
 
   this->CTest->SetRunCurrentScript(false);
   this->CTest->SetSuppressUpdatingCTestConfiguration(true);
-  int model = this->CTest->GetTestModelFromString(smodel);
+  int model;
+  if (smodel) {
+    model = this->CTest->GetTestModelFromString(smodel);
+  } else {
+    model = cmCTest::UNKNOWN;
+  }
   this->CTest->SetTestModel(model);
   this->CTest->SetProduceXML(true);
 

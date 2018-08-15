@@ -17,7 +17,7 @@
 #include "cmStateTypes.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cm_jsoncpp_value.h"
+#  include "cm_jsoncpp_value.h"
 #endif
 
 class cmExternalMakefileProjectGeneratorFactory;
@@ -119,6 +119,9 @@ public:
   };
 
   typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
+
+  static const int NO_BUILD_PARALLEL_LEVEL = -1;
+  static const int DEFAULT_BUILD_PARALLEL_LEVEL = 0;
 
   /// Default constructor
   cmake(Role role);
@@ -255,6 +258,16 @@ public:
   ///! Add an entry into the cache
   void AddCacheEntry(const std::string& key, const char* value,
                      const char* helpString, int type);
+
+  bool DoWriteGlobVerifyTarget() const;
+  std::string const& GetGlobVerifyScript() const;
+  std::string const& GetGlobVerifyStamp() const;
+  void AddGlobCacheEntry(bool recurse, bool listDirectories,
+                         bool followSymlinks, const std::string& relative,
+                         const std::string& expression,
+                         const std::vector<std::string>& files,
+                         const std::string& variable,
+                         cmListFileBacktrace const& bt);
 
   /**
    * Get the system information and write it to the file specified
@@ -421,7 +434,7 @@ public:
     cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
 
   ///! run the --build option
-  int Build(const std::string& dir, const std::string& target,
+  int Build(int jobs, const std::string& dir, const std::string& target,
             const std::string& config,
             const std::vector<std::string>& nativeOptions, bool clean);
 
@@ -543,7 +556,7 @@ private:
 
 #define CMAKE_STANDARD_OPTIONS_TABLE                                          \
   { "-C <initial-cache>", "Pre-load a script to populate the cache." },       \
-    { "-D <var>[:<type>]=<value>", "Create a cmake cache entry." },           \
+    { "-D <var>[:<type>]=<value>", "Create or update a cmake cache entry." }, \
     { "-U <globbing_expr>", "Remove matching entries from CMake cache." },    \
     { "-G <generator-name>", "Specify a build system generator." },           \
     { "-T <toolset-name>",                                                    \
@@ -556,11 +569,13 @@ private:
     { "-Wno-error=dev", "Make developer warnings not errors." },              \
     { "-Wdeprecated", "Enable deprecation warnings." },                       \
     { "-Wno-deprecated", "Suppress deprecation warnings." },                  \
-    { "-Werror=deprecated", "Make deprecated macro and function warnings "    \
-                            "errors." },                                      \
+    { "-Werror=deprecated",                                                   \
+      "Make deprecated macro and function warnings "                          \
+      "errors." },                                                            \
   {                                                                           \
-    "-Wno-error=deprecated", "Make deprecated macro and function warnings "   \
-                             "not errors."                                    \
+    "-Wno-error=deprecated",                                                  \
+      "Make deprecated macro and function warnings "                          \
+      "not errors."                                                           \
   }
 
 #define FOR_EACH_C_FEATURE(F)                                                 \
@@ -577,6 +592,7 @@ private:
   F(cxx_std_11)                                                               \
   F(cxx_std_14)                                                               \
   F(cxx_std_17)                                                               \
+  F(cxx_std_20)                                                               \
   F(cxx_aggregate_default_initializers)                                       \
   F(cxx_alias_templates)                                                      \
   F(cxx_alignas)                                                              \

@@ -8,9 +8,9 @@ file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "Directory.hxx.in"
-#include "Encoding.hxx.in"
-#include "SystemTools.hxx.in"
+#  include "Directory.hxx.in"
+#  include "Encoding.hxx.in"
+#  include "SystemTools.hxx.in"
 #endif
 
 #include <fstream>
@@ -73,7 +73,38 @@ int _doLongPathTest()
   return res;
 }
 
+int _copyDirectoryTest()
+{
+  using namespace kwsys;
+  const std::string source(TEST_SYSTEMTOOLS_BINARY_DIR
+                           "/directory_testing/copyDirectoryTestSrc");
+  if (SystemTools::PathExists(source)) {
+    std::cerr << source << " shouldn't exist before test" << std::endl;
+    return 1;
+  }
+  const std::string destination(TEST_SYSTEMTOOLS_BINARY_DIR
+                                "/directory_testing/copyDirectoryTestDst");
+  if (SystemTools::PathExists(destination)) {
+    std::cerr << destination << " shouldn't exist before test" << std::endl;
+    return 2;
+  }
+  const bool copysuccess = SystemTools::CopyADirectory(source, destination);
+  const bool destinationexists = SystemTools::PathExists(destination);
+  if (copysuccess) {
+    std::cerr << "CopyADirectory should have returned false" << std::endl;
+    SystemTools::RemoveADirectory(destination);
+    return 3;
+  }
+  if (destinationexists) {
+    std::cerr << "CopyADirectory returned false, but destination directory"
+              << " has been created" << std::endl;
+    SystemTools::RemoveADirectory(destination);
+    return 4;
+  }
+  return 0;
+}
+
 int testDirectory(int, char* [])
 {
-  return _doLongPathTest();
+  return _doLongPathTest() + _copyDirectoryTest();
 }

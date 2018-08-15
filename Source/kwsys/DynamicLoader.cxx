@@ -8,8 +8,8 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-#include "Configure.hxx.in"
-#include "DynamicLoader.hxx.in"
+#  include "Configure.hxx.in"
+#  include "DynamicLoader.hxx.in"
 #endif
 
 // This file actually contains several different implementations:
@@ -27,7 +27,7 @@
 
 #if !KWSYS_SUPPORTS_SHARED_LIBS
 // Implementation for environments without dynamic libs
-#include <string.h> // for strerror()
+#  include <string.h> // for strerror()
 
 namespace KWSYS_NAMESPACE {
 
@@ -61,8 +61,8 @@ const char* DynamicLoader::LastError()
 
 #elif defined(__hpux)
 // Implementation for HPUX machines
-#include <dl.h>
-#include <errno.h>
+#  include <dl.h>
+#  include <errno.h>
 
 namespace KWSYS_NAMESPACE {
 
@@ -124,8 +124,8 @@ const char* DynamicLoader::LastError()
 
 #elif defined(__APPLE__) && (MAC_OS_X_VERSION_MAX_ALLOWED < 1030)
 // Implementation for Mac OS X 10.2.x and earlier
-#include <mach-o/dyld.h>
-#include <string.h> // for strlen
+#  include <mach-o/dyld.h>
+#  include <string.h> // for strlen
 
 namespace KWSYS_NAMESPACE {
 
@@ -140,9 +140,9 @@ DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
   if (rc != NSObjectFileImageSuccess) {
     return 0;
   }
-  NSModule handle =
-    NSLinkModule(image, libname.c_str(), NSLINKMODULE_OPTION_BINDNOW |
-                   NSLINKMODULE_OPTION_RETURN_ON_ERROR);
+  NSModule handle = NSLinkModule(image, libname.c_str(),
+                                 NSLINKMODULE_OPTION_BINDNOW |
+                                   NSLINKMODULE_OPTION_RETURN_ON_ERROR);
   NSDestroyObjectFileImage(image);
   return handle;
 }
@@ -183,7 +183,7 @@ const char* DynamicLoader::LastError()
 
 #elif defined(_WIN32) && !defined(__CYGWIN__)
 // Implementation for Windows win32 code but not cygwin
-#include <windows.h>
+#  include <windows.h>
 
 namespace KWSYS_NAMESPACE {
 
@@ -231,20 +231,20 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
   // Note that the "@X" part of the name above is the total size (in
   // bytes) of the arguments on the stack.
   void* result;
-#if defined(__BORLANDC__) || defined(__WATCOMC__)
+#  if defined(__BORLANDC__) || defined(__WATCOMC__)
   // Need to prepend symbols with '_'
   std::string ssym = '_' + sym;
   const char* rsym = ssym.c_str();
-#else
+#  else
   const char* rsym = sym.c_str();
-#endif
+#  endif
   result = (void*)GetProcAddress(lib, rsym);
 // Hack to cast pointer-to-data to pointer-to-function.
-#ifdef __WATCOMC__
+#  ifdef __WATCOMC__
   return *(DynamicLoader::SymbolPointer*)(&result);
-#else
+#  else
   return *reinterpret_cast<DynamicLoader::SymbolPointer*>(&result);
-#endif
+#  endif
 }
 
 const char* DynamicLoader::LastError()
@@ -272,10 +272,10 @@ const char* DynamicLoader::LastError()
 
 #elif defined(__BEOS__)
 // Implementation for BeOS / Haiku
-#include <string.h> // for strerror()
+#  include <string.h> // for strerror()
 
-#include <be/kernel/image.h>
-#include <be/support/Errors.h>
+#  include <be/kernel/image.h>
+#  include <be/support/Errors.h>
 
 namespace KWSYS_NAMESPACE {
 
@@ -351,11 +351,11 @@ const char* DynamicLoader::LastError()
 
 #elif defined(__MINT__)
 // Implementation for FreeMiNT on Atari
-#define _GNU_SOURCE /* for program_invocation_name */
-#include <dld.h>
-#include <errno.h>
-#include <malloc.h>
-#include <string.h>
+#  define _GNU_SOURCE /* for program_invocation_name */
+#  include <dld.h>
+#  include <errno.h>
+#  include <malloc.h>
+#  include <string.h>
 
 namespace KWSYS_NAMESPACE {
 
@@ -399,7 +399,7 @@ const char* DynamicLoader::LastError()
 #else
 // Default implementation for *NIX systems (including Mac OS X 10.3 and
 // later) which use dlopen
-#include <dlfcn.h>
+#  include <dlfcn.h>
 
 namespace KWSYS_NAMESPACE {
 

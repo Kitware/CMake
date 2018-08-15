@@ -211,8 +211,9 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
     if (!aliasedTarget) {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << libName << "\" because target \""
-        << aliasedName << "\" does not already "
-                          "exist.";
+        << aliasedName
+        << "\" does not already "
+           "exist.";
       this->SetError(e.str());
       return false;
     }
@@ -225,6 +226,14 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << libName << "\" because target \""
         << aliasedName << "\" is not a library.";
+      this->SetError(e.str());
+      return false;
+    }
+    if (aliasedTarget->IsImported() &&
+        !aliasedTarget->IsImportedGloballyVisible()) {
+      std::ostringstream e;
+      e << "cannot create ALIAS target \"" << libName << "\" because target \""
+        << aliasedName << "\" is imported but not globally visible.";
       this->SetError(e.str());
       return false;
     }

@@ -7,7 +7,7 @@
 #include "cmsys/FStream.hxx"
 
 #ifndef VSSetupConstants
-#define VSSetupConstants
+#  define VSSetupConstants
 /* clang-format off */
 const IID IID_ISetupConfiguration = {
   0x42843719, 0xDB4C, 0x46C2,
@@ -199,6 +199,7 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
     if (!cmSystemTools::FileIsDirectory(vcToolsDir)) {
       return false;
     }
+    vsInstanceInfo.VCToolsetVersion = vcToolsVersion;
   }
 
   // Reboot may have been required before the product package was registered
@@ -252,6 +253,18 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(std::string& vsInstallLocation)
   }
 
   return isInstalled;
+}
+
+bool cmVSSetupAPIHelper::GetVCToolsetVersion(std::string& vsToolsetVersion)
+{
+  vsToolsetVersion.clear();
+  bool isInstalled = this->EnumerateAndChooseVSInstance();
+
+  if (isInstalled) {
+    vsToolsetVersion = chosenInstanceInfo.VCToolsetVersion;
+  }
+
+  return isInstalled && !vsToolsetVersion.empty();
 }
 
 bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()

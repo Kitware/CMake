@@ -8,7 +8,7 @@
 #include <vector>
 
 #ifdef __CYGWIN__
-#include <sys/cygwin.h>
+#  include <sys/cygwin.h>
 std::string CMakeToWixPath(const std::string& cygpath)
 {
   std::vector<char> winpath_chars;

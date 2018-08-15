@@ -7,7 +7,6 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-#include "cmWorkingDirectory.h"
 
 #include "cmsys/FStream.hxx"
 #include <sstream>
@@ -15,8 +14,7 @@
 #include <utility>
 
 cmDepends::cmDepends(cmLocalGenerator* lg, const char* targetDir)
-  : CompileDirectory()
-  , LocalGenerator(lg)
+  : LocalGenerator(lg)
   , Verbose(false)
   , FileComparison(nullptr)
   , TargetDirectory(targetDir)
@@ -73,9 +71,6 @@ bool cmDepends::Finalize(std::ostream& /*unused*/, std::ostream& /*unused*/)
 bool cmDepends::Check(const char* makeFile, const char* internalFile,
                       std::map<std::string, DependencyVector>& validDeps)
 {
-  // Dependency checks must be done in proper working directory.
-  cmWorkingDirectory workdir(this->CompileDirectory);
-
   // Check whether dependencies must be regenerated.
   bool okay = true;
   cmsys::ifstream fin(internalFile);

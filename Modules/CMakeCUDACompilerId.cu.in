@@ -17,7 +17,9 @@ char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
 @CMAKE_CUDA_COMPILER_ID_ERROR_FOR_TEST@
 
 const char* info_language_dialect_default = "INFO" ":" "dialect_default["
-#if __cplusplus > 201402L
+#if __cplusplus > 201703L
+  "20"
+#elif __cplusplus >= 201703L
   "17"
 #elif __cplusplus >= 201402L
   "14"

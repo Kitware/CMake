@@ -68,7 +68,7 @@ Submit to CDash Upload API
                [QUIET])
 
 This second signature is used to upload files to CDash via the CDash
-file upload API. The api first sends a request to upload to CDash along
+file upload API. The API first sends a request to upload to CDash along
 with a content hash of the file. If CDash does not already have the file,
 then it is uploaded. Along with the file, a CDash type string is specified
 to tell CDash which handler to use to process the data.

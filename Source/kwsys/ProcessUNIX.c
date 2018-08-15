@@ -7,8 +7,8 @@
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
-#include "Process.h.in"
-#include "System.h.in"
+#  include "Process.h.in"
+#  include "System.h.in"
 #endif
 
 /*
@@ -40,7 +40,7 @@ do.
 #if defined(__CYGWIN__)
 /* Increase the file descriptor limit for select() before including
    related system headers. (Default: 64) */
-#define FD_SETSIZE 16384
+#  define FD_SETSIZE 16384
 #endif
 
 #include <assert.h>    /* assert */
@@ -61,9 +61,9 @@ do.
 #include <unistd.h>    /* pipe, close, fork, execvp, select, _exit */
 
 #if defined(__VMS)
-#define KWSYSPE_VMS_NONBLOCK , O_NONBLOCK
+#  define KWSYSPE_VMS_NONBLOCK , O_NONBLOCK
 #else
-#define KWSYSPE_VMS_NONBLOCK
+#  define KWSYSPE_VMS_NONBLOCK
 #endif
 
 #if defined(KWSYS_C_HAS_PTRDIFF_T) && KWSYS_C_HAS_PTRDIFF_T
@@ -80,13 +80,13 @@ typedef int kwsysProcess_ssize_t;
 
 #if defined(__BEOS__) && !defined(__ZETA__)
 /* BeOS 5 doesn't have usleep(), but it has snooze(), which is identical. */
-#include <be/kernel/OS.h>
+#  include <be/kernel/OS.h>
 static inline void kwsysProcess_usleep(unsigned int msec)
 {
   snooze(msec);
 }
 #else
-#define kwsysProcess_usleep usleep
+#  define kwsysProcess_usleep usleep
 #endif
 
 /*
@@ -101,12 +101,12 @@ static inline void kwsysProcess_usleep(unsigned int msec)
  */
 #if !defined(__BEOS__) && !defined(__VMS) && !defined(__MINT__) &&            \
   !defined(KWSYSPE_USE_SELECT)
-#define KWSYSPE_USE_SELECT 1
+#  define KWSYSPE_USE_SELECT 1
 #endif
 
 /* Some platforms do not have siginfo on their signal handlers.  */
 #if defined(SA_SIGINFO) && !defined(__BEOS__)
-#define KWSYSPE_USE_SIGINFO 1
+#  define KWSYSPE_USE_SIGINFO 1
 #endif
 
 /* The number of pipes for the child's output.  The standard stdout
@@ -1266,21 +1266,21 @@ static int kwsysProcessWaitForPipe(kwsysProcess* cp, char** data, int* length,
       } else if (n == 0) /* EOF */
       {
 /* We are done reading from this pipe.  */
-#if defined(__VMS)
+#  if defined(__VMS)
         if (!cp->CommandsLeft)
-#endif
+#  endif
         {
           kwsysProcessCleanupDescriptor(&cp->PipeReadEnds[i]);
           --cp->PipesLeft;
         }
       } else if (n < 0) /* error */
       {
-#if defined(__VMS)
+#  if defined(__VMS)
         if (!cp->CommandsLeft) {
           kwsysProcessCleanupDescriptor(&cp->PipeReadEnds[i]);
           --cp->PipesLeft;
         } else
-#endif
+#  endif
           if ((errno != EINTR) && (errno != EAGAIN)) {
           strncpy(cp->ErrorMessage, strerror(errno), KWSYSPE_PIPE_BUFFER_SIZE);
           /* Kill the children now.  */
@@ -1471,12 +1471,12 @@ static void kwsysProcessVolatileFree(volatile void* p)
 /* clang has made it impossible to free memory that points to volatile
    without first using special pragmas to disable a warning...  */
 #if defined(__clang__) && !defined(__INTEL_COMPILER)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-qual"
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wcast-qual"
 #endif
   free((void*)p); /* The cast will silence most compilers, but not clang.  */
 #if defined(__clang__) && !defined(__INTEL_COMPILER)
-#pragma clang diagnostic pop
+#  pragma clang diagnostic pop
 #endif
 }
 
@@ -2098,11 +2098,11 @@ static void kwsysProcessSetExitExceptionByIndex(kwsysProcess* cp, int sig,
       break;
 #endif
 #ifdef SIGBUS
-#if !defined(SIGSEGV) || SIGBUS != SIGSEGV
+#  if !defined(SIGSEGV) || SIGBUS != SIGSEGV
     case SIGBUS:
       KWSYSPE_CASE(Fault, "Bus error");
       break;
-#endif
+#  endif
 #endif
 #ifdef SIGFPE
     case SIGFPE:
@@ -2150,11 +2150,11 @@ static void kwsysProcessSetExitExceptionByIndex(kwsysProcess* cp, int sig,
       break;
 #endif
 #ifdef SIGIOT
-#if !defined(SIGABRT) || SIGIOT != SIGABRT
+#  if !defined(SIGABRT) || SIGIOT != SIGABRT
     case SIGIOT:
       KWSYSPE_CASE(Other, "SIGIOT");
       break;
-#endif
+#  endif
 #endif
 #ifdef SIGUSR1
     case SIGUSR1:
@@ -2251,11 +2251,11 @@ static void kwsysProcessSetExitExceptionByIndex(kwsysProcess* cp, int sig,
       break;
 #endif
 #ifdef SIGIO
-#if !defined(SIGPOLL) || SIGIO != SIGPOLL
+#  if !defined(SIGPOLL) || SIGIO != SIGPOLL
     case SIGIO:
       KWSYSPE_CASE(Other, "SIGIO");
       break;
-#endif
+#  endif
 #endif
 #ifdef SIGPWR
     case SIGPWR:
@@ -2268,11 +2268,11 @@ static void kwsysProcessSetExitExceptionByIndex(kwsysProcess* cp, int sig,
       break;
 #endif
 #ifdef SIGUNUSED
-#if !defined(SIGSYS) || SIGUNUSED != SIGSYS
+#  if !defined(SIGSYS) || SIGUNUSED != SIGSYS
     case SIGUNUSED:
       KWSYSPE_CASE(Other, "SIGUNUSED");
       break;
-#endif
+#  endif
 #endif
     default:
       cp->ProcessResults[idx].ExitException = kwsysProcess_Exception_Other;
@@ -2468,21 +2468,21 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
    have two integers to store: the pid and then the ppid.  */
 #if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) ||       \
   defined(__OpenBSD__) || defined(__GLIBC__) || defined(__GNU__)
-#define KWSYSPE_PS_COMMAND "ps axo pid,ppid"
-#define KWSYSPE_PS_FORMAT "%d %d\n"
+#  define KWSYSPE_PS_COMMAND "ps axo pid,ppid"
+#  define KWSYSPE_PS_FORMAT "%d %d\n"
 #elif defined(__sun) && (defined(__SVR4) || defined(__svr4__)) /* Solaris */
-#define KWSYSPE_PS_COMMAND "ps -e -o pid,ppid"
-#define KWSYSPE_PS_FORMAT "%d %d\n"
+#  define KWSYSPE_PS_COMMAND "ps -e -o pid,ppid"
+#  define KWSYSPE_PS_FORMAT "%d %d\n"
 #elif defined(__hpux) || defined(__sun__) || defined(__sgi) ||                \
   defined(_AIX) || defined(__sparc)
-#define KWSYSPE_PS_COMMAND "ps -ef"
-#define KWSYSPE_PS_FORMAT "%*s %d %d %*[^\n]\n"
+#  define KWSYSPE_PS_COMMAND "ps -ef"
+#  define KWSYSPE_PS_FORMAT "%*s %d %d %*[^\n]\n"
 #elif defined(__QNX__)
-#define KWSYSPE_PS_COMMAND "ps -Af"
-#define KWSYSPE_PS_FORMAT "%*d %d %d %*[^\n]\n"
+#  define KWSYSPE_PS_COMMAND "ps -Af"
+#  define KWSYSPE_PS_FORMAT "%*d %d %d %*[^\n]\n"
 #elif defined(__CYGWIN__)
-#define KWSYSPE_PS_COMMAND "ps aux"
-#define KWSYSPE_PS_FORMAT "%d %d %*[^\n]\n"
+#  define KWSYSPE_PS_COMMAND "ps aux"
+#  define KWSYSPE_PS_FORMAT "%d %d %*[^\n]\n"
 #endif
 
 void kwsysProcess_KillPID(unsigned long process_id)
@@ -2509,13 +2509,13 @@ static void kwsysProcessKill(pid_t process_id)
 #if defined(__linux__) || defined(__CYGWIN__)
   /* First try using the /proc filesystem.  */
   if ((procdir = opendir("/proc")) != NULL) {
-#if defined(MAXPATHLEN)
+#  if defined(MAXPATHLEN)
     char fname[MAXPATHLEN];
-#elif defined(PATH_MAX)
+#  elif defined(PATH_MAX)
     char fname[PATH_MAX];
-#else
+#  else
     char fname[4096];
-#endif
+#  endif
     char buffer[KWSYSPE_PIPE_BUFFER_SIZE + 1];
     struct dirent* d;
 
@@ -2715,9 +2715,9 @@ static int kwsysProcessesAdd(kwsysProcess* cp)
 #if KWSYSPE_USE_SIGINFO
       newSigAction.sa_sigaction = kwsysProcessesSignalHandler;
       newSigAction.sa_flags = SA_NOCLDSTOP | SA_SIGINFO;
-#ifdef SA_RESTART
+#  ifdef SA_RESTART
       newSigAction.sa_flags |= SA_RESTART;
-#endif
+#  endif
 #else
       newSigAction.sa_handler = kwsysProcessesSignalHandler;
       newSigAction.sa_flags = SA_NOCLDSTOP;
@@ -2804,7 +2804,7 @@ static void kwsysProcessesSignalHandler(int signum
                                         ,
                                         siginfo_t* info, void* ucontext
 #endif
-                                        )
+)
 {
   int i, j, procStatus, old_errno = errno;
 #if KWSYSPE_USE_SIGINFO

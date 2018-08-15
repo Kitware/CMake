@@ -1,5 +1,5 @@
 #if defined(_MSC_VER) && _MSC_VER == 1800 && _MSC_FULL_VER < 180030723
-#error "VS 2013 safely supports this only with Update 3 or greater"
+#  error "VS 2013 safely supports this only with Update 3 or greater"
 #endif
 
 // Dummy implementation. Test only the compiler feature.

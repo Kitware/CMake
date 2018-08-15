@@ -82,17 +82,20 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     if (strcmp(tt, cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE)) ==
         0) {
       targetType = cmStateEnums::EXECUTABLE;
-    } else if (strcmp(tt, cmState::GetTargetTypeName(
-                            cmStateEnums::STATIC_LIBRARY)) == 0) {
+    } else if (strcmp(tt,
+                      cmState::GetTargetTypeName(
+                        cmStateEnums::STATIC_LIBRARY)) == 0) {
       targetType = cmStateEnums::STATIC_LIBRARY;
     } else {
       this->Makefile->IssueMessage(
-        cmake::FATAL_ERROR, std::string("Invalid value '") + tt +
+        cmake::FATAL_ERROR,
+        std::string("Invalid value '") + tt +
           "' for "
           "CMAKE_TRY_COMPILE_TARGET_TYPE.  Only "
           "'" +
-          cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE) + "' and "
-                                                                 "'" +
+          cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE) +
+          "' and "
+          "'" +
           cmState::GetTargetTypeName(cmStateEnums::STATIC_LIBRARY) +
           "' "
           "are allowed.");
@@ -224,8 +227,9 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
               cmake::FATAL_ERROR,
               "Only libraries may be used as try_compile or try_run IMPORTED "
               "LINK_LIBRARIES.  Got " +
-                std::string(tgt->GetName()) + " of "
-                                              "type " +
+                std::string(tgt->GetName()) +
+                " of "
+                "type " +
                 cmState::GetTargetTypeName(tgt->GetType()) + ".");
             return -1;
         }
@@ -487,8 +491,9 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       const char* flags = this->Makefile->GetDefinition(langFlags);
       fprintf(fout, "set(CMAKE_%s_FLAGS %s)\n", li.c_str(),
               cmOutputConverter::EscapeForCMake(flags ? flags : "").c_str());
-      fprintf(fout, "set(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}"
-                    " ${COMPILE_DEFINITIONS}\")\n",
+      fprintf(fout,
+              "set(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}"
+              " ${COMPILE_DEFINITIONS}\")\n",
               li.c_str(), li.c_str());
     }
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0066)) {
@@ -563,8 +568,9 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         }
         break;
     }
-    fprintf(fout, "set(CMAKE_EXE_LINKER_FLAGS \"${CMAKE_EXE_LINKER_FLAGS}"
-                  " ${EXE_LINKER_FLAGS}\")\n");
+    fprintf(fout,
+            "set(CMAKE_EXE_LINKER_FLAGS \"${CMAKE_EXE_LINKER_FLAGS}"
+            " ${EXE_LINKER_FLAGS}\")\n");
     fprintf(fout, "include_directories(${INCLUDE_DIRECTORIES})\n");
     fprintf(fout, "set(CMAKE_SUPPRESS_REGENERATION 1)\n");
     fprintf(fout, "link_directories(${LINK_DIRECTORIES})\n");
@@ -818,7 +824,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   // actually do the try compile now that everything is setup
   int res = this->Makefile->TryCompile(
     sourceDirectory, this->BinaryDirectory, projectName, targetName,
-    this->SrcFileSignature, &cmakeFlags, output);
+    this->SrcFileSignature, cmake::NO_BUILD_PARALLEL_LEVEL, &cmakeFlags,
+    output);
   if (erroroc) {
     cmSystemTools::SetErrorOccured();
   }

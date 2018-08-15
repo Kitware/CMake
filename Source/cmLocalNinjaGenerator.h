@@ -59,7 +59,10 @@ public:
     return this->HomeRelativeOutputPath;
   }
 
-  std::string BuildCommandLine(const std::vector<std::string>& cmdLines);
+  std::string BuildCommandLine(
+    std::vector<std::string> const& cmdLines,
+    std::string const& customStep = std::string(),
+    cmGeneratorTarget const* target = nullptr) const;
 
   void AppendTargetOutputs(cmGeneratorTarget* target, cmNinjaDeps& outputs);
   void AppendTargetDepends(
@@ -97,6 +100,10 @@ private:
   void WriteCustomCommandBuildStatements();
 
   std::string MakeCustomLauncher(cmCustomCommandGenerator const& ccg);
+
+  std::string WriteCommandScript(std::vector<std::string> const& cmdLines,
+                                 std::string const& customStep,
+                                 cmGeneratorTarget const* target) const;
 
   std::string HomeRelativeOutputPath;
 

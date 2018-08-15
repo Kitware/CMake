@@ -17,7 +17,7 @@
 #include <sys/stat.h>
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
-#include <unistd.h> // For access permissions for use with access()
+#  include <unistd.h> // For access permissions for use with access()
 #endif
 
 // Required for va_list
@@ -318,11 +318,11 @@ public:
  * Cross platform wrapper for stat struct
  */
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#if defined(__BORLANDC__)
+#  if defined(__BORLANDC__)
   typedef struct stati64 Stat_t;
-#else
+#  else
   typedef struct _stat64 Stat_t;
-#endif
+#  endif
 #else
   typedef struct stat Stat_t;
 #endif
@@ -523,9 +523,8 @@ public:
   static bool GetShortPath(const std::string& path, std::string& result);
 
   /**
-   * Read line from file. Make sure to get everything. Due to a buggy stream
-   * library on the HP and another on Mac OS X, we need this very carefully
-   * written version of getline. Returns true if any data were read before the
+   * Read line from file. Make sure to read a full line and truncates it if
+   * requested via sizeLimit. Returns true if any data were read before the
    * end-of-file was reached. If the has_newline argument is specified, it will
    * be true when the line read had a newline character.
    */

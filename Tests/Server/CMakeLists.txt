@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.4)
 project(Server CXX)
 
-find_package(PythonInterp REQUIRED)
+find_package(Python REQUIRED)
 
 macro(do_test bsname file type)
-  execute_process(COMMAND ${PYTHON_EXECUTABLE}
+  execute_process(COMMAND ${Python_EXECUTABLE}
     -B # no .pyc files
     "${CMAKE_SOURCE_DIR}/${type}-test.py"
     "${CMAKE_COMMAND}"

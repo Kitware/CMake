@@ -31,9 +31,6 @@ public:
       path from the build directory to the target file.  */
   cmDepends(cmLocalGenerator* lg = nullptr, const char* targetDir = "");
 
-  /** at what level will the compile be done from */
-  void SetCompileDirectory(const char* dir) { this->CompileDirectory = dir; }
-
   /** Set the local generator for the directory in which we are
       scanning dependencies.  This is not a full local generator; it
       has been setup to do relative path conversions for the current
@@ -94,9 +91,6 @@ protected:
   // Finalize the dependency information for the target.
   virtual bool Finalize(std::ostream& makeDepends,
                         std::ostream& internalDepends);
-
-  // The directory in which the build rule for the target file is executed.
-  std::string CompileDirectory;
 
   // The local generator.
   cmLocalGenerator* LocalGenerator;

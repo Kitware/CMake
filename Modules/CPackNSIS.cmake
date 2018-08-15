@@ -126,7 +126,7 @@
 # .. variable:: CPACK_NSIS_MENU_LINKS
 #
 #  Specify links in [application] menu.  This should contain a list of pair
-#  "link" "link name". The link may be an URL or a path relative to
+#  "link" "link name". The link may be a URL or a path relative to
 #  installation prefix.  Like::
 #
 #   set(CPACK_NSIS_MENU_LINKS

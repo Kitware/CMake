@@ -10,7 +10,7 @@
 #include "cmSystemTools.h"
 
 #ifdef Q_OS_WIN
-#include "qt_windows.h" // For SetErrorMode
+#  include "qt_windows.h" // For SetErrorMode
 #endif
 
 QCMake::QCMake(QObject* p)

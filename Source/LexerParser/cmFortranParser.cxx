@@ -1563,7 +1563,7 @@ yyreduce:
 #line 119 "cmFortranParser.y" /* yacc.c:1646  */
     {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
-    cmFortranParser_RuleUse(parser, (yyvsp[-4].string));
+    cmFortranParser_RuleSubmodule(parser, (yyvsp[-4].string), (yyvsp[-2].string));
     free((yyvsp[-4].string));
     free((yyvsp[-2].string));
   }
@@ -1574,7 +1574,7 @@ yyreduce:
 #line 125 "cmFortranParser.y" /* yacc.c:1646  */
     {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
-    cmFortranParser_RuleUse(parser, (yyvsp[-6].string));
+    cmFortranParser_RuleSubmoduleNested(parser, (yyvsp[-6].string), (yyvsp[-4].string), (yyvsp[-2].string));
     free((yyvsp[-6].string));
     free((yyvsp[-4].string));
     free((yyvsp[-2].string));

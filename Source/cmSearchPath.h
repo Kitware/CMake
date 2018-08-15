@@ -39,10 +39,10 @@ public:
   void AddCMakePrefixPath(const std::string& variable);
   void AddEnvPrefixPath(const std::string& variable, bool stripBin = false);
   void AddSuffixes(const std::vector<std::string>& suffixes);
-
-protected:
   void AddPrefixPaths(const std::vector<std::string>& paths,
                       const char* base = nullptr);
+
+protected:
   void AddPathInternal(const std::string& path, const char* base = nullptr);
 
   cmFindCommon* FC;

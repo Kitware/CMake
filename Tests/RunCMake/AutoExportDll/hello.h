@@ -1,11 +1,11 @@
 #ifndef _MSC_VER
-#define winexport
+#  define winexport
 #else
-#ifdef autoexport_EXPORTS
-#define winexport
-#else
-#define winexport __declspec(dllimport)
-#endif
+#  ifdef autoexport_EXPORTS
+#    define winexport
+#  else
+#    define winexport __declspec(dllimport)
+#  endif
 #endif
 
 class Hello

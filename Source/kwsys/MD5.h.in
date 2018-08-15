@@ -10,19 +10,19 @@
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
 #if !defined(KWSYS_NAMESPACE)
-#define kwsys_ns(x) @KWSYS_NAMESPACE@##x
-#define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
+#  define kwsys_ns(x) @KWSYS_NAMESPACE@##x
+#  define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
 #endif
 #if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-#define kwsysMD5 kwsys_ns(MD5)
-#define kwsysMD5_s kwsys_ns(MD5_s)
-#define kwsysMD5_New kwsys_ns(MD5_New)
-#define kwsysMD5_Delete kwsys_ns(MD5_Delete)
-#define kwsysMD5_Initialize kwsys_ns(MD5_Initialize)
-#define kwsysMD5_Append kwsys_ns(MD5_Append)
-#define kwsysMD5_Finalize kwsys_ns(MD5_Finalize)
-#define kwsysMD5_FinalizeHex kwsys_ns(MD5_FinalizeHex)
-#define kwsysMD5_DigestToHex kwsys_ns(MD5_DigestToHex)
+#  define kwsysMD5 kwsys_ns(MD5)
+#  define kwsysMD5_s kwsys_ns(MD5_s)
+#  define kwsysMD5_New kwsys_ns(MD5_New)
+#  define kwsysMD5_Delete kwsys_ns(MD5_Delete)
+#  define kwsysMD5_Initialize kwsys_ns(MD5_Initialize)
+#  define kwsysMD5_Append kwsys_ns(MD5_Append)
+#  define kwsysMD5_Finalize kwsys_ns(MD5_Finalize)
+#  define kwsysMD5_FinalizeHex kwsys_ns(MD5_FinalizeHex)
+#  define kwsysMD5_DigestToHex kwsys_ns(MD5_DigestToHex)
 #endif
 
 #if defined(__cplusplus)
@@ -79,19 +79,19 @@ kwsysEXPORT void kwsysMD5_DigestToHex(unsigned char const digest[16],
 /* If we are building a kwsys .c or .cxx file, let it use these macros.
    Otherwise, undefine them to keep the namespace clean.  */
 #if !defined(KWSYS_NAMESPACE)
-#undef kwsys_ns
-#undef kwsysEXPORT
-#if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
-#undef kwsysMD5
-#undef kwsysMD5_s
-#undef kwsysMD5_New
-#undef kwsysMD5_Delete
-#undef kwsysMD5_Initialize
-#undef kwsysMD5_Append
-#undef kwsysMD5_Finalize
-#undef kwsysMD5_FinalizeHex
-#undef kwsysMD5_DigestToHex
-#endif
+#  undef kwsys_ns
+#  undef kwsysEXPORT
+#  if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+#    undef kwsysMD5
+#    undef kwsysMD5_s
+#    undef kwsysMD5_New
+#    undef kwsysMD5_Delete
+#    undef kwsysMD5_Initialize
+#    undef kwsysMD5_Append
+#    undef kwsysMD5_Finalize
+#    undef kwsysMD5_FinalizeHex
+#    undef kwsysMD5_DigestToHex
+#  endif
 #endif
 
 #endif

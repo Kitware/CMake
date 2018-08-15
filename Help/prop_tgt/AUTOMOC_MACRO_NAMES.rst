@@ -25,8 +25,8 @@ with Qt.
 Example
 ^^^^^^^
 
-In this case the the ``Q_OBJECT`` macro is hidden inside an other macro
-called ``CUSTOM_MACRO``. To let CMake know that source files, that contain
-``CUSTOM_MACRO``, need to be ``moc`` processed, we call::
+In this case the ``Q_OBJECT`` macro is hidden inside another macro
+called ``CUSTOM_MACRO``.  To let CMake know that source files that contain
+``CUSTOM_MACRO`` need to be ``moc`` processed, we call::
 
   set_property(TARGET tgt APPEND PROPERTY AUTOMOC_MACRO_NAMES "CUSTOM_MACRO")

@@ -33,7 +33,7 @@ add_CMakeOnly_test(CompilerIdCXX)
 if(CMAKE_Fortran_COMPILER)
   add_CMakeOnly_test(CompilerIdFortran)
 endif()
-if(CMAKE_GENERATOR MATCHES "Visual Studio ([^89]|[89][0-9])")
+if(CMAKE_GENERATOR MATCHES "Visual Studio ([^9]|9[0-9])")
   add_CMakeOnly_test(CompilerIdCSharp)
 endif()
 

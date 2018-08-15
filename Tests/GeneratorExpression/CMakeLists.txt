@@ -57,6 +57,11 @@ add_custom_target(check-part1 ALL
     -Dtest_strequal_angle_r_comma=$<STREQUAL:$<ANGLE-R>,$<COMMA>>
     -Dtest_strequal_both_empty=$<STREQUAL:,>
     -Dtest_strequal_one_empty=$<STREQUAL:something,>
+    -Dtest_inlist_true=$<IN_LIST:a,a$<SEMICOLON>b>
+    -Dtest_inlist_false=$<IN_LIST:c,a$<SEMICOLON>b>
+    -Dtest_inlist_empty_1=$<IN_LIST:a,>
+    -Dtest_inlist_empty_2=$<IN_LIST:,a>
+    -Dtest_inlist_empty_3=$<IN_LIST:,>
     -Dtest_angle_r=$<ANGLE-R>
     -Dtest_comma=$<COMMA>
     -Dtest_semicolon=$<SEMICOLON>

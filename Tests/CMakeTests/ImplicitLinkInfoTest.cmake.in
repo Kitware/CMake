@@ -349,6 +349,12 @@ set(aix_xlf90_64_libs "xlf90;xlopt;xlf;xlomp_ser;m;c")
 set(aix_xlf90_64_dirs "/usr/lpp/xlf/lib")
 list(APPEND platforms aix_xlf90_64)
 
+# g++ dummy.c -v
+set(aix_g++_text " /prefix/libexec/gcc/powerpc-ibm-aix7.2.0.0/7.2.0/collect2 -bpT:0x10000000 -bpD:0x20000000 -btextro /lib/crt0.o /prefix/lib/gcc/powerpc-ibm-aix7.2.0.0/7.2.0/crtcxa.o /prefix/lib/gcc/powerpc-ibm-aix7.2.0.0/7.2.0/crtdbase.o -L/prefix/lib/gcc/powerpc-ibm-aix7.2.0.0/7.2.0 -L/prefix/lib/gcc/powerpc-ibm-aix7.2.0.0/7.2.0/../../.. /tmp//ccKROJ1f.o -lstdc++ -lm -lgcc_s /prefix/lib/gcc/powerpc-ibm-aix7.2.0.0/7.2.0/libgcc.a -lc -lgcc_s /prefix/lib/gcc/powerpc-ibm-aix7.2.0.0/7.2.0/libgcc.a")
+set(aix_g++_libs "stdc++;m;gcc_s;/prefix/lib/gcc/powerpc-ibm-aix7.2.0.0/7.2.0/libgcc.a;c;gcc_s;/prefix/lib/gcc/powerpc-ibm-aix7.2.0.0/7.2.0/libgcc.a")
+set(aix_g++_dirs "/prefix/lib/gcc/powerpc-ibm-aix7.2.0.0/7.2.0;/prefix/lib")
+list(APPEND platforms aix_g++)
+
 #-----------------------------------------------------------------------------
 # HP
 

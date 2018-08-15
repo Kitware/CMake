@@ -461,255 +461,910 @@ if(Relocatable_FOUND)
 endif()
 
 
-
 #-----------------------------------------------------------------------------
 # Test write_basic_config_version_file().
 
-# also test that an empty CMAKE_SIZEOF_VOID_P is accepted:
-set(_CMAKE_SIZEOF_VOID_P ${CMAKE_SIZEOF_VOID_P})
-set(CMAKE_SIZEOF_VOID_P "")
-
-write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/Foo123ConfigVersion.cmake
-                                 VERSION 1.2.3
-                                 COMPATIBILITY AnyNewerVersion)
-
-set(CMAKE_SIZEOF_VOID_P ${_CMAKE_SIZEOF_VOID_P})
-
-set(PACKAGE_FIND_VERSION 2.3.4)
-include(${CMAKE_CURRENT_BINARY_DIR}/Foo123ConfigVersion.cmake)
-if(PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Found Foo123 with version 1.2.3, but 2.3.4 was requested !")
-endif()
-
-set(PACKAGE_FIND_VERSION 0.0.1)
-include(${CMAKE_CURRENT_BINARY_DIR}/Foo123ConfigVersion.cmake)
-if(NOT PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Did not find Foo123 with version 1.2.3 (0.0.1 was requested) !")
-endif()
-
-if(PACKAGE_VERSION_UNSUITABLE)
-  message(SEND_ERROR "PACKAGE_VERSION_UNSUITABLE set, but must not be !")
-endif()
-
-set(PACKAGE_FIND_VERSION 1.0.0)
-include(${CMAKE_CURRENT_BINARY_DIR}/Foo123ConfigVersion.cmake)
-if(NOT PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Did not find Foo123 with version 1.2.3 (1.0.0 was requested) !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
-
-set(PACKAGE_FIND_VERSION 1.2.3)
-include(${CMAKE_CURRENT_BINARY_DIR}/Foo123ConfigVersion.cmake)
-if(NOT PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Did not find Foo123 with version 1.2.3 (1.2.3 was requested) !")
-endif()
-if(NOT PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT not set, although it should be !")
-endif()
-
-
-#######################
 include(WriteBasicConfigVersionFile)
 
-write_basic_config_version_file(${CMAKE_CURRENT_BINARY_DIR}/Boo123ConfigVersion.cmake
-                                VERSION 1.2.3
-                                COMPATIBILITY SameMajorVersion)
+set(_compatibilities AnyNewerVersion
+                     SameMajorVersion
+                     SameMinorVersion
+                     ExactVersion)
 
-unset(PACKAGE_VERSION_UNSUITABLE)
-set(PACKAGE_VERSION_EXACT FALSE)
-set(PACKAGE_FIND_VERSION 2.3.4)
-set(PACKAGE_FIND_VERSION_MAJOR 2)
-include(${CMAKE_CURRENT_BINARY_DIR}/Boo123ConfigVersion.cmake)
-if(PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Found Boo123 with version 1.2.3, but 2.3.4 was requested !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
+function(TEST_WRITE_BASIC_CONFIG_VERSION_FILE_PREPARE _version_installed)
+  set(_same_CMAKE_SIZEOF_VOID_P ${CMAKE_SIZEOF_VOID_P})
+  set(_no_CMAKE_SIZEOF_VOID_P "")
+  math(EXPR _diff_CMAKE_SIZEOF_VOID_P "${CMAKE_SIZEOF_VOID_P} + 1")
+  foreach(_compat ${_compatibilities})
+    set(_pkg ${_compat}${_version_installed})
+    string(REPLACE "." "" _pkg ${_pkg})
+    set(_filename "${CMAKE_CURRENT_BINARY_DIR}/${_pkg}ConfigVersion.cmake")
+    set(_filename_novoid "${CMAKE_CURRENT_BINARY_DIR}/${_pkg}NoVoidConfigVersion.cmake")
+    set(_filename_diffvoid "${CMAKE_CURRENT_BINARY_DIR}/${_pkg}DiffVoidConfigVersion.cmake")
 
-set(PACKAGE_FIND_VERSION 0.0.1)
-set(PACKAGE_FIND_VERSION_MAJOR 0)
-include(${CMAKE_CURRENT_BINARY_DIR}/Boo123ConfigVersion.cmake)
-if(PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Found Boo123 with version 1.2.3, but 0.0.1 was requested !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
+    set(CMAKE_SIZEOF_VOID_P ${_same_CMAKE_SIZEOF_VOID_P})
+    write_basic_config_version_file("${_filename}"
+                                    VERSION ${_version_installed}
+                                    COMPATIBILITY ${_compat})
 
-set(PACKAGE_FIND_VERSION 1.0.0)
-set(PACKAGE_FIND_VERSION_MAJOR 1)
-include(${CMAKE_CURRENT_BINARY_DIR}/Boo123ConfigVersion.cmake)
-if(NOT PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Did not find Boo123 with version 1.2.3 (1.0.0 was requested) !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
+    # Test that an empty CMAKE_SIZEOF_VOID_P is accepted:
+    set(CMAKE_SIZEOF_VOID_P ${_no_CMAKE_SIZEOF_VOID_P})
+    write_basic_config_version_file("${_filename_novoid}"
+                                    VERSION ${_version_installed}
+                                    COMPATIBILITY ${_compat})
 
-set(PACKAGE_FIND_VERSION 1.2.3)
-set(PACKAGE_FIND_VERSION_MAJOR 1)
-include(${CMAKE_CURRENT_BINARY_DIR}/Boo123ConfigVersion.cmake)
-if(NOT PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Did not find Boo123 with version 1.2.3 (1.2.3 was requested) !")
-endif()
-if(NOT PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT not set, although it should be !")
-endif()
+    # Test that a different CMAKE_SIZEOF_VOID_P results in
+    # PACKAGE_VERSION_UNSUITABLE
+    set(CMAKE_SIZEOF_VOID_P ${_diff_CMAKE_SIZEOF_VOID_P})
+    write_basic_config_version_file("${_filename_diffvoid}"
+                                    VERSION ${_version_installed}
+                                    COMPATIBILITY ${_compat})
+  endforeach()
+endfunction()
 
-if(PACKAGE_VERSION_UNSUITABLE)
-  message(SEND_ERROR "PACKAGE_VERSION_UNSUITABLE set, but must not be !")
-endif()
+macro(TEST_WRITE_BASIC_CONFIG_VERSION_FILE_CHECK _filename)
+  include("${_filename}")
 
-#######################
+  if(_expected_compatible AND NOT PACKAGE_VERSION_COMPATIBLE)
+    message(SEND_ERROR "Did not find package with version ${_version_installed} (${_version_requested} was requested)!")
+  elseif(NOT _expected_compatible AND PACKAGE_VERSION_COMPATIBLE)
+    message(SEND_ERROR "Found package with version ${_version_installed}, but ${_version_requested} was requested!")
+  endif()
 
-write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/Zot123ConfigVersion.cmake
-                                 VERSION 1.2.3.17
-                                 COMPATIBILITY SameMinorVersion)
+  if(${_expected_exact} AND NOT PACKAGE_VERSION_EXACT)
+    message(SEND_ERROR "PACKAGE_VERSION_EXACT not set, although it should be!")
+  elseif(NOT ${_expected_exact} AND PACKAGE_VERSION_EXACT)
+    message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be!")
+  endif()
 
-unset(PACKAGE_VERSION_UNSUITABLE)
-set(PACKAGE_VERSION_EXACT FALSE)
-set(PACKAGE_FIND_VERSION 2.3.4)
-set(PACKAGE_FIND_VERSION_MAJOR 2)
-set(PACKAGE_FIND_VERSION_MINOR 3)
-include(${CMAKE_CURRENT_BINARY_DIR}/Zot123ConfigVersion.cmake)
-if(PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Found Zot123 with version 1.2.3.17, but 2.3.4 was requested !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
+  if(${_expected_unsuitable} AND NOT PACKAGE_VERSION_UNSUITABLE)
+    message(SEND_ERROR "PACKAGE_VERSION_UNSUITABLE set, although it should not be!")
+  elseif(NOT ${_expected_unsuitable} AND PACKAGE_VERSION_UNSUITABLE)
+    message(SEND_ERROR "PACKAGE_VERSION_UNSUITABLE not set, although it should be!")
+  endif()
 
-set(PACKAGE_FIND_VERSION 0.0.1)
-set(PACKAGE_FIND_VERSION_MAJOR 0)
-set(PACKAGE_FIND_VERSION_MINOR 0)
-include(${CMAKE_CURRENT_BINARY_DIR}/Zot123ConfigVersion.cmake)
-if(PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Found Zot123 with version 1.2.3.17, but 0.0.1 was requested !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
+  unset(PACKAGE_VERSION_COMPATIBLE)
+  unset(PACKAGE_VERSION_EXACT)
+  unset(PACKAGE_VERSION_UNSUITABLE)
+endmacro()
 
-set(PACKAGE_FIND_VERSION 1.0.0)
-set(PACKAGE_FIND_VERSION_MAJOR 1)
-set(PACKAGE_FIND_VERSION_MINOR 0)
-include(${CMAKE_CURRENT_BINARY_DIR}/Zot123ConfigVersion.cmake)
-if(PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Found Zot123 with version 1.2.3.17 (1.0.0 was requested) !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
+function(TEST_WRITE_BASIC_CONFIG_VERSION_FILE _version_installed
+                                              _version_requested
+                                              _expected_compatible_AnyNewerVersion
+                                              _expected_compatible_SameMajorVersion
+                                              _expected_compatible_SameMinorVersion
+                                              _expected_compatible_ExactVersion)
+  set(PACKAGE_FIND_VERSION ${_version_requested})
+  if("${PACKAGE_FIND_VERSION}" MATCHES "^([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)$")
+    set(PACKAGE_FIND_VERSION_MAJOR "${CMAKE_MATCH_1}")
+    set(PACKAGE_FIND_VERSION_MINOR "${CMAKE_MATCH_2}")
+    set(PACKAGE_FIND_VERSION_PATCH "${CMAKE_MATCH_3}")
+    set(PACKAGE_FIND_VERSION_TWEAK "${CMAKE_MATCH_4}")
+  elseif("${PACKAGE_FIND_VERSION}" MATCHES "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$")
+    set(PACKAGE_FIND_VERSION_MAJOR "${CMAKE_MATCH_1}")
+    set(PACKAGE_FIND_VERSION_MINOR "${CMAKE_MATCH_2}")
+    set(PACKAGE_FIND_VERSION_PATCH "${CMAKE_MATCH_3}")
+    set(PACKAGE_FIND_VERSION_TWEAK "")
+  elseif("${PACKAGE_FIND_VERSION}" MATCHES "^([0-9]+)\\.([0-9]+)$")
+    set(PACKAGE_FIND_VERSION_MAJOR "${CMAKE_MATCH_1}")
+    set(PACKAGE_FIND_VERSION_MINOR "${CMAKE_MATCH_2}")
+    set(PACKAGE_FIND_VERSION_PATCH "")
+    set(PACKAGE_FIND_VERSION_TWEAK "")
+  elseif("${PACKAGE_FIND_VERSION}" MATCHES "^([0-9]+)$")
+    set(PACKAGE_FIND_VERSION_MAJOR "${CMAKE_MATCH_1}")
+    set(PACKAGE_FIND_VERSION_MINOR "")
+    set(PACKAGE_FIND_VERSION_PATCH "")
+    set(PACKAGE_FIND_VERSION_TWEAK "")
+  elseif("${PACKAGE_FIND_VERSION}" STREQUAL "")
+    set(PACKAGE_FIND_VERSION_MAJOR "")
+    set(PACKAGE_FIND_VERSION_MINOR "")
+    set(PACKAGE_FIND_VERSION_PATCH "")
+    set(PACKAGE_FIND_VERSION_TWEAK "")
+  else()
+    message(FATAL_ERROR "_version_requested (${_version_requested}) should be a version number")
+  endif()
 
-set(PACKAGE_FIND_VERSION 1.2.0)
-set(PACKAGE_FIND_VERSION_MAJOR 1)
-set(PACKAGE_FIND_VERSION_MINOR 2)
-include(${CMAKE_CURRENT_BINARY_DIR}/Zot123ConfigVersion.cmake)
-if(NOT PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Did not find Zot123 with version 1.2.3.17 (1.2.0 was requested) !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
+  if ("${_version_installed}" STREQUAL "${_version_requested}")
+    set(_expected_exact 1)
+  else()
+    set(_expected_exact 0)
+  endif()
 
-set(PACKAGE_FIND_VERSION 1.2.3)
-set(PACKAGE_FIND_VERSION_MAJOR 1)
-set(PACKAGE_FIND_VERSION_MINOR 2)
-include(${CMAKE_CURRENT_BINARY_DIR}/Zot123ConfigVersion.cmake)
-if(NOT PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Did not find Zot123 with version 1.2.3.17 (1.2.3 was requested) !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
+  unset(PACKAGE_VERSION_COMPATIBLE)
+  unset(PACKAGE_VERSION_EXACT)
+  unset(PACKAGE_VERSION_UNSUITABLE)
 
-set(PACKAGE_FIND_VERSION 1.2.3.17)
-set(PACKAGE_FIND_VERSION_MAJOR 1)
-set(PACKAGE_FIND_VERSION_MINOR 2)
-include(${CMAKE_CURRENT_BINARY_DIR}/Zot123ConfigVersion.cmake)
-if(NOT PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Did not find Zot123 with version 1.2.3.17 (1.2.3.17 was requested) !")
-endif()
-if(NOT PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT not set, although it should be !")
-endif()
+  foreach(_compat ${_compatibilities})
+    set(_pkg ${_compat}${_version_installed})
+    string(REPLACE "." "" _pkg ${_pkg})
+    set(_filename "${CMAKE_CURRENT_BINARY_DIR}/${_pkg}ConfigVersion.cmake")
+    set(_filename_novoid "${CMAKE_CURRENT_BINARY_DIR}/${_pkg}NoVoidConfigVersion.cmake")
+    set(_filename_diffvoid "${CMAKE_CURRENT_BINARY_DIR}/${_pkg}DiffVoidConfigVersion.cmake")
 
-if(PACKAGE_VERSION_UNSUITABLE)
-  message(SEND_ERROR "PACKAGE_VERSION_UNSUITABLE set, but must not be !")
-endif()
+    set(_expected_compatible ${_expected_compatible_${_compat}})
 
-#######################
+    # Test "normal" version
+    set(_expected_unsuitable 0)
+    message("TEST write_basic_config_version_file(VERSION ${_version_installed} \
+COMPATIBILITY ${_compat}) vs. ${_version_requested}                                 \
+(expected compatible = ${_expected_compatible}, exact = ${_expected_exact}, unsuitable = ${_expected_unsuitable})")
+    test_write_basic_config_version_file_check("${_filename}")
 
-write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/Bar123ConfigVersion.cmake
-                                 VERSION 1.2.3.17
-                                 COMPATIBILITY ExactVersion)
+    # test empty CMAKE_SIZEOF_VOID_P version:
+    set(_expected_unsuitable 0)
+    message("TEST write_basic_config_version_file(VERSION ${_version_installed} \
+COMPATIBILITY ${_compat}) vs. ${_version_requested} (no CMAKE_SIZEOF_VOID_P)        \
+(expected compatible = ${_expected_compatible}, exact = ${_expected_exact}, unsuitable = ${_expected_unsuitable})")
+    test_write_basic_config_version_file_check("${_filename_novoid}")
 
-unset(PACKAGE_VERSION_UNSUITABLE)
-set(PACKAGE_VERSION_EXACT FALSE)
-set(PACKAGE_FIND_VERSION 2.3.4)
-include(${CMAKE_CURRENT_BINARY_DIR}/Bar123ConfigVersion.cmake)
-if(PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Found Bar123 with version 1.2.3.17 (2.3.4 was requested) !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
+    # test different CMAKE_SIZEOF_VOID_P version:
+    set(_expected_unsuitable 1)
+    message("TEST write_basic_config_version_file(VERSION ${_version_installed} \
+COMPATIBILITY ${_compat}) vs. ${_version_requested} (different CMAKE_SIZEOF_VOID_P) \
+(expected compatible = ${_expected_compatible}, exact = ${_expected_exact}, unsuitable = ${_expected_unsuitable})")
+    test_write_basic_config_version_file_check("${_filename_diffvoid}")
 
-set(PACKAGE_FIND_VERSION 1.2)
-include(${CMAKE_CURRENT_BINARY_DIR}/Bar123ConfigVersion.cmake)
-if(PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Found Bar123 with version 1.2.3.17 (1.2 was requested) !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
+  endforeach()
+endfunction()
 
-set(PACKAGE_FIND_VERSION 1)
-include(${CMAKE_CURRENT_BINARY_DIR}/Bar123ConfigVersion.cmake)
-if(PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Found Bar123 with version 1.2.3.17 (1 was requested) !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
 
-set(PACKAGE_FIND_VERSION 1.2.3.4)
-include(${CMAKE_CURRENT_BINARY_DIR}/Bar123ConfigVersion.cmake)
-if(NOT PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Did not find Bar123 with version 1.2.3.17 (1.2.3.4 was requested) !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
+test_write_basic_config_version_file_prepare(4)
+test_write_basic_config_version_file_prepare(4.5)
+test_write_basic_config_version_file_prepare(4.5.6)
+test_write_basic_config_version_file_prepare(4.5.6.7)
 
-set(PACKAGE_FIND_VERSION 1.2.3)
-set(PACKAGE_VERSION_EXACT FALSE)
-set(PACKAGE_VERSION_COMPATIBLE FALSE)
-include(${CMAKE_CURRENT_BINARY_DIR}/Bar123ConfigVersion.cmake)
-if(NOT PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Did not find Bar123 with version 1.2.3.17 (1.2.3 was requested) !")
-endif()
-if(PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT set, although it should not be !")
-endif()
+#                                                      AnyNewerVersion
+#                                                      |  SameMajorVersion
+#                                                      |  |  SameMinorVersion
+#                                                      |  |  |  ExactVersion
+#                                                      |  |  |  |
+test_write_basic_config_version_file(4        0        1  0  0  0) # Request 0
+test_write_basic_config_version_file(4        2        1  0  0  0) # Request [older major]
+test_write_basic_config_version_file(4        4        1  1  1  1) # Request [same major]
+test_write_basic_config_version_file(4        9        0  0  0  0) # Request [newer major]
 
-set(PACKAGE_FIND_VERSION 1.2.3.17)
-set(PACKAGE_VERSION_EXACT FALSE)
-set(PACKAGE_VERSION_COMPATIBLE FALSE)
-include(${CMAKE_CURRENT_BINARY_DIR}/Bar123ConfigVersion.cmake)
-if(NOT PACKAGE_VERSION_COMPATIBLE)
-  message(SEND_ERROR "Did not find Bar123 with version 1.2.3.17 (1.2.3.17 was requested) !")
-endif()
-if(NOT PACKAGE_VERSION_EXACT)
-  message(SEND_ERROR "PACKAGE_VERSION_EXACT not set, although it should be !")
-endif()
+test_write_basic_config_version_file(4        0.0      1  0  0  0) # Request 0.0
+test_write_basic_config_version_file(4        0.9      1  0  0  0) # Request 0.[newer minor]
+test_write_basic_config_version_file(4        2.0      1  0  0  0) # Request [older major].0
+test_write_basic_config_version_file(4        2.9      1  0  0  0) # Request [older major].[newer minor]
+test_write_basic_config_version_file(4        4.0      1  1  0  0) # Request [same major].0
+test_write_basic_config_version_file(4        4.9      0  0  0  0) # Request [same major].[newer minor]
+test_write_basic_config_version_file(4        9.0      0  0  0  0) # Request [newer major].0
+test_write_basic_config_version_file(4        9.9      0  0  0  0) # Request [newer major].[newer minor]
 
-if(PACKAGE_VERSION_UNSUITABLE)
-  message(SEND_ERROR "PACKAGE_VERSION_UNSUITABLE set, but must not be !")
-endif()
+test_write_basic_config_version_file(4        0.0.0    1  0  0  0) # Request 0.0.0
+test_write_basic_config_version_file(4        0.0.9    1  0  0  0) # Request 0.0.[newer patch]
+test_write_basic_config_version_file(4        0.9.0    1  0  0  0) # Request 0.[newer minor].0
+test_write_basic_config_version_file(4        0.9.9    1  0  0  0) # Request 0.[newer minor].[newer patch]
+test_write_basic_config_version_file(4        2.0.0    1  0  0  0) # Request [older major].0.0
+test_write_basic_config_version_file(4        2.0.9    1  0  0  0) # Request [older major].0.[newer patch]
+test_write_basic_config_version_file(4        2.9.0    1  0  0  0) # Request [older major].[newer minor].0
+test_write_basic_config_version_file(4        2.9.9    1  0  0  0) # Request [older major].[newer minor].[newer patch]
+test_write_basic_config_version_file(4        4.0.0    1  1  0  0) # Request [same major].0.0
+test_write_basic_config_version_file(4        4.0.9    0  0  0  0) # Request [same major].0.[newer patch]
+test_write_basic_config_version_file(4        4.9.0    0  0  0  0) # Request [same major].[newer minor].0
+test_write_basic_config_version_file(4        4.9.9    0  0  0  0) # Request [same major].[newer minor].[newer patch]
+test_write_basic_config_version_file(4        9.0.0    0  0  0  0) # Request [newer major].0.0
+test_write_basic_config_version_file(4        9.0.9    0  0  0  0) # Request [newer major].0.[newer patch]
+test_write_basic_config_version_file(4        9.9.0    0  0  0  0) # Request [newer major].[newer minor].0
+test_write_basic_config_version_file(4        9.9.9    0  0  0  0) # Request [newer major].[newer minor].[newer patch]
+
+test_write_basic_config_version_file(4        0.0.0.0  1  0  0  0) # Request 0.0.0.0
+test_write_basic_config_version_file(4        0.0.0.9  1  0  0  0) # Request 0.0.0.[newer tweak]
+test_write_basic_config_version_file(4        0.0.9.0  1  0  0  0) # Request 0.0.[newer patch].0
+test_write_basic_config_version_file(4        0.0.9.9  1  0  0  0) # Request 0.0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4        0.9.0.0  1  0  0  0) # Request 0.[newer minor].0.0
+test_write_basic_config_version_file(4        0.9.0.9  1  0  0  0) # Request 0.[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4        0.9.9.0  1  0  0  0) # Request 0.[newer minor].[newer patch].0
+test_write_basic_config_version_file(4        0.9.9.9  1  0  0  0) # Request 0.[newer minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4        2.0.0.0  1  0  0  0) # Request [older major].0.0.0
+test_write_basic_config_version_file(4        2.0.0.9  1  0  0  0) # Request [older major].0.0.[newer tweak]
+test_write_basic_config_version_file(4        2.0.9.0  1  0  0  0) # Request [older major].0.[newer patch].0
+test_write_basic_config_version_file(4        2.0.9.9  1  0  0  0) # Request [older major].0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4        2.9.0.0  1  0  0  0) # Request [older major].[newer minor].0.0
+test_write_basic_config_version_file(4        2.9.0.9  1  0  0  0) # Request [older major].[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4        2.9.9.0  1  0  0  0) # Request [older major].[newer minor].[newer patch].0
+test_write_basic_config_version_file(4        2.9.9.9  1  0  0  0) # Request [older major].[newer minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4        4.0.0.0  1  1  0  0) # Request [same major].0.0.0
+test_write_basic_config_version_file(4        4.0.0.9  0  0  0  0) # Request [same major].0.0.[newer tweak]
+test_write_basic_config_version_file(4        4.0.9.0  0  0  0  0) # Request [same major].0.[newer patch].0
+test_write_basic_config_version_file(4        4.0.9.9  0  0  0  0) # Request [same major].0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4        4.9.0.0  0  0  0  0) # Request [same major].[newer minor].0.0
+test_write_basic_config_version_file(4        4.9.0.9  0  0  0  0) # Request [same major].[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4        4.9.9.0  0  0  0  0) # Request [same major].[newer minor].[newer patch].0
+test_write_basic_config_version_file(4        4.9.9.9  0  0  0  0) # Request [same major].[newer minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4        9.0.0.0  0  0  0  0) # Request [newer major].0.0.0
+test_write_basic_config_version_file(4        9.0.0.9  0  0  0  0) # Request [newer major].0.0.[newer tweak]
+test_write_basic_config_version_file(4        9.0.9.0  0  0  0  0) # Request [newer major].0.[newer patch].0
+test_write_basic_config_version_file(4        9.0.9.9  0  0  0  0) # Request [newer major].0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4        9.9.0.0  0  0  0  0) # Request [newer major].[newer minor].0.0
+test_write_basic_config_version_file(4        9.9.0.9  0  0  0  0) # Request [newer major].[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4        9.9.9.0  0  0  0  0) # Request [newer major].[newer minor].[newer patch].0
+test_write_basic_config_version_file(4        9.9.9.9  0  0  0  0) # Request [newer major].[newer minor].[newer patch].[newer tweak]
+
+
+
+test_write_basic_config_version_file(4.5      0        1  0  0  0) # Request 0
+test_write_basic_config_version_file(4.5      2        1  0  0  0) # Request [older major]
+test_write_basic_config_version_file(4.5      4        1  1  0  0) # Request [same major]
+test_write_basic_config_version_file(4.5      9        0  0  0  0) # Request [newer major]
+
+test_write_basic_config_version_file(4.5      0.0      1  0  0  0) # Request 0.0
+test_write_basic_config_version_file(4.5      0.2      1  0  0  0) # Request 0.[older minor]
+test_write_basic_config_version_file(4.5      0.5      1  0  0  0) # Request 0.[same minor]
+test_write_basic_config_version_file(4.5      0.9      1  0  0  0) # Request 0.[newer minor]
+test_write_basic_config_version_file(4.5      2.0      1  0  0  0) # Request [older major].0
+test_write_basic_config_version_file(4.5      2.2      1  0  0  0) # Request [older major].[older minor]
+test_write_basic_config_version_file(4.5      2.5      1  0  0  0) # Request [older major].[same minor]
+test_write_basic_config_version_file(4.5      2.9      1  0  0  0) # Request [older major].[newer minor]
+test_write_basic_config_version_file(4.5      4.0      1  1  0  0) # Request [same major].0
+test_write_basic_config_version_file(4.5      4.2      1  1  0  0) # Request [same major].[older minor]
+test_write_basic_config_version_file(4.5      4.5      1  1  1  1) # Request [same major].[same minor]
+test_write_basic_config_version_file(4.5      4.9      0  0  0  0) # Request [same major].[newer minor]
+test_write_basic_config_version_file(4.5      9.0      0  0  0  0) # Request [newer major].0
+test_write_basic_config_version_file(4.5      9.1      0  0  0  0) # Request [newer major].[older minor]
+test_write_basic_config_version_file(4.5      9.5      0  0  0  0) # Request [newer major].[same minor]
+test_write_basic_config_version_file(4.5      9.9      0  0  0  0) # Request [newer major].[newer minor]
+
+test_write_basic_config_version_file(4.5      0.0.0    1  0  0  0) # Request 0.0.0
+test_write_basic_config_version_file(4.5      0.0.9    1  0  0  0) # Request 0.0.[newer patch]
+test_write_basic_config_version_file(4.5      0.2.0    1  0  0  0) # Request 0.[older minor].0
+test_write_basic_config_version_file(4.5      0.2.9    1  0  0  0) # Request 0.[older minor].[newer patch]
+test_write_basic_config_version_file(4.5      0.5.0    1  0  0  0) # Request 0.[same minor].0
+test_write_basic_config_version_file(4.5      0.5.9    1  0  0  0) # Request 0.[same minor].[newer patch]
+test_write_basic_config_version_file(4.5      0.9.0    1  0  0  0) # Request 0.[newer minor].0
+test_write_basic_config_version_file(4.5      0.9.9    1  0  0  0) # Request 0.[newer minor].[newer patch]
+test_write_basic_config_version_file(4.5      2.0.0    1  0  0  0) # Request [older major].0.0
+test_write_basic_config_version_file(4.5      2.0.9    1  0  0  0) # Request [older major].0.[newer patch]
+test_write_basic_config_version_file(4.5      2.2.0    1  0  0  0) # Request [older major].[older minor].0
+test_write_basic_config_version_file(4.5      2.2.9    1  0  0  0) # Request [older major].[older minor].[newer patch]
+test_write_basic_config_version_file(4.5      2.5.0    1  0  0  0) # Request [older major].[same minor].0
+test_write_basic_config_version_file(4.5      2.5.9    1  0  0  0) # Request [older major].[same minor].[newer patch]
+test_write_basic_config_version_file(4.5      2.9.0    1  0  0  0) # Request [older major].[newer minor].0
+test_write_basic_config_version_file(4.5      2.9.9    1  0  0  0) # Request [older major].[newer minor].[newer patch]
+test_write_basic_config_version_file(4.5      4.0.0    1  1  0  0) # Request [same major].0.0
+test_write_basic_config_version_file(4.5      4.0.9    1  1  0  0) # Request [same major].0.[newer patch]
+test_write_basic_config_version_file(4.5      4.2.0    1  1  0  0) # Request [same major].[older minor].0
+test_write_basic_config_version_file(4.5      4.2.9    1  1  0  0) # Request [same major].[older minor].[newer patch]
+test_write_basic_config_version_file(4.5      4.5.0    1  1  1  0) # Request [same major].[same minor].0
+test_write_basic_config_version_file(4.5      4.5.9    0  0  0  0) # Request [same major].[same minor].[newer patch]
+test_write_basic_config_version_file(4.5      4.9.0    0  0  0  0) # Request [same major].[newer minor].0
+test_write_basic_config_version_file(4.5      4.9.9    0  0  0  0) # Request [same major].[newer minor].[newer patch]
+test_write_basic_config_version_file(4.5      9.0.0    0  0  0  0) # Request [newer major].0.0
+test_write_basic_config_version_file(4.5      9.0.9    0  0  0  0) # Request [newer major].0.[newer patch]
+test_write_basic_config_version_file(4.5      9.2.0    0  0  0  0) # Request [newer major].[older minor].0
+test_write_basic_config_version_file(4.5      9.2.9    0  0  0  0) # Request [newer major].[older minor].[newer patch]
+test_write_basic_config_version_file(4.5      9.5.0    0  0  0  0) # Request [newer major].[same minor].0
+test_write_basic_config_version_file(4.5      9.5.9    0  0  0  0) # Request [newer major].[same minor].[newer patch]
+test_write_basic_config_version_file(4.5      9.9.0    0  0  0  0) # Request [newer major].[newer minor].0
+test_write_basic_config_version_file(4.5      9.9.9    0  0  0  0) # Request [newer major].[newer minor].[newer patch]
+
+test_write_basic_config_version_file(4.5      0.0.0.0  1  0  0  0) # Request 0.0.0.0
+test_write_basic_config_version_file(4.5      0.0.0.9  1  0  0  0) # Request 0.0.0.[newer tweak]
+test_write_basic_config_version_file(4.5      0.0.9.0  1  0  0  0) # Request 0.0.[newer patch].0
+test_write_basic_config_version_file(4.5      0.0.9.9  1  0  0  0) # Request 0.0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      0.2.0.0  1  0  0  0) # Request 0.[older minor].0.0
+test_write_basic_config_version_file(4.5      0.2.0.9  1  0  0  0) # Request 0.[older minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5      0.2.9.0  1  0  0  0) # Request 0.[older minor].[newer patch].0
+test_write_basic_config_version_file(4.5      0.2.9.9  1  0  0  0) # Request 0.[older minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      0.5.0.0  1  0  0  0) # Request 0.[same minor].0.0
+test_write_basic_config_version_file(4.5      0.5.0.9  1  0  0  0) # Request 0.[same minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5      0.5.9.0  1  0  0  0) # Request 0.[same minor].[newer patch].0
+test_write_basic_config_version_file(4.5      0.5.9.9  1  0  0  0) # Request 0.[same minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      0.9.0.0  1  0  0  0) # Request 0.[newer minor].0.0
+test_write_basic_config_version_file(4.5      0.9.0.9  1  0  0  0) # Request 0.[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5      0.9.9.0  1  0  0  0) # Request 0.[newer minor].[newer patch].0
+test_write_basic_config_version_file(4.5      0.9.9.9  1  0  0  0) # Request 0.[newer minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      2.0.0.0  1  0  0  0) # Request [older major].0.0.0
+test_write_basic_config_version_file(4.5      2.0.0.9  1  0  0  0) # Request [older major].0.0.[newer tweak]
+test_write_basic_config_version_file(4.5      2.0.9.0  1  0  0  0) # Request [older major].0.[newer patch].0
+test_write_basic_config_version_file(4.5      2.0.9.9  1  0  0  0) # Request [older major].0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      2.2.0.0  1  0  0  0) # Request [older major].[older minor].0.0
+test_write_basic_config_version_file(4.5      2.2.0.9  1  0  0  0) # Request [older major].[older minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5      2.2.9.0  1  0  0  0) # Request [older major].[older minor].[newer patch].0
+test_write_basic_config_version_file(4.5      2.2.9.9  1  0  0  0) # Request [older major].[older minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      2.5.0.0  1  0  0  0) # Request [older major].[same minor].0.0
+test_write_basic_config_version_file(4.5      2.5.0.9  1  0  0  0) # Request [older major].[same minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5      2.5.9.0  1  0  0  0) # Request [older major].[same minor].[newer patch].0
+test_write_basic_config_version_file(4.5      2.5.9.9  1  0  0  0) # Request [older major].[same minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      2.9.0.0  1  0  0  0) # Request [older major].[newer minor].0.0
+test_write_basic_config_version_file(4.5      2.9.0.9  1  0  0  0) # Request [older major].[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5      2.9.9.0  1  0  0  0) # Request [older major].[newer minor].[newer patch].0
+test_write_basic_config_version_file(4.5      2.9.9.9  1  0  0  0) # Request [older major].[newer minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      4.0.0.0  1  1  0  0) # Request [same major].0.0.0
+test_write_basic_config_version_file(4.5      4.0.0.9  1  1  0  0) # Request [same major].0.0.[newer tweak]
+test_write_basic_config_version_file(4.5      4.0.9.0  1  1  0  0) # Request [same major].0.[newer patch].0
+test_write_basic_config_version_file(4.5      4.0.9.9  1  1  0  0) # Request [same major].0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      4.2.0.0  1  1  0  0) # Request [same major].[older minor].0.0
+test_write_basic_config_version_file(4.5      4.2.0.9  1  1  0  0) # Request [same major].[older minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5      4.2.9.0  1  1  0  0) # Request [same major].[older minor].[newer patch].0
+test_write_basic_config_version_file(4.5      4.2.9.9  1  1  0  0) # Request [same major].[older minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      4.5.0.0  1  1  1  0) # Request [same major].[same minor].0.0
+test_write_basic_config_version_file(4.5      4.5.0.9  0  0  0  0) # Request [same major].[same minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5      4.5.9.0  0  0  0  0) # Request [same major].[same minor].[newer patch].0
+test_write_basic_config_version_file(4.5      4.5.9.9  0  0  0  0) # Request [same major].[same minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      4.9.0.0  0  0  0  0) # Request [same major].[newer minor].0.0
+test_write_basic_config_version_file(4.5      4.9.0.9  0  0  0  0) # Request [same major].[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5      4.9.9.0  0  0  0  0) # Request [same major].[newer minor].[newer patch].0
+test_write_basic_config_version_file(4.5      4.9.9.9  0  0  0  0) # Request [same major].[newer minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      9.0.0.0  0  0  0  0) # Request [newer major].0.0.0
+test_write_basic_config_version_file(4.5      9.0.0.9  0  0  0  0) # Request [newer major].0.0.[newer tweak]
+test_write_basic_config_version_file(4.5      9.0.9.0  0  0  0  0) # Request [newer major].0.[newer patch].0
+test_write_basic_config_version_file(4.5      9.0.9.9  0  0  0  0) # Request [newer major].0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      9.2.0.0  0  0  0  0) # Request [newer major].[older minor].0.0
+test_write_basic_config_version_file(4.5      9.2.0.9  0  0  0  0) # Request [newer major].[older minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5      9.2.9.0  0  0  0  0) # Request [newer major].[older minor].[newer patch].0
+test_write_basic_config_version_file(4.5      9.2.9.9  0  0  0  0) # Request [newer major].[older minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      9.5.0.0  0  0  0  0) # Request [newer major].[same minor].0.0
+test_write_basic_config_version_file(4.5      9.5.0.9  0  0  0  0) # Request [newer major].[same minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5      9.5.9.0  0  0  0  0) # Request [newer major].[same minor].[newer patch].0
+test_write_basic_config_version_file(4.5      9.5.9.9  0  0  0  0) # Request [newer major].[same minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5      9.9.0.0  0  0  0  0) # Request [newer major].[newer minor].0.0
+test_write_basic_config_version_file(4.5      9.9.0.9  0  0  0  0) # Request [newer major].[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5      9.9.9.0  0  0  0  0) # Request [newer major].[newer minor].[newer patch].0
+test_write_basic_config_version_file(4.5      9.9.9.9  0  0  0  0) # Request [newer major].[newer minor].[newer patch].[newer tweak]
+
+
+test_write_basic_config_version_file(4.5.6    0        1  0  0  0) # Request 0
+test_write_basic_config_version_file(4.5.6    2        1  0  0  0) # Request [older major]
+test_write_basic_config_version_file(4.5.6    4        1  1  0  0) # Request [same major]
+test_write_basic_config_version_file(4.5.6    9        0  0  0  0) # Request [newer major]
+
+test_write_basic_config_version_file(4.5.6    0.0      1  0  0  0) # Request 0.0
+test_write_basic_config_version_file(4.5.6    0.2      1  0  0  0) # Request 0.[older minor]
+test_write_basic_config_version_file(4.5.6    0.5      1  0  0  0) # Request 0.[same minor]
+test_write_basic_config_version_file(4.5.6    0.9      1  0  0  0) # Request 0.[newer minor]
+test_write_basic_config_version_file(4.5.6    2.0      1  0  0  0) # Request [older major].0
+test_write_basic_config_version_file(4.5.6    2.2      1  0  0  0) # Request [older major].[older minor]
+test_write_basic_config_version_file(4.5.6    2.5      1  0  0  0) # Request [older major].[same minor]
+test_write_basic_config_version_file(4.5.6    2.9      1  0  0  0) # Request [older major].[newer minor]
+test_write_basic_config_version_file(4.5.6    4.0      1  1  0  0) # Request [same major].0
+test_write_basic_config_version_file(4.5.6    4.2      1  1  0  0) # Request [same major].[older minor]
+test_write_basic_config_version_file(4.5.6    4.5      1  1  1  0) # Request [same major].[same minor]
+test_write_basic_config_version_file(4.5.6    4.9      0  0  0  0) # Request [same major].[newer minor]
+test_write_basic_config_version_file(4.5.6    9.0      0  0  0  0) # Request [newer major].0
+test_write_basic_config_version_file(4.5.6    9.1      0  0  0  0) # Request [newer major].[older minor]
+test_write_basic_config_version_file(4.5.6    9.5      0  0  0  0) # Request [newer major].[same minor]
+test_write_basic_config_version_file(4.5.6    9.9      0  0  0  0) # Request [newer major].[newer minor]
+
+test_write_basic_config_version_file(4.5.6    0.0.0    1  0  0  0) # Request 0.0.0
+test_write_basic_config_version_file(4.5.6    0.0.2    1  0  0  0) # Request 0.0.[older patch]
+test_write_basic_config_version_file(4.5.6    0.0.6    1  0  0  0) # Request 0.0.[same patch]
+test_write_basic_config_version_file(4.5.6    0.0.9    1  0  0  0) # Request 0.0.[newer patch]
+test_write_basic_config_version_file(4.5.6    0.2.0    1  0  0  0) # Request 0.[older minor].0
+test_write_basic_config_version_file(4.5.6    0.2.2    1  0  0  0) # Request 0.[older minor].[older patch]
+test_write_basic_config_version_file(4.5.6    0.2.6    1  0  0  0) # Request 0.[older minor].[same patch]
+test_write_basic_config_version_file(4.5.6    0.2.9    1  0  0  0) # Request 0.[older minor].[newer patch]
+test_write_basic_config_version_file(4.5.6    0.5.0    1  0  0  0) # Request 0.[same minor].0
+test_write_basic_config_version_file(4.5.6    0.5.2    1  0  0  0) # Request 0.[same minor].[older patch]
+test_write_basic_config_version_file(4.5.6    0.5.6    1  0  0  0) # Request 0.[same minor].[same patch]
+test_write_basic_config_version_file(4.5.6    0.5.9    1  0  0  0) # Request 0.[same minor].[newer patch]
+test_write_basic_config_version_file(4.5.6    0.9.0    1  0  0  0) # Request 0.[newer minor].0
+test_write_basic_config_version_file(4.5.6    0.9.2    1  0  0  0) # Request 0.[newer minor].[older patch]
+test_write_basic_config_version_file(4.5.6    0.9.6    1  0  0  0) # Request 0.[newer minor].[same patch]
+test_write_basic_config_version_file(4.5.6    0.9.9    1  0  0  0) # Request 0.[newer minor].[newer patch]
+test_write_basic_config_version_file(4.5.6    2.0.0    1  0  0  0) # Request [older major].0.0
+test_write_basic_config_version_file(4.5.6    2.0.2    1  0  0  0) # Request [older major].0.[older patch]
+test_write_basic_config_version_file(4.5.6    2.0.6    1  0  0  0) # Request [older major].0.[same patch]
+test_write_basic_config_version_file(4.5.6    2.0.9    1  0  0  0) # Request [older major].0.[newer patch]
+test_write_basic_config_version_file(4.5.6    2.2.0    1  0  0  0) # Request [older major].[older minor].0
+test_write_basic_config_version_file(4.5.6    2.2.2    1  0  0  0) # Request [older major].[older minor].[older patch]
+test_write_basic_config_version_file(4.5.6    2.2.6    1  0  0  0) # Request [older major].[older minor].[same patch]
+test_write_basic_config_version_file(4.5.6    2.2.9    1  0  0  0) # Request [older major].[older minor].[newer patch]
+test_write_basic_config_version_file(4.5.6    2.5.0    1  0  0  0) # Request [older major].[same minor].0
+test_write_basic_config_version_file(4.5.6    2.5.2    1  0  0  0) # Request [older major].[same minor].[older patch]
+test_write_basic_config_version_file(4.5.6    2.5.6    1  0  0  0) # Request [older major].[same minor].[same patch]
+test_write_basic_config_version_file(4.5.6    2.5.9    1  0  0  0) # Request [older major].[same minor].[newer patch]
+test_write_basic_config_version_file(4.5.6    2.9.0    1  0  0  0) # Request [older major].[newer minor].0
+test_write_basic_config_version_file(4.5.6    2.9.2    1  0  0  0) # Request [older major].[newer minor].[older patch]
+test_write_basic_config_version_file(4.5.6    2.9.6    1  0  0  0) # Request [older major].[newer minor].[same patch]
+test_write_basic_config_version_file(4.5.6    2.9.9    1  0  0  0) # Request [older major].[newer minor].[newer patch]
+test_write_basic_config_version_file(4.5.6    4.0.0    1  1  0  0) # Request [same major].0.0
+test_write_basic_config_version_file(4.5.6    4.0.2    1  1  0  0) # Request [same major].0.[older patch]
+test_write_basic_config_version_file(4.5.6    4.0.6    1  1  0  0) # Request [same major].0.[same patch]
+test_write_basic_config_version_file(4.5.6    4.0.9    1  1  0  0) # Request [same major].0.[newer patch]
+test_write_basic_config_version_file(4.5.6    4.2.0    1  1  0  0) # Request [same major].[older minor].0
+test_write_basic_config_version_file(4.5.6    4.2.2    1  1  0  0) # Request [same major].[older minor].[older patch]
+test_write_basic_config_version_file(4.5.6    4.2.6    1  1  0  0) # Request [same major].[older minor].[same patch]
+test_write_basic_config_version_file(4.5.6    4.2.9    1  1  0  0) # Request [same major].[older minor].[newer patch]
+test_write_basic_config_version_file(4.5.6    4.5.0    1  1  1  0) # Request [same major].[same minor].0
+test_write_basic_config_version_file(4.5.6    4.5.2    1  1  1  0) # Request [same major].[same minor].[older patch]
+test_write_basic_config_version_file(4.5.6    4.5.6    1  1  1  1) # Request [same major].[same minor].[same patch]
+test_write_basic_config_version_file(4.5.6    4.5.9    0  0  0  0) # Request [same major].[same minor].[newer patch]
+test_write_basic_config_version_file(4.5.6    4.9.0    0  0  0  0) # Request [same major].[newer minor].0
+test_write_basic_config_version_file(4.5.6    4.9.2    0  0  0  0) # Request [same major].[newer minor].[older patch]
+test_write_basic_config_version_file(4.5.6    4.9.6    0  0  0  0) # Request [same major].[newer minor].[same patch]
+test_write_basic_config_version_file(4.5.6    4.9.9    0  0  0  0) # Request [same major].[newer minor].[newer patch]
+test_write_basic_config_version_file(4.5.6    9.0.0    0  0  0  0) # Request [newer major].0.0
+test_write_basic_config_version_file(4.5.6    9.0.2    0  0  0  0) # Request [newer major].0.[older patch]
+test_write_basic_config_version_file(4.5.6    9.0.6    0  0  0  0) # Request [newer major].0.[same patch]
+test_write_basic_config_version_file(4.5.6    9.0.9    0  0  0  0) # Request [newer major].0.[newer patch]
+test_write_basic_config_version_file(4.5.6    9.2.0    0  0  0  0) # Request [newer major].[older minor].0
+test_write_basic_config_version_file(4.5.6    9.2.2    0  0  0  0) # Request [newer major].[older minor].[older patch]
+test_write_basic_config_version_file(4.5.6    9.2.6    0  0  0  0) # Request [newer major].[older minor].[same patch]
+test_write_basic_config_version_file(4.5.6    9.2.9    0  0  0  0) # Request [newer major].[older minor].[newer patch]
+test_write_basic_config_version_file(4.5.6    9.5.0    0  0  0  0) # Request [newer major].[same minor].0
+test_write_basic_config_version_file(4.5.6    9.5.2    0  0  0  0) # Request [newer major].[same minor].[older patch]
+test_write_basic_config_version_file(4.5.6    9.5.6    0  0  0  0) # Request [newer major].[same minor].[same patch]
+test_write_basic_config_version_file(4.5.6    9.5.9    0  0  0  0) # Request [newer major].[same minor].[newer patch]
+test_write_basic_config_version_file(4.5.6    9.9.0    0  0  0  0) # Request [newer major].[newer minor].0
+test_write_basic_config_version_file(4.5.6    9.9.2    0  0  0  0) # Request [newer major].[newer minor].[older patch]
+test_write_basic_config_version_file(4.5.6    9.9.6    0  0  0  0) # Request [newer major].[newer minor].[same patch]
+test_write_basic_config_version_file(4.5.6    9.9.9    0  0  0  0) # Request [newer major].[newer minor].[newer patch]
+
+test_write_basic_config_version_file(4.5.6    0.0.0.0  1  0  0  0) # Request 0.0.0.0
+test_write_basic_config_version_file(4.5.6    0.0.0.9  1  0  0  0) # Request 0.0.0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.0.2.0  1  0  0  0) # Request 0.0.[older patch].0
+test_write_basic_config_version_file(4.5.6    0.0.2.9  1  0  0  0) # Request 0.0.[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.0.6.0  1  0  0  0) # Request 0.0.[same patch].0
+test_write_basic_config_version_file(4.5.6    0.0.6.9  1  0  0  0) # Request 0.0.[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.0.9.0  1  0  0  0) # Request 0.0.[newer patch].0
+test_write_basic_config_version_file(4.5.6    0.0.9.9  1  0  0  0) # Request 0.0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.2.0.0  1  0  0  0) # Request 0.[older minor].0.0
+test_write_basic_config_version_file(4.5.6    0.2.0.9  1  0  0  0) # Request 0.[older minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.2.2.0  1  0  0  0) # Request 0.[older minor].[older patch].0
+test_write_basic_config_version_file(4.5.6    0.2.2.9  1  0  0  0) # Request 0.[older minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.2.6.0  1  0  0  0) # Request 0.[older minor].[same patch].0
+test_write_basic_config_version_file(4.5.6    0.2.6.9  1  0  0  0) # Request 0.[older minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.2.9.0  1  0  0  0) # Request 0.[older minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6    0.2.9.9  1  0  0  0) # Request 0.[older minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.5.0.0  1  0  0  0) # Request 0.[same minor].0.0
+test_write_basic_config_version_file(4.5.6    0.5.0.9  1  0  0  0) # Request 0.[same minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.5.2.0  1  0  0  0) # Request 0.[same minor].[older patch].0
+test_write_basic_config_version_file(4.5.6    0.5.2.9  1  0  0  0) # Request 0.[same minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.5.6.0  1  0  0  0) # Request 0.[same minor].[same patch].0
+test_write_basic_config_version_file(4.5.6    0.5.6.9  1  0  0  0) # Request 0.[same minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.5.9.0  1  0  0  0) # Request 0.[same minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6    0.5.9.9  1  0  0  0) # Request 0.[same minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.9.0.0  1  0  0  0) # Request 0.[newer minor].0.0
+test_write_basic_config_version_file(4.5.6    0.9.0.9  1  0  0  0) # Request 0.[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.9.2.0  1  0  0  0) # Request 0.[newer minor].[older patch].0
+test_write_basic_config_version_file(4.5.6    0.9.2.9  1  0  0  0) # Request 0.[newer minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.9.6.0  1  0  0  0) # Request 0.[newer minor].[same patch].0
+test_write_basic_config_version_file(4.5.6    0.9.6.9  1  0  0  0) # Request 0.[newer minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    0.9.9.0  1  0  0  0) # Request 0.[newer minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6    0.9.9.9  1  0  0  0) # Request 0.[newer minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.0.0.0  1  0  0  0) # Request [older major].0.0.0
+test_write_basic_config_version_file(4.5.6    2.0.0.9  1  0  0  0) # Request [older major].0.0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.0.2.0  1  0  0  0) # Request [older major].0.[older patch].0
+test_write_basic_config_version_file(4.5.6    2.0.2.9  1  0  0  0) # Request [older major].0.[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.0.6.0  1  0  0  0) # Request [older major].0.[same patch].0
+test_write_basic_config_version_file(4.5.6    2.0.6.9  1  0  0  0) # Request [older major].0.[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.0.9.0  1  0  0  0) # Request [older major].0.[newer patch].0
+test_write_basic_config_version_file(4.5.6    2.0.9.9  1  0  0  0) # Request [older major].0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.2.0.0  1  0  0  0) # Request [older major].[older minor].0.0
+test_write_basic_config_version_file(4.5.6    2.2.0.9  1  0  0  0) # Request [older major].[older minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.2.2.0  1  0  0  0) # Request [older major].[older minor].[older patch].0
+test_write_basic_config_version_file(4.5.6    2.2.2.9  1  0  0  0) # Request [older major].[older minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.2.6.0  1  0  0  0) # Request [older major].[older minor].[same patch].0
+test_write_basic_config_version_file(4.5.6    2.2.6.9  1  0  0  0) # Request [older major].[older minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.2.9.0  1  0  0  0) # Request [older major].[older minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6    2.2.9.9  1  0  0  0) # Request [older major].[older minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.5.0.0  1  0  0  0) # Request [older major].[same minor].0.0
+test_write_basic_config_version_file(4.5.6    2.5.0.9  1  0  0  0) # Request [older major].[same minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.5.2.0  1  0  0  0) # Request [older major].[same minor].[older patch].0
+test_write_basic_config_version_file(4.5.6    2.5.2.9  1  0  0  0) # Request [older major].[same minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.5.6.0  1  0  0  0) # Request [older major].[same minor].[same patch].0
+test_write_basic_config_version_file(4.5.6    2.5.6.9  1  0  0  0) # Request [older major].[same minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.5.9.0  1  0  0  0) # Request [older major].[same minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6    2.5.9.9  1  0  0  0) # Request [older major].[same minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.9.0.0  1  0  0  0) # Request [older major].[newer minor].0.0
+test_write_basic_config_version_file(4.5.6    2.9.0.9  1  0  0  0) # Request [older major].[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.9.2.0  1  0  0  0) # Request [older major].[newer minor].[older patch].0
+test_write_basic_config_version_file(4.5.6    2.9.2.9  1  0  0  0) # Request [older major].[newer minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.9.6.0  1  0  0  0) # Request [older major].[newer minor].[same patch].0
+test_write_basic_config_version_file(4.5.6    2.9.6.9  1  0  0  0) # Request [older major].[newer minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    2.9.9.0  1  0  0  0) # Request [older major].[newer minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6    2.9.9.9  1  0  0  0) # Request [older major].[newer minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.0.0.0  1  1  0  0) # Request [same major].0.0.0
+test_write_basic_config_version_file(4.5.6    4.0.0.9  1  1  0  0) # Request [same major].0.0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.0.2.0  1  1  0  0) # Request [same major].0.[older patch].0
+test_write_basic_config_version_file(4.5.6    4.0.2.9  1  1  0  0) # Request [same major].0.[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.0.6.0  1  1  0  0) # Request [same major].0.[same patch].0
+test_write_basic_config_version_file(4.5.6    4.0.6.9  1  1  0  0) # Request [same major].0.[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.0.9.0  1  1  0  0) # Request [same major].0.[newer patch].0
+test_write_basic_config_version_file(4.5.6    4.0.9.9  1  1  0  0) # Request [same major].0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.2.0.0  1  1  0  0) # Request [same major].[older minor].0.0
+test_write_basic_config_version_file(4.5.6    4.2.0.9  1  1  0  0) # Request [same major].[older minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.2.2.0  1  1  0  0) # Request [same major].[older minor].[older patch].0
+test_write_basic_config_version_file(4.5.6    4.2.2.9  1  1  0  0) # Request [same major].[older minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.2.6.0  1  1  0  0) # Request [same major].[older minor].[same patch].0
+test_write_basic_config_version_file(4.5.6    4.2.6.9  1  1  0  0) # Request [same major].[older minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.2.9.0  1  1  0  0) # Request [same major].[older minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6    4.2.9.9  1  1  0  0) # Request [same major].[older minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.5.0.0  1  1  1  0) # Request [same major].[same minor].0.0
+test_write_basic_config_version_file(4.5.6    4.5.0.9  1  1  1  0) # Request [same major].[same minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.5.2.0  1  1  1  0) # Request [same major].[same minor].[older patch].0
+test_write_basic_config_version_file(4.5.6    4.5.2.9  1  1  1  0) # Request [same major].[same minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.5.6.0  1  1  1  1) # Request [same major].[same minor].[same patch].0
+test_write_basic_config_version_file(4.5.6    4.5.6.9  0  0  0  1) # Request [same major].[same minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.5.9.0  0  0  0  0) # Request [same major].[same minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6    4.5.9.9  0  0  0  0) # Request [same major].[same minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.9.0.0  0  0  0  0) # Request [same major].[newer minor].0.0
+test_write_basic_config_version_file(4.5.6    4.9.0.9  0  0  0  0) # Request [same major].[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.9.2.0  0  0  0  0) # Request [same major].[newer minor].[older patch].0
+test_write_basic_config_version_file(4.5.6    4.9.2.9  0  0  0  0) # Request [same major].[newer minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.9.6.0  0  0  0  0) # Request [same major].[newer minor].[same patch].0
+test_write_basic_config_version_file(4.5.6    4.9.6.9  0  0  0  0) # Request [same major].[newer minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    4.9.9.0  0  0  0  0) # Request [same major].[newer minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6    4.9.9.9  0  0  0  0) # Request [same major].[newer minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.0.0.0  0  0  0  0) # Request [newer major].0.0.0
+test_write_basic_config_version_file(4.5.6    9.0.0.9  0  0  0  0) # Request [newer major].0.0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.0.2.0  0  0  0  0) # Request [newer major].0.[older patch].0
+test_write_basic_config_version_file(4.5.6    9.0.2.9  0  0  0  0) # Request [newer major].0.[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.0.6.0  0  0  0  0) # Request [newer major].0.[same patch].0
+test_write_basic_config_version_file(4.5.6    9.0.6.9  0  0  0  0) # Request [newer major].0.[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.0.9.0  0  0  0  0) # Request [newer major].0.[newer patch].0
+test_write_basic_config_version_file(4.5.6    9.0.9.9  0  0  0  0) # Request [newer major].0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.2.0.0  0  0  0  0) # Request [newer major].[older minor].0.0
+test_write_basic_config_version_file(4.5.6    9.2.0.9  0  0  0  0) # Request [newer major].[older minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.2.2.0  0  0  0  0) # Request [newer major].[older minor].[older patch].0
+test_write_basic_config_version_file(4.5.6    9.2.2.9  0  0  0  0) # Request [newer major].[older minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.2.6.0  0  0  0  0) # Request [newer major].[older minor].[same patch].0
+test_write_basic_config_version_file(4.5.6    9.2.6.9  0  0  0  0) # Request [newer major].[older minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.2.9.0  0  0  0  0) # Request [newer major].[older minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6    9.2.9.9  0  0  0  0) # Request [newer major].[older minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.5.0.0  0  0  0  0) # Request [newer major].[same minor].0.0
+test_write_basic_config_version_file(4.5.6    9.5.0.9  0  0  0  0) # Request [newer major].[same minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.5.2.0  0  0  0  0) # Request [newer major].[same minor].[older patch].0
+test_write_basic_config_version_file(4.5.6    9.5.2.9  0  0  0  0) # Request [newer major].[same minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.5.6.0  0  0  0  0) # Request [newer major].[same minor].[same patch].0
+test_write_basic_config_version_file(4.5.6    9.5.6.9  0  0  0  0) # Request [newer major].[same minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.5.9.0  0  0  0  0) # Request [newer major].[same minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6    9.5.9.9  0  0  0  0) # Request [newer major].[same minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.9.0.0  0  0  0  0) # Request [newer major].[newer minor].0.0
+test_write_basic_config_version_file(4.5.6    9.9.0.9  0  0  0  0) # Request [newer major].[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.9.2.0  0  0  0  0) # Request [newer major].[newer minor].[older patch].0
+test_write_basic_config_version_file(4.5.6    9.9.2.9  0  0  0  0) # Request [newer major].[newer minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.9.6.0  0  0  0  0) # Request [newer major].[newer minor].[same patch].0
+test_write_basic_config_version_file(4.5.6    9.9.6.9  0  0  0  0) # Request [newer major].[newer minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6    9.9.9.0  0  0  0  0) # Request [newer major].[newer minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6    9.9.9.9  0  0  0  0) # Request [newer major].[newer minor].[newer patch].[newer tweak]
+
+
+test_write_basic_config_version_file(4.5.6.7  0        1  0  0  0) # Request 0
+test_write_basic_config_version_file(4.5.6.7  2        1  0  0  0) # Request [older major]
+test_write_basic_config_version_file(4.5.6.7  4        1  1  0  0) # Request [same major]
+test_write_basic_config_version_file(4.5.6.7  9        0  0  0  0) # Request [newer major]
+
+test_write_basic_config_version_file(4.5.6.7  0.0      1  0  0  0) # Request 0.0
+test_write_basic_config_version_file(4.5.6.7  0.2      1  0  0  0) # Request 0.[older minor]
+test_write_basic_config_version_file(4.5.6.7  0.5      1  0  0  0) # Request 0.[same minor]
+test_write_basic_config_version_file(4.5.6.7  0.9      1  0  0  0) # Request 0.[newer minor]
+test_write_basic_config_version_file(4.5.6.7  2.0      1  0  0  0) # Request [older major].0
+test_write_basic_config_version_file(4.5.6.7  2.2      1  0  0  0) # Request [older major].[older minor]
+test_write_basic_config_version_file(4.5.6.7  2.5      1  0  0  0) # Request [older major].[same minor]
+test_write_basic_config_version_file(4.5.6.7  2.9      1  0  0  0) # Request [older major].[newer minor]
+test_write_basic_config_version_file(4.5.6.7  4.0      1  1  0  0) # Request [same major].0
+test_write_basic_config_version_file(4.5.6.7  4.2      1  1  0  0) # Request [same major].[older minor]
+test_write_basic_config_version_file(4.5.6.7  4.5      1  1  1  0) # Request [same major].[same minor]
+test_write_basic_config_version_file(4.5.6.7  4.9      0  0  0  0) # Request [same major].[newer minor]
+test_write_basic_config_version_file(4.5.6.7  9.0      0  0  0  0) # Request [newer major].0
+test_write_basic_config_version_file(4.5.6.7  9.1      0  0  0  0) # Request [newer major].[older minor]
+test_write_basic_config_version_file(4.5.6.7  9.5      0  0  0  0) # Request [newer major].[same minor]
+test_write_basic_config_version_file(4.5.6.7  9.9      0  0  0  0) # Request [newer major].[newer minor]
+
+test_write_basic_config_version_file(4.5.6.7  0.0.0    1  0  0  0) # Request 0.0.0
+test_write_basic_config_version_file(4.5.6.7  0.0.2    1  0  0  0) # Request 0.0.[older patch]
+test_write_basic_config_version_file(4.5.6.7  0.0.6    1  0  0  0) # Request 0.0.[same patch]
+test_write_basic_config_version_file(4.5.6.7  0.0.9    1  0  0  0) # Request 0.0.[newer patch]
+test_write_basic_config_version_file(4.5.6.7  0.2.0    1  0  0  0) # Request 0.[older minor].0
+test_write_basic_config_version_file(4.5.6.7  0.2.2    1  0  0  0) # Request 0.[older minor].[older patch]
+test_write_basic_config_version_file(4.5.6.7  0.2.6    1  0  0  0) # Request 0.[older minor].[same patch]
+test_write_basic_config_version_file(4.5.6.7  0.2.9    1  0  0  0) # Request 0.[older minor].[newer patch]
+test_write_basic_config_version_file(4.5.6.7  0.5.0    1  0  0  0) # Request 0.[same minor].0
+test_write_basic_config_version_file(4.5.6.7  0.5.2    1  0  0  0) # Request 0.[same minor].[older patch]
+test_write_basic_config_version_file(4.5.6.7  0.5.6    1  0  0  0) # Request 0.[same minor].[same patch]
+test_write_basic_config_version_file(4.5.6.7  0.5.9    1  0  0  0) # Request 0.[same minor].[newer patch]
+test_write_basic_config_version_file(4.5.6.7  0.9.0    1  0  0  0) # Request 0.[newer minor].0
+test_write_basic_config_version_file(4.5.6.7  0.9.2    1  0  0  0) # Request 0.[newer minor].[older patch]
+test_write_basic_config_version_file(4.5.6.7  0.9.6    1  0  0  0) # Request 0.[newer minor].[same patch]
+test_write_basic_config_version_file(4.5.6.7  0.9.9    1  0  0  0) # Request 0.[newer minor].[newer patch]
+test_write_basic_config_version_file(4.5.6.7  2.0.0    1  0  0  0) # Request [older major].0.0
+test_write_basic_config_version_file(4.5.6.7  2.0.2    1  0  0  0) # Request [older major].0.[older patch]
+test_write_basic_config_version_file(4.5.6.7  2.0.6    1  0  0  0) # Request [older major].0.[same patch]
+test_write_basic_config_version_file(4.5.6.7  2.0.9    1  0  0  0) # Request [older major].0.[newer patch]
+test_write_basic_config_version_file(4.5.6.7  2.2.0    1  0  0  0) # Request [older major].[older minor].0
+test_write_basic_config_version_file(4.5.6.7  2.2.2    1  0  0  0) # Request [older major].[older minor].[older patch]
+test_write_basic_config_version_file(4.5.6.7  2.2.6    1  0  0  0) # Request [older major].[older minor].[same patch]
+test_write_basic_config_version_file(4.5.6.7  2.2.9    1  0  0  0) # Request [older major].[older minor].[newer patch]
+test_write_basic_config_version_file(4.5.6.7  2.5.0    1  0  0  0) # Request [older major].[same minor].0
+test_write_basic_config_version_file(4.5.6.7  2.5.2    1  0  0  0) # Request [older major].[same minor].[older patch]
+test_write_basic_config_version_file(4.5.6.7  2.5.6    1  0  0  0) # Request [older major].[same minor].[same patch]
+test_write_basic_config_version_file(4.5.6.7  2.5.9    1  0  0  0) # Request [older major].[same minor].[newer patch]
+test_write_basic_config_version_file(4.5.6.7  2.9.0    1  0  0  0) # Request [older major].[newer minor].0
+test_write_basic_config_version_file(4.5.6.7  2.9.2    1  0  0  0) # Request [older major].[newer minor].[older patch]
+test_write_basic_config_version_file(4.5.6.7  2.9.6    1  0  0  0) # Request [older major].[newer minor].[same patch]
+test_write_basic_config_version_file(4.5.6.7  2.9.9    1  0  0  0) # Request [older major].[newer minor].[newer patch]
+test_write_basic_config_version_file(4.5.6.7  4.0.0    1  1  0  0) # Request [same major].0.0
+test_write_basic_config_version_file(4.5.6.7  4.0.2    1  1  0  0) # Request [same major].0.[older patch]
+test_write_basic_config_version_file(4.5.6.7  4.0.6    1  1  0  0) # Request [same major].0.[same patch]
+test_write_basic_config_version_file(4.5.6.7  4.0.9    1  1  0  0) # Request [same major].0.[newer patch]
+test_write_basic_config_version_file(4.5.6.7  4.2.0    1  1  0  0) # Request [same major].[older minor].0
+test_write_basic_config_version_file(4.5.6.7  4.2.2    1  1  0  0) # Request [same major].[older minor].[older patch]
+test_write_basic_config_version_file(4.5.6.7  4.2.6    1  1  0  0) # Request [same major].[older minor].[same patch]
+test_write_basic_config_version_file(4.5.6.7  4.2.9    1  1  0  0) # Request [same major].[older minor].[newer patch]
+test_write_basic_config_version_file(4.5.6.7  4.5.0    1  1  1  0) # Request [same major].[same minor].0
+test_write_basic_config_version_file(4.5.6.7  4.5.2    1  1  1  0) # Request [same major].[same minor].[older patch]
+test_write_basic_config_version_file(4.5.6.7  4.5.6    1  1  1  1) # Request [same major].[same minor].[same patch]
+test_write_basic_config_version_file(4.5.6.7  4.5.9    0  0  0  0) # Request [same major].[same minor].[newer patch]
+test_write_basic_config_version_file(4.5.6.7  4.9.0    0  0  0  0) # Request [same major].[newer minor].0
+test_write_basic_config_version_file(4.5.6.7  4.9.2    0  0  0  0) # Request [same major].[newer minor].[older patch]
+test_write_basic_config_version_file(4.5.6.7  4.9.6    0  0  0  0) # Request [same major].[newer minor].[same patch]
+test_write_basic_config_version_file(4.5.6.7  4.9.9    0  0  0  0) # Request [same major].[newer minor].[newer patch]
+test_write_basic_config_version_file(4.5.6.7  9.0.0    0  0  0  0) # Request [newer major].0.0
+test_write_basic_config_version_file(4.5.6.7  9.0.2    0  0  0  0) # Request [newer major].0.[older patch]
+test_write_basic_config_version_file(4.5.6.7  9.0.6    0  0  0  0) # Request [newer major].0.[same patch]
+test_write_basic_config_version_file(4.5.6.7  9.0.9    0  0  0  0) # Request [newer major].0.[newer patch]
+test_write_basic_config_version_file(4.5.6.7  9.2.0    0  0  0  0) # Request [newer major].[older minor].0
+test_write_basic_config_version_file(4.5.6.7  9.2.2    0  0  0  0) # Request [newer major].[older minor].[older patch]
+test_write_basic_config_version_file(4.5.6.7  9.2.6    0  0  0  0) # Request [newer major].[older minor].[same patch]
+test_write_basic_config_version_file(4.5.6.7  9.2.9    0  0  0  0) # Request [newer major].[older minor].[newer patch]
+test_write_basic_config_version_file(4.5.6.7  9.5.0    0  0  0  0) # Request [newer major].[same minor].0
+test_write_basic_config_version_file(4.5.6.7  9.5.2    0  0  0  0) # Request [newer major].[same minor].[older patch]
+test_write_basic_config_version_file(4.5.6.7  9.5.6    0  0  0  0) # Request [newer major].[same minor].[same patch]
+test_write_basic_config_version_file(4.5.6.7  9.5.9    0  0  0  0) # Request [newer major].[same minor].[newer patch]
+test_write_basic_config_version_file(4.5.6.7  9.9.0    0  0  0  0) # Request [newer major].[newer minor].0
+test_write_basic_config_version_file(4.5.6.7  9.9.2    0  0  0  0) # Request [newer major].[newer minor].[older patch]
+test_write_basic_config_version_file(4.5.6.7  9.9.6    0  0  0  0) # Request [newer major].[newer minor].[same patch]
+test_write_basic_config_version_file(4.5.6.7  9.9.9    0  0  0  0) # Request [newer major].[newer minor].[newer patch]
+
+test_write_basic_config_version_file(4.5.6.7  0.0.0.0  1  0  0  0) # Request 0.0.0.0
+test_write_basic_config_version_file(4.5.6.7  0.0.0.2  1  0  0  0) # Request 0.0.0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.0.0.7  1  0  0  0) # Request 0.0.0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.0.0.9  1  0  0  0) # Request 0.0.0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.0.2.0  1  0  0  0) # Request 0.0.[older patch].0
+test_write_basic_config_version_file(4.5.6.7  0.0.2.2  1  0  0  0) # Request 0.0.[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.0.2.7  1  0  0  0) # Request 0.0.[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.0.2.9  1  0  0  0) # Request 0.0.[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.0.6.0  1  0  0  0) # Request 0.0.[same patch].0
+test_write_basic_config_version_file(4.5.6.7  0.0.6.2  1  0  0  0) # Request 0.0.[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.0.6.7  1  0  0  0) # Request 0.0.[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.0.6.9  1  0  0  0) # Request 0.0.[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.0.9.0  1  0  0  0) # Request 0.0.[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  0.0.9.2  1  0  0  0) # Request 0.0.[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.0.9.7  1  0  0  0) # Request 0.0.[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.0.9.9  1  0  0  0) # Request 0.0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.2.0.0  1  0  0  0) # Request 0.[older minor].0.0
+test_write_basic_config_version_file(4.5.6.7  0.2.0.2  1  0  0  0) # Request 0.[older minor].0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.2.0.7  1  0  0  0) # Request 0.[older minor].0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.2.0.9  1  0  0  0) # Request 0.[older minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.2.2.0  1  0  0  0) # Request 0.[older minor].[older patch].0
+test_write_basic_config_version_file(4.5.6.7  0.2.2.2  1  0  0  0) # Request 0.[older minor].[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.2.2.7  1  0  0  0) # Request 0.[older minor].[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.2.2.9  1  0  0  0) # Request 0.[older minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.2.6.0  1  0  0  0) # Request 0.[older minor].[same patch].0
+test_write_basic_config_version_file(4.5.6.7  0.2.6.2  1  0  0  0) # Request 0.[older minor].[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.2.6.7  1  0  0  0) # Request 0.[older minor].[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.2.6.9  1  0  0  0) # Request 0.[older minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.2.9.0  1  0  0  0) # Request 0.[older minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  0.2.9.2  1  0  0  0) # Request 0.[older minor].[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.2.9.7  1  0  0  0) # Request 0.[older minor].[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.2.9.9  1  0  0  0) # Request 0.[older minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.5.0.0  1  0  0  0) # Request 0.[same minor].0.0
+test_write_basic_config_version_file(4.5.6.7  0.5.0.2  1  0  0  0) # Request 0.[same minor].0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.5.0.7  1  0  0  0) # Request 0.[same minor].0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.5.0.9  1  0  0  0) # Request 0.[same minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.5.2.0  1  0  0  0) # Request 0.[same minor].[older patch].0
+test_write_basic_config_version_file(4.5.6.7  0.5.2.2  1  0  0  0) # Request 0.[same minor].[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.5.2.7  1  0  0  0) # Request 0.[same minor].[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.5.2.9  1  0  0  0) # Request 0.[same minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.5.6.0  1  0  0  0) # Request 0.[same minor].[same patch].0
+test_write_basic_config_version_file(4.5.6.7  0.5.6.2  1  0  0  0) # Request 0.[same minor].[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.5.6.7  1  0  0  0) # Request 0.[same minor].[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.5.6.9  1  0  0  0) # Request 0.[same minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.5.9.0  1  0  0  0) # Request 0.[same minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  0.5.9.2  1  0  0  0) # Request 0.[same minor].[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.5.9.7  1  0  0  0) # Request 0.[same minor].[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.5.9.9  1  0  0  0) # Request 0.[same minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.9.0.0  1  0  0  0) # Request 0.[newer minor].0.0
+test_write_basic_config_version_file(4.5.6.7  0.9.0.2  1  0  0  0) # Request 0.[newer minor].0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.9.0.7  1  0  0  0) # Request 0.[newer minor].0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.9.0.9  1  0  0  0) # Request 0.[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.9.2.0  1  0  0  0) # Request 0.[newer minor].[older patch].0
+test_write_basic_config_version_file(4.5.6.7  0.9.2.2  1  0  0  0) # Request 0.[newer minor].[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.9.2.7  1  0  0  0) # Request 0.[newer minor].[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.9.2.9  1  0  0  0) # Request 0.[newer minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.9.6.0  1  0  0  0) # Request 0.[newer minor].[same patch].0
+test_write_basic_config_version_file(4.5.6.7  0.9.6.2  1  0  0  0) # Request 0.[newer minor].[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.9.6.7  1  0  0  0) # Request 0.[newer minor].[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.9.6.9  1  0  0  0) # Request 0.[newer minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  0.9.9.0  1  0  0  0) # Request 0.[newer minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  0.9.9.2  1  0  0  0) # Request 0.[newer minor].[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  0.9.9.7  1  0  0  0) # Request 0.[newer minor].[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  0.9.9.9  1  0  0  0) # Request 0.[newer minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.0.0.0  1  0  0  0) # Request [older major].0.0.0
+test_write_basic_config_version_file(4.5.6.7  2.0.0.2  1  0  0  0) # Request [older major].0.0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.0.0.7  1  0  0  0) # Request [older major].0.0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.0.0.9  1  0  0  0) # Request [older major].0.0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.0.2.0  1  0  0  0) # Request [older major].0.[older patch].0
+test_write_basic_config_version_file(4.5.6.7  2.0.2.2  1  0  0  0) # Request [older major].0.[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.0.2.7  1  0  0  0) # Request [older major].0.[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.0.2.9  1  0  0  0) # Request [older major].0.[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.0.6.0  1  0  0  0) # Request [older major].0.[same patch].0
+test_write_basic_config_version_file(4.5.6.7  2.0.6.2  1  0  0  0) # Request [older major].0.[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.0.6.7  1  0  0  0) # Request [older major].0.[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.0.6.9  1  0  0  0) # Request [older major].0.[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.0.9.0  1  0  0  0) # Request [older major].0.[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  2.0.9.2  1  0  0  0) # Request [older major].0.[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.0.9.7  1  0  0  0) # Request [older major].0.[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.0.9.9  1  0  0  0) # Request [older major].0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.2.0.0  1  0  0  0) # Request [older major].[older minor].0.0
+test_write_basic_config_version_file(4.5.6.7  2.2.0.2  1  0  0  0) # Request [older major].[older minor].0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.2.0.7  1  0  0  0) # Request [older major].[older minor].0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.2.0.9  1  0  0  0) # Request [older major].[older minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.2.2.0  1  0  0  0) # Request [older major].[older minor].[older patch].0
+test_write_basic_config_version_file(4.5.6.7  2.2.2.2  1  0  0  0) # Request [older major].[older minor].[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.2.2.7  1  0  0  0) # Request [older major].[older minor].[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.2.2.9  1  0  0  0) # Request [older major].[older minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.2.6.0  1  0  0  0) # Request [older major].[older minor].[same patch].0
+test_write_basic_config_version_file(4.5.6.7  2.2.6.2  1  0  0  0) # Request [older major].[older minor].[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.2.6.7  1  0  0  0) # Request [older major].[older minor].[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.2.6.9  1  0  0  0) # Request [older major].[older minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.2.9.0  1  0  0  0) # Request [older major].[older minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  2.2.9.2  1  0  0  0) # Request [older major].[older minor].[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.2.9.7  1  0  0  0) # Request [older major].[older minor].[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.2.9.9  1  0  0  0) # Request [older major].[older minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.5.0.0  1  0  0  0) # Request [older major].[same minor].0.0
+test_write_basic_config_version_file(4.5.6.7  2.5.0.2  1  0  0  0) # Request [older major].[same minor].0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.5.0.7  1  0  0  0) # Request [older major].[same minor].0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.5.0.9  1  0  0  0) # Request [older major].[same minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.5.2.0  1  0  0  0) # Request [older major].[same minor].[older patch].0
+test_write_basic_config_version_file(4.5.6.7  2.5.2.2  1  0  0  0) # Request [older major].[same minor].[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.5.2.7  1  0  0  0) # Request [older major].[same minor].[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.5.2.9  1  0  0  0) # Request [older major].[same minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.5.6.0  1  0  0  0) # Request [older major].[same minor].[same patch].0
+test_write_basic_config_version_file(4.5.6.7  2.5.6.2  1  0  0  0) # Request [older major].[same minor].[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.5.6.7  1  0  0  0) # Request [older major].[same minor].[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.5.6.9  1  0  0  0) # Request [older major].[same minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.5.9.0  1  0  0  0) # Request [older major].[same minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  2.5.9.2  1  0  0  0) # Request [older major].[same minor].[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.5.9.7  1  0  0  0) # Request [older major].[same minor].[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.5.9.9  1  0  0  0) # Request [older major].[same minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.9.0.0  1  0  0  0) # Request [older major].[newer minor].0.0
+test_write_basic_config_version_file(4.5.6.7  2.9.0.2  1  0  0  0) # Request [older major].[newer minor].0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.9.0.7  1  0  0  0) # Request [older major].[newer minor].0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.9.0.9  1  0  0  0) # Request [older major].[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.9.2.0  1  0  0  0) # Request [older major].[newer minor].[older patch].0
+test_write_basic_config_version_file(4.5.6.7  2.9.2.2  1  0  0  0) # Request [older major].[newer minor].[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.9.2.7  1  0  0  0) # Request [older major].[newer minor].[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.9.2.9  1  0  0  0) # Request [older major].[newer minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.9.6.0  1  0  0  0) # Request [older major].[newer minor].[same patch].0
+test_write_basic_config_version_file(4.5.6.7  2.9.6.2  1  0  0  0) # Request [older major].[newer minor].[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.9.6.7  1  0  0  0) # Request [older major].[newer minor].[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.9.6.9  1  0  0  0) # Request [older major].[newer minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  2.9.9.0  1  0  0  0) # Request [older major].[newer minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  2.9.9.2  1  0  0  0) # Request [older major].[newer minor].[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  2.9.9.7  1  0  0  0) # Request [older major].[newer minor].[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  2.9.9.9  1  0  0  0) # Request [older major].[newer minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.0.0.0  1  1  0  0) # Request [same major].0.0.0
+test_write_basic_config_version_file(4.5.6.7  4.0.0.2  1  1  0  0) # Request [same major].0.0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.0.0.7  1  1  0  0) # Request [same major].0.0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.0.0.9  1  1  0  0) # Request [same major].0.0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.0.2.0  1  1  0  0) # Request [same major].0.[older patch].0
+test_write_basic_config_version_file(4.5.6.7  4.0.2.2  1  1  0  0) # Request [same major].0.[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.0.2.7  1  1  0  0) # Request [same major].0.[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.0.2.9  1  1  0  0) # Request [same major].0.[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.0.6.0  1  1  0  0) # Request [same major].0.[same patch].0
+test_write_basic_config_version_file(4.5.6.7  4.0.6.2  1  1  0  0) # Request [same major].0.[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.0.6.7  1  1  0  0) # Request [same major].0.[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.0.6.9  1  1  0  0) # Request [same major].0.[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.0.9.0  1  1  0  0) # Request [same major].0.[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  4.0.9.2  1  1  0  0) # Request [same major].0.[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.0.9.7  1  1  0  0) # Request [same major].0.[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.0.9.9  1  1  0  0) # Request [same major].0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.2.0.0  1  1  0  0) # Request [same major].[older minor].0.0
+test_write_basic_config_version_file(4.5.6.7  4.2.0.2  1  1  0  0) # Request [same major].[older minor].0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.2.0.7  1  1  0  0) # Request [same major].[older minor].0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.2.0.9  1  1  0  0) # Request [same major].[older minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.2.2.0  1  1  0  0) # Request [same major].[older minor].[older patch].0
+test_write_basic_config_version_file(4.5.6.7  4.2.2.2  1  1  0  0) # Request [same major].[older minor].[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.2.2.7  1  1  0  0) # Request [same major].[older minor].[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.2.2.9  1  1  0  0) # Request [same major].[older minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.2.6.0  1  1  0  0) # Request [same major].[older minor].[same patch].0
+test_write_basic_config_version_file(4.5.6.7  4.2.6.2  1  1  0  0) # Request [same major].[older minor].[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.2.6.7  1  1  0  0) # Request [same major].[older minor].[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.2.6.9  1  1  0  0) # Request [same major].[older minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.2.9.0  1  1  0  0) # Request [same major].[older minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  4.2.9.2  1  1  0  0) # Request [same major].[older minor].[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.2.9.7  1  1  0  0) # Request [same major].[older minor].[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.2.9.9  1  1  0  0) # Request [same major].[older minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.5.0.0  1  1  1  0) # Request [same major].[same minor].0.0
+test_write_basic_config_version_file(4.5.6.7  4.5.0.2  1  1  1  0) # Request [same major].[same minor].0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.5.0.7  1  1  1  0) # Request [same major].[same minor].0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.5.0.9  1  1  1  0) # Request [same major].[same minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.5.2.0  1  1  1  0) # Request [same major].[same minor].[older patch].0
+test_write_basic_config_version_file(4.5.6.7  4.5.2.2  1  1  1  0) # Request [same major].[same minor].[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.5.2.7  1  1  1  0) # Request [same major].[same minor].[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.5.2.9  1  1  1  0) # Request [same major].[same minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.5.6.0  1  1  1  1) # Request [same major].[same minor].[same patch].0
+test_write_basic_config_version_file(4.5.6.7  4.5.6.2  1  1  1  1) # Request [same major].[same minor].[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.5.6.7  1  1  1  1) # Request [same major].[same minor].[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.5.6.9  0  0  0  1) # Request [same major].[same minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.5.9.0  0  0  0  0) # Request [same major].[same minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  4.5.9.2  0  0  0  0) # Request [same major].[same minor].[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.5.9.7  0  0  0  0) # Request [same major].[same minor].[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.5.9.9  0  0  0  0) # Request [same major].[same minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.9.0.0  0  0  0  0) # Request [same major].[newer minor].0.0
+test_write_basic_config_version_file(4.5.6.7  4.9.0.2  0  0  0  0) # Request [same major].[newer minor].0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.9.0.7  0  0  0  0) # Request [same major].[newer minor].0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.9.0.9  0  0  0  0) # Request [same major].[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.9.2.0  0  0  0  0) # Request [same major].[newer minor].[older patch].0
+test_write_basic_config_version_file(4.5.6.7  4.9.2.2  0  0  0  0) # Request [same major].[newer minor].[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.9.2.7  0  0  0  0) # Request [same major].[newer minor].[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.9.2.9  0  0  0  0) # Request [same major].[newer minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.9.6.0  0  0  0  0) # Request [same major].[newer minor].[same patch].0
+test_write_basic_config_version_file(4.5.6.7  4.9.6.2  0  0  0  0) # Request [same major].[newer minor].[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.9.6.7  0  0  0  0) # Request [same major].[newer minor].[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.9.6.9  0  0  0  0) # Request [same major].[newer minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  4.9.9.0  0  0  0  0) # Request [same major].[newer minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  4.9.9.2  0  0  0  0) # Request [same major].[newer minor].[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  4.9.9.7  0  0  0  0) # Request [same major].[newer minor].[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  4.9.9.9  0  0  0  0) # Request [same major].[newer minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.0.0.0  0  0  0  0) # Request [newer major].0.0.0
+test_write_basic_config_version_file(4.5.6.7  9.0.0.2  0  0  0  0) # Request [newer major].0.0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.0.0.7  0  0  0  0) # Request [newer major].0.0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.0.0.9  0  0  0  0) # Request [newer major].0.0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.0.2.0  0  0  0  0) # Request [newer major].0.[older patch].0
+test_write_basic_config_version_file(4.5.6.7  9.0.2.2  0  0  0  0) # Request [newer major].0.[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.0.2.7  0  0  0  0) # Request [newer major].0.[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.0.2.9  0  0  0  0) # Request [newer major].0.[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.0.6.0  0  0  0  0) # Request [newer major].0.[same patch].0
+test_write_basic_config_version_file(4.5.6.7  9.0.6.2  0  0  0  0) # Request [newer major].0.[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.0.6.7  0  0  0  0) # Request [newer major].0.[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.0.6.9  0  0  0  0) # Request [newer major].0.[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.0.9.0  0  0  0  0) # Request [newer major].0.[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  9.0.9.2  0  0  0  0) # Request [newer major].0.[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.0.9.7  0  0  0  0) # Request [newer major].0.[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.0.9.9  0  0  0  0) # Request [newer major].0.[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.2.0.0  0  0  0  0) # Request [newer major].[older minor].0.0
+test_write_basic_config_version_file(4.5.6.7  9.2.0.2  0  0  0  0) # Request [newer major].[older minor].0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.2.0.7  0  0  0  0) # Request [newer major].[older minor].0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.2.0.9  0  0  0  0) # Request [newer major].[older minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.2.2.0  0  0  0  0) # Request [newer major].[older minor].[older patch].0
+test_write_basic_config_version_file(4.5.6.7  9.2.2.2  0  0  0  0) # Request [newer major].[older minor].[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.2.2.7  0  0  0  0) # Request [newer major].[older minor].[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.2.2.9  0  0  0  0) # Request [newer major].[older minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.2.6.0  0  0  0  0) # Request [newer major].[older minor].[same patch].0
+test_write_basic_config_version_file(4.5.6.7  9.2.6.2  0  0  0  0) # Request [newer major].[older minor].[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.2.6.7  0  0  0  0) # Request [newer major].[older minor].[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.2.6.9  0  0  0  0) # Request [newer major].[older minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.2.9.0  0  0  0  0) # Request [newer major].[older minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  9.2.9.2  0  0  0  0) # Request [newer major].[older minor].[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.2.9.7  0  0  0  0) # Request [newer major].[older minor].[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.2.9.9  0  0  0  0) # Request [newer major].[older minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.5.0.0  0  0  0  0) # Request [newer major].[same minor].0.0
+test_write_basic_config_version_file(4.5.6.7  9.5.0.2  0  0  0  0) # Request [newer major].[same minor].0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.5.0.7  0  0  0  0) # Request [newer major].[same minor].0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.5.0.9  0  0  0  0) # Request [newer major].[same minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.5.2.0  0  0  0  0) # Request [newer major].[same minor].[older patch].0
+test_write_basic_config_version_file(4.5.6.7  9.5.2.2  0  0  0  0) # Request [newer major].[same minor].[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.5.2.7  0  0  0  0) # Request [newer major].[same minor].[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.5.2.9  0  0  0  0) # Request [newer major].[same minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.5.6.0  0  0  0  0) # Request [newer major].[same minor].[same patch].0
+test_write_basic_config_version_file(4.5.6.7  9.5.6.2  0  0  0  0) # Request [newer major].[same minor].[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.5.6.7  0  0  0  0) # Request [newer major].[same minor].[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.5.6.9  0  0  0  0) # Request [newer major].[same minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.5.9.0  0  0  0  0) # Request [newer major].[same minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  9.5.9.2  0  0  0  0) # Request [newer major].[same minor].[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.5.9.7  0  0  0  0) # Request [newer major].[same minor].[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.5.9.9  0  0  0  0) # Request [newer major].[same minor].[newer patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.9.0.0  0  0  0  0) # Request [newer major].[newer minor].0.0
+test_write_basic_config_version_file(4.5.6.7  9.9.0.2  0  0  0  0) # Request [newer major].[newer minor].0.[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.9.0.7  0  0  0  0) # Request [newer major].[newer minor].0.[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.9.0.9  0  0  0  0) # Request [newer major].[newer minor].0.[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.9.2.0  0  0  0  0) # Request [newer major].[newer minor].[older patch].0
+test_write_basic_config_version_file(4.5.6.7  9.9.2.2  0  0  0  0) # Request [newer major].[newer minor].[older patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.9.2.7  0  0  0  0) # Request [newer major].[newer minor].[older patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.9.2.9  0  0  0  0) # Request [newer major].[newer minor].[older patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.9.6.0  0  0  0  0) # Request [newer major].[newer minor].[same patch].0
+test_write_basic_config_version_file(4.5.6.7  9.9.6.2  0  0  0  0) # Request [newer major].[newer minor].[same patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.9.6.7  0  0  0  0) # Request [newer major].[newer minor].[same patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.9.6.9  0  0  0  0) # Request [newer major].[newer minor].[same patch].[newer tweak]
+test_write_basic_config_version_file(4.5.6.7  9.9.9.0  0  0  0  0) # Request [newer major].[newer minor].[newer patch].0
+test_write_basic_config_version_file(4.5.6.7  9.9.9.2  0  0  0  0) # Request [newer major].[newer minor].[newer patch].[older tweak]
+test_write_basic_config_version_file(4.5.6.7  9.9.9.7  0  0  0  0) # Request [newer major].[newer minor].[newer patch].[same tweak]
+test_write_basic_config_version_file(4.5.6.7  9.9.9.9  0  0  0  0) # Request [newer major].[newer minor].[newer patch].[newer tweak]
 
 
 ############################################################################

@@ -108,8 +108,9 @@ public:
     while (true) {
       lastoffset = line.find('(', pos);
       if (lastoffset == std::string::npos) {
-        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, endnamepos
-                             << "File not found  " << lastoffset << std::endl,
+        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                           endnamepos << "File not found  " << lastoffset
+                                      << std::endl,
                            this->Coverage.Quiet);
         return false;
       }

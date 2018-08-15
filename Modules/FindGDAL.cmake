@@ -66,11 +66,49 @@ if(UNIX)
 
     if(GDAL_CONFIG)
         exec_program(${GDAL_CONFIG} ARGS --libs OUTPUT_VARIABLE GDAL_CONFIG_LIBS)
+
         if(GDAL_CONFIG_LIBS)
-            string(REGEX MATCHALL "-l[^ ]+" _gdal_dashl ${GDAL_CONFIG_LIBS})
-            string(REPLACE "-l" "" _gdal_lib "${_gdal_dashl}")
-            string(REGEX MATCHALL "-L[^ ]+" _gdal_dashL ${GDAL_CONFIG_LIBS})
-            string(REPLACE "-L" "" _gdal_libpath "${_gdal_dashL}")
+            # treat the output as a command line and split it up
+            separate_arguments(args NATIVE_COMMAND "${GDAL_CONFIG_LIBS}")
+
+            # only consider libraries whose name matches this pattern
+            set(name_pattern "[gG][dD][aA][lL]")
+
+            # consider each entry as a possible library path, name, or parent directory
+            foreach(arg IN LISTS args)
+                # library name
+                if("${arg}" MATCHES "^-l(.*)$")
+                    set(lib "${CMAKE_MATCH_1}")
+
+                    # only consider libraries whose name matches the expected pattern
+                    if("${lib}" MATCHES "${name_pattern}")
+                        list(APPEND _gdal_lib "${lib}")
+                    endif()
+                # library search path
+                elseif("${arg}" MATCHES "^-L(.*)$")
+                    list(APPEND _gdal_libpath "${CMAKE_MATCH_1}")
+                # assume this is a full path to a library
+                elseif(IS_ABSOLUTE "${arg}" AND EXISTS "${arg}")
+                    # extract the file name
+                    get_filename_component(lib "${arg}" NAME)
+
+                    # only consider libraries whose name matches the expected pattern
+                    if(NOT "${lib}" MATCHES "${name_pattern}")
+                        continue()
+                    endif()
+
+                    # extract the file directory
+                    get_filename_component(dir "${arg}" DIRECTORY)
+
+                    # remove library prefixes/suffixes
+                    string(REGEX REPLACE "^(${CMAKE_SHARED_LIBRARY_PREFIX}|${CMAKE_STATIC_LIBRARY_PREFIX})" "" lib "${lib}")
+                    string(REGEX REPLACE "(${CMAKE_SHARED_LIBRARY_SUFFIX}|${CMAKE_STATIC_LIBRARY_SUFFIX})$" "" lib "${lib}")
+
+                    # use the file name and directory as hints
+                    list(APPEND _gdal_libpath "${dir}")
+                    list(APPEND _gdal_lib "${lib}")
+                endif()
+            endforeach()
         endif()
     endif()
 endif()

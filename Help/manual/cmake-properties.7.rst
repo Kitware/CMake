@@ -40,6 +40,7 @@ Properties of Global Scope
    /prop_gbl/JOB_POOLS
    /prop_gbl/PREDEFINED_TARGETS_FOLDER
    /prop_gbl/ECLIPSE_EXTRA_NATURES
+   /prop_gbl/ECLIPSE_EXTRA_CPROJECT_CONTENTS
    /prop_gbl/REPORT_UNDEFINED_PROPERTIES
    /prop_gbl/RULE_LAUNCH_COMPILE
    /prop_gbl/RULE_LAUNCH_CUSTOM
@@ -84,6 +85,7 @@ Properties on Directories
    /prop_dir/RULE_LAUNCH_LINK
    /prop_dir/SOURCE_DIR
    /prop_dir/SUBDIRECTORIES
+   /prop_dir/TESTS
    /prop_dir/TEST_INCLUDE_FILES
    /prop_dir/VARIABLES
    /prop_dir/VS_GLOBAL_SECTION_POST_section
@@ -142,6 +144,7 @@ Properties on Targets
    /prop_tgt/C_EXTENSIONS
    /prop_tgt/C_STANDARD
    /prop_tgt/C_STANDARD_REQUIRED
+   /prop_tgt/COMMON_LANGUAGE_RUNTIME
    /prop_tgt/COMPATIBLE_INTERFACE_BOOL
    /prop_tgt/COMPATIBLE_INTERFACE_NUMBER_MAX
    /prop_tgt/COMPATIBLE_INTERFACE_NUMBER_MIN
@@ -169,12 +172,14 @@ Properties on Targets
    /prop_tgt/DEBUG_POSTFIX
    /prop_tgt/DEFINE_SYMBOL
    /prop_tgt/DEPLOYMENT_REMOTE_DIRECTORY
+   /prop_tgt/DOTNET_TARGET_FRAMEWORK_VERSION
    /prop_tgt/EchoString
    /prop_tgt/ENABLE_EXPORTS
    /prop_tgt/EXCLUDE_FROM_ALL
    /prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD_CONFIG
    /prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD
    /prop_tgt/EXPORT_NAME
+   /prop_tgt/EXPORT_PROPERTIES
    /prop_tgt/FOLDER
    /prop_tgt/Fortran_FORMAT
    /prop_tgt/Fortran_MODULE_DIRECTORY
@@ -184,6 +189,7 @@ Properties on Targets
    /prop_tgt/GNUtoMS
    /prop_tgt/HAS_CXX
    /prop_tgt/IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
+   /prop_tgt/IMPORTED_COMMON_LANGUAGE_RUNTIME
    /prop_tgt/IMPORTED_CONFIGURATIONS
    /prop_tgt/IMPORTED_GLOBAL
    /prop_tgt/IMPORTED_IMPLIB_CONFIG
@@ -295,6 +301,7 @@ Properties on Targets
    /prop_tgt/VISIBILITY_INLINES_HIDDEN
    /prop_tgt/VS_CONFIGURATION_TYPE
    /prop_tgt/VS_DEBUGGER_WORKING_DIRECTORY
+   /prop_tgt/VS_DEBUGGER_COMMAND
    /prop_tgt/VS_DESKTOP_EXTENSIONS_VERSION
    /prop_tgt/VS_DOTNET_REFERENCE_refname
    /prop_tgt/VS_DOTNET_REFERENCEPROP_refname_TAG_tagname
@@ -347,6 +354,7 @@ Properties on Tests
    /prop_test/LABELS
    /prop_test/MEASUREMENT
    /prop_test/PASS_REGULAR_EXPRESSION
+   /prop_test/PROCESSOR_AFFINITY
    /prop_test/PROCESSORS
    /prop_test/REQUIRED_FILES
    /prop_test/RESOURCE_LOCK
@@ -399,6 +407,7 @@ Properties on Source Files
    /prop_sf/VS_SHADER_ENTRYPOINT
    /prop_sf/VS_SHADER_FLAGS
    /prop_sf/VS_SHADER_MODEL
+   /prop_sf/VS_SHADER_OBJECT_FILE_NAME
    /prop_sf/VS_SHADER_OUTPUT_HEADER_FILE
    /prop_sf/VS_SHADER_TYPE
    /prop_sf/VS_SHADER_VARIABLE_NAME

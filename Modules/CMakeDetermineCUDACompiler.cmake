@@ -6,7 +6,7 @@ include(${CMAKE_ROOT}/Modules//CMakeParseImplicitLinkInfo.cmake)
 
 if( NOT ( ("${CMAKE_GENERATOR}" MATCHES "Make") OR
           ("${CMAKE_GENERATOR}" MATCHES "Ninja") OR
-          ("${CMAKE_GENERATOR}" MATCHES "Visual Studio (1|[89][0-9])") ) )
+          ("${CMAKE_GENERATOR}" MATCHES "Visual Studio (1|[9][0-9])") ) )
   message(FATAL_ERROR "CUDA language not currently supported by \"${CMAKE_GENERATOR}\" generator")
 endif()
 
@@ -40,7 +40,6 @@ else()
 endif()
 
 #Allow the user to specify a host compiler
-set(CMAKE_CUDA_HOST_COMPILER "" CACHE FILEPATH "Host compiler to be used by nvcc")
 if(NOT $ENV{CUDAHOSTCXX} STREQUAL "")
   get_filename_component(CMAKE_CUDA_HOST_COMPILER $ENV{CUDAHOSTCXX} PROGRAM)
   if(NOT EXISTS ${CMAKE_CUDA_HOST_COMPILER})

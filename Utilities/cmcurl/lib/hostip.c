@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,10 +54,12 @@
 #include "sendf.h"
 #include "hostip.h"
 #include "hash.h"
+#include "rand.h"
 #include "share.h"
 #include "strerror.h"
 #include "url.h"
 #include "inet_ntop.h"
+#include "multiif.h"
 #include "warnless.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -366,6 +368,70 @@ Curl_fetch_addr(struct connectdata *conn,
 }
 
 /*
+ * Curl_shuffle_addr() shuffles the order of addresses in a 'Curl_addrinfo'
+ * struct by re-linking its linked list.
+ *
+ * The addr argument should be the address of a pointer to the head node of a
+ * `Curl_addrinfo` list and it will be modified to point to the new head after
+ * shuffling.
+ *
+ * Not declared static only to make it easy to use in a unit test!
+ *
+ * @unittest: 1608
+ */
+CURLcode Curl_shuffle_addr(struct Curl_easy *data, Curl_addrinfo **addr)
+{
+  CURLcode result = CURLE_OK;
+  const int num_addrs = Curl_num_addresses(*addr);
+
+  if(num_addrs > 1) {
+    Curl_addrinfo **nodes;
+    infof(data, "Shuffling %i addresses", num_addrs);
+
+    nodes = malloc(num_addrs*sizeof(*nodes));
+    if(nodes) {
+      int i;
+      unsigned int *rnd;
+      const size_t rnd_size = num_addrs * sizeof(*rnd);
+
+      /* build a plain array of Curl_addrinfo pointers */
+      nodes[0] = *addr;
+      for(i = 1; i < num_addrs; i++) {
+        nodes[i] = nodes[i-1]->ai_next;
+      }
+
+      rnd = malloc(rnd_size);
+      if(rnd) {
+        /* Fisher-Yates shuffle */
+        if(Curl_rand(data, (unsigned char *)rnd, rnd_size) == CURLE_OK) {
+          Curl_addrinfo *swap_tmp;
+          for(i = num_addrs - 1; i > 0; i--) {
+            swap_tmp = nodes[rnd[i] % (i + 1)];
+            nodes[rnd[i] % (i + 1)] = nodes[i];
+            nodes[i] = swap_tmp;
+          }
+
+          /* relink list in the new order */
+          for(i = 1; i < num_addrs; i++) {
+            nodes[i-1]->ai_next = nodes[i];
+          }
+
+          nodes[num_addrs-1]->ai_next = NULL;
+          *addr = nodes[0];
+        }
+        free(rnd);
+      }
+      else
+        result = CURLE_OUT_OF_MEMORY;
+      free(nodes);
+    }
+    else
+      result = CURLE_OUT_OF_MEMORY;
+  }
+  return result;
+}
+
+/*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
  *
  * When calling Curl_resolv() has resulted in a response with a returned
@@ -384,6 +450,13 @@ Curl_cache_addr(struct Curl_easy *data,
   size_t entry_len;
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
+
+  /* shuffle addresses if requested */
+  if(data->set.dns_shuffle_addresses) {
+    CURLcode result = Curl_shuffle_addr(data, &addr);
+    if(!result)
+      return NULL;
+  }
 
   /* Create an entry id, based upon the hostname and port */
   entry_id = create_hostcache_id(hostname, port);
@@ -480,6 +553,17 @@ int Curl_resolv(struct connectdata *conn,
      * If not, bail out. */
     if(!Curl_ipvalid(conn))
       return CURLRESOLV_ERROR;
+
+    /* notify the resolver start callback */
+    if(data->set.resolver_start) {
+      int st;
+      Curl_set_in_callback(data, true);
+      st = data->set.resolver_start(data->state.resolver, NULL,
+                                    data->set.resolver_start_client);
+      Curl_set_in_callback(data, false);
+      if(st)
+        return CURLRESOLV_ERROR;
+    }
 
     /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
        non-zero value indicating that we need to wait for the response to the
@@ -781,7 +865,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 {
   struct curl_slist *hostp;
   char hostname[256];
-  int port;
+  int port = 0;
 
   for(hostp = data->change.resolve; hostp; hostp = hostp->next) {
     if(!hostp->data)
@@ -819,32 +903,95 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
     }
     else {
       struct Curl_dns_entry *dns;
-      Curl_addrinfo *addr;
+      Curl_addrinfo *head = NULL, *tail = NULL;
       char *entry_id;
       size_t entry_len;
-      char buffer[256];
-      char *address = &buffer[0];
+      char address[64];
+      char *addresses = NULL;
+      char *addr_begin;
+      char *addr_end;
+      char *port_ptr;
+      char *end_ptr;
+      char *host_end;
+      unsigned long tmp_port;
+      bool error = true;
 
-      if(3 != sscanf(hostp->data, "%255[^:]:%d:%255s", hostname, &port,
-                     address)) {
+      host_end = strchr(hostp->data, ':');
+      if(!host_end ||
+         ((host_end - hostp->data) >= (ptrdiff_t)sizeof(hostname)))
+        goto err;
+
+      memcpy(hostname, hostp->data, host_end - hostp->data);
+      hostname[host_end - hostp->data] = '\0';
+
+      port_ptr = host_end + 1;
+      tmp_port = strtoul(port_ptr, &end_ptr, 10);
+      if(tmp_port > USHRT_MAX || end_ptr == port_ptr || *end_ptr != ':')
+        goto err;
+
+      port = (int)tmp_port;
+      addresses = end_ptr + 1;
+
+      while(*end_ptr) {
+        size_t alen;
+        Curl_addrinfo *ai;
+
+        addr_begin = end_ptr + 1;
+        addr_end = strchr(addr_begin, ',');
+        if(!addr_end)
+          addr_end = addr_begin + strlen(addr_begin);
+        end_ptr = addr_end;
+
+        /* allow IP(v6) address within [brackets] */
+        if(*addr_begin == '[') {
+          if(addr_end == addr_begin || *(addr_end - 1) != ']')
+            goto err;
+          ++addr_begin;
+          --addr_end;
+        }
+
+        alen = addr_end - addr_begin;
+        if(!alen)
+          continue;
+
+        if(alen >= sizeof(address))
+          goto err;
+
+        memcpy(address, addr_begin, alen);
+        address[alen] = '\0';
+
+#ifndef ENABLE_IPV6
+        if(strchr(address, ':')) {
+          infof(data, "Ignoring resolve address '%s', missing IPv6 support.\n",
+                address);
+          continue;
+        }
+#endif
+
+        ai = Curl_str2addr(address, port);
+        if(!ai) {
+          infof(data, "Resolve address '%s' found illegal!\n", address);
+          goto err;
+        }
+
+        if(tail) {
+          tail->ai_next = ai;
+          tail = tail->ai_next;
+        }
+        else {
+          head = tail = ai;
+        }
+      }
+
+      if(!head)
+        goto err;
+
+      error = false;
+   err:
+      if(error) {
         infof(data, "Couldn't parse CURLOPT_RESOLVE entry '%s'!\n",
               hostp->data);
-        continue;
-      }
-
-      /* allow IP(v6) address within [brackets] */
-      if(address[0] == '[') {
-        size_t alen = strlen(address);
-        if(address[alen-1] != ']')
-          /* it needs to also end with ] to be valid */
-          continue;
-        address[alen-1] = 0; /* zero terminate there */
-        address++; /* pass the open bracket */
-      }
-
-      addr = Curl_str2addr(address, port);
-      if(!addr) {
-        infof(data, "Address in '%s' found illegal!\n", hostp->data);
+        Curl_freeaddrinfo(head);
         continue;
       }
 
@@ -852,10 +999,9 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       entry_id = create_hostcache_id(hostname, port);
       /* If we can't create the entry id, fail */
       if(!entry_id) {
-        Curl_freeaddrinfo(addr);
+        Curl_freeaddrinfo(head);
         return CURLE_OUT_OF_MEMORY;
       }
-
       entry_len = strlen(entry_id);
 
       if(data->share)
@@ -869,7 +1015,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 
       if(!dns) {
         /* if not in the cache already, put this host in the cache */
-        dns = Curl_cache_addr(data, addr, hostname, port);
+        dns = Curl_cache_addr(data, head, hostname, port);
         if(dns) {
           dns->timestamp = 0; /* mark as added by CURLOPT_RESOLVE */
           /* release the returned reference; the cache itself will keep the
@@ -880,19 +1026,19 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       else {
         /* this is a duplicate, free it again */
         infof(data, "RESOLVE %s:%d is already cached, %s not stored!\n",
-              hostname, port, address);
-        Curl_freeaddrinfo(addr);
+              hostname, port, addresses);
+        Curl_freeaddrinfo(head);
       }
 
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
       if(!dns) {
-        Curl_freeaddrinfo(addr);
+        Curl_freeaddrinfo(head);
         return CURLE_OUT_OF_MEMORY;
       }
       infof(data, "Added %s:%d:%s to DNS cache\n",
-            hostname, port, address);
+            hostname, port, addresses);
     }
   }
   data->change.resolve = NULL; /* dealt with now */

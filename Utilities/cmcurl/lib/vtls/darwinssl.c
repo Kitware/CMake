@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2017, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1135,28 +1135,79 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
      raise linker errors when used on that cat for some reason. */
 #if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
   if(CFURLCreateDataAndPropertiesFromResource(NULL, pkcs_url, &pkcs_data,
-    NULL, NULL, &status)) {
+   NULL, NULL, &status)) {
+    CFArrayRef items = NULL;
+
+  /* On iOS SecPKCS12Import will never add the client certificate to the
+   * Keychain.
+   *
+   * It gives us back a SecIdentityRef that we can use directly. */
+#if CURL_BUILD_IOS
     const void *cKeys[] = {kSecImportExportPassphrase};
     const void *cValues[] = {password};
     CFDictionaryRef options = CFDictionaryCreate(NULL, cKeys, cValues,
       password ? 1L : 0L, NULL, NULL);
-    CFArrayRef items = NULL;
 
-    /* Here we go: */
-    status = SecPKCS12Import(pkcs_data, options, &items);
+    if(options != NULL) {
+      status = SecPKCS12Import(pkcs_data, options, &items);
+      CFRelease(options);
+    }
+
+
+  /* On macOS SecPKCS12Import will always add the client certificate to
+   * the Keychain.
+   *
+   * As this doesn't match iOS, and apps may not want to see their client
+   * certificate saved in the the user's keychain, we use SecItemImport
+   * with a NULL keychain to avoid importing it.
+   *
+   * This returns a SecCertificateRef from which we can construct a
+   * SecIdentityRef.
+   */
+#elif CURL_BUILD_MAC_10_7
+    SecItemImportExportKeyParameters keyParams;
+    SecExternalFormat inputFormat = kSecFormatPKCS12;
+    SecExternalItemType inputType = kSecItemTypeCertificate;
+
+    memset(&keyParams, 0x00, sizeof(keyParams));
+    keyParams.version    = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
+    keyParams.passphrase = password;
+
+    status = SecItemImport(pkcs_data, NULL, &inputFormat, &inputType,
+                           0, &keyParams, NULL, &items);
+#endif
+
+
+    /* Extract the SecIdentityRef */
     if(status == errSecSuccess && items && CFArrayGetCount(items)) {
-      CFDictionaryRef identity_and_trust = CFArrayGetValueAtIndex(items, 0L);
-      const void *temp_identity = CFDictionaryGetValue(identity_and_trust,
-        kSecImportItemIdentity);
+      CFIndex i, count;
+      count = CFArrayGetCount(items);
 
-      /* Retain the identity; we don't care about any other data... */
-      CFRetain(temp_identity);
-      *out_cert_and_key = (SecIdentityRef)temp_identity;
+      for(i = 0; i < count; i++) {
+        CFTypeRef item = (CFTypeRef) CFArrayGetValueAtIndex(items, i);
+        CFTypeID  itemID = CFGetTypeID(item);
+
+        if(itemID == CFDictionaryGetTypeID()) {
+          CFTypeRef identity = (CFTypeRef) CFDictionaryGetValue(
+                                                 (CFDictionaryRef) item,
+                                                 kSecImportItemIdentity);
+          CFRetain(identity);
+          *out_cert_and_key = (SecIdentityRef) identity;
+          break;
+        }
+#if CURL_BUILD_MAC_10_7
+        else if(itemID == SecCertificateGetTypeID()) {
+          status = SecIdentityCreateWithCertificate(NULL,
+                                                 (SecCertificateRef) item,
+                                                 out_cert_and_key);
+          break;
+        }
+#endif
+      }
     }
 
     if(items)
       CFRelease(items);
-    CFRelease(options);
     CFRelease(pkcs_data);
   }
 #endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
@@ -1340,7 +1391,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #endif /* CURL_BUILD_MAC */
 
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
-  if(SSLCreateContext != NULL) {  /* use the newer API if avaialble */
+  if(SSLCreateContext != NULL) {  /* use the newer API if available */
     if(BACKEND->ssl_ctx)
       CFRelease(BACKEND->ssl_ctx);
     BACKEND->ssl_ctx = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
@@ -2843,13 +2894,14 @@ static CURLcode Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
   return CURLE_OK;
 }
 
-static void Curl_darwinssl_sha256sum(const unsigned char *tmp, /* input */
+static CURLcode Curl_darwinssl_sha256sum(const unsigned char *tmp, /* input */
                                      size_t tmplen,
                                      unsigned char *sha256sum, /* output */
                                      size_t sha256len)
 {
   assert(sha256len >= CURL_SHA256_DIGEST_LENGTH);
   (void)CC_SHA256(tmp, (CC_LONG)tmplen, sha256sum);
+  return CURLE_OK;
 }
 
 static bool Curl_darwinssl_false_start(void)
@@ -2977,15 +3029,11 @@ static void *Curl_darwinssl_get_internals(struct ssl_connect_data *connssl,
 const struct Curl_ssl Curl_ssl_darwinssl = {
   { CURLSSLBACKEND_DARWINSSL, "darwinssl" }, /* info */
 
-  0, /* have_ca_path */
-  0, /* have_certinfo */
 #ifdef DARWIN_SSL_PINNEDPUBKEY
-  1, /* have_pinnedpubkey */
+  SSLSUPP_PINNEDPUBKEY,
 #else
-  0, /* have_pinnedpubkey */
+  0,
 #endif /* DARWIN_SSL_PINNEDPUBKEY */
-  0, /* have_ssl_ctx */
-  0, /* support_https_proxy */
 
   sizeof(struct ssl_backend_data),
 

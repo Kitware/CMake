@@ -155,8 +155,9 @@ class cmMakefile;
          3, 0, 0, cmPolicies::WARN)                                           \
   SELECT(POLICY, CMP0051, "List TARGET_OBJECTS in SOURCES target property.",  \
          3, 1, 0, cmPolicies::WARN)                                           \
-  SELECT(POLICY, CMP0052, "Reject source and build dirs in installed "        \
-                          "INTERFACE_INCLUDE_DIRECTORIES.",                   \
+  SELECT(POLICY, CMP0052,                                                     \
+         "Reject source and build dirs in installed "                         \
+         "INTERFACE_INCLUDE_DIRECTORIES.",                                    \
          3, 1, 0, cmPolicies::WARN)                                           \
   SELECT(POLICY, CMP0053,                                                     \
          "Simplify variable reference and escape sequence evaluation.", 3, 1, \
@@ -214,7 +215,15 @@ class cmMakefile;
          3, 10, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0072,                                                     \
          "FindOpenGL prefers GLVND by default when available.", 3, 11, 0,     \
-         cmPolicies::WARN)
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0073,                                                     \
+         "Do not produce legacy _LIB_DEPENDS cache entries.", 3, 12, 0,       \
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0074, "find_package uses <PackageName>_ROOT variables.",  \
+         3, 12, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0075,                                                     \
+         "Include file check macros honor CMAKE_REQUIRED_LIBRARIES.", 3, 12,  \
+         0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -238,14 +247,13 @@ class cmMakefile;
   F(CMP0063)                                                                  \
   F(CMP0065)                                                                  \
   F(CMP0068)                                                                  \
-  F(CMP0069)
+  F(CMP0069)                                                                  \
+  F(CMP0073)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies
  *
- * See the cmake wiki section on
- * <a href="https://cmake.org/Wiki/CMake/Policies">policies</a>
- * for an overview of this class's purpose
+ * See the cmake-policies(7) manual for an overview of this class's purpose.
  */
 class cmPolicies
 {
@@ -284,7 +292,11 @@ public:
   static cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
 
   ///! Set a policy level for this listfile
-  static bool ApplyPolicyVersion(cmMakefile* mf, const char* version);
+  static bool ApplyPolicyVersion(cmMakefile* mf,
+                                 std::string const& version_min,
+                                 std::string const& version_max);
+  static bool ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
+                                 unsigned int minorVer, unsigned int patchVer);
 
   ///! return a warning string for a given policy
   static std::string GetPolicyWarning(cmPolicies::PolicyID id);

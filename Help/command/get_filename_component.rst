@@ -45,7 +45,7 @@ to the given base directory ``<BASE_DIR>``.  If no base directory is
 provided, the default base directory will be
 :variable:`CMAKE_CURRENT_SOURCE_DIR`.
 
-Paths are returned with forward slashes and have no trailing slahes.  If the
+Paths are returned with forward slashes and have no trailing slashes.  If the
 optional ``CACHE`` argument is specified, the result variable is added to the
 cache.
 

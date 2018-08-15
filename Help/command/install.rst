@@ -1,11 +1,19 @@
 install
 -------
 
-.. only:: html
-
-   .. contents::
-
 Specify rules to run at install time.
+
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  install(`TARGETS`_ <target>... [...])
+  install({`FILES`_ | `PROGRAMS`_} <file>... DESTINATION <dir> [...])
+  install(`DIRECTORY`_ <dir>... DESTINATION <dir> [...])
+  install(`SCRIPT`_ <file> [...])
+  install(`CODE`_ <code> [...])
+  install(`EXPORT`_ <export-name> DESTINATION <dir> [...])
 
 Introduction
 ^^^^^^^^^^^^
@@ -84,6 +92,8 @@ to control which messages are printed.
 Installing Targets
 ^^^^^^^^^^^^^^^^^^
 
+.. _TARGETS:
+
 ::
 
   install(TARGETS targets... [EXPORT <export-name>]
@@ -93,6 +103,7 @@ Installing Targets
            [PERMISSIONS permissions...]
            [CONFIGURATIONS [Debug|Release|...]]
            [COMPONENT <component>]
+           [NAMELINK_COMPONENT <component>]
            [OPTIONAL] [EXCLUDE_FROM_ALL]
            [NAMELINK_ONLY|NAMELINK_SKIP]
           ] [...]
@@ -100,63 +111,144 @@ Installing Targets
           )
 
 The ``TARGETS`` form specifies rules for installing targets from a
-project.  There are six kinds of target files that may be installed:
-``ARCHIVE``, ``LIBRARY``, ``RUNTIME``, ``OBJECTS``, ``FRAMEWORK``, and
-``BUNDLE``. Executables are treated as ``RUNTIME`` targets, except that
-those marked with the ``MACOSX_BUNDLE`` property are treated as ``BUNDLE``
-targets on OS X.  Static libraries are treated as ``ARCHIVE`` targets,
-except that those marked with the ``FRAMEWORK`` property are treated
-as ``FRAMEWORK`` targets on OS X.
-Module libraries are always treated as ``LIBRARY`` targets.
-For non-DLL platforms shared libraries are treated as ``LIBRARY``
-targets, except that those marked with the ``FRAMEWORK`` property are
-treated as ``FRAMEWORK`` targets on OS X.  For DLL platforms the DLL
-part of a shared library is treated as a ``RUNTIME`` target and the
-corresponding import library is treated as an ``ARCHIVE`` target.
-All Windows-based systems including Cygwin are DLL platforms. Object
-libraries are always treated as ``OBJECTS`` targets.
-The ``ARCHIVE``, ``LIBRARY``, ``RUNTIME``, ``OBJECTS``, and ``FRAMEWORK``
-arguments change the type of target to which the subsequent properties
-apply. If none is given the installation properties apply to all target
-types.  If only one is given then only targets of that type will be
-installed (which can be used to install just a DLL or just an import
-library).
+project.  There are several kinds of target files that may be installed:
 
-The ``PRIVATE_HEADER``, ``PUBLIC_HEADER``, and ``RESOURCE`` arguments
-cause subsequent properties to be applied to installing a ``FRAMEWORK``
-shared library target's associated files on non-Apple platforms.  Rules
-defined by these arguments are ignored on Apple platforms because the
-associated files are installed into the appropriate locations inside
-the framework folder.  See documentation of the
-:prop_tgt:`PRIVATE_HEADER`, :prop_tgt:`PUBLIC_HEADER`, and
-:prop_tgt:`RESOURCE` target properties for details.
+``ARCHIVE``
+  Static libraries are treated as ``ARCHIVE`` targets, except those
+  marked with the ``FRAMEWORK`` property on OS X (see ``FRAMEWORK``
+  below.) For DLL platforms (all Windows-based systems including
+  Cygwin), the DLL import library is treated as an ``ARCHIVE`` target.
 
-Either ``NAMELINK_ONLY`` or ``NAMELINK_SKIP`` may be specified as a
-``LIBRARY`` option.  On some platforms a versioned shared library
-has a symbolic link such as::
+``LIBRARY``
+  Module libraries are always treated as ``LIBRARY`` targets. For non-
+  DLL platforms shared libraries are treated as ``LIBRARY`` targets,
+  except those marked with the ``FRAMEWORK`` property on OS X (see
+  ``FRAMEWORK`` below.)
 
-  lib<name>.so -> lib<name>.so.1
+``RUNTIME``
+  Executables are treated as ``RUNTIME`` objects, except those marked
+  with the ``MACOSX_BUNDLE`` property on OS X (see ``BUNDLE`` below.)
+  For DLL platforms (all Windows-based systems including Cygwin), the
+  DLL part of a shared library is treated as a ``RUNTIME`` target.
 
-where ``lib<name>.so.1`` is the soname of the library and ``lib<name>.so``
-is a "namelink" allowing linkers to find the library when given
-``-l<name>``.  The ``NAMELINK_ONLY`` option causes installation of only the
-namelink when a library target is installed.  The ``NAMELINK_SKIP`` option
-causes installation of library files other than the namelink when a
-library target is installed.  When neither option is given both
-portions are installed.  On platforms where versioned shared libraries
-do not have namelinks or when a library is not versioned the
-``NAMELINK_SKIP`` option installs the library and the ``NAMELINK_ONLY``
-option installs nothing.  See the :prop_tgt:`VERSION` and
-:prop_tgt:`SOVERSION` target properties for details on creating versioned
-shared libraries.
+``OBJECTS``
+  Object libraries (a simple group of object files) are always treated
+  as ``OBJECTS`` targets.
 
-The ``INCLUDES DESTINATION`` specifies a list of directories
-which will be added to the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
-target property of the ``<targets>`` when exported by the
-:command:`install(EXPORT)` command.  If a relative path is
-specified, it is treated as relative to the ``$<INSTALL_PREFIX>``.
-This is independent of the rest of the argument groups and does
-not actually install anything.
+``FRAMEWORK``
+  Both static and shared libraries marked with the ``FRAMEWORK``
+  property are treated as ``FRAMEWORK`` targets on OS X.
+
+``BUNDLE``
+  Executables marked with the ``MACOSX_BUNDLE`` property are treated as
+  ``BUNDLE`` targets on OS X.
+
+``PUBLIC_HEADER``
+  Any ``PUBLIC_HEADER`` files associated with a library are installed in
+  the destination specified by the ``PUBLIC_HEADER`` argument on non-Apple
+  platforms. Rules defined by this argument are ignored for ``FRAMEWORK``
+  libraries on Apple platforms because the associated files are installed
+  into the appropriate locations inside the framework folder. See
+  :prop_tgt:`PUBLIC_HEADER` for details.
+
+``PRIVATE_HEADER``
+  Similar to ``PUBLIC_HEADER``, but for ``PRIVATE_HEADER`` files. See
+  :prop_tgt:`PRIVATE_HEADER` for details.
+
+``RESOURCE``
+  Similar to ``PUBLIC_HEADER`` and ``PRIVATE_HEADER``, but for
+  ``RESOURCE`` files. See :prop_tgt:`RESOURCE` for details.
+
+For each of these arguments given, the arguments following them only apply
+to the target or file type specified in the argument. If none is given, the
+installation properties apply to all target types. If only one is given then
+only targets of that type will be installed (which can be used to install
+just a DLL or just an import library.)
+
+In addition to the common options listed above, each target can accept
+the following additional arguments:
+
+``NAMELINK_COMPONENT``
+  On some platforms a versioned shared library has a symbolic link such
+  as::
+
+    lib<name>.so -> lib<name>.so.1
+
+  where ``lib<name>.so.1`` is the soname of the library and ``lib<name>.so``
+  is a "namelink" allowing linkers to find the library when given
+  ``-l<name>``. The ``NAMELINK_COMPONENT`` option is similar to the
+  ``COMPONENT`` option, but it changes the installation component of a shared
+  library namelink if one is generated. If not specified, this defaults to the
+  value of ``COMPONENT``. It is an error to use this parameter outside of a
+  ``LIBRARY`` block.
+
+  Consider the following example:
+
+  .. code-block:: cmake
+
+    install(TARGETS mylib
+            LIBRARY
+              DESTINATION lib
+              COMPONENT Libraries
+              NAMELINK_COMPONENT Development
+            PUBLIC_HEADER
+              DESTINATION include
+              COMPONENT Development
+           )
+
+  In this scenario, if you choose to install only the ``Development``
+  component, both the headers and namelink will be installed without the
+  library. (If you don't also install the ``Libraries`` component, the
+  namelink will be a dangling symlink, and projects that link to the library
+  will have build errors.) If you install only the ``Libraries`` component,
+  only the library will be installed, without the headers and namelink.
+
+  This option is typically used for package managers that have separate
+  runtime and development packages. For example, on Debian systems, the
+  library is expected to be in the runtime package, and the headers and
+  namelink are expected to be in the development package.
+
+  See the :prop_tgt:`VERSION` and :prop_tgt:`SOVERSION` target properties for
+  details on creating versioned shared libraries.
+
+``NAMELINK_ONLY``
+  This option causes the installation of only the namelink when a library
+  target is installed. On platforms where versioned shared libraries do not
+  have namelinks or when a library is not versioned, the ``NAMELINK_ONLY``
+  option installs nothing. It is an error to use this parameter outside of a
+  ``LIBRARY`` block.
+
+  When ``NAMELINK_ONLY`` is given, either ``NAMELINK_COMPONENT`` or
+  ``COMPONENT`` may be used to specify the installation component of the
+  namelink, but ``COMPONENT`` should generally be preferred.
+
+``NAMELINK_SKIP``
+  Similar to ``NAMELINK_ONLY``, but it has the opposite effect: it causes the
+  installation of library files other than the namelink when a library target
+  is installed. When neither ``NAMELINK_ONLY`` or ``NAMELINK_SKIP`` are given,
+  both portions are installed. On platforms where versioned shared libraries
+  do not have symlinks or when a library is not versioned, ``NAMELINK_SKIP``
+  installs the library. It is an error to use this parameter outside of a
+  ``LIBRARY`` block.
+
+  If ``NAMELINK_SKIP`` is specified, ``NAMELINK_COMPONENT`` has no effect. It
+  is not recommended to use ``NAMELINK_SKIP`` in conjunction with
+  ``NAMELINK_COMPONENT``.
+
+The ``install(TARGETS)`` command can also accept the following options at the
+top level:
+
+``EXPORT``
+  This option associates the installed target files with an export called
+  ``<export-name>``.  It must appear before any target options.  To actually
+  install the export file itself, call ``install(EXPORT)``, documented below.
+
+``INCLUDES DESTINATION``
+  This option specifies a list of directories which will be added to the
+  :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target property of the
+  ``<targets>`` when exported by the :command:`install(EXPORT)` command. If a
+  relative path is specified, it is treated as relative to the
+  ``$<INSTALL_PREFIX>``.
 
 One or more groups of properties may be specified in a single call to
 the ``TARGETS`` form of this command.  A target may be installed more than
@@ -178,10 +270,12 @@ the ``mySharedLib`` DLL will be installed to ``<prefix>/bin`` and
 ``/some/full/path`` and its import library will be installed to
 ``<prefix>/lib/static`` and ``/some/full/path``.
 
-The ``EXPORT`` option associates the installed target files with an
-export called ``<export-name>``.  It must appear before any ``RUNTIME``,
-``LIBRARY``, ``ARCHIVE``, or ``OBJECTS`` options.  To actually install the
-export file itself, call ``install(EXPORT)``, documented below.
+:ref:`Interface Libraries` may be listed among the targets to install.
+They install no artifacts but will be included in an associated ``EXPORT``.
+If :ref:`Object Libraries` are listed but given no destination for their
+object files, they will be exported as :ref:`Interface Libraries`.
+This is sufficient to satisfy transitive usage requirements of other
+targets that link to the object libraries in their implementation.
 
 Installing a target with the :prop_tgt:`EXCLUDE_FROM_ALL` target property
 set to ``TRUE`` has undefined behavior.
@@ -192,6 +286,9 @@ use "generator expressions" with the syntax ``$<...>``.  See the
 
 Installing Files
 ^^^^^^^^^^^^^^^^
+
+.. _FILES:
+.. _PROGRAMS:
 
 ::
 
@@ -225,6 +322,8 @@ use "generator expressions" with the syntax ``$<...>``.  See the
 
 Installing Directories
 ^^^^^^^^^^^^^^^^^^^^^^
+
+.. _DIRECTORY:
 
 ::
 
@@ -307,6 +406,9 @@ manual for available expressions.
 Custom Installation Logic
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. _CODE:
+.. _SCRIPT:
+
 ::
 
   install([[SCRIPT <file>] [CODE <code>]]
@@ -328,16 +430,18 @@ will print a message during installation.
 Installing Exports
 ^^^^^^^^^^^^^^^^^^
 
+.. _EXPORT:
+
 ::
 
   install(EXPORT <export-name> DESTINATION <dir>
           [NAMESPACE <namespace>] [[FILE <name>.cmake]|
-          [EXPORT_ANDROID_MK <name>.mk]]
           [PERMISSIONS permissions...]
           [CONFIGURATIONS [Debug|Release|...]]
           [EXPORT_LINK_INTERFACE_LIBRARIES]
           [COMPONENT <component>]
           [EXCLUDE_FROM_ALL])
+  install(EXPORT_ANDROID_MK <export-name> DESTINATION <dir> [...])
 
 The ``EXPORT`` form generates and installs a CMake file containing code to
 import targets from the installation tree into another project.
@@ -354,14 +458,28 @@ generated import file will reference only the matching target
 configurations.  The ``EXPORT_LINK_INTERFACE_LIBRARIES`` keyword, if
 present, causes the contents of the properties matching
 ``(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?`` to be exported, when
-policy :policy:`CMP0022` is ``NEW``.  If a ``COMPONENT`` option is
-specified that does not match that given to the targets associated with
-``<export-name>`` the behavior is undefined.  If a library target is
-included in the export but a target to which it links is not included
-the behavior is unspecified.
+policy :policy:`CMP0022` is ``NEW``.
 
-In addition to cmake language files, the ``EXPORT_ANDROID_MK`` option maybe
-used to specify an export to the android ndk build system.  The Android
+When a ``COMPONENT`` option is given, the listed ``<component>`` implicitly
+depends on all components mentioned in the export set. The exported
+``<name>.cmake`` file will require each of the exported components to be
+present in order for dependent projects to build properly. For example, a
+project may define components ``Runtime`` and ``Development``, with shared
+libraries going into the ``Runtime`` component and static libraries and
+headers going into the ``Development`` component. The export set would also
+typically be part of the ``Development`` component, but it would export
+targets from both the ``Runtime`` and ``Development`` components. Therefore,
+the ``Runtime`` component would need to be installed if the ``Development``
+component was installed, but not vice versa. If the ``Development`` component
+was installed without the ``Runtime`` component, dependent projects that try
+to link against it would have build errors. Package managers, such as APT and
+RPM, typically handle this by listing the ``Runtime`` component as a dependency
+of the ``Development`` component in the package metadata, ensuring that the
+library is always installed if the headers and CMake export file are present.
+
+In addition to cmake language files, the ``EXPORT_ANDROID_MK`` mode maybe
+used to specify an export to the android ndk build system.  This mode
+accepts the same options as the normal export mode.  The Android
 NDK supports the use of prebuilt libraries, both static and shared. This
 allows cmake to build the libraries of a project and make them available
 to an ndk build system complete with transitive dependencies, include flags
@@ -378,7 +496,7 @@ and installed by the current project.  For example, the code
 
 will install the executable myexe to ``<prefix>/bin`` and code to import
 it in the file ``<prefix>/lib/myproj/myproj.cmake`` and
-``<prefix>/lib/share/ndk-modules/Android.mk``.  An outside project
+``<prefix>/share/ndk-modules/Android.mk``.  An outside project
 may load this file with the include command and reference the ``myexe``
 executable from the installation tree using the imported target name
 ``mp_myexe`` as if the target were built in its own tree.
@@ -392,3 +510,26 @@ executable from the installation tree using the imported target name
   those generated by :command:`install_targets`,
   :command:`install_files`, and :command:`install_programs` commands
   is not defined.
+
+Generated Installation Script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``install()`` command generates a file, ``cmake_install.cmake``, inside
+the build directory, which is used internally by the generated install target
+and by CPack. You can also invoke this script manually with ``cmake -P``. This
+script accepts several variables:
+
+``COMPONENT``
+  Set this variable to install only a single CPack component as opposed to all
+  of them. For example, if you only want to install the ``Development``
+  component, run ``cmake -DCOMPONENT=Development -P cmake_install.cmake``.
+
+``BUILD_TYPE``
+  Set this variable to change the build type if you are using a multi-config
+  generator. For example, to install with the ``Debug`` configuration, run
+  ``cmake -DBUILD_TYPE=Debug -P cmake_install.cmake``.
+
+``DESTDIR``
+  This is an environment variable rather than a CMake variable. It allows you
+  to change the installation prefix on UNIX systems. See :envvar:`DESTDIR` for
+  details.

@@ -5,14 +5,19 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <functional>
 #include <iterator>
+#include <set>
 #include <sstream>
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h> // required for atoi
 
 #include "cmAlgorithms.h"
+#include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
+#include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -42,6 +47,9 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args,
   if (subCommand == "INSERT") {
     return this->HandleInsertCommand(args);
   }
+  if (subCommand == "JOIN") {
+    return this->HandleJoinCommand(args);
+  }
   if (subCommand == "REMOVE_AT") {
     return this->HandleRemoveAtCommand(args);
   }
@@ -51,8 +59,14 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args,
   if (subCommand == "REMOVE_DUPLICATES") {
     return this->HandleRemoveDuplicatesCommand(args);
   }
+  if (subCommand == "TRANSFORM") {
+    return this->HandleTransformCommand(args);
+  }
   if (subCommand == "SORT") {
     return this->HandleSortCommand(args);
+  }
+  if (subCommand == "SUBLIST") {
+    return this->HandleSublistCommand(args);
   }
   if (subCommand == "REVERSE") {
     return this->HandleReverseCommand(args);
@@ -294,6 +308,34 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
   return true;
 }
 
+bool cmListCommand::HandleJoinCommand(std::vector<std::string> const& args)
+{
+  if (args.size() != 4) {
+    std::ostringstream error;
+    error << "sub-command JOIN requires three arguments (" << args.size() - 1
+          << " found).";
+    this->SetError(error.str());
+    return false;
+  }
+
+  const std::string& listName = args[1];
+  const std::string& glue = args[2];
+  const std::string& variableName = args[3];
+
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  if (!this->GetList(varArgsExpanded, listName)) {
+    this->Makefile->AddDefinition(variableName, "");
+    return true;
+  }
+
+  std::string value =
+    cmJoin(cmMakeRange(varArgsExpanded.begin(), varArgsExpanded.end()), glue);
+
+  this->Makefile->AddDefinition(variableName, value.c_str());
+  return true;
+}
+
 bool cmListCommand::HandleRemoveItemCommand(
   std::vector<std::string> const& args)
 {
@@ -373,6 +415,554 @@ bool cmListCommand::HandleRemoveDuplicatesCommand(
   return true;
 }
 
+// Helpers for list(TRANSFORM <list> ...)
+namespace {
+using transform_type = std::function<std::string(const std::string&)>;
+
+class transform_error : public std::runtime_error
+{
+public:
+  transform_error(const std::string& error)
+    : std::runtime_error(error)
+  {
+  }
+};
+
+class TransformSelector
+{
+public:
+  virtual ~TransformSelector() {}
+
+  std::string Tag;
+
+  virtual bool Validate(std::size_t count = 0) = 0;
+
+  virtual bool InSelection(const std::string&) = 0;
+
+  virtual void Transform(std::vector<std::string>& list,
+                         const transform_type& transform)
+  {
+    std::transform(list.begin(), list.end(), list.begin(), transform);
+  }
+
+protected:
+  TransformSelector(std::string&& tag)
+    : Tag(std::move(tag))
+  {
+  }
+};
+class TransformNoSelector : public TransformSelector
+{
+public:
+  TransformNoSelector()
+    : TransformSelector("NO SELECTOR")
+  {
+  }
+
+  bool Validate(std::size_t) override { return true; }
+
+  bool InSelection(const std::string&) override { return true; }
+};
+class TransformSelectorRegex : public TransformSelector
+{
+public:
+  TransformSelectorRegex(const std::string& regex)
+    : TransformSelector("REGEX")
+    , Regex(regex)
+  {
+  }
+
+  bool Validate(std::size_t) override { return this->Regex.is_valid(); }
+
+  bool InSelection(const std::string& value) override
+  {
+    return this->Regex.find(value);
+  }
+
+  cmsys::RegularExpression Regex;
+};
+class TransformSelectorIndexes : public TransformSelector
+{
+public:
+  std::vector<int> Indexes;
+
+  bool InSelection(const std::string&) override { return true; }
+
+  void Transform(std::vector<std::string>& list,
+                 const transform_type& transform) override
+  {
+    this->Validate(list.size());
+
+    for (auto index : this->Indexes) {
+      list[index] = transform(list[index]);
+    }
+  }
+
+protected:
+  TransformSelectorIndexes(std::string&& tag)
+    : TransformSelector(std::move(tag))
+  {
+  }
+  TransformSelectorIndexes(std::string&& tag, std::vector<int>&& indexes)
+    : TransformSelector(std::move(tag))
+    , Indexes(indexes)
+  {
+  }
+
+  int NormalizeIndex(int index, std::size_t count)
+  {
+    if (index < 0) {
+      index = static_cast<int>(count) + index;
+    }
+    if (index < 0 || count <= static_cast<std::size_t>(index)) {
+      std::ostringstream str;
+      str << "sub-command TRANSFORM, selector " << this->Tag
+          << ", index: " << index << " out of range (-" << count << ", "
+          << count - 1 << ").";
+      throw transform_error(str.str());
+    }
+    return index;
+  }
+};
+class TransformSelectorAt : public TransformSelectorIndexes
+{
+public:
+  TransformSelectorAt(std::vector<int>&& indexes)
+    : TransformSelectorIndexes("AT", std::move(indexes))
+  {
+  }
+
+  bool Validate(std::size_t count) override
+  {
+    decltype(Indexes) indexes;
+
+    for (auto index : Indexes) {
+      indexes.push_back(this->NormalizeIndex(index, count));
+    }
+    this->Indexes = std::move(indexes);
+
+    return true;
+  }
+};
+class TransformSelectorFor : public TransformSelectorIndexes
+{
+public:
+  TransformSelectorFor(int start, int stop, int step)
+    : TransformSelectorIndexes("FOR")
+    , Start(start)
+    , Stop(stop)
+    , Step(step)
+  {
+  }
+
+  bool Validate(std::size_t count) override
+  {
+    this->Start = this->NormalizeIndex(this->Start, count);
+    this->Stop = this->NormalizeIndex(this->Stop, count);
+
+    // compute indexes
+    auto size = (this->Stop - this->Start + 1) / this->Step;
+    if ((this->Stop - this->Start + 1) % this->Step != 0) {
+      size += 1;
+    }
+
+    this->Indexes.resize(size);
+    auto start = this->Start, step = this->Step;
+    std::generate(this->Indexes.begin(), this->Indexes.end(),
+                  [&start, step]() -> int {
+                    auto r = start;
+                    start += step;
+                    return r;
+                  });
+
+    return true;
+  }
+
+private:
+  int Start, Stop, Step;
+};
+
+class TransformAction
+{
+public:
+  virtual ~TransformAction() {}
+
+  virtual std::string Transform(const std::string& input) = 0;
+};
+class TransformReplace : public TransformAction
+{
+public:
+  TransformReplace(const std::vector<std::string>& arguments,
+                   cmMakefile* makefile)
+    : ReplaceHelper(arguments[0], arguments[1], makefile)
+  {
+    makefile->ClearMatches();
+
+    if (!this->ReplaceHelper.IsRegularExpressionValid()) {
+      std::ostringstream error;
+      error
+        << "sub-command TRANSFORM, action REPLACE: Failed to compile regex \""
+        << arguments[0] << "\".";
+      throw transform_error(error.str());
+    }
+    if (!this->ReplaceHelper.IsReplaceExpressionValid()) {
+      std::ostringstream error;
+      error << "sub-command TRANSFORM, action REPLACE: "
+            << this->ReplaceHelper.GetError() << ".";
+      throw transform_error(error.str());
+    }
+  }
+
+  std::string Transform(const std::string& input) override
+  {
+    // Scan through the input for all matches.
+    std::string output;
+
+    if (!this->ReplaceHelper.Replace(input, output)) {
+      std::ostringstream error;
+      error << "sub-command TRANSFORM, action REPLACE: "
+            << this->ReplaceHelper.GetError() << ".";
+      throw transform_error(error.str());
+    }
+
+    return output;
+  }
+
+private:
+  cmStringReplaceHelper ReplaceHelper;
+};
+}
+
+bool cmListCommand::HandleTransformCommand(
+  std::vector<std::string> const& args)
+{
+  if (args.size() < 3) {
+    this->SetError(
+      "sub-command TRANSFORM requires an action to be specified.");
+    return false;
+  }
+
+  // Structure collecting all elements of the command
+  struct Command
+  {
+    Command(const std::string& listName)
+      : ListName(listName)
+      , OutputName(listName)
+    {
+    }
+
+    std::string Name;
+    std::string ListName;
+    std::vector<std::string> Arguments;
+    std::unique_ptr<TransformAction> Action;
+    std::unique_ptr<TransformSelector> Selector;
+    std::string OutputName;
+  } command(args[1]);
+
+  // Descriptor of action
+  // Arity: number of arguments required for the action
+  // Transform: lambda function implementing the action
+  struct ActionDescriptor
+  {
+    ActionDescriptor(const std::string& name)
+      : Name(name)
+    {
+    }
+    ActionDescriptor(const std::string& name, int arity,
+                     const transform_type& transform)
+      : Name(name)
+      , Arity(arity)
+      , Transform(transform)
+    {
+    }
+
+    operator const std::string&() const { return Name; }
+
+    std::string Name;
+    int Arity = 0;
+    transform_type Transform;
+  };
+
+  // Build a set of supported actions.
+  std::set<ActionDescriptor,
+           std::function<bool(const std::string&, const std::string&)>>
+    descriptors(
+      [](const std::string& x, const std::string& y) { return x < y; });
+  descriptors = { { "APPEND", 1,
+                    [&command](const std::string& s) -> std::string {
+                      if (command.Selector->InSelection(s)) {
+                        return s + command.Arguments[0];
+                      }
+
+                      return s;
+                    } },
+                  { "PREPEND", 1,
+                    [&command](const std::string& s) -> std::string {
+                      if (command.Selector->InSelection(s)) {
+                        return command.Arguments[0] + s;
+                      }
+
+                      return s;
+                    } },
+                  { "TOUPPER", 0,
+                    [&command](const std::string& s) -> std::string {
+                      if (command.Selector->InSelection(s)) {
+                        return cmSystemTools::UpperCase(s);
+                      }
+
+                      return s;
+                    } },
+                  { "TOLOWER", 0,
+                    [&command](const std::string& s) -> std::string {
+                      if (command.Selector->InSelection(s)) {
+                        return cmSystemTools::LowerCase(s);
+                      }
+
+                      return s;
+                    } },
+                  { "STRIP", 0,
+                    [&command](const std::string& s) -> std::string {
+                      if (command.Selector->InSelection(s)) {
+                        return cmSystemTools::TrimWhitespace(s);
+                      }
+
+                      return s;
+                    } },
+                  { "GENEX_STRIP", 0,
+                    [&command](const std::string& s) -> std::string {
+                      if (command.Selector->InSelection(s)) {
+                        return cmGeneratorExpression::Preprocess(
+                          s,
+                          cmGeneratorExpression::StripAllGeneratorExpressions);
+                      }
+
+                      return s;
+                    } },
+                  { "REPLACE", 2,
+                    [&command](const std::string& s) -> std::string {
+                      if (command.Selector->InSelection(s)) {
+                        return command.Action->Transform(s);
+                      }
+
+                      return s;
+                    } } };
+
+  using size_type = std::vector<std::string>::size_type;
+  size_type index = 2;
+
+  // Parse all possible function parameters
+  auto descriptor = descriptors.find(args[index]);
+
+  if (descriptor == descriptors.end()) {
+    std::ostringstream error;
+    error << " sub-command TRANSFORM, " << args[index] << " invalid action.";
+    this->SetError(error.str());
+    return false;
+  }
+
+  // Action arguments
+  index += 1;
+  if (args.size() < index + descriptor->Arity) {
+    std::ostringstream error;
+    error << "sub-command TRANSFORM, action " << descriptor->Name
+          << " expects " << descriptor->Arity << " argument(s).";
+    this->SetError(error.str());
+    return false;
+  }
+
+  command.Name = descriptor->Name;
+  index += descriptor->Arity;
+  if (descriptor->Arity > 0) {
+    command.Arguments =
+      std::vector<std::string>(args.begin() + 3, args.begin() + index);
+  }
+
+  if (command.Name == "REPLACE") {
+    try {
+      command.Action =
+        cm::make_unique<TransformReplace>(command.Arguments, this->Makefile);
+    } catch (const transform_error& e) {
+      this->SetError(e.what());
+      return false;
+    }
+  }
+
+  const std::string REGEX{ "REGEX" }, AT{ "AT" }, FOR{ "FOR" },
+    OUTPUT_VARIABLE{ "OUTPUT_VARIABLE" };
+
+  // handle optional arguments
+  while (args.size() > index) {
+    if ((args[index] == REGEX || args[index] == AT || args[index] == FOR) &&
+        command.Selector) {
+      std::ostringstream error;
+      error << "sub-command TRANSFORM, selector already specified ("
+            << command.Selector->Tag << ").";
+      this->SetError(error.str());
+      return false;
+    }
+
+    // REGEX selector
+    if (args[index] == REGEX) {
+      if (args.size() == ++index) {
+        this->SetError("sub-command TRANSFORM, selector REGEX expects "
+                       "'regular expression' argument.");
+        return false;
+      }
+
+      command.Selector = cm::make_unique<TransformSelectorRegex>(args[index]);
+      if (!command.Selector->Validate()) {
+        std::ostringstream error;
+        error << "sub-command TRANSFORM, selector REGEX failed to compile "
+                 "regex \"";
+        error << args[index] << "\".";
+        this->SetError(error.str());
+        return false;
+      }
+
+      index += 1;
+      continue;
+    }
+
+    // AT selector
+    if (args[index] == AT) {
+      // get all specified indexes
+      std::vector<int> indexes;
+      while (args.size() > ++index) {
+        std::size_t pos;
+        int value;
+
+        try {
+          value = std::stoi(args[index], &pos);
+          if (pos != args[index].length()) {
+            // this is not a number, stop processing
+            break;
+          }
+          indexes.push_back(value);
+        } catch (const std::invalid_argument&) {
+          // this is not a number, stop processing
+          break;
+        }
+      }
+
+      if (indexes.empty()) {
+        this->SetError(
+          "sub-command TRANSFORM, selector AT expects at least one "
+          "numeric value.");
+        return false;
+      }
+
+      command.Selector =
+        cm::make_unique<TransformSelectorAt>(std::move(indexes));
+
+      continue;
+    }
+
+    // FOR selector
+    if (args[index] == FOR) {
+      if (args.size() <= ++index + 1) {
+        this->SetError("sub-command TRANSFORM, selector FOR expects, at least,"
+                       " two arguments.");
+        return false;
+      }
+
+      int start = 0, stop = 0, step = 1;
+      bool valid = true;
+      try {
+        std::size_t pos;
+
+        start = std::stoi(args[index], &pos);
+        if (pos != args[index].length()) {
+          // this is not a number
+          valid = false;
+        } else {
+          stop = std::stoi(args[++index], &pos);
+          if (pos != args[index].length()) {
+            // this is not a number
+            valid = false;
+          }
+        }
+      } catch (const std::invalid_argument&) {
+        // this is not numbers
+        valid = false;
+      }
+      if (!valid) {
+        this->SetError("sub-command TRANSFORM, selector FOR expects, "
+                       "at least, two numeric values.");
+        return false;
+      }
+      // try to read a third numeric value for step
+      if (args.size() > ++index) {
+        try {
+          std::size_t pos;
+
+          step = std::stoi(args[index], &pos);
+          if (pos != args[index].length()) {
+            // this is not a number
+            step = 1;
+          } else {
+            index += 1;
+          }
+        } catch (const std::invalid_argument&) {
+          // this is not number, ignore exception
+        }
+      }
+
+      if (step < 0) {
+        this->SetError("sub-command TRANSFORM, selector FOR expects "
+                       "non negative numeric value for <step>.");
+      }
+
+      command.Selector =
+        cm::make_unique<TransformSelectorFor>(start, stop, step);
+
+      continue;
+    }
+
+    // output variable
+    if (args[index] == OUTPUT_VARIABLE) {
+      if (args.size() == ++index) {
+        this->SetError("sub-command TRANSFORM, OUTPUT_VARIABLE "
+                       "expects variable name argument.");
+        return false;
+      }
+
+      command.OutputName = args[index++];
+      continue;
+    }
+
+    std::ostringstream error;
+    error << "sub-command TRANSFORM, '"
+          << cmJoin(cmMakeRange(args).advance(index), " ")
+          << "': unexpected argument(s).";
+    this->SetError(error.str());
+    return false;
+  }
+
+  // expand the list variable
+  std::vector<std::string> varArgsExpanded;
+  if (!this->GetList(varArgsExpanded, command.ListName)) {
+    this->Makefile->AddDefinition(command.OutputName, "");
+    return true;
+  }
+
+  if (!command.Selector) {
+    // no selector specified, apply transformation to all elements
+    command.Selector = cm::make_unique<TransformNoSelector>();
+  }
+
+  try {
+    command.Selector->Transform(varArgsExpanded, descriptor->Transform);
+  } catch (const transform_error& e) {
+    this->SetError(e.what());
+    return false;
+  }
+
+  this->Makefile->AddDefinition(command.OutputName,
+                                cmJoin(varArgsExpanded, ";").c_str());
+
+  return true;
+}
+
 bool cmListCommand::HandleSortCommand(std::vector<std::string> const& args)
 {
   assert(args.size() >= 2);
@@ -393,6 +983,55 @@ bool cmListCommand::HandleSortCommand(std::vector<std::string> const& args)
 
   std::string value = cmJoin(varArgsExpanded, ";");
   this->Makefile->AddDefinition(listName, value.c_str());
+  return true;
+}
+
+bool cmListCommand::HandleSublistCommand(std::vector<std::string> const& args)
+{
+  if (args.size() != 5) {
+    std::ostringstream error;
+    error << "sub-command SUBLIST requires four arguments (" << args.size() - 1
+          << " found).";
+    this->SetError(error.str());
+    return false;
+  }
+
+  const std::string& listName = args[1];
+  const std::string& variableName = args[args.size() - 1];
+
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  if (!this->GetList(varArgsExpanded, listName) || varArgsExpanded.empty()) {
+    this->Makefile->AddDefinition(variableName, "");
+    return true;
+  }
+
+  const int start = atoi(args[2].c_str());
+  const int length = atoi(args[3].c_str());
+
+  using size_type = decltype(varArgsExpanded)::size_type;
+
+  if (start < 0 || size_type(start) >= varArgsExpanded.size()) {
+    std::ostringstream error;
+    error << "begin index: " << start << " is out of range 0 - "
+          << varArgsExpanded.size() - 1;
+    this->SetError(error.str());
+    return false;
+  }
+  if (length < -1) {
+    std::ostringstream error;
+    error << "length: " << length << " should be -1 or greater";
+    this->SetError(error.str());
+    return false;
+  }
+
+  const size_type end =
+    (length == -1 || size_type(start + length) > varArgsExpanded.size())
+    ? varArgsExpanded.size()
+    : size_type(start + length);
+  std::vector<std::string> sublist(varArgsExpanded.begin() + start,
+                                   varArgsExpanded.begin() + end);
+  this->Makefile->AddDefinition(variableName, cmJoin(sublist, ";").c_str());
   return true;
 }
 

@@ -16,6 +16,8 @@ macro(__compiler_qcc lang)
   set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE NO)
   set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER NO)
 
+  set(CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "${CMAKE_${lang}_COMPILER}" "-Wp,-dM" "-E" "-c" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
+
   unset(CMAKE_${lang}_COMPILE_OPTIONS_IPO)
   unset(CMAKE_${lang}_ARCHIVE_CREATE_IPO)
   unset(CMAKE_${lang}_ARCHIVE_APPEND_IPO)

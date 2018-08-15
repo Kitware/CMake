@@ -34,7 +34,7 @@ public:
   /// @brief Returns the generator name in upper case
   static std::string GeneratorNameUpper(GeneratorT genType);
 
-  /// @brief Returns a the string escaped and enclosed in quotes
+  /// @brief Returns the string escaped and enclosed in quotes
   static std::string Quoted(std::string const& text);
 
   static std::string QuotedCommand(std::vector<std::string> const& command);

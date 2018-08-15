@@ -3,16 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(_WIN32) && (defined(_MSC_VER) || defined(__WATCOMC__) ||          \
-                        defined(__BORLANDC__) || defined(__MINGW32__))
+#if defined(_WIN32) &&                                                        \
+  (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) ||      \
+   defined(__MINGW32__))
 
-#include <direct.h>
-#include <io.h>
+#  include <direct.h>
+#  include <io.h>
 
-#if defined(__WATCOMC__)
-#include <direct.h>
-#define _getcwd getcwd
-#endif
+#  if defined(__WATCOMC__)
+#    include <direct.h>
+#    define _getcwd getcwd
+#  endif
 
 static const char* Getcwd(char* buf, unsigned int len)
 {
@@ -35,9 +36,9 @@ static const char* Getcwd(char* buf, unsigned int len)
 }
 
 #else
-#include <fcntl.h>
-#include <sys/types.h>
-#include <unistd.h>
+#  include <fcntl.h>
+#  include <sys/types.h>
+#  include <unistd.h>
 
 static const char* Getcwd(char* buf, unsigned int len)
 {

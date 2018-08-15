@@ -260,12 +260,12 @@ public:
                                    BundleDirectoryLevel level) const;
 
   /** Return the install name directory for the target in the
-    * build tree.  For example: "\@rpath/", "\@loader_path/",
-    * or "/full/path/to/library".  */
+   * build tree.  For example: "\@rpath/", "\@loader_path/",
+   * or "/full/path/to/library".  */
   std::string GetInstallNameDirForBuildTree(const std::string& config) const;
 
   /** Return the install name directory for the target in the
-    * install tree.  For example: "\@rpath/" or "\@loader_path/". */
+   * install tree.  For example: "\@rpath/" or "\@loader_path/". */
   std::string GetInstallNameDirForInstallTree() const;
 
   cmListFileBacktrace GetBacktrace() const;
@@ -363,6 +363,12 @@ public:
   // until we have per-target object file properties.
   void GetLanguages(std::set<std::string>& languages,
                     std::string const& config) const;
+
+  // Evaluate if the target uses the given language for compilation
+  // and/or linking. If 'exclusive' is true, 'language' is expected
+  // to be the only language used for the target.
+  bool HasLanguage(std::string const& language, std::string const& config,
+                   bool exclusive = true) const;
 
   void GetObjectLibrariesCMP0026(
     std::vector<cmGeneratorTarget*>& objlibs) const;
@@ -493,8 +499,8 @@ public:
                             cmStateEnums::ArtifactType artifact) const;
 
   /** Clears cached meta data for local and external source files.
-    * The meta data will be recomputed on demand.
-    */
+   * The meta data will be recomputed on demand.
+   */
   void ClearSourcesCache();
 
   void AddSource(const std::string& src);
@@ -566,17 +572,17 @@ public:
   std::string GetLinkerLanguage(const std::string& config) const;
 
   /** Does this target have a GNU implib to convert to MS format?  */
-  bool HasImplibGNUtoMS() const;
+  bool HasImplibGNUtoMS(std::string const& config) const;
 
   /** Convert the given GNU import library name (.dll.a) to a name with a new
       extension (.lib or ${CMAKE_IMPORT_LIBRARY_SUFFIX}).  */
-  bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
-                        const char* newExt = nullptr) const;
+  bool GetImplibGNUtoMS(std::string const& config, std::string const& gnuName,
+                        std::string& out, const char* newExt = nullptr) const;
 
   bool IsExecutableWithExports() const;
 
   /** Return whether or not the target has a DLL import library.  */
-  bool HasImportLibrary() const;
+  bool HasImportLibrary(std::string const& config) const;
 
   /** Get a build-tree directory in which to place target support files.  */
   std::string GetSupportDirectory() const;
@@ -596,6 +602,19 @@ public:
 
   /** Return whether this target is a CFBundle (plugin) on Apple.  */
   bool IsCFBundleOnApple() const;
+
+  /** Assembly types. The order of the values of this enum is relevant
+      because of smaller/larger comparison operations! */
+  enum ManagedType
+  {
+    Undefined = 0, // target is no lib or executable
+    Native,        // target compiles to unmanaged binary.
+    Mixed,         // target compiles to mixed (managed and unmanaged) binary.
+    Managed        // target compiles to managed binary.
+  };
+
+  /** Return the type of assembly this target compiles to. */
+  ManagedType GetManagedType(const std::string& config) const;
 
   struct SourceFileFlags GetTargetSourceFileFlags(
     const cmSourceFile* sf) const;
@@ -741,10 +760,12 @@ private:
   {
     ImportInfo()
       : NoSOName(false)
+      , Managed(Native)
       , Multiplicity(0)
     {
     }
     bool NoSOName;
+    ManagedType Managed;
     unsigned int Multiplicity;
     std::string Location;
     std::string SOName;
@@ -837,6 +858,8 @@ private:
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;
+
+  ManagedType CheckManagedType(std::string const& propval) const;
 
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(

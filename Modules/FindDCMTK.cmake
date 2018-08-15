@@ -301,7 +301,7 @@ endif()
 # Compatibility: This variable is deprecated
 set(DCMTK_INCLUDE_DIR ${DCMTK_INCLUDE_DIRS})
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(DCMTK
   REQUIRED_VARS ${DCMTK_INCLUDE_DIR_NAMES} DCMTK_LIBRARIES
   FAIL_MESSAGE "Please set DCMTK_DIR and re-run configure")
@@ -309,20 +309,14 @@ find_package_handle_standard_args(DCMTK
 # Workaround bug in packaging of DCMTK 3.6.0 on Debian.
 # See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=637687
 if(DCMTK_FOUND AND UNIX AND NOT APPLE)
-  include(CheckCXXSourceCompiles)
+  include(${CMAKE_CURRENT_LIST_DIR}/CheckIncludeFiles.cmake)
   set(CMAKE_REQUIRED_FLAGS )
   set(CMAKE_REQUIRED_DEFINITIONS )
   set(CMAKE_REQUIRED_INCLUDES ${DCMTK_INCLUDE_DIRS})
   set(CMAKE_REQUIRED_LIBRARIES ${DCMTK_LIBRARIES})
   set(CMAKE_REQUIRED_QUIET ${DCMTK_FIND_QUIETLY})
-  check_cxx_source_compiles("#include <dcmtk/config/osconfig.h>\n#include <dcmtk/ofstd/ofstream.h>\nint main(int,char*[]){return 0;}"
-    DCMTK_HAVE_CONFIG_H_OPTIONAL
-    )
+  check_include_files("dcmtk/config/osconfig.h;dcmtk/ofstd/ofstream.h" DCMTK_HAVE_CONFIG_H_OPTIONAL LANGUAGE CXX)
   if(NOT DCMTK_HAVE_CONFIG_H_OPTIONAL)
     set(DCMTK_DEFINITIONS "HAVE_CONFIG_H")
   endif()
-endif()
-
-if(NOT DCMTK_FIND_QUIETLY)
-  message(STATUS "Trying to find DCMTK relying on FindDCMTK.cmake - ok")
 endif()

@@ -51,8 +51,8 @@ int cmCTestConfigureHandler::ProcessHandler()
   if (!this->CTest->GetShowOnly()) {
     cmGeneratedFileStream os;
     if (!this->StartResultingXML(cmCTest::PartConfigure, "Configure", os)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open configure file"
-                   << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "Cannot open configure file" << std::endl);
       return 1;
     }
     std::string start_time = this->CTest->CurrentTime();

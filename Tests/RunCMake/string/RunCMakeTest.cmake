@@ -9,6 +9,10 @@ run_cmake(PrependNoArgs)
 run_cmake(Concat)
 run_cmake(ConcatNoArgs)
 
+run_cmake(Join)
+run_cmake(JoinNoArgs)
+run_cmake(JoinNoVar)
+
 run_cmake(Timestamp)
 run_cmake(TimestampEmpty)
 run_cmake(TimestampInvalid)

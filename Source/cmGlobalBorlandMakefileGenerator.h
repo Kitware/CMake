@@ -5,6 +5,8 @@
 
 #include "cmGlobalNMakeMakefileGenerator.h"
 
+#include <iosfwd>
+
 /** \class cmGlobalBorlandMakefileGenerator
  * \brief Write a Borland makefiles.
  *
@@ -21,7 +23,7 @@ public:
   }
 
   ///! Get the name for the generator.
-  virtual std::string GetName() const
+  std::string GetName() const override
   {
     return cmGlobalBorlandMakefileGenerator::GetActualName();
   }
@@ -31,17 +33,30 @@ public:
   static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf);
+  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
   /**
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string> const& languages,
-                              cmMakefile*, bool optional);
+  void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
+                      bool optional) override;
 
-  virtual bool AllowNotParallel() const { return false; }
-  virtual bool AllowDeleteOnError() const { return false; }
+  bool AllowNotParallel() const override { return false; }
+  bool AllowDeleteOnError() const override { return false; }
+
+protected:
+  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
+                            const std::string& makeProgram,
+                            const std::string& projectName,
+                            const std::string& projectDir,
+                            const std::string& targetName,
+                            const std::string& config, bool fast, int jobs,
+                            bool verbose,
+                            std::vector<std::string> const& makeOptions =
+                              std::vector<std::string>()) override;
+
+  void PrintBuildCommandAdvice(std::ostream& os, int jobs) const override;
 };
 
 #endif

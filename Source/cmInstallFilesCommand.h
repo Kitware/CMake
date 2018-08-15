@@ -48,7 +48,7 @@ protected:
 
 private:
   std::vector<std::string> FinalArgs;
-  bool IsFilesForm;
+  bool IsFilesForm = false;
   std::string Destination;
   std::vector<std::string> Files;
 };

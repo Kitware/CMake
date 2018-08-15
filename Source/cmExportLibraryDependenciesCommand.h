@@ -27,7 +27,7 @@ public:
 
 private:
   std::string Filename;
-  bool Append;
+  bool Append = false;
   void ConstFinalPass() const;
 };
 

@@ -32,7 +32,6 @@ public:
   /** Known versions of Visual Studio.  */
   enum VSVersion
   {
-    VS8 = 80,
     VS9 = 90,
     VS10 = 100,
     VS11 = 110,
@@ -81,12 +80,6 @@ public:
 
   // return true if target is fortran only
   bool TargetIsFortranOnly(const cmGeneratorTarget* gt);
-
-  // return true if target is C# only
-  static bool TargetIsCSharpOnly(cmGeneratorTarget const* gt);
-
-  // return true if target can be referenced by C# targets
-  bool TargetCanBeReferenced(cmGeneratorTarget const* gt);
 
   /** Get the top-level registry key for this VS version.  */
   std::string GetRegistryBase();

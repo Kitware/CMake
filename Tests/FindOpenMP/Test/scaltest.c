@@ -1,8 +1,8 @@
 #ifdef __cplusplus
-#include <iostream>
+#  include <iostream>
 extern "C"
 #else
-#include <stdio.h>
+#  include <stdio.h>
 #endif
 int scalprod(int n, double* x, double* y, double* res);
 

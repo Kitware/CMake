@@ -21,12 +21,12 @@
 namespace cm {
 
 /***
-* RAII class to simplify and insure the safe usage of uv_*_t types. This
-* includes making sure resources are properly freed and contains casting
-* operators which allow for passing into relevant uv_* functions.
-*
-*@tparam T actual uv_*_t type represented.
-*/
+ * RAII class to simplify and insure the safe usage of uv_*_t types. This
+ * includes making sure resources are properly freed and contains casting
+ * operators which allow for passing into relevant uv_* functions.
+ *
+ *@tparam T actual uv_*_t type represented.
+ */
 template <typename T>
 class uv_handle_ptr_base_
 {
@@ -65,8 +65,9 @@ public:
    * that initializes something like uv_pipe_ptr or uv_tcp_ptr and interact
    * and clean up after it without caring about the exact type.
    */
-  template <typename S, typename = typename std::enable_if<
-                          std::is_rvalue_reference<S&&>::value>::type>
+  template <typename S,
+            typename = typename std::enable_if<
+              std::is_rvalue_reference<S&&>::value>::type>
   uv_handle_ptr_base_(S&& rhs)
   {
     // This will force a compiler error if rhs doesn't have a casting
@@ -198,9 +199,9 @@ typedef uv_handle_ptr_<uv_handle_t> uv_handle_ptr;
 
 extern template class uv_handle_ptr_base_<uv_handle_t>;
 
-#define UV_HANDLE_PTR_INSTANTIATE_EXTERN(NAME)                                \
-  extern template class uv_handle_ptr_base_<uv_##NAME##_t>;                   \
-  extern template class uv_handle_ptr_<uv_##NAME##_t>;
+#  define UV_HANDLE_PTR_INSTANTIATE_EXTERN(NAME)                              \
+    extern template class uv_handle_ptr_base_<uv_##NAME##_t>;                 \
+    extern template class uv_handle_ptr_<uv_##NAME##_t>;
 
 UV_HANDLE_PTR_INSTANTIATE_EXTERN(async)
 
@@ -216,7 +217,7 @@ UV_HANDLE_PTR_INSTANTIATE_EXTERN(timer)
 
 UV_HANDLE_PTR_INSTANTIATE_EXTERN(tty)
 
-#undef UV_HANDLE_PTR_INSTANTIATE_EXTERN
+#  undef UV_HANDLE_PTR_INSTANTIATE_EXTERN
 
 #endif
 }

@@ -67,8 +67,9 @@ protected:
  * contents have changed to prevent the file modification time from
  * being updated.
  */
-class cmGeneratedFileStream : private cmGeneratedFileStreamBase,
-                              public cmsys::ofstream
+class cmGeneratedFileStream
+  : private cmGeneratedFileStreamBase
+  , public cmsys::ofstream
 {
 public:
   typedef cmsys::ofstream Stream;
@@ -108,7 +109,7 @@ public:
   /**
    * Close the output file.  This should be used only with an open
    * stream.  The temporary file is atomically renamed to the
-   * destionation file if the stream is still valid when this method
+   * destination file if the stream is still valid when this method
    * is called.
    */
   bool Close();

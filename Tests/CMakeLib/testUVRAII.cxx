@@ -30,7 +30,8 @@ static bool testAsyncShutdown()
     std::thread([&] {
       std::this_thread::sleep_for(std::chrono::seconds(2));
       signal.send();
-    }).detach();
+    })
+      .detach();
 
     if (uv_run(&Loop, UV_RUN_DEFAULT) != 0) {
       std::cerr << "Unclean exit state in testAsyncDtor" << std::endl;

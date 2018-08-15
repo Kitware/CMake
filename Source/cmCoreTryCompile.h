@@ -46,7 +46,7 @@ protected:
   std::string BinaryDirectory;
   std::string OutputFile;
   std::string FindErrorMessage;
-  bool SrcFileSignature;
+  bool SrcFileSignature = false;
 
 private:
   std::vector<std::string> WarnCMP0067;

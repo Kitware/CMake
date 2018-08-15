@@ -80,7 +80,8 @@ the RPM information (e.g. package license).
   * Mandatory: YES
   * Default:
 
-   - :variable:`CPACK_DEBIAN_PACKAGE_HOMEPAGE` (this may be set already
+   - :variable:`CMAKE_PROJECT_HOMEPAGE_URL`, or if that is not set,
+     :variable:`CPACK_DEBIAN_PACKAGE_HOMEPAGE` (this may be set already
      for Debian packaging, so we may as well re-use it).
 
 .. variable:: CPACK_FREEBSD_PACKAGE_LICENSE
@@ -208,6 +209,7 @@ _cpack_freebsd_fallback_var("CPACK_FREEBSD_PACKAGE_DESCRIPTION"
 # There's really only one homepage for a project, so
 # re-use the Debian setting if it's there.
 _cpack_freebsd_fallback_var("CPACK_FREEBSD_PACKAGE_WWW"
+    "CMAKE_PROJECT_HOMEPAGE_URL"
     "CPACK_DEBIAN_PACKAGE_HOMEPAGE"
     "_cpack_freebsd_fallback_www"
     )

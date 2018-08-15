@@ -36,12 +36,22 @@
 # This is because, the lua location is not standardized and may exist in
 # locations other than lua/
 
+cmake_policy(PUSH)  # Policies apply to functions at definition-time
+cmake_policy(SET CMP0012 NEW)  # For while(TRUE)
+
 unset(_lua_include_subdirs)
 unset(_lua_library_names)
 unset(_lua_append_versions)
+set(_lua_additional_paths
+      ~/Library/Frameworks
+      /Library/Frameworks
+      /sw # Fink
+      /opt/local # DarwinPorts
+      /opt/csw # Blastwave
+      /opt)
 
 # this is a function only to have all the variables inside go away automatically
-function(_lua_set_version_vars)
+function(_lua_get_versions)
     set(LUA_VERSIONS5 5.3 5.2 5.1 5.0)
 
     if (Lua_FIND_VERSION_EXACT)
@@ -59,6 +69,10 @@ function(_lua_set_version_vars)
                         list(APPEND _lua_append_versions ${subver})
                     endif ()
                 endforeach ()
+                # New version -> Search for it (heuristic only! Defines in include might have changed)
+                if (NOT _lua_append_versions)
+                    set(_lua_append_versions ${Lua_FIND_VERSION_MAJOR}.${Lua_FIND_VERSION_MINOR})
+                endif()
             endif ()
         endif ()
     else ()
@@ -66,22 +80,42 @@ function(_lua_set_version_vars)
         set(_lua_append_versions ${LUA_VERSIONS5})
     endif ()
 
-    list(APPEND _lua_include_subdirs "include/lua" "include")
+    if (LUA_Debug)
+        message(STATUS "Considering following Lua versions: ${_lua_append_versions}")
+    endif()
+
+    set(_lua_append_versions "${_lua_append_versions}" PARENT_SCOPE)
+endfunction()
+
+function(_lua_set_version_vars)
+   set(_lua_include_subdirs_raw "lua")
 
     foreach (ver IN LISTS _lua_append_versions)
         string(REGEX MATCH "^([0-9]+)\\.([0-9]+)$" _ver "${ver}")
-        list(APPEND _lua_include_subdirs
-             include/lua${CMAKE_MATCH_1}${CMAKE_MATCH_2}
-             include/lua${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
-             include/lua-${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
+        list(APPEND _lua_include_subdirs_raw
+             lua${CMAKE_MATCH_1}${CMAKE_MATCH_2}
+             lua${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
+             lua-${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
         )
     endforeach ()
 
+    # Prepend "include/" to each path directly after the path
+    set(_lua_include_subdirs "include")
+    foreach (dir IN LISTS _lua_include_subdirs_raw)
+        list(APPEND _lua_include_subdirs "${dir}" "include/${dir}")
+    endforeach ()
+
     set(_lua_include_subdirs "${_lua_include_subdirs}" PARENT_SCOPE)
-    set(_lua_append_versions "${_lua_append_versions}" PARENT_SCOPE)
 endfunction(_lua_set_version_vars)
 
-function(_lua_check_header_version _hdr_file)
+function(_lua_get_header_version)
+    unset(LUA_VERSION_STRING PARENT_SCOPE)
+    set(_hdr_file "${LUA_INCLUDE_DIR}/lua.h")
+
+    if (NOT EXISTS "${_hdr_file}")
+        return()
+    endif ()
+
     # At least 5.[012] have different ways to express the version
     # so all of them need to be tested. Lua 5.2 defines LUA_VERSION
     # and LUA_RELEASE as joined by the C preprocessor, so avoid those.
@@ -111,38 +145,54 @@ function(_lua_check_header_version _hdr_file)
             return()
         endif ()
     endforeach ()
-endfunction(_lua_check_header_version)
+endfunction(_lua_get_header_version)
 
-_lua_set_version_vars()
+function(_lua_find_header)
+    _lua_set_version_vars()
 
-if (LUA_INCLUDE_DIR AND EXISTS "${LUA_INCLUDE_DIR}/lua.h")
-    _lua_check_header_version("${LUA_INCLUDE_DIR}/lua.h")
-endif ()
-
-if (NOT LUA_VERSION_STRING)
-    foreach (subdir IN LISTS _lua_include_subdirs)
-        unset(LUA_INCLUDE_PREFIX CACHE)
-        find_path(LUA_INCLUDE_PREFIX ${subdir}/lua.h
-          HINTS
-            ENV LUA_DIR
-          PATHS
-          ~/Library/Frameworks
-          /Library/Frameworks
-          /sw # Fink
-          /opt/local # DarwinPorts
-          /opt/csw # Blastwave
-          /opt
-        )
-        if (LUA_INCLUDE_PREFIX)
-            _lua_check_header_version("${LUA_INCLUDE_PREFIX}/${subdir}/lua.h")
-            if (LUA_VERSION_STRING)
-                set(LUA_INCLUDE_DIR "${LUA_INCLUDE_PREFIX}/${subdir}")
+    # Initialize as local variable
+    set(CMAKE_IGNORE_PATH ${CMAKE_IGNORE_PATH})
+    while (TRUE)
+        # Find the next header to test. Check each possible subdir in order
+        # This prefers e.g. higher versions as they are earlier in the list
+        # It is also consistent with previous versions of FindLua
+        foreach (subdir IN LISTS _lua_include_subdirs)
+            find_path(LUA_INCLUDE_DIR lua.h
+              HINTS
+                ENV LUA_DIR
+              PATH_SUFFIXES ${subdir}
+              PATHS ${_lua_additional_paths}
+            )
+            if (LUA_INCLUDE_DIR)
                 break()
-            endif ()
-        endif ()
-    endforeach ()
-endif ()
-unset(_lua_include_subdirs)
+            endif()
+        endforeach()
+        # Did not found header -> Fail
+        if (NOT LUA_INCLUDE_DIR)
+            return()
+        endif()
+        _lua_get_header_version()
+        # Found accepted version -> Ok
+        if (LUA_VERSION_STRING)
+            if (LUA_Debug)
+                message(STATUS "Found suitable version ${LUA_VERSION_STRING} in ${LUA_INCLUDE_DIR}/lua.h")
+            endif()
+            return()
+        endif()
+        # Found wrong version -> Ignore this path and retry
+        if (LUA_Debug)
+            message(STATUS "Ignoring unsuitable version in ${LUA_INCLUDE_DIR}")
+        endif()
+        list(APPEND CMAKE_IGNORE_PATH "${LUA_INCLUDE_DIR}")
+        unset(LUA_INCLUDE_DIR CACHE)
+        unset(LUA_INCLUDE_DIR)
+        unset(LUA_INCLUDE_DIR PARENT_SCOPE)
+    endwhile ()
+endfunction()
+
+_lua_get_versions()
+_lua_find_header()
+_lua_get_header_version()
 unset(_lua_append_versions)
 
 if (LUA_VERSION_STRING)
@@ -159,13 +209,7 @@ find_library(LUA_LIBRARY
   HINTS
     ENV LUA_DIR
   PATH_SUFFIXES lib
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
+  PATHS ${_lua_additional_paths}
 )
 unset(_lua_library_names)
 
@@ -195,3 +239,5 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua
                                   VERSION_VAR LUA_VERSION_STRING)
 
 mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARY LUA_MATH_LIBRARY)
+
+cmake_policy(POP)

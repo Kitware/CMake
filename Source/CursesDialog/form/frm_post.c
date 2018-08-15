@@ -67,7 +67,7 @@ int post_form(FORM * form)
   if ((form->cols > width) || (form->rows > height))
     RETURN(E_NO_ROOM);
 
-  /* reset form->curpage to an invald value. This forces Set_Form_Page
+  /* reset form->curpage to an invalid value. This forces Set_Form_Page
      to do the page initialization which is required by post_form.
   */
   page = form->curpage;

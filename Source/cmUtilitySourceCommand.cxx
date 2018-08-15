@@ -44,11 +44,11 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
     }
   } else {
     cmState* state = this->Makefile->GetState();
-    haveCacheValue =
-      (cacheValue && (strstr(cacheValue, "(IntDir)") == nullptr ||
-                      (intDir && strcmp(intDir, "$(IntDir)") == 0)) &&
-       (state->GetCacheMajorVersion() != 0 &&
-        state->GetCacheMinorVersion() != 0));
+    haveCacheValue = (cacheValue &&
+                      (strstr(cacheValue, "(IntDir)") == nullptr ||
+                       (intDir && strcmp(intDir, "$(IntDir)") == 0)) &&
+                      (state->GetCacheMajorVersion() != 0 &&
+                       state->GetCacheMinorVersion() != 0));
   }
 
   if (haveCacheValue) {

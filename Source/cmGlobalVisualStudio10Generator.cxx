@@ -231,8 +231,72 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     }
   }
 
+  if (!this->GeneratorToolsetVersion.empty() &&
+      this->GeneratorToolsetVersion != "Test Toolset Version") {
+    // If a specific minor version of the toolset was requested, verify that it
+    // is compatible to the major version and that is exists on disk.
+    // If not clear the value.
+    std::string version = this->GeneratorToolsetVersion;
+    cmsys::RegularExpression regex("[0-9][0-9]\\.[0-9][0-9]");
+    if (regex.find(version)) {
+      version = "v" + version.erase(2, 1);
+    } else {
+      // Version not recognized. Clear it.
+      version.clear();
+    }
+
+    if (version.find(this->GetPlatformToolsetString()) != 0) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given toolset and version specification\n"
+        "  " << this->GetPlatformToolsetString() << ",version=" <<
+        this->GeneratorToolsetVersion << "\n"
+        "contains an invalid version specification."
+      ;
+      /* clang-format on */
+      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+
+      // Clear the configured tool-set
+      this->GeneratorToolsetVersion.clear();
+    }
+
+    bool const isDefaultToolset =
+      this->IsDefaultToolset(this->GeneratorToolsetVersion);
+    if (isDefaultToolset) {
+      // If the given version is the default toolset, remove the setting
+      this->GeneratorToolsetVersion.clear();
+    } else {
+      std::string const toolsetPath = this->GetAuxiliaryToolset();
+      if (!toolsetPath.empty() && !cmSystemTools::FileExists(toolsetPath)) {
+
+        std::ostringstream e;
+        /* clang-format off */
+        e <<
+          "Generator\n"
+          "  " << this->GetName() << "\n"
+          "given toolset and version specification\n"
+          "  " << this->GetPlatformToolsetString() << ",version=" <<
+          this->GeneratorToolsetVersion << "\n"
+          "does not seem to be installed at\n" <<
+          "  " << toolsetPath;
+        ;
+        /* clang-format on */
+        mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+
+        // Clear the configured tool-set
+        this->GeneratorToolsetVersion.clear();
+      }
+    }
+  }
+
   if (const char* toolset = this->GetPlatformToolset()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET", toolset);
+  }
+  if (const char* version = this->GetPlatformToolsetVersion()) {
+    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_VERSION", version);
   }
   if (const char* hostArch = this->GetPlatformToolsetHostArchitecture()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE", hostArch);
@@ -317,6 +381,10 @@ bool cmGlobalVisualStudio10Generator::ProcessGeneratorToolsetField(
 {
   if (key == "cuda") {
     this->GeneratorToolsetCuda = value;
+    return true;
+  }
+  if (key == "version") {
+    this->GeneratorToolsetVersion = value;
     return true;
   }
   return false;
@@ -512,6 +580,25 @@ std::string const& cmGlobalVisualStudio10Generator::GetPlatformToolsetString()
   return empty;
 }
 
+const char* cmGlobalVisualStudio10Generator::GetPlatformToolsetVersion() const
+{
+  std::string const& version = this->GetPlatformToolsetVersionString();
+  if (version.empty()) {
+    return nullptr;
+  }
+  return version.c_str();
+}
+
+std::string const&
+cmGlobalVisualStudio10Generator::GetPlatformToolsetVersionString() const
+{
+  if (!this->GeneratorToolsetVersion.empty()) {
+    return this->GeneratorToolsetVersion;
+  }
+  static std::string const empty;
+  return empty;
+}
+
 const char*
 cmGlobalVisualStudio10Generator::GetPlatformToolsetHostArchitecture() const
 {
@@ -533,6 +620,17 @@ std::string const&
 cmGlobalVisualStudio10Generator::GetPlatformToolsetCudaString() const
 {
   return this->GeneratorToolsetCuda;
+}
+
+bool cmGlobalVisualStudio10Generator::IsDefaultToolset(
+  const std::string&) const
+{
+  return true;
+}
+
+std::string cmGlobalVisualStudio10Generator::GetAuxiliaryToolset() const
+{
+  return {};
 }
 
 bool cmGlobalVisualStudio10Generator::FindMakeProgram(cmMakefile* mf)
@@ -636,126 +734,89 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
     cmsys::ofstream fout(vcxprojAbs.c_str());
     cmXMLWriter xw(fout);
 
-    /* clang-format off */
-    xw.StartDocument();
-    xw.StartElement("Project");
-     xw.Attribute("DefaultTargets", "Build");
-     xw.Attribute("ToolsVersion", "4.0");
-     xw.Attribute("xmlns",
-                  "http://schemas.microsoft.com/developer/msbuild/2003");
-     if (this->IsNsightTegra()) {
-       xw.StartElement("PropertyGroup");
-        xw.Attribute("Label", "NsightTegraProject");
-        xw.StartElement("NsightTegraProjectRevisionNumber");
-         xw.Content("6");
-        xw.EndElement(); // NsightTegraProjectRevisionNumber
-       xw.EndElement(); // PropertyGroup
-     }
-     xw.StartElement("ItemGroup");
-      xw.Attribute("Label", "ProjectConfigurations");
-      xw.StartElement("ProjectConfiguration");
-       xw.Attribute("Include", "Debug|" + this->GetPlatformName());
-       xw.StartElement("Configuration");
-        xw.Content("Debug");
-       xw.EndElement(); // Configuration
-       xw.StartElement("Platform");
-        xw.Content(this->GetPlatformName());
-       xw.EndElement(); // Platform
-      xw.EndElement(); // ProjectConfiguration
-     xw.EndElement(); // ItemGroup
-    xw.StartElement("PropertyGroup");
-     xw.Attribute("Label", "Globals");
-     xw.StartElement("ProjectGuid");
-      xw.Content("{F3FC6D86-508D-3FB1-96D2-995F08B142EC}");
-     xw.EndElement(); // ProjectGuid
-     xw.StartElement("Keyword");
-      xw.Content("Win32Proj");
-     xw.EndElement(); // Keyword
-     xw.StartElement("Platform");
-      xw.Content(this->GetPlatformName());
-     xw.EndElement(); // Platform
-     if (this->GetSystemName() == "WindowsPhone") {
-       xw.StartElement("ApplicationType");
-        xw.Content("Windows Phone");
-       xw.EndElement(); // ApplicationType
-       xw.StartElement("ApplicationTypeRevision");
-        xw.Content(this->GetSystemVersion());
-       xw.EndElement(); // ApplicationTypeRevision
-     } else if (this->GetSystemName() == "WindowsStore") {
-       xw.StartElement("ApplicationType");
-        xw.Content("Windows Store");
-       xw.EndElement(); // ApplicationType
-       xw.StartElement("ApplicationTypeRevision");
-        xw.Content(this->GetSystemVersion());
-       xw.EndElement(); // ApplicationTypeRevision
-     }
-     if (!this->WindowsTargetPlatformVersion.empty()) {
-       xw.StartElement("WindowsTargetPlatformVersion");
-        xw.Content(this->WindowsTargetPlatformVersion);
-       xw.EndElement(); // WindowsTargetPlatformVersion
-     }
-     if (this->GetPlatformName() == "ARM64") {
-       xw.StartElement("WindowsSDKDesktopARM64Support");
-        xw.Content("true");
-       xw.EndElement(); // WindowsSDK64DesktopARMSupport
-     }
-     else if (this->GetPlatformName() == "ARM") {
-       xw.StartElement("WindowsSDKDesktopARMSupport");
-        xw.Content("true");
-       xw.EndElement(); // WindowsSDKDesktopARMSupport
-     }
-    xw.EndElement(); // PropertyGroup
-    xw.StartElement("Import");
-     xw.Attribute("Project",
-                  "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
-    xw.EndElement(); // Import
-    if (!this->GeneratorToolsetHostArchitecture.empty()) {
-      xw.StartElement("PropertyGroup");
-       xw.StartElement("PreferredToolArchitecture");
-        xw.Content(this->GeneratorToolsetHostArchitecture);
-       xw.EndElement(); // PreferredToolArchitecture
-      xw.EndElement(); // PropertyGroup
+    cmXMLDocument doc(xw);
+    cmXMLElement eprj(doc, "Project");
+    eprj.Attribute("DefaultTargets", "Build");
+    eprj.Attribute("ToolsVersion", "4.0");
+    eprj.Attribute("xmlns",
+                   "http://schemas.microsoft.com/developer/msbuild/2003");
+    if (this->IsNsightTegra()) {
+      cmXMLElement epg(eprj, "PropertyGroup");
+      epg.Attribute("Label", "NsightTegraProject");
+      cmXMLElement(epg, "NsightTegraProjectRevisionNumber").Content("6");
     }
-    xw.StartElement("PropertyGroup");
-     xw.Attribute("Label", "Configuration");
-     xw.StartElement("ConfigurationType");
-      if (this->IsNsightTegra()) {
-        // Tegra-Android platform does not understand "Utility".
-        xw.Content("StaticLibrary");
-      } else {
-        xw.Content("Utility");
+    {
+      cmXMLElement eig(eprj, "ItemGroup");
+      eig.Attribute("Label", "ProjectConfigurations");
+      cmXMLElement epc(eig, "ProjectConfiguration");
+      epc.Attribute("Include", "Debug|" + this->GetPlatformName());
+      cmXMLElement(epc, "Configuration").Content("Debug");
+      cmXMLElement(epc, "Platform").Content(this->GetPlatformName());
+    }
+    {
+      cmXMLElement epg(eprj, "PropertyGroup");
+      epg.Attribute("Label", "Globals");
+      cmXMLElement(epg, "ProjectGuid")
+        .Content("{F3FC6D86-508D-3FB1-96D2-995F08B142EC}");
+      cmXMLElement(epg, "Keyword").Content("Win32Proj");
+      cmXMLElement(epg, "Platform").Content(this->GetPlatformName());
+      if (this->GetSystemName() == "WindowsPhone") {
+        cmXMLElement(epg, "ApplicationType").Content("Windows Phone");
+        cmXMLElement(epg, "ApplicationTypeRevision")
+          .Content(this->GetSystemVersion());
+      } else if (this->GetSystemName() == "WindowsStore") {
+        cmXMLElement(epg, "ApplicationType").Content("Windows Store");
+        cmXMLElement(epg, "ApplicationTypeRevision")
+          .Content(this->GetSystemVersion());
       }
-     xw.EndElement(); // ConfigurationType
-     xw.StartElement("CharacterSet");
-      xw.Content("MultiByte");
-     xw.EndElement(); // CharacterSet
-     if (this->IsNsightTegra()) {
-       xw.StartElement("NdkToolchainVersion");
-       xw.Content(this->GetPlatformToolsetString());
-       xw.EndElement(); // NdkToolchainVersion
-     } else {
-       xw.StartElement("PlatformToolset");
-       xw.Content(this->GetPlatformToolsetString());
-       xw.EndElement(); // PlatformToolset
-     }
-    xw.EndElement(); // PropertyGroup
-    xw.StartElement("Import");
-     xw.Attribute("Project", "$(VCTargetsPath)\\Microsoft.Cpp.props");
-    xw.EndElement(); // Import
-    xw.StartElement("ItemDefinitionGroup");
-     xw.StartElement("PostBuildEvent");
-      xw.StartElement("Command");
-       xw.Content("echo VCTargetsPath=$(VCTargetsPath)");
-      xw.EndElement(); // Command
-     xw.EndElement(); // PostBuildEvent
-    xw.EndElement(); // ItemDefinitionGroup
-    xw.StartElement("Import");
-     xw.Attribute("Project",
-                  "$(VCTargetsPath)\\Microsoft.Cpp.targets");
-    xw.EndElement(); // Import
-    xw.EndElement(); // Project
-    xw.EndDocument();
-    /* clang-format on */
+      if (!this->WindowsTargetPlatformVersion.empty()) {
+        cmXMLElement(epg, "WindowsTargetPlatformVersion")
+          .Content(this->WindowsTargetPlatformVersion);
+      }
+      if (this->GetPlatformName() == "ARM64") {
+        cmXMLElement(epg, "WindowsSDKDesktopARM64Support").Content("true");
+      } else if (this->GetPlatformName() == "ARM") {
+        cmXMLElement(epg, "WindowsSDKDesktopARMSupport").Content("true");
+      }
+    }
+    cmXMLElement(eprj, "Import")
+      .Attribute("Project", "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
+    if (!this->GeneratorToolsetHostArchitecture.empty()) {
+      cmXMLElement epg(eprj, "PropertyGroup");
+      cmXMLElement(epg, "PreferredToolArchitecture")
+        .Content(this->GeneratorToolsetHostArchitecture);
+    }
+    {
+      cmXMLElement epg(eprj, "PropertyGroup");
+      epg.Attribute("Label", "Configuration");
+      {
+        cmXMLElement ect(epg, "ConfigurationType");
+        if (this->IsNsightTegra()) {
+          // Tegra-Android platform does not understand "Utility".
+          ect.Content("StaticLibrary");
+        } else {
+          ect.Content("Utility");
+        }
+      }
+      cmXMLElement(epg, "CharacterSet").Content("MultiByte");
+      if (this->IsNsightTegra()) {
+        cmXMLElement(epg, "NdkToolchainVersion")
+          .Content(this->GetPlatformToolsetString());
+      } else {
+        cmXMLElement(epg, "PlatformToolset")
+          .Content(this->GetPlatformToolsetString());
+      }
+    }
+    cmXMLElement(eprj, "Import")
+      .Attribute("Project", "$(VCTargetsPath)\\Microsoft.Cpp.props");
+    {
+      cmXMLElement eidg(eprj, "ItemDefinitionGroup");
+      cmXMLElement epbe(eidg, "PostBuildEvent");
+      cmXMLElement(epbe, "Command")
+        .Content("echo VCTargetsPath=$(VCTargetsPath)");
+    }
+    cmXMLElement(eprj, "Import")
+      .Attribute("Project", "$(VCTargetsPath)\\Microsoft.Cpp.targets");
   }
 
   std::vector<std::string> cmd;
@@ -801,7 +862,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string& makeProgram,
   const std::string& projectName, const std::string& projectDir,
   const std::string& targetName, const std::string& config, bool fast,
-  bool verbose, std::vector<std::string> const& makeOptions)
+  int jobs, bool verbose, std::vector<std::string> const& makeOptions)
 {
   // Select the caller- or user-preferred make program, else MSBuild.
   std::string makeProgramSelected =
@@ -842,7 +903,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     // Use devenv to build solutions containing Intel Fortran projects.
     cmGlobalVisualStudio7Generator::GenerateBuildCommand(
       makeCommand, makeProgram, projectName, projectDir, targetName, config,
-      fast, verbose, makeOptions);
+      fast, jobs, verbose, makeOptions);
     return;
   }
 
@@ -850,6 +911,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
 
   std::string realTarget = targetName;
   // msbuild.exe CxxOnly.sln /t:Build /p:Configuration=Debug /target:ALL_BUILD
+  //                         /m
   if (realTarget.empty()) {
     realTarget = "ALL_BUILD";
   }
@@ -878,6 +940,17 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   makeCommand.push_back(configArg);
   makeCommand.push_back(std::string("/p:VisualStudioVersion=") +
                         this->GetIDEVersion());
+
+  if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
+    if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
+      makeCommand.push_back("/m");
+    } else {
+      makeCommand.push_back(std::string("/m:") + std::to_string(jobs));
+    }
+    // Having msbuild.exe and cl.exe using multiple jobs is discouraged
+    makeCommand.push_back("/p:CL_MPCount=1");
+  }
+
   makeCommand.insert(makeCommand.end(), makeOptions.begin(),
                      makeOptions.end());
 }

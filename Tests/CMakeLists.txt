@@ -64,7 +64,7 @@ if(BUILD_TESTING)
   set(CMake_TEST_DEVENV "")
   if(CMAKE_VS_DEVENV_COMMAND)
     set(CMake_TEST_DEVENV "${CMAKE_VS_DEVENV_COMMAND}")
-  elseif(CMAKE_GENERATOR MATCHES "Visual Studio [89] " AND
+  elseif(CMAKE_GENERATOR MATCHES "Visual Studio 9 " AND
       NOT CMAKE_MAKE_PROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
     set(CMake_TEST_DEVENV "${CMAKE_MAKE_PROGRAM}")
   endif()
@@ -145,14 +145,22 @@ if(BUILD_TESTING)
     set(CPACK_BINARY_RPM OFF)
   endif()
 
-  # Look for rpmbuild to use for tests.
-  # The tool does not work with spaces in the path.
+  # Look for dpkg to use for tests.
   find_program(DPKG_EXECUTABLE NAMES dpkg)
 
   if(DPKG_EXECUTABLE)
     set(CPACK_BINARY_DEB ON)
   else()
     set(CPACK_BINARY_DEB OFF)
+  endif()
+
+  # Look for NuGet to use for tests.
+  find_program(NUGET_EXECUTABLE NAMES NuGet nuget)
+
+  if(NUGET_EXECUTABLE)
+    set(CPACK_BINARY_NUGET ON)
+  else()
+    set(CPACK_BINARY_NUGET OFF)
   endif()
 
   #---------------------------------------------------------------------------
@@ -243,6 +251,10 @@ if(BUILD_TESTING)
       if(_version MATCHES "^Xcode ([0-9]+(\\.[0-9]+)*)")
         set(CMake_TEST_XCODE_VERSION "${CMAKE_MATCH_1}")
       endif()
+    endif()
+    if(NOT CMake_TEST_XCODE_VERSION VERSION_LESS 10)
+      # Since Xcode 10 we do not have two supported architectures for the host.
+      set(CTEST_TEST_OSX_ARCH 0)
     endif()
     if(CMAKE_OSX_SYSROOT)
       execute_process(
@@ -345,9 +357,10 @@ if(BUILD_TESTING)
     endif()
   endif()
 
-  if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^89]|[89][0-9])")
+  if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^9]|[9][0-9])")
     ADD_TEST_MACRO(CSharpOnly CSharpOnly)
     ADD_TEST_MACRO(CSharpLinkToCxx CSharpLinkToCxx)
+    ADD_TEST_MACRO(CSharpLinkFromCxx CSharpLinkFromCxx)
   endif()
 
   ADD_TEST_MACRO(COnly COnly)
@@ -816,6 +829,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
   ADD_TEST_MACRO(CustomCommandByproducts CustomCommandByproducts)
 
+  ADD_TEST_MACRO(CommandLength CommandLength)
+
   ADD_TEST_MACRO(EmptyDepends ${CMAKE_CTEST_COMMAND})
 
   add_test(CustomCommandWorkingDirectory  ${CMAKE_CTEST_COMMAND}
@@ -948,6 +963,44 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endif()
   endif()
 
+  if(CTEST_TEST_CPACK)
+    add_test(CPackUseDefaultVersion ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackUseDefaultVersion"
+      "${CMake_BINARY_DIR}/Tests/CPackUseDefaultVersion"
+      ${build_generator_args}
+      --build-project CPackUseDefaultVersion
+      --build-two-config
+      --build-options ${build_options}
+        ${CPackUseDefaultVersion_BUILD_OPTIONS})
+    set_tests_properties(CPackUseDefaultVersion PROPERTIES PASS_REGULAR_EXPRESSION "CPACK_PACKAGE_VERSION=0\\.1\\.1")
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackUseDefaultVersion")
+
+    add_test(CPackUseProjectVersion ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackUseProjectVersion"
+      "${CMake_BINARY_DIR}/Tests/CPackUseProjectVersion"
+      ${build_generator_args}
+      --build-project CPackUseProjectVersion
+      --build-two-config
+      --build-options ${build_options}
+        ${CPackUseProjectVersion_BUILD_OPTIONS})
+    set_tests_properties(CPackUseProjectVersion PROPERTIES PASS_REGULAR_EXPRESSION "CPACK_PACKAGE_VERSION=1\\.2\\.3")
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackUseProjectVersion")
+
+    add_test(CPackUseShortProjectVersion ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackUseShortProjectVersion"
+      "${CMake_BINARY_DIR}/Tests/CPackUseShortProjectVersion"
+      ${build_generator_args}
+      --build-project CPackUseShortProjectVersion
+      --build-two-config
+      --build-options ${build_options}
+        ${CPackUseProjectVersion_BUILD_OPTIONS})
+    set_tests_properties(CPackUseShortProjectVersion PROPERTIES PASS_REGULAR_EXPRESSION "CPACK_PACKAGE_VERSION=2")
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackUseShortProjectVersion")
+  endif()
+
   if(CTEST_RUN_CPackComponents)
     set(CPackComponents_BUILD_OPTIONS)
     if(APPLE)
@@ -992,6 +1045,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     if(CPACK_BINARY_DEB)
       list(APPEND ACTIVE_CPACK_GENERATORS DEB)
     endif()
+    # Check whether if NuGet command is found
+    # before adding NuGet tests
+    if(CPACK_BINARY_NUGET)
+      list(APPEND ACTIVE_CPACK_GENERATORS NUGET)
+      set(CPACK_GENERATOR_STRING_NUGET NuGet)
+    endif()
 
     # ACTIVE_CPACK_GENERATORS variable
     # now contains the list of 'active generators'
@@ -1011,7 +1070,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     list(APPEND CWAYLST "IgnoreGroup")
     list(APPEND CWAYLST "AllInOne")
     foreach(CPackGen IN LISTS ACTIVE_CPACK_GENERATORS)
-      set(CPackRun_CPackGen  "-DCPackGen=${CPackGen}")
+      if(NOT DEFINED CPACK_GENERATOR_STRING_${CPackGen})
+        set(CPACK_GENERATOR_STRING_${CPackGen} ${CPackGen})
+      endif()
+      set(CPackRun_CPackGen  "-DCPackGen=${CPACK_GENERATOR_STRING_${CPackGen}}")
       foreach(CPackComponentWay ${CWAYLST})
         set(CPackRun_CPackComponentWay "-DCPackComponentWay=${CPackComponentWay}")
         add_test(CPackComponentsForAll-${CPackGen}-${CPackComponentWay}
@@ -1022,7 +1084,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
           ${build_generator_args}
           --build-project CPackComponentsForAll
           --build-options ${build_options}
-             -DCPACK_GENERATOR:STRING=${CPackGen}
+             -DCPACK_GENERATOR:STRING=${CPACK_GENERATOR_STRING_${CPackGen}}
              -DCPACK_BINARY_${CPackGen}:BOOL=ON
              ${CPackRun_CPackComponentWay}
              ${CPackComponentsForAll_BUILD_OPTIONS}
@@ -1310,6 +1372,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endif()
   endif()
 
+  if(CMake_TEST_FindALSA)
+    add_subdirectory(FindALSA)
+  endif()
+
   if(CMake_TEST_CUDA)
     add_subdirectory(Cuda)
     add_subdirectory(CudaOnly)
@@ -1321,6 +1387,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
   if(CMake_TEST_FindBZip2)
     add_subdirectory(FindBZip2)
+  endif()
+
+  if(CMake_TEST_FindCURL)
+    add_subdirectory(FindCURL)
   endif()
 
   if(CMake_TEST_FindDoxygen)
@@ -1352,6 +1422,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindICU)
   endif()
 
+  if(CMake_TEST_FindJPEG)
+    add_subdirectory(FindJPEG)
+  endif()
+
   if(CMake_TEST_FindJsonCpp)
     add_subdirectory(FindJsonCpp)
   endif()
@@ -1364,8 +1438,16 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindLibUV)
   endif()
 
+  if(CMake_TEST_FindLibXml2)
+    add_subdirectory(FindLibXml2)
+  endif()
+
   if(CMake_TEST_FindLTTngUST)
     add_subdirectory(FindLTTngUST)
+  endif()
+
+  if(CMake_TEST_FindODBC)
+    add_subdirectory(FindODBC)
   endif()
 
   if(CMake_TEST_FindOpenCL)
@@ -1416,13 +1498,36 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindXercesC)
   endif()
 
+  if(CMake_TEST_FindPython)
+    add_subdirectory(FindPython)
+  endif()
+
+  if(CMake_TEST_UseSWIG)
+    add_subdirectory(UseSWIG)
+  endif()
+
   add_subdirectory(FindThreads)
 
   # Matlab module
-  if(CMake_TEST_FindMatlab)
+  # CMake_TEST_FindMatlab: indicates to look for Matlab (from PATH for Linux)
+  # CMake_TEST_FindMatlab_MCR: indicates the MCR is installed
+  # CMake_TEST_FindMatlab_MCR_ROOT_DIR: indicates an optional root directory for the MCR, required on Linux
+  if(CMake_TEST_FindMatlab OR CMake_TEST_FindMatlab_MCR OR (NOT "${CMake_TEST_FindMatlab_MCR_ROOT_DIR}" STREQUAL ""))
+    set(FindMatlab_additional_test_options )
+    if(CMake_TEST_FindMatlab_MCR OR NOT "${CMake_TEST_FindMatlab_MCR_ROOT_DIR}" STREQUAL "")
+      set(FindMatlab_additional_test_options -DIS_MCR=TRUE)
+    endif()
+    if(NOT "${CMake_TEST_FindMatlab_MCR_ROOT_DIR}" STREQUAL "")
+      set(FindMatlab_additional_test_options ${FindMatlab_additional_test_options} "-DMCR_ROOT:FILEPATH=${CMake_TEST_FindMatlab_MCR_ROOT_DIR}")
+    endif()
+    set(FindMatlab.basic_checks_BUILD_OPTIONS ${FindMatlab_additional_test_options})
     ADD_TEST_MACRO(FindMatlab.basic_checks      ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>)
+    set(FindMatlab.versions_checks_BUILD_OPTIONS ${FindMatlab_additional_test_options})
     ADD_TEST_MACRO(FindMatlab.versions_checks   ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>)
+    set(FindMatlab.components_checks_BUILD_OPTIONS ${FindMatlab_additional_test_options})
     ADD_TEST_MACRO(FindMatlab.components_checks ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>)
+    set(FindMatlab.failure_reports_BUILD_OPTIONS ${FindMatlab_additional_test_options})
+    ADD_TEST_MACRO(FindMatlab.failure_reports   ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>)
   endif()
 
   find_package(GTK2 QUIET)
@@ -1443,6 +1548,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProject")
   set_tests_properties(ExternalProject PROPERTIES
+    RUN_SERIAL 1
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
 
   add_test(NAME ExternalProjectSubdir
@@ -1482,6 +1588,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectLocal")
   set_tests_properties(ExternalProjectLocal PROPERTIES
+    RUN_SERIAL 1
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
 
   add_test(ExternalProjectUpdateSetup ${CMAKE_CTEST_COMMAND}
@@ -1497,6 +1604,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate")
   set_tests_properties(ExternalProjectUpdateSetup PROPERTIES
+    RUN_SERIAL 1
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
 
   add_test(NAME ExternalProjectUpdate
@@ -1511,6 +1619,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate")
   set_tests_properties(ExternalProjectUpdate PROPERTIES
+    RUN_SERIAL 1
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT}
     WORKING_DIRECTORY ${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate
     DEPENDS ExternalProjectUpdateSetup )
@@ -1910,7 +2019,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   endif()
 
   if(MSVC AND NOT MSVC_VERSION LESS 1310
-     AND (NOT CMAKE_GENERATOR MATCHES "Visual Studio [89]( |$)"
+     AND (NOT CMAKE_GENERATOR MATCHES "Visual Studio 9 "
           OR CMAKE_SIZEOF_VOID_P EQUAL 4)
       )
     ADD_TEST_MACRO(VSMASM VSMASM)
@@ -1921,7 +2030,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       ADD_TEST_MACRO(SBCS SBCS)
     endif()
 
-    if(NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio [89]( |$)"
+    if(NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 9 "
         AND NOT CMAKE_GENERATOR_TOOLSET)
       ADD_TEST_MACRO(VSWindowsFormsResx VSWindowsFormsResx)
     endif()
@@ -2120,7 +2229,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endif()
   endif()
 
-  if(CMAKE_GENERATOR MATCHES "Visual Studio ([^89]|[89][0-9])" AND nasm)
+  if(CMAKE_GENERATOR MATCHES "Visual Studio ([^9]|9[0-9])" AND nasm)
     ADD_TEST_MACRO(VSNASM VSNASM)
   endif()
 
@@ -2728,6 +2837,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     --output-log "${CMake_BINARY_DIR}/Tests/CTestConfig/ScriptWithArgs.log"
     )
 
+  ADD_TEST_MACRO(CMakeCommands.add_compile_definitions add_compile_definitions)
   ADD_TEST_MACRO(CMakeCommands.add_compile_options add_compile_options)
   ADD_TEST_MACRO(CMakeCommands.target_link_libraries target_link_libraries)
   ADD_TEST_MACRO(CMakeCommands.target_include_directories target_include_directories)

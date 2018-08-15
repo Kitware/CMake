@@ -15,10 +15,10 @@
 #include <string>
 
 #if defined(_WIN32)
-#include <windows.h>
-#if __cplusplus >= 201103L
-#include <system_error>
-#endif
+#  include <windows.h>
+#  if __cplusplus >= 201103L
+#    include <system_error>
+#  endif
 #endif
 
 namespace @KWSYS_NAMESPACE@ {
@@ -231,12 +231,12 @@ private:
         (!input && m_hOutput == INVALID_HANDLE_VALUE)) {
       std::string errmsg =
         "GetStdHandle(" + handleName + ") returned INVALID_HANDLE_VALUE";
-#if __cplusplus >= 201103L
+#  if __cplusplus >= 201103L
       throw std::system_error(::GetLastError(), std::system_category(),
                               errmsg);
-#else
+#  else
       throw std::runtime_error(errmsg);
-#endif
+#  endif
     }
   }
   UINT getConsolesCodepage()

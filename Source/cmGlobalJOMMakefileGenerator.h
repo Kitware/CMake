@@ -5,6 +5,8 @@
 
 #include "cmGlobalUnixMakefileGenerator3.h"
 
+#include <iosfwd>
+
 /** \class cmGlobalJOMMakefileGenerator
  * \brief Write a JOM makefiles.
  *
@@ -19,7 +21,7 @@ public:
     return new cmGlobalGeneratorSimpleFactory<cmGlobalJOMMakefileGenerator>();
   }
   ///! Get the name for the generator.
-  virtual std::string GetName() const
+  std::string GetName() const override
   {
     return cmGlobalJOMMakefileGenerator::GetActualName();
   }
@@ -34,12 +36,23 @@ public:
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string> const& languages,
-                              cmMakefile*, bool optional);
+  void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
+                      bool optional) override;
+
+protected:
+  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
+                            const std::string& makeProgram,
+                            const std::string& projectName,
+                            const std::string& projectDir,
+                            const std::string& targetName,
+                            const std::string& config, bool fast, int jobs,
+                            bool verbose,
+                            std::vector<std::string> const& makeOptions =
+                              std::vector<std::string>()) override;
 
 private:
   void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
-                           const char* envVar) const;
+                           const char* envVar) const override;
 };
 
 #endif

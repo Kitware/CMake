@@ -6,15 +6,15 @@
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
-#include "Terminal.h.in"
+#  include "Terminal.h.in"
 #endif
 
 /* Configure support for this platform.  */
 #if defined(_WIN32) || defined(__CYGWIN__)
-#define KWSYS_TERMINAL_SUPPORT_CONSOLE
+#  define KWSYS_TERMINAL_SUPPORT_CONSOLE
 #endif
 #if !defined(_WIN32)
-#define KWSYS_TERMINAL_ISATTY_WORKS
+#  define KWSYS_TERMINAL_ISATTY_WORKS
 #endif
 
 /* Include needed system APIs.  */
@@ -24,14 +24,14 @@
 #include <string.h> /* strcmp */
 
 #if defined(KWSYS_TERMINAL_SUPPORT_CONSOLE)
-#include <io.h>      /* _get_osfhandle */
-#include <windows.h> /* SetConsoleTextAttribute */
+#  include <io.h>      /* _get_osfhandle */
+#  include <windows.h> /* SetConsoleTextAttribute */
 #endif
 
 #if defined(KWSYS_TERMINAL_ISATTY_WORKS)
-#include <unistd.h> /* isatty */
+#  include <unistd.h> /* isatty */
 #else
-#include <sys/stat.h> /* fstat */
+#  include <sys/stat.h> /* fstat */
 #endif
 
 static int kwsysTerminalStreamIsVT100(FILE* stream, int default_vt100,
@@ -153,6 +153,7 @@ static const char* kwsysTerminalVT100Names[] = { "Eterm",
                                                  "xterm-88color",
                                                  "xterm-color",
                                                  "xterm-debian",
+                                                 "xterm-kitty",
                                                  "xterm-termite",
                                                  0 };
 
@@ -300,10 +301,12 @@ static void kwsysTerminalSetVT100Color(FILE* stream, int color)
 
 #if defined(KWSYS_TERMINAL_SUPPORT_CONSOLE)
 
-#define KWSYS_TERMINAL_MASK_FOREGROUND                                        \
-  (FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY)
-#define KWSYS_TERMINAL_MASK_BACKGROUND                                        \
-  (BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY)
+#  define KWSYS_TERMINAL_MASK_FOREGROUND                                      \
+    (FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED |                    \
+     FOREGROUND_INTENSITY)
+#  define KWSYS_TERMINAL_MASK_BACKGROUND                                      \
+    (BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED |                    \
+     BACKGROUND_INTENSITY)
 
 /* Get the Windows handle for a FILE stream.  */
 static HANDLE kwsysTerminalGetStreamHandle(FILE* stream)
@@ -311,7 +314,7 @@ static HANDLE kwsysTerminalGetStreamHandle(FILE* stream)
   /* Get the C-library file descriptor from the stream.  */
   int fd = fileno(stream);
 
-#if defined(__CYGWIN__)
+#  if defined(__CYGWIN__)
   /* Cygwin seems to have an extra pipe level.  If the file descriptor
      corresponds to stdout or stderr then obtain the matching windows
      handle directly.  */
@@ -320,7 +323,7 @@ static HANDLE kwsysTerminalGetStreamHandle(FILE* stream)
   } else if (fd == fileno(stderr)) {
     return GetStdHandle(STD_ERROR_HANDLE);
   }
-#endif
+#  endif
 
   /* Get the underlying Windows handle for the descriptor.  */
   return (HANDLE)_get_osfhandle(fd);

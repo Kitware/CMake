@@ -122,8 +122,9 @@ bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
   std::ostringstream e;
   if (!this->SelectWindowsStoreToolset(this->DefaultPlatformToolset)) {
     if (this->DefaultPlatformToolset.empty()) {
-      e << this->GetName() << " supports Windows Store '8.0', '8.1' and "
-                              "'10.0', but not '"
+      e << this->GetName()
+        << " supports Windows Store '8.0', '8.1' and "
+           "'10.0', but not '"
         << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
     } else {
       e << "A Windows Store component with CMake requires both the Windows "

@@ -5,6 +5,7 @@
 #include "cmsys/Glob.hxx"
 #include <sstream>
 #include <stddef.h>
+#include <string.h>
 #include <utility>
 
 #include "cmAlgorithms.h"
@@ -32,16 +33,17 @@ class cmExecutionStatus;
 
 static cmInstallTargetGenerator* CreateInstallTargetGenerator(
   cmTarget& target, const cmInstallCommandArguments& args, bool impLib,
-  bool forceOpt = false)
+  bool forceOpt = false, bool namelink = false)
 {
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(target.GetMakefile());
   target.SetHaveInstallRule(true);
+  const char* component = namelink ? args.GetNamelinkComponent().c_str()
+                                   : args.GetComponent().c_str();
   return new cmInstallTargetGenerator(
     target.GetName(), args.GetDestination().c_str(), impLib,
-    args.GetPermissions().c_str(), args.GetConfigurations(),
-    args.GetComponent().c_str(), message, args.GetExcludeFromAll(),
-    args.GetOptional() || forceOpt);
+    args.GetPermissions().c_str(), args.GetConfigurations(), component,
+    message, args.GetExcludeFromAll(), args.GetOptional() || forceOpt);
 }
 
 static cmInstallFilesGenerator* CreateInstallFilesGenerator(
@@ -312,6 +314,20 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       "The NAMELINK_SKIP option may be specified only following LIBRARY.");
     return false;
   }
+  if (archiveArgs.HasNamelinkComponent() ||
+      runtimeArgs.HasNamelinkComponent() ||
+      objectArgs.HasNamelinkComponent() ||
+      frameworkArgs.HasNamelinkComponent() ||
+      bundleArgs.HasNamelinkComponent() ||
+      privateHeaderArgs.HasNamelinkComponent() ||
+      publicHeaderArgs.HasNamelinkComponent() ||
+      resourceArgs.HasNamelinkComponent()) {
+    this->SetError(
+      "TARGETS given NAMELINK_COMPONENT option not in LIBRARY group.  "
+      "The NAMELINK_COMPONENT option may be specified only following "
+      "LIBRARY.");
+    return false;
+  }
   if (libraryArgs.GetNamelinkOnly() && libraryArgs.GetNamelinkSkip()) {
     this->SetError("TARGETS given NAMELINK_ONLY and NAMELINK_SKIP.  "
                    "At most one of these two options may be specified.");
@@ -334,8 +350,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 
   // Check whether this is a DLL platform.
   bool dll_platform =
-    (this->Makefile->IsOn("WIN32") || this->Makefile->IsOn("CYGWIN") ||
-     this->Makefile->IsOn("MINGW"));
+    strcmp(this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"),
+           "") != 0;
 
   for (std::string const& tgt : targetList.GetVector()) {
 
@@ -360,17 +376,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         this->SetError(e.str());
         return false;
       }
-      if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-        std::string reason;
-        if (!this->Makefile->GetGlobalGenerator()->HasKnownObjectFileLocation(
-              &reason)) {
-          std::ostringstream e;
-          e << "TARGETS given OBJECT library \"" << tgt
-            << "\" which may not be installed" << reason << ".";
-          this->SetError(e.str());
-          return false;
-        }
-      }
       // Store the target in the list to be installed.
       targets.push_back(target);
     } else {
@@ -387,6 +392,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   // any files of the given type.
   bool installsArchive = false;
   bool installsLibrary = false;
+  bool installsNamelink = false;
   bool installsRuntime = false;
   bool installsObject = false;
   bool installsFramework = false;
@@ -401,6 +407,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     cmTarget& target = *ti;
     cmInstallTargetGenerator* archiveGenerator = nullptr;
     cmInstallTargetGenerator* libraryGenerator = nullptr;
+    cmInstallTargetGenerator* namelinkGenerator = nullptr;
     cmInstallTargetGenerator* runtimeGenerator = nullptr;
     cmInstallTargetGenerator* objectGenerator = nullptr;
     cmInstallTargetGenerator* frameworkGenerator = nullptr;
@@ -463,9 +470,18 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           } else {
             // The shared library uses the LIBRARY properties.
             if (!libraryArgs.GetDestination().empty()) {
-              libraryGenerator =
-                CreateInstallTargetGenerator(target, libraryArgs, false);
-              libraryGenerator->SetNamelinkMode(namelinkMode);
+              if (namelinkMode != cmInstallTargetGenerator::NamelinkModeOnly) {
+                libraryGenerator =
+                  CreateInstallTargetGenerator(target, libraryArgs, false);
+                libraryGenerator->SetNamelinkMode(
+                  cmInstallTargetGenerator::NamelinkModeSkip);
+              }
+              if (namelinkMode != cmInstallTargetGenerator::NamelinkModeSkip) {
+                namelinkGenerator = CreateInstallTargetGenerator(
+                  target, libraryArgs, false, false, true);
+                namelinkGenerator->SetNamelinkMode(
+                  cmInstallTargetGenerator::NamelinkModeOnly);
+              }
               namelinkOnly =
                 (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
             } else {
@@ -534,15 +550,23 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       case cmStateEnums::OBJECT_LIBRARY: {
         // Objects use OBJECT properties.
         if (!objectArgs.GetDestination().empty()) {
+          // Verify that we know where the objects are to install them.
+          std::string reason;
+          if (!this->Makefile->GetGlobalGenerator()
+                 ->HasKnownObjectFileLocation(&reason)) {
+            std::ostringstream e;
+            e << "TARGETS given OBJECT library \"" << target.GetName()
+              << "\" whose objects may not be installed" << reason << ".";
+            this->SetError(e.str());
+            return false;
+          }
+
           objectGenerator =
             CreateInstallTargetGenerator(target, objectArgs, false);
         } else {
-          std::ostringstream e;
-          e << "TARGETS given no OBJECTS DESTINATION for object library "
-               "target \""
-            << target.GetName() << "\".";
-          this->SetError(e.str());
-          return false;
+          // Installing an OBJECT library without a destination transforms
+          // it to an INTERFACE library.  It installs no files but can be
+          // exported.
         }
       } break;
       case cmStateEnums::EXECUTABLE: {
@@ -686,6 +710,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     // Keep track of whether we're installing anything in each category
     installsArchive = installsArchive || archiveGenerator != nullptr;
     installsLibrary = installsLibrary || libraryGenerator != nullptr;
+    installsNamelink = installsNamelink || namelinkGenerator != nullptr;
     installsRuntime = installsRuntime || runtimeGenerator != nullptr;
     installsObject = installsObject || objectGenerator != nullptr;
     installsFramework = installsFramework || frameworkGenerator != nullptr;
@@ -698,6 +723,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 
     this->Makefile->AddInstallGenerator(archiveGenerator);
     this->Makefile->AddInstallGenerator(libraryGenerator);
+    this->Makefile->AddInstallGenerator(namelinkGenerator);
     this->Makefile->AddInstallGenerator(runtimeGenerator);
     this->Makefile->AddInstallGenerator(objectGenerator);
     this->Makefile->AddInstallGenerator(frameworkGenerator);
@@ -736,6 +762,10 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   if (installsLibrary) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
       libraryArgs.GetComponent().c_str());
+  }
+  if (installsNamelink) {
+    this->Makefile->GetGlobalGenerator()->AddInstallComponent(
+      libraryArgs.GetNamelinkComponent().c_str());
   }
   if (installsRuntime) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
@@ -831,11 +861,13 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
           messageType = cmake::FATAL_ERROR;
       }
       if (modal) {
-        e << "The file\n  " << file << "\nwas generated by the export() "
-                                       "command.  It "
-          << modal << " not be installed with the "
-                      "install() command.  Use the install(EXPORT) mechanism "
-                      "instead.  See the cmake-packages(7) manual for more.\n";
+        e << "The file\n  " << file
+          << "\nwas generated by the export() "
+             "command.  It "
+          << modal
+          << " not be installed with the "
+             "install() command.  Use the install(EXPORT) mechanism "
+             "instead.  See the cmake-packages(7) manual for more.\n";
         this->Makefile->IssueMessage(messageType, e.str());
         if (messageType == cmake::FATAL_ERROR) {
           return false;

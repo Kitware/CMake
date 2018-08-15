@@ -36,6 +36,7 @@ public:
   cmTargetInternalPointer& operator=(cmTargetInternalPointer const& r);
   cmTargetInternals* operator->() const { return this->Pointer; }
   cmTargetInternals* Get() const { return this->Pointer; }
+
 private:
   cmTargetInternals* Pointer;
 };
@@ -137,7 +138,7 @@ public:
   /**
    * Clear the dependency information recorded for this target, if any.
    */
-  void ClearDependencyInformation(cmMakefile& mf, const std::string& target);
+  void ClearDependencyInformation(cmMakefile& mf);
 
   void AddLinkLibrary(cmMakefile& mf, const std::string& lib,
                       cmTargetLinkLibraryType llt,
@@ -182,8 +183,8 @@ public:
   void SetHaveInstallRule(bool h) { this->HaveInstallRule = h; }
 
   /**
-  * Get/Set whether this target was auto-created by a generator.
-  */
+   * Get/Set whether this target was auto-created by a generator.
+   */
   bool GetIsGeneratorProvided() const { return this->IsGeneratorProvided; }
   void SetIsGeneratorProvided(bool igp) { this->IsGeneratorProvided = igp; }
 
@@ -312,7 +313,6 @@ private:
   cmTargetInternalPointer Internal;
   cmStateEnums::TargetType TargetTypeValue;
   bool HaveInstallRule;
-  bool RecordDependencies;
   bool DLLPlatform;
   bool IsAndroid;
   bool IsImportedTarget;

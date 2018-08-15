@@ -1,5 +1,5 @@
 #if defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) < 407)
-#define OLD_GNU
+#  define OLD_GNU
 #endif
 
 #ifdef OLD_GNU

@@ -45,8 +45,7 @@ file(TIMESTAMP "${rccDepBinGen}" rdGenBefore "${timeformat}")
 # - Change a resource files listed in the .qrc file
 # - Rebuild
 execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
-execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${rccDepBD}/resPlain/input.txt")
-execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${rccDepBD}/resGen/input.txt")
+file(TOUCH "${rccDepBD}/resPlain/input.txt" "${rccDepBD}/resGen/input.txt")
 execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${rccDepBD}" RESULT_VARIABLE result)
 if (result)
   message(SEND_ERROR "Second build of rccDepends failed.")
@@ -63,7 +62,7 @@ if (NOT rdGenAfter GREATER rdGenBefore)
 endif()
 
 
-message("Changing a the .qrc file")
+message("Changing the .qrc file")
 # - Acquire binary timestamps before the build
 file(TIMESTAMP "${rccDepBinPlain}" rdPlainBefore "${timeformat}")
 file(TIMESTAMP "${rccDepBinGen}" rdGenBefore "${timeformat}")
@@ -97,8 +96,7 @@ file(TIMESTAMP "${rccDepBinGen}" rdGenBefore "${timeformat}")
 # - Change a newly added resource files listed in the .qrc file
 # - Rebuild
 execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1)
-execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${rccDepBD}/resPlain/inputAdded.txt")
-execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${rccDepBD}/resGen/inputAdded.txt")
+file(TOUCH "${rccDepBD}/resPlain/inputAdded.txt" "${rccDepBD}/resGen/inputAdded.txt")
 execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${rccDepBD}" RESULT_VARIABLE result)
 if (result)
   message(SEND_ERROR "Fourth build of rccDepends failed.")

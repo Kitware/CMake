@@ -3,13 +3,13 @@
 #include "someclass.hxx"
 
 #ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#  include <sys/types.h>
 #endif
 #ifdef HAVE_STDINT_H
-#include <stdint.h>
+#  include <stdint.h>
 #endif
 #ifdef HAVE_STDDEF_H
-#include <stddef.h>
+#  include <stddef.h>
 #endif
 
 #include <stdio.h>
@@ -87,17 +87,17 @@ int main()
 /* long long */
 #if defined(SIZEOF_LONG_LONG)
   CHECK(long long, SIZEOF_LONG_LONG);
-#if !defined(HAVE_SIZEOF_LONG_LONG)
+#  if !defined(HAVE_SIZEOF_LONG_LONG)
   NODEF(HAVE_SIZEOF_LONG_LONG);
-#endif
+#  endif
 #endif
 
 /* __int64 */
 #if defined(SIZEOF___INT64)
   CHECK(__int64, SIZEOF___INT64);
-#if !defined(HAVE_SIZEOF___INT64)
+#  if !defined(HAVE_SIZEOF___INT64)
   NODEF(HAVE_SIZEOF___INT64);
-#endif
+#  endif
 #elif defined(HAVE_SIZEOF___INT64)
   NODEF(SIZEOF___INT64);
 #endif
@@ -115,9 +115,9 @@ int main()
 /* ssize_t */
 #if defined(SIZEOF_SSIZE_T)
   CHECK(ssize_t, SIZEOF_SSIZE_T);
-#if !defined(HAVE_SIZEOF_SSIZE_T)
+#  if !defined(HAVE_SIZEOF_SSIZE_T)
   NODEF(HAVE_SIZEOF_SSIZE_T);
-#endif
+#  endif
 #elif defined(HAVE_SIZEOF_SSIZE_T)
   NODEF(SIZEOF_SSIZE_T);
 #endif
@@ -126,9 +126,9 @@ int main()
 #if defined(SIZEOF_NS_CLASSMEMBER_INT)
   CHECK(y.someint, SIZEOF_NS_CLASSMEMBER_INT);
   CHECK(y.someint, SIZEOF_INT);
-#if !defined(HAVE_SIZEOF_NS_CLASSMEMBER_INT)
+#  if !defined(HAVE_SIZEOF_NS_CLASSMEMBER_INT)
   NODEF(HAVE_SIZEOF_STRUCTMEMBER_INT);
-#endif
+#  endif
 #elif defined(HAVE_SIZEOF_STRUCTMEMBER_INT)
   NODEF(SIZEOF_STRUCTMEMBER_INT);
 #endif
@@ -137,9 +137,9 @@ int main()
 #if defined(SIZEOF_NS_CLASSMEMBER_PTR)
   CHECK(y.someptr, SIZEOF_NS_CLASSMEMBER_PTR);
   CHECK(y.someptr, SIZEOF_DATA_PTR);
-#if !defined(HAVE_SIZEOF_NS_CLASSMEMBER_PTR)
+#  if !defined(HAVE_SIZEOF_NS_CLASSMEMBER_PTR)
   NODEF(HAVE_SIZEOF_NS_CLASSMEMBER_PTR);
-#endif
+#  endif
 #elif defined(HAVE_SIZEOF_NS_CLASSMEMBER_PTR)
   NODEF(SIZEOF_NS_CLASSMEMBER_PTR);
 #endif
@@ -148,9 +148,9 @@ int main()
 #if defined(SIZEOF_NS_CLASSMEMBER_CHAR)
   CHECK(y.somechar, SIZEOF_NS_CLASSMEMBER_CHAR);
   CHECK(y.somechar, SIZEOF_CHAR);
-#if !defined(HAVE_SIZEOF_NS_CLASSMEMBER_CHAR)
+#  if !defined(HAVE_SIZEOF_NS_CLASSMEMBER_CHAR)
   NODEF(HAVE_SIZEOF_NS_CLASSMEMBER_CHAR);
-#endif
+#  endif
 #elif defined(HAVE_SIZEOF_NS_CLASSMEMBER_CHAR)
   NODEF(SIZEOF_NS_CLASSMEMBER_CHAR);
 #endif
@@ -159,9 +159,9 @@ int main()
 #if defined(SIZEOF_NS_CLASSMEMBER_BOOL)
   CHECK(y.somechar, SIZEOF_NS_CLASSMEMBER_BOOL);
   CHECK(y.somechar, SIZEOF_BOOL);
-#if !defined(HAVE_SIZEOF_NS_CLASSMEMBER_BOOL)
+#  if !defined(HAVE_SIZEOF_NS_CLASSMEMBER_BOOL)
   NODEF(HAVE_SIZEOF_NS_CLASSMEMBER_BOOL);
-#endif
+#  endif
 #elif defined(HAVE_SIZEOF_NS_CLASSMEMBER_BOOL)
   NODEF(SIZEOF_NS_CLASSMEMBER_BOOL);
 #endif

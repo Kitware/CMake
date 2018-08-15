@@ -25,7 +25,7 @@ cmIDEOptions::~cmIDEOptions()
 {
 }
 
-void cmIDEOptions::HandleFlag(const char* flag)
+void cmIDEOptions::HandleFlag(std::string const& flag)
 {
   // If the last option was -D then this option is the definition.
   if (this->DoingDefine) {
@@ -49,26 +49,27 @@ void cmIDEOptions::HandleFlag(const char* flag)
   }
 
   // Look for known arguments.
-  if (flag[0] == '-' || (this->AllowSlash && flag[0] == '/')) {
+  size_t len = flag.length();
+  if (len > 0 && (flag[0] == '-' || (this->AllowSlash && flag[0] == '/'))) {
     // Look for preprocessor definitions.
-    if (this->AllowDefine && flag[1] == 'D') {
-      if (flag[2] == '\0') {
+    if (this->AllowDefine && len > 1 && flag[1] == 'D') {
+      if (len <= 2) {
         // The next argument will have the definition.
         this->DoingDefine = true;
       } else {
         // Store this definition.
-        this->Defines.push_back(flag + 2);
+        this->Defines.push_back(flag.substr(2));
       }
       return;
     }
     // Look for include directory.
-    if (this->AllowInclude && flag[1] == 'I') {
-      if (flag[2] == '\0') {
+    if (this->AllowInclude && len > 1 && flag[1] == 'I') {
+      if (len <= 2) {
         // The next argument will have the include directory.
         this->DoingInclude = true;
       } else {
         // Store this include directory.
-        this->Includes.push_back(flag + 2);
+        this->Includes.push_back(flag.substr(2));
       }
       return;
     }
@@ -92,8 +93,9 @@ void cmIDEOptions::HandleFlag(const char* flag)
 }
 
 bool cmIDEOptions::CheckFlagTable(cmIDEFlagTable const* table,
-                                  const char* flag, bool& flag_handled)
+                                  std::string const& flag, bool& flag_handled)
 {
+  const char* pf = flag.c_str() + 1;
   // Look for an entry in the flag table matching this flag.
   for (cmIDEFlagTable const* entry = table; entry->IDEName; ++entry) {
     bool entry_found = false;
@@ -102,17 +104,17 @@ bool cmIDEOptions::CheckFlagTable(cmIDEFlagTable const* table,
       // the entry specifies UserRequired we must match only if a
       // non-empty value is given.
       int n = static_cast<int>(strlen(entry->commandFlag));
-      if ((strncmp(flag + 1, entry->commandFlag, n) == 0 ||
+      if ((strncmp(pf, entry->commandFlag, n) == 0 ||
            (entry->special & cmIDEFlagTable::CaseInsensitive &&
-            cmsysString_strncasecmp(flag + 1, entry->commandFlag, n))) &&
+            cmsysString_strncasecmp(pf, entry->commandFlag, n))) &&
           (!(entry->special & cmIDEFlagTable::UserRequired) ||
-           static_cast<int>(strlen(flag + 1)) > n)) {
-        this->FlagMapUpdate(entry, flag + n + 1);
+           static_cast<int>(strlen(pf)) > n)) {
+        this->FlagMapUpdate(entry, std::string(pf + n));
         entry_found = true;
       }
-    } else if (strcmp(flag + 1, entry->commandFlag) == 0 ||
+    } else if (strcmp(pf, entry->commandFlag) == 0 ||
                (entry->special & cmIDEFlagTable::CaseInsensitive &&
-                cmsysString_strcasecmp(flag + 1, entry->commandFlag) == 0)) {
+                cmsysString_strcasecmp(pf, entry->commandFlag) == 0)) {
       if (entry->special & cmIDEFlagTable::UserFollowing) {
         // This flag expects a value in the following argument.
         this->DoingFollowing = entry;
@@ -137,7 +139,7 @@ bool cmIDEOptions::CheckFlagTable(cmIDEFlagTable const* table,
 }
 
 void cmIDEOptions::FlagMapUpdate(cmIDEFlagTable const* entry,
-                                 const char* new_value)
+                                 std::string const& new_value)
 {
   if (entry->special & cmIDEFlagTable::UserIgnored) {
     // Ignore the user-specified value.
@@ -157,9 +159,9 @@ void cmIDEOptions::AddDefine(const std::string& def)
   this->Defines.push_back(def);
 }
 
-void cmIDEOptions::AddDefines(const char* defines)
+void cmIDEOptions::AddDefines(std::string const& defines)
 {
-  if (defines) {
+  if (!defines.empty()) {
     // Expand the list of definitions.
     cmSystemTools::ExpandListArgument(defines, this->Defines);
   }
@@ -179,9 +181,9 @@ void cmIDEOptions::AddInclude(const std::string& include)
   this->Includes.push_back(include);
 }
 
-void cmIDEOptions::AddIncludes(const char* includes)
+void cmIDEOptions::AddIncludes(std::string const& includes)
 {
-  if (includes) {
+  if (!includes.empty()) {
     // Expand the list of includes.
     cmSystemTools::ExpandListArgument(includes, this->Includes);
   }

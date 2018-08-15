@@ -8,13 +8,13 @@
 #include <string>
 
 #if defined(_WIN32)
-#include <windows.h> // DWORD
+#  include <windows.h> // DWORD
 #endif
 
 /**
-  * @brief Result of the locking/unlocking file.
-  * @note See @c cmFileLock
-  */
+ * @brief Result of the locking/unlocking file.
+ * @note See @c cmFileLock
+ */
 class cmFileLockResult
 {
 public:
@@ -25,33 +25,33 @@ public:
 #endif
 
   /**
-    * @brief Successful lock/unlock.
-    */
+   * @brief Successful lock/unlock.
+   */
   static cmFileLockResult MakeOk();
 
   /**
-    * @brief Lock/Unlock failed. Read error/GetLastError.
-    */
+   * @brief Lock/Unlock failed. Read error/GetLastError.
+   */
   static cmFileLockResult MakeSystem();
 
   /**
-    * @brief Lock/Unlock failed. Timeout reached.
-    */
+   * @brief Lock/Unlock failed. Timeout reached.
+   */
   static cmFileLockResult MakeTimeout();
 
   /**
-    * @brief File already locked.
-    */
+   * @brief File already locked.
+   */
   static cmFileLockResult MakeAlreadyLocked();
 
   /**
-    * @brief Internal error.
-    */
+   * @brief Internal error.
+   */
   static cmFileLockResult MakeInternal();
 
   /**
-    * @brief Try to lock with function guard outside of the function
-    */
+   * @brief Try to lock with function guard outside of the function
+   */
   static cmFileLockResult MakeNoFunction();
 
   bool IsOk() const;

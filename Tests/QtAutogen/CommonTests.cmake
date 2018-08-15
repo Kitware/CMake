@@ -1,4 +1,6 @@
 # Autogen tests common for Qt4 and Qt5
+ADD_AUTOGEN_TEST(Complex QtAutogen)
+ADD_AUTOGEN_TEST(LowMinimumVersion lowMinimumVersion)
 ADD_AUTOGEN_TEST(MocOnly mocOnly)
 ADD_AUTOGEN_TEST(MocOptions mocOptions)
 ADD_AUTOGEN_TEST(UicOnly uicOnly)
@@ -35,10 +37,10 @@ ADD_AUTOGEN_TEST(Parallel4 parallel4)
 ADD_AUTOGEN_TEST(ParallelAUTO parallelAUTO)
 ADD_AUTOGEN_TEST(SameName sameName)
 ADD_AUTOGEN_TEST(StaticLibraryCycle slc)
-ADD_AUTOGEN_TEST(Complex QtAutogen)
 # Rerun tests
 ADD_AUTOGEN_TEST(RerunMocBasic)
 if(NOT QT_TEST_VERSION STREQUAL 4)
   ADD_AUTOGEN_TEST(RerunMocPlugin)
 endif()
 ADD_AUTOGEN_TEST(RerunRccDepends)
+ADD_AUTOGEN_TEST(RerunRccConfigChange)

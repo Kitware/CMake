@@ -168,6 +168,18 @@ set(CPACK_RPM_RELOCATION_PATHS "${CMAKE_INSTALL_INCLUDEDIR}"
 # set CPACK_DEBIAN_FILE_NAME to use default package name format
 set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
 
+# set some tags for NuGet packages
+# 1. all in one package
+set(CPACK_NUGET_PACKAGE_TAGS "nuget" "unit" "test" "all-in-one")
+# 2. per component packages
+set(CPACK_NUGET_APPLICATIONS_PACKAGE_TAGS "nuget" "unit" "test" "applications")
+set(CPACK_NUGET_LIBRARIES_PACKAGE_TAGS "nuget" "unit" "test" "libraries")
+set(CPACK_NUGET_HEADERS_PACKAGE_TAGS "nuget" "unit" "test" "headers")
+set(CPACK_NUGET_UNSPECIFIED_PACKAGE_TAGS "nuget" "unit" "test" "uNsP3c1FiEd")
+# 3. per group packages
+set(CPACK_NUGET_RUNTIME_PACKAGE_TAGS "nuget" "unit" "test" "run-time")
+set(CPACK_NUGET_DEVELOPMENT_PACKAGE_TAGS "nuget" "unit" "test" "development")
+
 # We may use the CPack specific config file in order
 # to tailor CPack behavior on a CPack generator specific way
 # (Behavior would be different for RPM or TGZ or DEB ...)

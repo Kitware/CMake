@@ -16,8 +16,7 @@ set(fileNames)
 foreach(e ${fileExtensions})
   set(currentFile "${CMAKE_CURRENT_BINARY_DIR}/foo.${e}")
   list(APPEND fileNames ${currentFile})
-  execute_process(COMMAND ${CMAKE_COMMAND} -E touch
-    "${currentFile}")
+  file(TOUCH "${currentFile}")
   string(TOUPPER ${e} eUC)
   set_source_files_properties("${currentFile}"
     PROPERTIES

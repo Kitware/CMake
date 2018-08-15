@@ -65,7 +65,7 @@ endif()
 set(Vulkan_LIBRARIES ${Vulkan_LIBRARY})
 set(Vulkan_INCLUDE_DIRS ${Vulkan_INCLUDE_DIR})
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(Vulkan
   DEFAULT_MSG
   Vulkan_LIBRARY Vulkan_INCLUDE_DIR)

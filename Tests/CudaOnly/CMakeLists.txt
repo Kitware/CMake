@@ -2,6 +2,11 @@
 ADD_TEST_MACRO(CudaOnly.EnableStandard CudaOnlyEnableStandard)
 ADD_TEST_MACRO(CudaOnly.ExportPTX CudaOnlyExportPTX)
 ADD_TEST_MACRO(CudaOnly.GPUDebugFlag CudaOnlyGPUDebugFlag)
+ADD_TEST_MACRO(CudaOnly.LinkSystemDeviceLibraries CudaOnlyLinkSystemDeviceLibraries)
 ADD_TEST_MACRO(CudaOnly.ResolveDeviceSymbols CudaOnlyResolveDeviceSymbols)
 ADD_TEST_MACRO(CudaOnly.SeparateCompilation CudaOnlySeparateCompilation)
 ADD_TEST_MACRO(CudaOnly.WithDefs CudaOnlyWithDefs)
+
+if(MSVC)
+  ADD_TEST_MACRO(CudaOnly.PDB CudaOnlyPDB)
+endif()

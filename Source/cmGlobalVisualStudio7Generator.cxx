@@ -199,7 +199,7 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string& makeProgram,
   const std::string& projectName, const std::string& /*projectDir*/,
   const std::string& targetName, const std::string& config, bool /*fast*/,
-  bool /*verbose*/, std::vector<std::string> const& makeOptions)
+  int /*jobs*/, bool /*verbose*/, std::vector<std::string> const& makeOptions)
 {
   // Select the caller- or user-preferred make program, else devenv.
   std::string makeProgramSelected =
@@ -293,19 +293,6 @@ void cmGlobalVisualStudio7Generator::Generate()
   // tell Visual Studio to reload them...
   if (!cmSystemTools::GetErrorOccuredFlag()) {
     this->CallVisualStudioMacro(MacroReload);
-  }
-
-  if (this->Version == VS8 && !this->CMakeInstance->GetIsInTryCompile()) {
-    const char* cmakeWarnVS8 =
-      this->CMakeInstance->GetState()->GetCacheEntryValue("CMAKE_WARN_VS8");
-    if (!cmakeWarnVS8 || !cmSystemTools::IsOff(cmakeWarnVS8)) {
-      this->CMakeInstance->IssueMessage(
-        cmake::WARNING,
-        "The \"Visual Studio 8 2005\" generator is deprecated "
-        "and will be removed in a future version of CMake."
-        "\n"
-        "Add CMAKE_WARN_VS8=OFF to the cache to disable this warning.");
-    }
   }
 }
 

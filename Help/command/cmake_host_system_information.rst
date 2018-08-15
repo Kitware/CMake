@@ -27,13 +27,13 @@ Key                           Description
 ``IS_64BIT``                  One if processor is 64Bit
 ``HAS_FPU``                   One if processor has floating point unit
 ``HAS_MMX``                   One if processor supports MMX instructions
-``HAS_MMX_PLUS``              One if porcessor supports Ext. MMX instructions
-``HAS_SSE``                   One if porcessor supports SSE instructions
-``HAS_SSE2``                  One if porcessor supports SSE2 instructions
-``HAS_SSE_FP``                One if porcessor supports SSE FP instructions
-``HAS_SSE_MMX``               One if porcessor supports SSE MMX instructions
-``HAS_AMD_3DNOW``             One if porcessor supports 3DNow instructions
-``HAS_AMD_3DNOW_PLUS``        One if porcessor supports 3DNow+ instructions
+``HAS_MMX_PLUS``              One if processor supports Ext. MMX instructions
+``HAS_SSE``                   One if processor supports SSE instructions
+``HAS_SSE2``                  One if processor supports SSE2 instructions
+``HAS_SSE_FP``                One if processor supports SSE FP instructions
+``HAS_SSE_MMX``               One if processor supports SSE MMX instructions
+``HAS_AMD_3DNOW``             One if processor supports 3DNow instructions
+``HAS_AMD_3DNOW_PLUS``        One if processor supports 3DNow+ instructions
 ``HAS_IA64``                  One if IA64 processor emulating x86
 ``HAS_SERIAL_NUMBER``         One if processor has serial number
 ``PROCESSOR_SERIAL_NUMBER``   Processor serial number

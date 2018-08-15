@@ -6,10 +6,24 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cm_kwiml.h"
+#include <cstddef>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+
+// IWYU insists we should forward-declare instead of including <functional>,
+// but we cannot forward-declare reliably because some C++ standard libraries
+// put the template in an inline namespace.
+#ifdef CMAKE_IWYU
+/* clang-format off */
+namespace std {
+  template <class T> struct hash;
+}
+/* clang-format on */
+#else
+#  include <functional>
+#endif
 
 #include "cmFindCommon.h"
 
@@ -194,6 +208,24 @@ private:
     }
   };
   std::vector<ConfigFileInfo> ConsideredConfigs;
+
+  friend struct std::hash<ConfigFileInfo>;
 };
+
+namespace std {
+
+template <>
+struct hash<cmFindPackageCommand::ConfigFileInfo>
+{
+  typedef cmFindPackageCommand::ConfigFileInfo argument_type;
+  typedef size_t result_type;
+
+  result_type operator()(argument_type const& s) const noexcept
+  {
+    result_type const h(std::hash<std::string>{}(s.filename));
+    return h;
+  }
+};
+}
 
 #endif

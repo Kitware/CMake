@@ -6,9 +6,9 @@
 /* Use the zlib library configured for CMake.  */
 #include "cmThirdParty.h"
 #ifdef CMAKE_USE_SYSTEM_ZLIB
-#include <zlib.h>
+#  include <zlib.h>
 #else
-#include <cmzlib/zlib.h>
+#  include <cmzlib/zlib.h>
 #endif
 
 #endif

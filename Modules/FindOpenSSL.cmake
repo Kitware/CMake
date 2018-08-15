@@ -7,6 +7,12 @@
 #
 # Find the OpenSSL encryption library.
 #
+# Optional COMPONENTS
+# ^^^^^^^^^^^^^^^^^^^
+#
+# This module supports two optional COMPONENTS: ``Crypto`` and ``SSL``.  Both
+# components have associated imported targets, as described below.
+#
 # Imported Targets
 # ^^^^^^^^^^^^^^^^
 #
@@ -23,7 +29,8 @@
 # This module will set the following variables in your project:
 #
 # ``OPENSSL_FOUND``
-#   System has the OpenSSL library.
+#   System has the OpenSSL library. If no components are requested it only
+#   requires the crypto library.
 # ``OPENSSL_INCLUDE_DIR``
 #   The OpenSSL include directory.
 # ``OPENSSL_CRYPTO_LIBRARY``
@@ -371,28 +378,47 @@ if(OPENSSL_INCLUDE_DIR AND EXISTS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h")
   endif ()
 endif ()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-
 set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} )
 
-if (OPENSSL_VERSION)
-  find_package_handle_standard_args(OpenSSL
-    REQUIRED_VARS
-      #OPENSSL_SSL_LIBRARY # FIXME: require based on a component request?
-      OPENSSL_CRYPTO_LIBRARY
-      OPENSSL_INCLUDE_DIR
-    VERSION_VAR
-      OPENSSL_VERSION
-    FAIL_MESSAGE
-      "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
-  )
-else ()
-  find_package_handle_standard_args(OpenSSL "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
-    #OPENSSL_SSL_LIBRARY # FIXME: require based on a component request?
+foreach(_comp IN LISTS OpenSSL_FIND_COMPONENTS)
+  if(_comp STREQUAL "Crypto")
+    if(EXISTS "${OPENSSL_INCLUDE_DIR}" AND
+        (EXISTS "${OPENSSL_CRYPTO_LIBRARY}" OR
+        EXISTS "${LIB_EAY_LIBRARY_DEBUG}" OR
+        EXISTS "${LIB_EAY_LIBRARY_RELEASE}")
+    )
+      set(OpenSSL_${_comp}_FOUND TRUE)
+    else()
+      set(OpenSSL_${_comp}_FOUND FALSE)
+    endif()
+  elseif(_comp STREQUAL "SSL")
+    if(EXISTS "${OPENSSL_INCLUDE_DIR}" AND
+        (EXISTS "${OPENSSL_SSL_LIBRARY}" OR
+        EXISTS "${SSL_EAY_LIBRARY_DEBUG}" OR
+        EXISTS "${SSL_EAY_LIBRARY_RELEASE}")
+    )
+      set(OpenSSL_${_comp}_FOUND TRUE)
+    else()
+      set(OpenSSL_${_comp}_FOUND FALSE)
+    endif()
+  else()
+    message(WARNING "${_comp} is not a valid OpenSSL component")
+    set(OpenSSL_${_comp}_FOUND FALSE)
+  endif()
+endforeach()
+unset(_comp)
+
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+find_package_handle_standard_args(OpenSSL
+  REQUIRED_VARS
     OPENSSL_CRYPTO_LIBRARY
     OPENSSL_INCLUDE_DIR
-  )
-endif ()
+  VERSION_VAR
+    OPENSSL_VERSION
+  HANDLE_COMPONENTS
+  FAIL_MESSAGE
+    "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
+)
 
 mark_as_advanced(OPENSSL_INCLUDE_DIR OPENSSL_LIBRARIES)
 
@@ -425,6 +451,7 @@ if(OPENSSL_FOUND)
         IMPORTED_LOCATION_DEBUG "${LIB_EAY_LIBRARY_DEBUG}")
     endif()
   endif()
+
   if(NOT TARGET OpenSSL::SSL AND
       (EXISTS "${OPENSSL_SSL_LIBRARY}" OR
         EXISTS "${SSL_EAY_LIBRARY_DEBUG}" OR

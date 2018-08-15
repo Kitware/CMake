@@ -11,7 +11,9 @@
 
 #include "ui_AddCacheEntry.h"
 
-class AddCacheEntry : public QWidget, public Ui::AddCacheEntry
+class AddCacheEntry
+  : public QWidget
+  , public Ui::AddCacheEntry
 {
   Q_OBJECT
 public:

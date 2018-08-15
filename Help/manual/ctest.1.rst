@@ -13,7 +13,7 @@ Synopsis
  ctest [<options>]
  ctest <path-to-source> <path-to-build> --build-generator <generator>
        [<options>...] [-- <build-options>...] [--test-command <test>]
- ctest (-D <dashboard> | -M <model> -T <action> | -S <script> | -SP <script>)
+ ctest {-D <dashboard> | -M <model> -T <action> | -S <script> | -SP <script>}
        [-- <dashboard-options>...]
 
 Description
@@ -368,15 +368,17 @@ for "SubprojectB").
 Build and Test Mode
 ===================
 
-CTest provides a command-line signature to to configure (i.e.  run cmake on),
-build, and or execute a test::
+CTest provides a command-line signature to configure (i.e. run cmake on),
+build, and/or execute a test::
 
   ctest --build-and-test <path-to-source> <path-to-build>
-        --build-generator <generator> [<options>...] [-- <build-options>...]
-        [--test-command <test>]
+        --build-generator <generator>
+        [<options>...]
+        [--build-options <opts>...]
+        [--test-command <command> [<args>...]]
 
 The configure and test steps are optional. The arguments to this command line
-are the source and binary directories. The ``--build-generator`` option *must*
+are the source and binary directories.  The ``--build-generator`` option *must*
 be provided to use ``--build-and-test``.  If ``--test-command`` is specified
 then that will be run after the build is complete.  Other options that affect
 this mode include:
@@ -425,13 +427,15 @@ this mode include:
  should be used.  e.g.  Debug/Release/etc.
 
 ``--build-options``
- Add extra options to the build step.
-
- This option must be the last option with the exception of
- ``--test-command``
+ Additional options for configuring the build (i.e. for CMake, not for
+ the build tool).  Note that if this is specified, the ``--build-options``
+ keyword and its arguments must be the last option given on the command
+ line, with the possible exception of ``--test-command``.
 
 ``--test-command``
- The test to run with the ``--build-and-test`` option.
+ The command to run as the test step with the ``--build-and-test`` option.
+ All arguments following this keyword will be assumed to be part of the
+ test command line, so it must be the last option given.
 
 ``--test-timeout``
  The time limit in seconds

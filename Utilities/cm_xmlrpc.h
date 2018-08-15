@@ -6,8 +6,8 @@
 /* Use the xmlrpc library configured for CMake.  */
 #include "cmThirdParty.h"
 #ifdef CTEST_USE_XMLRPC
-#include <xmlrpc.h>
-#include <xmlrpc_client.h>
+#  include <xmlrpc.h>
+#  include <xmlrpc_client.h>
 #endif
 
 #endif

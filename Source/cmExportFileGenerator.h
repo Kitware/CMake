@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmGeneratorExpression.h"
+#include "cmStateTypes.h"
 #include "cmVersion.h"
 #include "cmVersionConfig.h"
 
@@ -76,7 +77,8 @@ protected:
   virtual void GenerateImportFooterCode(std::ostream& os);
   void GenerateImportVersionCode(std::ostream& os);
   virtual void GenerateImportTargetCode(std::ostream& os,
-                                        cmGeneratorTarget const* target);
+                                        cmGeneratorTarget const* target,
+                                        cmStateEnums::TargetType targetType);
   virtual void GenerateImportPropertyCode(std::ostream& os,
                                           const std::string& config,
                                           cmGeneratorTarget const* target,
@@ -165,6 +167,10 @@ protected:
 
   virtual void GenerateRequiredCMakeVersion(std::ostream& os,
                                             const char* versionString);
+
+  bool PopulateExportProperties(cmGeneratorTarget* gte,
+                                ImportPropertyMap& properties,
+                                std::string& errorMessage);
 
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;

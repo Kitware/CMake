@@ -372,8 +372,9 @@ bool cmCTestP4::NoteOldRevision()
 {
   this->OldRevision = this->GetWorkingRevision();
 
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Old revision of repository is: "
-               << this->OldRevision << "\n");
+  cmCTestLog(this->CTest, HANDLER_OUTPUT,
+             "   Old revision of repository is: " << this->OldRevision
+                                                  << "\n");
   this->PriorRev.Rev = this->OldRevision;
   return true;
 }
@@ -382,8 +383,9 @@ bool cmCTestP4::NoteNewRevision()
 {
   this->NewRevision = this->GetWorkingRevision();
 
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   New revision of repository is: "
-               << this->NewRevision << "\n");
+  cmCTestLog(this->CTest, HANDLER_OUTPUT,
+             "   New revision of repository is: " << this->NewRevision
+                                                  << "\n");
   return true;
 }
 
@@ -398,7 +400,8 @@ bool cmCTestP4::LoadRevisions()
   // If any revision is unknown it means we couldn't contact the server.
   // Do not process updates
   if (this->OldRevision == "<unknown>" || this->NewRevision == "<unknown>") {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   At least one of the revisions "
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               "   At least one of the revisions "
                  << "is unknown. No repository changes will be reported.\n");
     return false;
   }

@@ -1,9 +1,9 @@
 #include <mpi.h>
 
 #ifdef __cplusplus
-#include <cstdio>
+#  include <cstdio>
 #else
-#include <stdio.h>
+#  include <stdio.h>
 #endif
 
 #if defined(MPI_VERSION) && defined(MPI_SUBVERSION)
@@ -21,11 +21,11 @@ const char mpiver_str[] = { 'I', 'N',
 int main(int argc, char* argv[])
 {
 #if defined(MPI_VERSION) && defined(MPI_SUBVERSION)
-#ifdef __cplusplus
+#  ifdef __cplusplus
   std::puts(mpiver_str);
-#else
+#  else
   puts(mpiver_str);
-#endif
+#  endif
 #endif
 #ifdef TEST_MPI_MPICXX
   MPI::MPI_Init(&argc, &argv);

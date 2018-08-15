@@ -7,7 +7,7 @@
 
 #define CMake_VERSION_PATCH_IS_RELEASE(patch) ((patch) < 20000000)
 #if CMake_VERSION_PATCH_IS_RELEASE(CMake_VERSION_PATCH)
-#define CMake_VERSION_IS_RELEASE 1
+#  define CMake_VERSION_IS_RELEASE 1
 #endif
 
 #endif

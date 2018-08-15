@@ -1,6 +1,6 @@
 
 #ifndef USING_TESTSHAREDLIBREQUIRED
-#error Expected USING_TESTSHAREDLIBREQUIRED
+#  error Expected USING_TESTSHAREDLIBREQUIRED
 #endif
 
 #include "excludedFromAll.h"

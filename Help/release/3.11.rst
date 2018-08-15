@@ -127,15 +127,6 @@ Properties
 Modules
 -------
 
-* The :module:`CheckIncludeFile` module ``check_include_file`` macro
-  learned to honor the ``CMAKE_REQUIRED_LIBRARIES`` variable.
-
-* The :module:`CheckIncludeFileCXX` module ``check_include_file_cxx`` macro
-  learned to honor the ``CMAKE_REQUIRED_LIBRARIES`` variable.
-
-* The :module:`CheckIncludeFiles` module ``check_include_files`` macro
-  learned to honor the ``CMAKE_REQUIRED_LIBRARIES`` variable.
-
 * The :module:`CheckIncludeFiles` module :command:`CHECK_INCLUDE_FILES`
   command gained a ``LANGUAGE`` option to specify whether to check using the
   ``C`` or ``CXX`` compiler.
@@ -276,3 +267,41 @@ Other Changes
   values containing newlines are now truncated before writing to the file.
   In addition, a warning comment is written to the cache file, and a warning
   message is displayed to the user on the console.
+
+Updates
+=======
+
+Changes made since CMake 3.11.0 include the following.
+
+3.11.1
+------
+
+* The :module:`CheckIncludeFile` module ``check_include_file`` macro,
+  :module:`CheckIncludeFileCXX` module ``check_include_file_cxx`` macro,
+  and :module:`CheckIncludeFiles` module ``check_include_files`` macro
+  were taught to honor the ``CMAKE_REQUIRED_LIBRARIES`` variable in
+  CMake 3.11.0.  This has been reverted due to changing behavior of
+  checks for existing projects.  It may be restored in the future
+  with a policy for compatibility.
+
+3.11.2
+------
+
+* Calling :command:`add_library` to create an alias of an imported
+  target that is not globally visible now causes an error again as
+  it did prior to 3.11.0.  This diagnostic was accidentally dropped
+  from CMake 3.11.0 and 3.11.1 by the change to allow globally visible
+  imported targets to be aliased.
+
+* The :module:`FindQt4` module ``qt4_wrap_cpp``, ``qt4_wrap_ui`` and
+  ``qt4_add_resources`` macros now set :prop_sf:`SKIP_AUTOMOC` and
+  :prop_sf:`SKIP_AUTOUIC` on their generated files.  These files never
+  need to be processed by moc or uic, and we must say so explicitly to
+  account for policy :policy:`CMP0071`.
+
+3.11.3
+------
+
+* CMake 3.11.0 introduced support for resolving symbolic links on
+  Windows in code paths that typically do so on UNIX.  This has been
+  reverted due to breakage on ``subst`` drives.
