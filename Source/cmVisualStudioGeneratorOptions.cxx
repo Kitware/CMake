@@ -297,12 +297,12 @@ void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
   AddFlag(ENABLE_UAC, "true");
 }
 
-void cmVisualStudioGeneratorOptions::Parse(const char* flags)
+void cmVisualStudioGeneratorOptions::Parse(const std::string& flags)
 {
   // Parse the input string as a windows command line since the string
   // is intended for writing directly into the build files.
   std::vector<std::string> args;
-  cmSystemTools::ParseWindowsCommandLine(flags, args);
+  cmSystemTools::ParseWindowsCommandLine(flags.c_str(), args);
 
   // Process flags that need to be represented specially in the IDE
   // project file.
@@ -366,7 +366,7 @@ void cmVisualStudioGeneratorOptions::Reparse(std::string const& key)
   std::string const original = i->second[0];
   i->second[0] = "";
   this->UnknownFlagField = key;
-  this->Parse(original.c_str());
+  this->Parse(original);
 }
 
 void cmVisualStudioGeneratorOptions::StoreUnknownFlag(std::string const& flag)

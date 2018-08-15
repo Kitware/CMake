@@ -712,8 +712,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   targetOptions.FixExceptionHandlingDefault();
   std::string asmLocation = configName + "/";
   targetOptions.AddFlag("AssemblerListingLocation", asmLocation);
-  targetOptions.Parse(flags.c_str());
-  targetOptions.Parse(defineFlags.c_str());
+  targetOptions.Parse(flags);
+  targetOptions.Parse(defineFlags);
   targetOptions.ParseFinish();
   if (!langForClCompile.empty()) {
     std::vector<std::string> targetDefines;
@@ -990,7 +990,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
   }
   linkOptions.AddTable(cmLocalVisualStudio7GeneratorLinkFlagTable);
 
-  linkOptions.Parse(extraLinkOptions.c_str());
+  linkOptions.Parse(extraLinkOptions);
   cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
     target->GetModuleDefinitionInfo(configName);
   if (mdi && !mdi->DefFile.empty()) {
@@ -1735,7 +1735,7 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
               table = cmLocalVisualStudio7GeneratorFortranFlagTable;
             }
             Options fileOptions(this, tool, table, gg->ExtraFlagTable);
-            fileOptions.Parse(fc.CompileFlags.c_str());
+            fileOptions.Parse(fc.CompileFlags);
             fileOptions.AddDefines(fc.CompileDefs);
             fileOptions.AddDefines(fc.CompileDefsConfig);
             // validate source level include directories
