@@ -65,6 +65,7 @@ Submit to CDash Upload API
                [HTTPHEADER <header>]
                [RETRY_COUNT <count>]
                [RETRY_DELAY <delay>]
+               [RETURN_VALUE <result-var>]
                [QUIET])
 
 This second signature is used to upload files to CDash via the CDash
@@ -73,5 +74,5 @@ with a content hash of the file. If CDash does not already have the file,
 then it is uploaded. Along with the file, a CDash type string is specified
 to tell CDash which handler to use to process the data.
 
-This signature accepts the ``HTTPHEADER``, ``RETRY_COUNT``, ``RETRY_DELAY``, and
-``QUIET`` options as described above.
+This signature accepts the ``HTTPHEADER``, ``RETRY_COUNT``, ``RETRY_DELAY``,
+``RETURN_VALUE`` and ``QUIET`` options as described above.
