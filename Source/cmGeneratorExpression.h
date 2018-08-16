@@ -181,7 +181,7 @@ public:
 
   const char* Evaluate(const char* expression)
   {
-    return this->EvaluateExpression(expression);
+    return this->EvaluateExpression(expression).c_str();
   }
   const char* Evaluate(const std::string& expression)
   {
@@ -212,7 +212,7 @@ protected:
   const std::string& GetTargetName() const { return this->Target; }
   const std::string& GetLanguage() const { return this->Language; }
 
-  const char* EvaluateExpression(
+  const std::string& EvaluateExpression(
     const char* expression,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr)
   {
@@ -220,16 +220,13 @@ protected:
       this->GeneratorExpression.Parse(expression);
 
     if (dagChecker == nullptr) {
-      return this->CompiledGeneratorExpression
-        ->Evaluate(this->LocalGenerator, this->Config, false,
-                   this->GeneratorTarget)
-        .c_str();
+      return this->CompiledGeneratorExpression->Evaluate(
+        this->LocalGenerator, this->Config, false, this->GeneratorTarget);
     }
 
-    return this->CompiledGeneratorExpression
-      ->Evaluate(this->LocalGenerator, this->Config, false,
-                 this->GeneratorTarget, dagChecker, this->Language)
-      .c_str();
+    return this->CompiledGeneratorExpression->Evaluate(
+      this->LocalGenerator, this->Config, false, this->GeneratorTarget,
+      dagChecker, this->Language);
   }
 
 private:
