@@ -1143,6 +1143,11 @@ bool cmExportFileGenerator::PopulateExportProperties(
         return false;
       }
       auto propertyValue = targetProperties.GetPropertyValue(prop);
+      if (propertyValue == nullptr) {
+        // Asked to export a property that isn't defined on the target. Do not
+        // consider this an error, there's just nothing to export.
+        continue;
+      }
       std::string evaluatedValue = cmGeneratorExpression::Preprocess(
         propertyValue, cmGeneratorExpression::StripAllGeneratorExpressions);
       if (evaluatedValue != propertyValue) {
