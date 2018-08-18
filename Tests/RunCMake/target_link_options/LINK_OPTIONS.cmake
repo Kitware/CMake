@@ -22,6 +22,15 @@ add_executable(LinkOptions_consumer LinkOptionsExe.c)
 target_link_libraries(LinkOptions_consumer PRIVATE LinkOptions_producer)
 
 
+# static library with INTERFACE_LINK_OPTIONS
+add_library(LinkOptions_producer_static STATIC LinkOptionsLib.c)
+target_link_options(LinkOptions_producer_static
+  INTERFACE ${pre}BADFLAG_INTERFACE${obj})
+
+add_executable(LinkOptions_consumer_static LinkOptionsExe.c)
+target_link_libraries(LinkOptions_consumer_static PRIVATE LinkOptions_producer_static)
+
+
 # static library with generator expression
 add_library(LinkOptions_static STATIC LinkOptionsLib.c)
 target_link_options(LinkOptions_static PRIVATE $<$<CONFIG:Release>:${pre}BADFLAG_RELEASE${obj}>
