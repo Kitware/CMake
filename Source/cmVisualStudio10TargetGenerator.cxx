@@ -2490,6 +2490,16 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   if (this->MSTools) {
     if (this->ProjectType == vcxproj) {
       clOptions.FixExceptionHandlingDefault();
+      if (this->GlobalGenerator->GetVersion() >=
+          cmGlobalVisualStudioGenerator::VS15) {
+        // Toolsets that come with VS 2017 may now enable UseFullPaths
+        // by default and there is no negative /FC option that projects
+        // can use to switch it back.  Older toolsets disable this by
+        // default anyway so this will not hurt them.  If the project
+        // is using an explicit /FC option then parsing flags will
+        // replace this setting with "true" below.
+        clOptions.AddFlag("UseFullPaths", "false");
+      }
       clOptions.AddFlag("PrecompiledHeader", "NotUsing");
       std::string asmLocation = configName + "/";
       clOptions.AddFlag("AssemblerListingLocation", asmLocation);
