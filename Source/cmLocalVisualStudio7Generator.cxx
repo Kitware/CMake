@@ -118,7 +118,7 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
   if (this->GetCurrentBinaryDirectory() != this->GetSourceDirectory()) {
     if (!cmSystemTools::MakeDirectory(this->GetCurrentBinaryDirectory())) {
       cmSystemTools::Error("Error creating directory ",
-                           this->GetCurrentBinaryDirectory());
+                           this->GetCurrentBinaryDirectory().c_str());
     }
   }
 

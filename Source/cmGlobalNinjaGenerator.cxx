@@ -1011,8 +1011,7 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
     std::set<std::string> const& utils = target->GetUtilities();
     for (std::string const& util : utils) {
       std::string d =
-        target->GetLocalGenerator()->GetCurrentBinaryDirectory() +
-        std::string("/") + util;
+        target->GetLocalGenerator()->GetCurrentBinaryDirectory() + "/" + util;
       outputs.push_back(this->ConvertToNinjaPath(d));
     }
   } else {

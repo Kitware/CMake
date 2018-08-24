@@ -1014,7 +1014,7 @@ void cmGlobalVisualStudio10Generator::PathTooLong(cmGeneratorTarget* target,
                                                   std::string const& sfRel)
 {
   size_t len =
-    (strlen(target->GetLocalGenerator()->GetCurrentBinaryDirectory()) + 1 +
+    (target->GetLocalGenerator()->GetCurrentBinaryDirectory().length() + 1 +
      sfRel.length());
   if (len > this->LongestSource.Length) {
     this->LongestSource.Length = len;

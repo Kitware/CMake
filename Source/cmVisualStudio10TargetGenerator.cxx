@@ -250,7 +250,7 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
   this->TargetCompileAsWinRT = false;
   this->IsMissingFiles = false;
   this->DefaultArtifactDir =
-    this->LocalGenerator->GetCurrentBinaryDirectory() + std::string("/") +
+    this->LocalGenerator->GetCurrentBinaryDirectory() + "/" +
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   this->InSourceBuild =
     (strcmp(this->Makefile->GetCurrentSourceDirectory(),
@@ -1877,7 +1877,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(Elem& e2,
     std::string sourceRel = this->ConvertPath(sf->GetFullPath(), true);
     size_t const maxLen = 250;
     if (sf->GetCustomCommand() ||
-        ((strlen(this->LocalGenerator->GetCurrentBinaryDirectory()) + 1 +
+        ((this->LocalGenerator->GetCurrentBinaryDirectory().length() + 1 +
           sourceRel.length()) <= maxLen)) {
       forceRelative = true;
       sourceFile = sourceRel;
@@ -4131,8 +4131,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80(Elem& e1)
   // this can cause an overwrite problem if projects aren't organized in
   // folders
   std::string manifestFile =
-    this->LocalGenerator->GetCurrentBinaryDirectory() +
-    std::string("/WMAppManifest.xml");
+    this->LocalGenerator->GetCurrentBinaryDirectory() + "/WMAppManifest.xml";
   std::string artifactDir =
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   ConvertToWindowsSlash(artifactDir);

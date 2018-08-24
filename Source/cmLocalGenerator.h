@@ -296,8 +296,8 @@ public:
   std::string const& GetSourceDirectory() const;
   std::string const& GetBinaryDirectory() const;
 
-  const char* GetCurrentBinaryDirectory() const;
-  const char* GetCurrentSourceDirectory() const;
+  std::string const& GetCurrentBinaryDirectory() const;
+  std::string const& GetCurrentSourceDirectory() const;
 
   /**
    * Generate a Mac OS X application bundle Info.plist file.
