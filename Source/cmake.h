@@ -297,8 +297,10 @@ public:
   ///! this is called by generators to update the progress
   void UpdateProgress(const char* msg, float prog);
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   ///! Get the variable watch object
   cmVariableWatch* GetVariableWatch() { return this->VariableWatch; }
+#endif
 
   void GetGeneratorDocumentation(std::vector<cmDocumentationEntry>&);
 
@@ -493,8 +495,6 @@ protected:
 
   void GenerateGraphViz(const char* fileName) const;
 
-  cmVariableWatch* VariableWatch;
-
 private:
   ProgressCallbackType ProgressCallback;
   void* ProgressCallbackClientData;
@@ -524,6 +524,10 @@ private:
   cmFileTimeComparison* FileComparison;
   std::string GraphVizFile;
   InstalledFilesMap InstalledFiles;
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  cmVariableWatch* VariableWatch;
+#endif
 
   cmState* State;
   cmStateSnapshot CurrentSnapshot;
