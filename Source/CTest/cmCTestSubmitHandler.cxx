@@ -454,6 +454,10 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       // specify target
       ::curl_easy_setopt(curl, CURLOPT_URL, upload_as.c_str());
 
+      // CURLAUTH_BASIC is default, and here we allow additional methods,
+      // including more secure ones
+      ::curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+
       // now specify which file to upload
       ::curl_easy_setopt(curl, CURLOPT_INFILE, ftpfile);
 
