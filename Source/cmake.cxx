@@ -1262,10 +1262,7 @@ int cmake::ActualConfigure()
   this->UpdateConversionPathTable();
   this->CleanupCommandsAndMacros();
 
-  int res = 0;
-  if (this->GetWorkingMode() == NORMAL_MODE) {
-    res = this->DoPreConfigureChecks();
-  }
+  int res = this->DoPreConfigureChecks();
   if (res < 0) {
     return -2;
   }
@@ -1431,11 +1428,8 @@ int cmake::ActualConfigure()
       "CMakeLists.txt ?");
   }
 
-  // only save the cache if there were no fatal errors
-  if (this->GetWorkingMode() == NORMAL_MODE) {
-    this->State->SaveVerificationScript(this->GetHomeOutputDirectory());
-    this->SaveCache(this->GetHomeOutputDirectory());
-  }
+  this->State->SaveVerificationScript(this->GetHomeOutputDirectory());
+  this->SaveCache(this->GetHomeOutputDirectory());
   if (cmSystemTools::GetErrorOccuredFlag()) {
     return -1;
   }
@@ -1588,7 +1582,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   }
 
   int ret = this->Configure();
-  if (ret || this->GetWorkingMode() != NORMAL_MODE) {
+  if (ret) {
 #if defined(CMAKE_HAVE_VS_GENERATORS)
     if (!this->VSSolutionFile.empty() && this->GlobalGenerator) {
       // CMake is running to regenerate a Visual Studio build tree
@@ -1634,9 +1628,8 @@ int cmake::Generate()
   // Save the cache again after a successful Generate so that any internal
   // variables created during Generate are saved. (Specifically target GUIDs
   // for the Visual Studio and Xcode generators.)
-  if (this->GetWorkingMode() == NORMAL_MODE) {
-    this->SaveCache(this->GetHomeOutputDirectory());
-  }
+  this->SaveCache(this->GetHomeOutputDirectory());
+
   return 0;
 }
 
