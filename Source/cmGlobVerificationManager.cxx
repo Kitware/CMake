@@ -170,3 +170,10 @@ void cmGlobVerificationManager::AddCacheEntry(
     value.Backtraces.emplace_back(variable, backtrace);
   }
 }
+
+void cmGlobVerificationManager::Reset()
+{
+  this->Cache.clear();
+  this->VerifyScript.clear();
+  this->VerifyStamp.clear();
+}
