@@ -3463,7 +3463,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
   }
 
   if (!cmsys::SystemTools::FileIsFullPath(path)) {
-    path = this->Makefile->GetCurrentSourceDirectory() + ("/" + path);
+    path = this->Makefile->GetCurrentSourceDirectory() + "/" + path;
   }
 
   // Unify path (remove '//', '/../', ...)

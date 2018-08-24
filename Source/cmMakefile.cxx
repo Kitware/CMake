@@ -1635,14 +1635,14 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
   }
 }
 
-const char* cmMakefile::GetCurrentSourceDirectory() const
+const std::string& cmMakefile::GetCurrentSourceDirectory() const
 {
-  return this->StateSnapshot.GetDirectory().GetCurrentSource().c_str();
+  return this->StateSnapshot.GetDirectory().GetCurrentSource();
 }
 
-const char* cmMakefile::GetCurrentBinaryDirectory() const
+const std::string& cmMakefile::GetCurrentBinaryDirectory() const
 {
-  return this->StateSnapshot.GetDirectory().GetCurrentBinary().c_str();
+  return this->StateSnapshot.GetDirectory().GetCurrentBinary();
 }
 
 std::vector<cmTarget*> cmMakefile::GetImportedTargets() const

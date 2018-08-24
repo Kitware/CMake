@@ -769,7 +769,7 @@ static Json::Value DumpSourceFilesList(
     groupFileList.push_back(file->GetFullPath());
   }
 
-  const std::string baseDir = target->Makefile->GetCurrentSourceDirectory();
+  const std::string& baseDir = target->Makefile->GetCurrentSourceDirectory();
   Json::Value result = Json::arrayValue;
   for (auto const& it : fileGroups) {
     Json::Value group = DumpSourceFileGroup(it.first, it.second, baseDir);

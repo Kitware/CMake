@@ -80,17 +80,17 @@ bool cmAddSubDirectoryCommand::InitialPass(
 
     // Remove the CurrentDirectory from the srcPath and replace it
     // with the CurrentOutputDirectory.
-    const char* src = this->Makefile->GetCurrentSourceDirectory();
-    const char* bin = this->Makefile->GetCurrentBinaryDirectory();
-    size_t srcLen = strlen(src);
-    size_t binLen = strlen(bin);
+    const std::string& src = this->Makefile->GetCurrentSourceDirectory();
+    const std::string& bin = this->Makefile->GetCurrentBinaryDirectory();
+    size_t srcLen = src.length();
+    size_t binLen = bin.length();
     if (srcLen > 0 && src[srcLen - 1] == '/') {
       --srcLen;
     }
     if (binLen > 0 && bin[binLen - 1] == '/') {
       --binLen;
     }
-    binPath = std::string(bin, binLen) + srcPath.substr(srcLen);
+    binPath = bin.substr(0, binLen) + srcPath.substr(srcLen);
   } else {
     // Use the binary directory specified.
     // Interpret a relative path with respect to the current binary directory.

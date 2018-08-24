@@ -252,9 +252,8 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
   this->DefaultArtifactDir =
     this->LocalGenerator->GetCurrentBinaryDirectory() + std::string("/") +
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-  this->InSourceBuild =
-    (strcmp(this->Makefile->GetCurrentSourceDirectory(),
-            this->Makefile->GetCurrentBinaryDirectory()) == 0);
+  this->InSourceBuild = (this->Makefile->GetCurrentSourceDirectory() ==
+                         this->Makefile->GetCurrentBinaryDirectory());
 }
 
 cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
@@ -722,8 +721,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
       if (!name.empty()) {
         std::string path = i.second.GetValue();
         if (!cmsys::SystemTools::FileIsFullPath(path)) {
-          path = std::string(this->Makefile->GetCurrentSourceDirectory()) +
-            "/" + path;
+          path = this->Makefile->GetCurrentSourceDirectory() + "/" + path;
         }
         ConvertToWindowsSlash(path);
         this->DotNetHintReferences[""].push_back(
@@ -929,8 +927,10 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup(Elem& e0)
       e2.SetHasElements();
       if (this->ProjectType == csproj && !this->InSourceBuild) {
         // add <Link> tag to written XAML source if necessary
-        const std::string srcDir = this->Makefile->GetCurrentSourceDirectory();
-        const std::string binDir = this->Makefile->GetCurrentBinaryDirectory();
+        const std::string& srcDir =
+          this->Makefile->GetCurrentSourceDirectory();
+        const std::string& binDir =
+          this->Makefile->GetCurrentBinaryDirectory();
         std::string link;
         if (obj.find(srcDir) == 0) {
           link = obj.substr(srcDir.length() + 1);
@@ -4568,7 +4568,7 @@ void cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
   std::string const& binaryDir = LocalGenerator->GetCurrentBinaryDirectory();
 
   if (!cmSystemTools::IsSubDirectory(sourceFilePath, binaryDir)) {
-    const std::string stripFromPath =
+    const std::string& stripFromPath =
       this->Makefile->GetCurrentSourceDirectory();
     if (sourceFilePath.find(stripFromPath) == 0) {
       if (const char* l = sf->GetProperty("VS_CSHARP_Link")) {
