@@ -728,7 +728,7 @@ static Json::Value DumpSourceFilesList(
 
       const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
       if (const char* cincludes = file->GetProperty(INCLUDE_DIRECTORIES)) {
-        const char* evaluatedIncludes =
+        const std::string& evaluatedIncludes =
           genexInterpreter.Evaluate(cincludes, INCLUDE_DIRECTORIES);
         lg->AppendIncludeDirectories(includes, evaluatedIncludes, *file);
 

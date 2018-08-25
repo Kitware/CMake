@@ -386,11 +386,11 @@ void cmCompiledGeneratorExpression::GetMaxLanguageStandard(
   }
 }
 
-const char* cmGeneratorExpressionInterpreter::Evaluate(
+const std::string& cmGeneratorExpressionInterpreter::Evaluate(
   const char* expression, const std::string& property)
 {
   if (this->Target.empty()) {
-    return this->EvaluateExpression(expression).c_str();
+    return this->EvaluateExpression(expression);
   }
 
   // Specify COMPILE_OPTIONS to DAGchecker, same semantic as COMPILE_FLAGS
@@ -398,5 +398,5 @@ const char* cmGeneratorExpressionInterpreter::Evaluate(
     this->Target, property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property,
     nullptr, nullptr);
 
-  return this->EvaluateExpression(expression, &dagChecker).c_str();
+  return this->EvaluateExpression(expression, &dagChecker);
 }
