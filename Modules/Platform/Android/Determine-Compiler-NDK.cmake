@@ -35,7 +35,18 @@ elseif(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION)
   endif()
   set(_ANDROID_TOOL_PATTERNS "*-${CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION}")
 else()
-  set(_ANDROID_TOOL_PATTERNS "*-[0-9].[0-9]")
+  # If we can find any gcc toolchains then use one by default.
+  # Otherwise we look for clang toolchains (e.g. NDK r18+).
+  file(GLOB _ANDROID_CONFIG_MKS_FOR_GCC
+    "${CMAKE_ANDROID_NDK}/build/core/toolchains/*-[0-9].[0-9]/config.mk"
+    "${CMAKE_ANDROID_NDK}/toolchains/*-[0-9].[0-9]/config.mk"
+    )
+  if(_ANDROID_CONFIG_MKS_FOR_GCC)
+    set(_ANDROID_TOOL_PATTERNS "*-[0-9].[0-9]")
+  else()
+    set(_ANDROID_TOOL_PATTERNS "*-clang")
+  endif()
+  unset(_ANDROID_CONFIG_MKS_FOR_GCC)
 endif()
 set(_ANDROID_CONFIG_MK_PATTERNS)
 foreach(base "build/core/toolchains" "toolchains")
