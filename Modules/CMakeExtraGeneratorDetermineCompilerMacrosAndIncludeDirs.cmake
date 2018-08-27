@@ -66,10 +66,10 @@ macro(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
     #message(STATUS "m1: -${CMAKE_MATCH_1}- m2: -${CMAKE_MATCH_2}- m3: -${CMAKE_MATCH_3}-")
 
     list(APPEND ${_resultDefines} "${_name}")
-    if(_value)
-      list(APPEND ${_resultDefines} "${_value}")
-    else()
+    if ("${_value}" STREQUAL "")
       list(APPEND ${_resultDefines} " ")
+    else()
+      list(APPEND ${_resultDefines} "${_value}")
     endif()
   endforeach()
 
