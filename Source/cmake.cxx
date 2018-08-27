@@ -225,10 +225,8 @@ cmake::~cmake()
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-Json::Value cmake::ReportCapabilitiesJson(bool haveServerMode) const
+Json::Value cmake::ReportVersionJson() const
 {
-  Json::Value obj = Json::objectValue;
-  // Version information:
   Json::Value version = Json::objectValue;
   version["string"] = CMake_VERSION;
   version["major"] = CMake_VERSION_MAJOR;
@@ -236,8 +234,15 @@ Json::Value cmake::ReportCapabilitiesJson(bool haveServerMode) const
   version["suffix"] = CMake_VERSION_SUFFIX;
   version["isDirty"] = (CMake_VERSION_IS_DIRTY == 1);
   version["patch"] = CMake_VERSION_PATCH;
+  return version;
+}
 
-  obj["version"] = version;
+Json::Value cmake::ReportCapabilitiesJson(bool haveServerMode) const
+{
+  Json::Value obj = Json::objectValue;
+
+  // Version information:
+  obj["version"] = this->ReportVersionJson();
 
   // Generators:
   std::vector<cmake::GeneratorInfo> generatorInfoList;

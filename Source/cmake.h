@@ -128,6 +128,7 @@ public:
   ~cmake();
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+  Json::Value ReportVersionJson() const;
   Json::Value ReportCapabilitiesJson(bool haveServerMode) const;
 #endif
   std::string ReportCapabilities(bool haveServerMode) const;
