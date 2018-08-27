@@ -301,6 +301,7 @@ Properties on Targets
    /prop_tgt/SOVERSION
    /prop_tgt/STATIC_LIBRARY_FLAGS_CONFIG
    /prop_tgt/STATIC_LIBRARY_FLAGS
+   /prop_tgt/STATIC_LIBRARY_OPTIONS
    /prop_tgt/SUFFIX
    /prop_tgt/TYPE
    /prop_tgt/VERSION

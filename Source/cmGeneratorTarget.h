@@ -424,6 +424,9 @@ public:
   void GetLinkOptions(std::vector<std::string>& result,
                       const std::string& config,
                       const std::string& language) const;
+  void GetStaticLibraryLinkOptions(std::vector<std::string>& result,
+                                   const std::string& config,
+                                   const std::string& language) const;
 
   void GetLinkDepends(std::vector<std::string>& result,
                       const std::string& config,

@@ -3018,6 +3018,47 @@ void cmGeneratorTarget::GetLinkOptions(std::vector<std::string>& result,
 }
 
 namespace {
+void processStaticLibraryLinkOptions(
+  cmGeneratorTarget const* tgt,
+  const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
+  std::vector<std::string>& options,
+  std::unordered_set<std::string>& uniqueOptions,
+  cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
+  std::string const& language)
+{
+  processOptionsInternal(tgt, entries, options, uniqueOptions, dagChecker,
+                         config, false, "static library link options",
+                         language, OptionsParse::Shell);
+}
+}
+
+void cmGeneratorTarget::GetStaticLibraryLinkOptions(
+  std::vector<std::string>& result, const std::string& config,
+  const std::string& language) const
+{
+  std::vector<cmGeneratorTarget::TargetPropertyEntry*> entries;
+  std::unordered_set<std::string> uniqueOptions;
+
+  cmGeneratorExpressionDAGChecker dagChecker(
+    this->GetName(), "STATIC_LIBRARY_OPTIONS", nullptr, nullptr);
+
+  if (const char* linkOptions = this->GetProperty("STATIC_LIBRARY_OPTIONS")) {
+    std::vector<std::string> options;
+    cmGeneratorExpression ge;
+    cmSystemTools::ExpandListArgument(linkOptions, options);
+    for (const auto& option : options) {
+      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(option);
+      entries.push_back(
+        new cmGeneratorTarget::TargetPropertyEntry(std::move(cge)));
+    }
+  }
+  processStaticLibraryLinkOptions(this, entries, result, uniqueOptions,
+                                  &dagChecker, config, language);
+
+  cmDeleteAll(entries);
+}
+
+namespace {
 void processLinkDepends(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
