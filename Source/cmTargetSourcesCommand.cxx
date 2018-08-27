@@ -57,7 +57,7 @@ std::vector<std::string> cmTargetSourcesCommand::ConvertToAbsoluteContent(
   cmTarget* tgt, const std::vector<std::string>& content,
   bool isInterfaceContent)
 {
-  // Skip conversion in case old behavior has been explictly requested
+  // Skip conversion in case old behavior has been explicitly requested
   if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0076) ==
       cmPolicies::OLD) {
     return content;

@@ -16,7 +16,7 @@ class cmExecutionStatus;
 /** \class cmTryCompileCommand
  * \brief Specifies where to install some files
  *
- * cmTryCompileCommand is used to test if soucre code can be compiled
+ * cmTryCompileCommand is used to test if source code can be compiled
  */
 class cmTryCompileCommand : public cmCoreTryCompile
 {
