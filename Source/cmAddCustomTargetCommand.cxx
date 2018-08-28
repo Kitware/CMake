@@ -183,7 +183,7 @@ bool cmAddCustomTargetCommand::InitialPass(
 
   // Convert working directory to a full path.
   if (!working_directory.empty()) {
-    const char* build_dir = this->Makefile->GetCurrentBinaryDirectory();
+    const std::string& build_dir = this->Makefile->GetCurrentBinaryDirectory();
     working_directory =
       cmSystemTools::CollapseFullPath(working_directory, build_dir);
   }

@@ -69,7 +69,8 @@ void cmSearchPath::AddUserPath(const std::string& path)
 
   // Process them all from the current directory
   for (std::string const& p : outPaths) {
-    this->AddPathInternal(p, this->FC->Makefile->GetCurrentSourceDirectory());
+    this->AddPathInternal(
+      p, this->FC->Makefile->GetCurrentSourceDirectory().c_str());
   }
 }
 
@@ -83,8 +84,8 @@ void cmSearchPath::AddCMakePath(const std::string& variable)
     cmSystemTools::ExpandListArgument(value, expanded);
 
     for (std::string const& p : expanded) {
-      this->AddPathInternal(p,
-                            this->FC->Makefile->GetCurrentSourceDirectory());
+      this->AddPathInternal(
+        p, this->FC->Makefile->GetCurrentSourceDirectory().c_str());
     }
   }
 }
@@ -107,8 +108,8 @@ void cmSearchPath::AddCMakePrefixPath(const std::string& variable)
     std::vector<std::string> expanded;
     cmSystemTools::ExpandListArgument(value, expanded);
 
-    this->AddPrefixPaths(expanded,
-                         this->FC->Makefile->GetCurrentSourceDirectory());
+    this->AddPrefixPaths(
+      expanded, this->FC->Makefile->GetCurrentSourceDirectory().c_str());
   }
 }
 

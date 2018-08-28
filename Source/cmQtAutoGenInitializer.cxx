@@ -231,7 +231,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
   {
     // Collapsed current binary directory
     std::string const cbd = cmSystemTools::CollapseFullPath(
-      "", makefile->GetCurrentBinaryDirectory());
+      std::string(), makefile->GetCurrentBinaryDirectory());
 
     // Info directory
     this->Dir.Info = cbd;
@@ -452,7 +452,7 @@ bool cmQtAutoGenInitializer::InitUic()
       this->Target->GetSafeProperty("AUTOUIC_SEARCH_PATHS");
     if (!usp.empty()) {
       cmSystemTools::ExpandListArgument(usp, this->Uic.SearchPaths);
-      std::string const srcDir = makefile->GetCurrentSourceDirectory();
+      std::string const& srcDir = makefile->GetCurrentSourceDirectory();
       for (std::string& path : this->Uic.SearchPaths) {
         path = cmSystemTools::CollapseFullPath(path, srcDir);
       }

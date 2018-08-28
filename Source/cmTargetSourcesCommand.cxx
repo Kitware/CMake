@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetSourcesCommand.h"
 
-#include <cstring>
 #include <sstream>
 
 #include "cmAlgorithms.h"
@@ -71,8 +70,8 @@ std::vector<std::string> cmTargetSourcesCommand::ConvertToAbsoluteContent(
     if (cmSystemTools::FileIsFullPath(src) ||
         cmGeneratorExpression::Find(src) == 0 ||
         (!isInterfaceContent &&
-         strcmp(this->Makefile->GetCurrentSourceDirectory(),
-                tgt->GetMakefile()->GetCurrentSourceDirectory()) == 0)) {
+         (this->Makefile->GetCurrentSourceDirectory() ==
+          tgt->GetMakefile()->GetCurrentSourceDirectory()))) {
       absoluteSrc = src;
     } else {
       changedPath = true;

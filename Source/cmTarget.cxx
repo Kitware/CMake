@@ -1127,10 +1127,11 @@ void cmTarget::AppendBuildInterfaceIncludes()
   this->BuildInterfaceIncludesAppended = true;
 
   if (this->Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE")) {
-    const char* binDir = this->Makefile->GetCurrentBinaryDirectory();
-    const char* srcDir = this->Makefile->GetCurrentSourceDirectory();
-    const std::string dirs = std::string(binDir ? binDir : "") +
-      std::string(binDir ? ";" : "") + std::string(srcDir ? srcDir : "");
+    std::string dirs = this->Makefile->GetCurrentBinaryDirectory();
+    if (!dirs.empty()) {
+      dirs += ';';
+    }
+    dirs += this->Makefile->GetCurrentSourceDirectory();
     if (!dirs.empty()) {
       this->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
                            ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
