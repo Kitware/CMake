@@ -122,7 +122,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
   for (cmLocalGenerator* lg : lgs) {
     for (cmGeneratorTarget* lt : lg->GetGeneratorTargets()) {
       cmStateEnums::TargetType type = lt->GetType();
-      std::string outputDir = lg->GetCurrentBinaryDirectory();
+      std::string const& outputDir = lg->GetCurrentBinaryDirectory();
       std::string targetName = lt->GetName();
       std::string filename = outputDir + "/" + targetName + ".project";
       retval.push_back(targetName);
@@ -161,7 +161,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByProjectMaps(
   // for each sub project in the workspace create a codelite project
   for (auto const& it : this->GlobalGenerator->GetProjectMap()) {
 
-    std::string outputDir = it.second[0]->GetCurrentBinaryDirectory();
+    std::string const& outputDir = it.second[0]->GetCurrentBinaryDirectory();
     std::string projectName = it.second[0]->GetProjectName();
     retval.push_back(projectName);
     std::string filename = outputDir + "/" + projectName + ".project";
@@ -184,7 +184,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByProjectMaps(
 void cmExtraCodeLiteGenerator::CreateProjectFile(
   const std::vector<cmLocalGenerator*>& lgs)
 {
-  std::string outputDir = lgs[0]->GetCurrentBinaryDirectory();
+  std::string const& outputDir = lgs[0]->GetCurrentBinaryDirectory();
   std::string projectName = lgs[0]->GetProjectName();
   std::string filename = outputDir + "/";
 

@@ -456,7 +456,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // clean set just in case.
   exeCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
     this->LocalGenerator->GetCurrentBinaryDirectory(),
-    (targetFullPath + ".manifest").c_str()));
+    targetFullPath + ".manifest"));
 #endif
   if (targetNameReal != targetName) {
     exeCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(

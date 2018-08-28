@@ -3040,7 +3040,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   // Point Xcode at the top of the source tree.
   {
     std::string pdir =
-      this->RelativeToBinary(root->GetCurrentSourceDirectory());
+      this->RelativeToBinary(root->GetCurrentSourceDirectory().c_str());
     this->RootObject->AddAttribute("projectDirPath", this->CreateString(pdir));
     this->RootObject->AddAttribute("projectRoot", this->CreateString(""));
   }

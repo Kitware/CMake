@@ -2528,14 +2528,14 @@ std::string const& cmLocalGenerator::GetBinaryDirectory() const
   return this->GetCMakeInstance()->GetHomeOutputDirectory();
 }
 
-const char* cmLocalGenerator::GetCurrentBinaryDirectory() const
+std::string const& cmLocalGenerator::GetCurrentBinaryDirectory() const
 {
-  return this->StateSnapshot.GetDirectory().GetCurrentBinary().c_str();
+  return this->StateSnapshot.GetDirectory().GetCurrentBinary();
 }
 
-const char* cmLocalGenerator::GetCurrentSourceDirectory() const
+std::string const& cmLocalGenerator::GetCurrentSourceDirectory() const
 {
-  return this->StateSnapshot.GetDirectory().GetCurrentSource().c_str();
+  return this->StateSnapshot.GetDirectory().GetCurrentSource();
 }
 
 std::string cmLocalGenerator::GetTargetDirectory(

@@ -635,7 +635,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   if (this->GeneratorTarget->GetType() != cmStateEnums::STATIC_LIBRARY) {
     libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetCurrentBinaryDirectory(),
-      (targetFullPath + ".manifest").c_str()));
+      targetFullPath + ".manifest"));
   }
 #endif
 

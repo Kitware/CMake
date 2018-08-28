@@ -3606,8 +3606,9 @@ bool cmGeneratorTarget::StrictTargetComparison::operator()(
 {
   int nameResult = strcmp(t1->GetName().c_str(), t2->GetName().c_str());
   if (nameResult == 0) {
-    return strcmp(t1->GetLocalGenerator()->GetCurrentBinaryDirectory(),
-                  t2->GetLocalGenerator()->GetCurrentBinaryDirectory()) < 0;
+    return strcmp(
+             t1->GetLocalGenerator()->GetCurrentBinaryDirectory().c_str(),
+             t2->GetLocalGenerator()->GetCurrentBinaryDirectory().c_str()) < 0;
   }
   return nameResult < 0;
 }
