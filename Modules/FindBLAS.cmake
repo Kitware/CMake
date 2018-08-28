@@ -22,7 +22,8 @@
 #   BLAS_LINKER_FLAGS - uncached list of required linker flags (excluding -l
 #     and -L).
 #   BLAS_LIBRARIES - uncached list of libraries (using full path name) to
-#     link against to use BLAS
+#     link against to use BLAS (may be empty if compiler implicitly links
+#     BLAS)
 #   BLAS95_LIBRARIES - uncached list of libraries (using full path name)
 #     to link against to use BLAS95 interface
 #   BLAS95_FOUND - set to true if a library implementing the BLAS f95 interface
@@ -163,7 +164,11 @@ macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _thread)
     mark_as_advanced(${_prefix}${_combined_name}_WORKS)
     set(_libraries_work ${${_prefix}${_combined_name}_WORKS})
   endif()
-  if(NOT _libraries_work)
+  if(_libraries_work)
+    if("${_list}" STREQUAL "")
+      set(${LIBRARIES} "${LIBRARIES}-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
+    endif()
+  else()
     set(${LIBRARIES} FALSE)
   endif()
   #message("DEBUG: ${LIBRARIES} = ${${LIBRARIES}}")
@@ -177,6 +182,20 @@ if (NOT $ENV{BLA_VENDOR} STREQUAL "")
 else ()
   if(NOT BLA_VENDOR)
     set(BLA_VENDOR "All")
+  endif()
+endif ()
+
+if (BLA_VENDOR STREQUAL "All")
+  if(NOT BLAS_LIBRARIES)
+    # Implicitly linked BLAS libraries
+    check_fortran_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      ""
+      ""
+      )
   endif()
 endif ()
 
@@ -500,6 +519,7 @@ if (BLA_VENDOR STREQUAL "NAS" OR BLA_VENDOR STREQUAL "All")
       )
   endif ()
 endif ()
+
 # Generic BLAS library?
 if (BLA_VENDOR STREQUAL "Generic" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
@@ -700,6 +720,12 @@ if(BLA_F95)
   endif()
 else()
   find_package_handle_standard_args(BLAS REQUIRED_VARS BLAS_LIBRARIES)
+endif()
+
+# On compilers that implicitly link BLAS (such as ftn, cc, and CC on Cray HPC machines)
+# we used a placeholder for empty BLAS_LIBRARIES to get through our logic above.
+if (BLAS_LIBRARIES STREQUAL "BLAS_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
+  set(BLAS_LIBRARIES "")
 endif()
 
 cmake_pop_check_state()
