@@ -2571,8 +2571,10 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   }
 
   if (this->MSTools) {
-    // If we have the VS_WINRT_COMPONENT set then force Compile as WinRT.
-    if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT")) {
+    // If we have the VS_WINRT_COMPONENT or CMAKE_VS_WINRT_BY_DEFAULT
+    // set then force Compile as WinRT.
+    if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT") ||
+        this->Makefile->IsOn("CMAKE_VS_WINRT_BY_DEFAULT")) {
       clOptions.AddFlag("CompileAsWinRT", "true");
       // For WinRT components, add the _WINRT_DLL define to produce a lib
       if (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
