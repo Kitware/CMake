@@ -392,6 +392,11 @@ bool cmSystemTools::IsOn(const char* val)
   return (onValues.count(v) > 0);
 }
 
+bool cmSystemTools::IsOn(const std::string& val)
+{
+  return cmSystemTools::IsOn(val.c_str());
+}
+
 bool cmSystemTools::IsNOTFOUND(const char* val)
 {
   if (strcmp(val, "NOTFOUND") == 0) {
@@ -426,6 +431,11 @@ bool cmSystemTools::IsOff(const char* val)
     c = static_cast<char>(toupper(c));
   }
   return (offValues.count(v) > 0);
+}
+
+bool cmSystemTools::IsOff(const std::string& val)
+{
+  return cmSystemTools::IsOff(val.c_str());
 }
 
 void cmSystemTools::ParseWindowsCommandLine(const char* command,
