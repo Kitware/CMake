@@ -83,6 +83,7 @@ static const char* cmCTestErrorExceptions[] = {
   "instantiated from ",
   "candidates are:",
   ": warning",
+  ": WARNING",
   ": \\(Warning\\)",
   ": note",
   "Note:",
