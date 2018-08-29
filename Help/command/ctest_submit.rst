@@ -10,6 +10,7 @@ Perform the :ref:`CTest Submit Step` as a :ref:`Dashboard Client`.
                [RETRY_COUNT <count>]
                [RETRY_DELAY <delay>]
                [RETURN_VALUE <result-var>]
+               [CAPTURE_CMAKE_ERROR <result-var>]
                [QUIET]
                )
 
@@ -51,6 +52,10 @@ The options are:
 ``RETURN_VALUE <result-var>``
   Store in the ``<result-var>`` variable ``0`` for success and
   non-zero on failure.
+
+``CAPTURE_CMAKE_ERROR <result-var>``
+  Store in the ``<result-var>`` variable -1 if there are any errors running
+  the command and prevent ctest from returning non-zero if an error occurs.
 
 ``QUIET``
   Suppress all non-error messages that would have otherwise been
