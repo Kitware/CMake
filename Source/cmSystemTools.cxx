@@ -42,7 +42,6 @@
 #include <ctype.h>
 #include <errno.h>
 #include <iostream>
-#include <set>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -372,24 +371,31 @@ bool cmSystemTools::IsOn(const char* val)
   if (!val) {
     return false;
   }
-  size_t len = strlen(val);
-  if (len > 4) {
-    return false;
+  /* clang-format off */
+  // "1"
+  if (val[0] == '1' && val[1] == '\0') {
+    return true;
   }
-  std::string v(val, len);
-
-  static std::set<std::string> onValues;
-  if (onValues.empty()) {
-    onValues.insert("ON");
-    onValues.insert("1");
-    onValues.insert("YES");
-    onValues.insert("TRUE");
-    onValues.insert("Y");
+  // "ON"
+  if ((val[0] == 'O' || val[0] == 'o') &&
+      (val[1] == 'N' || val[1] == 'n') && val[2] == '\0') {
+    return true;
   }
-  for (char& c : v) {
-    c = static_cast<char>(toupper(c));
+  // "Y", "YES"
+  if ((val[0] == 'Y' || val[0] == 'y') && (val[1] == '\0' || (
+      (val[1] == 'E' || val[1] == 'e') &&
+      (val[2] == 'S' || val[2] == 's') && val[3] == '\0'))) {
+    return true;
   }
-  return (onValues.count(v) > 0);
+  // "TRUE"
+  if ((val[0] == 'T' || val[0] == 't') &&
+      (val[1] == 'R' || val[1] == 'r') &&
+      (val[2] == 'U' || val[2] == 'u') &&
+      (val[3] == 'E' || val[3] == 'e') && val[4] == '\0') {
+    return true;
+  }
+  /* clang-format on */
+  return false;
 }
 
 bool cmSystemTools::IsOn(const std::string& val)
@@ -407,30 +413,45 @@ bool cmSystemTools::IsNOTFOUND(const char* val)
 
 bool cmSystemTools::IsOff(const char* val)
 {
-  if (!val || !*val) {
+  // ""
+  if (!val || val[0] == '\0') {
     return true;
   }
-  size_t len = strlen(val);
-  // Try and avoid toupper() for large strings.
-  if (len > 6) {
-    return cmSystemTools::IsNOTFOUND(val);
+  /* clang-format off */
+  // "0"
+  if (val[0] == '0' && val[1] == '\0') {
+    return true;
   }
-
-  static std::set<std::string> offValues;
-  if (offValues.empty()) {
-    offValues.insert("OFF");
-    offValues.insert("0");
-    offValues.insert("NO");
-    offValues.insert("FALSE");
-    offValues.insert("N");
-    offValues.insert("IGNORE");
+  // "OFF"
+  if ((val[0] == 'O' || val[0] == 'o') &&
+      (val[1] == 'F' || val[1] == 'f') &&
+      (val[2] == 'F' || val[2] == 'f') && val[3] == '\0') {
+    return true;
   }
-  // Try and avoid toupper().
-  std::string v(val, len);
-  for (char& c : v) {
-    c = static_cast<char>(toupper(c));
+  // "N", "NO"
+  if ((val[0] == 'N' || val[0] == 'n') && (val[1] == '\0' || (
+      (val[1] == 'O' || val[1] == 'o') && val[2] == '\0'))) {
+    return true;
   }
-  return (offValues.count(v) > 0);
+  // "FALSE"
+  if ((val[0] == 'F' || val[0] == 'f') &&
+      (val[1] == 'A' || val[1] == 'a') &&
+      (val[2] == 'L' || val[2] == 'l') &&
+      (val[3] == 'S' || val[3] == 's') &&
+      (val[4] == 'E' || val[4] == 'e') && val[5] == '\0') {
+    return true;
+  }
+  // "IGNORE"
+  if ((val[0] == 'I' || val[0] == 'i') &&
+      (val[1] == 'G' || val[1] == 'g') &&
+      (val[2] == 'N' || val[2] == 'n') &&
+      (val[3] == 'O' || val[3] == 'o') &&
+      (val[4] == 'R' || val[4] == 'r') &&
+      (val[5] == 'E' || val[5] == 'e') && val[6] == '\0') {
+    return true;
+  }
+  /* clang-format on */
+  return cmSystemTools::IsNOTFOUND(val);
 }
 
 bool cmSystemTools::IsOff(const std::string& val)
