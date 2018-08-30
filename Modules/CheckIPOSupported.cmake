@@ -126,7 +126,13 @@ macro(_ipo_run_language_check language)
   )
 
   if(NOT result)
-    _ipo_not_supported("${output}")
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+      "${language} compiler IPO check failed with the following output:\n"
+      "${output}\n")
+    _ipo_not_supported("check failed to compile")
+    if(X_OUTPUT)
+      set("${X_OUTPUT}" "${output}" PARENT_SCOPE)
+    endif()
     return()
   endif()
 endmacro()
