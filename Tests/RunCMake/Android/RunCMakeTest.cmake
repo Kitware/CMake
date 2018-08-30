@@ -61,8 +61,12 @@ foreach(ndk IN LISTS TEST_ANDROID_NDK)
       list(APPEND _abis_${_version} ${_abis})
     endif()
   endforeach()
-  set(_abis_ ${_abis_${_latest_gcc}})
   set(_abis_clang ${_abis_${_latest_clang}})
+  if(_latest_gcc)
+    set(_abis_ ${_abis_${_latest_gcc}})
+  else()
+    set(_abis_ ${_abis_clang})
+  endif()
   if(_versions MATCHES "clang")
     set(_versions "clang" ${_versions})
   endif()
@@ -132,10 +136,11 @@ foreach(ndk IN LISTS TEST_ANDROID_NDK)
   set(stl_types
     none
     system
-    gnustl_static
-    gnustl_shared
     )
 
+  if(IS_DIRECTORY "${ndk}/sources/cxx-stl/gnu-libstdc++")
+    list(APPEND stl_types gnustl_static gnustl_shared)
+  endif()
   if(IS_DIRECTORY "${ndk}/sources/cxx-stl/gabi++/libs")
     list(APPEND stl_types gabi++_static gabi++_shared)
   endif()
