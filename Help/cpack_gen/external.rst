@@ -10,19 +10,32 @@ tools. For this reason, CPack provides the "External" generator, which allows
 external packaging software to take advantage of some of the functionality
 provided by CPack, such as component installation and the dependency graph.
 
-The CPack External generator doesn't actually package any files. Instead, it
-generates a .json file containing the CPack internal metadata, which gives
-external software information on how to package the software. This metadata
-file contains a list of CPack components and component groups, the various
-options passed to :command:`cpack_add_component` and
+Integration with External Packaging Tools
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The CPack External generator generates a .json file containing the
+CPack internal metadata, which gives external software information
+on how to package the software. External packaging software may itself
+invoke CPack, consume the generated metadata,
+install and package files as required.
+
+Alternatively CPack can invoke an external packaging software
+through an optional custom CMake script in
+:variable:`CPACK_EXT_PACKAGE_SCRIPT` instead.
+
+Staging of installation files may also optionally be
+taken care of by the generator when enabled through the
+:variable:`CPACK_EXT_ENABLE_STAGING` variable.
+
+JSON Format
+^^^^^^^^^^^
+
+The JSON metadata file contains a list of CPack components and component groups,
+the various options passed to :command:`cpack_add_component` and
 :command:`cpack_add_component_group`, the dependencies between the components
 and component groups, and various other options passed to CPack.
 
-Format
-^^^^^^
-
-The file produced by the CPack External generator is a .json file with an
-object as its root. This root object will always provide two fields:
+The JSON's root object will always provide two fields:
 ``formatVersionMajor`` and ``formatVersionMinor``, which are always integers
 that describe the output format of the generator. Backwards-compatible changes
 to the output format (for example, adding a new field that didn't exist before)
@@ -247,3 +260,24 @@ Variables specific to CPack External generator
   If an invalid version is encountered in ``CPACK_EXT_REQUESTED_VERSIONS`` (one
   that doesn't match ``major.minor``, where ``major`` and ``minor`` are
   integers), it is ignored.
+
+.. variable:: CPACK_EXT_ENABLE_STAGING
+
+  This variable can be set to true to enable optional installation
+  into a temporary staging area which can then be picked up
+  and packaged by an external packaging tool.
+  The top level directory used by CPack for the current packaging
+  task is contained in ``CPACK_TOPLEVEL_DIRECTORY``.
+  It is automatically cleaned up on each run before packaging is initiated
+  and can be used for custom temporary files required by
+  the external packaging tool.
+  It also contains the staging area ``CPACK_TEMPORARY_DIRECTORY``
+  into which CPack performs the installation when staging is enabled.
+
+.. variable:: CPACK_EXT_PACKAGE_SCRIPT
+
+  This variable can optionally specify the full path to
+  a CMake script file to be run as part of the CPack invocation.
+  It is invoked after (optional) staging took place and may
+  run an external packaging tool. The script has access to
+  the variables defined by the CPack config file.
