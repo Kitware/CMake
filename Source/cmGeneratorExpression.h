@@ -179,17 +179,10 @@ public:
   {
   }
 
-  const char* Evaluate(const char* expression)
-  {
-    return this->EvaluateExpression(expression).c_str();
-  }
-  const char* Evaluate(const std::string& expression)
-  {
-    return this->Evaluate(expression.c_str());
-  }
-  const char* Evaluate(const char* expression, const std::string& property);
-  const char* Evaluate(const std::string& expression,
-                       const std::string& property)
+  const std::string& Evaluate(const char* expression,
+                              const std::string& property);
+  const std::string& Evaluate(const std::string& expression,
+                              const std::string& property)
   {
     return this->Evaluate(expression.c_str(), property);
   }

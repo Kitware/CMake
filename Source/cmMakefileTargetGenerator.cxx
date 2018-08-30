@@ -445,7 +445,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   // Add flags from source file properties.
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
   if (const char* cflags = source.GetProperty(COMPILE_FLAGS)) {
-    const char* evaluatedFlags =
+    const std::string& evaluatedFlags =
       genexInterpreter.Evaluate(cflags, COMPILE_FLAGS);
     this->LocalGenerator->AppendFlags(flags, evaluatedFlags);
     *this->FlagFileStream << "# Custom flags: " << relativeObj
@@ -455,7 +455,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
 
   const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
   if (const char* coptions = source.GetProperty(COMPILE_OPTIONS)) {
-    const char* evaluatedOptions =
+    const std::string& evaluatedOptions =
       genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS);
     this->LocalGenerator->AppendCompileOptions(flags, evaluatedOptions);
     *this->FlagFileStream << "# Custom options: " << relativeObj
@@ -468,7 +468,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
 
   const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
   if (const char* cincludes = source.GetProperty(INCLUDE_DIRECTORIES)) {
-    const char* evaluatedIncludes =
+    const std::string& evaluatedIncludes =
       genexInterpreter.Evaluate(cincludes, INCLUDE_DIRECTORIES);
     this->LocalGenerator->AppendIncludeDirectories(includes, evaluatedIncludes,
                                                    source);
@@ -484,7 +484,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   // Add source-specific preprocessor definitions.
   const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
   if (const char* compile_defs = source.GetProperty(COMPILE_DEFINITIONS)) {
-    const char* evaluatedDefs =
+    const std::string& evaluatedDefs =
       genexInterpreter.Evaluate(compile_defs, COMPILE_DEFINITIONS);
     this->LocalGenerator->AppendDefines(defines, evaluatedDefs);
     *this->FlagFileStream << "# Custom defines: " << relativeObj
@@ -494,7 +494,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += configUpper;
   if (const char* config_compile_defs = source.GetProperty(defPropName)) {
-    const char* evaluatedDefs =
+    const std::string& evaluatedDefs =
       genexInterpreter.Evaluate(config_compile_defs, COMPILE_DEFINITIONS);
     this->LocalGenerator->AppendDefines(defines, evaluatedDefs);
     *this->FlagFileStream << "# Custom defines: " << relativeObj << "_DEFINES_"

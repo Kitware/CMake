@@ -762,9 +762,10 @@ public:
 
   using cmGeneratorExpressionInterpreter::Evaluate;
 
-  const char* Evaluate(const char* expression, const std::string& property)
+  const std::string& Evaluate(const char* expression,
+                              const std::string& property)
   {
-    const char* processed =
+    const std::string& processed =
       this->cmGeneratorExpressionInterpreter::Evaluate(expression, property);
     if (this->GetCompiledGeneratorExpression()
           .GetHadContextSensitiveCondition()) {
@@ -821,7 +822,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
   if (const char* compile_defs = sf->GetProperty(COMPILE_DEFINITIONS)) {
     this->AppendDefines(
-      flagsBuild, genexInterpreter.Evaluate(compile_defs, COMPILE_DEFINITIONS),
+      flagsBuild,
+      genexInterpreter.Evaluate(compile_defs, COMPILE_DEFINITIONS).c_str(),
       true);
   }
   if (!flagsBuild.IsEmpty()) {
