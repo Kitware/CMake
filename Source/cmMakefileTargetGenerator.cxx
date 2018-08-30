@@ -181,6 +181,12 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
           this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir,
                                                            output));
       }
+      const std::vector<std::string>& byproducts = ccg.GetByproducts();
+      for (std::string const& byproduct : byproducts) {
+        this->CleanFiles.push_back(
+          this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir,
+                                                           byproduct));
+      }
     }
   }
   std::vector<cmSourceFile const*> headerSources;
