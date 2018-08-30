@@ -187,7 +187,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
 
   // Tell the global generator about any installation component names
   // specified.
-  this->Makefile->GetGlobalGenerator()->AddInstallComponent(component.c_str());
+  this->Makefile->GetGlobalGenerator()->AddInstallComponent(component);
 
   return true;
 }
@@ -761,43 +761,43 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   // specified
   if (installsArchive) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      archiveArgs.GetComponent().c_str());
+      archiveArgs.GetComponent());
   }
   if (installsLibrary) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      libraryArgs.GetComponent().c_str());
+      libraryArgs.GetComponent());
   }
   if (installsNamelink) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      libraryArgs.GetNamelinkComponent().c_str());
+      libraryArgs.GetNamelinkComponent());
   }
   if (installsRuntime) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      runtimeArgs.GetComponent().c_str());
+      runtimeArgs.GetComponent());
   }
   if (installsObject) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      objectArgs.GetComponent().c_str());
+      objectArgs.GetComponent());
   }
   if (installsFramework) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      frameworkArgs.GetComponent().c_str());
+      frameworkArgs.GetComponent());
   }
   if (installsBundle) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      bundleArgs.GetComponent().c_str());
+      bundleArgs.GetComponent());
   }
   if (installsPrivateHeader) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      privateHeaderArgs.GetComponent().c_str());
+      privateHeaderArgs.GetComponent());
   }
   if (installsPublicHeader) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      publicHeaderArgs.GetComponent().c_str());
+      publicHeaderArgs.GetComponent());
   }
   if (installsResource) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      resourceArgs.GetComponent().c_str());
+      resourceArgs.GetComponent());
   }
 
   return true;
@@ -899,7 +899,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   // Tell the global generator about any installation component names
   // specified.
   this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-    ica.GetComponent().c_str());
+    ica.GetComponent());
 
   return true;
 }
@@ -1196,7 +1196,7 @@ bool cmInstallCommand::HandleDirectoryMode(
 
   // Tell the global generator about any installation component names
   // specified.
-  this->Makefile->GetGlobalGenerator()->AddInstallComponent(component.c_str());
+  this->Makefile->GetGlobalGenerator()->AddInstallComponent(component);
 
   return true;
 }

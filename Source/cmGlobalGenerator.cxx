@@ -1997,9 +1997,9 @@ void cmGlobalGenerator::AddMakefile(cmMakefile* mf)
   this->CMakeInstance->UpdateProgress("Configuring", prog);
 }
 
-void cmGlobalGenerator::AddInstallComponent(const char* component)
+void cmGlobalGenerator::AddInstallComponent(const std::string& component)
 {
-  if (component && *component) {
+  if (!component.empty()) {
     this->InstallComponents.insert(component);
   }
 }
