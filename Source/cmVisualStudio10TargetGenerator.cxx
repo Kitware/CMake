@@ -369,7 +369,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   path += "/";
   path += this->Name;
   path += ProjectFileExtension;
-  cmGeneratedFileStream BuildFileStream(path.c_str());
+  cmGeneratedFileStream BuildFileStream(path);
   const std::string PathToProjectFile = path;
   BuildFileStream.SetCopyIfDifferent(true);
 
@@ -1398,7 +1398,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   path += computeProjectFileExtension(this->GeneratorTarget,
                                       *this->Configurations.begin());
   path += ".filters";
-  cmGeneratedFileStream fout(path.c_str());
+  cmGeneratedFileStream fout(path);
   fout.SetCopyIfDifferent(true);
   char magic[] = { char(0xEF), char(0xBB), char(0xBF) };
   fout.write(magic, 3);
@@ -1886,7 +1886,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(Elem& e2,
     }
   }
   ConvertToWindowsSlash(sourceFile);
-  e2.StartElement(tool.c_str());
+  e2.StartElement(tool);
   e2.Attribute("Include", sourceFile);
 
   ToolSource toolSource = { sf, forceRelative };
@@ -4152,7 +4152,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80(Elem& e1)
   std::string targetNameXML =
     cmVS10EscapeXML(this->GeneratorTarget->GetName());
 
-  cmGeneratedFileStream fout(manifestFile.c_str());
+  cmGeneratedFileStream fout(manifestFile);
   fout.SetCopyIfDifferent(true);
 
   /* clang-format off */
@@ -4235,7 +4235,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP81(Elem& e1)
   std::string targetNameXML =
     cmVS10EscapeXML(this->GeneratorTarget->GetName());
 
-  cmGeneratedFileStream fout(manifestFile.c_str());
+  cmGeneratedFileStream fout(manifestFile);
   fout.SetCopyIfDifferent(true);
 
   /* clang-format off */
@@ -4298,7 +4298,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS80(Elem& e1)
   std::string targetNameXML =
     cmVS10EscapeXML(this->GeneratorTarget->GetName());
 
-  cmGeneratedFileStream fout(manifestFile.c_str());
+  cmGeneratedFileStream fout(manifestFile);
   fout.SetCopyIfDifferent(true);
 
   /* clang-format off */
@@ -4353,7 +4353,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS81(Elem& e1)
   std::string targetNameXML =
     cmVS10EscapeXML(this->GeneratorTarget->GetName());
 
-  cmGeneratedFileStream fout(manifestFile.c_str());
+  cmGeneratedFileStream fout(manifestFile);
   fout.SetCopyIfDifferent(true);
 
   /* clang-format off */
@@ -4413,7 +4413,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS10_0(Elem& e1)
   std::string targetNameXML =
     cmVS10EscapeXML(this->GeneratorTarget->GetName());
 
-  cmGeneratedFileStream fout(manifestFile.c_str());
+  cmGeneratedFileStream fout(manifestFile);
   fout.SetCopyIfDifferent(true);
 
   /* clang-format off */
