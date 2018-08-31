@@ -219,7 +219,7 @@ public:
 
   std::string GetExtraGeneratorName() const;
 
-  void AddInstallComponent(const char* component);
+  void AddInstallComponent(const std::string& component);
 
   const std::set<std::string>* GetInstallComponents() const
   {
