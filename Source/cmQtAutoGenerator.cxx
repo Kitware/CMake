@@ -645,7 +645,7 @@ cmQtAutoGenerator::cmQtAutoGenerator()
         Logger_.SetVerbosity(static_cast<unsigned int>(iVerbose));
       } else {
         // Non numeric verbosity
-        Logger_.SetVerbose(cmSystemTools::IsOn(verbose.c_str()));
+        Logger_.SetVerbose(cmSystemTools::IsOn(verbose));
       }
     }
   }
@@ -653,7 +653,7 @@ cmQtAutoGenerator::cmQtAutoGenerator()
     std::string colorEnv;
     cmSystemTools::GetEnv("COLOR", colorEnv);
     if (!colorEnv.empty()) {
-      Logger_.SetColorOutput(cmSystemTools::IsOn(colorEnv.c_str()));
+      Logger_.SetColorOutput(cmSystemTools::IsOn(colorEnv));
     } else {
       Logger_.SetColorOutput(true);
     }

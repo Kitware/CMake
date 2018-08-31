@@ -176,7 +176,7 @@ std::string cmGlobalGenerator::SelectMakeProgram(
   const std::string& inMakeProgram, const std::string& makeDefault) const
 {
   std::string makeProgram = inMakeProgram;
-  if (cmSystemTools::IsOff(makeProgram.c_str())) {
+  if (cmSystemTools::IsOff(makeProgram)) {
     const char* makeProgramCSTR =
       this->CMakeInstance->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
     if (cmSystemTools::IsOff(makeProgramCSTR)) {
@@ -184,7 +184,7 @@ std::string cmGlobalGenerator::SelectMakeProgram(
     } else {
       makeProgram = makeProgramCSTR;
     }
-    if (cmSystemTools::IsOff(makeProgram.c_str()) && !makeProgram.empty()) {
+    if (cmSystemTools::IsOff(makeProgram) && !makeProgram.empty()) {
       makeProgram = "CMAKE_MAKE_PROGRAM-NOTFOUND";
     }
   }

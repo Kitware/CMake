@@ -1798,7 +1798,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
             "EnableDebuggingInformation",
             "'$(Configuration)|$(Platform)'=='" + this->Configurations[i] +
               "|" + this->Platform + "'",
-            cmSystemTools::IsOn(enableDebug.c_str()) ? "true" : "false");
+            cmSystemTools::IsOn(enableDebug) ? "true" : "false");
         }
       }
     }
@@ -1815,8 +1815,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
             "DisableOptimizations",
             "'$(Configuration)|$(Platform)'=='" + this->Configurations[i] +
               "|" + this->Platform + "'",
-            (cmSystemTools::IsOn(disableOptimizations.c_str()) ? "true"
-                                                               : "false"));
+            (cmSystemTools::IsOn(disableOptimizations) ? "true" : "false"));
         }
       }
     }

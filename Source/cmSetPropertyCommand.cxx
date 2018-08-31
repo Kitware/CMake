@@ -330,8 +330,8 @@ bool cmSetPropertyCommand::HandleTest(cmTest* test)
 bool cmSetPropertyCommand::HandleCacheMode()
 {
   if (this->PropertyName == "ADVANCED") {
-    if (!this->Remove && !cmSystemTools::IsOn(this->PropertyValue.c_str()) &&
-        !cmSystemTools::IsOff(this->PropertyValue.c_str())) {
+    if (!this->Remove && !cmSystemTools::IsOn(this->PropertyValue) &&
+        !cmSystemTools::IsOff(this->PropertyValue)) {
       std::ostringstream e;
       e << "given non-boolean value \"" << this->PropertyValue
         << "\" for CACHE property \"ADVANCED\".  ";

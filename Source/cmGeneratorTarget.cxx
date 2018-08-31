@@ -2556,7 +2556,7 @@ static void processIncludeDirectories(
         }
       }
 
-      if (!cmSystemTools::IsOff(entryInclude.c_str())) {
+      if (!cmSystemTools::IsOff(entryInclude)) {
         cmSystemTools::ConvertToUnixSlashes(entryInclude);
       }
       std::string inc = entryInclude;

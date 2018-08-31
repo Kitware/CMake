@@ -120,7 +120,7 @@ void cmIncludeDirectoryCommand::NormalizeInclude(std::string& inc)
     return;
   }
 
-  if (!cmSystemTools::IsOff(inc.c_str())) {
+  if (!cmSystemTools::IsOff(inc)) {
     cmSystemTools::ConvertToUnixSlashes(inc);
 
     if (!cmSystemTools::FileIsFullPath(inc)) {

@@ -917,8 +917,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         if (args.size() >= 9 && args[8].length() >= 8 &&
             args[8].substr(0, 8) == "--color=") {
           // Enable or disable color based on the switch value.
-          color = (args[8].size() == 8 ||
-                   cmSystemTools::IsOn(args[8].substr(8).c_str()));
+          color =
+            (args[8].size() == 8 || cmSystemTools::IsOn(args[8].substr(8)));
         }
       } else {
         // Support older signature for existing makefiles:
@@ -1354,7 +1354,7 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
       // Enable or disable color based on the switch value.
       std::string value = args[i].substr(9);
       if (!value.empty()) {
-        enabled = cmSystemTools::IsOn(value.c_str());
+        enabled = cmSystemTools::IsOn(value);
       }
     } else if (cmHasLiteralPrefix(args[i], "--progress-dir=")) {
       progressDir = args[i].substr(15);
@@ -1407,7 +1407,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
   bool verbose = false;
   if (args.size() >= 4) {
     if (args[3].find("--verbose=") == 0) {
-      if (!cmSystemTools::IsOff(args[3].substr(10).c_str())) {
+      if (!cmSystemTools::IsOff(args[3].substr(10))) {
         verbose = true;
       }
     }

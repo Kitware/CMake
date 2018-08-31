@@ -679,7 +679,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
           std::unique_ptr<cmCompiledGeneratorExpression> cge =
             ge.Parse(propertyValue);
           if (cmSystemTools::IsOn(
-                cge->Evaluate(target->GetLocalGenerator(), i).c_str())) {
+                cge->Evaluate(target->GetLocalGenerator(), i))) {
             activeConfigs.insert(i);
           }
         }
