@@ -129,6 +129,7 @@ public:
    * as ifdef.
    */
   static bool IsOn(const char* val);
+  static bool IsOn(const std::string& val);
 
   /**
    * does a string indicate a false or off value ? Note that this is
@@ -138,6 +139,7 @@ public:
    * NOTFOUND, *-NOTFOUND or IGNORE will cause IsOff to return true.
    */
   static bool IsOff(const char* val);
+  static bool IsOff(const std::string& val);
 
   ///! Return true if value is NOTFOUND or ends in -NOTFOUND.
   static bool IsNOTFOUND(const char* value);
