@@ -244,7 +244,8 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     endif()
     # try in standard paths
     find_program (${_PYTHON_PREFIX}_EXECUTABLE
-                  NAMES python${_${_PYTHON_PREFIX}_VERSION})
+                  NAMES python${_${_PYTHON_PREFIX}_VERSION}
+                  NAMES_PER_DIR)
 
     _python_validate_interpreter ()
     if (${_PYTHON_PREFIX}_EXECUTABLE)
@@ -252,10 +253,15 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     endif()
   endforeach()
 
-  # try more generic names
+  # try more generic names. NAMES_PER_DIR is not specified on purpose to have a
+  # chance to find expected version.
+  # For example, typical systems have 'python' for version 2.* and 'python3'
+  # for version 3.*. So looking for names per dir will find, potentially,
+  # systematically 'python' (i.e. version 2) even if version 3 is searched.
   if (NOT ${_PYTHON_PREFIX}_EXECUTABLE)
     find_program (${_PYTHON_PREFIX}_EXECUTABLE
-                  NAMES python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} python
+                  NAMES python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
+                        python
                         ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                   HINTS ${_${_PYTHON_PREFIX}_HINTS}
                   PATH_SUFFIXES bin)
@@ -483,6 +489,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     list (APPEND _${_PYTHON_PREFIX}_CONFIG_NAMES "python${_${_PYTHON_PREFIX}_VERSION}-config")
     find_program (_${_PYTHON_PREFIX}_CONFIG
                   NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
+                  NAMES_PER_DIR
                   HINTS ${_${_PYTHON_PREFIX}_HINTS}
                   PATH_SUFFIXES bin)
     unset (_${_PYTHON_PREFIX}_CONFIG_NAMES)
