@@ -530,7 +530,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
         linkCmdVar = this->GeneratorTarget->GetFeatureSpecificLinkRuleVariable(
           linkCmdVar, this->TargetLinkLanguage, this->GetConfigName());
 
-        const char* linkCmd = mf->GetRequiredDefinition(linkCmdVar);
+        std::string const& linkCmd = mf->GetRequiredDefinition(linkCmdVar);
         cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
       }
       {
@@ -541,7 +541,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
         linkCmdVar = this->GeneratorTarget->GetFeatureSpecificLinkRuleVariable(
           linkCmdVar, this->TargetLinkLanguage, this->GetConfigName());
 
-        const char* linkCmd = mf->GetRequiredDefinition(linkCmdVar);
+        std::string const& linkCmd = mf->GetRequiredDefinition(linkCmdVar);
         cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
       }
       return linkCmds;

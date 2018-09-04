@@ -23,7 +23,7 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
 
   // what is the current source dir
   std::string cdir = this->Makefile->GetCurrentSourceDirectory();
-  const char* fluid_exe =
+  std::string const& fluid_exe =
     this->Makefile->GetRequiredDefinition("FLTK_FLUID_EXECUTABLE");
 
   // get parameter for the command

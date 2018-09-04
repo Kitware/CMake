@@ -665,11 +665,11 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
       std::string baseFlagVar = "CMAKE_";
       baseFlagVar += langForClCompile;
       baseFlagVar += "_FLAGS";
-      flags = this->Makefile->GetRequiredDefinition(baseFlagVar.c_str());
+      flags = this->Makefile->GetRequiredDefinition(baseFlagVar);
       std::string flagVar =
         baseFlagVar + std::string("_") + cmSystemTools::UpperCase(configName);
       flags += " ";
-      flags += this->Makefile->GetRequiredDefinition(flagVar.c_str());
+      flags += this->Makefile->GetRequiredDefinition(flagVar);
     }
     // set the correct language
     if (linkLanguage == "C") {
@@ -931,8 +931,7 @@ std::string cmLocalVisualStudio7Generator::GetBuildTypeLinkerFlags(
     rootLinkerFlags + "_" + configTypeUpper;
 
   std::string extraLinkOptionsBuildType =
-    this->Makefile->GetRequiredDefinition(
-      extraLinkOptionsBuildTypeDef.c_str());
+    this->Makefile->GetRequiredDefinition(extraLinkOptionsBuildTypeDef);
 
   return extraLinkOptionsBuildType;
 }

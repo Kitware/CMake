@@ -21,9 +21,9 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // Get the uic and moc executables to run in the custom commands.
-  const char* uic_exe =
+  std::string const& uic_exe =
     this->Makefile->GetRequiredDefinition("QT_UIC_EXECUTABLE");
-  const char* moc_exe =
+  std::string const& moc_exe =
     this->Makefile->GetRequiredDefinition("QT_MOC_EXECUTABLE");
 
   // Get the variable holding the list of sources.

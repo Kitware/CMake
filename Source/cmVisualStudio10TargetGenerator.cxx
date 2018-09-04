@@ -2468,7 +2468,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     baseFlagVar += "_FLAGS";
     flags = this->Makefile->GetRequiredDefinition(baseFlagVar);
     std::string flagVar =
-      baseFlagVar + std::string("_") + cmSystemTools::UpperCase(configName);
+      baseFlagVar + "_" + cmSystemTools::UpperCase(configName);
     flags += " ";
     flags += this->Makefile->GetRequiredDefinition(flagVar);
     this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,

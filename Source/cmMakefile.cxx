@@ -2354,16 +2354,16 @@ bool cmMakefile::CanIWriteThisFile(std::string const& fileName) const
     cmSystemTools::SameFile(fileName, this->GetHomeOutputDirectory());
 }
 
-const char* cmMakefile::GetRequiredDefinition(const std::string& name) const
+std::string cmMakefile::GetRequiredDefinition(const std::string& name) const
 {
   const char* ret = this->GetDefinition(name);
   if (!ret) {
     cmSystemTools::Error("Error required internal CMake variable not "
                          "set, cmake may not be built correctly.\n",
                          "Missing variable is:\n", name.c_str());
-    return "";
+    return std::string();
   }
-  return ret;
+  return std::string(ret);
 }
 
 bool cmMakefile::IsDefinitionSet(const std::string& name) const
