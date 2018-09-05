@@ -1207,7 +1207,11 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommands(Elem& e0)
       this->GeneratorTarget->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
     if (cmSourceFile const* sf =
           this->LocalGenerator->CreateVCProjBuildRule()) {
-      this->WriteCustomCommand(e0, sf);
+      // Write directly rather than through WriteCustomCommand because
+      // we do not want the de-duplication and it has no dependencies.
+      if (cmCustomCommand const* command = sf->GetCustomCommand()) {
+        this->WriteCustomRule(e0, sf, *command);
+      }
     }
   }
 }
