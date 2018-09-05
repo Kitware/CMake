@@ -1218,21 +1218,6 @@ function(_Matlab_find_instances_win32 matlab_roots)
 
   # filtering the results with the registry keys
   matlab_get_all_valid_matlab_roots_from_registry("${_matlab_versions_from_registry}" _matlab_possible_roots)
-  unset(_matlab_versions_from_registry)
-
-  set(_matlab_versions_from_registry)
-  matlab_extract_all_installed_versions_from_registry(CMAKE_CL_64 _matlab_versions_from_registry)
-
-  # the returned list is empty, doing the search on all known versions
-  if(NOT _matlab_versions_from_registry)
-    if(MATLAB_FIND_DEBUG)
-      message(STATUS "[MATLAB] Search for Matlab from the registry unsuccessful, testing all supported versions")
-    endif()
-    extract_matlab_versions_from_registry_brute_force(_matlab_versions_from_registry)
-  endif()
-
-  # filtering the results with the registry keys
-  matlab_get_all_valid_matlab_roots_from_registry("${_matlab_versions_from_registry}" _matlab_possible_roots)
   set(${matlab_roots} ${_matlab_possible_roots} PARENT_SCOPE)
 
 endfunction()
