@@ -138,8 +138,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
                                      this->SourceEntries, true);
 
   this->DLLPlatform =
-    strcmp(this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"),
-           "") != 0;
+    !this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
 
   this->PolicyMap = t->PolicyMap;
 }
@@ -3489,12 +3488,13 @@ void cmGeneratorTarget::GetFullNameInternal(
   }
 
   // if there is no prefix on the target use the cmake definition
+  std::string targetPrefix2, targetSuffix2;
   if (!targetPrefix && prefixVar) {
-    targetPrefix = this->Makefile->GetSafeDefinition(prefixVar);
+    targetPrefix2 = this->Makefile->GetSafeDefinition(prefixVar);
   }
   // if there is no suffix on the target use the cmake definition
   if (!targetSuffix && suffixVar) {
-    targetSuffix = this->Makefile->GetSafeDefinition(suffixVar);
+    targetSuffix2 = this->Makefile->GetSafeDefinition(suffixVar);
   }
 
   // frameworks have directory prefix but no suffix
@@ -3502,19 +3502,19 @@ void cmGeneratorTarget::GetFullNameInternal(
   if (this->IsFrameworkOnApple()) {
     fw_prefix = this->GetFrameworkDirectory(config, ContentLevel);
     fw_prefix += "/";
-    targetPrefix = fw_prefix.c_str();
-    targetSuffix = nullptr;
+    targetPrefix2 = fw_prefix;
+    targetSuffix2.clear();
   }
 
   if (this->IsCFBundleOnApple()) {
     fw_prefix = this->GetCFBundleDirectory(config, FullLevel);
     fw_prefix += "/";
-    targetPrefix = fw_prefix.c_str();
-    targetSuffix = nullptr;
+    targetPrefix2 = fw_prefix;
+    targetSuffix2.clear();
   }
 
   // Begin the final name with the prefix.
-  outPrefix = targetPrefix ? targetPrefix : "";
+  outPrefix = targetPrefix2;
 
   // Append the target name or property-specified name.
   outBase += this->GetOutputName(config, artifact);
@@ -3533,7 +3533,7 @@ void cmGeneratorTarget::GetFullNameInternal(
   }
 
   // Append the suffix.
-  outSuffix = targetSuffix ? targetSuffix : "";
+  outSuffix = targetSuffix2;
 }
 
 std::string cmGeneratorTarget::GetLinkerLanguage(

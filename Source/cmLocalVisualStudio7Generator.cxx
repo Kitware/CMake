@@ -1082,7 +1082,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       // Use the NOINHERIT macro to avoid getting VS project default
       // libraries which may be set by the user to something bad.
       fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
-           << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
+           << this->Makefile->GetSafeDefinition(standardLibsVar);
       if (this->FortranProject) {
         this->Internal->OutputObjects(fout, target, configName, " ");
       }
@@ -1167,7 +1167,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       // Use the NOINHERIT macro to avoid getting VS project default
       // libraries which may be set by the user to something bad.
       fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
-           << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
+           << this->Makefile->GetSafeDefinition(standardLibsVar);
       if (this->FortranProject) {
         this->Internal->OutputObjects(fout, target, configName, " ");
       }

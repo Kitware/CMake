@@ -230,7 +230,7 @@ public:
 
   const char* GetGlobalSetting(std::string const& name) const;
   bool GlobalSettingIsOn(std::string const& name) const;
-  const char* GetSafeGlobalSetting(std::string const& name) const;
+  std::string GetSafeGlobalSetting(std::string const& name) const;
 
   /** Add a file to the manifest of generated targets for a configuration.  */
   void AddToManifest(std::string const& f);

@@ -1126,7 +1126,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
       }
     };
     auto MfDef = [makefile](const char* key) {
-      return std::string(makefile->GetSafeDefinition(key));
+      return makefile->GetSafeDefinition(key);
     };
 
     // Write

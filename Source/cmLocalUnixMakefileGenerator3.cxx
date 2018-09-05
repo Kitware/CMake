@@ -1422,7 +1422,8 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   this->WriteDisclaimer(internalRuleFileStream);
 
   // for each language we need to scan, scan it
-  const char* langStr = mf->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES");
+  std::string const& langStr =
+    mf->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES");
   std::vector<std::string> langs;
   cmSystemTools::ExpandListArgument(langStr, langs);
   for (std::string const& lang : langs) {

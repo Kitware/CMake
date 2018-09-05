@@ -52,7 +52,7 @@ bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
       valueConf = makefile->GetDefinition(keyConf);
     }
     if (valueConf == nullptr) {
-      valueConf = makefile->GetSafeDefinition(key);
+      return makefile->GetSafeDefinition(key);
     }
     return std::string(valueConf);
   };

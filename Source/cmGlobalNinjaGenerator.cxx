@@ -651,13 +651,13 @@ void cmGlobalNinjaGenerator::EnableLanguage(
     this->ResolveLanguageCompiler(l, mf, optional);
   }
 #ifdef _WIN32
-  if (strcmp(mf->GetSafeDefinition("CMAKE_C_SIMULATE_ID"), "MSVC") != 0 &&
-      strcmp(mf->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID"), "MSVC") != 0 &&
+  if ((mf->GetSafeDefinition("CMAKE_C_SIMULATE_ID") != "MSVC") &&
+      (mf->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID") != "MSVC") &&
       (mf->IsOn("CMAKE_COMPILER_IS_MINGW") ||
-       strcmp(mf->GetSafeDefinition("CMAKE_C_COMPILER_ID"), "GNU") == 0 ||
-       strcmp(mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID"), "GNU") == 0 ||
-       strcmp(mf->GetSafeDefinition("CMAKE_C_COMPILER_ID"), "Clang") == 0 ||
-       strcmp(mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID"), "Clang") == 0)) {
+       (mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "GNU") ||
+       (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "GNU") ||
+       (mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "Clang") ||
+       (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "Clang"))) {
     this->UsingGCCOnWindows = true;
   }
 #endif

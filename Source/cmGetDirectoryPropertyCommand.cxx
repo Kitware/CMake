@@ -65,7 +65,7 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
                      "providing the name of the variable to get.");
       return false;
     }
-    std::string output = dir->GetSafeDefinition(*i);
+    std::string const& output = dir->GetSafeDefinition(*i);
     this->Makefile->AddDefinition(variable, output.c_str());
     return true;
   }

@@ -1204,7 +1204,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
       valueConf = makefile->GetDefinition(keyConf);
     }
     if (valueConf == nullptr) {
-      valueConf = makefile->GetSafeDefinition(key);
+      return makefile->GetSafeDefinition(key);
     }
     return std::string(valueConf);
   };
@@ -1226,7 +1226,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
   Base_.MultiConfig = InfoGetBool("AM_MULTI_CONFIG");
   {
     unsigned long num = Base_.NumThreads;
-    if (cmSystemTools::StringToULong(InfoGet("AM_PARALLEL"), &num)) {
+    if (cmSystemTools::StringToULong(InfoGet("AM_PARALLEL").c_str(), &num)) {
       num = std::max<unsigned long>(num, 1);
       num = std::min<unsigned long>(num, ParallelMax);
       Base_.NumThreads = static_cast<unsigned int>(num);
@@ -1264,7 +1264,8 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
   // - Qt environment
   {
     unsigned long qtv = Base_.QtVersionMajor;
-    if (cmSystemTools::StringToULong(InfoGet("AM_QT_VERSION_MAJOR"), &qtv)) {
+    if (cmSystemTools::StringToULong(InfoGet("AM_QT_VERSION_MAJOR").c_str(),
+                                     &qtv)) {
       Base_.QtVersionMajor = static_cast<unsigned int>(qtv);
     }
   }

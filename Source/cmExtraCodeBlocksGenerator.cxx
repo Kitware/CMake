@@ -666,7 +666,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
     pureFortran = true;
   }
 
-  std::string compilerId = mf->GetSafeDefinition(compilerIdVar);
+  std::string const& compilerId = mf->GetSafeDefinition(compilerIdVar);
   std::string compiler = "gcc"; // default to gcc
   if (compilerId == "MSVC") {
     if (mf->IsDefinitionSet("MSVC10")) {

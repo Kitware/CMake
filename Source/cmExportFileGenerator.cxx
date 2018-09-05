@@ -195,7 +195,7 @@ static bool checkInterfaceDirs(const std::string& prepro,
                                cmGeneratorTarget* target,
                                const std::string& prop)
 {
-  const char* installDir =
+  std::string const& installDir =
     target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
   std::string const& topSourceDir =
     target->GetLocalGenerator()->GetSourceDirectory();

@@ -10,7 +10,6 @@
 #include <map>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
-#include <string.h>
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
@@ -174,9 +173,8 @@ void cmNinjaTargetGenerator::AddIncludeFlags(std::string& languageFlags,
 
 bool cmNinjaTargetGenerator::NeedDepTypeMSVC(const std::string& lang) const
 {
-  return strcmp(this->GetMakefile()->GetSafeDefinition("CMAKE_NINJA_DEPTYPE_" +
-                                                       lang),
-                "msvc") == 0;
+  return (this->GetMakefile()->GetSafeDefinition("CMAKE_NINJA_DEPTYPE_" +
+                                                 lang) == "msvc");
 }
 
 // TODO: Refactor with
