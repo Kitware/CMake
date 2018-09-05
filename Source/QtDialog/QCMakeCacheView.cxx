@@ -614,7 +614,7 @@ bool QCMakeCacheModelDelegate::editorEvent(QEvent* e,
 // Can remove this function and FileDialogFlag when minimum Qt version is 4.5
 bool QCMakeCacheModelDelegate::eventFilter(QObject* object, QEvent* evt)
 {
-  // workaround for what looks like a bug in Qt on Mac OS X
+  // workaround for what looks like a bug in Qt on macOS
   // where it doesn't create a QWidget wrapper for the native file dialog
   // so the Qt library ends up assuming the focus was lost to something else
 

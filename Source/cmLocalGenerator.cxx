@@ -1345,7 +1345,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
                                             const std::string& lang,
                                             const std::string& config)
 {
-  // Only add Mac OS X specific flags on Darwin platforms (OSX and iphone):
+  // Only add macOS specific flags on Darwin platforms (macOS and iOS):
   if (this->Makefile->IsOn("APPLE") && this->EmitUniversalBinaryFlags) {
     std::vector<std::string> archs;
     target->GetAppleArchs(config, archs);
