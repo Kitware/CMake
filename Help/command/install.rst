@@ -115,19 +115,19 @@ project.  There are several kinds of target files that may be installed:
 
 ``ARCHIVE``
   Static libraries are treated as ``ARCHIVE`` targets, except those
-  marked with the ``FRAMEWORK`` property on OS X (see ``FRAMEWORK``
+  marked with the ``FRAMEWORK`` property on macOS (see ``FRAMEWORK``
   below.) For DLL platforms (all Windows-based systems including
   Cygwin), the DLL import library is treated as an ``ARCHIVE`` target.
 
 ``LIBRARY``
   Module libraries are always treated as ``LIBRARY`` targets. For non-
   DLL platforms shared libraries are treated as ``LIBRARY`` targets,
-  except those marked with the ``FRAMEWORK`` property on OS X (see
+  except those marked with the ``FRAMEWORK`` property on macOS (see
   ``FRAMEWORK`` below.)
 
 ``RUNTIME``
   Executables are treated as ``RUNTIME`` objects, except those marked
-  with the ``MACOSX_BUNDLE`` property on OS X (see ``BUNDLE`` below.)
+  with the ``MACOSX_BUNDLE`` property on macOS (see ``BUNDLE`` below.)
   For DLL platforms (all Windows-based systems including Cygwin), the
   DLL part of a shared library is treated as a ``RUNTIME`` target.
 
@@ -137,11 +137,11 @@ project.  There are several kinds of target files that may be installed:
 
 ``FRAMEWORK``
   Both static and shared libraries marked with the ``FRAMEWORK``
-  property are treated as ``FRAMEWORK`` targets on OS X.
+  property are treated as ``FRAMEWORK`` targets on macOS.
 
 ``BUNDLE``
   Executables marked with the ``MACOSX_BUNDLE`` property are treated as
-  ``BUNDLE`` targets on OS X.
+  ``BUNDLE`` targets on macOS.
 
 ``PUBLIC_HEADER``
   Any ``PUBLIC_HEADER`` files associated with a library are installed in

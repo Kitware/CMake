@@ -1,14 +1,14 @@
 CPack Bundle Generator
 ----------------------
 
-CPack Bundle generator (Mac OS X) specific options
+CPack Bundle generator (macOS) specific options
 
 Variables specific to CPack Bundle generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Installers built on Mac OS X using the Bundle generator use the
-aforementioned DragNDrop (CPACK_DMG_xxx) variables, plus the following
-Bundle-specific parameters (CPACK_BUNDLE_xxx).
+Installers built on macOS using the Bundle generator use the
+aforementioned DragNDrop (``CPACK_DMG_xxx``) variables, plus the following
+Bundle-specific parameters (``CPACK_BUNDLE_xxx``).
 
 .. variable:: CPACK_BUNDLE_NAME
 
@@ -25,7 +25,7 @@ Bundle-specific parameters (CPACK_BUNDLE_xxx).
 
  Path to an OSX icon file that will be used as the icon for the generated
  bundle. This is the icon that appears in the OSX finder for the bundle, and
- in the OSX dock when the bundle is opened.  Required.
+ in the OSX dock when the bundle is opened. Required.
 
 .. variable:: CPACK_BUNDLE_STARTUP_COMMAND
 
@@ -36,13 +36,13 @@ Bundle-specific parameters (CPACK_BUNDLE_xxx).
 .. variable:: CPACK_BUNDLE_APPLE_CERT_APP
 
  The name of your Apple supplied code signing certificate for the application.
- The name usually takes the form "Developer ID Application: [Name]" or
- "3rd Party Mac Developer Application: [Name]". If this variable is not set
+ The name usually takes the form ``Developer ID Application: [Name]`` or
+ ``3rd Party Mac Developer Application: [Name]``. If this variable is not set
  the application will not be signed.
 
 .. variable:: CPACK_BUNDLE_APPLE_ENTITLEMENTS
 
- The name of the plist file that contains your apple entitlements for sandboxing
+ The name of the ``Plist`` file that contains your apple entitlements for sandboxing
  your application. This file is required for submission to the Mac App Store.
 
 .. variable:: CPACK_BUNDLE_APPLE_CODESIGN_FILES
@@ -53,12 +53,12 @@ Bundle-specific parameters (CPACK_BUNDLE_xxx).
 
 .. variable:: CPACK_BUNDLE_APPLE_CODESIGN_PARAMETER
 
- Additional parameter that will passed to codesign.
- Default value: "--deep -f"
+ Additional parameter that will passed to ``codesign``.
+ Default value: ``--deep -f``
 
 .. variable:: CPACK_COMMAND_CODESIGN
 
- Path to the codesign(1) command used to sign applications with an
+ Path to the ``codesign(1)`` command used to sign applications with an
  Apple cert. This variable can be used to override the automatically
  detected command (or specify its location if the auto-detection fails
- to find it.)
+ to find it).

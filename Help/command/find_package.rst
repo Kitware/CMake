@@ -216,7 +216,7 @@ Each entry is meant for installation trees following Windows (W), UNIX
   <prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/               (W/U)
   <prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/ (W/U)
 
-On systems supporting OS X Frameworks and Application Bundles the
+On systems supporting macOS Frameworks and Application Bundles the
 following directories are searched for frameworks or bundles
 containing a configuration file::
 
