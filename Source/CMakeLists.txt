@@ -265,6 +265,7 @@ set(SRCS
   cmInstallDirectoryGenerator.h
   cmInstallDirectoryGenerator.cxx
   cmLinkedTree.h
+  cmLinkItem.cxx
   cmLinkItem.h
   cmLinkLineComputer.cxx
   cmLinkLineComputer.h

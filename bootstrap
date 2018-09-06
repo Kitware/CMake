@@ -352,6 +352,7 @@ CMAKE_CXX_SOURCES="\
   cmInstallTargetsCommand \
   cmInstalledFile \
   cmLinkDirectoriesCommand \
+  cmLinkItem \
   cmLinkLineComputer \
   cmListCommand \
   cmListFileCache \

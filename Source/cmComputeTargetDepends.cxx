@@ -229,7 +229,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
       emitted.insert(depender->GetName());
       for (cmLinkImplItem const& lib : impl->Libraries) {
         // Don't emit the same library twice for this target.
-        if (emitted.insert(lib).second) {
+        if (emitted.insert(lib.AsStr()).second) {
           this->AddTargetDepend(depender_index, lib, true);
           this->AddInterfaceDepends(depender_index, lib, it, emitted);
         }
@@ -245,7 +245,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     emitted.insert(depender->GetName());
     for (cmLinkItem const& litem : tutils) {
       // Don't emit the same utility twice for this target.
-      if (emitted.insert(litem).second) {
+      if (emitted.insert(litem.AsStr()).second) {
         this->AddTargetDepend(depender_index, litem, false);
       }
     }
@@ -261,7 +261,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
         dependee->GetLinkInterface(config, depender)) {
     for (cmLinkItem const& lib : iface->Libraries) {
       // Don't emit the same library twice for this target.
-      if (emitted.insert(lib).second) {
+      if (emitted.insert(lib.AsStr()).second) {
         this->AddTargetDepend(depender_index, lib, true);
         this->AddInterfaceDepends(depender_index, lib, config, emitted);
       }
@@ -324,7 +324,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
         << depender->GetName() << "\" does not exist.";
 
       cmListFileBacktrace const* backtrace =
-        depender->GetUtilityBacktrace(dependee_name);
+        depender->GetUtilityBacktrace(dependee_name.AsStr());
       if (backtrace) {
         cm->IssueMessage(messageType, e.str(), *backtrace);
       } else {

@@ -671,9 +671,12 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
     this->UtilityItemsDone = true;
     std::set<std::string> const& utilities = this->GetUtilities();
     for (std::string const& i : utilities) {
-      cmGeneratorTarget* gt =
-        this->LocalGenerator->FindGeneratorTargetToUse(i);
-      this->UtilityItems.insert(cmLinkItem(i, gt));
+      if (cmGeneratorTarget* gt =
+            this->LocalGenerator->FindGeneratorTargetToUse(i)) {
+        this->UtilityItems.insert(cmLinkItem(gt));
+      } else {
+        this->UtilityItems.insert(cmLinkItem(i));
+      }
     }
   }
   return this->UtilityItems;
@@ -816,7 +819,8 @@ static void AddInterfaceEntries(
         thisTarget->GetLinkImplementationLibraries(config)) {
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target) {
-        std::string genex = "$<TARGET_PROPERTY:" + lib + "," + prop + ">";
+        std::string genex =
+          "$<TARGET_PROPERTY:" + lib.AsStr() + "," + prop + ">";
         cmGeneratorExpression ge(lib.Backtrace);
         std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
         cge->SetEvaluateForBuildsystem(true);
@@ -836,7 +840,7 @@ static void AddObjectEntries(
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target &&
           lib.Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-        std::string genex = "$<TARGET_OBJECTS:" + lib + ">";
+        std::string genex = "$<TARGET_OBJECTS:" + lib.AsStr() + ">";
         cmGeneratorExpression ge(lib.Backtrace);
         std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
         cge->SetEvaluateForBuildsystem(true);
@@ -860,7 +864,7 @@ static bool processSources(
 
   for (cmGeneratorTarget::TargetPropertyEntry* entry : entries) {
     cmLinkImplItem const& item = entry->LinkImplItem;
-    std::string const& targetName = item;
+    std::string const& targetName = item.AsStr();
     std::vector<std::string> entrySources;
     cmSystemTools::ExpandListArgument(
       entry->ge->Evaluate(tgt->GetLocalGenerator(), config, false, tgt, tgt,
@@ -1756,7 +1760,7 @@ public:
   void Visit(cmLinkItem const& item)
   {
     if (!item.Target) {
-      if (item.find("::") != std::string::npos) {
+      if (item.AsStr().find("::") != std::string::npos) {
         bool noMessage = false;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
         std::ostringstream e;
@@ -1777,7 +1781,7 @@ public:
 
         if (!noMessage) {
           e << "Target \"" << this->Target->GetName()
-            << "\" links to target \"" << item
+            << "\" links to target \"" << item.AsStr()
             << "\" but the target was not found.  Perhaps a find_package() "
                "call is missing for an IMPORTED target, or an ALIAS target is "
                "missing?";
@@ -2477,7 +2481,7 @@ static void processIncludeDirectories(
 {
   for (cmGeneratorTarget::TargetPropertyEntry* entry : entries) {
     cmLinkImplItem const& item = entry->LinkImplItem;
-    std::string const& targetName = item;
+    std::string const& targetName = item.AsStr();
     bool const fromImported = item.Target && item.Target->IsImported();
     bool const checkCMP0027 = item.FromGenex;
     std::vector<std::string> entryIncludes;
@@ -2615,7 +2619,7 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
     cmLinkImplementationLibraries const* impl =
       this->GetLinkImplementationLibraries(config);
     for (cmLinkImplItem const& lib : impl->Libraries) {
-      std::string libDir = cmSystemTools::CollapseFullPath(lib);
+      std::string libDir = cmSystemTools::CollapseFullPath(lib.AsStr());
 
       static cmsys::RegularExpression frameworkCheck(
         "(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
@@ -4495,7 +4499,7 @@ void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
     if (name == this->GetName() || name.empty()) {
       continue;
     }
-    items.emplace_back(name, this->FindTargetToLink(name));
+    items.push_back(this->ResolveLinkItem(name));
   }
 }
 
@@ -4573,12 +4577,12 @@ void cmGeneratorTarget::ComputeLinkInterface(
       // on other shared libraries that are not in the interface.
       std::unordered_set<std::string> emitted;
       for (cmLinkItem const& lib : iface.Libraries) {
-        emitted.insert(lib);
+        emitted.insert(lib.AsStr());
       }
       if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
         cmLinkImplementation const* impl = this->GetLinkImplementation(config);
         for (cmLinkImplItem const& lib : impl->Libraries) {
-          if (emitted.insert(lib).second) {
+          if (emitted.insert(lib.AsStr()).second) {
             if (lib.Target) {
               // This is a runtime dependency on another shared library.
               if (lib.Target->GetType() == cmStateEnums::SHARED_LIBRARY) {
@@ -5603,7 +5607,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       }
 
       // The entry is meant for this configuration.
-      impl.Libraries.emplace_back(name, this->FindTargetToLink(name), *btIt,
+      impl.Libraries.emplace_back(this->ResolveLinkItem(name), *btIt,
                                   evaluated != *le);
     }
 
@@ -5631,14 +5635,12 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         continue;
       }
       // Support OLD behavior for CMP0003.
-      impl.WrongConfigLibraries.emplace_back(name,
-                                             this->FindTargetToLink(name));
+      impl.WrongConfigLibraries.push_back(this->ResolveLinkItem(name));
     }
   }
 }
 
-cmGeneratorTarget* cmGeneratorTarget::FindTargetToLink(
-  std::string const& name) const
+cmLinkItem cmGeneratorTarget::ResolveLinkItem(std::string const& name) const
 {
   cmGeneratorTarget* tgt =
     this->LocalGenerator->FindGeneratorTargetToUse(name);
@@ -5651,7 +5653,11 @@ cmGeneratorTarget* cmGeneratorTarget::FindTargetToLink(
     tgt = nullptr;
   }
 
-  return tgt;
+  if (tgt) {
+    return cmLinkItem(tgt);
+  }
+
+  return cmLinkItem(name);
 }
 
 std::string cmGeneratorTarget::GetPDBDirectory(const std::string& config) const

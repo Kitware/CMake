@@ -831,6 +831,16 @@ void cmExportFileGenerator::SetImportDetailProperties(
   }
 }
 
+static std::string const& asString(std::string const& l)
+{
+  return l;
+}
+
+static std::string const& asString(cmLinkItem const& l)
+{
+  return l.AsStr();
+}
+
 template <typename T>
 void cmExportFileGenerator::SetImportLinkProperty(
   std::string const& suffix, cmGeneratorTarget* target,
@@ -850,7 +860,7 @@ void cmExportFileGenerator::SetImportLinkProperty(
     link_entries += sep;
     sep = ";";
 
-    std::string temp = l;
+    std::string temp = asString(l);
     this->AddTargetNamespace(temp, target, missingTargets);
     link_entries += temp;
   }
