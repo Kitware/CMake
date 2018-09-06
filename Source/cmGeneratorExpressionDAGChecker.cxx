@@ -14,7 +14,7 @@
 #include <utility>
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
-  const cmListFileBacktrace& backtrace, const std::string& target,
+  const cmListFileBacktrace& backtrace, cmGeneratorTarget const* target,
   const std::string& property, const GeneratorExpressionContent* content,
   cmGeneratorExpressionDAGChecker* parent)
   : Parent(parent)
@@ -28,7 +28,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
 }
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
-  const std::string& target, const std::string& property,
+  cmGeneratorTarget const* target, const std::string& property,
   const GeneratorExpressionContent* content,
   cmGeneratorExpressionDAGChecker* parent)
   : Parent(parent)
@@ -58,8 +58,8 @@ void cmGeneratorExpressionDAGChecker::Initialize()
         TEST_TRANSITIVE_PROPERTY_METHOD) false)) // NOLINT(clang-tidy)
 #undef TEST_TRANSITIVE_PROPERTY_METHOD
   {
-    std::map<std::string, std::set<std::string>>::const_iterator it =
-      top->Seen.find(this->Target);
+    std::map<cmGeneratorTarget const*, std::set<std::string>>::const_iterator
+      it = top->Seen.find(this->Target);
     if (it != top->Seen.end()) {
       const std::set<std::string>& propSet = it->second;
       if (propSet.find(this->Property) != propSet.end()) {
@@ -166,7 +166,8 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingGenexExpression()
   return top->Property == "TARGET_GENEX_EVAL" || top->Property == "GENEX_EVAL";
 }
 
-bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(const char* tgt)
+bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(
+  cmGeneratorTarget const* tgt)
 {
   const cmGeneratorExpressionDAGChecker* top = this;
   const cmGeneratorExpressionDAGChecker* parent = this->Parent;
@@ -189,7 +190,7 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(const char* tgt)
     strcmp(prop, "INTERFACE_LINK_LIBRARIES") == 0;
 }
 
-std::string cmGeneratorExpressionDAGChecker::TopTarget() const
+cmGeneratorTarget const* cmGeneratorExpressionDAGChecker::TopTarget() const
 {
   const cmGeneratorExpressionDAGChecker* top = this;
   const cmGeneratorExpressionDAGChecker* parent = this->Parent;

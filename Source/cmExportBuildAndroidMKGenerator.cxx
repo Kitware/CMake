@@ -108,7 +108,7 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
         // build type of the makefile
         cmGeneratorExpression ge;
         cmGeneratorExpressionDAGChecker dagChecker(
-          target->GetName(), "INTERFACE_LINK_LIBRARIES", nullptr, nullptr);
+          target, "INTERFACE_LINK_LIBRARIES", nullptr, nullptr);
         std::unique_ptr<cmCompiledGeneratorExpression> cge =
           ge.Parse(property.second);
         std::string evaluated = cge->Evaluate(

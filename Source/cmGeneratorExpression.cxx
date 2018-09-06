@@ -13,7 +13,6 @@
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
 #include "cmGeneratorExpressionParser.h"
-#include "cmGeneratorTarget.h"
 #include "cmSystemTools.h"
 
 cmGeneratorExpression::cmGeneratorExpression(
@@ -395,7 +394,7 @@ const std::string& cmGeneratorExpressionInterpreter::Evaluate(
 
   // Specify COMPILE_OPTIONS to DAGchecker, same semantic as COMPILE_FLAGS
   cmGeneratorExpressionDAGChecker dagChecker(
-    this->HeadTarget->GetName(),
+    this->HeadTarget,
     property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property, nullptr,
     nullptr);
 

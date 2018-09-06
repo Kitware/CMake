@@ -1,4 +1,5 @@
 add_library(b STATIC b.c)
+target_compile_definitions(b INTERFACE DEF_B)
 
 add_library(sameName INTERFACE IMPORTED)
 target_link_libraries(sameName INTERFACE b)

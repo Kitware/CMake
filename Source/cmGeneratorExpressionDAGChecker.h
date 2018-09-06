@@ -13,6 +13,7 @@
 
 struct GeneratorExpressionContent;
 struct cmGeneratorExpressionContext;
+class cmGeneratorTarget;
 
 #define CM_SELECT_BOTH(F, A1, A2) F(A1, A2)
 #define CM_SELECT_FIRST(F, A1, A2) F(A1)
@@ -41,11 +42,11 @@ struct cmGeneratorExpressionContext;
 struct cmGeneratorExpressionDAGChecker
 {
   cmGeneratorExpressionDAGChecker(const cmListFileBacktrace& backtrace,
-                                  const std::string& target,
+                                  cmGeneratorTarget const* target,
                                   const std::string& property,
                                   const GeneratorExpressionContent* content,
                                   cmGeneratorExpressionDAGChecker* parent);
-  cmGeneratorExpressionDAGChecker(const std::string& target,
+  cmGeneratorExpressionDAGChecker(cmGeneratorTarget const* target,
                                   const std::string& property,
                                   const GeneratorExpressionContent* content,
                                   cmGeneratorExpressionDAGChecker* parent);
@@ -64,7 +65,7 @@ struct cmGeneratorExpressionDAGChecker
                    const std::string& expr);
 
   bool EvaluatingGenexExpression();
-  bool EvaluatingLinkLibraries(const char* tgt = nullptr);
+  bool EvaluatingLinkLibraries(cmGeneratorTarget const* tgt = nullptr);
 
 #define DECLARE_TRANSITIVE_PROPERTY_METHOD(METHOD) bool METHOD() const;
 
@@ -75,7 +76,7 @@ struct cmGeneratorExpressionDAGChecker
   bool GetTransitivePropertiesOnly();
   void SetTransitivePropertiesOnly() { this->TransitivePropertiesOnly = true; }
 
-  std::string TopTarget() const;
+  cmGeneratorTarget const* TopTarget() const;
 
 private:
   Result CheckGraph() const;
@@ -83,9 +84,9 @@ private:
 
 private:
   const cmGeneratorExpressionDAGChecker* const Parent;
-  const std::string Target;
+  cmGeneratorTarget const* Target;
   const std::string Property;
-  std::map<std::string, std::set<std::string>> Seen;
+  std::map<cmGeneratorTarget const*, std::set<std::string>> Seen;
   const GeneratorExpressionContent* const Content;
   const cmListFileBacktrace Backtrace;
   Result CheckResult;
