@@ -177,9 +177,9 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // Create a rule to re-run CMake.
     cmCustomCommandLine commandLine;
     commandLine.push_back(cmSystemTools::GetCMakeCommand());
-    std::string argH = "-H";
-    argH += lg->GetSourceDirectory();
-    commandLine.push_back(argH);
+    std::string argS = "-S";
+    argS += lg->GetSourceDirectory();
+    commandLine.push_back(argS);
     std::string argB = "-B";
     argB += lg->GetBinaryDirectory();
     commandLine.push_back(argB);
