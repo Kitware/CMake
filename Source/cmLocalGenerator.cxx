@@ -1655,7 +1655,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     std::string option_flag =
       "CMAKE_" + lang + *stdIt + "_" + type + "_COMPILE_OPTION";
 
-    const char* opt =
+    std::string const& opt =
       target->Target->GetMakefile()->GetRequiredDefinition(option_flag);
     std::vector<std::string> optVec;
     cmSystemTools::ExpandListArgument(opt, optVec);

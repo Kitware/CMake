@@ -423,7 +423,7 @@ public:
    */
   const char* GetDefinition(const std::string&) const;
   const char* GetSafeDefinition(const std::string&) const;
-  const char* GetRequiredDefinition(const std::string& name) const;
+  std::string GetRequiredDefinition(const std::string& name) const;
   bool IsDefinitionSet(const std::string&) const;
   /**
    * Get the list of all variables in the current space. If argument

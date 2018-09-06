@@ -54,9 +54,8 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
       this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
   }
   if (!mod_dir.empty()) {
-    const char* moddir_flag =
+    std::string modflag =
       this->Makefile->GetRequiredDefinition("CMAKE_Fortran_MODDIR_FLAG");
-    std::string modflag = moddir_flag;
     modflag += mod_dir;
     this->AppendFlags(flags, modflag);
   }
