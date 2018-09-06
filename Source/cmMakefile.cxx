@@ -2368,8 +2368,10 @@ const char* cmMakefile::GetRequiredDefinition(const std::string& name) const
 
 bool cmMakefile::IsDefinitionSet(const std::string& name) const
 {
-  const char* def = this->StateSnapshot.GetDefinition(name);
-  if (!def) {
+  const char* def;
+  if (const std::string* d = this->StateSnapshot.GetDefinition(name)) {
+    def = d->c_str();
+  } else {
     def = this->GetState()->GetInitializedCacheValue(name);
   }
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -2385,8 +2387,10 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
 
 const char* cmMakefile::GetDefinition(const std::string& name) const
 {
-  const char* def = this->StateSnapshot.GetDefinition(name);
-  if (!def) {
+  const char* def;
+  if (const std::string* d = this->StateSnapshot.GetDefinition(name)) {
+    def = d->c_str();
+  } else {
     def = this->GetState()->GetInitializedCacheValue(name);
   }
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -2402,8 +2406,9 @@ const char* cmMakefile::GetDefinition(const std::string& name) const
       // A callback was executed and may have caused re-allocation of the
       // variable storage.  Look it up again for now.
       // FIXME: Refactor variable storage to avoid this problem.
-      def = this->StateSnapshot.GetDefinition(name);
-      if (!def) {
+      if (const std::string* d = this->StateSnapshot.GetDefinition(name)) {
+        def = d->c_str();
+      } else {
         def = this->GetState()->GetInitializedCacheValue(name);
       }
     }
