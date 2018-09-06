@@ -722,8 +722,8 @@ static void PopulateFileGroupData(
         ? languageDataMap.at(kInterfaceSourcesLanguageDataKey)
         : languageDataMap.at(fileData.Language);
       cmLocalGenerator* lg = target->GetLocalGenerator();
-      cmGeneratorExpressionInterpreter genexInterpreter(
-        lg, target, config, target->GetName(), fileData.Language);
+      cmGeneratorExpressionInterpreter genexInterpreter(lg, config, target,
+                                                        fileData.Language);
 
       std::string compileFlags = ld.Flags;
       const std::string COMPILE_FLAGS("COMPILE_FLAGS");
@@ -817,7 +817,7 @@ static Json::Value DumpSourceFilesList(
   auto targetProp = target->Target->GetProperty("INTERFACE_SOURCES");
   if (targetProp != nullptr) {
     cmGeneratorExpressionInterpreter genexInterpreter(
-      target->GetLocalGenerator(), target, config, target->GetName(), "");
+      target->GetLocalGenerator(), config, target);
 
     auto evaluatedSources = cmsys::SystemTools::SplitString(
       genexInterpreter.Evaluate(targetProp, "INTERFACE_SOURCES"), ';');
@@ -977,8 +977,7 @@ static void CreateInterfaceSourcesEntry(
   LanguageData& ld = languageDataMap[kInterfaceSourcesLanguageDataKey];
   ld.Language = "";
 
-  cmGeneratorExpressionInterpreter genexInterpreter(lg, target, config,
-                                                    target->GetName(), "");
+  cmGeneratorExpressionInterpreter genexInterpreter(lg, config, target);
   std::vector<std::string> propertyValue;
   GetTargetProperty(genexInterpreter, target, "INTERFACE_INCLUDE_DIRECTORIES",
                     propertyValue);

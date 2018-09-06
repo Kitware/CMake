@@ -13,6 +13,7 @@
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
 #include "cmGeneratorExpressionParser.h"
+#include "cmGeneratorTarget.h"
 #include "cmSystemTools.h"
 
 cmGeneratorExpression::cmGeneratorExpression(
@@ -389,14 +390,16 @@ void cmCompiledGeneratorExpression::GetMaxLanguageStandard(
 const std::string& cmGeneratorExpressionInterpreter::Evaluate(
   const char* expression, const std::string& property)
 {
-  if (this->Target.empty()) {
-    return this->EvaluateExpression(expression);
-  }
+  this->CompiledGeneratorExpression =
+    this->GeneratorExpression.Parse(expression);
 
   // Specify COMPILE_OPTIONS to DAGchecker, same semantic as COMPILE_FLAGS
   cmGeneratorExpressionDAGChecker dagChecker(
-    this->Target, property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property,
-    nullptr, nullptr);
+    this->HeadTarget->GetName(),
+    property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property, nullptr,
+    nullptr);
 
-  return this->EvaluateExpression(expression, &dagChecker);
+  return this->CompiledGeneratorExpression->Evaluate(
+    this->LocalGenerator, this->Config, false, this->HeadTarget, &dagChecker,
+    this->Language);
 }
