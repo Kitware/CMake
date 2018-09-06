@@ -72,8 +72,8 @@ private:
   std::string Config;
   EntryVector FinalLinkEntries;
 
-  std::map<std::string, int>::iterator AllocateLinkEntry(
-    std::string const& item);
+  std::map<cmLinkItem, int>::iterator AllocateLinkEntry(
+    cmLinkItem const& item);
   int AddLinkEntry(cmLinkItem const& item);
   void AddVarLinkEntries(int depender_index, const char* value);
   void AddDirectLinkEntries();
@@ -83,7 +83,7 @@ private:
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;
-  std::map<std::string, int> LinkEntryIndex;
+  std::map<cmLinkItem, int> LinkEntryIndex;
 
   // BFS of initial dependencies.
   struct BFSEntry

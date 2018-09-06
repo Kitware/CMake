@@ -279,12 +279,12 @@ cmComputeLinkDepends::Compute()
   return this->FinalLinkEntries;
 }
 
-std::map<std::string, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
-  std::string const& item)
+std::map<cmLinkItem, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
+  cmLinkItem const& item)
 {
-  std::map<std::string, int>::value_type index_entry(
+  std::map<cmLinkItem, int>::value_type index_entry(
     item, static_cast<int>(this->EntryList.size()));
-  std::map<std::string, int>::iterator lei =
+  std::map<cmLinkItem, int>::iterator lei =
     this->LinkEntryIndex.insert(index_entry).first;
   this->EntryList.emplace_back();
   this->InferredDependSets.push_back(nullptr);
@@ -295,15 +295,14 @@ std::map<std::string, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
 int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
 {
   // Check if the item entry has already been added.
-  std::map<std::string, int>::iterator lei =
-    this->LinkEntryIndex.find(item.AsStr());
+  std::map<cmLinkItem, int>::iterator lei = this->LinkEntryIndex.find(item);
   if (lei != this->LinkEntryIndex.end()) {
     // Yes.  We do not need to follow the item's dependencies again.
     return lei->second;
   }
 
   // Allocate a spot for the item entry.
-  lei = this->AllocateLinkEntry(item.AsStr());
+  lei = this->AllocateLinkEntry(item);
 
   // Initialize the item entry.
   int index = lei->second;
@@ -397,11 +396,11 @@ void cmComputeLinkDepends::QueueSharedDependencies(
 void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 {
   // Check if the target already has an entry.
-  std::map<std::string, int>::iterator lei =
-    this->LinkEntryIndex.find(dep.Item.AsStr());
+  std::map<cmLinkItem, int>::iterator lei =
+    this->LinkEntryIndex.find(dep.Item);
   if (lei == this->LinkEntryIndex.end()) {
     // Allocate a spot for the item entry.
-    lei = this->AllocateLinkEntry(dep.Item.AsStr());
+    lei = this->AllocateLinkEntry(dep.Item);
 
     // Initialize the item entry.
     LinkEntry& entry = this->EntryList[lei->second];

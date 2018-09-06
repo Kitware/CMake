@@ -4575,14 +4575,14 @@ void cmGeneratorTarget::ComputeLinkInterface(
         this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       // Shared libraries may have runtime implementation dependencies
       // on other shared libraries that are not in the interface.
-      std::unordered_set<std::string> emitted;
+      std::set<cmLinkItem> emitted;
       for (cmLinkItem const& lib : iface.Libraries) {
-        emitted.insert(lib.AsStr());
+        emitted.insert(lib);
       }
       if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
         cmLinkImplementation const* impl = this->GetLinkImplementation(config);
         for (cmLinkImplItem const& lib : impl->Libraries) {
-          if (emitted.insert(lib.AsStr()).second) {
+          if (emitted.insert(lib).second) {
             if (lib.Target) {
               // This is a runtime dependency on another shared library.
               if (lib.Target->GetType() == cmStateEnums::SHARED_LIBRARY) {
