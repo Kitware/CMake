@@ -784,10 +784,10 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     if (*i == "LIST_DIRECTORIES") {
       ++i; // skip LIST_DIRECTORIES
       if (i != args.end()) {
-        if (cmSystemTools::IsOn(i->c_str())) {
+        if (cmSystemTools::IsOn(*i)) {
           g.SetListDirs(true);
           g.SetRecurseListDirs(true);
-        } else if (cmSystemTools::IsOff(i->c_str())) {
+        } else if (cmSystemTools::IsOff(*i)) {
           g.SetListDirs(false);
           g.SetRecurseListDirs(false);
         } else {
@@ -1756,7 +1756,7 @@ struct cmFileInstaller : public cmFileCopier
     // Check whether to copy files always or only if they have changed.
     std::string install_always;
     if (cmSystemTools::GetEnv("CMAKE_INSTALL_ALWAYS", install_always)) {
-      this->Always = cmSystemTools::IsOn(install_always.c_str());
+      this->Always = cmSystemTools::IsOn(install_always);
     }
     // Get the current manifest.
     this->Manifest =
@@ -2747,7 +2747,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     } else if (*i == "TLS_VERIFY") {
       ++i;
       if (i != args.end()) {
-        tls_verify = cmSystemTools::IsOn(i->c_str());
+        tls_verify = cmSystemTools::IsOn(*i);
       } else {
         this->SetError("TLS_VERIFY missing bool value.");
         return false;

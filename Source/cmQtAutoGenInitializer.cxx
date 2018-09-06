@@ -205,8 +205,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     unsigned long iVerb = 0;
     if (!cmSystemTools::StringToULong(this->Verbosity.c_str(), &iVerb)) {
       // Non numeric verbosity
-      this->Verbosity =
-        cmSystemTools::IsOn(this->Verbosity.c_str()) ? "1" : "0";
+      this->Verbosity = cmSystemTools::IsOn(this->Verbosity) ? "1" : "0";
     }
   }
 

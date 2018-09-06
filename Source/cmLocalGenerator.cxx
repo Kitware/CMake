@@ -2024,7 +2024,7 @@ void cmLocalGenerator::AppendIncludeDirectories(
 
     std::string inc = include;
 
-    if (!cmSystemTools::IsOff(inc.c_str())) {
+    if (!cmSystemTools::IsOff(inc)) {
       cmSystemTools::ConvertToUnixSlashes(inc);
     }
 

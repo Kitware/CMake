@@ -67,7 +67,7 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
   if (args.size() == 3) {
     initialValue = args[2];
   }
-  bool init = cmSystemTools::IsOn(initialValue.c_str());
+  bool init = cmSystemTools::IsOn(initialValue);
   this->Makefile->AddCacheDefinition(args[0], init ? "ON" : "OFF",
                                      args[1].c_str(), cmStateEnums::BOOL);
 

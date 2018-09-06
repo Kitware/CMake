@@ -2126,10 +2126,10 @@ bool cmCTestTestHandler::SetTestsProperties(
       for (cmCTestTestProperties& rt : this->TestList) {
         if (t == rt.Name) {
           if (key == "WILL_FAIL") {
-            rt.WillFail = cmSystemTools::IsOn(val.c_str());
+            rt.WillFail = cmSystemTools::IsOn(val);
           }
           if (key == "DISABLED") {
-            rt.Disabled = cmSystemTools::IsOn(val.c_str());
+            rt.Disabled = cmSystemTools::IsOn(val);
           }
           if (key == "ATTACHED_FILES") {
             cmSystemTools::ExpandListArgument(val, rt.AttachedFiles);
@@ -2172,7 +2172,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             cmSystemTools::ExpandListArgument(val, rt.RequiredFiles);
           }
           if (key == "RUN_SERIAL") {
-            rt.RunSerial = cmSystemTools::IsOn(val.c_str());
+            rt.RunSerial = cmSystemTools::IsOn(val);
           }
           if (key == "FAIL_REGULAR_EXPRESSION") {
             std::vector<std::string> lval;
@@ -2188,7 +2188,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             }
           }
           if (key == "PROCESSOR_AFFINITY") {
-            rt.WantAffinity = cmSystemTools::IsOn(val.c_str());
+            rt.WantAffinity = cmSystemTools::IsOn(val);
           }
           if (key == "SKIP_RETURN_CODE") {
             rt.SkipReturnCode = atoi(val.c_str());
