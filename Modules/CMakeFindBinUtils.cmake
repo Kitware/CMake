@@ -38,6 +38,8 @@ if(CMAKE_LINKER)
   endif()
 endif()
 
+set(_CMAKE_TOOL_VARS "")
+
 # if it's the MS C/CXX compiler, search for link
 if("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC"
    OR "x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" STREQUAL "xMSVC"
@@ -47,7 +49,7 @@ if("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC"
 
   find_program(CMAKE_LINKER NAMES link HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
 
-  mark_as_advanced(CMAKE_LINKER)
+  list(APPEND _CMAKE_TOOL_VARS CMAKE_LINKER)
 
 # in all other cases search for ar, ranlib, etc.
 else()
@@ -70,7 +72,7 @@ else()
   find_program(CMAKE_OBJDUMP NAMES ${_CMAKE_TOOLCHAIN_PREFIX}objdump HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
   find_program(CMAKE_OBJCOPY NAMES ${_CMAKE_TOOLCHAIN_PREFIX}objcopy HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
 
-  mark_as_advanced(CMAKE_AR CMAKE_RANLIB CMAKE_STRIP CMAKE_LINKER CMAKE_NM CMAKE_OBJDUMP CMAKE_OBJCOPY)
+  list(APPEND _CMAKE_TOOL_VARS CMAKE_AR CMAKE_RANLIB CMAKE_STRIP CMAKE_LINKER CMAKE_NM CMAKE_OBJDUMP CMAKE_OBJCOPY)
 
 endif()
 
@@ -81,5 +83,15 @@ if(CMAKE_PLATFORM_HAS_INSTALLNAME)
     message(FATAL_ERROR "Could not find install_name_tool, please check your installation.")
   endif()
 
-  mark_as_advanced(CMAKE_INSTALL_NAME_TOOL)
+  list(APPEND _CMAKE_TOOL_VARS CMAKE_INSTALL_NAME_TOOL)
 endif()
+
+# Mark any tool cache entries as advanced.
+foreach(var IN LISTS _CMAKE_TOOL_VARS)
+  get_property(_CMAKE_TOOL_CACHED CACHE ${var} PROPERTY TYPE)
+  if(_CMAKE_TOOL_CACHED)
+    mark_as_advanced(${var})
+  endif()
+endforeach()
+unset(_CMAKE_TOOL_VARS)
+unset(_CMAKE_TOOL_CACHED)
