@@ -48,6 +48,31 @@ run_cmake_command(cache-bad-entry
 run_cmake_command(cache-empty-entry
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-empty-entry/)
 
+function(run_ExplicitDirs)
+  set(source_dir ${RunCMake_SOURCE_DIR}/ExplicitDirs)
+  set(binary_dir ${RunCMake_BINARY_DIR}/ExplicitDirs-build)
+
+  file(REMOVE_RECURSE "${binary_dir}")
+  file(MAKE_DIRECTORY "${binary_dir}")
+  run_cmake_command(S-arg ${CMAKE_COMMAND} -S ${source_dir} ${binary_dir})
+  run_cmake_command(S-arg-reverse-order ${CMAKE_COMMAND} ${binary_dir} -S${source_dir} )
+  run_cmake_command(S-no-arg ${CMAKE_COMMAND} -S )
+  run_cmake_command(S-no-arg2 ${CMAKE_COMMAND} -S -T)
+  run_cmake_command(S-B ${CMAKE_COMMAND} -S ${source_dir} -B ${binary_dir})
+
+  # make sure that -B can explicitly construct build directories
+  file(REMOVE_RECURSE "${binary_dir}")
+  run_cmake_command(B-arg ${CMAKE_COMMAND} -B ${binary_dir} ${source_dir})
+  file(REMOVE_RECURSE "${binary_dir}")
+  run_cmake_command(B-arg-reverse-order ${CMAKE_COMMAND} ${source_dir} -B${binary_dir})
+  run_cmake_command(B-no-arg ${CMAKE_COMMAND} -B )
+  run_cmake_command(B-no-arg2 ${CMAKE_COMMAND} -B -T)
+  file(REMOVE_RECURSE "${binary_dir}")
+  run_cmake_command(B-S ${CMAKE_COMMAND} -B${binary_dir} -S${source_dir})
+
+endfunction()
+run_ExplicitDirs()
+
 function(run_BuildDir)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/BuildDir-build)
