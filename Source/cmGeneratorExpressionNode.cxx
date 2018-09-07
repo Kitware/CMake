@@ -1054,7 +1054,9 @@ std::string getLinkedTargetsContent(
     // Don't follow such link interface entries so as not to create a
     // self-referencing loop.
     if (l.Target && l.Target != target) {
-      depString += sep + "$<TARGET_PROPERTY:" + l.Target->GetName() + "," +
+      std::string uniqueName =
+        target->GetGlobalGenerator()->IndexGeneratorTargetUniquely(l.Target);
+      depString += sep + "$<TARGET_PROPERTY:" + std::move(uniqueName) + "," +
         interfacePropertyName + ">";
       sep = ";";
     }

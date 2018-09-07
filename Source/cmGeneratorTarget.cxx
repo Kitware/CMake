@@ -819,8 +819,11 @@ static void AddInterfaceEntries(
         thisTarget->GetLinkImplementationLibraries(config)) {
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target) {
+        std::string uniqueName =
+          thisTarget->GetGlobalGenerator()->IndexGeneratorTargetUniquely(
+            lib.Target);
         std::string genex =
-          "$<TARGET_PROPERTY:" + lib.AsStr() + "," + prop + ">";
+          "$<TARGET_PROPERTY:" + std::move(uniqueName) + "," + prop + ">";
         cmGeneratorExpression ge(lib.Backtrace);
         std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
         cge->SetEvaluateForBuildsystem(true);
@@ -840,7 +843,10 @@ static void AddObjectEntries(
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target &&
           lib.Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-        std::string genex = "$<TARGET_OBJECTS:" + lib.AsStr() + ">";
+        std::string uniqueName =
+          thisTarget->GetGlobalGenerator()->IndexGeneratorTargetUniquely(
+            lib.Target);
+        std::string genex = "$<TARGET_OBJECTS:" + std::move(uniqueName) + ">";
         cmGeneratorExpression ge(lib.Backtrace);
         std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
         cge->SetEvaluateForBuildsystem(true);

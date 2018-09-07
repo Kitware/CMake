@@ -303,6 +303,10 @@ public:
   void IndexTarget(cmTarget* t);
   void IndexGeneratorTarget(cmGeneratorTarget* gt);
 
+  // Index the target using a name that is unique to that target
+  // even if other targets have the same name.
+  std::string IndexGeneratorTargetUniquely(cmGeneratorTarget const* gt);
+
   static bool IsReservedTarget(std::string const& name);
 
   virtual const char* GetAllTargetName() const { return "ALL_BUILD"; }

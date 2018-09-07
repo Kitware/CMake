@@ -2155,6 +2155,24 @@ void cmGlobalGenerator::IndexGeneratorTarget(cmGeneratorTarget* gt)
   }
 }
 
+std::string cmGlobalGenerator::IndexGeneratorTargetUniquely(
+  cmGeneratorTarget const* gt)
+{
+  // Use the pointer value to uniquely identify the target instance.
+  // Use a "T" prefix to indicate that this identifier is for a target.
+  // We must satisfy cmGeneratorExpression::IsValidTargetName so use no
+  // other special characters.
+  char buf[64];
+  sprintf(buf, "::T%p",
+          static_cast<void const*>(gt)); // cast avoids format warning
+  std::string id = gt->GetName() + buf;
+  // We internally index pointers to non-const generator targets
+  // but our callers only have pointers to const generator targets.
+  // They will give up non-const privileges when looking up anyway.
+  this->GeneratorTargetSearchIndex[id] = const_cast<cmGeneratorTarget*>(gt);
+  return id;
+}
+
 void cmGlobalGenerator::IndexMakefile(cmMakefile* mf)
 {
   // FIXME: add_subdirectory supports multiple build directories
