@@ -1139,11 +1139,14 @@ void cmGlobalGenerator::ClearEnabledLanguages()
 
 void cmGlobalGenerator::CreateLocalGenerators()
 {
+  this->LocalGeneratorSearchIndex.clear();
   cmDeleteAll(this->LocalGenerators);
   this->LocalGenerators.clear();
   this->LocalGenerators.reserve(this->Makefiles.size());
   for (cmMakefile* m : this->Makefiles) {
-    this->LocalGenerators.push_back(this->CreateLocalGenerator(m));
+    cmLocalGenerator* lg = this->CreateLocalGenerator(m);
+    this->LocalGenerators.push_back(lg);
+    this->IndexLocalGenerator(lg);
   }
 }
 
@@ -1661,6 +1664,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->TargetSearchIndex.clear();
   this->GeneratorTargetSearchIndex.clear();
   this->MakefileSearchIndex.clear();
+  this->LocalGeneratorSearchIndex.clear();
   this->ProjectMap.clear();
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
@@ -2130,6 +2134,17 @@ cmMakefile* cmGlobalGenerator::FindMakefile(const std::string& start_dir) const
   return nullptr;
 }
 
+cmLocalGenerator* cmGlobalGenerator::FindLocalGenerator(
+  cmDirectoryId const& id) const
+{
+  LocalGeneratorMap::const_iterator i =
+    this->LocalGeneratorSearchIndex.find(id.String);
+  if (i != this->LocalGeneratorSearchIndex.end()) {
+    return i->second;
+  }
+  return nullptr;
+}
+
 void cmGlobalGenerator::AddAlias(const std::string& name,
                                  std::string const& tgtName)
 {
@@ -2182,6 +2197,12 @@ void cmGlobalGenerator::IndexMakefile(cmMakefile* mf)
   // up directories by build directory path.
   this->MakefileSearchIndex.insert(
     MakefileMap::value_type(mf->GetCurrentSourceDirectory(), mf));
+}
+
+void cmGlobalGenerator::IndexLocalGenerator(cmLocalGenerator* lg)
+{
+  cmDirectoryId id = lg->GetMakefile()->GetDirectoryId();
+  this->LocalGeneratorSearchIndex[id.String] = lg;
 }
 
 cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const

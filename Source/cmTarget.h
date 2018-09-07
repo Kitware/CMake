@@ -142,6 +142,9 @@ public:
 
   void AddLinkLibrary(cmMakefile& mf, const std::string& lib,
                       cmTargetLinkLibraryType llt);
+  void AddLinkLibrary(cmMakefile& mf, std::string const& lib,
+                      std::string const& libRef, cmTargetLinkLibraryType llt);
+
   enum TLLSignature
   {
     KeywordTLLSignature,

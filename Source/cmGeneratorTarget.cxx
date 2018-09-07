@@ -5648,11 +5648,38 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
 cmGeneratorTarget::TargetOrString cmGeneratorTarget::ResolveTargetReference(
   std::string const& name) const
 {
+  cmLocalGenerator const* lg = this->LocalGenerator;
+  std::string const* lookupName = &name;
+
+  // When target_link_libraries() is called with a LHS target that is
+  // not created in the calling directory it adds a directory id suffix
+  // that we can use to look up the calling directory.  It is that scope
+  // in which the item name is meaningful.  This case is relatively rare
+  // so we allocate a separate string only when the directory id is present.
+  std::string::size_type pos = name.find(CMAKE_DIRECTORY_ID_SEP);
+  std::string plainName;
+  if (pos != std::string::npos) {
+    // We will look up the plain name without the directory id suffix.
+    plainName = name.substr(0, pos);
+
+    // We will look up in the scope of the directory id.
+    // If we do not recognize the id then leave the original
+    // syntax in place to produce an indicative error later.
+    cmDirectoryId const dirId =
+      name.substr(pos + sizeof(CMAKE_DIRECTORY_ID_SEP) - 1);
+    if (cmLocalGenerator const* otherLG =
+          this->GlobalGenerator->FindLocalGenerator(dirId)) {
+      lg = otherLG;
+      lookupName = &plainName;
+    }
+  }
+
   TargetOrString resolved;
 
-  if (cmGeneratorTarget* tgt =
-        this->LocalGenerator->FindGeneratorTargetToUse(name)) {
+  if (cmGeneratorTarget* tgt = lg->FindGeneratorTargetToUse(*lookupName)) {
     resolved.Target = tgt;
+  } else if (lookupName == &plainName) {
+    resolved.String = std::move(plainName);
   } else {
     resolved.String = name;
   }

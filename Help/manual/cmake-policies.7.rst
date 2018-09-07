@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.13
 .. toctree::
    :maxdepth: 1
 
+   CMP0079: target_link_libraries allows use with targets in other directories. </policy/CMP0079>
    CMP0078: UseSWIG generates standard target names. </policy/CMP0078>
    CMP0077: option() honors normal variables. </policy/CMP0077>
    CMP0076: target_sources() command converts relative paths to absolute. </policy/CMP0076>

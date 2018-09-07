@@ -745,20 +745,27 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
 void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
                               cmTargetLinkLibraryType llt)
 {
+  this->AddLinkLibrary(mf, lib, lib, llt);
+}
+
+void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
+                              std::string const& libRef,
+                              cmTargetLinkLibraryType llt)
+{
   cmTarget* tgt = mf.FindTargetToUse(lib);
   {
     const bool isNonImportedTarget = tgt && !tgt->IsImported();
 
     const std::string libName =
       (isNonImportedTarget && llt != GENERAL_LibraryType)
-      ? targetNameGenex(lib)
-      : lib;
+      ? targetNameGenex(libRef)
+      : libRef;
     this->AppendProperty(
       "LINK_LIBRARIES",
       this->GetDebugGeneratorExpressions(libName, llt).c_str());
   }
 
-  if (cmGeneratorExpression::Find(lib) != std::string::npos ||
+  if (cmGeneratorExpression::Find(lib) != std::string::npos || lib != libRef ||
       (tgt &&
        (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
         tgt->GetType() == cmStateEnums::OBJECT_LIBRARY)) ||
