@@ -31,7 +31,7 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
   bool checkAndWarn = false;
   {
     auto status = this->Makefile->GetPolicyStatus(cmPolicies::CMP0077);
-    const char* existsBeforeSet =
+    const auto* existsBeforeSet =
       this->Makefile->GetStateSnapshot().GetDefinition(args[0]);
     switch (status) {
       case cmPolicies::WARN:
@@ -72,7 +72,7 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
                                      args[1].c_str(), cmStateEnums::BOOL);
 
   if (checkAndWarn) {
-    const char* existsAfterSet =
+    const auto* existsAfterSet =
       this->Makefile->GetStateSnapshot().GetDefinition(args[0]);
     if (!existsAfterSet) {
       std::ostringstream w;

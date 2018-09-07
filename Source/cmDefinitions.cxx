@@ -30,11 +30,11 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(const std::string& key,
   return begin->Map.insert(MapType::value_type(key, def)).first->second;
 }
 
-const char* cmDefinitions::Get(const std::string& key, StackIter begin,
-                               StackIter end)
+const std::string* cmDefinitions::Get(const std::string& key, StackIter begin,
+                                      StackIter end)
 {
   Def const& def = cmDefinitions::GetInternal(key, begin, end, false);
-  return def.Exists ? def.c_str() : nullptr;
+  return def.Exists ? &def : nullptr;
 }
 
 void cmDefinitions::Raise(const std::string& key, StackIter begin,

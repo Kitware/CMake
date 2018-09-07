@@ -298,9 +298,9 @@ cmStateSnapshot cmState::Reset()
 
   {
     std::string srcDir =
-      cmDefinitions::Get("CMAKE_SOURCE_DIR", pos->Vars, pos->Root);
+      *cmDefinitions::Get("CMAKE_SOURCE_DIR", pos->Vars, pos->Root);
     std::string binDir =
-      cmDefinitions::Get("CMAKE_BINARY_DIR", pos->Vars, pos->Root);
+      *cmDefinitions::Get("CMAKE_BINARY_DIR", pos->Vars, pos->Root);
     this->VarTree.Clear();
     pos->Vars = this->VarTree.Push(this->VarTree.Root());
     pos->Parent = this->VarTree.Root();
