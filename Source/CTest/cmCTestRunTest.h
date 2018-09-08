@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cmath>
 #include <set>
 #include <stddef.h>
 #include <string>
@@ -118,14 +119,7 @@ private:
 
 inline int getNumWidth(size_t n)
 {
-  int numWidth = 1;
-  if (n >= 10) {
-    numWidth = 2;
-  }
-  if (n >= 100) {
-    numWidth = 3;
-  }
-  return numWidth;
+  return static_cast<int>(std::log10(n)) + 1;
 }
 
 #endif
