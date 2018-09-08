@@ -334,7 +334,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   return passed || skipped;
 }
 
-bool cmCTestRunTest::StartAgain()
+bool cmCTestRunTest::StartAgain(size_t completed)
 {
   if (!this->RunAgain) {
     return false;
@@ -349,7 +349,7 @@ bool cmCTestRunTest::StartAgain()
     return true;
   }
 
-  this->StartTest(this->TotalNumberOfTests);
+  this->StartTest(completed, this->TotalNumberOfTests);
   return true;
 }
 
@@ -429,9 +429,10 @@ void cmCTestRunTest::StartFailure(std::string const& output)
 }
 
 // Starts the execution of a test.  Returns once it has started
-bool cmCTestRunTest::StartTest(size_t total)
+bool cmCTestRunTest::StartTest(size_t completed, size_t total)
 {
   this->TotalNumberOfTests = total; // save for rerun case
+  static_cast<void>(completed);
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              std::setw(2 * getNumWidth(total) + 8)
                << "Start "

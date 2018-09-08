@@ -65,7 +65,7 @@ public:
   void CompressOutput();
 
   // launch the test process, return whether it started correctly
-  bool StartTest(size_t total);
+  bool StartTest(size_t completed, size_t total);
   // capture and report the test results
   bool EndTest(size_t completed, size_t total, bool started);
   // Called by ctest -N to log the command string
@@ -73,7 +73,7 @@ public:
 
   void ComputeWeightedCost();
 
-  bool StartAgain();
+  bool StartAgain(size_t completed);
 
   void StartFailure(std::string const& output);
 

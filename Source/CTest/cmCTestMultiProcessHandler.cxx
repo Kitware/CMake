@@ -178,7 +178,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
                           this->Properties[test]->Directory + " : " +
                           std::strerror(workdir.GetLastResult()));
   } else {
-    if (testRun->StartTest(this->Total)) {
+    if (testRun->StartTest(this->Completed, this->Total)) {
       return true;
     }
   }
@@ -440,7 +440,7 @@ void cmCTestMultiProcessHandler::FinishTestProcess(cmCTestRunTest* runner,
     this->SetStopTimePassed();
   }
   if (started) {
-    if (!this->StopTimePassed && runner->StartAgain()) {
+    if (!this->StopTimePassed && runner->StartAgain(this->Completed)) {
       this->Completed--; // remove the completed test because run again
       return;
     }
