@@ -226,7 +226,7 @@ function(check_ipo_supported)
     endif()
   endforeach()
 
-  if(CMAKE_GENERATOR MATCHES "^Visual Studio ")
+  if(CMAKE_GENERATOR MATCHES "^Visual Studio 9 ")
     _ipo_not_supported("CMake doesn't support IPO for current generator")
     return()
   endif()

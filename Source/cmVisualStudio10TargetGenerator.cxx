@@ -1122,6 +1122,9 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
       this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_EXTENSIONS")) {
     e1.Element("WindowsAppContainer", "true");
   }
+  if (this->IPOEnabledConfigurations.count(config) > 0) {
+    e1.Element("WholeProgramOptimization", "true");
+  }
 }
 
 void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
@@ -2485,8 +2488,10 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     clOptions.AddFlag("CompileAs", "CompileAsCpp");
   }
 
-  // Check IPO related warning/error.
-  this->GeneratorTarget->IsIPOEnabled(linkLanguage, configName);
+  // Put the IPO enabled configurations into a set.
+  if (this->GeneratorTarget->IsIPOEnabled(linkLanguage, configName)) {
+    this->IPOEnabledConfigurations.insert(configName);
+  }
 
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Makefile->GetDefineFlags();
