@@ -5,7 +5,6 @@
 #include "cmAffinity.h"
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
-#include "cmCTestScriptHandler.h"
 #include "cmCTestTestHandler.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
@@ -53,6 +52,7 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
 {
   this->ParallelLevel = 1;
   this->TestLoad = 0;
+  this->FakeLoadForTesting = 0;
   this->Completed = 0;
   this->RunningCount = 0;
   this->ProcessorsAvailable = cmAffinity::GetProcessorsAvailable();
@@ -97,6 +97,16 @@ void cmCTestMultiProcessHandler::SetParallelLevel(size_t level)
 void cmCTestMultiProcessHandler::SetTestLoad(unsigned long load)
 {
   this->TestLoad = load;
+
+  std::string fake_load_value;
+  if (cmSystemTools::GetEnv("__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING",
+                            fake_load_value)) {
+    if (!cmSystemTools::StringToULong(fake_load_value.c_str(),
+                                      &this->FakeLoadForTesting)) {
+      cmSystemTools::Error("Failed to parse fake load value: ",
+                           fake_load_value.c_str());
+    }
+  }
 }
 
 void cmCTestMultiProcessHandler::RunTests()
@@ -259,11 +269,18 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
 
 void cmCTestMultiProcessHandler::StartNextTests()
 {
-  size_t numToStart = 0;
+  if (this->TestLoadRetryTimer.get() != nullptr) {
+    // This timer may be waiting to call StartNextTests again.
+    // Since we have been called it is no longer needed.
+    uv_timer_stop(this->TestLoadRetryTimer);
+  }
 
   if (this->Tests.empty()) {
+    this->TestLoadRetryTimer.reset();
     return;
   }
+
+  size_t numToStart = 0;
 
   if (this->RunningCount < this->ParallelLevel) {
     numToStart = this->ParallelLevel - this->RunningCount;
@@ -280,7 +297,6 @@ void cmCTestMultiProcessHandler::StartNextTests()
   }
 
   bool allTestsFailedTestLoadCheck = false;
-  bool usedFakeLoadForTesting = false;
   size_t minProcessorsRequired = this->ParallelLevel;
   std::string testWithMinProcessors;
 
@@ -293,15 +309,11 @@ void cmCTestMultiProcessHandler::StartNextTests()
     allTestsFailedTestLoadCheck = true;
 
     // Check for a fake load average value used in testing.
-    std::string fake_load_value;
-    if (cmSystemTools::GetEnv("__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING",
-                              fake_load_value)) {
-      usedFakeLoadForTesting = true;
-      if (!cmSystemTools::StringToULong(fake_load_value.c_str(),
-                                        &systemLoad)) {
-        cmSystemTools::Error("Failed to parse fake load value: ",
-                             fake_load_value.c_str());
-      }
+    if (this->FakeLoadForTesting > 0) {
+      systemLoad = this->FakeLoadForTesting;
+      // Drop the fake load for the next iteration to a value low enough
+      // that the next iteration will start tests.
+      this->FakeLoadForTesting = 1;
     }
     // If it's not set, look up the true load average.
     else {
@@ -385,16 +397,23 @@ void cmCTestMultiProcessHandler::StartNextTests()
     }
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "*****" << std::endl);
 
-    if (usedFakeLoadForTesting) {
-      // Break out of the infinite loop of waiting for our fake load
-      // to come down.
-      this->StopTimePassed = true;
-    } else {
-      // Wait between 1 and 5 seconds before trying again.
-      cmCTestScriptHandler::SleepInSeconds(cmSystemTools::RandomSeed() % 5 +
-                                           1);
+    // Wait between 1 and 5 seconds before trying again.
+    unsigned int milliseconds = (cmSystemTools::RandomSeed() % 5 + 1) * 1000;
+    if (this->FakeLoadForTesting) {
+      milliseconds = 10;
     }
+    if (this->TestLoadRetryTimer.get() == nullptr) {
+      this->TestLoadRetryTimer.init(this->Loop, this);
+    }
+    this->TestLoadRetryTimer.start(
+      &cmCTestMultiProcessHandler::OnTestLoadRetryCB, milliseconds, 0);
   }
+}
+
+void cmCTestMultiProcessHandler::OnTestLoadRetryCB(uv_timer_t* timer)
+{
+  auto self = static_cast<cmCTestMultiProcessHandler*>(timer->data);
+  self->StartNextTests();
 }
 
 void cmCTestMultiProcessHandler::FinishTestProcess(cmCTestRunTest* runner,
