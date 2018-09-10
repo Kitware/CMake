@@ -745,7 +745,7 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
 void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
                               cmTargetLinkLibraryType llt)
 {
-  cmTarget* tgt = this->Makefile->FindTargetToUse(lib);
+  cmTarget* tgt = mf.FindTargetToUse(lib);
   {
     const bool isNonImportedTarget = tgt && !tgt->IsImported();
 
