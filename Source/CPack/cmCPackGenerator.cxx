@@ -360,8 +360,6 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         return 0;
       }
       files = gl.GetFiles();
-      std::vector<std::string>::iterator gfit;
-      std::vector<cmsys::RegularExpression>::iterator regIt;
       for (std::string const& gf : files) {
         bool skip = false;
         std::string inFile = gf;
@@ -1499,7 +1497,6 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
     if (installTypes && *installTypes) {
       std::vector<std::string> installTypesVector;
       cmSystemTools::ExpandListArgument(installTypes, installTypesVector);
-      std::vector<std::string>::iterator installTypesIt;
       for (std::string const& installType : installTypesVector) {
         component->InstallationTypes.push_back(
           this->GetInstallationType(projectName, installType));
@@ -1511,7 +1508,6 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
     if (depends && *depends) {
       std::vector<std::string> dependsVector;
       cmSystemTools::ExpandListArgument(depends, dependsVector);
-      std::vector<std::string>::iterator dependIt;
       for (std::string const& depend : dependsVector) {
         cmCPackComponent* child = GetComponent(projectName, depend);
         component->Dependencies.push_back(child);

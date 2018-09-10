@@ -253,7 +253,6 @@ int cmCommandArgumentParserHelper::ParseString(const char* str, int verb)
 
 void cmCommandArgumentParserHelper::CleanupParser()
 {
-  std::vector<char*>::iterator sit;
   for (char* var : this->Variables) {
     delete[] var;
   }
