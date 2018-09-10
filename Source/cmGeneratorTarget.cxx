@@ -5645,24 +5645,38 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   }
 }
 
+cmGeneratorTarget::TargetOrString cmGeneratorTarget::ResolveTargetReference(
+  std::string const& name) const
+{
+  TargetOrString resolved;
+
+  if (cmGeneratorTarget* tgt =
+        this->LocalGenerator->FindGeneratorTargetToUse(name)) {
+    resolved.Target = tgt;
+  } else {
+    resolved.String = name;
+  }
+
+  return resolved;
+}
+
 cmLinkItem cmGeneratorTarget::ResolveLinkItem(std::string const& name) const
 {
-  cmGeneratorTarget* tgt =
-    this->LocalGenerator->FindGeneratorTargetToUse(name);
+  TargetOrString resolved = this->ResolveTargetReference(name);
+
+  if (!resolved.Target) {
+    return cmLinkItem(resolved.String);
+  }
 
   // Skip targets that will not really be linked.  This is probably a
   // name conflict between an external library and an executable
   // within the project.
-  if (tgt && tgt->GetType() == cmStateEnums::EXECUTABLE &&
-      !tgt->IsExecutableWithExports()) {
-    tgt = nullptr;
+  if (resolved.Target->GetType() == cmStateEnums::EXECUTABLE &&
+      !resolved.Target->IsExecutableWithExports()) {
+    return cmLinkItem(resolved.Target->GetName());
   }
 
-  if (tgt) {
-    return cmLinkItem(tgt);
-  }
-
-  return cmLinkItem(name);
+  return cmLinkItem(resolved.Target);
 }
 
 std::string cmGeneratorTarget::GetPDBDirectory(const std::string& config) const

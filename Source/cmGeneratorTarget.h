@@ -357,6 +357,13 @@ public:
                                           cmOptionalLinkImplementation& impl,
                                           const cmGeneratorTarget* head) const;
 
+  struct TargetOrString
+  {
+    std::string String;
+    cmGeneratorTarget* Target = nullptr;
+  };
+  TargetOrString ResolveTargetReference(std::string const& name) const;
+
   cmLinkItem ResolveLinkItem(std::string const& name) const;
 
   // Compute the set of languages compiled by the target.  This is
