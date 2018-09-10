@@ -27,6 +27,7 @@ macro(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
     set(_compilerExecutable "${CMAKE_C_COMPILER}")
     set(_arg1 "${CMAKE_C_COMPILER_ARG1}")
   endif ()
+  separate_arguments(_arg1 NATIVE_COMMAND "${_arg1}")
   execute_process(COMMAND ${_compilerExecutable} ${_arg1} ${_stdver} ${_stdlib} -v -E -x ${_lang} -dD dummy
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles
                   ERROR_VARIABLE _gccOutput
