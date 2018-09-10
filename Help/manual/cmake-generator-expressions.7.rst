@@ -51,7 +51,7 @@ Available logical expressions are:
   ``0`` if all ``?`` are ``0``, else ``1``
 ``$<NOT:?>``
   ``0`` if ``?`` is ``1``, else ``1``
-``$<IF:?,true-value...,false-value...>```
+``$<IF:?,true-value...,false-value...>``
   ``true-value...`` if ``?`` is ``1``, ``false-value...`` if ``?`` is ``0``
 ``$<STREQUAL:a,b>``
   ``1`` if ``a`` is STREQUAL ``b``, else ``0``
