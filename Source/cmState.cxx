@@ -140,10 +140,10 @@ const char* cmState::GetCacheEntryValue(std::string const& key) const
   return e->Value.c_str();
 }
 
-const char* cmState::GetInitializedCacheValue(std::string const& key) const
+const std::string* cmState::GetInitializedCacheValue(
+  std::string const& key) const
 {
-  const std::string* p = this->CacheManager->GetInitializedCacheValue(key);
-  return p ? p->c_str() : nullptr;
+  return this->CacheManager->GetInitializedCacheValue(key);
 }
 
 cmStateEnums::CacheEntryType cmState::GetCacheEntryType(

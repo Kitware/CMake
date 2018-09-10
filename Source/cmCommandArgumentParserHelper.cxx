@@ -68,12 +68,12 @@ const char* cmCommandArgumentParserHelper::ExpandSpecialVariable(
     return "";
   }
   if (strcmp(key, "CACHE") == 0) {
-    if (const char* c =
+    if (const std::string* c =
           this->Makefile->GetState()->GetInitializedCacheValue(var)) {
       if (this->EscapeQuotes) {
-        return this->AddString(cmSystemTools::EscapeQuotes(c));
+        return this->AddString(cmSystemTools::EscapeQuotes(*c));
       }
-      return this->AddString(c);
+      return this->AddString(*c);
     }
     return "";
   }

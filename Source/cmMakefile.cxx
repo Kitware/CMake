@@ -1718,7 +1718,8 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
                                     cmStateEnums::CacheEntryType type,
                                     bool force)
 {
-  const char* existingValue = this->GetState()->GetInitializedCacheValue(name);
+  const std::string* existingValue =
+    this->GetState()->GetInitializedCacheValue(name);
   // must be outside the following if() to keep it alive long enough
   std::string nvalue;
 
@@ -1728,7 +1729,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
     // if this is not a force, then use the value from the cache
     // if it is a force, then use the value being passed in
     if (!force) {
-      value = existingValue;
+      value = existingValue->c_str();
     }
     if (type == cmStateEnums::PATH || type == cmStateEnums::FILEPATH) {
       std::vector<std::string>::size_type cc;
@@ -1748,7 +1749,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
       }
 
       this->GetCMakeInstance()->AddCacheEntry(name, nvalue.c_str(), doc, type);
-      nvalue = this->GetState()->GetInitializedCacheValue(name);
+      nvalue = *this->GetState()->GetInitializedCacheValue(name);
       value = nvalue.c_str();
     }
   }
@@ -2368,17 +2369,15 @@ std::string cmMakefile::GetRequiredDefinition(const std::string& name) const
 
 bool cmMakefile::IsDefinitionSet(const std::string& name) const
 {
-  const char* def;
-  if (const std::string* d = this->StateSnapshot.GetDefinition(name)) {
-    def = d->c_str();
-  } else {
+  const std::string* def = this->StateSnapshot.GetDefinition(name);
+  if (!def) {
     def = this->GetState()->GetInitializedCacheValue(name);
   }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   if (cmVariableWatch* vv = this->GetVariableWatch()) {
     if (!def) {
       vv->VariableAccessed(
-        name, cmVariableWatch::UNKNOWN_VARIABLE_DEFINED_ACCESS, def, this);
+        name, cmVariableWatch::UNKNOWN_VARIABLE_DEFINED_ACCESS, nullptr, this);
     }
   }
 #endif
@@ -2387,10 +2386,8 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
 
 const char* cmMakefile::GetDefinition(const std::string& name) const
 {
-  const char* def;
-  if (const std::string* d = this->StateSnapshot.GetDefinition(name)) {
-    def = d->c_str();
-  } else {
+  const std::string* def = this->StateSnapshot.GetDefinition(name);
+  if (!def) {
     def = this->GetState()->GetInitializedCacheValue(name);
   }
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -2400,21 +2397,20 @@ const char* cmMakefile::GetDefinition(const std::string& name) const
       vv->VariableAccessed(name,
                            def ? cmVariableWatch::VARIABLE_READ_ACCESS
                                : cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS,
-                           def, this);
+                           (def ? def->c_str() : nullptr), this);
 
     if (watch_function_executed) {
       // A callback was executed and may have caused re-allocation of the
       // variable storage.  Look it up again for now.
       // FIXME: Refactor variable storage to avoid this problem.
-      if (const std::string* d = this->StateSnapshot.GetDefinition(name)) {
-        def = d->c_str();
-      } else {
+      def = this->StateSnapshot.GetDefinition(name);
+      if (!def) {
         def = this->GetState()->GetInitializedCacheValue(name);
       }
     }
   }
 #endif
-  return def;
+  return (def ? def->c_str() : nullptr);
 }
 
 const char* cmMakefile::GetSafeDefinition(const std::string& def) const
