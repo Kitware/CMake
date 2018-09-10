@@ -478,11 +478,13 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
           tag.clear();
         }
         std::string track;
-        if (cmSystemTools::GetLineFromStream(tfin, track)) {
+        if (cmSystemTools::GetLineFromStream(tfin, track) &&
+            !this->Parts[PartStart] && !command) {
           this->SpecificTrack = track;
         }
         std::string model;
-        if (cmSystemTools::GetLineFromStream(tfin, model)) {
+        if (cmSystemTools::GetLineFromStream(tfin, model) &&
+            !this->Parts[PartStart] && !command) {
           this->TestModel = GetTestModelFromString(model.c_str());
         }
         tfin.close();
