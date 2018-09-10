@@ -284,8 +284,6 @@ public:
   bool NameResolvesToFramework(const std::string& libname) const;
 
   cmMakefile* FindMakefile(const std::string& start_dir) const;
-  ///! Find a local generator by its startdirectory
-  cmLocalGenerator* FindLocalGenerator(const std::string& start_dir) const;
 
   /** Append the subdirectory for the given configuration.  If anything is
       appended the given prefix and suffix will be appended around it, which

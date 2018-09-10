@@ -2130,19 +2130,6 @@ cmMakefile* cmGlobalGenerator::FindMakefile(const std::string& start_dir) const
   return nullptr;
 }
 
-///! Find a local generator by its startdirectory
-cmLocalGenerator* cmGlobalGenerator::FindLocalGenerator(
-  const std::string& start_dir) const
-{
-  for (cmLocalGenerator* lg : this->LocalGenerators) {
-    std::string sd = lg->GetCurrentSourceDirectory();
-    if (sd == start_dir) {
-      return lg;
-    }
-  }
-  return nullptr;
-}
-
 void cmGlobalGenerator::AddAlias(const std::string& name,
                                  std::string const& tgtName)
 {
