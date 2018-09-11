@@ -136,9 +136,8 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
 
   // Add source file specific flags.
   cmGeneratorExpressionInterpreter genexInterpreter(
-    this->LocalGenerator, this->GeneratorTarget,
-    this->LocalGenerator->GetConfigName(), this->GeneratorTarget->GetName(),
-    language);
+    this->LocalGenerator, this->LocalGenerator->GetConfigName(),
+    this->GeneratorTarget, language);
 
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
   if (const char* cflags = source->GetProperty(COMPILE_FLAGS)) {
@@ -188,8 +187,7 @@ std::string cmNinjaTargetGenerator::ComputeDefines(cmSourceFile const* source,
   std::set<std::string> defines;
   const std::string config = this->LocalGenerator->GetConfigName();
   cmGeneratorExpressionInterpreter genexInterpreter(
-    this->LocalGenerator, this->GeneratorTarget, config,
-    this->GeneratorTarget->GetName(), language);
+    this->LocalGenerator, config, this->GeneratorTarget, language);
 
   const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
   if (const char* compile_defs = source->GetProperty(COMPILE_DEFINITIONS)) {
@@ -217,8 +215,7 @@ std::string cmNinjaTargetGenerator::ComputeIncludes(
   std::vector<std::string> includes;
   const std::string config = this->LocalGenerator->GetConfigName();
   cmGeneratorExpressionInterpreter genexInterpreter(
-    this->LocalGenerator, this->GeneratorTarget, config,
-    this->GeneratorTarget->GetName(), language);
+    this->LocalGenerator, config, this->GeneratorTarget, language);
 
   const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
   if (const char* cincludes = source->GetProperty(INCLUDE_DIRECTORIES)) {

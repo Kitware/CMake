@@ -751,11 +751,10 @@ class XCodeGeneratorExpressionInterpreter
 public:
   XCodeGeneratorExpressionInterpreter(cmSourceFile* sourceFile,
                                       cmLocalGenerator* localGenerator,
-                                      cmGeneratorTarget* generatorTarget,
+                                      cmGeneratorTarget* headTarget,
                                       const std::string& lang)
-    : cmGeneratorExpressionInterpreter(localGenerator, generatorTarget,
-                                       "NO-PER-CONFIG-SUPPORT-IN-XCODE",
-                                       generatorTarget->GetName(), lang)
+    : cmGeneratorExpressionInterpreter(
+        localGenerator, "NO-PER-CONFIG-SUPPORT-IN-XCODE", headTarget, lang)
     , SourceFile(sourceFile)
   {
   }
@@ -767,8 +766,7 @@ public:
   {
     const std::string& processed =
       this->cmGeneratorExpressionInterpreter::Evaluate(expression, property);
-    if (this->GetCompiledGeneratorExpression()
-          .GetHadContextSensitiveCondition()) {
+    if (this->CompiledGeneratorExpression->GetHadContextSensitiveCondition()) {
       std::ostringstream e;
       /* clang-format off */
       e <<
@@ -777,7 +775,7 @@ public:
           "specified for source:\n"
           "  " << this->SourceFile->GetFullPath() << "\n";
       /* clang-format on */
-      this->GetLocalGenerator()->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->LocalGenerator->IssueMessage(cmake::FATAL_ERROR, e.str());
     }
 
     return processed;

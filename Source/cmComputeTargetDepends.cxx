@@ -195,7 +195,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
   // dependencies in all targets, because the generated build-systems can't
   // deal with config-specific dependencies.
   {
-    std::set<std::string> emitted;
+    std::set<cmLinkItem> emitted;
 
     std::vector<std::string> configs;
     depender->Makefile->GetConfigurations(configs);
@@ -206,27 +206,31 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
       std::vector<cmSourceFile const*> objectFiles;
       depender->GetExternalObjects(objectFiles, it);
       for (cmSourceFile const* o : objectFiles) {
-        std::string objLib = o->GetObjectLibrary();
-        if (!objLib.empty() && emitted.insert(objLib).second) {
-          if (depender->GetType() != cmStateEnums::EXECUTABLE &&
-              depender->GetType() != cmStateEnums::STATIC_LIBRARY &&
-              depender->GetType() != cmStateEnums::SHARED_LIBRARY &&
-              depender->GetType() != cmStateEnums::MODULE_LIBRARY &&
-              depender->GetType() != cmStateEnums::OBJECT_LIBRARY) {
-            this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
-              cmake::FATAL_ERROR,
-              "Only executables and libraries may reference target objects.",
-              depender->GetBacktrace());
-            return;
+        std::string const& objLib = o->GetObjectLibrary();
+        if (!objLib.empty()) {
+          cmLinkItem const& objItem = depender->ResolveLinkItem(objLib);
+          if (emitted.insert(objItem).second) {
+            if (depender->GetType() != cmStateEnums::EXECUTABLE &&
+                depender->GetType() != cmStateEnums::STATIC_LIBRARY &&
+                depender->GetType() != cmStateEnums::SHARED_LIBRARY &&
+                depender->GetType() != cmStateEnums::MODULE_LIBRARY &&
+                depender->GetType() != cmStateEnums::OBJECT_LIBRARY) {
+              this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
+                cmake::FATAL_ERROR,
+                "Only executables and libraries may reference target objects.",
+                depender->GetBacktrace());
+              return;
+            }
+            const_cast<cmGeneratorTarget*>(depender)->Target->AddUtility(
+              objLib);
           }
-          const_cast<cmGeneratorTarget*>(depender)->Target->AddUtility(objLib);
         }
       }
 
       cmLinkImplementation const* impl = depender->GetLinkImplementation(it);
 
       // A target should not depend on itself.
-      emitted.insert(depender->GetName());
+      emitted.insert(cmLinkItem(depender));
       for (cmLinkImplItem const& lib : impl->Libraries) {
         // Don't emit the same library twice for this target.
         if (emitted.insert(lib).second) {
@@ -240,9 +244,9 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
   // Loop over all utility dependencies.
   {
     std::set<cmLinkItem> const& tutils = depender->GetUtilityItems();
-    std::set<std::string> emitted;
+    std::set<cmLinkItem> emitted;
     // A target should not depend on itself.
-    emitted.insert(depender->GetName());
+    emitted.insert(cmLinkItem(depender));
     for (cmLinkItem const& litem : tutils) {
       // Don't emit the same utility twice for this target.
       if (emitted.insert(litem).second) {
@@ -254,7 +258,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
 
 void cmComputeTargetDepends::AddInterfaceDepends(
   int depender_index, const cmGeneratorTarget* dependee,
-  const std::string& config, std::set<std::string>& emitted)
+  const std::string& config, std::set<cmLinkItem>& emitted)
 {
   cmGeneratorTarget const* depender = this->Targets[depender_index];
   if (cmLinkInterface const* iface =
@@ -271,7 +275,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
 
 void cmComputeTargetDepends::AddInterfaceDepends(
   int depender_index, cmLinkItem const& dependee_name,
-  const std::string& config, std::set<std::string>& emitted)
+  const std::string& config, std::set<cmLinkItem>& emitted)
 {
   cmGeneratorTarget const* depender = this->Targets[depender_index];
   cmGeneratorTarget const* dependee = dependee_name.Target;
@@ -285,7 +289,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
 
   if (dependee) {
     // A target should not depend on itself.
-    emitted.insert(depender->GetName());
+    emitted.insert(cmLinkItem(depender));
     this->AddInterfaceDepends(depender_index, dependee, config, emitted);
   }
 }
@@ -324,7 +328,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
         << depender->GetName() << "\" does not exist.";
 
       cmListFileBacktrace const* backtrace =
-        depender->GetUtilityBacktrace(dependee_name);
+        depender->GetUtilityBacktrace(dependee_name.AsStr());
       if (backtrace) {
         cm->IssueMessage(messageType, e.str(), *backtrace);
       } else {

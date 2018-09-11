@@ -2117,8 +2117,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         flagtable = gg->GetCSharpFlagTable();
       }
       cmGeneratorExpressionInterpreter genexInterpreter(
-        this->LocalGenerator, this->GeneratorTarget, config,
-        this->GeneratorTarget->GetName(), lang);
+        this->LocalGenerator, config, this->GeneratorTarget, lang);
       cmVS10GeneratorOptions clOptions(
         this->LocalGenerator, cmVisualStudioGeneratorOptions::Compiler,
         flagtable, this);

@@ -1497,8 +1497,7 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
       lang = sourceLang;
     }
 
-    cmGeneratorExpressionInterpreter genexInterpreter(lg, gt, *i,
-                                                      gt->GetName(), lang);
+    cmGeneratorExpressionInterpreter genexInterpreter(lg, *i, gt, lang);
 
     bool needfc = false;
     if (!objectName.empty()) {

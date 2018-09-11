@@ -434,8 +434,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   std::string config = this->LocalGenerator->GetConfigName();
   std::string configUpper = cmSystemTools::UpperCase(config);
   cmGeneratorExpressionInterpreter genexInterpreter(
-    this->LocalGenerator, this->GeneratorTarget, config,
-    this->GeneratorTarget->GetName(), lang);
+    this->LocalGenerator, config, this->GeneratorTarget, lang);
 
   // Add Fortran format flags.
   if (lang == "Fortran") {

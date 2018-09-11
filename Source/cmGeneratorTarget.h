@@ -357,7 +357,7 @@ public:
                                           cmOptionalLinkImplementation& impl,
                                           const cmGeneratorTarget* head) const;
 
-  cmGeneratorTarget* FindTargetToLink(std::string const& name) const;
+  cmLinkItem ResolveLinkItem(std::string const& name) const;
 
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change

@@ -671,9 +671,12 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
     this->UtilityItemsDone = true;
     std::set<std::string> const& utilities = this->GetUtilities();
     for (std::string const& i : utilities) {
-      cmGeneratorTarget* gt =
-        this->LocalGenerator->FindGeneratorTargetToUse(i);
-      this->UtilityItems.insert(cmLinkItem(i, gt));
+      if (cmGeneratorTarget* gt =
+            this->LocalGenerator->FindGeneratorTargetToUse(i)) {
+        this->UtilityItems.insert(cmLinkItem(gt));
+      } else {
+        this->UtilityItems.insert(cmLinkItem(i));
+      }
     }
   }
   return this->UtilityItems;
@@ -770,7 +773,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
 
   if (iter == this->SystemIncludesCache.end()) {
     cmGeneratorExpressionDAGChecker dagChecker(
-      this->GetName(), "SYSTEM_INCLUDE_DIRECTORIES", nullptr, nullptr);
+      this, "SYSTEM_INCLUDE_DIRECTORIES", nullptr, nullptr);
 
     bool excludeImported = this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
 
@@ -816,7 +819,8 @@ static void AddInterfaceEntries(
         thisTarget->GetLinkImplementationLibraries(config)) {
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target) {
-        std::string genex = "$<TARGET_PROPERTY:" + lib + "," + prop + ">";
+        std::string genex =
+          "$<TARGET_PROPERTY:" + lib.AsStr() + "," + prop + ">";
         cmGeneratorExpression ge(lib.Backtrace);
         std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
         cge->SetEvaluateForBuildsystem(true);
@@ -836,7 +840,7 @@ static void AddObjectEntries(
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target &&
           lib.Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-        std::string genex = "$<TARGET_OBJECTS:" + lib + ">";
+        std::string genex = "$<TARGET_OBJECTS:" + lib.AsStr() + ">";
         cmGeneratorExpression ge(lib.Backtrace);
         std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
         cge->SetEvaluateForBuildsystem(true);
@@ -860,7 +864,7 @@ static bool processSources(
 
   for (cmGeneratorTarget::TargetPropertyEntry* entry : entries) {
     cmLinkImplItem const& item = entry->LinkImplItem;
-    std::string const& targetName = item;
+    std::string const& targetName = item.AsStr();
     std::vector<std::string> entrySources;
     cmSystemTools::ExpandListArgument(
       entry->ge->Evaluate(tgt->GetLocalGenerator(), config, false, tgt, tgt,
@@ -960,8 +964,8 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<std::string>& files,
     this->DebugSourcesDone = true;
   }
 
-  cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), "SOURCES",
-                                             nullptr, nullptr);
+  cmGeneratorExpressionDAGChecker dagChecker(this, "SOURCES", nullptr,
+                                             nullptr);
 
   std::unordered_set<std::string> uniqueSrcs;
   bool contextDependentDirectSources =
@@ -1756,7 +1760,7 @@ public:
   void Visit(cmLinkItem const& item)
   {
     if (!item.Target) {
-      if (item.find("::") != std::string::npos) {
+      if (item.AsStr().find("::") != std::string::npos) {
         bool noMessage = false;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
         std::ostringstream e;
@@ -1777,7 +1781,7 @@ public:
 
         if (!noMessage) {
           e << "Target \"" << this->Target->GetName()
-            << "\" links to target \"" << item
+            << "\" links to target \"" << item.AsStr()
             << "\" but the target was not found.  Perhaps a find_package() "
                "call is missing for an IMPORTED target, or an ALIAS target is "
                "missing?";
@@ -2074,8 +2078,8 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string>& result,
   }
   cmGeneratorExpression ge;
 
-  cmGeneratorExpressionDAGChecker dagChecker(
-    this->GetName(), "AUTOUIC_OPTIONS", nullptr, nullptr);
+  cmGeneratorExpressionDAGChecker dagChecker(this, "AUTOUIC_OPTIONS", nullptr,
+                                             nullptr);
   cmSystemTools::ExpandListArgument(
     ge.Parse(prop)->Evaluate(this->LocalGenerator, config, false, this,
                              &dagChecker),
@@ -2477,7 +2481,7 @@ static void processIncludeDirectories(
 {
   for (cmGeneratorTarget::TargetPropertyEntry* entry : entries) {
     cmLinkImplItem const& item = entry->LinkImplItem;
-    std::string const& targetName = item;
+    std::string const& targetName = item.AsStr();
     bool const fromImported = item.Target && item.Target->IsImported();
     bool const checkCMP0027 = item.FromGenex;
     std::vector<std::string> entryIncludes;
@@ -2584,8 +2588,8 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
   std::vector<std::string> includes;
   std::unordered_set<std::string> uniqueIncludes;
 
-  cmGeneratorExpressionDAGChecker dagChecker(
-    this->GetName(), "INCLUDE_DIRECTORIES", nullptr, nullptr);
+  cmGeneratorExpressionDAGChecker dagChecker(this, "INCLUDE_DIRECTORIES",
+                                             nullptr, nullptr);
 
   std::vector<std::string> debugProperties;
   const char* debugProp =
@@ -2615,7 +2619,7 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
     cmLinkImplementationLibraries const* impl =
       this->GetLinkImplementationLibraries(config);
     for (cmLinkImplItem const& lib : impl->Libraries) {
-      std::string libDir = cmSystemTools::CollapseFullPath(lib);
+      std::string libDir = cmSystemTools::CollapseFullPath(lib.AsStr());
 
       static cmsys::RegularExpression frameworkCheck(
         "(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
@@ -2706,8 +2710,8 @@ void cmGeneratorTarget::GetCompileOptions(std::vector<std::string>& result,
 {
   std::unordered_set<std::string> uniqueOptions;
 
-  cmGeneratorExpressionDAGChecker dagChecker(
-    this->GetName(), "COMPILE_OPTIONS", nullptr, nullptr);
+  cmGeneratorExpressionDAGChecker dagChecker(this, "COMPILE_OPTIONS", nullptr,
+                                             nullptr);
 
   std::vector<std::string> debugProperties;
   const char* debugProp =
@@ -2759,8 +2763,8 @@ void cmGeneratorTarget::GetCompileFeatures(std::vector<std::string>& result,
 {
   std::unordered_set<std::string> uniqueFeatures;
 
-  cmGeneratorExpressionDAGChecker dagChecker(
-    this->GetName(), "COMPILE_FEATURES", nullptr, nullptr);
+  cmGeneratorExpressionDAGChecker dagChecker(this, "COMPILE_FEATURES", nullptr,
+                                             nullptr);
 
   std::vector<std::string> debugProperties;
   const char* debugProp =
@@ -2810,8 +2814,8 @@ void cmGeneratorTarget::GetCompileDefinitions(
 {
   std::unordered_set<std::string> uniqueOptions;
 
-  cmGeneratorExpressionDAGChecker dagChecker(
-    this->GetName(), "COMPILE_DEFINITIONS", nullptr, nullptr);
+  cmGeneratorExpressionDAGChecker dagChecker(this, "COMPILE_DEFINITIONS",
+                                             nullptr, nullptr);
 
   std::vector<std::string> debugProperties;
   const char* debugProp =
@@ -2891,8 +2895,8 @@ void cmGeneratorTarget::GetLinkOptions(std::vector<std::string>& result,
 {
   std::unordered_set<std::string> uniqueOptions;
 
-  cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), "LINK_OPTIONS",
-                                             nullptr, nullptr);
+  cmGeneratorExpressionDAGChecker dagChecker(this, "LINK_OPTIONS", nullptr,
+                                             nullptr);
 
   std::vector<std::string> debugProperties;
   const char* debugProp =
@@ -3039,8 +3043,8 @@ void cmGeneratorTarget::GetStaticLibraryLinkOptions(
   std::vector<cmGeneratorTarget::TargetPropertyEntry*> entries;
   std::unordered_set<std::string> uniqueOptions;
 
-  cmGeneratorExpressionDAGChecker dagChecker(
-    this->GetName(), "STATIC_LIBRARY_OPTIONS", nullptr, nullptr);
+  cmGeneratorExpressionDAGChecker dagChecker(this, "STATIC_LIBRARY_OPTIONS",
+                                             nullptr, nullptr);
 
   if (const char* linkOptions = this->GetProperty("STATIC_LIBRARY_OPTIONS")) {
     std::vector<std::string> options;
@@ -3079,8 +3083,8 @@ void cmGeneratorTarget::GetLinkDepends(std::vector<std::string>& result,
 {
   std::vector<cmGeneratorTarget::TargetPropertyEntry*> linkDependsEntries;
   std::unordered_set<std::string> uniqueOptions;
-  cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), "LINK_DEPENDS",
-                                             nullptr, nullptr);
+  cmGeneratorExpressionDAGChecker dagChecker(this, "LINK_DEPENDS", nullptr,
+                                             nullptr);
 
   if (const char* linkDepends = this->GetProperty("LINK_DEPENDS")) {
     std::vector<std::string> depends;
@@ -4495,7 +4499,7 @@ void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
     if (name == this->GetName() || name.empty()) {
       continue;
     }
-    items.emplace_back(name, this->FindTargetToLink(name));
+    items.push_back(this->ResolveLinkItem(name));
   }
 }
 
@@ -4505,8 +4509,7 @@ void cmGeneratorTarget::ExpandLinkItems(
   std::vector<cmLinkItem>& items, bool& hadHeadSensitiveCondition) const
 {
   cmGeneratorExpression ge;
-  cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), prop, nullptr,
-                                             nullptr);
+  cmGeneratorExpressionDAGChecker dagChecker(this, prop, nullptr, nullptr);
   // The $<LINK_ONLY> expression may be in a link interface to specify private
   // link dependencies that are otherwise excluded from usage requirements.
   if (usage_requirements_only) {
@@ -4571,7 +4574,7 @@ void cmGeneratorTarget::ComputeLinkInterface(
         this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       // Shared libraries may have runtime implementation dependencies
       // on other shared libraries that are not in the interface.
-      std::unordered_set<std::string> emitted;
+      std::set<cmLinkItem> emitted;
       for (cmLinkItem const& lib : iface.Libraries) {
         emitted.insert(lib);
       }
@@ -5557,8 +5560,8 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
                                      end = entryRange.end();
        le != end; ++le, ++btIt) {
     std::vector<std::string> llibs;
-    cmGeneratorExpressionDAGChecker dagChecker(
-      this->GetName(), "LINK_LIBRARIES", nullptr, nullptr);
+    cmGeneratorExpressionDAGChecker dagChecker(this, "LINK_LIBRARIES", nullptr,
+                                               nullptr);
     cmGeneratorExpression ge(*btIt);
     std::unique_ptr<cmCompiledGeneratorExpression> const cge = ge.Parse(*le);
     std::string const& evaluated =
@@ -5603,7 +5606,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       }
 
       // The entry is meant for this configuration.
-      impl.Libraries.emplace_back(name, this->FindTargetToLink(name), *btIt,
+      impl.Libraries.emplace_back(this->ResolveLinkItem(name), *btIt,
                                   evaluated != *le);
     }
 
@@ -5631,14 +5634,12 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         continue;
       }
       // Support OLD behavior for CMP0003.
-      impl.WrongConfigLibraries.emplace_back(name,
-                                             this->FindTargetToLink(name));
+      impl.WrongConfigLibraries.push_back(this->ResolveLinkItem(name));
     }
   }
 }
 
-cmGeneratorTarget* cmGeneratorTarget::FindTargetToLink(
-  std::string const& name) const
+cmLinkItem cmGeneratorTarget::ResolveLinkItem(std::string const& name) const
 {
   cmGeneratorTarget* tgt =
     this->LocalGenerator->FindGeneratorTargetToUse(name);
@@ -5651,7 +5652,11 @@ cmGeneratorTarget* cmGeneratorTarget::FindTargetToLink(
     tgt = nullptr;
   }
 
-  return tgt;
+  if (tgt) {
+    return cmLinkItem(tgt);
+  }
+
+  return cmLinkItem(name);
 }
 
 std::string cmGeneratorTarget::GetPDBDirectory(const std::string& config) const

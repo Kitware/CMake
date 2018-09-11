@@ -378,8 +378,8 @@ protected:
   {
     if (context->HeadTarget) {
       cmGeneratorExpressionDAGChecker dagChecker(
-        context->Backtrace, context->HeadTarget->GetName(), genexOperator,
-        content, dagCheckerParent);
+        context->Backtrace, context->HeadTarget, genexOperator, content,
+        dagCheckerParent);
       switch (dagChecker.Check()) {
         case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
         case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE: {
@@ -1196,9 +1196,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return target->GetLinkerLanguage(context->Config);
     }
 
-    cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,
-                                               target->GetName(), propertyName,
-                                               content, dagCheckerParent);
+    cmGeneratorExpressionDAGChecker dagChecker(
+      context->Backtrace, target, propertyName, content, dagCheckerParent);
 
     switch (dagChecker.Check()) {
       case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
@@ -1911,9 +1910,9 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
       return std::string();
     }
     if (dagChecker &&
-        (dagChecker->EvaluatingLinkLibraries(name.c_str()) ||
+        (dagChecker->EvaluatingLinkLibraries(target) ||
          (dagChecker->EvaluatingSources() &&
-          name == dagChecker->TopTarget()))) {
+          target == dagChecker->TopTarget()))) {
       ::reportError(context, content->GetOriginalExpression(),
                     "Expressions which require the linker language may not "
                     "be used while evaluating link libraries");
