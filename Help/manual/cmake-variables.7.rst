@@ -24,6 +24,7 @@ Variables that Provide Information
    /variable/CMAKE_CACHE_PATCH_VERSION
    /variable/CMAKE_CFG_INTDIR
    /variable/CMAKE_COMMAND
+   /variable/CMAKE_CPACK_COMMAND
    /variable/CMAKE_CROSSCOMPILING
    /variable/CMAKE_CROSSCOMPILING_EMULATOR
    /variable/CMAKE_CTEST_COMMAND
