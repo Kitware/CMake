@@ -111,8 +111,8 @@ endfunction()
 set(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING} 5)
 
 # Verify that new tests are not started when the load average exceeds
-# our threshold.
-run_TestLoad(test-load-fail 2)
+# our threshold and that they then run once the load average drops.
+run_TestLoad(test-load-wait 3)
 
 # Verify that warning message is displayed but tests still start when
 # an invalid argument is given.
