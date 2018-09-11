@@ -71,7 +71,7 @@ protected:
   // write the depend rules for this target
   void WriteTargetDependRules();
 
-  // write rules for Mac OS X Application Bundle content.
+  // write rules for macOS Application Bundle content.
   struct MacOSXContentGeneratorType
     : cmOSXBundleGenerator::MacOSXContentGeneratorType
   {
@@ -237,7 +237,7 @@ protected:
   std::string TargetNameImport;
   std::string TargetNamePDB;
 
-  // Mac OS X content info.
+  // macOS content info.
   std::set<std::string> MacContentFolders;
   cmOSXBundleGenerator* OSXBundleGenerator;
   MacOSXContentGeneratorType* MacOSXContentGenerator;

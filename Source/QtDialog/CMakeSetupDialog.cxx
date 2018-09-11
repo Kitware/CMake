@@ -108,7 +108,7 @@ CMakeSetupDialog::CMakeSetupDialog()
 
   QMenu* ToolsMenu = this->menuBar()->addMenu(tr("&Tools"));
   this->ConfigureAction = ToolsMenu->addAction(tr("&Configure"));
-  // prevent merging with Preferences menu item on Mac OS X
+  // prevent merging with Preferences menu item on macOS
   this->ConfigureAction->setMenuRole(QAction::NoRole);
   QObject::connect(this->ConfigureAction, SIGNAL(triggered(bool)), this,
                    SLOT(doConfigure()));

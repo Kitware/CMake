@@ -1,10 +1,10 @@
 MACOSX_BUNDLE_INFO_PLIST
 ------------------------
 
-Specify a custom ``Info.plist`` template for a OS X and iOS Application Bundle.
+Specify a custom ``Info.plist`` template for a macOS and iOS Application Bundle.
 
 An executable target with :prop_tgt:`MACOSX_BUNDLE` enabled will be built as an
-application bundle on OS X.  By default its ``Info.plist`` file is created
+application bundle on macOS.  By default its ``Info.plist`` file is created
 by configuring a template called ``MacOSXBundleInfo.plist.in`` located in the
 :variable:`CMAKE_MODULE_PATH`.  This property specifies an alternative template
 file name which may be a full path.

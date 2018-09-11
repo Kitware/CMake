@@ -35,7 +35,7 @@ variable :variable:`BUILD_SHARED_LIBS` is ``ON``.  For ``SHARED`` and
 ``MODULE`` libraries the :prop_tgt:`POSITION_INDEPENDENT_CODE` target
 property is set to ``ON`` automatically.
 A ``SHARED`` or ``STATIC`` library may be marked with the :prop_tgt:`FRAMEWORK`
-target property to create an OS X Framework.
+target property to create an macOS Framework.
 
 If a library does not export any symbols, it must not be declared as a
 ``SHARED`` library.  For example, a Windows resource DLL or a managed C++/CLI

@@ -17,7 +17,7 @@ and meta information for QtIFW_ tools.
 
 The QtIFW_ provides a set of tools and utilities to create
 installers for the supported desktop Qt platforms: Linux, Microsoft Windows,
-and Mac OS X.
+and macOS.
 
 You should also install QtIFW_ to use CPack ``IFW`` generator.
 
@@ -107,7 +107,7 @@ Package
 
 .. variable:: CPACK_IFW_PACKAGE_ICON
 
- Filename for a custom installer icon. The actual file is '.icns' (Mac OS X),
+ Filename for a custom installer icon. The actual file is '.icns' (macOS),
  '.ico' (Windows). No functionality on Unix.
 
 .. variable:: CPACK_IFW_PACKAGE_WINDOW_ICON

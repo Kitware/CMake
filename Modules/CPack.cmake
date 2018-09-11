@@ -19,7 +19,7 @@ command (and the deprecated :command:`install_files`,
 :command:`install_programs` and :command:`install_targets` commands).
 
 For certain kinds of binary installers (including the graphical
-installers on Mac OS X and Windows), CPack generates installers that
+installers on macOS and Windows), CPack generates installers that
 allow users to select individual application components to install.
 See :module:`CPackComponent` module for further details.
 

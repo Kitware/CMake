@@ -30,7 +30,7 @@ Notes about linking on various platforms:
 
 ------------------------------------------------------------------------------
 
-Linux, FreeBSD, Mac OS X, IRIX, Sun, Windows:
+Linux, FreeBSD, macOS, IRIX, Sun, Windows:
 
 Linking to libraries using the full path works fine.
 

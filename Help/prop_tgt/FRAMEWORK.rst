@@ -1,17 +1,17 @@
 FRAMEWORK
 ---------
 
-Build ``SHARED`` or ``STATIC`` library as Framework Bundle on the OS X and iOS.
+Build ``SHARED`` or ``STATIC`` library as Framework Bundle on the macOS and iOS.
 
 If such a library target has this property set to ``TRUE`` it will be
-built as a framework when built on the OS X and iOS.  It will have the
+built as a framework when built on the macOS and iOS.  It will have the
 directory structure required for a framework and will be suitable to
 be used with the ``-framework`` option
 
 To customize ``Info.plist`` file in the framework, use
 :prop_tgt:`MACOSX_FRAMEWORK_INFO_PLIST` target property.
 
-For OS X see also the :prop_tgt:`FRAMEWORK_VERSION` target property.
+For macOS see also the :prop_tgt:`FRAMEWORK_VERSION` target property.
 
 Example of creation ``dynamicFramework``:
 

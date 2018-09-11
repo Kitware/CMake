@@ -95,7 +95,7 @@ Apple Frameworks
 """"""""""""""""
 
 A ``SHARED`` library may be marked with the :prop_tgt:`FRAMEWORK`
-target property to create an OS X or iOS Framework Bundle.
+target property to create an macOS or iOS Framework Bundle.
 The ``MACOSX_FRAMEWORK_IDENTIFIER`` sets ``CFBundleIdentifier`` key
 and it uniquely identifies the bundle.
 

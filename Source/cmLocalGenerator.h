@@ -300,14 +300,14 @@ public:
   std::string const& GetCurrentSourceDirectory() const;
 
   /**
-   * Generate a Mac OS X application bundle Info.plist file.
+   * Generate a macOS application bundle Info.plist file.
    */
   void GenerateAppleInfoPList(cmGeneratorTarget* target,
                               const std::string& targetName,
                               const char* fname);
 
   /**
-   * Generate a Mac OS X framework Info.plist file.
+   * Generate a macOS framework Info.plist file.
    */
   void GenerateFrameworkInfoPList(cmGeneratorTarget* target,
                                   const std::string& targetName,

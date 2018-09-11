@@ -493,11 +493,11 @@ function(_Boost_GUESS_COMPILER_PREFIX _ret)
           if(Boost_MINOR_VERSION)
             if(${Boost_MINOR_VERSION} GREATER 35)
               # In Boost 1.36.0 and newer, the mangled compiler name used
-              # on Mac OS X/Darwin is "xgcc".
+              # on macOS/Darwin is "xgcc".
               set(_boost_COMPILER "-xgcc${_boost_COMPILER_VERSION}")
             else()
               # In Boost <= 1.35.0, there is no mangled compiler name for
-              # the Mac OS X/Darwin version of GCC.
+              # the macOS/Darwin version of GCC.
               set(_boost_COMPILER "")
             endif()
           else()
