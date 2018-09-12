@@ -573,7 +573,7 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
   endif()
 
   set(_Boost_IMPORTED_TARGETS TRUE)
-  if(Boost_VERSION VERSION_LESS 103300)
+  if(Boost_VERSION AND Boost_VERSION VERSION_LESS 103300)
     message(WARNING "Imported targets and dependency information not available for Boost version ${Boost_VERSION} (all versions older than 1.33)")
     set(_Boost_IMPORTED_TARGETS FALSE)
   elseif(NOT Boost_VERSION VERSION_LESS 103300 AND Boost_VERSION VERSION_LESS 103500)
