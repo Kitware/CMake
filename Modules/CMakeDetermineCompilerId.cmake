@@ -525,6 +525,9 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
       ${CMAKE_${lang}_COMPILER_ID_STRINGS_PARAMETERS}
       REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
     set(COMPILER_ID_TWICE)
+    # With the IAR Compiler, some strings are found twice, first time as incomplete
+    # list like "?<Constant "INFO:compiler[IAR]">".  Remove the incomplete copies.
+    list(FILTER CMAKE_${lang}_COMPILER_ID_STRINGS EXCLUDE REGEX "\\?<Constant \\\"")
     # In C# binaries, some strings are found more than once.
     list(REMOVE_DUPLICATES CMAKE_${lang}_COMPILER_ID_STRINGS)
     foreach(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
