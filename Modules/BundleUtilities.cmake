@@ -35,6 +35,10 @@ The following functions are provided by this module:
 Requires CMake 2.6 or greater because it uses function, break and
 PARENT_SCOPE.  Also depends on GetPrerequisites.cmake.
 
+DO NOT USE THESE FUNCTIONS AT CONFIGURE TIME (from ``CMakeLists.txt``)!
+Instead, invoke them from an :command:`install(CODE)` or
+:command:`install(SCRIPT)` rule.
+
 ::
 
   FIXUP_BUNDLE(<app> <libs> <dirs>)
