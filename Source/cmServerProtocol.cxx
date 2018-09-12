@@ -1339,20 +1339,20 @@ cmServerResponse cmServerProtocol1::ProcessConfigure(
 
   if (cm->LoadCache(buildDir)) {
     // build directory has been set up before
-    const char* cachedSourceDir =
+    const std::string* cachedSourceDir =
       cm->GetState()->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY");
     if (!cachedSourceDir) {
       return request.ReportError("No CMAKE_HOME_DIRECTORY found in cache.");
     }
     if (sourceDir.empty()) {
-      sourceDir = std::string(cachedSourceDir);
+      sourceDir = *cachedSourceDir;
       cm->SetHomeDirectory(sourceDir);
     }
 
-    const char* cachedGenerator =
+    const std::string* cachedGenerator =
       cm->GetState()->GetInitializedCacheValue("CMAKE_GENERATOR");
     if (cachedGenerator) {
-      if (gg && gg->GetName() != cachedGenerator) {
+      if (gg && gg->GetName() != *cachedGenerator) {
         return request.ReportError("Configured generator does not match with "
                                    "CMAKE_GENERATOR found in cache.");
       }

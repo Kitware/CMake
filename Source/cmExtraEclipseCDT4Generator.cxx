@@ -215,7 +215,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
 
   std::string cacheEntryName = "CMAKE_ECLIPSE_ENVVAR_";
   cacheEntryName += envVar;
-  const char* cacheValue =
+  const std::string* cacheValue =
     lg->GetState()->GetInitializedCacheValue(cacheEntryName);
 
   // now we have both, decide which one to use
@@ -232,14 +232,14 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
     mf->GetCMakeInstance()->SaveCache(lg->GetBinaryDirectory());
   } else if (!envVarSet && cacheValue != nullptr) {
     // It is already in the cache, but not in the env, so use it from the cache
-    valueToUse = cacheValue;
+    valueToUse = *cacheValue;
   } else {
     // It is both in the cache and in the env.
     // Use the version from the env. except if the value from the env is
     // completely contained in the value from the cache (for the case that we
     // now have a PATH without MSVC dirs in the env. but had the full PATH with
     // all MSVC dirs during the cmake run which stored the var in the cache:
-    valueToUse = cacheValue;
+    valueToUse = *cacheValue;
     if (valueToUse.find(envVarValue) == std::string::npos) {
       valueToUse = envVarValue;
       mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),

@@ -215,15 +215,15 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string& lang,
   if (!optional && (path.empty() || !cmSystemTools::FileExists(path))) {
     return;
   }
-  const char* cname =
+  const std::string* cname =
     this->GetCMakeInstance()->GetState()->GetInitializedCacheValue(langComp);
   std::string changeVars;
   if (cname && !optional) {
     std::string cnameString;
-    if (!cmSystemTools::FileIsFullPath(cname)) {
-      cnameString = cmSystemTools::FindProgram(cname);
+    if (!cmSystemTools::FileIsFullPath(*cname)) {
+      cnameString = cmSystemTools::FindProgram(*cname);
     } else {
-      cnameString = cname;
+      cnameString = *cname;
     }
     std::string pathString = path;
     // get rid of potentially multiple slashes:
@@ -239,7 +239,7 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string& lang,
       }
       changeVars += langComp;
       changeVars += ";";
-      changeVars += cname;
+      changeVars += *cname;
       this->GetCMakeInstance()->GetState()->SetGlobalProperty(
         "__CMAKE_DELETE_CACHE_CHANGE_VARS_", changeVars.c_str());
     }
@@ -1970,7 +1970,7 @@ void cmGlobalGenerator::AddMakefile(cmMakefile* mf)
 
   // update progress
   // estimate how many lg there will be
-  const char* numGenC =
+  const std::string* numGenC =
     this->CMakeInstance->GetState()->GetInitializedCacheValue(
       "CMAKE_NUMBER_OF_MAKEFILES");
 
@@ -1988,7 +1988,7 @@ void cmGlobalGenerator::AddMakefile(cmMakefile* mf)
     return;
   }
 
-  int numGen = atoi(numGenC);
+  int numGen = atoi(numGenC->c_str());
   float prog = 0.9f * static_cast<float>(this->Makefiles.size()) /
     static_cast<float>(numGen);
   if (prog > 0.9f) {
