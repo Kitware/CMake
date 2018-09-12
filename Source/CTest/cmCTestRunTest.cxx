@@ -140,6 +140,9 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   bool passed = true;
   cmProcess::State res =
     started ? this->TestProcess->GetProcessStatus() : cmProcess::State::Error;
+  if (res != cmProcess::State::Expired) {
+    this->TimeoutIsForStopTime = false;
+  }
   int retVal = this->TestProcess->GetExitValue();
   bool forceFail = false;
   bool skipped = false;
@@ -537,6 +540,7 @@ bool cmCTestRunTest::StartTest(size_t total)
 
   auto timeout = this->TestProperties->Timeout;
 
+  this->TimeoutIsForStopTime = false;
   std::chrono::system_clock::time_point stop_time = this->CTest->GetStopTime();
   if (stop_time != std::chrono::system_clock::time_point()) {
     std::chrono::duration<double> stop_timeout =
@@ -547,6 +551,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     }
     if (timeout == std::chrono::duration<double>::zero() ||
         stop_timeout < timeout) {
+      this->TimeoutIsForStopTime = true;
       timeout = stop_timeout;
     }
   }
