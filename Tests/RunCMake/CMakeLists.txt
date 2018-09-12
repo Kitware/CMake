@@ -251,6 +251,7 @@ add_RunCMake_test(separate_arguments)
 add_RunCMake_test(set_property)
 add_RunCMake_test(string)
 add_RunCMake_test(test_include_dirs)
+add_RunCMake_test(BundleUtilities)
 
 function(add_RunCMake_test_try_compile)
   if(CMAKE_VERSION VERSION_LESS 3.9.20170907 AND "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC")
