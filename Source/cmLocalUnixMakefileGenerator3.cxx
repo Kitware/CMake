@@ -967,8 +967,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       // Short-circuit if there is no launcher.
       const char* val = this->GetRuleLauncher(target, "RULE_LAUNCH_CUSTOM");
       if (val && *val) {
-        // Expand rules in the empty string.  It may insert the launcher and
-        // perform replacements.
+        // Expand rule variables referenced in the given launcher command.
         cmRulePlaceholderExpander::RuleVariables vars;
         vars.CMTargetName = target->GetName().c_str();
         vars.CMTargetType = cmState::GetTargetTypeName(target->GetType());
@@ -986,7 +985,6 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         vars.Output = output.c_str();
 
         launcher = val;
-        launcher += " ";
         rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);
         if (!launcher.empty()) {
           launcher += " ";
