@@ -2374,9 +2374,11 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
   Options& linkOptions = *(this->LinkOptions[configName]);
   const std::string cond = this->CalcCondition(configName);
 
-  const char* incremental = linkOptions.GetFlag("LinkIncremental");
-  e1.WritePlatformConfigTag("LinkIncremental", cond,
-                            (incremental ? incremental : "true"));
+  if (this->IPOEnabledConfigurations.count(configName) == 0) {
+    const char* incremental = linkOptions.GetFlag("LinkIncremental");
+    e1.WritePlatformConfigTag("LinkIncremental", cond,
+                              (incremental ? incremental : "true"));
+  }
   linkOptions.RemoveFlag("LinkIncremental");
 
   const char* manifest = linkOptions.GetFlag("GenerateManifest");
