@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <set>
 #include <string>
 #include <unordered_set>
@@ -21,6 +22,7 @@
 #endif
 
 class cmExternalMakefileProjectGeneratorFactory;
+class cmFileAPI;
 class cmFileTimeComparison;
 class cmGlobalGenerator;
 class cmGlobalGeneratorFactory;
@@ -528,6 +530,7 @@ private:
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   cmVariableWatch* VariableWatch;
+  std::unique_ptr<cmFileAPI> FileAPI;
 #endif
 
   cmState* State;

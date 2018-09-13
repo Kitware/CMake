@@ -30,6 +30,7 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  include "cm_jsoncpp_writer.h"
 
+#  include "cmFileAPI.h"
 #  include "cmGraphVizWriter.h"
 #  include "cmVariableWatch.h"
 #  include <unordered_map>
@@ -1443,6 +1444,11 @@ int cmake::ActualConfigure()
     this->TruncateOutputLog("CMakeError.log");
   }
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->FileAPI = cm::make_unique<cmFileAPI>(this);
+  this->FileAPI->ReadQueries();
+#endif
+
   // actually do the configure
   this->GlobalGenerator->Configure();
   // Before saving the cache
@@ -1681,6 +1687,10 @@ int cmake::Generate()
   // variables created during Generate are saved. (Specifically target GUIDs
   // for the Visual Studio and Xcode generators.)
   this->SaveCache(this->GetHomeOutputDirectory());
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->FileAPI->WriteReplies();
+#endif
 
   return 0;
 }
