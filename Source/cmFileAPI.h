@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cm_jsoncpp_reader.h"
 #include "cm_jsoncpp_value.h"
 #include "cm_jsoncpp_writer.h"
 
@@ -71,6 +72,49 @@ private:
     std::vector<std::string> Unknown;
   };
 
+  /** Represent one request in a client 'query.json'.  */
+  struct ClientRequest : public Object
+  {
+    /** Empty if request is valid, else the error string.  */
+    std::string Error;
+  };
+
+  /** Represent the "requests" in a client 'query.json'.  */
+  struct ClientRequests : public std::vector<ClientRequest>
+  {
+    /** Empty if requests field is valid, else the error string.  */
+    std::string Error;
+  };
+
+  /** Represent the content of a client query.json file.  */
+  struct ClientQueryJson
+  {
+    /** The error string if parsing failed, else empty.  */
+    std::string Error;
+
+    /** The 'query.json' object "client" member if it exists, else null.  */
+    Json::Value ClientValue;
+
+    /** The 'query.json' object "requests" member if it exists, else null.  */
+    Json::Value RequestsValue;
+
+    /** Requests extracted from 'query.json'.  */
+    ClientRequests Requests;
+  };
+
+  /** Represent content of a client query directory.  */
+  struct ClientQuery
+  {
+    /** The content of the client query directory except 'query.json'.  */
+    Query DirQuery;
+
+    /** True if 'query.json' exists.  */
+    bool HaveQueryJson = false;
+
+    /** The 'query.json' content.  */
+    ClientQueryJson QueryJson;
+  };
+
   /** Whether the top-level query directory exists at all.  */
   bool QueryExists = false;
 
@@ -78,13 +122,17 @@ private:
   Query TopQuery;
 
   /** The content of each "client-$client" query directory.  */
-  std::map<std::string, Query> ClientQueries;
+  std::map<std::string, ClientQuery> ClientQueries;
 
   /** Reply index object generated for object kind/version.
       This populates the "objects" field of the reply index.  */
   std::map<Object, Json::Value> ReplyIndexObjects;
 
+  std::unique_ptr<Json::CharReader> JsonReader;
   std::unique_ptr<Json::StreamWriter> JsonWriter;
+
+  bool ReadJsonFile(std::string const& file, Json::Value& value,
+                    std::string& error);
 
   std::string WriteJsonFile(
     Json::Value const& value, std::string const& prefix,
@@ -95,6 +143,7 @@ private:
   static bool ReadQuery(std::string const& query,
                         std::vector<Object>& objects);
   void ReadClient(std::string const& client);
+  void ReadClientQuery(std::string const& client, ClientQueryJson& q);
 
   Json::Value BuildReplyIndex();
   Json::Value BuildCMake();
@@ -107,6 +156,28 @@ private:
 
   Json::Value BuildObject(Object const& object);
 
+  ClientRequests BuildClientRequests(Json::Value const& requests);
+  ClientRequest BuildClientRequest(Json::Value const& request);
+  Json::Value BuildClientReply(ClientQuery const& q);
+  Json::Value BuildClientReplyResponses(ClientRequests const& requests);
+  Json::Value BuildClientReplyResponse(ClientRequest const& request);
+
+  struct RequestVersion
+  {
+    unsigned int Major = 0;
+    unsigned int Minor = 0;
+  };
+  static bool ReadRequestVersions(Json::Value const& version,
+                                  std::vector<RequestVersion>& versions,
+                                  std::string& error);
+  static bool ReadRequestVersion(Json::Value const& version, bool inArray,
+                                 std::vector<RequestVersion>& result,
+                                 std::string& error);
+  static std::string NoSupportedVersion(
+    std::vector<RequestVersion> const& versions);
+
+  void BuildClientRequestInternalTest(
+    ClientRequest& r, std::vector<RequestVersion> const& versions);
   Json::Value BuildInternalTest(Object const& object);
 };
 

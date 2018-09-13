@@ -81,6 +81,12 @@ def check_error(value, error):
     assert is_string(value["error"])
     assert value["error"] == error
 
+def check_error_re(value, error):
+    assert is_dict(value)
+    assert sorted(value.keys()) == ["error"]
+    assert is_string(value["error"])
+    assert re.search(error, value["error"])
+
 reply_index = sys.argv[1]
 reply_dir = os.path.dirname(reply_index)
 

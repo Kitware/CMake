@@ -24,6 +24,14 @@ cmFileAPI::cmFileAPI(cmake* cm)
   this->APIv1 =
     this->CMakeInstance->GetHomeOutputDirectory() + "/.cmake/api/v1";
 
+  Json::CharReaderBuilder rbuilder;
+  rbuilder["collectComments"] = false;
+  rbuilder["failIfExtra"] = true;
+  rbuilder["rejectDupKeys"] = false;
+  rbuilder["strictRoot"] = true;
+  this->JsonReader =
+    std::unique_ptr<Json::CharReader>(rbuilder.newCharReader());
+
   Json::StreamWriterBuilder wbuilder;
   wbuilder["indentation"] = "\t";
   this->JsonWriter =
@@ -86,6 +94,46 @@ void cmFileAPI::RemoveOldReplyFiles()
       cmSystemTools::RemoveFile(file);
     }
   }
+}
+
+bool cmFileAPI::ReadJsonFile(std::string const& file, Json::Value& value,
+                             std::string& error)
+{
+  std::vector<char> content;
+
+  cmsys::ifstream fin;
+  if (!cmSystemTools::FileIsDirectory(file)) {
+    fin.open(file.c_str(), std::ios::binary);
+  }
+  auto finEnd = fin.rdbuf()->pubseekoff(0, std::ios::end);
+  if (finEnd > 0) {
+    size_t finSize = finEnd;
+    try {
+      // Allocate a buffer to read the whole file.
+      content.resize(finSize);
+
+      // Now read the file from the beginning.
+      fin.seekg(0, std::ios::beg);
+      fin.read(content.data(), finSize);
+    } catch (...) {
+      fin.setstate(std::ios::failbit);
+    }
+  }
+  fin.close();
+  if (!fin) {
+    value = Json::Value();
+    error = "failed to read from file";
+    return false;
+  }
+
+  // Parse our buffer as json.
+  if (!this->JsonReader->parse(content.data(), content.data() + content.size(),
+                               &value, &error)) {
+    value = Json::Value();
+    return false;
+  }
+
+  return true;
 }
 
 std::string cmFileAPI::WriteJsonFile(
@@ -186,12 +234,36 @@ void cmFileAPI::ReadClient(std::string const& client)
   std::vector<std::string> queries = this->LoadDir(clientDir);
 
   // Read the queries and save for later.
-  Query& clientQuery = this->ClientQueries[client];
+  ClientQuery& clientQuery = this->ClientQueries[client];
   for (std::string& query : queries) {
-    if (!this->ReadQuery(query, clientQuery.Known)) {
-      clientQuery.Unknown.push_back(std::move(query));
+    if (query == "query.json") {
+      clientQuery.HaveQueryJson = true;
+      this->ReadClientQuery(client, clientQuery.QueryJson);
+    } else if (!this->ReadQuery(query, clientQuery.DirQuery.Known)) {
+      clientQuery.DirQuery.Unknown.push_back(std::move(query));
     }
   }
+}
+
+void cmFileAPI::ReadClientQuery(std::string const& client, ClientQueryJson& q)
+{
+  // Read the query.json file.
+  std::string queryFile = this->APIv1 + "/query/" + client + "/query.json";
+  Json::Value query;
+  if (!this->ReadJsonFile(queryFile, query, q.Error)) {
+    return;
+  }
+  if (!query.isObject()) {
+    q.Error = "query root is not an object";
+    return;
+  }
+
+  Json::Value const& clientValue = query["client"];
+  if (!clientValue.isNull()) {
+    q.ClientValue = clientValue;
+  }
+  q.RequestsValue = std::move(query["requests"]);
+  q.Requests = this->BuildClientRequests(q.RequestsValue);
 }
 
 Json::Value cmFileAPI::BuildReplyIndex()
@@ -205,8 +277,8 @@ Json::Value cmFileAPI::BuildReplyIndex()
   Json::Value& reply = index["reply"] = this->BuildReply(this->TopQuery);
   for (auto const& client : this->ClientQueries) {
     std::string const& clientName = client.first;
-    Query const& clientQuery = client.second;
-    reply[clientName] = this->BuildReply(clientQuery);
+    ClientQuery const& clientQuery = client.second;
+    reply[clientName] = this->BuildClientReply(clientQuery);
   }
 
   // Move our index of generated objects into its field.
@@ -301,10 +373,231 @@ Json::Value cmFileAPI::BuildObject(Object const& object)
   return value;
 }
 
+cmFileAPI::ClientRequests cmFileAPI::BuildClientRequests(
+  Json::Value const& requests)
+{
+  ClientRequests result;
+  if (requests.isNull()) {
+    result.Error = "'requests' member missing";
+    return result;
+  }
+  if (!requests.isArray()) {
+    result.Error = "'requests' member is not an array";
+    return result;
+  }
+
+  result.reserve(requests.size());
+  for (Json::Value const& request : requests) {
+    result.emplace_back(this->BuildClientRequest(request));
+  }
+
+  return result;
+}
+
+cmFileAPI::ClientRequest cmFileAPI::BuildClientRequest(
+  Json::Value const& request)
+{
+  ClientRequest r;
+
+  if (!request.isObject()) {
+    r.Error = "request is not an object";
+    return r;
+  }
+
+  Json::Value const& kind = request["kind"];
+  if (kind.isNull()) {
+    r.Error = "'kind' member missing";
+    return r;
+  }
+  if (!kind.isString()) {
+    r.Error = "'kind' member is not a string";
+    return r;
+  }
+  std::string const& kindName = kind.asString();
+
+  if (kindName == this->ObjectKindName(ObjectKind::InternalTest)) {
+    r.Kind = ObjectKind::InternalTest;
+  } else {
+    r.Error = "unknown request kind '" + kindName + "'";
+    return r;
+  }
+
+  Json::Value const& version = request["version"];
+  if (version.isNull()) {
+    r.Error = "'version' member missing";
+    return r;
+  }
+  std::vector<RequestVersion> versions;
+  if (!cmFileAPI::ReadRequestVersions(version, versions, r.Error)) {
+    return r;
+  }
+
+  switch (r.Kind) {
+    case ObjectKind::InternalTest:
+      this->BuildClientRequestInternalTest(r, versions);
+      break;
+  }
+
+  return r;
+}
+
+Json::Value cmFileAPI::BuildClientReply(ClientQuery const& q)
+{
+  Json::Value reply = this->BuildReply(q.DirQuery);
+
+  if (!q.HaveQueryJson) {
+    return reply;
+  }
+
+  Json::Value& reply_query_json = reply["query.json"];
+  ClientQueryJson const& qj = q.QueryJson;
+
+  if (!qj.Error.empty()) {
+    reply_query_json = this->BuildReplyError(qj.Error);
+    return reply;
+  }
+
+  if (!qj.ClientValue.isNull()) {
+    reply_query_json["client"] = qj.ClientValue;
+  }
+
+  if (!qj.RequestsValue.isNull()) {
+    reply_query_json["requests"] = qj.RequestsValue;
+  }
+
+  reply_query_json["responses"] = this->BuildClientReplyResponses(qj.Requests);
+
+  return reply;
+}
+
+Json::Value cmFileAPI::BuildClientReplyResponses(
+  ClientRequests const& requests)
+{
+  Json::Value responses;
+
+  if (!requests.Error.empty()) {
+    responses = this->BuildReplyError(requests.Error);
+    return responses;
+  }
+
+  responses = Json::arrayValue;
+  for (ClientRequest const& request : requests) {
+    responses.append(this->BuildClientReplyResponse(request));
+  }
+
+  return responses;
+}
+
+Json::Value cmFileAPI::BuildClientReplyResponse(ClientRequest const& request)
+{
+  Json::Value response;
+  if (!request.Error.empty()) {
+    response = this->BuildReplyError(request.Error);
+    return response;
+  }
+  response = this->AddReplyIndexObject(request);
+  return response;
+}
+
+bool cmFileAPI::ReadRequestVersions(Json::Value const& version,
+                                    std::vector<RequestVersion>& versions,
+                                    std::string& error)
+{
+  if (version.isArray()) {
+    for (Json::Value const& v : version) {
+      if (!ReadRequestVersion(v, /*inArray=*/true, versions, error)) {
+        return false;
+      }
+    }
+  } else {
+    if (!ReadRequestVersion(version, /*inArray=*/false, versions, error)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool cmFileAPI::ReadRequestVersion(Json::Value const& version, bool inArray,
+                                   std::vector<RequestVersion>& result,
+                                   std::string& error)
+{
+  if (version.isUInt()) {
+    RequestVersion v;
+    v.Major = version.asUInt();
+    result.push_back(v);
+    return true;
+  }
+
+  if (!version.isObject()) {
+    if (inArray) {
+      error = "'version' array entry is not a non-negative integer or object";
+    } else {
+      error =
+        "'version' member is not a non-negative integer, object, or array";
+    }
+    return false;
+  }
+
+  Json::Value const& major = version["major"];
+  if (major.isNull()) {
+    error = "'version' object 'major' member missing";
+    return false;
+  }
+  if (!major.isUInt()) {
+    error = "'version' object 'major' member is not a non-negative integer";
+    return false;
+  }
+
+  RequestVersion v;
+  v.Major = major.asUInt();
+
+  Json::Value const& minor = version["minor"];
+  if (minor.isUInt()) {
+    v.Minor = minor.asUInt();
+  } else if (!minor.isNull()) {
+    error = "'version' object 'minor' member is not a non-negative integer";
+    return false;
+  }
+
+  result.push_back(v);
+
+  return true;
+}
+
+std::string cmFileAPI::NoSupportedVersion(
+  std::vector<RequestVersion> const& versions)
+{
+  std::ostringstream msg;
+  msg << "no supported version specified";
+  if (!versions.empty()) {
+    msg << " among:";
+    for (RequestVersion const& v : versions) {
+      msg << " " << v.Major << "." << v.Minor;
+    }
+  }
+  return msg.str();
+}
+
 // The "__test" object kind is for internal testing of CMake.
 
 static unsigned int const InternalTestV1Minor = 3;
 static unsigned int const InternalTestV2Minor = 0;
+
+void cmFileAPI::BuildClientRequestInternalTest(
+  ClientRequest& r, std::vector<RequestVersion> const& versions)
+{
+  // Select a known version from those requested.
+  for (RequestVersion const& v : versions) {
+    if ((v.Major == 1 && v.Minor <= InternalTestV1Minor) || //
+        (v.Major == 2 && v.Minor <= InternalTestV2Minor)) {
+      r.Version = v.Major;
+      break;
+    }
+  }
+  if (!r.Version) {
+    r.Error = NoSupportedVersion(versions);
+  }
+}
 
 Json::Value cmFileAPI::BuildInternalTest(Object const& object)
 {

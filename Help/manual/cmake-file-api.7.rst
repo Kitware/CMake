@@ -31,8 +31,8 @@ It has the following subdirectories:
 
 ``query/``
   Holds query files written by clients.
-  These may be `v1 Shared Stateless Query Files`_ or
-  `v1 Client Stateless Query Files`_.
+  These may be `v1 Shared Stateless Query Files`_,
+  `v1 Client Stateless Query Files`_, or `v1 Client Stateful Query Files`_.
 
 ``reply/``
   Holds reply files written by CMake whenever it runs to generate a build
@@ -83,6 +83,87 @@ own means.
 
 Files of this form are stateless queries owned by the client ``<client>``.
 The owning client may remove them at any time.
+
+v1 Client Stateful Query Files
+------------------------------
+
+Stateful query files allow clients to request a list of versions of
+each of the `Object Kinds`_ and get only the most recent version
+recognized by the CMake that runs.
+
+Clients may create owned stateful queries by creating ``query.json``
+files in client-specific query subdirectories.  The form is::
+
+  <build>/.cmake/api/v1/query/client-<client>/query.json
+
+where ``client-`` is literal, ``<client>`` is a string uniquely
+identifying the client, and ``query.json`` is literal.  Each client
+must choose a unique ``<client>`` identifier via its own means.
+
+``query.json`` files are stateful queries owned by the client ``<client>``.
+The owning client may update or remove them at any time.  When a
+given client installation is updated it may then update the stateful
+query it writes to build trees to request newer object versions.
+This can be used to avoid asking CMake to generate multiple object
+versions unnecessarily.
+
+A ``query.json`` file must contain a JSON object:
+
+.. code-block:: json
+
+  {
+    "requests": [
+      { "kind": "<kind>" , "version": 1 },
+      { "kind": "<kind>" , "version": { "major": 1, "minor": 2 } },
+      { "kind": "<kind>" , "version": [2, 1] },
+      { "kind": "<kind>" , "version": [2, { "major": 1, "minor": 2 }] },
+      { "kind": "<kind>" , "version": 1, "client": {} },
+      { "kind": "..." }
+    ],
+    "client": {}
+  }
+
+The members are:
+
+``requests``
+  A JSON array containing zero or more requests.  Each request is
+  a JSON object with members:
+
+  ``kind``
+    Specifies one of the `Object Kinds`_ to be included in the reply.
+
+  ``version``
+    Indicates the version(s) of the object kind that the client
+    understands.  Versions have major and minor components following
+    semantic version conventions.  The value must be
+
+    * a JSON integer specifying a (non-negative) major version number, or
+    * a JSON object containing ``major`` and (optionally) ``minor``
+      members specifying non-negative integer version components, or
+    * a JSON array whose elements are each one of the above.
+
+  ``client``
+    Optional member reserved for use by the client.  This value is
+    preserved in the reply written for the client in the
+    `v1 Reply Index File`_ but is otherwise ignored.  Clients may use
+    this to pass custom information with a request through to its reply.
+
+  For each requested object kind CMake will choose the *first* version
+  that it recognizes for that kind among those listed in the request.
+  The response will use the selected *major* version with the highest
+  *minor* version known to the running CMake for that major version.
+  Therefore clients should list all supported major versions in
+  preferred order along with the minimal minor version required
+  for each major version.
+
+``client``
+  Optional member reserved for use by the client.  This value is
+  preserved in the reply written for the client in the
+  `v1 Reply Index File`_ but is otherwise ignored.  Clients may use
+  this to pass custom information with a query through to its reply.
+
+Other ``query.json`` top-level members are reserved for future use.
+If present they are ignored for forward compatibility.
 
 v1 Reply Index File
 -------------------
@@ -135,7 +216,18 @@ The reply index file contains a JSON object:
                              "version": { "major": 1, "minor": 0 },
                              "jsonFile": "<file>" },
         "<unknown>": { "error": "unknown query file" },
-        "...": {}
+        "...": {},
+        "query.json": {
+          "requests": [ {}, {}, {} ],
+          "responses": [
+            { "kind": "<kind>",
+              "version": { "major": 1, "minor": 0 },
+              "jsonFile": "<file>" },
+            { "error": "unknown query file" },
+            { "...": {} }
+          ],
+          "client": {}
+        }
       }
     }
   }
@@ -210,6 +302,33 @@ The members are:
       The value is a JSON object with a single ``error`` member
       containing a string with an error message indicating that the
       query file is unknown.
+
+    ``query.json``
+      This member appears for clients using
+      `v1 Client Stateful Query Files`_.
+      If the ``query.json`` file failed to read or parse as a JSON object,
+      this member is a JSON object with a single ``error`` member
+      containing a string with an error message.  Otherwise, this member
+      is a JSON object mirroring the content of the ``query.json`` file.
+      The members are:
+
+      ``client``
+        A copy of the ``query.json`` file ``client`` member, if it exists.
+
+      ``requests``
+        A copy of the ``query.json`` file ``requests`` member, if it exists.
+
+      ``responses``
+        If the ``query.json`` file ``requests`` member is missing or invalid,
+        this member is a JSON object with a single ``error`` member
+        containing a string with an error message.  Otherwise, this member
+        contains a JSON array with a response for each entry of the
+        ``requests`` array, in the same order.  Each response is
+
+        * a JSON object with a single ``error`` member containing a string
+          with an error message, or
+        * a `v1 Reply File Reference`_ to the corresponding reply file for
+          the requested object kind and selected version.
 
 After reading the reply index file, clients may read the other
 `v1 Reply Files`_ it references.
