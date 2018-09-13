@@ -31,7 +31,8 @@ It has the following subdirectories:
 
 ``query/``
   Holds query files written by clients.
-  These may be `v1 Shared Stateless Query Files`_.
+  These may be `v1 Shared Stateless Query Files`_ or
+  `v1 Client Stateless Query Files`_.
 
 ``reply/``
   Holds reply files written by CMake whenever it runs to generate a build
@@ -61,6 +62,27 @@ and ``<major>`` is the major version number.
 Files of this form are stateless shared queries not owned by any specific
 client.  Once created they should not be removed without external client
 coordination or human intervention.
+
+v1 Client Stateless Query Files
+-------------------------------
+
+Client stateless query files allow clients to create owned requests for
+major versions of the `Object Kinds`_ and get all requested versions
+recognized by the CMake that runs.
+
+Clients may create owned requests by creating empty files in
+client-specific query subdirectories.  The form is::
+
+  <build>/.cmake/api/v1/query/client-<client>/<kind>-v<major>
+
+where ``client-`` is literal, ``<client>`` is a string uniquely
+identifying the client, ``<kind>`` is one of the `Object Kinds`_,
+``-v`` is literal, and ``<major>`` is the major version number.
+Each client must choose a unique ``<client>`` identifier via its
+own means.
+
+Files of this form are stateless queries owned by the client ``<client>``.
+The owning client may remove them at any time.
 
 v1 Reply Index File
 -------------------
@@ -107,7 +129,14 @@ The reply index file contains a JSON object:
                            "version": { "major": 1, "minor": 0 },
                            "jsonFile": "<file>" },
       "<unknown>": { "error": "unknown query file" },
-      "...": {}
+      "...": {},
+      "client-<client>": {
+        "<kind>-v<major>": { "kind": "<kind>",
+                             "version": { "major": 1, "minor": 0 },
+                             "jsonFile": "<file>" },
+        "<unknown>": { "error": "unknown query file" },
+        "...": {}
+      }
     }
   }
 
@@ -161,6 +190,26 @@ The members are:
     The value is a JSON object with a single ``error`` member
     containing a string with an error message indicating that the
     query file is unknown.
+
+  ``client-<client>``
+    A member of this form appears for each client-owned directory
+    holding `v1 Client Stateless Query Files`_.
+    The value is a JSON object mirroring the content of the
+    ``query/client-<client>/`` directory.  The members are of the form:
+
+    ``<kind>-v<major>``
+      A member of this form appears for each of the
+      `v1 Client Stateless Query Files`_ that CMake recognized as a
+      request for object kind ``<kind>`` with major version ``<major>``.
+      The value is a `v1 Reply File Reference`_ to the corresponding
+      reply file for that object kind and version.
+
+    ``<unknown>``
+      A member of this form appears for each of the
+      `v1 Client Stateless Query Files`_ that CMake did not recognize.
+      The value is a JSON object with a single ``error`` member
+      containing a string with an error message indicating that the
+      query file is unknown.
 
 After reading the reply index file, clients may read the other
 `v1 Reply Files`_ it references.

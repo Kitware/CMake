@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileAPI.h"
 
+#include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
@@ -42,7 +43,9 @@ void cmFileAPI::ReadQueries()
 
   // Read the queries and save for later.
   for (std::string& query : queries) {
-    if (!cmFileAPI::ReadQuery(query, this->TopQuery.Known)) {
+    if (cmHasLiteralPrefix(query, "client-")) {
+      this->ReadClient(query);
+    } else if (!cmFileAPI::ReadQuery(query, this->TopQuery.Known)) {
       this->TopQuery.Unknown.push_back(std::move(query));
     }
   }
@@ -176,6 +179,21 @@ bool cmFileAPI::ReadQuery(std::string const& query,
   return false;
 }
 
+void cmFileAPI::ReadClient(std::string const& client)
+{
+  // Load queries for the client.
+  std::string clientDir = this->APIv1 + "/query/" + client;
+  std::vector<std::string> queries = this->LoadDir(clientDir);
+
+  // Read the queries and save for later.
+  Query& clientQuery = this->ClientQueries[client];
+  for (std::string& query : queries) {
+    if (!this->ReadQuery(query, clientQuery.Known)) {
+      clientQuery.Unknown.push_back(std::move(query));
+    }
+  }
+}
+
 Json::Value cmFileAPI::BuildReplyIndex()
 {
   Json::Value index(Json::objectValue);
@@ -184,7 +202,12 @@ Json::Value cmFileAPI::BuildReplyIndex()
   index["cmake"] = this->BuildCMake();
 
   // Reply to all queries that we loaded.
-  index["reply"] = this->BuildReply(this->TopQuery);
+  Json::Value& reply = index["reply"] = this->BuildReply(this->TopQuery);
+  for (auto const& client : this->ClientQueries) {
+    std::string const& clientName = client.first;
+    Query const& clientQuery = client.second;
+    reply[clientName] = this->BuildReply(clientQuery);
+  }
 
   // Move our index of generated objects into its field.
   Json::Value& objects = index["objects"] = Json::arrayValue;

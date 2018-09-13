@@ -77,6 +77,9 @@ private:
   /** The content of the top-level query directory.  */
   Query TopQuery;
 
+  /** The content of each "client-$client" query directory.  */
+  std::map<std::string, Query> ClientQueries;
+
   /** Reply index object generated for object kind/version.
       This populates the "objects" field of the reply index.  */
   std::map<Object, Json::Value> ReplyIndexObjects;
@@ -91,6 +94,7 @@ private:
 
   static bool ReadQuery(std::string const& query,
                         std::vector<Object>& objects);
+  void ReadClient(std::string const& client);
 
   Json::Value BuildReplyIndex();
   Json::Value BuildCMake();
