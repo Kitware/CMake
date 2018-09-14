@@ -81,6 +81,7 @@
 
 #ifdef CMAKE_USE_ECLIPSE
 #  include "cmExtraEclipseCDT4Generator.h"
+#  include "cmExtraEclipseCDT9Generator.h"
 #endif
 
 #if defined(__APPLE__)
@@ -894,6 +895,7 @@ void cmake::AddDefaultExtraGenerators()
 
 #  ifdef CMAKE_USE_ECLIPSE
   this->ExtraGenerators.push_back(cmExtraEclipseCDT4Generator::GetFactory());
+  this->ExtraGenerators.push_back(cmExtraEclipseCDT9Generator::GetFactory());
 #  endif
 
 #endif
