@@ -78,6 +78,7 @@ Variables that Provide Information
    /variable/CMAKE_PROJECT_VERSION_TWEAK
    /variable/CMAKE_RANLIB
    /variable/CMAKE_ROOT
+   /variable/CMAKE_RULE_MESSAGES
    /variable/CMAKE_SCRIPT_MODE_FILE
    /variable/CMAKE_SHARED_LIBRARY_PREFIX
    /variable/CMAKE_SHARED_LIBRARY_SUFFIX
