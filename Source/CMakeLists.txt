@@ -203,6 +203,8 @@ set(SRCS
   cmExtraCodeLiteGenerator.h
   cmExtraEclipseCDT4Generator.cxx
   cmExtraEclipseCDT4Generator.h
+  cmExtraEclipseCDT9Generator.cxx
+  cmExtraEclipseCDT9Generator.h
   cmExtraKateGenerator.cxx
   cmExtraKateGenerator.h
   cmExtraSublimeTextGenerator.cxx
