@@ -106,6 +106,8 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     this->PopulateInterfaceProperty("INTERFACE_LINK_OPTIONS", gt,
                                     cmGeneratorExpression::InstallInterface,
                                     properties, missingTargets);
+    this->PopulateLinkDirectoriesInterface(
+      te, cmGeneratorExpression::InstallInterface, properties, missingTargets);
     this->PopulateLinkDependsInterface(
       te, cmGeneratorExpression::InstallInterface, properties, missingTargets);
 

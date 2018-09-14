@@ -228,6 +228,7 @@ Properties on Targets
    /prop_tgt/INTERFACE_COMPILE_OPTIONS
    /prop_tgt/INTERFACE_INCLUDE_DIRECTORIES
    /prop_tgt/INTERFACE_LINK_DEPENDS
+   /prop_tgt/INTERFACE_LINK_DIRECTORIES
    /prop_tgt/INTERFACE_LINK_LIBRARIES
    /prop_tgt/INTERFACE_LINK_OPTIONS
    /prop_tgt/INTERFACE_POSITION_INDEPENDENT_CODE
@@ -252,6 +253,7 @@ Properties on Targets
    /prop_tgt/LINK_DEPENDS_NO_SHARED
    /prop_tgt/LINK_DEPENDS
    /prop_tgt/LINKER_LANGUAGE
+   /prop_tgt/LINK_DIRECTORIES
    /prop_tgt/LINK_FLAGS_CONFIG
    /prop_tgt/LINK_FLAGS
    /prop_tgt/LINK_INTERFACE_LIBRARIES_CONFIG

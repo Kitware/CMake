@@ -154,10 +154,6 @@ public:
                            cmListFileContext const& lfc);
   void GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const;
 
-  const std::vector<std::string>& GetLinkDirectories() const;
-
-  void AddLinkDirectory(const std::string& d);
-
   /**
    * Set the path where this target should be installed. This is relative to
    * INSTALL_PREFIX
@@ -247,6 +243,8 @@ public:
                                cmListFileBacktrace const& bt);
   void InsertLinkOption(std::string const& entry,
                         cmListFileBacktrace const& bt, bool before = false);
+  void InsertLinkDirectory(std::string const& entry,
+                           cmListFileBacktrace const& bt, bool before = false);
 
   void AppendBuildInterfaceIncludes();
 
@@ -277,6 +275,9 @@ public:
   cmStringRange GetLinkOptionsEntries() const;
   cmBacktraceRange GetLinkOptionsBacktraces() const;
 
+  cmStringRange GetLinkDirectoriesEntries() const;
+  cmBacktraceRange GetLinkDirectoriesBacktraces() const;
+
   cmStringRange GetLinkImplementationEntries() const;
   cmBacktraceRange GetLinkImplementationBacktraces() const;
 
@@ -306,14 +307,12 @@ private:
   bool IsGeneratorProvided;
   cmPropertyMap Properties;
   std::set<std::string> SystemIncludeDirectories;
-  std::set<std::string> LinkDirectoriesEmmitted;
   std::set<std::string> Utilities;
   std::map<std::string, cmListFileBacktrace> UtilityBacktraces;
   cmPolicies::PolicyMap PolicyMap;
   std::string Name;
   std::string InstallPath;
   std::string RuntimeInstallPath;
-  std::vector<std::string> LinkDirectories;
   std::vector<cmCustomCommand> PreBuildCommands;
   std::vector<cmCustomCommand> PreLinkCommands;
   std::vector<cmCustomCommand> PostBuildCommands;

@@ -147,6 +147,10 @@ protected:
     cmTargetExport* target,
     cmGeneratorExpression::PreprocessContext preprocessRule,
     ImportPropertyMap& properties, std::vector<std::string>& missingTargets);
+  void PopulateLinkDirectoriesInterface(
+    cmTargetExport* target,
+    cmGeneratorExpression::PreprocessContext preprocessRule,
+    ImportPropertyMap& properties, std::vector<std::string>& missingTargets);
   void PopulateLinkDependsInterface(
     cmTargetExport* target,
     cmGeneratorExpression::PreprocessContext preprocessRule,

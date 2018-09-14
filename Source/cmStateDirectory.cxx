@@ -396,6 +396,43 @@ void cmStateDirectory::ClearLinkOptions()
                this->Snapshot_.Position->LinkOptionsPosition);
 }
 
+cmStringRange cmStateDirectory::GetLinkDirectoriesEntries() const
+{
+  return GetPropertyContent(this->DirectoryState->LinkDirectories,
+                            this->Snapshot_.Position->LinkDirectoriesPosition);
+}
+
+cmBacktraceRange cmStateDirectory::GetLinkDirectoriesEntryBacktraces() const
+{
+  return GetPropertyBacktraces(
+    this->DirectoryState->LinkDirectories,
+    this->DirectoryState->LinkDirectoriesBacktraces,
+    this->Snapshot_.Position->LinkDirectoriesPosition);
+}
+
+void cmStateDirectory::AppendLinkDirectoriesEntry(
+  const std::string& vec, const cmListFileBacktrace& lfbt)
+{
+  AppendEntry(this->DirectoryState->LinkDirectories,
+              this->DirectoryState->LinkDirectoriesBacktraces,
+              this->Snapshot_.Position->LinkDirectoriesPosition, vec, lfbt);
+}
+
+void cmStateDirectory::SetLinkDirectories(const std::string& vec,
+                                          const cmListFileBacktrace& lfbt)
+{
+  SetContent(this->DirectoryState->LinkDirectories,
+             this->DirectoryState->LinkDirectoriesBacktraces,
+             this->Snapshot_.Position->LinkDirectoriesPosition, vec, lfbt);
+}
+
+void cmStateDirectory::ClearLinkDirectories()
+{
+  ClearContent(this->DirectoryState->LinkDirectories,
+               this->DirectoryState->LinkDirectoriesBacktraces,
+               this->Snapshot_.Position->LinkDirectoriesPosition);
+}
+
 void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
                                    cmListFileBacktrace const& lfbt)
 {
@@ -431,6 +468,14 @@ void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
     this->SetLinkOptions(value, lfbt);
     return;
   }
+  if (prop == "LINK_DIRECTORIES") {
+    if (!value) {
+      this->ClearLinkDirectories();
+      return;
+    }
+    this->SetLinkDirectories(value, lfbt);
+    return;
+  }
 
   this->DirectoryState->Properties.SetProperty(prop, value);
 }
@@ -453,6 +498,10 @@ void cmStateDirectory::AppendProperty(const std::string& prop,
   }
   if (prop == "LINK_OPTIONS") {
     this->AppendLinkOptionsEntry(value, lfbt);
+    return;
+  }
+  if (prop == "LINK_DIRECTORIES") {
+    this->AppendLinkDirectoriesEntry(value, lfbt);
     return;
   }
 
@@ -540,6 +589,10 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
   }
   if (prop == "LINK_OPTIONS") {
     output = cmJoin(this->GetLinkOptionsEntries(), ";");
+    return output.c_str();
+  }
+  if (prop == "LINK_DIRECTORIES") {
+    output = cmJoin(this->GetLinkDirectoriesEntries(), ";");
     return output.c_str();
   }
 

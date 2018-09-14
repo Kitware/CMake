@@ -284,6 +284,8 @@ cmStateSnapshot cmState::Reset()
     it->CompileOptionsBacktraces.clear();
     it->LinkOptions.clear();
     it->LinkOptionsBacktraces.clear();
+    it->LinkDirectories.clear();
+    it->LinkDirectoriesBacktraces.clear();
     it->DirectoryEnd = pos;
     it->NormalTargetNames.clear();
     it->Properties.clear();
@@ -660,6 +662,7 @@ cmStateSnapshot cmState::CreateBaseSnapshot()
   pos->CompileDefinitionsPosition = 0;
   pos->CompileOptionsPosition = 0;
   pos->LinkOptionsPosition = 0;
+  pos->LinkDirectoriesPosition = 0;
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->Policies = this->PolicyStack.Root();
   pos->PolicyRoot = this->PolicyStack.Root();
@@ -813,6 +816,8 @@ cmStateSnapshot cmState::Pop(cmStateSnapshot const& originSnapshot)
     prevPos->BuildSystemDirectory->CompileOptions.size();
   prevPos->LinkOptionsPosition =
     prevPos->BuildSystemDirectory->LinkOptions.size();
+  prevPos->LinkDirectoriesPosition =
+    prevPos->BuildSystemDirectory->LinkDirectories.size();
   prevPos->BuildSystemDirectory->DirectoryEnd = prevPos;
 
   if (!pos->Keep && this->SnapshotData.IsLast(pos)) {

@@ -619,6 +619,18 @@ export(TARGETS testLinkOptions NAMESPACE bld_ APPEND FILE ExportBuildTree.cmake)
 
 
 #------------------------------------------------------------------------------
+# test export of INTERFACE_LINK_DIRECTORIES
+add_library(testLinkDirectories INTERFACE)
+target_link_directories(testLinkDirectories INTERFACE
+  $<BUILD_INTERFACE:/interface/build>
+  $<INSTALL_INTERFACE:interface/install>)
+
+install(TARGETS testLinkDirectories
+        EXPORT RequiredExp DESTINATION lib)
+export(TARGETS testLinkDirectories NAMESPACE bld_ APPEND FILE ExportBuildTree.cmake)
+
+
+#------------------------------------------------------------------------------
 # test export of INTERFACE_LINK_DEPENDS
 if(CMAKE_GENERATOR MATCHES "Make|Ninja")
   add_library(testLinkDepends INTERFACE)

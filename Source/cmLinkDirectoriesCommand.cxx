@@ -4,6 +4,7 @@
 
 #include <sstream>
 
+#include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmSystemTools.h"
@@ -29,7 +30,8 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
 {
   std::string unixPath = dir;
   cmSystemTools::ConvertToUnixSlashes(unixPath);
-  if (!cmSystemTools::FileIsFullPath(unixPath)) {
+  if (!cmSystemTools::FileIsFullPath(unixPath) &&
+      !cmGeneratorExpression::StartsWithGeneratorExpression(unixPath)) {
     bool convertToAbsolute = false;
     std::ostringstream e;
     /* clang-format off */
@@ -41,6 +43,7 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0015);
         this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+        break;
       case cmPolicies::OLD:
         // OLD behavior does not convert
         break;
@@ -61,5 +64,5 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
       unixPath = tmp;
     }
   }
-  this->Makefile->AppendProperty("LINK_DIRECTORIES", unixPath.c_str());
+  this->Makefile->AddLinkDirectory(unixPath);
 }
