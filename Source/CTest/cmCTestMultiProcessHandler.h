@@ -113,6 +113,9 @@ protected:
   inline size_t GetProcessorsUsed(int index);
   std::string GetName(int index);
 
+  bool CheckStopTimePassed();
+  void SetStopTimePassed();
+
   void LockResources(int index);
   void UnlockResources(int index);
   // map from test number to set of depend tests
@@ -125,7 +128,7 @@ protected:
   size_t RunningCount;
   std::set<size_t> ProcessorsAvailable;
   size_t HaveAffinity;
-  bool StopTimePassed;
+  bool StopTimePassed = false;
   // list of test properties (indices concurrent to the test map)
   PropertiesMap Properties;
   std::map<int, bool> TestRunningMap;

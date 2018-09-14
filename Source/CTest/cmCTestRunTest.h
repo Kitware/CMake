@@ -80,6 +80,8 @@ public:
 
   void FinalizeTest();
 
+  bool TimedOutForStopTime() const { return this->TimeoutIsForStopTime; }
+
 private:
   bool NeedsToRerun();
   void DartProcessing();
@@ -92,6 +94,7 @@ private:
   void MemCheckPostProcess();
 
   cmCTestTestHandler::cmCTestTestProperties* TestProperties;
+  bool TimeoutIsForStopTime = false;
   // Pointer back to the "parent"; the handler that invoked this test run
   cmCTestTestHandler* TestHandler;
   cmCTest* CTest;
