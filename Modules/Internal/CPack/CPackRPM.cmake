@@ -3,6 +3,9 @@
 
 # Author: Eric Noulard with the help of Alexander Neundorf.
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 function(get_file_permissions FILE RETURN_VAR)
   execute_process(COMMAND ls -l ${FILE}
           OUTPUT_VARIABLE permissions_
@@ -1865,3 +1868,5 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
 endfunction()
 
 cpack_rpm_generate_package()
+
+cmake_policy(POP)

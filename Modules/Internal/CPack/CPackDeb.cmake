@@ -10,6 +10,9 @@ if(CMAKE_BINARY_DIR)
   message(FATAL_ERROR "CPackDeb.cmake may only be used by CPack internally.")
 endif()
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 function(cpack_deb_variable_fallback OUTPUT_VAR_NAME)
   set(FALLBACK_VAR_NAMES ${ARGN})
 
@@ -579,3 +582,5 @@ function(cpack_deb_prepare_package_vars)
 endfunction()
 
 cpack_deb_prepare_package_vars()
+
+cmake_policy(POP)
