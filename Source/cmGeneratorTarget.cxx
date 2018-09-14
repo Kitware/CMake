@@ -819,8 +819,11 @@ static void AddInterfaceEntries(
         thisTarget->GetLinkImplementationLibraries(config)) {
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target) {
+        std::string uniqueName =
+          thisTarget->GetGlobalGenerator()->IndexGeneratorTargetUniquely(
+            lib.Target);
         std::string genex =
-          "$<TARGET_PROPERTY:" + lib.AsStr() + "," + prop + ">";
+          "$<TARGET_PROPERTY:" + std::move(uniqueName) + "," + prop + ">";
         cmGeneratorExpression ge(lib.Backtrace);
         std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
         cge->SetEvaluateForBuildsystem(true);
@@ -840,7 +843,10 @@ static void AddObjectEntries(
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target &&
           lib.Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-        std::string genex = "$<TARGET_OBJECTS:" + lib.AsStr() + ">";
+        std::string uniqueName =
+          thisTarget->GetGlobalGenerator()->IndexGeneratorTargetUniquely(
+            lib.Target);
+        std::string genex = "$<TARGET_OBJECTS:" + std::move(uniqueName) + ">";
         cmGeneratorExpression ge(lib.Backtrace);
         std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
         cge->SetEvaluateForBuildsystem(true);
@@ -5639,24 +5645,65 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   }
 }
 
+cmGeneratorTarget::TargetOrString cmGeneratorTarget::ResolveTargetReference(
+  std::string const& name) const
+{
+  cmLocalGenerator const* lg = this->LocalGenerator;
+  std::string const* lookupName = &name;
+
+  // When target_link_libraries() is called with a LHS target that is
+  // not created in the calling directory it adds a directory id suffix
+  // that we can use to look up the calling directory.  It is that scope
+  // in which the item name is meaningful.  This case is relatively rare
+  // so we allocate a separate string only when the directory id is present.
+  std::string::size_type pos = name.find(CMAKE_DIRECTORY_ID_SEP);
+  std::string plainName;
+  if (pos != std::string::npos) {
+    // We will look up the plain name without the directory id suffix.
+    plainName = name.substr(0, pos);
+
+    // We will look up in the scope of the directory id.
+    // If we do not recognize the id then leave the original
+    // syntax in place to produce an indicative error later.
+    cmDirectoryId const dirId =
+      name.substr(pos + sizeof(CMAKE_DIRECTORY_ID_SEP) - 1);
+    if (cmLocalGenerator const* otherLG =
+          this->GlobalGenerator->FindLocalGenerator(dirId)) {
+      lg = otherLG;
+      lookupName = &plainName;
+    }
+  }
+
+  TargetOrString resolved;
+
+  if (cmGeneratorTarget* tgt = lg->FindGeneratorTargetToUse(*lookupName)) {
+    resolved.Target = tgt;
+  } else if (lookupName == &plainName) {
+    resolved.String = std::move(plainName);
+  } else {
+    resolved.String = name;
+  }
+
+  return resolved;
+}
+
 cmLinkItem cmGeneratorTarget::ResolveLinkItem(std::string const& name) const
 {
-  cmGeneratorTarget* tgt =
-    this->LocalGenerator->FindGeneratorTargetToUse(name);
+  TargetOrString resolved = this->ResolveTargetReference(name);
+
+  if (!resolved.Target) {
+    return cmLinkItem(resolved.String);
+  }
 
   // Skip targets that will not really be linked.  This is probably a
   // name conflict between an external library and an executable
   // within the project.
-  if (tgt && tgt->GetType() == cmStateEnums::EXECUTABLE &&
-      !tgt->IsExecutableWithExports()) {
-    tgt = nullptr;
+  if (resolved.Target->GetType() == cmStateEnums::EXECUTABLE &&
+      !resolved.Target->IsExecutableWithExports()) {
+    return cmLinkItem(resolved.Target->GetName());
   }
 
-  if (tgt) {
-    return cmLinkItem(tgt);
-  }
-
-  return cmLinkItem(name);
+  return cmLinkItem(resolved.Target);
 }
 
 std::string cmGeneratorTarget::GetPDBDirectory(const std::string& config) const

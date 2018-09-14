@@ -567,14 +567,17 @@ bool cmExportFileGenerator::AddTargetNamespace(
   std::string& input, cmGeneratorTarget* target,
   std::vector<std::string>& missingTargets)
 {
-  cmLocalGenerator* lg = target->GetLocalGenerator();
+  cmGeneratorTarget::TargetOrString resolved =
+    target->ResolveTargetReference(input);
 
-  cmGeneratorTarget* tgt = lg->FindGeneratorTargetToUse(input);
+  cmGeneratorTarget* tgt = resolved.Target;
   if (!tgt) {
+    input = resolved.String;
     return false;
   }
 
   if (tgt->IsImported()) {
+    input = tgt->GetName();
     return true;
   }
   if (this->ExportedTargets.find(tgt) != this->ExportedTargets.end()) {
@@ -584,6 +587,8 @@ bool cmExportFileGenerator::AddTargetNamespace(
     this->HandleMissingTarget(namespacedTarget, missingTargets, target, tgt);
     if (!namespacedTarget.empty()) {
       input = namespacedTarget;
+    } else {
+      input = tgt->GetName();
     }
   }
   return true;

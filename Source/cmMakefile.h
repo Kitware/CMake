@@ -47,6 +47,14 @@ class cmTest;
 class cmTestGenerator;
 class cmVariableWatch;
 
+/** A type-safe wrapper for a string representing a directory id.  */
+class cmDirectoryId
+{
+public:
+  cmDirectoryId(std::string s);
+  std::string String;
+};
+
 /** \class cmMakefile
  * \brief Process the input CMakeLists.txt file.
  *
@@ -74,6 +82,8 @@ public:
    * Destructor.
    */
   ~cmMakefile();
+
+  cmDirectoryId GetDirectoryId() const;
 
   bool ReadListFile(const char* filename);
 

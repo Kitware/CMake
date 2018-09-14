@@ -26,6 +26,9 @@
 #  include "cmFileLockPool.h"
 #endif
 
+#define CMAKE_DIRECTORY_ID_SEP "::@"
+
+class cmDirectoryId;
 class cmExportBuildFileGenerator;
 class cmExternalMakefileProjectGenerator;
 class cmGeneratorTarget;
@@ -284,8 +287,7 @@ public:
   bool NameResolvesToFramework(const std::string& libname) const;
 
   cmMakefile* FindMakefile(const std::string& start_dir) const;
-  ///! Find a local generator by its startdirectory
-  cmLocalGenerator* FindLocalGenerator(const std::string& start_dir) const;
+  cmLocalGenerator* FindLocalGenerator(cmDirectoryId const& id) const;
 
   /** Append the subdirectory for the given configuration.  If anything is
       appended the given prefix and suffix will be appended around it, which
@@ -304,6 +306,10 @@ public:
 
   void IndexTarget(cmTarget* t);
   void IndexGeneratorTarget(cmGeneratorTarget* gt);
+
+  // Index the target using a name that is unique to that target
+  // even if other targets have the same name.
+  std::string IndexGeneratorTargetUniquely(cmGeneratorTarget const* gt);
 
   static bool IsReservedTarget(std::string const& name);
 
@@ -514,6 +520,7 @@ private:
   typedef std::unordered_map<std::string, cmGeneratorTarget*>
     GeneratorTargetMap;
   typedef std::unordered_map<std::string, cmMakefile*> MakefileMap;
+  typedef std::unordered_map<std::string, cmLocalGenerator*> LocalGeneratorMap;
   // Map efficiently from target name to cmTarget instance.
   // Do not use this structure for looping over all targets.
   // It contains both normal and globally visible imported targets.
@@ -524,6 +531,11 @@ private:
   // Do not use this structure for looping over all directories.
   // It may not contain all of them (see note in IndexMakefile method).
   MakefileMap MakefileSearchIndex;
+
+  // Map efficiently from source directory path to cmLocalGenerator instance.
+  // Do not use this structure for looping over all directories.
+  // Its order is not deterministic.
+  LocalGeneratorMap LocalGeneratorSearchIndex;
 
   cmMakefile* TryCompileOuterMakefile;
   // If you add a new map here, make sure it is copied
@@ -583,6 +595,7 @@ private:
                     std::string const& reason) const;
 
   void IndexMakefile(cmMakefile* mf);
+  void IndexLocalGenerator(cmLocalGenerator* lg);
 
   virtual const char* GetBuildIgnoreErrorsFlag() const { return nullptr; }
 

@@ -155,6 +155,13 @@ add_library(testStaticLibRequiredPrivate testStaticLibRequiredPrivate.c)
 target_link_libraries(testLibDepends PRIVATE testStaticLibRequiredPrivate)
 cmake_policy(POP)
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0079 NEW)
+add_library(TopDirLib STATIC testTopDirLib.c)
+add_subdirectory(SubDirLinkA)
+add_subdirectory(SubDirLinkB)
+cmake_policy(POP)
+
 macro(add_include_lib _libName)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_libName}.c" "/* no content */\n")
   add_library(${_libName} "${CMAKE_CURRENT_BINARY_DIR}/${_libName}.c")
@@ -508,6 +515,7 @@ install(
   testLibCycleA testLibCycleB
   testLibNoSONAME
   cmp0022NEW cmp0022OLD
+  TopDirLib SubDirLinkA
   systemlib
   EXPORT exp
   RUNTIME DESTINATION $<1:bin>$<0:/wrong>
@@ -566,6 +574,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
   testSharedLibRequired testSharedLibRequiredUser testSharedLibRequiredUser2
   testSharedLibDepends renamed_on_export
   cmp0022NEW cmp0022OLD
+  TopDirLib SubDirLinkA
   systemlib
   NAMESPACE bld_
   FILE ExportBuildTree.cmake

@@ -1139,11 +1139,14 @@ void cmGlobalGenerator::ClearEnabledLanguages()
 
 void cmGlobalGenerator::CreateLocalGenerators()
 {
+  this->LocalGeneratorSearchIndex.clear();
   cmDeleteAll(this->LocalGenerators);
   this->LocalGenerators.clear();
   this->LocalGenerators.reserve(this->Makefiles.size());
   for (cmMakefile* m : this->Makefiles) {
-    this->LocalGenerators.push_back(this->CreateLocalGenerator(m));
+    cmLocalGenerator* lg = this->CreateLocalGenerator(m);
+    this->LocalGenerators.push_back(lg);
+    this->IndexLocalGenerator(lg);
   }
 }
 
@@ -1661,6 +1664,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->TargetSearchIndex.clear();
   this->GeneratorTargetSearchIndex.clear();
   this->MakefileSearchIndex.clear();
+  this->LocalGeneratorSearchIndex.clear();
   this->ProjectMap.clear();
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
@@ -2130,15 +2134,13 @@ cmMakefile* cmGlobalGenerator::FindMakefile(const std::string& start_dir) const
   return nullptr;
 }
 
-///! Find a local generator by its startdirectory
 cmLocalGenerator* cmGlobalGenerator::FindLocalGenerator(
-  const std::string& start_dir) const
+  cmDirectoryId const& id) const
 {
-  for (cmLocalGenerator* lg : this->LocalGenerators) {
-    std::string sd = lg->GetCurrentSourceDirectory();
-    if (sd == start_dir) {
-      return lg;
-    }
+  LocalGeneratorMap::const_iterator i =
+    this->LocalGeneratorSearchIndex.find(id.String);
+  if (i != this->LocalGeneratorSearchIndex.end()) {
+    return i->second;
   }
   return nullptr;
 }
@@ -2168,6 +2170,24 @@ void cmGlobalGenerator::IndexGeneratorTarget(cmGeneratorTarget* gt)
   }
 }
 
+std::string cmGlobalGenerator::IndexGeneratorTargetUniquely(
+  cmGeneratorTarget const* gt)
+{
+  // Use the pointer value to uniquely identify the target instance.
+  // Use a "T" prefix to indicate that this identifier is for a target.
+  // We must satisfy cmGeneratorExpression::IsValidTargetName so use no
+  // other special characters.
+  char buf[64];
+  sprintf(buf, "::T%p",
+          static_cast<void const*>(gt)); // cast avoids format warning
+  std::string id = gt->GetName() + buf;
+  // We internally index pointers to non-const generator targets
+  // but our callers only have pointers to const generator targets.
+  // They will give up non-const privileges when looking up anyway.
+  this->GeneratorTargetSearchIndex[id] = const_cast<cmGeneratorTarget*>(gt);
+  return id;
+}
+
 void cmGlobalGenerator::IndexMakefile(cmMakefile* mf)
 {
   // FIXME: add_subdirectory supports multiple build directories
@@ -2177,6 +2197,12 @@ void cmGlobalGenerator::IndexMakefile(cmMakefile* mf)
   // up directories by build directory path.
   this->MakefileSearchIndex.insert(
     MakefileMap::value_type(mf->GetCurrentSourceDirectory(), mf));
+}
+
+void cmGlobalGenerator::IndexLocalGenerator(cmLocalGenerator* lg)
+{
+  cmDirectoryId id = lg->GetMakefile()->GetDirectoryId();
+  this->LocalGeneratorSearchIndex[id.String] = lg;
 }
 
 cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const

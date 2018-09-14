@@ -11,6 +11,7 @@
 #include <iterator>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
+#include <stdio.h>
 #include <stdlib.h>
 #include <utility>
 
@@ -47,6 +48,11 @@
 #endif
 
 class cmMessenger;
+
+cmDirectoryId::cmDirectoryId(std::string s)
+  : String(std::move(s))
+{
+}
 
 // default is not to be building executables
 cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
@@ -109,6 +115,17 @@ cmMakefile::~cmMakefile()
   cmDeleteAll(this->FinalPassCommands);
   cmDeleteAll(this->FunctionBlockers);
   cmDeleteAll(this->EvaluationFiles);
+}
+
+cmDirectoryId cmMakefile::GetDirectoryId() const
+{
+  // Use the instance pointer value to uniquely identify this directory.
+  // If we ever need to expose this to CMake language code we should
+  // add a read-only property in cmMakefile::GetProperty.
+  char buf[32];
+  sprintf(buf, "<%p>",
+          static_cast<void const*>(this)); // cast avoids format warning
+  return std::string(buf);
 }
 
 void cmMakefile::IssueMessage(cmake::MessageType t,

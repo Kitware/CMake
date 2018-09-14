@@ -359,30 +359,53 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
     }
   }
 
+  bool warnRemoteInterface = false;
+  bool rejectRemoteLinking = false;
+  bool encodeRemoteReference = false;
+  if (this->Makefile != this->Target->GetMakefile()) {
+    // The LHS target was created in another directory.
+    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0079)) {
+      case cmPolicies::WARN:
+        warnRemoteInterface = true;
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        rejectRemoteLinking = true;
+        break;
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::NEW:
+        encodeRemoteReference = true;
+        break;
+    }
+  }
+
+  std::string libRef;
+  if (encodeRemoteReference && !cmSystemTools::FileIsFullPath(lib)) {
+    // This is a library name added by a caller that is not in the
+    // same directory as the target was created.  Add a suffix to
+    // the name to tell ResolveLinkItem to look up the name in the
+    // caller's directory.
+    cmDirectoryId const dirId = this->Makefile->GetDirectoryId();
+    libRef = lib + CMAKE_DIRECTORY_ID_SEP + dirId.String;
+  } else {
+    // This is an absolute path or a library name added by a caller
+    // in the same directory as the target was created.  We can use
+    // the original name directly.
+    libRef = lib;
+  }
+
   // Handle normal case where the command was called with another keyword than
   // INTERFACE / LINK_INTERFACE_LIBRARIES or none at all. (The "LINK_LIBRARIES"
   // property of the target on the LHS shall be populated.)
   if (this->CurrentProcessingState != ProcessingKeywordLinkInterface &&
       this->CurrentProcessingState != ProcessingPlainLinkInterface) {
 
-    // Assure that the target on the LHS was created in the current directory.
-    cmTarget* t =
-      this->Makefile->FindLocalNonAliasTarget(this->Target->GetName());
-    if (!t) {
-      const std::vector<cmTarget*>& importedTargets =
-        this->Makefile->GetOwnedImportedTargets();
-      for (cmTarget* importedTarget : importedTargets) {
-        if (importedTarget->GetName() == this->Target->GetName()) {
-          t = importedTarget;
-          break;
-        }
-      }
-    }
-    if (!t) {
+    if (rejectRemoteLinking) {
       std::ostringstream e;
       e << "Attempt to add link library \"" << lib << "\" to target \""
         << this->Target->GetName()
-        << "\" which is not built in this directory.";
+        << "\" which is not built in this directory.\n"
+        << "This is allowed only when policy CMP0079 is set to NEW.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return false;
     }
@@ -404,7 +427,20 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     }
 
-    this->Target->AddLinkLibrary(*this->Makefile, lib, llt);
+    this->Target->AddLinkLibrary(*this->Makefile, lib, libRef, llt);
+  }
+
+  if (warnRemoteInterface) {
+    std::ostringstream w;
+    /* clang-format off */
+    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0079) << "\n"
+      "Target\n  " << this->Target->GetName() << "\nis not created in this "
+      "directory.  For compatibility with older versions of CMake, link "
+      "library\n  " << lib << "\nwill be looked up in the directory in "
+      "which the target was created rather than in this calling "
+      "directory.";
+    /* clang-format on */
+    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
   }
 
   // Handle (additional) case where the command was called with PRIVATE /
@@ -415,9 +451,9 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       this->CurrentProcessingState == ProcessingPlainPrivateInterface) {
     if (this->Target->GetType() == cmStateEnums::STATIC_LIBRARY) {
       std::string configLib =
-        this->Target->GetDebugGeneratorExpressions(lib, llt);
-      if (cmGeneratorExpression::IsValidTargetName(lib) ||
-          cmGeneratorExpression::Find(lib) != std::string::npos) {
+        this->Target->GetDebugGeneratorExpressions(libRef, llt);
+      if (cmGeneratorExpression::IsValidTargetName(libRef) ||
+          cmGeneratorExpression::Find(libRef) != std::string::npos) {
         configLib = "$<LINK_ONLY:" + configLib + ">";
       }
       this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
@@ -431,7 +467,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
   // property of the target on the LHS shall be populated.)
   this->Target->AppendProperty(
     "INTERFACE_LINK_LIBRARIES",
-    this->Target->GetDebugGeneratorExpressions(lib, llt).c_str());
+    this->Target->GetDebugGeneratorExpressions(libRef, llt).c_str());
 
   // Stop processing if called without any keyword.
   if (this->CurrentProcessingState == ProcessingLinkLibraries) {
@@ -464,12 +500,12 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       for (std::string const& dc : debugConfigs) {
         prop = "LINK_INTERFACE_LIBRARIES_";
         prop += dc;
-        this->Target->AppendProperty(prop, lib.c_str());
+        this->Target->AppendProperty(prop, libRef.c_str());
       }
     }
     if (llt == OPTIMIZED_LibraryType || llt == GENERAL_LibraryType) {
       // Put in the non-DEBUG configuration interfaces.
-      this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", lib.c_str());
+      this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", libRef.c_str());
 
       // Make sure the DEBUG configuration interfaces exist so that the
       // general one will not be used as a fall-back.
