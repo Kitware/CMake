@@ -33,9 +33,9 @@ std::string cmTargetLinkOptionsCommand::Join(
 }
 
 bool cmTargetLinkOptionsCommand::HandleDirectContent(
-  cmTarget* tgt, const std::vector<std::string>& content, bool, bool)
+  cmTarget* tgt, const std::vector<std::string>& content, bool prepend, bool)
 {
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-  tgt->InsertLinkOption(this->Join(content), lfbt);
+  tgt->InsertLinkOption(this->Join(content), lfbt, prepend);
   return true; // Successfully handled.
 }
