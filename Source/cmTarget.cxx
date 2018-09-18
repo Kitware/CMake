@@ -190,13 +190,11 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   // Check whether this is a DLL platform.
   this->DLLPlatform =
-    strcmp(this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"),
-           "") != 0;
+    !this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
 
   // Check whether we are targeting an Android platform.
   this->IsAndroid =
-    strcmp(this->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME"),
-           "Android") == 0;
+    (this->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Android");
 
   // Setup default property values.
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&

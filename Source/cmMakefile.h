@@ -432,7 +432,8 @@ public:
    * cache is then queried.
    */
   const char* GetDefinition(const std::string&) const;
-  const char* GetSafeDefinition(const std::string&) const;
+  const std::string* GetDef(const std::string&) const;
+  const std::string& GetSafeDefinition(const std::string&) const;
   std::string GetRequiredDefinition(const std::string& name) const;
   bool IsDefinitionSet(const std::string&) const;
   /**

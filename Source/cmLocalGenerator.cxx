@@ -683,7 +683,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
 
   std::string flagVar = "CMAKE_INCLUDE_FLAG_";
   flagVar += lang;
-  const char* includeFlag = this->Makefile->GetSafeDefinition(flagVar);
+  std::string const& includeFlag = this->Makefile->GetSafeDefinition(flagVar);
   flagVar = "CMAKE_INCLUDE_FLAG_SEP_";
   flagVar += lang;
   const char* sep = this->Makefile->GetDefinition(flagVar);
@@ -1824,9 +1824,9 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
     std::string flagsVar = "CMAKE_SHARED_LIBRARY_";
     flagsVar += lang;
     flagsVar += "_FLAGS";
-    const char* flags = this->Makefile->GetSafeDefinition(flagsVar);
+    std::string const& flags = this->Makefile->GetSafeDefinition(flagsVar);
 
-    if (flags && flags != originalFlags) {
+    if (!flags.empty() && flags != originalFlags) {
       switch (this->GetPolicyStatus(cmPolicies::CMP0018)) {
         case cmPolicies::WARN: {
           std::ostringstream e;
@@ -1859,7 +1859,7 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
                                                    std::string const& lang,
                                                    int targetType)
 {
-  const char* picFlags = nullptr;
+  std::string picFlags;
 
   if (targetType == cmStateEnums::EXECUTABLE) {
     std::string flagsVar = "CMAKE_";
@@ -1867,13 +1867,13 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
     flagsVar += "_COMPILE_OPTIONS_PIE";
     picFlags = this->Makefile->GetSafeDefinition(flagsVar);
   }
-  if (!picFlags) {
+  if (picFlags.empty()) {
     std::string flagsVar = "CMAKE_";
     flagsVar += lang;
     flagsVar += "_COMPILE_OPTIONS_PIC";
     picFlags = this->Makefile->GetSafeDefinition(flagsVar);
   }
-  if (picFlags) {
+  if (!picFlags.empty()) {
     std::vector<std::string> options;
     cmSystemTools::ExpandListArgument(picFlags, options);
     for (std::string const& o : options) {

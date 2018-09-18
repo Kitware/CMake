@@ -580,10 +580,11 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
                                    cmGeneratorExpressionDAGChecker* /*unused*/,
                                    const std::string& lang) const
   {
-    const char* compilerId = context->LG->GetMakefile()->GetSafeDefinition(
-      "CMAKE_" + lang + "_COMPILER_ID");
+    std::string const& compilerId =
+      context->LG->GetMakefile()->GetSafeDefinition("CMAKE_" + lang +
+                                                    "_COMPILER_ID");
     if (parameters.empty()) {
-      return compilerId ? compilerId : "";
+      return compilerId;
     }
     static cmsys::RegularExpression compilerIdValidator("^[A-Za-z0-9_]*$");
     if (!compilerIdValidator.find(*parameters.begin())) {
@@ -591,15 +592,16 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
                   "Expression syntax not recognized.");
       return std::string();
     }
-    if (!compilerId) {
+    if (compilerId.empty()) {
       return parameters.front().empty() ? "1" : "0";
     }
 
-    if (strcmp(parameters.begin()->c_str(), compilerId) == 0) {
+    if (strcmp(parameters.begin()->c_str(), compilerId.c_str()) == 0) {
       return "1";
     }
 
-    if (cmsysString_strcasecmp(parameters.begin()->c_str(), compilerId) == 0) {
+    if (cmsysString_strcasecmp(parameters.begin()->c_str(),
+                               compilerId.c_str()) == 0) {
       switch (context->LG->GetPolicyStatus(cmPolicies::CMP0044)) {
         case cmPolicies::WARN: {
           std::ostringstream e;
@@ -676,11 +678,11 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
                                    cmGeneratorExpressionDAGChecker* /*unused*/,
                                    const std::string& lang) const
   {
-    const char* compilerVersion =
+    std::string const& compilerVersion =
       context->LG->GetMakefile()->GetSafeDefinition("CMAKE_" + lang +
                                                     "_COMPILER_VERSION");
     if (parameters.empty()) {
-      return compilerVersion ? compilerVersion : "";
+      return compilerVersion;
     }
 
     static cmsys::RegularExpression compilerIdValidator("^[0-9\\.]*$");
@@ -689,13 +691,13 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
                   "Expression syntax not recognized.");
       return std::string();
     }
-    if (!compilerVersion) {
+    if (compilerVersion.empty()) {
       return parameters.front().empty() ? "1" : "0";
     }
 
     return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
                                          parameters.begin()->c_str(),
-                                         compilerVersion)
+                                         compilerVersion.c_str())
       ? "1"
       : "0";
   }
@@ -757,17 +759,17 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    const char* platformId =
+    std::string const& platformId =
       context->LG->GetMakefile()->GetSafeDefinition("CMAKE_SYSTEM_NAME");
     if (parameters.empty()) {
-      return platformId ? platformId : "";
+      return platformId;
     }
 
-    if (!platformId) {
+    if (platformId.empty()) {
       return parameters.front().empty() ? "1" : "0";
     }
 
-    if (strcmp(parameters.begin()->c_str(), platformId) == 0) {
+    if (*parameters.begin() == platformId) {
       return "1";
     }
     return "0";

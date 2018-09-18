@@ -2401,7 +2401,7 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
   return def != nullptr;
 }
 
-const char* cmMakefile::GetDefinition(const std::string& name) const
+const std::string* cmMakefile::GetDef(const std::string& name) const
 {
   const std::string* def = this->StateSnapshot.GetDefinition(name);
   if (!def) {
@@ -2427,16 +2427,26 @@ const char* cmMakefile::GetDefinition(const std::string& name) const
     }
   }
 #endif
-  return (def ? def->c_str() : nullptr);
+  return def;
 }
 
-const char* cmMakefile::GetSafeDefinition(const std::string& def) const
+const char* cmMakefile::GetDefinition(const std::string& name) const
 {
-  const char* ret = this->GetDefinition(def);
-  if (!ret) {
-    return "";
+  const std::string* def = GetDef(name);
+  if (!def) {
+    return nullptr;
   }
-  return ret;
+  return def->c_str();
+}
+
+const std::string& cmMakefile::GetSafeDefinition(const std::string& name) const
+{
+  static std::string const empty;
+  const std::string* def = GetDef(name);
+  if (!def) {
+    return empty;
+  }
+  return *def;
 }
 
 std::vector<std::string> cmMakefile::GetDefinitions() const

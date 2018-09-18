@@ -2699,11 +2699,9 @@ bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
   Options& rcOptions = *pOptions;
 
   std::string CONFIG = cmSystemTools::UpperCase(configName);
-  std::string rcConfigFlagsVar = std::string("CMAKE_RC_FLAGS_") + CONFIG;
-  std::string flags =
-    std::string(this->Makefile->GetSafeDefinition("CMAKE_RC_FLAGS")) +
-    std::string(" ") +
-    std::string(this->Makefile->GetSafeDefinition(rcConfigFlagsVar));
+  std::string rcConfigFlagsVar = "CMAKE_RC_FLAGS_" + CONFIG;
+  std::string flags = this->Makefile->GetSafeDefinition("CMAKE_RC_FLAGS") +
+    " " + this->Makefile->GetSafeDefinition(rcConfigFlagsVar);
 
   rcOptions.Parse(flags);
 
@@ -2757,10 +2755,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   // Get compile flags for CUDA in this directory.
   std::string CONFIG = cmSystemTools::UpperCase(configName);
   std::string configFlagsVar = std::string("CMAKE_CUDA_FLAGS_") + CONFIG;
-  std::string flags =
-    std::string(this->Makefile->GetSafeDefinition("CMAKE_CUDA_FLAGS")) +
-    std::string(" ") +
-    std::string(this->Makefile->GetSafeDefinition(configFlagsVar));
+  std::string flags = this->Makefile->GetSafeDefinition("CMAKE_CUDA_FLAGS") +
+    " " + this->Makefile->GetSafeDefinition(configFlagsVar);
   this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget, "CUDA",
                                           configName);
 
@@ -2971,9 +2967,8 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
   std::string CONFIG = cmSystemTools::UpperCase(configName);
   std::string configFlagsVar = std::string("CMAKE_ASM_MASM_FLAGS_") + CONFIG;
   std::string flags =
-    std::string(this->Makefile->GetSafeDefinition("CMAKE_ASM_MASM_FLAGS")) +
-    std::string(" ") +
-    std::string(this->Makefile->GetSafeDefinition(configFlagsVar));
+    this->Makefile->GetSafeDefinition("CMAKE_ASM_MASM_FLAGS") + " " +
+    this->Makefile->GetSafeDefinition(configFlagsVar);
 
   masmOptions.Parse(flags);
 
@@ -3024,14 +3019,11 @@ bool cmVisualStudio10TargetGenerator::ComputeNasmOptions(
   Options& nasmOptions = *pOptions;
 
   std::string CONFIG = cmSystemTools::UpperCase(configName);
-  std::string configFlagsVar = std::string("CMAKE_ASM_NASM_FLAGS_") + CONFIG;
+  std::string configFlagsVar = "CMAKE_ASM_NASM_FLAGS_" + CONFIG;
   std::string flags =
-    std::string(this->Makefile->GetSafeDefinition("CMAKE_ASM_NASM_FLAGS")) +
-    std::string(" -f") +
-    std::string(
-      this->Makefile->GetSafeDefinition("CMAKE_ASM_NASM_OBJECT_FORMAT")) +
-    std::string(" ") +
-    std::string(this->Makefile->GetSafeDefinition(configFlagsVar));
+    this->Makefile->GetSafeDefinition("CMAKE_ASM_NASM_FLAGS") + " -f" +
+    this->Makefile->GetSafeDefinition("CMAKE_ASM_NASM_OBJECT_FORMAT") + " " +
+    this->Makefile->GetSafeDefinition(configFlagsVar);
   nasmOptions.Parse(flags);
 
   // Get includes for this target
