@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.13
 .. toctree::
    :maxdepth: 1
 
+   CMP0081: Relative paths not allowed in LINK_DIRECTORIES target property. </policy/CMP0081>
    CMP0080: BundleUtilities cannot be included at configure time. </policy/CMP0080>
    CMP0079: target_link_libraries allows use with targets in other directories. </policy/CMP0079>
    CMP0078: UseSWIG generates standard target names. </policy/CMP0078>
