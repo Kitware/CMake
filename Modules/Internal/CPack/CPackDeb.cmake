@@ -92,7 +92,7 @@ function(cpack_deb_prepare_package_vars)
     # get file info so that we can determine if file is executable or not
     unset(CPACK_DEB_INSTALL_FILES)
     foreach(FILE_ IN LISTS FILE_PATHS_)
-      execute_process(COMMAND env LC_ALL=C ${FILE_EXECUTABLE} "./${FILE_}"
+      execute_process(COMMAND ${CMAKE_COMMAND} -E env LC_ALL=C ${FILE_EXECUTABLE} "./${FILE_}"
         WORKING_DIRECTORY "${WDIR}"
         RESULT_VARIABLE FILE_RESULT_
         OUTPUT_VARIABLE INSTALL_FILE_)
@@ -123,7 +123,7 @@ function(cpack_deb_prepare_package_vars)
 
     if(SHLIBDEPS_EXECUTABLE)
       # Check version of the dpkg-shlibdeps tool using CPackDEB method
-      execute_process(COMMAND env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --version
+      execute_process(COMMAND ${CMAKE_COMMAND} -E env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --version
         OUTPUT_VARIABLE _TMP_VERSION
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -151,7 +151,7 @@ function(cpack_deb_prepare_package_vars)
         file(MAKE_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}/DEBIAN")
 
         # Add --ignore-missing-info if the tool supports it
-        execute_process(COMMAND env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --help
+        execute_process(COMMAND ${CMAKE_COMMAND} -E env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --help
           OUTPUT_VARIABLE _TMP_HELP
           ERROR_QUIET
           OUTPUT_STRIP_TRAILING_WHITESPACE)
