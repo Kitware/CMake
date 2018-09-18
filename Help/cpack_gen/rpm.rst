@@ -85,7 +85,7 @@ List of CPack RPM generator specific variables:
    By using user provided spec file, rpm macro extensions such as for
    generating debuginfo packages or by simply using multiple components more
    than one rpm file may be generated, either from a single spec file or from
-   multiple spec files (each component execution produces it's own spec file).
+   multiple spec files (each component execution produces its own spec file).
    In such cases duplicate file names may occur as a result of this variable
    setting or spec file content structure. Duplicate files get overwritten
    and it is up to the packager to set the variables in a manner that will
@@ -749,7 +749,7 @@ Packaging of debug information
 Debuginfo packages contain debug symbols and sources for debugging packaged
 binaries.
 
-Debuginfo RPM packaging has it's own set of variables:
+Debuginfo RPM packaging has its own set of variables:
 
 .. variable:: CPACK_RPM_DEBUGINFO_PACKAGE
               CPACK_RPM_<component>_DEBUGINFO_PACKAGE
@@ -911,7 +911,7 @@ directories.
  different binary rpm packages on different platforms depending on the platform's
  packaging rules.
 
-Source RPM packaging has it's own set of variables:
+Source RPM packaging has its own set of variables:
 
 .. variable:: CPACK_RPM_PACKAGE_SOURCES
 
