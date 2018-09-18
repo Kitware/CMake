@@ -1122,6 +1122,9 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
       this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_EXTENSIONS")) {
     e1.Element("WindowsAppContainer", "true");
   }
+  if (this->IPOEnabledConfigurations.count(config) > 0) {
+    e1.Element("WholeProgramOptimization", "true");
+  }
 }
 
 void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
@@ -2370,9 +2373,11 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
   Options& linkOptions = *(this->LinkOptions[configName]);
   const std::string cond = this->CalcCondition(configName);
 
-  const char* incremental = linkOptions.GetFlag("LinkIncremental");
-  e1.WritePlatformConfigTag("LinkIncremental", cond,
-                            (incremental ? incremental : "true"));
+  if (this->IPOEnabledConfigurations.count(configName) == 0) {
+    const char* incremental = linkOptions.GetFlag("LinkIncremental");
+    e1.WritePlatformConfigTag("LinkIncremental", cond,
+                              (incremental ? incremental : "true"));
+  }
   linkOptions.RemoveFlag("LinkIncremental");
 
   const char* manifest = linkOptions.GetFlag("GenerateManifest");
@@ -2484,8 +2489,10 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     clOptions.AddFlag("CompileAs", "CompileAsCpp");
   }
 
-  // Check IPO related warning/error.
-  this->GeneratorTarget->IsIPOEnabled(linkLanguage, configName);
+  // Put the IPO enabled configurations into a set.
+  if (this->GeneratorTarget->IsIPOEnabled(linkLanguage, configName)) {
+    this->IPOEnabledConfigurations.insert(configName);
+  }
 
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Makefile->GetDefineFlags();
