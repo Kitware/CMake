@@ -5,7 +5,7 @@ Add directories in which the linker will look for libraries.
 
 ::
 
-  link_directories(directory1 [directory2 ...])
+  link_directories([AFTER|BEFORE] directory1 [directory2 ...])
 
 Add the paths in which the linker should search for libraries.
 Relative paths given to this command are interpreted as relative to
@@ -15,6 +15,12 @@ The directories are added to the :prop_dir:`LINK_DIRECTORIES` directory
 property for the current ``CMakeLists.txt`` file, converting relative
 paths to absolute as needed.
 The command will apply only to targets created after it is called.
+
+By default the directories specified are appended onto the current list of
+directories.  This default behavior can be changed by setting
+:variable:`CMAKE_LINK_DIRECTORIES_BEFORE` to ``ON``.  By using
+``AFTER`` or ``BEFORE`` explicitly, you can select between appending and
+prepending, independent of the default.
 
 Arguments to ``link_directories`` may use "generator expressions" with
 the syntax "$<...>".  See the :manual:`cmake-generator-expressions(7)`

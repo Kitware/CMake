@@ -1248,9 +1248,16 @@ void cmMakefile::AddLinkOption(std::string const& option)
   this->AppendProperty("LINK_OPTIONS", option.c_str());
 }
 
-void cmMakefile::AddLinkDirectory(std::string const& directory)
+void cmMakefile::AddLinkDirectory(std::string const& directory, bool before)
 {
-  this->AppendProperty("LINK_DIRECTORIES", directory.c_str());
+  cmListFileBacktrace lfbt = this->GetBacktrace();
+  if (before) {
+    this->StateSnapshot.GetDirectory().PrependLinkDirectoriesEntry(directory,
+                                                                   lfbt);
+  } else {
+    this->StateSnapshot.GetDirectory().AppendLinkDirectoriesEntry(directory,
+                                                                  lfbt);
+  }
 }
 
 bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)

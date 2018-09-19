@@ -182,7 +182,7 @@ public:
   void AddCompileDefinition(std::string const& definition);
   void AddCompileOption(std::string const& option);
   void AddLinkOption(std::string const& option);
-  void AddLinkDirectory(std::string const& directory);
+  void AddLinkDirectory(std::string const& directory, bool before = false);
 
   /** Create a new imported target with the name and type given.  */
   cmTarget* AddImportedTarget(const std::string& name,

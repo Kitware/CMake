@@ -417,6 +417,33 @@ void cmStateDirectory::AppendLinkDirectoriesEntry(
               this->DirectoryState->LinkDirectoriesBacktraces,
               this->Snapshot_.Position->LinkDirectoriesPosition, vec, lfbt);
 }
+void cmStateDirectory::PrependLinkDirectoriesEntry(
+  const std::string& vec, const cmListFileBacktrace& lfbt)
+{
+  std::vector<std::string>::iterator entryEnd =
+    this->DirectoryState->LinkDirectories.begin() +
+    this->Snapshot_.Position->LinkDirectoriesPosition;
+
+  std::vector<std::string>::reverse_iterator rend =
+    this->DirectoryState->LinkDirectories.rend();
+  std::vector<std::string>::reverse_iterator rbegin =
+    cmMakeReverseIterator(entryEnd);
+  rbegin = std::find(rbegin, rend, cmPropertySentinal);
+
+  std::vector<std::string>::iterator entryIt = rbegin.base();
+  std::vector<std::string>::iterator entryBegin =
+    this->DirectoryState->LinkDirectories.begin();
+
+  std::vector<cmListFileBacktrace>::iterator btIt =
+    this->DirectoryState->LinkDirectoriesBacktraces.begin() +
+    std::distance(entryBegin, entryIt);
+
+  this->DirectoryState->LinkDirectories.insert(entryIt, vec);
+  this->DirectoryState->LinkDirectoriesBacktraces.insert(btIt, lfbt);
+
+  this->Snapshot_.Position->LinkDirectoriesPosition =
+    this->DirectoryState->LinkDirectories.size();
+}
 
 void cmStateDirectory::SetLinkDirectories(const std::string& vec,
                                           const cmListFileBacktrace& lfbt)

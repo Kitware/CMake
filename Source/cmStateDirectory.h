@@ -62,6 +62,8 @@ public:
   cmBacktraceRange GetLinkOptionsEntryBacktraces() const;
   void AppendLinkOptionsEntry(std::string const& vec,
                               cmListFileBacktrace const& lfbt);
+  void PrependLinkDirectoriesEntry(std::string const& vec,
+                                   cmListFileBacktrace const& lfbt);
   void SetLinkOptions(std::string const& vec, cmListFileBacktrace const& lfbt);
   void ClearLinkOptions();
 
