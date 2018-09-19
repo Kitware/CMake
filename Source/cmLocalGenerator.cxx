@@ -1826,7 +1826,7 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
     flagsVar += "_FLAGS";
     std::string const& flags = this->Makefile->GetSafeDefinition(flagsVar);
 
-    if (!flags.empty() && flags != originalFlags) {
+    if (flags != originalFlags) {
       switch (this->GetPolicyStatus(cmPolicies::CMP0018)) {
         case cmPolicies::WARN: {
           std::ostringstream e;
