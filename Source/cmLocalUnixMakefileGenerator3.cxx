@@ -773,7 +773,7 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsBottom(
     std::string cmakefileName = cmake::GetCMakeFilesDirectoryPostSlash();
     cmakefileName += "Makefile.cmake";
     std::string runRule =
-      "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
+      "$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
     runRule += " --check-build-system ";
     runRule +=
       this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL);
@@ -1683,7 +1683,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
     cmakefileName += "Makefile.cmake";
     {
       std::string runRule =
-        "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
+        "$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
       runRule += " --check-build-system ";
       runRule +=
         this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL);

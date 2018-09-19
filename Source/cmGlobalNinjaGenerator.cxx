@@ -1340,7 +1340,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   std::ostringstream cmd;
   cmd << lg->ConvertToOutputFormat(cmSystemTools::GetCMakeCommand(),
                                    cmOutputConverter::SHELL)
-      << " -H"
+      << " -S"
       << lg->ConvertToOutputFormat(lg->GetSourceDirectory(),
                                    cmOutputConverter::SHELL)
       << " -B"

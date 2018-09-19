@@ -150,7 +150,7 @@ int main(int argc, char** argv)
   typedef cmsys::CommandLineArguments argT;
   arg.AddArgument("-B", argT::CONCAT_ARGUMENT, &binaryDirectory,
                   "Binary Directory");
-  arg.AddArgument("-H", argT::CONCAT_ARGUMENT, &sourceDirectory,
+  arg.AddArgument("-S", argT::CONCAT_ARGUMENT, &sourceDirectory,
                   "Source Directory");
   // do not complain about unknown options
   arg.StoreUnusedArguments(true);

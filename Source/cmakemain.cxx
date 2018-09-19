@@ -38,7 +38,8 @@ static const char* cmDocumentationName[][2] = {
 static const char* cmDocumentationUsage[][2] = {
   { nullptr,
     "  cmake [options] <path-to-source>\n"
-    "  cmake [options] <path-to-existing-build>" },
+    "  cmake [options] <path-to-existing-build>\n"
+    "  cmake [options] -S <path-to-source> -B <path-to-build>" },
   { nullptr,
     "Specify a source directory to (re-)generate a build system for "
     "it in the current working directory.  Specify an existing build "

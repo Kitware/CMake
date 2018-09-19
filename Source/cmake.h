@@ -556,7 +556,9 @@ private:
 };
 
 #define CMAKE_STANDARD_OPTIONS_TABLE                                          \
-  { "-C <initial-cache>", "Pre-load a script to populate the cache." },       \
+  { "-S <path-to-source>", "Explicitly specify a source directory." },        \
+    { "-B <path-to-build>", "Explicitly specify a build directory." },        \
+    { "-C <initial-cache>", "Pre-load a script to populate the cache." },     \
     { "-D <var>[:<type>]=<value>", "Create or update a cmake cache entry." }, \
     { "-U <globbing_expr>", "Remove matching entries from CMake cache." },    \
     { "-G <generator-name>", "Specify a build system generator." },           \

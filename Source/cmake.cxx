@@ -612,19 +612,43 @@ void cmake::SetArgs(const std::vector<std::string>& args,
   bool havePlatform = false;
   for (unsigned int i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
-    if (arg.find("-H", 0) == 0) {
+    if (arg.find("-H", 0) == 0 || arg.find("-S", 0) == 0) {
       directoriesSet = true;
       std::string path = arg.substr(2);
+      if (path.empty()) {
+        ++i;
+        if (i >= args.size()) {
+          cmSystemTools::Error("No source directory specified for -S");
+          return;
+        }
+        path = args[i];
+        if (path[0] == '-') {
+          cmSystemTools::Error("No source directory specified for -S");
+          return;
+        }
+      }
+
       path = cmSystemTools::CollapseFullPath(path);
       cmSystemTools::ConvertToUnixSlashes(path);
       this->SetHomeDirectory(path);
-    } else if (arg.find("-S", 0) == 0) {
-      // There is no local generate anymore.  Ignore -S option.
     } else if (arg.find("-O", 0) == 0) {
       // There is no local generate anymore.  Ignore -O option.
     } else if (arg.find("-B", 0) == 0) {
       directoriesSet = true;
       std::string path = arg.substr(2);
+      if (path.empty()) {
+        ++i;
+        if (i >= args.size()) {
+          cmSystemTools::Error("No build directory specified for -B");
+          return;
+        }
+        path = args[i];
+        if (path[0] == '-') {
+          cmSystemTools::Error("No build directory specified for -B");
+          return;
+        }
+      }
+
       path = cmSystemTools::CollapseFullPath(path);
       cmSystemTools::ConvertToUnixSlashes(path);
       this->SetHomeOutputDirectory(path);
@@ -836,20 +860,27 @@ void cmake::SetDirectoriesFromFile(const char* arg)
       this->SetHomeOutputDirectory(listPath);
     } else {
       // Source directory given on command line.  Use current working
-      // directory as build tree.
-      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-      this->SetHomeOutputDirectory(cwd);
+      // directory as build tree if -B hasn't been given already
+      if (this->GetHomeOutputDirectory().empty()) {
+        std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+        this->SetHomeOutputDirectory(cwd);
+      }
     }
     return;
   }
 
-  // We didn't find a CMakeLists.txt or CMakeCache.txt file from the
-  // argument.  Assume it is the path to the source tree, and use the
-  // current working directory as the build tree.
-  std::string full = cmSystemTools::CollapseFullPath(arg);
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  this->SetHomeDirectory(full);
-  this->SetHomeOutputDirectory(cwd);
+  if (this->GetHomeDirectory().empty()) {
+    // We didn't find a CMakeLists.txt and it wasn't specified
+    // with -S. Assume it is the path to the source tree
+    std::string full = cmSystemTools::CollapseFullPath(arg);
+    this->SetHomeDirectory(full);
+  }
+  if (this->GetHomeOutputDirectory().empty()) {
+    // We didn't find a CMakeCache.txt and it wasn't specified
+    // with -B. Assume the current working directory as the build tree.
+    std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+    this->SetHomeOutputDirectory(cwd);
+  }
 }
 
 // at the end of this CMAKE_ROOT and CMAKE_COMMAND should be added to the

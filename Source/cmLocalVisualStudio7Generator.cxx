@@ -260,7 +260,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   std::string comment = "Building Custom Rule ";
   comment += makefileIn;
   std::string args;
-  args = "-H";
+  args = "-S";
   args += this->GetSourceDirectory();
   commandLine.push_back(args);
   args = "-B";
