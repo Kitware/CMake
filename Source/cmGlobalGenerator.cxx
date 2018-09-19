@@ -828,11 +828,8 @@ void cmGlobalGenerator::EnableLanguage(
     std::string sharedLibFlagsVar = "CMAKE_SHARED_LIBRARY_";
     sharedLibFlagsVar += lang;
     sharedLibFlagsVar += "_FLAGS";
-    std::string const& sharedLibFlags =
+    this->LanguageToOriginalSharedLibFlags[lang] =
       mf->GetSafeDefinition(sharedLibFlagsVar);
-    if (!sharedLibFlags.empty()) {
-      this->LanguageToOriginalSharedLibFlags[lang] = sharedLibFlags;
-    }
 
     // Translate compiler ids for compatibility.
     this->CheckCompilerIdCompatibility(mf, lang);
