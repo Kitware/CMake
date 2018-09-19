@@ -108,6 +108,7 @@ void CMakeCommandUsage(const char* program)
     << "  time command [args...]    - run command and display elapsed time\n"
     << "  touch file                - touch a file.\n"
     << "  touch_nocreate file       - touch a file but do not create it.\n"
+    << "  create_symlink old new    - create a symbolic link new -> old\n"
 #if defined(_WIN32) && !defined(__CYGWIN__)
     << "Available on Windows only:\n"
     << "  delete_regv key           - delete registry value\n"
@@ -116,9 +117,6 @@ void CMakeCommandUsage(const char* program)
     << "  env_vs9_wince sdkname     - displays a batch file which sets the "
        "environment for the provided Windows CE SDK installed in VS2008\n"
     << "  write_regv key value      - write registry value\n"
-#else
-    << "Available on UNIX only:\n"
-    << "  create_symlink old new    - create a symbolic link new -> old\n"
 #endif
     ;
   /* clang-format on */
@@ -868,9 +866,6 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         return 1;
       }
       if (!cmSystemTools::CreateSymlink(args[2], args[3])) {
-        std::string emsg = cmSystemTools::GetLastSystemError();
-        std::cerr << "failed to create symbolic link '" << destinationFileName
-                  << "': " << emsg << "\n";
         return 1;
       }
       return 0;

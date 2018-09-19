@@ -6,6 +6,7 @@
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 #include "cm_sys_stat.h"
+#include "cm_uv.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  include "cmArchiveWrite.h"
@@ -55,8 +56,6 @@
 #  include <wincrypt.h>
 
 #  include <fcntl.h> /* _O_TEXT */
-
-#  include "cm_uv.h"
 #else
 #  include <sys/time.h>
 #  include <unistd.h>
@@ -2987,4 +2986,26 @@ bool cmSystemTools::StringToULong(const char* str, unsigned long* value)
   char* endp;
   *value = strtoul(str, &endp, 10);
   return (*endp == '\0') && (endp != str) && (errno == 0);
+}
+
+bool cmSystemTools::CreateSymlink(const std::string& origName,
+                                  const std::string& newName)
+{
+  uv_fs_t req;
+  int flags = 0;
+#if defined(_WIN32)
+  if (cmsys::SystemTools::FileIsDirectory(origName)) {
+    flags |= UV_FS_SYMLINK_DIR;
+  }
+#endif
+  int err = uv_fs_symlink(nullptr, &req, origName.c_str(), newName.c_str(),
+                          flags, nullptr);
+  if (err) {
+    std::string e =
+      "failed to create symbolic link '" + newName + "': " + uv_strerror(err);
+    cmSystemTools::Error(e.c_str());
+    return false;
+  }
+
+  return true;
 }
