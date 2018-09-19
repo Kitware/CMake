@@ -425,6 +425,29 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
         ((url.find('?') == std::string::npos) ? '?' : '&') +
         "FileName=" + ofile;
 
+      cmCTestCurl ctest_curl(this->CTest);
+      upload_as += "&build=";
+      upload_as +=
+        ctest_curl.Escape(this->CTest->GetCTestConfiguration("BuildName"));
+      upload_as += "&site=";
+      upload_as +=
+        ctest_curl.Escape(this->CTest->GetCTestConfiguration("Site"));
+      upload_as += "&stamp=";
+      upload_as += ctest_curl.Escape(this->CTest->GetCurrentTag());
+      upload_as += "-";
+      upload_as += ctest_curl.Escape(this->CTest->GetTestModelString());
+      cmCTestScriptHandler* ch =
+        static_cast<cmCTestScriptHandler*>(this->CTest->GetHandler("script"));
+      cmake* cm = ch->GetCMake();
+      if (cm) {
+        const char* subproject =
+          cm->GetState()->GetGlobalProperty("SubProject");
+        if (subproject) {
+          upload_as += "&subproject=";
+          upload_as += ctest_curl.Escape(subproject);
+        }
+      }
+
       upload_as += "&MD5=";
 
       if (cmSystemTools::IsOn(this->GetOption("InternalTest"))) {
