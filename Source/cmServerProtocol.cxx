@@ -550,22 +550,11 @@ cmServerResponse cmServerProtocol1::ProcessCache(
   return request.Reply(result);
 }
 
-cmServerResponse cmServerProtocol1::ProcessCMakeInputs(
-  const cmServerRequest& request)
+static Json::Value DumpCMakeInputs(const cmake* cm)
 {
-  if (this->m_State < STATE_CONFIGURED) {
-    return request.ReportError("This instance was not yet configured.");
-  }
-
-  const cmake* cm = this->CMakeInstance();
   const cmGlobalGenerator* gg = cm->GetGlobalGenerator();
-  const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot();
   const std::string& buildDir = cm->GetHomeOutputDirectory();
   const std::string& sourceDir = cm->GetHomeDirectory();
-
-  Json::Value result = Json::objectValue;
-  result[kSOURCE_DIRECTORY_KEY] = sourceDir;
-  result[kCMAKE_ROOT_DIRECTORY_KEY] = cmakeRootDir;
 
   std::vector<std::string> internalFiles;
   std::vector<std::string> explicitFiles;
@@ -593,8 +582,24 @@ cmServerResponse cmServerProtocol1::ProcessCMakeInputs(
   tmp[kSOURCES_KEY] = fromStringList(tmpFiles);
   array.append(tmp);
 
-  result[kBUILD_FILES_KEY] = array;
+  return array;
+}
 
+cmServerResponse cmServerProtocol1::ProcessCMakeInputs(
+  const cmServerRequest& request)
+{
+  if (this->m_State < STATE_CONFIGURED) {
+    return request.ReportError("This instance was not yet configured.");
+  }
+
+  const cmake* cm = this->CMakeInstance();
+  const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot();
+  const std::string& sourceDir = cm->GetHomeDirectory();
+
+  Json::Value result = Json::objectValue;
+  result[kSOURCE_DIRECTORY_KEY] = sourceDir;
+  result[kCMAKE_ROOT_DIRECTORY_KEY] = cmakeRootDir;
+  result[kBUILD_FILES_KEY] = DumpCMakeInputs(cm);
   return request.Reply(result);
 }
 
@@ -958,6 +963,13 @@ static Json::Value DumpCTestConfigurationsList(const cmake* cm)
   return result;
 }
 
+static Json::Value DumpCTestInfo(const cmake* cm)
+{
+  Json::Value result = Json::objectValue;
+  result[kCONFIGURATIONS_KEY] = DumpCTestConfigurationsList(cm);
+  return result;
+}
+
 static void GetTargetProperty(
   cmGeneratorExpressionInterpreter& genexInterpreter,
   cmGeneratorTarget* target, const char* propertyName,
@@ -1256,6 +1268,13 @@ static Json::Value DumpConfigurationsList(const cmake* cm)
   return result;
 }
 
+static Json::Value DumpCodeModel(const cmake* cm)
+{
+  Json::Value result = Json::objectValue;
+  result[kCONFIGURATIONS_KEY] = DumpConfigurationsList(cm);
+  return result;
+}
+
 cmServerResponse cmServerProtocol1::ProcessCodeModel(
   const cmServerRequest& request)
 {
@@ -1263,9 +1282,7 @@ cmServerResponse cmServerProtocol1::ProcessCodeModel(
     return request.ReportError("No build system was generated yet.");
   }
 
-  Json::Value result = Json::objectValue;
-  result[kCONFIGURATIONS_KEY] = DumpConfigurationsList(this->CMakeInstance());
-  return request.Reply(result);
+  return request.Reply(DumpCodeModel(this->CMakeInstance()));
 }
 
 cmServerResponse cmServerProtocol1::ProcessCompute(
@@ -1488,10 +1505,7 @@ cmServerResponse cmServerProtocol1::ProcessCTests(
     return request.ReportError("This instance was not yet computed.");
   }
 
-  Json::Value result = Json::objectValue;
-  result[kCONFIGURATIONS_KEY] =
-    DumpCTestConfigurationsList(this->CMakeInstance());
-  return request.Reply(result);
+  return request.Reply(DumpCTestInfo(this->CMakeInstance()));
 }
 
 cmServerProtocol1::GeneratorInformation::GeneratorInformation(
