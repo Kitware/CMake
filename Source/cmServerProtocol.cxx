@@ -7,6 +7,7 @@
 #include "cmFileMonitor.h"
 #include "cmGlobalGenerator.h"
 #include "cmJsonObjectDictionary.h"
+#include "cmJsonObjects.h"
 #include "cmServer.h"
 #include "cmServerDictionary.h"
 #include "cmState.h"
@@ -36,8 +37,6 @@ std::vector<std::string> toStringList(const Json::Value& in)
 }
 
 } // namespace
-
-#include "cmJsonObjects.cxx"
 
 cmServerRequest::cmServerRequest(cmServer* server, cmConnection* connection,
                                  const std::string& t, const std::string& c,
@@ -473,7 +472,7 @@ cmServerResponse cmServerProtocol1::ProcessCMakeInputs(
   Json::Value result = Json::objectValue;
   result[kSOURCE_DIRECTORY_KEY] = sourceDir;
   result[kCMAKE_ROOT_DIRECTORY_KEY] = cmakeRootDir;
-  result[kBUILD_FILES_KEY] = DumpCMakeInputs(cm);
+  result[kBUILD_FILES_KEY] = cmDumpCMakeInputs(cm);
   return request.Reply(result);
 }
 
@@ -484,7 +483,7 @@ cmServerResponse cmServerProtocol1::ProcessCodeModel(
     return request.ReportError("No build system was generated yet.");
   }
 
-  return request.Reply(DumpCodeModel(this->CMakeInstance()));
+  return request.Reply(cmDumpCodeModel(this->CMakeInstance()));
 }
 
 cmServerResponse cmServerProtocol1::ProcessCompute(
@@ -601,7 +600,8 @@ cmServerResponse cmServerProtocol1::ProcessConfigure(
   }
 
   std::vector<std::string> toWatchList;
-  getCMakeInputs(gg, std::string(), buildDir, nullptr, &toWatchList, nullptr);
+  cmGetCMakeInputs(gg, std::string(), buildDir, nullptr, &toWatchList,
+                   nullptr);
 
   FileMonitor()->MonitorPaths(toWatchList,
                               [this](const std::string& p, int e, int s) {
@@ -707,7 +707,7 @@ cmServerResponse cmServerProtocol1::ProcessCTests(
     return request.ReportError("This instance was not yet computed.");
   }
 
-  return request.Reply(DumpCTestInfo(this->CMakeInstance()));
+  return request.Reply(cmDumpCTestInfo(this->CMakeInstance()));
 }
 
 cmServerProtocol1::GeneratorInformation::GeneratorInformation(

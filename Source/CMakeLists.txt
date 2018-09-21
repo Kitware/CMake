@@ -1047,6 +1047,9 @@ target_link_libraries(cmake CMakeLib)
 add_library(CMakeServerLib
   cmConnection.h cmConnection.cxx
   cmFileMonitor.cxx cmFileMonitor.h
+  cmJsonObjectDictionary.h
+  cmJsonObjects.h
+  cmJsonObjects.cxx
   cmPipeConnection.cxx cmPipeConnection.h
   cmServer.cxx cmServer.h
   cmServerConnection.cxx cmServerConnection.h

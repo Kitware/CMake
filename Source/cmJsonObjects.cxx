@@ -1,11 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
+#include "cmJsonObjects.h" // IWYU pragma: keep
 
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallGenerator.h"
 #include "cmInstallTargetGenerator.h"
+#include "cmJsonObjectDictionary.h"
+#include "cmJsonObjects.h"
 #include "cmLinkLineComputer.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -66,11 +69,14 @@ Json::Value fromStringList(const T& in)
   return result;
 }
 
-void getCMakeInputs(const cmGlobalGenerator* gg, const std::string& sourceDir,
-                    const std::string& buildDir,
-                    std::vector<std::string>* internalFiles,
-                    std::vector<std::string>* explicitFiles,
-                    std::vector<std::string>* tmpFiles)
+} // namespace
+
+void cmGetCMakeInputs(const cmGlobalGenerator* gg,
+                      const std::string& sourceDir,
+                      const std::string& buildDir,
+                      std::vector<std::string>* internalFiles,
+                      std::vector<std::string>* explicitFiles,
+                      std::vector<std::string>* tmpFiles)
 {
   const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot() + '/';
   std::vector<cmMakefile*> const& makefiles = gg->GetMakefiles();
@@ -109,9 +115,7 @@ void getCMakeInputs(const cmGlobalGenerator* gg, const std::string& sourceDir,
   }
 }
 
-} // namespace
-
-static Json::Value DumpCMakeInputs(const cmake* cm)
+Json::Value cmDumpCMakeInputs(const cmake* cm)
 {
   const cmGlobalGenerator* gg = cm->GetGlobalGenerator();
   const std::string& buildDir = cm->GetHomeOutputDirectory();
@@ -120,8 +124,8 @@ static Json::Value DumpCMakeInputs(const cmake* cm)
   std::vector<std::string> internalFiles;
   std::vector<std::string> explicitFiles;
   std::vector<std::string> tmpFiles;
-  getCMakeInputs(gg, sourceDir, buildDir, &internalFiles, &explicitFiles,
-                 &tmpFiles);
+  cmGetCMakeInputs(gg, sourceDir, buildDir, &internalFiles, &explicitFiles,
+                   &tmpFiles);
 
   Json::Value array = Json::arrayValue;
 
@@ -506,7 +510,7 @@ static Json::Value DumpCTestConfigurationsList(const cmake* cm)
   return result;
 }
 
-static Json::Value DumpCTestInfo(const cmake* cm)
+Json::Value cmDumpCTestInfo(const cmake* cm)
 {
   Json::Value result = Json::objectValue;
   result[kCONFIGURATIONS_KEY] = DumpCTestConfigurationsList(cm);
@@ -811,7 +815,7 @@ static Json::Value DumpConfigurationsList(const cmake* cm)
   return result;
 }
 
-static Json::Value DumpCodeModel(const cmake* cm)
+Json::Value cmDumpCodeModel(const cmake* cm)
 {
   Json::Value result = Json::objectValue;
   result[kCONFIGURATIONS_KEY] = DumpConfigurationsList(cm);
