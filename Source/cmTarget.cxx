@@ -440,6 +440,31 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   if (this->TargetTypeValue <= cmStateEnums::UTILITY) {
     this->SetPropertyDefault("DOTNET_TARGET_FRAMEWORK_VERSION", nullptr);
   }
+
+  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
+      this->GetType() != cmStateEnums::UTILITY) {
+
+    // check for "CMAKE_VS_GLOBALS" variable and set up target properties
+    // if any
+    const char* globals = mf->GetDefinition("CMAKE_VS_GLOBALS");
+    if (globals) {
+      const std::string genName = mf->GetGlobalGenerator()->GetName();
+      if (cmHasLiteralPrefix(genName, "Visual Studio")) {
+        std::vector<std::string> props;
+        cmSystemTools::ExpandListArgument(globals, props);
+        const std::string vsGlobal = "VS_GLOBAL_";
+        for (const std::string& i : props) {
+          // split NAME=VALUE
+          const std::string::size_type assignment = i.find('=');
+          if (assignment != std::string::npos) {
+            const std::string propName = vsGlobal + i.substr(0, assignment);
+            const std::string propValue = i.substr(assignment + 1);
+            this->SetPropertyDefault(propName, propValue.c_str());
+          }
+        }
+      }
+    }
+  }
 }
 
 cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
