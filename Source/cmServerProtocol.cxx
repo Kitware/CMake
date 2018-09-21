@@ -6,6 +6,7 @@
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileMonitor.h"
 #include "cmGlobalGenerator.h"
+#include "cmJsonObjectDictionary.h"
 #include "cmServer.h"
 #include "cmServerDictionary.h"
 #include "cmState.h"
