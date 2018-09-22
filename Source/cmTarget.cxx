@@ -514,9 +514,7 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
   std::string srcFiles;
   const char* sep = "";
   for (auto filename : srcs) {
-    const char* src = filename.c_str();
-
-    if (!(src[0] == '$' && src[1] == '<')) {
+    if (!cmGeneratorExpression::StartsWithGeneratorExpression(filename)) {
       if (!filename.empty()) {
         filename = this->ProcessSourceItemCMP0049(filename);
         if (filename.empty()) {
