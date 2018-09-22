@@ -42,3 +42,23 @@ add_custom_target(
 )
 
 add_dependencies(working2 Custom2)
+
+file(MAKE_DIRECTORY ${TestWorkingDir_BINARY_DIR}/genex)
+add_custom_command(
+  OUTPUT "${TestWorkingDir_BINARY_DIR}/genex/working.c"
+  COMMAND "${CMAKE_COMMAND}" -E copy "${TestWorkingDir_SOURCE_DIR}/working.c.in" "${TestWorkingDir_BINARY_DIR}/genex/working.c"
+  WORKING_DIRECTORY "${TestWorkingDir_BINARY_DIR}/$<1:genex>/"
+  COMMENT "custom command"
+)
+
+add_executable(workinggenex "${TestWorkingDir_BINARY_DIR}/genex/working.c"
+  "${TestWorkingDir_BINARY_DIR}/genex/customTarget.c")
+
+add_custom_target(
+  CustomGenex ALL
+  COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${TestWorkingDir_SOURCE_DIR}/customTarget.c" "${TestWorkingDir_BINARY_DIR}/genex/customTarget.c"
+  BYPRODUCTS "${TestWorkingDir_BINARY_DIR}/genex/customTarget.c"
+  WORKING_DIRECTORY "${TestWorkingDir_BINARY_DIR}/$<1:genex>/"
+)
+
+add_dependencies(workinggenex CustomGenex)
