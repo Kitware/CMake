@@ -94,6 +94,9 @@ private:
   // Run post processing of the process output for MemCheck
   void MemCheckPostProcess();
 
+  // Returns "completed/total Test #Index: "
+  std::string GetTestPrefix(size_t completed, size_t total) const;
+
   cmCTestTestHandler::cmCTestTestProperties* TestProperties;
   bool TimeoutIsForStopTime = false;
   // Pointer back to the "parent"; the handler that invoked this test run
