@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <memory> // IWYU pragma: keep
 #include <stddef.h>
 #include <string>
 #include <vector>
@@ -115,18 +116,20 @@ public:
   // Default-constructed backtrace may not be used until after
   // set via assignment from a backtrace constructed with a
   // valid snapshot.
-  cmListFileBacktrace();
+  cmListFileBacktrace() = default;
 
   // Construct an empty backtrace whose bottom sits in the directory
   // indicated by the given valid snapshot.
   cmListFileBacktrace(cmStateSnapshot const& snapshot);
 
-  // Backtraces may be copied and assigned as values.
-  cmListFileBacktrace(cmListFileBacktrace const& r);
-  cmListFileBacktrace& operator=(cmListFileBacktrace const& r);
-  ~cmListFileBacktrace();
+  // Backtraces may be copied, moved, and assigned as values.
+  cmListFileBacktrace(cmListFileBacktrace const&) = default;
+  cmListFileBacktrace(cmListFileBacktrace&&) noexcept = default;
+  cmListFileBacktrace& operator=(cmListFileBacktrace const&) = default;
+  cmListFileBacktrace& operator=(cmListFileBacktrace&&) noexcept = default;
+  ~cmListFileBacktrace() = default;
 
-  cmStateSnapshot GetBottom() const { return this->Bottom; }
+  cmStateSnapshot GetBottom() const;
 
   // Get a backtrace with the given file scope added to the top.
   // May not be called until after construction with a valid snapshot.
@@ -153,14 +156,15 @@ public:
   // Get the number of 'frames' in this backtrace
   size_t Depth() const;
 
+  // Return true if this backtrace is empty.
+  bool Empty() const;
+
 private:
   struct Entry;
-
-  cmStateSnapshot Bottom;
-  Entry* Cur;
-  cmListFileBacktrace(cmStateSnapshot const& bottom, Entry* up,
+  std::shared_ptr<Entry const> TopEntry;
+  cmListFileBacktrace(std::shared_ptr<Entry const> parent,
                       cmListFileContext const& lfc);
-  cmListFileBacktrace(cmStateSnapshot const& bottom, Entry* cur);
+  cmListFileBacktrace(std::shared_ptr<Entry const> top);
 };
 
 struct cmListFile
