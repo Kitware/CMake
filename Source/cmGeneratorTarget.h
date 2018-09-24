@@ -75,8 +75,8 @@ public:
   bool GetPropertyAsBool(const std::string& prop) const;
   void GetSourceFiles(std::vector<cmSourceFile*>& files,
                       const std::string& config) const;
-  void GetSourceFilesWithoutObjectLibraries(std::vector<cmSourceFile*>& files,
-                                            const std::string& config) const;
+  std::vector<BT<cmSourceFile*>> GetSourceFiles(
+    std::string const& config) const;
 
   /** Source file kinds (classifications).
       Generators use this to decide how to treat a source file.  */
@@ -99,7 +99,7 @@ public:
   /** A source file paired with a kind (classification).  */
   struct SourceAndKind
   {
-    cmSourceFile* Source;
+    BT<cmSourceFile*> Source;
     SourceKind Kind;
   };
 
@@ -412,34 +412,49 @@ public:
                                     std::string const& config) const;
 
   /** Get the include directories for this target.  */
-  std::vector<std::string> GetIncludeDirectories(
+  std::vector<BT<std::string>> GetIncludeDirectories(
     const std::string& config, const std::string& lang) const;
 
   void GetCompileOptions(std::vector<std::string>& result,
                          const std::string& config,
                          const std::string& language) const;
+  std::vector<BT<std::string>> GetCompileOptions(
+    std::string const& config, std::string const& language) const;
 
   void GetCompileFeatures(std::vector<std::string>& features,
                           const std::string& config) const;
+  std::vector<BT<std::string>> GetCompileFeatures(
+    std::string const& config) const;
 
   void GetCompileDefinitions(std::vector<std::string>& result,
                              const std::string& config,
                              const std::string& language) const;
+  std::vector<BT<std::string>> GetCompileDefinitions(
+    std::string const& config, std::string const& language) const;
 
   void GetLinkOptions(std::vector<std::string>& result,
                       const std::string& config,
                       const std::string& language) const;
+  std::vector<BT<std::string>> GetLinkOptions(
+    std::string const& config, std::string const& language) const;
+
   void GetStaticLibraryLinkOptions(std::vector<std::string>& result,
                                    const std::string& config,
                                    const std::string& language) const;
+  std::vector<BT<std::string>> GetStaticLibraryLinkOptions(
+    std::string const& config, std::string const& language) const;
 
   void GetLinkDirectories(std::vector<std::string>& result,
                           const std::string& config,
                           const std::string& language) const;
+  std::vector<BT<std::string>> GetLinkDirectories(
+    std::string const& config, std::string const& language) const;
 
   void GetLinkDepends(std::vector<std::string>& result,
                       const std::string& config,
                       const std::string& language) const;
+  std::vector<BT<std::string>> GetLinkDepends(
+    std::string const& config, std::string const& language) const;
 
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config,
@@ -841,8 +856,12 @@ private:
                        cmListFileBacktrace const& bt,
                        std::vector<cmLinkItem>& items) const;
 
-  void GetSourceFiles(std::vector<std::string>& files,
-                      const std::string& config) const;
+  std::vector<BT<std::string>> GetSourceFilePaths(
+    std::string const& config) const;
+  std::vector<BT<cmSourceFile*>> GetSourceFilesWithoutObjectLibraries(
+    std::string const& config) const;
+  void GetSourceFilesWithoutObjectLibraries(std::vector<cmSourceFile*>& files,
+                                            const std::string& config) const;
 
   struct HeadToLinkImplementationMap
     : public std::map<cmGeneratorTarget const*, cmOptionalLinkImplementation>
