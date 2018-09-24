@@ -9,10 +9,10 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include <algorithm>
 #include <assert.h>
 #include <memory>
 #include <sstream>
+#include <utility>
 
 cmCommandContext::cmCommandName& cmCommandContext::cmCommandName::operator=(
   std::string const& name)
@@ -473,4 +473,9 @@ bool operator==(const cmListFileContext& lhs, const cmListFileContext& rhs)
 bool operator!=(const cmListFileContext& lhs, const cmListFileContext& rhs)
 {
   return !(lhs == rhs);
+}
+
+std::ostream& operator<<(std::ostream& os, BT<std::string> const& s)
+{
+  return os << s.Value;
 }
