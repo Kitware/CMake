@@ -568,6 +568,8 @@ set(SRCS
   cmSiteNameCommand.h
   cmSourceGroupCommand.cxx
   cmSourceGroupCommand.h
+  cmString.cxx
+  cmString.hxx
   cmStringReplaceHelper.cxx
   cmStringCommand.cxx
   cmStringCommand.h
