@@ -377,6 +377,7 @@ cmListFileBacktrace cmListFileBacktrace::Pop() const
 cmListFileContext const& cmListFileBacktrace::Top() const
 {
   assert(this->TopEntry);
+  assert(!this->TopEntry->IsBottom());
   return this->TopEntry->Context;
 }
 

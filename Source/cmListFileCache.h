@@ -144,7 +144,7 @@ public:
   cmListFileBacktrace Pop() const;
 
   // Get the context at the top of the backtrace.
-  // Returns an empty context if the backtrace is empty.
+  // This may be called only if Empty() would return false.
   cmListFileContext const& Top() const;
 
   // Print the top of the backtrace.
