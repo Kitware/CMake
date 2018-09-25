@@ -375,6 +375,8 @@ set(SRCS
   cmXMLWriter.h
   cmake.cxx
   cmake.h
+  cm_string_view.cxx
+  cm_string_view.hxx
 
   cmCommand.cxx
   cmCommand.h
