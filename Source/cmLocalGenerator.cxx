@@ -202,9 +202,10 @@ void cmLocalGenerator::ComputeObjectMaxPath()
   this->ObjectMaxPathViolations.clear();
 }
 
-void cmLocalGenerator::MoveSystemIncludesToEnd(
-  std::vector<std::string>& includeDirs, const std::string& config,
-  const std::string& lang, const cmGeneratorTarget* target) const
+static void MoveSystemIncludesToEnd(std::vector<std::string>& includeDirs,
+                                    const std::string& config,
+                                    const std::string& lang,
+                                    const cmGeneratorTarget* target)
 {
   if (!target) {
     return;
@@ -707,7 +708,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
   }
 
   std::vector<std::string> includes = includeDirs;
-  this->MoveSystemIncludesToEnd(includes, config, lang, target);
+  MoveSystemIncludesToEnd(includes, config, lang, target);
 
   OutputFormat shellFormat = forResponseFile ? RESPONSE : SHELL;
   std::ostringstream includeFlags;
@@ -960,7 +961,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     }
   }
 
-  this->MoveSystemIncludesToEnd(dirs, config, lang, target);
+  MoveSystemIncludesToEnd(dirs, config, lang, target);
 
   // Add standard include directories for this language.
   {
