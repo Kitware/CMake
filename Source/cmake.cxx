@@ -2467,6 +2467,14 @@ int cmake::Build(int jobs, const std::string& dir, const std::string& target,
       return 1;
     }
   }
+  const char* cachedGeneratorPlatform =
+    this->State->GetCacheEntryValue("CMAKE_GENERATOR_PLATFORM");
+  if (cachedGeneratorPlatform) {
+    cmMakefile mf(gen, this->GetCurrentSnapshot());
+    if (!gen->SetGeneratorPlatform(cachedGeneratorPlatform, &mf)) {
+      return 1;
+    }
+  }
   std::string output;
   std::string projName;
   const char* cachedProjectName =
