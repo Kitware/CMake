@@ -3,8 +3,8 @@ set(BOOTSTRAP_ARGS "--docdir=doc/cmake")
 set(HOST linux64)
 set(MAKE_PROGRAM "make")
 set(CPACK_BINARY_GENERATORS "STGZ TGZ")
-set(CC /opt/gcc-6.1.0/bin/gcc)
-set(CXX /opt/gcc-6.1.0/bin/g++)
+set(CC /opt/gcc-8.2.0/bin/gcc)
+set(CXX /opt/gcc-8.2.0/bin/g++)
 set(CFLAGS   "")
 set(CXXFLAGS "")
 set(qt_prefix "/home/kitware/qt-5.7.0")
@@ -41,6 +41,9 @@ CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL:STRING=3
 CMAKE_PREFIX_PATH:STRING=${qt_prefix}
 CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES:STRING=${qt_xcb_libs}
 ")
+set(ENV [[
+export CMAKE_PREFIX_PATH=/opt/binutils-2.31
+]])
 
 # Exclude Qt5 tests because our Qt5 is static.
 set(EXTRA_CTEST_ARGS "-E Qt5")
