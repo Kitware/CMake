@@ -996,6 +996,20 @@ function(matlab_add_mex)
   endif() # documentation
 
   # entry point in the mex file + taking care of visibility and symbol clashes.
+  if (MSVC)
+    get_target_property(
+        _previous_link_flags
+        ${${prefix}_NAME}
+        LINK_FLAGS)
+    if(NOT _previous_link_flags)
+      set(_previous_link_flags)
+    endif()
+
+    set_target_properties(${${prefix}_NAME}
+      PROPERTIES
+        LINK_FLAGS "${_previous_link_flags} /EXPORT:mexFunction")
+  endif()
+
   if(WIN32)
     set_target_properties(${${prefix}_NAME}
       PROPERTIES
