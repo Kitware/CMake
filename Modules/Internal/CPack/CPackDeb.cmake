@@ -64,6 +64,8 @@ function(cpack_deb_prepare_package_vars)
   endif()
 
   set(WDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_DEB_PACKAGE_COMPONENT_PART_PATH}")
+  set(DBGSYMDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_DEB_PACKAGE_COMPONENT_PART_PATH}-dbgsym")
+  file(REMOVE_RECURSE "${DBGSYMDIR}")
 
   # per component automatic discover: some of the component might not have
   # binaries.
@@ -80,7 +82,10 @@ function(cpack_deb_prepare_package_vars)
     endif()
   endif()
 
-  if(CPACK_DEBIAN_PACKAGE_SHLIBDEPS OR CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS)
+  cpack_deb_variable_fallback("CPACK_DEBIAN_DEBUGINFO_PACKAGE"
+    "CPACK_DEBIAN_${_local_component_name}_DEBUGINFO_PACKAGE"
+    "CPACK_DEBIAN_DEBUGINFO_PACKAGE")
+  if(CPACK_DEBIAN_PACKAGE_SHLIBDEPS OR CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS OR CPACK_DEBIAN_DEBUGINFO_PACKAGE)
     # Generating binary list - Get type of all install files
     file(GLOB_RECURSE FILE_PATHS_ LIST_DIRECTORIES false RELATIVE "${WDIR}" "${WDIR}/*")
 
@@ -92,7 +97,7 @@ function(cpack_deb_prepare_package_vars)
     # get file info so that we can determine if file is executable or not
     unset(CPACK_DEB_INSTALL_FILES)
     foreach(FILE_ IN LISTS FILE_PATHS_)
-      execute_process(COMMAND env LC_ALL=C ${FILE_EXECUTABLE} "./${FILE_}"
+      execute_process(COMMAND ${CMAKE_COMMAND} -E env LC_ALL=C ${FILE_EXECUTABLE} "./${FILE_}"
         WORKING_DIRECTORY "${WDIR}"
         RESULT_VARIABLE FILE_RESULT_
         OUTPUT_VARIABLE INSTALL_FILE_)
@@ -114,6 +119,81 @@ function(cpack_deb_prepare_package_vars)
         string(REGEX MATCH "(^.*):" _FILE_NAME "${_FILE}")
         list(APPEND CPACK_DEB_SHARED_OBJECT_FILES "${CMAKE_MATCH_1}")
       endif()
+      if(_FILE MATCHES "ELF.*not stripped")
+        string(REGEX MATCH "(^.*):" _FILE_NAME "${_FILE}")
+        list(APPEND CPACK_DEB_UNSTRIPPED_FILES "${CMAKE_MATCH_1}")
+      endif()
+    endforeach()
+  endif()
+
+  find_program(READELF_EXECUTABLE NAMES readelf)
+
+  if(CPACK_DEBIAN_DEBUGINFO_PACKAGE AND CPACK_DEB_UNSTRIPPED_FILES)
+    find_program(OBJCOPY_EXECUTABLE NAMES objcopy)
+
+    if(NOT OBJCOPY_EXECUTABLE)
+      message(FATAL_ERROR "debuginfo packages require the objcopy tool")
+    endif()
+    if(NOT READELF_EXECUTABLE)
+      message(FATAL_ERROR "debuginfo packages require the readelf tool")
+    endif()
+
+    file(RELATIVE_PATH _DBGSYM_ROOT "${CPACK_TEMPORARY_DIRECTORY}" "${DBGSYMDIR}")
+    foreach(_FILE IN LISTS CPACK_DEB_UNSTRIPPED_FILES)
+
+      # Get the file's Build ID
+      execute_process(COMMAND env LC_ALL=C ${READELF_EXECUTABLE} -n "${_FILE}"
+        WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+        OUTPUT_VARIABLE READELF_OUTPUT
+        RESULT_VARIABLE READELF_RESULT
+        ERROR_VARIABLE READELF_ERROR
+        OUTPUT_STRIP_TRAILING_WHITESPACE )
+      if(NOT READELF_RESULT EQUAL 0)
+        message(FATAL_ERROR "CPackDeb: readelf: '${READELF_ERROR}';\n"
+            "executed command: '${READELF_EXECUTABLE} -n ${_FILE}'")
+      endif()
+      if(READELF_OUTPUT MATCHES "Build ID: ([0-9a-zA-Z][0-9a-zA-Z])([0-9a-zA-Z]*)")
+        set(_BUILD_ID_START ${CMAKE_MATCH_1})
+        set(_BUILD_ID_REMAINING ${CMAKE_MATCH_2})
+        list(APPEND BUILD_IDS ${_BUILD_ID_START}${_BUILD_ID_REMAINING})
+      else()
+        message(FATAL_ERROR "Unable to determine Build ID for ${_FILE}")
+      endif()
+
+      # Split out the debug symbols from the binaries
+      set(_FILE_DBGSYM ${_DBGSYM_ROOT}/usr/lib/debug/.build-id/${_BUILD_ID_START}/${_BUILD_ID_REMAINING}.debug)
+      get_filename_component(_OUT_DIR "${_FILE_DBGSYM}" DIRECTORY)
+      file(MAKE_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}/${_OUT_DIR}")
+      execute_process(COMMAND ${OBJCOPY_EXECUTABLE} --only-keep-debug "${_FILE}" "${_FILE_DBGSYM}"
+        WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+        OUTPUT_VARIABLE OBJCOPY_OUTPUT
+        RESULT_VARIABLE OBJCOPY_RESULT
+        ERROR_VARIABLE OBJCOPY_ERROR
+        OUTPUT_STRIP_TRAILING_WHITESPACE )
+      if(NOT OBJCOPY_RESULT EQUAL 0)
+        message(FATAL_ERROR "CPackDeb: objcopy: '${OBJCOPY_ERROR}';\n"
+            "executed command: '${OBJCOPY_EXECUTABLE} --only-keep-debug ${_FILE} ${_FILE_DBGSYM}'")
+      endif()
+      execute_process(COMMAND ${OBJCOPY_EXECUTABLE} --strip-unneeded ${_FILE}
+        WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+        OUTPUT_VARIABLE OBJCOPY_OUTPUT
+        RESULT_VARIABLE OBJCOPY_RESULT
+        ERROR_VARIABLE OBJCOPY_ERROR
+        OUTPUT_STRIP_TRAILING_WHITESPACE )
+      if(NOT OBJCOPY_RESULT EQUAL 0)
+        message(FATAL_ERROR "CPackDeb: objcopy: '${OBJCOPY_ERROR}';\n"
+            "executed command: '${OBJCOPY_EXECUTABLE} --strip-debug ${_FILE}'")
+      endif()
+      execute_process(COMMAND ${OBJCOPY_EXECUTABLE} --add-gnu-debuglink=${_FILE_DBGSYM} ${_FILE}
+        WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+        OUTPUT_VARIABLE OBJCOPY_OUTPUT
+        RESULT_VARIABLE OBJCOPY_RESULT
+        ERROR_VARIABLE OBJCOPY_ERROR
+        OUTPUT_STRIP_TRAILING_WHITESPACE )
+      if(NOT OBJCOPY_RESULT EQUAL 0)
+        message(FATAL_ERROR "CPackDeb: objcopy: '${OBJCOPY_ERROR}';\n"
+            "executed command: '${OBJCOPY_EXECUTABLE} --add-gnu-debuglink=${_FILE_DBGSYM} ${_FILE}'")
+      endif()
     endforeach()
   endif()
 
@@ -123,7 +203,7 @@ function(cpack_deb_prepare_package_vars)
 
     if(SHLIBDEPS_EXECUTABLE)
       # Check version of the dpkg-shlibdeps tool using CPackDEB method
-      execute_process(COMMAND env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --version
+      execute_process(COMMAND ${CMAKE_COMMAND} -E env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --version
         OUTPUT_VARIABLE _TMP_VERSION
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -151,7 +231,7 @@ function(cpack_deb_prepare_package_vars)
         file(MAKE_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}/DEBIAN")
 
         # Add --ignore-missing-info if the tool supports it
-        execute_process(COMMAND env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --help
+        execute_process(COMMAND ${CMAKE_COMMAND} -E env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --help
           OUTPUT_VARIABLE _TMP_HELP
           ERROR_QUIET
           OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -450,8 +530,6 @@ function(cpack_deb_prepare_package_vars)
     set(CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY "=")
   endif()
 
-  find_program(READELF_EXECUTABLE NAMES readelf)
-
   if(CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS)
     if(READELF_EXECUTABLE)
       foreach(_FILE IN LISTS CPACK_DEB_SHARED_OBJECT_FILES)
@@ -507,18 +585,24 @@ function(cpack_deb_prepare_package_vars)
       # <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
       set(CPACK_OUTPUT_FILE_NAME
         "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
+      set(CPACK_DBGSYM_OUTPUT_FILE_NAME
+        "${CPACK_DEBIAN_PACKAGE_NAME}-dbgsym_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.ddeb")
     else()
       if(NOT CPACK_DEBIAN_FILE_NAME MATCHES ".*\\.(deb|ipk)")
         message(FATAL_ERROR "'${CPACK_DEBIAN_FILE_NAME}' is not a valid DEB package file name as it must end with '.deb' or '.ipk'!")
       endif()
 
       set(CPACK_OUTPUT_FILE_NAME "${CPACK_DEBIAN_FILE_NAME}")
+      string(REGEX REPLACE "\.deb$" "-dbgsym.ddeb" CPACK_DBGSYM_OUTPUT_FILE_NAME "${CPACK_DEBIAN_FILE_NAME}")
     endif()
 
     set(CPACK_TEMPORARY_PACKAGE_FILE_NAME "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_OUTPUT_FILE_NAME}")
     get_filename_component(BINARY_DIR "${CPACK_OUTPUT_FILE_PATH}" DIRECTORY)
     set(CPACK_OUTPUT_FILE_PATH "${BINARY_DIR}/${CPACK_OUTPUT_FILE_NAME}")
-  endif() # else() back compatibility - don't change the name
+  else()
+    # back compatibility - don't change the name
+    string(REGEX REPLACE "\.deb$" "-dbgsym.ddeb" CPACK_DBGSYM_OUTPUT_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}")
+  endif()
 
   # Print out some debug information if we were asked for that
   if(CPACK_DEBIAN_PACKAGE_DEBUG)
@@ -579,6 +663,14 @@ function(cpack_deb_prepare_package_vars)
   set(GEN_CPACK_DEBIAN_GENERATE_POSTINST "${CPACK_DEBIAN_GENERATE_POSTINST}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_GENERATE_POSTRM "${CPACK_DEBIAN_GENERATE_POSTRM}" PARENT_SCOPE)
   set(GEN_WDIR "${WDIR}" PARENT_SCOPE)
+
+  set(GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE "${CPACK_DEBIAN_DEBUGINFO_PACKAGE}" PARENT_SCOPE)
+  if(BUILD_IDS)
+    set(GEN_DBGSYMDIR "${DBGSYMDIR}" PARENT_SCOPE)
+    set(GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME "${CPACK_DBGSYM_OUTPUT_FILE_NAME}" PARENT_SCOPE)
+    string(REPLACE ";" " " BUILD_IDS "${BUILD_IDS}")
+    set(GEN_BUILD_IDS "${BUILD_IDS}" PARENT_SCOPE)
+  endif()
 endfunction()
 
 cpack_deb_prepare_package_vars()

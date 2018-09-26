@@ -518,6 +518,26 @@ List of CPack Deb generator specific variables:
    This value is not interpreted. It is possible to pass an optional
    revision number of the referenced source package as well.
 
+Packaging of debug information
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Dbgsym packages contain debug symbols for debugging packaged binaries.
+
+Dbgsym packaging has its own set of variables:
+
+.. variable:: CPACK_DEBIAN_DEBUGINFO_PACKAGE
+              CPACK_DEBIAN_<component>_DEBUGINFO_PACKAGE
+
+ Enable generation of dbgsym .ddeb package(s).
+
+ * Mandatory : NO
+ * Default   : OFF
+
+.. note::
+
+ Binaries must contain debug symbols before packaging so use either ``Debug``
+ or ``RelWithDebInfo`` for :variable:`CMAKE_BUILD_TYPE` variable value.
+
 Building Debian packages on Windows
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
