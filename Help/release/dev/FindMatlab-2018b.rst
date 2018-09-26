@@ -7,3 +7,6 @@ FindMatlab-2018b
 
 * The :module:`FindMatlab` module now explicitly exports mexFunction in Visual
   Studio.
+
+* The :module:`FindMatlab` module gained the ability to discover Matlab R2018a
+  and R2018b.
