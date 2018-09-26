@@ -21,6 +21,8 @@
 #
 # * ``MX_LIBRARY``, ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the ``MX``,
 #   ``ENG`` and ``MAT`` libraries of Matlab
+# * ``ENGINE_LIBRARY``, ``DATAARRAY_LIBRARY``: respectively the ``MatlabEngine``
+#   and ``MatlabDataArray`` libraries of Matlab (Matlab 2018a and later)
 # * ``MAIN_PROGRAM`` the Matlab binary program. Note that this component is not
 #   available on the MCR version, and will yield an error if the MCR is found
 #   instead of the regular Matlab installation.
@@ -106,6 +108,12 @@
 #   is requested.
 # ``Matlab_MAT_LIBRARY``
 #   Matlab matrix library. Available only if the component ``MAT_LIBRARY``
+#   is requested.
+# ``Matlab_ENGINE_LIBRARY``
+#   Matlab C++ engine library. Available only if the component ``ENGINE_LIBRARY``
+#   is requested.
+# ``Matlab_DATAARRAY_LIBRARY``
+#   Matlab C++ data array library. Available only if the component ``DATAARRAY_LIBRARY``
 #   is requested.
 # ``Matlab_LIBRARIES``
 #   the whole set of libraries of Matlab
@@ -960,6 +968,14 @@ function(matlab_add_mex)
     target_link_libraries(${${prefix}_NAME} ${Matlab_MX_LIBRARY})
   endif()
 
+  if(DEFINED Matlab_ENGINE_LIBRARY)
+    target_link_libraries(${${prefix}_NAME} ${Matlab_ENGINE_LIBRARY})
+  endif()
+
+  if(DEFINED Matlab_DATAARRAY_LIBRARY)
+    target_link_libraries(${${prefix}_NAME} ${Matlab_DATAARRAY_LIBRARY})
+  endif()
+
   target_link_libraries(${${prefix}_NAME} ${Matlab_MEX_LIBRARY} ${${prefix}_LINK_TO})
   set_target_properties(${${prefix}_NAME}
       PROPERTIES
@@ -1416,6 +1432,8 @@ if(DEFINED Matlab_ROOT_DIR_LAST_CACHED)
         Matlab_MX_LIBRARY
         Matlab_ENG_LIBRARY
         Matlab_MAT_LIBRARY
+        Matlab_ENGINE_LIBRARY
+        Matlab_DATAARRAY_LIBRARY
         Matlab_MEX_EXTENSION
         Matlab_SIMULINK_INCLUDE_DIR
 
@@ -1668,9 +1686,51 @@ if(_matlab_find_mcc_compiler GREATER -1)
 endif()
 unset(_matlab_find_mcc_compiler)
 
+# component MatlabEngine
+list(FIND Matlab_FIND_COMPONENTS ENGINE_LIBRARY _matlab_find_matlab_engine)
+if(_matlab_find_matlab_engine GREATER -1)
+  _Matlab_find_library(
+    ${_matlab_lib_prefix_for_search}
+    Matlab_ENGINE_LIBRARY
+    MatlabEngine
+    PATHS ${_matlab_lib_dir_for_search}
+    DOC "MatlabEngine Library"
+    NO_DEFAULT_PATH
+  )
+  if(Matlab_ENGINE_LIBRARY)
+    set(Matlab_ENGINE_LIBRARY_FOUND TRUE)
+  endif()
+endif()
+unset(_matlab_find_matlab_engine)
+
+# component MatlabDataArray
+list(FIND Matlab_FIND_COMPONENTS DATAARRAY_LIBRARY _matlab_find_matlab_dataarray)
+if(_matlab_find_matlab_dataarray GREATER -1)
+  _Matlab_find_library(
+  ${_matlab_lib_prefix_for_search}
+    Matlab_DATAARRAY_LIBRARY
+    MatlabDataArray
+    PATHS ${_matlab_lib_dir_for_search}
+    DOC "MatlabDataArray Library"
+    NO_DEFAULT_PATH
+  )
+  if(Matlab_DATAARRAY_LIBRARY)
+    set(Matlab_DATAARRAY_LIBRARY_FOUND TRUE)
+  endif()
+endif()
+unset(_matlab_find_matlab_dataarray)
+
 unset(_matlab_lib_dir_for_search)
 
 set(Matlab_LIBRARIES ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY} ${Matlab_ENG_LIBRARY} ${Matlab_MAT_LIBRARY})
+
+if(Matlab_DATAARRAY_LIBRARY_FOUND)
+  set(Matlab_LIBRARIES ${Matlab_LIBRARIES} ${Matlab_DATAARRAY_LIBRARY})
+endif()
+
+if(Matlab_ENGINE_LIBRARY_FOUND)
+  set(Matlab_LIBRARIES ${Matlab_LIBRARIES} ${Matlab_ENGINE_LIBRARY})
+endif()
 
 find_package_handle_standard_args(
   Matlab
@@ -1692,6 +1752,8 @@ if(Matlab_INCLUDE_DIRS AND Matlab_LIBRARIES)
     Matlab_MEX_LIBRARY
     Matlab_MX_LIBRARY
     Matlab_ENG_LIBRARY
+    Matlab_ENGINE_LIBRARY
+    Matlab_DATAARRAY_LIBRARY
     Matlab_MAT_LIBRARY
     Matlab_INCLUDE_DIRS
     Matlab_FOUND
