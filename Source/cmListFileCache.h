@@ -124,9 +124,11 @@ public:
 
   // Backtraces may be copied, moved, and assigned as values.
   cmListFileBacktrace(cmListFileBacktrace const&) = default;
-  cmListFileBacktrace(cmListFileBacktrace&&) noexcept = default;
+  cmListFileBacktrace(cmListFileBacktrace&&) // NOLINT(clang-tidy)
+    noexcept = default;
   cmListFileBacktrace& operator=(cmListFileBacktrace const&) = default;
-  cmListFileBacktrace& operator=(cmListFileBacktrace&&) noexcept = default;
+  cmListFileBacktrace& operator=(cmListFileBacktrace&&) // NOLINT(clang-tidy)
+    noexcept = default;
   ~cmListFileBacktrace() = default;
 
   cmStateSnapshot GetBottom() const;
@@ -144,7 +146,7 @@ public:
   cmListFileBacktrace Pop() const;
 
   // Get the context at the top of the backtrace.
-  // Returns an empty context if the backtrace is empty.
+  // This may be called only if Empty() would return false.
   cmListFileContext const& Top() const;
 
   // Print the top of the backtrace.
