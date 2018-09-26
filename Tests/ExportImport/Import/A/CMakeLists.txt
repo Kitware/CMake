@@ -490,6 +490,11 @@ checkForProperty(bld_testLinkOptions "INTERFACE_LINK_OPTIONS" "INTERFACE_FLAG")
 checkForProperty(Req::testLinkOptions "INTERFACE_LINK_OPTIONS" "INTERFACE_FLAG")
 
 #---------------------------------------------------------------------------------
+# check that imported libraries have the expected INTERFACE_LINK_DIRECTORIES property
+checkForProperty(bld_testLinkDirectories "INTERFACE_LINK_DIRECTORIES" "/interface/build")
+checkForProperty(Req::testLinkDirectories "INTERFACE_LINK_DIRECTORIES" "${CMAKE_INSTALL_PREFIX}/interface/install")
+
+#---------------------------------------------------------------------------------
 # check that imported libraries have the expected INTERFACE_LINK_DEPENDS property
 if(CMAKE_GENERATOR MATCHES "Make|Ninja")
   checkForProperty(bld_testLinkDepends "INTERFACE_LINK_DEPENDS" "BUILD_LINK_DEPENDS")

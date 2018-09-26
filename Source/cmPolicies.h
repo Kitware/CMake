@@ -237,7 +237,10 @@ class cmMakefile;
     13, 0, cmPolicies::WARN)                                                  \
   SELECT(POLICY, CMP0080,                                                     \
          "BundleUtilities cannot be included at configure time", 3, 13, 0,    \
-         cmPolicies::WARN)
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0081,                                                     \
+         "Relative paths not allowed in LINK_DIRECTORIES target property.",   \
+         3, 13, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -263,7 +266,8 @@ class cmMakefile;
   F(CMP0068)                                                                  \
   F(CMP0069)                                                                  \
   F(CMP0073)                                                                  \
-  F(CMP0076)
+  F(CMP0076)                                                                  \
+  F(CMP0081)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies

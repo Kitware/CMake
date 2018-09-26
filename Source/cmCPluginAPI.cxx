@@ -171,7 +171,7 @@ void CCONV cmAddLinkDirectoryForTarget(void* arg, const char* tgt,
       " for directory ", d);
     return;
   }
-  t->AddLinkDirectory(d);
+  t->InsertLinkDirectory(d, mf->GetBacktrace());
 }
 
 void CCONV cmAddExecutable(void* arg, const char* exename, int numSrcs,

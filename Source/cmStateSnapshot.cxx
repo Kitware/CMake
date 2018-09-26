@@ -398,6 +398,13 @@ void cmStateSnapshot::InitializeFromParent()
     this->Position->BuildSystemDirectory->LinkOptionsBacktraces,
     this->Position->LinkOptionsPosition);
 
+  InitializeContentFromParent(
+    parent->BuildSystemDirectory->LinkDirectories,
+    this->Position->BuildSystemDirectory->LinkDirectories,
+    parent->BuildSystemDirectory->LinkDirectoriesBacktraces,
+    this->Position->BuildSystemDirectory->LinkDirectoriesBacktraces,
+    this->Position->LinkDirectoriesPosition);
+
   const char* include_regex =
     parent->BuildSystemDirectory->Properties.GetPropertyValue(
       "INCLUDE_REGULAR_EXPRESSION");

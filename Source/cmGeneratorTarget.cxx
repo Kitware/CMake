@@ -103,6 +103,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   , DebugCompileFeaturesDone(false)
   , DebugCompileDefinitionsDone(false)
   , DebugLinkOptionsDone(false)
+  , DebugLinkDirectoriesDone(false)
   , DebugSourcesDone(false)
   , LinkImplementationLanguageIsContextDependent(true)
   , UtilityItemsDone(false)
@@ -133,6 +134,10 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
                                      t->GetLinkOptionsBacktraces(),
                                      this->LinkOptionsEntries);
 
+  CreatePropertyGeneratorExpressions(t->GetLinkDirectoriesEntries(),
+                                     t->GetLinkDirectoriesBacktraces(),
+                                     this->LinkDirectoriesEntries);
+
   CreatePropertyGeneratorExpressions(t->GetSourceEntries(),
                                      t->GetSourceBacktraces(),
                                      this->SourceEntries, true);
@@ -150,6 +155,7 @@ cmGeneratorTarget::~cmGeneratorTarget()
   cmDeleteAll(this->CompileFeaturesEntries);
   cmDeleteAll(this->CompileDefinitionsEntries);
   cmDeleteAll(this->LinkOptionsEntries);
+  cmDeleteAll(this->LinkDirectoriesEntries);
   cmDeleteAll(this->SourceEntries);
   cmDeleteAll(this->LinkInformation);
 }
@@ -1704,11 +1710,6 @@ cmListFileBacktrace cmGeneratorTarget::GetBacktrace() const
   return this->Target->GetBacktrace();
 }
 
-const std::vector<std::string>& cmGeneratorTarget::GetLinkDirectories() const
-{
-  return this->Target->GetLinkDirectories();
-}
-
 const std::set<std::string>& cmGeneratorTarget::GetUtilities() const
 {
   return this->Target->GetUtilities();
@@ -3065,6 +3066,126 @@ void cmGeneratorTarget::GetStaticLibraryLinkOptions(
                                   &dagChecker, config, language);
 
   cmDeleteAll(entries);
+}
+
+namespace {
+void processLinkDirectories(
+  cmGeneratorTarget const* tgt,
+  const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
+  std::vector<std::string>& directories,
+  std::unordered_set<std::string>& uniqueDirectories,
+  cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
+  bool debugDirectories, std::string const& language)
+{
+  for (cmGeneratorTarget::TargetPropertyEntry* entry : entries) {
+    cmLinkImplItem const& item = entry->LinkImplItem;
+    std::string const& targetName = item.AsStr();
+
+    std::vector<std::string> entryDirectories;
+    cmSystemTools::ExpandListArgument(
+      entry->ge->Evaluate(tgt->GetLocalGenerator(), config, false, tgt,
+                          dagChecker, language),
+      entryDirectories);
+
+    std::string usedDirectories;
+    for (std::string& entryDirectory : entryDirectories) {
+      if (!cmSystemTools::FileIsFullPath(entryDirectory)) {
+        std::ostringstream e;
+        bool noMessage = false;
+        cmake::MessageType messageType = cmake::FATAL_ERROR;
+        if (!targetName.empty()) {
+          /* clang-format off */
+          e << "Target \"" << targetName << "\" contains relative "
+            "path in its INTERFACE_LINK_DIRECTORIES:\n"
+            "  \"" << entryDirectory << "\"";
+          /* clang-format on */
+        } else {
+          switch (tgt->GetPolicyStatusCMP0081()) {
+            case cmPolicies::WARN: {
+              e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0081) << "\n";
+              messageType = cmake::AUTHOR_WARNING;
+            } break;
+            case cmPolicies::OLD:
+              noMessage = true;
+              break;
+            case cmPolicies::REQUIRED_IF_USED:
+            case cmPolicies::REQUIRED_ALWAYS:
+            case cmPolicies::NEW:
+              // Issue the fatal message.
+              break;
+          }
+          e << "Found relative path while evaluating link directories of "
+               "\""
+            << tgt->GetName() << "\":\n  \"" << entryDirectory << "\"\n";
+        }
+        if (!noMessage) {
+          tgt->GetLocalGenerator()->IssueMessage(messageType, e.str());
+          if (messageType == cmake::FATAL_ERROR) {
+            return;
+          }
+        }
+      }
+
+      // Sanitize the path the same way the link_directories command does
+      // in case projects set the LINK_DIRECTORIES property directly.
+      cmSystemTools::ConvertToUnixSlashes(entryDirectory);
+      if (uniqueDirectories.insert(entryDirectory).second) {
+        directories.push_back(entryDirectory);
+        if (debugDirectories) {
+          usedDirectories += " * " + entryDirectory + "\n";
+        }
+      }
+    }
+    if (!usedDirectories.empty()) {
+      tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
+        cmake::LOG,
+        std::string("Used link directories for target ") + tgt->GetName() +
+          ":\n" + usedDirectories,
+        entry->ge->GetBacktrace());
+    }
+  }
+}
+}
+
+void cmGeneratorTarget::GetLinkDirectories(std::vector<std::string>& result,
+                                           const std::string& config,
+                                           const std::string& language) const
+{
+  std::unordered_set<std::string> uniqueDirectories;
+
+  cmGeneratorExpressionDAGChecker dagChecker(this, "LINK_DIRECTORIES", nullptr,
+                                             nullptr);
+
+  std::vector<std::string> debugProperties;
+  const char* debugProp =
+    this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
+  if (debugProp) {
+    cmSystemTools::ExpandListArgument(debugProp, debugProperties);
+  }
+
+  bool debugDirectories = !this->DebugLinkDirectoriesDone &&
+    std::find(debugProperties.begin(), debugProperties.end(),
+              "LINK_DIRECTORIES") != debugProperties.end();
+
+  if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
+    this->DebugLinkDirectoriesDone = true;
+  }
+
+  processLinkDirectories(this, this->LinkDirectoriesEntries, result,
+                         uniqueDirectories, &dagChecker, config,
+                         debugDirectories, language);
+
+  std::vector<cmGeneratorTarget::TargetPropertyEntry*>
+    linkInterfaceLinkDirectoriesEntries;
+
+  AddInterfaceEntries(this, config, "INTERFACE_LINK_DIRECTORIES",
+                      linkInterfaceLinkDirectoriesEntries);
+
+  processLinkDirectories(this, linkInterfaceLinkDirectoriesEntries, result,
+                         uniqueDirectories, &dagChecker, config,
+                         debugDirectories, language);
+
+  cmDeleteAll(linkInterfaceLinkDirectoriesEntries);
 }
 
 namespace {

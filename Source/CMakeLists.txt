@@ -579,6 +579,8 @@ set(SRCS
   cmTargetIncludeDirectoriesCommand.h
   cmTargetLinkOptionsCommand.cxx
   cmTargetLinkOptionsCommand.h
+  cmTargetLinkDirectoriesCommand.cxx
+  cmTargetLinkDirectoriesCommand.h
   cmTargetLinkLibrariesCommand.cxx
   cmTargetLinkLibrariesCommand.h
   cmTargetPropCommandBase.cxx

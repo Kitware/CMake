@@ -28,6 +28,7 @@ class cmGeneratorTarget;
   SELECT(F, EvaluatingSources, SOURCES)                                       \
   SELECT(F, EvaluatingCompileFeatures, COMPILE_FEATURES)                      \
   SELECT(F, EvaluatingLinkOptions, LINK_OPTIONS)                              \
+  SELECT(F, EvaluatingLinkDirectories, LINK_DIRECTORIES)                      \
   SELECT(F, EvaluatingLinkDepends, LINK_DEPENDS)
 
 #define CM_FOR_EACH_TRANSITIVE_PROPERTY(F)                                    \

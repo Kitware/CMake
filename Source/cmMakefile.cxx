@@ -243,6 +243,17 @@ cmBacktraceRange cmMakefile::GetLinkOptionsBacktraces() const
   return this->StateSnapshot.GetDirectory().GetLinkOptionsEntryBacktraces();
 }
 
+cmStringRange cmMakefile::GetLinkDirectoriesEntries() const
+{
+  return this->StateSnapshot.GetDirectory().GetLinkDirectoriesEntries();
+}
+
+cmBacktraceRange cmMakefile::GetLinkDirectoriesBacktraces() const
+{
+  return this->StateSnapshot.GetDirectory()
+    .GetLinkDirectoriesEntryBacktraces();
+}
+
 cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
   return this->Backtrace;
@@ -1237,6 +1248,18 @@ void cmMakefile::AddLinkOption(std::string const& option)
   this->AppendProperty("LINK_OPTIONS", option.c_str());
 }
 
+void cmMakefile::AddLinkDirectory(std::string const& directory, bool before)
+{
+  cmListFileBacktrace lfbt = this->GetBacktrace();
+  if (before) {
+    this->StateSnapshot.GetDirectory().PrependLinkDirectoriesEntry(directory,
+                                                                   lfbt);
+  } else {
+    this->StateSnapshot.GetDirectory().AppendLinkDirectoriesEntry(directory,
+                                                                  lfbt);
+  }
+}
+
 bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
 {
   // Create a regular expression to match valid definitions.
@@ -1334,10 +1357,6 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
 
   // link libraries
   this->SetProperty("LINK_LIBRARIES", parent->GetProperty("LINK_LIBRARIES"));
-
-  // link directories
-  this->SetProperty("LINK_DIRECTORIES",
-                    parent->GetProperty("LINK_DIRECTORIES"));
 
   // the initial project name
   this->StateSnapshot.SetProjectName(parent->StateSnapshot.GetProjectName());
@@ -1871,17 +1890,6 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
     case cmStateEnums::INTERFACE_LIBRARY:
       return;
     default:;
-  }
-  if (const char* linkDirsProp = this->GetProperty("LINK_DIRECTORIES")) {
-    std::vector<std::string> linkDirs;
-    cmSystemTools::ExpandListArgument(linkDirsProp, linkDirs);
-
-    for (std::string& linkDir : linkDirs) {
-      // Sanitize the path the same way the link_directories command does
-      // in case projects set the LINK_DIRECTORIES property directly.
-      cmSystemTools::ConvertToUnixSlashes(linkDir);
-      target.AddLinkDirectory(linkDir);
-    }
   }
 
   if (const char* linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {

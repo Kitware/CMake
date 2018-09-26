@@ -273,8 +273,6 @@ public:
 
   cmListFileBacktrace GetBacktrace() const;
 
-  const std::vector<std::string>& GetLinkDirectories() const;
-
   std::set<std::string> const& GetUtilities() const;
   cmListFileBacktrace const* GetUtilityBacktrace(const std::string& u) const;
 
@@ -434,6 +432,10 @@ public:
   void GetStaticLibraryLinkOptions(std::vector<std::string>& result,
                                    const std::string& config,
                                    const std::string& language) const;
+
+  void GetLinkDirectories(std::vector<std::string>& result,
+                          const std::string& config,
+                          const std::string& language) const;
 
   void GetLinkDepends(std::vector<std::string>& result,
                       const std::string& config,
@@ -825,6 +827,7 @@ private:
   std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
   std::vector<TargetPropertyEntry*> LinkOptionsEntries;
+  std::vector<TargetPropertyEntry*> LinkDirectoriesEntries;
   std::vector<TargetPropertyEntry*> SourceEntries;
   mutable std::set<std::string> LinkImplicitNullProperties;
 
@@ -874,6 +877,7 @@ private:
   mutable bool DebugCompileFeaturesDone;
   mutable bool DebugCompileDefinitionsDone;
   mutable bool DebugLinkOptionsDone;
+  mutable bool DebugLinkDirectoriesDone;
   mutable bool DebugSourcesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
   mutable bool UtilityItemsDone;

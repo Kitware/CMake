@@ -101,6 +101,7 @@
 #  include "cmRemoveDefinitionsCommand.h"
 #  include "cmSourceGroupCommand.h"
 #  include "cmSubdirDependsCommand.h"
+#  include "cmTargetLinkDirectoriesCommand.h"
 #  include "cmTargetLinkOptionsCommand.h"
 #  include "cmUseMangledMesaCommand.h"
 #  include "cmUtilitySourceCommand.h"
@@ -278,6 +279,8 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("link_libraries", new cmLinkLibrariesCommand);
   state->AddBuiltinCommand("target_link_options",
                            new cmTargetLinkOptionsCommand);
+  state->AddBuiltinCommand("target_link_directories",
+                           new cmTargetLinkDirectoriesCommand);
   state->AddBuiltinCommand("load_cache", new cmLoadCacheCommand);
   state->AddBuiltinCommand("qt_wrap_cpp", new cmQTWrapCPPCommand);
   state->AddBuiltinCommand("qt_wrap_ui", new cmQTWrapUICommand);

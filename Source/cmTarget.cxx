@@ -168,6 +168,8 @@ public:
   std::vector<cmListFileBacktrace> SourceBacktraces;
   std::vector<std::string> LinkOptionsEntries;
   std::vector<cmListFileBacktrace> LinkOptionsBacktraces;
+  std::vector<std::string> LinkDirectoriesEntries;
+  std::vector<cmListFileBacktrace> LinkDirectoriesBacktraces;
   std::vector<std::string> LinkImplementationPropertyEntries;
   std::vector<cmListFileBacktrace> LinkImplementationPropertyBacktraces;
 };
@@ -391,6 +393,18 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->Internal->LinkOptionsBacktraces.insert(
       this->Internal->LinkOptionsBacktraces.end(),
       parentLinkOptionsBts.begin(), parentLinkOptionsBts.end());
+
+    const cmStringRange parentLinkDirectories =
+      this->Makefile->GetLinkDirectoriesEntries();
+    const cmBacktraceRange parentLinkDirectoriesBts =
+      this->Makefile->GetLinkDirectoriesBacktraces();
+
+    this->Internal->LinkDirectoriesEntries.insert(
+      this->Internal->LinkDirectoriesEntries.end(),
+      parentLinkDirectories.begin(), parentLinkDirectories.end());
+    this->Internal->LinkDirectoriesBacktraces.insert(
+      this->Internal->LinkDirectoriesBacktraces.end(),
+      parentLinkDirectoriesBts.begin(), parentLinkDirectoriesBts.end());
   }
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
@@ -514,9 +528,7 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
   std::string srcFiles;
   const char* sep = "";
   for (auto filename : srcs) {
-    const char* src = filename.c_str();
-
-    if (!(src[0] == '$' && src[1] == '<')) {
+    if (!cmGeneratorExpression::StartsWithGeneratorExpression(filename)) {
       if (!filename.empty()) {
         filename = this->ProcessSourceItemCMP0049(filename);
         if (filename.empty()) {
@@ -654,19 +666,6 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
   }
   return this->Makefile->GetOrCreateSource(src, false,
                                            cmSourceFileLocationKind::Known);
-}
-
-void cmTarget::AddLinkDirectory(const std::string& d)
-{
-  // Make sure we don't add unnecessary search directories.
-  if (this->LinkDirectoriesEmmitted.insert(d).second) {
-    this->LinkDirectories.push_back(d);
-  }
-}
-
-const std::vector<std::string>& cmTarget::GetLinkDirectories() const
-{
-  return this->LinkDirectories;
 }
 
 void cmTarget::ClearDependencyInformation(cmMakefile& mf)
@@ -876,6 +875,16 @@ cmBacktraceRange cmTarget::GetLinkOptionsBacktraces() const
   return cmMakeRange(this->Internal->LinkOptionsBacktraces);
 }
 
+cmStringRange cmTarget::GetLinkDirectoriesEntries() const
+{
+  return cmMakeRange(this->Internal->LinkDirectoriesEntries);
+}
+
+cmBacktraceRange cmTarget::GetLinkDirectoriesBacktraces() const
+{
+  return cmMakeRange(this->Internal->LinkDirectoriesBacktraces);
+}
+
 cmStringRange cmTarget::GetLinkImplementationEntries() const
 {
   return cmMakeRange(this->Internal->LinkImplementationPropertyEntries);
@@ -902,6 +911,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   MAKE_STATIC_PROP(IMPORTED_GLOBAL);
   MAKE_STATIC_PROP(INCLUDE_DIRECTORIES);
   MAKE_STATIC_PROP(LINK_OPTIONS);
+  MAKE_STATIC_PROP(LINK_DIRECTORIES);
   MAKE_STATIC_PROP(LINK_LIBRARIES);
   MAKE_STATIC_PROP(MANUALLY_ADDED_DEPENDENCIES);
   MAKE_STATIC_PROP(NAME);
@@ -987,6 +997,14 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       this->Internal->LinkOptionsEntries.push_back(value);
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->LinkOptionsBacktraces.push_back(lfbt);
+    }
+  } else if (prop == propLINK_DIRECTORIES) {
+    this->Internal->LinkDirectoriesEntries.clear();
+    this->Internal->LinkDirectoriesBacktraces.clear();
+    if (value) {
+      this->Internal->LinkDirectoriesEntries.push_back(value);
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      this->Internal->LinkDirectoriesBacktraces.push_back(lfbt);
     }
   } else if (prop == propLINK_LIBRARIES) {
     this->Internal->LinkImplementationPropertyEntries.clear();
@@ -1099,6 +1117,12 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
       this->Internal->LinkOptionsBacktraces.push_back(lfbt);
     }
+  } else if (prop == "LINK_DIRECTORIES") {
+    if (value && *value) {
+      this->Internal->LinkDirectoriesEntries.push_back(value);
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      this->Internal->LinkDirectoriesBacktraces.push_back(lfbt);
+    }
   } else if (prop == "LINK_LIBRARIES") {
     if (value && *value) {
       cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
@@ -1194,6 +1218,21 @@ void cmTarget::InsertLinkOption(std::string const& entry,
 
   this->Internal->LinkOptionsEntries.insert(position, entry);
   this->Internal->LinkOptionsBacktraces.insert(btPosition, bt);
+}
+
+void cmTarget::InsertLinkDirectory(std::string const& entry,
+                                   cmListFileBacktrace const& bt, bool before)
+{
+  std::vector<std::string>::iterator position = before
+    ? this->Internal->LinkDirectoriesEntries.begin()
+    : this->Internal->LinkDirectoriesEntries.end();
+
+  std::vector<cmListFileBacktrace>::iterator btPosition = before
+    ? this->Internal->LinkDirectoriesBacktraces.begin()
+    : this->Internal->LinkDirectoriesBacktraces.end();
+
+  this->Internal->LinkDirectoriesEntries.insert(position, entry);
+  this->Internal->LinkDirectoriesBacktraces.insert(btPosition, bt);
 }
 
 static void cmTargetCheckLINK_INTERFACE_LIBRARIES(const std::string& prop,
@@ -1316,6 +1355,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
   MAKE_STATIC_PROP(COMPILE_OPTIONS);
   MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
   MAKE_STATIC_PROP(LINK_OPTIONS);
+  MAKE_STATIC_PROP(LINK_DIRECTORIES);
   MAKE_STATIC_PROP(IMPORTED);
   MAKE_STATIC_PROP(IMPORTED_GLOBAL);
   MAKE_STATIC_PROP(MANUALLY_ADDED_DEPENDENCIES);
@@ -1332,6 +1372,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     specialProps.insert(propCOMPILE_OPTIONS);
     specialProps.insert(propCOMPILE_DEFINITIONS);
     specialProps.insert(propLINK_OPTIONS);
+    specialProps.insert(propLINK_DIRECTORIES);
     specialProps.insert(propIMPORTED);
     specialProps.insert(propIMPORTED_GLOBAL);
     specialProps.insert(propMANUALLY_ADDED_DEPENDENCIES);
@@ -1397,6 +1438,16 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(this->Internal->LinkOptionsEntries, ";");
+      return output.c_str();
+    }
+    if (prop == propLINK_DIRECTORIES) {
+      if (this->Internal->LinkDirectoriesEntries.empty()) {
+        return nullptr;
+      }
+
+      static std::string output;
+      output = cmJoin(this->Internal->LinkDirectoriesEntries, ";");
+
       return output.c_str();
     }
     if (prop == propMANUALLY_ADDED_DEPENDENCIES) {

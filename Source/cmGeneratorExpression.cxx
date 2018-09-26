@@ -168,7 +168,7 @@ static std::string stripAllGeneratorExpressions(const std::string& input)
     const char* c = input.c_str() + pos;
     const char* const cStart = c;
     for (; *c; ++c) {
-      if (c[0] == '$' && c[1] == '<') {
+      if (cmGeneratorExpression::StartsWithGeneratorExpression(c)) {
         ++nestingLevel;
         ++c;
         continue;
@@ -243,7 +243,7 @@ static std::string stripExportInterface(
     const char* c = input.c_str() + pos;
     const char* const cStart = c;
     for (; *c; ++c) {
-      if (c[0] == '$' && c[1] == '<') {
+      if (cmGeneratorExpression::StartsWithGeneratorExpression(c)) {
         ++nestingLevel;
         ++c;
         continue;
@@ -310,7 +310,7 @@ void cmGeneratorExpression::Split(const std::string& input,
     const char* c = input.c_str() + pos;
     const char* const cStart = c;
     for (; *c; ++c) {
-      if (c[0] == '$' && c[1] == '<') {
+      if (cmGeneratorExpression::StartsWithGeneratorExpression(c)) {
         ++nestingLevel;
         ++c;
         continue;

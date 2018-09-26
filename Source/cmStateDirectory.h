@@ -62,8 +62,18 @@ public:
   cmBacktraceRange GetLinkOptionsEntryBacktraces() const;
   void AppendLinkOptionsEntry(std::string const& vec,
                               cmListFileBacktrace const& lfbt);
+  void PrependLinkDirectoriesEntry(std::string const& vec,
+                                   cmListFileBacktrace const& lfbt);
   void SetLinkOptions(std::string const& vec, cmListFileBacktrace const& lfbt);
   void ClearLinkOptions();
+
+  cmStringRange GetLinkDirectoriesEntries() const;
+  cmBacktraceRange GetLinkDirectoriesEntryBacktraces() const;
+  void AppendLinkDirectoriesEntry(std::string const& vec,
+                                  cmListFileBacktrace const& lfbt);
+  void SetLinkDirectories(std::string const& vec,
+                          cmListFileBacktrace const& lfbt);
+  void ClearLinkDirectories();
 
   void SetProperty(const std::string& prop, const char* value,
                    cmListFileBacktrace const& lfbt);
