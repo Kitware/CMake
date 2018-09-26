@@ -198,6 +198,7 @@ endif ()
 
 find_library(LUA_LIBRARY
   NAMES ${_lua_library_names} lua
+  NAMES_PER_DIR
   HINTS
     ENV LUA_DIR
   PATH_SUFFIXES lib
