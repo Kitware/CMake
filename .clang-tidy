@@ -5,7 +5,6 @@ misc-*,\
 -misc-incorrect-roundings,\
 -misc-macro-parentheses,\
 -misc-misplaced-widening-cast,\
--misc-noexcept-move-constructor,\
 -misc-static-assert,\
 modernize-*,\
 -modernize-deprecated-headers,\

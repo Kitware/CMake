@@ -124,9 +124,11 @@ public:
 
   // Backtraces may be copied, moved, and assigned as values.
   cmListFileBacktrace(cmListFileBacktrace const&) = default;
-  cmListFileBacktrace(cmListFileBacktrace&&) noexcept = default;
+  cmListFileBacktrace(cmListFileBacktrace&&) // NOLINT(clang-tidy)
+    noexcept = default;
   cmListFileBacktrace& operator=(cmListFileBacktrace const&) = default;
-  cmListFileBacktrace& operator=(cmListFileBacktrace&&) noexcept = default;
+  cmListFileBacktrace& operator=(cmListFileBacktrace&&) // NOLINT(clang-tidy)
+    noexcept = default;
   ~cmListFileBacktrace() = default;
 
   cmStateSnapshot GetBottom() const;
