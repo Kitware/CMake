@@ -2128,12 +2128,13 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
   get_filename_component(ntver "[HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion;CurrentVersion]" NAME)
   if(WIN32 AND ntver VERSION_GREATER 6.1) # Windows >= 8.0
-    macro(add_test_VSWinStorePhone name generator systemName systemVersion)
+    macro(add_test_VSWinStorePhone name generator systemName systemVersion architecture)
       add_test(NAME VSWinStorePhone.${name} COMMAND ${CMAKE_CTEST_COMMAND}
         --build-and-test
         "${CMake_SOURCE_DIR}/Tests/VSWinStorePhone"
         "${CMake_BINARY_DIR}/Tests/VSWinStorePhone/${name}"
         --build-generator "${generator}"
+        --build-generator-platform "${architecture}"
         --build-project VSWinStorePhone
         --build-config $<CONFIGURATION>
         --build-options -DCMAKE_SYSTEM_NAME=${systemName}
@@ -2143,14 +2144,14 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endmacro()
 
     if(vs11 AND ws80)
-      add_test_VSWinStorePhone(vs11-store80-X86 "Visual Studio 11 2012" WindowsStore 8.0)
-      add_test_VSWinStorePhone(vs11-store80-ARM "Visual Studio 11 2012 ARM" WindowsStore 8.0)
-      add_test_VSWinStorePhone(vs11-store80-X64 "Visual Studio 11 2012 Win64" WindowsStore 8.0)
+      add_test_VSWinStorePhone(vs11-store80-X86 "Visual Studio 11 2012" WindowsStore 8.0 Win32)
+      add_test_VSWinStorePhone(vs11-store80-ARM "Visual Studio 11 2012" WindowsStore 8.0 ARM)
+      add_test_VSWinStorePhone(vs11-store80-X64 "Visual Studio 11 2012" WindowsStore 8.0 x64)
     endif()
     if(vs12 AND ws81)
-      add_test_VSWinStorePhone(vs12-store81-X86 "Visual Studio 12 2013" WindowsStore 8.1)
-      add_test_VSWinStorePhone(vs12-store81-ARM "Visual Studio 12 2013 ARM" WindowsStore 8.1)
-      add_test_VSWinStorePhone(vs12-store81-X64 "Visual Studio 12 2013 Win64" WindowsStore 8.1)
+      add_test_VSWinStorePhone(vs12-store81-X86 "Visual Studio 12 2013" WindowsStore 8.1 Win32)
+      add_test_VSWinStorePhone(vs12-store81-ARM "Visual Studio 12 2013" WindowsStore 8.1 ARM)
+      add_test_VSWinStorePhone(vs12-store81-X64 "Visual Studio 12 2013" WindowsStore 8.1 x64)
 
       add_test(NAME VSXaml COMMAND ${CMAKE_CTEST_COMMAND}
         --build-and-test
@@ -2164,22 +2165,23 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         )
     endif()
     if(CMake_TEST_VSWinStorePhone_VS_2017 AND ws10_0)
-      add_test_VSWinStorePhone(vs15-store10_0-X86 "Visual Studio 15 2017" WindowsStore 10.0)
-      add_test_VSWinStorePhone(vs15-store10_0-ARM "Visual Studio 15 2017 ARM" WindowsStore 10.0)
-      add_test_VSWinStorePhone(vs15-store10_0-X64 "Visual Studio 15 2017 Win64" WindowsStore 10.0)
+      add_test_VSWinStorePhone(vs15-store10_0-X86 "Visual Studio 15 2017" WindowsStore 10.0 Win32)
+      add_test_VSWinStorePhone(vs15-store10_0-ARM "Visual Studio 15 2017" WindowsStore 10.0 ARM)
+      add_test_VSWinStorePhone(vs15-store10_0-X64 "Visual Studio 15 2017" WindowsStore 10.0 x64)
+      add_test_VSWinStorePhone(vs15-store10_0-ARM64 "Visual Studio 15 2017" WindowsStore 10.0 ARM64)
     endif()
     if(vs14 AND ws10_0)
-      add_test_VSWinStorePhone(vs14-store10_0-X86 "Visual Studio 14 2015" WindowsStore 10.0)
-      add_test_VSWinStorePhone(vs14-store10_0-ARM "Visual Studio 14 2015 ARM" WindowsStore 10.0)
-      add_test_VSWinStorePhone(vs14-store10_0-X64 "Visual Studio 14 2015 Win64" WindowsStore 10.0)
+      add_test_VSWinStorePhone(vs14-store10_0-X86 "Visual Studio 14 2015" WindowsStore 10.0 Win32)
+      add_test_VSWinStorePhone(vs14-store10_0-ARM "Visual Studio 14 2015" WindowsStore 10.0 ARM)
+      add_test_VSWinStorePhone(vs14-store10_0-X64 "Visual Studio 14 2015" WindowsStore 10.0 x64)
     endif()
     if(vs11 AND wp80)
-      add_test_VSWinStorePhone(vs11-phone80-X86 "Visual Studio 11 2012" WindowsPhone 8.0)
-      add_test_VSWinStorePhone(vs11-phone80-ARM "Visual Studio 11 2012 ARM" WindowsPhone 8.0)
+      add_test_VSWinStorePhone(vs11-phone80-X86 "Visual Studio 11 2012" WindowsPhone 8.0 Win32)
+      add_test_VSWinStorePhone(vs11-phone80-ARM "Visual Studio 11 2012" WindowsPhone 8.0 ARM)
     endif()
     if(vs12 AND wp81)
-      add_test_VSWinStorePhone(vs12-phone81-X86 "Visual Studio 12 2013" WindowsPhone 8.1)
-      add_test_VSWinStorePhone(vs12-phone81-ARM "Visual Studio 12 2013 ARM" WindowsPhone 8.1)
+      add_test_VSWinStorePhone(vs12-phone81-X86 "Visual Studio 12 2013" WindowsPhone 8.1 Win32)
+      add_test_VSWinStorePhone(vs12-phone81-ARM "Visual Studio 12 2013" WindowsPhone 8.1 ARM)
     endif()
   endif()
 
