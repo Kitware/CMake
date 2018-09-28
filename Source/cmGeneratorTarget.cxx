@@ -4268,21 +4268,35 @@ std::string compatibilityAgree(CompatibleType t, bool dominant)
 }
 
 template <typename PropertyType>
-PropertyType getTypedProperty(cmGeneratorTarget const* tgt,
-                              const std::string& prop);
+PropertyType getTypedProperty(
+  cmGeneratorTarget const* tgt, const std::string& prop,
+  cmGeneratorExpressionInterpreter* genexInterpreter = nullptr);
 
 template <>
 bool getTypedProperty<bool>(cmGeneratorTarget const* tgt,
-                            const std::string& prop)
+                            const std::string& prop,
+                            cmGeneratorExpressionInterpreter* genexInterpreter)
 {
-  return tgt->GetPropertyAsBool(prop);
+  if (genexInterpreter == nullptr) {
+    return tgt->GetPropertyAsBool(prop);
+  }
+
+  const char* value = tgt->GetProperty(prop);
+  return cmSystemTools::IsOn(genexInterpreter->Evaluate(value, prop));
 }
 
 template <>
-const char* getTypedProperty<const char*>(cmGeneratorTarget const* tgt,
-                                          const std::string& prop)
+const char* getTypedProperty<const char*>(
+  cmGeneratorTarget const* tgt, const std::string& prop,
+  cmGeneratorExpressionInterpreter* genexInterpreter)
 {
-  return tgt->GetProperty(prop);
+  const char* value = tgt->GetProperty(prop);
+
+  if (genexInterpreter == nullptr) {
+    return value;
+  }
+
+  return genexInterpreter->Evaluate(value, prop).c_str();
 }
 
 template <typename PropertyType>
@@ -4423,6 +4437,11 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
   }
 
   std::string interfaceProperty = "INTERFACE_" + p;
+  std::unique_ptr<cmGeneratorExpressionInterpreter> genexInterpreter(
+    p == "POSITION_INDEPENDENT_CODE" ? new cmGeneratorExpressionInterpreter(
+                                         tgt->GetLocalGenerator(), config, tgt)
+                                     : nullptr);
+
   for (cmGeneratorTarget const* theTarget : deps) {
     // An error should be reported if one dependency
     // has INTERFACE_POSITION_INDEPENDENT_CODE ON and the other
@@ -4434,8 +4453,8 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
 
     const bool ifaceIsSet = std::find(propKeys.begin(), propKeys.end(),
                                       interfaceProperty) != propKeys.end();
-    PropertyType ifacePropContent =
-      getTypedProperty<PropertyType>(theTarget, interfaceProperty);
+    PropertyType ifacePropContent = getTypedProperty<PropertyType>(
+      theTarget, interfaceProperty, genexInterpreter.get());
 
     std::string reportEntry;
     if (ifaceIsSet) {
