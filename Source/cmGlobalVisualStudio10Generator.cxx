@@ -938,6 +938,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     configArg += "Debug";
   }
   makeCommand.push_back(configArg);
+  makeCommand.push_back("/p:Platform=" + this->GetPlatformName());
   makeCommand.push_back(std::string("/p:VisualStudioVersion=") +
                         this->GetIDEVersion());
 
