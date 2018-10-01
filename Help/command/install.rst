@@ -89,6 +89,13 @@ Command signatures that install files may print messages during
 installation.  Use the :variable:`CMAKE_INSTALL_MESSAGE` variable
 to control which messages are printed.
 
+Many of the ``install()`` variants implicitly create the directories
+containing the installed files. If
+:variable:`CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS` is set, these
+directories will be created with the permissions specified. Otherwise,
+they will be created according to the uname rules on Unix-like platforms.
+Windows platforms are unaffected.
+
 Installing Targets
 ^^^^^^^^^^^^^^^^^^
 
