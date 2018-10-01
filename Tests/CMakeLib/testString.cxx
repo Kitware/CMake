@@ -11,6 +11,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <utility>
 
 #define ASSERT_TRUE(x)                                                        \
@@ -942,6 +943,103 @@ static bool testMethod_find_last_not_of()
   return true;
 }
 
+static bool testAddition()
+{
+  std::cout << "testAddition()\n";
+  {
+    ASSERT_TRUE(cm::String("a") + "b" == "ab");
+    ASSERT_TRUE("ab" == "a" + cm::String("b"));
+    ASSERT_TRUE("a" + cm::String("b") + "c" == "abc");
+    ASSERT_TRUE("abc" == "a" + cm::String("b") + "c");
+    ASSERT_TRUE("a" + (cm::String("b") + "c") + "d" == "abcd");
+    ASSERT_TRUE("abcd" == "a" + (cm::String("b") + "c") + "d");
+  }
+  {
+    const char* a = "a";
+    const char* b = "b";
+    const char* ab = "ab";
+    ASSERT_TRUE(cm::String(a) + b == ab);
+    ASSERT_TRUE(ab == a + cm::String(b));
+    const char* c = "c";
+    const char* abc = "abc";
+    ASSERT_TRUE(a + cm::String(b) + c == abc);
+    ASSERT_TRUE(abc == a + cm::String(b) + c);
+    const char* d = "d";
+    const char* abcd = "abcd";
+    ASSERT_TRUE(a + (cm::String(b) + c) + d == abcd);
+    ASSERT_TRUE(abcd == a + (cm::String(b) + c) + d);
+  }
+  {
+    ASSERT_TRUE(cm::String('a') + 'b' == "ab");
+    ASSERT_TRUE("ab" == 'a' + cm::String('b'));
+    ASSERT_TRUE('a' + cm::String('b') + 'c' == "abc");
+    ASSERT_TRUE("abc" == 'a' + cm::String('b') + 'c');
+    ASSERT_TRUE('a' + (cm::String('b') + 'c') + 'd' == "abcd");
+    ASSERT_TRUE("abcd" == 'a' + (cm::String('b') + 'c') + 'd');
+  }
+  {
+    std::string a = "a";
+    std::string b = "b";
+    std::string ab = "ab";
+    ASSERT_TRUE(cm::String(a) + b == ab);
+    ASSERT_TRUE(ab == a + cm::String(b));
+    std::string c = "c";
+    std::string abc = "abc";
+    ASSERT_TRUE(a + cm::String(b) + c == abc);
+    ASSERT_TRUE(abc == a + cm::String(b) + c);
+    std::string d = "d";
+    std::string abcd = "abcd";
+    ASSERT_TRUE(a + (cm::String(b) + c) + d == abcd);
+    ASSERT_TRUE(abcd == a + (cm::String(b) + c) + d);
+  }
+  {
+    cm::string_view a("a", 1);
+    cm::string_view b("b", 1);
+    cm::string_view ab("ab", 2);
+    ASSERT_TRUE(cm::String(a) + b == ab);
+    ASSERT_TRUE(ab == a + cm::String(b));
+    cm::string_view c("c", 1);
+    cm::string_view abc("abc", 3);
+    ASSERT_TRUE(a + cm::String(b) + c == abc);
+    ASSERT_TRUE(abc == a + cm::String(b) + c);
+    cm::string_view d("d", 1);
+    cm::string_view abcd("abcd", 4);
+    ASSERT_TRUE(a + (cm::String(b) + c) + d == abcd);
+    ASSERT_TRUE(abcd == a + (cm::String(b) + c) + d);
+  }
+  {
+    cm::String a = "a";
+    cm::String b = "b";
+    cm::String ab = "ab";
+    ASSERT_TRUE(a + b == ab);
+    ASSERT_TRUE(ab == a + b);
+    cm::String c = "c";
+    cm::String abc = "abc";
+    ASSERT_TRUE(a + cm::String(b) + c == abc);
+    ASSERT_TRUE(abc == a + cm::String(b) + c);
+    cm::String d = "d";
+    cm::String abcd = "abcd";
+    ASSERT_TRUE(a + (cm::String(b) + c) + d == abcd);
+    ASSERT_TRUE(abcd == a + (cm::String(b) + c) + d);
+  }
+  {
+    cm::String str;
+    str += "a" + cm::String("b") + 'c';
+    ASSERT_TRUE(str == "abc");
+  }
+  {
+    std::string s;
+    s += "a" + cm::String("b") + 'c';
+    ASSERT_TRUE(s == "abc");
+  }
+  {
+    std::ostringstream ss;
+    ss << ("a" + cm::String("b") + 'c');
+    ASSERT_TRUE(ss.str() == "abc");
+  }
+  return true;
+}
+
 int testString(int /*unused*/, char* /*unused*/ [])
 {
   if (!testConstructDefault()) {
@@ -1104,6 +1202,9 @@ int testString(int /*unused*/, char* /*unused*/ [])
     return 1;
   }
   if (!testMethod_find_last_not_of()) {
+    return 1;
+  }
+  if (!testAddition()) {
     return 1;
   }
   return 0;

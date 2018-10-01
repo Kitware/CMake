@@ -662,6 +662,107 @@ operator>=(L&& l, R&& r)
 std::ostream& operator<<(std::ostream& os, String const& s);
 std::string& operator+=(std::string& self, String const& s);
 
+template <typename L, typename R>
+struct StringOpPlus
+{
+  L l;
+  R r;
+#if defined(__SUNPRO_CC)
+  StringOpPlus(L in_l, R in_r)
+    : l(in_l)
+    , r(in_r)
+  {
+  }
+#endif
+  operator std::string() const;
+  std::string::size_type size() const { return l.size() + r.size(); }
+};
+
+template <typename T>
+struct StringAdd
+{
+  static const bool value = AsStringView<T>::value;
+  typedef string_view temp_type;
+  template <typename S>
+  static temp_type temp(S&& s)
+  {
+    return AsStringView<T>::view(std::forward<S>(s));
+  }
+};
+
+template <typename L, typename R>
+struct StringAdd<StringOpPlus<L, R>> : std::true_type
+{
+  typedef StringOpPlus<L, R> const& temp_type;
+  static temp_type temp(temp_type s) { return s; }
+};
+
+template <typename L, typename R>
+StringOpPlus<L, R>::operator std::string() const
+{
+  std::string s;
+  s.reserve(size());
+  s += *this;
+  return s;
+}
+
+template <typename L, typename R>
+std::string& operator+=(std::string& s, StringOpPlus<L, R> const& a)
+{
+  s.reserve(s.size() + a.size());
+  s += a.l;
+  s += a.r;
+  return s;
+}
+
+template <typename L, typename R>
+String& operator+=(String& s, StringOpPlus<L, R> const& a)
+{
+  std::string r;
+  r.reserve(s.size() + a.size());
+  r.assign(s.data(), s.size());
+  r += a.l;
+  r += a.r;
+  s = std::move(r);
+  return s;
+}
+
+template <typename L, typename R>
+std::ostream& operator<<(std::ostream& os, StringOpPlus<L, R> const& a)
+{
+  return os << a.l << a.r;
+}
+
+template <typename L, typename R>
+struct IntoString<StringOpPlus<L, R>> : std::true_type
+{
+  static std::string into_string(StringOpPlus<L, R> const& a) { return a; }
+};
+
+template <typename L, typename R>
+typename std::enable_if<StringAdd<L>::value && StringAdd<R>::value,
+                        StringOpPlus<typename StringAdd<L>::temp_type,
+                                     typename StringAdd<R>::temp_type>>::type
+operator+(L&& l, R&& r)
+{
+  return { StringAdd<L>::temp(std::forward<L>(l)),
+           StringAdd<R>::temp(std::forward<R>(r)) };
+}
+
+template <typename LL, typename LR, typename R>
+typename std::enable_if<AsStringView<R>::value, bool>::type operator==(
+  StringOpPlus<LL, LR> const& l, R&& r)
+{
+  return std::string(l) == AsStringView<R>::view(std::forward<R>(r));
+}
+
+template <typename L, typename RL, typename RR>
+typename std::enable_if<AsStringView<L>::value, bool>::type operator==(
+  L&& l, StringOpPlus<RL, RR> const& r)
+{
+  return AsStringView<L>::view(std::forward<L>(l)) == std::string(r);
+}
+
 } // namespace cm
 
 namespace std {
