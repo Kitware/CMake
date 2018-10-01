@@ -181,6 +181,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       }
     }
   }
+  std::ostringstream outputStream;
   if (res == cmProcess::State::Exited) {
     bool success = !forceFail &&
       (retVal == 0 ||
@@ -196,36 +197,36 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     } else if ((success && !this->TestProperties->WillFail) ||
                (!success && this->TestProperties->WillFail)) {
       this->TestResult.Status = cmCTestTestHandler::COMPLETED;
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Passed  ");
+      outputStream << "   Passed  ";
     } else {
       this->TestResult.Status = cmCTestTestHandler::FAILED;
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Failed  " << reason);
+      outputStream << "***Failed  " << reason;
       outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
     }
   } else if (res == cmProcess::State::Expired) {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Timeout ");
+    outputStream << "***Timeout ";
     this->TestResult.Status = cmCTestTestHandler::TIMEOUT;
     outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
   } else if (res == cmProcess::State::Exception) {
     outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Exception: ");
+    outputStream << "***Exception: ";
     this->TestResult.ExceptionStatus =
       this->TestProcess->GetExitExceptionString();
     switch (this->TestProcess->GetExitException()) {
       case cmProcess::Exception::Fault:
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "SegFault");
+        outputStream << "SegFault";
         this->TestResult.Status = cmCTestTestHandler::SEGFAULT;
         break;
       case cmProcess::Exception::Illegal:
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "Illegal");
+        outputStream << "Illegal";
         this->TestResult.Status = cmCTestTestHandler::ILLEGAL;
         break;
       case cmProcess::Exception::Interrupt:
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "Interrupt");
+        outputStream << "Interrupt";
         this->TestResult.Status = cmCTestTestHandler::INTERRUPT;
         break;
       case cmProcess::Exception::Numerical:
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "Numerical");
+        outputStream << "Numerical";
         this->TestResult.Status = cmCTestTestHandler::NUMERICAL;
         break;
       default:
@@ -234,16 +235,41 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         this->TestResult.Status = cmCTestTestHandler::OTHER_FAULT;
     }
   } else if ("Disabled" == this->TestResult.CompletionStatus) {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run (Disabled) ");
+    outputStream << "***Not Run (Disabled) ";
   } else // cmProcess::State::Error
   {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run ");
+    outputStream << "***Not Run ";
   }
 
   passed = this->TestResult.Status == cmCTestTestHandler::COMPLETED;
   char buf[1024];
   sprintf(buf, "%6.2f sec", this->TestProcess->GetTotalTime().count());
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, buf << "\n");
+  outputStream << buf << "\n";
+
+  if (this->CTest->GetTestProgressOutput()) {
+    if (!passed) {
+      // If the test did not pass, reprint test name and error
+      std::string output = GetTestPrefix(completed, total);
+      std::string testName = this->TestProperties->Name;
+      const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
+      testName.resize(maxTestNameWidth + 4, '.');
+
+      output += testName;
+      output += outputStream.str();
+      outputStream.str("");
+      outputStream.clear();
+      outputStream << output;
+      cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, "\n"); // flush
+    }
+    if (completed == total) {
+      std::string testName =
+        GetTestPrefix(completed, total) + this->TestProperties->Name + "\n";
+      cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, testName);
+    }
+  }
+  if (!this->CTest->GetTestProgressOutput() || !passed) {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, outputStream.str());
+  }
 
   if (outputTestErrorsToConsole) {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, this->ProcessOutput << std::endl);
@@ -331,7 +357,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   return passed || skipped;
 }
 
-bool cmCTestRunTest::StartAgain()
+bool cmCTestRunTest::StartAgain(size_t completed)
 {
   if (!this->RunAgain) {
     return false;
@@ -346,7 +372,7 @@ bool cmCTestRunTest::StartAgain()
     return true;
   }
 
-  this->StartTest(this->TotalNumberOfTests);
+  this->StartTest(completed, this->TotalNumberOfTests);
   return true;
 }
 
@@ -398,12 +424,14 @@ void cmCTestRunTest::StartFailure(std::string const& output)
 {
   // Still need to log the Start message so the test summary records our
   // attempt to start this test
-  cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             std::setw(2 * getNumWidth(this->TotalNumberOfTests) + 8)
-               << "Start "
-               << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
-               << this->TestProperties->Index << ": "
-               << this->TestProperties->Name << std::endl);
+  if (!this->CTest->GetTestProgressOutput()) {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               std::setw(2 * getNumWidth(this->TotalNumberOfTests) + 8)
+                 << "Start "
+                 << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
+                 << this->TestProperties->Index << ": "
+                 << this->TestProperties->Name << std::endl);
+  }
 
   this->ProcessOutput.clear();
   if (!output.empty()) {
@@ -425,16 +453,44 @@ void cmCTestRunTest::StartFailure(std::string const& output)
   this->TestProcess = cm::make_unique<cmProcess>(*this);
 }
 
+std::string cmCTestRunTest::GetTestPrefix(size_t completed, size_t total) const
+{
+  std::ostringstream outputStream;
+  outputStream << std::setw(getNumWidth(total)) << completed << "/";
+  outputStream << std::setw(getNumWidth(total)) << total << " ";
+
+  if (this->TestHandler->MemCheck) {
+    outputStream << "MemCheck";
+  } else {
+    outputStream << "Test";
+  }
+
+  std::ostringstream indexStr;
+  indexStr << " #" << this->Index << ":";
+  outputStream << std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
+               << indexStr.str();
+  outputStream << " ";
+
+  return outputStream.str();
+}
+
 // Starts the execution of a test.  Returns once it has started
-bool cmCTestRunTest::StartTest(size_t total)
+bool cmCTestRunTest::StartTest(size_t completed, size_t total)
 {
   this->TotalNumberOfTests = total; // save for rerun case
-  cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             std::setw(2 * getNumWidth(total) + 8)
-               << "Start "
-               << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
-               << this->TestProperties->Index << ": "
-               << this->TestProperties->Name << std::endl);
+  if (!this->CTest->GetTestProgressOutput()) {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               std::setw(2 * getNumWidth(total) + 8)
+                 << "Start "
+                 << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
+                 << this->TestProperties->Index << ": "
+                 << this->TestProperties->Name << std::endl);
+  } else {
+    std::string testName =
+      GetTestPrefix(completed, total) + this->TestProperties->Name + "\n";
+    cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, testName);
+  }
+
   this->ProcessOutput.clear();
 
   // Return immediately if test is disabled
@@ -689,44 +745,41 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
 
 void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 {
-  // if this is the last or only run of this test
-  // then print out completed / total
+  std::ostringstream outputStream;
+
+  // If this is the last or only run of this test, or progress output is
+  // requested, then print out completed / total.
   // Only issue is if a test fails and we are running until fail
   // then it will never print out the completed / total, same would
   // got for run until pass.  Trick is when this is called we don't
   // yet know if we are passing or failing.
-  if (this->NumberOfRunsLeft == 1) {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               std::setw(getNumWidth(total)) << completed << "/");
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               std::setw(getNumWidth(total)) << total << " ");
+  if (this->NumberOfRunsLeft == 1 || this->CTest->GetTestProgressOutput()) {
+    outputStream << std::setw(getNumWidth(total)) << completed << "/";
+    outputStream << std::setw(getNumWidth(total)) << total << " ";
   }
   // if this is one of several runs of a test just print blank space
   // to keep things neat
   else {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               std::setw(getNumWidth(total)) << " "
-                                             << " ");
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               std::setw(getNumWidth(total)) << " "
-                                             << " ");
+    outputStream << std::setw(getNumWidth(total)) << "  ";
+    outputStream << std::setw(getNumWidth(total)) << "  ";
   }
 
   if (this->TestHandler->MemCheck) {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "MemCheck");
+    outputStream << "MemCheck";
   } else {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "Test");
+    outputStream << "Test";
   }
 
   std::ostringstream indexStr;
   indexStr << " #" << this->Index << ":";
-  cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
-               << indexStr.str());
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
+  outputStream << std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
+               << indexStr.str();
+  outputStream << " ";
+
   const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
   std::string outname = this->TestProperties->Name + " ";
   outname.resize(maxTestNameWidth + 4, '.');
+  outputStream << outname;
 
   *this->TestHandler->LogFile << this->TestProperties->Index << "/"
                               << this->TestHandler->TotalNumberOfTests
@@ -754,7 +807,10 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
   *this->TestHandler->LogFile << this->ProcessOutput << "<end of output>"
                               << std::endl;
 
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, outname.c_str());
+  if (!this->CTest->GetTestProgressOutput()) {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, outputStream.str());
+  }
+
   cmCTestLog(this->CTest, DEBUG,
              "Testing " << this->TestProperties->Name << " ... ");
 }

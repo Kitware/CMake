@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cmath>
 #include <set>
 #include <stddef.h>
 #include <string>
@@ -64,7 +65,7 @@ public:
   void CompressOutput();
 
   // launch the test process, return whether it started correctly
-  bool StartTest(size_t total);
+  bool StartTest(size_t completed, size_t total);
   // capture and report the test results
   bool EndTest(size_t completed, size_t total, bool started);
   // Called by ctest -N to log the command string
@@ -72,7 +73,7 @@ public:
 
   void ComputeWeightedCost();
 
-  bool StartAgain();
+  bool StartAgain(size_t completed);
 
   void StartFailure(std::string const& output);
 
@@ -92,6 +93,9 @@ private:
   void WriteLogOutputTop(size_t completed, size_t total);
   // Run post processing of the process output for MemCheck
   void MemCheckPostProcess();
+
+  // Returns "completed/total Test #Index: "
+  std::string GetTestPrefix(size_t completed, size_t total) const;
 
   cmCTestTestHandler::cmCTestTestProperties* TestProperties;
   bool TimeoutIsForStopTime = false;
@@ -118,14 +122,7 @@ private:
 
 inline int getNumWidth(size_t n)
 {
-  int numWidth = 1;
-  if (n >= 10) {
-    numWidth = 2;
-  }
-  if (n >= 100) {
-    numWidth = 3;
-  }
-  return numWidth;
+  return static_cast<int>(std::log10(n)) + 1;
 }
 
 #endif
