@@ -5227,10 +5227,14 @@ bool cmGeneratorTarget::HasLanguage(std::string const& language,
 {
   std::set<std::string> languages;
   this->GetLanguages(languages, config);
+  // The "exclusive" check applies only to source files and not
+  // the linker language which may be affected by dependencies.
+  if (exclusive && languages.size() > 1) {
+    return false;
+  }
   // add linker language (if it is different from compiler languages)
   languages.insert(this->GetLinkerLanguage(config));
-  return (languages.size() == 1 || !exclusive) &&
-    languages.count(language) > 0;
+  return languages.count(language) > 0;
 }
 
 void cmGeneratorTarget::ComputeLinkImplementationLanguages(

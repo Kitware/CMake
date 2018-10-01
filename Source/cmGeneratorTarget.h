@@ -366,7 +366,7 @@ public:
 
   // Evaluate if the target uses the given language for compilation
   // and/or linking. If 'exclusive' is true, 'language' is expected
-  // to be the only language used for the target.
+  // to be the only language used in source files for the target.
   bool HasLanguage(std::string const& language, std::string const& config,
                    bool exclusive = true) const;
 
