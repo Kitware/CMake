@@ -9,17 +9,17 @@ add_custom_command(
 )
 
 set_source_files_properties(
-  "${TestWorkingDir_BINARY_DIR}/customTarget.c"
+  "${TestWorkingDir_BINARY_DIR}/customTarget1.c"
   "${TestWorkingDir_BINARY_DIR}/customTarget2.c"
   PROPERTIES GENERATED 1)
 
 add_executable(working "${TestWorkingDir_BINARY_DIR}/working.c"
-  "${TestWorkingDir_BINARY_DIR}/customTarget.c")
+  "${TestWorkingDir_BINARY_DIR}/customTarget1.c")
 
 add_custom_target(
   Custom ALL
-  COMMAND "${CMAKE_COMMAND}" -E copy_if_different ./customTarget.c "${TestWorkingDir_BINARY_DIR}/customTarget.c"
-  BYPRODUCTS "${TestWorkingDir_BINARY_DIR}/customTarget.c"
+  COMMAND "${CMAKE_COMMAND}" -E copy_if_different ./customTarget.c "${TestWorkingDir_BINARY_DIR}/customTarget1.c"
+  BYPRODUCTS "${TestWorkingDir_BINARY_DIR}/customTarget1.c"
   WORKING_DIRECTORY  "${TestWorkingDir_SOURCE_DIR}"
 )
 

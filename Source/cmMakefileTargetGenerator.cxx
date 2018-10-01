@@ -181,6 +181,36 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
           this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir,
                                                            output));
       }
+      const std::vector<std::string>& byproducts = ccg.GetByproducts();
+      for (std::string const& byproduct : byproducts) {
+        this->CleanFiles.push_back(
+          this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir,
+                                                           byproduct));
+      }
+    }
+  }
+
+  // Add byproducts from build events to the clean rules
+  if (clean) {
+    std::vector<cmCustomCommand> buildEventCommands =
+      this->GeneratorTarget->GetPreBuildCommands();
+
+    buildEventCommands.insert(
+      buildEventCommands.end(),
+      this->GeneratorTarget->GetPreLinkCommands().begin(),
+      this->GeneratorTarget->GetPreLinkCommands().end());
+    buildEventCommands.insert(
+      buildEventCommands.end(),
+      this->GeneratorTarget->GetPostBuildCommands().begin(),
+      this->GeneratorTarget->GetPostBuildCommands().end());
+
+    for (const auto& be : buildEventCommands) {
+      const std::vector<std::string>& byproducts = be.GetByproducts();
+      for (std::string const& byproduct : byproducts) {
+        this->CleanFiles.push_back(
+          this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir,
+                                                           byproduct));
+      }
     }
   }
   std::vector<cmSourceFile const*> headerSources;
