@@ -1275,6 +1275,33 @@ protected:
     this->DirPermissions |= mode_world_read;
     this->DirPermissions |= mode_world_execute;
   }
+
+  bool GetDefaultDirectoryPermissions(mode_t** mode)
+  {
+    // check if default dir creation permissions were set
+    const char* default_dir_install_permissions =
+      this->Makefile->GetDefinition(
+        "CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
+    if (default_dir_install_permissions && *default_dir_install_permissions) {
+      std::vector<std::string> items;
+      cmSystemTools::ExpandListArgument(default_dir_install_permissions,
+                                        items);
+      for (const auto& arg : items) {
+        if (!this->CheckPermissions(arg, **mode)) {
+          std::ostringstream e;
+          e << this->FileCommand->GetError()
+            << " Set with CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS "
+               "variable.";
+          this->FileCommand->SetError(e.str());
+          return false;
+        }
+      }
+    } else {
+      *mode = nullptr;
+    }
+
+    return true;
+  }
 };
 
 bool cmFileCopier::Parse(std::vector<std::string> const& args)
@@ -1668,8 +1695,15 @@ bool cmFileCopier::InstallDirectory(const char* source,
   this->ReportCopy(destination, TypeDir,
                    !cmSystemTools::FileIsDirectory(destination));
 
+  // check if default dir creation permissions were set
+  mode_t default_dir_mode_v = 0;
+  mode_t* default_dir_mode = &default_dir_mode_v;
+  if (!this->GetDefaultDirectoryPermissions(&default_dir_mode)) {
+    return false;
+  }
+
   // Make sure the destination directory exists.
-  if (!cmSystemTools::MakeDirectory(destination)) {
+  if (!cmSystemTools::MakeDirectory(destination, default_dir_mode)) {
     std::ostringstream e;
     e << this->Name << " cannot make directory \"" << destination
       << "\": " << cmSystemTools::GetLastSystemError();
@@ -2073,23 +2107,9 @@ bool cmFileInstaller::HandleInstallDestination()
 
   // check if default dir creation permissions were set
   mode_t default_dir_mode_v = 0;
-  mode_t* default_dir_mode = nullptr;
-  const char* default_dir_install_permissions = this->Makefile->GetDefinition(
-    "CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
-  if (default_dir_install_permissions && *default_dir_install_permissions) {
-    std::vector<std::string> items;
-    cmSystemTools::ExpandListArgument(default_dir_install_permissions, items);
-    for (const auto& arg : items) {
-      if (!this->CheckPermissions(arg, default_dir_mode_v)) {
-        std::ostringstream e;
-        e << this->FileCommand->GetError()
-          << " Set with CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS variable.";
-        this->FileCommand->SetError(e.str());
-        return false;
-      }
-    }
-
-    default_dir_mode = &default_dir_mode_v;
+  mode_t* default_dir_mode = &default_dir_mode_v;
+  if (!this->GetDefaultDirectoryPermissions(&default_dir_mode)) {
+    return false;
   }
 
   if (this->InstallType != cmInstallType_DIRECTORY) {
