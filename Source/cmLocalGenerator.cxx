@@ -517,31 +517,62 @@ void cmLocalGenerator::GenerateInstallRules()
   }
 
   // Ask each install generator to write its code.
+  cmPolicies::PolicyStatus status = this->GetPolicyStatus(cmPolicies::CMP0082);
   std::vector<cmInstallGenerator*> const& installers =
     this->Makefile->GetInstallGenerators();
-  for (cmInstallGenerator* installer : installers) {
-    installer->Generate(fout, config, configurationTypes);
+  bool haveSubdirectoryInstall = false;
+  bool haveInstallAfterSubdirectory = false;
+  if (status == cmPolicies::WARN) {
+    for (cmInstallGenerator* installer : installers) {
+      installer->CheckCMP0082(haveSubdirectoryInstall,
+                              haveInstallAfterSubdirectory);
+      installer->Generate(fout, config, configurationTypes);
+    }
+  } else {
+    for (cmInstallGenerator* installer : installers) {
+      installer->Generate(fout, config, configurationTypes);
+    }
   }
 
   // Write rules from old-style specification stored in targets.
   this->GenerateTargetInstallRules(fout, config, configurationTypes);
 
   // Include install scripts from subdirectories.
-  std::vector<cmStateSnapshot> children =
-    this->Makefile->GetStateSnapshot().GetChildren();
-  if (!children.empty()) {
-    fout << "if(NOT CMAKE_INSTALL_LOCAL_ONLY)\n";
-    fout << "  # Include the install script for each subdirectory.\n";
-    for (cmStateSnapshot const& c : children) {
-      if (!c.GetDirectory().GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
-        std::string odir = c.GetDirectory().GetCurrentBinary();
-        cmSystemTools::ConvertToUnixSlashes(odir);
-        fout << "  include(\"" << odir << "/cmake_install.cmake\")"
-             << std::endl;
+  switch (status) {
+    case cmPolicies::WARN:
+      if (haveInstallAfterSubdirectory &&
+          this->Makefile->PolicyOptionalWarningEnabled(
+            "CMAKE_POLICY_WARNING_CMP0082")) {
+        std::ostringstream e;
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0082) << "\n";
+        this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
       }
-    }
-    fout << "\n";
-    fout << "endif()\n\n";
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD: {
+      std::vector<cmStateSnapshot> children =
+        this->Makefile->GetStateSnapshot().GetChildren();
+      if (!children.empty()) {
+        fout << "if(NOT CMAKE_INSTALL_LOCAL_ONLY)\n";
+        fout << "  # Include the install script for each subdirectory.\n";
+        for (cmStateSnapshot const& c : children) {
+          if (!c.GetDirectory().GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
+            std::string odir = c.GetDirectory().GetCurrentBinary();
+            cmSystemTools::ConvertToUnixSlashes(odir);
+            fout << "  include(\"" << odir << "/cmake_install.cmake\")"
+                 << std::endl;
+          }
+        }
+        fout << "\n";
+        fout << "endif()\n\n";
+      }
+    } break;
+
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      // NEW behavior is handled in
+      // cmInstallSubdirectoryGenerator::GenerateScript()
+      break;
   }
 
   // Record the install manifest.

@@ -28,6 +28,7 @@
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallGenerator.h" // IWYU pragma: keep
+#include "cmInstallSubdirectoryGenerator.h"
 #include "cmListFileCache.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
@@ -1669,6 +1670,9 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
   } else {
     this->UnConfiguredDirectories.push_back(subMf);
   }
+
+  this->AddInstallGenerator(new cmInstallSubdirectoryGenerator(
+    subMf, binPath.c_str(), excludeFromAll));
 }
 
 const std::string& cmMakefile::GetCurrentSourceDirectory() const
