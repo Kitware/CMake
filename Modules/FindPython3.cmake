@@ -136,6 +136,12 @@ Hints
 
     Value ``ONLY`` is not supported so ``FIRST`` will be used instead.
 
+.. note::
+
+  If a Python virtual environment is configured, set variable
+  ``Python_FIND_REGISTRY`` (Windows) or ``CMAKE_FIND_FRAMEWORK`` (macOS) with
+  value ``LAST`` or ``NEVER`` to select it preferably.
+
 Commands
 ^^^^^^^^
 
