@@ -1,6 +1,9 @@
 include(Compiler/Clang)
 __compiler_clang(C)
 
+set(CMAKE_C_LINK_OPTIONS_PIE ${CMAKE_C_COMPILE_OPTIONS_PIE} -Xlinker -pie)
+set(CMAKE_C_LINK_OPTIONS_NO_PIE -Xlinker -no_pie)
+
 if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.0)
   set(CMAKE_C90_STANDARD_COMPILE_OPTION "-std=c90")
   set(CMAKE_C90_EXTENSION_COMPILE_OPTION "-std=gnu90")

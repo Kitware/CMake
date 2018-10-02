@@ -1,6 +1,9 @@
 include(Compiler/Clang)
 __compiler_clang(CXX)
 
+set(CMAKE_CXX_LINK_OPTIONS_PIE ${CMAKE_CXX_COMPILE_OPTIONS_PIE} -Xlinker -pie)
+set(CMAKE_CXX_LINK_OPTIONS_NO_PIE -Xlinker -no_pie)
+
 if(NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
   set(CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN "-fvisibility-inlines-hidden")
 endif()

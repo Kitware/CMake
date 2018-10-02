@@ -126,6 +126,10 @@ public:
   void AppendIPOLinkerFlags(std::string& flags, cmGeneratorTarget* target,
                             const std::string& config,
                             const std::string& lang);
+  void AppendPositionIndependentLinkerFlags(std::string& flags,
+                                            cmGeneratorTarget* target,
+                                            const std::string& config,
+                                            const std::string& lang);
   ///! Get the include flags for the current makefile and language
   std::string GetIncludeFlags(const std::vector<std::string>& includes,
                               cmGeneratorTarget* target,
