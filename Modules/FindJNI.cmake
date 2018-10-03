@@ -187,6 +187,7 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib/jvm/default/jre/lib/{libarch}
   /usr/lib/jvm/default/lib/{libarch}
   # Ubuntu specific paths for default JVM
+  /usr/lib/jvm/java-11-openjdk-{libarch}/jre/lib/{libarch}    # Ubuntu 18.04 LTS
   /usr/lib/jvm/java-8-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
   /usr/lib/jvm/java-7-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
   /usr/lib/jvm/java-6-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
