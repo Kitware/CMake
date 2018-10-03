@@ -20,7 +20,7 @@ Generators
 * The :generator:`Xcode` generator learned to configure more Xcode Scheme
   fields.  See the :variable:`CMAKE_XCODE_GENERATE_SCHEME` variable.
 
-* The :generator:`Green Hills MULTI` generator has been udpated:
+* The :generator:`Green Hills MULTI` generator has been updated:
 
   - Added support for architecture selection through
     :variable:`CMAKE_GENERATOR_PLATFORM`:
