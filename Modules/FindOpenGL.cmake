@@ -268,11 +268,9 @@ else()
   endif()
 
   if(_OpenGL_GL_POLICY_WARN AND OPENGL_gl_LIBRARY AND OPENGL_opengl_LIBRARY AND OPENGL_glx_LIBRARY)
+    cmake_policy(GET_WARNING CMP0072 _cmp0072_warning)
     message(AUTHOR_WARNING
-      "Policy CMP0072 is not set: FindOpenGL prefers GLVND by default when available.  "
-      "Run \"cmake --help-policy CMP0072\" for policy details.  "
-      "Use the cmake_policy command to set the policy and suppress this warning."
-      "\n"
+      "${_cmp0072_warning}\n"
       "FindOpenGL found both a legacy GL library:\n"
       "  OPENGL_gl_LIBRARY: ${OPENGL_gl_LIBRARY}\n"
       "and GLVND libraries for OpenGL and GLX:\n"
