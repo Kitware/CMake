@@ -362,7 +362,7 @@ if(MSVC)
           )
       endif()
 
-      # include the language dll's for vs8 as well as the actuall dll's
+      # include the language dll's for vs8 as well as the actual dll's
       set(MSVC_MFCLOC_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC80.MFCLOC")
       # Install the manifest that allows DLLs to be loaded from the
       # directory containing the executable.
@@ -406,7 +406,7 @@ if(MSVC)
           )
       endif()
 
-      # include the language dll's for vs9 as well as the actuall dll's
+      # include the language dll's for vs9 as well as the actual dll's
       set(MSVC_MFCLOC_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC90.MFCLOC")
       # Install the manifest that allows DLLs to be loaded from the
       # directory containing the executable.
@@ -487,7 +487,7 @@ if(MSVC)
         endif()
       endif()
 
-      # include the language dll's as well as the actuall dll's
+      # include the language dll's as well as the actual dll's
       set(MSVC_MFCLOC_DIR "${MSVC_REDIST_MFC_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.MFCLOC")
       set(__install__libs ${__install__libs}
         "${MSVC_MFCLOC_DIR}/mfc${v}chs.dll"

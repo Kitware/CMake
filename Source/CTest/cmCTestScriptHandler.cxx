@@ -563,7 +563,7 @@ int cmCTestScriptHandler::RunCurrentScript()
 
   // now that we have done most of the error checking finally run the
   // dashboard, we may be asked to repeatedly run this dashboard, such as
-  // for a continuous, do we ned to run it more than once?
+  // for a continuous, do we need to run it more than once?
   if (this->ContinuousDuration >= 0) {
     this->UpdateElapsedTime();
     auto ending_time =

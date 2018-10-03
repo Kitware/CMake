@@ -491,7 +491,7 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
           list(LENGTH SYMLINK_RELOCATIONS SYMLINK_RELOCATIONS_COUNT)
           list(LENGTH POINT_RELOCATIONS POINT_RELOCATIONS_COUNT)
         else()
-          # location pointed to is ouside WDR so it should be treated as a permanent symlink
+          # location pointed to is outside WDR so it should be treated as a permanent symlink
           set(SYMLINK_POINT_WD_ "${SYMLINK_POINT_}")
 
           unset(SYMLINK_RELOCATIONS)
