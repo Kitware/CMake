@@ -2452,10 +2452,12 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   }
 
   // Choose a language whose flags to use for ClCompile.
-  static const char* clLangs[] = { "CXX", "C", "Fortran", "CSharp" };
+  static const char* clLangs[] = { "CXX", "C", "Fortran" };
   std::string langForClCompile;
-  if (std::find(cm::cbegin(clLangs), cm::cend(clLangs), linkLanguage) !=
-      cm::cend(clLangs)) {
+  if (this->ProjectType == csproj) {
+    langForClCompile = "CSharp";
+  } else if (std::find(cm::cbegin(clLangs), cm::cend(clLangs), linkLanguage) !=
+             cm::cend(clLangs)) {
     langForClCompile = linkLanguage;
   } else {
     std::set<std::string> languages;
