@@ -9,7 +9,7 @@ CMake Warning \(dev\) at CMP0051-WARN.cmake:6 \(get_target_property\):
   needs to be adapted to ignore the generator expression using the
   string\(GENEX_STRIP\) command.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 Sources: "empty.cpp"
@@ -25,7 +25,7 @@ CMake Warning \(dev\) at CMP0051-WARN.cmake:12 \(get_target_property\):
   needs to be adapted to ignore the generator expression using the
   string\(GENEX_STRIP\) command.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 Sources: "../empty.cpp"$

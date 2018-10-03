@@ -4,4 +4,4 @@ CMake Error at CMP0026-LOCATION-CONFIG-NEW.cmake:7 \(get_target_property\):
   expression \$<TARGET_FILE>, as appropriate.
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

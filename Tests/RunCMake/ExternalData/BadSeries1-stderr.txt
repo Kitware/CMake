@@ -15,5 +15,5 @@ CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
 
 Call Stack \(most recent call first\):
   .*
-  BadSeries1.cmake:3 \(ExternalData_Expand_Arguments\)
-  CMakeLists.txt:3 \(include\)
+  BadSeries1\.cmake:[0-9]+ \(ExternalData_Expand_Arguments\)
+  CMakeLists\.txt:[0-9]+ \(include\)
