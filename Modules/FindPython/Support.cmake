@@ -355,20 +355,23 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                   NAMES_PER_DIR
                   HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                  PATH_SUFFIXES bin
+                  PATH_SUFFIXES bin ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES}
                   NO_SYSTEM_ENVIRONMENT_PATH
                   NO_CMAKE_SYSTEM_PATH)
     # try using standard paths.
-    # NAMES_PER_DIR is not defined on purpose to have a chance to find
-    # expected version.
-    # For example, typical systems have 'python' for version 2.* and 'python3'
-    # for version 3.*. So looking for names per dir will find, potentially,
-    # systematically 'python' (i.e. version 2) even if version 3 is searched.
-    find_program (${_PYTHON_PREFIX}_EXECUTABLE
-                  NAMES python${_${_PYTHON_PREFIX}_VERSION}
-                        python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
-                        python
-                        ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES})
+    if (WIN32)
+      find_program (${_PYTHON_PREFIX}_EXECUTABLE
+                    NAMES python${_${_PYTHON_PREFIX}_VERSION}
+                          python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
+                          python
+                          ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
+                    NAMES_PER_DIR)
+    else()
+      find_program (${_PYTHON_PREFIX}_EXECUTABLE
+                    NAMES python${_${_PYTHON_PREFIX}_VERSION}
+                          python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
+                    NAMES_PER_DIR)
+    endif()
 
     # Apple frameworks handling
     if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
@@ -413,6 +416,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                   NAMES python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
                         python
                         ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
+                  NAMES_PER_DIR
                   HINTS ${_${_PYTHON_PREFIX}_HINTS}
                   PATH_SUFFIXES bin ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES}
                   NO_SYSTEM_ENVIRONMENT_PATH
