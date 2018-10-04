@@ -294,6 +294,7 @@ cmCTest::cmCTest()
   this->SuppressUpdatingCTestConfiguration = false;
   this->DartVersion = 1;
   this->DropSiteCDash = false;
+  this->BuildID = "";
   this->OutputTestOutputOnTestFailure = false;
   this->RepeatTests = 1; // default to run each test once
   this->RepeatUntilFail = false;
@@ -320,6 +321,7 @@ cmCTest::cmCTest()
   this->Parts[PartNotes].SetName("Notes");
   this->Parts[PartExtraFiles].SetName("ExtraFiles");
   this->Parts[PartUpload].SetName("Upload");
+  this->Parts[PartDone].SetName("Done");
 
   // Fill the part name-to-id map.
   for (Part p = PartStart; p != PartCount; p = Part(p + 1)) {
@@ -612,6 +614,7 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
   std::string bld_dir = this->GetCTestConfiguration("BuildDirectory");
   this->DartVersion = 1;
   this->DropSiteCDash = false;
+  this->BuildID = "";
   for (Part p = PartStart; p != PartCount; p = Part(p + 1)) {
     this->Parts[p].SubmitFiles.clear();
   }
@@ -1563,6 +1566,24 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
   }
 
   return this->GenerateNotesFile(files);
+}
+
+int cmCTest::GenerateDoneFile()
+{
+  cmGeneratedFileStream ofs;
+  if (!this->OpenOutputFile(this->CurrentTag, "Done.xml", ofs)) {
+    cmCTestLog(this, ERROR_MESSAGE, "Cannot open done file" << std::endl);
+    return 1;
+  }
+  cmXMLWriter xml(ofs);
+  xml.StartDocument();
+  xml.StartElement("Done");
+  xml.Element("buildId", this->BuildID);
+  xml.Element("time", std::chrono::system_clock::now());
+  xml.EndElement(); // Done
+  xml.EndDocument();
+
+  return 0;
 }
 
 std::string cmCTest::Base64GzipEncodeFile(std::string const& file)
