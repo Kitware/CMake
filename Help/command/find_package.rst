@@ -1,6 +1,10 @@
 find_package
 ------------
 
+.. only:: html
+
+   .. contents::
+
 Find an external project, and load its settings.
 
 ::
