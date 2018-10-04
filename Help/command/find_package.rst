@@ -122,6 +122,10 @@ fatal error is generated and the configure step stops executing.  If
 ``<PackageName>_DIR`` has been set to a directory not containing a
 configuration file CMake will ignore it and search from scratch.
 
+Package maintainers providing CMake package configuration files are
+encouraged to name and install them such that the `Search Procedure`_
+outlined below will find them without requiring use of additional options.
+
 Version Selection
 ^^^^^^^^^^^^^^^^^
 
@@ -204,18 +208,6 @@ For instance in order to select the highest version one can set::
   SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
 
 before calling ``find_package``.
-
-Config mode provides an elaborate interface and search procedure.
-Much of the interface is provided for completeness and for use
-internally by find-modules loaded by Module mode.  Most user code
-should simply call::
-
-  find_package(<PackageName> [major[.minor]] [EXACT] [REQUIRED|QUIET])
-
-in order to find a package.  Package maintainers providing CMake
-package configuration files are encouraged to name and install them
-such that the procedure outlined below will find them without
-requiring use of additional options.
 
 Search Procedure
 ^^^^^^^^^^^^^^^^
