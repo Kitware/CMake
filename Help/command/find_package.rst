@@ -1,7 +1,7 @@
 find_package
 ------------
 
-Load settings for an external project.
+Find an external project, and load its settings.
 
 ::
 
