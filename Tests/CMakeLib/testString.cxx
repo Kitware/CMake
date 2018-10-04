@@ -469,6 +469,17 @@ static bool testOperatorStdStringPlusEqual()
   return true;
 }
 
+static bool testMethod_borrow()
+{
+  std::cout << "testMethod_borrow()\n";
+  std::string s = "abc";
+  cm::String str = cm::String::borrow(s);
+  ASSERT_TRUE(str.data() == s.data());
+  ASSERT_TRUE(str.size() == s.size());
+  ASSERT_TRUE(str == s);
+  return true;
+}
+
 static bool testMethod_view()
 {
   std::cout << "testMethod_view()\n";
@@ -716,6 +727,12 @@ static bool testMethod_substr_AtEnd(cm::String str)
   return true;
 }
 
+static bool testMethod_substr_AtEndBorrowed()
+{
+  std::cout << "testMethod_substr_AtEndBorrowed()\n";
+  return testMethod_substr_AtEnd(cm::String::borrow("abc"));
+}
+
 static bool testMethod_substr_AtEndOwned()
 {
   std::cout << "testMethod_substr_AtEndOwned()\n";
@@ -762,6 +779,12 @@ static bool testMethod_substr_AtStart(cm::String str)
   }
 
   return true;
+}
+
+static bool testMethod_substr_AtStartBorrowed()
+{
+  std::cout << "testMethod_substr_AtStartBorrowed()\n";
+  return testMethod_substr_AtStart(cm::String::borrow("abc"));
 }
 
 static bool testMethod_substr_AtStartOwned()
@@ -1132,6 +1155,9 @@ int testString(int /*unused*/, char* /*unused*/ [])
   if (!testOperatorStdStringPlusEqual()) {
     return 1;
   }
+  if (!testMethod_borrow()) {
+    return 1;
+  }
   if (!testMethod_view()) {
     return 1;
   }
@@ -1177,7 +1203,13 @@ int testString(int /*unused*/, char* /*unused*/ [])
   if (!testMethodIterators()) {
     return 1;
   }
+  if (!testMethod_substr_AtEndBorrowed()) {
+    return 1;
+  }
   if (!testMethod_substr_AtEndOwned()) {
+    return 1;
+  }
+  if (!testMethod_substr_AtStartBorrowed()) {
     return 1;
   }
   if (!testMethod_substr_AtStartOwned()) {

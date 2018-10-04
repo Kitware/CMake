@@ -272,6 +272,10 @@ public:
 
   ~String() = default;
 
+  /** Construct by borrowing an externally-owned buffer.  The buffer
+      must outlive the returned instance and all copies of it.  */
+  static String borrow(string_view v) { return String(v, Private()); }
+
   /** Assign by moving from another String instance.
       The other instance is left as a null string.  */
   String& operator=(String&& s) noexcept
