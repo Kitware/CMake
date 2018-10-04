@@ -203,8 +203,10 @@ Deprecated and Removed Features
 Other Changes
 =============
 
-* The :command:`option` command now honors existing normal variables instead
-  of replacing them with a cache entry. See policy :policy:`CMP0077`.
+* The :command:`option` command now honors an existing normal variable
+  of the same name and does nothing instead of possibly creating a cache
+  entry (or setting its type) and removing the normal variable.
+  See policy :policy:`CMP0077`.
 
 * The :ref:`Makefile Generators` learned to remove custom command and
   custom target byproducts during ``make clean``.
