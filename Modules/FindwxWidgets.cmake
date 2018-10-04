@@ -396,6 +396,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
           list(APPEND wxWidgets_LIBRARIES
             debug ${WX_${LIB}d} optimized ${WX_${LIB}}
             )
+          set(wxWidgets_${LIB}_FOUND TRUE)
         elseif(NOT wxWidgets_FIND_REQUIRED_${LIB})
           DBG_MSG_V("- ignored optional missing WX_${LIB}=${WX_${LIB}} or WX_${LIB}d=${WX_${LIB}d}")
         else()
@@ -410,6 +411,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
         if(WX_${LIB}${_DBG})
           DBG_MSG_V("Found ${LIB}${_DBG}")
           list(APPEND wxWidgets_LIBRARIES ${WX_${LIB}${_DBG}})
+          set(wxWidgets_${LIB}_FOUND TRUE)
         elseif(NOT wxWidgets_FIND_REQUIRED_${LIB})
           DBG_MSG_V("- ignored optional missing WX_${LIB}${_DBG}=${WX_${LIB}${_DBG}}")
         else()
@@ -978,10 +980,18 @@ DBG_MSG("wxWidgets_USE_FILE        : ${wxWidgets_USE_FILE}")
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
+# FIXME: set wxWidgets_<comp>_FOUND for wx-config branch
+#        and use HANDLE_COMPONENTS on Unix too
+if(wxWidgets_FIND_STYLE STREQUAL "win32")
+  set(wxWidgets_HANDLE_COMPONENTS "HANDLE_COMPONENTS")
+endif()
+
 find_package_handle_standard_args(wxWidgets
   REQUIRED_VARS wxWidgets_LIBRARIES wxWidgets_INCLUDE_DIRS
   VERSION_VAR   wxWidgets_VERSION_STRING
+  ${wxWidgets_HANDLE_COMPONENTS}
   )
+unset(wxWidgets_HANDLE_COMPONENTS)
 
 #=====================================================================
 # Macros for use in wxWidgets apps.
