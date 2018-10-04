@@ -397,7 +397,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       set(_pkg_check_modules_exist_query)
 
       # check whether version is given
-      if (_pkg_check_modules_pkg MATCHES "(.*[^><])(>=|=|<=)(.*)")
+      if (_pkg_check_modules_pkg MATCHES "(.*[^><])(=|[><]=?)(.*)")
         set(_pkg_check_modules_pkg_name "${CMAKE_MATCH_1}")
         set(_pkg_check_modules_pkg_op "${CMAKE_MATCH_2}")
         set(_pkg_check_modules_pkg_ver "${CMAKE_MATCH_3}")
@@ -415,9 +415,11 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       list(APPEND _pkg_check_modules_packages    "${_pkg_check_modules_pkg_name}")
 
       # create the final query which is of the format:
+      # * <pkg-name> > <version>
       # * <pkg-name> >= <version>
       # * <pkg-name> = <version>
       # * <pkg-name> <= <version>
+      # * <pkg-name> < <version>
       # * --exists <pkg-name>
       list(APPEND _pkg_check_modules_exist_query --print-errors --short-errors)
       if (_pkg_check_modules_pkg_op)
