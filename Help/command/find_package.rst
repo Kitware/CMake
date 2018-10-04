@@ -7,6 +7,8 @@ find_package
 
 Find an external project, and load its settings.
 
+.. _`basic signature`:
+
 Basic Signature and Module Mode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -40,7 +42,7 @@ should be compatible (format is ``major[.minor[.patch[.tweak]]]``).  The
 inside a find-module, the corresponding arguments are forwarded
 automatically from the outer call (including the ``EXACT`` flag for
 ``[version]``).  Version support is currently provided only on a
-package-by-package basis (details below).
+package-by-package basis (see the `Version Selection`_ section below).
 
 See the :command:`cmake_policy` command documentation for discussion
 of the ``NO_POLICY_SCOPE`` option.
@@ -48,15 +50,15 @@ of the ``NO_POLICY_SCOPE`` option.
 Full Signature and Config Mode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-User code should generally look for packages using the above simple
-signature.  The remainder of this command documentation specifies the
+User code should generally look for packages using the above `basic
+signature`_.  The remainder of this command documentation specifies the
 full command signature and details of the search process.  Project
 maintainers wishing to provide a package to be found by this command
 are encouraged to read on.
 
 The command has two modes by which it searches for packages: "Module"
 mode and "Config" mode.  Module mode is available when the command is
-invoked with the above reduced signature.  CMake searches for a file
+invoked with the above `basic signature`_.  CMake searches for a file
 called ``Find<PackageName>.cmake`` in the :variable:`CMAKE_MODULE_PATH`
 followed by the CMake installation.  If the file is found, it is read
 and processed by CMake.  It is responsible for finding the package,
@@ -91,8 +93,8 @@ The complete Config mode command signature is::
 
 The ``CONFIG`` option may be used to skip Module mode explicitly and
 switch to Config mode.  It is synonymous to using ``NO_MODULE``.  Config
-mode is also implied by use of options not specified in the reduced
-signature.
+mode is also implied by use of options not specified in the `basic
+signature`_.
 
 Config mode attempts to locate a configuration file provided by the
 package to be found.  A cache entry called ``<PackageName>_DIR`` is created to
