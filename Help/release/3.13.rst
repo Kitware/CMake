@@ -157,6 +157,10 @@ Modules
 * The :module:`FindPkgConfig` module gained an option to create imported
   targets in global scope.
 
+* The :module:`FindPkgConfig` module gained support for ``<`` and ``>``
+  operators for version checks in addition to the already supported
+  operators ``>=``, ``<=``, and ``=``.
+
 * Modules :module:`FindPython3`, :module:`FindPython2` and :module:`FindPython`
   gain capability to control order of resource lookup on macOS (Framework) and
   Windows (Registry).
