@@ -39,6 +39,9 @@ automatically from the outer call (including the ``EXACT`` flag for
 ``[version]``).  Version support is currently provided only on a
 package-by-package basis (details below).
 
+See the :command:`cmake_policy` command documentation for discussion
+of the ``NO_POLICY_SCOPE`` option.
+
 User code should generally look for packages using the above simple
 signature.  The remainder of this command documentation specifies the
 full command signature and details of the search process.  Project
@@ -381,6 +384,3 @@ configuration file to handle components in a way that makes sense
 for the package.  The package configuration file may set
 ``<PackageName>_FOUND`` to false to tell ``find_package`` that component
 requirements are not satisfied.
-
-See the :command:`cmake_policy` command documentation for discussion
-of the ``NO_POLICY_SCOPE`` option.
