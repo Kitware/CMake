@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestCurl.h"
 #include "cmCTestScriptHandler.h"
@@ -152,10 +153,9 @@ void cmCTestSubmitHandler::Initialize()
   this->Files.clear();
 }
 
-bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
-                                          const std::set<std::string>& files,
-                                          const std::string& remoteprefix,
-                                          const std::string& url)
+bool cmCTestSubmitHandler::SubmitUsingFTP(
+  const std::string& localprefix, const std::vector<std::string>& files,
+  const std::string& remoteprefix, const std::string& url)
 {
   CURL* curl;
   CURLcode res;
@@ -299,10 +299,9 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
 }
 
 // Uploading files is simpler
-bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
-                                           const std::set<std::string>& files,
-                                           const std::string& remoteprefix,
-                                           const std::string& url)
+bool cmCTestSubmitHandler::SubmitUsingHTTP(
+  const std::string& localprefix, const std::vector<std::string>& files,
+  const std::string& remoteprefix, const std::string& url)
 {
   CURL* curl;
   CURLcode res;
@@ -662,9 +661,9 @@ void cmCTestSubmitHandler::ParseResponse(
   }
 }
 
-bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::set<std::string>& files,
-                                            const std::string& remoteprefix,
-                                            const std::string& url)
+bool cmCTestSubmitHandler::TriggerUsingHTTP(
+  const std::vector<std::string>& files, const std::string& remoteprefix,
+  const std::string& url)
 {
   CURL* curl;
   char error_buffer[1024];
@@ -792,11 +791,10 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(const std::set<std::string>& files,
   return true;
 }
 
-bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
-                                          const std::string& localprefix,
-                                          const std::set<std::string>& files,
-                                          const std::string& remoteprefix,
-                                          const std::string& url)
+bool cmCTestSubmitHandler::SubmitUsingSCP(
+  const std::string& scp_command, const std::string& localprefix,
+  const std::vector<std::string>& files, const std::string& remoteprefix,
+  const std::string& url)
 {
   if (scp_command.empty() || localprefix.empty() || files.empty() ||
       remoteprefix.empty() || url.empty()) {
@@ -890,7 +888,7 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(const std::string& scp_command,
 }
 
 bool cmCTestSubmitHandler::SubmitUsingCP(const std::string& localprefix,
-                                         const std::set<std::string>& files,
+                                         const std::vector<std::string>& files,
                                          const std::string& remoteprefix,
                                          const std::string& destination)
 {
@@ -925,7 +923,7 @@ bool cmCTestSubmitHandler::SubmitUsingCP(const std::string& localprefix,
 
 #if defined(CTEST_USE_XMLRPC)
 bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
-  const std::string& localprefix, const std::set<std::string>& files,
+  const std::string& localprefix, const std::vector<std::string>& files,
   const std::string& remoteprefix, const std::string& url)
 {
   xmlrpc_env env;
@@ -1020,7 +1018,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
 }
 #else
 bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
-  std::string const& /*unused*/, std::set<std::string> const& /*unused*/,
+  std::string const& /*unused*/, std::vector<std::string> const& /*unused*/,
   std::string const& /*unused*/, std::string const& /*unused*/)
 {
   return false;
@@ -1351,13 +1349,13 @@ int cmCTestSubmitHandler::ProcessHandler()
   cmGeneratedFileStream ofs;
   this->StartLogFile("Submit", ofs);
 
-  cmCTest::SetOfStrings files;
+  std::vector<std::string> files;
   std::string prefix = this->GetSubmitResultsPrefix();
 
   if (!this->Files.empty()) {
     // Submit the explicitly selected files:
     //
-    files.insert(this->Files.begin(), this->Files.end());
+    files.insert(files.end(), this->Files.begin(), this->Files.end());
   }
 
   // Add to the list of files to submit from any selected, existing parts:
@@ -1404,7 +1402,16 @@ int cmCTestSubmitHandler::ProcessHandler()
 
     // Submit files from this part.
     std::vector<std::string> const& pfiles = this->CTest->GetSubmitFiles(p);
-    files.insert(pfiles.begin(), pfiles.end());
+    files.insert(files.end(), pfiles.begin(), pfiles.end());
+  }
+
+  // Make sure files are unique, but preserve order.
+  {
+    // This endPos intermediate is needed to work around non-conformant C++11
+    // standard libraries that have erase(iterator,iterator) instead of
+    // erase(const_iterator,const_iterator).
+    size_t endPos = cmRemoveDuplicates(files) - files.cbegin();
+    files.erase(files.begin() + endPos, files.end());
   }
 
   if (ofs) {
