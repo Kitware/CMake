@@ -3,41 +3,46 @@ if
 
 Conditionally execute a group of commands.
 
-.. code-block:: cmake
+Synopsis
+^^^^^^^^
 
- if(expression)
-   # then section.
-   COMMAND1(ARGS ...)
-   COMMAND2(ARGS ...)
-   #...
- elseif(expression2)
-   # elseif section.
-   COMMAND1(ARGS ...)
-   COMMAND2(ARGS ...)
-   #...
- else(expression)
-   # else section.
-   COMMAND1(ARGS ...)
-   COMMAND2(ARGS ...)
-   #...
- endif(expression)
+::
 
-Evaluates the given expression.  If the result is true, the commands
-in the THEN section are invoked.  Otherwise, the commands in the else
-section are invoked.  The elseif and else sections are optional.  You
-may have multiple elseif clauses.  Note that the expression in the
-else and endif clause is optional.  Long expressions can be used and
-there is a traditional order of precedence.  Parenthetical expressions
-are evaluated first followed by unary tests such as ``EXISTS``,
-``COMMAND``, and ``DEFINED``.  Then any binary tests such as
+  if(<condition>)
+    <commands>
+  elseif(<condition>) # optional block, can be repeated
+    <commands>
+  else()              # optional block
+    <commands>
+  endif()
+
+Evaluates the ``condition`` argument of the ``if`` clause according to the
+`Condition syntax`_ described below. If the result is true, then the
+``commands`` in the ``if`` block are executed.
+Otherwise, optional ``elseif`` blocks are processed in the same way.
+Finally, if no ``condition`` is true, ``commands`` in the optional ``else``
+block are executed.
+
+Per legacy, the ``else`` and ``endif`` clause may also have a ``condition`` argument,
+which then must be a verbatim repeat of the argument of the opening ``if`` clause.
+
+Condition Syntax
+^^^^^^^^^^^^^^^^
+
+The following syntax applies to the ``condition`` argument of
+the ``if``, ``elseif`` and :command:`while` clauses.
+
+Compound conditions are evaluated in the following order of precedence:
+Innermost parentheses are evaluated first. Next come unary tests such
+as ``EXISTS``, ``COMMAND``, and ``DEFINED``.  Then binary tests such as
 ``EQUAL``, ``LESS``, ``LESS_EQUAL``, ``GREATER``, ``GREATER_EQUAL``,
 ``STREQUAL``, ``STRLESS``, ``STRLESS_EQUAL``, ``STRGREATER``,
 ``STRGREATER_EQUAL``, ``VERSION_EQUAL``, ``VERSION_LESS``,
 ``VERSION_LESS_EQUAL``, ``VERSION_GREATER``, ``VERSION_GREATER_EQUAL``,
-and ``MATCHES`` will be evaluated.  Then boolean ``NOT`` operators and
-finally boolean ``AND`` and then ``OR`` operators will be evaluated.
+and ``MATCHES``.  Then the boolean operators in the order ``NOT``,  ``AND``,
+and finally ``OR``.
 
-Possible expressions are:
+Possible conditions are:
 
 ``if(<constant>)``
  True if the constant is ``1``, ``ON``, ``YES``, ``TRUE``, ``Y``,
@@ -52,14 +57,14 @@ Possible expressions are:
  True if given a variable that is defined to a value that is not a false
  constant.  False otherwise.  (Note macro arguments are not variables.)
 
-``if(NOT <expression>)``
- True if the expression is not true.
+``if(NOT <condition>)``
+ True if the condition is not true.
 
-``if(<expr1> AND <expr2>)``
- True if both expressions would be considered true individually.
+``if(<cond1> AND <cond2>)``
+ True if both conditions would be considered true individually.
 
-``if(<expr1> OR <expr2>)``
- True if either expression would be considered true individually.
+``if(<cond1> OR <cond2>)``
+ True if either condition would be considered true individually.
 
 ``if(COMMAND command-name)``
  True if the given name is a command, macro or function that can be
@@ -103,7 +108,7 @@ Possible expressions are:
 
 ``if(<variable|string> MATCHES regex)``
  True if the given string or variable's value matches the given regular
- expression.  See :ref:`Regex Specification` for regex format.
+ condition.  See :ref:`Regex Specification` for regex format.
  ``()`` groups are captured in :variable:`CMAKE_MATCH_<n>` variables.
 
 ``if(<variable|string> LESS <variable|string>)``
@@ -184,11 +189,14 @@ Possible expressions are:
  variable is true or false just if it has been set.  (Note macro
  arguments are not variables.)
 
-``if((expression) AND (expression OR (expression)))``
- The expressions inside the parenthesis are evaluated first and then
- the remaining expression is evaluated as in the previous examples.
+``if((condition) AND (condition OR (condition)))``
+ The conditions inside the parenthesis are evaluated first and then
+ the remaining condition is evaluated as in the previous examples.
  Where there are nested parenthesis the innermost are evaluated as part
- of evaluating the expression that contains them.
+ of evaluating the condition that contains them.
+
+Variable Expansion
+^^^^^^^^^^^^^^^^^^
 
 The if command was written very early in CMake's history, predating
 the ``${}`` variable evaluation syntax, and for convenience evaluates
