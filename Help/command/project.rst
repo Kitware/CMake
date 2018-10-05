@@ -5,7 +5,7 @@ Sets project details such as name, version, etc. and enables languages.
 
 .. code-block:: cmake
 
- project(<PROJECT-NAME> [LANGUAGES] [<language-name>...])
+ project(<PROJECT-NAME> [<language-name>...])
  project(<PROJECT-NAME>
          [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
          [DESCRIPTION <project-description-string>]
