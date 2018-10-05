@@ -1,7 +1,16 @@
 find_package
 ------------
 
-Load settings for an external project.
+.. only:: html
+
+   .. contents::
+
+Find an external project, and load its settings.
+
+.. _`basic signature`:
+
+Basic Signature and Module Mode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -15,7 +24,6 @@ will be set to indicate whether the package was found.  When the
 package is found package-specific information is provided through
 variables and :ref:`Imported Targets` documented by the package itself.  The
 ``QUIET`` option disables messages if the package cannot be found.  The
-``MODULE`` option disables the second signature documented below.  The
 ``REQUIRED`` option stops processing with an error message if the package
 cannot be found.
 
@@ -33,24 +41,31 @@ should be compatible (format is ``major[.minor[.patch[.tweak]]]``).  The
 inside a find-module, the corresponding arguments are forwarded
 automatically from the outer call (including the ``EXACT`` flag for
 ``[version]``).  Version support is currently provided only on a
-package-by-package basis (details below).
+package-by-package basis (see the `Version Selection`_ section below).
 
-User code should generally look for packages using the above simple
-signature.  The remainder of this command documentation specifies the
+See the :command:`cmake_policy` command documentation for discussion
+of the ``NO_POLICY_SCOPE`` option.
+
+The command has two modes by which it searches for packages: "Module"
+mode and "Config" mode.  The above signature selects Module mode.
+If no module is found the command falls back to Config mode, described
+below. This fall back is disabled if the ``MODULE`` option is given.
+
+In Module mode, CMake searches for a file called ``Find<PackageName>.cmake``
+in the :variable:`CMAKE_MODULE_PATH` followed by the CMake installation.
+If the file is found, it is read and processed by CMake.  It is responsible
+for finding the package, checking the version, and producing any needed
+messages.  Some find-modules provide limited or no support for versioning;
+check the module documentation.
+
+Full Signature and Config Mode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+User code should generally look for packages using the above `basic
+signature`_.  The remainder of this command documentation specifies the
 full command signature and details of the search process.  Project
 maintainers wishing to provide a package to be found by this command
 are encouraged to read on.
-
-The command has two modes by which it searches for packages: "Module"
-mode and "Config" mode.  Module mode is available when the command is
-invoked with the above reduced signature.  CMake searches for a file
-called ``Find<PackageName>.cmake`` in the :variable:`CMAKE_MODULE_PATH`
-followed by the CMake installation.  If the file is found, it is read
-and processed by CMake.  It is responsible for finding the package,
-checking the version, and producing any needed messages.  Many
-find-modules provide limited or no support for versioning; check
-the module documentation.  If no module is found and the ``MODULE``
-option is not given the command proceeds to Config mode.
 
 The complete Config mode command signature is::
 
@@ -76,12 +91,12 @@ The complete Config mode command signature is::
                 ONLY_CMAKE_FIND_ROOT_PATH |
                 NO_CMAKE_FIND_ROOT_PATH])
 
-The ``CONFIG`` option may be used to skip Module mode explicitly and
-switch to Config mode.  It is synonymous to using ``NO_MODULE``.  Config
-mode is also implied by use of options not specified in the reduced
-signature.
+The ``CONFIG`` option, the synonymous ``NO_MODULE`` option, or the use
+of options not specified in the `basic signature`_ all enforce pure Config
+mode.  In pure Config mode, the command skips Module mode search and
+proceeds at once with Config mode search.
 
-Config mode attempts to locate a configuration file provided by the
+Config mode search attempts to locate a configuration file provided by the
 package to be found.  A cache entry called ``<PackageName>_DIR`` is created to
 hold the directory containing the file.  By default the command
 searches for a package with the name ``<PackageName>``.  If the ``NAMES`` option
@@ -106,6 +121,13 @@ specified.  If ``REQUIRED`` is specified and the package is not found a
 fatal error is generated and the configure step stops executing.  If
 ``<PackageName>_DIR`` has been set to a directory not containing a
 configuration file CMake will ignore it and search from scratch.
+
+Package maintainers providing CMake package configuration files are
+encouraged to name and install them such that the `Search Procedure`_
+outlined below will find them without requiring use of additional options.
+
+Version Selection
+^^^^^^^^^^^^^^^^^
 
 When the ``[version]`` argument is given Config mode will only find a
 version of the package that claims compatibility with the requested
@@ -187,17 +209,8 @@ For instance in order to select the highest version one can set::
 
 before calling ``find_package``.
 
-Config mode provides an elaborate interface and search procedure.
-Much of the interface is provided for completeness and for use
-internally by find-modules loaded by Module mode.  Most user code
-should simply call::
-
-  find_package(<PackageName> [major[.minor]] [EXACT] [REQUIRED|QUIET])
-
-in order to find a package.  Package maintainers providing CMake
-package configuration files are encouraged to name and install them
-such that the procedure outlined below will find them without
-requiring use of additional options.
+Search Procedure
+^^^^^^^^^^^^^^^^
 
 CMake constructs a set of possible installation prefixes for the
 package.  Under each prefix several directories are searched for a
@@ -339,6 +352,9 @@ enabled.
 Every non-REQUIRED ``find_package`` call can be disabled by setting the
 :variable:`CMAKE_DISABLE_FIND_PACKAGE_<PackageName>` variable to ``TRUE``.
 
+Package File Interface Variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 When loading a find module or package configuration file ``find_package``
 defines variables to provide information about the call arguments (and
 restores their original state before returning):
@@ -377,6 +393,3 @@ configuration file to handle components in a way that makes sense
 for the package.  The package configuration file may set
 ``<PackageName>_FOUND`` to false to tell ``find_package`` that component
 requirements are not satisfied.
-
-See the :command:`cmake_policy` command documentation for discussion
-of the ``NO_POLICY_SCOPE`` option.
