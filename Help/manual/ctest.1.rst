@@ -35,6 +35,19 @@ Options
  which one should be tested.  Example configurations are "Debug" and
  "Release".
 
+``--progress``
+ Enable short progress output from tests.
+
+ When the output of ``ctest`` is being sent directly to a terminal, the
+ progress through the set of tests is reported by updating the same line
+ rather than printing start and end messages for each test on new lines.
+ This can significantly reduce the verbosity of the test output.
+ Test completion messages are still output on their own line for failed
+ tests and the final test summary will also still be logged.
+
+ This option can also be enabled by setting the environment variable
+ :envvar:`CTEST_PROGRESS_OUTPUT`.
+
 ``-V,--verbose``
  Enable verbose output from tests.
 
