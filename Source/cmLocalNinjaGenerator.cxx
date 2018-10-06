@@ -17,6 +17,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmNinjaTargetGenerator.h"
 #include "cmRulePlaceholderExpander.h"
@@ -40,8 +41,7 @@ cmRulePlaceholderExpander*
 cmLocalNinjaGenerator::CreateRulePlaceholderExpander() const
 {
   cmRulePlaceholderExpander* ret =
-    new cmRulePlaceholderExpander(this->Compilers, this->VariableMappings,
-                                  this->CompilerSysroot, this->LinkerSysroot);
+    this->cmLocalGenerator::CreateRulePlaceholderExpander();
   ret->SetTargetImpLib("$TARGET_IMPLIB");
   return ret;
 }
