@@ -44,6 +44,7 @@ Variables corresponding to unspecified versions are set to the empty string
 
 If the optional ``DESCRIPTION`` is given, then :variable:`PROJECT_DESCRIPTION`
 and :variable:`<PROJECT-NAME>_DESCRIPTION` will be set to its argument.
+These variables will be cleared if ``DESCRIPTION`` is not given.
 The description is expected to be a relatively short string, usually no more
 than a few words.
 
@@ -51,6 +52,7 @@ The optional ``HOMEPAGE_URL`` sets the analogous variables
 :variable:`PROJECT_HOMEPAGE_URL` and :variable:`<PROJECT-NAME>_HOMEPAGE_URL`.
 When this option is given, the URL provided should be the canonical home for
 the project.
+These variables will be cleared if ``HOMEPAGE_URL`` is not given.
 
 Note that the description and homepage URL may be used as defaults for
 things like packaging meta-data, documentation, etc.
