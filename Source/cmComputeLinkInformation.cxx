@@ -421,7 +421,8 @@ std::string cmComputeLinkInformation::GetRPathLinkString() const
     return "";
   }
 
-  // Construct the linker runtime search path.
+  // Construct the linker runtime search path. These MUST NOT contain tokens
+  // such as $ORIGIN, see https://sourceware.org/bugzilla/show_bug.cgi?id=16936
   return cmJoin(this->OrderDependentRPath->GetOrderedDirectories(), ":");
 }
 
@@ -1702,6 +1703,14 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH") &&
     this->Target->GetPropertyAsBool("INSTALL_RPATH_USE_LINK_PATH");
 
+  // Select whether to use $ORIGIN in RPATHs for artifacts in the build tree.
+  std::string const& originToken = this->Makefile->GetSafeDefinition(
+    "CMAKE_SHARED_LIBRARY_RPATH_ORIGIN_TOKEN");
+  std::string targetOutputDir = this->Target->GetDirectory(this->Config);
+  bool use_relative_build_rpath =
+    this->Target->GetPropertyAsBool("BUILD_RPATH_USE_ORIGIN") &&
+    !originToken.empty() && !targetOutputDir.empty();
+
   // Construct the RPATH.
   std::set<std::string> emitted;
   if (use_install_rpath) {
@@ -1711,6 +1720,8 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
   if (use_build_rpath) {
     // Add directories explicitly specified by user
     if (const char* build_rpath = this->Target->GetProperty("BUILD_RPATH")) {
+      // This will not resolve entries to use $ORIGIN, the user is expected to
+      // do that if necessary.
       cmCLI_ExpandListUnique(build_rpath, runtimeDirs, emitted);
     }
   }
@@ -1728,6 +1739,8 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
       this->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
     cmSystemTools::ConvertToUnixSlashes(rootPath);
     std::vector<std::string> const& rdirs = this->GetRuntimeSearchPath();
+    std::string const& topBinaryDir =
+      this->CMakeInstance->GetHomeOutputDirectory();
     for (std::string const& ri : rdirs) {
       // Put this directory in the rpath if using build-tree rpath
       // support or if using the link path as an rpath.
@@ -1741,6 +1754,18 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
           d += "/";
           d += suffix;
           cmSystemTools::ConvertToUnixSlashes(d);
+        } else if (use_relative_build_rpath) {
+          // If expansion of the $ORIGIN token is supported and permitted per
+          // policy, use relative paths in the RPATH.
+          if (cmSystemTools::ComparePath(d, topBinaryDir) ||
+              cmSystemTools::IsSubDirectory(d, topBinaryDir)) {
+            d = cmSystemTools::RelativePath(targetOutputDir, d);
+            if (!d.empty()) {
+              d = originToken + "/" + d;
+            } else {
+              d = originToken;
+            }
+          }
         }
         if (emitted.insert(d).second) {
           runtimeDirs.push_back(std::move(d));
@@ -1749,8 +1774,6 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
         // Do not add any path inside the source or build tree.
         std::string const& topSourceDir =
           this->CMakeInstance->GetHomeDirectory();
-        std::string const& topBinaryDir =
-          this->CMakeInstance->GetHomeOutputDirectory();
         if (!cmSystemTools::ComparePath(ri, topSourceDir) &&
             !cmSystemTools::ComparePath(ri, topBinaryDir) &&
             !cmSystemTools::IsSubDirectory(ri, topSourceDir) &&
