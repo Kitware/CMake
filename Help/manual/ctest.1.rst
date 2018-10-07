@@ -55,8 +55,8 @@ Options
 
 ``--output-on-failure``
  Output anything outputted by the test program if the test should fail.
- This option can also be enabled by setting the environment variable
- ``CTEST_OUTPUT_ON_FAILURE``.
+ This option can also be enabled by setting the
+ :envvar:`CTEST_OUTPUT_ON_FAILURE` environment variable
 
 ``-F``
  Enable failover.
@@ -70,7 +70,7 @@ Options
 
  This option tells CTest to run the tests in parallel using given
  number of jobs. This option can also be set by setting the
- environment variable ``CTEST_PARALLEL_LEVEL``.
+ :envvar:`CTEST_PARALLEL_LEVEL` environment variable.
 
  This option can be used with the :prop_test:`PROCESSORS` test property.
 
@@ -867,7 +867,7 @@ Configuration settings include:
 
   * `CTest Script`_ variable: :variable:`CTEST_CONFIGURATION_TYPE`
   * :module:`CTest` module variable: ``DEFAULT_CTEST_CONFIGURATION_TYPE``,
-    initialized by the ``CMAKE_CONFIG_TYPE`` environment variable
+    initialized by the :envvar:`CMAKE_CONFIG_TYPE` environment variable
 
 ``LabelsForSubprojects``
   Specify a semicolon-separated list of labels that will be treated as
