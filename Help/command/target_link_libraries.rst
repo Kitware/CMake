@@ -78,6 +78,20 @@ Each ``<item>`` may be:
   flags explicitly. The flags will then be placed at the toolchain-defined
   flag position in the link command.
 
+* **A generator expression**: A ``$<...>`` :manual:`generator expression
+  <cmake-generator-expressions(7)>` may evaluate to any of the above
+  items or to a :ref:`;-list <CMake Language Lists>` of them.
+  If the ``...`` contains any ``;`` characters, e.g. after evaluation
+  of a ``${list}`` variable, be sure to use an explicitly quoted
+  argument ``"$<...>"`` so that this command receives it as a
+  single ``<item>``.
+
+  Additionally, a generator expression may be used as a fragment of
+  any of the above items, e.g. ``foo$<1:_d>``.
+
+  Note that generator expressions will not be used in OLD handling of
+  policy :policy:`CMP0003` or policy :policy:`CMP0004`.
+
 * A ``debug``, ``optimized``, or ``general`` keyword immediately followed
   by another ``<item>``.  The item following such a keyword will be used
   only for the corresponding build configuration.  The ``debug`` keyword
@@ -88,18 +102,16 @@ Each ``<item>`` may be:
   optional.  Higher granularity may be achieved for per-configuration
   rules by creating and linking to
   :ref:`IMPORTED library targets <Imported Targets>`.
+  These keywords are interpreted immediately by this command and therefore
+  have no special meaning when produced by a generator expression.
 
 Items containing ``::``, such as ``Foo::Bar``, are assumed to be
 :ref:`IMPORTED <Imported Targets>` or :ref:`ALIAS <Alias Targets>` library
 target names and will cause an error if no such target exists.
 See policy :policy:`CMP0028`.
 
-Arguments to ``target_link_libraries`` may use "generator expressions"
-with the syntax ``$<...>``.  Note however, that generator expressions
-will not be used in OLD handling of :policy:`CMP0003` or :policy:`CMP0004`.
-See the :manual:`cmake-generator-expressions(7)` manual for available
-expressions.  See the :manual:`cmake-buildsystem(7)` manual for more on
-defining buildsystem properties.
+See the :manual:`cmake-buildsystem(7)` manual for more on defining
+buildsystem properties.
 
 Libraries for a Target and/or its Dependents
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
