@@ -1125,6 +1125,9 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   if (this->IPOEnabledConfigurations.count(config) > 0) {
     e1.Element("WholeProgramOptimization", "true");
   }
+  if (this->SpectreMitigationConfigurations.count(config) > 0) {
+    e1.Element("SpectreMitigation", "Spectre");
+  }
 }
 
 void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
@@ -2623,6 +2626,11 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     if (clOptions.HasFlag("NoWin32Manifest")) {
       clOptions.RemoveFlag("ApplicationManifest");
     }
+  }
+
+  if (clOptions.HasFlag("SpectreMitigation")) {
+    this->SpectreMitigationConfigurations.insert(configName);
+    clOptions.RemoveFlag("SpectreMitigation");
   }
 
   this->ClOptions[configName] = std::move(pOptions);
