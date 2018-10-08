@@ -500,6 +500,10 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   get_property (compile_options SOURCE "${infile}" PROPERTY GENERATED_COMPILE_OPTIONS)
   set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY COMPILE_OPTIONS $<TARGET_GENEX_EVAL:${target_name},$<TARGET_PROPERTY:${target_name},SWIG_GENERATED_COMPILE_OPTIONS>> ${compile_options})
 
+  if (SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG MATCHES "php")
+    set_property (SOURCE "${swig_generated_file_fullname}" APPEND PROPERTY INCLUDE_DIRECTORIES "${outdir}")
+  endif()
+
   set(${outfiles} "${swig_generated_file_fullname}" ${swig_extra_generated_files} PARENT_SCOPE)
 
   # legacy support
