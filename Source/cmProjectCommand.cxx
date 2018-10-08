@@ -300,19 +300,15 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
 
-  if (haveDescription) {
-    this->Makefile->AddDefinition("PROJECT_DESCRIPTION", description.c_str());
-    this->Makefile->AddDefinition(projectName + "_DESCRIPTION",
-                                  description.c_str());
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_DESCRIPTION", description.c_str());
-  }
+  this->Makefile->AddDefinition("PROJECT_DESCRIPTION", description.c_str());
+  this->Makefile->AddDefinition(projectName + "_DESCRIPTION",
+                                description.c_str());
+  TopLevelCMakeVarCondSet("CMAKE_PROJECT_DESCRIPTION", description.c_str());
 
-  if (haveHomepage) {
-    this->Makefile->AddDefinition("PROJECT_HOMEPAGE_URL", homepage.c_str());
-    this->Makefile->AddDefinition(projectName + "_HOMEPAGE_URL",
-                                  homepage.c_str());
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_HOMEPAGE_URL", homepage.c_str());
-  }
+  this->Makefile->AddDefinition("PROJECT_HOMEPAGE_URL", homepage.c_str());
+  this->Makefile->AddDefinition(projectName + "_HOMEPAGE_URL",
+                                homepage.c_str());
+  TopLevelCMakeVarCondSet("CMAKE_PROJECT_HOMEPAGE_URL", homepage.c_str());
 
   if (languages.empty()) {
     // if no language is specified do c and c++
