@@ -83,6 +83,13 @@ For instructions how to do this, see documentation on `Running CMake`_.
 
 .. _`Running CMake`: https://cmake.org/cmake/help/runningcmake.html
 
+To build the documentation, install `Sphinx`_ and configure CMake with
+``-DSPHINX_HTML=ON`` and/or ``-DSPHINX_MAN=ON`` to enable the "html" or
+"man" builder.  Add ``-DSPHINX_EXECUTABLE=/path/to/sphinx-build`` if the
+tool is not found automatically.
+
+.. _`Sphinx`: http://sphinx-doc.org
+
 Reporting Bugs
 ==============
 
