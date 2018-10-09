@@ -96,7 +96,7 @@ time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm& tm) const
   // From Linux timegm() manpage.
 
   std::string tz_old;
-  cmSystemTools::GetEnv("TZ", tz_old);
+  bool const tz_was_set = cmSystemTools::GetEnv("TZ", tz_old);
   tz_old = "TZ=" + tz_old;
 
   // The standard says that "TZ=" or "TZ=[UNRECOGNIZED_TZ]" means UTC.
@@ -109,7 +109,17 @@ time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm& tm) const
 
   time_t result = mktime(&tm);
 
+#  ifdef CMAKE_BUILD_WITH_CMAKE
+  if (tz_was_set) {
+    cmSystemTools::PutEnv(tz_old);
+  } else {
+    cmSystemTools::UnsetEnv("TZ");
+  }
+#  else
+  // No UnsetEnv during bootstrap.  This is good enough for CMake itself.
   cmSystemTools::PutEnv(tz_old);
+  static_cast<void>(tz_was_set);
+#  endif
 
   tzset();
 
