@@ -16,7 +16,11 @@ Synopsis
          [LANGUAGES <language-name>...])
 
 Sets the name of the project, and stores it in the variable
-:variable:`PROJECT_NAME`.  Also sets the variables
+:variable:`PROJECT_NAME`. When called from the top-level
+``CMakeLists.txt`` also stores the project name in the
+variable :variable:`CMAKE_PROJECT_NAME`.
+
+Also sets the variables
 
 * :variable:`PROJECT_SOURCE_DIR`,
   :variable:`<PROJECT-NAME>_SOURCE_DIR`
@@ -55,6 +59,9 @@ The options are:
   * :variable:`PROJECT_VERSION_TWEAK`,
     :variable:`<PROJECT-NAME>_VERSION_TWEAK`.
 
+  When the :command:`project()` command is called from the top-level ``CMakeLists.txt``,
+  then the version is also stored in the variable :variable:`CMAKE_PROJECT_VERSION`.
+
 ``DESCRIPTION <project-description-string>``
   Optional.
   Sets the variables
@@ -65,6 +72,9 @@ The options are:
   It is recommended that this description is a relatively short string,
   usually no more than a few words.
 
+  When the :command:`project()` command is called from the top-level ``CMakeLists.txt``,
+  then the description is also stored in the variable :variable:`CMAKE_PROJECT_DESCRIPTION`.
+
 ``HOMEPAGE_URL <url-string>``
   Optional.
   Sets the variables
@@ -72,6 +82,9 @@ The options are:
   * :variable:`PROJECT_HOMEPAGE_URL`, :variable:`<PROJECT-NAME>_HOMEPAGE_URL`
 
   to ``<url-string>``, which should be the canonical home URL for the project.
+
+  When the :command:`project()` command is called from the top-level ``CMakeLists.txt``,
+  then the URL also is stored in the variable :variable:`CMAKE_PROJECT_HOMEPAGE_URL`.
 
 ``LANGUAGES <language-name>...``
   Optional.
@@ -96,16 +109,11 @@ The top-level ``CMakeLists.txt`` file for a project must contain a
 literal, direct call to the :command:`project` command; loading one
 through the :command:`include` command is not sufficient.  If no such
 call exists CMake will implicitly add one to the top that enables the
-default languages (``C`` and ``CXX``).  The name of the project set in
-the top level ``CMakeLists.txt`` file is available from the
-:variable:`CMAKE_PROJECT_NAME` variable, its description from
-:variable:`CMAKE_PROJECT_DESCRIPTION`, its homepage URL from
-:variable:`CMAKE_PROJECT_HOMEPAGE_URL` and its version from
-:variable:`CMAKE_PROJECT_VERSION`.
+default languages (``C`` and ``CXX``).
 
 .. note::
   Call the :command:`cmake_minimum_required` command at the beginning
   of the top-level ``CMakeLists.txt`` file even before calling the
-  ``project()`` command.  It is important to establish version and
+  :command:`project()` command.  It is important to establish version and
   policy settings before invoking other commands whose behavior they
   may affect.  See also policy :policy:`CMP0000`.
