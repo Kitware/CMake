@@ -53,8 +53,10 @@
 # * SGIMATH
 # * IBMESSL
 # * Intel10_32 (intel mkl v10 32 bit)
-# * Intel10_64lp (intel mkl v10 64 bit, lp thread model, lp64 model)
-# * Intel10_64lp_seq (intel mkl v10 64 bit, sequential code, lp64 model)
+# * Intel10_64lp (intel mkl v10+ 64 bit, threaded code, lp64 model)
+# * Intel10_64lp_seq (intel mkl v10+ 64 bit, sequential code, lp64 model)
+# * Intel10_64ilp (intel mkl v10+ 64 bit, threaded code, ilp64 model)
+# * Intel10_64ilp_seq (intel mkl v10+ 64 bit, sequential code, ilp64 model)
 # * Intel (older versions of mkl 32 and 64 bit)
 # * ACML
 # * ACML_MP
@@ -199,9 +201,14 @@ if (BLA_VENDOR STREQUAL "All")
   endif()
 endif ()
 
-#BLAS in intel mkl 10 library? (em64t 64bit)
+#BLAS in intel mkl 10+ library? (em64t 64bit)
 if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
   if (NOT BLAS_LIBRARIES)
+    if (BLA_VENDOR MATCHES "_64ilp")
+      set(BLAS_mkl_ILP_MODE "ilp64")
+    else ()
+      set(BLAS_mkl_ILP_MODE "lp64")
+    endif ()
     if (NOT WIN32)
       set(LM "-lm")
     endif ()
@@ -230,9 +237,9 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
               "mkl_blas95${BLAS_mkl_DLL_SUFFIX} mkl_intel_c${BLAS_mkl_DLL_SUFFIX}")
           endif()
-          if (BLA_VENDOR MATCHES "^Intel10_64lp" OR BLA_VENDOR STREQUAL "All")
+          if (BLA_VENDOR MATCHES "^Intel10_64i?lp" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
-              "mkl_blas95_lp64${BLAS_mkl_DLL_SUFFIX} mkl_intel_lp64${BLAS_mkl_DLL_SUFFIX}")
+              "mkl_blas95_${BLAS_mkl_ILP_MODE}${BLAS_mkl_DLL_SUFFIX} mkl_intel_${BLAS_mkl_ILP_MODE}${BLAS_mkl_DLL_SUFFIX}")
           endif ()
 
           # Add threading/sequential libs
@@ -262,23 +269,23 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS
               "mkl_blas95 mkl_intel mkl_intel_thread mkl_core guide")
           endif ()
-          if (BLA_VENDOR STREQUAL "Intel10_64lp" OR BLA_VENDOR STREQUAL "All")
+          if (BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
             # old version
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_blas95 mkl_intel_lp64 mkl_intel_thread mkl_core guide")
+              "mkl_blas95 mkl_intel_${BLAS_mkl_ILP_MODE} mkl_intel_thread mkl_core guide")
 
             # mkl >= 10.3
             if (CMAKE_C_COMPILER MATCHES ".+gcc")
               list(APPEND BLAS_SEARCH_LIBS
-                "mkl_blas95_lp64 mkl_intel_lp64 mkl_gnu_thread mkl_core gomp")
+                "mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_intel_${BLAS_mkl_ILP_MODE} mkl_gnu_thread mkl_core gomp")
             else ()
               list(APPEND BLAS_SEARCH_LIBS
-                "mkl_blas95_lp64 mkl_intel_lp64 mkl_intel_thread mkl_core iomp5")
+                "mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_intel_${BLAS_mkl_ILP_MODE} mkl_intel_thread mkl_core iomp5")
             endif ()
           endif ()
-          if (BLA_VENDOR STREQUAL "Intel10_64lp_seq" OR BLA_VENDOR STREQUAL "All")
+          if (BLA_VENDOR MATCHES "^Intel10_64i?lp_seq$" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_intel_lp64 mkl_sequential mkl_core")
+              "mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_intel_${BLAS_mkl_ILP_MODE} mkl_sequential mkl_core")
           endif ()
         endif ()
       else ()
@@ -297,9 +304,9 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
               "mkl_intel_c${BLAS_mkl_DLL_SUFFIX}")
           endif()
-          if (BLA_VENDOR MATCHES "^Intel10_64lp" OR BLA_VENDOR STREQUAL "All")
+          if (BLA_VENDOR MATCHES "^Intel10_64i?lp" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
-              "mkl_intel_lp64${BLAS_mkl_DLL_SUFFIX}")
+              "mkl_intel_${BLAS_mkl_ILP_MODE}${BLAS_mkl_DLL_SUFFIX}")
           endif ()
 
           # Add threading/sequential libs
@@ -329,24 +336,24 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS
               "mkl_intel mkl_intel_thread mkl_core guide")
           endif ()
-          if (BLA_VENDOR STREQUAL "Intel10_64lp" OR BLA_VENDOR STREQUAL "All")
+          if (BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
 
             # old version
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_intel_lp64 mkl_intel_thread mkl_core guide")
+              "mkl_intel_${BLAS_mkl_ILP_MODE} mkl_intel_thread mkl_core guide")
 
             # mkl >= 10.3
             if (CMAKE_C_COMPILER MATCHES ".+gcc")
               list(APPEND BLAS_SEARCH_LIBS
-                "mkl_intel_lp64 mkl_gnu_thread mkl_core gomp")
+                "mkl_intel_${BLAS_mkl_ILP_MODE} mkl_gnu_thread mkl_core gomp")
             else ()
               list(APPEND BLAS_SEARCH_LIBS
-                "mkl_intel_lp64 mkl_intel_thread mkl_core iomp5")
+                "mkl_intel_${BLAS_mkl_ILP_MODE} mkl_intel_thread mkl_core iomp5")
             endif ()
           endif ()
-          if (BLA_VENDOR STREQUAL "Intel10_64lp_seq" OR BLA_VENDOR STREQUAL "All")
+          if (BLA_VENDOR MATCHES "^Intel10_64i?lp_seq$" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_intel_lp64 mkl_sequential mkl_core")
+              "mkl_intel_${BLAS_mkl_ILP_MODE} mkl_sequential mkl_core")
           endif ()
 
           #older vesions of intel mkl libs
@@ -376,6 +383,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       endforeach ()
 
     endif ()
+    unset(BLAS_mkl_ILP_MODE)
   endif ()
 endif ()
 
