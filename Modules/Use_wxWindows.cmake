@@ -5,7 +5,8 @@
 # Use_wxWindows
 # -------------
 #
-#
+# Deprecated.  Use ``find_package(wxWidgets)`` and
+# ``include(${wxWidgets_USE_FILE})`` instead.
 #
 #
 # This convenience include finds if wxWindows is installed and set the

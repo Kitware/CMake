@@ -268,6 +268,7 @@ Deprecated Utility Modules
    /module/CMakeExpandImportedTargets
    /module/CMakeForceCompiler
    /module/TestCXXAcceptsFlag
+   /module/Use_wxWindows
    /module/WriteBasicConfigVersionFile
 
 Deprecated Find Modules
