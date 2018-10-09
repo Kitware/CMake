@@ -9,7 +9,7 @@ Check whether the C compiler supports a given flag.
 
 .. command:: check_c_compiler_flag
 
-  ::
+  .. code-block:: cmake
 
     check_c_compiler_flag(<flag> <var>)
 

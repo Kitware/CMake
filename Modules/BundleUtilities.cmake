@@ -12,7 +12,7 @@ bundles on the Mac and bundle-like directories on any OS.
 
 The following functions are provided by this module:
 
-::
+.. code-block:: cmake
 
    fixup_bundle
    copy_and_fixup_bundle
@@ -39,7 +39,7 @@ DO NOT USE THESE FUNCTIONS AT CONFIGURE TIME (from ``CMakeLists.txt``)!
 Instead, invoke them from an :command:`install(CODE)` or
 :command:`install(SCRIPT)` rule.
 
-::
+.. code-block:: cmake
 
   FIXUP_BUNDLE(<app> <libs> <dirs>)
 
@@ -62,14 +62,14 @@ ensure that it is truly standalone.
 As an optional parameter (IGNORE_ITEM) a list of file names can be passed,
 which are then ignored (e.g. IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe")
 
-::
+.. code-block:: cmake
 
   COPY_AND_FIXUP_BUNDLE(<src> <dst> <libs> <dirs>)
 
 Makes a copy of the bundle <src> at location <dst> and then fixes up
 the new copied bundle in-place at <dst>...
 
-::
+.. code-block:: cmake
 
   VERIFY_APP(<app>)
 
@@ -80,14 +80,14 @@ is not verified.
 As an optional parameter (IGNORE_ITEM) a list of file names can be passed,
 which are then ignored (e.g. IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe")
 
-::
+.. code-block:: cmake
 
   GET_BUNDLE_MAIN_EXECUTABLE(<bundle> <result_var>)
 
 The result will be the full path name of the bundle's main executable
 file or an "error:" prefixed string if it could not be determined.
 
-::
+.. code-block:: cmake
 
   GET_DOTAPP_DIR(<exe> <dotapp_dir_var>)
 
@@ -97,7 +97,7 @@ simply return the dir containing the executable.
 
 The returned directory may or may not exist.
 
-::
+.. code-block:: cmake
 
   GET_BUNDLE_AND_EXECUTABLE(<app> <bundle_var> <executable_var> <valid_var>)
 
@@ -106,14 +106,14 @@ nested inside a ".app" directory and returns the path to the ".app"
 directory in <bundle_var> and the path to its main executable in
 <executable_var>
 
-::
+.. code-block:: cmake
 
   GET_BUNDLE_ALL_EXECUTABLES(<bundle> <exes_var>)
 
 Scans the given bundle recursively for all executable files and
 accumulates them into a variable.
 
-::
+.. code-block:: cmake
 
   GET_ITEM_KEY(<item> <key_var>)
 
@@ -125,7 +125,7 @@ extension with "." replaced by "_"
 This key is used as a prefix for CMake variables so that we can
 associate a set of variables with a given item based on its key.
 
-::
+.. code-block:: cmake
 
   CLEAR_BUNDLE_KEYS(<keys_var>)
 
@@ -135,7 +135,7 @@ each key.  After the loop, clear the list of keys itself.
 Caller of get_bundle_keys should call clear_bundle_keys when done with
 list of keys.
 
-::
+.. code-block:: cmake
 
   SET_BUNDLE_KEY_VALUES(<keys_var> <context> <item> <exepath> <dirs>
                         <copyflag> [<rpaths>])
@@ -143,7 +143,7 @@ list of keys.
 Add a key to the list (if necessary) for the given item.  If added,
 also set all the variables associated with that key.
 
-::
+.. code-block:: cmake
 
   GET_BUNDLE_KEYS(<app> <libs> <dirs> <keys_var>)
 
@@ -156,7 +156,7 @@ appropriate install_name_tool fixups.
 As an optional parameter (IGNORE_ITEM) a list of file names can be passed,
 which are then ignored (e.g. IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe")
 
-::
+.. code-block:: cmake
 
   COPY_RESOLVED_ITEM_INTO_BUNDLE(<resolved_item> <resolved_embedded_item>)
 
@@ -164,7 +164,7 @@ Copy a resolved item into the bundle if necessary.  Copy is not
 necessary if the resolved_item is "the same as" the
 resolved_embedded_item.
 
-::
+.. code-block:: cmake
 
   COPY_RESOLVED_FRAMEWORK_INTO_BUNDLE(<resolved_item> <resolved_embedded_item>)
 
@@ -178,7 +178,7 @@ BU_COPY_FULL_FRAMEWORK_CONTENTS to ON before calling fixup_bundle.  By
 default, COPY_RESOLVED_FRAMEWORK_INTO_BUNDLE copies the framework
 dylib itself plus the framework Resources directory.
 
-::
+.. code-block:: cmake
 
   FIXUP_BUNDLE_ITEM(<resolved_embedded_item> <exepath> <dirs>)
 
@@ -204,7 +204,7 @@ once.
 If the BU_CHMOD_BUNDLE_ITEMS variable is set then bundle items will be
 marked writable before install_name_tool tries to change them.
 
-::
+.. code-block:: cmake
 
   VERIFY_BUNDLE_PREREQUISITES(<bundle> <result_var> <info_var>)
 
@@ -215,7 +215,7 @@ presumed to exist everywhere.
 As an optional parameter (IGNORE_ITEM) a list of file names can be passed,
 which are then ignored (e.g. IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe")
 
-::
+.. code-block:: cmake
 
   VERIFY_BUNDLE_SYMLINKS(<bundle> <result_var> <info_var>)
 

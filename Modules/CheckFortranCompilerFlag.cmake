@@ -9,7 +9,7 @@ Check whether the Fortran compiler supports a given flag.
 
 .. command:: check_fortran_compiler_flag
 
-  ::
+  .. code-block:: cmake
 
     check_fortran_compiler_flag(<flag> <var>)
 

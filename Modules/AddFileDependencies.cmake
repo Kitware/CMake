@@ -5,9 +5,13 @@
 # AddFileDependencies
 # -------------------
 #
-# ADD_FILE_DEPENDENCIES(source_file depend_files...)
+# Add dependencies to a source file.
 #
-# Adds the given files as dependencies to source_file
+# .. code-block:: cmake
+#
+#   ADD_FILE_DEPENDENCIES(<source> <files>)
+#
+# Adds the given ``<files>`` to the dependencies of file ``<source>``.
 
 macro(ADD_FILE_DEPENDENCIES _file)
 
