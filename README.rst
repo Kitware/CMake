@@ -68,7 +68,7 @@ Windows
 ^^^^^^^
 
 You need to download and install a binary release of CMake in order to build
-CMake.  You can get these releases from the `CMake Download Page`_ .  Then
+CMake.  You can get these releases from the `CMake Download Page`_.  Then
 proceed with the instructions below.
 
 .. _`CMake Download Page`: https://cmake.org/cmake/resources/software.html
