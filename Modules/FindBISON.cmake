@@ -149,17 +149,25 @@ if(BISON_EXECUTABLE)
       set(BISON_TARGET_verbose_file "${ReportFile}")
       list(APPEND BISON_TARGET_cmdopt "--report-file=${BISON_TARGET_verbose_file}")
     endif()
+    if(NOT IS_ABSOLUTE "${BISON_TARGET_verbose_file}")
+      set(BISON_TARGET_verbose_file "${CMAKE_CURRENT_SOURCE_DIR}/${BISON_TARGET_verbose_file}")
+    endif()
   endmacro()
 
   # internal macro
   # adds a custom command and sets
-  #   BISON_TARGET_cmdopt, BISON_TARGET_verbose_file, BISON_TARGET_extraoutputs
+  #   BISON_TARGET_cmdopt, BISON_TARGET_extraoutputs
   macro(BISON_TARGET_option_verbose Name BisonOutput filename)
     list(APPEND BISON_TARGET_cmdopt "--verbose")
-    list(APPEND BISON_TARGET_extraoutputs
+    list(APPEND BISON_TARGET_outputs
       "${BISON_TARGET_verbose_file}")
     if (NOT "${filename}" STREQUAL "")
-      add_custom_command(OUTPUT ${filename}
+      if(IS_ABSOLUTE "${filename}")
+        set(BISON_TARGET_verbose_extra_file "${filename}")
+      else()
+        set(BISON_TARGET_verbose_extra_file "${CMAKE_CURRENT_SOURCE_DIR}/${filename}")
+      endif()
+      add_custom_command(OUTPUT ${BISON_TARGET_verbose_extra_file}
         COMMAND ${CMAKE_COMMAND} -E copy
         "${BISON_TARGET_verbose_file}"
         "${filename}"
@@ -167,10 +175,10 @@ if(BISON_EXECUTABLE)
         DEPENDS
         "${BISON_TARGET_verbose_file}"
         COMMENT "[BISON][${Name}] Copying bison verbose table to ${filename}"
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-      set(BISON_${Name}_VERBOSE_FILE ${filename})
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
       list(APPEND BISON_TARGET_extraoutputs
-        "${filename}")
+        "${BISON_TARGET_verbose_extra_file}")
+      unset(BISON_TARGET_verbose_extra_file)
     endif()
   endmacro()
 
@@ -226,7 +234,6 @@ if(BISON_EXECUTABLE)
       list(APPEND BISON_TARGET_outputs "${BISON_TARGET_output_header}")
 
       add_custom_command(OUTPUT ${BISON_TARGET_outputs}
-        ${BISON_TARGET_extraoutputs}
         COMMAND ${BISON_EXECUTABLE} ${BISON_TARGET_cmdopt} -o ${BisonOutput} ${BisonInput}
         VERBATIM
         DEPENDS ${BisonInput}
