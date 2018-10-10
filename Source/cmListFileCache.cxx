@@ -479,3 +479,16 @@ std::ostream& operator<<(std::ostream& os, BT<std::string> const& s)
 {
   return os << s.Value;
 }
+
+std::vector<BT<std::string>> ExpandListWithBacktrace(
+  const char* list, cmListFileBacktrace const& bt)
+{
+  std::vector<BT<std::string>> result;
+  std::vector<std::string> tmp;
+  cmSystemTools::ExpandListArgument(list, tmp);
+  result.reserve(tmp.size());
+  for (std::string& i : tmp) {
+    result.emplace_back(std::move(i), bt);
+  }
+  return result;
+}

@@ -198,6 +198,9 @@ public:
 
 std::ostream& operator<<(std::ostream& os, BT<std::string> const& s);
 
+std::vector<BT<std::string>> ExpandListWithBacktrace(
+  const char* list, cmListFileBacktrace const& bt = cmListFileBacktrace());
+
 struct cmListFile
 {
   bool ParseFile(const char* path, cmMessenger* messenger,
