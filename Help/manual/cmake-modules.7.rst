@@ -3,12 +3,14 @@
 cmake-modules(7)
 ****************
 
-.. only:: html
+The modules listed here are part of the CMake distribution.
+Projects may provide further modules; their location(s)
+can be specified in the :variable:`CMAKE_MODULE_PATH` variable.
 
-   .. contents::
+Utility Modules
+^^^^^^^^^^^^^^^
 
-All Modules
-===========
+These modules are loaded using the :command:`include` command.
 
 .. toctree::
    :maxdepth: 1
@@ -41,12 +43,9 @@ All Modules
    /module/CMakeAddFortranSubdirectory
    /module/CMakeBackwardCompatibilityCXX
    /module/CMakeDependentOption
-   /module/CMakeDetermineVSServicePack
-   /module/CMakeExpandImportedTargets
    /module/CMakeFindDependencyMacro
    /module/CMakeFindFrameworks
    /module/CMakeFindPackageMode
-   /module/CMakeForceCompiler
    /module/CMakeGraphVizOptions
    /module/CMakePackageConfigHelpers
    /module/CMakeParseArguments
@@ -70,6 +69,42 @@ All Modules
    /module/ExternalProject
    /module/FeatureSummary
    /module/FetchContent
+   /module/FindPackageHandleStandardArgs
+   /module/FindPackageMessage
+   /module/FortranCInterface
+   /module/GenerateExportHeader
+   /module/GetPrerequisites
+   /module/GNUInstallDirs
+   /module/GoogleTest
+   /module/InstallRequiredSystemLibraries
+   /module/MacroAddFileDependencies
+   /module/ProcessorCount
+   /module/SelectLibraryConfigurations
+   /module/SquishTestScript
+   /module/TestBigEndian
+   /module/TestForANSIForScope
+   /module/TestForANSIStreamHeaders
+   /module/TestForSSTREAM
+   /module/TestForSTDNamespace
+   /module/UseEcos
+   /module/UseJavaClassFilelist
+   /module/UseJava
+   /module/UseJavaSymlinks
+   /module/UsePkgConfig
+   /module/UseSWIG
+   /module/UsewxWidgets
+   /module/Use_wxWindows
+   /module/WriteCompilerDetectionHeader
+
+Find Modules
+^^^^^^^^^^^^
+
+These modules search for third-party software.
+They are normally called through the :command:`find_package` command.
+
+.. toctree::
+   :maxdepth: 1
+
    /module/FindALSA
    /module/FindArmadillo
    /module/FindASPELL
@@ -82,7 +117,6 @@ All Modules
    /module/FindBZip2
    /module/FindCABLE
    /module/FindCoin3D
-   /module/FindCUDA
    /module/FindCups
    /module/FindCURL
    /module/FindCurses
@@ -173,8 +207,6 @@ All Modules
    /module/FindosgViewer
    /module/FindosgVolume
    /module/FindosgWidget
-   /module/FindPackageHandleStandardArgs
-   /module/FindPackageMessage
    /module/FindPatch
    /module/FindPerlLibs
    /module/FindPerl
@@ -189,8 +221,6 @@ All Modules
    /module/FindPython
    /module/FindPython2
    /module/FindPython3
-   /module/FindPythonInterp
-   /module/FindPythonLibs
    /module/FindQt3
    /module/FindQt4
    /module/FindQt
@@ -218,39 +248,39 @@ All Modules
    /module/FindWget
    /module/FindWish
    /module/FindwxWidgets
-   /module/FindwxWindows
    /module/FindXCTest
    /module/FindXalanC
    /module/FindXercesC
    /module/FindX11
    /module/FindXMLRPC
    /module/FindZLIB
-   /module/FortranCInterface
-   /module/GenerateExportHeader
-   /module/GetPrerequisites
-   /module/GNUInstallDirs
-   /module/GoogleTest
-   /module/InstallRequiredSystemLibraries
-   /module/MacroAddFileDependencies
-   /module/ProcessorCount
-   /module/SelectLibraryConfigurations
-   /module/SquishTestScript
-   /module/TestBigEndian
+
+Deprecated Modules
+^^^^^^^^^^^^^^^^^^^
+
+Deprecated Utility Modules
+==========================
+
+.. toctree::
+   :maxdepth: 1
+
+   /module/CMakeDetermineVSServicePack
+   /module/CMakeExpandImportedTargets
+   /module/CMakeForceCompiler
    /module/TestCXXAcceptsFlag
-   /module/TestForANSIForScope
-   /module/TestForANSIStreamHeaders
-   /module/TestForSSTREAM
-   /module/TestForSTDNamespace
-   /module/UseEcos
-   /module/UseJavaClassFilelist
-   /module/UseJava
-   /module/UseJavaSymlinks
-   /module/UsePkgConfig
-   /module/UseSWIG
-   /module/UsewxWidgets
    /module/Use_wxWindows
    /module/WriteBasicConfigVersionFile
-   /module/WriteCompilerDetectionHeader
+
+Deprecated Find Modules
+=======================
+
+.. toctree::
+   :maxdepth: 1
+
+   /module/FindCUDA
+   /module/FindPythonInterp
+   /module/FindPythonLibs
+   /module/FindwxWindows
 
 Legacy CPack Modules
 ====================

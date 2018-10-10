@@ -5,9 +5,12 @@
 # FindQt
 # ------
 #
-# Searches for all installed versions of Qt.
+# Searches for all installed versions of Qt3 or Qt4.
 #
-# This should only be used if your project can work with multiple
+# This module cannot handle Qt5 or any later versions.
+# For those, see :manual:`cmake-qt(7)`.
+#
+# This module should only be used if your project can work with multiple
 # versions of Qt.  If not, you should just directly use FindQt4 or
 # FindQt3.  If multiple versions of Qt are found on the machine, then
 # The user must set the option DESIRED_QT_VERSION to the version they
@@ -15,9 +18,6 @@
 # the DESIRED_QT_VERSION is set to that version and the matching FindQt3
 # or FindQt4 module is included.  Once the user sets DESIRED_QT_VERSION,
 # then the FindQt3 or FindQt4 module is included.
-#
-# This module can only detect and switch between Qt versions 3 and 4. It
-# cannot handle Qt5 or any later versions.
 #
 # ::
 #
