@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.7)
-project (CudaOnlGPUDebugFlag CUDA)
+project (GPUDebugFlag CUDA)
 
 #Goal for this example:
 #verify that -G enables gpu debug flags
