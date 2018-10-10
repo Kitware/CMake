@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(CudaOnlyLinkSystemDeviceLibraries CUDA)
+project(LinkSystemDeviceLibraries CUDA)
 
 string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_35,code=compute_35 -gencode arch=compute_35,code=sm_35")
 set(CMAKE_CUDA_STANDARD 11)

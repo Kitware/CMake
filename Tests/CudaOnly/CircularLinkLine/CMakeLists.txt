@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project (CudaOnlyCircularLinkLine CUDA)
+project (CircularLinkLine CUDA)
 
 #Goal for this example:
 # Verify that we de-duplicate the device link line

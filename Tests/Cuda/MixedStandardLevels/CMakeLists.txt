@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project(CudaComplex CXX CUDA)
+project(MixedStandardLevels CXX CUDA)
 
 string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=compute_30")
 

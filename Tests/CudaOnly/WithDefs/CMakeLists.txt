@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.7)
-project (CudaOnlyWithDefs CUDA)
+project (WithDefs CUDA)
 
 #verify that we can pass explicit cuda arch flags
 string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=compute_30")
