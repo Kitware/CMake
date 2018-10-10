@@ -88,7 +88,9 @@ endmacro()
 .. command:: pkg_get_variable
 
   Retrieves the value of a pkg-config variable ``varName`` and stores it in the
-  result variable ``resultVar`` in the calling scope. ::
+  result variable ``resultVar`` in the calling scope.
+
+  .. code-block:: cmake
 
     pkg_get_variable(<resultVar> <moduleName> <varName>)
 
@@ -514,7 +516,9 @@ endmacro()
 .. command:: pkg_check_modules
 
   Checks for all the given modules, setting a variety of result variables in
-  the calling scope. ::
+  the calling scope.
+
+  .. code-block:: cmake
 
     pkg_check_modules(<prefix>
                       [REQUIRED] [QUIET]
@@ -552,10 +556,10 @@ endmacro()
   - ``foo>=3.1`` matches any version from 3.1 or later.
   - ``foo=1.2.3`` requires that foo must be exactly version 1.2.3.
 
-  The following variables may be set upon return.  Two sets of values exist,
-  one for the common case (``<XXX> = <prefix>``) and another for the
-  information ``pkg-config`` provides when it is called with the ``--static``
-  option (``<XXX> = <prefix>_STATIC``)
+  The following variables may be set upon return.  Two sets of values exist:
+  One for the common case (``<XXX> = <prefix>``) and another for the
+  information ``pkg-config`` provides when called with the ``--static``
+  option (``<XXX> = <prefix>_STATIC``).
 
   ``<XXX>_FOUND``
     set to 1 if module(s) exist
@@ -582,7 +586,7 @@ endmacro()
   There are some special variables whose prefix depends on the number of
   ``<moduleSpec>`` given.  When there is only one ``<moduleSpec>``,
   ``<YYY>`` will simply be ``<prefix>``, but if two or more ``<moduleSpec>``
-  items are given, ``<YYY>`` will be ``<prefix>_<moduleName>``
+  items are given, ``<YYY>`` will be ``<prefix>_<moduleName>``.
 
   ``<YYY>_VERSION``
     version of the module
@@ -593,7 +597,7 @@ endmacro()
   ``<YYY>_LIBDIR``
     lib directory of the module
 
-  Examples
+  Examples:
 
   .. code-block:: cmake
 
@@ -653,7 +657,9 @@ endmacro()
 
   The behavior of this command is the same as :command:`pkg_check_modules`,
   except that rather than checking for all the specified modules, it searches
-  for just the first successful match. ::
+  for just the first successful match.
+
+  .. code-block:: cmake
 
     pkg_search_module(<prefix>
                       [REQUIRED] [QUIET]
@@ -662,7 +668,7 @@ endmacro()
                       [IMPORTED_TARGET [GLOBAL]]
                       <moduleSpec> [<moduleSpec>...])
 
-  Examples
+  Example:
 
   .. code-block:: cmake
 

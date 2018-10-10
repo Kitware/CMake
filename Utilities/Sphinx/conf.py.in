@@ -15,6 +15,7 @@ project = 'CMake'
 copyright = '@conf_copyright@'
 version = '@conf_version@' # feature version
 release = '@conf_release@' # full version string
+pygments_style = 'colors.CMakeTemplateStyle'
 
 primary_domain = 'cmake'
 highlight_language = 'none'

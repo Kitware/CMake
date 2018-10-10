@@ -16,7 +16,9 @@ External Project Definition
 
   The ``ExternalProject_Add()`` function creates a custom target to drive
   download, update/patch, configure, build, install and test steps of an
-  external project::
+  external project:
+
+  .. code-block:: cmake
 
     ExternalProject_Add(<name> [<option>...])
 
@@ -608,7 +610,9 @@ External Project Definition
       appended to them by following them with as many ``COMMAND ...`` options
       as needed
       (:manual:`generator expressions <cmake-generator-expressions(7)>` are
-      supported). For example::
+      supported). For example:
+
+      .. code-block:: cmake
 
         ExternalProject_Add(example
           ... # Download options, etc.
@@ -627,7 +631,9 @@ Obtaining Project Properties
 .. command:: ExternalProject_Get_Property
 
   The ``ExternalProject_Get_Property()`` function retrieves external project
-  target properties::
+  target properties:
+
+  .. code-block:: cmake
 
     ExternalProject_Get_Property(<name> <prop1> [<prop2>...])
 
@@ -655,7 +661,9 @@ control needed to implement such step-level capabilities.
 
   The ``ExternalProject_Add_Step()`` function specifies an additional custom
   step for an external project defined by an earlier call to
-  :command:`ExternalProject_Add`::
+  :command:`ExternalProject_Add`:
+
+  .. code-block:: cmake
 
     ExternalProject_Add_Step(<name> <step> [<option>...])
 
@@ -722,7 +730,9 @@ control needed to implement such step-level capabilities.
 
   The ``ExternalProject_Add_StepTargets()`` function generates targets for the
   steps listed. The name of each created target will be of the form
-  ``<name>-<step>``::
+  ``<name>-<step>``:
+
+  .. code-block:: cmake
 
     ExternalProject_Add_StepTargets(<name> [NO_DEPENDS] <step1> [<step2>...])
 
@@ -773,7 +783,9 @@ control needed to implement such step-level capabilities.
   The ``ExternalProject_Add_StepDependencies()`` function can be used to add
   dependencies to a step. The dependencies added must be targets CMake already
   knows about (these can be ordinary executable or library targets, custom
-  targets or even step targets of another external project)::
+  targets or even step targets of another external project):
+
+  .. code-block:: cmake
 
     ExternalProject_Add_StepDependencies(<name> <step> <target1> [<target2>...])
 

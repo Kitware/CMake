@@ -5,8 +5,8 @@ Execute one or more child processes.
 
 .. code-block:: cmake
 
-  execute_process(COMMAND <cmd1> [args1...]]
-                  [COMMAND <cmd2> [args2...] [...]]
+  execute_process(COMMAND <cmd1> [<arguments>]
+                  [COMMAND <cmd2> [<arguments>]]...
                   [WORKING_DIRECTORY <directory>]
                   [TIMEOUT <seconds>]
                   [RESULT_VARIABLE <variable>]

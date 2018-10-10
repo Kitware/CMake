@@ -206,9 +206,10 @@ enclosed content, such as `Escape Sequences`_ or `Variable References`_,
 is performed.  A bracket argument is always given to the command
 invocation as exactly one argument.
 
-For example:
+.. No code-block syntax highlighting in the following example
+   (long string literal not supported by our cmake.py)
 
-.. code-block:: cmake
+For example::
 
  message([=[
  This is the first line in a bracket argument with bracket length 1.
@@ -253,9 +254,10 @@ closing quotes.  Both `Escape Sequences`_ and `Variable References`_
 are evaluated.  A quoted argument is always given to the command
 invocation as exactly one argument.
 
-For example:
+.. No code-block syntax highlighting in the following example
+   (escape \" not supported by our cmake.py)
 
-::
+For example::
 
  message("This is a quoted argument containing multiple lines.
  This is always one argument even though it contains a ; character.
@@ -264,11 +266,12 @@ For example:
  It does end in an unescaped double quote.
  ")
 
+.. No code-block syntax highlighting in the following example
+   (for conformity with the two above examples)
+
 The final ``\`` on any line ending in an odd number of backslashes
 is treated as a line continuation and ignored along with the
-immediately following newline character.  For example:
-
-.. code-block:: cmake
+immediately following newline character.  For example::
 
  message("\
  This is the first line of a quoted argument. \
