@@ -384,13 +384,8 @@ std::string cmExtraSublimeTextGenerator::ComputeDefines(
   cmGeneratorExpressionInterpreter genexInterpreter(lg, config, target,
                                                     language);
 
-  // Add the export symbol definition for shared library objects.
-  if (const char* exportMacro = target->GetExportMacro()) {
-    lg->AppendDefines(defines, exportMacro);
-  }
-
   // Add preprocessor definitions for this target and configuration.
-  lg->AddCompileDefinitions(defines, target, config, language);
+  lg->GetTargetDefines(target, config, language, defines);
   const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
   if (const char* compile_defs = source->GetProperty(COMPILE_DEFINITIONS)) {
     lg->AppendDefines(

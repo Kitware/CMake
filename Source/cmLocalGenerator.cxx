@@ -773,16 +773,6 @@ std::string cmLocalGenerator::GetIncludeFlags(
   return flags;
 }
 
-void cmLocalGenerator::AddCompileDefinitions(std::set<std::string>& defines,
-                                             cmGeneratorTarget const* target,
-                                             const std::string& config,
-                                             const std::string& lang) const
-{
-  std::vector<std::string> targetDefines;
-  target->GetCompileDefinitions(targetDefines, config, lang);
-  this->AppendDefines(defines, targetDefines);
-}
-
 void cmLocalGenerator::AddCompileOptions(std::string& flags,
                                          cmGeneratorTarget* target,
                                          const std::string& lang,
@@ -1237,7 +1227,9 @@ void cmLocalGenerator::GetTargetDefines(cmGeneratorTarget const* target,
   }
 
   // Add preprocessor definitions for this target and configuration.
-  this->AddCompileDefinitions(defines, target, config, lang);
+  std::vector<std::string> targetDefines;
+  target->GetCompileDefinitions(targetDefines, config, lang);
+  this->AppendDefines(defines, targetDefines);
 }
 
 std::string cmLocalGenerator::GetTargetFortranFlags(

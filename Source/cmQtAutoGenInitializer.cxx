@@ -416,7 +416,7 @@ bool cmQtAutoGenInitializer::InitMoc()
     auto GetCompileDefinitions =
       [this, localGen](std::string const& cfg) -> std::string {
       std::set<std::string> defines;
-      localGen->AddCompileDefinitions(defines, this->Target, cfg, "CXX");
+      localGen->GetTargetDefines(this->Target, cfg, "CXX", defines);
       return cmJoin(defines, ";");
     };
 
