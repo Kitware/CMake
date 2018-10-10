@@ -2671,6 +2671,13 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     // Specify the compiler program database file if configured.
     std::string pdb = this->GeneratorTarget->GetCompilePDBPath(configName);
     if (!pdb.empty()) {
+      if (this->GlobalGenerator->IsCudaEnabled()) {
+        // CUDA does not quote paths with spaces correctly when forwarding
+        // this to the host compiler.  Use a relative path to avoid spaces.
+        // FIXME: We can likely do this even when CUDA is not involved,
+        // but for now we will make a minimal change.
+        pdb = this->ConvertPath(pdb, true);
+      }
       ConvertToWindowsSlash(pdb);
       e2.Element("ProgramDataBaseFileName", pdb);
     }
