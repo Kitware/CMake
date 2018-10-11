@@ -1225,13 +1225,17 @@ bool cmListCommand::HandleRemoveAtCommand(std::vector<std::string> const& args)
   const std::string& listName = args[1];
   // expand the variable
   std::vector<std::string> varArgsExpanded;
-  if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command REMOVE_AT requires list to be present.");
-    return false;
-  }
-  // FIXME: Add policy to make non-existing lists an error like empty lists.
-  if (varArgsExpanded.empty()) {
-    this->SetError("REMOVE_AT given empty list");
+  if (!this->GetList(varArgsExpanded, listName) || varArgsExpanded.empty()) {
+    std::ostringstream str;
+    str << "index: ";
+    for (size_t i = 1; i < args.size(); ++i) {
+      str << args[i];
+      if (i != args.size() - 1) {
+        str << ", ";
+      }
+    }
+    str << " out of range (0, 0)";
+    this->SetError(str.str());
     return false;
   }
 
