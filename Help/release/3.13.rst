@@ -61,9 +61,6 @@ Commands
 * The :command:`add_link_options` command was created to add link
   options in the current directory.
 
-* The :command:`install(CODE)` and :command:`install(SCRIPT)` commands
-  learned to support generator expressions.
-
 * The :command:`install(TARGETS)` command learned to install targets
   created outside the current directory.
 
