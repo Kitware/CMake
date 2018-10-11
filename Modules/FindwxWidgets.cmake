@@ -12,7 +12,7 @@
 # modules that you will use, you need to name them as components to the
 # package:
 #
-# find_package(wxWidgets COMPONENTS core base ...)
+# find_package(wxWidgets COMPONENTS core base ... OPTIONAL_COMPONENTS net ...)
 #
 # There are two search branches: a windows style and a unix style.  For
 # windows, the following variables are searched for and set to defaults
@@ -89,7 +89,7 @@
 # ::
 #
 #    # Note that for MinGW users the order of libs is important!
-#    find_package(wxWidgets COMPONENTS net gl core base)
+#    find_package(wxWidgets COMPONENTS gl core base OPTIONAL_COMPONENTS net)
 #    if(wxWidgets_FOUND)
 #      include(${wxWidgets_USE_FILE})
 #      # and for each of your dependent executable/library targets:
@@ -102,7 +102,7 @@
 #
 # ::
 #
-#    find_package(wxWidgets REQUIRED net gl core base)
+#    find_package(wxWidgets REQUIRED gl core base OPTIONAL_COMPONENTS net)
 #    include(${wxWidgets_USE_FILE})
 #    # and for each of your dependent executable/library targets:
 #    target_link_libraries(<YourTarget> ${wxWidgets_LIBRARIES})
@@ -396,6 +396,9 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
           list(APPEND wxWidgets_LIBRARIES
             debug ${WX_${LIB}d} optimized ${WX_${LIB}}
             )
+          set(wxWidgets_${LIB}_FOUND TRUE)
+        elseif(NOT wxWidgets_FIND_REQUIRED_${LIB})
+          DBG_MSG_V("- ignored optional missing WX_${LIB}=${WX_${LIB}} or WX_${LIB}d=${WX_${LIB}d}")
         else()
           DBG_MSG_V("- not found due to missing WX_${LIB}=${WX_${LIB}} or WX_${LIB}d=${WX_${LIB}d}")
           set(wxWidgets_FOUND FALSE)
@@ -408,9 +411,11 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
         if(WX_${LIB}${_DBG})
           DBG_MSG_V("Found ${LIB}${_DBG}")
           list(APPEND wxWidgets_LIBRARIES ${WX_${LIB}${_DBG}})
+          set(wxWidgets_${LIB}_FOUND TRUE)
+        elseif(NOT wxWidgets_FIND_REQUIRED_${LIB})
+          DBG_MSG_V("- ignored optional missing WX_${LIB}${_DBG}=${WX_${LIB}${_DBG}}")
         else()
-          DBG_MSG_V(
-            "- not found due to missing WX_${LIB}${_DBG}=${WX_${LIB}${_DBG}}")
+          DBG_MSG_V("- not found due to missing WX_${LIB}${_DBG}=${WX_${LIB}${_DBG}}")
           set(wxWidgets_FOUND FALSE)
         endif()
       endforeach()
@@ -803,11 +808,24 @@ else()
       # - NOTE: wx-config doesn't verify that the libs requested exist
       #         it just produces the names. Maybe a TRY_COMPILE would
       #         be useful here...
-      string(REPLACE ";" ","
-        wxWidgets_FIND_COMPONENTS "${wxWidgets_FIND_COMPONENTS}")
+      unset(_cmp_req)
+      unset(_cmp_opt)
+      foreach(_cmp IN LISTS wxWidgets_FIND_COMPONENTS)
+        if(wxWidgets_FIND_REQUIRED_${_cmp})
+          list(APPEND _cmp_req "${_cmp}")
+        else()
+          list(APPEND _cmp_opt "${_cmp}")
+        endif()
+      endforeach()
+      DBG_MSG_V("wxWidgets required components : ${_cmp_req}")
+      DBG_MSG_V("wxWidgets optional components : ${_cmp_opt}")
+      if(DEFINED _cmp_opt)
+        string(REPLACE ";" "," _cmp_opt "--optional-libs ${_cmp_opt}")
+      endif()
+      string(REPLACE ";" "," _cmp_req "${_cmp_req}")
       execute_process(
         COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}"
-          ${wxWidgets_SELECT_OPTIONS} --libs ${wxWidgets_FIND_COMPONENTS}
+          ${wxWidgets_SELECT_OPTIONS} --libs ${_cmp_req} ${_cmp_opt}
         OUTPUT_VARIABLE wxWidgets_LIBRARIES
         RESULT_VARIABLE RET
         ERROR_QUIET
@@ -833,8 +851,10 @@ else()
 
       else()
         set(wxWidgets_FOUND FALSE)
-        DBG_MSG("${wxWidgets_CONFIG_EXECUTABLE} --libs ${wxWidgets_FIND_COMPONENTS} FAILED with RET=${RET}")
+        DBG_MSG("${wxWidgets_CONFIG_EXECUTABLE} --libs ${_cmp_req} ${_cmp_opt} FAILED with RET=${RET}")
       endif()
+      unset(_cmp_req)
+      unset(_cmp_opt)
     endif()
 
     # When using wx-config in MSYS, the include paths are UNIX style paths which may or may
@@ -960,10 +980,18 @@ DBG_MSG("wxWidgets_USE_FILE        : ${wxWidgets_USE_FILE}")
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
+# FIXME: set wxWidgets_<comp>_FOUND for wx-config branch
+#        and use HANDLE_COMPONENTS on Unix too
+if(wxWidgets_FIND_STYLE STREQUAL "win32")
+  set(wxWidgets_HANDLE_COMPONENTS "HANDLE_COMPONENTS")
+endif()
+
 find_package_handle_standard_args(wxWidgets
   REQUIRED_VARS wxWidgets_LIBRARIES wxWidgets_INCLUDE_DIRS
   VERSION_VAR   wxWidgets_VERSION_STRING
+  ${wxWidgets_HANDLE_COMPONENTS}
   )
+unset(wxWidgets_HANDLE_COMPONENTS)
 
 #=====================================================================
 # Macros for use in wxWidgets apps.
