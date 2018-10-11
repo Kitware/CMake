@@ -33,6 +33,7 @@ The options are:
     ExtraFiles = Files listed by CTEST_EXTRA_SUBMIT_FILES
     Upload     = Files prepared for upload by ctest_upload(), in Upload.xml
     Submit     = nothing
+    Done       = Build is complete, in Done.xml
 
 ``FILES <file>...``
   Specify an explicit list of specific files to be submitted.
