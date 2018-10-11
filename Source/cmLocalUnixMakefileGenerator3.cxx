@@ -1819,8 +1819,8 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
 
     // Build a list of preprocessor definitions for the target.
     std::set<std::string> defines;
-    this->AddCompileDefinitions(defines, target, this->ConfigName,
-                                implicitLang.first);
+    this->GetTargetDefines(target, this->ConfigName, implicitLang.first,
+                           defines);
     if (!defines.empty()) {
       /* clang-format off */
       cmakefileStream
