@@ -346,8 +346,7 @@ bool cmListCommand::HandleRemoveItemCommand(
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command REMOVE_ITEM requires list to be present.");
-    return false;
+    return true;
   }
 
   std::vector<std::string> remove(args.begin() + 2, args.end());
@@ -376,8 +375,7 @@ bool cmListCommand::HandleReverseCommand(std::vector<std::string> const& args)
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command REVERSE requires list to be present.");
-    return false;
+    return true;
   }
 
   std::string value = cmJoin(cmReverseRange(varArgsExpanded), ";");
@@ -399,9 +397,7 @@ bool cmListCommand::HandleRemoveDuplicatesCommand(
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError(
-      "sub-command REMOVE_DUPLICATES requires list to be present.");
-    return false;
+    return true;
   }
 
   std::vector<std::string>::const_iterator argsEnd =
@@ -1152,8 +1148,7 @@ bool cmListCommand::HandleSortCommand(std::vector<std::string> const& args)
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command SORT requires list to be present.");
-    return false;
+    return true;
   }
 
   if ((sortCompare == cmStringSorter::Compare::STRING) &&
@@ -1304,8 +1299,7 @@ bool cmListCommand::HandleFilterCommand(std::vector<std::string> const& args)
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command FILTER requires list to be present.");
-    return false;
+    return true;
   }
 
   const std::string& mode = args[3];
