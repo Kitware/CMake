@@ -8,5 +8,5 @@ CMake Warning \(dev\) at LOCATION-and-TARGET_OBJECTS.cmake:[0-9]+ \(get_target_p
   \$<TARGET_FILE>, as appropriate.
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.

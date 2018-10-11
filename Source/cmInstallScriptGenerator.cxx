@@ -37,9 +37,9 @@ void cmInstallScriptGenerator::AddScriptInstallRule(std::ostream& os,
                                                     std::string const& script)
 {
   if (this->Code) {
-    os << indent.Next() << script << "\n";
+    os << indent << script << "\n";
   } else {
-    os << indent.Next() << "include(\"" << script << "\")\n";
+    os << indent << "include(\"" << script << "\")\n";
   }
 }
 

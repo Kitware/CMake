@@ -5,4 +5,4 @@
 
   does not contain a CMakeLists.txt file.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

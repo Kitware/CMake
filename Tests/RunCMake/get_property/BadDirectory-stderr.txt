@@ -3,4 +3,4 @@
   found.  This could be because the directory argument was invalid or, it is
   valid but has not been processed yet.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

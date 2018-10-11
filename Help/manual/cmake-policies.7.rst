@@ -51,6 +51,14 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.14
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0082: Install rules from add_subdirectory() are interleaved with those in caller. </policy/CMP0082>
+
 Policies Introduced by CMake 3.13
 =================================
 

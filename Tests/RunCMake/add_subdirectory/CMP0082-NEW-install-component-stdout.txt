@@ -1,0 +1,4 @@
+^-- Install configuration: "[^\n]*"
+-- Install component: "Unspecified"
+-- sub
+-- top$

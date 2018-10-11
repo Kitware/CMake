@@ -38,6 +38,10 @@ public:
                      bool exclude_from_all);
   ~cmInstallGenerator() override;
 
+  virtual bool HaveInstall();
+  virtual void CheckCMP0082(bool& haveSubdirectoryInstall,
+                            bool& haveInstallAfterSubdirectory);
+
   void AddInstallRule(
     std::ostream& os, std::string const& dest, cmInstallType type,
     std::vector<std::string> const& files, bool optional = false,
