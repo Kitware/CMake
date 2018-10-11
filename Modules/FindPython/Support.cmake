@@ -230,7 +230,7 @@ if (${_PYTHON_PREFIX}_FIND_VERSION_COUNT GREATER 1)
   endif()
 endif()
 
-# Anaconda distribution: define which architectures can be used
+# Python and Anaconda distributions: define which architectures can be used
 if (CMAKE_SIZEOF_VOID_P)
   # In this case, search only for 64bit or 32bit
   math (EXPR _${_PYTHON_PREFIX}_ARCH "${CMAKE_SIZEOF_VOID_P} * 8")
@@ -336,9 +336,13 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                     NAMES_PER_DIR
                     HINTS ${_${_PYTHON_PREFIX}_HINTS}
                     PATHS [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
+                          [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+                          [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
                           [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
+                          [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+                          [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\IronPython\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
@@ -393,9 +397,13 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                           ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                     NAMES_PER_DIR
                     PATHS [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
+                          [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+                          [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
                           [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
+                          [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+                          [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\IronPython\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
@@ -463,6 +471,23 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   endif()
 
   if (${_PYTHON_PREFIX}_Interpreter_FOUND)
+    if (NOT CMAKE_SIZEOF_VOID_P)
+      # determine interpreter architecture
+      execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; print(sys.maxsize > 2**32)"
+                       RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                       OUTPUT_VARIABLE ${_PYTHON_PREFIX}_IS64BIT
+                       ERROR_VARIABLE ${_PYTHON_PREFIX}_IS64BIT)
+      if (NOT _${_PYTHON_PREFIX}_RESULT)
+        if (${_PYTHON_PREFIX}_IS64BIT)
+          set (_${_PYTHON_PREFIX}_ARCH 64)
+          set (_${_PYTHON_PREFIX}_ARCH2 64)
+        else()
+          set (_${_PYTHON_PREFIX}_ARCH 32)
+          set (_${_PYTHON_PREFIX}_ARCH2 32)
+        endif()
+      endif()
+    endif()
+
     # retrieve interpreter identity
     execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -V
                      RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
@@ -769,9 +794,15 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
       set (_${_PYTHON_PREFIX}_REGISTRY_PATHS
         [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
+        [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+        [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
         [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+        [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
         [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
-        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath])
+        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
+        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath])
 
       if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
         find_library (${_PYTHON_PREFIX}_LIBRARY_RELEASE
