@@ -1289,14 +1289,6 @@ bool cmListCommand::HandleFilterCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  const std::string& listName = args[1];
-  // expand the variable
-  std::vector<std::string> varArgsExpanded;
-  if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command FILTER requires list to be present.");
-    return false;
-  }
-
   const std::string& op = args[2];
   bool includeMatches;
   if (op == "INCLUDE") {
@@ -1305,6 +1297,14 @@ bool cmListCommand::HandleFilterCommand(std::vector<std::string> const& args)
     includeMatches = false;
   } else {
     this->SetError("sub-command FILTER does not recognize operator " + op);
+    return false;
+  }
+
+  const std::string& listName = args[1];
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  if (!this->GetList(varArgsExpanded, listName)) {
+    this->SetError("sub-command FILTER requires list to be present.");
     return false;
   }
 
