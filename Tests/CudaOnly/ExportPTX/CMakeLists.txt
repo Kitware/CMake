@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project (CudaOnlyExportPTX CUDA)
+project (ExportPTX CUDA)
 
 #Goal for this example:
 # How to generate PTX files instead of OBJECT files

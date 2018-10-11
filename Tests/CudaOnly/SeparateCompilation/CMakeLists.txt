@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.7)
-project (CudaOnlySeparateCompilation CUDA)
+project (SeparateCompilation CUDA)
 
 #Goal for this example:
 #Build a static library that defines multiple methods and kernels that

@@ -2679,6 +2679,13 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     // Specify the compiler program database file if configured.
     std::string pdb = this->GeneratorTarget->GetCompilePDBPath(configName);
     if (!pdb.empty()) {
+      if (this->GlobalGenerator->IsCudaEnabled()) {
+        // CUDA does not quote paths with spaces correctly when forwarding
+        // this to the host compiler.  Use a relative path to avoid spaces.
+        // FIXME: We can likely do this even when CUDA is not involved,
+        // but for now we will make a minimal change.
+        pdb = this->ConvertPath(pdb, true);
+      }
       ConvertToWindowsSlash(pdb);
       e2.Element("ProgramDataBaseFileName", pdb);
     }
@@ -2819,15 +2826,19 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   // Specify the compiler program database file if configured.
   std::string pdb = this->GeneratorTarget->GetCompilePDBPath(configName);
   if (!pdb.empty()) {
-    // CUDA does not have a field for this and does not honor the
-    // ProgramDataBaseFileName field in ClCompile.  Work around this
-    // limitation by creating the directory and passing the flag ourselves.
+    // CUDA does not make the directory if it is non-standard.
     std::string const pdbDir = cmSystemTools::GetFilenamePath(pdb);
     cmSystemTools::MakeDirectory(pdbDir);
-    pdb = this->ConvertPath(pdb, true);
-    ConvertToWindowsSlash(pdb);
-    std::string const clFd = "-Xcompiler=\"-Fd\\\"" + pdb + "\\\"\"";
-    cudaOptions.AppendFlagString("AdditionalOptions", clFd);
+    if (cmSystemTools::VersionCompareGreaterEq(
+          "9.2", this->GlobalGenerator->GetPlatformToolsetCudaString())) {
+      // CUDA does not have a field for this and does not honor the
+      // ProgramDataBaseFileName field in ClCompile.  Work around this
+      // limitation by creating the directory and passing the flag ourselves.
+      pdb = this->ConvertPath(pdb, true);
+      ConvertToWindowsSlash(pdb);
+      std::string const clFd = "-Xcompiler=\"-Fd\\\"" + pdb + "\\\"\"";
+      cudaOptions.AppendFlagString("AdditionalOptions", clFd);
+    }
   }
 
   // CUDA automatically passes the proper '--machine' flag to nvcc
