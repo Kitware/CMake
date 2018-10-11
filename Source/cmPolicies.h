@@ -236,7 +236,7 @@ class cmMakefile;
     "target_link_libraries allows use with targets in other directories.", 3, \
     13, 0, cmPolicies::WARN)                                                  \
   SELECT(POLICY, CMP0080,                                                     \
-         "BundleUtilities cannot be included at configure time", 3, 13, 0,    \
+         "BundleUtilities cannot be included at configure time.", 3, 13, 0,   \
          cmPolicies::WARN)                                                    \
   SELECT(POLICY, CMP0081,                                                     \
          "Relative paths not allowed in LINK_DIRECTORIES target property.",   \
