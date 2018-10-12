@@ -640,6 +640,7 @@ ExternalProject_Add(${proj}
   CONFIGURE_COMMAND "${configure_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "configure"
   BUILD_COMMAND "${build_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "build"
   INSTALL_COMMAND "${install_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "install"
+  LOG_MERGED_STDOUTERR 1
   LOG_DIR ${CMAKE_CURRENT_BINARY_DIR}/different_log
   LOG_DOWNLOAD 1
   LOG_PATCH 1

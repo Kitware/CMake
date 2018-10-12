@@ -544,6 +544,9 @@ External Project Definition
     ``LOG_TEST <bool>``
       When enabled, the output of the test step is logged to files.
 
+    ``LOG_MERGED_STDOUTERR <bool>``
+      When enabled, the output the step is not split by stdout and stderr.
+
   **Terminal Access Options:**
     Steps can be given direct access to the terminal in some cases. Giving a
     step access to the terminal may allow it to receive terminal input if
@@ -1946,21 +1949,29 @@ endif()
   # Wrap the command in a script to log output to files.
   set(script ${stamp_dir}/${name}-${step}-$<CONFIG>.cmake)
   set(logbase ${log_dir}/${name}-${step})
+  get_property(log_merged TARGET ${name} PROPERTY _EP_LOG_MERGED_STDOUTERR)
+  if (log_merged)
+    set(stdout_log "${logbase}.log")
+    set(stderr_log "${logbase}.log")
+  else()
+    set(stdout_log "${logbase}-out.log")
+    set(stderr_log "${logbase}-err.log")
+  endif()
   set(code "
 ${code_cygpath_make}
 set(command \"${command}\")
 execute_process(
   COMMAND \${command}
   RESULT_VARIABLE result
-  OUTPUT_FILE \"${logbase}-out.log\"
-  ERROR_FILE \"${logbase}-err.log\"
+  OUTPUT_FILE \"${stdout_log}\"
+  ERROR_FILE \"${stderr_log}\"
   )
 if(result)
   set(msg \"Command failed: \${result}\\n\")
   foreach(arg IN LISTS command)
     set(msg \"\${msg} '\${arg}'\")
   endforeach()
-  set(msg \"\${msg}\\nSee also\\n  ${logbase}-*.log\")
+  set(msg \"\${msg}\\nSee also\\n  ${stderr_log}\")
   message(FATAL_ERROR \"\${msg}\")
 else()
   set(msg \"${name} ${step} command succeeded.  See also ${logbase}-*.log\")
