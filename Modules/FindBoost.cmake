@@ -1740,6 +1740,7 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
     list(APPEND _boost_RELEASE_NAMES
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}${_boost_ARCHITECTURE_TAG}-${Boost_LIB_VERSION}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}
+      ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component}${_boost_MULTITHREADED}
       ${Boost_LIB_PREFIX}${Boost_NAMESPACE}_${component} )
     if(_boost_STATIC_RUNTIME_WORKAROUND)
       set(_boost_RELEASE_STATIC_ABI_TAG "-s${_boost_RELEASE_ABI_TAG}")
