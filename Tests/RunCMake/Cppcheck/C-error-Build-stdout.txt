@@ -1,0 +1,1 @@
+.*Error: cppcheck reported failure.*error.*warning.*style.*performance.*information.*

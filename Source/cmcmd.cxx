@@ -323,11 +323,15 @@ static int HandleCppCheck(const std::string& runCmd,
       stdErr.find("(performance)") != std::string::npos ||
       stdErr.find("(portability)") != std::string::npos ||
       stdErr.find("(information)") != std::string::npos) {
-    std::cerr << "Warning: cppcheck reported diagnostics:\n";
+    if (ret == 0) {
+      std::cerr << "Warning: cppcheck reported diagnostics:\n";
+    } else {
+      std::cerr << "Error: cppcheck reported failure:\n";
+    }
   }
   std::cerr << stdErr;
-  // ignore errors so build continues
-  return 0;
+
+  return ret;
 }
 
 typedef int (*CoCompileHandler)(const std::string&, const std::string&,
