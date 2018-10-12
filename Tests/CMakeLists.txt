@@ -1409,6 +1409,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindLibRHash)
   endif()
 
+  if(CMake_TEST_FindLibinput)
+    add_subdirectory(FindLibinput)
+  endif()
+
   if(CMake_TEST_FindLibUV)
     add_subdirectory(FindLibUV)
   endif()

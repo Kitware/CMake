@@ -39,6 +39,7 @@ The following individuals and institutions are among the Contributors:
 * Alexander Neundorf <neundorf@kde.org>
 * Alexander Smorkalov <alexander.smorkalov@itseez.com>
 * Alexey Sokolov <sokolov@google.com>
+* Alex Merry <alex.merry@kde.org>
 * Alex Turbov <i.zaufi@gmail.com>
 * Andreas Pakulat <apaku@gmx.de>
 * Andreas Schneider <asn@cryptomilk.org>
@@ -65,6 +66,7 @@ The following individuals and institutions are among the Contributors:
 * Kelly Thompson <kgt@lanl.gov>
 * Konstantin Podsvirov <konstantin@podsvirov.pro>
 * Mario Bensi <mbensi@ipsquad.net>
+* Martin Gräßlin <mgraesslin@kde.org>
 * Mathieu Malaterre <mathieu.malaterre@gmail.com>
 * Matthaeus G. Chajdas
 * Matthias Kretz <kretz@kde.org>

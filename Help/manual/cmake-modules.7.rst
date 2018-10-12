@@ -165,6 +165,7 @@ They are normally called through the :command:`find_package` command.
    /module/FindLAPACK
    /module/FindLATEX
    /module/FindLibArchive
+   /module/FindLibinput
    /module/FindLibLZMA
    /module/FindLibXml2
    /module/FindLibXslt
