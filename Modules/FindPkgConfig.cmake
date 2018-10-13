@@ -540,12 +540,15 @@ endmacro()
   :command:`target_link_libraries`. The ``GLOBAL`` argument will make the
   imported target available in global scope.
 
-  Each ``<moduleSpec>`` must be in one of the following formats::
+  Each ``<moduleSpec>`` can be either a bare module name or it can be a
+  module name with a version constraint (operators ``=``, ``<``, ``>``,
+  ``<=`` and ``>=`` are supported).  The following are examples for a module
+  named ``foo`` with various constraints::
 
-    {moduleName}            ... matches any version
-    {moduleName}>={version} ... at least version <version> is required
-    {moduleName}={version}  ... exactly version <version> is required
-    {moduleName}<={version} ... modules must not be newer than <version>
+    foo           # Any version matches
+    foo<2         # Only match versions before 2
+    foo>=3.1      # Match any version from 3.1 or later
+    foo=1.2.3     # Foo must be exactly version 1.2.3
 
   The following variables may be set upon return.  Two sets of values exist,
   one for the common case (``<XXX> = <prefix>``) and another for the
