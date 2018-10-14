@@ -4,16 +4,6 @@
 
 #include "cmMakefile.h"
 
-cmCustomCommand::cmCustomCommand()
-  : Backtrace()
-{
-  this->HaveComment = false;
-  this->EscapeOldStyle = true;
-  this->EscapeAllowMakeVars = false;
-  this->UsesTerminal = false;
-  this->CommandExpandLists = false;
-}
-
 cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
                                  const std::vector<std::string>& outputs,
                                  const std::vector<std::string>& byproducts,
