@@ -12,6 +12,9 @@ EN	; This entry point shouldn't be found without fixing
  ; This line not executable
  D T6^ZZCOVTST
  ;
+% ; a line to test for a problem where % was dropped
+ N Do,Re,Mi
+ S Do="A#"
 T1 ; This line should always be found
  N D
  S D=2
