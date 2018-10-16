@@ -467,6 +467,17 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
           cmSystemTools::ComputeFileHash(local_file, cmCryptoHash::AlgoMD5);
       }
 
+      // Generate Done.xml right before it is submitted.
+      // The reason for this is two-fold:
+      // 1) It must be generated after some other part has been submitted
+      //    so we have a buildId to refer to in its contents.
+      // 2) By generating Done.xml here its timestamp will be as late as
+      //    possible. This gives us a more accurate record of how long the
+      //    entire build took to complete.
+      if (file == "Done.xml") {
+        this->CTest->GenerateDoneFile();
+      }
+
       if (!cmSystemTools::FileExists(local_file)) {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
                    "   Cannot find file: " << local_file << std::endl);
@@ -1420,7 +1431,6 @@ int cmCTestSubmitHandler::ProcessHandler()
 
   // Submit Done.xml last
   if (this->SubmitPart[cmCTest::PartDone]) {
-    this->CTest->GenerateDoneFile();
     files.push_back("Done.xml");
   }
 
