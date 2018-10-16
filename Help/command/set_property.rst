@@ -3,21 +3,22 @@ set_property
 
 Set a named property in a given scope.
 
-::
+.. code-block:: cmake
 
-  set_property(<GLOBAL                            |
-                DIRECTORY [dir]                   |
-                TARGET    [target1 [target2 ...]] |
-                SOURCE    [src1 [src2 ...]]       |
-                INSTALL   [file1 [file2 ...]]     |
-                TEST      [test1 [test2 ...]]     |
-                CACHE     [entry1 [entry2 ...]]>
+  set_property(<GLOBAL                      |
+                DIRECTORY [<dir>]           |
+                TARGET    [<target1> ...]   |
+                SOURCE    [<src1> ...]      |
+                INSTALL   [<file1> ...]     |
+                TEST      [<test1> ...]     |
+                CACHE     [<entry1> ...]    >
                [APPEND] [APPEND_STRING]
-               PROPERTY <name> [value1 [value2 ...]])
+               PROPERTY <name> [value1 ...])
 
-Set one property on zero or more objects of a scope.  The first
-argument determines the scope in which the property is set.  It must
-be one of the following:
+Sets one property on zero or more objects of a scope.
+
+The first argument determines the scope in which the property is set.
+It must be one of the following:
 
 ``GLOBAL``
   Scope is unique and does not accept a name.

@@ -48,7 +48,7 @@ Search and Replace
 
 .. _FIND:
 
-::
+.. code-block:: cmake
 
   string(FIND <string> <substring> <output variable> [REVERSE])
 
@@ -59,7 +59,7 @@ substring.  If the substring is not found, a position of -1 is returned.
 
 .. _REPLACE:
 
-::
+.. code-block:: cmake
 
   string(REPLACE <match_string>
          <replace_string> <output variable>
@@ -73,7 +73,7 @@ Regular Expressions
 
 .. _`REGEX MATCH`:
 
-::
+.. code-block:: cmake
 
   string(REGEX MATCH <regular_expression>
          <output variable> <input> [<input>...])
@@ -83,7 +83,7 @@ All ``<input>`` arguments are concatenated before matching.
 
 .. _`REGEX MATCHALL`:
 
-::
+.. code-block:: cmake
 
   string(REGEX MATCHALL <regular_expression>
          <output variable> <input> [<input>...])
@@ -94,7 +94,7 @@ All ``<input>`` arguments are concatenated before matching.
 
 .. _`REGEX REPLACE`:
 
-::
+.. code-block:: cmake
 
   string(REGEX REPLACE <regular_expression>
          <replace_expression> <output variable>
@@ -177,7 +177,7 @@ Manipulation
 
 .. _APPEND:
 
-::
+.. code-block:: cmake
 
   string(APPEND <string variable> [<input>...])
 
@@ -185,7 +185,7 @@ Append all the input arguments to the string.
 
 .. _PREPEND:
 
-::
+.. code-block:: cmake
 
   string(PREPEND <string variable> [<input>...])
 
@@ -193,7 +193,7 @@ Prepend all the input arguments to the string.
 
 .. _CONCAT:
 
-::
+.. code-block:: cmake
 
   string(CONCAT <output variable> [<input>...])
 
@@ -202,7 +202,7 @@ the result in the named output variable.
 
 .. _JOIN:
 
-::
+.. code-block:: cmake
 
   string(JOIN <glue> <output variable> [<input>...])
 
@@ -215,7 +215,7 @@ special characters like ``;`` in them.
 
 .. _TOLOWER:
 
-::
+.. code-block:: cmake
 
   string(TOLOWER <string1> <output variable>)
 
@@ -223,7 +223,7 @@ Convert string to lower characters.
 
 .. _TOUPPER:
 
-::
+.. code-block:: cmake
 
   string(TOUPPER <string1> <output variable>)
 
@@ -231,7 +231,7 @@ Convert string to upper characters.
 
 .. _LENGTH:
 
-::
+.. code-block:: cmake
 
   string(LENGTH <string> <output variable>)
 
@@ -239,7 +239,7 @@ Store in an output variable a given string's length.
 
 .. _SUBSTRING:
 
-::
+.. code-block:: cmake
 
   string(SUBSTRING <string> <begin> <length> <output variable>)
 
@@ -253,7 +253,7 @@ If string is shorter than length then end of string is used instead.
 
 .. _STRIP:
 
-::
+.. code-block:: cmake
 
   string(STRIP <string> <output variable>)
 
@@ -262,7 +262,7 @@ trailing spaces removed.
 
 .. _GENEX_STRIP:
 
-::
+.. code-block:: cmake
 
   string(GENEX_STRIP <input string> <output variable>)
 
@@ -274,7 +274,7 @@ Comparison
 
 .. _COMPARE:
 
-::
+.. code-block:: cmake
 
   string(COMPARE LESS <string1> <string2> <output variable>)
   string(COMPARE GREATER <string1> <string2> <output variable>)
@@ -292,7 +292,7 @@ Hashing
 
 .. _`HASH`:
 
-::
+.. code-block:: cmake
 
   string(<HASH> <output variable> <input>)
 
@@ -325,7 +325,7 @@ Generation
 
 .. _ASCII:
 
-::
+.. code-block:: cmake
 
   string(ASCII <number> [<number> ...] <output variable>)
 
@@ -333,7 +333,7 @@ Convert all numbers into corresponding ASCII characters.
 
 .. _CONFIGURE:
 
-::
+.. code-block:: cmake
 
   string(CONFIGURE <string1> <output variable>
          [@ONLY] [ESCAPE_QUOTES])
@@ -342,7 +342,7 @@ Transform a string like :command:`configure_file` transforms a file.
 
 .. _MAKE_C_IDENTIFIER:
 
-::
+.. code-block:: cmake
 
   string(MAKE_C_IDENTIFIER <input string> <output variable>)
 
@@ -353,7 +353,7 @@ the result.
 
 .. _RANDOM:
 
-::
+.. code-block:: cmake
 
   string(RANDOM [LENGTH <length>] [ALPHABET <alphabet>]
          [RANDOM_SEED <seed>] <output variable>)
@@ -366,7 +366,7 @@ random number generator.
 
 .. _TIMESTAMP:
 
-::
+.. code-block:: cmake
 
   string(TIMESTAMP <output variable> [<format string>] [UTC])
 
@@ -421,7 +421,7 @@ If no explicit ``<format string>`` is given it will default to:
 
 .. _UUID:
 
-::
+.. code-block:: cmake
 
   string(UUID <output variable> NAMESPACE <namespace> NAME <name>
          TYPE <MD5|SHA1> [UPPER])

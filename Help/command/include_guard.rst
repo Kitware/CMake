@@ -3,7 +3,7 @@ include_guard
 
 Provides an include guard for the file currently being processed by CMake.
 
-::
+.. code-block:: cmake
 
   include_guard([DIRECTORY|GLOBAL])
 

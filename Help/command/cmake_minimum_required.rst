@@ -1,10 +1,14 @@
 cmake_minimum_required
 ----------------------
 
-Set the minimum required version of cmake for a project and
-update `Policy Settings`_ to match the version given::
+Require a minimum version of cmake.
+
+.. code-block:: cmake
 
   cmake_minimum_required(VERSION <min>[...<max>] [FATAL_ERROR])
+
+Sets the minimum required version of cmake for a project.
+Also updates the policy settings as explained below.
 
 ``<min>`` and the optional ``<max>`` are each CMake versions of the form
 ``major.minor[.patch[.tweak]]``, and the ``...`` is literal.
@@ -47,13 +51,17 @@ as of a given CMake version and tells newer CMake versions to warn
 about their new policies.
 
 When a ``<min>`` version higher than 2.4 is specified the command
-implicitly invokes::
+implicitly invokes
+
+.. code-block:: cmake
 
   cmake_policy(VERSION <min>[...<max>])
 
 which sets CMake policies based on the range of versions specified.
 When a ``<min>`` version 2.4 or lower is given the command implicitly
-invokes::
+invokes
+
+.. code-block:: cmake
 
   cmake_policy(VERSION 2.4[...<max>])
 
