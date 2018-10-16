@@ -391,8 +391,9 @@ inside out, e.g. ``${outer_${inner_variable}_variable}``.
 
 Literal variable references may consist of alphanumeric characters,
 the characters ``/_.+-``, and `Escape Sequences`_.  Nested references
-may be used to evaluate variables of any name.  (See also policy
-:policy:`CMP0053` documentation for historical considerations.)
+may be used to evaluate variables of any name.  See also policy
+:policy:`CMP0053` documentation for historical considerations and reasons why
+the ``$`` is also technically permitted but is discouraged.
 
 The `Variables`_ section documents the scope of variable names
 and how their values are set.
