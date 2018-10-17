@@ -26,7 +26,7 @@ This will define the following variables in your project:
   the libraries to link against to use libinput.
 ``Libinput_INCLUDE_DIRS``
   where to find the libinput headers.
-``Libinput_DEFINITIONS``
+``Libinput_COMPILE_OPTIONS``
   this should be passed to target_compile_options(), if the
   target is not used for linking
 
@@ -38,7 +38,7 @@ This will define the following variables in your project:
 find_package(PkgConfig QUIET)
 pkg_check_modules(PKG_Libinput QUIET libinput)
 
-set(Libinput_DEFINITIONS ${PKG_Libinput_CFLAGS_OTHER})
+set(Libinput_COMPILE_OPTIONS ${PKG_Libinput_CFLAGS_OTHER})
 set(Libinput_VERSION ${PKG_Libinput_VERSION})
 
 find_path(Libinput_INCLUDE_DIR
@@ -69,7 +69,7 @@ if(Libinput_FOUND AND NOT TARGET Libinput::Libinput)
   add_library(Libinput::Libinput UNKNOWN IMPORTED)
   set_target_properties(Libinput::Libinput PROPERTIES
     IMPORTED_LOCATION "${Libinput_LIBRARY}"
-    INTERFACE_COMPILE_OPTIONS "${Libinput_DEFINITIONS}"
+    INTERFACE_COMPILE_OPTIONS "${Libinput_COMPILE_OPTIONS}"
     INTERFACE_INCLUDE_DIRECTORIES "${Libinput_INCLUDE_DIR}"
   )
 endif()
