@@ -346,8 +346,7 @@ bool cmListCommand::HandleRemoveItemCommand(
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command REMOVE_ITEM requires list to be present.");
-    return false;
+    return true;
   }
 
   std::vector<std::string> remove(args.begin() + 2, args.end());
@@ -376,8 +375,7 @@ bool cmListCommand::HandleReverseCommand(std::vector<std::string> const& args)
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command REVERSE requires list to be present.");
-    return false;
+    return true;
   }
 
   std::string value = cmJoin(cmReverseRange(varArgsExpanded), ";");
@@ -399,9 +397,7 @@ bool cmListCommand::HandleRemoveDuplicatesCommand(
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError(
-      "sub-command REMOVE_DUPLICATES requires list to be present.");
-    return false;
+    return true;
   }
 
   std::vector<std::string>::const_iterator argsEnd =
@@ -1152,8 +1148,7 @@ bool cmListCommand::HandleSortCommand(std::vector<std::string> const& args)
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command SORT requires list to be present.");
-    return false;
+    return true;
   }
 
   if ((sortCompare == cmStringSorter::Compare::STRING) &&
@@ -1230,13 +1225,17 @@ bool cmListCommand::HandleRemoveAtCommand(std::vector<std::string> const& args)
   const std::string& listName = args[1];
   // expand the variable
   std::vector<std::string> varArgsExpanded;
-  if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command REMOVE_AT requires list to be present.");
-    return false;
-  }
-  // FIXME: Add policy to make non-existing lists an error like empty lists.
-  if (varArgsExpanded.empty()) {
-    this->SetError("REMOVE_AT given empty list");
+  if (!this->GetList(varArgsExpanded, listName) || varArgsExpanded.empty()) {
+    std::ostringstream str;
+    str << "index: ";
+    for (size_t i = 1; i < args.size(); ++i) {
+      str << args[i];
+      if (i != args.size() - 1) {
+        str << ", ";
+      }
+    }
+    str << " out of range (0, 0)";
+    this->SetError(str.str());
     return false;
   }
 
@@ -1289,14 +1288,6 @@ bool cmListCommand::HandleFilterCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  const std::string& listName = args[1];
-  // expand the variable
-  std::vector<std::string> varArgsExpanded;
-  if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command FILTER requires list to be present.");
-    return false;
-  }
-
   const std::string& op = args[2];
   bool includeMatches;
   if (op == "INCLUDE") {
@@ -1306,6 +1297,13 @@ bool cmListCommand::HandleFilterCommand(std::vector<std::string> const& args)
   } else {
     this->SetError("sub-command FILTER does not recognize operator " + op);
     return false;
+  }
+
+  const std::string& listName = args[1];
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  if (!this->GetList(varArgsExpanded, listName)) {
+    return true;
   }
 
   const std::string& mode = args[3];
