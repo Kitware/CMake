@@ -20,6 +20,7 @@
 #include "cmInstallGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
@@ -32,7 +33,8 @@ class cmExecutionStatus;
 
 static cmInstallTargetGenerator* CreateInstallTargetGenerator(
   cmTarget& target, const cmInstallCommandArguments& args, bool impLib,
-  bool forceOpt = false, bool namelink = false)
+  cmListFileBacktrace const& backtrace, bool forceOpt = false,
+  bool namelink = false)
 {
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(target.GetMakefile());
@@ -42,7 +44,8 @@ static cmInstallTargetGenerator* CreateInstallTargetGenerator(
   return new cmInstallTargetGenerator(
     target.GetName(), args.GetDestination().c_str(), impLib,
     args.GetPermissions().c_str(), args.GetConfigurations(), component,
-    message, args.GetExcludeFromAll(), args.GetOptional() || forceOpt);
+    message, args.GetExcludeFromAll(), args.GetOptional() || forceOpt,
+    backtrace);
 }
 
 static cmInstallFilesGenerator* CreateInstallFilesGenerator(
@@ -435,13 +438,13 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           // This is a DLL platform.
           if (!archiveArgs.GetDestination().empty()) {
             // The import library uses the ARCHIVE properties.
-            archiveGenerator =
-              CreateInstallTargetGenerator(target, archiveArgs, true);
+            archiveGenerator = CreateInstallTargetGenerator(
+              target, archiveArgs, true, this->Makefile->GetBacktrace());
           }
           if (!runtimeArgs.GetDestination().empty()) {
             // The DLL uses the RUNTIME properties.
-            runtimeGenerator =
-              CreateInstallTargetGenerator(target, runtimeArgs, false);
+            runtimeGenerator = CreateInstallTargetGenerator(
+              target, runtimeArgs, false, this->Makefile->GetBacktrace());
           }
           if ((archiveGenerator == nullptr) && (runtimeGenerator == nullptr)) {
             this->SetError("Library TARGETS given no DESTINATION!");
@@ -459,8 +462,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 
             // Use the FRAMEWORK properties.
             if (!frameworkArgs.GetDestination().empty()) {
-              frameworkGenerator =
-                CreateInstallTargetGenerator(target, frameworkArgs, false);
+              frameworkGenerator = CreateInstallTargetGenerator(
+                target, frameworkArgs, false, this->Makefile->GetBacktrace());
             } else {
               std::ostringstream e;
               e << "TARGETS given no FRAMEWORK DESTINATION for shared library "
@@ -473,14 +476,15 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             // The shared library uses the LIBRARY properties.
             if (!libraryArgs.GetDestination().empty()) {
               if (namelinkMode != cmInstallTargetGenerator::NamelinkModeOnly) {
-                libraryGenerator =
-                  CreateInstallTargetGenerator(target, libraryArgs, false);
+                libraryGenerator = CreateInstallTargetGenerator(
+                  target, libraryArgs, false, this->Makefile->GetBacktrace());
                 libraryGenerator->SetNamelinkMode(
                   cmInstallTargetGenerator::NamelinkModeSkip);
               }
               if (namelinkMode != cmInstallTargetGenerator::NamelinkModeSkip) {
                 namelinkGenerator = CreateInstallTargetGenerator(
-                  target, libraryArgs, false, false, true);
+                  target, libraryArgs, false, this->Makefile->GetBacktrace(),
+                  false, true);
                 namelinkGenerator->SetNamelinkMode(
                   cmInstallTargetGenerator::NamelinkModeOnly);
               }
@@ -508,8 +512,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 
           // Use the FRAMEWORK properties.
           if (!frameworkArgs.GetDestination().empty()) {
-            frameworkGenerator =
-              CreateInstallTargetGenerator(target, frameworkArgs, false);
+            frameworkGenerator = CreateInstallTargetGenerator(
+              target, frameworkArgs, false, this->Makefile->GetBacktrace());
           } else {
             std::ostringstream e;
             e << "TARGETS given no FRAMEWORK DESTINATION for static library "
@@ -521,8 +525,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         } else {
           // Static libraries use ARCHIVE properties.
           if (!archiveArgs.GetDestination().empty()) {
-            archiveGenerator =
-              CreateInstallTargetGenerator(target, archiveArgs, false);
+            archiveGenerator = CreateInstallTargetGenerator(
+              target, archiveArgs, false, this->Makefile->GetBacktrace());
           } else {
             std::ostringstream e;
             e << "TARGETS given no ARCHIVE DESTINATION for static library "
@@ -536,8 +540,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       case cmStateEnums::MODULE_LIBRARY: {
         // Modules use LIBRARY properties.
         if (!libraryArgs.GetDestination().empty()) {
-          libraryGenerator =
-            CreateInstallTargetGenerator(target, libraryArgs, false);
+          libraryGenerator = CreateInstallTargetGenerator(
+            target, libraryArgs, false, this->Makefile->GetBacktrace());
           libraryGenerator->SetNamelinkMode(namelinkMode);
           namelinkOnly =
             (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
@@ -563,8 +567,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             return false;
           }
 
-          objectGenerator =
-            CreateInstallTargetGenerator(target, objectArgs, false);
+          objectGenerator = CreateInstallTargetGenerator(
+            target, objectArgs, false, this->Makefile->GetBacktrace());
         } else {
           // Installing an OBJECT library without a destination transforms
           // it to an INTERFACE library.  It installs no files but can be
@@ -575,15 +579,15 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         if (target.IsAppBundleOnApple()) {
           // Application bundles use the BUNDLE properties.
           if (!bundleArgs.GetDestination().empty()) {
-            bundleGenerator =
-              CreateInstallTargetGenerator(target, bundleArgs, false);
+            bundleGenerator = CreateInstallTargetGenerator(
+              target, bundleArgs, false, this->Makefile->GetBacktrace());
           } else if (!runtimeArgs.GetDestination().empty()) {
             bool failure = false;
             if (this->CheckCMP0006(failure)) {
               // For CMake 2.4 compatibility fallback to the RUNTIME
               // properties.
-              bundleGenerator =
-                CreateInstallTargetGenerator(target, runtimeArgs, false);
+              bundleGenerator = CreateInstallTargetGenerator(
+                target, runtimeArgs, false, this->Makefile->GetBacktrace());
             } else if (failure) {
               return false;
             }
@@ -599,8 +603,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         } else {
           // Executables use the RUNTIME properties.
           if (!runtimeArgs.GetDestination().empty()) {
-            runtimeGenerator =
-              CreateInstallTargetGenerator(target, runtimeArgs, false);
+            runtimeGenerator = CreateInstallTargetGenerator(
+              target, runtimeArgs, false, this->Makefile->GetBacktrace());
           } else {
             std::ostringstream e;
             e << "TARGETS given no RUNTIME DESTINATION for executable "
@@ -617,8 +621,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         if (dll_platform && !archiveArgs.GetDestination().empty() &&
             target.IsExecutableWithExports()) {
           // The import library uses the ARCHIVE properties.
-          archiveGenerator =
-            CreateInstallTargetGenerator(target, archiveArgs, true, true);
+          archiveGenerator = CreateInstallTargetGenerator(
+            target, archiveArgs, true, this->Makefile->GetBacktrace(), true);
         }
       } break;
       case cmStateEnums::INTERFACE_LIBRARY:
