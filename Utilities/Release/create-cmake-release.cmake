@@ -54,7 +54,7 @@ cd \${name}-build &&
   -DCMAKE_INSTALL_PREFIX=\"\$inst/\" \\
   -DCMAKE_DOC_DIR=doc/cmake \\
   -DSPHINX_EXECUTABLE=\"${SPHINX_EXECUTABLE}\" \\
-  -DSPHINX_HTML=ON -DSPHINX_MAN=ON &&
+  -DSPHINX_HTML=ON -DSPHINX_MAN=ON -DSPHINX_QTHELP=ON &&
 make install &&
 cd .. &&
 tar czf \${name}.tar.gz \${name} ||
