@@ -362,7 +362,8 @@ public:
   };
   TargetOrString ResolveTargetReference(std::string const& name) const;
 
-  cmLinkItem ResolveLinkItem(std::string const& name) const;
+  cmLinkItem ResolveLinkItem(std::string const& name,
+                             cmListFileBacktrace const& bt) const;
 
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
@@ -838,6 +839,7 @@ private:
                        std::vector<cmLinkItem>& items,
                        bool& hadHeadSensitiveCondition) const;
   void LookupLinkItems(std::vector<std::string> const& names,
+                       cmListFileBacktrace const& bt,
                        std::vector<cmLinkItem>& items) const;
 
   void GetSourceFiles(std::vector<std::string>& files,

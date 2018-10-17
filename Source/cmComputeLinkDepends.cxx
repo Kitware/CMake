@@ -6,6 +6,7 @@
 #include "cmComputeComponentGraph.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
@@ -565,7 +566,7 @@ cmLinkItem cmComputeLinkDepends::ResolveLinkItem(int depender_index,
       from = depender;
     }
   }
-  return from->ResolveLinkItem(name);
+  return from->ResolveLinkItem(name, cmListFileBacktrace());
 }
 
 void cmComputeLinkDepends::InferDependencies()

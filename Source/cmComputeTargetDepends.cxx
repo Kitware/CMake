@@ -6,6 +6,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
@@ -21,8 +22,6 @@
 #include <sstream>
 #include <stdio.h>
 #include <utility>
-
-class cmListFileBacktrace;
 
 /*
 
@@ -208,7 +207,8 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
       for (cmSourceFile const* o : objectFiles) {
         std::string const& objLib = o->GetObjectLibrary();
         if (!objLib.empty()) {
-          cmLinkItem const& objItem = depender->ResolveLinkItem(objLib);
+          cmLinkItem const& objItem =
+            depender->ResolveLinkItem(objLib, cmListFileBacktrace());
           if (emitted.insert(objItem).second) {
             if (depender->GetType() != cmStateEnums::EXECUTABLE &&
                 depender->GetType() != cmStateEnums::STATIC_LIBRARY &&
@@ -230,7 +230,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
       cmLinkImplementation const* impl = depender->GetLinkImplementation(it);
 
       // A target should not depend on itself.
-      emitted.insert(cmLinkItem(depender));
+      emitted.insert(cmLinkItem(depender, cmListFileBacktrace()));
       for (cmLinkImplItem const& lib : impl->Libraries) {
         // Don't emit the same library twice for this target.
         if (emitted.insert(lib).second) {
@@ -246,7 +246,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     std::set<cmLinkItem> const& tutils = depender->GetUtilityItems();
     std::set<cmLinkItem> emitted;
     // A target should not depend on itself.
-    emitted.insert(cmLinkItem(depender));
+    emitted.insert(cmLinkItem(depender, cmListFileBacktrace()));
     for (cmLinkItem const& litem : tutils) {
       // Don't emit the same utility twice for this target.
       if (emitted.insert(litem).second) {
@@ -289,7 +289,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
 
   if (dependee) {
     // A target should not depend on itself.
-    emitted.insert(cmLinkItem(depender));
+    emitted.insert(cmLinkItem(depender, cmListFileBacktrace()));
     this->AddInterfaceDepends(depender_index, dependee, config, emitted);
   }
 }
@@ -327,13 +327,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
       e << "The dependency target \"" << dependee_name << "\" of target \""
         << depender->GetName() << "\" does not exist.";
 
-      cmListFileBacktrace const* backtrace =
-        depender->GetUtilityBacktrace(dependee_name.AsStr());
-      if (backtrace) {
-        cm->IssueMessage(messageType, e.str(), *backtrace);
-      } else {
-        cm->IssueMessage(messageType, e.str());
-      }
+      cm->IssueMessage(messageType, e.str(), dependee_name.Backtrace);
     }
   }
 

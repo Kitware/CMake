@@ -12,15 +12,18 @@ cmLinkItem::cmLinkItem()
 {
 }
 
-cmLinkItem::cmLinkItem(std::string const& n)
+cmLinkItem::cmLinkItem(std::string const& n, cmListFileBacktrace const& bt)
   : String(n)
   , Target(nullptr)
+  , Backtrace(bt)
 {
 }
 
-cmLinkItem::cmLinkItem(cmGeneratorTarget const* t)
+cmLinkItem::cmLinkItem(cmGeneratorTarget const* t,
+                       cmListFileBacktrace const& bt)
   : String()
   , Target(t)
+  , Backtrace(bt)
 {
 }
 
@@ -58,15 +61,12 @@ std::ostream& operator<<(std::ostream& os, cmLinkItem const& item)
 
 cmLinkImplItem::cmLinkImplItem()
   : cmLinkItem()
-  , Backtrace()
   , FromGenex(false)
 {
 }
 
-cmLinkImplItem::cmLinkImplItem(cmLinkItem item, cmListFileBacktrace const& bt,
-                               bool fromGenex)
+cmLinkImplItem::cmLinkImplItem(cmLinkItem item, bool fromGenex)
   : cmLinkItem(std::move(item))
-  , Backtrace(bt)
   , FromGenex(fromGenex)
 {
 }

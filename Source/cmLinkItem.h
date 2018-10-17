@@ -24,10 +24,11 @@ class cmLinkItem
 
 public:
   cmLinkItem();
-  explicit cmLinkItem(std::string const& s);
-  explicit cmLinkItem(cmGeneratorTarget const* t);
+  cmLinkItem(std::string const& s, cmListFileBacktrace const& bt);
+  cmLinkItem(cmGeneratorTarget const* t, cmListFileBacktrace const& bt);
   std::string const& AsStr() const;
   cmGeneratorTarget const* Target;
+  cmListFileBacktrace Backtrace;
   friend bool operator<(cmLinkItem const& l, cmLinkItem const& r);
   friend bool operator==(cmLinkItem const& l, cmLinkItem const& r);
   friend std::ostream& operator<<(std::ostream& os, cmLinkItem const& item);
@@ -37,9 +38,7 @@ class cmLinkImplItem : public cmLinkItem
 {
 public:
   cmLinkImplItem();
-  cmLinkImplItem(cmLinkItem item, cmListFileBacktrace const& bt,
-                 bool fromGenex);
-  cmListFileBacktrace Backtrace;
+  cmLinkImplItem(cmLinkItem item, bool fromGenex);
   bool FromGenex;
 };
 
