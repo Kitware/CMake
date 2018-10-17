@@ -674,16 +674,13 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
 {
   if (!this->UtilityItemsDone) {
     this->UtilityItemsDone = true;
-    std::set<std::string> const& utilities = this->GetUtilities();
-    for (std::string const& i : utilities) {
-      cmListFileBacktrace const* bt = this->GetUtilityBacktrace(i);
+    std::set<BT<std::string>> const& utilities = this->GetUtilities();
+    for (BT<std::string> const& i : utilities) {
       if (cmGeneratorTarget* gt =
-            this->LocalGenerator->FindGeneratorTargetToUse(i)) {
-        this->UtilityItems.insert(
-          cmLinkItem(gt, bt ? *bt : cmListFileBacktrace()));
+            this->LocalGenerator->FindGeneratorTargetToUse(i.Value)) {
+        this->UtilityItems.insert(cmLinkItem(gt, i.Backtrace));
       } else {
-        this->UtilityItems.insert(
-          cmLinkItem(i, bt ? *bt : cmListFileBacktrace()));
+        this->UtilityItems.insert(cmLinkItem(i.Value, i.Backtrace));
       }
     }
   }
@@ -1713,15 +1710,9 @@ cmListFileBacktrace cmGeneratorTarget::GetBacktrace() const
   return this->Target->GetBacktrace();
 }
 
-const std::set<std::string>& cmGeneratorTarget::GetUtilities() const
+const std::set<BT<std::string>>& cmGeneratorTarget::GetUtilities() const
 {
   return this->Target->GetUtilities();
-}
-
-const cmListFileBacktrace* cmGeneratorTarget::GetUtilityBacktrace(
-  const std::string& u) const
-{
-  return this->Target->GetUtilityBacktrace(u);
 }
 
 bool cmGeneratorTarget::HaveWellDefinedOutputFiles() const

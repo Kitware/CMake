@@ -145,7 +145,7 @@ protected:
 
   virtual void WriteExternalProject(
     std::ostream& fout, const std::string& name, const char* path,
-    const char* typeGuid, const std::set<std::string>& dependencies) = 0;
+    const char* typeGuid, const std::set<BT<std::string>>& dependencies) = 0;
 
   std::string ConvertToSolutionPath(const char* path);
 

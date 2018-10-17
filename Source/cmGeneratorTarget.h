@@ -273,8 +273,7 @@ public:
 
   cmListFileBacktrace GetBacktrace() const;
 
-  std::set<std::string> const& GetUtilities() const;
-  cmListFileBacktrace const* GetUtilityBacktrace(const std::string& u) const;
+  std::set<BT<std::string>> const& GetUtilities() const;
 
   bool LinkLanguagePropagatesToDependents() const
   {
