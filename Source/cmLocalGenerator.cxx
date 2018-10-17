@@ -1253,8 +1253,8 @@ void cmLocalGenerator::GetTargetDefines(cmGeneratorTarget const* target,
                                         std::set<std::string>& defines) const
 {
   // Add the export symbol definition for shared library objects.
-  if (const char* exportMacro = target->GetExportMacro()) {
-    this->AppendDefines(defines, exportMacro);
+  if (const std::string* exportMacro = target->GetExportMacro()) {
+    this->AppendDefines(defines, *exportMacro);
   }
 
   // Add preprocessor definitions for this target and configuration.

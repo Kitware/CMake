@@ -2566,8 +2566,9 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   configDefine += configName;
   configDefine += "\"";
   clOptions.AddDefine(configDefine);
-  if (const char* exportMacro = this->GeneratorTarget->GetExportMacro()) {
-    clOptions.AddDefine(exportMacro);
+  if (const std::string* exportMacro =
+        this->GeneratorTarget->GetExportMacro()) {
+    clOptions.AddDefine(*exportMacro);
   }
 
   if (this->MSTools) {
@@ -2863,8 +2864,9 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   configDefine += configName;
   configDefine += "\"";
   cudaOptions.AddDefine(configDefine);
-  if (const char* exportMacro = this->GeneratorTarget->GetExportMacro()) {
-    cudaOptions.AddDefine(exportMacro);
+  if (const std::string* exportMacro =
+        this->GeneratorTarget->GetExportMacro()) {
+    cudaOptions.AddDefine(*exportMacro);
   }
 
   // Get includes for this target

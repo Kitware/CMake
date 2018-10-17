@@ -1730,7 +1730,7 @@ bool cmGeneratorTarget::HaveWellDefinedOutputFiles() const
     this->GetType() == cmStateEnums::EXECUTABLE;
 }
 
-const char* cmGeneratorTarget::GetExportMacro() const
+const std::string* cmGeneratorTarget::GetExportMacro() const
 {
   // Define the symbol for targets that export symbols.
   if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
@@ -1743,7 +1743,7 @@ const char* cmGeneratorTarget::GetExportMacro() const
       in += "_EXPORTS";
       this->ExportMacro = cmSystemTools::MakeCidentifier(in);
     }
-    return this->ExportMacro.c_str();
+    return &this->ExportMacro;
   }
   return nullptr;
 }
