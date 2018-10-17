@@ -62,7 +62,7 @@ within the CMake source directory or any other build directory of your
 choice. Once this has finished successfully, run ``make`` and
 ``make install``.  In summary::
 
- $ ./bootstrap && make && make install
+ $ ./bootstrap && make && sudo make install
 
 Windows
 ^^^^^^^
