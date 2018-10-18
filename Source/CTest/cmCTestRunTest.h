@@ -78,6 +78,10 @@ public:
 
   cmCTest* GetCTest() const { return this->CTest; }
 
+  std::string& GetActualCommand() { return this->ActualCommand; }
+
+  const std::vector<std::string>& GetArguments() { return this->Arguments; }
+
   void FinalizeTest();
 
   bool TimedOutForStopTime() const { return this->TimeoutIsForStopTime; }

@@ -215,6 +215,10 @@ public:
   /** Should we only show what we would do? */
   bool GetShowOnly();
 
+  bool GetOutputAsJson();
+
+  int GetOutputAsJsonVersion();
+
   bool ShouldUseHTTP10() { return this->UseHTTP10; }
 
   bool ShouldPrintLabels() { return this->PrintLabels; }
@@ -507,6 +511,8 @@ private:
   t_TestingHandlers TestingHandlers;
 
   bool ShowOnly;
+  bool OutputAsJson;
+  int OutputAsJsonVersion;
 
   /** Map of configuration properties */
   typedef std::map<std::string, std::string> CTestConfigurationMap;

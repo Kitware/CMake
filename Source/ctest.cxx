@@ -46,7 +46,10 @@ static const char* cmDocumentationOptions[][2] = {
     "given number of jobs." },
   { "-Q,--quiet", "Make ctest quiet." },
   { "-O <file>, --output-log <file>", "Output to log file" },
-  { "-N,--show-only", "Disable actual execution of tests." },
+  { "-N,--show-only[=format]",
+    "Disable actual execution of tests. The optional 'format' defines the "
+    "format of the test information and can be 'human' for the current text "
+    "format or 'json-v1' for json format. Defaults to 'human'." },
   { "-L <regex>, --label-regex <regex>",
     "Run tests with labels matching "
     "regular expression." },
