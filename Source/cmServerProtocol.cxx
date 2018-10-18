@@ -164,12 +164,7 @@ bool cmServerProtocol::DoActivate(const cmServerRequest& /*request*/,
 
 std::pair<int, int> cmServerProtocol1::ProtocolVersion() const
 {
-  // Revision history
-  // 1, 1 - Report backtraces in codemodel response
-  // 1, 2 - Add target install destinations to codemodel
-  // 1, 3 - Add a flag to target filegroups indicating whether or not the
-  // filegroup is for INTERFACE_SOURCES
-  return std::make_pair(1, 3);
+  return std::make_pair(1, 2);
 }
 
 static void setErrorMessage(std::string* errorMessage, const std::string& text)

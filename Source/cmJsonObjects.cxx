@@ -150,8 +150,6 @@ Json::Value cmDumpCMakeInputs(const cmake* cm)
   return array;
 }
 
-const std::string kInterfaceSourcesLanguageDataKey =
-  "INTERFACE_SOURCES_LD_KEY";
 class LanguageData
 {
 public:
@@ -184,12 +182,6 @@ void LanguageData::SetDefines(const std::set<std::string>& defines)
   Defines = std::move(result);
 }
 
-struct FileGroupSources
-{
-  bool IsInterfaceSources;
-  std::vector<std::string> Files;
-};
-
 namespace std {
 
 template <>
@@ -217,35 +209,31 @@ struct hash<LanguageData>
 } // namespace std
 
 static Json::Value DumpSourceFileGroup(const LanguageData& data,
-                                       bool isInterfaceSource,
                                        const std::vector<std::string>& files,
                                        const std::string& baseDir)
 {
   Json::Value result = Json::objectValue;
 
-  if (isInterfaceSource) {
-    result[kIS_INTERFACE_SOURCES_KEY] = true;
-  }
   if (!data.Language.empty()) {
     result[kLANGUAGE_KEY] = data.Language;
-  }
-  if (!data.Flags.empty()) {
-    result[kCOMPILE_FLAGS_KEY] = data.Flags;
-  }
-  if (!data.IncludePathList.empty()) {
-    Json::Value includes = Json::arrayValue;
-    for (auto const& i : data.IncludePathList) {
-      Json::Value tmp = Json::objectValue;
-      tmp[kPATH_KEY] = i.first;
-      if (i.second) {
-        tmp[kIS_SYSTEM_KEY] = i.second;
-      }
-      includes.append(tmp);
+    if (!data.Flags.empty()) {
+      result[kCOMPILE_FLAGS_KEY] = data.Flags;
     }
-    result[kINCLUDE_PATH_KEY] = includes;
-  }
-  if (!data.Defines.empty()) {
-    result[kDEFINES_KEY] = fromStringList(data.Defines);
+    if (!data.IncludePathList.empty()) {
+      Json::Value includes = Json::arrayValue;
+      for (auto const& i : data.IncludePathList) {
+        Json::Value tmp = Json::objectValue;
+        tmp[kPATH_KEY] = i.first;
+        if (i.second) {
+          tmp[kIS_SYSTEM_KEY] = i.second;
+        }
+        includes.append(tmp);
+      }
+      result[kINCLUDE_PATH_KEY] = includes;
+    }
+    if (!data.Defines.empty()) {
+      result[kDEFINES_KEY] = fromStringList(data.Defines);
+    }
   }
 
   result[kIS_GENERATED_KEY] = data.IsGenerated;
@@ -260,19 +248,21 @@ static Json::Value DumpSourceFileGroup(const LanguageData& data,
   return result;
 }
 
-static void PopulateFileGroupData(
-  cmGeneratorTarget* target, bool isInterfaceSources,
-  const std::vector<cmSourceFile*>& files, const std::string& config,
-  const std::map<std::string, LanguageData>& languageDataMap,
-  std::unordered_map<LanguageData, FileGroupSources>& fileGroups)
+static Json::Value DumpSourceFilesList(
+  cmGeneratorTarget* target, const std::string& config,
+  const std::map<std::string, LanguageData>& languageDataMap)
 {
+  // Collect sourcefile groups:
+
+  std::vector<cmSourceFile*> files;
+  target->GetSourceFiles(files, config);
+
+  std::unordered_map<LanguageData, std::vector<std::string>> fileGroups;
   for (cmSourceFile* file : files) {
     LanguageData fileData;
     fileData.Language = file->GetLanguage();
-    if (!fileData.Language.empty() || isInterfaceSources) {
-      const LanguageData& ld = isInterfaceSources
-        ? languageDataMap.at(kInterfaceSourcesLanguageDataKey)
-        : languageDataMap.at(fileData.Language);
+    if (!fileData.Language.empty()) {
+      const LanguageData& ld = languageDataMap.at(fileData.Language);
       cmLocalGenerator* lg = target->GetLocalGenerator();
       cmGeneratorExpressionInterpreter genexInterpreter(lg, config, target,
                                                         fileData.Language);
@@ -300,14 +290,10 @@ static void PopulateFileGroupData(
         lg->AppendIncludeDirectories(includes, evaluatedIncludes, *file);
 
         for (const auto& include : includes) {
-          // INTERFACE_LIBRARY targets do not support the
-          // IsSystemIncludeDirectory call so just set it to false.
-          const bool isSystemInclude = isInterfaceSources
-            ? false
-            : target->IsSystemIncludeDirectory(include, config,
-                                               fileData.Language);
           fileData.IncludePathList.push_back(
-            std::make_pair(include, isSystemInclude));
+            std::make_pair(include,
+                           target->IsSystemIncludeDirectory(
+                             include, config, fileData.Language)));
         }
       }
 
@@ -336,71 +322,14 @@ static void PopulateFileGroupData(
     }
 
     fileData.IsGenerated = file->GetPropertyAsBool("GENERATED");
-    FileGroupSources& groupFileList = fileGroups[fileData];
-    groupFileList.IsInterfaceSources = isInterfaceSources;
-    groupFileList.Files.push_back(file->GetFullPath());
-  }
-}
-
-static Json::Value DumpSourceFilesList(
-  cmGeneratorTarget* target, const std::string& config,
-  const std::map<std::string, LanguageData>& languageDataMap)
-{
-  const cmStateEnums::TargetType type = target->GetType();
-  std::unordered_map<LanguageData, FileGroupSources> fileGroups;
-
-  // Collect sourcefile groups:
-
-  std::vector<cmSourceFile*> files;
-  if (type == cmStateEnums::INTERFACE_LIBRARY) {
-    // INTERFACE_LIBRARY targets do not create all the data structures
-    // associated with regular targets. If properties are explicitly specified
-    // for files in INTERFACE_SOURCES then we can get them through the Makefile
-    // rather than the target.
-    files = target->Makefile->GetSourceFiles();
-  } else {
-    target->GetSourceFiles(files, config);
-    PopulateFileGroupData(target, false /* isInterfaceSources */, files,
-                          config, languageDataMap, fileGroups);
-  }
-
-  // Collect interface sourcefile groups:
-
-  auto targetProp = target->Target->GetProperty("INTERFACE_SOURCES");
-  if (targetProp != nullptr) {
-    cmGeneratorExpressionInterpreter genexInterpreter(
-      target->GetLocalGenerator(), config, target);
-
-    auto evaluatedSources = cmsys::SystemTools::SplitString(
-      genexInterpreter.Evaluate(targetProp, "INTERFACE_SOURCES"), ';');
-
-    std::map<std::string, cmSourceFile*> filesMap;
-    for (auto file : files) {
-      filesMap[file->GetFullPath()] = file;
-    }
-
-    std::vector<cmSourceFile*> interfaceSourceFiles;
-    for (const std::string& interfaceSourceFilePath : evaluatedSources) {
-      auto entry = filesMap.find(interfaceSourceFilePath);
-      if (entry != filesMap.end()) {
-        // use what we have since it has all the associated properties
-        interfaceSourceFiles.push_back(entry->second);
-      } else {
-        interfaceSourceFiles.push_back(
-          new cmSourceFile(target->Makefile, interfaceSourceFilePath));
-      }
-    }
-
-    PopulateFileGroupData(target, true /* isInterfaceSources */,
-                          interfaceSourceFiles, config, languageDataMap,
-                          fileGroups);
+    std::vector<std::string>& groupFileList = fileGroups[fileData];
+    groupFileList.push_back(file->GetFullPath());
   }
 
   const std::string& baseDir = target->Makefile->GetCurrentSourceDirectory();
   Json::Value result = Json::arrayValue;
   for (auto const& it : fileGroups) {
-    Json::Value group = DumpSourceFileGroup(
-      it.first, it.second.IsInterfaceSources, it.second.Files, baseDir);
+    Json::Value group = DumpSourceFileGroup(it.first, it.second, baseDir);
     if (!group.isNull()) {
       result.append(group);
     }
@@ -517,58 +446,6 @@ Json::Value cmDumpCTestInfo(const cmake* cm)
   return result;
 }
 
-static void GetTargetProperty(
-  cmGeneratorExpressionInterpreter& genexInterpreter,
-  cmGeneratorTarget* target, const char* propertyName,
-  std::vector<std::string>& propertyValue)
-{
-  auto targetProp = target->Target->GetProperty(propertyName);
-  if (targetProp != nullptr) {
-    propertyValue = cmsys::SystemTools::SplitString(
-      genexInterpreter.Evaluate(targetProp, propertyName), ';');
-  }
-}
-
-static void CreateInterfaceSourcesEntry(
-  cmLocalGenerator* lg, cmGeneratorTarget* target, const std::string& config,
-  std::map<std::string, LanguageData>& languageDataMap)
-{
-  LanguageData& ld = languageDataMap[kInterfaceSourcesLanguageDataKey];
-  ld.Language = "";
-
-  cmGeneratorExpressionInterpreter genexInterpreter(lg, config, target);
-  std::vector<std::string> propertyValue;
-  GetTargetProperty(genexInterpreter, target, "INTERFACE_INCLUDE_DIRECTORIES",
-                    propertyValue);
-  for (std::string const& i : propertyValue) {
-    ld.IncludePathList.push_back(
-      std::make_pair(i, false /* isSystemInclude */));
-  }
-
-  propertyValue.clear();
-  GetTargetProperty(genexInterpreter, target,
-                    "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES", propertyValue);
-  for (std::string const& i : propertyValue) {
-    ld.IncludePathList.push_back(
-      std::make_pair(i, true /* isSystemInclude */));
-  }
-
-  propertyValue.clear();
-  GetTargetProperty(genexInterpreter, target, "INTERFACE_COMPILE_OPTIONS",
-                    propertyValue);
-  for (const auto& s : propertyValue) {
-    ld.Flags += " " + s;
-  }
-
-  propertyValue.clear();
-  GetTargetProperty(genexInterpreter, target, "INTERFACE_COMPILE_DEFINITIONS",
-                    propertyValue);
-  if (!propertyValue.empty()) {
-    std::set<std::string> defines(propertyValue.begin(), propertyValue.end());
-    ld.SetDefines(defines);
-  }
-}
-
 static Json::Value DumpTarget(cmGeneratorTarget* target,
                               const std::string& config)
 {
@@ -598,6 +475,11 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
   result[kTYPE_KEY] = typeName;
   result[kSOURCE_DIRECTORY_KEY] = lg->GetCurrentSourceDirectory();
   result[kBUILD_DIRECTORY_KEY] = lg->GetCurrentBinaryDirectory();
+
+  if (type == cmStateEnums::INTERFACE_LIBRARY) {
+    return result;
+  }
+
   result[kFULL_NAME_KEY] = target->GetFullName(config);
 
   if (target->Target->GetHaveInstallRule()) {
@@ -684,21 +566,8 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
   }
 
   std::set<std::string> languages;
+  target->GetLanguages(languages, config);
   std::map<std::string, LanguageData> languageDataMap;
-  if (type == cmStateEnums::INTERFACE_LIBRARY) {
-    // INTERFACE_LIBRARY targets do not create all the data structures
-    // associated with regular targets. If properties are explicitly specified
-    // for files in INTERFACE_SOURCES then we can get them through the Makefile
-    // rather than the target.
-    for (auto file : target->Makefile->GetSourceFiles()) {
-      const std::string& language = file->GetLanguage();
-      if (!language.empty()) {
-        languages.insert(language);
-      }
-    }
-  } else {
-    target->GetLanguages(languages, config);
-  }
 
   for (std::string const& lang : languages) {
     LanguageData& ld = languageDataMap[lang];
@@ -713,11 +582,6 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
       ld.IncludePathList.push_back(
         std::make_pair(i, target->IsSystemIncludeDirectory(i, config, lang)));
     }
-  }
-
-  if (target->Target->GetProperty("INTERFACE_SOURCES") != nullptr) {
-    // Create an entry in the languageDataMap for interface sources.
-    CreateInterfaceSourcesEntry(lg, target, config, languageDataMap);
   }
 
   Json::Value sourceGroupsValue =
