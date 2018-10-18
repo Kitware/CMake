@@ -51,6 +51,7 @@ private:
   // Keep in sync with ObjectKindName.
   enum class ObjectKind
   {
+    CodeModel,
     InternalTest
   };
 
@@ -180,6 +181,10 @@ private:
                                  std::string& error);
   static std::string NoSupportedVersion(
     std::vector<RequestVersion> const& versions);
+
+  void BuildClientRequestCodeModel(
+    ClientRequest& r, std::vector<RequestVersion> const& versions);
+  Json::Value BuildCodeModel(Object const& object);
 
   void BuildClientRequestInternalTest(
     ClientRequest& r, std::vector<RequestVersion> const& versions);

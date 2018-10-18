@@ -126,6 +126,8 @@
   { symbol: [ "SIGINT", private, "\"cm_uv.h\"", public ] },
   { symbol: [ "ssize_t", private, "\"cm_uv.h\"", public ] },
 
+  { symbol: [ "Json::ArrayIndex", private, "\"cm_jsoncpp_value.h\"", public ] },
+
   { symbol: [ "std::ifstream", private, "\"cmsys/FStream.hxx\"", public ] },
   { symbol: [ "std::ofstream", private, "\"cmsys/FStream.hxx\"", public ] },
   { symbol: [ "cmsys::ifstream", private, "\"cmsys/FStream.hxx\"", public ] },

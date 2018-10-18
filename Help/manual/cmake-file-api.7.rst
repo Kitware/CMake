@@ -399,3 +399,473 @@ The ``kind`` member is a string specifying the object kind name.
 The ``version`` member is a JSON object with ``major`` and ``minor``
 members specifying integer components of the object kind's version.
 Additional top-level members are specific to each object kind.
+
+Object Kind "codemodel"
+-----------------------
+
+The ``codemodel`` object kind describes the build system structure as
+modeled by CMake.
+
+There is only one ``codemodel`` object major version, version 2.
+Version 1 does not exist to avoid confusion with that from
+:manual:`cmake-server(7)` mode.
+
+"codemodel" version 2
+^^^^^^^^^^^^^^^^^^^^^
+
+``codemodel`` object version 2 is a JSON object:
+
+.. code-block:: json
+
+  {
+    "kind": "codemodel",
+    "version": { "major": 2, "minor": 0 },
+    "paths": {
+      "source": "/path/to/top-level-source-dir",
+      "build": "/path/to/top-level-build-dir"
+    },
+    "configurations": [
+      {
+        "name": "Debug",
+        "directories": [
+          {
+            "source": ".",
+            "build": ".",
+            "childIndexes": [ 1 ],
+            "targetIndexes": [ 0 ]
+          },
+          {
+            "source": "sub",
+            "build": "sub",
+            "parentIndex": 0,
+            "targetIndexes": [ 1 ]
+          }
+        ],
+        "targets": [
+          {
+            "name": "MyExecutable",
+            "directoryIndex": 0,
+            "jsonFile": "<file>"
+          },
+          {
+            "name": "MyLibrary",
+            "directoryIndex": 1,
+            "jsonFile": "<file>"
+          }
+        ]
+      }
+    ]
+  }
+
+The members specific to ``codemodel`` objects are:
+
+``paths``
+  A JSON object containing members:
+
+  ``source``
+    A string specifying the absolute path to the top-level source directory,
+    represented with forward slashes.
+
+  ``build``
+    A string specifying the absolute path to the top-level build directory,
+    represented with forward slashes.
+
+``configurations``
+  A JSON array of entries corresponding to available build configurations.
+  On single-configuration generators there is one entry for the value
+  of the :variable:`CMAKE_BUILD_TYPE` variable.  For multi-configuration
+  generators there is an entry for each configuration listed in the
+  :variable:`CMAKE_CONFIGURATION_TYPES` variable.
+  Each entry is a JSON object containing members:
+
+  ``name``
+    A string specifying the name of the configuration, e.g. ``Debug``.
+
+  ``directories``
+    A JSON array of entries each corresponding to a build system directory
+    whose source directory contains a ``CMakeLists.txt`` file.  The first
+    entry corresponds to the top-level directory.  Each entry is a
+    JSON object containing members:
+
+    ``source``
+      A string specifying the path to the source directory, represented
+      with forward slashes.  If the directory is inside the top-level
+      source directory then the path is specified relative to that
+      directory (with ``.`` for the top-level source directory itself).
+      Otherwise the path is absolute.
+
+    ``build``
+      A string specifying the path to the build directory, represented
+      with forward slashes.  If the directory is inside the top-level
+      build directory then the path is specified relative to that
+      directory (with ``.`` for the top-level build directory itself).
+      Otherwise the path is absolute.
+
+    ``parentIndex``
+      Optional member that is present when the directory is not top-level.
+      The value is an unsigned integer 0-based index of another entry in
+      the main ``directories`` array that corresponds to the parent
+      directory that added this directory as a subdirectory.
+
+    ``childIndexes``
+      Optional member that is present when the directory has subdirectories.
+      The value is a JSON array of entries corresponding to child directories
+      created by the :command:`add_subdirectory` or :command:`subdirs`
+      command.  Each entry is an unsigned integer 0-based index of another
+      entry in the main ``directories`` array.
+
+    ``targetIndexes``
+      Optional member that is present when the directory itself has targets,
+      excluding those belonging to subdirectories.  The value is a JSON
+      array of entries corresponding to the targets.  Each entry is an
+      unsigned integer 0-based index into the main ``targets`` array.
+
+  ``targets``
+    A JSON array of entries corresponding to the build system targets.
+    Such targets are created by calls to :command:`add_executable`,
+    :command:`add_library`, and :command:`add_custom_target`, excluding
+    imported targets and interface libraries (which do not generate any
+    build rules).  Each entry is a JSON object containing members:
+
+    ``name``
+      A string specifying the target name.
+
+    ``id``
+      A string uniquely identifying the target.  This matches the ``id``
+      field in the file referenced by ``jsonFile``.
+
+    ``directoryIndex``
+      An unsigned integer 0-based index into the main ``directories`` array
+      indicating the build system directory in which the target is defined.
+
+    ``jsonFile``
+      A JSON string specifying a path relative to the codemodel file
+      to another JSON file containing a
+      `"codemodel" version 2 "target" object`_.
+
+"codemodel" version 2 "target" object
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A codemodel "target" object is referenced by a `"codemodel" version 2`_
+object's ``targets`` array.  Each "target" object is a JSON object
+with members:
+
+``name``
+  A string specifying the logical name of the target.
+
+``id``
+  A string uniquely identifying the target.  The format is unspecified
+  and should not be interpreted by clients.
+
+``type``
+  A string specifying the type of the target.  The value is one of
+  ``EXECUTABLE``, ``STATIC_LIBRARY``, ``SHARED_LIBRARY``,
+  ``MODULE_LIBRARY``, ``OBJECT_LIBRARY``, or ``UTILITY``.
+
+``backtrace``
+  Optional member that is present when a CMake language backtrace to
+  the command in the source code that created the target is available.
+  The value is an unsigned integer 0-based index into the
+  ``backtraceGraph`` member's ``nodes`` array.
+
+``folder``
+  Optional member that is present when the :prop_tgt:`FOLDER` target
+  property is set.  The value is a JSON object with one member:
+
+  ``name``
+    A string specifying the name of the target folder.
+
+``paths``
+  A JSON object containing members:
+
+  ``source``
+    A string specifying the path to the target's source directory,
+    represented with forward slashes.  If the directory is inside the
+    top-level source directory then the path is specified relative to
+    that directory (with ``.`` for the top-level source directory itself).
+    Otherwise the path is absolute.
+
+  ``build``
+    A string specifying the path to the target's build directory,
+    represented with forward slashes.  If the directory is inside the
+    top-level build directory then the path is specified relative to
+    that directory (with ``.`` for the top-level build directory itself).
+    Otherwise the path is absolute.
+
+``nameOnDisk``
+  Optional member that is present for executable and library targets
+  that are linked or archived into a single primary artifact.
+  The value is a string specifying the file name of that artifact on disk.
+
+``artifacts``
+  Optional member that is present for executable and library targets
+  that produce artifacts on disk meant for consumption by dependents.
+  The value is a JSON array of entries corresponding to the artifacts.
+  Each entry is a JSON object containing one member:
+
+  ``path``
+    A string specifying the path to the file on disk, represented with
+    forward slashes.  If the file is inside the top-level build directory
+    then the path is specified relative to that directory.
+    Otherwise the path is absolute.
+
+``isGeneratorProvided``
+  Optional member that is present with boolean value ``true`` if the
+  target is provided by CMake's build system generator rather than by
+  a command in the source code.
+
+``install``
+  Optional member that is present when the target has an :command:`install`
+  rule.  The value is a JSON object with members:
+
+  ``prefix``
+    A JSON object specifying the installation prefix.  It has one member:
+
+    ``path``
+      A string specifying the value of :variable:`CMAKE_INSTALL_PREFIX`.
+
+  ``destinations``
+    A JSON array of entries specifying an install destination path.
+    Each entry is a JSON object with members:
+
+    ``path``
+      A string specifying the install destination path.  The path may
+      be absolute or relative to the install prefix.
+
+    ``backtrace``
+      Optional member that is present when a CMake language backtrace to
+      the :command:`install` command invocation that specified this
+      destination is available.  The value is an unsigned integer 0-based
+      index into the ``backtraceGraph`` member's ``nodes`` array.
+
+``link``
+  Optional member that is present for executables and shared library
+  targets that link into a runtime binary.  The value is a JSON object
+  with members describing the link step:
+
+  ``language``
+    A string specifying the language (e.g. ``C``, ``CXX``, ``Fortran``)
+    of the toolchain is used to invoke the linker.
+
+  ``commandFragments``
+    Optional member that is present when fragments of the link command
+    line invocation are available.  The value is a JSON array of entries
+    specifying ordered fragments.  Each entry is a JSON object with members:
+
+    ``fragment``
+      A string specifying a fragment of the link command line invocation.
+      The value is encoded in the build system's native shell format.
+
+    ``role``
+      A string specifying the role of the fragment's content:
+
+      * ``flags``: link flags.
+      * ``libraries``: link library file paths or flags.
+      * ``libraryPath``: library search path flags.
+      * ``frameworkPath``: macOS framework search path flags.
+
+  ``lto``
+    Optional member that is present with boolean value ``true``
+    when link-time optimization (a.k.a. interprocedural optimization
+    or link-time code generation) is enabled.
+
+  ``sysroot``
+    Optional member that is present when the :variable:`CMAKE_SYSROOT_LINK`
+    or :variable:`CMAKE_SYSROOT` variable is defined.  The value is a
+    JSON object with one member:
+
+    ``path``
+      A string specifying the absolute path to the sysroot, represented
+      with forward slashes.
+
+``archive``
+  Optional member that is present for static library targets.  The value
+  is a JSON object with members describing the archive step:
+
+  ``commandFragments``
+    Optional member that is present when fragments of the archiver command
+    line invocation are available.  The value is a JSON array of entries
+    specifying the fragments.  Each entry is a JSON object with members:
+
+    ``fragment``
+      A string specifying a fragment of the archiver command line invocation.
+      The value is encoded in the build system's native shell format.
+
+    ``role``
+      A string specifying the role of the fragment's content:
+
+      * ``flags``: archiver flags.
+
+  ``lto``
+    Optional member that is present with boolean value ``true``
+    when link-time optimization (a.k.a. interprocedural optimization
+    or link-time code generation) is enabled.
+
+``dependencies``
+  Optional member that is present when the target depends on other targets.
+  The value is a JSON array of entries corresponding to the dependencies.
+  Each entry is a JSON object with members:
+
+  ``id``
+    A string uniquely identifying the target on which this target depends.
+    This matches the main ``id`` member of the other target.
+
+  ``backtrace``
+    Optional member that is present when a CMake language backtrace to
+    the :command:`add_dependencies`, :command:`target_link_libraries`,
+    or other command invocation that created this dependency is
+    available.  The value is an unsigned integer 0-based index into
+    the ``backtraceGraph`` member's ``nodes`` array.
+
+``sources``
+  A JSON array of entries corresponding to the target's source files.
+  Each entry is a JSON object with members:
+
+  ``path``
+    A string specifying the path to the source file on disk, represented
+    with forward slashes.  If the file is inside the top-level source
+    directory then the path is specified relative to that directory.
+    Otherwise the path is absolute.
+
+  ``compileGroupIndex``
+    Optional member that is present when the source is compiled.
+    The value is an unsigned integer 0-based index into the
+    ``compileGroups`` array.
+
+  ``sourceGroupIndex``
+    Optional member that is present when the source is part of a source
+    group either via the :command:`source_group` command or by default.
+    The value is an unsigned integer 0-based index into the
+    ``sourceGroups`` array.
+
+  ``isGenerated``
+    Optional member that is present with boolean value ``true`` if
+    the source is :prop_sf:`GENERATED`.
+
+  ``backtrace``
+    Optional member that is present when a CMake language backtrace to
+    the :command:`target_sources`, :command:`add_executable`,
+    :command:`add_library`, :command:`add_custom_target`, or other
+    command invocation that added this source to the target is
+    available.  The value is an unsigned integer 0-based index into
+    the ``backtraceGraph`` member's ``nodes`` array.
+
+``sourceGroups``
+  Optional member that is present when sources are grouped together by
+  the :command:`source_group` command or by default.  The value is a
+  JSON array of entries corresponding to the groups.  Each entry is
+  a JSON object with members:
+
+  ``name``
+    A string specifying the name of the source group.
+
+  ``sourceIndexes``
+    A JSON array listing the sources belonging to the group.
+    Each entry is an unsigned integer 0-based index into the
+    main ``sources`` array for the target.
+
+``compileGroups``
+  Optional member that is present when the target has sources that compile.
+  The value is a JSON array of entries corresponding to groups of sources
+  that all compile with the same settings.  Each entry is a JSON object
+  with members:
+
+  ``sourceIndexes``
+    A JSON array listing the sources belonging to the group.
+    Each entry is an unsigned integer 0-based index into the
+    main ``sources`` array for the target.
+
+  ``language``
+    A string specifying the language (e.g. ``C``, ``CXX``, ``Fortran``)
+    of the toolchain is used to compile the source file.
+
+  ``compileCommandFragments``
+    Optional member that is present when fragments of the compiler command
+    line invocation are available.  The value is a JSON array of entries
+    specifying ordered fragments.  Each entry is a JSON object with
+    one member:
+
+    ``fragment``
+      A string specifying a fragment of the compile command line invocation.
+      The value is encoded in the build system's native shell format.
+
+  ``includes``
+    Optional member that is present when there are include directories.
+    The value is a JSON array with an entry for each directory.  Each
+    entry is a JSON object with members:
+
+    ``path``
+      A string specifying the path to the include directory,
+      represented with forward slashes.
+
+    ``isSystem``
+      Optional member that is present with boolean value ``true`` if
+      the include directory is marked as a system include directory.
+
+    ``backtrace``
+      Optional member that is present when a CMake language backtrace to
+      the :command:`target_include_directories` or other command invocation
+      that added this include directory is available.  The value is
+      an unsigned integer 0-based index into the ``backtraceGraph``
+      member's ``nodes`` array.
+
+  ``defines``
+    Optional member that is present when there are preprocessor definitions.
+    The value is a JSON array with an entry for each definition.  Each
+    entry is a JSON object with members:
+
+    ``define``
+      A string specifying the preprocessor definition in the format
+      ``<name>[=<value>]``, e.g. ``DEF`` or ``DEF=1``.
+
+    ``backtrace``
+      Optional member that is present when a CMake language backtrace to
+      the :command:`target_compile_definitions` or other command invocation
+      that added this preprocessor definition is available.  The value is
+      an unsigned integer 0-based index into the ``backtraceGraph``
+      member's ``nodes`` array.
+
+  ``sysroot``
+    Optional member that is present when the
+    :variable:`CMAKE_SYSROOT_COMPILE` or :variable:`CMAKE_SYSROOT`
+    variable is defined.  The value is a JSON object with one member:
+
+    ``path``
+      A string specifying the absolute path to the sysroot, represented
+      with forward slashes.
+
+``backtraceGraph``
+  A JSON object describing the graph of backtraces whose nodes are
+  referenced from ``backtrace`` members elsewhere.  The members are:
+
+  ``nodes``
+    A JSON array listing nodes in the backtrace graph.  Each entry
+    is a JSON object with members:
+
+    ``file``
+      An unsigned integer 0-based index into the backtrace ``files`` array.
+
+    ``line``
+      An optional member present when the node represents a line within
+      the file.  The value is an unsigned integer 1-based line number.
+
+    ``command``
+      An optional member present when the node represents a command
+      invocation within the file.  The value is an unsigned integer
+      0-based index into the backtrace ``commands`` array.
+
+    ``parent``
+      An optional member present when the node is not the bottom of
+      the call stack.  The value is an unsigned integer 0-based index
+      of another entry in the backtrace ``nodes`` array.
+
+  ``commands``
+    A JSON array listing command names referenced by backtrace nodes.
+    Each entry is a string specifying a command name.
+
+  ``files``
+    A JSON array listing CMake language files referenced by backtrace nodes.
+    Each entry is a string specifying the path to a file, represented
+    with forward slashes.  If the file is inside the top-level source
+    directory then the path is specified relative to that directory.
+    Otherwise the path is absolute.
