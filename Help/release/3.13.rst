@@ -204,6 +204,9 @@ Deprecated and Removed Features
 Other Changes
 =============
 
+* The precompiled binaries provided on ``cmake.org`` now include
+  qthelp-format documentation.
+
 * The :command:`option` command now honors an existing normal variable
   of the same name and does nothing instead of possibly creating a cache
   entry (or setting its type) and removing the normal variable.
