@@ -283,7 +283,7 @@ public:
 
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
-  const char* GetExportMacro() const;
+  const std::string* GetExportMacro() const;
 
   /** Get the soname of the target.  Allowed only for a shared library.  */
   std::string GetSOName(const std::string& config) const;

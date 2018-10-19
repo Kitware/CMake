@@ -251,10 +251,6 @@ public:
                              bool appendAllImplicitDirs = false) const;
   void AddCompileOptions(std::string& flags, cmGeneratorTarget* target,
                          const std::string& lang, const std::string& config);
-  void AddCompileDefinitions(std::set<std::string>& defines,
-                             cmGeneratorTarget const* target,
-                             const std::string& config,
-                             const std::string& lang) const;
 
   std::string GetProjectName() const;
 

@@ -50,6 +50,7 @@ public:
     PartNotes,
     PartExtraFiles,
     PartUpload,
+    PartDone,
     PartCount // Update names in constructor when adding a part
   };
 
@@ -373,6 +374,9 @@ public:
   /** Create XML file that contains all the notes specified */
   int GenerateNotesFile(const VectorOfStrings& files);
 
+  /** Create XML file to indicate that build is complete */
+  int GenerateDoneFile();
+
   /** Submit extra files to the server */
   bool SubmitExtraFiles(const char* files);
   bool SubmitExtraFiles(const VectorOfStrings& files);
@@ -404,6 +408,10 @@ public:
   /** Get the version of dart server */
   int GetDartVersion() { return this->DartVersion; }
   int GetDropSiteCDash() { return this->DropSiteCDash; }
+
+  /** The Build ID is assigned by CDash */
+  void SetBuildID(const std::string& id) { this->BuildID = id; }
+  std::string GetBuildID() { return this->BuildID; }
 
   /** Add file to be submitted */
   void AddSubmitFile(Part part, const char* name);
@@ -606,6 +614,8 @@ private:
 
   int DartVersion;
   bool DropSiteCDash;
+
+  std::string BuildID;
 
   std::vector<std::string> InitialCommandLineArguments;
 

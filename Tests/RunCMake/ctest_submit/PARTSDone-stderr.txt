@@ -1,0 +1,3 @@
+ *Error when uploading file: .*/Done.xml
+ *Error message was: ([Cc]ould *n.t resolve host:? '?-no-site-'?.*|The requested URL returned error:.*)
+ *Problems when submitting via HTTP

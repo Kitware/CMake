@@ -225,11 +225,8 @@ external file causes this function to fail the verification.
 #]=======================================================================]
 
 function(_warn_cmp0080)
-  message(AUTHOR_WARNING
-    "Policy CMP0080 is not set: BundleUtilities prefers not to be included at configure time. "
-    "Run \"cmake --help-policy CMP0080\" for policy details. "
-    "Use the cmake_policy command to set the policy and suppress this warning."
-    )
+  cmake_policy(GET_WARNING CMP0080 _cmp0080_warning)
+  message(AUTHOR_WARNING "${_cmp0080_warning}\n")
 endfunction()
 
 # Do not include this module at configure time!

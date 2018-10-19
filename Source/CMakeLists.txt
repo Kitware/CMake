@@ -260,6 +260,8 @@ set(SRCS
   cmInstallFilesGenerator.cxx
   cmInstallScriptGenerator.h
   cmInstallScriptGenerator.cxx
+  cmInstallSubdirectoryGenerator.h
+  cmInstallSubdirectoryGenerator.cxx
   cmInstallTargetGenerator.h
   cmInstallTargetGenerator.cxx
   cmInstallDirectoryGenerator.h

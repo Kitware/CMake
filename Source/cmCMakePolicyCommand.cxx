@@ -46,6 +46,9 @@ bool cmCMakePolicyCommand::InitialPass(std::vector<std::string> const& args,
   if (args[0] == "VERSION") {
     return this->HandleVersionMode(args);
   }
+  if (args[0] == "GET_WARNING") {
+    return this->HandleGetWarningMode(args);
+  }
 
   std::ostringstream e;
   e << "given unknown first argument \"" << args[0] << "\"";
@@ -179,5 +182,35 @@ bool cmCMakePolicyCommand::HandleVersionMode(
   }
 
   this->Makefile->SetPolicyVersion(version_min, version_max);
+  return true;
+}
+
+bool cmCMakePolicyCommand::HandleGetWarningMode(
+  std::vector<std::string> const& args)
+{
+  if (args.size() != 3) {
+    this->SetError(
+      "GET_WARNING must be given exactly 2 additional arguments.");
+    return false;
+  }
+
+  // Get arguments.
+  std::string const& id = args[1];
+  std::string const& var = args[2];
+
+  // Lookup the policy number.
+  cmPolicies::PolicyID pid;
+  if (!cmPolicies::GetPolicyID(id.c_str(), pid)) {
+    std::ostringstream e;
+    e << "GET_WARNING given policy \"" << id
+      << "\" which is not known to this version of CMake.";
+    this->SetError(e.str());
+    return false;
+  }
+
+  // Lookup the policy warning.
+  this->Makefile->AddDefinition(var,
+                                cmPolicies::GetPolicyWarning(pid).c_str());
+
   return true;
 }

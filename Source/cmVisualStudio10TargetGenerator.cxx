@@ -45,24 +45,21 @@ struct cmVisualStudio10TargetGenerator::Elem
   bool HasContent = false;
   std::string Tag;
 
-  Elem(std::ostream& s)
+  Elem(std::ostream& s, const char* tag)
     : S(s)
     , Indent(0)
+    , Tag(tag)
   {
+    this->StartElement();
   }
   Elem(const Elem&) = delete;
-  Elem(Elem& par)
-    : S(par.S)
-    , Indent(par.Indent + 1)
-  {
-    par.SetHasElements();
-  }
   Elem(Elem& par, const char* tag)
     : S(par.S)
     , Indent(par.Indent + 1)
+    , Tag(tag)
   {
     par.SetHasElements();
-    this->StartElement(tag);
+    this->StartElement();
   }
   void SetHasElements()
   {
@@ -72,12 +69,7 @@ struct cmVisualStudio10TargetGenerator::Elem
     }
   }
   std::ostream& WriteString(const char* line);
-  Elem& StartElement(const std::string& tag)
-  {
-    this->Tag = tag;
-    this->WriteString("<") << tag;
-    return *this;
-  }
+  void StartElement() { this->WriteString("<") << this->Tag; }
   void Element(const char* tag, const std::string& val)
   {
     Elem(*this, tag).Content(val);
@@ -87,8 +79,6 @@ struct cmVisualStudio10TargetGenerator::Elem
     this->S << " " << an << "=\"" << cmVS10EscapeAttr(av) << "\"";
     return *this;
   }
-  // This method for now assumes that this->Tag has been set, e.g. by calling
-  // StartElement().
   void Content(const std::string& val)
   {
     if (!this->HasContent) {
@@ -380,8 +370,7 @@ void cmVisualStudio10TargetGenerator::Generate()
                   << this->GlobalGenerator->Encoding() << "\"?>"
                   << "\n";
   {
-    Elem e0(BuildFileStream);
-    e0.StartElement("Project");
+    Elem e0(BuildFileStream, "Project");
     e0.Attribute("DefaultTargets", "Build");
     e0.Attribute("ToolsVersion", this->GlobalGenerator->GetToolsVersion());
     e0.Attribute("xmlns",
@@ -922,8 +911,8 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup(Elem& e0)
         xamlType = "Page";
       }
 
-      Elem e2(e1);
-      this->WriteSource(e2, xamlType, oi);
+      Elem e2(e1, xamlType);
+      this->WriteSource(e2, oi);
       e2.SetHasElements();
       if (this->ProjectType == csproj && !this->InSourceBuild) {
         // add <Link> tag to written XAML source if necessary
@@ -1275,15 +1264,15 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
   std::unique_ptr<Elem> spe2;
   if (this->ProjectType != csproj) {
     spe1 = cm::make_unique<Elem>(e0, "ItemGroup");
-    spe2 = cm::make_unique<Elem>(*spe1);
-    this->WriteSource(*spe2, "CustomBuild", source);
+    spe2 = cm::make_unique<Elem>(*spe1, "CustomBuild");
+    this->WriteSource(*spe2, source);
     spe2->SetHasElements();
   } else {
     Elem e1(e0, "ItemGroup");
-    Elem e2(e1);
+    Elem e2(e1, "None");
     std::string link;
     this->GetCSharpSourceLink(source, link);
-    this->WriteSource(e2, "None", source);
+    this->WriteSource(e2, source);
     e2.SetHasElements();
     if (!link.empty()) {
       e2.Element("Link", link);
@@ -1417,8 +1406,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
        << this->GlobalGenerator->Encoding() << "\"?>"
        << "\n";
   {
-    Elem e0(fout);
-    e0.StartElement("Project");
+    Elem e0(fout, "Project");
     e0.Attribute("ToolsVersion", this->GlobalGenerator->GetToolsVersion());
     e0.Attribute("xmlns",
                  "http://schemas.microsoft.com/developer/msbuild/2003");
@@ -1569,8 +1557,8 @@ void cmVisualStudio10TargetGenerator::WriteHeaderSource(Elem& e1,
                                                         cmSourceFile const* sf)
 {
   std::string const& fileName = sf->GetFullPath();
-  Elem e2(e1);
-  this->WriteSource(e2, "ClInclude", sf);
+  Elem e2(e1, "ClInclude");
+  this->WriteSource(e2, sf);
   if (this->IsResxHeader(fileName)) {
     e2.Element("FileType", "CppForm");
   } else if (this->IsXamlHeader(fileName)) {
@@ -1738,8 +1726,8 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
     }
   }
 
-  Elem e2(e1);
-  this->WriteSource(e2, tool, sf);
+  Elem e2(e1, tool);
+  this->WriteSource(e2, sf);
   if (toolHasSettings) {
     e2.SetHasElements();
 
@@ -1859,7 +1847,6 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
 }
 
 void cmVisualStudio10TargetGenerator::WriteSource(Elem& e2,
-                                                  std::string const& tool,
                                                   cmSourceFile const* sf)
 {
   // Visual Studio tools append relative paths to the current dir, as in:
@@ -1895,11 +1882,10 @@ void cmVisualStudio10TargetGenerator::WriteSource(Elem& e2,
     }
   }
   ConvertToWindowsSlash(sourceFile);
-  e2.StartElement(tool);
   e2.Attribute("Include", sourceFile);
 
   ToolSource toolSource = { sf, forceRelative };
-  this->Tools[tool].push_back(toolSource);
+  this->Tools[e2.Tag].push_back(toolSource);
 }
 
 void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
@@ -2003,8 +1989,8 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
                           include_configs.begin(), include_configs.end(),
                           std::back_inserter(exclude_configs));
 
-      Elem e2(e1);
-      this->WriteSource(e2, tool, si.Source);
+      Elem e2(e1, tool);
+      this->WriteSource(e2, si.Source);
       if (si.Kind == cmGeneratorTarget::SourceKindObjectSource) {
         this->OutputSourceSpecificFlags(e2, si.Source);
       }
@@ -2580,8 +2566,9 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   configDefine += configName;
   configDefine += "\"";
   clOptions.AddDefine(configDefine);
-  if (const char* exportMacro = this->GeneratorTarget->GetExportMacro()) {
-    clOptions.AddDefine(exportMacro);
+  if (const std::string* exportMacro =
+        this->GeneratorTarget->GetExportMacro()) {
+    clOptions.AddDefine(*exportMacro);
   }
 
   if (this->MSTools) {
@@ -2877,8 +2864,9 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   configDefine += configName;
   configDefine += "\"";
   cudaOptions.AddDefine(configDefine);
-  if (const char* exportMacro = this->GeneratorTarget->GetExportMacro()) {
-    cudaOptions.AddDefine(exportMacro);
+  if (const std::string* exportMacro =
+        this->GeneratorTarget->GetExportMacro()) {
+    cudaOptions.AddDefine(*exportMacro);
   }
 
   // Get includes for this target
@@ -3882,15 +3870,13 @@ void cmVisualStudio10TargetGenerator::WriteSinglePlatformExtension(
 void cmVisualStudio10TargetGenerator::WriteSDKReferences(Elem& e0)
 {
   std::vector<std::string> sdkReferences;
-  Elem e1(e0);
-  bool hasWrittenItemGroup = false;
+  std::unique_ptr<Elem> spe1;
   if (const char* vsSDKReferences =
         this->GeneratorTarget->GetProperty("VS_SDK_REFERENCES")) {
     cmSystemTools::ExpandListArgument(vsSDKReferences, sdkReferences);
-    e1.StartElement("ItemGroup");
-    hasWrittenItemGroup = true;
+    spe1 = cm::make_unique<Elem>(e0, "ItemGroup");
     for (std::string const& ri : sdkReferences) {
-      Elem(e1, "SDKReference").Attribute("Include", ri);
+      Elem(*spe1, "SDKReference").Attribute("Include", ri);
     }
   }
 
@@ -3906,19 +3892,20 @@ void cmVisualStudio10TargetGenerator::WriteSDKReferences(Elem& e0)
 
     if (desktopExtensionsVersion || mobileExtensionsVersion ||
         iotExtensionsVersion) {
-      if (!hasWrittenItemGroup) {
-        e1.StartElement("ItemGroup");
+      if (!spe1) {
+        spe1 = cm::make_unique<Elem>(e0, "ItemGroup");
       }
       if (desktopExtensionsVersion) {
-        this->WriteSingleSDKReference(e1, "WindowsDesktop",
+        this->WriteSingleSDKReference(*spe1, "WindowsDesktop",
                                       desktopExtensionsVersion);
       }
       if (mobileExtensionsVersion) {
-        this->WriteSingleSDKReference(e1, "WindowsMobile",
+        this->WriteSingleSDKReference(*spe1, "WindowsMobile",
                                       mobileExtensionsVersion);
       }
       if (iotExtensionsVersion) {
-        this->WriteSingleSDKReference(e1, "WindowsIoT", iotExtensionsVersion);
+        this->WriteSingleSDKReference(*spe1, "WindowsIoT",
+                                      iotExtensionsVersion);
       }
     }
   }

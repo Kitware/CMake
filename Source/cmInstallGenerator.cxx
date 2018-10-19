@@ -22,6 +22,19 @@ cmInstallGenerator::~cmInstallGenerator()
 {
 }
 
+bool cmInstallGenerator::HaveInstall()
+{
+  return true;
+}
+
+void cmInstallGenerator::CheckCMP0082(bool& haveSubdirectoryInstall,
+                                      bool& haveInstallAfterSubdirectory)
+{
+  if (haveSubdirectoryInstall) {
+    haveInstallAfterSubdirectory = true;
+  }
+}
+
 void cmInstallGenerator::AddInstallRule(
   std::ostream& os, std::string const& dest, cmInstallType type,
   std::vector<std::string> const& files, bool optional /* = false */,

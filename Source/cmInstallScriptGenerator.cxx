@@ -30,9 +30,9 @@ void cmInstallScriptGenerator::GenerateScript(std::ostream& os)
   os << indent << "if(" << component_test << ")\n";
 
   if (this->Code) {
-    os << indent.Next() << this->Script << "\n";
+    os << indent << this->Script << "\n";
   } else {
-    os << indent.Next() << "include(\"" << this->Script << "\")\n";
+    os << indent << "include(\"" << this->Script << "\")\n";
   }
 
   os << indent << "endif()\n\n";

@@ -735,8 +735,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   targetOptions.AddDefine(configDefine);
 
   // Add the export symbol definition for shared library objects.
-  if (const char* exportMacro = target->GetExportMacro()) {
-    targetOptions.AddDefine(exportMacro);
+  if (const std::string* exportMacro = target->GetExportMacro()) {
+    targetOptions.AddDefine(*exportMacro);
   }
 
   // The intermediate directory name consists of a directory for the

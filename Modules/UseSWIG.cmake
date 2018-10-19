@@ -554,11 +554,8 @@ function(SWIG_ADD_LIBRARY name)
     set (UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
   else()
     if (NOT target_name_policy)
-      message(AUTHOR_WARNING
-        "Policy CMP0078 is not set.  "
-        "Run \"cmake --help-policy CMP0078\" for policy details.  "
-        "Use the cmake_policy command to set the policy and suppress this warning."
-        )
+      cmake_policy(GET_WARNING CMP0078 _cmp0078_warning)
+      message(AUTHOR_WARNING "${_cmp0078_warning}\n")
     endif()
     if (NOT DEFINED UseSWIG_TARGET_NAME_PREFERENCE)
       set (UseSWIG_TARGET_NAME_PREFERENCE LEGACY)
