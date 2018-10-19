@@ -43,6 +43,9 @@ Each ``<item>`` may be:
   the library instead of using the full path
   (e.g. ``/usr/lib/libfoo.so`` becomes ``-lfoo``).
 
+  The full path to the target's artifact will be quoted/escaped for
+  the shell automatically.
+
 * **A full path to a library file**: The generated link line will
   normally preserve the full path to the file. The buildsystem will
   have a dependency to re-link ``<target>`` if the library file changes.
@@ -62,8 +65,14 @@ Each ``<item>`` may be:
   imported into generated project files.  This is not supported by other
   generators.
 
+  The full path to the library file will be quoted/escaped for
+  the shell automatically.
+
 * **A plain library name**: The generated link line will ask the linker
   to search for the library (e.g. ``foo`` becomes ``-lfoo`` or ``foo.lib``).
+
+  The library name/flag is treated as a command-line string fragment and
+  will be used with no extra quoting or escaping.
 
 * **A link flag**: Item names starting with ``-``, but not ``-l`` or
   ``-framework``, are treated as linker flags.  Note that such flags will
@@ -77,6 +86,9 @@ Each ``<item>`` may be:
   :command:`target_link_options` command to add link
   flags explicitly. The flags will then be placed at the toolchain-defined
   flag position in the link command.
+
+  The link flag is treated as a command-line string fragment and
+  will be used with no extra quoting or escaping.
 
 * **A generator expression**: A ``$<...>`` :manual:`generator expression
   <cmake-generator-expressions(7)>` may evaluate to any of the above
