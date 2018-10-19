@@ -112,7 +112,8 @@ typedef int siginfo_t;
 #  endif
 #endif
 
-#if defined(__linux) || defined(__sun) || defined(_SCO_DS)
+#if defined(__linux) || defined(__sun) || defined(_SCO_DS) ||                 \
+  defined(__GLIBC__) || defined(__GNU__)
 #  include <netdb.h>
 #  include <netinet/in.h>
 #  include <sys/socket.h>
