@@ -674,13 +674,13 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
 {
   if (!this->UtilityItemsDone) {
     this->UtilityItemsDone = true;
-    std::set<std::string> const& utilities = this->GetUtilities();
-    for (std::string const& i : utilities) {
+    std::set<BT<std::string>> const& utilities = this->GetUtilities();
+    for (BT<std::string> const& i : utilities) {
       if (cmGeneratorTarget* gt =
-            this->LocalGenerator->FindGeneratorTargetToUse(i)) {
-        this->UtilityItems.insert(cmLinkItem(gt));
+            this->LocalGenerator->FindGeneratorTargetToUse(i.Value)) {
+        this->UtilityItems.insert(cmLinkItem(gt, i.Backtrace));
       } else {
-        this->UtilityItems.insert(cmLinkItem(i));
+        this->UtilityItems.insert(cmLinkItem(i.Value, i.Backtrace));
       }
     }
   }
@@ -1710,15 +1710,9 @@ cmListFileBacktrace cmGeneratorTarget::GetBacktrace() const
   return this->Target->GetBacktrace();
 }
 
-const std::set<std::string>& cmGeneratorTarget::GetUtilities() const
+const std::set<BT<std::string>>& cmGeneratorTarget::GetUtilities() const
 {
   return this->Target->GetUtilities();
-}
-
-const cmListFileBacktrace* cmGeneratorTarget::GetUtilityBacktrace(
-  const std::string& u) const
-{
-  return this->Target->GetUtilityBacktrace(u);
 }
 
 bool cmGeneratorTarget::HaveWellDefinedOutputFiles() const
@@ -4618,6 +4612,7 @@ void cmGeneratorTarget::ReportPropertyOrigin(
 }
 
 void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
+                                        cmListFileBacktrace const& bt,
                                         std::vector<cmLinkItem>& items) const
 {
   for (std::string const& n : names) {
@@ -4625,7 +4620,7 @@ void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
     if (name == this->GetName() || name.empty()) {
       continue;
     }
-    items.push_back(this->ResolveLinkItem(name));
+    items.push_back(this->ResolveLinkItem(name, bt));
   }
 }
 
@@ -4647,7 +4642,7 @@ void cmGeneratorTarget::ExpandLinkItems(
                                                   false, headTarget, this,
                                                   &dagChecker),
                                     libs);
-  this->LookupLinkItems(libs, items);
+  this->LookupLinkItems(libs, cge->GetBacktrace(), items);
   hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
 }
 
@@ -5200,7 +5195,7 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
                           iface.HadHeadSensitiveCondition);
     std::vector<std::string> deps;
     cmSystemTools::ExpandListArgument(info->SharedDeps, deps);
-    this->LookupLinkItems(deps, iface.SharedDeps);
+    this->LookupLinkItems(deps, cmListFileBacktrace(), iface.SharedDeps);
   }
 
   return &iface;
@@ -5736,7 +5731,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       }
 
       // The entry is meant for this configuration.
-      impl.Libraries.emplace_back(this->ResolveLinkItem(name), *btIt,
+      impl.Libraries.emplace_back(this->ResolveLinkItem(name, *btIt),
                                   evaluated != *le);
     }
 
@@ -5764,7 +5759,8 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         continue;
       }
       // Support OLD behavior for CMP0003.
-      impl.WrongConfigLibraries.push_back(this->ResolveLinkItem(name));
+      impl.WrongConfigLibraries.push_back(
+        this->ResolveLinkItem(name, cmListFileBacktrace()));
     }
   }
 }
@@ -5811,12 +5807,13 @@ cmGeneratorTarget::TargetOrString cmGeneratorTarget::ResolveTargetReference(
   return resolved;
 }
 
-cmLinkItem cmGeneratorTarget::ResolveLinkItem(std::string const& name) const
+cmLinkItem cmGeneratorTarget::ResolveLinkItem(
+  std::string const& name, cmListFileBacktrace const& bt) const
 {
   TargetOrString resolved = this->ResolveTargetReference(name);
 
   if (!resolved.Target) {
-    return cmLinkItem(resolved.String);
+    return cmLinkItem(resolved.String, bt);
   }
 
   // Skip targets that will not really be linked.  This is probably a
@@ -5824,10 +5821,10 @@ cmLinkItem cmGeneratorTarget::ResolveLinkItem(std::string const& name) const
   // within the project.
   if (resolved.Target->GetType() == cmStateEnums::EXECUTABLE &&
       !resolved.Target->IsExecutableWithExports()) {
-    return cmLinkItem(resolved.Target->GetName());
+    return cmLinkItem(resolved.Target->GetName(), bt);
   }
 
-  return cmLinkItem(resolved.Target);
+  return cmLinkItem(resolved.Target, bt);
 }
 
 std::string cmGeneratorTarget::GetPDBDirectory(const std::string& config) const

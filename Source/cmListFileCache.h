@@ -9,6 +9,7 @@
 #include <memory> // IWYU pragma: keep
 #include <stddef.h>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmStateSnapshot.h"
@@ -168,6 +169,37 @@ private:
                       cmListFileContext const& lfc);
   cmListFileBacktrace(std::shared_ptr<Entry const> top);
 };
+
+// Wrap type T as a value with a backtrace.  For purposes of
+// ordering and equality comparison, only the original value is
+// used.  The backtrace is considered incidental.
+template <typename T>
+class BT
+{
+public:
+  BT(T v = T(), cmListFileBacktrace bt = cmListFileBacktrace())
+    : Value(std::move(v))
+    , Backtrace(std::move(bt))
+  {
+  }
+  T Value;
+  cmListFileBacktrace Backtrace;
+  friend bool operator==(BT<T> const& l, BT<T> const& r)
+  {
+    return l.Value == r.Value;
+  }
+  friend bool operator<(BT<T> const& l, BT<T> const& r)
+  {
+    return l.Value < r.Value;
+  }
+  friend bool operator==(BT<T> const& l, T const& r) { return l.Value == r; }
+  friend bool operator==(T const& l, BT<T> const& r) { return l == r.Value; }
+};
+
+std::ostream& operator<<(std::ostream& os, BT<std::string> const& s);
+
+std::vector<BT<std::string>> ExpandListWithBacktrace(
+  const char* list, cmListFileBacktrace const& bt = cmListFileBacktrace());
 
 struct cmListFile
 {

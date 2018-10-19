@@ -486,24 +486,10 @@ cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
   return this->GetMakefile()->GetGlobalGenerator();
 }
 
-void cmTarget::AddUtility(const std::string& u, cmMakefile* makefile)
+void cmTarget::AddUtility(std::string const& u, cmMakefile* mf)
 {
-  if (this->Utilities.insert(u).second && makefile) {
-    this->UtilityBacktraces.insert(
-      std::make_pair(u, makefile->GetBacktrace()));
-  }
-}
-
-cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(
-  const std::string& u) const
-{
-  std::map<std::string, cmListFileBacktrace>::const_iterator i =
-    this->UtilityBacktraces.find(u);
-  if (i == this->UtilityBacktraces.end()) {
-    return nullptr;
-  }
-
-  return &i->second;
+  BT<std::string> util(u, mf ? mf->GetBacktrace() : cmListFileBacktrace());
+  this->Utilities.insert(util);
 }
 
 cmListFileBacktrace const& cmTarget::GetBacktrace() const

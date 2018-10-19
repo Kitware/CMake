@@ -12,6 +12,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
@@ -940,8 +941,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       new cmGeneratorTarget(autogenTarget, localGen));
 
     // Forward origin utilities to autogen target
-    for (std::string const& depName : this->Target->Target->GetUtilities()) {
-      autogenTarget->AddUtility(depName, makefile);
+    for (BT<std::string> const& depName : this->Target->GetUtilities()) {
+      autogenTarget->AddUtility(depName.Value, makefile);
     }
     // Add additional autogen target dependencies to autogen target
     for (cmTarget* depTarget : this->AutogenTarget.DependTargets) {

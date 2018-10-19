@@ -19,6 +19,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmGeneratorTarget.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
@@ -1008,10 +1009,11 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
 {
   if (target->GetType() == cmStateEnums::GLOBAL_TARGET) {
     // These depend only on other CMake-provided targets, e.g. "all".
-    std::set<std::string> const& utils = target->GetUtilities();
-    for (std::string const& util : utils) {
+    std::set<BT<std::string>> const& utils = target->GetUtilities();
+    for (BT<std::string> const& util : utils) {
       std::string d =
-        target->GetLocalGenerator()->GetCurrentBinaryDirectory() + "/" + util;
+        target->GetLocalGenerator()->GetCurrentBinaryDirectory() + "/" +
+        util.Value;
       outputs.push_back(this->ConvertToNinjaPath(d));
     }
   } else {

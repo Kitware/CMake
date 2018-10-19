@@ -17,6 +17,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMakefileTargetGenerator.h"
@@ -1546,8 +1547,10 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
       if (!text) {
         text = "Running external command ...";
       }
-      depends.insert(depends.end(), gt->GetUtilities().begin(),
-                     gt->GetUtilities().end());
+      depends.reserve(gt->GetUtilities().size());
+      for (BT<std::string> const& u : gt->GetUtilities()) {
+        depends.push_back(u.Value);
+      }
       this->AppendEcho(commands, text,
                        cmLocalUnixMakefileGenerator3::EchoGlobal);
 
