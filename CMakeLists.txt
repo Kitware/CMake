@@ -35,6 +35,7 @@
 #                            target_link_libraries. Because of how interface
 #                            properties propagate, this target is not suitable
 #                            for use with PUBLIC or INTERFACE linking.
+#  KWSYS_ALIAS_TARGET = The name of an alias target to create to the actual target.
 #
 #    Example:
 #
@@ -887,6 +888,9 @@ IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
     ADD_LIBRARY(${KWSYS_TARGET_INTERFACE} ${KWSYS_LIBRARY_TYPE}
       ${KWSYS_C_SRCS} ${KWSYS_CXX_SRCS})
   ENDIF()
+  if (KWSYS_ALIAS_TARGET)
+    add_library(${KWSYS_ALIAS_TARGET} ALIAS ${KWSYS_TARGET_INTERFACE})
+  endif ()
   SET_TARGET_PROPERTIES(${KWSYS_TARGET_OBJECT} PROPERTIES
     C_CLANG_TIDY ""
     CXX_CLANG_TIDY ""
