@@ -5,24 +5,29 @@
 # CheckFunctionExists
 # -------------------
 #
-# Check if a C function can be linked::
+# Check if a C function can be linked
+#
+# .. code-block:: cmake
 #
 #   check_function_exists(<function> <variable>)
 #
-# Check that the ``<function>`` is provided by libraries on the system and store
-# the result in a ``<variable>``. ``<variable>`` will be created as an internal
+# Checks that the ``<function>`` is provided by libraries on the system and store
+# the result in a ``<variable>``, which will be created as an internal
 # cache variable.
 #
 # The following variables may be set before calling this macro to modify the
 # way the check is run:
 #
-# ::
-#
-#   CMAKE_REQUIRED_FLAGS = string of compile command line flags
-#   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-#   CMAKE_REQUIRED_INCLUDES = list of include directories
-#   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
-#   CMAKE_REQUIRED_QUIET = execute quietly without messages
+# ``CMAKE_REQUIRED_FLAGS``
+#   string of compile command line flags
+# ``CMAKE_REQUIRED_DEFINITIONS``
+#   list of macros to define (-DFOO=bar)
+# ``CMAKE_REQUIRED_INCLUDES``
+#   list of include directories
+# ``CMAKE_REQUIRED_LIBRARIES``
+#   list of libraries to link
+# ``CMAKE_REQUIRED_QUIET``
+#   execute quietly without messages
 #
 # .. note::
 #

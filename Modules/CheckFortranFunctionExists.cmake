@@ -5,24 +5,24 @@
 # CheckFortranFunctionExists
 # --------------------------
 #
-# macro which checks if the Fortran function exists
+# :command:`Macro <macro>` which checks if a Fortran function exists.
 #
-# CHECK_FORTRAN_FUNCTION_EXISTS(FUNCTION VARIABLE)
+# .. code-block:: cmake
 #
-# ::
+#   CHECK_FORTRAN_FUNCTION_EXISTS(<function> <result>)
 #
-#   FUNCTION - the name of the Fortran function
-#   VARIABLE - variable to store the result
-#              Will be created as an internal cache variable.
+# where
 #
-#
+# ``<function>``
+#   the name of the Fortran function
+# ``<result>``
+#   variable to store the result; will be created as an internal cache variable.
 #
 # The following variables may be set before calling this macro to modify
 # the way the check is run:
 #
-# ::
-#
-#   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+# ``CMAKE_REQUIRED_LIBRARIES``
+#   list of libraries to link
 
 include_guard(GLOBAL)
 

@@ -40,7 +40,7 @@ Module Functions
 
 .. command:: android_add_test_data
 
-  ::
+  .. code-block:: cmake
 
     android_add_test_data(<test-name>
       [FILES <files>...] [FILES_DEST <device-dir>]

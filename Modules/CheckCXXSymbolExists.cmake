@@ -7,10 +7,12 @@
 #
 # Check if a symbol exists as a function, variable, or macro in C++
 #
-# CHECK_CXX_SYMBOL_EXISTS(<symbol> <files> <variable>)
+# .. code-block:: cmake
 #
-# Check that the <symbol> is available after including given header
-# <files> and store the result in a <variable>.  Specify the list of
+#   CHECK_CXX_SYMBOL_EXISTS(<symbol> <files> <variable>)
+#
+# Check that the ``<symbol>`` is available after including given header
+# ``<files>`` and store the result in a ``<variable>``.  Specify the list of
 # files in one argument as a semicolon-separated list.
 # CHECK_CXX_SYMBOL_EXISTS() can be used to check in C++ files, as
 # opposed to CHECK_SYMBOL_EXISTS(), which works only for C.
@@ -24,13 +26,16 @@
 # The following variables may be set before calling this macro to modify
 # the way the check is run:
 #
-# ::
-#
-#   CMAKE_REQUIRED_FLAGS = string of compile command line flags
-#   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-#   CMAKE_REQUIRED_INCLUDES = list of include directories
-#   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
-#   CMAKE_REQUIRED_QUIET = execute quietly without messages
+# ``CMAKE_REQUIRED_FLAGS``
+#    string of compile command line flags
+# ``CMAKE_REQUIRED_DEFINITIONS``
+#    list of macros to define (-DFOO=bar)
+# ``CMAKE_REQUIRED_INCLUDES``
+#    list of include directories
+# ``CMAKE_REQUIRED_LIBRARIES``
+#    list of libraries to link
+# ``CMAKE_REQUIRED_QUIET``
+#    execute quietly without messages
 
 include_guard(GLOBAL)
 include(CheckSymbolExists)
