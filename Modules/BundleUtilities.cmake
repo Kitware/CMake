@@ -224,17 +224,21 @@ that are already also in the bundle...  Anything that points to an
 external file causes this function to fail the verification.
 #]=======================================================================]
 
+function(_warn_cmp0080)
+  message(AUTHOR_WARNING
+    "Policy CMP0080 is not set: BundleUtilities prefers not to be included at configure time. "
+    "Run \"cmake --help-policy CMP0080\" for policy details. "
+    "Use the cmake_policy command to set the policy and suppress this warning."
+    )
+endfunction()
+
 # Do not include this module at configure time!
 if(DEFINED CMAKE_GENERATOR)
   cmake_policy(GET CMP0080 _BundleUtilities_CMP0080)
   if(_BundleUtilities_CMP0080 STREQUAL "NEW")
     message(FATAL_ERROR "BundleUtilities cannot be included at configure time!")
-  elseif(NOT _BundleUtilities_CMP0080 STREQUAL "OLD")
-    message(AUTHOR_WARNING
-      "Policy CMP0080 is not set: BundleUtilities prefers not to be included at configure time. "
-      "Run \"cmake --help-policy CMP0080\" for policy details. "
-      "Use the cmake_policy command to set the policy and suppress this warning."
-      )
+  elseif(NOT _BundleUtilities_CMP0080 STREQUAL "OLD" AND NOT _CMP0080_SUPPRESS_WARNING)
+    _warn_cmp0080()
   endif()
 endif()
 
