@@ -1376,6 +1376,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindEXPAT)
   endif()
 
+  if(CMake_TEST_FindFontconfig)
+    add_subdirectory(FindFontconfig)
+  endif()
+
   if(CMake_TEST_FindFreetype)
     add_subdirectory(FindFreetype)
   endif()

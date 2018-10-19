@@ -64,6 +64,7 @@ The following individuals and institutions are among the Contributors:
 * Insight Software Consortium <insightsoftwareconsortium.org>
 * Jan Woetzel
 * Kelly Thompson <kgt@lanl.gov>
+* Laurent Montel <montel@kde.org>
 * Konstantin Podsvirov <konstantin@podsvirov.pro>
 * Mario Bensi <mbensi@ipsquad.net>
 * Martin Gräßlin <mgraesslin@kde.org>

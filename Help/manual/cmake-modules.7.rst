@@ -131,6 +131,7 @@ They are normally called through the :command:`find_package` command.
    /module/FindFLEX
    /module/FindFLTK2
    /module/FindFLTK
+   /module/FindFontconfig
    /module/FindFreetype
    /module/FindGCCXML
    /module/FindGDAL
