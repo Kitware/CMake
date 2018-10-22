@@ -19,10 +19,8 @@ can also be used:
 
 The module supports the following components:
 
-* ``MX_LIBRARY``, ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the ``MX``,
-  ``ENG`` and ``MAT`` libraries of Matlab
-* ``ENGINE_LIBRARY``, ``DATAARRAY_LIBRARY``: respectively the ``MatlabEngine``
-  and ``MatlabDataArray`` libraries of Matlab (Matlab 2018a and later)
+* ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the ``ENG`` and ``MAT``
+  libraries of Matlab
 * ``MAIN_PROGRAM`` the Matlab binary program. Note that this component is not
   available on the MCR version, and will yield an error if the MCR is found
   instead of the regular Matlab installation.
@@ -101,8 +99,7 @@ Result variables
 ``Matlab_MEX_LIBRARY``
   library for mex, always available.
 ``Matlab_MX_LIBRARY``
-  mx library of Matlab (arrays). Available only if the component
-  ``MX_LIBRARY`` has been requested.
+  mx library of Matlab (arrays), always available.
 ``Matlab_ENG_LIBRARY``
   Matlab engine library. Available only if the component ``ENG_LIBRARY``
   is requested.
@@ -110,11 +107,9 @@ Result variables
   Matlab matrix library. Available only if the component ``MAT_LIBRARY``
   is requested.
 ``Matlab_ENGINE_LIBRARY``
-  Matlab C++ engine library. Available only if the component ``ENGINE_LIBRARY``
-  is requested.
+  Matlab C++ engine library, always available for R2018a and newer.
 ``Matlab_DATAARRAY_LIBRARY``
-  Matlab C++ data array library. Available only if the component ``DATAARRAY_LIBRARY``
-  is requested.
+  Matlab C++ data array library, always available for R2018a and newer.
 ``Matlab_LIBRARIES``
   the whole set of libraries of Matlab
 ``Matlab_MEX_COMPILER``
@@ -898,8 +893,7 @@ endfunction()
     list of source files.
   ``LINK_TO``
     a list of additional link dependencies.  The target links to ``libmex``
-    by default. If ``Matlab_MX_LIBRARY`` is defined, it also
-    links to ``libmx``.
+    and ``libmx`` by default.
   ``OUTPUT_NAME``
     if given, overrides the default name. The default name is
     the name of the target without any prefix and
@@ -1491,7 +1485,9 @@ if(MATLAB_FIND_DEBUG)
   message(STATUS "[MATLAB] Current version is ${Matlab_VERSION_STRING} located ${Matlab_ROOT_DIR}")
 endif()
 
-
+if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.4") # MATLAB 9.4 (R2018a) and newer have a new C++ API
+  set(Matlab_HAS_CPP_API 1)
+endif()
 
 if(Matlab_ROOT_DIR)
   file(TO_CMAKE_PATH ${Matlab_ROOT_DIR} Matlab_ROOT_DIR)
@@ -1530,6 +1526,8 @@ set(Matlab_BINARIES_DIR
     ${Matlab_ROOT_DIR}/bin/${_matlab_bin_prefix}${_matlab_current_suffix})
 set(Matlab_EXTERN_LIBRARY_DIR
     ${Matlab_ROOT_DIR}/extern/lib/${_matlab_bin_prefix}${_matlab_current_suffix})
+set(Matlab_EXTERN_BINARIES_DIR
+    ${Matlab_ROOT_DIR}/extern/bin/${_matlab_bin_prefix}${_matlab_current_suffix})
 
 if(WIN32)
   if(MINGW)
@@ -1539,7 +1537,7 @@ if(WIN32)
   endif()
   set(_matlab_lib_prefix_for_search "lib")
 else()
-  set(_matlab_lib_dir_for_search ${Matlab_BINARIES_DIR})
+  set(_matlab_lib_dir_for_search ${Matlab_BINARIES_DIR} ${Matlab_EXTERN_BINARIES_DIR})
   set(_matlab_lib_prefix_for_search "lib")
 endif()
 
@@ -1590,7 +1588,6 @@ _Matlab_find_library(
   PATHS ${_matlab_lib_dir_for_search}
   NO_DEFAULT_PATH
 )
-
 list(APPEND _matlab_required_variables Matlab_MEX_LIBRARY)
 
 # the MEX extension is required
@@ -1631,21 +1628,18 @@ if(_matlab_find_matlab_program GREATER -1)
 endif()
 unset(_matlab_find_matlab_program)
 
-# Component MX library
-list(FIND Matlab_FIND_COMPONENTS MX_LIBRARY _matlab_find_mx)
-if(_matlab_find_mx GREATER -1)
-  _Matlab_find_library(
-    ${_matlab_lib_prefix_for_search}
-    Matlab_MX_LIBRARY
-    mx
-    PATHS ${_matlab_lib_dir_for_search}
-    NO_DEFAULT_PATH
-  )
-  if(Matlab_MX_LIBRARY)
-    set(Matlab_MX_LIBRARY_FOUND TRUE)
-  endif()
+# The MX library is required
+_Matlab_find_library(
+  ${_matlab_lib_prefix_for_search}
+  Matlab_MX_LIBRARY
+  mx
+  PATHS ${_matlab_lib_dir_for_search}
+  NO_DEFAULT_PATH
+)
+list(APPEND _matlab_required_variables Matlab_MX_LIBRARY)
+if(Matlab_MX_LIBRARY)
+  set(Matlab_MX_LIBRARY_FOUND TRUE)
 endif()
-unset(_matlab_find_mx)
 
 # Component ENG library
 list(FIND Matlab_FIND_COMPONENTS ENG_LIBRARY _matlab_find_eng)
@@ -1711,9 +1705,9 @@ if(_matlab_find_mcc_compiler GREATER -1)
 endif()
 unset(_matlab_find_mcc_compiler)
 
-# component MatlabEngine
-list(FIND Matlab_FIND_COMPONENTS ENGINE_LIBRARY _matlab_find_matlab_engine)
-if(_matlab_find_matlab_engine GREATER -1)
+if(Matlab_HAS_CPP_API)
+
+  # The MatlabEngine library is required for R2018a+
   _Matlab_find_library(
     ${_matlab_lib_prefix_for_search}
     Matlab_ENGINE_LIBRARY
@@ -1722,40 +1716,33 @@ if(_matlab_find_matlab_engine GREATER -1)
     DOC "MatlabEngine Library"
     NO_DEFAULT_PATH
   )
+  list(APPEND _matlab_required_variables Matlab_ENGINE_LIBRARY)
   if(Matlab_ENGINE_LIBRARY)
     set(Matlab_ENGINE_LIBRARY_FOUND TRUE)
   endif()
-endif()
-unset(_matlab_find_matlab_engine)
 
-# component MatlabDataArray
-list(FIND Matlab_FIND_COMPONENTS DATAARRAY_LIBRARY _matlab_find_matlab_dataarray)
-if(_matlab_find_matlab_dataarray GREATER -1)
+  # The MatlabDataArray library is required for R2018a+
   _Matlab_find_library(
-  ${_matlab_lib_prefix_for_search}
+    ${_matlab_lib_prefix_for_search}
     Matlab_DATAARRAY_LIBRARY
     MatlabDataArray
     PATHS ${_matlab_lib_dir_for_search}
     DOC "MatlabDataArray Library"
     NO_DEFAULT_PATH
   )
+  list(APPEND _matlab_required_variables Matlab_DATAARRAY_LIBRARY)
   if(Matlab_DATAARRAY_LIBRARY)
     set(Matlab_DATAARRAY_LIBRARY_FOUND TRUE)
   endif()
+
 endif()
-unset(_matlab_find_matlab_dataarray)
 
 unset(_matlab_lib_dir_for_search)
 
-set(Matlab_LIBRARIES ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY} ${Matlab_ENG_LIBRARY} ${Matlab_MAT_LIBRARY})
-
-if(Matlab_DATAARRAY_LIBRARY_FOUND)
-  set(Matlab_LIBRARIES ${Matlab_LIBRARIES} ${Matlab_DATAARRAY_LIBRARY})
-endif()
-
-if(Matlab_ENGINE_LIBRARY_FOUND)
-  set(Matlab_LIBRARIES ${Matlab_LIBRARIES} ${Matlab_ENGINE_LIBRARY})
-endif()
+set(Matlab_LIBRARIES
+  ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY}
+  ${Matlab_ENG_LIBRARY} ${Matlab_MAT_LIBRARY}
+  ${Matlab_DATAARRAY_LIBRARY} ${Matlab_ENGINE_LIBRARY})
 
 find_package_handle_standard_args(
   Matlab
