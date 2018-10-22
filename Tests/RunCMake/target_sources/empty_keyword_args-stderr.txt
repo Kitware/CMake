@@ -1,4 +1,0 @@
-CMake Error at empty_keyword_args.cmake:2 \(target_sources\):
-  target_sources may only set INTERFACE properties on INTERFACE targets
-Call Stack \(most recent call first\):
-  CMakeLists.txt:5 \(include\)
