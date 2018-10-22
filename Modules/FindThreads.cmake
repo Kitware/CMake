@@ -208,7 +208,9 @@ if(THREADS_FOUND AND NOT TARGET Threads::Threads)
   add_library(Threads::Threads INTERFACE IMPORTED)
 
   if(THREADS_HAVE_PTHREAD_ARG)
-    set_property(TARGET Threads::Threads PROPERTY INTERFACE_COMPILE_OPTIONS "-pthread")
+    set_property(TARGET Threads::Threads
+                 PROPERTY INTERFACE_COMPILE_OPTIONS "$<$<COMPILE_LANGUAGE:CUDA>:SHELL:-Xcompiler -pthread>"
+                                                    "$<$<NOT:$<COMPILE_LANGUAGE:CUDA>>:-pthread>")
   endif()
 
   if(CMAKE_THREAD_LIBS_INIT)
