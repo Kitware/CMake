@@ -884,6 +884,7 @@ endfunction()
          [OUTPUT_NAME output_name]
          [DOCUMENTATION file.txt]
          [LINK_TO target1 target2 ...]
+         [R2017b | R2018a]
          [...]
      )
 
@@ -904,6 +905,12 @@ endfunction()
     the same folder without any processing, with the same name as the final
     mex file, and with extension `.m`. In that case, typing ``help <name>``
     in Matlab prints the documentation contained in this file.
+  ``R2017b`` or ``R2018a`` may be given to specify the version of the C API
+    to use: ``R2017b`` specifies the traditional (separate complex) C API,
+    and corresponds to the ``-R2017b`` flag for the `mex` command. ``R2018a``
+    specifies the new interleaved complex C API, and corresponds to the
+    ``-R2018a`` flag for the `mex` command. Ignored if MATLAB version prior
+    to R2018a. Defaults to ``R2017b``.
   ``MODULE`` or ``SHARED`` may be given to specify the type of library to be
     created. ``EXECUTABLE`` may be given to create an executable instead of
     a library. If no type is given explicitly, the type is ``SHARED``.
@@ -933,7 +940,7 @@ function(matlab_add_mex)
 
   endif()
 
-  set(options EXECUTABLE MODULE SHARED)
+  set(options EXECUTABLE MODULE SHARED R2017b R2018a)
   set(oneValueArgs NAME DOCUMENTATION OUTPUT_NAME)
   set(multiValueArgs LINK_TO SRC)
 
@@ -948,9 +955,25 @@ function(matlab_add_mex)
     set(${prefix}_OUTPUT_NAME ${${prefix}_NAME})
   endif()
 
+  if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, add version source file
+    # TODO: check the file extensions in ${${prefix}_SRC} to see if they're C or C++ files
+    # Currently, the C and C++ versions of the version files are identical, so this doesn't matter.
+    set(MEX_VERSION_FILE "${Matlab_ROOT_DIR}/extern/version/c_mexapi_version.c")
+    #set(MEX_VERSION_FILE "${Matlab_ROOT_DIR}/extern/version/cpp_mexapi_version.cpp")
+  endif()
+
+  if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.4") # For 9.4 (R2018a) and newer, add API macro
+    if(${${prefix}_R2018a})
+      set(MEX_API_MACRO "MATLAB_DEFAULT_RELEASE=R2018a")
+    else()
+      set(MEX_API_MACRO "MATLAB_DEFAULT_RELEASE=R2017b")
+    endif()
+  endif()
+
   if(${prefix}_EXECUTABLE)
     add_executable(${${prefix}_NAME}
       ${${prefix}_SRC}
+      ${MEX_VERSION_FILE}
       ${${prefix}_DOCUMENTATION}
       ${${prefix}_UNPARSED_ARGUMENTS})
   else()
@@ -963,31 +986,25 @@ function(matlab_add_mex)
     add_library(${${prefix}_NAME}
       ${type}
       ${${prefix}_SRC}
+      ${MEX_VERSION_FILE}
       ${${prefix}_DOCUMENTATION}
       ${${prefix}_UNPARSED_ARGUMENTS})
   endif()
 
   target_include_directories(${${prefix}_NAME} PRIVATE ${Matlab_INCLUDE_DIRS})
 
-  if(DEFINED Matlab_MX_LIBRARY)
-    target_link_libraries(${${prefix}_NAME} ${Matlab_MX_LIBRARY})
+  if(Matlab_HAS_CPP_API)
+    target_link_libraries(${${prefix}_NAME} ${Matlab_ENGINE_LIBRARY} ${Matlab_DATAARRAY_LIBRARY})
   endif()
 
-  if(DEFINED Matlab_ENGINE_LIBRARY)
-    target_link_libraries(${${prefix}_NAME} ${Matlab_ENGINE_LIBRARY})
-  endif()
-
-  if(DEFINED Matlab_DATAARRAY_LIBRARY)
-    target_link_libraries(${${prefix}_NAME} ${Matlab_DATAARRAY_LIBRARY})
-  endif()
-
-  target_link_libraries(${${prefix}_NAME} ${Matlab_MEX_LIBRARY} ${${prefix}_LINK_TO})
+  target_link_libraries(${${prefix}_NAME} ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY} ${${prefix}_LINK_TO})
   set_target_properties(${${prefix}_NAME}
       PROPERTIES
         PREFIX ""
         OUTPUT_NAME ${${prefix}_OUTPUT_NAME}
         SUFFIX ".${Matlab_MEX_EXTENSION}")
 
+  target_compile_definitions(${${prefix}_NAME} PRIVATE ${MEX_API_MACRO} MATLAB_MEX_FILE)
 
   # documentation
   if(NOT ${${prefix}_DOCUMENTATION} STREQUAL "")
@@ -1001,82 +1018,82 @@ function(matlab_add_mex)
   endif() # documentation
 
   # entry point in the mex file + taking care of visibility and symbol clashes.
-  if (MSVC)
-    get_target_property(
-        _previous_link_flags
-        ${${prefix}_NAME}
-        LINK_FLAGS)
-    if(NOT _previous_link_flags)
-      set(_previous_link_flags)
-    endif()
-
-    set_target_properties(${${prefix}_NAME}
-      PROPERTIES
-        LINK_FLAGS "${_previous_link_flags} /EXPORT:mexFunction")
-  endif()
-
   if(WIN32)
+
+    if (MSVC)
+
+      set(_link_flags "${_link_flags} /EXPORT:${mexFunction}")
+      if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, export version
+        set(_link_flags "${_link_flags} /EXPORT:${mexfilerequiredapiversion}")
+      endif()
+
+      if(Matlab_HAS_CPP_API)
+        set(_link_flags "${_link_flags} /EXPORT:${mexCreateMexFunction} /EXPORT:${mexDestroyMexFunction} /EXPORT:${mexFunctionAdapter}")
+        #TODO: Is this necessary?
+      endif()
+
+      set_property(TARGET ${${prefix}_NAME} APPEND PROPERTY LINK_FLAGS ${_link_flags})
+
+    endif() # TODO: what if there's a different compiler on Windows?
+
     set_target_properties(${${prefix}_NAME}
       PROPERTIES
         DEFINE_SYMBOL "DLL_EXPORT_SYM=__declspec(dllexport)")
+
   else()
 
-    if(HAS_MINUS_PTHREAD AND NOT APPLE)
-      # Apparently, compiling with -pthread generated the proper link flags
-      # and some defines at compilation
-      target_compile_options(${${prefix}_NAME} PRIVATE "-pthread")
+    if(${Matlab_VERSION_STRING} VERSION_LESS "9.1") # For versions prior to 9.1 (R2016b)
+      set(_ver_map_files ${Matlab_EXTERN_LIBRARY_DIR}/mexFunction.map)
+    else()                                          # For 9.1 (R2016b) and newer
+      set(_ver_map_files ${Matlab_EXTERN_LIBRARY_DIR}/c_exportsmexfileversion.map)
     endif()
 
+    if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.5") # For 9.5 (R2018b) (and newer?)
+      target_compile_options(${${prefix}_NAME} PRIVATE "-fvisibility=default")
+      # This one is weird, it might be a bug in <mex.h> for R2018b. When compiling with
+      # -fvisibility=hidden, the symbol `mexFunction` cannot be exported. Reading the
+      # source code for <mex.h>, it seems that the preprocessor macro `MW_NEEDS_VERSION_H`
+      # needs to be defined for `__attribute__ ((visibility("default")))` to be added
+      # in front of the declaration of `mexFunction`. In previous versions of MATLAB this
+      # was not the case, there `DLL_EXPORT_SYM` needed to be defined.
+      # Adding `-fvisibility=hidden` to the `mex` command causes the build to fail.
+      # TODO: Check that this is still necessary in R2019a when it comes out.
+    endif()
 
-    # if we do not do that, the symbols linked from eg. boost remain weak and
-    # then clash with the ones defined in the matlab process. So by default
-    # the symbols are hidden.
-    # This also means that for shared libraries (like MEX), the entry point
-    # should be explicitly declared with default visibility, otherwise Matlab
-    # cannot find the entry point.
-    # Note that this is particularly meaningful if the MEX wrapper itself
-    # contains symbols that are clashing with Matlab (that are compiled in the
-    # MEX file). In order to propagate the visibility options to the libraries
-    # to which the MEX file is linked against, the -Wl,--exclude-libs,ALL
-    # option should also be specified.
+    if(APPLE)
 
-    set_target_properties(${${prefix}_NAME}
-      PROPERTIES
-        CXX_VISIBILITY_PRESET "hidden"
-        C_VISIBILITY_PRESET "hidden"
-        VISIBILITY_INLINES_HIDDEN ON
-    )
+      if(Matlab_HAS_CPP_API)
+        list(APPEND _ver_map_files ${Matlab_EXTERN_LIBRARY_DIR}/cppMexFunction.map) # This one doesn't exist on Linux
+        set(_link_flags "${_link_flags} -Wl,-U,_mexCreateMexFunction -Wl,-U,_mexDestroyMexFunction -Wl,-U,_mexFunctionAdapter")
+        # On MacOS, the MEX command adds the above, without it the link breaks
+        # because we indiscriminately use "cppMexFunction.map" even for C API MEX-files.
+      endif()
 
-    #  get_target_property(
-    #    _previous_link_flags
-    #    ${${prefix}_NAME}
-    #    LINK_FLAGS)
-    #  if(NOT _previous_link_flags)
-    #    set(_previous_link_flags)
-    #  endif()
+      set(_export_flag_name -exported_symbols_list)
 
-    #  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    #    set_target_properties(${${prefix}_NAME}
-    #      PROPERTIES
-    #        LINK_FLAGS "${_previous_link_flags} -Wl,--exclude-libs,ALL"
-    #        # -Wl,--version-script=${_FindMatlab_SELF_DIR}/MatlabLinuxVisibility.map"
-    #    )
-    #  elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    #    # in this case, all other symbols become hidden.
-    #    set_target_properties(${${prefix}_NAME}
-    #      PROPERTIES
-    #        LINK_FLAGS "${_previous_link_flags} -Wl,-exported_symbol,_mexFunction"
-    #        #-Wl,-exported_symbols_list,${_FindMatlab_SELF_DIR}/MatlabOSXVisilibity.map"
-    #    )
-    #  endif()
+    else() # Linux
 
+      if(HAS_MINUS_PTHREAD)
+        # Apparently, compiling with -pthread generated the proper link flags
+        # and some defines at compilation
+        target_compile_options(${${prefix}_NAME} PRIVATE "-pthread")
+      endif()
 
+      set(_link_flags "${_link_flags} -Wl,--as-needed")
+
+      set(_export_flag_name --version-script)
+
+    endif()
+
+    foreach(_file ${_ver_map_files})
+      set(_link_flags "${_link_flags} -Wl,${_export_flag_name},${_file}")
+    endforeach()
 
     set_target_properties(${${prefix}_NAME}
       PROPERTIES
         DEFINE_SYMBOL "DLL_EXPORT_SYM=__attribute__ ((visibility (\"default\")))"
-    )
-
+        LINK_FLAGS "${_link_flags}"
+    ) # The `mex` command doesn't add this define. Is it necessary?
 
   endif()
 
