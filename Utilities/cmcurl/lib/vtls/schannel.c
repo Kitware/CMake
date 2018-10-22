@@ -90,10 +90,16 @@
 #endif
 #endif
 
+#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX)
+#define HAS_CLIENT_CERT_PATH
+#endif
+
+#ifdef HAS_CLIENT_CERT_PATH
 #ifdef UNICODE
 #define CURL_CERT_STORE_PROV_SYSTEM CERT_STORE_PROV_SYSTEM_W
 #else
 #define CURL_CERT_STORE_PROV_SYSTEM CERT_STORE_PROV_SYSTEM_A
+#endif
 #endif
 
 #ifndef SP_PROT_SSL2_CLIENT
@@ -199,6 +205,155 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct connectdata *conn)
   return CURLE_OK;
 }
 
+/*longest is 26, buffer is slightly bigger*/
+#define LONGEST_ALG_ID 32
+#define CIPHEROPTION(X) \
+if(strcmp(#X, tmp) == 0) \
+  return X
+
+static int
+get_alg_id_by_name(char *name)
+{
+  char tmp[LONGEST_ALG_ID] = { 0 };
+  char *nameEnd = strchr(name, ':');
+  size_t n = nameEnd ? min((size_t)(nameEnd - name), LONGEST_ALG_ID - 1) : \
+    min(strlen(name), LONGEST_ALG_ID - 1);
+  strncpy(tmp, name, n);
+  tmp[n] = 0;
+  CIPHEROPTION(CALG_MD2);
+  CIPHEROPTION(CALG_MD4);
+  CIPHEROPTION(CALG_MD5);
+  CIPHEROPTION(CALG_SHA);
+  CIPHEROPTION(CALG_SHA1);
+  CIPHEROPTION(CALG_MAC);
+  CIPHEROPTION(CALG_RSA_SIGN);
+  CIPHEROPTION(CALG_DSS_SIGN);
+/*ifdefs for the options that are defined conditionally in wincrypt.h*/
+#ifdef CALG_NO_SIGN
+  CIPHEROPTION(CALG_NO_SIGN);
+#endif
+  CIPHEROPTION(CALG_RSA_KEYX);
+  CIPHEROPTION(CALG_DES);
+#ifdef CALG_3DES_112
+  CIPHEROPTION(CALG_3DES_112);
+#endif
+  CIPHEROPTION(CALG_3DES);
+  CIPHEROPTION(CALG_DESX);
+  CIPHEROPTION(CALG_RC2);
+  CIPHEROPTION(CALG_RC4);
+  CIPHEROPTION(CALG_SEAL);
+#ifdef CALG_DH_SF
+  CIPHEROPTION(CALG_DH_SF);
+#endif
+  CIPHEROPTION(CALG_DH_EPHEM);
+#ifdef CALG_AGREEDKEY_ANY
+  CIPHEROPTION(CALG_AGREEDKEY_ANY);
+#endif
+#ifdef CALG_HUGHES_MD5
+  CIPHEROPTION(CALG_HUGHES_MD5);
+#endif
+  CIPHEROPTION(CALG_SKIPJACK);
+#ifdef CALG_TEK
+  CIPHEROPTION(CALG_TEK);
+#endif
+  CIPHEROPTION(CALG_CYLINK_MEK);
+  CIPHEROPTION(CALG_SSL3_SHAMD5);
+#ifdef CALG_SSL3_MASTER
+  CIPHEROPTION(CALG_SSL3_MASTER);
+#endif
+#ifdef CALG_SCHANNEL_MASTER_HASH
+  CIPHEROPTION(CALG_SCHANNEL_MASTER_HASH);
+#endif
+#ifdef CALG_SCHANNEL_MAC_KEY
+  CIPHEROPTION(CALG_SCHANNEL_MAC_KEY);
+#endif
+#ifdef CALG_SCHANNEL_ENC_KEY
+  CIPHEROPTION(CALG_SCHANNEL_ENC_KEY);
+#endif
+#ifdef CALG_PCT1_MASTER
+  CIPHEROPTION(CALG_PCT1_MASTER);
+#endif
+#ifdef CALG_SSL2_MASTER
+  CIPHEROPTION(CALG_SSL2_MASTER);
+#endif
+#ifdef CALG_TLS1_MASTER
+  CIPHEROPTION(CALG_TLS1_MASTER);
+#endif
+#ifdef CALG_RC5
+  CIPHEROPTION(CALG_RC5);
+#endif
+#ifdef CALG_HMAC
+  CIPHEROPTION(CALG_HMAC);
+#endif
+#if !defined(__W32API_MAJOR_VERSION) || \
+    !defined(__W32API_MINOR_VERSION) || \
+    defined(__MINGW64_VERSION_MAJOR) || \
+    (__W32API_MAJOR_VERSION > 5)     || \
+    ((__W32API_MAJOR_VERSION == 5) && (__W32API_MINOR_VERSION > 0))
+  /* CALG_TLS1PRF has a syntax error in MinGW's w32api up to version 5.0,
+     see https://osdn.net/projects/mingw/ticket/38391 */
+  CIPHEROPTION(CALG_TLS1PRF);
+#endif
+#ifdef CALG_HASH_REPLACE_OWF
+  CIPHEROPTION(CALG_HASH_REPLACE_OWF);
+#endif
+#ifdef CALG_AES_128
+  CIPHEROPTION(CALG_AES_128);
+#endif
+#ifdef CALG_AES_192
+  CIPHEROPTION(CALG_AES_192);
+#endif
+#ifdef CALG_AES_256
+  CIPHEROPTION(CALG_AES_256);
+#endif
+#ifdef CALG_AES
+  CIPHEROPTION(CALG_AES);
+#endif
+#ifdef CALG_SHA_256
+  CIPHEROPTION(CALG_SHA_256);
+#endif
+#ifdef CALG_SHA_384
+  CIPHEROPTION(CALG_SHA_384);
+#endif
+#ifdef CALG_SHA_512
+  CIPHEROPTION(CALG_SHA_512);
+#endif
+#ifdef CALG_ECDH
+  CIPHEROPTION(CALG_ECDH);
+#endif
+#ifdef CALG_ECMQV
+  CIPHEROPTION(CALG_ECMQV);
+#endif
+#ifdef CALG_ECDSA
+  CIPHEROPTION(CALG_ECDSA);
+#endif
+  return 0;
+}
+
+static CURLcode
+set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
+{
+  char *startCur = ciphers;
+  int algCount = 0;
+  static ALG_ID algIds[45]; /*There are 45 listed in the MS headers*/
+  while(startCur && (0 != *startCur) && (algCount < 45)) {
+    long alg = strtol(startCur, 0, 0);
+    if(!alg)
+      alg = get_alg_id_by_name(startCur);
+    if(alg)
+      algIds[algCount++] = alg;
+    else
+      return CURLE_SSL_CIPHER;
+    startCur = strchr(startCur, ':');
+    if(startCur)
+      startCur++;
+  }
+    schannel_cred->palgSupportedAlgs = algIds;
+  schannel_cred->cSupportedAlgs = algCount;
+  return CURLE_OK;
+}
+
+#ifdef HAS_CLIENT_CERT_PATH
 static CURLcode
 get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
                   TCHAR **thumbprint)
@@ -248,6 +403,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
 
   return CURLE_OK;
 }
+#endif
 
 static CURLcode
 schannel_connect_step1(struct connectdata *conn, int sockindex)
@@ -299,10 +455,15 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #endif
 
 #ifdef _WIN32_WCE
+#ifdef HAS_MANUAL_VERIFY_API
   /* certificate validation on CE doesn't seem to work right; we'll
    * do it following a more manual process. */
   BACKEND->use_manual_cred_validation = true;
 #else
+#error "compiler too old to support requisite manual cert verify for Win CE"
+#endif
+#else
+#ifdef HAS_MANUAL_VERIFY_API
   if(SSL_CONN_CONFIG(CAfile)) {
     if(Curl_verify_windows_version(6, 1, PLATFORM_WINNT,
                                    VERSION_GREATER_THAN_EQUAL)) {
@@ -316,6 +477,12 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   }
   else
     BACKEND->use_manual_cred_validation = false;
+#else
+  if(SSL_CONN_CONFIG(CAfile)) {
+    failf(data, "schannel: CA cert support not built in");
+    return CURLE_NOT_BUILT_IN;
+  }
+#endif
 #endif
 
   BACKEND->cred = NULL;
@@ -341,9 +508,11 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
 
     if(conn->ssl_config.verifypeer) {
+#ifdef HAS_MANUAL_VERIFY_API
       if(BACKEND->use_manual_cred_validation)
         schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION;
       else
+#endif
         schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION;
 
       /* TODO s/data->set.ssl.no_revoke/SSL_SET_OPTION(no_revoke)/g */
@@ -401,6 +570,16 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       return CURLE_SSL_CONNECT_ERROR;
     }
 
+    if(SSL_CONN_CONFIG(cipher_list)) {
+      result = set_ssl_ciphers(&schannel_cred, SSL_CONN_CONFIG(cipher_list));
+      if(CURLE_OK != result) {
+        failf(data, "Unable to set ciphers to passed via SSL_CONN_CONFIG");
+        return result;
+      }
+    }
+
+
+#ifdef HAS_CLIENT_CERT_PATH
     /* client certificate */
     if(data->set.ssl.cert) {
       DWORD cert_store_name;
@@ -417,14 +596,21 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       result = get_cert_location(cert_path, &cert_store_name,
                                  &cert_store_path, &cert_thumbprint_str);
       if(result != CURLE_OK) {
+        failf(data, "schannel: Failed to get certificate location for %s",
+              cert_path);
         Curl_unicodefree(cert_path);
         return result;
       }
 
-      cert_store = CertOpenStore(CURL_CERT_STORE_PROV_SYSTEM, 0,
-                                 (HCRYPTPROV)NULL,
-                                 cert_store_name, cert_store_path);
+      cert_store =
+        CertOpenStore(CURL_CERT_STORE_PROV_SYSTEM, 0,
+                      (HCRYPTPROV)NULL,
+                      CERT_STORE_OPEN_EXISTING_FLAG | cert_store_name,
+                      cert_store_path);
       if(!cert_store) {
+        failf(data, "schannel: Failed to open cert store %x %s, "
+              "last error is %x",
+              cert_store_name, cert_store_path, GetLastError());
         Curl_unicodefree(cert_path);
         return CURLE_SSL_CONNECT_ERROR;
       }
@@ -453,6 +639,12 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 
       CertCloseStore(cert_store, 0);
     }
+#else
+    if(data->set.ssl.cert) {
+      failf(data, "schannel: client cert support not built in");
+      return CURLE_NOT_BUILT_IN;
+    }
+#endif
 
     /* allocate memory for the re-usable credential handle */
     BACKEND->cred = (struct curl_schannel_cred *)
@@ -877,9 +1069,11 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     }
   }
 
+#ifdef HAS_MANUAL_VERIFY_API
   if(conn->ssl_config.verifypeer && BACKEND->use_manual_cred_validation) {
     return verify_certificate(conn, sockindex);
   }
+#endif
 
   return CURLE_OK;
 }
@@ -1819,7 +2013,7 @@ static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
 
     x509_der = (const char *)pCertContextServer->pbCertEncoded;
     x509_der_len = pCertContextServer->cbCertEncoded;
-    memset(&x509_parsed, 0, sizeof x509_parsed);
+    memset(&x509_parsed, 0, sizeof(x509_parsed));
     if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
       break;
 
@@ -1870,7 +2064,8 @@ static void Curl_schannel_checksum(const unsigned char *input,
     if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
       break; /* failed */
 
-    if(!CryptHashData(hHash, (const BYTE*)input, (DWORD)inputlen, 0))
+    /* workaround for original MinGW, should be (const BYTE*) */
+    if(!CryptHashData(hHash, (BYTE*)input, (DWORD)inputlen, 0))
       break; /* failed */
 
     /* get hash size */

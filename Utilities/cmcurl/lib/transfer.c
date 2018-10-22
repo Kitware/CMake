@@ -106,15 +106,26 @@ char *Curl_checkheaders(const struct connectdata *conn,
 }
 #endif
 
+CURLcode Curl_get_upload_buffer(struct Curl_easy *data)
+{
+  if(!data->state.ulbuf) {
+    data->state.ulbuf = malloc(data->set.upload_buffer_size);
+    if(!data->state.ulbuf)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  return CURLE_OK;
+}
+
 /*
  * This function will call the read callback to fill our buffer with data
  * to upload.
  */
-CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
+CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
+                             size_t *nreadp)
 {
   struct Curl_easy *data = conn->data;
-  size_t buffersize = (size_t)bytes;
-  int nread;
+  size_t buffersize = bytes;
+  size_t nread;
 #ifdef CURL_DOES_CONVERSIONS
   bool sending_http_headers = FALSE;
 
@@ -134,11 +145,9 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     data->req.upload_fromhere += (8 + 2); /* 32bit hex + CRLF */
   }
 
-  /* this function returns a size_t, so we typecast to int to prevent warnings
-     with picky compilers */
   Curl_set_in_callback(data, true);
-  nread = (int)data->state.fread_func(data->req.upload_fromhere, 1,
-                                      buffersize, data->state.in);
+  nread = data->state.fread_func(data->req.upload_fromhere, 1,
+                                 buffersize, data->state.in);
   Curl_set_in_callback(data, false);
 
   if(nread == CURL_READFUNC_ABORT) {
@@ -167,7 +176,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 
     return CURLE_OK; /* nothing was read */
   }
-  else if((size_t)nread > buffersize) {
+  else if(nread > buffersize) {
     /* the read function returned a too large value */
     *nreadp = 0;
     failf(data, "read function returned funny value");
@@ -226,13 +235,13 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 #ifdef CURL_DOES_CONVERSIONS
     {
       CURLcode result;
-      int length;
+      size_t length;
       if(data->set.prefer_ascii)
         /* translate the protocol and data */
         length = nread;
       else
         /* just translate the protocol portion */
-        length = (int)strlen(hexbuffer);
+        length = strlen(hexbuffer);
       result = Curl_convert_to_network(data, data->req.upload_fromhere,
                                        length);
       /* Curl_convert_to_network calls failf if unsuccessful */
@@ -247,7 +256,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
       infof(data, "Signaling end of chunked upload via terminating chunk.\n");
     }
 
-    nread += (int)strlen(endofline_native); /* for the added end of line */
+    nread += strlen(endofline_native); /* for the added end of line */
   }
 #ifdef CURL_DOES_CONVERSIONS
   else if((data->set.prefer_ascii) && (!sending_http_headers)) {
@@ -444,7 +453,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   ssize_t nread; /* number of bytes read */
   size_t excess = 0; /* excess bytes read */
-  bool is_empty_data = FALSE;
   bool readmore = FALSE; /* used by RTP to signal for more data */
   int maxloops = 100;
 
@@ -454,6 +462,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   /* This is where we loop until we have read everything there is to
      read or we get a CURLE_AGAIN */
   do {
+    bool is_empty_data = FALSE;
     size_t buffersize = data->set.buffer_size;
     size_t bytestoread = buffersize;
 
@@ -660,14 +669,14 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       if(data->set.verbose) {
         if(k->badheader) {
           Curl_debug(data, CURLINFO_DATA_IN, data->state.headerbuff,
-                     (size_t)k->hbuflen, conn);
+                     (size_t)k->hbuflen);
           if(k->badheader == HEADER_PARTHEADER)
             Curl_debug(data, CURLINFO_DATA_IN,
-                       k->str, (size_t)nread, conn);
+                       k->str, (size_t)nread);
         }
         else
           Curl_debug(data, CURLINFO_DATA_IN,
-                     k->str, (size_t)nread, conn);
+                     k->str, (size_t)nread);
       }
 
 #ifndef CURL_DISABLE_HTTP
@@ -797,7 +806,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                                            nread);
             }
           }
-          else
+          else if(!k->ignorebody)
             result = Curl_unencode_write(conn, k->writer_stack, k->str, nread);
         }
         k->badheader = HEADER_NORMAL; /* taken care of now */
@@ -869,6 +878,26 @@ static CURLcode done_sending(struct connectdata *conn,
   return CURLE_OK;
 }
 
+#ifdef WIN32
+#ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
+#define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
+#endif
+
+static void win_update_buffer_size(curl_socket_t sockfd)
+{
+  int result;
+  ULONG ideal;
+  DWORD ideallen;
+  result = WSAIoctl(sockfd, SIO_IDEAL_SEND_BACKLOG_QUERY, 0, 0,
+                    &ideal, sizeof(ideal), &ideallen, 0, 0);
+  if(result == 0) {
+    setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF,
+               (const char *)&ideal, sizeof(ideal));
+  }
+}
+#else
+#define win_update_buffer_size(x)
+#endif
 
 /*
  * Send data to upload to the server, when the socket is writable.
@@ -894,13 +923,16 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
     /* only read more data if there's no upload data already
        present in the upload buffer */
     if(0 == k->upload_present) {
+      result = Curl_get_upload_buffer(data);
+      if(result)
+        return result;
       /* init the "upload from here" pointer */
-      k->upload_fromhere = data->state.uploadbuffer;
+      k->upload_fromhere = data->state.ulbuf;
 
       if(!k->upload_done) {
         /* HTTP pollution, this should be written nicer to become more
            protocol agnostic. */
-        int fillcount;
+        size_t fillcount;
         struct HTTP *http = k->protop;
 
         if((k->exp100 == EXP100_SENDING_REQUEST) &&
@@ -931,7 +963,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
         if(result)
           return result;
 
-        nread = (ssize_t)fillcount;
+        nread = fillcount;
       }
       else
         nread = 0; /* we're done uploading/reading */
@@ -959,7 +991,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
          (data->set.crlf))) {
         /* Do we need to allocate a scratch buffer? */
         if(!data->state.scratch) {
-          data->state.scratch = malloc(2 * data->set.buffer_size);
+          data->state.scratch = malloc(2 * UPLOAD_BUFSIZE);
           if(!data->state.scratch) {
             failf(data, "Failed to alloc scratch buffer!");
 
@@ -1020,14 +1052,15 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
                         k->upload_fromhere, /* buffer pointer */
                         k->upload_present,  /* buffer size */
                         &bytes_written);    /* actually sent */
-
     if(result)
       return result;
+
+    win_update_buffer_size(conn->writesockfd);
 
     if(data->set.verbose)
       /* show the data before we change the pointer upload_fromhere */
       Curl_debug(data, CURLINFO_DATA_OUT, k->upload_fromhere,
-                 (size_t)bytes_written, conn);
+                 (size_t)bytes_written);
 
     k->writebytecount += bytes_written;
 
@@ -1050,7 +1083,10 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
     }
     else {
       /* we've uploaded that buffer now */
-      k->upload_fromhere = data->state.uploadbuffer;
+      result = Curl_get_upload_buffer(data);
+      if(result)
+        return result;
+      k->upload_fromhere = data->state.ulbuf;
       k->upload_present = 0; /* no more bytes left */
 
       if(k->upload_done) {
@@ -1482,7 +1518,7 @@ static size_t strlen_url(const char *url, bool relative)
     switch(*ptr) {
     case '?':
       left = FALSE;
-      /* fall through */
+      /* FALLTHROUGH */
     default:
       if(urlchar_needs_escaping(*ptr))
         newlen += 2;
@@ -1527,7 +1563,7 @@ static void strcpy_url(char *output, const char *url, bool relative)
     switch(*iptr) {
     case '?':
       left = FALSE;
-      /* fall through */
+      /* FALLTHROUGH */
     default:
       if(urlchar_needs_escaping(*iptr)) {
         snprintf(optr, 4, "%%%02x", *iptr);
