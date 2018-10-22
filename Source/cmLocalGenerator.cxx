@@ -202,9 +202,10 @@ void cmLocalGenerator::ComputeObjectMaxPath()
   this->ObjectMaxPathViolations.clear();
 }
 
-void cmLocalGenerator::MoveSystemIncludesToEnd(
-  std::vector<std::string>& includeDirs, const std::string& config,
-  const std::string& lang, const cmGeneratorTarget* target) const
+static void MoveSystemIncludesToEnd(std::vector<std::string>& includeDirs,
+                                    const std::string& config,
+                                    const std::string& lang,
+                                    const cmGeneratorTarget* target)
 {
   if (!target) {
     return;
@@ -216,6 +217,24 @@ void cmLocalGenerator::MoveSystemIncludesToEnd(
       return !target->IsSystemIncludeDirectory(a, config, lang) &&
         target->IsSystemIncludeDirectory(b, config, lang);
     });
+}
+
+static void MoveSystemIncludesToEnd(std::vector<BT<std::string>>& includeDirs,
+                                    const std::string& config,
+                                    const std::string& lang,
+                                    const cmGeneratorTarget* target)
+{
+  if (!target) {
+    return;
+  }
+
+  std::stable_sort(includeDirs.begin(), includeDirs.end(),
+                   [target, &config, &lang](BT<std::string> const& a,
+                                            BT<std::string> const& b) {
+                     return !target->IsSystemIncludeDirectory(a.Value, config,
+                                                              lang) &&
+                       target->IsSystemIncludeDirectory(b.Value, config, lang);
+                   });
 }
 
 void cmLocalGenerator::TraceDependencies()
@@ -707,7 +726,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
   }
 
   std::vector<std::string> includes = includeDirs;
-  this->MoveSystemIncludesToEnd(includes, config, lang, target);
+  MoveSystemIncludesToEnd(includes, config, lang, target);
 
   OutputFormat shellFormat = forResponseFile ? RESPONSE : SHELL;
   std::ostringstream includeFlags;
@@ -868,6 +887,21 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              bool stripImplicitDirs,
                                              bool appendAllImplicitDirs) const
 {
+  std::vector<BT<std::string>> tmp = this->GetIncludeDirectories(
+    target, lang, config, stripImplicitDirs, appendAllImplicitDirs);
+  dirs.reserve(tmp.size());
+  for (BT<std::string>& v : tmp) {
+    dirs.emplace_back(std::move(v.Value));
+  }
+}
+
+std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectories(
+  cmGeneratorTarget const* target, std::string const& lang,
+  std::string const& config, bool stripImplicitDirs,
+  bool appendAllImplicitDirs) const
+{
+  std::vector<BT<std::string>> result;
+
   // Do not repeat an include path.
   std::set<std::string> emitted;
 
@@ -884,7 +918,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
       std::string binDir =
         this->StateSnapshot.GetDirectory().GetCurrentBinary();
       if (emitted.insert(binDir).second) {
-        dirs.push_back(std::move(binDir));
+        result.emplace_back(std::move(binDir));
       }
     }
     // Current source directory
@@ -892,13 +926,13 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
       std::string srcDir =
         this->StateSnapshot.GetDirectory().GetCurrentSource();
       if (emitted.insert(srcDir).second) {
-        dirs.push_back(std::move(srcDir));
+        result.emplace_back(std::move(srcDir));
       }
     }
   }
 
   if (!target) {
-    return;
+    return result;
   }
 
   // Implicit include directories
@@ -931,7 +965,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   }
 
   // Get the target-specific include directories.
-  std::vector<std::string> userDirs =
+  std::vector<BT<std::string>> userDirs =
     target->GetIncludeDirectories(config, lang);
 
   // Support putting all the in-project include directories first if
@@ -939,44 +973,44 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   if (this->Makefile->IsOn("CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE")) {
     std::string const &topSourceDir = this->GetState()->GetSourceDirectory(),
                       &topBinaryDir = this->GetState()->GetBinaryDirectory();
-    for (std::string const& i : userDirs) {
+    for (BT<std::string> const& i : userDirs) {
       // Emit this directory only if it is a subdirectory of the
       // top-level source or binary tree.
-      if (cmSystemTools::ComparePath(i, topSourceDir) ||
-          cmSystemTools::ComparePath(i, topBinaryDir) ||
-          cmSystemTools::IsSubDirectory(i, topSourceDir) ||
-          cmSystemTools::IsSubDirectory(i, topBinaryDir)) {
-        if (emitted.insert(i).second) {
-          dirs.push_back(i);
+      if (cmSystemTools::ComparePath(i.Value, topSourceDir) ||
+          cmSystemTools::ComparePath(i.Value, topBinaryDir) ||
+          cmSystemTools::IsSubDirectory(i.Value, topSourceDir) ||
+          cmSystemTools::IsSubDirectory(i.Value, topBinaryDir)) {
+        if (emitted.insert(i.Value).second) {
+          result.push_back(i);
         }
       }
     }
   }
 
   // Construct the final ordered include directory list.
-  for (std::string const& i : userDirs) {
-    if (emitted.insert(i).second) {
-      dirs.push_back(i);
+  for (BT<std::string> const& i : userDirs) {
+    if (emitted.insert(i.Value).second) {
+      result.push_back(i);
     }
   }
 
-  this->MoveSystemIncludesToEnd(dirs, config, lang, target);
+  MoveSystemIncludesToEnd(result, config, lang, target);
 
   // Add standard include directories for this language.
   {
-    std::vector<std::string>::size_type const before = userDirs.size();
+    std::vector<std::string> userStandardDirs;
     {
       std::string key = "CMAKE_";
       key += lang;
       key += "_STANDARD_INCLUDE_DIRECTORIES";
       std::string const value = this->Makefile->GetSafeDefinition(key);
-      cmSystemTools::ExpandListArgument(value, userDirs);
+      cmSystemTools::ExpandListArgument(value, userStandardDirs);
     }
-    for (std::vector<std::string>::iterator i = userDirs.begin() + before,
-                                            ie = userDirs.end();
-         i != ie; ++i) {
-      cmSystemTools::ConvertToUnixSlashes(*i);
-      dirs.push_back(*i);
+    userDirs.reserve(userDirs.size() + userStandardDirs.size());
+    for (std::string& d : userStandardDirs) {
+      cmSystemTools::ConvertToUnixSlashes(d);
+      result.emplace_back(d);
+      userDirs.emplace_back(std::move(d));
     }
   }
 
@@ -984,18 +1018,20 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     // Append only implicit directories that were requested by the user
     for (std::string const& i : implicitDirs) {
       if (std::find(userDirs.begin(), userDirs.end(), i) != userDirs.end()) {
-        dirs.push_back(i);
+        result.emplace_back(i);
       }
     }
     // Append remaining implicit directories on demand
     if (appendAllImplicitDirs) {
       for (std::string const& i : implicitDirs) {
-        if (std::find(dirs.begin(), dirs.end(), i) == dirs.end()) {
-          dirs.push_back(i);
+        if (std::find(result.begin(), result.end(), i) == result.end()) {
+          result.emplace_back(i);
         }
       }
     }
   }
+
+  return result;
 }
 
 void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
@@ -1252,15 +1288,29 @@ void cmLocalGenerator::GetTargetDefines(cmGeneratorTarget const* target,
                                         std::string const& lang,
                                         std::set<std::string>& defines) const
 {
+  std::set<BT<std::string>> tmp = this->GetTargetDefines(target, config, lang);
+  for (BT<std::string> const& v : tmp) {
+    defines.emplace(v.Value);
+  }
+}
+
+std::set<BT<std::string>> cmLocalGenerator::GetTargetDefines(
+  cmGeneratorTarget const* target, std::string const& config,
+  std::string const& lang) const
+{
+  std::set<BT<std::string>> defines;
+
   // Add the export symbol definition for shared library objects.
   if (const std::string* exportMacro = target->GetExportMacro()) {
     this->AppendDefines(defines, *exportMacro);
   }
 
   // Add preprocessor definitions for this target and configuration.
-  std::vector<std::string> targetDefines;
-  target->GetCompileDefinitions(targetDefines, config, lang);
+  std::vector<BT<std::string>> targetDefines =
+    target->GetCompileDefinitions(config, lang);
   this->AppendDefines(defines, targetDefines);
+
+  return defines;
 }
 
 std::string cmLocalGenerator::GetTargetFortranFlags(
@@ -2060,24 +2110,32 @@ void cmLocalGenerator::AppendIncludeDirectories(
 void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
                                      const char* defines_list) const
 {
+  std::set<BT<std::string>> tmp;
+  this->AppendDefines(tmp, ExpandListWithBacktrace(defines_list));
+  for (BT<std::string> const& i : tmp) {
+    defines.emplace(i.Value);
+  }
+}
+
+void cmLocalGenerator::AppendDefines(std::set<BT<std::string>>& defines,
+                                     const char* defines_list) const
+{
   // Short-circuit if there are no definitions.
   if (!defines_list) {
     return;
   }
 
   // Expand the list of definitions.
-  std::vector<std::string> defines_vec;
-  cmSystemTools::ExpandListArgument(defines_list, defines_vec);
-  this->AppendDefines(defines, defines_vec);
+  this->AppendDefines(defines, ExpandListWithBacktrace(defines_list));
 }
 
 void cmLocalGenerator::AppendDefines(
-  std::set<std::string>& defines,
-  const std::vector<std::string>& defines_vec) const
+  std::set<BT<std::string>>& defines,
+  const std::vector<BT<std::string>>& defines_vec) const
 {
-  for (std::string const& d : defines_vec) {
+  for (BT<std::string> const& d : defines_vec) {
     // Skip unsupported definitions.
-    if (!this->CheckDefinition(d)) {
+    if (!this->CheckDefinition(d.Value)) {
       continue;
     }
     defines.insert(d);

@@ -175,8 +175,15 @@ public:
   {
     this->AppendDefines(defines, defines_list.c_str());
   }
-  void AppendDefines(std::set<std::string>& defines,
-                     const std::vector<std::string>& defines_vec) const;
+  void AppendDefines(std::set<BT<std::string>>& defines,
+                     const char* defines_list) const;
+  void AppendDefines(std::set<BT<std::string>>& defines,
+                     std::string const& defines_list) const
+  {
+    this->AppendDefines(defines, defines_list.c_str());
+  }
+  void AppendDefines(std::set<BT<std::string>>& defines,
+                     const std::vector<BT<std::string>>& defines_vec) const;
 
   /**
    * Encode a list of compile options for the compiler
@@ -249,6 +256,10 @@ public:
                              const std::string& config = "",
                              bool stripImplicitDirs = true,
                              bool appendAllImplicitDirs = false) const;
+  std::vector<BT<std::string>> GetIncludeDirectories(
+    cmGeneratorTarget const* target, std::string const& lang = "C",
+    std::string const& config = "", bool stripImplicitDirs = true,
+    bool appendAllImplicitDirs = false) const;
   void AddCompileOptions(std::string& flags, cmGeneratorTarget* target,
                          const std::string& lang, const std::string& config);
 
@@ -332,6 +343,9 @@ public:
   void GetTargetDefines(cmGeneratorTarget const* target,
                         std::string const& config, std::string const& lang,
                         std::set<std::string>& defines) const;
+  std::set<BT<std::string>> GetTargetDefines(cmGeneratorTarget const* target,
+                                             std::string const& config,
+                                             std::string const& lang) const;
   void GetTargetCompileFlags(cmGeneratorTarget* target,
                              std::string const& config,
                              std::string const& lang, std::string& flags);
@@ -414,10 +428,6 @@ private:
                                    int targetType);
 
   void ComputeObjectMaxPath();
-  void MoveSystemIncludesToEnd(std::vector<std::string>& includeDirs,
-                               const std::string& config,
-                               const std::string& lang,
-                               cmGeneratorTarget const* target) const;
 };
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)

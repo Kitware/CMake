@@ -439,7 +439,7 @@ static void handleSystemIncludesDep(
     KindedSources const& kinded = this->GetKindedSources(config);             \
     for (SourceAndKind const& s : kinded.Sources) {                           \
       if (s.Kind == KIND) {                                                   \
-        data.push_back(s.Source);                                             \
+        data.push_back(s.Source.Value);                                       \
       }                                                                       \
     }                                                                         \
   }
@@ -865,7 +865,8 @@ static void AddObjectEntries(
 static bool processSources(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
-  std::vector<std::string>& srcs, std::unordered_set<std::string>& uniqueSrcs,
+  std::vector<BT<std::string>>& srcs,
+  std::unordered_set<std::string>& uniqueSrcs,
   cmGeneratorExpressionDAGChecker* dagChecker, std::string const& config,
   bool debugSources)
 {
@@ -916,7 +917,7 @@ static bool processSources(
     std::string usedSources;
     for (std::string const& src : entrySources) {
       if (uniqueSrcs.insert(src).second) {
-        srcs.push_back(src);
+        srcs.emplace_back(src, entry->ge->GetBacktrace());
         if (debugSources) {
           usedSources += " * " + src + "\n";
         }
@@ -933,9 +934,10 @@ static bool processSources(
   return contextDependent;
 }
 
-void cmGeneratorTarget::GetSourceFiles(std::vector<std::string>& files,
-                                       const std::string& config) const
+std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
+  std::string const& config) const
 {
+  std::vector<BT<std::string>> files;
   assert(this->GetType() != cmStateEnums::INTERFACE_LIBRARY);
 
   if (!this->LocalGenerator->GetGlobalGenerator()->GetConfigureDoneCMP0026()) {
@@ -957,7 +959,7 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<std::string>& files,
         files.push_back(item);
       }
     }
-    return;
+    return files;
   }
 
   std::vector<std::string> debugProperties;
@@ -1009,11 +1011,23 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<std::string>& files,
 
   cmDeleteAll(linkInterfaceSourcesEntries);
   cmDeleteAll(linkObjectsEntries);
+  return files;
 }
 
 void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*>& files,
                                        const std::string& config) const
 {
+  std::vector<BT<cmSourceFile*>> tmp = this->GetSourceFiles(config);
+  files.reserve(tmp.size());
+  for (BT<cmSourceFile*>& v : tmp) {
+    files.push_back(v.Value);
+  }
+}
+
+std::vector<BT<cmSourceFile*>> cmGeneratorTarget::GetSourceFiles(
+  std::string const& config) const
+{
+  std::vector<BT<cmSourceFile*>> files;
   if (!this->GlobalGenerator->GetConfigureDoneCMP0026()) {
     // Since we are still configuring not all sources may exist yet,
     // so we need to avoid full source classification because that
@@ -1021,16 +1035,15 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*>& files,
     // Since this is only for compatibility with old policies that
     // projects should not depend on anymore, just compute the files
     // without memoizing them.
-    std::vector<std::string> srcs;
-    this->GetSourceFiles(srcs, config);
+    std::vector<BT<std::string>> srcs = this->GetSourceFilePaths(config);
     std::set<cmSourceFile*> emitted;
-    for (std::string const& s : srcs) {
-      cmSourceFile* sf = this->Makefile->GetOrCreateSource(s);
+    for (BT<std::string> const& s : srcs) {
+      cmSourceFile* sf = this->Makefile->GetOrCreateSource(s.Value);
       if (emitted.insert(sf).second) {
-        files.push_back(sf);
+        files.emplace_back(sf, s.Backtrace);
       }
     }
-    return;
+    return files;
   }
 
   KindedSources const& kinded = this->GetKindedSources(config);
@@ -1038,18 +1051,33 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*>& files,
   for (SourceAndKind const& si : kinded.Sources) {
     files.push_back(si.Source);
   }
+  return files;
 }
 
 void cmGeneratorTarget::GetSourceFilesWithoutObjectLibraries(
   std::vector<cmSourceFile*>& files, const std::string& config) const
 {
+  std::vector<BT<cmSourceFile*>> tmp =
+    this->GetSourceFilesWithoutObjectLibraries(config);
+  files.reserve(tmp.size());
+  for (BT<cmSourceFile*>& v : tmp) {
+    files.push_back(v.Value);
+  }
+}
+
+std::vector<BT<cmSourceFile*>>
+cmGeneratorTarget::GetSourceFilesWithoutObjectLibraries(
+  std::string const& config) const
+{
+  std::vector<BT<cmSourceFile*>> files;
   KindedSources const& kinded = this->GetKindedSources(config);
   files.reserve(kinded.Sources.size());
   for (SourceAndKind const& si : kinded.Sources) {
-    if (si.Source->GetObjectLibrary().empty()) {
+    if (si.Source.Value->GetObjectLibrary().empty()) {
       files.push_back(si.Source);
     }
   }
+  return files;
 }
 
 cmGeneratorTarget::KindedSources const& cmGeneratorTarget::GetKindedSources(
@@ -1089,16 +1117,15 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
                                              std::string const& config) const
 {
   // Get the source file paths by string.
-  std::vector<std::string> srcs;
-  this->GetSourceFiles(srcs, config);
+  std::vector<BT<std::string>> srcs = this->GetSourceFilePaths(config);
 
   cmsys::RegularExpression header_regex(CM_HEADER_REGEX);
   std::vector<cmSourceFile*> badObjLib;
 
   std::set<cmSourceFile*> emitted;
-  for (std::string const& s : srcs) {
+  for (BT<std::string> const& s : srcs) {
     // Create each source at most once.
-    cmSourceFile* sf = this->Makefile->GetOrCreateSource(s);
+    cmSourceFile* sf = this->Makefile->GetOrCreateSource(s.Value);
     if (!emitted.insert(sf).second) {
       continue;
     }
@@ -1161,7 +1188,7 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     }
 
     // Save this classified source file in the result vector.
-    files.Sources.push_back({ sf, kind });
+    files.Sources.push_back({ BT<cmSourceFile*>(sf, s.Backtrace), kind });
   }
 
   if (!badObjLib.empty()) {
@@ -1197,14 +1224,14 @@ void cmGeneratorTarget::ComputeAllConfigSources() const
     KindedSources const& sources = this->GetKindedSources(configs[ci]);
     for (SourceAndKind const& src : sources.Sources) {
       std::map<cmSourceFile const*, size_t>::iterator mi =
-        index.find(src.Source);
+        index.find(src.Source.Value);
       if (mi == index.end()) {
         AllConfigSource acs;
-        acs.Source = src.Source;
+        acs.Source = src.Source.Value;
         acs.Kind = src.Kind;
         this->AllConfigSources.push_back(std::move(acs));
         std::map<cmSourceFile const*, size_t>::value_type entry(
-          src.Source, this->AllConfigSources.size() - 1);
+          src.Source.Value, this->AllConfigSources.size() - 1);
         mi = index.insert(entry).first;
       }
       this->AllConfigSources[mi->second].Configs.push_back(ci);
@@ -2474,7 +2501,7 @@ std::string cmGeneratorTarget::GetCreateRuleVariable(
 static void processIncludeDirectories(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
-  std::vector<std::string>& includes,
+  std::vector<BT<std::string>>& includes,
   std::unordered_set<std::string>& uniqueIncludes,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   bool debugIncludes, const std::string& language)
@@ -2566,7 +2593,7 @@ static void processIncludeDirectories(
       std::string inc = entryInclude;
 
       if (uniqueIncludes.insert(inc).second) {
-        includes.push_back(inc);
+        includes.emplace_back(inc, entry->ge->GetBacktrace());
         if (debugIncludes) {
           usedIncludes += " * " + inc + "\n";
         }
@@ -2582,10 +2609,10 @@ static void processIncludeDirectories(
   }
 }
 
-std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
+std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   const std::string& config, const std::string& lang) const
 {
-  std::vector<std::string> includes;
+  std::vector<BT<std::string>> includes;
   std::unordered_set<std::string> uniqueIncludes;
 
   cmGeneratorExpressionDAGChecker dagChecker(this, "INCLUDE_DIRECTORIES",
@@ -2655,7 +2682,7 @@ enum class OptionsParse
 static void processOptionsInternal(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
-  std::vector<std::string>& options,
+  std::vector<BT<std::string>>& options,
   std::unordered_set<std::string>& uniqueOptions,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   bool debugOptions, const char* logName, std::string const& language,
@@ -2672,9 +2699,13 @@ static void processOptionsInternal(
       if (uniqueOptions.insert(opt).second) {
         if (parse == OptionsParse::Shell &&
             cmHasLiteralPrefix(opt, "SHELL:")) {
-          cmSystemTools::ParseUnixCommandLine(opt.c_str() + 6, options);
+          std::vector<std::string> tmp;
+          cmSystemTools::ParseUnixCommandLine(opt.c_str() + 6, tmp);
+          for (std::string& o : tmp) {
+            options.emplace_back(std::move(o), entry->ge->GetBacktrace());
+          }
         } else {
-          options.push_back(opt);
+          options.emplace_back(opt, entry->ge->GetBacktrace());
         }
         if (debugOptions) {
           usedOptions += " * " + opt + "\n";
@@ -2694,7 +2725,7 @@ static void processOptionsInternal(
 static void processCompileOptions(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
-  std::vector<std::string>& options,
+  std::vector<BT<std::string>>& options,
   std::unordered_set<std::string>& uniqueOptions,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   bool debugOptions, std::string const& language)
@@ -2708,6 +2739,17 @@ void cmGeneratorTarget::GetCompileOptions(std::vector<std::string>& result,
                                           const std::string& config,
                                           const std::string& language) const
 {
+  std::vector<BT<std::string>> tmp = this->GetCompileOptions(config, language);
+  result.reserve(tmp.size());
+  for (BT<std::string>& v : tmp) {
+    result.emplace_back(std::move(v.Value));
+  }
+}
+
+std::vector<BT<std::string>> cmGeneratorTarget::GetCompileOptions(
+  std::string const& config, std::string const& language) const
+{
+  std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueOptions;
 
   cmGeneratorExpressionDAGChecker dagChecker(this, "COMPILE_OPTIONS", nullptr,
@@ -2743,12 +2785,13 @@ void cmGeneratorTarget::GetCompileOptions(std::vector<std::string>& result,
                         language);
 
   cmDeleteAll(linkInterfaceCompileOptionsEntries);
+  return result;
 }
 
 static void processCompileFeatures(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
-  std::vector<std::string>& options,
+  std::vector<BT<std::string>>& options,
   std::unordered_set<std::string>& uniqueOptions,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   bool debugOptions)
@@ -2761,6 +2804,17 @@ static void processCompileFeatures(
 void cmGeneratorTarget::GetCompileFeatures(std::vector<std::string>& result,
                                            const std::string& config) const
 {
+  std::vector<BT<std::string>> tmp = this->GetCompileFeatures(config);
+  result.reserve(tmp.size());
+  for (BT<std::string>& v : tmp) {
+    result.emplace_back(std::move(v.Value));
+  }
+}
+
+std::vector<BT<std::string>> cmGeneratorTarget::GetCompileFeatures(
+  std::string const& config) const
+{
+  std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueFeatures;
 
   cmGeneratorExpressionDAGChecker dagChecker(this, "COMPILE_FEATURES", nullptr,
@@ -2793,12 +2847,13 @@ void cmGeneratorTarget::GetCompileFeatures(std::vector<std::string>& result,
                          uniqueFeatures, &dagChecker, config, debugFeatures);
 
   cmDeleteAll(linkInterfaceCompileFeaturesEntries);
+  return result;
 }
 
 static void processCompileDefinitions(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
-  std::vector<std::string>& options,
+  std::vector<BT<std::string>>& options,
   std::unordered_set<std::string>& uniqueOptions,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   bool debugOptions, std::string const& language)
@@ -2809,9 +2864,21 @@ static void processCompileDefinitions(
 }
 
 void cmGeneratorTarget::GetCompileDefinitions(
-  std::vector<std::string>& list, const std::string& config,
+  std::vector<std::string>& result, const std::string& config,
   const std::string& language) const
 {
+  std::vector<BT<std::string>> tmp =
+    this->GetCompileDefinitions(config, language);
+  result.reserve(tmp.size());
+  for (BT<std::string>& v : tmp) {
+    result.emplace_back(std::move(v.Value));
+  }
+}
+
+std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
+  std::string const& config, std::string const& language) const
+{
+  std::vector<BT<std::string>> list;
   std::unordered_set<std::string> uniqueOptions;
 
   cmGeneratorExpressionDAGChecker dagChecker(this, "COMPILE_DEFINITIONS",
@@ -2872,13 +2939,14 @@ void cmGeneratorTarget::GetCompileDefinitions(
                             language);
 
   cmDeleteAll(linkInterfaceCompileDefinitionsEntries);
+  return list;
 }
 
 namespace {
 void processLinkOptions(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
-  std::vector<std::string>& options,
+  std::vector<BT<std::string>>& options,
   std::unordered_set<std::string>& uniqueOptions,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   bool debugOptions, std::string const& language)
@@ -2893,6 +2961,17 @@ void cmGeneratorTarget::GetLinkOptions(std::vector<std::string>& result,
                                        const std::string& config,
                                        const std::string& language) const
 {
+  std::vector<BT<std::string>> tmp = this->GetLinkOptions(config, language);
+  result.reserve(tmp.size());
+  for (BT<std::string>& v : tmp) {
+    result.emplace_back(std::move(v.Value));
+  }
+}
+
+std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
+  std::string const& config, std::string const& language) const
+{
+  std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueOptions;
 
   cmGeneratorExpressionDAGChecker dagChecker(this, "LINK_OPTIONS", nullptr,
@@ -2946,21 +3025,24 @@ void cmGeneratorTarget::GetLinkOptions(std::vector<std::string>& result,
   const std::string SHELL{ "SHELL:" };
   const std::string LINKER_SHELL = LINKER + SHELL;
 
-  std::vector<std::string>::iterator entry;
+  std::vector<BT<std::string>>::iterator entry;
   while ((entry = std::find_if(result.begin(), result.end(),
-                               [&LINKER](const std::string& item) -> bool {
-                                 return item.compare(0, LINKER.length(),
-                                                     LINKER) == 0;
+                               [&LINKER](BT<std::string> const& item) -> bool {
+                                 return item.Value.compare(0, LINKER.length(),
+                                                           LINKER) == 0;
                                })) != result.end()) {
+    std::string value = std::move(entry->Value);
+    cmListFileBacktrace bt = std::move(entry->Backtrace);
+    entry = result.erase(entry);
+
     std::vector<std::string> linkerOptions;
-    if (entry->compare(0, LINKER_SHELL.length(), LINKER_SHELL) == 0) {
+    if (value.compare(0, LINKER_SHELL.length(), LINKER_SHELL) == 0) {
       cmSystemTools::ParseUnixCommandLine(
-        entry->c_str() + LINKER_SHELL.length(), linkerOptions);
+        value.c_str() + LINKER_SHELL.length(), linkerOptions);
     } else {
       linkerOptions =
-        cmSystemTools::tokenize(entry->substr(LINKER.length()), ",");
+        cmSystemTools::tokenize(value.substr(LINKER.length()), ",");
     }
-    entry = result.erase(entry);
 
     if (linkerOptions.empty() ||
         (linkerOptions.size() == 1 && linkerOptions.front().empty())) {
@@ -2976,56 +3058,64 @@ void cmGeneratorTarget::GetLinkOptions(std::vector<std::string>& result,
         cmake::FATAL_ERROR,
         "'SHELL:' prefix is not supported as part of 'LINKER:' arguments.",
         this->GetBacktrace());
-      return;
+      return result;
     }
 
+    std::vector<BT<std::string>> options;
     if (wrapperFlag.empty()) {
       // nothing specified, insert elements as is
-      result.insert(entry, linkerOptions.begin(), linkerOptions.end());
+      options.reserve(linkerOptions.size());
+      for (std::string& o : linkerOptions) {
+        options.emplace_back(std::move(o), bt);
+      }
     } else {
-      std::vector<std::string> options;
-
       if (!wrapperSep.empty()) {
         if (concatFlagAndArgs) {
           // insert flag elements except last one
-          options.insert(options.end(), wrapperFlag.begin(),
-                         wrapperFlag.end() - 1);
+          for (auto i = wrapperFlag.begin(); i != wrapperFlag.end() - 1; ++i) {
+            options.emplace_back(*i, bt);
+          }
           // concatenate last flag element and all LINKER list values
           // in one option
-          options.push_back(wrapperFlag.back() +
-                            cmJoin(linkerOptions, wrapperSep));
+          options.emplace_back(
+            wrapperFlag.back() + cmJoin(linkerOptions, wrapperSep), bt);
         } else {
-          options.insert(options.end(), wrapperFlag.begin(),
-                         wrapperFlag.end());
+          for (std::string const& i : wrapperFlag) {
+            options.emplace_back(i, bt);
+          }
           // concatenate all LINKER list values in one option
-          options.push_back(cmJoin(linkerOptions, wrapperSep));
+          options.emplace_back(cmJoin(linkerOptions, wrapperSep), bt);
         }
       } else {
         // prefix each element of LINKER list with wrapper
         if (concatFlagAndArgs) {
-          std::transform(
-            linkerOptions.begin(), linkerOptions.end(), linkerOptions.begin(),
-            [&wrapperFlag](const std::string& value) -> std::string {
-              return wrapperFlag.back() + value;
-            });
+          std::transform(linkerOptions.begin(), linkerOptions.end(),
+                         linkerOptions.begin(),
+                         [&wrapperFlag](std::string const& o) -> std::string {
+                           return wrapperFlag.back() + o;
+                         });
         }
-        for (const auto& value : linkerOptions) {
-          options.insert(options.end(), wrapperFlag.begin(),
-                         concatFlagAndArgs ? wrapperFlag.end() - 1
-                                           : wrapperFlag.end());
-          options.push_back(value);
+        for (std::string& o : linkerOptions) {
+          for (auto i = wrapperFlag.begin(),
+                    e = concatFlagAndArgs ? wrapperFlag.end() - 1
+                                          : wrapperFlag.end();
+               i != e; ++i) {
+            options.emplace_back(*i, bt);
+          }
+          options.emplace_back(std::move(o), bt);
         }
       }
-      result.insert(entry, options.begin(), options.end());
     }
+    result.insert(entry, options.begin(), options.end());
   }
+  return result;
 }
 
 namespace {
 void processStaticLibraryLinkOptions(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
-  std::vector<std::string>& options,
+  std::vector<BT<std::string>>& options,
   std::unordered_set<std::string>& uniqueOptions,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   std::string const& language)
@@ -3040,6 +3130,18 @@ void cmGeneratorTarget::GetStaticLibraryLinkOptions(
   std::vector<std::string>& result, const std::string& config,
   const std::string& language) const
 {
+  std::vector<BT<std::string>> tmp =
+    this->GetStaticLibraryLinkOptions(config, language);
+  result.reserve(tmp.size());
+  for (BT<std::string>& v : tmp) {
+    result.emplace_back(std::move(v.Value));
+  }
+}
+
+std::vector<BT<std::string>> cmGeneratorTarget::GetStaticLibraryLinkOptions(
+  std::string const& config, std::string const& language) const
+{
+  std::vector<BT<std::string>> result;
   std::vector<cmGeneratorTarget::TargetPropertyEntry*> entries;
   std::unordered_set<std::string> uniqueOptions;
 
@@ -3060,13 +3162,14 @@ void cmGeneratorTarget::GetStaticLibraryLinkOptions(
                                   &dagChecker, config, language);
 
   cmDeleteAll(entries);
+  return result;
 }
 
 namespace {
 void processLinkDirectories(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
-  std::vector<std::string>& directories,
+  std::vector<BT<std::string>>& directories,
   std::unordered_set<std::string>& uniqueDirectories,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   bool debugDirectories, std::string const& language)
@@ -3145,6 +3248,18 @@ void cmGeneratorTarget::GetLinkDirectories(std::vector<std::string>& result,
                                            const std::string& config,
                                            const std::string& language) const
 {
+  std::vector<BT<std::string>> tmp =
+    this->GetLinkDirectories(config, language);
+  result.reserve(tmp.size());
+  for (BT<std::string>& v : tmp) {
+    result.emplace_back(std::move(v.Value));
+  }
+}
+
+std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDirectories(
+  std::string const& config, std::string const& language) const
+{
+  std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueDirectories;
 
   cmGeneratorExpressionDAGChecker dagChecker(this, "LINK_DIRECTORIES", nullptr,
@@ -3180,13 +3295,14 @@ void cmGeneratorTarget::GetLinkDirectories(std::vector<std::string>& result,
                          debugDirectories, language);
 
   cmDeleteAll(linkInterfaceLinkDirectoriesEntries);
+  return result;
 }
 
 namespace {
 void processLinkDepends(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
-  std::vector<std::string>& options,
+  std::vector<BT<std::string>>& options,
   std::unordered_set<std::string>& uniqueOptions,
   cmGeneratorExpressionDAGChecker* dagChecker, const std::string& config,
   std::string const& language)
@@ -3201,6 +3317,17 @@ void cmGeneratorTarget::GetLinkDepends(std::vector<std::string>& result,
                                        const std::string& config,
                                        const std::string& language) const
 {
+  std::vector<BT<std::string>> tmp = this->GetLinkDepends(config, language);
+  result.reserve(tmp.size());
+  for (BT<std::string>& v : tmp) {
+    result.emplace_back(std::move(v.Value));
+  }
+}
+
+std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
+  std::string const& config, std::string const& language) const
+{
+  std::vector<BT<std::string>> result;
   std::vector<cmGeneratorTarget::TargetPropertyEntry*> linkDependsEntries;
   std::unordered_set<std::string> uniqueOptions;
   cmGeneratorExpressionDAGChecker dagChecker(this, "LINK_DEPENDS", nullptr,
@@ -3222,6 +3349,7 @@ void cmGeneratorTarget::GetLinkDepends(std::vector<std::string>& result,
                      &dagChecker, config, language);
 
   cmDeleteAll(linkDependsEntries);
+  return result;
 }
 
 void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
@@ -3287,10 +3415,9 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
 
 bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config) const
 {
-  std::vector<std::string> features;
-  this->GetCompileFeatures(features, config);
-  for (std::string const& f : features) {
-    if (!this->Makefile->AddRequiredTargetFeature(this->Target, f)) {
+  std::vector<BT<std::string>> features = this->GetCompileFeatures(config);
+  for (BT<std::string> const& f : features) {
+    if (!this->Makefile->AddRequiredTargetFeature(this->Target, f.Value)) {
       return false;
     }
   }
