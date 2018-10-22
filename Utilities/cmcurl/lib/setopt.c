@@ -142,6 +142,25 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
                             va_arg(param, char *));
     break;
 
+  case CURLOPT_TLS13_CIPHERS:
+    if(Curl_ssl_tls13_ciphersuites()) {
+      /* set preferred list of TLS 1.3 cipher suites */
+      result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST_ORIG],
+                              va_arg(param, char *));
+    }
+    else
+      return CURLE_NOT_BUILT_IN;
+    break;
+  case CURLOPT_PROXY_TLS13_CIPHERS:
+    if(Curl_ssl_tls13_ciphersuites()) {
+      /* set preferred list of TLS 1.3 cipher suites for proxy */
+      result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST_PROXY],
+                              va_arg(param, char *));
+    }
+    else
+      return CURLE_NOT_BUILT_IN;
+    break;
+
   case CURLOPT_RANDOM_FILE:
     /*
      * This is the path name to a file that contains random data to seed
@@ -1584,14 +1603,19 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * String that holds the SSL crypto engine.
      */
     argptr = va_arg(param, char *);
-    if(argptr && argptr[0])
-      result = Curl_ssl_set_engine(data, argptr);
+    if(argptr && argptr[0]) {
+      result = Curl_setstropt(&data->set.str[STRING_SSL_ENGINE], argptr);
+      if(!result) {
+        result = Curl_ssl_set_engine(data, argptr);
+      }
+    }
     break;
 
   case CURLOPT_SSLENGINE_DEFAULT:
     /*
      * flag to set engine as default.
      */
+    Curl_setstropt(&data->set.str[STRING_SSL_ENGINE], NULL);
     result = Curl_ssl_set_engine_default(data);
     break;
   case CURLOPT_CRLF:
@@ -1942,6 +1966,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
       if(data->share->sslsession == data->state.session)
         data->state.session = NULL;
 
+#ifdef USE_LIBPSL
+      if(data->psl == &data->share->psl)
+        data->psl = data->multi? &data->multi->psl: NULL;
+#endif
+
       data->share->dirty--;
 
       Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
@@ -1973,8 +2002,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
         data->set.general_ssl.max_ssl_sessions = data->share->max_ssl_sessions;
         data->state.session = data->share->sslsession;
       }
-      Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
+#ifdef USE_LIBPSL
+      if(data->share->specifier & (1 << CURL_LOCK_DATA_PSL))
+        data->psl = &data->share->psl;
+#endif
 
+      Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
     }
     /* check for host cache not needed,
      * it will be done by curl_easy_perform */
@@ -2561,6 +2594,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_DNS_SHUFFLE_ADDRESSES:
     data->set.dns_shuffle_addresses = (0 != va_arg(param, long)) ? TRUE:FALSE;
+    break;
+  case CURLOPT_DISALLOW_USERNAME_IN_URL:
+    data->set.disallow_username_in_url =
+      (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
   default:
     /* unknown tag and its companion, just ignore: */

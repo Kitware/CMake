@@ -1252,14 +1252,13 @@ static CURLcode darwinssl_version_from_curl(SSLProtocol *darwinver,
       return CURLE_OK;
     case CURL_SSLVERSION_TLSv1_3:
       /* TLS 1.3 support first appeared in iOS 11 and macOS 10.13 */
-#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
-      /* We can assume __builtin_available() will always work in the
-         10.13/11.0 SDK: */
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
       if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
         *darwinver = kTLSProtocol13;
         return CURLE_OK;
       }
-#endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
+#endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
+          HAVE_BUILTIN_AVAILABLE == 1 */
       break;
   }
   return CURLE_SSL_CONNECT_ERROR;
@@ -1278,7 +1277,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
   /* macOS 10.5-10.7 supported TLS 1.0 only.
      macOS 10.8 and later, and iOS 5 and later, added TLS 1.1 and 1.2.
      macOS 10.13 and later, and iOS 11 and later, added TLS 1.3. */
-#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
   if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
     max_supported_version_by_os = CURL_SSLVERSION_MAX_TLSv1_3;
   }
@@ -1287,7 +1286,8 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
   }
 #else
   max_supported_version_by_os = CURL_SSLVERSION_MAX_TLSv1_2;
-#endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
+#endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
+          HAVE_BUILTIN_AVAILABLE == 1 */
 
   switch(ssl_version) {
     case CURL_SSLVERSION_DEFAULT:
@@ -1430,7 +1430,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
       (void)SSLSetProtocolVersionMin(BACKEND->ssl_ctx, kTLSProtocol1);
-#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
       if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
         (void)SSLSetProtocolVersionMax(BACKEND->ssl_ctx, kTLSProtocol13);
       }
@@ -1439,7 +1439,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       }
 #else
       (void)SSLSetProtocolVersionMax(BACKEND->ssl_ctx, kTLSProtocol12);
-#endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
+#endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
+          HAVE_BUILTIN_AVAILABLE == 1 */
       break;
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
@@ -1571,6 +1572,35 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
   }
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
+
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
+  if(conn->bits.tls_enable_alpn) {
+    if(__builtin_available(macOS 10.13.4, iOS 11, *)) {
+      CFMutableArrayRef alpnArr = CFArrayCreateMutable(NULL, 0,
+                                                       &kCFTypeArrayCallBacks);
+
+#ifdef USE_NGHTTP2
+      if(data->set.httpversion >= CURL_HTTP_VERSION_2 &&
+         (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)) {
+        CFArrayAppendValue(alpnArr, CFSTR(NGHTTP2_PROTO_VERSION_ID));
+        infof(data, "ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
+      }
+#endif
+
+      CFArrayAppendValue(alpnArr, CFSTR(ALPN_HTTP_1_1));
+      infof(data, "ALPN, offering %s\n", ALPN_HTTP_1_1);
+
+      /* expects length prefixed preference ordered list of protocols in wire
+       * format
+       */
+      err = SSLSetALPNProtocols(BACKEND->ssl_ctx, alpnArr);
+      if(err != noErr)
+        infof(data, "WARNING: failed to set ALPN protocols; OSStatus %d\n",
+              err);
+      CFRelease(alpnArr);
+    }
+  }
+#endif
 
   if(SSL_SET_OPTION(key)) {
     infof(data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
@@ -2465,6 +2495,39 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         infof(data, "Unknown protocol connection\n");
         break;
     }
+
+#if(CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
+    if(conn->bits.tls_enable_alpn) {
+      if(__builtin_available(macOS 10.13.4, iOS 11, *)) {
+        CFArrayRef alpnArr = NULL;
+        CFStringRef chosenProtocol = NULL;
+        err = SSLCopyALPNProtocols(BACKEND->ssl_ctx, &alpnArr);
+
+        if(err == noErr && alpnArr && CFArrayGetCount(alpnArr) >= 1)
+          chosenProtocol = CFArrayGetValueAtIndex(alpnArr, 0);
+
+#ifdef USE_NGHTTP2
+        if(chosenProtocol &&
+           !CFStringCompare(chosenProtocol, CFSTR(NGHTTP2_PROTO_VERSION_ID),
+                            0)) {
+          conn->negnpn = CURL_HTTP_VERSION_2;
+        }
+        else
+#endif
+        if(chosenProtocol &&
+           !CFStringCompare(chosenProtocol, CFSTR(ALPN_HTTP_1_1), 0)) {
+          conn->negnpn = CURL_HTTP_VERSION_1_1;
+        }
+        else
+          infof(data, "ALPN, server did not agree to a protocol\n");
+
+        /* chosenProtocol is a reference to the string within alpnArr
+           and doesn't need to be freed separately */
+        if(alpnArr)
+          CFRelease(alpnArr);
+      }
+    }
+#endif
 
     return CURLE_OK;
   }
