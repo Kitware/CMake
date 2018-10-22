@@ -631,3 +631,21 @@ ExternalProject_Add(${proj}
   LOG_BUILD 1
   LOG_INSTALL 1
   )
+
+set(proj ExternalProject-log-dir)
+ExternalProject_Add(${proj}
+  DOWNLOAD_COMMAND "${download_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "download"
+  PATCH_COMMAND "${patch_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "patch"
+  UPDATE_COMMAND "${update_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "update"
+  CONFIGURE_COMMAND "${configure_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "configure"
+  BUILD_COMMAND "${build_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "build"
+  INSTALL_COMMAND "${install_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "install"
+  LOG_MERGED_STDOUTERR 1
+  LOG_DIR ${CMAKE_CURRENT_BINARY_DIR}/different_log
+  LOG_DOWNLOAD 1
+  LOG_PATCH 1
+  LOG_UPDATE 1
+  LOG_CONFIGURE 1
+  LOG_BUILD 1
+  LOG_INSTALL 1
+  )
