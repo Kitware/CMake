@@ -876,6 +876,12 @@
 /* The size of `long', as computed by sizeof. */
 @SIZEOF_LONG_CODE@
 
+/* The size of `long long', as computed by sizeof. */
+@SIZEOF_LONG_LONG_CODE@
+
+/* The size of `__int64', as computed by sizeof. */
+@SIZEOF___INT64_CODE@
+
 /* The size of `off_t', as computed by sizeof. */
 @SIZEOF_OFF_T_CODE@
 
