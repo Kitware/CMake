@@ -1,30 +1,31 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindPatch
-# ---------
-#
-# The module defines the following variables:
-#
-# ``Patch_EXECUTABLE``
-#   Path to patch command-line executable.
-# ``Patch_FOUND``
-#   True if the patch command-line executable was found.
-#
-# The following :prop_tgt:`IMPORTED` targets are also defined:
-#
-# ``Patch::patch``
-#   The command-line executable.
-#
-# Example usage:
-#
-# .. code-block:: cmake
-#
-#    find_package(Patch)
-#    if(Patch_FOUND)
-#      message("Patch found: ${Patch_EXECUTABLE}")
-#    endif()
+#[=======================================================================[.rst:
+FindPatch
+---------
+
+The module defines the following variables:
+
+``Patch_EXECUTABLE``
+  Path to patch command-line executable.
+``Patch_FOUND``
+  True if the patch command-line executable was found.
+
+The following :prop_tgt:`IMPORTED` targets are also defined:
+
+``Patch::patch``
+  The command-line executable.
+
+Example usage:
+
+.. code-block:: cmake
+
+   find_package(Patch)
+   if(Patch_FOUND)
+     message("Patch found: ${Patch_EXECUTABLE}")
+   endif()
+#]=======================================================================]
 
 set(_doc "Patch command line executable")
 set(_patch_path )

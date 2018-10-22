@@ -1,17 +1,18 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# TestForSSTREAM
-# --------------
-#
-# Test for compiler support of ANSI sstream header
-#
-# check if the compiler supports the standard ANSI sstream header
-#
-# ::
-#
-#   CMAKE_NO_ANSI_STRING_STREAM - defined by the results
+#[=======================================================================[.rst:
+TestForSSTREAM
+--------------
+
+Test for compiler support of ANSI sstream header
+
+check if the compiler supports the standard ANSI sstream header
+
+::
+
+  CMAKE_NO_ANSI_STRING_STREAM - defined by the results
+#]=======================================================================]
 
 if(NOT DEFINED CMAKE_HAS_ANSI_STRING_STREAM)
   message(STATUS "Check for sstream")

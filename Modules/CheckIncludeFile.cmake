@@ -1,40 +1,41 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# CheckIncludeFile
-# ----------------
-#
-# Provides a macro to check if a header file can be included in ``C``.
-#
-# .. command:: CHECK_INCLUDE_FILE
-#
-#   ::
-#
-#     CHECK_INCLUDE_FILE(<include> <variable> [<flags>])
-#
-#   Check if the given ``<include>`` file may be included in a ``C``
-#   source file and store the result in an internal cache entry named
-#   ``<variable>``.  The optional third argument may be used to add
-#   compilation flags to the check (or use ``CMAKE_REQUIRED_FLAGS`` below).
-#
-# The following variables may be set before calling this macro to modify
-# the way the check is run:
-#
-# ``CMAKE_REQUIRED_FLAGS``
-#   string of compile command line flags
-# ``CMAKE_REQUIRED_DEFINITIONS``
-#   list of macros to define (-DFOO=bar)
-# ``CMAKE_REQUIRED_INCLUDES``
-#   list of include directories
-# ``CMAKE_REQUIRED_LIBRARIES``
-#   A list of libraries to link.  See policy :policy:`CMP0075`.
-# ``CMAKE_REQUIRED_QUIET``
-#   execute quietly without messages
-#
-# See the :module:`CheckIncludeFiles` module to check for multiple headers
-# at once.  See the :module:`CheckIncludeFileCXX` module to check for headers
-# using the ``CXX`` language.
+#[=======================================================================[.rst:
+CheckIncludeFile
+----------------
+
+Provides a macro to check if a header file can be included in ``C``.
+
+.. command:: CHECK_INCLUDE_FILE
+
+  ::
+
+    CHECK_INCLUDE_FILE(<include> <variable> [<flags>])
+
+  Check if the given ``<include>`` file may be included in a ``C``
+  source file and store the result in an internal cache entry named
+  ``<variable>``.  The optional third argument may be used to add
+  compilation flags to the check (or use ``CMAKE_REQUIRED_FLAGS`` below).
+
+The following variables may be set before calling this macro to modify
+the way the check is run:
+
+``CMAKE_REQUIRED_FLAGS``
+  string of compile command line flags
+``CMAKE_REQUIRED_DEFINITIONS``
+  list of macros to define (-DFOO=bar)
+``CMAKE_REQUIRED_INCLUDES``
+  list of include directories
+``CMAKE_REQUIRED_LIBRARIES``
+  A list of libraries to link.  See policy :policy:`CMP0075`.
+``CMAKE_REQUIRED_QUIET``
+  execute quietly without messages
+
+See the :module:`CheckIncludeFiles` module to check for multiple headers
+at once.  See the :module:`CheckIncludeFileCXX` module to check for headers
+using the ``CXX`` language.
+#]=======================================================================]
 
 include_guard(GLOBAL)
 

@@ -1,28 +1,29 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindGIF
-# -------
-#
-# This finds the GIF library (giflib)
-#
-# The module defines the following variables:
-#
-# ``GIF_FOUND``
-#   True if giflib was found
-# ``GIF_LIBRARIES``
-#   Libraries to link to in order to use giflib
-# ``GIF_INCLUDE_DIR``
-#   where to find the headers
-# ``GIF_VERSION``
-#   3, 4 or a full version string (eg 5.1.4) for versions >= 4.1.6
-#
-# The minimum required version of giflib can be specified using the
-# standard syntax, e.g.  find_package(GIF 4)
-#
-# $GIF_DIR is an environment variable that would correspond to the
-# ./configure --prefix=$GIF_DIR
+#[=======================================================================[.rst:
+FindGIF
+-------
+
+This finds the GIF library (giflib)
+
+The module defines the following variables:
+
+``GIF_FOUND``
+  True if giflib was found
+``GIF_LIBRARIES``
+  Libraries to link to in order to use giflib
+``GIF_INCLUDE_DIR``
+  where to find the headers
+``GIF_VERSION``
+  3, 4 or a full version string (eg 5.1.4) for versions >= 4.1.6
+
+The minimum required version of giflib can be specified using the
+standard syntax, e.g.  find_package(GIF 4)
+
+$GIF_DIR is an environment variable that would correspond to the
+./configure --prefix=$GIF_DIR
+#]=======================================================================]
 
 # Created by Eric Wing.
 # Modifications by Alexander Neundorf, Ben Campbell

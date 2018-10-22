@@ -1,20 +1,21 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindLibArchive
-# --------------
-#
-# Find libarchive library and headers
-#
-# The module defines the following variables:
-#
-# ::
-#
-#   LibArchive_FOUND        - true if libarchive was found
-#   LibArchive_INCLUDE_DIRS - include search path
-#   LibArchive_LIBRARIES    - libraries to link
-#   LibArchive_VERSION      - libarchive 3-component version number
+#[=======================================================================[.rst:
+FindLibArchive
+--------------
+
+Find libarchive library and headers
+
+The module defines the following variables:
+
+::
+
+  LibArchive_FOUND        - true if libarchive was found
+  LibArchive_INCLUDE_DIRS - include search path
+  LibArchive_LIBRARIES    - libraries to link
+  LibArchive_VERSION      - libarchive 3-component version number
+#]=======================================================================]
 
 find_path(LibArchive_INCLUDE_DIR
   NAMES archive.h

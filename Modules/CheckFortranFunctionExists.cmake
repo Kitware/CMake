@@ -1,28 +1,29 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# CheckFortranFunctionExists
-# --------------------------
-#
-# :command:`Macro <macro>` which checks if a Fortran function exists.
-#
-# .. code-block:: cmake
-#
-#   CHECK_FORTRAN_FUNCTION_EXISTS(<function> <result>)
-#
-# where
-#
-# ``<function>``
-#   the name of the Fortran function
-# ``<result>``
-#   variable to store the result; will be created as an internal cache variable.
-#
-# The following variables may be set before calling this macro to modify
-# the way the check is run:
-#
-# ``CMAKE_REQUIRED_LIBRARIES``
-#   list of libraries to link
+#[=======================================================================[.rst:
+CheckFortranFunctionExists
+--------------------------
+
+:command:`Macro <macro>` which checks if a Fortran function exists.
+
+.. code-block:: cmake
+
+  CHECK_FORTRAN_FUNCTION_EXISTS(<function> <result>)
+
+where
+
+``<function>``
+  the name of the Fortran function
+``<result>``
+  variable to store the result; will be created as an internal cache variable.
+
+The following variables may be set before calling this macro to modify
+the way the check is run:
+
+``CMAKE_REQUIRED_LIBRARIES``
+  list of libraries to link
+#]=======================================================================]
 
 include_guard(GLOBAL)
 

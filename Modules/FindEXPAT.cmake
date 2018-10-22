@@ -1,32 +1,33 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindEXPAT
-# ---------
-#
-# Find the native Expat headers and library.
-#
-# Imported Targets
-# ^^^^^^^^^^^^^^^^
-#
-# This module defines the following :prop_tgt:`IMPORTED` targets:
-#
-# ``EXPAT::EXPAT``
-#   The Expat ``expat`` library, if found.
-#
-# Result Variables
-# ^^^^^^^^^^^^^^^^
-#
-# This module will set the following variables in your project:
-#
-# ``EXPAT_INCLUDE_DIRS``
-#   where to find expat.h, etc.
-# ``EXPAT_LIBRARIES``
-#   the libraries to link against to use Expat.
-# ``EXPAT_FOUND``
-#   true if the Expat headers and libraries were found.
-#
+#[=======================================================================[.rst:
+FindEXPAT
+---------
+
+Find the native Expat headers and library.
+
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+This module defines the following :prop_tgt:`IMPORTED` targets:
+
+``EXPAT::EXPAT``
+  The Expat ``expat`` library, if found.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module will set the following variables in your project:
+
+``EXPAT_INCLUDE_DIRS``
+  where to find expat.h, etc.
+``EXPAT_LIBRARIES``
+  the libraries to link against to use Expat.
+``EXPAT_FOUND``
+  true if the Expat headers and libraries were found.
+
+#]=======================================================================]
 
 find_package(PkgConfig QUIET)
 

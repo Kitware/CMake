@@ -1,14 +1,15 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindDart
-# --------
-#
-# Find DART
-#
-# This module looks for the dart testing software and sets DART_ROOT to
-# point to where it found it.
+#[=======================================================================[.rst:
+FindDart
+--------
+
+Find DART
+
+This module looks for the dart testing software and sets DART_ROOT to
+point to where it found it.
+#]=======================================================================]
 
 find_path(DART_ROOT README.INSTALL
     HINTS

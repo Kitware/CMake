@@ -1,35 +1,36 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# CheckLanguage
-# -------------
-#
-# Check if a language can be enabled
-#
-# Usage:
-#
-# ::
-#
-#   check_language(<lang>)
-#
-# where <lang> is a language that may be passed to enable_language()
-# such as "Fortran".  If CMAKE_<lang>_COMPILER is already defined the
-# check does nothing.  Otherwise it tries enabling the language in a
-# test project.  The result is cached in CMAKE_<lang>_COMPILER as the
-# compiler that was found, or NOTFOUND if the language cannot be
-# enabled.
-#
-# Example:
-#
-# ::
-#
-#   check_language(Fortran)
-#   if(CMAKE_Fortran_COMPILER)
-#     enable_language(Fortran)
-#   else()
-#     message(STATUS "No Fortran support")
-#   endif()
+#[=======================================================================[.rst:
+CheckLanguage
+-------------
+
+Check if a language can be enabled
+
+Usage:
+
+::
+
+  check_language(<lang>)
+
+where <lang> is a language that may be passed to enable_language()
+such as "Fortran".  If CMAKE_<lang>_COMPILER is already defined the
+check does nothing.  Otherwise it tries enabling the language in a
+test project.  The result is cached in CMAKE_<lang>_COMPILER as the
+compiler that was found, or NOTFOUND if the language cannot be
+enabled.
+
+Example:
+
+::
+
+  check_language(Fortran)
+  if(CMAKE_Fortran_COMPILER)
+    enable_language(Fortran)
+  else()
+    message(STATUS "No Fortran support")
+  endif()
+#]=======================================================================]
 
 include_guard(GLOBAL)
 

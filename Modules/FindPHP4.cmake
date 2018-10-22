@@ -1,20 +1,21 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindPHP4
-# --------
-#
-# Find PHP4
-#
-# This module finds if PHP4 is installed and determines where the
-# include files and libraries are.  It also determines what the name of
-# the library is.  This code sets the following variables:
-#
-# ::
-#
-#   PHP4_INCLUDE_PATH       = path to where php.h can be found
-#   PHP4_EXECUTABLE         = full path to the php4 binary
+#[=======================================================================[.rst:
+FindPHP4
+--------
+
+Find PHP4
+
+This module finds if PHP4 is installed and determines where the
+include files and libraries are.  It also determines what the name of
+the library is.  This code sets the following variables:
+
+::
+
+  PHP4_INCLUDE_PATH       = path to where php.h can be found
+  PHP4_EXECUTABLE         = full path to the php4 binary
+#]=======================================================================]
 
 set(PHP4_POSSIBLE_INCLUDE_PATHS
   /usr/include/php4

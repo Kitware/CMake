@@ -1,18 +1,19 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# TestForANSIForScope
-# -------------------
-#
-# Check for ANSI for scope support
-#
-# Check if the compiler restricts the scope of variables declared in a
-# for-init-statement to the loop body.
-#
-# ::
-#
-#   CMAKE_NO_ANSI_FOR_SCOPE - holds result
+#[=======================================================================[.rst:
+TestForANSIForScope
+-------------------
+
+Check for ANSI for scope support
+
+Check if the compiler restricts the scope of variables declared in a
+for-init-statement to the loop body.
+
+::
+
+  CMAKE_NO_ANSI_FOR_SCOPE - holds result
+#]=======================================================================]
 
 if(NOT DEFINED CMAKE_ANSI_FOR_SCOPE)
   message(STATUS "Check for ANSI scope")

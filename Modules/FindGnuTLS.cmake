@@ -1,22 +1,23 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindGnuTLS
-# ----------
-#
-# Try to find the GNU Transport Layer Security library (gnutls)
-#
-#
-#
-# Once done this will define
-#
-# ::
-#
-#   GNUTLS_FOUND - System has gnutls
-#   GNUTLS_INCLUDE_DIR - The gnutls include directory
-#   GNUTLS_LIBRARIES - The libraries needed to use gnutls
-#   GNUTLS_DEFINITIONS - Compiler switches required for using gnutls
+#[=======================================================================[.rst:
+FindGnuTLS
+----------
+
+Try to find the GNU Transport Layer Security library (gnutls)
+
+
+
+Once done this will define
+
+::
+
+  GNUTLS_FOUND - System has gnutls
+  GNUTLS_INCLUDE_DIR - The gnutls include directory
+  GNUTLS_LIBRARIES - The libraries needed to use gnutls
+  GNUTLS_DEFINITIONS - Compiler switches required for using gnutls
+#]=======================================================================]
 
 # Note that this doesn't try to find the gnutls-extra package.
 

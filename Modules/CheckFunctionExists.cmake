@@ -1,47 +1,48 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# CheckFunctionExists
-# -------------------
-#
-# Check if a C function can be linked
-#
-# .. code-block:: cmake
-#
-#   check_function_exists(<function> <variable>)
-#
-# Checks that the ``<function>`` is provided by libraries on the system and store
-# the result in a ``<variable>``, which will be created as an internal
-# cache variable.
-#
-# The following variables may be set before calling this macro to modify the
-# way the check is run:
-#
-# ``CMAKE_REQUIRED_FLAGS``
-#   string of compile command line flags
-# ``CMAKE_REQUIRED_DEFINITIONS``
-#   list of macros to define (-DFOO=bar)
-# ``CMAKE_REQUIRED_INCLUDES``
-#   list of include directories
-# ``CMAKE_REQUIRED_LIBRARIES``
-#   list of libraries to link
-# ``CMAKE_REQUIRED_QUIET``
-#   execute quietly without messages
-#
-# .. note::
-#
-#   Prefer using :Module:`CheckSymbolExists` instead of this module,
-#   for the following reasons:
-#
-#   * ``check_function_exists()`` can't detect functions that are inlined
-#     in headers or specified as a macro.
-#
-#   * ``check_function_exists()`` can't detect anything in the 32-bit
-#     versions of the Win32 API, because of a mismatch in calling conventions.
-#
-#   * ``check_function_exists()`` only verifies linking, it does not verify
-#     that the function is declared in system headers.
+#[=======================================================================[.rst:
+CheckFunctionExists
+-------------------
+
+Check if a C function can be linked
+
+.. code-block:: cmake
+
+  check_function_exists(<function> <variable>)
+
+Checks that the ``<function>`` is provided by libraries on the system and store
+the result in a ``<variable>``, which will be created as an internal
+cache variable.
+
+The following variables may be set before calling this macro to modify the
+way the check is run:
+
+``CMAKE_REQUIRED_FLAGS``
+  string of compile command line flags
+``CMAKE_REQUIRED_DEFINITIONS``
+  list of macros to define (-DFOO=bar)
+``CMAKE_REQUIRED_INCLUDES``
+  list of include directories
+``CMAKE_REQUIRED_LIBRARIES``
+  list of libraries to link
+``CMAKE_REQUIRED_QUIET``
+  execute quietly without messages
+
+.. note::
+
+  Prefer using :Module:`CheckSymbolExists` instead of this module,
+  for the following reasons:
+
+  * ``check_function_exists()`` can't detect functions that are inlined
+    in headers or specified as a macro.
+
+  * ``check_function_exists()`` can't detect anything in the 32-bit
+    versions of the Win32 API, because of a mismatch in calling conventions.
+
+  * ``check_function_exists()`` only verifies linking, it does not verify
+    that the function is declared in system headers.
+#]=======================================================================]
 
 include_guard(GLOBAL)
 

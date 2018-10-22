@@ -1,36 +1,37 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# CheckVariableExists
-# -------------------
-#
-# Check if the variable exists.
-#
-# ::
-#
-#   CHECK_VARIABLE_EXISTS(VAR VARIABLE)
-#
-#
-#
-# ::
-#
-#   VAR      - the name of the variable
-#   VARIABLE - variable to store the result
-#              Will be created as an internal cache variable.
-#
-#
-# This macro is only for C variables.
-#
-# The following variables may be set before calling this macro to modify
-# the way the check is run:
-#
-# ::
-#
-#   CMAKE_REQUIRED_FLAGS = string of compile command line flags
-#   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-#   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
-#   CMAKE_REQUIRED_QUIET = execute quietly without messages
+#[=======================================================================[.rst:
+CheckVariableExists
+-------------------
+
+Check if the variable exists.
+
+::
+
+  CHECK_VARIABLE_EXISTS(VAR VARIABLE)
+
+
+
+::
+
+  VAR      - the name of the variable
+  VARIABLE - variable to store the result
+             Will be created as an internal cache variable.
+
+
+This macro is only for C variables.
+
+The following variables may be set before calling this macro to modify
+the way the check is run:
+
+::
+
+  CMAKE_REQUIRED_FLAGS = string of compile command line flags
+  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+  CMAKE_REQUIRED_QUIET = execute quietly without messages
+#]=======================================================================]
 
 include_guard(GLOBAL)
 

@@ -1,17 +1,18 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# AddFileDependencies
-# -------------------
-#
-# Add dependencies to a source file.
-#
-# .. code-block:: cmake
-#
-#   ADD_FILE_DEPENDENCIES(<source> <files>)
-#
-# Adds the given ``<files>`` to the dependencies of file ``<source>``.
+#[=======================================================================[.rst:
+AddFileDependencies
+-------------------
+
+Add dependencies to a source file.
+
+.. code-block:: cmake
+
+  ADD_FILE_DEPENDENCIES(<source> <files>)
+
+Adds the given ``<files>`` to the dependencies of file ``<source>``.
+#]=======================================================================]
 
 macro(ADD_FILE_DEPENDENCIES _file)
 

@@ -1,29 +1,30 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindGDAL
-# --------
-#
-#
-#
-# Locate gdal
-#
-# This module accepts the following environment variables:
-#
-# ::
-#
-#     GDAL_DIR or GDAL_ROOT - Specify the location of GDAL
-#
-#
-#
-# This module defines the following CMake variables:
-#
-# ::
-#
-#     GDAL_FOUND - True if libgdal is found
-#     GDAL_LIBRARY - A variable pointing to the GDAL library
-#     GDAL_INCLUDE_DIR - Where to find the headers
+#[=======================================================================[.rst:
+FindGDAL
+--------
+
+
+
+Locate gdal
+
+This module accepts the following environment variables:
+
+::
+
+    GDAL_DIR or GDAL_ROOT - Specify the location of GDAL
+
+
+
+This module defines the following CMake variables:
+
+::
+
+    GDAL_FOUND - True if libgdal is found
+    GDAL_LIBRARY - A variable pointing to the GDAL library
+    GDAL_INCLUDE_DIR - Where to find the headers
+#]=======================================================================]
 
 #
 # $GDALDIR is an environment variable that would

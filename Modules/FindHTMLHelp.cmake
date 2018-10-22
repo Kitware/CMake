@@ -1,19 +1,20 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindHTMLHelp
-# ------------
-#
-# This module looks for Microsoft HTML Help Compiler
-#
-# It defines:
-#
-# ::
-#
-#    HTML_HELP_COMPILER     : full path to the Compiler (hhc.exe)
-#    HTML_HELP_INCLUDE_PATH : include path to the API (htmlhelp.h)
-#    HTML_HELP_LIBRARY      : full path to the library (htmlhelp.lib)
+#[=======================================================================[.rst:
+FindHTMLHelp
+------------
+
+This module looks for Microsoft HTML Help Compiler
+
+It defines:
+
+::
+
+   HTML_HELP_COMPILER     : full path to the Compiler (hhc.exe)
+   HTML_HELP_INCLUDE_PATH : include path to the API (htmlhelp.h)
+   HTML_HELP_LIBRARY      : full path to the library (htmlhelp.lib)
+#]=======================================================================]
 
 if(WIN32)
 
