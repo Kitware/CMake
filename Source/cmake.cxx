@@ -676,10 +676,25 @@ void cmake::SetArgs(const std::vector<std::string>& args,
 #endif
     else if (arg.find("-D", 0) == 0) {
       // skip for now
+      // in case '-D var=val' is given, also skip the next
+      // in case '-Dvar=val' is given, don't skip the next
+      if (arg.size() == 2) {
+        ++i;
+      }
     } else if (arg.find("-U", 0) == 0) {
       // skip for now
+      // in case '-U var' is given, also skip the next
+      // in case '-Uvar' is given, don't skip the next
+      if (arg.size() == 2) {
+        ++i;
+      }
     } else if (arg.find("-C", 0) == 0) {
       // skip for now
+      // in case '-C path' is given, also skip the next
+      // in case '-Cpath' is given, don't skip the next
+      if (arg.size() == 2) {
+        ++i;
+      }
     } else if (arg.find("-P", 0) == 0) {
       // skip for now
       i++;
