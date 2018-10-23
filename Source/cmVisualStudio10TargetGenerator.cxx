@@ -1130,6 +1130,10 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
 void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
   Elem& e1, std::string const& config)
 {
+  if (this->GeneratorTarget->GetType() > cmStateEnums::OBJECT_LIBRARY) {
+    return;
+  }
+
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
 
   Options& o = *(this->ClOptions[config]);
