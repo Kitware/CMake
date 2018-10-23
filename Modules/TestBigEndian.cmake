@@ -1,18 +1,19 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# TestBigEndian
-# -------------
-#
-# Define macro to determine endian type
-#
-# Check if the system is big endian or little endian
-#
-# ::
-#
-#   TEST_BIG_ENDIAN(VARIABLE)
-#   VARIABLE - variable to store the result to
+#[=======================================================================[.rst:
+TestBigEndian
+-------------
+
+Define macro to determine endian type
+
+Check if the system is big endian or little endian
+
+::
+
+  TEST_BIG_ENDIAN(VARIABLE)
+  VARIABLE - variable to store the result to
+#]=======================================================================]
 
 include(CheckTypeSize)
 

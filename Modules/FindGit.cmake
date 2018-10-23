@@ -1,27 +1,28 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindGit
-# -------
-#
-# The module defines the following variables:
-#
-# ``GIT_EXECUTABLE``
-#   Path to Git command-line client.
-# ``Git_FOUND``, ``GIT_FOUND``
-#   True if the Git command-line client was found.
-# ``GIT_VERSION_STRING``
-#   The version of Git found.
-#
-# Example usage:
-#
-# .. code-block:: cmake
-#
-#    find_package(Git)
-#    if(Git_FOUND)
-#      message("Git found: ${GIT_EXECUTABLE}")
-#    endif()
+#[=======================================================================[.rst:
+FindGit
+-------
+
+The module defines the following variables:
+
+``GIT_EXECUTABLE``
+  Path to Git command-line client.
+``Git_FOUND``, ``GIT_FOUND``
+  True if the Git command-line client was found.
+``GIT_VERSION_STRING``
+  The version of Git found.
+
+Example usage:
+
+.. code-block:: cmake
+
+   find_package(Git)
+   if(Git_FOUND)
+     message("Git found: ${GIT_EXECUTABLE}")
+   endif()
+#]=======================================================================]
 
 # Look for 'git' or 'eg' (easy git)
 #

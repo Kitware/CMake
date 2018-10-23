@@ -1,20 +1,21 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# CMakeBackwardCompatibilityCXX
-# -----------------------------
-#
-# define a bunch of backwards compatibility variables
-#
-# ::
-#
-#   CMAKE_ANSI_CXXFLAGS - flag for ansi c++
-#   CMAKE_HAS_ANSI_STRING_STREAM - has <strstream>
-#   include(TestForANSIStreamHeaders)
-#   include(CheckIncludeFileCXX)
-#   include(TestForSTDNamespace)
-#   include(TestForANSIForScope)
+#[=======================================================================[.rst:
+CMakeBackwardCompatibilityCXX
+-----------------------------
+
+define a bunch of backwards compatibility variables
+
+::
+
+  CMAKE_ANSI_CXXFLAGS - flag for ansi c++
+  CMAKE_HAS_ANSI_STRING_STREAM - has <strstream>
+  include(TestForANSIStreamHeaders)
+  include(CheckIncludeFileCXX)
+  include(TestForSTDNamespace)
+  include(TestForANSIForScope)
+#]=======================================================================]
 
 if(NOT CMAKE_SKIP_COMPATIBILITY_TESTS)
   # check for some ANSI flags in the CXX compiler if it is not gnu

@@ -1,15 +1,16 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# UseQt4
-# ------
-#
-# Use Module for QT4
-#
-# Sets up C and C++ to use Qt 4.  It is assumed that FindQt.cmake has
-# already been loaded.  See FindQt.cmake for information on how to load
-# Qt 4 into your CMake project.
+#[=======================================================================[.rst:
+UseQt4
+------
+
+Use Module for QT4
+
+Sets up C and C++ to use Qt 4.  It is assumed that FindQt.cmake has
+already been loaded.  See FindQt.cmake for information on how to load
+Qt 4 into your CMake project.
+#]=======================================================================]
 
 add_definitions(${QT_DEFINITIONS})
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS $<$<NOT:$<CONFIG:Debug>>:QT_NO_DEBUG>)

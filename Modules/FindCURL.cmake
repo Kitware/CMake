@@ -1,34 +1,35 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindCURL
-# --------
-#
-# Find the native CURL headers and libraries.
-#
-# IMPORTED Targets
-# ^^^^^^^^^^^^^^^^
-#
-# This module defines :prop_tgt:`IMPORTED` target ``CURL::libcurl``, if
-# curl has been found.
-#
-# Result Variables
-# ^^^^^^^^^^^^^^^^
-#
-# This module defines the following variables:
-#
-# ``CURL_FOUND``
-#   True if curl found.
-#
-# ``CURL_INCLUDE_DIRS``
-#   where to find curl/curl.h, etc.
-#
-# ``CURL_LIBRARIES``
-#   List of libraries when using curl.
-#
-# ``CURL_VERSION_STRING``
-#   The version of curl found.
+#[=======================================================================[.rst:
+FindCURL
+--------
+
+Find the native CURL headers and libraries.
+
+IMPORTED Targets
+^^^^^^^^^^^^^^^^
+
+This module defines :prop_tgt:`IMPORTED` target ``CURL::libcurl``, if
+curl has been found.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``CURL_FOUND``
+  True if curl found.
+
+``CURL_INCLUDE_DIRS``
+  where to find curl/curl.h, etc.
+
+``CURL_LIBRARIES``
+  List of libraries when using curl.
+
+``CURL_VERSION_STRING``
+  The version of curl found.
+#]=======================================================================]
 
 # Look for the header file.
 find_path(CURL_INCLUDE_DIR NAMES curl/curl.h)

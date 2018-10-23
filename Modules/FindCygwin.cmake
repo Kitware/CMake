@@ -1,11 +1,12 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindCygwin
-# ----------
-#
-# this module looks for Cygwin
+#[=======================================================================[.rst:
+FindCygwin
+----------
+
+this module looks for Cygwin
+#]=======================================================================]
 
 if (WIN32)
   if(CYGWIN_INSTALL_PATH)

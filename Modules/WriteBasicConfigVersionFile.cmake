@@ -1,22 +1,23 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# WriteBasicConfigVersionFile
-# ---------------------------
-#
-#
-#
-# ::
-#
-#   WRITE_BASIC_CONFIG_VERSION_FILE( filename
-#     [VERSION major.minor.patch]
-#     COMPATIBILITY (AnyNewerVersion|SameMajorVersion|SameMinorVersion|ExactVersion)
-#     )
-#
-#
-#
-# Deprecated, see WRITE_BASIC_PACKAGE_VERSION_FILE(), it is identical.
+#[=======================================================================[.rst:
+WriteBasicConfigVersionFile
+---------------------------
+
+
+
+::
+
+  WRITE_BASIC_CONFIG_VERSION_FILE( filename
+    [VERSION major.minor.patch]
+    COMPATIBILITY (AnyNewerVersion|SameMajorVersion|SameMinorVersion|ExactVersion)
+    )
+
+
+
+Deprecated, see WRITE_BASIC_PACKAGE_VERSION_FILE(), it is identical.
+#]=======================================================================]
 
 function(WRITE_BASIC_CONFIG_VERSION_FILE _filename)
 

@@ -1,17 +1,18 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# TestForSTDNamespace
-# -------------------
-#
-# Test for std:: namespace support
-#
-# check if the compiler supports std:: on stl classes
-#
-# ::
-#
-#   CMAKE_NO_STD_NAMESPACE - defined by the results
+#[=======================================================================[.rst:
+TestForSTDNamespace
+-------------------
+
+Test for std:: namespace support
+
+check if the compiler supports std:: on stl classes
+
+::
+
+  CMAKE_NO_STD_NAMESPACE - defined by the results
+#]=======================================================================]
 
 if(NOT DEFINED CMAKE_STD_NAMESPACE)
   message(STATUS "Check for STD namespace")

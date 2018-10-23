@@ -1,18 +1,19 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindGTK
-# -------
-#
-# try to find GTK (and glib) and GTKGLArea
-#
-# ::
-#
-#   GTK_INCLUDE_DIR   - Directories to include to use GTK
-#   GTK_LIBRARIES     - Files to link against to use GTK
-#   GTK_FOUND         - GTK was found
-#   GTK_GL_FOUND      - GTK's GL features were found
+#[=======================================================================[.rst:
+FindGTK
+-------
+
+try to find GTK (and glib) and GTKGLArea
+
+::
+
+  GTK_INCLUDE_DIR   - Directories to include to use GTK
+  GTK_LIBRARIES     - Files to link against to use GTK
+  GTK_FOUND         - GTK was found
+  GTK_GL_FOUND      - GTK's GL features were found
+#]=======================================================================]
 
 # don't even bother under WIN32
 if(UNIX)

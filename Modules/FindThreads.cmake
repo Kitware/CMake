@@ -1,44 +1,45 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindThreads
-# -----------
-#
-# This module determines the thread library of the system.
-#
-# The following variables are set
-#
-# ::
-#
-#   CMAKE_THREAD_LIBS_INIT     - the thread library
-#   CMAKE_USE_SPROC_INIT       - are we using sproc?
-#   CMAKE_USE_WIN32_THREADS_INIT - using WIN32 threads?
-#   CMAKE_USE_PTHREADS_INIT    - are we using pthreads
-#   CMAKE_HP_PTHREADS_INIT     - are we using hp pthreads
-#
-# The following import target is created
-#
-# ::
-#
-#   Threads::Threads
-#
-# For systems with multiple thread libraries, caller can set
-#
-# ::
-#
-#   CMAKE_THREAD_PREFER_PTHREAD
-#
-# If the use of the -pthread compiler and linker flag is preferred then the
-# caller can set
-#
-# ::
-#
-#   THREADS_PREFER_PTHREAD_FLAG
-#
-# Please note that the compiler flag can only be used with the imported
-# target. Use of both the imported target as well as this switch is highly
-# recommended for new code.
+#[=======================================================================[.rst:
+FindThreads
+-----------
+
+This module determines the thread library of the system.
+
+The following variables are set
+
+::
+
+  CMAKE_THREAD_LIBS_INIT     - the thread library
+  CMAKE_USE_SPROC_INIT       - are we using sproc?
+  CMAKE_USE_WIN32_THREADS_INIT - using WIN32 threads?
+  CMAKE_USE_PTHREADS_INIT    - are we using pthreads
+  CMAKE_HP_PTHREADS_INIT     - are we using hp pthreads
+
+The following import target is created
+
+::
+
+  Threads::Threads
+
+For systems with multiple thread libraries, caller can set
+
+::
+
+  CMAKE_THREAD_PREFER_PTHREAD
+
+If the use of the -pthread compiler and linker flag is preferred then the
+caller can set
+
+::
+
+  THREADS_PREFER_PTHREAD_FLAG
+
+Please note that the compiler flag can only be used with the imported
+target. Use of both the imported target as well as this switch is highly
+recommended for new code.
+#]=======================================================================]
 
 include (CheckLibraryExists)
 include (CheckSymbolExists)

@@ -1,13 +1,14 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# Qt4Macros
-# ---------
-#
-#
-#
-# This file is included by FindQt4.cmake, don't include it directly.
+#[=======================================================================[.rst:
+Qt4Macros
+---------
+
+
+
+This file is included by FindQt4.cmake, don't include it directly.
+#]=======================================================================]
 
 ######################################
 #
