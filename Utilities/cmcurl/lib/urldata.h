@@ -80,6 +80,7 @@
 #define RESP_TIMEOUT (1800*1000)
 
 #include "cookie.h"
+#include "psl.h"
 #include "formdata.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -142,8 +143,13 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
 #endif /* HAVE_LIBSSH2_H */
 
 /* The upload buffer size, should not be smaller than CURL_MAX_WRITE_SIZE, as
-   it needs to hold a full buffer as could be sent in a write callback */
-#define UPLOAD_BUFSIZE CURL_MAX_WRITE_SIZE
+   it needs to hold a full buffer as could be sent in a write callback.
+
+   The size was 16KB for many years but was bumped to 64KB because it makes
+   libcurl able to do significantly faster uploads in some circumstances. Even
+   larger buffers can help further, but this is deemed a fair memory/speed
+   compromise. */
+#define UPLOAD_BUFSIZE 65536
 
 /* The "master buffer" is for HTTP pipelining */
 #define MASTERBUF_SIZE 16384
@@ -155,11 +161,6 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
 #define CURLEASY_MAGIC_NUMBER 0xc0dedbadU
 #define GOOD_EASY_HANDLE(x) \
   ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
-
-/* Some convenience macros to get the larger/smaller value out of two given.
-   We prefix with CURL to prevent name collisions. */
-#define CURLMAX(x,y) ((x)>(y)?(x):(y))
-#define CURLMIN(x,y) ((x)<(y)?(x):(y))
 
 #ifdef HAVE_GSSAPI
 /* Types needed for krb5-ftp connections */
@@ -226,6 +227,7 @@ struct ssl_primary_config {
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
+  char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
 };
 
 struct ssl_config_data {
@@ -779,11 +781,12 @@ struct connectdata {
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;
 
-  bool inuse; /* This is a marker for the connection cache logic. If this is
-                 TRUE this handle is being used by one or more easy handles
-                 and can only used by any other easy handle without careful
-                 consideration (== only for pipelining/multiplexing) and it
-                 cannot be used by another multi handle! */
+  /* This is used by the connection cache logic. If this returns TRUE, this
+     handle is being used by one or more easy handles and can only used by any
+     other easy handle without careful consideration (== only for
+     pipelining/multiplexing) and it cannot be used by another multi
+     handle! */
+#define CONN_INUSE(c) ((c)->send_pipe.size + (c)->recv_pipe.size)
 
   /**** Fields set when inited and not modified again */
   long connection_id; /* Contains a unique number to make it easier to
@@ -1222,7 +1225,7 @@ struct UrlState {
   size_t headersize;   /* size of the allocation */
 
   char *buffer; /* download buffer */
-  char uploadbuffer[UPLOAD_BUFSIZE + 1]; /* upload buffer */
+  char *ulbuf; /* alloced upload buffer or NULL */
   curl_off_t current_speed;  /* the ProgressShow() function sets this,
                                 bytes / second */
   bool this_is_a_follow; /* this is a followed Location: request */
@@ -1265,7 +1268,7 @@ struct UrlState {
   void *resolver; /* resolver state, if it is used in the URL state -
                      ares_channel f.e. */
 
-#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_ENGINE_H)
+#if defined(USE_OPENSSL)
   /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
   void *engine;
 #endif /* USE_OPENSSL */
@@ -1283,9 +1286,6 @@ struct UrlState {
   int httpversion;       /* the lowest HTTP version*10 reported by any server
                             involved in this request */
   bool expect100header;  /* TRUE if we added Expect: 100-continue */
-
-  bool pipe_broke; /* TRUE if the connection we were pipelined on broke
-                      and we need to restart from the beginning */
 
 #if !defined(WIN32) && !defined(MSDOS) && !defined(__EMX__) && \
     !defined(__SYMBIAN32__)
@@ -1346,7 +1346,7 @@ struct DynamicStatic {
   char *url;        /* work URL, copied from UserDefined */
   bool url_alloc;   /* URL string is malloc()'ed */
   char *referer;    /* referer string */
-  bool referer_alloc; /* referer sting is malloc()ed */
+  bool referer_alloc; /* referer string is malloc()ed */
   struct curl_slist *cookielist; /* list of cookie files set by
                                     curl_easy_setopt(COOKIEFILE) calls */
   struct curl_slist *resolve; /* set to point to the set.resolve list when
@@ -1400,6 +1400,8 @@ enum dupstring {
   STRING_SSL_PINNEDPUBLICKEY_PROXY, /* public key file to verify proxy */
   STRING_SSL_CIPHER_LIST_ORIG, /* list of ciphers to use */
   STRING_SSL_CIPHER_LIST_PROXY, /* list of ciphers to use */
+  STRING_SSL_CIPHER13_LIST_ORIG, /* list of TLS 1.3 ciphers to use */
+  STRING_SSL_CIPHER13_LIST_PROXY, /* list of TLS 1.3 ciphers to use */
   STRING_SSL_EGDSOCKET,   /* path to file containing the EGD daemon socket */
   STRING_SSL_RANDOM_FILE, /* path to file containing "random" data */
   STRING_USERAGENT,       /* User-Agent string */
@@ -1407,6 +1409,7 @@ enum dupstring {
   STRING_SSL_CRLFILE_PROXY, /* crl file to check certificate */
   STRING_SSL_ISSUERCERT_ORIG, /* issuer cert file to check certificate */
   STRING_SSL_ISSUERCERT_PROXY, /* issuer cert file to check certificate */
+  STRING_SSL_ENGINE,      /* name of ssl engine */
   STRING_USERNAME,        /* <username>, if used */
   STRING_PASSWORD,        /* <password>, if used */
   STRING_OPTIONS,         /* <options>, if used */
@@ -1559,6 +1562,8 @@ struct UserDefined {
   curl_proxytype proxytype; /* what kind of proxy that is in use */
   long dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
+  long upload_buffer_size; /* size of upload buffer to use,
+                              keep it >= CURL_MAX_WRITE_SIZE */
   void *private_data; /* application-private data */
 
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
@@ -1581,8 +1586,6 @@ struct UserDefined {
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
    and they don't change during operations. */
-
-  bool printhost;        /* printing host name in debug info */
   bool get_filetime;     /* get the time and get of the remote file */
   bool tunnel_thru_httpproxy; /* use CONNECT through a HTTP proxy */
   bool prefer_ascii;     /* ASCII rather than binary */
@@ -1676,7 +1679,7 @@ struct UserDefined {
   bool stream_depends_e; /* set or don't set the Exclusive bit */
   int stream_weight;
 
-  bool haproxyprotocol; /* whether to send HAProxy PROXY protocol header */
+  bool haproxyprotocol; /* whether to send HAProxy PROXY protocol v1 header */
 
   struct Curl_http2_dep *stream_dependents;
 
@@ -1685,6 +1688,7 @@ struct UserDefined {
   curl_resolver_start_callback resolver_start; /* optional callback called
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
+  bool disallow_username_in_url; /* disallow username in url */
 };
 
 struct Names {
@@ -1736,6 +1740,9 @@ struct Curl_easy {
                                     struct to which this "belongs" when used
                                     by the easy interface */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
+#ifdef USE_LIBPSL
+  struct PslCache *psl;        /* The associated PSL cache. */
+#endif
   struct SingleRequest req;    /* Request-specific data */
   struct UserDefined set;      /* values set by the libcurl user */
   struct DynamicStatic change; /* possibly modified userdefined data */
