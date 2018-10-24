@@ -3,6 +3,15 @@
 #include <cuda_runtime.h>
 #include <iostream>
 
+#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
+
+#  include <pthread.h>
+static int verify_linking_to_pthread()
+{
+  return static_cast<int>(pthread_self());
+}
+#endif
+
 // this test only makes sense for versions of CUDA that ships
 // static libraries that have separable compilation device symbols
 #if __CUDACC_VER_MAJOR__ <= 9

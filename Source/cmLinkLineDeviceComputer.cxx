@@ -25,6 +25,23 @@ cmLinkLineDeviceComputer::~cmLinkLineDeviceComputer()
 {
 }
 
+static bool cmLinkItemValidForDevice(std::string const& item)
+{
+  // Valid items are:
+  // * Non-flags (does not start in '-')
+  // * Specific flags --library, --library-path, -l, -L
+  // For example:
+  // * 'cublas_device' => pass-along
+  // * '--library pthread' => pass-along
+  // * '-lpthread' => pass-along
+  // * '-pthread' => drop
+  // * '-a' => drop
+  return (!cmHasLiteralPrefix(item, "-") || //
+          cmHasLiteralPrefix(item, "-l") || //
+          cmHasLiteralPrefix(item, "-L") || //
+          cmHasLiteralPrefix(item, "--library"));
+}
+
 std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
   cmComputeLinkInformation& cli, std::string const& stdLibString)
 {
@@ -69,7 +86,7 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
       }
       out +=
         this->ConvertToOutputFormat(this->ConvertToLinkReference(item.Value));
-    } else {
+    } else if (cmLinkItemValidForDevice(item.Value)) {
       out += item.Value;
     }
 
