@@ -1289,7 +1289,7 @@ endif()
 add_executable(LIBCURL curltest.c)
 target_link_libraries(LIBCURL cmcurl)
 
-if(CMAKE_CURL_TEST_URL)
+if(BUILD_TESTING AND CMAKE_CURL_TEST_URL)
   add_test(curl LIBCURL ${CMAKE_CURL_TEST_URL})
 endif()
 
