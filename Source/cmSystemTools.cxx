@@ -1703,6 +1703,32 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
   fflush(out);
 }
 
+bool la_diagnostic(struct archive* ar, __LA_SSIZE_T r)
+{
+  // See archive.h definition of ARCHIVE_OK for return values.
+
+  if (r >= ARCHIVE_OK) {
+    return true;
+  }
+
+  if (r >= ARCHIVE_WARN) {
+    const char* warn = archive_error_string(ar);
+    if (!warn) {
+      warn = "unknown warning";
+    }
+    std::cerr << "cmake -E tar: warning: " << warn << '\n';
+    return true;
+  }
+
+  // Error.
+  const char* err = archive_error_string(ar);
+  if (!err) {
+    err = "unknown error";
+  }
+  std::cerr << "cmake -E tar: error: " << err << '\n';
+  return false;
+}
+
 // Return 'true' on success
 bool copy_data(struct archive* ar, struct archive* aw)
 {
@@ -1716,24 +1742,17 @@ bool copy_data(struct archive* ar, struct archive* aw)
 #  endif
 
   for (;;) {
-    // Return value:
-    // * ARCHIVE_OK - read succeed
-    // * ARCHIVE_EOF - no more data to read left
+    // See archive.h definition of ARCHIVE_OK for return values.
     r = archive_read_data_block(ar, &buff, &size, &offset);
     if (r == ARCHIVE_EOF) {
       return true;
     }
-    if (r != ARCHIVE_OK) {
+    if (!la_diagnostic(ar, r)) {
       return false;
     }
-    // Return value:
-    // * >= ARCHIVE_OK - write succeed
-    // * < ARCHIVE_OK - write failed
-    const __LA_SSIZE_T w_size =
-      archive_write_data_block(aw, buff, size, offset);
-    if (w_size < ARCHIVE_OK) {
-      cmSystemTools::Message("archive_write_data_block()",
-                             archive_error_string(aw));
+    // See archive.h definition of ARCHIVE_OK for return values.
+    __LA_SSIZE_T const w = archive_write_data_block(aw, buff, size, offset);
+    if (!la_diagnostic(ar, w)) {
       return false;
     }
   }
@@ -1792,7 +1811,6 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
       r = archive_write_header(ext, entry);
       if (r == ARCHIVE_OK) {
         if (!copy_data(a, ext)) {
-          cmSystemTools::Error("Problem with copy_data");
           break;
         }
         r = archive_write_finish_entry(ext);
