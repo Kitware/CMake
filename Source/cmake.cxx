@@ -2128,7 +2128,7 @@ void cmake::MarkCliAsUsed(const std::string& variable)
 void cmake::GenerateGraphViz(const char* fileName) const
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  cmGraphVizWriter gvWriter(this->GetGlobalGenerator()->GetLocalGenerators());
+  cmGraphVizWriter gvWriter(this->GetGlobalGenerator());
 
   std::string settingsFile = this->GetHomeOutputDirectory();
   settingsFile += "/CMakeGraphVizOptions.cmake";
