@@ -31,6 +31,11 @@ public:
   /** Get the "cmake" instance with which this was constructed.  */
   cmake* GetCMakeInstance() const { return this->CMakeInstance; }
 
+  /** Convert a JSON object or array into an object with a single
+      "jsonFile" member specifying a file named with the given prefix
+      and holding the original object.  Other JSON types are unchanged.  */
+  Json::Value MaybeJsonFile(Json::Value in, std::string const& prefix);
+
 private:
   cmake* CMakeInstance;
 

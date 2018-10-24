@@ -175,6 +175,18 @@ std::string cmFileAPI::WriteJsonFile(
   return fileName;
 }
 
+Json::Value cmFileAPI::MaybeJsonFile(Json::Value in, std::string const& prefix)
+{
+  Json::Value out;
+  if (in.isObject() || in.isArray()) {
+    out = Json::objectValue;
+    out["jsonFile"] = this->WriteJsonFile(in, prefix);
+  } else {
+    out = std::move(in);
+  }
+  return out;
+}
+
 std::string cmFileAPI::ComputeSuffixHash(std::string const& file)
 {
   cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_256);
