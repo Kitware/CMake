@@ -3,7 +3,7 @@ unset
 
 Unset a variable, cache variable, or environment variable.
 
-::
+.. code-block:: cmake
 
   unset(<variable> [CACHE | PARENT_SCOPE])
 
@@ -24,7 +24,7 @@ for further details.
 
 ``<variable>`` can be an environment variable such as:
 
-::
+.. code-block:: cmake
 
   unset(ENV{LD_LIBRARY_PATH})
 

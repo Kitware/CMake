@@ -1,26 +1,28 @@
 cmake_parse_arguments
 ---------------------
 
-``cmake_parse_arguments`` is intended to be used in macros or functions for
-parsing the arguments given to that macro or function.  It processes the
-arguments and defines a set of variables which hold the values of the
-respective options.
+Parse function or macro arguments.
 
-::
+.. code-block:: cmake
 
   cmake_parse_arguments(<prefix> <options> <one_value_keywords>
-                        <multi_value_keywords> args...)
+                        <multi_value_keywords> <args>...)
 
-  cmake_parse_arguments(PARSE_ARGV N <prefix> <options> <one_value_keywords>
-                        <multi_value_keywords>)
+  cmake_parse_arguments(PARSE_ARGV <N> <prefix> <options>
+                        <one_value_keywords> <multi_value_keywords>)
 
-The first signature reads processes arguments passed in the ``args...``.
+This command is for use in macros or functions.
+It processes the arguments given to that macro or function,
+and defines a set of variables which hold the values of the
+respective options.
+
+The first signature reads processes arguments passed in the ``<args>...``.
 This may be used in either a :command:`macro` or a :command:`function`.
 
 The ``PARSE_ARGV`` signature is only for use in a :command:`function`
 body.  In this case the arguments that are parsed come from the
 ``ARGV#`` variables of the calling function.  The parsing starts with
-the Nth argument, where ``N`` is an unsigned integer.  This allows for
+the ``<N>``-th argument, where ``<N>`` is an unsigned integer.  This allows for
 the values to have special characters like ``;`` in them.
 
 The ``<options>`` argument contains all options for the respective macro,

@@ -12,7 +12,7 @@ Find an external project, and load its settings.
 Basic Signature and Module Mode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   find_package(<PackageName> [version] [EXACT] [QUIET] [MODULE]
                [REQUIRED] [[COMPONENTS] [components...]]
@@ -67,7 +67,9 @@ full command signature and details of the search process.  Project
 maintainers wishing to provide a package to be found by this command
 are encouraged to read on.
 
-The complete Config mode command signature is::
+The complete Config mode command signature is
+
+.. code-block:: cmake
 
   find_package(<PackageName> [version] [EXACT] [QUIET]
                [REQUIRED] [[COMPONENTS] [components...]]
@@ -202,7 +204,9 @@ is set no attempt is made to choose a highest or closest version number.
 To control the order in which ``find_package`` checks for compatibility use
 the two variables :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER` and
 :variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION`.
-For instance in order to select the highest version one can set::
+For instance in order to select the highest version one can set
+
+.. code-block:: cmake
 
   SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
   SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)

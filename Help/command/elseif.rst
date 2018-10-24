@@ -1,10 +1,11 @@
 elseif
 ------
 
-Starts the elseif portion of an if block.
+Starts an elseif portion of an if block.
 
-::
+.. code-block:: cmake
 
-  elseif(expression)
+  elseif(<condition>)
 
-See the :command:`if` command.
+See the :command:`if` command, especially for the syntax and logic
+of the ``<condition>``.

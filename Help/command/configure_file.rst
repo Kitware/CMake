@@ -3,7 +3,7 @@ configure_file
 
 Copy a file to another location and modify its contents.
 
-::
+.. code-block:: cmake
 
   configure_file(<input> <output>
                  [COPYONLY] [ESCAPE_QUOTES] [@ONLY]
@@ -13,15 +13,21 @@ Copies an ``<input>`` file to an ``<output>`` file and substitutes
 variable values referenced as ``@VAR@`` or ``${VAR}`` in the input
 file content.  Each variable reference will be replaced with the
 current value of the variable, or the empty string if the variable
-is not defined.  Furthermore, input lines of the form::
+is not defined.  Furthermore, input lines of the form
+
+.. code-block:: c
 
   #cmakedefine VAR ...
 
-will be replaced with either::
+will be replaced with either
+
+.. code-block:: c
 
   #define VAR ...
 
-or::
+or
+
+.. code-block:: c
 
   /* #undef VAR */
 
@@ -33,12 +39,16 @@ either ``#define VAR 1`` or ``#define VAR 0`` similarly.
 The result lines (with the exception of the ``#undef`` comments) can be
 indented using spaces and/or tabs between the ``#`` character
 and the ``cmakedefine`` or ``cmakedefine01`` words. This whitespace
-indentation will be preserved in the output lines::
+indentation will be preserved in the output lines:
+
+.. code-block:: c
 
   #  cmakedefine VAR
   #  cmakedefine01 VAR
 
-will be replaced, if ``VAR`` is defined, with::
+will be replaced, if ``VAR`` is defined, with
+
+.. code-block:: c
 
   #  define VAR
   #  define VAR 1

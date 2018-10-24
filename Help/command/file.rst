@@ -42,7 +42,7 @@ Reading
 
 .. _READ:
 
-::
+.. code-block:: cmake
 
   file(READ <filename> <variable>
        [OFFSET <offset>] [LIMIT <max-in>] [HEX])
@@ -54,7 +54,7 @@ be converted to a hexadecimal representation (useful for binary data).
 
 .. _STRINGS:
 
-::
+.. code-block:: cmake
 
   file(STRINGS <filename> <variable> [<options>...])
 
@@ -105,7 +105,7 @@ from the input file.
 
 .. _HASH:
 
-::
+.. code-block:: cmake
 
   file(<HASH> <filename> <variable>)
 
@@ -116,7 +116,7 @@ command.
 
 .. _TIMESTAMP:
 
-::
+.. code-block:: cmake
 
   file(TIMESTAMP <filename> <variable> [<format>] [UTC])
 
@@ -133,7 +133,7 @@ Writing
 .. _WRITE:
 .. _APPEND:
 
-::
+.. code-block:: cmake
 
   file(WRITE <filename> <content>...)
   file(APPEND <filename> <content>...)
@@ -150,7 +150,7 @@ to update the file only when its content changes.
 .. _TOUCH:
 .. _TOUCH_NOCREATE:
 
-::
+.. code-block:: cmake
 
   file(TOUCH [<files>...])
   file(TOUCH_NOCREATE [<files>...])
@@ -167,7 +167,7 @@ modified.
 
 .. _GENERATE:
 
-::
+.. code-block:: cmake
 
   file(GENERATE OUTPUT output-file
        <INPUT input-file|CONTENT content>
@@ -217,7 +217,7 @@ Filesystem
 .. _GLOB:
 .. _GLOB_RECURSE:
 
-::
+.. code-block:: cmake
 
   file(GLOB <variable>
        [LIST_DIRECTORIES true|false] [RELATIVE <path>] [CONFIGURE_DEPENDS]
@@ -272,7 +272,7 @@ Examples of recursive globbing include::
 
 .. _RENAME:
 
-::
+.. code-block:: cmake
 
   file(RENAME <oldname> <newname>)
 
@@ -282,7 +282,7 @@ Move a file or directory within a filesystem from ``<oldname>`` to
 .. _REMOVE:
 .. _REMOVE_RECURSE:
 
-::
+.. code-block:: cmake
 
   file(REMOVE [<files>...])
   file(REMOVE_RECURSE [<files>...])
@@ -293,7 +293,7 @@ given file does not exist.
 
 .. _MAKE_DIRECTORY:
 
-::
+.. code-block:: cmake
 
   file(MAKE_DIRECTORY [<directories>...])
 
@@ -302,7 +302,7 @@ Create the given directories and their parents as needed.
 .. _COPY:
 .. _INSTALL:
 
-::
+.. code-block:: cmake
 
   file(<COPY|INSTALL> <files>... DESTINATION <dir>
        [FILE_PERMISSIONS <permissions>...]
@@ -338,7 +338,7 @@ Path Conversion
 
 .. _RELATIVE_PATH:
 
-::
+.. code-block:: cmake
 
   file(RELATIVE_PATH <variable> <directory> <file>)
 
@@ -348,7 +348,7 @@ store it in the ``<variable>``.
 .. _TO_CMAKE_PATH:
 .. _TO_NATIVE_PATH:
 
-::
+.. code-block:: cmake
 
   file(TO_CMAKE_PATH "<path>" <variable>)
   file(TO_NATIVE_PATH "<path>" <variable>)
@@ -370,7 +370,7 @@ Transfer
 .. _DOWNLOAD:
 .. _UPLOAD:
 
-::
+.. code-block:: cmake
 
   file(DOWNLOAD <url> <file> [<options>...])
   file(UPLOAD   <file> <url> [<options>...])
@@ -460,7 +460,7 @@ Locking
 
 .. _LOCK:
 
-::
+.. code-block:: cmake
 
   file(LOCK <path> [DIRECTORY] [RELEASE]
        [GUARD <FUNCTION|FILE|PROCESS>]

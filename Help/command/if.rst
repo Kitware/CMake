@@ -6,7 +6,7 @@ Conditionally execute a group of commands.
 Synopsis
 ^^^^^^^^
 
-::
+.. code-block:: cmake
 
   if(<condition>)
     <commands>
@@ -23,8 +23,11 @@ Otherwise, optional ``elseif`` blocks are processed in the same way.
 Finally, if no ``condition`` is true, ``commands`` in the optional ``else``
 block are executed.
 
-Per legacy, the ``else`` and ``endif`` clause may also have a ``condition`` argument,
-which then must be a verbatim repeat of the argument of the opening ``if`` clause.
+Per legacy, the :command:`else` and :command:`elseif` commands admit
+an optional ``<condition>`` argument.
+If used, it must be a verbatim
+repeat of the argument of the opening
+``if`` command.
 
 Condition Syntax
 ^^^^^^^^^^^^^^^^
@@ -202,21 +205,27 @@ The if command was written very early in CMake's history, predating
 the ``${}`` variable evaluation syntax, and for convenience evaluates
 variables named by its arguments as shown in the above signatures.
 Note that normal variable evaluation with ``${}`` applies before the if
-command even receives the arguments.  Therefore code like::
+command even receives the arguments.  Therefore code like
+
+.. code-block:: cmake
 
  set(var1 OFF)
  set(var2 "var1")
  if(${var2})
 
-appears to the if command as::
+appears to the if command as
 
- if(var1)
+.. code-block:: cmake
+
+  if(var1)
 
 and is evaluated according to the ``if(<variable>)`` case documented
 above.  The result is ``OFF`` which is false.  However, if we remove the
-``${}`` from the example then the command sees::
+``${}`` from the example then the command sees
 
- if(var2)
+.. code-block:: cmake
+
+  if(var2)
 
 which is true because ``var2`` is defined to "var1" which is not a false
 constant.

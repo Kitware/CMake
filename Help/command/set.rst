@@ -15,11 +15,11 @@ unset.  See the :command:`unset` command to unset variables explicitly.
 Set Normal Variable
 ^^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   set(<variable> <value>... [PARENT_SCOPE])
 
-Set the given ``<variable>`` in the current function or directory scope.
+Sets the given ``<variable>`` in the current function or directory scope.
 
 If the ``PARENT_SCOPE`` option is given the variable will be set in
 the scope above the current scope.  Each new directory or function
@@ -32,11 +32,11 @@ undefined and if it had a value, it is still that value).
 Set Cache Entry
 ^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   set(<variable> <value>... CACHE <type> <docstring> [FORCE])
 
-Set the given cache ``<variable>`` (cache entry).  Since cache entries
+Sets the given cache ``<variable>`` (cache entry).  Since cache entries
 are meant to provide user-settable values this does not overwrite
 existing cache entries by default.  Use the ``FORCE`` option to
 overwrite existing entries.
@@ -84,8 +84,8 @@ current working directory and convert it to an absolute path.
 Set Environment Variable
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   set(ENV{<variable>} <value>...)
 
-Set the current process environment ``<variable>`` to the given value.
+Sets the current process environment ``<variable>`` to the given value.
