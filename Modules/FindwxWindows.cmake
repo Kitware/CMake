@@ -5,13 +5,15 @@
 FindwxWindows
 -------------
 
+.. deprecated:: 3.0
+
+  Replaced by :module:`FindwxWidgets`.
+
 Find wxWindows (wxWidgets) installation
 
 This module finds if wxWindows/wxWidgets is installed and determines
 where the include files and libraries are.  It also determines what
-the name of the library is.  Please note this file is DEPRECATED and
-replaced by FindwxWidgets.cmake.  This code sets the following
-variables:
+the name of the library is.  This code sets the following variables:
 
 ::
 

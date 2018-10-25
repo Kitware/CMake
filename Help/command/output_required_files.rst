@@ -1,7 +1,7 @@
 output_required_files
 ---------------------
 
-Disallowed.  See CMake Policy :policy:`CMP0032`.
+Disallowed since version 3.0.  See CMake Policy :policy:`CMP0032`.
 
 Approximate C preprocessor dependency scanning.
 

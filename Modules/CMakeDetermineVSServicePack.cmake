@@ -5,7 +5,9 @@
 CMakeDetermineVSServicePack
 ---------------------------
 
-Deprecated.  Do not use.
+.. deprecated:: 3.0
+
+  Do not use.
 
 The functionality of this module has been superseded by the
 :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable that contains
@@ -170,4 +172,3 @@ function(DetermineVSServicePack _pack)
         endif()
     endif()
 endfunction()
-

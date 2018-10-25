@@ -5,7 +5,9 @@
 CMakeForceCompiler
 ------------------
 
-Deprecated.  Do not use.
+.. deprecated:: 3.6
+
+  Do not use.
 
 The macros provided by this module were once intended for use by
 cross-compiling toolchain files when CMake was not able to automatically

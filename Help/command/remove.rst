@@ -1,7 +1,9 @@
 remove
 ------
 
-Deprecated. Use the :command:`list(REMOVE_ITEM)` command instead.
+.. deprecated:: 3.0
+
+  Use the :command:`list(REMOVE_ITEM)` command instead.
 
 ::
 
