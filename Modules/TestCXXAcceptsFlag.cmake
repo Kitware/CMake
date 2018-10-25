@@ -5,7 +5,9 @@
 TestCXXAcceptsFlag
 ------------------
 
-Deprecated.  See :module:`CheckCXXCompilerFlag`.
+.. deprecated:: 3.0
+
+  See :module:`CheckCXXCompilerFlag`.
 
 Check if the CXX compiler accepts a flag.
 

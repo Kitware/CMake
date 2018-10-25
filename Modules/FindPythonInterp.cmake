@@ -5,11 +5,11 @@
 FindPythonInterp
 ----------------
 
-Find python interpreter
-
 .. deprecated:: 3.12
 
   Use :module:`FindPython3`, :module:`FindPython2` or :module:`FindPython` instead.
+
+Find python interpreter
 
 This module finds if Python interpreter is installed and determines
 where the executables are.  This code sets the following variables:

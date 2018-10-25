@@ -5,11 +5,11 @@
 FindPythonLibs
 --------------
 
-Find python libraries
-
 .. deprecated:: 3.12
 
   Use :module:`FindPython3`, :module:`FindPython2` or :module:`FindPython` instead.
+
+Find python libraries
 
 This module finds if Python is installed and determines where the
 include files and libraries are.  It also determines what the name of

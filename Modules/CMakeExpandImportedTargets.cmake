@@ -5,7 +5,9 @@
 CMakeExpandImportedTargets
 --------------------------
 
-Deprecated.  Do not use.
+.. deprecated:: 3.4
+
+  Do not use.
 
 This module was once needed to expand imported targets to the underlying
 libraries they reference on disk for use with the :command:`try_compile`

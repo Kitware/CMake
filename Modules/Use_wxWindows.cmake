@@ -5,9 +5,9 @@
 Use_wxWindows
 -------------
 
-Deprecated.  Use ``find_package(wxWidgets)`` and
-``include(${wxWidgets_USE_FILE})`` instead.
+.. deprecated:: 3.14
 
+  Use ``find_package(wxWidgets)`` and ``include(${wxWidgets_USE_FILE})`` instead.
 
 This convenience include finds if wxWindows is installed and set the
 appropriate libs, incdirs, flags etc.  author Jan Woetzel <jw -at-
@@ -67,4 +67,3 @@ if(WXWINDOWS_FOUND)
 else()
   message(SEND_ERROR "wxWindows not found by Use_wxWindows.cmake")
 endif()
-
