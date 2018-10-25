@@ -791,9 +791,10 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   endif()
 endif()
 
-# add a test
-add_test(SystemInformationNew "${CMAKE_CMAKE_COMMAND}"
-  --system-information  -G "${CMAKE_GENERATOR}" )
+if(BUILD_TESTING)
+  add_test(SystemInformationNew "${CMAKE_CMAKE_COMMAND}"
+    --system-information  -G "${CMAKE_GENERATOR}" )
+endif()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   # Install license file as it requires.
