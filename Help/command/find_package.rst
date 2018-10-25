@@ -51,8 +51,9 @@ mode and "Config" mode.  The above signature selects Module mode.
 If no module is found the command falls back to Config mode, described
 below. This fall back is disabled if the ``MODULE`` option is given.
 
-In Module mode, CMake searches for a file called ``Find<PackageName>.cmake``
-in the :variable:`CMAKE_MODULE_PATH` followed by the CMake installation.
+In Module mode, CMake searches for a file called ``Find<PackageName>.cmake``.
+The file is first searched in the :variable:`CMAKE_MODULE_PATH`,
+then among the :ref:`Find Modules` provided by the CMake installation.
 If the file is found, it is read and processed by CMake.  It is responsible
 for finding the package, checking the version, and producing any needed
 messages.  Some find-modules provide limited or no support for versioning;
