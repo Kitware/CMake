@@ -31,7 +31,9 @@ Logical Expressions
 Logical expressions are used to create conditional output.  The basic
 expressions are the ``0`` and ``1`` expressions.  Because other logical
 expressions evaluate to either ``0`` or ``1``, they can be composed to
-create conditional output::
+create conditional output:
+
+.. code-block:: cmake
 
   $<$<CONFIG:Debug>:DEBUG_MODE>
 
@@ -151,14 +153,18 @@ Informational Expressions
 =========================
 
 These expressions expand to some information. The information may be used
-directly, eg::
+directly, eg:
+
+.. code-block:: cmake
 
   include_directories(/usr/include/$<CXX_COMPILER_ID>/)
 
 expands to ``/usr/include/GNU/`` or ``/usr/include/Clang/`` etc, depending on
 the Id of the compiler.
 
-These expressions may also may be combined with logical expressions::
+These expressions may also may be combined with logical expressions:
+
+.. code-block:: cmake
 
   $<$<VERSION_LESS:$<CXX_COMPILER_VERSION>,4.2.0>:OLD_COMPILER>
 
@@ -246,18 +252,24 @@ Output Expressions
 
 These expressions generate output, in some cases depending on an input. These
 expressions may be combined with other expressions for information or logical
-comparison::
+comparison:
+
+.. code-block:: cmake
 
   -I$<JOIN:$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>, -I>
 
 generates a string of the entries in the :prop_tgt:`INCLUDE_DIRECTORIES` target
 property with each entry preceded by ``-I``. Note that a more-complete use
 in this situation would require first checking if the INCLUDE_DIRECTORIES
-property is non-empty::
+property is non-empty:
+
+.. code-block:: cmake
 
   $<$<BOOL:${prop}>:-I$<JOIN:${prop}, -I>>
 
-where ``${prop}`` refers to a helper variable::
+where ``${prop}`` refers to a helper variable:
+
+.. code-block:: cmake
 
   set(prop "$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>")
 
