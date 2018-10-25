@@ -257,27 +257,31 @@ invocation as exactly one argument.
 .. No code-block syntax highlighting in the following example
    (escape \" not supported by our cmake.py)
 
-For example::
+For example:
 
- message("This is a quoted argument containing multiple lines.
- This is always one argument even though it contains a ; character.
- Both \\-escape sequences and ${variable} references are evaluated.
- The text does not end on an escaped double-quote like \".
- It does end in an unescaped double quote.
- ")
+.. code-block:: cmake
+
+  message("This is a quoted argument containing multiple lines.
+  This is always one argument even though it contains a ; character.
+  Both \\-escape sequences and ${variable} references are evaluated.
+  The text does not end on an escaped double-quote like \".
+  It does end in an unescaped double quote.
+  ")
 
 .. No code-block syntax highlighting in the following example
    (for conformity with the two above examples)
 
 The final ``\`` on any line ending in an odd number of backslashes
 is treated as a line continuation and ignored along with the
-immediately following newline character.  For example::
+immediately following newline character.  For example:
 
- message("\
- This is the first line of a quoted argument. \
- In fact it is the only line but since it is long \
- the source code uses line continuation.\
- ")
+.. code-block:: cmake
+
+  message("\
+  This is the first line of a quoted argument. \
+  In fact it is the only line but since it is long \
+  the source code uses line continuation.\
+  ")
 
 .. note::
  CMake versions prior to 3.0 do not support continuation with ``\``.
