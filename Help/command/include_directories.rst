@@ -3,7 +3,7 @@ include_directories
 
 Add include directories to the build.
 
-::
+.. code-block:: cmake
 
   include_directories([AFTER|BEFORE] [SYSTEM] dir1 [dir2 ...])
 

@@ -3,7 +3,7 @@ include_external_msproject
 
 Include an external Microsoft project file in a workspace.
 
-::
+.. code-block:: cmake
 
   include_external_msproject(projectname location
                              [TYPE projectTypeGUID]

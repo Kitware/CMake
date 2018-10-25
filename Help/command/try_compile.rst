@@ -10,7 +10,7 @@ Try building some code.
 Try Compiling Whole Projects
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   try_compile(RESULT_VAR <bindir> <srcdir>
               <projectName> [<targetName>] [CMAKE_FLAGS <flags>...]
@@ -28,7 +28,7 @@ below for the meaning of other options.
 Try Compiling Source Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   try_compile(RESULT_VAR <bindir> <srcfile|SOURCES srcfile...>
               [CMAKE_FLAGS <flags>...]
@@ -47,7 +47,9 @@ returned in ``RESULT_VAR``.
 
 In this form the user need only supply one or more source files that include a
 definition for ``main``.  CMake will create a ``CMakeLists.txt`` file to build
-the source(s) as an executable that looks something like this::
+the source(s) as an executable that looks something like this:
+
+.. code-block:: cmake
 
   add_definitions(<expanded COMPILE_DEFINITIONS from caller>)
   include_directories(${INCLUDE_DIRECTORIES})

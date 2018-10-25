@@ -101,7 +101,7 @@ Installing Targets
 
 .. _TARGETS:
 
-::
+.. code-block:: cmake
 
   install(TARGETS targets... [EXPORT <export-name>]
           [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
@@ -305,7 +305,7 @@ Installing Files
 .. _FILES:
 .. _PROGRAMS:
 
-::
+.. code-block:: cmake
 
   install(<FILES|PROGRAMS> files... DESTINATION <dir>
           [PERMISSIONS permissions...]
@@ -340,7 +340,7 @@ Installing Directories
 
 .. _DIRECTORY:
 
-::
+.. code-block:: cmake
 
   install(DIRECTORY dirs... DESTINATION <dir>
           [FILE_PERMISSIONS permissions...]
@@ -424,7 +424,7 @@ Custom Installation Logic
 .. _CODE:
 .. _SCRIPT:
 
-::
+.. code-block:: cmake
 
   install([[SCRIPT <file>] [CODE <code>]]
           [COMPONENT <component>] [EXCLUDE_FROM_ALL] [...])
@@ -447,7 +447,7 @@ Installing Exports
 
 .. _EXPORT:
 
-::
+.. code-block:: cmake
 
   install(EXPORT <export-name> DESTINATION <dir>
           [NAMESPACE <namespace>] [[FILE <name>.cmake]|

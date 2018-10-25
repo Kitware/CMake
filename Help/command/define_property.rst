@@ -3,7 +3,7 @@ define_property
 
 Define and document custom properties.
 
-::
+.. code-block:: cmake
 
   define_property(<GLOBAL | DIRECTORY | TARGET | SOURCE |
                    TEST | VARIABLE | CACHED_VARIABLE>
@@ -11,7 +11,7 @@ Define and document custom properties.
                    BRIEF_DOCS <brief-doc> [docs...]
                    FULL_DOCS <full-doc> [docs...])
 
-Define one property in a scope for use with the :command:`set_property` and
+Defines one property in a scope for use with the :command:`set_property` and
 :command:`get_property` commands.  This is primarily useful to associate
 documentation with property names that may be retrieved with the
 :command:`get_property` command. The first argument determines the kind of

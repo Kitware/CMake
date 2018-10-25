@@ -3,11 +3,11 @@ get_source_file_property
 
 Get a property for a source file.
 
-::
+.. code-block:: cmake
 
   get_source_file_property(VAR file property)
 
-Get a property from a source file.  The value of the property is
+Gets a property from a source file.  The value of the property is
 stored in the variable ``VAR``.  If the source property is not found, the
 behavior depends on whether it has been defined to be an ``INHERITED`` property
 or not (see :command:`define_property`).  Non-inherited properties will set

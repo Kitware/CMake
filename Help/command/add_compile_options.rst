@@ -1,9 +1,9 @@
 add_compile_options
 -------------------
 
-Adds options to the compilation of source files.
+Add options to the compilation of source files.
 
-::
+.. code-block:: cmake
 
   add_compile_options(<option> ...)
 

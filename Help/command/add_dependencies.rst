@@ -3,11 +3,11 @@ add_dependencies
 
 Add a dependency between top-level targets.
 
-::
+.. code-block:: cmake
 
   add_dependencies(<target> [<target-dependency>]...)
 
-Make a top-level ``<target>`` depend on other top-level targets to
+Makes a top-level ``<target>`` depend on other top-level targets to
 ensure that they build before ``<target>`` does.  A top-level target
 is one created by one of the :command:`add_executable`,
 :command:`add_library`, or :command:`add_custom_target` commands
