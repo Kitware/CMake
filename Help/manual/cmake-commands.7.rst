@@ -145,8 +145,9 @@ These commands are available only in CTest scripts.
 Deprecated Commands
 ===================
 
-These commands are available only for compatibility with older
-versions of CMake.  Do not use them in new code.
+These commands are deprecated since CMake version 3.0.
+They are available only for backward compatibility.
+Do not use them in new code.
 
 .. toctree::
    :maxdepth: 1
