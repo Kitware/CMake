@@ -1,7 +1,9 @@
 write_file
 ----------
 
-Deprecated. Use the :command:`file(WRITE)` command instead.
+.. deprecated:: 3.0
+
+  Use the :command:`file(WRITE)` command instead.
 
 ::
 

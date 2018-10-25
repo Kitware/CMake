@@ -1,7 +1,9 @@
 exec_program
 ------------
 
-Deprecated.  Use the :command:`execute_process` command instead.
+.. deprecated:: 3.0
+
+  Use the :command:`execute_process` command instead.
 
 Run an executable program during the processing of the CMakeList.txt
 file.

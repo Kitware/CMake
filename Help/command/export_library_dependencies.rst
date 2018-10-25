@@ -1,7 +1,7 @@
 export_library_dependencies
 ---------------------------
 
-Disallowed.  See CMake Policy :policy:`CMP0033`.
+Disallowed since version 3.0.  See CMake Policy :policy:`CMP0033`.
 
 Use :command:`install(EXPORT)` or :command:`export` command.
 
