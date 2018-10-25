@@ -1131,7 +1131,12 @@ macro(_MPI_create_imported_target LANG)
     add_library(MPI::MPI_${LANG} INTERFACE IMPORTED)
   endif()
 
-  set_property(TARGET MPI::MPI_${LANG} PROPERTY INTERFACE_COMPILE_OPTIONS "${MPI_${LANG}_COMPILE_OPTIONS}")
+  # When this is consumed for compiling CUDA, use '-Xcompiler' to wrap '-pthread'.
+  string(REPLACE "-pthread" "$<$<COMPILE_LANGUAGE:CUDA>:SHELL:-Xcompiler >-pthread"
+    _MPI_${LANG}_COMPILE_OPTIONS "${MPI_${LANG}_COMPILE_OPTIONS}")
+  set_property(TARGET MPI::MPI_${LANG} PROPERTY INTERFACE_COMPILE_OPTIONS "${_MPI_${LANG}_COMPILE_OPTIONS}")
+  unset(_MPI_${LANG}_COMPILE_OPTIONS)
+
   set_property(TARGET MPI::MPI_${LANG} PROPERTY INTERFACE_COMPILE_DEFINITIONS "${MPI_${LANG}_COMPILE_DEFINITIONS}")
 
   set_property(TARGET MPI::MPI_${LANG} PROPERTY INTERFACE_LINK_LIBRARIES "")
