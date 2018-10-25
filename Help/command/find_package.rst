@@ -290,7 +290,7 @@ enabled.
 
 2. Search paths specified in cmake-specific cache variables.  These
    are intended to be used on the command line with a ``-DVAR=value``.
-   The values are interpreted as :ref:`;-lists <CMake Language Lists>`.
+   The values are interpreted as :ref:`semicolon-separated lists <CMake Language Lists>`.
    This can be skipped if ``NO_CMAKE_PATH`` is passed::
 
      CMAKE_PREFIX_PATH

@@ -1,7 +1,7 @@
 CMAKE_IGNORE_PATH
 -----------------
 
-:ref:`;-list <CMake Language Lists>` of directories to be *ignored* by
+:ref:`Semicolon-separated list <CMake Language Lists>` of directories to be *ignored* by
 the :command:`find_program`, :command:`find_library`, :command:`find_file`,
 and :command:`find_path` commands.  This is useful in cross-compiling
 environments where some system directories contain incompatible but

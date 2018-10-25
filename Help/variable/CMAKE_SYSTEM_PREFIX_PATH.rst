@@ -1,7 +1,7 @@
 CMAKE_SYSTEM_PREFIX_PATH
 ------------------------
 
-:ref:`;-list <CMake Language Lists>` of directories specifying installation
+:ref:`Semicolon-separated list <CMake Language Lists>` of directories specifying installation
 *prefixes* to be searched by the :command:`find_package`,
 :command:`find_program`, :command:`find_library`, :command:`find_file`, and
 :command:`find_path` commands.  Each command will add appropriate

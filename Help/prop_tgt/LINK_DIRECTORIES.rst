@@ -4,7 +4,7 @@ LINK_DIRECTORIES
 List of directories to use for the link step of shared library, module
 and executable targets.
 
-This property holds a :ref:`;-list <CMake Language Lists>` of directories
+This property holds a :ref:`semicolon-separated list <CMake Language Lists>` of directories
 specified so far for its target.  Use the :command:`target_link_directories`
 command to append more search directories.
 

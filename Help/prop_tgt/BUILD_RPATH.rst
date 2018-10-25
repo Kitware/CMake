@@ -1,7 +1,7 @@
 BUILD_RPATH
 -----------
 
-A :ref:`;-list <CMake Language Lists>` specifying runtime path (``RPATH``)
+A :ref:`semicolon-separated list <CMake Language Lists>` specifying runtime path (``RPATH``)
 entries to add to binaries linked in the build tree (for platforms that
 support it).  The entries will *not* be used for binaries in the install
 tree.  See also the :prop_tgt:`INSTALL_RPATH` target property.

@@ -3,7 +3,7 @@
 
 This property is implemented only when ``<LANG>`` is ``C`` or ``CXX``.
 
-Specify a :ref:`;-list <CMake Language Lists>` containing a command
+Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a command
 line for the ``include-what-you-use`` tool.  The :ref:`Makefile Generators`
 and the :generator:`Ninja` generator will run this tool along with the
 compiler and report a warning if the tool reports any problems.

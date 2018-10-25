@@ -5,7 +5,7 @@ Defines the syntax of compiler driver option to pass options to the linker
 tool. It will be used to translate the ``LINKER:`` prefix in the link options
 (see :command:`add_link_options` and :command:`target_link_options`).
 
-This variable holds a :ref:`;-list <CMake Language Lists>` of tokens.
+This variable holds a :ref:`semicolon-separated list <CMake Language Lists>` of tokens.
 If a space (i.e. " ") is specified as last token, flag and ``LINKER:``
 arguments will be specified as separate arguments to the compiler driver.
 The :variable:`CMAKE_<LANG>_LINKER_WRAPPER_FLAG_SEP` variable can be specified

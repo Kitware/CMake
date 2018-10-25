@@ -3,7 +3,7 @@
 
 This property is supported only when ``<LANG>`` is ``C`` or ``CXX``.
 
-Specify a :ref:`;-list <CMake Language Lists>` containing a command line
+Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a command line
 for the ``cpplint`` style checker.  The :ref:`Makefile Generators` and the
 :generator:`Ninja` generator will run ``cpplint`` along with the compiler
 and report any problems.

@@ -92,7 +92,7 @@ Each ``<item>`` may be:
 
 * **A generator expression**: A ``$<...>`` :manual:`generator expression
   <cmake-generator-expressions(7)>` may evaluate to any of the above
-  items or to a :ref:`;-list <CMake Language Lists>` of them.
+  items or to a :ref:`semicolon-separated list <CMake Language Lists>` of them.
   If the ``...`` contains any ``;`` characters, e.g. after evaluation
   of a ``${list}`` variable, be sure to use an explicitly quoted
   argument ``"$<...>"`` so that this command receives it as a
