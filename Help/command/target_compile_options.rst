@@ -3,13 +3,13 @@ target_compile_options
 
 Add compile options to a target.
 
-::
+.. code-block:: cmake
 
   target_compile_options(<target> [BEFORE]
     <INTERFACE|PUBLIC|PRIVATE> [items1...]
     [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
 
-Specify compile options to use when compiling a given target.  The
+Specifies compile options to use when compiling a given target.  The
 named ``<target>`` must have been created by a command such as
 :command:`add_executable` or :command:`add_library` and must not be an
 :ref:`ALIAS target <Alias Targets>`.

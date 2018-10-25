@@ -3,13 +3,13 @@ target_include_directories
 
 Add include directories to a target.
 
-::
+.. code-block:: cmake
 
   target_include_directories(<target> [SYSTEM] [BEFORE]
     <INTERFACE|PUBLIC|PRIVATE> [items1...]
     [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
 
-Specify include directories to use when compiling a given target.
+Specifies include directories to use when compiling a given target.
 The named ``<target>`` must have been created by a command such
 as :command:`add_executable` or :command:`add_library` and must not be an
 :ref:`ALIAS target <Alias Targets>`.

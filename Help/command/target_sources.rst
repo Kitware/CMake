@@ -3,13 +3,13 @@ target_sources
 
 Add sources to a target.
 
-::
+.. code-block:: cmake
 
   target_sources(<target>
     <INTERFACE|PUBLIC|PRIVATE> [items1...]
     [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
 
-Specify sources to use when compiling a given target.  Relative
+Specifies sources to use when compiling a given target.  Relative
 source file paths are interpreted as being relative to the current
 source directory (i.e. :variable:`CMAKE_CURRENT_SOURCE_DIR`).  The
 named ``<target>`` must have been created by a command such as

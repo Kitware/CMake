@@ -10,7 +10,7 @@ Try compiling and then running some code.
 Try Compiling and Running Source Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   try_run(RUN_RESULT_VAR COMPILE_RESULT_VAR
           bindir srcfile [CMAKE_FLAGS <flags>...]

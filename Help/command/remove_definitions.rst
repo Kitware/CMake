@@ -1,9 +1,9 @@
 remove_definitions
 ------------------
 
-Removes -D define flags added by :command:`add_definitions`.
+Remove -D define flags added by :command:`add_definitions`.
 
-::
+.. code-block:: cmake
 
   remove_definitions(-DFOO -DBAR ...)
 

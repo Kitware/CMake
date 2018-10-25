@@ -3,13 +3,13 @@ target_link_options
 
 Add link options to a target.
 
-::
+.. code-block:: cmake
 
   target_link_options(<target> [BEFORE]
     <INTERFACE|PUBLIC|PRIVATE> [items1...]
     [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
 
-Specify link options to use when linking a given target.  The
+Specifies link options to use when linking a given target.  The
 named ``<target>`` must have been created by a command such as
 :command:`add_executable` or :command:`add_library` and must not be an
 :ref:`ALIAS target <Alias Targets>`.

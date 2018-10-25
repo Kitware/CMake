@@ -3,7 +3,7 @@ get_test_property
 
 Get a property of the test.
 
-::
+.. code-block:: cmake
 
   get_test_property(test property VAR)
 

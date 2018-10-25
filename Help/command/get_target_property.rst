@@ -3,7 +3,7 @@ get_target_property
 
 Get a property from a target.
 
-::
+.. code-block:: cmake
 
   get_target_property(VAR target property)
 
