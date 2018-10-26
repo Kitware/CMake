@@ -2108,7 +2108,7 @@ void cmLocalGenerator::AppendIncludeDirectories(
 }
 
 void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
-                                     const char* defines_list) const
+                                     std::string const& defines_list) const
 {
   std::set<BT<std::string>> tmp;
   this->AppendDefines(tmp, ExpandListWithBacktrace(defines_list));
@@ -2118,10 +2118,10 @@ void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
 }
 
 void cmLocalGenerator::AppendDefines(std::set<BT<std::string>>& defines,
-                                     const char* defines_list) const
+                                     std::string const& defines_list) const
 {
   // Short-circuit if there are no definitions.
-  if (!defines_list) {
+  if (defines_list.empty()) {
     return;
   }
 
