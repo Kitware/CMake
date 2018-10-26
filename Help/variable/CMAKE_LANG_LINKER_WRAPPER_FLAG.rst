@@ -17,7 +17,7 @@ For example, for ``Clang`` we have:
 
   set (CMAKE_C_LINKER_WRAPPER_FLAG "-Xlinker" " ")
 
-Specifying ``"LINKER:-z defs"`` will be transformed in
+Specifying ``"LINKER:-z,defs"`` will be transformed in
 ``-Xlinker -z -Xlinker defs``.
 
 For ``GNU GCC``:
@@ -27,7 +27,7 @@ For ``GNU GCC``:
   set (CMAKE_C_LINKER_WRAPPER_FLAG "-Wl,")
   set (CMAKE_C_LINKER_WRAPPER_FLAG_SEP ",")
 
-Specifying ``"LINKER:-z defs"`` will be transformed in ``-Wl,-z,defs``.
+Specifying ``"LINKER:-z,defs"`` will be transformed in ``-Wl,-z,defs``.
 
 And for ``SunPro``:
 
@@ -36,4 +36,4 @@ And for ``SunPro``:
   set (CMAKE_C_LINKER_WRAPPER_FLAG "-Qoption" "ld" " ")
   set (CMAKE_C_LINKER_WRAPPER_FLAG_SEP ",")
 
-Specifying ``"LINKER:-z defs"`` will be transformed in ``-Qoption ld -z,defs``.
+Specifying ``"LINKER:-z,defs"`` will be transformed in ``-Qoption ld -z,defs``.
