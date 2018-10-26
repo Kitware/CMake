@@ -238,7 +238,10 @@ Available informational expressions are:
   expression is evaluated on.
 ``$<TARGET_PROPERTY:prop>``
   Value of the property ``prop`` on the target on which the generator
-  expression is evaluated.
+  expression is evaluated. Note that for generator expressions in
+  :ref:`Target Usage Requirements` this is the value of the property
+  on the consuming target rather than the target specifying the
+  requirement.
 ``$<INSTALL_PREFIX>``
   Content of the install prefix when the target is exported via
   :command:`install(EXPORT)` and empty otherwise.
