@@ -101,7 +101,7 @@ bool cmTargetPropCommandBase::ProcessContentArgs(
   for (unsigned int i = argIndex; i < args.size(); ++i, ++argIndex) {
     if (args[i] == "PUBLIC" || args[i] == "PRIVATE" ||
         args[i] == "INTERFACE") {
-      return this->PopulateTargetProperies(scope, content, prepend, system);
+      break;
     }
     content.push_back(args[i]);
   }
