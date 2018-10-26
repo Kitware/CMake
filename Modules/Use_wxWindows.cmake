@@ -5,7 +5,7 @@
 Use_wxWindows
 -------------
 
-.. deprecated:: 3.14
+.. deprecated:: 2.8.10
 
   Use ``find_package(wxWidgets)`` and ``include(${wxWidgets_USE_FILE})`` instead.
 
