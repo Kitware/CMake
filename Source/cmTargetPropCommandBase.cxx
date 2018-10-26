@@ -112,6 +112,9 @@ bool cmTargetPropCommandBase::PopulateTargetProperies(
   const std::string& scope, const std::vector<std::string>& content,
   bool prepend, bool system)
 {
+  if (content.empty()) {
+    return true;
+  }
   if (scope == "PRIVATE" || scope == "PUBLIC") {
     if (!this->HandleDirectContent(this->Target, content, prepend, system)) {
       return false;
