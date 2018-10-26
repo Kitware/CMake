@@ -1,0 +1,5 @@
+CMake Error at empty_keyword_args.cmake:2 \(target_link_directories\):
+  target_link_directories may only set INTERFACE properties on INTERFACE
+  targets
+Call Stack \(most recent call first\):
+  CMakeLists.txt:5 \(include\)

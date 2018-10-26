@@ -1,0 +1,5 @@
+CMake Error at empty_keyword_args.cmake:2 \(target_compile_definitions\):
+  target_compile_definitions may only set INTERFACE properties on INTERFACE
+  targets
+Call Stack \(most recent call first\):
+  CMakeLists.txt:5 \(include\)
