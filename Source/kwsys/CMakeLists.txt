@@ -90,6 +90,7 @@ FOREACH(p
     CMP0048 # CMake 3.0, Let the project command manage version variables.
     CMP0056 # CMake 3.2, Honor link flags in try_compile() source-file signature.
     CMP0063 # CMake 3.3, Honor visibility properties for all target types.
+    CMP0069 # CMake 3.9, INTERPROCEDURAL_OPTIMIZATION is enforced when enabled.
     )
   IF(POLICY ${p})
     CMAKE_POLICY(SET ${p} NEW)
