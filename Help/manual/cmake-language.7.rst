@@ -405,12 +405,10 @@ the ``$`` is also technically permitted but is discouraged.
 The `Variables`_ section documents the scope of variable names
 and how their values are set.
 
-An *environment variable reference* has the form ``$ENV{VAR}`` and
-is evaluated in the same contexts as a normal variable reference.
+An *environment variable reference* has the form ``$ENV{VAR}``.
 See :variable:`ENV` for more information.
 
-A *cache variable reference* has the form ``$CACHE{VAR}`` and
-is evaluated in the same contexts as a normal variable reference.
+A *cache variable reference* has the form ``$CACHE{VAR}``.
 See :variable:`CACHE` for more information.
 
 Comments
