@@ -406,7 +406,7 @@ The `Variables`_ section documents the scope of variable names
 and how their values are set.
 
 An *environment variable reference* has the form ``$ENV{VAR}``.
-See :variable:`ENV` for more information.
+See the `Environment Variables`_ section for more information.
 
 A *cache variable reference* has the form ``$CACHE{VAR}``.
 See :variable:`CACHE` for more information.
@@ -562,6 +562,33 @@ that are provided by CMake or have meaning to CMake when set
 by project code.
 
 .. _`CMake Language Lists`:
+
+Environment Variables
+=====================
+
+Environment Variables are like ordinary `Variables`_, with the
+following differences:
+
+Scope
+ Environment variables have global scope in a CMake process.
+ They are never cached.
+
+References
+ `Variable References`_ have the form ``$ENV{<variable>}``.
+
+Initialization
+ Initial values of the CMake environment variables are those of
+ the calling process.
+ Values can be changed using the :command:`set` and :command:`unset`
+ commands.
+ These commands only affect the running CMake process,
+ not the system environment at large.
+ Changed values are not written back to the calling process,
+ and they are not seen by subsequent build or test processes.
+
+The :manual:`cmake-env-variables(7)` manual documents environment
+variables that have special meaning to CMake.
+
 
 Lists
 =====
