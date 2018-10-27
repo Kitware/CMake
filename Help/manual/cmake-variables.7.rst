@@ -7,6 +7,14 @@ cmake-variables(7)
 
    .. contents::
 
+This page  documents variables that are provided by CMake
+or have meaning to CMake when set by project code.
+
+For general information on variables, see the
+:ref:`Variables <CMake Language Variables>`
+section in the cmake-language manual.
+
+
 Variables that Provide Information
 ==================================
 

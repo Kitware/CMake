@@ -557,11 +557,11 @@ Otherwise, the variable reference evaluates to an empty string.
 The ``$CACHE{VAR}`` syntax can be used to do direct cache entry
 lookups.
 
-The :manual:`cmake-variables(7)` manual documents many variables
+The :manual:`cmake-variables(7)` manual documents the many variables
 that are provided by CMake or have meaning to CMake when set
 by project code.
 
-.. _`CMake Language Lists`:
+.. _`CMake Language Environment Variables`:
 
 Environment Variables
 =====================
@@ -589,6 +589,7 @@ Initialization
 The :manual:`cmake-env-variables(7)` manual documents environment
 variables that have special meaning to CMake.
 
+.. _`CMake Language Lists`:
 
 Lists
 =====
