@@ -122,7 +122,7 @@ ensure generated files will receive the required settings.
   If set to ``TRUE``, contents of target property
   :prop_tgt:`INCLUDE_DIRECTORIES` will be forwarded to ``SWIG`` compiler.
   If set to ``FALSE`` target property :prop_tgt:`INCLUDE_DIRECTORIES` will be
-  ignored. If not set, target property ``SWIG_USE_TARGT_INCLUDE_DIRECTORIES``
+  ignored. If not set, target property ``SWIG_USE_TARGET_INCLUDE_DIRECTORIES``
   will be considered.
 
 ``GENERATED_INCLUDE_DIRECTORIES``, ``GENERATED_COMPILE_DEFINITIONS`` and ``GENERATED_COMPILE_OPTIONS``
