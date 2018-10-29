@@ -68,7 +68,7 @@ const char* getShapeForTarget(const cmGeneratorTarget* target)
 }
 
 std::map<std::string, LinkLibraryScopeType> getScopedLinkLibrariesFromTarget(
-  cmTarget* Target)
+  cmTarget* Target, const cmGlobalGenerator* globalGenerator)
 {
   char sep = ';';
   std::map<std::string, LinkLibraryScopeType> tokens;
@@ -95,6 +95,13 @@ std::map<std::string, LinkLibraryScopeType> getScopedLinkLibrariesFromTarget(
     }
 
     std::string element = interfaceLinkLibraries.substr(start, end - start);
+    if (globalGenerator->IsAlias(element)) {
+      const auto tgt = globalGenerator->FindTarget(element);
+      if (tgt) {
+        element = tgt->GetName();
+      }
+    }
+
     if (std::string::npos == element.find("$<LINK_ONLY:", 0)) {
       // we assume first, that this library is an interface library.
       // if we find it again in the linklibraries property, we promote it to an
@@ -116,6 +123,12 @@ std::map<std::string, LinkLibraryScopeType> getScopedLinkLibrariesFromTarget(
     }
 
     std::string element = linkLibraries.substr(start, end - start);
+    if (globalGenerator->IsAlias(element)) {
+      const auto tgt = globalGenerator->FindTarget(element);
+      if (tgt) {
+        element = tgt->GetName();
+      }
+    }
 
     if (tokens.find(element) == tokens.end()) {
       // this library is not found in interfaceLinkLibraries but in
@@ -137,13 +150,13 @@ std::map<std::string, LinkLibraryScopeType> getScopedLinkLibrariesFromTarget(
 }
 }
 
-cmGraphVizWriter::cmGraphVizWriter(
-  const std::vector<cmLocalGenerator*>& localGenerators)
+cmGraphVizWriter::cmGraphVizWriter(const cmGlobalGenerator* globalGenerator)
   : GraphType("digraph")
   , GraphName("GG")
   , GraphHeader("node [\n  fontsize = \"12\"\n];")
   , GraphNodePrefix("node")
-  , LocalGenerators(localGenerators)
+  , GlobalGenerator(globalGenerator)
+  , LocalGenerators(globalGenerator->GetLocalGenerators())
   , GenerateForExecutables(true)
   , GenerateForStaticLibs(true)
   , GenerateForSharedLibs(true)
@@ -374,7 +387,8 @@ void cmGraphVizWriter::WriteConnections(
 
   std::string myNodeName = this->TargetNamesNodes.find(targetName)->second;
   std::map<std::string, LinkLibraryScopeType> ll =
-    getScopedLinkLibrariesFromTarget(targetPtrIt->second->Target);
+    getScopedLinkLibrariesFromTarget(targetPtrIt->second->Target,
+                                     GlobalGenerator);
 
   for (auto const& llit : ll) {
     const char* libName = llit.first.c_str();
@@ -439,7 +453,7 @@ void cmGraphVizWriter::WriteDependerConnections(
     // Now we have a target, check whether it links against targetName.
     // If so, draw a connection, and then continue with dependers on that one.
     std::map<std::string, LinkLibraryScopeType> ll =
-      getScopedLinkLibrariesFromTarget(tptr.second->Target);
+      getScopedLinkLibrariesFromTarget(tptr.second->Target, GlobalGenerator);
 
     for (auto const& llit : ll) {
       if (llit.first == targetName) {
@@ -538,6 +552,13 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
         if (this->IgnoreThisTarget(libName)) {
           // Skip ignored targets
           continue;
+        }
+
+        if (GlobalGenerator->IsAlias(libName)) {
+          const auto tgt = GlobalGenerator->FindTarget(libName);
+          if (tgt) {
+            libName = tgt->GetName().c_str();
+          }
         }
 
         std::map<std::string, const cmGeneratorTarget*>::const_iterator tarIt =
