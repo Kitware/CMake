@@ -1,3 +1,9 @@
+
+// simple workaround to some compiler specific problems
+// see
+// http://stackoverflow.com/questions/22367516/mex-compile-error-unknown-type-name-char16-t/23281916#23281916
+#include <algorithm>
+
 #include "mex.h"
 
 // This test uses the new complex-interleaved C API (R2018a and newer)
