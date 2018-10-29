@@ -169,19 +169,9 @@ public:
    * command line.
    */
   void AppendDefines(std::set<std::string>& defines,
-                     const char* defines_list) const;
-  void AppendDefines(std::set<std::string>& defines,
-                     std::string const& defines_list) const
-  {
-    this->AppendDefines(defines, defines_list.c_str());
-  }
+                     std::string const& defines_list) const;
   void AppendDefines(std::set<BT<std::string>>& defines,
-                     const char* defines_list) const;
-  void AppendDefines(std::set<BT<std::string>>& defines,
-                     std::string const& defines_list) const
-  {
-    this->AppendDefines(defines, defines_list.c_str());
-  }
+                     std::string const& defines_list) const;
   void AppendDefines(std::set<BT<std::string>>& defines,
                      const std::vector<BT<std::string>>& defines_vec) const;
 

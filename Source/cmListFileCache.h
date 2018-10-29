@@ -199,7 +199,8 @@ public:
 std::ostream& operator<<(std::ostream& os, BT<std::string> const& s);
 
 std::vector<BT<std::string>> ExpandListWithBacktrace(
-  const char* list, cmListFileBacktrace const& bt = cmListFileBacktrace());
+  std::string const& list,
+  cmListFileBacktrace const& bt = cmListFileBacktrace());
 
 struct cmListFile
 {

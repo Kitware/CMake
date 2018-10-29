@@ -481,7 +481,7 @@ std::ostream& operator<<(std::ostream& os, BT<std::string> const& s)
 }
 
 std::vector<BT<std::string>> ExpandListWithBacktrace(
-  const char* list, cmListFileBacktrace const& bt)
+  std::string const& list, cmListFileBacktrace const& bt)
 {
   std::vector<BT<std::string>> result;
   std::vector<std::string> tmp;
