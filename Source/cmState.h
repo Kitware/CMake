@@ -135,6 +135,7 @@ public:
                             cmPolicies::PolicyID policy, const char* message);
   void AddUnexpectedCommand(std::string const& name, const char* error);
   void AddScriptedCommand(std::string const& name, cmCommand* command);
+  void RemoveBuiltinCommand(std::string const& name);
   void RemoveUserDefinedCommands();
   std::vector<std::string> GetCommandNames() const;
 
