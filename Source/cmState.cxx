@@ -502,6 +502,16 @@ std::vector<std::string> cmState::GetCommandNames() const
   return commandNames;
 }
 
+void cmState::RemoveBuiltinCommand(std::string const& name)
+{
+  assert(name == cmSystemTools::LowerCase(name));
+  std::map<std::string, cmCommand*>::iterator i =
+    this->BuiltinCommands.find(name);
+  assert(i != this->BuiltinCommands.end());
+  delete i->second;
+  this->BuiltinCommands.erase(i);
+}
+
 void cmState::RemoveUserDefinedCommands()
 {
   cmDeleteAll(this->ScriptedCommands);
