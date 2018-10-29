@@ -1662,6 +1662,7 @@ void cmCTestTestHandler::GetListOfTests()
   cm.GetState()->AddBuiltinCommand("set_tests_properties", newCom4);
 
   // Add handler for SET_DIRECTORY_PROPERTIES
+  cm.GetState()->RemoveBuiltinCommand("set_directory_properties");
   cmCTestSetDirectoryPropertiesCommand* newCom5 =
     new cmCTestSetDirectoryPropertiesCommand;
   newCom5->TestHandler = this;
