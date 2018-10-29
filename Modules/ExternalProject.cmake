@@ -532,6 +532,9 @@ External Project Definition
     ``LOG_UPDATE <bool>``
       When enabled, the output of the update step is logged to files.
 
+    ``LOG_PATCH <bool>``
+      When enabled, the output of the patch step is logged to files.
+
     ``LOG_CONFIGURE <bool>``
       When enabled, the output of the configure step is logged to files.
 
@@ -2760,10 +2763,18 @@ function(_ep_add_patch_command name)
     set(work_dir ${source_dir})
   endif()
 
+  get_property(log TARGET ${name} PROPERTY _EP_LOG_PATCH)
+  if(log)
+    set(log LOG 1)
+  else()
+    set(log "")
+  endif()
+
   ExternalProject_Add_Step(${name} patch
     COMMAND ${cmd}
     WORKING_DIRECTORY ${work_dir}
     DEPENDEES download
+    ${log}
     )
 endfunction()
 

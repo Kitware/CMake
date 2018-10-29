@@ -100,6 +100,7 @@ ExternalProject_Add(${proj}
              -DTEST_LIST:STRING=A::B::C
   INSTALL_COMMAND ""
   LOG_CONFIGURE 1
+  LOG_PATCH 1
 )
 set_property(TARGET ${proj} PROPERTY FOLDER "Local/TAR")
 
