@@ -117,6 +117,18 @@ option(CMake_BUILD_DEVELOPER_REFERENCE
   "Build CMake Developer Reference" OFF)
 mark_as_advanced(CMake_BUILD_DEVELOPER_REFERENCE)
 
+# option to build using interprocedural optimizations (IPO/LTO)
+if (NOT CMAKE_VERSION VERSION_LESS 3.12.2)
+  option(CMake_BUILD_LTO "Compile CMake with link-time optimization if supported" OFF)
+  if(CMake_BUILD_LTO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT HAVE_IPO)
+    if(HAVE_IPO)
+      set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endif()
+  endif()
+endif()
+
 #-----------------------------------------------------------------------
 # a macro to deal with system libraries, implemented as a macro
 # simply to improve readability of the main script
