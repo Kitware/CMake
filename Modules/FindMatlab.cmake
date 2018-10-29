@@ -1022,13 +1022,13 @@ function(matlab_add_mex)
 
     if (MSVC)
 
-      set(_link_flags "${_link_flags} /EXPORT:${mexFunction}")
+      set(_link_flags "${_link_flags} /EXPORT:mexFunction")
       if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, export version
-        set(_link_flags "${_link_flags} /EXPORT:${mexfilerequiredapiversion}")
+        set(_link_flags "${_link_flags} /EXPORT:mexfilerequiredapiversion")
       endif()
 
       if(Matlab_HAS_CPP_API)
-        set(_link_flags "${_link_flags} /EXPORT:${mexCreateMexFunction} /EXPORT:${mexDestroyMexFunction} /EXPORT:${mexFunctionAdapter}")
+        set(_link_flags "${_link_flags} /EXPORT:mexCreateMexFunction /EXPORT:mexDestroyMexFunction /EXPORT:mexFunctionAdapter")
         #TODO: Is this necessary?
       endif()
 
@@ -1460,6 +1460,7 @@ if(DEFINED Matlab_ROOT_DIR_LAST_CACHED)
 
   if(NOT Matlab_ROOT_DIR_LAST_CACHED STREQUAL Matlab_ROOT_DIR)
     set(_Matlab_cached_vars
+        Matlab_VERSION_STRING
         Matlab_INCLUDE_DIRS
         Matlab_MEX_LIBRARY
         Matlab_MEX_COMPILER
@@ -1477,7 +1478,7 @@ if(DEFINED Matlab_ROOT_DIR_LAST_CACHED)
         Matlab_MEXEXTENSIONS_PROG
         Matlab_ROOT_DIR_LAST_CACHED
         #Matlab_PROG_VERSION_STRING_AUTO_DETECT
-        Matlab_VERSION_STRING_INTERNAL
+        #Matlab_VERSION_STRING_INTERNAL
         )
     foreach(_var IN LISTS _Matlab_cached_vars)
       if(DEFINED ${_var})
