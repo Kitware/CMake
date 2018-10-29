@@ -2,7 +2,7 @@ SUBDIRECTORIES
 --------------
 
 This read-only directory property contains a
-:ref:`;-list <CMake Language Lists>` of subdirectories processed so far by
+:ref:`semicolon-separated list <CMake Language Lists>` of subdirectories processed so far by
 the :command:`add_subdirectory` or :command:`subdirs` commands.  Each entry is
 the absolute path to the source directory (containing the ``CMakeLists.txt``
 file).  This is suitable to pass to the :command:`get_property` command

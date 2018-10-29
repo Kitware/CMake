@@ -6,7 +6,7 @@ and executable targets. Targets that are static libraries need to use
 the :prop_tgt:`STATIC_LIBRARY_OPTIONS` target property.
 
 
-This property holds a :ref:`;-list <CMake Language Lists>` of options
+This property holds a :ref:`semicolon-separated list <CMake Language Lists>` of options
 specified so far for its target.  Use the :command:`target_link_options`
 command to append more options.
 

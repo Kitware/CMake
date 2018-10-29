@@ -3,7 +3,7 @@
 
 This property is supported only when ``<LANG>`` is ``C`` or ``CXX``.
 
-Specify a :ref:`;-list <CMake Language Lists>` containing a command line
+Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a command line
 for the ``cppcheck`` static analysis tool.  The :ref:`Makefile Generators`
 and the :generator:`Ninja` generator will run ``cppcheck`` along with the
 compiler and report any problems.  If the command-line specifies the

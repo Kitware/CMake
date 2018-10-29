@@ -3,7 +3,7 @@ OBJECT_DEPENDS
 
 Additional files on which a compiled object file depends.
 
-Specifies a :ref:`;-list <CMake Language Lists>` of full-paths to
+Specifies a :ref:`semicolon-separated list <CMake Language Lists>` of full-paths to
 files on which any object files compiled from this source file depend.
 On :ref:`Makefile Generators` and the :generator:`Ninja` generator an
 object file will be recompiled if any of the named files is newer than it.

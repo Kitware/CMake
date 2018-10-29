@@ -8,7 +8,7 @@ and cache entries.
 
 Signatures of this command that specify a ``<value>...`` placeholder
 expect zero or more arguments.  Multiple arguments will be joined as
-a :ref:`;-list <CMake Language Lists>` to form the actual variable
+a :ref:`semicolon-separated list <CMake Language Lists>` to form the actual variable
 value to be set.  Zero arguments will cause normal variables to be
 unset.  See the :command:`unset` command to unset variables explicitly.
 
