@@ -151,6 +151,8 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("separate_arguments",
                            new cmSeparateArgumentsCommand);
   state->AddBuiltinCommand("set", new cmSetCommand);
+  state->AddBuiltinCommand("set_directory_properties",
+                           new cmSetDirectoryPropertiesCommand);
   state->AddBuiltinCommand("set_property", new cmSetPropertyCommand);
   state->AddBuiltinCommand("site_name", new cmSiteNameCommand);
   state->AddBuiltinCommand("string", new cmStringCommand);
@@ -240,8 +242,6 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("install_targets", new cmInstallTargetsCommand);
   state->AddBuiltinCommand("link_directories", new cmLinkDirectoriesCommand);
   state->AddBuiltinCommand("project", new cmProjectCommand);
-  state->AddBuiltinCommand("set_directory_properties",
-                           new cmSetDirectoryPropertiesCommand);
   state->AddBuiltinCommand("set_source_files_properties",
                            new cmSetSourceFilesPropertiesCommand);
   state->AddBuiltinCommand("set_target_properties",
