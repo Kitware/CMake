@@ -22,7 +22,7 @@ public:
   bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
   bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf) override;
 
-  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
+  void GenerateBuildCommand(GeneratedMakeCommand& makeCommand,
                             const std::string& makeProgram,
                             const std::string& projectName,
                             const std::string& projectDir,

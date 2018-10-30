@@ -490,7 +490,7 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
 }
 
 void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
-  std::vector<std::string>& makeCommand, const std::string& makeProgram,
+  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
   const std::string& /*projectName*/, const std::string& /*projectDir*/,
   const std::string& targetName, const std::string& /*config*/, bool fast,
   int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
@@ -510,17 +510,16 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     mf = mfu.get();
   }
 
-  makeCommand.push_back(this->SelectMakeProgram(makeProgram));
+  makeCommand.add(this->SelectMakeProgram(makeProgram));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    makeCommand.emplace_back("-j");
+    makeCommand.add("-j");
     if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.push_back(std::to_string(jobs));
+      makeCommand.add(std::to_string(jobs));
     }
   }
 
-  makeCommand.insert(makeCommand.end(), makeOptions.begin(),
-                     makeOptions.end());
+  makeCommand.add(makeOptions.begin(), makeOptions.end());
   if (!targetName.empty()) {
     std::string tname = targetName;
     if (fast) {
@@ -530,7 +529,7 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     tname =
       conv.ConvertToRelativePath(mf->GetState()->GetBinaryDirectory(), tname);
     cmSystemTools::ConvertToOutputSlashes(tname);
-    makeCommand.push_back(std::move(tname));
+    makeCommand.add(std::move(tname));
   }
 }
 

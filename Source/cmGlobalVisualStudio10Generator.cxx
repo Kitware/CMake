@@ -864,7 +864,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
 }
 
 void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
-  std::vector<std::string>& makeCommand, const std::string& makeProgram,
+  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
   const std::string& projectName, const std::string& projectDir,
   const std::string& targetName, const std::string& config, bool fast,
   int jobs, bool verbose, std::vector<std::string> const& makeOptions)
@@ -878,6 +878,10 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   cmSystemTools::LowerCase(makeProgramLower);
   bool useDevEnv = (makeProgramLower.find("devenv") != std::string::npos ||
                     makeProgramLower.find("vcexpress") != std::string::npos);
+
+  // Workaround to convince VCExpress.exe to produce output.
+  makeCommand.RequiresOutputForward =
+    (makeProgramLower.find("vcexpress") != std::string::npos);
 
   // MSBuild is preferred (and required for VS Express), but if the .sln has
   // an Intel Fortran .vfproj then we have to use devenv. Parse it to find out.
@@ -912,7 +916,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     return;
   }
 
-  makeCommand.push_back(makeProgramSelected);
+  makeCommand.add(makeProgramSelected);
 
   std::string realTarget = targetName;
   // msbuild.exe CxxOnly.sln /t:Build /p:Configuration=Debug /target:ALL_BUILD
@@ -921,8 +925,8 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     realTarget = "ALL_BUILD";
   }
   if (realTarget == "clean") {
-    makeCommand.push_back(std::string(projectName) + ".sln");
-    makeCommand.push_back("/t:Clean");
+    makeCommand.add(std::string(projectName) + ".sln");
+    makeCommand.add("/t:Clean");
   } else {
     std::string targetProject(realTarget);
     targetProject += ".vcxproj";
@@ -934,7 +938,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
         cmSystemTools::ConvertToUnixSlashes(targetProject);
       }
     }
-    makeCommand.push_back(targetProject);
+    makeCommand.add(std::move(targetProject));
   }
   std::string configArg = "/p:Configuration=";
   if (!config.empty()) {
@@ -942,23 +946,22 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   } else {
     configArg += "Debug";
   }
-  makeCommand.push_back(configArg);
-  makeCommand.push_back("/p:Platform=" + this->GetPlatformName());
-  makeCommand.push_back(std::string("/p:VisualStudioVersion=") +
-                        this->GetIDEVersion());
+  makeCommand.add(configArg);
+  makeCommand.add(std::string("/p:Platform=") + this->GetPlatformName());
+  makeCommand.add(std::string("/p:VisualStudioVersion=") +
+                  this->GetIDEVersion());
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
     if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.push_back("/m");
+      makeCommand.add("/m");
     } else {
-      makeCommand.push_back(std::string("/m:") + std::to_string(jobs));
+      makeCommand.add(std::string("/m:") + std::to_string(jobs));
     }
     // Having msbuild.exe and cl.exe using multiple jobs is discouraged
-    makeCommand.push_back("/p:CL_MPCount=1");
+    makeCommand.add("/p:CL_MPCount=1");
   }
 
-  makeCommand.insert(makeCommand.end(), makeOptions.begin(),
-                     makeOptions.end());
+  makeCommand.add(makeOptions.begin(), makeOptions.end());
 }
 
 bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)

@@ -339,20 +339,20 @@ bool cmGlobalXCodeGenerator::Open(const std::string& bindir,
 }
 
 void cmGlobalXCodeGenerator::GenerateBuildCommand(
-  std::vector<std::string>& makeCommand, const std::string& makeProgram,
+  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
   const std::string& projectName, const std::string& /*projectDir*/,
   const std::string& targetName, const std::string& config, bool /*fast*/,
   int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
 {
   // now build the test
-  makeCommand.emplace_back(
+  makeCommand.add(
     this->SelectMakeProgram(makeProgram, this->GetXcodeBuildCommand()));
 
-  makeCommand.emplace_back("-project");
+  makeCommand.add("-project");
   std::string projectArg = projectName;
   projectArg += ".xcode";
   projectArg += "proj";
-  makeCommand.emplace_back(projectArg);
+  makeCommand.add(projectArg);
 
   bool clean = false;
   std::string realTarget = targetName;
@@ -360,29 +360,19 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
     clean = true;
     realTarget = "ALL_BUILD";
   }
-  if (clean) {
-    makeCommand.emplace_back("clean");
-  } else {
-    makeCommand.emplace_back("build");
-  }
-  makeCommand.emplace_back("-target");
-  if (!realTarget.empty()) {
-    makeCommand.emplace_back(realTarget);
-  } else {
-    makeCommand.emplace_back("ALL_BUILD");
-  }
-  makeCommand.emplace_back("-configuration");
-  makeCommand.emplace_back(!config.empty() ? config : "Debug");
+
+  makeCommand.add((clean ? "clean" : "build"));
+  makeCommand.add("-target", (realTarget.empty() ? "ALL_BUILD" : realTarget));
+  makeCommand.add("-configuration", (config.empty() ? "Debug" : config));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    makeCommand.emplace_back("-jobs");
+    makeCommand.add("-jobs");
     if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.emplace_back(std::to_string(jobs));
+      makeCommand.add(std::to_string(jobs));
     }
   }
 
-  makeCommand.insert(makeCommand.end(), makeOptions.begin(),
-                     makeOptions.end());
+  makeCommand.add(makeOptions.begin(), makeOptions.end());
 }
 
 ///! Create a local generator appropriate to this Global Generator
