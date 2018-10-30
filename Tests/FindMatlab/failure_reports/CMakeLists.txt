@@ -8,11 +8,10 @@ project(failure_reports)
 set(MATLAB_FIND_DEBUG TRUE)
 
 if(IS_MCR)
-    set(components MX_LIBRARY)
     set(RUN_UNIT_TESTS FALSE)
 else()
     set(RUN_UNIT_TESTS TRUE)
-    set(components MX_LIBRARY MAIN_PROGRAM)
+    set(components MAIN_PROGRAM)
 endif()
 
 if(NOT "${MCR_ROOT}" STREQUAL "")
@@ -32,7 +31,7 @@ matlab_add_mex(
     OUTPUT_NAME cmake_matlab_mex1
     SRC ${CMAKE_CURRENT_SOURCE_DIR}/../matlab_wrapper1.cpp
     DOCUMENTATION ${CMAKE_CURRENT_SOURCE_DIR}/../help_text1.m.txt
-  )
+    )
 
 if(RUN_UNIT_TESTS)
     # the unit test file does not exist: the failure should be properly reported

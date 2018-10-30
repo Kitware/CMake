@@ -19,10 +19,8 @@ can also be used:
 
 The module supports the following components:
 
-* ``MX_LIBRARY``, ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the ``MX``,
-  ``ENG`` and ``MAT`` libraries of Matlab
-* ``ENGINE_LIBRARY``, ``DATAARRAY_LIBRARY``: respectively the ``MatlabEngine``
-  and ``MatlabDataArray`` libraries of Matlab (Matlab 2018a and later)
+* ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the ``ENG`` and ``MAT``
+  libraries of Matlab
 * ``MAIN_PROGRAM`` the Matlab binary program. Note that this component is not
   available on the MCR version, and will yield an error if the MCR is found
   instead of the regular Matlab installation.
@@ -101,8 +99,7 @@ Result variables
 ``Matlab_MEX_LIBRARY``
   library for mex, always available.
 ``Matlab_MX_LIBRARY``
-  mx library of Matlab (arrays). Available only if the component
-  ``MX_LIBRARY`` has been requested.
+  mx library of Matlab (arrays), always available.
 ``Matlab_ENG_LIBRARY``
   Matlab engine library. Available only if the component ``ENG_LIBRARY``
   is requested.
@@ -110,11 +107,9 @@ Result variables
   Matlab matrix library. Available only if the component ``MAT_LIBRARY``
   is requested.
 ``Matlab_ENGINE_LIBRARY``
-  Matlab C++ engine library. Available only if the component ``ENGINE_LIBRARY``
-  is requested.
+  Matlab C++ engine library, always available for R2018a and newer.
 ``Matlab_DATAARRAY_LIBRARY``
-  Matlab C++ data array library. Available only if the component ``DATAARRAY_LIBRARY``
-  is requested.
+  Matlab C++ data array library, always available for R2018a and newer.
 ``Matlab_LIBRARIES``
   the whole set of libraries of Matlab
 ``Matlab_MEX_COMPILER``
@@ -889,6 +884,7 @@ endfunction()
          [OUTPUT_NAME output_name]
          [DOCUMENTATION file.txt]
          [LINK_TO target1 target2 ...]
+         [R2017b | R2018a]
          [...]
      )
 
@@ -898,8 +894,7 @@ endfunction()
     list of source files.
   ``LINK_TO``
     a list of additional link dependencies.  The target links to ``libmex``
-    by default. If ``Matlab_MX_LIBRARY`` is defined, it also
-    links to ``libmx``.
+    and ``libmx`` by default.
   ``OUTPUT_NAME``
     if given, overrides the default name. The default name is
     the name of the target without any prefix and
@@ -910,6 +905,12 @@ endfunction()
     the same folder without any processing, with the same name as the final
     mex file, and with extension `.m`. In that case, typing ``help <name>``
     in Matlab prints the documentation contained in this file.
+  ``R2017b`` or ``R2018a`` may be given to specify the version of the C API
+    to use: ``R2017b`` specifies the traditional (separate complex) C API,
+    and corresponds to the ``-R2017b`` flag for the `mex` command. ``R2018a``
+    specifies the new interleaved complex C API, and corresponds to the
+    ``-R2018a`` flag for the `mex` command. Ignored if MATLAB version prior
+    to R2018a. Defaults to ``R2017b``.
   ``MODULE`` or ``SHARED`` may be given to specify the type of library to be
     created. ``EXECUTABLE`` may be given to create an executable instead of
     a library. If no type is given explicitly, the type is ``SHARED``.
@@ -939,7 +940,7 @@ function(matlab_add_mex)
 
   endif()
 
-  set(options EXECUTABLE MODULE SHARED)
+  set(options EXECUTABLE MODULE SHARED R2017b R2018a)
   set(oneValueArgs NAME DOCUMENTATION OUTPUT_NAME)
   set(multiValueArgs LINK_TO SRC)
 
@@ -954,9 +955,25 @@ function(matlab_add_mex)
     set(${prefix}_OUTPUT_NAME ${${prefix}_NAME})
   endif()
 
+  if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, add version source file
+    # TODO: check the file extensions in ${${prefix}_SRC} to see if they're C or C++ files
+    # Currently, the C and C++ versions of the version files are identical, so this doesn't matter.
+    set(MEX_VERSION_FILE "${Matlab_ROOT_DIR}/extern/version/c_mexapi_version.c")
+    #set(MEX_VERSION_FILE "${Matlab_ROOT_DIR}/extern/version/cpp_mexapi_version.cpp")
+  endif()
+
+  if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.4") # For 9.4 (R2018a) and newer, add API macro
+    if(${${prefix}_R2018a})
+      set(MEX_API_MACRO "MATLAB_DEFAULT_RELEASE=R2018a")
+    else()
+      set(MEX_API_MACRO "MATLAB_DEFAULT_RELEASE=R2017b")
+    endif()
+  endif()
+
   if(${prefix}_EXECUTABLE)
     add_executable(${${prefix}_NAME}
       ${${prefix}_SRC}
+      ${MEX_VERSION_FILE}
       ${${prefix}_DOCUMENTATION}
       ${${prefix}_UNPARSED_ARGUMENTS})
   else()
@@ -969,31 +986,25 @@ function(matlab_add_mex)
     add_library(${${prefix}_NAME}
       ${type}
       ${${prefix}_SRC}
+      ${MEX_VERSION_FILE}
       ${${prefix}_DOCUMENTATION}
       ${${prefix}_UNPARSED_ARGUMENTS})
   endif()
 
   target_include_directories(${${prefix}_NAME} PRIVATE ${Matlab_INCLUDE_DIRS})
 
-  if(DEFINED Matlab_MX_LIBRARY)
-    target_link_libraries(${${prefix}_NAME} ${Matlab_MX_LIBRARY})
+  if(Matlab_HAS_CPP_API)
+    target_link_libraries(${${prefix}_NAME} ${Matlab_ENGINE_LIBRARY} ${Matlab_DATAARRAY_LIBRARY})
   endif()
 
-  if(DEFINED Matlab_ENGINE_LIBRARY)
-    target_link_libraries(${${prefix}_NAME} ${Matlab_ENGINE_LIBRARY})
-  endif()
-
-  if(DEFINED Matlab_DATAARRAY_LIBRARY)
-    target_link_libraries(${${prefix}_NAME} ${Matlab_DATAARRAY_LIBRARY})
-  endif()
-
-  target_link_libraries(${${prefix}_NAME} ${Matlab_MEX_LIBRARY} ${${prefix}_LINK_TO})
+  target_link_libraries(${${prefix}_NAME} ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY} ${${prefix}_LINK_TO})
   set_target_properties(${${prefix}_NAME}
       PROPERTIES
         PREFIX ""
         OUTPUT_NAME ${${prefix}_OUTPUT_NAME}
         SUFFIX ".${Matlab_MEX_EXTENSION}")
 
+  target_compile_definitions(${${prefix}_NAME} PRIVATE ${MEX_API_MACRO} MATLAB_MEX_FILE)
 
   # documentation
   if(NOT ${${prefix}_DOCUMENTATION} STREQUAL "")
@@ -1007,82 +1018,82 @@ function(matlab_add_mex)
   endif() # documentation
 
   # entry point in the mex file + taking care of visibility and symbol clashes.
-  if (MSVC)
-    get_target_property(
-        _previous_link_flags
-        ${${prefix}_NAME}
-        LINK_FLAGS)
-    if(NOT _previous_link_flags)
-      set(_previous_link_flags)
-    endif()
-
-    set_target_properties(${${prefix}_NAME}
-      PROPERTIES
-        LINK_FLAGS "${_previous_link_flags} /EXPORT:mexFunction")
-  endif()
-
   if(WIN32)
+
+    if (MSVC)
+
+      set(_link_flags "${_link_flags} /EXPORT:mexFunction")
+      if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, export version
+        set(_link_flags "${_link_flags} /EXPORT:mexfilerequiredapiversion")
+      endif()
+
+      if(Matlab_HAS_CPP_API)
+        set(_link_flags "${_link_flags} /EXPORT:mexCreateMexFunction /EXPORT:mexDestroyMexFunction /EXPORT:mexFunctionAdapter")
+        #TODO: Is this necessary?
+      endif()
+
+      set_property(TARGET ${${prefix}_NAME} APPEND PROPERTY LINK_FLAGS ${_link_flags})
+
+    endif() # TODO: what if there's a different compiler on Windows?
+
     set_target_properties(${${prefix}_NAME}
       PROPERTIES
         DEFINE_SYMBOL "DLL_EXPORT_SYM=__declspec(dllexport)")
+
   else()
 
-    if(HAS_MINUS_PTHREAD AND NOT APPLE)
-      # Apparently, compiling with -pthread generated the proper link flags
-      # and some defines at compilation
-      target_compile_options(${${prefix}_NAME} PRIVATE "-pthread")
+    if(${Matlab_VERSION_STRING} VERSION_LESS "9.1") # For versions prior to 9.1 (R2016b)
+      set(_ver_map_files ${Matlab_EXTERN_LIBRARY_DIR}/mexFunction.map)
+    else()                                          # For 9.1 (R2016b) and newer
+      set(_ver_map_files ${Matlab_EXTERN_LIBRARY_DIR}/c_exportsmexfileversion.map)
     endif()
 
+    if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.5") # For 9.5 (R2018b) (and newer?)
+      target_compile_options(${${prefix}_NAME} PRIVATE "-fvisibility=default")
+      # This one is weird, it might be a bug in <mex.h> for R2018b. When compiling with
+      # -fvisibility=hidden, the symbol `mexFunction` cannot be exported. Reading the
+      # source code for <mex.h>, it seems that the preprocessor macro `MW_NEEDS_VERSION_H`
+      # needs to be defined for `__attribute__ ((visibility("default")))` to be added
+      # in front of the declaration of `mexFunction`. In previous versions of MATLAB this
+      # was not the case, there `DLL_EXPORT_SYM` needed to be defined.
+      # Adding `-fvisibility=hidden` to the `mex` command causes the build to fail.
+      # TODO: Check that this is still necessary in R2019a when it comes out.
+    endif()
 
-    # if we do not do that, the symbols linked from eg. boost remain weak and
-    # then clash with the ones defined in the matlab process. So by default
-    # the symbols are hidden.
-    # This also means that for shared libraries (like MEX), the entry point
-    # should be explicitly declared with default visibility, otherwise Matlab
-    # cannot find the entry point.
-    # Note that this is particularly meaningful if the MEX wrapper itself
-    # contains symbols that are clashing with Matlab (that are compiled in the
-    # MEX file). In order to propagate the visibility options to the libraries
-    # to which the MEX file is linked against, the -Wl,--exclude-libs,ALL
-    # option should also be specified.
+    if(APPLE)
 
-    set_target_properties(${${prefix}_NAME}
-      PROPERTIES
-        CXX_VISIBILITY_PRESET "hidden"
-        C_VISIBILITY_PRESET "hidden"
-        VISIBILITY_INLINES_HIDDEN ON
-    )
+      if(Matlab_HAS_CPP_API)
+        list(APPEND _ver_map_files ${Matlab_EXTERN_LIBRARY_DIR}/cppMexFunction.map) # This one doesn't exist on Linux
+        set(_link_flags "${_link_flags} -Wl,-U,_mexCreateMexFunction -Wl,-U,_mexDestroyMexFunction -Wl,-U,_mexFunctionAdapter")
+        # On MacOS, the MEX command adds the above, without it the link breaks
+        # because we indiscriminately use "cppMexFunction.map" even for C API MEX-files.
+      endif()
 
-    #  get_target_property(
-    #    _previous_link_flags
-    #    ${${prefix}_NAME}
-    #    LINK_FLAGS)
-    #  if(NOT _previous_link_flags)
-    #    set(_previous_link_flags)
-    #  endif()
+      set(_export_flag_name -exported_symbols_list)
 
-    #  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    #    set_target_properties(${${prefix}_NAME}
-    #      PROPERTIES
-    #        LINK_FLAGS "${_previous_link_flags} -Wl,--exclude-libs,ALL"
-    #        # -Wl,--version-script=${_FindMatlab_SELF_DIR}/MatlabLinuxVisibility.map"
-    #    )
-    #  elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    #    # in this case, all other symbols become hidden.
-    #    set_target_properties(${${prefix}_NAME}
-    #      PROPERTIES
-    #        LINK_FLAGS "${_previous_link_flags} -Wl,-exported_symbol,_mexFunction"
-    #        #-Wl,-exported_symbols_list,${_FindMatlab_SELF_DIR}/MatlabOSXVisilibity.map"
-    #    )
-    #  endif()
+    else() # Linux
 
+      if(HAS_MINUS_PTHREAD)
+        # Apparently, compiling with -pthread generated the proper link flags
+        # and some defines at compilation
+        target_compile_options(${${prefix}_NAME} PRIVATE "-pthread")
+      endif()
 
+      set(_link_flags "${_link_flags} -Wl,--as-needed")
+
+      set(_export_flag_name --version-script)
+
+    endif()
+
+    foreach(_file ${_ver_map_files})
+      set(_link_flags "${_link_flags} -Wl,${_export_flag_name},${_file}")
+    endforeach()
 
     set_target_properties(${${prefix}_NAME}
       PROPERTIES
         DEFINE_SYMBOL "DLL_EXPORT_SYM=__attribute__ ((visibility (\"default\")))"
-    )
-
+        LINK_FLAGS "${_link_flags}"
+    ) # The `mex` command doesn't add this define. Is it necessary?
 
   endif()
 
@@ -1449,6 +1460,7 @@ if(DEFINED Matlab_ROOT_DIR_LAST_CACHED)
 
   if(NOT Matlab_ROOT_DIR_LAST_CACHED STREQUAL Matlab_ROOT_DIR)
     set(_Matlab_cached_vars
+        Matlab_VERSION_STRING
         Matlab_INCLUDE_DIRS
         Matlab_MEX_LIBRARY
         Matlab_MEX_COMPILER
@@ -1466,7 +1478,7 @@ if(DEFINED Matlab_ROOT_DIR_LAST_CACHED)
         Matlab_MEXEXTENSIONS_PROG
         Matlab_ROOT_DIR_LAST_CACHED
         #Matlab_PROG_VERSION_STRING_AUTO_DETECT
-        Matlab_VERSION_STRING_INTERNAL
+        #Matlab_VERSION_STRING_INTERNAL
         )
     foreach(_var IN LISTS _Matlab_cached_vars)
       if(DEFINED ${_var})
@@ -1491,7 +1503,9 @@ if(MATLAB_FIND_DEBUG)
   message(STATUS "[MATLAB] Current version is ${Matlab_VERSION_STRING} located ${Matlab_ROOT_DIR}")
 endif()
 
-
+if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.4") # MATLAB 9.4 (R2018a) and newer have a new C++ API
+  set(Matlab_HAS_CPP_API 1)
+endif()
 
 if(Matlab_ROOT_DIR)
   file(TO_CMAKE_PATH ${Matlab_ROOT_DIR} Matlab_ROOT_DIR)
@@ -1530,6 +1544,8 @@ set(Matlab_BINARIES_DIR
     ${Matlab_ROOT_DIR}/bin/${_matlab_bin_prefix}${_matlab_current_suffix})
 set(Matlab_EXTERN_LIBRARY_DIR
     ${Matlab_ROOT_DIR}/extern/lib/${_matlab_bin_prefix}${_matlab_current_suffix})
+set(Matlab_EXTERN_BINARIES_DIR
+    ${Matlab_ROOT_DIR}/extern/bin/${_matlab_bin_prefix}${_matlab_current_suffix})
 
 if(WIN32)
   if(MINGW)
@@ -1539,7 +1555,7 @@ if(WIN32)
   endif()
   set(_matlab_lib_prefix_for_search "lib")
 else()
-  set(_matlab_lib_dir_for_search ${Matlab_BINARIES_DIR})
+  set(_matlab_lib_dir_for_search ${Matlab_BINARIES_DIR} ${Matlab_EXTERN_BINARIES_DIR})
   set(_matlab_lib_prefix_for_search "lib")
 endif()
 
@@ -1590,7 +1606,6 @@ _Matlab_find_library(
   PATHS ${_matlab_lib_dir_for_search}
   NO_DEFAULT_PATH
 )
-
 list(APPEND _matlab_required_variables Matlab_MEX_LIBRARY)
 
 # the MEX extension is required
@@ -1631,21 +1646,18 @@ if(_matlab_find_matlab_program GREATER -1)
 endif()
 unset(_matlab_find_matlab_program)
 
-# Component MX library
-list(FIND Matlab_FIND_COMPONENTS MX_LIBRARY _matlab_find_mx)
-if(_matlab_find_mx GREATER -1)
-  _Matlab_find_library(
-    ${_matlab_lib_prefix_for_search}
-    Matlab_MX_LIBRARY
-    mx
-    PATHS ${_matlab_lib_dir_for_search}
-    NO_DEFAULT_PATH
-  )
-  if(Matlab_MX_LIBRARY)
-    set(Matlab_MX_LIBRARY_FOUND TRUE)
-  endif()
+# The MX library is required
+_Matlab_find_library(
+  ${_matlab_lib_prefix_for_search}
+  Matlab_MX_LIBRARY
+  mx
+  PATHS ${_matlab_lib_dir_for_search}
+  NO_DEFAULT_PATH
+)
+list(APPEND _matlab_required_variables Matlab_MX_LIBRARY)
+if(Matlab_MX_LIBRARY)
+  set(Matlab_MX_LIBRARY_FOUND TRUE)
 endif()
-unset(_matlab_find_mx)
 
 # Component ENG library
 list(FIND Matlab_FIND_COMPONENTS ENG_LIBRARY _matlab_find_eng)
@@ -1711,9 +1723,9 @@ if(_matlab_find_mcc_compiler GREATER -1)
 endif()
 unset(_matlab_find_mcc_compiler)
 
-# component MatlabEngine
-list(FIND Matlab_FIND_COMPONENTS ENGINE_LIBRARY _matlab_find_matlab_engine)
-if(_matlab_find_matlab_engine GREATER -1)
+if(Matlab_HAS_CPP_API)
+
+  # The MatlabEngine library is required for R2018a+
   _Matlab_find_library(
     ${_matlab_lib_prefix_for_search}
     Matlab_ENGINE_LIBRARY
@@ -1722,40 +1734,33 @@ if(_matlab_find_matlab_engine GREATER -1)
     DOC "MatlabEngine Library"
     NO_DEFAULT_PATH
   )
+  list(APPEND _matlab_required_variables Matlab_ENGINE_LIBRARY)
   if(Matlab_ENGINE_LIBRARY)
     set(Matlab_ENGINE_LIBRARY_FOUND TRUE)
   endif()
-endif()
-unset(_matlab_find_matlab_engine)
 
-# component MatlabDataArray
-list(FIND Matlab_FIND_COMPONENTS DATAARRAY_LIBRARY _matlab_find_matlab_dataarray)
-if(_matlab_find_matlab_dataarray GREATER -1)
+  # The MatlabDataArray library is required for R2018a+
   _Matlab_find_library(
-  ${_matlab_lib_prefix_for_search}
+    ${_matlab_lib_prefix_for_search}
     Matlab_DATAARRAY_LIBRARY
     MatlabDataArray
     PATHS ${_matlab_lib_dir_for_search}
     DOC "MatlabDataArray Library"
     NO_DEFAULT_PATH
   )
+  list(APPEND _matlab_required_variables Matlab_DATAARRAY_LIBRARY)
   if(Matlab_DATAARRAY_LIBRARY)
     set(Matlab_DATAARRAY_LIBRARY_FOUND TRUE)
   endif()
+
 endif()
-unset(_matlab_find_matlab_dataarray)
 
 unset(_matlab_lib_dir_for_search)
 
-set(Matlab_LIBRARIES ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY} ${Matlab_ENG_LIBRARY} ${Matlab_MAT_LIBRARY})
-
-if(Matlab_DATAARRAY_LIBRARY_FOUND)
-  set(Matlab_LIBRARIES ${Matlab_LIBRARIES} ${Matlab_DATAARRAY_LIBRARY})
-endif()
-
-if(Matlab_ENGINE_LIBRARY_FOUND)
-  set(Matlab_LIBRARIES ${Matlab_LIBRARIES} ${Matlab_ENGINE_LIBRARY})
-endif()
+set(Matlab_LIBRARIES
+  ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY}
+  ${Matlab_ENG_LIBRARY} ${Matlab_MAT_LIBRARY}
+  ${Matlab_DATAARRAY_LIBRARY} ${Matlab_ENGINE_LIBRARY})
 
 find_package_handle_standard_args(
   Matlab
