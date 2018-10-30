@@ -766,8 +766,6 @@ set_ssl_version_min_max(unsigned int *protoflags, struct connectdata *conn)
   long i = ssl_version;
   switch(ssl_version_max) {
     case CURL_SSLVERSION_MAX_NONE:
-      ssl_version_max = ssl_version;
-      break;
     case CURL_SSLVERSION_MAX_DEFAULT:
       ssl_version_max = CURL_SSLVERSION_TLSv1_2;
       break;
@@ -1316,8 +1314,7 @@ static int Curl_gskit_shutdown(struct connectdata *conn, int sockindex)
 
 static size_t Curl_gskit_version(char *buffer, size_t size)
 {
-  strncpy(buffer, "GSKit", size);
-  return strlen(buffer);
+  return snprintf(buffer, size, "GSKit");
 }
 
 

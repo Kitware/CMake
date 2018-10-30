@@ -38,7 +38,7 @@
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
-cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)
@@ -92,7 +92,7 @@ option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OF
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
   if(PICKY_COMPILER)
-    foreach(_CCOPT -pedantic -Wall -W -Wpointer-arith -Wwrite-strings -Wunused -Wshadow -Winline -Wnested-externs -Wmissing-declarations -Wmissing-prototypes -Wno-long-long -Wfloat-equal -Wno-multichar -Wsign-compare -Wundef -Wno-format-nonliteral -Wendif-labels -Wstrict-prototypes -Wdeclaration-after-statement -Wstrict-aliasing=3 -Wcast-align -Wtype-limits -Wold-style-declaration -Wmissing-parameter-type -Wempty-body -Wclobbered -Wignored-qualifiers -Wconversion -Wno-sign-conversion -Wvla -Wdouble-promotion -Wno-system-headers)
+    foreach(_CCOPT -pedantic -Wall -W -Wpointer-arith -Wwrite-strings -Wunused -Wshadow -Winline -Wnested-externs -Wmissing-declarations -Wmissing-prototypes -Wno-long-long -Wfloat-equal -Wno-multichar -Wsign-compare -Wundef -Wno-format-nonliteral -Wendif-labels -Wstrict-prototypes -Wdeclaration-after-statement -Wstrict-aliasing=3 -Wcast-align -Wtype-limits -Wold-style-declaration -Wmissing-parameter-type -Wempty-body -Wclobbered -Wignored-qualifiers -Wconversion -Wno-sign-conversion -Wvla -Wdouble-promotion -Wno-system-headers -Wno-pedantic-ms-format)
       # surprisingly, CHECK_C_COMPILER_FLAG needs a new variable to store each new
       # test result in.
       check_c_compiler_flag(${_CCOPT} OPT${_CCOPT})
@@ -352,7 +352,16 @@ if(CMAKE_USE_OPENSSL)
   set(USE_OPENSSL ON)
   set(HAVE_LIBCRYPTO ON)
   set(HAVE_LIBSSL ON)
-  list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
+
+  # Depend on OpenSSL via imported targets if supported by the running
+  # version of CMake.  This allows our dependents to get our dependencies
+  # transitively.
+  if(NOT CMAKE_VERSION VERSION_LESS 3.4)
+    list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
+  else()
+    list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
+    include_directories(${OPENSSL_INCLUDE_DIR})
+  endif()
 
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
   check_include_file("openssl/crypto.h" HAVE_OPENSSL_CRYPTO_H)
@@ -499,15 +508,23 @@ check_library_exists("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
 option(CURL_ZLIB "Set to ON to enable building curl with zlib support." ON)
 set(HAVE_LIBZ OFF)
 set(HAVE_ZLIB_H OFF)
-set(HAVE_ZLIB OFF)
+set(USE_ZLIB OFF)
 if(CURL_ZLIB)
   find_package(ZLIB QUIET)
   if(ZLIB_FOUND)
     set(HAVE_ZLIB_H ON)
-    set(HAVE_ZLIB ON)
     set(HAVE_LIBZ ON)
-    list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
-    include_directories(${ZLIB_INCLUDE_DIRS})
+    set(USE_ZLIB ON)
+
+    # Depend on ZLIB via imported targets if supported by the running
+    # version of CMake.  This allows our dependents to get our dependencies
+    # transitively.
+    if(NOT CMAKE_VERSION VERSION_LESS 3.4)
+      list(APPEND CURL_LIBS ZLIB::ZLIB)
+    else()
+      list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
+      include_directories(${ZLIB_INCLUDE_DIRS})
+    endif()
     list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
   endif()
 endif()
@@ -947,7 +964,6 @@ foreach(CURL_TEST
     HAVE_GETHOSTBYNAME_R_3_REENTRANT
     HAVE_GETHOSTBYNAME_R_5_REENTRANT
     HAVE_GETHOSTBYNAME_R_6_REENTRANT
-    HAVE_SOCKLEN_T
     HAVE_IN_ADDR_T
     HAVE_BOOL_T
     STDC_HEADERS
@@ -1017,6 +1033,12 @@ if(HAVE_INET_NTOA_R_DECL_REENTRANT)
   set(NEED_REENTRANT 1)
 endif()
 
+# Check clock_gettime(CLOCK_MONOTONIC, x) support
+curl_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)
+
+# Check compiler support of __builtin_available()
+curl_internal_test(HAVE_BUILTIN_AVAILABLE)
+
 # Some other minor tests
 
 if(NOT HAVE_IN_ADDR_T)
@@ -1064,24 +1086,6 @@ if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
     set_source_files_properties(mprintf.c PROPERTIES
       COMPILE_FLAGS ${MPRINTF_COMPILE_FLAGS})
   endif()
-endif()
-
-if(HAVE_SOCKLEN_T)
-  set(CURL_TYPEOF_CURL_SOCKLEN_T "socklen_t")
-  if(WIN32)
-    set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h;ws2tcpip.h")
-  elseif(HAVE_SYS_SOCKET_H)
-    set(CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
-  endif()
-  check_type_size("socklen_t" CURL_SIZEOF_CURL_SOCKLEN_T)
-  set(CMAKE_EXTRA_INCLUDE_FILES)
-  if(NOT HAVE_CURL_SIZEOF_CURL_SOCKLEN_T)
-    message(FATAL_ERROR
-     "Check for sizeof socklen_t failed, see CMakeFiles/CMakerror.log")
-  endif()
-else()
-  set(CURL_TYPEOF_CURL_SOCKLEN_T int)
-  set(CURL_SIZEOF_CURL_SOCKLEN_T ${SIZEOF_INT})
 endif()
 
 # TODO test which of these headers are required
@@ -1144,11 +1148,13 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
-if(WIN32 AND NOT CYGWIN)
-  set(CURL_INSTALL_CMAKE_DIR CMake)
-else()
-  set(CURL_INSTALL_CMAKE_DIR lib/cmake/curl)
-endif()
+include(GNUInstallDirs)
+
+set(CURL_INSTALL_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
+set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 
 if(USE_MANUAL)
   add_subdirectory(docs)
@@ -1282,7 +1288,7 @@ set(VERSIONNUM              "${CURL_VERSION_NUM}")
 configure_file("${CURL_SOURCE_DIR}/curl-config.in"
                "${CURL_BINARY_DIR}/curl-config" @ONLY)
 install(FILES "${CURL_BINARY_DIR}/curl-config"
-        DESTINATION bin
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
         PERMISSIONS
           OWNER_READ OWNER_WRITE OWNER_EXECUTE
           GROUP_READ GROUP_EXECUTE
@@ -1292,34 +1298,36 @@ install(FILES "${CURL_BINARY_DIR}/curl-config"
 configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
                "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
 install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
-        DESTINATION lib/pkgconfig)
-
-# This needs to be run very last so other parts of the scripts can take advantage of this.
-if(NOT CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
-  set(CURL_CONFIG_HAS_BEEN_RUN_BEFORE 1 CACHE INTERNAL "Flag to track whether this is the first time running CMake or if CMake has been configured before")
-endif()
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 # install headers
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
-    DESTINATION include
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.h")
-
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-    "${PROJECT_BINARY_DIR}/curl-config-version.cmake"
+    "${version_config}"
     VERSION ${CURL_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
-configure_file(CMake/curl-config.cmake.in
-        "${PROJECT_BINARY_DIR}/curl-config.cmake"
-        @ONLY
+# Use:
+# * TARGETS_EXPORT_NAME
+# * PROJECT_NAME
+configure_package_config_file(CMake/curl-config.cmake.in
+        "${project_config}"
+        INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
 )
 
 install(
-        FILES ${PROJECT_BINARY_DIR}/curl-config.cmake
-              ${PROJECT_BINARY_DIR}/curl-config-version.cmake
+        EXPORT "${TARGETS_EXPORT_NAME}"
+        NAMESPACE "${PROJECT_NAME}::"
+        DESTINATION ${CURL_INSTALL_CMAKE_DIR}
+)
+
+install(
+        FILES ${version_config} ${project_config}
         DESTINATION ${CURL_INSTALL_CMAKE_DIR}
 )
 

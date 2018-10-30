@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_INET_PTON_H
-#define HEADER_CURL_INET_PTON_H
+#ifndef HEADER_CURL_MESALINK_H
+#define HEADER_CURL_MESALINK_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,6 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
+ * Copyright (C) 2017-2018, Yiming Jing, <jingyiming@baidu.com>
  * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -21,19 +22,11 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-int Curl_inet_pton(int, const char *, void *);
+#ifdef USE_MESALINK
 
-#ifdef HAVE_INET_PTON
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#elif defined(HAVE_WS2TCPIP_H)
-/* inet_pton() exists in Vista or later */
-#include <ws2tcpip.h>
-#endif
-#define Curl_inet_pton(x,y,z) inet_pton(x,y,z)
-#endif
+extern const struct Curl_ssl Curl_ssl_mesalink;
 
-#endif /* HEADER_CURL_INET_PTON_H */
+#endif /* USE_MESALINK */
+#endif /* HEADER_CURL_MESALINK_H */

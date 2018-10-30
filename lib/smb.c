@@ -610,7 +610,8 @@ static CURLcode smb_send_and_recv(struct connectdata *conn, void **msg)
 
   /* Check if there is data in the transfer buffer */
   if(!smbc->send_size && smbc->upload_size) {
-    size_t nread = smbc->upload_size > UPLOAD_BUFSIZE ? UPLOAD_BUFSIZE :
+    size_t nread = smbc->upload_size > conn->data->set.upload_buffer_size ?
+      conn->data->set.upload_buffer_size :
       smbc->upload_size;
     conn->data->req.upload_fromhere = conn->data->state.ulbuf;
     result = Curl_fillreadbuffer(conn, nread, &nread);
@@ -968,7 +969,7 @@ static CURLcode smb_parse_url_path(struct connectdata *conn)
   char *slash;
 
   /* URL decode the path */
-  result = Curl_urldecode(data, data->state.path, 0, &path, NULL, TRUE);
+  result = Curl_urldecode(data, data->state.up.path, 0, &path, NULL, TRUE);
   if(result)
     return result;
 

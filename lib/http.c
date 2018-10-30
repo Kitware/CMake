@@ -169,7 +169,7 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   data->req.protop = http;
 
   if(!CONN_INUSE(conn))
-    /* if not alredy multi-using, setup connection details */
+    /* if not already multi-using, setup connection details */
     Curl_http2_setup_conn(conn);
   Curl_http2_setup_req(data);
   return CURLE_OK;
@@ -537,14 +537,6 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
   }
 
   if(pickhost || pickproxy) {
-    /* In case this is GSS auth, the newurl field is already allocated so
-       we must make sure to free it before allocating a new one. As figured
-       out in bug #2284386 */
-    Curl_safefree(data->req.newurl);
-    data->req.newurl = strdup(data->change.url); /* clone URL */
-    if(!data->req.newurl)
-      return CURLE_OUT_OF_MEMORY;
-
     if((data->set.httpreq != HTTPREQ_GET) &&
        (data->set.httpreq != HTTPREQ_HEAD) &&
        !conn->bits.rewindaftersend) {
@@ -552,6 +544,13 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
       if(result)
         return result;
     }
+    /* In case this is GSS auth, the newurl field is already allocated so
+       we must make sure to free it before allocating a new one. As figured
+       out in bug #2284386 */
+    Curl_safefree(data->req.newurl);
+    data->req.newurl = strdup(data->change.url); /* clone URL */
+    if(!data->req.newurl)
+      return CURLE_OUT_OF_MEMORY;
   }
   else if((data->req.httpcode < 300) &&
           (!data->state.authhost.done) &&
@@ -1094,11 +1093,13 @@ Curl_send_buffer *Curl_add_buffer_init(void)
 /*
  * Curl_add_buffer_free() frees all associated resources.
  */
-void Curl_add_buffer_free(Curl_send_buffer *buff)
+void Curl_add_buffer_free(Curl_send_buffer **inp)
 {
-  if(buff) /* deal with NULL input */
-    free(buff->buffer);
-  free(buff);
+  Curl_send_buffer *in = *inp;
+  if(in) /* deal with NULL input */
+    free(in->buffer);
+  free(in);
+  *inp = NULL;
 }
 
 /*
@@ -1107,7 +1108,7 @@ void Curl_add_buffer_free(Curl_send_buffer *buff)
  *
  * Returns CURLcode
  */
-CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
+CURLcode Curl_add_buffer_send(Curl_send_buffer **inp,
                               struct connectdata *conn,
 
                                /* add the number of sent bytes to this
@@ -1128,6 +1129,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
   size_t sendsize;
   curl_socket_t sockfd;
   size_t headersize;
+  Curl_send_buffer *in = *inp;
 
   DEBUGASSERT(socketindex <= SECONDARYSOCKET);
 
@@ -1148,7 +1150,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
   /* Curl_convert_to_network calls failf if unsuccessful */
   if(result) {
     /* conversion failed, free memory and return to the caller */
-    Curl_add_buffer_free(in);
+    Curl_add_buffer_free(inp);
     return result;
   }
 
@@ -1172,7 +1174,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
     result = Curl_get_upload_buffer(data);
     if(result) {
       /* malloc failed, free memory and return to the caller */
-      Curl_add_buffer_free(in);
+      Curl_add_buffer_free(&in);
       return result;
     }
     memcpy(data->state.ulbuf, ptr, sendsize);
@@ -1256,7 +1258,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
       Curl_pipeline_leave_write(conn);
     }
   }
-  Curl_add_buffer_free(in);
+  Curl_add_buffer_free(&in);
 
   return result;
 }
@@ -1265,31 +1267,35 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
 /*
  * add_bufferf() add the formatted input to the buffer.
  */
-CURLcode Curl_add_bufferf(Curl_send_buffer *in, const char *fmt, ...)
+CURLcode Curl_add_bufferf(Curl_send_buffer **inp, const char *fmt, ...)
 {
   char *s;
   va_list ap;
+  Curl_send_buffer *in = *inp;
   va_start(ap, fmt);
   s = vaprintf(fmt, ap); /* this allocs a new string to append */
   va_end(ap);
 
   if(s) {
-    CURLcode result = Curl_add_buffer(in, s, strlen(s));
+    CURLcode result = Curl_add_buffer(inp, s, strlen(s));
     free(s);
     return result;
   }
   /* If we failed, we cleanup the whole buffer and return error */
   free(in->buffer);
   free(in);
+  *inp = NULL;
   return CURLE_OUT_OF_MEMORY;
 }
 
 /*
- * add_buffer() appends a memory chunk to the existing buffer
+ * Curl_add_buffer() appends a memory chunk to the existing buffer
  */
-CURLcode Curl_add_buffer(Curl_send_buffer *in, const void *inptr, size_t size)
+CURLcode Curl_add_buffer(Curl_send_buffer **inp, const void *inptr,
+                         size_t size)
 {
   char *new_rb;
+  Curl_send_buffer *in = *inp;
 
   if(~size < in->size_used) {
     /* If resulting used size of send buffer would wrap size_t, cleanup
@@ -1297,6 +1303,7 @@ CURLcode Curl_add_buffer(Curl_send_buffer *in, const void *inptr, size_t size)
        size will fit into a single allocatable memory chunk */
     Curl_safefree(in->buffer);
     free(in);
+    *inp = NULL;
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -1323,6 +1330,7 @@ CURLcode Curl_add_buffer(Curl_send_buffer *in, const void *inptr, size_t size)
     if(!new_rb) {
       /* If we failed, we cleanup the whole buffer and return error */
       free(in);
+      *inp = NULL;
       return CURLE_OUT_OF_MEMORY;
     }
 
@@ -1484,11 +1492,11 @@ static CURLcode add_haproxy_protocol_header(struct connectdata *conn)
   if(!req_buffer)
     return CURLE_OUT_OF_MEMORY;
 
-  result = Curl_add_bufferf(req_buffer, proxy_header);
+  result = Curl_add_bufferf(&req_buffer, proxy_header);
   if(result)
     return result;
 
-  result = Curl_add_buffer_send(req_buffer,
+  result = Curl_add_buffer_send(&req_buffer,
                                 conn,
                                 &conn->data->info.request_size,
                                 0,
@@ -1561,8 +1569,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
     return CURLE_OK;
 
   if(http->send_buffer) {
-    Curl_add_buffer_free(http->send_buffer);
-    http->send_buffer = NULL; /* clear the pointer */
+    Curl_add_buffer_free(&http->send_buffer);
   }
 
   Curl_http2_done(conn, premature);
@@ -1653,8 +1660,8 @@ static CURLcode expect100(struct Curl_easy *data,
         Curl_compareheader(ptr, "Expect:", "100-continue");
     }
     else {
-      result = Curl_add_bufferf(req_buffer,
-                         "Expect: 100-continue\r\n");
+      result = Curl_add_bufferf(&req_buffer,
+                                "Expect: 100-continue\r\n");
       if(!result)
         data->state.expect100header = TRUE;
     }
@@ -1785,7 +1792,7 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
                    !strcasecompare(data->state.first_host, conn->host.name)))
             ;
           else {
-            result = Curl_add_bufferf(req_buffer, "%s\r\n", headers->data);
+            result = Curl_add_bufferf(&req_buffer, "%s\r\n", headers->data);
           }
           if(semicolonp)
             *semicolonp = ';'; /* put back the semicolon */
@@ -1854,7 +1861,7 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
            tm->tm_min,
            tm->tm_sec);
 
-  result = Curl_add_buffer(req_buffer, datestr, strlen(datestr));
+  result = Curl_add_buffer(&req_buffer, datestr, strlen(datestr));
 
   return result;
 }
@@ -1869,7 +1876,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
   struct HTTP *http;
-  const char *ppath = data->state.path;
+  const char *path = data->state.up.path;
+  const char *query = data->state.up.query;
   bool paste_ftp_userpwd = FALSE;
   char ftp_typecode[sizeof("/;type=?")] = "";
   const char *host = conn->host.name;
@@ -1987,7 +1995,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 
   /* setup the authentication headers */
-  result = Curl_http_output_auth(conn, request, ppath, FALSE);
+  result = Curl_http_output_auth(conn, request, path, FALSE);
   if(result)
     return result;
 
@@ -2215,47 +2223,59 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     /* The path sent to the proxy is in fact the entire URL. But if the remote
        host is a IDN-name, we must make sure that the request we produce only
        uses the encoded host name! */
+
+    /* and no fragment part */
+    CURLUcode uc;
+    char *url;
+    CURLU *h = curl_url_dup(data->state.uh);
+    if(!h)
+      return CURLE_OUT_OF_MEMORY;
+
     if(conn->host.dispname != conn->host.name) {
-      char *url = data->change.url;
-      ptr = strstr(url, conn->host.dispname);
-      if(ptr) {
-        /* This is where the display name starts in the URL, now replace this
-           part with the encoded name. TODO: This method of replacing the host
-           name is rather crude as I believe there's a slight risk that the
-           user has entered a user name or password that contain the host name
-           string. */
-        size_t currlen = strlen(conn->host.dispname);
-        size_t newlen = strlen(conn->host.name);
-        size_t urllen = strlen(url);
-
-        char *newurl;
-
-        newurl = malloc(urllen + newlen - currlen + 1);
-        if(newurl) {
-          /* copy the part before the host name */
-          memcpy(newurl, url, ptr - url);
-          /* append the new host name instead of the old */
-          memcpy(newurl + (ptr - url), conn->host.name, newlen);
-          /* append the piece after the host name */
-          memcpy(newurl + newlen + (ptr - url),
-                 ptr + currlen, /* copy the trailing zero byte too */
-                 urllen - (ptr-url) - currlen + 1);
-          if(data->change.url_alloc) {
-            Curl_safefree(data->change.url);
-            data->change.url_alloc = FALSE;
-          }
-          data->change.url = newurl;
-          data->change.url_alloc = TRUE;
-        }
-        else
-          return CURLE_OUT_OF_MEMORY;
+      uc = curl_url_set(h, CURLUPART_HOST, conn->host.name, 0);
+      if(uc) {
+        curl_url_cleanup(h);
+        return CURLE_OUT_OF_MEMORY;
       }
     }
-    ppath = data->change.url;
-    if(checkprefix("ftp://", ppath)) {
+    uc = curl_url_set(h, CURLUPART_FRAGMENT, NULL, 0);
+    if(uc) {
+      curl_url_cleanup(h);
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    if(strcasecompare("http", data->state.up.scheme)) {
+      /* when getting HTTP, we don't want the userinfo the URL */
+      uc = curl_url_set(h, CURLUPART_USER, NULL, 0);
+      if(uc) {
+        curl_url_cleanup(h);
+        return CURLE_OUT_OF_MEMORY;
+      }
+      uc = curl_url_set(h, CURLUPART_PASSWORD, NULL, 0);
+      if(uc) {
+        curl_url_cleanup(h);
+        return CURLE_OUT_OF_MEMORY;
+      }
+    }
+    /* now extract the new version of the URL */
+    uc = curl_url_get(h, CURLUPART_URL, &url, 0);
+    if(uc) {
+      curl_url_cleanup(h);
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    if(data->change.url_alloc)
+      free(data->change.url);
+
+    data->change.url = url;
+    data->change.url_alloc = TRUE;
+
+    curl_url_cleanup(h);
+
+    if(strcasecompare("ftp", data->state.up.scheme)) {
       if(data->set.proxy_transfer_mode) {
         /* when doing ftp, append ;type=<a|i> if not present */
-        char *type = strstr(ppath, ";type=");
+        char *type = strstr(path, ";type=");
         if(type && type[6] && type[7] == 0) {
           switch(Curl_raw_toupper(type[6])) {
           case 'A':
@@ -2270,7 +2290,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           char *p = ftp_typecode;
           /* avoid sending invalid URLs like ftp://example.com;type=i if the
            * user specified ftp://example.com without the slash */
-          if(!*data->state.path && ppath[strlen(ppath) - 1] != '/') {
+          if(!*data->state.up.path && path[strlen(path) - 1] != '/') {
             *p++ = '/';
           }
           snprintf(p, sizeof(ftp_typecode) - 1, ";type=%c",
@@ -2419,25 +2439,36 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   /* add the main request stuff */
   /* GET/HEAD/POST/PUT */
-  result = Curl_add_bufferf(req_buffer, "%s ", request);
+  result = Curl_add_bufferf(&req_buffer, "%s ", request);
   if(result)
     return result;
 
-  if(data->set.str[STRING_TARGET])
-    ppath = data->set.str[STRING_TARGET];
+  if(data->set.str[STRING_TARGET]) {
+    path = data->set.str[STRING_TARGET];
+    query = NULL;
+  }
 
   /* url */
-  if(paste_ftp_userpwd)
-    result = Curl_add_bufferf(req_buffer, "ftp://%s:%s@%s",
+  if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
+    char *url = data->change.url;
+    result = Curl_add_buffer(&req_buffer, url, strlen(url));
+  }
+  else if(paste_ftp_userpwd)
+    result = Curl_add_bufferf(&req_buffer, "ftp://%s:%s@%s",
                               conn->user, conn->passwd,
-                              ppath + sizeof("ftp://") - 1);
-  else
-    result = Curl_add_buffer(req_buffer, ppath, strlen(ppath));
+                              path + sizeof("ftp://") - 1);
+  else {
+    result = Curl_add_buffer(&req_buffer, path, strlen(path));
+    if(result)
+      return result;
+    if(query)
+      result = Curl_add_bufferf(&req_buffer, "?%s", query);
+  }
   if(result)
     return result;
 
   result =
-    Curl_add_bufferf(req_buffer,
+    Curl_add_bufferf(&req_buffer,
                      "%s" /* ftp typecode (;type=x) */
                      " HTTP/%s\r\n" /* HTTP version */
                      "%s" /* host */
@@ -2507,7 +2538,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       co = Curl_cookie_getlist(data->cookies,
                                conn->allocptr.cookiehost?
                                conn->allocptr.cookiehost:host,
-                               data->state.path,
+                               data->state.up.path,
                                (conn->handler->protocol&CURLPROTO_HTTPS)?
                                TRUE:FALSE);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
@@ -2518,11 +2549,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       while(co) {
         if(co->value) {
           if(0 == count) {
-            result = Curl_add_bufferf(req_buffer, "Cookie: ");
+            result = Curl_add_bufferf(&req_buffer, "Cookie: ");
             if(result)
               break;
           }
-          result = Curl_add_bufferf(req_buffer,
+          result = Curl_add_bufferf(&req_buffer,
                                     "%s%s=%s", count?"; ":"",
                                     co->name, co->value);
           if(result)
@@ -2535,15 +2566,15 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
     if(addcookies && !result) {
       if(!count)
-        result = Curl_add_bufferf(req_buffer, "Cookie: ");
+        result = Curl_add_bufferf(&req_buffer, "Cookie: ");
       if(!result) {
-        result = Curl_add_bufferf(req_buffer, "%s%s", count?"; ":"",
+        result = Curl_add_bufferf(&req_buffer, "%s%s", count?"; ":"",
                                   addcookies);
         count++;
       }
     }
     if(count && !result)
-      result = Curl_add_buffer(req_buffer, "\r\n", 2);
+      result = Curl_add_buffer(&req_buffer, "\r\n", 2);
 
     if(result)
       return result;
@@ -2577,7 +2608,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if((postsize != -1) && !data->req.upload_chunky &&
        (conn->bits.authneg || !Curl_checkheaders(conn, "Content-Length"))) {
       /* only add Content-Length if not uploading chunked */
-      result = Curl_add_bufferf(req_buffer,
+      result = Curl_add_bufferf(&req_buffer,
                                 "Content-Length: %" CURL_FORMAT_CURL_OFF_T
                                 "\r\n", postsize);
       if(result)
@@ -2590,7 +2621,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         return result;
     }
 
-    result = Curl_add_buffer(req_buffer, "\r\n", 2); /* end of headers */
+    result = Curl_add_buffer(&req_buffer, "\r\n", 2); /* end of headers */
     if(result)
       return result;
 
@@ -2598,7 +2629,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     Curl_pgrsSetUploadSize(data, postsize);
 
     /* this sends the buffer and frees all the buffer resources */
-    result = Curl_add_buffer_send(req_buffer, conn,
+    result = Curl_add_buffer_send(&req_buffer, conn,
                                   &data->info.request_size, 0, FIRSTSOCKET);
     if(result)
       failf(data, "Failed sending PUT request");
@@ -2616,11 +2647,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     /* This is form posting using mime data. */
     if(conn->bits.authneg) {
       /* nothing to post! */
-      result = Curl_add_bufferf(req_buffer, "Content-Length: 0\r\n\r\n");
+      result = Curl_add_bufferf(&req_buffer, "Content-Length: 0\r\n\r\n");
       if(result)
         return result;
 
-      result = Curl_add_buffer_send(req_buffer, conn,
+      result = Curl_add_buffer_send(&req_buffer, conn,
                                     &data->info.request_size, 0, FIRSTSOCKET);
       if(result)
         failf(data, "Failed sending POST request");
@@ -2640,7 +2671,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        (conn->bits.authneg || !Curl_checkheaders(conn, "Content-Length"))) {
       /* we allow replacing this header if not during auth negotiation,
          although it isn't very wise to actually set your own */
-      result = Curl_add_bufferf(req_buffer,
+      result = Curl_add_bufferf(&req_buffer,
                                 "Content-Length: %" CURL_FORMAT_CURL_OFF_T
                                 "\r\n", postsize);
       if(result)
@@ -2652,7 +2683,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       struct curl_slist *hdr;
 
       for(hdr = http->sendit->curlheaders; hdr; hdr = hdr->next) {
-        result = Curl_add_bufferf(req_buffer, "%s\r\n", hdr->data);
+        result = Curl_add_bufferf(&req_buffer, "%s\r\n", hdr->data);
         if(result)
           return result;
       }
@@ -2676,7 +2707,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       data->state.expect100header = FALSE;
 
     /* make the request end in a true CRLF */
-    result = Curl_add_buffer(req_buffer, "\r\n", 2);
+    result = Curl_add_buffer(&req_buffer, "\r\n", 2);
     if(result)
       return result;
 
@@ -2689,7 +2720,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     http->sending = HTTPSEND_BODY;
 
     /* this sends the buffer and frees all the buffer resources */
-    result = Curl_add_buffer_send(req_buffer, conn,
+    result = Curl_add_buffer_send(&req_buffer, conn,
                                   &data->info.request_size, 0, FIRSTSOCKET);
     if(result)
       failf(data, "Failed sending POST request");
@@ -2719,7 +2750,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        (conn->bits.authneg || !Curl_checkheaders(conn, "Content-Length"))) {
       /* we allow replacing this header if not during auth negotiation,
          although it isn't very wise to actually set your own */
-      result = Curl_add_bufferf(req_buffer,
+      result = Curl_add_bufferf(&req_buffer,
                                 "Content-Length: %" CURL_FORMAT_CURL_OFF_T
                                 "\r\n", postsize);
       if(result)
@@ -2727,7 +2758,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
 
     if(!Curl_checkheaders(conn, "Content-Type")) {
-      result = Curl_add_bufferf(req_buffer,
+      result = Curl_add_bufferf(&req_buffer,
                                 "Content-Type: application/"
                                 "x-www-form-urlencoded\r\n");
       if(result)
@@ -2765,31 +2796,31 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
            is no magic limit but only set to prevent really huge POSTs to
            get the data duplicated with malloc() and family. */
 
-        result = Curl_add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+        result = Curl_add_buffer(&req_buffer, "\r\n", 2); /* end of headers! */
         if(result)
           return result;
 
         if(!data->req.upload_chunky) {
           /* We're not sending it 'chunked', append it to the request
              already now to reduce the number if send() calls */
-          result = Curl_add_buffer(req_buffer, data->set.postfields,
+          result = Curl_add_buffer(&req_buffer, data->set.postfields,
                                    (size_t)postsize);
           included_body = postsize;
         }
         else {
           if(postsize) {
             /* Append the POST data chunky-style */
-            result = Curl_add_bufferf(req_buffer, "%x\r\n", (int)postsize);
+            result = Curl_add_bufferf(&req_buffer, "%x\r\n", (int)postsize);
             if(!result) {
-              result = Curl_add_buffer(req_buffer, data->set.postfields,
+              result = Curl_add_buffer(&req_buffer, data->set.postfields,
                                        (size_t)postsize);
               if(!result)
-                result = Curl_add_buffer(req_buffer, "\r\n", 2);
+                result = Curl_add_buffer(&req_buffer, "\r\n", 2);
               included_body = postsize + 2;
             }
           }
           if(!result)
-            result = Curl_add_buffer(req_buffer, "\x30\x0d\x0a\x0d\x0a", 5);
+            result = Curl_add_buffer(&req_buffer, "\x30\x0d\x0a\x0d\x0a", 5);
           /* 0  CR  LF  CR  LF */
           included_body += 5;
         }
@@ -2811,20 +2842,20 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* set the upload size to the progress meter */
         Curl_pgrsSetUploadSize(data, http->postsize);
 
-        result = Curl_add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+        result = Curl_add_buffer(&req_buffer, "\r\n", 2); /* end of headers! */
         if(result)
           return result;
       }
     }
     else {
-      result = Curl_add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+      result = Curl_add_buffer(&req_buffer, "\r\n", 2); /* end of headers! */
       if(result)
         return result;
 
       if(data->req.upload_chunky && conn->bits.authneg) {
         /* Chunky upload is selected and we're negotiating auth still, send
            end-of-data only */
-        result = Curl_add_buffer(req_buffer,
+        result = Curl_add_buffer(&req_buffer,
                                  "\x30\x0d\x0a\x0d\x0a", 5);
         /* 0  CR  LF  CR  LF */
         if(result)
@@ -2845,7 +2876,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       }
     }
     /* issue the request */
-    result = Curl_add_buffer_send(req_buffer, conn, &data->info.request_size,
+    result = Curl_add_buffer_send(&req_buffer, conn, &data->info.request_size,
                                   (size_t)included_body, FIRSTSOCKET);
 
     if(result)
@@ -2857,12 +2888,12 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     break;
 
   default:
-    result = Curl_add_buffer(req_buffer, "\r\n", 2);
+    result = Curl_add_buffer(&req_buffer, "\r\n", 2);
     if(result)
       return result;
 
     /* issue the request */
-    result = Curl_add_buffer_send(req_buffer, conn,
+    result = Curl_add_buffer_send(&req_buffer, conn,
                                   &data->info.request_size, 0, FIRSTSOCKET);
 
     if(result)
@@ -3828,7 +3859,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                          here, or else use real peer host name. */
                       conn->allocptr.cookiehost?
                       conn->allocptr.cookiehost:conn->host.name,
-                      data->state.path);
+                      data->state.up.path);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
 #endif

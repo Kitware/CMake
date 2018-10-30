@@ -127,6 +127,9 @@
 /* Define to 1 if bool is an available type. */
 #cmakedefine HAVE_BOOL_T 1
 
+/* Define to 1 if you have the __builtin_available function. */
+#cmakedefine HAVE_BUILTIN_AVAILABLE 1
+
 /* Define to 1 if you have the clock_gettime function and monotonic timer. */
 #cmakedefine HAVE_CLOCK_GETTIME_MONOTONIC 1
 
@@ -899,9 +902,6 @@
 
 /* The size of `time_t', as computed by sizeof. */
 #cmakedefine SIZEOF_TIME_T ${SIZEOF_TIME_T}
-
-/* The size of `void*', as computed by sizeof. */
-#cmakedefine SIZEOF_VOIDP ${SIZEOF_VOIDP}
 
 /* Define to 1 if you have the ANSI C header files. */
 #cmakedefine STDC_HEADERS 1

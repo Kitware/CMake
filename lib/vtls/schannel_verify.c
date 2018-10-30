@@ -135,7 +135,7 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
     failf(data,
           "schannel: CA file exceeds max size of %u bytes",
           MAX_CAFILE_SIZE);
-    result = CURLE_OUT_OF_MEMORY;
+    result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
 
@@ -244,7 +244,7 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
             CertFreeCertificateContext(cert_context);
             if(!add_cert_result) {
               failf(data,
-                    "schannel: failed to add certificate from CA file '%s'"
+                    "schannel: failed to add certificate from CA file '%s' "
                     "to certificate store: %s",
                     ca_file, Curl_strerror(conn, GetLastError()));
               result = CURLE_SSL_CACERT_BADFILE;
@@ -319,6 +319,10 @@ static CURLcode verify_host(struct Curl_easy *data,
    * embedded null bytes. This appears to be undocumented behavior.
    */
   cert_hostname_buff = (LPTSTR)malloc(len * sizeof(TCHAR));
+  if(!cert_hostname_buff) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto cleanup;
+  }
   actual_len = CertGetNameString(pCertContextServer,
                                  CERT_NAME_DNS_TYPE,
                                  name_flags,
