@@ -5594,20 +5594,23 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
   }
 }
 
-bool cmGeneratorTarget::HasLanguage(std::string const& language,
-                                    std::string const& config,
-                                    bool exclusive) const
+bool cmGeneratorTarget::IsCSharpOnly() const
 {
-  std::set<std::string> languages;
-  this->GetLanguages(languages, config);
-  // The "exclusive" check applies only to source files and not
-  // the linker language which may be affected by dependencies.
-  if (exclusive && languages.size() > 1) {
+  // Only certain target types may compile CSharp.
+  if (this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GetType() != cmStateEnums::STATIC_LIBRARY &&
+      this->GetType() != cmStateEnums::EXECUTABLE) {
     return false;
   }
-  // add linker language (if it is different from compiler languages)
-  languages.insert(this->GetLinkerLanguage(config));
-  return languages.count(language) > 0;
+  std::set<std::string> languages;
+  this->GetLanguages(languages, "");
+  // Consider an explicit linker language property, but *not* the
+  // computed linker language that may depend on linked targets.
+  const char* linkLang = this->GetProperty("LINKER_LANGUAGE");
+  if (linkLang && *linkLang) {
+    languages.insert(linkLang);
+  }
+  return languages.size() == 1 && languages.count("CSharp") > 0;
 }
 
 void cmGeneratorTarget::ComputeLinkImplementationLanguages(
@@ -5971,6 +5974,5 @@ cmGeneratorTarget::ManagedType cmGeneratorTarget::GetManagedType(
   // C# targets are always managed. This language specific check
   // is added to avoid that the COMMON_LANGUAGE_RUNTIME target property
   // has to be set manually for C# targets.
-  return this->HasLanguage("CSharp", config) ? ManagedType::Managed
-                                             : ManagedType::Native;
+  return this->IsCSharpOnly() ? ManagedType::Managed : ManagedType::Native;
 }

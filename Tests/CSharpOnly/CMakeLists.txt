@@ -9,5 +9,5 @@ add_executable(CSharpOnly csharponly.cs)
 
 target_link_libraries(CSharpOnly lib1 lib2)
 
-add_custom_target(CSharpCustom SOURCES empty.cs)
-add_custom_target(custom.cs DEPENDS empty.txt)
+add_custom_target(CSharpCustom ALL SOURCES empty.cs)
+add_custom_target(custom.cs ALL DEPENDS empty.txt)

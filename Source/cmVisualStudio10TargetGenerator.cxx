@@ -215,12 +215,11 @@ static bool cmVS10IsTargetsFile(std::string const& path)
   return cmSystemTools::Strucmp(ext.c_str(), ".targets") == 0;
 }
 
-static std::string computeProjectFileExtension(cmGeneratorTarget const* t,
-                                               const std::string& config)
+static std::string computeProjectFileExtension(cmGeneratorTarget const* t)
 {
   std::string res;
   res = ".vcxproj";
-  if (t->HasLanguage("CSharp", config)) {
+  if (t->IsCSharpOnly()) {
     res = ".csproj";
   }
   return res;
@@ -315,8 +314,8 @@ void cmVisualStudio10TargetGenerator::Generate()
       this->GeneratorTarget->GetProperty("EXTERNAL_MSPROJECT")) {
     return;
   }
-  const std::string ProjectFileExtension = computeProjectFileExtension(
-    this->GeneratorTarget, *this->Configurations.begin());
+  const std::string ProjectFileExtension =
+    computeProjectFileExtension(this->GeneratorTarget);
   if (ProjectFileExtension == ".vcxproj") {
     this->ProjectType = vcxproj;
     this->Managed = false;
@@ -1409,8 +1408,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   std::string path = this->LocalGenerator->GetCurrentBinaryDirectory();
   path += "/";
   path += this->Name;
-  path += computeProjectFileExtension(this->GeneratorTarget,
-                                      *this->Configurations.begin());
+  path += computeProjectFileExtension(this->GeneratorTarget);
   path += ".filters";
   cmGeneratedFileStream fout(path);
   fout.SetCopyIfDifferent(true);
@@ -3812,7 +3810,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
       path = lg->GetCurrentBinaryDirectory();
       path += "/";
       path += dt->GetName();
-      path += computeProjectFileExtension(dt, *this->Configurations.begin());
+      path += computeProjectFileExtension(dt);
     }
     ConvertToWindowsSlash(path);
     Elem e2(e1, "ProjectReference");
@@ -3838,7 +3836,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
     }
     // Workaround for static library C# targets
     if (referenceNotManaged && dt->GetType() == cmStateEnums::STATIC_LIBRARY) {
-      referenceNotManaged = !dt->HasLanguage("CSharp", "");
+      referenceNotManaged = !dt->IsCSharpOnly();
     }
     if (referenceNotManaged) {
       e2.Element("ReferenceOutputAssembly", "false");
