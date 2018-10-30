@@ -1,0 +1,9 @@
+#ifndef A_MC_HPP
+#define A_MC_HPP
+
+namespace a_mc {
+
+char const* mocs_compilation = "@MOCS_COMPILATION@";
+}
+
+#endif

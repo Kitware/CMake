@@ -1,0 +1,9 @@
+#include <b_mc.hpp>
+
+namespace b_mc {
+
+char const* mocs_compilation()
+{
+  return "@MOCS_COMPILATION@";
+}
+}
