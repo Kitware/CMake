@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(MocDepends)
+project(AutogenOriginDependsOn)
 include("../AutogenTest.cmake")
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
