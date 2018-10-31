@@ -7,6 +7,12 @@ FindPostgreSQL
 
 Find the PostgreSQL installation.
 
+IMPORTED Targets
+^^^^^^^^^^^^^^^^
+
+This module defines :prop_tgt:`IMPORTED` target ``PostgreSQL::PostgreSQL``
+if PostgreSQL has been found.
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -55,6 +61,8 @@ This module will set the following variables in your project:
 #  PostgreSQL_INCLUDE_DIRS  - Include directories for PostgreSQL
 #  PostgreSQL_LIBRARY_DIRS  - Link directories for PostgreSQL libraries
 #  PostgreSQL_LIBRARIES     - The PostgreSQL libraries.
+#
+# The ``PostgreSQL::PostgreSQL`` imported target is also created.
 #
 # ----------------------------------------------------------------------------
 # If you have installed PostgreSQL in a non-standard location.
@@ -187,6 +195,12 @@ set(PostgreSQL_FOUND  ${POSTGRESQL_FOUND})
 
 # Now try to get the include and library path.
 if(PostgreSQL_FOUND)
+  if (NOT TARGET PostgreSQL::PostgreSQL)
+    add_library(PostgreSQL::PostgreSQL UNKNOWN IMPORTED)
+    set_target_properties(PostgreSQL::PostgreSQL PROPERTIES
+      IMPORTED_LOCATION "${PostgreSQL_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${PostgreSQL_INCLUDE_DIR};${PostgreSQL_TYPE_INCLUDE_DIR}")
+  endif ()
   set(PostgreSQL_INCLUDE_DIRS ${PostgreSQL_INCLUDE_DIR} ${PostgreSQL_TYPE_INCLUDE_DIR} )
   set(PostgreSQL_LIBRARY_DIRS ${PostgreSQL_LIBRARY_DIR} )
   set(PostgreSQL_LIBRARIES ${PostgreSQL_LIBRARY})
