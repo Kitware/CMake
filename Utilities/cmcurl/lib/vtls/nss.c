@@ -217,10 +217,15 @@ static const cipher_s cipherlist[] = {
 #endif
 };
 
+#ifdef WIN32
+static const char *pem_library = "nsspem.dll";
+static const char *trust_library = "nssckbi.dll";
+#else
 static const char *pem_library = "libnsspem.so";
-static SECMODModule *pem_module = NULL;
-
 static const char *trust_library = "libnssckbi.so";
+#endif
+
+static SECMODModule *pem_module = NULL;
 static SECMODModule *trust_module = NULL;
 
 /* NSPR I/O layer we use to detect blocking direction during SSL handshake */
@@ -1522,7 +1527,6 @@ static bool is_nss_error(CURLcode err)
 {
   switch(err) {
   case CURLE_PEER_FAILED_VERIFICATION:
-  case CURLE_SSL_CACERT:
   case CURLE_SSL_CERTPROBLEM:
   case CURLE_SSL_CONNECT_ERROR:
   case CURLE_SSL_ISSUER_ERROR:
@@ -1579,8 +1583,9 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
     infof(data, "%s %s\n", (result) ? "failed to load" : "loaded",
           trust_library);
     if(result == CURLE_FAILED_INIT)
-      /* make the error non-fatal if we are not going to verify peer */
-      result = CURLE_SSL_CACERT_BADFILE;
+      /* If libnssckbi.so is not available (or fails to load), one can still
+         use CA certificates stored in NSS database.  Ignore the failure. */
+      result = CURLE_OK;
   }
   else if(!use_trust_module && trust_module) {
     /* libnssckbi.so not needed but already loaded --> unload it! */
@@ -1715,8 +1720,6 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
       failf(data, "unsupported min version passed via CURLOPT_SSLVERSION");
       return result;
     }
-    if(max == CURL_SSLVERSION_MAX_NONE)
-      sslver->max = sslver->min;
   }
 
   switch(max) {
