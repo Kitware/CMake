@@ -1461,6 +1461,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindPatch)
   endif()
 
+  if(CMake_TEST_FindPostgreSQL)
+    add_subdirectory(FindPostgreSQL)
+  endif()
+
   if(CMake_TEST_FindProtobuf)
     add_subdirectory(FindProtobuf)
   endif()
