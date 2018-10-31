@@ -381,19 +381,14 @@ function(_protobuf_find_libraries name filename)
     mark_as_advanced(${name}_LIBRARY_DEBUG)
 
     select_library_configurations(${name})
+
+    if(UNIX AND Threads_FOUND)
+      list(APPEND ${name}_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+    endif()
+
     set(${name}_LIBRARY "${${name}_LIBRARY}" PARENT_SCOPE)
     set(${name}_LIBRARIES "${${name}_LIBRARIES}" PARENT_SCOPE)
   endif()
-endfunction()
-
-# Internal function: find threads library
-function(_protobuf_find_threads)
-    set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-    find_package(Threads)
-    if(Threads_FOUND)
-        list(APPEND Protobuf_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
-        set(Protobuf_LIBRARIES "${Protobuf_LIBRARIES}" PARENT_SCOPE)
-    endif()
 endfunction()
 
 #
@@ -416,6 +411,11 @@ if(MSVC)
     find_path(Protobuf_SRC_ROOT_FOLDER protobuf.pc.in)
 endif()
 
+if(UNIX)
+  # Protobuf headers may depend on threading.
+  find_package(Threads QUIET)
+endif()
+
 # The Protobuf library
 _protobuf_find_libraries(Protobuf protobuf)
 #DOC "The Google Protocol Buffers RELEASE Library"
@@ -428,10 +428,6 @@ _protobuf_find_libraries(Protobuf_PROTOC protoc)
 # Restore original find library prefixes
 if(MSVC)
     set(CMAKE_FIND_LIBRARY_PREFIXES "${Protobuf_ORIG_FIND_LIBRARY_PREFIXES}")
-endif()
-
-if(UNIX)
-    _protobuf_find_threads()
 endif()
 
 # Find the include directory
@@ -521,6 +517,10 @@ if(Protobuf_INCLUDE_DIR)
             set_target_properties(protobuf::libprotobuf PROPERTIES
               IMPORTED_LOCATION_DEBUG "${Protobuf_LIBRARY_DEBUG}")
           endif()
+          if(UNIX AND TARGET Threads::Threads)
+            set_property(TARGET protobuf::libprotobuf APPEND PROPERTY
+                INTERFACE_LINK_LIBRARIES Threads::Threads)
+          endif()
       endif()
   endif()
 
@@ -545,6 +545,10 @@ if(Protobuf_INCLUDE_DIR)
             set_target_properties(protobuf::libprotobuf-lite PROPERTIES
               IMPORTED_LOCATION_DEBUG "${Protobuf_LITE_LIBRARY_DEBUG}")
           endif()
+          if(UNIX AND TARGET Threads::Threads)
+            set_property(TARGET protobuf::libprotobuf-lite APPEND PROPERTY
+                INTERFACE_LINK_LIBRARIES Threads::Threads)
+          endif()
       endif()
   endif()
 
@@ -568,6 +572,10 @@ if(Protobuf_INCLUDE_DIR)
               IMPORTED_CONFIGURATIONS DEBUG)
             set_target_properties(protobuf::libprotoc PROPERTIES
               IMPORTED_LOCATION_DEBUG "${Protobuf_PROTOC_LIBRARY_DEBUG}")
+          endif()
+          if(UNIX AND TARGET Threads::Threads)
+            set_property(TARGET protobuf::libprotoc APPEND PROPERTY
+                INTERFACE_LINK_LIBRARIES Threads::Threads)
           endif()
       endif()
   endif()
