@@ -10,6 +10,9 @@ Searches for all installed versions of Qt3 or Qt4.
 This module cannot handle Qt5 or any later versions.
 For those, see :manual:`cmake-qt(7)`.
 
+This module exists for the :command:`find_package` command only if
+policy :policy:`CMP0084` is not set to ``NEW``.
+
 This module should only be used if your project can work with multiple
 versions of Qt.  If not, you should just directly use FindQt4 or
 FindQt3.  If multiple versions of Qt are found on the machine, then
@@ -33,6 +36,11 @@ then the FindQt3 or FindQt4 module is included.
   QT4_INSTALLED is set to TRUE if qt4 is found.
   QT3_INSTALLED is set to TRUE if qt3 is found.
 #]=======================================================================]
+
+if(_findqt_testing)
+  set(_findqt_included TRUE)
+  return()
+endif()
 
 # look for signs of qt3 installations
 file(GLOB GLOB_TEMP_VAR /usr/lib*/qt-3*/bin/qmake /usr/lib*/qt3*/bin/qmake)

@@ -3500,7 +3500,8 @@ void cmMakefile::DisplayStatus(const char* message, float s) const
   cm->UpdateProgress(message, s);
 }
 
-std::string cmMakefile::GetModulesFile(const char* filename) const
+std::string cmMakefile::GetModulesFile(const char* filename,
+                                       bool& system) const
 {
   std::string result;
 
@@ -3547,8 +3548,10 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
   // Normally, prefer the files found in CMAKE_MODULE_PATH. Only when the file
   // from which we are being called is located itself in CMAKE_ROOT, then
   // prefer results from CMAKE_ROOT depending on the policy setting.
+  system = false;
   result = moduleInCMakeModulePath;
   if (result.empty()) {
+    system = true;
     result = moduleInCMakeRoot;
   }
 
@@ -3571,11 +3574,13 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
           CM_FALLTHROUGH;
         }
         case cmPolicies::OLD:
+          system = false;
           result = moduleInCMakeModulePath;
           break;
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
         case cmPolicies::NEW:
+          system = true;
           result = moduleInCMakeRoot;
           break;
       }

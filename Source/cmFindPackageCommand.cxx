@@ -111,6 +111,8 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->SortOrder = None;
   this->SortDirection = Asc;
   this->AppendSearchPathGroups();
+
+  this->DeprecatedFindModules["Qt"] = cmPolicies::CMP0084;
 }
 
 void cmFindPackageCommand::AppendSearchPathGroups()
@@ -653,8 +655,31 @@ bool cmFindPackageCommand::FindModule(bool& found)
   std::string module = "Find";
   module += this->Name;
   module += ".cmake";
-  std::string mfile = this->Makefile->GetModulesFile(module.c_str());
+  bool system = false;
+  std::string mfile = this->Makefile->GetModulesFile(module.c_str(), system);
   if (!mfile.empty()) {
+    if (system) {
+      auto it = this->DeprecatedFindModules.find(this->Name);
+      if (it != this->DeprecatedFindModules.end()) {
+        cmPolicies::PolicyStatus status =
+          this->Makefile->GetPolicyStatus(it->second);
+        switch (status) {
+          case cmPolicies::WARN: {
+            std::ostringstream e;
+            e << cmPolicies::GetPolicyWarning(it->second) << "\n";
+            this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+            CM_FALLTHROUGH;
+          }
+          case cmPolicies::OLD:
+            break;
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::NEW:
+            return true;
+        }
+      }
+    }
+
     // Load the module we found, and set "<name>_FIND_MODULE" to true
     // while inside it.
     found = true;
