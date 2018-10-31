@@ -1408,6 +1408,13 @@ if ( NOT Boost_NAMESPACE )
   set(Boost_NAMESPACE "boost")
 endif()
 
+if(Boost_DEBUG)
+  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+    "Boost_LIB_PREFIX = ${Boost_LIB_PREFIX}")
+  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+    "Boost_NAMESPACE = ${Boost_NAMESPACE}")
+endif()
+
 # ------------------------------------------------------------------------
 #  Suffix initialization and compiler suffix detection.
 # ------------------------------------------------------------------------
