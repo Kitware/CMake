@@ -4,9 +4,7 @@ include(CTest)
 
 find_package(GDAL REQUIRED)
 
-# FindGDAL doesn't export a version number.
-#add_definitions(-DCMAKE_EXPECTED_GDAL_VERSION="${GDAL_VERSION}")
-add_definitions(-DCMAKE_EXPECTED_GDAL_VERSION="unknown")
+add_definitions(-DCMAKE_EXPECTED_GDAL_VERSION="${GDAL_VERSION}")
 
 add_executable(test_tgt main.c)
 target_link_libraries(test_tgt GDAL::GDAL)

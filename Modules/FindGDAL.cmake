@@ -24,6 +24,8 @@ This module will set the following variables in your project:
   Include directories for GDAL headers.
 ``GDAL_LIBRARIES``
   Libraries to link to GDAL.
+``GDAL_VERSION``
+  The version of GDAL found.
 
 Cache variables
 ^^^^^^^^^^^^^^^
@@ -138,8 +140,19 @@ find_library(GDAL_LIBRARY
   PATH_SUFFIXES lib
 )
 
+if (EXISTS "${GDAL_INCLUDE_DIR}/gdal_version.h")
+    file(STRINGS "${GDAL_INCLUDE_DIR}/gdal_version.h" _gdal_version
+        REGEX "GDAL_RELEASE_NAME")
+    string(REGEX REPLACE ".*\"\(.*\)\"" "\\1" GDAL_VERSION "${_gdal_version}")
+    unset(_gdal_version)
+else ()
+    set(GDAL_VERSION GDAL_VERSION-NOTFOUND)
+endif ()
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(GDAL DEFAULT_MSG GDAL_LIBRARY GDAL_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(GDAL
+    VERSION_VAR GDAL_VERSION
+    REQUIRED_VARS GDAL_LIBRARY GDAL_INCLUDE_DIR)
 
 if (GDAL_FOUND AND NOT TARGET GDAL::GDAL)
     add_library(GDAL::GDAL UNKNOWN IMPORTED)
