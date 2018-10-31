@@ -7,6 +7,12 @@ FindGDAL
 
 Find GDAL.
 
+IMPORTED Targets
+^^^^^^^^^^^^^^^^
+
+This module defines :prop_tgt:`IMPORTED` target ``GDAL::GDAL``
+if GDAL has been found.
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -134,6 +140,13 @@ find_library(GDAL_LIBRARY
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GDAL DEFAULT_MSG GDAL_LIBRARY GDAL_INCLUDE_DIR)
+
+if (GDAL_FOUND AND NOT TARGET GDAL::GDAL)
+    add_library(GDAL::GDAL UNKNOWN IMPORTED)
+    set_target_properties(GDAL::GDAL PROPERTIES
+        IMPORTED_LOCATION "${GDAL_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${GDAL_INCLUDE_DIR}")
+endif ()
 
 set(GDAL_LIBRARIES ${GDAL_LIBRARY})
 set(GDAL_INCLUDE_DIRS ${GDAL_INCLUDE_DIR})
