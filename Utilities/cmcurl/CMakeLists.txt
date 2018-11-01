@@ -1285,11 +1285,11 @@ endif()
 
 #-----------------------------------------------------------------------------
 # CMake-specific curl code.
-add_executable(LIBCURL curltest.c)
-target_link_libraries(LIBCURL cmcurl)
+add_executable(curltest curltest.c)
+target_link_libraries(curltest cmcurl)
 
 if(BUILD_TESTING AND CMAKE_CURL_TEST_URL)
-  add_test(curl LIBCURL ${CMAKE_CURL_TEST_URL})
+  add_test(curl curltest ${CMAKE_CURL_TEST_URL})
 endif()
 
 install(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmcurl)
