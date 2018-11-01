@@ -5,28 +5,37 @@
 FindGDAL
 --------
 
+Find GDAL.
 
+Result Variables
+^^^^^^^^^^^^^^^^
 
-Locate gdal
+This module will set the following variables in your project:
 
-This module accepts the following environment variables:
+``GDAL_FOUND``
+  True if GDAL is found.
+``GDAL_INCLUDE_DIRS``
+  Include directories for GDAL headers.
+``GDAL_LIBRARIES``
+  Libraries to link to GDAL.
 
-::
+Cache variables
+^^^^^^^^^^^^^^^
 
-    GDAL_DIR or GDAL_ROOT - Specify the location of GDAL
+The following cache variables may also be set:
 
+``GDAL_LIBRARY``
+  The libgdal library file.
+``GDAL_INCLUDE_DIR``
+  The directory containing ``gdal.h``.
 
+Hints
+^^^^^
 
-This module defines the following CMake variables:
-
-::
-
-    GDAL_FOUND - True if libgdal is found
-    GDAL_LIBRARY - A variable pointing to the GDAL library
-    GDAL_INCLUDE_DIR - Where to find the headers
+Set ``GDAL_DIR`` or ``GDAL_ROOT`` in the environment to specify the
+GDAL installation prefix.
 #]=======================================================================]
 
-#
 # $GDALDIR is an environment variable that would
 # correspond to the ./configure --prefix=$GDAL_DIR
 # used in building gdal.
