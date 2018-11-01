@@ -52,6 +52,7 @@ private:
   enum class ObjectKind
   {
     CodeModel,
+    Cache,
     InternalTest
   };
 
@@ -185,6 +186,10 @@ private:
   void BuildClientRequestCodeModel(
     ClientRequest& r, std::vector<RequestVersion> const& versions);
   Json::Value BuildCodeModel(Object const& object);
+
+  void BuildClientRequestCache(ClientRequest& r,
+                               std::vector<RequestVersion> const& versions);
+  Json::Value BuildCache(Object const& object);
 
   void BuildClientRequestInternalTest(
     ClientRequest& r, std::vector<RequestVersion> const& versions);

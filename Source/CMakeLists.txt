@@ -209,6 +209,8 @@ set(SRCS
   cmExtraSublimeTextGenerator.h
   cmFileAPI.cxx
   cmFileAPI.h
+  cmFileAPICache.cxx
+  cmFileAPICache.h
   cmFileAPICodemodel.cxx
   cmFileAPICodemodel.h
   cmFileLock.cxx

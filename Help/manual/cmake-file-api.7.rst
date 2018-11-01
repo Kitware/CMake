@@ -869,3 +869,77 @@ with members:
     with forward slashes.  If the file is inside the top-level source
     directory then the path is specified relative to that directory.
     Otherwise the path is absolute.
+
+Object Kind "cache"
+-------------------
+
+The ``cache`` object kind lists cache entries.  These are the
+:ref:`CMake Language Variables` stored in the persistent cache
+(``CMakeCache.txt``) for the build tree.
+
+There is only one ``cache`` object major version, version 2.
+Version 1 does not exist to avoid confusion with that from
+:manual:`cmake-server(7)` mode.
+
+"cache" version 2
+^^^^^^^^^^^^^^^^^
+
+``cache`` object version 2 is a JSON object:
+
+.. code-block:: json
+
+  {
+    "kind": "cache",
+    "version": { "major": 2, "minor": 0 },
+    "entries": [
+      {
+        "name": "BUILD_SHARED_LIBS",
+        "value": "ON",
+        "type": "BOOL",
+        "properties": [
+          {
+            "name": "HELPSTRING",
+            "value": "Build shared libraries"
+          }
+        ]
+      },
+      {
+        "name": "CMAKE_GENERATOR",
+        "value": "Unix Makefiles",
+        "type": "INTERNAL",
+        "properties": [
+          {
+            "name": "HELPSTRING",
+            "value": "Name of generator."
+          }
+        ]
+      }
+    ]
+  }
+
+The members specific to ``cache`` objects are:
+
+``entries``
+  A JSON array whose entries are each a JSON object specifying a
+  cache entry.  The members of each entry are:
+
+  ``name``
+    A string specifying the name of the entry.
+
+  ``value``
+    A string specifying the value of the entry.
+
+  ``type``
+    A string specifying the type of the entry used by
+    :manual:`cmake-gui(1)` to choose a widget for editing.
+
+  ``properties``
+    A JSON array of entries specifying associated
+    :ref:`cache entry properties <Cache Entry Properties>`.
+    Each entry is a JSON object containing members:
+
+    ``name``
+      A string specifying the name of the cache entry property.
+
+    ``value``
+      A string specifying the value of the cache entry property.
