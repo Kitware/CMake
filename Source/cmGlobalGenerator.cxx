@@ -112,6 +112,15 @@ cmGlobalGenerator::~cmGlobalGenerator()
   delete this->ExtraGenerator;
 }
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+Json::Value cmGlobalGenerator::GetJson() const
+{
+  Json::Value generator = Json::objectValue;
+  generator["name"] = this->GetName();
+  return generator;
+}
+#endif
+
 bool cmGlobalGenerator::SetGeneratorInstance(std::string const& i,
                                              cmMakefile* mf)
 {

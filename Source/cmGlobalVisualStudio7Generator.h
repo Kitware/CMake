@@ -28,6 +28,10 @@ public:
   ///! Create a local generator appropriate to this Global Generator
   cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  Json::Value GetJson() const override;
+#endif
+
   bool SetSystemName(std::string const& s, cmMakefile* mf) override;
 
   bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;

@@ -197,6 +197,9 @@ The reply index file contains a JSON object:
         "ctest": "/prefix/bin/ctest",
         "cpack": "/prefix/bin/cpack",
         "root": "/prefix/share/cmake-3.14"
+      },
+      "generator": {
+        "name": "Unix Makefiles"
       }
     },
     "objects": [
@@ -259,6 +262,16 @@ The members are:
     represented with forward slashes.  It also has a ``root`` member for
     the absolute path to the directory containing CMake resources like the
     ``Modules/`` directory (see :variable:`CMAKE_ROOT`).
+
+  ``generator``
+    A JSON object describing the CMake generator used for the build.
+    It has members:
+
+    ``name``
+      A string specifying the name of the generator.
+    ``platform``
+      If the generator supports :variable:`CMAKE_GENERATOR_PLATFORM`,
+      this is a string specifying the generator platform name.
 
 ``objects``
   A JSON array listing all versions of all `Object Kinds`_ generated

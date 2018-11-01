@@ -23,9 +23,10 @@ def is_string(x):
 
 def check_cmake(cmake):
     assert is_dict(cmake)
-    assert sorted(cmake.keys()) == ["paths", "version"]
+    assert sorted(cmake.keys()) == ["generator", "paths", "version"]
     check_cmake_version(cmake["version"])
     check_cmake_paths(cmake["paths"])
+    check_cmake_generator(cmake["generator"])
 
 def check_cmake_version(v):
     assert is_dict(v)
@@ -44,6 +45,16 @@ def check_cmake_paths(v):
     assert is_string(v["cpack"])
     assert is_string(v["ctest"])
     assert is_string(v["root"])
+
+def check_cmake_generator(g):
+    assert is_dict(g)
+    name = g.get("name", None)
+    assert is_string(name)
+    if name.startswith("Visual Studio"):
+        assert sorted(g.keys()) == ["name", "platform"]
+        assert is_string(g["platform"])
+    else:
+        assert sorted(g.keys()) == ["name"]
 
 def check_index_object(indexEntry, kind, major, minor, check):
     assert is_dict(indexEntry)

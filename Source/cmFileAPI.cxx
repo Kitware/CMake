@@ -4,6 +4,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
+#include "cmGlobalGenerator.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cmake.h"
@@ -311,6 +312,7 @@ Json::Value cmFileAPI::BuildCMake()
   cmake_paths["ctest"] = cmSystemTools::GetCTestCommand();
   cmake_paths["cpack"] = cmSystemTools::GetCPackCommand();
   cmake_paths["root"] = cmSystemTools::GetCMakeRoot();
+  cmake["generator"] = this->CMakeInstance->GetGlobalGenerator()->GetJson();
   return cmake;
 }
 
