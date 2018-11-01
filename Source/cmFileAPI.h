@@ -53,6 +53,7 @@ private:
   {
     CodeModel,
     Cache,
+    CMakeFiles,
     InternalTest
   };
 
@@ -190,6 +191,10 @@ private:
   void BuildClientRequestCache(ClientRequest& r,
                                std::vector<RequestVersion> const& versions);
   Json::Value BuildCache(Object const& object);
+
+  void BuildClientRequestCMakeFiles(
+    ClientRequest& r, std::vector<RequestVersion> const& versions);
+  Json::Value BuildCMakeFiles(Object const& object);
 
   void BuildClientRequestInternalTest(
     ClientRequest& r, std::vector<RequestVersion> const& versions);

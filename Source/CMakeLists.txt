@@ -213,6 +213,8 @@ set(SRCS
   cmFileAPICache.h
   cmFileAPICodemodel.cxx
   cmFileAPICodemodel.h
+  cmFileAPICMakeFiles.cxx
+  cmFileAPICMakeFiles.h
   cmFileLock.cxx
   cmFileLock.h
   cmFileLockPool.cxx

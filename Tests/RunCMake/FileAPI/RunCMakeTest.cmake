@@ -55,3 +55,4 @@ endfunction()
 
 run_object(codemodel-v2)
 run_object(cache-v2)
+run_object(cmakeFiles-v1)

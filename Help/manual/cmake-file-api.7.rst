@@ -943,3 +943,85 @@ The members specific to ``cache`` objects are:
 
     ``value``
       A string specifying the value of the cache entry property.
+
+Object Kind "cmakeFiles"
+------------------------
+
+The ``cmakeFiles`` object kind lists files used by CMake while
+configuring and generating the build system.  These include the
+``CMakeLists.txt`` files as well as included ``.cmake`` files.
+
+There is only one ``cmakeFiles`` object major version, version 1.
+
+"cmakeFiles" version 1
+^^^^^^^^^^^^^^^^^^^^^^
+
+``cmakeFiles`` object version 1 is a JSON object:
+
+.. code-block:: json
+
+  {
+    "kind": "cmakeFiles",
+    "version": { "major": 1, "minor": 0 },
+    "paths": {
+      "build": "/path/to/top-level-build-dir",
+      "source": "/path/to/top-level-source-dir"
+    },
+    "inputs": [
+      {
+        "path": "CMakeLists.txt"
+      },
+      {
+        "isGenerated": true,
+        "path": "/path/to/top-level-build-dir/.../CMakeSystem.cmake"
+      },
+      {
+        "isExternal": true,
+        "path": "/path/to/external/third-party/module.cmake"
+      },
+      {
+        "isCMake": true,
+        "isExternal": true,
+        "path": "/path/to/cmake/Modules/CMakeGenericSystem.cmake"
+      }
+    ]
+  }
+
+The members specific to ``cmakeFiles`` objects are:
+
+``paths``
+  A JSON object containing members:
+
+  ``source``
+    A string specifying the absolute path to the top-level source directory,
+    represented with forward slashes.
+
+  ``build``
+    A string specifying the absolute path to the top-level build directory,
+    represented with forward slashes.
+
+``inputs``
+  A JSON array whose entries are each a JSON object specifying an input
+  file used by CMake when configuring and generating the build system.
+  The members of each entry are:
+
+  ``path``
+    A string specifying the path to an input file to CMake, represented
+    with forward slashes.  If the file is inside the top-level source
+    directory then the path is specified relative to that directory.
+    Otherwise the path is absolute.
+
+  ``isGenerated``
+    Optional member that is present with boolean value ``true``
+    if the path specifies a file that is under the top-level
+    build directory and the build is out-of-source.
+    This member is not available on in-source builds.
+
+  ``isExternal``
+    Optional member that is present with boolean value ``true``
+    if the path specifies a file that is not under the top-level
+    source or build directories.
+
+  ``isCMake``
+    Optional member that is present with boolean value ``true``
+    if the path specifies a file in the CMake installation.
