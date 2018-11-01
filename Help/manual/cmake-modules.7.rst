@@ -237,6 +237,7 @@ They are normally called through the :command:`find_package` command.
    /module/FindSDL_ttf
    /module/FindSelfPackers
    /module/FindSquish
+   /module/FindSQLite3
    /module/FindSubversion
    /module/FindSWIG
    /module/FindTCL

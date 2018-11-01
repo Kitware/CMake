@@ -1469,6 +1469,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindProtobuf)
   endif()
 
+  if(CMake_TEST_FindSQLite3)
+    add_subdirectory(FindSQLite3)
+  endif()
+
   if(CMake_TEST_FindTIFF)
     add_subdirectory(FindTIFF)
   endif()
