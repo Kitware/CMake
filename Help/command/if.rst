@@ -231,7 +231,7 @@ which is true because ``var2`` is defined to "var1" which is not a false
 constant.
 
 Automatic evaluation applies in the other cases whenever the
-above-documented signature accepts ``<variable|string>``:
+above-documented condition syntax accepts ``<variable|string>``:
 
 * The left hand argument to ``MATCHES`` is first checked to see if it is
   a defined variable, if so the variable's value is used, otherwise the
@@ -269,3 +269,7 @@ specified in a :ref:`Quoted Argument` or a :ref:`Bracket Argument`.
 A quoted or bracketed variable or keyword will be interpreted as a
 string and not dereferenced or interpreted.
 See policy :policy:`CMP0054`.
+
+There is no short form for environment or cache :ref:`Variable References`.
+They can be referenced as ``$ENV{<name>}`` or ``$CACHE{<name>}``
+wherever the above-documented condition syntax accepts <variable|string>.
