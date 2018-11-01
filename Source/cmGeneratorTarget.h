@@ -372,11 +372,7 @@ public:
   void GetLanguages(std::set<std::string>& languages,
                     std::string const& config) const;
 
-  // Evaluate if the target uses the given language for compilation
-  // and/or linking. If 'exclusive' is true, 'language' is expected
-  // to be the only language used in source files for the target.
-  bool HasLanguage(std::string const& language, std::string const& config,
-                   bool exclusive = true) const;
+  bool IsCSharpOnly() const;
 
   void GetObjectLibrariesCMP0026(
     std::vector<cmGeneratorTarget*>& objlibs) const;
