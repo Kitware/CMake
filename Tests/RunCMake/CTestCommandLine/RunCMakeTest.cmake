@@ -173,3 +173,32 @@ function(run_TestStdin)
   run_cmake_command(TestStdin ${CMAKE_CTEST_COMMAND} -V)
 endfunction()
 run_TestStdin()
+
+function(ShowAsJson_check_python v)
+  set(json_file "${RunCMake_TEST_BINARY_DIR}/ctest.json")
+  file(WRITE "${json_file}" "${actual_stdout}")
+  set(actual_stdout "" PARENT_SCOPE)
+  execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} "${RunCMake_SOURCE_DIR}/ShowAsJson${v}-check.py" "${json_file}"
+    RESULT_VARIABLE result
+    OUTPUT_VARIABLE output
+    ERROR_VARIABLE output
+    )
+  if(NOT result EQUAL 0)
+    string(REPLACE "\n" "\n  " output "  ${output}")
+    set(RunCMake_TEST_FAILED "Unexpected output:\n${output}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(run_ShowAsJson)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ShowAsJson)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+    add_test(ShowAsJson \"${CMAKE_COMMAND}\" -E echo)
+    set_tests_properties(ShowAsJson PROPERTIES WILL_FAIL true _BACKTRACE_TRIPLES \"file1;1;add_test;file0;;\")
+")
+  run_cmake_command(ShowAsJsonVersionOne ${CMAKE_CTEST_COMMAND} --show-only=json-v1)
+endfunction()
+run_ShowAsJson()
