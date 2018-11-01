@@ -241,7 +241,6 @@ Variables that Describe the System
    /variable/ANDROID
    /variable/APPLE
    /variable/BORLAND
-   /variable/CACHE
    /variable/CMAKE_CL_64
    /variable/CMAKE_COMPILER_2005
    /variable/CMAKE_HOST_APPLE
@@ -260,7 +259,6 @@ Variables that Describe the System
    /variable/CMAKE_SYSTEM_PROCESSOR
    /variable/CMAKE_SYSTEM_VERSION
    /variable/CYGWIN
-   /variable/ENV
    /variable/GHS-MULTI
    /variable/MINGW
    /variable/MSVC
@@ -599,3 +597,12 @@ Variables for CPack
    /variable/CPACK_PACKAGING_INSTALL_PREFIX
    /variable/CPACK_SET_DESTDIR
    /variable/CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION
+
+Variable Expansion Operators
+============================
+
+.. toctree::
+   :maxdepth: 1
+
+   /variable/CACHE
+   /variable/ENV
