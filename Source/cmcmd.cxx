@@ -1521,6 +1521,8 @@ class cmVSLink
   std::string ManifestFileRC;
   std::string ManifestFileRes;
   std::string TargetFile;
+  std::string MtPath;
+  std::string RcPath;
 
 public:
   cmVSLink(int type, bool verbose)
@@ -1664,6 +1666,12 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
     } else if (cmHasLiteralPrefix(*arg, "--intdir=")) {
       intDir = arg->substr(9);
       ++arg;
+    } else if (cmHasLiteralPrefix(*arg, "--rc=")) {
+      this->RcPath = arg->substr(5);
+      ++arg;
+    } else if (cmHasLiteralPrefix(*arg, "--mt=")) {
+      this->MtPath = arg->substr(5);
+      ++arg;
     } else {
       std::cerr << "unknown argument '" << *arg << "'\n";
       return false;
@@ -1803,7 +1811,7 @@ int cmVSLink::LinkIncremental()
 
   // Compile the resource file.
   std::vector<std::string> rcCommand;
-  rcCommand.push_back("rc");
+  rcCommand.push_back(this->RcPath.empty() ? "rc" : this->RcPath);
   rcCommand.push_back("/fo" + this->ManifestFileRes);
   rcCommand.push_back(this->ManifestFileRC);
   if (!RunCommand("RC Pass 1", rcCommand, this->Verbose, FORMAT_DECIMAL)) {
@@ -1862,7 +1870,7 @@ int cmVSLink::LinkNonIncremental()
 int cmVSLink::RunMT(std::string const& out, bool notify)
 {
   std::vector<std::string> mtCommand;
-  mtCommand.push_back("mt");
+  mtCommand.push_back(this->MtPath.empty() ? "mt" : this->MtPath);
   mtCommand.push_back("/nologo");
   mtCommand.push_back("/manifest");
   if (this->LinkGeneratesManifest) {
