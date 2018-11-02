@@ -35,6 +35,7 @@ public:
   bool GetNamelinkOnly() const;
   bool GetNamelinkSkip() const;
   bool HasNamelinkComponent() const;
+  const std::string& GetType() const;
 
   // once HandleDirectoryMode() is also switched to using
   // cmInstallCommandArguments then these two functions can become non-static
@@ -55,6 +56,7 @@ private:
   cmCAEnabler Optional;
   cmCAEnabler NamelinkOnly;
   cmCAEnabler NamelinkSkip;
+  cmCAString Type;
 
   std::string DestinationString;
   std::string PermissionsString;
