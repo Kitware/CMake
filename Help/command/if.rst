@@ -187,11 +187,10 @@ Possible conditions are:
 ``if(<variable|string> IN_LIST <variable>)``
  True if the given element is contained in the named list variable.
 
-``if(DEFINED <name>|ENV{<name>})``
- True if a variable or environment variable
- with given ``<name>`` is defined.
- The value of the variable does not matter.
- Note that macro arguments are not variables.
+``if(DEFINED <name>|CACHE{<name>}|ENV{<name>})``
+ True if a variable, cache variable or environment variable
+ with given ``<name>`` is defined. The value of the variable
+ does not matter. Note that macro arguments are not variables.
 
 ``if((condition) AND (condition OR (condition)))``
  The conditions inside the parenthesis are evaluated first and then

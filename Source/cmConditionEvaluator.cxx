@@ -495,6 +495,12 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
             argP1->GetValue().operator[](argP1len - 1) == '}') {
           std::string env = argP1->GetValue().substr(4, argP1len - 5);
           bdef = cmSystemTools::HasEnv(env);
+        } else if (argP1len > 6 &&
+                   argP1->GetValue().substr(0, 6) == "CACHE{" &&
+                   argP1->GetValue().operator[](argP1len - 1) == '}') {
+          std::string cache = argP1->GetValue().substr(6, argP1len - 7);
+          bdef =
+            this->Makefile.GetState()->GetCacheEntryValue(cache) != nullptr;
         } else {
           bdef = this->Makefile.IsDefinitionSet(argP1->GetValue());
         }
