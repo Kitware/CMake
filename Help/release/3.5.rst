@@ -120,23 +120,23 @@ Platforms
 CPack
 -----
 
-* The :cpack_gen:`CPack DMG Generator` learned new variable to
+* The :cpack_gen:`CPack DragNDrop Generator` learned new variable to
   specify AppleScript file run to customize appearance of ``DragNDrop``
   installer folder, including background image setting using supplied
   PNG or multi-resolution TIFF file.
   See the :variable:`CPACK_DMG_DS_STORE_SETUP_SCRIPT` and
   :variable:`CPACK_DMG_BACKGROUND_IMAGE` variables.
 
-* The :cpack_gen:`CPack Deb Generator` learned to set the optional config
+* The :cpack_gen:`CPack DEB Generator` learned to set the optional config
   file ``Source`` field using a monolithic or per-component variable.
   See :variable:`CPACK_DEBIAN_PACKAGE_SOURCE`.
 
-* The :cpack_gen:`CPack Deb Generator` learned to set Package, Section
+* The :cpack_gen:`CPack DEB Generator` learned to set Package, Section
   and Priority control fields per-component.
   See variables :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_SECTION` and
   :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_PRIORITY`.
 
-* The :cpack_gen:`CPack DMG Generator` learned to add
+* The :cpack_gen:`CPack DragNDrop Generator` learned to add
   multi-lingual SLAs to a DMG which is presented to the user when they try to
   mount the DMG.  See the :variable:`CPACK_DMG_SLA_LANGUAGES` and
   :variable:`CPACK_DMG_SLA_DIR` variables for details.
