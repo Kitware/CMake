@@ -102,6 +102,7 @@ String Comparisons
 ``$<VERSION_GREATER_EQUAL:v1,v2>``
   ``1`` if ``v1`` is a version greater than or equal to ``v2``, else ``0``.
 
+
 Variable Queries
 ----------------
 
@@ -144,6 +145,9 @@ Variable Queries
   for the 'head' target, an error is reported.  See the
   :manual:`cmake-compile-features(7)` manual for information on
   compile features and a list of supported compilers.
+
+.. _`Boolean COMPILE_LANGUAGE Generator Expression`:
+
 ``$<COMPILE_LANGUAGE:language>``
   ``1`` when the language used for compilation unit matches ``language``,
   otherwise ``0``.  This expression may be used to specify compile options,
@@ -187,20 +191,22 @@ Variable Queries
     add_executable(myapp main.cpp)
     target_link_libraries(myapp myapp_c myapp_cxx)
 
-Informational Generator Expressions
+String-Valued Generator Expressions
 ===================================
 
-These expressions expand to some information. The information may be used
-directly, eg:
+These expressions expand to some string.
+For example,
 
 .. code-block:: cmake
 
   include_directories(/usr/include/$<CXX_COMPILER_ID>/)
 
 expands to ``/usr/include/GNU/`` or ``/usr/include/Clang/`` etc, depending on
-the Id of the compiler.
+the compiler identifier.
 
-These expressions may also may be combined with logical expressions:
+String-valued expressions may also be combined with other expressions.
+Here an example for a string-valued expression within a boolean expressions
+within a conditional expression:
 
 .. code-block:: cmake
 
@@ -210,12 +216,95 @@ expands to ``OLD_COMPILER`` if the
 :variable:`CMAKE_CXX_COMPILER_VERSION <CMAKE_<LANG>_COMPILER_VERSION>` is less
 than 4.2.0.
 
+And here two nested string-valued expressions:
+
+.. code-block:: cmake
+
+  -I$<JOIN:$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>, -I>
+
+generates a string of the entries in the :prop_tgt:`INCLUDE_DIRECTORIES` target
+property with each entry preceded by ``-I``.
+
+Expanding on the previous example, if one first wants to check if the
+``INCLUDE_DIRECTORIES`` property is non-empty, then it is advisable to
+introduce a helper variable to keep the code readable:
+
+.. code-block:: cmake
+
+  set(prop "$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>") # helper variable
+  $<$<BOOL:${prop}>:-I$<JOIN:${prop}, -I>>
+
 Available informational expressions are:
 
-``$<CONFIGURATION>``
-  Configuration name. Deprecated. Use ``CONFIG`` instead.
+Escaped Characters
+------------------
+
+String literals to escape the special meaning a character would otherwise have:
+
+``$<ANGLE-R>``
+  A literal ``>``. Used for example to compare strings that contain a ``>``.
+``$<COMMA>``
+  A literal ``,``. Used for example to compare strings which contain a ``,``.
+``$<SEMICOLON>``
+  A literal ``;``. Used to prevent list expansion on an argument with ``;``.
+
+String Operations
+-----------------
+
+``$<JOIN:list,string>``
+  Joins the list with the content of ``string``
+``$<LOWER_CASE:string>``
+  Content of ``string`` converted to lower case.
+``$<UPPER_CASE:string>``
+  Content of ``string`` converted to upper case.
+
+``$<GENEX_EVAL:expr>``
+  Content of ``expr`` evaluated as a generator expression in the current
+  context. This enables consumption of generator expressions whose
+  evaluation results itself in generator expressions.
+``$<TARGET_GENEX_EVAL:tgt,expr>``
+  Content of ``expr`` evaluated as a generator expression in the context of
+  ``tgt`` target. This enables consumption of custom target properties that
+  themselves contain generator expressions.
+
+  Having the capability to evaluate generator expressions is very useful when
+  you want to manage custom properties supporting generator expressions.
+  For example:
+
+  .. code-block:: cmake
+
+    add_library(foo ...)
+
+    set_property(TARGET foo PROPERTY
+      CUSTOM_KEYS $<$<CONFIG:DEBUG>:FOO_EXTRA_THINGS>
+    )
+
+    add_custom_target(printFooKeys
+      COMMAND ${CMAKE_COMMAND} -E echo $<TARGET_PROPERTY:foo,CUSTOM_KEYS>
+    )
+
+  This naive implementation of the ``printFooKeys`` custom command is wrong
+  because ``CUSTOM_KEYS`` target property is not evaluated and the content
+  is passed as is (i.e. ``$<$<CONFIG:DEBUG>:FOO_EXTRA_THINGS>``).
+
+  To have the expected result (i.e. ``FOO_EXTRA_THINGS`` if config is
+  ``Debug``), it is required to evaluate the output of
+  ``$<TARGET_PROPERTY:foo,CUSTOM_KEYS>``:
+
+  .. code-block:: cmake
+
+    add_custom_target(printFooKeys
+      COMMAND ${CMAKE_COMMAND} -E
+        echo $<TARGET_GENEX_EVAL:foo,$<TARGET_PROPERTY:foo,CUSTOM_KEYS>>
+    )
+
+Variable Queries
+----------------
+
 ``$<CONFIG>``
   Configuration name
+``$<CONFIGURATION>``
+  Configuration name. Deprecated. Use ``CONFIG`` instead.
 ``$<PLATFORM_ID>``
   The CMake-id of the platform.
   See also the :variable:`CMAKE_SYSTEM_NAME` variable.
@@ -231,6 +320,19 @@ Available informational expressions are:
 ``$<CXX_COMPILER_VERSION>``
   The version of the CXX compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<COMPILE_LANGUAGE>``
+  The compile language of source files when evaluating compile options.
+  See :ref:`the related boolean expression
+  <Boolean COMPILE_LANGUAGE Generator Expression>`
+  ``$<COMPILE_LANGUAGE:language>``
+  for notes about the portability of this generator expression.
+
+Target-Dependent Queries
+------------------------
+
+``$<TARGET_NAME_IF_EXISTS:tgt>``
+  Expands to the ``tgt`` if the given target exists, an empty string
+  otherwise.
 ``$<TARGET_FILE:tgt>``
   Full path to main file (.exe, .so.1.2, .a) where ``tgt`` is the name of a target.
 ``$<TARGET_FILE_NAME:tgt>``
@@ -283,54 +385,14 @@ Available informational expressions are:
 ``$<INSTALL_PREFIX>``
   Content of the install prefix when the target is exported via
   :command:`install(EXPORT)` and empty otherwise.
-``$<COMPILE_LANGUAGE>``
-  The compile language of source files when evaluating compile options. See
-  the unary version for notes about portability of this generator
-  expression.
 
-Output Generator Expressions
-============================
+Output-Related Expressions
+--------------------------
 
-These expressions generate output, in some cases depending on an input. These
-expressions may be combined with other expressions for information or logical
-comparison:
-
-.. code-block:: cmake
-
-  -I$<JOIN:$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>, -I>
-
-generates a string of the entries in the :prop_tgt:`INCLUDE_DIRECTORIES` target
-property with each entry preceded by ``-I``. Note that a more-complete use
-in this situation would require first checking if the INCLUDE_DIRECTORIES
-property is non-empty:
-
-.. code-block:: cmake
-
-  $<$<BOOL:${prop}>:-I$<JOIN:${prop}, -I>>
-
-where ``${prop}`` refers to a helper variable:
-
-.. code-block:: cmake
-
-  set(prop "$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>")
-
-Available output expressions are:
-
-``$<JOIN:list,...>``
-  Joins the list with the content of ``...``
-``$<ANGLE-R>``
-  A literal ``>``. Used to compare strings which contain a ``>`` for example.
-``$<COMMA>``
-  A literal ``,``. Used to compare strings which contain a ``,`` for example.
-``$<SEMICOLON>``
-  A literal ``;``. Used to prevent list expansion on an argument with ``;``.
 ``$<TARGET_NAME:...>``
   Marks ``...`` as being the name of a target.  This is required if exporting
   targets to multiple dependent export sets.  The ``...`` must be a literal
   name of a target- it may not contain generator expressions.
-``$<TARGET_NAME_IF_EXISTS:...>``
-  Expands to the ``...`` if the given target exists, an empty string
-  otherwise.
 ``$<LINK_ONLY:...>``
   Content of ``...`` except when evaluated in a link interface while
   propagating :ref:`Target Usage Requirements`, in which case it is the
@@ -345,10 +407,6 @@ Available output expressions are:
   Content of ``...`` when the property is exported using :command:`export`, or
   when the target is used by another target in the same buildsystem. Expands to
   the empty string otherwise.
-``$<LOWER_CASE:...>``
-  Content of ``...`` converted to lower case.
-``$<UPPER_CASE:...>``
-  Content of ``...`` converted to upper case.
 ``$<MAKE_C_IDENTIFIER:...>``
   Content of ``...`` converted to a C identifier.  The conversion follows the
   same behavior as :command:`string(MAKE_C_IDENTIFIER)`.
@@ -359,42 +417,3 @@ Available output expressions are:
   Content of ``...`` converted to shell path style. For example, slashes are
   converted to backslashes in Windows shells and drive letters are converted
   to posix paths in MSYS shells. The ``...`` must be an absolute path.
-``$<GENEX_EVAL:...>``
-  Content of ``...`` evaluated as a generator expression in the current
-  context. This enables consumption of generator expressions
-  whose evaluation results itself in generator expressions.
-``$<TARGET_GENEX_EVAL:tgt,...>``
-  Content of ``...`` evaluated as a generator expression in the context of
-  ``tgt`` target. This enables consumption of custom target properties that
-  themselves contain generator expressions.
-
-  Having the capability to evaluate generator expressions is very useful when
-  you want to manage custom properties supporting generator expressions.
-  For example:
-
-  .. code-block:: cmake
-
-    add_library(foo ...)
-
-    set_property(TARGET foo PROPERTY
-      CUSTOM_KEYS $<$<CONFIG:DEBUG>:FOO_EXTRA_THINGS>
-    )
-
-    add_custom_target(printFooKeys
-      COMMAND ${CMAKE_COMMAND} -E echo $<TARGET_PROPERTY:foo,CUSTOM_KEYS>
-    )
-
-  This naive implementation of the ``printFooKeys`` custom command is wrong
-  because ``CUSTOM_KEYS`` target property is not evaluated and the content
-  is passed as is (i.e. ``$<$<CONFIG:DEBUG>:FOO_EXTRA_THINGS>``).
-
-  To have the expected result (i.e. ``FOO_EXTRA_THINGS`` if config is
-  ``Debug``), it is required to evaluate the output of
-  ``$<TARGET_PROPERTY:foo,CUSTOM_KEYS>``:
-
-  .. code-block:: cmake
-
-    add_custom_target(printFooKeys
-      COMMAND ${CMAKE_COMMAND} -E
-        echo $<TARGET_GENEX_EVAL:foo,$<TARGET_PROPERTY:foo,CUSTOM_KEYS>>
-    )
