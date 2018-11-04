@@ -63,6 +63,9 @@ They are typically used to construct the condition in a
 
 Available boolean expressions are:
 
+Logical Operators
+-----------------
+
 ``$<BOOL:condition>``
   ``1`` if the ``condition`` is true, else ``0``
 
@@ -79,12 +82,29 @@ Available boolean expressions are:
 ``$<NOT:condition>``
   ``0`` if ``condition`` is ``1``, else ``1``
 
+String Comparisons
+------------------
+
 ``$<STREQUAL:a,b>``
   ``1`` if ``a`` is STREQUAL ``b``, else ``0``
 ``$<EQUAL:a,b>``
   ``1`` if ``a`` is EQUAL ``b`` in a numeric comparison, else ``0``
 ``$<IN_LIST:a,b>``
   ``1`` if ``a`` is IN_LIST ``b``, else ``0``
+``$<VERSION_LESS:v1,v2>``
+  ``1`` if ``v1`` is a version less than ``v2``, else ``0``.
+``$<VERSION_GREATER:v1,v2>``
+  ``1`` if ``v1`` is a version greater than ``v2``, else ``0``.
+``$<VERSION_EQUAL:v1,v2>``
+  ``1`` if ``v1`` is the same version as ``v2``, else ``0``.
+``$<VERSION_LESS_EQUAL:v1,v2>``
+  ``1`` if ``v1`` is a version less than or equal to ``v2``, else ``0``.
+``$<VERSION_GREATER_EQUAL:v1,v2>``
+  ``1`` if ``v1`` is a version greater than or equal to ``v2``, else ``0``.
+
+Variable Queries
+----------------
+
 ``$<TARGET_EXISTS:target>``
   ``1`` if ``target`` exists, else ``0``.
 ``$<CONFIG:cfg>``
@@ -104,16 +124,6 @@ Available boolean expressions are:
   ``1`` if the CMake-id of the CXX compiler matches ``compiler_id``,
   otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
-``$<VERSION_LESS:v1,v2>``
-  ``1`` if ``v1`` is a version less than ``v2``, else ``0``.
-``$<VERSION_GREATER:v1,v2>``
-  ``1`` if ``v1`` is a version greater than ``v2``, else ``0``.
-``$<VERSION_EQUAL:v1,v2>``
-  ``1`` if ``v1`` is the same version as ``v2``, else ``0``.
-``$<VERSION_LESS_EQUAL:v1,v2>``
-  ``1`` if ``v1`` is a version less than or equal to ``v2``, else ``0``.
-``$<VERSION_GREATER_EQUAL:v1,v2>``
-  ``1`` if ``v1`` is a version greater than or equal to ``v2``, else ``0``.
 ``$<C_COMPILER_VERSION:version>``
   ``1`` if the version of the C compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
