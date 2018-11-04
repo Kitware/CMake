@@ -67,7 +67,7 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 
-  this->SuppressWatches = false;
+  this->SuppressSideEffects = false;
 
   // Setup the default include complaint regular expression (match nothing).
   this->ComplainFileRegularExpression = "^$";
@@ -2421,7 +2421,7 @@ const std::string* cmMakefile::GetDef(const std::string& name) const
   }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
-  if (vv && !this->SuppressWatches) {
+  if (vv && !this->SuppressSideEffects) {
     bool const watch_function_executed =
       vv->VariableAccessed(name,
                            def ? cmVariableWatch::VARIABLE_READ_ACCESS
@@ -2508,11 +2508,11 @@ const std::string& cmMakefile::ExpandVariablesInString(
       compareResults = true;
       // Suppress variable watches to avoid calling hooks twice. Suppress new
       // dereferences since the OLD behavior is still what is actually used.
-      this->SuppressWatches = true;
+      this->SuppressSideEffects = true;
       newError = ExpandVariablesInStringNew(
         newErrorstr, newResult, escapeQuotes, noEscapes, atOnly, filename,
         line, removeEmpty, replaceAt);
-      this->SuppressWatches = false;
+      this->SuppressSideEffects = false;
       CM_FALLTHROUGH;
     }
     case cmPolicies::OLD:
