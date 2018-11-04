@@ -25,6 +25,21 @@ conditional include directories, and more.  The conditions may be based on
 the build configuration, target properties, platform information or any other
 queryable information.
 
+Conditional Expressions
+=======================
+
+Conditional expressions depend on a boolean condition that must be
+``0`` or ``1``.
+
+``$<condition:true_value>``
+  Evaluates to ``true_value`` if ``condition`` is ``1``.
+  Otherwise evaluates to the empty string.
+
+``$<IF:condition,true_value,false_value>``
+  Evaluates to ``true_value`` if ``condition`` is ``1``.
+  Otherwise evaluates to ``false_value``.
+
+
 Logical Expressions
 ===================
 
@@ -57,10 +72,6 @@ Available logical expressions are:
 
 ``$<NOT:condition>``
   ``0`` if ``condition`` is ``1``, else ``1``
-
-``$<IF:condition,true_value,false_value>``
-  ``true_value`` if ``condition`` is ``1``,
-  ``false_value`` if ``condition`` is ``0``
 
 ``$<STREQUAL:a,b>``
   ``1`` if ``a`` is STREQUAL ``b``, else ``0``
@@ -289,10 +300,6 @@ where ``${prop}`` refers to a helper variable:
 
 Available output expressions are:
 
-``$<0:...>``
-  Empty string (ignores ``...``)
-``$<1:...>``
-  Content of ``...``
 ``$<JOIN:list,...>``
   Joins the list with the content of ``...``
 ``$<ANGLE-R>``
