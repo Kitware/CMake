@@ -25,6 +25,11 @@ conditional include directories, and more.  The conditions may be based on
 the build configuration, target properties, platform information or any other
 queryable information.
 
+Generator expressions have the form ``$<...>``.  To avoid confusion, this page
+deviates from most of the CMake documentation in that it omits angular brackets
+``<...>`` around placeholders like ``condition``, ``true_value``, ``string``,
+and so on.
+
 .. _`Conditional Generator Expressions`:
 
 Conditional Generator Expressions
