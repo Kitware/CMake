@@ -63,12 +63,14 @@ Logical Operators
 String Comparisons
 ------------------
 
-``$<STREQUAL:a,b>``
-  ``1`` if ``a`` is STREQUAL ``b``, else ``0``
-``$<EQUAL:a,b>``
-  ``1`` if ``a`` is EQUAL ``b`` in a numeric comparison, else ``0``
-``$<IN_LIST:a,b>``
-  ``1`` if ``a`` is IN_LIST ``b``, else ``0``
+``$<STREQUAL:string1,string2>``
+  ``1`` if ``string1`` and ``string2`` are equal, else ``0``.
+  The comparison is case-sensitive.
+``$<EQUAL:value1,value2>``
+  ``1`` if ``value1`` and ``value2`` are numerically equal, else ``0``
+``$<IN_LIST:string,list>``
+  ``1`` if ``string`` is member of the comma-separated ``list``, else ``0``.
+  Uses case-sensitive comparisons.
 ``$<VERSION_LESS:v1,v2>``
   ``1`` if ``v1`` is a version less than ``v2``, else ``0``.
 ``$<VERSION_GREATER:v1,v2>``
