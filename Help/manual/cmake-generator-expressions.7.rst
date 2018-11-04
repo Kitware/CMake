@@ -58,7 +58,7 @@ Logical Operators
   Otherwise evaluates to ``0``.
 
 ``$<NOT:condition>``
-  ``0`` if ``condition`` is ``1``, else ``1``
+  ``0`` if ``condition`` is ``1``, else ``1``.
 
 String Comparisons
 ------------------
@@ -67,7 +67,7 @@ String Comparisons
   ``1`` if ``string1`` and ``string2`` are equal, else ``0``.
   The comparison is case-sensitive.
 ``$<EQUAL:value1,value2>``
-  ``1`` if ``value1`` and ``value2`` are numerically equal, else ``0``
+  ``1`` if ``value1`` and ``value2`` are numerically equal, else ``0``.
 ``$<IN_LIST:string,list>``
   ``1`` if ``string`` is member of the comma-separated ``list``, else ``0``.
   Uses case-sensitive comparisons.
@@ -258,7 +258,7 @@ String Operations
 -----------------
 
 ``$<JOIN:list,string>``
-  Joins the list with the content of ``string``
+  Joins the list with the content of ``string``.
 ``$<LOWER_CASE:string>``
   Content of ``string`` converted to lower case.
 ``$<UPPER_CASE:string>``
@@ -308,7 +308,7 @@ Variable Queries
 ----------------
 
 ``$<CONFIG>``
-  Configuration name
+  Configuration name.
 ``$<CONFIGURATION>``
   Configuration name. Deprecated since CMake 3.0. Use ``CONFIG`` instead.
 ``$<PLATFORM_ID>``
