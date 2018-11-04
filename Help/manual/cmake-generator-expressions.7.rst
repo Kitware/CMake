@@ -68,21 +68,24 @@ Available logical expressions are:
   ``1`` if ``a`` is EQUAL ``b`` in a numeric comparison, else ``0``
 ``$<IN_LIST:a,b>``
   ``1`` if ``a`` is IN_LIST ``b``, else ``0``
-``$<TARGET_EXISTS:tgt>``
-  ``1`` if ``tgt`` is an existed target name, else ``0``.
+``$<TARGET_EXISTS:target>``
+  ``1`` if ``target`` exists, else ``0``.
 ``$<CONFIG:cfg>``
   ``1`` if config is ``cfg``, else ``0``. This is a case-insensitive comparison.
   The mapping in :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by
   this expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`
   target.
-``$<PLATFORM_ID:comp>``
-  ``1`` if the CMake-id of the platform matches ``comp``, otherwise ``0``.
+``$<PLATFORM_ID:platform_id>``
+  ``1`` if the CMake-id of the platform matches ``platform_id``
+  otherwise ``0``.
   See also the :variable:`CMAKE_SYSTEM_NAME` variable.
-``$<C_COMPILER_ID:comp>``
-  ``1`` if the CMake-id of the C compiler matches ``comp``, otherwise ``0``.
+``$<C_COMPILER_ID:compiler_id>``
+  ``1`` if the CMake-id of the C compiler matches ``compiler_id``,
+  otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
-``$<CXX_COMPILER_ID:comp>``
-  ``1`` if the CMake-id of the CXX compiler matches ``comp``, otherwise ``0``.
+``$<CXX_COMPILER_ID:compiler_id>``
+  ``1`` if the CMake-id of the CXX compiler matches ``compiler_id``,
+  otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<VERSION_LESS:v1,v2>``
   ``1`` if ``v1`` is a version less than ``v2``, else ``0``.
@@ -94,27 +97,28 @@ Available logical expressions are:
   ``1`` if ``v1`` is a version less than or equal to ``v2``, else ``0``.
 ``$<VERSION_GREATER_EQUAL:v1,v2>``
   ``1`` if ``v1`` is a version greater than or equal to ``v2``, else ``0``.
-``$<C_COMPILER_VERSION:ver>``
-  ``1`` if the version of the C compiler matches ``ver``, otherwise ``0``.
+``$<C_COMPILER_VERSION:version>``
+  ``1`` if the version of the C compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
-``$<CXX_COMPILER_VERSION:ver>``
-  ``1`` if the version of the CXX compiler matches ``ver``, otherwise ``0``.
+``$<CXX_COMPILER_VERSION:version>``
+  ``1`` if the version of the CXX compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
-``$<TARGET_POLICY:pol>``
-  ``1`` if the policy ``pol`` was NEW when the 'head' target was created,
-  else ``0``.  If the policy was not set, the warning message for the policy
+``$<TARGET_POLICY:policy>``
+  ``1`` if the ``policy`` was NEW when the 'head' target was created,
+  else ``0``.  If the ``policy`` was not set, the warning message for the policy
   will be emitted. This generator expression only works for a subset of
   policies.
-``$<COMPILE_FEATURES:feature[,feature]...>``
-  ``1`` if all of the ``feature`` features are available for the 'head'
+``$<COMPILE_FEATURES:features>``
+  where ``features`` is a comma-spearated list.
+  Evaluates to ``1`` if all of the ``features`` are available for the 'head'
   target, and ``0`` otherwise. If this expression is used while evaluating
   the link implementation of a target and if any dependency transitively
   increases the required :prop_tgt:`C_STANDARD` or :prop_tgt:`CXX_STANDARD`
   for the 'head' target, an error is reported.  See the
   :manual:`cmake-compile-features(7)` manual for information on
   compile features and a list of supported compilers.
-``$<COMPILE_LANGUAGE:lang>``
-  ``1`` when the language used for compilation unit matches ``lang``,
+``$<COMPILE_LANGUAGE:language>``
+  ``1`` when the language used for compilation unit matches ``language``,
   otherwise ``0``.  This expression may be used to specify compile options,
   compile definitions, and include directories for source files of a
   particular language in a target. For example:
