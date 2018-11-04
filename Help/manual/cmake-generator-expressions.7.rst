@@ -42,19 +42,26 @@ otherwise expands to nothing.
 
 Available logical expressions are:
 
-``$<BOOL:...>``
-  ``1`` if the ``...`` is true, else ``0``
-``$<AND:?[,?]...>``
-  ``1`` if all ``?`` are ``1``, else ``0``
+``$<BOOL:condition>``
+  ``1`` if the ``condition`` is true, else ``0``
 
-  The ``?`` must always be either ``0`` or ``1`` in boolean expressions.
+``$<AND:conditions>``
+  where ``conditions`` is a comma-separated list of boolean expressions.
+  Evaluates to ``1`` if all conditions are ``1``.
+  Otherwise evaluates to ``0``.
 
-``$<OR:?[,?]...>``
-  ``0`` if all ``?`` are ``0``, else ``1``
-``$<NOT:?>``
-  ``0`` if ``?`` is ``1``, else ``1``
-``$<IF:?,true-value...,false-value...>``
-  ``true-value...`` if ``?`` is ``1``, ``false-value...`` if ``?`` is ``0``
+``$<OR:conditions>``
+  where ``conditions`` is a comma-separated list of boolean expressions.
+  Evaluates to ``1`` if at least one of the conditions is ``1``.
+  Otherwise evaluates to ``0``.
+
+``$<NOT:condition>``
+  ``0`` if ``condition`` is ``1``, else ``1``
+
+``$<IF:condition,true_value,false_value>``
+  ``true_value`` if ``condition`` is ``1``,
+  ``false_value`` if ``condition`` is ``0``
+
 ``$<STREQUAL:a,b>``
   ``1`` if ``a`` is STREQUAL ``b``, else ``0``
 ``$<EQUAL:a,b>``
