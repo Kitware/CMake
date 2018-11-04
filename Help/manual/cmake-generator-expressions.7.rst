@@ -30,41 +30,14 @@ deviates from most of the CMake documentation in that it omits angular brackets
 ``<...>`` around placeholders like ``condition``, ``true_value``, ``string``,
 and so on.
 
-.. _`Conditional Generator Expressions`:
-
-Conditional Generator Expressions
-=================================
-
-Conditional generator expressions depend on a boolean condition
-that must be ``0`` or ``1``.
-
-``$<condition:true_value>``
-  Evaluates to ``true_value`` if ``condition`` is ``1``.
-  Otherwise evaluates to the empty string.
-
-``$<IF:condition,true_value,false_value>``
-  Evaluates to ``true_value`` if ``condition`` is ``1``.
-  Otherwise evaluates to ``false_value``.
-
-Typically, the ``condition`` is a
-:ref:`boolean generator expression<Boolean Generator Expressions>`.
-For instance,
-
-.. code-block:: cmake
-
-  $<$<CONFIG:Debug>:DEBUG_MODE>
-
-expands to ``DEBUG_MODE`` when the ``Debug`` configuration is used, and
-otherwise expands to the empty string.
-
 .. _`Boolean Generator Expressions`:
 
 Boolean Generator Expressions
 =============================
 
 Boolean expressions evaluate to either ``0`` or ``1``.
-They are typically used to construct the condition in a
-:ref:`conditional generator expression<Conditional Generator Expressions>`.
+They are typically used to construct the condition in a :ref:`conditional
+generator expression<Conditional Generator Expressions>`.
 
 Available boolean expressions are:
 
@@ -239,7 +212,7 @@ introduce a helper variable to keep the code readable:
   set(prop "$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>") # helper variable
   $<$<BOOL:${prop}>:-I$<JOIN:${prop}, -I>>
 
-Available informational expressions are:
+The following string-valued generator expressions are available:
 
 Escaped Characters
 ------------------
@@ -252,6 +225,32 @@ String literals to escape the special meaning a character would otherwise have:
   A literal ``,``. Used for example to compare strings which contain a ``,``.
 ``$<SEMICOLON>``
   A literal ``;``. Used to prevent list expansion on an argument with ``;``.
+
+.. _`Conditional Generator Expressions`:
+
+Conditional Expressions
+-----------------------
+
+Conditional generator expressions depend on a boolean condition
+that must be ``0`` or ``1``.
+
+``$<condition:true_string>``
+  Evaluates to ``true_string`` if ``condition`` is ``1``.
+  Otherwise evaluates to the empty string.
+
+``$<IF:condition,true_string,false_string>``
+  Evaluates to ``true_string`` if ``condition`` is ``1``.
+  Otherwise evaluates to ``false_string``.
+
+Typically, the ``condition`` is a :ref:`boolean generator expression
+<Boolean Generator Expressions>`.  For instance,
+
+.. code-block:: cmake
+
+  $<$<CONFIG:Debug>:DEBUG_MODE>
+
+expands to ``DEBUG_MODE`` when the ``Debug`` configuration is used, and
+otherwise expands to the empty string.
 
 String Operations
 -----------------
