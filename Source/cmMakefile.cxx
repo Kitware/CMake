@@ -2766,7 +2766,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
             } else {
               varresult = value;
             }
-          } else if (!removeEmpty) {
+          } else if (!removeEmpty && !this->SuppressSideEffects) {
             // check to see if we need to print a warning
             // if strict mode is on and the variable has
             // not been "cleared"/initialized with a set(foo ) call
