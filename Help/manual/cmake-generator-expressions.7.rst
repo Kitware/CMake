@@ -20,10 +20,10 @@ commands to populate those properties, such as :command:`target_link_libraries`,
 :command:`target_include_directories`, :command:`target_compile_definitions`
 and others.
 
-This means that they enable conditional linking, conditional
-definitions used when compiling, and conditional include directories and
-more.  The conditions may be based on the build configuration, target
-properties, platform information or any other queryable information.
+They enable conditional linking, conditional definitions used when compiling,
+conditional include directories, and more.  The conditions may be based on
+the build configuration, target properties, platform information or any other
+queryable information.
 
 Logical Expressions
 ===================
