@@ -25,11 +25,13 @@ conditional include directories, and more.  The conditions may be based on
 the build configuration, target properties, platform information or any other
 queryable information.
 
-Conditional Expressions
-=======================
+.. _`Conditional Generator Expressions`:
 
-Conditional expressions depend on a boolean condition that must be
-``0`` or ``1``.
+Conditional Generator Expressions
+=================================
+
+Conditional generator expressions depend on a boolean condition
+that must be ``0`` or ``1``.
 
 ``$<condition:true_value>``
   Evaluates to ``true_value`` if ``condition`` is ``1``.
@@ -39,23 +41,27 @@ Conditional expressions depend on a boolean condition that must be
   Evaluates to ``true_value`` if ``condition`` is ``1``.
   Otherwise evaluates to ``false_value``.
 
-
-Logical Expressions
-===================
-
-Logical expressions are used to create conditional output.  The basic
-expressions are the ``0`` and ``1`` expressions.  Because other logical
-expressions evaluate to either ``0`` or ``1``, they can be composed to
-create conditional output:
+Typically, the ``condition`` is a
+:ref:`boolean generator expression<Boolean Generator Expressions>`.
+For instance,
 
 .. code-block:: cmake
 
   $<$<CONFIG:Debug>:DEBUG_MODE>
 
 expands to ``DEBUG_MODE`` when the ``Debug`` configuration is used, and
-otherwise expands to nothing.
+otherwise expands to the empty string.
 
-Available logical expressions are:
+.. _`Boolean Generator Expressions`:
+
+Boolean Generator Expressions
+=============================
+
+Boolean expressions evaluate to either ``0`` or ``1``.
+They are typically used to construct the condition in a
+:ref:`conditional generator expression<Conditional Generator Expressions>`.
+
+Available boolean expressions are:
 
 ``$<BOOL:condition>``
   ``1`` if the ``condition`` is true, else ``0``
@@ -171,8 +177,8 @@ Available logical expressions are:
     add_executable(myapp main.cpp)
     target_link_libraries(myapp myapp_c myapp_cxx)
 
-Informational Expressions
-=========================
+Informational Generator Expressions
+===================================
 
 These expressions expand to some information. The information may be used
 directly, eg:
@@ -272,8 +278,8 @@ Available informational expressions are:
   the unary version for notes about portability of this generator
   expression.
 
-Output Expressions
-==================
+Output Generator Expressions
+============================
 
 These expressions generate output, in some cases depending on an input. These
 expressions may be combined with other expressions for information or logical
