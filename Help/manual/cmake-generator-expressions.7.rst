@@ -309,7 +309,7 @@ Variable Queries
 ``$<CONFIG>``
   Configuration name
 ``$<CONFIGURATION>``
-  Configuration name. Deprecated. Use ``CONFIG`` instead.
+  Configuration name. Deprecated since CMake 3.0. Use ``CONFIG`` instead.
 ``$<PLATFORM_ID>``
   The CMake-id of the platform.
   See also the :variable:`CMAKE_SYSTEM_NAME` variable.
