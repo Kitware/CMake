@@ -440,3 +440,25 @@ Output-Related Expressions
   Content of ``...`` converted to shell path style. For example, slashes are
   converted to backslashes in Windows shells and drive letters are converted
   to posix paths in MSYS shells. The ``...`` must be an absolute path.
+
+Debugging
+=========
+
+Since generator expressions are evaluated during generation of the buildsystem,
+and not during processing of ``CMakeLists.txt`` files, it is not possible to
+inspect their result with the :command:`message()` command.
+
+One possible way to generate debug messages is to add a custom target,
+
+.. code-block:: cmake
+
+  add_custom_target(genexdebug COMMAND ${CMAKE_COMMAND} -E echo "$<...>")
+
+The shell command ``make genexdebug`` (invoked after execution of ``cmake``)
+would then print the result of ``$<...>``.
+
+Another way is to write debug messages to a file:
+
+.. code-block:: cmake
+
+  file(GENERATE OUTPUT filename CONTENT "$<...>")
