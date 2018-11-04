@@ -65,7 +65,14 @@ String Comparisons
 
 ``$<STREQUAL:string1,string2>``
   ``1`` if ``string1`` and ``string2`` are equal, else ``0``.
-  The comparison is case-sensitive.
+  The comparison is case-sensitive.  For a case-insensitive comparison,
+  combine with a :ref:`string transforming generator expression
+  <String Transforming Generator Expressions>`,
+
+  .. code-block:: cmake
+
+    $<STREQUAL:$<UPPER_CASE:${foo}>,"BAR"> # "1" if ${foo} is any of "BAR", "Bar", "bar", ...
+
 ``$<EQUAL:value1,value2>``
   ``1`` if ``value1`` and ``value2`` are numerically equal, else ``0``.
 ``$<IN_LIST:string,list>``
@@ -254,8 +261,10 @@ Typically, the ``condition`` is a :ref:`boolean generator expression
 expands to ``DEBUG_MODE`` when the ``Debug`` configuration is used, and
 otherwise expands to the empty string.
 
-String Operations
------------------
+.. _`String Transforming Generator Expressions`:
+
+String Transformations
+----------------------
 
 ``$<JOIN:list,string>``
   Joins the list with the content of ``string``.
