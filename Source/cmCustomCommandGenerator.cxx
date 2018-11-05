@@ -70,6 +70,12 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
     std::unique_ptr<cmCompiledGeneratorExpression> cge =
       this->GE->Parse(workingdirectory);
     this->WorkingDirectory = cge->Evaluate(this->LG, this->Config);
+    // Convert working directory to a full path.
+    if (!this->WorkingDirectory.empty()) {
+      std::string const& build_dir = this->LG->GetCurrentBinaryDirectory();
+      this->WorkingDirectory =
+        cmSystemTools::CollapseFullPath(this->WorkingDirectory, build_dir);
+    }
   }
 }
 
