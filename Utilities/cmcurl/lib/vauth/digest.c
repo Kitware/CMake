@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -342,7 +342,7 @@ bool Curl_auth_is_digest_supported(void)
  * data    [in]     - The session handle.
  * chlg64  [in]     - The base64 encoded challenge message.
  * userp   [in]     - The user name.
- * passdwp [in]     - The user's password.
+ * passwdp [in]     - The user's password.
  * service [in]     - The service type such as http, smtp, pop or imap.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
@@ -668,7 +668,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
  *
  * data    [in]     - The session handle.
  * userp   [in]     - The user name.
- * passdwp [in]     - The user's password.
+ * passwdp [in]     - The user's password.
  * request [in]     - The HTTP request.
  * uripath [in]     - The path of the HTTP uri.
  * digest  [in/out] - The digest data struct being used and modified.
@@ -781,6 +781,8 @@ static CURLcode _Curl_auth_create_digest_http_message(
   */
 
   hashthis = (unsigned char *) aprintf("%s:%s", request, uripath);
+  if(!hashthis)
+    return CURLE_OUT_OF_MEMORY;
 
   if(digest->qop && strcasecompare(digest->qop, "auth-int")) {
     /* We don't support auth-int for PUT or POST at the moment.
@@ -932,7 +934,7 @@ static CURLcode _Curl_auth_create_digest_http_message(
  *
  * data    [in]     - The session handle.
  * userp   [in]     - The user name.
- * passdwp [in]     - The user's password.
+ * passwdp [in]     - The user's password.
  * request [in]     - The HTTP request.
  * uripath [in]     - The path of the HTTP uri.
  * digest  [in/out] - The digest data struct being used and modified.

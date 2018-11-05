@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_INET_PTON_H
-#define HEADER_CURL_INET_PTON_H
+#ifndef HEADER_CURL_URLAPI_INT_H
+#define HEADER_CURL_URLAPI_INT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,19 +21,13 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+/* scheme is not URL encoded, the longest libcurl supported ones are 6
+   letters */
+#define MAX_SCHEME_LEN 8
 
-int Curl_inet_pton(int, const char *, void *);
-
-#ifdef HAVE_INET_PTON
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#elif defined(HAVE_WS2TCPIP_H)
-/* inet_pton() exists in Vista or later */
-#include <ws2tcpip.h>
-#endif
-#define Curl_inet_pton(x,y,z) inet_pton(x,y,z)
-#endif
-
-#endif /* HEADER_CURL_INET_PTON_H */
+bool Curl_is_absolute_url(const char *url, char *scheme, size_t buflen);
+char *Curl_concat_url(const char *base, const char *relurl);
+size_t Curl_strlen_url(const char *url, bool relative);
+void Curl_strcpy_url(char *output, const char *url, bool relative);
+#endif /* HEADER_CURL_URLAPI_INT_H */
