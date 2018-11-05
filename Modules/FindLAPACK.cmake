@@ -287,7 +287,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
     set(LAPACK_SEARCH_LIBS "")
 
     if (BLA_F95)
-      set(LAPACK_mkl_SEARCH_SYMBOL "CHEEV")
+      set(LAPACK_mkl_SEARCH_SYMBOL "cheev_f95")
       set(_LIBRARIES LAPACK95_LIBRARIES)
       set(_BLAS_LIBRARIES ${BLAS95_LIBRARIES})
 
@@ -298,7 +298,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       list(APPEND LAPACK_SEARCH_LIBS
         "mkl_intel_c")
       list(APPEND LAPACK_SEARCH_LIBS
-        "mkl_intel_${BLAS_mkl_ILP_MODE}")
+        "mkl_lapack95_${BLAS_mkl_ILP_MODE}")
     else()
       set(LAPACK_mkl_SEARCH_SYMBOL "cheev")
       set(_LIBRARIES LAPACK_LIBRARIES)
