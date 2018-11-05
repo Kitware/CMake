@@ -98,7 +98,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
 * destination server.
 *
 * Reference :
-*   http://socks.permeo.com/protocol/socks4.protocol
+*   https://www.openssh.com/txt/socks4.protocol
 *
 * Note :
 *   Set protocol4a=true for  "SOCKS 4A (Simple Extension to SOCKS 4 Protocol)"
@@ -789,4 +789,3 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
 }
 
 #endif /* CURL_DISABLE_PROXY */
-

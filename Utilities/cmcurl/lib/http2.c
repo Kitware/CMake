@@ -141,10 +141,8 @@ static int http2_getsock(struct connectdata *conn,
 static void http2_stream_free(struct HTTP *http)
 {
   if(http) {
-    Curl_add_buffer_free(http->header_recvbuf);
-    http->header_recvbuf = NULL; /* clear the pointer */
-    Curl_add_buffer_free(http->trailer_recvbuf);
-    http->trailer_recvbuf = NULL; /* clear the pointer */
+    Curl_add_buffer_free(&http->header_recvbuf);
+    Curl_add_buffer_free(&http->trailer_recvbuf);
     for(; http->push_headers_used > 0; --http->push_headers_used) {
       free(http->push_headers[http->push_headers_used - 1]);
     }
@@ -203,7 +201,7 @@ static bool http2_connisdead(struct connectdata *conn)
     dead = !Curl_connalive(conn);
     if(!dead) {
       /* This happens before we've sent off a request and the connection is
-         not in use by any other thransfer, there shouldn't be any data here,
+         not in use by any other transfer, there shouldn't be any data here,
          only "protocol frames" */
       CURLcode result;
       struct http_conn *httpc = &conn->proto.httpc;
@@ -233,10 +231,41 @@ static unsigned int http2_conncheck(struct connectdata *check,
                                     unsigned int checks_to_perform)
 {
   unsigned int ret_val = CONNRESULT_NONE;
+  struct http_conn *c = &check->proto.httpc;
+  int rc;
+  bool send_frames = false;
 
   if(checks_to_perform & CONNCHECK_ISDEAD) {
     if(http2_connisdead(check))
       ret_val |= CONNRESULT_DEAD;
+  }
+
+  if(checks_to_perform & CONNCHECK_KEEPALIVE) {
+    struct curltime now = Curl_now();
+    time_t elapsed = Curl_timediff(now, check->keepalive);
+
+    if(elapsed > check->upkeep_interval_ms) {
+      /* Perform an HTTP/2 PING */
+      rc = nghttp2_submit_ping(c->h2, 0, ZERO_NULL);
+      if(!rc) {
+        /* Successfully added a PING frame to the session. Need to flag this
+           so the frame is sent. */
+        send_frames = true;
+      }
+      else {
+       failf(check->data, "nghttp2_submit_ping() failed: %s(%d)",
+             nghttp2_strerror(rc), rc);
+      }
+
+      check->keepalive = now;
+    }
+  }
+
+  if(send_frames) {
+    rc = nghttp2_session_send(c->h2);
+    if(rc)
+      failf(check->data, "nghttp2_session_send() failed: %s(%d)",
+            nghttp2_strerror(rc), rc);
   }
 
   return ret_val;
@@ -599,6 +628,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   int rv;
   size_t left, ncopy;
   int32_t stream_id = frame->hd.stream_id;
+  CURLcode result;
 
   if(!stream_id) {
     /* stream ID zero is for connection-oriented stuff */
@@ -674,7 +704,9 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       stream->status_code = -1;
     }
 
-    Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
+    result = Curl_add_buffer(&stream->header_recvbuf, "\r\n", 2);
+    if(result)
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
 
     left = stream->header_recvbuf->size_used - stream->nread_header_recvbuf;
     ncopy = CURLMIN(stream->len, left);
@@ -898,6 +930,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   struct Curl_easy *data_s;
   int32_t stream_id = frame->hd.stream_id;
   struct connectdata *conn = (struct connectdata *)userp;
+  CURLcode result;
   (void)flags;
 
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
@@ -924,6 +957,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
       stream->push_headers_alloc = 10;
       stream->push_headers = malloc(stream->push_headers_alloc *
                                     sizeof(char *));
+      if(!stream->push_headers)
+        return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
       stream->push_headers_used = 0;
     }
     else if(stream->push_headers_used ==
@@ -952,11 +987,21 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     H2BUGF(infof(data_s, "h2 trailer: %.*s: %.*s\n", namelen, name, valuelen,
                  value));
 
-    Curl_add_buffer(stream->trailer_recvbuf, &n, sizeof(n));
-    Curl_add_buffer(stream->trailer_recvbuf, name, namelen);
-    Curl_add_buffer(stream->trailer_recvbuf, ": ", 2);
-    Curl_add_buffer(stream->trailer_recvbuf, value, valuelen);
-    Curl_add_buffer(stream->trailer_recvbuf, "\r\n\0", 3);
+    result = Curl_add_buffer(&stream->trailer_recvbuf, &n, sizeof(n));
+    if(result)
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    result = Curl_add_buffer(&stream->trailer_recvbuf, name, namelen);
+    if(result)
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    result = Curl_add_buffer(&stream->trailer_recvbuf, ": ", 2);
+    if(result)
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    result = Curl_add_buffer(&stream->trailer_recvbuf, value, valuelen);
+    if(result)
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    result = Curl_add_buffer(&stream->trailer_recvbuf, "\r\n\0", 3);
+    if(result)
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
 
     return 0;
   }
@@ -969,10 +1014,16 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     stream->status_code = decode_status_code(value, valuelen);
     DEBUGASSERT(stream->status_code != -1);
 
-    Curl_add_buffer(stream->header_recvbuf, "HTTP/2 ", 7);
-    Curl_add_buffer(stream->header_recvbuf, value, valuelen);
+    result = Curl_add_buffer(&stream->header_recvbuf, "HTTP/2 ", 7);
+    if(result)
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    result = Curl_add_buffer(&stream->header_recvbuf, value, valuelen);
+    if(result)
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
     /* the space character after the status code is mandatory */
-    Curl_add_buffer(stream->header_recvbuf, " \r\n", 3);
+    result = Curl_add_buffer(&stream->header_recvbuf, " \r\n", 3);
+    if(result)
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
     /* if we receive data for another handle, wake that up */
     if(conn->data != data_s)
       Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
@@ -985,10 +1036,18 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   /* nghttp2 guarantees that namelen > 0, and :status was already
      received, and this is not pseudo-header field . */
   /* convert to a HTTP1-style header */
-  Curl_add_buffer(stream->header_recvbuf, name, namelen);
-  Curl_add_buffer(stream->header_recvbuf, ": ", 2);
-  Curl_add_buffer(stream->header_recvbuf, value, valuelen);
-  Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
+  result = Curl_add_buffer(&stream->header_recvbuf, name, namelen);
+  if(result)
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  result = Curl_add_buffer(&stream->header_recvbuf, ": ", 2);
+  if(result)
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  result = Curl_add_buffer(&stream->header_recvbuf, value, valuelen);
+  if(result)
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  result = Curl_add_buffer(&stream->header_recvbuf, "\r\n", 2);
+  if(result)
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
   /* if we receive data for another handle, wake that up */
   if(conn->data != data_s)
     Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
@@ -1049,7 +1108,8 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
   return nread;
 }
 
-#ifdef NGHTTP2_HAS_ERROR_CALLBACK
+#if defined(NGHTTP2_HAS_ERROR_CALLBACK) &&      \
+  !defined(CURL_DISABLE_VERBOSE_STRINGS)
 static int error_callback(nghttp2_session *session,
                           const char *msg,
                           size_t len,
@@ -1085,17 +1145,11 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
   struct HTTP *http = data->req.protop;
   struct http_conn *httpc = &conn->proto.httpc;
 
-  if(!httpc->h2) /* not HTTP/2 ? */
-    return;
-
-  if(data->state.drain)
-    drained_transfer(data, httpc);
-
+  /* there might be allocated resources done before this got the 'h2' pointer
+     setup */
   if(http->header_recvbuf) {
-    Curl_add_buffer_free(http->header_recvbuf);
-    http->header_recvbuf = NULL; /* clear the pointer */
-    Curl_add_buffer_free(http->trailer_recvbuf);
-    http->trailer_recvbuf = NULL; /* clear the pointer */
+    Curl_add_buffer_free(&http->header_recvbuf);
+    Curl_add_buffer_free(&http->trailer_recvbuf);
     if(http->push_headers) {
       /* if they weren't used and then freed before */
       for(; http->push_headers_used > 0; --http->push_headers_used) {
@@ -1105,6 +1159,12 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
       http->push_headers = NULL;
     }
   }
+
+  if(!httpc->h2) /* not HTTP/2 ? */
+    return;
+
+  if(data->state.drain)
+    drained_transfer(data, httpc);
 
   if(premature) {
     /* RST_STREAM */
@@ -1167,7 +1227,9 @@ CURLcode Curl_http2_init(struct connectdata *conn)
     /* nghttp2_on_header_callback */
     nghttp2_session_callbacks_set_on_header_callback(callbacks, on_header);
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
     nghttp2_session_callbacks_set_error_callback(callbacks, error_callback);
+#endif
 
     /* The nghttp2 session is not yet setup, do it */
     rc = nghttp2_session_client_new(&conn->proto.httpc.h2, callbacks, conn);
@@ -1204,7 +1266,7 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
                                          httpc->local_settings_num);
   if(!binlen) {
     failf(conn->data, "nghttp2 unexpectedly failed on pack_settings_payload");
-    Curl_add_buffer_free(req);
+    Curl_add_buffer_free(&req);
     return CURLE_FAILED_INIT;
   }
   conn->proto.httpc.binlen = binlen;
@@ -1212,11 +1274,11 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   result = Curl_base64url_encode(conn->data, (const char *)binsettings, binlen,
                                  &base64, &blen);
   if(result) {
-    Curl_add_buffer_free(req);
+    Curl_add_buffer_free(&req);
     return result;
   }
 
-  result = Curl_add_bufferf(req,
+  result = Curl_add_bufferf(&req,
                             "Connection: Upgrade, HTTP2-Settings\r\n"
                             "Upgrade: %s\r\n"
                             "HTTP2-Settings: %s\r\n",
@@ -2060,8 +2122,11 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
 
   stream->stream_id = -1;
 
-  if(!stream->header_recvbuf)
+  if(!stream->header_recvbuf) {
     stream->header_recvbuf = Curl_add_buffer_init();
+    if(!stream->header_recvbuf)
+      return CURLE_OUT_OF_MEMORY;
+  }
 
   if((conn->handler == &Curl_handler_http2_ssl) ||
      (conn->handler == &Curl_handler_http2))
@@ -2073,8 +2138,10 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
     conn->handler = &Curl_handler_http2;
 
   result = Curl_http2_init(conn);
-  if(result)
+  if(result) {
+    Curl_add_buffer_free(&stream->header_recvbuf);
     return result;
+  }
 
   infof(conn->data, "Using HTTP2, server supports multi-use\n");
   stream->upload_left = 0;

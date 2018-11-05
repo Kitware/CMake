@@ -347,6 +347,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   Curl_llist_init(&multi->pending, multi_freeamsg);
 
   multi->max_pipeline_length = 5;
+  multi->pipelining = CURLPIPE_MULTIPLEX;
 
   /* -1 means it not set by user, use the default value */
   multi->maxconnects = -1;
@@ -491,6 +492,8 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   data->state.conn_cache->closure_handle->set.timeout = data->set.timeout;
   data->state.conn_cache->closure_handle->set.server_response_timeout =
     data->set.server_response_timeout;
+  data->state.conn_cache->closure_handle->set.no_signal =
+    data->set.no_signal;
 
   update_timer(multi);
   return CURLM_OK;
@@ -541,10 +544,8 @@ static CURLcode multi_done(struct connectdata **connp,
   Curl_getoff_all_pipelines(data, conn);
 
   /* Cleanup possible redirect junk */
-  free(data->req.newurl);
-  data->req.newurl = NULL;
-  free(data->req.location);
-  data->req.location = NULL;
+  Curl_safefree(data->req.newurl);
+  Curl_safefree(data->req.location);
 
   switch(status) {
   case CURLE_ABORTED_BY_CALLBACK:
@@ -656,7 +657,6 @@ static CURLcode multi_done(struct connectdata **connp,
                     cache here, and therefore cannot be used from this point on
                  */
   Curl_free_request_state(data);
-
   return result;
 }
 
@@ -905,7 +905,7 @@ static int multi_getsock(struct Curl_easy *data,
     return 0;
 
   case CURLM_STATE_WAITRESOLVE:
-    return Curl_resolver_getsock(data->easy_conn, socks, numsocks);
+    return Curl_resolv_getsock(data->easy_conn, socks, numsocks);
 
   case CURLM_STATE_PROTOCONNECT:
   case CURLM_STATE_SENDPROTOCONNECT:
@@ -1009,13 +1009,6 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
-  /* If the internally desired timeout is actually shorter than requested from
-     the outside, then use the shorter time! But only if the internal timer
-     is actually larger than -1! */
-  (void)multi_timeout(multi, &timeout_internal);
-  if((timeout_internal >= 0) && (timeout_internal < (long)timeout_ms))
-    timeout_ms = (int)timeout_internal;
-
   /* Count up how many fds we have from the multi handle */
   data = multi->easyp;
   while(data) {
@@ -1039,6 +1032,13 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
 
     data = data->next; /* check next handle */
   }
+
+  /* If the internally desired timeout is actually shorter than requested from
+     the outside, then use the shorter time! But only if the internal timer
+     is actually larger than -1! */
+  (void)multi_timeout(multi, &timeout_internal);
+  if((timeout_internal >= 0) && (timeout_internal < (long)timeout_ms))
+    timeout_ms = (int)timeout_internal;
 
   curlfds = nfds; /* number of internal file descriptors */
   nfds += extra_nfds; /* add the externally provided ones */
@@ -1235,7 +1235,7 @@ static CURLcode multi_reconnect_request(struct connectdata **connp)
           return result;
 
         /* Resolved, continue with the connection */
-        result = Curl_async_resolved(conn, &protocol_done);
+        result = Curl_once_resolved(conn, &protocol_done);
         if(result)
           return result;
       }
@@ -1511,7 +1511,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 
       if(!dns)
-        result = Curl_resolver_is_resolved(data->easy_conn, &dns);
+        result = Curl_resolv_check(data->easy_conn, &dns);
 
       /* Update sockets here, because the socket(s) may have been
          closed and the application thus needs to be told, even if it
@@ -1524,10 +1524,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(dns) {
         /* Perform the next step in the connection phase, and then move on
            to the WAITCONNECT state */
-        result = Curl_async_resolved(data->easy_conn, &protocol_connect);
+        result = Curl_once_resolved(data->easy_conn, &protocol_connect);
 
         if(result)
-          /* if Curl_async_resolved() returns failure, the connection struct
+          /* if Curl_once_resolved() returns failure, the connection struct
              is already freed and gone */
           data->easy_conn = NULL;           /* no more connection */
         else {
@@ -1608,7 +1608,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_SENDPROTOCONNECT:
       result = Curl_protocol_connect(data->easy_conn, &protocol_connect);
-      if(!protocol_connect)
+      if(!result && !protocol_connect)
         /* switch to waiting state */
         multistate(data, CURLM_STATE_PROTOCONNECT);
       else if(!result) {
@@ -1707,7 +1707,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           char *newurl = NULL;
           followtype follow = FOLLOW_NONE;
           CURLcode drc;
-          bool retry = FALSE;
 
           drc = Curl_retry_request(data->easy_conn, &newurl);
           if(drc) {
@@ -1715,15 +1714,13 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             result = drc;
             stream_error = TRUE;
           }
-          else
-            retry = (newurl)?TRUE:FALSE;
 
           Curl_posttransfer(data);
           drc = multi_done(&data->easy_conn, result, FALSE);
 
           /* When set to retry the connection, we must to go back to
            * the CONNECT state */
-          if(retry) {
+          if(newurl) {
             if(!drc || (drc == CURLE_SEND_ERROR)) {
               follow = FOLLOW_RETRY;
               drc = Curl_follow(data, newurl, follow);
@@ -1993,6 +1990,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
               rc = CURLM_CALL_MULTI_PERFORM;
             }
           }
+          free(newurl);
         }
         else {
           /* after the transfer is done, go DONE */
@@ -2004,18 +2002,21 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             newurl = data->req.location;
             data->req.location = NULL;
             result = Curl_follow(data, newurl, FOLLOW_FAKE);
-            if(result)
+            free(newurl);
+            if(result) {
               stream_error = TRUE;
+              result = multi_done(&data->easy_conn, result, TRUE);
+            }
           }
 
-          multistate(data, CURLM_STATE_DONE);
-          rc = CURLM_CALL_MULTI_PERFORM;
+          if(!result) {
+            multistate(data, CURLM_STATE_DONE);
+            rc = CURLM_CALL_MULTI_PERFORM;
+          }
         }
       }
       else if(comeback)
         rc = CURLM_CALL_MULTI_PERFORM;
-
-      free(newurl);
       break;
     }
 
@@ -2131,15 +2132,21 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
     if(CURLM_STATE_COMPLETED == data->mstate) {
-      /* now fill in the Curl_message with this info */
-      msg = &data->msg;
+      if(data->set.fmultidone) {
+        /* signal via callback instead */
+        data->set.fmultidone(data, result);
+      }
+      else {
+        /* now fill in the Curl_message with this info */
+        msg = &data->msg;
 
-      msg->extmsg.msg = CURLMSG_DONE;
-      msg->extmsg.easy_handle = data;
-      msg->extmsg.data.result = result;
+        msg->extmsg.msg = CURLMSG_DONE;
+        msg->extmsg.easy_handle = data;
+        msg->extmsg.data.result = result;
 
-      rc = multi_addmsg(multi, msg);
-      DEBUGASSERT(!data->easy_conn);
+        rc = multi_addmsg(multi, msg);
+        DEBUGASSERT(!data->easy_conn);
+      }
       multistate(data, CURLM_STATE_MSGSENT);
     }
   } while((rc == CURLM_CALL_MULTI_PERFORM) || multi_ischanged(multi, FALSE));
@@ -2705,7 +2712,7 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
     multi->push_userp = va_arg(param, void *);
     break;
   case CURLMOPT_PIPELINING:
-    multi->pipelining = va_arg(param, long);
+    multi->pipelining = va_arg(param, long) & CURLPIPE_MULTIPLEX;
     break;
   case CURLMOPT_TIMERFUNCTION:
     multi->timer_cb = va_arg(param, curl_multi_timer_callback);
