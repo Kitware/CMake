@@ -506,7 +506,6 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
           gt.GetFullPath(cfgName, cmStateEnums::RuntimeBinaryArtifact,
                          /*realname=*/true));
         cmakeCommand += targetOutputReal;
-        cmakeCommand += " || true";
         linkCmds.push_back(std::move(cmakeCommand));
       }
       return linkCmds;
