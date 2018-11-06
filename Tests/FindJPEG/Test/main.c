@@ -12,5 +12,5 @@ int main()
   cinfo.err = jpeg_std_error(&jerr);
   jpeg_create_decompress(&cinfo);
 
-  return 0;
+  return (JPEG_LIB_VERSION != CMAKE_EXPECTED_JPEG_VERSION);
 }
