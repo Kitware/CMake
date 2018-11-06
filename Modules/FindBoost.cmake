@@ -147,6 +147,9 @@ setting variables::
                              used if multiple compatible suffixes should
                              be tested for, in decreasing order of
                              preference.
+  Boost_ARCHITECTURE       - Set to the architecture-specific library suffix
+                             (e.g. "-x64").  Default is auto-computed for the
+                             C++ compiler in use.
   Boost_THREADAPI          - Suffix for "thread" component library name,
                              such as "pthread" or "win32".  Names with
                              and without this suffix will both be tried.
@@ -1507,27 +1510,35 @@ endif()
 #  -x86     Architecture and address model tag
 #           First character is the architecture, then word-size, either 32 or 64
 #           Only used in 'versioned' layout, added in Boost 1.66.0
-set(_boost_ARCHITECTURE_TAG "")
-# {CMAKE_CXX_COMPILER_ARCHITECTURE_ID} is not currently set for all compilers
-if(NOT "x${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "x" AND NOT Boost_VERSION VERSION_LESS 106600)
-  string(APPEND _boost_ARCHITECTURE_TAG "-")
-  # This needs to be kept in-sync with the section of CMakePlatformId.h.in
-  # inside 'defined(_WIN32) && defined(_MSC_VER)'
-  if(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "IA64")
-    string(APPEND _boost_ARCHITECTURE_TAG "i")
-  elseif(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "X86"
-            OR CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "x64")
-    string(APPEND _boost_ARCHITECTURE_TAG "x")
-  elseif(CMAKE_CXX_COMPILER_ARCHITECTURE_ID MATCHES "^ARM")
-    string(APPEND _boost_ARCHITECTURE_TAG "a")
-  elseif(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "MIPS")
-    string(APPEND _boost_ARCHITECTURE_TAG "m")
+if(DEFINED Boost_ARCHITECTURE)
+  set(_boost_ARCHITECTURE_TAG "${Boost_ARCHITECTURE}")
+  if(Boost_DEBUG)
+    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+      "using user-specified Boost_ARCHITECTURE = ${_boost_ARCHITECTURE_TAG}")
   endif()
+else()
+  set(_boost_ARCHITECTURE_TAG "")
+  # {CMAKE_CXX_COMPILER_ARCHITECTURE_ID} is not currently set for all compilers
+  if(NOT "x${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "x" AND NOT Boost_VERSION VERSION_LESS 106600)
+    string(APPEND _boost_ARCHITECTURE_TAG "-")
+    # This needs to be kept in-sync with the section of CMakePlatformId.h.in
+    # inside 'defined(_WIN32) && defined(_MSC_VER)'
+    if(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "IA64")
+      string(APPEND _boost_ARCHITECTURE_TAG "i")
+    elseif(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "X86"
+              OR CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "x64")
+      string(APPEND _boost_ARCHITECTURE_TAG "x")
+    elseif(CMAKE_CXX_COMPILER_ARCHITECTURE_ID MATCHES "^ARM")
+      string(APPEND _boost_ARCHITECTURE_TAG "a")
+    elseif(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "MIPS")
+      string(APPEND _boost_ARCHITECTURE_TAG "m")
+    endif()
 
-  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    string(APPEND _boost_ARCHITECTURE_TAG "64")
-  else()
-    string(APPEND _boost_ARCHITECTURE_TAG "32")
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      string(APPEND _boost_ARCHITECTURE_TAG "64")
+    else()
+      string(APPEND _boost_ARCHITECTURE_TAG "32")
+    endif()
   endif()
 endif()
 
