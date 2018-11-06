@@ -9,9 +9,15 @@ Targets which have their :prop_tgt:`AUTOMOC` or :prop_tgt:`AUTOUIC` property
 generate-time, it is not possible to define dependencies of it,
 such as to create inputs for the ``moc`` or ``uic`` executable.
 
-The :prop_tgt:`AUTOGEN_TARGET_DEPENDS` target property can be set instead to a
-list of dependencies of the ``_autogen`` target.  Dependencies can be target
-names or file names.
+The dependencies of the ``_autogen`` target are composed from
+
+- the origin target dependencies
+  (by default enabled via :prop_tgt:`AUTOGEN_ORIGIN_DEPENDS`)
+- user defined dependencies from :prop_tgt:`AUTOGEN_TARGET_DEPENDS`
+
+The :prop_tgt:`AUTOGEN_TARGET_DEPENDS` target property can be set to a
+list of additional dependencies for the ``_autogen`` target.  Dependencies
+can be target names or file names.
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.

@@ -3,7 +3,7 @@ AUTORCC
 
 Should the target be processed with autorcc (for Qt projects).
 
-``AUTORCC`` is a boolean specifying whether CMake will handle
+:prop_tgt:`AUTORCC` is a boolean specifying whether CMake will handle
 the Qt ``rcc`` code generator automatically, i.e. without having to use
 the :module:`QT4_ADD_RESOURCES() <FindQt4>` or ``QT5_ADD_RESOURCES()``
 macro.  Currently Qt4 and Qt5 are supported.

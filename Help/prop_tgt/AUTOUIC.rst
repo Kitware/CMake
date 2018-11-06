@@ -3,7 +3,7 @@ AUTOUIC
 
 Should the target be processed with autouic (for Qt projects).
 
-``AUTOUIC`` is a boolean specifying whether CMake will handle
+:prop_tgt:`AUTOUIC` is a boolean specifying whether CMake will handle
 the Qt ``uic`` code generator automatically, i.e. without having to use
 the :module:`QT4_WRAP_UI() <FindQt4>` or ``QT5_WRAP_UI()`` macro. Currently
 Qt4 and Qt5 are supported.

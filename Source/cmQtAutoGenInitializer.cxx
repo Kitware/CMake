@@ -322,6 +322,9 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
     // Autogen target: Compute user defined dependencies
     {
+      this->AutogenTarget.DependOrigin =
+        this->Target->GetPropertyAsBool("AUTOGEN_ORIGIN_DEPENDS");
+
       std::string const deps =
         this->Target->GetSafeProperty("AUTOGEN_TARGET_DEPENDS");
       if (!deps.empty()) {
@@ -904,7 +907,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
 
     // Add link library target dependencies to the autogen target
     // dependencies
-    {
+    if (this->AutogenTarget.DependOrigin) {
       // add_dependencies/addUtility do not support generator expressions.
       // We depend only on the libraries found in all configs therefore.
       std::map<cmGeneratorTarget const*, std::size_t> commonTargets;
@@ -941,8 +944,10 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       new cmGeneratorTarget(autogenTarget, localGen));
 
     // Forward origin utilities to autogen target
-    for (BT<std::string> const& depName : this->Target->GetUtilities()) {
-      autogenTarget->AddUtility(depName.Value, makefile);
+    if (this->AutogenTarget.DependOrigin) {
+      for (BT<std::string> const& depName : this->Target->GetUtilities()) {
+        autogenTarget->AddUtility(depName.Value, makefile);
+      }
     }
     // Add additional autogen target dependencies to autogen target
     for (cmTarget* depTarget : this->AutogenTarget.DependTargets) {

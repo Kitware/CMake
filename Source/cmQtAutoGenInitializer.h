@@ -107,6 +107,7 @@ private:
     std::string SettingsFile;
     std::map<std::string, std::string> ConfigSettingsFile;
     // Dependencies
+    bool DependOrigin = false;
     std::set<std::string> DependFiles;
     std::set<cmTarget*> DependTargets;
     // Sources to process

@@ -1,0 +1,8 @@
+#ifndef CONFIG_HPP
+#define CONFIG_HPP
+
+// Application configuration
+
+enum dummy { NO_OP };
+
+#endif
