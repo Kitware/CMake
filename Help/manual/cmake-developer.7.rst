@@ -13,6 +13,9 @@ Introduction
 This manual is intended for reference by developers modifying the CMake
 source tree itself, and by those authoring externally-maintained modules.
 
+See https://cmake.org/get-involved/ to get involved in development of
+CMake upstream.
+
 Adding Compile Features
 =======================
 
