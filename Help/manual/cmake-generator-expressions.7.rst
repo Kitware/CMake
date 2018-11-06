@@ -27,8 +27,10 @@ queryable information.
 
 Generator expressions have the form ``$<...>``.  To avoid confusion, this page
 deviates from most of the CMake documentation in that it omits angular brackets
-``<...>`` around placeholders like ``condition``, ``true_value``, ``string``,
-and so on.
+``<...>`` around placeholders like ``condition``, ``string``, ``target``,
+among others.
+
+Generator expressions can be nested, as shown in most of the examples below.
 
 .. _`Boolean Generator Expressions`:
 
