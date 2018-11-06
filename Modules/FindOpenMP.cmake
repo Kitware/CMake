@@ -124,7 +124,7 @@ endfunction()
 set(OpenMP_C_CXX_TEST_SOURCE
 "
 #include <omp.h>
-int main() {
+int main(void) {
 #ifdef _OPENMP
   omp_get_max_threads();
   return 0;
@@ -291,7 +291,7 @@ const char ompver_str[] = { 'I', 'N', 'F', 'O', ':', 'O', 'p', 'e', 'n', 'M',
                             ('0' + ((_OPENMP/10)%10)),
                             ('0' + ((_OPENMP/1)%10)),
                             ']', '\\0' };
-int main()
+int main(void)
 {
   puts(ompver_str);
   return 0;
