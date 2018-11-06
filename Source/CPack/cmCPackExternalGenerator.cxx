@@ -1,6 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmCPackExtGenerator.h"
+#include "cmCPackExternalGenerator.h"
 
 #include "cmAlgorithms.h"
 #include "cmCPackComponentGroup.h"
@@ -16,25 +16,25 @@
 #include <utility>
 #include <vector>
 
-int cmCPackExtGenerator::InitializeInternal()
+int cmCPackExternalGenerator::InitializeInternal()
 {
-  this->SetOption("CPACK_EXT_KNOWN_VERSIONS", "1.0");
+  this->SetOption("CPACK_EXTERNAL_KNOWN_VERSIONS", "1.0");
 
-  if (!this->ReadListFile("Internal/CPack/CPackExt.cmake")) {
+  if (!this->ReadListFile("Internal/CPack/CPackExternal.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Error while executing CPackExt.cmake" << std::endl);
+                  "Error while executing CPackExternal.cmake" << std::endl);
     return 0;
   }
 
-  std::string major = this->GetOption("CPACK_EXT_SELECTED_MAJOR");
+  std::string major = this->GetOption("CPACK_EXTERNAL_SELECTED_MAJOR");
   if (major == "1") {
-    this->Generator = cm::make_unique<cmCPackExtVersion1Generator>(this);
+    this->Generator = cm::make_unique<cmCPackExternalVersion1Generator>(this);
   }
 
   return this->Superclass::InitializeInternal();
 }
 
-int cmCPackExtGenerator::PackageFiles()
+int cmCPackExternalGenerator::PackageFiles()
 {
   Json::StreamWriterBuilder builder;
   builder["indentation"] = "  ";
@@ -57,12 +57,12 @@ int cmCPackExtGenerator::PackageFiles()
     return 0;
   }
 
-  const char* packageScript = this->GetOption("CPACK_EXT_PACKAGE_SCRIPT");
+  const char* packageScript = this->GetOption("CPACK_EXTERNAL_PACKAGE_SCRIPT");
   if (packageScript && *packageScript) {
     if (!cmSystemTools::FileIsFullPath(packageScript)) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
-        "CPACK_EXT_PACKAGE_SCRIPT does not contain a full file path"
+        "CPACK_EXTERNAL_PACKAGE_SCRIPT does not contain a full file path"
           << std::endl);
       return 0;
     }
@@ -77,12 +77,12 @@ int cmCPackExtGenerator::PackageFiles()
   return 1;
 }
 
-bool cmCPackExtGenerator::SupportsComponentInstallation() const
+bool cmCPackExternalGenerator::SupportsComponentInstallation() const
 {
   return true;
 }
 
-int cmCPackExtGenerator::InstallProjectViaInstallCommands(
+int cmCPackExternalGenerator::InstallProjectViaInstallCommands(
   bool setDestDir, const std::string& tempInstallDirectory)
 {
   if (this->StagingEnabled()) {
@@ -93,7 +93,7 @@ int cmCPackExtGenerator::InstallProjectViaInstallCommands(
   return 1;
 }
 
-int cmCPackExtGenerator::InstallProjectViaInstallScript(
+int cmCPackExternalGenerator::InstallProjectViaInstallScript(
   bool setDestDir, const std::string& tempInstallDirectory)
 {
   if (this->StagingEnabled()) {
@@ -104,7 +104,7 @@ int cmCPackExtGenerator::InstallProjectViaInstallScript(
   return 1;
 }
 
-int cmCPackExtGenerator::InstallProjectViaInstalledDirectories(
+int cmCPackExternalGenerator::InstallProjectViaInstalledDirectories(
   bool setDestDir, const std::string& tempInstallDirectory,
   const mode_t* default_dir_mode)
 {
@@ -116,7 +116,7 @@ int cmCPackExtGenerator::InstallProjectViaInstalledDirectories(
   return 1;
 }
 
-int cmCPackExtGenerator::RunPreinstallTarget(
+int cmCPackExternalGenerator::RunPreinstallTarget(
   const std::string& installProjectName, const std::string& installDirectory,
   cmGlobalGenerator* globalGenerator, const std::string& buildConfig)
 {
@@ -128,7 +128,7 @@ int cmCPackExtGenerator::RunPreinstallTarget(
   return 1;
 }
 
-int cmCPackExtGenerator::InstallCMakeProject(
+int cmCPackExternalGenerator::InstallCMakeProject(
   bool setDestDir, const std::string& installDirectory,
   const std::string& baseTempInstallDirectory, const mode_t* default_dir_mode,
   const std::string& component, bool componentInstall,
@@ -145,18 +145,19 @@ int cmCPackExtGenerator::InstallCMakeProject(
   return 1;
 }
 
-bool cmCPackExtGenerator::StagingEnabled() const
+bool cmCPackExternalGenerator::StagingEnabled() const
 {
-  return !cmSystemTools::IsOff(this->GetOption("CPACK_EXT_ENABLE_STAGING"));
+  return !cmSystemTools::IsOff(
+    this->GetOption("CPACK_EXTERNAL_ENABLE_STAGING"));
 }
 
-cmCPackExtGenerator::cmCPackExtVersionGenerator::cmCPackExtVersionGenerator(
-  cmCPackExtGenerator* parent)
+cmCPackExternalGenerator::cmCPackExternalVersionGenerator::
+  cmCPackExternalVersionGenerator(cmCPackExternalGenerator* parent)
   : Parent(parent)
 {
 }
 
-int cmCPackExtGenerator::cmCPackExtVersionGenerator::WriteVersion(
+int cmCPackExternalGenerator::cmCPackExternalVersionGenerator::WriteVersion(
   Json::Value& root)
 {
   root["formatVersionMajor"] = this->GetVersionMajor();
@@ -165,7 +166,7 @@ int cmCPackExtGenerator::cmCPackExtVersionGenerator::WriteVersion(
   return 1;
 }
 
-int cmCPackExtGenerator::cmCPackExtVersionGenerator::WriteToJSON(
+int cmCPackExternalGenerator::cmCPackExternalVersionGenerator::WriteToJSON(
   Json::Value& root)
 {
   if (!this->WriteVersion(root)) {

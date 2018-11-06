@@ -12,7 +12,7 @@
 #  include "cmCPackFreeBSDGenerator.h"
 #endif
 #include "cmCPackDebGenerator.h"
-#include "cmCPackExtGenerator.h"
+#include "cmCPackExternalGenerator.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmCPackNSISGenerator.h"
@@ -111,9 +111,9 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
     this->RegisterGenerator("NuGet", "NuGet packages",
                             cmCPackNuGetGenerator::CreateGenerator);
   }
-  if (cmCPackExtGenerator::CanGenerate()) {
-    this->RegisterGenerator("Ext", "CPack External packages",
-                            cmCPackExtGenerator::CreateGenerator);
+  if (cmCPackExternalGenerator::CanGenerate()) {
+    this->RegisterGenerator("External", "CPack External packages",
+                            cmCPackExternalGenerator::CreateGenerator);
   }
 #ifdef __APPLE__
   if (cmCPackDragNDropGenerator::CanGenerate()) {

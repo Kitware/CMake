@@ -890,7 +890,7 @@ set(CPACK_SRCS
   CPack/cmCPackArchiveGenerator.cxx
   CPack/cmCPackComponentGroup.cxx
   CPack/cmCPackDebGenerator.cxx
-  CPack/cmCPackExtGenerator.cxx
+  CPack/cmCPackExternalGenerator.cxx
   CPack/cmCPackGeneratorFactory.cxx
   CPack/cmCPackGenerator.cxx
   CPack/cmCPackLog.cxx

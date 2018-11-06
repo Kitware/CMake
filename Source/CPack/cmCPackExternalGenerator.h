@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackExtGenerator_h
-#define cmCPackExtGenerator_h
+#ifndef cmCPackExternalGenerator_h
+#define cmCPackExternalGenerator_h
 
 #include "cmCPackGenerator.h"
 #include "cm_sys_stat.h"
@@ -14,13 +14,13 @@ namespace Json {
 class Value;
 }
 
-/** \class cmCPackExtGenerator
+/** \class cmCPackExternalGenerator
  * \brief A generator for CPack External packaging tools
  */
-class cmCPackExtGenerator : public cmCPackGenerator
+class cmCPackExternalGenerator : public cmCPackGenerator
 {
 public:
-  cmCPackTypeMacro(cmCPackExtGenerator, cmCPackGenerator);
+  cmCPackTypeMacro(cmCPackExternalGenerator, cmCPackGenerator);
 
   const char* GetOutputExtension() override { return ".json"; }
 
@@ -54,12 +54,12 @@ protected:
 private:
   bool StagingEnabled() const;
 
-  class cmCPackExtVersionGenerator
+  class cmCPackExternalVersionGenerator
   {
   public:
-    cmCPackExtVersionGenerator(cmCPackExtGenerator* parent);
+    cmCPackExternalVersionGenerator(cmCPackExternalGenerator* parent);
 
-    virtual ~cmCPackExtVersionGenerator() = default;
+    virtual ~cmCPackExternalVersionGenerator() = default;
 
     virtual int WriteToJSON(Json::Value& root);
 
@@ -69,20 +69,21 @@ private:
 
     int WriteVersion(Json::Value& root);
 
-    cmCPackExtGenerator* Parent;
+    cmCPackExternalGenerator* Parent;
   };
 
-  class cmCPackExtVersion1Generator : public cmCPackExtVersionGenerator
+  class cmCPackExternalVersion1Generator
+    : public cmCPackExternalVersionGenerator
   {
   public:
-    using cmCPackExtVersionGenerator::cmCPackExtVersionGenerator;
+    using cmCPackExternalVersionGenerator::cmCPackExternalVersionGenerator;
 
   protected:
     int GetVersionMajor() override { return 1; }
     int GetVersionMinor() override { return 0; }
   };
 
-  std::unique_ptr<cmCPackExtVersionGenerator> Generator;
+  std::unique_ptr<cmCPackExternalVersionGenerator> Generator;
 };
 
 #endif
