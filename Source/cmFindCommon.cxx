@@ -293,13 +293,13 @@ void cmFindCommon::AddPathSuffix(std::string const& arg)
   if (suffix.empty()) {
     return;
   }
-  if (suffix[0] == '/') {
+  if (suffix.front() == '/') {
     suffix = suffix.substr(1);
   }
   if (suffix.empty()) {
     return;
   }
-  if (suffix[suffix.size() - 1] == '/') {
+  if (suffix.back() == '/') {
     suffix = suffix.substr(0, suffix.size() - 1);
   }
   if (suffix.empty()) {

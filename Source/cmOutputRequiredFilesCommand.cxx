@@ -340,7 +340,7 @@ protected:
         } else {
           // try to guess which include path to use
           for (std::string incpath : this->IncludeDirectories) {
-            if (!incpath.empty() && incpath[incpath.size() - 1] != '/') {
+            if (!incpath.empty() && incpath.back() != '/') {
               incpath = incpath + "/";
             }
             incpath = incpath + path;
@@ -421,7 +421,7 @@ protected:
     }
 
     for (std::string path : this->IncludeDirectories) {
-      if (!path.empty() && path[path.size() - 1] != '/') {
+      if (!path.empty() && path.back() != '/') {
         path = path + "/";
       }
       path = path + fname;
@@ -435,7 +435,7 @@ protected:
 
     if (extraPath) {
       std::string path = extraPath;
-      if (!path.empty() && path[path.size() - 1] != '/') {
+      if (!path.empty() && path.back() != '/') {
         path = path + "/";
       }
       path = path + fname;

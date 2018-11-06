@@ -118,11 +118,11 @@ std::string cmOutputConverter::ForceToRelativePath(
   std::string const& local_path, std::string const& remote_path)
 {
   // The paths should never be quoted.
-  assert(local_path[0] != '\"');
-  assert(remote_path[0] != '\"');
+  assert(local_path.front() != '\"');
+  assert(remote_path.front() != '\"');
 
   // The local path should never have a trailing slash.
-  assert(local_path.empty() || local_path[local_path.size() - 1] != '/');
+  assert(local_path.empty() || local_path.back() != '/');
 
   // If the path is already relative then just return the path.
   if (!cmSystemTools::FileIsFullPath(remote_path)) {

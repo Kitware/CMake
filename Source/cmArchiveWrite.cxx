@@ -178,7 +178,7 @@ bool cmArchiveWrite::Add(std::string path, size_t skip, const char* prefix,
                          bool recursive)
 {
   if (this->Okay()) {
-    if (!path.empty() && path[path.size() - 1] == '/') {
+    if (!path.empty() && path.back() == '/') {
       path.erase(path.size() - 1);
     }
     this->AddPath(path.c_str(), skip, prefix, recursive);

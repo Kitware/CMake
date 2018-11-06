@@ -590,7 +590,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       // mingw32-make incorrectly interprets 'a\ b c' as 'a b' and 'c'
       // (but 'a\ b "c"' as 'a\', 'b', and 'c'!).  Workaround this by
       // avoiding a trailing backslash in the argument.
-      targetOutPathCompilePDB[targetOutPathCompilePDB.size() - 1] = '/';
+      targetOutPathCompilePDB.back() = '/';
     }
   }
   cmRulePlaceholderExpander::RuleVariables vars;

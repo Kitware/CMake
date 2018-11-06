@@ -546,7 +546,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
             target->GetType() == cmStateEnums::STATIC_LIBRARY ||
             target->GetType() == cmStateEnums::SHARED_LIBRARY ||
             target->GetType() == cmStateEnums::MODULE_LIBRARY))) {
-        makeHelper[makeHelper.size() - 1] = // fill placeholder
+        makeHelper.back() = // fill placeholder
           this->PostBuildMakeTarget(target->GetName(), "$(CONFIGURATION)");
         cmCustomCommandLines commandLines;
         commandLines.push_back(makeHelper);

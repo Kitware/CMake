@@ -228,8 +228,7 @@ void cmRST::ProcessLine(std::string const& line)
   else {
     this->NormalLine(line);
     this->LastLineEndedInColonColon =
-      (line.size() >= 2 && line[line.size() - 2] == ':' &&
-       line[line.size() - 1] == ':');
+      (line.size() >= 2 && line[line.size() - 2] == ':' && line.back() == ':');
   }
 }
 

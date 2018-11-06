@@ -87,7 +87,7 @@ const char* cmTargetPropertyComputer::GetSources<cmTarget>(
     cmSystemTools::ExpandListArgument(entry, files);
     for (std::string const& file : files) {
       if (cmHasLiteralPrefix(file, "$<TARGET_OBJECTS:") &&
-          file[file.size() - 1] == '>') {
+          file.back() == '>') {
         std::string objLibName = file.substr(17, file.size() - 18);
 
         if (cmGeneratorExpression::Find(objLibName) != std::string::npos) {

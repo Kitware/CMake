@@ -186,7 +186,7 @@ bool cmOrderDirectoriesConstraintSOName::FindConflict(std::string const& dir)
     // file name.  Usually the soname starts with the library name.
     std::string base = this->FileName;
     std::set<std::string>::const_iterator first = files.lower_bound(base);
-    ++base[base.size() - 1];
+    ++base.back();
     std::set<std::string>::const_iterator last = files.upper_bound(base);
     if (first != last) {
       return true;
