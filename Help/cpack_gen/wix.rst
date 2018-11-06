@@ -1,9 +1,9 @@
-CPack WiX Generator
+CPack WIX Generator
 -------------------
 
-CPack WiX generator specific options
+CPack WIX generator specific options
 
-Variables specific to CPack WiX generator
+Variables specific to CPack WIX generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The following variables are specific to the installers built on
@@ -50,11 +50,11 @@ Windows using WiX.
  If CPACK_RESOURCE_FILE_LICENSE has an .rtf extension it is used as-is.
 
  If CPACK_RESOURCE_FILE_LICENSE has an .txt extension it is implicitly
- converted to RTF by the WiX Generator.
+ converted to RTF by the WIX Generator.
  The expected encoding of the .txt file is UTF-8.
 
  With CPACK_WIX_LICENSE_RTF you can override the license file used by the
- WiX Generator in case CPACK_RESOURCE_FILE_LICENSE is in an unsupported
+ WIX Generator in case CPACK_RESOURCE_FILE_LICENSE is in an unsupported
  format or the .txt -> .rtf conversion does not work as expected.
 
 .. variable:: CPACK_WIX_PRODUCT_ICON
@@ -122,10 +122,10 @@ Windows using WiX.
  generated WiX sources
 
  This optional variable can be used to specify an XML file that the
- WiX generator will use to inject fragments into its generated
+ WIX generator will use to inject fragments into its generated
  source files.
 
- Patch files understood by the CPack WiX generator
+ Patch files understood by the CPack WIX generator
  roughly follow this RELAX NG compact schema:
 
  .. code-block:: none
@@ -155,7 +155,7 @@ Windows using WiX.
 
  The following example illustrates how this works.
 
- Given that the WiX generator creates the following XML element:
+ Given that the WIX generator creates the following XML element:
 
  .. code-block:: xml
 
