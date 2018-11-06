@@ -150,8 +150,8 @@
     \}
   \},
   "packageDescriptionFile" : ".*/Templates/CPack\.GenericDescription\.txt",
-  "packageDescriptionSummary" : "EXT-(none|good(_multi)?|invalid_good)-subtest-(MONOLITHIC|COMPONENT)-type built using CMake",
-  "packageName" : "ext",
+  "packageDescriptionSummary" : "EXTERNAL-(none|good(_multi)?|invalid_good)-subtest-(MONOLITHIC|COMPONENT)-type built using CMake",
+  "packageName" : "external",
   "packageVersion" : "0\.1\.1",
   "projects" :[ ]
   \[
@@ -164,9 +164,9 @@
         "f3",
         "f4"
       \],
-      "directory" : ".*/Tests/RunCMake/Ext/CPack/EXT-build-(none|good(_multi)?|invalid_good)-subtest",
+      "directory" : ".*/Tests/RunCMake/External/CPack/EXTERNAL-build-(none|good(_multi)?|invalid_good)-subtest",
       "installationTypes" : \[\],
-      "projectName" : "EXT-(none|good(_multi)?|invalid_good)-subtest-(MONOLITHIC|COMPONENT)-type",
+      "projectName" : "EXTERNAL-(none|good(_multi)?|invalid_good)-subtest-(MONOLITHIC|COMPONENT)-type",
       "subDirectory" : "/"
     \}
   \],
