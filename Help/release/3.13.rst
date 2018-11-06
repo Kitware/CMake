@@ -181,11 +181,11 @@ CTest
 CPack
 -----
 
-* The :cpack_gen:`CPack Deb Generator` learned to split debug symbols into
+* The :cpack_gen:`CPack DEB Generator` learned to split debug symbols into
   a corresponding .ddeb package when ``CPACK_DEBIAN_DEBUGINFO_PACKAGE`` is
   set.
 
-* The :cpack_gen:`CPack Deb Generator` learned to honor the ``SOURCE_DATE_EPOCH``
+* The :cpack_gen:`CPack DEB Generator` learned to honor the ``SOURCE_DATE_EPOCH``
   environment variable when packaging files.  This is useful for generating
   reproducible packages.
 

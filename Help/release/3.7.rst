@@ -226,7 +226,7 @@ CPack
 * CPack gained a new :variable:`CPACK_PACKAGE_CHECKSUM` variable to
   enable generation of a checksum file for each package file.
 
-* The :cpack_gen:`CPack Deb Generator` learned to support long file names
+* The :cpack_gen:`CPack DEB Generator` learned to support long file names
   when archive format is set to GNU tar.
   See :variable:`CPACK_DEBIAN_ARCHIVE_TYPE`
 
@@ -252,19 +252,19 @@ CPack
   :variable:`CPACK_NSIS_<compName>_INSTALL_DIRECTORY`.
   This can be used to set component specific installation directories.
 
-* The :cpack_gen:`CPack WiX Generator` now supports
+* The :cpack_gen:`CPack WIX Generator` now supports
   :variable:`CPACK_WIX_SKIP_PROGRAM_FOLDER` to allow specification
   of a custom absolute installation prefix outside
   of the ProgramFiles folders.
 
-* The :cpack_gen:`CPack WiX Generator` now supports
+* The :cpack_gen:`CPack WIX Generator` now supports
   :variable:`CPACK_COMPONENT_<compName>_DISABLED`.
   This can be used to deselect a component from being installed by default.
 
-* The :cpack_gen:`CPack WiX Generator` now supports
+* The :cpack_gen:`CPack WIX Generator` now supports
   :variable:`CPACK_WIX_PATCH_FILE` fragments for Feature elements.
 
-* The :cpack_gen:`CPack WiX Generator` now supports
+* The :cpack_gen:`CPack WIX Generator` now supports
   :variable:`CPACK_WIX_ROOT_FEATURE_TITLE` and
   :variable:`CPACK_WIX_ROOT_FEATURE_DESCRIPTION` to allow the specification
   of a custom title and description for the root feature element.

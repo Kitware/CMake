@@ -1,7 +1,7 @@
-CPack DMG Generator
--------------------
+CPack DragNDrop Generator
+-------------------------
 
-DragNDrop CPack generator (macOS).
+The DragNDrop CPack generator (macOS) creates a DMG image.
 
 Variables specific to CPack DragNDrop generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

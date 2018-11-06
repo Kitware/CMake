@@ -172,11 +172,11 @@ CPack
 * The :cpack_gen:`CPack IFW Generator` learned to support
   Qt Framework Installer 2.0 tools.
 
-* The :cpack_gen:`CPack Deb Generator` learned a new
+* The :cpack_gen:`CPack DEB Generator` learned a new
   :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_SHLIBDEPS`
   variable to specify per-component use of ``dpkg-shlibdeps``.
 
-* The :cpack_gen:`CPack Deb Generator` learned a new
+* The :cpack_gen:`CPack DEB Generator` learned a new
   :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_DEPENDS`
   option to specify per-component dependencies.
 

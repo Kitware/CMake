@@ -1,20 +1,20 @@
-CPack Deb Generator
+CPack DEB Generator
 -------------------
 
-The built in (binary) CPack Deb generator (Unix only)
+The built in (binary) CPack DEB generator (Unix only)
 
 Variables specific to CPack Debian (DEB) generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The CPack Deb generator may be used to create Deb package using :module:`CPack`.
-The CPack Deb generator is a :module:`CPack` generator thus it uses the
+The CPack DEB generator may be used to create DEB package using :module:`CPack`.
+The CPack DEB generator is a :module:`CPack` generator thus it uses the
 ``CPACK_XXX`` variables used by :module:`CPack`.
 
-The CPack Deb generator should work on any Linux host but it will produce
+The CPack DEB generator should work on any Linux host but it will produce
 better deb package when Debian specific tools ``dpkg-xxx`` are usable on
 the build system.
 
-The CPack Deb generator has specific features which are controlled by the
+The CPack DEB generator has specific features which are controlled by the
 specifics :code:`CPACK_DEBIAN_XXX` variables.
 
 :code:`CPACK_DEBIAN_<COMPONENT>_XXXX` variables may be used in order to have
@@ -22,13 +22,13 @@ specifics :code:`CPACK_DEBIAN_XXX` variables.
 the **grouping name** written in upper case. It may be either a component name
 or a component GROUP name.
 
-Here are some CPack Deb generator wiki resources that are here for historic
+Here are some CPack DEB generator wiki resources that are here for historic
 reasons and are no longer maintained but may still prove useful:
 
  - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/Configuration
  - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators#deb-unix-only
 
-List of CPack Deb generator specific variables:
+List of CPack DEB generator specific variables:
 
 .. variable:: CPACK_DEB_COMPONENT_INSTALL
 
@@ -64,7 +64,7 @@ List of CPack Deb generator specific variables:
  * Mandatory : YES
  * Default   : ``<CPACK_PACKAGE_FILE_NAME>[-<component>].deb``
 
- This may be set to ``DEB-DEFAULT`` to allow the CPack Deb generator to generate
+ This may be set to ``DEB-DEFAULT`` to allow the CPack DEB generator to generate
  package file name by itself in deb format::
 
    <PackageName>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
@@ -75,7 +75,7 @@ List of CPack Deb generator specific variables:
  .. note::
 
    Preferred setting of this variable is ``DEB-DEFAULT`` but for backward
-   compatibility with the CPack Deb generator in CMake prior to version 3.6 this
+   compatibility with the CPack DEB generator in CMake prior to version 3.6 this
    feature is disabled by default.
 
  .. note::
@@ -279,7 +279,7 @@ List of CPack Deb generator specific variables:
 .. variable:: CPACK_DEBIAN_PACKAGE_DEBUG
 
  May be set when invoking cpack in order to trace debug information
- during the CPack Deb generator run.
+ during the CPack DEB generator run.
 
  * Mandatory : NO
  * Default   : -
@@ -553,5 +553,5 @@ Reproducible packages
 
 The environment variable ``SOURCE_DATE_EPOCH`` may be set to a UNIX
 timestamp, defined as the number of seconds, excluding leap seconds,
-since 01 Jan 1970 00:00:00 UTC.  If set, the CPack Deb generator will
+since 01 Jan 1970 00:00:00 UTC.  If set, the CPack DEB generator will
 use its value for timestamps in the package.
