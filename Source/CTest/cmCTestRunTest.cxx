@@ -14,6 +14,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
 #include <cmAlgorithms.h>
+#include <cstdint>
 #include <cstring>
 #include <iomanip>
 #include <ratio>
@@ -143,7 +144,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   if (res != cmProcess::State::Expired) {
     this->TimeoutIsForStopTime = false;
   }
-  int retVal = this->TestProcess->GetExitValue();
+  std::int64_t retVal = this->TestProcess->GetExitValue();
   bool forceFail = false;
   bool skipped = false;
   bool outputTestErrorsToConsole = false;
