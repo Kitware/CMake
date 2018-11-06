@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenInitializer.h"
 #include "cmQtAutoGen.h"
+#include "cmQtAutoGenGlobalInitializer.h"
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
@@ -174,17 +175,19 @@ static bool StaticLibraryCycle(cmGeneratorTarget const* targetOrigin,
   return cycle;
 }
 
-cmQtAutoGenInitializer::cmQtAutoGenInitializer(cmGeneratorTarget* target,
-                                               bool mocEnabled,
-                                               bool uicEnabled,
-                                               bool rccEnabled,
-                                               IntegerVersion const& qtVersion)
-  : Target(target)
+cmQtAutoGenInitializer::cmQtAutoGenInitializer(
+  cmQtAutoGenGlobalInitializer* globalInitializer, cmGeneratorTarget* target,
+  IntegerVersion const& qtVersion, bool mocEnabled, bool uicEnabled,
+  bool rccEnabled, bool globalAutogenTarget, bool globalAutoRccTarget)
+  : GlobalInitializer(globalInitializer)
+  , Target(target)
   , QtVersion(qtVersion)
 {
+  AutogenTarget.GlobalTarget = globalAutogenTarget;
   Moc.Enabled = mocEnabled;
   Uic.Enabled = uicEnabled;
   Rcc.Enabled = rccEnabled;
+  Rcc.GlobalTarget = globalAutoRccTarget;
 }
 
 bool cmQtAutoGenInitializer::InitCustomTargets()
@@ -882,6 +885,10 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     if (!this->AutogenTarget.DependFiles.empty()) {
       usePRE_BUILD = false;
     }
+    // Cannot use PRE_BUILD when a global autogen target is in place
+    if (AutogenTarget.GlobalTarget) {
+      usePRE_BUILD = false;
+    }
   }
   // Create the autogen target/command
   if (usePRE_BUILD) {
@@ -961,6 +968,12 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
 
     // Add autogen target to the origin target dependencies
     this->Target->Target->AddUtility(this->AutogenTarget.Name, makefile);
+
+    // Add autogen target to the global autogen target dependencies
+    if (this->AutogenTarget.GlobalTarget) {
+      this->GlobalInitializer->AddToGlobalAutoGen(localGen,
+                                                  this->AutogenTarget.Name);
+    }
   }
 
   return true;
@@ -1004,7 +1017,7 @@ bool cmQtAutoGenInitializer::InitRccTargets()
     std::string ccComment = "Automatic RCC for ";
     ccComment += FileProjectRelativePath(makefile, qrc.QrcFile);
 
-    if (qrc.Generated) {
+    if (qrc.Generated || this->Rcc.GlobalTarget) {
       // Create custom rcc target
       std::string ccName;
       {
@@ -1035,6 +1048,11 @@ bool cmQtAutoGenInitializer::InitRccTargets()
       }
       // Add autogen target to the origin target dependencies
       this->Target->Target->AddUtility(ccName, makefile);
+
+      // Add autogen target to the global autogen target dependencies
+      if (this->Rcc.GlobalTarget) {
+        this->GlobalInitializer->AddToGlobalAutoRcc(localGen, ccName);
+      }
     } else {
       // Create custom rcc command
       {

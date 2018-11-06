@@ -5,7 +5,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <memory>
+#include <map>
+#include <memory> // IWYU pragma: keep
+#include <string>
 #include <vector>
 
 class cmLocalGenerator;
@@ -22,11 +24,24 @@ public:
   bool generate();
 
 private:
+  friend class cmQtAutoGenInitializer;
+
   bool InitializeCustomTargets();
   bool SetupCustomTargets();
 
+  void GetOrCreateGlobalTarget(cmLocalGenerator* localGen,
+                               std::string const& name,
+                               std::string const& comment);
+
+  void AddToGlobalAutoGen(cmLocalGenerator* localGen,
+                          std::string const& targetName);
+  void AddToGlobalAutoRcc(cmLocalGenerator* localGen,
+                          std::string const& targetName);
+
 private:
   std::vector<std::unique_ptr<cmQtAutoGenInitializer>> Initializers_;
+  std::map<cmLocalGenerator*, std::string> GlobalAutoGenTargets_;
+  std::map<cmLocalGenerator*, std::string> GlobalAutoRccTargets_;
 };
 
 #endif

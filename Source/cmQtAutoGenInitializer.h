@@ -13,6 +13,7 @@
 
 class cmGeneratorTarget;
 class cmTarget;
+class cmQtAutoGenGlobalInitializer;
 
 /// @brief Initializes the QtAutoGen generators
 class cmQtAutoGenInitializer : public cmQtAutoGen
@@ -46,9 +47,11 @@ public:
 public:
   static IntegerVersion GetQtVersion(cmGeneratorTarget const* target);
 
-  cmQtAutoGenInitializer(cmGeneratorTarget* target, bool mocEnabled,
+  cmQtAutoGenInitializer(cmQtAutoGenGlobalInitializer* globalInitializer,
+                         cmGeneratorTarget* target,
+                         IntegerVersion const& qtVersion, bool mocEnabled,
                          bool uicEnabled, bool rccEnabled,
-                         IntegerVersion const& qtVersion);
+                         bool globalAutogenTarget, bool globalAutoRccTarget);
 
   bool InitCustomTargets();
   bool SetupCustomTargets();
@@ -76,6 +79,7 @@ private:
                      std::string& errorMessage);
 
 private:
+  cmQtAutoGenGlobalInitializer* GlobalInitializer;
   cmGeneratorTarget* Target;
 
   // Configuration
@@ -100,6 +104,7 @@ private:
   struct
   {
     std::string Name;
+    bool GlobalTarget = false;
     // Settings
     std::string Parallel;
     // Configuration files
@@ -148,6 +153,7 @@ private:
   struct
   {
     bool Enabled = false;
+    bool GlobalTarget = false;
     std::string Executable;
     std::vector<std::string> ListOptions;
     std::vector<Qrc> Qrcs;
