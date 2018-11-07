@@ -296,6 +296,7 @@ cmCTest::cmCTest()
   this->DropSiteCDash = false;
   this->BuildID = "";
   this->OutputTestOutputOnTestFailure = false;
+  this->OutputColorCode = this->ColoredOutputSupportedByConsole();
   this->RepeatTests = 1; // default to run each test once
   this->RepeatUntilFail = false;
 
@@ -2075,7 +2076,18 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   return true;
 }
 
-bool cmCTest::ProgressOutputSupportedByConsole() const
+#if !defined(_WIN32)
+bool cmCTest::ConsoleIsNotDumb()
+{
+  std::string term_env_variable;
+  if (cmSystemTools::GetEnv("TERM", term_env_variable)) {
+    return isatty(1) && term_env_variable != "dumb";
+  }
+  return false;
+}
+#endif
+
+bool cmCTest::ProgressOutputSupportedByConsole()
 {
 #if defined(_WIN32)
   // On Windows we need a console buffer.
@@ -2084,12 +2096,19 @@ bool cmCTest::ProgressOutputSupportedByConsole() const
   return GetConsoleScreenBufferInfo(console, &csbi);
 #else
   // On UNIX we need a non-dumb tty.
-  std::string term_env_variable;
-  if (cmSystemTools::GetEnv("TERM", term_env_variable)) {
-    return isatty(1) && term_env_variable != "dumb";
-  }
+  return ConsoleIsNotDumb();
 #endif
+}
+
+bool cmCTest::ColoredOutputSupportedByConsole()
+{
+#if defined(_WIN32)
+  // Not supported on Windows
   return false;
+#else
+  // On UNIX we need a non-dumb tty.
+  return ConsoleIsNotDumb();
+#endif
 }
 
 // handle the -S -SR and -SP arguments
@@ -2956,6 +2975,20 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
         out.flush();
     }
   }
+}
+
+std::string cmCTest::GetColorCode(Color color) const
+{
+  if (this->OutputColorCode) {
+#if defined(_WIN32)
+    // Not supported on Windows
+    static_cast<void>(color);
+#else
+    return "\033[0;" + std::to_string(static_cast<int>(color)) + "m";
+#endif
+  }
+
+  return "";
 }
 
 cmDuration cmCTest::GetRemainingTimeAllowed()
