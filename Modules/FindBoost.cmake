@@ -413,11 +413,17 @@ endmacro()
 # Runs compiler with "-dumpversion" and parses major/minor
 # version with a regex.
 #
-function(_Boost_COMPILER_DUMPVERSION _OUTPUT_VERSION)
-  string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?" "\\1\\2"
-    _boost_COMPILER_VERSION ${CMAKE_CXX_COMPILER_VERSION})
+function(_Boost_COMPILER_DUMPVERSION _OUTPUT_VERSION _OUTPUT_VERSION_MAJOR _OUTPUT_VERSION_MINOR)
+  string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?" "\\1"
+    _boost_COMPILER_VERSION_MAJOR ${CMAKE_CXX_COMPILER_VERSION})
+  string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?" "\\2"
+    _boost_COMPILER_VERSION_MINOR ${CMAKE_CXX_COMPILER_VERSION})
+
+  set(_boost_COMPILER_VERSION "${_boost_COMPILER_VERSION_MAJOR}${_boost_COMPILER_VERSION_MINOR}")
 
   set(${_OUTPUT_VERSION} ${_boost_COMPILER_VERSION} PARENT_SCOPE)
+  set(${_OUTPUT_VERSION_MAJOR} ${_boost_COMPILER_VERSION_MAJOR} PARENT_SCOPE)
+  set(${_OUTPUT_VERSION_MINOR} ${_boost_COMPILER_VERSION_MINOR} PARENT_SCOPE)
 endfunction()
 
 #
@@ -482,15 +488,25 @@ function(_Boost_GUESS_COMPILER_PREFIX _ret)
     if(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
         set(_boost_COMPILER "-mgw") # no GCC version encoding prior to 1.34
     else()
-      _Boost_COMPILER_DUMPVERSION(_boost_COMPILER_VERSION)
+      _Boost_COMPILER_DUMPVERSION(_boost_COMPILER_VERSION _boost_COMPILER_VERSION_MAJOR _boost_COMPILER_VERSION_MINOR)
       set(_boost_COMPILER "-mgw${_boost_COMPILER_VERSION}")
     endif()
   elseif (UNIX)
-    if (CMAKE_COMPILER_IS_GNUCXX)
+    _Boost_COMPILER_DUMPVERSION(_boost_COMPILER_VERSION _boost_COMPILER_VERSION_MAJOR _boost_COMPILER_VERSION_MINOR)
+    if(NOT Boost_VERSION VERSION_LESS 106900)
+      # From GCC 5 and clang 4, versioning changes and minor becomes patch.
+      # For those compilers, patch is exclude from compiler tag in Boost 1.69+ library naming.
+      if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND _boost_COMPILER_VERSION_MAJOR VERSION_GREATER 4)
+        set(_boost_COMPILER_VERSION "${_boost_COMPILER_VERSION_MAJOR}")
+      elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND _boost_COMPILER_VERSION_MAJOR VERSION_GREATER 3)
+        set(_boost_COMPILER_VERSION "${_boost_COMPILER_VERSION_MAJOR}")
+      endif()
+    endif()
+
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
       if(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
         set(_boost_COMPILER "-gcc") # no GCC version encoding prior to 1.34
       else()
-        _Boost_COMPILER_DUMPVERSION(_boost_COMPILER_VERSION)
         # Determine which version of GCC we have.
         if(APPLE)
           if(Boost_MINOR_VERSION)
@@ -512,7 +528,10 @@ function(_Boost_GUESS_COMPILER_PREFIX _ret)
           set(_boost_COMPILER "-gcc${_boost_COMPILER_VERSION}")
         endif()
       endif()
-    endif ()
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+      # TODO: Find out any Boost version constraints vs clang support.
+      set(_boost_COMPILER "-clang${_boost_COMPILER_VERSION}")
+    endif()
   else()
     # TODO at least Boost_DEBUG here?
     set(_boost_COMPILER "")
