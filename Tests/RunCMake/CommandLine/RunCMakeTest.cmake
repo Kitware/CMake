@@ -348,6 +348,10 @@ set(RunCMake_TEST_OPTIONS --trace-expand --warn-uninitialized)
 run_cmake(trace-expand-warn-uninitialized)
 unset(RunCMake_TEST_OPTIONS)
 
+set(RunCMake_TEST_OPTIONS --warn-uninitialized)
+run_cmake(warn-uninitialized)
+unset(RunCMake_TEST_OPTIONS)
+
 set(RunCMake_TEST_OPTIONS --trace-source=trace-only-this-file.cmake)
 run_cmake(trace-source)
 unset(RunCMake_TEST_OPTIONS)

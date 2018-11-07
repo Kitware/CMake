@@ -1025,7 +1025,7 @@ private:
   bool CheckCMP0000;
   std::set<std::string> WarnedCMP0074;
   bool IsSourceFileTryCompile;
-  mutable bool SuppressWatches;
+  mutable bool SuppressSideEffects;
 };
 
 #endif

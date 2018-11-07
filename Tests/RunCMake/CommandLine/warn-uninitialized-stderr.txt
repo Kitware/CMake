@@ -1,0 +1,5 @@
+^CMake Warning \(dev\) at warn-uninitialized.cmake:1 \(set\):
+  uninitialized variable 'WARN_FROM_NORMAL_CMAKE_FILE'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$
