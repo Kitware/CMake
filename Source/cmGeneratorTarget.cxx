@@ -953,7 +953,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
       cmSystemTools::ExpandListArgument(entry, items);
       for (std::string const& item : items) {
         if (cmHasLiteralPrefix(item, "$<TARGET_OBJECTS:") &&
-            item[item.size() - 1] == '>') {
+            item.back() == '>') {
           continue;
         }
         files.push_back(item);
@@ -5612,8 +5612,7 @@ void cmGeneratorTarget::GetObjectLibrariesCMP0026(
     std::vector<std::string> files;
     cmSystemTools::ExpandListArgument(entry, files);
     for (std::string const& li : files) {
-      if (cmHasLiteralPrefix(li, "$<TARGET_OBJECTS:") &&
-          li[li.size() - 1] == '>') {
+      if (cmHasLiteralPrefix(li, "$<TARGET_OBJECTS:") && li.back() == '>') {
         std::string objLibName = li.substr(17, li.size() - 18);
 
         if (cmGeneratorExpression::Find(objLibName) != std::string::npos) {

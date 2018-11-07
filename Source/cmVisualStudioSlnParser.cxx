@@ -602,8 +602,8 @@ bool cmVisualStudioSlnParser::ParseTag(const std::string& fullTag,
   }
   const std::string& arg = cmSystemTools::TrimWhitespace(
     fullTag.substr(idxLeftParen + 1, idxRightParen - idxLeftParen - 1));
-  if (arg[0] == '"') {
-    if (arg[arg.size() - 1] != '"') {
+  if (arg.front() == '"') {
+    if (arg.back() != '"') {
       this->LastResult.SetError(ResultErrorInputStructure,
                                 state.GetCurrentLine());
       return false;
@@ -620,7 +620,7 @@ bool cmVisualStudioSlnParser::ParseValue(const std::string& value,
   const std::string& trimmed = cmSystemTools::TrimWhitespace(value);
   if (trimmed.empty())
     parsedLine.AddValue(trimmed);
-  else if (trimmed[0] == '"' && trimmed[trimmed.size() - 1] == '"')
+  else if (trimmed.front() == '"' && trimmed.back() == '"')
     parsedLine.AddQuotedValue(trimmed.substr(1, trimmed.size() - 2));
   else
     parsedLine.AddValue(trimmed);

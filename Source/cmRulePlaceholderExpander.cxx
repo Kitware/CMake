@@ -110,7 +110,7 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   if (replaceValues.Target) {
     if (variable == "TARGET_QUOTED") {
       std::string targetQuoted = replaceValues.Target;
-      if (!targetQuoted.empty() && targetQuoted[0] != '\"') {
+      if (!targetQuoted.empty() && targetQuoted.front() != '\"') {
         targetQuoted = '\"';
         targetQuoted += replaceValues.Target;
         targetQuoted += '\"';
@@ -120,7 +120,7 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
     if (variable == "TARGET_UNQUOTED") {
       std::string unquoted = replaceValues.Target;
       std::string::size_type sz = unquoted.size();
-      if (sz > 2 && unquoted[0] == '\"' && unquoted[sz - 1] == '\"') {
+      if (sz > 2 && unquoted.front() == '\"' && unquoted.back() == '\"') {
         unquoted = unquoted.substr(1, sz - 2);
       }
       return unquoted;

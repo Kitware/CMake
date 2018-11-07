@@ -838,7 +838,7 @@ static void EnsureTrailingSlash(std::string& path)
   if (path.empty()) {
     return;
   }
-  std::string::value_type last = path[path.size() - 1];
+  std::string::value_type last = path.back();
 #ifdef _WIN32
   if (last != '\\') {
     path += '\\';

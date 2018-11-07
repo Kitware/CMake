@@ -976,9 +976,9 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     lg->GetIndividualFileTargets(objectFileTargets);
     for (std::string const& f : objectFileTargets) {
       const char* prefix = "[obj] ";
-      if (f[f.length() - 1] == 's') {
+      if (f.back() == 's') {
         prefix = "[to asm] ";
-      } else if (f[f.length() - 1] == 'i') {
+      } else if (f.back() == 'i') {
         prefix = "[pre] ";
       }
       this->AppendTarget(xml, f, make, makeArgs, subdir, prefix);
@@ -1035,8 +1035,7 @@ std::string cmExtraEclipseCDT4Generator::GetPathBasename(
 {
   std::string outputBasename = path;
   while (!outputBasename.empty() &&
-         (outputBasename[outputBasename.size() - 1] == '/' ||
-          outputBasename[outputBasename.size() - 1] == '\\')) {
+         (outputBasename.back() == '/' || outputBasename.back() == '\\')) {
     outputBasename.resize(outputBasename.size() - 1);
   }
   std::string::size_type loc = outputBasename.find_last_of("/\\");

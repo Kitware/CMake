@@ -867,8 +867,8 @@ static bool ParseEntryWithoutType(const std::string& entry, std::string& var,
 
   // if value is enclosed in single quotes ('foo') then remove them
   // it is used to enclose trailing space or tab
-  if (flag && value.size() >= 2 && value[0] == '\'' &&
-      value[value.size() - 1] == '\'') {
+  if (flag && value.size() >= 2 && value.front() == '\'' &&
+      value.back() == '\'') {
     value = value.substr(1, value.size() - 2);
   }
 
@@ -900,8 +900,8 @@ bool cmState::ParseCacheEntry(const std::string& entry, std::string& var,
 
   // if value is enclosed in single quotes ('foo') then remove them
   // it is used to enclose trailing space or tab
-  if (flag && value.size() >= 2 && value[0] == '\'' &&
-      value[value.size() - 1] == '\'') {
+  if (flag && value.size() >= 2 && value.front() == '\'' &&
+      value.back() == '\'') {
     value = value.substr(1, value.size() - 2);
   }
 

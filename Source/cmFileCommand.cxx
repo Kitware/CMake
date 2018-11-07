@@ -2525,7 +2525,7 @@ bool cmFileCommand::HandleCMakePathCommand(
       // remove double quotes in the path
       std::string& s = *j;
 
-      if (s.size() > 1 && s[0] == '\"' && s[s.size() - 1] == '\"') {
+      if (s.size() > 1 && s.front() == '\"' && s.back() == '\"') {
         s = s.substr(1, s.size() - 2);
       }
     }

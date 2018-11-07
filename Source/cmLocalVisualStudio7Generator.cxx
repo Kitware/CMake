@@ -1347,7 +1347,7 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(
        d != dirs.end(); ++d) {
     // Remove any trailing slash and skip empty paths.
     std::string dir = *d;
-    if (dir[dir.size() - 1] == '/') {
+    if (dir.back() == '/') {
       dir = dir.substr(0, dir.size() - 1);
     }
     if (dir.empty()) {

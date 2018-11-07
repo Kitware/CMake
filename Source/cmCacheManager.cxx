@@ -415,8 +415,7 @@ void cmCacheManager::OutputValueNoNewlines(std::ostream& fout,
                                            std::string const& value)
 {
   // if value has trailing space or tab, enclose it in single quotes
-  if (!value.empty() &&
-      (value[value.size() - 1] == ' ' || value[value.size() - 1] == '\t')) {
+  if (!value.empty() && (value.back() == ' ' || value.back() == '\t')) {
     fout << '\'' << value << '\'';
   } else {
     fout << value;

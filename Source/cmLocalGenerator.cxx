@@ -807,19 +807,19 @@ std::string cmLocalGenerator::GetIncludeFlags(
     }
     std::string includePath =
       this->ConvertToIncludeReference(i, shellFormat, forceFullPaths);
-    if (quotePaths && !includePath.empty() && includePath[0] != '\"') {
+    if (quotePaths && !includePath.empty() && includePath.front() != '\"') {
       includeFlags << "\"";
     }
     includeFlags << includePath;
-    if (quotePaths && !includePath.empty() && includePath[0] != '\"') {
+    if (quotePaths && !includePath.empty() && includePath.front() != '\"') {
       includeFlags << "\"";
     }
     includeFlags << sep;
   }
   std::string flags = includeFlags.str();
   // remove trailing separators
-  if ((sep[0] != ' ') && !flags.empty() && flags[flags.size() - 1] == sep[0]) {
-    flags[flags.size() - 1] = ' ';
+  if ((sep[0] != ' ') && !flags.empty() && flags.back() == sep[0]) {
+    flags.back() = ' ';
   }
   return flags;
 }
