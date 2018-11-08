@@ -22,20 +22,41 @@ void String::internally_mutate_to_stable_string()
   *this = String(data(), size());
 }
 
-std::string const& String::str()
+bool String::is_stable() const
+{
+  return str_if_stable() != nullptr;
+}
+
+void String::stabilize()
+{
+  if (is_stable()) {
+    return;
+  }
+  this->internally_mutate_to_stable_string();
+}
+
+std::string const* String::str_if_stable() const
 {
   if (!data()) {
     // We view no string.
     // This is stable for the lifetime of our current value.
-    return empty_string_;
+    return &empty_string_;
   }
 
   if (string_ && data() == string_->data() && size() == string_->size()) {
     // We view an entire string.
     // This is stable for the lifetime of our current value.
-    return *string_;
+    return string_.get();
   }
 
+  return nullptr;
+}
+
+std::string const& String::str()
+{
+  if (std::string const* s = str_if_stable()) {
+    return *s;
+  }
   // Mutate to hold a std::string that is stable for the lifetime
   // of our current value.
   this->internally_mutate_to_stable_string();

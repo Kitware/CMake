@@ -30,8 +30,10 @@ static bool testConstructDefault()
   ASSERT_TRUE(str_const.data() == nullptr);
   ASSERT_TRUE(str_const.size() == 0);
   ASSERT_TRUE(str_const.empty());
+  ASSERT_TRUE(str_const.is_stable());
   ASSERT_TRUE(str.c_str() == nullptr);
   ASSERT_TRUE(str.str().empty());
+  ASSERT_TRUE(str.is_stable());
   return true;
 }
 
@@ -42,8 +44,10 @@ static bool testFromNullPtr(cm::String str)
   ASSERT_TRUE(str_const.data() == nullptr);
   ASSERT_TRUE(str_const.size() == 0);
   ASSERT_TRUE(str_const.empty());
+  ASSERT_TRUE(str_const.is_stable());
   ASSERT_TRUE(str.c_str() == nullptr);
   ASSERT_TRUE(str.str().empty());
+  ASSERT_TRUE(str.is_stable());
   return true;
 }
 
@@ -68,8 +72,10 @@ static bool testFromCStrNull(cm::String str)
   ASSERT_TRUE(str_const.data() == nullptr);
   ASSERT_TRUE(str_const.size() == 0);
   ASSERT_TRUE(str_const.empty());
+  ASSERT_TRUE(str_const.is_stable());
   ASSERT_TRUE(str.c_str() == nullptr);
   ASSERT_TRUE(str.str().empty());
+  ASSERT_TRUE(str.is_stable());
   return true;
 }
 
@@ -96,12 +102,16 @@ static bool testFromCharArray(cm::String str)
   cm::String const& str_const = str;
   ASSERT_TRUE(str_const.data() != charArray);
   ASSERT_TRUE(str_const.size() == sizeof(charArray) - 1);
+  ASSERT_TRUE(str_const.is_stable());
   ASSERT_TRUE(str.c_str() != charArray);
+  ASSERT_TRUE(str.is_stable());
   cm::String substr = str.substr(1);
   cm::String const& substr_const = substr;
   ASSERT_TRUE(substr_const.data() != &charArray[1]);
   ASSERT_TRUE(substr_const.size() == 2);
+  ASSERT_TRUE(!substr_const.is_stable());
   ASSERT_TRUE(substr.c_str() != &charArray[1]);
+  ASSERT_TRUE(!substr.is_stable());
   return true;
 }
 
@@ -126,6 +136,7 @@ static bool testFromCStr(cm::String const& str)
   ASSERT_TRUE(str.data() != cstr);
   ASSERT_TRUE(str.size() == 3);
   ASSERT_TRUE(std::strncmp(str.data(), cstr, 3) == 0);
+  ASSERT_TRUE(str.is_stable());
   return true;
 }
 
@@ -156,6 +167,7 @@ static bool testFromStdString(cm::String const& str)
 #endif
   ASSERT_TRUE(str.size() == 3);
   ASSERT_TRUE(std::strncmp(str.data(), stdstr.data(), 3) == 0);
+  ASSERT_TRUE(str.is_stable());
   return true;
 }
 
@@ -193,6 +205,7 @@ static bool testFromChar(cm::String const& str)
 {
   ASSERT_TRUE(str.size() == 1);
   ASSERT_TRUE(std::strncmp(str.data(), "a", 1) == 0);
+  ASSERT_TRUE(str.is_stable());
   return true;
 }
 
@@ -216,6 +229,7 @@ static bool testConstructFromInitList()
   cm::String const str{ 'a', 'b', 'c' };
   ASSERT_TRUE(str.size() == 3);
   ASSERT_TRUE(std::strncmp(str.data(), "abc", 3) == 0);
+  ASSERT_TRUE(str.is_stable());
   return true;
 }
 
@@ -226,6 +240,7 @@ static bool testAssignFromInitList()
   str = { 'a', 'b', 'c' };
   ASSERT_TRUE(str.size() == 3);
   ASSERT_TRUE(std::strncmp(str.data(), "abc", 3) == 0);
+  ASSERT_TRUE(str.is_stable());
   return true;
 }
 
@@ -243,6 +258,7 @@ static bool testConstructFromInputIterator()
   ASSERT_TRUE(str.data() != cstr);
   ASSERT_TRUE(str.size() == 3);
   ASSERT_TRUE(std::strncmp(str.data(), cstr, 3) == 0);
+  ASSERT_TRUE(str.is_stable());
   return true;
 }
 
@@ -252,6 +268,7 @@ static bool testConstructFromN()
   cm::String const str(3, 'a');
   ASSERT_TRUE(str.size() == 3);
   ASSERT_TRUE(std::strncmp(str.data(), "aaa", 3) == 0);
+  ASSERT_TRUE(str.is_stable());
   return true;
 }
 
@@ -262,12 +279,16 @@ static bool testFromStaticStringView(cm::String str)
   cm::String const& str_const = str;
   ASSERT_TRUE(str_const.data() == staticStringView.data());
   ASSERT_TRUE(str_const.size() == staticStringView.size());
+  ASSERT_TRUE(!str_const.is_stable());
   ASSERT_TRUE(str.c_str() == staticStringView);
+  ASSERT_TRUE(!str.is_stable());
   cm::String substr = str.substr(1);
   cm::String const& substr_const = substr;
   ASSERT_TRUE(substr_const.data() == &staticStringView[1]);
   ASSERT_TRUE(substr_const.size() == 2);
+  ASSERT_TRUE(!substr_const.is_stable());
   ASSERT_TRUE(substr.c_str() == &staticStringView[1]);
+  ASSERT_TRUE(!substr.is_stable());
   return true;
 }
 
@@ -294,6 +315,8 @@ static bool testConstructCopy()
   ASSERT_TRUE(s1.size() == 3);
   ASSERT_TRUE(s2.size() == 3);
   ASSERT_TRUE(std::strncmp(s2.data(), "abc", 3) == 0);
+  ASSERT_TRUE(s1.is_stable());
+  ASSERT_TRUE(s2.is_stable());
   return true;
 }
 
@@ -306,6 +329,8 @@ static bool testConstructMove()
   ASSERT_TRUE(s1.size() == 0);
   ASSERT_TRUE(s2.size() == 3);
   ASSERT_TRUE(std::strncmp(s2.data(), "abc", 3) == 0);
+  ASSERT_TRUE(s1.is_stable());
+  ASSERT_TRUE(s2.is_stable());
   return true;
 }
 
@@ -319,6 +344,8 @@ static bool testAssignCopy()
   ASSERT_TRUE(s1.size() == 3);
   ASSERT_TRUE(s2.size() == 3);
   ASSERT_TRUE(std::strncmp(s2.data(), "abc", 3) == 0);
+  ASSERT_TRUE(s1.is_stable());
+  ASSERT_TRUE(s2.is_stable());
   return true;
 }
 
@@ -332,6 +359,8 @@ static bool testAssignMove()
   ASSERT_TRUE(s1.size() == 0);
   ASSERT_TRUE(s2.size() == 3);
   ASSERT_TRUE(std::strncmp(s2.data(), "abc", 3) == 0);
+  ASSERT_TRUE(s1.is_stable());
+  ASSERT_TRUE(s2.is_stable());
   return true;
 }
 
@@ -376,6 +405,7 @@ static bool testOperatorPlusEqual()
   str += cm::String("g");
   ASSERT_TRUE(str.size() == 7);
   ASSERT_TRUE(std::strncmp(str.data(), "abcdefg", 7) == 0);
+  ASSERT_TRUE(str.is_stable());
   return true;
 }
 
@@ -742,15 +772,18 @@ static bool testMethod_substr_AtEnd(cm::String str)
   cm::String substr = str.substr(1);
   ASSERT_TRUE(substr.data() == str.data() + 1);
   ASSERT_TRUE(substr.size() == 2);
+  ASSERT_TRUE(!substr.is_stable());
 
   // c_str() at the end of the buffer does not internally mutate.
   ASSERT_TRUE(std::strcmp(substr.c_str(), "bc") == 0);
   ASSERT_TRUE(substr.c_str() == str.data() + 1);
   ASSERT_TRUE(substr.data() == str.data() + 1);
   ASSERT_TRUE(substr.size() == 2);
+  ASSERT_TRUE(!substr.is_stable());
 
   // str() internally mutates.
   ASSERT_TRUE(substr.str() == "bc");
+  ASSERT_TRUE(substr.is_stable());
   ASSERT_TRUE(substr.data() != str.data() + 1);
   ASSERT_TRUE(substr.size() == 2);
   ASSERT_TRUE(substr.c_str() != str.data() + 1);
@@ -783,9 +816,11 @@ static bool testMethod_substr_AtStart(cm::String str)
     ASSERT_TRUE(substr_c != str.data());
     ASSERT_TRUE(substr.data() != str.data());
     ASSERT_TRUE(substr.size() == 2);
+    ASSERT_TRUE(substr.is_stable());
 
     // str() does not need to internally mutate after c_str() did so
     ASSERT_TRUE(substr.str() == "ab");
+    ASSERT_TRUE(substr.is_stable());
     ASSERT_TRUE(substr.data() == substr_c);
     ASSERT_TRUE(substr.size() == 2);
     ASSERT_TRUE(substr.c_str() == substr_c);
@@ -795,9 +830,11 @@ static bool testMethod_substr_AtStart(cm::String str)
     cm::String substr = str.substr(0, 2);
     ASSERT_TRUE(substr.data() == str.data());
     ASSERT_TRUE(substr.size() == 2);
+    ASSERT_TRUE(!substr.is_stable());
 
     // str() internally mutates.
     ASSERT_TRUE(substr.str() == "ab");
+    ASSERT_TRUE(substr.is_stable());
     ASSERT_TRUE(substr.data() != str.data());
     ASSERT_TRUE(substr.size() == 2);
     ASSERT_TRUE(substr.c_str() != str.data());
@@ -807,6 +844,7 @@ static bool testMethod_substr_AtStart(cm::String str)
     ASSERT_TRUE(std::strcmp(substr_c, "ab") == 0);
     ASSERT_TRUE(substr_c == substr.data());
     ASSERT_TRUE(substr.size() == 2);
+    ASSERT_TRUE(substr.is_stable());
   }
 
   return true;
@@ -1088,6 +1126,7 @@ static bool testAddition()
     cm::String str;
     str += "a" + cm::String("b") + 'c';
     ASSERT_TRUE(str == "abc");
+    ASSERT_TRUE(str.is_stable());
   }
   {
     std::string s;
@@ -1099,6 +1138,23 @@ static bool testAddition()
     ss << ("a" + cm::String("b") + 'c');
     ASSERT_TRUE(ss.str() == "abc");
   }
+  return true;
+}
+
+static bool testStability()
+{
+  std::cout << "testStability()\n";
+  cm::String str = "abc"_s;
+  ASSERT_TRUE(!str.is_stable());
+  ASSERT_TRUE(str.str_if_stable() == nullptr);
+  str.stabilize();
+  ASSERT_TRUE(str.is_stable());
+  std::string const* str_if_stable = str.str_if_stable();
+  ASSERT_TRUE(str_if_stable != nullptr);
+  ASSERT_TRUE(*str_if_stable == "abc");
+  str.stabilize();
+  ASSERT_TRUE(str.is_stable());
+  ASSERT_TRUE(str.str_if_stable() == str_if_stable);
   return true;
 }
 
@@ -1282,6 +1338,9 @@ int testString(int /*unused*/, char* /*unused*/ [])
     return 1;
   }
   if (!testAddition()) {
+    return 1;
+  }
+  if (!testStability()) {
     return 1;
   }
   return 0;

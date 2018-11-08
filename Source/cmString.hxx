@@ -348,6 +348,20 @@ public:
 
   char back() const noexcept { return view_.back(); }
 
+  /** Return true if this instance is stable and otherwise false.
+      An instance is stable if it is in the 'null' state or if it is
+      an 'owned' state not produced by substring operations, or
+      after a call to 'stabilize()' or 'str()'.  */
+  bool is_stable() const;
+
+  /** If 'is_stable()' does not return true, mutate so it does.  */
+  void stabilize();
+
+  /** Get a pointer to a normal std::string if 'is_stable()' returns
+      true and otherwise nullptr.  The pointer is valid until this
+      instance is mutated or destroyed.  */
+  std::string const* str_if_stable() const;
+
   /** Get a refernce to a normal std::string.  The reference
       is valid until this instance is mutated or destroyed.  */
   std::string const& str();
