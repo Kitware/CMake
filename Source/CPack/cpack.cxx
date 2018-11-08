@@ -358,8 +358,9 @@ int main(int argc, char const* const* argv)
             cpackGenerator->SetTraceExpand(traceExpand);
           } else {
             cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-                        "Cannot initialize CPack generator: " << gen
-                                                              << std::endl);
+                        "Could not create CPack generator: " << gen
+                                                             << std::endl);
+
             parsed = 0;
           }
 
