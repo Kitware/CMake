@@ -231,6 +231,7 @@ function(_pkg_find_libs _prefix _no_cmake_path _no_cmake_environment_path)
     find_library(pkgcfg_lib_${_prefix}_${_pkg_search}
                  NAMES ${_pkg_search}
                  ${_find_opts})
+    mark_as_advanced(pkgcfg_lib_${_prefix}_${_pkg_search})
     list(APPEND _libs "${pkgcfg_lib_${_prefix}_${_pkg_search}}")
   endforeach()
 
