@@ -21,6 +21,7 @@
 #include "cmCPackLog.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
+#include "cmDocumentationFormatter.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateSnapshot.h"
@@ -360,7 +361,19 @@ int main(int argc, char const* const* argv)
             cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                         "Could not create CPack generator: " << gen
                                                              << std::endl);
-
+            // Print out all the valid generators
+            cmDocumentation generatorDocs;
+            std::vector<cmDocumentationEntry> v;
+            for (auto const& g : generators.GetGeneratorsList()) {
+              cmDocumentationEntry e;
+              e.Name = g.first;
+              e.Brief = g.second;
+              v.push_back(std::move(e));
+            }
+            generatorDocs.SetSection("Generators", v);
+            std::cerr << "\n";
+            generatorDocs.PrintDocumentation(cmDocumentation::ListGenerators,
+                                             std::cerr);
             parsed = 0;
           }
 
