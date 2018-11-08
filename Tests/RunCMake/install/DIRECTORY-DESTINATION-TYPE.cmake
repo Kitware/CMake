@@ -1,0 +1,1 @@
+install(DIRECTORY dir TYPE BIN DESTINATION mybin)

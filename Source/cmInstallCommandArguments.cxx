@@ -29,6 +29,7 @@ cmInstallCommandArguments::cmInstallCommandArguments(
   , Optional(&Parser, "OPTIONAL", &ArgumentGroup)
   , NamelinkOnly(&Parser, "NAMELINK_ONLY", &ArgumentGroup)
   , NamelinkSkip(&Parser, "NAMELINK_SKIP", &ArgumentGroup)
+  , Type(&Parser, "TYPE", &ArgumentGroup)
   , GenericArguments(nullptr)
   , DefaultComponentName(defaultComponent)
 {
@@ -143,6 +144,11 @@ bool cmInstallCommandArguments::HasNamelinkComponent() const
     return this->GenericArguments->HasNamelinkComponent();
   }
   return false;
+}
+
+const std::string& cmInstallCommandArguments::GetType() const
+{
+  return this->Type.GetString();
 }
 
 const std::vector<std::string>& cmInstallCommandArguments::GetConfigurations()

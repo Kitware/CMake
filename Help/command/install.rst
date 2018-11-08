@@ -9,8 +9,8 @@ Synopsis
 .. parsed-literal::
 
   install(`TARGETS`_ <target>... [...])
-  install({`FILES`_ | `PROGRAMS`_} <file>... DESTINATION <dir> [...])
-  install(`DIRECTORY`_ <dir>... DESTINATION <dir> [...])
+  install({`FILES`_ | `PROGRAMS`_} <file>... [DESTINATION <dir>] [...])
+  install(`DIRECTORY`_ <dir>... [DESTINATION <dir>] [...])
   install(`SCRIPT`_ <file> [...])
   install(`CODE`_ <code> [...])
   install(`EXPORT`_ <export-name> DESTINATION <dir> [...])
@@ -172,6 +172,29 @@ installation properties apply to all target types. If only one is given then
 only targets of that type will be installed (which can be used to install
 just a DLL or just an import library.)
 
+For some target types, the ``DESTINATION`` argument is optional. If no
+``DESTINATION`` argument is specified for these target types, the destination
+will default to either the appropriate variable from :module:`GNUInstallDirs`
+(if it is defined) or a built-in default (if the variable is not defined.) These
+defaults are outlined below:
+
+================== =============================== ======================
+   Target Type         GNUInstallDirs Variable        Built-In Default
+================== =============================== ======================
+``RUNTIME``        ``${CMAKE_INSTALL_BINDIR}``     ``bin``
+``LIBRARY``        ``${CMAKE_INSTALL_LIBDIR}``     ``lib``
+``ARCHIVE``        ``${CMAKE_INSTALL_LIBDIR}``     ``lib``
+``PRIVATE_HEADER`` ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
+``PUBLIC_HEADER``  ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
+================== =============================== ======================
+
+To make your package compliant with distribution filesystem layout policies, it
+is not recommended that you specify a ``DESTINATION`` for a target unless it
+must be installed in a nonstandard location. That way, package maintainers can
+control the install destination by setting the appropriate cache variables. In
+any case, it is recommended that you use the :module:`GNUInstallDirs` variables
+in your ``DESTINATION`` arguments whenever possible.
+
 In addition to the common options listed above, each target can accept
 the following additional arguments:
 
@@ -307,7 +330,7 @@ Installing Files
 
 .. code-block:: cmake
 
-  install(<FILES|PROGRAMS> files... DESTINATION <dir>
+  install(<FILES|PROGRAMS> files... [DESTINATION <dir> | TYPE <type>]
           [PERMISSIONS permissions...]
           [CONFIGURATIONS [Debug|Release|...]]
           [COMPONENT <component>]
@@ -331,6 +354,47 @@ The list of ``files...`` given to ``FILES`` or ``PROGRAMS`` may use
 However, if any item begins in a generator expression it must evaluate
 to a full path.
 
+Instead of specifying ``DESTINATION``, you may specify a generic file type
+via the ``TYPE`` argument as listed below. If a type is selected and no
+destination is specified, the destination will default to either the
+appropriate variable from :module:`GNUInstallDirs` (if it is defined) or a
+built-in default (if the variable is not defined.) These defaults are outlined
+below:
+
+======================= ================================== =========================
+   ``TYPE`` Argument         GNUInstallDirs Variable           Built-In Default
+======================= ================================== =========================
+``BIN``                 ``${CMAKE_INSTALL_BINDIR}``        ``bin``
+``SBIN``                ``${CMAKE_INSTALL_SBINDIR}``       ``sbin``
+``LIB``                 ``${CMAKE_INSTALL_LIBDIR}``        ``lib``
+``INCLUDE``             ``${CMAKE_INSTALL_INCLUDEDIR}``    ``include``
+``SYSCONF``             ``${CMAKE_INSTALL_SYSCONFDIR}``    ``etc``
+``SHAREDSTATE``         ``${CMAKE_INSTALL_SHARESTATEDIR}`` ``com``
+``LOCALSTATE``          ``${CMAKE_INSTALL_LOCALSTATEDIR}`` ``var``
+``RUNSTATE``            ``${CMAKE_INSTALL_RUNSTATEDIR}``   ``<LOCALSTATE dir>/run``
+``DATA``                ``${CMAKE_INSTALL_DATADIR}``       ``<DATAROOT dir>``
+``INFO``                ``${CMAKE_INSTALL_INFODIR}``       ``<DATAROOT dir>/info``
+``LOCALE``              ``${CMAKE_INSTALL_LOCALEDIR}``     ``<DATAROOT dir>/locale``
+``MAN``                 ``${CMAKE_INSTALL_MANDIR}``        ``<DATAROOT dir>/man``
+``DOC``                 ``${CMAKE_INSTALL_DOCDIR}``        ``<DATAROOT dir>/doc``
+======================= ================================== =========================
+
+It is an error to use ``TYPE`` and ``DESTINATION`` arguments together.
+
+Note that some of the types' built-in defaults use the ``DATAROOT`` directory as
+a prefix. The ``DATAROOT`` prefix is calculated similarly to the types, with
+``CMAKE_INSTALL_DATAROOTDIR`` as the variable and ``share`` as the built-in
+default. You cannot use ``DATAROOT`` as a ``TYPE`` parameter; please use
+``DATA`` instead.
+
+To make your package compliant with distribution filesystem layout policies, it
+is recommended that you specify one of the above generic file types, rather than
+a ``DESTINATION`` argument, unless the files must be installed in a nonstandard
+location. That way, package maintainers can control the install destination by
+setting the appropriate cache variables. In any case, it is recommended that you
+use the :module:`GNUInstallDirs` variables in your ``DESTINATION`` arguments
+whenever possible.
+
 The install destination given to the files install ``DESTINATION`` may
 use "generator expressions" with the syntax ``$<...>``.  See the
 :manual:`cmake-generator-expressions(7)` manual for available expressions.
@@ -342,7 +406,7 @@ Installing Directories
 
 .. code-block:: cmake
 
-  install(DIRECTORY dirs... DESTINATION <dir>
+  install(DIRECTORY dirs... [DESTINATION <dir> | TYPE <type>]
           [FILE_PERMISSIONS permissions...]
           [DIRECTORY_PERMISSIONS permissions...]
           [USE_SOURCE_PERMISSIONS] [OPTIONAL] [MESSAGE_NEVER]
@@ -412,6 +476,47 @@ will install the ``icons`` directory to ``share/myproj/icons`` and the
 ``scripts`` directory to ``share/myproj``.  The icons will get default
 file permissions, the scripts will be given specific permissions, and any
 ``CVS`` directories will be excluded.
+
+Instead of specifying ``DESTINATION``, you may specify a generic file type
+via the ``TYPE`` argument as listed below. If a type is selected and no
+destination is specified, the destination will default to either the
+appropriate variable from :module:`GNUInstallDirs` (if it is defined) or a
+built-in default (if the variable is not defined.) These defaults are outlined
+below:
+
+======================= ================================== =========================
+   ``TYPE`` Argument         GNUInstallDirs Variable           Built-In Default
+======================= ================================== =========================
+``BIN``                 ``${CMAKE_INSTALL_BINDIR}``        ``bin``
+``SBIN``                ``${CMAKE_INSTALL_SBINDIR}``       ``sbin``
+``LIB``                 ``${CMAKE_INSTALL_LIBDIR}``        ``lib``
+``INCLUDE``             ``${CMAKE_INSTALL_INCLUDEDIR}``    ``include``
+``SYSCONF``             ``${CMAKE_INSTALL_SYSCONFDIR}``    ``etc``
+``SHAREDSTATE``         ``${CMAKE_INSTALL_SHARESTATEDIR}`` ``com``
+``LOCALSTATE``          ``${CMAKE_INSTALL_LOCALSTATEDIR}`` ``var``
+``RUNSTATE``            ``${CMAKE_INSTALL_RUNSTATEDIR}``   ``<LOCALSTATE dir>/run``
+``DATA``                ``${CMAKE_INSTALL_DATADIR}``       ``<DATAROOT dir>``
+``INFO``                ``${CMAKE_INSTALL_INFODIR}``       ``<DATAROOT dir>/info``
+``LOCALE``              ``${CMAKE_INSTALL_LOCALEDIR}``     ``<DATAROOT dir>/locale``
+``MAN``                 ``${CMAKE_INSTALL_MANDIR}``        ``<DATAROOT dir>/man``
+``DOC``                 ``${CMAKE_INSTALL_DOCDIR}``        ``<DATAROOT dir>/doc``
+======================= ================================== =========================
+
+It is an error to use ``TYPE`` and ``DESTINATION`` arguments together.
+
+Note that some of the types' built-in defaults use the ``DATAROOT`` directory as
+a prefix. The ``DATAROOT`` prefix is calculated similarly to the types, with
+``CMAKE_INSTALL_DATAROOTDIR`` as the variable and ``share`` as the built-in
+default. You cannot use ``DATAROOT`` as a ``TYPE`` parameter; please use
+``DATA`` instead.
+
+To make your package compliant with distribution filesystem layout policies, it
+is recommended that you specify one of the above generic file types, rather than
+a ``DESTINATION`` argument, unless the files must be installed in a nonstandard
+location. That way, package maintainers can control the install destination by
+setting the appropriate cache variables. In any case, it is recommended that you
+use the :module:`GNUInstallDirs` variables in your ``DESTINATION`` arguments
+whenever possible.
 
 The list of ``dirs...`` given to ``DIRECTORY`` and the install destination
 given to the directory install ``DESTINATION`` may use "generator expressions"
