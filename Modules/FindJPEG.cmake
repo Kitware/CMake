@@ -67,23 +67,33 @@ endif()
 unset(jpeg_names)
 unset(jpeg_names_debug)
 
-if(JPEG_INCLUDE_DIR AND EXISTS "${JPEG_INCLUDE_DIR}/jpeglib.h")
-  file(STRINGS "${JPEG_INCLUDE_DIR}/jpeglib.h"
-    jpeg_lib_version REGEX "^#define[\t ]+JPEG_LIB_VERSION[\t ]+.*")
+if(JPEG_INCLUDE_DIR)
+  file(GLOB _JPEG_CONFIG_HEADERS_FEDORA "${JPEG_INCLUDE_DIR}/jconfig*.h")
+  file(GLOB _JPEG_CONFIG_HEADERS_DEBIAN "${JPEG_INCLUDE_DIR}/*/jconfig.h")
+  set(_JPEG_CONFIG_HEADERS
+    "${JPEG_INCLUDE_DIR}/jpeglib.h"
+    ${_JPEG_CONFIG_HEADERS_FEDORA}
+    ${_JPEG_CONFIG_HEADERS_DEBIAN})
+  foreach (_JPEG_CONFIG_HEADER IN LISTS _JPEG_CONFIG_HEADERS)
+    if (NOT EXISTS "${_JPEG_CONFIG_HEADER}")
+      continue ()
+    endif ()
+    file(STRINGS "${_JPEG_CONFIG_HEADER}"
+      jpeg_lib_version REGEX "^#define[\t ]+JPEG_LIB_VERSION[\t ]+.*")
 
-  if (NOT jpeg_lib_version)
-    # libjpeg-turbo sticks JPEG_LIB_VERSION in jconfig.h
-    find_path(jconfig_dir jconfig.h)
-    if (jconfig_dir)
-      file(STRINGS "${jconfig_dir}/jconfig.h"
-        jpeg_lib_version REGEX "^#define[\t ]+JPEG_LIB_VERSION[\t ]+.*")
-    endif()
-    unset(jconfig_dir)
-  endif()
+    if (NOT jpeg_lib_version)
+      continue ()
+    endif ()
 
-  string(REGEX REPLACE "^#define[\t ]+JPEG_LIB_VERSION[\t ]+([0-9]+).*"
-    "\\1" JPEG_VERSION "${jpeg_lib_version}")
+    string(REGEX REPLACE "^#define[\t ]+JPEG_LIB_VERSION[\t ]+([0-9]+).*"
+      "\\1" JPEG_VERSION "${jpeg_lib_version}")
+    break ()
+  endforeach ()
   unset(jpeg_lib_version)
+  unset(_JPEG_CONFIG_HEADER)
+  unset(_JPEG_CONFIG_HEADERS)
+  unset(_JPEG_CONFIG_HEADERS_FEDORA)
+  unset(_JPEG_CONFIG_HEADERS_DEBIAN)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
