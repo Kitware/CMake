@@ -187,10 +187,11 @@ Possible conditions are:
 ``if(<variable|string> IN_LIST <variable>)``
  True if the given element is contained in the named list variable.
 
-``if(DEFINED <variable>)``
- True if the given variable is defined.  It does not matter if the
- variable is true or false just if it has been set.  (Note macro
- arguments are not variables.)
+``if(DEFINED <name>|ENV{<name>})``
+ True if a variable or environment variable
+ with given ``<name>`` is defined.
+ The value of the variable does not matter.
+ Note that macro arguments are not variables.
 
 ``if((condition) AND (condition OR (condition)))``
  The conditions inside the parenthesis are evaluated first and then
@@ -231,7 +232,7 @@ which is true because ``var2`` is defined to "var1" which is not a false
 constant.
 
 Automatic evaluation applies in the other cases whenever the
-above-documented signature accepts ``<variable|string>``:
+above-documented condition syntax accepts ``<variable|string>``:
 
 * The left hand argument to ``MATCHES`` is first checked to see if it is
   a defined variable, if so the variable's value is used, otherwise the
@@ -269,3 +270,8 @@ specified in a :ref:`Quoted Argument` or a :ref:`Bracket Argument`.
 A quoted or bracketed variable or keyword will be interpreted as a
 string and not dereferenced or interpreted.
 See policy :policy:`CMP0054`.
+
+There is no automatic evaluation for environment or cache
+:ref:`Variable References`.  Their values must be referenced as
+``$ENV{<name>}`` or ``$CACHE{<name>}`` wherever the above-documented
+condition syntax accepts ``<variable|string>``.

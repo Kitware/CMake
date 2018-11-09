@@ -7,6 +7,14 @@ cmake-env-variables(7)
 
    .. contents::
 
+This page lists environment variables that have special
+meaning to CMake.
+
+For general information on environment variables, see the
+:ref:`Environment Variables <CMake Language Environment Variables>`
+section in the cmake-language manual.
+
+
 Environment Variables that Control the Build
 ============================================
 
