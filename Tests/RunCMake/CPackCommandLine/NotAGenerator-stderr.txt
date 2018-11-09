@@ -1,1 +1,1 @@
-^CPack Error: Cannot initialize CPack generator: NotAGenerator
+^CPack Error: Could not create CPack generator: NotAGenerator
