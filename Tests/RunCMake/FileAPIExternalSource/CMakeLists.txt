@@ -1,0 +1,12 @@
+project(External)
+enable_language(CXX)
+
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/generated.cxx" "")
+add_executable(generated_exe empty.c)
+target_sources(generated_exe PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated.cxx")
+source_group("Generated Source Files" FILES "${CMAKE_CURRENT_BINARY_DIR}/generated.cxx")
+set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/generated.cxx" PROPERTY GENERATED ON)
+set_property(SOURCE empty.c PROPERTY COMPILE_DEFINITIONS EMPTY_C=1 SRC_DUMMY)
+set_property(SOURCE empty.c PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}")
+target_include_directories(generated_exe SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_compile_definitions(generated_exe PRIVATE GENERATED_EXE=1 -DTGT_DUMMY)
