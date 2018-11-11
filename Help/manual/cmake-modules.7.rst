@@ -48,7 +48,6 @@ These modules are loaded using the :command:`include` command.
    /module/CMakeFindPackageMode
    /module/CMakeGraphVizOptions
    /module/CMakePackageConfigHelpers
-   /module/CMakeParseArguments
    /module/CMakePrintHelpers
    /module/CMakePrintSystemInformation
    /module/CMakePushCheckState
@@ -270,6 +269,7 @@ Deprecated Utility Modules
    /module/CMakeDetermineVSServicePack
    /module/CMakeExpandImportedTargets
    /module/CMakeForceCompiler
+   /module/CMakeParseArguments
    /module/TestCXXAcceptsFlag
    /module/Use_wxWindows
    /module/WriteBasicConfigVersionFile
