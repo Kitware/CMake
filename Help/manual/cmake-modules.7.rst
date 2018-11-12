@@ -76,7 +76,6 @@ These modules are loaded using the :command:`include` command.
    /module/GNUInstallDirs
    /module/GoogleTest
    /module/InstallRequiredSystemLibraries
-   /module/MacroAddFileDependencies
    /module/ProcessorCount
    /module/SelectLibraryConfigurations
    /module/SquishTestScript
@@ -89,10 +88,8 @@ These modules are loaded using the :command:`include` command.
    /module/UseJavaClassFilelist
    /module/UseJava
    /module/UseJavaSymlinks
-   /module/UsePkgConfig
    /module/UseSWIG
    /module/UsewxWidgets
-   /module/Use_wxWindows
    /module/WriteCompilerDetectionHeader
 
 Find Modules
@@ -270,7 +267,9 @@ Deprecated Utility Modules
    /module/CMakeExpandImportedTargets
    /module/CMakeForceCompiler
    /module/CMakeParseArguments
+   /module/MacroAddFileDependencies
    /module/TestCXXAcceptsFlag
+   /module/UsePkgConfig
    /module/Use_wxWindows
    /module/WriteBasicConfigVersionFile
 
