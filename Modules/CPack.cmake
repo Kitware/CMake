@@ -7,8 +7,8 @@ CPack
 
 Build binary and source package installers.
 
-Variables common to all CPack generators
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Introduction
+^^^^^^^^^^^^
 
 The CPack module generates binary and source installers in a variety of
 formats using the cpack program.  Inclusion of the CPack module adds
@@ -22,6 +22,9 @@ For certain kinds of binary installers (including the graphical
 installers on macOS and Windows), CPack generates installers that
 allow users to select individual application components to install.
 See :module:`CPackComponent` module for further details.
+
+CPack generators
+^^^^^^^^^^^^^^^^
 
 The :variable:`CPACK_GENERATOR` variable has different meanings in different
 contexts.  In a ``CMakeLists.txt`` file, :variable:`CPACK_GENERATOR` is a
@@ -56,6 +59,9 @@ This is the key: For each generator listed in :variable:`CPACK_GENERATOR` in
 ``CPackConfig.cmake``, cpack will *reset* :variable:`CPACK_GENERATOR`
 internally to *the one currently being used* and then include the
 :variable:`CPACK_PROJECT_CONFIG_FILE`.
+
+Variables common to all CPack generators
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Before including this CPack module in your ``CMakeLists.txt`` file, there
 are a variety of variables that can be set to customize the resulting
