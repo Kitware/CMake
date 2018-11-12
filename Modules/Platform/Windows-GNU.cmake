@@ -72,6 +72,8 @@ macro(__windows_compiler_gnu lang)
   # No -fPIC on Windows
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "")
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "")
+  set(CMAKE_${lang}_LINK_OPTIONS_PIE "")
+  set(CMAKE_${lang}_LINK_OPTIONS_NO_PIE "")
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "")
 
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS ${__WINDOWS_GNU_LD_RESPONSE})

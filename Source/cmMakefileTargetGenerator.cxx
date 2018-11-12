@@ -97,6 +97,9 @@ void cmMakefileTargetGenerator::GetTargetLinkFlags(
   this->GeneratorTarget->GetLinkOptions(opts, this->ConfigName, linkLanguage);
   // LINK_OPTIONS are escaped.
   this->LocalGenerator->AppendCompileOptions(flags, opts);
+
+  this->LocalGenerator->AppendPositionIndependentLinkerFlags(
+    flags, this->GeneratorTarget, this->ConfigName, linkLanguage);
 }
 
 void cmMakefileTargetGenerator::CreateRuleFile()

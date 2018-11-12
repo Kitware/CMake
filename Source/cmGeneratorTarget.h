@@ -173,6 +173,8 @@ public:
   const char* GetFeature(const std::string& feature,
                          const std::string& config) const;
 
+  const char* GetLinkPIEProperty(const std::string& config) const;
+
   bool IsIPOEnabled(std::string const& lang, std::string const& config) const;
 
   bool IsLinkInterfaceDependentBoolProperty(const std::string& p,
@@ -788,6 +790,9 @@ private:
     std::string const& config) const;
   cmHeadToLinkInterfaceMap& GetHeadToLinkInterfaceUsageRequirementsMap(
     std::string const& config) const;
+
+  std::string GetLinkInterfaceDependentStringAsBoolProperty(
+    const std::string& p, const std::string& config) const;
 
   // Cache import information from properties for each configuration.
   struct ImportInfo

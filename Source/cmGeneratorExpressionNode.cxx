@@ -1225,7 +1225,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     const char* prop = target->GetProperty(propertyName);
 
     if (dagCheckerParent) {
-      if (dagCheckerParent->EvaluatingGenexExpression()) {
+      if (dagCheckerParent->EvaluatingGenexExpression() ||
+          dagCheckerParent->EvaluatingPICExpression()) {
         // No check required.
       } else if (dagCheckerParent->EvaluatingLinkLibraries()) {
 #define TRANSITIVE_PROPERTY_COMPARE(PROPERTY)                                 \

@@ -1755,6 +1755,26 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
   }
 }
 
+void cmGlobalXCodeGenerator::AddPositionIndependentLinkAttribute(
+  cmGeneratorTarget* target, cmXCodeObject* buildSettings,
+  const std::string& configName)
+{
+  // For now, only EXECUTABLE is concerned
+  if (target->GetType() != cmStateEnums::EXECUTABLE) {
+    return;
+  }
+
+  const char* PICValue = target->GetLinkPIEProperty(configName);
+  if (PICValue == nullptr) {
+    // POSITION_INDEPENDENT_CODE is not set
+    return;
+  }
+
+  buildSettings->AddAttribute(
+    "LD_NO_PIE",
+    this->CreateString(cmSystemTools::IsOn(PICValue) ? "NO" : "YES"));
+}
+
 void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                                                  cmXCodeObject* buildSettings,
                                                  const std::string& configName)
@@ -1805,6 +1825,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       this->CurrentMakefile->IsOn("_CMAKE_LTO_THIN") ? "YES_THIN" : "YES";
     buildSettings->AddAttribute("LLVM_LTO", this->CreateString(ltoValue));
   }
+
+  // Handle PIE linker configuration
+  this->AddPositionIndependentLinkAttribute(gtgt, buildSettings, configName);
 
   // Add define flags
   this->CurrentLocalGenerator->AppendFlags(

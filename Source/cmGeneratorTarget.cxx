@@ -495,6 +495,36 @@ const char* cmGeneratorTarget::GetFeature(const std::string& feature,
   return this->LocalGenerator->GetFeature(feature, config);
 }
 
+const char* cmGeneratorTarget::GetLinkPIEProperty(
+  const std::string& config) const
+{
+  static std::string PICValue;
+
+  PICValue = this->GetLinkInterfaceDependentStringAsBoolProperty(
+    "POSITION_INDEPENDENT_CODE", config);
+
+  if (PICValue == "(unset)") {
+    // POSITION_INDEPENDENT_CODE is not set
+    return nullptr;
+  }
+
+  switch (this->GetPolicyStatusCMP0083()) {
+    case cmPolicies::WARN: {
+      std::ostringstream e;
+      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0083);
+      this->LocalGenerator->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      CM_FALLTHROUGH;
+    }
+    case cmPolicies::OLD:
+      return nullptr;
+    default:
+      // nothing to do
+      break;
+  }
+
+  return PICValue.c_str();
+}
+
 bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
                                      std::string const& config) const
 {
@@ -4237,6 +4267,29 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
   }
 }
 
+template <typename PropertyType>
+std::string valueAsString(PropertyType);
+template <>
+std::string valueAsString<bool>(bool value)
+{
+  return value ? "TRUE" : "FALSE";
+}
+template <>
+std::string valueAsString<const char*>(const char* value)
+{
+  return value ? value : "(unset)";
+}
+template <>
+std::string valueAsString<std::string>(std::string value)
+{
+  return value;
+}
+template <>
+std::string valueAsString<std::nullptr_t>(std::nullptr_t /*unused*/)
+{
+  return "(unset)";
+}
+
 std::string compatibilityType(CompatibleType t)
 {
   switch (t) {
@@ -4268,34 +4321,49 @@ std::string compatibilityAgree(CompatibleType t, bool dominant)
 }
 
 template <typename PropertyType>
-PropertyType getTypedProperty(cmGeneratorTarget const* tgt,
-                              const std::string& prop);
+PropertyType getTypedProperty(
+  cmGeneratorTarget const* tgt, const std::string& prop,
+  cmGeneratorExpressionInterpreter* genexInterpreter = nullptr);
 
 template <>
 bool getTypedProperty<bool>(cmGeneratorTarget const* tgt,
-                            const std::string& prop)
+                            const std::string& prop,
+                            cmGeneratorExpressionInterpreter* genexInterpreter)
 {
-  return tgt->GetPropertyAsBool(prop);
+  if (genexInterpreter == nullptr) {
+    return tgt->GetPropertyAsBool(prop);
+  }
+
+  const char* value = tgt->GetProperty(prop);
+  return cmSystemTools::IsOn(genexInterpreter->Evaluate(value, prop));
 }
 
 template <>
-const char* getTypedProperty<const char*>(cmGeneratorTarget const* tgt,
-                                          const std::string& prop)
+const char* getTypedProperty<const char*>(
+  cmGeneratorTarget const* tgt, const std::string& prop,
+  cmGeneratorExpressionInterpreter* genexInterpreter)
 {
-  return tgt->GetProperty(prop);
+  const char* value = tgt->GetProperty(prop);
+
+  if (genexInterpreter == nullptr) {
+    return value;
+  }
+
+  return genexInterpreter->Evaluate(value, prop).c_str();
 }
 
-template <typename PropertyType>
-std::string valueAsString(PropertyType);
 template <>
-std::string valueAsString<bool>(bool value)
+std::string getTypedProperty<std::string>(
+  cmGeneratorTarget const* tgt, const std::string& prop,
+  cmGeneratorExpressionInterpreter* genexInterpreter)
 {
-  return value ? "TRUE" : "FALSE";
-}
-template <>
-std::string valueAsString<const char*>(const char* value)
-{
-  return value ? value : "(unset)";
+  const char* value = tgt->GetProperty(prop);
+
+  if (genexInterpreter == nullptr) {
+    return valueAsString(value);
+  }
+
+  return genexInterpreter->Evaluate(value, prop);
 }
 
 template <typename PropertyType>
@@ -4309,6 +4377,12 @@ template <>
 const char* impliedValue<const char*>(const char* /*unused*/)
 {
   return "";
+}
+template <>
+std::string impliedValue<std::string>(
+  std::string /*unused*/) // NOLINT(clang-tidy)
+{
+  return std::string();
 }
 
 template <typename PropertyType>
@@ -4328,6 +4402,13 @@ std::pair<bool, const char*> consistentStringProperty(const char* lhs,
 {
   const bool b = strcmp(lhs, rhs) == 0;
   return std::make_pair(b, b ? lhs : nullptr);
+}
+
+std::pair<bool, std::string> consistentStringProperty(const std::string& lhs,
+                                                      const std::string& rhs)
+{
+  const bool b = lhs == rhs;
+  return std::make_pair(b, b ? lhs : valueAsString(nullptr));
 }
 
 std::pair<bool, const char*> consistentNumberProperty(const char* lhs,
@@ -4372,9 +4453,10 @@ std::pair<bool, const char*> consistentProperty(const char* lhs,
   const char* const null_ptr = nullptr;
 
   switch (t) {
-    case BoolType:
-      assert(false && "consistentProperty for strings called with BoolType");
-      return std::pair<bool, const char*>(false, null_ptr);
+    case BoolType: {
+      bool same = cmSystemTools::IsOn(lhs) == cmSystemTools::IsOn(rhs);
+      return std::make_pair(same, same ? lhs : nullptr);
+    }
     case StringType:
       return consistentStringProperty(lhs, rhs);
     case NumberMinType:
@@ -4383,6 +4465,40 @@ std::pair<bool, const char*> consistentProperty(const char* lhs,
   }
   assert(false && "Unreachable!");
   return std::pair<bool, const char*>(false, null_ptr);
+}
+
+std::pair<bool, std::string> consistentProperty(const std::string& lhs,
+                                                const std::string& rhs,
+                                                CompatibleType t)
+{
+  const std::string null_ptr = valueAsString(nullptr);
+
+  if (lhs == null_ptr && rhs == null_ptr) {
+    return std::make_pair(true, lhs);
+  }
+  if (lhs == null_ptr) {
+    return std::make_pair(true, rhs);
+  }
+  if (rhs == null_ptr) {
+    return std::make_pair(true, lhs);
+  }
+
+  switch (t) {
+    case BoolType: {
+      bool same = cmSystemTools::IsOn(lhs) == cmSystemTools::IsOn(rhs);
+      return std::make_pair(same, same ? lhs : null_ptr);
+    }
+    case StringType:
+      return consistentStringProperty(lhs, rhs);
+    case NumberMinType:
+    case NumberMaxType: {
+      auto value = consistentNumberProperty(lhs.c_str(), rhs.c_str(), t);
+      return std::make_pair(
+        value.first, value.first ? std::string(value.second) : null_ptr);
+    }
+  }
+  assert(false && "Unreachable!");
+  return std::pair<bool, std::string>(false, null_ptr);
 }
 
 template <typename PropertyType>
@@ -4394,6 +4510,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
                                                  PropertyType* /*unused*/)
 {
   PropertyType propContent = getTypedProperty<PropertyType>(tgt, p);
+
   std::vector<std::string> headPropKeys = tgt->GetPropertyKeys();
   const bool explicitlySet =
     std::find(headPropKeys.begin(), headPropKeys.end(), p) !=
@@ -4423,6 +4540,11 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
   }
 
   std::string interfaceProperty = "INTERFACE_" + p;
+  std::unique_ptr<cmGeneratorExpressionInterpreter> genexInterpreter(
+    p == "POSITION_INDEPENDENT_CODE" ? new cmGeneratorExpressionInterpreter(
+                                         tgt->GetLocalGenerator(), config, tgt)
+                                     : nullptr);
+
   for (cmGeneratorTarget const* theTarget : deps) {
     // An error should be reported if one dependency
     // has INTERFACE_POSITION_INDEPENDENT_CODE ON and the other
@@ -4434,8 +4556,8 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
 
     const bool ifaceIsSet = std::find(propKeys.begin(), propKeys.end(),
                                       interfaceProperty) != propKeys.end();
-    PropertyType ifacePropContent =
-      getTypedProperty<PropertyType>(theTarget, interfaceProperty);
+    PropertyType ifacePropContent = getTypedProperty<PropertyType>(
+      theTarget, interfaceProperty, genexInterpreter.get());
 
     std::string reportEntry;
     if (ifaceIsSet) {
@@ -4531,6 +4653,13 @@ bool cmGeneratorTarget::GetLinkInterfaceDependentBoolProperty(
 {
   return checkInterfacePropertyCompatibility<bool>(this, p, config, "FALSE",
                                                    BoolType, nullptr);
+}
+
+std::string cmGeneratorTarget::GetLinkInterfaceDependentStringAsBoolProperty(
+  const std::string& p, const std::string& config) const
+{
+  return checkInterfacePropertyCompatibility<std::string>(
+    this, p, config, "FALSE", BoolType, nullptr);
 }
 
 const char* cmGeneratorTarget::GetLinkInterfaceDependentStringProperty(

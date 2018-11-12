@@ -1201,6 +1201,8 @@ void cmLocalGenerator::GetTargetFlags(
       break;
   }
 
+  this->AppendPositionIndependentLinkerFlags(linkFlags, target, config,
+                                             linkLanguage);
   this->AppendIPOLinkerFlags(linkFlags, target, config, linkLanguage);
 }
 
@@ -2024,6 +2026,36 @@ void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
   cmSystemTools::ExpandListArgument(rawFlagsList, flagsList);
   for (std::string const& o : flagsList) {
     this->AppendFlagEscape(flags, o);
+  }
+}
+
+void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
+  std::string& flags, cmGeneratorTarget* target, const std::string& config,
+  const std::string& lang)
+{
+  // For now, only EXECUTABLE is concerned
+  if (target->GetType() != cmStateEnums::EXECUTABLE) {
+    return;
+  }
+
+  const char* PICValue = target->GetLinkPIEProperty(config);
+  if (PICValue == nullptr) {
+    // POSITION_INDEPENDENT_CODE is not set
+    return;
+  }
+
+  std::string name = "CMAKE_" + lang + "_LINK_OPTIONS_";
+  name += cmSystemTools::IsOn(PICValue) ? "PIE" : "NO_PIE";
+
+  auto pieFlags = this->Makefile->GetSafeDefinition(name);
+  if (pieFlags.empty()) {
+    return;
+  }
+
+  std::vector<std::string> flagsList;
+  cmSystemTools::ExpandListArgument(pieFlags, flagsList);
+  for (const auto& flag : flagsList) {
+    this->AppendFlagEscape(flags, flag);
   }
 }
 

@@ -27,6 +27,8 @@ macro(__cygwin_compiler_gnu lang)
    # No -fPIC on cygwin
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "")
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "")
+  set(CMAKE_${lang}_LINK_OPTIONS_PIE "")
+  set(CMAKE_${lang}_LINK_OPTIONS_NO_PIE "")
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "")
 
   # Initialize C link type selection flags.  These flags are used when

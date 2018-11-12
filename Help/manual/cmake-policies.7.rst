@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.14
 .. toctree::
    :maxdepth: 1
 
+   CMP0083: Add PIE options when linking executable. </policy/CMP0083>
    CMP0082: Install rules from add_subdirectory() are interleaved with those in caller. </policy/CMP0082>
 
 Policies Introduced by CMake 3.13

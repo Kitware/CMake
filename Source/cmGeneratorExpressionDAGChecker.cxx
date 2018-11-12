@@ -166,6 +166,18 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingGenexExpression()
   return top->Property == "TARGET_GENEX_EVAL" || top->Property == "GENEX_EVAL";
 }
 
+bool cmGeneratorExpressionDAGChecker::EvaluatingPICExpression()
+{
+  const cmGeneratorExpressionDAGChecker* top = this;
+  const cmGeneratorExpressionDAGChecker* parent = this->Parent;
+  while (parent) {
+    top = parent;
+    parent = parent->Parent;
+  }
+
+  return top->Property == "INTERFACE_POSITION_INDEPENDENT_CODE";
+}
+
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(
   cmGeneratorTarget const* tgt)
 {

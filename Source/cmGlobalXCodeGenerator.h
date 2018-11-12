@@ -171,6 +171,9 @@ private:
                                    const std::string& configName);
   cmXCodeObject* CreateUtilityTarget(cmGeneratorTarget* gtgt);
   void AddDependAndLinkInformation(cmXCodeObject* target);
+  void AddPositionIndependentLinkAttribute(cmGeneratorTarget* target,
+                                           cmXCodeObject* buildSettings,
+                                           const std::string& configName);
   void CreateBuildSettings(cmGeneratorTarget* gtgt,
                            cmXCodeObject* buildSettings,
                            const std::string& buildType);
