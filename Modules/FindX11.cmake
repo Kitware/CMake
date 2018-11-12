@@ -29,7 +29,7 @@ and also the following more fine grained variables:
   X11_Xcursor_INCLUDE_PATH,      X11_Xcursor_LIB,    X11_Xcursor_FOUND
   X11_Xdamage_INCLUDE_PATH,      X11_Xdamage_LIB,    X11_Xdamage_FOUND
   X11_Xdmcp_INCLUDE_PATH,        X11_Xdmcp_LIB,      X11_Xdmcp_FOUND
-                                 X11_Xext_LIB,       X11_Xext_FOUND
+  X11_Xext_INCLUDE_PATH,         X11_Xext_LIB,       X11_Xext_FOUND
   X11_dpms_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_dpms_FOUND
   X11_XShm_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_XShm_FOUND
   X11_Xshape_INCLUDE_PATH,       (in X11_Xext_LIB),  X11_Xshape_FOUND
@@ -97,6 +97,7 @@ if (UNIX)
   find_path(X11_Xcursor_INCLUDE_PATH X11/Xcursor/Xcursor.h           ${X11_INC_SEARCH_PATH})
   find_path(X11_Xdamage_INCLUDE_PATH X11/extensions/Xdamage.h        ${X11_INC_SEARCH_PATH})
   find_path(X11_Xdmcp_INCLUDE_PATH X11/Xdmcp.h                       ${X11_INC_SEARCH_PATH})
+  find_path(X11_Xext_INCLUDE_PATH X11/extensions/Xext.h              ${X11_INC_SEARCH_PATH})
   find_path(X11_dpms_INCLUDE_PATH X11/extensions/dpms.h              ${X11_INC_SEARCH_PATH})
   find_path(X11_Xxf86misc_INCLUDE_PATH X11/extensions/xf86misc.h     ${X11_INC_SEARCH_PATH})
   find_path(X11_Xxf86vm_INCLUDE_PATH X11/extensions/xf86vmode.h      ${X11_INC_SEARCH_PATH})
@@ -450,6 +451,7 @@ if (UNIX)
   mark_as_advanced(
     X11_X11_INCLUDE_PATH
     X11_X11_LIB
+    X11_Xext_INCLUDE_PATH
     X11_Xext_LIB
     X11_Xau_LIB
     X11_Xau_INCLUDE_PATH
