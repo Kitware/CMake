@@ -203,7 +203,11 @@ if (UNIX)
   endif()
 
   if(X11_Xft_LIB AND X11_Xft_INCLUDE_PATH)
-    set(X11_Xft_FOUND TRUE)
+    find_package(Freetype QUIET)
+    find_package(Fontconfig QUIET)
+    if (FREETYPE_FOUND AND FONTCONFIG_FOUND)
+      set(X11_Xft_FOUND TRUE)
+    endif ()
     list(APPEND X11_INCLUDE_DIR ${X11_Xft_INCLUDE_PATH})
   endif()
 
