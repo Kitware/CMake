@@ -5,18 +5,18 @@
 CMakeAddFortranSubdirectory
 ---------------------------
 
-Use MinGW gfortran from VS if a fortran compiler is not found.
+Add a fortran-only subdirectory, find a fortran compiler, and build.
 
-The 'add_fortran_subdirectory' function adds a subdirectory to a
-project that contains a fortran only sub-project.  The module will
+The ``cmake_add_fortran_subdirectory`` function adds a subdirectory
+to a project that contains a fortran-only subproject.  The module will
 check the current compiler and see if it can support fortran.  If no
 fortran compiler is found and the compiler is MSVC, then this module
 will find the MinGW gfortran.  It will then use an external project to
 build with the MinGW tools.  It will also create imported targets for
 the libraries created.  This will only work if the fortran code is
-built into a dll, so BUILD_SHARED_LIBS is turned on in the project.
-In addition the CMAKE_GNUtoMS option is set to on, so that the MS .lib
-files are created.  Usage is as follows:
+built into a dll, so :variable:`BUILD_SHARED_LIBS` is turned on in
+the project.  In addition the :variable:`CMAKE_GNUtoMS` option is set
+to on, so that Microsoft .lib files are created.  Usage is as follows:
 
 ::
 
