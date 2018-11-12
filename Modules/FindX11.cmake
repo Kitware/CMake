@@ -33,22 +33,21 @@ and also the following more fine grained variables:
   X11_dpms_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_dpms_FOUND
   X11_XShm_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_XShm_FOUND
   X11_Xshape_INCLUDE_PATH,       (in X11_Xext_LIB),  X11_Xshape_FOUND
-  X11_xf86misc_INCLUDE_PATH,     X11_Xxf86misc_LIB,  X11_xf86misc_FOUND
-  X11_xf86vmode_INCLUDE_PATH,    X11_Xxf86vm_LIB     X11_xf86vmode_FOUND
+  X11_Xxf86misc_INCLUDE_PATH,    X11_Xxf86misc_LIB,  X11_Xxf86misc_FOUND
+  X11_Xxf86vm_INCLUDE_PATH,      X11_Xxf86vm_LIB     X11_Xxf86vm_FOUND
   X11_Xfixes_INCLUDE_PATH,       X11_Xfixes_LIB,     X11_Xfixes_FOUND
   X11_Xft_INCLUDE_PATH,          X11_Xft_LIB,        X11_Xft_FOUND
   X11_Xi_INCLUDE_PATH,           X11_Xi_LIB,         X11_Xi_FOUND
   X11_Xinerama_INCLUDE_PATH,     X11_Xinerama_LIB,   X11_Xinerama_FOUND
-  X11_Xinput_INCLUDE_PATH,       X11_Xinput_LIB,     X11_Xinput_FOUND
   X11_Xkb_INCLUDE_PATH,                              X11_Xkb_FOUND
   X11_Xkblib_INCLUDE_PATH,                           X11_Xkb_FOUND
-  X11_Xkbfile_INCLUDE_PATH,      X11_Xkbfile_LIB,    X11_Xkbfile_FOUND
+  X11_xkbfile_INCLUDE_PATH,      X11_xkbfile_LIB,    X11_xkbfile_FOUND
   X11_Xmu_INCLUDE_PATH,          X11_Xmu_LIB,        X11_Xmu_FOUND
   X11_Xpm_INCLUDE_PATH,          X11_Xpm_LIB,        X11_Xpm_FOUND
-  X11_XTest_INCLUDE_PATH,        X11_XTest_LIB,      X11_XTest_FOUND
+  X11_Xtst_INCLUDE_PATH,         X11_Xtst_LIB,       X11_Xtst_FOUND
   X11_Xrandr_INCLUDE_PATH,       X11_Xrandr_LIB,     X11_Xrandr_FOUND
   X11_Xrender_INCLUDE_PATH,      X11_Xrender_LIB,    X11_Xrender_FOUND
-  X11_Xscreensaver_INCLUDE_PATH, X11_Xscreensaver_LIB, X11_Xscreensaver_FOUND
+  X11_Xss_INCLUDE_PATH,          X11_Xss_LIB,        X11_Xss_FOUND
   X11_Xt_INCLUDE_PATH,           X11_Xt_LIB,         X11_Xt_FOUND
   X11_Xutil_INCLUDE_PATH,                            X11_Xutil_FOUND
   X11_Xv_INCLUDE_PATH,           X11_Xv_LIB,         X11_Xv_FOUND
@@ -99,30 +98,36 @@ if (UNIX)
   find_path(X11_Xdamage_INCLUDE_PATH X11/extensions/Xdamage.h        ${X11_INC_SEARCH_PATH})
   find_path(X11_Xdmcp_INCLUDE_PATH X11/Xdmcp.h                       ${X11_INC_SEARCH_PATH})
   find_path(X11_dpms_INCLUDE_PATH X11/extensions/dpms.h              ${X11_INC_SEARCH_PATH})
-  find_path(X11_xf86misc_INCLUDE_PATH X11/extensions/xf86misc.h      ${X11_INC_SEARCH_PATH})
-  find_path(X11_xf86vmode_INCLUDE_PATH X11/extensions/xf86vmode.h    ${X11_INC_SEARCH_PATH})
+  find_path(X11_Xxf86misc_INCLUDE_PATH X11/extensions/xf86misc.h     ${X11_INC_SEARCH_PATH})
+  find_path(X11_Xxf86vm_INCLUDE_PATH X11/extensions/xf86vmode.h      ${X11_INC_SEARCH_PATH})
   find_path(X11_Xfixes_INCLUDE_PATH X11/extensions/Xfixes.h          ${X11_INC_SEARCH_PATH})
   find_path(X11_Xft_INCLUDE_PATH X11/Xft/Xft.h                       ${X11_INC_SEARCH_PATH})
   find_path(X11_Xi_INCLUDE_PATH X11/extensions/XInput.h              ${X11_INC_SEARCH_PATH})
   find_path(X11_Xinerama_INCLUDE_PATH X11/extensions/Xinerama.h      ${X11_INC_SEARCH_PATH})
-  find_path(X11_Xinput_INCLUDE_PATH X11/extensions/XInput.h          ${X11_INC_SEARCH_PATH})
   find_path(X11_Xkb_INCLUDE_PATH X11/extensions/XKB.h                ${X11_INC_SEARCH_PATH})
   find_path(X11_Xkblib_INCLUDE_PATH X11/XKBlib.h                     ${X11_INC_SEARCH_PATH})
-  find_path(X11_Xkbfile_INCLUDE_PATH X11/extensions/XKBfile.h        ${X11_INC_SEARCH_PATH})
+  find_path(X11_xkbfile_INCLUDE_PATH X11/extensions/XKBfile.h        ${X11_INC_SEARCH_PATH})
   find_path(X11_Xmu_INCLUDE_PATH X11/Xmu/Xmu.h                       ${X11_INC_SEARCH_PATH})
   find_path(X11_Xpm_INCLUDE_PATH X11/xpm.h                           ${X11_INC_SEARCH_PATH})
-  find_path(X11_XTest_INCLUDE_PATH X11/extensions/XTest.h            ${X11_INC_SEARCH_PATH})
+  find_path(X11_Xtst_INCLUDE_PATH X11/extensions/XTest.h             ${X11_INC_SEARCH_PATH})
   find_path(X11_XShm_INCLUDE_PATH X11/extensions/XShm.h              ${X11_INC_SEARCH_PATH})
   find_path(X11_Xrandr_INCLUDE_PATH X11/extensions/Xrandr.h          ${X11_INC_SEARCH_PATH})
   find_path(X11_Xrender_INCLUDE_PATH X11/extensions/Xrender.h        ${X11_INC_SEARCH_PATH})
   find_path(X11_XRes_INCLUDE_PATH X11/extensions/XRes.h              ${X11_INC_SEARCH_PATH})
-  find_path(X11_Xscreensaver_INCLUDE_PATH X11/extensions/scrnsaver.h ${X11_INC_SEARCH_PATH})
+  find_path(X11_Xss_INCLUDE_PATH X11/extensions/scrnsaver.h          ${X11_INC_SEARCH_PATH})
   find_path(X11_Xshape_INCLUDE_PATH X11/extensions/shape.h           ${X11_INC_SEARCH_PATH})
   find_path(X11_Xutil_INCLUDE_PATH X11/Xutil.h                       ${X11_INC_SEARCH_PATH})
   find_path(X11_Xt_INCLUDE_PATH X11/Intrinsic.h                      ${X11_INC_SEARCH_PATH})
   find_path(X11_Xv_INCLUDE_PATH X11/extensions/Xvlib.h               ${X11_INC_SEARCH_PATH})
   find_path(X11_XSync_INCLUDE_PATH X11/extensions/sync.h             ${X11_INC_SEARCH_PATH})
 
+  # Backwards compatibility.
+  set(X11_Xinput_INCLUDE_PATH "${X11_Xi_INCLUDE_PATH}")
+  set(X11_xf86misc_INCLUDE_PATH "${X11_Xxf86misc_INCLUDE_PATH}")
+  set(X11_xf86vmode_INCLUDE_PATH "${X11_Xxf8vm_INCLUDE_PATH}")
+  set(X11_Xkbfile_INCLUDE_PATH "${X11_xkbfile_INCLUDE_PATH}")
+  set(X11_XTest_INCLUDE_PATH "${X11_Xtst_INCLUDE_PATH}")
+  set(X11_Xscreensaver_INCLUDE_PATH "${X11_Xss_INCLUDE_PATH}")
 
   find_library(X11_X11_LIB X11               ${X11_LIB_SEARCH_PATH})
 
@@ -139,19 +144,24 @@ if (UNIX)
   find_library(X11_Xft_LIB Xft               ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xi_LIB Xi                 ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xinerama_LIB Xinerama     ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xinput_LIB Xi             ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xkbfile_LIB xkbfile       ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xkbfile_LIB xkbfile       ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xmu_LIB Xmu               ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xpm_LIB Xpm               ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xrandr_LIB Xrandr         ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xrender_LIB Xrender       ${X11_LIB_SEARCH_PATH})
   find_library(X11_XRes_LIB XRes             ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xscreensaver_LIB Xss      ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xss_LIB Xss               ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xt_LIB Xt                 ${X11_LIB_SEARCH_PATH})
-  find_library(X11_XTest_LIB Xtst            ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xtst_LIB Xtst             ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xv_LIB Xv                 ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xxf86misc_LIB Xxf86misc   ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xxf86vm_LIB Xxf86vm       ${X11_LIB_SEARCH_PATH})
+
+  # Backwards compatibility.
+  set(X11_Xinput_LIB "${X11_Xi_LIB}")
+  set(X11_Xkbfile_LIB "${X11_xkbfile_LIB}")
+  set(X11_XTest_LIB "${X11_Xtst_LIB}")
+  set(X11_Xscreensaver_LIB "${X11_Xss_LIB}")
 
   set(X11_LIBRARY_DIR "")
   if(X11_X11_LIB)
@@ -236,13 +246,17 @@ if (UNIX)
      list(APPEND X11_INCLUDE_DIR ${X11_XShm_INCLUDE_PATH})
   endif ()
 
-  if (X11_XTest_INCLUDE_PATH AND X11_XTest_LIB)
+  if (X11_Xtst_INCLUDE_PATH AND X11_Xtst_LIB)
+      set(X11_Xtst_FOUND TRUE)
+      # Backwards compatibility.
       set(X11_XTest_FOUND TRUE)
-      list(APPEND X11_INCLUDE_DIR ${X11_XTest_INCLUDE_PATH})
+      list(APPEND X11_INCLUDE_DIR ${X11_Xtst_INCLUDE_PATH})
   endif ()
 
   if (X11_Xi_INCLUDE_PATH AND X11_Xi_LIB)
      set(X11_Xi_FOUND TRUE)
+     # Backwards compatibility.
+     set(X11_Xinput_FOUND TRUE)
      list(APPEND X11_INCLUDE_DIR ${X11_Xi_INCLUDE_PATH})
   endif ()
 
@@ -271,14 +285,18 @@ if (UNIX)
      list(APPEND X11_INCLUDE_DIR ${X11_Xrandr_INCLUDE_PATH})
   endif ()
 
-  if (X11_xf86misc_INCLUDE_PATH AND X11_Xxf86misc_LIB)
+  if (X11_Xxf86misc_INCLUDE_PATH AND X11_Xxf86misc_LIB)
+     set(X11_Xxf86misc_FOUND TRUE)
+     # Backwards compatibility.
      set(X11_xf86misc_FOUND TRUE)
-     list(APPEND X11_INCLUDE_DIR ${X11_xf86misc_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xxf86misc_INCLUDE_PATH})
   endif ()
 
-  if (X11_xf86vmode_INCLUDE_PATH AND X11_Xxf86vm_LIB)
+  if (X11_Xxf86vm_INCLUDE_PATH AND X11_Xxf86vm_LIB)
+     set(X11_Xxf86vm_FOUND TRUE)
+     # Backwards compatibility.
      set(X11_xf86vmode_FOUND TRUE)
-     list(APPEND X11_INCLUDE_DIR ${X11_xf86vmode_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xxf86vm_INCLUDE_PATH})
   endif ()
 
   if (X11_Xcursor_INCLUDE_PATH AND X11_Xcursor_LIB)
@@ -286,9 +304,10 @@ if (UNIX)
      list(APPEND X11_INCLUDE_DIR ${X11_Xcursor_INCLUDE_PATH})
   endif ()
 
-  if (X11_Xscreensaver_INCLUDE_PATH AND X11_Xscreensaver_LIB)
+  if (X11_Xss_INCLUDE_PATH AND X11_Xss_LIB)
+     set(X11_Xss_FOUND TRUE)
      set(X11_Xscreensaver_FOUND TRUE)
-     list(APPEND X11_INCLUDE_DIR ${X11_Xscreensaver_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xss_INCLUDE_PATH})
   endif ()
 
   if (X11_dpms_INCLUDE_PATH)
@@ -301,19 +320,16 @@ if (UNIX)
      list(APPEND X11_INCLUDE_DIR ${X11_Xkb_INCLUDE_PATH} )
   endif ()
 
-  if (X11_Xkbfile_INCLUDE_PATH AND X11_Xkbfile_LIB AND X11_Xlib_INCLUDE_PATH)
+  if (X11_xkbfile_INCLUDE_PATH AND X11_xkbfile_LIB AND X11_Xlib_INCLUDE_PATH)
+     set(X11_xkbfile_FOUND TRUE)
+     # Backwards compatibility.
      set(X11_Xkbfile_FOUND TRUE)
-     list(APPEND X11_INCLUDE_DIR ${X11_Xkbfile_INCLUDE_PATH} )
+     list(APPEND X11_INCLUDE_DIR ${X11_xkbfile_INCLUDE_PATH} )
   endif ()
 
   if (X11_Xmu_INCLUDE_PATH AND X11_Xmu_LIB)
      set(X11_Xmu_FOUND TRUE)
      list(APPEND X11_INCLUDE_DIR ${X11_Xmu_INCLUDE_PATH})
-  endif ()
-
-  if (X11_Xinput_INCLUDE_PATH AND X11_Xinput_LIB)
-     set(X11_Xinput_FOUND TRUE)
-     list(APPEND X11_INCLUDE_DIR ${X11_Xinput_INCLUDE_PATH})
   endif ()
 
   if (X11_XSync_INCLUDE_PATH)
@@ -453,15 +469,15 @@ if (UNIX)
     X11_XRes_LIB
     X11_XRes_INCLUDE_PATH
     X11_Xxf86misc_LIB
-    X11_xf86misc_INCLUDE_PATH
+    X11_Xxf86misc_INCLUDE_PATH
     X11_Xxf86vm_LIB
-    X11_xf86vmode_INCLUDE_PATH
+    X11_Xxf86vm_INCLUDE_PATH
     X11_Xi_LIB
     X11_Xi_INCLUDE_PATH
     X11_Xinerama_LIB
     X11_Xinerama_INCLUDE_PATH
-    X11_XTest_LIB
-    X11_XTest_INCLUDE_PATH
+    X11_Xtst_LIB
+    X11_Xtst_INCLUDE_PATH
     X11_Xcursor_LIB
     X11_Xcursor_INCLUDE_PATH
     X11_dpms_INCLUDE_PATH
@@ -474,16 +490,14 @@ if (UNIX)
     X11_Xdmcp_INCLUDE_PATH
     X11_Xkb_INCLUDE_PATH
     X11_Xkblib_INCLUDE_PATH
-    X11_Xkbfile_INCLUDE_PATH
-    X11_Xkbfile_LIB
+    X11_xkbfile_INCLUDE_PATH
+    X11_xkbfile_LIB
     X11_Xmu_INCLUDE_PATH
     X11_Xmu_LIB
-    X11_Xscreensaver_INCLUDE_PATH
-    X11_Xscreensaver_LIB
+    X11_Xss_INCLUDE_PATH
+    X11_Xss_LIB
     X11_Xpm_INCLUDE_PATH
     X11_Xpm_LIB
-    X11_Xinput_LIB
-    X11_Xinput_INCLUDE_PATH
     X11_Xft_LIB
     X11_Xft_INCLUDE_PATH
     X11_Xshape_INCLUDE_PATH
