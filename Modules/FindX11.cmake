@@ -459,7 +459,6 @@ if (UNIX)
     X11_Xutil_INCLUDE_PATH
     X11_Xcomposite_INCLUDE_PATH
     X11_Xcomposite_LIB
-    X11_Xaccess_INCLUDE_PATH
     X11_Xfixes_LIB
     X11_Xfixes_INCLUDE_PATH
     X11_Xrandr_LIB
