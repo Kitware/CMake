@@ -363,6 +363,10 @@ if(ICU_FOUND)
             IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
             IMPORTED_LOCATION_DEBUG "${${_ICU_component_cache_debug}}")
         endif()
+        if(CMAKE_DL_LIBS AND _ICU_component STREQUAL "uc")
+          set_target_properties(${_ICU_imported_target} PROPERTIES
+            INTERFACE_LINK_LIBRARIES "${CMAKE_DL_LIBS}")
+        endif()
       endif()
     endif()
     unset(_ICU_component_upcase)
