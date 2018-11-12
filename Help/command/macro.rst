@@ -9,12 +9,46 @@ Start recording a macro for later invocation as a command
     <commands>
   endmacro()
 
-Defines a macro named ``<name>`` that takes arguments
-named ``<arg1>``, ...
-Commands listed after macro, but before the matching
-:command:`endmacro()`, are not invoked until the macro is invoked.
-When it is invoked, the commands recorded in the macro are first
-modified by replacing formal parameters (``${arg1}``, ...)
+Defines a macro named ``<name>`` that takes arguments named
+``<arg1>``, ... Commands listed after macro, but before the
+matching :command:`endmacro()`, are not executed until the macro
+is invoked.
+
+Per legacy, the :command:`endmacro` command admits an optional
+``<name>`` argument. If used, it must be a verbatim repeat of the
+argument of the opening ``macro`` command.
+
+See the :command:`cmake_policy()` command documentation for the behavior
+of policies inside macros.
+
+Invocation
+^^^^^^^^^^
+
+The macro invocation is case-insensitive. A macro defined as
+
+.. code-block:: cmake
+
+  macro(foo)
+    <commands>
+  endmacro()
+
+can be invoked through any of
+
+.. code-block:: cmake
+
+  foo()
+  Foo()
+  FOO()
+
+and so on. However, it is strongly recommended to stay with the
+case chosen in the macro definition.  Typically macros use
+all-lowercase names.
+
+Arguments
+^^^^^^^^^
+
+When a macro is invoked, the commands recorded in the macro are
+first modified by replacing formal parameters (``${arg1}``, ...)
 with the arguments passed, and then invoked as normal commands.
 
 In addition to referencing the formal parameters you can reference the
@@ -31,16 +65,8 @@ behavior. Checking that ``${ARGC}`` is greater than ``#`` is the only
 way to ensure that ``${ARGV#}`` was passed to the function as an extra
 argument.
 
-Per legacy, the :command:`endmacro` command admits an optional
-``<name>`` argument. If used, it must be a verbatim repeat of the
-argument of the opening ``macro`` command.
-
-
-See the :command:`cmake_policy()` command documentation for the behavior
-of policies inside macros.
-
-Macro Argument Caveats
-^^^^^^^^^^^^^^^^^^^^^^
+Argument Caveats
+^^^^^^^^^^^^^^^^
 
 Note that the parameters to a macro and values such as ``ARGN`` are
 not variables in the usual CMake sense.  They are string
