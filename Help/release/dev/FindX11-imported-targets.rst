@@ -29,3 +29,4 @@ FindX11-imported-targets
     - ``X11_Xinput_FOUND`` (use ``X11_Xi_FOUND``)
 
 * The :module:`FindX11` now provides ``X11_Xext_INCLUDE_PATH``.
+* The :module:`FindX11` now provides imported targets.
