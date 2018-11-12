@@ -352,14 +352,14 @@ if (UNIX)
       set(X11_X_EXTRA_LIBS "")
 
       # See if XOpenDisplay in X11 works by itself.
-      CHECK_LIBRARY_EXISTS("${X11_LIBRARIES}" "XOpenDisplay" "${X11_LIBRARY_DIR}" X11_LIB_X11_SOLO)
+      check_library_exists("${X11_LIBRARIES}" "XOpenDisplay" "${X11_LIBRARY_DIR}" X11_LIB_X11_SOLO)
       if(NOT X11_LIB_X11_SOLO)
         # Find library needed for dnet_ntoa.
-        CHECK_LIBRARY_EXISTS("dnet" "dnet_ntoa" "" X11_LIB_DNET_HAS_DNET_NTOA)
+        check_library_exists("dnet" "dnet_ntoa" "" X11_LIB_DNET_HAS_DNET_NTOA)
         if (X11_LIB_DNET_HAS_DNET_NTOA)
           set (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -ldnet)
         else ()
-          CHECK_LIBRARY_EXISTS("dnet_stub" "dnet_ntoa" "" X11_LIB_DNET_STUB_HAS_DNET_NTOA)
+          check_library_exists("dnet_stub" "dnet_ntoa" "" X11_LIB_DNET_STUB_HAS_DNET_NTOA)
           if (X11_LIB_DNET_STUB_HAS_DNET_NTOA)
             set (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -ldnet_stub)
           endif ()
@@ -367,13 +367,13 @@ if (UNIX)
       endif()
 
       # Find library needed for gethostbyname.
-      CHECK_FUNCTION_EXISTS("gethostbyname" CMAKE_HAVE_GETHOSTBYNAME)
+      check_function_exists("gethostbyname" CMAKE_HAVE_GETHOSTBYNAME)
       if(NOT CMAKE_HAVE_GETHOSTBYNAME)
-        CHECK_LIBRARY_EXISTS("nsl" "gethostbyname" "" CMAKE_LIB_NSL_HAS_GETHOSTBYNAME)
+        check_library_exists("nsl" "gethostbyname" "" CMAKE_LIB_NSL_HAS_GETHOSTBYNAME)
         if (CMAKE_LIB_NSL_HAS_GETHOSTBYNAME)
           set (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -lnsl)
         else ()
-          CHECK_LIBRARY_EXISTS("bsd" "gethostbyname" "" CMAKE_LIB_BSD_HAS_GETHOSTBYNAME)
+          check_library_exists("bsd" "gethostbyname" "" CMAKE_LIB_BSD_HAS_GETHOSTBYNAME)
           if (CMAKE_LIB_BSD_HAS_GETHOSTBYNAME)
             set (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -lbsd)
           endif ()
@@ -381,27 +381,27 @@ if (UNIX)
       endif()
 
       # Find library needed for connect.
-      CHECK_FUNCTION_EXISTS("connect" CMAKE_HAVE_CONNECT)
+      check_function_exists("connect" CMAKE_HAVE_CONNECT)
       if(NOT CMAKE_HAVE_CONNECT)
-        CHECK_LIBRARY_EXISTS("socket" "connect" "" CMAKE_LIB_SOCKET_HAS_CONNECT)
+        check_library_exists("socket" "connect" "" CMAKE_LIB_SOCKET_HAS_CONNECT)
         if (CMAKE_LIB_SOCKET_HAS_CONNECT)
           set (X11_X_EXTRA_LIBS -lsocket ${X11_X_EXTRA_LIBS})
         endif ()
       endif()
 
       # Find library needed for remove.
-      CHECK_FUNCTION_EXISTS("remove" CMAKE_HAVE_REMOVE)
+      check_function_exists("remove" CMAKE_HAVE_REMOVE)
       if(NOT CMAKE_HAVE_REMOVE)
-        CHECK_LIBRARY_EXISTS("posix" "remove" "" CMAKE_LIB_POSIX_HAS_REMOVE)
+        check_library_exists("posix" "remove" "" CMAKE_LIB_POSIX_HAS_REMOVE)
         if (CMAKE_LIB_POSIX_HAS_REMOVE)
           set (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -lposix)
         endif ()
       endif()
 
       # Find library needed for shmat.
-      CHECK_FUNCTION_EXISTS("shmat" CMAKE_HAVE_SHMAT)
+      check_function_exists("shmat" CMAKE_HAVE_SHMAT)
       if(NOT CMAKE_HAVE_SHMAT)
-        CHECK_LIBRARY_EXISTS("ipc" "shmat" "" CMAKE_LIB_IPS_HAS_SHMAT)
+        check_library_exists("ipc" "shmat" "" CMAKE_LIB_IPS_HAS_SHMAT)
         if (CMAKE_LIB_IPS_HAS_SHMAT)
           set (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -lipc)
         endif ()
@@ -409,7 +409,7 @@ if (UNIX)
     endif()
 
     if (X11_ICE_FOUND)
-      CHECK_LIBRARY_EXISTS("ICE" "IceConnectionNumber" "${X11_LIBRARY_DIR}"
+      check_library_exists("ICE" "IceConnectionNumber" "${X11_LIBRARY_DIR}"
                             CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER)
       if(CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER)
         set (X11_X_PRE_LIBS ${X11_ICE_LIB})
@@ -423,7 +423,7 @@ if (UNIX)
     set(X11_LIBRARIES ${X11_X_PRE_LIBS} ${X11_LIBRARIES} ${X11_X_EXTRA_LIBS})
 
     include(${CMAKE_CURRENT_LIST_DIR}/FindPackageMessage.cmake)
-    FIND_PACKAGE_MESSAGE(X11 "Found X11: ${X11_X11_LIB}"
+    find_package_message(X11 "Found X11: ${X11_X11_LIB}"
       "[${X11_X11_LIB}][${X11_INCLUDE_DIR}]")
   else ()
     if (X11_FIND_REQUIRED)
