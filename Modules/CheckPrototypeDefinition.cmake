@@ -28,7 +28,7 @@ Example:
    "unistd.h;pwd.h"
    SOLARIS_GETPWENT_R)
 
-The following variables may be set before calling this macro to modify
+The following variables may be set before calling this function to modify
 the way the check is run:
 
 ::
@@ -46,7 +46,7 @@ get_filename_component(__check_proto_def_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 include_guard(GLOBAL)
 
-function(CHECK_PROTOTYPE_DEFINITION _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIABLE)
+function(check_prototype_definition _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIABLE)
 
   if (NOT DEFINED ${_VARIABLE})
     set(CHECK_PROTOTYPE_DEFINITION_CONTENT "/* */\n")
