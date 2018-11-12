@@ -1485,6 +1485,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindVulkan)
   endif()
 
+  if(CMake_TEST_FindX11)
+    add_subdirectory(FindX11)
+  endif()
+
   if(CMake_TEST_FindXalanC)
     add_subdirectory(FindXalanC)
   endif()
