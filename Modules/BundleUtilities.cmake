@@ -41,7 +41,7 @@ Instead, invoke them from an :command:`install(CODE)` or
 
 .. code-block:: cmake
 
-  FIXUP_BUNDLE(<app> <libs> <dirs>)
+  fixup_bundle(<app> <libs> <dirs>)
 
 Fix up a bundle in-place and make it standalone, such that it can be
 drag-n-drop copied to another machine and run on that machine as long
@@ -64,14 +64,14 @@ which are then ignored (e.g. IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe")
 
 .. code-block:: cmake
 
-  COPY_AND_FIXUP_BUNDLE(<src> <dst> <libs> <dirs>)
+  copy_and_fixup_bundle(<src> <dst> <libs> <dirs>)
 
 Makes a copy of the bundle <src> at location <dst> and then fixes up
 the new copied bundle in-place at <dst>...
 
 .. code-block:: cmake
 
-  VERIFY_APP(<app>)
+  verify_app(<app>)
 
 Verifies that an application <app> appears valid based on running
 analysis tools on it.  Calls "message(FATAL_ERROR" if the application
@@ -82,14 +82,14 @@ which are then ignored (e.g. IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe")
 
 .. code-block:: cmake
 
-  GET_BUNDLE_MAIN_EXECUTABLE(<bundle> <result_var>)
+  get_bundle_main_executable(<bundle> <result_var>)
 
 The result will be the full path name of the bundle's main executable
 file or an "error:" prefixed string if it could not be determined.
 
 .. code-block:: cmake
 
-  GET_DOTAPP_DIR(<exe> <dotapp_dir_var>)
+  get_dotapp_dir(<exe> <dotapp_dir_var>)
 
 Returns the nearest parent dir whose name ends with ".app" given the
 full path to an executable.  If there is no such parent dir, then
@@ -99,7 +99,7 @@ The returned directory may or may not exist.
 
 .. code-block:: cmake
 
-  GET_BUNDLE_AND_EXECUTABLE(<app> <bundle_var> <executable_var> <valid_var>)
+  get_bundle_and_executable(<app> <bundle_var> <executable_var> <valid_var>)
 
 Takes either a ".app" directory name or the name of an executable
 nested inside a ".app" directory and returns the path to the ".app"
@@ -108,14 +108,14 @@ directory in <bundle_var> and the path to its main executable in
 
 .. code-block:: cmake
 
-  GET_BUNDLE_ALL_EXECUTABLES(<bundle> <exes_var>)
+  get_bundle_all_executables(<bundle> <exes_var>)
 
 Scans the given bundle recursively for all executable files and
 accumulates them into a variable.
 
 .. code-block:: cmake
 
-  GET_ITEM_KEY(<item> <key_var>)
+  get_item_key(<item> <key_var>)
 
 Given a file (item) name, generate a key that should be unique
 considering the set of libraries that need copying or fixing up to
@@ -127,7 +127,7 @@ associate a set of variables with a given item based on its key.
 
 .. code-block:: cmake
 
-  CLEAR_BUNDLE_KEYS(<keys_var>)
+  clear_bundle_keys(<keys_var>)
 
 Loop over the list of keys, clearing all the variables associated with
 each key.  After the loop, clear the list of keys itself.
@@ -137,7 +137,7 @@ list of keys.
 
 .. code-block:: cmake
 
-  SET_BUNDLE_KEY_VALUES(<keys_var> <context> <item> <exepath> <dirs>
+  set_bundle_key_values(<keys_var> <context> <item> <exepath> <dirs>
                         <copyflag> [<rpaths>])
 
 Add a key to the list (if necessary) for the given item.  If added,
@@ -145,7 +145,7 @@ also set all the variables associated with that key.
 
 .. code-block:: cmake
 
-  GET_BUNDLE_KEYS(<app> <libs> <dirs> <keys_var>)
+  get_bundle_keys(<app> <libs> <dirs> <keys_var>)
 
 Loop over all the executable and library files within the bundle (and
 given as extra <libs>) and accumulate a list of keys representing
@@ -158,7 +158,7 @@ which are then ignored (e.g. IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe")
 
 .. code-block:: cmake
 
-  COPY_RESOLVED_ITEM_INTO_BUNDLE(<resolved_item> <resolved_embedded_item>)
+  copy_resolved_item_into_bundle(<resolved_item> <resolved_embedded_item>)
 
 Copy a resolved item into the bundle if necessary.  Copy is not
 necessary if the resolved_item is "the same as" the
@@ -166,7 +166,7 @@ resolved_embedded_item.
 
 .. code-block:: cmake
 
-  COPY_RESOLVED_FRAMEWORK_INTO_BUNDLE(<resolved_item> <resolved_embedded_item>)
+  copy_resolved_framework_into_bundle(<resolved_item> <resolved_embedded_item>)
 
 Copy a resolved framework into the bundle if necessary.  Copy is not
 necessary if the resolved_item is "the same as" the
@@ -180,7 +180,7 @@ dylib itself plus the framework Resources directory.
 
 .. code-block:: cmake
 
-  FIXUP_BUNDLE_ITEM(<resolved_embedded_item> <exepath> <dirs>)
+  fixup_bundle_item(<resolved_embedded_item> <exepath> <dirs>)
 
 Get the direct/non-system prerequisites of the resolved embedded item.
 For each prerequisite, change the way it is referenced to the value of
@@ -206,7 +206,7 @@ marked writable before install_name_tool tries to change them.
 
 .. code-block:: cmake
 
-  VERIFY_BUNDLE_PREREQUISITES(<bundle> <result_var> <info_var>)
+  verify_bundle_prerequisites(<bundle> <result_var> <info_var>)
 
 Verifies that the sum of all prerequisites of all files inside the
 bundle are contained within the bundle or are "system" libraries,
@@ -217,7 +217,7 @@ which are then ignored (e.g. IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe")
 
 .. code-block:: cmake
 
-  VERIFY_BUNDLE_SYMLINKS(<bundle> <result_var> <info_var>)
+  verify_bundle_symlinks(<bundle> <result_var> <info_var>)
 
 Verifies that any symlinks found in the bundle point to other files
 that are already also in the bundle...  Anything that points to an
