@@ -22,14 +22,14 @@ and also the following more fine grained variables:
   X11_ICE_INCLUDE_PATH,          X11_ICE_LIB,        X11_ICE_FOUND
   X11_SM_INCLUDE_PATH,           X11_SM_LIB,         X11_SM_FOUND
   X11_X11_INCLUDE_PATH,          X11_X11_LIB
-  X11_Xaccessrules_INCLUDE_PATH,                     X11_Xaccess_FOUND
+  X11_Xaccessrules_INCLUDE_PATH,
   X11_Xaccessstr_INCLUDE_PATH,                       X11_Xaccess_FOUND
   X11_Xau_INCLUDE_PATH,          X11_Xau_LIB,        X11_Xau_FOUND
   X11_Xcomposite_INCLUDE_PATH,   X11_Xcomposite_LIB, X11_Xcomposite_FOUND
   X11_Xcursor_INCLUDE_PATH,      X11_Xcursor_LIB,    X11_Xcursor_FOUND
   X11_Xdamage_INCLUDE_PATH,      X11_Xdamage_LIB,    X11_Xdamage_FOUND
   X11_Xdmcp_INCLUDE_PATH,        X11_Xdmcp_LIB,      X11_Xdmcp_FOUND
-  X11_Xext_LIB,       X11_Xext_FOUND
+                                 X11_Xext_LIB,       X11_Xext_FOUND
   X11_dpms_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_dpms_FOUND
   X11_XShm_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_XShm_FOUND
   X11_Xshape_INCLUDE_PATH,       (in X11_Xext_LIB),  X11_Xshape_FOUND
