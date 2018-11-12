@@ -34,8 +34,6 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmQtAutoGen.h"
-#include "cmQtAutoGenInitializer.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -46,6 +44,7 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  include "cmCryptoHash.h"
+#  include "cmQtAutoGenGlobalInitializer.h"
 #  include "cm_jsoncpp_value.h"
 #  include "cm_jsoncpp_writer.h"
 #endif
@@ -1469,64 +1468,11 @@ bool cmGlobalGenerator::ComputeTargetDepends()
 bool cmGlobalGenerator::QtAutoGen()
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  std::vector<std::unique_ptr<cmQtAutoGenInitializer>> autogenInits;
-
-  for (cmLocalGenerator* localGen : this->LocalGenerators) {
-    const std::vector<cmGeneratorTarget*>& targets =
-      localGen->GetGeneratorTargets();
-    // Find targets that require AUTOGEN processing
-    for (cmGeneratorTarget* target : targets) {
-      if (target->GetType() == cmStateEnums::GLOBAL_TARGET) {
-        continue;
-      }
-      if (target->GetType() != cmStateEnums::EXECUTABLE &&
-          target->GetType() != cmStateEnums::STATIC_LIBRARY &&
-          target->GetType() != cmStateEnums::SHARED_LIBRARY &&
-          target->GetType() != cmStateEnums::MODULE_LIBRARY &&
-          target->GetType() != cmStateEnums::OBJECT_LIBRARY) {
-        continue;
-      }
-      if (target->IsImported()) {
-        continue;
-      }
-
-      const bool mocEnabled = target->GetPropertyAsBool("AUTOMOC");
-      const bool uicEnabled = target->GetPropertyAsBool("AUTOUIC");
-      const bool rccEnabled = target->GetPropertyAsBool("AUTORCC");
-      if (!mocEnabled && !uicEnabled && !rccEnabled) {
-        continue;
-      }
-
-      auto qtVersion = cmQtAutoGenInitializer::GetQtVersion(target);
-      // don't do anything if there is no Qt4 or Qt5Core (which contains moc)
-      if (qtVersion.Major != 4 && qtVersion.Major != 5) {
-        continue;
-      }
-
-      autogenInits.emplace_back(cm::make_unique<cmQtAutoGenInitializer>(
-        target, mocEnabled, uicEnabled, rccEnabled, qtVersion));
-    }
-  }
-
-  if (!autogenInits.empty()) {
-    // Initialize custom targets
-    for (auto& autoGen : autogenInits) {
-      if (!autoGen->InitCustomTargets()) {
-        return false;
-      }
-    }
-
-    // Setup custom targets
-    for (auto& autoGen : autogenInits) {
-      if (!autoGen->SetupCustomTargets()) {
-        return false;
-      }
-      autoGen.reset(nullptr);
-    }
-  }
-#endif
-
+  cmQtAutoGenGlobalInitializer initializer(this->LocalGenerators);
+  return initializer.generate();
+#else
   return true;
+#endif
 }
 
 cmLinkLineComputer* cmGlobalGenerator::CreateLinkLineComputer(

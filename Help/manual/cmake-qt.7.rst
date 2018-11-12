@@ -236,6 +236,7 @@ when either
   :prop_sf:`SKIP_AUTOMOC`, :prop_sf:`SKIP_AUTOUIC`, :prop_sf:`SKIP_AUTOGEN`
   or :policy:`CMP0071`
 - :prop_tgt:`AUTOGEN_TARGET_DEPENDS` lists a source file
+- :variable:`CMAKE_GLOBAL_AUTOGEN_TARGET` is enabled
 
 qtmain.lib on Windows
 =====================
