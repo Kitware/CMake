@@ -7,9 +7,8 @@ WriteCompilerDetectionHeader
 
 This module provides the function write_compiler_detection_header().
 
-The ``WRITE_COMPILER_DETECTION_HEADER`` function can be used to generate
-a file suitable for preprocessor inclusion which contains macros to be
-used in source code::
+This function can be used to generate a file suitable for preprocessor
+inclusion which contains macros to be used in source code::
 
    write_compiler_detection_header(
              FILE <file>
@@ -25,8 +24,8 @@ used in source code::
              [ALLOW_UNKNOWN_COMPILER_VERSIONS]
    )
 
-The ``write_compiler_detection_header`` function generates the
-file ``<file>`` with macros which all have the prefix ``<prefix>``.
+This generates the file ``<file>`` with macros which all have the prefix
+``<prefix>``.
 
 By default, all content is written directly to the ``<file>``.  The
 ``OUTPUT_FILES_VAR`` may be specified to cause the compiler-specific
