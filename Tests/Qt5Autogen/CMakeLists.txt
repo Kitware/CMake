@@ -3,4 +3,4 @@ set(QT_TEST_VERSION 5)
 include("../QtAutogen/TestMacros.cmake")
 
 # Common tests
-include("../QtAutogen/CommonTests.cmake")
+include("../QtAutogen/Tests.cmake")
