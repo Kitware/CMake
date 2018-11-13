@@ -66,6 +66,12 @@ bool cmStateSnapshot::IsValid() const
     : false;
 }
 
+cmStateSnapshot cmStateSnapshot::GetBuildsystemDirectory() const
+{
+  return cmStateSnapshot(this->State,
+                         this->Position->BuildSystemDirectory->DirectoryEnd);
+}
+
 cmStateSnapshot cmStateSnapshot::GetBuildsystemDirectoryParent() const
 {
   cmStateSnapshot snapshot;
