@@ -1,6 +1,8 @@
 LDFLAGS
 -------
 
+.. include:: ENV_VAR.txt
+
 Will only be used by CMake on the first configuration to determine the default
 linker flags, after which the value for ``LDFLAGS`` is stored in the cache
 as :variable:`CMAKE_EXE_LINKER_FLAGS_INIT`,

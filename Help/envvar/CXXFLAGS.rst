@@ -1,6 +1,8 @@
 CXXFLAGS
 --------
 
+.. include:: ENV_VAR.txt
+
 Default compilation flags to be used when compiling ``CXX`` (C++) files. Will
 only be used by CMake on the first configuration to determine ``CXX`` default
 compilation flags, after which the value for ``CXXFLAGS`` is stored in the cache

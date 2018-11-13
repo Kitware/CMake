@@ -1,6 +1,8 @@
 <PackageName>_ROOT
 ------------------
 
+.. include:: ENV_VAR.txt
+
 Calls to :command:`find_package(<PackageName>)` will search in prefixes
 specified by the ``<PackageName>_ROOT`` environment variable, where
 ``<PackageName>`` is the name given to the ``find_package`` call

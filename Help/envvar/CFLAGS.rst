@@ -1,6 +1,8 @@
 CFLAGS
 ------
 
+.. include:: ENV_VAR.txt
+
 Default compilation flags to be used when compiling ``C`` files. Will only be
 used by CMake on the first configuration to determine ``CC`` default compilation
 flags, after which the value for ``CFLAGS`` is stored in the cache

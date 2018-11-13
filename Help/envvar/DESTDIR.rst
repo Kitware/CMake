@@ -1,6 +1,8 @@
 DESTDIR
 -------
 
+.. include:: ENV_VAR.txt
+
 On UNIX one can use the ``DESTDIR`` mechanism in order to relocate the
 whole installation.  ``DESTDIR`` means DESTination DIRectory.  It is
 commonly used by makefile users in order to install software at

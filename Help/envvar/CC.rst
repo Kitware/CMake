@@ -1,6 +1,8 @@
 CC
 --
 
+.. include:: ENV_VAR.txt
+
 Preferred executable for compiling ``C`` language files. Will only be used by
 CMake on the first configuration to determine ``C`` compiler, after which the
 value for ``CC`` is stored in the cache as
