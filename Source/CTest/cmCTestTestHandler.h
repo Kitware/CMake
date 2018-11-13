@@ -7,6 +7,8 @@
 
 #include "cmCTestGenericHandler.h"
 #include "cmDuration.h"
+#include "cmListFileCache.h"
+#include "cmState.h"
 
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
@@ -141,6 +143,8 @@ public:
     std::set<std::string> FixturesCleanup;
     std::set<std::string> FixturesRequired;
     std::set<std::string> RequireSuccessDepends;
+    // Private test generator properties used to track backtraces
+    cmListFileBacktrace Backtrace;
   };
 
   struct cmCTestTestResult
@@ -308,6 +312,9 @@ private:
 
   std::string TestsToRunString;
   bool UseUnion;
+  // Needed to re-construct our backtrace from the internal _BACKTRACE_TRIPLES
+  // property.
+  cmState State;
   ListOfTests TestList;
   size_t TotalNumberOfTests;
   cmsys::RegularExpression DartStuff;

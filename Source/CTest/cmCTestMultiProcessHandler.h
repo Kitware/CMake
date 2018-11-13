@@ -50,6 +50,7 @@ public:
   void SetParallelLevel(size_t);
   void SetTestLoad(unsigned long load);
   virtual void RunTests();
+  void PrintOutputAsJson();
   void PrintTestList();
   void PrintLabels();
 

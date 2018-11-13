@@ -2125,6 +2125,33 @@ bool cmCTestTestHandler::SetTestsProperties(
     for (std::string const& t : tests) {
       for (cmCTestTestProperties& rt : this->TestList) {
         if (t == rt.Name) {
+          if (key == "_BACKTRACE_TRIPLES") {
+            std::vector<std::string> triples;
+            // allow empty args in the triples
+            cmSystemTools::ExpandListArgument(val, triples, true);
+
+            // Ensure we have complete triples otherwise the data is corrupt.
+            if (triples.size() % 3 == 0) {
+              // Create an empty entry on the bottom which isn't used but
+              // allows us to look at depth to figure out when our backtrace is
+              // empty.
+              rt.Backtrace =
+                cmListFileBacktrace(this->State.CreateBaseSnapshot());
+              rt.Backtrace = rt.Backtrace.Push("empty");
+              
+              // the first entry represents the top of the trace so we need to
+              // reconstruct the backtrace in reverse
+              for (size_t i = triples.size(); i >= 3; i -= 3) {
+                long line = 0;
+                if (!cmSystemTools::StringToLong(triples[i - 2].c_str(),
+                                                 &line)) {
+                  line = 0;
+                }
+                cmListFileContext fc(triples[i - 1], triples[i - 3], line);
+                rt.Backtrace = rt.Backtrace.Push(fc);
+              }
+            }
+          }
           if (key == "WILL_FAIL") {
             rt.WillFail = cmSystemTools::IsOn(val.c_str());
           }

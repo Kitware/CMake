@@ -272,6 +272,8 @@ cmCTest::cmCTest()
   this->ExtraVerbose = false;
   this->ProduceXML = false;
   this->ShowOnly = false;
+  this->OutputAsJson = false;
+  this->OutputAsJsonVersion = 1;
   this->RunConfigurationScript = false;
   this->UseHTTP10 = false;
   this->PrintLabels = false;
@@ -1918,6 +1920,27 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   if (this->CheckArgument(arg, "-N", "--show-only")) {
     this->ShowOnly = true;
   }
+  if (cmSystemTools::StringStartsWith(arg.c_str(), "--show-as-json")) {
+    // Force show only mode so the tests don't run.
+    this->ShowOnly = true;
+    // Force quiet mode so the only output is the json object model.
+    this->Quiet = true;
+    this->OutputAsJson = true;
+    this->OutputAsJsonVersion = 1;
+
+    // Check if a specific version is requested
+    std::string argWithVersion = "--show-as-json=";
+    if (cmSystemTools::StringStartsWith(arg.c_str(), argWithVersion.c_str())) {
+      std::string version = arg.substr(argWithVersion.length());
+      this->OutputAsJsonVersion = atoi(version.c_str());
+    }
+
+	if (this->OutputAsJsonVersion != 1) {
+      errormsg = "'--show-as-json[=<version>]' error, version must be 1 '" +
+        args[i] + "'";
+      return false;
+    }
+  }
 
   if (this->CheckArgument(arg, "-O", "--output-log") && i < args.size() - 1) {
     i++;
@@ -2569,6 +2592,16 @@ std::string const& cmCTest::GetConfigType()
 bool cmCTest::GetShowOnly()
 {
   return this->ShowOnly;
+}
+
+bool cmCTest::GetOutputAsJson()
+{
+  return this->OutputAsJson;
+}
+
+int cmCTest::GetOutputAsJsonVersion()
+{
+  return this->OutputAsJsonVersion;
 }
 
 int cmCTest::GetMaxTestNameWidth() const
