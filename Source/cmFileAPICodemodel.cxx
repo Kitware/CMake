@@ -63,21 +63,41 @@ class CodemodelConfig
   {
     cmStateSnapshot Snapshot;
     Json::Value TargetIndexes = Json::arrayValue;
+    Json::ArrayIndex ProjectIndex;
   };
   std::map<cmStateSnapshot, Json::ArrayIndex, cmStateSnapshot::StrictWeakOrder>
     DirectoryMap;
   std::vector<Directory> Directories;
+
+  struct Project
+  {
+    cmStateSnapshot Snapshot;
+    static const Json::ArrayIndex NoParentIndex =
+      static_cast<Json::ArrayIndex>(-1);
+    Json::ArrayIndex ParentIndex = NoParentIndex;
+    Json::Value ChildIndexes = Json::arrayValue;
+    Json::Value DirectoryIndexes = Json::arrayValue;
+    Json::Value TargetIndexes = Json::arrayValue;
+  };
+  std::map<cmStateSnapshot, Json::ArrayIndex, cmStateSnapshot::StrictWeakOrder>
+    ProjectMap;
+  std::vector<Project> Projects;
 
   void ProcessDirectories();
 
   Json::ArrayIndex GetDirectoryIndex(cmLocalGenerator const* lg);
   Json::ArrayIndex GetDirectoryIndex(cmStateSnapshot s);
 
+  Json::ArrayIndex AddProject(cmStateSnapshot s);
+
   Json::Value DumpTargets();
   Json::Value DumpTarget(cmGeneratorTarget* gt, Json::ArrayIndex ti);
 
   Json::Value DumpDirectories();
   Json::Value DumpDirectory(Directory& d);
+
+  Json::Value DumpProjects();
+  Json::Value DumpProject(Project& p);
 
 public:
   CodemodelConfig(cmFileAPI& fileAPI, unsigned long version,
@@ -358,6 +378,7 @@ Json::Value CodemodelConfig::Dump()
   this->ProcessDirectories();
   configuration["targets"] = this->DumpTargets();
   configuration["directories"] = this->DumpDirectories();
+  configuration["projects"] = this->DumpProjects();
   return configuration;
 }
 
@@ -376,6 +397,9 @@ void CodemodelConfig::ProcessDirectories()
     Directory& d = this->Directories[directoryIndex];
     d.Snapshot = lg->GetStateSnapshot().GetBuildsystemDirectory();
     this->DirectoryMap[d.Snapshot] = directoryIndex;
+
+    d.ProjectIndex = this->AddProject(d.Snapshot);
+    this->Projects[d.ProjectIndex].DirectoryIndexes.append(directoryIndex);
   }
 }
 
@@ -390,6 +414,29 @@ Json::ArrayIndex CodemodelConfig::GetDirectoryIndex(cmStateSnapshot s)
   auto i = this->DirectoryMap.find(s);
   assert(i != this->DirectoryMap.end());
   return i->second;
+}
+
+Json::ArrayIndex CodemodelConfig::AddProject(cmStateSnapshot s)
+{
+  cmStateSnapshot ps = s.GetBuildsystemDirectoryParent();
+  if (ps.IsValid() && ps.GetProjectName() == s.GetProjectName()) {
+    // This directory is part of its parent directory project.
+    Json::ArrayIndex const parentDirIndex = this->GetDirectoryIndex(ps);
+    return this->Directories[parentDirIndex].ProjectIndex;
+  }
+
+  // This directory starts a new project.
+  auto projectIndex = static_cast<Json::ArrayIndex>(this->Projects.size());
+  this->Projects.emplace_back();
+  Project& p = this->Projects[projectIndex];
+  p.Snapshot = s;
+  this->ProjectMap[s] = projectIndex;
+  if (ps.IsValid()) {
+    Json::ArrayIndex const parentDirIndex = this->GetDirectoryIndex(ps);
+    p.ParentIndex = this->Directories[parentDirIndex].ProjectIndex;
+    this->Projects[p.ParentIndex].ChildIndexes.append(projectIndex);
+  }
+  return projectIndex;
 }
 
 Json::Value CodemodelConfig::DumpTargets()
@@ -437,6 +484,11 @@ Json::Value CodemodelConfig::DumpTarget(cmGeneratorTarget* gt,
   target["directoryIndex"] = di;
   this->Directories[di].TargetIndexes.append(ti);
 
+  // Cross-reference project containing target.
+  Json::ArrayIndex pi = this->Directories[di].ProjectIndex;
+  target["projectIndex"] = pi;
+  this->Projects[pi].TargetIndexes.append(ti);
+
   return target;
 }
 
@@ -473,11 +525,45 @@ Json::Value CodemodelConfig::DumpDirectory(Directory& d)
     directory["childIndexes"] = std::move(childIndexes);
   }
 
+  directory["projectIndex"] = d.ProjectIndex;
+
   if (!d.TargetIndexes.empty()) {
     directory["targetIndexes"] = std::move(d.TargetIndexes);
   }
 
   return directory;
+}
+
+Json::Value CodemodelConfig::DumpProjects()
+{
+  Json::Value projects = Json::arrayValue;
+  for (Project& p : this->Projects) {
+    projects.append(this->DumpProject(p));
+  }
+  return projects;
+}
+
+Json::Value CodemodelConfig::DumpProject(Project& p)
+{
+  Json::Value project = Json::objectValue;
+
+  project["name"] = p.Snapshot.GetProjectName();
+
+  if (p.ParentIndex != Project::NoParentIndex) {
+    project["parentIndex"] = p.ParentIndex;
+  }
+
+  if (!p.ChildIndexes.empty()) {
+    project["childIndexes"] = std::move(p.ChildIndexes);
+  }
+
+  project["directoryIndexes"] = std::move(p.DirectoryIndexes);
+
+  if (!p.TargetIndexes.empty()) {
+    project["targetIndexes"] = std::move(p.TargetIndexes);
+  }
+
+  return project;
 }
 
 Target::Target(cmGeneratorTarget* gt, std::string const& config)

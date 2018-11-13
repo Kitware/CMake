@@ -432,24 +432,35 @@ Version 1 does not exist to avoid confusion with that from
             "source": ".",
             "build": ".",
             "childIndexes": [ 1 ],
+            "projectIndex": 0,
             "targetIndexes": [ 0 ]
           },
           {
             "source": "sub",
             "build": "sub",
             "parentIndex": 0,
+            "projectIndex": 0,
             "targetIndexes": [ 1 ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "MyProject",
+            "directoryIndexes": [ 0, 1 ],
+            "targetIndexes": [ 0, 1 ]
           }
         ],
         "targets": [
           {
             "name": "MyExecutable",
             "directoryIndex": 0,
+            "projectIndex": 0,
             "jsonFile": "<file>"
           },
           {
             "name": "MyLibrary",
             "directoryIndex": 1,
+            "projectIndex": 0,
             "jsonFile": "<file>"
           }
         ]
@@ -514,9 +525,50 @@ The members specific to ``codemodel`` objects are:
       command.  Each entry is an unsigned integer 0-based index of another
       entry in the main ``directories`` array.
 
+    ``projectIndex``
+      An unsigned integer 0-based index into the main ``projects`` array
+      indicating the build system project to which the this directory belongs.
+
     ``targetIndexes``
       Optional member that is present when the directory itself has targets,
       excluding those belonging to subdirectories.  The value is a JSON
+      array of entries corresponding to the targets.  Each entry is an
+      unsigned integer 0-based index into the main ``targets`` array.
+
+  ``projects``
+    A JSON array of entries corresponding to the top-level project
+    and sub-projects defined in the build system.  Each (sub-)project
+    corresponds to a source directory whose ``CMakeLists.txt`` file
+    calls the :command:`project` command with a project name different
+    from its parent directory.  The first entry corresponds to the
+    top-level project.
+
+    Each entry is a JSON object containing members:
+
+    ``name``
+      A string specifying the name given to the :command:`project` command.
+
+    ``parentIndex``
+      Optional member that is present when the project is not top-level.
+      The value is an unsigned integer 0-based index of another entry in
+      the main ``projects`` array that corresponds to the parent project
+      that added this project as a sub-project.
+
+    ``childIndexes``
+      Optional member that is present when the project has sub-projects.
+      The value is a JSON array of entries corresponding to the sub-projects.
+      Each entry is an unsigned integer 0-based index of another
+      entry in the main ``projects`` array.
+
+    ``directoryIndexes``
+      A JSON array of entries corresponding to build system directories
+      that are part of the project.  The first entry corresponds to the
+      top-level directory of the project.  Each entry is an unsigned
+      integer 0-based index into the main ``directories`` array.
+
+    ``targetIndexes``
+      Optional member that is present when the project itself has targets,
+      excluding those belonging to sub-projects.  The value is a JSON
       array of entries corresponding to the targets.  Each entry is an
       unsigned integer 0-based index into the main ``targets`` array.
 
@@ -537,6 +589,10 @@ The members specific to ``codemodel`` objects are:
     ``directoryIndex``
       An unsigned integer 0-based index into the main ``directories`` array
       indicating the build system directory in which the target is defined.
+
+    ``projectIndex``
+      An unsigned integer 0-based index into the main ``projects`` array
+      indicating the build system project in which the target is defined.
 
     ``jsonFile``
       A JSON string specifying a path relative to the codemodel file

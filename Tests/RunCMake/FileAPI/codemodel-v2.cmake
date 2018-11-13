@@ -20,6 +20,7 @@ add_subdirectory(object)
 add_subdirectory(imported)
 add_subdirectory(custom)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../FileAPIExternalSource" "${CMAKE_CURRENT_BINARY_DIR}/../FileAPIExternalBuild")
+add_subdirectory(dir)
 
 set_property(TARGET c_shared_lib PROPERTY LIBRARY_OUTPUT_DIRECTORY lib)
 set_property(TARGET c_shared_lib PROPERTY RUNTIME_OUTPUT_DIRECTORY lib)
