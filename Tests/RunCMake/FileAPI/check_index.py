@@ -6,8 +6,8 @@ import re
 if sys.version_info[0] >= 3:
     unicode = str
 
-def is_bool(x):
-    return isinstance(x, bool)
+def is_bool(x, val=None):
+    return isinstance(x, bool) and (val is None or x == val)
 
 def is_dict(x):
     return isinstance(x, dict)
@@ -15,11 +15,69 @@ def is_dict(x):
 def is_list(x):
     return isinstance(x, list)
 
-def is_int(x):
-    return isinstance(x, int) or isinstance(x, long)
+def is_int(x, val=None):
+    return (isinstance(x, int) or isinstance(x, long)) and (val is None or x == val)
 
-def is_string(x):
-    return isinstance(x, str) or isinstance(x, unicode)
+def is_string(x, val=None):
+    return (isinstance(x, str) or isinstance(x, unicode)) and (val is None or x == val)
+
+def matches(s, pattern):
+    return is_string(s) and bool(re.search(pattern, s))
+
+def check_list_match(match, actual, expected, check=None, check_exception=None, missing_exception=None, extra_exception=None, allow_extra=False):
+    """
+    Handle the common pattern of making sure every actual item "matches" some
+    item in the expected list, and that neither list has extra items after
+    matching is completed.
+
+    @param match: Callback to check if an actual item matches an expected
+    item. Return True if the item matches, return False if the item doesn't
+    match.
+    @param actual: List of actual items to search.
+    @param expected: List of expected items to match.
+    @param check: Optional function to check that the actual item is valid by
+    comparing it to the expected item.
+    @param check_exception: Optional function that returns an argument to
+    append to any exception thrown by the check function.
+    @param missing_exception: Optional function that returns an argument to
+    append to the exception thrown when an item is not found.
+    @param extra_exception: Optional function that returns an argument to
+    append to the exception thrown when an extra item is found.
+    @param allow_extra: Optional parameter allowing there to be extra actual
+    items after all the expected items have been found.
+    """
+    assert is_list(actual)
+    _actual = actual[:]
+    for expected_item in expected:
+        found = False
+        for i, actual_item in enumerate(_actual):
+            if match(actual_item, expected_item):
+                if check:
+                    try:
+                        check(actual_item, expected_item)
+                    except BaseException as e:
+                        if check_exception:
+                            e.args += (check_exception(actual_item, expected_item),)
+                        raise
+                found = True
+                del _actual[i]
+                break
+        if missing_exception:
+            assert found, missing_exception(expected_item)
+        else:
+            assert found
+    if not allow_extra:
+        if extra_exception:
+            assert len(_actual) == 0, [extra_exception(a) for a in _actual]
+        else:
+            assert len(_actual) == 0
+
+def filter_list(f, l):
+    if l is not None:
+        l = list(filter(f, l))
+    if l == []:
+        l = None
+    return l
 
 def check_cmake(cmake):
     assert is_dict(cmake)
