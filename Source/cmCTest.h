@@ -405,6 +405,19 @@ public:
   void Log(int logType, const char* file, int line, const char* msg,
            bool suppress = false);
 
+  /** Color values */
+  enum class Color
+  {
+    CLEAR_COLOR = 0,
+    RED = 31,
+    GREEN = 32,
+    YELLOW = 33,
+    BLUE = 34
+  };
+
+  /** Get color code characters for a specific color */
+  std::string GetColorCode(Color color) const;
+
   /** Get the version of dart server */
   int GetDartVersion() { return this->DartVersion; }
   int GetDropSiteCDash() { return this->DropSiteCDash; }
@@ -575,8 +588,16 @@ private:
   bool HandleCommandLineArguments(size_t& i, std::vector<std::string>& args,
                                   std::string& errormsg);
 
+#if !defined(_WIN32)
   /** returns true iff the console supports progress output */
-  bool ProgressOutputSupportedByConsole() const;
+  static bool ConsoleIsNotDumb();
+#endif
+
+  /** returns true iff the console supports progress output */
+  static bool ProgressOutputSupportedByConsole();
+
+  /** returns true iff the console supports colored output */
+  static bool ColoredOutputSupportedByConsole();
 
   /** handle the -S -SP and -SR arguments */
   void HandleScriptArguments(size_t& i, std::vector<std::string>& args,
@@ -625,6 +646,7 @@ private:
   int OutputLogFileLastTag;
 
   bool OutputTestOutputOnTestFailure;
+  bool OutputColorCode;
 
   std::map<std::string, std::string> Definitions;
 };

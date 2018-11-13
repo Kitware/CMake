@@ -535,11 +535,21 @@ int cmCTestTestHandler::ProcessHandler()
       percent = 99;
     }
 
+    std::string passColorCode;
+    std::string failedColorCode;
+    if (failed.empty()) {
+      passColorCode = this->CTest->GetColorCode(cmCTest::Color::GREEN);
+    } else {
+      failedColorCode = this->CTest->GetColorCode(cmCTest::Color::RED);
+    }
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
                std::endl
-                 << static_cast<int>(percent + .5f) << "% tests passed, "
-                 << failed.size() << " tests failed out of " << total
-                 << std::endl);
+                 << passColorCode << static_cast<int>(percent + .5f)
+                 << "% tests passed"
+                 << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
+                 << ", " << failedColorCode << failed.size() << " tests failed"
+                 << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
+                 << " out of " << total << std::endl);
     if ((!this->CTest->GetLabelsForSubprojects().empty() &&
          this->CTest->GetSubprojectSummary())) {
       this->PrintLabelOrSubprojectSummary(true);
@@ -562,6 +572,8 @@ int cmCTestTestHandler::ProcessHandler()
       this->StartLogFile("TestsDisabled", ofs);
 
       const char* disabled_reason;
+      cmCTestLog(this->CTest, HANDLER_OUTPUT,
+                 this->CTest->GetColorCode(cmCTest::Color::BLUE));
       for (cmCTestTestResult const& dt : disabledTests) {
         ofs << dt.TestCount << ":" << dt.Name << std::endl;
         if (dt.CompletionStatus == "Disabled") {
@@ -573,6 +585,8 @@ int cmCTestTestHandler::ProcessHandler()
                    "\t" << std::setw(3) << dt.TestCount << " - " << dt.Name
                         << " (" << disabled_reason << ")" << std::endl);
       }
+      cmCTestLog(this->CTest, HANDLER_OUTPUT,
+                 this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR));
     }
 
     if (!failed.empty()) {
@@ -587,10 +601,17 @@ int cmCTestTestHandler::ProcessHandler()
             !cmHasLiteralPrefix(ft.CompletionStatus, "SKIP_RETURN_CODE=") &&
             ft.CompletionStatus != "Disabled") {
           ofs << ft.TestCount << ":" << ft.Name << std::endl;
-          cmCTestLog(this->CTest, HANDLER_OUTPUT,
-                     "\t" << std::setw(3) << ft.TestCount << " - " << ft.Name
-                          << " (" << this->GetTestStatus(ft) << ")"
-                          << std::endl);
+          auto testColor = cmCTest::Color::RED;
+          if (this->GetTestStatus(ft) == "Not Run") {
+            testColor = cmCTest::Color::YELLOW;
+          }
+          cmCTestLog(
+            this->CTest, HANDLER_OUTPUT,
+            "\t" << this->CTest->GetColorCode(testColor) << std::setw(3)
+                 << ft.TestCount << " - " << ft.Name << " ("
+                 << this->GetTestStatus(ft) << ")"
+                 << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
+                 << std::endl);
         }
       }
     }
@@ -1725,7 +1746,7 @@ void cmCTestTestHandler::UseExcludeRegExp()
   this->UseExcludeRegExpFirst = !this->UseIncludeRegExpFlag;
 }
 
-const char* cmCTestTestHandler::GetTestStatus(cmCTestTestResult const& result)
+std::string cmCTestTestHandler::GetTestStatus(cmCTestTestResult const& result)
 {
   static const char* statuses[] = { "Not Run",     "Timeout",   "SEGFAULT",
                                     "ILLEGAL",     "INTERRUPT", "NUMERICAL",
@@ -1737,7 +1758,7 @@ const char* cmCTestTestHandler::GetTestStatus(cmCTestTestResult const& result)
     return "No Status";
   }
   if (status == cmCTestTestHandler::OTHER_FAULT) {
-    return result.ExceptionStatus.c_str();
+    return result.ExceptionStatus;
   }
   return statuses[status];
 }
