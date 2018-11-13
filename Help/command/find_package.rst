@@ -330,8 +330,10 @@ enabled.
 
 6. Search paths stored in the CMake :ref:`User Package Registry`.
    This can be skipped if ``NO_CMAKE_PACKAGE_REGISTRY`` is passed or by
-   setting the :variable:`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`
-   to ``TRUE``.
+   setting the variable :variable:`CMAKE_FIND_USE_PACKAGE_REGISTRY`
+   to ``FALSE`` or the deprecated variable
+   :variable:`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY` to ``TRUE``.
+
    See the :manual:`cmake-packages(7)` manual for details on the user
    package registry.
 

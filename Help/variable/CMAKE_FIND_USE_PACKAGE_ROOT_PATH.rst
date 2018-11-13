@@ -14,4 +14,5 @@ commands take precedence over this variable.
 See also the :variable:`CMAKE_FIND_USE_CMAKE_PATH`,
 :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH`,
 :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`,
-and :variable:`CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH` variables.
+:variable:`CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH`,
+and :variable:`CMAKE_FIND_USE_PACKAGE_REGISTRY` variables.

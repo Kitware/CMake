@@ -188,7 +188,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // Check if User Package Registry should be disabled
-  if (this->Makefile->IsOn("CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY")) {
+  // The `CMAKE_FIND_USE_PACKAGE_REGISTRY` has
+  // priority over the deprecated CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY
+  if (const char* def =
+        this->Makefile->GetDefinition("CMAKE_FIND_USE_PACKAGE_REGISTRY")) {
+    this->NoUserRegistry = !cmSystemTools::IsOn(def);
+  } else if (this->Makefile->IsOn("CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY")) {
     this->NoUserRegistry = true;
   }
 
