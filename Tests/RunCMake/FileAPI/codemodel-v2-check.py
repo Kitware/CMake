@@ -64,6 +64,16 @@ def check_directory(c):
                              missing_exception=lambda e: "Target ID: %s" % e,
                              extra_exception=lambda a: "Target ID: %s" % c["targets"][a]["id"])
 
+        if expected["minimumCMakeVersion"] is not None:
+            expected_keys.append("minimumCMakeVersion")
+            assert is_dict(actual["minimumCMakeVersion"])
+            assert sorted(actual["minimumCMakeVersion"].keys()) == ["string"]
+            assert is_string(actual["minimumCMakeVersion"]["string"], expected["minimumCMakeVersion"])
+
+        if expected["hasInstallRule"] is not None:
+            expected_keys.append("hasInstallRule")
+            assert is_bool(actual["hasInstallRule"], expected["hasInstallRule"])
+
         assert sorted(actual.keys()) == sorted(expected_keys)
 
     return _check
@@ -448,6 +458,8 @@ def gen_check_directories(c, g):
                 "^interface_exe::@6890427a1f51a3e7e1df$",
             ],
             "projectName": "codemodel-v2",
+            "minimumCMakeVersion": "3.12",
+            "hasInstallRule": True,
         },
         {
             "source": "^alias$",
@@ -461,6 +473,8 @@ def gen_check_directories(c, g):
                 "^cxx_alias_exe::@53632cba2752272bb008$",
             ],
             "projectName": "Alias",
+            "minimumCMakeVersion": "3.12",
+            "hasInstallRule": None,
         },
         {
             "source": "^custom$",
@@ -474,6 +488,8 @@ def gen_check_directories(c, g):
                 "^custom_tgt::@c11385ffed57b860da63$",
             ],
             "projectName": "Custom",
+            "minimumCMakeVersion": "3.12",
+            "hasInstallRule": None,
         },
         {
             "source": "^cxx$",
@@ -491,6 +507,8 @@ def gen_check_directories(c, g):
                 "^cxx_static_lib::@a56b12a3f5c0529fb296$",
             ],
             "projectName": "Cxx",
+            "minimumCMakeVersion": "3.12",
+            "hasInstallRule": None,
         },
         {
             "source": "^imported$",
@@ -507,6 +525,8 @@ def gen_check_directories(c, g):
                 "^link_imported_static_exe::@ba7eb709d0b48779c6c8$",
             ],
             "projectName": "Imported",
+            "minimumCMakeVersion": "3.12",
+            "hasInstallRule": None,
         },
         {
             "source": "^object$",
@@ -522,6 +542,8 @@ def gen_check_directories(c, g):
                 "^cxx_object_lib::@5ed5358f70faf8d8af7a$",
             ],
             "projectName": "Object",
+            "minimumCMakeVersion": "3.13",
+            "hasInstallRule": True,
         },
         {
             "source": "^dir$",
@@ -542,6 +564,8 @@ def gen_check_directories(c, g):
             "childSources": None,
             "targetIds": None,
             "projectName": "codemodel-v2",
+            "minimumCMakeVersion": "3.12",
+            "hasInstallRule": None,
         },
         {
             "source": "^.*/Tests/RunCMake/FileAPIExternalSource$",
@@ -554,6 +578,8 @@ def gen_check_directories(c, g):
                 "^generated_exe::@[0-9a-f]+$",
             ],
             "projectName": "External",
+            "minimumCMakeVersion": "3.12",
+            "hasInstallRule": None,
         },
     ]
 

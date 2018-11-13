@@ -433,14 +433,21 @@ Version 1 does not exist to avoid confusion with that from
             "build": ".",
             "childIndexes": [ 1 ],
             "projectIndex": 0,
-            "targetIndexes": [ 0 ]
+            "targetIndexes": [ 0 ],
+            "hasInstallRule": true,
+            "minimumCMakeVersion": {
+              "string": "3.14"
+            }
           },
           {
             "source": "sub",
             "build": "sub",
             "parentIndex": 0,
             "projectIndex": 0,
-            "targetIndexes": [ 1 ]
+            "targetIndexes": [ 1 ],
+            "minimumCMakeVersion": {
+              "string": "3.14"
+            }
           }
         ],
         "projects": [
@@ -534,6 +541,27 @@ The members specific to ``codemodel`` objects are:
       excluding those belonging to subdirectories.  The value is a JSON
       array of entries corresponding to the targets.  Each entry is an
       unsigned integer 0-based index into the main ``targets`` array.
+
+    ``minimumCMakeVersion``
+      Optional member present when a minimum required version of CMake is
+      known for the directory.  This is the ``<min>`` version given to the
+      most local call to the :command:`cmake_minimum_required(VERSION)`
+      command in the directory itself or one of its ancestors.
+      The value is a JSON object with one member:
+
+      ``string``
+        A string specifying the minimum required version in the format::
+
+          <major>.<minor>[.<patch>[.<tweak>]][<suffix>]
+
+        Each component is an unsigned integer and the suffix may be an
+        arbitrary string.
+
+    ``hasInstallRule``
+      Optional member that is present with boolean value ``true`` when
+      the directory or one of its subdirectories contains any
+      :command:`install` rules, i.e. whether a ``make install``
+      or equivalent rule is available.
 
   ``projects``
     A JSON array of entries corresponding to the top-level project

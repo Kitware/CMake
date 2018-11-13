@@ -8,6 +8,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallGenerator.h"
+#include "cmInstallSubdirectoryGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
 #include "cmListFileCache.h"
@@ -62,8 +63,10 @@ class CodemodelConfig
   struct Directory
   {
     cmStateSnapshot Snapshot;
+    cmLocalGenerator const* LocalGenerator = nullptr;
     Json::Value TargetIndexes = Json::arrayValue;
     Json::ArrayIndex ProjectIndex;
+    bool HasInstallRule = false;
   };
   std::map<cmStateSnapshot, Json::ArrayIndex, cmStateSnapshot::StrictWeakOrder>
     DirectoryMap;
@@ -98,6 +101,8 @@ class CodemodelConfig
 
   Json::Value DumpProjects();
   Json::Value DumpProject(Project& p);
+
+  Json::Value DumpMinimumCMakeVersion(cmStateSnapshot s);
 
 public:
   CodemodelConfig(cmFileAPI& fileAPI, unsigned long version,
@@ -396,10 +401,35 @@ void CodemodelConfig::ProcessDirectories()
     this->Directories.emplace_back();
     Directory& d = this->Directories[directoryIndex];
     d.Snapshot = lg->GetStateSnapshot().GetBuildsystemDirectory();
+    d.LocalGenerator = lg;
     this->DirectoryMap[d.Snapshot] = directoryIndex;
 
     d.ProjectIndex = this->AddProject(d.Snapshot);
     this->Projects[d.ProjectIndex].DirectoryIndexes.append(directoryIndex);
+  }
+
+  // Update directories in reverse order to process children before parents.
+  for (auto di = this->Directories.rbegin(); di != this->Directories.rend();
+       ++di) {
+    Directory& d = *di;
+
+    // Accumulate the presence of install rules on the way up.
+    for (auto gen : d.LocalGenerator->GetMakefile()->GetInstallGenerators()) {
+      if (!dynamic_cast<cmInstallSubdirectoryGenerator*>(gen)) {
+        d.HasInstallRule = true;
+        break;
+      }
+    }
+    if (!d.HasInstallRule) {
+      for (cmStateSnapshot const& child : d.Snapshot.GetChildren()) {
+        cmStateSnapshot childDir = child.GetBuildsystemDirectory();
+        Json::ArrayIndex const childIndex = this->GetDirectoryIndex(childDir);
+        if (this->Directories[childIndex].HasInstallRule) {
+          d.HasInstallRule = true;
+          break;
+        }
+      }
+    }
   }
 }
 
@@ -531,6 +561,15 @@ Json::Value CodemodelConfig::DumpDirectory(Directory& d)
     directory["targetIndexes"] = std::move(d.TargetIndexes);
   }
 
+  Json::Value minimumCMakeVersion = this->DumpMinimumCMakeVersion(d.Snapshot);
+  if (!minimumCMakeVersion.isNull()) {
+    directory["minimumCMakeVersion"] = std::move(minimumCMakeVersion);
+  }
+
+  if (d.HasInstallRule) {
+    directory["hasInstallRule"] = true;
+  }
+
   return directory;
 }
 
@@ -564,6 +603,17 @@ Json::Value CodemodelConfig::DumpProject(Project& p)
   }
 
   return project;
+}
+
+Json::Value CodemodelConfig::DumpMinimumCMakeVersion(cmStateSnapshot s)
+{
+  Json::Value minimumCMakeVersion;
+  if (std::string const* def =
+        s.GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION")) {
+    minimumCMakeVersion = Json::objectValue;
+    minimumCMakeVersion["string"] = *def;
+  }
+  return minimumCMakeVersion;
 }
 
 Target::Target(cmGeneratorTarget* gt, std::string const& config)
