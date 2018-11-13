@@ -194,6 +194,8 @@ static cmVS7FlagTable cmVS141CLFlagTable[] = {
   { "EnablePREfast", "analyze", "", "true", 0 },
   { "UseFullPaths", "FC", "", "true", 0 },
   { "OmitDefaultLibName", "Zl", "", "true", 0 },
+  { "SupportJustMyCode", "JMC-", "", "false", 0 },
+  { "SupportJustMyCode", "JMC", "", "true", 0 },
 
   // Bool Properties With Argument
   { "MultiProcessorCompilation", "MP", "", "true",
