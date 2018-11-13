@@ -380,6 +380,7 @@ try_compile(EXPORTER_COMPILED
   ${FindPackageTest_SOURCE_DIR}/Exporter
   CMakeTestExportPackage dummy
   CMAKE_FLAGS "-UCMAKE_EXPORT_NO_PACKAGE_REGISTRY"
+    "-DCMAKE_POLICY_DEFAULT_CMP0090:STRING=OLD"
     -Dversion=${version}
   OUTPUT_VARIABLE output)
 message(STATUS "Searching for export(PACKAGE) test project")
@@ -416,6 +417,25 @@ find_package(CMakeTestExportPackage 1.${version} EXACT QUIET)
 if(CMakeTestExportPackage_FOUND)
   message(SEND_ERROR "CMakeTestExportPackage should not be FOUND!")
 endif()
+
+message(STATUS "Remove export(PACKAGE) test project")
+file(REMOVE_RECURSE ${FindPackageTest_BINARY_DIR}/Exporter-build)
+
+message(STATUS "Preparing export(PACKAGE) test project with POLICY CMP0090=NEW")
+try_compile(EXPORTER_COMPILED
+  ${FindPackageTest_BINARY_DIR}/Exporter-build
+  ${FindPackageTest_SOURCE_DIR}/Exporter
+  CMakeTestExportPackage dummy
+  CMAKE_FLAGS
+   "-DCMAKE_POLICY_DEFAULT_CMP0090:STRING=NEW"
+    -Dversion=${version}
+  OUTPUT_VARIABLE output)
+message(STATUS "Searching for export(PACKAGE) test project")
+find_package(CMakeTestExportPackage 1.${version} EXACT QUIET)
+if(CMakeTestExportPackage_FOUND)
+  message(SEND_ERROR "CMakeTestExportPackage should not be FOUND!")
+endif()
+
 
 #-----------------------------------------------------------------------------
 # Test configure_package_config_file().

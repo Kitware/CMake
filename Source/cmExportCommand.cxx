@@ -13,6 +13,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -243,10 +244,23 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
     return false;
   }
 
-  // If the CMAKE_EXPORT_NO_PACKAGE_REGISTRY variable is set the command
-  // export(PACKAGE) does nothing.
-  if (this->Makefile->IsOn("CMAKE_EXPORT_NO_PACKAGE_REGISTRY")) {
-    return true;
+  // CMP0090 decides both the default and what variable changes it.
+  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0090)) {
+    case cmPolicies::WARN:
+    case cmPolicies::OLD:
+      // Default is to export, but can be disabled.
+      if (this->Makefile->IsOn("CMAKE_EXPORT_NO_PACKAGE_REGISTRY")) {
+        return true;
+      }
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      // Default is to not export, but can be enabled.
+      if (!this->Makefile->IsOn("CMAKE_EXPORT_PACKAGE_REGISTRY")) {
+        return true;
+      }
+      break;
   }
 
   // We store the current build directory in the registry as a value
