@@ -7,7 +7,7 @@ Start recording a macro for later invocation as a command
 
   macro(<name> [<arg1> ...])
     <commands>
-  endmacro(<name>)
+  endmacro()
 
 Defines a macro named ``<name>`` that takes arguments
 named ``<arg1>``, ...
@@ -30,6 +30,11 @@ Referencing to ``${ARGV#}`` arguments beyond ``${ARGC}`` have undefined
 behavior. Checking that ``${ARGC}`` is greater than ``#`` is the only
 way to ensure that ``${ARGV#}`` was passed to the function as an extra
 argument.
+
+Per legacy, the :command:`endmacro` command admits an optional
+``<name>`` argument. If used, it must be a verbatim repeat of the
+argument of the opening ``macro`` command.
+
 
 See the :command:`cmake_policy()` command documentation for the behavior
 of policies inside macros.
