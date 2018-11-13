@@ -2,6 +2,7 @@
 #include "IncB.hpp"
 #include "StyleA.hpp"
 #include "StyleB.hpp"
+#include <iostream>
 
 int main(int argv, char** args)
 {
@@ -10,5 +11,8 @@ int main(int argv, char** args)
   IncA incA;
   IncB incB;
 
-  return 0;
+  // Test the TOKEN definition passed on the command line
+  std::string token(TOKEN);
+  std::cout << "std::string(TOKEN): \"" << token << "\"\n";
+  return (token == "hello;") ? 0 : -1;
 }
