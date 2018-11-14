@@ -40,13 +40,6 @@ building on older toolchains some constructs need to be handled with care:
   derived from non-copyable classes must also be made non-copyable explicitly
   with ``CM_DISABLE_COPY``.
 
-* Use ``size_t`` instead of ``std::size_t``.
-
-  Various implementations have differing implementation of ``size_t``.
-  When assigning the result of ``.size()`` on a container for example,
-  the result should be assigned to ``size_t`` not to ``std::size_t``,
-  ``unsigned int`` or similar types.
-
 Source Tree Layout
 ==================
 
