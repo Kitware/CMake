@@ -16,53 +16,6 @@ source tree itself, and by those authoring externally-maintained modules.
 See https://cmake.org/get-involved/ to get involved in development of
 CMake upstream.
 
-Adding Compile Features
-=======================
-
-CMake reports an error if a compiler whose features are known does not report
-support for a particular requested feature.  A compiler is considered to have
-known features if it reports support for at least one feature.
-
-When adding a new compile feature to CMake, it is therefore necessary to list
-support for the feature for all CompilerIds which already have one or more
-feature supported, if the new feature is available for any version of the
-compiler.
-
-When adding the first supported feature to a particular CompilerId, it is
-necessary to list support for all features known to cmake (See
-:variable:`CMAKE_C_COMPILE_FEATURES` and
-:variable:`CMAKE_CXX_COMPILE_FEATURES` as appropriate), where available for
-the compiler.  Ensure that the ``CMAKE_<LANG>_STANDARD_DEFAULT`` is set to
-the computed internal variable ``CMAKE_<LANG>_STANDARD_COMPUTED_DEFAULT``
-for compiler versions which should be supported.
-
-It is sensible to record the features for the most recent version of a
-particular CompilerId first, and then work backwards.  It is sensible to
-try to create a continuous range of versions of feature releases of the
-compiler.  Gaps in the range indicate incorrect features recorded for
-intermediate releases.
-
-Generally, features are made available for a particular version if the
-compiler vendor documents availability of the feature with that
-version.  Note that sometimes partially implemented features appear to
-be functional in previous releases (such as ``cxx_constexpr`` in GNU 4.6,
-though availability is documented in GNU 4.7), and sometimes compiler vendors
-document availability of features, though supporting infrastructure is
-not available (such as ``__has_feature(cxx_generic_lambdas)`` indicating
-non-availability in Clang 3.4, though it is documented as available, and
-fixed in Clang 3.5).  Similar cases for other compilers and versions
-need to be investigated when extending CMake to support them.
-
-When a vendor releases a new version of a known compiler which supports
-a previously unsupported feature, and there are already known features for
-that compiler, the feature should be listed as supported in CMake for
-that version of the compiler as soon as reasonably possible.
-
-Standard-specific/compiler-specific variables such
-``CMAKE_CXX98_COMPILE_FEATURES`` are deliberately not documented.  They
-only exist for the compiler-specific implementation of adding the ``-std``
-compile flag for compilers which need that.
-
 Help
 ====
 
