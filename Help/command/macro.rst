@@ -98,18 +98,18 @@ existing variable instead of the arguments. For example:
 
 .. code-block:: cmake
 
- macro(_BAR)
+ macro(bar)
    foreach(arg IN LISTS ARGN)
      <commands>
    endforeach()
  endmacro()
 
- function(_FOO)
-   _bar(x y z)
+ function(foo)
+   bar(x y z)
  endfunction()
 
- _foo(a b c)
+ foo(a b c)
 
-Will loop over ``a;b;c`` and not over ``x;y;z`` as one might be expecting.
+Will loop over ``a;b;c`` and not over ``x;y;z`` as one might have expected.
 If you want true CMake variables and/or better CMake scope control you
 should look at the function command.
