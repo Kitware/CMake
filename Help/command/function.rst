@@ -23,6 +23,9 @@ details.
 See the :command:`cmake_policy()` command documentation for the behavior
 of policies inside functions.
 
+See the :command:`macro()` command documentation for differences
+between CMake functions and macros.
+
 Invocation
 ^^^^^^^^^^
 
