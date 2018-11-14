@@ -72,31 +72,11 @@ function(TEST_WRITE_BASIC_CONFIG_VERSION_FILE _version_installed
                                               _expected_compatible_SameMinorVersion
                                               _expected_compatible_ExactVersion)
   set(PACKAGE_FIND_VERSION ${_version_requested})
-  if("${PACKAGE_FIND_VERSION}" MATCHES "^([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)$")
-    set(PACKAGE_FIND_VERSION_MAJOR "${CMAKE_MATCH_1}")
-    set(PACKAGE_FIND_VERSION_MINOR "${CMAKE_MATCH_2}")
-    set(PACKAGE_FIND_VERSION_PATCH "${CMAKE_MATCH_3}")
-    set(PACKAGE_FIND_VERSION_TWEAK "${CMAKE_MATCH_4}")
-  elseif("${PACKAGE_FIND_VERSION}" MATCHES "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$")
-    set(PACKAGE_FIND_VERSION_MAJOR "${CMAKE_MATCH_1}")
-    set(PACKAGE_FIND_VERSION_MINOR "${CMAKE_MATCH_2}")
-    set(PACKAGE_FIND_VERSION_PATCH "${CMAKE_MATCH_3}")
-    set(PACKAGE_FIND_VERSION_TWEAK "")
-  elseif("${PACKAGE_FIND_VERSION}" MATCHES "^([0-9]+)\\.([0-9]+)$")
-    set(PACKAGE_FIND_VERSION_MAJOR "${CMAKE_MATCH_1}")
-    set(PACKAGE_FIND_VERSION_MINOR "${CMAKE_MATCH_2}")
-    set(PACKAGE_FIND_VERSION_PATCH "")
-    set(PACKAGE_FIND_VERSION_TWEAK "")
-  elseif("${PACKAGE_FIND_VERSION}" MATCHES "^([0-9]+)$")
-    set(PACKAGE_FIND_VERSION_MAJOR "${CMAKE_MATCH_1}")
-    set(PACKAGE_FIND_VERSION_MINOR "")
-    set(PACKAGE_FIND_VERSION_PATCH "")
-    set(PACKAGE_FIND_VERSION_TWEAK "")
-  elseif("${PACKAGE_FIND_VERSION}" STREQUAL "")
-    set(PACKAGE_FIND_VERSION_MAJOR "")
-    set(PACKAGE_FIND_VERSION_MINOR "")
-    set(PACKAGE_FIND_VERSION_PATCH "")
-    set(PACKAGE_FIND_VERSION_TWEAK "")
+  if("${PACKAGE_FIND_VERSION}" MATCHES [[(^([0-9]+)(\.([0-9]+)(\.([0-9]+)(\.([0-9]+))?)?)?)?$]])
+    set(PACKAGE_FIND_VERSION_MAJOR "${CMAKE_MATCH_2}")
+    set(PACKAGE_FIND_VERSION_MINOR "${CMAKE_MATCH_4}")
+    set(PACKAGE_FIND_VERSION_PATCH "${CMAKE_MATCH_6}")
+    set(PACKAGE_FIND_VERSION_TWEAK "${CMAKE_MATCH_8}")
   else()
     message(FATAL_ERROR "_version_requested (${_version_requested}) should be a version number")
   endif()
@@ -122,21 +102,21 @@ function(TEST_WRITE_BASIC_CONFIG_VERSION_FILE _version_installed
 
     # Test "normal" version
     set(_expected_unsuitable 0)
-    message("TEST write_basic_config_version_file(VERSION ${_version_installed} \
+    message(STATUS "TEST write_basic_config_version_file(VERSION ${_version_installed} \
 COMPATIBILITY ${_compat}) vs. ${_version_requested}                                 \
 (expected compatible = ${_expected_compatible}, exact = ${_expected_exact}, unsuitable = ${_expected_unsuitable})")
     test_write_basic_config_version_file_check("${_filename}")
 
     # test empty CMAKE_SIZEOF_VOID_P version:
     set(_expected_unsuitable 0)
-    message("TEST write_basic_config_version_file(VERSION ${_version_installed} \
+    message(STATUS "TEST write_basic_config_version_file(VERSION ${_version_installed} \
 COMPATIBILITY ${_compat}) vs. ${_version_requested} (no CMAKE_SIZEOF_VOID_P)        \
 (expected compatible = ${_expected_compatible}, exact = ${_expected_exact}, unsuitable = ${_expected_unsuitable})")
     test_write_basic_config_version_file_check("${_filename_novoid}")
 
     # test different CMAKE_SIZEOF_VOID_P version:
     set(_expected_unsuitable 1)
-    message("TEST write_basic_config_version_file(VERSION ${_version_installed} \
+    message(STATUS "TEST write_basic_config_version_file(VERSION ${_version_installed} \
 COMPATIBILITY ${_compat}) vs. ${_version_requested} (different CMAKE_SIZEOF_VOID_P) \
 (expected compatible = ${_expected_compatible}, exact = ${_expected_exact}, unsuitable = ${_expected_unsuitable})")
     test_write_basic_config_version_file_check("${_filename_diffvoid}")
