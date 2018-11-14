@@ -49,7 +49,7 @@ The CMake source tree is organized as follows.
   Shell and editor integration files.
 
 * ``Help/``:
-  Documentation.
+  Documentation.  See the `CMake Documentation Guide`_.
 
   * ``Help/dev/``:
     Developer documentation.
@@ -85,4 +85,5 @@ The CMake source tree is organized as follows.
   * ``Utilities/Release/``:
     Scripts used to package CMake itself for distribution on ``cmake.org``.
 
+.. _`CMake Documentation Guide`: documentation.rst
 .. _`Tests/README.rst`: ../../Tests/README.rst
