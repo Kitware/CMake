@@ -412,7 +412,7 @@ referred to before the link:
 
 .. code-block:: rst
 
-  If policy :prop_tgt:`CMP0022` is set to ``NEW`` the behavior is ...
+  If policy :policy:`CMP0022` is set to ``NEW`` the behavior is ...
 
 However, markup self-references with ``inline-literal`` syntax.
 For example, within the :command:`add_executable` command
