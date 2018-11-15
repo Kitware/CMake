@@ -656,6 +656,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
               ? "NEW"
               : "OLD");
 
+    /* Set the appropriate policy information for PIE link flags */
+    fprintf(fout, "cmake_policy(SET CMP0083 %s)\n",
+            this->Makefile->GetPolicyStatus(cmPolicies::CMP0083) ==
+                cmPolicies::NEW
+              ? "NEW"
+              : "OLD");
+
     if (targetType == cmStateEnums::EXECUTABLE) {
       /* Put the executable at a known location (for COPY_FILE).  */
       fprintf(fout, "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY \"%s\")\n",
