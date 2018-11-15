@@ -19,7 +19,7 @@ Synopsis
 Description
 ===========
 
-The "cmake" executable is the CMake command-line interface.  It may be
+The **cmake** executable is the CMake command-line interface.  It may be
 used to configure projects in scripts.  Project configuration settings
 may be specified on the command line with the -D option.
 

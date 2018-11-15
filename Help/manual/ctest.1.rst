@@ -19,7 +19,7 @@ Synopsis
 Description
 ===========
 
-The "ctest" executable is the CMake test driver program.
+The **ctest** executable is the CMake test driver program.
 CMake-generated build trees created for projects that use the
 ENABLE_TESTING and ADD_TEST commands have testing support.  This
 program will run the tests and report results.
@@ -38,7 +38,7 @@ Options
 ``--progress``
  Enable short progress output from tests.
 
- When the output of ``ctest`` is being sent directly to a terminal, the
+ When the output of **ctest** is being sent directly to a terminal, the
  progress through the set of tests is reported by updating the same line
  rather than printing start and end messages for each test on new lines.
  This can significantly reduce the verbosity of the test output.
