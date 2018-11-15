@@ -335,6 +335,13 @@ endif()
 
 if(XCODE_VERSION)
   add_RunCMake_test(XcodeProject -DXCODE_VERSION=${XCODE_VERSION})
+
+  # This test can take a very long time due to lots of combinations.
+  # Use a long default timeout and provide an option to customize it.
+  if(NOT DEFINED CMake_TEST_XcodeProject_TIMEOUT)
+    set(CMake_TEST_XcodeProject_TIMEOUT 2000)
+  endif()
+  set_property(TEST RunCMake.XcodeProject PROPERTY TIMEOUT ${CMake_TEST_XcodeProject_TIMEOUT})
 endif()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
