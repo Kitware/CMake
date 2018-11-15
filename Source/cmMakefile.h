@@ -689,7 +689,13 @@ public:
   /**
    * Return a location of a file in cmake or custom modules directory
    */
-  std::string GetModulesFile(const char* name) const;
+  std::string GetModulesFile(const char* name) const
+  {
+    bool system;
+    return this->GetModulesFile(name, system);
+  }
+
+  std::string GetModulesFile(const char* name, bool& system) const;
 
   ///! Set/Get a property of this directory
   void SetProperty(const std::string& prop, const char* value);

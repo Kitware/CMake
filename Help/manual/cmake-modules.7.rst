@@ -221,7 +221,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindPython3
    /module/FindQt3
    /module/FindQt4
-   /module/FindQt
    /module/FindQuickTime
    /module/FindRTI
    /module/FindRuby
@@ -282,6 +281,7 @@ Deprecated Find Modules
    /module/FindCUDA
    /module/FindPythonInterp
    /module/FindPythonLibs
+   /module/FindQt
    /module/FindwxWindows
 
 Legacy CPack Modules

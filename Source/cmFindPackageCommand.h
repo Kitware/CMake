@@ -4,6 +4,7 @@
 #define cmFindPackageCommand_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
+#include "cmPolicies.h"
 
 #include "cm_kwiml.h"
 #include <cstddef>
@@ -147,6 +148,8 @@ private:
     std::string value;
   };
   std::map<std::string, OriginalDef> OriginalDefs;
+
+  std::map<std::string, cmPolicies::PolicyID> DeprecatedFindModules;
 
   std::string Name;
   std::string Variable;
