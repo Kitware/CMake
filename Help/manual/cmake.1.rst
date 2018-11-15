@@ -8,13 +8,27 @@ Synopsis
 
 .. parsed-literal::
 
- cmake [<options>] {<path-to-source> | <path-to-existing-build>}
- cmake [<options>] -S <path-to-source> -B <path-to-build>
- cmake [{-D <var>=<value>}...] -P <cmake-script-file>
- cmake --build <dir> [<options>...] [-- <build-tool-options>...]
- cmake --open <dir>
- cmake -E <command> [<options>...]
- cmake --find-package <options>...
+ `Generate a Project Buildsystem`_
+  cmake [<options>] {<path-to-source> | <path-to-existing-build>}
+  cmake [<options>] -S <path-to-source> -B <path-to-build>
+
+ `Build a Project`_
+  cmake --build <dir> [<options>] [-- <build-tool-options>]
+
+ `Open a Project`_
+  cmake --open <dir>
+
+ `Run a Script`_
+  cmake [{-D <var>=<value>}...] -P <cmake-script-file>
+
+ `Run a Command-Line Tool`_
+  cmake -E <command> [<options>]
+
+ `Run the Find-Package Tool`_
+  cmake --find-package [<options>]
+
+ `View Help`_
+  cmake --help[-<topic>]
 
 Description
 ===========
@@ -29,15 +43,33 @@ in each directory of a source tree with the name CMakeLists.txt.
 Users build a project by using CMake to generate a build system for a
 native tool on their platform.
 
+
+Generate a Project Buildsystem
+==============================
+
+.. code-block:: shell
+
+  cmake [<options>] {<path-to-source> | <path-to-existing-build>}
+  cmake [<options>] -S <path-to-source> -B <path-to-build>
+
+The parameter ``<path-to-source>`` must be the relative or absolute path
+of the source directory that contains the top-level ``CMakeLists.txt`` file.
+Alternatively, if the named directory contains ``CMakeCache.txt`` it will
+be treated as ``<path-to-existing-build>`` and the path to the source will
+be loaded from the cache.
+
+By default, **cmake** writes the generated Makefiles and all other output
+to the directory from where it was invoked.  This behavior can be changed
+by the variant with the parameter ``<path-to-build>``.
+
+In all cases the ``<options>`` may be zero or more of the `Options`_ below.
+
 .. _`CMake Options`:
 
 Options
-=======
+-------
 
 .. include:: OPTIONS_BUILD.txt
-
-``-E <command> [<options>...]``
- See `Command-Line Tool Mode`_.
 
 ``-L[A][H]``
  List non-advanced cached variables.
@@ -50,29 +82,11 @@ Options
  display also advanced variables.  If H is specified, it will also
  display help for each variable.
 
-``--build <dir>``
- See `Build Tool Mode`_.
-
-``--open <dir>``
- Open the generated project in the associated application.  This is
- only supported by some generators.
-
 ``-N``
  View mode only.
 
  Only load the cache.  Do not actually run configure and generate
  steps.
-
-``-P <file>``
- Process script mode.
-
- Process the given cmake file as a script written in the CMake
- language.  No configure or generate step is performed and the cache
- is not modified.  If variables are defined using -D, this must be
- done before the -P argument.
-
-``--find-package``
- See `Find-Package Tool Mode`_.
 
 ``--graphviz=[file]``
  Generate graphviz of dependencies, see :module:`CMakeGraphVizOptions` for more.
@@ -142,17 +156,17 @@ Options
  in CMAKE_SOURCE_DIR and CMAKE_BINARY_DIR.  This flag tells CMake to
  warn about other files as well.
 
-.. include:: OPTIONS_HELP.txt
-
 .. _`Build Tool Mode`:
 
-Build Tool Mode
+Build a Project
 ===============
 
 CMake provides a command-line signature to build an already-generated
-project binary tree::
+project binary tree:
 
- cmake --build <dir> [<options>...] [-- <build-tool-options>...]
+.. code-block:: shell
+
+  cmake --build <dir> [<options>] [-- <build-tool-options>]
 
 This abstracts a native build tool's command-line interface with the
 following options:
@@ -185,12 +199,41 @@ following options:
 
 Run ``cmake --build`` with no options for quick help.
 
-Command-Line Tool Mode
-======================
 
-CMake provides builtin command-line tools through the signature::
+Open a Project
+==============
 
- cmake -E <command> [<options>...]
+.. code-block:: shell
+
+  cmake --open <dir>
+
+Open the generated project in the associated application.  This is only
+supported by some generators.
+
+
+.. _`Script Processing Mode`:
+
+Run a Script
+============
+
+.. code-block:: shell
+
+  cmake [{-D <var>=<value>}...] -P <cmake-script-file>
+
+Process the given cmake file as a script written in the CMake
+language.  No configure or generate step is performed and the cache
+is not modified.  If variables are defined using -D, this must be
+done before the -P argument.
+
+
+Run a Command-Line Tool
+=======================
+
+CMake provides builtin command-line tools through the signature
+
+.. code-block:: shell
+
+  cmake -E <command> [<options>]
 
 Run ``cmake -E`` or ``cmake -E help`` for a summary of commands.
 Available commands are:
@@ -326,7 +369,7 @@ Available commands are:
 ``sleep <number>...``
   Sleep for given number of seconds.
 
-``tar [cxt][vf][zjJ] file.tar [<options>...] [--] [<file>...]``
+``tar [cxt][vf][zjJ] file.tar [<options>] [--] [<file>...]``
   Create or extract a tar or zip archive.  Options are:
 
   ``--``
@@ -379,23 +422,39 @@ The following ``cmake -E`` commands are available only on Windows:
 ``write_regv <key> <value>``
   Write Windows registry value.
 
-Find-Package Tool Mode
-======================
 
-CMake provides a helper for Makefile-based projects with the signature::
+Run the Find-Package Tool
+=========================
 
-  cmake --find-package <options>...
+CMake provides a pkg-config like helper for Makefile-based projects:
 
-This runs in a pkg-config like mode.
+.. code-block:: shell
 
-Search a package using :command:`find_package()` and print the resulting flags
-to stdout.  This can be used to use cmake instead of pkg-config to find
-installed libraries in plain Makefile-based projects or in autoconf-based
-projects (via ``share/aclocal/cmake.m4``).
+  cmake --find-package [<options>]
+
+It searches a package using :command:`find_package()` and prints the
+resulting flags to stdout.  This can be used instead of pkg-config
+to find installed libraries in plain Makefile-based projects or in
+autoconf-based projects (via ``share/aclocal/cmake.m4``).
 
 .. note::
   This mode is not well-supported due to some technical limitations.
   It is kept for compatibility but should not be used in new projects.
+
+
+View Help
+=========
+
+To print selected pages from the CMake documentation, use
+
+.. code-block:: shell
+
+  cmake --help[-<topic>]
+
+with one of the following options:
+
+.. include:: OPTIONS_HELP.txt
+
 
 See Also
 ========
