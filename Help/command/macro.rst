@@ -21,6 +21,9 @@ argument of the opening ``macro`` command.
 See the :command:`cmake_policy()` command documentation for the behavior
 of policies inside macros.
 
+See the :ref:`Macro vs Function` section below for differences
+between CMake macros and :command:`functions <function>`.
+
 Invocation
 ^^^^^^^^^^
 
@@ -65,13 +68,36 @@ behavior. Checking that ``${ARGC}`` is greater than ``#`` is the only
 way to ensure that ``${ARGV#}`` was passed to the function as an extra
 argument.
 
+.. _`Macro vs Function`:
+
+Macro vs Function
+^^^^^^^^^^^^^^^^^
+
+The ``macro`` command is very similar to the :command:`function` command.
+Nonetheless, there are a few important differences.
+
+In a function, ``ARGC``, ``ARGC`` and ``ARGV0``, ``ARGV1``, ... are
+true variables in the usual CMake sense.  In a macro, they are not.
+They are string replacements much like the C preprocessor would do
+with a macro.  This has a number of consequences, as explained in
+the :ref:`Argument Caveats` section below.
+
+Another difference between macros and functions is the control flow.
+A function is executed by transfering control from the calling
+statement to the function body.  A macro is executed as if the macro
+body were pasted in place of the calling statement.  This has for
+consequence that a :command:`return()` in a macro body does not
+just terminate execution of the macro; rather, control is returned
+from the scope of the macro call.  To avoid confusion, it is recommended
+to avoid :command:`return()` in macros altogether.
+
+.. _`Argument Caveats`:
+
 Argument Caveats
 ^^^^^^^^^^^^^^^^
 
-Note that the parameters to a macro and values such as ``ARGN`` are
-not variables in the usual CMake sense.  They are string
-replacements much like the C preprocessor would do with a macro.
-Therefore you will NOT be able to use commands like
+Since ``ARGC``, ``ARGC``, ``ARGV0`` etc are not variables,
+you will NOT be able to use commands like
 
 .. code-block:: cmake
 
@@ -80,12 +106,11 @@ Therefore you will NOT be able to use commands like
  if(ARGC GREATER 2) # ARGC is not a variable
  foreach(loop_var IN LISTS ARGN) # ARGN is not a variable
 
-In the first case, you can use ``if(${ARGV1})``.
-In the second and third case, the proper way to check if an optional
-variable was passed to the macro is to use ``if(${ARGC} GREATER 2)``.
-In the last case, you can use ``foreach(loop_var ${ARGN})`` but this
-will skip empty arguments.
-If you need to include them, you can use
+In the first case, you can use ``if(${ARGV1})``.  In the second and
+third case, the proper way to check if an optional variable was
+passed to the macro is to use ``if(${ARGC} GREATER 2)``.  In the
+last case, you can use ``foreach(loop_var ${ARGN})`` but this will
+skip empty arguments.  If you need to include them, you can use
 
 .. code-block:: cmake
 
@@ -98,18 +123,18 @@ existing variable instead of the arguments. For example:
 
 .. code-block:: cmake
 
- macro(_BAR)
+ macro(bar)
    foreach(arg IN LISTS ARGN)
      <commands>
    endforeach()
  endmacro()
 
- function(_FOO)
-   _bar(x y z)
+ function(foo)
+   bar(x y z)
  endfunction()
 
- _foo(a b c)
+ foo(a b c)
 
-Will loop over ``a;b;c`` and not over ``x;y;z`` as one might be expecting.
+Will loop over ``a;b;c`` and not over ``x;y;z`` as one might have expected.
 If you want true CMake variables and/or better CMake scope control you
 should look at the function command.
