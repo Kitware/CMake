@@ -711,6 +711,23 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     if (NOT _${_PYTHON_PREFIX}_CONFIG)
       continue()
     endif()
+    if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
+      # check that config tool match library architecture
+      execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --configdir
+                       RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                       OUTPUT_VARIABLE _${_PYTHON_PREFIX}_CONFIGDIR
+                       ERROR_QUIET
+                       OUTPUT_STRIP_TRAILING_WHITESPACE)
+      if (_${_PYTHON_PREFIX}_RESULT)
+        unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+        continue()
+      endif()
+      string(FIND "${_${_PYTHON_PREFIX}_CONFIGDIR}" "${CMAKE_LIBRARY_ARCHITECTURE}" _${_PYTHON_PREFIX}_RESULT)
+      if (_${_PYTHON_PREFIX}_RESULT EQUAL -1)
+        unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+        continue()
+      endif()
+    endif()
 
     # retrieve root install directory
     execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --prefix
