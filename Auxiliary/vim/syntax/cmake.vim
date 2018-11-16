@@ -877,6 +877,7 @@ syn keyword cmakeKWExternalProject contained
             \ LOG_DOWNLOAD
             \ LOG_INSTALL
             \ LOG_MERGED_STDOUTERR
+            \ LOG_OUTPUT_ON_FAILURE
             \ LOG_PATCH
             \ LOG_TEST
             \ LOG_UPDATE
