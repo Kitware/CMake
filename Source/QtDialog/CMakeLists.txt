@@ -19,8 +19,19 @@ if (Qt5Widgets_FOUND)
   macro(qt4_add_resources)
     qt5_add_resources(${ARGN})
   endmacro()
+
   set(CMake_QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
   set(QT_QTMAIN_LIBRARY ${Qt5Core_QTMAIN_LIBRARIES})
+
+  # Try to find the package WinExtras for the task bar progress
+  if(WIN32)
+    find_package(Qt5WinExtras QUIET)
+    if (Qt5WinExtras_FOUND)
+      include_directories(${Qt5WinExtras_INCLUDE_DIRS})
+      add_definitions(-DQT_WINEXTRAS)
+      list(APPEND CMake_QT_LIBRARIES ${Qt5WinExtras_LIBRARIES})
+    endif()
+  endif()
 
   # Remove this when the minimum version of Qt is 4.6.
   add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
