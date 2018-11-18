@@ -178,7 +178,7 @@ if(BLAS_FOUND)
 #intel lapack
 if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
   if (NOT WIN32)
-    set(LM "-lm")
+    set(LAPACK_mkl_LM "-lm")
   endif ()
   if (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED)
     if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
@@ -188,9 +188,9 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
     endif()
 
     if (BLA_VENDOR MATCHES "_64ilp")
-      set(BLAS_mkl_ILP_MODE "ilp64")
+      set(LAPACK_mkl_ILP_MODE "ilp64")
     else ()
-      set(BLAS_mkl_ILP_MODE "lp64")
+      set(LAPACK_mkl_ILP_MODE "lp64")
     endif ()
 
     set(LAPACK_SEARCH_LIBS "")
@@ -207,7 +207,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       list(APPEND LAPACK_SEARCH_LIBS
         "mkl_intel_c")
       list(APPEND LAPACK_SEARCH_LIBS
-        "mkl_lapack95_${BLAS_mkl_ILP_MODE}")
+        "mkl_lapack95_${LAPACK_mkl_ILP_MODE}")
     else()
       set(LAPACK_mkl_SEARCH_SYMBOL "cheev")
       set(_LIBRARIES LAPACK_LIBRARIES)
@@ -222,7 +222,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
     if (NOT ${_LIBRARIES})
       check_lapack_libraries(
         ${_LIBRARIES}
-        BLAS
+        LAPACK
         ${LAPACK_mkl_SEARCH_SYMBOL}
         ""
         ""
@@ -235,17 +235,19 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       if (NOT ${_LIBRARIES})
         check_lapack_libraries(
           ${_LIBRARIES}
-          BLAS
+          LAPACK
           ${LAPACK_mkl_SEARCH_SYMBOL}
           ""
           "${IT}"
           "${_BLAS_LIBRARIES}"
-          "${CMAKE_THREAD_LIBS_INIT};${LM}"
+          "${CMAKE_THREAD_LIBS_INIT};${LAPACK_mkl_LM}"
           )
       endif ()
     endforeach ()
 
-    unset(BLAS_mkl_ILP_MODE)
+    unset(LAPACK_mkl_ILP_MODE)
+    unset(LAPACK_mkl_SEARCH_SYMBOL)
+    unset(LAPACK_mkl_LM)
   endif ()
 endif()
 
