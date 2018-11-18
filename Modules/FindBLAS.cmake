@@ -285,8 +285,13 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
           endforeach()
         else ()
           if (BLA_VENDOR STREQUAL "Intel10_32" OR BLA_VENDOR STREQUAL "All")
+            # old version
             list(APPEND BLAS_SEARCH_LIBS
               "mkl_blas95 mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core guide")
+
+            # mkl >= 10.3
+            list(APPEND BLAS_SEARCH_LIBS
+              "mkl_blas95 mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_OMP}")
           endif ()
           if (BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
             # old version
@@ -341,11 +346,15 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
           endforeach()
         else ()
           if (BLA_VENDOR STREQUAL "Intel10_32" OR BLA_VENDOR STREQUAL "All")
+            # old version
             list(APPEND BLAS_SEARCH_LIBS
               "mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core guide")
+
+            # mkl >= 10.3
+            list(APPEND BLAS_SEARCH_LIBS
+              "mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_OMP}")
           endif ()
           if (BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
-
             # old version
             list(APPEND BLAS_SEARCH_LIBS
               "mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_THREADING}_thread mkl_core guide")
