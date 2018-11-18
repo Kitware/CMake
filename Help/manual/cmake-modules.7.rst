@@ -176,6 +176,7 @@ They are normally called through the :command:`find_package` command.
    /module/FindMPEG2
    /module/FindMPEG
    /module/FindMPI
+   /module/FindOctave
    /module/FindODBC
    /module/FindOpenACC
    /module/FindOpenAL
