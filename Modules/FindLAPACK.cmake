@@ -96,6 +96,9 @@ if (NOT _libdir)
     set(_libdir ENV LD_LIBRARY_PATH)
   endif ()
 endif ()
+
+list(APPEND _libdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
+
 foreach(_library ${_list})
   set(_combined_name ${_combined_name}_${_library})
 
@@ -179,6 +182,7 @@ if(BLAS_FOUND)
 if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
   if (NOT WIN32)
     set(LAPACK_mkl_LM "-lm")
+    set(LAPACK_mkl_LDL "-ldl")
   endif ()
   if (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED)
     if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
@@ -240,7 +244,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
           ""
           "${IT}"
           "${_BLAS_LIBRARIES}"
-          "${CMAKE_THREAD_LIBS_INIT};${LAPACK_mkl_LM}"
+          "${CMAKE_THREAD_LIBS_INIT};${LAPACK_mkl_LM};${LAPACK_mkl_LDL}"
           )
       endif ()
     endforeach ()
@@ -248,6 +252,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
     unset(LAPACK_mkl_ILP_MODE)
     unset(LAPACK_mkl_SEARCH_SYMBOL)
     unset(LAPACK_mkl_LM)
+    unset(LAPACK_mkl_LDL)
   endif ()
 endif()
 
