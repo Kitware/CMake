@@ -216,9 +216,6 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       # old
       list(APPEND LAPACK_SEARCH_LIBS
         "mkl_lapack")
-      # new >= 10.3
-      list(APPEND LAPACK_SEARCH_LIBS
-        "mkl_gf_${BLAS_mkl_ILP_MODE}")
     endif()
 
     # First try empty lapack libs
@@ -230,7 +227,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         ""
         ""
         "${_BLAS_LIBRARIES}"
-        "${CMAKE_THREAD_LIBS_INIT};${LM}"
+        ""
         )
     endif ()
     # Then try the search libs
