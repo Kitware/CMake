@@ -175,6 +175,83 @@ if(BLAS_FOUND)
     endif()
   endif ()
 
+#intel lapack
+if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
+  if (NOT WIN32)
+    set(LM "-lm")
+  endif ()
+  if (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED)
+    if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
+      find_PACKAGE(Threads)
+    else()
+      find_package(Threads REQUIRED)
+    endif()
+
+    if (BLA_VENDOR MATCHES "_64ilp")
+      set(BLAS_mkl_ILP_MODE "ilp64")
+    else ()
+      set(BLAS_mkl_ILP_MODE "lp64")
+    endif ()
+
+    set(LAPACK_SEARCH_LIBS "")
+
+    if (BLA_F95)
+      set(LAPACK_mkl_SEARCH_SYMBOL "cheev_f95")
+      set(_LIBRARIES LAPACK95_LIBRARIES)
+      set(_BLAS_LIBRARIES ${BLAS95_LIBRARIES})
+
+      # old
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_lapack95")
+      # new >= 10.3
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_intel_c")
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_lapack95_${BLAS_mkl_ILP_MODE}")
+    else()
+      set(LAPACK_mkl_SEARCH_SYMBOL "cheev")
+      set(_LIBRARIES LAPACK_LIBRARIES)
+      set(_BLAS_LIBRARIES ${BLAS_LIBRARIES})
+
+      # old
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_lapack")
+      # new >= 10.3
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_gf_${BLAS_mkl_ILP_MODE}")
+    endif()
+
+    # First try empty lapack libs
+    if (NOT ${_LIBRARIES})
+      check_lapack_libraries(
+        ${_LIBRARIES}
+        BLAS
+        ${LAPACK_mkl_SEARCH_SYMBOL}
+        ""
+        ""
+        "${_BLAS_LIBRARIES}"
+        "${CMAKE_THREAD_LIBS_INIT};${LM}"
+        )
+    endif ()
+    # Then try the search libs
+    foreach (IT ${LAPACK_SEARCH_LIBS})
+      if (NOT ${_LIBRARIES})
+        check_lapack_libraries(
+          ${_LIBRARIES}
+          BLAS
+          ${LAPACK_mkl_SEARCH_SYMBOL}
+          ""
+          "${IT}"
+          "${_BLAS_LIBRARIES}"
+          "${CMAKE_THREAD_LIBS_INIT};${LM}"
+          )
+      endif ()
+    endforeach ()
+
+    unset(BLAS_mkl_ILP_MODE)
+  endif ()
+endif()
+
 if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
  if(NOT LAPACK_LIBRARIES)
   check_lapack_libraries(
@@ -267,82 +344,7 @@ if (BLA_VENDOR STREQUAL "Generic" OR
     )
   endif ()
 endif ()
-#intel lapack
-if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
-  if (NOT WIN32)
-    set(LM "-lm")
-  endif ()
-  if (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED)
-    if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
-      find_PACKAGE(Threads)
-    else()
-      find_package(Threads REQUIRED)
-    endif()
 
-    if (BLA_VENDOR MATCHES "_64ilp")
-      set(BLAS_mkl_ILP_MODE "ilp64")
-    else ()
-      set(BLAS_mkl_ILP_MODE "lp64")
-    endif ()
-
-    set(LAPACK_SEARCH_LIBS "")
-
-    if (BLA_F95)
-      set(LAPACK_mkl_SEARCH_SYMBOL "cheev_f95")
-      set(_LIBRARIES LAPACK95_LIBRARIES)
-      set(_BLAS_LIBRARIES ${BLAS95_LIBRARIES})
-
-      # old
-      list(APPEND LAPACK_SEARCH_LIBS
-        "mkl_lapack95")
-      # new >= 10.3
-      list(APPEND LAPACK_SEARCH_LIBS
-        "mkl_intel_c")
-      list(APPEND LAPACK_SEARCH_LIBS
-        "mkl_lapack95_${BLAS_mkl_ILP_MODE}")
-    else()
-      set(LAPACK_mkl_SEARCH_SYMBOL "cheev")
-      set(_LIBRARIES LAPACK_LIBRARIES)
-      set(_BLAS_LIBRARIES ${BLAS_LIBRARIES})
-
-      # old
-      list(APPEND LAPACK_SEARCH_LIBS
-        "mkl_lapack")
-      # new >= 10.3
-      list(APPEND LAPACK_SEARCH_LIBS
-        "mkl_gf_${BLAS_mkl_ILP_MODE}")
-    endif()
-
-    # First try empty lapack libs
-    if (NOT ${_LIBRARIES})
-      check_lapack_libraries(
-        ${_LIBRARIES}
-        BLAS
-        ${LAPACK_mkl_SEARCH_SYMBOL}
-        ""
-        ""
-        "${_BLAS_LIBRARIES}"
-        "${CMAKE_THREAD_LIBS_INIT};${LM}"
-        )
-    endif ()
-    # Then try the search libs
-    foreach (IT ${LAPACK_SEARCH_LIBS})
-      if (NOT ${_LIBRARIES})
-        check_lapack_libraries(
-          ${_LIBRARIES}
-          BLAS
-          ${LAPACK_mkl_SEARCH_SYMBOL}
-          ""
-          "${IT}"
-          "${_BLAS_LIBRARIES}"
-          "${CMAKE_THREAD_LIBS_INIT};${LM}"
-          )
-      endif ()
-    endforeach ()
-
-    unset(BLAS_mkl_ILP_MODE)
-  endif ()
-endif()
 else()
   message(STATUS "LAPACK requires BLAS")
 endif()
