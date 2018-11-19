@@ -14,7 +14,7 @@ if(NOT Boost_PROGRAM_OPTIONS_FOUND)
 endif(NOT Boost_PROGRAM_OPTIONS_FOUND)
 
 add_definitions(-DCMAKE_EXPECTED_BOOST_VERSION="${Boost_VERSION}")
-add_definitions(-DCMAKE_EXPECTED_BOOST_VERSION_COMPONENTS="${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
+add_definitions(-DCMAKE_EXPECTED_BOOST_VERSION_COMPONENTS="${Boost_VERSION_STRING}")
 
 add_executable(test_boost_tgt main.cxx)
 target_link_libraries(test_boost_tgt

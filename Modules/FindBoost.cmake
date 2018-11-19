@@ -35,6 +35,7 @@ case results are reported in variables::
   Boost_MAJOR_VERSION    - Boost major version number (X in X.y.z)
   Boost_MINOR_VERSION    - Boost minor version number (Y in x.Y.z)
   Boost_SUBMINOR_VERSION - Boost subminor version number (Z in x.y.Z)
+  Boost_VERSION_STRING   - Boost version number in x.y.z format
   Boost_LIB_DIAGNOSTIC_DEFINITIONS (Windows)
                          - Pass to add_definitions() to have diagnostic
                            information about Boost's automatic linking
@@ -1371,6 +1372,7 @@ if(Boost_INCLUDE_DIR)
   math(EXPR Boost_MAJOR_VERSION "${Boost_VERSION} / 100000")
   math(EXPR Boost_MINOR_VERSION "${Boost_VERSION} / 100 % 1000")
   math(EXPR Boost_SUBMINOR_VERSION "${Boost_VERSION} % 100")
+  set(Boost_VERSION_STRING "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
 
   string(APPEND Boost_ERROR_REASON
     "Boost version: ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}\nBoost include path: ${Boost_INCLUDE_DIR}")
