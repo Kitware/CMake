@@ -76,16 +76,16 @@ Macro vs Function
 The ``macro`` command is very similar to the :command:`function` command.
 Nonetheless, there are a few important differences.
 
-In a function, ``ARGC``, ``ARGC`` and ``ARGV0``, ``ARGV1``, ... are
-true variables in the usual CMake sense.  In a macro, they are not.
-They are string replacements much like the C preprocessor would do
+In a function, ``ARGN``, ``ARGC``, ``ARGV`` and ``ARGV0``, ``ARGV1``, ...
+are true variables in the usual CMake sense.  In a macro, they are not,
+they are string replacements much like the C preprocessor would do
 with a macro.  This has a number of consequences, as explained in
 the :ref:`Argument Caveats` section below.
 
 Another difference between macros and functions is the control flow.
 A function is executed by transfering control from the calling
 statement to the function body.  A macro is executed as if the macro
-body were pasted in place of the calling statement.  This has for
+body were pasted in place of the calling statement.  This has the
 consequence that a :command:`return()` in a macro body does not
 just terminate execution of the macro; rather, control is returned
 from the scope of the macro call.  To avoid confusion, it is recommended
@@ -96,7 +96,7 @@ to avoid :command:`return()` in macros altogether.
 Argument Caveats
 ^^^^^^^^^^^^^^^^
 
-Since ``ARGC``, ``ARGC``, ``ARGV0`` etc are not variables,
+Since ``ARGN``, ``ARGC``, ``ARGV``, ``ARGV0`` etc. are not variables,
 you will NOT be able to use commands like
 
 .. code-block:: cmake
