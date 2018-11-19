@@ -2596,7 +2596,7 @@ bool cmake::Open(const std::string& dir, bool dryRun)
 
   std::unique_ptr<cmGlobalGenerator> gen(
     this->CreateGlobalGenerator(fullName));
-  if (!gen.get()) {
+  if (!gen) {
     std::cerr << "Error: could create CMAKE_GENERATOR \"" << fullName
               << "\"\n";
     return false;

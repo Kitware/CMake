@@ -21,8 +21,8 @@ AddCacheEntry::AddCacheEntry(QWidget* p, const QStringList& varNames,
   , VarTypes(varTypes)
 {
   this->setupUi(this);
-  for (int i = 0; i < NumTypes; i++) {
-    this->Type->addItem(TypeStrings[i]);
+  for (auto const& elem : TypeStrings) {
+    this->Type->addItem(elem);
   }
   QWidget* cb = new QCheckBox();
   QWidget* path = new QCMakePathEditor();

@@ -112,7 +112,7 @@ std::string cmGlobalNinjaGenerator::EncodeLiteral(const std::string& lit)
 
 std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
 {
-  std::string result = path; // NOLINT(clang-tidy)
+  std::string result = path;
 #ifdef _WIN32
   if (this->IsGCCOnWindows())
     std::replace(result.begin(), result.end(), '\\', '/');
@@ -254,7 +254,7 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
   bool restat, const cmNinjaDeps& outputs, const cmNinjaDeps& deps,
   const cmNinjaDeps& orderOnly)
 {
-  std::string cmd = command; // NOLINT(clang-tidy)
+  std::string cmd = command; // NOLINT(*)
 #ifdef _WIN32
   if (cmd.empty())
     // TODO Shouldn't an empty command be handled by ninja?
@@ -1940,7 +1940,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   cm.SetHomeOutputDirectory(dir_top_bld);
   std::unique_ptr<cmGlobalNinjaGenerator> ggd(
     static_cast<cmGlobalNinjaGenerator*>(cm.CreateGlobalGenerator("Ninja")));
-  if (!ggd.get() ||
+  if (!ggd ||
       !ggd->WriteDyndepFile(dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld,
                             arg_dd, arg_ddis, module_dir,
                             linked_target_dirs)) {
