@@ -137,7 +137,10 @@ public:
       CloseHandle(this->handle_);
     }
   }
-  operator bool() const { return this->handle_ != INVALID_HANDLE_VALUE; }
+  explicit operator bool() const
+  {
+    return this->handle_ != INVALID_HANDLE_VALUE;
+  }
   bool operator!() const { return this->handle_ == INVALID_HANDLE_VALUE; }
   operator HANDLE() const { return this->handle_; }
 
