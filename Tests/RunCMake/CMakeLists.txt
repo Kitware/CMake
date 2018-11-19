@@ -382,7 +382,8 @@ add_RunCMake_test(FetchContent)
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   set(CTestCommandLine_ARGS -DTEST_AFFINITY=$<TARGET_FILE:testAffinity>)
 endif()
-add_RunCMake_test(CTestCommandLine)
+add_executable(print_stdin print_stdin.c)
+add_RunCMake_test(CTestCommandLine -DTEST_PRINT_STDIN=$<TARGET_FILE:print_stdin>)
 add_RunCMake_test(CacheNewline)
 # Only run this test on unix platforms that support
 # symbolic links

@@ -65,6 +65,13 @@ function(run_cmake test)
   else()
     set(maybe_timeout "")
   endif()
+  if(RunCMake-stdin-file AND EXISTS ${top_src}/${RunCMake-stdin-file})
+    set(maybe_input_file INPUT_FILE ${top_src}/${RunCMake-stdin-file})
+  elseif(EXISTS ${top_src}/${test}-stdin.txt)
+    set(maybe_input_file INPUT_FILE ${top_src}/${test}-stdin.txt)
+  else()
+    set(maybe_input_file "")
+  endif()
   if(RunCMake_TEST_COMMAND)
     execute_process(
       COMMAND ${RunCMake_TEST_COMMAND}
@@ -74,6 +81,7 @@ function(run_cmake test)
       RESULT_VARIABLE actual_result
       ENCODING UTF8
       ${maybe_timeout}
+      ${maybe_input_file}
       )
   else()
     if(RunCMake_GENERATOR_INSTANCE)
@@ -96,6 +104,7 @@ function(run_cmake test)
       RESULT_VARIABLE actual_result
       ENCODING UTF8
       ${maybe_timeout}
+      ${maybe_input_file}
       )
   endif()
   set(msg "")
