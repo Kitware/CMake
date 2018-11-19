@@ -15,6 +15,7 @@ Try Compiling and Running Source Files
   try_run(RUN_RESULT_VAR COMPILE_RESULT_VAR
           bindir srcfile [CMAKE_FLAGS <flags>...]
           [COMPILE_DEFINITIONS <defs>...]
+          [LINK_OPTIONS <options>...]
           [LINK_LIBRARIES <libs>...]
           [COMPILE_OUTPUT_VARIABLE <var>]
           [RUN_OUTPUT_VARIABLE <var>]
@@ -38,7 +39,7 @@ The options are:
   are used.
 
 ``COMPILE_DEFINITIONS <defs>...``
-  Specify ``-Ddefinition`` arguments to pass to ``add_definitions``
+  Specify ``-Ddefinition`` arguments to pass to :command:`add_definitions`
   in the generated test project.
 
 ``COMPILE_OUTPUT_VARIABLE <var>``
@@ -51,6 +52,10 @@ The options are:
 
   If this option is specified, any ``-DLINK_LIBRARIES=...`` value
   given to the ``CMAKE_FLAGS`` option will be ignored.
+
+``LINK_OPTIONS <options>...``
+  Specify link step options to pass to :command:`target_link_options` in the
+  generated project.
 
 ``OUTPUT_VARIABLE <var>``
   Report the compile build output and the output from running the executable

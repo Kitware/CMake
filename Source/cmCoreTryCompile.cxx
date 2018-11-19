@@ -121,6 +121,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   std::string cxxExtensions;
   std::string cudaExtensions;
   std::vector<std::string> targets;
+  std::vector<std::string> linkOptions;
   std::string libsToLink = " ";
   bool useOldLinkLibs = true;
   char targetNameBuf[64];
@@ -144,6 +145,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     DoingNone,
     DoingCMakeFlags,
     DoingCompileDefinitions,
+    DoingLinkOptions,
     DoingLinkLibraries,
     DoingOutputVariable,
     DoingCopyFile,
@@ -165,6 +167,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       doing = DoingCMakeFlags;
     } else if (argv[i] == "COMPILE_DEFINITIONS") {
       doing = DoingCompileDefinitions;
+    } else if (argv[i] == "LINK_OPTIONS") {
+      doing = DoingLinkOptions;
     } else if (argv[i] == "LINK_LIBRARIES") {
       doing = DoingLinkLibraries;
       useOldLinkLibs = false;
@@ -208,6 +212,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       cmakeFlags.push_back(argv[i]);
     } else if (doing == DoingCompileDefinitions) {
       compileDefs.push_back(argv[i]);
+    } else if (doing == DoingLinkOptions) {
+      linkOptions.push_back(argv[i]);
     } else if (doing == DoingLinkLibraries) {
       libsToLink += "\"" + cmSystemTools::TrimWhitespace(argv[i]) + "\" ";
       if (cmTarget* tgt = this->Makefile->FindTargetToUse(argv[i])) {
@@ -811,6 +817,23 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       }
       if (!cudaExtensions.empty()) {
         writeProperty(fout, targetName, "CUDA_EXTENSIONS", cudaExtensions);
+      }
+    }
+
+    if (!linkOptions.empty()) {
+      std::vector<std::string> options;
+      options.reserve(linkOptions.size());
+      for (const auto& option : linkOptions) {
+        options.emplace_back(cmOutputConverter::EscapeForCMake(option));
+      }
+
+      if (targetType == cmStateEnums::STATIC_LIBRARY) {
+        fprintf(fout,
+                "set_property(TARGET %s PROPERTY STATIC_LIBRARY_OPTIONS %s)\n",
+                targetName.c_str(), cmJoin(options, " ").c_str());
+      } else {
+        fprintf(fout, "target_link_options(%s PRIVATE %s)\n",
+                targetName.c_str(), cmJoin(options, " ").c_str());
       }
     }
 
