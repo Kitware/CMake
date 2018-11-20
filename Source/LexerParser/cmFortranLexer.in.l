@@ -146,7 +146,7 @@ $[ \t]*endif    { return F90PPR_ENDIF; }
 [Ii][Nn][Cc][Ll][Uu][Dd][Ee] { return INCLUDE; }
 [Ii][Nn][Tt][Ee][Rr][Ff][Aa][Cc][Ee] { return INTERFACE; }
 [Mm][Oo][Dd][Uu][Ll][Ee] { return MODULE; }
-[Ss][Uu][bb][Mm][Oo][Dd][Uu][Ll][Ee] { return SUBMODULE; }
+[Ss][Uu][Bb][Mm][Oo][Dd][Uu][Ll][Ee] { return SUBMODULE; }
 [Uu][Ss][Ee] { return USE; }
 
 [a-zA-Z_][a-zA-Z_0-9]* {
