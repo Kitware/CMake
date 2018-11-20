@@ -1084,8 +1084,10 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   std::string dropMethod;
   std::string url;
   this->ConstructCDashURL(dropMethod, url);
-  std::string::size_type pos = url.find("submit.php?");
-  url = url.substr(0, pos + 10);
+  std::string::size_type pos = url.find('?');
+  if (pos != std::string::npos) {
+    url = url.substr(0, pos);
+  }
   if (!(dropMethod == "http" || dropMethod == "https")) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Only http and https are supported for CDASH_UPLOAD\n");
