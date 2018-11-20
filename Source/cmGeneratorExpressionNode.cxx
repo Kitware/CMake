@@ -283,14 +283,39 @@ static const struct InListNode : public cmGeneratorExpressionNode
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* /*context*/,
+    cmGeneratorExpressionContext* context,
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    std::vector<std::string> values;
-    cmSystemTools::ExpandListArgument(parameters[1], values);
-    if (values.empty()) {
-      return "0";
+    std::vector<std::string> values, checkValues;
+    bool check = false;
+    switch (context->LG->GetPolicyStatus(cmPolicies::CMP0085)) {
+      case cmPolicies::WARN:
+        if (parameters.front().empty()) {
+          check = true;
+          cmSystemTools::ExpandListArgument(parameters[1], checkValues, true);
+        }
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        cmSystemTools::ExpandListArgument(parameters[1], values);
+        if (check && values != checkValues) {
+          std::ostringstream e;
+          e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0085)
+            << "\nSearch Item:\n  \"" << parameters.front()
+            << "\"\nList:\n  \"" << parameters[1] << "\"\n";
+          context->LG->GetCMakeInstance()->IssueMessage(
+            cmake::AUTHOR_WARNING, e.str(), context->Backtrace);
+          return "0";
+        }
+        if (values.empty()) {
+          return "0";
+        }
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::NEW:
+        cmSystemTools::ExpandListArgument(parameters[1], values, true);
+        break;
     }
 
     return std::find(values.cbegin(), values.cend(), parameters.front()) ==
