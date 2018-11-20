@@ -1388,6 +1388,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindGDAL)
   endif()
 
+  if(CMake_TEST_FindGIF)
+    add_subdirectory(FindGIF)
+  endif()
+
   if(CMake_TEST_FindGSL)
     add_subdirectory(FindGSL)
   endif()
