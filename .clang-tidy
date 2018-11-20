@@ -1,5 +1,8 @@
 ---
 Checks: "-*,\
+bugprone-*,\
+-bugprone-macro-parentheses,\
+-bugprone-misplaced-widening-cast,\
 google-readability-casting,\
 misc-*,\
 -misc-incorrect-roundings,\
