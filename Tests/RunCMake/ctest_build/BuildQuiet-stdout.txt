@@ -1,7 +1,6 @@
 Run dashboard with model Experimental
    Source directory: .*/Tests/RunCMake/ctest_build/BuildQuiet
    Build directory: .*/Tests/RunCMake/ctest_build/BuildQuiet-build
-   Reading ctest configuration file: .*/Tests/RunCMake/ctest_build/BuildQuiet/CTestConfig.cmake
    Site: test-site
    Build name: test-build-name
    Use Experimental tag: [0-9-]+

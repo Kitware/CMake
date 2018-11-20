@@ -27,7 +27,6 @@ to creating tests when testing is enabled.
 To enable submissions to a CDash server, create a ``CTestConfig.cmake``
 file at the top of the project with content such as::
 
-  set(CTEST_PROJECT_NAME "MyProject")
   set(CTEST_NIGHTLY_START_TIME "01:00:00 UTC")
   set(CTEST_DROP_METHOD "http")
   set(CTEST_DROP_SITE "my.cdash.org")

@@ -1,2 +1,1 @@
-set(CTEST_PROJECT_NAME "CTestLabelsForSubprojects@CASE_NAME@")
 @CTEST_EXTRA_CONFIG@
