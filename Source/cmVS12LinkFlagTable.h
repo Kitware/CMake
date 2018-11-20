@@ -268,5 +268,5 @@ static cmVS7FlagTable cmVS12LinkFlagTable[] = {
   { "KeyContainer", "KEYCONTAINER:", "Key Container", "",
     cmVS7FlagTable::UserValue },
   // Skip [AdditionalOptions] - no command line Switch.
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };

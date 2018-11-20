@@ -3,13 +3,15 @@
 #ifndef cmIDEFlagTable_h
 #define cmIDEFlagTable_h
 
+#include <string>
+
 // This is a table mapping XML tag IDE names to command line options
 struct cmIDEFlagTable
 {
-  const char* IDEName;     // name used in the IDE xml file
-  const char* commandFlag; // command line flag
-  const char* comment;     // comment
-  const char* value;       // string value
+  std::string IDEName;     // name used in the IDE xml file
+  std::string commandFlag; // command line flag
+  std::string comment;     // comment
+  std::string value;       // string value
   unsigned int special;    // flags for special handling requests
   enum
   {

@@ -31,5 +31,5 @@ static cmVS7FlagTable cmVS10CudaHostFlagTable[] = {
   { "Warning", "W4", "Level 4", "W4", 0 },
   { "Warning", "Wall", "Enable All Warnings", "Wall", 0 },
 
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };

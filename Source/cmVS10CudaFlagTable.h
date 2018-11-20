@@ -50,5 +50,5 @@ static cmVS7FlagTable cmVS10CudaFlagTable[] = {
   { "MaxRegCount", "maxrregcount=", "", "", cmVS7FlagTable::UserValue },
   { "MaxRegCount", "maxrregcount", "", "", cmVS7FlagTable::UserFollowing },
 
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };

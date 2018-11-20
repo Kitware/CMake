@@ -256,5 +256,5 @@ static cmVS7FlagTable cmVS141CLFlagTable[] = {
   // Skip [XMLDocumentationFileName] - no command line Switch.
   // Skip [BrowseInformationFile] - no command line Switch.
   // Skip [AdditionalOptions] - no command line Switch.
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };

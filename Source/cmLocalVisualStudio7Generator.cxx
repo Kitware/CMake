@@ -362,7 +362,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranFlagTable[] = {
   { "EnableRecursion", "recursive", "", "true", 0 },
   { "ReentrantCode", "reentrancy", "", "true", 0 },
   // done up to Language
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };
 // fill the table here currently the comment field is not used for
 // anything other than documentation NOTE: Make sure the longer
@@ -472,7 +472,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] = {
   { "WarnAsError", "WX", "Treat warnings as errors", "true", 0 },
   { "BrowseInformation", "FR", "Generate browse information", "1", 0 },
   { "StringPooling", "GF", "Enable StringPooling", "true", 0 },
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };
 
 cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] = {
@@ -537,7 +537,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] = {
   { "ModuleDefinitionFile", "DEF:", "add an export def file", "",
     cmVS7FlagTable::UserValue },
   { "GenerateMapFile", "MAP", "enable generation of map file", "true", 0 },
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };
 
 cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranLinkFlagTable[] = {
@@ -545,7 +545,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranLinkFlagTable[] = {
     "linkIncrementalNo", 0 },
   { "LinkIncremental", "INCREMENTAL:YES", "link incremental",
     "linkIncrementalYes", 0 },
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };
 
 // Helper class to write build event <Tool .../> elements.

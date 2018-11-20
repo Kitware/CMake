@@ -46,5 +46,5 @@ static cmVS7FlagTable cmVS10NASMFlagTable[] = {
   // Skip [CommandLineTemplate] - no command line Switch.
   // Skip [ExecutionDescription] - no command line Switch.
   // Skip [AdditionalOptions] - no command line Switch.
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };

@@ -72,5 +72,5 @@ static cmVS7FlagTable cmVS10LibFlagTable[] = {
   { "Name", "NAME:", "Name", "", cmVS7FlagTable::UserValue },
   // Skip [TrackerLogDirectory] - no command line Switch.
   // Skip [AdditionalOptions] - no command line Switch.
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };

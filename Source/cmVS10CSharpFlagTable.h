@@ -117,5 +117,5 @@ static cmVS7FlagTable cmVS10CSharpFlagTable[] = {
   { "ErrorReport", "errorreport:queue", "Queue For Next Login", "queue", 0 },
   { "ErrorReport", "errorreport:send", "Send Automatically", "send", 0 },
 
-  { 0, 0, 0, 0, 0 },
+  { "", "", "", "", 0 },
 };
