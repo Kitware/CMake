@@ -176,6 +176,9 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
   if (subCommand == "LOCK") {
     return this->HandleLockCommand(args);
   }
+  if (subCommand == "SIZE") {
+    return this->HandleSizeCommand(args);
+  }
 
   std::string e = "does not recognize sub-command " + subCommand;
   this->SetError(e);
@@ -3602,6 +3605,35 @@ bool cmFileCommand::HandleTimestampCommand(
   std::string result =
     timestamp.FileModificationTime(filename.c_str(), formatString, utcFlag);
   this->Makefile->AddDefinition(outputVariable, result.c_str());
+
+  return true;
+}
+
+bool cmFileCommand::HandleSizeCommand(std::vector<std::string> const& args)
+{
+  if (args.size() != 3) {
+    std::ostringstream e;
+    e << args[0] << " requires a file name and output variable";
+    this->SetError(e.str());
+    return false;
+  }
+
+  unsigned int argsIndex = 1;
+
+  const std::string& filename = args[argsIndex++];
+
+  const std::string& outputVariable = args[argsIndex++];
+
+  if (!cmSystemTools::FileExists(filename, true)) {
+    std::ostringstream e;
+    e << "SIZE requested of path that is not readable " << filename;
+    this->SetError(e.str());
+    return false;
+  }
+
+  this->Makefile->AddDefinition(
+    outputVariable,
+    std::to_string(cmSystemTools::FileLength(filename)).c_str());
 
   return true;
 }

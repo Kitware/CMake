@@ -36,6 +36,8 @@ run_cmake(READ_ELF)
 run_cmake(GLOB)
 run_cmake(GLOB_RECURSE)
 run_cmake(GLOB_RECURSE-noexp-FOLLOW_SYMLINKS)
+run_cmake(SIZE)
+run_cmake(SIZE-error-does-not-exist)
 
 # tests are valid both for GLOB and GLOB_RECURSE
 run_cmake(GLOB-sort-dedup)
