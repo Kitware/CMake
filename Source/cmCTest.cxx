@@ -649,16 +649,6 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
       command->SetError(m);
       return false;
     }
-  } else {
-    cmCTestOptionalLog(this, WARNING,
-                       "Cannot locate CTest configuration: in BuildDirectory: "
-                         << bld_dir_fname << std::endl,
-                       command->ShouldBeQuiet());
-    cmCTestOptionalLog(
-      this, WARNING,
-      "Cannot locate CTest configuration: in SourceDirectory: "
-        << src_dir_fname << std::endl,
-      command->ShouldBeQuiet());
   }
 
   this->SetCTestConfigurationFromCMakeVariable(mf, "NightlyStartTime",
