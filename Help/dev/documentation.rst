@@ -458,32 +458,22 @@ reStructuredText markup from comment blocks that start in ``.rst:``.
 At the top of ``Modules/<module-name>.cmake``, begin with the following
 license notice:
 
-.. code-block:: cmake
+::
 
  # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
  # file Copyright.txt or https://cmake.org/licensing for details.
 
 After this notice, add a *BLANK* line.  Then, add documentation using
-a `Line Comment`_ block of the form:
-
-.. code-block:: cmake
-
- #.rst:
- # <module-name>
- # -------------
- #
- # <reStructuredText documentation of module>
-
-or a `Bracket Comment`_ of the form:
+a `Bracket Comment`_ of the form:
 
 ::
 
- #[[.rst:
- <module-name>
- -------------
+  #[=======================================================================[.rst:
+  <module-name>
+  -------------
 
- <reStructuredText documentation of module>
- #]]
+  <reStructuredText documentation of module>
+  #]=======================================================================]
 
 Any number of ``=`` may be used in the opening and closing brackets
 as long as they match.  Content on the line containing the closing
@@ -496,35 +486,38 @@ For example, a ``Findxxx.cmake`` module may contain:
 
 ::
 
- # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
- # file Copyright.txt or https://cmake.org/licensing for details.
+  # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+  # file Copyright.txt or https://cmake.org/licensing for details.
 
- #.rst:
- # FindXxx
- # -------
- #
- # This is a cool module.
- # This module does really cool stuff.
- # It can do even more than you think.
- #
- # It even needs two paragraphs to tell you about it.
- # And it defines the following variables:
- #
- # * VAR_COOL: this is great isn't it?
- # * VAR_REALLY_COOL: cool right?
+  #[=======================================================================[.rst:
+  FindXxx
+  -------
 
- <code>
+  This is a cool module.
+  This module does really cool stuff.
+  It can do even more than you think.
 
- #[========================================[.rst:
- .. command:: xxx_do_something
+  It even needs two paragraphs to tell you about it.
+  And it defines the following variables:
 
-  This command does something for Xxx::
+  ``VAR_COOL``
+    this is great isn't it?
+  ``VAR_REALLY_COOL``
+    cool right?
+  #]=======================================================================]
 
-   xxx_do_something(some arguments)
- #]========================================]
- macro(xxx_do_something)
-   <code>
- endmacro()
+  <code>
+
+  #[=======================================================================[.rst:
+  .. command:: xxx_do_something
+
+   This command does something for Xxx::
+
+    xxx_do_something(some arguments)
+  #]=======================================================================]
+  macro(xxx_do_something)
+    <code>
+  endmacro()
 
 Test the documentation formatting by running
 ``cmake --help-module <module-name>``, and also by enabling the
@@ -534,5 +527,4 @@ have a .cmake file in this directory NOT show up in the modules
 documentation, simply leave out the ``Help/module/<module-name>.rst``
 file and the ``Help/manual/cmake-modules.7.rst`` toctree entry.
 
-.. _`Line Comment`: https://cmake.org/cmake/help/latest/manual/cmake-language.7.html#line-comment
 .. _`Bracket Comment`: https://cmake.org/cmake/help/latest/manual/cmake-language.7.html#bracket-comment

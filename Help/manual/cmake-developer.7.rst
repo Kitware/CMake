@@ -196,49 +196,78 @@ them.
 A Sample Find Module
 --------------------
 
-We will describe how to create a simple find module for a library
-``Foo``.
+We will describe how to create a simple find module for a library ``Foo``.
 
-The first thing that is needed is a license notice.
+The top of the module should begin with a license notice, followed by
+a blank line, and then followed by a :ref:`Bracket Comment`.  The comment
+should begin with ``.rst:`` to indicate that the rest of its content is
+reStructuredText-format documentation.  For example:
 
-.. code-block:: cmake
+::
 
- # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
- # file Copyright.txt or https://cmake.org/licensing for details.
+  # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+  # file Copyright.txt or https://cmake.org/licensing for details.
 
-Next we need module documentation.  CMake's documentation system requires you
-to follow the license notice with a blank line and then with a documentation
-marker and the name of the module.  You should follow this with a simple
-statement of what the module does.
+  #[=======================================================================[.rst:
+  FindFoo
+  -------
 
-.. code-block:: cmake
+  Finds the Foo library.
 
-  #.rst:
-  # FindFoo
-  # -------
-  #
-  # Finds the Foo library
-  #
+  Imported Targets
+  ^^^^^^^^^^^^^^^^
 
-More description may be required for some packages.  If there are
-caveats or other details users of the module should be aware of, you can
-add further paragraphs below this.  Then you need to document what
-variables and imported targets are set by the module, such as
+  This module provides the following imported targets, if found:
 
-.. code-block:: cmake
+  ``Foo::Foo``
+    The Foo library
 
-  # This will define the following variables::
-  #
-  #   Foo_FOUND    - True if the system has the Foo library
-  #   Foo_VERSION  - The version of the Foo library which was found
-  #
-  # and the following imported targets::
-  #
-  #   Foo::Foo   - The Foo library
+  Result Variables
+  ^^^^^^^^^^^^^^^^
 
-If the package provides any macros, they should be listed here, but can
-be documented where they are defined.
+  This will define the following variables:
 
+  ``Foo_FOUND``
+    True if the system has the Foo library.
+  ``Foo_VERSION``
+    The version of the Foo library which was found.
+  ``Foo_INCLUDE_DIRS``
+    Include directories needed to use Foo.
+  ``Foo_LIBRARIES``
+    Libraries needed to link to Foo.
+
+  Cache Variables
+  ^^^^^^^^^^^^^^^
+
+  The following cache variables may also be set:
+
+  ``Foo_INCLUDE_DIR``
+    The directory containing ``foo.h``.
+  ``Foo_LIBRARY``
+    The path to the Foo library.
+
+  #]=======================================================================]
+
+The module documentation consists of:
+
+* An underlined heading specifying the module name.
+
+* A simple description of what the module finds.
+  More description may be required for some packages.  If there are
+  caveats or other details users of the module should be aware of,
+  specify them here.
+
+* A section listing imported targets provided by the module, if any.
+
+* A section listing result variables provided by the module.
+
+* Optionally a section listing cache variables used by the module, if any.
+
+If the package provides any macros or functions, they should be listed in
+an additional section, but can be documented by additional ``.rst:``
+comment blocks immediately above where those macros or functions are defined.
+
+The find module implementation may begin below the documentation block.
 Now the actual libraries and so on have to be found.  The code here will
 obviously vary from module to module (dealing with that, after all, is the
 point of find modules), but there tends to be a common pattern for libraries.
