@@ -1,2 +1,22 @@
 [
+  {
+    "name":  "AdditionalCompilerOptions",
+    "switch": "Xcompiler=",
+    "comment": "Host compiler options",
+    "value": "",
+    "flags": [
+      "UserValue",
+      "SpaceAppendable"
+    ]
+  },
+  {
+    "name":  "AdditionalCompilerOptions",
+    "switch": "Xcompiler",
+    "comment": "Host compiler options",
+    "value": "",
+    "flags": [
+      "UserFollowing",
+      "SpaceAppendable"
+    ]
+  }
 ]
