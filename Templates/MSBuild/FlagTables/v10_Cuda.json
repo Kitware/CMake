@@ -202,5 +202,23 @@
     "comment": "",
     "value": "true",
     "flags": []
+  },
+  {
+    "name":  "MaxRegCount",
+    "switch": "maxrregcount=",
+    "comment": "",
+    "value": "",
+    "flags": [
+      "UserValue"
+    ]
+  },
+  {
+    "name":  "MaxRegCount",
+    "switch": "maxrregcount",
+    "comment": "",
+    "value": "",
+    "flags": [
+      "UserFollowing"
+    ]
   }
 ]
