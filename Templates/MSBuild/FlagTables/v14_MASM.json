@@ -246,7 +246,7 @@
   },
   {
     "name": "PreprocessorDefinitions",
-    "switch": "D\"[value]\"",
+    "switch": "D",
     "comment": "Preprocessor Definitions",
     "value": "",
     "flags": [
@@ -256,7 +256,7 @@
   },
   {
     "name": "IncludePaths",
-    "switch": "I \"[value]\"",
+    "switch": "I",
     "comment": "Include Paths",
     "value": "",
     "flags": [
@@ -266,7 +266,7 @@
   },
   {
     "name": "BrowseFile",
-    "switch": "FR\"[value]\"",
+    "switch": "FR",
     "comment": "Generate Browse Information File",
     "value": "",
     "flags": [
@@ -276,7 +276,7 @@
   },
   {
     "name": "ObjectFileName",
-    "switch": "Fo\"[value]\"",
+    "switch": "Fo",
     "comment": "Object File Name",
     "value": "",
     "flags": [
@@ -285,7 +285,7 @@
   },
   {
     "name": "AssembledCodeListingFile",
-    "switch": "Fl\"[value]\"",
+    "switch": "Fl",
     "comment": "Assembled Code Listing File",
     "value": "",
     "flags": [
