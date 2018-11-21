@@ -7,22 +7,43 @@ FindGIF
 
 This finds the GIF library (giflib)
 
-The module defines the following variables:
+Imported targets
+^^^^^^^^^^^^^^^^
+
+This module defines the following :prop_tgt:`IMPORTED` target:
+
+``GIF::GIF``
+  The giflib library, if found.
+
+Result variables
+^^^^^^^^^^^^^^^^
+
+This module will set the following variables in your project:
 
 ``GIF_FOUND``
-  True if giflib was found
+  If false, do not try to use GIF.
+``GIF_INCLUDE_DIRS``
+  where to find gif_lib.h, etc.
 ``GIF_LIBRARIES``
-  Libraries to link to in order to use giflib
-``GIF_INCLUDE_DIR``
-  where to find the headers
+  the libraries needed to use GIF.
 ``GIF_VERSION``
-  3, 4 or a full version string (eg 5.1.4) for versions >= 4.1.6
+  3, 4 or a full version string (eg 5.1.4) for versions >= 4.1.6.
 
-The minimum required version of giflib can be specified using the
-standard syntax, e.g.  find_package(GIF 4)
+Cache variables
+^^^^^^^^^^^^^^^
 
-$GIF_DIR is an environment variable that would correspond to the
-./configure --prefix=$GIF_DIR
+The following cache variables may also be set:
+
+``GIF_INCLUDE_DIR``
+  where to find the GIF headers.
+``GIF_LIBRARY``
+  where to find the GIF library.
+
+Hints
+^^^^^
+
+``GIF_DIR`` is an environment variable that would correspond to the
+``./configure --prefix=$GIF_DIR``.
 #]=======================================================================]
 
 # Created by Eric Wing.
@@ -43,9 +64,6 @@ find_library(GIF_LIBRARY
     ENV GIF_DIR
   PATH_SUFFIXES lib
 )
-
-# see readme.txt
-set(GIF_LIBRARIES ${GIF_LIBRARY})
 
 # Very basic version detection.
 # The GIF_LIB_VERSION string in gif_lib.h seems to be unreliable, since it seems
@@ -89,5 +107,21 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GIF  REQUIRED_VARS  GIF_LIBRARY  GIF_INCLUDE_DIR
                                        VERSION_VAR GIF_VERSION )
+
+if(GIF_FOUND)
+  set(GIF_INCLUDE_DIRS "${GIF_INCLUDE_DIR}")
+  set(GIF_LIBRARIES ${GIF_LIBRARY})
+
+  if(NOT TARGET GIF::GIF)
+    add_library(GIF::GIF UNKNOWN IMPORTED)
+    set_target_properties(GIF::GIF PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${GIF_INCLUDE_DIRS}")
+    if(EXISTS "${GIF_LIBRARY}")
+      set_target_properties(GIF::GIF PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        IMPORTED_LOCATION "${GIF_LIBRARY}")
+    endif()
+  endif()
+endif()
 
 mark_as_advanced(GIF_INCLUDE_DIR GIF_LIBRARY)
