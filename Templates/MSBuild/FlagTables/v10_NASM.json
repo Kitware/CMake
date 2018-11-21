@@ -1,6 +1,13 @@
 [
   {
     "name": "Outputswitch",
+    "switch": "fwin",
+    "comment": "Object File win32",
+    "value": "0",
+    "flags": []
+  },
+  {
+    "name": "Outputswitch",
     "switch": "fwin32",
     "comment": "Object File win32",
     "value": "0",
@@ -11,6 +18,13 @@
     "switch": "fwin64",
     "comment": "Object File win64",
     "value": "1",
+    "flags": []
+  },
+  {
+    "name": "Outputswitch",
+    "switch": "felf",
+    "comment": "ELF32 (i386) object files (e.g. Linux)",
+    "value": "2",
     "flags": []
   },
   {
