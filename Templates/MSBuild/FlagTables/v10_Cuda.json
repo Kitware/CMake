@@ -18,5 +18,35 @@
       "UserFollowing",
       "SpaceAppendable"
     ]
+  },
+  {
+    "name":  "CudaRuntime",
+    "switch": "cudart=none",
+    "comment": "No CUDA runtime library",
+    "value": "None",
+    "flags": []
+  },
+  {
+    "name":  "CudaRuntime",
+    "switch": "cudart=shared",
+    "comment": "Shared/dynamic CUDA runtime library",
+    "value": "Shared",
+    "flags": []
+  },
+  {
+    "name":  "CudaRuntime",
+    "switch": "cudart=static",
+    "comment": "Static CUDA runtime library",
+    "value": "Static",
+    "flags": []
+  },
+  {
+    "name":  "CudaRuntime",
+    "switch": "cudart",
+    "comment": "CUDA runtime library",
+    "value": "",
+    "flags": [
+      "UserFollowing"
+    ]
   }
 ]
