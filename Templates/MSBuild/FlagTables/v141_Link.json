@@ -648,11 +648,7 @@
     "switch": "MANIFESTUAC:NO",
     "comment": "Enable User Account Control (UAC)",
     "value": "false",
-    "flags": [
-      "UserValue",
-      "UserIgnored",
-      "Continue"
-    ]
+    "flags": []
   },
   {
     "name": "EnableUAC",
