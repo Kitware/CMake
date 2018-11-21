@@ -127,7 +127,7 @@
   },
   {
     "name": "AssembledCodeListingFile",
-    "switch": "l \"[value]\"",
+    "switch": "l",
     "comment": "Assembled Code Listing File",
     "value": "",
     "flags": [
@@ -137,7 +137,7 @@
   },
   {
     "name": "ErrorReporting",
-    "switch": "Z \"[value]\"",
+    "switch": "Z",
     "comment": "Redirect Error Messages to File",
     "value": "",
     "flags": [
@@ -147,7 +147,7 @@
   },
   {
     "name": "IncludePaths",
-    "switch": "I\"[value]\"",
+    "switch": "I",
     "comment": "Include Paths",
     "value": "",
     "flags": [
@@ -157,7 +157,7 @@
   },
   {
     "name": "PreprocessorDefinitions",
-    "switch": "D\"[value]\"",
+    "switch": "D",
     "comment": "Preprocessor Definitions",
     "value": "",
     "flags": [
@@ -167,7 +167,7 @@
   },
   {
     "name": "UndefinePreprocessorDefinitions",
-    "switch": "U\"[value]\"",
+    "switch": "U",
     "comment": "Undefine Preprocessor Definitions",
     "value": "",
     "flags": [
@@ -177,7 +177,7 @@
   },
   {
     "name": "OutputFormat",
-    "switch": "o \"[value]\"",
+    "switch": "o",
     "comment": "Output File Name",
     "value": "",
     "flags": [
