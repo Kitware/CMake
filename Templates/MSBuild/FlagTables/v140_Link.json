@@ -120,24 +120,21 @@
   },
   {
     "name": "GenerateDebugInformation",
-    "switch": "",
-    "comment": "No",
-    "value": "false",
-    "flags": []
-  },
-  {
-    "name": "GenerateDebugInformation",
     "switch": "DEBUG",
     "comment": "Optimize for debugging",
     "value": "true",
-    "flags": []
+    "flags": [
+      "CaseInsensitive"
+    ]
   },
   {
     "name": "GenerateDebugInformation",
     "switch": "DEBUG:FASTLINK",
     "comment": "Optimize for faster linking",
     "value": "DebugFastLink",
-    "flags": []
+    "flags": [
+      "CaseInsensitive"
+    ]
   },
   {
     "name": "SubSystem",

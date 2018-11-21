@@ -658,7 +658,9 @@
     "switch": "DEBUG",
     "comment": "Generate Debug Info",
     "value": "true",
-    "flags": []
+    "flags": [
+      "CaseInsensitive"
+    ]
   },
   {
     "name": "GenerateMapFile",
