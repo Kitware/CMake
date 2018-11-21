@@ -264,12 +264,9 @@ private:
 
   struct LocalObjectEntry
   {
-    cmGeneratorTarget* Target;
+    cmGeneratorTarget* Target = nullptr;
     std::string Language;
-    LocalObjectEntry()
-      : Target(nullptr)
-    {
-    }
+    LocalObjectEntry() {}
     LocalObjectEntry(cmGeneratorTarget* t, const std::string& lang)
       : Target(t)
       , Language(lang)
@@ -278,15 +275,10 @@ private:
   };
   struct LocalObjectInfo : public std::vector<LocalObjectEntry>
   {
-    bool HasSourceExtension;
-    bool HasPreprocessRule;
-    bool HasAssembleRule;
-    LocalObjectInfo()
-      : HasSourceExtension(false)
-      , HasPreprocessRule(false)
-      , HasAssembleRule(false)
-    {
-    }
+    bool HasSourceExtension = false;
+    bool HasPreprocessRule = false;
+    bool HasAssembleRule = false;
+    LocalObjectInfo() {}
   };
   void GetLocalObjectFiles(
     std::map<std::string, LocalObjectInfo>& localObjectFiles);

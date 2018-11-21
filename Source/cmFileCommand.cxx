@@ -1095,13 +1095,9 @@ protected:
   // Properties set by pattern and regex match rules.
   struct MatchProperties
   {
-    bool Exclude;
-    mode_t Permissions;
-    MatchProperties()
-      : Exclude(false)
-      , Permissions(0)
-    {
-    }
+    bool Exclude = false;
+    mode_t Permissions = 0;
+    MatchProperties() {}
   };
   struct MatchRule
   {

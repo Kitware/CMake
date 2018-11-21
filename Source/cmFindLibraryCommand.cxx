@@ -198,13 +198,10 @@ struct cmFindLibraryHelper
   // Current names under consideration.
   struct Name
   {
-    bool TryRaw;
+    bool TryRaw = false;
     std::string Raw;
     cmsys::RegularExpression Regex;
-    Name()
-      : TryRaw(false)
-    {
-    }
+    Name() {}
   };
   std::vector<Name> Names;
 

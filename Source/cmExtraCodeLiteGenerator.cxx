@@ -22,7 +22,6 @@
 
 cmExtraCodeLiteGenerator::cmExtraCodeLiteGenerator()
   : ConfigName("NoConfig")
-  , CpuCount(2)
 {
 }
 

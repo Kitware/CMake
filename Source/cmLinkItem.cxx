@@ -7,13 +7,11 @@
 #include <utility> // IWYU pragma: keep
 
 cmLinkItem::cmLinkItem()
-  : Target(nullptr)
 {
 }
 
 cmLinkItem::cmLinkItem(std::string const& n, cmListFileBacktrace const& bt)
   : String(n)
-  , Target(nullptr)
   , Backtrace(bt)
 {
 }
@@ -59,7 +57,6 @@ std::ostream& operator<<(std::ostream& os, cmLinkItem const& item)
 
 cmLinkImplItem::cmLinkImplItem()
   : cmLinkItem()
-  , FromGenex(false)
 {
 }
 

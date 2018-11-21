@@ -3,8 +3,6 @@
 #include "cmGeneratorExpressionLexer.h"
 
 cmGeneratorExpressionLexer::cmGeneratorExpressionLexer()
-  : SawBeginExpression(false)
-  , SawGeneratorExpression(false)
 {
 }
 

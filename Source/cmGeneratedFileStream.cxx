@@ -103,18 +103,10 @@ void cmGeneratedFileStream::SetCompressionExtraExtension(bool ext)
 }
 
 cmGeneratedFileStreamBase::cmGeneratedFileStreamBase()
-  : CopyIfDifferent(false)
-  , Okay(false)
-  , Compress(false)
-  , CompressExtraExtension(true)
 {
 }
 
 cmGeneratedFileStreamBase::cmGeneratedFileStreamBase(std::string const& name)
-  : CopyIfDifferent(false)
-  , Okay(false)
-  , Compress(false)
-  , CompressExtraExtension(true)
 {
   this->Open(name);
 }

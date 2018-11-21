@@ -45,10 +45,7 @@ void cmProcessTools::RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
 }
 
 cmProcessTools::LineParser::LineParser(char sep, bool ignoreCR)
-  : Log(nullptr)
-  , Prefix(nullptr)
-  , Separator(sep)
-  , LineEnd('\0')
+  : Separator(sep)
   , IgnoreCR(ignoreCR)
 {
 }

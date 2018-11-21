@@ -20,7 +20,6 @@
 #define INCLUDE_REGEX_TRANSFORM_MARKER "#IncludeRegexTransform: "
 
 cmDependsC::cmDependsC()
-  : ValidDeps(nullptr)
 {
 }
 

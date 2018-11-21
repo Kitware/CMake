@@ -12,10 +12,7 @@
 class cmScriptGeneratorIndent
 {
 public:
-  cmScriptGeneratorIndent()
-    : Level(0)
-  {
-  }
+  cmScriptGeneratorIndent() {}
   cmScriptGeneratorIndent(int level)
     : Level(level)
   {
@@ -32,7 +29,7 @@ public:
   }
 
 private:
-  int Level;
+  int Level = 0;
 };
 inline std::ostream& operator<<(std::ostream& os,
                                 cmScriptGeneratorIndent indent)

@@ -110,11 +110,8 @@ public:
     std::set<std::string> ExpectedResxHeaders;
     std::set<std::string> ExpectedXamlHeaders;
     std::set<std::string> ExpectedXamlSources;
-    bool Initialized;
-    KindedSources()
-      : Initialized(false)
-    {
-    }
+    bool Initialized = false;
+    KindedSources() {}
   };
 
   /** Get all sources needed for a configuration with kinds assigned.  */
@@ -565,13 +562,9 @@ public:
   };
   struct SourceFileFlags
   {
-    SourceFileFlags()
-      : Type(SourceFileTypeNormal)
-      , MacFolder(nullptr)
-    {
-    }
-    SourceFileType Type;
-    const char* MacFolder; // location inside Mac content folders
+    SourceFileFlags() {}
+    SourceFileType Type = SourceFileTypeNormal;
+    const char* MacFolder = nullptr; // location inside Mac content folders
   };
   void GetAutoUicOptions(std::vector<std::string>& result,
                          const std::string& config) const;
@@ -757,11 +750,8 @@ private:
 
   struct CompatibleInterfaces : public CompatibleInterfacesBase
   {
-    CompatibleInterfaces()
-      : Done(false)
-    {
-    }
-    bool Done;
+    CompatibleInterfaces() {}
+    bool Done = false;
   };
   mutable std::map<std::string, CompatibleInterfaces> CompatibleInterfacesMap;
 
@@ -774,11 +764,8 @@ private:
 
   struct LinkImplClosure : public std::vector<cmGeneratorTarget const*>
   {
-    LinkImplClosure()
-      : Done(false)
-    {
-    }
-    bool Done;
+    LinkImplClosure() {}
+    bool Done = false;
   };
   mutable std::map<std::string, LinkImplClosure> LinkImplClosureMap;
 
@@ -797,15 +784,10 @@ private:
   // Cache import information from properties for each configuration.
   struct ImportInfo
   {
-    ImportInfo()
-      : NoSOName(false)
-      , Managed(Native)
-      , Multiplicity(0)
-    {
-    }
-    bool NoSOName;
-    ManagedType Managed;
-    unsigned int Multiplicity;
+    ImportInfo() {}
+    bool NoSOName = false;
+    ManagedType Managed = Native;
+    unsigned int Multiplicity = 0;
     std::string Location;
     std::string SOName;
     std::string ImportLibrary;

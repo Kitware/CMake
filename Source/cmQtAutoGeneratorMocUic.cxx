@@ -1130,11 +1130,6 @@ void cmQtAutoGeneratorMocUic::WorkerT::UVProcessFinished()
 cmQtAutoGeneratorMocUic::cmQtAutoGeneratorMocUic()
   : Base_(&FileSys())
   , Moc_(&FileSys())
-  , Stage_(StageT::SETTINGS_READ)
-  , JobsRemain_(0)
-  , JobError_(false)
-  , JobThreadsAbort_(false)
-  , MocAutoFileUpdated_(false)
 {
   // Precompile regular expressions
   Moc_.RegExpInclude.compile(

@@ -475,13 +475,9 @@ private:
   {
     std::string Name;
     std::string EMail;
-    unsigned long Time;
-    long TimeZone;
-    Person()
-      : Time(0)
-      , TimeZone(0)
-    {
-    }
+    unsigned long Time = 0;
+    long TimeZone = 0;
+    Person() {}
   };
 
   void ParsePerson(const char* str, Person& person)

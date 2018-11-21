@@ -33,7 +33,7 @@ public:
 
 private:
   std::string Value;
-  bool Quoted;
+  bool Quoted = false;
 };
 
 #endif

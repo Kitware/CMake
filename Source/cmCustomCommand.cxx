@@ -18,9 +18,6 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
   , Comment(comment ? comment : "")
   , WorkingDirectory(workingDirectory ? workingDirectory : "")
   , HaveComment(comment != nullptr)
-  , EscapeAllowMakeVars(false)
-  , EscapeOldStyle(true)
-  , CommandExpandLists(false)
 {
   if (mf) {
     this->Backtrace = mf->GetBacktrace();

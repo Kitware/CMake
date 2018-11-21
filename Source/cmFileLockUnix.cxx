@@ -9,7 +9,6 @@
 #include <unistd.h>
 
 cmFileLock::cmFileLock()
-  : File(-1)
 {
 }
 

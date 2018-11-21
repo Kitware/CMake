@@ -1675,10 +1675,7 @@ private:
 class cmFileList
 {
 public:
-  cmFileList()
-    : Last(nullptr)
-  {
-  }
+  cmFileList() {}
   virtual ~cmFileList() {}
   cmFileList& operator/(cmFileListGeneratorBase const& rhs)
   {
@@ -1702,7 +1699,7 @@ private:
   virtual bool Visit(std::string const& fullPath) = 0;
   friend class cmFileListGeneratorBase;
   std::unique_ptr<cmFileListGeneratorBase> First;
-  cmFileListGeneratorBase* Last;
+  cmFileListGeneratorBase* Last = nullptr;
 };
 
 class cmFindPackageFileList : public cmFileList

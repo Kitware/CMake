@@ -70,13 +70,10 @@ private:
 
   struct CacheEntryValue
   {
-    bool Initialized;
+    bool Initialized = false;
     std::vector<std::string> Files;
     std::vector<std::pair<std::string, cmListFileBacktrace>> Backtraces;
-    CacheEntryValue()
-      : Initialized(false)
-    {
-    }
+    CacheEntryValue() {}
   };
 
   typedef std::map<CacheEntryKey, CacheEntryValue> CacheEntryMap;

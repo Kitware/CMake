@@ -35,15 +35,10 @@ public:
   struct LinkEntry
   {
     std::string Item;
-    cmGeneratorTarget const* Target;
-    bool IsSharedDep;
-    bool IsFlag;
-    LinkEntry()
-      : Target(nullptr)
-      , IsSharedDep(false)
-      , IsFlag(false)
-    {
-    }
+    cmGeneratorTarget const* Target = nullptr;
+    bool IsSharedDep = false;
+    bool IsFlag = false;
+    LinkEntry() {}
     LinkEntry(LinkEntry const& r)
       : Item(r.Item)
       , Target(r.Target)

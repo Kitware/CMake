@@ -478,11 +478,8 @@ protected:
     cmCustomCommandLines CommandLines;
     std::vector<std::string> Depends;
     std::string WorkingDir;
-    bool UsesTerminal;
-    GlobalTargetInfo()
-      : UsesTerminal(false)
-    {
-    }
+    bool UsesTerminal = false;
+    GlobalTargetInfo() {}
   };
 
   void CreateDefaultGlobalTargets(std::vector<GlobalTargetInfo>& targets);
@@ -608,13 +605,10 @@ private:
   // Cache directory content and target files to be built.
   struct DirectoryContent
   {
-    long LastDiskTime;
+    long LastDiskTime = -1;
     std::set<std::string> All;
     std::set<std::string> Generated;
-    DirectoryContent()
-      : LastDiskTime(-1)
-    {
-    }
+    DirectoryContent() {}
   };
   std::map<std::string, DirectoryContent> DirectoryContentMap;
 

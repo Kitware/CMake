@@ -10,7 +10,6 @@
 #include <utility>
 
 cmInstalledFile::cmInstalledFile()
-  : NameExpression(nullptr)
 {
 }
 

@@ -25,11 +25,7 @@ public:
   class Qrc
   {
   public:
-    Qrc()
-      : Generated(false)
-      , Unique(false)
-    {
-    }
+    Qrc() {}
 
   public:
     std::string LockFile;
@@ -40,8 +36,8 @@ public:
     std::string SettingsFile;
     std::map<std::string, std::string> ConfigSettingsFile;
     std::string RccFile;
-    bool Generated;
-    bool Unique;
+    bool Generated = false;
+    bool Unique = false;
     std::vector<std::string> Options;
     std::vector<std::string> Resources;
   };
