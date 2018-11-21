@@ -137,6 +137,24 @@
     ]
   },
   {
+    "name": "GenerateDebugInformation",
+    "switch": "DEBUG:FULL",
+    "comment": "Optimize for debugging",
+    "value": "true",
+    "flags": [
+      "CaseInsensitive"
+    ]
+  },
+  {
+    "name": "GenerateDebugInformation",
+    "switch": "DEBUG:NONE",
+    "comment": "Produces no debugging information",
+    "value": "false",
+    "flags": [
+      "CaseInsensitive"
+    ]
+  },
+  {
     "name": "SubSystem",
     "switch": "",
     "comment": "Not Set",
