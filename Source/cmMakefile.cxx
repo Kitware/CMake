@@ -2342,7 +2342,7 @@ cmMakefile::AppleSDK cmMakefile::GetAppleSDKType() const
     { "watchsimulator", AppleSDK::WatchSimulator },
   };
 
-  for (auto entry : sdkDatabase) {
+  for (auto const& entry : sdkDatabase) {
     if (sdkRoot.find(entry.name) == 0 ||
         sdkRoot.find(std::string("/") + entry.name) != std::string::npos) {
       return entry.sdk;

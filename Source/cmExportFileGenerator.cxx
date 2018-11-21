@@ -79,7 +79,7 @@ bool cmExportFileGenerator::GenerateImportFile()
     ap->SetCopyIfDifferent(true);
     foutPtr = std::move(ap);
   }
-  if (!foutPtr.get() || !*foutPtr) {
+  if (!foutPtr || !*foutPtr) {
     std::string se = cmSystemTools::GetLastSystemError();
     std::ostringstream e;
     e << "cannot write to file \"" << this->MainImportFile << "\": " << se;

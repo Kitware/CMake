@@ -4379,8 +4379,7 @@ const char* impliedValue<const char*>(const char* /*unused*/)
   return "";
 }
 template <>
-std::string impliedValue<std::string>(
-  std::string /*unused*/) // NOLINT(clang-tidy)
+std::string impliedValue<std::string>(std::string /*unused*/) // NOLINT(*)
 {
   return std::string();
 }
