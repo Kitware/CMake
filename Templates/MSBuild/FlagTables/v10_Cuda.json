@@ -160,5 +160,47 @@
     "flags": [
       "UserFollowing"
     ]
+  },
+  {
+    "name":  "FastMath",
+    "switch": "use_fast_math",
+    "comment": "",
+    "value": "true",
+    "flags": []
+  },
+  {
+    "name":  "FastMath",
+    "switch": "-use_fast_math",
+    "comment": "",
+    "value": "true",
+    "flags": []
+  },
+  {
+    "name":  "GPUDebugInfo",
+    "switch": "G",
+    "comment": "",
+    "value": "true",
+    "flags": []
+  },
+  {
+    "name":  "GPUDebugInfo",
+    "switch": "-device-debug",
+    "comment": "",
+    "value": "true",
+    "flags": []
+  },
+  {
+    "name":  "HostDebugInfo",
+    "switch": "g",
+    "comment": "",
+    "value": "true",
+    "flags": []
+  },
+  {
+    "name":  "HostDebugInfo",
+    "switch": "-debug",
+    "comment": "",
+    "value": "true",
+    "flags": []
   }
 ]
