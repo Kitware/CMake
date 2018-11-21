@@ -1,3 +1,11 @@
+``-S <path-to-source>``
+ Path to root directory of the CMake project to build.
+
+``-B <path-to-build>``
+ Path to directory which CMake will use as the root of build directory.
+
+ If the directory doesn't already exist CMake will make it.
+
 ``-C <initial-cache>``
  Pre-load a script to populate the cache.
 

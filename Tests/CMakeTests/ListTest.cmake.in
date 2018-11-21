@@ -53,6 +53,10 @@ set(result andy brad)
 list(INSERT result -1 bill ken)
 TEST("INSERT result -1 bill ken" "andy;bill;ken;brad")
 
+set(result andy brad)
+list(INSERT result 2 bill ken)
+TEST("INSERT result 2 bill ken" "andy;brad;bill;ken")
+
 set(result andy bill brad ken bob)
 list(REMOVE_ITEM result bob)
 TEST("REMOVE_ITEM result bob" "andy;bill;brad;ken")

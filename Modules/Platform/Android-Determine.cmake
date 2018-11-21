@@ -18,6 +18,9 @@ if(CMAKE_SYSTEM_VERSION EQUAL 1)
   return()
 endif()
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 # If the user provided CMAKE_SYSROOT for us, extract information from it.
 set(_ANDROID_SYSROOT_NDK "")
 set(_ANDROID_SYSROOT_API "")
@@ -371,3 +374,5 @@ endif()
 
 # Report the chosen architecture.
 message(STATUS "Android: Targeting API '${CMAKE_SYSTEM_VERSION}' with architecture '${CMAKE_ANDROID_ARCH}', ABI '${CMAKE_ANDROID_ARCH_ABI}', and processor '${CMAKE_SYSTEM_PROCESSOR}'")
+
+cmake_policy(POP)

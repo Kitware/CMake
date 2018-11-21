@@ -124,7 +124,7 @@ endfunction()
 set(OpenMP_C_CXX_TEST_SOURCE
 "
 #include <omp.h>
-int main() {
+int main(void) {
 #ifdef _OPENMP
   omp_get_max_threads();
   return 0;
@@ -270,6 +270,9 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           break()
         endif()
       endif()
+    else()
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+        "Detecting ${LANG} OpenMP failed with the following output:\n${OpenMP_TRY_COMPILE_OUTPUT}\n\n")
     endif()
     set("${OPENMP_LIB_NAMES_VAR}" "NOTFOUND" PARENT_SCOPE)
     set("${OPENMP_FLAG_VAR}" "NOTFOUND" PARENT_SCOPE)
@@ -291,7 +294,7 @@ const char ompver_str[] = { 'I', 'N', 'F', 'O', ':', 'O', 'p', 'e', 'n', 'M',
                             ('0' + ((_OPENMP/10)%10)),
                             ('0' + ((_OPENMP/1)%10)),
                             ']', '\\0' };
-int main()
+int main(void)
 {
   puts(ompver_str);
   return 0;
@@ -324,7 +327,8 @@ function(_OPENMP_GET_SPEC_DATE LANG SPEC_DATE)
   string(REGEX REPLACE "[-/=+]" "" OPENMP_PLAIN_FLAG "${OPENMP_FLAG}")
   try_compile(OpenMP_SPECTEST_${LANG}_${OPENMP_PLAIN_FLAG} "${CMAKE_BINARY_DIR}" "${_OPENMP_TEST_SRC}"
               CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OpenMP_${LANG}_FLAGS}"
-              COPY_FILE ${BIN_FILE})
+              COPY_FILE ${BIN_FILE}
+              OUTPUT_VARIABLE OpenMP_TRY_COMPILE_OUTPUT)
 
   if(${OpenMP_SPECTEST_${LANG}_${OPENMP_PLAIN_FLAG}})
     file(STRINGS ${BIN_FILE} specstr LIMIT_COUNT 1 REGEX "INFO:OpenMP-date")
@@ -332,6 +336,9 @@ function(_OPENMP_GET_SPEC_DATE LANG SPEC_DATE)
     if("${specstr}" MATCHES "${regex_spec_date}")
       set(${SPEC_DATE} "${CMAKE_MATCH_1}" PARENT_SCOPE)
     endif()
+  else()
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+        "Detecting ${LANG} OpenMP version failed with the following output:\n${OpenMP_TRY_COMPILE_OUTPUT}\n\n")
   endif()
 endfunction()
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -57,7 +57,11 @@ int Curl_parsenetrc(const char *host,
 {
   FILE *file;
   int retcode = 1;
-  int specific_login = (*loginp && **loginp != 0);
+  char *login = *loginp;
+  char *password = *passwordp;
+  bool specific_login = (login && *login != 0);
+  bool login_alloc = FALSE;
+  bool password_alloc = FALSE;
   bool netrc_alloc = FALSE;
   enum host_lookup_state state = NOTHING;
 
@@ -115,7 +119,7 @@ int Curl_parsenetrc(const char *host,
     char *tok;
     char *tok_buf;
     bool done = FALSE;
-    char netrcbuffer[256];
+    char netrcbuffer[4096];
     int  netrcbuffsize = (int)sizeof(netrcbuffer);
 
     while(!done && fgets(netrcbuffer, netrcbuffsize, file)) {
@@ -125,7 +129,7 @@ int Curl_parsenetrc(const char *host,
         continue;
       while(!done && tok) {
 
-        if((*loginp && **loginp) && (*passwordp && **passwordp)) {
+        if((login && *login) && (password && *password)) {
           done = TRUE;
           break;
         }
@@ -158,26 +162,34 @@ int Curl_parsenetrc(const char *host,
           /* we are now parsing sub-keywords concerning "our" host */
           if(state_login) {
             if(specific_login) {
-              state_our_login = strcasecompare(*loginp, tok);
+              state_our_login = strcasecompare(login, tok);
             }
             else {
-              free(*loginp);
-              *loginp = strdup(tok);
-              if(!*loginp) {
+              if(login_alloc) {
+                free(login);
+                login_alloc = FALSE;
+              }
+              login = strdup(tok);
+              if(!login) {
                 retcode = -1; /* allocation failed */
                 goto out;
               }
+              login_alloc = TRUE;
             }
             state_login = 0;
           }
           else if(state_password) {
             if(state_our_login || !specific_login) {
-              free(*passwordp);
-              *passwordp = strdup(tok);
-              if(!*passwordp) {
+              if(password_alloc) {
+                free(password);
+                password_alloc = FALSE;
+              }
+              password = strdup(tok);
+              if(!password) {
                 retcode = -1; /* allocation failed */
                 goto out;
               }
+              password_alloc = TRUE;
             }
             state_password = 0;
           }
@@ -198,6 +210,24 @@ int Curl_parsenetrc(const char *host,
     } /* while fgets() */
 
     out:
+    if(!retcode) {
+      if(login_alloc) {
+        if(*loginp)
+          free(*loginp);
+        *loginp = login;
+      }
+      if(password_alloc) {
+        if(*passwordp)
+          free(*passwordp);
+        *passwordp = password;
+      }
+    }
+    else {
+      if(login_alloc)
+        free(login);
+      if(password_alloc)
+        free(password);
+    }
     fclose(file);
   }
 

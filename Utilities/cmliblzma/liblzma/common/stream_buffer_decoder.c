@@ -15,13 +15,10 @@
 
 extern LZMA_API(lzma_ret)
 lzma_stream_buffer_decode(uint64_t *memlimit, uint32_t flags,
-		lzma_allocator *allocator,
+		const lzma_allocator *allocator,
 		const uint8_t *in, size_t *in_pos, size_t in_size,
 		uint8_t *out, size_t *out_pos, size_t out_size)
 {
-	lzma_next_coder stream_decoder = LZMA_NEXT_CODER_INIT;
-	lzma_ret ret;
-
 	// Sanity checks
 	if (in_pos == NULL || (in == NULL && *in_pos != in_size)
 			|| *in_pos > in_size || out_pos == NULL
@@ -36,7 +33,8 @@ lzma_stream_buffer_decode(uint64_t *memlimit, uint32_t flags,
 	// Initialize the Stream decoder.
 	// TODO: We need something to tell the decoder that it can use the
 	// output buffer as workspace, and thus save significant amount of RAM.
-	ret = lzma_stream_decoder_init(
+	lzma_next_coder stream_decoder = LZMA_NEXT_CODER_INIT;
+	lzma_ret ret = lzma_stream_decoder_init(
 			&stream_decoder, allocator, *memlimit, flags);
 
 	if (ret == LZMA_OK) {

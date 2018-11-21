@@ -392,8 +392,12 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
       std::string local_file = file;
+      bool initialize_cdash_buildid = false;
       if (!cmSystemTools::FileExists(local_file)) {
         local_file = localprefix + "/" + file;
+        // If this file exists within the local Testing directory we assume
+        // that it will be associated with the current build in CDash.
+        initialize_cdash_buildid = true;
       }
       std::string remote_file =
         remoteprefix + cmSystemTools::GetFilenameName(file);
@@ -425,6 +429,33 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
         ((url.find('?') == std::string::npos) ? '?' : '&') +
         "FileName=" + ofile;
 
+      if (initialize_cdash_buildid) {
+        // Provide extra arguments to CDash so that it can initialize and
+        // return a buildid.
+        cmCTestCurl ctest_curl(this->CTest);
+        upload_as += "&build=";
+        upload_as +=
+          ctest_curl.Escape(this->CTest->GetCTestConfiguration("BuildName"));
+        upload_as += "&site=";
+        upload_as +=
+          ctest_curl.Escape(this->CTest->GetCTestConfiguration("Site"));
+        upload_as += "&stamp=";
+        upload_as += ctest_curl.Escape(this->CTest->GetCurrentTag());
+        upload_as += "-";
+        upload_as += ctest_curl.Escape(this->CTest->GetTestModelString());
+        cmCTestScriptHandler* ch = static_cast<cmCTestScriptHandler*>(
+          this->CTest->GetHandler("script"));
+        cmake* cm = ch->GetCMake();
+        if (cm) {
+          const char* subproject =
+            cm->GetState()->GetGlobalProperty("SubProject");
+          if (subproject) {
+            upload_as += "&subproject=";
+            upload_as += ctest_curl.Escape(subproject);
+          }
+        }
+      }
+
       upload_as += "&MD5=";
 
       if (cmSystemTools::IsOn(this->GetOption("InternalTest"))) {
@@ -453,6 +484,10 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
 
       // specify target
       ::curl_easy_setopt(curl, CURLOPT_URL, upload_as.c_str());
+
+      // CURLAUTH_BASIC is default, and here we allow additional methods,
+      // including more secure ones
+      ::curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 
       // now specify which file to upload
       ::curl_easy_setopt(curl, CURLOPT_INFILE, ftpfile);

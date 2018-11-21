@@ -30,6 +30,8 @@ run_ctest_submit(CDashUploadNone CDASH_UPLOAD)
 run_ctest_submit(CDashUploadMissingFile CDASH_UPLOAD bad-upload)
 run_ctest_submit(CDashUploadRetry CDASH_UPLOAD ${CMAKE_CURRENT_LIST_FILE} CDASH_UPLOAD_TYPE foo RETRY_COUNT 2 RETRY_DELAY 1 INTERNAL_TEST_CHECKSUM)
 run_ctest_submit(CDashSubmitQuiet QUIET)
+run_ctest_submit_debug(CDashSubmitVerbose)
+run_ctest_submit_debug(FILESNoBuildId FILES ${CMAKE_CURRENT_LIST_FILE})
 run_ctest_submit_debug(CDashSubmitHeaders HTTPHEADER "Authorization: Bearer asdf")
 run_ctest_submit_debug(CDashUploadHeaders CDASH_UPLOAD ${CMAKE_CURRENT_LIST_FILE} CDASH_UPLOAD_TYPE foo HTTPHEADER "Authorization: Bearer asdf")
 

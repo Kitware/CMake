@@ -15,12 +15,9 @@
 
 extern LZMA_API(lzma_ret)
 lzma_filter_flags_decode(
-		lzma_filter *filter, lzma_allocator *allocator,
+		lzma_filter *filter, const lzma_allocator *allocator,
 		const uint8_t *in, size_t *in_pos, size_t in_size)
 {
-	lzma_vli props_size;
-	lzma_ret ret;
-	
 	// Set the pointer to NULL so the caller can always safely free it.
 	filter->options = NULL;
 
@@ -32,6 +29,7 @@ lzma_filter_flags_decode(
 		return LZMA_DATA_ERROR;
 
 	// Size of Properties
+	lzma_vli props_size;
 	return_if_error(lzma_vli_decode(&props_size, NULL,
 			in, in_pos, in_size));
 
@@ -39,7 +37,7 @@ lzma_filter_flags_decode(
 	if (in_size - *in_pos < props_size)
 		return LZMA_DATA_ERROR;
 
-	ret = lzma_properties_decode(
+	const lzma_ret ret = lzma_properties_decode(
 			filter, allocator, in + *in_pos, props_size);
 
 	*in_pos += props_size;

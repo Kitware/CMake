@@ -140,7 +140,8 @@ const char* cmState::GetCacheEntryValue(std::string const& key) const
   return e->Value.c_str();
 }
 
-const char* cmState::GetInitializedCacheValue(std::string const& key) const
+const std::string* cmState::GetInitializedCacheValue(
+  std::string const& key) const
 {
   return this->CacheManager->GetInitializedCacheValue(key);
 }
@@ -267,6 +268,7 @@ cmStateSnapshot cmState::Reset()
 {
   this->GlobalProperties.clear();
   this->PropertyDefinitions.clear();
+  this->GlobVerificationManager->Reset();
 
   cmStateDetail::PositionType pos = this->SnapshotData.Truncate();
   this->ExecutionListFiles.Truncate();
@@ -280,6 +282,10 @@ cmStateSnapshot cmState::Reset()
     it->CompileDefinitionsBacktraces.clear();
     it->CompileOptions.clear();
     it->CompileOptionsBacktraces.clear();
+    it->LinkOptions.clear();
+    it->LinkOptionsBacktraces.clear();
+    it->LinkDirectories.clear();
+    it->LinkDirectoriesBacktraces.clear();
     it->DirectoryEnd = pos;
     it->NormalTargetNames.clear();
     it->Properties.clear();
@@ -295,9 +301,9 @@ cmStateSnapshot cmState::Reset()
 
   {
     std::string srcDir =
-      cmDefinitions::Get("CMAKE_SOURCE_DIR", pos->Vars, pos->Root);
+      *cmDefinitions::Get("CMAKE_SOURCE_DIR", pos->Vars, pos->Root);
     std::string binDir =
-      cmDefinitions::Get("CMAKE_BINARY_DIR", pos->Vars, pos->Root);
+      *cmDefinitions::Get("CMAKE_BINARY_DIR", pos->Vars, pos->Root);
     this->VarTree.Clear();
     pos->Vars = this->VarTree.Push(this->VarTree.Root());
     pos->Parent = this->VarTree.Root();
@@ -500,6 +506,16 @@ std::vector<std::string> cmState::GetCommandNames() const
   return commandNames;
 }
 
+void cmState::RemoveBuiltinCommand(std::string const& name)
+{
+  assert(name == cmSystemTools::LowerCase(name));
+  std::map<std::string, cmCommand*>::iterator i =
+    this->BuiltinCommands.find(name);
+  assert(i != this->BuiltinCommands.end());
+  delete i->second;
+  this->BuiltinCommands.erase(i);
+}
+
 void cmState::RemoveUserDefinedCommands()
 {
   cmDeleteAll(this->ScriptedCommands);
@@ -521,20 +537,20 @@ const char* cmState::GetGlobalProperty(const std::string& prop)
 {
   if (prop == "CACHE_VARIABLES") {
     std::vector<std::string> cacheKeys = this->GetCacheEntryKeys();
-    this->SetGlobalProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";").c_str(), cmListFileBacktrace::Empty());
+    this->SetGlobalProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";").c_str(), cmListFileBacktrace());
   } else if (prop == "COMMANDS") {
     std::vector<std::string> commands = this->GetCommandNames();
-    this->SetGlobalProperty("COMMANDS", cmJoin(commands, ";").c_str(), cmListFileBacktrace::Empty());
+    this->SetGlobalProperty("COMMANDS", cmJoin(commands, ";").c_str(), cmListFileBacktrace());
   } else if (prop == "IN_TRY_COMPILE") {
     this->SetGlobalProperty("IN_TRY_COMPILE",
-                            this->IsInTryCompile ? "1" : "0", cmListFileBacktrace::Empty());
+                            this->IsInTryCompile ? "1" : "0", cmListFileBacktrace());
   } else if (prop == "GENERATOR_IS_MULTI_CONFIG") {
     this->SetGlobalProperty("GENERATOR_IS_MULTI_CONFIG",
-                            this->IsGeneratorMultiConfig ? "1" : "0", cmListFileBacktrace::Empty());
+                            this->IsGeneratorMultiConfig ? "1" : "0", cmListFileBacktrace());
   } else if (prop == "ENABLED_LANGUAGES") {
     std::string langs;
     langs = cmJoin(this->EnabledLanguages, ";");
-    this->SetGlobalProperty("ENABLED_LANGUAGES", langs.c_str(), cmListFileBacktrace::Empty());
+    this->SetGlobalProperty("ENABLED_LANGUAGES", langs.c_str(), cmListFileBacktrace());
   }
 #define STRING_LIST_ELEMENT(F) ";" #F
   if (prop == "CMAKE_C_KNOWN_FEATURES") {
@@ -659,6 +675,8 @@ cmStateSnapshot cmState::CreateBaseSnapshot()
   pos->IncludeDirectoryPosition = 0;
   pos->CompileDefinitionsPosition = 0;
   pos->CompileOptionsPosition = 0;
+  pos->LinkOptionsPosition = 0;
+  pos->LinkDirectoriesPosition = 0;
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->Policies = this->PolicyStack.Root();
   pos->PolicyRoot = this->PolicyStack.Root();
@@ -810,6 +828,10 @@ cmStateSnapshot cmState::Pop(cmStateSnapshot const& originSnapshot)
     prevPos->BuildSystemDirectory->CompileDefinitions.size();
   prevPos->CompileOptionsPosition =
     prevPos->BuildSystemDirectory->CompileOptions.size();
+  prevPos->LinkOptionsPosition =
+    prevPos->BuildSystemDirectory->LinkOptions.size();
+  prevPos->LinkDirectoriesPosition =
+    prevPos->BuildSystemDirectory->LinkDirectories.size();
   prevPos->BuildSystemDirectory->DirectoryEnd = prevPos;
 
   if (!pos->Keep && this->SnapshotData.IsLast(pos)) {

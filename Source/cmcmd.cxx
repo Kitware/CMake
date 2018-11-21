@@ -24,6 +24,7 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32)
 #  include "bindexplib.h"
+#  include "cmsys/ConsoleBuf.hxx"
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32) && !defined(__CYGWIN__)
@@ -107,6 +108,7 @@ void CMakeCommandUsage(const char* program)
     << "  time command [args...]    - run command and display elapsed time\n"
     << "  touch file                - touch a file.\n"
     << "  touch_nocreate file       - touch a file but do not create it.\n"
+    << "  create_symlink old new    - create a symbolic link new -> old\n"
 #if defined(_WIN32) && !defined(__CYGWIN__)
     << "Available on Windows only:\n"
     << "  delete_regv key           - delete registry value\n"
@@ -115,9 +117,6 @@ void CMakeCommandUsage(const char* program)
     << "  env_vs9_wince sdkname     - displays a batch file which sets the "
        "environment for the provided Windows CE SDK installed in VS2008\n"
     << "  write_regv key value      - write registry value\n"
-#else
-    << "Available on UNIX only:\n"
-    << "  create_symlink old new    - create a symbolic link new -> old\n"
 #endif
     ;
   /* clang-format on */
@@ -867,9 +866,6 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         return 1;
       }
       if (!cmSystemTools::CreateSymlink(args[2], args[3])) {
-        std::string emsg = cmSystemTools::GetLastSystemError();
-        std::cerr << "failed to create symbolic link '" << destinationFileName
-                  << "': " << emsg << "\n";
         return 1;
       }
       return 0;
@@ -916,8 +912,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         if (args.size() >= 9 && args[8].length() >= 8 &&
             args[8].substr(0, 8) == "--color=") {
           // Enable or disable color based on the switch value.
-          color = (args[8].size() == 8 ||
-                   cmSystemTools::IsOn(args[8].substr(8).c_str()));
+          color =
+            (args[8].size() == 8 || cmSystemTools::IsOn(args[8].substr(8)));
         }
       } else {
         // Support older signature for existing makefiles:
@@ -1353,7 +1349,7 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
       // Enable or disable color based on the switch value.
       std::string value = args[i].substr(9);
       if (!value.empty()) {
-        enabled = cmSystemTools::IsOn(value.c_str());
+        enabled = cmSystemTools::IsOn(value);
       }
     } else if (cmHasLiteralPrefix(args[i], "--progress-dir=")) {
       progressDir = args[i].substr(15);
@@ -1406,7 +1402,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
   bool verbose = false;
   if (args.size() >= 4) {
     if (args[3].find("--verbose=") == 0) {
-      if (!cmSystemTools::IsOff(args[3].substr(10).c_str())) {
+      if (!cmSystemTools::IsOff(args[3].substr(10))) {
         verbose = true;
       }
     }
@@ -1545,6 +1541,15 @@ private:
 // still works.
 int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type)
 {
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+  // Replace streambuf so we output in the system codepage. CMake is set up
+  // to output in Unicode (see SetUTF8Pipes) but the Visual Studio linker
+  // outputs using the system codepage so we need to change behavior when
+  // we run the link command.
+  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
+  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
+#endif
+
   if (args.size() < 2) {
     return -1;
   }
@@ -1775,10 +1780,11 @@ int cmVSLink::LinkIncremental()
     if (!fout) {
       return -1;
     }
-	// Insert a pragma statement to specify utf-8 encoding.
-    fout << "#pragma code_page(65001)";
-    fout << this->Type << " /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ "
-                          "24 /* RT_MANIFEST */ \""
+    // Insert a pragma statement to specify utf-8 encoding.
+    fout << "#pragma code_page(65001)\n";
+    fout << this->Type
+         << " /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ "
+            "24 /* RT_MANIFEST */ \""
          << absManifestFile << "\"";
   }
 

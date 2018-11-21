@@ -118,7 +118,7 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
   if (this->GetCurrentBinaryDirectory() != this->GetSourceDirectory()) {
     if (!cmSystemTools::MakeDirectory(this->GetCurrentBinaryDirectory())) {
       cmSystemTools::Error("Error creating directory ",
-                           this->GetCurrentBinaryDirectory());
+                           this->GetCurrentBinaryDirectory().c_str());
     }
   }
 
@@ -260,7 +260,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   std::string comment = "Building Custom Rule ";
   comment += makefileIn;
   std::string args;
-  args = "-H";
+  args = "-S";
   args += this->GetSourceDirectory();
   commandLine.push_back(args);
   args = "-B";
@@ -665,11 +665,11 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
       std::string baseFlagVar = "CMAKE_";
       baseFlagVar += langForClCompile;
       baseFlagVar += "_FLAGS";
-      flags = this->Makefile->GetRequiredDefinition(baseFlagVar.c_str());
+      flags = this->Makefile->GetRequiredDefinition(baseFlagVar);
       std::string flagVar =
         baseFlagVar + std::string("_") + cmSystemTools::UpperCase(configName);
       flags += " ";
-      flags += this->Makefile->GetRequiredDefinition(flagVar.c_str());
+      flags += this->Makefile->GetRequiredDefinition(flagVar);
     }
     // set the correct language
     if (linkLanguage == "C") {
@@ -712,8 +712,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   targetOptions.FixExceptionHandlingDefault();
   std::string asmLocation = configName + "/";
   targetOptions.AddFlag("AssemblerListingLocation", asmLocation);
-  targetOptions.Parse(flags.c_str());
-  targetOptions.Parse(defineFlags.c_str());
+  targetOptions.Parse(flags);
+  targetOptions.Parse(defineFlags);
   targetOptions.ParseFinish();
   if (!langForClCompile.empty()) {
     std::vector<std::string> targetDefines;
@@ -931,8 +931,7 @@ std::string cmLocalVisualStudio7Generator::GetBuildTypeLinkerFlags(
     rootLinkerFlags + "_" + configTypeUpper;
 
   std::string extraLinkOptionsBuildType =
-    this->Makefile->GetRequiredDefinition(
-      extraLinkOptionsBuildTypeDef.c_str());
+    this->Makefile->GetRequiredDefinition(extraLinkOptionsBuildTypeDef);
 
   return extraLinkOptionsBuildType;
 }
@@ -977,13 +976,20 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
     extraLinkOptions += " ";
     extraLinkOptions += targetLinkFlags;
   }
+
+  std::vector<std::string> opts;
+  target->GetLinkOptions(opts, configName,
+                         target->GetLinkerLanguage(configName));
+  // LINK_OPTIONS are escaped.
+  this->AppendCompileOptions(extraLinkOptions, opts);
+
   Options linkOptions(this, Options::Linker);
   if (this->FortranProject) {
     linkOptions.AddTable(cmLocalVisualStudio7GeneratorFortranLinkFlagTable);
   }
   linkOptions.AddTable(cmLocalVisualStudio7GeneratorLinkFlagTable);
 
-  linkOptions.Parse(extraLinkOptions.c_str());
+  linkOptions.Parse(extraLinkOptions);
   cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
     target->GetModuleDefinitionInfo(configName);
   if (mdi && !mdi->DefFile.empty()) {
@@ -1031,7 +1037,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         }
       }
       std::string libflags;
-      this->GetStaticLibraryFlags(libflags, configTypeUpper, target);
+      this->GetStaticLibraryFlags(libflags, configTypeUpper,
+                                  target->GetLinkerLanguage(configName),
+                                  target);
       if (!libflags.empty()) {
         fout << "\t\t\t\tAdditionalOptions=\"" << libflags << "\"\n";
       }
@@ -1074,7 +1082,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       // Use the NOINHERIT macro to avoid getting VS project default
       // libraries which may be set by the user to something bad.
       fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
-           << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
+           << this->Makefile->GetSafeDefinition(standardLibsVar);
       if (this->FortranProject) {
         this->Internal->OutputObjects(fout, target, configName, " ");
       }
@@ -1159,7 +1167,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       // Use the NOINHERIT macro to avoid getting VS project default
       // libraries which may be set by the user to something bad.
       fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
-           << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
+           << this->Makefile->GetSafeDefinition(standardLibsVar);
       if (this->FortranProject) {
         this->Internal->OutputObjects(fout, target, configName, " ");
       }
@@ -1226,30 +1234,56 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
   }
 }
 
+static std::string cmLocalVisualStudio7GeneratorEscapeForXML(
+  const std::string& s)
+{
+  std::string ret = s;
+  cmSystemTools::ReplaceString(ret, "&", "&amp;");
+  cmSystemTools::ReplaceString(ret, "\"", "&quot;");
+  cmSystemTools::ReplaceString(ret, "<", "&lt;");
+  cmSystemTools::ReplaceString(ret, ">", "&gt;");
+  cmSystemTools::ReplaceString(ret, "\n", "&#x0D;&#x0A;");
+  return ret;
+}
+
+static std::string GetEscapedPropertyIfValueNotNULL(const char* propertyValue)
+{
+  return propertyValue == nullptr
+    ? std::string()
+    : cmLocalVisualStudio7GeneratorEscapeForXML(propertyValue);
+}
+
 void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
   std::ostream& fout, std::string const& config, cmGeneratorTarget* target)
 {
   if (this->WindowsCEProject) {
-    if (const char* dir = target->GetProperty("DEPLOYMENT_REMOTE_DIRECTORY")) {
-      /* clang-format off */
-      fout <<
-        "\t\t\t<DeploymentTool\n"
-        "\t\t\t\tForceDirty=\"-1\"\n"
-        "\t\t\t\tRemoteDirectory=\"" << this->EscapeForXML(dir) << "\"\n"
-        "\t\t\t\tRegisterOutput=\"0\"\n"
-        "\t\t\t\tAdditionalFiles=\"\"/>\n"
-        ;
-      /* clang-format on */
+    const char* dir = target->GetProperty("DEPLOYMENT_REMOTE_DIRECTORY");
+    const char* additionalFiles =
+      target->GetProperty("DEPLOYMENT_ADDITIONAL_FILES");
+
+    if (dir == nullptr && additionalFiles == nullptr) {
+      return;
+    }
+
+    fout << "\t\t\t<DeploymentTool\n"
+            "\t\t\t\tForceDirty=\"-1\"\n"
+            "\t\t\t\tRemoteDirectory=\""
+         << GetEscapedPropertyIfValueNotNULL(dir)
+         << "\"\n"
+            "\t\t\t\tRegisterOutput=\"0\"\n"
+            "\t\t\t\tAdditionalFiles=\""
+         << GetEscapedPropertyIfValueNotNULL(additionalFiles) << "\"/>\n";
+
+    if (dir != nullptr) {
       std::string const exe =
         dir + std::string("\\") + target->GetFullName(config);
-      /* clang-format off */
-      fout <<
-        "\t\t\t<DebuggerTool\n"
-        "\t\t\t\tRemoteExecutable=\"" << this->EscapeForXML(exe) << "\"\n"
-        "\t\t\t\tArguments=\"\"\n"
-        "\t\t\t/>\n"
-        ;
-      /* clang-format on */
+
+      fout << "\t\t\t<DebuggerTool\n"
+              "\t\t\t\tRemoteExecutable=\""
+           << this->EscapeForXML(exe)
+           << "\"\n"
+              "\t\t\t\tArguments=\"\"\n"
+              "\t\t\t/>\n";
     }
   }
 }
@@ -1463,8 +1497,7 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
       lang = sourceLang;
     }
 
-    cmGeneratorExpressionInterpreter genexInterpreter(lg, gt, *i,
-                                                      gt->GetName(), lang);
+    cmGeneratorExpressionInterpreter genexInterpreter(lg, *i, gt, lang);
 
     bool needfc = false;
     if (!objectName.empty()) {
@@ -1702,7 +1735,7 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
               table = cmLocalVisualStudio7GeneratorFortranFlagTable;
             }
             Options fileOptions(this, tool, table, gg->ExtraFlagTable);
-            fileOptions.Parse(fc.CompileFlags.c_str());
+            fileOptions.Parse(fc.CompileFlags);
             fileOptions.AddDefines(fc.CompileDefs);
             fileOptions.AddDefines(fc.CompileDefsConfig);
             // validate source level include directories
@@ -2047,17 +2080,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFooter(
 
   fout << "\t</Globals>\n"
        << "</VisualStudioProject>\n";
-}
-
-std::string cmLocalVisualStudio7GeneratorEscapeForXML(const std::string& s)
-{
-  std::string ret = s;
-  cmSystemTools::ReplaceString(ret, "&", "&amp;");
-  cmSystemTools::ReplaceString(ret, "\"", "&quot;");
-  cmSystemTools::ReplaceString(ret, "<", "&lt;");
-  cmSystemTools::ReplaceString(ret, ">", "&gt;");
-  cmSystemTools::ReplaceString(ret, "\n", "&#x0D;&#x0A;");
-  return ret;
 }
 
 std::string cmLocalVisualStudio7Generator::EscapeForXML(const std::string& s)

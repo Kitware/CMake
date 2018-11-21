@@ -36,7 +36,9 @@ To contribute patches:
 #. Push a topic branch to a personal repository fork on GitLab.
 #. Create a GitLab Merge Request targeting the upstream ``master`` branch
    (even if the change is intended for merge to the ``release`` branch).
-   Check the box to allow edits from maintainers.
+   Check the box labelled "Allow commits from members who can merge to the
+   target branch".  This will allow maintainers to make minor edits on your
+   behalf.
 
 The merge request will enter the `CMake Review Process`_ for consideration.
 
@@ -46,6 +48,20 @@ The merge request will enter the `CMake Review Process`_ for consideration.
 .. _`CMake Source Code Guide`: Help/dev/source.rst
 .. _`commit messages`: Help/dev/review.rst#commit-messages
 .. _`CMake Review Process`: Help/dev/review.rst
+
+CMake Dashboard Client
+======================
+
+The *integration testing* step of the `CMake Review Process`_ uses a set of
+testing machines that follow an integration branch on their own schedule to
+drive testing and submit results to the `CMake CDash Page`_.  Anyone is
+welcome to provide testing machines in order to help keep support for their
+platforms working.
+
+See documentation on `CMake Testing Process`_ for more information.
+
+.. _`CMake CDash Page`: https://open.cdash.org/index.php?project=CMake
+.. _`CMake Testing Process`: Help/dev/testing.rst
 
 License
 =======

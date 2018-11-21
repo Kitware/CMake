@@ -94,11 +94,11 @@ void QCMake::setBinaryDirectory(const QString& _dir)
     }
     const char* gen = state->GetCacheEntryValue("CMAKE_GENERATOR");
     if (gen) {
-      const char* extraGen =
+      const std::string* extraGen =
         state->GetInitializedCacheValue("CMAKE_EXTRA_GENERATOR");
       std::string curGen =
         cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
-          gen, extraGen ? extraGen : "");
+          gen, extraGen ? *extraGen : "");
       this->setGenerator(QString::fromLocal8Bit(curGen.c_str()));
     }
 

@@ -178,7 +178,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   // Store the list of modules provided by this target.
   std::string fiName = this->TargetDirectory;
   fiName += "/fortran.internal";
-  cmGeneratedFileStream fiStream(fiName.c_str());
+  cmGeneratedFileStream fiStream(fiName);
   fiStream << "# The fortran modules provided by this target.\n";
   fiStream << "provides\n";
   std::set<std::string> const& provides = this->Internal->TargetProvides;
@@ -190,7 +190,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   if (!provides.empty()) {
     std::string fcName = this->TargetDirectory;
     fcName += "/cmake_clean_Fortran.cmake";
-    cmGeneratedFileStream fcStream(fcName.c_str());
+    cmGeneratedFileStream fcStream(fcName);
     fcStream << "# Remove fortran modules provided by this target.\n";
     fcStream << "FILE(REMOVE";
     std::string currentBinDir =

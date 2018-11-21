@@ -368,6 +368,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(CxxSubdirC CxxSubdirC)
   ADD_TEST_MACRO(IPO COnly/COnly)
   ADD_TEST_MACRO(OutDir runtime/OutDir)
+  ADD_TEST_MACRO(OutName exe.OutName.exe)
   ADD_TEST_MACRO(ObjectLibrary UseCshared)
   ADD_TEST_MACRO(NewlineArgs NewlineArgs)
   ADD_TEST_MACRO(SetLang SetLang)
@@ -396,6 +397,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(CompatibleInterface CompatibleInterface)
   ADD_TEST_MACRO(AliasTarget AliasTarget)
   ADD_TEST_MACRO(StagingPrefix StagingPrefix)
+  ADD_TEST_MACRO(ImportedSameName ImportedSameName)
   ADD_TEST_MACRO(InterfaceLibrary InterfaceLibrary)
   if (CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
     set(ConfigSources_BUILD_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
@@ -868,33 +870,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     --build-options ${build_options}
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BuildDepends")
-
-  set(SimpleInstallInstallDir
-    "${CMake_BINARY_DIR}/Tests/SimpleInstall/InstallDirectory")
-  add_test(SimpleInstall ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/SimpleInstall"
-    "${CMake_BINARY_DIR}/Tests/SimpleInstall"
-    ${build_generator_args}
-    --build-project TestSimpleInstall
-    --build-two-config
-    --build-options ${build_options}
-    "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
-    "-DCTEST_TEST_CPACK:BOOL=${CTEST_TEST_CPACK}"
-    --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstExe)
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/SimpleInstall")
-  add_test(SimpleInstall-Stage2 ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/SimpleInstallS2"
-    "${CMake_BINARY_DIR}/Tests/SimpleInstallS2"
-    ${build_generator_args}
-    --build-project TestSimpleInstall
-    --build-two-config
-    --build-options ${build_options}
-    "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
-    "-DSTAGE2:BOOL=1"
-    --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstExeS2)
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/SimpleInstallS2")
 
   set(MissingInstallInstallDir
     "${CMake_BINARY_DIR}/Tests/MissingInstall/InstallDirectory")
@@ -1821,7 +1796,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   set_tests_properties ( testdriver2 PROPERTIES DEPENDS testdriver1)
   set_tests_properties ( testdriver3 PROPERTIES DEPENDS testdriver2)
   set_tests_properties ( linkorder2 PROPERTIES DEPENDS linkorder1)
-  set_tests_properties ( SimpleInstall-Stage2 PROPERTIES DEPENDS SimpleInstall)
 
   # Test static linking on toolchains known to support it.
   if(CMAKE_C_COMPILER_ID STREQUAL "GNU"
@@ -1939,6 +1913,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         if(ov MATCHES "VCExpress")
           message(STATUS
             ".vcproj file association indicates VCExpress, avoiding MFC test")
+          set(CTEST_RUN_MFC OFF)
+        elseif( NOT ov )
+          message(STATUS
+            ".vcproj has no file association, avoiding MFC test")
           set(CTEST_RUN_MFC OFF)
         endif()
       endif()
@@ -2129,7 +2107,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     set(reg_vs10 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0;InstallDir]")
     set(reg_vs11 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0;InstallDir]")
     set(reg_vs12 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\12.0;InstallDir]")
-    set(reg_vs14 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots;KitsRoot10]")
+    set(reg_vs14 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\14.0;InstallDir]")
     set(reg_ws80 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v8.0;InstallationFolder]")
     set(reg_ws81 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v8.1;InstallationFolder]")
     set(reg_ws10_0 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\14.0\\Setup\\Build Tools for Windows 10;srcPath]")
@@ -2150,12 +2128,13 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
   get_filename_component(ntver "[HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion;CurrentVersion]" NAME)
   if(WIN32 AND ntver VERSION_GREATER 6.1) # Windows >= 8.0
-    macro(add_test_VSWinStorePhone name generator systemName systemVersion)
+    macro(add_test_VSWinStorePhone name generator systemName systemVersion architecture)
       add_test(NAME VSWinStorePhone.${name} COMMAND ${CMAKE_CTEST_COMMAND}
         --build-and-test
         "${CMake_SOURCE_DIR}/Tests/VSWinStorePhone"
         "${CMake_BINARY_DIR}/Tests/VSWinStorePhone/${name}"
         --build-generator "${generator}"
+        --build-generator-platform "${architecture}"
         --build-project VSWinStorePhone
         --build-config $<CONFIGURATION>
         --build-options -DCMAKE_SYSTEM_NAME=${systemName}
@@ -2165,14 +2144,14 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endmacro()
 
     if(vs11 AND ws80)
-      add_test_VSWinStorePhone(vs11-store80-X86 "Visual Studio 11 2012" WindowsStore 8.0)
-      add_test_VSWinStorePhone(vs11-store80-ARM "Visual Studio 11 2012 ARM" WindowsStore 8.0)
-      add_test_VSWinStorePhone(vs11-store80-X64 "Visual Studio 11 2012 Win64" WindowsStore 8.0)
+      add_test_VSWinStorePhone(vs11-store80-X86 "Visual Studio 11 2012" WindowsStore 8.0 Win32)
+      add_test_VSWinStorePhone(vs11-store80-ARM "Visual Studio 11 2012" WindowsStore 8.0 ARM)
+      add_test_VSWinStorePhone(vs11-store80-X64 "Visual Studio 11 2012" WindowsStore 8.0 x64)
     endif()
     if(vs12 AND ws81)
-      add_test_VSWinStorePhone(vs12-store81-X86 "Visual Studio 12 2013" WindowsStore 8.1)
-      add_test_VSWinStorePhone(vs12-store81-ARM "Visual Studio 12 2013 ARM" WindowsStore 8.1)
-      add_test_VSWinStorePhone(vs12-store81-X64 "Visual Studio 12 2013 Win64" WindowsStore 8.1)
+      add_test_VSWinStorePhone(vs12-store81-X86 "Visual Studio 12 2013" WindowsStore 8.1 Win32)
+      add_test_VSWinStorePhone(vs12-store81-ARM "Visual Studio 12 2013" WindowsStore 8.1 ARM)
+      add_test_VSWinStorePhone(vs12-store81-X64 "Visual Studio 12 2013" WindowsStore 8.1 x64)
 
       add_test(NAME VSXaml COMMAND ${CMAKE_CTEST_COMMAND}
         --build-and-test
@@ -2185,18 +2164,24 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
                           -DCMAKE_SYSTEM_VERSION=8.1
         )
     endif()
+    if(CMake_TEST_VSWinStorePhone_VS_2017 AND ws10_0)
+      add_test_VSWinStorePhone(vs15-store10_0-X86 "Visual Studio 15 2017" WindowsStore 10.0 Win32)
+      add_test_VSWinStorePhone(vs15-store10_0-ARM "Visual Studio 15 2017" WindowsStore 10.0 ARM)
+      add_test_VSWinStorePhone(vs15-store10_0-X64 "Visual Studio 15 2017" WindowsStore 10.0 x64)
+      add_test_VSWinStorePhone(vs15-store10_0-ARM64 "Visual Studio 15 2017" WindowsStore 10.0 ARM64)
+    endif()
     if(vs14 AND ws10_0)
-      add_test_VSWinStorePhone(vs14-store10_0-X86 "Visual Studio 14 2015" WindowsStore 10.0)
-      add_test_VSWinStorePhone(vs14-store10_0-ARM "Visual Studio 14 2015 ARM" WindowsStore 10.0)
-      add_test_VSWinStorePhone(vs14-store10_0-X64 "Visual Studio 14 2015 Win64" WindowsStore 10.0)
+      add_test_VSWinStorePhone(vs14-store10_0-X86 "Visual Studio 14 2015" WindowsStore 10.0 Win32)
+      add_test_VSWinStorePhone(vs14-store10_0-ARM "Visual Studio 14 2015" WindowsStore 10.0 ARM)
+      add_test_VSWinStorePhone(vs14-store10_0-X64 "Visual Studio 14 2015" WindowsStore 10.0 x64)
     endif()
     if(vs11 AND wp80)
-      add_test_VSWinStorePhone(vs11-phone80-X86 "Visual Studio 11 2012" WindowsPhone 8.0)
-      add_test_VSWinStorePhone(vs11-phone80-ARM "Visual Studio 11 2012 ARM" WindowsPhone 8.0)
+      add_test_VSWinStorePhone(vs11-phone80-X86 "Visual Studio 11 2012" WindowsPhone 8.0 Win32)
+      add_test_VSWinStorePhone(vs11-phone80-ARM "Visual Studio 11 2012" WindowsPhone 8.0 ARM)
     endif()
     if(vs12 AND wp81)
-      add_test_VSWinStorePhone(vs12-phone81-X86 "Visual Studio 12 2013" WindowsPhone 8.1)
-      add_test_VSWinStorePhone(vs12-phone81-ARM "Visual Studio 12 2013 ARM" WindowsPhone 8.1)
+      add_test_VSWinStorePhone(vs12-phone81-X86 "Visual Studio 12 2013" WindowsPhone 8.1 Win32)
+      add_test_VSWinStorePhone(vs12-phone81-ARM "Visual Studio 12 2013" WindowsPhone 8.1 ARM)
     endif()
   endif()
 
@@ -2256,7 +2241,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         --build-generator "Green Hills MULTI"
         --build-project ReturnNum
         --build-config $<CONFIGURATION>
-        --build-options -DGHS_PRIMARY_TARGET="arm_integrity.tgt"
+        --build-options -DGHS_PRIMARY_TARGET=arm_integrity.tgt
         -DGHS_BSP_NAME="simarm"
         )
   endif ()
@@ -2843,6 +2828,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   ADD_TEST_MACRO(CMakeCommands.target_include_directories target_include_directories)
   ADD_TEST_MACRO(CMakeCommands.target_compile_definitions target_compile_definitions)
   ADD_TEST_MACRO(CMakeCommands.target_compile_options target_compile_options)
+  ADD_TEST_MACRO(CMakeCommands.target_sources target_sources)
+
+  ADD_TEST_MACRO(CMakeCommands.add_link_options)
+  ADD_TEST_MACRO(CMakeCommands.target_link_options)
+  ADD_TEST_MACRO(CMakeCommands.link_directories)
+  ADD_TEST_MACRO(CMakeCommands.target_link_directories)
 
   # The cmake server-mode test requires python for a simple client.
   find_package(PythonInterp QUIET)
@@ -3436,10 +3427,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       COMMENT "Removing test build directories."
       )
   endif()
-
-  add_test(NAME CMakeWizardTest COMMAND cmake -i)
-  set_property(TEST CMakeWizardTest PROPERTY PASS_REGULAR_EXPRESSION
-    "The \"cmake -i\" wizard mode is no longer supported.")
 
   # Define a set of "contract" tests, each activated by a cache entry
   # named "CMake_TEST_CONTRACT_<project>".  For each Contract test,

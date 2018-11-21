@@ -13,6 +13,8 @@
 # libraries and nodekits.  Please see FindOpenSceneGraph.cmake for full
 # documentation.
 
+include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+
 #
 # OSG_FIND_PATH
 #
@@ -39,7 +41,7 @@ endfunction()
 function(OSG_FIND_LIBRARY module library)
    string(TOUPPER ${module} module_uc)
 
-   find_library(${module_uc}_LIBRARY
+   find_library(${module_uc}_LIBRARY_RELEASE
        NAMES ${library}
        HINTS
             ENV ${module_uc}_DIR
@@ -63,18 +65,12 @@ function(OSG_FIND_LIBRARY module library)
        PATH_SUFFIXES lib
     )
 
-   if(NOT ${module_uc}_LIBRARY_DEBUG)
-      # They don't have a debug library
-      set(${module_uc}_LIBRARY_DEBUG ${${module_uc}_LIBRARY} PARENT_SCOPE)
-      set(${module_uc}_LIBRARIES ${${module_uc}_LIBRARY} PARENT_SCOPE)
-   else()
-      # They really have a FOO_LIBRARY_DEBUG
-      set(${module_uc}_LIBRARIES
-          optimized ${${module_uc}_LIBRARY}
-          debug ${${module_uc}_LIBRARY_DEBUG}
-          PARENT_SCOPE
-      )
-   endif()
+   select_library_configurations(${module_uc})
+
+   # the variables set by select_library_configurations go out of scope
+   # here, so we need to set them again
+   set(${module_uc}_LIBRARY ${${module_uc}_LIBRARY} PARENT_SCOPE)
+   set(${module_uc}_LIBRARIES ${${module_uc}_LIBRARIES} PARENT_SCOPE)
 endfunction()
 
 #

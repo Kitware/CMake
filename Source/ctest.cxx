@@ -27,6 +27,7 @@ static const char* cmDocumentationUsage[][2] = { { nullptr,
 
 static const char* cmDocumentationOptions[][2] = {
   { "-C <cfg>, --build-config <cfg>", "Choose configuration to test." },
+  { "--progress", "Enable short progress output from tests." },
   { "-V,--verbose", "Enable verbose output from tests." },
   { "-VV,--extra-verbose", "Enable more verbose output from tests." },
   { "--debug", "Displaying more verbose internals of CTest." },

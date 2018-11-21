@@ -29,7 +29,7 @@
 @SIZE_OF_UNSIGNED_CODE@
 @SIZE_OF_UNSIGNED_LONG_CODE@
 @SIZE_OF_UNSIGNED_LONG_LONG_CODE@
-@SIZE_OF_SIZE_T_CODE@
+@SIZEOF_SIZE_T_CODE@
 
 /*
  * If we lack int64_t, define it to the first of __int64, int, long, and long long
@@ -179,32 +179,6 @@ typedef uint64_t uintmax_t;
 
 
 #cmakedefine uintptr_t @uintptr_t@
-
-
-#cmakedefine HAVE_RESTRICT
-#cmakedefine HAVE___RESTRICT
-
-#cmakedefine HAVE_INLINE
-#cmakedefine HAVE___INLINE
-
-#ifndef HAVE_RESTRICT
-#  ifdef HAVE___RESTRICT
-#    define LZMA_RESTRICT __restrict
-#  else
-#    define LZMA_RESTRICT
-#  endif
-#else
-#  define LZMA_RESTRICT restrict
-#endif /* HAVE_RESTRICT */
-
-#ifndef HAVE_INLINE
-#  ifdef HAVE___INLINE
-#    define inline __inline
-#  else
-#    define inline
-#  endif
-#endif /* HAVE_INLINE */
-
 
 #cmakedefine WORDS_BIGENDIAN 1
 

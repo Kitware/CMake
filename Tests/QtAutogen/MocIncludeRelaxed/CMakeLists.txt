@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC_RELAXED_MODE TRUE)
 set(MOC_INCLUDE_NAME "mocIncludeRelaxed")
 include(${CMAKE_CURRENT_SOURCE_DIR}/../MocInclude/shared.cmake)
 
-# Relaxed ony executable
+# Relaxed only executable
 add_executable(mocIncludeRelaxedOnly
   RObjA.cpp
   RObjB.cpp

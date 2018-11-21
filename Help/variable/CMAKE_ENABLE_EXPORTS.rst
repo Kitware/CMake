@@ -12,7 +12,7 @@ dependency on the executable is created for targets that link to it.
 For DLL platforms an import library will be created for the exported
 symbols and then used for linking.  All Windows-based systems
 including Cygwin are DLL platforms.  For non-DLL platforms that
-require all symbols to be resolved at link time, such as OS X, the
+require all symbols to be resolved at link time, such as macOS, the
 module will ``link`` to the executable using a flag like
 ``-bundle_loader``.  For other non-DLL platforms the link rule is simply
 ignored since the dynamic loader will automatically bind symbols when

@@ -285,7 +285,8 @@ if(CMake_RUN_IWYU)
     message(FATAL_ERROR "CMake_RUN_IWYU is ON but include-what-you-use is not found!")
   endif()
   set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE
-    "${IWYU_COMMAND};-Xiwyu;--mapping_file=${CMake_SOURCE_DIR}/Utilities/IWYU/mapping.imp;-w;-DCMAKE_IWYU")
+    "${IWYU_COMMAND};-Xiwyu;--mapping_file=${CMake_SOURCE_DIR}/Utilities/IWYU/mapping.imp;-w")
+  list(APPEND CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${CMake_IWYU_OPTIONS})
 endif()
 
 
@@ -409,7 +410,6 @@ macro (CMAKE_BUILD_UTILITIES)
     set(CURL_SPECIAL_ZLIB_H ${CMAKE_ZLIB_HEADER})
     set(CURL_SPECIAL_LIBZ_INCLUDES ${CMAKE_ZLIB_INCLUDES})
     set(CURL_SPECIAL_LIBZ ${CMAKE_ZLIB_LIBRARIES})
-    add_definitions(-DCURL_STATICLIB)
     set(CMAKE_CURL_INCLUDES)
     set(CMAKE_CURL_LIBRARIES cmcurl)
     if(CMAKE_TESTS_CDASH_SERVER)
@@ -497,7 +497,7 @@ macro (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
   # Build or use system libarchive for CMake and CTest.
   if(CMAKE_USE_SYSTEM_LIBARCHIVE)
-    find_package(LibArchive 3.0.0)
+    find_package(LibArchive 3.1.0)
     if(NOT LibArchive_FOUND)
       message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBARCHIVE is ON but LibArchive is not found!")
     endif()
@@ -512,6 +512,7 @@ macro (CMAKE_BUILD_UTILITIES)
     set(ENABLE_NETTLE OFF CACHE INTERNAL "Enable use of Nettle")
     set(ENABLE_OPENSSL ${CMAKE_USE_OPENSSL} CACHE INTERNAL "Enable use of OpenSSL")
     set(ENABLE_LZMA ON CACHE INTERNAL "Enable the use of the system LZMA library if found")
+    set(ENABLE_LZ4 OFF CACHE INTERNAL "Enable the use of the system LZ4 library if found")
     set(ENABLE_LZO OFF CACHE INTERNAL "Enable the use of the system LZO library if found")
     set(ENABLE_ZLIB ON CACHE INTERNAL "Enable the use of the system ZLIB library if found")
     set(ENABLE_BZip2 ON CACHE INTERNAL "Enable the use of the system BZip2 library if found")
@@ -790,9 +791,10 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   endif()
 endif()
 
-# add a test
-add_test(SystemInformationNew "${CMAKE_CMAKE_COMMAND}"
-  --system-information  -G "${CMAKE_GENERATOR}" )
+if(BUILD_TESTING)
+  add_test(SystemInformationNew "${CMAKE_CMAKE_COMMAND}"
+    --system-information  -G "${CMAKE_GENERATOR}" )
+endif()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   # Install license file as it requires.

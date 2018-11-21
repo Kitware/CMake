@@ -113,7 +113,7 @@ static CURLcode win32_init(void)
   res = WSAStartup(wVersionRequested, &wsaData);
 
   if(res != 0)
-    /* Tell the user that we couldn't find a useable */
+    /* Tell the user that we couldn't find a usable */
     /* winsock.dll.     */
     return CURLE_FAILED_INIT;
 
@@ -125,7 +125,7 @@ static CURLcode win32_init(void)
 
   if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
      HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
-    /* Tell the user that we couldn't find a useable */
+    /* Tell the user that we couldn't find a usable */
 
     /* winsock.dll. */
     WSACleanup();
@@ -661,38 +661,27 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
   bool done = FALSE;
   CURLMcode mcode = CURLM_OK;
   CURLcode result = CURLE_OK;
-  struct curltime before;
-  int without_fds = 0;  /* count number of consecutive returns from
-                           curl_multi_wait() without any filedescriptors */
 
   while(!done && !mcode) {
     int still_running = 0;
     int rc;
 
-    before = Curl_now();
     mcode = curl_multi_wait(multi, NULL, 0, 1000, &rc);
 
     if(!mcode) {
       if(!rc) {
-        struct curltime after = Curl_now();
+        long sleep_ms;
 
         /* If it returns without any filedescriptor instantly, we need to
            avoid busy-looping during periods where it has nothing particular
            to wait for */
-        if(Curl_timediff(after, before) <= 10) {
-          without_fds++;
-          if(without_fds > 2) {
-            int sleep_ms = without_fds < 10 ? (1 << (without_fds - 1)) : 1000;
-            Curl_wait_ms(sleep_ms);
-          }
+        curl_multi_timeout(multi, &sleep_ms);
+        if(sleep_ms) {
+          if(sleep_ms > 1000)
+            sleep_ms = 1000;
+          Curl_wait_ms((int)sleep_ms);
         }
-        else
-          /* it wasn't "instant", restart counter */
-          without_fds = 0;
       }
-      else
-        /* got file descriptor, restart counter */
-        without_fds = 0;
 
       mcode = curl_multi_perform(multi, &still_running);
     }
@@ -969,6 +958,13 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
     outcurl->change.referer_alloc = TRUE;
   }
 
+  /* Reinitialize an SSL engine for the new handle
+   * note: the engine name has already been copied by dupset */
+  if(outcurl->set.str[STRING_SSL_ENGINE]) {
+    if(Curl_ssl_set_engine(outcurl, outcurl->set.str[STRING_SSL_ENGINE]))
+      goto fail;
+  }
+
   /* Clone the resolver handle, if present, for the new handle */
   if(Curl_resolver_duphandle(&outcurl->state.resolver,
                              data->state.resolver))
@@ -1006,10 +1002,6 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
  */
 void curl_easy_reset(struct Curl_easy *data)
 {
-  Curl_safefree(data->state.pathbuffer);
-
-  data->state.path = NULL;
-
   Curl_free_request_state(data);
 
   /* zero out UserDefined data: */
@@ -1200,4 +1192,23 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
   *n = (size_t)n1;
 
   return result;
+}
+
+/*
+ * Performs connection upkeep for the given session handle.
+ */
+CURLcode curl_easy_upkeep(struct Curl_easy *data)
+{
+  /* Verify that we got an easy handle we can work with. */
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(data->multi_easy) {
+    /* Use the common function to keep connections alive. */
+    return Curl_upkeep(&data->multi_easy->conn_cache, data);
+  }
+  else {
+    /* No connections, so just return success */
+    return CURLE_OK;
+  }
 }

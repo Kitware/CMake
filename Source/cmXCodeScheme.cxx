@@ -143,6 +143,41 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
   xout.Attribute("debugServiceExtension", "internal");
   xout.Attribute("allowLocationSimulation", "YES");
 
+  // Diagnostics tab begin
+
+  bool useAddressSanitizer = WriteLaunchActionAttribute(
+    xout, "enableAddressSanitizer",
+    "XCODE_SCHEME_ADDRESS_SANITIZER"); // not allowed with
+                                       // enableThreadSanitizer=YES
+  WriteLaunchActionAttribute(
+    xout, "enableASanStackUseAfterReturn",
+    "XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN");
+
+  bool useThreadSanitizer = false;
+  if (!useAddressSanitizer) {
+    useThreadSanitizer = WriteLaunchActionAttribute(
+      xout, "enableThreadSanitizer",
+      "XCODE_SCHEME_THREAD_SANITIZER"); // not allowed with
+                                        // enableAddressSanitizer=YES
+  }
+
+  WriteLaunchActionAttribute(xout, "stopOnEveryThreadSanitizerIssue",
+                             "XCODE_SCHEME_THREAD_SANITIZER_STOP");
+
+  WriteLaunchActionAttribute(xout, "enableUBSanitizer",
+                             "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER");
+  WriteLaunchActionAttribute(
+    xout, "stopOnEveryUBSanitizerIssue",
+    "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP");
+
+  WriteLaunchActionAttribute(
+    xout, "disableMainThreadChecker",
+    "XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER"); // negative enabled!
+  WriteLaunchActionAttribute(xout, "stopOnEveryMainThreadCheckerIssue",
+                             "XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP");
+
+  // Diagnostics tab end
+
   if (IsExecutable(this->Target)) {
     xout.StartElement("BuildableProductRunnable");
     xout.BreakAttributes();
@@ -156,10 +191,142 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 
   xout.EndElement(); // MacroExpansion
 
+  // Info tab begin
+
+  if (const char* exe =
+        this->Target->GetTarget()->GetProperty("XCODE_SCHEME_EXECUTABLE")) {
+
+    xout.StartElement("PathRunnable");
+    xout.BreakAttributes();
+
+    xout.Attribute("runnableDebuggingMode", "0");
+    xout.Attribute("FilePath", exe);
+
+    xout.EndElement(); // PathRunnable
+  }
+
+  // Info tab end
+
+  // Arguments tab begin
+
+  if (const char* argList =
+        this->Target->GetTarget()->GetProperty("XCODE_SCHEME_ARGUMENTS")) {
+    std::vector<std::string> arguments;
+    cmSystemTools::ExpandListArgument(argList, arguments);
+    if (!arguments.empty()) {
+      xout.StartElement("CommandLineArguments");
+
+      for (auto argument : arguments) {
+        xout.StartElement("CommandLineArgument");
+        xout.BreakAttributes();
+
+        xout.Attribute("argument", argument);
+        xout.Attribute("isEnabled", "YES");
+
+        xout.EndElement(); // CommandLineArgument
+      }
+
+      xout.EndElement(); // CommandLineArguments
+    }
+  }
+
+  if (const char* envList =
+        this->Target->GetTarget()->GetProperty("XCODE_SCHEME_ENVIRONMENT")) {
+    std::vector<std::string> envs;
+    cmSystemTools::ExpandListArgument(envList, envs);
+    if (!envs.empty()) {
+      xout.StartElement("EnvironmentVariables");
+
+      for (auto env : envs) {
+
+        xout.StartElement("EnvironmentVariable");
+        xout.BreakAttributes();
+
+        std::string envValue;
+        const auto p = env.find_first_of('=');
+        if (p != std::string::npos) {
+          envValue = env.substr(p + 1);
+          env.resize(p);
+        }
+
+        xout.Attribute("key", env);
+        xout.Attribute("value", envValue);
+        xout.Attribute("isEnabled", "YES");
+
+        xout.EndElement(); // EnvironmentVariable
+      }
+
+      xout.EndElement(); // EnvironmentVariables
+    }
+  }
+
+  // Arguments tab end
+
   xout.StartElement("AdditionalOptions");
+
+  if (!useThreadSanitizer) {
+    WriteLaunchActionAdditionalOption(xout, "MallocScribble", "",
+                                      "XCODE_SCHEME_MALLOC_SCRIBBLE");
+  }
+
+  if (!useThreadSanitizer && !useAddressSanitizer) {
+    WriteLaunchActionAdditionalOption(xout, "MallocGuardEdges", "",
+                                      "XCODE_SCHEME_MALLOC_GUARD_EDGES");
+  }
+
+  if (!useThreadSanitizer && !useAddressSanitizer) {
+    WriteLaunchActionAdditionalOption(xout, "DYLD_INSERT_LIBRARIES",
+                                      "/usr/lib/libgmalloc.dylib",
+                                      "XCODE_SCHEME_GUARD_MALLOC");
+  }
+
+  WriteLaunchActionAdditionalOption(xout, "NSZombieEnabled", "YES",
+                                    "XCODE_SCHEME_ZOMBIE_OBJECTS");
+
+  if (!useThreadSanitizer && !useAddressSanitizer) {
+    WriteLaunchActionAdditionalOption(xout, "MallocStackLogging", "",
+                                      "XCODE_SCHEME_MALLOC_STACK");
+  }
+
+  WriteLaunchActionAdditionalOption(xout, "DYLD_PRINT_APIS", "",
+                                    "XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE");
+
+  WriteLaunchActionAdditionalOption(xout, "DYLD_PRINT_LIBRARIES", "",
+                                    "XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS");
+
   xout.EndElement();
 
   xout.EndElement(); // LaunchAction
+}
+
+bool cmXCodeScheme::WriteLaunchActionAttribute(cmXMLWriter& xout,
+                                               const std::string& attrName,
+                                               const std::string& varName)
+{
+  if (Target->GetTarget()->GetPropertyAsBool(varName)) {
+    xout.Attribute(attrName.c_str(), "YES");
+    return true;
+  }
+  return false;
+}
+
+bool cmXCodeScheme::WriteLaunchActionAdditionalOption(
+  cmXMLWriter& xout, const std::string& key, const std::string& value,
+  const std::string& varName)
+{
+  if (Target->GetTarget()->GetPropertyAsBool(varName)) {
+    xout.StartElement("AdditionalOption");
+    xout.BreakAttributes();
+
+    xout.Attribute("key", key);
+    xout.Attribute("value", value);
+    xout.Attribute("isEnabled", "YES");
+
+    xout.EndElement(); // AdditionalOption
+
+    return true;
+  }
+  return false;
 }
 
 void cmXCodeScheme::WriteProfileAction(cmXMLWriter& xout,

@@ -37,6 +37,10 @@ protected:
   // of the toolset is installed
   bool IsWindowsStoreToolsetInstalled() const;
 
+  // Used to make sure that the Windows 10 SDK selected can work with the
+  // version of the toolset.
+  virtual std::string GetWindows10SDKMaxVersion() const;
+
   const char* GetIDEVersion() override { return "14.0"; }
   virtual bool SelectWindows10SDK(cmMakefile* mf, bool required);
 

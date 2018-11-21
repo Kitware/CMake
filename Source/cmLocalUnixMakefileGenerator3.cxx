@@ -211,8 +211,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   // rules may depend on this file itself.
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
   cmGeneratedFileStream ruleFileStream(
-    ruleFileNameFull.c_str(), false,
-    this->GlobalGenerator->GetMakefileEncoding());
+    ruleFileNameFull, false, this->GlobalGenerator->GetMakefileEncoding());
   if (!ruleFileStream) {
     return;
   }
@@ -433,7 +432,7 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
   infoFileName += "/CMakeDirectoryInformation.cmake";
 
   // Open the output file.
-  cmGeneratedFileStream infoFileStream(infoFileName.c_str());
+  cmGeneratedFileStream infoFileStream(infoFileName);
   if (!infoFileStream) {
     return;
   }
@@ -774,7 +773,7 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsBottom(
     std::string cmakefileName = cmake::GetCMakeFilesDirectoryPostSlash();
     cmakefileName += "Makefile.cmake";
     std::string runRule =
-      "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
+      "$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
     runRule += " --check-build-system ";
     runRule +=
       this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL);
@@ -968,8 +967,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       // Short-circuit if there is no launcher.
       const char* val = this->GetRuleLauncher(target, "RULE_LAUNCH_CUSTOM");
       if (val && *val) {
-        // Expand rules in the empty string.  It may insert the launcher and
-        // perform replacements.
+        // Expand rule variables referenced in the given launcher command.
         cmRulePlaceholderExpander::RuleVariables vars;
         vars.CMTargetName = target->GetName().c_str();
         vars.CMTargetType = cmState::GetTargetTypeName(target->GetType());
@@ -987,7 +985,6 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         vars.Output = output.c_str();
 
         launcher = val;
-        launcher += " ";
         rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);
         if (!launcher.empty()) {
           launcher += " ";
@@ -1403,8 +1400,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   std::string ruleFileNameFull = dir;
   ruleFileNameFull += "/depend.make";
   cmGeneratedFileStream ruleFileStream(
-    ruleFileNameFull.c_str(), false,
-    this->GlobalGenerator->GetMakefileEncoding());
+    ruleFileNameFull, false, this->GlobalGenerator->GetMakefileEncoding());
   ruleFileStream.SetCopyIfDifferent(true);
   if (!ruleFileStream) {
     return false;
@@ -1416,7 +1412,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   std::string internalRuleFileNameFull = dir;
   internalRuleFileNameFull += "/depend.internal";
   cmGeneratedFileStream internalRuleFileStream(
-    internalRuleFileNameFull.c_str(), false,
+    internalRuleFileNameFull, false,
     this->GlobalGenerator->GetMakefileEncoding());
   if (!internalRuleFileStream) {
     return false;
@@ -1426,7 +1422,8 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   this->WriteDisclaimer(internalRuleFileStream);
 
   // for each language we need to scan, scan it
-  const char* langStr = mf->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES");
+  std::string const& langStr =
+    mf->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES");
   std::vector<std::string> langs;
   cmSystemTools::ExpandListArgument(langStr, langs);
   for (std::string const& lang : langs) {
@@ -1686,7 +1683,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
     cmakefileName += "Makefile.cmake";
     {
       std::string runRule =
-        "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
+        "$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
       runRule += " --check-build-system ";
       runRule +=
         this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL);

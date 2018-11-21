@@ -278,10 +278,16 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       find_package(Threads REQUIRED)
     endif()
 
+    if (BLA_VENDOR MATCHES "_64ilp")
+      set(BLAS_mkl_ILP_MODE "ilp64")
+    else ()
+      set(BLAS_mkl_ILP_MODE "lp64")
+    endif ()
+
     set(LAPACK_SEARCH_LIBS "")
 
     if (BLA_F95)
-      set(LAPACK_mkl_SEARCH_SYMBOL "CHEEV")
+      set(LAPACK_mkl_SEARCH_SYMBOL "cheev_f95")
       set(_LIBRARIES LAPACK95_LIBRARIES)
       set(_BLAS_LIBRARIES ${BLAS95_LIBRARIES})
 
@@ -292,7 +298,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       list(APPEND LAPACK_SEARCH_LIBS
         "mkl_intel_c")
       list(APPEND LAPACK_SEARCH_LIBS
-        "mkl_intel_lp64")
+        "mkl_lapack95_${BLAS_mkl_ILP_MODE}")
     else()
       set(LAPACK_mkl_SEARCH_SYMBOL "cheev")
       set(_LIBRARIES LAPACK_LIBRARIES)
@@ -303,7 +309,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         "mkl_lapack")
       # new >= 10.3
       list(APPEND LAPACK_SEARCH_LIBS
-        "mkl_gf_lp64")
+        "mkl_gf_${BLAS_mkl_ILP_MODE}")
     endif()
 
     # First try empty lapack libs
@@ -332,6 +338,8 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
           )
       endif ()
     endforeach ()
+
+    unset(BLAS_mkl_ILP_MODE)
   endif ()
 endif()
 else()

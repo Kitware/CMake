@@ -7,7 +7,7 @@
 
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
-#include "cmsys/String.hxx"
+
 #include <chrono>
 #include <map>
 #include <set>
@@ -93,7 +93,7 @@ public:
       if the string does not name a valid part.  */
   Part GetPartFromName(const char* name);
 
-  typedef std::vector<cmsys::String> VectorOfStrings;
+  typedef std::vector<std::string> VectorOfStrings;
   typedef std::set<std::string> SetOfStrings;
 
   /** Process Command line arguments */
@@ -394,6 +394,7 @@ public:
     OUTPUT,
     HANDLER_OUTPUT,
     HANDLER_PROGRESS_OUTPUT,
+    HANDLER_TEST_PROGRESS_OUTPUT,
     HANDLER_VERBOSE_OUTPUT,
     WARNING,
     ERROR_MESSAGE,
@@ -433,6 +434,8 @@ public:
   void SetFailover(bool failover) { this->Failover = failover; }
   bool GetFailover() { return this->Failover; }
 
+  bool GetTestProgressOutput() const { return this->TestProgressOutput; }
+
   bool GetVerbose() { return this->Verbose; }
   bool GetExtraVerbose() { return this->ExtraVerbose; }
 
@@ -471,6 +474,7 @@ private:
   std::string ConfigType;
   std::string ScheduleType;
   std::chrono::system_clock::time_point StopTime;
+  bool TestProgressOutput;
   bool Verbose;
   bool ExtraVerbose;
   bool ProduceXML;
@@ -479,6 +483,8 @@ private:
   bool UseHTTP10;
   bool PrintLabels;
   bool Failover;
+
+  bool FlushTestProgressLine;
 
   bool ForceNewCTestProcess;
 
@@ -566,6 +572,9 @@ private:
   /** parse and process most common command line arguments */
   bool HandleCommandLineArguments(size_t& i, std::vector<std::string>& args,
                                   std::string& errormsg);
+
+  /** returns true iff the console supports progress output */
+  bool ProgressOutputSupportedByConsole() const;
 
   /** handle the -S -SP and -SR arguments */
   void HandleScriptArguments(size_t& i, std::vector<std::string>& args,

@@ -43,7 +43,7 @@
 # matches what is needed by the CUDA runtime version.
 #
 # The following variables affect the behavior of the macros in the
-# script (in alphebetical order).  Note that any of these flags can be
+# script (in alphabetical order).  Note that any of these flags can be
 # changed multiple times in the same directory before calling
 # ``CUDA_ADD_EXECUTABLE``, ``CUDA_ADD_LIBRARY``, ``CUDA_COMPILE``,
 # ``CUDA_COMPILE_PTX``, ``CUDA_COMPILE_FATBIN``, ``CUDA_COMPILE_CUBIN``
@@ -105,6 +105,8 @@
 #      the host compiler is constructed with one or more visual studio macros
 #      such as $(VCInstallDir), that expands out to the path when
 #      the command is run from within VS.
+#      If the CUDAHOSTCXX environment variable is set it will
+#      be used as the default.
 #
 #   CUDA_NVCC_FLAGS
 #   CUDA_NVCC_FLAGS_<CONFIG>
@@ -147,7 +149,7 @@
 #      VERBOSE=1 to see output), although setting CUDA_VERBOSE_BUILD to ON will
 #      always print the output.
 #
-# The script creates the following macros (in alphebetical order)::
+# The script creates the following macros (in alphabetical order)::
 #
 #   CUDA_ADD_CUFFT_TO_TARGET( cuda_target )
 #   -- Adds the cufft library to the target (can be any target).  Handles whether
@@ -527,7 +529,9 @@ option(CUDA_HOST_COMPILATION_CPP "Generated file extension" ON)
 # Extra user settable flags
 cmake_initialize_per_config_variable(CUDA_NVCC_FLAGS "Semi-colon delimit multiple arguments.")
 
-if(CMAKE_GENERATOR MATCHES "Visual Studio")
+if(DEFINED ENV{CUDAHOSTCXX})
+  set(CUDA_HOST_COMPILER "$ENV{CUDAHOSTCXX}" CACHE FILEPATH "Host side compiler used by NVCC")
+elseif(CMAKE_GENERATOR MATCHES "Visual Studio")
   set(_CUDA_MSVC_HOST_COMPILER "$(VCInstallDir)Tools/MSVC/$(VCToolsVersion)/bin/Host$(Platform)/$(PlatformTarget)")
   if(MSVC_VERSION LESS 1910)
    set(_CUDA_MSVC_HOST_COMPILER "$(VCInstallDir)bin")
@@ -971,7 +975,8 @@ if(NOT CUDA_VERSION VERSION_LESS "3.2")
     find_cuda_helper_libs(nvcuvid)
   endif()
 endif()
-if(CUDA_VERSION VERSION_GREATER "5.0")
+if(CUDA_VERSION VERSION_GREATER "5.0" AND CUDA_VERSION VERSION_LESS "9.2")
+  # In CUDA 9.2 cublas_device was deprecated
   find_cuda_helper_libs(cublas_device)
 endif()
 

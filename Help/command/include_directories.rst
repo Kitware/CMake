@@ -33,3 +33,9 @@ Arguments to ``include_directories`` may use "generator expressions" with
 the syntax "$<...>".  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
 manual for more on defining buildsystem properties.
+
+.. note::
+
+  Prefer the :command:`target_include_directories` command to add include
+  directories to individual targets and optionally propagate/export them
+  to dependents.

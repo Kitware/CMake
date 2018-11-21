@@ -111,8 +111,8 @@ endfunction()
 set(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING} 5)
 
 # Verify that new tests are not started when the load average exceeds
-# our threshold.
-run_TestLoad(test-load-fail 2)
+# our threshold and that they then run once the load average drops.
+run_TestLoad(test-load-wait 3)
 
 # Verify that warning message is displayed but tests still start when
 # an invalid argument is given.
@@ -161,3 +161,15 @@ endfunction()
 if(TEST_AFFINITY)
   run_TestAffinity()
 endif()
+
+function(run_TestStdin)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestStdin)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+  add_test(TestStdin \"${TEST_PRINT_STDIN}\")
+  ")
+  run_cmake_command(TestStdin ${CMAKE_CTEST_COMMAND} -V)
+endfunction()
+run_TestStdin()

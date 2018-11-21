@@ -41,6 +41,7 @@ Reference Manuals
    /manual/cmake-server.7
    /manual/cmake-toolchains.7
    /manual/cmake-variables.7
+   /manual/cpack-generators.7
 
 .. only:: html or text
 

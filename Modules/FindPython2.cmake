@@ -117,6 +117,31 @@ Hints
   * If set to TRUE, search **only** for static libraries.
   * If set to FALSE, search **only** for shared libraries.
 
+``Python2_FIND_REGISTRY``
+  On Windows the ``Python2_FIND_REGISTRY`` variable determine the order
+  of preference between registry and environment variables.
+  the ``Python2_FIND_REGISTRY`` variable can be set to empty or one of the
+  following:
+
+  * ``FIRST``: Try to use registry before environment variables.
+    This is the default.
+  * ``LAST``: Try to use registry after environment variables.
+  * ``NEVER``: Never try to use registry.
+
+``CMAKE_FIND_FRAMEWORK``
+  On macOS the :variable:`CMAKE_FIND_FRAMEWORK` variable determine the order of
+  preference between Apple-style and unix-style package components.
+
+  .. note::
+
+    Value ``ONLY`` is not supported so ``FIRST`` will be used instead.
+
+.. note::
+
+  If a Python virtual environment is configured, set variable
+  ``Python_FIND_REGISTRY`` (Windows) or ``CMAKE_FIND_FRAMEWORK`` (macOS) with
+  value ``LAST`` or ``NEVER`` to select it preferably.
+
 Commands
 ^^^^^^^^
 

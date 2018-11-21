@@ -356,8 +356,7 @@ protected:
 
     if (!found) {
       // Couldn't find any dependency information.
-      if (this->ComplainFileRegularExpression.find(
-            info->IncludeName.c_str())) {
+      if (this->ComplainFileRegularExpression.find(info->IncludeName)) {
         cmSystemTools::Error("error cannot find dependencies for ", path);
       } else {
         // Destroy the name of the file so that it won't be output as a

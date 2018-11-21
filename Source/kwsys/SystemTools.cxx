@@ -686,7 +686,7 @@ public:
     for (iterator i = this->begin(); i != this->end(); ++i) {
 #  if defined(_WIN32)
       const std::string s = Encoding::ToNarrow(*i);
-      kwsysUnPutEnv(s.c_str());
+      kwsysUnPutEnv(s);
 #  else
       kwsysUnPutEnv(*i);
 #  endif
@@ -1197,9 +1197,27 @@ bool SystemTools::FileExists(const std::string& filename)
   }
   return access(filename.c_str(), R_OK) == 0;
 #elif defined(_WIN32)
-  return (
-    GetFileAttributesW(Encoding::ToWindowsExtendedPath(filename).c_str()) !=
-    INVALID_FILE_ATTRIBUTES);
+  DWORD attr =
+    GetFileAttributesW(Encoding::ToWindowsExtendedPath(filename).c_str());
+  if (attr == INVALID_FILE_ATTRIBUTES) {
+    return false;
+  }
+
+  if (attr & FILE_ATTRIBUTE_REPARSE_POINT) {
+    // Using 0 instead of GENERIC_READ as it allows reading of file attributes
+    // even if we do not have permission to read the file itself
+    HANDLE handle =
+      CreateFileW(Encoding::ToWindowsExtendedPath(filename).c_str(), 0, 0,
+                  NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+
+    if (handle == INVALID_HANDLE_VALUE) {
+      return false;
+    }
+
+    CloseHandle(handle);
+  }
+
+  return true;
 #else
 // SCO OpenServer 5.0.7/3.2's command has 711 permission.
 #  if defined(_SCO_DS)
@@ -1752,11 +1770,11 @@ std::string SystemTools::CropString(const std::string& s, size_t max_len)
   return n;
 }
 
-std::vector<kwsys::String> SystemTools::SplitString(const std::string& p,
-                                                    char sep, bool isPath)
+std::vector<std::string> SystemTools::SplitString(const std::string& p,
+                                                  char sep, bool isPath)
 {
   std::string path = p;
-  std::vector<kwsys::String> paths;
+  std::vector<std::string> paths;
   if (path.empty()) {
     return paths;
   }
@@ -1973,7 +1991,7 @@ std::string SystemTools::ConvertToUnixOutputPath(const std::string& path)
   }
   // escape spaces and () in the path
   if (ret.find_first_of(" ") != std::string::npos) {
-    std::string result = "";
+    std::string result;
     char lastch = 1;
     for (const char* ch = ret.c_str(); *ch != '\0'; ++ch) {
       // if it is already escaped then don't try to escape it again
@@ -3140,7 +3158,7 @@ void SystemTools::AddTranslationPath(const std::string& a,
 void SystemTools::AddKeepPath(const std::string& dir)
 {
   std::string cdir;
-  Realpath(SystemTools::CollapseFullPath(dir).c_str(), cdir);
+  Realpath(SystemTools::CollapseFullPath(dir), cdir);
   SystemTools::AddTranslationPath(cdir, dir);
 }
 
@@ -3279,13 +3297,12 @@ std::string SystemTools::RelativePath(const std::string& local,
   std::string r = SystemTools::CollapseFullPath(remote);
 
   // split up both paths into arrays of strings using / as a separator
-  std::vector<kwsys::String> localSplit =
-    SystemTools::SplitString(l, '/', true);
-  std::vector<kwsys::String> remoteSplit =
+  std::vector<std::string> localSplit = SystemTools::SplitString(l, '/', true);
+  std::vector<std::string> remoteSplit =
     SystemTools::SplitString(r, '/', true);
-  std::vector<kwsys::String>
+  std::vector<std::string>
     commonPath; // store shared parts of path in this array
-  std::vector<kwsys::String> finalPath; // store the final relative path here
+  std::vector<std::string> finalPath; // store the final relative path here
   // count up how many matching directory names there are from the start
   unsigned int sameCount = 0;
   while (((sameCount <= (localSplit.size() - 1)) &&
@@ -3325,7 +3342,7 @@ std::string SystemTools::RelativePath(const std::string& local,
   }
   // for each entry that is not common in the remote path add it
   // to the final path.
-  for (std::vector<String>::iterator vit = remoteSplit.begin();
+  for (std::vector<std::string>::iterator vit = remoteSplit.begin();
        vit != remoteSplit.end(); ++vit) {
     if (!vit->empty()) {
       finalPath.push_back(*vit);
@@ -3334,7 +3351,7 @@ std::string SystemTools::RelativePath(const std::string& local,
   std::string relativePath; // result string
   // now turn the array of directories into a unix path by puttint /
   // between each entry that does not already have one
-  for (std::vector<String>::iterator vit1 = finalPath.begin();
+  for (std::vector<std::string>::iterator vit1 = finalPath.begin();
        vit1 != finalPath.end(); ++vit1) {
     if (!relativePath.empty() && *relativePath.rbegin() != '/') {
       relativePath += "/";
@@ -3623,11 +3640,11 @@ bool SystemTools::Split(const std::string& str,
   while (lpos < data.length()) {
     std::string::size_type rpos = data.find_first_of(separator, lpos);
     if (rpos == std::string::npos) {
-      // Line ends at end of string without a newline.
+      // String ends at end of string without a separator.
       lines.push_back(data.substr(lpos));
       return false;
     } else {
-      // Line ends in a "\n", remove the character.
+      // String ends in a separator, remove the character.
       lines.push_back(data.substr(lpos, rpos - lpos));
     }
     lpos = rpos + 1;
@@ -3641,7 +3658,7 @@ bool SystemTools::Split(const std::string& str,
   std::string data(str);
   std::string::size_type lpos = 0;
   while (lpos < data.length()) {
-    std::string::size_type rpos = data.find_first_of("\n", lpos);
+    std::string::size_type rpos = data.find_first_of('\n', lpos);
     if (rpos == std::string::npos) {
       // Line ends at end of string without a newline.
       lines.push_back(data.substr(lpos));

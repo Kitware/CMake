@@ -36,7 +36,8 @@ public:
                    cmExecutionStatus& status) override;
 
 private:
-  void AddLinkDir(std::string const& dir);
+  void AddLinkDir(std::string const& dir,
+                  std::vector<std::string>& directories);
 };
 
 #endif

@@ -318,12 +318,6 @@ bool cmAddCustomCommandCommand::InitialPass(
     return false;
   }
 
-  // Convert working directory to a full path.
-  if (!working.empty()) {
-    const char* build_dir = this->Makefile->GetCurrentBinaryDirectory();
-    working = cmSystemTools::CollapseFullPath(working, build_dir);
-  }
-
   // Choose which mode of the command to use.
   bool escapeOldStyle = !verbatim;
   if (source.empty() && output.empty()) {

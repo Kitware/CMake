@@ -28,7 +28,7 @@ set_target_properties(sameName PROPERTIES
 )
 
 # Set different compression levels
-if (QT_TEST_VERSION STREQUAL 4)
+if (QT_TEST_VERSION EQUAL 4)
   set(rccCompress "-compress")
 else()
   set(rccCompress "--compress")

@@ -273,7 +273,7 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
 
   // Scan through the input for all matches.
   std::string output;
-  if (re.find(input.c_str())) {
+  if (re.find(input)) {
     this->Makefile->StoreMatches(re);
     std::string::size_type l = re.start();
     std::string::size_type r = re.end();

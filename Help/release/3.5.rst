@@ -120,31 +120,33 @@ Platforms
 CPack
 -----
 
-* The :module:`CPackDMG` module learned new variable to specify AppleScript
-  file run to customize appearance of ``DragNDrop`` installer folder,
-  including background image setting using supplied PNG or multi-resolution
-  TIFF file.  See the :variable:`CPACK_DMG_DS_STORE_SETUP_SCRIPT` and
+* The :cpack_gen:`CPack DragNDrop Generator` learned new variable to
+  specify AppleScript file run to customize appearance of ``DragNDrop``
+  installer folder, including background image setting using supplied
+  PNG or multi-resolution TIFF file.
+  See the :variable:`CPACK_DMG_DS_STORE_SETUP_SCRIPT` and
   :variable:`CPACK_DMG_BACKGROUND_IMAGE` variables.
 
-* The :module:`CPackDeb` module learned to set the optional config
+* The :cpack_gen:`CPack DEB Generator` learned to set the optional config
   file ``Source`` field using a monolithic or per-component variable.
   See :variable:`CPACK_DEBIAN_PACKAGE_SOURCE`.
 
-* The :module:`CPackDeb` module learned to set Package, Section
+* The :cpack_gen:`CPack DEB Generator` learned to set Package, Section
   and Priority control fields per-component.
   See variables :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_SECTION` and
   :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_PRIORITY`.
 
-* The :module:`CPack DragNDrop generator <CPackDMG>` learned to add
+* The :cpack_gen:`CPack DragNDrop Generator` learned to add
   multi-lingual SLAs to a DMG which is presented to the user when they try to
   mount the DMG.  See the :variable:`CPACK_DMG_SLA_LANGUAGES` and
   :variable:`CPACK_DMG_SLA_DIR` variables for details.
 
-* The :module:`CPackNSIS` module learned new variables to add bitmaps to the
-  installer.  See the :variable:`CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP`
+* The :cpack_gen:`CPack NSIS Generator` learned new variables to
+  add bitmaps to the installer.
+  See the :variable:`CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP`
   and :variable:`CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP` variables.
 
-* The :module:`CPackRPM` module learned to set Name and Group
+* The :cpack_gen:`CPack RPM Generator` learned to set Name and Group
   control fields per-component.
   See :variable:`CPACK_RPM_<component>_PACKAGE_NAME`
   and :variable:`CPACK_RPM_<component>_PACKAGE_GROUP`.

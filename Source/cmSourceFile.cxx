@@ -132,8 +132,8 @@ bool cmSourceFile::FindFullPath(std::string* error)
   cmMakefile const* mf = this->Location.GetMakefile();
   const char* tryDirs[3] = { nullptr, nullptr, nullptr };
   if (this->Location.DirectoryIsAmbiguous()) {
-    tryDirs[0] = mf->GetCurrentSourceDirectory();
-    tryDirs[1] = mf->GetCurrentBinaryDirectory();
+    tryDirs[0] = mf->GetCurrentSourceDirectory().c_str();
+    tryDirs[1] = mf->GetCurrentBinaryDirectory().c_str();
   } else {
     tryDirs[0] = "";
   }
@@ -296,6 +296,15 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
   }
 
   return retVal;
+}
+
+const char* cmSourceFile::GetSafeProperty(const std::string& prop) const
+{
+  const char* ret = this->GetProperty(prop);
+  if (!ret) {
+    return "";
+  }
+  return ret;
 }
 
 bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const

@@ -205,15 +205,16 @@ function(run_sub_cmake test ninja_output_path_prefix)
     set(cmd_prefix "")
     set(cmd_suffix "")
   endif()
+  set(fs_delay 3) # We assume the system as 1 sec timestamp resolution.
   file(WRITE "${top_build_ninja}" "\
 subninja ${escaped_ninja_output_path_prefix}/build.ninja
 default ${escaped_ninja_output_path_prefix}/all
 
-# Sleep for 1 second before to regenerate to make sure the timestamp of
+# Sleep for long enough before regenerating to make sure the timestamp of
 # the top build.ninja will be strictly greater than the timestamp of the
-# sub/build.ninja file. We assume the system as 1 sec timestamp resolution.
+# sub/build.ninja file.
 rule RERUN
-  command = ${cmd_prefix}\"${escaped_CMAKE_COMMAND}\" -E sleep 1 && \"${escaped_CMAKE_COMMAND}\" -E touch \"${escaped_top_build_ninja}\"${cmd_suffix}
+  command = ${cmd_prefix}\"${escaped_CMAKE_COMMAND}\" -E sleep ${fs_delay} && \"${escaped_CMAKE_COMMAND}\" -E touch \"${escaped_top_build_ninja}\"${cmd_suffix}
   description = Testing regeneration
   generator = 1
 
@@ -239,7 +240,7 @@ build build.ninja: RERUN ${escaped_build_ninja_dep} || ${escaped_ninja_output_pa
 
   # Test regeneration rules run in order.
   set(main_cmakelists "${RunCMake_SOURCE_DIR}/CMakeLists.txt")
-  sleep(1) # Assume the system as 1 sec timestamp resolution.
+  sleep(${fs_delay})
   touch("${main_cmakelists}")
   touch("${build_ninja_dep}")
   run_ninja("${top_build_dir}")
@@ -278,3 +279,17 @@ foreach(ninja_output_path_prefix "sub space" "sub")
   run_sub_cmake(SubDirPrefix "${ninja_output_path_prefix}")
   run_sub_cmake(CustomCommandWorkingDirectory "${ninja_output_path_prefix}")
 endforeach(ninja_output_path_prefix)
+
+function (run_PreventTargetAliasesDupBuildRule)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/PreventTargetAliasesDupBuildRule-build)
+  run_cmake(PreventTargetAliasesDupBuildRule)
+  run_ninja("${RunCMake_TEST_BINARY_DIR}" -w dupbuild=err)
+endfunction ()
+run_PreventTargetAliasesDupBuildRule()
+
+function (run_PreventConfigureFileDupBuildRule)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/PreventConfigureFileDupBuildRule-build)
+  run_cmake(PreventConfigureFileDupBuildRule)
+  run_ninja("${RunCMake_TEST_BINARY_DIR}" -w dupbuild=err)
+endfunction()
+run_PreventConfigureFileDupBuildRule()

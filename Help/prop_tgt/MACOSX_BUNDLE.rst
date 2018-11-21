@@ -1,9 +1,9 @@
 MACOSX_BUNDLE
 -------------
 
-Build an executable as an Application Bundle on OS X or iOS.
+Build an executable as an Application Bundle on macOS or iOS.
 
-When this property is set to ``TRUE`` the executable when built on OS X
+When this property is set to ``TRUE`` the executable when built on macOS
 or iOS will be created as an application bundle.  This makes it
 a GUI executable that can be launched from the Finder.  See the
 :prop_tgt:`MACOSX_BUNDLE_INFO_PLIST` target property for information about

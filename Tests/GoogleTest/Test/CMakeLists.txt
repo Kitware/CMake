@@ -44,12 +44,13 @@ endif()
 set_tests_properties(set2.GoogleTest.ConditionalFail.foo PROPERTIES WILL_FAIL YES)
 
 
-# Search specific sources to get the test list
-add_executable(test_gtest2 main2.cxx)
+# Search specific sources to get the test list. Include an empty file
+# to ensure they are handled correctly too.
+add_executable(test_gtest2 main2.cxx empty.cxx)
 target_link_libraries(test_gtest2 GTest::Main)
 gtest_add_tests(TARGET test_gtest2
   TEST_LIST testList
-  SOURCES main2.h
+  SOURCES main2.h empty.cxx
 )
 set(expectedTests
   GoogleTest.SomethingElse

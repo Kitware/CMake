@@ -1,7 +1,7 @@
 MACOSX_RPATH
 ------------
 
-Whether this target on OS X or iOS is located at runtime using rpaths.
+Whether this target on macOS or iOS is located at runtime using rpaths.
 
 When this property is set to ``TRUE``, the directory portion of
 the ``install_name`` field of this shared library will be ``@rpath``

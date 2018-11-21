@@ -564,8 +564,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
     return std::string();
   }
 
-  // Expand rules in the empty string.  It may insert the launcher and
-  // perform replacements.
+  // Expand rule variables referenced in the given launcher command.
   cmRulePlaceholderExpander::RuleVariables vars;
 
   std::string output;
@@ -580,12 +579,10 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   }
   vars.Output = output.c_str();
 
-  std::string launcher = property_value;
-  launcher += " ";
-
   std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
     this->CreateRulePlaceholderExpander());
 
+  std::string launcher = property_value;
   rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);
   if (!launcher.empty()) {
     launcher += " ";

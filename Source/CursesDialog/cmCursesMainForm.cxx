@@ -709,7 +709,7 @@ void cmCursesMainForm::FixValue(cmStateEnums::CacheEntryType type,
     cmSystemTools::ConvertToUnixSlashes(out);
   }
   if (type == cmStateEnums::BOOL) {
-    if (cmSystemTools::IsOff(out.c_str())) {
+    if (cmSystemTools::IsOff(out)) {
       out = "OFF";
     } else {
       out = "ON";

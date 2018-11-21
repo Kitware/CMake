@@ -56,8 +56,12 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
         set(EXPECTED_FILE_CONTENT_${file_no_} "${EXPECTED_FILE_CONTENT_${file_no_}_LIST}")
         toExpectedContentList("${file_no_}" "EXPECTED_FILE_CONTENT_${file_no_}")
 
-        list(SORT PACKAGE_CONTENT)
-        list(SORT EXPECTED_FILE_CONTENT_${file_no_})
+        if(NOT PACKAGE_CONTENT STREQUAL "")
+          list(SORT PACKAGE_CONTENT)
+        endif()
+        if(NOT EXPECTED_FILE_CONTENT_${file_no_} STREQUAL "")
+          list(SORT EXPECTED_FILE_CONTENT_${file_no_})
+        endif()
 
         if(PACKAGE_CONTENT STREQUAL EXPECTED_FILE_CONTENT_${file_no_})
           set(expected_content_list TRUE)
@@ -88,7 +92,7 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
   # check that there were no extra files generated
   foreach(all_files_glob_ IN LISTS ALL_FILES_GLOB)
     file(GLOB foundAll_ RELATIVE "${bin_dir}" "${all_files_glob_}")
-    list(APPEND allFoundFiles_ "${foundAll_}")
+    list(APPEND allFoundFiles_ ${foundAll_})
   endforeach()
 
   list(LENGTH foundFiles_ foundFilesCount_)

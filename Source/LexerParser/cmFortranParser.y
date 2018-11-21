@@ -56,6 +56,9 @@ static void cmFortran_yyerror(yyscan_t yyscanner, const char* message)
 # pragma warning (disable: 4127) /* Conditional expression is constant.  */
 # pragma warning (disable: 4244) /* Conversion to smaller type, data loss. */
 #endif
+#if defined(__GNUC__) && __GNUC__ >= 8
+# pragma GCC diagnostic ignored "-Wconversion"
+#endif
 %}
 
 /* Generate a reentrant parser object.  */

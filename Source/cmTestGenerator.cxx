@@ -103,7 +103,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     }
   } else {
     // Use the command name given.
-    exe = ge.Parse(exe.c_str())->Evaluate(this->LG, config);
+    exe = ge.Parse(exe)->Evaluate(this->LG, config);
     cmSystemTools::ConvertToUnixSlashes(exe);
   }
 
@@ -191,15 +191,16 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
 void cmTestGenerator::GenerateInternalProperties(std::ostream& os)
 {
   cmListFileBacktrace bt = this->Test->GetBacktrace();
-  if (bt.Depth() == 0)
+  if (bt.Empty()) {
     return;
+  }
 
   os << " "
      << "_BACKTRACE_TRIPLES"
      << " \"";
 
   bool prependTripleSeparator = false;
-  while (bt.Depth() > 0) {
+  while (!bt.Empty()) {
     const auto& entry = bt.Top();
     if (prependTripleSeparator) {
       os << ";";

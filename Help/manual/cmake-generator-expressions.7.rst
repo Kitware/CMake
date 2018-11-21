@@ -51,7 +51,7 @@ Available logical expressions are:
   ``0`` if all ``?`` are ``0``, else ``1``
 ``$<NOT:?>``
   ``0`` if ``?`` is ``1``, else ``1``
-``$<IF:?,true-value...,false-value...>```
+``$<IF:?,true-value...,false-value...>``
   ``true-value...`` if ``?`` is ``1``, ``false-value...`` if ``?`` is ``0``
 ``$<STREQUAL:a,b>``
   ``1`` if ``a`` is STREQUAL ``b``, else ``0``
@@ -68,10 +68,13 @@ Available logical expressions are:
   target.
 ``$<PLATFORM_ID:comp>``
   ``1`` if the CMake-id of the platform matches ``comp``, otherwise ``0``.
+  See also the :variable:`CMAKE_SYSTEM_NAME` variable.
 ``$<C_COMPILER_ID:comp>``
   ``1`` if the CMake-id of the C compiler matches ``comp``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<CXX_COMPILER_ID:comp>``
   ``1`` if the CMake-id of the CXX compiler matches ``comp``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<VERSION_LESS:v1,v2>``
   ``1`` if ``v1`` is a version less than ``v2``, else ``0``.
 ``$<VERSION_GREATER:v1,v2>``
@@ -84,8 +87,10 @@ Available logical expressions are:
   ``1`` if ``v1`` is a version greater than or equal to ``v2``, else ``0``.
 ``$<C_COMPILER_VERSION:ver>``
   ``1`` if the version of the C compiler matches ``ver``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<CXX_COMPILER_VERSION:ver>``
   ``1`` if the version of the CXX compiler matches ``ver``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<TARGET_POLICY:pol>``
   ``1`` if the policy ``pol`` was NEW when the 'head' target was created,
   else ``0``.  If the policy was not set, the warning message for the policy

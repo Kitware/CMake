@@ -237,12 +237,18 @@ public:
     return true;
   }
 
-  /** Get the include flags for the current makefile and language.  */
+  /** @brief Get the include directories for the current makefile and language.
+   * @arg stripImplicitDirs Strip all directories found in
+   *      CMAKE_<LANG>_IMPLICIT_INCLUDE_DIRECTORIES from the result.
+   * @arg appendAllImplicitDirs Append all directories found in
+   *      CMAKE_<LANG>_IMPLICIT_INCLUDE_DIRECTORIES to the result.
+   */
   void GetIncludeDirectories(std::vector<std::string>& dirs,
                              cmGeneratorTarget const* target,
                              const std::string& lang = "C",
                              const std::string& config = "",
-                             bool stripImplicitInclDirs = true) const;
+                             bool stripImplicitDirs = true,
+                             bool appendAllImplicitDirs = false) const;
   void AddCompileOptions(std::string& flags, cmGeneratorTarget* target,
                          const std::string& lang, const std::string& config);
   void AddCompileDefinitions(std::set<std::string>& defines,
@@ -290,18 +296,18 @@ public:
   std::string const& GetSourceDirectory() const;
   std::string const& GetBinaryDirectory() const;
 
-  const char* GetCurrentBinaryDirectory() const;
-  const char* GetCurrentSourceDirectory() const;
+  std::string const& GetCurrentBinaryDirectory() const;
+  std::string const& GetCurrentSourceDirectory() const;
 
   /**
-   * Generate a Mac OS X application bundle Info.plist file.
+   * Generate a macOS application bundle Info.plist file.
    */
   void GenerateAppleInfoPList(cmGeneratorTarget* target,
                               const std::string& targetName,
                               const char* fname);
 
   /**
-   * Generate a Mac OS X framework Info.plist file.
+   * Generate a macOS framework Info.plist file.
    */
   void GenerateFrameworkInfoPList(cmGeneratorTarget* target,
                                   const std::string& targetName,
@@ -317,6 +323,7 @@ public:
 
   /** Fill out the static linker flags for the given target.  */
   void GetStaticLibraryFlags(std::string& flags, std::string const& config,
+                             std::string const& linkLanguage,
                              cmGeneratorTarget* target);
 
   /** Fill out these strings for the given target.  Libraries to link,

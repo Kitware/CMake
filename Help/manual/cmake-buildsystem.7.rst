@@ -95,7 +95,7 @@ Apple Frameworks
 """"""""""""""""
 
 A ``SHARED`` library may be marked with the :prop_tgt:`FRAMEWORK`
-target property to create an OS X or iOS Framework Bundle.
+target property to create an macOS or iOS Framework Bundle.
 The ``MACOSX_FRAMEWORK_IDENTIFIER`` sets ``CFBundleIdentifier`` key
 and it uniquely identifies the bundle.
 
@@ -784,7 +784,7 @@ A *library* output artifact of a buildsystem target may be:
   with the ``MODULE`` option.
 
 * On non-DLL platforms: the shared library file (e.g. ``.so`` or ``.dylib``)
-  of a shared shared library target created by the :command:`add_library`
+  of a shared library target created by the :command:`add_library`
   command with the ``SHARED`` option.
 
 The :prop_tgt:`LIBRARY_OUTPUT_DIRECTORY` and :prop_tgt:`LIBRARY_OUTPUT_NAME`

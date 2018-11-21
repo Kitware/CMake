@@ -18,4 +18,6 @@ elseif("${CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR")
   __compiler_iar_AVR(ASM)
   set(CMAKE_ASM_SOURCE_FILE_EXTENSIONS s90;asm;msa)
 
+else()
+  message(FATAL_ERROR "CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID not detected as \"AVR\" or \"ARM\".  This should be automatic.")
 endif()

@@ -38,7 +38,8 @@ static const char* cmDocumentationName[][2] = {
 static const char* cmDocumentationUsage[][2] = {
   { nullptr,
     "  cmake [options] <path-to-source>\n"
-    "  cmake [options] <path-to-existing-build>" },
+    "  cmake [options] <path-to-existing-build>\n"
+    "  cmake [options] -S <path-to-source> -B <path-to-build>" },
   { nullptr,
     "Specify a source directory to (re-)generate a build system for "
     "it in the current working directory.  Specify an existing build "
@@ -185,18 +186,11 @@ int main(int ac, char const* const* av)
 #endif
 
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
-  // Replace streambuf so we can output Unicode to console. The only time we
-  // want to stick with the default encoding is if we are running the VS
-  // linker. This is because the VS linker operates in the console code page.
+  // Replace streambuf so we can output Unicode to console
   cmsys::ConsoleBuf::Manager consoleOut(std::cout);
+  consoleOut.SetUTF8Pipes();
   cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
-  bool isRunningVSLinkerCommand = (ac > 2) && (strcmp(av[1], "-E") == 0) &&
-    ((strcmp(av[2], "vs_link_exe") == 0) ||
-     (strcmp(av[2], "vs_link_dll") == 0));
-  if (!isRunningVSLinkerCommand) {
-    consoleOut.SetUTF8Pipes();
-    consoleErr.SetUTF8Pipes();
-  }
+  consoleErr.SetUTF8Pipes();
 #endif
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(ac, av);

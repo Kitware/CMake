@@ -59,6 +59,9 @@ function(_XercesC_GET_VERSION  version_hdr)
         endif()
 
         set(XercesC_VERSION "${XercesC_MAJOR}.${XercesC_MINOR}.${XercesC_PATCH}" PARENT_SCOPE)
+        set(XercesC_VERSION_MAJOR "${XercesC_MAJOR}" PARENT_SCOPE)
+        set(XercesC_VERSION_MINOR "${XercesC_MINOR}" PARENT_SCOPE)
+        set(XercesC_VERSION_PATCH "${XercesC_PATCH}" PARENT_SCOPE)
     else()
         message(FATAL_ERROR "Include file ${version_hdr} does not exist or does not contain expected version information")
     endif()
@@ -70,22 +73,26 @@ find_path(XercesC_INCLUDE_DIR
           DOC "Xerces-C++ include directory")
 mark_as_advanced(XercesC_INCLUDE_DIR)
 
+if(XercesC_INCLUDE_DIR)
+  _XercesC_GET_VERSION("${XercesC_INCLUDE_DIR}/xercesc/util/XercesVersion.hpp")
+endif()
+
 if(NOT XercesC_LIBRARY)
   # Find all XercesC libraries
   find_library(XercesC_LIBRARY_RELEASE
-               NAMES "xerces-c" "xerces-c_3"
+               NAMES "xerces-c" "xerces-c_${XercesC_VERSION_MAJOR}"
                DOC "Xerces-C++ libraries (release)")
   find_library(XercesC_LIBRARY_DEBUG
-               NAMES "xerces-cd" "xerces-c_3D" "xerces-c_3_1D"
+               NAMES "xerces-cd" "xerces-c_${XercesC_VERSION_MAJOR}D" "xerces-c_${XercesC_VERSION_MAJOR}_${XercesC_VERSION_MINOR}D"
                DOC "Xerces-C++ libraries (debug)")
   include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
   select_library_configurations(XercesC)
   mark_as_advanced(XercesC_LIBRARY_RELEASE XercesC_LIBRARY_DEBUG)
 endif()
 
-if(XercesC_INCLUDE_DIR)
-  _XercesC_GET_VERSION("${XercesC_INCLUDE_DIR}/xercesc/util/XercesVersion.hpp")
-endif()
+unset(XercesC_VERSION_MAJOR)
+unset(XercesC_VERSION_MINOR)
+unset(XercesC_VERSION_PATCH)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(XercesC

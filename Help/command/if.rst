@@ -148,23 +148,33 @@ Possible expressions are:
 
 ``if(<variable|string> VERSION_LESS <variable|string>)``
  Component-wise integer version number comparison (version format is
- ``major[.minor[.patch[.tweak]]]``).
+ ``major[.minor[.patch[.tweak]]]``, omitted components are treated as zero).
+ Any non-integer version component or non-integer trailing part of a version
+ component effectively truncates the string at that point.
 
 ``if(<variable|string> VERSION_GREATER <variable|string>)``
  Component-wise integer version number comparison (version format is
- ``major[.minor[.patch[.tweak]]]``).
+ ``major[.minor[.patch[.tweak]]]``, omitted components are treated as zero).
+ Any non-integer version component or non-integer trailing part of a version
+ component effectively truncates the string at that point.
 
 ``if(<variable|string> VERSION_EQUAL <variable|string>)``
  Component-wise integer version number comparison (version format is
- ``major[.minor[.patch[.tweak]]]``).
+ ``major[.minor[.patch[.tweak]]]``, omitted components are treated as zero).
+ Any non-integer version component or non-integer trailing part of a version
+ component effectively truncates the string at that point.
 
 ``if(<variable|string> VERSION_LESS_EQUAL <variable|string>)``
  Component-wise integer version number comparison (version format is
- ``major[.minor[.patch[.tweak]]]``).
+ ``major[.minor[.patch[.tweak]]]``, omitted components are treated as zero).
+ Any non-integer version component or non-integer trailing part of a version
+ component effectively truncates the string at that point.
 
 ``if(<variable|string> VERSION_GREATER_EQUAL <variable|string>)``
  Component-wise integer version number comparison (version format is
- ``major[.minor[.patch[.tweak]]]``).
+ ``major[.minor[.patch[.tweak]]]``, omitted components are treated as zero).
+ Any non-integer version component or non-integer trailing part of a version
+ component effectively truncates the string at that point.
 
 ``if(<variable|string> IN_LIST <variable>)``
  True if the given element is contained in the named list variable.

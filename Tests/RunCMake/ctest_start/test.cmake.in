@@ -14,7 +14,7 @@ function(setup_tests)
   ctest_start(${ctest_start_args})
 endfunction()
 
-if("@CASE_NAME@" MATCHES "^Append")
+if("@CASE_NAME@" MATCHES "^(No)?Append")
   if("@CASE_NAME@" MATCHES "^AppendNoMatchingTrack$")
     file(WRITE "${CTEST_BINARY_DIRECTORY}/Testing/TAG" "19551112-2204\nSomeWeirdTrackName\n")
   else()

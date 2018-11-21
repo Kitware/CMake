@@ -70,7 +70,27 @@ if(NOT RunCMake_GENERATOR STREQUAL "Xcode" OR NOT "$ENV{CMAKE_OSX_ARCHITECTURES}
   run_install_test(FILES-TARGET_OBJECTS)
 endif()
 
+run_install_test(TARGETS-InstallFromSubDir)
+run_install_test(TARGETS-OPTIONAL)
+run_install_test(FILES-OPTIONAL)
+run_install_test(DIRECTORY-OPTIONAL)
+
+set(RunCMake_TEST_OPTIONS "-DCMAKE_BUILD_TYPE:STRING=Debug")
+run_install_test(TARGETS-OUTPUT_NAME)
+unset(RunCMake_TEST_OPTIONS)
+
+run_install_test(Deprecated)
+run_install_test(PRE_POST_INSTALL_SCRIPT)
+run_install_test(SCRIPT)
+run_install_test(TARGETS-CONFIGURATIONS)
+run_install_test(DIRECTORY-PATTERN)
+run_install_test(TARGETS-Parts)
+run_install_test(FILES-PERMISSIONS)
+run_install_test(TARGETS-RPATH)
+run_install_test(InstallRequiredSystemLibraries)
+
 set(run_install_test_components 1)
 run_install_test(FILES-EXCLUDE_FROM_ALL)
 run_install_test(TARGETS-EXCLUDE_FROM_ALL)
 run_install_test(TARGETS-NAMELINK_COMPONENT)
+run_install_test(SCRIPT-COMPONENT)

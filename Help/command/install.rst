@@ -89,6 +89,13 @@ Command signatures that install files may print messages during
 installation.  Use the :variable:`CMAKE_INSTALL_MESSAGE` variable
 to control which messages are printed.
 
+Many of the ``install()`` variants implicitly create the directories
+containing the installed files. If
+:variable:`CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS` is set, these
+directories will be created with the permissions specified. Otherwise,
+they will be created according to the uname rules on Unix-like platforms.
+Windows platforms are unaffected.
+
 Installing Targets
 ^^^^^^^^^^^^^^^^^^
 
@@ -115,19 +122,19 @@ project.  There are several kinds of target files that may be installed:
 
 ``ARCHIVE``
   Static libraries are treated as ``ARCHIVE`` targets, except those
-  marked with the ``FRAMEWORK`` property on OS X (see ``FRAMEWORK``
+  marked with the ``FRAMEWORK`` property on macOS (see ``FRAMEWORK``
   below.) For DLL platforms (all Windows-based systems including
   Cygwin), the DLL import library is treated as an ``ARCHIVE`` target.
 
 ``LIBRARY``
   Module libraries are always treated as ``LIBRARY`` targets. For non-
   DLL platforms shared libraries are treated as ``LIBRARY`` targets,
-  except those marked with the ``FRAMEWORK`` property on OS X (see
+  except those marked with the ``FRAMEWORK`` property on macOS (see
   ``FRAMEWORK`` below.)
 
 ``RUNTIME``
   Executables are treated as ``RUNTIME`` objects, except those marked
-  with the ``MACOSX_BUNDLE`` property on OS X (see ``BUNDLE`` below.)
+  with the ``MACOSX_BUNDLE`` property on macOS (see ``BUNDLE`` below.)
   For DLL platforms (all Windows-based systems including Cygwin), the
   DLL part of a shared library is treated as a ``RUNTIME`` target.
 
@@ -137,11 +144,11 @@ project.  There are several kinds of target files that may be installed:
 
 ``FRAMEWORK``
   Both static and shared libraries marked with the ``FRAMEWORK``
-  property are treated as ``FRAMEWORK`` targets on OS X.
+  property are treated as ``FRAMEWORK`` targets on macOS.
 
 ``BUNDLE``
   Executables marked with the ``MACOSX_BUNDLE`` property are treated as
-  ``BUNDLE`` targets on OS X.
+  ``BUNDLE`` targets on macOS.
 
 ``PUBLIC_HEADER``
   Any ``PUBLIC_HEADER`` files associated with a library are installed in
@@ -279,6 +286,14 @@ targets that link to the object libraries in their implementation.
 
 Installing a target with the :prop_tgt:`EXCLUDE_FROM_ALL` target property
 set to ``TRUE`` has undefined behavior.
+
+:command:`install(TARGETS)` can install targets that were created in
+other directories.  When using such cross-directory install rules, running
+``make install`` (or similar) from a subdirectory will not guarantee that
+targets from other directories are up-to-date.  You can use
+:command:`target_link_libraries` or :command:`add_dependencies`
+to ensure that such out-of-directory targets are built before the
+subdirectory-specific install rules are run.
 
 The install destination given to the target install ``DESTINATION`` may
 use "generator expressions" with the syntax ``$<...>``.  See the

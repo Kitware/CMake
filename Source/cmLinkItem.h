@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <map>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -17,47 +18,31 @@
 class cmGeneratorTarget;
 
 // Basic information about each link item.
-class cmLinkItem : public std::string
+class cmLinkItem
 {
-  typedef std::string std_string;
+  std::string String;
 
 public:
-  cmLinkItem()
-    : std_string()
-    , Target(nullptr)
-    , Backtrace()
-  {
-  }
-  cmLinkItem(const std_string& n, cmGeneratorTarget const* t)
-      : std_string(n)
-      , Target(t)
-      , Backtrace()
-  {
-  }
-  cmLinkItem(const std_string& n, cmGeneratorTarget const* t, cmListFileBacktrace const & bt)
-    : std_string(n)
-    , Target(t)
-    , Backtrace(bt)
-  {
-  }
+  cmLinkItem();
+  explicit cmLinkItem(std::string const& s);
+  explicit cmLinkItem(cmGeneratorTarget const* t);
+  explicit cmLinkItem(const std::string& n, cmGeneratorTarget const* t,
+                      cmListFileBacktrace const& bt);
+  std::string const& AsStr() const;
   cmGeneratorTarget const* Target;
   cmListFileBacktrace Backtrace;
+  friend bool operator<(cmLinkItem const& l, cmLinkItem const& r);
+  friend bool operator==(cmLinkItem const& l, cmLinkItem const& r);
+  friend std::ostream& operator<<(std::ostream& os, cmLinkItem const& item);
 };
 
 class cmLinkImplItem : public cmLinkItem
 {
 public:
-  cmLinkImplItem()
-    : cmLinkItem()
-    , FromGenex(false)
-  {
-  }
-  cmLinkImplItem(std::string const& n, cmGeneratorTarget const* t,
-                 cmListFileBacktrace const& bt, bool fromGenex)
-    : cmLinkItem(n, t, bt)
-    , FromGenex(fromGenex)
-  {
-  }
+  cmLinkImplItem();
+  cmLinkImplItem(cmLinkItem item, cmListFileBacktrace const& bt,
+                 bool fromGenex);
+  cmListFileBacktrace Backtrace;
   bool FromGenex;
 };
 

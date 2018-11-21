@@ -237,7 +237,7 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
   }
   const char* packageExpr = "^[A-Za-z0-9_.-]+$";
   cmsys::RegularExpression packageRegex(packageExpr);
-  if (!packageRegex.find(package.c_str())) {
+  if (!packageRegex.find(package)) {
     std::ostringstream e;
     e << "PACKAGE given invalid package name \"" << package << "\".  "
       << "Package names must match \"" << packageExpr << "\".";
@@ -254,12 +254,12 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
   // We store the current build directory in the registry as a value
   // named by a hash of its own content.  This is deterministic and is
   // unique with high probability.
-  const char* outDir = this->Makefile->GetCurrentBinaryDirectory();
+  const std::string& outDir = this->Makefile->GetCurrentBinaryDirectory();
   std::string hash = cmSystemTools::ComputeStringMD5(outDir);
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  this->StorePackageRegistryWin(package, outDir, hash.c_str());
+  this->StorePackageRegistryWin(package, outDir.c_str(), hash.c_str());
 #else
-  this->StorePackageRegistryDir(package, outDir, hash.c_str());
+  this->StorePackageRegistryDir(package, outDir.c_str(), hash.c_str());
 #endif
 
   return true;
@@ -339,7 +339,7 @@ void cmExportCommand::StorePackageRegistryDir(std::string const& package,
   fname += "/";
   fname += hash;
   if (!cmSystemTools::FileExists(fname)) {
-    cmGeneratedFileStream entry(fname.c_str(), true);
+    cmGeneratedFileStream entry(fname, true);
     if (entry) {
       entry << content << "\n";
     } else {

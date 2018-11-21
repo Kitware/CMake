@@ -21,7 +21,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // Get the moc executable to run in the custom command.
-  const char* moc_exe =
+  std::string const& moc_exe =
     this->Makefile->GetRequiredDefinition("QT_MOC_EXECUTABLE");
 
   // Get the variable holding the list of sources.

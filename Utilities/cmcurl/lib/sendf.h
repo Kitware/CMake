@@ -36,7 +36,7 @@ void Curl_failf(struct Curl_easy *, const char *fmt, ...);
 #elif defined(HAVE_VARIADIC_MACROS_GCC)
 #define infof(x...)  Curl_nop_stmt
 #else
-#define infof (void)
+#error "missing VARIADIC macro define, fix and rebuild!"
 #endif
 
 #else /* CURL_DISABLE_VERBOSE_STRINGS */
@@ -84,9 +84,8 @@ CURLcode Curl_write_plain(struct connectdata *conn,
                           ssize_t *written);
 
 /* the function used to output verbose information */
-int Curl_debug(struct Curl_easy *handle, curl_infotype type,
-               char *data, size_t size,
-               struct connectdata *conn);
+int Curl_debug(struct Curl_easy *data, curl_infotype type,
+               char *ptr, size_t size);
 
 
 #endif /* HEADER_CURL_SENDF_H */
