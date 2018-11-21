@@ -223,7 +223,8 @@ int cmCPackNSISGenerator::PackageFiles()
       if (!group.second.Description.empty()) {
         groupDescriptions += "  !insertmacro MUI_DESCRIPTION_TEXT ${" +
           group.first + "} \"" +
-          this->TranslateNewlines(group.second.Description) + "\"\n";
+          cmCPackNSISGenerator::TranslateNewlines(group.second.Description) +
+          "\"\n";
       }
     }
 
@@ -253,7 +254,8 @@ int cmCPackNSISGenerator::PackageFiles()
       if (!comp.second.Description.empty()) {
         componentDescriptions += "  !insertmacro MUI_DESCRIPTION_TEXT ${" +
           comp.first + "} \"" +
-          this->TranslateNewlines(comp.second.Description) + "\"\n";
+          cmCPackNSISGenerator::TranslateNewlines(comp.second.Description) +
+          "\"\n";
       }
     }
 

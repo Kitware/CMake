@@ -397,8 +397,8 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
     prop += suffix;
 
     // Append the installed file name.
-    value += itgen->GetInstallFilename(target, config,
-                                       cmInstallTargetGenerator::NameImplib);
+    value += cmInstallTargetGenerator::GetInstallFilename(
+      target, config, cmInstallTargetGenerator::NameImplib);
 
     // Store the property.
     properties[prop] = value;
@@ -426,12 +426,12 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
 
     // Append the installed file name.
     if (target->IsAppBundleOnApple()) {
-      value += itgen->GetInstallFilename(target, config);
+      value += cmInstallTargetGenerator::GetInstallFilename(target, config);
       value += ".app/Contents/MacOS/";
-      value += itgen->GetInstallFilename(target, config);
+      value += cmInstallTargetGenerator::GetInstallFilename(target, config);
     } else {
-      value += itgen->GetInstallFilename(target, config,
-                                         cmInstallTargetGenerator::NameReal);
+      value += cmInstallTargetGenerator::GetInstallFilename(
+        target, config, cmInstallTargetGenerator::NameReal);
     }
 
     // Store the property.

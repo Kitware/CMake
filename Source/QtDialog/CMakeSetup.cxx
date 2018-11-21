@@ -130,15 +130,15 @@ int main(int argc, char** argv)
   QTranslator translator;
   QString transfile = QString("cmake_%1").arg(QLocale::system().name());
   translator.load(transfile, translationsDir.path());
-  app.installTranslator(&translator);
+  QApplication::installTranslator(&translator);
 
   // app setup
-  app.setApplicationName("CMakeSetup");
-  app.setOrganizationName("Kitware");
+  QApplication::setApplicationName("CMakeSetup");
+  QApplication::setOrganizationName("Kitware");
   QIcon appIcon;
   appIcon.addFile(":/Icons/CMakeSetup32.png");
   appIcon.addFile(":/Icons/CMakeSetup128.png");
-  app.setWindowIcon(appIcon);
+  QApplication::setWindowIcon(appIcon);
 
   CMakeSetupDialog dialog;
   dialog.show();
@@ -159,7 +159,7 @@ int main(int argc, char** argv)
     dialog.setSourceDirectory(QString::fromLocal8Bit(sourceDirectory.c_str()));
     dialog.setBinaryDirectory(QString::fromLocal8Bit(binaryDirectory.c_str()));
   } else {
-    QStringList args = app.arguments();
+    QStringList args = QApplication::arguments();
     if (args.count() == 2) {
       std::string filePath =
         cmSystemTools::CollapseFullPath(args[1].toLocal8Bit().data());
@@ -189,7 +189,7 @@ int main(int argc, char** argv)
     }
   }
 
-  return app.exec();
+  return QApplication::exec();
 }
 
 #if defined(Q_OS_MAC)

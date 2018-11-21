@@ -188,13 +188,12 @@ void cmLocalNinjaGenerator::WriteProjectHeader(std::ostream& os)
 void cmLocalNinjaGenerator::WriteNinjaRequiredVersion(std::ostream& os)
 {
   // Default required version
-  std::string requiredVersion =
-    this->GetGlobalNinjaGenerator()->RequiredNinjaVersion();
+  std::string requiredVersion = cmGlobalNinjaGenerator::RequiredNinjaVersion();
 
   // Ninja generator uses the 'console' pool if available (>= 1.5)
   if (this->GetGlobalNinjaGenerator()->SupportsConsolePool()) {
     requiredVersion =
-      this->GetGlobalNinjaGenerator()->RequiredNinjaVersionForConsolePool();
+      cmGlobalNinjaGenerator::RequiredNinjaVersionForConsolePool();
   }
 
   // The Ninja generator writes rules which require support for restat
@@ -204,7 +203,7 @@ void cmLocalNinjaGenerator::WriteNinjaRequiredVersion(std::ostream& os)
       !this->GetGlobalNinjaGenerator()->GlobalSettingIsOn(
         "CMAKE_SUPPRESS_REGENERATION")) {
     requiredVersion =
-      this->GetGlobalNinjaGenerator()->RequiredNinjaVersionForManifestRestat();
+      cmGlobalNinjaGenerator::RequiredNinjaVersionForManifestRestat();
   }
 
   cmGlobalNinjaGenerator::WriteComment(

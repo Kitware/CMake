@@ -256,7 +256,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
   // Make sure the last argument was not a library type specifier.
   if (haveLLT) {
     std::ostringstream e;
-    e << "The \"" << this->LinkLibraryTypeNames[llt]
+    e << "The \"" << cmTargetLinkLibrariesCommand::LinkLibraryTypeNames[llt]
       << "\" argument must be followed by a library.";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
@@ -284,8 +284,10 @@ void cmTargetLinkLibrariesCommand::LinkLibraryTypeSpecifierWarning(int left,
                                                                    int right)
 {
   std::ostringstream w;
-  w << "Link library type specifier \"" << this->LinkLibraryTypeNames[left]
-    << "\" is followed by specifier \"" << this->LinkLibraryTypeNames[right]
+  w << "Link library type specifier \""
+    << cmTargetLinkLibrariesCommand::LinkLibraryTypeNames[left]
+    << "\" is followed by specifier \""
+    << cmTargetLinkLibrariesCommand::LinkLibraryTypeNames[right]
     << "\" instead of a library name.  "
     << "The first specifier will be ignored.";
   this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());

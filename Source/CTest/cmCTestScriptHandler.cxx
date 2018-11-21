@@ -760,8 +760,8 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
 
   // put the initial cache into the bin dir
   if (!this->InitialCache.empty()) {
-    if (!this->WriteInitialCache(this->BinaryDir.c_str(),
-                                 this->InitialCache.c_str())) {
+    if (!cmCTestScriptHandler::WriteInitialCache(this->BinaryDir.c_str(),
+                                                 this->InitialCache.c_str())) {
       this->RestoreBackupDirectories();
       return 9;
     }

@@ -296,7 +296,7 @@ cmCTest::cmCTest()
   this->DropSiteCDash = false;
   this->BuildID = "";
   this->OutputTestOutputOnTestFailure = false;
-  this->OutputColorCode = this->ColoredOutputSupportedByConsole();
+  this->OutputColorCode = cmCTest::ColoredOutputSupportedByConsole();
   this->RepeatTests = 1; // default to run each test once
   this->RepeatUntilFail = false;
 

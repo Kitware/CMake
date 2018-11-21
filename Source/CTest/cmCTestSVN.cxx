@@ -330,13 +330,15 @@ private:
     if (name == "logentry") {
       this->Rev = Revision();
       this->Rev.SVNInfo = &SVNRepo;
-      if (const char* rev = this->FindAttribute(atts, "revision")) {
+      if (const char* rev =
+            cmCTestSVN::LogParser::FindAttribute(atts, "revision")) {
         this->Rev.Rev = rev;
       }
       this->Changes.clear();
     } else if (name == "path") {
       this->CurChange = Change();
-      if (const char* action = this->FindAttribute(atts, "action")) {
+      if (const char* action =
+            cmCTestSVN::LogParser::FindAttribute(atts, "action")) {
         this->CurChange.Action = action[0];
       }
     }

@@ -1236,8 +1236,9 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
   }
   for (std::string const& obj : this->Objects) {
     *this->BuildFileStream << " " << lineContinue << "\n";
-    *this->BuildFileStream << this->LocalGenerator->ConvertToQuotedOutputPath(
-      obj.c_str(), useWatcomQuote);
+    *this->BuildFileStream
+      << cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
+           obj.c_str(), useWatcomQuote);
   }
   *this->BuildFileStream << "\n";
 
@@ -1258,8 +1259,9 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
     object =
       this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir, obj);
     *this->BuildFileStream << " " << lineContinue << "\n";
-    *this->BuildFileStream << this->LocalGenerator->ConvertToQuotedOutputPath(
-      obj.c_str(), useWatcomQuote);
+    *this->BuildFileStream
+      << cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
+           obj.c_str(), useWatcomQuote);
   }
   *this->BuildFileStream << "\n"
                          << "\n";

@@ -503,7 +503,7 @@ void cmGlobalNinjaGenerator::Generate()
     std::ostringstream msg;
     msg << "The detected version of Ninja (" << this->NinjaVersion;
     msg << ") is less than the version of Ninja required by CMake (";
-    msg << this->RequiredNinjaVersion() << ").";
+    msg << cmGlobalNinjaGenerator::RequiredNinjaVersion() << ").";
     this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, msg.str());
     return;
   }
@@ -577,7 +577,7 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
     RequiredNinjaVersionForConsolePool().c_str());
   this->NinjaSupportsImplicitOuts = !cmSystemTools::VersionCompare(
     cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    this->RequiredNinjaVersionForImplicitOuts().c_str());
+    cmGlobalNinjaGenerator::RequiredNinjaVersionForImplicitOuts().c_str());
   this->NinjaSupportsManifestRestat = !cmSystemTools::VersionCompare(
     cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
     RequiredNinjaVersionForManifestRestat().c_str());
@@ -1425,7 +1425,9 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
         << "is less than the version of Ninja required by CMake for adding "
            "restat dependencies to the build.ninja manifest regeneration "
            "target:\n"
-        << "  " << this->RequiredNinjaVersionForManifestRestat() << "\n";
+        << "  "
+        << cmGlobalNinjaGenerator::RequiredNinjaVersionForManifestRestat()
+        << "\n";
     msg << "Any pre-check scripts, such as those generated for file(GLOB "
            "CONFIGURE_DEPENDS), will not be run by Ninja.";
     this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, msg.str());

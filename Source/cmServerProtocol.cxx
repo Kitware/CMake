@@ -244,7 +244,7 @@ bool cmServerProtocol1::DoActivate(const cmServerRequest& request,
       return false;
     }
 
-    const std::string cachePath = cm->FindCacheFile(buildDirectory);
+    const std::string cachePath = cmake::FindCacheFile(buildDirectory);
     if (cm->LoadCache(cachePath)) {
       cmState* state = cm->GetState();
 

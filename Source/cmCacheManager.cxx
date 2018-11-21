@@ -188,7 +188,7 @@ bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
   }
 
   const char* end = entryKey.c_str() + entryKey.size();
-  for (const char** p = this->PersistentProperties; *p; ++p) {
+  for (const char** p = cmCacheManager::PersistentProperties; *p; ++p) {
     std::string::size_type plen = strlen(*p) + 1;
     if (entryKey.size() > plen && *(end - plen) == '-' &&
         strcmp(end - plen + 1, *p) == 0) {
@@ -212,7 +212,7 @@ bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
 void cmCacheManager::WritePropertyEntries(std::ostream& os, CacheIterator i,
                                           cmMessenger* messenger)
 {
-  for (const char** p = this->PersistentProperties; *p; ++p) {
+  for (const char** p = cmCacheManager::PersistentProperties; *p; ++p) {
     if (const char* value = i.GetProperty(*p)) {
       std::string helpstring = *p;
       helpstring += " property for variable: ";
@@ -222,9 +222,9 @@ void cmCacheManager::WritePropertyEntries(std::ostream& os, CacheIterator i,
       std::string key = i.GetName();
       key += "-";
       key += *p;
-      this->OutputKey(os, key);
+      cmCacheManager::OutputKey(os, key);
       os << ":INTERNAL=";
-      this->OutputValue(os, value);
+      cmCacheManager::OutputValue(os, value);
       os << "\n";
       cmCacheManager::OutputNewlineTruncationWarning(os, key, value,
                                                      messenger);
@@ -319,9 +319,9 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
       } else {
         cmCacheManager::OutputHelpString(fout, "Missing description");
       }
-      this->OutputKey(fout, i.first);
+      cmCacheManager::OutputKey(fout, i.first);
       fout << ":" << cmState::CacheEntryTypeToString(t) << "=";
-      this->OutputValue(fout, ce.Value);
+      cmCacheManager::OutputValue(fout, ce.Value);
       fout << "\n";
       cmCacheManager::OutputNewlineTruncationWarning(fout, i.first, ce.Value,
                                                      messenger);
@@ -346,11 +346,11 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
     if (t == cmStateEnums::INTERNAL) {
       // Format is key:type=value
       if (const char* help = i.GetProperty("HELPSTRING")) {
-        this->OutputHelpString(fout, help);
+        cmCacheManager::OutputHelpString(fout, help);
       }
-      this->OutputKey(fout, i.GetName());
+      cmCacheManager::OutputKey(fout, i.GetName());
       fout << ":" << cmState::CacheEntryTypeToString(t) << "=";
-      this->OutputValue(fout, i.GetValue());
+      cmCacheManager::OutputValue(fout, i.GetValue());
       fout << "\n";
       cmCacheManager::OutputNewlineTruncationWarning(fout, i.GetName(),
                                                      i.GetValue(), messenger);

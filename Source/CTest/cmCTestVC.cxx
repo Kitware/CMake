@@ -79,13 +79,13 @@ bool cmCTestVC::RunChild(char const* const* cmd, OutputParser* out,
                          OutputParser* err, const char* workDir,
                          Encoding encoding)
 {
-  this->Log << this->ComputeCommandLine(cmd) << "\n";
+  this->Log << cmCTestVC::ComputeCommandLine(cmd) << "\n";
 
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, cmd);
   workDir = workDir ? workDir : this->SourceDirectory.c_str();
   cmsysProcess_SetWorkingDirectory(cp, workDir);
-  this->RunProcess(cp, out, err, encoding);
+  cmCTestVC::RunProcess(cp, out, err, encoding);
   int result = cmsysProcess_GetExitValue(cp);
   cmsysProcess_Delete(cp);
   return result == 0;

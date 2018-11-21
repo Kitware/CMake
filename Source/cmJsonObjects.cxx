@@ -450,10 +450,9 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
                               const std::string& config)
 {
   cmLocalGenerator* lg = target->GetLocalGenerator();
-  const cmState* state = lg->GetState();
 
   const cmStateEnums::TargetType type = target->GetType();
-  const std::string typeName = state->GetTargetTypeName(type);
+  const std::string typeName = cmState::GetTargetTypeName(type);
 
   Json::Value ttl = Json::arrayValue;
   ttl.append("EXECUTABLE");
