@@ -547,13 +547,6 @@
     "flags": []
   },
   {
-    "name": "LinkControlFlowGuard",
-    "switch": "guard:cf",
-    "comment": "Enable Security Check with Guard",
-    "value": "Guard",
-    "flags": []
-  },
-  {
     "name": "LinkIncremental",
     "switch": "INCREMENTAL:NO",
     "comment": "Enable Incremental Linking",
