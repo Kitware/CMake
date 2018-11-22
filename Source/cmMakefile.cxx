@@ -30,6 +30,7 @@
 #include "cmInstallGenerator.h" // IWYU pragma: keep
 #include "cmInstallSubdirectoryGenerator.h"
 #include "cmListFileCache.h"
+#include "cmMessageType.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmState.h"
@@ -129,11 +130,11 @@ cmDirectoryId cmMakefile::GetDirectoryId() const
   return std::string(buf);
 }
 
-void cmMakefile::IssueMessage(cmake::MessageType t,
-                              std::string const& text) const
+void cmMakefile::IssueMessage(MessageType t, std::string const& text) const
 {
   if (!this->ExecutionStatusStack.empty()) {
-    if ((t == cmake::FATAL_ERROR) || (t == cmake::INTERNAL_ERROR)) {
+    if ((t == MessageType::FATAL_ERROR) ||
+        (t == MessageType::INTERNAL_ERROR)) {
       this->ExecutionStatusStack.back()->SetNestedError();
     }
   }
@@ -143,7 +144,7 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
 bool cmMakefile::CheckCMP0037(std::string const& targetName,
                               cmStateEnums::TargetType targetType) const
 {
-  cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+  MessageType messageType = MessageType::AUTHOR_WARNING;
   std::ostringstream e;
   bool issueMessage = false;
   switch (this->GetPolicyStatus(cmPolicies::CMP0037)) {
@@ -159,7 +160,7 @@ bool cmMakefile::CheckCMP0037(std::string const& targetName,
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
       issueMessage = true;
-      messageType = cmake::FATAL_ERROR;
+      messageType = MessageType::FATAL_ERROR;
       break;
   }
   if (issueMessage) {
@@ -169,7 +170,7 @@ bool cmMakefile::CheckCMP0037(std::string const& targetName,
          "in undefined behavior.";
     this->IssueMessage(messageType, e.str());
 
-    if (messageType == cmake::FATAL_ERROR) {
+    if (messageType == MessageType::FATAL_ERROR) {
       return false;
     }
   }
@@ -198,7 +199,7 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& pkg)
         << "  " << env << "\n";
     }
     w << "For compatibility, CMake is ignoring the variable.";
-    this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+    this->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
   }
 }
 
@@ -381,7 +382,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
           // The command invocation requested that we report an error.
           std::string const error =
             std::string(lff.Name.Original) + " " + pcmd->GetError();
-          this->IssueMessage(cmake::FATAL_ERROR, error);
+          this->IssueMessage(MessageType::FATAL_ERROR, error);
         }
         result = false;
         if (this->GetCMakeInstance()->GetWorkingMode() != cmake::NORMAL_MODE) {
@@ -397,7 +398,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
       std::string error = "Unknown CMake command \"";
       error += lff.Name.Original;
       error += "\".";
-      this->IssueMessage(cmake::FATAL_ERROR, error);
+      this->IssueMessage(MessageType::FATAL_ERROR, error);
       result = false;
       cmSystemTools::SetFatalErrorOccured();
     }
@@ -509,7 +510,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
           << "affects policy settings.  "
           << "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
           << "so the effects are applied to the including context.";
-        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+        this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
       }
       break;
     case cmPolicies::REQUIRED_IF_USED:
@@ -521,7 +522,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
         << this->Makefile->GetExecutionFilePath() << "\n"
         << "affects policy settings, so it requires this policy to be set.";
       /* clang-format on */
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     } break;
     case cmPolicies::OLD:
     case cmPolicies::NEW:
@@ -665,7 +666,7 @@ void cmMakefile::EnforceDirectoryLevelRules() const
       case cmPolicies::WARN:
         // Warn because the user did not provide a minimum required
         // version.
-        this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
+        this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
                                                msg.str(), this->Backtrace);
       case cmPolicies::OLD:
         // OLD behavior is to use policy version 2.4 set in
@@ -675,8 +676,8 @@ void cmMakefile::EnforceDirectoryLevelRules() const
       case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
         // NEW behavior is to issue an error.
-        this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, msg.str(),
-                                               this->Backtrace);
+        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                               msg.str(), this->Backtrace);
         cmSystemTools::SetFatalErrorOccured();
         return;
     }
@@ -764,7 +765,7 @@ void cmMakefile::ConfigureFinalPass()
   if (oldValue &&
       cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, oldValue, "2.4")) {
     this->GetCMakeInstance()->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "You have set CMAKE_BACKWARDS_COMPATIBILITY to a CMake version less "
       "than 2.4. This version of CMake only supports backwards compatibility "
       "with CMake 2.4 or later. For compatibility with older versions please "
@@ -785,7 +786,7 @@ void cmMakefile::AddCustomCommandToTarget(
   cmTargets::iterator ti = this->Targets.find(target);
 
   if (ti == this->Targets.end()) {
-    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    MessageType messageType = MessageType::AUTHOR_WARNING;
     bool issueMessage = false;
     std::ostringstream e;
     switch (this->GetPolicyStatus(cmPolicies::CMP0040)) {
@@ -798,7 +799,7 @@ void cmMakefile::AddCustomCommandToTarget(
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         issueMessage = true;
-        messageType = cmake::FATAL_ERROR;
+        messageType = MessageType::FATAL_ERROR;
     }
 
     if (issueMessage) {
@@ -826,7 +827,7 @@ void cmMakefile::AddCustomCommandToTarget(
     e << "Target \"" << target
       << "\" is an OBJECT library "
          "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.";
-    this->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (t.GetType() == cmStateEnums::INTERFACE_LIBRARY) {
@@ -834,7 +835,7 @@ void cmMakefile::AddCustomCommandToTarget(
     e << "Target \"" << target
       << "\" is an INTERFACE library "
          "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.";
-    this->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
 
@@ -886,7 +887,7 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
     if (!cl.empty() && !cl[0].empty() && cl[0][0] == '"') {
       std::ostringstream e;
       e << "COMMAND may not contain literal quotes:\n  " << cl[0] << "\n";
-      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return nullptr;
     }
   }
@@ -1278,7 +1279,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
     // This definition has a non-trivial value.
     switch (this->GetPolicyStatus(cmPolicies::CMP0005)) {
       case cmPolicies::WARN:
-        this->IssueMessage(cmake::AUTHOR_WARNING,
+        this->IssueMessage(MessageType::AUTHOR_WARNING,
                            cmPolicies::GetPolicyWarning(cmPolicies::CMP0005));
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -1288,7 +1289,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         this->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0005));
         return false;
       case cmPolicies::NEW:
@@ -1617,7 +1618,7 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
           << "\n"
           << cmPolicies::GetPolicyWarning(cmPolicies::CMP0014);
         /* clang-format on */
-        this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+        this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
       case cmPolicies::OLD:
         // OLD behavior does not warn.
         break;
@@ -1627,7 +1628,7 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
         CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior prints the error.
-        this->IssueMessage(cmake::FATAL_ERROR, e.str());
+        this->IssueMessage(MessageType::FATAL_ERROR, e.str());
     }
     return;
   }
@@ -1849,7 +1850,7 @@ void cmMakefile::MaybeWarnUninitialized(std::string const& variable,
         (sourceFilename && this->IsProjectFile(sourceFilename))) {
       std::ostringstream msg;
       msg << "uninitialized variable \'" << variable << "\'";
-      this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
+      this->IssueMessage(MessageType::AUTHOR_WARNING, msg.str());
     }
   }
 }
@@ -1868,7 +1869,7 @@ void cmMakefile::LogUnused(const char* reason, const std::string& name) const
     if (this->CheckSystemVars || this->IsProjectFile(path.c_str())) {
       std::ostringstream msg;
       msg << "unused variable (" << reason << ") \'" << name << "\'";
-      this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
+      this->IssueMessage(MessageType::AUTHOR_WARNING, msg.str());
     }
   }
 }
@@ -2274,8 +2275,8 @@ void cmMakefile::ExpandVariablesCMP0019()
       << "The following variable evaluations were encountered:\n"
       << w.str();
     /* clang-format on */
-    this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, m.str(),
-                                           this->Backtrace);
+    this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
+                                           m.str(), this->Backtrace);
   }
 }
 
@@ -2494,7 +2495,7 @@ const std::string& cmMakefile::ExpandVariablesInString(
   const char* filename, long line, bool removeEmpty, bool replaceAt) const
 {
   bool compareResults = false;
-  cmake::MessageType mtype = cmake::LOG;
+  MessageType mtype = MessageType::LOG;
   std::string errorstr;
   std::string original;
 
@@ -2502,7 +2503,7 @@ const std::string& cmMakefile::ExpandVariablesInString(
   if (atOnly && (!noEscapes || !removeEmpty)) {
     // This case should never be called.  At-only is for
     // configure-file/string which always does no escapes.
-    this->IssueMessage(cmake::INTERNAL_ERROR,
+    this->IssueMessage(MessageType::INTERNAL_ERROR,
                        "ExpandVariablesInString @ONLY called "
                        "on something with escapes.");
     return source;
@@ -2511,7 +2512,7 @@ const std::string& cmMakefile::ExpandVariablesInString(
   // Variables used in the WARN case.
   std::string newResult;
   std::string newErrorstr;
-  cmake::MessageType newError = cmake::LOG;
+  MessageType newError = MessageType::LOG;
 
   switch (this->GetPolicyStatus(cmPolicies::CMP0053)) {
     case cmPolicies::WARN: {
@@ -2544,8 +2545,8 @@ const std::string& cmMakefile::ExpandVariablesInString(
   }
 
   // If it's an error in either case, just report the error...
-  if (mtype != cmake::LOG) {
-    if (mtype == cmake::FATAL_ERROR) {
+  if (mtype != MessageType::LOG) {
+    if (mtype == MessageType::FATAL_ERROR) {
       cmSystemTools::SetFatalErrorOccured();
     }
     this->IssueMessage(mtype, errorstr);
@@ -2584,20 +2585,20 @@ const std::string& cmMakefile::ExpandVariablesInString(
     msg +=
       "Using the old result for compatibility since the policy is not set.";
 
-    this->IssueMessage(cmake::AUTHOR_WARNING, msg);
+    this->IssueMessage(MessageType::AUTHOR_WARNING, msg);
   }
 
   return source;
 }
 
-cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
+MessageType cmMakefile::ExpandVariablesInStringOld(
   std::string& errorstr, std::string& source, bool escapeQuotes,
   bool noEscapes, bool atOnly, const char* filename, long line,
   bool removeEmpty, bool replaceAt) const
 {
   // Fast path strings without any special characters.
   if (source.find_first_of("$@\\") == std::string::npos) {
-    return cmake::LOG;
+    return MessageType::LOG;
   }
 
   // Special-case the @ONLY mode.
@@ -2636,7 +2637,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
     // Append the rest of the unchanged part of the string.
     source.append(in);
 
-    return cmake::LOG;
+    return MessageType::LOG;
   }
 
   // This method replaces ${VAR} and @VAR@ where VAR is looked up
@@ -2653,7 +2654,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
   parser.SetRemoveEmpty(removeEmpty);
   int res = parser.ParseString(source.c_str(), 0);
   const char* emsg = parser.GetError();
-  cmake::MessageType mtype = cmake::LOG;
+  MessageType mtype = MessageType::LOG;
   if (res && !emsg[0]) {
     source = parser.GetResult();
   } else {
@@ -2676,7 +2677,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
     // parser reported an error message without failing because the
     // helper implementation is unhappy, which has always reported an
     // error.
-    mtype = cmake::FATAL_ERROR;
+    mtype = MessageType::FATAL_ERROR;
     if (!res) {
       // This is a real argument parsing error.  Use policy CMP0010 to
       // decide whether it is an error.
@@ -2686,7 +2687,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
           CM_FALLTHROUGH;
         case cmPolicies::OLD:
           // OLD behavior is to just warn and continue.
-          mtype = cmake::AUTHOR_WARNING;
+          mtype = MessageType::AUTHOR_WARNING;
           break;
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
@@ -2723,7 +2724,7 @@ bool cmMakefile::IsProjectFile(const char* filename) const
                                     cmake::GetCMakeFilesDirectory()));
 }
 
-cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
+MessageType cmMakefile::ExpandVariablesInStringNew(
   std::string& errorstr, std::string& source, bool escapeQuotes,
   bool noEscapes, bool atOnly, const char* filename, long line,
   bool replaceAt) const
@@ -2740,7 +2741,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
   std::vector<t_lookup> openstack;
   bool error = false;
   bool done = false;
-  cmake::MessageType mtype = cmake::LOG;
+  MessageType mtype = MessageType::LOG;
 
   cmState* state = this->GetCMakeInstance()->GetState();
 
@@ -2819,7 +2820,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
                 std::string(next, this->cmNamedCurly.end()) +
                 "{} is not supported.  Only ${}, $ENV{}, "
                 "and $CACHE{} are allowed.";
-              mtype = cmake::FATAL_ERROR;
+              mtype = MessageType::FATAL_ERROR;
               error = true;
             }
           }
@@ -2927,7 +2928,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
           errorstr += "\') in a variable name: "
                       "'" +
             result.substr(openstack.back().loc) + "'";
-          mtype = cmake::FATAL_ERROR;
+          mtype = MessageType::FATAL_ERROR;
           error = true;
         }
         break;
@@ -2958,7 +2959,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
     emsg << "when parsing string\n"
          << "  " << source << "\n";
     emsg << errorstr;
-    mtype = cmake::FATAL_ERROR;
+    mtype = MessageType::FATAL_ERROR;
     errorstr = emsg.str();
   } else {
     // Append the rest of the unchanged part of the string.
@@ -3052,7 +3053,7 @@ void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
         << "  " << lfc << "\n"
         << "is not closed.";
       /* clang-format on */
-      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->IssueMessage(MessageType::FATAL_ERROR, e.str());
       reportError = false;
     }
   }
@@ -3205,7 +3206,7 @@ std::unique_ptr<cmFunctionBlocker> cmMakefile::RemoveFunctionBlocker(
           << "  " << closingContext << "\n"
           << "with mis-matching arguments.";
         /* clang-format on */
-        this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+        this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
       }
       cmFunctionBlocker* b = *pos;
       this->FunctionBlockers.erase(pos);
@@ -3362,7 +3363,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   // use the cmake object instead of calling cmake
   cmWorkingDirectory workdir(bindir);
   if (workdir.Failed()) {
-    this->IssueMessage(cmake::FATAL_ERROR,
+    this->IssueMessage(MessageType::FATAL_ERROR,
                        "Failed to set working directory to " + bindir + " : " +
                          std::strerror(workdir.GetLastResult()));
     cmSystemTools::SetFatalErrorOccured();
@@ -3378,7 +3379,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   cmGlobalGenerator* gg =
     cm.CreateGlobalGenerator(this->GetGlobalGenerator()->GetName());
   if (!gg) {
-    this->IssueMessage(cmake::INTERNAL_ERROR,
+    this->IssueMessage(MessageType::INTERNAL_ERROR,
                        "Global generator '" +
                          this->GetGlobalGenerator()->GetName() +
                          "' could not be created.");
@@ -3444,7 +3445,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
                      cmStateEnums::INTERNAL);
   }
   if (cm.Configure() != 0) {
-    this->IssueMessage(cmake::FATAL_ERROR,
+    this->IssueMessage(MessageType::FATAL_ERROR,
                        "Failed to configure test project build system.");
     cmSystemTools::SetFatalErrorOccured();
     this->IsSourceFileTryCompile = false;
@@ -3452,7 +3453,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   }
 
   if (cm.Generate() != 0) {
-    this->IssueMessage(cmake::FATAL_ERROR,
+    this->IssueMessage(MessageType::FATAL_ERROR,
                        "Failed to generate test project build system.");
     cmSystemTools::SetFatalErrorOccured();
     this->IsSourceFileTryCompile = false;
@@ -3584,7 +3585,7 @@ std::string cmMakefile::GetModulesFile(const char* filename,
             << cmPolicies::GetPolicyWarning(cmPolicies::CMP0017);
           /* clang-format on */
 
-          this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+          this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
           CM_FALLTHROUGH;
         }
         case cmPolicies::OLD:
@@ -3740,7 +3741,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
       std::ostringstream e;
       e << "File starts with a Byte-Order-Mark that is not UTF-8:\n  "
         << sinfile;
-      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return 0;
     }
     // rewind to copy BOM to output file
@@ -3937,7 +3938,7 @@ void cmMakefile::RaiseScope(const std::string& var, const char* varDef)
   if (!this->StateSnapshot.RaiseScope(var, varDef)) {
     std::ostringstream m;
     m << "Cannot set \"" << var << "\": current scope has no parent.";
-    this->IssueMessage(cmake::AUTHOR_WARNING, m.str());
+    this->IssueMessage(MessageType::AUTHOR_WARNING, m.str());
     return;
   }
 
@@ -4022,7 +4023,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
     // target names must be globally unique
     switch (this->GetPolicyStatus(cmPolicies::CMP0002)) {
       case cmPolicies::WARN:
-        this->IssueMessage(cmake::AUTHOR_WARNING,
+        this->IssueMessage(MessageType::AUTHOR_WARNING,
                            cmPolicies::GetPolicyWarning(cmPolicies::CMP0002));
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -4030,7 +4031,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         this->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0002));
         return true;
       case cmPolicies::NEW:
@@ -4109,7 +4110,7 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
         << "to work accidentally and is being allowed for "
         << "compatibility.";
       /* clang-format on */
-      this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
       CM_FALLTHROUGH;
     case cmPolicies::OLD:
       // OLD behavior does not warn.
@@ -4128,7 +4129,7 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
         << "  " << srcPath << "\n"
         << "Specify a unique binary directory name.";
       /* clang-format on */
-      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->IssueMessage(MessageType::FATAL_ERROR, e.str());
       break;
   }
 
@@ -4213,7 +4214,7 @@ bool cmMakefile::SetPolicy(const char* id, cmPolicies::PolicyStatus status)
   if (!cmPolicies::GetPolicyID(id, /* out */ pid)) {
     std::ostringstream e;
     e << "Policy \"" << id << "\" is not known to this version of CMake.";
-    this->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
   return this->SetPolicy(pid, status);
@@ -4226,7 +4227,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   if (status != cmPolicies::NEW &&
       cmPolicies::GetPolicyStatus(id) == cmPolicies::REQUIRED_ALWAYS) {
     std::string msg = cmPolicies::GetRequiredAlwaysPolicyError(id);
-    this->IssueMessage(cmake::FATAL_ERROR, msg);
+    this->IssueMessage(MessageType::FATAL_ERROR, msg);
     return false;
   }
 
@@ -4237,7 +4238,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
           id == cmPolicies::CMP0065))) {
-    this->IssueMessage(cmake::DEPRECATION_WARNING,
+    this->IssueMessage(MessageType::DEPRECATION_WARNING,
                        cmPolicies::GetPolicyDeprecatedWarning(id));
   }
 
@@ -4264,7 +4265,7 @@ void cmMakefile::PushPolicy(bool weak, cmPolicies::PolicyMap const& pm)
 void cmMakefile::PopPolicy()
 {
   if (!this->StateSnapshot.PopPolicy()) {
-    this->IssueMessage(cmake::FATAL_ERROR,
+    this->IssueMessage(MessageType::FATAL_ERROR,
                        "cmake_policy POP without matching PUSH");
   }
 }
@@ -4276,7 +4277,7 @@ void cmMakefile::PopSnapshot(bool reportError)
   // reject any still-open nested policy scopes with an error.
   while (!this->StateSnapshot.CanPopPolicyScope()) {
     if (reportError) {
-      this->IssueMessage(cmake::FATAL_ERROR,
+      this->IssueMessage(MessageType::FATAL_ERROR,
                          "cmake_policy PUSH without matching POP");
       reportError = false;
     }
@@ -4369,7 +4370,7 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
     if (error) {
       *error = e.str();
     } else {
-      this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
+      this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str(),
                                              this->Backtrace);
     }
     return false;
@@ -4416,7 +4417,7 @@ bool cmMakefile::CompileFeatureKnown(cmTarget const* target,
   if (error) {
     *error = e.str();
   } else {
-    this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
+    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str(),
                                            this->Backtrace);
   }
   return false;
@@ -4436,7 +4437,7 @@ const char* cmMakefile::CompileFeaturesAvailable(const std::string& lang,
     if (error) {
       *error = e.str();
     } else {
-      this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
+      this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str(),
                                              this->Backtrace);
     }
     return nullptr;
@@ -4459,7 +4460,7 @@ const char* cmMakefile::CompileFeaturesAvailable(const std::string& lang,
     if (error) {
       *error = e.str();
     } else {
-      this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
+      this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str(),
                                              this->Backtrace);
     }
     return nullptr;
@@ -4484,7 +4485,7 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
     std::ostringstream e;
     e << "CMAKE_C_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
          "not fully configured for this compiler.";
-    this->IssueMessage(cmake::INTERNAL_ERROR, e.str());
+    this->IssueMessage(MessageType::INTERNAL_ERROR, e.str());
     // Return true so the caller does not try to lookup the default standard.
     return true;
   }
@@ -4494,7 +4495,7 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
     e << "The CMAKE_C_STANDARD_DEFAULT variable contains an "
          "invalid value: \""
       << defaultCStandard << "\".";
-    this->IssueMessage(cmake::INTERNAL_ERROR, e.str());
+    this->IssueMessage(MessageType::INTERNAL_ERROR, e.str());
     return false;
   }
 
@@ -4514,7 +4515,7 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
     std::ostringstream e;
     e << "The C_STANDARD property on target \"" << target->GetName()
       << "\" contained an invalid value: \"" << existingCStandard << "\".";
-    this->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
 
@@ -4568,7 +4569,7 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
     std::ostringstream e;
     e << "CMAKE_CXX_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
          "not fully configured for this compiler.";
-    this->IssueMessage(cmake::INTERNAL_ERROR, e.str());
+    this->IssueMessage(MessageType::INTERNAL_ERROR, e.str());
     // Return true so the caller does not try to lookup the default standard.
     return true;
   }
@@ -4578,7 +4579,7 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
     e << "The CMAKE_CXX_STANDARD_DEFAULT variable contains an "
          "invalid value: \""
       << defaultCxxStandard << "\".";
-    this->IssueMessage(cmake::INTERNAL_ERROR, e.str());
+    this->IssueMessage(MessageType::INTERNAL_ERROR, e.str());
     return false;
   }
 
@@ -4602,7 +4603,7 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
     std::ostringstream e;
     e << "The CXX_STANDARD property on target \"" << target->GetName()
       << "\" contained an invalid value: \"" << existingCxxStandard << "\".";
-    this->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
 
@@ -4682,8 +4683,8 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
       if (error) {
         *error = e.str();
       } else {
-        this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                               this->Backtrace);
+        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                               e.str(), this->Backtrace);
       }
       return false;
     }
@@ -4703,8 +4704,8 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
       if (error) {
         *error = e.str();
       } else {
-        this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                               this->Backtrace);
+        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                               e.str(), this->Backtrace);
       }
       return false;
     }
@@ -4781,8 +4782,8 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
       if (error) {
         *error = e.str();
       } else {
-        this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                               this->Backtrace);
+        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                               e.str(), this->Backtrace);
       }
       return false;
     }

@@ -6,10 +6,10 @@
 
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmTarget.h"
 #include "cmTargetPropertyComputer.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 class cmMessenger;
@@ -52,7 +52,7 @@ bool cmGetTargetPropertyCommand::InitialPass(
   } else {
     bool issueMessage = false;
     std::ostringstream e;
-    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    MessageType messageType = MessageType::AUTHOR_WARNING;
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0045)) {
       case cmPolicies::WARN:
         issueMessage = true;
@@ -63,13 +63,13 @@ bool cmGetTargetPropertyCommand::InitialPass(
       case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
         issueMessage = true;
-        messageType = cmake::FATAL_ERROR;
+        messageType = MessageType::FATAL_ERROR;
     }
     if (issueMessage) {
       e << "get_target_property() called with non-existent target \""
         << targetName << "\".";
       this->Makefile->IssueMessage(messageType, e.str());
-      if (messageType == cmake::FATAL_ERROR) {
+      if (messageType == MessageType::FATAL_ERROR) {
         return false;
       }
     }

@@ -25,6 +25,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPropertyMap.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
@@ -340,7 +341,7 @@ std::string cmGeneratorTarget::GetOutputName(
     // An empty map entry indicates we have been called recursively
     // from the above block.
     this->LocalGenerator->GetCMakeInstance()->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "Target '" + this->GetName() + "' OUTPUT_NAME depends on itself.",
       this->GetBacktrace());
   }
@@ -512,7 +513,7 @@ const char* cmGeneratorTarget::GetLinkPIEProperty(
     case cmPolicies::WARN: {
       std::ostringstream e;
       e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0083);
-      this->LocalGenerator->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      this->LocalGenerator->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
       CM_FALLTHROUGH;
     }
     case cmPolicies::OLD:
@@ -559,7 +560,7 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
       w << "INTERPROCEDURAL_OPTIMIZATION property will be ignored for target "
         << "'" << this->GetName() << "'.";
       this->LocalGenerator->GetCMakeInstance()->IssueMessage(
-        cmake::AUTHOR_WARNING, w.str(), this->GetBacktrace());
+        MessageType::AUTHOR_WARNING, w.str(), this->GetBacktrace());
 
       this->PolicyReportedCMP0069 = true;
     }
@@ -590,7 +591,7 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
   this->PolicyReportedCMP0069 = true;
 
   this->LocalGenerator->GetCMakeInstance()->IssueMessage(
-    cmake::FATAL_ERROR, message, this->GetBacktrace());
+    MessageType::FATAL_ERROR, message, this->GetBacktrace());
   return false;
 }
 
@@ -924,7 +925,7 @@ static bool processSources(
       if (fullPath.empty()) {
         if (!e.empty()) {
           cmake* cm = tgt->GetLocalGenerator()->GetCMakeInstance();
-          cm->IssueMessage(cmake::FATAL_ERROR, e, tgt->GetBacktrace());
+          cm->IssueMessage(MessageType::FATAL_ERROR, e, tgt->GetBacktrace());
         }
         return contextDependent;
       }
@@ -939,7 +940,8 @@ static bool processSources(
           err << "Found relative path while evaluating sources of \""
               << tgt->GetName() << "\":\n  \"" << src << "\"\n";
         }
-        tgt->GetLocalGenerator()->IssueMessage(cmake::FATAL_ERROR, err.str());
+        tgt->GetLocalGenerator()->IssueMessage(MessageType::FATAL_ERROR,
+                                               err.str());
         return contextDependent;
       }
       src = fullPath;
@@ -955,7 +957,7 @@ static bool processSources(
     }
     if (!usedSources.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-        cmake::LOG,
+        MessageType::LOG,
         std::string("Used sources for target ") + tgt->GetName() + ":\n" +
           usedSources,
         entry->ge->GetBacktrace());
@@ -1129,7 +1131,7 @@ cmGeneratorTarget::KindedSources const& cmGeneratorTarget::GetKindedSources(
         << "\" use a generator expression that depends on the "
            "SOURCES themselves.";
       this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
-        cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
+        MessageType::FATAL_ERROR, e.str(), this->GetBacktrace());
       static KindedSources empty;
       return empty;
     }
@@ -1230,7 +1232,7 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     e << "but may contain only sources that compile, header files, and "
          "other files that would not affect linking of a normal library.";
     this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
-      cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
+      MessageType::FATAL_ERROR, e.str(), this->GetBacktrace());
   }
 }
 
@@ -1388,7 +1390,7 @@ bool cmGeneratorTarget::NeedRelinkBeforeInstall(
     /* clang-format on */
 
     cmake* cm = this->LocalGenerator->GetCMakeInstance();
-    cm->IssueMessage(cmake::FATAL_ERROR, w.str(), this->GetBacktrace());
+    cm->IssueMessage(MessageType::FATAL_ERROR, w.str(), this->GetBacktrace());
   }
 
   return have_rpath;
@@ -1519,7 +1521,7 @@ bool cmGeneratorTarget::HasMacOSXRpathInstallNameDir(
     w << " less than 10.5 or because CMake's platform configuration is";
     w << " corrupt.";
     cmake* cm = this->LocalGenerator->GetCMakeInstance();
-    cm->IssueMessage(cmake::FATAL_ERROR, w.str(), this->GetBacktrace());
+    cm->IssueMessage(MessageType::FATAL_ERROR, w.str(), this->GetBacktrace());
   }
 
   return true;
@@ -1819,13 +1821,13 @@ public:
     if (!item.Target) {
       if (item.AsStr().find("::") != std::string::npos) {
         bool noMessage = false;
-        cmake::MessageType messageType = cmake::FATAL_ERROR;
+        MessageType messageType = MessageType::FATAL_ERROR;
         std::ostringstream e;
         switch (this->Target->GetLocalGenerator()->GetPolicyStatus(
           cmPolicies::CMP0028)) {
           case cmPolicies::WARN: {
             e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0028) << "\n";
-            messageType = cmake::AUTHOR_WARNING;
+            messageType = MessageType::AUTHOR_WARNING;
           } break;
           case cmPolicies::OLD:
             noMessage = true;
@@ -1928,7 +1930,7 @@ public:
       }
       e << "Set the LINKER_LANGUAGE property for this target.";
       cmake* cm = this->Target->GetLocalGenerator()->GetCMakeInstance();
-      cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
+      cm->IssueMessage(MessageType::FATAL_ERROR, e.str(),
                        this->Target->GetBacktrace());
     }
     return *this->Preferred.begin();
@@ -2053,7 +2055,7 @@ cmGeneratorTarget::CompileInfo const* cmGeneratorTarget::GetCompileInfo(
     msg += this->GetName();
     msg += " which has type ";
     msg += cmState::GetTargetTypeName(this->GetType());
-    this->LocalGenerator->IssueMessage(cmake::INTERNAL_ERROR, msg);
+    this->LocalGenerator->IssueMessage(MessageType::INTERNAL_ERROR, msg);
     return nullptr;
   }
 
@@ -2239,7 +2241,7 @@ cmTargetTraceDependencies::cmTargetTraceDependencies(cmGeneratorTarget* target)
             << "\"\ndepends on the sources of a target it is used in.  This "
                "is a dependency loop and is not allowed.";
           this->GeneratorTarget->LocalGenerator->IssueMessage(
-            cmake::FATAL_ERROR, e.str());
+            MessageType::FATAL_ERROR, e.str());
           return;
         }
         if (emitted.insert(sf).second &&
@@ -2551,14 +2553,14 @@ static void processIncludeDirectories(
     for (std::string& entryInclude : entryIncludes) {
       if (fromImported && !cmSystemTools::FileExists(entryInclude)) {
         std::ostringstream e;
-        cmake::MessageType messageType = cmake::FATAL_ERROR;
+        MessageType messageType = MessageType::FATAL_ERROR;
         if (checkCMP0027) {
           switch (tgt->GetPolicyStatusCMP0027()) {
             case cmPolicies::WARN:
               e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0027) << "\n";
               CM_FALLTHROUGH;
             case cmPolicies::OLD:
-              messageType = cmake::AUTHOR_WARNING;
+              messageType = MessageType::AUTHOR_WARNING;
               break;
             case cmPolicies::REQUIRED_ALWAYS:
             case cmPolicies::REQUIRED_IF_USED:
@@ -2584,7 +2586,7 @@ static void processIncludeDirectories(
       if (!cmSystemTools::FileIsFullPath(entryInclude)) {
         std::ostringstream e;
         bool noMessage = false;
-        cmake::MessageType messageType = cmake::FATAL_ERROR;
+        MessageType messageType = MessageType::FATAL_ERROR;
         if (!targetName.empty()) {
           /* clang-format off */
           e << "Target \"" << targetName << "\" contains relative "
@@ -2595,7 +2597,7 @@ static void processIncludeDirectories(
           switch (tgt->GetPolicyStatusCMP0021()) {
             case cmPolicies::WARN: {
               e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0021) << "\n";
-              messageType = cmake::AUTHOR_WARNING;
+              messageType = MessageType::AUTHOR_WARNING;
             } break;
             case cmPolicies::OLD:
               noMessage = true;
@@ -2611,7 +2613,7 @@ static void processIncludeDirectories(
         }
         if (!noMessage) {
           tgt->GetLocalGenerator()->IssueMessage(messageType, e.str());
-          if (messageType == cmake::FATAL_ERROR) {
+          if (messageType == MessageType::FATAL_ERROR) {
             return;
           }
         }
@@ -2631,7 +2633,7 @@ static void processIncludeDirectories(
     }
     if (!usedIncludes.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-        cmake::LOG,
+        MessageType::LOG,
         std::string("Used includes for target ") + tgt->GetName() + ":\n" +
           usedIncludes,
         entry->ge->GetBacktrace());
@@ -2744,7 +2746,7 @@ static void processOptionsInternal(
     }
     if (!usedOptions.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-        cmake::LOG,
+        MessageType::LOG,
         std::string("Used ") + logName + std::string(" for target ") +
           tgt->GetName() + ":\n" + usedOptions,
         entry->ge->GetBacktrace());
@@ -2946,7 +2948,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
         case cmPolicies::WARN: {
           std::ostringstream e;
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0043);
-          this->LocalGenerator->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+          this->LocalGenerator->IssueMessage(MessageType::AUTHOR_WARNING,
+                                             e.str());
           CM_FALLTHROUGH;
         }
         case cmPolicies::OLD: {
@@ -3085,7 +3088,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
                        return item.find(SHELL) != std::string::npos;
                      }) != linkerOptions.end()) {
       this->LocalGenerator->GetCMakeInstance()->IssueMessage(
-        cmake::FATAL_ERROR,
+        MessageType::FATAL_ERROR,
         "'SHELL:' prefix is not supported as part of 'LINKER:' arguments.",
         this->GetBacktrace());
       return result;
@@ -3219,7 +3222,7 @@ void processLinkDirectories(
       if (!cmSystemTools::FileIsFullPath(entryDirectory)) {
         std::ostringstream e;
         bool noMessage = false;
-        cmake::MessageType messageType = cmake::FATAL_ERROR;
+        MessageType messageType = MessageType::FATAL_ERROR;
         if (!targetName.empty()) {
           /* clang-format off */
           e << "Target \"" << targetName << "\" contains relative "
@@ -3230,7 +3233,7 @@ void processLinkDirectories(
           switch (tgt->GetPolicyStatusCMP0081()) {
             case cmPolicies::WARN: {
               e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0081) << "\n";
-              messageType = cmake::AUTHOR_WARNING;
+              messageType = MessageType::AUTHOR_WARNING;
             } break;
             case cmPolicies::OLD:
               noMessage = true;
@@ -3247,7 +3250,7 @@ void processLinkDirectories(
         }
         if (!noMessage) {
           tgt->GetLocalGenerator()->IssueMessage(messageType, e.str());
-          if (messageType == cmake::FATAL_ERROR) {
+          if (messageType == MessageType::FATAL_ERROR) {
             return;
           }
         }
@@ -3265,7 +3268,7 @@ void processLinkDirectories(
     }
     if (!usedDirectories.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-        cmake::LOG,
+        MessageType::LOG,
         std::string("Used link directories for target ") + tgt->GetName() +
           ":\n" + usedDirectories,
         entry->ge->GetBacktrace());
@@ -3511,7 +3514,7 @@ std::string cmGeneratorTarget::NormalGetRealName(
   if (this->IsImported()) {
     std::string msg = "NormalGetRealName called on imported target: ";
     msg += this->GetName();
-    this->LocalGenerator->IssueMessage(cmake::INTERNAL_ERROR, msg);
+    this->LocalGenerator->IssueMessage(MessageType::INTERNAL_ERROR, msg);
   }
 
   if (this->GetType() == cmStateEnums::EXECUTABLE) {
@@ -3545,7 +3548,7 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name, std::string& soName,
   if (this->IsImported()) {
     std::string msg = "GetLibraryNames called on imported target: ";
     msg += this->GetName();
-    this->LocalGenerator->IssueMessage(cmake::INTERNAL_ERROR, msg);
+    this->LocalGenerator->IssueMessage(MessageType::INTERNAL_ERROR, msg);
     return;
   }
 
@@ -3622,7 +3625,7 @@ void cmGeneratorTarget::GetExecutableNames(std::string& name,
   if (this->IsImported()) {
     std::string msg = "GetExecutableNames called on imported target: ";
     msg += this->GetName();
-    this->LocalGenerator->IssueMessage(cmake::INTERNAL_ERROR, msg);
+    this->LocalGenerator->IssueMessage(MessageType::INTERNAL_ERROR, msg);
   }
 
 // This versioning is supported only for executables and then only
@@ -4123,7 +4126,8 @@ void checkPropertyConsistency(cmGeneratorTarget const* depender,
            "This is not allowed.  Only user-defined properties may appear "
            "listed in the "
         << propName << " property.";
-      depender->GetLocalGenerator()->IssueMessage(cmake::FATAL_ERROR, e.str());
+      depender->GetLocalGenerator()->IssueMessage(MessageType::FATAL_ERROR,
+                                                  e.str());
       return;
     }
     if (emitted.insert(p).second) {
@@ -4263,7 +4267,7 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
          "in a boolean interpretation, a numeric minimum, a numeric maximum "
          "or a "
          "string interpretation, but not a mixture.";
-    this->LocalGenerator->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->LocalGenerator->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
 }
 
@@ -4863,7 +4867,8 @@ void cmGeneratorTarget::ReportPropertyOrigin(
   areport += result;
   areport += "\"):\n" + report;
 
-  this->LocalGenerator->GetCMakeInstance()->IssueMessage(cmake::LOG, areport);
+  this->LocalGenerator->GetCMakeInstance()->IssueMessage(MessageType::LOG,
+                                                         areport);
 }
 
 void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
@@ -5092,7 +5097,7 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
     msg += this->GetName();
     msg += " which has type ";
     msg += cmState::GetTargetTypeName(this->GetType());
-    this->LocalGenerator->IssueMessage(cmake::INTERNAL_ERROR, msg);
+    this->LocalGenerator->IssueMessage(MessageType::INTERNAL_ERROR, msg);
     return nullptr;
   }
 
@@ -5123,7 +5128,7 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
     // An empty map entry indicates we have been called recursively
     // from the above block.
     this->LocalGenerator->GetCMakeInstance()->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "Target '" + this->GetName() + "' OUTPUT_DIRECTORY depends on itself.",
       this->GetBacktrace());
     return nullptr;
@@ -5343,7 +5348,7 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
         linkIfaceProp << ":\n"
         "  " << explicitLibraries << "\n";
       /* clang-format on */
-      this->LocalGenerator->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      this->LocalGenerator->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
       this->PolicyWarnedCMP0022 = true;
     }
   }
@@ -5412,7 +5417,8 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
           "Link implementation:\n"
           "  " << oldLibraries << "\n";
         /* clang-format on */
-        this->LocalGenerator->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+        this->LocalGenerator->IssueMessage(MessageType::AUTHOR_WARNING,
+                                           w.str());
         this->PolicyWarnedCMP0022 = true;
       }
     }
@@ -5720,7 +5726,7 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
           "Config \"" << *it << "\":\n"
           "  " << thisConfigFiles << "\n";
       /* clang-format on */
-      this->LocalGenerator->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->LocalGenerator->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
   }
@@ -5778,7 +5784,8 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
         w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0004) << "\n"
           << "Target \"" << this->GetName() << "\" links to item \"" << item
           << "\" which has leading or trailing whitespace.";
-        cm->IssueMessage(cmake::AUTHOR_WARNING, w.str(), this->GetBacktrace());
+        cm->IssueMessage(MessageType::AUTHOR_WARNING, w.str(),
+                         this->GetBacktrace());
       }
       case cmPolicies::OLD:
         break;
@@ -5787,7 +5794,8 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
         e << "Target \"" << this->GetName() << "\" links to item \"" << item
           << "\" which has leading or trailing whitespace.  "
           << "This is now an error according to policy CMP0004.";
-        cm->IssueMessage(cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
+        cm->IssueMessage(MessageType::FATAL_ERROR, e.str(),
+                         this->GetBacktrace());
       } break;
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS: {
@@ -5795,7 +5803,8 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
         e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0004) << "\n"
           << "Target \"" << this->GetName() << "\" links to item \"" << item
           << "\" which has leading or trailing whitespace.";
-        cm->IssueMessage(cmake::FATAL_ERROR, e.str(), this->GetBacktrace());
+        cm->IssueMessage(MessageType::FATAL_ERROR, e.str(),
+                         this->GetBacktrace());
       } break;
     }
   }
@@ -5959,12 +5968,12 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       if (name == this->GetName() || name.empty()) {
         if (name == this->GetName()) {
           bool noMessage = false;
-          cmake::MessageType messageType = cmake::FATAL_ERROR;
+          MessageType messageType = MessageType::FATAL_ERROR;
           std::ostringstream e;
           switch (this->GetPolicyStatusCMP0038()) {
             case cmPolicies::WARN: {
               e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0038) << "\n";
-              messageType = cmake::AUTHOR_WARNING;
+              messageType = MessageType::AUTHOR_WARNING;
             } break;
             case cmPolicies::OLD:
               noMessage = true;
@@ -5979,7 +5988,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
             e << "Target \"" << this->GetName() << "\" links to itself.";
             this->LocalGenerator->GetCMakeInstance()->IssueMessage(
               messageType, e.str(), this->GetBacktrace());
-            if (messageType == cmake::FATAL_ERROR) {
+            if (messageType == MessageType::FATAL_ERROR) {
               return;
             }
           }

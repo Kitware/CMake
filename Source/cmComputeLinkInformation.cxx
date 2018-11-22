@@ -8,6 +8,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmOrderDirectories.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
@@ -522,7 +523,7 @@ bool cmComputeLinkInformation::Compute()
       "name."
       ;
     /* clang-format on */
-    this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
+    this->CMakeInstance->IssueMessage(MessageType::AUTHOR_WARNING, w.str(),
                                       this->Target->GetBacktrace());
   }
 
@@ -1382,7 +1383,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
         /* clang-format on */
-        this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
+        this->CMakeInstance->IssueMessage(MessageType::AUTHOR_WARNING, w.str(),
                                           this->Target->GetBacktrace());
       }
     }
@@ -1401,7 +1402,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
       /* clang-format on */
-      this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
+      this->CMakeInstance->IssueMessage(MessageType::FATAL_ERROR, e.str(),
                                         this->Target->GetBacktrace());
     } break;
   }
@@ -1424,7 +1425,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
           "CMP0003-WARNING-GIVEN", "1");
         std::ostringstream w;
         this->PrintLinkPolicyDiagnosis(w);
-        this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
+        this->CMakeInstance->IssueMessage(MessageType::AUTHOR_WARNING, w.str(),
                                           this->Target->GetBacktrace());
       }
     case cmPolicies::OLD:
@@ -1439,7 +1440,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
       std::ostringstream e;
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0003) << "\n";
       this->PrintLinkPolicyDiagnosis(e);
-      this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
+      this->CMakeInstance->IssueMessage(MessageType::FATAL_ERROR, e.str(),
                                         this->Target->GetBacktrace());
       return false;
     }

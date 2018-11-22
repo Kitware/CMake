@@ -5,8 +5,8 @@
 #include <sstream>
 
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -89,7 +89,7 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args,
   if (!unknown_args.empty()) {
     std::string msg = "configure_file called with unknown argument(s):\n";
     msg += unknown_args;
-    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, msg);
+    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg);
   }
 
   if (!this->ConfigureFile()) {

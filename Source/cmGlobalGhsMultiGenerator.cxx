@@ -12,6 +12,7 @@
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
 #include "cmVersion.h"
+#include "cmake.h"
 
 const char* cmGlobalGhsMultiGenerator::FILE_EXTENSION = ".gpj";
 const char* cmGlobalGhsMultiGenerator::DEFAULT_BUILD_PROGRAM = "gbuild.exe";

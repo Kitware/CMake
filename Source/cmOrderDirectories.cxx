@@ -5,6 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -475,7 +476,7 @@ void cmOrderDirectories::FindImplicitConflicts()
     << " libraries in implicit directories:\n"
     << text << "Some of these libraries may not be found correctly.";
   this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
-    cmake::WARNING, w.str(), this->Target->GetBacktrace());
+    MessageType::WARNING, w.str(), this->Target->GetBacktrace());
 }
 
 void cmOrderDirectories::OrderDirectories()
@@ -544,7 +545,7 @@ void cmOrderDirectories::DiagnoseCycle()
   }
   e << "Some of these libraries may not be found correctly.";
   this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
-    cmake::WARNING, e.str(), this->Target->GetBacktrace());
+    MessageType::WARNING, e.str(), this->Target->GetBacktrace());
 }
 
 bool cmOrderDirectories::IsSameDirectory(std::string const& l,

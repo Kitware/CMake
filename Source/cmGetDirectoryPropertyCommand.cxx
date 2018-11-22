@@ -4,9 +4,9 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -76,7 +76,7 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
       switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0059)) {
         case cmPolicies::WARN:
           this->Makefile->IssueMessage(
-            cmake::AUTHOR_WARNING,
+            MessageType::AUTHOR_WARNING,
             cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
           CM_FALLTHROUGH;
         case cmPolicies::OLD:

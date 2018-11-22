@@ -6,6 +6,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalVisualStudio10Generator.h"
 #include "cmLocalVisualStudio10Generator.h"
@@ -320,8 +321,7 @@ void cmVisualStudio10TargetGenerator::Generate()
         this->GeneratorTarget->GetName() +
         "\" is of type STATIC_LIBRARY. This is discouraged (and may be "
         "disabled in future). Make it a SHARED library instead.";
-      this->Makefile->IssueMessage(cmake::MessageType::DEPRECATION_WARNING,
-                                   message);
+      this->Makefile->IssueMessage(MessageType::DEPRECATION_WARNING, message);
     }
     this->ProjectType = csproj;
     this->Managed = true;
@@ -2590,7 +2590,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
           "\" the /clr compiler flag was added manually. " +
           "Set usage of C++/CLI by setting COMMON_LANGUAGE_RUNTIME "
           "target property.";
-        this->Makefile->IssueMessage(cmake::MessageType::WARNING, message);
+        this->Makefile->IssueMessage(MessageType::WARNING, message);
       }
     }
     if (auto* clr =

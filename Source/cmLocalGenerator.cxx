@@ -165,7 +165,7 @@ cmLocalGenerator::~cmLocalGenerator()
   cmDeleteAll(this->OwnedImportedGeneratorTargets);
 }
 
-void cmLocalGenerator::IssueMessage(cmake::MessageType t,
+void cmLocalGenerator::IssueMessage(MessageType t,
                                     std::string const& text) const
 {
   this->GetCMakeInstance()->IssueMessage(t, text, this->DirectoryBacktrace);
@@ -190,14 +190,14 @@ void cmLocalGenerator::ComputeObjectMaxPath()
         w << "CMAKE_OBJECT_PATH_MAX is set to " << pmax
           << ", which is less than the minimum of 128.  "
           << "The value will be ignored.";
-        this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+        this->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
       }
     } else {
       std::ostringstream w;
       w << "CMAKE_OBJECT_PATH_MAX is set to \"" << plen
         << "\", which fails to parse as a positive integer.  "
         << "The value will be ignored.";
-      this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      this->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
     }
   }
   this->ObjectMaxPathViolations.clear();
@@ -565,7 +565,7 @@ void cmLocalGenerator::GenerateInstallRules()
             "CMAKE_POLICY_WARNING_CMP0082")) {
         std::ostringstream e;
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0082) << "\n";
-        this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+        this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
       }
       CM_FALLTHROUGH;
     case cmPolicies::OLD: {
@@ -874,7 +874,7 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
            "on "
            "and be depended on by the link implementation."
         << std::endl;
-      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return;
     }
   }
@@ -1387,7 +1387,7 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
             "additional flags may be added to export symbols on all "
             "executables regardless of their ENABLE_EXPORTS property.";
           /* clang-format on */
-          this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+          this->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -1397,7 +1397,7 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         this->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0065));
         CM_FALLTHROUGH;
       case cmPolicies::NEW:
@@ -1670,7 +1670,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
         << (ext ? "(with compiler extensions)" : "")
         << ", but CMake "
            "does not know the compile flags to use to enable it.";
-      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->IssueMessage(MessageType::FATAL_ERROR, e.str());
     } else {
       std::vector<std::string> optVec;
       cmSystemTools::ExpandListArgument(opt, optVec);
@@ -1709,7 +1709,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     std::string e =
       lang + "_STANDARD is set to invalid value '" + standard + "'";
     this->GetGlobalGenerator()->GetCMakeInstance()->IssueMessage(
-      cmake::FATAL_ERROR, e, target->GetBacktrace());
+      MessageType::FATAL_ERROR, e, target->GetBacktrace());
     return;
   }
 
@@ -1719,7 +1719,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     std::string e = "CMAKE_" + lang +
       "_STANDARD_DEFAULT is set to invalid value '" + std::string(defaultStd) +
       "'";
-    this->IssueMessage(cmake::INTERNAL_ERROR, e);
+    this->IssueMessage(MessageType::INTERNAL_ERROR, e);
     return;
   }
 
@@ -1857,7 +1857,7 @@ void cmLocalGenerator::AddVisibilityPresetFlags(
       "For compatibility CMake is not honoring them for this target.";
     /* clang-format on */
     target->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-      cmake::AUTHOR_WARNING, w.str(), target->GetBacktrace());
+      MessageType::AUTHOR_WARNING, w.str(), target->GetBacktrace());
   }
 }
 
@@ -1916,7 +1916,7 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
             << flagsVar << " was removed.\n"
             << cmPolicies::GetPolicyWarning(cmPolicies::CMP0018);
 
-          this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+          this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
           CM_FALLTHROUGH;
         }
         case cmPolicies::OLD:
@@ -2130,7 +2130,7 @@ void cmLocalGenerator::AppendIncludeDirectories(
         << sourceFile.GetLocation().GetName() << "\":\n  \"" << include
         << "\"\n";
 
-      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return;
     }
 
@@ -2500,7 +2500,7 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
           << "cannot be safely placed under this directory.  "
           << "The build may not work correctly.";
         /* clang-format on */
-        this->IssueMessage(cmake::WARNING, m.str());
+        this->IssueMessage(MessageType::WARNING, m.str());
       }
     }
 #else

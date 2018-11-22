@@ -129,7 +129,7 @@ bool cmGlobalVisualStudio12Generator::InitializeWindowsPhone(cmMakefile* mf)
         << "Desktop SDK as well as the Windows Phone '" << this->SystemVersion
         << "' SDK. Please make sure that you have both installed";
     }
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
   return true;
@@ -149,7 +149,7 @@ bool cmGlobalVisualStudio12Generator::InitializeWindowsStore(cmMakefile* mf)
         << "Desktop SDK as well as the Windows Store '" << this->SystemVersion
         << "' SDK. Please make sure that you have both installed";
     }
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
   return true;

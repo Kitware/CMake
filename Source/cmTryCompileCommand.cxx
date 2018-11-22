@@ -3,6 +3,7 @@
 #include "cmTryCompileCommand.h"
 
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmake.h"
 
 class cmExecutionStatus;
@@ -18,7 +19,7 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv,
   if (this->Makefile->GetCMakeInstance()->GetWorkingMode() ==
       cmake::FIND_PACKAGE_MODE) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "The TRY_COMPILE() command is not supported in --find-package mode.");
     return false;
   }

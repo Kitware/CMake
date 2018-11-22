@@ -7,6 +7,7 @@
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmVSSetupHelper.h"
+#include "cmake.h"
 
 #if defined(_M_ARM64)
 #  define HOST_PLATFORM_NAME "ARM64";
@@ -256,7 +257,7 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
         "could not find specified instance of Visual Studio:\n"
         "  " << i;
       /* clang-format on */
-      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
   }
@@ -270,7 +271,7 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
       "  " << this->GetName() << "\n"
       "could not find any instance of Visual Studio.\n";
     /* clang-format on */
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
 

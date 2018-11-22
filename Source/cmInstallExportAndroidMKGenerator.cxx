@@ -13,7 +13,7 @@
 #include "cmInstallTargetGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmake.h"
+#include "cmMessageType.h"
 
 cmInstallExportAndroidMKGenerator::cmInstallExportAndroidMKGenerator(
   cmExportSet* exportSet, const char* destination,

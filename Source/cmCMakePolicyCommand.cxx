@@ -5,10 +5,10 @@
 #include <sstream>
 
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -146,7 +146,7 @@ bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
           << "The call to cmake_policy(GET " << id << " ...) at which this "
           << "error appears requests the policy, and this version of CMake "
           << "requires that the policy be set to NEW before it is checked.";
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       }
   }
 

@@ -126,7 +126,7 @@ bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
         << "Desktop SDK as well as the Windows Store '" << this->SystemVersion
         << "' SDK. Please make sure that you have both installed";
     }
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
   if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
@@ -144,7 +144,7 @@ bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf,
     std::ostringstream e;
     e << "Could not find an appropriate version of the Windows 10 SDK"
       << " installed on this machine";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
   if (!cmSystemTools::VersionCompareEqual(this->WindowsTargetPlatformVersion,

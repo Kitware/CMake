@@ -15,6 +15,7 @@
 #include "cmInstallType.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -91,7 +92,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
     case cmStateEnums::GLOBAL_TARGET:
     case cmStateEnums::UNKNOWN_LIBRARY:
       this->Target->GetLocalGenerator()->IssueMessage(
-        cmake::INTERNAL_ERROR,
+        MessageType::INTERNAL_ERROR,
         "cmInstallTargetGenerator created with non-installable target.");
       return;
   }
@@ -695,7 +696,7 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
         << "Therefore, runtime paths will not be changed when installing.  "
         << "CMAKE_BUILD_WITH_INSTALL_RPATH may be used to work around"
            " this limitation.";
-      mf->IssueMessage(cmake::WARNING, msg.str());
+      mf->IssueMessage(MessageType::WARNING, msg.str());
     } else {
       // Note: These paths are kept unique to avoid
       // install_name_tool corruption.

@@ -11,6 +11,7 @@
 #include <string>
 
 #include "cmGeneratedFileStream.h"
+#include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
@@ -478,7 +479,7 @@ void cmCacheManager::OutputNewlineTruncationWarning(std::ostream& fout,
       std::string message = "Value of ";
       message += key;
       message += " contained a newline; truncating";
-      messenger->IssueMessage(cmake::WARNING, message);
+      messenger->IssueMessage(MessageType::WARNING, message);
     }
 
     std::string comment = "WARNING: Value of ";

@@ -298,6 +298,7 @@ set(SRCS
   cmMakefileExecutableTargetGenerator.cxx
   cmMakefileLibraryTargetGenerator.cxx
   cmMakefileUtilityTargetGenerator.cxx
+  cmMessageType.h
   cmMessenger.cxx
   cmMessenger.h
   cmMSVC60LinkLineComputer.cxx

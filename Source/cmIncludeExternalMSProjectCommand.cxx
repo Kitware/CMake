@@ -8,6 +8,7 @@
 #  include "cmStateTypes.h"
 #  include "cmSystemTools.h"
 #  include "cmTarget.h"
+#  include "cmake.h"
 #endif
 
 class cmExecutionStatus;

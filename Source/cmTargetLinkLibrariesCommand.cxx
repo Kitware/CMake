@@ -8,6 +8,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -51,7 +52,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
     }
   }
   if (!this->Target) {
-    cmake::MessageType t = cmake::FATAL_ERROR; // fail by default
+    MessageType t = MessageType::FATAL_ERROR; // fail by default
     std::ostringstream e;
     e << "Cannot specify link libraries for target \"" << args[0] << "\" "
       << "which is not built by this project.";
@@ -60,7 +61,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
     if (args.size() < 2) {
       switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0016)) {
         case cmPolicies::WARN:
-          t = cmake::AUTHOR_WARNING;
+          t = MessageType::AUTHOR_WARNING;
           // Print the warning.
           e << "\n"
             << "CMake does not support this but it used to work accidentally "
@@ -69,7 +70,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
             << cmPolicies::GetPolicyWarning(cmPolicies::CMP0016);
           break;
         case cmPolicies::OLD: // OLD behavior does not warn.
-          t = cmake::MESSAGE;
+          t = MessageType::MESSAGE;
           break;
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
@@ -81,11 +82,11 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
     }
     // Now actually print the message.
     switch (t) {
-      case cmake::AUTHOR_WARNING:
-        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      case MessageType::AUTHOR_WARNING:
+        this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
         break;
-      case cmake::FATAL_ERROR:
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      case MessageType::FATAL_ERROR:
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
         cmSystemTools::SetFatalErrorOccured();
         break;
       default:
@@ -98,7 +99,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
   if (this->Target->GetType() == cmStateEnums::UTILITY) {
     std::ostringstream e;
     const char* modal = nullptr;
-    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    MessageType messageType = MessageType::AUTHOR_WARNING;
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0039)) {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0039) << "\n";
@@ -109,13 +110,13 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW:
         modal = "must";
-        messageType = cmake::FATAL_ERROR;
+        messageType = MessageType::FATAL_ERROR;
     }
     if (modal) {
       e << "Utility target \"" << this->Target->GetName() << "\" " << modal
         << " not be used as the target of a target_link_libraries call.";
       this->Makefile->IssueMessage(messageType, e.str());
-      if (messageType == cmake::FATAL_ERROR) {
+      if (messageType == MessageType::FATAL_ERROR) {
         return false;
       }
     }
@@ -141,7 +142,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
       this->CurrentProcessingState = ProcessingPlainLinkInterface;
       if (i != 1) {
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           "The LINK_INTERFACE_LIBRARIES option must appear as the second "
           "argument, just after the target name.");
         return true;
@@ -152,7 +153,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
           this->CurrentProcessingState != ProcessingKeywordPublicInterface &&
           this->CurrentProcessingState != ProcessingKeywordLinkInterface) {
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           "The INTERFACE, PUBLIC or PRIVATE option must appear as the second "
           "argument, just after the target name.");
         return true;
@@ -163,7 +164,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
           this->CurrentProcessingState != ProcessingPlainPrivateInterface &&
           this->CurrentProcessingState != ProcessingPlainPublicInterface) {
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           "The LINK_PUBLIC or LINK_PRIVATE option must appear as the second "
           "argument, just after the target name.");
         return true;
@@ -175,7 +176,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
           this->CurrentProcessingState != ProcessingKeywordPublicInterface &&
           this->CurrentProcessingState != ProcessingKeywordLinkInterface) {
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           "The INTERFACE, PUBLIC or PRIVATE option must appear as the second "
           "argument, just after the target name.");
         return true;
@@ -186,7 +187,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
           this->CurrentProcessingState != ProcessingPlainPublicInterface &&
           this->CurrentProcessingState != ProcessingPlainPrivateInterface) {
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           "The LINK_PUBLIC or LINK_PRIVATE option must appear as the second "
           "argument, just after the target name.");
         return true;
@@ -198,7 +199,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
           this->CurrentProcessingState != ProcessingKeywordPublicInterface &&
           this->CurrentProcessingState != ProcessingKeywordLinkInterface) {
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           "The INTERFACE, PUBLIC or PRIVATE option must appear as the second "
           "argument, just after the target name.");
         return true;
@@ -258,7 +259,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
     std::ostringstream e;
     e << "The \"" << cmTargetLinkLibrariesCommand::LinkLibraryTypeNames[llt]
       << "\" argument must be followed by a library.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
   }
 
@@ -290,7 +291,7 @@ void cmTargetLinkLibrariesCommand::LinkLibraryTypeSpecifierWarning(int left,
     << cmTargetLinkLibrariesCommand::LinkLibraryTypeNames[right]
     << "\" instead of a library name.  "
     << "The first specifier will be ignored.";
-  this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+  this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
 }
 
 bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
@@ -299,7 +300,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
   if (this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY &&
       this->CurrentProcessingState != ProcessingKeywordLinkInterface) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "INTERFACE library can only be used with the INTERFACE keyword of "
       "target_link_libraries");
     return false;
@@ -307,7 +308,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
   if (this->Target->IsImported() &&
       this->CurrentProcessingState != ProcessingKeywordLinkInterface) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "IMPORTED library can only be used with the INTERFACE keyword of "
       "target_link_libraries");
     return false;
@@ -325,7 +326,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
         sig, this->Makefile->GetExecutionContext())) {
     std::ostringstream e;
     const char* modal = nullptr;
-    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    MessageType messageType = MessageType::AUTHOR_WARNING;
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0023)) {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0023) << "\n";
@@ -336,7 +337,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW:
         modal = "must";
-        messageType = cmake::FATAL_ERROR;
+        messageType = MessageType::FATAL_ERROR;
     }
 
     if (modal) {
@@ -355,7 +356,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
                                             ? cmTarget::PlainTLLSignature
                                             : cmTarget::KeywordTLLSignature);
       this->Makefile->IssueMessage(messageType, e.str());
-      if (messageType == cmake::FATAL_ERROR) {
+      if (messageType == MessageType::FATAL_ERROR) {
         return false;
       }
     }
@@ -408,7 +409,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
         << this->Target->GetName()
         << "\" which is not built in this directory.\n"
         << "This is allowed only when policy CMP0079 is set to NEW.";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
 
@@ -426,7 +427,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
         << " may not be linked into another target.  One may link only to "
            "INTERFACE, OBJECT, STATIC or SHARED libraries, or to executables "
            "with the ENABLE_EXPORTS property set.";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     }
 
     this->Target->AddLinkLibrary(*this->Makefile, lib, libRef, llt);
@@ -442,7 +443,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       "which the target was created rather than in this calling "
       "directory.";
     /* clang-format on */
-    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
   }
 
   // Handle (additional) case where the command was called with PRIVATE /

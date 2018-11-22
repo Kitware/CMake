@@ -5,9 +5,9 @@
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
-#include "cmake.h"
 
 #include <cstring>
 #include <sstream>
@@ -289,7 +289,7 @@ bool cmCTestHandlerCommand::CheckArgumentValue(std::string const& arg)
     if (this->Values[k]) {
       std::ostringstream e;
       e << "Called with more than one value for " << this->Arguments[k];
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       this->ArgumentDoing = ArgumentDoingError;
       return true;
     }
