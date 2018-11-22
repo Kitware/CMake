@@ -1222,7 +1222,7 @@ void cmMakefileTargetGenerator::MakeEchoProgress(
   cmLocalUnixMakefileGenerator3::EchoProgress& progress) const
 {
   progress.Dir = this->LocalGenerator->GetBinaryDirectory();
-  progress.Dir += cmake::GetCMakeFilesDirectory();
+  progress.Dir += "/CMakeFiles";
   std::ostringstream progressArg;
   progressArg << "$(CMAKE_PROGRESS_" << this->NumberOfProgressActions << ")";
   progress.Arg = progressArg.str();

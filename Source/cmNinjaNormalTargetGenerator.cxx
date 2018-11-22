@@ -31,7 +31,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 class cmCustomCommand;
 
@@ -718,8 +717,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
     globalGen.GetRuleCmdLength(this->LanguageLinkerDeviceRule());
 
   const std::string rspfile = this->ConvertToNinjaPath(
-    std::string(cmake::GetCMakeFilesDirectoryPostSlash()) +
-    genTarget.GetName() + ".rsp");
+    std::string("CMakeFiles/") + genTarget.GetName() + ".rsp");
 
   // Gather order-only dependencies.
   cmNinjaDeps orderOnlyDeps;
@@ -1004,8 +1002,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   }
 
   const std::string rspfile = this->ConvertToNinjaPath(
-    std::string(cmake::GetCMakeFilesDirectoryPostSlash()) + gt.GetName() +
-    ".rsp");
+    std::string("CMakeFiles/") + gt.GetName() + ".rsp");
 
   // Gather order-only dependencies.
   cmNinjaDeps orderOnlyDeps;

@@ -485,7 +485,7 @@ void cmGlobalGenerator::EnableLanguage(
 
   mf->AddDefinition("RUN_CONFIGURE", true);
   std::string rootBin = this->CMakeInstance->GetHomeOutputDirectory();
-  rootBin += cmake::GetCMakeFilesDirectory();
+  rootBin += "/CMakeFiles";
 
   // If the configuration files path has been set,
   // then we are in a try compile and need to copy the enable language
@@ -1214,7 +1214,7 @@ void cmGlobalGenerator::Configure()
       const char* logs[] = { "CMakeOutput.log", "CMakeError.log", nullptr };
       for (const char** log = logs; *log; ++log) {
         std::string f = this->CMakeInstance->GetHomeOutputDirectory();
-        f += cmake::GetCMakeFilesDirectory();
+        f += "/CMakeFiles";
         f += "/";
         f += *log;
         if (cmSystemTools::FileExists(f)) {
@@ -2000,7 +2000,7 @@ void cmGlobalGenerator::SetConfiguredFilesPath(cmGlobalGenerator* gen)
     this->ConfiguredFilesPath = gen->ConfiguredFilesPath;
   } else {
     this->ConfiguredFilesPath = gen->CMakeInstance->GetHomeOutputDirectory();
-    this->ConfiguredFilesPath += cmake::GetCMakeFilesDirectory();
+    this->ConfiguredFilesPath += "/CMakeFiles";
   }
 }
 
@@ -2618,8 +2618,7 @@ std::string cmGlobalGenerator::GenerateRuleFile(
   ruleFile += ".rule";
   const char* dir = this->GetCMakeCFGIntDir();
   if (dir && dir[0] == '$') {
-    cmSystemTools::ReplaceString(ruleFile, dir,
-                                 cmake::GetCMakeFilesDirectory());
+    cmSystemTools::ReplaceString(ruleFile, dir, "/CMakeFiles");
   }
   return ruleFile;
 }
@@ -2820,7 +2819,7 @@ void cmGlobalGenerator::CheckRuleHashes()
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   std::string home = this->GetCMakeInstance()->GetHomeOutputDirectory();
   std::string pfile = home;
-  pfile += cmake::GetCMakeFilesDirectory();
+  pfile += "/CMakeFiles";
   pfile += "/CMakeRuleHashes.txt";
   this->CheckRuleHashes(pfile, home);
   this->WriteRuleHashes(pfile);
@@ -2899,7 +2898,7 @@ void cmGlobalGenerator::WriteSummary()
 {
   // Record all target directories in a central location.
   std::string fname = this->CMakeInstance->GetHomeOutputDirectory();
-  fname += cmake::GetCMakeFilesDirectory();
+  fname += "/CMakeFiles";
   fname += "/TargetDirectories.txt";
   cmGeneratedFileStream fout(fname);
 

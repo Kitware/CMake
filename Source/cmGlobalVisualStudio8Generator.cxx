@@ -117,7 +117,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 
   // Create a list of all stamp files for this project.
   std::vector<std::string> stamps;
-  std::string stampList = cmake::GetCMakeFilesDirectoryPostSlash();
+  std::string stampList = "CMakeFiles/";
   stampList += cmGlobalVisualStudio8Generator::GetGenerateStampList();
   {
     std::string stampListFile =
@@ -129,7 +129,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     for (cmLocalGenerator const* gi : generators) {
       stampFile = gi->GetMakefile()->GetCurrentBinaryDirectory();
       stampFile += "/";
-      stampFile += cmake::GetCMakeFilesDirectoryPostSlash();
+      stampFile += "CMakeFiles/";
       stampFile += "generate.stamp";
       fout << stampFile << "\n";
       stamps.push_back(stampFile);

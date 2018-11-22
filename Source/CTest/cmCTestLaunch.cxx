@@ -282,7 +282,7 @@ void cmCTestLaunch::LoadLabels()
 
   // Labels are listed in per-target files.
   std::string fname = this->OptionBuildDir;
-  fname += cmake::GetCMakeFilesDirectory();
+  fname += "/CMakeFiles";
   fname += "/";
   fname += this->OptionTargetName;
   fname += ".dir/Labels.txt";

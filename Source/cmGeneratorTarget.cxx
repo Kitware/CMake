@@ -6140,7 +6140,7 @@ bool cmGeneratorTarget::HasImportLibrary(std::string const& config) const
 std::string cmGeneratorTarget::GetSupportDirectory() const
 {
   std::string dir = this->LocalGenerator->GetCurrentBinaryDirectory();
-  dir += cmake::GetCMakeFilesDirectory();
+  dir += "/CMakeFiles";
   dir += "/";
   dir += this->GetName();
 #if defined(__VMS)

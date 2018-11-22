@@ -19,7 +19,6 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 cmInstallTargetGenerator::cmInstallTargetGenerator(
   const std::string& targetName, const char* dest, bool implib,
@@ -102,7 +101,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
   if (this->Target->NeedRelinkBeforeInstall(config)) {
     fromDirConfig =
       this->Target->GetLocalGenerator()->GetCurrentBinaryDirectory();
-    fromDirConfig += cmake::GetCMakeFilesDirectory();
+    fromDirConfig += "/CMakeFiles";
     fromDirConfig += "/CMakeRelink.dir/";
   } else {
     cmStateEnums::ArtifactType artifact = this->ImportLibrary

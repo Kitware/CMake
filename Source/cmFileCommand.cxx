@@ -558,7 +558,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   if (hex_conversion_enabled) {
     // TODO: should work without temp file, but just on a memory buffer
     std::string binaryFileName = this->Makefile->GetCurrentBinaryDirectory();
-    binaryFileName += cmake::GetCMakeFilesDirectory();
+    binaryFileName += "/CMakeFiles";
     binaryFileName += "/FileCommandStringsBinaryFile";
     if (cmHexFileConverter::TryConvert(fileName.c_str(),
                                        binaryFileName.c_str())) {

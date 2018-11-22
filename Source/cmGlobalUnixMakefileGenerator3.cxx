@@ -146,7 +146,7 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   for (cmLocalGenerator* lg : this->LocalGenerators) {
     std::string markFileName = lg->GetCurrentBinaryDirectory();
     markFileName += "/";
-    markFileName += cmake::GetCMakeFilesDirectory();
+    markFileName += "/CMakeFiles";
     markFileName += "/progress.marks";
     cmGeneratedFileStream markFile(markFileName);
     markFile << this->CountProgressMarksInAll(lg) << "\n";
@@ -196,7 +196,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
   // see if the build system must be regenerated.
   std::string makefileName =
     this->GetCMakeInstance()->GetHomeOutputDirectory();
-  makefileName += cmake::GetCMakeFilesDirectory();
+  makefileName += "/CMakeFiles";
   makefileName += "/Makefile2";
   cmGeneratedFileStream makefileStream(makefileName, false,
                                        this->GetMakefileEncoding());
@@ -268,7 +268,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   // see if the build system must be regenerated.
   std::string cmakefileName =
     this->GetCMakeInstance()->GetHomeOutputDirectory();
-  cmakefileName += cmake::GetCMakeFilesDirectory();
+  cmakefileName += "/CMakeFiles";
   cmakefileName += "/Makefile.cmake";
   cmGeneratedFileStream cmakefileStream(cmakefileName);
   if (!cmakefileStream) {
@@ -332,7 +332,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
 
   // Build the path to the cache check file.
   std::string check = this->GetCMakeInstance()->GetHomeOutputDirectory();
-  check += cmake::GetCMakeFilesDirectory();
+  check += "/CMakeFiles";
   check += "/cmake.check_cache";
 
   // Set the corresponding makefile in the cmake file.
@@ -363,7 +363,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     for (cmLocalGenerator* localGen : this->LocalGenerators) {
       lg = static_cast<cmLocalUnixMakefileGenerator3*>(localGen);
       tmpStr = lg->GetCurrentBinaryDirectory();
-      tmpStr += cmake::GetCMakeFilesDirectory();
+      tmpStr += "/CMakeFiles";
       tmpStr += "/CMakeDirectoryInformation.cmake";
       cmakefileStream << "  \"" << lg->ConvertToRelativePath(binDir, tmpStr)
                       << "\"\n";
@@ -572,7 +572,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(
 
         // Write the rule.
         commands.clear();
-        std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
+        std::string tmp = "CMakeFiles/";
         tmp += "Makefile2";
         commands.push_back(lg->GetRecursiveMakeCall(tmp.c_str(), name));
         depends.clear();
@@ -672,7 +672,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
 
       cmLocalUnixMakefileGenerator3::EchoProgress progress;
       progress.Dir = lg->GetBinaryDirectory();
-      progress.Dir += cmake::GetCMakeFilesDirectory();
+      progress.Dir += "/CMakeFiles";
       {
         std::ostringstream progressArg;
         const char* sep = "";
@@ -726,7 +726,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
         progCmd << " " << this->CountProgressMarksInTarget(gtarget, emitted);
         commands.push_back(progCmd.str());
       }
-      std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
+      std::string tmp = "CMakeFiles/";
       tmp += "Makefile2";
       commands.push_back(lg->GetRecursiveMakeCall(tmp.c_str(), localName));
       {

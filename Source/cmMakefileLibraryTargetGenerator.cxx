@@ -25,7 +25,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 cmMakefileLibraryTargetGenerator::cmMakefileLibraryTargetGenerator(
   cmGeneratorTarget* target)
@@ -499,7 +498,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     outpath += "/";
   } else if (relink) {
     outpath = this->Makefile->GetCurrentBinaryDirectory();
-    outpath += cmake::GetCMakeFilesDirectory();
+    outpath += "/CMakeFiles";
     outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath);
     outpath += "/";

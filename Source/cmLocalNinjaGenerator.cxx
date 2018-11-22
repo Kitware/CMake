@@ -106,7 +106,7 @@ void cmLocalNinjaGenerator::Generate()
 std::string cmLocalNinjaGenerator::GetTargetDirectory(
   cmGeneratorTarget const* target) const
 {
-  std::string dir = cmake::GetCMakeFilesDirectoryPostSlash();
+  std::string dir = "CMakeFiles/";
   dir += target->GetName();
 #if defined(__VMS)
   dir += "_dir";
@@ -305,7 +305,7 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
     scriptPath = target->GetSupportDirectory();
   } else {
     scriptPath = this->GetCurrentBinaryDirectory();
-    scriptPath += cmake::GetCMakeFilesDirectory();
+    scriptPath += "/CMakeFiles";
   }
   cmSystemTools::MakeDirectory(scriptPath);
   scriptPath += '/';
