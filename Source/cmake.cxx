@@ -140,7 +140,7 @@ cmake::cmake(Role role)
 
   this->State = new cmState;
   this->CurrentSnapshot = this->State->CreateBaseSnapshot();
-  this->Messenger = new cmMessenger(this->State);
+  this->Messenger = new cmMessenger;
 
 #ifdef __APPLE__
   struct rlimit rlp;
@@ -1299,6 +1299,23 @@ int cmake::Configure()
     }
   }
 
+  // Cache variables may have already been set by a previous invocation,
+  // so we cannot rely on command line options alone. Always ensure our
+  // messenger is in sync with the cache.
+  const char* value = this->State->GetCacheEntryValue("CMAKE_WARN_DEPRECATED");
+  this->Messenger->SetSuppressDeprecatedWarnings(value &&
+                                                 cmSystemTools::IsOff(value));
+
+  value = this->State->GetCacheEntryValue("CMAKE_ERROR_DEPRECATED");
+  this->Messenger->SetDeprecatedWarningsAsErrors(cmSystemTools::IsOn(value));
+
+  value = this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
+  this->Messenger->SetSuppressDevWarnings(cmSystemTools::IsOn(value));
+
+  value = this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_ERRORS");
+  this->Messenger->SetDevWarningsAsErrors(value &&
+                                          cmSystemTools::IsOff(value));
+
   int ret = this->ActualConfigure();
   const char* delCacheVars =
     this->State->GetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_");
@@ -1691,6 +1708,18 @@ void cmake::AddCacheEntry(const std::string& key, const char* value,
   this->State->AddCacheEntry(key, value, helpString,
                              cmStateEnums::CacheEntryType(type));
   this->UnwatchUnusedCli(key);
+
+  if (key == "CMAKE_WARN_DEPRECATED") {
+    this->Messenger->SetSuppressDeprecatedWarnings(
+      value && cmSystemTools::IsOff(value));
+  } else if (key == "CMAKE_ERROR_DEPRECATED") {
+    this->Messenger->SetDeprecatedWarningsAsErrors(cmSystemTools::IsOn(value));
+  } else if (key == "CMAKE_SUPPRESS_DEVELOPER_WARNINGS") {
+    this->Messenger->SetSuppressDevWarnings(cmSystemTools::IsOn(value));
+  } else if (key == "CMAKE_SUPPRESS_DEVELOPER_ERRORS") {
+    this->Messenger->SetDevWarningsAsErrors(value &&
+                                            cmSystemTools::IsOff(value));
+  }
 }
 
 bool cmake::DoWriteGlobVerifyTarget() const
