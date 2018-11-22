@@ -205,18 +205,18 @@ List of CPack DEB generator specific variables:
  The archive format used for creating the Debian package.
 
  * Mandatory : YES
- * Default   : "paxr"
+ * Default   : "gnutar"
 
- Possible values are:
+ Possible value is:
 
- - paxr
  - gnutar
 
  .. note::
 
-   Default pax archive format is the most portable format and generates
-   packages that do not treat sparse files specially.
-   GNU tar format on the other hand supports longer filenames.
+   This variable previously defaulted to the ``paxr`` value, but ``dpkg``
+   has never supported that tar format. For backwards compatibility the
+   ``paxr`` value will be mapped to ``gnutar`` and a deprecation message
+   will be emitted.
 
 .. variable:: CPACK_DEBIAN_COMPRESSION_TYPE
 
