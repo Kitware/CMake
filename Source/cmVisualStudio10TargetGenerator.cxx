@@ -3584,8 +3584,8 @@ bool cmVisualStudio10TargetGenerator::ComputeLibOptions(
     this->LocalGenerator->GetCurrentBinaryDirectory();
   for (cmComputeLinkInformation::Item const& l : libs) {
     if (l.IsPath && cmVS10IsTargetsFile(l.Value)) {
-      std::string path =
-        this->LocalGenerator->ConvertToRelativePath(currentBinDir, l.Value);
+      std::string path = this->LocalGenerator->MaybeConvertToRelativePath(
+        currentBinDir, l.Value);
       ConvertToWindowsSlash(path);
       this->AddTargetsFileAndConfigPair(path, config);
     }
@@ -3668,8 +3668,8 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
     }
 
     if (l.IsPath) {
-      std::string path =
-        this->LocalGenerator->ConvertToRelativePath(currentBinDir, l.Value);
+      std::string path = this->LocalGenerator->MaybeConvertToRelativePath(
+        currentBinDir, l.Value);
       ConvertToWindowsSlash(path);
       if (cmVS10IsTargetsFile(l.Value)) {
         vsTargetVec.push_back(path);

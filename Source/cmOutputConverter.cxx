@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "cmState.h"
-#include "cmStateDirectory.h"
 #include "cmSystemTools.h"
 
 cmOutputConverter::cmOutputConverter(cmStateSnapshot const& snapshot)
@@ -70,17 +69,6 @@ std::string cmOutputConverter::ConvertDirectorySeparatorsForShell(
     std::replace(result.begin(), result.end(), '/', '\\');
   }
   return result;
-}
-
-std::string cmOutputConverter::ConvertToRelativePath(
-  std::string const& local_path, std::string const& remote_path) const
-{
-  if (!this->StateSnapshot.GetDirectory().ContainsBoth(local_path,
-                                                       remote_path)) {
-    return remote_path;
-  }
-
-  return cmSystemTools::ForceToRelativePath(local_path, remote_path);
 }
 
 static bool cmOutputConverterIsShellOperator(const std::string& str)

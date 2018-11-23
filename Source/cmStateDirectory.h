@@ -35,6 +35,9 @@ public:
   bool ContainsBoth(std::string const& local_path,
                     std::string const& remote_path) const;
 
+  std::string ConvertToRelPathIfNotContained(
+    std::string const& local_path, std::string const& remote_path) const;
+
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesEntryBacktraces() const;
   void AppendIncludeDirectoriesEntry(std::string const& vec,

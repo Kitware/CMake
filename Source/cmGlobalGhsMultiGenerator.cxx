@@ -297,7 +297,7 @@ void cmGlobalGhsMultiGenerator::WriteSubProjects(
     if (projName && projType) {
       cmLocalGenerator* lg = target->GetLocalGenerator();
       std::string dir = lg->GetCurrentBinaryDirectory();
-      dir = root->ConvertToRelativePath(rootBinaryDir, dir.c_str());
+      dir = root->MaybeConvertToRelativePath(rootBinaryDir, dir.c_str());
       if (dir == ".") {
         dir.clear();
       } else {

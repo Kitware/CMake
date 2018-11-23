@@ -19,7 +19,6 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
-#include "cmOutputConverter.h"
 #include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
@@ -747,11 +746,12 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
   const char* sigString =
     (sig == cmTarget::KeywordTLLSignature ? "keyword" : "plain");
   s << "The uses of the " << sigString << " signature are here:\n";
-  cmOutputConverter converter(this->GetMakefile()->GetStateSnapshot());
+  cmStateDirectory cmDir =
+    this->GetMakefile()->GetStateSnapshot().GetDirectory();
   for (auto const& cmd : this->TLLCommands) {
     if (cmd.first == sig) {
       cmListFileContext lfc = cmd.second;
-      lfc.FilePath = converter.ConvertToRelativePath(
+      lfc.FilePath = cmDir.ConvertToRelPathIfNotContained(
         this->Makefile->GetState()->GetSourceDirectory(), lfc.FilePath);
       s << " * " << lfc << std::endl;
     }

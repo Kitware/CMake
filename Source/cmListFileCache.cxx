@@ -5,8 +5,8 @@
 #include "cmListFileLexer.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
-#include "cmOutputConverter.h"
 #include "cmState.h"
+#include "cmStateDirectory.h"
 #include "cmSystemTools.h"
 
 #include <assert.h>
@@ -390,9 +390,8 @@ void cmListFileBacktrace::PrintTitle(std::ostream& out) const
   }
   cmListFileContext lfc = this->TopEntry->Context;
   cmStateSnapshot bottom = this->GetBottom();
-  cmOutputConverter converter(bottom);
   if (!bottom.GetState()->GetIsInTryCompile()) {
-    lfc.FilePath = converter.ConvertToRelativePath(
+    lfc.FilePath = bottom.GetDirectory().ConvertToRelPathIfNotContained(
       bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
   }
   out << (lfc.Line ? " at " : " in ") << lfc;
@@ -409,7 +408,6 @@ void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
 
   bool first = true;
   cmStateSnapshot bottom = this->GetBottom();
-  cmOutputConverter converter(bottom);
   for (Entry const* cur = this->TopEntry->Parent.get(); !cur->IsBottom();
        cur = cur->Parent.get()) {
     if (cur->Context.Name.empty()) {
@@ -423,7 +421,7 @@ void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
     }
     cmListFileContext lfc = cur->Context;
     if (!bottom.GetState()->GetIsInTryCompile()) {
-      lfc.FilePath = converter.ConvertToRelativePath(
+      lfc.FilePath = bottom.GetDirectory().ConvertToRelPathIfNotContained(
         bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
     }
     out << "  " << lfc << "\n";

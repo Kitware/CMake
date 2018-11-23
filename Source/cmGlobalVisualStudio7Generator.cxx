@@ -367,7 +367,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       if (vcprojName) {
         cmLocalGenerator* lg = target->GetLocalGenerator();
         std::string dir = lg->GetCurrentBinaryDirectory();
-        dir = root->ConvertToRelativePath(rootBinaryDir, dir.c_str());
+        dir = root->MaybeConvertToRelativePath(rootBinaryDir, dir.c_str());
         if (dir == ".") {
           dir.clear(); // msbuild cannot handle ".\" prefix
         }

@@ -150,7 +150,8 @@ void cmGhsMultiTargetGenerator::WriteTargetSpecifics(std::ostream& fout,
   if (this->TagType != GhsMultiGpj::SUBPROJECT) {
     // set target binary file destination
     outpath = this->GeneratorTarget->GetDirectory(config);
-    outpath = this->LocalGenerator->ConvertToRelativePath(rootpath, outpath);
+    outpath =
+      this->LocalGenerator->MaybeConvertToRelativePath(rootpath, outpath);
     fout << "    :binDirRelative=\"" << outpath << "\"" << std::endl;
     fout << "    -o \"" << this->TargetNameReal << "\"" << std::endl;
   }
@@ -550,7 +551,7 @@ void cmGhsMultiTargetGenerator::WriteReferences(std::ostream& fout)
     std::string tpath = t->LocalGenerator->GetCurrentBinaryDirectory();
     std::string rootpath = this->LocalGenerator->GetCurrentBinaryDirectory();
     std::string outpath =
-      this->LocalGenerator->ConvertToRelativePath(rootpath, tpath) + "/" +
+      this->LocalGenerator->MaybeConvertToRelativePath(rootpath, tpath) + "/" +
       tname + "REF" + cmGlobalGhsMultiGenerator::FILE_EXTENSION;
 
     fout << outpath;
