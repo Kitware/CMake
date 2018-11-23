@@ -9,7 +9,6 @@
 #include <string.h>
 #include <vector>
 
-#include "cmAlgorithms.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmSystemTools.h"
@@ -73,41 +72,11 @@ std::string cmOutputConverter::ConvertDirectorySeparatorsForShell(
   return result;
 }
 
-static bool cmOutputConverterNotAbove(const char* a, const char* b)
-{
-  return (cmSystemTools::ComparePath(a, b) ||
-          cmSystemTools::IsSubDirectory(a, b));
-}
-
-bool cmOutputConverter::ContainedInDirectory(std::string const& local_path,
-                                             std::string const& remote_path,
-                                             cmStateDirectory const& directory)
-{
-  const std::string& relativePathTopBinary =
-    directory.GetRelativePathTopBinary();
-  const std::string& relativePathTopSource =
-    directory.GetRelativePathTopSource();
-
-  const bool bothInBinary =
-    cmOutputConverterNotAbove(local_path.c_str(),
-                              relativePathTopBinary.c_str()) &&
-    cmOutputConverterNotAbove(remote_path.c_str(),
-                              relativePathTopBinary.c_str());
-
-  const bool bothInSource =
-    cmOutputConverterNotAbove(local_path.c_str(),
-                              relativePathTopSource.c_str()) &&
-    cmOutputConverterNotAbove(remote_path.c_str(),
-                              relativePathTopSource.c_str());
-
-  return bothInSource || bothInBinary;
-}
-
 std::string cmOutputConverter::ConvertToRelativePath(
   std::string const& local_path, std::string const& remote_path) const
 {
-  if (!ContainedInDirectory(local_path, remote_path,
-                            this->StateSnapshot.GetDirectory())) {
+  if (!this->StateSnapshot.GetDirectory().ContainsBoth(local_path,
+                                                       remote_path)) {
     return remote_path;
   }
 

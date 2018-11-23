@@ -1308,8 +1308,7 @@ public:
 private:
   std::string MaybeConvertToRelativePath(std::string const& obj)
   {
-    if (!cmOutputConverter::ContainedInDirectory(
-          this->StateDir.GetCurrentBinary(), obj, this->StateDir)) {
+    if (!this->StateDir.ContainsBoth(this->StateDir.GetCurrentBinary(), obj)) {
       return obj;
     }
     return cmSystemTools::ForceToRelativePath(

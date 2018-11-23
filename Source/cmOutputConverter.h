@@ -10,7 +10,6 @@
 #include "cmStateSnapshot.h"
 
 class cmState;
-class cmStateDirectory;
 
 class cmOutputConverter
 {
@@ -91,10 +90,6 @@ public:
     FortranFormatFree
   };
   static FortranFormat GetFortranFormat(const char* value);
-
-  static bool ContainedInDirectory(std::string const& local_path,
-                                   std::string const& remote_path,
-                                   cmStateDirectory const& directory);
 
   /**
    * Convert the given remote path to a relative path with respect to

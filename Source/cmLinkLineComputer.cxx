@@ -47,8 +47,7 @@ std::string cmLinkLineComputer::ConvertToLinkReference(
 {
   std::string relLib = lib;
 
-  if (cmOutputConverter::ContainedInDirectory(
-        this->StateDir.GetCurrentBinary(), lib, this->StateDir)) {
+  if (this->StateDir.ContainsBoth(this->StateDir.GetCurrentBinary(), lib)) {
     relLib = cmSystemTools::ForceToRelativePath(
       this->StateDir.GetCurrentBinary(), lib);
   }

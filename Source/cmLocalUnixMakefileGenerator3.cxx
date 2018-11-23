@@ -2093,8 +2093,7 @@ void cmLocalUnixMakefileGenerator3::CreateCDCommand(
 std::string cmLocalUnixMakefileGenerator3::MaybeConvertToRelativePath(
   std::string const& base, std::string const& path)
 {
-  if (!cmOutputConverter::ContainedInDirectory(
-        base, path, this->GetStateSnapshot().GetDirectory())) {
+  if (!this->GetStateSnapshot().GetDirectory().ContainsBoth(base, path)) {
     return path;
   }
   return cmSystemTools::ForceToRelativePath(base, path);
