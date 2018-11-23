@@ -11,6 +11,7 @@
 #include "cmOutputConverter.h"
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
+#include "cmSystemTools.h"
 
 cmLinkLineComputer::cmLinkLineComputer(cmOutputConverter* outputConverter,
                                        cmStateDirectory const& stateDir)
@@ -48,7 +49,7 @@ std::string cmLinkLineComputer::ConvertToLinkReference(
 
   if (cmOutputConverter::ContainedInDirectory(
         this->StateDir.GetCurrentBinary(), lib, this->StateDir)) {
-    relLib = cmOutputConverter::ForceToRelativePath(
+    relLib = cmSystemTools::ForceToRelativePath(
       this->StateDir.GetCurrentBinary(), lib);
   }
   return relLib;

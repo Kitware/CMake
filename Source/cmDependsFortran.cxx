@@ -701,5 +701,5 @@ std::string cmDependsFortran::MaybeConvertToRelativePath(
         base, path, this->LocalGenerator->GetStateSnapshot().GetDirectory())) {
     return path;
   }
-  return cmOutputConverter::ForceToRelativePath(base, path);
+  return cmSystemTools::ForceToRelativePath(base, path);
 }

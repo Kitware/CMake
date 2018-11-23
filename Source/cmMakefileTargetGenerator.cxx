@@ -1312,7 +1312,7 @@ private:
           this->StateDir.GetCurrentBinary(), obj, this->StateDir)) {
       return obj;
     }
-    return cmOutputConverter::ForceToRelativePath(
+    return cmSystemTools::ForceToRelativePath(
       this->StateDir.GetCurrentBinary(), obj);
   }
 

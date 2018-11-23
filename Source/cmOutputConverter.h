@@ -106,14 +106,6 @@ public:
   std::string ConvertToRelativePath(std::string const& local_path,
                                     std::string const& remote_path) const;
 
-  /**
-   * Convert the given remote path to a relative path with respect to
-   * the given local path.  Both paths must use forward slashes and not
-   * already be escaped or quoted.
-   */
-  static std::string ForceToRelativePath(std::string const& local_path,
-                                         std::string const& remote_path);
-
 private:
   cmState* GetState() const;
 

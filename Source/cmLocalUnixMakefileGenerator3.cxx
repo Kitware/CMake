@@ -2097,5 +2097,5 @@ std::string cmLocalUnixMakefileGenerator3::MaybeConvertToRelativePath(
         base, path, this->GetStateSnapshot().GetDirectory())) {
     return path;
   }
-  return cmOutputConverter::ForceToRelativePath(base, path);
+  return cmSystemTools::ForceToRelativePath(base, path);
 }

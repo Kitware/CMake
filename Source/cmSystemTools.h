@@ -375,6 +375,14 @@ public:
   static std::string RelativePath(std::string const& local,
                                   std::string const& remote);
 
+  /**
+   * Convert the given remote path to a relative path with respect to
+   * the given local path.  Both paths must use forward slashes and not
+   * already be escaped or quoted.
+   */
+  static std::string ForceToRelativePath(std::string const& local_path,
+                                         std::string const& remote_path);
+
   /** Joins two paths while collapsing x/../ parts
    * For example CollapseCombinedPath("a/b/c", "../../d") results in "a/d"
    */
