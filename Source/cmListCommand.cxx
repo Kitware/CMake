@@ -289,12 +289,10 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
     if (item < 0) {
       item = static_cast<int>(nitem) + item;
     }
-    if (item < 0 || nitem <= static_cast<size_t>(item)) {
+    if (item < 0 || nitem < static_cast<size_t>(item)) {
       std::ostringstream str;
       str << "index: " << item << " out of range (-" << varArgsExpanded.size()
-          << ", "
-          << (varArgsExpanded.empty() ? 0 : (varArgsExpanded.size() - 1))
-          << ")";
+          << ", " << varArgsExpanded.size() << ")";
       this->SetError(str.str());
       return false;
     }
@@ -963,12 +961,191 @@ bool cmListCommand::HandleTransformCommand(
   return true;
 }
 
+class cmStringSorter
+{
+public:
+  enum class Order
+  {
+    UNINITIALIZED,
+    ASCENDING,
+    DESCENDING,
+  };
+
+  enum class Compare
+  {
+    UNINITIALIZED,
+    STRING,
+    FILE_BASENAME,
+  };
+  enum class CaseSensitivity
+  {
+    UNINITIALIZED,
+    SENSITIVE,
+    INSENSITIVE,
+  };
+
+protected:
+  typedef std::string (*StringFilter)(const std::string& in);
+  StringFilter GetCompareFilter(Compare compare)
+  {
+    return (compare == Compare::FILE_BASENAME) ? cmSystemTools::GetFilenameName
+                                               : nullptr;
+  }
+
+  StringFilter GetCaseFilter(CaseSensitivity sensitivity)
+  {
+    return (sensitivity == CaseSensitivity::INSENSITIVE)
+      ? cmSystemTools::LowerCase
+      : nullptr;
+  }
+
+public:
+  cmStringSorter(Compare compare, CaseSensitivity caseSensitivity,
+                 Order desc = Order::ASCENDING)
+    : filters{ GetCompareFilter(compare), GetCaseFilter(caseSensitivity) }
+    , descending(desc == Order::DESCENDING)
+  {
+  }
+
+  std::string ApplyFilter(const std::string& argument)
+  {
+    std::string result = argument;
+    for (auto filter : filters) {
+      if (filter != nullptr) {
+        result = filter(result);
+      }
+    }
+    return result;
+  }
+
+  bool operator()(const std::string& a, const std::string& b)
+  {
+    std::string af = ApplyFilter(a);
+    std::string bf = ApplyFilter(b);
+    bool result;
+    if (descending) {
+      result = bf < af;
+    } else {
+      result = af < bf;
+    }
+    return result;
+  }
+
+protected:
+  StringFilter filters[2] = { nullptr, nullptr };
+  bool descending;
+};
+
 bool cmListCommand::HandleSortCommand(std::vector<std::string> const& args)
 {
   assert(args.size() >= 2);
-  if (args.size() > 2) {
-    this->SetError("sub-command SORT only takes one argument.");
+  if (args.size() > 8) {
+    this->SetError("sub-command SORT only takes up to six arguments.");
     return false;
+  }
+
+  auto sortCompare = cmStringSorter::Compare::UNINITIALIZED;
+  auto sortCaseSensitivity = cmStringSorter::CaseSensitivity::UNINITIALIZED;
+  auto sortOrder = cmStringSorter::Order::UNINITIALIZED;
+
+  size_t argumentIndex = 2;
+  const std::string messageHint = "sub-command SORT ";
+
+  while (argumentIndex < args.size()) {
+    const std::string option = args[argumentIndex++];
+    if (option == "COMPARE") {
+      if (sortCompare != cmStringSorter::Compare::UNINITIALIZED) {
+        std::string error = messageHint + "option \"" + option +
+          "\" has been specified multiple times.";
+        this->SetError(error);
+        return false;
+      }
+      if (argumentIndex < args.size()) {
+        const std::string argument = args[argumentIndex++];
+        if (argument == "STRING") {
+          sortCompare = cmStringSorter::Compare::STRING;
+        } else if (argument == "FILE_BASENAME") {
+          sortCompare = cmStringSorter::Compare::FILE_BASENAME;
+        } else {
+          std::string error = messageHint + "value \"" + argument +
+            "\" for option \"" + option + "\" is invalid.";
+          this->SetError(error);
+          return false;
+        }
+      } else {
+        std::string error =
+          messageHint + "missing argument for option \"" + option + "\".";
+        this->SetError(error);
+        return false;
+      }
+    } else if (option == "CASE") {
+      if (sortCaseSensitivity !=
+          cmStringSorter::CaseSensitivity::UNINITIALIZED) {
+        std::string error = messageHint + "option \"" + option +
+          "\" has been specified multiple times.";
+        this->SetError(error);
+        return false;
+      }
+      if (argumentIndex < args.size()) {
+        const std::string argument = args[argumentIndex++];
+        if (argument == "SENSITIVE") {
+          sortCaseSensitivity = cmStringSorter::CaseSensitivity::SENSITIVE;
+        } else if (argument == "INSENSITIVE") {
+          sortCaseSensitivity = cmStringSorter::CaseSensitivity::INSENSITIVE;
+        } else {
+          std::string error = messageHint + "value \"" + argument +
+            "\" for option \"" + option + "\" is invalid.";
+          this->SetError(error);
+          return false;
+        }
+      } else {
+        std::string error =
+          messageHint + "missing argument for option \"" + option + "\".";
+        this->SetError(error);
+        return false;
+      }
+    } else if (option == "ORDER") {
+
+      if (sortOrder != cmStringSorter::Order::UNINITIALIZED) {
+        std::string error = messageHint + "option \"" + option +
+          "\" has been specified multiple times.";
+        this->SetError(error);
+        return false;
+      }
+      if (argumentIndex < args.size()) {
+        const std::string argument = args[argumentIndex++];
+        if (argument == "ASCENDING") {
+          sortOrder = cmStringSorter::Order::ASCENDING;
+        } else if (argument == "DESCENDING") {
+          sortOrder = cmStringSorter::Order::DESCENDING;
+        } else {
+          std::string error = messageHint + "value \"" + argument +
+            "\" for option \"" + option + "\" is invalid.";
+          this->SetError(error);
+          return false;
+        }
+      } else {
+        std::string error =
+          messageHint + "missing argument for option \"" + option + "\".";
+        this->SetError(error);
+        return false;
+      }
+    } else {
+      std::string error =
+        messageHint + "option \"" + option + "\" is unknown.";
+      this->SetError(error);
+      return false;
+    }
+  }
+  // set Default Values if Option is not given
+  if (sortCompare == cmStringSorter::Compare::UNINITIALIZED) {
+    sortCompare = cmStringSorter::Compare::STRING;
+  }
+  if (sortCaseSensitivity == cmStringSorter::CaseSensitivity::UNINITIALIZED) {
+    sortCaseSensitivity = cmStringSorter::CaseSensitivity::SENSITIVE;
+  }
+  if (sortOrder == cmStringSorter::Order::UNINITIALIZED) {
+    sortOrder = cmStringSorter::Order::ASCENDING;
   }
 
   const std::string& listName = args[1];
@@ -979,7 +1156,14 @@ bool cmListCommand::HandleSortCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  std::sort(varArgsExpanded.begin(), varArgsExpanded.end());
+  if ((sortCompare == cmStringSorter::Compare::STRING) &&
+      (sortCaseSensitivity == cmStringSorter::CaseSensitivity::SENSITIVE) &&
+      (sortOrder == cmStringSorter::Order::ASCENDING)) {
+    std::sort(varArgsExpanded.begin(), varArgsExpanded.end());
+  } else {
+    cmStringSorter sorter(sortCompare, sortCaseSensitivity, sortOrder);
+    std::sort(varArgsExpanded.begin(), varArgsExpanded.end(), sorter);
+  }
 
   std::string value = cmJoin(varArgsExpanded, ";");
   this->Makefile->AddDefinition(listName, value.c_str());

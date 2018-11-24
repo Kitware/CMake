@@ -52,6 +52,8 @@ public:
   cmGeneratorTarget* GetGeneratorTarget() { return this->GeneratorTarget; }
 
 protected:
+  void GetTargetLinkFlags(std::string& flags, const std::string& linkLanguage);
+
   // create the file and directory etc
   void CreateRuleFile();
 
@@ -69,7 +71,7 @@ protected:
   // write the depend rules for this target
   void WriteTargetDependRules();
 
-  // write rules for Mac OS X Application Bundle content.
+  // write rules for macOS Application Bundle content.
   struct MacOSXContentGeneratorType
     : cmOSXBundleGenerator::MacOSXContentGeneratorType
   {
@@ -126,7 +128,8 @@ protected:
   void AppendObjectDepends(std::vector<std::string>& depends);
 
   // Append link rule dependencies (objects, etc.).
-  void AppendLinkDepends(std::vector<std::string>& depends);
+  void AppendLinkDepends(std::vector<std::string>& depends,
+                         const std::string& linkLanguage);
 
   // Lookup the link rule for this target.
   std::string GetLinkRule(const std::string& linkRuleVar);
@@ -234,7 +237,7 @@ protected:
   std::string TargetNameImport;
   std::string TargetNamePDB;
 
-  // Mac OS X content info.
+  // macOS content info.
   std::set<std::string> MacContentFolders;
   cmOSXBundleGenerator* OSXBundleGenerator;
   MacOSXContentGeneratorType* MacOSXContentGenerator;

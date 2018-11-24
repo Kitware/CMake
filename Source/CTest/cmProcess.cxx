@@ -127,7 +127,8 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
   uv_pipe_open(pipe_writer, fds[1]);
 
   uv_stdio_container_t stdio[3];
-  stdio[0].flags = UV_IGNORE;
+  stdio[0].flags = UV_INHERIT_FD;
+  stdio[0].data.fd = 0;
   stdio[1].flags = UV_INHERIT_STREAM;
   stdio[1].data.stream = pipe_writer;
   stdio[2] = stdio[1];

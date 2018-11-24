@@ -16,6 +16,10 @@ cleaned up to simplify the behavior.  Specifically:
 * Literal ``${VAR}`` reference syntax may contain only
   alphanumeric characters (``A-Z``, ``a-z``, ``0-9``) and
   the characters ``_``, ``.``, ``/``, ``-``, and ``+``.
+  Note that ``$`` is technically allowed in the ``NEW`` behavior, but is
+  invalid for ``OLD`` behavior.  This is due to an oversight during the
+  implementation of :policy:`CMP0053` and its use as a literal variable
+  reference is discouraged for this reason.
   Variables with other characters in their name may still
   be referenced indirectly, e.g.
 

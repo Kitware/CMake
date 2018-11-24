@@ -3,5 +3,5 @@ foo:
 %else
 _foo:
 %endif
-    mov  	eax, 0
+    mov  	EAX_COMMA_SPACE_ZERO
     ret

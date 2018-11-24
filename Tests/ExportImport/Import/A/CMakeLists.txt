@@ -1,3 +1,9 @@
+# Prepare imported targets that the exported project itself imported.
+add_library(SubDirLinkAImported IMPORTED INTERFACE)
+target_compile_definitions(SubDirLinkAImported INTERFACE DEF_SubDirLinkAImportedForImport)
+add_library(SubDirLinkBImported IMPORTED INTERFACE)
+target_compile_definitions(SubDirLinkBImported INTERFACE DEF_SubDirLinkBImportedForImport)
+
 # Import targets from the exported build tree.
 include(${Import_BINARY_DIR}/../Export/ExportBuildTree.cmake)
 
@@ -157,6 +163,11 @@ add_executable(cmp0022OLD_exp_test cmp0022OLD_test_vs6_2.cpp)
 target_link_libraries(cmp0022OLD_exp_test exp_cmp0022OLD)
 add_executable(cmp0022NEW_exp_test cmp0022NEW_test_vs6_2.cpp)
 target_link_libraries(cmp0022NEW_exp_test exp_cmp0022NEW)
+
+add_executable(SubDirLink_bld SubDirLink.c)
+target_link_libraries(SubDirLink_bld PRIVATE bld_TopDirLib bld_SubDirLinkA)
+add_executable(SubDirLink_exp SubDirLink.c)
+target_link_libraries(SubDirLink_exp PRIVATE exp_TopDirLib exp_SubDirLinkA)
 
 # Try building a plugin to an executable imported from the build tree.
 add_library(imp_mod1b MODULE imp_mod1.c)
@@ -471,4 +482,21 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
       endif()
     endif()
   endif()
+endif()
+
+#---------------------------------------------------------------------------------
+# check that imported libraries have the expected INTERFACE_LINK_OPTIONS property
+checkForProperty(bld_testLinkOptions "INTERFACE_LINK_OPTIONS" "INTERFACE_FLAG")
+checkForProperty(Req::testLinkOptions "INTERFACE_LINK_OPTIONS" "INTERFACE_FLAG")
+
+#---------------------------------------------------------------------------------
+# check that imported libraries have the expected INTERFACE_LINK_DIRECTORIES property
+checkForProperty(bld_testLinkDirectories "INTERFACE_LINK_DIRECTORIES" "/interface/build")
+checkForProperty(Req::testLinkDirectories "INTERFACE_LINK_DIRECTORIES" "${CMAKE_INSTALL_PREFIX}/interface/install")
+
+#---------------------------------------------------------------------------------
+# check that imported libraries have the expected INTERFACE_LINK_DEPENDS property
+if(CMAKE_GENERATOR MATCHES "Make|Ninja")
+  checkForProperty(bld_testLinkDepends "INTERFACE_LINK_DEPENDS" "BUILD_LINK_DEPENDS")
+  checkForProperty(Req::testLinkDepends "INTERFACE_LINK_DEPENDS" "${CMAKE_INSTALL_PREFIX}/INSTALL_LINK_DEPENDS")
 endif()

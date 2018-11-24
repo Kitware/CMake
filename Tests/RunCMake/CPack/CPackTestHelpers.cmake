@@ -1,10 +1,14 @@
 cmake_policy(SET CMP0057 NEW)
 
-function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source PACKAGING_TYPE)
+function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source PACKAGING_TYPE package_target)
   if(TEST_TYPE IN_LIST types)
     set(RunCMake_TEST_NO_CLEAN TRUE)
-    set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${TEST_NAME}-build")
-    set(full_test_name_ "${TEST_NAME}")
+    if(package_target)
+      set(full_test_name_ "${TEST_NAME}-package-target")
+    else()
+      set(full_test_name_ "${TEST_NAME}")
+    endif()
+    set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${full_test_name_}-build")
 
     if(SUBTEST_SUFFIX)
       set(RunCMake_TEST_BINARY_DIR "${RunCMake_TEST_BINARY_DIR}-${SUBTEST_SUFFIX}-subtest")
@@ -67,9 +71,19 @@ function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source PACK
       unset(pack_params_)
     endif()
 
+    if(package_target)
+      set(cpack_command_ ${CMAKE_COMMAND} --build "${RunCMake_TEST_BINARY_DIR}" --target package)
+    else()
+      set(cpack_command_ ${CMAKE_CPACK_COMMAND} ${pack_params_})
+    endif()
+
     # execute cpack
+    set(SETENV)
+    if(ENVIRONMENT)
+      set(SETENV ${CMAKE_COMMAND} -E env "${ENVIRONMENT}")
+    endif()
     execute_process(
-      COMMAND ${CMAKE_CPACK_COMMAND} ${pack_params_}
+      COMMAND ${SETENV} ${cpack_command_}
       WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
       RESULT_VARIABLE "result_"
       OUTPUT_FILE "${RunCMake_TEST_BINARY_DIR}/test_output.txt"
@@ -113,18 +127,24 @@ endfunction()
 
 function(run_cpack_test TEST_NAME types build PACKAGING_TYPES)
   foreach(packaging_type_ IN LISTS PACKAGING_TYPES)
-    run_cpack_test_common_("${TEST_NAME}" "${types}" "${build}" "" false "${packaging_type_}")
+    run_cpack_test_common_("${TEST_NAME}" "${types}" "${build}" "" false "${packaging_type_}" false)
+  endforeach()
+endfunction()
+
+function(run_cpack_test_package_target TEST_NAME types build PACKAGING_TYPES)
+  foreach(packaging_type_ IN LISTS PACKAGING_TYPES)
+    run_cpack_test_common_("${TEST_NAME}" "${types}" "${build}" "" false "${packaging_type_}" true)
   endforeach()
 endfunction()
 
 function(run_cpack_test_subtests TEST_NAME SUBTEST_SUFFIXES types build PACKAGING_TYPES)
   foreach(suffix_ IN LISTS SUBTEST_SUFFIXES)
     foreach(packaging_type_ IN LISTS PACKAGING_TYPES)
-      run_cpack_test_common_("${TEST_NAME}" "${types}" "${build}" "${suffix_}" false "${packaging_type_}")
+      run_cpack_test_common_("${TEST_NAME}" "${types}" "${build}" "${suffix_}" false "${packaging_type_}" false)
     endforeach()
   endforeach()
 endfunction()
 
 function(run_cpack_source_test TEST_NAME types)
-  run_cpack_test_common_("${TEST_NAME}" "${types}" false "" true "")
+  run_cpack_test_common_("${TEST_NAME}" "${types}" false "" true "" false)
 endfunction()

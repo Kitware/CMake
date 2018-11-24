@@ -239,8 +239,8 @@ CPack
   :variable:`CMAKE_PROJECT_VERSION_PATCH`
   to initialize corresponding CPack variables.
 
-* :manual:`cpack(1)` gained basic support for `NuGet`_.
-  See the :module:`CPackNuGet` module.
+* A :cpack_gen:`CPack NuGet Generator` was was added with basic
+  support for `NuGet`_.
 
 .. _NuGet: https://docs.microsoft.com/en-us/nuget/what-is-nuget
 

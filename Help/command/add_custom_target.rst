@@ -121,3 +121,6 @@ The options are:
   Execute the command with the given current working directory.
   If it is a relative path it will be interpreted relative to the
   build tree directory corresponding to the current source directory.
+
+  Arguments to ``WORKING_DIRECTORY`` may use
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.

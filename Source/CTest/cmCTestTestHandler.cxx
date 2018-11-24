@@ -1686,6 +1686,7 @@ void cmCTestTestHandler::GetListOfTests()
   cm.GetState()->AddBuiltinCommand("set_tests_properties", newCom4);
 
   // Add handler for SET_DIRECTORY_PROPERTIES
+  cm.GetState()->RemoveBuiltinCommand("set_directory_properties");
   cmCTestSetDirectoryPropertiesCommand* newCom5 =
     new cmCTestSetDirectoryPropertiesCommand;
   newCom5->TestHandler = this;
@@ -2132,13 +2133,9 @@ bool cmCTestTestHandler::SetTestsProperties(
 
             // Ensure we have complete triples otherwise the data is corrupt.
             if (triples.size() % 3 == 0) {
-              // Create an empty entry on the bottom which isn't used but
-              // allows us to look at depth to figure out when our backtrace is
-              // empty.
-              rt.Backtrace =
-                cmListFileBacktrace(this->State.CreateBaseSnapshot());
-              rt.Backtrace = rt.Backtrace.Push("empty");
-              
+              cmState state;
+              rt.Backtrace = cmListFileBacktrace(state.CreateBaseSnapshot());
+
               // the first entry represents the top of the trace so we need to
               // reconstruct the backtrace in reverse
               for (size_t i = triples.size(); i >= 3; i -= 3) {
@@ -2153,10 +2150,10 @@ bool cmCTestTestHandler::SetTestsProperties(
             }
           }
           if (key == "WILL_FAIL") {
-            rt.WillFail = cmSystemTools::IsOn(val.c_str());
+            rt.WillFail = cmSystemTools::IsOn(val);
           }
           if (key == "DISABLED") {
-            rt.Disabled = cmSystemTools::IsOn(val.c_str());
+            rt.Disabled = cmSystemTools::IsOn(val);
           }
           if (key == "ATTACHED_FILES") {
             cmSystemTools::ExpandListArgument(val, rt.AttachedFiles);
@@ -2199,7 +2196,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             cmSystemTools::ExpandListArgument(val, rt.RequiredFiles);
           }
           if (key == "RUN_SERIAL") {
-            rt.RunSerial = cmSystemTools::IsOn(val.c_str());
+            rt.RunSerial = cmSystemTools::IsOn(val);
           }
           if (key == "FAIL_REGULAR_EXPRESSION") {
             std::vector<std::string> lval;
@@ -2215,7 +2212,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             }
           }
           if (key == "PROCESSOR_AFFINITY") {
-            rt.WantAffinity = cmSystemTools::IsOn(val.c_str());
+            rt.WantAffinity = cmSystemTools::IsOn(val);
           }
           if (key == "SKIP_RETURN_CODE") {
             rt.SkipReturnCode = atoi(val.c_str());
@@ -2337,7 +2334,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
                      this->Quiet);
 
   if (this->UseExcludeRegExpFlag && this->UseExcludeRegExpFirst &&
-      this->ExcludeTestsRegularExpression.find(testname.c_str())) {
+      this->ExcludeTestsRegularExpression.find(testname)) {
     return true;
   }
   if (this->MemCheck) {
@@ -2392,10 +2389,10 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.SkipReturnCode = -1;
   test.PreviousRuns = 0;
   if (this->UseIncludeRegExpFlag &&
-      !this->IncludeTestsRegularExpression.find(testname.c_str())) {
+      !this->IncludeTestsRegularExpression.find(testname)) {
     test.IsInBasedOnREOptions = false;
   } else if (this->UseExcludeRegExpFlag && !this->UseExcludeRegExpFirst &&
-             this->ExcludeTestsRegularExpression.find(testname.c_str())) {
+             this->ExcludeTestsRegularExpression.find(testname)) {
     test.IsInBasedOnREOptions = false;
   }
   this->TestList.push_back(test);

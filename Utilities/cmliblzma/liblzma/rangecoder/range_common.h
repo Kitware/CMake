@@ -40,11 +40,8 @@
 // This does the same for a complete bit tree.
 // (A tree represented as an array.)
 #define bittree_reset(probs, bit_levels) \
-	do { \
-		uint32_t bt_i; \
-		for (bt_i = 0; bt_i < (1 << (bit_levels)); ++bt_i) \
-			bit_reset((probs)[bt_i]); \
-	} while (0)
+	for (uint32_t bt_i = 0; bt_i < (1 << (bit_levels)); ++bt_i) \
+		bit_reset((probs)[bt_i])
 
 
 //////////////////////

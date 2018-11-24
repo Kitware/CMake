@@ -64,6 +64,19 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
     }
     this->Depends.insert(this->Depends.end(), result.begin(), result.end());
   }
+
+  const std::string& workingdirectory = this->CC.GetWorkingDirectory();
+  if (!workingdirectory.empty()) {
+    std::unique_ptr<cmCompiledGeneratorExpression> cge =
+      this->GE->Parse(workingdirectory);
+    this->WorkingDirectory = cge->Evaluate(this->LG, this->Config);
+    // Convert working directory to a full path.
+    if (!this->WorkingDirectory.empty()) {
+      std::string const& build_dir = this->LG->GetCurrentBinaryDirectory();
+      this->WorkingDirectory =
+        cmSystemTools::CollapseFullPath(this->WorkingDirectory, build_dir);
+    }
+  }
 }
 
 cmCustomCommandGenerator::~cmCustomCommandGenerator()
@@ -186,7 +199,7 @@ const char* cmCustomCommandGenerator::GetComment() const
 
 std::string cmCustomCommandGenerator::GetWorkingDirectory() const
 {
-  return this->CC.GetWorkingDirectory();
+  return this->WorkingDirectory;
 }
 
 std::vector<std::string> const& cmCustomCommandGenerator::GetOutputs() const

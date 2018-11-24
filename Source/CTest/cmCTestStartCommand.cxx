@@ -121,7 +121,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
 
   // Log startup actions.
   std::string startLogFile = binaryDir + "/Testing/Temporary/LastStart.log";
-  cmGeneratedFileStream ofs(startLogFile.c_str());
+  cmGeneratedFileStream ofs(startLogFile);
   if (!ofs) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot create log file: LastStart.log" << std::endl);

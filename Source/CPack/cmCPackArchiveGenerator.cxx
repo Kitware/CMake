@@ -103,18 +103,18 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
  */
 #define DECLARE_AND_OPEN_ARCHIVE(filename, archive)                           \
   cmGeneratedFileStream gf;                                                   \
-  gf.Open((filename).c_str(), false, true);                                   \
+  gf.Open((filename), false, true);                                           \
   if (!GenerateHeader(&gf)) {                                                 \
     cmCPackLogger(cmCPackLog::LOG_ERROR,                                      \
-                  "Problem to generate Header for archive < "                 \
+                  "Problem to generate Header for archive <"                  \
                     << (filename) << ">." << std::endl);                      \
     return 0;                                                                 \
   }                                                                           \
   cmArchiveWrite archive(gf, this->Compress, this->ArchiveFormat);            \
   if (!(archive)) {                                                           \
     cmCPackLogger(cmCPackLog::LOG_ERROR,                                      \
-                  "Problem to create archive < "                              \
-                    << (filename) << ">. ERROR =" << (archive).GetError()     \
+                  "Problem to create archive <"                               \
+                    << (filename) << ">, ERROR = " << (archive).GetError()    \
                     << std::endl);                                            \
     return 0;                                                                 \
   }
@@ -262,9 +262,9 @@ int cmCPackArchiveGenerator::PackageFiles()
     archive.Add(rp, 0, nullptr, false);
     if (!archive) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Problem while adding file< "
+                    "Problem while adding file <"
                       << file << "> to archive <" << packageFileNames[0]
-                      << "> .ERROR =" << archive.GetError() << std::endl);
+                      << ">, ERROR = " << archive.GetError() << std::endl);
       return 0;
     }
   }

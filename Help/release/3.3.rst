@@ -169,26 +169,26 @@ CTest
 CPack
 -----
 
-* The :manual:`cpack(1)` ``IFW`` generator and the :module:`CPackIFW`
-  module learned to support Qt Framework Installer 2.0 tools.
+* The :cpack_gen:`CPack IFW Generator` learned to support
+  Qt Framework Installer 2.0 tools.
 
-* The :module:`CPackDeb` module learned a new
+* The :cpack_gen:`CPack DEB Generator` learned a new
   :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_SHLIBDEPS`
   variable to specify per-component use of ``dpkg-shlibdeps``.
 
-* The :module:`CPackDeb` module learned a new
+* The :cpack_gen:`CPack DEB Generator` learned a new
   :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_DEPENDS`
   option to specify per-component dependencies.
 
-* The :module:`CPackRPM` module learned to package symbolic links
+* The :cpack_gen:`CPack RPM Generator` learned to package symbolic links
   more cleanly and now supports directory symlinks with recent
   ``rpmbuild`` versions.
 
-* The :module:`CPackRPM` module learned a new
+* The :cpack_gen:`CPack RPM Generator` learned a new
   :variable:`CPACK_RPM_ADDITIONAL_MAN_DIRS` variable to specify
   directories containing man pages for the brp-compress RPM macro.
 
-* The :module:`CPackRPM` module learned a new
+* The :cpack_gen:`CPack RPM Generator` learned a new
   :variable:`CPACK_RPM_<component>_PACKAGE_ARCHITECTURE` variable
   to specify a component-specific package architecture.
 

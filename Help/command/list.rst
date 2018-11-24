@@ -28,7 +28,7 @@ Synopsis
 
   `Ordering`_
     list(`REVERSE`_ <list>)
-    list(`SORT`_ <list>)
+    list(`SORT`_ <list> [...])
 
 Introduction
 ^^^^^^^^^^^^
@@ -253,7 +253,27 @@ Reverses the contents of the list in-place.
 
 ::
 
-  list(SORT <list>)
-
+  list(SORT <list> [COMPARE <compare>] [CASE <case>] [ORDER <order>])
 
 Sorts the list in-place alphabetically.
+Use the ``COMPARE`` keyword to select the comparison method for sorting.
+The ``<compare>`` option should be one of:
+
+* ``STRING``: Sorts a list of strings alphabetically.  This is the
+  default behavior if the ``COMPARE`` option is not given.
+* ``FILE_BASENAME``: Sorts a list of pathnames of files by their basenames.
+
+Use the ``CASE`` keyword to select a case sensitive or case insensitive
+sort mode.  The ``<case>`` option should be one of:
+
+* ``SENSITIVE``: List items are sorted in a case-sensitive manner.  This is
+  the default behavior if the ``CASE`` option is not given.
+* ``INSENSITIVE``: List items are sorted case insensitively.  The order of
+  items which differ only by upper/lowercase is not specified.
+
+To control the sort order, the ``ORDER`` keyword can be given.
+The ``<order>`` option should be one of:
+
+* ``ASCENDING``: Sorts the list in ascending order.  This is the default
+  behavior when the ``ORDER`` option is not given.
+* ``DESCENDING``: Sorts the list in descending order.

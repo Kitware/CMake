@@ -151,9 +151,9 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
       cmSystemTools::CollapseFullPath(this->Values[ct_BUILD]).c_str(),
       this->Quiet);
   } else {
-    const char* bdir =
+    std::string const& bdir =
       this->Makefile->GetSafeDefinition("CTEST_BINARY_DIRECTORY");
-    if (bdir) {
+    if (!bdir.empty()) {
       this->CTest->SetCTestConfiguration(
         "BuildDirectory", cmSystemTools::CollapseFullPath(bdir).c_str(),
         this->Quiet);

@@ -51,12 +51,12 @@ function(_Boost_FIND_COMPONENT_DEPENDENCIES component includedir _ret_libs)
 
   # Special-case since it is part of mpi; look only in boost/mpi/python*
   if(component STREQUAL "mpi_python")
-    set(_boost_DEPS "python")
+    set(_boost_DEPS "python\${component_python_version}")
     set(library_component TRUE)
     set(_boost_unprocessed_headers ${_boost_mpi_python_headers})
   # Special-case since it is part of python; look only in boost/python/numpy*
   elseif(component STREQUAL "numpy")
-    set(_boost_DEPS "python")
+    set(_boost_DEPS "python\${component_python_version}")
     set(library_component TRUE)
     set(_boost_unprocessed_headers ${_boost_python_numpy_headers})
   # Special-case since it is a serialization variant; look in boost/serialization

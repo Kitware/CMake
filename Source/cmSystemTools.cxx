@@ -6,6 +6,7 @@
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 #include "cm_sys_stat.h"
+#include "cm_uv.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  include "cmArchiveWrite.h"
@@ -42,7 +43,6 @@
 #include <ctype.h>
 #include <errno.h>
 #include <iostream>
-#include <set>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,8 +56,6 @@
 #  include <wincrypt.h>
 
 #  include <fcntl.h> /* _O_TEXT */
-
-#  include "cm_uv.h"
 #else
 #  include <sys/time.h>
 #  include <unistd.h>
@@ -372,24 +370,36 @@ bool cmSystemTools::IsOn(const char* val)
   if (!val) {
     return false;
   }
-  size_t len = strlen(val);
-  if (len > 4) {
-    return false;
+  /* clang-format off */
+  // "1"
+  if (val[0] == '1' && val[1] == '\0') {
+    return true;
   }
-  std::string v(val, len);
+  // "ON"
+  if ((val[0] == 'O' || val[0] == 'o') &&
+      (val[1] == 'N' || val[1] == 'n') && val[2] == '\0') {
+    return true;
+  }
+  // "Y", "YES"
+  if ((val[0] == 'Y' || val[0] == 'y') && (val[1] == '\0' || (
+      (val[1] == 'E' || val[1] == 'e') &&
+      (val[2] == 'S' || val[2] == 's') && val[3] == '\0'))) {
+    return true;
+  }
+  // "TRUE"
+  if ((val[0] == 'T' || val[0] == 't') &&
+      (val[1] == 'R' || val[1] == 'r') &&
+      (val[2] == 'U' || val[2] == 'u') &&
+      (val[3] == 'E' || val[3] == 'e') && val[4] == '\0') {
+    return true;
+  }
+  /* clang-format on */
+  return false;
+}
 
-  static std::set<std::string> onValues;
-  if (onValues.empty()) {
-    onValues.insert("ON");
-    onValues.insert("1");
-    onValues.insert("YES");
-    onValues.insert("TRUE");
-    onValues.insert("Y");
-  }
-  for (char& c : v) {
-    c = static_cast<char>(toupper(c));
-  }
-  return (onValues.count(v) > 0);
+bool cmSystemTools::IsOn(const std::string& val)
+{
+  return cmSystemTools::IsOn(val.c_str());
 }
 
 bool cmSystemTools::IsNOTFOUND(const char* val)
@@ -402,30 +412,50 @@ bool cmSystemTools::IsNOTFOUND(const char* val)
 
 bool cmSystemTools::IsOff(const char* val)
 {
-  if (!val || !*val) {
+  // ""
+  if (!val || val[0] == '\0') {
     return true;
   }
-  size_t len = strlen(val);
-  // Try and avoid toupper() for large strings.
-  if (len > 6) {
-    return cmSystemTools::IsNOTFOUND(val);
+  /* clang-format off */
+  // "0"
+  if (val[0] == '0' && val[1] == '\0') {
+    return true;
   }
+  // "OFF"
+  if ((val[0] == 'O' || val[0] == 'o') &&
+      (val[1] == 'F' || val[1] == 'f') &&
+      (val[2] == 'F' || val[2] == 'f') && val[3] == '\0') {
+    return true;
+  }
+  // "N", "NO"
+  if ((val[0] == 'N' || val[0] == 'n') && (val[1] == '\0' || (
+      (val[1] == 'O' || val[1] == 'o') && val[2] == '\0'))) {
+    return true;
+  }
+  // "FALSE"
+  if ((val[0] == 'F' || val[0] == 'f') &&
+      (val[1] == 'A' || val[1] == 'a') &&
+      (val[2] == 'L' || val[2] == 'l') &&
+      (val[3] == 'S' || val[3] == 's') &&
+      (val[4] == 'E' || val[4] == 'e') && val[5] == '\0') {
+    return true;
+  }
+  // "IGNORE"
+  if ((val[0] == 'I' || val[0] == 'i') &&
+      (val[1] == 'G' || val[1] == 'g') &&
+      (val[2] == 'N' || val[2] == 'n') &&
+      (val[3] == 'O' || val[3] == 'o') &&
+      (val[4] == 'R' || val[4] == 'r') &&
+      (val[5] == 'E' || val[5] == 'e') && val[6] == '\0') {
+    return true;
+  }
+  /* clang-format on */
+  return cmSystemTools::IsNOTFOUND(val);
+}
 
-  static std::set<std::string> offValues;
-  if (offValues.empty()) {
-    offValues.insert("OFF");
-    offValues.insert("0");
-    offValues.insert("NO");
-    offValues.insert("FALSE");
-    offValues.insert("N");
-    offValues.insert("IGNORE");
-  }
-  // Try and avoid toupper().
-  std::string v(val, len);
-  for (char& c : v) {
-    c = static_cast<char>(toupper(c));
-  }
-  return (offValues.count(v) > 0);
+bool cmSystemTools::IsOff(const std::string& val)
+{
+  return cmSystemTools::IsOff(val.c_str());
 }
 
 void cmSystemTools::ParseWindowsCommandLine(const char* command,
@@ -1703,6 +1733,32 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
   fflush(out);
 }
 
+bool la_diagnostic(struct archive* ar, __LA_SSIZE_T r)
+{
+  // See archive.h definition of ARCHIVE_OK for return values.
+
+  if (r >= ARCHIVE_OK) {
+    return true;
+  }
+
+  if (r >= ARCHIVE_WARN) {
+    const char* warn = archive_error_string(ar);
+    if (!warn) {
+      warn = "unknown warning";
+    }
+    std::cerr << "cmake -E tar: warning: " << warn << '\n';
+    return true;
+  }
+
+  // Error.
+  const char* err = archive_error_string(ar);
+  if (!err) {
+    err = "unknown error";
+  }
+  std::cerr << "cmake -E tar: error: " << err << '\n';
+  return false;
+}
+
 // Return 'true' on success
 bool copy_data(struct archive* ar, struct archive* aw)
 {
@@ -1716,24 +1772,17 @@ bool copy_data(struct archive* ar, struct archive* aw)
 #  endif
 
   for (;;) {
-    // Return value:
-    // * ARCHIVE_OK - read succeed
-    // * ARCHIVE_EOF - no more data to read left
+    // See archive.h definition of ARCHIVE_OK for return values.
     r = archive_read_data_block(ar, &buff, &size, &offset);
     if (r == ARCHIVE_EOF) {
       return true;
     }
-    if (r != ARCHIVE_OK) {
+    if (!la_diagnostic(ar, r)) {
       return false;
     }
-    // Return value:
-    // * >= ARCHIVE_OK - write succeed
-    // * < ARCHIVE_OK - write failed
-    const __LA_SSIZE_T w_size =
-      archive_write_data_block(aw, buff, size, offset);
-    if (w_size < ARCHIVE_OK) {
-      cmSystemTools::Message("archive_write_data_block()",
-                             archive_error_string(aw));
+    // See archive.h definition of ARCHIVE_OK for return values.
+    __LA_SSIZE_T const w = archive_write_data_block(aw, buff, size, offset);
+    if (!la_diagnostic(ar, w)) {
       return false;
     }
   }
@@ -1792,7 +1841,6 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
       r = archive_write_header(ext, entry);
       if (r == ARCHIVE_OK) {
         if (!copy_data(a, ext)) {
-          cmSystemTools::Error("Problem with copy_data");
           break;
         }
         r = archive_write_finish_entry(ext);
@@ -2796,11 +2844,11 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
         // contain the location of the linker map, however on MIPS the
         // .dynamic section is always read-only so this is not possible. MIPS
         // objects instead contain a DT_MIPS_RLD_MAP tag which contains the
-        // address where the dyanmic linker will write to (an indirect
+        // address where the dynamic linker will write to (an indirect
         // version of DT_DEBUG). Since this doesn't work when using PIE, a
         // relative equivalent was created - DT_MIPS_RLD_MAP_REL. Since this
         // version contains a relative offset, moving it changes the
-        // calculated address. This may cause the dyanmic linker to write
+        // calculated address. This may cause the dynamic linker to write
         // into memory it should not be changing.
         //
         // To fix this, we adjust the value of DT_MIPS_RLD_MAP_REL here. If
@@ -2956,4 +3004,26 @@ bool cmSystemTools::StringToULong(const char* str, unsigned long* value)
   char* endp;
   *value = strtoul(str, &endp, 10);
   return (*endp == '\0') && (endp != str) && (errno == 0);
+}
+
+bool cmSystemTools::CreateSymlink(const std::string& origName,
+                                  const std::string& newName)
+{
+  uv_fs_t req;
+  int flags = 0;
+#if defined(_WIN32)
+  if (cmsys::SystemTools::FileIsDirectory(origName)) {
+    flags |= UV_FS_SYMLINK_DIR;
+  }
+#endif
+  int err = uv_fs_symlink(nullptr, &req, origName.c_str(), newName.c_str(),
+                          flags, nullptr);
+  if (err) {
+    std::string e =
+      "failed to create symbolic link '" + newName + "': " + uv_strerror(err);
+    cmSystemTools::Error(e.c_str());
+    return false;
+  }
+
+  return true;
 }

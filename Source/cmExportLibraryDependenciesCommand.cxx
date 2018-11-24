@@ -54,7 +54,7 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
       cm::make_unique<cmsys::ofstream>(this->Filename.c_str(), std::ios::app);
   } else {
     std::unique_ptr<cmGeneratedFileStream> ap(
-      new cmGeneratedFileStream(this->Filename.c_str(), true));
+      new cmGeneratedFileStream(this->Filename, true));
     ap->SetCopyIfDifferent(true);
     foutPtr = std::move(ap);
   }

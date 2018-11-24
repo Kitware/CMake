@@ -6,22 +6,6 @@ include(CheckSymbolExists)
 include(CheckTypeSize)
 include(TestBigEndian)
 
-CHECK_C_SOURCE_COMPILES(
-  "int test (void *restrict x);\nint main (void) {return 0;}"
-  HAVE_RESTRICT)
-
-CHECK_C_SOURCE_COMPILES(
-"typedef struct abc *d;\nint test (d __restrict x);\nint main (void) {return 0;}"
-  HAVE___RESTRICT)
-
-CHECK_C_SOURCE_COMPILES(
-  "static inline int test (void) {return 0;}\nint main (void) {return test();}"
-  HAVE_INLINE)
-
-CHECK_C_SOURCE_COMPILES (
-  "static __inline int test (void) {return 0;}\nint main (void) {return test();}"
-  HAVE___INLINE)
-
 CHECK_INCLUDE_FILE(byteswap.h HAVE_BYTESWAP_H)
 CHECK_INCLUDE_FILE(inttypes.h HAVE_INTTYPES_H)
 CHECK_INCLUDE_FILE(limits.h HAVE_LIMITS_H)
@@ -95,7 +79,7 @@ CHECK_TYPE_SIZE("unsigned short" SIZE_OF_UNSIGNED_SHORT)
 CHECK_TYPE_SIZE("unsigned" SIZE_OF_UNSIGNED)
 CHECK_TYPE_SIZE("unsigned long" SIZE_OF_UNSIGNED_LONG)
 CHECK_TYPE_SIZE("unsigned long long" SIZE_OF_UNSIGNED_LONG_LONG)
-CHECK_TYPE_SIZE("size_t" SIZE_OF_SIZE_T)
+CHECK_TYPE_SIZE("size_t" SIZEOF_SIZE_T)
 
 CHECK_TYPE_SIZE("__int64" __INT64)
 CHECK_TYPE_SIZE("unsigned __int64" UNSIGNED___INT64)

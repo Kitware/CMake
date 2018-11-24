@@ -52,7 +52,7 @@ bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
       valueConf = makefile->GetDefinition(keyConf);
     }
     if (valueConf == nullptr) {
-      valueConf = makefile->GetSafeDefinition(key);
+      return makefile->GetSafeDefinition(key);
     }
     return std::string(valueConf);
   };
@@ -70,6 +70,7 @@ bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
   }
 
   // - Configurations
+  Log().RaiseVerbosity(InfoGet("ARCC_VERBOSITY"));
   MultiConfig_ = makefile->IsOn("ARCC_MULTI_CONFIG");
 
   // - Directories
@@ -140,9 +141,7 @@ bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
 
   // Compute rcc output file name
   if (IsMultiConfig()) {
-    RccFileOutput_ = AutogenBuildDir_;
-    RccFileOutput_ += '/';
-    RccFileOutput_ += IncludeDir_;
+    RccFileOutput_ = IncludeDir_;
     RccFileOutput_ += '/';
     RccFileOutput_ += MultiConfigOutput();
   } else {

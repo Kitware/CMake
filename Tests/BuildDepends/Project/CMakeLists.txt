@@ -106,7 +106,12 @@ set_property(
 
 if(TEST_LINK_DEPENDS)
   add_executable(linkdep linkdep.cxx)
-  set_property(TARGET linkdep PROPERTY LINK_DEPENDS ${TEST_LINK_DEPENDS})
+  set_property(TARGET linkdep PROPERTY LINK_DEPENDS $<1:${TEST_LINK_DEPENDS}>)
+
+  add_library(foo_interface INTERFACE)
+  set_property(TARGET foo_interface PROPERTY INTERFACE_LINK_DEPENDS $<1:${TEST_LINK_DEPENDS}>)
+  add_executable(linkdep2 linkdep.cxx)
+  target_link_libraries(linkdep2 PRIVATE foo_interface)
 endif()
 
 add_library(link_depends_no_shared_lib SHARED link_depends_no_shared_lib.c

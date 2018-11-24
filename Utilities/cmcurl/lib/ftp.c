@@ -239,8 +239,8 @@ static void close_secondarysocket(struct connectdata *conn)
 
 static void freedirs(struct ftp_conn *ftpc)
 {
-  int i;
   if(ftpc->dirs) {
+    int i;
     for(i = 0; i < ftpc->dirdepth; i++) {
       free(ftpc->dirs[i]);
       ftpc->dirs[i] = NULL;
@@ -637,8 +637,6 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
    * line in a response or continue reading.  */
 
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
-  time_t timeout;              /* timeout in milliseconds */
-  time_t interval_ms;
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
@@ -657,7 +655,8 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
   while(!*ftpcode && !result) {
     /* check and reset timeout value every lap */
-    timeout = Curl_pp_state_timeout(pp);
+    time_t timeout = Curl_pp_state_timeout(pp); /* timeout in milliseconds */
+    time_t interval_ms;
 
     if(timeout <= 0) {
       failf(data, "FTP response timeout");
@@ -1445,6 +1444,7 @@ static CURLcode ftp_state_list(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
+  struct FTP *ftp = data->req.protop;
 
   /* If this output is to be machine-parsed, the NLST command might be better
      to use, since the LIST command output is not specified or standard in any
@@ -1461,7 +1461,7 @@ static CURLcode ftp_state_list(struct connectdata *conn)
      then just do LIST (in that case: nothing to do here)
   */
   char *cmd, *lstArg, *slashPos;
-  const char *inpath = data->state.path;
+  const char *inpath = ftp->path;
 
   lstArg = NULL;
   if((data->set.ftp_filemethod == FTPFILE_NOCWD) &&
@@ -1589,7 +1589,6 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
   struct FTP *ftp = conn->data->req.protop;
   struct Curl_easy *data = conn->data;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
-  int seekerr = CURL_SEEKFUNC_OK;
 
   if((data->state.resume_from && !sizechecked) ||
      ((data->state.resume_from > 0) && sizechecked)) {
@@ -1605,6 +1604,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
     /* 3. pass file-size number of bytes in the source file */
     /* 4. lower the infilesize counter */
     /* => transfer as usual */
+    int seekerr = CURL_SEEKFUNC_OK;
 
     if(data->state.resume_from < 0) {
       /* Got no given size to start from, figure it out */
@@ -2782,7 +2782,6 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         char *ptr = &data->state.buffer[4];  /* start on the first letter */
         const size_t buf_size = data->set.buffer_size;
         char *dir;
-        char *store;
         bool entry_extracted = FALSE;
 
         dir = malloc(nread + 1);
@@ -2805,6 +2804,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
 
         if('\"' == *ptr) {
           /* it started good */
+          char *store;
           ptr++;
           for(store = dir; *ptr;) {
             if('\"' == *ptr) {
@@ -3142,7 +3142,6 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   int ftpcode;
   CURLcode result = CURLE_OK;
   char *path = NULL;
-  const char *path_to_use = data->state.path;
 
   if(!ftp)
     return CURLE_OK;
@@ -3194,7 +3193,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
 
   if(!result)
     /* get the "raw" path */
-    result = Curl_urldecode(data, path_to_use, 0, &path, NULL, TRUE);
+    result = Curl_urldecode(data, ftp->path, 0, &path, NULL, TRUE);
   if(result) {
     /* We can limp along anyway (and should try to since we may already be in
      * the error path) */
@@ -3214,9 +3213,11 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
           ftpc->prevpath[dlen] = 0; /* terminate */
       }
       else {
+        free(path);
         /* we never changed dir */
         ftpc->prevpath = strdup("");
-        free(path);
+        if(!ftpc->prevpath)
+          return CURLE_OUT_OF_MEMORY;
       }
       if(ftpc->prevpath)
         infof(data, "Remembering we are in dir \"%s\"\n", ftpc->prevpath);
@@ -3347,7 +3348,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   /* Send any post-transfer QUOTE strings? */
   if(!status && !result && !premature && data->set.postquote)
     result = ftp_sendquote(conn, data->set.postquote);
-
+  Curl_safefree(ftp->pathalloc);
   return result;
 }
 
@@ -3697,12 +3698,13 @@ static void wc_data_dtor(void *ptr)
 static CURLcode init_wc_data(struct connectdata *conn)
 {
   char *last_slash;
-  char *path = conn->data->state.path;
+  struct FTP *ftp = conn->data->req.protop;
+  char *path = ftp->path;
   struct WildcardData *wildcard = &(conn->data->wildcard);
   CURLcode result = CURLE_OK;
   struct ftp_wc *ftpwc = NULL;
 
-  last_slash = strrchr(conn->data->state.path, '/');
+  last_slash = strrchr(ftp->path, '/');
   if(last_slash) {
     last_slash++;
     if(last_slash[0] == '\0') {
@@ -3759,7 +3761,7 @@ static CURLcode init_wc_data(struct connectdata *conn)
     goto fail;
   }
 
-  wildcard->path = strdup(conn->data->state.path);
+  wildcard->path = strdup(ftp->path);
   if(!wildcard->path) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
@@ -3830,16 +3832,15 @@ static CURLcode wc_statemach(struct connectdata *conn)
     /* filelist has at least one file, lets get first one */
     struct ftp_conn *ftpc = &conn->proto.ftpc;
     struct curl_fileinfo *finfo = wildcard->filelist.head->ptr;
+    struct FTP *ftp = conn->data->req.protop;
 
     char *tmp_path = aprintf("%s%s", wildcard->path, finfo->filename);
     if(!tmp_path)
       return CURLE_OUT_OF_MEMORY;
 
-    /* switch default "state.pathbuffer" and tmp_path, good to see
-       ftp_parse_url_path function to understand this trick */
-    Curl_safefree(conn->data->state.pathbuffer);
-    conn->data->state.pathbuffer = tmp_path;
-    conn->data->state.path = tmp_path;
+    /* switch default ftp->path and tmp_path */
+    free(ftp->pathalloc);
+    ftp->pathalloc = ftp->path = tmp_path;
 
     infof(conn->data, "Wildcard - START of \"%s\"\n", finfo->filename);
     if(conn->data->set.chunk_bgn) {
@@ -3965,10 +3966,14 @@ CURLcode Curl_ftpsend(struct connectdata *conn, const char *cmd)
   enum protection_level data_sec = conn->data_prot;
 #endif
 
-  write_len = strlen(cmd);
-  if(write_len > (sizeof(s) -3))
+  if(!cmd)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
+  write_len = strlen(cmd);
+  if(!write_len || write_len > (sizeof(s) -3))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  memcpy(&s, cmd, write_len);
   strcpy(&s[write_len], "\r\n"); /* append a trailing CRLF */
   write_len += 2;
   bytes_written = 0;
@@ -3993,8 +3998,7 @@ CURLcode Curl_ftpsend(struct connectdata *conn, const char *cmd)
       break;
 
     if(conn->data->set.verbose)
-      Curl_debug(conn->data, CURLINFO_HEADER_OUT,
-                 sptr, (size_t)bytes_written, conn);
+      Curl_debug(conn->data, CURLINFO_HEADER_OUT, sptr, (size_t)bytes_written);
 
     if(bytes_written != (ssize_t)write_len) {
       write_len -= bytes_written;
@@ -4104,7 +4108,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   struct FTP *ftp = data->req.protop;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   const char *slash_pos;  /* position of the first '/' char in curpos */
-  const char *path_to_use = data->state.path;
+  const char *path_to_use = ftp->path;
   const char *cur_pos;
   const char *filename = NULL;
 
@@ -4190,7 +4194,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
       /* parse the URL path into separate path components */
       while((slash_pos = strchr(cur_pos, '/')) != NULL) {
         /* 1 or 0 pointer offset to indicate absolute directory */
-        ssize_t absolute_dir = ((cur_pos - data->state.path > 0) &&
+        ssize_t absolute_dir = ((cur_pos - ftp->path > 0) &&
                                 (ftpc->dirdepth == 0))?1:0;
 
         /* seek out the next path component */
@@ -4267,7 +4271,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     size_t dlen;
     char *path;
     CURLcode result =
-      Curl_urldecode(conn->data, data->state.path, 0, &path, &dlen, TRUE);
+      Curl_urldecode(conn->data, ftp->path, 0, &path, &dlen, TRUE);
     if(result) {
       freedirs(ftpc);
       return result;
@@ -4385,24 +4389,24 @@ static CURLcode ftp_setup_connection(struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
   char *type;
-  char command;
   struct FTP *ftp;
 
-  conn->data->req.protop = ftp = malloc(sizeof(struct FTP));
+  conn->data->req.protop = ftp = calloc(sizeof(struct FTP), 1);
   if(NULL == ftp)
     return CURLE_OUT_OF_MEMORY;
 
-  data->state.path++;   /* don't include the initial slash */
+  ftp->path = &data->state.up.path[1]; /* don't include the initial slash */
   data->state.slash_removed = TRUE; /* we've skipped the slash */
 
   /* FTP URLs support an extension like ";type=<typecode>" that
    * we'll try to get now! */
-  type = strstr(data->state.path, ";type=");
+  type = strstr(ftp->path, ";type=");
 
   if(!type)
     type = strstr(conn->host.rawalloc, ";type=");
 
   if(type) {
+    char command;
     *type = 0;                     /* it was in the middle of the hostname */
     command = Curl_raw_toupper(type[6]);
     conn->bits.type_set = TRUE;

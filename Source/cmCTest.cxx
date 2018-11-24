@@ -9,7 +9,6 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/Process.h"
-#include "cmsys/String.hxx"
 #include "cmsys/SystemInformation.hxx"
 #include <algorithm>
 #include <chrono>
@@ -25,6 +24,11 @@
 #include <time.h>
 #include <utility>
 #include <vector>
+#if defined(_WIN32)
+#  include <windows.h> // IWYU pragma: keep
+#else
+#  include <unistd.h> // IWYU pragma: keep
+#endif
 
 #include "cmAlgorithms.h"
 #include "cmCTestBuildAndTestHandler.h"
@@ -264,6 +268,8 @@ cmCTest::cmCTest()
   this->Failover = false;
   this->ForceNewCTestProcess = false;
   this->TomorrowTag = false;
+  this->TestProgressOutput = false;
+  this->FlushTestProgressLine = false;
   this->Verbose = false;
 
   this->Debug = false;
@@ -293,11 +299,16 @@ cmCTest::cmCTest()
   this->OutputTestOutputOnTestFailure = false;
   this->RepeatTests = 1; // default to run each test once
   this->RepeatUntilFail = false;
-  std::string outOnFail;
-  if (cmSystemTools::GetEnv("CTEST_OUTPUT_ON_FAILURE", outOnFail)) {
-    this->OutputTestOutputOnTestFailure =
-      !cmSystemTools::IsOff(outOnFail.c_str());
+
+  std::string envValue;
+  if (cmSystemTools::GetEnv("CTEST_OUTPUT_ON_FAILURE", envValue)) {
+    this->OutputTestOutputOnTestFailure = !cmSystemTools::IsOff(envValue);
   }
+  envValue.clear();
+  if (cmSystemTools::GetEnv("CTEST_PROGRESS_OUTPUT", envValue)) {
+    this->TestProgressOutput = !cmSystemTools::IsOff(envValue);
+  }
+
   this->InitStreams();
 
   this->Parts[PartStart].SetName("Start");
@@ -480,11 +491,13 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
           tag.clear();
         }
         std::string track;
-        if (cmSystemTools::GetLineFromStream(tfin, track)) {
+        if (cmSystemTools::GetLineFromStream(tfin, track) &&
+            !this->Parts[PartStart] && !command) {
           this->SpecificTrack = track;
         }
         std::string model;
-        if (cmSystemTools::GetLineFromStream(tfin, model)) {
+        if (cmSystemTools::GetLineFromStream(tfin, model) &&
+            !this->Parts[PartStart] && !command) {
           this->TestModel = GetTestModelFromString(model.c_str());
         }
         tfin.close();
@@ -750,8 +763,8 @@ bool cmCTest::UpdateCTestConfiguration()
     }
   }
   if (this->ProduceXML) {
-    this->CompressXMLFiles = cmSystemTools::IsOn(
-      this->GetCTestConfiguration("CompressSubmission").c_str());
+    this->CompressXMLFiles =
+      cmSystemTools::IsOn(this->GetCTestConfiguration("CompressSubmission"));
   }
   return true;
 }
@@ -821,7 +834,7 @@ bool cmCTest::OpenOutputFile(const std::string& path, const std::string& name,
     }
   }
   std::string filename = testingDir + "/" + name;
-  stream.Open(filename.c_str());
+  stream.Open(filename);
   if (!stream) {
     cmCTestLog(this, ERROR_MESSAGE,
                "Problem opening file: " << filename << std::endl);
@@ -1493,7 +1506,7 @@ int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
   this->AddSiteProperties(xml);
   xml.StartElement("Notes");
 
-  for (cmsys::String const& file : files) {
+  for (std::string const& file : files) {
     cmCTestLog(this, OUTPUT, "\tAdd file: " << file << std::endl);
     std::string note_time = this->CurrentTime();
     xml.StartElement("Note");
@@ -1597,7 +1610,7 @@ std::string cmCTest::Base64EncodeFile(std::string const& file)
 
 bool cmCTest::SubmitExtraFiles(const VectorOfStrings& files)
 {
-  for (cmsys::String const& file : files) {
+  for (std::string const& file : files) {
     if (!cmSystemTools::FileExists(file)) {
       cmCTestLog(this, ERROR_MESSAGE,
                  "Cannot find extra file: " << file << " to submit."
@@ -1877,6 +1890,9 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   if (this->CheckArgument(arg, "-Q", "--quiet")) {
     this->Quiet = true;
   }
+  if (this->CheckArgument(arg, "--progress")) {
+    this->TestProgressOutput = true;
+  }
   if (this->CheckArgument(arg, "-V", "--verbose")) {
     this->Verbose = true;
   }
@@ -1960,7 +1976,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   if (this->CheckArgument(arg, "--interactive-debug-mode") &&
       i < args.size() - 1) {
     i++;
-    this->InteractiveDebugMode = cmSystemTools::IsOn(args[i].c_str());
+    this->InteractiveDebugMode = cmSystemTools::IsOn(args[i]);
   }
   if (this->CheckArgument(arg, "--submit-index") && i < args.size() - 1) {
     i++;
@@ -2059,6 +2075,23 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     this->GetHandler("memcheck")->SetPersistentOption("RerunFailed", "true");
   }
   return true;
+}
+
+bool cmCTest::ProgressOutputSupportedByConsole() const
+{
+#if defined(_WIN32)
+  // On Windows we need a console buffer.
+  void* console = GetStdHandle(STD_OUTPUT_HANDLE);
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  return GetConsoleScreenBufferInfo(console, &csbi);
+#else
+  // On UNIX we need a non-dumb tty.
+  std::string term_env_variable;
+  if (cmSystemTools::GetEnv("TERM", term_env_variable)) {
+    return isatty(1) && term_env_variable != "dumb";
+  }
+#endif
+  return false;
 }
 
 // handle the -S -SR and -SP arguments
@@ -2214,6 +2247,18 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
       this->SetParallelLevel(plevel);
     }
   }
+
+  // TestProgressOutput only supported if console supports it and not logging
+  // to a file
+  this->TestProgressOutput = this->TestProgressOutput &&
+    !this->OutputLogFile && this->ProgressOutputSupportedByConsole();
+#ifdef _WIN32
+  if (this->TestProgressOutput) {
+    // Disable output line buffering so we can print content without
+    // a newline.
+    std::setvbuf(stdout, nullptr, _IONBF, 0);
+  }
+#endif
 
   // now what should cmake do? if --build-and-test was specified then
   // we run the build and test handler and return
@@ -2794,6 +2839,7 @@ static const char* cmCTestStringLogType[] = { "DEBUG",
                                               "OUTPUT",
                                               "HANDLER_OUTPUT",
                                               "HANDLER_PROGRESS_OUTPUT",
+                                              "HANDLER_TEST_PROGRESS_OUTPUT",
                                               "HANDLER_VERBOSE_OUTPUT",
                                               "WARNING",
                                               "ERROR_MESSAGE",
@@ -2854,6 +2900,34 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
   if (!this->Quiet) {
     std::ostream& out = *this->StreamOut;
     std::ostream& err = *this->StreamErr;
+
+    if (logType == HANDLER_TEST_PROGRESS_OUTPUT) {
+      if (this->TestProgressOutput) {
+        cmCTestLogOutputFileLine(out);
+        if (this->FlushTestProgressLine) {
+          printf("\r");
+          this->FlushTestProgressLine = false;
+          out.flush();
+        }
+
+        std::string msg_str{ msg };
+        auto const lineBreakIt = msg_str.find('\n');
+        if (lineBreakIt != std::string::npos) {
+          this->FlushTestProgressLine = true;
+          msg_str.erase(std::remove(msg_str.begin(), msg_str.end(), '\n'),
+                        msg_str.end());
+        }
+
+        out << msg_str;
+#ifndef _WIN32
+        printf("\x1B[K"); // move caret to end
+#endif
+        out.flush();
+        return;
+      }
+      logType = HANDLER_OUTPUT;
+    }
+
     switch (logType) {
       case DEBUG:
         if (this->Debug) {

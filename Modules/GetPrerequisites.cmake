@@ -275,7 +275,6 @@ function(gp_item_default_embedded_path item default_embedded_path_var)
   # as the executable by default:
   #
   set(path "@executable_path")
-  set(overridden 0)
 
   # On the Mac, relative to the executable depending on the type
   # of the thing we are embedding:
@@ -294,20 +293,11 @@ function(gp_item_default_embedded_path item default_embedded_path_var)
     #
     set(path "@executable_path/../../Contents/MacOS")
 
-    # Embed .dylibs right next to the main bundle executable:
+    # Embed frameworks and .dylibs in the embedded "Frameworks" directory
+    # (sibling of MacOS):
     #
-    if(item MATCHES "\\.dylib$")
-      set(path "@executable_path/../MacOS")
-      set(overridden 1)
-    endif()
-
-    # Embed frameworks in the embedded "Frameworks" directory (sibling of MacOS):
-    #
-    if(NOT overridden)
-      if(item MATCHES "[^/]+\\.framework/")
-        set(path "@executable_path/../Frameworks")
-        set(overridden 1)
-      endif()
+    if(item MATCHES "[^/]+\\.framework/" OR item MATCHES "\\.dylib$")
+      set(path "@executable_path/../Frameworks")
     endif()
   endif()
 

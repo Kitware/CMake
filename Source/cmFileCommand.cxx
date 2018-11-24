@@ -7,9 +7,10 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
-#include "cmsys/String.hxx"
+
 #include <algorithm>
 #include <assert.h>
+#include <ctype.h>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
@@ -207,16 +208,20 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   cmSystemTools::MakeDirectory(dir);
 
   mode_t mode = 0;
+  bool writable = false;
 
   // Set permissions to writable
   if (cmSystemTools::GetPermissions(fileName.c_str(), mode)) {
-    cmSystemTools::SetPermissions(fileName.c_str(),
 #if defined(_MSC_VER) || defined(__MINGW32__)
-                                  mode | S_IWRITE
+    writable = mode & S_IWRITE;
+    mode_t newMode = mode | S_IWRITE;
 #else
-                                  mode | S_IWUSR | S_IWGRP
+    writable = mode & S_IWUSR;
+    mode_t newMode = mode | S_IWUSR | S_IWGRP;
 #endif
-    );
+    if (!writable) {
+      cmSystemTools::SetPermissions(fileName.c_str(), newMode);
+    }
   }
   // If GetPermissions fails, pretend like it is ok. File open will fail if
   // the file is not writable
@@ -241,7 +246,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
     return false;
   }
   file.close();
-  if (mode) {
+  if (mode && !writable) {
     cmSystemTools::SetPermissions(fileName.c_str(), mode);
   }
   return true;
@@ -609,8 +614,8 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       continue;
     }
 
-    if ((c >= 0x20 && c < 0x7F) || c == '\t' ||
-        (c == '\n' && newline_consume)) {
+    if (c >= 0 && c <= 0xFF &&
+        (isprint(c) || c == '\t' || (c == '\n' && newline_consume))) {
       // This is an ASCII character that may be part of a string.
       // Cast added to avoid compiler warning. Cast is ok because
       // c is guaranteed to fit in char by the above if...
@@ -658,7 +663,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // The current line has been terminated.  Check if the current
       // string matches the requirements.  The length may now be as
       // low as zero since blank lines are allowed.
-      if (s.length() >= minlen && (!have_regex || regex.find(s.c_str()))) {
+      if (s.length() >= minlen && (!have_regex || regex.find(s))) {
         output_size += static_cast<int>(s.size()) + 1;
         if (limit_output >= 0 && output_size >= limit_output) {
           s.clear();
@@ -674,7 +679,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // string matches the requirements.  We require that the length
       // be at least one no matter what the user specified.
       if (s.length() >= minlen && !s.empty() &&
-          (!have_regex || regex.find(s.c_str()))) {
+          (!have_regex || regex.find(s))) {
         output_size += static_cast<int>(s.size()) + 1;
         if (limit_output >= 0 && output_size >= limit_output) {
           s.clear();
@@ -691,7 +696,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
 
     if (maxlen > 0 && s.size() == maxlen) {
       // Terminate a string if the maximum length is reached.
-      if (s.length() >= minlen && (!have_regex || regex.find(s.c_str()))) {
+      if (s.length() >= minlen && (!have_regex || regex.find(s))) {
         output_size += static_cast<int>(s.size()) + 1;
         if (limit_output >= 0 && output_size >= limit_output) {
           s.clear();
@@ -707,7 +712,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   // input file or the input size limit.  Check if the current string
   // matches the requirements.
   if ((!limit_count || strings.size() < limit_count) && !s.empty() &&
-      s.length() >= minlen && (!have_regex || regex.find(s.c_str()))) {
+      s.length() >= minlen && (!have_regex || regex.find(s))) {
     output_size += static_cast<int>(s.size()) + 1;
     if (limit_output < 0 || output_size < limit_output) {
       strings.push_back(s);
@@ -779,10 +784,10 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     if (*i == "LIST_DIRECTORIES") {
       ++i; // skip LIST_DIRECTORIES
       if (i != args.end()) {
-        if (cmSystemTools::IsOn(i->c_str())) {
+        if (cmSystemTools::IsOn(*i)) {
           g.SetListDirs(true);
           g.SetRecurseListDirs(true);
-        } else if (cmSystemTools::IsOff(i->c_str())) {
+        } else if (cmSystemTools::IsOff(*i)) {
           g.SetListDirs(false);
           g.SetRecurseListDirs(false);
         } else {
@@ -1270,6 +1275,33 @@ protected:
     this->DirPermissions |= mode_world_read;
     this->DirPermissions |= mode_world_execute;
   }
+
+  bool GetDefaultDirectoryPermissions(mode_t** mode)
+  {
+    // check if default dir creation permissions were set
+    const char* default_dir_install_permissions =
+      this->Makefile->GetDefinition(
+        "CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
+    if (default_dir_install_permissions && *default_dir_install_permissions) {
+      std::vector<std::string> items;
+      cmSystemTools::ExpandListArgument(default_dir_install_permissions,
+                                        items);
+      for (const auto& arg : items) {
+        if (!this->CheckPermissions(arg, **mode)) {
+          std::ostringstream e;
+          e << this->FileCommand->GetError()
+            << " Set with CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS "
+               "variable.";
+          this->FileCommand->SetError(e.str());
+          return false;
+        }
+      }
+    } else {
+      *mode = nullptr;
+    }
+
+    return true;
+  }
 };
 
 bool cmFileCopier::Parse(std::vector<std::string> const& args)
@@ -1663,8 +1695,15 @@ bool cmFileCopier::InstallDirectory(const char* source,
   this->ReportCopy(destination, TypeDir,
                    !cmSystemTools::FileIsDirectory(destination));
 
+  // check if default dir creation permissions were set
+  mode_t default_dir_mode_v = 0;
+  mode_t* default_dir_mode = &default_dir_mode_v;
+  if (!this->GetDefaultDirectoryPermissions(&default_dir_mode)) {
+    return false;
+  }
+
   // Make sure the destination directory exists.
-  if (!cmSystemTools::MakeDirectory(destination)) {
+  if (!cmSystemTools::MakeDirectory(destination, default_dir_mode)) {
     std::ostringstream e;
     e << this->Name << " cannot make directory \"" << destination
       << "\": " << cmSystemTools::GetLastSystemError();
@@ -1751,7 +1790,7 @@ struct cmFileInstaller : public cmFileCopier
     // Check whether to copy files always or only if they have changed.
     std::string install_always;
     if (cmSystemTools::GetEnv("CMAKE_INSTALL_ALWAYS", install_always)) {
-      this->Always = cmSystemTools::IsOn(install_always.c_str());
+      this->Always = cmSystemTools::IsOn(install_always);
     }
     // Get the current manifest.
     this->Manifest =
@@ -2068,23 +2107,9 @@ bool cmFileInstaller::HandleInstallDestination()
 
   // check if default dir creation permissions were set
   mode_t default_dir_mode_v = 0;
-  mode_t* default_dir_mode = nullptr;
-  const char* default_dir_install_permissions = this->Makefile->GetDefinition(
-    "CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
-  if (default_dir_install_permissions && *default_dir_install_permissions) {
-    std::vector<std::string> items;
-    cmSystemTools::ExpandListArgument(default_dir_install_permissions, items);
-    for (const auto& arg : items) {
-      if (!this->CheckPermissions(arg, default_dir_mode_v)) {
-        std::ostringstream e;
-        e << this->FileCommand->GetError()
-          << " Set with CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS variable.";
-        this->FileCommand->SetError(e.str());
-        return false;
-      }
-    }
-
-    default_dir_mode = &default_dir_mode_v;
+  mode_t* default_dir_mode = &default_dir_mode_v;
+  if (!this->GetDefaultDirectoryPermissions(&default_dir_mode)) {
+    return false;
   }
 
   if (this->InstallType != cmInstallType_DIRECTORY) {
@@ -2484,11 +2509,11 @@ bool cmFileCommand::HandleCMakePathCommand(
 #else
   char pathSep = ':';
 #endif
-  std::vector<cmsys::String> path = cmSystemTools::SplitString(*i, pathSep);
+  std::vector<std::string> path = cmSystemTools::SplitString(*i, pathSep);
   i++;
   const char* var = i->c_str();
   std::string value;
-  for (std::vector<cmsys::String>::iterator j = path.begin(); j != path.end();
+  for (std::vector<std::string>::iterator j = path.begin(); j != path.end();
        ++j) {
     if (j != path.begin()) {
       value += ";";
@@ -2498,7 +2523,7 @@ bool cmFileCommand::HandleCMakePathCommand(
     } else {
       *j = cmSystemTools::ConvertToOutputPath(*j);
       // remove double quotes in the path
-      cmsys::String& s = *j;
+      std::string& s = *j;
 
       if (s.size() > 1 && s[0] == '\"' && s[s.size() - 1] == '\"') {
         s = s.substr(1, s.size() - 2);
@@ -2742,7 +2767,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     } else if (*i == "TLS_VERIFY") {
       ++i;
       if (i != args.end()) {
-        tls_verify = cmSystemTools::IsOn(i->c_str());
+        tls_verify = cmSystemTools::IsOn(*i);
       } else {
         this->SetError("TLS_VERIFY missing bool value.");
         return false;
@@ -2880,6 +2905,10 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   cURLEasyGuard g_curl(curl);
   ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   check_curl_result(res, "DOWNLOAD cannot set url: ");
+
+  // enable auth
+  res = ::curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+  check_curl_result(res, "DOWNLOAD cannot set httpauth: ");
 
   // enable HTTP ERROR parsing
   res = ::curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
@@ -3180,6 +3209,10 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   res = ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   check_curl_result(res, "UPLOAD cannot set url: ");
 
+  // enable auth
+  res = ::curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+  check_curl_result(res, "UPLOAD cannot set httpauth: ");
+
   res =
     ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cmWriteToMemoryCallback);
   check_curl_result(res, "UPLOAD cannot set write function: ");
@@ -3458,7 +3491,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
   }
 
   if (!cmsys::SystemTools::FileIsFullPath(path)) {
-    path = this->Makefile->GetCurrentSourceDirectory() + ("/" + path);
+    path = this->Makefile->GetCurrentSourceDirectory() + "/" + path;
   }
 
   // Unify path (remove '//', '/../', ...)

@@ -1,5 +1,13 @@
 include(RunCMake)
 
+function(run_TargetWithCommand)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TargetWithCommand-build)
+  run_cmake(TargetWithCommand)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(TargetWithCommand-build ${CMAKE_COMMAND} --build . --config Debug)
+endfunction()
+run_TargetWithCommand()
+
 # Use a single build tree for a few tests without cleaning.
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CommandWithOutput-build)
 set(RunCMake_TEST_NO_CLEAN 1)

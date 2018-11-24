@@ -6,7 +6,7 @@ if(QT_QMAKE_EXECUTABLE)
   list(APPEND CMAKE_PREFIX_PATH ${Qt_PREFIX_DIR})
 endif()
 
-if (QT_TEST_VERSION STREQUAL 4)
+if (QT_TEST_VERSION EQUAL 4)
   find_package(Qt4 REQUIRED)
   include(UseQt4)
 
@@ -21,7 +21,7 @@ if (QT_TEST_VERSION STREQUAL 4)
     qt4_generate_moc(${ARGN})
   endmacro()
 
-elseif(QT_TEST_VERSION STREQUAL 5)
+elseif(QT_TEST_VERSION EQUAL 5)
   find_package(Qt5Widgets REQUIRED)
 
   set(QT_QTCORE_TARGET Qt5::Core)

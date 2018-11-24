@@ -10,7 +10,6 @@
 #include <map>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
-#include <string.h>
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
@@ -136,9 +135,8 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
 
   // Add source file specific flags.
   cmGeneratorExpressionInterpreter genexInterpreter(
-    this->LocalGenerator, this->GeneratorTarget,
-    this->LocalGenerator->GetConfigName(), this->GeneratorTarget->GetName(),
-    language);
+    this->LocalGenerator, this->LocalGenerator->GetConfigName(),
+    this->GeneratorTarget, language);
 
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
   if (const char* cflags = source->GetProperty(COMPILE_FLAGS)) {
@@ -175,9 +173,8 @@ void cmNinjaTargetGenerator::AddIncludeFlags(std::string& languageFlags,
 
 bool cmNinjaTargetGenerator::NeedDepTypeMSVC(const std::string& lang) const
 {
-  return strcmp(this->GetMakefile()->GetSafeDefinition("CMAKE_NINJA_DEPTYPE_" +
-                                                       lang),
-                "msvc") == 0;
+  return (this->GetMakefile()->GetSafeDefinition("CMAKE_NINJA_DEPTYPE_" +
+                                                 lang) == "msvc");
 }
 
 // TODO: Refactor with
@@ -188,8 +185,7 @@ std::string cmNinjaTargetGenerator::ComputeDefines(cmSourceFile const* source,
   std::set<std::string> defines;
   const std::string config = this->LocalGenerator->GetConfigName();
   cmGeneratorExpressionInterpreter genexInterpreter(
-    this->LocalGenerator, this->GeneratorTarget, config,
-    this->GeneratorTarget->GetName(), language);
+    this->LocalGenerator, config, this->GeneratorTarget, language);
 
   const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
   if (const char* compile_defs = source->GetProperty(COMPILE_DEFINITIONS)) {
@@ -217,8 +213,7 @@ std::string cmNinjaTargetGenerator::ComputeIncludes(
   std::vector<std::string> includes;
   const std::string config = this->LocalGenerator->GetConfigName();
   cmGeneratorExpressionInterpreter genexInterpreter(
-    this->LocalGenerator, this->GeneratorTarget, config,
-    this->GeneratorTarget->GetName(), language);
+    this->LocalGenerator, config, this->GeneratorTarget, language);
 
   const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
   if (const char* cincludes = source->GetProperty(INCLUDE_DIRECTORIES)) {
@@ -235,7 +230,8 @@ std::string cmNinjaTargetGenerator::ComputeIncludes(
   return includesString;
 }
 
-cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
+cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps(
+  const std::string& linkLanguage) const
 {
   // Static libraries never depend on other targets for linking.
   if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY ||
@@ -270,13 +266,11 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
   }
 
   // Add user-specified dependencies.
-  if (const char* linkDepends =
-        this->GeneratorTarget->GetProperty("LINK_DEPENDS")) {
-    std::vector<std::string> linkDeps;
-    cmSystemTools::ExpandListArgument(linkDepends, linkDeps);
-    std::transform(linkDeps.begin(), linkDeps.end(),
-                   std::back_inserter(result), MapToNinjaPath());
-  }
+  std::vector<std::string> linkDeps;
+  this->GeneratorTarget->GetLinkDepends(linkDeps, this->ConfigName,
+                                        linkLanguage);
+  std::transform(linkDeps.begin(), linkDeps.end(), std::back_inserter(result),
+                 MapToNinjaPath());
 
   return result;
 }
@@ -1134,7 +1128,7 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang)
   }
 
   std::string const tdin = this->GetTargetDependInfoPath(lang);
-  cmGeneratedFileStream tdif(tdin.c_str());
+  cmGeneratedFileStream tdif(tdin);
   tdif << tdi;
 }
 

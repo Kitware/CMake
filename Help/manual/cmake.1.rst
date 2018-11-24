@@ -9,6 +9,7 @@ Synopsis
 .. parsed-literal::
 
  cmake [<options>] {<path-to-source> | <path-to-existing-build>}
+ cmake [<options>] -S <path-to-source> -B <path-to-build>
  cmake [{-D <var>=<value>}...] -P <cmake-script-file>
  cmake --build <dir> [<options>...] [-- <build-tool-options>...]
  cmake --open <dir>
@@ -352,11 +353,6 @@ Available commands are:
 ``touch_nocreate <file>``
   Touch a file if it exists but do not create it.  If a file does
   not exist it will be silently ignored.
-
-UNIX-specific Command-Line Tools
---------------------------------
-
-The following ``cmake -E`` commands are available only on UNIX:
 
 ``create_symlink <old> <new>``
   Create a symbolic link ``<new>`` naming ``<old>``.

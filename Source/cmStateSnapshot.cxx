@@ -204,7 +204,8 @@ bool cmStateSnapshot::HasDefinedPolicyCMP0011()
   return !this->Position->Policies->IsEmpty();
 }
 
-const char* cmStateSnapshot::GetDefinition(std::string const& name) const
+std::string const* cmStateSnapshot::GetDefinition(
+  std::string const& name) const
 {
   assert(this->Position->Vars.IsValid());
   return cmDefinitions::Get(name, this->Position->Vars, this->Position->Root);
@@ -347,7 +348,7 @@ void cmStateSnapshot::SetDefaultDefinitions()
 
   // Setup the default include file regular expression (match everything).
   this->Position->BuildSystemDirectory->Properties.SetProperty(
-    "INCLUDE_REGULAR_EXPRESSION", "^.*$", cmListFileBacktrace::Empty());
+    "INCLUDE_REGULAR_EXPRESSION", "^.*$", cmListFileBacktrace());
 }
 
 void cmStateSnapshot::SetDirectoryDefinitions()
@@ -390,11 +391,25 @@ void cmStateSnapshot::InitializeFromParent()
     this->Position->BuildSystemDirectory->CompileOptionsBacktraces,
     this->Position->CompileOptionsPosition);
 
+  InitializeContentFromParent(
+    parent->BuildSystemDirectory->LinkOptions,
+    this->Position->BuildSystemDirectory->LinkOptions,
+    parent->BuildSystemDirectory->LinkOptionsBacktraces,
+    this->Position->BuildSystemDirectory->LinkOptionsBacktraces,
+    this->Position->LinkOptionsPosition);
+
+  InitializeContentFromParent(
+    parent->BuildSystemDirectory->LinkDirectories,
+    this->Position->BuildSystemDirectory->LinkDirectories,
+    parent->BuildSystemDirectory->LinkDirectoriesBacktraces,
+    this->Position->BuildSystemDirectory->LinkDirectoriesBacktraces,
+    this->Position->LinkDirectoriesPosition);
+
   const char* include_regex =
     parent->BuildSystemDirectory->Properties.GetPropertyValue(
       "INCLUDE_REGULAR_EXPRESSION");
   this->Position->BuildSystemDirectory->Properties.SetProperty(
-    "INCLUDE_REGULAR_EXPRESSION", include_regex, cmListFileBacktrace::Empty());
+    "INCLUDE_REGULAR_EXPRESSION", include_regex, cmListFileBacktrace());
 }
 
 cmState* cmStateSnapshot::GetState() const
@@ -419,8 +434,8 @@ std::string cmStateSnapshot::GetProjectName() const
 
 void cmStateSnapshot::InitializeFromParent_ForSubdirsCommand()
 {
-  std::string currentSrcDir = this->GetDefinition("CMAKE_CURRENT_SOURCE_DIR");
-  std::string currentBinDir = this->GetDefinition("CMAKE_CURRENT_BINARY_DIR");
+  std::string currentSrcDir = *this->GetDefinition("CMAKE_CURRENT_SOURCE_DIR");
+  std::string currentBinDir = *this->GetDefinition("CMAKE_CURRENT_BINARY_DIR");
   this->InitializeFromParent();
   this->SetDefinition("CMAKE_SOURCE_DIR", this->State->GetSourceDirectory());
   this->SetDefinition("CMAKE_BINARY_DIR", this->State->GetBinaryDirectory());

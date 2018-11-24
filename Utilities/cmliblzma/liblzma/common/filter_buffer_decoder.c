@@ -14,30 +14,27 @@
 
 
 extern LZMA_API(lzma_ret)
-lzma_raw_buffer_decode(const lzma_filter *filters, lzma_allocator *allocator,
+lzma_raw_buffer_decode(
+		const lzma_filter *filters, const lzma_allocator *allocator,
 		const uint8_t *in, size_t *in_pos, size_t in_size,
 		uint8_t *out, size_t *out_pos, size_t out_size)
 {
-	lzma_next_coder next = LZMA_NEXT_CODER_INIT;
-	size_t in_start;
-	size_t out_start;
-	lzma_ret ret;
-
 	// Validate what isn't validated later in filter_common.c.
 	if (in == NULL || in_pos == NULL || *in_pos > in_size || out == NULL
 			|| out_pos == NULL || *out_pos > out_size)
 		return LZMA_PROG_ERROR;
 
 	// Initialize the decoer.
+	lzma_next_coder next = LZMA_NEXT_CODER_INIT;
 	return_if_error(lzma_raw_decoder_init(&next, allocator, filters));
 
 	// Store the positions so that we can restore them if something
 	// goes wrong.
-	in_start = *in_pos;
-	out_start = *out_pos;
+	const size_t in_start = *in_pos;
+	const size_t out_start = *out_pos;
 
 	// Do the actual decoding and free decoder's memory.
-	ret = next.code(next.coder, allocator, in, in_pos, in_size,
+	lzma_ret ret = next.code(next.coder, allocator, in, in_pos, in_size,
 			out, out_pos, out_size, LZMA_FINISH);
 
 	if (ret == LZMA_STREAM_END) {

@@ -17,9 +17,14 @@
 
 // -- Class methods
 
-void cmQtAutoGenerator::Logger::SetVerbose(bool value)
+void cmQtAutoGenerator::Logger::RaiseVerbosity(std::string const& value)
 {
-  Verbose_ = value;
+  unsigned long verbosity = 0;
+  if (cmSystemTools::StringToULong(value.c_str(), &verbosity)) {
+    if (this->Verbosity_ < verbosity) {
+      this->Verbosity_ = static_cast<unsigned int>(verbosity);
+    }
+  }
 }
 
 void cmQtAutoGenerator::Logger::SetColorOutput(bool value)
@@ -632,12 +637,23 @@ cmQtAutoGenerator::cmQtAutoGenerator()
   : FileSys_(&Logger_)
 {
   // Initialize logger
-  Logger_.SetVerbose(cmSystemTools::HasEnv("VERBOSE"));
+  {
+    std::string verbose;
+    if (cmSystemTools::GetEnv("VERBOSE", verbose) && !verbose.empty()) {
+      unsigned long iVerbose = 0;
+      if (cmSystemTools::StringToULong(verbose.c_str(), &iVerbose)) {
+        Logger_.SetVerbosity(static_cast<unsigned int>(iVerbose));
+      } else {
+        // Non numeric verbosity
+        Logger_.SetVerbose(cmSystemTools::IsOn(verbose));
+      }
+    }
+  }
   {
     std::string colorEnv;
     cmSystemTools::GetEnv("COLOR", colorEnv);
     if (!colorEnv.empty()) {
-      Logger_.SetColorOutput(cmSystemTools::IsOn(colorEnv.c_str()));
+      Logger_.SetColorOutput(cmSystemTools::IsOn(colorEnv));
     } else {
       Logger_.SetColorOutput(true);
     }

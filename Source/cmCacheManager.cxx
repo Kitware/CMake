@@ -127,15 +127,15 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
   }
   this->CacheMajorVersion = 0;
   this->CacheMinorVersion = 0;
-  if (const char* cmajor =
+  if (const std::string* cmajor =
         this->GetInitializedCacheValue("CMAKE_CACHE_MAJOR_VERSION")) {
     unsigned int v = 0;
-    if (sscanf(cmajor, "%u", &v) == 1) {
+    if (sscanf(cmajor->c_str(), "%u", &v) == 1) {
       this->CacheMajorVersion = v;
     }
-    if (const char* cminor =
+    if (const std::string* cminor =
           this->GetInitializedCacheValue("CMAKE_CACHE_MINOR_VERSION")) {
-      if (sscanf(cminor, "%u", &v) == 1) {
+      if (sscanf(cminor->c_str(), "%u", &v) == 1) {
         this->CacheMinorVersion = v;
       }
     }
@@ -153,18 +153,20 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
   }
   // check to make sure the cache directory has not
   // been moved
-  const char* oldDir = this->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR");
+  const std::string* oldDir =
+    this->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR");
   if (internal && oldDir) {
     std::string currentcwd = path;
-    std::string oldcwd = oldDir;
+    std::string oldcwd = *oldDir;
     cmSystemTools::ConvertToUnixSlashes(currentcwd);
     currentcwd += "/CMakeCache.txt";
     oldcwd += "/CMakeCache.txt";
     if (!cmSystemTools::SameFile(oldcwd, currentcwd)) {
+      const std::string* dir =
+        this->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR");
       std::ostringstream message;
       message << "The current CMakeCache.txt directory " << currentcwd
-              << " is different than the directory "
-              << this->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR")
+              << " is different than the directory " << (dir ? *dir : "")
               << " where CMakeCache.txt was created. This may result "
                  "in binaries being created in the wrong place. If you "
                  "are not sure, reedit the CMakeCache.txt";
@@ -234,7 +236,7 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
 {
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
-  cmGeneratedFileStream fout(cacheFile.c_str());
+  cmGeneratedFileStream fout(cacheFile);
   fout.SetCopyIfDifferent(true);
   if (!fout) {
     cmSystemTools::Error("Unable to open cache file for save. ",
@@ -512,12 +514,12 @@ cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator(const char* key)
   return CacheIterator(*this, key);
 }
 
-const char* cmCacheManager::GetInitializedCacheValue(
+const std::string* cmCacheManager::GetInitializedCacheValue(
   const std::string& key) const
 {
   CacheEntryMap::const_iterator i = this->Cache.find(key);
   if (i != this->Cache.end() && i->second.Initialized) {
-    return i->second.Value.c_str();
+    return &i->second.Value;
   }
   return nullptr;
 }
@@ -616,7 +618,7 @@ void cmCacheManager::CacheIterator::SetValue(const char* value)
 
 bool cmCacheManager::CacheIterator::GetValueAsBool() const
 {
-  return cmSystemTools::IsOn(this->GetEntry().Value.c_str());
+  return cmSystemTools::IsOn(this->GetEntry().Value);
 }
 
 std::vector<std::string> cmCacheManager::CacheEntry::GetPropertyList() const
@@ -644,7 +646,7 @@ void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
   } else if (prop == "VALUE") {
     this->Value = value ? value : "";
   } else {
-    this->Properties.SetProperty(prop, value, cmListFileBacktrace::Empty());
+    this->Properties.SetProperty(prop, value, cmListFileBacktrace());
   }
 }
 
@@ -662,7 +664,7 @@ void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
       this->Value += value;
     }
   } else {
-    this->Properties.AppendProperty(prop, value, cmListFileBacktrace::Empty(), asString);
+    this->Properties.AppendProperty(prop, value, cmListFileBacktrace(), asString);
   }
 }
 

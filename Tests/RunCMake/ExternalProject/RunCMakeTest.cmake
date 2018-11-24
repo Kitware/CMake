@@ -1,5 +1,7 @@
 include(RunCMake)
 
+run_cmake(IncludeScope-Add)
+run_cmake(IncludeScope-Add_Step)
 run_cmake(NoOptions)
 run_cmake(SourceEmpty)
 run_cmake(SourceMissing)

@@ -28,6 +28,8 @@ Modify cmExprLexer.cxx:
 /* Include the set of tokens from the parser.  */
 #include "cmExprParserTokens.h"
 
+#include <string>
+
 /*--------------------------------------------------------------------------*/
 %}
 
@@ -38,8 +40,10 @@ Modify cmExprLexer.cxx:
 %pointer
 
 %%
+[ \t]  {}
 
-[0-9][0-9]* { yylvalp->Number = atoi(yytext); return exp_NUMBER; }
+[0-9][0-9]* { yylvalp->Number = std::stoll(yytext, nullptr, 10); return exp_NUMBER; }
+0[xX][0-9a-fA-F][0-9a-fA-F]* {  yylvalp->Number = std::stoll(yytext, nullptr, 16); return exp_NUMBER; }
 
 "+" { return exp_PLUS; }
 "-" { return exp_MINUS; }
@@ -54,5 +58,6 @@ Modify cmExprLexer.cxx:
 ">>" { return exp_SHIFTRIGHT; }
 "(" { return exp_OPENPARENT; }
 ")" { return exp_CLOSEPARENT; }
+. { yyextra->UnexpectedChar(yytext[0]); }
 
 %%

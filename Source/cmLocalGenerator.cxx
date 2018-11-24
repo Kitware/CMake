@@ -253,7 +253,7 @@ void cmLocalGenerator::GenerateTestFiles()
   file += "/";
   file += "CTestTestfile.cmake";
 
-  cmGeneratedFileStream fout(file.c_str());
+  cmGeneratedFileStream fout(file);
   fout.SetCopyIfDifferent(true);
 
   fout << "# CMake generated Testfile for " << std::endl
@@ -429,7 +429,7 @@ void cmLocalGenerator::GenerateInstallRules()
     toplevel_install = 1;
   }
   file += "/cmake_install.cmake";
-  cmGeneratedFileStream fout(file.c_str());
+  cmGeneratedFileStream fout(file);
   fout.SetCopyIfDifferent(true);
 
   // Write the header.
@@ -683,7 +683,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
 
   std::string flagVar = "CMAKE_INCLUDE_FLAG_";
   flagVar += lang;
-  const char* includeFlag = this->Makefile->GetSafeDefinition(flagVar);
+  std::string const& includeFlag = this->Makefile->GetSafeDefinition(flagVar);
   flagVar = "CMAKE_INCLUDE_FLAG_SEP_";
   flagVar += lang;
   const char* sep = this->Makefile->GetDefinition(flagVar);
@@ -844,12 +844,11 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              cmGeneratorTarget const* target,
                                              const std::string& lang,
                                              const std::string& config,
-                                             bool stripImplicitInclDirs) const
+                                             bool stripImplicitDirs,
+                                             bool appendAllImplicitDirs) const
 {
-  // Need to decide whether to automatically include the source and
-  // binary directories at the beginning of the include path.
-  bool includeSourceDir = false;
-  bool includeBinaryDir = false;
+  // Do not repeat an include path.
+  std::set<std::string> emitted;
 
   // When automatic include directories are requested for a build then
   // include the source and binary directories at the beginning of the
@@ -859,26 +858,21 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   // cannot fix this because not all native build tools support
   // per-source-file include paths.
   if (this->Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR")) {
-    includeSourceDir = true;
-    includeBinaryDir = true;
-  }
-
-  // Do not repeat an include path.
-  std::set<std::string> emitted;
-
-  // Store the automatic include paths.
-  if (includeBinaryDir) {
-    std::string binDir = this->StateSnapshot.GetDirectory().GetCurrentBinary();
-    if (emitted.find(binDir) == emitted.end()) {
-      dirs.push_back(binDir);
-      emitted.insert(binDir);
+    // Current binary directory
+    {
+      std::string binDir =
+        this->StateSnapshot.GetDirectory().GetCurrentBinary();
+      if (emitted.insert(binDir).second) {
+        dirs.push_back(std::move(binDir));
+      }
     }
-  }
-  if (includeSourceDir) {
-    std::string srcDir = this->StateSnapshot.GetDirectory().GetCurrentSource();
-    if (emitted.find(srcDir) == emitted.end()) {
-      dirs.push_back(srcDir);
-      emitted.insert(srcDir);
+    // Current source directory
+    {
+      std::string srcDir =
+        this->StateSnapshot.GetDirectory().GetCurrentSource();
+      if (emitted.insert(srcDir).second) {
+        dirs.push_back(std::move(srcDir));
+      }
     }
   }
 
@@ -886,43 +880,45 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     return;
   }
 
-  std::string rootPath;
-  if (const char* sysrootCompile =
-        this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE")) {
-    rootPath = sysrootCompile;
-  } else {
-    rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
-  }
-
+  // Implicit include directories
   std::vector<std::string> implicitDirs;
-  // Load implicit include directories for this language.
-  std::string impDirVar = "CMAKE_";
-  impDirVar += lang;
-  impDirVar += "_IMPLICIT_INCLUDE_DIRECTORIES";
-  if (const char* value = this->Makefile->GetDefinition(impDirVar)) {
-    std::vector<std::string> impDirVec;
-    cmSystemTools::ExpandListArgument(value, impDirVec);
-    for (std::string const& i : impDirVec) {
-      std::string d = rootPath + i;
-      cmSystemTools::ConvertToUnixSlashes(d);
-      emitted.insert(std::move(d));
-      if (!stripImplicitInclDirs) {
+  {
+    std::string rootPath;
+    if (const char* sysrootCompile =
+          this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE")) {
+      rootPath = sysrootCompile;
+    } else {
+      rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+    }
+
+    // Load implicit include directories for this language.
+    std::string key = "CMAKE_";
+    key += lang;
+    key += "_IMPLICIT_INCLUDE_DIRECTORIES";
+    if (const char* value = this->Makefile->GetDefinition(key)) {
+      std::vector<std::string> impDirVec;
+      cmSystemTools::ExpandListArgument(value, impDirVec);
+      for (std::string const& i : impDirVec) {
+        {
+          std::string d = rootPath + i;
+          cmSystemTools::ConvertToUnixSlashes(d);
+          emitted.insert(std::move(d));
+        }
         implicitDirs.push_back(i);
       }
     }
   }
 
   // Get the target-specific include directories.
-  std::vector<std::string> includes;
-
-  includes = target->GetIncludeDirectories(config, lang);
+  std::vector<std::string> userDirs =
+    target->GetIncludeDirectories(config, lang);
 
   // Support putting all the in-project include directories first if
   // it is requested by the project.
   if (this->Makefile->IsOn("CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE")) {
     std::string const &topSourceDir = this->GetState()->GetSourceDirectory(),
                       &topBinaryDir = this->GetState()->GetBinaryDirectory();
-    for (std::string const& i : includes) {
+    for (std::string const& i : userDirs) {
       // Emit this directory only if it is a subdirectory of the
       // top-level source or binary tree.
       if (cmSystemTools::ComparePath(i, topSourceDir) ||
@@ -937,7 +933,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   }
 
   // Construct the final ordered include directory list.
-  for (std::string const& i : includes) {
+  for (std::string const& i : userDirs) {
     if (emitted.insert(i).second) {
       dirs.push_back(i);
     }
@@ -946,28 +942,44 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   this->MoveSystemIncludesToEnd(dirs, config, lang, target);
 
   // Add standard include directories for this language.
-  // We do not filter out implicit directories here.
-  std::string const standardIncludesVar =
-    "CMAKE_" + lang + "_STANDARD_INCLUDE_DIRECTORIES";
-  std::string const standardIncludes =
-    this->Makefile->GetSafeDefinition(standardIncludesVar);
-  std::vector<std::string>::size_type const before = includes.size();
-  cmSystemTools::ExpandListArgument(standardIncludes, includes);
-  for (std::vector<std::string>::iterator i = includes.begin() + before;
-       i != includes.end(); ++i) {
-    cmSystemTools::ConvertToUnixSlashes(*i);
-    dirs.push_back(*i);
+  {
+    std::vector<std::string>::size_type const before = userDirs.size();
+    {
+      std::string key = "CMAKE_";
+      key += lang;
+      key += "_STANDARD_INCLUDE_DIRECTORIES";
+      std::string const value = this->Makefile->GetSafeDefinition(key);
+      cmSystemTools::ExpandListArgument(value, userDirs);
+    }
+    for (std::vector<std::string>::iterator i = userDirs.begin() + before,
+                                            ie = userDirs.end();
+         i != ie; ++i) {
+      cmSystemTools::ConvertToUnixSlashes(*i);
+      dirs.push_back(*i);
+    }
   }
 
-  for (std::string const& i : implicitDirs) {
-    if (std::find(includes.begin(), includes.end(), i) != includes.end()) {
-      dirs.push_back(i);
+  if (!stripImplicitDirs) {
+    // Append only implicit directories that were requested by the user
+    for (std::string const& i : implicitDirs) {
+      if (std::find(userDirs.begin(), userDirs.end(), i) != userDirs.end()) {
+        dirs.push_back(i);
+      }
+    }
+    // Append remaining implicit directories on demand
+    if (appendAllImplicitDirs) {
+      for (std::string const& i : implicitDirs) {
+        if (std::find(dirs.begin(), dirs.end(), i) == dirs.end()) {
+          dirs.push_back(i);
+        }
+      }
     }
   }
 }
 
 void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
                                              std::string const& config,
+                                             std::string const& linkLanguage,
                                              cmGeneratorTarget* target)
 {
   this->AppendFlags(
@@ -981,6 +993,11 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
     std::string name = "STATIC_LIBRARY_FLAGS_" + config;
     this->AppendFlags(flags, target->GetProperty(name));
   }
+
+  std::vector<std::string> options;
+  target->GetStaticLibraryLinkOptions(options, config, linkLanguage);
+  // STATIC_LIBRARY_OPTIONS are escaped.
+  this->AppendCompileOptions(flags, options);
 }
 
 void cmLocalGenerator::GetTargetFlags(
@@ -998,7 +1015,7 @@ void cmLocalGenerator::GetTargetFlags(
 
   switch (target->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
-      this->GetStaticLibraryFlags(linkFlags, buildType, target);
+      this->GetStaticLibraryFlags(linkFlags, buildType, linkLanguage, target);
       break;
     case cmStateEnums::MODULE_LIBRARY:
       libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";
@@ -1042,6 +1059,10 @@ void cmLocalGenerator::GetTargetFlags(
           linkFlags += " ";
         }
       }
+      std::vector<std::string> opts;
+      target->GetLinkOptions(opts, config, linkLanguage);
+      // LINK_OPTIONS are escaped.
+      this->AppendCompileOptions(linkFlags, opts);
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                   frameworkPath, linkPath);
@@ -1113,6 +1134,10 @@ void cmLocalGenerator::GetTargetFlags(
           linkFlags += " ";
         }
       }
+      std::vector<std::string> opts;
+      target->GetLinkOptions(opts, config, linkLanguage);
+      // LINK_OPTIONS are escaped.
+      this->AppendCompileOptions(linkFlags, opts);
     } break;
     default:
       break;
@@ -1320,7 +1345,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
                                             const std::string& lang,
                                             const std::string& config)
 {
-  // Only add Mac OS X specific flags on Darwin platforms (OSX and iphone):
+  // Only add macOS specific flags on Darwin platforms (macOS and iOS):
   if (this->Makefile->IsOn("APPLE") && this->EmitUniversalBinaryFlags) {
     std::vector<std::string> archs;
     target->GetAppleArchs(config, archs);
@@ -1630,7 +1655,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     std::string option_flag =
       "CMAKE_" + lang + *stdIt + "_" + type + "_COMPILE_OPTION";
 
-    const char* opt =
+    std::string const& opt =
       target->Target->GetMakefile()->GetRequiredDefinition(option_flag);
     std::vector<std::string> optVec;
     cmSystemTools::ExpandListArgument(opt, optVec);
@@ -1799,9 +1824,9 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
     std::string flagsVar = "CMAKE_SHARED_LIBRARY_";
     flagsVar += lang;
     flagsVar += "_FLAGS";
-    const char* flags = this->Makefile->GetSafeDefinition(flagsVar);
+    std::string const& flags = this->Makefile->GetSafeDefinition(flagsVar);
 
-    if (flags && flags != originalFlags) {
+    if (flags != originalFlags) {
       switch (this->GetPolicyStatus(cmPolicies::CMP0018)) {
         case cmPolicies::WARN: {
           std::ostringstream e;
@@ -1834,7 +1859,7 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
                                                    std::string const& lang,
                                                    int targetType)
 {
-  const char* picFlags = nullptr;
+  std::string picFlags;
 
   if (targetType == cmStateEnums::EXECUTABLE) {
     std::string flagsVar = "CMAKE_";
@@ -1842,13 +1867,13 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
     flagsVar += "_COMPILE_OPTIONS_PIE";
     picFlags = this->Makefile->GetSafeDefinition(flagsVar);
   }
-  if (!picFlags) {
+  if (picFlags.empty()) {
     std::string flagsVar = "CMAKE_";
     flagsVar += lang;
     flagsVar += "_COMPILE_OPTIONS_PIC";
     picFlags = this->Makefile->GetSafeDefinition(flagsVar);
   }
-  if (picFlags) {
+  if (!picFlags.empty()) {
     std::vector<std::string> options;
     cmSystemTools::ExpandListArgument(picFlags, options);
     for (std::string const& o : options) {
@@ -1952,7 +1977,7 @@ void cmLocalGenerator::AppendCompileOptions(
     cmsys::RegularExpression r(regex);
 
     for (std::string const& opt : options_vec) {
-      if (r.find(opt.c_str())) {
+      if (r.find(opt)) {
         this->AppendFlagEscape(options, opt);
       }
     }
@@ -1999,7 +2024,7 @@ void cmLocalGenerator::AppendIncludeDirectories(
 
     std::string inc = include;
 
-    if (!cmSystemTools::IsOff(inc.c_str())) {
+    if (!cmSystemTools::IsOff(inc)) {
       cmSystemTools::ConvertToUnixSlashes(inc);
     }
 
@@ -2503,12 +2528,12 @@ std::string const& cmLocalGenerator::GetBinaryDirectory() const
   return this->GetCMakeInstance()->GetHomeOutputDirectory();
 }
 
-const char* cmLocalGenerator::GetCurrentBinaryDirectory() const
+std::string const& cmLocalGenerator::GetCurrentBinaryDirectory() const
 {
   return this->StateSnapshot.GetDirectory().GetCurrentBinary();
 }
 
-const char* cmLocalGenerator::GetCurrentSourceDirectory() const
+std::string const& cmLocalGenerator::GetCurrentSourceDirectory() const
 {
   return this->StateSnapshot.GetDirectory().GetCurrentSource();
 }

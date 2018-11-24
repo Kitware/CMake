@@ -34,7 +34,7 @@ cmRST::cmRST(std::ostream& os, std::string const& docroot)
   , NoteDirective("^.. note::[ \t]*(.*)$")
   , ModuleRST("^#\\[(=*)\\[\\.rst:$")
   , CMakeRole("(:cmake)?:("
-              "command|generator|variable|envvar|module|policy|"
+              "command|cpack_gen|generator|variable|envvar|module|policy|"
               "prop_cache|prop_dir|prop_gbl|prop_inst|prop_sf|"
               "prop_test|prop_tgt|"
               "manual"

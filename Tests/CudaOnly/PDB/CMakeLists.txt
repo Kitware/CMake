@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.11)
-project (CudaOnlyPDB CUDA)
+project (PDB CUDA)
 
 add_executable(CudaOnlyPDB main.cu)
 set_target_properties(CudaOnlyPDB PROPERTIES

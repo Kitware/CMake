@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project (CudaOnlyResolveDeviceSymbols CUDA)
+project (ResolveDeviceSymbols CUDA)
 
 # Find nm and dumpbin
 if(CMAKE_NM)

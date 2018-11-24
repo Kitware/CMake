@@ -90,7 +90,7 @@ void cmDocumentationFormatter::SetIndent(const char* indent)
 
 void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
 {
-  // Print text arranged in an indented column of fixed witdh.
+  // Print text arranged in an indented column of fixed width.
   const char* l = text;
   long column = 0;
   bool newSentence = false;

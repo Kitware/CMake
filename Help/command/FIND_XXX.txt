@@ -137,7 +137,7 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
 
 .. |FIND_ARGS_XXX| replace:: <VAR> NAMES name
 
-On OS X the :variable:`CMAKE_FIND_FRAMEWORK` and
+On macOS the :variable:`CMAKE_FIND_FRAMEWORK` and
 :variable:`CMAKE_FIND_APPBUNDLE` variables determine the order of
 preference between Apple-style and unix-style package components.
 

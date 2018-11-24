@@ -219,6 +219,7 @@ endfunction()
 
 if(NOT XCODE_VERSION VERSION_LESS 7)
   XcodeSchemaGeneration()
+  run_cmake(XcodeSchemaProperty)
 endif()
 
 if(XCODE_VERSION VERSION_GREATER_EQUAL 8)

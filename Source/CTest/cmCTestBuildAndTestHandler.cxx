@@ -5,6 +5,7 @@
 #include "cmCTest.h"
 #include "cmCTestTestHandler.h"
 #include "cmGlobalGenerator.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 #include "cmake.h"
@@ -210,9 +211,14 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   if (this->BuildNoCMake) {
     // Make the generator available for the Build call below.
-    cm.SetGlobalGenerator(cm.CreateGlobalGenerator(this->BuildGenerator));
-    cm.SetGeneratorPlatform(this->BuildGeneratorPlatform);
-    cm.SetGeneratorToolset(this->BuildGeneratorToolset);
+    cmGlobalGenerator* gen = cm.CreateGlobalGenerator(this->BuildGenerator);
+    cm.SetGlobalGenerator(gen);
+    if (!this->BuildGeneratorPlatform.empty()) {
+      cmMakefile mf(gen, cm.GetCurrentSnapshot());
+      if (!gen->SetGeneratorPlatform(this->BuildGeneratorPlatform, &mf)) {
+        return 1;
+      }
+    }
 
     // Load the cache to make CMAKE_MAKE_PROGRAM available.
     cm.LoadCache(this->BinaryDir);

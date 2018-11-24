@@ -10,6 +10,9 @@ if("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
   #
   # --c++ is full C++ and supported since 6.10
   if(NOT CMAKE_IAR_CXX_FLAG)
+    if(NOT CMAKE_CXX_COMPILER_VERSION)
+      message(FATAL_ERROR "CMAKE_CXX_COMPILER_VERSION not detected.  This should be automatic.")
+    endif()
     if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.10)
       set(CMAKE_IAR_CXX_FLAG --c++)
     else()
@@ -48,4 +51,7 @@ elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR")
   get_filename_component(_compilerDir "${CMAKE_C_COMPILER}" PATH)
   get_filename_component(_compilerDir "${_compilerDir}" PATH)
   include_directories("${_compilerDir}/inc")
+
+else()
+  message(FATAL_ERROR "CMAKE_CXX_COMPILER_ARCHITECTURE_ID not detected as \"AVR\" or \"ARM\".  This should be automatic." )
 endif()

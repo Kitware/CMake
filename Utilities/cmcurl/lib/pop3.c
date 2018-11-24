@@ -613,7 +613,6 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   const char *line = data->state.buffer;
   size_t len = strlen(line);
-  size_t i;
 
   (void)instate; /* no use for this yet */
 
@@ -625,6 +624,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
     /* Does the server support APOP authentication? */
     if(len >= 4 && line[len - 2] == '>') {
       /* Look for the APOP timestamp */
+      size_t i;
       for(i = 3; i < len - 2; ++i) {
         if(line[i] == '<') {
           /* Calculate the length of the timestamp */
@@ -664,7 +664,6 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   const char *line = data->state.buffer;
   size_t len = strlen(line);
-  size_t wordlen;
 
   (void)instate; /* no use for this yet */
 
@@ -689,6 +688,7 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
       /* Loop through the data line */
       for(;;) {
         size_t llen;
+        size_t wordlen;
         unsigned int mechbit;
 
         while(len &&
@@ -1303,8 +1303,6 @@ static CURLcode pop3_regular_transfer(struct connectdata *conn,
 
 static CURLcode pop3_setup_connection(struct connectdata *conn)
 {
-  struct Curl_easy *data = conn->data;
-
   /* Initialise the POP3 layer */
   CURLcode result = pop3_init(conn);
   if(result)
@@ -1312,7 +1310,6 @@ static CURLcode pop3_setup_connection(struct connectdata *conn)
 
   /* Clear the TLS upgraded flag */
   conn->tls_upgraded = FALSE;
-  data->state.path++;   /* don't include the initial slash */
 
   return CURLE_OK;
 }
@@ -1387,7 +1384,7 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
   /* The POP3 struct is already initialised in pop3_connect() */
   struct Curl_easy *data = conn->data;
   struct POP3 *pop3 = data->req.protop;
-  const char *path = data->state.path;
+  const char *path = &data->state.up.path[1]; /* skip leading path */
 
   /* URL decode the path for the message ID */
   return Curl_urldecode(data, path, 0, &pop3->id, NULL, TRUE);

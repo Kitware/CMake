@@ -221,13 +221,12 @@ CTest
 CPack
 -----
 
-* CPack gained a ``productbuild`` generator on OS X, configured by
-  the :module:`CPackProductBuild` module.
+* CPack gained a :cpack_gen:`CPack productbuild Generator` on OS X.
 
 * CPack gained a new :variable:`CPACK_PACKAGE_CHECKSUM` variable to
   enable generation of a checksum file for each package file.
 
-* The :module:`CPackDeb` module learned to support long file names
+* The :cpack_gen:`CPack DEB Generator` learned to support long file names
   when archive format is set to GNU tar.
   See :variable:`CPACK_DEBIAN_ARCHIVE_TYPE`
 
@@ -240,32 +239,32 @@ CPack
   ``USER_INTERFACES`` option to add a list of additional pages to the IFW
   installer.
 
-* The :module:`CPackRPM` module learned to generate debuginfo
+* The :cpack_gen:`CPack RPM Generator` learned to generate debuginfo
   packages on demand. See :variable:`CPACK_RPM_DEBUGINFO_PACKAGE`
   and its per component version.
 
-* The :module:`CPackRPM` module learned to generate source rpm
+* The :cpack_gen:`CPack RPM Generator` learned to generate source rpm
   (SRPM) packages on demand. See :variable:`CPACK_RPM_PACKAGE_SOURCES`,
   :variable:`CPACK_RPM_SOURCE_PKG_BUILD_PARAMS` and
   :variable:`CPACK_RPM_SOURCE_PKG_PACKAGING_INSTALL_PREFIX`.
 
-* The CPack NSIS generator now supports
+* The :cpack_gen:`CPack NSIS Generator` now supports
   :variable:`CPACK_NSIS_<compName>_INSTALL_DIRECTORY`.
   This can be used to set component specific installation directories.
 
-* The CPack WIX generator now supports
+* The :cpack_gen:`CPack WIX Generator` now supports
   :variable:`CPACK_WIX_SKIP_PROGRAM_FOLDER` to allow specification
   of a custom absolute installation prefix outside
   of the ProgramFiles folders.
 
-* The CPack WIX generator now supports
+* The :cpack_gen:`CPack WIX Generator` now supports
   :variable:`CPACK_COMPONENT_<compName>_DISABLED`.
   This can be used to deselect a component from being installed by default.
 
-* The CPack WIX generator now supports :variable:`CPACK_WIX_PATCH_FILE`
-  fragments for Feature elements.
+* The :cpack_gen:`CPack WIX Generator` now supports
+  :variable:`CPACK_WIX_PATCH_FILE` fragments for Feature elements.
 
-* The CPack WIX generator now supports
+* The :cpack_gen:`CPack WIX Generator` now supports
   :variable:`CPACK_WIX_ROOT_FEATURE_TITLE` and
   :variable:`CPACK_WIX_ROOT_FEATURE_DESCRIPTION` to allow the specification
   of a custom title and description for the root feature element.

@@ -21,8 +21,8 @@ static cmVS7FlagTable cmVS141CSharpFlagTable[] = {
   { "AddModules", "addmodule:", "", "", cmIDEFlagTable::SemicolonAppendable },
   { "", "link", "", "", 0 },
 
-  { "Win32Resource", "win32res", "", "", cmIDEFlagTable::UserValueRequired },
-  { "ApplicationIcon", "win32icon", "", "",
+  { "Win32Resource", "win32res:", "", "", cmIDEFlagTable::UserValueRequired },
+  { "ApplicationIcon", "win32icon:", "", "",
     cmIDEFlagTable::UserValueRequired },
 
   { "ApplicationManifest", "win32manifest:", "", "",
@@ -76,7 +76,12 @@ static cmVS7FlagTable cmVS141CSharpFlagTable[] = {
   { "LangVersion", "langversion:4", "", "4", 0 },
   { "LangVersion", "langversion:5", "", "5", 0 },
   { "LangVersion", "langversion:6", "", "6", 0 },
+  { "LangVersion", "langversion:7.0", "", "7.0", 0 },
+  { "LangVersion", "langversion:7.1", "", "7.1", 0 },
+  { "LangVersion", "langversion:7.2", "", "7.2", 0 },
+  { "LangVersion", "langversion:7.3", "", "7.3", 0 },
   { "LangVersion", "langversion:default", "", "default", 0 },
+  { "LangVersion", "langversion:latest", "", "latest", 0 },
 
   { "DelaySign", "delaysign", "", "true", 0 },
   { "DelaySign", "delaysign-", "", "false", 0 },

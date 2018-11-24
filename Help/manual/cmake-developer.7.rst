@@ -579,11 +579,11 @@ file and the ``Help/manual/cmake-modules.7.rst`` toctree entry.
 Find Modules
 ------------
 
-A "find module" is a ``Modules/Find<package>.cmake`` file to be loaded
-by the :command:`find_package` command when invoked for ``<package>``.
+A "find module" is a ``Modules/Find<PackageName>.cmake`` file to be loaded
+by the :command:`find_package` command when invoked for ``<PackageName>``.
 
 The primary task of a find module is to determine whether a package
-exists on the system, set the ``<package>_FOUND`` variable to reflect
+exists on the system, set the ``<PackageName>_FOUND`` variable to reflect
 this and provide any variables, macros and imported targets required to
 use the package.  A find module is useful in cases where an upstream
 library does not provide a

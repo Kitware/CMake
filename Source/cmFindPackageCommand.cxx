@@ -337,7 +337,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
         return false;
       }
       this->Configs.push_back(args[i]);
-    } else if (!haveVersion && version.find(args[i].c_str())) {
+    } else if (!haveVersion && version.find(args[i])) {
       haveVersion = true;
       this->Version = args[i];
     } else {
@@ -487,7 +487,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
 
   this->SetModuleVariables(components);
 
-  // See if there is a Find<package>.cmake module.
+  // See if there is a Find<PackageName>.cmake module.
   if (this->UseFindModules) {
     bool foundModule = false;
     if (!this->FindModule(foundModule)) {
@@ -538,7 +538,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // No find module.  Assume the project has a CMake config file.  Use
-  // a <package>_DIR cache variable to locate it.
+  // a <PackageName>_DIR cache variable to locate it.
   this->Variable = this->Name;
   this->Variable += "_DIR";
 

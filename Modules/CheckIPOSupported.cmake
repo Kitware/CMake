@@ -56,13 +56,14 @@ include(CMakeParseArguments) # cmake_parse_arguments
 # X_RESULT - name of the final result variable
 # X_OUTPUT - name of the variable with information about error
 macro(_ipo_not_supported output)
-  string(COMPARE EQUAL "${X_RESULT}" "" is_empty)
-  if(is_empty)
+  if(NOT X_RESULT)
     message(FATAL_ERROR "IPO is not supported (${output}).")
   endif()
 
   set("${X_RESULT}" NO PARENT_SCOPE)
-  set("${X_OUTPUT}" "${output}" PARENT_SCOPE)
+  if(X_OUTPUT)
+    set("${X_OUTPUT}" "${output}" PARENT_SCOPE)
+  endif()
 endmacro()
 
 # Run IPO/LTO test
@@ -125,7 +126,13 @@ macro(_ipo_run_language_check language)
   )
 
   if(NOT result)
-    _ipo_not_supported("${output}")
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+      "${language} compiler IPO check failed with the following output:\n"
+      "${output}\n")
+    _ipo_not_supported("check failed to compile")
+    if(X_OUTPUT)
+      set("${X_OUTPUT}" "${output}" PARENT_SCOPE)
+    endif()
     return()
   endif()
 endmacro()
@@ -219,7 +226,7 @@ function(check_ipo_supported)
     endif()
   endforeach()
 
-  if(CMAKE_GENERATOR MATCHES "^Visual Studio ")
+  if(CMAKE_GENERATOR MATCHES "^Visual Studio 9 ")
     _ipo_not_supported("CMake doesn't support IPO for current generator")
     return()
   endif()

@@ -174,7 +174,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
       // Complain if the file cannot be found and matches the complain
       // regex.
       if (fullName.empty() &&
-          this->IncludeRegexComplain.find(current.FileName.c_str())) {
+          this->IncludeRegexComplain.find(current.FileName)) {
         cmSystemTools::Error("Cannot find file \"", current.FileName.c_str(),
                              "\".");
         return false;
@@ -359,7 +359,7 @@ void cmDependsC::Scan(std::istream& is, const char* directory,
     }
 
     // Match include directives.
-    if (this->IncludeRegexLine.find(line.c_str())) {
+    if (this->IncludeRegexLine.find(line)) {
       // Get the file being included.
       UnscannedEntry entry;
       entry.FileName = this->IncludeRegexLine.match(2);
@@ -383,7 +383,7 @@ void cmDependsC::Scan(std::istream& is, const char* directory,
       // file their own directory by simply using "filename.h" (#12619)
       // This kind of problem will be fixed when a more
       // preprocessor-like implementation of this scanner is created.
-      if (this->IncludeRegexScan.find(entry.FileName.c_str())) {
+      if (this->IncludeRegexScan.find(entry.FileName)) {
         newCacheEntry->UnscannedEntries.push_back(entry);
         if (this->Encountered.find(entry.FileName) ==
             this->Encountered.end()) {
@@ -449,7 +449,7 @@ void cmDependsC::ParseTransform(std::string const& xform)
 void cmDependsC::TransformLine(std::string& line)
 {
   // Check for a transform rule match.  Return if none.
-  if (!this->IncludeRegexTransform.find(line.c_str())) {
+  if (!this->IncludeRegexTransform.find(line)) {
     return;
   }
   TransformRulesType::const_iterator tri =

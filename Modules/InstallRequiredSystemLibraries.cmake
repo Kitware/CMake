@@ -302,7 +302,15 @@ if(MSVC)
       get_filename_component(windows_kits_dir
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots;KitsRoot10]" ABSOLUTE)
       set(programfilesx86 "ProgramFiles(x86)")
-      find_path(WINDOWS_KITS_DIR NAMES Redist/ucrt/DLLs/${CMAKE_MSVC_ARCH}/ucrtbase.dll
+      if(";${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION};$ENV{UCRTVersion};$ENV{WindowsSDKVersion};" MATCHES [=[;(10\.[0-9.]+)[;\]]=])
+        set(__ucrt_version "${CMAKE_MATCH_1}/")
+      else()
+        set(__ucrt_version "")
+      endif()
+      find_path(WINDOWS_KITS_DIR
+        NAMES
+          Redist/${__ucrt_version}ucrt/DLLs/${CMAKE_MSVC_ARCH}/ucrtbase.dll
+          Redist/ucrt/DLLs/${CMAKE_MSVC_ARCH}/ucrtbase.dll
         PATHS
         $ENV{CMAKE_WINDOWS_KITS_10_DIR}
         "${windows_kits_dir}"
@@ -313,11 +321,19 @@ if(MSVC)
 
       # Glob the list of UCRT DLLs.
       if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
-        file(GLOB __ucrt_dlls "${WINDOWS_KITS_DIR}/Redist/ucrt/DLLs/${CMAKE_MSVC_ARCH}/*.dll")
+        if(EXISTS "${WINDOWS_KITS_DIR}/Redist/${__ucrt_version}ucrt/DLLs/${CMAKE_MSVC_ARCH}/ucrtbase.dll")
+          file(GLOB __ucrt_dlls "${WINDOWS_KITS_DIR}/Redist/${__ucrt_version}ucrt/DLLs/${CMAKE_MSVC_ARCH}/*.dll")
+        else()
+          file(GLOB __ucrt_dlls "${WINDOWS_KITS_DIR}/Redist/ucrt/DLLs/${CMAKE_MSVC_ARCH}/*.dll")
+        endif()
         list(APPEND __install__libs ${__ucrt_dlls})
       endif()
       if(CMAKE_INSTALL_DEBUG_LIBRARIES)
-        file(GLOB __ucrt_dlls "${WINDOWS_KITS_DIR}/bin/${CMAKE_MSVC_ARCH}/ucrt/*.dll")
+        if(EXISTS "${WINDOWS_KITS_DIR}/bin/${__ucrt_version}${CMAKE_MSVC_ARCH}/ucrt/ucrtbased.dll")
+          file(GLOB __ucrt_dlls "${WINDOWS_KITS_DIR}/bin/${__ucrt_version}${CMAKE_MSVC_ARCH}/ucrt/*.dll")
+        else()
+          file(GLOB __ucrt_dlls "${WINDOWS_KITS_DIR}/bin/${CMAKE_MSVC_ARCH}/ucrt/*.dll")
+        endif()
         list(APPEND __install__libs ${__ucrt_dlls})
       endif()
     endif()
@@ -362,7 +378,7 @@ if(MSVC)
           )
       endif()
 
-      # include the language dll's for vs8 as well as the actuall dll's
+      # include the language dll's for vs8 as well as the actual dll's
       set(MSVC_MFCLOC_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC80.MFCLOC")
       # Install the manifest that allows DLLs to be loaded from the
       # directory containing the executable.
@@ -406,7 +422,7 @@ if(MSVC)
           )
       endif()
 
-      # include the language dll's for vs9 as well as the actuall dll's
+      # include the language dll's for vs9 as well as the actual dll's
       set(MSVC_MFCLOC_DIR "${MSVC_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC90.MFCLOC")
       # Install the manifest that allows DLLs to be loaded from the
       # directory containing the executable.
@@ -487,7 +503,7 @@ if(MSVC)
         endif()
       endif()
 
-      # include the language dll's as well as the actuall dll's
+      # include the language dll's as well as the actual dll's
       set(MSVC_MFCLOC_DIR "${MSVC_REDIST_MFC_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.${MSVC_REDIST_NAME}.MFCLOC")
       set(__install__libs ${__install__libs}
         "${MSVC_MFCLOC_DIR}/mfc${v}chs.dll"

@@ -184,6 +184,9 @@ Helper functions which are used by the above ones
 
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 function(csharp_get_filename_keys OUT)
   set(${OUT} "")
   foreach(f ${ARGN})
@@ -304,3 +307,5 @@ function(csharp_set_xaml_cs_properties)
     endif()
   endforeach()
 endfunction()
+
+cmake_policy(POP)
