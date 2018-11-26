@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <cmath>
 #include <ctype.h>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
@@ -2602,10 +2603,10 @@ public:
 
   bool UpdatePercentage(double value, double total, std::string& status)
   {
-    int OldPercentage = this->CurrentPercentage;
+    long OldPercentage = this->CurrentPercentage;
 
     if (total > 0.0) {
-      this->CurrentPercentage = static_cast<int>(value / total * 100.0 + 0.5);
+      this->CurrentPercentage = std::lround(value / total * 100.0);
       if (this->CurrentPercentage > 100) {
         // Avoid extra progress reports for unexpected data beyond total.
         this->CurrentPercentage = 100;
@@ -2627,7 +2628,7 @@ public:
   cmFileCommand* GetFileCommand() { return this->FileCommand; }
 
 private:
-  int CurrentPercentage;
+  long CurrentPercentage;
   cmFileCommand* FileCommand;
   std::string Text;
 };

@@ -3,6 +3,7 @@
 #include "cmCTestTestHandler.h"
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cmsys/Base64.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/RegularExpression.hxx>
@@ -544,8 +545,7 @@ int cmCTestTestHandler::ProcessHandler()
     }
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
                std::endl
-                 << passColorCode << static_cast<int>(percent + .5f)
-                 << "% tests passed"
+                 << passColorCode << std::lround(percent) << "% tests passed"
                  << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
                  << ", " << failedColorCode << failed.size() << " tests failed"
                  << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
