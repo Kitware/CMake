@@ -6,6 +6,8 @@ function(run_ctest CASE_NAME)
   if(EXISTS "${RunCMake_SOURCE_DIR}/CTestConfig.cmake.in")
     configure_file(${RunCMake_SOURCE_DIR}/CTestConfig.cmake.in
                    ${RunCMake_BINARY_DIR}/${CASE_NAME}/CTestConfig.cmake @ONLY)
+  else()
+    file(REMOVE ${RunCMake_BINARY_DIR}/${CASE_NAME}/CTestConfig.cmake)
   endif()
   configure_file(${RunCMake_SOURCE_DIR}/CMakeLists.txt.in
                  ${RunCMake_BINARY_DIR}/${CASE_NAME}/CMakeLists.txt @ONLY)
