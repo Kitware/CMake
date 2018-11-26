@@ -9,7 +9,8 @@ Synopsis
 .. parsed-literal::
 
  `Generate a Project Buildsystem`_
-  cmake [<options>] {<path-to-source> | <path-to-existing-build>}
+  cmake [<options>] <path-to-source>
+  cmake [<options>] <path-to-existing-build>
   cmake [<options>] -S <path-to-source> -B <path-to-build>
 
  `Build a Project`_
@@ -33,36 +34,130 @@ Synopsis
 Description
 ===========
 
-The **cmake** executable is the CMake command-line interface.  It may be
-used to configure projects in scripts.  Project configuration settings
-may be specified on the command line with the -D option.
+The **cmake** executable is the command-line interface of the cross-platform
+buildsystem generator CMake.  The above `Synopsis`_ lists various actions
+the tool can perform as described in sections below.
 
-CMake is a cross-platform build system generator.  Projects specify
-their build process with platform-independent CMake listfiles included
-in each directory of a source tree with the name CMakeLists.txt.
-Users build a project by using CMake to generate a build system for a
-native tool on their platform.
+To build a software project with CMake, `Generate a Project Buildsystem`_.
+Optionally use **cmake** to `Build a Project`_ or just run the
+corresponding build tool (e.g. ``make``) directly.  **cmake** can also
+be used to `View Help`_.
+
+The other actions are meant for use by software developers writing
+scripts in the :manual:`CMake language <cmake-language(7)>` to support
+their builds.
+
+For graphical user interfaces that may be used in place of **cmake**,
+see :manual:`ccmake <ccmake(1)>` and :manual:`cmake-gui <cmake-gui(1)>`.
+For command-line interfaces to the CMake testing and packaging facilities,
+see :manual:`ctest <ctest(1)>` and :manual:`cpack <cpack(1)>`.
+
+For more information on CMake at large, `see also`_ the links at the end
+of this manual.
+
+
+Introduction to CMake Buildsystems
+==================================
+
+A *buildsystem* describes how to build a project's executables and libraries
+from its source code using a *build tool* to automate the process.  For
+example, a buildsystem may be a ``Makefile`` for use with a command-line
+``make`` tool or a project file for an Integrated Development Environment
+(IDE).  In order to avoid maintaining multiple such buildsystems, a project
+may specify its buildsystem abstractly using files written in the
+:manual:`CMake language <cmake-language(7)>`.  From these files CMake
+generates a preferred buildsystem locally for each user through a backend
+called a *generator*.
+
+To generate a buildsystem with CMake, the following must be selected:
+
+Source Tree
+  The top-level directory containing source files provided by the project.
+  The project specifies its buildsystem using files as described in the
+  :manual:`cmake-language(7)` manual, starting with a top-level file named
+  ``CMakeLists.txt``.  These files specify build targets and their
+  dependencies as described in the :manual:`cmake-buildsystem(7)` manual.
+
+Build Tree
+  The top-level directory in which buildsystem files and build output
+  artifacts (e.g. executables and libraries) are to be stored.
+  CMake will write a ``CMakeCache.txt`` file to identify the directory
+  as a build tree and store persistent information such as buildsystem
+  configuration options.
+
+  To maintain a pristine source tree, perform an *out-of-source* build
+  by using a separate dedicated build tree.  An *in-source* build in
+  which the build tree is placed in the same directory as the source
+  tree is also supported, but discouraged.
+
+Generator
+  This chooses the kind of buildsystem to generate.  See the
+  :manual:`cmake-generators(7)` manual for documentation of all generators.
+  Run ``cmake --help`` to see a list of generators available locally.
+  Optionally use the ``-G`` option below to specify a generator, or simply
+  accept the default CMake chooses for the current platform.
+
+  When using one of the :ref:`Command-Line Build Tool Generators`
+  CMake expects that the environment needed by the compiler toolchain
+  is already configured in the shell.  When using one of the
+  :ref:`IDE Build Tool Generators`, no particular environment is needed.
 
 
 Generate a Project Buildsystem
 ==============================
 
-.. code-block:: shell
+Run CMake with one of the following command signatures to specify the
+source and build trees and generate a buildsystem:
 
-  cmake [<options>] {<path-to-source> | <path-to-existing-build>}
-  cmake [<options>] -S <path-to-source> -B <path-to-build>
+``cmake [<options>] <path-to-source>``
+  Uses the current working directory as the build tree, and
+  ``<path-to-source>`` as the source tree.  The specified path may
+  be absolute or relative to the current working directory.
+  The source tree must contain a ``CMakeLists.txt`` file and must
+  *not* contain a ``CMakeCache.txt`` file because the latter
+  identifies an existing build tree.  For example:
 
-The parameter ``<path-to-source>`` must be the relative or absolute path
-of the source directory that contains the top-level ``CMakeLists.txt`` file.
-Alternatively, if the named directory contains ``CMakeCache.txt`` it will
-be treated as ``<path-to-existing-build>`` and the path to the source will
-be loaded from the cache.
+  .. code-block:: console
 
-By default, **cmake** writes the generated Makefiles and all other output
-to the directory from where it was invoked.  This behavior can be changed
-by the variant with the parameter ``<path-to-build>``.
+    $ mkdir build ; cd build
+    $ cmake ../src
+
+``cmake [<options>] <path-to-existing-build>``
+  Uses ``<path-to-existing-build>`` as the build tree, and loads the
+  path to the source tree from its ``CMakeCache.txt`` file, which must
+  have already been generated by a previous run of CMake.  The specified
+  path may be absolute or relative to the current working directory.
+  For example:
+
+  .. code-block:: console
+
+    $ cd build
+    $ cmake .
+
+``cmake [<options>] -S <path-to-source> -B <path-to-build>``
+  Uses ``<path-to-build>`` as the build tree and ``<path-to-source>``
+  as the source tree.  The specified paths may be absolute or relative
+  to the current working directory.  The source tree must contain a
+  ``CMakeLists.txt`` file.  The build tree will be created automatically
+  if it does not already exist.  For example:
+
+  .. code-block:: console
+
+    $ cmake -S src -B build
 
 In all cases the ``<options>`` may be zero or more of the `Options`_ below.
+
+After generating a buildsystem one may use the corresponding native
+build tool to build the project.  For example, after using the
+:generator:`Unix Makefiles` generator one may run ``make`` directly:
+
+  .. code-block:: console
+
+    $ make
+    $ make install
+
+Alternatively, one may use **cmake** to `Build a Project`_ by
+automatically choosing and invoking the appropriate native build tool.
 
 .. _`CMake Options`:
 
