@@ -133,11 +133,14 @@
     ]
   },
   {
-    "name":  "Win32Manifest",
+    "name":  "ApplicationManifest",
     "switch": "win32manifest:",
     "comment": "",
-    "value": "true",
-    "flags": []
+    "value": "",
+    "flags": [
+      "UserValue",
+      "UserRequired"
+    ]
   },
   {
     "name":  "NoWin32Manifest",
