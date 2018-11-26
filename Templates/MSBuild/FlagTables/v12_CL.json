@@ -415,7 +415,7 @@
   },
   {
     "name": "PrecompiledHeader",
-    "switch": "",
+    "switch": "Y-",
     "comment": "Not Using Precompiled Headers",
     "value": "NotUsing",
     "flags": []
