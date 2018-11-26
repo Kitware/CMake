@@ -215,6 +215,10 @@ bool cmGlobalVisualStudio14Generator::IsWindowsStoreToolsetInstalled() const
 std::string cmGlobalVisualStudio14Generator::GetWindows10SDKMaxVersion() const
 {
   // The last Windows 10 SDK version that VS 2015 can target is 10.0.14393.0.
+  //
+  // "VS 2015 Users: The Windows 10 SDK (15063, 16299, 17134, 17763) is
+  // officially only supported for VS 2017." From:
+  // https://blogs.msdn.microsoft.com/chuckw/2018/10/02/windows-10-october-2018-update/
   return "10.0.14393.0";
 }
 
@@ -287,28 +291,28 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
   // only the UCRT MSIs were installed for them.
   cmEraseIf(sdks, NoWindowsH());
 
+  // Only use the filename, which will be the SDK version.
+  for (std::string& i : sdks) {
+    i = cmSystemTools::GetFilenameName(i);
+  }
+
+  // Skip SDKs that cannot be used with our toolset.
+  std::string maxVersion = this->GetWindows10SDKMaxVersion();
+  if (!maxVersion.empty()) {
+    cmEraseIf(sdks, WindowsSDKTooRecent(maxVersion));
+  }
+
+  // Sort the results to make sure we select the most recent one.
+  std::sort(sdks.begin(), sdks.end(), cmSystemTools::VersionCompareGreater);
+
+  // Look for a SDK exactly matching the requested target version.
+  for (std::string const& i : sdks) {
+    if (cmSystemTools::VersionCompareEqual(i, this->SystemVersion)) {
+      return i;
+    }
+  }
+
   if (!sdks.empty()) {
-    // Only use the filename, which will be the SDK version.
-    for (std::string& i : sdks) {
-      i = cmSystemTools::GetFilenameName(i);
-    }
-
-    // Sort the results to make sure we select the most recent one.
-    std::sort(sdks.begin(), sdks.end(), cmSystemTools::VersionCompareGreater);
-
-    // Skip SDKs that cannot be used with our toolset.
-    std::string maxVersion = this->GetWindows10SDKMaxVersion();
-    if (!maxVersion.empty()) {
-      cmEraseIf(sdks, WindowsSDKTooRecent(maxVersion));
-    }
-
-    // Look for a SDK exactly matching the requested target version.
-    for (std::string const& i : sdks) {
-      if (cmSystemTools::VersionCompareEqual(i, this->SystemVersion)) {
-        return i;
-      }
-    }
-
     // Use the latest Windows 10 SDK since the exact version is not available.
     return sdks.at(0);
   }
