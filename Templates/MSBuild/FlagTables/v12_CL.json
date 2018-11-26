@@ -951,13 +951,12 @@
     ]
   },
   {
-    "name": "PREfastAdditionalOptions",
-    "switch": "analyze:",
-    "comment": "Additional Code Analysis Native options",
+    "name": "PREfastLog",
+    "switch": "analyze:log",
+    "comment": "Code Analysis Log",
     "value": "",
     "flags": [
-      "UserValue",
-      "SemicolonAppendable"
+      "UserFollowing"
     ]
   },
   {
@@ -1063,15 +1062,6 @@
     "flags": [
       "UserValue",
       "UserRequired"
-    ]
-  },
-  {
-    "name": "PREfastLog",
-    "switch": "analyze:log",
-    "comment": "Code Analysis Log",
-    "value": "",
-    "flags": [
-      "UserValue"
     ]
   },
   {
