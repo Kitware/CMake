@@ -1117,5 +1117,68 @@
       "UserValue",
       "UserRequired"
     ]
+  },
+  {
+    "name": "CppLanguageStandard",
+    "switch": "",
+    "comment": "Default",
+    "value": "Default",
+    "flags": []
+  },
+  {
+    "name": "CppLanguageStandard",
+    "switch": "std=c++98",
+    "comment": "C++03",
+    "value": "c++98",
+    "flags": []
+  },
+  {
+    "name": "CppLanguageStandard",
+    "switch": "std=c++11",
+    "comment": "C++11",
+    "value": "c++11",
+    "flags": []
+  },
+  {
+    "name": "CppLanguageStandard",
+    "switch": "std=c++1y",
+    "comment": "C++14",
+    "value": "c++1y",
+    "flags": []
+  },
+  {
+    "name": "CppLanguageStandard",
+    "switch": "std=c++14",
+    "comment": "C++14",
+    "value": "c++1y",
+    "flags": []
+  },
+  {
+    "name": "CppLanguageStandard",
+    "switch": "std=gnu++98",
+    "comment": "C++03 (GNU Dialect)",
+    "value": "gnu++98",
+    "flags": []
+  },
+  {
+    "name": "CppLanguageStandard",
+    "switch": "std=gnu++11",
+    "comment": "C++11 (GNU Dialect)",
+    "value": "gnu++11",
+    "flags": []
+  },
+  {
+    "name": "CppLanguageStandard",
+    "switch": "std=gnu++1y",
+    "comment": "C++14 (GNU Dialect)",
+    "value": "gnu++1y",
+    "flags": []
+  },
+  {
+    "name": "CppLanguageStandard",
+    "switch": "std=gnu++14",
+    "comment": "C++14 (GNU Dialect)",
+    "value": "gnu++1y",
+    "flags": []
   }
 ]
