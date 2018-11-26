@@ -1243,5 +1243,19 @@
     "comment": "C++14 (GNU Dialect)",
     "value": "gnu++1y",
     "flags": []
+  },
+  {
+    "name": "SupportJustMyCode",
+    "switch": "JMC-",
+    "comment": "",
+    "value": "false",
+    "flags": []
+  },
+  {
+    "name": "SupportJustMyCode",
+    "switch": "JMC",
+    "comment": "",
+    "value": "true",
+    "flags": []
   }
 ]
