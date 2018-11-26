@@ -114,7 +114,7 @@
   },
   {
     "name":  "Win32Resource",
-    "switch": "win32res",
+    "switch": "win32res:",
     "comment": "",
     "value": "",
     "flags": [
@@ -124,7 +124,7 @@
   },
   {
     "name":  "ApplicationIcon",
-    "switch": "win32icon",
+    "switch": "win32icon:",
     "comment": "",
     "value": "",
     "flags": [
