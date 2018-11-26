@@ -36,6 +36,13 @@
   },
   {
     "name": "TargetMachine",
+    "switch": "MACHINE:ARM64",
+    "comment": "MachineARM64",
+    "value": "MachineARM64",
+    "flags": []
+  },
+  {
+    "name": "TargetMachine",
     "switch": "MACHINE:EBC",
     "comment": "MachineEBC",
     "value": "MachineEBC",
