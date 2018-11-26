@@ -10,7 +10,7 @@ be included together.
 
 .. command:: CHECK_INCLUDE_FILES
 
-  ::
+  .. code-block:: cmake
 
     CHECK_INCLUDE_FILES("<includes>" <variable> [LANGUAGE <language>])
 
@@ -19,24 +19,28 @@ be included together.
   entry named ``<variable>``.  Specify the ``<includes>`` argument
   as a :ref:`;-list <CMake Language Lists>` of header file names.
 
-If LANGUAGE is set, the specified compiler will be used to perform the
-check. Acceptable values are ``C`` and ``CXX``. If not set, the C compiler
-will be used if enabled. If the C compiler is not enabled, the C++
-compiler will be used if enabled.
+  If ``LANGUAGE`` is set, the specified compiler will be used to perform the
+  check. Acceptable values are ``C`` and ``CXX``. If not set, the C compiler
+  will be used if enabled. If the C compiler is not enabled, the C++
+  compiler will be used if enabled.
 
 The following variables may be set before calling this macro to modify
 the way the check is run:
 
 ``CMAKE_REQUIRED_FLAGS``
-  string of compile command line flags
+  string of compile command line flags.
 ``CMAKE_REQUIRED_DEFINITIONS``
-  list of macros to define (-DFOO=bar)
+  a :ref:`;-list <CMake Language Lists>` of macros to define (-DFOO=bar).
 ``CMAKE_REQUIRED_INCLUDES``
-  list of include directories
+  a :ref:`;-list <CMake Language Lists>` of header search paths to pass to
+  the compiler.
+``CMAKE_REQUIRED_LINK_OPTIONS``
+  a :ref:`;-list <CMake Language Lists>` of options to add to the link command.
 ``CMAKE_REQUIRED_LIBRARIES``
-  A list of libraries to link.  See policy :policy:`CMP0075`.
+  a :ref:`;-list <CMake Language Lists>` of libraries to add to the link
+  command. See policy :policy:`CMP0075`.
 ``CMAKE_REQUIRED_QUIET``
-  execute quietly without messages
+  execute quietly without messages.
 
 See modules :module:`CheckIncludeFile` and :module:`CheckIncludeFileCXX`
 to check for a single header file in ``C`` or ``CXX`` languages.
@@ -98,6 +102,11 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
       set(_description "include file ${_INCLUDE}")
     endif()
 
+    set(_CIF_LINK_OPTIONS)
+    if(CMAKE_REQUIRED_LINK_OPTIONS)
+      set(_CIF_LINK_OPTIONS LINK_OPTIONS ${CMAKE_REQUIRED_LINK_OPTIONS})
+    endif()
+
     set(_CIF_LINK_LIBRARIES "")
     if(CMAKE_REQUIRED_LIBRARIES)
       cmake_policy(GET CMP0075 _CIF_CMP0075
@@ -128,11 +137,13 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
       ${CMAKE_BINARY_DIR}
       ${src}
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
+      ${_CIF_LINK_OPTIONS}
       ${_CIF_LINK_LIBRARIES}
       CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_INCLUDE_FILES_FLAGS}
       "${CHECK_INCLUDE_FILES_INCLUDE_DIRS}"
       OUTPUT_VARIABLE OUTPUT)
+    unset(_CIF_LINK_OPTIONS)
     unset(_CIF_LINK_LIBRARIES)
     if(${VARIABLE})
       if(NOT CMAKE_REQUIRED_QUIET)

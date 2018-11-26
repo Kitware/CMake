@@ -7,20 +7,21 @@ CheckVariableExists
 
 Check if the variable exists.
 
-::
+.. command:: CHECK_VARIABLE_EXISTS
 
-  CHECK_VARIABLE_EXISTS(VAR VARIABLE)
+  .. code-block:: cmake
 
-
-
-::
-
-  VAR      - the name of the variable
-  VARIABLE - variable to store the result
-             Will be created as an internal cache variable.
+    CHECK_VARIABLE_EXISTS(VAR VARIABLE)
 
 
-This macro is only for C variables.
+  ::
+
+    VAR      - the name of the variable
+    VARIABLE - variable to store the result
+               Will be created as an internal cache variable.
+
+
+  This macro is only for ``C`` variables.
 
 The following variables may be set before calling this macro to modify
 the way the check is run:
@@ -29,6 +30,7 @@ the way the check is run:
 
   CMAKE_REQUIRED_FLAGS = string of compile command line flags
   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+  CMAKE_REQUIRED_LINK_OPTIONS = list of options to pass to link command
   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
   CMAKE_REQUIRED_QUIET = execute quietly without messages
 #]=======================================================================]
@@ -42,6 +44,12 @@ macro(CHECK_VARIABLE_EXISTS VAR VARIABLE)
     if(NOT CMAKE_REQUIRED_QUIET)
       message(STATUS "Looking for ${VAR}")
     endif()
+    if(CMAKE_REQUIRED_LINK_OPTIONS)
+      set(CHECK_VARIABLE_EXISTS_ADD_LINK_OPTIONS
+        LINK_OPTIONS ${CMAKE_REQUIRED_LINK_OPTIONS})
+    else()
+      set(CHECK_VARIABLE_EXISTS_ADD_LINK_OPTIONS)
+    endif()
     if(CMAKE_REQUIRED_LIBRARIES)
       set(CHECK_VARIABLE_EXISTS_ADD_LIBRARIES
         LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
@@ -52,6 +60,7 @@ macro(CHECK_VARIABLE_EXISTS VAR VARIABLE)
       ${CMAKE_BINARY_DIR}
       ${CMAKE_ROOT}/Modules/CheckVariableExists.c
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
+      ${CHECK_VARIABLE_EXISTS_ADD_LINK_OPTIONS}
       ${CHECK_VARIABLE_EXISTS_ADD_LIBRARIES}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_VARIABLE_DEFINITIONS}
       OUTPUT_VARIABLE OUTPUT)
