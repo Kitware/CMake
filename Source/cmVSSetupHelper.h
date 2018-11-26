@@ -150,6 +150,7 @@ private:
   HRESULT comInitialized;
   // current best instance of VS selected
   VSInstanceInfo chosenInstanceInfo;
+  bool IsEWDKEnabled();
 
   std::string SpecifiedVSInstallLocation;
 };

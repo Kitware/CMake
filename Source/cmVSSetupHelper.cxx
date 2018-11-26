@@ -267,10 +267,43 @@ bool cmVSSetupAPIHelper::GetVCToolsetVersion(std::string& vsToolsetVersion)
   return isInstalled && !vsToolsetVersion.empty();
 }
 
+bool cmVSSetupAPIHelper::IsEWDKEnabled()
+{
+  std::string envEnterpriseWDK, envDisableRegistryUse;
+  cmSystemTools::GetEnv("EnterpriseWDK", envEnterpriseWDK);
+  cmSystemTools::GetEnv("DisableRegistryUse", envDisableRegistryUse);
+  if (!cmSystemTools::Strucmp(envEnterpriseWDK.c_str(), "True") &&
+      !cmSystemTools::Strucmp(envDisableRegistryUse.c_str(), "True")) {
+    return true;
+  }
+
+  return false;
+}
+
 bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 {
   bool isVSInstanceExists = false;
   if (chosenInstanceInfo.VSInstallLocation.compare(L"") != 0) {
+    return true;
+  }
+
+  if (this->IsEWDKEnabled()) {
+    std::string envWindowsSdkDir81, envVSVersion, envVsInstallDir;
+
+    cmSystemTools::GetEnv("WindowsSdkDir_81", envWindowsSdkDir81);
+    cmSystemTools::GetEnv("VisualStudioVersion", envVSVersion);
+    cmSystemTools::GetEnv("VSINSTALLDIR", envVsInstallDir);
+    if (envVSVersion.empty() || envVsInstallDir.empty())
+      return false;
+
+    chosenInstanceInfo.VSInstallLocation =
+      std::wstring(envVsInstallDir.begin(), envVsInstallDir.end());
+    chosenInstanceInfo.Version =
+      std::wstring(envVSVersion.begin(), envVSVersion.end());
+    chosenInstanceInfo.VCToolsetVersion = envVSVersion;
+    chosenInstanceInfo.ullVersion = std::stoi(envVSVersion);
+    chosenInstanceInfo.IsWin10SDKInstalled = true;
+    chosenInstanceInfo.IsWin81SDKInstalled = !envWindowsSdkDir81.empty();
     return true;
   }
 
