@@ -134,13 +134,6 @@
   },
   {
     "name": "Optimization",
-    "switch": "Os",
-    "comment": "Minimize Size",
-    "value": "MinSize",
-    "flags": []
-  },
-  {
-    "name": "Optimization",
     "switch": "O1",
     "comment": "Maximum Optimization (Favor Size)",
     "value": "MinSpace",
