@@ -409,15 +409,12 @@ endmacro()
 
 #-------------------------------------------------------------------------------
 
-#
-# Runs compiler with "-dumpversion" and parses major/minor
-# version with a regex.
-#
+# Convert CMAKE_CXX_COMPILER_VERSION to boost compiler suffix version.
 function(_Boost_COMPILER_DUMPVERSION _OUTPUT_VERSION _OUTPUT_VERSION_MAJOR _OUTPUT_VERSION_MINOR)
   string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?" "\\1"
-    _boost_COMPILER_VERSION_MAJOR ${CMAKE_CXX_COMPILER_VERSION})
+    _boost_COMPILER_VERSION_MAJOR "${CMAKE_CXX_COMPILER_VERSION}")
   string(REGEX REPLACE "([0-9]+)\\.([0-9]+)(\\.[0-9]+)?" "\\2"
-    _boost_COMPILER_VERSION_MINOR ${CMAKE_CXX_COMPILER_VERSION})
+    _boost_COMPILER_VERSION_MINOR "${CMAKE_CXX_COMPILER_VERSION}")
 
   set(_boost_COMPILER_VERSION "${_boost_COMPILER_VERSION_MAJOR}${_boost_COMPILER_VERSION_MINOR}")
 
