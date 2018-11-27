@@ -1106,8 +1106,7 @@ Configuration settings include:
 
 ``DropMethod``
   Specify the method by which results should be submitted to the
-  dashboard server.  The value may be ``ftp``, ``http``, or
-  ``https``.
+  dashboard server.  The value may be ``http`` or ``https``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_METHOD`
   * :module:`CTest` module variable: ``DROP_METHOD`` if set,

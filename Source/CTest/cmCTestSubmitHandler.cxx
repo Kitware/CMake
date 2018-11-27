@@ -120,7 +120,6 @@ static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
 
 cmCTestSubmitHandler::cmCTestSubmitHandler()
   : HTTPProxy()
-  , FTPProxy()
 {
   this->Initialize();
 }
@@ -139,158 +138,10 @@ void cmCTestSubmitHandler::Initialize()
   this->HTTPProxy.clear();
   this->HTTPProxyType = 0;
   this->HTTPProxyAuth.clear();
-  this->FTPProxy.clear();
-  this->FTPProxyType = 0;
   this->LogFile = nullptr;
   this->Files.clear();
 }
 
-bool cmCTestSubmitHandler::SubmitUsingFTP(
-  const std::string& localprefix, const std::vector<std::string>& files,
-  const std::string& remoteprefix, const std::string& url)
-{
-  CURL* curl;
-  CURLcode res;
-  FILE* ftpfile;
-  char error_buffer[1024];
-
-  /* In windows, this will init the winsock stuff */
-  ::curl_global_init(CURL_GLOBAL_ALL);
-
-  for (std::string const& file : files) {
-    /* get a curl handle */
-    curl = curl_easy_init();
-    if (curl) {
-      // Using proxy
-      if (this->FTPProxyType > 0) {
-        curl_easy_setopt(curl, CURLOPT_PROXY, this->FTPProxy.c_str());
-        switch (this->FTPProxyType) {
-          case 2:
-            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
-            break;
-          case 3:
-            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
-            break;
-          default:
-            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
-        }
-      }
-
-      // enable uploading
-      ::curl_easy_setopt(curl, CURLOPT_UPLOAD, 1);
-
-      // if there is little to no activity for too long stop submitting
-      ::curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1);
-      ::curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME,
-                         SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT);
-
-      ::curl_easy_setopt(curl, CURLOPT_UPLOAD, 1);
-
-      std::string local_file = file;
-      if (!cmSystemTools::FileExists(local_file)) {
-        local_file = localprefix + "/" + file;
-      }
-      std::string upload_as =
-        url + "/" + remoteprefix + cmSystemTools::GetFilenameName(file);
-
-      if (!cmSystemTools::FileExists(local_file)) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Cannot find file: " << local_file << std::endl);
-        ::curl_easy_cleanup(curl);
-        ::curl_global_cleanup();
-        return false;
-      }
-      unsigned long filelen = cmSystemTools::FileLength(local_file);
-
-      ftpfile = cmsys::SystemTools::Fopen(local_file, "rb");
-      *this->LogFile << "\tUpload file: " << local_file << " to " << upload_as
-                     << std::endl;
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         "   Upload file: " << local_file << " to "
-                                            << upload_as << std::endl,
-                         this->Quiet);
-
-      ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-
-      // specify target
-      ::curl_easy_setopt(curl, CURLOPT_URL, upload_as.c_str());
-
-      // now specify which file to upload
-      ::curl_easy_setopt(curl, CURLOPT_INFILE, ftpfile);
-
-      // and give the size of the upload (optional)
-      ::curl_easy_setopt(curl, CURLOPT_INFILESIZE, static_cast<long>(filelen));
-
-      // and give curl the buffer for errors
-      ::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error_buffer);
-
-      // specify handler for output
-      ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-                         cmCTestSubmitHandlerWriteMemoryCallback);
-      ::curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION,
-                         cmCTestSubmitHandlerCurlDebugCallback);
-
-      /* we pass our 'chunk' struct to the callback function */
-      cmCTestSubmitHandlerVectorOfChar chunk;
-      cmCTestSubmitHandlerVectorOfChar chunkDebug;
-      ::curl_easy_setopt(curl, CURLOPT_FILE, &chunk);
-      ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
-
-      // Now run off and do what you've been told!
-      res = ::curl_easy_perform(curl);
-
-      if (!chunk.empty()) {
-        cmCTestOptionalLog(this->CTest, DEBUG,
-                           "CURL output: ["
-                             << cmCTestLogWrite(&*chunk.begin(), chunk.size())
-                             << "]" << std::endl,
-                           this->Quiet);
-      }
-      if (!chunkDebug.empty()) {
-        cmCTestOptionalLog(
-          this->CTest, DEBUG,
-          "CURL debug output: ["
-            << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]"
-            << std::endl,
-          this->Quiet);
-      }
-
-      fclose(ftpfile);
-      if (res) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Error when uploading file: " << local_file
-                                                    << std::endl);
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Error message was: " << error_buffer << std::endl);
-        *this->LogFile << "   Error when uploading file: " << local_file
-                       << std::endl
-                       << "   Error message was: " << error_buffer << std::endl
-                       << "   Curl output was: ";
-        // avoid dereference of empty vector
-        if (!chunk.empty()) {
-          *this->LogFile << cmCTestLogWrite(&*chunk.begin(), chunk.size());
-          cmCTestLog(this->CTest, ERROR_MESSAGE,
-                     "CURL output: ["
-                       << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
-                       << std::endl);
-        }
-        *this->LogFile << std::endl;
-        ::curl_easy_cleanup(curl);
-        ::curl_global_cleanup();
-        return false;
-      }
-      // always cleanup
-      ::curl_easy_cleanup(curl);
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                         "   Uploaded: " + local_file << std::endl,
-                         this->Quiet);
-    }
-  }
-  ::curl_global_cleanup();
-  return true;
-}
-
-// Uploading files is simpler
 bool cmCTestSubmitHandler::SubmitUsingHTTP(
   const std::string& localprefix, const std::vector<std::string>& files,
   const std::string& remoteprefix, const std::string& url)
@@ -1091,34 +942,9 @@ int cmCTestSubmitHandler::ProcessHandler()
     }
   }
 
-  if (getenv("FTP_PROXY")) {
-    this->FTPProxyType = 1;
-    this->FTPProxy = getenv("FTP_PROXY");
-    if (getenv("FTP_PROXY_PORT")) {
-      this->FTPProxy += ":";
-      this->FTPProxy += getenv("FTP_PROXY_PORT");
-    }
-    if (getenv("FTP_PROXY_TYPE")) {
-      std::string type = getenv("FTP_PROXY_TYPE");
-      // HTTP/SOCKS4/SOCKS5
-      if (type == "HTTP") {
-        this->FTPProxyType = 1;
-      } else if (type == "SOCKS4") {
-        this->FTPProxyType = 2;
-      } else if (type == "SOCKS5") {
-        this->FTPProxyType = 3;
-      }
-    }
-  }
-
   if (!this->HTTPProxy.empty()) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "   Use HTTP Proxy: " << this->HTTPProxy << std::endl,
-                       this->Quiet);
-  }
-  if (!this->FTPProxy.empty()) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Use FTP Proxy: " << this->FTPProxy << std::endl,
                        this->Quiet);
   }
   cmGeneratedFileStream ofs;
@@ -1217,66 +1043,11 @@ int cmCTestSubmitHandler::ProcessHandler()
 
   std::string dropMethod(this->CTest->GetCTestConfiguration("DropMethod"));
 
-  if (dropMethod.empty() || dropMethod == "ftp") {
-    ofs << "Using drop method: FTP" << std::endl;
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Using FTP submit method" << std::endl
-                                                    << "   Drop site: ftp://",
-                       this->Quiet);
-    std::string url = "ftp://";
-    url += cmCTest::MakeURLSafe(
-             this->CTest->GetCTestConfiguration("DropSiteUser")) +
-      ":" +
-      cmCTest::MakeURLSafe(
-             this->CTest->GetCTestConfiguration("DropSitePassword")) +
-      "@" + this->CTest->GetCTestConfiguration("DropSite") +
-      cmCTest::MakeURLSafe(this->CTest->GetCTestConfiguration("DropLocation"));
-    if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty()) {
-      cmCTestOptionalLog(
-        this->CTest, HANDLER_OUTPUT,
-        this->CTest->GetCTestConfiguration("DropSiteUser").c_str(),
-        this->Quiet);
-      if (!this->CTest->GetCTestConfiguration("DropSitePassword").empty()) {
-        cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, ":******",
-                           this->Quiet);
-      }
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "@", this->Quiet);
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       this->CTest->GetCTestConfiguration("DropSite")
-                         << this->CTest->GetCTestConfiguration("DropLocation")
-                         << std::endl,
-                       this->Quiet);
-    if (!this->SubmitUsingFTP(buildDirectory + "/Testing/" +
-                                this->CTest->GetCurrentTag(),
-                              files, prefix, url)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "   Problems when submitting via FTP" << std::endl);
-      ofs << "   Problems when submitting via FTP" << std::endl;
-      return -1;
-    }
-    if (!this->CDash) {
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                         "   Using HTTP trigger method"
-                           << std::endl
-                           << "   Trigger site: "
-                           << this->CTest->GetCTestConfiguration("TriggerSite")
-                           << std::endl,
-                         this->Quiet);
-      if (!this->TriggerUsingHTTP(
-            files, prefix,
-            this->CTest->GetCTestConfiguration("TriggerSite"))) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Problems when triggering via HTTP" << std::endl);
-        ofs << "   Problems when triggering via HTTP" << std::endl;
-        return -1;
-      }
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                         "   Submission successful" << std::endl, this->Quiet);
-      ofs << "   Submission successful" << std::endl;
-      return 0;
-    }
-  } else if (dropMethod == "http" || dropMethod == "https") {
+  if (dropMethod.empty()) {
+    dropMethod = "http";
+  }
+
+  if (dropMethod == "http" || dropMethod == "https") {
     std::string url = dropMethod;
     url += "://";
     ofs << "Using drop method: " << dropMethod << std::endl;

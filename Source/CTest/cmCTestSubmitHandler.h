@@ -56,9 +56,6 @@ private:
   /**
    * Submit file using various ways
    */
-  bool SubmitUsingFTP(const std::string& localprefix,
-                      const std::vector<std::string>& files,
-                      const std::string& remoteprefix, const std::string& url);
   bool SubmitUsingHTTP(const std::string& localprefix,
                        const std::vector<std::string>& files,
                        const std::string& remoteprefix,
@@ -79,8 +76,6 @@ private:
   std::string HTTPProxy;
   int HTTPProxyType;
   std::string HTTPProxyAuth;
-  std::string FTPProxy;
-  int FTPProxyType;
   std::ostream* LogFile;
   bool SubmitPart[cmCTest::PartCount];
   bool CDash;
