@@ -287,6 +287,12 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
   // only the UCRT MSIs were installed for them.
   cmEraseIf(sdks, NoWindowsH());
 
+  // Skip SDKs that cannot be used with our toolset.
+  std::string maxVersion = this->GetWindows10SDKMaxVersion();
+  if (!maxVersion.empty()) {
+    cmEraseIf(sdks, WindowsSDKTooRecent(maxVersion));
+  }
+
   if (!sdks.empty()) {
     // Only use the filename, which will be the SDK version.
     for (std::string& i : sdks) {
@@ -295,12 +301,6 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
 
     // Sort the results to make sure we select the most recent one.
     std::sort(sdks.begin(), sdks.end(), cmSystemTools::VersionCompareGreater);
-
-    // Skip SDKs that cannot be used with our toolset.
-    std::string maxVersion = this->GetWindows10SDKMaxVersion();
-    if (!maxVersion.empty()) {
-      cmEraseIf(sdks, WindowsSDKTooRecent(maxVersion));
-    }
 
     // Look for a SDK exactly matching the requested target version.
     for (std::string const& i : sdks) {
