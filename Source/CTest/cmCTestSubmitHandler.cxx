@@ -23,16 +23,9 @@
 #include "cmProcessOutput.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
-#include "cmThirdParty.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
-
-#if defined(CTEST_USE_XMLRPC)
-#  include "cmVersion.h"
-#  include "cm_sys_stat.h"
-#  include "cm_xmlrpc.h"
-#endif
 
 #define SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT 120
 
@@ -936,110 +929,6 @@ bool cmCTestSubmitHandler::SubmitUsingCP(const std::string& localprefix,
   return true;
 }
 
-#if defined(CTEST_USE_XMLRPC)
-bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
-  const std::string& localprefix, const std::vector<std::string>& files,
-  const std::string& remoteprefix, const std::string& url)
-{
-  xmlrpc_env env;
-  char ctestString[] = "CTest";
-  std::string ctestVersionString = cmVersion::GetCMakeVersion();
-  char* ctestVersion = const_cast<char*>(ctestVersionString.c_str());
-
-  std::string realURL = url + "/" + remoteprefix + "/Command/";
-
-  /* Start up our XML-RPC client library. */
-  xmlrpc_client_init(XMLRPC_CLIENT_NO_FLAGS, ctestString, ctestVersion);
-
-  /* Initialize our error-handling environment. */
-  xmlrpc_env_init(&env);
-
-  /* Call the famous server at UserLand. */
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     "   Submitting to: " << realURL << " (" << remoteprefix
-                                          << ")" << std::endl,
-                     this->Quiet);
-  for (std::string const& file : files) {
-    xmlrpc_value* result;
-
-    std::string local_file = file;
-    if (!cmSystemTools::FileExists(local_file)) {
-      local_file = localprefix + "/" + file;
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Submit file: " << local_file << std::endl,
-                       this->Quiet);
-    struct stat st;
-    if (::stat(local_file.c_str(), &st)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  Cannot find file: " << local_file << std::endl);
-      return false;
-    }
-
-    // off_t can be bigger than size_t.  fread takes size_t.
-    // make sure the file is not too big.
-    if (static_cast<off_t>(static_cast<size_t>(st.st_size)) !=
-        static_cast<off_t>(st.st_size)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  File too big: " << local_file << std::endl);
-      return false;
-    }
-    size_t fileSize = static_cast<size_t>(st.st_size);
-    FILE* fp = cmsys::SystemTools::Fopen(local_file, "rb");
-    if (!fp) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  Cannot open file: " << local_file << std::endl);
-      return false;
-    }
-
-    unsigned char* fileBuffer = new unsigned char[fileSize];
-    if (fread(fileBuffer, 1, fileSize, fp) != fileSize) {
-      delete[] fileBuffer;
-      fclose(fp);
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  Cannot read file: " << local_file << std::endl);
-      return false;
-    }
-    fclose(fp);
-
-    char remoteCommand[] = "Submit.put";
-    char* pRealURL = const_cast<char*>(realURL.c_str());
-    result =
-      xmlrpc_client_call(&env, pRealURL, remoteCommand, "(6)", fileBuffer,
-                         static_cast<xmlrpc_int32>(fileSize));
-
-    delete[] fileBuffer;
-
-    if (env.fault_occurred) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 " Submission problem: " << env.fault_string << " ("
-                                         << env.fault_code << ")"
-                                         << std::endl);
-      xmlrpc_env_clean(&env);
-      xmlrpc_client_cleanup();
-      return false;
-    }
-
-    /* Dispose of our result value. */
-    xmlrpc_DECREF(result);
-  }
-
-  /* Clean up our error-handling environment. */
-  xmlrpc_env_clean(&env);
-
-  /* Shutdown our XML-RPC client library. */
-  xmlrpc_client_cleanup();
-  return true;
-}
-#else
-bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
-  std::string const& /*unused*/, std::vector<std::string> const& /*unused*/,
-  std::string const& /*unused*/, std::string const& /*unused*/)
-{
-  return false;
-}
-#endif
-
 void cmCTestSubmitHandler::ConstructCDashURL(std::string& dropMethod,
                                              std::string& url)
 {
@@ -1592,32 +1481,6 @@ int cmCTestSubmitHandler::ProcessHandler()
     }
 
     return 0;
-  } else if (dropMethod == "xmlrpc") {
-#if defined(CTEST_USE_XMLRPC)
-    ofs << "Using drop method: XML-RPC" << std::endl;
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Using XML-RPC submit method" << std::endl,
-                       this->Quiet);
-    std::string url = this->CTest->GetCTestConfiguration("DropSite");
-    prefix = this->CTest->GetCTestConfiguration("DropLocation");
-    if (!this->SubmitUsingXMLRPC(buildDirectory + "/Testing/" +
-                                   this->CTest->GetCurrentTag(),
-                                 files, prefix, url)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "   Problems when submitting via XML-RPC" << std::endl);
-      ofs << "   Problems when submitting via XML-RPC" << std::endl;
-      return -1;
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Submission successful" << std::endl, this->Quiet);
-    ofs << "   Submission successful" << std::endl;
-    return 0;
-#else
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "   Submission method \"xmlrpc\" not compiled into CTest!"
-                 << std::endl);
-    return -1;
-#endif
   } else if (dropMethod == "scp") {
     std::string url;
     if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty()) {

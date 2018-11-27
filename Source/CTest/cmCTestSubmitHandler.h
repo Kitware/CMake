@@ -76,11 +76,6 @@ private:
                         const std::string& remoteprefix,
                         const std::string& url);
 
-  bool SubmitUsingXMLRPC(const std::string& localprefix,
-                         const std::vector<std::string>& files,
-                         const std::string& remoteprefix,
-                         const std::string& url);
-
   typedef std::vector<char> cmCTestSubmitHandlerVectorOfChar;
 
   void ParseResponse(cmCTestSubmitHandlerVectorOfChar chunk);

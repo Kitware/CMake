@@ -1107,8 +1107,7 @@ Configuration settings include:
 ``DropMethod``
   Specify the method by which results should be submitted to the
   dashboard server.  The value may be ``cp``, ``ftp``, ``http``,
-  ``https``, ``scp``, or ``xmlrpc`` (if CMake was built with
-  support for it).
+  ``https``, or ``scp``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_METHOD`
   * :module:`CTest` module variable: ``DROP_METHOD`` if set,
@@ -1116,7 +1115,7 @@ Configuration settings include:
 
 ``DropSite``
   The dashboard server name
-  (for ``ftp``, ``http``, and ``https``, ``scp``, and ``xmlrpc``).
+  (for ``ftp``, ``http``, and ``https``, ``scp``).
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE`
   * :module:`CTest` module variable: ``DROP_SITE`` if set,

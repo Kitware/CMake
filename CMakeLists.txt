@@ -137,10 +137,6 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
   # Options have dependencies.
   include(CMakeDependentOption)
 
-  # Optionally use system xmlrpc.  We no longer build or use it by default.
-  option(CTEST_USE_XMLRPC "Enable xmlrpc submission method in CTest." OFF)
-  mark_as_advanced(CTEST_USE_XMLRPC)
-
   # Allow the user to enable/disable all system utility library options by
   # defining CMAKE_USE_SYSTEM_LIBRARIES or CMAKE_USE_SYSTEM_LIBRARY_${util}.
   set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBRHASH LIBUV ZLIB)
@@ -171,10 +167,8 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 
   # Optionally use system utility libraries.
   option(CMAKE_USE_SYSTEM_LIBARCHIVE "Use system-installed libarchive" "${CMAKE_USE_SYSTEM_LIBRARY_LIBARCHIVE}")
-  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_CURL "Use system-installed curl"
-    "${CMAKE_USE_SYSTEM_LIBRARY_CURL}" "NOT CTEST_USE_XMLRPC" ON)
-  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_EXPAT "Use system-installed expat"
-    "${CMAKE_USE_SYSTEM_LIBRARY_EXPAT}" "NOT CTEST_USE_XMLRPC" ON)
+  option(CMAKE_USE_SYSTEM_CURL "Use system-installed curl" "${CMAKE_USE_SYSTEM_LIBRARY_CURL}")
+  option(CMAKE_USE_SYSTEM_EXPAT "Use system-installed expat" "${CMAKE_USE_SYSTEM_LIBRARY_EXPAT}")
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
     "${CMAKE_USE_SYSTEM_LIBRARY_ZLIB}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE;NOT CMAKE_USE_SYSTEM_CURL" ON)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_BZIP2 "Use system-installed bzip2"
@@ -212,7 +206,7 @@ endmacro()
 macro(CMAKE_SETUP_TESTING)
   if(BUILD_TESTING)
     set(CMAKE_TEST_SYSTEM_LIBRARIES 0)
-    foreach(util CURL EXPAT XMLRPC ZLIB)
+    foreach(util CURL EXPAT ZLIB)
       if(CMAKE_USE_SYSTEM_${util})
         set(CMAKE_TEST_SYSTEM_LIBRARIES 1)
       endif()
@@ -572,18 +566,6 @@ macro (CMAKE_BUILD_UTILITIES)
   endif()
 
   #---------------------------------------------------------------------
-  # Build XMLRPC library for CMake and CTest.
-  if(CTEST_USE_XMLRPC)
-    find_package(XMLRPC QUIET REQUIRED libwww-client)
-    if(NOT XMLRPC_FOUND)
-      message(FATAL_ERROR
-        "CTEST_USE_XMLRPC is ON but xmlrpc is not found!")
-    endif()
-    set(CMAKE_XMLRPC_INCLUDES ${XMLRPC_INCLUDE_DIRS})
-    set(CMAKE_XMLRPC_LIBRARIES ${XMLRPC_LIBRARIES})
-  endif()
-
-  #---------------------------------------------------------------------
   # Use curses?
   if (UNIX)
     if(NOT DEFINED BUILD_CursesDialog)
@@ -736,7 +718,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   # the build tree, which is both the build and the install RPATH.
   if (UNIX)
     if(   CMAKE_USE_SYSTEM_CURL   OR  CMAKE_USE_SYSTEM_ZLIB
-          OR  CMAKE_USE_SYSTEM_EXPAT  OR  CTEST_USE_XMLRPC  OR  CURSES_NEED_RPATH  OR  QT_NEED_RPATH)
+          OR  CMAKE_USE_SYSTEM_EXPAT  OR  CURSES_NEED_RPATH  OR  QT_NEED_RPATH)
       set(CMAKE_SKIP_RPATH OFF CACHE INTERNAL "CMake built with RPATH.")
       set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
       set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
