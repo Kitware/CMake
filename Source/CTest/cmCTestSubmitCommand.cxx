@@ -20,8 +20,6 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   const char* ctestDropSite = this->Makefile->GetDefinition("CTEST_DROP_SITE");
   const char* ctestDropLocation =
     this->Makefile->GetDefinition("CTEST_DROP_LOCATION");
-  const char* ctestTriggerSite =
-    this->Makefile->GetDefinition("CTEST_TRIGGER_SITE");
   bool ctestDropSiteCDash = this->Makefile->IsOn("CTEST_DROP_SITE_CDASH");
   if (!ctestDropMethod) {
     ctestDropMethod = "http";
@@ -43,13 +41,6 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 
   this->CTest->SetCTestConfiguration(
     "IsCDash", ctestDropSiteCDash ? "TRUE" : "FALSE", this->Quiet);
-
-  // Only propagate TriggerSite for non-CDash projects:
-  //
-  if (!ctestDropSiteCDash) {
-    this->CTest->SetCTestConfiguration("TriggerSite", ctestTriggerSite,
-                                       this->Quiet);
-  }
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "CurlOptions", "CTEST_CURL_OPTIONS", this->Quiet);

@@ -61,10 +61,6 @@ private:
                        const std::string& remoteprefix,
                        const std::string& url);
 
-  bool TriggerUsingHTTP(const std::vector<std::string>& files,
-                        const std::string& remoteprefix,
-                        const std::string& url);
-
   typedef std::vector<char> cmCTestSubmitHandlerVectorOfChar;
 
   void ParseResponse(cmCTestSubmitHandlerVectorOfChar chunk);
@@ -78,7 +74,6 @@ private:
   std::string HTTPProxyAuth;
   std::ostream* LogFile;
   bool SubmitPart[cmCTest::PartCount];
-  bool CDash;
   bool HasWarnings;
   bool HasErrors;
   cmCTest::SetOfStrings Files;

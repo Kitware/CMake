@@ -29,7 +29,6 @@ DropSiteUser: @DROP_SITE_USER@
 DropSitePassword: @DROP_SITE_PASSWORD@
 DropSiteMode: @DROP_SITE_MODE@
 DropMethod: @DROP_METHOD@
-TriggerSite: @TRIGGER_SITE@
 
 # Dashboard start time
 NightlyStartTime: @NIGHTLY_START_TIME@

@@ -1137,7 +1137,7 @@ Configuration settings include:
 
 ``IsCDash``
   Specify whether the dashboard server is `CDash`_ or an older
-  dashboard server implementation requiring ``TriggerSite``.
+  dashboard server implementation.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_CDASH`
   * :module:`CTest` module variable: ``CTEST_DROP_SITE_CDASH``
@@ -1157,8 +1157,7 @@ Configuration settings include:
     initialized by the :command:`site_name` command
 
 ``TriggerSite``
-  Legacy option to support older dashboard server implementations.
-  Not used when ``IsCDash`` is true.
+  Legacy option.  Not used.
 
   * `CTest Script`_ variable: :variable:`CTEST_TRIGGER_SITE`
   * :module:`CTest` module variable: ``TRIGGER_SITE`` if set,

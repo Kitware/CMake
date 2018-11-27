@@ -131,7 +131,6 @@ void cmCTestSubmitHandler::Initialize()
        p = cmCTest::Part(p + 1)) {
     this->SubmitPart[p] = true;
   }
-  this->CDash = false;
   this->HasWarnings = false;
   this->HasErrors = false;
   this->Superclass::Initialize();
@@ -516,136 +515,6 @@ void cmCTestSubmitHandler::ParseResponse(
   }
 }
 
-bool cmCTestSubmitHandler::TriggerUsingHTTP(
-  const std::vector<std::string>& files, const std::string& remoteprefix,
-  const std::string& url)
-{
-  CURL* curl;
-  char error_buffer[1024];
-
-  /* In windows, this will init the winsock stuff */
-  ::curl_global_init(CURL_GLOBAL_ALL);
-
-  for (std::string const& file : files) {
-    /* get a curl handle */
-    curl = curl_easy_init();
-    if (curl) {
-      // Using proxy
-      if (this->HTTPProxyType > 0) {
-        curl_easy_setopt(curl, CURLOPT_PROXY, this->HTTPProxy.c_str());
-        switch (this->HTTPProxyType) {
-          case 2:
-            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
-            break;
-          case 3:
-            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
-            break;
-          default:
-            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
-            if (!this->HTTPProxyAuth.empty()) {
-              curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD,
-                               this->HTTPProxyAuth.c_str());
-            }
-        }
-      }
-
-      ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-
-      // and give curl the buffer for errors
-      ::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error_buffer);
-
-      // specify handler for output
-      ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-                         cmCTestSubmitHandlerWriteMemoryCallback);
-      ::curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION,
-                         cmCTestSubmitHandlerCurlDebugCallback);
-
-      /* we pass our 'chunk' struct to the callback function */
-      cmCTestSubmitHandlerVectorOfChar chunk;
-      cmCTestSubmitHandlerVectorOfChar chunkDebug;
-      ::curl_easy_setopt(curl, CURLOPT_FILE, &chunk);
-      ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
-
-      std::string rfile = remoteprefix + cmSystemTools::GetFilenameName(file);
-      std::string ofile;
-      for (char c : rfile) {
-        char hexCh[4] = { 0, 0, 0, 0 };
-        hexCh[0] = c;
-        switch (c) {
-          case '+':
-          case '?':
-          case '/':
-          case '\\':
-          case '&':
-          case ' ':
-          case '=':
-          case '%':
-            sprintf(hexCh, "%%%02X", static_cast<int>(c));
-            ofile.append(hexCh);
-            break;
-          default:
-            ofile.append(hexCh);
-        }
-      }
-      std::string turl = url +
-        ((url.find('?') == std::string::npos) ? '?' : '&') +
-        "xmlfile=" + ofile;
-      *this->LogFile << "Trigger url: " << turl << std::endl;
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         "   Trigger url: " << turl << std::endl, this->Quiet);
-      curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-      curl_easy_setopt(curl, CURLOPT_URL, turl.c_str());
-      if (curl_easy_perform(curl)) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Error when triggering: " << turl << std::endl);
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Error message was: " << error_buffer << std::endl);
-        *this->LogFile << "\tTriggering failed with error: " << error_buffer
-                       << std::endl
-                       << "   Error message was: " << error_buffer
-                       << std::endl;
-        if (!chunk.empty()) {
-          *this->LogFile << "   Curl output was: "
-                         << cmCTestLogWrite(&*chunk.begin(), chunk.size())
-                         << std::endl;
-          cmCTestLog(this->CTest, ERROR_MESSAGE,
-                     "CURL output: ["
-                       << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
-                       << std::endl);
-        }
-        ::curl_easy_cleanup(curl);
-        ::curl_global_cleanup();
-        return false;
-      }
-
-      if (!chunk.empty()) {
-        cmCTestOptionalLog(this->CTest, DEBUG,
-                           "CURL output: ["
-                             << cmCTestLogWrite(&*chunk.begin(), chunk.size())
-                             << "]" << std::endl,
-                           this->Quiet);
-      }
-      if (!chunkDebug.empty()) {
-        cmCTestOptionalLog(
-          this->CTest, DEBUG,
-          "CURL debug output: ["
-            << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]"
-            << std::endl,
-          this->Quiet);
-      }
-
-      // always cleanup
-      ::curl_easy_cleanup(curl);
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl,
-                         this->Quiet);
-    }
-  }
-  ::curl_global_cleanup();
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     "   Dart server triggered..." << std::endl, this->Quiet);
-  return true;
-}
-
 void cmCTestSubmitHandler::ConstructCDashURL(std::string& dropMethod,
                                              std::string& url)
 {
@@ -900,11 +769,6 @@ int cmCTestSubmitHandler::ProcessHandler()
   if (cdashUploadFile && cdashUploadType) {
     return this->HandleCDashUploadFile(cdashUploadFile, cdashUploadType);
   }
-  std::string iscdash = this->CTest->GetCTestConfiguration("IsCDash");
-  // cdash does not need to trigger so just return true
-  if (!iscdash.empty()) {
-    this->CDash = true;
-  }
 
   const std::string& buildDirectory =
     this->CTest->GetCTestConfiguration("BuildDirectory");
@@ -1083,23 +947,6 @@ int cmCTestSubmitHandler::ProcessHandler()
                  "   Problems when submitting via HTTP" << std::endl);
       ofs << "   Problems when submitting via HTTP" << std::endl;
       return -1;
-    }
-    if (!this->CDash) {
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                         "   Using HTTP trigger method"
-                           << std::endl
-                           << "   Trigger site: "
-                           << this->CTest->GetCTestConfiguration("TriggerSite")
-                           << std::endl,
-                         this->Quiet);
-      if (!this->TriggerUsingHTTP(
-            files, prefix,
-            this->CTest->GetCTestConfiguration("TriggerSite"))) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Problems when triggering via HTTP" << std::endl);
-        ofs << "   Problems when triggering via HTTP" << std::endl;
-        return -1;
-      }
     }
     if (this->HasErrors) {
       cmCTestLog(this->CTest, HANDLER_OUTPUT,
