@@ -1084,8 +1084,12 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   std::string dropMethod;
   std::string url;
   this->ConstructCDashURL(dropMethod, url);
-  std::string::size_type pos = url.find("submit.php?");
-  url = url.substr(0, pos + 10);
+  std::string fields;
+  std::string::size_type pos = url.find('?');
+  if (pos != std::string::npos) {
+    fields = url.substr(pos + 1);
+    url = url.substr(0, pos);
+  }
   if (!(dropMethod == "http" || dropMethod == "https")) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Only http and https are supported for CDASH_UPLOAD\n");
@@ -1133,8 +1137,6 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   const char* subproject = cm->GetState()->GetGlobalProperty("SubProject");
   // TODO: Encode values for a URL instead of trusting caller.
   std::ostringstream str;
-  str << "project="
-      << curl.Escape(this->CTest->GetCTestConfiguration("ProjectName")) << "&";
   if (subproject) {
     str << "subproject=" << curl.Escape(subproject) << "&";
   }
@@ -1152,7 +1154,10 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
       << "endtime=" << timeNow << "&"
       << "datafilesmd5[0]=" << md5sum << "&"
       << "type=" << curl.Escape(typeString);
-  std::string fields = str.str();
+  if (!fields.empty()) {
+    fields += '&';
+  }
+  fields += str.str();
   cmCTestOptionalLog(this->CTest, DEBUG,
                      "fields: " << fields << "\nurl:" << url
                                 << "\nfile: " << file << "\n",

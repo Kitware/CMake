@@ -1,4 +1,3 @@
-set(CTEST_PROJECT_NAME "CTestSubmit@CASE_NAME@")
 
 # Intentionally leave out other upload-related CTestConfig.cmake settings
 # so that any ctest_submit calls fail with an error message.

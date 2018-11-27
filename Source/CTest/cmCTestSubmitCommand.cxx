@@ -23,8 +23,6 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   const char* ctestTriggerSite =
     this->Makefile->GetDefinition("CTEST_TRIGGER_SITE");
   bool ctestDropSiteCDash = this->Makefile->IsOn("CTEST_DROP_SITE_CDASH");
-  const char* ctestProjectName =
-    this->Makefile->GetDefinition("CTEST_PROJECT_NAME");
   if (!ctestDropMethod) {
     ctestDropMethod = "http";
   }
@@ -37,8 +35,6 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     // error: CDash requires CTEST_DROP_LOCATION definition
     // in CTestConfig.cmake
   }
-  this->CTest->SetCTestConfiguration("ProjectName", ctestProjectName,
-                                     this->Quiet);
   this->CTest->SetCTestConfiguration("DropMethod", ctestDropMethod,
                                      this->Quiet);
   this->CTest->SetCTestConfiguration("DropSite", ctestDropSite, this->Quiet);
