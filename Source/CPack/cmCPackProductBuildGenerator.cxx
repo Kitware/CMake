@@ -151,7 +151,7 @@ bool cmCPackProductBuildGenerator::RunProductBuild(const std::string& command)
     this->GeneratorVerbose, cmDuration::zero());
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Done running command" << std::endl);
   if (!res || retVal) {
-    cmGeneratedFileStream ofs(tmpFile.c_str());
+    cmGeneratedFileStream ofs(tmpFile);
     ofs << "# Run command: " << command << std::endl
         << "# Output:" << std::endl
         << output << std::endl;

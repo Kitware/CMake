@@ -216,12 +216,11 @@ static bool cmOSXInstall(std::string const& dir, std::string const& tool)
   if (symlink(tool.c_str(), link.c_str()) == 0) {
     std::cerr << "Linked: '" << link << "' -> '" << tool << "'\n";
     return true;
-  } else {
-    int err = errno;
-    std::cerr << "Failed: '" << link << "' -> '" << tool
-              << "': " << strerror(err) << "\n";
-    return false;
   }
+  int err = errno;
+  std::cerr << "Failed: '" << link << "' -> '" << tool
+            << "': " << strerror(err) << "\n";
+  return false;
 }
 static int cmOSXInstall(std::string dir)
 {

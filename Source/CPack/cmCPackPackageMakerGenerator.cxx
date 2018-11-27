@@ -307,7 +307,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     numTries--;
   }
   if (!res || retVal) {
-    cmGeneratedFileStream ofs(tmpFile.c_str());
+    cmGeneratedFileStream ofs(tmpFile);
     ofs << "# Run command: " << dmgCmd.str() << std::endl
         << "# Output:" << std::endl
         << output << std::endl;
@@ -475,7 +475,7 @@ bool cmCPackPackageMakerGenerator::RunPackageMaker(const char* command,
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Done running package maker" << std::endl);
   if (!res || retVal) {
-    cmGeneratedFileStream ofs(tmpFile.c_str());
+    cmGeneratedFileStream ofs(tmpFile);
     ofs << "# Run command: " << command << std::endl
         << "# Output:" << std::endl
         << output << std::endl;

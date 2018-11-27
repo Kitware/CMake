@@ -533,7 +533,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       cmSystemTools::ExpandListArgument(cpack_dmg_languages, languages);
     }
 
-    cmGeneratedFileStream ofs(sla_r.c_str());
+    cmGeneratedFileStream ofs(sla_r);
     ofs << "#include <CoreServices/CoreServices.r>\n\n";
     if (oldStyle) {
       ofs << SLAHeader;
