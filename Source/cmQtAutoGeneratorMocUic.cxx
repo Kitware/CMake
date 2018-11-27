@@ -1279,16 +1279,6 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
       Moc_.SkipList.insert(lst.begin(), lst.end());
     }
     Moc_.Definitions = InfoGetConfigList("AM_MOC_DEFINITIONS");
-#ifdef _WIN32
-    {
-      std::string win32("WIN32");
-      auto itB = Moc().Definitions.cbegin();
-      auto itE = Moc().Definitions.cend();
-      if (std::find(itB, itE, win32) == itE) {
-        Moc_.Definitions.emplace_back(std::move(win32));
-      }
-    }
-#endif
     Moc_.IncludePaths = InfoGetConfigList("AM_MOC_INCLUDES");
     Moc_.Options = InfoGetList("AM_MOC_OPTIONS");
     Moc_.RelaxedMode = InfoGetBool("AM_MOC_RELAXED_MODE");
