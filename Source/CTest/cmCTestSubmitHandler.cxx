@@ -5,9 +5,7 @@
 #include "cm_curl.h"
 #include "cm_jsoncpp_reader.h"
 #include "cm_jsoncpp_value.h"
-#include "cmsys/Process.h"
 #include <chrono>
-#include <cstring>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,10 +18,8 @@
 #include "cmCurl.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
-#include "cmProcessOutput.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
-#include "cmWorkingDirectory.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
 
@@ -799,102 +795,6 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(
   return true;
 }
 
-bool cmCTestSubmitHandler::SubmitUsingSCP(
-  const std::string& scp_command, const std::string& localprefix,
-  const std::vector<std::string>& files, const std::string& remoteprefix,
-  const std::string& url)
-{
-  if (scp_command.empty() || localprefix.empty() || files.empty() ||
-      remoteprefix.empty() || url.empty()) {
-    return false;
-  }
-
-  std::vector<const char*> argv;
-  argv.push_back(scp_command.c_str()); // Scp command
-  argv.push_back(scp_command.c_str()); // Dummy string for file
-  argv.push_back(scp_command.c_str()); // Dummy string for remote url
-  argv.push_back(nullptr);
-
-  cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
-  // cmsysProcess_SetTimeout(cp, timeout);
-
-  int problems = 0;
-
-  for (std::string const& file : files) {
-    int retVal;
-
-    std::string lfname = localprefix;
-    cmSystemTools::ConvertToUnixSlashes(lfname);
-    lfname += "/" + file;
-    lfname = cmSystemTools::ConvertToOutputPath(lfname);
-    argv[1] = lfname.c_str();
-    std::string rfname = url + "/" + remoteprefix + file;
-    argv[2] = rfname.c_str();
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "Execute \"" << argv[0] << "\" \"" << argv[1] << "\" \""
-                                    << argv[2] << "\"" << std::endl,
-                       this->Quiet);
-    *this->LogFile << "Execute \"" << argv[0] << "\" \"" << argv[1] << "\" \""
-                   << argv[2] << "\"" << std::endl;
-
-    cmsysProcess_SetCommand(cp, &*argv.begin());
-    cmsysProcess_Execute(cp);
-    char* data;
-    int length;
-    cmProcessOutput processOutput;
-    std::string strdata;
-
-    while (cmsysProcess_WaitForData(cp, &data, &length, nullptr)) {
-      processOutput.DecodeText(data, length, strdata);
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         cmCTestLogWrite(strdata.c_str(), strdata.size()),
-                         this->Quiet);
-    }
-    processOutput.DecodeText(std::string(), strdata);
-    if (!strdata.empty()) {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         cmCTestLogWrite(strdata.c_str(), strdata.size()),
-                         this->Quiet);
-    }
-
-    cmsysProcess_WaitForExit(cp, nullptr);
-
-    int result = cmsysProcess_GetState(cp);
-
-    if (result == cmsysProcess_State_Exited) {
-      retVal = cmsysProcess_GetExitValue(cp);
-      if (retVal != 0) {
-        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                           "\tSCP returned: " << retVal << std::endl,
-                           this->Quiet);
-        *this->LogFile << "\tSCP returned: " << retVal << std::endl;
-        problems++;
-      }
-    } else if (result == cmsysProcess_State_Exception) {
-      retVal = cmsysProcess_GetExitException(cp);
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "\tThere was an exception: " << retVal << std::endl);
-      *this->LogFile << "\tThere was an exception: " << retVal << std::endl;
-      problems++;
-    } else if (result == cmsysProcess_State_Expired) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "\tThere was a timeout" << std::endl);
-      *this->LogFile << "\tThere was a timeout" << std::endl;
-      problems++;
-    } else if (result == cmsysProcess_State_Error) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "\tError executing SCP: " << cmsysProcess_GetErrorString(cp)
-                                           << std::endl);
-      *this->LogFile << "\tError executing SCP: "
-                     << cmsysProcess_GetErrorString(cp) << std::endl;
-      problems++;
-    }
-  }
-  cmsysProcess_Delete(cp);
-  return problems == 0;
-}
-
 void cmCTestSubmitHandler::ConstructCDashURL(std::string& dropMethod,
                                              std::string& url)
 {
@@ -1446,39 +1346,6 @@ int cmCTestSubmitHandler::ProcessHandler()
           << (this->HasWarnings ? ", with warnings." : "") << std::endl;
     }
 
-    return 0;
-  } else if (dropMethod == "scp") {
-    std::string url;
-    if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty()) {
-      url += this->CTest->GetCTestConfiguration("DropSiteUser") + "@";
-    }
-    url += this->CTest->GetCTestConfiguration("DropSite") + ":" +
-      this->CTest->GetCTestConfiguration("DropLocation");
-
-    // change to the build directory so that we can uses a relative path
-    // on windows since scp doesn't support "c:" a drive in the path
-    cmWorkingDirectory workdir(buildDirectory);
-    if (workdir.Failed()) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "   Failed to change directory to "
-                   << buildDirectory << " : "
-                   << std::strerror(workdir.GetLastResult()) << std::endl);
-      ofs << "   Failed to change directory to " << buildDirectory << " : "
-          << std::strerror(workdir.GetLastResult()) << std::endl;
-      return -1;
-    }
-
-    if (!this->SubmitUsingSCP(this->CTest->GetCTestConfiguration("ScpCommand"),
-                              "Testing/" + this->CTest->GetCurrentTag(), files,
-                              prefix, url)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "   Problems when submitting via SCP" << std::endl);
-      ofs << "   Problems when submitting via SCP" << std::endl;
-      return -1;
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Submission successful" << std::endl, this->Quiet);
-    ofs << "   Submission successful" << std::endl;
     return 0;
   }
 

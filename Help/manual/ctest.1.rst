@@ -1106,8 +1106,8 @@ Configuration settings include:
 
 ``DropMethod``
   Specify the method by which results should be submitted to the
-  dashboard server.  The value may be ``ftp``, ``http``,
-  ``https``, or ``scp``.
+  dashboard server.  The value may be ``ftp``, ``http``, or
+  ``https``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_METHOD`
   * :module:`CTest` module variable: ``DROP_METHOD`` if set,
@@ -1144,7 +1144,7 @@ Configuration settings include:
   * :module:`CTest` module variable: ``CTEST_DROP_SITE_CDASH``
 
 ``ScpCommand``
-  ``scp`` command-line tool to use when ``DropMethod`` is ``scp``.
+  Legacy option.  Not used.
 
   * `CTest Script`_ variable: :variable:`CTEST_SCP_COMMAND`
   * :module:`CTest` module variable: ``SCPCOMMAND``

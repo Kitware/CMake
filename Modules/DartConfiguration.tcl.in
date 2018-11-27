@@ -30,7 +30,6 @@ DropSitePassword: @DROP_SITE_PASSWORD@
 DropSiteMode: @DROP_SITE_MODE@
 DropMethod: @DROP_METHOD@
 TriggerSite: @TRIGGER_SITE@
-ScpCommand: @SCPCOMMAND@
 
 # Dashboard start time
 NightlyStartTime: @NIGHTLY_START_TIME@

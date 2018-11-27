@@ -63,10 +63,6 @@ private:
                        const std::vector<std::string>& files,
                        const std::string& remoteprefix,
                        const std::string& url);
-  bool SubmitUsingSCP(const std::string& scp_command,
-                      const std::string& localprefix,
-                      const std::vector<std::string>& files,
-                      const std::string& remoteprefix, const std::string& url);
 
   bool TriggerUsingHTTP(const std::vector<std::string>& files,
                         const std::string& remoteprefix,

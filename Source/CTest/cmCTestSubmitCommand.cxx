@@ -58,8 +58,6 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "DropSitePassword", "CTEST_DROP_SITE_PASSWORD",
     this->Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "ScpCommand", "CTEST_SCP_COMMAND", this->Quiet);
 
   const char* notesFilesVariable =
     this->Makefile->GetDefinition("CTEST_NOTES_FILES");
