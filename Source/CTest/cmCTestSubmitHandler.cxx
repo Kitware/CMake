@@ -895,40 +895,6 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(
   return problems == 0;
 }
 
-bool cmCTestSubmitHandler::SubmitUsingCP(const std::string& localprefix,
-                                         const std::vector<std::string>& files,
-                                         const std::string& remoteprefix,
-                                         const std::string& destination)
-{
-  if (localprefix.empty() || files.empty() || remoteprefix.empty() ||
-      destination.empty()) {
-    /* clang-format off */
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Missing arguments for submit via cp:\n"
-               << "\tlocalprefix: " << localprefix << "\n"
-               << "\tNumber of files: " << files.size() << "\n"
-               << "\tremoteprefix: " << remoteprefix << "\n"
-               << "\tdestination: " << destination << std::endl);
-    /* clang-format on */
-    return false;
-  }
-
-  for (std::string const& file : files) {
-    std::string lfname = localprefix;
-    cmSystemTools::ConvertToUnixSlashes(lfname);
-    lfname += "/" + file;
-    std::string rfname = destination + "/" + remoteprefix + file;
-    cmSystemTools::CopyFileAlways(lfname, rfname);
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "   Copy file: " << lfname << " to " << rfname
-                                        << std::endl,
-                       this->Quiet);
-  }
-  std::string tagDoneFile = destination + "/" + remoteprefix + "DONE";
-  cmSystemTools::Touch(tagDoneFile, true);
-  return true;
-}
-
 void cmCTestSubmitHandler::ConstructCDashURL(std::string& dropMethod,
                                              std::string& url)
 {
@@ -1508,36 +1474,6 @@ int cmCTestSubmitHandler::ProcessHandler()
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "   Problems when submitting via SCP" << std::endl);
       ofs << "   Problems when submitting via SCP" << std::endl;
-      return -1;
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Submission successful" << std::endl, this->Quiet);
-    ofs << "   Submission successful" << std::endl;
-    return 0;
-  } else if (dropMethod == "cp") {
-    std::string location = this->CTest->GetCTestConfiguration("DropLocation");
-
-    // change to the build directory so that we can uses a relative path
-    // on windows since scp doesn't support "c:" a drive in the path
-    cmWorkingDirectory workdir(buildDirectory);
-    if (workdir.Failed()) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "   Failed to change directory to "
-                   << buildDirectory << " : "
-                   << std::strerror(workdir.GetLastResult()) << std::endl);
-      ofs << "   Failed to change directory to " << buildDirectory << " : "
-          << std::strerror(workdir.GetLastResult()) << std::endl;
-      return -1;
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "   Change directory: " << buildDirectory << std::endl,
-                       this->Quiet);
-
-    if (!this->SubmitUsingCP("Testing/" + this->CTest->GetCurrentTag(), files,
-                             prefix, location)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "   Problems when submitting via CP" << std::endl);
-      ofs << "   Problems when submitting via cp" << std::endl;
       return -1;
     }
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,

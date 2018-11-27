@@ -68,10 +68,6 @@ private:
                       const std::vector<std::string>& files,
                       const std::string& remoteprefix, const std::string& url);
 
-  bool SubmitUsingCP(const std::string& localprefix,
-                     const std::vector<std::string>& files,
-                     const std::string& remoteprefix, const std::string& url);
-
   bool TriggerUsingHTTP(const std::vector<std::string>& files,
                         const std::string& remoteprefix,
                         const std::string& url);
