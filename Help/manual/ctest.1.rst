@@ -1069,7 +1069,7 @@ Configuration settings include:
   * :module:`CTest` module variable: ``BUILDNAME``
 
 ``CDashVersion``
-  Specify the version of `CDash`_ on the server.
+  Legacy option.  Not used.
 
   * `CTest Script`_ variable: none, detected from server
   * :module:`CTest` module variable: ``CTEST_CDASH_VERSION``
@@ -1136,8 +1136,7 @@ Configuration settings include:
     else ``CTEST_DROP_SITE_USER``
 
 ``IsCDash``
-  Specify whether the dashboard server is `CDash`_ or an older
-  dashboard server implementation.
+  Legacy option.  Not used.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_CDASH`
   * :module:`CTest` module variable: ``CTEST_DROP_SITE_CDASH``

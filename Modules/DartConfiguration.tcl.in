@@ -20,9 +20,6 @@ BuildName: @BUILDNAME@
 LabelsForSubprojects: @CTEST_LABELS_FOR_SUBPROJECTS@
 
 # Submission information
-IsCDash: @CTEST_DROP_SITE_CDASH@
-CDashVersion: @CTEST_CDASH_VERSION@
-QueryCDashVersion: @CTEST_CDASH_QUERY_VERSION@
 DropSite: @DROP_SITE@
 DropLocation: @DROP_LOCATION@
 DropSiteUser: @DROP_SITE_USER@

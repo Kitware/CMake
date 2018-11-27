@@ -292,8 +292,6 @@ cmCTest::cmCTest()
   this->OutputLogFile = nullptr;
   this->OutputLogFileLastTag = -1;
   this->SuppressUpdatingCTestConfiguration = false;
-  this->DartVersion = 1;
-  this->DropSiteCDash = false;
   this->BuildID = "";
   this->OutputTestOutputOnTestFailure = false;
   this->OutputColorCode = cmCTest::ColoredOutputSupportedByConsole();
@@ -613,8 +611,6 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
 {
   std::string src_dir = this->GetCTestConfiguration("SourceDirectory");
   std::string bld_dir = this->GetCTestConfiguration("BuildDirectory");
-  this->DartVersion = 1;
-  this->DropSiteCDash = false;
   this->BuildID = "";
   for (Part p = PartStart; p != PartCount; p = Part(p + 1)) {
     this->Parts[p].SubmitFiles.clear();
@@ -658,18 +654,6 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
                                                command->ShouldBeQuiet());
   this->SetCTestConfigurationFromCMakeVariable(
     mf, "BuildName", "CTEST_BUILD_NAME", command->ShouldBeQuiet());
-  const char* dartVersion = mf->GetDefinition("CTEST_DART_SERVER_VERSION");
-  if (dartVersion) {
-    this->DartVersion = atoi(dartVersion);
-    if (this->DartVersion < 0) {
-      cmCTestLog(this, ERROR_MESSAGE,
-                 "Invalid Dart server version: "
-                   << dartVersion << ". Please specify the version number."
-                   << std::endl);
-      return false;
-    }
-  }
-  this->DropSiteCDash = mf->IsOn("CTEST_DROP_SITE_CDASH");
 
   if (!this->Initialize(bld_dir.c_str(), command)) {
     return false;
