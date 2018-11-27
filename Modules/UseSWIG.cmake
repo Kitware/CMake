@@ -142,6 +142,11 @@ ensure generated files will receive the required settings.
 
     set_property(SOURCE mymod.i PROPERTY SWIG_MODULE_NAME mymod_realname)
 
+  .. note::
+
+    If policy :policy:`CMP0086` is set to ``NEW``, ``-module <module_name>``
+    is passed to ``SWIG`` compiler.
+
 Target library properties can be set to apply same configuration to all SWIG
 input files.
 
@@ -220,12 +225,19 @@ as well as ``SWIG``:
 #]=======================================================================]
 
 cmake_policy(GET CMP0078 target_name_policy)
+cmake_policy(GET CMP0086 module_name_policy)
+
 cmake_policy (VERSION 3.12)
 if (target_name_policy)
   # respect user choice regarding CMP0078 policy
   cmake_policy(SET CMP0078 ${target_name_policy})
 endif()
+if (module_name_policy)
+  # respect user choice regarding CMP0086 policy
+  cmake_policy(SET CMP0086 ${module_name_policy})
+endif()
 unset(target_name_policy)
+unset(module_name_policy)
 
 set(SWIG_CXX_EXTENSION "cxx")
 set(SWIG_EXTRA_LIBRARIES "")
@@ -424,6 +436,19 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   # default is c, so add c++ flag if it is c++
   if(swig_source_file_cplusplus)
     list (APPEND swig_special_flags "-c++")
+  endif()
+
+  cmake_policy(GET CMP0086 module_name_policy)
+  if (module_name_policy STREQUAL "NEW")
+    get_source_file_property(module_name "${infile}" SWIG_MODULE_NAME)
+    if (module_name)
+      list (APPEND swig_special_flags "-module" "${module_name}")
+    endif()
+  else()
+    if (NOT module_name_policy)
+      cmake_policy(GET_WARNING CMP0086 _cmp0086_warning)
+      message(AUTHOR_WARNING "${_cmp0086_warning}\n")
+    endif()
   endif()
 
   set (swig_extra_flags)
