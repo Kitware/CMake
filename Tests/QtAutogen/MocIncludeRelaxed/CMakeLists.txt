@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(MocIncludeRelaxed)
-include("../AutogenTest.cmake")
+include("../AutogenCoreTest.cmake")
 
 # Test moc include patterns
 set(CMAKE_AUTOMOC_RELAXED_MODE TRUE)

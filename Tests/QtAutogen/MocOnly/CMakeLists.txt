@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(MocOnly)
-include("../AutogenTest.cmake")
+include("../AutogenCoreTest.cmake")
 
 add_executable(mocOnly
   main.cpp

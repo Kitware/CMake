@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(RerunRccDepends)
-include("../AutogenTest.cmake")
+include("../AutogenCoreTest.cmake")
 
 # Tests rcc rebuilding when a resource file changes
 

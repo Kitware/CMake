@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 project(MocOsMacros)
-include("../AutogenTest.cmake")
+include("../AutogenCoreTest.cmake")
 
 # Tests if moc processes Q_OS_XXX macros
 

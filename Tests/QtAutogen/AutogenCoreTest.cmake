@@ -7,11 +7,11 @@ if(QT_QMAKE_EXECUTABLE)
 endif()
 
 if (QT_TEST_VERSION EQUAL 4)
-  find_package(Qt4 REQUIRED)
+
+  find_package(Qt4 REQUIRED QtCore)
   include(UseQt4)
 
   set(QT_QTCORE_TARGET Qt4::QtCore)
-  set(QT_QTGUI_TARGET Qt4::QtGui)
 
   # Qt macros
   macro(qtx_wrap_cpp)
@@ -22,14 +22,16 @@ if (QT_TEST_VERSION EQUAL 4)
   endmacro()
 
 elseif(QT_TEST_VERSION EQUAL 5)
-  find_package(Qt5Widgets REQUIRED)
+
+  find_package(Qt5Core REQUIRED)
 
   set(QT_QTCORE_TARGET Qt5::Core)
-  set(QT_QTGUI_TARGET Qt5::Widgets)
+  set(QT_LIBRARIES Qt5::Core)
 
-  include_directories(${Qt5Widgets_INCLUDE_DIRS})
-  set(QT_LIBRARIES Qt5::Widgets)
+  # Include directories
+  include_directories(${Qt5Core_INCLUDE_DIRS})
 
+  # Definitions
   if(Qt5_POSITION_INDEPENDENT_CODE AND CMAKE_CXX_COMPILE_OPTIONS_PIC)
     add_definitions(${CMAKE_CXX_COMPILE_OPTIONS_PIC})
   endif()
