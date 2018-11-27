@@ -1409,7 +1409,7 @@ bool cmQtAutoGenInitializer::GetUicExecutable()
   }
 
   // Test uic command
-  if (err.empty()) {
+  if (err.empty() && !this->Uic.Executable.empty()) {
     if (cmSystemTools::FileExists(this->Uic.Executable, true)) {
       std::vector<std::string> command;
       command.push_back(this->Uic.Executable);
