@@ -25,6 +25,7 @@ ADD_AUTOGEN_TEST(SameName sameName)
 ADD_AUTOGEN_TEST(StaticLibraryCycle slc)
 ADD_AUTOGEN_TEST(UicInclude uicInclude)
 ADD_AUTOGEN_TEST(UicInterface QtAutoUicInterface)
+ADD_AUTOGEN_TEST(UicNoGui uicNoGui)
 ADD_AUTOGEN_TEST(UicOnly uicOnly)
 ADD_AUTOGEN_TEST(UicSkipSource)
 
