@@ -16,3 +16,11 @@ By default :variable:`CMAKE_GLOBAL_AUTOGEN_TARGET` is unset.
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
+
+Note
+^^^^
+
+``<ORIGIN>_autogen`` targets by default inherit their origin target's
+dependencies.  This might result in unintended dependency target
+builds when only ``<ORIGIN>_autogen`` targets are built.  A solution is to
+disable :prop_tgt:`AUTOGEN_ORIGIN_DEPENDS` on the respective origin targets.
