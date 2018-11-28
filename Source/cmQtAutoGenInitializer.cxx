@@ -35,8 +35,21 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
+
+std::string GetQtExecutableTargetName(
+  const cmQtAutoGen::IntegerVersion& qtVersion, std::string const& executable)
+{
+  if (qtVersion.Major == 5) {
+    return ("Qt5::" + executable);
+  }
+  if (qtVersion.Major == 4) {
+    return ("Qt4::" + executable);
+  }
+  return ("");
+}
 
 static std::size_t GetParallelCPUCount()
 {
@@ -544,11 +557,7 @@ bool cmQtAutoGenInitializer::InitMoc()
   }
 
   // Moc executable
-  if (!GetMocExecutable()) {
-    return false;
-  }
-
-  return true;
+  return GetMocExecutable();
 }
 
 bool cmQtAutoGenInitializer::InitUic()
@@ -625,19 +634,12 @@ bool cmQtAutoGenInitializer::InitUic()
   }
 
   // Uic executable
-  if (!GetUicExecutable()) {
-    return false;
-  }
-
-  return true;
+  return GetUicExecutable();
 }
 
 bool cmQtAutoGenInitializer::InitRcc()
 {
-  if (!GetRccExecutable()) {
-    return false;
-  }
-  return true;
+  return GetRccExecutable();
 }
 
 bool cmQtAutoGenInitializer::InitScanFiles()
@@ -1409,199 +1411,109 @@ cmQtAutoGenInitializer::IntegerVersion cmQtAutoGenInitializer::GetQtVersion(
   return cmQtAutoGenInitializer::IntegerVersion();
 }
 
-bool cmQtAutoGenInitializer::GetMocExecutable()
+std::pair<bool, std::string> GetQtExecutable(
+  const cmQtAutoGen::IntegerVersion& qtVersion, cmGeneratorTarget* target,
+  const std::string& executable, bool ignoreMissingTarget, std::string* output)
 {
   std::string err;
+  std::string result;
 
-  // Find moc executable
+  // Find executable
   {
-    std::string targetName;
-    if (this->QtVersion.Major == 5) {
-      targetName = "Qt5::moc";
-    } else if (this->QtVersion.Major == 4) {
-      targetName = "Qt4::moc";
+    const std::string targetName =
+      GetQtExecutableTargetName(qtVersion, executable);
+    if (targetName.empty()) {
+      err = "The AUTOMOC, AUTOUIC and AUTORCC feature ";
+      err += "supports only Qt 4 and Qt 5";
     } else {
-      err = "The AUTOMOC feature supports only Qt 4 and Qt 5";
-    }
-    if (!targetName.empty()) {
-      cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
+      cmLocalGenerator* localGen = target->GetLocalGenerator();
       cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse(targetName);
       if (tgt != nullptr) {
-        this->Moc.Executable = tgt->ImportedGetLocation("");
+        result = tgt->ImportedGetLocation("");
       } else {
+        if (ignoreMissingTarget) {
+          return std::make_pair(true, "");
+        }
+
         err = "Could not find target " + targetName;
       }
     }
   }
 
-  // Test moc command
+  // Test executable
   if (err.empty()) {
-    if (cmSystemTools::FileExists(this->Moc.Executable, true)) {
+    if (cmSystemTools::FileExists(result, true)) {
       std::vector<std::string> command;
-      command.push_back(this->Moc.Executable);
+      command.push_back(result);
       command.push_back("-h");
       std::string stdOut;
       std::string stdErr;
       int retVal = 0;
-      bool result = cmSystemTools::RunSingleCommand(
+      const bool runResult = cmSystemTools::RunSingleCommand(
         command, &stdOut, &stdErr, &retVal, nullptr,
         cmSystemTools::OUTPUT_NONE, cmDuration::zero(), cmProcessOutput::Auto);
-      if (!result) {
-        err = "The moc test command failed: ";
-        err += QuotedCommand(command);
+      if (!runResult) {
+        err = "Test of \"" + executable + "\" binary ";
+        err += cmQtAutoGen::Quoted(result) + " failed: ";
+        err += cmQtAutoGen::QuotedCommand(command);
+      } else {
+        if (output != nullptr) {
+          *output = stdOut;
+        }
       }
     } else {
-      err = "The moc executable ";
-      err += Quoted(this->Moc.Executable);
+      err = "The \"" + executable + "\" binary ";
+      err += cmQtAutoGen::Quoted(result);
       err += " does not exist";
     }
   }
 
   // Print error
   if (!err.empty()) {
-    std::string msg = "AutoMoc (";
-    msg += this->Target->GetName();
+    std::string msg = "AutoGen (";
+    msg += target->GetName();
     msg += "): ";
     msg += err;
     cmSystemTools::Error(msg.c_str());
-    return false;
+    return std::make_pair(false, "");
   }
 
-  return true;
+  return std::make_pair(true, result);
+}
+
+bool cmQtAutoGenInitializer::GetMocExecutable()
+{
+  const auto result =
+    GetQtExecutable(this->QtVersion, this->Target, "moc", false, nullptr);
+  this->Moc.Executable = result.second;
+  return result.first;
 }
 
 bool cmQtAutoGenInitializer::GetUicExecutable()
 {
-  std::string err;
-
-  // Find uic executable
-  {
-    std::string targetName;
-    if (this->QtVersion.Major == 5) {
-      targetName = "Qt5::uic";
-    } else if (this->QtVersion.Major == 4) {
-      targetName = "Qt4::uic";
-    } else {
-      err = "The AUTOUIC feature supports only Qt 4 and Qt 5";
-    }
-    if (!targetName.empty()) {
-      cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
-      cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse(targetName);
-      if (tgt != nullptr) {
-        this->Uic.Executable = tgt->ImportedGetLocation("");
-      } else {
-        if (this->QtVersion.Major == 5) {
-          // Project does not use Qt5Widgets, but has AUTOUIC ON anyway
-        } else {
-          err = "Could not find target " + targetName;
-        }
-      }
-    }
-  }
-
-  // Test uic command
-  if (err.empty() && !this->Uic.Executable.empty()) {
-    if (cmSystemTools::FileExists(this->Uic.Executable, true)) {
-      std::vector<std::string> command;
-      command.push_back(this->Uic.Executable);
-      command.push_back("-h");
-      std::string stdOut;
-      std::string stdErr;
-      int retVal = 0;
-      bool result = cmSystemTools::RunSingleCommand(
-        command, &stdOut, &stdErr, &retVal, nullptr,
-        cmSystemTools::OUTPUT_NONE, cmDuration::zero(), cmProcessOutput::Auto);
-      if (!result) {
-        err = "The uic test command failed: ";
-        err += QuotedCommand(command);
-      }
-    } else {
-      err = "The uic executable ";
-      err += Quoted(this->Uic.Executable);
-      err += " does not exist";
-    }
-  }
-
-  // Print error
-  if (!err.empty()) {
-    std::string msg = "AutoUic (";
-    msg += this->Target->GetName();
-    msg += "): ";
-    msg += err;
-    cmSystemTools::Error(msg.c_str());
-    return false;
-  }
-
-  return true;
+  const auto result =
+    GetQtExecutable(this->QtVersion, this->Target, "uic", true, nullptr);
+  this->Uic.Executable = result.second;
+  return result.first;
 }
 
 bool cmQtAutoGenInitializer::GetRccExecutable()
 {
-  std::string err;
-
-  // Find rcc executable
-  {
-    std::string targetName;
-    if (this->QtVersion.Major == 5) {
-      targetName = "Qt5::rcc";
-    } else if (this->QtVersion.Major == 4) {
-      targetName = "Qt4::rcc";
-    } else {
-      err = "The AUTORCC feature supports only Qt 4 and Qt 5";
-    }
-    if (!targetName.empty()) {
-      cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
-      cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse(targetName);
-      if (tgt != nullptr) {
-        this->Rcc.Executable = tgt->ImportedGetLocation("");
-      } else {
-        err = "Could not find target " + targetName;
-      }
-    }
-  }
-
-  // Test rcc command
-  if (err.empty()) {
-    if (cmSystemTools::FileExists(this->Rcc.Executable, true)) {
-      std::vector<std::string> command;
-      command.push_back(this->Rcc.Executable);
-      command.push_back("-h");
-      std::string stdOut;
-      std::string stdErr;
-      int retVal = 0;
-      bool result = cmSystemTools::RunSingleCommand(
-        command, &stdOut, &stdErr, &retVal, nullptr,
-        cmSystemTools::OUTPUT_NONE, cmDuration::zero(), cmProcessOutput::Auto);
-      if (result) {
-        // Detect if rcc supports (-)-list
-        if (this->QtVersion.Major == 5) {
-          if (stdOut.find("--list") != std::string::npos) {
-            this->Rcc.ListOptions.push_back("--list");
-          } else {
-            this->Rcc.ListOptions.push_back("-list");
-          }
-        }
-      } else {
-        err = "The rcc test command failed: ";
-        err += QuotedCommand(command);
-      }
-    } else {
-      err = "The rcc executable ";
-      err += Quoted(this->Rcc.Executable);
-      err += " does not exist";
-    }
-  }
-
-  // Print error
-  if (!err.empty()) {
-    std::string msg = "AutoRcc (";
-    msg += this->Target->GetName();
-    msg += "): ";
-    msg += err;
-    cmSystemTools::Error(msg.c_str());
+  std::string stdOut;
+  const auto result =
+    GetQtExecutable(this->QtVersion, this->Target, "rcc", false, &stdOut);
+  this->Rcc.Executable = result.second;
+  if (!result.first) {
     return false;
   }
 
+  if (this->QtVersion.Major == 5) {
+    if (stdOut.find("--list") != std::string::npos) {
+      this->Rcc.ListOptions.push_back("--list");
+    } else {
+      this->Rcc.ListOptions.push_back("-list");
+    }
+  }
   return true;
 }
 
