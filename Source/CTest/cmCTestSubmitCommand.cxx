@@ -15,7 +15,9 @@ class cmExecutionStatus;
 
 cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 {
-  const char* submitURL = this->Makefile->GetDefinition("CTEST_SUBMIT_URL");
+  const char* submitURL = !this->SubmitURL.empty()
+    ? this->SubmitURL.c_str()
+    : this->Makefile->GetDefinition("CTEST_SUBMIT_URL");
 
   if (submitURL) {
     this->CTest->SetCTestConfiguration("SubmitURL", submitURL, this->Quiet);
@@ -174,6 +176,11 @@ bool cmCTestSubmitCommand::CheckArgumentKeyword(std::string const& arg)
     return true;
   }
 
+  if (arg == "SUBMIT_URL") {
+    this->ArgumentDoing = ArgumentDoingSubmitURL;
+    return true;
+  }
+
   if (arg == "INTERNAL_TEST_CHECKSUM") {
     this->InternalTest = true;
     return true;
@@ -236,6 +243,12 @@ bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
   if (this->ArgumentDoing == ArgumentDoingCDashUploadType) {
     this->ArgumentDoing = ArgumentDoingNone;
     this->CDashUploadType = arg;
+    return true;
+  }
+
+  if (this->ArgumentDoing == ArgumentDoingSubmitURL) {
+    this->ArgumentDoing = ArgumentDoingNone;
+    this->SubmitURL = arg;
     return true;
   }
 
