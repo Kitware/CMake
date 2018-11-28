@@ -54,7 +54,7 @@ public:
     InfoWriter(std::string const& filename);
 
     /// @return True if the file is open
-    operator bool() const { return static_cast<bool>(Ofs_); }
+    explicit operator bool() const { return static_cast<bool>(Ofs_); }
 
     void Write(const char* text) { Ofs_ << text; }
     void Write(const char* key, std::string const& value);

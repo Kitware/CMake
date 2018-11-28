@@ -66,7 +66,7 @@ public:
     const std::string& GetName() const { return this->Name; }
 
     void Enable() { this->Enabled = true; }
-    operator bool() const { return this->Enabled; }
+    explicit operator bool() const { return this->Enabled; }
 
     std::vector<std::string> SubmitFiles;
 
