@@ -1355,39 +1355,15 @@ bool SystemTools::Touch(const std::string& filename, bool create)
   }
   CloseHandle(h);
 #elif KWSYS_CXX_HAS_UTIMENSAT
-  struct timespec times[2] = { { 0, UTIME_OMIT }, { 0, UTIME_NOW } };
-  if (utimensat(AT_FDCWD, filename.c_str(), times, 0) < 0) {
+  // utimensat is only available on newer Unixes and macOS 10.13+
+  if (utimensat(AT_FDCWD, filename.c_str(), NULL, 0) < 0) {
     return false;
   }
 #else
-  struct stat st;
-  if (stat(filename.c_str(), &st) < 0) {
+  // fall back to utimes
+  if (utimes(filename.c_str(), NULL) < 0) {
     return false;
   }
-  struct timeval mtime;
-  gettimeofday(&mtime, 0);
-#  if KWSYS_CXX_HAS_UTIMES
-  struct timeval atime;
-#    if KWSYS_CXX_STAT_HAS_ST_MTIM
-  atime.tv_sec = st.st_atim.tv_sec;
-  atime.tv_usec = st.st_atim.tv_nsec / 1000;
-#    elif KWSYS_CXX_STAT_HAS_ST_MTIMESPEC
-  atime.tv_sec = st.st_atimespec.tv_sec;
-  atime.tv_usec = st.st_atimespec.tv_nsec / 1000;
-#    else
-  atime.tv_sec = st.st_atime;
-  atime.tv_usec = 0;
-#    endif
-  struct timeval times[2] = { atime, mtime };
-  if (utimes(filename.c_str(), times) < 0) {
-    return false;
-  }
-#  else
-  struct utimbuf times = { st.st_atime, mtime.tv_sec };
-  if (utime(filename.c_str(), &times) < 0) {
-    return false;
-  }
-#  endif
 #endif
   return true;
 }
