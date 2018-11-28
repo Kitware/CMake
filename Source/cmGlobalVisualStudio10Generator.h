@@ -144,6 +144,9 @@ protected:
 
   std::string const& GetMSBuildCommand();
 
+  cmIDEFlagTable const* LoadFlagTable(std::string const& flagTableName,
+                                      std::string const& table) const;
+
   std::string GeneratorToolset;
   std::string GeneratorToolsetVersion;
   std::string GeneratorToolsetHostArchitecture;
@@ -153,15 +156,15 @@ protected:
   std::string SystemName;
   std::string SystemVersion;
   std::string NsightTegraVersion;
-  cmIDEFlagTable const* DefaultClFlagTable;
-  cmIDEFlagTable const* DefaultCSharpFlagTable;
-  cmIDEFlagTable const* DefaultLibFlagTable;
-  cmIDEFlagTable const* DefaultLinkFlagTable;
-  cmIDEFlagTable const* DefaultCudaFlagTable;
-  cmIDEFlagTable const* DefaultCudaHostFlagTable;
-  cmIDEFlagTable const* DefaultMasmFlagTable;
-  cmIDEFlagTable const* DefaultNasmFlagTable;
-  cmIDEFlagTable const* DefaultRcFlagTable;
+  std::string DefaultCLFlagTableName;
+  std::string DefaultCSharpFlagTableName;
+  std::string DefaultLibFlagTableName;
+  std::string DefaultLinkFlagTableName;
+  std::string DefaultCudaFlagTableName;
+  std::string DefaultCudaHostFlagTableName;
+  std::string DefaultMasmFlagTableName;
+  std::string DefaultNasmFlagTableName;
+  std::string DefaultRCFlagTableName;
   bool SystemIsWindowsCE;
   bool SystemIsWindowsPhone;
   bool SystemIsWindowsStore;

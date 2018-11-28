@@ -6,12 +6,6 @@
 #include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
-#include "cmVS12CLFlagTable.h"
-#include "cmVS12CSharpFlagTable.h"
-#include "cmVS12LibFlagTable.h"
-#include "cmVS12LinkFlagTable.h"
-#include "cmVS12MASMFlagTable.h"
-#include "cmVS12RCFlagTable.h"
 
 static const char vs12generatorName[] = "Visual Studio 12 2013";
 
@@ -90,12 +84,12 @@ cmGlobalVisualStudio12Generator::cmGlobalVisualStudio12Generator(
     "ProductDir",
     vc12Express, cmSystemTools::KeyWOW64_32);
   this->DefaultPlatformToolset = "v120";
-  this->DefaultClFlagTable = cmVS12CLFlagTable;
-  this->DefaultCSharpFlagTable = cmVS12CSharpFlagTable;
-  this->DefaultLibFlagTable = cmVS12LibFlagTable;
-  this->DefaultLinkFlagTable = cmVS12LinkFlagTable;
-  this->DefaultMasmFlagTable = cmVS12MASMFlagTable;
-  this->DefaultRcFlagTable = cmVS12RCFlagTable;
+  this->DefaultCLFlagTableName = "v12";
+  this->DefaultCSharpFlagTableName = "v12";
+  this->DefaultLibFlagTableName = "v12";
+  this->DefaultLinkFlagTableName = "v12";
+  this->DefaultMasmFlagTableName = "v12";
+  this->DefaultRCFlagTableName = "v12";
   this->Version = VS12;
 }
 
