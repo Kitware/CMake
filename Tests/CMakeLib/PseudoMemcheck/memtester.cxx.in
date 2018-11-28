@@ -15,15 +15,15 @@ int main(int ac, char** av)
   std::string logarg;
   bool nextarg = false;
 
-  if (exename.find("valgrind") != exename.npos) {
+  if (exename.find("valgrind") != std::string::npos) {
     logarg = "--log-file=";
-  } else if (exename.find("purify") != exename.npos) {
+  } else if (exename.find("purify") != std::string::npos) {
 #ifdef _WIN32
     logarg = "/SAVETEXTDATA=";
 #else
     logarg = "-log-file=";
 #endif
-  } else if (exename.find("BC") != exename.npos) {
+  } else if (exename.find("BC") != std::string::npos) {
     nextarg = true;
     logarg = "/X";
   }

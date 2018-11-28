@@ -194,7 +194,8 @@ private:
     this->CData.clear();
     if (name == "logentry") {
       this->Rev = Revision();
-      if (const char* rev = this->FindAttribute(atts, "revision")) {
+      if (const char* rev =
+            cmCTestHG::LogParser::FindAttribute(atts, "revision")) {
         this->Rev.Rev = rev;
       }
       this->Changes.clear();

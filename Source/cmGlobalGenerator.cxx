@@ -1204,7 +1204,7 @@ void cmGlobalGenerator::Configure()
       const char* logs[] = { "CMakeOutput.log", "CMakeError.log", nullptr };
       for (const char** log = logs; *log; ++log) {
         std::string f = this->CMakeInstance->GetHomeOutputDirectory();
-        f += this->CMakeInstance->GetCMakeFilesDirectory();
+        f += cmake::GetCMakeFilesDirectory();
         f += "/";
         f += *log;
         if (cmSystemTools::FileExists(f)) {
@@ -2808,7 +2808,7 @@ void cmGlobalGenerator::CheckRuleHashes()
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   std::string home = this->GetCMakeInstance()->GetHomeOutputDirectory();
   std::string pfile = home;
-  pfile += this->GetCMakeInstance()->GetCMakeFilesDirectory();
+  pfile += cmake::GetCMakeFilesDirectory();
   pfile += "/CMakeRuleHashes.txt";
   this->CheckRuleHashes(pfile, home);
   this->WriteRuleHashes(pfile);

@@ -183,7 +183,8 @@ bool cmInstallCommandArguments::CheckPermissions()
 {
   this->PermissionsString.clear();
   for (std::string const& perm : this->Permissions.GetVector()) {
-    if (!this->CheckPermissions(perm, this->PermissionsString)) {
+    if (!cmInstallCommandArguments::CheckPermissions(
+          perm, this->PermissionsString)) {
       return false;
     }
   }

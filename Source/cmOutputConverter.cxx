@@ -111,7 +111,7 @@ std::string cmOutputConverter::ConvertToRelativePath(
     return remote_path;
   }
 
-  return this->ForceToRelativePath(local_path, remote_path);
+  return cmOutputConverter::ForceToRelativePath(local_path, remote_path);
 }
 
 std::string cmOutputConverter::ForceToRelativePath(

@@ -334,7 +334,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
     // Info directory
     this->Dir.Info = cbd;
-    this->Dir.Info += makefile->GetCMakeInstance()->GetCMakeFilesDirectory();
+    this->Dir.Info += cmake::GetCMakeFilesDirectory();
     this->Dir.Info += '/';
     this->Dir.Info += this->Target->GetName();
     this->Dir.Info += "_autogen";

@@ -216,7 +216,7 @@ cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
   }
 
   this->Protocol =
-    this->FindMatchingProtocol(this->SupportedProtocols, major, minor);
+    cmServer::FindMatchingProtocol(this->SupportedProtocols, major, minor);
   if (!this->Protocol) {
     return request.ReportError("Protocol version not supported.");
   }

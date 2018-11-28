@@ -248,9 +248,9 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
     }
   } else if (this->View == GroupView) {
     QMap<QString, QCMakePropertyList> newPropsTree;
-    this->breakProperties(newProps, newPropsTree);
+    QCMakeCacheModel::breakProperties(newProps, newPropsTree);
     QMap<QString, QCMakePropertyList> newPropsTree2;
-    this->breakProperties(newProps2, newPropsTree2);
+    QCMakeCacheModel::breakProperties(newProps2, newPropsTree2);
 
     QStandardItem* root = this->invisibleRootItem();
 

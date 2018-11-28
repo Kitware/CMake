@@ -122,7 +122,7 @@ void cmRST::ProcessModule(std::istream& is)
 void cmRST::Reset()
 {
   if (!this->MarkupLines.empty()) {
-    this->UnindentLines(this->MarkupLines);
+    cmRST::UnindentLines(this->MarkupLines);
   }
   switch (this->Directive) {
     case DirectiveNone:

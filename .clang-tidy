@@ -35,7 +35,6 @@ readability-*,\
 -readability-redundant-declaration,\
 -readability-redundant-member-init,\
 -readability-simplify-boolean-expr,\
--readability-static-accessed-through-instance,\
 "
 HeaderFilterRegex: 'Source/cm[^/]*\.(h|hxx|cxx)$'
 ...
