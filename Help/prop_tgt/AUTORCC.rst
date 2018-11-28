@@ -21,6 +21,9 @@ If the ``.qrc`` file is :prop_sf:`GENERATED` though, a
 Additional command line options for rcc can be set via the
 :prop_sf:`AUTORCC_OPTIONS` source file property on the ``.qrc`` file.
 
+The ``rcc`` executable will be detected automatically, but can be forced to
+a certain binary using the :prop_tgt:`AUTORCC_EXECUTABLE` property.
+
 The global property :prop_gbl:`AUTOGEN_TARGETS_FOLDER` can be used to group
 the autorcc targets together in an IDE, e.g. in MSVS.
 

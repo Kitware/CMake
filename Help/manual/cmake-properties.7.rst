@@ -129,13 +129,16 @@ Properties on Targets
    /prop_tgt/AUTOGEN_TARGET_DEPENDS
    /prop_tgt/AUTOMOC_COMPILER_PREDEFINES
    /prop_tgt/AUTOMOC_DEPEND_FILTERS
+   /prop_tgt/AUTOMOC_EXECUTABLE
    /prop_tgt/AUTOMOC_MACRO_NAMES
    /prop_tgt/AUTOMOC_MOC_OPTIONS
    /prop_tgt/AUTOMOC
    /prop_tgt/AUTOUIC
+   /prop_tgt/AUTOUIC_EXECUTABLE
    /prop_tgt/AUTOUIC_OPTIONS
    /prop_tgt/AUTOUIC_SEARCH_PATHS
    /prop_tgt/AUTORCC
+   /prop_tgt/AUTORCC_EXECUTABLE
    /prop_tgt/AUTORCC_OPTIONS
    /prop_tgt/BINARY_DIR
    /prop_tgt/BUILD_RPATH

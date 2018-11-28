@@ -30,6 +30,9 @@ Additional command line options for ``uic`` can be set via the
 The global property :prop_gbl:`AUTOGEN_TARGETS_FOLDER` can be used to group the
 autouic targets together in an IDE, e.g. in MSVS.
 
+The ``uic`` executable will be detected automatically, but can be forced to
+a certain binary using the :prop_tgt:`AUTOUIC_EXECUTABLE` property.
+
 Source files can be excluded from :prop_tgt:`AUTOUIC` processing by
 enabling :prop_sf:`SKIP_AUTOUIC` or the broader :prop_sf:`SKIP_AUTOGEN`.
 
