@@ -77,7 +77,8 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
       if (moc || uic || rcc) {
         // We support Qt4 and Qt5
         auto qtVersion = cmQtAutoGenInitializer::GetQtVersion(target);
-        if ((qtVersion.Major == 4) || (qtVersion.Major == 5)) {
+        if ((qtVersion.Major == 4) || (qtVersion.Major == 5) ||
+            (qtVersion.Major == 6)) {
           // Create autogen target initializer
           Initializers_.emplace_back(cm::make_unique<cmQtAutoGenInitializer>(
             this, target, qtVersion, moc, uic, rcc, globalAutoGenTarget,

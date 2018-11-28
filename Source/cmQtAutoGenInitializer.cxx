@@ -42,6 +42,9 @@
 std::string GetQtExecutableTargetName(
   const cmQtAutoGen::IntegerVersion& qtVersion, std::string const& executable)
 {
+  if (qtVersion.Major == 6) {
+    return ("Qt6::" + executable);
+  }
   if (qtVersion.Major == 5) {
     return ("Qt5::" + executable);
   }
@@ -504,7 +507,7 @@ bool cmQtAutoGenInitializer::InitMoc()
   {
     // We need to disable this until we have all implicit includes available.
     // See issue #18669.
-    // bool const appendImplicit = (this->QtVersion.Major == 5);
+    // bool const appendImplicit = (this->QtVersion.Major >= 5);
 
     auto GetIncludeDirs =
       [this, localGen](std::string const& cfg) -> std::vector<std::string> {
@@ -839,7 +842,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
 
   // Process qrc files
   if (!this->Rcc.Qrcs.empty()) {
-    const bool QtV5 = (this->QtVersion.Major == 5);
+    const bool modernQt = (this->QtVersion.Major >= 5);
     // Target rcc options
     std::vector<std::string> optionsTarget;
     cmSystemTools::ExpandListArgument(
@@ -911,10 +914,10 @@ bool cmQtAutoGenInitializer::InitScanFiles()
         std::vector<std::string> nameOpts;
         nameOpts.emplace_back("-name");
         nameOpts.emplace_back(std::move(name));
-        RccMergeOptions(opts, nameOpts, QtV5);
+        RccMergeOptions(opts, nameOpts, modernQt);
       }
       // Merge file option
-      RccMergeOptions(opts, qrc.Options, QtV5);
+      RccMergeOptions(opts, qrc.Options, modernQt);
       qrc.Options = std::move(opts);
     }
     // RCC resources
@@ -1374,7 +1377,7 @@ static std::vector<cmQtAutoGenInitializer::IntegerVersion> GetKnownQtVersions(
 
   std::vector<cmQtAutoGenInitializer::IntegerVersion> result;
   for (const std::string& prefix :
-       std::vector<std::string>({ "Qt5Core", "QT" })) {
+       std::vector<std::string>({ "Qt6Core", "Qt5Core", "QT" })) {
     auto tmp = cmQtAutoGenInitializer::IntegerVersion(
       StringToInt(makefile->GetSafeDefinition(prefix + "_VERSION_MAJOR")),
       StringToInt(makefile->GetSafeDefinition(prefix + "_VERSION_MINOR")));
@@ -1427,7 +1430,7 @@ std::pair<bool, std::string> GetQtExecutable(
       GetQtExecutableTargetName(qtVersion, executable);
     if (targetName.empty()) {
       err = "The AUTOMOC, AUTOUIC and AUTORCC feature ";
-      err += "supports only Qt 4 and Qt 5";
+      err += "supports only Qt 4, Qt 5 and Qt 6.";
     } else {
       cmLocalGenerator* localGen = target->GetLocalGenerator();
       cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse(targetName);
@@ -1510,7 +1513,7 @@ bool cmQtAutoGenInitializer::GetRccExecutable()
     return false;
   }
 
-  if (this->QtVersion.Major == 5) {
+  if (this->QtVersion.Major == 5 || this->QtVersion.Major == 6) {
     if (stdOut.find("--list") != std::string::npos) {
       this->Rcc.ListOptions.push_back("--list");
     } else {
