@@ -494,23 +494,6 @@ void cmCTestSubmitHandler::ParseResponse(
   }
 }
 
-void cmCTestSubmitHandler::ConstructCDashURL(std::string& dropMethod,
-                                             std::string& url)
-{
-  dropMethod = this->CTest->GetCTestConfiguration("DropMethod");
-  url = dropMethod;
-  url += "://";
-  if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty()) {
-    url += this->CTest->GetCTestConfiguration("DropSiteUser");
-    if (!this->CTest->GetCTestConfiguration("DropSitePassword").empty()) {
-      url += ":" + this->CTest->GetCTestConfiguration("DropSitePassword");
-    }
-    url += "@";
-  }
-  url += this->CTest->GetCTestConfiguration("DropSite") +
-    this->CTest->GetCTestConfiguration("DropLocation");
-}
-
 int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
                                                 std::string const& typeString)
 {
@@ -531,9 +514,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   curl.SetCurlOptions(args);
   curl.SetTimeOutSeconds(SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT);
   curl.SetHttpHeaders(this->HttpHeaders);
-  std::string dropMethod;
-  std::string url;
-  this->ConstructCDashURL(dropMethod, url);
+  std::string url = this->CTest->GetSubmitURL();
   std::string fields;
   std::string::size_type pos = url.find('?');
   if (pos != std::string::npos) {
@@ -878,23 +859,7 @@ int cmCTestSubmitHandler::ProcessHandler()
   }
   this->SetLogFile(&ofs);
 
-  std::string dropMethod(this->CTest->GetCTestConfiguration("DropMethod"));
-
-  if (dropMethod.empty()) {
-    dropMethod = "http";
-  }
-
-  std::string url = dropMethod;
-  url += "://";
-  if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty()) {
-    url += this->CTest->GetCTestConfiguration("DropSiteUser");
-    if (!this->CTest->GetCTestConfiguration("DropSitePassword").empty()) {
-      url += ":" + this->CTest->GetCTestConfiguration("DropSitePassword");
-    }
-    url += "@";
-  }
-  url += this->CTest->GetCTestConfiguration("DropSite") +
-    this->CTest->GetCTestConfiguration("DropLocation");
+  std::string url = this->CTest->GetSubmitURL();
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                      "   SubmitURL: " << url << '\n', this->Quiet);
   if (!this->SubmitUsingHTTP(buildDirectory + "/Testing/" +

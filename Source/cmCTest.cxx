@@ -2626,6 +2626,32 @@ void cmCTest::SetCTestConfiguration(const char* name, const char* value,
   this->CTestConfiguration[name] = value;
 }
 
+std::string cmCTest::GetSubmitURL()
+{
+  std::string url;
+  {
+    std::string method = this->GetCTestConfiguration("DropMethod");
+    std::string user = this->GetCTestConfiguration("DropSiteUser");
+    std::string password = this->GetCTestConfiguration("DropSitePassword");
+    std::string site = this->GetCTestConfiguration("DropSite");
+    std::string location = this->GetCTestConfiguration("DropLocation");
+
+    url = method.empty() ? "http" : method;
+    url += "://";
+    if (!user.empty()) {
+      url += user;
+      if (!password.empty()) {
+        url += ':';
+        url += password;
+      }
+      url += '@';
+    }
+    url += site;
+    url += location;
+  }
+  return url;
+}
+
 std::string cmCTest::GetCurrentTag()
 {
   return this->CurrentTag;
