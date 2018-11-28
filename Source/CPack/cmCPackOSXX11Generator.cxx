@@ -169,7 +169,7 @@ int cmCPackOSXX11Generator::PackageFiles()
     numTries--;
   }
   if (!res || retVal) {
-    cmGeneratedFileStream ofs(tmpFile.c_str());
+    cmGeneratedFileStream ofs(tmpFile);
     ofs << "# Run command: " << dmgCmd.str() << std::endl
         << "# Output:" << std::endl
         << output << std::endl;
