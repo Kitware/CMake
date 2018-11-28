@@ -3009,6 +3009,35 @@ bool cmSystemTools::StringToULong(const char* str, unsigned long* value)
   return (*endp == '\0') && (endp != str) && (errno == 0);
 }
 
+std::string cmSystemTools::EncodeURL(std::string const& in, bool escapeSlashes)
+{
+  std::string out;
+  for (char c : in) {
+    char hexCh[4] = { 0, 0, 0, 0 };
+    hexCh[0] = c;
+    switch (c) {
+      case '+':
+      case '?':
+      case '\\':
+      case '&':
+      case ' ':
+      case '=':
+      case '%':
+        sprintf(hexCh, "%%%02X", static_cast<int>(c));
+        break;
+      case '/':
+        if (escapeSlashes) {
+          strcpy(hexCh, "%2F");
+        }
+        break;
+      default:
+        break;
+    }
+    out.append(hexCh);
+  }
+  return out;
+}
+
 bool cmSystemTools::CreateSymlink(const std::string& origName,
                                   const std::string& newName)
 {

@@ -407,26 +407,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
       *this->LogFile << "\tUpload file: " << local_file << " to "
                      << remote_file << std::endl;
 
-      std::string ofile;
-      for (char c : remote_file) {
-        char hexCh[4] = { 0, 0, 0, 0 };
-        hexCh[0] = c;
-        switch (c) {
-          case '+':
-          case '?':
-          case '/':
-          case '\\':
-          case '&':
-          case ' ':
-          case '=':
-          case '%':
-            sprintf(hexCh, "%%%02X", static_cast<int>(c));
-            ofile.append(hexCh);
-            break;
-          default:
-            ofile.append(hexCh);
-        }
-      }
+      std::string ofile = cmSystemTools::EncodeURL(remote_file);
       std::string upload_as = url +
         ((url.find('?') == std::string::npos) ? '?' : '&') +
         "FileName=" + ofile;
