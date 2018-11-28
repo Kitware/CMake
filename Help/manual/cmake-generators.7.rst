@@ -27,6 +27,8 @@ when creating a new build tree.
 CMake Generators
 ================
 
+.. _`Command-Line Build Tool Generators`:
+
 Command-Line Build Tool Generators
 ----------------------------------
 
@@ -57,6 +59,8 @@ Ninja Generator
    :maxdepth: 1
 
    /generator/Ninja
+
+.. _`IDE Build Tool Generators`:
 
 IDE Build Tool Generators
 -------------------------

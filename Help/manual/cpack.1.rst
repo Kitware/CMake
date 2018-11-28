@@ -13,10 +13,10 @@ Synopsis
 Description
 ===========
 
-The ``cpack`` executable is the CMake packaging program.  It generates
+The **cpack** executable is the CMake packaging program.  It generates
 installers and source packages in a variety of formats.
 
-For each installer or package format, ``cpack`` has a specific backend,
+For each installer or package format, **cpack** has a specific backend,
 called "generator". A generator is responsible for generating the required
 inputs and invoking the specific package creation tools. These installer
 or package generators are not to be confused with the makefile generators
@@ -28,7 +28,7 @@ list of generators supported for the target platform.  Which of them are
 to be used can be selected through the :variable:`CPACK_GENERATOR` variable
 or through the command-line option ``-G``.
 
-The ``cpack`` program is steered by a configuration file written in the
+The **cpack** program is steered by a configuration file written in the
 :manual:`CMake language <cmake-language(7)>`. Unless chosen differently
 through the command-line option ``--config``, the file ``CPackConfig.cmake``
 in the current directory is used.
