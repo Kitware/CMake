@@ -2628,8 +2628,8 @@ void cmCTest::SetCTestConfiguration(const char* name, const char* value,
 
 std::string cmCTest::GetSubmitURL()
 {
-  std::string url;
-  {
+  std::string url = this->GetCTestConfiguration("SubmitURL");
+  if (url.empty()) {
     std::string method = this->GetCTestConfiguration("DropMethod");
     std::string user = this->GetCTestConfiguration("DropSiteUser");
     std::string password = this->GetCTestConfiguration("DropSitePassword");

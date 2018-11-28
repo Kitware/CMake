@@ -15,36 +15,26 @@ class cmExecutionStatus;
 
 cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 {
-  const char* ctestDropMethod =
-    this->Makefile->GetDefinition("CTEST_DROP_METHOD");
-  const char* ctestDropSite = this->Makefile->GetDefinition("CTEST_DROP_SITE");
-  const char* ctestDropLocation =
-    this->Makefile->GetDefinition("CTEST_DROP_LOCATION");
-  if (!ctestDropMethod) {
-    ctestDropMethod = "http";
-  }
+  const char* submitURL = this->Makefile->GetDefinition("CTEST_SUBMIT_URL");
 
-  if (!ctestDropSite) {
-    // error: CDash requires CTEST_DROP_SITE definition
-    // in CTestConfig.cmake
+  if (submitURL) {
+    this->CTest->SetCTestConfiguration("SubmitURL", submitURL, this->Quiet);
+  } else {
+    this->CTest->SetCTestConfigurationFromCMakeVariable(
+      this->Makefile, "DropMethod", "CTEST_DROP_METHOD", this->Quiet);
+    this->CTest->SetCTestConfigurationFromCMakeVariable(
+      this->Makefile, "DropSiteUser", "CTEST_DROP_SITE_USER", this->Quiet);
+    this->CTest->SetCTestConfigurationFromCMakeVariable(
+      this->Makefile, "DropSitePassword", "CTEST_DROP_SITE_PASSWORD",
+      this->Quiet);
+    this->CTest->SetCTestConfigurationFromCMakeVariable(
+      this->Makefile, "DropSite", "CTEST_DROP_SITE", this->Quiet);
+    this->CTest->SetCTestConfigurationFromCMakeVariable(
+      this->Makefile, "DropLocation", "CTEST_DROP_LOCATION", this->Quiet);
   }
-  if (!ctestDropLocation) {
-    // error: CDash requires CTEST_DROP_LOCATION definition
-    // in CTestConfig.cmake
-  }
-  this->CTest->SetCTestConfiguration("DropMethod", ctestDropMethod,
-                                     this->Quiet);
-  this->CTest->SetCTestConfiguration("DropSite", ctestDropSite, this->Quiet);
-  this->CTest->SetCTestConfiguration("DropLocation", ctestDropLocation,
-                                     this->Quiet);
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "CurlOptions", "CTEST_CURL_OPTIONS", this->Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "DropSiteUser", "CTEST_DROP_SITE_USER", this->Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "DropSitePassword", "CTEST_DROP_SITE_PASSWORD",
-    this->Quiet);
 
   const char* notesFilesVariable =
     this->Makefile->GetDefinition("CTEST_NOTES_FILES");
