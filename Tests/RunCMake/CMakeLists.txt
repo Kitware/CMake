@@ -338,6 +338,9 @@ endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^9]|9[0-9])")
   add_RunCMake_test(VS10Project)
+  if( vs12 AND wince )
+    add_RunCMake_test( VS10ProjectWinCE "-DRunCMake_GENERATOR_PLATFORM=${wince_sdk}")
+  endif()
 endif()
 
 if(XCODE_VERSION)

@@ -178,7 +178,6 @@ if(BUILD_TESTING)
         endif()
         # Build a key to be used by get_filename_component that is pointing to the SDK directory
         set(_reg "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows CE Tools\\SDKs\\${_sdk}]")
-
         # Set return values
         set(${selected_reg} ${_reg})
         set(${selected_sdk} ${_sdk})
