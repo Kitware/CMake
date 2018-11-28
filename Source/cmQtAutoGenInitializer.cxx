@@ -1342,56 +1342,65 @@ void cmQtAutoGenInitializer::AddGeneratedSource(std::string const& filename,
   this->Target->AddSource(filename);
 }
 
+static unsigned int CharPtrToInt(const char* const input)
+{
+  unsigned long tmp = 0;
+  if (input != nullptr && cmSystemTools::StringToULong(input, &tmp)) {
+    return static_cast<unsigned int>(tmp);
+  }
+  return 0;
+}
+
+static unsigned int StringToInt(const std::string& input)
+{
+  return input.empty() ? 0 : CharPtrToInt(input.c_str());
+}
+
+static std::vector<cmQtAutoGenInitializer::IntegerVersion> GetKnownQtVersions(
+  cmGeneratorTarget const* target)
+{
+  cmMakefile* makefile = target->Target->GetMakefile();
+
+  std::vector<cmQtAutoGenInitializer::IntegerVersion> result;
+  for (const std::string& prefix :
+       std::vector<std::string>({ "Qt5Core", "QT" })) {
+    auto tmp = cmQtAutoGenInitializer::IntegerVersion(
+      StringToInt(makefile->GetSafeDefinition(prefix + "_VERSION_MAJOR")),
+      StringToInt(makefile->GetSafeDefinition(prefix + "_VERSION_MINOR")));
+    if (tmp.Major != 0) {
+      result.push_back(tmp);
+    }
+  }
+
+  return result;
+}
+
 cmQtAutoGenInitializer::IntegerVersion cmQtAutoGenInitializer::GetQtVersion(
   cmGeneratorTarget const* target)
 {
-  cmQtAutoGenInitializer::IntegerVersion res;
-  cmMakefile* makefile = target->Target->GetMakefile();
-
-  // -- Major version
-  std::string qtMajor = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
-  if (qtMajor.empty()) {
-    qtMajor = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
-  }
-  {
-    const char* targetQtVersion =
-      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", "");
-    if (targetQtVersion != nullptr) {
-      qtMajor = targetQtVersion;
-    }
+  auto knownQtVersions = GetKnownQtVersions(target);
+  if (knownQtVersions.empty()) {
+    return cmQtAutoGenInitializer::IntegerVersion(); // No Qt
   }
 
-  // -- Minor version
-  std::string qtMinor;
-  if (!qtMajor.empty()) {
-    if (qtMajor == "5") {
-      qtMinor = makefile->GetSafeDefinition("Qt5Core_VERSION_MINOR");
-    }
-    if (qtMinor.empty()) {
-      qtMinor = makefile->GetSafeDefinition("QT_VERSION_MINOR");
-    }
-    {
-      const char* targetQtVersion =
-        target->GetLinkInterfaceDependentStringProperty("QT_MINOR_VERSION",
-                                                        "");
-      if (targetQtVersion != nullptr) {
-        qtMinor = targetQtVersion;
-      }
+  // Pick a version from the known versions:
+  auto targetVersion = CharPtrToInt(
+    target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", ""));
+
+  if (targetVersion == 0) {
+    // No specific version was requested by the target:
+    // Use highest known Qt version.
+    return knownQtVersions.at(0);
+  }
+
+  for (auto it : knownQtVersions) {
+    if (it.Major == targetVersion) {
+      return it;
     }
   }
 
-  // -- Convert to integer
-  if (!qtMajor.empty() && !qtMinor.empty()) {
-    unsigned long majorUL(0);
-    unsigned long minorUL(0);
-    if (cmSystemTools::StringToULong(qtMajor.c_str(), &majorUL) &&
-        cmSystemTools::StringToULong(qtMinor.c_str(), &minorUL)) {
-      res.Major = static_cast<unsigned int>(majorUL);
-      res.Minor = static_cast<unsigned int>(minorUL);
-    }
-  }
-
-  return res;
+  // Requested version was not found
+  return cmQtAutoGenInitializer::IntegerVersion();
 }
 
 bool cmQtAutoGenInitializer::GetMocExecutable()
