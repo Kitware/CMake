@@ -191,8 +191,8 @@ macro(ECOS_ADD_EXECUTABLE _exe_NAME )
    set(CMAKE_CXX_LINK_EXECUTABLE  "<CMAKE_CXX_COMPILER> <CMAKE_CXX_LINK_FLAGS> <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
    set(CMAKE_C_LINK_EXECUTABLE    "<CMAKE_C_COMPILER>   <CMAKE_C_LINK_FLAGS>   <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
 # some strict compiler flags
-   set (CMAKE_C_FLAGS "-Wstrict-prototypes")
-   set (CMAKE_CXX_FLAGS "-Woverloaded-virtual -fno-rtti -Wctor-dtor-privacy -fno-strict-aliasing -fno-exceptions")
+   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-prototypes")
+   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Woverloaded-virtual -fno-rtti -Wctor-dtor-privacy -fno-strict-aliasing -fno-exceptions")
 
    add_executable(${_exe_NAME} ${ARGN})
    set_target_properties(${_exe_NAME} PROPERTIES SUFFIX ".elf")
