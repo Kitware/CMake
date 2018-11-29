@@ -547,6 +547,11 @@ example, the code
 
 will print a message during installation.
 
+``<file>`` or ``<code>`` may use "generator expressions" with the syntax
+``$<...>`` (in the case of ``<file>``, this refers to their use in the file
+name, not the file's contents).  See the
+:manual:`cmake-generator-expressions(7)` manual for available expressions.
+
 Installing Exports
 ^^^^^^^^^^^^^^^^^^
 
