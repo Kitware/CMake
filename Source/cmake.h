@@ -531,6 +531,7 @@ private:
   // Print a list of valid generators to stderr.
   void PrintGeneratorList();
 
+  std::unique_ptr<cmGlobalGenerator> EvaluateDefaultGlobalGenerator();
   void CreateDefaultGlobalGenerator();
 
   void AppendGlobalGeneratorsDocumentation(std::vector<cmDocumentationEntry>&);
