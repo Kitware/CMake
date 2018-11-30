@@ -54,6 +54,9 @@ elseif(testname STREQUAL configure_line_number_CMP0053_new) # pass
 elseif(testname STREQUAL configure_line_number_CMP0053_old_use_at) # pass
   test_configure_line_number("\@CMAKE_CURRENT_LIST_LINE\@" OLD)
 
+elseif(testname STREQUAL configure_line_number_CMP0053_new_use_at) # pass
+  test_configure_line_number("\@CMAKE_CURRENT_LIST_LINE\@" NEW)
+
 elseif(testname STREQUAL configure_bogus) # fail
   string(CONFIGURE "this is @testname@" v ESCAPE_QUOTES BOGUS)
 
