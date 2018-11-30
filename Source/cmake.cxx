@@ -1924,13 +1924,19 @@ void cmake::SetIsInTryCompile(bool b)
   this->State->SetIsInTryCompile(b);
 }
 
-void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
+void cmake::AppendGlobalGeneratorsDocumentation(
+  std::vector<cmDocumentationEntry>& v)
 {
   for (cmGlobalGeneratorFactory* g : this->Generators) {
     cmDocumentationEntry e;
     g->GetDocumentation(e);
     v.push_back(std::move(e));
   }
+}
+
+void cmake::AppendExtraGeneratorsDocumentation(
+  std::vector<cmDocumentationEntry>& v)
+{
   for (cmExternalMakefileProjectGeneratorFactory* eg : this->ExtraGenerators) {
     const std::string doc = eg->GetDocumentation();
     const std::string name = eg->GetName();
@@ -1956,12 +1962,19 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
   }
 }
 
+std::vector<cmDocumentationEntry> cmake::GetGeneratorsDocumentation()
+{
+  std::vector<cmDocumentationEntry> v;
+  this->AppendGlobalGeneratorsDocumentation(v);
+  this->AppendExtraGeneratorsDocumentation(v);
+  return v;
+}
+
 void cmake::PrintGeneratorList()
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDocumentation doc;
-  std::vector<cmDocumentationEntry> generators;
-  this->GetGeneratorDocumentation(generators);
+  auto generators = this->GetGeneratorsDocumentation();
   doc.AppendSection("Generators", generators);
   std::cerr << "\n";
   doc.PrintDocumentation(cmDocumentation::ListGenerators, std::cerr);

@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include "cmAlgorithms.h"
-#include "cmDocumentationEntry.h"
+#include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
@@ -227,9 +227,7 @@ int do_cmake(int ac, char const* const* av)
     std::vector<std::string> args(av, av + ac);
     hcm.SetCacheArgs(args);
 
-    std::vector<cmDocumentationEntry> generators;
-
-    hcm.GetGeneratorDocumentation(generators);
+    auto generators = hcm.GetGeneratorsDocumentation();
 
     doc.SetName("cmake");
     doc.SetSection("Name", cmDocumentationName);

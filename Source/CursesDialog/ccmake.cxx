@@ -5,7 +5,7 @@
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
 #include "cmDocumentation.h"
-#include "cmDocumentationEntry.h"
+#include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
@@ -88,8 +88,7 @@ int main(int argc, char const* const* argv)
     hcm.SetHomeDirectory("");
     hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();
-    std::vector<cmDocumentationEntry> generators;
-    hcm.GetGeneratorDocumentation(generators);
+    auto generators = hcm.GetGeneratorsDocumentation();
     doc.SetName("ccmake");
     doc.SetSection("Name", cmDocumentationName);
     doc.SetSection("Usage", cmDocumentationUsage);
