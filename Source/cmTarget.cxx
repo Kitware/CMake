@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <assert.h>
 #include <iterator>
-#include <map>
 #include <set>
 #include <sstream>
 #include <string.h>
