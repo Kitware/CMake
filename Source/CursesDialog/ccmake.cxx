@@ -95,7 +95,7 @@ int main(int argc, char const* const* argv)
     if (argc == 1) {
       doc.AppendSection("Usage", cmDocumentationUsageNote);
     }
-    doc.SetSection("Generators", generators);
+    doc.AppendSection("Generators", generators);
     doc.PrependSection("Options", cmDocumentationOptions);
     return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
   }
