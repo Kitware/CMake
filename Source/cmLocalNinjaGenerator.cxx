@@ -319,6 +319,7 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
   cmsys::ofstream script(scriptPath.c_str());
 
 #ifdef _WIN32
+  script << "@echo off\n";
   int line = 1;
 #else
   script << "set -e\n\n";
