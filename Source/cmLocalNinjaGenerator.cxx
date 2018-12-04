@@ -318,7 +318,9 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
 
   cmsys::ofstream script(scriptPath.c_str());
 
-#ifndef _WIN32
+#ifdef _WIN32
+  int line = 1;
+#else
   script << "set -e\n\n";
 #endif
 
@@ -329,11 +331,21 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
     // for the raw shell script.
     cmSystemTools::ReplaceString(cmd, "$$", "$");
 #ifdef _WIN32
-    script << cmd << " || exit /b 1" << '\n';
+    script << cmd << " || (set FAIL_LINE=" << ++line << "& goto :ABORT)"
+           << '\n';
 #else
     script << cmd << '\n';
 #endif
   }
+
+#ifdef _WIN32
+  script << "goto :EOF\n\n"
+            ":ABORT\n"
+            "set ERROR_CODE=%ERRORLEVEL%\n"
+            "echo Batch file failed at line %FAIL_LINE% "
+            "with errorcode %ERRORLEVEL%\n"
+            "exit /b %ERROR_CODE%";
+#endif
 
   return scriptPath;
 }
