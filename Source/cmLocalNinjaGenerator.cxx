@@ -329,7 +329,7 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
     // for the raw shell script.
     cmSystemTools::ReplaceString(cmd, "$$", "$");
 #ifdef _WIN32
-    script << cmd << " || exit /b" << '\n';
+    script << cmd << " || exit /b 1" << '\n';
 #else
     script << cmd << '\n';
 #endif
