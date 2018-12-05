@@ -84,6 +84,10 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   bool relink)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
+  if (!this->GlobalGenerator->GetLanguageEnabled("CUDA")) {
+    return;
+  }
+
   const std::string cuda_lang("CUDA");
   cmGeneratorTarget::LinkClosure const* closure =
     this->GeneratorTarget->GetLinkClosure(this->ConfigName);

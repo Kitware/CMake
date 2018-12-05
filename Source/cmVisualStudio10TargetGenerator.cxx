@@ -3331,7 +3331,8 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   std::vector<std::string> vsTargetVec;
   this->AddLibraries(cli, libVec, vsTargetVec, config);
   if (std::find(linkClosure->Languages.begin(), linkClosure->Languages.end(),
-                "CUDA") != linkClosure->Languages.end()) {
+                "CUDA") != linkClosure->Languages.end() &&
+      this->CudaOptions[config] != nullptr) {
     switch (this->CudaOptions[config]->GetCudaRuntime()) {
       case cmVisualStudioGeneratorOptions::CudaRuntimeStatic:
         libVec.push_back("cudadevrt.lib");
