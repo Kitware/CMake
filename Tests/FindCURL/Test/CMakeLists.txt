@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(TestFindCURL C)
 include(CTest)
 
-find_package(CURL REQUIRED)
+find_package(CURL REQUIRED COMPONENTS HTTP)
 
 add_definitions(-DCMAKE_EXPECTED_CURL_VERSION="${CURL_VERSION_STRING}")
 
