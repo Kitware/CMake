@@ -558,6 +558,10 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
 
 void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
 {
+  if (!this->GetGlobalGenerator()->GetLanguageEnabled("CUDA")) {
+    return;
+  }
+
   cmGeneratorTarget& genTarget = *this->GetGeneratorTarget();
 
   // determine if we need to do any device linking for this target
