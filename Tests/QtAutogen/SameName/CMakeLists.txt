@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(SameName)
-include("../AutogenTest.cmake")
+include("../AutogenGuiTest.cmake")
 
 # Test AUTOMOC and AUTORCC on source files with the same name
 # but in different subdirectories

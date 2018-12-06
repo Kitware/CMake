@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(StaticLibraryCycle)
-include("../AutogenTest.cmake")
+include("../AutogenCoreTest.cmake")
 
 # Test AUTOMOC on cyclic static libraries
 

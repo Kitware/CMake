@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11.2)
 project(RerunRccConfigChange)
-include("../AutogenTest.cmake")
+include("../AutogenCoreTest.cmake")
 
 # Tests rcc rebuilding after a configuration change
 

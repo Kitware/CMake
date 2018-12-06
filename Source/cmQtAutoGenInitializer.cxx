@@ -521,6 +521,12 @@ bool cmQtAutoGenInitializer::InitMoc()
       [this, localGen](std::string const& cfg) -> std::set<std::string> {
       std::set<std::string> defines;
       localGen->GetTargetDefines(this->Target, cfg, "CXX", defines);
+#ifdef _WIN32
+      if (this->Moc.PredefsCmd.empty()) {
+        // Add WIN32 definition if we don't have a moc_predefs.h
+        defines.insert("WIN32");
+      }
+#endif
       return defines;
     };
 

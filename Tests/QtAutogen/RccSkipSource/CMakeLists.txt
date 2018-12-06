@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(RccSkipSource)
-include("../AutogenTest.cmake")
+include("../AutogenCoreTest.cmake")
 
 # Test for SKIP_AUTORCC and SKIP_AUTOGEN on an AUTORCC enabled target
 set(skipRccSources

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(UicInterface)
-include("../AutogenTest.cmake")
+include("../AutogenGuiTest.cmake")
 
 set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 set(CMAKE_AUTOMOC ON)
@@ -43,12 +43,12 @@ set(INC_DIR "include" )
 endif()
 
 add_library(LibWidget libwidget.cpp)
-target_link_libraries(LibWidget KI18n ${QT_QTGUI_TARGET})
+target_link_libraries(LibWidget KI18n ${QT_LIBRARIES})
 set_property(TARGET LibWidget PROPERTY NO_KUIT_SEMANTIC ON)
 set_property(TARGET LibWidget PROPERTY TRANSLATION_DOMAIN customdomain)
 
 add_library(MyWidget mywidget.cpp)
-target_link_libraries(MyWidget KI18n ${QT_QTGUI_TARGET})
+target_link_libraries(MyWidget KI18n ${QT_LIBRARIES})
 
 add_executable(QtAutoUicInterface main.cpp)
 target_compile_definitions(QtAutoUicInterface
