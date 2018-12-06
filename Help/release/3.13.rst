@@ -239,3 +239,16 @@ Other Changes
   These internal implementation modules are also no longer available
   to scripts that may have been incorrectly including them, because
   they should never have been available in the first place.
+
+Updates
+=======
+
+Changes made since CMake 3.13.0 include the following.
+
+3.13.2
+------
+
+* CMake 3.13.0 included a change to pass compiler implicit include
+  directories to the ``moc`` tool for :prop_tgt:`AUTOMOC`.  This has
+  been reverted due to regressing existing builds and will need
+  further investigation before being re-introduced in a later release.

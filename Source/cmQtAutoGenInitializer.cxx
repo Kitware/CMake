@@ -386,9 +386,13 @@ bool cmQtAutoGenInitializer::InitMoc()
 
   // Moc includes
   {
-    bool const appendImplicit = (this->QtVersion.Major == 5);
-    auto GetIncludeDirs =
-      [this, localGen, appendImplicit](std::string const& cfg) -> std::string {
+    // We need to disable this until we have all implicit includes available.
+    // See issue #18669.
+    // bool const appendImplicit = (this->QtVersion.Major == 5);
+
+    auto GetIncludeDirs = [this,
+                           localGen](std::string const& cfg) -> std::string {
+      bool const appendImplicit = false;
       // Get the include dirs for this target, without stripping the implicit
       // include dirs off, see
       // https://gitlab.kitware.com/cmake/cmake/issues/13667
