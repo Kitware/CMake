@@ -31,8 +31,7 @@ public:
   struct Item
   {
     Item()
-      : Value()
-      , IsPath(true)
+      : IsPath(true)
       , Target(nullptr)
     {
     }

@@ -48,8 +48,7 @@ private:
 
   public:
     Def()
-      : std_string()
-      , Exists(false)
+      : Exists(false)
       , Used(false)
     {
     }

@@ -625,8 +625,7 @@ private:
 
   // Internal constructor for view of statically allocated string.
   String(string_view v, Private)
-    : string_()
-    , view_(v)
+    : view_(v)
   {
   }
 

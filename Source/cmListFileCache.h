@@ -54,8 +54,7 @@ struct cmListFileArgument
     Bracket
   };
   cmListFileArgument()
-    : Value()
-    , Delim(Unquoted)
+    : Delim(Unquoted)
     , Line(0)
   {
   }
@@ -82,9 +81,7 @@ public:
   std::string FilePath;
   long Line;
   cmListFileContext()
-    : Name()
-    , FilePath()
-    , Line(0)
+    : Line(0)
   {
   }
 

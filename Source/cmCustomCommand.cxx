@@ -15,7 +15,6 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
   , Byproducts(byproducts)
   , Depends(depends)
   , CommandLines(commandLines)
-  , Backtrace()
   , Comment(comment ? comment : "")
   , WorkingDirectory(workingDirectory ? workingDirectory : "")
   , HaveComment(comment != nullptr)

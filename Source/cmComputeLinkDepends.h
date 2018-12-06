@@ -39,8 +39,7 @@ public:
     bool IsSharedDep;
     bool IsFlag;
     LinkEntry()
-      : Item()
-      , Target(nullptr)
+      : Target(nullptr)
       , IsSharedDep(false)
       , IsFlag(false)
     {

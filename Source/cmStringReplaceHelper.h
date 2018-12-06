@@ -46,7 +46,6 @@ private:
     }
     RegexReplacement(int n)
       : Number(n)
-      , Value()
     {
     }
     RegexReplacement() {}

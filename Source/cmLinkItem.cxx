@@ -7,8 +7,7 @@
 #include <utility> // IWYU pragma: keep
 
 cmLinkItem::cmLinkItem()
-  : String()
-  , Target(nullptr)
+  : Target(nullptr)
 {
 }
 
@@ -21,8 +20,7 @@ cmLinkItem::cmLinkItem(std::string const& n, cmListFileBacktrace const& bt)
 
 cmLinkItem::cmLinkItem(cmGeneratorTarget const* t,
                        cmListFileBacktrace const& bt)
-  : String()
-  , Target(t)
+  : Target(t)
   , Backtrace(bt)
 {
 }

@@ -21,8 +21,7 @@
 #include <utility>
 
 cmExtraCodeLiteGenerator::cmExtraCodeLiteGenerator()
-  : cmExternalMakefileProjectGenerator()
-  , ConfigName("NoConfig")
+  : ConfigName("NoConfig")
   , CpuCount(2)
 {
 }

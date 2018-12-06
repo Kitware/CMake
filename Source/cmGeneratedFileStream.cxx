@@ -12,8 +12,6 @@
 #endif
 
 cmGeneratedFileStream::cmGeneratedFileStream(Encoding encoding)
-  : cmGeneratedFileStreamBase()
-  , Stream()
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
   if (encoding != codecvt::None) {
@@ -105,9 +103,7 @@ void cmGeneratedFileStream::SetCompressionExtraExtension(bool ext)
 }
 
 cmGeneratedFileStreamBase::cmGeneratedFileStreamBase()
-  : Name()
-  , TempName()
-  , CopyIfDifferent(false)
+  : CopyIfDifferent(false)
   , Okay(false)
   , Compress(false)
   , CompressExtraExtension(true)
@@ -115,9 +111,7 @@ cmGeneratedFileStreamBase::cmGeneratedFileStreamBase()
 }
 
 cmGeneratedFileStreamBase::cmGeneratedFileStreamBase(std::string const& name)
-  : Name()
-  , TempName()
-  , CopyIfDifferent(false)
+  : CopyIfDifferent(false)
   , Okay(false)
   , Compress(false)
   , CompressExtraExtension(true)

@@ -17,9 +17,7 @@ const std::string cmInstallCommandArguments::EmptyString;
 
 cmInstallCommandArguments::cmInstallCommandArguments(
   const std::string& defaultComponent)
-  : Parser()
-  , ArgumentGroup()
-  , Destination(&Parser, "DESTINATION", &ArgumentGroup)
+  : Destination(&Parser, "DESTINATION", &ArgumentGroup)
   , Component(&Parser, "COMPONENT", &ArgumentGroup)
   , NamelinkComponent(&Parser, "NAMELINK_COMPONENT", &ArgumentGroup)
   , ExcludeFromAll(&Parser, "EXCLUDE_FROM_ALL", &ArgumentGroup)

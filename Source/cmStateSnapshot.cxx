@@ -28,7 +28,6 @@
 
 cmStateSnapshot::cmStateSnapshot(cmState* state)
   : State(state)
-  , Position()
 {
 }
 

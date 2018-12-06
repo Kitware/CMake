@@ -478,9 +478,7 @@ private:
     unsigned long Time;
     long TimeZone;
     Person()
-      : Name()
-      , EMail()
-      , Time(0)
+      : Time(0)
       , TimeZone(0)
     {
     }
