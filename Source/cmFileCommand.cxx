@@ -3630,7 +3630,7 @@ bool cmFileCommand::HandleSizeCommand(std::vector<std::string> const& args)
 
   if (!cmSystemTools::FileExists(filename, true)) {
     std::ostringstream e;
-    e << "SIZE requested of path that is not readable " << filename;
+    e << "SIZE requested of path that is not readable:\n  " << filename;
     this->SetError(e.str());
     return false;
   }
