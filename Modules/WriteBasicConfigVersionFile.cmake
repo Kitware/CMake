@@ -15,6 +15,7 @@ WriteBasicConfigVersionFile
   WRITE_BASIC_CONFIG_VERSION_FILE( filename
     [VERSION major.minor.patch]
     COMPATIBILITY (AnyNewerVersion|SameMajorVersion|SameMinorVersion|ExactVersion)
+    [ARCH_INDEPENDENT]
     )
 
 
@@ -22,7 +23,7 @@ WriteBasicConfigVersionFile
 
 function(WRITE_BASIC_CONFIG_VERSION_FILE _filename)
 
-  set(options )
+  set(options ARCH_INDEPENDENT )
   set(oneValueArgs VERSION COMPATIBILITY )
   set(multiValueArgs )
 

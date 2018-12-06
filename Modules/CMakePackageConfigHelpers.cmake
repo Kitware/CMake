@@ -124,7 +124,8 @@ Generating a Package Version File
 
    write_basic_package_version_file(<filename>
      [VERSION <major.minor.patch>]
-     COMPATIBILITY <AnyNewerVersion|SameMajorVersion|SameMinorVersion|ExactVersion> )
+     COMPATIBILITY <AnyNewerVersion|SameMajorVersion|SameMinorVersion|ExactVersion>
+     [ARCH_INDEPENDENT] )
 
 
 Writes a file for use as ``<PackageName>ConfigVersion.cmake`` file to
@@ -157,6 +158,18 @@ without compatibility guarantees.
 If your project has more elaborated version matching rules, you will need to
 write your own custom ``ConfigVersion.cmake`` file instead of using this
 macro.
+
+If ``ARCH_INDEPENDENT`` is given, the installed package version will be
+considered compatible even if it was built for a different architecture than
+the requested architecture.  Otherwise, an architecture check will be performed,
+and the package will be considered compatible only if the architecture matches
+exactly.  For example, if the package is built for a 32-bit architecture, the
+package is only considered compatible if it is used on a 32-bit architecture,
+unless ``ARCH_INDEPENDENT`` is given, in which case the package is considered
+compatible on any architecture.
+
+.. note:: ``ARCH_INDEPENDENT`` is intended for header-only libraries or similar
+   packages with no binaries.
 
 Internally, this macro executes :command:`configure_file()` to create the
 resulting version file.  Depending on the ``COMPATIBILITY``, the corresponding
