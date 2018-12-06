@@ -691,6 +691,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     if (args[1] == "touch" && args.size() > 2) {
       for (std::string::size_type cc = 2; cc < args.size(); cc++) {
         if (!cmSystemTools::Touch(args[cc], true)) {
+          std::cerr << "cmake -E touch: failed to update \"";
+          std::cerr << args[cc] << "\".\n";
           return 1;
         }
       }
@@ -701,6 +703,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     if (args[1] == "touch_nocreate" && args.size() > 2) {
       for (std::string::size_type cc = 2; cc < args.size(); cc++) {
         if (!cmSystemTools::Touch(args[cc], false)) {
+          std::cerr << "cmake -E touch_nocreate: failed to update \"";
+          std::cerr << args[cc] << "\".\n";
           return 1;
         }
       }
