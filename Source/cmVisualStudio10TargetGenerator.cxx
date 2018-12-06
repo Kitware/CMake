@@ -1680,6 +1680,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
     subType = "Designer";
   }
   if (const char* c = sf->GetProperty("VS_COPY_TO_OUT_DIR")) {
+    tool = "Content";
     copyToOutDir = c;
     toolHasSettings = true;
   }
