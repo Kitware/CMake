@@ -39,7 +39,8 @@ endif()
 # Qt5 only tests
 if(QT_TEST_VERSION GREATER 4)
   ADD_AUTOGEN_TEST(MocMacroName mocMacroName)
-  ADD_AUTOGEN_TEST(MocOsMacros)
+  # Disabled for issue #18669
+  #ADD_AUTOGEN_TEST(MocOsMacros)
   ADD_AUTOGEN_TEST(RerunMocPlugin)
   if(APPLE)
     ADD_AUTOGEN_TEST(MacOsFW)
