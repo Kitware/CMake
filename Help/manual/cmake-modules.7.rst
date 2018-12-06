@@ -28,6 +28,7 @@ These modules are loaded using the :command:`include` command.
    /module/CheckFortranCompilerFlag
    /module/CheckFortranFunctionExists
    /module/CheckFortranSourceCompiles
+   /module/CheckFortranSourceRuns
    /module/CheckFunctionExists
    /module/CheckIPOSupported
    /module/CheckIncludeFileCXX

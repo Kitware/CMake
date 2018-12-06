@@ -2,36 +2,32 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
-CheckFortranSourceCompiles
---------------------------
+CheckFortranSourceRuns
+----------------------
 
-Check if given Fortran source compiles and links into an executable.
+Check if given Fortran source compiles and links into an executable and can
+subsequently be run.
 
-.. command:: check_fortran_source_compiles
+.. command:: check_fortran_source_runs
 
   .. code-block:: cmake
 
-    check_fortran_source_compiles(<code> <resultVar>
-        [FAIL_REGEX <regex>...]
-        [SRC_EXT <extension>]
-    )
+    check_fortran_source_runs(<code> <resultVar>
+        [SRC_EXT <extension>])
 
-  Checks that the source supplied in ``<code>`` can be compiled as a Fortran
-  source file and linked as an executable (so it must contain at least a
-  ``PROGRAM`` entry point). The result will be stored in the internal cache
-  variable ``<resultVar>``, with a boolean true value for success and boolean
-  false for failure.
+  Check that the source supplied in ``<code>`` can be compiled as a Fortran source
+  file, linked as an executable and then run. The ``<code>`` must contain at
+  least ``program; end program`` statements. If the ``<code>`` could be built and run
+  successfully, the internal cache variable specified by ``<resultVar>`` will
+  be set to 1, otherwise it will be set to an value that evaluates to boolean
+  false (e.g. an empty string or an error message).
 
-  If ``FAIL_REGEX`` is provided, then failure is determined by checking
-  if anything in the output matches any of the specified regular expressions.
+  By default, the test source file will be given a ``.F90`` file extension. The
+  ``SRC_EXT`` option can be used to override this with ``.<extension>`` instead.
 
-  By default, the test source file will be given a ``.F`` file extension. The
-  ``SRC_EXT`` option can be used to override this with ``.<extension>`` instead--
-  ``.F90`` is a typical choice.
-
-  The underlying check is performed by the :command:`try_compile` command. The
+  The underlying check is performed by the :command:`try_run` command. The
   compile and link commands can be influenced by setting any of the following
-  variables prior to calling ``check_fortran_source_compiles()``:
+  variables prior to calling ``check_fortran_source_runs()``:
 
   ``CMAKE_REQUIRED_FLAGS``
     Additional flags to pass to the compiler. Note that the contents of
@@ -47,17 +43,17 @@ Check if given Fortran source compiles and links into an executable.
   ``CMAKE_REQUIRED_INCLUDES``
     A :ref:`;-list <CMake Language Lists>` of header search paths to pass to
     the compiler. These will be the only header search paths used by
-    ``try_compile()``, i.e. the contents of the :prop_dir:`INCLUDE_DIRECTORIES`
+    ``try_run()``, i.e. the contents of the :prop_dir:`INCLUDE_DIRECTORIES`
     directory property will be ignored.
 
   ``CMAKE_REQUIRED_LINK_OPTIONS``
     A :ref:`;-list <CMake Language Lists>` of options to add to the link
-    command (see :command:`try_compile` for further details).
+    command (see :command:`try_run` for further details).
 
   ``CMAKE_REQUIRED_LIBRARIES``
     A :ref:`;-list <CMake Language Lists>` of libraries to add to the link
     command. These can be the name of system libraries or they can be
-    :ref:`Imported Targets <Imported Targets>` (see :command:`try_compile` for
+    :ref:`Imported Targets <Imported Targets>` (see :command:`try_run` for
     further details).
 
   ``CMAKE_REQUIRED_QUIET``
@@ -74,13 +70,12 @@ Check if given Fortran source compiles and links into an executable.
 
 include_guard(GLOBAL)
 
-macro(CHECK_Fortran_SOURCE_COMPILES SOURCE VAR)
+macro(CHECK_Fortran_SOURCE_RUNS SOURCE VAR)
   if(NOT DEFINED "${VAR}")
-    set(_FAIL_REGEX)
     set(_SRC_EXT)
     set(_key)
     foreach(arg ${ARGN})
-      if("${arg}" MATCHES "^(FAIL_REGEX|SRC_EXT)$")
+      if("${arg}" MATCHES "^(SRC_EXT)$")
         set(_key "${arg}")
       elseif(_key)
         list(APPEND _${_key} "${arg}")
@@ -89,7 +84,7 @@ macro(CHECK_Fortran_SOURCE_COMPILES SOURCE VAR)
       endif()
     endforeach()
     if(NOT _SRC_EXT)
-      set(_SRC_EXT F)
+      set(_SRC_EXT F90)
     endif()
     set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
@@ -117,23 +112,23 @@ macro(CHECK_Fortran_SOURCE_COMPILES SOURCE VAR)
     if(NOT CMAKE_REQUIRED_QUIET)
       message(STATUS "Performing Test ${VAR}")
     endif()
-    try_compile(${VAR}
+    try_run(${VAR}_EXITCODE ${VAR}_COMPILED
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.${_SRC_EXT}
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       ${CHECK_Fortran_SOURCE_COMPILES_ADD_LINK_OPTIONS}
       ${CHECK_Fortran_SOURCE_COMPILES_ADD_LIBRARIES}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
+      -DCMAKE_SKIP_RPATH:BOOL=${CMAKE_SKIP_RPATH}
       "${CHECK_Fortran_SOURCE_COMPILES_ADD_INCLUDES}"
-      OUTPUT_VARIABLE OUTPUT)
+      COMPILE_OUTPUT_VARIABLE OUTPUT)
 
-    foreach(_regex ${_FAIL_REGEX})
-      if("${OUTPUT}" MATCHES "${_regex}")
-        set(${VAR} 0)
-      endif()
-    endforeach()
-
-    if(${VAR})
+    # if it did not compile make the return value fail code of 1
+    if(NOT ${VAR}_COMPILED)
+      set(${VAR}_EXITCODE 1)
+    endif()
+    # if the return value was 0 then it worked
+    if("${${VAR}_EXITCODE}" EQUAL 0)
       set(${VAR} 1 CACHE INTERNAL "Test ${VAR}")
       if(NOT CMAKE_REQUIRED_QUIET)
         message(STATUS "Performing Test ${VAR} - Success")
@@ -141,15 +136,22 @@ macro(CHECK_Fortran_SOURCE_COMPILES SOURCE VAR)
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing Fortran SOURCE FILE Test ${VAR} succeeded with the following output:\n"
         "${OUTPUT}\n"
+        "Return value: ${${VAR}}\n"
         "Source file was:\n${SOURCE}\n")
     else()
+      if(CMAKE_CROSSCOMPILING AND "${${VAR}_EXITCODE}" MATCHES  "FAILED_TO_RUN")
+        set(${VAR} "${${VAR}_EXITCODE}")
+      else()
+        set(${VAR} "" CACHE INTERNAL "Test ${VAR}")
+      endif()
+
       if(NOT CMAKE_REQUIRED_QUIET)
         message(STATUS "Performing Test ${VAR} - Failed")
       endif()
-      set(${VAR} "" CACHE INTERNAL "Test ${VAR}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing Fortran SOURCE FILE Test ${VAR} failed with the following output:\n"
         "${OUTPUT}\n"
+        "Return value: ${${VAR}_EXITCODE}\n"
         "Source file was:\n${SOURCE}\n")
     endif()
   endif()
