@@ -43,6 +43,10 @@ Check if given C++ source compiles and links into an executable.
     ``try_compile()``, i.e. the contents of the :prop_dir:`INCLUDE_DIRECTORIES`
     directory property will be ignored.
 
+  ``CMAKE_REQUIRED_LINK_OPTIONS``
+    A :ref:`;-list <CMake Language Lists>` of options to add to the link
+    command (see :command:`try_compile` for further details).
+
   ``CMAKE_REQUIRED_LIBRARIES``
     A :ref:`;-list <CMake Language Lists>` of libraries to add to the link
     command. These can be the name of system libraries or they can be
@@ -79,6 +83,12 @@ macro(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
 
     set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
+    if(CMAKE_REQUIRED_LINK_OPTIONS)
+      set(CHECK_CXX_SOURCE_COMPILES_ADD_LINK_OPTIONS
+        LINK_OPTIONS ${CMAKE_REQUIRED_LINK_OPTIONS})
+    else()
+      set(CHECK_CXX_SOURCE_COMPILES_ADD_LINK_OPTIONS)
+    endif()
     if(CMAKE_REQUIRED_LIBRARIES)
       set(CHECK_CXX_SOURCE_COMPILES_ADD_LIBRARIES
         LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
@@ -101,6 +111,7 @@ macro(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.cxx
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
+      ${CHECK_CXX_SOURCE_COMPILES_ADD_LINK_OPTIONS}
       ${CHECK_CXX_SOURCE_COMPILES_ADD_LIBRARIES}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
       "${CHECK_CXX_SOURCE_COMPILES_ADD_INCLUDES}"

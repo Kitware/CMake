@@ -33,6 +33,7 @@ Try Compiling Source Files
   try_compile(RESULT_VAR <bindir> <srcfile|SOURCES srcfile...>
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
+              [LINK_OPTIONS <options>...]
               [LINK_LIBRARIES <libs>...]
               [OUTPUT_VARIABLE <var>]
               [COPY_FILE <fileName> [COPY_FILE_ERROR <var>]]
@@ -55,6 +56,7 @@ the source(s) as an executable that looks something like this:
   include_directories(${INCLUDE_DIRECTORIES})
   link_directories(${LINK_DIRECTORIES})
   add_executable(cmTryCompileExec <srcfile>...)
+  target_link_options(cmTryCompileExec PRIVATE <LINK_OPTIONS from caller>)
   target_link_libraries(cmTryCompileExec ${LINK_LIBRARIES})
 
 The options are:
@@ -67,7 +69,7 @@ The options are:
   are used.
 
 ``COMPILE_DEFINITIONS <defs>...``
-  Specify ``-Ddefinition`` arguments to pass to ``add_definitions``
+  Specify ``-Ddefinition`` arguments to pass to :command:`add_definitions`
   in the generated test project.
 
 ``COPY_FILE <fileName>``
@@ -84,6 +86,11 @@ The options are:
 
   If this option is specified, any ``-DLINK_LIBRARIES=...`` value
   given to the ``CMAKE_FLAGS`` option will be ignored.
+
+``LINK_OPTIONS <options>...``
+  Specify link step options to pass to :command:`target_link_options` or
+  to :prop_tgt:`STATIC_LIBRARY_OPTIONS` target property in the generated
+  project, depending of the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable.
 
 ``OUTPUT_VARIABLE <var>``
   Store the output from the build process the given variable.
