@@ -15,9 +15,9 @@ better deb package when Debian specific tools ``dpkg-xxx`` are usable on
 the build system.
 
 The CPack DEB generator has specific features which are controlled by the
-specifics :code:`CPACK_DEBIAN_XXX` variables.
+specifics ``CPACK_DEBIAN_XXX`` variables.
 
-:code:`CPACK_DEBIAN_<COMPONENT>_XXXX` variables may be used in order to have
+``CPACK_DEBIAN_<COMPONENT>_XXXX`` variables may be used in order to have
 **component** specific values.  Note however that ``<COMPONENT>`` refers to
 the **grouping name** written in upper case. It may be either a component name
 or a component GROUP name.
@@ -133,8 +133,8 @@ List of CPack DEB generator specific variables:
  The Debian package architecture
 
  * Mandatory : YES
- * Default   : Output of :code:`dpkg --print-architecture` (or :code:`i386`
-   if :code:`dpkg` is not found)
+ * Default   : Output of ``dpkg --print-architecture`` (or ``i386``
+   if ``dpkg`` is not found)
 
 .. variable:: CPACK_DEBIAN_PACKAGE_DEPENDS
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_DEPENDS
@@ -176,7 +176,7 @@ List of CPack DEB generator specific variables:
  The Debian package maintainer
 
  * Mandatory : YES
- * Default   : :code:`CPACK_PACKAGE_CONTACT`
+ * Default   : ``CPACK_PACKAGE_CONTACT``
 
 .. variable:: CPACK_DEBIAN_PACKAGE_DESCRIPTION
               CPACK_COMPONENT_<COMPONENT>_DESCRIPTION
@@ -205,18 +205,18 @@ List of CPack DEB generator specific variables:
  The archive format used for creating the Debian package.
 
  * Mandatory : YES
- * Default   : "paxr"
+ * Default   : "gnutar"
 
- Possible values are:
+ Possible value is:
 
- - paxr
  - gnutar
 
  .. note::
 
-   Default pax archive format is the most portable format and generates
-   packages that do not treat sparse files specially.
-   GNU tar format on the other hand supports longer filenames.
+   This variable previously defaulted to the ``paxr`` value, but ``dpkg``
+   has never supported that tar format. For backwards compatibility the
+   ``paxr`` value will be mapped to ``gnutar`` and a deprecation message
+   will be emitted.
 
 .. variable:: CPACK_DEBIAN_COMPRESSION_TYPE
 
@@ -260,7 +260,7 @@ List of CPack DEB generator specific variables:
 .. variable:: CPACK_DEBIAN_PACKAGE_SHLIBDEPS
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_SHLIBDEPS
 
- May be set to ON in order to use :code:`dpkg-shlibdeps` to generate
+ May be set to ON in order to use ``dpkg-shlibdeps`` to generate
  better package dependency list.
 
  * Mandatory : NO
@@ -272,7 +272,7 @@ List of CPack DEB generator specific variables:
  .. note::
 
    You may need set :variable:`CMAKE_INSTALL_RPATH` to an appropriate value
-   if you use this feature, because if you don't :code:`dpkg-shlibdeps`
+   if you use this feature, because if you don't ``dpkg-shlibdeps``
    may fail to find your own shared libs.
    See https://gitlab.kitware.com/cmake/community/wikis/doc/cmake/RPATH-handling
 
@@ -289,7 +289,7 @@ List of CPack DEB generator specific variables:
 
  Sets the `Pre-Depends` field of the Debian package.
  Like :variable:`Depends <CPACK_DEBIAN_PACKAGE_DEPENDS>`, except that it
- also forces :code:`dpkg` to complete installation of the packages named
+ also forces ``dpkg`` to complete installation of the packages named
  before even starting the installation of the package which declares the
  pre-dependency.
 
@@ -324,7 +324,7 @@ List of CPack DEB generator specific variables:
 
  Sets the `Breaks` field of the Debian package.
  When a binary package (P) declares that it breaks other packages (B),
- :code:`dpkg` will not allow the package (P) which declares `Breaks` be
+ ``dpkg`` will not allow the package (P) which declares `Breaks` be
  **unpacked** unless the packages that will be broken (B) are deconfigured
  first.
  As long as the package (P) is configured, the previously deconfigured
@@ -344,7 +344,7 @@ List of CPack DEB generator specific variables:
 
  Sets the `Conflicts` field of the Debian package.
  When one binary package declares a conflict with another using a `Conflicts`
- field, :code:`dpkg` will not allow them to be unpacked on the system at
+ field, ``dpkg`` will not allow them to be unpacked on the system at
  the same time.
 
  * Mandatory : NO

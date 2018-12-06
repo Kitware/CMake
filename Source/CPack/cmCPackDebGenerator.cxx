@@ -80,7 +80,7 @@ DebGenerator::DebGenerator(
   , WorkDir(workDir)
   , TopLevelDir(topLevelDir)
   , TemporaryDir(temporaryDir)
-  , DebianArchiveType(debianArchiveType ? debianArchiveType : "paxr")
+  , DebianArchiveType(debianArchiveType ? debianArchiveType : "gnutar")
   , ControlValues(controlValues)
   , GenShLibs(genShLibs)
   , ShLibsFilename(shLibsFilename)

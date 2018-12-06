@@ -18,7 +18,7 @@ The CPack NuGet generator may be used to create NuGet packages using
 it uses the ``CPACK_XXX`` variables used by :module:`CPack`.
 
 The CPack NuGet generator has specific features which are controlled by the
-specifics :code:`CPACK_NUGET_XXX` variables. In the "one per group" mode
+specifics ``CPACK_NUGET_XXX`` variables. In the "one per group" mode
 (see :variable:`CPACK_COMPONENTS_GROUPING`), ``<compName>`` placeholder
 in the variables below would contain a group name (uppercased and turned into
 a "C" identifier).
