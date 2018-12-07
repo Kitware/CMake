@@ -83,7 +83,7 @@ with a macro.  This has a number of consequences, as explained in
 the :ref:`Argument Caveats` section below.
 
 Another difference between macros and functions is the control flow.
-A function is executed by transfering control from the calling
+A function is executed by transferring control from the calling
 statement to the function body.  A macro is executed as if the macro
 body were pasted in place of the calling statement.  This has the
 consequence that a :command:`return()` in a macro body does not

@@ -714,7 +714,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     xml.Attribute("path", p);
     xml.EndElement();
 
-    // exlude source directory from output search path
+    // exclude source directory from output search path
     // - only if not named the same as an output directory
     if (!cmSystemTools::FileIsDirectory(
           std::string(this->HomeOutputDirectory + "/" + p))) {
