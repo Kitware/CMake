@@ -1,3 +1,6 @@
+# To include compiler feature detection
+include(Compiler/GNU-CXX)
+
 include(Compiler/QCC)
 __compiler_qcc(CXX)
 
