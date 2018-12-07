@@ -55,8 +55,7 @@ cmGeneratedFileStream& operator<<(cmGeneratedFileStream& s,
                                   const EscapeQuotes& v)
 {
   s << '"';
-  for (std::string::size_type i = 0; i < v.value.length(); ++i) {
-    char c = v.value[i];
+  for (char c : v.value) {
     switch (c) {
       case '\n':
         s << "\\n";
@@ -148,8 +147,8 @@ public:
 
   ManifestKeyListValue& operator<<(const std::vector<std::string>& v)
   {
-    for (VList::const_iterator it = v.begin(); it != v.end(); ++it) {
-      (*this) << (*it);
+    for (std::string const& e : v) {
+      (*this) << e;
     }
     return *this;
   }
@@ -159,9 +158,9 @@ public:
     bool with_comma = false;
 
     s << '[';
-    for (VList::const_iterator it = value.begin(); it != value.end(); ++it) {
+    for (std::string const& elem : value) {
       s << (with_comma ? ',' : ' ');
-      s << EscapeQuotes(*it);
+      s << EscapeQuotes(elem);
       with_comma = true;
     }
     s << " ]";
@@ -182,8 +181,8 @@ public:
   void write_value(cmGeneratedFileStream& s) const override
   {
     s << "{\n";
-    for (VList::const_iterator it = value.begin(); it != value.end(); ++it) {
-      s << "  \"" << *it << "\": {\"origin\": \"" << *it << "\"},\n";
+    for (std::string const& elem : value) {
+      s << "  \"" << elem << "\": {\"origin\": \"" << elem << "\"},\n";
     }
     s << '}';
   }
@@ -206,9 +205,8 @@ std::string cmCPackFreeBSDGenerator::var_lookup(const char* var_name)
   const char* pv = this->GetOption(var_name);
   if (!pv) {
     return std::string();
-  } else {
-    return pv;
   }
+  return pv;
 }
 
 // Produce UCL in the given @p manifest file for the common
@@ -234,7 +232,7 @@ void cmCPackFreeBSDGenerator::write_manifest_fields(
   cmSystemTools::ExpandListArgument(
     var_lookup("CPACK_FREEBSD_PACKAGE_LICENSE"), licenses);
   std::string licenselogic("single");
-  if (licenses.size() < 1) {
+  if (licenses.empty()) {
     cmSystemTools::SetFatalErrorOccured();
   } else if (licenses.size() > 1) {
     licenselogic = var_lookup("CPACK_FREEBSD_PACKAGE_LICENSE_LOGIC");
@@ -249,7 +247,7 @@ void cmCPackFreeBSDGenerator::write_manifest_fields(
   std::vector<std::string> deps;
   cmSystemTools::ExpandListArgument(var_lookup("CPACK_FREEBSD_PACKAGE_DEPS"),
                                     deps);
-  if (deps.size() > 0) {
+  if (!deps.empty()) {
     manifest << (ManifestKeyDepsValue("deps") << deps);
   }
 }
@@ -277,13 +275,9 @@ void write_manifest_files(cmGeneratedFileStream& s,
                           const std::string& toplevel,
                           const std::vector<std::string>& files)
 {
-  const char* c_toplevel = toplevel.c_str();
-  std::vector<std::string>::const_iterator it;
-
   s << "\"files\": {\n";
-  for (it = files.begin(); it != files.end(); ++it) {
-    s << "  \"/" << cmSystemTools::RelativePath(c_toplevel, it->c_str())
-      << "\": \""
+  for (std::string const& file : files) {
+    s << "  \"/" << cmSystemTools::RelativePath(toplevel, file) << "\": \""
       << "<sha256>"
       << "\",\n";
   }
@@ -313,7 +307,7 @@ int cmCPackFreeBSDGenerator::PackageFiles()
 
   std::string manifestname = toplevel + "/+MANIFEST";
   {
-    cmGeneratedFileStream manifest(manifestname.c_str());
+    cmGeneratedFileStream manifest(manifestname);
     manifest << "{\n";
     write_manifest_fields(manifest);
     write_manifest_files(manifest, toplevel, files);
@@ -340,16 +334,15 @@ int cmCPackFreeBSDGenerator::PackageFiles()
   std::string output_dir =
     cmSystemTools::CollapseCombinedPath(toplevel, "../");
   pkg_create_from_manifest(output_dir.c_str(), ::TXZ, toplevel.c_str(),
-                           manifestname.c_str(), NULL);
+                           manifestname.c_str(), nullptr);
 
   std::string broken_suffix = std::string("-") +
     var_lookup("CPACK_TOPLEVEL_TAG") + std::string(GetOutputExtension());
-  for (std::vector<std::string>::iterator it = packageFileNames.begin();
-       it != packageFileNames.end(); ++it) {
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Packagefile " << *it << std::endl);
-    if (has_suffix(*it, broken_suffix)) {
-      it->replace(it->size() - broken_suffix.size(), std::string::npos,
-                  GetOutputExtension());
+  for (std::string& name : packageFileNames) {
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Packagefile " << name << std::endl);
+    if (has_suffix(name, broken_suffix)) {
+      name.replace(name.size() - broken_suffix.size(), std::string::npos,
+                   GetOutputExtension());
       break;
     }
   }
