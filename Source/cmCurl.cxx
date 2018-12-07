@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCurl.h"
 
-#include "cmThirdParty.h"
-
 #if !defined(CMAKE_USE_SYSTEM_CURL) && !defined(_WIN32) &&                    \
   !defined(__APPLE__) && !defined(CURL_CA_BUNDLE) && !defined(CURL_CA_PATH)
 #  define CMAKE_FIND_CAFILE

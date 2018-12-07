@@ -97,9 +97,6 @@
   { include: [ "@<uv-.+\\.h>", private, "\"cm_uv.h\"", public ] },
   { include: [ "<kwiml/abi.h>", private, "\"cm_kwiml.h\"", public ] },
   { include: [ "<kwiml/int.h>", private, "\"cm_kwiml.h\"", public ] },
-  { include: [ "<xmlrpc.h>", private, "\"cm_xmlrpc.h\"", public ] },
-  { include: [ "<xmlrpc_client.h>", private, "\"cm_xmlrpc.h\"", public ] },
-  { include: [ "@<xmlrpc-c/.+\\.h>", private, "\"cm_xmlrpc.h\"", public ] },
   { include: [ "<zconf.h>", private, "\"cm_zlib.h\"", public ] },
   { include: [ "<zlib.h>", private, "\"cm_zlib.h\"", public ] },
 

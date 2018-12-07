@@ -177,9 +177,6 @@ if(BUILD_TESTING)
     )
   set(MEMORYCHECK_SUPPRESSIONS_FILE "" CACHE FILEPATH
     "File that contains suppressions for the memory checker")
-  find_program(SCPCOMMAND scp DOC
-    "Path to scp command, used by CTest for submitting results to a Dart server"
-    )
   find_program(COVERAGE_COMMAND gcov DOC
     "Path to the coverage program that CTest uses for performing coverage inspection"
     )

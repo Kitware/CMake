@@ -418,10 +418,6 @@ public:
   /** Get color code characters for a specific color */
   std::string GetColorCode(Color color) const;
 
-  /** Get the version of dart server */
-  int GetDartVersion() { return this->DartVersion; }
-  int GetDropSiteCDash() { return this->DropSiteCDash; }
-
   /** The Build ID is assigned by CDash */
   void SetBuildID(const std::string& id) { this->BuildID = id; }
   std::string GetBuildID() { return this->BuildID; }
@@ -632,9 +628,6 @@ private:
   bool Debug;
   bool ShowLineNumbers;
   bool Quiet;
-
-  int DartVersion;
-  bool DropSiteCDash;
 
   std::string BuildID;
 

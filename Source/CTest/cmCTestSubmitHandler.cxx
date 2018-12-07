@@ -5,9 +5,7 @@
 #include "cm_curl.h"
 #include "cm_jsoncpp_reader.h"
 #include "cm_jsoncpp_value.h"
-#include "cmsys/Process.h"
 #include <chrono>
-#include <cstring>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,19 +18,10 @@
 #include "cmCurl.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
-#include "cmProcessOutput.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
-#include "cmThirdParty.h"
-#include "cmWorkingDirectory.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
-
-#if defined(CTEST_USE_XMLRPC)
-#  include "cmVersion.h"
-#  include "cm_sys_stat.h"
-#  include "cm_xmlrpc.h"
-#endif
 
 #define SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT 120
 
@@ -131,7 +120,6 @@ static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
 
 cmCTestSubmitHandler::cmCTestSubmitHandler()
   : HTTPProxy()
-  , FTPProxy()
 {
   this->Initialize();
 }
@@ -143,165 +131,16 @@ void cmCTestSubmitHandler::Initialize()
        p = cmCTest::Part(p + 1)) {
     this->SubmitPart[p] = true;
   }
-  this->CDash = false;
   this->HasWarnings = false;
   this->HasErrors = false;
   this->Superclass::Initialize();
   this->HTTPProxy.clear();
   this->HTTPProxyType = 0;
   this->HTTPProxyAuth.clear();
-  this->FTPProxy.clear();
-  this->FTPProxyType = 0;
   this->LogFile = nullptr;
   this->Files.clear();
 }
 
-bool cmCTestSubmitHandler::SubmitUsingFTP(
-  const std::string& localprefix, const std::vector<std::string>& files,
-  const std::string& remoteprefix, const std::string& url)
-{
-  CURL* curl;
-  CURLcode res;
-  FILE* ftpfile;
-  char error_buffer[1024];
-
-  /* In windows, this will init the winsock stuff */
-  ::curl_global_init(CURL_GLOBAL_ALL);
-
-  for (std::string const& file : files) {
-    /* get a curl handle */
-    curl = curl_easy_init();
-    if (curl) {
-      // Using proxy
-      if (this->FTPProxyType > 0) {
-        curl_easy_setopt(curl, CURLOPT_PROXY, this->FTPProxy.c_str());
-        switch (this->FTPProxyType) {
-          case 2:
-            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
-            break;
-          case 3:
-            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
-            break;
-          default:
-            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
-        }
-      }
-
-      // enable uploading
-      ::curl_easy_setopt(curl, CURLOPT_UPLOAD, 1);
-
-      // if there is little to no activity for too long stop submitting
-      ::curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1);
-      ::curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME,
-                         SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT);
-
-      ::curl_easy_setopt(curl, CURLOPT_UPLOAD, 1);
-
-      std::string local_file = file;
-      if (!cmSystemTools::FileExists(local_file)) {
-        local_file = localprefix + "/" + file;
-      }
-      std::string upload_as =
-        url + "/" + remoteprefix + cmSystemTools::GetFilenameName(file);
-
-      if (!cmSystemTools::FileExists(local_file)) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Cannot find file: " << local_file << std::endl);
-        ::curl_easy_cleanup(curl);
-        ::curl_global_cleanup();
-        return false;
-      }
-      unsigned long filelen = cmSystemTools::FileLength(local_file);
-
-      ftpfile = cmsys::SystemTools::Fopen(local_file, "rb");
-      *this->LogFile << "\tUpload file: " << local_file << " to " << upload_as
-                     << std::endl;
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         "   Upload file: " << local_file << " to "
-                                            << upload_as << std::endl,
-                         this->Quiet);
-
-      ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-
-      // specify target
-      ::curl_easy_setopt(curl, CURLOPT_URL, upload_as.c_str());
-
-      // now specify which file to upload
-      ::curl_easy_setopt(curl, CURLOPT_INFILE, ftpfile);
-
-      // and give the size of the upload (optional)
-      ::curl_easy_setopt(curl, CURLOPT_INFILESIZE, static_cast<long>(filelen));
-
-      // and give curl the buffer for errors
-      ::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error_buffer);
-
-      // specify handler for output
-      ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-                         cmCTestSubmitHandlerWriteMemoryCallback);
-      ::curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION,
-                         cmCTestSubmitHandlerCurlDebugCallback);
-
-      /* we pass our 'chunk' struct to the callback function */
-      cmCTestSubmitHandlerVectorOfChar chunk;
-      cmCTestSubmitHandlerVectorOfChar chunkDebug;
-      ::curl_easy_setopt(curl, CURLOPT_FILE, &chunk);
-      ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
-
-      // Now run off and do what you've been told!
-      res = ::curl_easy_perform(curl);
-
-      if (!chunk.empty()) {
-        cmCTestOptionalLog(this->CTest, DEBUG,
-                           "CURL output: ["
-                             << cmCTestLogWrite(&*chunk.begin(), chunk.size())
-                             << "]" << std::endl,
-                           this->Quiet);
-      }
-      if (!chunkDebug.empty()) {
-        cmCTestOptionalLog(
-          this->CTest, DEBUG,
-          "CURL debug output: ["
-            << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]"
-            << std::endl,
-          this->Quiet);
-      }
-
-      fclose(ftpfile);
-      if (res) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Error when uploading file: " << local_file
-                                                    << std::endl);
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Error message was: " << error_buffer << std::endl);
-        *this->LogFile << "   Error when uploading file: " << local_file
-                       << std::endl
-                       << "   Error message was: " << error_buffer << std::endl
-                       << "   Curl output was: ";
-        // avoid dereference of empty vector
-        if (!chunk.empty()) {
-          *this->LogFile << cmCTestLogWrite(&*chunk.begin(), chunk.size());
-          cmCTestLog(this->CTest, ERROR_MESSAGE,
-                     "CURL output: ["
-                       << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
-                       << std::endl);
-        }
-        *this->LogFile << std::endl;
-        ::curl_easy_cleanup(curl);
-        ::curl_global_cleanup();
-        return false;
-      }
-      // always cleanup
-      ::curl_easy_cleanup(curl);
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                         "   Uploaded: " + local_file << std::endl,
-                         this->Quiet);
-    }
-  }
-  ::curl_global_cleanup();
-  return true;
-}
-
-// Uploading files is simpler
 bool cmCTestSubmitHandler::SubmitUsingHTTP(
   const std::string& localprefix, const std::vector<std::string>& files,
   const std::string& remoteprefix, const std::string& url)
@@ -657,370 +496,6 @@ void cmCTestSubmitHandler::ParseResponse(
   }
 }
 
-bool cmCTestSubmitHandler::TriggerUsingHTTP(
-  const std::vector<std::string>& files, const std::string& remoteprefix,
-  const std::string& url)
-{
-  CURL* curl;
-  char error_buffer[1024];
-
-  /* In windows, this will init the winsock stuff */
-  ::curl_global_init(CURL_GLOBAL_ALL);
-
-  for (std::string const& file : files) {
-    /* get a curl handle */
-    curl = curl_easy_init();
-    if (curl) {
-      // Using proxy
-      if (this->HTTPProxyType > 0) {
-        curl_easy_setopt(curl, CURLOPT_PROXY, this->HTTPProxy.c_str());
-        switch (this->HTTPProxyType) {
-          case 2:
-            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
-            break;
-          case 3:
-            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
-            break;
-          default:
-            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
-            if (!this->HTTPProxyAuth.empty()) {
-              curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD,
-                               this->HTTPProxyAuth.c_str());
-            }
-        }
-      }
-
-      ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-
-      // and give curl the buffer for errors
-      ::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error_buffer);
-
-      // specify handler for output
-      ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-                         cmCTestSubmitHandlerWriteMemoryCallback);
-      ::curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION,
-                         cmCTestSubmitHandlerCurlDebugCallback);
-
-      /* we pass our 'chunk' struct to the callback function */
-      cmCTestSubmitHandlerVectorOfChar chunk;
-      cmCTestSubmitHandlerVectorOfChar chunkDebug;
-      ::curl_easy_setopt(curl, CURLOPT_FILE, &chunk);
-      ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
-
-      std::string rfile = remoteprefix + cmSystemTools::GetFilenameName(file);
-      std::string ofile;
-      for (char c : rfile) {
-        char hexCh[4] = { 0, 0, 0, 0 };
-        hexCh[0] = c;
-        switch (c) {
-          case '+':
-          case '?':
-          case '/':
-          case '\\':
-          case '&':
-          case ' ':
-          case '=':
-          case '%':
-            sprintf(hexCh, "%%%02X", static_cast<int>(c));
-            ofile.append(hexCh);
-            break;
-          default:
-            ofile.append(hexCh);
-        }
-      }
-      std::string turl = url +
-        ((url.find('?') == std::string::npos) ? '?' : '&') +
-        "xmlfile=" + ofile;
-      *this->LogFile << "Trigger url: " << turl << std::endl;
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         "   Trigger url: " << turl << std::endl, this->Quiet);
-      curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-      curl_easy_setopt(curl, CURLOPT_URL, turl.c_str());
-      if (curl_easy_perform(curl)) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Error when triggering: " << turl << std::endl);
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Error message was: " << error_buffer << std::endl);
-        *this->LogFile << "\tTriggering failed with error: " << error_buffer
-                       << std::endl
-                       << "   Error message was: " << error_buffer
-                       << std::endl;
-        if (!chunk.empty()) {
-          *this->LogFile << "   Curl output was: "
-                         << cmCTestLogWrite(&*chunk.begin(), chunk.size())
-                         << std::endl;
-          cmCTestLog(this->CTest, ERROR_MESSAGE,
-                     "CURL output: ["
-                       << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
-                       << std::endl);
-        }
-        ::curl_easy_cleanup(curl);
-        ::curl_global_cleanup();
-        return false;
-      }
-
-      if (!chunk.empty()) {
-        cmCTestOptionalLog(this->CTest, DEBUG,
-                           "CURL output: ["
-                             << cmCTestLogWrite(&*chunk.begin(), chunk.size())
-                             << "]" << std::endl,
-                           this->Quiet);
-      }
-      if (!chunkDebug.empty()) {
-        cmCTestOptionalLog(
-          this->CTest, DEBUG,
-          "CURL debug output: ["
-            << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]"
-            << std::endl,
-          this->Quiet);
-      }
-
-      // always cleanup
-      ::curl_easy_cleanup(curl);
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl,
-                         this->Quiet);
-    }
-  }
-  ::curl_global_cleanup();
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     "   Dart server triggered..." << std::endl, this->Quiet);
-  return true;
-}
-
-bool cmCTestSubmitHandler::SubmitUsingSCP(
-  const std::string& scp_command, const std::string& localprefix,
-  const std::vector<std::string>& files, const std::string& remoteprefix,
-  const std::string& url)
-{
-  if (scp_command.empty() || localprefix.empty() || files.empty() ||
-      remoteprefix.empty() || url.empty()) {
-    return false;
-  }
-
-  std::vector<const char*> argv;
-  argv.push_back(scp_command.c_str()); // Scp command
-  argv.push_back(scp_command.c_str()); // Dummy string for file
-  argv.push_back(scp_command.c_str()); // Dummy string for remote url
-  argv.push_back(nullptr);
-
-  cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
-  // cmsysProcess_SetTimeout(cp, timeout);
-
-  int problems = 0;
-
-  for (std::string const& file : files) {
-    int retVal;
-
-    std::string lfname = localprefix;
-    cmSystemTools::ConvertToUnixSlashes(lfname);
-    lfname += "/" + file;
-    lfname = cmSystemTools::ConvertToOutputPath(lfname);
-    argv[1] = lfname.c_str();
-    std::string rfname = url + "/" + remoteprefix + file;
-    argv[2] = rfname.c_str();
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "Execute \"" << argv[0] << "\" \"" << argv[1] << "\" \""
-                                    << argv[2] << "\"" << std::endl,
-                       this->Quiet);
-    *this->LogFile << "Execute \"" << argv[0] << "\" \"" << argv[1] << "\" \""
-                   << argv[2] << "\"" << std::endl;
-
-    cmsysProcess_SetCommand(cp, &*argv.begin());
-    cmsysProcess_Execute(cp);
-    char* data;
-    int length;
-    cmProcessOutput processOutput;
-    std::string strdata;
-
-    while (cmsysProcess_WaitForData(cp, &data, &length, nullptr)) {
-      processOutput.DecodeText(data, length, strdata);
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         cmCTestLogWrite(strdata.c_str(), strdata.size()),
-                         this->Quiet);
-    }
-    processOutput.DecodeText(std::string(), strdata);
-    if (!strdata.empty()) {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         cmCTestLogWrite(strdata.c_str(), strdata.size()),
-                         this->Quiet);
-    }
-
-    cmsysProcess_WaitForExit(cp, nullptr);
-
-    int result = cmsysProcess_GetState(cp);
-
-    if (result == cmsysProcess_State_Exited) {
-      retVal = cmsysProcess_GetExitValue(cp);
-      if (retVal != 0) {
-        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                           "\tSCP returned: " << retVal << std::endl,
-                           this->Quiet);
-        *this->LogFile << "\tSCP returned: " << retVal << std::endl;
-        problems++;
-      }
-    } else if (result == cmsysProcess_State_Exception) {
-      retVal = cmsysProcess_GetExitException(cp);
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "\tThere was an exception: " << retVal << std::endl);
-      *this->LogFile << "\tThere was an exception: " << retVal << std::endl;
-      problems++;
-    } else if (result == cmsysProcess_State_Expired) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "\tThere was a timeout" << std::endl);
-      *this->LogFile << "\tThere was a timeout" << std::endl;
-      problems++;
-    } else if (result == cmsysProcess_State_Error) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "\tError executing SCP: " << cmsysProcess_GetErrorString(cp)
-                                           << std::endl);
-      *this->LogFile << "\tError executing SCP: "
-                     << cmsysProcess_GetErrorString(cp) << std::endl;
-      problems++;
-    }
-  }
-  cmsysProcess_Delete(cp);
-  return problems == 0;
-}
-
-bool cmCTestSubmitHandler::SubmitUsingCP(const std::string& localprefix,
-                                         const std::vector<std::string>& files,
-                                         const std::string& remoteprefix,
-                                         const std::string& destination)
-{
-  if (localprefix.empty() || files.empty() || remoteprefix.empty() ||
-      destination.empty()) {
-    /* clang-format off */
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Missing arguments for submit via cp:\n"
-               << "\tlocalprefix: " << localprefix << "\n"
-               << "\tNumber of files: " << files.size() << "\n"
-               << "\tremoteprefix: " << remoteprefix << "\n"
-               << "\tdestination: " << destination << std::endl);
-    /* clang-format on */
-    return false;
-  }
-
-  for (std::string const& file : files) {
-    std::string lfname = localprefix;
-    cmSystemTools::ConvertToUnixSlashes(lfname);
-    lfname += "/" + file;
-    std::string rfname = destination + "/" + remoteprefix + file;
-    cmSystemTools::CopyFileAlways(lfname, rfname);
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "   Copy file: " << lfname << " to " << rfname
-                                        << std::endl,
-                       this->Quiet);
-  }
-  std::string tagDoneFile = destination + "/" + remoteprefix + "DONE";
-  cmSystemTools::Touch(tagDoneFile, true);
-  return true;
-}
-
-#if defined(CTEST_USE_XMLRPC)
-bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
-  const std::string& localprefix, const std::vector<std::string>& files,
-  const std::string& remoteprefix, const std::string& url)
-{
-  xmlrpc_env env;
-  char ctestString[] = "CTest";
-  std::string ctestVersionString = cmVersion::GetCMakeVersion();
-  char* ctestVersion = const_cast<char*>(ctestVersionString.c_str());
-
-  std::string realURL = url + "/" + remoteprefix + "/Command/";
-
-  /* Start up our XML-RPC client library. */
-  xmlrpc_client_init(XMLRPC_CLIENT_NO_FLAGS, ctestString, ctestVersion);
-
-  /* Initialize our error-handling environment. */
-  xmlrpc_env_init(&env);
-
-  /* Call the famous server at UserLand. */
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     "   Submitting to: " << realURL << " (" << remoteprefix
-                                          << ")" << std::endl,
-                     this->Quiet);
-  for (std::string const& file : files) {
-    xmlrpc_value* result;
-
-    std::string local_file = file;
-    if (!cmSystemTools::FileExists(local_file)) {
-      local_file = localprefix + "/" + file;
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Submit file: " << local_file << std::endl,
-                       this->Quiet);
-    struct stat st;
-    if (::stat(local_file.c_str(), &st)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  Cannot find file: " << local_file << std::endl);
-      return false;
-    }
-
-    // off_t can be bigger than size_t.  fread takes size_t.
-    // make sure the file is not too big.
-    if (static_cast<off_t>(static_cast<size_t>(st.st_size)) !=
-        static_cast<off_t>(st.st_size)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  File too big: " << local_file << std::endl);
-      return false;
-    }
-    size_t fileSize = static_cast<size_t>(st.st_size);
-    FILE* fp = cmsys::SystemTools::Fopen(local_file, "rb");
-    if (!fp) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  Cannot open file: " << local_file << std::endl);
-      return false;
-    }
-
-    unsigned char* fileBuffer = new unsigned char[fileSize];
-    if (fread(fileBuffer, 1, fileSize, fp) != fileSize) {
-      delete[] fileBuffer;
-      fclose(fp);
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "  Cannot read file: " << local_file << std::endl);
-      return false;
-    }
-    fclose(fp);
-
-    char remoteCommand[] = "Submit.put";
-    char* pRealURL = const_cast<char*>(realURL.c_str());
-    result =
-      xmlrpc_client_call(&env, pRealURL, remoteCommand, "(6)", fileBuffer,
-                         static_cast<xmlrpc_int32>(fileSize));
-
-    delete[] fileBuffer;
-
-    if (env.fault_occurred) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 " Submission problem: " << env.fault_string << " ("
-                                         << env.fault_code << ")"
-                                         << std::endl);
-      xmlrpc_env_clean(&env);
-      xmlrpc_client_cleanup();
-      return false;
-    }
-
-    /* Dispose of our result value. */
-    xmlrpc_DECREF(result);
-  }
-
-  /* Clean up our error-handling environment. */
-  xmlrpc_env_clean(&env);
-
-  /* Shutdown our XML-RPC client library. */
-  xmlrpc_client_cleanup();
-  return true;
-}
-#else
-bool cmCTestSubmitHandler::SubmitUsingXMLRPC(
-  std::string const& /*unused*/, std::vector<std::string> const& /*unused*/,
-  std::string const& /*unused*/, std::string const& /*unused*/)
-{
-  return false;
-}
-#endif
-
 void cmCTestSubmitHandler::ConstructCDashURL(std::string& dropMethod,
                                              std::string& url)
 {
@@ -1275,11 +750,6 @@ int cmCTestSubmitHandler::ProcessHandler()
   if (cdashUploadFile && cdashUploadType) {
     return this->HandleCDashUploadFile(cdashUploadFile, cdashUploadType);
   }
-  std::string iscdash = this->CTest->GetCTestConfiguration("IsCDash");
-  // cdash does not need to trigger so just return true
-  if (!iscdash.empty()) {
-    this->CDash = true;
-  }
 
   const std::string& buildDirectory =
     this->CTest->GetCTestConfiguration("BuildDirectory");
@@ -1317,34 +787,9 @@ int cmCTestSubmitHandler::ProcessHandler()
     }
   }
 
-  if (getenv("FTP_PROXY")) {
-    this->FTPProxyType = 1;
-    this->FTPProxy = getenv("FTP_PROXY");
-    if (getenv("FTP_PROXY_PORT")) {
-      this->FTPProxy += ":";
-      this->FTPProxy += getenv("FTP_PROXY_PORT");
-    }
-    if (getenv("FTP_PROXY_TYPE")) {
-      std::string type = getenv("FTP_PROXY_TYPE");
-      // HTTP/SOCKS4/SOCKS5
-      if (type == "HTTP") {
-        this->FTPProxyType = 1;
-      } else if (type == "SOCKS4") {
-        this->FTPProxyType = 2;
-      } else if (type == "SOCKS5") {
-        this->FTPProxyType = 3;
-      }
-    }
-  }
-
   if (!this->HTTPProxy.empty()) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "   Use HTTP Proxy: " << this->HTTPProxy << std::endl,
-                       this->Quiet);
-  }
-  if (!this->FTPProxy.empty()) {
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Use FTP Proxy: " << this->FTPProxy << std::endl,
                        this->Quiet);
   }
   cmGeneratedFileStream ofs;
@@ -1443,66 +888,11 @@ int cmCTestSubmitHandler::ProcessHandler()
 
   std::string dropMethod(this->CTest->GetCTestConfiguration("DropMethod"));
 
-  if (dropMethod.empty() || dropMethod == "ftp") {
-    ofs << "Using drop method: FTP" << std::endl;
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Using FTP submit method" << std::endl
-                                                    << "   Drop site: ftp://",
-                       this->Quiet);
-    std::string url = "ftp://";
-    url += cmCTest::MakeURLSafe(
-             this->CTest->GetCTestConfiguration("DropSiteUser")) +
-      ":" +
-      cmCTest::MakeURLSafe(
-             this->CTest->GetCTestConfiguration("DropSitePassword")) +
-      "@" + this->CTest->GetCTestConfiguration("DropSite") +
-      cmCTest::MakeURLSafe(this->CTest->GetCTestConfiguration("DropLocation"));
-    if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty()) {
-      cmCTestOptionalLog(
-        this->CTest, HANDLER_OUTPUT,
-        this->CTest->GetCTestConfiguration("DropSiteUser").c_str(),
-        this->Quiet);
-      if (!this->CTest->GetCTestConfiguration("DropSitePassword").empty()) {
-        cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, ":******",
-                           this->Quiet);
-      }
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "@", this->Quiet);
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       this->CTest->GetCTestConfiguration("DropSite")
-                         << this->CTest->GetCTestConfiguration("DropLocation")
-                         << std::endl,
-                       this->Quiet);
-    if (!this->SubmitUsingFTP(buildDirectory + "/Testing/" +
-                                this->CTest->GetCurrentTag(),
-                              files, prefix, url)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "   Problems when submitting via FTP" << std::endl);
-      ofs << "   Problems when submitting via FTP" << std::endl;
-      return -1;
-    }
-    if (!this->CDash) {
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                         "   Using HTTP trigger method"
-                           << std::endl
-                           << "   Trigger site: "
-                           << this->CTest->GetCTestConfiguration("TriggerSite")
-                           << std::endl,
-                         this->Quiet);
-      if (!this->TriggerUsingHTTP(
-            files, prefix,
-            this->CTest->GetCTestConfiguration("TriggerSite"))) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Problems when triggering via HTTP" << std::endl);
-        ofs << "   Problems when triggering via HTTP" << std::endl;
-        return -1;
-      }
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                         "   Submission successful" << std::endl, this->Quiet);
-      ofs << "   Submission successful" << std::endl;
-      return 0;
-    }
-  } else if (dropMethod == "http" || dropMethod == "https") {
+  if (dropMethod.empty()) {
+    dropMethod = "http";
+  }
+
+  if (dropMethod == "http" || dropMethod == "https") {
     std::string url = dropMethod;
     url += "://";
     ofs << "Using drop method: " << dropMethod << std::endl;
@@ -1539,23 +929,6 @@ int cmCTestSubmitHandler::ProcessHandler()
       ofs << "   Problems when submitting via HTTP" << std::endl;
       return -1;
     }
-    if (!this->CDash) {
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                         "   Using HTTP trigger method"
-                           << std::endl
-                           << "   Trigger site: "
-                           << this->CTest->GetCTestConfiguration("TriggerSite")
-                           << std::endl,
-                         this->Quiet);
-      if (!this->TriggerUsingHTTP(
-            files, prefix,
-            this->CTest->GetCTestConfiguration("TriggerSite"))) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "   Problems when triggering via HTTP" << std::endl);
-        ofs << "   Problems when triggering via HTTP" << std::endl;
-        return -1;
-      }
-    }
     if (this->HasErrors) {
       cmCTestLog(this->CTest, HANDLER_OUTPUT,
                  "   Errors occurred during "
@@ -1572,95 +945,6 @@ int cmCTestSubmitHandler::ProcessHandler()
           << (this->HasWarnings ? ", with warnings." : "") << std::endl;
     }
 
-    return 0;
-  } else if (dropMethod == "xmlrpc") {
-#if defined(CTEST_USE_XMLRPC)
-    ofs << "Using drop method: XML-RPC" << std::endl;
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Using XML-RPC submit method" << std::endl,
-                       this->Quiet);
-    std::string url = this->CTest->GetCTestConfiguration("DropSite");
-    prefix = this->CTest->GetCTestConfiguration("DropLocation");
-    if (!this->SubmitUsingXMLRPC(buildDirectory + "/Testing/" +
-                                   this->CTest->GetCurrentTag(),
-                                 files, prefix, url)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "   Problems when submitting via XML-RPC" << std::endl);
-      ofs << "   Problems when submitting via XML-RPC" << std::endl;
-      return -1;
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Submission successful" << std::endl, this->Quiet);
-    ofs << "   Submission successful" << std::endl;
-    return 0;
-#else
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "   Submission method \"xmlrpc\" not compiled into CTest!"
-                 << std::endl);
-    return -1;
-#endif
-  } else if (dropMethod == "scp") {
-    std::string url;
-    if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty()) {
-      url += this->CTest->GetCTestConfiguration("DropSiteUser") + "@";
-    }
-    url += this->CTest->GetCTestConfiguration("DropSite") + ":" +
-      this->CTest->GetCTestConfiguration("DropLocation");
-
-    // change to the build directory so that we can uses a relative path
-    // on windows since scp doesn't support "c:" a drive in the path
-    cmWorkingDirectory workdir(buildDirectory);
-    if (workdir.Failed()) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "   Failed to change directory to "
-                   << buildDirectory << " : "
-                   << std::strerror(workdir.GetLastResult()) << std::endl);
-      ofs << "   Failed to change directory to " << buildDirectory << " : "
-          << std::strerror(workdir.GetLastResult()) << std::endl;
-      return -1;
-    }
-
-    if (!this->SubmitUsingSCP(this->CTest->GetCTestConfiguration("ScpCommand"),
-                              "Testing/" + this->CTest->GetCurrentTag(), files,
-                              prefix, url)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "   Problems when submitting via SCP" << std::endl);
-      ofs << "   Problems when submitting via SCP" << std::endl;
-      return -1;
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Submission successful" << std::endl, this->Quiet);
-    ofs << "   Submission successful" << std::endl;
-    return 0;
-  } else if (dropMethod == "cp") {
-    std::string location = this->CTest->GetCTestConfiguration("DropLocation");
-
-    // change to the build directory so that we can uses a relative path
-    // on windows since scp doesn't support "c:" a drive in the path
-    cmWorkingDirectory workdir(buildDirectory);
-    if (workdir.Failed()) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "   Failed to change directory to "
-                   << buildDirectory << " : "
-                   << std::strerror(workdir.GetLastResult()) << std::endl);
-      ofs << "   Failed to change directory to " << buildDirectory << " : "
-          << std::strerror(workdir.GetLastResult()) << std::endl;
-      return -1;
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "   Change directory: " << buildDirectory << std::endl,
-                       this->Quiet);
-
-    if (!this->SubmitUsingCP("Testing/" + this->CTest->GetCurrentTag(), files,
-                             prefix, location)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "   Problems when submitting via CP" << std::endl);
-      ofs << "   Problems when submitting via cp" << std::endl;
-      return -1;
-    }
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Submission successful" << std::endl, this->Quiet);
-    ofs << "   Submission successful" << std::endl;
     return 0;
   }
 

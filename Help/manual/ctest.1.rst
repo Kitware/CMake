@@ -1069,7 +1069,7 @@ Configuration settings include:
   * :module:`CTest` module variable: ``BUILDNAME``
 
 ``CDashVersion``
-  Specify the version of `CDash`_ on the server.
+  Legacy option.  Not used.
 
   * `CTest Script`_ variable: none, detected from server
   * :module:`CTest` module variable: ``CTEST_CDASH_VERSION``
@@ -1106,17 +1106,14 @@ Configuration settings include:
 
 ``DropMethod``
   Specify the method by which results should be submitted to the
-  dashboard server.  The value may be ``cp``, ``ftp``, ``http``,
-  ``https``, ``scp``, or ``xmlrpc`` (if CMake was built with
-  support for it).
+  dashboard server.  The value may be ``http`` or ``https``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_METHOD`
   * :module:`CTest` module variable: ``DROP_METHOD`` if set,
     else ``CTEST_DROP_METHOD``
 
 ``DropSite``
-  The dashboard server name
-  (for ``ftp``, ``http``, and ``https``, ``scp``, and ``xmlrpc``).
+  The dashboard server name.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE`
   * :module:`CTest` module variable: ``DROP_SITE`` if set,
@@ -1139,14 +1136,13 @@ Configuration settings include:
     else ``CTEST_DROP_SITE_USER``
 
 ``IsCDash``
-  Specify whether the dashboard server is `CDash`_ or an older
-  dashboard server implementation requiring ``TriggerSite``.
+  Legacy option.  Not used.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_CDASH`
   * :module:`CTest` module variable: ``CTEST_DROP_SITE_CDASH``
 
 ``ScpCommand``
-  ``scp`` command-line tool to use when ``DropMethod`` is ``scp``.
+  Legacy option.  Not used.
 
   * `CTest Script`_ variable: :variable:`CTEST_SCP_COMMAND`
   * :module:`CTest` module variable: ``SCPCOMMAND``
@@ -1160,8 +1156,7 @@ Configuration settings include:
     initialized by the :command:`site_name` command
 
 ``TriggerSite``
-  Legacy option to support older dashboard server implementations.
-  Not used when ``IsCDash`` is true.
+  Legacy option.  Not used.
 
   * `CTest Script`_ variable: :variable:`CTEST_TRIGGER_SITE`
   * :module:`CTest` module variable: ``TRIGGER_SITE`` if set,
