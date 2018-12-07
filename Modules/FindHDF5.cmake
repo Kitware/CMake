@@ -818,7 +818,7 @@ if( NOT HDF5_FOUND )
                     set( THIS_LIBRARY_SEARCH_DEBUG
                         lib${LIB}d.a lib${LIB}_debug.a lib${LIB}d lib${LIB}_D lib${LIB}_debug
                         lib${LIB}d-static.a lib${LIB}_debug-static.a lib${LIB}d-static lib${LIB}_D-static lib${LIB}_debug-static )
-                    set( THIS_LIBRARY_SEARCH_RELEASE lib${LIB}.a ${LIB} lib${LIB}-static.a lib${LIB}-static)
+                    set( THIS_LIBRARY_SEARCH_RELEASE lib${LIB}.a lib${LIB} lib${LIB}-static.a lib${LIB}-static)
                 else()
                     set( THIS_LIBRARY_SEARCH_DEBUG ${LIB}d ${LIB}_D ${LIB}_debug ${LIB}d-shared ${LIB}_D-shared ${LIB}_debug-shared)
                     set( THIS_LIBRARY_SEARCH_RELEASE ${LIB} ${LIB}-shared)
