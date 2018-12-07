@@ -6,7 +6,6 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
-#include <map>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -343,12 +342,5 @@ private:
 };
 
 typedef std::unordered_map<std::string, cmTarget> cmTargets;
-
-class cmTargetSet : public std::set<std::string>
-{
-};
-class cmTargetManifest : public std::map<std::string, cmTargetSet>
-{
-};
 
 #endif
