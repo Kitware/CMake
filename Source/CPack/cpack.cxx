@@ -88,6 +88,15 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
   return 1;
 }
 
+static void cpackProgressCallback(const char* message, float progress,
+                                  void* clientdata)
+{
+  (void)progress;
+  (void)clientdata;
+
+  std::cout << "-- " << message << std::endl;
+}
+
 // this is CPack.
 int main(int argc, char const* const* argv)
 {
@@ -201,6 +210,7 @@ int main(int argc, char const* const* argv)
   cmake cminst(cmake::RoleScript);
   cminst.SetHomeDirectory("");
   cminst.SetHomeOutputDirectory("");
+  cminst.SetProgressCallback(cpackProgressCallback, nullptr);
   cminst.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator cmgg(&cminst);
   cmMakefile globalMF(&cmgg, cminst.GetCurrentSnapshot());
