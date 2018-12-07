@@ -362,7 +362,7 @@ static cmVS7FlagTable cmVS8ExtraFlagTable[] = {
   { "TreatWChar_tAsBuiltInType", "Zc:wchar_t-",
     "wchar_t is not a built-in type", "false", 0 },
 
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };
 cmIDEFlagTable const* cmGlobalVisualStudio8Generator::GetExtraFlagTableVS8()
 {

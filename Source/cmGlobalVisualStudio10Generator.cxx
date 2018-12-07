@@ -8,19 +8,11 @@
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmVS10CLFlagTable.h"
-#include "cmVS10CSharpFlagTable.h"
-#include "cmVS10CudaFlagTable.h"
-#include "cmVS10CudaHostFlagTable.h"
-#include "cmVS10LibFlagTable.h"
-#include "cmVS10LinkFlagTable.h"
-#include "cmVS10MASMFlagTable.h"
-#include "cmVS10NASMFlagTable.h"
-#include "cmVS10RCFlagTable.h"
 #include "cmVersion.h"
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
 #include "cmXMLWriter.h"
+#include "cm_jsoncpp_reader.h"
 #include "cmake.h"
 
 #include "cmsys/FStream.hxx"
@@ -30,6 +22,7 @@
 #include <algorithm>
 
 static const char vs10generatorName[] = "Visual Studio 10 2010";
+static std::map<std::string, std::vector<cmIDEFlagTable>> loadedFlagJsonFiles;
 
 // Map generator name without year to name with year.
 static const char* cmVS10GenName(const std::string& name, std::string& genName)
@@ -120,15 +113,16 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
       this->DefaultPlatformToolset = "v100";
     }
   }
-  this->DefaultClFlagTable = cmVS10CLFlagTable;
-  this->DefaultCSharpFlagTable = cmVS10CSharpFlagTable;
-  this->DefaultLibFlagTable = cmVS10LibFlagTable;
-  this->DefaultLinkFlagTable = cmVS10LinkFlagTable;
-  this->DefaultCudaFlagTable = cmVS10CudaFlagTable;
-  this->DefaultCudaHostFlagTable = cmVS10CudaHostFlagTable;
-  this->DefaultMasmFlagTable = cmVS10MASMFlagTable;
-  this->DefaultNasmFlagTable = cmVS10NASMFlagTable;
-  this->DefaultRcFlagTable = cmVS10RCFlagTable;
+  this->DefaultCLFlagTableName = "v10";
+  this->DefaultCSharpFlagTableName = "v10";
+  this->DefaultLibFlagTableName = "v10";
+  this->DefaultLinkFlagTableName = "v10";
+  this->DefaultCudaFlagTableName = "v10";
+  this->DefaultCudaHostFlagTableName = "v10";
+  this->DefaultMasmFlagTableName = "v10";
+  this->DefaultNasmFlagTableName = "v10";
+  this->DefaultRCFlagTableName = "v10";
+
   this->Version = VS10;
   this->PlatformToolsetNeedsDebugEnum = false;
 }
@@ -1050,67 +1044,174 @@ std::string cmGlobalVisualStudio10Generator::GetInstalledNsightTegraVersion()
   return version;
 }
 
+static std::string cmLoadFlagTableString(Json::Value entry, const char* field)
+{
+  if (entry.isMember(field)) {
+    auto string = entry[field];
+    if (string.isConvertibleTo(Json::ValueType::stringValue)) {
+      return string.asString();
+    }
+  }
+  return "";
+}
+
+static unsigned int cmLoadFlagTableSpecial(Json::Value entry,
+                                           const char* field)
+{
+  unsigned int value = 0;
+  if (entry.isMember(field)) {
+    auto specials = entry[field];
+    if (specials.isArray()) {
+      for (auto const& special : specials) {
+        std::string s = special.asString();
+        if (s == "UserValue") {
+          value |= cmIDEFlagTable::UserValue;
+        } else if (s == "UserIgnored") {
+          value |= cmIDEFlagTable::UserIgnored;
+        } else if (s == "UserRequired") {
+          value |= cmIDEFlagTable::UserRequired;
+        } else if (s == "Continue") {
+          value |= cmIDEFlagTable::Continue;
+        } else if (s == "SemicolonAppendable") {
+          value |= cmIDEFlagTable::SemicolonAppendable;
+        } else if (s == "UserFollowing") {
+          value |= cmIDEFlagTable::UserFollowing;
+        } else if (s == "CaseInsensitive") {
+          value |= cmIDEFlagTable::CaseInsensitive;
+        } else if (s == "SpaceAppendable") {
+          value |= cmIDEFlagTable::SpaceAppendable;
+        }
+      }
+    }
+  }
+  return value;
+}
+
+static cmIDEFlagTable const* cmLoadFlagTableJson(
+  std::string const& flagJsonPath)
+{
+  cmIDEFlagTable* ret = nullptr;
+  auto savedFlagIterator = loadedFlagJsonFiles.find(flagJsonPath);
+  if (savedFlagIterator != loadedFlagJsonFiles.end()) {
+    ret = savedFlagIterator->second.data();
+  } else {
+    Json::Reader reader;
+    cmsys::ifstream stream;
+
+    stream.open(flagJsonPath.c_str(), std::ios_base::in);
+    if (stream) {
+      Json::Value flags;
+      if (reader.parse(stream, flags, false) && flags.isArray()) {
+        std::vector<cmIDEFlagTable> flagTable;
+        for (auto const& flag : flags) {
+          cmIDEFlagTable flagEntry;
+          flagEntry.IDEName = cmLoadFlagTableString(flag, "name");
+          flagEntry.commandFlag = cmLoadFlagTableString(flag, "switch");
+          flagEntry.comment = cmLoadFlagTableString(flag, "comment");
+          flagEntry.value = cmLoadFlagTableString(flag, "value");
+          flagEntry.special = cmLoadFlagTableSpecial(flag, "flags");
+          flagTable.push_back(flagEntry);
+        }
+        cmIDEFlagTable endFlag{ "", "", "", "", 0 };
+        flagTable.push_back(endFlag);
+
+        loadedFlagJsonFiles[flagJsonPath] = flagTable;
+        ret = loadedFlagJsonFiles[flagJsonPath].data();
+      }
+    }
+  }
+  return ret;
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
+  std::string const& flagTableName, std::string const& table) const
+{
+  cmIDEFlagTable const* ret = nullptr;
+
+  std::string filename = cmSystemTools::GetCMakeRoot() +
+    "/Templates/MSBuild/FlagTables/" + flagTableName + "_" + table + ".json";
+  ret = cmLoadFlagTableJson(filename);
+
+  if (!ret) {
+    cmMakefile* mf = this->GetCurrentMakefile();
+
+    std::ostringstream e;
+    /* clang-format off */
+    e << "JSON flag table \"" << filename <<
+      "\" could not be loaded.\n";
+    /* clang-format on */
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+  }
+  return ret;
+}
+
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetClFlagTable() const
 {
-  cmIDEFlagTable const* table = this->ToolsetOptions.GetClFlagTable(
-    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string flagTableName = this->ToolsetOptions.GetClFlagTableName(
+    this->GetPlatformName(), this->GetPlatformToolsetString(),
+    this->DefaultCLFlagTableName);
 
-  return (table != nullptr) ? table : this->DefaultClFlagTable;
+  return LoadFlagTable(flagTableName, "CL");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCSharpFlagTable()
   const
 {
-  cmIDEFlagTable const* table = this->ToolsetOptions.GetCSharpFlagTable(
-    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string flagTableName = this->ToolsetOptions.GetCSharpFlagTableName(
+    this->GetPlatformName(), this->GetPlatformToolsetString(),
+    this->DefaultCSharpFlagTableName);
 
-  return (table != nullptr) ? table : this->DefaultCSharpFlagTable;
+  return LoadFlagTable(flagTableName, "CSharp");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetRcFlagTable() const
 {
-  cmIDEFlagTable const* table = this->ToolsetOptions.GetRcFlagTable(
-    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string flagTableName = this->ToolsetOptions.GetRcFlagTableName(
+    this->GetPlatformName(), this->GetPlatformToolsetString(),
+    this->DefaultRCFlagTableName);
 
-  return (table != nullptr) ? table : this->DefaultRcFlagTable;
+  return LoadFlagTable(flagTableName, "RC");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLibFlagTable() const
 {
-  cmIDEFlagTable const* table = this->ToolsetOptions.GetLibFlagTable(
-    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string flagTableName = this->ToolsetOptions.GetLibFlagTableName(
+    this->GetPlatformName(), this->GetPlatformToolsetString(),
+    this->DefaultLibFlagTableName);
 
-  return (table != nullptr) ? table : this->DefaultLibFlagTable;
+  return LoadFlagTable(flagTableName, "LIB");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLinkFlagTable() const
 {
-  cmIDEFlagTable const* table = this->ToolsetOptions.GetLinkFlagTable(
-    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string flagTableName = this->ToolsetOptions.GetLinkFlagTableName(
+    this->GetPlatformName(), this->GetPlatformToolsetString(),
+    this->DefaultLinkFlagTableName);
 
-  return (table != nullptr) ? table : this->DefaultLinkFlagTable;
+  return LoadFlagTable(flagTableName, "Link");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCudaFlagTable() const
 {
-  return this->DefaultCudaFlagTable;
+  return LoadFlagTable(this->DefaultCudaFlagTableName, "Cuda");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCudaHostFlagTable()
   const
 {
-  return this->DefaultCudaHostFlagTable;
+  return LoadFlagTable(this->DefaultCudaHostFlagTableName, "CudaHost");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetMasmFlagTable() const
 {
-  cmIDEFlagTable const* table = this->ToolsetOptions.GetMasmFlagTable(
-    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string flagTableName = this->ToolsetOptions.GetMasmFlagTableName(
+    this->GetPlatformName(), this->GetPlatformToolsetString(),
+    this->DefaultMasmFlagTableName);
 
-  return (table != nullptr) ? table : this->DefaultMasmFlagTable;
+  return LoadFlagTable(flagTableName, "MASM");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetNasmFlagTable() const
 {
-  return this->DefaultNasmFlagTable;
+  return LoadFlagTable(this->DefaultNasmFlagTableName, "NASM");
 }

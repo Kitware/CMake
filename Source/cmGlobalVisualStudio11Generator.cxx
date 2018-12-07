@@ -6,12 +6,6 @@
 #include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
-#include "cmVS11CLFlagTable.h"
-#include "cmVS11CSharpFlagTable.h"
-#include "cmVS11LibFlagTable.h"
-#include "cmVS11LinkFlagTable.h"
-#include "cmVS11MASMFlagTable.h"
-#include "cmVS11RCFlagTable.h"
 
 static const char vs11generatorName[] = "Visual Studio 11 2012";
 
@@ -107,12 +101,12 @@ cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
     "ProductDir",
     vc11Express, cmSystemTools::KeyWOW64_32);
   this->DefaultPlatformToolset = "v110";
-  this->DefaultClFlagTable = cmVS11CLFlagTable;
-  this->DefaultCSharpFlagTable = cmVS11CSharpFlagTable;
-  this->DefaultLibFlagTable = cmVS11LibFlagTable;
-  this->DefaultLinkFlagTable = cmVS11LinkFlagTable;
-  this->DefaultMasmFlagTable = cmVS11MASMFlagTable;
-  this->DefaultRcFlagTable = cmVS11RCFlagTable;
+  this->DefaultCLFlagTableName = "v11";
+  this->DefaultCSharpFlagTableName = "v11";
+  this->DefaultLibFlagTableName = "v11";
+  this->DefaultLinkFlagTableName = "v11";
+  this->DefaultMasmFlagTableName = "v11";
+  this->DefaultRCFlagTableName = "v11";
   this->Version = VS11;
 }
 

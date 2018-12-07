@@ -7,8 +7,6 @@
 
 #include <string>
 
-struct cmIDEFlagTable;
-
 /** \class cmVisualStudio10ToolsetOptions
  * \brief Retrieves toolset options for MSBuild.
  *
@@ -17,18 +15,24 @@ struct cmIDEFlagTable;
 class cmVisualStudio10ToolsetOptions
 {
 public:
-  cmIDEFlagTable const* GetClFlagTable(std::string const& name,
-                                       std::string const& toolset) const;
-  cmIDEFlagTable const* GetCSharpFlagTable(std::string const& name,
-                                           std::string const& toolset) const;
-  cmIDEFlagTable const* GetRcFlagTable(std::string const& name,
-                                       std::string const& toolset) const;
-  cmIDEFlagTable const* GetLibFlagTable(std::string const& name,
-                                        std::string const& toolset) const;
-  cmIDEFlagTable const* GetLinkFlagTable(std::string const& name,
-                                         std::string const& toolset) const;
-  cmIDEFlagTable const* GetMasmFlagTable(std::string const& name,
-                                         std::string const& toolset) const;
+  std::string GetClFlagTableName(std::string const& name,
+                                 std::string const& toolset,
+                                 std::string const& defaultToolset) const;
+  std::string GetCSharpFlagTableName(std::string const& name,
+                                     std::string const& toolset,
+                                     std::string const& defaultToolset) const;
+  std::string GetRcFlagTableName(std::string const& name,
+                                 std::string const& toolset,
+                                 std::string const& defaultToolset) const;
+  std::string GetLibFlagTableName(std::string const& name,
+                                  std::string const& toolset,
+                                  std::string const& defaultToolset) const;
+  std::string GetLinkFlagTableName(std::string const& name,
+                                   std::string const& toolset,
+                                   std::string const& defaultToolset) const;
+  std::string GetMasmFlagTableName(std::string const& name,
+                                   std::string const& toolset,
+                                   std::string const& defaultToolset) const;
 
 private:
   std::string GetToolsetName(std::string const& name,

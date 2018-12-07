@@ -37,7 +37,7 @@ static cmVS7FlagTable cmVS7ExtraFlagTable[] = {
   // and have EHa passed on the command line by leaving out the table
   // entry.
 
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };
 
 cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
