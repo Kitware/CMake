@@ -1,0 +1,38 @@
+CMAKE_LANG=CXX
+CMAKE_CXX_COMPILER_ABI=ELF
+CMAKE_CXX_COMPILER_AR=CMAKE_CXX_COMPILER_AR-NOTFOUND
+CMAKE_CXX_COMPILER_ARCHITECTURE_ID=
+CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CXX_COMPILER_ID=Clang
+CMAKE_CXX_COMPILER_LAUNCHER=
+CMAKE_CXX_COMPILER_LOADED=1
+CMAKE_CXX_COMPILER_RANLIB=CMAKE_CXX_COMPILER_RANLIB-NOTFOUND
+CMAKE_CXX_COMPILER_TARGET=
+CMAKE_CXX_COMPILER_VERSION=5.0.1
+CMAKE_CXX_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_a2bf8/fast"
+/usr/bin/make -f CMakeFiles/cmTC_a2bf8.dir/build.make CMakeFiles/cmTC_a2bf8.dir/build
+Building CXX object CMakeFiles/cmTC_a2bf8.dir/CMakeCXXCompilerABI.cpp.o
+/usr/bin/c++    -v -o CMakeFiles/cmTC_a2bf8.dir/CMakeCXXCompilerABI.cpp.o -c /usr/local/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+OpenBSD clang version 5.0.1 (tags/RELEASE_501/final) (based on LLVM 5.0.1)
+Target: amd64-unknown-openbsd6.3
+Thread model: posix
+InstalledDir: /usr/bin
+ "/usr/bin/c++" -cc1 -triple amd64-unknown-openbsd6.3 -emit-obj -mrelax-all -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 1 -pic-is-pie -mthread-model posix -mdisable-fp-elim -relaxed-aliasing -masm-verbose -mconstructor-aliases -munwind-tables -target-cpu x86-64 -v -dwarf-column-info -debugger-tuning=gdb -coverage-notes-file /tmp/ii/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_a2bf8.dir/CMakeCXXCompilerABI.cpp.gcno -resource-dir /usr/lib/clang/5.0.1 -internal-isystem /usr/include/c++/v1 -fdeprecated-macro -fdebug-compilation-dir /tmp/ii/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -femulated-tls -fwrapv -stack-protector 2 -fobjc-runtime=gnustep -fcxx-exceptions -fexceptions -fdiagnostics-show-option -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-valloc -fno-builtin-free -fno-builtin-strdup -fno-builtin-strndup -o CMakeFiles/cmTC_a2bf8.dir/CMakeCXXCompilerABI.cpp.o -x c++ /usr/local/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+clang -cc1 version 5.0.1 based upon LLVM 5.0.1 default target amd64-unknown-openbsd6.3
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/include/c++/v1
+ /usr/lib/clang/5.0.1/include
+ /usr/include
+End of search list.
+Linking CXX executable cmTC_a2bf8
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a2bf8.dir/link.txt --verbose=1
+/usr/bin/c++      -v CMakeFiles/cmTC_a2bf8.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_a2bf8 -Wl,-rpath-link,/usr/X11R6/lib:/usr/local/lib
+OpenBSD clang version 5.0.1 (tags/RELEASE_501/final) (based on LLVM 5.0.1)
+Target: amd64-unknown-openbsd6.3
+Thread model: posix
+InstalledDir: /usr/bin
+ "/usr/bin/ld" -e __start --eh-frame-hdr -Bdynamic -dynamic-linker /usr/libexec/ld.so -o cmTC_a2bf8 /usr/bin/../lib/crt0.o /usr/bin/../lib/crtbegin.o -L/usr/bin/../lib -L/usr/lib CMakeFiles/cmTC_a2bf8.dir/CMakeCXXCompilerABI.cpp.o -rpath-link /usr/X11R6/lib:/usr/local/lib -lc++ -lc++abi -lpthread -lm -lcompiler_rt -lc -lcompiler_rt /usr/bin/../lib/crtend.o

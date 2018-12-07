@@ -1,0 +1,38 @@
+CMAKE_LANG=CXX
+CMAKE_CXX_COMPILER_ABI=
+CMAKE_CXX_COMPILER_AR=
+CMAKE_CXX_COMPILER_ARCHITECTURE_ID=
+CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CXX_COMPILER_ID=SunPro
+CMAKE_CXX_COMPILER_LAUNCHER=
+CMAKE_CXX_COMPILER_LOADED=1
+CMAKE_CXX_COMPILER_RANLIB=
+CMAKE_CXX_COMPILER_TARGET=
+CMAKE_CXX_COMPILER_VERSION=5.13.0
+CMAKE_CXX_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/opt/csw/bin/gmake" "cmTC_cc4b2/fast"
+/opt/csw/bin/gmake -f CMakeFiles/cmTC_cc4b2.dir/build.make CMakeFiles/cmTC_cc4b2.dir/build
+gmake[1]: Entering directory '/tmp/ii/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_cc4b2.dir/CMakeCXXCompilerABI.cpp.o
+/opt/solarisstudio12.4/bin/CC    -v   -o CMakeFiles/cmTC_cc4b2.dir/CMakeCXXCompilerABI.cpp.o -c /tmp/CMake/Modules/CMakeCXXCompilerABI.cpp
+### CC: Note: NLSPATH = /opt/solarisstudio12.4/bin/../lib/locale/%L/LC_MESSAGES/%N.cat:/opt/solarisstudio12.4/bin/../../lib/locale/%L/LC_MESSAGES/%N.cat
+###     command line files and options (expanded):
+### -v -oCMakeFiles/cmTC_cc4b2.dir/CMakeCXXCompilerABI.cpp.o -c /tmp/CMake/Modules/CMakeCXXCompilerABI.cpp
+/opt/solarisstudio12.4/lib/compilers/ccfe -D__SunOS_5_10 -D__SUNPRO_CC=0x5130 -D__unix -D__SVR4 -D__sun -D__SunOS -D__sparcv8 -D__sparc -D__BUILTIN_VA_ARG_INCR -Dunix -Dsun -Dsparc -D__SUN_PREFETCH -D__SUNPRO_CC_COMPAT=5 -D__NOVECTORSIZE__ -I-xbuiltin -I/opt/solarisstudio12.4/lib/compilers/include/CC/Cstd -I/opt/solarisstudio12.4/lib/compilers/include/CC -I/opt/solarisstudio12.4/lib/compilers/include/cc -ptf /tmp/ccfe.1547820952.9069.02.%1.%2 -ptx /opt/solarisstudio12.4/bin/CC -ptk "-v -c " -compat=5 -xdebuginfo=%none -instlib=/opt/solarisstudio12.4/lib/compilers/libCstd.a -xdbggen=dwarf+usedonly+incl -xF=%none -xbuiltin=%none -xldscope=global -xivdep=loop -O0 -xarrayloc /tmp/CMake/Modules/CMakeCXXCompilerABI.cpp -ptb CMakeFiles/cmTC_cc4b2.dir/CMakeCXXCompilerABI.cpp.o -y-fbe -y/opt/solarisstudio12.4/bin/fbe -y-xmemalign=8i -y-verbose -y-comdat -y-xdebuginfo=%none -y-xarch=generic -y-m32 -y-comdat -y-xthreadvar=no%dynamic -y-xannotate=yes -y-o -yCMakeFiles/cmTC_cc4b2.dir/CMakeCXXCompilerABI.cpp.o 2> /tmp/ccfe.1547820952.9069.01.err
+rm /tmp/ccfe.1547820952.9069.01.err
+Linking CXX executable cmTC_cc4b2
+/tmp/CMake/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cc4b2.dir/link.txt --verbose=1
+/opt/solarisstudio12.4/bin/CC   -v    CMakeFiles/cmTC_cc4b2.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_cc4b2
+### CC: Note: NLSPATH = /opt/solarisstudio12.4/bin/../lib/locale/%L/LC_MESSAGES/%N.cat:/opt/solarisstudio12.4/bin/../../lib/locale/%L/LC_MESSAGES/%N.cat
+###     command line files and options (expanded):
+### -v CMakeFiles/cmTC_cc4b2.dir/CMakeCXXCompilerABI.cpp.o -ocmTC_cc4b2
+### CC: Note: LD_LIBRARY_PATH = (null)
+### CC: Note: LD_RUN_PATH     = (null)
+### CC: Note: LD_OPTIONS      = (null)
+ln -s /opt/solarisstudio12.4/lib/compilers /tmp/lib_link.1547820952.9076.01
+/usr/ccs/bin/ld -zld32=-S/tmp/lib_link.1547820952.9076.01/libldstab_ws.so -zld64=-S/tmp/lib_link.1547820952.9076.01/sparcv9/libldstab_ws.so -zld32=-S/tmp/lib_link.1547820952.9076.01/libld_annotate.so -zld64=-S/tmp/lib_link.1547820952.9076.01/sparcv9/libld_annotate.so -zld32=-S/tmp/lib_link.1547820952.9076.01/libCCexcept.so.1 -zld64=-S/tmp/lib_link.1547820952.9076.01/sparcv9/libCCexcept.so.1 /opt/solarisstudio12.4/lib/compilers/crti.o -u __1cH__CimplKcplus_init6F_v_ /opt/solarisstudio12.4/lib/compilers/CCrti.o /opt/solarisstudio12.4/lib/compilers/crt1.o /opt/solarisstudio12.4/lib/compilers/misalign.o /opt/solarisstudio12.4/lib/compilers/values-xa.o CMakeFiles/cmTC_cc4b2.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_cc4b2 -Y "P,/opt/solarisstudio12.4/lib/compilers/sparc:/opt/solarisstudio12.4/lib/compilers:/opt/solarisstudio12.4/lib/sparc:/opt/solarisstudio12.4/lib:/usr/ccs/lib:/lib:/usr/lib" -Qy "-R/opt/solarisstudio12.4/lib/sparc:/opt/solarisstudio12.4/lib" -lCstd -lCrun -lm -lc /opt/solarisstudio12.4/lib/compilers/CCrtn.o /opt/solarisstudio12.4/lib/compilers/crtn.o 2> /tmp/ld.1547820952.9076.02.err
+rm /tmp/lib_link.1547820952.9076.01
+rm /tmp/ld.1547820952.9076.02.err
+gmake[1]: Leaving directory '/tmp/ii/CMakeFiles/CMakeTmp'

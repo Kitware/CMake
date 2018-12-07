@@ -6,6 +6,7 @@
 # This is used internally by CMake and should not be included by user
 # code.
 
+include(${CMAKE_ROOT}/Modules/CMakeParseImplicitIncludeInfo.cmake)
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
 include(CMakeTestCompilerCommon)
 
@@ -85,6 +86,18 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
 
       if(ABI_NAME)
         set(CMAKE_${lang}_COMPILER_ABI "${ABI_NAME}" PARENT_SCOPE)
+      endif()
+
+      # Parse implicit include directory for this language, if available.
+      set (implicit_incdirs "")
+      if(CMAKE_${lang}_VERBOSE_FLAG)
+        cmake_parse_implicit_include_info("${OUTPUT}" "${lang}"
+          implicit_incdirs log rv)
+        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+          "Parsed ${lang} implicit include dir info from above output: rv=${rv}\n${log}\n\n")
+        if("${rv}" STREQUAL "done")  # update parent if parse completed ok
+          set(CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES "${implicit_incdirs}" PARENT_SCOPE)
+        endif()
       endif()
 
       # Parse implicit linker information for this language, if available.
