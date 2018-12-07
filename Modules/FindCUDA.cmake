@@ -875,11 +875,7 @@ endif()
 
 if(CUDA_USE_STATIC_CUDA_RUNTIME)
   if(UNIX)
-    # Check for the dependent libraries.  Here we look for pthreads.
-    if (DEFINED CMAKE_THREAD_PREFER_PTHREAD)
-      set(_cuda_cmake_thread_prefer_pthread ${CMAKE_THREAD_PREFER_PTHREAD})
-    endif()
-    set(CMAKE_THREAD_PREFER_PTHREAD 1)
+    # Check for the dependent libraries.
 
     # Many of the FindXYZ CMake comes with makes use of try_compile with int main(){return 0;}
     # as the source file.  Unfortunately this causes a warning with -Wstrict-prototypes and
@@ -889,13 +885,6 @@ if(CUDA_USE_STATIC_CUDA_RUNTIME)
     set(CMAKE_C_FLAGS "-fPIC")
     find_package(Threads REQUIRED)
     set(CMAKE_C_FLAGS ${_cuda_cmake_c_flags})
-
-    if (DEFINED _cuda_cmake_thread_prefer_pthread)
-      set(CMAKE_THREAD_PREFER_PTHREAD ${_cuda_cmake_thread_prefer_pthread})
-      unset(_cuda_cmake_thread_prefer_pthread)
-    else()
-      unset(CMAKE_THREAD_PREFER_PTHREAD)
-    endif()
 
     if(NOT APPLE)
       #On Linux, you must link against librt when using the static cuda runtime.

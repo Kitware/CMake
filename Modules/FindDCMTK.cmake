@@ -200,7 +200,6 @@ if(DCMTK_oflog_LIBRARY_RELEASE OR DCMTK_oflog_LIBRARY_DEBUG)
   # Hack - Not having a DCMTKConfig.cmake file to read the settings from, we will attempt to
   # find the library in all cases.
   # Ideally, pthread library should be discovered only if DCMTK_WITH_THREADS is enabled.
-  set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
   find_package(Threads)
 endif()
 

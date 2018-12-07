@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 project(FindThreads_C-only C)
 
-set(CMAKE_THREAD_PREFER_PTHREAD On)
 find_package(Threads REQUIRED)
 
 if (NOT WIN32)
