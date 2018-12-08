@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cm_static_string_view.hxx"
 #include "cm_string_view.hxx"
 
 #include <algorithm>
@@ -90,6 +91,12 @@ struct IntoString<string_view> : std::true_type
 };
 
 template <>
+struct IntoString<static_string_view> : std::true_type
+{
+  static string_view into_string(static_string_view s) { return s; }
+};
+
+template <>
 struct IntoString<char> : std::true_type
 {
   static std::string into_string(char const& c) { return std::string(1, c); }
@@ -154,6 +161,12 @@ template <>
 struct AsStringView<string_view> : std::true_type
 {
   static string_view view(string_view const& s) { return s; }
+};
+
+template <>
+struct AsStringView<static_string_view> : std::true_type
+{
+  static string_view view(static_string_view const& s) { return s; }
 };
 
 template <>
@@ -370,7 +383,7 @@ public:
   }
 
   /** Assign to an empty string.  */
-  void clear() { *this = String(string_view("", 0), Private()); }
+  void clear() { *this = ""_s; }
 
   /** Insert 'count' copies of 'ch' at position 'index'.  */
   String& insert(size_type index, size_type count, char ch);

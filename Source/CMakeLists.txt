@@ -377,6 +377,7 @@ set(SRCS
   cmake.h
   cm_string_view.cxx
   cm_string_view.hxx
+  cm_static_string_view.hxx
 
   cmCommand.cxx
   cmCommand.h
