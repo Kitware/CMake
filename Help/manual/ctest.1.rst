@@ -313,10 +313,11 @@ See `Build and Test Mode`_.
  Do not use.
 
 ``--timeout <seconds>``
- Set a global timeout on all tests.
+ Set the default test timeout.
 
- This option will set a global timeout on all tests that do not
- already have a timeout set on them.
+ This option effectively sets a timeout on all tests that do not
+ already have a timeout set on them via the :prop_test:`TIMEOUT`
+ property.
 
 ``--stop-time <time>``
  Set a time at which all tests should stop running.
