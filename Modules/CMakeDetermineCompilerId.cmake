@@ -659,13 +659,10 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
 #      set(CMAKE_EXECUTABLE_FORMAT "COFF" CACHE STRING "Executable file format")
 #    endif()
 #
-#    # Mach-O files start with CAFEBABE or FEEDFACE, according to http://radio.weblogs.com/0100490/2003/01/28.html
-#    if("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "cafebabe")
-#      set(CMAKE_EXECUTABLE_FORMAT "MACHO" CACHE STRING "Executable file format")
-#    endif()
-#    if("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "feedface")
-#      set(CMAKE_EXECUTABLE_FORMAT "MACHO" CACHE STRING "Executable file format")
-#    endif()
+    # Mach-O files start with MH_MAGIC or MH_CIGAM
+    if("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "feedface|cefaedfe|feedfacf|cffaedfe")
+      set(CMAKE_EXECUTABLE_FORMAT "MACHO" CACHE STRING "Executable file format")
+    endif()
 
   endif()
   if(NOT DEFINED CMAKE_EXECUTABLE_FORMAT)
