@@ -451,7 +451,8 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
   // STATIC library.)
   if (this->CurrentProcessingState == ProcessingKeywordPrivateInterface ||
       this->CurrentProcessingState == ProcessingPlainPrivateInterface) {
-    if (this->Target->GetType() == cmStateEnums::STATIC_LIBRARY) {
+    if (this->Target->GetType() == cmStateEnums::STATIC_LIBRARY ||
+        this->Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
       std::string configLib =
         this->Target->GetDebugGeneratorExpressions(libRef, llt);
       if (cmGeneratorExpression::IsValidTargetName(libRef) ||

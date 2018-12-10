@@ -45,6 +45,7 @@ run_object_lib_build2(LinkObjRHSObject)
 run_object_lib_build(LinkObjRHSShared2)
 run_object_lib_build(LinkObjRHSStatic2)
 run_object_lib_build2(LinkObjRHSObject2)
+run_object_lib_build(TransitiveDependencies)
 
 run_cmake(MissingSource)
 run_cmake(ObjWithObj)
