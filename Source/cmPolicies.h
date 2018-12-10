@@ -251,7 +251,10 @@ class cmMakefile;
          "The FindQt module does not exist for find_package().", 3, 14, 0,    \
          cmPolicies::WARN)                                                    \
   SELECT(POLICY, CMP0085, "$<IN_LIST:...> handles empty list items.", 3, 14,  \
-         0, cmPolicies::WARN)
+         0, cmPolicies::WARN)                                                 \
+  SELECT(POLICY, CMP0086,                                                     \
+         "UseSWIG honors SWIG_MODULE_NAME via -module flag.", 3, 14, 0,       \
+         cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
