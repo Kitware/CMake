@@ -55,6 +55,9 @@ run_cmake_command(GLOB-error-CONFIGURE_DEPENDS-SCRIPT_MODE ${CMAKE_COMMAND} -P
 if(NOT WIN32 OR CYGWIN)
   run_cmake(GLOB_RECURSE-cyclic-recursion)
   run_cmake(INSTALL-SYMLINK)
+  run_cmake(READ_SYMLINK)
+  run_cmake(READ_SYMLINK-noexist)
+  run_cmake(READ_SYMLINK-notsymlink)
 endif()
 
 if(RunCMake_GENERATOR STREQUAL "Ninja")

@@ -180,6 +180,9 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
   if (subCommand == "SIZE") {
     return this->HandleSizeCommand(args);
   }
+  if (subCommand == "READ_SYMLINK") {
+    return this->HandleReadSymlinkCommand(args);
+  }
 
   std::string e = "does not recognize sub-command " + subCommand;
   this->SetError(e);
@@ -3627,7 +3630,7 @@ bool cmFileCommand::HandleSizeCommand(std::vector<std::string> const& args)
 
   if (!cmSystemTools::FileExists(filename, true)) {
     std::ostringstream e;
-    e << "SIZE requested of path that is not readable " << filename;
+    e << "SIZE requested of path that is not readable:\n  " << filename;
     this->SetError(e.str());
     return false;
   }
@@ -3635,6 +3638,33 @@ bool cmFileCommand::HandleSizeCommand(std::vector<std::string> const& args)
   this->Makefile->AddDefinition(
     outputVariable,
     std::to_string(cmSystemTools::FileLength(filename)).c_str());
+
+  return true;
+}
+
+bool cmFileCommand::HandleReadSymlinkCommand(
+  std::vector<std::string> const& args)
+{
+  if (args.size() != 3) {
+    std::ostringstream e;
+    e << args[0] << " requires a file name and output variable";
+    this->SetError(e.str());
+    return false;
+  }
+
+  const std::string& filename = args[1];
+  const std::string& outputVariable = args[2];
+
+  std::string result;
+  if (!cmSystemTools::ReadSymlink(filename, result)) {
+    std::ostringstream e;
+    e << "READ_SYMLINK requested of path that is not a symlink:\n  "
+      << filename;
+    this->SetError(e.str());
+    return false;
+  }
+
+  this->Makefile->AddDefinition(outputVariable, result.c_str());
 
   return true;
 }

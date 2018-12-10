@@ -26,6 +26,7 @@ Synopsis
     file(`MAKE_DIRECTORY`_ [<dir>...])
     file({`COPY`_ | `INSTALL`_} <file>... DESTINATION <dir> [...])
     file(`SIZE`_ <filename> <out-var>)
+    file(`READ_SYMLINK`_ <filename> <out-var>)
 
   `Path Conversion`_
     file(`RELATIVE_PATH`_ <out-var> <directory> <file>)
@@ -343,6 +344,29 @@ use this signature (with some undocumented options for internal use).
 Determine the file size of the ``<filename>`` and put the result in
 ``<variable>`` variable. Requires that ``<filename>`` is a valid path
 pointing to a file and is readable.
+
+.. _READ_SYMLINK:
+
+.. code-block:: cmake
+
+  file(READ_SYMLINK <filename> <variable>)
+
+Read the symlink at ``<filename>`` and put the result in ``<variable>``.
+Requires that ``<filename>`` is a valid path pointing to a symlink. If
+``<filename>`` does not exist, or is not a symlink, an error is thrown.
+
+Note that this command returns the raw symlink path and does not resolve
+relative symlinks. If you want to resolve the relative symlink yourself, you
+could do something like this:
+
+.. code-block:: cmake
+
+  set(filename "/path/to/foo.sym")
+  file(READ_SYMLINK "${filename}" result)
+  if(NOT IS_ABSOLUTE "${result}")
+    get_filename_component(dir "${filename}" DIRECTORY)
+    set(result "${dir}/${result}")
+  endif()
 
 Path Conversion
 ^^^^^^^^^^^^^^^
