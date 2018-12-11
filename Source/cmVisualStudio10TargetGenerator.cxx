@@ -723,7 +723,8 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
       // if the entry from VS_DOTNET_REFERENCES is an existing file, generate
       // a new hint-reference and name it from the filename
       if (cmsys::SystemTools::FileExists(ri, true)) {
-        std::string name = cmsys::SystemTools::GetFilenameWithoutExtension(ri);
+        std::string name =
+          cmsys::SystemTools::GetFilenameWithoutLastExtension(ri);
         std::string path = ri;
         ConvertToWindowsSlash(path);
         this->DotNetHintReferences[""].push_back(
