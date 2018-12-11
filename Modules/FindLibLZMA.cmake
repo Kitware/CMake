@@ -9,6 +9,18 @@ Find LibLZMA
 
 Find LibLZMA headers and library
 
+
+IMPORTED Targets
+^^^^^^^^^^^^^^^^
+
+This module defines :prop_tgt:`IMPORTED` target ``LibLZMA::LibLZMA``, if
+LibLZMA has been found.
+
+Result variables
+^^^^^^^^^^^^^^^^
+
+This module will set the following variables in your project:
+
 ::
 
   LIBLZMA_FOUND             - True if liblzma is found.
@@ -51,17 +63,23 @@ if (LIBLZMA_LIBRARY)
 endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibLZMA  REQUIRED_VARS  LIBLZMA_INCLUDE_DIR
-                                                          LIBLZMA_LIBRARY
+find_package_handle_standard_args(LibLZMA  REQUIRED_VARS  LIBLZMA_LIBRARY
+                                                          LIBLZMA_INCLUDE_DIR
                                                           LIBLZMA_HAS_AUTO_DECODER
                                                           LIBLZMA_HAS_EASY_ENCODER
                                                           LIBLZMA_HAS_LZMA_PRESET
                                            VERSION_VAR    LIBLZMA_VERSION_STRING
                                  )
+mark_as_advanced( LIBLZMA_INCLUDE_DIR LIBLZMA_LIBRARY )
 
 if (LIBLZMA_FOUND)
     set(LIBLZMA_LIBRARIES ${LIBLZMA_LIBRARY})
     set(LIBLZMA_INCLUDE_DIRS ${LIBLZMA_INCLUDE_DIR})
+    if(NOT TARGET LibLZMA::LibLZMA)
+        add_library(LibLZMA::LibLZMA UNKNOWN IMPORTED)
+        set_target_properties(LibLZMA::LibLZMA PROPERTIES
+                              INTERFACE_INCLUDE_DIRECTORIES ${LIBLZMA_INCLUDE_DIR}
+                              IMPORTED_LINK_INTERFACE_LANGUAGES C
+                              IMPORTED_LOCATION ${LIBLZMA_LIBRARY})
+    endif()
 endif ()
-
-mark_as_advanced( LIBLZMA_INCLUDE_DIR LIBLZMA_LIBRARY )
