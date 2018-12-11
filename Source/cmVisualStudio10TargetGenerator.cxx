@@ -2484,6 +2484,10 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       if (!clrString.empty()) {
         clrString = ":" + clrString;
       }
+      auto pos = flags.find("/JMC");
+      if (pos != std::string::npos) {
+        flags.erase(pos, 4);
+      }
       flags += " /clr" + clrString;
     }
   }
