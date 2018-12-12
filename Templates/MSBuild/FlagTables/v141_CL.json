@@ -812,8 +812,15 @@
   {
     "name": "ConformanceMode",
     "switch": "permissive-",
-    "comment": "Conformance mode",
+    "comment": "Conformance mode enabled",
     "value": "true",
+    "flags": []
+  },
+  {
+    "name": "ConformanceMode",
+    "switch": "permissive",
+    "comment": "Conformance mode disabled",
+    "value": "false",
     "flags": []
   },
   {
