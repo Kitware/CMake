@@ -82,6 +82,10 @@
 #  include <signal.h> /* sigprocmask */
 #endif
 
+#ifdef __linux
+#  include <linux/fs.h>
+#endif
+
 // Windows API.
 #if defined(_WIN32)
 #  include <windows.h>
@@ -2158,6 +2162,120 @@ bool SystemTools::FilesDiffer(const std::string& source,
 }
 
 /**
+ * Blockwise copy source to destination file
+ */
+static bool CopyFileContentBlockwise(const std::string& source,
+                                     const std::string& destination)
+{
+// Open files
+#if defined(_WIN32)
+  kwsys::ifstream fin(
+    Encoding::ToNarrow(Encoding::ToWindowsExtendedPath(source)).c_str(),
+    std::ios::in | std::ios::binary);
+#else
+  kwsys::ifstream fin(source.c_str(), std::ios::in | std::ios::binary);
+#endif
+  if (!fin) {
+    return false;
+  }
+
+  // try and remove the destination file so that read only destination files
+  // can be written to.
+  // If the remove fails continue so that files in read only directories
+  // that do not allow file removal can be modified.
+  SystemTools::RemoveFile(destination);
+
+#if defined(_WIN32)
+  kwsys::ofstream fout(
+    Encoding::ToNarrow(Encoding::ToWindowsExtendedPath(destination)).c_str(),
+    std::ios::out | std::ios::trunc | std::ios::binary);
+#else
+  kwsys::ofstream fout(destination.c_str(),
+                       std::ios::out | std::ios::trunc | std::ios::binary);
+#endif
+  if (!fout) {
+    return false;
+  }
+
+  // This copy loop is very sensitive on certain platforms with
+  // slightly broken stream libraries (like HPUX).  Normally, it is
+  // incorrect to not check the error condition on the fin.read()
+  // before using the data, but the fin.gcount() will be zero if an
+  // error occurred.  Therefore, the loop should be safe everywhere.
+  while (fin) {
+    const int bufferSize = 4096;
+    char buffer[bufferSize];
+
+    fin.read(buffer, bufferSize);
+    if (fin.gcount()) {
+      fout.write(buffer, fin.gcount());
+    } else {
+      break;
+    }
+  }
+
+  // Make sure the operating system has finished writing the file
+  // before closing it.  This will ensure the file is finished before
+  // the check below.
+  fout.flush();
+
+  fin.close();
+  fout.close();
+
+  if (!fout) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Clone the source file to the destination file
+ *
+ * If available, the Linux FICLONE ioctl is used to create a check
+ * copy-on-write clone of the source file.
+ *
+ * The method returns false for the following cases:
+ * - The code has not been compiled on Linux or the ioctl was unknown
+ * - The source and destination is on different file systems
+ * - The underlying filesystem does not support file cloning
+ * - An unspecified error occurred
+ */
+static bool CloneFileContent(const std::string& source,
+                             const std::string& destination)
+{
+#if defined(__linux) && defined(FICLONE)
+  int in = open(source.c_str(), O_RDONLY);
+  if (in < 0) {
+    return false;
+  }
+
+  SystemTools::RemoveFile(destination);
+
+  int out =
+    open(destination.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+  if (out < 0) {
+    close(in);
+    return false;
+  }
+
+  int result = ioctl(out, FICLONE, in);
+  close(in);
+  close(out);
+
+  if (result < 0) {
+    return false;
+  }
+
+  return true;
+#else
+  (void)source;
+  (void)destination;
+  return false;
+#endif
+}
+
+/**
  * Copy a file named by "source" to the file named by "destination".
  */
 bool SystemTools::CopyFileAlways(const std::string& source,
@@ -2174,9 +2292,6 @@ bool SystemTools::CopyFileAlways(const std::string& source,
   if (SystemTools::FileIsDirectory(source)) {
     SystemTools::MakeDirectory(destination);
   } else {
-    const int bufferSize = 4096;
-    char buffer[bufferSize];
-
     // If destination is a directory, try to create a file with the same
     // name as the source in that directory.
 
@@ -2195,61 +2310,11 @@ bool SystemTools::CopyFileAlways(const std::string& source,
 
     SystemTools::MakeDirectory(destination_dir);
 
-// Open files
-#if defined(_WIN32)
-    kwsys::ifstream fin(
-      Encoding::ToNarrow(Encoding::ToWindowsExtendedPath(source)).c_str(),
-      std::ios::in | std::ios::binary);
-#else
-    kwsys::ifstream fin(source.c_str(), std::ios::in | std::ios::binary);
-#endif
-    if (!fin) {
-      return false;
-    }
-
-    // try and remove the destination file so that read only destination files
-    // can be written to.
-    // If the remove fails continue so that files in read only directories
-    // that do not allow file removal can be modified.
-    SystemTools::RemoveFile(real_destination);
-
-#if defined(_WIN32)
-    kwsys::ofstream fout(
-      Encoding::ToNarrow(Encoding::ToWindowsExtendedPath(real_destination))
-        .c_str(),
-      std::ios::out | std::ios::trunc | std::ios::binary);
-#else
-    kwsys::ofstream fout(real_destination.c_str(),
-                         std::ios::out | std::ios::trunc | std::ios::binary);
-#endif
-    if (!fout) {
-      return false;
-    }
-
-    // This copy loop is very sensitive on certain platforms with
-    // slightly broken stream libraries (like HPUX).  Normally, it is
-    // incorrect to not check the error condition on the fin.read()
-    // before using the data, but the fin.gcount() will be zero if an
-    // error occurred.  Therefore, the loop should be safe everywhere.
-    while (fin) {
-      fin.read(buffer, bufferSize);
-      if (fin.gcount()) {
-        fout.write(buffer, fin.gcount());
-      } else {
-        break;
+    if (!CloneFileContent(source, real_destination)) {
+      // if cloning did not succeed, fall back to blockwise copy
+      if (!CopyFileContentBlockwise(source, real_destination)) {
+        return false;
       }
-    }
-
-    // Make sure the operating system has finished writing the file
-    // before closing it.  This will ensure the file is finished before
-    // the check below.
-    fout.flush();
-
-    fin.close();
-    fout.close();
-
-    if (!fout) {
-      return false;
     }
   }
   if (perms) {
