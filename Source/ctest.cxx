@@ -128,7 +128,7 @@ static const char* cmDocumentationOptions[][2] = {
   { "--schedule-random", "Use a random order for scheduling tests" },
   { "--submit-index",
     "Submit individual dashboard tests with specific index" },
-  { "--timeout <seconds>", "Set a global timeout on all tests." },
+  { "--timeout <seconds>", "Set the default test timeout." },
   { "--stop-time <time>",
     "Set a time at which all tests should stop running." },
   { "--http1.0", "Submit using HTTP 1.0." },
