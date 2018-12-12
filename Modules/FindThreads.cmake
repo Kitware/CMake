@@ -12,7 +12,6 @@ The following variables are set
 ::
 
   CMAKE_THREAD_LIBS_INIT     - the thread library
-  CMAKE_USE_SPROC_INIT       - are we using sproc?
   CMAKE_USE_WIN32_THREADS_INIT - using WIN32 threads?
   CMAKE_USE_PTHREADS_INIT    - are we using pthreads
   CMAKE_HP_PTHREADS_INIT     - are we using hp pthreads
@@ -22,12 +21,6 @@ The following import target is created
 ::
 
   Threads::Threads
-
-For systems with multiple thread libraries, caller can set
-
-::
-
-  CMAKE_THREAD_PREFER_PTHREAD
 
 If the use of the -pthread compiler and linker flag is preferred then the
 caller can set
@@ -53,12 +46,6 @@ elseif(CMAKE_CXX_COMPILER_LOADED)
   include (CheckIncludeFileCXX)
 else()
   message(FATAL_ERROR "FindThreads only works if either C or CXX language is enabled")
-endif()
-
-# Do we have sproc?
-if(CMAKE_SYSTEM_NAME MATCHES IRIX AND NOT CMAKE_THREAD_PREFER_PTHREAD)
-  include (CheckIncludeFiles)
-  CHECK_INCLUDE_FILES("sys/types.h;sys/prctl.h"  CMAKE_HAVE_SPROC_H)
 endif()
 
 # Internal helper macro.
@@ -113,58 +100,53 @@ macro(_check_pthreads_flag)
   endif()
 endmacro()
 
-if(CMAKE_HAVE_SPROC_H AND NOT CMAKE_THREAD_PREFER_PTHREAD)
-  # We have sproc
-  set(CMAKE_USE_SPROC_INIT 1)
+# Do we have pthreads?
+if(CMAKE_C_COMPILER_LOADED)
+  CHECK_INCLUDE_FILE("pthread.h" CMAKE_HAVE_PTHREAD_H)
 else()
-  # Do we have pthreads?
-  if(CMAKE_C_COMPILER_LOADED)
-    CHECK_INCLUDE_FILE("pthread.h" CMAKE_HAVE_PTHREAD_H)
-  else()
-    CHECK_INCLUDE_FILE_CXX("pthread.h" CMAKE_HAVE_PTHREAD_H)
-  endif()
-  if(CMAKE_HAVE_PTHREAD_H)
+  CHECK_INCLUDE_FILE_CXX("pthread.h" CMAKE_HAVE_PTHREAD_H)
+endif()
+if(CMAKE_HAVE_PTHREAD_H)
 
-    #
-    # We have pthread.h
-    # Let's check for the library now.
-    #
-    set(CMAKE_HAVE_THREADS_LIBRARY)
-    if(NOT THREADS_HAVE_PTHREAD_ARG)
-      # Check if pthread functions are in normal C library.
-      # If the pthread functions already exist in C library, we could just use
-      # them instead of linking to the additional pthread library. We could
-      # try to check any pthread symbol name, but here is an exception. If we
-      # use clang asan build, we will find the pthread_create() symbol in the
-      # libc(libasan). However, it doesn't have the full pthread implementation.
-      # So, we can't assume that we have the pthread implementation in libc
-      # using the pthread_create() checking here. Then, we turn to check the
-      # pthread_kill() symbol instead.
-      CHECK_SYMBOL_EXISTS(pthread_kill pthread.h CMAKE_HAVE_LIBC_PTHREAD_KILL)
-      if(CMAKE_HAVE_LIBC_PTHREAD_KILL)
-        set(CMAKE_THREAD_LIBS_INIT "")
-        set(CMAKE_HAVE_THREADS_LIBRARY 1)
-        set(Threads_FOUND TRUE)
-      else()
+  #
+  # We have pthread.h
+  # Let's check for the library now.
+  #
+  set(CMAKE_HAVE_THREADS_LIBRARY)
+  if(NOT THREADS_HAVE_PTHREAD_ARG)
+    # Check if pthread functions are in normal C library.
+    # If the pthread functions already exist in C library, we could just use
+    # them instead of linking to the additional pthread library. We could
+    # try to check any pthread symbol name, but here is an exception. If we
+    # use clang asan build, we will find the pthread_create() symbol in the
+    # libc(libasan). However, it doesn't have the full pthread implementation.
+    # So, we can't assume that we have the pthread implementation in libc
+    # using the pthread_create() checking here. Then, we turn to check the
+    # pthread_kill() symbol instead.
+    CHECK_SYMBOL_EXISTS(pthread_kill pthread.h CMAKE_HAVE_LIBC_PTHREAD_KILL)
+    if(CMAKE_HAVE_LIBC_PTHREAD_KILL)
+      set(CMAKE_THREAD_LIBS_INIT "")
+      set(CMAKE_HAVE_THREADS_LIBRARY 1)
+      set(Threads_FOUND TRUE)
+    else()
 
-        # Check for -pthread first if enabled. This is the recommended
-        # way, but not backwards compatible as one must also pass -pthread
-        # as compiler flag then.
-        if (THREADS_PREFER_PTHREAD_FLAG)
-           _check_pthreads_flag()
-        endif ()
+      # Check for -pthread first if enabled. This is the recommended
+      # way, but not backwards compatible as one must also pass -pthread
+      # as compiler flag then.
+      if (THREADS_PREFER_PTHREAD_FLAG)
+         _check_pthreads_flag()
+      endif ()
 
-        _check_threads_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
-        _check_threads_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
-        if(CMAKE_SYSTEM_NAME MATCHES "SunOS")
-            # On sun also check for -lthread
-            _check_threads_lib(thread thr_create CMAKE_HAVE_THR_CREATE)
-        endif()
+      _check_threads_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
+      _check_threads_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
+      if(CMAKE_SYSTEM_NAME MATCHES "SunOS")
+          # On sun also check for -lthread
+          _check_threads_lib(thread thr_create CMAKE_HAVE_THR_CREATE)
       endif()
     endif()
-
-    _check_pthreads_flag()
   endif()
+
+  _check_pthreads_flag()
 endif()
 
 if(CMAKE_THREAD_LIBS_INIT OR CMAKE_HAVE_LIBC_PTHREAD_KILL)
