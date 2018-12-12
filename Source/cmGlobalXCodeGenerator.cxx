@@ -3563,7 +3563,7 @@ std::string cmGlobalXCodeGenerator::RelativeToSource(const char* p)
 {
   // We force conversion because Xcode breakpoints do not work unless
   // they are in a file named relative to the source tree.
-  return cmOutputConverter::ForceToRelativePath(
+  return cmSystemTools::ForceToRelativePath(
     cmSystemTools::JoinPath(this->ProjectSourceDirectoryComponents), p);
 }
 

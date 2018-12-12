@@ -697,9 +697,9 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
 std::string cmDependsFortran::MaybeConvertToRelativePath(
   std::string const& base, std::string const& path)
 {
-  if (!cmOutputConverter::ContainedInDirectory(
-        base, path, this->LocalGenerator->GetStateSnapshot().GetDirectory())) {
+  if (!this->LocalGenerator->GetStateSnapshot().GetDirectory().ContainsBoth(
+        base, path)) {
     return path;
   }
-  return cmOutputConverter::ForceToRelativePath(base, path);
+  return cmSystemTools::ForceToRelativePath(base, path);
 }

@@ -32,6 +32,9 @@ public:
   void SetRelativePathTopSource(const char* dir);
   void SetRelativePathTopBinary(const char* dir);
 
+  bool ContainsBoth(std::string const& local_path,
+                    std::string const& remote_path) const;
+
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesEntryBacktraces() const;
   void AppendIncludeDirectoriesEntry(std::string const& vec,
