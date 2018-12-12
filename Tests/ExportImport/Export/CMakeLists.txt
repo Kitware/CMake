@@ -155,6 +155,13 @@ add_library(testStaticLibRequiredPrivate testStaticLibRequiredPrivate.c)
 target_link_libraries(testLibDepends PRIVATE testStaticLibRequiredPrivate)
 cmake_policy(POP)
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0079 NEW)
+add_library(TopDirLib STATIC testTopDirLib.c)
+add_subdirectory(SubDirLinkA)
+add_subdirectory(SubDirLinkB)
+cmake_policy(POP)
+
 macro(add_include_lib _libName)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_libName}.c" "/* no content */\n")
   add_library(${_libName} "${CMAKE_CURRENT_BINARY_DIR}/${_libName}.c")
@@ -508,11 +515,12 @@ install(
   testLibCycleA testLibCycleB
   testLibNoSONAME
   cmp0022NEW cmp0022OLD
+  TopDirLib SubDirLinkA
   systemlib
   EXPORT exp
-  RUNTIME DESTINATION $<1:bin>
-  LIBRARY DESTINATION $<1:lib> NAMELINK_SKIP
-  ARCHIVE DESTINATION $<1:lib>
+  RUNTIME DESTINATION $<1:bin>$<0:/wrong>
+  LIBRARY DESTINATION $<1:lib>$<0:/wrong> NAMELINK_SKIP
+  ARCHIVE DESTINATION $<1:lib>$<0:/wrong>
   ${maybe_OBJECTS_DESTINATION}
   FRAMEWORK DESTINATION Frameworks
   BUNDLE DESTINATION Applications
@@ -566,6 +574,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
   testSharedLibRequired testSharedLibRequiredUser testSharedLibRequiredUser2
   testSharedLibDepends renamed_on_export
   cmp0022NEW cmp0022OLD
+  TopDirLib SubDirLinkA
   systemlib
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
@@ -597,3 +606,39 @@ install(
   )
 install(DIRECTORY $<1:include/abs>$<0:/wrong> DESTINATION $<1:include>$<0:/wrong>)
 install(EXPORT expAbs NAMESPACE expAbs_ DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/expAbs)
+
+
+#------------------------------------------------------------------------------
+# test export of INTERFACE_LINK_OPTIONS
+add_library(testLinkOptions INTERFACE)
+target_link_options(testLinkOptions INTERFACE INTERFACE_FLAG)
+
+install(TARGETS testLinkOptions
+        EXPORT RequiredExp DESTINATION lib)
+export(TARGETS testLinkOptions NAMESPACE bld_ APPEND FILE ExportBuildTree.cmake)
+
+
+#------------------------------------------------------------------------------
+# test export of INTERFACE_LINK_DIRECTORIES
+add_library(testLinkDirectories INTERFACE)
+target_link_directories(testLinkDirectories INTERFACE
+  $<BUILD_INTERFACE:/interface/build>
+  $<INSTALL_INTERFACE:interface/install>)
+
+install(TARGETS testLinkDirectories
+        EXPORT RequiredExp DESTINATION lib)
+export(TARGETS testLinkDirectories NAMESPACE bld_ APPEND FILE ExportBuildTree.cmake)
+
+
+#------------------------------------------------------------------------------
+# test export of INTERFACE_LINK_DEPENDS
+if(CMAKE_GENERATOR MATCHES "Make|Ninja")
+  add_library(testLinkDepends INTERFACE)
+  set_property(TARGET testLinkDepends PROPERTY INTERFACE_LINK_DEPENDS
+    $<BUILD_INTERFACE:BUILD_LINK_DEPENDS>
+    $<INSTALL_INTERFACE:INSTALL_LINK_DEPENDS>)
+
+  install(TARGETS testLinkDepends
+    EXPORT RequiredExp DESTINATION lib)
+  export(TARGETS testLinkDepends NAMESPACE bld_ APPEND FILE ExportBuildTree.cmake)
+endif()

@@ -130,3 +130,15 @@ target_link_libraries(newsignature1 PRIVATE depC INTERFACE depD PUBLIC depB PRIV
 
 assert_property(newsignature1 INTERFACE_LINK_LIBRARIES "depD;depB")
 assert_property(newsignature1 LINK_LIBRARIES "depC;depB;subdirlib")
+
+#----------------------------------------------------------------------------
+# Test cross-directory linking.
+cmake_policy(PUSH)
+cmake_policy(SET CMP0079 NEW)
+add_executable(TopDir TopDir.c)
+add_subdirectory(SubDirA)
+add_subdirectory(SubDirB)
+target_link_libraries(SubDirB TopDirImported)
+add_library(TopDirImported IMPORTED INTERFACE)
+target_compile_definitions(TopDirImported INTERFACE DEF_TopDirImported)
+cmake_policy(POP)

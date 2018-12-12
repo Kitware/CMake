@@ -22,7 +22,7 @@ public:
   cmStateSnapshot(cmState* state = nullptr);
   cmStateSnapshot(cmState* state, cmStateDetail::PositionType position);
 
-  const char* GetDefinition(std::string const& name) const;
+  std::string const* GetDefinition(std::string const& name) const;
   bool IsInitialized(std::string const& name) const;
   void SetDefinition(std::string const& name, std::string const& value);
   void RemoveDefinition(std::string const& name);

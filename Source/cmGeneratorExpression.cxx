@@ -38,7 +38,7 @@ cmGeneratorExpression::~cmGeneratorExpression()
 {
 }
 
-const char* cmCompiledGeneratorExpression::Evaluate(
+const std::string& cmCompiledGeneratorExpression::Evaluate(
   cmLocalGenerator* lg, const std::string& config, bool quiet,
   const cmGeneratorTarget* headTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
@@ -48,7 +48,7 @@ const char* cmCompiledGeneratorExpression::Evaluate(
                         language);
 }
 
-const char* cmCompiledGeneratorExpression::Evaluate(
+const std::string& cmCompiledGeneratorExpression::Evaluate(
   cmLocalGenerator* lg, const std::string& config, bool quiet,
   const cmGeneratorTarget* headTarget, const cmGeneratorTarget* currentTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
@@ -61,12 +61,12 @@ const char* cmCompiledGeneratorExpression::Evaluate(
   return this->EvaluateWithContext(context, dagChecker);
 }
 
-const char* cmCompiledGeneratorExpression::EvaluateWithContext(
+const std::string& cmCompiledGeneratorExpression::EvaluateWithContext(
   cmGeneratorExpressionContext& context,
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
   if (!this->NeedsEvaluation) {
-    return this->Input.c_str();
+    return this->Input;
   }
 
   this->Output.clear();
@@ -97,8 +97,7 @@ const char* cmCompiledGeneratorExpression::EvaluateWithContext(
 
   this->DependTargets = context.DependTargets;
   this->AllTargetsSeen = context.AllTargets;
-  // TODO: Return a std::string from here instead?
-  return this->Output.c_str();
+  return this->Output;
 }
 
 cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
@@ -169,7 +168,7 @@ static std::string stripAllGeneratorExpressions(const std::string& input)
     const char* c = input.c_str() + pos;
     const char* const cStart = c;
     for (; *c; ++c) {
-      if (c[0] == '$' && c[1] == '<') {
+      if (cmGeneratorExpression::StartsWithGeneratorExpression(c)) {
         ++nestingLevel;
         ++c;
         continue;
@@ -244,7 +243,7 @@ static std::string stripExportInterface(
     const char* c = input.c_str() + pos;
     const char* const cStart = c;
     for (; *c; ++c) {
-      if (c[0] == '$' && c[1] == '<') {
+      if (cmGeneratorExpression::StartsWithGeneratorExpression(c)) {
         ++nestingLevel;
         ++c;
         continue;
@@ -311,7 +310,7 @@ void cmGeneratorExpression::Split(const std::string& input,
     const char* c = input.c_str() + pos;
     const char* const cStart = c;
     for (; *c; ++c) {
-      if (c[0] == '$' && c[1] == '<') {
+      if (cmGeneratorExpression::StartsWithGeneratorExpression(c)) {
         ++nestingLevel;
         ++c;
         continue;
@@ -387,17 +386,19 @@ void cmCompiledGeneratorExpression::GetMaxLanguageStandard(
   }
 }
 
-const char* cmGeneratorExpressionInterpreter::Evaluate(
+const std::string& cmGeneratorExpressionInterpreter::Evaluate(
   const char* expression, const std::string& property)
 {
-  if (this->Target.empty()) {
-    return this->EvaluateExpression(expression);
-  }
+  this->CompiledGeneratorExpression =
+    this->GeneratorExpression.Parse(expression);
 
   // Specify COMPILE_OPTIONS to DAGchecker, same semantic as COMPILE_FLAGS
   cmGeneratorExpressionDAGChecker dagChecker(
-    this->Target, property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property,
-    nullptr, nullptr);
+    this->HeadTarget,
+    property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property, nullptr,
+    nullptr);
 
-  return this->EvaluateExpression(expression, &dagChecker);
+  return this->CompiledGeneratorExpression->Evaluate(
+    this->LocalGenerator, this->Config, false, this->HeadTarget, &dagChecker,
+    this->Language);
 }

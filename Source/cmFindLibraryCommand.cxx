@@ -236,9 +236,9 @@ cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf)
   this->GG = this->Makefile->GetGlobalGenerator();
 
   // Collect the list of library name prefixes/suffixes to try.
-  const char* prefixes_list =
+  std::string const& prefixes_list =
     this->Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_PREFIXES");
-  const char* suffixes_list =
+  std::string const& suffixes_list =
     this->Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_SUFFIXES");
   cmSystemTools::ExpandListArgument(prefixes_list, this->Prefixes, true);
   cmSystemTools::ExpandListArgument(suffixes_list, this->Suffixes, true);

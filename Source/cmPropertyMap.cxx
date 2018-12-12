@@ -68,7 +68,7 @@ const cmListFileBacktrace & cmPropertyMap::GetPropertyBacktrace(const std::strin
 
   cmPropertyMap::const_iterator it = this->find(name);
   if (it == this->end()) {
-    return cmListFileBacktrace::Empty();
+    return cmListFileBacktrace::EmptyBacktrace();
   }
   return it->second.GetBacktrace();
 }

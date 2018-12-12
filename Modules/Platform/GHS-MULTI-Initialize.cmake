@@ -1,40 +1,44 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+#Setup Green Hills MULTI specific compilation information
 
-#Setup Greenhills MULTI specific compilation information
+set(GHS_OS_ROOT "C:/ghs" CACHE PATH "GHS platform OS search root directory")
+mark_as_advanced(GHS_OS_ROOT)
 
-if (NOT GHS_INT_DIRECTORY)
-  #Assume the C:/ghs/int#### directory that is latest is preferred
-  set(GHS_EXPECTED_ROOT "C:/ghs")
-  if (EXISTS ${GHS_EXPECTED_ROOT})
-    FILE(GLOB GHS_CANDIDATE_INT_DIRS RELATIVE
-      ${GHS_EXPECTED_ROOT} ${GHS_EXPECTED_ROOT}/*)
-    string(REGEX MATCHALL  "int[0-9][0-9][0-9][0-9a-z]" GHS_CANDIDATE_INT_DIRS
-      ${GHS_CANDIDATE_INT_DIRS})
-    if (GHS_CANDIDATE_INT_DIRS)
-      list(SORT GHS_CANDIDATE_INT_DIRS)
-      list(GET GHS_CANDIDATE_INT_DIRS -1 GHS_INT_DIRECTORY)
-      string(CONCAT GHS_INT_DIRECTORY ${GHS_EXPECTED_ROOT} "/"
-        ${GHS_INT_DIRECTORY})
+set(GHS_OS_DIR "NOTFOUND" CACHE PATH "GHS platform OS directory")
+mark_as_advanced(GHS_OS_DIR)
+
+#set GHS_OS_DIR if not set by user
+if ( NOT GHS_OS_DIR )
+  if (EXISTS ${GHS_OS_ROOT})
+
+    #get all directories in root directory
+    FILE(GLOB GHS_CANDIDATE_OS_DIRS
+      LIST_DIRECTORIES true RELATIVE ${GHS_OS_ROOT} ${GHS_OS_ROOT}/*)
+    FILE(GLOB GHS_CANDIDATE_OS_FILES
+      LIST_DIRECTORIES false RELATIVE ${GHS_OS_ROOT} ${GHS_OS_ROOT}/*)
+    if ( GHS_CANDIDATE_OS_FILES )
+      list(REMOVE_ITEM GHS_CANDIDATE_OS_DIRS ${GHS_CANDIDATE_OS_FILES})
     endif ()
-  endif ()
 
-  #Try to look for known registry values
-  if (NOT GHS_INT_DIRECTORY)
-    find_path(GHS_INT_DIRECTORY INTEGRITY.ld PATHS
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\GreenHillsSoftware6433c345;InstallLocation]" #int1122
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\GreenHillsSoftware289b6625;InstallLocation]" #int1104
-      )
-  endif ()
+    #filter based on platform name
+    if (GHS_TARGET_PLATFORM STREQUAL "integrity")
+      list(FILTER GHS_CANDIDATE_OS_DIRS INCLUDE REGEX "int[0-9][0-9][0-9][0-9a-z].*")
+    endif ()
 
-  set(GHS_INT_DIRECTORY ${GHS_INT_DIRECTORY} CACHE PATH
-    "Path to integrity directory")
+    if (GHS_CANDIDATE_OS_DIRS)
+      list(SORT GHS_CANDIDATE_OS_DIRS)
+      list(GET GHS_CANDIDATE_OS_DIRS -1 GHS_OS_DIR)
+      string(CONCAT GHS_OS_DIR ${GHS_OS_ROOT} "/" ${GHS_OS_DIR})
+    endif()
+
+    set(GHS_OS_DIR "${GHS_OS_DIR}" CACHE PATH "GHS platform OS directory" FORCE)
+  endif ()
 endif ()
 
-set(GHS_OS_DIR ${GHS_INT_DIRECTORY} CACHE PATH "OS directory")
-set(GHS_PRIMARY_TARGET "arm_integrity.tgt" CACHE STRING "target for compilation")
-set(GHS_BSP_NAME "simarm" CACHE STRING "BSP name")
+set(GHS_BSP_NAME "IGNORE" CACHE STRING "BSP name")
+
 set(GHS_CUSTOMIZATION "" CACHE FILEPATH "optional GHS customization")
 mark_as_advanced(GHS_CUSTOMIZATION)
 set(GHS_GPJ_MACROS "" CACHE STRING "optional GHS macros generated in the .gpjs for legacy reasons")

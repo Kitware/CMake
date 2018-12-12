@@ -57,6 +57,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="styleSheet">
+        <string notr="true">padding-left: 0</string>
+       </property>
        <property name="editable">
         <bool>true</bool>
        </property>

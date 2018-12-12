@@ -15,7 +15,7 @@
 
 
 static size_t
-sparc_code(lzma_simple *simple lzma_attribute((__unused__)),
+sparc_code(void *simple lzma_attribute((__unused__)),
 		uint32_t now_pos, bool is_encoder,
 		uint8_t *buffer, size_t size)
 {
@@ -26,8 +26,6 @@ sparc_code(lzma_simple *simple lzma_attribute((__unused__)),
 				|| (buffer[i] == 0x7F
 				&& (buffer[i + 1] & 0xC0) == 0xC0)) {
 
-			uint32_t dest;
-
 			uint32_t src = ((uint32_t)buffer[i + 0] << 24)
 					| ((uint32_t)buffer[i + 1] << 16)
 					| ((uint32_t)buffer[i + 2] << 8)
@@ -35,6 +33,7 @@ sparc_code(lzma_simple *simple lzma_attribute((__unused__)),
 
 			src <<= 2;
 
+			uint32_t dest;
 			if (is_encoder)
 				dest = now_pos + (uint32_t)(i) + src;
 			else
@@ -58,7 +57,7 @@ sparc_code(lzma_simple *simple lzma_attribute((__unused__)),
 
 
 static lzma_ret
-sparc_coder_init(lzma_next_coder *next, lzma_allocator *allocator,
+sparc_coder_init(lzma_next_coder *next, const lzma_allocator *allocator,
 		const lzma_filter_info *filters, bool is_encoder)
 {
 	return lzma_simple_coder_init(next, allocator, filters,
@@ -68,7 +67,8 @@ sparc_coder_init(lzma_next_coder *next, lzma_allocator *allocator,
 
 extern lzma_ret
 lzma_simple_sparc_encoder_init(lzma_next_coder *next,
-		lzma_allocator *allocator, const lzma_filter_info *filters)
+		const lzma_allocator *allocator,
+		const lzma_filter_info *filters)
 {
 	return sparc_coder_init(next, allocator, filters, true);
 }
@@ -76,7 +76,8 @@ lzma_simple_sparc_encoder_init(lzma_next_coder *next,
 
 extern lzma_ret
 lzma_simple_sparc_decoder_init(lzma_next_coder *next,
-		lzma_allocator *allocator, const lzma_filter_info *filters)
+		const lzma_allocator *allocator,
+		const lzma_filter_info *filters)
 {
 	return sparc_coder_init(next, allocator, filters, false);
 }

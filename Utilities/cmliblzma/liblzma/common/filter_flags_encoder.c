@@ -31,8 +31,6 @@ extern LZMA_API(lzma_ret)
 lzma_filter_flags_encode(const lzma_filter *filter,
 		uint8_t *out, size_t *out_pos, size_t out_size)
 {
-	uint32_t props_size;
-
 	// Filter ID
 	if (filter->id >= LZMA_FILTER_RESERVED_START)
 		return LZMA_PROG_ERROR;
@@ -41,6 +39,7 @@ lzma_filter_flags_encode(const lzma_filter *filter,
 			out, out_pos, out_size));
 
 	// Size of Properties
+	uint32_t props_size;
 	return_if_error(lzma_properties_size(&props_size, filter));
 	return_if_error(lzma_vli_encode(props_size, NULL,
 			out, out_pos, out_size));

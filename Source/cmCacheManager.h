@@ -126,7 +126,7 @@ public:
   int GetSize() { return static_cast<int>(this->Cache.size()); }
 
   ///! Get a value from the cache given a key
-  const char* GetInitializedCacheValue(const std::string& key) const;
+  const std::string* GetInitializedCacheValue(const std::string& key) const;
 
   const char* GetCacheEntryValue(const std::string& key)
   {

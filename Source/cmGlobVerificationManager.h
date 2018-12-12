@@ -37,6 +37,9 @@ protected:
                      const std::string& variable,
                      const cmListFileBacktrace& bt);
 
+  ///! Clear the glob cache for state reset.
+  void Reset();
+
   ///! Check targets should be written in generated build system.
   bool DoWriteVerifyTarget() const;
 

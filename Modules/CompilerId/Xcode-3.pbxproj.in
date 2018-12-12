@@ -73,6 +73,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				@id_development_team@
+				@id_code_sign_identity@
 				PRODUCT_NAME = CompilerId@id_lang@;
 			};
 			name = Debug;

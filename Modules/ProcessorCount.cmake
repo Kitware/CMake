@@ -12,7 +12,7 @@
 # Sets the variable named ${var} to the number of physical cores
 # available on the machine if the information can be determined.
 # Otherwise it is set to 0.  Currently this functionality is implemented
-# for AIX, cygwin, FreeBSD, HPUX, IRIX, Linux, Mac OS X, QNX, Sun and
+# for AIX, cygwin, FreeBSD, HPUX, IRIX, Linux, macOS, QNX, Sun and
 # Windows.
 #
 # This function is guaranteed to return a positive integer (>=1) if it

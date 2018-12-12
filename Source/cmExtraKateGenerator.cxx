@@ -58,7 +58,7 @@ void cmExtraKateGenerator::CreateKateProjectFile(
 {
   std::string filename = lg->GetBinaryDirectory();
   filename += "/.kateproject";
-  cmGeneratedFileStream fout(filename.c_str());
+  cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
   }
@@ -215,7 +215,7 @@ void cmExtraKateGenerator::CreateDummyKateProjectFile(
   filename += "/";
   filename += this->ProjectName;
   filename += ".kateproject";
-  cmGeneratedFileStream fout(filename.c_str());
+  cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
   }

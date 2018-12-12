@@ -15,6 +15,7 @@
 #include "cm_sys_stat.h"
 
 class cmCPackLog;
+class cmGlobalGenerator;
 class cmInstalledFile;
 class cmMakefile;
 
@@ -185,6 +186,17 @@ protected:
     bool setDestDir, const std::string& tempInstallDirectory,
     const mode_t* default_dir_mode);
 
+  virtual int RunPreinstallTarget(const std::string& installProjectName,
+                                  const std::string& installDirectory,
+                                  cmGlobalGenerator* globalGenerator,
+                                  const std::string& buildConfig);
+  virtual int InstallCMakeProject(
+    bool setDestDir, const std::string& installDirectory,
+    const std::string& baseTempInstallDirectory,
+    const mode_t* default_dir_mode, const std::string& component,
+    bool componentInstall, const std::string& installSubDirectory,
+    const std::string& buildConfig, std::string& absoluteDestFiles);
+
   /**
    * The various level of support of
    * CPACK_SET_DESTDIR used by the generator.
@@ -271,6 +283,7 @@ protected:
    */
   std::vector<std::string> files;
 
+  std::vector<cmCPackInstallCMakeProject> CMakeProjects;
   std::map<std::string, cmCPackInstallationType> InstallationTypes;
   /**
    * The set of components.
@@ -308,7 +321,6 @@ protected:
   bool Trace;
   bool TraceExpand;
 
-private:
   cmMakefile* MakefileMap;
 };
 

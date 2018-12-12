@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.1...3.13)
 
 project(TestMultiplePython CXX)
 
@@ -17,7 +17,6 @@ else()
   set (PS ":")
 endif()
 
-set(UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
 unset(CMAKE_SWIG_FLAGS)
 
 set_property(SOURCE "../example.i" PROPERTY CPLUSPLUS ON)

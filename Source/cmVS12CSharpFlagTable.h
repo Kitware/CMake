@@ -21,8 +21,8 @@ static cmVS7FlagTable cmVS12CSharpFlagTable[] = {
   { "AddModules", "addmodule:", "", "", cmIDEFlagTable::SemicolonAppendable },
   { "", "link", "", "", 0 },
 
-  { "Win32Resource", "win32res", "", "", cmIDEFlagTable::UserValueRequired },
-  { "ApplicationIcon", "win32icon", "", "",
+  { "Win32Resource", "win32res:", "", "", cmIDEFlagTable::UserValueRequired },
+  { "ApplicationIcon", "win32icon:", "", "",
     cmIDEFlagTable::UserValueRequired },
 
   { "ApplicationManifest", "win32manifest:", "", "",

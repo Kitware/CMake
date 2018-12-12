@@ -184,37 +184,35 @@ CTest
 CPack
 -----
 
-* CPack gained a ``FREEBSD`` generator for FreeBSD ``pkg(8)``, configured
-  by the :module:`CPackFreeBSD` module.
+* A :cpack_gen:`CPack FreeBSD Generator` was added for FreeBSD ``pkg(8)``.
 
-* The CPack ``DEB`` generator, configured by the :module:`CPackDeb` module,
-  was enabled on Windows.  While not fully featured (due to the lack of
-  external UNIX tools) this will allow building basic cross-platform Debian
-  packages.
+* The :cpack_gen:`CPack DEB Generator` was enabled on Windows.  While not
+  fully featured (due to the lack of external UNIX tools) this will allow
+  building basic cross-platform Debian packages.
 
-* The :module:`CPackDeb` module learned to set package release version in
-  ``Version`` info property.
+* The :cpack_gen:`CPack DEB Generator` learned to set package release
+  version in ``Version`` info property.
   See the :variable:`CPACK_DEBIAN_PACKAGE_RELEASE` variable.
 
-* The :module:`CPackDeb` module learned more strict package version checking
-  that complies with Debian rules.
+* The :cpack_gen:`CPack DEB Generator` learned more strict package
+  version checking that complies with Debian rules.
 
 * The :module:`CPackIFW` module :command:`cpack_ifw_configure_component` and
   :command:`cpack_ifw_configure_component_group` commands gained a new
   ``REPLACES`` and ``CHECKABLE`` options.
 
-* The :module:`CPackIFW` module gained new
+* The :cpack_gen:`CPack IFW Generator` gained new
   :variable:`CPACK_IFW_PACKAGE_FILE_EXTENSION` variable to customize
   target binary format.
 
-* The :module:`CPackIFW` module gained new
+* The :cpack_gen:`CPack IFW Generator` gained new
   :variable:`CPACK_IFW_REPOSITORIES_DIRECTORIES` variable to specify
   additional repositories dirs that will be used to resolve and
   repack dependent components. This feature is only available when
   using QtIFW 3.1 or later.
 
-* Modules :module:`CPackRPM` and :module:`CPackDeb` learned to set package epoch
-  version.
+* The :cpack_gen:`CPack RPM Generator` and :cpack_gen:`CPack DEB Generator`
+  learned to set the package epoch version.
   See :variable:`CPACK_RPM_PACKAGE_EPOCH` and
   :variable:`CPACK_DEBIAN_PACKAGE_EPOCH` variables.
 

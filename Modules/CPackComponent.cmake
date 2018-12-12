@@ -14,7 +14,7 @@
 # part of CPack.  See CPack module for general information about CPack.
 #
 # For certain kinds of binary installers (including the graphical
-# installers on Mac OS X and Windows), CPack generates installers that
+# installers on macOS and Windows), CPack generates installers that
 # allow users to select individual application components to install.
 # The contents of each of the components are identified by the COMPONENT
 # argument of CMake's INSTALL command.  These components can be
@@ -283,8 +283,8 @@
 #
 #
 #
-# On Mac OS X, installers that download components on-the-fly can only
-# be built and installed on system using Mac OS X 10.5 or later.
+# On macOS, installers that download components on-the-fly can only
+# be built and installed on system using macOS 10.5 or later.
 #
 # The site argument is a URL where the archives for downloadable
 # components will reside, e.g.,

@@ -156,27 +156,27 @@ CTest
 CPack
 -----
 
-* The :module:`CPackRPM` module learned options to set per-component
+* The :cpack_gen:`CPack RPM Generator` learned options to set per-component
   descriptions and summaries.  See the
   :variable:`CPACK_RPM_<component>_PACKAGE_DESCRIPTION` and
   :variable:`CPACK_RPM_<component>_PACKAGE_SUMMARY` variables.
 
-* The :module:`CPackRPM` module learned options to specify
+* The :cpack_gen:`CPack RPM Generator` learned options to specify
   requirements for pre- and post-install scripts.  See the
   :variable:`CPACK_RPM_PACKAGE_REQUIRES_PRE` and
   :variable:`CPACK_RPM_PACKAGE_REQUIRES_POST` variables.
 
-* The :module:`CPackRPM` module learned options to specify
+* The :cpack_gen:`CPack RPM Generator` learned options to specify
   requirements for pre- and post-uninstall scripts.  See the
   :variable:`CPACK_RPM_PACKAGE_REQUIRES_PREUN` and
   :variable:`CPACK_RPM_PACKAGE_REQUIRES_POSTUN` variables.
 
-* The :module:`CPackRPM` module learned a new
+* The :cpack_gen:`CPack RPM Generator` learned a new
   :variable:`CPACK_RPM_<COMPONENT>_PACKAGE_PREFIX` variable to
   specify a component-specific value to use instead of
   :variable:`CPACK_PACKAGING_INSTALL_PREFIX`.
 
-* The :module:`CPackRPM` module learned a new
+* The :cpack_gen:`CPack RPM Generator` learned a new
   :variable:`CPACK_RPM_RELOCATION_PATHS` variable to
   specify multiple relocation prefixes for a single rpm package.
 

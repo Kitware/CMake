@@ -30,18 +30,17 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args,
 
     // if they specified a relative path then compute the full
     std::string srcPath =
-      std::string(this->Makefile->GetCurrentSourceDirectory()) + "/" + i;
+      this->Makefile->GetCurrentSourceDirectory() + "/" + i;
     if (cmSystemTools::FileIsDirectory(srcPath)) {
       std::string binPath =
-        std::string(this->Makefile->GetCurrentBinaryDirectory()) + "/" + i;
+        this->Makefile->GetCurrentBinaryDirectory() + "/" + i;
       this->Makefile->AddSubDirectory(srcPath, binPath, excludeFromAll, false);
     }
     // otherwise it is a full path
     else if (cmSystemTools::FileIsDirectory(i)) {
       // we must compute the binPath from the srcPath, we just take the last
       // element from the source path and use that
-      std::string binPath =
-        std::string(this->Makefile->GetCurrentBinaryDirectory()) + "/" +
+      std::string binPath = this->Makefile->GetCurrentBinaryDirectory() + "/" +
         cmSystemTools::GetFilenameName(i);
       this->Makefile->AddSubDirectory(i, binPath, excludeFromAll, false);
     } else {

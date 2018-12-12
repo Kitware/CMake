@@ -8,19 +8,19 @@
 # Find Java
 #
 # This module finds if Java is installed and determines where the
-# include files and libraries are.  The caller may set variable JAVA_HOME
+# include files and libraries are.  The caller may set variable ``JAVA_HOME``
 # to specify a Java installation prefix explicitly.
 #
-# See also the :module:`FindJNI` module to find Java development tools.
+# See also the :module:`FindJNI` module to find Java Native Interface (JNI).
 #
 # Specify one or more of the following components as you call this find module. See example below.
 #
 # ::
 #
-#   Runtime     = User just want to execute some Java byte-compiled
+#   Runtime     = Java Runtime Environment used to execute Java byte-compiled applications
 #   Development = Development tools (java, javac, javah, jar and javadoc), includes Runtime component
-#   IdlJ        = idl compiler for Java
-#   JarSigner   = signer tool for jar
+#   IdlJ        = Interface Description Language (IDL) to Java compiler
+#   JarSigner   = Signer and verifier tool for Java Archive (JAR) files
 #
 #
 # This module sets the following result variables:
@@ -44,14 +44,18 @@
 #
 #
 # The minimum required version of Java can be specified using the
-# standard CMake syntax, e.g.  find_package(Java 1.5)
+# :command:`find_package` syntax, e.g.
 #
-# NOTE: ${Java_VERSION} and ${Java_VERSION_STRING} are not guaranteed to
+# .. code-block:: cmake
+#
+#   find_package(Java 1.8)
+#
+# NOTE: ``${Java_VERSION}`` and ``${Java_VERSION_STRING}`` are not guaranteed to
 # be identical.  For example some java version may return:
-# Java_VERSION_STRING = 1.5.0_17 and Java_VERSION = 1.5.0.17
+# ``Java_VERSION_STRING = 1.8.0_17`` and ``Java_VERSION = 1.8.0.17``
 #
-# another example is the Java OEM, with: Java_VERSION_STRING = 1.6.0-oem
-# and Java_VERSION = 1.6.0
+# another example is the Java OEM, with: ``Java_VERSION_STRING = 1.8.0-oem``
+# and ``Java_VERSION = 1.8.0``
 #
 # For these components the following variables are set:
 #
@@ -67,6 +71,7 @@
 # ::
 #
 #   find_package(Java)
+#   find_package(Java 1.8 REQUIRED)
 #   find_package(Java COMPONENTS Runtime)
 #   find_package(Java COMPONENTS Development)
 

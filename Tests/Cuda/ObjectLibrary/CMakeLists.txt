@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project (CudaObjectLibrary CUDA CXX)
+project (ObjectLibrary CUDA CXX)
 #Goal for this example:
 #
 #Build C++ and CUDA object files and than use them to make an executable

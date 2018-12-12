@@ -7,11 +7,9 @@
 #include <sstream>
 #include <utility>
 
-#include "cmGeneratorExpression.h"
-#include "cmGeneratorExpressionDAGChecker.h"
+#include "cmAlgorithms.h"
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
-#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
@@ -103,27 +101,14 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
         os << "LOCAL_CPP_FEATURES += ";
         os << (property.second) << "\n";
       } else if (property.first == "INTERFACE_LINK_LIBRARIES") {
-        // evaluate any generator expressions with the current
-        // build type of the makefile
-        cmGeneratorExpression ge;
-        cmGeneratorExpressionDAGChecker dagChecker(
-          target->GetName(), "INTERFACE_LINK_LIBRARIES", nullptr, nullptr);
-        std::unique_ptr<cmCompiledGeneratorExpression> cge =
-          ge.Parse(property.second);
-        std::string evaluated = cge->Evaluate(
-          target->GetLocalGenerator(), config, false, target, &dagChecker);
-        // need to look at list in pi->second and see if static or shared
-        // FindTargetToLink
-        // target->GetLocalGenerator()->FindGeneratorTargetToUse()
-        // then add to LOCAL_CPPFLAGS
-        std::vector<std::string> libraries;
-        cmSystemTools::ExpandListArgument(evaluated, libraries);
         std::string staticLibs;
         std::string sharedLibs;
         std::string ldlibs;
-        for (std::string const& lib : libraries) {
-          cmGeneratorTarget* gt =
-            target->GetLocalGenerator()->FindGeneratorTargetToUse(lib);
+        cmLinkInterfaceLibraries const* linkIFace =
+          target->GetLinkInterfaceLibraries(config, target, false);
+        for (cmLinkItem const& item : linkIFace->Libraries) {
+          cmGeneratorTarget const* gt = item.Target;
+          std::string const& lib = item.AsStr();
           if (gt) {
 
             if (gt->GetType() == cmStateEnums::SHARED_LIBRARY ||
@@ -169,6 +154,11 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
           end = "\\\n";
         }
         os << "\n";
+      } else if (property.first == "INTERFACE_LINK_OPTIONS") {
+        os << "LOCAL_EXPORT_LDFLAGS := ";
+        std::vector<std::string> linkFlagsList;
+        cmSystemTools::ExpandListArgument(property.second, linkFlagsList);
+        os << cmJoin(linkFlagsList, " ") << "\n";
       } else {
         os << "# " << property.first << " " << (property.second) << "\n";
       }

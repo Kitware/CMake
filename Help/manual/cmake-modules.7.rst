@@ -54,22 +54,10 @@ All Modules
    /module/CMakePrintSystemInformation
    /module/CMakePushCheckState
    /module/CMakeVerifyManifest
-   /module/CPackArchive
-   /module/CPackBundle
    /module/CPackComponent
-   /module/CPackCygwin
-   /module/CPackDeb
-   /module/CPackDMG
-   /module/CPackFreeBSD
    /module/CPackIFW
    /module/CPackIFWConfigureFile
-   /module/CPackNSIS
-   /module/CPackNuGet
-   /module/CPackPackageMaker
-   /module/CPackProductBuild
-   /module/CPackRPM
    /module/CPack
-   /module/CPackWIX
    /module/CSharpUtilities
    /module/CTest
    /module/CTestCoverageCollectGCOV
@@ -263,3 +251,26 @@ All Modules
    /module/Use_wxWindows
    /module/WriteBasicConfigVersionFile
    /module/WriteCompilerDetectionHeader
+
+Legacy CPack Modules
+====================
+
+These modules used to be mistakenly exposed to the user, and have been moved
+out of user visibility. They are for CPack internal use, and should never be
+used directly.
+
+.. toctree::
+   :maxdepth: 1
+
+   /module/CPackArchive
+   /module/CPackBundle
+   /module/CPackCygwin
+   /module/CPackDeb
+   /module/CPackDMG
+   /module/CPackFreeBSD
+   /module/CPackNSIS
+   /module/CPackNuGet
+   /module/CPackPackageMaker
+   /module/CPackProductBuild
+   /module/CPackRPM
+   /module/CPackWIX

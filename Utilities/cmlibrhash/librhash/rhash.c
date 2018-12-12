@@ -18,6 +18,8 @@
 #define _LARGEFILE64_SOURCE
 #define _FILE_OFFSET_BITS 64
 
+#include "ustd.h"   /* Need this first within CMake.  */
+
 #include <string.h> /* memset() */
 #include <stdlib.h> /* free() */
 #include <stddef.h> /* ptrdiff_t */

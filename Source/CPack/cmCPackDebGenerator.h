@@ -65,6 +65,8 @@ protected:
 
 private:
   int createDeb();
+  int createDbgsymDDeb();
+
   std::vector<std::string> packageFiles;
 };
 

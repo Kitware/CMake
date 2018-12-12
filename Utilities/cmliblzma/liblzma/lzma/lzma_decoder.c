@@ -16,6 +16,12 @@
 #include "lzma_decoder.h"
 #include "range_decoder.h"
 
+// The macros unroll loops with switch statements.
+// Silence warnings about missing fall-through comments.
+#if TUKLIB_GNUC_REQ(7, 0)
+#	pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif
+
 
 #ifdef HAVE_SMALL
 
@@ -114,33 +120,33 @@ do { \
 case seq ## _CHOICE: \
 	rc_if_0(ld.choice, seq ## _CHOICE) { \
 		rc_update_0(ld.choice); \
-		rc_bit_case(ld.low[pos_state][symbol], 0, 0, seq ## _LOW0); \
-		rc_bit_case(ld.low[pos_state][symbol], 0, 0, seq ## _LOW1); \
-		rc_bit_case(ld.low[pos_state][symbol], 0, 0, seq ## _LOW2); \
+		rc_bit_case(ld.low[pos_state][symbol], , , seq ## _LOW0); \
+		rc_bit_case(ld.low[pos_state][symbol], , , seq ## _LOW1); \
+		rc_bit_case(ld.low[pos_state][symbol], , , seq ## _LOW2); \
 		target = symbol - LEN_LOW_SYMBOLS + MATCH_LEN_MIN; \
 	} else { \
 		rc_update_1(ld.choice); \
 case seq ## _CHOICE2: \
 		rc_if_0(ld.choice2, seq ## _CHOICE2) { \
 			rc_update_0(ld.choice2); \
-			rc_bit_case(ld.mid[pos_state][symbol], 0, 0, \
+			rc_bit_case(ld.mid[pos_state][symbol], , , \
 					seq ## _MID0); \
-			rc_bit_case(ld.mid[pos_state][symbol], 0, 0, \
+			rc_bit_case(ld.mid[pos_state][symbol], , , \
 					seq ## _MID1); \
-			rc_bit_case(ld.mid[pos_state][symbol], 0, 0, \
+			rc_bit_case(ld.mid[pos_state][symbol], , , \
 					seq ## _MID2); \
 			target = symbol - LEN_MID_SYMBOLS \
 					+ MATCH_LEN_MIN + LEN_LOW_SYMBOLS; \
 		} else { \
 			rc_update_1(ld.choice2); \
-			rc_bit_case(ld.high[symbol], 0, 0, seq ## _HIGH0); \
-			rc_bit_case(ld.high[symbol], 0, 0, seq ## _HIGH1); \
-			rc_bit_case(ld.high[symbol], 0, 0, seq ## _HIGH2); \
-			rc_bit_case(ld.high[symbol], 0, 0, seq ## _HIGH3); \
-			rc_bit_case(ld.high[symbol], 0, 0, seq ## _HIGH4); \
-			rc_bit_case(ld.high[symbol], 0, 0, seq ## _HIGH5); \
-			rc_bit_case(ld.high[symbol], 0, 0, seq ## _HIGH6); \
-			rc_bit_case(ld.high[symbol], 0, 0, seq ## _HIGH7); \
+			rc_bit_case(ld.high[symbol], , , seq ## _HIGH0); \
+			rc_bit_case(ld.high[symbol], , , seq ## _HIGH1); \
+			rc_bit_case(ld.high[symbol], , , seq ## _HIGH2); \
+			rc_bit_case(ld.high[symbol], , , seq ## _HIGH3); \
+			rc_bit_case(ld.high[symbol], , , seq ## _HIGH4); \
+			rc_bit_case(ld.high[symbol], , , seq ## _HIGH5); \
+			rc_bit_case(ld.high[symbol], , , seq ## _HIGH6); \
+			rc_bit_case(ld.high[symbol], , , seq ## _HIGH7); \
 			target = symbol - LEN_HIGH_SYMBOLS \
 					+ MATCH_LEN_MIN \
 					+ LEN_LOW_SYMBOLS + LEN_MID_SYMBOLS; \
@@ -161,7 +167,7 @@ typedef struct {
 } lzma_length_decoder;
 
 
-struct lzma_coder_s {
+typedef struct {
 	///////////////////
 	// Probabilities //
 	///////////////////
@@ -193,15 +199,15 @@ struct lzma_coder_s {
 	/// Probability tree for the highest two bits of the match distance.
 	/// There is a separate probability tree for match lengths of
 	/// 2 (i.e. MATCH_LEN_MIN), 3, 4, and [5, 273].
-	probability pos_slot[LEN_TO_POS_STATES][POS_SLOTS];
+	probability dist_slot[DIST_STATES][DIST_SLOTS];
 
 	/// Probability trees for additional bits for match distance when the
 	/// distance is in the range [4, 127].
-	probability pos_special[FULL_DISTANCES - END_POS_MODEL_INDEX];
+	probability pos_special[FULL_DISTANCES - DIST_MODEL_END];
 
 	/// Probability tree for the lowest four bits of a match distance
 	/// that is equal to or greater than 128.
-	probability pos_align[ALIGN_TABLE_SIZE];
+	probability pos_align[ALIGN_SIZE];
 
 	/// Length of a normal match
 	lzma_length_decoder match_len_decoder;
@@ -245,8 +251,8 @@ struct lzma_coder_s {
 		SEQ_LITERAL_WRITE,
 		SEQ_IS_REP,
 		seq_len(SEQ_MATCH_LEN),
-		seq_6(SEQ_POS_SLOT),
-		SEQ_POS_MODEL,
+		seq_6(SEQ_DIST_SLOT),
+		SEQ_DIST_MODEL,
 		SEQ_DIRECT,
 		seq_4(SEQ_ALIGN),
 		SEQ_EOPM,
@@ -277,14 +283,27 @@ struct lzma_coder_s {
 	/// If decoding a literal: match byte.
 	/// If decoding a match: length of the match.
 	uint32_t len;
-};
+} lzma_lzma1_decoder;
 
 
 static lzma_ret
-lzma_decode(lzma_coder *LZMA_RESTRICT coder, lzma_dict *LZMA_RESTRICT dictptr,
-		const uint8_t *LZMA_RESTRICT in,
-		size_t *LZMA_RESTRICT in_pos, size_t in_size)
+lzma_decode(void *coder_ptr, lzma_dict *restrict dictptr,
+		const uint8_t *restrict in,
+		size_t *restrict in_pos, size_t in_size)
 {
+	lzma_lzma1_decoder *restrict coder = coder_ptr;
+
+	////////////////////
+	// Initialization //
+	////////////////////
+
+	{
+		const lzma_ret ret = rc_read_init(
+				&coder->rc, in, in_pos, in_size);
+		if (ret != LZMA_STREAM_END)
+			return ret;
+	}
+
 	///////////////
 	// Variables //
 	///////////////
@@ -331,16 +350,6 @@ lzma_decode(lzma_coder *LZMA_RESTRICT coder, lzma_dict *LZMA_RESTRICT dictptr,
 	if (no_eopm && coder->uncompressed_size < dict.limit - dict.pos)
 		dict.limit = dict.pos + (size_t)(coder->uncompressed_size);
 
-	////////////////////
-	// Initialization //
-	////////////////////
-
-	if (!rc_read_init(&coder->rc, in, in_pos, in_size))
-		return LZMA_OK;
-
-	rc = coder->rc;
-	rc_in_pos = *in_pos;
-
 	// The main decoder loop. The "switch" is used to restart the decoder at
 	// correct location. Once restarted, the "switch" is no longer used.
 	switch (coder->sequence)
@@ -356,21 +365,6 @@ lzma_decode(lzma_coder *LZMA_RESTRICT coder, lzma_dict *LZMA_RESTRICT dictptr,
 			break;
 
 		rc_if_0(coder->is_match[state][pos_state], SEQ_IS_MATCH) {
-			static const lzma_lzma_state next_state[] = {
-				STATE_LIT_LIT,
-				STATE_LIT_LIT,
-				STATE_LIT_LIT,
-				STATE_LIT_LIT,
-				STATE_MATCH_LIT_LIT,
-				STATE_REP_LIT_LIT,
-				STATE_SHORTREP_LIT_LIT,
-				STATE_MATCH_LIT,
-				STATE_REP_LIT,
-				STATE_SHORTREP_LIT,
-				STATE_MATCH_LIT,
-				STATE_REP_LIT
-			};
-
 			rc_update_0(coder->is_match[state][pos_state]);
 
 			// It's a literal i.e. a single 8-bit byte.
@@ -388,21 +382,16 @@ lzma_decode(lzma_coder *LZMA_RESTRICT coder, lzma_dict *LZMA_RESTRICT dictptr,
 					rc_bit(probs[symbol], , , SEQ_LITERAL);
 				} while (symbol < (1 << 8));
 #else
-				rc_bit_case(probs[symbol], 0, 0, SEQ_LITERAL0);
-				rc_bit_case(probs[symbol], 0, 0, SEQ_LITERAL1);
-				rc_bit_case(probs[symbol], 0, 0, SEQ_LITERAL2);
-				rc_bit_case(probs[symbol], 0, 0, SEQ_LITERAL3);
-				rc_bit_case(probs[symbol], 0, 0, SEQ_LITERAL4);
-				rc_bit_case(probs[symbol], 0, 0, SEQ_LITERAL5);
-				rc_bit_case(probs[symbol], 0, 0, SEQ_LITERAL6);
-				rc_bit_case(probs[symbol], 0, 0, SEQ_LITERAL7);
+				rc_bit_case(probs[symbol], , , SEQ_LITERAL0);
+				rc_bit_case(probs[symbol], , , SEQ_LITERAL1);
+				rc_bit_case(probs[symbol], , , SEQ_LITERAL2);
+				rc_bit_case(probs[symbol], , , SEQ_LITERAL3);
+				rc_bit_case(probs[symbol], , , SEQ_LITERAL4);
+				rc_bit_case(probs[symbol], , , SEQ_LITERAL5);
+				rc_bit_case(probs[symbol], , , SEQ_LITERAL6);
+				rc_bit_case(probs[symbol], , , SEQ_LITERAL7);
 #endif
 			} else {
-#ifndef HAVE_SMALL
-				uint32_t match_bit;
-				uint32_t subcoder_index;
-#endif
-
 				// Decode literal with match byte.
 				//
 				// We store the byte we compare against
@@ -441,6 +430,8 @@ lzma_decode(lzma_coder *LZMA_RESTRICT coder, lzma_dict *LZMA_RESTRICT dictptr,
 				} while (symbol < (1 << 8));
 #else
 				// Unroll the loop.
+				uint32_t match_bit;
+				uint32_t subcoder_index;
 
 #	define d(seq) \
 		case seq: \
@@ -474,6 +465,20 @@ lzma_decode(lzma_coder *LZMA_RESTRICT coder, lzma_dict *LZMA_RESTRICT dictptr,
 			// Use a lookup table to update to literal state,
 			// since compared to other state updates, this would
 			// need two branches.
+			static const lzma_lzma_state next_state[] = {
+				STATE_LIT_LIT,
+				STATE_LIT_LIT,
+				STATE_LIT_LIT,
+				STATE_LIT_LIT,
+				STATE_MATCH_LIT_LIT,
+				STATE_REP_LIT_LIT,
+				STATE_SHORTREP_LIT_LIT,
+				STATE_MATCH_LIT,
+				STATE_REP_LIT,
+				STATE_SHORTREP_LIT,
+				STATE_MATCH_LIT,
+				STATE_REP_LIT
+			};
 			state = next_state[state];
 
 	case SEQ_LITERAL_WRITE:
@@ -509,28 +514,28 @@ lzma_decode(lzma_coder *LZMA_RESTRICT coder, lzma_dict *LZMA_RESTRICT dictptr,
 
 			// Prepare to decode the highest two bits of the
 			// match distance.
-			probs = coder->pos_slot[get_len_to_pos_state(len)];
+			probs = coder->dist_slot[get_dist_state(len)];
 			symbol = 1;
 
 #ifdef HAVE_SMALL
-	case SEQ_POS_SLOT:
+	case SEQ_DIST_SLOT:
 			do {
-				rc_bit(probs[symbol], , , SEQ_POS_SLOT);
-			} while (symbol < POS_SLOTS);
+				rc_bit(probs[symbol], , , SEQ_DIST_SLOT);
+			} while (symbol < DIST_SLOTS);
 #else
-			rc_bit_case(probs[symbol], 0, 0, SEQ_POS_SLOT0);
-			rc_bit_case(probs[symbol], 0, 0, SEQ_POS_SLOT1);
-			rc_bit_case(probs[symbol], 0, 0, SEQ_POS_SLOT2);
-			rc_bit_case(probs[symbol], 0, 0, SEQ_POS_SLOT3);
-			rc_bit_case(probs[symbol], 0, 0, SEQ_POS_SLOT4);
-			rc_bit_case(probs[symbol], 0, 0, SEQ_POS_SLOT5);
+			rc_bit_case(probs[symbol], , , SEQ_DIST_SLOT0);
+			rc_bit_case(probs[symbol], , , SEQ_DIST_SLOT1);
+			rc_bit_case(probs[symbol], , , SEQ_DIST_SLOT2);
+			rc_bit_case(probs[symbol], , , SEQ_DIST_SLOT3);
+			rc_bit_case(probs[symbol], , , SEQ_DIST_SLOT4);
+			rc_bit_case(probs[symbol], , , SEQ_DIST_SLOT5);
 #endif
 			// Get rid of the highest bit that was needed for
 			// indexing of the probability array.
-			symbol -= POS_SLOTS;
+			symbol -= DIST_SLOTS;
 			assert(symbol <= 63);
 
-			if (symbol < START_POS_MODEL_INDEX) {
+			if (symbol < DIST_MODEL_START) {
 				// Match distances [0, 3] have only two bits.
 				rep0 = symbol;
 			} else {
@@ -540,7 +545,7 @@ lzma_decode(lzma_coder *LZMA_RESTRICT coder, lzma_dict *LZMA_RESTRICT dictptr,
 				assert(limit >= 1 && limit <= 30);
 				rep0 = 2 + (symbol & 1);
 
-				if (symbol < END_POS_MODEL_INDEX) {
+				if (symbol < DIST_MODEL_END) {
 					// Prepare to decode the low bits for
 					// a distance of [4, 127].
 					assert(limit <= 5);
@@ -560,38 +565,38 @@ lzma_decode(lzma_coder *LZMA_RESTRICT coder, lzma_dict *LZMA_RESTRICT dictptr,
 							- symbol - 1;
 					symbol = 1;
 					offset = 0;
-	case SEQ_POS_MODEL:
+	case SEQ_DIST_MODEL:
 #ifdef HAVE_SMALL
 					do {
 						rc_bit(probs[symbol], ,
 							rep0 += 1 << offset,
-							SEQ_POS_MODEL);
+							SEQ_DIST_MODEL);
 					} while (++offset < limit);
 #else
 					switch (limit) {
 					case 5:
 						assert(offset == 0);
-						rc_bit(probs[symbol], 0,
+						rc_bit(probs[symbol], ,
 							rep0 += 1,
-							SEQ_POS_MODEL);
+							SEQ_DIST_MODEL);
 						++offset;
 						--limit;
 					case 4:
-						rc_bit(probs[symbol], 0,
+						rc_bit(probs[symbol], ,
 							rep0 += 1 << offset,
-							SEQ_POS_MODEL);
+							SEQ_DIST_MODEL);
 						++offset;
 						--limit;
 					case 3:
-						rc_bit(probs[symbol], 0,
+						rc_bit(probs[symbol], ,
 							rep0 += 1 << offset,
-							SEQ_POS_MODEL);
+							SEQ_DIST_MODEL);
 						++offset;
 						--limit;
 					case 2:
-						rc_bit(probs[symbol], 0,
+						rc_bit(probs[symbol], ,
 							rep0 += 1 << offset,
-							SEQ_POS_MODEL);
+							SEQ_DIST_MODEL);
 						++offset;
 						--limit;
 					case 1:
@@ -601,9 +606,9 @@ lzma_decode(lzma_coder *LZMA_RESTRICT coder, lzma_dict *LZMA_RESTRICT dictptr,
 						// rc_bit_last() here to omit
 						// the unneeded updating of
 						// "symbol".
-						rc_bit_last(probs[symbol], 0,
+						rc_bit_last(probs[symbol], ,
 							rep0 += 1 << offset,
-							SEQ_POS_MODEL);
+							SEQ_DIST_MODEL);
 					}
 #endif
 				} else {
@@ -635,19 +640,19 @@ lzma_decode(lzma_coder *LZMA_RESTRICT coder, lzma_dict *LZMA_RESTRICT dictptr,
 					} while (++offset < ALIGN_BITS);
 #else
 	case SEQ_ALIGN0:
-					rc_bit(coder->pos_align[symbol], 0,
+					rc_bit(coder->pos_align[symbol], ,
 							rep0 += 1, SEQ_ALIGN0);
 	case SEQ_ALIGN1:
-					rc_bit(coder->pos_align[symbol], 0,
+					rc_bit(coder->pos_align[symbol], ,
 							rep0 += 2, SEQ_ALIGN1);
 	case SEQ_ALIGN2:
-					rc_bit(coder->pos_align[symbol], 0,
+					rc_bit(coder->pos_align[symbol], ,
 							rep0 += 4, SEQ_ALIGN2);
 	case SEQ_ALIGN3:
-					// Like in SEQ_POS_MODEL, we don't
+					// Like in SEQ_DIST_MODEL, we don't
 					// need "symbol" for anything else
 					// than indexing the probability array.
-					rc_bit_last(coder->pos_align[symbol], 0,
+					rc_bit_last(coder->pos_align[symbol], ,
 							rep0 += 8, SEQ_ALIGN3);
 #endif
 
@@ -732,11 +737,9 @@ lzma_decode(lzma_coder *LZMA_RESTRICT coder, lzma_dict *LZMA_RESTRICT dictptr,
 				// is stored to rep0 and rep1, rep2 and rep3
 				// are updated accordingly.
 				rc_if_0(coder->is_rep1[state], SEQ_IS_REP1) {
-					uint32_t distance;
-
 					rc_update_0(coder->is_rep1[state]);
 
-					distance = rep1;
+					const uint32_t distance = rep1;
 					rep1 = rep0;
 					rep0 = distance;
 
@@ -745,23 +748,19 @@ lzma_decode(lzma_coder *LZMA_RESTRICT coder, lzma_dict *LZMA_RESTRICT dictptr,
 	case SEQ_IS_REP2:
 					rc_if_0(coder->is_rep2[state],
 							SEQ_IS_REP2) {
-						uint32_t distance;
-
 						rc_update_0(coder->is_rep2[
 								state]);
 
-						distance = rep2;
+						const uint32_t distance = rep2;
 						rep2 = rep1;
 						rep1 = rep0;
 						rep0 = distance;
 
 					} else {
-						uint32_t distance;
-
 						rc_update_1(coder->is_rep2[
 								state]);
 
-						distance = rep3;
+						const uint32_t distance = rep3;
 						rep3 = rep2;
 						rep2 = rep1;
 						rep1 = rep0;
@@ -849,26 +848,17 @@ out:
 
 
 static void
-lzma_decoder_uncompressed(lzma_coder *coder, lzma_vli uncompressed_size)
+lzma_decoder_uncompressed(void *coder_ptr, lzma_vli uncompressed_size)
 {
+	lzma_lzma1_decoder *coder = coder_ptr;
 	coder->uncompressed_size = uncompressed_size;
 }
 
-/*
-extern void
-lzma_lzma_decoder_uncompressed(void *coder_ptr, lzma_vli uncompressed_size)
-{
-	// This is hack.
-	(*(lzma_coder **)(coder))->uncompressed_size = uncompressed_size;
-}
-*/
 
 static void
-lzma_decoder_reset(lzma_coder *coder, const void *opt)
+lzma_decoder_reset(void *coder_ptr, const void *opt)
 {
-	uint32_t i, j, pos_state;
-	uint32_t num_pos_states;
-
+	lzma_lzma1_decoder *coder = coder_ptr;
 	const lzma_options_lzma *options = opt;
 
 	// NOTE: We assume that lc/lp/pb are valid since they were
@@ -895,8 +885,8 @@ lzma_decoder_reset(lzma_coder *coder, const void *opt)
 	rc_reset(coder->rc);
 
 	// Bit and bittree decoders
-	for (i = 0; i < STATES; ++i) {
-		for (j = 0; j <= coder->pos_mask; ++j) {
+	for (uint32_t i = 0; i < STATES; ++i) {
+		for (uint32_t j = 0; j <= coder->pos_mask; ++j) {
 			bit_reset(coder->is_match[i][j]);
 			bit_reset(coder->is_rep0_long[i][j]);
 		}
@@ -907,22 +897,22 @@ lzma_decoder_reset(lzma_coder *coder, const void *opt)
 		bit_reset(coder->is_rep2[i]);
 	}
 
-	for (i = 0; i < LEN_TO_POS_STATES; ++i)
-		bittree_reset(coder->pos_slot[i], POS_SLOT_BITS);
+	for (uint32_t i = 0; i < DIST_STATES; ++i)
+		bittree_reset(coder->dist_slot[i], DIST_SLOT_BITS);
 
-	for (i = 0; i < FULL_DISTANCES - END_POS_MODEL_INDEX; ++i)
+	for (uint32_t i = 0; i < FULL_DISTANCES - DIST_MODEL_END; ++i)
 		bit_reset(coder->pos_special[i]);
 
 	bittree_reset(coder->pos_align, ALIGN_BITS);
 
 	// Len decoders (also bit/bittree)
-	num_pos_states = 1U << options->pb;
+	const uint32_t num_pos_states = 1U << options->pb;
 	bit_reset(coder->match_len_decoder.choice);
 	bit_reset(coder->match_len_decoder.choice2);
 	bit_reset(coder->rep_len_decoder.choice);
 	bit_reset(coder->rep_len_decoder.choice2);
 
-	for (pos_state = 0; pos_state < num_pos_states; ++pos_state) {
+	for (uint32_t pos_state = 0; pos_state < num_pos_states; ++pos_state) {
 		bittree_reset(coder->match_len_decoder.low[pos_state],
 				LEN_LOW_BITS);
 		bittree_reset(coder->match_len_decoder.mid[pos_state],
@@ -949,13 +939,11 @@ lzma_decoder_reset(lzma_coder *coder, const void *opt)
 
 
 extern lzma_ret
-lzma_lzma_decoder_create(lzma_lz_decoder *lz, lzma_allocator *allocator,
+lzma_lzma_decoder_create(lzma_lz_decoder *lz, const lzma_allocator *allocator,
 		const void *opt, lzma_lz_options *lz_options)
 {
-	const lzma_options_lzma *options = opt;
-
 	if (lz->coder == NULL) {
-		lz->coder = lzma_alloc(sizeof(lzma_coder), allocator);
+		lz->coder = lzma_alloc(sizeof(lzma_lzma1_decoder), allocator);
 		if (lz->coder == NULL)
 			return LZMA_MEM_ERROR;
 
@@ -966,6 +954,7 @@ lzma_lzma_decoder_create(lzma_lz_decoder *lz, lzma_allocator *allocator,
 
 	// All dictionary sizes are OK here. LZ decoder will take care of
 	// the special cases.
+	const lzma_options_lzma *options = opt;
 	lz_options->dict_size = options->dict_size;
 	lz_options->preset_dict = options->preset_dict;
 	lz_options->preset_dict_size = options->preset_dict_size;
@@ -978,7 +967,7 @@ lzma_lzma_decoder_create(lzma_lz_decoder *lz, lzma_allocator *allocator,
 /// initialization (lzma_lzma_decoder_init() passes function pointer to
 /// the LZ initialization).
 static lzma_ret
-lzma_decoder_init(lzma_lz_decoder *lz, lzma_allocator *allocator,
+lzma_decoder_init(lzma_lz_decoder *lz, const lzma_allocator *allocator,
 		const void *options, lzma_lz_options *lz_options)
 {
 	if (!is_lclppb_valid(options))
@@ -995,7 +984,7 @@ lzma_decoder_init(lzma_lz_decoder *lz, lzma_allocator *allocator,
 
 
 extern lzma_ret
-lzma_lzma_decoder_init(lzma_next_coder *next, lzma_allocator *allocator,
+lzma_lzma_decoder_init(lzma_next_coder *next, const lzma_allocator *allocator,
 		const lzma_filter_info *filters)
 {
 	// LZMA can only be the last filter in the chain. This is enforced
@@ -1027,7 +1016,8 @@ extern uint64_t
 lzma_lzma_decoder_memusage_nocheck(const void *options)
 {
 	const lzma_options_lzma *const opt = options;
-	return sizeof(lzma_coder) + lzma_lz_decoder_memusage(opt->dict_size);
+	return sizeof(lzma_lzma1_decoder)
+			+ lzma_lz_decoder_memusage(opt->dict_size);
 }
 
 
@@ -1042,15 +1032,14 @@ lzma_lzma_decoder_memusage(const void *options)
 
 
 extern lzma_ret
-lzma_lzma_props_decode(void **options, lzma_allocator *allocator,
+lzma_lzma_props_decode(void **options, const lzma_allocator *allocator,
 		const uint8_t *props, size_t props_size)
 {
-	lzma_options_lzma *opt;
-
 	if (props_size != 5)
 		return LZMA_OPTIONS_ERROR;
 
-	opt = lzma_alloc(sizeof(lzma_options_lzma), allocator);
+	lzma_options_lzma *opt
+			= lzma_alloc(sizeof(lzma_options_lzma), allocator);
 	if (opt == NULL)
 		return LZMA_MEM_ERROR;
 

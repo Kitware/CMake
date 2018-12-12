@@ -19,17 +19,21 @@
 #
 #
 # The minimum required version of Subversion can be specified using the
-# standard syntax, e.g.  find_package(Subversion 1.4)
+# standard syntax, e.g. ``find_package(Subversion 1.4)``.
 #
 # If the command line client executable is found two macros are defined:
 #
 # ::
 #
-#   Subversion_WC_INFO(<dir> <var-prefix>)
+#   Subversion_WC_INFO(<dir> <var-prefix> [IGNORE_SVN_FAILURE])
 #   Subversion_WC_LOG(<dir> <var-prefix>)
 #
-# Subversion_WC_INFO extracts information of a subversion working copy
-# at a given location.  This macro defines the following variables:
+# ``Subversion_WC_INFO`` extracts information of a subversion working copy at a
+# given location.  This macro defines the following variables if running
+# Subversion's ``info`` command on ``<dir>`` succeeds; otherwise a
+# ``SEND_ERROR`` message is generated. The error can be ignored by providing the
+# ``IGNORE_SVN_FAILURE`` option, which causes these variables to remain
+# undefined.
 #
 # ::
 #
@@ -41,9 +45,8 @@
 #   <var-prefix>_WC_LAST_CHANGED_REV - revision of last commit
 #   <var-prefix>_WC_INFO - output of command `svn info <dir>'
 #
-# Subversion_WC_LOG retrieves the log message of the base revision of a
-# subversion working copy at a given location.  This macro defines the
-# variable:
+# ``Subversion_WC_LOG`` retrieves the log message of the base revision of a
+# subversion working copy at a given location.  This macro defines the variable:
 #
 # ::
 #
@@ -84,6 +87,14 @@ if(Subversion_SVN_EXECUTABLE)
     "\\2" Subversion_VERSION_SVN "${Subversion_VERSION_SVN}")
 
   macro(Subversion_WC_INFO dir prefix)
+
+    cmake_parse_arguments(
+      "Subversion_WC_INFO"
+      "IGNORE_SVN_FAILURE"
+      "" ""
+      ${ARGN}
+    )
+
     # the subversion commands should be executed with the C locale, otherwise
     # the message (which are parsed) may be translated, Alex
     set(_Subversion_SAVED_LC_ALL "$ENV{LC_ALL}")
@@ -95,10 +106,7 @@ if(Subversion_SVN_EXECUTABLE)
       RESULT_VARIABLE Subversion_svn_info_result
       OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-    if(NOT ${Subversion_svn_info_result} EQUAL 0)
-      message(SEND_ERROR "Command \"${Subversion_SVN_EXECUTABLE} info ${dir}\" failed with output:\n${Subversion_svn_info_error}")
-    else()
-
+    if(${Subversion_svn_info_result} EQUAL 0)
       string(REGEX REPLACE "^(.*\n)?URL: ([^\n]+).*"
         "\\2" ${prefix}_WC_URL "${${prefix}_WC_INFO}")
       string(REGEX REPLACE "^(.*\n)?Repository Root: ([^\n]+).*"
@@ -111,7 +119,8 @@ if(Subversion_SVN_EXECUTABLE)
         "\\2" ${prefix}_WC_LAST_CHANGED_REV "${${prefix}_WC_INFO}")
       string(REGEX REPLACE "^(.*\n)?Last Changed Date: ([^\n]+).*"
         "\\2" ${prefix}_WC_LAST_CHANGED_DATE "${${prefix}_WC_INFO}")
-
+    elseif(NOT Subversion_WC_INFO_IGNORE_SVN_FAILURE)
+      message(SEND_ERROR "Command \"${Subversion_SVN_EXECUTABLE} info ${dir}\" failed with output:\n${Subversion_svn_info_error}")
     endif()
 
     # restore the previous LC_ALL

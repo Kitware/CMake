@@ -200,11 +200,11 @@ CPack
 
 * :manual:`cpack(1)` gained ``--trace`` and ``--trace-expand`` options.
 
-* The :module:`CPackIFW` module gained new
+* The :cpack_gen:`CPack IFW Generator` gained new
   :variable:`CPACK_IFW_PACKAGE_REMOVE_TARGET_DIR` variable to control
   if the target directory should not be deleted when uninstalling.
 
-* The :module:`CPackRPM` module learned to enable enforcing of execute
+* The :cpack_gen:`CPack RPM Generator` learned to enable enforcing of execute
   privileges on programs and shared libraries.
   See :variable:`CPACK_RPM_INSTALL_WITH_EXEC` variable.
 

@@ -142,7 +142,11 @@ public:
 
   void AddLinkLibrary(cmMakefile& mf, const std::string& lib,
                       cmTargetLinkLibraryType llt,
-                      const cmListFileBacktrace & bt);
+	                  const cmListFileBacktrace & bt);
+  void AddLinkLibrary(cmMakefile& mf, std::string const& lib,
+                      std::string const& libRef, cmTargetLinkLibraryType llt,
+	                  const cmListFileBacktrace & bt);
+
   enum TLLSignature
   {
     KeywordTLLSignature,
@@ -151,10 +155,6 @@ public:
   bool PushTLLCommandTrace(TLLSignature signature,
                            cmListFileContext const& lfc);
   void GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const;
-
-  const std::vector<std::string>& GetLinkDirectories() const;
-
-  void AddLinkDirectory(const std::string& d);
 
   /**
    * Set the path where this target should be installed. This is relative to
@@ -201,7 +201,10 @@ public:
   void SetProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace);
   void AppendProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace,
                       bool asString = false);
+  ///! Might return a nullptr if the property is not set or invalid
   const char* GetProperty(const std::string& prop) const;
+  ///! Always returns a valid pointer
+  const char* GetSafeProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
   const char* GetComputedProperty(const std::string& prop,
@@ -241,6 +244,10 @@ public:
                            cmListFileBacktrace const& bt, bool before = false);
   void InsertCompileDefinition(std::string const& entry,
                                cmListFileBacktrace const& bt);
+  void InsertLinkOption(std::string const& entry,
+                        cmListFileBacktrace const& bt, bool before = false);
+  void InsertLinkDirectory(std::string const& entry,
+                           cmListFileBacktrace const& bt, bool before = false);
 
   void AppendBuildInterfaceIncludes();
 
@@ -267,6 +274,13 @@ public:
 
   cmStringRange GetSourceEntries() const;
   cmBacktraceRange GetSourceBacktraces() const;
+
+  cmStringRange GetLinkOptionsEntries() const;
+  cmBacktraceRange GetLinkOptionsBacktraces() const;
+
+  cmStringRange GetLinkDirectoriesEntries() const;
+  cmBacktraceRange GetLinkDirectoriesBacktraces() const;
+
   cmStringRange GetLinkImplementationEntries() const;
   cmBacktraceRange GetLinkImplementationBacktraces() const;
 
@@ -296,14 +310,12 @@ private:
   bool IsGeneratorProvided;
   cmPropertyMap Properties;
   std::set<std::string> SystemIncludeDirectories;
-  std::set<std::string> LinkDirectoriesEmmitted;
   std::set<std::string> Utilities;
   std::map<std::string, cmListFileBacktrace> UtilityBacktraces;
   cmPolicies::PolicyMap PolicyMap;
   std::string Name;
   std::string InstallPath;
   std::string RuntimeInstallPath;
-  std::vector<std::string> LinkDirectories;
   std::vector<cmCustomCommand> PreBuildCommands;
   std::vector<cmCustomCommand> PreLinkCommands;
   std::vector<cmCustomCommand> PostBuildCommands;

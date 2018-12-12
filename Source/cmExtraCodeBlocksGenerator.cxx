@@ -199,7 +199,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
   const std::vector<cmLocalGenerator*>& lgs, const std::string& filename)
 {
   const cmMakefile* mf = lgs[0]->GetMakefile();
-  cmGeneratedFileStream fout(filename.c_str());
+  cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
   }
@@ -476,7 +476,7 @@ std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
   filename += "/";
   filename += target->GetName();
   filename += ".objlib";
-  cmGeneratedFileStream fout(filename.c_str());
+  cmGeneratedFileStream fout(filename);
   if (fout) {
     /* clang-format off */
     fout << "# This is a dummy file for the OBJECT library "
@@ -666,7 +666,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
     pureFortran = true;
   }
 
-  std::string compilerId = mf->GetSafeDefinition(compilerIdVar);
+  std::string const& compilerId = mf->GetSafeDefinition(compilerIdVar);
   std::string compiler = "gcc"; // default to gcc
   if (compilerId == "MSVC") {
     if (mf->IsDefinitionSet("MSVC10")) {

@@ -26,13 +26,14 @@ commands to set up a new integration testing client:
   $ git clone https://gitlab.kitware.com/cmake/dashboard-scripts.git CMakeScripts
   $ cd CMakeScripts
 
-The ``cmake_common.cmake`` script contains comments at the top with
+The `cmake_common.cmake`_ script contains comments at the top with
 instructions to set up a testing client.  As it instructs, create a
 CTest script with local settings and include ``cmake_common.cmake``.
 
 .. _`CMake Review Process`: review.rst
 .. _`CMake CDash Page`: https://open.cdash.org/index.php?project=CMake
 .. _`CMake Dashboard Scripts Repository`: https://gitlab.kitware.com/cmake/dashboard-scripts
+.. _`cmake_common.cmake`: https://gitlab.kitware.com/cmake/dashboard-scripts/blob/master/cmake_common.cmake
 
 Nightly Start Time
 ------------------

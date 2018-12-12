@@ -182,6 +182,9 @@ The options are:
   If it is a relative path it will be interpreted relative to the
   build tree directory corresponding to the current source directory.
 
+  Arguments to ``WORKING_DIRECTORY`` may use
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
 ``DEPFILE``
   Specify a ``.d`` depfile for the :generator:`Ninja` generator.
   A ``.d`` file holds dependencies usually emitted by the custom

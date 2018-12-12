@@ -51,11 +51,11 @@ private:
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
   void AddInterfaceDepends(int depender_index, cmLinkItem const& dependee_name,
                            const std::string& config,
-                           std::set<std::string>& emitted);
+                           std::set<cmLinkItem>& emitted);
   void AddInterfaceDepends(int depender_index,
                            cmGeneratorTarget const* dependee,
                            const std::string& config,
-                           std::set<std::string>& emitted);
+                           std::set<cmLinkItem>& emitted);
   cmGlobalGenerator* GlobalGenerator;
   bool DebugMode;
   bool NoCycles;

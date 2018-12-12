@@ -10,6 +10,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "block_buffer_encoder.h"
 #include "block_encoder.h"
 #include "filter_encoder.h"
 #include "lzma2_encoder.h"
@@ -28,11 +29,9 @@
 		+ LZMA_CHECK_SIZE_MAX + 3) & ~3)
 
 
-static lzma_vli
-lzma2_bound(lzma_vli uncompressed_size)
+static uint64_t
+lzma2_bound(uint64_t uncompressed_size)
 {
-	lzma_vli overhead;
-
 	// Prevent integer overflow in overhead calculation.
 	if (uncompressed_size > COMPRESSED_SIZE_MAX)
 		return 0;
@@ -41,7 +40,7 @@ lzma2_bound(lzma_vli uncompressed_size)
 	// uncompressed_size up to the next multiple of LZMA2_CHUNK_MAX,
 	// multiply by the size of per-chunk header, and add one byte for
 	// the end marker.
-	overhead = ((uncompressed_size + LZMA2_CHUNK_MAX - 1)
+	const uint64_t overhead = ((uncompressed_size + LZMA2_CHUNK_MAX - 1)
 				/ LZMA2_CHUNK_MAX)
 			* LZMA2_HEADER_UNCOMPRESSED + 1;
 
@@ -53,30 +52,36 @@ lzma2_bound(lzma_vli uncompressed_size)
 }
 
 
-extern LZMA_API(size_t)
-lzma_block_buffer_bound(size_t uncompressed_size)
+extern uint64_t
+lzma_block_buffer_bound64(uint64_t uncompressed_size)
 {
-	// For now, if the data doesn't compress, we always use uncompressed
-	// chunks of LZMA2. In future we may use Subblock filter too, but
-	// but for simplicity we probably will still use the same bound
-	// calculation even though Subblock filter would have slightly less
-	// overhead.
-	lzma_vli lzma2_size = lzma2_bound(uncompressed_size);
+	// If the data doesn't compress, we always use uncompressed
+	// LZMA2 chunks.
+	uint64_t lzma2_size = lzma2_bound(uncompressed_size);
 	if (lzma2_size == 0)
 		return 0;
 
 	// Take Block Padding into account.
-	lzma2_size = (lzma2_size + 3) & ~LZMA_VLI_C(3);
+	lzma2_size = (lzma2_size + 3) & ~UINT64_C(3);
 
-#if SIZE_MAX < LZMA_VLI_MAX
-	// Catch the possible integer overflow on 32-bit systems. There's no
-	// overflow on 64-bit systems, because lzma2_bound() already takes
+	// No risk of integer overflow because lzma2_bound() already takes
 	// into account the size of the headers in the Block.
-	if (SIZE_MAX - HEADERS_BOUND < lzma2_size)
+	return HEADERS_BOUND + lzma2_size;
+}
+
+
+extern LZMA_API(size_t)
+lzma_block_buffer_bound(size_t uncompressed_size)
+{
+	uint64_t ret = lzma_block_buffer_bound64(uncompressed_size);
+
+#if SIZE_MAX < UINT64_MAX
+	// Catch the possible integer overflow on 32-bit systems.
+	if (ret > SIZE_MAX)
 		return 0;
 #endif
 
-	return HEADERS_BOUND + lzma2_size;
+	return ret;
 }
 
 
@@ -84,17 +89,12 @@ static lzma_ret
 block_encode_uncompressed(lzma_block *block, const uint8_t *in, size_t in_size,
 		uint8_t *out, size_t *out_pos, size_t out_size)
 {
-	size_t in_pos = 0;
-	uint8_t control = 0x01; // Dictionary reset
-	lzma_filter *filters_orig;
-
-	// TODO: Figure out if the last filter is LZMA2 or Subblock and use
-	// that filter to encode the uncompressed chunks.
-
 	// Use LZMA2 uncompressed chunks. We wouldn't need a dictionary at
 	// all, but LZMA2 always requires a dictionary, so use the minimum
 	// value to minimize memory usage of the decoder.
-	lzma_options_lzma lzma2 = { LZMA_DICT_SIZE_MIN };
+	lzma_options_lzma lzma2 = {
+		.dict_size = LZMA_DICT_SIZE_MIN,
+	};
 
 	lzma_filter filters[2];
 	filters[0].id = LZMA_FILTER_LZMA2;
@@ -103,7 +103,7 @@ block_encode_uncompressed(lzma_block *block, const uint8_t *in, size_t in_size,
 
 	// Set the above filter options to *block temporarily so that we can
 	// encode the Block Header.
-	filters_orig = block->filters;
+	lzma_filter *filters_orig = block->filters;
 	block->filters = filters;
 
 	if (lzma_block_header_size(block) != LZMA_OK) {
@@ -132,17 +132,18 @@ block_encode_uncompressed(lzma_block *block, const uint8_t *in, size_t in_size,
 	*out_pos += block->header_size;
 
 	// Encode the data using LZMA2 uncompressed chunks.
+	size_t in_pos = 0;
+	uint8_t control = 0x01; // Dictionary reset
 
 	while (in_pos < in_size) {
-		size_t copy_size;
-
 		// Control byte: Indicate uncompressed chunk, of which
 		// the first resets the dictionary.
 		out[(*out_pos)++] = control;
 		control = 0x02; // No dictionary reset
 
 		// Size of the uncompressed chunk
-		copy_size = my_min(in_size - in_pos, LZMA2_CHUNK_MAX);
+		const size_t copy_size
+				= my_min(in_size - in_pos, LZMA2_CHUNK_MAX);
 		out[(*out_pos)++] = (copy_size - 1) >> 8;
 		out[(*out_pos)++] = (copy_size - 1) & 0xFF;
 
@@ -163,27 +164,18 @@ block_encode_uncompressed(lzma_block *block, const uint8_t *in, size_t in_size,
 
 
 static lzma_ret
-block_encode_normal(lzma_block *block, lzma_allocator *allocator,
+block_encode_normal(lzma_block *block, const lzma_allocator *allocator,
 		const uint8_t *in, size_t in_size,
 		uint8_t *out, size_t *out_pos, size_t out_size)
 {
-	size_t out_start;
-	lzma_next_coder raw_encoder = LZMA_NEXT_CODER_INIT;
-	lzma_ret ret;
-
 	// Find out the size of the Block Header.
-	block->compressed_size = lzma2_bound(in_size);
-	if (block->compressed_size == 0)
-		return LZMA_DATA_ERROR;
-
-	block->uncompressed_size = in_size;
 	return_if_error(lzma_block_header_size(block));
 
 	// Reserve space for the Block Header and skip it for now.
 	if (out_size - *out_pos <= block->header_size)
 		return LZMA_BUF_ERROR;
 
-	out_start = *out_pos;
+	const size_t out_start = *out_pos;
 	*out_pos += block->header_size;
 
 	// Limit out_size so that we stop encoding if the output would grow
@@ -193,7 +185,8 @@ block_encode_normal(lzma_block *block, lzma_allocator *allocator,
 
 	// TODO: In many common cases this could be optimized to use
 	// significantly less memory.
-	ret = lzma_raw_encoder_init(
+	lzma_next_coder raw_encoder = LZMA_NEXT_CODER_INIT;
+	lzma_ret ret = lzma_raw_encoder_init(
 			&raw_encoder, allocator, block->filters);
 
 	if (ret == LZMA_OK) {
@@ -227,15 +220,12 @@ block_encode_normal(lzma_block *block, lzma_allocator *allocator,
 }
 
 
-extern LZMA_API(lzma_ret)
-lzma_block_buffer_encode(lzma_block *block, lzma_allocator *allocator,
+static lzma_ret
+block_buffer_encode(lzma_block *block, const lzma_allocator *allocator,
 		const uint8_t *in, size_t in_size,
-		uint8_t *out, size_t *out_pos, size_t out_size)
+		uint8_t *out, size_t *out_pos, size_t out_size,
+		bool try_to_compress)
 {
-	size_t check_size;
-	lzma_ret ret;
-	size_t i;
-
 	// Validate the arguments.
 	if (block == NULL || (in == NULL && in_size != 0) || out == NULL
 			|| out_pos == NULL || *out_pos > out_size)
@@ -243,11 +233,11 @@ lzma_block_buffer_encode(lzma_block *block, lzma_allocator *allocator,
 
 	// The contents of the structure may depend on the version so
 	// check the version before validating the contents of *block.
-	if (block->version != 0)
+	if (block->version > 1)
 		return LZMA_OPTIONS_ERROR;
 
 	if ((unsigned int)(block->check) > LZMA_CHECK_ID_MAX
-			|| block->filters == NULL)
+			|| (try_to_compress && block->filters == NULL))
 		return LZMA_PROG_ERROR;
 
 	if (!lzma_check_is_supported(block->check))
@@ -259,7 +249,7 @@ lzma_block_buffer_encode(lzma_block *block, lzma_allocator *allocator,
 	out_size -= (out_size - *out_pos) & 3;
 
 	// Get the size of the Check field.
-	check_size = lzma_check_size(block->check);
+	const size_t check_size = lzma_check_size(block->check);
 	assert(check_size != UINT32_MAX);
 
 	// Reserve space for the Check field.
@@ -268,9 +258,19 @@ lzma_block_buffer_encode(lzma_block *block, lzma_allocator *allocator,
 
 	out_size -= check_size;
 
+	// Initialize block->uncompressed_size and calculate the worst-case
+	// value for block->compressed_size.
+	block->uncompressed_size = in_size;
+	block->compressed_size = lzma2_bound(in_size);
+	if (block->compressed_size == 0)
+		return LZMA_DATA_ERROR;
+
 	// Do the actual compression.
-	ret = block_encode_normal(block, allocator,
-			in, in_size, out, out_pos, out_size);
+	lzma_ret ret = LZMA_BUF_ERROR;
+	if (try_to_compress)
+		ret = block_encode_normal(block, allocator,
+				in, in_size, out, out_pos, out_size);
+
 	if (ret != LZMA_OK) {
 		// If the error was something else than output buffer
 		// becoming full, return the error now.
@@ -291,7 +291,7 @@ lzma_block_buffer_encode(lzma_block *block, lzma_allocator *allocator,
 	// Block Padding. No buffer overflow here, because we already adjusted
 	// out_size so that (out_size - out_start) is a multiple of four.
 	// Thus, if the buffer is full, the loop body can never run.
-	for (i = (size_t)(block->compressed_size); i & 3; ++i) {
+	for (size_t i = (size_t)(block->compressed_size); i & 3; ++i) {
 		assert(*out_pos < out_size);
 		out[(*out_pos)++] = 0x00;
 	}
@@ -312,4 +312,26 @@ lzma_block_buffer_encode(lzma_block *block, lzma_allocator *allocator,
 	}
 
 	return LZMA_OK;
+}
+
+
+extern LZMA_API(lzma_ret)
+lzma_block_buffer_encode(lzma_block *block, const lzma_allocator *allocator,
+		const uint8_t *in, size_t in_size,
+		uint8_t *out, size_t *out_pos, size_t out_size)
+{
+	return block_buffer_encode(block, allocator,
+			in, in_size, out, out_pos, out_size, true);
+}
+
+
+extern LZMA_API(lzma_ret)
+lzma_block_uncomp_encode(lzma_block *block,
+		const uint8_t *in, size_t in_size,
+		uint8_t *out, size_t *out_pos, size_t out_size)
+{
+	// It won't allocate any memory from heap so no need
+	// for lzma_allocator.
+	return block_buffer_encode(block, NULL,
+			in, in_size, out, out_pos, out_size, false);
 }

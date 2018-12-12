@@ -19,6 +19,8 @@ Platform specification is supported only on specific generators:
 * For :ref:`Visual Studio Generators` with VS 2005 and above this
   specifies the target architecture.
 
+* For :generator:`Green Hills MULTI` this specifies the target architecture.
+
 See native build system documentation for allowed platform names.
 
 Visual Studio Platform Selection

@@ -34,6 +34,9 @@ struct cmFindProgramHelper
   // Current names under consideration.
   std::vector<std::string> Names;
 
+  // Current name with extension under consideration.
+  std::string TestNameExt;
+
   // Current full path under consideration.
   std::string TestPath;
 
@@ -42,6 +45,19 @@ struct cmFindProgramHelper
   {
     this->Names.clear();
     this->AddName(name);
+  }
+  bool CheckCompoundNames()
+  {
+    for (std::string const& n : this->Names) {
+      // Only perform search relative to current directory if the file name
+      // contains a directory separator.
+      if (n.find('/') != std::string::npos) {
+        if (this->CheckDirectoryForName("", n)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
   bool CheckDirectory(std::string const& path)
   {
@@ -55,14 +71,16 @@ struct cmFindProgramHelper
   bool CheckDirectoryForName(std::string const& path, std::string const& name)
   {
     for (std::string const& ext : this->Extensions) {
-      this->TestPath = path;
-      this->TestPath += name;
       if (!ext.empty() && cmSystemTools::StringEndsWith(name, ext.c_str())) {
         continue;
       }
-      this->TestPath += ext;
+      this->TestNameExt = name;
+      this->TestNameExt += ext;
+      this->TestPath =
+        cmSystemTools::CollapseCombinedPath(path, this->TestNameExt);
+
       if (cmSystemTools::FileExists(this->TestPath, true)) {
-        this->BestPath = cmSystemTools::CollapseFullPath(this->TestPath);
+        this->BestPath = this->TestPath;
         return true;
       }
     }
@@ -145,8 +163,8 @@ std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()
     helper.AddName(n);
   }
 
-  // Check for the names themselves (e.g. absolute paths).
-  if (helper.CheckDirectory(std::string())) {
+  // Check for the names themselves if they contain a directory separator.
+  if (helper.CheckCompoundNames()) {
     return helper.BestPath;
   }
 
@@ -168,8 +186,8 @@ std::string cmFindProgramCommand::FindNormalProgramDirsPerName()
     // Switch to searching for this name.
     helper.SetName(n);
 
-    // Check for the name by itself (e.g. an absolute path).
-    if (helper.CheckDirectory(std::string())) {
+    // Check for the names themselves if they contain a directory separator.
+    if (helper.CheckCompoundNames()) {
       return helper.BestPath;
     }
 

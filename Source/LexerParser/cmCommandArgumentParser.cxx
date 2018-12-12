@@ -126,8 +126,11 @@ static void cmCommandArgument_yyerror(yyscan_t yyscanner, const char* message);
 # pragma warning (disable: 4244) /* loss of precision */
 # pragma warning (disable: 4702) /* unreachable code */
 #endif
+#if defined(__GNUC__) && __GNUC__ >= 8
+# pragma GCC diagnostic ignored "-Wconversion"
+#endif
 
-#line 131 "cmCommandArgumentParser.cxx" /* yacc.c:339  */
+#line 134 "cmCommandArgumentParser.cxx" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -200,7 +203,7 @@ int cmCommandArgument_yyparse (yyscan_t yyscanner);
 
 /* Copy the second part of user declarations.  */
 
-#line 204 "cmCommandArgumentParser.cxx" /* yacc.c:358  */
+#line 207 "cmCommandArgumentParser.cxx" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -498,9 +501,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    96,    96,   102,   105,   110,   113,   118,   121,   126,
-     129,   132,   135,   138,   141,   146,   149,   152,   155,   160,
-     163,   168,   171,   176,   179
+       0,    99,    99,   105,   108,   113,   116,   121,   124,   129,
+     132,   135,   138,   141,   144,   149,   152,   155,   158,   163,
+     166,   171,   174,   179,   182
 };
 #endif
 
@@ -1297,192 +1300,192 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 96 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+#line 99 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = 0;
     yyGetParser->SetResult((yyvsp[0].str));
   }
-#line 1306 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1309 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 102 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+#line 105 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1314 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1317 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 105 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+#line 108 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = yyGetParser->CombineUnions((yyvsp[-1].str), (yyvsp[0].str));
   }
-#line 1322 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1325 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 110 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+#line 113 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = 0;
   }
-#line 1330 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1333 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 113 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+#line 116 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = yyGetParser->CombineUnions((yyvsp[-1].str), (yyvsp[0].str));
   }
-#line 1338 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1341 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 118 "cmCommandArgumentParser.y" /* yacc.c:1646  */
-    {
-    (yyval.str) = (yyvsp[0].str);
-  }
-#line 1346 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
-    break;
-
-  case 8:
 #line 121 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1354 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1349 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
-  case 9:
-#line 126 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+  case 8:
+#line 124 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1362 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1357 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
-  case 10:
+  case 9:
 #line 129 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1370 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1365 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
-  case 11:
+  case 10:
 #line 132 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1378 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1373 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
-  case 12:
+  case 11:
 #line 135 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1386 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1381 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
-  case 13:
+  case 12:
 #line 138 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1394 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1389 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
-  case 14:
+  case 13:
 #line 141 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1402 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1397 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+    break;
+
+  case 14:
+#line 144 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+    {
+    (yyval.str) = (yyvsp[0].str);
+  }
+#line 1405 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 146 "cmCommandArgumentParser.y" /* yacc.c:1646  */
-    {
-    (yyval.str) = yyGetParser->ExpandSpecialVariable((yyvsp[-2].str), (yyvsp[-1].str));
-  }
-#line 1410 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
-    break;
-
-  case 16:
 #line 149 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = yyGetParser->ExpandSpecialVariable((yyvsp[-2].str), (yyvsp[-1].str));
   }
-#line 1418 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1413 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+    break;
+
+  case 16:
+#line 152 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+    {
+    (yyval.str) = yyGetParser->ExpandSpecialVariable((yyvsp[-2].str), (yyvsp[-1].str));
+  }
+#line 1421 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 152 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+#line 155 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = yyGetParser->ExpandVariable((yyvsp[-1].str));
   }
-#line 1426 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1429 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 155 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+#line 158 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = yyGetParser->ExpandVariableForAt((yyvsp[0].str));
   }
-#line 1434 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1437 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 160 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+#line 163 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1442 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1445 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 163 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+#line 166 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = (yyvsp[-1].str);
   }
-#line 1450 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1453 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 168 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+#line 171 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = 0;
   }
-#line 1458 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1461 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 171 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+#line 174 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = yyGetParser->CombineUnions((yyvsp[-1].str), (yyvsp[0].str));
   }
-#line 1466 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1469 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 176 "cmCommandArgumentParser.y" /* yacc.c:1646  */
-    {
-    (yyval.str) = (yyvsp[0].str);
-  }
-#line 1474 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
-    break;
-
-  case 24:
 #line 179 "cmCommandArgumentParser.y" /* yacc.c:1646  */
     {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1482 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1477 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+    break;
+
+  case 24:
+#line 182 "cmCommandArgumentParser.y" /* yacc.c:1646  */
+    {
+    (yyval.str) = (yyvsp[0].str);
+  }
+#line 1485 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
     break;
 
 
-#line 1486 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
+#line 1489 "cmCommandArgumentParser.cxx" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1712,7 +1715,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 184 "cmCommandArgumentParser.y" /* yacc.c:1906  */
+#line 187 "cmCommandArgumentParser.y" /* yacc.c:1906  */
 
 /* End of grammar */
 

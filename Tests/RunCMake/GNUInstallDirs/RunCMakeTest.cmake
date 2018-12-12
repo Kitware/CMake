@@ -1,6 +1,6 @@
 include(RunCMake)
 
-if(SYSTEM_NAME MATCHES "^(.*BSD|DragonFly)$")
+if(SYSTEM_NAME MATCHES "^(([^k].*)?BSD|DragonFly)$")
   set(EXPECT_BSD 1)
 endif()
 

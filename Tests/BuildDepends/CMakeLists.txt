@@ -345,6 +345,17 @@ is not newer than dependency
   ${TEST_LINK_DEPENDS}
 ")
   endif()
+
+  set(linkdep2 ${BuildDepends_BINARY_DIR}/Project/linkdep2${CMAKE_EXECUTABLE_SUFFIX})
+  if(${linkdep2} IS_NEWER_THAN ${TEST_LINK_DEPENDS})
+    message("INTERFACE_LINK_DEPENDS worked")
+  else()
+    message(SEND_ERROR "INTERFACE_LINK_DEPENDS failed.  Executable
+  ${linkdep2}
+is not newer than dependency
+  ${TEST_LINK_DEPENDS}
+")
+  endif()
 endif()
 
 if(EXISTS "${link_depends_no_shared_check_txt}")

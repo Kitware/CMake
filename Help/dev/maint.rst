@@ -51,15 +51,18 @@ using a local branch named ``release-$ver``, where ``$ver`` is the version
 number of the current release in the form ``$major.$minor``.  It is always
 merged into ``master`` before publishing.
 
-To merge some ``$topic`` branch into ``release``, first create the local
-branch:
+Before merging a ``$topic`` branch into ``release``, verify that the
+``$topic`` branch has already been merged to ``master`` via the usual
+``Do: merge`` process.  Then, to merge the ``$topic`` branch into
+``release``, start by creating the local branch:
 
 .. code-block:: shell
 
   git fetch origin
   git checkout -b release-$ver origin/release
 
-Merge the ``$topic`` branch into the local ``release-$ver`` branch:
+Merge the ``$topic`` branch into the local ``release-$ver`` branch, making
+sure to include a ``Merge-request: !xxxx`` footer in the commit message:
 
 .. code-block:: shell
 

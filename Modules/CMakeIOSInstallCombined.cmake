@@ -1,6 +1,8 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 # Function to print messages of this module
 function(_ios_install_combined_message)
@@ -57,6 +59,7 @@ endfunction()
 
 # Get architectures of given SDK (iphonesimulator/iphoneos)
 function(_ios_install_combined_get_valid_archs sdk resultvar)
+  cmake_policy(PUSH)
   cmake_policy(SET CMP0007 NEW)
 
   if("${resultvar}" STREQUAL "")
@@ -73,6 +76,8 @@ function(_ios_install_combined_get_valid_archs sdk resultvar)
   _ios_install_combined_message("Architectures (${sdk}): ${printable}")
 
   set("${resultvar}" "${valid_archs}" PARENT_SCOPE)
+
+  cmake_policy(POP)
 endfunction()
 
 # Final target can contain more architectures that specified by SDK. This
@@ -161,8 +166,6 @@ function(_ios_install_combined_keep_archs lib archs)
 endfunction()
 
 function(_ios_install_combined_detect_sdks this_sdk_var corr_sdk_var)
-  cmake_policy(SET CMP0057 NEW)
-
   set(this_sdk "$ENV{PLATFORM_NAME}")
   if("${this_sdk}" STREQUAL "")
     message(FATAL_ERROR "Environment variable PLATFORM_NAME is empty")
@@ -305,3 +308,5 @@ function(ios_install_combined target destination)
 
   _ios_install_combined_message("Install done: ${destination}")
 endfunction()
+
+cmake_policy(POP)

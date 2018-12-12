@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.7)
-project (CudaComplex CXX CUDA)
+project (Complex CXX CUDA)
 #Goal for this example:
 
 #build a cpp dynamic library base

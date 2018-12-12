@@ -186,8 +186,8 @@ void cmXMLParserCharacterDataHandler(void* parser, const char* data,
 void cmXMLParser::ReportXmlParseError()
 {
   XML_Parser parser = static_cast<XML_Parser>(this->Parser);
-  this->ReportError(XML_GetCurrentLineNumber(parser),
-                    XML_GetCurrentColumnNumber(parser),
+  this->ReportError(static_cast<int>(XML_GetCurrentLineNumber(parser)),
+                    static_cast<int>(XML_GetCurrentColumnNumber(parser)),
                     XML_ErrorString(XML_GetErrorCode(parser)));
 }
 

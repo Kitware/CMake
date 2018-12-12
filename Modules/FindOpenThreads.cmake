@@ -47,6 +47,8 @@
 # standard install paths.
 # Explicit -DVAR=value arguments should still be able to override everything.
 
+include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+
 find_path(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
     HINTS
         ENV OPENTHREADS_INCLUDE_DIR
@@ -62,7 +64,7 @@ find_path(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
 )
 
 
-find_library(OPENTHREADS_LIBRARY
+find_library(OPENTHREADS_LIBRARY_RELEASE
     NAMES OpenThreads OpenThreadsWin32
     HINTS
         ENV OPENTHREADS_LIBRARY_DIR
@@ -93,13 +95,7 @@ find_library(OPENTHREADS_LIBRARY_DEBUG
     PATH_SUFFIXES lib
 )
 
-if(OPENTHREADS_LIBRARY_DEBUG)
-    set(OPENTHREADS_LIBRARIES
-        optimized ${OPENTHREADS_LIBRARY}
-        debug ${OPENTHREADS_LIBRARY_DEBUG})
-else()
-    set(OPENTHREADS_LIBRARIES ${OPENTHREADS_LIBRARY})
-endif()
+select_library_configurations(OPENTHREADS)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenThreads DEFAULT_MSG

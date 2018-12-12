@@ -4,6 +4,8 @@
 
 #include <sstream>
 
+#include "cmAlgorithms.h"
+#include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmSystemTools.h"
@@ -19,17 +21,34 @@ bool cmLinkDirectoriesCommand::InitialPass(
     return true;
   }
 
-  for (std::string const& i : args) {
-    this->AddLinkDir(i);
+  bool before = this->Makefile->IsOn("CMAKE_LINK_DIRECTORIES_BEFORE");
+
+  auto i = args.cbegin();
+  if ((*i) == "BEFORE") {
+    before = true;
+    ++i;
+  } else if ((*i) == "AFTER") {
+    before = false;
+    ++i;
   }
+
+  std::vector<std::string> directories;
+  for (; i != args.cend(); ++i) {
+    this->AddLinkDir(*i, directories);
+  }
+
+  this->Makefile->AddLinkDirectory(cmJoin(directories, ";"), before);
+
   return true;
 }
 
-void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
+void cmLinkDirectoriesCommand::AddLinkDir(
+  std::string const& dir, std::vector<std::string>& directories)
 {
   std::string unixPath = dir;
   cmSystemTools::ConvertToUnixSlashes(unixPath);
-  if (!cmSystemTools::FileIsFullPath(unixPath)) {
+  if (!cmSystemTools::FileIsFullPath(unixPath) &&
+      !cmGeneratorExpression::StartsWithGeneratorExpression(unixPath)) {
     bool convertToAbsolute = false;
     std::ostringstream e;
     /* clang-format off */
@@ -41,6 +60,7 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0015);
         this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+        break;
       case cmPolicies::OLD:
         // OLD behavior does not convert
         break;
@@ -61,5 +81,5 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
       unixPath = tmp;
     }
   }
-  this->Makefile->AppendProperty("LINK_DIRECTORIES", unixPath.c_str());
+  directories.push_back(unixPath);
 }

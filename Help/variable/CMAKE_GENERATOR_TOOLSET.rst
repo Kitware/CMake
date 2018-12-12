@@ -18,6 +18,7 @@ Toolset specification is supported only on specific generators:
 
 * :ref:`Visual Studio Generators` for VS 2010 and above
 * The :generator:`Xcode` generator for Xcode 3.0 and above
+* The :generator:`Green Hills MULTI` generator
 
 See native build system documentation for allowed toolset names.
 

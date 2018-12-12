@@ -206,7 +206,7 @@ CTest
 CPack
 -----
 
-* The :module:`CPackArchive` module learned to modify the filename
+* The :cpack_gen:`CPack Archive Generator` learned to modify the filename
   per-component.  See the :variable:`CPACK_ARCHIVE_FILE_NAME` variable and
   its per-component version :variable:`CPACK_ARCHIVE_<component>_FILE_NAME`.
 
@@ -220,23 +220,24 @@ CPack
   internationalization support for ``DISPLAY_NAME`` and ``DESCRIPTION``
   options.
 
-* The :module:`CPackIFW` module learned the new hint :variable:`CPACK_IFW_ROOT`
-  variable for finding the QtIFW tool suite installed in a non-standard place.
+* The :cpack_gen:`CPack IFW Generator` learned the new hint
+  :variable:`CPACK_IFW_ROOT` variable for finding the QtIFW tool suite
+  installed in a non-standard place.
 
-* The :module:`CPackProductBuild` module gained a new
+* The :cpack_gen:`CPack productbuild Generator` gained a new
   :variable:`CPACK_PRODUCTBUILD_RESOURCES_DIR` variable to
   specify resources to be copied into the ``Resources``
   directory.
 
-* The :module:`CPackRPM` module learned to modify the ``debuginfo`` package
-  name.  See the :variable:`CPACK_RPM_DEBUGINFO_FILE_NAME` variable.
+* The :cpack_gen:`CPack RPM Generator` learned to modify the ``debuginfo``
+  package name.  See the :variable:`CPACK_RPM_DEBUGINFO_FILE_NAME` variable.
 
-* The :module:`CPackWIX` module patching system now has the ability to set
-  additional attributes.  This can be done by specifying attributes with
-  the ``CPackWiXFragment`` XML tag after the ``Id`` attribute.
+* The :cpack_gen:`CPack WIX Generator` patching system now has the
+  ability to set additional attributes.  This can be done by specifying
+  attributes with the ``CPackWiXFragment`` XML tag after the ``Id`` attribute.
   See the :variable:`CPACK_WIX_PATCH_FILE` variable.
 
-* The CPack WIX generator implemented a new
+* The :cpack_gen:`CPack WIX Generator` implemented a new
   :variable:`CPACK_WIX_ROOT_FOLDER_ID` variable which allows
   using a custom root folder ID instead of the default
   ``ProgramFilesFolder`` / ``ProgramFiles64Folder``.

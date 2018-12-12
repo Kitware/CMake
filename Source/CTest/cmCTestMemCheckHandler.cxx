@@ -1087,7 +1087,7 @@ void cmCTestMemCheckHandler::TestOutputFileNames(
     g.FindFiles(ofile);
     if (g.GetFiles().empty()) {
       std::string log = "Cannot find memory tester output file: " + ofile;
-      cmCTestLog(this->CTest, ERROR_MESSAGE, log << std::endl);
+      cmCTestLog(this->CTest, WARNING, log << std::endl);
       ofile.clear();
     } else {
       files = g.GetFiles();
@@ -1095,7 +1095,7 @@ void cmCTestMemCheckHandler::TestOutputFileNames(
     }
   } else if (!cmSystemTools::FileExists(ofile)) {
     std::string log = "Cannot find memory tester output file: " + ofile;
-    cmCTestLog(this->CTest, ERROR_MESSAGE, log << std::endl);
+    cmCTestLog(this->CTest, WARNING, log << std::endl);
     ofile.clear();
   }
   files.push_back(std::move(ofile));

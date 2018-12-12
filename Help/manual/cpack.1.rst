@@ -29,9 +29,10 @@ Options
   package(s) in that generator's format according to the details provided in
   the ``CPackConfig.cmake`` configuration file.  A generator is responsible for
   generating the required inputs for a particular package system and invoking
-  that system's package creation tools.  Possible generator names are specified
-  in the :manual:`Generators <cmake-generators(7)>` section of the manual and
+  that system's package creation tools.  All supported generators are specified
+  in the :manual:`Generators <cpack-generators(7)>` section of the manual and
   the ``--help`` option lists the generators supported for the target platform.
+
   If this option is not given, the :variable:`CPACK_GENERATOR` variable
   determines the default set of generators that will be used.
 

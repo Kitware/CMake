@@ -98,7 +98,7 @@ void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
     ext = ".vfproj";
     project = "Project(\"{6989167D-11E4-40FE-8C1A-2192A86A7E90}\") = \"";
   }
-  if (t->HasLanguage("CSharp", "")) {
+  if (t->IsCSharpOnly()) {
     ext = ".csproj";
     project = "Project(\"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}\") = \"";
   }

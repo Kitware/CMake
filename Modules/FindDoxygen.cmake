@@ -370,6 +370,9 @@ Deprecated Hint Variables
 
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 # For backwards compatibility support
 if(Doxygen_FIND_QUIETLY)
     set(DOXYGEN_FIND_QUIETLY TRUE)
@@ -1108,3 +1111,5 @@ doxygen_add_docs() for target ${targetName}")
     )
 
 endfunction()
+
+cmake_policy(POP)

@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 
 project(FindPkgConfig_IMPORTED_TARGET C)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(NCURSES IMPORTED_TARGET QUIET ncurses)
+
+message(STATUS "source: ${CMAKE_CURRENT_SOURCE_DIR} bin ${CMAKE_CURRENT_BINARY_DIR}")
 
 if (NCURSES_FOUND)
   set(tgt PkgConfig::NCURSES)
@@ -64,6 +66,16 @@ endif()
 pkg_check_modules(FakePackage1 REQUIRED QUIET IMPORTED_TARGET cmakeinternalfakepackage1)
 if (NOT TARGET PkgConfig::FakePackage1)
   message(FATAL_ERROR "No import target for fake package 1 with prefix path")
+endif()
+
+# find targets in subdir and check their visibility
+add_subdirectory(target_subdir)
+if (TARGET PkgConfig::FakePackage1_dir)
+  message(FATAL_ERROR "imported target PkgConfig::FakePackage1_dir is visible outside it's directory")
+endif()
+
+if (NOT TARGET PkgConfig::FakePackage1_global)
+  message(FATAL_ERROR "imported target PkgConfig::FakePackage1_global is not visible outside it's directory")
 endif()
 
 # And now do the same for the NO_CMAKE_ENVIRONMENT_PATH - ENV{CMAKE_PREFIX_PATH}

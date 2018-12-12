@@ -49,7 +49,7 @@ int cmCPackNuGetGenerator::PackageFiles()
     this->SetOption("CPACK_NUGET_ORDINAL_MONOLITIC", "TRUE");
   }
 
-  auto retval = this->ReadListFile("CPackNuGet.cmake");
+  auto retval = this->ReadListFile("Internal/CPack/CPackNuGet.cmake");
   if (retval) {
     AddGeneratedPackageNames();
   } else {

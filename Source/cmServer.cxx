@@ -5,6 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmConnection.h"
 #include "cmFileMonitor.h"
+#include "cmJsonObjectDictionary.h"
 #include "cmServerDictionary.h"
 #include "cmServerProtocol.h"
 #include "cmSystemTools.h"

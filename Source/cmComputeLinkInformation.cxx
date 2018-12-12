@@ -30,7 +30,7 @@ Notes about linking on various platforms:
 
 ------------------------------------------------------------------------------
 
-Linux, FreeBSD, Mac OS X, IRIX, Sun, Windows:
+Linux, FreeBSD, macOS, IRIX, Sun, Windows:
 
 Linking to libraries using the full path works fine.
 
@@ -357,10 +357,10 @@ cmComputeLinkInformation::cmComputeLinkInformation(
   }
 
   // Add the search path entries requested by the user to path ordering.
-  this->OrderLinkerSearchPath->AddUserDirectories(
-    this->Target->GetLinkDirectories());
-  this->OrderRuntimeSearchPath->AddUserDirectories(
-    this->Target->GetLinkDirectories());
+  std::vector<std::string> directories;
+  this->Target->GetLinkDirectories(directories, config, this->LinkLanguage);
+  this->OrderLinkerSearchPath->AddUserDirectories(directories);
+  this->OrderRuntimeSearchPath->AddUserDirectories(directories);
 
   // Set up the implicit link directories.
   this->LoadImplicitLinkInfo();
@@ -387,8 +387,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
   if (this->OldLinkDirMode) {
     // Construct a mask to not bother with this behavior for link
     // directories already specified by the user.
-    std::vector<std::string> const& dirs = this->Target->GetLinkDirectories();
-    this->OldLinkDirMask.insert(dirs.begin(), dirs.end());
+    this->OldLinkDirMask.insert(directories.begin(), directories.end());
   }
 
   this->CMP0060Warn = this->Makefile->PolicyOptionalWarningEnabled(
@@ -1725,7 +1724,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     }
     const char* stagePath =
       this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX");
-    const char* installPrefix =
+    std::string const& installPrefix =
       this->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
     cmSystemTools::ConvertToUnixSlashes(rootPath);
     std::vector<std::string> const& rdirs = this->GetRuntimeSearchPath();

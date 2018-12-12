@@ -36,7 +36,7 @@ bool cmDepends::Write(std::ostream& makeDepends, std::ostream& internalDepends)
   std::string srcLang = "CMAKE_DEPENDS_CHECK_";
   srcLang += this->Language;
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
-  const char* srcStr = mf->GetSafeDefinition(srcLang);
+  std::string const& srcStr = mf->GetSafeDefinition(srcLang);
   std::vector<std::string> pairs;
   cmSystemTools::ExpandListArgument(srcStr, pairs);
 

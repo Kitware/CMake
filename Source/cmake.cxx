@@ -226,10 +226,8 @@ cmake::~cmake()
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-Json::Value cmake::ReportCapabilitiesJson(bool haveServerMode) const
+Json::Value cmake::ReportVersionJson() const
 {
-  Json::Value obj = Json::objectValue;
-  // Version information:
   Json::Value version = Json::objectValue;
   version["string"] = CMake_VERSION;
   version["major"] = CMake_VERSION_MAJOR;
@@ -237,8 +235,15 @@ Json::Value cmake::ReportCapabilitiesJson(bool haveServerMode) const
   version["suffix"] = CMake_VERSION_SUFFIX;
   version["isDirty"] = (CMake_VERSION_IS_DIRTY == 1);
   version["patch"] = CMake_VERSION_PATCH;
+  return version;
+}
 
-  obj["version"] = version;
+Json::Value cmake::ReportCapabilitiesJson(bool haveServerMode) const
+{
+  Json::Value obj = Json::objectValue;
+
+  // Version information:
+  obj["version"] = this->ReportVersionJson();
 
   // Generators:
   std::vector<cmake::GeneratorInfo> generatorInfoList;
@@ -320,9 +325,10 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         bool haveValue = false;
         std::string cachedValue;
         if (this->WarnUnusedCli) {
-          if (const char* v = this->State->GetInitializedCacheValue(var)) {
+          if (const std::string* v =
+                this->State->GetInitializedCacheValue(var)) {
             haveValue = true;
-            cachedValue = v;
+            cachedValue = *v;
           }
         }
 
@@ -332,7 +338,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 
         if (this->WarnUnusedCli) {
           if (!haveValue ||
-              cachedValue != this->State->GetInitializedCacheValue(var)) {
+              cachedValue != *this->State->GetInitializedCacheValue(var)) {
             this->WatchUnusedCli(var);
           }
         }
@@ -408,7 +414,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       for (std::string const& ck : cacheKeys) {
         cmStateEnums::CacheEntryType t = this->State->GetCacheEntryType(ck);
         if (t != cmStateEnums::STATIC) {
-          if (regex.find(ck.c_str())) {
+          if (regex.find(ck)) {
             entriesToDelete.push_back(ck);
           }
         }
@@ -612,19 +618,43 @@ void cmake::SetArgs(const std::vector<std::string>& args,
   bool havePlatform = false;
   for (unsigned int i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
-    if (arg.find("-H", 0) == 0) {
+    if (arg.find("-H", 0) == 0 || arg.find("-S", 0) == 0) {
       directoriesSet = true;
       std::string path = arg.substr(2);
+      if (path.empty()) {
+        ++i;
+        if (i >= args.size()) {
+          cmSystemTools::Error("No source directory specified for -S");
+          return;
+        }
+        path = args[i];
+        if (path[0] == '-') {
+          cmSystemTools::Error("No source directory specified for -S");
+          return;
+        }
+      }
+
       path = cmSystemTools::CollapseFullPath(path);
       cmSystemTools::ConvertToUnixSlashes(path);
       this->SetHomeDirectory(path);
-    } else if (arg.find("-S", 0) == 0) {
-      // There is no local generate anymore.  Ignore -S option.
     } else if (arg.find("-O", 0) == 0) {
       // There is no local generate anymore.  Ignore -O option.
     } else if (arg.find("-B", 0) == 0) {
       directoriesSet = true;
       std::string path = arg.substr(2);
+      if (path.empty()) {
+        ++i;
+        if (i >= args.size()) {
+          cmSystemTools::Error("No build directory specified for -B");
+          return;
+        }
+        path = args[i];
+        if (path[0] == '-') {
+          cmSystemTools::Error("No build directory specified for -B");
+          return;
+        }
+      }
+
       path = cmSystemTools::CollapseFullPath(path);
       cmSystemTools::ConvertToUnixSlashes(path);
       this->SetHomeOutputDirectory(path);
@@ -836,20 +866,27 @@ void cmake::SetDirectoriesFromFile(const char* arg)
       this->SetHomeOutputDirectory(listPath);
     } else {
       // Source directory given on command line.  Use current working
-      // directory as build tree.
-      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-      this->SetHomeOutputDirectory(cwd);
+      // directory as build tree if -B hasn't been given already
+      if (this->GetHomeOutputDirectory().empty()) {
+        std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+        this->SetHomeOutputDirectory(cwd);
+      }
     }
     return;
   }
 
-  // We didn't find a CMakeLists.txt or CMakeCache.txt file from the
-  // argument.  Assume it is the path to the source tree, and use the
-  // current working directory as the build tree.
-  std::string full = cmSystemTools::CollapseFullPath(arg);
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  this->SetHomeDirectory(full);
-  this->SetHomeOutputDirectory(cwd);
+  if (this->GetHomeDirectory().empty()) {
+    // We didn't find a CMakeLists.txt and it wasn't specified
+    // with -S. Assume it is the path to the source tree
+    std::string full = cmSystemTools::CollapseFullPath(arg);
+    this->SetHomeDirectory(full);
+  }
+  if (this->GetHomeOutputDirectory().empty()) {
+    // We didn't find a CMakeCache.txt and it wasn't specified
+    // with -B. Assume the current working directory as the build tree.
+    std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+    this->SetHomeOutputDirectory(cwd);
+  }
 }
 
 // at the end of this CMAKE_ROOT and CMAKE_COMMAND should be added to the
@@ -1108,7 +1145,7 @@ int cmake::DoPreConfigureChecks()
   // do a sanity check on some values
   if (this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY")) {
     std::string cacheStart =
-      this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY");
+      *this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY");
     cacheStart += "/CMakeLists.txt";
     std::string currentStart = this->GetHomeDirectory();
     currentStart += "/CMakeLists.txt";
@@ -1140,7 +1177,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
   std::vector<std::string> argsSplit;
   cmSystemTools::ExpandListArgument(std::string(var), argsSplit, true);
   // erase the property to avoid infinite recursion
-  this->State->SetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "", cmListFileBacktrace::Empty());
+  this->State->SetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "", cmListFileBacktrace());
   if (this->State->GetIsInTryCompile()) {
     return 0;
   }
@@ -1263,10 +1300,7 @@ int cmake::ActualConfigure()
   this->UpdateConversionPathTable();
   this->CleanupCommandsAndMacros();
 
-  int res = 0;
-  if (this->GetWorkingMode() == NORMAL_MODE) {
-    res = this->DoPreConfigureChecks();
-  }
+  int res = this->DoPreConfigureChecks();
   if (res < 0) {
     return -2;
   }
@@ -1280,14 +1314,14 @@ int cmake::ActualConfigure()
 
   // no generator specified on the command line
   if (!this->GlobalGenerator) {
-    const char* genName =
+    const std::string* genName =
       this->State->GetInitializedCacheValue("CMAKE_GENERATOR");
-    const char* extraGenName =
+    const std::string* extraGenName =
       this->State->GetInitializedCacheValue("CMAKE_EXTRA_GENERATOR");
     if (genName) {
       std::string fullName =
         cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
-          genName, extraGenName ? extraGenName : "");
+          *genName, extraGenName ? *extraGenName : "");
       this->GlobalGenerator = this->CreateGlobalGenerator(fullName);
     }
     if (this->GlobalGenerator) {
@@ -1305,14 +1339,14 @@ int cmake::ActualConfigure()
     }
   }
 
-  const char* genName =
+  const std::string* genName =
     this->State->GetInitializedCacheValue("CMAKE_GENERATOR");
   if (genName) {
-    if (!this->GlobalGenerator->MatchesGeneratorName(genName)) {
+    if (!this->GlobalGenerator->MatchesGeneratorName(*genName)) {
       std::string message = "Error: generator : ";
       message += this->GlobalGenerator->GetName();
       message += "\nDoes not match the generator used previously: ";
-      message += genName;
+      message += *genName;
       message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
                  "directory or choose a different binary directory.";
       cmSystemTools::Error(message.c_str());
@@ -1329,14 +1363,14 @@ int cmake::ActualConfigure()
                         cmStateEnums::INTERNAL);
   }
 
-  if (const char* instance =
+  if (const std::string* instance =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_INSTANCE")) {
     if (!this->GeneratorInstance.empty() &&
-        this->GeneratorInstance != instance) {
+        this->GeneratorInstance != *instance) {
       std::string message = "Error: generator instance: ";
       message += this->GeneratorInstance;
       message += "\nDoes not match the instance used previously: ";
-      message += instance;
+      message += *instance;
       message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
                  "directory or choose a different binary directory.";
       cmSystemTools::Error(message.c_str());
@@ -1348,14 +1382,14 @@ int cmake::ActualConfigure()
       "Generator instance identifier.", cmStateEnums::INTERNAL);
   }
 
-  if (const char* platformName =
+  if (const std::string* platformName =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_PLATFORM")) {
     if (!this->GeneratorPlatform.empty() &&
-        this->GeneratorPlatform != platformName) {
+        this->GeneratorPlatform != *platformName) {
       std::string message = "Error: generator platform: ";
       message += this->GeneratorPlatform;
       message += "\nDoes not match the platform used previously: ";
-      message += platformName;
+      message += *platformName;
       message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
                  "directory or choose a different binary directory.";
       cmSystemTools::Error(message.c_str());
@@ -1367,13 +1401,13 @@ int cmake::ActualConfigure()
                         "Name of generator platform.", cmStateEnums::INTERNAL);
   }
 
-  if (const char* tsName =
+  if (const std::string* tsName =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_TOOLSET")) {
-    if (!this->GeneratorToolset.empty() && this->GeneratorToolset != tsName) {
+    if (!this->GeneratorToolset.empty() && this->GeneratorToolset != *tsName) {
       std::string message = "Error: generator toolset: ";
       message += this->GeneratorToolset;
       message += "\nDoes not match the toolset used previously: ";
-      message += tsName;
+      message += *tsName;
       message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
                  "directory or choose a different binary directory.";
       cmSystemTools::Error(message.c_str());
@@ -1432,11 +1466,8 @@ int cmake::ActualConfigure()
       "CMakeLists.txt ?");
   }
 
-  // only save the cache if there were no fatal errors
-  if (this->GetWorkingMode() == NORMAL_MODE) {
-    this->State->SaveVerificationScript(this->GetHomeOutputDirectory());
-    this->SaveCache(this->GetHomeOutputDirectory());
-  }
+  this->State->SaveVerificationScript(this->GetHomeOutputDirectory());
+  this->SaveCache(this->GetHomeOutputDirectory());
   if (cmSystemTools::GetErrorOccuredFlag()) {
     return -1;
   }
@@ -1589,7 +1620,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   }
 
   int ret = this->Configure();
-  if (ret || this->GetWorkingMode() != NORMAL_MODE) {
+  if (ret) {
 #if defined(CMAKE_HAVE_VS_GENERATORS)
     if (!this->VSSolutionFile.empty() && this->GlobalGenerator) {
       // CMake is running to regenerate a Visual Studio build tree
@@ -1635,9 +1666,8 @@ int cmake::Generate()
   // Save the cache again after a successful Generate so that any internal
   // variables created during Generate are saved. (Specifically target GUIDs
   // for the Visual Studio and Xcode generators.)
-  if (this->GetWorkingMode() == NORMAL_MODE) {
-    this->SaveCache(this->GetHomeOutputDirectory());
-  }
+  this->SaveCache(this->GetHomeOutputDirectory());
+
   return 0;
 }
 
@@ -1693,7 +1723,8 @@ std::string cmake::StripExtension(const std::string& file) const
 
 const char* cmake::GetCacheDefinition(const std::string& name) const
 {
-  return this->State->GetInitializedCacheValue(name);
+  const std::string* p = this->State->GetInitializedCacheValue(name);
+  return p ? p->c_str() : nullptr;
 }
 
 void cmake::AddScriptingCommands()
@@ -1876,14 +1907,14 @@ void cmake::PrintGeneratorList()
 void cmake::UpdateConversionPathTable()
 {
   // Update the path conversion table with any specified file:
-  const char* tablepath =
+  const std::string* tablepath =
     this->State->GetInitializedCacheValue("CMAKE_PATH_TRANSLATION_FILE");
 
   if (tablepath) {
-    cmsys::ifstream table(tablepath);
+    cmsys::ifstream table(tablepath->c_str());
     if (!table) {
-      cmSystemTools::Error("CMAKE_PATH_TRANSLATION_FILE set to ", tablepath,
-                           ". CMake can not open file.");
+      cmSystemTools::Error("CMAKE_PATH_TRANSLATION_FILE set to ",
+                           tablepath->c_str(), ". CMake can not open file.");
       cmSystemTools::ReportLastSystemError("CMake can not open file.");
     } else {
       std::string a, b;
@@ -2437,6 +2468,14 @@ int cmake::Build(int jobs, const std::string& dir, const std::string& target,
       return 1;
     }
   }
+  const char* cachedGeneratorPlatform =
+    this->State->GetCacheEntryValue("CMAKE_GENERATOR_PLATFORM");
+  if (cachedGeneratorPlatform) {
+    cmMakefile mf(gen, this->GetCurrentSnapshot());
+    if (!gen->SetGeneratorPlatform(cachedGeneratorPlatform, &mf)) {
+      return 1;
+    }
+  }
   std::string output;
   std::string projName;
   const char* cachedProjectName =
@@ -2535,11 +2574,11 @@ bool cmake::Open(const std::string& dir, bool dryRun)
     std::cerr << "Error: could not find CMAKE_GENERATOR in Cache\n";
     return false;
   }
-  const char* extraGenName =
+  const std::string* extraGenName =
     this->State->GetInitializedCacheValue("CMAKE_EXTRA_GENERATOR");
   std::string fullName =
     cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
-      genName, extraGenName ? extraGenName : "");
+      genName, extraGenName ? *extraGenName : "");
 
   std::unique_ptr<cmGlobalGenerator> gen(
     this->CreateGlobalGenerator(fullName));

@@ -35,7 +35,8 @@ typedef struct {
 	/// \return     - LZMA_OK: Properties decoded successfully.
 	///             - LZMA_OPTIONS_ERROR: Unsupported properties
 	///             - LZMA_MEM_ERROR: Memory allocation failed.
-	lzma_ret (*props_decode)(void **options, lzma_allocator *allocator,
+	lzma_ret (*props_decode)(
+			void **options, const lzma_allocator *allocator,
 			const uint8_t *props, size_t props_size);
 
 } lzma_filter_decoder;
@@ -44,74 +45,74 @@ typedef struct {
 static const lzma_filter_decoder decoders[] = {
 #ifdef HAVE_DECODER_LZMA1
 	{
-		LZMA_FILTER_LZMA1,
-		&lzma_lzma_decoder_init,
-		&lzma_lzma_decoder_memusage,
-		&lzma_lzma_props_decode,
+		.id = LZMA_FILTER_LZMA1,
+		.init = &lzma_lzma_decoder_init,
+		.memusage = &lzma_lzma_decoder_memusage,
+		.props_decode = &lzma_lzma_props_decode,
 	},
 #endif
 #ifdef HAVE_DECODER_LZMA2
 	{
-		LZMA_FILTER_LZMA2,
-		&lzma_lzma2_decoder_init,
-		&lzma_lzma2_decoder_memusage,
-		&lzma_lzma2_props_decode,
+		.id = LZMA_FILTER_LZMA2,
+		.init = &lzma_lzma2_decoder_init,
+		.memusage = &lzma_lzma2_decoder_memusage,
+		.props_decode = &lzma_lzma2_props_decode,
 	},
 #endif
 #ifdef HAVE_DECODER_X86
 	{
-		LZMA_FILTER_X86,
-		&lzma_simple_x86_decoder_init,
-		NULL,
-		&lzma_simple_props_decode,
+		.id = LZMA_FILTER_X86,
+		.init = &lzma_simple_x86_decoder_init,
+		.memusage = NULL,
+		.props_decode = &lzma_simple_props_decode,
 	},
 #endif
 #ifdef HAVE_DECODER_POWERPC
 	{
-		LZMA_FILTER_POWERPC,
-		&lzma_simple_powerpc_decoder_init,
-		NULL,
-		&lzma_simple_props_decode,
+		.id = LZMA_FILTER_POWERPC,
+		.init = &lzma_simple_powerpc_decoder_init,
+		.memusage = NULL,
+		.props_decode = &lzma_simple_props_decode,
 	},
 #endif
 #ifdef HAVE_DECODER_IA64
 	{
-		LZMA_FILTER_IA64,
-		&lzma_simple_ia64_decoder_init,
-		NULL,
-		&lzma_simple_props_decode,
+		.id = LZMA_FILTER_IA64,
+		.init = &lzma_simple_ia64_decoder_init,
+		.memusage = NULL,
+		.props_decode = &lzma_simple_props_decode,
 	},
 #endif
 #ifdef HAVE_DECODER_ARM
 	{
-		LZMA_FILTER_ARM,
-		&lzma_simple_arm_decoder_init,
-		NULL,
-		&lzma_simple_props_decode,
+		.id = LZMA_FILTER_ARM,
+		.init = &lzma_simple_arm_decoder_init,
+		.memusage = NULL,
+		.props_decode = &lzma_simple_props_decode,
 	},
 #endif
 #ifdef HAVE_DECODER_ARMTHUMB
 	{
-		LZMA_FILTER_ARMTHUMB,
-		&lzma_simple_armthumb_decoder_init,
-		NULL,
-		&lzma_simple_props_decode,
+		.id = LZMA_FILTER_ARMTHUMB,
+		.init = &lzma_simple_armthumb_decoder_init,
+		.memusage = NULL,
+		.props_decode = &lzma_simple_props_decode,
 	},
 #endif
 #ifdef HAVE_DECODER_SPARC
 	{
-		LZMA_FILTER_SPARC,
-		&lzma_simple_sparc_decoder_init,
-		NULL,
-		&lzma_simple_props_decode,
+		.id = LZMA_FILTER_SPARC,
+		.init = &lzma_simple_sparc_decoder_init,
+		.memusage = NULL,
+		.props_decode = &lzma_simple_props_decode,
 	},
 #endif
 #ifdef HAVE_DECODER_DELTA
 	{
-		LZMA_FILTER_DELTA,
-		&lzma_delta_decoder_init,
-		&lzma_delta_coder_memusage,
-		&lzma_delta_props_decode,
+		.id = LZMA_FILTER_DELTA,
+		.init = &lzma_delta_decoder_init,
+		.memusage = &lzma_delta_coder_memusage,
+		.props_decode = &lzma_delta_props_decode,
 	},
 #endif
 };
@@ -120,8 +121,7 @@ static const lzma_filter_decoder decoders[] = {
 static const lzma_filter_decoder *
 decoder_find(lzma_vli id)
 {
-	size_t i;
-	for (i = 0; i < ARRAY_SIZE(decoders); ++i)
+	for (size_t i = 0; i < ARRAY_SIZE(decoders); ++i)
 		if (decoders[i].id == id)
 			return decoders + i;
 
@@ -137,7 +137,7 @@ lzma_filter_decoder_is_supported(lzma_vli id)
 
 
 extern lzma_ret
-lzma_raw_decoder_init(lzma_next_coder *next, lzma_allocator *allocator,
+lzma_raw_decoder_init(lzma_next_coder *next, const lzma_allocator *allocator,
 		const lzma_filter *options)
 {
 	return lzma_raw_coder_init(next, allocator,
@@ -148,7 +148,7 @@ lzma_raw_decoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 extern LZMA_API(lzma_ret)
 lzma_raw_decoder(lzma_stream *strm, const lzma_filter *options)
 {
-	lzma_next_strm_init1(lzma_raw_decoder_init, strm, options);
+	lzma_next_strm_init(lzma_raw_decoder_init, strm, options);
 
 	strm->internal->supported_actions[LZMA_RUN] = true;
 	strm->internal->supported_actions[LZMA_FINISH] = true;
@@ -166,14 +166,13 @@ lzma_raw_decoder_memusage(const lzma_filter *filters)
 
 
 extern LZMA_API(lzma_ret)
-lzma_properties_decode(lzma_filter *filter, lzma_allocator *allocator,
+lzma_properties_decode(lzma_filter *filter, const lzma_allocator *allocator,
 		const uint8_t *props, size_t props_size)
 {
-	const lzma_filter_decoder *const fd = decoder_find(filter->id);
-
 	// Make it always NULL so that the caller can always safely free() it.
 	filter->options = NULL;
 
+	const lzma_filter_decoder *const fd = decoder_find(filter->id);
 	if (fd == NULL)
 		return LZMA_OPTIONS_ERROR;
 

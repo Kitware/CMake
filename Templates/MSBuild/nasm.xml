@@ -36,7 +36,7 @@
         <DataSource Persistence="ProjectFile" ItemType="NASM" SourceType="Item"/>
       </StringProperty.DataSource>
     </StringProperty>
-    <StringProperty Name="OutputFormat" Category="Assembler Options" HelpUrl="http://www.nasm.us/doc/" DisplayName="Output File Name" Description="Specify Output Filename.-o [value]" Switch="-o [value]"/>
+    <StringProperty Name="OutputFormat" Category="Assembler Options" HelpUrl="http://www.nasm.us/doc/" DisplayName="Output File Name" Description="Specify Output Filename.-o [value]" Switch="-o &quot;[value]&quot;"/>
     <BoolProperty Name="tasmmode" Category="Advanced" HelpUrl="http://www.nasm.us/doc/" DisplayName="SciTech TASM compatible mode" Description="assemble in SciTech TASM compatible mode" Switch="-t"/>
     <EnumProperty Name="Outputswitch" Category="Assembler Options" HelpUrl="http://www.nasm.us/doc/" DisplayName="Output Switch" Description="Select the type of output format required. Linking Should be disabled for ELF and Binary ,else error will popup">
       <EnumValue Name="0" DisplayName="Object File win32" Switch="-fwin32"/>
@@ -48,8 +48,8 @@
     <BoolProperty Name="GenerateDebugInformation" Category="Assembler Options" DisplayName="Generate Debug Information" Description="Generates Debug Information.     (-g)" HelpUrl="http://www.nasm.us/doc/" Switch="-g"/>
     <StringListProperty Name="ErrorReporting" Category="Advanced" HelpUrl="http://www.nasm.us/doc/" DisplayName="Redirect Error Messages to File" Description="Drops the error Message on specified device" Switch="-Z &quot;[value]&quot;"/>
     <StringListProperty Name="IncludePaths" Category="General" DisplayName="Include Paths" Description="Sets path for include file.     (-I[path])" HelpUrl="http://www.nasm.us/doc/" Switch="-I&quot;[value]&quot;"/>
-    <StringListProperty Name="PreprocessorDefinitions" Category="Preprocessor" HelpUrl="http://www.nasm.us/doc/" DisplayName="Preprocessor Definitions" Description="Defines a text macro with the given name.     (-D[symbol])" Switch="-D[value]"/>
-    <StringListProperty Name="UndefinePreprocessorDefinitions" Category="Preprocessor" HelpUrl="http://www.nasm.us/doc/" DisplayName="Undefine Preprocessor Definitions" Description="Undefines a text macro with the given name.     (-U[symbol])" Switch="-U[value]"/>
+    <StringListProperty Name="PreprocessorDefinitions" Category="Preprocessor" HelpUrl="http://www.nasm.us/doc/" DisplayName="Preprocessor Definitions" Description="Defines a text macro with the given name.     (-D[symbol])" Switch="-D&quot;[value]&quot;"/>
+    <StringListProperty Name="UndefinePreprocessorDefinitions" Category="Preprocessor" HelpUrl="http://www.nasm.us/doc/" DisplayName="Undefine Preprocessor Definitions" Description="Undefines a text macro with the given name.     (-U[symbol])" Switch="-U&quot;[value]&quot;"/>
     <EnumProperty Name="ErrorReportingFormat" Category="Advanced" HelpUrl="http://www.nasm.us/doc/" DisplayName="Error Reporting Format" Description="Select the error reporting format ie. GNU or VC">
       <EnumValue Name="0" DisplayName="-Xgnu GNU format: Default format" Switch="-Xgnu"/>
       <EnumValue Name="1" DisplayName="-Xvc Style used by Microsoft Visual C++" Switch="-Xvc"/>

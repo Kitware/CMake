@@ -30,6 +30,9 @@ macro(__linux_compiler_intel lang)
   # executables that use dlopen but do not set ENABLE_EXPORTS.
   set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS "-rdynamic")
 
+  set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
+  set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
+
   set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
 
   if(XIAR)

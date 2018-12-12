@@ -91,7 +91,7 @@ void cmExtraSublimeTextGenerator::CreateNewProjectFile(
 {
   const cmMakefile* mf = lgs[0]->GetMakefile();
 
-  cmGeneratedFileStream fout(filename.c_str());
+  cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
   }
@@ -354,8 +354,8 @@ std::string cmExtraSublimeTextGenerator::ComputeFlagsForObject(
   lg->GetTargetCompileFlags(gtgt, config, language, flags);
 
   // Add source file specific flags.
-  cmGeneratorExpressionInterpreter genexInterpreter(lg, gtgt, config,
-                                                    gtgt->GetName(), language);
+  cmGeneratorExpressionInterpreter genexInterpreter(lg, config, gtgt,
+                                                    language);
 
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
   if (const char* cflags = source->GetProperty(COMPILE_FLAGS)) {
@@ -381,8 +381,8 @@ std::string cmExtraSublimeTextGenerator::ComputeDefines(
   cmMakefile* makefile = lg->GetMakefile();
   const std::string& language = source->GetLanguage();
   const std::string& config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  cmGeneratorExpressionInterpreter genexInterpreter(
-    lg, target, config, target->GetName(), language);
+  cmGeneratorExpressionInterpreter genexInterpreter(lg, config, target,
+                                                    language);
 
   // Add the export symbol definition for shared library objects.
   if (const char* exportMacro = target->GetExportMacro()) {
@@ -419,8 +419,8 @@ std::string cmExtraSublimeTextGenerator::ComputeIncludes(
   cmMakefile* makefile = lg->GetMakefile();
   const std::string& language = source->GetLanguage();
   const std::string& config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  cmGeneratorExpressionInterpreter genexInterpreter(
-    lg, target, config, target->GetName(), language);
+  cmGeneratorExpressionInterpreter genexInterpreter(lg, config, target,
+                                                    language);
 
   // Add include directories for this source file
   const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");

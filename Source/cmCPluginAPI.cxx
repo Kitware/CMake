@@ -118,22 +118,22 @@ const char* CCONV cmGetHomeOutputDirectory(void* arg)
 const char* CCONV cmGetStartDirectory(void* arg)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  return mf->GetCurrentSourceDirectory();
+  return mf->GetCurrentSourceDirectory().c_str();
 }
 const char* CCONV cmGetStartOutputDirectory(void* arg)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  return mf->GetCurrentBinaryDirectory();
+  return mf->GetCurrentBinaryDirectory().c_str();
 }
 const char* CCONV cmGetCurrentDirectory(void* arg)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  return mf->GetCurrentSourceDirectory();
+  return mf->GetCurrentSourceDirectory().c_str();
 }
 const char* CCONV cmGetCurrentOutputDirectory(void* arg)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  return mf->GetCurrentBinaryDirectory();
+  return mf->GetCurrentBinaryDirectory().c_str();
 }
 const char* CCONV cmGetDefinition(void* arg, const char* def)
 {
@@ -171,7 +171,7 @@ void CCONV cmAddLinkDirectoryForTarget(void* arg, const char* tgt,
       " for directory ", d);
     return;
   }
-  t->AddLinkDirectory(d);
+  t->InsertLinkDirectory(d, mf->GetBacktrace());
 }
 
 void CCONV cmAddExecutable(void* arg, const char* exename, int numSrcs,
@@ -620,7 +620,7 @@ void CCONV cmSourceFileSetProperty(void* arg, const char* prop,
     if (!value) {
       value = "NOTFOUND";
     }
-    sf->Properties.SetProperty(prop, value, cmListFileBacktrace::Empty());
+    sf->Properties.SetProperty(prop, value, cmListFileBacktrace());
   }
 }
 
@@ -739,7 +739,7 @@ void CCONV cmSourceFileSetName2(void* arg, const char* name, const char* dir,
 
   // Implement the old SetName method code here.
   if (headerFileOnly) {
-    sf->Properties.SetProperty("HEADER_FILE_ONLY", "1", cmListFileBacktrace::Empty());
+    sf->Properties.SetProperty("HEADER_FILE_ONLY", "1", cmListFileBacktrace());
   }
   sf->SourceName = name;
   std::string fname = sf->SourceName;

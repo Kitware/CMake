@@ -73,7 +73,7 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
   cmMakefile const& mf = *this->LocalGenerator->GetMakefile();
   for (std::string& d : dirs) {
     if (!cmSystemTools::FileIsFullPath(d)) {
-      d = std::string(mf.GetCurrentSourceDirectory()) + "/" + d;
+      d = mf.GetCurrentSourceDirectory() + "/" + d;
     }
   }
 

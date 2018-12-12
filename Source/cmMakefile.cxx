@@ -11,6 +11,7 @@
 #include <iterator>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
+#include <stdio.h>
 #include <stdlib.h>
 #include <utility>
 
@@ -47,6 +48,11 @@
 #endif
 
 class cmMessenger;
+
+cmDirectoryId::cmDirectoryId(std::string s)
+  : String(std::move(s))
+{
+}
 
 // default is not to be building executables
 cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
@@ -109,6 +115,17 @@ cmMakefile::~cmMakefile()
   cmDeleteAll(this->FinalPassCommands);
   cmDeleteAll(this->FunctionBlockers);
   cmDeleteAll(this->EvaluationFiles);
+}
+
+cmDirectoryId cmMakefile::GetDirectoryId() const
+{
+  // Use the instance pointer value to uniquely identify this directory.
+  // If we ever need to expose this to CMake language code we should
+  // add a read-only property in cmMakefile::GetProperty.
+  char buf[32];
+  sprintf(buf, "<%p>",
+          static_cast<void const*>(this)); // cast avoids format warning
+  return std::string(buf);
 }
 
 void cmMakefile::IssueMessage(cmake::MessageType t,
@@ -214,6 +231,27 @@ cmBacktraceRange cmMakefile::GetCompileDefinitionsBacktraces() const
 {
   return this->StateSnapshot.GetDirectory()
     .GetCompileDefinitionsEntryBacktraces();
+}
+
+cmStringRange cmMakefile::GetLinkOptionsEntries() const
+{
+  return this->StateSnapshot.GetDirectory().GetLinkOptionsEntries();
+}
+
+cmBacktraceRange cmMakefile::GetLinkOptionsBacktraces() const
+{
+  return this->StateSnapshot.GetDirectory().GetLinkOptionsEntryBacktraces();
+}
+
+cmStringRange cmMakefile::GetLinkDirectoriesEntries() const
+{
+  return this->StateSnapshot.GetDirectory().GetLinkDirectoriesEntries();
+}
+
+cmBacktraceRange cmMakefile::GetLinkDirectoriesBacktraces() const
+{
+  return this->StateSnapshot.GetDirectory()
+    .GetLinkDirectoriesEntryBacktraces();
 }
 
 cmListFileBacktrace cmMakefile::GetBacktrace() const
@@ -1202,6 +1240,23 @@ void cmMakefile::AddCompileOption(std::string const& option)
   this->AppendProperty("COMPILE_OPTIONS", option.c_str());
 }
 
+void cmMakefile::AddLinkOption(std::string const& option)
+{
+  this->AppendProperty("LINK_OPTIONS", option.c_str());
+}
+
+void cmMakefile::AddLinkDirectory(std::string const& directory, bool before)
+{
+  cmListFileBacktrace lfbt = this->GetBacktrace();
+  if (before) {
+    this->StateSnapshot.GetDirectory().PrependLinkDirectoriesEntry(directory,
+                                                                   lfbt);
+  } else {
+    this->StateSnapshot.GetDirectory().AppendLinkDirectoriesEntry(directory,
+                                                                  lfbt);
+  }
+}
+
 bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
 {
   // Create a regular expression to match valid definitions.
@@ -1299,10 +1354,6 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
 
   // link libraries
   this->SetProperty("LINK_LIBRARIES", parent->GetProperty("LINK_LIBRARIES"));
-
-  // link directories
-  this->SetProperty("LINK_DIRECTORIES",
-                    parent->GetProperty("LINK_DIRECTORIES"));
 
   // the initial project name
   this->StateSnapshot.SetProjectName(parent->StateSnapshot.GetProjectName());
@@ -1617,12 +1668,12 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
   }
 }
 
-const char* cmMakefile::GetCurrentSourceDirectory() const
+const std::string& cmMakefile::GetCurrentSourceDirectory() const
 {
   return this->StateSnapshot.GetDirectory().GetCurrentSource();
 }
 
-const char* cmMakefile::GetCurrentBinaryDirectory() const
+const std::string& cmMakefile::GetCurrentBinaryDirectory() const
 {
   return this->StateSnapshot.GetDirectory().GetCurrentBinary();
 }
@@ -1700,7 +1751,8 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
                                     cmStateEnums::CacheEntryType type,
                                     bool force)
 {
-  const char* existingValue = this->GetState()->GetInitializedCacheValue(name);
+  const std::string* existingValue =
+    this->GetState()->GetInitializedCacheValue(name);
   // must be outside the following if() to keep it alive long enough
   std::string nvalue;
 
@@ -1710,7 +1762,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
     // if this is not a force, then use the value from the cache
     // if it is a force, then use the value being passed in
     if (!force) {
-      value = existingValue;
+      value = existingValue->c_str();
     }
     if (type == cmStateEnums::PATH || type == cmStateEnums::FILEPATH) {
       std::vector<std::string>::size_type cc;
@@ -1720,7 +1772,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
       cmSystemTools::ExpandListArgument(nvalue, files);
       nvalue.clear();
       for (cc = 0; cc < files.size(); cc++) {
-        if (!cmSystemTools::IsOff(files[cc].c_str())) {
+        if (!cmSystemTools::IsOff(files[cc])) {
           files[cc] = cmSystemTools::CollapseFullPath(files[cc]);
         }
         if (cc > 0) {
@@ -1730,7 +1782,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
       }
 
       this->GetCMakeInstance()->AddCacheEntry(name, nvalue.c_str(), doc, type);
-      nvalue = this->GetState()->GetInitializedCacheValue(name);
+      nvalue = *this->GetState()->GetInitializedCacheValue(name);
       value = nvalue.c_str();
     }
   }
@@ -1835,17 +1887,6 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
     case cmStateEnums::INTERFACE_LIBRARY:
       return;
     default:;
-  }
-  if (const char* linkDirsProp = this->GetProperty("LINK_DIRECTORIES")) {
-    std::vector<std::string> linkDirs;
-    cmSystemTools::ExpandListArgument(linkDirsProp, linkDirs);
-
-    for (std::string& linkDir : linkDirs) {
-      // Sanitize the path the same way the link_directories command does
-      // in case projects set the LINK_DIRECTORIES property directly.
-      cmSystemTools::ConvertToUnixSlashes(linkDir);
-      target.AddLinkDirectory(linkDir);
-    }
   }
 
   if (const char* linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
@@ -2339,21 +2380,21 @@ bool cmMakefile::CanIWriteThisFile(std::string const& fileName) const
     cmSystemTools::SameFile(fileName, this->GetHomeOutputDirectory());
 }
 
-const char* cmMakefile::GetRequiredDefinition(const std::string& name) const
+std::string cmMakefile::GetRequiredDefinition(const std::string& name) const
 {
   const char* ret = this->GetDefinition(name);
   if (!ret) {
     cmSystemTools::Error("Error required internal CMake variable not "
                          "set, cmake may not be built correctly.\n",
                          "Missing variable is:\n", name.c_str());
-    return "";
+    return std::string();
   }
-  return ret;
+  return std::string(ret);
 }
 
 bool cmMakefile::IsDefinitionSet(const std::string& name) const
 {
-  const char* def = this->StateSnapshot.GetDefinition(name);
+  const std::string* def = this->StateSnapshot.GetDefinition(name);
   if (!def) {
     def = this->GetState()->GetInitializedCacheValue(name);
   }
@@ -2361,16 +2402,16 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
   if (cmVariableWatch* vv = this->GetVariableWatch()) {
     if (!def) {
       vv->VariableAccessed(
-        name, cmVariableWatch::UNKNOWN_VARIABLE_DEFINED_ACCESS, def, this);
+        name, cmVariableWatch::UNKNOWN_VARIABLE_DEFINED_ACCESS, nullptr, this);
     }
   }
 #endif
   return def != nullptr;
 }
 
-const char* cmMakefile::GetDefinition(const std::string& name) const
+const std::string* cmMakefile::GetDef(const std::string& name) const
 {
-  const char* def = this->StateSnapshot.GetDefinition(name);
+  const std::string* def = this->StateSnapshot.GetDefinition(name);
   if (!def) {
     def = this->GetState()->GetInitializedCacheValue(name);
   }
@@ -2381,7 +2422,7 @@ const char* cmMakefile::GetDefinition(const std::string& name) const
       vv->VariableAccessed(name,
                            def ? cmVariableWatch::VARIABLE_READ_ACCESS
                                : cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS,
-                           def, this);
+                           (def ? def->c_str() : nullptr), this);
 
     if (watch_function_executed) {
       // A callback was executed and may have caused re-allocation of the
@@ -2397,13 +2438,23 @@ const char* cmMakefile::GetDefinition(const std::string& name) const
   return def;
 }
 
-const char* cmMakefile::GetSafeDefinition(const std::string& def) const
+const char* cmMakefile::GetDefinition(const std::string& name) const
 {
-  const char* ret = this->GetDefinition(def);
-  if (!ret) {
-    return "";
+  const std::string* def = GetDef(name);
+  if (!def) {
+    return nullptr;
   }
-  return ret;
+  return def->c_str();
+}
+
+const std::string& cmMakefile::GetSafeDefinition(const std::string& name) const
+{
+  static std::string const empty;
+  const std::string* def = GetDef(name);
+  if (!def) {
+    return empty;
+  }
+  return *def;
 }
 
 std::vector<std::string> cmMakefile::GetDefinitions() const
@@ -4157,7 +4208,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 
   // Deprecate old policies, especially those that require a lot
   // of code to maintain the old behavior.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0054) {
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0063) {
     this->IssueMessage(cmake::DEPRECATION_WARNING,
                        cmPolicies::GetPolicyDeprecatedWarning(id));
   }

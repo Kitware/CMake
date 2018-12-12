@@ -23,8 +23,8 @@ class cmDefinitions
   typedef cmLinkedTree<cmDefinitions>::iterator StackIter;
 
 public:
-  static const char* Get(const std::string& key, StackIter begin,
-                         StackIter end);
+  static const std::string* Get(const std::string& key, StackIter begin,
+                                StackIter end);
 
   static void Raise(const std::string& key, StackIter begin, StackIter end);
 

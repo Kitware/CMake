@@ -563,7 +563,7 @@ int cmCTestScriptHandler::RunCurrentScript()
 
   // now that we have done most of the error checking finally run the
   // dashboard, we may be asked to repeatedly run this dashboard, such as
-  // for a continuous, do we ned to run it more than once?
+  // for a continuous, do we need to run it more than once?
   if (this->ContinuousDuration >= 0) {
     this->UpdateElapsedTime();
     auto ending_time =
@@ -792,7 +792,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "Write CMake output to file: " << cmakeOutputFile
                                                 << std::endl);
-      cmGeneratedFileStream fout(cmakeOutputFile.c_str());
+      cmGeneratedFileStream fout(cmakeOutputFile);
       if (fout) {
         fout << output.c_str();
       } else {
@@ -856,7 +856,7 @@ bool cmCTestScriptHandler::WriteInitialCache(const char* directory,
 {
   std::string cacheFile = directory;
   cacheFile += "/CMakeCache.txt";
-  cmGeneratedFileStream fout(cacheFile.c_str());
+  cmGeneratedFileStream fout(cacheFile);
   if (!fout) {
     return false;
   }

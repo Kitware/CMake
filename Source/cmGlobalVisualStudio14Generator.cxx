@@ -212,12 +212,32 @@ bool cmGlobalVisualStudio14Generator::IsWindowsStoreToolsetInstalled() const
                                           cmSystemTools::KeyWOW64_32);
 }
 
+std::string cmGlobalVisualStudio14Generator::GetWindows10SDKMaxVersion() const
+{
+  // The last Windows 10 SDK version that VS 2015 can target is 10.0.14393.0.
+  return "10.0.14393.0";
+}
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
 struct NoWindowsH
 {
   bool operator()(std::string const& p)
   {
     return !cmSystemTools::FileExists(p + "/um/windows.h", true);
+  }
+};
+class WindowsSDKTooRecent
+{
+  std::string const& MaxVersion;
+
+public:
+  WindowsSDKTooRecent(std::string const& maxVersion)
+    : MaxVersion(maxVersion)
+  {
+  }
+  bool operator()(std::string const& v)
+  {
+    return cmSystemTools::VersionCompareGreater(v, MaxVersion);
   }
 };
 #endif
@@ -266,6 +286,12 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
   // Skip SDKs that do not contain <um/windows.h> because that indicates that
   // only the UCRT MSIs were installed for them.
   cmEraseIf(sdks, NoWindowsH());
+
+  // Skip SDKs that cannot be used with our toolset.
+  std::string maxVersion = this->GetWindows10SDKMaxVersion();
+  if (!maxVersion.empty()) {
+    cmEraseIf(sdks, WindowsSDKTooRecent(maxVersion));
+  }
 
   if (!sdks.empty()) {
     // Only use the filename, which will be the SDK version.

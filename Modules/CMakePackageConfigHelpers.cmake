@@ -27,10 +27,10 @@
 #      )
 #
 # ``configure_package_config_file()`` should be used instead of the plain
-# :command:`configure_file()` command when creating the ``<Name>Config.cmake``
-# or ``<Name>-config.cmake`` file for installing a project or library.  It helps
-# making the resulting package relocatable by avoiding hardcoded paths in the
-# installed ``Config.cmake`` file.
+# :command:`configure_file()` command when creating the ``<PackageName>Config.cmake``
+# or ``<PackageName>-config.cmake`` file for installing a project or library.
+# It helps making the resulting package relocatable by avoiding hardcoded paths
+# in the installed ``Config.cmake`` file.
 #
 # In a ``FooConfig.cmake`` file there may be code like this to make the install
 # destinations know to the using project:
@@ -101,7 +101,7 @@
 # When using the ``NO_SET_AND_CHECK_MACRO``, this macro is not generated
 # into the ``FooConfig.cmake`` file.
 #
-# ``check_required_components(<package_name>)`` should be called at the end of
+# ``check_required_components(<PackageName>)`` should be called at the end of
 # the ``FooConfig.cmake`` file. This macro checks whether all requested,
 # non-optional components have been found, and if this is not the case, sets
 # the ``Foo_FOUND`` variable to ``FALSE``, so that the package is considered to
@@ -127,7 +127,7 @@
 #      COMPATIBILITY <AnyNewerVersion|SameMajorVersion|SameMinorVersion|ExactVersion> )
 #
 #
-# Writes a file for use as ``<package>ConfigVersion.cmake`` file to
+# Writes a file for use as ``<PackageName>ConfigVersion.cmake`` file to
 # ``<filename>``.  See the documentation of :command:`find_package()` for
 # details on this.
 #

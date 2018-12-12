@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <set>
 
+#include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
@@ -69,11 +70,6 @@ bool cmIncludeDirectoryCommand::InitialPass(
   return true;
 }
 
-static bool StartsWithGeneratorExpression(const std::string& input)
-{
-  return input[0] == '$' && input[1] == '<';
-}
-
 // do a lot of cleanup on the arguments because this is one place where folks
 // sometimes take the output of a program and pass it directly into this
 // command not thinking that a single argument could be filled with spaces
@@ -120,11 +116,11 @@ void cmIncludeDirectoryCommand::NormalizeInclude(std::string& inc)
     return;
   }
 
-  if (!cmSystemTools::IsOff(inc.c_str())) {
+  if (!cmSystemTools::IsOff(inc)) {
     cmSystemTools::ConvertToUnixSlashes(inc);
 
     if (!cmSystemTools::FileIsFullPath(inc)) {
-      if (!StartsWithGeneratorExpression(inc)) {
+      if (!cmGeneratorExpression::StartsWithGeneratorExpression(inc)) {
         std::string tmp = this->Makefile->GetCurrentSourceDirectory();
         tmp += "/";
         tmp += inc;

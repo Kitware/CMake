@@ -28,14 +28,11 @@ literal_matched(lzma_range_encoder *rc, probability *subcoder,
 	symbol += UINT32_C(1) << 8;
 
 	do {
-		uint32_t match_bit;
-		uint32_t subcoder_index;
-		uint32_t bit;
-
 		match_byte <<= 1;
-		match_bit = match_byte & offset;
-		subcoder_index = offset + match_bit + (symbol >> 8);
-		bit = (symbol >> 7) & 1;
+		const uint32_t match_bit = match_byte & offset;
+		const uint32_t subcoder_index
+				= offset + match_bit + (symbol >> 8);
+		const uint32_t bit = (symbol >> 7) & 1;
 		rc_bit(rc, &subcoder[subcoder_index], bit);
 
 		symbol <<= 1;
@@ -46,7 +43,7 @@ literal_matched(lzma_range_encoder *rc, probability *subcoder,
 
 
 static inline void
-literal(lzma_coder *coder, lzma_mf *mf, uint32_t position)
+literal(lzma_lzma1_encoder *coder, lzma_mf *mf, uint32_t position)
 {
 	// Locate the literal byte to be encoded and the subcoder.
 	const uint8_t cur_byte = mf->buffer[
@@ -80,19 +77,16 @@ literal(lzma_coder *coder, lzma_mf *mf, uint32_t position)
 static void
 length_update_prices(lzma_length_encoder *lc, const uint32_t pos_state)
 {
-	uint32_t a0, a1, b0, b1;
-	uint32_t *prices;
-	uint32_t i;
-
 	const uint32_t table_size = lc->table_size;
 	lc->counters[pos_state] = table_size;
 
-	a0 = rc_bit_0_price(lc->choice);
-	a1 = rc_bit_1_price(lc->choice);
-	b0 = a1 + rc_bit_0_price(lc->choice2);
-	b1 = a1 + rc_bit_1_price(lc->choice2);
-	prices = lc->prices[pos_state];
+	const uint32_t a0 = rc_bit_0_price(lc->choice);
+	const uint32_t a1 = rc_bit_1_price(lc->choice);
+	const uint32_t b0 = a1 + rc_bit_0_price(lc->choice2);
+	const uint32_t b1 = a1 + rc_bit_1_price(lc->choice2);
+	uint32_t *const prices = lc->prices[pos_state];
 
+	uint32_t i;
 	for (i = 0; i < table_size && i < LEN_LOW_SYMBOLS; ++i)
 		prices[i] = a0 + rc_bittree_price(lc->low[pos_state],
 				LEN_LOW_BITS, i);
@@ -146,39 +140,36 @@ length(lzma_range_encoder *rc, lzma_length_encoder *lc,
 ///////////
 
 static inline void
-match(lzma_coder *coder, const uint32_t pos_state,
+match(lzma_lzma1_encoder *coder, const uint32_t pos_state,
 		const uint32_t distance, const uint32_t len)
 {
-	uint32_t pos_slot;
-	uint32_t len_to_pos_state;
-
 	update_match(coder->state);
 
 	length(&coder->rc, &coder->match_len_encoder, pos_state, len,
 			coder->fast_mode);
 
-	pos_slot = get_pos_slot(distance);
-	len_to_pos_state = get_len_to_pos_state(len);
-	rc_bittree(&coder->rc, coder->pos_slot[len_to_pos_state],
-			POS_SLOT_BITS, pos_slot);
+	const uint32_t dist_slot = get_dist_slot(distance);
+	const uint32_t dist_state = get_dist_state(len);
+	rc_bittree(&coder->rc, coder->dist_slot[dist_state],
+			DIST_SLOT_BITS, dist_slot);
 
-	if (pos_slot >= START_POS_MODEL_INDEX) {
-		const uint32_t footer_bits = (pos_slot >> 1) - 1;
-		const uint32_t base = (2 | (pos_slot & 1)) << footer_bits;
-		const uint32_t pos_reduced = distance - base;
+	if (dist_slot >= DIST_MODEL_START) {
+		const uint32_t footer_bits = (dist_slot >> 1) - 1;
+		const uint32_t base = (2 | (dist_slot & 1)) << footer_bits;
+		const uint32_t dist_reduced = distance - base;
 
-		if (pos_slot < END_POS_MODEL_INDEX) {
-			// Careful here: base - pos_slot - 1 can be -1, but
+		if (dist_slot < DIST_MODEL_END) {
+			// Careful here: base - dist_slot - 1 can be -1, but
 			// rc_bittree_reverse starts at probs[1], not probs[0].
 			rc_bittree_reverse(&coder->rc,
-				coder->pos_special + base - pos_slot - 1,
-				footer_bits, pos_reduced);
+				coder->dist_special + base - dist_slot - 1,
+				footer_bits, dist_reduced);
 		} else {
-			rc_direct(&coder->rc, pos_reduced >> ALIGN_BITS,
+			rc_direct(&coder->rc, dist_reduced >> ALIGN_BITS,
 					footer_bits - ALIGN_BITS);
 			rc_bittree_reverse(
-					&coder->rc, coder->pos_align,
-					ALIGN_BITS, pos_reduced & ALIGN_MASK);
+					&coder->rc, coder->dist_align,
+					ALIGN_BITS, dist_reduced & ALIGN_MASK);
 			++coder->align_price_count;
 		}
 	}
@@ -196,7 +187,7 @@ match(lzma_coder *coder, const uint32_t pos_state,
 ////////////////////
 
 static inline void
-rep_match(lzma_coder *coder, const uint32_t pos_state,
+rep_match(lzma_lzma1_encoder *coder, const uint32_t pos_state,
 		const uint32_t rep, const uint32_t len)
 {
 	if (rep == 0) {
@@ -240,7 +231,7 @@ rep_match(lzma_coder *coder, const uint32_t pos_state,
 //////////
 
 static void
-encode_symbol(lzma_coder *coder, lzma_mf *mf,
+encode_symbol(lzma_lzma1_encoder *coder, lzma_mf *mf,
 		uint32_t back, uint32_t len, uint32_t position)
 {
 	const uint32_t pos_state = position & coder->pos_mask;
@@ -256,7 +247,7 @@ encode_symbol(lzma_coder *coder, lzma_mf *mf,
 		rc_bit(&coder->rc,
 			&coder->is_match[coder->state][pos_state], 1);
 
-		if (back < REP_DISTANCES) {
+		if (back < REPS) {
 			// It's a repeated match i.e. the same distance
 			// has been used earlier.
 			rc_bit(&coder->rc, &coder->is_rep[coder->state], 1);
@@ -264,7 +255,7 @@ encode_symbol(lzma_coder *coder, lzma_mf *mf,
 		} else {
 			// Normal match
 			rc_bit(&coder->rc, &coder->is_rep[coder->state], 0);
-			match(coder, pos_state, back - REP_DISTANCES, len);
+			match(coder, pos_state, back - REPS, len);
 		}
 	}
 
@@ -274,7 +265,7 @@ encode_symbol(lzma_coder *coder, lzma_mf *mf,
 
 
 static bool
-encode_init(lzma_coder *coder, lzma_mf *mf)
+encode_init(lzma_lzma1_encoder *coder, lzma_mf *mf)
 {
 	assert(mf_position(mf) == 0);
 
@@ -302,7 +293,7 @@ encode_init(lzma_coder *coder, lzma_mf *mf)
 
 
 static void
-encode_eopm(lzma_coder *coder, uint32_t position)
+encode_eopm(lzma_lzma1_encoder *coder, uint32_t position)
 {
 	const uint32_t pos_state = position & coder->pos_mask;
 	rc_bit(&coder->rc, &coder->is_match[coder->state][pos_state], 1);
@@ -318,23 +309,18 @@ encode_eopm(lzma_coder *coder, uint32_t position)
 
 
 extern lzma_ret
-lzma_lzma_encode(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT mf,
-		uint8_t *LZMA_RESTRICT out, size_t *LZMA_RESTRICT out_pos,
+lzma_lzma_encode(lzma_lzma1_encoder *restrict coder, lzma_mf *restrict mf,
+		uint8_t *restrict out, size_t *restrict out_pos,
 		size_t out_size, uint32_t limit)
 {
-	uint32_t position;
-
 	// Initialize the stream if no data has been encoded yet.
 	if (!coder->is_initialized && !encode_init(coder, mf))
 		return LZMA_OK;
 
 	// Get the lowest bits of the uncompressed offset from the LZ layer.
-	position = mf_position(mf);
+	uint32_t position = mf_position(mf);
 
 	while (true) {
-		uint32_t len;
-		uint32_t back;
-
 		// Encode pending bits, if any. Calling this before encoding
 		// the next symbol is needed only with plain LZMA, since
 		// LZMA2 always provides big enough buffer to flush
@@ -367,12 +353,14 @@ lzma_lzma_encode(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT mf,
 
 		// Get optimal match (repeat position and length).
 		// Value ranges for pos:
-		//   - [0, REP_DISTANCES): repeated match
-		//   - [REP_DISTANCES, UINT32_MAX):
-		//     match at (pos - REP_DISTANCES)
+		//   - [0, REPS): repeated match
+		//   - [REPS, UINT32_MAX):
+		//     match at (pos - REPS)
 		//   - UINT32_MAX: not a match but a literal
 		// Value ranges for len:
 		//   - [MATCH_LEN_MIN, MATCH_LEN_MAX]
+		uint32_t len;
+		uint32_t back;
 
 		if (coder->fast_mode)
 			lzma_lzma_optimum_fast(coder, mf, &back, &len);
@@ -414,8 +402,8 @@ lzma_lzma_encode(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT mf,
 
 
 static lzma_ret
-lzma_encode(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT mf,
-		uint8_t *LZMA_RESTRICT out, size_t *LZMA_RESTRICT out_pos,
+lzma_encode(void *coder, lzma_mf *restrict mf,
+		uint8_t *restrict out, size_t *restrict out_pos,
 		size_t out_size)
 {
 	// Plain LZMA has no support for sync-flushing.
@@ -465,12 +453,10 @@ static void
 length_encoder_reset(lzma_length_encoder *lencoder,
 		const uint32_t num_pos_states, const bool fast_mode)
 {
-	size_t pos_state;
-
 	bit_reset(lencoder->choice);
 	bit_reset(lencoder->choice2);
 
-	for (pos_state = 0; pos_state < num_pos_states; ++pos_state) {
+	for (size_t pos_state = 0; pos_state < num_pos_states; ++pos_state) {
 		bittree_reset(lencoder->low[pos_state], LEN_LOW_BITS);
 		bittree_reset(lencoder->mid[pos_state], LEN_MID_BITS);
 	}
@@ -478,7 +464,7 @@ length_encoder_reset(lzma_length_encoder *lencoder,
 	bittree_reset(lencoder->high, LEN_HIGH_BITS);
 
 	if (!fast_mode)
-		for (pos_state = 0; pos_state < num_pos_states;
+		for (uint32_t pos_state = 0; pos_state < num_pos_states;
 				++pos_state)
 			length_update_prices(lencoder, pos_state);
 
@@ -487,10 +473,9 @@ length_encoder_reset(lzma_length_encoder *lencoder,
 
 
 extern lzma_ret
-lzma_lzma_encoder_reset(lzma_coder *coder, const lzma_options_lzma *options)
+lzma_lzma_encoder_reset(lzma_lzma1_encoder *coder,
+		const lzma_options_lzma *options)
 {
-	size_t i, j;
-
 	if (!is_options_valid(options))
 		return LZMA_OPTIONS_ERROR;
 
@@ -503,14 +488,14 @@ lzma_lzma_encoder_reset(lzma_coder *coder, const lzma_options_lzma *options)
 
 	// State
 	coder->state = STATE_LIT_LIT;
-	for (i = 0; i < REP_DISTANCES; ++i)
+	for (size_t i = 0; i < REPS; ++i)
 		coder->reps[i] = 0;
 
 	literal_init(coder->literal, options->lc, options->lp);
 
 	// Bit encoders
-	for (i = 0; i < STATES; ++i) {
-		for (j = 0; j <= coder->pos_mask; ++j) {
+	for (size_t i = 0; i < STATES; ++i) {
+		for (size_t j = 0; j <= coder->pos_mask; ++j) {
 			bit_reset(coder->is_match[i][j]);
 			bit_reset(coder->is_rep0_long[i][j]);
 		}
@@ -521,14 +506,14 @@ lzma_lzma_encoder_reset(lzma_coder *coder, const lzma_options_lzma *options)
 		bit_reset(coder->is_rep2[i]);
 	}
 
-	for (i = 0; i < FULL_DISTANCES - END_POS_MODEL_INDEX; ++i)
-		bit_reset(coder->pos_special[i]);
+	for (size_t i = 0; i < FULL_DISTANCES - DIST_MODEL_END; ++i)
+		bit_reset(coder->dist_special[i]);
 
 	// Bit tree encoders
-	for (i = 0; i < LEN_TO_POS_STATES; ++i)
-		bittree_reset(coder->pos_slot[i], POS_SLOT_BITS);
+	for (size_t i = 0; i < DIST_STATES; ++i)
+		bittree_reset(coder->dist_slot[i], DIST_SLOT_BITS);
 
-	bittree_reset(coder->pos_align, ALIGN_BITS);
+	bittree_reset(coder->dist_align, ALIGN_BITS);
 
 	// Length encoders
 	length_encoder_reset(&coder->match_len_encoder,
@@ -561,20 +546,18 @@ lzma_lzma_encoder_reset(lzma_coder *coder, const lzma_options_lzma *options)
 
 
 extern lzma_ret
-lzma_lzma_encoder_create(lzma_coder **coder_ptr, lzma_allocator *allocator,
+lzma_lzma_encoder_create(void **coder_ptr,
+		const lzma_allocator *allocator,
 		const lzma_options_lzma *options, lzma_lz_options *lz_options)
 {
-	lzma_coder *coder;
-	uint32_t log_size = 0;
-
-	// Allocate lzma_coder if it wasn't already allocated.
+	// Allocate lzma_lzma1_encoder if it wasn't already allocated.
 	if (*coder_ptr == NULL) {
-		*coder_ptr = lzma_alloc(sizeof(lzma_coder), allocator);
+		*coder_ptr = lzma_alloc(sizeof(lzma_lzma1_encoder), allocator);
 		if (*coder_ptr == NULL)
 			return LZMA_MEM_ERROR;
 	}
 
-	coder = *coder_ptr;
+	lzma_lzma1_encoder *coder = *coder_ptr;
 
 	// Set compression mode. We haven't validates the options yet,
 	// but it's OK here, since nothing bad happens with invalid
@@ -590,6 +573,7 @@ lzma_lzma_encoder_create(lzma_coder **coder_ptr, lzma_allocator *allocator,
 
 			// Set dist_table_size.
 			// Round the dictionary size up to next 2^n.
+			uint32_t log_size = 0;
 			while ((UINT32_C(1) << log_size) < options->dict_size)
 				++log_size;
 
@@ -622,7 +606,7 @@ lzma_lzma_encoder_create(lzma_coder **coder_ptr, lzma_allocator *allocator,
 
 
 static lzma_ret
-lzma_encoder_init(lzma_lz_encoder *lz, lzma_allocator *allocator,
+lzma_encoder_init(lzma_lz_encoder *lz, const lzma_allocator *allocator,
 		const void *options, lzma_lz_options *lz_options)
 {
 	lz->code = &lzma_encode;
@@ -632,7 +616,7 @@ lzma_encoder_init(lzma_lz_encoder *lz, lzma_allocator *allocator,
 
 
 extern lzma_ret
-lzma_lzma_encoder_init(lzma_next_coder *next, lzma_allocator *allocator,
+lzma_lzma_encoder_init(lzma_next_coder *next, const lzma_allocator *allocator,
 		const lzma_filter_info *filters)
 {
 	return lzma_lz_encoder_init(
@@ -643,19 +627,17 @@ lzma_lzma_encoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 extern uint64_t
 lzma_lzma_encoder_memusage(const void *options)
 {
-	lzma_lz_options lz_options;
-	uint64_t lz_memusage;
-
 	if (!is_options_valid(options))
 		return UINT64_MAX;
 
+	lzma_lz_options lz_options;
 	set_lz_options(&lz_options, options);
 
-	lz_memusage = lzma_lz_encoder_memusage(&lz_options);
+	const uint64_t lz_memusage = lzma_lz_encoder_memusage(&lz_options);
 	if (lz_memusage == UINT64_MAX)
 		return UINT64_MAX;
 
-	return (uint64_t)(sizeof(lzma_coder)) + lz_memusage;
+	return (uint64_t)(sizeof(lzma_lzma1_encoder)) + lz_memusage;
 }
 
 

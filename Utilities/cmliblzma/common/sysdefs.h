@@ -18,6 +18,7 @@
 
 #if defined(_MSC_VER)
 # pragma warning(push,1)
+# pragma warning(disable: 4028) /* formal parameter different from decl */
 # pragma warning(disable: 4142) /* benign redefinition of type */
 # pragma warning(disable: 4761) /* integral size mismatch in argument */
 #endif
@@ -124,9 +125,9 @@
 
 // The code currently assumes that size_t is either 32-bit or 64-bit.
 #ifndef SIZE_MAX
-#	if SIZE_OF_SIZE_T == 4
+#	if SIZEOF_SIZE_T == 4
 #		define SIZE_MAX UINT32_MAX
-#	elif SIZE_OF_SIZE_T == 8
+#	elif SIZEOF_SIZE_T == 8
 #		define SIZE_MAX UINT64_MAX
 #	else
 #		error size_t is not 32-bit or 64-bit
@@ -175,6 +176,16 @@ typedef unsigned char _Bool;
 #	include <memory.h>
 #endif
 
+// As of MSVC 2013, inline and restrict are supported with
+// non-standard keywords.
+#if defined(_WIN32) && defined(_MSC_VER)
+#	ifndef inline
+#		define inline __inline
+#	endif
+#	ifndef restrict
+#		define restrict __restrict
+#	endif
+#endif
 
 ////////////
 // Macros //

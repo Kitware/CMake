@@ -205,18 +205,18 @@ bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
     }
   } else if (this->AmbiguousDirectory) {
     // Compare possible directory combinations.
-    std::string const& srcDir = cmSystemTools::CollapseFullPath(
+    std::string const srcDir = cmSystemTools::CollapseFullPath(
       this->Directory, this->Makefile->GetCurrentSourceDirectory());
-    std::string const& binDir = cmSystemTools::CollapseFullPath(
+    std::string const binDir = cmSystemTools::CollapseFullPath(
       this->Directory, this->Makefile->GetCurrentBinaryDirectory());
     if (srcDir != loc.Directory && binDir != loc.Directory) {
       return false;
     }
   } else if (loc.AmbiguousDirectory) {
     // Compare possible directory combinations.
-    std::string const& srcDir = cmSystemTools::CollapseFullPath(
+    std::string const srcDir = cmSystemTools::CollapseFullPath(
       loc.Directory, loc.Makefile->GetCurrentSourceDirectory());
-    std::string const& binDir = cmSystemTools::CollapseFullPath(
+    std::string const binDir = cmSystemTools::CollapseFullPath(
       loc.Directory, loc.Makefile->GetCurrentBinaryDirectory());
     if (srcDir != this->Directory && binDir != this->Directory) {
       return false;

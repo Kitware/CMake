@@ -1,7 +1,9 @@
 #include <cstdio>
+#include <memory>
 #include <unordered_map>
 
 int main()
 {
-  return 0;
+  std::unique_ptr<int> u(new int(0));
+  return *u;
 }

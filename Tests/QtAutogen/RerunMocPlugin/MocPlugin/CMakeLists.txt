@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 project(MocPlugin)
 include("../../AutogenTest.cmake")
 
-if (NOT QT_TEST_VERSION STREQUAL 5)
-  message(SEND_ERROR "Invalid Qt version specified.")
+if (QT_TEST_VERSION LESS 5)
+  message(SEND_ERROR "Qt 5 or higher required.")
 endif()
 
 set(CMAKE_AUTOMOC_DEPEND_FILTERS

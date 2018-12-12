@@ -208,6 +208,22 @@ if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
     )
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "kFreeBSD")
+  list(APPEND uv_libraries
+    freebsd-glue
+    kvm
+    )
+  list(APPEND uv_headers
+    include/uv-bsd.h
+    )
+  list(APPEND uv_sources
+    src/unix/bsd-ifaddrs.c
+    src/unix/freebsd.c
+    src/unix/kqueue.c
+    src/unix/posix-hrtime.c
+    )
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
   list(APPEND uv_libraries
     kvm

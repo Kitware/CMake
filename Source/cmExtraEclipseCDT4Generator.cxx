@@ -98,7 +98,7 @@ void cmExtraEclipseCDT4Generator::Generate()
 
   std::string eclipseVersion = mf->GetSafeDefinition("CMAKE_ECLIPSE_VERSION");
   cmsys::RegularExpression regex(".*([0-9]+\\.[0-9]+).*");
-  if (regex.find(eclipseVersion.c_str())) {
+  if (regex.find(eclipseVersion)) {
     unsigned int majorVersion = 0;
     unsigned int minorVersion = 0;
     int res =
@@ -176,7 +176,7 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile()
                               this->GetPathBasename(this->HomeDirectory));
 
   const std::string filename = this->HomeDirectory + "/.project";
-  cmGeneratedFileStream fout(filename.c_str());
+  cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
   }
@@ -215,7 +215,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
 
   std::string cacheEntryName = "CMAKE_ECLIPSE_ENVVAR_";
   cacheEntryName += envVar;
-  const char* cacheValue =
+  const std::string* cacheValue =
     lg->GetState()->GetInitializedCacheValue(cacheEntryName);
 
   // now we have both, decide which one to use
@@ -232,14 +232,14 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
     mf->GetCMakeInstance()->SaveCache(lg->GetBinaryDirectory());
   } else if (!envVarSet && cacheValue != nullptr) {
     // It is already in the cache, but not in the env, so use it from the cache
-    valueToUse = cacheValue;
+    valueToUse = *cacheValue;
   } else {
     // It is both in the cache and in the env.
     // Use the version from the env. except if the value from the env is
     // completely contained in the value from the cache (for the case that we
     // now have a PATH without MSVC dirs in the env. but had the full PATH with
     // all MSVC dirs during the cmake run which stored the var in the cache:
-    valueToUse = cacheValue;
+    valueToUse = *cacheValue;
     if (valueToUse.find(envVarValue) == std::string::npos) {
       valueToUse = envVarValue;
       mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
@@ -261,7 +261,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
   const std::string filename = this->HomeOutputDirectory + "/.project";
 
-  cmGeneratedFileStream fout(filename.c_str());
+  cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
   }
@@ -555,7 +555,7 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
       // Frameworks/ part has to be stripped
       //   /System/Library/Frameworks/GLUT.framework/Headers
       cmsys::RegularExpression frameworkRx("(.+/Frameworks)/.+\\.framework/");
-      if (frameworkRx.find(dir.c_str())) {
+      if (frameworkRx.find(dir)) {
         dir = frameworkRx.match(1);
       }
 
@@ -582,7 +582,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 
   const std::string filename = this->HomeOutputDirectory + "/.cproject";
 
-  cmGeneratedFileStream fout(filename.c_str());
+  cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
   }

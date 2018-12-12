@@ -30,15 +30,13 @@ stream_flags_decode(lzma_stream_flags *options, const uint8_t *in)
 extern LZMA_API(lzma_ret)
 lzma_stream_header_decode(lzma_stream_flags *options, const uint8_t *in)
 {
-	uint32_t crc;
-
 	// Magic
 	if (memcmp(in, lzma_header_magic, sizeof(lzma_header_magic)) != 0)
 		return LZMA_FORMAT_ERROR;
 
 	// Verify the CRC32 so we can distinguish between corrupt
 	// and unsupported files.
-	crc = lzma_crc32(in + sizeof(lzma_header_magic),
+	const uint32_t crc = lzma_crc32(in + sizeof(lzma_header_magic),
 			LZMA_STREAM_FLAGS_SIZE, 0);
 	if (crc != unaligned_read32le(in + sizeof(lzma_header_magic)
 			+ LZMA_STREAM_FLAGS_SIZE))
@@ -61,15 +59,13 @@ lzma_stream_header_decode(lzma_stream_flags *options, const uint8_t *in)
 extern LZMA_API(lzma_ret)
 lzma_stream_footer_decode(lzma_stream_flags *options, const uint8_t *in)
 {
-	uint32_t crc;
-
 	// Magic
 	if (memcmp(in + sizeof(uint32_t) * 2 + LZMA_STREAM_FLAGS_SIZE,
 			lzma_footer_magic, sizeof(lzma_footer_magic)) != 0)
 		return LZMA_FORMAT_ERROR;
 
 	// CRC32
-	crc = lzma_crc32(in + sizeof(uint32_t),
+	const uint32_t crc = lzma_crc32(in + sizeof(uint32_t),
 			sizeof(uint32_t) + LZMA_STREAM_FLAGS_SIZE, 0);
 	if (crc != unaligned_read32le(in))
 		return LZMA_DATA_ERROR;

@@ -308,7 +308,7 @@ function(gtest_add_tests)
       set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${source})
     endif()
     file(READ "${source}" contents)
-    string(REGEX MATCHALL "${gtest_test_type_regex} *\\(([A-Za-z_0-9 ,]+)\\)" found_tests ${contents})
+    string(REGEX MATCHALL "${gtest_test_type_regex} *\\(([A-Za-z_0-9 ,]+)\\)" found_tests "${contents}")
     foreach(hit ${found_tests})
       string(REGEX MATCH "${gtest_test_type_regex}" test_type ${hit})
 

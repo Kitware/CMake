@@ -96,6 +96,8 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   bool IsMultiConfig() const override;
 
+  bool IsXcode() const override { return true; }
+
   bool HasKnownObjectFileLocation(std::string* reason) const override;
 
   bool IsIPOSupported() const override { return true; }
@@ -109,6 +111,8 @@ public:
 
 protected:
   void AddExtraIDETargets() override;
+  void ComputeTargetOrder();
+  void ComputeTargetOrder(cmGeneratorTarget const* gt, size_t& index);
   void Generate() override;
 
 private:
@@ -204,6 +208,8 @@ private:
   void AddXCodeProjBuildRule(cmGeneratorTarget* target,
                              std::vector<cmSourceFile*>& sources) const;
   bool CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&);
+  bool CreateXCodeTarget(cmGeneratorTarget* gtgt,
+                         std::vector<cmXCodeObject*>&);
   bool IsHeaderFile(cmSourceFile*);
   void AddDependTarget(cmXCodeObject* target, cmXCodeObject* dependTarget);
   void CreateXCodeDependHackTarget(std::vector<cmXCodeObject*>& targets);
@@ -286,6 +292,7 @@ private:
   std::string ObjectDirArchDefault;
   std::string ObjectDirArch;
   std::string GeneratorToolset;
+  std::map<cmGeneratorTarget const*, size_t> TargetOrderIndex;
 };
 
 #endif

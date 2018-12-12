@@ -82,12 +82,12 @@ void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(const char* source,
   // regular expression for gl GL or xmesa in a file (match(1) of above)
   cmsys::RegularExpression glLine("(gl|GL|xmesa)");
   while (cmSystemTools::GetLineFromStream(fin, inLine)) {
-    if (includeLine.find(inLine.c_str())) {
+    if (includeLine.find(inLine)) {
       std::string includeFile = includeLine.match(1);
-      if (glDirLine.find(includeFile.c_str())) {
+      if (glDirLine.find(includeFile)) {
         std::string gfile = glDirLine.match(3);
         fout << "#include \"" << outdir << "/" << gfile << "\"\n";
-      } else if (glLine.find(includeFile.c_str())) {
+      } else if (glLine.find(includeFile)) {
         fout << "#include \"" << outdir << "/" << includeLine.match(1)
              << "\"\n";
       } else {

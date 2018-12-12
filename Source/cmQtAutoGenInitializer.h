@@ -12,15 +12,12 @@
 #include <vector>
 
 class cmGeneratorTarget;
+class cmTarget;
 
 /// @brief Initializes the QtAutoGen generators
 class cmQtAutoGenInitializer : public cmQtAutoGen
 {
 public:
-  static std::string GetQtMajorVersion(cmGeneratorTarget const* target);
-  static std::string GetQtMinorVersion(cmGeneratorTarget const* target,
-                                       std::string const& qtVersionMajor);
-
   /// @brief Rcc job information
   class Qrc
   {
@@ -38,6 +35,7 @@ public:
     std::string PathChecksum;
     std::string InfoFile;
     std::string SettingsFile;
+    std::map<std::string, std::string> ConfigSettingsFile;
     std::string RccFile;
     bool Generated;
     bool Unique;
@@ -46,21 +44,32 @@ public:
   };
 
 public:
+  static IntegerVersion GetQtVersion(cmGeneratorTarget const* target);
+
   cmQtAutoGenInitializer(cmGeneratorTarget* target, bool mocEnabled,
                          bool uicEnabled, bool rccEnabled,
-                         std::string const& qtVersionMajor);
+                         IntegerVersion const& qtVersion);
 
-  void InitCustomTargets();
-  void SetupCustomTargets();
+  bool InitCustomTargets();
+  bool SetupCustomTargets();
 
 private:
-  void SetupCustomTargetsMoc();
-  void SetupCustomTargetsUic();
+  bool InitMoc();
+  bool InitUic();
+  bool InitRcc();
+
+  bool InitScanFiles();
+  bool InitAutogenTarget();
+  bool InitRccTargets();
+
+  bool SetupWriteAutogenInfo();
+  bool SetupWriteRccInfo();
 
   void AddGeneratedSource(std::string const& filename, GeneratorT genType);
 
-  bool QtVersionGreaterOrEqual(unsigned long requestMajor,
-                               unsigned long requestMinor) const;
+  bool GetMocExecutable();
+  bool GetUicExecutable();
+  bool GetRccExecutable();
 
   bool RccListInputs(std::string const& fileName,
                      std::vector<std::string>& files,
@@ -68,49 +77,80 @@ private:
 
 private:
   cmGeneratorTarget* Target;
-  bool MocEnabled;
-  bool UicEnabled;
-  bool RccEnabled;
-  bool MultiConfig;
-  // Qt
-  std::string QtVersionMajor;
-  std::string QtVersionMinor;
-  std::string MocExecutable;
-  std::string UicExecutable;
-  std::string RccExecutable;
-  std::vector<std::string> RccListOptions;
-  // Configurations
+
+  // Configuration
+  IntegerVersion QtVersion;
+  bool MultiConfig = false;
   std::string ConfigDefault;
   std::vector<std::string> ConfigsList;
-  std::string Parallel;
-  // Names
-  std::string AutogenTargetName;
-  std::string AutogenFolder;
-  std::string AutogenInfoFile;
-  std::string AutogenSettingsFile;
-  // Directories
-  std::string DirInfo;
-  std::string DirBuild;
-  std::string DirWork;
-  // Sources
-  std::vector<std::string> Headers;
-  std::vector<std::string> Sources;
-  // Moc
-  std::string MocPredefsCmd;
-  std::set<std::string> MocSkip;
-  std::string MocIncludes;
-  std::map<std::string, std::string> MocIncludesConfig;
-  std::string MocDefines;
-  std::map<std::string, std::string> MocDefinesConfig;
-  // Uic
-  std::set<std::string> UicSkip;
-  std::vector<std::string> UicSearchPaths;
-  std::string UicOptions;
-  std::map<std::string, std::string> UicOptionsConfig;
-  std::vector<std::string> UicFileFiles;
-  std::vector<std::vector<std::string>> UicFileOptions;
-  // Rcc
-  std::vector<Qrc> Qrcs;
+  std::string Verbosity;
+  std::string TargetsFolder;
+
+  /// @brief Common directories
+  struct
+  {
+    std::string Info;
+    std::string Build;
+    std::string Work;
+    std::string Include;
+    std::map<std::string, std::string> ConfigInclude;
+  } Dir;
+
+  /// @brief Autogen target variables
+  struct
+  {
+    std::string Name;
+    // Settings
+    std::string Parallel;
+    // Configuration files
+    std::string InfoFile;
+    std::string SettingsFile;
+    std::map<std::string, std::string> ConfigSettingsFile;
+    // Dependencies
+    std::set<std::string> DependFiles;
+    std::set<cmTarget*> DependTargets;
+    // Sources to process
+    std::vector<std::string> Headers;
+    std::vector<std::string> Sources;
+    std::vector<std::string> HeadersGenerated;
+    std::vector<std::string> SourcesGenerated;
+  } AutogenTarget;
+
+  /// @brief Moc only variables
+  struct
+  {
+    bool Enabled = false;
+    std::string Executable;
+    std::string PredefsCmd;
+    std::set<std::string> Skip;
+    std::string Includes;
+    std::map<std::string, std::string> ConfigIncludes;
+    std::string Defines;
+    std::map<std::string, std::string> ConfigDefines;
+    std::string MocsCompilation;
+  } Moc;
+
+  ///@brief Uic only variables
+  struct
+  {
+    bool Enabled = false;
+    std::string Executable;
+    std::set<std::string> Skip;
+    std::vector<std::string> SearchPaths;
+    std::string Options;
+    std::map<std::string, std::string> ConfigOptions;
+    std::vector<std::string> FileFiles;
+    std::vector<std::vector<std::string>> FileOptions;
+  } Uic;
+
+  /// @brief Rcc only variables
+  struct
+  {
+    bool Enabled = false;
+    std::string Executable;
+    std::vector<std::string> ListOptions;
+    std::vector<Qrc> Qrcs;
+  } Rcc;
 };
 
 #endif

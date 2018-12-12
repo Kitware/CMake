@@ -143,7 +143,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
 #endif
   size_t real_path_len;
 
-  CURLcode result = Curl_urldecode(data, data->state.path, 0, &real_path,
+  CURLcode result = Curl_urldecode(data, data->state.up.path, 0, &real_path,
                                    &real_path_len, FALSE);
   if(result)
     return result;
@@ -197,7 +197,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
 
   file->fd = fd;
   if(!data->set.upload && (fd == -1)) {
-    failf(data, "Couldn't open file %s", data->state.path);
+    failf(data, "Couldn't open file %s", data->state.up.path);
     file_done(conn, CURLE_FILE_COULDNT_READ_FILE, FALSE);
     return CURLE_FILE_COULDNT_READ_FILE;
   }
@@ -256,8 +256,6 @@ static CURLcode file_upload(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   char *buf = data->state.buffer;
-  size_t nread;
-  size_t nwrite;
   curl_off_t bytecount = 0;
   struct_stat file_stat;
   const char *buf2;
@@ -306,15 +304,17 @@ static CURLcode file_upload(struct connectdata *conn)
   }
 
   while(!result) {
-    int readcount;
-    result = Curl_fillreadbuffer(conn, (int)data->set.buffer_size, &readcount);
+    size_t nread;
+    size_t nwrite;
+    size_t readcount;
+    result = Curl_fillreadbuffer(conn, data->set.buffer_size, &readcount);
     if(result)
       break;
 
     if(readcount <= 0)  /* fix questionable compare error. curlvms */
       break;
 
-    nread = (size_t)readcount;
+    nread = readcount;
 
     /*skip bytes before resume point*/
     if(data->state.resume_from) {
@@ -378,7 +378,6 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   curl_off_t expected_size = 0;
   bool size_known;
   bool fstated = FALSE;
-  ssize_t nread;
   struct Curl_easy *data = conn->data;
   char *buf = data->state.buffer;
   curl_off_t bytecount = 0;
@@ -387,7 +386,6 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
 
   *done = TRUE; /* unconditionally */
 
-  Curl_initinfo(data);
   Curl_pgrsStartNow(data);
 
   if(data->set.upload)
@@ -414,21 +412,18 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     }
   }
 
-  /* If we have selected NOBODY and HEADER, it means that we only want file
-     information. Which for FILE can't be much more than the file size and
-     date. */
-  if(data->set.opt_no_body && data->set.include_header && fstated) {
+  if(fstated) {
     time_t filetime;
     struct tm buffer;
     const struct tm *tm = &buffer;
     char header[80];
     snprintf(header, sizeof(header),
              "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", expected_size);
-    result = Curl_client_write(conn, CLIENTWRITE_BOTH, header, 0);
+    result = Curl_client_write(conn, CLIENTWRITE_HEADER, header, 0);
     if(result)
       return result;
 
-    result = Curl_client_write(conn, CLIENTWRITE_BOTH,
+    result = Curl_client_write(conn, CLIENTWRITE_HEADER,
                                (char *)"Accept-ranges: bytes\r\n", 0);
     if(result)
       return result;
@@ -440,19 +435,22 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
 
     /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
     snprintf(header, sizeof(header),
-             "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
+             "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n%s",
              Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
              tm->tm_mday,
              Curl_month[tm->tm_mon],
              tm->tm_year + 1900,
              tm->tm_hour,
              tm->tm_min,
-             tm->tm_sec);
-    result = Curl_client_write(conn, CLIENTWRITE_BOTH, header, 0);
-    if(!result)
-      /* set the file size to make it available post transfer */
-      Curl_pgrsSetDownloadSize(data, expected_size);
-    return result;
+             tm->tm_sec,
+             data->set.opt_no_body ? "": "\r\n");
+    result = Curl_client_write(conn, CLIENTWRITE_HEADER, header, 0);
+    if(result)
+      return result;
+    /* set the file size to make it available post transfer */
+    Curl_pgrsSetDownloadSize(data, expected_size);
+    if(data->set.opt_no_body)
+      return result;
   }
 
   /* Check whether file range has been specified */
@@ -461,7 +459,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     return result;
 
   /* Adjust the start offset in case we want to get the N last bytes
-   * of the stream iff the filesize could be determined */
+   * of the stream if the filesize could be determined */
   if(data->state.resume_from < 0) {
     if(!fstated) {
       failf(data, "Can't get the size of file.");
@@ -502,6 +500,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
   while(!result) {
+    ssize_t nread;
     /* Don't fill a whole buffer if we want less than all data */
     size_t bytestoread;
 

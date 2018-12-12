@@ -5,77 +5,27 @@
 #include "cmAlgorithms.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileMonitor.h"
-#include "cmGeneratorExpression.h"
-#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
-#include "cmInstallGenerator.h"
-#include "cmInstallTargetGenerator.h"
-#include "cmLinkLineComputer.h"
-#include "cmLocalGenerator.h"
-#include "cmMakefile.h"
-#include "cmProperty.h"
+#include "cmJsonObjectDictionary.h"
+#include "cmJsonObjects.h"
 #include "cmServer.h"
 #include "cmServerDictionary.h"
-#include "cmSourceFile.h"
 #include "cmState.h"
-#include "cmStateDirectory.h"
-#include "cmStateSnapshot.h"
-#include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmsys/Directory.hxx"
-#include "cmTarget.h"
-#include "cmTest.h"
 #include "cm_uv.h"
 #include "cmake.h"
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <functional>
-#include <limits>
-#include <map>
 #include <memory>
-#include <set>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 // Get rid of some windows macros:
 #undef max
 
 namespace {
-
-std::vector<std::string> getConfigurations(const cmake* cm)
-{
-  std::vector<std::string> configurations;
-  auto makefiles = cm->GetGlobalGenerator()->GetMakefiles();
-  if (makefiles.empty()) {
-    return configurations;
-  }
-
-  makefiles[0]->GetConfigurations(configurations);
-  if (configurations.empty()) {
-    configurations.push_back("");
-  }
-  return configurations;
-}
-
-bool hasString(const Json::Value& v, const std::string& s)
-{
-  return !v.isNull() &&
-    std::any_of(v.begin(), v.end(),
-                [s](const Json::Value& i) { return i.asString() == s; });
-}
-
-template <class T>
-Json::Value fromStringList(const T& in)
-{
-  Json::Value result = Json::arrayValue;
-  for (std::string const& i : in) {
-    result.append(i);
-  }
-  return result;
-}
 
 std::vector<std::string> toStringList(const Json::Value& in)
 {
@@ -84,49 +34,6 @@ std::vector<std::string> toStringList(const Json::Value& in)
     result.push_back(it.asString());
   }
   return result;
-}
-
-void getCMakeInputs(const cmGlobalGenerator* gg, const std::string& sourceDir,
-                    const std::string& buildDir,
-                    std::vector<std::string>* internalFiles,
-                    std::vector<std::string>* explicitFiles,
-                    std::vector<std::string>* tmpFiles)
-{
-  const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot() + '/';
-  std::vector<cmMakefile*> const& makefiles = gg->GetMakefiles();
-  for (cmMakefile const* mf : makefiles) {
-    for (std::string const& lf : mf->GetListFiles()) {
-
-      const std::string startOfFile = lf.substr(0, cmakeRootDir.size());
-      const bool isInternal = (startOfFile == cmakeRootDir);
-      const bool isTemporary = !isInternal && (lf.find(buildDir + '/') == 0);
-
-      std::string toAdd = lf;
-      if (!sourceDir.empty()) {
-        const std::string& relative =
-          cmSystemTools::RelativePath(sourceDir, lf);
-        if (toAdd.size() > relative.size()) {
-          toAdd = relative;
-        }
-      }
-
-      if (isInternal) {
-        if (internalFiles) {
-          internalFiles->push_back(std::move(toAdd));
-        }
-      } else {
-        if (isTemporary) {
-          if (tmpFiles) {
-            tmpFiles->push_back(std::move(toAdd));
-          }
-        } else {
-          if (explicitFiles) {
-            explicitFiles->push_back(std::move(toAdd));
-          }
-        }
-      }
-    }
-  }
 }
 
 } // namespace
@@ -563,837 +470,14 @@ cmServerResponse cmServerProtocol1::ProcessCMakeInputs(
   }
 
   const cmake* cm = this->CMakeInstance();
-  const cmGlobalGenerator* gg = cm->GetGlobalGenerator();
   const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot();
-  const std::string& buildDir = cm->GetHomeOutputDirectory();
   const std::string& sourceDir = cm->GetHomeDirectory();
 
   Json::Value result = Json::objectValue;
   result[kSOURCE_DIRECTORY_KEY] = sourceDir;
   result[kCMAKE_ROOT_DIRECTORY_KEY] = cmakeRootDir;
-
-  std::vector<std::string> internalFiles;
-  std::vector<std::string> explicitFiles;
-  std::vector<std::string> tmpFiles;
-  getCMakeInputs(gg, sourceDir, buildDir, &internalFiles, &explicitFiles,
-                 &tmpFiles);
-
-  Json::Value array = Json::arrayValue;
-
-  Json::Value tmp = Json::objectValue;
-  tmp[kIS_CMAKE_KEY] = true;
-  tmp[kIS_TEMPORARY_KEY] = false;
-  tmp[kSOURCES_KEY] = fromStringList(internalFiles);
-  array.append(tmp);
-
-  tmp = Json::objectValue;
-  tmp[kIS_CMAKE_KEY] = false;
-  tmp[kIS_TEMPORARY_KEY] = false;
-  tmp[kSOURCES_KEY] = fromStringList(explicitFiles);
-  array.append(tmp);
-
-  tmp = Json::objectValue;
-  tmp[kIS_CMAKE_KEY] = false;
-  tmp[kIS_TEMPORARY_KEY] = true;
-  tmp[kSOURCES_KEY] = fromStringList(tmpFiles);
-  array.append(tmp);
-
-  result[kBUILD_FILES_KEY] = array;
-
+  result[kBUILD_FILES_KEY] = cmDumpCMakeInputs(cm);
   return request.Reply(result);
-}
-
-class LanguageData
-{
-public:
-  bool operator==(const LanguageData& other) const;
-
-  void SetDefines(const std::set<std::string>& defines);
-
-  bool IsGenerated = false;
-  std::string Language;
-  std::string Flags;
-  std::vector<std::string> Defines;
-  std::vector<std::pair<std::string, bool>> IncludePathList;
-  std::string SourceGroup;
-};
-
-bool LanguageData::operator==(const LanguageData& other) const
-{
-  return Language == other.Language && Defines == other.Defines &&
-    Flags == other.Flags && IncludePathList == other.IncludePathList &&
-    IsGenerated == other.IsGenerated;
-}
-
-void LanguageData::SetDefines(const std::set<std::string>& defines)
-{
-  std::vector<std::string> result;
-  result.reserve(defines.size());
-  for (std::string const& i : defines) {
-    result.push_back(i);
-  }
-  std::sort(result.begin(), result.end());
-  Defines = std::move(result);
-}
-
-namespace std {
-
-template <>
-struct hash<LanguageData>
-{
-  std::size_t operator()(const LanguageData& in) const
-  {
-    using std::hash;
-    size_t result =
-      hash<std::string>()(in.Language) ^ hash<std::string>()(in.Flags);
-    for (auto const& i : in.IncludePathList) {
-      result = result ^
-        (hash<std::string>()(i.first) ^
-         (i.second ? std::numeric_limits<size_t>::max() : 0));
-    }
-    for (auto const& i : in.Defines) {
-      result = result ^ hash<std::string>()(i);
-    }
-    result =
-      result ^ (in.IsGenerated ? std::numeric_limits<size_t>::max() : 0);
-    return result;
-  }
-};
-
-} // namespace std
-
-static Json::Value DumpSourceFileGroup(const LanguageData& data,
-                                       const std::vector<std::string>& files,
-                                       const std::vector<std::string>& sourceGroups,
-                                       const std::string& baseDir)
-{
-  Json::Value result = Json::objectValue;
-
-  if (!data.Language.empty()) {
-    result[kLANGUAGE_KEY] = data.Language;
-    if (!data.Flags.empty()) {
-      result[kCOMPILE_FLAGS_KEY] = data.Flags;
-    }
-    if (!data.IncludePathList.empty()) {
-      Json::Value includes = Json::arrayValue;
-      for (auto const& i : data.IncludePathList) {
-        Json::Value tmp = Json::objectValue;
-        tmp[kPATH_KEY] = i.first;
-        if (i.second) {
-          tmp[kIS_SYSTEM_KEY] = i.second;
-        }
-        includes.append(tmp);
-      }
-      result[kINCLUDE_PATH_KEY] = includes;
-    }
-    if (!data.Defines.empty()) {
-      result[kDEFINES_KEY] = fromStringList(data.Defines);
-    }
-  }
-
-  result[kIS_GENERATED_KEY] = data.IsGenerated;
-
-  Json::Value sourcesValue = Json::arrayValue;
-  for (auto const& file : files) {
-    const std::string relPath =
-      cmSystemTools::RelativePath(baseDir.c_str(), file.c_str());
-    sourcesValue.append(relPath.size() < file.size() ? relPath : file);
-  }
-
-  result[kSOURCES_KEY] = sourcesValue;
-
-  // Source groups are optional, check we have the data. 
-  // In order to be backwards compatible, the source group is a parallel array and not part of each file.
-  if (!sourceGroups.empty()) {
-    Json::Value sourcesGroupsValue = Json::arrayValue;
-    for (auto const& groupPath : sourceGroups) {
-      sourcesGroupsValue.append(groupPath);
-    }
-
-    result[KSOURCE_GROUPS_KEY] = sourcesGroupsValue;
-  }
-  return result;
-}
-
-static Json::Value DumpSourceFilesList(
-  cmGeneratorTarget* target, const std::string& config,
-  const std::map<std::string, LanguageData>& languageDataMap,
-  bool includeSourceGroups)
-{
-  // Collect sourcefile groups:
-
-  std::vector<cmSourceFile*> files;
-  target->GetSourceFiles(files, config);
-
-  // Apply source groups to each file if necessary
-  std::vector<cmSourceGroup> sourceGroups = target->Makefile->GetSourceGroups();
-
-
-  std::unordered_map<LanguageData, std::pair<std::vector<std::string>, std::vector<std::string>>> fileGroups;
-  for (cmSourceFile* file : files) {
-    LanguageData fileData;
-    fileData.Language = file->GetLanguage();
-    if (!fileData.Language.empty()) {
-      const LanguageData& ld = languageDataMap.at(fileData.Language);
-      cmLocalGenerator* lg = target->GetLocalGenerator();
-      cmGeneratorExpressionInterpreter genexInterpreter(
-        lg, target, config, target->GetName(), fileData.Language);
-
-      std::string compileFlags = ld.Flags;
-      const std::string COMPILE_FLAGS("COMPILE_FLAGS");
-      if (const char* cflags = file->GetProperty(COMPILE_FLAGS)) {
-        lg->AppendFlags(compileFlags,
-                        genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
-      }
-      const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
-      if (const char* coptions = file->GetProperty(COMPILE_OPTIONS)) {
-        lg->AppendCompileOptions(
-          compileFlags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
-      }
-      fileData.Flags = compileFlags;
-
-      // Add include directories from source file properties.
-      std::vector<std::string> includes;
-
-      const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
-      if (const char* cincludes = file->GetProperty(INCLUDE_DIRECTORIES)) {
-        const char* evaluatedIncludes =
-          genexInterpreter.Evaluate(cincludes, INCLUDE_DIRECTORIES);
-        lg->AppendIncludeDirectories(includes, evaluatedIncludes, *file);
-
-        for (const auto& include : includes) {
-          fileData.IncludePathList.push_back(
-            std::make_pair(include,
-                           target->IsSystemIncludeDirectory(
-                             include, config, fileData.Language)));
-        }
-      }
-
-      fileData.IncludePathList.insert(fileData.IncludePathList.end(),
-                                      ld.IncludePathList.begin(),
-                                      ld.IncludePathList.end());
-
-      const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
-      std::set<std::string> defines;
-      if (const char* defs = file->GetProperty(COMPILE_DEFINITIONS)) {
-        lg->AppendDefines(
-          defines, genexInterpreter.Evaluate(defs, COMPILE_DEFINITIONS));
-      }
-
-      const std::string defPropName =
-        "COMPILE_DEFINITIONS_" + cmSystemTools::UpperCase(config);
-      if (const char* config_defs = file->GetProperty(defPropName)) {
-        lg->AppendDefines(
-          defines,
-          genexInterpreter.Evaluate(config_defs, COMPILE_DEFINITIONS));
-      }
-
-      defines.insert(ld.Defines.begin(), ld.Defines.end());
-
-      fileData.SetDefines(defines);
-    }
-
-    fileData.IsGenerated = file->GetPropertyAsBool("GENERATED");
-    auto & groupFileList = fileGroups[fileData];
-    const std::string & filePath = file->GetFullPath();
-    groupFileList.first.push_back(filePath);
-
-    if (includeSourceGroups) {
-      cmSourceGroup* sourceGroup =
-        target->Makefile->FindSourceGroup(filePath.c_str(), sourceGroups);
-      if (sourceGroup != nullptr) {
-        groupFileList.second.push_back(sourceGroup->GetFullName());
-      }
-      else
-      {
-        // Don't forget the empty placeholder
-        groupFileList.second.push_back("");
-      }
-
-    }
-
-  }
-
-  const std::string baseDir = target->Makefile->GetCurrentSourceDirectory();
-  Json::Value result = Json::arrayValue;
-  for (auto const& it : fileGroups) {
-    Json::Value group = DumpSourceFileGroup(it.first, it.second.first, it.second.second, baseDir);
-    if (!group.isNull()) {
-      result.append(group);
-    }
-  }
-
-  return result;
-}
-
-struct CaseInsensitiveHash
-{
-  size_t operator()(const std::string& keyVal) const
-  {
-    return std::hash<std::string>()(cmsys::SystemTools::LowerCase(keyVal));
-  }
-};
-
-struct CaseInsensitiveEqual
-{
-  bool operator()(const std::string& left, const std::string& right) const
-  {
-    return cmsys::SystemTools::LowerCase(left) == cmsys::SystemTools::LowerCase(right);
-  }
-};
-
-static Json::Value DumpSourceFilesListForInterfaceTarget(
-  cmGeneratorTarget* target,
-  const std::string& config)
-{
-  std::unordered_set<std::string, CaseInsensitiveHash, CaseInsensitiveEqual>
-    sources;
-  
-  cmLocalGenerator* lg = target->GetLocalGenerator();
-  // Leave language unspecified in the evaluator. If it's ever needed we
-  // have to compute it for each file based on its file type.
-  cmGeneratorExpressionInterpreter genexInterpreter(
-    lg, target, config, target->GetName(), "");
-  
-  // First see if there are any INTERFACE_SOURCES defined for this target.
-  auto targetProp = target->Target->GetProperty("INTERFACE_SOURCES");
-  if (targetProp != nullptr) {
-    const char* evaluatedSources =
-      genexInterpreter.Evaluate(targetProp, "INTERFACE_SOURCES");
-    auto components = cmsys::SystemTools::SplitString(evaluatedSources, ';');
-    if (!components.empty()) {
-      sources.insert(components.begin(), components.end());
-    }
-  }
-
-  // Next pick up directories from INTERFACE_INCLUDE_DIRECTORIES and
-  // INTERFACE_SYSTEM_INCLUDE_DIRECTORIES if defined for this target.
-  // Note that we send back the directory names rather than expanding 
-  // them here.
-  targetProp = target->Target->GetProperty("INTERFACE_INCLUDE_DIRECTORIES");
-  if (targetProp != nullptr) {
-    const char* evaluatedIncludes =
-      genexInterpreter.Evaluate(targetProp, "INTERFACE_INCLUDE_DIRECTORIES");
-    auto components = cmsys::SystemTools::SplitString(evaluatedIncludes, ';');
-    if (!components.empty()) {
-      sources.insert(components.begin(), components.end());
-    }
-  }
-  targetProp = target->Target->GetProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES");
-  if (targetProp != nullptr) {
-    const char* evaluatedIncludes =
-      genexInterpreter.Evaluate(targetProp, "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES");
-    auto components = cmsys::SystemTools::SplitString(evaluatedIncludes, ';');
-    if (!components.empty()) {
-      sources.insert(components.begin(), components.end());
-    }
-  }
-
-  Json::Value result = Json::arrayValue;
-  
-  if (!sources.empty()) {
-    const std::string baseDir = target->Makefile->GetCurrentSourceDirectory();
-	
-	Json::Value sourcesValue = Json::arrayValue;
-    for (auto file : sources) {
-      const std::string relPath =
-        cmSystemTools::RelativePath(baseDir.c_str(), file.c_str());
-      sourcesValue.append(relPath.size() < file.size() ? relPath : file);
-    }
-
-	Json::Value fileGroup = Json::objectValue;
-    fileGroup[kSOURCES_KEY] = sourcesValue;
-    result.append(fileGroup);
-  }
-  
-  return result;
-}
-
-static Json::Value DumpBacktrace_Protocol1(const cmListFileBacktrace& backtrace)
-{
-  Json::Value result = Json::arrayValue;
-
-  cmListFileBacktrace backtraceCopy = backtrace;
-  while (backtraceCopy.Top().HasFilePath()) {
-    Json::Value entry = Json::objectValue;
-    entry[kPATH_KEY] = backtraceCopy.Top().FilePath();
-    if (backtraceCopy.Top().Line) {
-      entry[kLINE_NUMBER_KEY] = static_cast<int>(backtraceCopy.Top().Line);
-    }
-    if (backtraceCopy.Top().HasName()) {
-      entry[kNAME_KEY] = backtraceCopy.Top().Name();
-    }
-    result.append(entry);
-    backtraceCopy = backtraceCopy.Pop();
-  }
-  return result;
-}
-
-static Json::Value DumpBacktrace_Protocol2(const cmListFileBacktrace& backtrace, std::unordered_set<size_t> * seenTraceIds)
-{
-  Json::Value result = Json::arrayValue;
-
-  auto ids = backtrace.GetFrameIds();
-  for (auto & id : ids) {
-    result.append(id);
-    seenTraceIds->emplace(id);
-  }
-  return std::move(result);
-}
-
-static Json::Value DumpBacktrace(const cmListFileBacktrace& backtrace, std::unordered_set<size_t> * seenTraceIds)
-{
-  if (seenTraceIds == nullptr) {
-    return DumpBacktrace_Protocol1(backtrace);
-  }
-
-  return DumpBacktrace_Protocol2(backtrace, seenTraceIds);
-}
-
-static void DumpBacktraceRange(Json::Value& result, const std::string& type,
-                               cmBacktraceRange range, std::unordered_set<size_t> * seenTraceIds)
-{
-  for (auto const& bt : range) {
-    Json::Value obj = Json::objectValue;
-    obj[kTYPE_KEY] = type;
-    obj[kBACKTRACE_KEY] = DumpBacktrace(bt, seenTraceIds);
-    result.append(obj);
-  }
-}
-
-static Json::Value DumpCTestInfo(cmLocalGenerator * lg, cmTest* testInfo, 
-                                 const std::string& config, std::unordered_set<size_t> * seenTraceIds)
-{
-  Json::Value result = Json::objectValue;
-  result[kCTEST_NAME] = testInfo->GetName();
-
-  // Concat command entries together. After the first should be the arguments
-  // for the command
-  std::string command;
-  for (auto const& cmd : testInfo->GetCommand()) {
-    command.append(cmd);
-    command.append(" ");
-  }
-
-  // Remove any config specific variables from the output.
-  cmGeneratorExpression ge;
-  auto cge = ge.Parse(command.c_str());
-  const char* processed = cge->Evaluate(lg, config);
-
-  result[kCTEST_COMMAND] = processed;
-
-  // Build up the list of properties that may have been specified
-  Json::Value properties = Json::arrayValue;
-  for (auto& prop : testInfo->GetProperties()) {
-    Json::Value entry = Json::objectValue;
-    entry[kKEY_KEY] = prop.first;
-
-    // Remove config variables from the value too.
-    auto cge_value = ge.Parse(prop.second.GetValue());
-    const char* processed_value = cge_value->Evaluate(lg, config);
-    entry[kVALUE_KEY] = processed_value;
-    properties.append(entry);
-  }
-  result[kPROPERTIES_KEY] = properties;
-
-  if (seenTraceIds != nullptr) {
-    // Need backtrace to figure out where this test was originally added
-    result[kBACKTRACE_KEY] = DumpBacktrace(testInfo->GetBacktrace(), seenTraceIds);
-  }
-
-  return std::move(result);
-}
-
-static void DumpMakefileTests(cmLocalGenerator* lg, const std::string& config,
-                              Json::Value* result, std::unordered_set<size_t> * seenTraceIds)
-{
-  auto mf = lg->GetMakefile();
-  std::vector<cmTest*> tests;
-  mf->GetTests(config, tests);
-  for (auto test : tests) {
-    Json::Value tmp = DumpCTestInfo(lg, test, config, seenTraceIds);
-
-    if (!tmp.isNull()) {
-      result->append(tmp);
-    }
-  }
-}
-
-static Json::Value DumpCTestProjectList(const cmake* cm,
-                                        std::string const& config,
-                                        std::unordered_set<size_t> * seenTraceIds)
-{
-  Json::Value result = Json::arrayValue;
-
-  auto globalGen = cm->GetGlobalGenerator();
-
-  for (const auto& projectIt : globalGen->GetProjectMap()) {
-    Json::Value pObj = Json::objectValue;
-    pObj[kNAME_KEY] = projectIt.first;
-
-    Json::Value tests = Json::arrayValue;
-
-    // Gather tests for every generator
-    for (const auto& lg : projectIt.second) {
-      // Make sure they're generated.
-      lg->GenerateTestFiles();
-
-      DumpMakefileTests(lg, config, &tests, seenTraceIds);
-    }
-
-    pObj[kCTEST_INFO] = tests;
-
-    result.append(pObj);
-  }
-
-  return result;
-}
-
-static Json::Value DumpCTestConfiguration(const cmake* cm,
-                                          const std::string& config,
-                                          std::unordered_set<size_t> * seenTraceIds)
-{
-  Json::Value result = Json::objectValue;
-  result[kNAME_KEY] = config;
-
-  result[kPROJECTS_KEY] = DumpCTestProjectList(cm, config, seenTraceIds);
-
-  return result;
-}
-
-static Json::Value DumpCTestConfigurationsList(const cmake* cm, std::unordered_set<size_t> * seenTraceIds)
-{
-  Json::Value result = Json::arrayValue;
-
-  for (const std::string& c : getConfigurations(cm)) {
-    result.append(DumpCTestConfiguration(cm, c, seenTraceIds));
-  }
-
-  return result;
-}
-
-static Json::Value DumpTarget(cmGeneratorTarget* target,
-                              const std::string& config,
-                              std::unordered_set<size_t> * seenTraceIds,
-                              bool includeSourceGroups)
-{
-  cmGlobalGenerator* g = target->GetGlobalGenerator();
-  cmLocalGenerator* lg = target->GetLocalGenerator();
-  const cmState* state = lg->GetState();
-
-  const cmStateEnums::TargetType type = target->GetType();
-  const std::string typeName = state->GetTargetTypeName(type);
-
-  Json::Value ttl = Json::arrayValue;
-  ttl.append("EXECUTABLE");
-  ttl.append("STATIC_LIBRARY");
-  ttl.append("SHARED_LIBRARY");
-  ttl.append("MODULE_LIBRARY");
-  ttl.append("OBJECT_LIBRARY");
-  ttl.append("UTILITY");
-  ttl.append("INTERFACE_LIBRARY");
-
-  if (!hasString(ttl, typeName) || target->IsImported()) {
-    return Json::Value();
-  }
-
-  Json::Value result = Json::objectValue;
-  result[kNAME_KEY] = target->GetName();
-  result[kIS_GENERATOR_PROVIDED_KEY] =
-    target->Target->GetIsGeneratorProvided();
-  result[kTYPE_KEY] = typeName;
-  result[kSOURCE_DIRECTORY_KEY] = lg->GetCurrentSourceDirectory();
-  result[kBUILD_DIRECTORY_KEY] = lg->GetCurrentBinaryDirectory();
-
-  if (type == cmStateEnums::INTERFACE_LIBRARY) {
-    Json::Value fileGroupsValue = DumpSourceFilesListForInterfaceTarget(target, config);
-    if (!fileGroupsValue.empty()) {
-      result[kFILE_GROUPS_KEY] = fileGroupsValue;
-    }
-    return result;
-  }
-
-  result[kFULL_NAME_KEY] = target->GetFullName(config);
-
-  if (target->Target->GetHaveInstallRule()) {
-    result[kHAS_INSTALL_RULE] = true;
-
-    Json::Value installPaths = Json::arrayValue;
-    auto targetGenerators = target->Makefile->GetInstallGenerators();
-    for (auto installGenerator : targetGenerators) {
-      auto installTargetGenerator =
-        dynamic_cast<cmInstallTargetGenerator*>(installGenerator);
-      if (installTargetGenerator != nullptr &&
-          installTargetGenerator->GetTarget()->Target == target->Target) {
-        auto dest = installTargetGenerator->GetDestination(config);
-
-        std::string installPath;
-        if (!dest.empty() && cmSystemTools::FileIsFullPath(dest)) {
-          installPath = dest;
-        } else {
-          std::string installPrefix =
-            target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
-          installPath = installPrefix + '/' + dest;
-        }
-
-        installPaths.append(installPath);
-      }
-    }
-
-    result[kINSTALL_PATHS] = installPaths;
-  }
-
-  if (seenTraceIds != nullptr) {
-    Json::Value crossRefs = Json::objectValue;
-    crossRefs[kBACKTRACE_KEY] = DumpBacktrace(target->Target->GetBacktrace(), seenTraceIds);
-
-    Json::Value statements = Json::arrayValue;
-    DumpBacktraceRange(statements, "target_compile_definitions",
-      target->Target->GetCompileDefinitionsBacktraces(), seenTraceIds);
-    DumpBacktraceRange(statements, "target_include_directories",
-      target->Target->GetIncludeDirectoriesBacktraces(), seenTraceIds);
-    DumpBacktraceRange(statements, "target_compile_options",
-      target->Target->GetCompileOptionsBacktraces(), seenTraceIds);
-    DumpBacktraceRange(statements, "target_link_libraries",
-      target->Target->GetLinkImplementationBacktraces(), seenTraceIds);
-
-    crossRefs[kRELATED_STATEMENTS_KEY] = std::move(statements);
-    result[kTARGET_CROSS_REFERENCES_KEY] = std::move(crossRefs);
-  }
-
-
-  if (seenTraceIds != nullptr) {
-    cmGlobalGenerator::TargetDependSet const& tgtdeps = g->GetTargetDirectDepends(target);
-    Json::Value dependencies = Json::arrayValue;
-    for (auto const & depend : tgtdeps) {
-      Json::Value obj = Json::objectValue;
-      obj[kNAME_KEY] = depend->GetFullName(config);
-      obj[kBACKTRACE_KEY] = DumpBacktrace(depend.Backtrace(), seenTraceIds);
-      dependencies.append(obj);
-    }
-    result[KTARGET_DEPENDENCIES_KEY] = dependencies;
-  }
-
-  // Build up the list of properties that may have been specified
-  cmGeneratorExpression ge;
-  Json::Value properties = Json::arrayValue;
-  for (auto& prop : target->Target->GetProperties()) {
-    Json::Value entry = Json::objectValue;
-    entry[kKEY_KEY] = prop.first;
-
-    // Remove config variables from the value too.
-    auto cge_value = ge.Parse(prop.second.GetValue());
-    const char* processed_value = cge_value->Evaluate(lg, config);
-    entry[kVALUE_KEY] = processed_value;
-    properties.append(entry);
-  }
-  result[kPROPERTIES_KEY] = properties;
-
-
-  if (target->HaveWellDefinedOutputFiles()) {
-    Json::Value artifacts = Json::arrayValue;
-    artifacts.append(
-      target->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact));
-    if (target->IsDLLPlatform()) {
-      artifacts.append(
-        target->GetFullPath(config, cmStateEnums::ImportLibraryArtifact));
-      const cmGeneratorTarget::OutputInfo* output =
-        target->GetOutputInfo(config);
-      if (output && !output->PdbDir.empty()) {
-        artifacts.append(output->PdbDir + '/' + target->GetPDBName(config));
-      }
-    }
-    result[kARTIFACTS_KEY] = artifacts;
-
-    result[kLINKER_LANGUAGE_KEY] = target->GetLinkerLanguage(config);
-
-    std::string linkLibs;
-    std::string linkFlags;
-    std::string linkLanguageFlags;
-    std::string frameworkPath;
-    std::string linkPath;
-    cmLinkLineComputer linkLineComputer(lg,
-                                        lg->GetStateSnapshot().GetDirectory());
-    lg->GetTargetFlags(&linkLineComputer, config, linkLibs, linkLanguageFlags,
-                       linkFlags, frameworkPath, linkPath, target);
-
-    linkLibs = cmSystemTools::TrimWhitespace(linkLibs);
-    linkFlags = cmSystemTools::TrimWhitespace(linkFlags);
-    linkLanguageFlags = cmSystemTools::TrimWhitespace(linkLanguageFlags);
-    frameworkPath = cmSystemTools::TrimWhitespace(frameworkPath);
-    linkPath = cmSystemTools::TrimWhitespace(linkPath);
-
-    if (!cmSystemTools::TrimWhitespace(linkLibs).empty()) {
-      result[kLINK_LIBRARIES_KEY] = linkLibs;
-    }
-    if (!cmSystemTools::TrimWhitespace(linkFlags).empty()) {
-      result[kLINK_FLAGS_KEY] = linkFlags;
-    }
-    if (!cmSystemTools::TrimWhitespace(linkLanguageFlags).empty()) {
-      result[kLINK_LANGUAGE_FLAGS_KEY] = linkLanguageFlags;
-    }
-    if (!frameworkPath.empty()) {
-      result[kFRAMEWORK_PATH_KEY] = frameworkPath;
-    }
-    if (!linkPath.empty()) {
-      result[kLINK_PATH_KEY] = linkPath;
-    }
-    const std::string sysroot =
-      lg->GetMakefile()->GetSafeDefinition("CMAKE_SYSROOT");
-    if (!sysroot.empty()) {
-      result[kSYSROOT_KEY] = sysroot;
-    }
-  }
-
-  std::set<std::string> languages;
-  target->GetLanguages(languages, config);
-  std::map<std::string, LanguageData> languageDataMap;
-  for (std::string const& lang : languages) {
-    LanguageData& ld = languageDataMap[lang];
-    ld.Language = lang;
-    lg->GetTargetCompileFlags(target, config, lang, ld.Flags);
-    std::set<std::string> defines;
-    lg->GetTargetDefines(target, config, lang, defines);
-    ld.SetDefines(defines);
-    std::vector<std::string> includePathList;
-    lg->GetIncludeDirectories(includePathList, target, lang, config, true);
-    for (std::string const& i : includePathList) {
-      ld.IncludePathList.push_back(
-        std::make_pair(i, target->IsSystemIncludeDirectory(i, config, lang)));
-    }
-  }
-
-  Json::Value fileGroupsValue =
-    DumpSourceFilesList(target, config, languageDataMap, includeSourceGroups);
-  if (!fileGroupsValue.empty()) {
-    result[kFILE_GROUPS_KEY] = fileGroupsValue;
-  }
-
-  return result;
-}
-
-static Json::Value DumpTargetsList(const std::vector<cmLocalGenerator*>& generators, 
-                                   const std::string& config, 
-                                   std::unordered_set<size_t> * seenTraceIds, 
-                                   bool includeSourceGroups)
-{
-  Json::Value result = Json::arrayValue;
-
-  std::vector<cmGeneratorTarget*> targetList;
-  for (auto const& lgIt : generators) {
-    const auto& list = lgIt->GetGeneratorTargets();
-    targetList.insert(targetList.end(), list.begin(), list.end());
-  }
-  std::sort(targetList.begin(), targetList.end());
-
-  for (cmGeneratorTarget* target : targetList) {
-    Json::Value tmp = DumpTarget(target, config, seenTraceIds, includeSourceGroups);
-    if (!tmp.isNull()) {
-      result.append(tmp);
-    }
-  }
-
-  return result;
-}
-
-static Json::Value DumpProjectList(const cmake* cm, 
-                                   std::string const& config, 
-                                   std::unordered_set<size_t> * seenTraceIds,
-                                   bool includeSourceGroups)
-{
-  Json::Value result = Json::arrayValue;
-
-  auto globalGen = cm->GetGlobalGenerator();
-
-  for (auto const& projectIt : globalGen->GetProjectMap()) {
-    Json::Value pObj = Json::objectValue;
-    pObj[kNAME_KEY] = projectIt.first;
-
-    // All Projects must have at least one local generator
-    assert(!projectIt.second.empty());
-    const cmLocalGenerator* lg = projectIt.second.at(0);
-
-    // Project structure information:
-    const cmMakefile* mf = lg->GetMakefile();
-    auto minVersion = mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
-    pObj[kMINIMUM_CMAKE_VERSION] = minVersion ? minVersion : "";
-    pObj[kSOURCE_DIRECTORY_KEY] = mf->GetCurrentSourceDirectory();
-    pObj[kBUILD_DIRECTORY_KEY] = mf->GetCurrentBinaryDirectory();
-    pObj[kTARGETS_KEY] = DumpTargetsList(projectIt.second, config, seenTraceIds, includeSourceGroups);
-
-    // For a project-level install rule it might be defined in any of its
-    // associated generators.
-    bool hasInstallRule = false;
-    for (const auto generator : projectIt.second) {
-      hasInstallRule =
-        generator->GetMakefile()->GetInstallGenerators().empty() == false;
-
-      if (hasInstallRule) {
-        break;
-      }
-    }
-
-    pObj[kHAS_INSTALL_RULE] = hasInstallRule;
-
-    result.append(pObj);
-  }
-
-  return result;
-}
-
-static Json::Value DumpConfiguration(const cmake* cm,
-                                     const std::string& config,
-                                     std::unordered_set<size_t> * seenTraceIds,
-                                     bool includeSourceGroups)
-{
-  Json::Value result = Json::objectValue;
-  result[kNAME_KEY] = config;
-
-  result[kPROJECTS_KEY] = DumpProjectList(cm, config, seenTraceIds, includeSourceGroups);
-
-  return result;
-}
-
-static Json::Value DumpConfigurationsList(const cmake* cm, 
-                                          std::unordered_set<size_t> * seenTraceIds,
-                                          bool includeSourceGroups)
-{
-  Json::Value result = Json::arrayValue;
-
-  for (std::string const& c : getConfigurations(cm)) {
-    result.append(DumpConfiguration(cm, c, seenTraceIds, includeSourceGroups));
-  }
-
-  return result;
-}
-
-static Json::Value DumpFrame(size_t id, const cmListFileContext & frame)
-{
-  Json::Value entry = Json::objectValue;
-
-  entry[kID_KEY] = id;
-  entry[kPATH_KEY] = frame.FilePath();
-  if (frame.Line) {
-    entry[kLINE_NUMBER_KEY] = static_cast<int>(frame.Line);
-  }
-  if (frame.HasName()) {
-    entry[kNAME_KEY] = frame.Name();
-  }
-
-  return entry;
-}
-
-static Json::Value DumpReferencedTraces(std::unordered_set<size_t> & seenTraceIds)
-{
-  Json::Value result = Json::arrayValue;
-
-  auto frames = cmListFileBacktrace::ConvertFrameIds(seenTraceIds);
-
-  for (const auto & pair : frames) {
-    result.append(DumpFrame(pair.first, pair.second));
-  }
-
-  return result;
 }
 
 cmServerResponse cmServerProtocol1::ProcessCodeModel(
@@ -1403,28 +487,20 @@ cmServerResponse cmServerProtocol1::ProcessCodeModel(
     return request.ReportError("No build system was generated yet.");
   }
 
-  Json::Value result = Json::objectValue;
-  result[kCONFIGURATIONS_KEY] = DumpConfigurationsList(this->CMakeInstance(), nullptr, false);
-  return request.Reply(result);
+  return request.Reply(cmDumpCodeModel(this->CMakeInstance()));
 }
 
 cmServerResponse cmServerProtocol2::ProcessCodeModel(
   const cmServerRequest& request)
+
 {
   if (this->m_State != STATE_COMPUTED) {
     return request.ReportError("No build system was generated yet.");
   }
-
   auto includeTraces = request.Data[kINCLUDE_TRACES_KEY].asBool();
   auto includeSourceGroups = request.Data[KINCLUDE_SOURCE_GROUPS_KEY].asBool();
-  std::unordered_set<size_t> seenTraceIds;
-  Json::Value result = Json::objectValue;
-  result[kCONFIGURATIONS_KEY] = DumpConfigurationsList(
-    this->CMakeInstance(), includeTraces ? &seenTraceIds : nullptr, includeSourceGroups);
-  if (includeTraces) {
-    result[KREFERENCED_TRACES_KEY] = DumpReferencedTraces(seenTraceIds);
-  }
-  return request.Reply(result);
+  return request.Reply(
+    cmDumpCodeModel2(this->CMakeInstance(), includeTraces, includeSourceGroups));
 }
 
 cmServerResponse cmServerProtocol1::ProcessCompute(
@@ -1498,20 +574,20 @@ cmServerResponse cmServerProtocol1::ProcessConfigure(
 
   if (cm->LoadCache(buildDir)) {
     // build directory has been set up before
-    const char* cachedSourceDir =
+    const std::string* cachedSourceDir =
       cm->GetState()->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY");
     if (!cachedSourceDir) {
       return request.ReportError("No CMAKE_HOME_DIRECTORY found in cache.");
     }
     if (sourceDir.empty()) {
-      sourceDir = std::string(cachedSourceDir);
+      sourceDir = *cachedSourceDir;
       cm->SetHomeDirectory(sourceDir);
     }
 
-    const char* cachedGenerator =
+    const std::string* cachedGenerator =
       cm->GetState()->GetInitializedCacheValue("CMAKE_GENERATOR");
     if (cachedGenerator) {
-      if (gg && gg->GetName() != cachedGenerator) {
+      if (gg && gg->GetName() != *cachedGenerator) {
         return request.ReportError("Configured generator does not match with "
                                    "CMAKE_GENERATOR found in cache.");
       }
@@ -1541,7 +617,8 @@ cmServerResponse cmServerProtocol1::ProcessConfigure(
   }
 
   std::vector<std::string> toWatchList;
-  getCMakeInputs(gg, std::string(), buildDir, nullptr, &toWatchList, nullptr);
+  cmGetCMakeInputs(gg, std::string(), buildDir, nullptr, &toWatchList,
+                   nullptr);
 
   FileMonitor()->MonitorPaths(toWatchList,
                               [this](const std::string& p, int e, int s) {
@@ -1658,10 +735,7 @@ cmServerResponse cmServerProtocol1::ProcessCTests(
     return request.ReportError("This instance was not yet computed.");
   }
 
-  Json::Value result = Json::objectValue;
-  result[kCONFIGURATIONS_KEY] =
-    DumpCTestConfigurationsList(this->CMakeInstance(), nullptr);
-  return request.Reply(result);
+  return request.Reply(cmDumpCTestInfo(this->CMakeInstance()));
 }
 
 cmServerResponse cmServerProtocol2::ProcessCTests(
@@ -1672,14 +746,7 @@ cmServerResponse cmServerProtocol2::ProcessCTests(
   }
 
   auto includeTraces = request.Data[kINCLUDE_TRACES_KEY].asBool();
-  Json::Value result = Json::objectValue;
-  std::unordered_set<size_t> seenTraceIds;
-  result[kCONFIGURATIONS_KEY] =
-    DumpCTestConfigurationsList(this->CMakeInstance(), includeTraces ? &seenTraceIds : nullptr);
-  if (includeTraces) {
-    result[KREFERENCED_TRACES_KEY] = DumpReferencedTraces(seenTraceIds);
-  }
-  return request.Reply(result);
+  return request.Reply(cmDumpCTestInfo2(this->CMakeInstance(), includeTraces));
 }
 
 cmServerProtocol1::GeneratorInformation::GeneratorInformation(

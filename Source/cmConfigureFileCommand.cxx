@@ -20,11 +20,8 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   std::string const& inFile = args[0];
-  if (!cmSystemTools::FileIsFullPath(inFile)) {
-    this->InputFile = this->Makefile->GetCurrentSourceDirectory();
-    this->InputFile += "/";
-  }
-  this->InputFile += inFile;
+  this->InputFile = cmSystemTools::CollapseFullPath(
+    inFile, this->Makefile->GetCurrentSourceDirectory());
 
   // If the input location is a directory, error out.
   if (cmSystemTools::FileIsDirectory(this->InputFile)) {
@@ -39,11 +36,8 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   std::string const& outFile = args[1];
-  if (!cmSystemTools::FileIsFullPath(outFile)) {
-    this->OutputFile = this->Makefile->GetCurrentBinaryDirectory();
-    this->OutputFile += "/";
-  }
-  this->OutputFile += outFile;
+  this->OutputFile = cmSystemTools::CollapseFullPath(
+    outFile, this->Makefile->GetCurrentBinaryDirectory());
 
   // If the output location is already a directory put the file in it.
   if (cmSystemTools::FileIsDirectory(this->OutputFile)) {

@@ -95,7 +95,7 @@ protected:
   }
 
   /// @return the list of link dependency for the given target @a target.
-  cmNinjaDeps ComputeLinkDeps() const;
+  cmNinjaDeps ComputeLinkDeps(const std::string& linkLanguage) const;
 
   /// @return the source file path for the given @a source.
   std::string GetSourceFilePath(cmSourceFile const* source) const;
@@ -135,7 +135,7 @@ protected:
   void EnsureDirectoryExists(const std::string& dir) const;
   void EnsureParentDirectoryExists(const std::string& path) const;
 
-  // write rules for Mac OS X Application Bundle content.
+  // write rules for macOS Application Bundle content.
   struct MacOSXContentGeneratorType
     : cmOSXBundleGenerator::MacOSXContentGeneratorType
   {

@@ -20,7 +20,7 @@ These numbers are used as the image version of the binary.
 Mach-O Versions
 ^^^^^^^^^^^^^^^
 
-For shared libraries and executables on Mach-O systems (e.g. OS X, iOS),
+For shared libraries and executables on Mach-O systems (e.g. macOS, iOS),
 the ``SOVERSION`` property corresponds to *compatibility version* and
 :prop_tgt:`VERSION` to *current version*.  See the :prop_tgt:`FRAMEWORK` target
 property for an example.  Versions of Mach-O binaries may be checked with the

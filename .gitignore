@@ -8,3 +8,6 @@ Testing
 
 # Visual Studio work directory
 .vs/
+
+# Visual Studio Code
+.vscode/

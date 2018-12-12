@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmHexFileConverter.h"
 
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -11,13 +12,6 @@
 #define INTEL_HEX_MAX_LINE_LENGTH (1 + 8 + (256 * 2) + 2)
 #define MOTOROLA_SREC_MIN_LINE_LENGTH (2 + 2 + 4 + 2)
 #define MOTOROLA_SREC_MAX_LINE_LENGTH (2 + 2 + 8 + (256 * 2) + 2)
-
-// might go to SystemTools ?
-static bool cm_IsHexChar(char c)
-{
-  return (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'f')) ||
-          ((c >= 'A') && (c <= 'F')));
-}
 
 static unsigned int ChompStrlen(const char* line)
 {
@@ -169,7 +163,7 @@ cmHexFileConverter::FileType cmHexFileConverter::DetermineFileType(
   }
 
   for (unsigned int i = 1; i < slen; i++) {
-    if (!cm_IsHexChar(buf[i])) {
+    if (!isxdigit(buf[i])) {
       return Binary;
     }
   }

@@ -8,7 +8,6 @@ endif()
 foreach(f
     "${CMAKE_C_ANDROID_TOOLCHAIN_PREFIX}gcc${CMAKE_C_ANDROID_TOOLCHAIN_SUFFIX}"
     "${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}g++${CMAKE_CXX_ANDROID_TOOLCHAIN_SUFFIX}"
-    "${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}cpp${CMAKE_CXX_ANDROID_TOOLCHAIN_SUFFIX}"
     "${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}ar${CMAKE_CXX_ANDROID_TOOLCHAIN_SUFFIX}"
     "${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}ld${CMAKE_CXX_ANDROID_TOOLCHAIN_SUFFIX}"
     )
@@ -61,10 +60,12 @@ execute_process(
 if(NOT _res EQUAL 0)
   message(SEND_ERROR "Failed to run 'gcc -dumpmachine':\n ${_res}")
 endif()
-if(NOT _out STREQUAL "${CMAKE_C_ANDROID_TOOLCHAIN_MACHINE}")
+string(REPLACE "--" "-" _out_check "${_out}")
+if(NOT _out_check STREQUAL "${CMAKE_C_ANDROID_TOOLCHAIN_MACHINE}"
+    AND NOT (_out STREQUAL "arm--linux-android" AND CMAKE_C_ANDROID_TOOLCHAIN_MACHINE STREQUAL "arm-linux-androideabi"))
   message(SEND_ERROR "'gcc -dumpmachine' produced:\n"
     " ${_out}\n"
-    "which is not equal to CMAKE_C_ANDROID_TOOLCHAIN_MACHINE:\n"
+    "which does not match CMAKE_C_ANDROID_TOOLCHAIN_MACHINE:\n"
     " ${CMAKE_C_ANDROID_TOOLCHAIN_MACHINE}"
     )
 endif()

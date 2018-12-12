@@ -36,101 +36,100 @@ static const struct {
 } features[] = {
 #if defined (HAVE_ENCODER_LZMA1) || defined(HAVE_DECODER_LZMA1)
 	{
-		LZMA_FILTER_LZMA1,
-		sizeof(lzma_options_lzma),
-		false,
-		true,
-		true,
+		.id = LZMA_FILTER_LZMA1,
+		.options_size = sizeof(lzma_options_lzma),
+		.non_last_ok = false,
+		.last_ok = true,
+		.changes_size = true,
 	},
 #endif
 #if defined(HAVE_ENCODER_LZMA2) || defined(HAVE_DECODER_LZMA2)
 	{
-		LZMA_FILTER_LZMA2,
-		sizeof(lzma_options_lzma),
-		false,
-		true,
-		true,
+		.id = LZMA_FILTER_LZMA2,
+		.options_size = sizeof(lzma_options_lzma),
+		.non_last_ok = false,
+		.last_ok = true,
+		.changes_size = true,
 	},
 #endif
 #if defined(HAVE_ENCODER_X86) || defined(HAVE_DECODER_X86)
 	{
-		LZMA_FILTER_X86,
-		sizeof(lzma_options_bcj),
-		true,
-		false,
-		false,
+		.id = LZMA_FILTER_X86,
+		.options_size = sizeof(lzma_options_bcj),
+		.non_last_ok = true,
+		.last_ok = false,
+		.changes_size = false,
 	},
 #endif
 #if defined(HAVE_ENCODER_POWERPC) || defined(HAVE_DECODER_POWERPC)
 	{
-		LZMA_FILTER_POWERPC,
-		sizeof(lzma_options_bcj),
-		true,
-		false,
-		false,
+		.id = LZMA_FILTER_POWERPC,
+		.options_size = sizeof(lzma_options_bcj),
+		.non_last_ok = true,
+		.last_ok = false,
+		.changes_size = false,
 	},
 #endif
 #if defined(HAVE_ENCODER_IA64) || defined(HAVE_DECODER_IA64)
 	{
-		LZMA_FILTER_IA64,
-		sizeof(lzma_options_bcj),
-		true,
-		false,
-		false,
+		.id = LZMA_FILTER_IA64,
+		.options_size = sizeof(lzma_options_bcj),
+		.non_last_ok = true,
+		.last_ok = false,
+		.changes_size = false,
 	},
 #endif
 #if defined(HAVE_ENCODER_ARM) || defined(HAVE_DECODER_ARM)
 	{
-		LZMA_FILTER_ARM,
-		sizeof(lzma_options_bcj),
-		true,
-		false,
-		false,
+		.id = LZMA_FILTER_ARM,
+		.options_size = sizeof(lzma_options_bcj),
+		.non_last_ok = true,
+		.last_ok = false,
+		.changes_size = false,
 	},
 #endif
 #if defined(HAVE_ENCODER_ARMTHUMB) || defined(HAVE_DECODER_ARMTHUMB)
 	{
-		LZMA_FILTER_ARMTHUMB,
-		sizeof(lzma_options_bcj),
-		true,
-		false,
-		false,
+		.id = LZMA_FILTER_ARMTHUMB,
+		.options_size = sizeof(lzma_options_bcj),
+		.non_last_ok = true,
+		.last_ok = false,
+		.changes_size = false,
 	},
 #endif
 #if defined(HAVE_ENCODER_SPARC) || defined(HAVE_DECODER_SPARC)
 	{
-		LZMA_FILTER_SPARC,
-		sizeof(lzma_options_bcj),
-		true,
-		false,
-		false,
+		.id = LZMA_FILTER_SPARC,
+		.options_size = sizeof(lzma_options_bcj),
+		.non_last_ok = true,
+		.last_ok = false,
+		.changes_size = false,
 	},
 #endif
 #if defined(HAVE_ENCODER_DELTA) || defined(HAVE_DECODER_DELTA)
 	{
-		LZMA_FILTER_DELTA,
-		sizeof(lzma_options_delta),
-		true,
-		false,
-		false,
+		.id = LZMA_FILTER_DELTA,
+		.options_size = sizeof(lzma_options_delta),
+		.non_last_ok = true,
+		.last_ok = false,
+		.changes_size = false,
 	},
 #endif
 	{
-		LZMA_VLI_UNKNOWN
+		.id = LZMA_VLI_UNKNOWN
 	}
 };
 
 
 extern LZMA_API(lzma_ret)
 lzma_filters_copy(const lzma_filter *src, lzma_filter *dest,
-		lzma_allocator *allocator)
+		const lzma_allocator *allocator)
 {
-	size_t i;
-	lzma_ret ret;
-
 	if (src == NULL || dest == NULL)
 		return LZMA_PROG_ERROR;
 
+	lzma_ret ret;
+	size_t i;
 	for (i = 0; src[i].id != LZMA_VLI_UNKNOWN; ++i) {
 		// There must be a maximum of four filters plus
 		// the array terminator.
@@ -194,6 +193,10 @@ error:
 static lzma_ret
 validate_chain(const lzma_filter *filters, size_t *count)
 {
+	// There must be at least one filter.
+	if (filters == NULL || filters[0].id == LZMA_VLI_UNKNOWN)
+		return LZMA_PROG_ERROR;
+
 	// Number of non-last filters that may change the size of the data
 	// significantly (that is, more than 1-2 % or so).
 	size_t changes_size_count = 0;
@@ -207,11 +210,6 @@ validate_chain(const lzma_filter *filters, size_t *count)
 	bool last_ok = false;
 
 	size_t i = 0;
-
-	// There must be at least one filter.
-	if (filters == NULL || filters[0].id == LZMA_VLI_UNKNOWN)
-		return LZMA_PROG_ERROR;
-
 	do {
 		size_t j;
 		for (j = 0; filters[i].id != features[j].id; ++j)
@@ -241,21 +239,18 @@ validate_chain(const lzma_filter *filters, size_t *count)
 
 
 extern lzma_ret
-lzma_raw_coder_init(lzma_next_coder *next, lzma_allocator *allocator,
+lzma_raw_coder_init(lzma_next_coder *next, const lzma_allocator *allocator,
 		const lzma_filter *options,
 		lzma_filter_find coder_find, bool is_encoder)
 {
-	lzma_filter_info filters[LZMA_FILTERS_MAX + 1];
-	size_t count;
-	size_t i;
-	lzma_ret ret;
-
 	// Do some basic validation and get the number of filters.
+	size_t count;
 	return_if_error(validate_chain(options, &count));
 
 	// Set the filter functions and copy the options pointer.
+	lzma_filter_info filters[LZMA_FILTERS_MAX + 1];
 	if (is_encoder) {
-		for (i = 0; i < count; ++i) {
+		for (size_t i = 0; i < count; ++i) {
 			// The order of the filters is reversed in the
 			// encoder. It allows more efficient handling
 			// of the uncompressed data.
@@ -271,7 +266,7 @@ lzma_raw_coder_init(lzma_next_coder *next, lzma_allocator *allocator,
 			filters[j].options = options[i].options;
 		}
 	} else {
-		for (i = 0; i < count; ++i) {
+		for (size_t i = 0; i < count; ++i) {
 			const lzma_filter_coder *const fc
 					= coder_find(options[i].id);
 			if (fc == NULL || fc->init == NULL)
@@ -288,7 +283,7 @@ lzma_raw_coder_init(lzma_next_coder *next, lzma_allocator *allocator,
 	filters[count].init = NULL;
 
 	// Initialize the filters.
-	ret = lzma_next_filter_init(next, allocator, filters);
+	const lzma_ret ret = lzma_next_filter_init(next, allocator, filters);
 	if (ret != LZMA_OK)
 		lzma_next_end(next, allocator);
 
@@ -300,15 +295,15 @@ extern uint64_t
 lzma_raw_coder_memusage(lzma_filter_find coder_find,
 		const lzma_filter *filters)
 {
-	uint64_t total = 0;
-	size_t i = 0;
-
 	// The chain has to have at least one filter.
 	{
 		size_t tmp;
 		if (validate_chain(filters, &tmp) != LZMA_OK)
 			return UINT64_MAX;
 	}
+
+	uint64_t total = 0;
+	size_t i = 0;
 
 	do {
 		const lzma_filter_coder *const fc

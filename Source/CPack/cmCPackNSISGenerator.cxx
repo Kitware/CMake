@@ -305,7 +305,7 @@ int cmCPackNSISGenerator::PackageFiles()
     nsisCmd.c_str(), &output, &output, &retVal, nullptr,
     this->GeneratorVerbose, cmDuration::zero());
   if (!res || retVal) {
-    cmGeneratedFileStream ofs(tmpFile.c_str());
+    cmGeneratedFileStream ofs(tmpFile);
     ofs << "# Run command: " << nsisCmd << std::endl
         << "# Output:" << std::endl
         << output << std::endl;
@@ -416,7 +416,7 @@ int cmCPackNSISGenerator::InitializeInternal()
     const char* topDir = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     std::string tmpFile = topDir ? topDir : ".";
     tmpFile += "/NSISOutput.log";
-    cmGeneratedFileStream ofs(tmpFile.c_str());
+    cmGeneratedFileStream ofs(tmpFile);
     ofs << "# Run command: " << nsisCmd << std::endl
         << "# Output:" << std::endl
         << output << std::endl;
@@ -703,7 +703,7 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
 
     // Find a ZIP program
     if (!this->IsSet("ZIP_EXECUTABLE")) {
-      this->ReadListFile("CPackZIP.cmake");
+      this->ReadListFile("Internal/CPack/CPackZIP.cmake");
 
       if (!this->IsSet("ZIP_EXECUTABLE")) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -726,7 +726,7 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
       cmSystemTools::IsOn(this->GetOption("CPACK_ZIP_NEED_QUOTES"));
     unsigned long totalSize = 0;
     { // the scope is needed for cmGeneratedFileStream
-      cmGeneratedFileStream out(zipListFileName.c_str());
+      cmGeneratedFileStream out(zipListFileName);
       for (std::string const& file : component->Files) {
         if (needQuotesInFile) {
           out << "\"";
@@ -754,7 +754,7 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     if (!res || retVal) {
       std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
       tmpFile += "/CompressZip.log";
-      cmGeneratedFileStream ofs(tmpFile.c_str());
+      cmGeneratedFileStream ofs(tmpFile);
       ofs << "# Run command: " << cmd << std::endl
           << "# Output:" << std::endl
           << output << std::endl;

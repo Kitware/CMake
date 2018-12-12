@@ -34,17 +34,29 @@
 find_path(CURL_INCLUDE_DIR NAMES curl/curl.h)
 mark_as_advanced(CURL_INCLUDE_DIR)
 
-# Look for the library (sorted from most current/relevant entry to least).
-find_library(CURL_LIBRARY NAMES
-    curl
-  # Windows MSVC prebuilts:
-    curllib
-    libcurl_imp
-    curllib_static
-  # Windows older "Win32 - MSVC" prebuilts (libcurl.lib, e.g. libcurl-7.15.5-win32-msvc.zip):
-    libcurl
-)
-mark_as_advanced(CURL_LIBRARY)
+if(NOT CURL_LIBRARY)
+  # Look for the library (sorted from most current/relevant entry to least).
+  find_library(CURL_LIBRARY_RELEASE NAMES
+      curl
+    # Windows MSVC prebuilts:
+      curllib
+      libcurl_imp
+      curllib_static
+    # Windows older "Win32 - MSVC" prebuilts (libcurl.lib, e.g. libcurl-7.15.5-win32-msvc.zip):
+      libcurl
+  )
+  mark_as_advanced(CURL_LIBRARY_RELEASE)
+
+  find_library(CURL_LIBRARY_DEBUG NAMES
+    # Windows MSVC CMake builds in debug configuration on vcpkg:
+      libcurl-d_imp
+      libcurl-d
+  )
+  mark_as_advanced(CURL_LIBRARY_DEBUG)
+
+  include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+  select_library_configurations(CURL)
+endif()
 
 if(CURL_INCLUDE_DIR)
   foreach(_curl_version_header curlver.h curl.h)
@@ -69,7 +81,27 @@ if(CURL_FOUND)
 
   if(NOT TARGET CURL::libcurl)
     add_library(CURL::libcurl UNKNOWN IMPORTED)
-    set_target_properties(CURL::libcurl PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}")
-    set_property(TARGET CURL::libcurl APPEND PROPERTY IMPORTED_LOCATION "${CURL_LIBRARY}")
+    set_target_properties(CURL::libcurl PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}")
+
+    if(EXISTS "${CURL_LIBRARY}")
+      set_target_properties(CURL::libcurl PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        IMPORTED_LOCATION "${CURL_LIBRARY}")
+    endif()
+    if(CURL_LIBRARY_RELEASE)
+      set_property(TARGET CURL::libcurl APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS RELEASE)
+      set_target_properties(CURL::libcurl PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        IMPORTED_LOCATION_RELEASE "${CURL_LIBRARY_RELEASE}")
+    endif()
+    if(CURL_LIBRARY_DEBUG)
+      set_property(TARGET CURL::libcurl APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG)
+      set_target_properties(CURL::libcurl PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        IMPORTED_LOCATION_DEBUG "${CURL_LIBRARY_DEBUG}")
+    endif()
   endif()
 endif()

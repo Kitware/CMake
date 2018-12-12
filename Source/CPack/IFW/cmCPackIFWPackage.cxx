@@ -528,7 +528,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   }
 
   // Output stream
-  cmGeneratedFileStream fout((this->Directory + "/meta/package.xml").data());
+  cmGeneratedFileStream fout(this->Directory + "/meta/package.xml");
   cmXMLWriter xout(fout);
 
   xout.StartDocument();

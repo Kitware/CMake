@@ -35,19 +35,19 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
   srcdir += "_SOURCE_DIR";
 
   this->Makefile->AddCacheDefinition(
-    bindir, this->Makefile->GetCurrentBinaryDirectory(),
+    bindir, this->Makefile->GetCurrentBinaryDirectory().c_str(),
     "Value Computed by CMake", cmStateEnums::STATIC);
   this->Makefile->AddCacheDefinition(
-    srcdir, this->Makefile->GetCurrentSourceDirectory(),
+    srcdir, this->Makefile->GetCurrentSourceDirectory().c_str(),
     "Value Computed by CMake", cmStateEnums::STATIC);
 
   bindir = "PROJECT_BINARY_DIR";
   srcdir = "PROJECT_SOURCE_DIR";
 
-  this->Makefile->AddDefinition(bindir,
-                                this->Makefile->GetCurrentBinaryDirectory());
-  this->Makefile->AddDefinition(srcdir,
-                                this->Makefile->GetCurrentSourceDirectory());
+  this->Makefile->AddDefinition(
+    bindir, this->Makefile->GetCurrentBinaryDirectory().c_str());
+  this->Makefile->AddDefinition(
+    srcdir, this->Makefile->GetCurrentSourceDirectory().c_str());
 
   this->Makefile->AddDefinition("PROJECT_NAME", projectName.c_str());
 
@@ -300,19 +300,15 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
 
-  if (haveDescription) {
-    this->Makefile->AddDefinition("PROJECT_DESCRIPTION", description.c_str());
-    this->Makefile->AddDefinition(projectName + "_DESCRIPTION",
-                                  description.c_str());
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_DESCRIPTION", description.c_str());
-  }
+  this->Makefile->AddDefinition("PROJECT_DESCRIPTION", description.c_str());
+  this->Makefile->AddDefinition(projectName + "_DESCRIPTION",
+                                description.c_str());
+  TopLevelCMakeVarCondSet("CMAKE_PROJECT_DESCRIPTION", description.c_str());
 
-  if (haveHomepage) {
-    this->Makefile->AddDefinition("PROJECT_HOMEPAGE_URL", homepage.c_str());
-    this->Makefile->AddDefinition(projectName + "_HOMEPAGE_URL",
-                                  homepage.c_str());
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_HOMEPAGE_URL", homepage.c_str());
-  }
+  this->Makefile->AddDefinition("PROJECT_HOMEPAGE_URL", homepage.c_str());
+  this->Makefile->AddDefinition(projectName + "_HOMEPAGE_URL",
+                                homepage.c_str());
+  TopLevelCMakeVarCondSet("CMAKE_PROJECT_HOMEPAGE_URL", homepage.c_str());
 
   if (languages.empty()) {
     // if no language is specified do c and c++

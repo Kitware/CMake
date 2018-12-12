@@ -30,7 +30,7 @@
 #define	ARCHIVE_ENTRY_H_INCLUDED
 
 /* Note: Compiler will complain if this does not match archive.h! */
-#define	ARCHIVE_VERSION_NUMBER 3003002
+#define	ARCHIVE_VERSION_NUMBER 3003003
 
 /*
  * Note: archive_entry.h is for use outside of libarchive; the
@@ -42,6 +42,7 @@
 
 #include <sys/types.h>
 #include <stddef.h>  /* for wchar_t */
+#include <stdint.h>
 #include <time.h>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)

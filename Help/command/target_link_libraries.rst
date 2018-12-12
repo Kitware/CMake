@@ -18,10 +18,13 @@ All of them have the general form::
 
   target_link_libraries(<target> ... <item>... ...)
 
-The named ``<target>`` must have been created in the current directory by
-a command such as :command:`add_executable` or :command:`add_library` and
-must not be an :ref:`ALIAS target <Alias Targets>`.
-Repeated calls for the same ``<target>`` append items in the order called.
+The named ``<target>`` must have been created by a command such as
+:command:`add_executable` or :command:`add_library` and must not be an
+:ref:`ALIAS target <Alias Targets>`.  If policy :policy:`CMP0079` is not
+set to ``NEW`` then the target must have been created in the current
+directory.  Repeated calls for the same ``<target>`` append items in
+the order called.
+
 Each ``<item>`` may be:
 
 * **A library target name**: The generated link line will have the
@@ -39,6 +42,9 @@ Each ``<item>`` may be:
   target property set, CMake may ask the linker to search for
   the library instead of using the full path
   (e.g. ``/usr/lib/libfoo.so`` becomes ``-lfoo``).
+
+  The full path to the target's artifact will be quoted/escaped for
+  the shell automatically.
 
 * **A full path to a library file**: The generated link line will
   normally preserve the full path to the file. The buildsystem will
@@ -59,8 +65,14 @@ Each ``<item>`` may be:
   imported into generated project files.  This is not supported by other
   generators.
 
+  The full path to the library file will be quoted/escaped for
+  the shell automatically.
+
 * **A plain library name**: The generated link line will ask the linker
   to search for the library (e.g. ``foo`` becomes ``-lfoo`` or ``foo.lib``).
+
+  The library name/flag is treated as a command-line string fragment and
+  will be used with no extra quoting or escaping.
 
 * **A link flag**: Item names starting with ``-``, but not ``-l`` or
   ``-framework``, are treated as linker flags.  Note that such flags will
@@ -70,9 +82,27 @@ Each ``<item>`` may be:
 
   Link flags specified here are inserted into the link command in the same
   place as the link libraries. This might not be correct, depending on
-  the linker. Use the :prop_tgt:`LINK_FLAGS` target property to add link
+  the linker. Use the :prop_tgt:`LINK_OPTIONS` target property or
+  :command:`target_link_options` command to add link
   flags explicitly. The flags will then be placed at the toolchain-defined
   flag position in the link command.
+
+  The link flag is treated as a command-line string fragment and
+  will be used with no extra quoting or escaping.
+
+* **A generator expression**: A ``$<...>`` :manual:`generator expression
+  <cmake-generator-expressions(7)>` may evaluate to any of the above
+  items or to a :ref:`;-list <CMake Language Lists>` of them.
+  If the ``...`` contains any ``;`` characters, e.g. after evaluation
+  of a ``${list}`` variable, be sure to use an explicitly quoted
+  argument ``"$<...>"`` so that this command receives it as a
+  single ``<item>``.
+
+  Additionally, a generator expression may be used as a fragment of
+  any of the above items, e.g. ``foo$<1:_d>``.
+
+  Note that generator expressions will not be used in OLD handling of
+  policy :policy:`CMP0003` or policy :policy:`CMP0004`.
 
 * A ``debug``, ``optimized``, or ``general`` keyword immediately followed
   by another ``<item>``.  The item following such a keyword will be used
@@ -84,18 +114,16 @@ Each ``<item>`` may be:
   optional.  Higher granularity may be achieved for per-configuration
   rules by creating and linking to
   :ref:`IMPORTED library targets <Imported Targets>`.
+  These keywords are interpreted immediately by this command and therefore
+  have no special meaning when produced by a generator expression.
 
 Items containing ``::``, such as ``Foo::Bar``, are assumed to be
 :ref:`IMPORTED <Imported Targets>` or :ref:`ALIAS <Alias Targets>` library
 target names and will cause an error if no such target exists.
 See policy :policy:`CMP0028`.
 
-Arguments to ``target_link_libraries`` may use "generator expressions"
-with the syntax ``$<...>``.  Note however, that generator expressions
-will not be used in OLD handling of :policy:`CMP0003` or :policy:`CMP0004`.
-See the :manual:`cmake-generator-expressions(7)` manual for available
-expressions.  See the :manual:`cmake-buildsystem(7)` manual for more on
-defining buildsystem properties.
+See the :manual:`cmake-buildsystem(7)` manual for more on defining
+buildsystem properties.
 
 Libraries for a Target and/or its Dependents
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

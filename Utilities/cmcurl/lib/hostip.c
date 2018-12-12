@@ -60,6 +60,7 @@
 #include "url.h"
 #include "inet_ntop.h"
 #include "multiif.h"
+#include "doh.h"
 #include "warnless.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -454,7 +455,7 @@ Curl_cache_addr(struct Curl_easy *data,
   /* shuffle addresses if requested */
   if(data->set.dns_shuffle_addresses) {
     CURLcode result = Curl_shuffle_addr(data, &addr);
-    if(!result)
+    if(result)
       return NULL;
   }
 
@@ -565,23 +566,27 @@ int Curl_resolv(struct connectdata *conn,
         return CURLRESOLV_ERROR;
     }
 
-    /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
-       non-zero value indicating that we need to wait for the response to the
-       resolve call */
-    addr = Curl_getaddrinfo(conn,
+    if(data->set.doh) {
+      addr = Curl_doh(conn, hostname, port, &respwait);
+    }
+    else {
+      /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
+         non-zero value indicating that we need to wait for the response to the
+         resolve call */
+      addr = Curl_getaddrinfo(conn,
 #ifdef DEBUGBUILD
-                            (data->set.str[STRING_DEVICE]
-                             && !strcmp(data->set.str[STRING_DEVICE],
-                                        "LocalHost"))?"localhost":
+                              (data->set.str[STRING_DEVICE]
+                               && !strcmp(data->set.str[STRING_DEVICE],
+                                          "LocalHost"))?"localhost":
 #endif
-                            hostname, port, &respwait);
-
+                              hostname, port, &respwait);
+    }
     if(!addr) {
       if(respwait) {
         /* the response to our resolve call will come asynchronously at
            a later time, good or bad */
         /* First, check that we haven't received the info by now */
-        result = Curl_resolver_is_resolved(conn, &dns);
+        result = Curl_resolv_check(conn, &dns);
         if(result) /* error detected */
           return CURLRESOLV_ERROR;
         if(dns)
@@ -907,7 +912,9 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       char *entry_id;
       size_t entry_len;
       char address[64];
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
       char *addresses = NULL;
+#endif
       char *addr_begin;
       char *addr_end;
       char *port_ptr;
@@ -930,7 +937,9 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         goto err;
 
       port = (int)tmp_port;
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
       addresses = end_ptr + 1;
+#endif
 
       while(*end_ptr) {
         size_t alen;
@@ -1010,24 +1019,28 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       /* See if its already in our dns cache */
       dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
+      if(dns) {
+        infof(data, "RESOLVE %s:%d is - old addresses discarded!\n",
+                hostname, port);
+        /* delete old entry entry, there are two reasons for this
+         1. old entry may have different addresses.
+         2. even if entry with correct addresses is already in the cache,
+            but if it is close to expire, then by the time next http
+            request is made, it can get expired and pruned because old
+            entry is not necessarily marked as added by CURLOPT_RESOLVE. */
+
+        Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
+      }
       /* free the allocated entry_id again */
       free(entry_id);
 
-      if(!dns) {
-        /* if not in the cache already, put this host in the cache */
-        dns = Curl_cache_addr(data, head, hostname, port);
-        if(dns) {
-          dns->timestamp = 0; /* mark as added by CURLOPT_RESOLVE */
-          /* release the returned reference; the cache itself will keep the
-           * entry alive: */
-          dns->inuse--;
-        }
-      }
-      else {
-        /* this is a duplicate, free it again */
-        infof(data, "RESOLVE %s:%d is already cached, %s not stored!\n",
-              hostname, port, addresses);
-        Curl_freeaddrinfo(head);
+      /* put this new host in the cache */
+      dns = Curl_cache_addr(data, head, hostname, port);
+      if(dns) {
+        dns->timestamp = 0; /* mark as added by CURLOPT_RESOLVE */
+        /* release the returned reference; the cache itself will keep the
+         * entry alive: */
+            dns->inuse--;
       }
 
       if(data->share)
@@ -1044,4 +1057,55 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
   data->change.resolve = NULL; /* dealt with now */
 
   return CURLE_OK;
+}
+
+CURLcode Curl_resolv_check(struct connectdata *conn,
+                           struct Curl_dns_entry **dns)
+{
+  if(conn->data->set.doh)
+    return Curl_doh_is_resolved(conn, dns);
+  return Curl_resolver_is_resolved(conn, dns);
+}
+
+int Curl_resolv_getsock(struct connectdata *conn,
+                        curl_socket_t *socks,
+                        int numsocks)
+{
+#ifdef CURLRES_ASYNCH
+  if(conn->data->set.doh)
+    /* nothing to wait for during DOH resolve, those handles have their own
+       sockets */
+    return GETSOCK_BLANK;
+  return Curl_resolver_getsock(conn, socks, numsocks);
+#else
+  (void)conn;
+  (void)socks;
+  (void)numsocks;
+  return GETSOCK_BLANK;
+#endif
+}
+
+/* Call this function after Curl_connect() has returned async=TRUE and
+   then a successful name resolve has been received.
+
+   Note: this function disconnects and frees the conn data in case of
+   resolve failure */
+CURLcode Curl_once_resolved(struct connectdata *conn,
+                            bool *protocol_done)
+{
+  CURLcode result;
+
+  if(conn->async.dns) {
+    conn->dns_entry = conn->async.dns;
+    conn->async.dns = NULL;
+  }
+
+  result = Curl_setup_conn(conn, protocol_done);
+
+  if(result)
+    /* We're not allowed to return failure with memory left allocated
+       in the connectdata struct, free those here */
+    Curl_disconnect(conn->data, conn, TRUE); /* close the connection */
+
+  return result;
 }

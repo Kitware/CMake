@@ -32,12 +32,44 @@
 
 #include "urldata.h"
 
+/* <wincrypt.h> has been included via the above <schnlsp.h>.
+ * Or in case of ldap.c, it was included via <winldap.h>.
+ * And since <wincrypt.h> has this:
+ *   #define X509_NAME  ((LPCSTR) 7)
+ *
+ * And in BoringSSL's <openssl/base.h> there is:
+ *  typedef struct X509_name_st X509_NAME;
+ *  etc.
+ *
+ * this will cause all kinds of C-preprocessing paste errors in
+ * BoringSSL's <openssl/x509.h>: So just undefine those defines here
+ * (and only here).
+ */
+#if defined(HAVE_BORINGSSL) || defined(OPENSSL_IS_BORINGSSL)
+# undef X509_NAME
+# undef X509_CERT_PAIR
+# undef X509_EXTENSIONS
+#endif
+
 extern const struct Curl_ssl Curl_ssl_schannel;
 
 CURLcode verify_certificate(struct connectdata *conn, int sockindex);
 
 /* structs to expose only in schannel.c and schannel_verify.c */
 #ifdef EXPOSE_SCHANNEL_INTERNAL_STRUCTS
+
+#ifdef __MINGW32__
+#include <_mingw.h>
+#ifdef __MINGW64_VERSION_MAJOR
+#define HAS_MANUAL_VERIFY_API
+#endif
+#else
+#include <wincrypt.h>
+#ifdef CERT_CHAIN_REVOCATION_CHECK_CHAIN
+#define HAS_MANUAL_VERIFY_API
+#endif
+#endif
+
 struct curl_schannel_cred {
   CredHandle cred_handle;
   TimeStamp time_stamp;
@@ -66,7 +98,9 @@ struct ssl_backend_data {
   bool recv_sspi_close_notify; /* true if connection closed by close_notify */
   bool recv_connection_closed; /* true if connection closed, regardless how */
   bool use_alpn; /* true if ALPN is used for this connection */
+#ifdef HAS_MANUAL_VERIFY_API
   bool use_manual_cred_validation; /* true if manual cred validation is used */
+#endif
 };
 #endif /* EXPOSE_SCHANNEL_INTERNAL_STRUCTS */
 

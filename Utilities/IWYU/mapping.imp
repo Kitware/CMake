@@ -52,6 +52,9 @@
   #{ symbol: [ "std::pair", private, "<map>", public ] },
   #{ symbol: [ "std::pair", private, "<set>", public ] },
 
+  # HACK: iwyu wrongly thinks that <system_error> is needed for std::hash
+  { symbol: [ "std::hash", private, "<functional>", public ] },
+
   # __decay_and_strip is used internally in the C++11 standard library.
   # IWYU does not classify it as internal and suggests to add <type_traits>.
   # To ignore it, we simply map it to a file that is included anyway.

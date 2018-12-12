@@ -83,6 +83,7 @@ static const char* cmCTestErrorExceptions[] = {
   "instantiated from ",
   "candidates are:",
   ": warning",
+  ": WARNING",
   ": \\(Warning\\)",
   ": note",
   "Note:",
@@ -326,7 +327,7 @@ int cmCTestBuildHandler::ProcessHandler()
 
   std::string const& useLaunchers =
     this->CTest->GetCTestConfiguration("UseLaunchers");
-  this->UseCTestLaunch = cmSystemTools::IsOn(useLaunchers.c_str());
+  this->UseCTestLaunch = cmSystemTools::IsOn(useLaunchers);
 
   // Create a last build log
   cmGeneratedFileStream ofs;
@@ -589,7 +590,7 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
       for (cmCTestCompileErrorWarningRex& rit :
            this->ErrorWarningFileLineRegex) {
         cmsys::RegularExpression* re = &rit.RegularExpression;
-        if (re->find(cm->Text.c_str())) {
+        if (re->find(cm->Text)) {
           cm->SourceFile = re->match(rit.FileIndex);
           // At this point we need to make this->SourceFile relative to
           // the source root of the project, so cvs links will work
@@ -742,7 +743,7 @@ void cmCTestBuildHandler::LaunchHelper::WriteLauncherConfig()
   // Give some testing configuration information to the launcher.
   std::string fname = this->Handler->CTestLaunchDir;
   fname += "/CTestLaunchConfig.cmake";
-  cmGeneratedFileStream fout(fname.c_str());
+  cmGeneratedFileStream fout(fname);
   std::string srcdir = this->CTest->GetCTestConfiguration("SourceDirectory");
   fout << "set(CTEST_SOURCE_DIRECTORY \"" << srcdir << "\")\n";
 }
@@ -757,7 +758,7 @@ void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers(
   fname += "/Custom";
   fname += purpose;
   fname += ".txt";
-  cmGeneratedFileStream fout(fname.c_str());
+  cmGeneratedFileStream fout(fname);
   for (std::string const& m : matchers) {
     fout << m << "\n";
   }

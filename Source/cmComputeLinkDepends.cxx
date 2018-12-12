@@ -279,12 +279,12 @@ cmComputeLinkDepends::Compute()
   return this->FinalLinkEntries;
 }
 
-std::map<std::string, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
-  std::string const& item)
+std::map<cmLinkItem, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
+  cmLinkItem const& item)
 {
-  std::map<std::string, int>::value_type index_entry(
+  std::map<cmLinkItem, int>::value_type index_entry(
     item, static_cast<int>(this->EntryList.size()));
-  std::map<std::string, int>::iterator lei =
+  std::map<cmLinkItem, int>::iterator lei =
     this->LinkEntryIndex.insert(index_entry).first;
   this->EntryList.emplace_back();
   this->InferredDependSets.push_back(nullptr);
@@ -295,7 +295,7 @@ std::map<std::string, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
 int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
 {
   // Check if the item entry has already been added.
-  std::map<std::string, int>::iterator lei = this->LinkEntryIndex.find(item);
+  std::map<cmLinkItem, int>::iterator lei = this->LinkEntryIndex.find(item);
   if (lei != this->LinkEntryIndex.end()) {
     // Yes.  We do not need to follow the item's dependencies again.
     return lei->second;
@@ -307,10 +307,11 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
   // Initialize the item entry.
   int index = lei->second;
   LinkEntry& entry = this->EntryList[index];
-  entry.Item = item;
+  entry.Item = item.AsStr();
   entry.Target = item.Target;
-  entry.IsFlag = (!entry.Target && item[0] == '-' && item[1] != 'l' &&
-                  item.substr(0, 10) != "-framework");
+  entry.IsFlag =
+    (!entry.Target && entry.Item[0] == '-' && entry.Item[1] != 'l' &&
+     entry.Item.substr(0, 10) != "-framework");
 
   // If the item has dependencies queue it to follow them.
   if (entry.Target) {
@@ -395,7 +396,7 @@ void cmComputeLinkDepends::QueueSharedDependencies(
 void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 {
   // Check if the target already has an entry.
-  std::map<std::string, int>::iterator lei =
+  std::map<cmLinkItem, int>::iterator lei =
     this->LinkEntryIndex.find(dep.Item);
   if (lei == this->LinkEntryIndex.end()) {
     // Allocate a spot for the item entry.
@@ -403,7 +404,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 
     // Initialize the item entry.
     LinkEntry& entry = this->EntryList[lei->second];
-    entry.Item = dep.Item;
+    entry.Item = dep.Item.AsStr();
     entry.Target = dep.Item.Target;
 
     // This item was added specifically because it is a dependent
@@ -473,9 +474,9 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
 
       // If the library is meant for this link type then use it.
       if (llt == GENERAL_LibraryType || llt == this->LinkType) {
-        actual_libs.emplace_back(d, this->FindTargetToLink(depender_index, d));
+        actual_libs.emplace_back(this->ResolveLinkItem(depender_index, d));
       } else if (this->OldLinkDirMode) {
-        cmLinkItem item(d, this->FindTargetToLink(depender_index, d));
+        cmLinkItem item = this->ResolveLinkItem(depender_index, d);
         this->CheckWrongConfigItem(item);
       }
 
@@ -512,7 +513,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
     // Skip entries that will resolve to the target getting linked or
     // are empty.
     cmLinkItem const& item = l;
-    if (item == this->Target->GetName() || item.empty()) {
+    if (item.AsStr() == this->Target->GetName() || item.AsStr().empty()) {
       continue;
     }
 
@@ -553,8 +554,8 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
   }
 }
 
-cmGeneratorTarget const* cmComputeLinkDepends::FindTargetToLink(
-  int depender_index, const std::string& name)
+cmLinkItem cmComputeLinkDepends::ResolveLinkItem(int depender_index,
+                                                 const std::string& name)
 {
   // Look for a target in the scope of the depender.
   cmGeneratorTarget const* from = this->Target;
@@ -564,7 +565,7 @@ cmGeneratorTarget const* cmComputeLinkDepends::FindTargetToLink(
       from = depender;
     }
   }
-  return from->FindTargetToLink(name);
+  return from->ResolveLinkItem(name);
 }
 
 void cmComputeLinkDepends::InferDependencies()

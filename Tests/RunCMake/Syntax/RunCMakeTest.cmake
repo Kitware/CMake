@@ -111,6 +111,11 @@ run_cmake(CMP0053-NameWithNewlineQuoted)
 run_cmake(CMP0053-NameWithCarriageReturnQuoted)
 run_cmake(CMP0053-NameWithEscapedSpacesQuoted)
 run_cmake(CMP0053-NameWithEscapedTabsQuoted)
+run_cmake(CMP0053-Dollar-OLD)
+run_cmake(CMP0053-Dollar-NEW)
+
+# Variable special types
+run_cmake(QueryCache)
 
 # Function and macro tests.
 run_cmake(FunctionUnmatched)

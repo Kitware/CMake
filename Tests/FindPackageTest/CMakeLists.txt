@@ -188,7 +188,7 @@ find_package(ArchC 3.1 EXACT NAMES zot)
 find_package(ArchD 4.0 EXACT NAMES zot)
 unset(CMAKE_LIBRARY_ARCHITECTURE)
 
-# Test <Package>_DIR environment variable.
+# Test <PackageName>_DIR environment variable.
 # We erase the main prefix path to ensure the env var is used.
 set(CMAKE_PREFIX_PATH)
 set(ENV{EnvA_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/lib/zot-3.1")

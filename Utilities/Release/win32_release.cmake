@@ -39,6 +39,6 @@ get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 set(GIT_EXTRA "git config core.autocrlf true")
 if(CMAKE_CREATE_VERSION STREQUAL "nightly")
   # Some tests fail spuriously too often.
-  set(EXTRA_CTEST_ARGS "-E 'ConsoleBuf'")
+  set(EXTRA_CTEST_ARGS "-E 'ConsoleBuf|Module.ExternalData'")
 endif()
 include(${path}/release_cmake.cmake)

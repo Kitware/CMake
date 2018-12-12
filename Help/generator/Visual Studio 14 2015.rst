@@ -3,11 +3,26 @@ Visual Studio 14 2015
 
 Generates Visual Studio 14 (VS 2015) project files.
 
-The :variable:`CMAKE_GENERATOR_PLATFORM` variable may be set
-to specify a target platform name (architecture).
+Project Types
+^^^^^^^^^^^^^
+
+Only Visual C++ and C# projects may be generated.  Other types of
+projects (JavaScript, Powershell, Python, etc.) are not supported.
+
+Platform Selection
+^^^^^^^^^^^^^^^^^^
+
+The :variable:`CMAKE_GENERATOR_PLATFORM` variable may be set, perhaps
+via the :manual:`cmake(1)` ``-A`` option, to specify a target platform
+name (architecture).  For example:
+
+* ``cmake -G "Visual Studio 14 2015" -A Win32``
+* ``cmake -G "Visual Studio 14 2015" -A x64``
+* ``cmake -G "Visual Studio 14 2015" -A ARM``
 
 For compatibility with CMake versions prior to 3.1, one may specify
-a target platform name optionally at the end of this generator name:
+a target platform name optionally at the end of the generator name.
+This is supported only for:
 
 ``Visual Studio 14 2015 Win64``
   Specify target platform ``x64``.

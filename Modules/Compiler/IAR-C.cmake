@@ -5,6 +5,9 @@ include(Compiler/CMakeCommonCompilerMacros)
 
 # The toolchains for ARM and AVR are quite different:
 if("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
+  if(NOT CMAKE_C_COMPILER_VERSION)
+    message(FATAL_ERROR "CMAKE_C_COMPILER_VERSION not detected.  This should be automatic.")
+  endif()
 
   set(CMAKE_C_EXTENSION_COMPILE_OPTION -e)
 
@@ -40,4 +43,7 @@ elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR")
   get_filename_component(_compilerDir "${CMAKE_C_COMPILER}" PATH)
   get_filename_component(_compilerDir "${_compilerDir}" PATH)
   include_directories("${_compilerDir}/inc" )
+
+else()
+  message(FATAL_ERROR "CMAKE_C_COMPILER_ARCHITECTURE_ID not detected as \"AVR\" or \"ARM\".  This should be automatic.")
 endif()

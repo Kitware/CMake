@@ -121,6 +121,34 @@ unset(_PYTHON1_VERSIONS)
 unset(_PYTHON2_VERSIONS)
 unset(_PYTHON3_VERSIONS)
 
+# Python distribution: define which architectures can be used
+if (CMAKE_SIZEOF_VOID_P)
+  # In this case, search only for 64bit or 32bit
+  math (EXPR _PYTHON_ARCH "${CMAKE_SIZEOF_VOID_P} * 8")
+  set (_PYTHON_ARCH2 _PYTHON_PREFIX_ARCH})
+else()
+  if (PYTHON_EXECUTABLE)
+    # determine interpreter architecture
+    execute_process (COMMAND "${PYTHON_EXECUTABLE}" -c "import sys; print(sys.maxsize > 2**32)"
+                     RESULT_VARIABLE _PYTHON_RESULT
+                     OUTPUT_VARIABLE _PYTHON_IS64BIT
+                     ERROR_VARIABLE _PYTHON_IS64BIT)
+      if (NOT _PYTHON_RESULT)
+        if (_PYTHON_IS64BIT)
+          set (_PYTHON_ARCH 64)
+          set (_PYTHON_ARCH2 64)
+        else()
+          set (_PYTHON_ARCH 32)
+          set (_PYTHON_ARCH2 32)
+        endif()
+      endif()
+  else()
+    # architecture unknown, search for both 64bit and 32bit
+    set (_PYTHON_ARCH 64)
+    set (_PYTHON_ARCH2 32)
+  endif()
+endif()
+
 foreach(_CURRENT_VERSION ${_Python_VERSIONS})
   string(REPLACE "." "" _CURRENT_VERSION_NO_DOTS ${_CURRENT_VERSION})
   if(WIN32)
@@ -130,9 +158,17 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
       HINTS ${_Python_LIBRARY_PATH_HINT}
       PATHS
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/libs/Debug
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/libs/Debug
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
+      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/libs/Debug
+      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/libs/Debug
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/libs
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/libs
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/libs
+      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/libs
       )
   endif()
 
@@ -156,7 +192,11 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
     PATHS
       ${PYTHON_FRAMEWORK_LIBRARIES}
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/libs
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/libs
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/libs
+      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/libs
   )
   # Look for the static library in the Python config directory
   find_library(PYTHON_LIBRARY
@@ -201,7 +241,11 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
       PATHS
         ${PYTHON_FRAMEWORK_INCLUDES}
         [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
+        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/include
+        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/include
         [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
+        [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/include
+        [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/include
       PATH_SUFFIXES
         python${_CURRENT_VERSION}mu
         python${_CURRENT_VERSION}m

@@ -197,7 +197,7 @@ CTest
 CPack
 -----
 
-* The :module:`CPackDeb` module learned to set package dependencies
+* The :cpack_gen:`CPack DEB Generator` learned to set package dependencies
   per component.  See variables:
 
   * :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_BREAKS`
@@ -249,11 +249,11 @@ Other Changes
   :module:`CheckSymbolExists`, and :module:`FindThreads` modules learned to
   work in environments where only CXX is enabled.
 
-* The :module:`CPackDeb` module now correctly excludes symlinks during package
-  checksum calculation.
+* The :cpack_gen:`CPack DEB Generator` now correctly excludes symlinks
+  during package checksum calculation.
 
-* The :module:`CPackDeb` no longer uses fakeroot and system tar program for
-  packaging.
+* The :cpack_gen:`CPack DEB Generator` no longer uses fakeroot and
+  system tar program for packaging.
 
 * The :module:`CPack` module no longer mangles settings with CMake-special
   characters when they're used as defaults for other settings. The macro

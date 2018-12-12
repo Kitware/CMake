@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.7)
-project (CudaOnlyEnableStandard CUDA)
+project (EnableStandard CUDA)
 
 #Goal for this example:
 #build cuda sources that require C++11 to be enabled.

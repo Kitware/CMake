@@ -115,8 +115,7 @@ rc_direct(lzma_range_encoder *rc,
 static inline void
 rc_flush(lzma_range_encoder *rc)
 {
-	size_t i;
-	for (i = 0; i < 5; ++i)
+	for (size_t i = 0; i < 5; ++i)
 		rc->symbols[rc->count++] = RC_FLUSH;
 }
 

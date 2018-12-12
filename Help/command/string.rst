@@ -121,6 +121,11 @@ The following characters have special meaning in regular expressions:
   Matches at end of input
 ``.``
   Matches any single character
+``\<char>``
+  Matches the single character specified by ``<char>``.  Use this to
+  match special regex characters, e.g. ``\.`` for a literal ``.``
+  or ``\\`` for a literal backslash ``\``.  Escaping a non-special
+  character is unnecessary but allowed, e.g. ``\a`` matches ``a``.
 ``[ ]``
   Matches any character(s) inside the brackets
 ``[^ ]``
@@ -150,6 +155,22 @@ The following characters have special meaning in regular expressions:
 has lower precedence than concatenation.  This means that the regular
 expression ``^ab+d$`` matches ``abbd`` but not ``ababd``, and the regular
 expression ``^(ab|cd)$`` matches ``ab`` but not ``abd``.
+
+CMake language :ref:`Escape Sequences` such as ``\t``, ``\r``, ``\n``,
+and ``\\`` may be used to construct literal tabs, carriage returns,
+newlines, and backslashes (respectively) to pass in a regex.  For example:
+
+* The quoted argument ``"[ \t\r\n]"`` specifies a regex that matches
+  any single whitespace character.
+* The quoted argument ``"[/\\]"`` specifies a regex that matches
+  a single forward slash ``/`` or backslash ``\``.
+* The quoted argument ``"[A-Za-z0-9_]"`` specifies a regex that matches
+  any single "word" character in the C locale.
+* The quoted argument ``"\\(\\a\\+b\\)"`` specifies a regex that matches
+  the exact string ``(a+b)``.  Each ``\\`` is parsed in a quoted argument
+  as just ``\``, so the regex itself is actually ``\(\a\+\b\)``.  This
+  can alternatively be specified in a :ref:`bracket argument` without
+  having to escape the backslashes, e.g. ``[[\(\a\+\b\)]]``.
 
 Manipulation
 ^^^^^^^^^^^^

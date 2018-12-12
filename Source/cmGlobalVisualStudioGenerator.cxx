@@ -878,12 +878,13 @@ bool cmGlobalVisualStudioGenerator::Open(const std::string& bindir,
                                          const std::string& projectName,
                                          bool dryRun)
 {
-  std::string buildDir = cmSystemTools::ConvertToOutputPath(bindir);
-  std::string sln = buildDir + "\\" + projectName + ".sln";
+  std::string sln = bindir + "/" + projectName + ".sln";
 
   if (dryRun) {
     return cmSystemTools::FileExists(sln, true);
   }
+
+  sln = cmSystemTools::ConvertToOutputPath(sln);
 
   return std::async(std::launch::async, OpenSolution, sln).get();
 }

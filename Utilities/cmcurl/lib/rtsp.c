@@ -218,8 +218,6 @@ static CURLcode rtsp_done(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   struct RTSP *rtsp = data->req.protop;
   CURLcode httpStatus;
-  long CSeq_sent;
-  long CSeq_recv;
 
   /* Bypass HTTP empty-reply checks on receive */
   if(data->set.rtspreq == RTSPREQ_RECEIVE)
@@ -229,8 +227,8 @@ static CURLcode rtsp_done(struct connectdata *conn,
 
   if(rtsp) {
     /* Check the sequence numbers */
-    CSeq_sent = rtsp->CSeq_sent;
-    CSeq_recv = rtsp->CSeq_recv;
+    long CSeq_sent = rtsp->CSeq_sent;
+    long CSeq_recv = rtsp->CSeq_recv;
     if((data->set.rtspreq != RTSPREQ_RECEIVE) && (CSeq_sent != CSeq_recv)) {
       failf(data,
             "The CSeq of this request %ld did not match the response %ld",
@@ -464,7 +462,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
     return CURLE_OUT_OF_MEMORY;
 
   result =
-    Curl_add_bufferf(req_buffer,
+    Curl_add_bufferf(&req_buffer,
                      "%s %s RTSP/1.0\r\n" /* Request Stream-URI RTSP/1.0 */
                      "CSeq: %ld\r\n", /* CSeq */
                      p_request, p_stream_uri, rtsp->CSeq_sent);
@@ -476,7 +474,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
    * to make comparison easier
    */
   if(p_session_id) {
-    result = Curl_add_bufferf(req_buffer, "Session: %s\r\n", p_session_id);
+    result = Curl_add_bufferf(&req_buffer, "Session: %s\r\n", p_session_id);
     if(result)
       return result;
   }
@@ -484,7 +482,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   /*
    * Shared HTTP-like options
    */
-  result = Curl_add_bufferf(req_buffer,
+  result = Curl_add_bufferf(&req_buffer,
                             "%s" /* transport */
                             "%s" /* accept */
                             "%s" /* accept-encoding */
@@ -543,9 +541,10 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
       /* As stated in the http comments, it is probably not wise to
        * actually set a custom Content-Length in the headers */
       if(!Curl_checkheaders(conn, "Content-Length")) {
-        result = Curl_add_bufferf(req_buffer,
-            "Content-Length: %" CURL_FORMAT_CURL_OFF_T"\r\n",
-            (data->set.upload ? putsize : postsize));
+        result =
+          Curl_add_bufferf(&req_buffer,
+                           "Content-Length: %" CURL_FORMAT_CURL_OFF_T"\r\n",
+                           (data->set.upload ? putsize : postsize));
         if(result)
           return result;
       }
@@ -553,8 +552,8 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
       if(rtspreq == RTSPREQ_SET_PARAMETER ||
          rtspreq == RTSPREQ_GET_PARAMETER) {
         if(!Curl_checkheaders(conn, "Content-Type")) {
-          result = Curl_add_bufferf(req_buffer,
-              "Content-Type: text/parameters\r\n");
+          result = Curl_add_bufferf(&req_buffer,
+                                    "Content-Type: text/parameters\r\n");
           if(result)
             return result;
         }
@@ -562,8 +561,8 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
 
       if(rtspreq == RTSPREQ_ANNOUNCE) {
         if(!Curl_checkheaders(conn, "Content-Type")) {
-          result = Curl_add_bufferf(req_buffer,
-              "Content-Type: application/sdp\r\n");
+          result = Curl_add_bufferf(&req_buffer,
+                                    "Content-Type: application/sdp\r\n");
           if(result)
             return result;
         }
@@ -581,19 +580,19 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   /* RTSP never allows chunked transfer */
   data->req.forbidchunk = TRUE;
   /* Finish the request buffer */
-  result = Curl_add_buffer(req_buffer, "\r\n", 2);
+  result = Curl_add_buffer(&req_buffer, "\r\n", 2);
   if(result)
     return result;
 
   if(postsize > 0) {
-    result = Curl_add_buffer(req_buffer, data->set.postfields,
+    result = Curl_add_buffer(&req_buffer, data->set.postfields,
                              (size_t)postsize);
     if(result)
       return result;
   }
 
   /* issue the request */
-  result = Curl_add_buffer_send(req_buffer, conn,
+  result = Curl_add_buffer_send(&req_buffer, conn,
                                 &data->info.request_size, 0, FIRSTSOCKET);
   if(result) {
     failf(data, "Failed sending RTSP request");

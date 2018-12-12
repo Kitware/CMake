@@ -307,7 +307,7 @@ CPack
   option now is deprecated and will be removed in a future version of CMake.
   Please use new ``SORTING_PRIORITY`` option instead.
 
-* The :module:`CPackIFW` module gained new
+* The :cpack_gen:`CPack IFW Generator` gained new
   :variable:`CPACK_IFW_PACKAGE_WATERMARK`,
   :variable:`CPACK_IFW_PACKAGE_BANNER`,
   :variable:`CPACK_IFW_PACKAGE_BACKGROUND`,
@@ -317,26 +317,26 @@ CPack
   :variable:`CPACK_IFW_PACKAGE_TITLE_COLOR`
   variables to customize a QtIFW installer look.
 
-* The :module:`CPackProductBuild` module gained options to sign packages.
+* The :cpack_gen:`CPack productbuild Generator` gained options to sign packages.
   See the variables :variable:`CPACK_PRODUCTBUILD_IDENTITY_NAME`,
   :variable:`CPACK_PRODUCTBUILD_KEYCHAIN_PATH`,
   :variable:`CPACK_PKGBUILD_IDENTITY_NAME`, and
   :variable:`CPACK_PKGBUILD_KEYCHAIN_PATH`.
 
-* The :module:`CPackRPM` module learned to omit tags that are not supported by
-  provided ``rpmbuild`` tool. If unsupported tags are set they are ignored
-  and a developer warning is printed out.
+* The :cpack_gen:`CPack RPM Generator` learned to omit tags that are not
+  supported by provided ``rpmbuild`` tool. If unsupported tags are set they
+  are ignored and a developer warning is printed out.
 
-* The :module:`CPackRPM` module learned to generate main component package
-  which forces generation of a rpm for defined component without component
-  suffix in filename and package name.
+* The :cpack_gen:`CPack RPM Generator` learned to generate main component
+  package which forces generation of a rpm for defined component without
+  component suffix in filename and package name.
   See :variable:`CPACK_RPM_MAIN_COMPONENT` variable.
 
-* The :module:`CPackRPM` module learned to generate a single ``debuginfo``
-  package on demand even if components packaging is used.
+* The :cpack_gen:`CPack RPM Generator` learned to generate a single
+  ``debuginfo`` package on demand even if components packaging is used.
   See :variable:`CPACK_RPM_DEBUGINFO_SINGLE_PACKAGE` variable.
 
-* The :module:`CPackRPM` module learned to support
+* The :cpack_gen:`CPack RPM Generator` learned to support
   multiple directives per file when using
   :variable:`CPACK_RPM_USER_FILELIST` variable.
 

@@ -312,9 +312,6 @@ private:
 
   std::string TestsToRunString;
   bool UseUnion;
-  // Needed to re-construct our backtrace from the internal _BACKTRACE_TRIPLES
-  // property.
-  cmState State;
   ListOfTests TestList;
   size_t TotalNumberOfTests;
   cmsys::RegularExpression DartStuff;

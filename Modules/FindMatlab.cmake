@@ -21,10 +21,13 @@
 #
 # * ``MX_LIBRARY``, ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the ``MX``,
 #   ``ENG`` and ``MAT`` libraries of Matlab
+# * ``ENGINE_LIBRARY``, ``DATAARRAY_LIBRARY``: respectively the ``MatlabEngine``
+#   and ``MatlabDataArray`` libraries of Matlab (Matlab 2018a and later)
 # * ``MAIN_PROGRAM`` the Matlab binary program. Note that this component is not
 #   available on the MCR version, and will yield an error if the MCR is found
 #   instead of the regular Matlab installation.
 # * ``MEX_COMPILER`` the MEX compiler.
+# * ``MCC_COMPILER`` the MCC compiler, included with the Matlab Compiler add-on.
 # * ``SIMULINK`` the Simulink environment.
 #
 # .. note::
@@ -106,11 +109,20 @@
 # ``Matlab_MAT_LIBRARY``
 #   Matlab matrix library. Available only if the component ``MAT_LIBRARY``
 #   is requested.
+# ``Matlab_ENGINE_LIBRARY``
+#   Matlab C++ engine library. Available only if the component ``ENGINE_LIBRARY``
+#   is requested.
+# ``Matlab_DATAARRAY_LIBRARY``
+#   Matlab C++ data array library. Available only if the component ``DATAARRAY_LIBRARY``
+#   is requested.
 # ``Matlab_LIBRARIES``
 #   the whole set of libraries of Matlab
 # ``Matlab_MEX_COMPILER``
 #   the mex compiler of Matlab. Currently not used.
-#   Available only if the component ``MEX_COMPILER`` is asked
+#   Available only if the component ``MEX_COMPILER`` is requested.
+# ``Matlab_MCC_COMPILER``
+#   the mcc compiler of Matlab. Included with the Matlab Compiler add-on.
+#   Available only if the component ``MCC_COMPILER`` is requested.
 #
 # Cached variables
 # """"""""""""""""
@@ -230,6 +242,8 @@ if(NOT MATLAB_ADDITIONAL_VERSIONS)
 endif()
 
 set(MATLAB_VERSIONS_MAPPING
+  "R2018b=9.5"
+  "R2018a=9.4"
   "R2017b=9.3"
   "R2017a=9.2"
   "R2016b=9.1"
@@ -956,6 +970,14 @@ function(matlab_add_mex)
     target_link_libraries(${${prefix}_NAME} ${Matlab_MX_LIBRARY})
   endif()
 
+  if(DEFINED Matlab_ENGINE_LIBRARY)
+    target_link_libraries(${${prefix}_NAME} ${Matlab_ENGINE_LIBRARY})
+  endif()
+
+  if(DEFINED Matlab_DATAARRAY_LIBRARY)
+    target_link_libraries(${${prefix}_NAME} ${Matlab_DATAARRAY_LIBRARY})
+  endif()
+
   target_link_libraries(${${prefix}_NAME} ${Matlab_MEX_LIBRARY} ${${prefix}_LINK_TO})
   set_target_properties(${${prefix}_NAME}
       PROPERTIES
@@ -976,6 +998,20 @@ function(matlab_add_mex)
   endif() # documentation
 
   # entry point in the mex file + taking care of visibility and symbol clashes.
+  if (MSVC)
+    get_target_property(
+        _previous_link_flags
+        ${${prefix}_NAME}
+        LINK_FLAGS)
+    if(NOT _previous_link_flags)
+      set(_previous_link_flags)
+    endif()
+
+    set_target_properties(${${prefix}_NAME}
+      PROPERTIES
+        LINK_FLAGS "${_previous_link_flags} /EXPORT:mexFunction")
+  endif()
+
   if(WIN32)
     set_target_properties(${${prefix}_NAME}
       PROPERTIES
@@ -1163,21 +1199,24 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
 
     # return the updated value
     set(${matlab_final_version} ${Matlab_VERSION_STRING_INTERNAL} PARENT_SCOPE)
-  else()
+  elseif(EXISTS "${matlab_root}/VersionInfo.xml")
     # MCR
     # we cannot run anything in order to extract the version. We assume that the file
     # VersionInfo.xml exists under the MatlabRoot, we look for it and extract the version from there
     set(_matlab_version_tmp "unknown")
     file(STRINGS "${matlab_root}/VersionInfo.xml" versioninfo_string NEWLINE_CONSUME)
-    # parses "<version>9.2.0.538062</version>"
-    string(REGEX MATCH "<version>(.*)</version>"
-           version_reg_match
-           ${versioninfo_string}
-          )
 
-    if(NOT "${version_reg_match}" STREQUAL "")
-      if("${CMAKE_MATCH_1}" MATCHES "(([0-9])\\.([0-9]))[\\.0-9]*")
-        set(_matlab_version_tmp "${CMAKE_MATCH_1}")
+    if(versioninfo_string)
+      # parses "<version>9.2.0.538062</version>"
+      string(REGEX MATCH "<version>(.*)</version>"
+             version_reg_match
+             ${versioninfo_string}
+            )
+
+      if(NOT "${version_reg_match}" STREQUAL "")
+        if("${CMAKE_MATCH_1}" MATCHES "(([0-9])\\.([0-9]))[\\.0-9]*")
+          set(_matlab_version_tmp "${CMAKE_MATCH_1}")
+        endif()
       endif()
     endif()
     set(${matlab_final_version} "${_matlab_version_tmp}" PARENT_SCOPE)
@@ -1185,8 +1224,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
         "${_matlab_version_tmp}"
         CACHE INTERNAL "Matlab (MCR) version (automatically determined)"
         FORCE)
-
-    endif() # Matlab or MCR
+  endif() # Matlab or MCR
 
 endfunction()
 
@@ -1207,21 +1245,6 @@ function(_Matlab_find_instances_win32 matlab_roots)
   endif()
 
   matlab_extract_all_installed_versions_from_registry(_matlab_win64 _matlab_versions_from_registry)
-
-  # the returned list is empty, doing the search on all known versions
-  if(NOT _matlab_versions_from_registry)
-    if(MATLAB_FIND_DEBUG)
-      message(STATUS "[MATLAB] Search for Matlab from the registry unsuccessful, testing all supported versions")
-    endif()
-    extract_matlab_versions_from_registry_brute_force(_matlab_versions_from_registry)
-  endif()
-
-  # filtering the results with the registry keys
-  matlab_get_all_valid_matlab_roots_from_registry("${_matlab_versions_from_registry}" _matlab_possible_roots)
-  unset(_matlab_versions_from_registry)
-
-  set(_matlab_versions_from_registry)
-  matlab_extract_all_installed_versions_from_registry(CMAKE_CL_64 _matlab_versions_from_registry)
 
   # the returned list is empty, doing the search on all known versions
   if(NOT _matlab_versions_from_registry)
@@ -1369,7 +1392,7 @@ else()
   # if the user does not specify the possible installation root, we look for
   # one installation using the appropriate heuristics.
   # There is apparently no standard way on Linux.
-  if(WIN32)
+  if(CMAKE_HOST_WIN32)
     _Matlab_find_instances_win32(_matlab_possible_roots_win32)
     list(APPEND _matlab_possible_roots ${_matlab_possible_roots_win32})
   elseif(APPLE)
@@ -1420,10 +1443,13 @@ if(DEFINED Matlab_ROOT_DIR_LAST_CACHED)
         Matlab_INCLUDE_DIRS
         Matlab_MEX_LIBRARY
         Matlab_MEX_COMPILER
+        Matlab_MCC_COMPILER
         Matlab_MAIN_PROGRAM
         Matlab_MX_LIBRARY
         Matlab_ENG_LIBRARY
         Matlab_MAT_LIBRARY
+        Matlab_ENGINE_LIBRARY
+        Matlab_DATAARRAY_LIBRARY
         Matlab_MEX_EXTENSION
         Matlab_SIMULINK_INCLUDE_DIR
 
@@ -1660,9 +1686,67 @@ if(_matlab_find_simulink GREATER -1)
 endif()
 unset(_matlab_find_simulink)
 
+# component MCC Compiler
+list(FIND Matlab_FIND_COMPONENTS MCC_COMPILER _matlab_find_mcc_compiler)
+if(_matlab_find_mcc_compiler GREATER -1)
+  find_program(
+    Matlab_MCC_COMPILER
+    "mcc"
+    PATHS ${Matlab_BINARIES_DIR}
+    DOC "Matlab MCC compiler"
+    NO_DEFAULT_PATH
+  )
+  if(Matlab_MCC_COMPILER)
+    set(Matlab_MCC_COMPILER_FOUND TRUE)
+  endif()
+endif()
+unset(_matlab_find_mcc_compiler)
+
+# component MatlabEngine
+list(FIND Matlab_FIND_COMPONENTS ENGINE_LIBRARY _matlab_find_matlab_engine)
+if(_matlab_find_matlab_engine GREATER -1)
+  _Matlab_find_library(
+    ${_matlab_lib_prefix_for_search}
+    Matlab_ENGINE_LIBRARY
+    MatlabEngine
+    PATHS ${_matlab_lib_dir_for_search}
+    DOC "MatlabEngine Library"
+    NO_DEFAULT_PATH
+  )
+  if(Matlab_ENGINE_LIBRARY)
+    set(Matlab_ENGINE_LIBRARY_FOUND TRUE)
+  endif()
+endif()
+unset(_matlab_find_matlab_engine)
+
+# component MatlabDataArray
+list(FIND Matlab_FIND_COMPONENTS DATAARRAY_LIBRARY _matlab_find_matlab_dataarray)
+if(_matlab_find_matlab_dataarray GREATER -1)
+  _Matlab_find_library(
+  ${_matlab_lib_prefix_for_search}
+    Matlab_DATAARRAY_LIBRARY
+    MatlabDataArray
+    PATHS ${_matlab_lib_dir_for_search}
+    DOC "MatlabDataArray Library"
+    NO_DEFAULT_PATH
+  )
+  if(Matlab_DATAARRAY_LIBRARY)
+    set(Matlab_DATAARRAY_LIBRARY_FOUND TRUE)
+  endif()
+endif()
+unset(_matlab_find_matlab_dataarray)
+
 unset(_matlab_lib_dir_for_search)
 
 set(Matlab_LIBRARIES ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY} ${Matlab_ENG_LIBRARY} ${Matlab_MAT_LIBRARY})
+
+if(Matlab_DATAARRAY_LIBRARY_FOUND)
+  set(Matlab_LIBRARIES ${Matlab_LIBRARIES} ${Matlab_DATAARRAY_LIBRARY})
+endif()
+
+if(Matlab_ENGINE_LIBRARY_FOUND)
+  set(Matlab_LIBRARIES ${Matlab_LIBRARIES} ${Matlab_ENGINE_LIBRARY})
+endif()
 
 find_package_handle_standard_args(
   Matlab
@@ -1684,6 +1768,8 @@ if(Matlab_INCLUDE_DIRS AND Matlab_LIBRARIES)
     Matlab_MEX_LIBRARY
     Matlab_MX_LIBRARY
     Matlab_ENG_LIBRARY
+    Matlab_ENGINE_LIBRARY
+    Matlab_DATAARRAY_LIBRARY
     Matlab_MAT_LIBRARY
     Matlab_INCLUDE_DIRS
     Matlab_FOUND

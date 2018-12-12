@@ -68,7 +68,10 @@ public:
   std::string GetExportName() const;
 
   std::vector<std::string> GetPropertyKeys() const;
+  ///! Might return a nullptr if the property is not set or invalid
   const char* GetProperty(const std::string& prop) const;
+  ///! Always returns a valid pointer
+  const char* GetSafeProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void GetSourceFiles(std::vector<cmSourceFile*>& files,
                       const std::string& config) const;
@@ -270,8 +273,6 @@ public:
 
   cmListFileBacktrace GetBacktrace() const;
 
-  const std::vector<std::string>& GetLinkDirectories() const;
-
   std::set<std::string> const& GetUtilities() const;
   cmListFileBacktrace const* GetUtilityBacktrace(const std::string& u) const;
 
@@ -354,7 +355,14 @@ public:
                                           cmOptionalLinkImplementation& impl,
                                           const cmGeneratorTarget* head) const;
 
-  cmGeneratorTarget* FindTargetToLink(std::string const& name) const;
+  struct TargetOrString
+  {
+    std::string String;
+    cmGeneratorTarget* Target = nullptr;
+  };
+  TargetOrString ResolveTargetReference(std::string const& name) const;
+
+  cmLinkItem ResolveLinkItem(std::string const& name) const;
 
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
@@ -364,11 +372,7 @@ public:
   void GetLanguages(std::set<std::string>& languages,
                     std::string const& config) const;
 
-  // Evaluate if the target uses the given language for compilation
-  // and/or linking. If 'exclusive' is true, 'language' is expected
-  // to be the only language used for the target.
-  bool HasLanguage(std::string const& language, std::string const& config,
-                   bool exclusive = true) const;
+  bool IsCSharpOnly() const;
 
   void GetObjectLibrariesCMP0026(
     std::vector<cmGeneratorTarget*>& objlibs) const;
@@ -417,6 +421,21 @@ public:
   void GetCompileDefinitions(std::vector<std::string>& result,
                              const std::string& config,
                              const std::string& language) const;
+
+  void GetLinkOptions(std::vector<std::string>& result,
+                      const std::string& config,
+                      const std::string& language) const;
+  void GetStaticLibraryLinkOptions(std::vector<std::string>& result,
+                                   const std::string& config,
+                                   const std::string& language) const;
+
+  void GetLinkDirectories(std::vector<std::string>& result,
+                          const std::string& config,
+                          const std::string& language) const;
+
+  void GetLinkDepends(std::vector<std::string>& result,
+                      const std::string& config,
+                      const std::string& language) const;
 
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config,
@@ -647,7 +666,7 @@ public:
       no soname at all.  */
   bool IsImportedSharedLibWithoutSOName(const std::string& config) const;
 
-  const char* ImportedGetLocation(const std::string& config) const;
+  std::string ImportedGetLocation(const std::string& config) const;
 
   /** Get the target major and minor version numbers interpreted from
       the VERSION property.  Version 0 is returned if the property is
@@ -803,6 +822,8 @@ private:
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;
   std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
+  std::vector<TargetPropertyEntry*> LinkOptionsEntries;
+  std::vector<TargetPropertyEntry*> LinkDirectoriesEntries;
   std::vector<TargetPropertyEntry*> SourceEntries;
   mutable std::set<std::string> LinkImplicitNullProperties;
 
@@ -851,6 +872,8 @@ private:
   mutable bool DebugCompileOptionsDone;
   mutable bool DebugCompileFeaturesDone;
   mutable bool DebugCompileDefinitionsDone;
+  mutable bool DebugLinkOptionsDone;
+  mutable bool DebugLinkDirectoriesDone;
   mutable bool DebugSourcesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
   mutable bool UtilityItemsDone;

@@ -1,5 +1,13 @@
 set(LIB_NAME cmcurl)
 
+if(BUILD_SHARED_LIBS)
+  set(CURL_STATICLIB NO)
+else()
+  set(CURL_STATICLIB YES)
+endif()
+
+# Use:
+# * CURL_STATICLIB
 configure_file(curl_config.h.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
 
@@ -59,14 +67,6 @@ if(USE_ARES)
   include_directories(${CARES_INCLUDE_DIR})
 endif()
 
-if(CURL_STATICLIB)
-  # Static lib
-  set(CURL_USER_DEFINED_DYNAMIC_OR_STATIC STATIC)
-else()
-  # DLL / so dynamic lib
-  set(CURL_USER_DEFINED_DYNAMIC_OR_STATIC SHARED)
-endif()
-
 # For windows we want to install OPENSSL_LIBRARIES dlls
 # and also copy them into the build tree so that testing
 # can find them.
@@ -93,16 +93,19 @@ endif()
 
 add_library(
   ${LIB_NAME}
-  ${CURL_USER_DEFINED_DYNAMIC_OR_STATIC}
   ${HHEADERS} ${CSOURCES}
   ${CMAKE_CURL_SSL_DLLS}
   )
+
+if(NOT BUILD_SHARED_LIBS)
+    set_target_properties(${LIB_NAME} PROPERTIES INTERFACE_COMPILE_DEFINITIONS CURL_STATICLIB)
+endif()
 
 target_link_libraries(${LIB_NAME} ${CURL_LIBS})
 
 if(0) # This code not needed for building within CMake.
 if(WIN32)
-  add_definitions( -D_USRDLL )
+  add_definitions(-D_USRDLL)
 endif()
 endif()
 
@@ -119,38 +122,26 @@ set_target_properties(${LIB_NAME} PROPERTIES PREFIX "")
 set_target_properties(${LIB_NAME} PROPERTIES IMPORT_PREFIX "")
 
 if(WIN32)
-  if(NOT CURL_STATICLIB)
+  if(BUILD_SHARED_LIBS)
     # Add "_imp" as a suffix before the extension to avoid conflicting with the statically linked "libcurl.lib"
     set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
-
-    set_target_properties (${LIB_NAME} PROPERTIES
-       DEBUG_POSTFIX "-d"
-       # Note: no postfix for release variants, let user choose what style of release he wants
-       # MINSIZEREL_POSTFIX "-z"
-       # RELWITHDEBINFO_POSTFIX "-g"
-       )
   endif()
 endif()
 
 target_include_directories(${LIB_NAME} INTERFACE
-	$<INSTALL_INTERFACE:include>)
+  $<INSTALL_INTERFACE:include>
+  $<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>)
 
 install(TARGETS ${LIB_NAME}
-  EXPORT libcurl-target
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
+  EXPORT ${TARGETS_EXPORT_NAME}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 export(TARGETS ${LIB_NAME}
        APPEND FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
        NAMESPACE CURL::
-)
-
-install(EXPORT libcurl-target
-        FILE libcurl-target.cmake
-        NAMESPACE CURL::
-        DESTINATION ${CURL_INSTALL_CMAKE_DIR}
 )
 
 endif()

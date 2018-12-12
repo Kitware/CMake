@@ -18,6 +18,7 @@ Modify cmExprParser.cxx:
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdexcept>
 
 /*-------------------------------------------------------------------------*/
 #define YYDEBUG 1
@@ -35,6 +36,9 @@ static void cmExpr_yyerror(yyscan_t yyscanner, const char* message);
 #ifdef _MSC_VER
 # pragma warning (disable: 4102) /* Unused goto label.  */
 # pragma warning (disable: 4065) /* Switch statement contains default but no case. */
+#endif
+#if defined(__GNUC__) && __GNUC__ >= 8
+# pragma GCC diagnostic ignored "-Wconversion"
 #endif
 %}
 
@@ -128,6 +132,9 @@ term:
     $<Number>$ = $<Number>1 * $<Number>3;
   }
 | term exp_DIVIDE unary {
+    if (yyvsp[0].Number == 0) {
+      throw std::overflow_error("divide by zero");
+    }
     $<Number>$ = $<Number>1 / $<Number>3;
   }
 | term exp_MOD unary {

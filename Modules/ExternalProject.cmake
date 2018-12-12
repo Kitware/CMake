@@ -934,6 +934,11 @@ function(_ep_parse_arguments f name ns args)
   # We loop through ARGN and consider the namespace starting with an
   # upper-case letter followed by at least two more upper-case letters,
   # numbers or underscores to be keywords.
+
+  if(NOT DEFINED _ExternalProject_SELF)
+    message(FATAL_ERROR "error: ExternalProject module must be explicitly included before using ${f} function")
+  endif()
+
   set(key)
 
   foreach(arg IN LISTS args)

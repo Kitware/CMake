@@ -391,14 +391,20 @@ inside out, e.g. ``${outer_${inner_variable}_variable}``.
 
 Literal variable references may consist of alphanumeric characters,
 the characters ``/_.+-``, and `Escape Sequences`_.  Nested references
-may be used to evaluate variables of any name.  (See also policy
-:policy:`CMP0053` documentation for historical considerations.)
+may be used to evaluate variables of any name.  See also policy
+:policy:`CMP0053` documentation for historical considerations and reasons why
+the ``$`` is also technically permitted but is discouraged.
 
 The `Variables`_ section documents the scope of variable names
 and how their values are set.
 
 An *environment variable reference* has the form ``$ENV{VAR}`` and
 is evaluated in the same contexts as a normal variable reference.
+See :variable:`ENV` for more information.
+
+A *cache variable reference* has the form ``$CACHE{VAR}`` and
+is evaluated in the same contexts as a normal variable reference.
+See :variable:`CACHE` for more information.
 
 Comments
 --------
@@ -543,6 +549,8 @@ to the binding in the current directory scope, if any.  If a
 is found, or no binding is found, CMake then searches for a
 cache entry.  If a cache entry is found, its value is used.
 Otherwise, the variable reference evaluates to an empty string.
+The ``$CACHE{VAR}`` syntax can be used to do direct cache entry
+lookups.
 
 The :manual:`cmake-variables(7)` manual documents many variables
 that are provided by CMake or have meaning to CMake when set

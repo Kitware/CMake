@@ -9,5 +9,5 @@ created.  For example:
 
 .. code-block:: cmake
 
-  set(CMAKE_CXX_CLANG_TIDY clang-tidy checks=-*,readability-*)
+  set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*,readability-*)
   add_executable(foo foo.cxx)

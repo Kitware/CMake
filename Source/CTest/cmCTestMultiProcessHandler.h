@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "cmUVHandlePtr.h"
 #include "cm_uv.h"
 
 class cmCTest;
@@ -102,6 +103,8 @@ protected:
   void EraseTest(int index);
   void FinishTestProcess(cmCTestRunTest* runner, bool started);
 
+  static void OnTestLoadRetryCB(uv_timer_t* timer);
+
   void RemoveTest(int index);
   // Check if we need to resume an interrupted test set
   void CheckResume();
@@ -110,6 +113,9 @@ protected:
   int FindMaxIndex();
   inline size_t GetProcessorsUsed(int index);
   std::string GetName(int index);
+
+  bool CheckStopTimePassed();
+  void SetStopTimePassed();
 
   void LockResources(int index);
   void UnlockResources(int index);
@@ -123,7 +129,7 @@ protected:
   size_t RunningCount;
   std::set<size_t> ProcessorsAvailable;
   size_t HaveAffinity;
-  bool StopTimePassed;
+  bool StopTimePassed = false;
   // list of test properties (indices concurrent to the test map)
   PropertiesMap Properties;
   std::map<int, bool> TestRunningMap;
@@ -136,7 +142,9 @@ protected:
   std::vector<cmCTestTestHandler::cmCTestTestResult>* TestResults;
   size_t ParallelLevel; // max number of process that can be run at once
   unsigned long TestLoad;
+  unsigned long FakeLoadForTesting;
   uv_loop_t Loop;
+  cm::uv_timer_ptr TestLoadRetryTimer;
   cmCTestTestHandler* TestHandler;
   cmCTest* CTest;
   bool HasCycles;

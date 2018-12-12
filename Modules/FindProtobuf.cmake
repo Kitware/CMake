@@ -119,31 +119,140 @@
 #   ``ARGN``
 #     ``.proto`` filess
 
-function(PROTOBUF_GENERATE_CPP SRCS HDRS)
-  cmake_parse_arguments(protobuf "" "EXPORT_MACRO;DESCRIPTORS" "" ${ARGN})
+function(protobuf_generate)
+  include(CMakeParseArguments)
 
-  set(PROTO_FILES "${protobuf_UNPARSED_ARGUMENTS}")
-  if(NOT PROTO_FILES)
-    message(SEND_ERROR "Error: PROTOBUF_GENERATE_CPP() called without any proto files")
+  set(_options APPEND_PATH DESCRIPTORS)
+  set(_singleargs LANGUAGE OUT_VAR EXPORT_MACRO PROTOC_OUT_DIR)
+  if(COMMAND target_sources)
+    list(APPEND _singleargs TARGET)
+  endif()
+  set(_multiargs PROTOS IMPORT_DIRS GENERATE_EXTENSIONS)
+
+  cmake_parse_arguments(protobuf_generate "${_options}" "${_singleargs}" "${_multiargs}" "${ARGN}")
+
+  if(NOT protobuf_generate_PROTOS AND NOT protobuf_generate_TARGET)
+    message(SEND_ERROR "Error: protobuf_generate called without any targets or source files")
     return()
   endif()
 
-  if(protobuf_EXPORT_MACRO)
-    set(DLL_EXPORT_DECL "dllexport_decl=${protobuf_EXPORT_MACRO}:")
+  if(NOT protobuf_generate_OUT_VAR AND NOT protobuf_generate_TARGET)
+    message(SEND_ERROR "Error: protobuf_generate called without a target or output variable")
+    return()
   endif()
 
-  if(PROTOBUF_GENERATE_CPP_APPEND_PATH)
+  if(NOT protobuf_generate_LANGUAGE)
+    set(protobuf_generate_LANGUAGE cpp)
+  endif()
+  string(TOLOWER ${protobuf_generate_LANGUAGE} protobuf_generate_LANGUAGE)
+
+  if(NOT protobuf_generate_PROTOC_OUT_DIR)
+    set(protobuf_generate_PROTOC_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
+  endif()
+
+  if(protobuf_generate_EXPORT_MACRO AND protobuf_generate_LANGUAGE STREQUAL cpp)
+    set(_dll_export_decl "dllexport_decl=${protobuf_generate_EXPORT_MACRO}:")
+  endif()
+
+  if(NOT protobuf_generate_GENERATE_EXTENSIONS)
+    if(protobuf_generate_LANGUAGE STREQUAL cpp)
+      set(protobuf_generate_GENERATE_EXTENSIONS .pb.h .pb.cc)
+    elseif(protobuf_generate_LANGUAGE STREQUAL python)
+      set(protobuf_generate_GENERATE_EXTENSIONS _pb2.py)
+    else()
+      message(SEND_ERROR "Error: protobuf_generate given unknown Language ${LANGUAGE}, please provide a value for GENERATE_EXTENSIONS")
+      return()
+    endif()
+  endif()
+
+  if(protobuf_generate_TARGET)
+    get_target_property(_source_list ${protobuf_generate_TARGET} SOURCES)
+    foreach(_file ${_source_list})
+      if(_file MATCHES "proto$")
+        list(APPEND protobuf_generate_PROTOS ${_file})
+      endif()
+    endforeach()
+  endif()
+
+  if(NOT protobuf_generate_PROTOS)
+    message(SEND_ERROR "Error: protobuf_generate could not find any .proto files")
+    return()
+  endif()
+
+  if(protobuf_generate_APPEND_PATH)
     # Create an include path for each file specified
-    foreach(FIL ${PROTO_FILES})
-      get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
-      get_filename_component(ABS_PATH ${ABS_FIL} PATH)
-      list(FIND _protobuf_include_path ${ABS_PATH} _contains_already)
+    foreach(_file ${protobuf_generate_PROTOS})
+      get_filename_component(_abs_file ${_file} ABSOLUTE)
+      get_filename_component(_abs_path ${_abs_file} PATH)
+      list(FIND _protobuf_include_path ${_abs_path} _contains_already)
       if(${_contains_already} EQUAL -1)
-          list(APPEND _protobuf_include_path -I ${ABS_PATH})
+          list(APPEND _protobuf_include_path -I ${_abs_path})
       endif()
     endforeach()
   else()
     set(_protobuf_include_path -I ${CMAKE_CURRENT_SOURCE_DIR})
+  endif()
+
+  foreach(DIR ${protobuf_generate_IMPORT_DIRS})
+    get_filename_component(ABS_PATH ${DIR} ABSOLUTE)
+    list(FIND _protobuf_include_path ${ABS_PATH} _contains_already)
+    if(${_contains_already} EQUAL -1)
+        list(APPEND _protobuf_include_path -I ${ABS_PATH})
+    endif()
+  endforeach()
+
+  set(_generated_srcs_all)
+  foreach(_proto ${protobuf_generate_PROTOS})
+    get_filename_component(_abs_file ${_proto} ABSOLUTE)
+    get_filename_component(_abs_dir ${_abs_file} DIRECTORY)
+    get_filename_component(_basename ${_proto} NAME_WE)
+    file(RELATIVE_PATH _rel_dir ${CMAKE_CURRENT_SOURCE_DIR} ${_abs_dir})
+
+    set(_generated_srcs)
+    foreach(_ext ${protobuf_generate_GENERATE_EXTENSIONS})
+      list(APPEND _generated_srcs "${protobuf_generate_PROTOC_OUT_DIR}/${_basename}${_ext}")
+    endforeach()
+
+    if(protobuf_generate_DESCRIPTORS AND protobuf_generate_LANGUAGE STREQUAL cpp)
+      set(_descriptor_file "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.desc")
+      set(_dll_desc_out "--descriptor_set_out=${_descriptor_file}")
+      list(APPEND _generated_srcs ${_descriptor_file})
+    endif()
+    list(APPEND _generated_srcs_all ${_generated_srcs})
+
+    add_custom_command(
+      OUTPUT ${_generated_srcs}
+      COMMAND  protobuf::protoc
+      ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_dll_desc_out} ${_protobuf_include_path} ${_abs_file}
+      DEPENDS ${_abs_file} protobuf::protoc
+      COMMENT "Running ${protobuf_generate_LANGUAGE} protocol buffer compiler on ${_proto}"
+      VERBATIM )
+  endforeach()
+
+  set_source_files_properties(${_generated_srcs_all} PROPERTIES GENERATED TRUE)
+  if(protobuf_generate_OUT_VAR)
+    set(${protobuf_generate_OUT_VAR} ${_generated_srcs_all} PARENT_SCOPE)
+  endif()
+  if(protobuf_generate_TARGET)
+    target_sources(${protobuf_generate_TARGET} PRIVATE ${_generated_srcs_all})
+  endif()
+endfunction()
+
+function(PROTOBUF_GENERATE_CPP SRCS HDRS)
+  cmake_parse_arguments(protobuf_generate_cpp "" "EXPORT_MACRO;DESCRIPTORS" "" ${ARGN})
+
+  set(_proto_files "${protobuf_generate_cpp_UNPARSED_ARGUMENTS}")
+  if(NOT _proto_files)
+    message(SEND_ERROR "Error: PROTOBUF_GENERATE_CPP() called without any proto files")
+    return()
+  endif()
+
+  if(PROTOBUF_GENERATE_CPP_APPEND_PATH)
+    set(_append_arg APPEND_PATH)
+  endif()
+
+  if(protobuf_generate_cpp_DESCRIPTORS)
+    set(_descriptors DESCRIPTORS)
   endif()
 
   if(DEFINED PROTOBUF_IMPORT_DIRS AND NOT DEFINED Protobuf_IMPORT_DIRS)
@@ -151,62 +260,31 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
   endif()
 
   if(DEFINED Protobuf_IMPORT_DIRS)
-    foreach(DIR ${Protobuf_IMPORT_DIRS})
-      get_filename_component(ABS_PATH ${DIR} ABSOLUTE)
-      list(FIND _protobuf_include_path ${ABS_PATH} _contains_already)
-      if(${_contains_already} EQUAL -1)
-          list(APPEND _protobuf_include_path -I ${ABS_PATH})
-      endif()
-    endforeach()
+    set(_import_arg IMPORT_DIRS ${Protobuf_IMPORT_DIRS})
   endif()
+
+  set(_outvar)
+  protobuf_generate(${_append_arg} ${_descriptors} LANGUAGE cpp EXPORT_MACRO ${protobuf_generate_cpp_EXPORT_MACRO} OUT_VAR _outvar ${_import_arg} PROTOS ${_proto_files})
 
   set(${SRCS})
   set(${HDRS})
-  if (protobuf_DESCRIPTORS)
-    set(${protobuf_DESCRIPTORS})
+  if(protobuf_generate_cpp_DESCRIPTORS)
+    set(${protobuf_generate_cpp_DESCRIPTORS})
   endif()
 
-  foreach(FIL ${PROTO_FILES})
-    get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
-    get_filename_component(FIL_WE ${FIL} NAME_WE)
-    if(NOT PROTOBUF_GENERATE_CPP_APPEND_PATH)
-      get_filename_component(FIL_DIR ${FIL} DIRECTORY)
-      if(FIL_DIR)
-        set(FIL_WE "${FIL_DIR}/${FIL_WE}")
-      endif()
-    endif()
-
-    set(_protobuf_protoc_src "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc")
-    set(_protobuf_protoc_hdr "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.h")
-    list(APPEND ${SRCS} "${_protobuf_protoc_src}")
-    list(APPEND ${HDRS} "${_protobuf_protoc_hdr}")
-
-    if(protobuf_DESCRIPTORS)
-      set(_protobuf_protoc_desc "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.desc")
-      set(_protobuf_protoc_flags "--descriptor_set_out=${_protobuf_protoc_desc}")
-      list(APPEND ${protobuf_DESCRIPTORS} "${_protobuf_protoc_desc}")
+  foreach(_file ${_outvar})
+    if(_file MATCHES "cc$")
+      list(APPEND ${SRCS} ${_file})
+    elseif(_file MATCHES "desc$")
+      list(APPEND ${protobuf_generate_cpp_DESCRIPTORS} ${_file})
     else()
-      set(_protobuf_protoc_desc "")
-      set(_protobuf_protoc_flags "")
+      list(APPEND ${HDRS} ${_file})
     endif()
-
-    add_custom_command(
-      OUTPUT "${_protobuf_protoc_src}"
-             "${_protobuf_protoc_hdr}"
-             ${_protobuf_protoc_desc}
-      COMMAND  protobuf::protoc
-               "--cpp_out=${DLL_EXPORT_DECL}${CMAKE_CURRENT_BINARY_DIR}"
-               ${_protobuf_protoc_flags}
-               ${_protobuf_include_path} ${ABS_FIL}
-      DEPENDS ${ABS_FIL} protobuf::protoc
-      COMMENT "Running C++ protocol buffer compiler on ${FIL}"
-      VERBATIM )
   endforeach()
-
-  set(${SRCS} "${${SRCS}}" PARENT_SCOPE)
-  set(${HDRS} "${${HDRS}}" PARENT_SCOPE)
-  if(protobuf_DESCRIPTORS)
-    set(${protobuf_DESCRIPTORS} "${${protobuf_DESCRIPTORS}}" PARENT_SCOPE)
+  set(${SRCS} ${${SRCS}} PARENT_SCOPE)
+  set(${HDRS} ${${HDRS}} PARENT_SCOPE)
+  if(protobuf_generate_cpp_DESCRIPTORS)
+    set(${protobuf_generate_cpp_DESCRIPTORS} "${${protobuf_generate_cpp_DESCRIPTORS}}" PARENT_SCOPE)
   endif()
 endfunction()
 
@@ -217,17 +295,7 @@ function(PROTOBUF_GENERATE_PYTHON SRCS)
   endif()
 
   if(PROTOBUF_GENERATE_CPP_APPEND_PATH)
-    # Create an include path for each file specified
-    foreach(FIL ${ARGN})
-      get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
-      get_filename_component(ABS_PATH ${ABS_FIL} PATH)
-      list(FIND _protobuf_include_path ${ABS_PATH} _contains_already)
-      if(${_contains_already} EQUAL -1)
-          list(APPEND _protobuf_include_path -I ${ABS_PATH})
-      endif()
-    endforeach()
-  else()
-    set(_protobuf_include_path -I ${CMAKE_CURRENT_SOURCE_DIR})
+    set(_append_arg APPEND_PATH)
   endif()
 
   if(DEFINED PROTOBUF_IMPORT_DIRS AND NOT DEFINED Protobuf_IMPORT_DIRS)
@@ -235,36 +303,12 @@ function(PROTOBUF_GENERATE_PYTHON SRCS)
   endif()
 
   if(DEFINED Protobuf_IMPORT_DIRS)
-    foreach(DIR ${Protobuf_IMPORT_DIRS})
-      get_filename_component(ABS_PATH ${DIR} ABSOLUTE)
-      list(FIND _protobuf_include_path ${ABS_PATH} _contains_already)
-      if(${_contains_already} EQUAL -1)
-          list(APPEND _protobuf_include_path -I ${ABS_PATH})
-      endif()
-    endforeach()
+    set(_import_arg IMPORT_DIRS ${Protobuf_IMPORT_DIRS})
   endif()
 
-  set(${SRCS})
-  foreach(FIL ${ARGN})
-    get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
-    get_filename_component(FIL_WE ${FIL} NAME_WE)
-    if(NOT PROTOBUF_GENERATE_CPP_APPEND_PATH)
-      get_filename_component(FIL_DIR ${FIL} DIRECTORY)
-      if(FIL_DIR)
-        set(FIL_WE "${FIL_DIR}/${FIL_WE}")
-      endif()
-    endif()
-
-    list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}_pb2.py")
-    add_custom_command(
-      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}_pb2.py"
-      COMMAND  protobuf::protoc --python_out ${CMAKE_CURRENT_BINARY_DIR} ${_protobuf_include_path} ${ABS_FIL}
-      DEPENDS ${ABS_FIL} protobuf::protoc
-      COMMENT "Running Python protocol buffer compiler on ${FIL}"
-      VERBATIM )
-  endforeach()
-
-  set(${SRCS} ${${SRCS}} PARENT_SCOPE)
+  set(_outvar)
+  protobuf_generate(${_append_arg} LANGUAGE python OUT_VAR _outvar ${_import_arg} PROTOS ${ARGN})
+  set(${SRCS} ${_outvar} PARENT_SCOPE)
 endfunction()
 
 
@@ -337,19 +381,14 @@ function(_protobuf_find_libraries name filename)
     mark_as_advanced(${name}_LIBRARY_DEBUG)
 
     select_library_configurations(${name})
+
+    if(UNIX AND Threads_FOUND)
+      list(APPEND ${name}_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+    endif()
+
     set(${name}_LIBRARY "${${name}_LIBRARY}" PARENT_SCOPE)
     set(${name}_LIBRARIES "${${name}_LIBRARIES}" PARENT_SCOPE)
   endif()
-endfunction()
-
-# Internal function: find threads library
-function(_protobuf_find_threads)
-    set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-    find_package(Threads)
-    if(Threads_FOUND)
-        list(APPEND Protobuf_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
-        set(Protobuf_LIBRARIES "${Protobuf_LIBRARIES}" PARENT_SCOPE)
-    endif()
 endfunction()
 
 #
@@ -372,6 +411,11 @@ if(MSVC)
     find_path(Protobuf_SRC_ROOT_FOLDER protobuf.pc.in)
 endif()
 
+if(UNIX)
+  # Protobuf headers may depend on threading.
+  find_package(Threads QUIET)
+endif()
+
 # The Protobuf library
 _protobuf_find_libraries(Protobuf protobuf)
 #DOC "The Google Protocol Buffers RELEASE Library"
@@ -384,10 +428,6 @@ _protobuf_find_libraries(Protobuf_PROTOC protoc)
 # Restore original find library prefixes
 if(MSVC)
     set(CMAKE_FIND_LIBRARY_PREFIXES "${Protobuf_ORIG_FIND_LIBRARY_PREFIXES}")
-endif()
-
-if(UNIX)
-    _protobuf_find_threads()
 endif()
 
 # Find the include directory
@@ -477,6 +517,10 @@ if(Protobuf_INCLUDE_DIR)
             set_target_properties(protobuf::libprotobuf PROPERTIES
               IMPORTED_LOCATION_DEBUG "${Protobuf_LIBRARY_DEBUG}")
           endif()
+          if(UNIX AND TARGET Threads::Threads)
+            set_property(TARGET protobuf::libprotobuf APPEND PROPERTY
+                INTERFACE_LINK_LIBRARIES Threads::Threads)
+          endif()
       endif()
   endif()
 
@@ -501,6 +545,10 @@ if(Protobuf_INCLUDE_DIR)
             set_target_properties(protobuf::libprotobuf-lite PROPERTIES
               IMPORTED_LOCATION_DEBUG "${Protobuf_LITE_LIBRARY_DEBUG}")
           endif()
+          if(UNIX AND TARGET Threads::Threads)
+            set_property(TARGET protobuf::libprotobuf-lite APPEND PROPERTY
+                INTERFACE_LINK_LIBRARIES Threads::Threads)
+          endif()
       endif()
   endif()
 
@@ -524,6 +572,10 @@ if(Protobuf_INCLUDE_DIR)
               IMPORTED_CONFIGURATIONS DEBUG)
             set_target_properties(protobuf::libprotoc PROPERTIES
               IMPORTED_LOCATION_DEBUG "${Protobuf_PROTOC_LIBRARY_DEBUG}")
+          endif()
+          if(UNIX AND TARGET Threads::Threads)
+            set_property(TARGET protobuf::libprotoc APPEND PROPERTY
+                INTERFACE_LINK_LIBRARIES Threads::Threads)
           endif()
       endif()
   endif()

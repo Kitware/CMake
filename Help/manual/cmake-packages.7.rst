@@ -73,7 +73,7 @@ Handling of ``COMPONENTS`` and ``OPTIONAL_COMPONENTS`` is defined by the
 package.
 
 By setting the :variable:`CMAKE_DISABLE_FIND_PACKAGE_<PackageName>` variable to
-``TRUE``, the ``PackageName`` package will not be searched, and will always
+``TRUE``, the ``<PackageName>`` package will not be searched, and will always
 be ``NOTFOUND``.
 
 .. _`Config File Packages`:
@@ -92,9 +92,9 @@ packages, that is, they belong with the header files and any other files
 provided to assist downstreams in using the package.
 
 A set of variables which provide package status information are also set
-automatically when using a config-file package.  The ``<Package>_FOUND``
+automatically when using a config-file package.  The ``<PackageName>_FOUND``
 variable is set to true or false, depending on whether the package was
-found.  The ``<Package>_DIR`` cache variable is set to the location of the
+found.  The ``<PackageName>_DIR`` cache variable is set to the location of the
 package configuration file.
 
 Find-module Packages
@@ -108,10 +108,10 @@ file, it is not shipped with upstream, but is used by downstream to find the
 files by guessing locations of files with platform-specific hints.
 
 Unlike the case of an upstream-provided package configuration file, no single point
-of reference identifies the package as being found, so the ``<Package>_FOUND``
+of reference identifies the package as being found, so the ``<PackageName>_FOUND``
 variable is not automatically set by the :command:`find_package` command.  It
 can still be expected to be set by convention however and should be set by
-the author of the Find-module.  Similarly there is no ``<Package>_DIR`` variable,
+the author of the Find-module.  Similarly there is no ``<PackageName>_DIR`` variable,
 but each of the artifacts such as library locations and header file locations
 provide a separate cache variable.
 
@@ -197,7 +197,7 @@ When the :command:`find_package` command loads a version file it first sets the
 following variables:
 
 ``PACKAGE_FIND_NAME``
- The <package> name
+ The ``<PackageName>``
 
 ``PACKAGE_FIND_VERSION``
  Full requested version string
@@ -240,26 +240,26 @@ variables. When the version file claims to be an acceptable match for the
 requested version the find_package command sets the following variables for
 use by the project:
 
-``<package>_VERSION``
+``<PackageName>_VERSION``
  Full provided version string
 
-``<package>_VERSION_MAJOR``
+``<PackageName>_VERSION_MAJOR``
  Major version if provided, else 0
 
-``<package>_VERSION_MINOR``
+``<PackageName>_VERSION_MINOR``
  Minor version if provided, else 0
 
-``<package>_VERSION_PATCH``
+``<PackageName>_VERSION_PATCH``
  Patch version if provided, else 0
 
-``<package>_VERSION_TWEAK``
+``<PackageName>_VERSION_TWEAK``
  Tweak version if provided, else 0
 
-``<package>_VERSION_COUNT``
+``<PackageName>_VERSION_COUNT``
  Number of version components, 0 to 4
 
 The variables report the version of the package that was actually found.
-The ``<package>`` part of their name matches the argument given to the
+The ``<PackageName>`` part of their name matches the argument given to the
 :command:`find_package` command.
 
 .. _`Creating Packages`:
@@ -347,8 +347,8 @@ The :module:`CMakePackageConfigHelpers` module provides a macro for creating
 a simple ``ConfigVersion.cmake`` file.  This file sets the version of the
 package.  It is read by CMake when :command:`find_package` is called to
 determine the compatibility with the requested version, and to set some
-version-specific variables ``<Package>_VERSION``, ``<Package>_VERSION_MAJOR``,
-``<Package>_VERSION_MINOR`` etc.  The :command:`install(EXPORT)` command is
+version-specific variables ``<PackageName>_VERSION``, ``<PackageName>_VERSION_MAJOR``,
+``<PackageName>_VERSION_MINOR`` etc.  The :command:`install(EXPORT)` command is
 used to export the targets in the ``ClimbingStatsTargets`` export-set, defined
 previously by the :command:`install(TARGETS)` command. This command generates
 the ``ClimbingStatsTargets.cmake`` file to contain :prop_tgt:`IMPORTED`
@@ -432,8 +432,8 @@ the dependency is not found, along with a diagnostic that the ``ClimbingStats``
 package can not be used without the ``Stats`` package.
 
 If ``COMPONENTS`` are specified when the downstream uses :command:`find_package`,
-they are listed in the ``<Package>_FIND_COMPONENTS`` variable. If a particular
-component is non-optional, then the ``<Package>_FIND_REQUIRED_<comp>`` will
+they are listed in the ``<PackageName>_FIND_COMPONENTS`` variable. If a particular
+component is non-optional, then the ``<PackageName>_FIND_REQUIRED_<comp>`` will
 be true. This can be tested with logic in the package configuration file:
 
 .. code-block:: cmake
@@ -580,8 +580,8 @@ non-standard install locations or directly in their own build trees.
 A project may populate either the user or system registry (using its own
 means, see below) to refer to its location.
 In either case the package should store at the registered location a
-`Package Configuration File`_ (``<package>Config.cmake``) and optionally a
-`Package Version File`_ (``<package>ConfigVersion.cmake``).
+`Package Configuration File`_ (``<PackageName>Config.cmake``) and optionally a
+`Package Version File`_ (``<PackageName>ConfigVersion.cmake``).
 
 The :command:`find_package` command searches the two package registries
 as two of the search steps specified in its documentation.  If it has
@@ -603,18 +603,18 @@ must be manually taught to register their packages if desired.
 On Windows the user package registry is stored in the Windows registry
 under a key in ``HKEY_CURRENT_USER``.
 
-A ``<package>`` may appear under registry key::
+A ``<PackageName>`` may appear under registry key::
 
-  HKEY_CURRENT_USER\Software\Kitware\CMake\Packages\<package>
+  HKEY_CURRENT_USER\Software\Kitware\CMake\Packages\<PackageName>
 
 as a ``REG_SZ`` value, with arbitrary name, that specifies the directory
 containing the package configuration file.
 
 On UNIX platforms the user package registry is stored in the user home
-directory under ``~/.cmake/packages``.  A ``<package>`` may appear under
+directory under ``~/.cmake/packages``.  A ``<PackageName>`` may appear under
 the directory::
 
-  ~/.cmake/packages/<package>
+  ~/.cmake/packages/<PackageName>
 
 as a file, with arbitrary name, whose content specifies the directory
 containing the package configuration file.
@@ -629,10 +629,10 @@ CMake currently provides no interface to add to the system package registry.
 Installers must be manually taught to register their packages if desired.
 
 On Windows the system package registry is stored in the Windows registry
-under a key in ``HKEY_LOCAL_MACHINE``.  A ``<package>`` may appear under
+under a key in ``HKEY_LOCAL_MACHINE``.  A ``<PackageName>`` may appear under
 registry key::
 
-  HKEY_LOCAL_MACHINE\Software\Kitware\CMake\Packages\<package>
+  HKEY_LOCAL_MACHINE\Software\Kitware\CMake\Packages\<PackageName>
 
 as a ``REG_SZ`` value, with arbitrary name, that specifies the directory
 containing the package configuration file.

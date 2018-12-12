@@ -1,7 +1,7 @@
 CMAKE_INSTALL_NAME_DIR
 ----------------------
 
-OS X directory name for installed targets.
+macOS directory name for installed targets.
 
 ``CMAKE_INSTALL_NAME_DIR`` is used to initialize the
 :prop_tgt:`INSTALL_NAME_DIR` property on all targets.  See that target

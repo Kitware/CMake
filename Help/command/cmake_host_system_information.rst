@@ -20,10 +20,10 @@ Key                           Description
 ``NUMBER_OF_PHYSICAL_CORES``  Number of physical cores
 ``HOSTNAME``                  Hostname
 ``FQDN``                      Fully qualified domain name
-``TOTAL_VIRTUAL_MEMORY``      Total virtual memory in megabytes
-``AVAILABLE_VIRTUAL_MEMORY``  Available virtual memory in megabytes
-``TOTAL_PHYSICAL_MEMORY``     Total physical memory in megabytes
-``AVAILABLE_PHYSICAL_MEMORY`` Available physical memory in megabytes
+``TOTAL_VIRTUAL_MEMORY``      Total virtual memory in MiB [#mebibytes]_
+``AVAILABLE_VIRTUAL_MEMORY``  Available virtual memory in MiB [#mebibytes]_
+``TOTAL_PHYSICAL_MEMORY``     Total physical memory in MiB [#mebibytes]_
+``AVAILABLE_PHYSICAL_MEMORY`` Available physical memory in MiB [#mebibytes]_
 ``IS_64BIT``                  One if processor is 64Bit
 ``HAS_FPU``                   One if processor has floating point unit
 ``HAS_MMX``                   One if processor supports MMX instructions
@@ -44,3 +44,7 @@ Key                           Description
 ``OS_VERSION``                The OS build ID
 ``OS_PLATFORM``               See :variable:`CMAKE_HOST_SYSTEM_PROCESSOR`
 ============================= ================================================
+
+.. rubric:: Footnotes
+
+.. [#mebibytes] One MiB (mebibyte) is equal to 1024x1024 bytes.

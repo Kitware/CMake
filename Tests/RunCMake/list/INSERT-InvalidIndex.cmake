@@ -1,2 +1,2 @@
 set(mylist alpha bravo charlie)
-list(INSERT mylist 3 delta)
+list(INSERT mylist 4 delta)

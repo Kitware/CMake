@@ -26,6 +26,9 @@
 #  include "cmFileLockPool.h"
 #endif
 
+#define CMAKE_DIRECTORY_ID_SEP "::@"
+
+class cmDirectoryId;
 class cmExportBuildFileGenerator;
 class cmExternalMakefileProjectGenerator;
 class cmGeneratorTarget;
@@ -33,7 +36,6 @@ class cmLinkLineComputer;
 class cmLocalGenerator;
 class cmMakefile;
 class cmOutputConverter;
-class cmQtAutoGenInitializer;
 class cmSourceFile;
 class cmStateDirectory;
 class cmake;
@@ -220,7 +222,7 @@ public:
 
   std::string GetExtraGeneratorName() const;
 
-  void AddInstallComponent(const char* component);
+  void AddInstallComponent(const std::string& component);
 
   const std::set<std::string>* GetInstallComponents() const
   {
@@ -231,7 +233,7 @@ public:
 
   const char* GetGlobalSetting(std::string const& name) const;
   bool GlobalSettingIsOn(std::string const& name) const;
-  const char* GetSafeGlobalSetting(std::string const& name) const;
+  std::string GetSafeGlobalSetting(std::string const& name) const;
 
   /** Add a file to the manifest of generated targets for a configuration.  */
   void AddToManifest(std::string const& f);
@@ -285,8 +287,7 @@ public:
   bool NameResolvesToFramework(const std::string& libname) const;
 
   cmMakefile* FindMakefile(const std::string& start_dir) const;
-  ///! Find a local generator by its startdirectory
-  cmLocalGenerator* FindLocalGenerator(const std::string& start_dir) const;
+  cmLocalGenerator* FindLocalGenerator(cmDirectoryId const& id) const;
 
   /** Append the subdirectory for the given configuration.  If anything is
       appended the given prefix and suffix will be appended around it, which
@@ -305,6 +306,10 @@ public:
 
   void IndexTarget(cmTarget* t);
   void IndexGeneratorTarget(cmGeneratorTarget* gt);
+
+  // Index the target using a name that is unique to that target
+  // even if other targets have the same name.
+  std::string IndexGeneratorTargetUniquely(cmGeneratorTarget const* gt);
 
   static bool IsReservedTarget(std::string const& name);
 
@@ -353,6 +358,8 @@ public:
   /** Return true if the generated build tree may contain multiple builds.
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig() const { return false; }
+
+  virtual bool IsXcode() const { return false; }
 
   /** Return true if we know the exact location of object files.
       If false, store the reason in the given string.
@@ -441,9 +448,9 @@ protected:
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
-  // Qt auto generators
-  std::vector<std::unique_ptr<cmQtAutoGenInitializer>>
-  CreateQtAutoGenInitializers();
+  /// @brief Qt AUTOMOC/UIC/RCC target generation
+  /// @return true on success
+  bool QtAutoGen();
 
   std::string SelectMakeProgram(const std::string& makeProgram,
                                 const std::string& makeDefault = "") const;
@@ -513,6 +520,7 @@ private:
   typedef std::unordered_map<std::string, cmGeneratorTarget*>
     GeneratorTargetMap;
   typedef std::unordered_map<std::string, cmMakefile*> MakefileMap;
+  typedef std::unordered_map<std::string, cmLocalGenerator*> LocalGeneratorMap;
   // Map efficiently from target name to cmTarget instance.
   // Do not use this structure for looping over all targets.
   // It contains both normal and globally visible imported targets.
@@ -523,6 +531,11 @@ private:
   // Do not use this structure for looping over all directories.
   // It may not contain all of them (see note in IndexMakefile method).
   MakefileMap MakefileSearchIndex;
+
+  // Map efficiently from source directory path to cmLocalGenerator instance.
+  // Do not use this structure for looping over all directories.
+  // Its order is not deterministic.
+  LocalGeneratorMap LocalGeneratorSearchIndex;
 
   cmMakefile* TryCompileOuterMakefile;
   // If you add a new map here, make sure it is copied
@@ -582,6 +595,7 @@ private:
                     std::string const& reason) const;
 
   void IndexMakefile(cmMakefile* mf);
+  void IndexLocalGenerator(cmLocalGenerator* lg);
 
   virtual const char* GetBuildIgnoreErrorsFlag() const { return nullptr; }
 

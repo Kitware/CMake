@@ -1,7 +1,8 @@
 ENV
 ---
 
-Access environment variables.
+Read environment variables.
 
-Use the syntax ``$ENV{VAR}`` to read environment variable ``VAR``.  See also
-the :command:`set` command to set ``ENV{VAR}``.
+Use the syntax ``$ENV{VAR}`` to read environment variable ``VAR``.
+
+See the :command:`set` command to see how to write environment variables.

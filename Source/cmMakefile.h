@@ -47,6 +47,14 @@ class cmTest;
 class cmTestGenerator;
 class cmVariableWatch;
 
+/** A type-safe wrapper for a string representing a directory id.  */
+class cmDirectoryId
+{
+public:
+  cmDirectoryId(std::string s);
+  std::string String;
+};
+
 /** \class cmMakefile
  * \brief Process the input CMakeLists.txt file.
  *
@@ -74,6 +82,8 @@ public:
    * Destructor.
    */
   ~cmMakefile();
+
+  cmDirectoryId GetDirectoryId() const;
 
   bool ReadListFile(const char* filename);
 
@@ -171,6 +181,8 @@ public:
   void RemoveDefineFlag(std::string const& definition);
   void AddCompileDefinition(std::string const& definition);
   void AddCompileOption(std::string const& option);
+  void AddLinkOption(std::string const& option);
+  void AddLinkDirectory(std::string const& directory, bool before = false);
 
   /** Create a new imported target with the name and type given.  */
   cmTarget* AddImportedTarget(const std::string& name,
@@ -326,8 +338,8 @@ public:
    */
   void SetArgcArgv(const std::vector<std::string>& args);
 
-  const char* GetCurrentSourceDirectory() const;
-  const char* GetCurrentBinaryDirectory() const;
+  std::string const& GetCurrentSourceDirectory() const;
+  std::string const& GetCurrentBinaryDirectory() const;
 
   //@}
 
@@ -421,8 +433,9 @@ public:
    * cache is then queried.
    */
   const char* GetDefinition(const std::string&) const;
-  const char* GetSafeDefinition(const std::string&) const;
-  const char* GetRequiredDefinition(const std::string& name) const;
+  const std::string* GetDef(const std::string&) const;
+  const std::string& GetSafeDefinition(const std::string&) const;
+  std::string GetRequiredDefinition(const std::string& name) const;
   bool IsDefinitionSet(const std::string&) const;
   /**
    * Get the list of all variables in the current space. If argument
@@ -789,6 +802,10 @@ public:
   cmBacktraceRange GetCompileOptionsBacktraces() const;
   cmStringRange GetCompileDefinitionsEntries() const;
   cmBacktraceRange GetCompileDefinitionsBacktraces() const;
+  cmStringRange GetLinkOptionsEntries() const;
+  cmBacktraceRange GetLinkOptionsBacktraces() const;
+  cmStringRange GetLinkDirectoriesEntries() const;
+  cmBacktraceRange GetLinkDirectoriesBacktraces() const;
 
   std::set<std::string> const& GetSystemIncludeDirectories() const
   {

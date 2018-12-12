@@ -258,6 +258,11 @@ bool cmGlobalVisualStudio15Generator::IsWin81SDKInstalled() const
   return false;
 }
 
+std::string cmGlobalVisualStudio15Generator::GetWindows10SDKMaxVersion() const
+{
+  return std::string();
+}
+
 std::string cmGlobalVisualStudio15Generator::FindMSBuildCommand()
 {
   std::string msbuild;

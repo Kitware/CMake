@@ -21,8 +21,8 @@ set(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING} 5)
 run_ctest_test(TestLoadPass TEST_LOAD 6)
 
 # Verify that new tests are not started when the load average exceeds
-# our threshold.
-run_ctest_test(TestLoadFail TEST_LOAD 2)
+# our threshold and that they then run once the load average drops.
+run_ctest_test(TestLoadWait TEST_LOAD 2)
 
 # Verify that when an invalid "TEST_LOAD" value is given, a warning
 # message is displayed and the value is ignored.
@@ -34,9 +34,9 @@ set(CASE_CTEST_TEST_LOAD 7)
 run_ctest_test(CTestTestLoadPass)
 
 # Verify that new tests are not started when the load average exceeds
-# our threshold.
+# our threshold and that they then run once the load average drops.
 set(CASE_CTEST_TEST_LOAD 4)
-run_ctest_test(CTestTestLoadFail)
+run_ctest_test(CTestTestLoadWait)
 
 # Verify that when an invalid "CTEST_TEST_LOAD" value is given,
 # a warning message is displayed and the value is ignored.

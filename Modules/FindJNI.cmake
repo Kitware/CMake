@@ -1,29 +1,49 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindJNI
-# -------
-#
-# Find JNI java libraries.
-#
-# This module finds if Java is installed and determines where the
-# include files and libraries are.  It also determines what the name of
-# the library is.  The caller may set variable JAVA_HOME to specify a
-# Java installation prefix explicitly.
-#
-# This module sets the following result variables:
-#
-# ::
-#
-#   JNI_INCLUDE_DIRS      = the include dirs to use
-#   JNI_LIBRARIES         = the libraries to use
-#   JNI_FOUND             = TRUE if JNI headers and libraries were found.
-#   JAVA_AWT_LIBRARY      = the path to the jawt library
-#   JAVA_JVM_LIBRARY      = the path to the jvm library
-#   JAVA_INCLUDE_PATH     = the include path to jni.h
-#   JAVA_INCLUDE_PATH2    = the include path to jni_md.h
-#   JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
+#[=======================================================================[.rst:
+FindJNI
+-------
+
+Find Java Native Interface (JNI) libraries.
+
+JNI enables Java code running in a Java Virtual Machine (JVM) to call
+and be called by native applications and libraries written in other
+languages such as C, C++.
+
+This module finds if Java is installed and determines where the
+include files and libraries are.  It also determines what the name of
+the library is.  The caller may set variable ``JAVA_HOME`` to specify a
+Java installation prefix explicitly.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module sets the following result variables:
+
+``JNI_INCLUDE_DIRS``
+  the include dirs to use
+``JNI_LIBRARIES``
+  the libraries to use (JAWT and JVM)
+``JNI_FOUND``
+  TRUE if JNI headers and libraries were found.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables are also available to set or use:
+
+``JAVA_AWT_LIBRARY``
+  the path to the Java AWT Native Interface (JAWT) library
+``JAVA_JVM_LIBRARY``
+  the path to the Java Virtual Machine (JVM) library
+``JAVA_INCLUDE_PATH``
+  the include path to jni.h
+``JAVA_INCLUDE_PATH2``
+  the include path to jni_md.h and jniport.h
+``JAVA_AWT_INCLUDE_PATH``
+  the include path to jawt.h
+#]=======================================================================]
 
 # Expand {libarch} occurrences to java_libarch subdirectory(-ies) and set ${_var}
 macro(java_append_library_directories _var)
@@ -187,6 +207,7 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib/jvm/default/jre/lib/{libarch}
   /usr/lib/jvm/default/lib/{libarch}
   # Ubuntu specific paths for default JVM
+  /usr/lib/jvm/java-11-openjdk-{libarch}/jre/lib/{libarch}    # Ubuntu 18.04 LTS
   /usr/lib/jvm/java-8-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
   /usr/lib/jvm/java-7-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
   /usr/lib/jvm/java-6-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10

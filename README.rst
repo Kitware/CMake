@@ -6,10 +6,12 @@ Introduction
 
 CMake is a cross-platform, open-source build system generator.
 For full documentation visit the `CMake Home Page`_ and the
-`CMake Documentation Page`_.
+`CMake Documentation Page`_. The `CMake Community Wiki`_ also
+references useful guides and recipes.
 
 .. _`CMake Home Page`: https://cmake.org
 .. _`CMake Documentation Page`: https://cmake.org/cmake/help/documentation.html
+.. _`CMake Community Wiki`: https://gitlab.kitware.com/cmake/community/wikis/home
 
 CMake is maintained and supported by `Kitware`_ and developed in
 collaboration with a productive community of contributors.

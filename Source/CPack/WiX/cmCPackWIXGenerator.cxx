@@ -100,6 +100,10 @@ bool cmCPackWIXGenerator::RunCandleCommand(std::string const& sourceFile,
     command << " -ext " << QuotePath(ext);
   }
 
+  if (sourceFile.rfind(this->CPackTopLevel, 0) != 0) {
+    command << " " << QuotePath("-I" + this->CPackTopLevel);
+  }
+
   AddCustomFlags("CPACK_WIX_CANDLE_EXTRA_FLAGS", command);
 
   command << " " << QuotePath(sourceFile);
@@ -148,7 +152,7 @@ int cmCPackWIXGenerator::PackageFiles()
 
 bool cmCPackWIXGenerator::InitializeWiXConfiguration()
 {
-  if (!ReadListFile("CPackWIX.cmake")) {
+  if (!ReadListFile("Internal/CPack/CPackWIX.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while executing CPackWIX.cmake" << std::endl);
     return false;

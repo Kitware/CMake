@@ -5,7 +5,6 @@
 #include "cmsys/Glob.hxx"
 #include <sstream>
 #include <stddef.h>
-#include <string.h>
 #include <utility>
 
 #include "cmAlgorithms.h"
@@ -187,7 +186,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
 
   // Tell the global generator about any installation component names
   // specified.
-  this->Makefile->GetGlobalGenerator()->AddInstallComponent(component.c_str());
+  this->Makefile->GetGlobalGenerator()->AddInstallComponent(component);
 
   return true;
 }
@@ -350,8 +349,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 
   // Check whether this is a DLL platform.
   bool dll_platform =
-    strcmp(this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"),
-           "") != 0;
+    !this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
 
   for (std::string const& tgt : targetList.GetVector()) {
 
@@ -362,7 +360,12 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       return false;
     }
     // Lookup this target in the current directory.
-    if (cmTarget* target = this->Makefile->FindLocalNonAliasTarget(tgt)) {
+    cmTarget* target = this->Makefile->FindLocalNonAliasTarget(tgt);
+    if (!target) {
+      // If no local target has been found, find it in the global scope.
+      target = this->Makefile->GetGlobalGenerator()->FindTarget(tgt, true);
+    }
+    if (target) {
       // Found the target.  Check its type.
       if (target->GetType() != cmStateEnums::EXECUTABLE &&
           target->GetType() != cmStateEnums::STATIC_LIBRARY &&
@@ -381,8 +384,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     } else {
       // Did not find the target.
       std::ostringstream e;
-      e << "TARGETS given target \"" << tgt
-        << "\" which does not exist in this directory.";
+      e << "TARGETS given target \"" << tgt << "\" which does not exist.";
       this->SetError(e.str());
       return false;
     }
@@ -757,43 +759,43 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   // specified
   if (installsArchive) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      archiveArgs.GetComponent().c_str());
+      archiveArgs.GetComponent());
   }
   if (installsLibrary) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      libraryArgs.GetComponent().c_str());
+      libraryArgs.GetComponent());
   }
   if (installsNamelink) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      libraryArgs.GetNamelinkComponent().c_str());
+      libraryArgs.GetNamelinkComponent());
   }
   if (installsRuntime) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      runtimeArgs.GetComponent().c_str());
+      runtimeArgs.GetComponent());
   }
   if (installsObject) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      objectArgs.GetComponent().c_str());
+      objectArgs.GetComponent());
   }
   if (installsFramework) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      frameworkArgs.GetComponent().c_str());
+      frameworkArgs.GetComponent());
   }
   if (installsBundle) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      bundleArgs.GetComponent().c_str());
+      bundleArgs.GetComponent());
   }
   if (installsPrivateHeader) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      privateHeaderArgs.GetComponent().c_str());
+      privateHeaderArgs.GetComponent());
   }
   if (installsPublicHeader) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      publicHeaderArgs.GetComponent().c_str());
+      publicHeaderArgs.GetComponent());
   }
   if (installsResource) {
     this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-      resourceArgs.GetComponent().c_str());
+      resourceArgs.GetComponent());
   }
 
   return true;
@@ -895,7 +897,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   // Tell the global generator about any installation component names
   // specified.
   this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-    ica.GetComponent().c_str());
+    ica.GetComponent());
 
   return true;
 }
@@ -1192,7 +1194,7 @@ bool cmInstallCommand::HandleDirectoryMode(
 
   // Tell the global generator about any installation component names
   // specified.
-  this->Makefile->GetGlobalGenerator()->AddInstallComponent(component.c_str());
+  this->Makefile->GetGlobalGenerator()->AddInstallComponent(component);
 
   return true;
 }

@@ -33,8 +33,11 @@ public:
   {
   public:
     // -- Verbosity
-    bool Verbose() const { return this->Verbose_; }
-    void SetVerbose(bool value);
+    unsigned int Verbosity() const { return this->Verbosity_; }
+    void SetVerbosity(unsigned int value) { this->Verbosity_ = value; }
+    void RaiseVerbosity(std::string const& value);
+    bool Verbose() const { return (this->Verbosity_ != 0); }
+    void SetVerbose(bool value) { this->Verbosity_ = value ? 1 : 0; }
     bool ColorOutput() const { return this->ColorOutput_; }
     void SetColorOutput(bool value);
     // -- Log info
@@ -56,8 +59,8 @@ public:
 
   private:
     std::mutex Mutex_;
-    bool volatile Verbose_ = false;
-    bool volatile ColorOutput_ = false;
+    unsigned int Verbosity_ = 0;
+    bool ColorOutput_ = false;
   };
 
   /// @brief Thread safe file system interface

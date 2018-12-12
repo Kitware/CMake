@@ -42,13 +42,10 @@ lzma_stream_buffer_bound(size_t uncompressed_size)
 
 extern LZMA_API(lzma_ret)
 lzma_stream_buffer_encode(lzma_filter *filters, lzma_check check,
-		lzma_allocator *allocator, const uint8_t *in, size_t in_size,
+		const lzma_allocator *allocator,
+		const uint8_t *in, size_t in_size,
 		uint8_t *out, size_t *out_pos_ptr, size_t out_size)
 {
-	lzma_stream_flags stream_flags = { 0 };
-	lzma_block block = { 0 };
-	size_t out_pos;
-
 	// Sanity checks
 	if (filters == NULL || (unsigned int)(check) > LZMA_CHECK_ID_MAX
 			|| (in == NULL && in_size != 0) || out == NULL
@@ -65,7 +62,7 @@ lzma_stream_buffer_encode(lzma_filter *filters, lzma_check check,
 
 	// Use a local copy. We update *out_pos_ptr only if everything
 	// succeeds.
-	out_pos = *out_pos_ptr;
+	size_t out_pos = *out_pos_ptr;
 
 	// Check that there's enough space for both Stream Header and
 	// Stream Footer.
@@ -77,7 +74,10 @@ lzma_stream_buffer_encode(lzma_filter *filters, lzma_check check,
 	out_size -= LZMA_STREAM_HEADER_SIZE;
 
 	// Encode the Stream Header.
-	stream_flags.check = check;
+	lzma_stream_flags stream_flags = {
+		.version = 0,
+		.check = check,
+	};
 
 	if (lzma_stream_header_encode(&stream_flags, out + out_pos)
 			!= LZMA_OK)
@@ -86,8 +86,11 @@ lzma_stream_buffer_encode(lzma_filter *filters, lzma_check check,
 	out_pos += LZMA_STREAM_HEADER_SIZE;
 
 	// Encode a Block but only if there is at least one byte of input.
-	block.check = check;
-	block.filters = filters;
+	lzma_block block = {
+		.version = 0,
+		.check = check,
+		.filters = filters,
+	};
 
 	if (in_size > 0)
 		return_if_error(lzma_block_buffer_encode(&block, allocator,
@@ -95,8 +98,6 @@ lzma_stream_buffer_encode(lzma_filter *filters, lzma_check check,
 
 	// Index
 	{
-		lzma_ret ret;
-
 		// Create an Index. It will have one Record if there was
 		// at least one byte of input to encode. Otherwise the
 		// Index will be empty.
@@ -104,7 +105,7 @@ lzma_stream_buffer_encode(lzma_filter *filters, lzma_check check,
 		if (i == NULL)
 			return LZMA_MEM_ERROR;
 
-		ret = LZMA_OK;
+		lzma_ret ret = LZMA_OK;
 
 		if (in_size > 0)
 			ret = lzma_index_append(i, allocator,

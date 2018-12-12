@@ -160,7 +160,7 @@ bool cmParseGTMCoverage::ParseMCOVLine(std::string const& line,
 {
   // this method parses lines from the .mcov file
   // each line has ^COVERAGE(...) in it, and there
-  // are several varients of coverage lines:
+  // are several variants of coverage lines:
   //
   // ^COVERAGE("DIC11","PR1",0)="2:0:0:0"
   //          ( file  , entry, line ) = "number_executed:timing_info"

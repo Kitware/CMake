@@ -22,4 +22,4 @@ the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
 manual for more on defining buildsystem properties.
 
-.. include:: COMPILE_OPTIONS_SHELL.txt
+.. include:: OPTIONS_SHELL.txt

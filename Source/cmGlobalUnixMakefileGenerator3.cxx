@@ -147,7 +147,7 @@ void cmGlobalUnixMakefileGenerator3::Generate()
     markFileName += "/";
     markFileName += cmake::GetCMakeFilesDirectory();
     markFileName += "/progress.marks";
-    cmGeneratedFileStream markFile(markFileName.c_str());
+    cmGeneratedFileStream markFile(markFileName);
     markFile << this->CountProgressMarksInAll(lg) << "\n";
   }
 
@@ -170,8 +170,7 @@ void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
     std::string commandDatabaseName =
       std::string(this->GetCMakeInstance()->GetHomeOutputDirectory()) +
       "/compile_commands.json";
-    this->CommandDatabase =
-      new cmGeneratedFileStream(commandDatabaseName.c_str());
+    this->CommandDatabase = new cmGeneratedFileStream(commandDatabaseName);
     *this->CommandDatabase << "[" << std::endl;
   } else {
     *this->CommandDatabase << "," << std::endl;
@@ -198,7 +197,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
     this->GetCMakeInstance()->GetHomeOutputDirectory();
   makefileName += cmake::GetCMakeFilesDirectory();
   makefileName += "/Makefile2";
-  cmGeneratedFileStream makefileStream(makefileName.c_str(), false,
+  cmGeneratedFileStream makefileStream(makefileName, false,
                                        this->GetMakefileEncoding());
   if (!makefileStream) {
     return;
@@ -270,7 +269,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     this->GetCMakeInstance()->GetHomeOutputDirectory();
   cmakefileName += cmake::GetCMakeFilesDirectory();
   cmakefileName += "/Makefile.cmake";
-  cmGeneratedFileStream cmakefileStream(cmakefileName.c_str());
+  cmGeneratedFileStream cmakefileStream(cmakefileName);
   if (!cmakefileStream) {
     return;
   }
@@ -876,7 +875,7 @@ void cmGlobalUnixMakefileGenerator3::RecordTargetProgress(
 void cmGlobalUnixMakefileGenerator3::TargetProgress::WriteProgressVariables(
   unsigned long total, unsigned long& current)
 {
-  cmGeneratedFileStream fout(this->VariableFile.c_str());
+  cmGeneratedFileStream fout(this->VariableFile);
   for (unsigned long i = 1; i <= this->NumberOfActions; ++i) {
     fout << "CMAKE_PROGRESS_" << i << " = ";
     if (total <= 100) {

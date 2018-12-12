@@ -33,8 +33,6 @@ lzma_crc32(const uint8_t *buf, size_t size, uint32_t crc)
 #endif
 
 	if (size > 8) {
-		const uint8_t * limit;
-
 		// Fix the alignment, if needed. The if statement above
 		// ensures that this won't read past the end of buf[].
 		while ((uintptr_t)(buf) & 7) {
@@ -43,7 +41,7 @@ lzma_crc32(const uint8_t *buf, size_t size, uint32_t crc)
 		}
 
 		// Calculate the position where to stop.
-		limit = buf + (size & ~(size_t)(7));
+		const uint8_t *const limit = buf + (size & ~(size_t)(7));
 
 		// Calculate how many bytes must be calculated separately
 		// before returning the result.
@@ -51,8 +49,6 @@ lzma_crc32(const uint8_t *buf, size_t size, uint32_t crc)
 
 		// Calculate the CRC32 using the slice-by-eight algorithm.
 		while (buf < limit) {
-			uint32_t tmp;
-
 			crc ^= *(const uint32_t *)(buf);
 			buf += 4;
 
@@ -61,7 +57,7 @@ lzma_crc32(const uint8_t *buf, size_t size, uint32_t crc)
 			    ^ lzma_crc32_table[5][C(crc)]
 			    ^ lzma_crc32_table[4][D(crc)];
 
-			tmp = *(const uint32_t *)(buf);
+			const uint32_t tmp = *(const uint32_t *)(buf);
 			buf += 4;
 
 			// At least with some compilers, it is critical for

@@ -83,9 +83,9 @@ bool cmOutputConverter::ContainedInDirectory(std::string const& local_path,
                                              std::string const& remote_path,
                                              cmStateDirectory const& directory)
 {
-  const std::string relativePathTopBinary =
+  const std::string& relativePathTopBinary =
     directory.GetRelativePathTopBinary();
-  const std::string relativePathTopSource =
+  const std::string& relativePathTopSource =
     directory.GetRelativePathTopSource();
 
   const bool bothInBinary =

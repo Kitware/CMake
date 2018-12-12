@@ -89,7 +89,7 @@ int cmCPackRPMGenerator::PackageOnePack(std::string const& initialToplevel,
   component_path += packageName;
   this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH",
                   component_path.c_str());
-  if (!this->ReadListFile("CPackRPM.cmake")) {
+  if (!this->ReadListFile("Internal/CPack/CPackRPM.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while execution CPackRPM.cmake" << std::endl);
     retval = 0;
@@ -385,7 +385,7 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne(
                     component_path.c_str());
   }
 
-  if (this->ReadListFile("CPackRPM.cmake")) {
+  if (this->ReadListFile("Internal/CPack/CPackRPM.cmake")) {
     AddGeneratedPackageNames();
   } else {
     cmCPackLogger(cmCPackLog::LOG_ERROR,

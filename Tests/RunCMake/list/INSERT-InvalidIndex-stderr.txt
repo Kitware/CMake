@@ -1,4 +1,4 @@
 ^CMake Error at INSERT-InvalidIndex.cmake:2 \(list\):
-  list index: 3 out of range \(-3, 2\)
+  list index: 4 out of range \(-3, 3\)
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)$

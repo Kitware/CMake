@@ -14,13 +14,10 @@
 
 
 extern LZMA_API(lzma_ret)
-lzma_block_buffer_decode(lzma_block *block, lzma_allocator *allocator,
+lzma_block_buffer_decode(lzma_block *block, const lzma_allocator *allocator,
 		const uint8_t *in, size_t *in_pos, size_t in_size,
 		uint8_t *out, size_t *out_pos, size_t out_size)
 {
-	lzma_next_coder block_decoder;
-	lzma_ret ret;
-
 	if (in_pos == NULL || (in == NULL && *in_pos != in_size)
 			|| *in_pos > in_size || out_pos == NULL
 			|| (out == NULL && *out_pos != out_size)
@@ -28,8 +25,9 @@ lzma_block_buffer_decode(lzma_block *block, lzma_allocator *allocator,
 		return LZMA_PROG_ERROR;
 
 	// Initialize the Block decoder.
-	block_decoder = LZMA_NEXT_CODER_INIT;
-	ret = lzma_block_decoder_init(&block_decoder, allocator, block);
+	lzma_next_coder block_decoder = LZMA_NEXT_CODER_INIT;
+	lzma_ret ret = lzma_block_decoder_init(
+			&block_decoder, allocator, block);
 
 	if (ret == LZMA_OK) {
 		// Save the positions so that we can restore them in case

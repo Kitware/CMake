@@ -276,7 +276,7 @@ _GNUInstallDirs_cache_path(CMAKE_INSTALL_DATAROOTDIR "share"
 _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATAROOTDIR}"
   "Read-only architecture-independent data (DATAROOTDIR)")
 
-if(CMAKE_SYSTEM_NAME MATCHES "^(.*BSD|DragonFly)$")
+if(CMAKE_SYSTEM_NAME MATCHES "^(([^k].*)?BSD|DragonFly)$")
   _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_INFODIR "info"
     "Info documentation (info)")
   _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_MANDIR "man"

@@ -306,7 +306,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   }
 
   // Output stream
-  cmGeneratedFileStream fout((this->Directory + "/config/config.xml").data());
+  cmGeneratedFileStream fout(this->Directory + "/config/config.xml");
   cmXMLWriter xout(fout);
 
   xout.StartDocument();

@@ -355,6 +355,12 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     else()
       set(id_development_team "")
     endif()
+    if(DEFINED CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY)
+      set(id_code_sign_identity
+        "CODE_SIGN_IDENTITY = \"${CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY}\";")
+    else()
+      set(id_code_sign_identity "")
+    endif()
     configure_file(${CMAKE_ROOT}/Modules/CompilerId/Xcode-3.pbxproj.in
       ${id_dir}/CompilerId${lang}.xcodeproj/project.pbxproj @ONLY)
     unset(_ENV_MACOSX_DEPLOYMENT_TARGET)
@@ -519,6 +525,9 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
       ${CMAKE_${lang}_COMPILER_ID_STRINGS_PARAMETERS}
       REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
     set(COMPILER_ID_TWICE)
+    # With the IAR Compiler, some strings are found twice, first time as incomplete
+    # list like "?<Constant "INFO:compiler[IAR]">".  Remove the incomplete copies.
+    list(FILTER CMAKE_${lang}_COMPILER_ID_STRINGS EXCLUDE REGEX "\\?<Constant \\\"")
     # In C# binaries, some strings are found more than once.
     list(REMOVE_DUPLICATES CMAKE_${lang}_COMPILER_ID_STRINGS)
     foreach(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
