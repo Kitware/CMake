@@ -2727,6 +2727,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
 
   cmState* state = this->GetCMakeInstance()->GetState();
 
+  static const std::string lineVar = "CMAKE_CURRENT_LIST_LINE";
   do {
     char inc = *in;
     switch (inc) {
@@ -2739,7 +2740,6 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
           const char* value = nullptr;
           std::string varresult;
           std::string svalue;
-          static const std::string lineVar = "CMAKE_CURRENT_LIST_LINE";
           switch (var.domain) {
             case NORMAL:
               if (filename && lookup == lineVar) {
@@ -2889,7 +2889,14 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
                          "abcdefghijklmnopqrstuvwxyz"
                          "0123456789/_.+-")) {
             std::string variable(in + 1, nextAt - in - 1);
-            std::string varresult = this->GetSafeDefinition(variable);
+
+            std::string varresult;
+            if (filename && variable == lineVar) {
+              varresult = std::to_string(line);
+            } else {
+              varresult = this->GetSafeDefinition(variable);
+            }
+
             if (escapeQuotes) {
               varresult = cmSystemTools::EscapeQuotes(varresult);
             }
@@ -3648,8 +3655,15 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
   }
 
   // Perform variable replacements.
-  this->ExpandVariablesInString(output, escapeQuotes, true, atOnly, nullptr,
-                                -1, true, true);
+  const char* filename = nullptr;
+  long lineNumber = -1;
+  if (!this->Backtrace.Empty()) {
+    const auto& currentTrace = this->Backtrace.Top();
+    filename = currentTrace.FilePath.c_str();
+    lineNumber = currentTrace.Line;
+  }
+  this->ExpandVariablesInString(output, escapeQuotes, true, atOnly, filename,
+                                lineNumber, true, true);
 }
 
 int cmMakefile::ConfigureFile(const char* infile, const char* outfile,

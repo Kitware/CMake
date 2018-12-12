@@ -1,5 +1,18 @@
 message(STATUS "testname='${testname}'")
 
+function(test_configure_line_number EXPRESSION POLICY)
+  cmake_policy(PUSH)
+  cmake_policy(SET CMP0053 ${POLICY})
+  string(CONFIGURE
+  "${EXPRESSION}" v) # line should indicate string() call
+  math(EXPR vplus3 "${v} + 3")
+  if(NOT ${CMAKE_CURRENT_LIST_LINE} EQUAL ${vplus3})
+    message(SEND_ERROR "Couldn't configure CMAKE_CURRENT_LIST_LINE, evaluated into '${v}'")
+  endif()
+  message(STATUS "v='${v}'")
+  cmake_policy(POP)
+endfunction()
+
 if(testname STREQUAL empty) # fail
   string()
 
@@ -31,6 +44,18 @@ elseif(testname STREQUAL configure_no_variable) # fail
 elseif(testname STREQUAL configure_escape_quotes) # pass
   string(CONFIGURE "this is @testname@" v ESCAPE_QUOTES)
   message(STATUS "v='${v}'")
+
+elseif(testname STREQUAL configure_line_number_CMP0053_old) # pass
+  test_configure_line_number("\${CMAKE_CURRENT_LIST_LINE}" OLD)
+
+elseif(testname STREQUAL configure_line_number_CMP0053_new) # pass
+  test_configure_line_number("\${CMAKE_CURRENT_LIST_LINE}" NEW)
+
+elseif(testname STREQUAL configure_line_number_CMP0053_old_use_at) # pass
+  test_configure_line_number("\@CMAKE_CURRENT_LIST_LINE\@" OLD)
+
+elseif(testname STREQUAL configure_line_number_CMP0053_new_use_at) # pass
+  test_configure_line_number("\@CMAKE_CURRENT_LIST_LINE\@" NEW)
 
 elseif(testname STREQUAL configure_bogus) # fail
   string(CONFIGURE "this is @testname@" v ESCAPE_QUOTES BOGUS)
