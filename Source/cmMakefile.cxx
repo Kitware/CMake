@@ -2522,9 +2522,9 @@ const std::string& cmMakefile::ExpandVariablesInString(
       // Suppress variable watches to avoid calling hooks twice. Suppress new
       // dereferences since the OLD behavior is still what is actually used.
       this->SuppressSideEffects = true;
-      newError = ExpandVariablesInStringNew(
-        newErrorstr, newResult, escapeQuotes, noEscapes, atOnly, filename,
-        line, removeEmpty, replaceAt);
+      newError = ExpandVariablesInStringNew(newErrorstr, newResult,
+                                            escapeQuotes, noEscapes, atOnly,
+                                            filename, line, replaceAt);
       this->SuppressSideEffects = false;
       CM_FALLTHROUGH;
     }
@@ -2537,9 +2537,9 @@ const std::string& cmMakefile::ExpandVariablesInString(
     case cmPolicies::REQUIRED_ALWAYS:
     // Messaging here would be *very* verbose.
     case cmPolicies::NEW:
-      mtype = ExpandVariablesInStringNew(errorstr, source, escapeQuotes,
-                                         noEscapes, atOnly, filename, line,
-                                         removeEmpty, replaceAt);
+      mtype =
+        ExpandVariablesInStringNew(errorstr, source, escapeQuotes, noEscapes,
+                                   atOnly, filename, line, replaceAt);
       break;
   }
 
@@ -2726,7 +2726,7 @@ bool cmMakefile::IsProjectFile(const char* filename) const
 cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
   std::string& errorstr, std::string& source, bool escapeQuotes,
   bool noEscapes, bool atOnly, const char* filename, long line,
-  bool removeEmpty, bool replaceAt) const
+  bool replaceAt) const
 {
   // This method replaces ${VAR} and @VAR@ where VAR is looked up
   // with GetDefinition(), if not found in the map, nothing is expanded.
@@ -2783,7 +2783,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
             } else {
               varresult = value;
             }
-          } else if (!removeEmpty && !this->SuppressSideEffects) {
+          } else if (!this->SuppressSideEffects) {
             this->MaybeWarnUninitialized(lookup, filename);
           }
           result.replace(var.loc, result.size() - var.loc, varresult);
@@ -2896,7 +2896,12 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
             if (filename && variable == lineVar) {
               varresult = std::to_string(line);
             } else {
-              varresult = this->GetSafeDefinition(variable);
+              const std::string* def = this->GetDef(variable);
+              if (def) {
+                varresult = *def;
+              } else if (!this->SuppressSideEffects) {
+                this->MaybeWarnUninitialized(variable, filename);
+              }
             }
 
             if (escapeQuotes) {

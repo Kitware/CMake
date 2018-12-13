@@ -92,9 +92,11 @@ const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     return this->AddString(ostr.str());
   }
   const char* value = this->Makefile->GetDefinition(var);
-  if (!value && !this->RemoveEmpty) {
+  if (!value) {
     this->Makefile->MaybeWarnUninitialized(var, this->FileName);
-    return nullptr;
+    if (!this->RemoveEmpty) {
+      return nullptr;
+    }
   }
   if (this->EscapeQuotes && value) {
     return this->AddString(cmSystemTools::EscapeQuotes(value));

@@ -350,7 +350,7 @@ set(RunCMake_TEST_OPTIONS --trace-expand --warn-uninitialized)
 run_cmake(trace-expand-warn-uninitialized)
 unset(RunCMake_TEST_OPTIONS)
 
-set(RunCMake_TEST_OPTIONS --warn-uninitialized)
+set(RunCMake_TEST_OPTIONS -Wno-deprecated --warn-uninitialized)
 run_cmake(warn-uninitialized)
 unset(RunCMake_TEST_OPTIONS)
 
