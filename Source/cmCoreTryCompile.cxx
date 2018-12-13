@@ -24,10 +24,18 @@
 static std::string const kCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN =
   "CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN";
 static std::string const kCMAKE_C_COMPILER_TARGET = "CMAKE_C_COMPILER_TARGET";
+static std::string const kCMAKE_C_LINK_NO_PIE_SUPPORTED =
+  "CMAKE_C_LINK_NO_PIE_SUPPORTED";
+static std::string const kCMAKE_C_LINK_PIE_SUPPORTED =
+  "CMAKE_C_LINK_PIE_SUPPORTED";
 static std::string const kCMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN =
   "CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN";
 static std::string const kCMAKE_CXX_COMPILER_TARGET =
   "CMAKE_CXX_COMPILER_TARGET";
+static std::string const kCMAKE_CXX_LINK_NO_PIE_SUPPORTED =
+  "CMAKE_CXX_LINK_NO_PIE_SUPPORTED";
+static std::string const kCMAKE_CXX_LINK_PIE_SUPPORTED =
+  "CMAKE_CXX_LINK_PIE_SUPPORTED";
 static std::string const kCMAKE_ENABLE_EXPORTS = "CMAKE_ENABLE_EXPORTS";
 static std::string const kCMAKE_LINK_SEARCH_END_STATIC =
   "CMAKE_LINK_SEARCH_END_STATIC";
@@ -631,6 +639,16 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         std::vector<std::string> varList;
         cmSystemTools::ExpandListArgument(varListStr, varList);
         vars.insert(varList.begin(), varList.end());
+      }
+
+      if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0083) ==
+          cmPolicies::NEW) {
+        // To ensure full support of PIE, propagate cache variables
+        // driving the link options
+        vars.insert(kCMAKE_C_LINK_PIE_SUPPORTED);
+        vars.insert(kCMAKE_C_LINK_NO_PIE_SUPPORTED);
+        vars.insert(kCMAKE_CXX_LINK_PIE_SUPPORTED);
+        vars.insert(kCMAKE_CXX_LINK_NO_PIE_SUPPORTED);
       }
 
       /* for the TRY_COMPILEs we want to be able to specify the architecture.

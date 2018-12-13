@@ -1,6 +1,9 @@
 
 cmake_policy(SET CMP0083 NEW)
 
+include(CheckPIESupported)
+check_pie_supported()
+
 add_executable (pie_on main.cpp)
 set_property(TARGET pie_on PROPERTY POSITION_INDEPENDENT_CODE ON)
 

@@ -72,6 +72,7 @@ macro(__windows_compiler_gnu lang)
   # No -fPIC on Windows
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "")
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "")
+  set(_CMAKE_${lang}_PIE_MAY_BE_SUPPORTED_BY_LINKER NO)
   set(CMAKE_${lang}_LINK_OPTIONS_PIE "")
   set(CMAKE_${lang}_LINK_OPTIONS_NO_PIE "")
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "")

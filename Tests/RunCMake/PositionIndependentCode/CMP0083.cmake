@@ -6,6 +6,8 @@ add_executable (cmp0083_ref main.cpp)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 cmake_policy(SET CMP0083 NEW)
+include(CheckPIESupported)
+check_pie_supported()
 add_executable (cmp0083_new_pie main.cpp)
 
 
