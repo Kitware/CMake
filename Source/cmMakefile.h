@@ -866,6 +866,7 @@ public:
   std::deque<std::vector<std::string>> FindPackageRootPathStack;
 
   void MaybeWarnCMP0074(std::string const& pkg);
+  bool IsProjectFile(const char* filename) const;
 
 protected:
   // add link libraries and directories to the target

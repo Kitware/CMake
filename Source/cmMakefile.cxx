@@ -1848,11 +1848,7 @@ void cmMakefile::LogUnused(const char* reason, const std::string& name) const
       path += "/CMakeLists.txt";
     }
 
-    if (this->CheckSystemVars ||
-        cmSystemTools::IsSubDirectory(path, this->GetHomeDirectory()) ||
-        (cmSystemTools::IsSubDirectory(path, this->GetHomeOutputDirectory()) &&
-         !cmSystemTools::IsSubDirectory(path,
-                                        cmake::GetCMakeFilesDirectory()))) {
+    if (this->CheckSystemVars || this->IsProjectFile(path.c_str())) {
       std::ostringstream msg;
       msg << "unused variable (" << reason << ") \'" << name << "\'";
       this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
@@ -2702,6 +2698,14 @@ struct t_lookup
   size_t loc = 0;
 };
 
+bool cmMakefile::IsProjectFile(const char* filename) const
+{
+  return cmSystemTools::IsSubDirectory(filename, this->GetHomeDirectory()) ||
+    (cmSystemTools::IsSubDirectory(filename, this->GetHomeOutputDirectory()) &&
+     !cmSystemTools::IsSubDirectory(filename,
+                                    cmake::GetCMakeFilesDirectory()));
+}
+
 cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
   std::string& errorstr, std::string& source, bool escapeQuotes,
   bool noEscapes, bool atOnly, const char* filename, long line,
@@ -2769,11 +2773,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
             if (this->GetCMakeInstance()->GetWarnUninitialized() &&
                 !this->VariableInitialized(lookup)) {
               if (this->CheckSystemVars ||
-                  (filename &&
-                   (cmSystemTools::IsSubDirectory(filename,
-                                                  this->GetHomeDirectory()) ||
-                    cmSystemTools::IsSubDirectory(
-                      filename, this->GetHomeOutputDirectory())))) {
+                  (filename && this->IsProjectFile(filename))) {
                 std::ostringstream msg;
                 msg << "uninitialized variable \'" << lookup << "\'";
                 this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
