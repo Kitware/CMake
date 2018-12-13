@@ -24,6 +24,7 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  include "cmFileLockPool.h"
+#  include "cm_jsoncpp_value.h"
 #endif
 
 #define CMAKE_DIRECTORY_ID_SEP "::@"
@@ -69,6 +70,11 @@ public:
   {
     return codecvt::None;
   }
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  /** Get a JSON object describing the generator.  */
+  virtual Json::Value GetJson() const;
+#endif
 
   /** Tell the generator about the target system.  */
   virtual bool SetSystemName(std::string const&, cmMakefile*) { return true; }

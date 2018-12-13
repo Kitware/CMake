@@ -254,6 +254,15 @@ cmLocalGenerator* cmGlobalVisualStudio7Generator::CreateLocalGenerator(
   return lg;
 }
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+Json::Value cmGlobalVisualStudio7Generator::GetJson() const
+{
+  Json::Value generator = this->cmGlobalVisualStudioGenerator::GetJson();
+  generator["platform"] = this->GetPlatformName();
+  return generator;
+}
+#endif
+
 std::string const& cmGlobalVisualStudio7Generator::GetPlatformName() const
 {
   if (!this->GeneratorPlatform.empty()) {
