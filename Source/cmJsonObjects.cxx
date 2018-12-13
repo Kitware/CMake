@@ -6,6 +6,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallGenerator.h"
+#include "cmInstallSubdirectoryGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmJsonObjectDictionary.h"
 #include "cmJsonObjects.h"
@@ -640,8 +641,13 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
     // associated generators.
     bool hasInstallRule = false;
     for (const auto generator : projectIt.second) {
-      hasInstallRule =
-        generator->GetMakefile()->GetInstallGenerators().empty() == false;
+      for (const auto installGen :
+           generator->GetMakefile()->GetInstallGenerators()) {
+        if (!dynamic_cast<cmInstallSubdirectoryGenerator*>(installGen)) {
+          hasInstallRule = true;
+          break;
+        }
+      }
 
       if (hasInstallRule) {
         break;
