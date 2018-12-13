@@ -42,7 +42,12 @@ function(add_RunCMake_test_group test types)
     # much system information so it is easier to set programs and environment
     # values here
     unset(${test}_${type}_FOUND_PREREQUIREMENTS)
-    include("${CMAKE_CURRENT_SOURCE_DIR}/${test}/${type}/Prerequirements.cmake")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${test}/${type}/Prerequirements.cmake")
+      include("${CMAKE_CURRENT_SOURCE_DIR}/${test}/${type}/Prerequirements.cmake")
+    else()
+      string(REGEX MATCH "^[^.]*" main_type "${type}")
+      include("${CMAKE_CURRENT_SOURCE_DIR}/${test}/${main_type}/Prerequirements.cmake")
+    endif()
     get_test_prerequirements("${test}_${type}_FOUND_PREREQUIREMENTS"
         "${TEST_CONFIG_DIR}/${type}_config.cmake")
 
