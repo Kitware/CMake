@@ -417,7 +417,7 @@ static void __start_thread(void* arg)
   auto server = static_cast<cmServerBase*>(arg);
   std::string error;
   bool success = server->Serve(&error);
-  if (!success || error.empty() == false) {
+  if (!success || !error.empty()) {
     std::cerr << "Error during serve: " << error << std::endl;
   }
 }

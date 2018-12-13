@@ -1257,7 +1257,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 #define TRANSITIVE_PROPERTY_COMPARE(PROPERTY)                                 \
   (#PROPERTY == propertyName || "INTERFACE_" #PROPERTY == propertyName) ||
         if (CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(
-              TRANSITIVE_PROPERTY_COMPARE) false) { // NOLINT(clang-tidy)
+              TRANSITIVE_PROPERTY_COMPARE) false) { // NOLINT(*)
           reportError(
             context, content->GetOriginalExpression(),
             "$<TARGET_PROPERTY:...> expression in link libraries "

@@ -32,7 +32,6 @@ readability-*,\
 -readability-inconsistent-declaration-parameter-name,\
 -readability-named-parameter,\
 -readability-redundant-declaration,\
--readability-simplify-boolean-expr,\
 "
 HeaderFilterRegex: 'Source/cm[^/]*\.(h|hxx|cxx)$'
 CheckOptions:

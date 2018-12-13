@@ -257,13 +257,8 @@ void cmCPackFreeBSDGenerator::write_manifest_fields(
 static bool ignore_file(const std::string& filename)
 {
   struct stat statbuf;
-
-  if (!((stat(filename.c_str(), &statbuf) >= 0) &&
-        ((statbuf.st_mode & S_IFMT) == S_IFREG))) {
-    return true;
-  }
-  // May be other reasons to return false
-  return false;
+  return stat(filename.c_str(), &statbuf) < 0 ||
+    (statbuf.st_mode & S_IFMT) != S_IFREG;
 }
 
 // Write the given list of @p files to the manifest stream @p s,
