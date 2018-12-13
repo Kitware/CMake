@@ -430,6 +430,7 @@ CMAKE_CXX_SOURCES="\
   cmake  \
   cmakemain \
   cmcmd  \
+  cm_string_view \
 "
 
 if ${cmake_system_mingw}; then
