@@ -9,6 +9,10 @@ foreach(arg
 endforeach()
 
 function(run_cmake test)
+  if(DEFINED ENV{RunCMake_TEST_FILTER} AND NOT test MATCHES "$ENV{RunCMake_TEST_FILTER}")
+    return()
+  endif()
+
   set(top_src "${RunCMake_SOURCE_DIR}")
   set(top_bin "${RunCMake_BINARY_DIR}")
   if(EXISTS ${top_src}/${test}-result.txt)
