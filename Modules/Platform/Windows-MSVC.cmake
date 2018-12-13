@@ -178,6 +178,7 @@ if(WINCE)
   set(_PLATFORM_DEFINES_CXX " /D${_MSVC_CXX_ARCHITECTURE_FAMILY} /D_${_MSVC_CXX_ARCHITECTURE_FAMILY_UPPER}_")
 
   set(_RTC1 "")
+  set(_JMC "")
   set(_FLAGS_C "")
   set(_FLAGS_CXX " /GR /EHsc")
 
@@ -230,6 +231,10 @@ else()
     set(_RTC1 "/GZ")
     set(_FLAGS_CXX " /GR /GX")
     set(CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib")
+  endif()
+
+  if(MSVC_VERSION GREATER_EQUAL 1915)
+    set(_JMC "/JMC")
   endif()
 
   if(MSVC_VERSION LESS 1310)
@@ -358,7 +363,7 @@ macro(__windows_compiler_msvc lang)
       string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " /MD -DNDEBUG") # TODO: Add '-Os' once VS generator maps it properly for Clang
     else()
       string(APPEND CMAKE_${lang}_FLAGS_INIT " ${_PLATFORM_DEFINES}${_PLATFORM_DEFINES_${lang}} /D_WINDOWS /W3${_FLAGS_${lang}}")
-      string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " /MDd /Zi /Ob0 /Od ${_RTC1}")
+      string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " /MDd /Zi /Ob0 /Od ${_RTC1} ${_JMC}") 
       string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " /MD /O2 /Ob2 /DNDEBUG")
       string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " /MD /Zi /O2 /Ob1 /DNDEBUG")
       string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " /MD /O1 /Ob1 /DNDEBUG")
