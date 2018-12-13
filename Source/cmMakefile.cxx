@@ -1837,6 +1837,23 @@ bool cmMakefile::VariableInitialized(const std::string& var) const
   return this->StateSnapshot.IsInitialized(var);
 }
 
+void cmMakefile::MaybeWarnUninitialized(std::string const& variable,
+                                        const char* sourceFilename) const
+{
+  // check to see if we need to print a warning
+  // if strict mode is on and the variable has
+  // not been "cleared"/initialized with a set(foo ) call
+  if (this->GetCMakeInstance()->GetWarnUninitialized() &&
+      !this->VariableInitialized(variable)) {
+    if (this->CheckSystemVars ||
+        (sourceFilename && this->IsProjectFile(sourceFilename))) {
+      std::ostringstream msg;
+      msg << "uninitialized variable \'" << variable << "\'";
+      this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
+    }
+  }
+}
+
 void cmMakefile::LogUnused(const char* reason, const std::string& name) const
 {
   if (this->WarnUnused) {
@@ -2767,18 +2784,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
               varresult = value;
             }
           } else if (!removeEmpty && !this->SuppressSideEffects) {
-            // check to see if we need to print a warning
-            // if strict mode is on and the variable has
-            // not been "cleared"/initialized with a set(foo ) call
-            if (this->GetCMakeInstance()->GetWarnUninitialized() &&
-                !this->VariableInitialized(lookup)) {
-              if (this->CheckSystemVars ||
-                  (filename && this->IsProjectFile(filename))) {
-                std::ostringstream msg;
-                msg << "uninitialized variable \'" << lookup << "\'";
-                this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
-              }
-            }
+            this->MaybeWarnUninitialized(lookup, filename);
           }
           result.replace(var.loc, result.size() - var.loc, varresult);
           // Start looking from here on out.

@@ -866,6 +866,8 @@ public:
   std::deque<std::vector<std::string>> FindPackageRootPathStack;
 
   void MaybeWarnCMP0074(std::string const& pkg);
+  void MaybeWarnUninitialized(std::string const& variable,
+                              const char* sourceFilename) const;
   bool IsProjectFile(const char* filename) const;
 
 protected:
