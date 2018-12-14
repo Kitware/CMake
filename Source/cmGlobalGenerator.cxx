@@ -3014,11 +3014,23 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
 std::string cmGlobalGenerator::EscapeJSON(const std::string& s)
 {
   std::string result;
+  result.reserve(s.size());
   for (char i : s) {
-    if (i == '"' || i == '\\') {
-      result += '\\';
+    switch (i) {
+      case '"':
+      case '\\':
+        result += '\\';
+        result += i;
+        break;
+      case '\n':
+        result += "\\n";
+        break;
+      case '\t':
+        result += "\\t";
+        break;
+      default:
+        result += i;
     }
-    result += i;
   }
   return result;
 }
