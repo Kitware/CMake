@@ -98,6 +98,8 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->ConfigureDoneCMP0026AndCMP0024 = false;
   this->FirstTimeProgress = 0.0f;
 
+  this->RecursionDepth = 0;
+
   cm->GetState()->SetIsGeneratorMultiConfig(false);
   cm->GetState()->SetMinGWMake(false);
   cm->GetState()->SetMSYSShell(false);
@@ -1166,6 +1168,7 @@ void cmGlobalGenerator::Configure()
     this->CMakeInstance->GetHomeOutputDirectory());
 
   cmMakefile* dirMf = new cmMakefile(this, snapshot);
+  dirMf->SetRecursionDepth(this->RecursionDepth);
   this->Makefiles.push_back(dirMf);
   this->IndexMakefile(dirMf);
 

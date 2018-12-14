@@ -1,0 +1,5 @@
+[0-9]+
+CMake Error at include_recursive\.cmake:1 \(message\):
+  Maximum recursion depth of [0-9]+ exceeded
+Call Stack \(most recent call first\):
+  include_recursive\.cmake:3 \(include\)

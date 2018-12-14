@@ -1,0 +1,5 @@
+[0-9]+
+CMake Error at FindRecursivePackage\.cmake:1 \(message\):
+  Maximum recursion depth of [0-9]+ exceeded
+Call Stack \(most recent call first\):
+  FindRecursivePackage\.cmake:3 \(find_package\)

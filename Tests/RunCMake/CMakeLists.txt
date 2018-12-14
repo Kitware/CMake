@@ -215,6 +215,7 @@ endif()
 add_RunCMake_test(CompatibleInterface)
 add_RunCMake_test(Syntax)
 add_RunCMake_test(WorkingDirectory)
+add_RunCMake_test(MaxRecursionDepth)
 
 add_RunCMake_test(add_custom_command)
 add_RunCMake_test(add_custom_target)

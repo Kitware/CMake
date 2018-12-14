@@ -45,6 +45,8 @@
 #include "cm_sys_stat.h"
 #include "cmake.h"
 
+#include "cmConfigure.h" // IWYU pragma: keep
+
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #  include "cmVariableWatch.h"
 #endif
@@ -83,6 +85,7 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->StateSnapshot =
     this->StateSnapshot.GetState()->CreatePolicyScopeSnapshot(
       this->StateSnapshot);
+  this->RecursionDepth = 0;
 
   // Enter a policy level for this directory.
   this->PushPolicy();
@@ -333,12 +336,14 @@ public:
     cmListFileContext const& lfc = cmListFileContext::FromCommandContext(
       cc, this->Makefile->StateSnapshot.GetExecutionListFile());
     this->Makefile->Backtrace = this->Makefile->Backtrace.Push(lfc);
+    ++this->Makefile->RecursionDepth;
     this->Makefile->ExecutionStatusStack.push_back(&status);
   }
 
   ~cmMakefileCall()
   {
     this->Makefile->ExecutionStatusStack.pop_back();
+    --this->Makefile->RecursionDepth;
     this->Makefile->Backtrace = this->Makefile->Backtrace.Pop();
   }
 
@@ -360,6 +365,24 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   // Place this call on the call stack.
   cmMakefileCall stack_manager(this, lff, status);
   static_cast<void>(stack_manager);
+
+  // Check for maximum recursion depth.
+  int depth = CMake_DEFAULT_RECURSION_LIMIT;
+  const char* depthStr = this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH");
+  if (depthStr) {
+    std::istringstream s(depthStr);
+    int d;
+    if (s >> d) {
+      depth = d;
+    }
+  }
+  if (this->RecursionDepth > depth) {
+    std::ostringstream e;
+    e << "Maximum recursion depth of " << depth << " exceeded";
+    this->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
 
   // Lookup the command prototype.
   if (cmCommand* proto =
@@ -1369,6 +1392,9 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
 
   // Imported targets.
   this->ImportedTargets = parent->ImportedTargets;
+
+  // Recursion depth.
+  this->RecursionDepth = parent->RecursionDepth;
 }
 
 void cmMakefile::PushFunctionScope(std::string const& fileName,
@@ -2725,6 +2751,16 @@ bool cmMakefile::IsProjectFile(const char* filename) const
                                     cmake::GetCMakeFilesDirectory()));
 }
 
+int cmMakefile::GetRecursionDepth() const
+{
+  return this->RecursionDepth;
+}
+
+void cmMakefile::SetRecursionDepth(int recursionDepth)
+{
+  this->RecursionDepth = recursionDepth;
+}
+
 MessageType cmMakefile::ExpandVariablesInStringNew(
   std::string& errorstr, std::string& source, bool escapeQuotes,
   bool noEscapes, bool atOnly, const char* filename, long line,
@@ -3388,6 +3424,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     this->IsSourceFileTryCompile = false;
     return 1;
   }
+  gg->RecursionDepth = this->RecursionDepth;
   cm.SetGlobalGenerator(gg);
 
   // do a configure
@@ -3406,6 +3443,12 @@ int cmMakefile::TryCompile(const std::string& srcdir,
       cm.AddCacheEntry("CMAKE_BUILD_TYPE", config, "Build configuration",
                        cmStateEnums::STRING);
     }
+  }
+  const char* recursionDepth =
+    this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH");
+  if (recursionDepth) {
+    cm.AddCacheEntry("CMAKE_MAXIMUM_RECURSION_DEPTH", recursionDepth,
+                     "Maximum recursion depth", cmStateEnums::STRING);
   }
   // if cmake args were provided then pass them in
   if (cmakeArgs) {

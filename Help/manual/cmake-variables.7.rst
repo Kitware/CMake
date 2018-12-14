@@ -190,6 +190,7 @@ Variables that Change Behavior
    /variable/CMAKE_LIBRARY_PATH
    /variable/CMAKE_LINK_DIRECTORIES_BEFORE
    /variable/CMAKE_MFC_FLAG
+   /variable/CMAKE_MAXIMUM_RECURSION_DEPTH
    /variable/CMAKE_MODULE_PATH
    /variable/CMAKE_NOT_USING_CONFIG_FLAGS
    /variable/CMAKE_POLICY_DEFAULT_CMPNNNN
