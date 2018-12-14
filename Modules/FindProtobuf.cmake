@@ -121,8 +121,6 @@ Example:
 #]=======================================================================]
 
 function(protobuf_generate)
-  include(CMakeParseArguments)
-
   set(_options APPEND_PATH DESCRIPTORS)
   set(_singleargs LANGUAGE OUT_VAR EXPORT_MACRO PROTOC_OUT_DIR)
   if(COMMAND target_sources)
