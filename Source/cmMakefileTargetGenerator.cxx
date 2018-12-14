@@ -687,6 +687,17 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       std::string langIncludes = std::string("$(") + lang + "_INCLUDES)";
       compileCommand.replace(compileCommand.find(langIncludes),
                              langIncludes.size(), this->GetIncludes(lang));
+
+      const char* eliminate[] = {
+        this->Makefile->GetDefinition("CMAKE_START_TEMP_FILE"),
+        this->Makefile->GetDefinition("CMAKE_END_TEMP_FILE")
+      };
+      for (const char* el : eliminate) {
+        if (el) {
+          cmSystemTools::ReplaceString(compileCommand, el, "");
+        }
+      }
+
       this->GlobalGenerator->AddCXXCompileCommand(
         source.GetFullPath(), workingDirectory, compileCommand);
     }
