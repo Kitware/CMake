@@ -660,6 +660,15 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     return()
   endif()
 
+  # Check for a script by extension (.bat,.sh,...) or if the file starts with "#!" (shebang)
+  file(READ ${target} file_contents LIMIT 5)
+  if(target MATCHES "\\.(bat|c?sh|bash|ksh|cmd)$" OR file_contents MATCHES "^#!")
+    message(STATUS "GetPrequisites(${target}) : ignoring script file")
+    # Clear var
+    set(${prerequisites_var} "" PARENT_SCOPE)
+    return()
+  endif()
+
   set(gp_cmd_paths ${gp_cmd_paths}
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\14.0;InstallDir]/../../VC/bin"
     "$ENV{VS140COMNTOOLS}/../../VC/bin"
