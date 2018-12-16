@@ -63,6 +63,9 @@ searched first when a target without any path info is given.  Then
 standard system locations are also searched: PATH, Framework
 locations, /usr/lib...
 
+The variable GET_PREREQUISITES_VERBOSE can be set to true to enable verbose
+output.
+
 ::
 
   LIST_PREREQUISITES(<target> [<recurse> [<exclude_system> [<verbose>]]])
@@ -642,6 +645,10 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     set(rpaths "${ARGV6}")
   else()
     set(rpaths "")
+  endif()
+
+  if(GET_PREREQUISITES_VERBOSE)
+    set(verbose 1)
   endif()
 
   if(NOT IS_ABSOLUTE "${target}")
