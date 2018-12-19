@@ -45,16 +45,16 @@ protected:
   std::string TempName;
 
   // Whether to do a copy-if-different.
-  bool CopyIfDifferent;
+  bool CopyIfDifferent = false;
 
   // Whether the real file stream was valid when it was closed.
-  bool Okay;
+  bool Okay = false;
 
   // Whether the destination file is compressed
-  bool Compress;
+  bool Compress = false;
 
   // Whether the destination file is compressed
-  bool CompressExtraExtension;
+  bool CompressExtraExtension = true;
 };
 
 /** \class cmGeneratedFileStream

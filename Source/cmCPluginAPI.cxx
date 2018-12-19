@@ -475,11 +475,8 @@ int CCONV cmGetTotalArgumentSize(int argc, char** argv)
 // API for source files.
 struct cmCPluginAPISourceFile
 {
-  cmCPluginAPISourceFile()
-    : RealSourceFile(nullptr)
-  {
-  }
-  cmSourceFile* RealSourceFile;
+  cmCPluginAPISourceFile() {}
+  cmSourceFile* RealSourceFile = nullptr;
   std::string SourceName;
   std::string SourceExtension;
   std::string FullPath;

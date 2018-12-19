@@ -50,8 +50,7 @@ struct cmStateDetail::PolicyStackEntry : public cmPolicies::PolicyMap
 {
   typedef cmPolicies::PolicyMap derived;
   PolicyStackEntry(bool w = false)
-    : derived()
-    , Weak(w)
+    : Weak(w)
   {
   }
   PolicyStackEntry(derived const& d, bool w)

@@ -202,14 +202,14 @@ private:
 
   std::string SourceDirectory;
   std::string BinaryDirectory;
-  bool IsInTryCompile;
-  bool IsGeneratorMultiConfig;
-  bool WindowsShell;
-  bool WindowsVSIDE;
-  bool WatcomWMake;
-  bool MinGWMake;
-  bool NMake;
-  bool MSYSShell;
+  bool IsInTryCompile = false;
+  bool IsGeneratorMultiConfig = false;
+  bool WindowsShell = false;
+  bool WindowsVSIDE = false;
+  bool WatcomWMake = false;
+  bool MinGWMake = false;
+  bool NMake = false;
+  bool MSYSShell = false;
 };
 
 #endif

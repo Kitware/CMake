@@ -15,10 +15,7 @@
 
 cmDepends::cmDepends(cmLocalGenerator* lg, const char* targetDir)
   : LocalGenerator(lg)
-  , Verbose(false)
-  , FileComparison(nullptr)
   , TargetDirectory(targetDir)
-  , MaxPath(16384)
   , Dependee(new char[MaxPath])
   , Depender(new char[MaxPath])
 {

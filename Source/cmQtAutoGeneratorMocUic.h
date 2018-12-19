@@ -404,7 +404,7 @@ private:
   MocSettingsT Moc_;
   UicSettingsT Uic_;
   // -- Progress
-  StageT Stage_;
+  StageT Stage_ = StageT::SETTINGS_READ;
   // -- Job queues
   std::mutex JobsMutex_;
   struct
@@ -416,15 +416,15 @@ private:
     JobQueueT Uic;
   } JobQueues_;
   JobQueueT JobQueue_;
-  std::size_t volatile JobsRemain_;
-  bool volatile JobError_;
-  bool volatile JobThreadsAbort_;
+  std::size_t volatile JobsRemain_ = 0;
+  bool volatile JobError_ = false;
+  bool volatile JobThreadsAbort_ = false;
   std::condition_variable JobsConditionRead_;
   // -- Moc meta
   std::set<std::string> MocIncludedStrings_;
   std::set<std::string> MocIncludedFiles_;
   std::set<std::string> MocAutoFiles_;
-  bool volatile MocAutoFileUpdated_;
+  bool volatile MocAutoFileUpdated_ = false;
   // -- Settings file
   std::string SettingsFile_;
   std::string SettingsStringMoc_;

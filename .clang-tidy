@@ -15,7 +15,6 @@ modernize-*,\
 -modernize-raw-string-literal,\
 -modernize-return-braced-init-list,\
 -modernize-use-auto,\
--modernize-use-default-member-init,\
 -modernize-use-emplace,\
 -modernize-use-equals-default,\
 -modernize-use-equals-delete,\
@@ -33,8 +32,10 @@ readability-*,\
 -readability-inconsistent-declaration-parameter-name,\
 -readability-named-parameter,\
 -readability-redundant-declaration,\
--readability-redundant-member-init,\
 -readability-simplify-boolean-expr,\
 "
 HeaderFilterRegex: 'Source/cm[^/]*\.(h|hxx|cxx)$'
+CheckOptions:
+  - key:   modernize-use-default-member-init.UseAssignment
+    value: '1'
 ...

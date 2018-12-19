@@ -96,15 +96,15 @@ protected:
   cmLocalGenerator* LocalGenerator;
 
   // Flag for verbose output.
-  bool Verbose;
-  cmFileTimeComparison* FileComparison;
+  bool Verbose = false;
+  cmFileTimeComparison* FileComparison = nullptr;
 
   std::string Language;
 
   // The full path to the target's build directory.
   std::string TargetDirectory;
 
-  size_t MaxPath;
+  size_t MaxPath = 16384;
   char* Dependee;
   char* Depender;
 

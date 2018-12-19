@@ -83,9 +83,9 @@ public:
   cmMakefile const* GetMakefile() const { return this->Makefile; }
 
 private:
-  cmMakefile const* const Makefile;
-  bool AmbiguousDirectory;
-  bool AmbiguousExtension;
+  cmMakefile const* const Makefile = nullptr;
+  bool AmbiguousDirectory = true;
+  bool AmbiguousExtension = true;
   std::string Directory;
   std::string Name;
 

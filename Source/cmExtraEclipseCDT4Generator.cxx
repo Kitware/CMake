@@ -41,7 +41,6 @@ void AppendDictionary(cmXMLWriter& xml, const char* key, T const& value)
 }
 
 cmExtraEclipseCDT4Generator::cmExtraEclipseCDT4Generator()
-  : cmExternalMakefileProjectGenerator()
 {
   this->SupportsVirtualFolders = true;
   this->GenerateLinkedResources = true;

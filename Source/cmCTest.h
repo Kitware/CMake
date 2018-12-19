@@ -57,10 +57,7 @@ public:
   /** Representation of one part.  */
   struct PartInfo
   {
-    PartInfo()
-      : Enabled(false)
-    {
-    }
+    PartInfo() {}
 
     void SetName(const std::string& name) { this->Name = name; }
     const std::string& GetName() const { return this->Name; }
@@ -71,7 +68,7 @@ public:
     std::vector<std::string> SubmitFiles;
 
   private:
-    bool Enabled;
+    bool Enabled = false;
     std::string Name;
   };
 #ifdef CMAKE_BUILD_WITH_CMAKE

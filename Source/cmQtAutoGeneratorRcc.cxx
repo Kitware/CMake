@@ -15,12 +15,6 @@
 // -- Class methods
 
 cmQtAutoGeneratorRcc::cmQtAutoGeneratorRcc()
-  : MultiConfig_(false)
-  , SettingsChanged_(false)
-  , Stage_(StageT::SETTINGS_READ)
-  , Error_(false)
-  , Generate_(false)
-  , BuildFileChanged_(false)
 {
   // Initialize libuv asynchronous iteration request
   UVRequest().init(*UVLoop(), &cmQtAutoGeneratorRcc::UVPollStage, this);

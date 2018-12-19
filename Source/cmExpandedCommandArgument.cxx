@@ -3,7 +3,6 @@
 #include "cmExpandedCommandArgument.h"
 
 cmExpandedCommandArgument::cmExpandedCommandArgument()
-  : Quoted(false)
 {
 }
 

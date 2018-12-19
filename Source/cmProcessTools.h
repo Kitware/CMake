@@ -54,11 +54,11 @@ public:
     void SetLog(std::ostream* log, const char* prefix);
 
   protected:
-    std::ostream* Log;
-    const char* Prefix;
+    std::ostream* Log = nullptr;
+    const char* Prefix = nullptr;
     std::string Line;
     char Separator;
-    char LineEnd;
+    char LineEnd = '\0';
     bool IgnoreCR;
     bool ProcessChunk(const char* data, int length) override;
 

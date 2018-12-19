@@ -37,13 +37,7 @@ class cmCustomCommand;
 cmNinjaNormalTargetGenerator::cmNinjaNormalTargetGenerator(
   cmGeneratorTarget* target)
   : cmNinjaTargetGenerator(target)
-  , TargetNameOut()
-  , TargetNameSO()
-  , TargetNameReal()
-  , TargetNameImport()
-  , TargetNamePDB()
   , TargetLinkLanguage("")
-  , DeviceLinkObject()
 {
   this->TargetLinkLanguage = target->GetLinkerLanguage(this->GetConfigName());
   if (target->GetType() == cmStateEnums::EXECUTABLE) {

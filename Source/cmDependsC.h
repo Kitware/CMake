@@ -75,16 +75,13 @@ public:
 
   struct cmIncludeLines
   {
-    cmIncludeLines()
-      : Used(false)
-    {
-    }
+    cmIncludeLines() {}
     std::vector<UnscannedEntry> UnscannedEntries;
-    bool Used;
+    bool Used = false;
   };
 
 protected:
-  const std::map<std::string, DependencyVector>* ValidDeps;
+  const std::map<std::string, DependencyVector>* ValidDeps = nullptr;
   std::set<std::string> Encountered;
   std::queue<UnscannedEntry> Unscanned;
 

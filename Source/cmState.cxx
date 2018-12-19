@@ -22,14 +22,6 @@
 #include "cmake.h"
 
 cmState::cmState()
-  : IsInTryCompile(false)
-  , IsGeneratorMultiConfig(false)
-  , WindowsShell(false)
-  , WindowsVSIDE(false)
-  , WatcomWMake(false)
-  , MinGWMake(false)
-  , NMake(false)
-  , MSYSShell(false)
 {
   this->CacheManager = new cmCacheManager;
   this->GlobVerificationManager = new cmGlobVerificationManager;

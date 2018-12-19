@@ -51,14 +51,13 @@ private:
   cmFileLockResult LockWithTimeout(unsigned long timeoutSec);
 
 #if defined(_WIN32)
-  typedef HANDLE FileId;
+  HANDLE File = INVALID_HANDLE_VALUE;
   BOOL LockFile(DWORD flags);
 #else
-  typedef int FileId;
+  int File = -1;
   int LockFile(int cmd, int type);
 #endif
 
-  FileId File;
   std::string Filename;
 };
 

@@ -55,7 +55,6 @@ cmExtraSublimeTextGenerator::GetFactory()
 }
 
 cmExtraSublimeTextGenerator::cmExtraSublimeTextGenerator()
-  : cmExternalMakefileProjectGenerator()
 {
   this->ExcludeBuildFolder = false;
 }

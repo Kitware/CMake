@@ -25,9 +25,7 @@ class cmExecutionStatus;
 #endif
 
 cmExportCommand::cmExportCommand()
-  : cmCommand()
-  , ArgumentGroup()
-  , Targets(&Helper, "TARGETS")
+  : Targets(&Helper, "TARGETS")
   , Append(&Helper, "APPEND", &ArgumentGroup)
   , ExportSetName(&Helper, "EXPORT", &ArgumentGroup)
   , Namespace(&Helper, "NAMESPACE", &ArgumentGroup)

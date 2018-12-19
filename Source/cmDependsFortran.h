@@ -76,7 +76,7 @@ protected:
   std::set<std::string> PPDefinitions;
 
   // Internal implementation details.
-  cmDependsFortranInternals* Internal;
+  cmDependsFortranInternals* Internal = nullptr;
 
 private:
   std::string MaybeConvertToRelativePath(std::string const& base,

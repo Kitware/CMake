@@ -2697,13 +2697,9 @@ typedef enum
 } t_domain;
 struct t_lookup
 {
-  t_lookup()
-    : domain(NORMAL)
-    , loc(0)
-  {
-  }
-  t_domain domain;
-  size_t loc;
+  t_lookup() {}
+  t_domain domain = NORMAL;
+  size_t loc = 0;
 };
 
 cmake::MessageType cmMakefile::ExpandVariablesInStringNew(

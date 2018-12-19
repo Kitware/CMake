@@ -217,11 +217,8 @@ protected:
   // Store per-target progress counters.
   struct TargetProgress
   {
-    TargetProgress()
-      : NumberOfActions(0)
-    {
-    }
-    unsigned long NumberOfActions;
+    TargetProgress() {}
+    unsigned long NumberOfActions = 0;
     std::string VariableFile;
     std::vector<unsigned long> Marks;
     void WriteProgressVariables(unsigned long total, unsigned long& current);

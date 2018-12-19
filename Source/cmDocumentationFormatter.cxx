@@ -11,8 +11,6 @@
 #include <vector>
 
 cmDocumentationFormatter::cmDocumentationFormatter()
-  : TextWidth(77)
-  , TextIndent("")
 {
 }
 

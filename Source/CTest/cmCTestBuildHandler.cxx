@@ -503,10 +503,7 @@ public:
     : FTC(ftc)
   {
   }
-  FragmentCompare()
-    : FTC(nullptr)
-  {
-  }
+  FragmentCompare() {}
   bool operator()(std::string const& l, std::string const& r) const
   {
     // Order files by modification time.  Use lexicographic order
@@ -520,7 +517,7 @@ public:
   }
 
 private:
-  cmFileTimeComparison* FTC;
+  cmFileTimeComparison* FTC = nullptr;
 };
 
 void cmCTestBuildHandler::GenerateXMLLaunched(cmXMLWriter& xml)

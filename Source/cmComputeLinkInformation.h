@@ -30,12 +30,7 @@ public:
 
   struct Item
   {
-    Item()
-      : Value()
-      , IsPath(true)
-      , Target(nullptr)
-    {
-    }
+    Item() {}
     Item(std::string const& v, bool p,
          cmGeneratorTarget const* target = nullptr)
       : Value(v)
@@ -44,8 +39,8 @@ public:
     {
     }
     std::string Value;
-    bool IsPath;
-    cmGeneratorTarget const* Target;
+    bool IsPath = true;
+    cmGeneratorTarget const* Target = nullptr;
   };
   typedef std::vector<Item> ItemVector;
   ItemVector const& GetItems() const;

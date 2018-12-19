@@ -33,11 +33,8 @@ struct cmCommandContext
     cmCommandName(std::string const& name) { *this = name; }
     cmCommandName& operator=(std::string const& name);
   } Name;
-  long Line;
-  cmCommandContext()
-    : Line(0)
-  {
-  }
+  long Line = 0;
+  cmCommandContext() {}
   cmCommandContext(const char* name, int line)
     : Name(name)
     , Line(line)
@@ -53,12 +50,7 @@ struct cmListFileArgument
     Quoted,
     Bracket
   };
-  cmListFileArgument()
-    : Value()
-    , Delim(Unquoted)
-    , Line(0)
-  {
-  }
+  cmListFileArgument() {}
   cmListFileArgument(const std::string& v, Delimiter d, long line)
     : Value(v)
     , Delim(d)
@@ -71,8 +63,8 @@ struct cmListFileArgument
   }
   bool operator!=(const cmListFileArgument& r) const { return !(*this == r); }
   std::string Value;
-  Delimiter Delim;
-  long Line;
+  Delimiter Delim = Unquoted;
+  long Line = 0;
 };
 
 class cmListFileContext
@@ -80,13 +72,8 @@ class cmListFileContext
 public:
   std::string Name;
   std::string FilePath;
-  long Line;
-  cmListFileContext()
-    : Name()
-    , FilePath()
-    , Line(0)
-  {
-  }
+  long Line = 0;
+  cmListFileContext() {}
 
   static cmListFileContext FromCommandContext(cmCommandContext const& lfcc,
                                               std::string const& fileName)

@@ -28,11 +28,7 @@ public:
    * Construct with dependency generation marked not done; instance
    * not placed in cmMakefile's list.
    */
-  cmDependInformation()
-    : DependDone(false)
-    , SourceFile(nullptr)
-  {
-  }
+  cmDependInformation() {}
 
   /**
    * The set of files on which this one depends.
@@ -44,13 +40,13 @@ public:
    * This flag indicates whether dependency checking has been
    * performed for this file.
    */
-  bool DependDone;
+  bool DependDone = false;
 
   /**
    * If this object corresponds to a cmSourceFile instance, this points
    * to it.
    */
-  const cmSourceFile* SourceFile;
+  const cmSourceFile* SourceFile = nullptr;
 
   /**
    * Full path to this file.
