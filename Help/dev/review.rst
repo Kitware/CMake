@@ -323,6 +323,14 @@ branch (e.g. ``master``) branch followed by a sequence of merges each
 integrating changes from an open MR that has been staged for integration
 testing.  Each time the target integration branch is updated the stage
 is rebuilt automatically by merging the staged MR topics again.
+The branch is stored in the upstream repository by special refs:
+
+* ``refs/stage/master/head``: The current topic stage branch.
+  This is used by continuous builds that report to CDash.
+* ``refs/stage/master/nightly/latest``: Topic stage as of 1am UTC each night.
+  This is used by most nightly builds that report to CDash.
+* ``refs/stage/master/nightly/<yyyy>/<mm>/<dd>``: Topic stage as of 1am UTC
+  on the date specified. This is used for historical reference.
 
 `CMake GitLab Project Developers`_ may stage a MR for integration testing
 by adding a comment with a command among the `comment trailing lines`_::
