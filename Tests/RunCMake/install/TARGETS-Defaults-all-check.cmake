@@ -17,8 +17,8 @@ if(WIN32)
 elseif(CYGWIN)
   set(_check_files
     [[bin]]
-    [[bin/exe\.exe]]
     [[bin/cyglib1\.dll]]
+    [[bin/exe\.exe]]
     [[include]]
     [[include/obj4\.h]]
     [[include/obj5\.h]]
