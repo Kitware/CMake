@@ -354,6 +354,11 @@ enabled.
 .. include:: FIND_XXX_ROOT.txt
 .. include:: FIND_XXX_ORDER.txt
 
+By default the value stored in the result variable will be the path at
+which the file is found.  The :variable:`CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS`
+variable may be set to ``TRUE`` before calling ``find_package`` in order
+to resolve symbolic links and store the real path to the file.
+
 Every non-REQUIRED ``find_package`` call can be disabled by setting the
 :variable:`CMAKE_DISABLE_FIND_PACKAGE_<PackageName>` variable to ``TRUE``.
 

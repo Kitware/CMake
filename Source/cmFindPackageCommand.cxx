@@ -95,6 +95,7 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->UseLib32Paths = false;
   this->UseLib64Paths = false;
   this->UseLibx32Paths = false;
+  this->UseRealPath = false;
   this->PolicyScope = true;
   this->VersionMajor = 0;
   this->VersionMinor = 0;
@@ -193,6 +194,11 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
   // Check if System Package Registry should be disabled
   if (this->Makefile->IsOn("CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY")) {
     this->NoSystemRegistry = true;
+  }
+
+  // Check whether we should resolve symlinks when finding packages
+  if (this->Makefile->IsOn("CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS")) {
+    this->UseRealPath = true;
   }
 
   // Check if Sorting should be enabled
@@ -1502,6 +1508,10 @@ bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
       fprintf(stderr, "Checking file [%s]\n", file.c_str());
     }
     if (cmSystemTools::FileExists(file, true) && this->CheckVersion(file)) {
+      // Allow resolving symlinks when the config file is found through a link
+      if (this->UseRealPath) {
+        file = cmSystemTools::GetRealPath(file);
+      }
       return true;
     }
   }
