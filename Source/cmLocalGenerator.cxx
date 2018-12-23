@@ -2044,8 +2044,14 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
     return;
   }
 
-  std::string name = "CMAKE_" + lang + "_LINK_OPTIONS_";
-  name += cmSystemTools::IsOn(PICValue) ? "PIE" : "NO_PIE";
+  const std::string mode = cmSystemTools::IsOn(PICValue) ? "PIE" : "NO_PIE";
+
+  std::string supported = "CMAKE_" + lang + "_LINK_" + mode + "_SUPPORTED";
+  if (cmSystemTools::IsOff(this->Makefile->GetDefinition(supported))) {
+    return;
+  }
+
+  std::string name = "CMAKE_" + lang + "_LINK_OPTIONS_" + mode;
 
   auto pieFlags = this->Makefile->GetSafeDefinition(name);
   if (pieFlags.empty()) {

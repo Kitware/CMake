@@ -35,6 +35,7 @@ These modules are loaded using the :command:`include` command.
    /module/CheckIncludeFiles
    /module/CheckLanguage
    /module/CheckLibraryExists
+   /module/CheckPIESupported
    /module/CheckPrototypeDefinition
    /module/CheckStructHasMember
    /module/CheckSymbolExists

@@ -15,23 +15,14 @@ macro(__compiler_gnu lang)
   # Feature flags.
   set(CMAKE_${lang}_VERBOSE_FLAG "-v")
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "-fPIC")
+  set (_CMAKE_${lang}_PIE_MAY_BE_SUPPORTED_BY_LINKER NO)
   if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.4)
     set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "-fPIE")
     # Support of PIE at link stage depends on various elements : platform, compiler, linker
-    # so the easiest way is to check if compiler supports these flags
-    cmake_check_compiler_flag(${lang} "${CMAKE_${lang}_COMPILE_OPTIONS_PIE};-pie"
-                              CMAKE_${lang}_FLAG_PIE)
-    if (CMAKE_${lang}_FLAG_PIE)
-      set(CMAKE_${lang}_LINK_OPTIONS_PIE ${CMAKE_${lang}_COMPILE_OPTIONS_PIE} "-pie")
-    else()
-      set(CMAKE_${lang}_LINK_OPTIONS_PIE "")
-    endif()
-    cmake_check_compiler_flag(${lang} "-no-pie" CMAKE_${lang}_FLAG_NO_PIE)
-    if (CMAKE_${lang}_FLAG_NO_PIE)
-      set(CMAKE_${lang}_LINK_OPTIONS_NO_PIE "-no-pie")
-    else()
-      set(CMAKE_${lang}_LINK_OPTIONS_NO_PIE "")
-    endif()
+    # so to activate it, module CheckPIESupported must be used.
+    set (_CMAKE_${lang}_PIE_MAY_BE_SUPPORTED_BY_LINKER YES)
+    set(CMAKE_${lang}_LINK_OPTIONS_PIE ${CMAKE_${lang}_COMPILE_OPTIONS_PIE} "-pie")
+    set(CMAKE_${lang}_LINK_OPTIONS_NO_PIE "-no-pie")
   endif()
   if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.0)
     set(CMAKE_${lang}_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")

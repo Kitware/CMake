@@ -17,8 +17,46 @@ is set:
   passed to the linker step. For example ``-no-pie`` for ``GCC``.
 * Not set: no flags are passed to the linker step.
 
+Since a given linker may not support ``PIE`` flags in all environments in
+which it is used, it is the project's responsibility to use the
+:module:`CheckPIESupported` module to check for support to ensure that the
+:prop_tgt:`POSITION_INDEPENDENT_CODE` target property for executables will be
+honored at link time.
+
 This policy was introduced in CMake version 3.14.  CMake version
 |release| warns when the policy is not set and uses ``OLD`` behavior.  Use
 the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
 
 .. include:: DEPRECATED.txt
+
+Examples
+^^^^^^^^
+
+Behave like CMake 3.13 and do not apply any ``PIE`` flags at link stage.
+
+.. code-block:: cmake
+
+  cmake_minimum_required(VERSION 3.13)
+  project(foo)
+
+  # ...
+
+  add_executable(foo ...)
+  set_property(TARGET foo PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+
+Use the :module:`CheckPIESupported` module to detect whether ``PIE`` is
+supported by the current linker and environment.  Apply ``PIE`` flags only
+if the linker supports them.
+
+.. code-block:: cmake
+
+  cmake_minimum_required(VERSION 3.14) # CMP0083 NEW
+  project(foo)
+
+  include(CheckPIESupported)
+  check_pie_supported()
+
+  # ...
+
+  add_executable(foo ...)
+  set_property(TARGET foo PROPERTY POSITION_INDEPENDENT_CODE TRUE)

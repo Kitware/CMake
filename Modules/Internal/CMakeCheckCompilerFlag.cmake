@@ -12,12 +12,17 @@ The function does not use the try_compile() command so as to avoid infinite
 recursion.  It may not work for all platforms or toolchains, the caller is
 responsible for ensuring it is only called in valid situations.
 
+  cmake_check_compiler_flag(<lang> <flag> <result>
+                            [SRC_EXT <ext>] [COMMAND_PATTERN <pattern>]
+                            [FAIL_REGEX <regex> ...]
+                            [OUTPUT_VARIABLE <output>])
+
 Parameters:
-  lang   - Language to check.
-  flag   - The flag to add to the compile/link command line.
-  result - Boolean output variable.  It will be stored in the cache as an
-           internal variable and if true, will cause future tests that assign
-           to that variable to be bypassed.
+  <lang>   - Language to check.
+  <flag>   - The flag to add to the compile/link command line.
+  <result> - Boolean output variable.  It will be stored in the cache as an
+             internal variable and if true, will cause future tests that assign
+             to that variable to be bypassed.
 
 Optional parameters:
   SRC_EXT         - Overrides the extension of the source file used for the
@@ -28,7 +33,7 @@ Optional parameters:
                     the output, give a failed result for the check.  A common
                     set of regular expressions will be included in addition to
                     those given by FAIL_REGEX.
-
+  OUTPUT_VARIABLE - Set <output> variable with details about any error.
 #]=]
 
 include_guard(GLOBAL)
@@ -58,7 +63,7 @@ function(CMAKE_CHECK_COMPILER_FLAG lang flag result)
     set(check_lang ${lang})
   endif()
 
-  cmake_parse_arguments(CCCF "" "SRC_EXT;COMMAND_PATTERN" "FAIL_REGEX" ${ARGN})
+  cmake_parse_arguments(CCCF "" "SRC_EXT;COMMAND_PATTERN;OUTPUT_VARIABLE" "FAIL_REGEX" ${ARGN})
 
   if (NOT CCCF_COMMAND_PATTERN)
     set (CCCF_COMMAND_PATTERN "<FLAG> -o <OUTPUT> <SOURCE>")
@@ -93,6 +98,10 @@ function(CMAKE_CHECK_COMPILER_FLAG lang flag result)
     elseif(check_lang STREQUAL "Fortran")
       set(CCCF_SRC_EXT F)
     endif()
+  endif()
+
+  if (CCCF_OUTPUT_VARIABLE)
+    unset(${CCCF_OUTPUT_VARIABLE} PARENT_SCOPE)
   endif()
 
   # Compute the directory in which to run the test.
@@ -139,6 +148,9 @@ function(CMAKE_CHECK_COMPILER_FLAG lang flag result)
         "Determining if the ${flag} option "
         "is supported for ${lang} language failed with the following output:\n"
         "${COMPILER_FLAG_OUTPUT}\n")
+    if (CCCF_OUTPUT_VARIABLE)
+      set(${CCCF_OUTPUT_VARIABLE} "${COMPILER_FLAG_OUTPUT}" PARENT_SCOPE)
+    endif()
     return()
   endif()
 

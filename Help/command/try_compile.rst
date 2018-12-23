@@ -134,6 +134,11 @@ default values:
 If :policy:`CMP0056` is set to ``NEW``, then
 :variable:`CMAKE_EXE_LINKER_FLAGS` is passed in as well.
 
+If :policy:`CMP0083` is set to ``NEW``, then in order to obtain correct
+behavior at link time, the ``check_pie_supported()`` command from the
+:module:`CheckPIESupported` module must be called before using the
+:command:`try_compile` command.
+
 The current settings of :policy:`CMP0065` and :policy:`CMP0083` are set in the
 generated project.
 
