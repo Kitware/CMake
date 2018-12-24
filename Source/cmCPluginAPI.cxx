@@ -407,7 +407,7 @@ char CCONV* cmExpandVariablesInString(void* arg, const char* source,
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
   std::string barf = source;
   std::string const& result =
-    mf->ExpandVariablesInString(barf, escapeQuotes, atOnly);
+    mf->ExpandVariablesInString(barf, escapeQuotes != 0, atOnly != 0);
   return strdup(result.c_str());
 }
 

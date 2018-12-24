@@ -50,7 +50,7 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args,
   // Set permissions to writable
   if (cmSystemTools::GetPermissions(fileName.c_str(), mode)) {
 #if defined(_MSC_VER) || defined(__MINGW32__)
-    writable = mode & S_IWRITE;
+    writable = (mode & S_IWRITE) != 0;
     mode_t newMode = mode | S_IWRITE;
 #else
     writable = mode & S_IWUSR;
