@@ -27,6 +27,7 @@ Synopsis
     file({`COPY`_ | `INSTALL`_} <file>... DESTINATION <dir> [...])
     file(`SIZE`_ <filename> <out-var>)
     file(`READ_SYMLINK`_ <filename> <out-var>)
+    file(`CREATE_LINK`_ <file> <new-file> [...])
 
   `Path Conversion`_
     file(`RELATIVE_PATH`_ <out-var> <directory> <file>)
@@ -367,6 +368,28 @@ could do something like this:
     get_filename_component(dir "${filename}" DIRECTORY)
     set(result "${dir}/${result}")
   endif()
+
+.. _CREATE_LINK:
+
+.. code-block:: cmake
+
+  file(CREATE_LINK <file> <new-file>
+       [RESULT <result>] [COPY_ON_ERROR] [SYMBOLIC])
+
+Create a link to ``<file>`` at ``<new-file>``.
+
+It is a hard link by default. This can be changed to symbolic links by
+using ``SYMBOLIC``.  The original file needs to exist for hard links.
+
+The ``<result>`` variable, if specified, gets the status of the operation.
+It is set to ``0`` in case of success. Otherwise, it contains the error
+generated. In case of failures, if ``RESULT`` is not specified, a fatal error
+is emitted.
+
+Specifying ``COPY_ON_ERROR`` enables copying the file as a fallback if
+creating the link fails.
+
+Overwrites the ``<new-file>`` if it exists.
 
 Path Conversion
 ^^^^^^^^^^^^^^^
