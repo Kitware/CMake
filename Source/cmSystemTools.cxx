@@ -3134,3 +3134,19 @@ bool cmSystemTools::CreateSymlink(const std::string& origName,
 
   return true;
 }
+
+bool cmSystemTools::CreateLink(const std::string& origName,
+                               const std::string& newName)
+{
+  uv_fs_t req;
+  int err =
+    uv_fs_link(nullptr, &req, origName.c_str(), newName.c_str(), nullptr);
+  if (err) {
+    std::string e =
+      "failed to create link '" + newName + "': " + uv_strerror(err);
+    cmSystemTools::Error(e.c_str());
+    return false;
+  }
+
+  return true;
+}

@@ -530,6 +530,11 @@ public:
   static bool CreateSymlink(const std::string& origName,
                             const std::string& newName);
 
+  /** Create a hard link if the platform supports it.  Returns whether
+      creation succeeded. */
+  static bool CreateLink(const std::string& origName,
+                         const std::string& newName);
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

@@ -61,6 +61,7 @@ protected:
   bool HandleLockCommand(std::vector<std::string> const& args);
   bool HandleSizeCommand(std::vector<std::string> const& args);
   bool HandleReadSymlinkCommand(std::vector<std::string> const& args);
+  bool HandleCreateLinkCommand(std::vector<std::string> const& args);
 
 private:
   void AddEvaluationFile(const std::string& inputName,
