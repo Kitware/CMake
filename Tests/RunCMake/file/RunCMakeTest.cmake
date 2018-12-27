@@ -1,6 +1,7 @@
 include(RunCMake)
 
 run_cmake(CREATE_LINK)
+run_cmake(CREATE_LINK-noarg)
 run_cmake(CREATE_LINK-noexist)
 run_cmake(DOWNLOAD-hash-mismatch)
 run_cmake(DOWNLOAD-unused-argument)
