@@ -1,5 +1,7 @@
 include(RunCMake)
 
+run_cmake(CREATE_LINK)
+run_cmake(CREATE_LINK-noexist)
 run_cmake(DOWNLOAD-hash-mismatch)
 run_cmake(DOWNLOAD-unused-argument)
 run_cmake(DOWNLOAD-httpheader-not-set)
