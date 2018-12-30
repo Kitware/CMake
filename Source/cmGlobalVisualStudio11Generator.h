@@ -44,7 +44,7 @@ protected:
   bool IsWindowsStoreToolsetInstalled() const;
 
   const char* GetIDEVersion() override { return "11.0"; }
-  bool UseFolderProperty();
+  bool UseFolderProperty() const override;
   static std::set<std::string> GetInstalledWindowsCESDKs();
 
   /** Return true if the configuration needs to be deployed */

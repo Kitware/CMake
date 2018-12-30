@@ -118,7 +118,7 @@ public:
   std::string ExpandCFGIntDir(const std::string& str,
                               const std::string& config) const override;
 
-  void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
+  void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;
 
   std::string GetStartupProjectName(cmLocalGenerator const* root) const;
 
@@ -163,7 +163,7 @@ protected:
 private:
   virtual std::string GetVSMakeProgram() = 0;
   void PrintCompilerAdvice(std::ostream&, std::string const&,
-                           const char*) const
+                           const char*) const override
   {
   }
 

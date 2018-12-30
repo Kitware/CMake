@@ -73,7 +73,7 @@ protected:
                            const char* path,
                            const cmGeneratorTarget* t) override;
 
-  bool UseFolderProperty();
+  bool UseFolderProperty() const override;
 
   std::string Name;
   std::string WindowsCEVersion;
