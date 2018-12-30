@@ -850,7 +850,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   set(gp_install_id)
   if(gp_tool STREQUAL "otool")
     execute_process(
-      COMMAND otool -D ${target}
+      COMMAND ${gp_cmd} -D ${target}
       RESULT_VARIABLE otool_rv
       OUTPUT_VARIABLE gp_install_id_ov
       ERROR_VARIABLE otool_ev
