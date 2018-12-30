@@ -59,18 +59,17 @@ void cmExtraCodeLiteGenerator::Generate()
   // and extract the information for creating the worspace
   // root makefile
   for (auto const& it : projectMap) {
-    const cmMakefile* mf = it.second[0]->GetMakefile();
+    cmLocalGenerator* lg = it.second[0];
+    const cmMakefile* mf = lg->GetMakefile();
     this->ConfigName = GetConfigurationName(mf);
 
-    if (it.second[0]->GetCurrentBinaryDirectory() ==
-        it.second[0]->GetBinaryDirectory()) {
-      workspaceOutputDir = it.second[0]->GetCurrentBinaryDirectory();
-      workspaceProjectName = it.second[0]->GetProjectName();
-      workspaceSourcePath = it.second[0]->GetSourceDirectory();
+    if (lg->GetCurrentBinaryDirectory() == lg->GetBinaryDirectory()) {
+      workspaceOutputDir = lg->GetCurrentBinaryDirectory();
+      workspaceProjectName = lg->GetProjectName();
+      workspaceSourcePath = lg->GetSourceDirectory();
       workspaceFileName = workspaceOutputDir + "/";
       workspaceFileName += workspaceProjectName + ".workspace";
-      this->WorkspacePath = it.second[0]->GetCurrentBinaryDirectory();
-      ;
+      this->WorkspacePath = lg->GetCurrentBinaryDirectory();
       break;
     }
   }

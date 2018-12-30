@@ -196,7 +196,7 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string& config,
   std::string outputFilename(this->GetOutputFilename(config));
 
   if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
-    std::string const static_library_suffix =
+    std::string const& static_library_suffix =
       this->Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
     *this->GetFolderBuildStreams()
       << "    -o \"" << outputDir << outputFilename << static_library_suffix
@@ -478,10 +478,9 @@ void cmGhsMultiTargetGenerator::WriteSources(
   std::vector<cmSourceFile*> const& objectSources,
   std::map<const cmSourceFile*, std::string> const& objectNames)
 {
-  for (std::vector<cmSourceFile*>::const_iterator si = objectSources.begin();
-       si != objectSources.end(); ++si) {
+  for (const cmSourceFile* sf : objectSources) {
     std::vector<cmSourceGroup> sourceGroups(this->Makefile->GetSourceGroups());
-    std::string const& sourceFullPath = (*si)->GetFullPath();
+    std::string const& sourceFullPath = sf->GetFullPath();
     cmSourceGroup* sourceGroup =
       this->Makefile->FindSourceGroup(sourceFullPath, sourceGroups);
     std::string sgPath = sourceGroup->GetFullName();
@@ -491,8 +490,8 @@ void cmGhsMultiTargetGenerator::WriteSources(
       this->LocalGenerator->GetBinaryDirectory().c_str(), sgPath,
       GhsMultiGpj::SUBPROJECT, this->RelBuildFilePath);
 
-    std::string fullSourcePath((*si)->GetFullPath());
-    if ((*si)->GetExtension() == "int" || (*si)->GetExtension() == "bsp") {
+    std::string fullSourcePath(sf->GetFullPath());
+    if (sf->GetExtension() == "int" || sf->GetExtension() == "bsp") {
       *this->FolderBuildStreams[sgPath] << fullSourcePath << std::endl;
     } else {
       // WORKAROUND: GHS MULTI needs the path to use backslashes without quotes
@@ -501,12 +500,12 @@ void cmGhsMultiTargetGenerator::WriteSources(
       *this->FolderBuildStreams[sgPath] << fullSourcePath << std::endl;
     }
 
-    if ("ld" != (*si)->GetExtension() && "int" != (*si)->GetExtension() &&
-        "bsp" != (*si)->GetExtension()) {
-      this->WriteObjectLangOverride(this->FolderBuildStreams[sgPath], (*si));
-      if (objectNames.end() != objectNames.find(*si)) {
+    if ("ld" != sf->GetExtension() && "int" != sf->GetExtension() &&
+        "bsp" != sf->GetExtension()) {
+      this->WriteObjectLangOverride(this->FolderBuildStreams[sgPath], sf);
+      if (objectNames.end() != objectNames.find(sf)) {
         *this->FolderBuildStreams[sgPath]
-          << "    -o \"" << objectNames.find(*si)->second << "\"" << std::endl;
+          << "    -o \"" << objectNames.find(sf)->second << "\"" << std::endl;
       }
 
       this->WriteObjectDir(this->FolderBuildStreams[sgPath],
@@ -516,7 +515,7 @@ void cmGhsMultiTargetGenerator::WriteSources(
 }
 
 void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
-  cmGeneratedFileStream* fileStream, cmSourceFile* sourceFile)
+  cmGeneratedFileStream* fileStream, const cmSourceFile* sourceFile)
 {
   const char* rawLangProp = sourceFile->GetProperty("LANGUAGE");
   if (NULL != rawLangProp) {
