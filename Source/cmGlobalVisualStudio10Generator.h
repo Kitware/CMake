@@ -86,7 +86,7 @@ public:
   }
 
   /** Return true if building for WindowsCE */
-  bool TargetsWindowsCE() const { return this->SystemIsWindowsCE; }
+  bool TargetsWindowsCE() const override { return this->SystemIsWindowsCE; }
 
   /** Return true if building for WindowsPhone */
   bool TargetsWindowsPhone() const { return this->SystemIsWindowsPhone; }

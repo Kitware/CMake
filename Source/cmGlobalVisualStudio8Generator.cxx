@@ -78,7 +78,7 @@ void cmGlobalVisualStudio8Generator::Configure()
   this->cmGlobalVisualStudio7Generator::Configure();
 }
 
-bool cmGlobalVisualStudio8Generator::UseFolderProperty()
+bool cmGlobalVisualStudio8Generator::UseFolderProperty() const
 {
   return IsExpressEdition() ? false : cmGlobalGenerator::UseFolderProperty();
 }

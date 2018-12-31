@@ -37,7 +37,7 @@ protected:
   void WriteSLNHeader(std::ostream& fout) override;
 
   // Folders are not supported by VS 7.1.
-  virtual bool UseFolderProperty() { return false; }
+  bool UseFolderProperty() const override { return false; }
 
   std::string ProjectConfigurationSectionName;
 };

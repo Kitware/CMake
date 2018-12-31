@@ -25,13 +25,13 @@ public:
   }
 
   ///! create the correct local generator
-  virtual cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf);
+  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
   /// @return the name of this generator.
   static std::string GetActualName() { return "Green Hills MULTI"; }
 
   ///! Get the name for this generator
-  virtual std::string GetName() const { return this->GetActualName(); }
+  std::string GetName() const override { return this->GetActualName(); }
 
   /// Overloaded methods. @see cmGlobalGenerator::GetDocumentation()
   static void GetDocumentation(cmDocumentationEntry& entry);
@@ -49,15 +49,15 @@ public:
   static bool SupportsPlatform() { return true; }
 
   // Toolset / Platform Support
-  virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
-  virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
+  bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf) override;
+  bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
 
   /**
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string> const& languages,
-                              cmMakefile*, bool optional);
+  void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
+                      bool optional) override;
   /*
    * Determine what program to use for building the project.
    */
@@ -88,13 +88,16 @@ public:
   inline bool IsOSDirRelative() { return this->OSDirRelative; }
 
 protected:
-  virtual void Generate();
-  virtual void GenerateBuildCommand(
-    std::vector<std::string>& makeCommand, const std::string& makeProgram,
-    const std::string& projectName, const std::string& projectDir,
-    const std::string& targetName, const std::string& config, bool fast,
-    int jobs, bool verbose,
-    std::vector<std::string> const& makeOptions = std::vector<std::string>());
+  void Generate() override;
+  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
+                            const std::string& makeProgram,
+                            const std::string& projectName,
+                            const std::string& projectDir,
+                            const std::string& targetName,
+                            const std::string& config, bool fast, int jobs,
+                            bool verbose,
+                            std::vector<std::string> const& makeOptions =
+                              std::vector<std::string>()) override;
 
 private:
   void GetToolset(cmMakefile* mf, std::string& tsd, std::string& ts);

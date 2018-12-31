@@ -198,7 +198,7 @@ void cmGlobalVisualStudio11Generator::WriteSLNHeader(std::ostream& fout)
   }
 }
 
-bool cmGlobalVisualStudio11Generator::UseFolderProperty()
+bool cmGlobalVisualStudio11Generator::UseFolderProperty() const
 {
   // Intentionally skip up to the top-level class implementation.
   // Folders are not supported by the Express editions in VS10 and earlier,
