@@ -733,7 +733,7 @@ syn keyword cmakeVariable contained
             \ CTEST_CUSTOM_POST_TEST
             \ CTEST_CUSTOM_PRE_MEMCHECK
             \ CTEST_CUSTOM_PRE_TEST
-            \ CTEST_CUSTOM_TEST_IGNORE
+            \ CTEST_CUSTOM_TESTS_IGNORE
             \ CTEST_CUSTOM_WARNING_EXCEPTION
             \ CTEST_CUSTOM_WARNING_MATCH
             \ CTEST_CVS_CHECKOUT
