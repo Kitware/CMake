@@ -4,7 +4,6 @@
 
 #include "cmAlgorithms.h"
 #include "cmDocumentationFormatter.h"
-#include "cmState.h"
 #include "cmSystemTools.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -131,11 +130,6 @@ void displayMessage(cmake::MessageType t, std::ostringstream& msg)
   }
 }
 
-cmMessenger::cmMessenger(cmState* state)
-  : State(state)
-{
-}
-
 void cmMessenger::IssueMessage(cmake::MessageType t, const std::string& text,
                                const cmListFileBacktrace& backtrace) const
 {
@@ -172,32 +166,4 @@ void cmMessenger::DisplayMessage(cmake::MessageType t, const std::string& text,
   backtrace.PrintCallStack(msg);
 
   displayMessage(t, msg);
-}
-
-bool cmMessenger::GetSuppressDevWarnings() const
-{
-  const char* cacheEntryValue =
-    this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
-  return cmSystemTools::IsOn(cacheEntryValue);
-}
-
-bool cmMessenger::GetSuppressDeprecatedWarnings() const
-{
-  const char* cacheEntryValue =
-    this->State->GetCacheEntryValue("CMAKE_WARN_DEPRECATED");
-  return cacheEntryValue && cmSystemTools::IsOff(cacheEntryValue);
-}
-
-bool cmMessenger::GetDevWarningsAsErrors() const
-{
-  const char* cacheEntryValue =
-    this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_ERRORS");
-  return cacheEntryValue && cmSystemTools::IsOff(cacheEntryValue);
-}
-
-bool cmMessenger::GetDeprecatedWarningsAsErrors() const
-{
-  const char* cacheEntryValue =
-    this->State->GetCacheEntryValue("CMAKE_ERROR_DEPRECATED");
-  return cmSystemTools::IsOn(cacheEntryValue);
 }
