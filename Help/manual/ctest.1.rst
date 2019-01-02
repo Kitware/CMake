@@ -109,19 +109,22 @@ Options
 
  This option tells CTest to write all its output to a log file.
 
-``-N,--show-only``
+``-N,--show-only[=<format>]``
  Disable actual execution of tests.
 
  This option tells CTest to list the tests that would be run but not
  actually run them.  Useful in conjunction with the ``-R`` and ``-E``
  options.
 
-``--show-as-json[=<version>]``
- Dump the test information in json format. Optionally specify a major
- version number. Defaults to 1 if not passed. Dumps the highest known
- minor version associated with the requested major version.
+ ``<format>`` can be one of the following values.
 
- See `Show as json Object Model`_.
+   ``human``
+     Human-friendly output.  This is not guaranteed to be stable.
+     This is the default.
+
+   ``json-v1``
+     Dump the test information in JSON format.
+     See `Show as JSON Object Model`_.
 
 ``-L <regex>, --label-regex <regex>``
  Run tests with labels matching regular expression.
@@ -345,7 +348,10 @@ See `Build and Test Mode`_.
 Show as JSON Object Model
 =========================
 
-When the ``--show-as-json`` command line option is given, the test
+Show as JSON Object Model
+=========================
+
+When the ``--show-only=json-v1`` command line option is given, the test
 information is output in JSON format.  Version 1.0 of the JSON object
 model is defined as follows:
 
