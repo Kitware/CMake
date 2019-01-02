@@ -111,7 +111,6 @@ public:
 
 protected:
   void Generate() override;
-  virtual const char* GetIDEVersion() = 0;
 
   std::string const& GetDevEnvCommand();
   virtual std::string FindDevEnvCommand();

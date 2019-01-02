@@ -140,7 +140,7 @@ protected:
   virtual bool SelectWindowsPhoneToolset(std::string& toolset) const;
   virtual bool SelectWindowsStoreToolset(std::string& toolset) const;
 
-  const char* GetIDEVersion() override { return "10.0"; }
+  const char* GetIDEVersion() const override { return "10.0"; }
 
   std::string const& GetMSBuildCommand();
 

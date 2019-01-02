@@ -41,7 +41,7 @@ protected:
   // version of the toolset.
   virtual std::string GetWindows10SDKMaxVersion() const;
 
-  const char* GetIDEVersion() override { return "14.0"; }
+  const char* GetIDEVersion() const override { return "14.0"; }
   virtual bool SelectWindows10SDK(cmMakefile* mf, bool required);
 
   // Used to verify that the Desktop toolset for the current generator is

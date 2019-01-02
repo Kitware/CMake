@@ -37,7 +37,7 @@ public:
   std::string GetUserMacrosRegKeyBase() override;
 
 protected:
-  const char* GetIDEVersion() override { return "9.0"; }
+  const char* GetIDEVersion() const override { return "9.0"; }
 
 private:
   class Factory;
