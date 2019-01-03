@@ -1123,14 +1123,32 @@ static cmIDEFlagTable const* cmLoadFlagTableJson(
   return ret;
 }
 
+static std::string cmGetFlagTableName(std::string const& toolsetName,
+                                      std::string const& table)
+{
+  return cmSystemTools::GetCMakeRoot() + "/Templates/MSBuild/FlagTables/" +
+    toolsetName + "_" + table + ".json";
+}
+
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
-  std::string const& flagTableName, std::string const& table) const
+  std::string const& optionsName, std::string const& toolsetName,
+  std::string const& defaultName, std::string const& table) const
 {
   cmIDEFlagTable const* ret = nullptr;
 
-  std::string filename = cmSystemTools::GetCMakeRoot() +
-    "/Templates/MSBuild/FlagTables/" + flagTableName + "_" + table + ".json";
-  ret = cmLoadFlagTableJson(filename);
+  std::string filename;
+  if (!optionsName.empty()) {
+    filename = cmGetFlagTableName(optionsName, table);
+    ret = cmLoadFlagTableJson(filename);
+  } else {
+    filename = cmGetFlagTableName(toolsetName, table);
+    if (cmSystemTools::FileExists(filename)) {
+      ret = cmLoadFlagTableJson(filename);
+    } else {
+      filename = cmGetFlagTableName(defaultName, table);
+      ret = cmLoadFlagTableJson(filename);
+    }
+  }
 
   if (!ret) {
     cmMakefile* mf = this->GetCurrentMakefile();
@@ -1147,71 +1165,95 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetClFlagTable() const
 {
-  std::string flagTableName = this->ToolsetOptions.GetClFlagTableName(
-    this->GetPlatformName(), this->GetPlatformToolsetString(),
-    this->DefaultCLFlagTableName);
-
-  return LoadFlagTable(flagTableName, "CL");
+  std::string optionsName = this->ToolsetOptions.GetClFlagTableName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string toolsetName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string defaultName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->DefaultCLFlagTableName);
+  return LoadFlagTable(optionsName, toolsetName, defaultName, "CL");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCSharpFlagTable()
   const
 {
-  std::string flagTableName = this->ToolsetOptions.GetCSharpFlagTableName(
-    this->GetPlatformName(), this->GetPlatformToolsetString(),
-    this->DefaultCSharpFlagTableName);
-
-  return LoadFlagTable(flagTableName, "CSharp");
+  std::string optionsName = this->ToolsetOptions.GetCSharpFlagTableName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string toolsetName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string defaultName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->DefaultCSharpFlagTableName);
+  return LoadFlagTable(optionsName, toolsetName, defaultName, "CSharp");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetRcFlagTable() const
 {
-  std::string flagTableName = this->ToolsetOptions.GetRcFlagTableName(
-    this->GetPlatformName(), this->GetPlatformToolsetString(),
-    this->DefaultRCFlagTableName);
-
-  return LoadFlagTable(flagTableName, "RC");
+  std::string optionsName = this->ToolsetOptions.GetRcFlagTableName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string toolsetName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string defaultName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->DefaultRCFlagTableName);
+  return LoadFlagTable(optionsName, toolsetName, defaultName, "RC");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLibFlagTable() const
 {
-  std::string flagTableName = this->ToolsetOptions.GetLibFlagTableName(
-    this->GetPlatformName(), this->GetPlatformToolsetString(),
-    this->DefaultLibFlagTableName);
-
-  return LoadFlagTable(flagTableName, "LIB");
+  std::string optionsName = this->ToolsetOptions.GetLibFlagTableName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string toolsetName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string defaultName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->DefaultLibFlagTableName);
+  return LoadFlagTable(optionsName, toolsetName, defaultName, "LIB");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLinkFlagTable() const
 {
-  std::string flagTableName = this->ToolsetOptions.GetLinkFlagTableName(
-    this->GetPlatformName(), this->GetPlatformToolsetString(),
-    this->DefaultLinkFlagTableName);
-
-  return LoadFlagTable(flagTableName, "Link");
+  std::string optionsName = this->ToolsetOptions.GetLinkFlagTableName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string toolsetName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string defaultName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->DefaultLinkFlagTableName);
+  return LoadFlagTable(optionsName, toolsetName, defaultName, "Link");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCudaFlagTable() const
 {
-  return LoadFlagTable(this->DefaultCudaFlagTableName, "Cuda");
+  std::string toolsetName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string defaultName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->DefaultCudaFlagTableName);
+  return LoadFlagTable("", toolsetName, defaultName, "Cuda");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCudaHostFlagTable()
   const
 {
-  return LoadFlagTable(this->DefaultCudaHostFlagTableName, "CudaHost");
+  std::string toolsetName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string defaultName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->DefaultCudaHostFlagTableName);
+  return LoadFlagTable("", toolsetName, defaultName, "CudaHost");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetMasmFlagTable() const
 {
-  std::string flagTableName = this->ToolsetOptions.GetMasmFlagTableName(
-    this->GetPlatformName(), this->GetPlatformToolsetString(),
-    this->DefaultMasmFlagTableName);
-
-  return LoadFlagTable(flagTableName, "MASM");
+  std::string optionsName = this->ToolsetOptions.GetMasmFlagTableName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string toolsetName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string defaultName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->DefaultMasmFlagTableName);
+  return LoadFlagTable(optionsName, toolsetName, defaultName, "MASM");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetNasmFlagTable() const
 {
-  return LoadFlagTable(this->DefaultNasmFlagTableName, "NASM");
+  std::string toolsetName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->GetPlatformToolsetString());
+  std::string defaultName = this->ToolsetOptions.GetToolsetName(
+    this->GetPlatformName(), this->DefaultNasmFlagTableName);
+  return LoadFlagTable("", toolsetName, defaultName, "NASM");
 }

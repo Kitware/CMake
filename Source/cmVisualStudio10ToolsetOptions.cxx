@@ -7,8 +7,7 @@
 #include "cmVisualStudioGeneratorOptions.h"
 
 std::string cmVisualStudio10ToolsetOptions::GetClFlagTableName(
-  std::string const& name, std::string const& toolset,
-  std::string const& defaultToolset) const
+  std::string const& name, std::string const& toolset) const
 {
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
@@ -23,13 +22,12 @@ std::string cmVisualStudio10ToolsetOptions::GetClFlagTableName(
   } else if (useToolset == "v100") {
     return "v10";
   } else {
-    return this->GetToolsetName(name, defaultToolset);
+    return "";
   }
 }
 
 std::string cmVisualStudio10ToolsetOptions::GetCSharpFlagTableName(
-  std::string const& name, std::string const& toolset,
-  std::string const& defaultToolset) const
+  std::string const& name, std::string const& toolset) const
 {
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
@@ -44,13 +42,12 @@ std::string cmVisualStudio10ToolsetOptions::GetCSharpFlagTableName(
   } else if (useToolset == "v100") {
     return "v10";
   } else {
-    return this->GetToolsetName(name, defaultToolset);
+    return "";
   }
 }
 
 std::string cmVisualStudio10ToolsetOptions::GetRcFlagTableName(
-  std::string const& name, std::string const& toolset,
-  std::string const& defaultToolset) const
+  std::string const& name, std::string const& toolset) const
 {
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
@@ -63,13 +60,12 @@ std::string cmVisualStudio10ToolsetOptions::GetRcFlagTableName(
   } else if (useToolset == "v100") {
     return "v10";
   } else {
-    return this->GetToolsetName(name, defaultToolset);
+    return "";
   }
 }
 
 std::string cmVisualStudio10ToolsetOptions::GetLibFlagTableName(
-  std::string const& name, std::string const& toolset,
-  std::string const& defaultToolset) const
+  std::string const& name, std::string const& toolset) const
 {
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
@@ -82,13 +78,12 @@ std::string cmVisualStudio10ToolsetOptions::GetLibFlagTableName(
   } else if (useToolset == "v100") {
     return "v10";
   } else {
-    return this->GetToolsetName(name, defaultToolset);
+    return "";
   }
 }
 
 std::string cmVisualStudio10ToolsetOptions::GetLinkFlagTableName(
-  std::string const& name, std::string const& toolset,
-  std::string const& defaultToolset) const
+  std::string const& name, std::string const& toolset) const
 {
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
@@ -103,13 +98,12 @@ std::string cmVisualStudio10ToolsetOptions::GetLinkFlagTableName(
   } else if (useToolset == "v100") {
     return "v10";
   } else {
-    return this->GetToolsetName(name, defaultToolset);
+    return "";
   }
 }
 
 std::string cmVisualStudio10ToolsetOptions::GetMasmFlagTableName(
-  std::string const& name, std::string const& toolset,
-  std::string const& defaultToolset) const
+  std::string const& name, std::string const& toolset) const
 {
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
@@ -122,7 +116,7 @@ std::string cmVisualStudio10ToolsetOptions::GetMasmFlagTableName(
   } else if (useToolset == "v100") {
     return "v10";
   } else {
-    return this->GetToolsetName(name, defaultToolset);
+    return "";
   }
 }
 
