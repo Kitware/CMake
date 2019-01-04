@@ -751,6 +751,7 @@ bool CMakeSetupDialog::setupFirstConfigure()
   if (dialog.exec() == QDialog::Accepted) {
     dialog.saveToSettings();
     this->CMakeThread->cmakeInstance()->setGenerator(dialog.getGenerator());
+    this->CMakeThread->cmakeInstance()->setPlatform(dialog.getPlatform());
     this->CMakeThread->cmakeInstance()->setToolset(dialog.getToolset());
 
     QCMakeCacheModel* m = this->CacheValues->cacheModel();
