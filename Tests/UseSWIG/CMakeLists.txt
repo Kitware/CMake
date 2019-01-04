@@ -111,3 +111,15 @@ add_test(NAME UseSWIG.ModuleName COMMAND
   --build-options ${build_options}
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
+
+
+add_test(NAME UseSWIG.SwigSrcFileExtension COMMAND
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+  --build-and-test
+  "${CMake_SOURCE_DIR}/Tests/UseSWIG/SwigSrcFileExtension"
+  "${CMake_BINARY_DIR}/Tests/UseSWIG/SwigSrcFileExtension"
+  ${build_generator_args}
+  --build-project SwigSrcFileExtension
+  --build-options ${build_options}
+  --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+  )

@@ -75,7 +75,8 @@ Defines the following command for use with ``SWIG``:
   ``SOURCES``
     List of sources for the library. Files with extension ``.i`` will be
     identified as sources for the ``SWIG`` tool. Other files will be handled in
-    the standard way.
+    the standard way. This behavior can be overriden by specifying the variable
+    ``SWIG_SOURCE_FILE_EXTENSIONS``.
 
   .. note::
 
@@ -222,6 +223,15 @@ as well as ``SWIG``:
 
 ``SWIG_MODULE_<name>_EXTRA_DEPS``
   Specify extra dependencies for the generated module for ``<name>``.
+
+``SWIG_SOURCE_FILE_EXTENSIONS``
+  Specify a list of source file extensions to override the default
+  behavior of considering only ``.i`` files as sources for the ``SWIG``
+  tool. For example:
+
+  .. code-block:: cmake
+
+    set(SWIG_SOURCE_FILE_EXTENSIONS ".i" ".swg")
 #]=======================================================================]
 
 cmake_policy(GET CMP0078 target_name_policy)
@@ -659,8 +669,20 @@ function(SWIG_ADD_LIBRARY name)
   set(CMAKE_SWIG_OUTDIR "${outputdir}")
   set(SWIG_OUTFILE_DIR "${outfiledir}")
 
+  # See if the user has specified source extensions for swig files?
+  if (NOT DEFINED SWIG_SOURCE_FILE_EXTENSIONS)
+    # Assume the default (*.i) file extension for Swig source files
+    set(SWIG_SOURCE_FILE_EXTENSIONS ".i")
+  endif()
+
+  # Generate a regex out of file extensions.
+  string(REGEX REPLACE "([$^.*+?|()-])" "\\\\\\1" swig_source_ext_regex "${SWIG_SOURCE_FILE_EXTENSIONS}")
+  list (JOIN swig_source_ext_regex "|" swig_source_ext_regex)
+  string (PREPEND swig_source_ext_regex "(")
+  string (APPEND swig_source_ext_regex ")$")
+
   set(swig_dot_i_sources ${_SAM_SOURCES})
-  list(FILTER swig_dot_i_sources INCLUDE REGEX "\\.i$")
+  list(FILTER swig_dot_i_sources INCLUDE REGEX ${swig_source_ext_regex})
   if (NOT swig_dot_i_sources)
     message(FATAL_ERROR "SWIG_ADD_LIBRARY: no SWIG interface files specified")
   endif()
