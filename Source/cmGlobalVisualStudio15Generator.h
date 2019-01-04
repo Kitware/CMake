@@ -39,7 +39,7 @@ protected:
   bool InitializeWindows(cmMakefile* mf) override;
   bool SelectWindowsStoreToolset(std::string& toolset) const override;
 
-  const char* GetIDEVersion() override { return "15.0"; }
+  const char* GetIDEVersion() const override { return "15.0"; }
 
   // Used to verify that the Desktop toolset for the current generator is
   // installed on the machine.

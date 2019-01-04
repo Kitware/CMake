@@ -49,7 +49,7 @@ public:
 
 protected:
   void AddExtraIDETargets() override;
-  const char* GetIDEVersion() override { return "8.0"; }
+  const char* GetIDEVersion() const override { return "8.0"; }
 
   std::string FindDevEnvCommand() override;
 

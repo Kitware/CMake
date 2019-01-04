@@ -48,7 +48,7 @@ protected:
   // of the toolset is installed
   bool IsWindowsPhoneToolsetInstalled() const;
   bool IsWindowsStoreToolsetInstalled() const;
-  const char* GetIDEVersion() override { return "12.0"; }
+  const char* GetIDEVersion() const override { return "12.0"; }
 
 private:
   class Factory;
