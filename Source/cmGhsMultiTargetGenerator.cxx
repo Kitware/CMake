@@ -13,15 +13,11 @@
 #include "cmSourceGroup.h"
 #include "cmTarget.h"
 
-std::string const cmGhsMultiTargetGenerator::DDOption("-dynamic");
-
 cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
   : GeneratorTarget(target)
   , LocalGenerator(
       static_cast<cmLocalGhsMultiGenerator*>(target->GetLocalGenerator()))
   , Makefile(target->Target->GetMakefile())
-  , TargetGroup(DetermineIfTargetGroup(target))
-  , DynamicDownload(false)
   , Name(target->GetName())
 {
   // Store the configuration name that is being used
@@ -50,8 +46,7 @@ void cmGhsMultiTargetGenerator::Generate()
       this->GeneratorTarget->GetExecutableNames(
         targetName, this->TargetNameReal, targetNameImport, targetNamePDB,
         this->ConfigName);
-      if (cmGhsMultiTargetGenerator::DetermineIfTargetGroup(
-            this->GeneratorTarget)) {
+      if (cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()) {
         this->TagType = GhsMultiGpj::INTERGRITY_APPLICATION;
       } else {
         this->TagType = GhsMultiGpj::PROGRAM;
@@ -126,11 +121,7 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
 
   const std::string language(
     this->GeneratorTarget->GetLinkerLanguage(this->ConfigName));
-  this->DynamicDownload =
-    this->DetermineIfDynamicDownload(this->ConfigName, language);
-  if (this->DynamicDownload) {
-    fout << "#component integrity_dynamic_download" << std::endl;
-  }
+
   this->WriteTargetSpecifics(fout, this->ConfigName);
   this->SetCompilerFlags(this->ConfigName, language);
   this->WriteCompilerFlags(fout, this->ConfigName, language);
@@ -139,7 +130,7 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
   this->WriteTargetLinkLine(fout, this->ConfigName);
   this->WriteCustomCommands(fout);
   this->WriteSources(fout);
-
+  this->WriteReferences(fout);
   fout.Close();
 }
 
@@ -541,36 +532,49 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
     }
   }
 }
-
-bool cmGhsMultiTargetGenerator::DetermineIfTargetGroup(
-  const cmGeneratorTarget* target)
+void cmGhsMultiTargetGenerator::WriteReferences(std::ostream& fout)
 {
-  bool output = false;
-  std::vector<cmSourceFile*> sources;
-  std::string config =
-    target->Target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  target->GetSourceFiles(sources, config);
-  for (std::vector<cmSourceFile*>::const_iterator sources_i = sources.begin();
-       sources.end() != sources_i; ++sources_i) {
-    if ("int" == (*sources_i)->GetExtension()) {
-      output = true;
-    }
+  // This only applies to INTEGRITY Applications
+  if (this->TagType != GhsMultiGpj::INTERGRITY_APPLICATION) {
+    return;
   }
-  return output;
+
+  // Get the targets that this one depends upon
+  cmTargetDependSet unordered =
+    this->GetGlobalGenerator()->GetTargetDirectDepends(this->GeneratorTarget);
+  cmGlobalGhsMultiGenerator::OrderedTargetDependSet ordered(unordered,
+                                                            this->Name);
+  for (auto& t : ordered) {
+    std::string tname = t->GetName();
+    std::string tpath = t->LocalGenerator->GetCurrentBinaryDirectory();
+    std::string rootpath = this->LocalGenerator->GetCurrentBinaryDirectory();
+    std::string outpath =
+      this->LocalGenerator->ConvertToRelativePath(rootpath, tpath) + "/" +
+      tname + "REF" + cmGlobalGhsMultiGenerator::FILE_EXTENSION;
+
+    fout << outpath;
+    fout << "    ";
+    GhsMultiGpj::WriteGpjTag(GhsMultiGpj::REFERENCE, fout);
+
+    // Tell the global generator that a refernce project needs to be created
+    t->Target->SetProperty("GHS_REFERENCE_PROJECT", "ON");
+  }
 }
 
-bool cmGhsMultiTargetGenerator::DetermineIfDynamicDownload(
-  std::string const& config, const std::string& language)
+bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp(void)
 {
-  std::vector<std::string> options;
-  bool output = false;
-  this->GeneratorTarget->GetCompileOptions(options, config, language);
-  for (std::vector<std::string>::const_iterator options_i = options.begin();
-       options_i != options.end(); ++options_i) {
-    std::string option = *options_i;
-    if (this->DDOption == option) {
-      output = true;
+  const char* p = this->GeneratorTarget->GetProperty("ghs_integrity_app");
+  if (p) {
+    return cmSystemTools::IsOn(
+      this->GeneratorTarget->GetProperty("ghs_integrity_app"));
+  } else {
+    std::vector<cmSourceFile*> sources;
+    this->GeneratorTarget->GetSourceFiles(sources, this->ConfigName);
+    for (auto& sf : sources) {
+      if ("int" == sf->GetExtension()) {
+        return true;
+      }
     }
+    return false;
   }
-  return output;
 }

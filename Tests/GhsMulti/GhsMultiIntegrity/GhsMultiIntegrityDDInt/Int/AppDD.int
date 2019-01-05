@@ -7,6 +7,6 @@ Kernel
 EndKernel
 
 AddressSpace        App
-  Filename      "App/App.as"
+  Filename          "App/App"
   Language C
 EndAddressSpace

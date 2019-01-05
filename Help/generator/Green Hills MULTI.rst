@@ -18,36 +18,45 @@ If the toolset is not specified then the latest toolset will be used.
 
 * ``GHS_TARGET_PLATFORM``
 
-Default to ``integrity``.
-Usual values are ``integrity``, ``threadx``, ``uvelosity``,
-``velosity``, ``vxworks``, ``standalone``.
+  | Defaults to ``integrity``.
+  | Usual values are ``integrity``, ``threadx``, ``uvelosity``, ``velosity``,
+    ``vxworks``, ``standalone``.
+
 
 * ``GHS_PRIMARY_TARGET``
 
-Sets ``primaryTarget`` field in project file.
-Defaults to ``<arch>_<GHS_TARGET_PLATFORM>.tgt``.
+  | Sets ``primaryTarget`` entry in project file.
+  | Defaults to ``<arch>_<GHS_TARGET_PLATFORM>.tgt``.
 
 * ``GHS_TOOLSET_ROOT``
 
-Default to ``C:/ghs``.  Root path for ``toolset``.
+  | Root path for ``toolset``.
+  | Defaults to ``C:/ghs``.
 
 * ``GHS_OS_ROOT``
 
-Default to ``C:/ghs``.  Root path for RTOS searches.
+  | Root path for RTOS searches.
+  | Defaults to ``C:/ghs``.
 
 * ``GHS_OS_DIR``
 
-Default to latest platform OS installation at ``GHS_OS_ROOT``.  Set this value if
-a specific RTOS is to be used.
+  | Sets ``-os_dir`` entry in project file.
+  | Defaults to latest platform OS installation at ``GHS_OS_ROOT``.  Set this value if
+    a specific RTOS is to be used.
 
 * ``GHS_BSP_NAME``
 
-Defaults to ``sim<arch>`` if not set by user.
+  | Sets ``-bsp`` entry in project file.
+  | Defaults to ``sim<arch>`` for ``integrity`` platforms.
 
 Customizations are available through the following cache variables:
 
 * ``GHS_CUSTOMIZATION``
 * ``GHS_GPJ_MACROS``
+
+The following properties are available:
+
+* :prop_tgt:`GHS_INTEGRITY_APP`
 
 .. note::
   This generator is deemed experimental as of CMake |release|

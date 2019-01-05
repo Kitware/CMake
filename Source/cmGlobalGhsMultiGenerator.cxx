@@ -315,8 +315,26 @@ void cmGlobalGhsMultiGenerator::WriteSubProjects(
       if (cmSystemTools::IsOn(target->GetProperty("EXCLUDE_FROM_ALL"))) {
         fout << "{comment} ";
       }
-      fout << dir << projName << FILE_EXTENSION;
+      std::string projFile = dir + projName + FILE_EXTENSION;
+      fout << projFile;
       fout << " " << projType << std::endl;
+
+      if (cmSystemTools::IsOn(target->GetProperty("GHS_REFERENCE_PROJECT"))) {
+        // create reference project
+        std::string fname = dir;
+        fname += target->GetName();
+        fname += "REF";
+        fname += FILE_EXTENSION;
+
+        cmGeneratedFileStream fref(fname.c_str());
+        fref.SetCopyIfDifferent(true);
+
+        this->WriteFileHeader(fref);
+        GhsMultiGpj::WriteGpjTag(GhsMultiGpj::REFERENCE, fref);
+        fref << "    :reference=" << projFile << std::endl;
+
+        fref.Close();
+      }
     }
   }
 }

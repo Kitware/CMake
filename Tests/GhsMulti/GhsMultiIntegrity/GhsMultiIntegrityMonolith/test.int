@@ -1,8 +1,8 @@
 Kernel
-  Filename        kernel/kernel.as
+  Filename        kernel
 EndKernel
 
 AddressSpace      App
-  Filename        "vas/vas.as"
+  Filename        vas
   Language C
 EndAddressSpace

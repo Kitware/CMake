@@ -302,7 +302,8 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
     for (cmGeneratorTarget* target : targets) {
       if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
           target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
-          target->GetType() == cmStateEnums::TargetType::UTILITY) {
+          target->GetType() == cmStateEnums::TargetType::UTILITY ||
+          cmSystemTools::IsOn(target->GetProperty("ghs_integrity_app"))) {
         continue;
       }
 

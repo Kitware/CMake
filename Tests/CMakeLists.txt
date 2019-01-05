@@ -2292,6 +2292,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       if (NOT ghs_skip_integrity AND (NOT ghs_target_platform OR ghs_target_platform MATCHES "integrity"))
         add_test_GhsMulti(integrityDDInt GhsMultiIntegrity/GhsMultiIntegrityDDInt "" "" "")
         add_test_GhsMulti(integrityMonolith GhsMultiIntegrity/GhsMultiIntegrityMonolith "" "" "")
+        add_test_GhsMulti(integrityDD GhsMultiIntegrity/GhsMultiIntegrityDD "" "" "")
       endif ()
       add_test_GhsMulti(duplicate_source_filenames GhsMultiDuplicateSourceFilenames "" "" "")
       add_test_GhsMulti_rename_install(SINGLE_EXEC)
