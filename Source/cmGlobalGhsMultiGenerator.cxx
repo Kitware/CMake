@@ -413,7 +413,11 @@ void cmGlobalGhsMultiGenerator::GenerateBuildCommand(
     if (targetName == "clean") {
       makeCommand.push_back("-clean");
     } else {
-      makeCommand.push_back(targetName);
+      if (targetName.compare(targetName.size() - 4, 4, ".gpj") == 0) {
+        makeCommand.push_back(targetName);
+      } else {
+        makeCommand.push_back(targetName + ".gpj");
+      }
     }
   }
 }
