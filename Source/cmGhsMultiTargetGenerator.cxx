@@ -367,6 +367,21 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
   }
 }
 
+void cmGhsMultiTargetGenerator::WriteSourceProperty(std::ostream& fout,
+                                                    const cmSourceFile* sf,
+                                                    std::string propName,
+                                                    std::string propFlag)
+{
+  const char* prop = sf->GetProperty(propName);
+  if (prop) {
+    std::vector<std::string> list;
+    cmSystemTools::ExpandListArgument(prop, list);
+    for (auto& p : list) {
+      fout << "    " << propFlag << p << std::endl;
+    }
+  }
+}
+
 void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 {
   /* vector of all sources for this target */
@@ -494,6 +509,11 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
           "bsp" != si->GetExtension()) {
         this->WriteObjectLangOverride(*fout, si);
       }
+
+      this->WriteSourceProperty(*fout, si, "INCLUDE_DIRECTORIES", "-I");
+      this->WriteSourceProperty(*fout, si, "COMPILE_DEFINITIONS", "-D");
+      this->WriteSourceProperty(*fout, si, "COMPILE_OPTIONS", "");
+
       /* to avoid clutter in the gui only print out the objectName if it has
        * been renamed */
       std::string objectName = this->GeneratorTarget->GetObjectName(si);

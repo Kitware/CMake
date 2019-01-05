@@ -52,7 +52,8 @@ private:
     std::ostream& fout, std::vector<cmCustomCommand> const& commandsSet,
     cmTarget::CustomCommandType commandType);
   void WriteSources(std::ostream& fout_proj);
-
+  void WriteSourceProperty(std::ostream& fout, const cmSourceFile* sf,
+                           std::string propName, std::string propFlag);
   static void WriteObjectLangOverride(std::ostream& fout,
                                       const cmSourceFile* sourceFile);
 
