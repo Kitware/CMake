@@ -21,6 +21,7 @@ cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
   , Makefile(target->Target->GetMakefile())
   , TargetGroup(DetermineIfTargetGroup(target))
   , DynamicDownload(false)
+  , Name(target->GetName())
 {
   this->RelBuildFilePath = this->GetRelBuildFilePath(target);
 
@@ -100,15 +101,24 @@ std::string cmGhsMultiTargetGenerator::AddSlashIfNeededToPath(
 
 void cmGhsMultiTargetGenerator::Generate()
 {
+  // Tell the global generator the name of the project file
+  this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME",
+                                             this->Name.c_str());
+
+  // Skip if empty or not included in build
   std::vector<cmSourceFile*> objectSources = this->GetSources();
   if (!objectSources.empty() && this->IncludeThisTarget()) {
-    if (!cmSystemTools::FileExists(this->AbsBuildFilePath.c_str())) {
-      cmSystemTools::MakeDirectory(this->AbsBuildFilePath.c_str());
-    }
-    cmGlobalGhsMultiGenerator::Open(std::string(""), this->AbsBuildFileName,
-                                    &this->FolderBuildStreams);
-    cmGlobalGhsMultiGenerator::OpenBuildFileStream(
-      this->GetFolderBuildStreams());
+
+    // Open the filestream in copy-if-different mode.
+    std::string fname = this->LocalGenerator->GetCurrentBinaryDirectory();
+    fname += "/";
+    fname += this->Name;
+    fname += cmGlobalGhsMultiGenerator::FILE_EXTENSION;
+    cmGeneratedFileStream fout(fname.c_str());
+    fout.SetCopyIfDifferent(true);
+
+    cmGlobalGhsMultiGenerator::OpenBuildFileStream(&fout);
+
     std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
     if (0 == config.length()) {
       config = "RELEASE";
@@ -118,28 +128,30 @@ void cmGhsMultiTargetGenerator::Generate()
     config = cmSystemTools::UpperCase(config);
     this->DynamicDownload = this->DetermineIfDynamicDownload(config, language);
     if (this->DynamicDownload) {
-      *this->GetFolderBuildStreams()
-        << "#component integrity_dynamic_download" << std::endl;
+      fout << "#component integrity_dynamic_download" << std::endl;
     }
-    GhsMultiGpj::WriteGpjTag(this->GetGpjTag(), this->GetFolderBuildStreams());
-    cmGlobalGhsMultiGenerator::WriteDisclaimer(this->GetFolderBuildStreams());
+    GhsMultiGpj::WriteGpjTag(this->GetGpjTag(), &fout);
+    cmGlobalGhsMultiGenerator::WriteDisclaimer(&fout);
 
     bool const notKernel = this->IsNotKernel(config, language);
-    this->WriteTypeSpecifics(config, notKernel);
+    this->WriteTypeSpecifics(fout, config, notKernel);
     this->SetCompilerFlags(config, language, notKernel);
-    this->WriteCompilerFlags(config, language);
-    this->WriteCompilerDefinitions(config, language);
-    this->WriteIncludes(config, language);
+    this->WriteCompilerFlags(fout, config, language);
+    this->WriteCompilerDefinitions(fout, config, language);
+    this->WriteIncludes(fout, config, language);
     if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-      this->WriteTargetLinkLibraries(config, language);
+      this->WriteTargetLinkLibraries(fout, config, language);
     }
-    this->WriteCustomCommands();
+    this->WriteCustomCommands(fout);
 
     std::map<const cmSourceFile*, std::string> objectNames =
       cmGhsMultiTargetGenerator::GetObjectNames(
         &objectSources, this->LocalGenerator, this->GeneratorTarget);
-
+#if 0 /* temp stub - this generates its own files */
     this->WriteSources(objectSources, objectNames);
+#endif
+
+    fout.Close();
   }
 }
 
@@ -189,7 +201,8 @@ cmGlobalGhsMultiGenerator* cmGhsMultiTargetGenerator::GetGlobalGenerator()
     this->LocalGenerator->GetGlobalGenerator());
 }
 
-void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string& config,
+void cmGhsMultiTargetGenerator::WriteTypeSpecifics(std::ostream& fout,
+                                                   const std::string& config,
                                                    bool const notKernel)
 {
   std::string outputDir(this->GetOutputDirectory(config));
@@ -198,25 +211,22 @@ void cmGhsMultiTargetGenerator::WriteTypeSpecifics(const std::string& config,
   if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
     std::string const& static_library_suffix =
       this->Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
-    *this->GetFolderBuildStreams()
-      << "    -o \"" << outputDir << outputFilename << static_library_suffix
-      << "\"" << std::endl;
+    fout << "    -o \"" << outputDir << outputFilename << static_library_suffix
+         << "\"" << std::endl;
   } else if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
     if (notKernel && !this->IsTargetGroup()) {
-      *this->GetFolderBuildStreams() << "    -relprog" << std::endl;
+      fout << "    -relprog" << std::endl;
     }
     if (this->IsTargetGroup()) {
-      *this->GetFolderBuildStreams()
-        << "    -o \"" << outputDir << outputFilename << ".elf\"" << std::endl;
-      *this->GetFolderBuildStreams()
-        << "    :extraOutputFile=\"" << outputDir << outputFilename
-        << ".elf.ael\"" << std::endl;
+      fout << "    -o \"" << outputDir << outputFilename << ".elf\""
+           << std::endl;
+      fout << "    :extraOutputFile=\"" << outputDir << outputFilename
+           << ".elf.ael\"" << std::endl;
     } else {
       std::string const executable_suffix =
         this->Makefile->GetSafeDefinition("CMAKE_EXECUTABLE_SUFFIX");
-      *this->GetFolderBuildStreams()
-        << "    -o \"" << outputDir << outputFilename << executable_suffix
-        << "\"" << std::endl;
+      fout << "    -o \"" << outputDir << outputFilename << executable_suffix
+           << "\"" << std::endl;
     }
   }
 }
@@ -281,21 +291,21 @@ std::string cmGhsMultiTargetGenerator::GetDefines(const std::string& language,
   return i->second;
 }
 
-void cmGhsMultiTargetGenerator::WriteCompilerFlags(std::string const&,
+void cmGhsMultiTargetGenerator::WriteCompilerFlags(std::ostream& fout,
+                                                   std::string const&,
                                                    const std::string& language)
 {
   std::map<std::string, std::string>::iterator flagsByLangI =
     this->FlagsByLanguage.find(language);
   if (flagsByLangI != this->FlagsByLanguage.end()) {
     if (!flagsByLangI->second.empty()) {
-      *this->GetFolderBuildStreams()
-        << "    " << flagsByLangI->second << std::endl;
+      fout << "    " << flagsByLangI->second << std::endl;
     }
   }
 }
 
 void cmGhsMultiTargetGenerator::WriteCompilerDefinitions(
-  const std::string& config, const std::string& language)
+  std::ostream& fout, const std::string& config, const std::string& language)
 {
   std::vector<std::string> compileDefinitions;
   this->GeneratorTarget->GetCompileDefinitions(compileDefinitions, config,
@@ -303,11 +313,12 @@ void cmGhsMultiTargetGenerator::WriteCompilerDefinitions(
   for (std::vector<std::string>::const_iterator cdI =
          compileDefinitions.begin();
        cdI != compileDefinitions.end(); ++cdI) {
-    *this->GetFolderBuildStreams() << "    -D" << (*cdI) << std::endl;
+    fout << "    -D" << (*cdI) << std::endl;
   }
 }
 
-void cmGhsMultiTargetGenerator::WriteIncludes(const std::string& config,
+void cmGhsMultiTargetGenerator::WriteIncludes(std::ostream& fout,
+                                              const std::string& config,
                                               const std::string& language)
 {
   std::vector<std::string> includes;
@@ -316,13 +327,12 @@ void cmGhsMultiTargetGenerator::WriteIncludes(const std::string& config,
 
   for (std::vector<std::string>::const_iterator includes_i = includes.begin();
        includes_i != includes.end(); ++includes_i) {
-    *this->GetFolderBuildStreams()
-      << "    -I\"" << *includes_i << "\"" << std::endl;
+    fout << "    -I\"" << *includes_i << "\"" << std::endl;
   }
 }
 
 void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries(
-  std::string const& config, std::string const& language)
+  std::ostream& fout, std::string const& config, std::string const& language)
 {
   // library directories
   cmTargetDependSet tds =
@@ -330,8 +340,7 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries(
   for (cmTargetDependSet::iterator tdsI = tds.begin(); tdsI != tds.end();
        ++tdsI) {
     const cmGeneratorTarget* tg = *tdsI;
-    *this->GetFolderBuildStreams()
-      << "    -L\"" << GetAbsBuildFilePath(tg) << "\"" << std::endl;
+    fout << "    -L\"" << GetAbsBuildFilePath(tg) << "\"" << std::endl;
   }
   // library targets
   cmTarget::LinkLibraryVectorType llv =
@@ -344,8 +353,7 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries(
     if (NULL != tg) {
       libName = tg->GetName() + ".a";
     }
-    *this->GetFolderBuildStreams()
-      << "    -l\"" << libName << "\"" << std::endl;
+    fout << "    -l\"" << libName << "\"" << std::endl;
   }
 
   if (!this->TargetGroup) {
@@ -371,25 +379,25 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries(
 
     if (!linkPath.empty()) {
       linkPath = " " + linkPath.substr(0U, linkPath.size() - 1U);
-      *this->GetFolderBuildStreams() << linkPath;
+      fout << linkPath;
     }
 
     if (!linkFlags.empty()) {
-      *this->GetFolderBuildStreams() << "    " << linkFlags << std::endl;
+      fout << "    " << linkFlags << std::endl;
     }
   }
 }
 
-void cmGhsMultiTargetGenerator::WriteCustomCommands()
+void cmGhsMultiTargetGenerator::WriteCustomCommands(std::ostream& fout)
 {
-  WriteCustomCommandsHelper(this->GeneratorTarget->GetPreBuildCommands(),
+  WriteCustomCommandsHelper(fout, this->GeneratorTarget->GetPreBuildCommands(),
                             cmTarget::PRE_BUILD);
-  WriteCustomCommandsHelper(this->GeneratorTarget->GetPostBuildCommands(),
-                            cmTarget::POST_BUILD);
+  WriteCustomCommandsHelper(
+    fout, this->GeneratorTarget->GetPostBuildCommands(), cmTarget::POST_BUILD);
 }
 
 void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
-  std::vector<cmCustomCommand> const& commandsSet,
+  std::ostream& fout, std::vector<cmCustomCommand> const& commandsSet,
   cmTarget::CustomCommandType const commandType)
 {
   for (std::vector<cmCustomCommand>::const_iterator commandsSetI =
@@ -400,10 +408,10 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
          commandI != commands.end(); ++commandI) {
       switch (commandType) {
         case cmTarget::PRE_BUILD:
-          *this->GetFolderBuildStreams() << "    :preexecShellSafe=";
+          fout << "    :preexecShellSafe=";
           break;
         case cmTarget::POST_BUILD:
-          *this->GetFolderBuildStreams() << "    :postexecShellSafe=";
+          fout << "    :postexecShellSafe=";
           break;
         default:
           assert("Only pre and post are supported");
@@ -414,15 +422,14 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
         std::string subCommandE =
           this->LocalGenerator->EscapeForShell(*commandLineI, true);
         if (!command.empty()) {
-          *this->GetFolderBuildStreams()
-            << (command.begin() == commandLineI ? "'" : " ");
+          fout << (command.begin() == commandLineI ? "'" : " ");
           // Need to double escape backslashes
           cmSystemTools::ReplaceString(subCommandE, "\\", "\\\\");
         }
-        *this->GetFolderBuildStreams() << subCommandE;
+        fout << subCommandE;
       }
       if (!command.empty()) {
-        *this->GetFolderBuildStreams() << "'" << std::endl;
+        fout << "'" << std::endl;
       }
     }
   }
@@ -515,14 +522,14 @@ void cmGhsMultiTargetGenerator::WriteSources(
 }
 
 void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
-  cmGeneratedFileStream* fileStream, const cmSourceFile* sourceFile)
+  std::ostream* fout, const cmSourceFile* sourceFile)
 {
   const char* rawLangProp = sourceFile->GetProperty("LANGUAGE");
   if (NULL != rawLangProp) {
     std::string sourceLangProp(rawLangProp);
     std::string extension(sourceFile->GetExtension());
     if ("CXX" == sourceLangProp && ("c" == extension || "C" == extension)) {
-      *fileStream << "    -dotciscxx" << std::endl;
+      *fout << "    -dotciscxx" << std::endl;
     }
   }
 }

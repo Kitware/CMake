@@ -18,16 +18,32 @@ cmLocalGhsMultiGenerator::~cmLocalGhsMultiGenerator()
 {
 }
 
+void cmLocalGhsMultiGenerator::GenerateTargetsDepthFirst(
+  cmGeneratorTarget* target, std::vector<cmGeneratorTarget*>& remaining)
+{
+  if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    return;
+  }
+  // Find this target in the list of remaining targets.
+  auto it = std::find(remaining.begin(), remaining.end(), target);
+  if (it == remaining.end()) {
+    // This target was already handled.
+    return;
+  }
+  // Remove this target from the list of remaining targets because
+  // we are handling it now.
+  *it = nullptr;
+
+  cmGhsMultiTargetGenerator tg(target);
+  tg.Generate();
+}
+
 void cmLocalGhsMultiGenerator::Generate()
 {
-  const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
-
-  for (std::vector<cmGeneratorTarget*>::const_iterator l = tgts.begin();
-       l != tgts.end(); ++l) {
-    if ((*l)->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-      continue;
+  std::vector<cmGeneratorTarget*> remaining = this->GetGeneratorTargets();
+  for (auto& t : remaining) {
+    if (t) {
+      GenerateTargetsDepthFirst(t, remaining);
     }
-    cmGhsMultiTargetGenerator tg(*l);
-    tg.Generate();
   }
 }

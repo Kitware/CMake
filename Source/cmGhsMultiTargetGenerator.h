@@ -60,10 +60,11 @@ private:
   };
   bool IsTargetGroup() const { return this->TargetGroup; }
 
-  void WriteTypeSpecifics(const std::string& config, bool notKernel);
-  void WriteCompilerFlags(const std::string& config,
+  void WriteTypeSpecifics(std::ostream& fout, const std::string& config,
+                          bool notKernel);
+  void WriteCompilerFlags(std::ostream& fout, const std::string& config,
                           const std::string& language);
-  void WriteCompilerDefinitions(const std::string& config,
+  void WriteCompilerDefinitions(std::ostream& fout, const std::string& config,
                                 const std::string& language);
 
   void SetCompilerFlags(std::string const& config, const std::string& language,
@@ -71,12 +72,13 @@ private:
   std::string GetDefines(const std::string& langugae,
                          std::string const& config);
 
-  void WriteIncludes(const std::string& config, const std::string& language);
-  void WriteTargetLinkLibraries(std::string const& config,
+  void WriteIncludes(std::ostream& fout, const std::string& config,
+                     const std::string& language);
+  void WriteTargetLinkLibraries(std::ostream& fout, std::string const& config,
                                 std::string const& language);
-  void WriteCustomCommands();
+  void WriteCustomCommands(std::ostream& fout);
   void WriteCustomCommandsHelper(
-    std::vector<cmCustomCommand> const& commandsSet,
+    std::ostream& fout, std::vector<cmCustomCommand> const& commandsSet,
     cmTarget::CustomCommandType commandType);
   void WriteSources(
     std::vector<cmSourceFile*> const& objectSources,
@@ -85,7 +87,7 @@ private:
     std::vector<cmSourceFile*>* objectSources,
     cmLocalGhsMultiGenerator* localGhsMultiGenerator,
     cmGeneratorTarget* generatorTarget);
-  static void WriteObjectLangOverride(cmGeneratedFileStream* fileStream,
+  static void WriteObjectLangOverride(std::ostream* fout,
                                       const cmSourceFile* sourceFile);
   static void WriteObjectDir(cmGeneratedFileStream* fileStream,
                              std::string const& dir);
@@ -115,6 +117,7 @@ private:
   static std::string const DDOption;
   std::map<std::string, std::string> FlagsByLanguage;
   std::map<std::string, std::string> DefinesByLanguage;
+  std::string const Name;
 };
 
 #endif // ! cmGhsMultiTargetGenerator_h

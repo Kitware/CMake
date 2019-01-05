@@ -24,6 +24,10 @@ public:
    * Generate the makefile for this directory.
    */
   virtual void Generate();
+
+private:
+  void GenerateTargetsDepthFirst(cmGeneratorTarget* target,
+                                 std::vector<cmGeneratorTarget*>& remaining);
 };
 
 #endif
