@@ -80,17 +80,14 @@ private:
   void WriteCustomCommandsHelper(
     std::ostream& fout, std::vector<cmCustomCommand> const& commandsSet,
     cmTarget::CustomCommandType commandType);
-  void WriteSources(
-    std::vector<cmSourceFile*> const& objectSources,
-    std::map<const cmSourceFile*, std::string> const& objectNames);
+  void WriteSources(std::ostream& fout_proj);
   static std::map<const cmSourceFile*, std::string> GetObjectNames(
     std::vector<cmSourceFile*>* objectSources,
     cmLocalGhsMultiGenerator* localGhsMultiGenerator,
     cmGeneratorTarget* generatorTarget);
   static void WriteObjectLangOverride(std::ostream* fout,
                                       const cmSourceFile* sourceFile);
-  static void WriteObjectDir(cmGeneratedFileStream* fileStream,
-                             std::string const& dir);
+  static void WriteObjectDir(std::ostream& fout, std::string const& dir);
   std::string GetOutputDirectory(const std::string& config) const;
   std::string GetOutputFilename(const std::string& config) const;
   static std::string ComputeLongestObjectDirectory(

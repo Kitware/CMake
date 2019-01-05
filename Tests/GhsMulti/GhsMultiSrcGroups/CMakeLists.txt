@@ -32,6 +32,9 @@ add_executable(groups
   standard.h
   )
 
+if(TEST_PROP)
+  set_target_properties(groups PROPERTIES GHS_NO_SOURCE_GROUP_FILE ON)
+endif()
 source_group( gC FILES sub/testOBJ.h testOBJ.c testOBJ.h sub/testOBJ.c )
 source_group( gA FILES test1.c test1.h)
 source_group( gB test[65].c )
