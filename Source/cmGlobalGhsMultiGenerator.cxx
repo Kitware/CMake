@@ -216,7 +216,8 @@ void cmGlobalGhsMultiGenerator::OpenBuildFileStream()
   std::string buildFilePath =
     this->GetCMakeInstance()->GetHomeOutputDirectory();
   buildFilePath += "/";
-  buildFilePath += "default";
+  buildFilePath +=
+    this->GetCMakeInstance()->GetCurrentSnapshot().GetProjectName();
   buildFilePath += FILE_EXTENSION;
 
   this->Open(std::string(""), buildFilePath, &this->TargetFolderBuildStreams);
@@ -313,7 +314,7 @@ void cmGlobalGhsMultiGenerator::Generate()
 
 void cmGlobalGhsMultiGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string& makeProgram,
-  const std::string& /*projectName*/, const std::string& /*projectDir*/,
+  const std::string& projectName, const std::string& /*projectDir*/,
   const std::string& targetName, const std::string& /*config*/, bool /*fast*/,
   int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
 {
@@ -331,6 +332,8 @@ void cmGlobalGhsMultiGenerator::GenerateBuildCommand(
 
   makeCommand.insert(makeCommand.end(), makeOptions.begin(),
                      makeOptions.end());
+  makeCommand.push_back("-top");
+  makeCommand.push_back(projectName + FILE_EXTENSION);
   if (!targetName.empty()) {
     if (targetName == "clean") {
       makeCommand.push_back("-clean");
