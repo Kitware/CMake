@@ -52,16 +52,9 @@ private:
     std::ostream& fout, std::vector<cmCustomCommand> const& commandsSet,
     cmTarget::CustomCommandType commandType);
   void WriteSources(std::ostream& fout_proj);
-  static std::map<const cmSourceFile*, std::string> GetObjectNames(
-    std::vector<cmSourceFile*>* objectSources,
-    cmLocalGhsMultiGenerator* localGhsMultiGenerator,
-    cmGeneratorTarget* generatorTarget);
+
   static void WriteObjectLangOverride(std::ostream& fout,
                                       const cmSourceFile* sourceFile);
-
-  static std::string ComputeLongestObjectDirectory(
-    cmLocalGhsMultiGenerator const* localGhsMultiGenerator,
-    cmGeneratorTarget* generatorTarget, cmSourceFile* const sourceFile);
 
   static bool DetermineIfTargetGroup(const cmGeneratorTarget* target);
   bool DetermineIfDynamicDownload(std::string const& config,

@@ -28,6 +28,10 @@ public:
   std::string GetTargetDirectory(
     cmGeneratorTarget const* target) const override;
 
+  void ComputeObjectFilenames(
+    std::map<cmSourceFile const*, std::string>& mapping,
+    cmGeneratorTarget const* gt = nullptr) override;
+
 private:
   void GenerateTargetsDepthFirst(cmGeneratorTarget* target,
                                  std::vector<cmGeneratorTarget*>& remaining);

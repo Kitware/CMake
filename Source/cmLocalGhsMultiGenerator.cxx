@@ -7,6 +7,7 @@
 #include "cmGhsMultiTargetGenerator.h"
 #include "cmGlobalGhsMultiGenerator.h"
 #include "cmMakefile.h"
+#include "cmSourceFile.h"
 
 cmLocalGhsMultiGenerator::cmLocalGhsMultiGenerator(cmGlobalGenerator* gg,
                                                    cmMakefile* mf)
@@ -54,5 +55,46 @@ void cmLocalGhsMultiGenerator::Generate()
     if (t) {
       GenerateTargetsDepthFirst(t, remaining);
     }
+  }
+}
+
+void cmLocalGhsMultiGenerator::ComputeObjectFilenames(
+  std::map<cmSourceFile const*, std::string>& mapping,
+  cmGeneratorTarget const* gt)
+{
+  std::string dir_max;
+  dir_max += this->GetCurrentBinaryDirectory();
+  dir_max += "/";
+  dir_max += this->GetTargetDirectory(gt);
+  dir_max += "/";
+
+  // Count the number of object files with each name.  Note that
+  // filesystem may not be case sensitive.
+  std::map<std::string, int> counts;
+
+  for (auto const& si : mapping) {
+    cmSourceFile const* sf = si.first;
+    std::string objectNameLower = cmSystemTools::LowerCase(
+      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()));
+    objectNameLower += this->GlobalGenerator->GetLanguageOutputExtension(*sf);
+    counts[objectNameLower] += 1;
+  }
+
+  // For all source files producing duplicate names we need unique
+  // object name computation.
+  for (auto& si : mapping) {
+    cmSourceFile const* sf = si.first;
+    std::string objectName =
+      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+    objectName += this->GlobalGenerator->GetLanguageOutputExtension(*sf);
+
+    if (counts[cmSystemTools::LowerCase(objectName)] > 1) {
+      const_cast<cmGeneratorTarget*>(gt)->AddExplicitObjectName(sf);
+      bool keptSourceExtension;
+      objectName = this->GetObjectFileNameWithoutTarget(*sf, dir_max,
+                                                        &keptSourceExtension);
+      cmsys::SystemTools::ReplaceString(objectName, "/", "_");
+    }
+    si.second = objectName;
   }
 }

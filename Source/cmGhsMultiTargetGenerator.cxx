@@ -76,10 +76,15 @@ void cmGhsMultiTargetGenerator::Generate()
       return;
     }
     case cmStateEnums::OBJECT_LIBRARY: {
-      std::string msg = "add_library(<name> OBJECT ...) not supported: ";
-      msg += this->Name;
-      cmSystemTools::Message(msg.c_str());
-      return;
+      std::string targetName;
+      std::string targetNameSO;
+      std::string targetNameImport;
+      std::string targetNamePDB;
+      this->GeneratorTarget->GetLibraryNames(
+        targetName, targetNameSO, this->TargetNameReal, targetNameImport,
+        targetNamePDB, this->ConfigName);
+      this->TagType = GhsMultiGpj::SUBPROJECT;
+      break;
     }
     case cmStateEnums::MODULE_LIBRARY: {
       std::string msg = "add_library(<name> MODULE ...) not supported: ";
@@ -151,11 +156,13 @@ void cmGhsMultiTargetGenerator::WriteTargetSpecifics(std::ostream& fout,
   std::string outpath;
   std::string rootpath = this->LocalGenerator->GetCurrentBinaryDirectory();
 
-  // set target binary file destination
-  outpath = this->GeneratorTarget->GetDirectory(config);
-  outpath = this->LocalGenerator->ConvertToRelativePath(rootpath, outpath);
-  fout << "    :binDirRelative=\"" << outpath << "\"" << std::endl;
-  fout << "    -o \"" << this->TargetNameReal << "\"" << std::endl;
+  if (this->TagType != GhsMultiGpj::SUBPROJECT) {
+    // set target binary file destination
+    outpath = this->GeneratorTarget->GetDirectory(config);
+    outpath = this->LocalGenerator->ConvertToRelativePath(rootpath, outpath);
+    fout << "    :binDirRelative=\"" << outpath << "\"" << std::endl;
+    fout << "    -o \"" << this->TargetNameReal << "\"" << std::endl;
+  }
 
   // set target object file destination
   outpath = this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
@@ -360,52 +367,6 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
   }
 }
 
-std::map<const cmSourceFile*, std::string>
-cmGhsMultiTargetGenerator::GetObjectNames(
-  std::vector<cmSourceFile*>* const objectSources,
-  cmLocalGhsMultiGenerator* const localGhsMultiGenerator,
-  cmGeneratorTarget* const generatorTarget)
-{
-  std::map<std::string, std::vector<cmSourceFile*>> filenameToSource;
-  std::map<cmSourceFile*, std::string> sourceToFilename;
-  for (std::vector<cmSourceFile*>::const_iterator sf = objectSources->begin();
-       sf != objectSources->end(); ++sf) {
-    const std::string filename =
-      cmSystemTools::GetFilenameName((*sf)->GetFullPath());
-    const std::string lower_filename = cmSystemTools::LowerCase(filename);
-    filenameToSource[lower_filename].push_back(*sf);
-    sourceToFilename[*sf] = lower_filename;
-  }
-
-  std::vector<cmSourceFile*> duplicateSources;
-  for (std::map<std::string, std::vector<cmSourceFile*>>::const_iterator
-         msvSourceI = filenameToSource.begin();
-       msvSourceI != filenameToSource.end(); ++msvSourceI) {
-    if (msvSourceI->second.size() > 1) {
-      duplicateSources.insert(duplicateSources.end(),
-                              msvSourceI->second.begin(),
-                              msvSourceI->second.end());
-    }
-  }
-
-  std::map<const cmSourceFile*, std::string> objectNamesCorrected;
-
-  for (std::vector<cmSourceFile*>::const_iterator sf =
-         duplicateSources.begin();
-       sf != duplicateSources.end(); ++sf) {
-    std::string const longestObjectDirectory(
-      cmGhsMultiTargetGenerator::ComputeLongestObjectDirectory(
-        localGhsMultiGenerator, generatorTarget, *sf));
-    std::string objFilenameName =
-      localGhsMultiGenerator->GetObjectFileNameWithoutTarget(
-        **sf, longestObjectDirectory);
-    cmsys::SystemTools::ReplaceString(objFilenameName, "/", "_");
-    objectNamesCorrected[*sf] = objFilenameName;
-  }
-
-  return objectNamesCorrected;
-}
-
 void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 {
   /* vector of all sources for this target */
@@ -473,11 +434,6 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
               });
   }
 
-  /* get all the object names for these sources */
-  std::map<const cmSourceFile*, std::string> objectNames =
-    cmGhsMultiTargetGenerator::GetObjectNames(&sources, this->LocalGenerator,
-                                              this->GeneratorTarget);
-
   /* list of open project files */
   std::vector<cmGeneratedFileStream*> gfiles;
 
@@ -537,10 +493,13 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       if ("ld" != si->GetExtension() && "int" != si->GetExtension() &&
           "bsp" != si->GetExtension()) {
         this->WriteObjectLangOverride(*fout, si);
-        if (objectNames.end() != objectNames.find(si)) {
-          *fout << "    -o \"" << objectNames.find(si)->second << "\""
-                << std::endl;
-        }
+      }
+      /* to avoid clutter in the gui only print out the objectName if it has
+       * been renamed */
+      std::string objectName = this->GeneratorTarget->GetObjectName(si);
+      if (!objectName.empty() &&
+          this->GeneratorTarget->HasExplicitObjectName(si)) {
+        *fout << "    -o " << objectName << std::endl;
       }
     }
   }
@@ -561,30 +520,6 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
       fout << "    -dotciscxx" << std::endl;
     }
   }
-}
-
-std::string cmGhsMultiTargetGenerator::ComputeLongestObjectDirectory(
-  cmLocalGhsMultiGenerator const* localGhsMultiGenerator,
-  cmGeneratorTarget* const generatorTarget, cmSourceFile* const sourceFile)
-{
-  std::string dir_max;
-  dir_max +=
-    localGhsMultiGenerator->GetMakefile()->GetCurrentBinaryDirectory();
-  dir_max += "/";
-  dir_max += generatorTarget->Target->GetName();
-  dir_max += "/";
-  std::vector<cmSourceGroup> sourceGroups(
-    localGhsMultiGenerator->GetMakefile()->GetSourceGroups());
-  std::string const& sourceFullPath = sourceFile->GetFullPath();
-  cmSourceGroup* sourceGroup =
-    localGhsMultiGenerator->GetMakefile()->FindSourceGroup(sourceFullPath,
-                                                           sourceGroups);
-  std::string const& sgPath = sourceGroup->GetFullName();
-  dir_max += sgPath;
-  dir_max += "/Objs/libs/";
-  dir_max += generatorTarget->Target->GetName();
-  dir_max += "/";
-  return dir_max;
 }
 
 bool cmGhsMultiTargetGenerator::DetermineIfTargetGroup(
