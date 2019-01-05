@@ -3,6 +3,9 @@ Green Hills MULTI
 
 Generates Green Hills MULTI project files (experimental, work-in-progress).
 
+The buildsystem has predetermined build-configuration settings that can be controlled
+via the :variable:`CMAKE_BUILD_TYPE` variable.
+
 Customizations that are used to pick toolset and target system:
 
 The ``-A <arch>`` can be supplied for setting the target architecture.

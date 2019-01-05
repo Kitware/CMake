@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGhsMultiTargetGenerator.h"
 
+#include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGhsMultiGenerator.h"
@@ -35,6 +36,15 @@ cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
   this->AbsBuildFilePath = absPathToRoot + this->RelBuildFilePath;
   this->AbsBuildFileName = absPathToRoot + this->RelBuildFileName;
   this->AbsOutputFileName = absPathToRoot + this->RelOutputFileName;
+
+  // Store the configuration name that is being used
+  if (const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
+    // Use the build type given by the user.
+    this->ConfigName = config;
+  } else {
+    // No configuration type given.
+    this->ConfigName.clear();
+  }
 }
 
 cmGhsMultiTargetGenerator::~cmGhsMultiTargetGenerator()
@@ -104,6 +114,13 @@ void cmGhsMultiTargetGenerator::Generate()
   // Determine type of target for this project
   switch (this->GeneratorTarget->GetType()) {
     case cmStateEnums::EXECUTABLE: {
+      // Get the name of the executable to generate.
+      std::string targetName;
+      std::string targetNameImport;
+      std::string targetNamePDB;
+      this->GeneratorTarget->GetExecutableNames(
+        targetName, this->TargetNameReal, targetNameImport, targetNamePDB,
+        this->ConfigName);
       if (cmGhsMultiTargetGenerator::DetermineIfTargetGroup(
             this->GeneratorTarget)) {
         this->TagType = GhsMultiGpj::INTERGRITY_APPLICATION;
@@ -113,6 +130,13 @@ void cmGhsMultiTargetGenerator::Generate()
       break;
     }
     case cmStateEnums::STATIC_LIBRARY: {
+      std::string targetName;
+      std::string targetNameSO;
+      std::string targetNameImport;
+      std::string targetNamePDB;
+      this->GeneratorTarget->GetLibraryNames(
+        targetName, targetNameSO, this->TargetNameReal, targetNameImport,
+        targetNamePDB, this->ConfigName);
       this->TagType = GhsMultiGpj::LIBRARY;
       break;
     }
@@ -143,6 +167,7 @@ void cmGhsMultiTargetGenerator::Generate()
     default:
       return;
   }
+
   // Tell the global generator the name of the project file
   this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME",
                                              this->Name.c_str());
@@ -182,7 +207,7 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
     cmGlobalGhsMultiGenerator::WriteDisclaimer(&fout);
 
     bool const notKernel = this->IsNotKernel(config, language);
-    this->WriteTypeSpecifics(fout, config, notKernel);
+    this->WriteTargetSpecifics(fout, config, notKernel);
     this->SetCompilerFlags(config, language, notKernel);
     this->WriteCompilerFlags(fout, config, language);
     this->WriteCompilerDefinitions(fout, config, language);
@@ -224,34 +249,22 @@ cmGlobalGhsMultiGenerator* cmGhsMultiTargetGenerator::GetGlobalGenerator()
     this->LocalGenerator->GetGlobalGenerator());
 }
 
-void cmGhsMultiTargetGenerator::WriteTypeSpecifics(std::ostream& fout,
-                                                   const std::string& config,
-                                                   bool const notKernel)
+void cmGhsMultiTargetGenerator::WriteTargetSpecifics(std::ostream& fout,
+                                                     const std::string& config,
+                                                     bool const notKernel)
 {
-  std::string outputDir(this->GetOutputDirectory(config));
-  std::string outputFilename(this->GetOutputFilename(config));
+  std::string outpath;
+  std::string rootpath = this->LocalGenerator->GetCurrentBinaryDirectory();
 
-  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
-    std::string const& static_library_suffix =
-      this->Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
-    fout << "    -o \"" << outputDir << outputFilename << static_library_suffix
-         << "\"" << std::endl;
-  } else if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-    if (notKernel && !this->IsTargetGroup()) {
-      fout << "    -relprog" << std::endl;
-    }
-    if (this->IsTargetGroup()) {
-      fout << "    -o \"" << outputDir << outputFilename << ".elf\""
-           << std::endl;
-      fout << "    :extraOutputFile=\"" << outputDir << outputFilename
-           << ".elf.ael\"" << std::endl;
-    } else {
-      std::string const executable_suffix =
-        this->Makefile->GetSafeDefinition("CMAKE_EXECUTABLE_SUFFIX");
-      fout << "    -o \"" << outputDir << outputFilename << executable_suffix
-           << "\"" << std::endl;
-    }
-  }
+  // set target binary file destination
+  outpath = this->GeneratorTarget->GetDirectory(config);
+  outpath = this->LocalGenerator->ConvertToRelativePath(rootpath, outpath);
+  fout << "    :binDirRelative=\"" << outpath << "\"" << std::endl;
+  fout << "    -o \"" << this->TargetNameReal << "\"" << std::endl;
+
+  // set target object file destination
+  outpath = this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+  fout << "    :outputDirRelative=\"" << outpath << "\"" << std::endl;
 }
 
 void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
@@ -643,8 +656,6 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
           *fout << "    -o \"" << objectNames.find(si)->second << "\""
                 << std::endl;
         }
-
-        this->WriteObjectDir(*fout, this->AbsBuildFilePath);
       }
     }
   }
@@ -665,18 +676,6 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
       *fout << "    -dotciscxx" << std::endl;
     }
   }
-}
-
-void cmGhsMultiTargetGenerator::WriteObjectDir(std::ostream& fout,
-                                               std::string const& dir)
-{
-  std::string workingDir(dir);
-  cmSystemTools::ConvertToUnixSlashes(workingDir);
-  if (!workingDir.empty()) {
-    workingDir += "/";
-  }
-  workingDir += "Objs";
-  fout << "    -object_dir=\"" << workingDir << "\"" << std::endl;
 }
 
 std::string cmGhsMultiTargetGenerator::GetOutputDirectory(

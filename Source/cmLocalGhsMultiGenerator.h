@@ -25,6 +25,9 @@ public:
    */
   virtual void Generate();
 
+  std::string GetTargetDirectory(
+    cmGeneratorTarget const* target) const override;
+
 private:
   void GenerateTargetsDepthFirst(cmGeneratorTarget* target,
                                  std::vector<cmGeneratorTarget*>& remaining);

@@ -60,8 +60,8 @@ private:
 
   bool IsTargetGroup() const { return this->TargetGroup; }
 
-  void WriteTypeSpecifics(std::ostream& fout, const std::string& config,
-                          bool notKernel);
+  void WriteTargetSpecifics(std::ostream& fout, const std::string& config,
+                            bool notKernel);
   void WriteCompilerFlags(std::ostream& fout, const std::string& config,
                           const std::string& language);
   void WriteCompilerDefinitions(std::ostream& fout, const std::string& config,
@@ -87,7 +87,6 @@ private:
     cmGeneratorTarget* generatorTarget);
   static void WriteObjectLangOverride(std::ostream* fout,
                                       const cmSourceFile* sourceFile);
-  static void WriteObjectDir(std::ostream& fout, std::string const& dir);
   std::string GetOutputDirectory(const std::string& config) const;
   std::string GetOutputFilename(const std::string& config) const;
   static std::string ComputeLongestObjectDirectory(
@@ -115,8 +114,10 @@ private:
   std::map<std::string, std::string> FlagsByLanguage;
   std::map<std::string, std::string> DefinesByLanguage;
 
+  std::string TargetNameReal;
   GhsMultiGpj::Types TagType;
   std::string const Name;
+  std::string ConfigName; /* CMAKE_BUILD_TYPE */
 };
 
 #endif // ! cmGhsMultiTargetGenerator_h

@@ -41,6 +41,18 @@ void cmGlobalGhsMultiGenerator::GetDocumentation(cmDocumentationEntry& entry)
     "Generates Green Hills MULTI files (experimental, work-in-progress).";
 }
 
+void cmGlobalGhsMultiGenerator::ComputeTargetObjectDirectory(
+  cmGeneratorTarget* gt) const
+{
+  // Compute full path to object file directory for this target.
+  std::string dir;
+  dir += gt->LocalGenerator->GetCurrentBinaryDirectory();
+  dir += "/";
+  dir += gt->LocalGenerator->GetTargetDirectory(gt);
+  dir += "/";
+  gt->ObjectDirectory = dir;
+}
+
 bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
                                                     cmMakefile* mf)
 {

@@ -18,6 +18,15 @@ cmLocalGhsMultiGenerator::~cmLocalGhsMultiGenerator()
 {
 }
 
+std::string cmLocalGhsMultiGenerator::GetTargetDirectory(
+  cmGeneratorTarget const* target) const
+{
+  std::string dir;
+  dir += target->GetName();
+  dir += ".dir";
+  return dir;
+}
+
 void cmLocalGhsMultiGenerator::GenerateTargetsDepthFirst(
   cmGeneratorTarget* target, std::vector<cmGeneratorTarget*>& remaining)
 {

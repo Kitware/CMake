@@ -63,6 +63,8 @@ public:
    */
   bool FindMakeProgram(cmMakefile* mf) override;
 
+  void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;
+
   cmGeneratedFileStream* GetBuildFileStream()
   {
     return this->TargetFolderBuildStreams[""];
