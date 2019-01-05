@@ -34,15 +34,16 @@ private:
 
   bool IsTargetGroup() const { return this->TargetGroup; }
 
-  void WriteTargetSpecifics(std::ostream& fout, const std::string& config,
-                            bool notKernel);
+  void WriteTargetSpecifics(std::ostream& fout, const std::string& config);
+
   void WriteCompilerFlags(std::ostream& fout, const std::string& config,
                           const std::string& language);
   void WriteCompilerDefinitions(std::ostream& fout, const std::string& config,
                                 const std::string& language);
 
-  void SetCompilerFlags(std::string const& config, const std::string& language,
-                        bool const notKernel);
+  void SetCompilerFlags(std::string const& config,
+                        const std::string& language);
+
   std::string GetDefines(const std::string& langugae,
                          std::string const& config);
 
@@ -65,7 +66,6 @@ private:
     cmLocalGhsMultiGenerator const* localGhsMultiGenerator,
     cmGeneratorTarget* generatorTarget, cmSourceFile* const sourceFile);
 
-  bool IsNotKernel(std::string const& config, const std::string& language);
   static bool DetermineIfTargetGroup(const cmGeneratorTarget* target);
   bool DetermineIfDynamicDownload(std::string const& config,
                                   const std::string& language);

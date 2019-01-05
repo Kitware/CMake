@@ -121,25 +121,19 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
 
     this->GetGlobalGenerator()->WriteFileHeader(fout);
     GhsMultiGpj::WriteGpjTag(this->TagType, fout);
-
-    std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-    if (0 == config.length()) {
-      config = "RELEASE";
-    }
     const std::string language(
-      this->GeneratorTarget->GetLinkerLanguage(config));
-    config = cmSystemTools::UpperCase(config);
-    this->DynamicDownload = this->DetermineIfDynamicDownload(config, language);
+      this->GeneratorTarget->GetLinkerLanguage(this->ConfigName));
+    this->DynamicDownload =
+      this->DetermineIfDynamicDownload(this->ConfigName, language);
     if (this->DynamicDownload) {
       fout << "#component integrity_dynamic_download" << std::endl;
     }
-    bool const notKernel = this->IsNotKernel(config, language);
-    this->WriteTargetSpecifics(fout, config, notKernel);
-    this->SetCompilerFlags(config, language, notKernel);
-    this->WriteCompilerFlags(fout, config, language);
-    this->WriteCompilerDefinitions(fout, config, language);
-    this->WriteIncludes(fout, config, language);
-    this->WriteTargetLinkLine(fout, config);
+    this->WriteTargetSpecifics(fout, this->ConfigName);
+    this->SetCompilerFlags(this->ConfigName, language);
+    this->WriteCompilerFlags(fout, this->ConfigName, language);
+    this->WriteCompilerDefinitions(fout, this->ConfigName, language);
+    this->WriteIncludes(fout, this->ConfigName, language);
+    this->WriteTargetLinkLine(fout, this->ConfigName);
     this->WriteCustomCommands(fout);
     this->WriteSources(fout);
 
@@ -162,8 +156,7 @@ bool cmGhsMultiTargetGenerator::IncludeThisTarget()
 std::vector<cmSourceFile*> cmGhsMultiTargetGenerator::GetSources() const
 {
   std::vector<cmSourceFile*> output;
-  std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  this->GeneratorTarget->GetSourceFiles(output, config);
+  this->GeneratorTarget->GetSourceFiles(output, this->ConfigName);
   return output;
 }
 
@@ -175,8 +168,7 @@ cmGlobalGhsMultiGenerator* cmGhsMultiTargetGenerator::GetGlobalGenerator()
 }
 
 void cmGhsMultiTargetGenerator::WriteTargetSpecifics(std::ostream& fout,
-                                                     const std::string& config,
-                                                     bool const notKernel)
+                                                     const std::string& config)
 {
   std::string outpath;
   std::string rootpath = this->LocalGenerator->GetCurrentBinaryDirectory();
@@ -193,8 +185,7 @@ void cmGhsMultiTargetGenerator::WriteTargetSpecifics(std::ostream& fout,
 }
 
 void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
-                                                 const std::string& language,
-                                                 bool const notKernel)
+                                                 const std::string& language)
 {
   std::map<std::string, std::string>::iterator i =
     this->FlagsByLanguage.find(language);
@@ -202,14 +193,9 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
     std::string flags;
     const char* lang = language.c_str();
 
-    if (notKernel) {
-      this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
-                                             lang, config);
-    } else {
-      this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
-                                             lang + std::string("_GHS_KERNEL"),
-                                             config);
-    }
+    this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget, lang,
+                                           config);
+
     this->LocalGenerator->AddCMP0018Flags(flags, this->GeneratorTarget, lang,
                                           config);
     this->LocalGenerator->AddVisibilityPresetFlags(
@@ -260,7 +246,11 @@ void cmGhsMultiTargetGenerator::WriteCompilerFlags(std::ostream& fout,
     this->FlagsByLanguage.find(language);
   if (flagsByLangI != this->FlagsByLanguage.end()) {
     if (!flagsByLangI->second.empty()) {
-      fout << "    " << flagsByLangI->second << std::endl;
+      std::vector<std::string> ghsCompFlags =
+        cmSystemTools::ParseArguments(flagsByLangI->second.c_str());
+      for (auto& f : ghsCompFlags) {
+        fout << "    " << f << std::endl;
+      }
     }
   }
 }
@@ -616,17 +606,6 @@ std::string cmGhsMultiTargetGenerator::ComputeLongestObjectDirectory(
   dir_max += generatorTarget->Target->GetName();
   dir_max += "/";
   return dir_max;
-}
-
-bool cmGhsMultiTargetGenerator::IsNotKernel(std::string const& config,
-                                            const std::string& language)
-{
-  bool output;
-  std::vector<std::string> options;
-  this->GeneratorTarget->GetCompileOptions(options, config, language);
-  output =
-    options.end() == std::find(options.begin(), options.end(), "-kernel");
-  return output;
 }
 
 bool cmGhsMultiTargetGenerator::DetermineIfTargetGroup(
