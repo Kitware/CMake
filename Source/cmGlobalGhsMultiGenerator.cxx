@@ -311,6 +311,10 @@ void cmGlobalGhsMultiGenerator::WriteSubProjects(
           dir += "/";
         }
       }
+
+      if (cmSystemTools::IsOn(target->GetProperty("EXCLUDE_FROM_ALL"))) {
+        fout << "{comment} ";
+      }
       fout << dir << projName << FILE_EXTENSION;
       fout << " " << projType << std::endl;
     }
@@ -439,21 +443,6 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(std::ostream& fout)
     fout << "customization=" << trimQuotes(customization) << std::endl;
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_CUSTOMIZATION");
   }
-}
-
-bool cmGlobalGhsMultiGenerator::IsTgtForBuild(const cmGeneratorTarget* tgt)
-{
-  const std::string config =
-    tgt->Target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  std::vector<cmSourceFile*> tgtSources;
-  tgt->GetSourceFiles(tgtSources, config);
-  bool tgtInBuild = true;
-  char const* excludeFromAll = tgt->GetProperty("EXCLUDE_FROM_ALL");
-  if (NULL != excludeFromAll && '1' == excludeFromAll[0] &&
-      '\0' == excludeFromAll[1]) {
-    tgtInBuild = false;
-  }
-  return !tgtSources.empty() && tgtInBuild;
 }
 
 std::string cmGlobalGhsMultiGenerator::trimQuotes(std::string const& str)

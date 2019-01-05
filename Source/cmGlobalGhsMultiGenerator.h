@@ -111,8 +111,6 @@ private:
   void WriteSubProjects(std::ostream& fout, cmLocalGenerator* root,
                         std::vector<cmLocalGenerator*>& generators);
 
-  bool IsTgtForBuild(const cmGeneratorTarget* tgt);
-
   std::string trimQuotes(std::string const& str);
 
   static const char* DEFAULT_BUILD_PROGRAM;

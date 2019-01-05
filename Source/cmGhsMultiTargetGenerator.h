@@ -24,9 +24,6 @@ public:
 
   virtual void Generate();
 
-  bool IncludeThisTarget();
-  std::vector<cmSourceFile*> GetSources() const;
-
 private:
   cmGlobalGhsMultiGenerator* GetGlobalGenerator() const;
 

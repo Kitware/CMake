@@ -108,56 +108,34 @@ void cmGhsMultiTargetGenerator::Generate()
 
 void cmGhsMultiTargetGenerator::GenerateTarget()
 {
-  // Skip if empty or not included in build
-  if (!this->GetSources().empty() && this->IncludeThisTarget()) {
+  // Open the filestream in copy-if-different mode.
+  std::string fname = this->LocalGenerator->GetCurrentBinaryDirectory();
+  fname += "/";
+  fname += this->Name;
+  fname += cmGlobalGhsMultiGenerator::FILE_EXTENSION;
+  cmGeneratedFileStream fout(fname.c_str());
+  fout.SetCopyIfDifferent(true);
 
-    // Open the filestream in copy-if-different mode.
-    std::string fname = this->LocalGenerator->GetCurrentBinaryDirectory();
-    fname += "/";
-    fname += this->Name;
-    fname += cmGlobalGhsMultiGenerator::FILE_EXTENSION;
-    cmGeneratedFileStream fout(fname.c_str());
-    fout.SetCopyIfDifferent(true);
+  this->GetGlobalGenerator()->WriteFileHeader(fout);
+  GhsMultiGpj::WriteGpjTag(this->TagType, fout);
 
-    this->GetGlobalGenerator()->WriteFileHeader(fout);
-    GhsMultiGpj::WriteGpjTag(this->TagType, fout);
-    const std::string language(
-      this->GeneratorTarget->GetLinkerLanguage(this->ConfigName));
-    this->DynamicDownload =
-      this->DetermineIfDynamicDownload(this->ConfigName, language);
-    if (this->DynamicDownload) {
-      fout << "#component integrity_dynamic_download" << std::endl;
-    }
-    this->WriteTargetSpecifics(fout, this->ConfigName);
-    this->SetCompilerFlags(this->ConfigName, language);
-    this->WriteCompilerFlags(fout, this->ConfigName, language);
-    this->WriteCompilerDefinitions(fout, this->ConfigName, language);
-    this->WriteIncludes(fout, this->ConfigName, language);
-    this->WriteTargetLinkLine(fout, this->ConfigName);
-    this->WriteCustomCommands(fout);
-    this->WriteSources(fout);
-
-    fout.Close();
+  const std::string language(
+    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName));
+  this->DynamicDownload =
+    this->DetermineIfDynamicDownload(this->ConfigName, language);
+  if (this->DynamicDownload) {
+    fout << "#component integrity_dynamic_download" << std::endl;
   }
-}
+  this->WriteTargetSpecifics(fout, this->ConfigName);
+  this->SetCompilerFlags(this->ConfigName, language);
+  this->WriteCompilerFlags(fout, this->ConfigName, language);
+  this->WriteCompilerDefinitions(fout, this->ConfigName, language);
+  this->WriteIncludes(fout, this->ConfigName, language);
+  this->WriteTargetLinkLine(fout, this->ConfigName);
+  this->WriteCustomCommands(fout);
+  this->WriteSources(fout);
 
-bool cmGhsMultiTargetGenerator::IncludeThisTarget()
-{
-  bool output = true;
-  char const* excludeFromAll =
-    this->GeneratorTarget->GetProperty("EXCLUDE_FROM_ALL");
-  if (NULL != excludeFromAll && '1' == excludeFromAll[0] &&
-      '\0' == excludeFromAll[1]) {
-    output = false;
-  }
-  return output;
-}
-
-std::vector<cmSourceFile*> cmGhsMultiTargetGenerator::GetSources() const
-{
-  std::vector<cmSourceFile*> output;
-  this->GeneratorTarget->GetSourceFiles(output, this->ConfigName);
-  return output;
+  fout.Close();
 }
 
 cmGlobalGhsMultiGenerator* cmGhsMultiTargetGenerator::GetGlobalGenerator()
@@ -431,7 +409,8 @@ cmGhsMultiTargetGenerator::GetObjectNames(
 void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 {
   /* vector of all sources for this target */
-  std::vector<cmSourceFile*> sources = this->GetSources();
+  std::vector<cmSourceFile*> sources;
+  this->GeneratorTarget->GetSourceFiles(sources, this->ConfigName);
 
   /* vector of all groups defined for this target
    * -- but the vector is not expanded with sub groups or in any useful order
