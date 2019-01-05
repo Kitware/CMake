@@ -9,6 +9,9 @@ mark_as_advanced(GHS_OS_ROOT)
 set(GHS_OS_DIR "NOTFOUND" CACHE PATH "GHS platform OS directory")
 mark_as_advanced(GHS_OS_DIR)
 
+set(GHS_OS_DIR_OPTION "-os_dir " CACHE STRING "GHS compiler os option")
+mark_as_advanced(GHS_OS_DIR)
+
 #set GHS_OS_DIR if not set by user
 if ( NOT GHS_OS_DIR )
   if (EXISTS ${GHS_OS_ROOT})
@@ -23,8 +26,11 @@ if ( NOT GHS_OS_DIR )
     endif ()
 
     #filter based on platform name
-    if (GHS_TARGET_PLATFORM STREQUAL "integrity")
+    if (GHS_TARGET_PLATFORM MATCHES "integrity")
       list(FILTER GHS_CANDIDATE_OS_DIRS INCLUDE REGEX "int[0-9][0-9][0-9][0-9a-z].*")
+    else() #fall-back for standalone
+      unset(GHS_CANDIDATE_OS_DIRS)
+      set(GHS_OS_DIR "IGNORE")
     endif ()
 
     if (GHS_CANDIDATE_OS_DIRS)

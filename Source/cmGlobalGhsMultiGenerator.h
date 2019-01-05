@@ -85,7 +85,6 @@ public:
                    std::map<std::string, cmGeneratedFileStream*>* fileMap);
 
   static std::string trimQuotes(std::string const& str);
-  inline bool IsOSDirRelative() { return this->OSDirRelative; }
 
 protected:
   void Generate() override;
@@ -105,7 +104,6 @@ private:
 
   void WriteMacros();
   void WriteHighLevelDirectives();
-  void WriteCompilerOptions(std::string const& fOSDir);
 
   static void AddFilesUpToPathNewBuildFile(
     cmGeneratedFileStream* mainBuildFile,
@@ -126,7 +124,6 @@ private:
 
   std::vector<std::string> LibDirs;
 
-  bool OSDirRelative;
   static const char* DEFAULT_BUILD_PROGRAM;
   static const char* DEFAULT_TOOLSET_ROOT;
 };
