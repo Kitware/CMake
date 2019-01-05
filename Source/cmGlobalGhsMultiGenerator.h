@@ -71,6 +71,7 @@ public:
   static void OpenBuildFileStream(std::string const& filepath,
                                   cmGeneratedFileStream** filestream);
   static void OpenBuildFileStream(cmGeneratedFileStream* filestream);
+  void OpenBuildFileStream(std::ostream& fout);
   static void CloseBuildFileStream(cmGeneratedFileStream** filestream);
   /// Write the common disclaimer text at the top of each build file.
   static void WriteDisclaimer(std::ostream* os);
@@ -86,6 +87,24 @@ public:
 
   static std::string trimQuotes(std::string const& str);
 
+  // Target dependency sorting
+  class TargetSet : public std::set<cmGeneratorTarget const*>
+  {
+  };
+  class TargetCompare
+  {
+    std::string First;
+
+  public:
+    TargetCompare(std::string const& first)
+      : First(first)
+    {
+    }
+    bool operator()(cmGeneratorTarget const* l,
+                    cmGeneratorTarget const* r) const;
+  };
+  class OrderedTargetDependSet;
+
 protected:
   void Generate() override;
   void GenerateBuildCommand(std::vector<std::string>& makeCommand,
@@ -100,10 +119,16 @@ protected:
 
 private:
   void GetToolset(cmMakefile* mf, std::string& tsd, std::string& ts);
-  void OpenBuildFileStream();
 
-  void WriteMacros();
-  void WriteHighLevelDirectives();
+  /* top-level project */
+  void OutputTopLevelProject(cmLocalGenerator* root,
+                             std::vector<cmLocalGenerator*>& generators);
+  void WriteTopLevelProject(std::ostream& fout, cmLocalGenerator* root,
+                            std::vector<cmLocalGenerator*>& generators);
+  void WriteMacros(std::ostream& fout);
+  void WriteHighLevelDirectives(std::ostream& fout);
+  void WriteSubProjects(std::ostream& fout, cmLocalGenerator* root,
+                        std::vector<cmLocalGenerator*>& generators);
 
   static void AddFilesUpToPathNewBuildFile(
     cmGeneratedFileStream* mainBuildFile,
@@ -116,7 +141,7 @@ private:
     std::vector<std::string>::const_iterator splitPathI,
     std::vector<std::string>::const_iterator end, GhsMultiGpj::Types projType);
   static std::string GetFileNameFromPath(std::string const& path);
-  void UpdateBuildFiles(const std::vector<cmGeneratorTarget*>& tgts);
+
   bool IsTgtForBuild(const cmGeneratorTarget* tgt);
 
   std::vector<cmGeneratedFileStream*> TargetSubProjects;
@@ -126,6 +151,19 @@ private:
 
   static const char* DEFAULT_BUILD_PROGRAM;
   static const char* DEFAULT_TOOLSET_ROOT;
+};
+
+class cmGlobalGhsMultiGenerator::OrderedTargetDependSet
+  : public std::multiset<cmTargetDepend,
+                         cmGlobalGhsMultiGenerator::TargetCompare>
+{
+  typedef std::multiset<cmTargetDepend,
+                        cmGlobalGhsMultiGenerator::TargetCompare>
+    derived;
+
+public:
+  typedef cmGlobalGenerator::TargetDependSet TargetDependSet;
+  OrderedTargetDependSet(TargetDependSet const&, std::string const& first);
 };
 
 #endif

@@ -26,8 +26,6 @@ public:
 
   bool IncludeThisTarget();
   std::vector<cmSourceFile*> GetSources() const;
-  GhsMultiGpj::Types GetGpjTag() const;
-  static GhsMultiGpj::Types GetGpjTag(const cmGeneratorTarget* target);
   const char* GetAbsBuildFilePath() const
   {
     return this->AbsBuildFilePath.c_str();
@@ -58,6 +56,8 @@ private:
   {
     return this->FolderBuildStreams[""];
   };
+  void GenerateTarget();
+
   bool IsTargetGroup() const { return this->TargetGroup; }
 
   void WriteTypeSpecifics(std::ostream& fout, const std::string& config,
@@ -114,6 +114,8 @@ private:
   static std::string const DDOption;
   std::map<std::string, std::string> FlagsByLanguage;
   std::map<std::string, std::string> DefinesByLanguage;
+
+  GhsMultiGpj::Types TagType;
   std::string const Name;
 };
 

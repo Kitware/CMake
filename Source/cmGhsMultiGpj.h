@@ -22,6 +22,8 @@ public:
 
   static void WriteGpjTag(Types const gpjType,
                           cmGeneratedFileStream* filestream);
+
+  static const char* GetGpjTag(Types const gpjType);
 };
 
 #endif // ! cmGhsMultiGpjType_h

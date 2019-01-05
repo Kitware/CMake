@@ -209,25 +209,24 @@ void cmGlobalGhsMultiGenerator::OpenBuildFileStream(
 {
   *filestream << "#!gbuild" << std::endl;
 }
-
-void cmGlobalGhsMultiGenerator::OpenBuildFileStream()
+/* temporary until all file handling is cleaned up */
+void cmGlobalGhsMultiGenerator::OpenBuildFileStream(std::ostream& fout)
 {
-  // Compute GHS MULTI's build file path.
-  std::string buildFilePath =
-    this->GetCMakeInstance()->GetHomeOutputDirectory();
-  buildFilePath += "/";
-  buildFilePath +=
-    this->GetCMakeInstance()->GetCurrentSnapshot().GetProjectName();
-  buildFilePath += FILE_EXTENSION;
+  fout << "#!gbuild" << std::endl;
+}
 
-  this->Open(std::string(""), buildFilePath, &this->TargetFolderBuildStreams);
-  OpenBuildFileStream(GetBuildFileStream());
+void cmGlobalGhsMultiGenerator::WriteTopLevelProject(
+  std::ostream& fout, cmLocalGenerator* root,
+  std::vector<cmLocalGenerator*>& generators)
+{
+  OpenBuildFileStream(fout);
 
-  this->WriteMacros();
-  this->WriteHighLevelDirectives();
-  GhsMultiGpj::WriteGpjTag(GhsMultiGpj::PROJECT, this->GetBuildFileStream());
-  this->WriteDisclaimer(this->GetBuildFileStream());
-  *this->GetBuildFileStream() << "# Top Level Project File" << std::endl;
+  this->WriteMacros(fout);
+  this->WriteHighLevelDirectives(fout);
+  // GhsMultiGpj::WriteGpjTag(GhsMultiGpj::PROJECT, &fout);
+  fout << "[Project]" << std::endl;
+  this->WriteDisclaimer(&fout);
+  fout << "# Top Level Project File" << std::endl;
 
   // Specify BSP option if supplied by user
   // -- not all platforms require this entry in the project file
@@ -256,7 +255,7 @@ void cmGlobalGhsMultiGenerator::OpenBuildFileStream()
   }
 
   if (!cmSystemTools::IsOff(bspName.c_str())) {
-    *this->GetBuildFileStream() << "    -bsp " << bspName << std::endl;
+    fout << "    -bsp " << bspName << std::endl;
   }
 
   // Specify OS DIR if supplied by user
@@ -276,8 +275,46 @@ void cmGlobalGhsMultiGenerator::OpenBuildFileStream()
   if (!cmSystemTools::IsOff(osDir.c_str()) ||
       platform.find("integrity") != std::string::npos) {
     std::replace(osDir.begin(), osDir.end(), '\\', '/');
-    *this->GetBuildFileStream()
-      << "    " << osDirOption << "\"" << osDir << "\"" << std::endl;
+    fout << "    " << osDirOption << "\"" << osDir << "\"" << std::endl;
+  }
+
+  WriteSubProjects(fout, root, generators);
+}
+
+void cmGlobalGhsMultiGenerator::WriteSubProjects(
+  std::ostream& fout, cmLocalGenerator* root,
+  std::vector<cmLocalGenerator*>& generators)
+{
+  // Collect all targets under this root generator and the transitive
+  // closure of their dependencies.
+  TargetDependSet projectTargets;
+  TargetDependSet originalTargets;
+  this->GetTargetSets(projectTargets, originalTargets, root, generators);
+  OrderedTargetDependSet orderedProjectTargets(projectTargets, "");
+
+  // write out all the sub-projects
+  std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
+  for (cmGeneratorTarget const* target : orderedProjectTargets) {
+    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+      continue;
+    }
+
+    const char* projName = target->GetProperty("GENERATOR_FILE_NAME");
+    const char* projType = target->GetProperty("GENERATOR_FILE_NAME_EXT");
+    if (projName && projType) {
+      cmLocalGenerator* lg = target->GetLocalGenerator();
+      std::string dir = lg->GetCurrentBinaryDirectory();
+      dir = root->ConvertToRelativePath(rootBinaryDir, dir.c_str());
+      if (dir == ".") {
+        dir.clear();
+      } else {
+        if (dir.back() != '/') {
+          dir += "/";
+        }
+      }
+      fout << dir << projName << FILE_EXTENSION;
+      fout << " " << projType << std::endl;
+    }
   }
 }
 
@@ -294,27 +331,43 @@ void cmGlobalGhsMultiGenerator::CloseBuildFileStream(
 
 void cmGlobalGhsMultiGenerator::Generate()
 {
+  // first do the superclass method
   this->cmGlobalGenerator::Generate();
 
-  if (!this->LocalGenerators.empty()) {
-    this->OpenBuildFileStream();
+  // output top-level projects
+  for (auto& it : this->ProjectMap) {
+    this->OutputTopLevelProject(it.second[0], it.second);
+  }
+}
 
-    // Build all the folder build files
-    for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
-      cmLocalGhsMultiGenerator* lg =
-        static_cast<cmLocalGhsMultiGenerator*>(this->LocalGenerators[i]);
-      const std::vector<cmGeneratorTarget*>& tgts = lg->GetGeneratorTargets();
-      this->UpdateBuildFiles(tgts);
-    }
+void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
+  cmLocalGenerator* root, std::vector<cmLocalGenerator*>& generators)
+{
+  if (generators.empty()) {
+    return;
   }
 
-  cmDeleteAll(TargetFolderBuildStreams);
-  this->TargetFolderBuildStreams.clear();
+  /* Name top-level projects as filename.top.gpj to avoid name clashes
+   * with target projects.  This avoid the issue where the project has
+   * the same name as the executable target.
+   */
+  std::string fname = root->GetCurrentBinaryDirectory();
+  fname += "/";
+  fname += root->GetProjectName();
+  fname += ".top";
+  fname += FILE_EXTENSION;
+
+  cmGeneratedFileStream fout(fname.c_str());
+  fout.SetCopyIfDifferent(true);
+
+  this->WriteTopLevelProject(fout, root, generators);
+
+  fout.Close();
 }
 
 void cmGlobalGhsMultiGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string& makeProgram,
-  const std::string& projectName, const std::string& /*projectDir*/,
+  const std::string& projectName, const std::string& projectDir,
   const std::string& targetName, const std::string& /*config*/, bool /*fast*/,
   int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
 {
@@ -332,8 +385,20 @@ void cmGlobalGhsMultiGenerator::GenerateBuildCommand(
 
   makeCommand.insert(makeCommand.end(), makeOptions.begin(),
                      makeOptions.end());
+
+  /* determine which top-project file to use */
+  std::string proj = projectName + ".top" + FILE_EXTENSION;
+  std::vector<std::string> files;
+  cmSystemTools::Glob(projectDir, ".*\\.top\\.gpj", files);
+  if (!files.empty()) {
+    auto p = std::find(files.begin(), files.end(), proj);
+    if (p == files.end()) {
+      proj = files.at(0);
+    }
+  }
+
   makeCommand.push_back("-top");
-  makeCommand.push_back(projectName + FILE_EXTENSION);
+  makeCommand.push_back(proj);
   if (!targetName.empty()) {
     if (targetName == "clean") {
       makeCommand.push_back("-clean");
@@ -343,7 +408,7 @@ void cmGlobalGhsMultiGenerator::GenerateBuildCommand(
   }
 }
 
-void cmGlobalGhsMultiGenerator::WriteMacros()
+void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout)
 {
   char const* ghsGpjMacros =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_GPJ_MACROS");
@@ -353,12 +418,12 @@ void cmGlobalGhsMultiGenerator::WriteMacros()
     for (std::vector<std::string>::const_iterator expandedListI =
            expandedList.begin();
          expandedListI != expandedList.end(); ++expandedListI) {
-      *this->GetBuildFileStream() << "macro " << *expandedListI << std::endl;
+      fout << "macro " << *expandedListI << std::endl;
     }
   }
 }
 
-void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives()
+void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(std::ostream& fout)
 {
   /* set primary target */
   std::string tgt;
@@ -378,13 +443,12 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives()
     tgt += ".tgt";
   }
 
-  *this->GetBuildFileStream() << "primaryTarget=" << tgt << std::endl;
+  fout << "primaryTarget=" << tgt << std::endl;
 
   char const* const customization =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_CUSTOMIZATION");
   if (NULL != customization && strlen(customization) > 0) {
-    *this->GetBuildFileStream()
-      << "customization=" << trimQuotes(customization) << std::endl;
+    fout << "customization=" << trimQuotes(customization) << std::endl;
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_CUSTOMIZATION");
   }
 }
@@ -499,33 +563,6 @@ std::string cmGlobalGhsMultiGenerator::GetFileNameFromPath(
   return output;
 }
 
-void cmGlobalGhsMultiGenerator::UpdateBuildFiles(
-  const std::vector<cmGeneratorTarget*>& tgts)
-{
-  for (std::vector<cmGeneratorTarget*>::const_iterator tgtsI = tgts.begin();
-       tgtsI != tgts.end(); ++tgtsI) {
-    const cmGeneratorTarget* tgt = *tgtsI;
-    if (IsTgtForBuild(tgt)) {
-      std::string folderName = tgt->GetEffectiveFolderName();
-      if (this->TargetFolderBuildStreams.end() ==
-          this->TargetFolderBuildStreams.find(folderName)) {
-        this->AddFilesUpToPath(
-          GetBuildFileStream(), &this->TargetFolderBuildStreams,
-          this->GetCMakeInstance()->GetHomeOutputDirectory().c_str(),
-          folderName, GhsMultiGpj::PROJECT);
-      }
-      std::vector<std::string> splitPath = cmSystemTools::SplitString(
-        cmGhsMultiTargetGenerator::GetRelBuildFileName(tgt));
-      std::string foldNameRelBuildFile(*(splitPath.end() - 2) + "/" +
-                                       splitPath.back());
-      *this->TargetFolderBuildStreams[folderName] << foldNameRelBuildFile
-                                                  << " ";
-      GhsMultiGpj::WriteGpjTag(cmGhsMultiTargetGenerator::GetGpjTag(tgt),
-                               this->TargetFolderBuildStreams[folderName]);
-    }
-  }
-}
-
 bool cmGlobalGhsMultiGenerator::IsTgtForBuild(const cmGeneratorTarget* tgt)
 {
   const std::string config =
@@ -551,4 +588,26 @@ std::string cmGlobalGhsMultiGenerator::trimQuotes(std::string const& str)
     }
   }
   return result;
+}
+
+bool cmGlobalGhsMultiGenerator::TargetCompare::operator()(
+  cmGeneratorTarget const* l, cmGeneratorTarget const* r) const
+{
+  // Make sure a given named target is ordered first,
+  // e.g. to set ALL_BUILD as the default active project.
+  // When the empty string is named this is a no-op.
+  if (r->GetName() == this->First) {
+    return false;
+  }
+  if (l->GetName() == this->First) {
+    return true;
+  }
+  return l->GetName() < r->GetName();
+}
+
+cmGlobalGhsMultiGenerator::OrderedTargetDependSet::OrderedTargetDependSet(
+  TargetDependSet const& targets, std::string const& first)
+  : derived(TargetCompare(first))
+{
+  this->insert(targets.begin(), targets.end());
 }

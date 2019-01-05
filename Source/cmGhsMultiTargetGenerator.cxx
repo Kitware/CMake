@@ -101,10 +101,59 @@ std::string cmGhsMultiTargetGenerator::AddSlashIfNeededToPath(
 
 void cmGhsMultiTargetGenerator::Generate()
 {
+  // Determine type of target for this project
+  switch (this->GeneratorTarget->GetType()) {
+    case cmStateEnums::EXECUTABLE: {
+      if (cmGhsMultiTargetGenerator::DetermineIfTargetGroup(
+            this->GeneratorTarget)) {
+        this->TagType = GhsMultiGpj::INTERGRITY_APPLICATION;
+      } else {
+        this->TagType = GhsMultiGpj::PROGRAM;
+      }
+      break;
+    }
+    case cmStateEnums::STATIC_LIBRARY: {
+      this->TagType = GhsMultiGpj::LIBRARY;
+      break;
+    }
+    case cmStateEnums::SHARED_LIBRARY: {
+      std::string msg = "add_library(<name> SHARED ...) not supported: ";
+      msg += this->Name;
+      cmSystemTools::Message(msg.c_str());
+      return;
+    }
+    case cmStateEnums::OBJECT_LIBRARY: {
+      std::string msg = "add_library(<name> OBJECT ...) not supported: ";
+      msg += this->Name;
+      cmSystemTools::Message(msg.c_str());
+      return;
+    }
+    case cmStateEnums::MODULE_LIBRARY: {
+      std::string msg = "add_library(<name> MODULE ...) not supported: ";
+      msg += this->Name;
+      cmSystemTools::Message(msg.c_str());
+      return;
+    }
+    case cmStateEnums::UTILITY: {
+      std::string msg = "add_custom_target(<name> ...) not supported: ";
+      msg += this->Name;
+      cmSystemTools::Message(msg.c_str());
+      return;
+    }
+    default:
+      return;
+  }
   // Tell the global generator the name of the project file
   this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME",
                                              this->Name.c_str());
+  this->GeneratorTarget->Target->SetProperty(
+    "GENERATOR_FILE_NAME_EXT", GhsMultiGpj::GetGpjTag(this->TagType));
 
+  this->GenerateTarget();
+}
+
+void cmGhsMultiTargetGenerator::GenerateTarget()
+{
   // Skip if empty or not included in build
   if (!this->GetSources().empty() && this->IncludeThisTarget()) {
 
@@ -129,7 +178,7 @@ void cmGhsMultiTargetGenerator::Generate()
     if (this->DynamicDownload) {
       fout << "#component integrity_dynamic_download" << std::endl;
     }
-    GhsMultiGpj::WriteGpjTag(this->GetGpjTag(), &fout);
+    GhsMultiGpj::WriteGpjTag(this->TagType, &fout);
     cmGlobalGhsMultiGenerator::WriteDisclaimer(&fout);
 
     bool const notKernel = this->IsNotKernel(config, language);
@@ -165,25 +214,6 @@ std::vector<cmSourceFile*> cmGhsMultiTargetGenerator::GetSources() const
   std::vector<cmSourceFile*> output;
   std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   this->GeneratorTarget->GetSourceFiles(output, config);
-  return output;
-}
-
-GhsMultiGpj::Types cmGhsMultiTargetGenerator::GetGpjTag() const
-{
-  return cmGhsMultiTargetGenerator::GetGpjTag(this->GeneratorTarget);
-}
-
-GhsMultiGpj::Types cmGhsMultiTargetGenerator::GetGpjTag(
-  const cmGeneratorTarget* target)
-{
-  GhsMultiGpj::Types output;
-  if (cmGhsMultiTargetGenerator::DetermineIfTargetGroup(target)) {
-    output = GhsMultiGpj::INTERGRITY_APPLICATION;
-  } else if (target->GetType() == cmStateEnums::STATIC_LIBRARY) {
-    output = GhsMultiGpj::LIBRARY;
-  } else {
-    output = GhsMultiGpj::PROGRAM;
-  }
   return output;
 }
 
