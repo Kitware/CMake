@@ -74,8 +74,7 @@ private:
 
   void WriteIncludes(std::ostream& fout, const std::string& config,
                      const std::string& language);
-  void WriteTargetLinkLibraries(std::ostream& fout, std::string const& config,
-                                std::string const& language);
+  void WriteTargetLinkLine(std::ostream& fout, std::string const& config);
   void WriteCustomCommands(std::ostream& fout);
   void WriteCustomCommandsHelper(
     std::ostream& fout, std::vector<cmCustomCommand> const& commandsSet,

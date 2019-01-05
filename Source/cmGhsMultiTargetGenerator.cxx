@@ -212,9 +212,7 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
     this->WriteCompilerFlags(fout, config, language);
     this->WriteCompilerDefinitions(fout, config, language);
     this->WriteIncludes(fout, config, language);
-    if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-      this->WriteTargetLinkLibraries(fout, config, language);
-    }
+    this->WriteTargetLinkLine(fout, config);
     this->WriteCustomCommands(fout);
     this->WriteSources(fout);
 
@@ -367,59 +365,55 @@ void cmGhsMultiTargetGenerator::WriteIncludes(std::ostream& fout,
   }
 }
 
-void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries(
-  std::ostream& fout, std::string const& config, std::string const& language)
+void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
+                                                    std::string const& config)
 {
-  // library directories
-  cmTargetDependSet tds =
-    this->GetGlobalGenerator()->GetTargetDirectDepends(this->GeneratorTarget);
-  for (cmTargetDependSet::iterator tdsI = tds.begin(); tdsI != tds.end();
-       ++tdsI) {
-    const cmGeneratorTarget* tg = *tdsI;
-    fout << "    -L\"" << GetAbsBuildFilePath(tg) << "\"" << std::endl;
-  }
-  // library targets
-  cmTarget::LinkLibraryVectorType llv =
-    this->GeneratorTarget->Target->GetOriginalLinkLibraries();
-  for (cmTarget::LinkLibraryVectorType::const_iterator llvI = llv.begin();
-       llvI != llv.end(); ++llvI) {
-    std::string libName = llvI->first;
-    // if it is a user defined target get the full path to the lib
-    cmTarget* tg(GetGlobalGenerator()->FindTarget(libName));
-    if (NULL != tg) {
-      libName = tg->GetName() + ".a";
-    }
-    fout << "    -l\"" << libName << "\"" << std::endl;
+  if (this->TagType == GhsMultiGpj::INTERGRITY_APPLICATION) {
+    return;
   }
 
-  if (!this->TargetGroup) {
-    std::string linkLibraries;
-    std::string flags;
-    std::string linkFlags;
-    std::string frameworkPath;
-    std::string linkPath;
-    std::string createRule =
-      this->GeneratorTarget->GetCreateRuleVariable(language, config);
-    bool useWatcomQuote =
-      this->Makefile->IsOn(createRule + "_USE_WATCOM_QUOTE");
-    std::unique_ptr<cmLinkLineComputer> linkLineComputer(
-      this->GetGlobalGenerator()->CreateLinkLineComputer(
-        this->LocalGenerator,
-        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
-    linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
+  std::string linkLibraries;
+  std::string flags;
+  std::string linkFlags;
+  std::string frameworkPath;
+  std::string linkPath;
 
-    this->LocalGenerator->GetTargetFlags(
-      linkLineComputer.get(), config, linkLibraries, flags, linkFlags,
-      frameworkPath, linkPath, this->GeneratorTarget);
-    linkFlags = cmSystemTools::TrimWhitespace(linkFlags);
+  std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+    this->GetGlobalGenerator()->CreateLinkLineComputer(
+      this->LocalGenerator,
+      this->LocalGenerator->GetStateSnapshot().GetDirectory()));
 
-    if (!linkPath.empty()) {
-      linkPath = " " + linkPath.substr(0U, linkPath.size() - 1U);
-      fout << linkPath;
-    }
+  this->LocalGenerator->GetTargetFlags(
+    linkLineComputer.get(), config, linkLibraries, flags, linkFlags,
+    frameworkPath, linkPath, this->GeneratorTarget);
 
-    if (!linkFlags.empty()) {
-      fout << "    " << linkFlags << std::endl;
+  // write out link options
+  std::vector<std::string> lopts =
+    cmSystemTools::ParseArguments(linkFlags.c_str());
+  for (auto& l : lopts) {
+    fout << "    " << l << std::endl;
+  }
+
+  // write out link search paths
+  // must be quoted for paths that contain spaces
+  std::vector<std::string> lpath =
+    cmSystemTools::ParseArguments(linkPath.c_str());
+  for (auto& l : lpath) {
+    fout << "    -L\"" << l << "\"" << std::endl;
+  }
+
+  // write out link libs
+  // must be quoted for filepaths that contains spaces
+  std::string cbd = this->LocalGenerator->GetCurrentBinaryDirectory();
+
+  std::vector<std::string> llibs =
+    cmSystemTools::ParseArguments(linkLibraries.c_str());
+  for (auto& l : llibs) {
+    if (l.compare(0, 2, "-l") == 0) {
+      fout << "    \"" << l << "\"" << std::endl;
+    } else {
+      std::string rl = cmSystemTools::CollapseCombinedPath(cbd, l);
+      fout << "    -l\"" << rl << "\"" << std::endl;
     }
   }
 }
