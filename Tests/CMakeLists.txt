@@ -2260,31 +2260,72 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   endif()
 
   if (CMake_TEST_GreenHillsMULTI)
-    macro(add_test_GhsMulti name primaryTarget bspName)
-      add_test(NAME GhsMulti.${name} COMMAND ${CMAKE_CTEST_COMMAND}
-        --build-and-test
-        "${CMake_SOURCE_DIR}/Tests/GhsMulti"
-        "${CMake_BINARY_DIR}/Tests/GhsMulti/${name}"
-        --build-generator "Green Hills MULTI"
-        --build-project ReturnNum
-        --build-config $<CONFIGURATION>
-        --build-options -DGHS_PRIMARY_TARGET=${primaryTarget}
-        -DGHS_BSP_NAME=${bspName}
-        )
-    endmacro ()
-    add_test_GhsMulti("arm_integrity_simarm" "arm_integrity.tgt" "simarm")
-    add_test_GhsMulti("arm64_integrity_simarm" "arm64_integrity.tgt" "simarm")
-    add_test(NAME GhsMulti.duplicate_source_filenames
+    macro(add_test_GhsMulti test_name test_dir bin_sub_dir build_opts test_cmd)
+      separate_arguments(_build_opts UNIX_COMMAND ${build_opts})
+      separate_arguments(_test_cmd UNIX_COMMAND ${test_cmd})
+      separate_arguments(_ghs_toolset_extra UNIX_COMMAND ${ghs_toolset_extra})
+      add_test(NAME GhsMulti.${ghs_config_name}.${test_name}
         COMMAND ${CMAKE_CTEST_COMMAND}
         --build-and-test
-        "${CMake_SOURCE_DIR}/Tests/GhsMultiDuplicateSourceFilenames"
-        "${CMake_BINARY_DIR}/Tests/GhsMultiDuplicateSourceFilenames"
+        "${CMake_SOURCE_DIR}/Tests/GhsMulti/${test_dir}"
+        "${CMake_BINARY_DIR}/Tests/GhsMulti/${ghs_config_name}/${test_dir}/${bin_sub_dir}"
         --build-generator "Green Hills MULTI"
-        --build-project ReturnNum
+        --build-project test
         --build-config $<CONFIGURATION>
-        --build-options -DGHS_PRIMARY_TARGET=arm_integrity.tgt
-        -DGHS_BSP_NAME="simarm"
+        --build-options ${ghs_target_arch} ${ghs_toolset_name} ${ghs_toolset_root} ${ghs_target_platform}
+          ${ghs_os_root} ${ghs_os_dir} ${ghs_bsp_name} ${_build_opts} ${_ghs_toolset_extra}
+        --test-command ${_test_cmd}
         )
+    endmacro ()
+    macro(add_test_GhsMulti_rename_install test_name)
+      add_test_GhsMulti( ${test_name} GhsMultiRenameInstall ${test_name}
+        "-DCMAKE_INSTALL_PREFIX=. -DRUN_TEST=${test_name}" "${CMAKE_CMAKE_COMMAND} -P ./cmake_install.cmake")
+    endmacro ()
+    foreach(ghs_file IN LISTS CMake_TEST_GreenHillsMULTI_config)
+      # source GHS tools config file
+      if(IS_ABSOLUTE ${ghs_file})
+        include(${ghs_file})
+      else()
+        include(${CMAKE_BINARY_DIR}/${ghs_file})
+      endif()
+      # test integrity build
+      if (NOT ghs_skip_integrity AND (NOT ghs_target_platform OR ghs_target_platform MATCHES "integrity"))
+        add_test_GhsMulti(integrityDDInt GhsMultiIntegrity/GhsMultiIntegrityDDInt "" "" "")
+        add_test_GhsMulti(integrityMonolith GhsMultiIntegrity/GhsMultiIntegrityMonolith "" "" "")
+      endif ()
+      add_test_GhsMulti(duplicate_source_filenames GhsMultiDuplicateSourceFilenames "" "" "")
+      add_test_GhsMulti_rename_install(SINGLE_EXEC)
+      add_test_GhsMulti_rename_install(SINGLE_EXEC_RENAMED)
+      add_test_GhsMulti_rename_install(EXEC_AND_LIB)
+      add_test_GhsMulti(multiple_source_groups GhsMultiSrcGroups Default "" "")
+      add_test_GhsMulti(multiple_source_groups_folders GhsMultiSrcGroups Folders "-DCMAKE_FOLDER=ON" "")
+      add_test_GhsMulti(unsupported_targets GhsMultiUnsupportedTargets "" "" "")
+      set_tests_properties(GhsMulti.${ghs_config_name}.unsupported_targets PROPERTIES TIMEOUT 15)
+      add_test_GhsMulti(object_library GhsMultiObjectLibrary "" "" "")
+      set_tests_properties(GhsMulti.${ghs_config_name}.object_library PROPERTIES TIMEOUT 15)
+      add_test_GhsMulti(exclude GhsMultiExclude "" ""
+        "${CMAKE_CMAKE_COMMAND} -P ${CMake_SOURCE_DIR}/Tests/GhsMulti/GhsMultiExclude/verify.cmake")
+      add_test_GhsMulti(interface GhsMultiInterface "" "" "")
+      set_tests_properties(GhsMulti.${ghs_config_name}.interface PROPERTIES TIMEOUT 15)
+      add_test_GhsMulti(transitive_link_test GhsMultiLinkTest TransitiveLink "-DRUN_TEST=NO_FLAGS" "")
+      add_test_GhsMulti(flags_link_test GhsMultiLinkTest FlagsCheck "-DRUN_TEST=CHECK_FLAGS" "")
+      add_test_GhsMulti(sub_link_test GhsMultiLinkTestSub "" "" "")
+      add_test_GhsMulti(multiple_projects GhsMultiMultipleProjects "" ""
+        "${CMAKE_CMAKE_COMMAND} -P ${CMake_SOURCE_DIR}/Tests/GhsMulti/GhsMultiMultipleProjects/verify.cmake")
+      add_test_GhsMulti(compiler_options_none GhsMultiCompilerOptions None "-DRUN_TEST=RELEASE_FLAGS -DRUN_TEST_BUILD_TYPE=\"\"" "")
+      add_test_GhsMulti(compiler_options_kernel GhsMultiCompilerOptions Kernel "-DRUN_TEST=KERNEL_FLAGS -DRUN_TEST_BUILD_TYPE=DEBUG" "")
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/GhsMulti/${ghs_config_name}")
+      #unset ghs config variables
+      unset(ghs_config_name)
+      unset(ghs_target_arch)
+      unset(ghs_toolset_root)
+      unset(ghs_toolset_name)
+      unset(ghs_os_root)
+      unset(ghs_os_dir)
+      unset(ghs_target_platform)
+      unset(ghs_bsp_name)
+      unset(ghs_toolset_extra)
+    endforeach(ghs_file)
   endif ()
 
   if(tegra AND NOT "${CMake_SOURCE_DIR};${CMake_BINARY_DIR}" MATCHES " ")
