@@ -65,29 +65,8 @@ public:
 
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;
 
-  cmGeneratedFileStream* GetBuildFileStream()
-  {
-    return this->TargetFolderBuildStreams[""];
-  }
-
-  static void OpenBuildFileStream(std::string const& filepath,
-                                  cmGeneratedFileStream** filestream);
-  static void OpenBuildFileStream(cmGeneratedFileStream* filestream);
-  void OpenBuildFileStream(std::ostream& fout);
-  static void CloseBuildFileStream(cmGeneratedFileStream** filestream);
-  /// Write the common disclaimer text at the top of each build file.
-  static void WriteDisclaimer(std::ostream* os);
-  std::vector<std::string> GetLibDirs() { return this->LibDirs; }
-
-  static void AddFilesUpToPath(
-    cmGeneratedFileStream* mainBuildFile,
-    std::map<std::string, cmGeneratedFileStream*>* targetFolderBuildStreams,
-    char const* homeOutputDirectory, std::string const& path,
-    GhsMultiGpj::Types projType, std::string const& relPath = "");
-  static void Open(std::string const& mapKeyName, std::string const& fileName,
-                   std::map<std::string, cmGeneratedFileStream*>* fileMap);
-
-  static std::string trimQuotes(std::string const& str);
+  // Write the common disclaimer text at the top of each build file.
+  void WriteFileHeader(std::ostream& fout);
 
   // Target dependency sorting
   class TargetSet : public std::set<cmGeneratorTarget const*>
@@ -132,24 +111,9 @@ private:
   void WriteSubProjects(std::ostream& fout, cmLocalGenerator* root,
                         std::vector<cmLocalGenerator*>& generators);
 
-  static void AddFilesUpToPathNewBuildFile(
-    cmGeneratedFileStream* mainBuildFile,
-    std::map<std::string, cmGeneratedFileStream*>* targetFolderBuildStreams,
-    char const* homeOutputDirectory, std::string const& pathUpTo, bool isFirst,
-    std::string const& relPath, GhsMultiGpj::Types projType);
-  static void AddFilesUpToPathAppendNextFile(
-    std::map<std::string, cmGeneratedFileStream*>* targetFolderBuildStreams,
-    std::string const& pathUpTo,
-    std::vector<std::string>::const_iterator splitPathI,
-    std::vector<std::string>::const_iterator end, GhsMultiGpj::Types projType);
-  static std::string GetFileNameFromPath(std::string const& path);
-
   bool IsTgtForBuild(const cmGeneratorTarget* tgt);
 
-  std::vector<cmGeneratedFileStream*> TargetSubProjects;
-  std::map<std::string, cmGeneratedFileStream*> TargetFolderBuildStreams;
-
-  std::vector<std::string> LibDirs;
+  std::string trimQuotes(std::string const& str);
 
   static const char* DEFAULT_BUILD_PROGRAM;
   static const char* DEFAULT_TOOLSET_ROOT;

@@ -29,10 +29,9 @@ const char* GhsMultiGpj::GetGpjTag(Types const gpjType)
   return tag;
 }
 
-void GhsMultiGpj::WriteGpjTag(Types const gpjType,
-                              cmGeneratedFileStream* const filestream)
+void GhsMultiGpj::WriteGpjTag(Types const gpjType, std::ostream& fout)
 {
   char const* tag;
   tag = GhsMultiGpj::GetGpjTag(gpjType);
-  *filestream << tag << std::endl;
+  fout << tag << std::endl;
 }

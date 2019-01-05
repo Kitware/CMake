@@ -24,19 +24,6 @@ cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
   , DynamicDownload(false)
   , Name(target->GetName())
 {
-  this->RelBuildFilePath = this->GetRelBuildFilePath(target);
-
-  this->RelOutputFileName = this->RelBuildFilePath + target->GetName() + ".a";
-
-  this->RelBuildFileName = this->RelBuildFilePath;
-  this->RelBuildFileName += this->GetBuildFileName(target);
-
-  std::string absPathToRoot = this->GetAbsPathToRoot(target);
-  absPathToRoot = this->AddSlashIfNeededToPath(absPathToRoot);
-  this->AbsBuildFilePath = absPathToRoot + this->RelBuildFilePath;
-  this->AbsBuildFileName = absPathToRoot + this->RelBuildFileName;
-  this->AbsOutputFileName = absPathToRoot + this->RelOutputFileName;
-
   // Store the configuration name that is being used
   if (const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
     // Use the build type given by the user.
@@ -49,64 +36,6 @@ cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
 
 cmGhsMultiTargetGenerator::~cmGhsMultiTargetGenerator()
 {
-  cmDeleteAll(this->FolderBuildStreams);
-}
-
-std::string cmGhsMultiTargetGenerator::GetRelBuildFilePath(
-  const cmGeneratorTarget* target)
-{
-  std::string output = target->GetEffectiveFolderName();
-  cmSystemTools::ConvertToUnixSlashes(output);
-  if (!output.empty()) {
-    output += "/";
-  }
-  output += target->GetName() + "/";
-  return output;
-}
-
-std::string cmGhsMultiTargetGenerator::GetAbsPathToRoot(
-  const cmGeneratorTarget* target)
-{
-  return target->GetLocalGenerator()->GetBinaryDirectory();
-}
-
-std::string cmGhsMultiTargetGenerator::GetAbsBuildFilePath(
-  const cmGeneratorTarget* target)
-{
-  std::string output;
-  output = cmGhsMultiTargetGenerator::GetAbsPathToRoot(target);
-  output = cmGhsMultiTargetGenerator::AddSlashIfNeededToPath(output);
-  output += cmGhsMultiTargetGenerator::GetRelBuildFilePath(target);
-  return output;
-}
-
-std::string cmGhsMultiTargetGenerator::GetRelBuildFileName(
-  const cmGeneratorTarget* target)
-{
-  std::string output;
-  output = cmGhsMultiTargetGenerator::GetRelBuildFilePath(target);
-  output = cmGhsMultiTargetGenerator::AddSlashIfNeededToPath(output);
-  output += cmGhsMultiTargetGenerator::GetBuildFileName(target);
-  return output;
-}
-
-std::string cmGhsMultiTargetGenerator::GetBuildFileName(
-  const cmGeneratorTarget* target)
-{
-  std::string output;
-  output = target->GetName();
-  output += cmGlobalGhsMultiGenerator::FILE_EXTENSION;
-  return output;
-}
-
-std::string cmGhsMultiTargetGenerator::AddSlashIfNeededToPath(
-  std::string const& input)
-{
-  std::string output(input);
-  if (!cmHasLiteralSuffix(output, "/")) {
-    output += "/";
-  }
-  return output;
 }
 
 void cmGhsMultiTargetGenerator::Generate()
@@ -190,7 +119,8 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
     cmGeneratedFileStream fout(fname.c_str());
     fout.SetCopyIfDifferent(true);
 
-    cmGlobalGhsMultiGenerator::OpenBuildFileStream(&fout);
+    this->GetGlobalGenerator()->WriteFileHeader(fout);
+    GhsMultiGpj::WriteGpjTag(this->TagType, fout);
 
     std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
     if (0 == config.length()) {
@@ -203,9 +133,6 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
     if (this->DynamicDownload) {
       fout << "#component integrity_dynamic_download" << std::endl;
     }
-    GhsMultiGpj::WriteGpjTag(this->TagType, &fout);
-    cmGlobalGhsMultiGenerator::WriteDisclaimer(&fout);
-
     bool const notKernel = this->IsNotKernel(config, language);
     this->WriteTargetSpecifics(fout, config, notKernel);
     this->SetCompilerFlags(config, language, notKernel);
@@ -614,11 +541,10 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       f->SetCopyIfDifferent(true);
       gfiles.push_back(f);
       fout = f;
-      cmGlobalGhsMultiGenerator::OpenBuildFileStream(f);
-      *fout << "[Subproject]" << std::endl;
-      cmGlobalGhsMultiGenerator::WriteDisclaimer(f);
+      this->GetGlobalGenerator()->WriteFileHeader(*f);
+      GhsMultiGpj::WriteGpjTag(GhsMultiGpj::SUBPROJECT, *f);
       fout_proj << lpath << " ";
-      fout_proj << "[Subproject]" << std::endl;
+      GhsMultiGpj::WriteGpjTag(GhsMultiGpj::SUBPROJECT, fout_proj);
     }
 
     if (useProjectFile) {
@@ -631,21 +557,17 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 
     /* output rule for each source file */
     for (const cmSourceFile* si : groupFiles[sg]) {
-      std::string fullSourcePath(si->GetFullPath());
 
-      if (si->GetExtension() == "int" || si->GetExtension() == "bsp") {
-        *fout << fullSourcePath << std::endl;
-      } else {
-        // WORKAROUND: GHS MULTI needs the path to use backslashes without
-        // quotes
-        //  to open files in search as of version 6.1.6
-        cmsys::SystemTools::ReplaceString(fullSourcePath, "/", "\\");
-        *fout << fullSourcePath << std::endl;
-      }
+      // Convert filename to native system
+      // WORKAROUND: GHS MULTI 6.1.4 and 6.1.6 are known to need backslash on
+      // windows when opening some files from the search window.
+      std::string fname(si->GetFullPath());
+      cmSystemTools::ConvertToOutputSlashes(fname);
+      *fout << fname << std::endl;
 
       if ("ld" != si->GetExtension() && "int" != si->GetExtension() &&
           "bsp" != si->GetExtension()) {
-        this->WriteObjectLangOverride(fout, si);
+        this->WriteObjectLangOverride(*fout, si);
         if (objectNames.end() != objectNames.find(si)) {
           *fout << "    -o \"" << objectNames.find(si)->second << "\""
                 << std::endl;
@@ -660,63 +582,16 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 }
 
 void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
-  std::ostream* fout, const cmSourceFile* sourceFile)
+  std::ostream& fout, const cmSourceFile* sourceFile)
 {
   const char* rawLangProp = sourceFile->GetProperty("LANGUAGE");
   if (NULL != rawLangProp) {
     std::string sourceLangProp(rawLangProp);
     std::string extension(sourceFile->GetExtension());
     if ("CXX" == sourceLangProp && ("c" == extension || "C" == extension)) {
-      *fout << "    -dotciscxx" << std::endl;
+      fout << "    -dotciscxx" << std::endl;
     }
   }
-}
-
-std::string cmGhsMultiTargetGenerator::GetOutputDirectory(
-  const std::string& config) const
-{
-  std::string outputDir(AbsBuildFilePath);
-
-  const char* runtimeOutputProp =
-    this->GeneratorTarget->GetProperty("RUNTIME_OUTPUT_DIRECTORY");
-  if (NULL != runtimeOutputProp) {
-    outputDir = runtimeOutputProp;
-  }
-
-  std::string configCapped(cmSystemTools::UpperCase(config));
-  const char* runtimeOutputSProp = this->GeneratorTarget->GetProperty(
-    "RUNTIME_OUTPUT_DIRECTORY_" + configCapped);
-  if (NULL != runtimeOutputSProp) {
-    outputDir = runtimeOutputSProp;
-  }
-  cmSystemTools::ConvertToUnixSlashes(outputDir);
-
-  if (!outputDir.empty()) {
-    outputDir += "/";
-  }
-
-  return outputDir;
-}
-
-std::string cmGhsMultiTargetGenerator::GetOutputFilename(
-  const std::string& config) const
-{
-  std::string outputFilename(this->GeneratorTarget->GetName());
-
-  const char* outputNameProp =
-    this->GeneratorTarget->GetProperty("OUTPUT_NAME");
-  if (NULL != outputNameProp) {
-    outputFilename = outputNameProp;
-  }
-
-  std::string configCapped(cmSystemTools::UpperCase(config));
-  const char* outputNameSProp =
-    this->GeneratorTarget->GetProperty(configCapped + "_OUTPUT_NAME");
-  if (NULL != outputNameSProp) {
-    outputFilename = outputNameSProp;
-  }
-
-  return outputFilename;
 }
 
 std::string cmGhsMultiTargetGenerator::ComputeLongestObjectDirectory(

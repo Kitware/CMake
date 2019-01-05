@@ -26,36 +26,10 @@ public:
 
   bool IncludeThisTarget();
   std::vector<cmSourceFile*> GetSources() const;
-  const char* GetAbsBuildFilePath() const
-  {
-    return this->AbsBuildFilePath.c_str();
-  }
-  const char* GetRelBuildFileName() const
-  {
-    return this->RelBuildFileName.c_str();
-  }
-  const char* GetAbsBuildFileName() const
-  {
-    return this->AbsBuildFileName.c_str();
-  }
-  const char* GetAbsOutputFileName() const
-  {
-    return this->AbsOutputFileName.c_str();
-  }
-
-  static std::string GetRelBuildFilePath(const cmGeneratorTarget* target);
-  static std::string GetAbsPathToRoot(const cmGeneratorTarget* target);
-  static std::string GetAbsBuildFilePath(const cmGeneratorTarget* target);
-  static std::string GetRelBuildFileName(const cmGeneratorTarget* target);
-  static std::string GetBuildFileName(const cmGeneratorTarget* target);
-  static std::string AddSlashIfNeededToPath(std::string const& input);
 
 private:
   cmGlobalGhsMultiGenerator* GetGlobalGenerator() const;
-  cmGeneratedFileStream* GetFolderBuildStreams()
-  {
-    return this->FolderBuildStreams[""];
-  };
+
   void GenerateTarget();
 
   bool IsTargetGroup() const { return this->TargetGroup; }
@@ -84,10 +58,9 @@ private:
     std::vector<cmSourceFile*>* objectSources,
     cmLocalGhsMultiGenerator* localGhsMultiGenerator,
     cmGeneratorTarget* generatorTarget);
-  static void WriteObjectLangOverride(std::ostream* fout,
+  static void WriteObjectLangOverride(std::ostream& fout,
                                       const cmSourceFile* sourceFile);
-  std::string GetOutputDirectory(const std::string& config) const;
-  std::string GetOutputFilename(const std::string& config) const;
+
   static std::string ComputeLongestObjectDirectory(
     cmLocalGhsMultiGenerator const* localGhsMultiGenerator,
     cmGeneratorTarget* generatorTarget, cmSourceFile* const sourceFile);
@@ -100,13 +73,6 @@ private:
   cmGeneratorTarget* GeneratorTarget;
   cmLocalGhsMultiGenerator* LocalGenerator;
   cmMakefile* Makefile;
-  std::string AbsBuildFilePath;
-  std::string RelBuildFilePath;
-  std::string AbsBuildFileName;
-  std::string RelBuildFileName;
-  std::string RelOutputFileName;
-  std::string AbsOutputFileName;
-  std::map<std::string, cmGeneratedFileStream*> FolderBuildStreams;
   bool TargetGroup;
   bool DynamicDownload;
   static std::string const DDOption;
