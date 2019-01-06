@@ -877,9 +877,13 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
     execute_process(COMMAND chmod u+w "${resolved_embedded_item}")
   endif()
 
+  # CMAKE_INSTALL_NAME_TOOL may not be set if executed in script mode
+  # Duplicated from CMakeFindBinUtils.cmake
+  find_program(CMAKE_INSTALL_NAME_TOOL NAMES install_name_tool HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
+
   # Only if install_name_tool supports -delete_rpath:
   #
-  execute_process(COMMAND install_name_tool
+  execute_process(COMMAND ${CMAKE_INSTALL_NAME_TOOL}
     OUTPUT_VARIABLE install_name_tool_usage
     ERROR_VARIABLE  install_name_tool_usage
     )
@@ -897,7 +901,7 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
   # to install_name_tool:
   #
   if(changes)
-    set(cmd install_name_tool ${changes} "${resolved_embedded_item}")
+    set(cmd ${CMAKE_INSTALL_NAME_TOOL} ${changes} "${resolved_embedded_item}")
     execute_process(COMMAND ${cmd} RESULT_VARIABLE install_name_tool_result)
     if(NOT install_name_tool_result EQUAL 0)
       string(REPLACE ";" "' '" msg "'${cmd}'")

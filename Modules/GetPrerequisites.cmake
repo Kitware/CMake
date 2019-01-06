@@ -63,6 +63,9 @@ searched first when a target without any path info is given.  Then
 standard system locations are also searched: PATH, Framework
 locations, /usr/lib...
 
+The variable GET_PREREQUISITES_VERBOSE can be set to true to enable verbose
+output.
+
 ::
 
   LIST_PREREQUISITES(<target> [<recurse> [<exclude_system> [<verbose>]]])
@@ -644,12 +647,25 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     set(rpaths "")
   endif()
 
+  if(GET_PREREQUISITES_VERBOSE)
+    set(verbose 1)
+  endif()
+
   if(NOT IS_ABSOLUTE "${target}")
     message("warning: target '${target}' is not absolute...")
   endif()
 
   if(NOT EXISTS "${target}")
     message("warning: target '${target}' does not exist...")
+    return()
+  endif()
+
+  # Check for a script by extension (.bat,.sh,...) or if the file starts with "#!" (shebang)
+  file(READ ${target} file_contents LIMIT 5)
+  if(target MATCHES "\\.(bat|c?sh|bash|ksh|cmd)$" OR file_contents MATCHES "^#!")
+    message(STATUS "GetPrequisites(${target}) : ignoring script file")
+    # Clear var
+    set(${prerequisites_var} "" PARENT_SCOPE)
     return()
   endif()
 
@@ -711,25 +727,25 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
 
   set(gp_cmd_maybe_filter)      # optional command to pre-filter gp_tool results
 
-  if(gp_tool STREQUAL "ldd")
+  if(gp_tool MATCHES "ldd$")
     set(gp_cmd_args "")
     set(gp_regex "^[\t ]*[^\t ]+ => ([^\t\(]+) .*${eol_char}$")
     set(gp_regex_error "not found${eol_char}$")
     set(gp_regex_fallback "^[\t ]*([^\t ]+) => ([^\t ]+).*${eol_char}$")
     set(gp_regex_cmp_count 1)
-  elseif(gp_tool STREQUAL "otool")
+  elseif(gp_tool MATCHES "otool$")
     set(gp_cmd_args "-L")
     set(gp_regex "^\t([^\t]+) \\(compatibility version ([0-9]+.[0-9]+.[0-9]+), current version ([0-9]+.[0-9]+.[0-9]+)\\)${eol_char}$")
     set(gp_regex_error "")
     set(gp_regex_fallback "")
     set(gp_regex_cmp_count 3)
-  elseif(gp_tool STREQUAL "dumpbin")
+  elseif(gp_tool MATCHES "dumpbin$")
     set(gp_cmd_args "/dependents")
     set(gp_regex "^    ([^ ].*[Dd][Ll][Ll])${eol_char}$")
     set(gp_regex_error "")
     set(gp_regex_fallback "")
     set(gp_regex_cmp_count 1)
-  elseif(gp_tool STREQUAL "objdump")
+  elseif(gp_tool MATCHES "objdump$")
     set(gp_cmd_args "-p")
     set(gp_regex "^\t*DLL Name: (.*\\.[Dd][Ll][Ll])${eol_char}$")
     set(gp_regex_error "")
@@ -752,7 +768,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   endif()
 
 
-  if(gp_tool STREQUAL "dumpbin")
+  if(gp_tool MATCHES "dumpbin$")
     # When running dumpbin, it also needs the "Common7/IDE" directory in the
     # PATH. It will already be in the PATH if being run from a Visual Studio
     # command prompt. Add it to the PATH here in case we are running from a
@@ -781,7 +797,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   #
   # </setup-gp_tool-vars>
 
-  if(gp_tool STREQUAL "ldd")
+  if(gp_tool MATCHES "ldd$")
     set(old_ld_env "$ENV{LD_LIBRARY_PATH}")
     set(new_ld_env "${exepath}")
     foreach(dir ${dirs})
@@ -806,7 +822,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     ERROR_VARIABLE gp_ev
     )
 
-  if(gp_tool STREQUAL "dumpbin")
+  if(gp_tool MATCHES "dumpbin$")
     # Exclude delay load dependencies under windows (they are listed in dumpbin output after the message below)
     string(FIND "${gp_cmd_ov}" "Image has the following delay load dependencies" gp_delayload_pos)
     if (${gp_delayload_pos} GREATER -1)
@@ -820,7 +836,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   endif()
 
   if(NOT gp_rv STREQUAL "0")
-    if(gp_tool STREQUAL "dumpbin")
+    if(gp_tool MATCHES "dumpbin$")
       # dumpbin error messages seem to go to stdout
       message(FATAL_ERROR "${gp_cmd} failed: ${gp_rv}\n${gp_ev}\n${gp_cmd_ov}")
     else()
@@ -828,7 +844,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     endif()
   endif()
 
-  if(gp_tool STREQUAL "ldd")
+  if(gp_tool MATCHES "ldd$")
     set(ENV{LD_LIBRARY_PATH} "${old_ld_env}")
   endif()
 
@@ -848,9 +864,9 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   # check for install id and remove it from list, since otool -L can include a
   # reference to itself
   set(gp_install_id)
-  if(gp_tool STREQUAL "otool")
+  if(gp_tool MATCHES "otool$")
     execute_process(
-      COMMAND otool -D ${target}
+      COMMAND ${gp_cmd} -D ${target}
       RESULT_VARIABLE otool_rv
       OUTPUT_VARIABLE gp_install_id_ov
       ERROR_VARIABLE otool_ev
