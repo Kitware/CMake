@@ -75,8 +75,6 @@ private:
   long FileLine;
   int CurrentLine;
   int Verbose;
-  bool WarnUninitialized;
-  bool CheckSystemVars;
   bool EscapeQuotes;
   bool NoEscapeMode;
   bool ReplaceAtSyntax;

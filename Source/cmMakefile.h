@@ -866,6 +866,9 @@ public:
   std::deque<std::vector<std::string>> FindPackageRootPathStack;
 
   void MaybeWarnCMP0074(std::string const& pkg);
+  void MaybeWarnUninitialized(std::string const& variable,
+                              const char* sourceFilename) const;
+  bool IsProjectFile(const char* filename) const;
 
 protected:
   // add link libraries and directories to the target
@@ -987,7 +990,7 @@ private:
   cmake::MessageType ExpandVariablesInStringNew(
     std::string& errorstr, std::string& source, bool escapeQuotes,
     bool noEscapes, bool atOnly, const char* filename, long line,
-    bool removeEmpty, bool replaceAt) const;
+    bool replaceAt) const;
   /**
    * Old version of GetSourceFileWithOutput(const std::string&) kept for
    * backward-compatibility. It implements a linear search and support

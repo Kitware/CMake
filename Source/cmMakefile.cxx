@@ -1837,6 +1837,23 @@ bool cmMakefile::VariableInitialized(const std::string& var) const
   return this->StateSnapshot.IsInitialized(var);
 }
 
+void cmMakefile::MaybeWarnUninitialized(std::string const& variable,
+                                        const char* sourceFilename) const
+{
+  // check to see if we need to print a warning
+  // if strict mode is on and the variable has
+  // not been "cleared"/initialized with a set(foo ) call
+  if (this->GetCMakeInstance()->GetWarnUninitialized() &&
+      !this->VariableInitialized(variable)) {
+    if (this->CheckSystemVars ||
+        (sourceFilename && this->IsProjectFile(sourceFilename))) {
+      std::ostringstream msg;
+      msg << "uninitialized variable \'" << variable << "\'";
+      this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
+    }
+  }
+}
+
 void cmMakefile::LogUnused(const char* reason, const std::string& name) const
 {
   if (this->WarnUnused) {
@@ -1848,11 +1865,7 @@ void cmMakefile::LogUnused(const char* reason, const std::string& name) const
       path += "/CMakeLists.txt";
     }
 
-    if (this->CheckSystemVars ||
-        cmSystemTools::IsSubDirectory(path, this->GetHomeDirectory()) ||
-        (cmSystemTools::IsSubDirectory(path, this->GetHomeOutputDirectory()) &&
-         !cmSystemTools::IsSubDirectory(path,
-                                        cmake::GetCMakeFilesDirectory()))) {
+    if (this->CheckSystemVars || this->IsProjectFile(path.c_str())) {
       std::ostringstream msg;
       msg << "unused variable (" << reason << ") \'" << name << "\'";
       this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
@@ -2509,9 +2522,9 @@ const std::string& cmMakefile::ExpandVariablesInString(
       // Suppress variable watches to avoid calling hooks twice. Suppress new
       // dereferences since the OLD behavior is still what is actually used.
       this->SuppressSideEffects = true;
-      newError = ExpandVariablesInStringNew(
-        newErrorstr, newResult, escapeQuotes, noEscapes, atOnly, filename,
-        line, removeEmpty, replaceAt);
+      newError = ExpandVariablesInStringNew(newErrorstr, newResult,
+                                            escapeQuotes, noEscapes, atOnly,
+                                            filename, line, replaceAt);
       this->SuppressSideEffects = false;
       CM_FALLTHROUGH;
     }
@@ -2524,9 +2537,9 @@ const std::string& cmMakefile::ExpandVariablesInString(
     case cmPolicies::REQUIRED_ALWAYS:
     // Messaging here would be *very* verbose.
     case cmPolicies::NEW:
-      mtype = ExpandVariablesInStringNew(errorstr, source, escapeQuotes,
-                                         noEscapes, atOnly, filename, line,
-                                         removeEmpty, replaceAt);
+      mtype =
+        ExpandVariablesInStringNew(errorstr, source, escapeQuotes, noEscapes,
+                                   atOnly, filename, line, replaceAt);
       break;
   }
 
@@ -2702,10 +2715,18 @@ struct t_lookup
   size_t loc = 0;
 };
 
+bool cmMakefile::IsProjectFile(const char* filename) const
+{
+  return cmSystemTools::IsSubDirectory(filename, this->GetHomeDirectory()) ||
+    (cmSystemTools::IsSubDirectory(filename, this->GetHomeOutputDirectory()) &&
+     !cmSystemTools::IsSubDirectory(filename,
+                                    cmake::GetCMakeFilesDirectory()));
+}
+
 cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
   std::string& errorstr, std::string& source, bool escapeQuotes,
   bool noEscapes, bool atOnly, const char* filename, long line,
-  bool removeEmpty, bool replaceAt) const
+  bool replaceAt) const
 {
   // This method replaces ${VAR} and @VAR@ where VAR is looked up
   // with GetDefinition(), if not found in the map, nothing is expanded.
@@ -2762,23 +2783,8 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
             } else {
               varresult = value;
             }
-          } else if (!removeEmpty && !this->SuppressSideEffects) {
-            // check to see if we need to print a warning
-            // if strict mode is on and the variable has
-            // not been "cleared"/initialized with a set(foo ) call
-            if (this->GetCMakeInstance()->GetWarnUninitialized() &&
-                !this->VariableInitialized(lookup)) {
-              if (this->CheckSystemVars ||
-                  (filename &&
-                   (cmSystemTools::IsSubDirectory(filename,
-                                                  this->GetHomeDirectory()) ||
-                    cmSystemTools::IsSubDirectory(
-                      filename, this->GetHomeOutputDirectory())))) {
-                std::ostringstream msg;
-                msg << "uninitialized variable \'" << lookup << "\'";
-                this->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
-              }
-            }
+          } else if (!this->SuppressSideEffects) {
+            this->MaybeWarnUninitialized(lookup, filename);
           }
           result.replace(var.loc, result.size() - var.loc, varresult);
           // Start looking from here on out.
@@ -2890,7 +2896,12 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
             if (filename && variable == lineVar) {
               varresult = std::to_string(line);
             } else {
-              varresult = this->GetSafeDefinition(variable);
+              const std::string* def = this->GetDef(variable);
+              if (def) {
+                varresult = *def;
+              } else if (!this->SuppressSideEffects) {
+                this->MaybeWarnUninitialized(variable, filename);
+              }
             }
 
             if (escapeQuotes) {
