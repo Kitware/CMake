@@ -258,6 +258,9 @@ class cmMakefile;
   SELECT(POLICY, CMP0087,                                                     \
          "Install CODE|SCRIPT allow the use of generator "                    \
          "expressions.",                                                      \
+         3, 14, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0088,                                                     \
+         "FindBISON runs bison in CMAKE_CURRENT_BINARY_DIR when executing.",  \
          3, 14, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)

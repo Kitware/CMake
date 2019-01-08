@@ -151,7 +151,15 @@ if(BISON_EXECUTABLE)
       list(APPEND BISON_TARGET_cmdopt "--report-file=${BISON_TARGET_verbose_file}")
     endif()
     if(NOT IS_ABSOLUTE "${BISON_TARGET_verbose_file}")
-      set(BISON_TARGET_verbose_file "${CMAKE_CURRENT_SOURCE_DIR}/${BISON_TARGET_verbose_file}")
+      cmake_policy(GET CMP0088 _BISON_CMP0088
+        PARENT_SCOPE # undocumented, do not use outside of CMake
+        )
+      if("x${_BISON_CMP0088}x" STREQUAL "xNEWx")
+        set(BISON_TARGET_verbose_file "${CMAKE_CURRENT_BINARY_DIR}/${BISON_TARGET_verbose_file}")
+      else()
+        set(BISON_TARGET_verbose_file "${CMAKE_CURRENT_SOURCE_DIR}/${BISON_TARGET_verbose_file}")
+      endif()
+      unset(_BISON_CMP0088)
     endif()
   endmacro()
 
@@ -159,6 +167,15 @@ if(BISON_EXECUTABLE)
   # adds a custom command and sets
   #   BISON_TARGET_cmdopt, BISON_TARGET_extraoutputs
   macro(BISON_TARGET_option_verbose Name BisonOutput filename)
+    cmake_policy(GET CMP0088 _BISON_CMP0088
+        PARENT_SCOPE # undocumented, do not use outside of CMake
+        )
+    set(_BISON_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    if("x${_BISON_CMP0088}x" STREQUAL "xNEWx")
+      set(_BISON_WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    endif()
+    unset(_BISON_CMP0088)
+
     list(APPEND BISON_TARGET_cmdopt "--verbose")
     list(APPEND BISON_TARGET_outputs
       "${BISON_TARGET_verbose_file}")
@@ -166,8 +183,9 @@ if(BISON_EXECUTABLE)
       if(IS_ABSOLUTE "${filename}")
         set(BISON_TARGET_verbose_extra_file "${filename}")
       else()
-        set(BISON_TARGET_verbose_extra_file "${CMAKE_CURRENT_SOURCE_DIR}/${filename}")
+        set(BISON_TARGET_verbose_extra_file "${_BISON_WORKING_DIRECTORY}/${filename}")
       endif()
+
       add_custom_command(OUTPUT ${BISON_TARGET_verbose_extra_file}
         COMMAND ${CMAKE_COMMAND} -E copy
         "${BISON_TARGET_verbose_file}"
@@ -176,10 +194,11 @@ if(BISON_EXECUTABLE)
         DEPENDS
         "${BISON_TARGET_verbose_file}"
         COMMENT "[BISON][${Name}] Copying bison verbose table to ${filename}"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+        WORKING_DIRECTORY ${_BISON_WORKING_DIRECTORY})
       list(APPEND BISON_TARGET_extraoutputs
         "${BISON_TARGET_verbose_extra_file}")
       unset(BISON_TARGET_verbose_extra_file)
+      unset(_BISON_WORKING_DIRECTORY)
     endif()
   endmacro()
 
@@ -234,12 +253,23 @@ if(BISON_EXECUTABLE)
 
       list(APPEND BISON_TARGET_outputs "${BISON_TARGET_output_header}")
 
+      cmake_policy(GET CMP0088 _BISON_CMP0088
+        PARENT_SCOPE # undocumented, do not use outside of CMake
+        )
+      set(_BISON_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+      if("x${_BISON_CMP0088}x" STREQUAL "xNEWx")
+        set(_BISON_WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+      endif()
+      unset(_BISON_CMP0088)
+
       add_custom_command(OUTPUT ${BISON_TARGET_outputs}
         COMMAND ${BISON_EXECUTABLE} ${BISON_TARGET_cmdopt} -o ${BisonOutput} ${BisonInput}
         VERBATIM
         DEPENDS ${BisonInput}
         COMMENT "[BISON][${Name}] Building parser with bison ${BISON_VERSION}"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+        WORKING_DIRECTORY ${_BISON_WORKING_DIRECTORY})
+
+      unset(_BISON_WORKING_DIRECTORY)
 
       # define target variables
       set(BISON_${Name}_DEFINED TRUE)
