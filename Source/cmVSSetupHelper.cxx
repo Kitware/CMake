@@ -295,6 +295,9 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
     return false;
   }
 
+  // FIXME: Add a way for caller to specify other versions.
+  std::wstring wantVersion = std::to_wstring(15) + L'.';
+
   SmartCOMPtr<ISetupInstance> instance;
   while (SUCCEEDED(enumInstances->Next(1, &instance, NULL)) && instance) {
     SmartCOMPtr<ISetupInstance2> instance2 = NULL;
@@ -310,6 +313,12 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
     instance = instance2 = NULL;
 
     if (isInstalled) {
+      // We are looking for a specific major version.
+      if (instanceInfo.Version.size() < wantVersion.size() ||
+          instanceInfo.Version.substr(0, wantVersion.size()) != wantVersion) {
+        continue;
+      }
+
       if (!this->SpecifiedVSInstallLocation.empty()) {
         // We are looking for a specific instance.
         std::string currentVSLocation = instanceInfo.GetInstallLocation();
