@@ -12,9 +12,10 @@ The ``-A <arch>`` can be supplied for setting the target architecture.
 ``<arch>`` usually is one of "arm", "ppc", "86", etcetera.  If the target architecture
 is not specified then the default architecture of "arm" will be used.
 
-The ``-T <toolset>`` can be supplied for setting the toolset to be used.
-All toolsets are expected to be located at ``GHS_TOOLSET_ROOT``.
-If the toolset is not specified then the latest toolset will be used.
+The ``-T <toolset>`` option can be used to set the directory location of the toolset.
+Both absolute and relative paths are valid. Relative paths use ``GHS_TOOLSET_ROOT``
+as the root. If the toolset is not specified then the latest toolset found in
+``GHS_TOOLSET_ROOT`` will be used.
 
 * ``GHS_TARGET_PLATFORM``
 
@@ -30,7 +31,7 @@ If the toolset is not specified then the latest toolset will be used.
 
 * ``GHS_TOOLSET_ROOT``
 
-  | Root path for ``toolset``.
+  | Root path for ``toolset`` searches.
   | Defaults to ``C:/ghs``.
 
 * ``GHS_OS_ROOT``

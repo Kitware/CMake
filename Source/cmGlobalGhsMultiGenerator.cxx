@@ -55,43 +55,44 @@ void cmGlobalGhsMultiGenerator::ComputeTargetObjectDirectory(
 bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
                                                     cmMakefile* mf)
 {
-  std::string tsp;      /* toolset path */
-  std::string tsn = ts; /* toolset name */
+  std::string tsp; /* toolset path */
 
-  GetToolset(mf, tsp, tsn);
+  this->GetToolset(mf, tsp, ts);
 
   /* no toolset was found */
-  if (tsn.empty()) {
+  if (tsp.empty()) {
     return false;
   } else if (ts.empty()) {
     std::string message;
     message =
       "Green Hills MULTI: -T <toolset> not specified; defaulting to \"";
-    message += tsn;
+    message += tsp;
     message += "\"";
     cmSystemTools::Message(message.c_str());
 
-    /* store the toolset for later use
+    /* store the full toolset for later use
      * -- already done if -T<toolset> was specified
      */
-    mf->AddCacheDefinition("CMAKE_GENERATOR_TOOLSET", tsn.c_str(),
-                           "Name of generator toolset.",
+    mf->AddCacheDefinition("CMAKE_GENERATOR_TOOLSET", tsp.c_str(),
+                           "Location of generator toolset.",
                            cmStateEnums::INTERNAL);
   }
 
   /* set the build tool to use */
+  std::string gbuild(tsp + ((tsp.back() == '/') ? "" : "/") +
+                     DEFAULT_BUILD_PROGRAM);
   const char* prevTool = mf->GetDefinition("CMAKE_MAKE_PROGRAM");
-  std::string gbuild(tsp + "/" + tsn + "/" + DEFAULT_BUILD_PROGRAM);
 
   /* check if the toolset changed from last generate */
   if (prevTool != NULL && (gbuild != prevTool)) {
-    std::string message = "generator toolset: ";
+    std::string message = "toolset build tool: ";
     message += gbuild;
-    message += "\nDoes not match the toolset used previously: ";
+    message += "\nDoes not match the previously used build tool: ";
     message += prevTool;
     message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
                "directory or choose a different binary directory.";
     cmSystemTools::Error(message.c_str());
+    return false;
   } else {
     /* store the toolset that is being used for this build */
     mf->AddCacheDefinition("CMAKE_MAKE_PROGRAM", gbuild.c_str(),
@@ -99,7 +100,7 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
                            true);
   }
 
-  mf->AddDefinition("CMAKE_SYSTEM_VERSION", tsn.c_str());
+  mf->AddDefinition("CMAKE_SYSTEM_VERSION", tsp.c_str());
 
   // FIXME: compiler detection not implemented
   // gbuild uses the primaryTarget setting in the top-level project
@@ -172,11 +173,11 @@ bool cmGlobalGhsMultiGenerator::FindMakeProgram(cmMakefile* /*mf*/)
 }
 
 void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsd,
-                                           std::string& ts)
+                                           const std::string& ts)
 {
   const char* ghsRoot = mf->GetDefinition("GHS_TOOLSET_ROOT");
 
-  if (!ghsRoot) {
+  if (!ghsRoot || ghsRoot[0] == '\0') {
     ghsRoot = DEFAULT_TOOLSET_ROOT;
   }
   tsd = ghsRoot;
@@ -185,20 +186,29 @@ void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsd,
     std::vector<std::string> output;
 
     // Use latest? version
+    if (tsd.back() != '/') {
+      tsd += "/";
+    }
     cmSystemTools::Glob(tsd, "comp_[^;]+", output);
 
     if (output.empty()) {
-      cmSystemTools::Error("GHS toolset not found in ", tsd.c_str());
-      ts = "";
+      std::string msg =
+        "No GHS toolsets found in GHS_TOOLSET_ROOT \"" + tsd + "\".";
+      cmSystemTools::Error(msg.c_str());
+      tsd = "";
     } else {
-      ts = output.back();
+      tsd += output.back();
     }
   } else {
-    std::string tryPath = tsd + std::string("/") + ts;
+    std::string tryPath;
+    /* CollapseCombinedPath will check if ts is an absolute path */
+    tryPath = cmSystemTools::CollapseCombinedPath(tsd, ts);
     if (!cmSystemTools::FileExists(tryPath)) {
-      cmSystemTools::Error("GHS toolset \"", ts.c_str(), "\" not found in ",
-                           tsd.c_str());
-      ts = "";
+      std::string msg = "GHS toolset \"" + tryPath + "\" not found.";
+      cmSystemTools::Error(msg.c_str());
+      tsd = "";
+    } else {
+      tsd = tryPath;
     }
   }
 }

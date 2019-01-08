@@ -99,7 +99,7 @@ protected:
                               std::vector<std::string>()) override;
 
 private:
-  void GetToolset(cmMakefile* mf, std::string& tsd, std::string& ts);
+  void GetToolset(cmMakefile* mf, std::string& tsd, const std::string& ts);
 
   /* top-level project */
   void OutputTopLevelProject(cmLocalGenerator* root,
