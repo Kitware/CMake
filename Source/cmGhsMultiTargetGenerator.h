@@ -86,7 +86,7 @@ private:
     cmLocalGhsMultiGenerator* localGhsMultiGenerator,
     cmGeneratorTarget* generatorTarget);
   static void WriteObjectLangOverride(cmGeneratedFileStream* fileStream,
-                                      cmSourceFile* sourceFile);
+                                      const cmSourceFile* sourceFile);
   static void WriteObjectDir(cmGeneratedFileStream* fileStream,
                              std::string const& dir);
   std::string GetOutputDirectory(const std::string& config) const;

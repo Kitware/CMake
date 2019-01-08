@@ -71,16 +71,11 @@ const std::string& cmCompiledGeneratorExpression::EvaluateWithContext(
 
   this->Output.clear();
 
-  std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it =
-    this->Evaluators.begin();
-  const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end =
-    this->Evaluators.end();
+  for (const cmGeneratorExpressionEvaluator* it : this->Evaluators) {
+    this->Output += it->Evaluate(&context, dagChecker);
 
-  for (; it != end; ++it) {
-    this->Output += (*it)->Evaluate(&context, dagChecker);
-
-    this->SeenTargetProperties.insert(context.SeenTargetProperties.begin(),
-                                      context.SeenTargetProperties.end());
+    this->SeenTargetProperties.insert(context.SeenTargetProperties.cbegin(),
+                                      context.SeenTargetProperties.cend());
     if (context.HadError) {
       this->Output.clear();
       break;
