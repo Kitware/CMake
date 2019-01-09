@@ -11,6 +11,7 @@
 #include "cmGhsMultiTargetGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmVersion.h"
 #include "cmake.h"
 
@@ -21,6 +22,7 @@ const char* cmGlobalGhsMultiGenerator::DEFAULT_TOOLSET_ROOT = "C:/ghs";
 cmGlobalGhsMultiGenerator::cmGlobalGhsMultiGenerator(cmake* cm)
   : cmGlobalGenerator(cm)
 {
+  cm->GetState()->SetGhsMultiIDE(true);
 }
 
 cmGlobalGhsMultiGenerator::~cmGlobalGhsMultiGenerator()

@@ -17,12 +17,13 @@ Both absolute and relative paths are valid. Relative paths use ``GHS_TOOLSET_ROO
 as the root. If the toolset is not specified then the latest toolset found in
 ``GHS_TOOLSET_ROOT`` will be used.
 
+Cache variables that are used for toolset and target system customization:
+
 * ``GHS_TARGET_PLATFORM``
 
   | Defaults to ``integrity``.
   | Usual values are ``integrity``, ``threadx``, ``uvelosity``, ``velosity``,
     ``vxworks``, ``standalone``.
-
 
 * ``GHS_PRIMARY_TARGET``
 

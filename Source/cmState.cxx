@@ -593,6 +593,16 @@ bool cmState::UseWindowsVSIDE() const
   return this->WindowsVSIDE;
 }
 
+void cmState::SetGhsMultiIDE(bool ghsMultiIDE)
+{
+  this->GhsMultiIDE = ghsMultiIDE;
+}
+
+bool cmState::UseGhsMultiIDE() const
+{
+  return this->GhsMultiIDE;
+}
+
 void cmState::SetWatcomWMake(bool watcomWMake)
 {
   this->WatcomWMake = watcomWMake;
