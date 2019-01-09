@@ -32,7 +32,7 @@ public:
 
 protected:
   cmGlobalVisualStudioVersionedGenerator(
-    cmake* cm, const std::string& name,
+    VSVersion version, cmake* cm, const std::string& name,
     std::string const& platformInGeneratorName);
 
   bool InitializeWindows(cmMakefile* mf) override;

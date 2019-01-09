@@ -8,6 +8,26 @@
 #include "cmMakefile.h"
 #include "cmVSSetupHelper.h"
 
+static unsigned int VSVersionToMajor(
+  cmGlobalVisualStudioGenerator::VSVersion v)
+{
+  switch (v) {
+    case cmGlobalVisualStudioGenerator::VS9:
+      return 9;
+    case cmGlobalVisualStudioGenerator::VS10:
+      return 10;
+    case cmGlobalVisualStudioGenerator::VS11:
+      return 11;
+    case cmGlobalVisualStudioGenerator::VS12:
+      return 12;
+    case cmGlobalVisualStudioGenerator::VS14:
+      return 14;
+    case cmGlobalVisualStudioGenerator::VS15:
+      return 15;
+  }
+  return 0;
+}
+
 static const char vs15generatorName[] = "Visual Studio 15 2017";
 
 // Map generator name without year to name with year.
@@ -38,16 +58,19 @@ public:
       return 0;
     }
     if (!*p) {
-      return new cmGlobalVisualStudioVersionedGenerator(cm, genName, "");
+      return new cmGlobalVisualStudioVersionedGenerator(
+        cmGlobalVisualStudioGenerator::VS15, cm, genName, "");
     }
     if (*p++ != ' ') {
       return 0;
     }
     if (strcmp(p, "Win64") == 0) {
-      return new cmGlobalVisualStudioVersionedGenerator(cm, genName, "x64");
+      return new cmGlobalVisualStudioVersionedGenerator(
+        cmGlobalVisualStudioGenerator::VS15, cm, genName, "x64");
     }
     if (strcmp(p, "ARM") == 0) {
-      return new cmGlobalVisualStudioVersionedGenerator(cm, genName, "ARM");
+      return new cmGlobalVisualStudioVersionedGenerator(
+        cmGlobalVisualStudioGenerator::VS15, cm, genName, "ARM");
     }
     return 0;
   }
@@ -77,25 +100,35 @@ cmGlobalVisualStudioVersionedGenerator::NewFactory15()
 }
 
 cmGlobalVisualStudioVersionedGenerator::cmGlobalVisualStudioVersionedGenerator(
-  cmake* cm, const std::string& name,
+  VSVersion version, cmake* cm, const std::string& name,
   std::string const& platformInGeneratorName)
   : cmGlobalVisualStudio14Generator(cm, name, platformInGeneratorName)
-  , vsSetupAPIHelper(15)
+  , vsSetupAPIHelper(VSVersionToMajor(version))
 {
   this->ExpressEdition = false;
   this->DefaultPlatformToolset = "v141";
   this->DefaultCLFlagTableName = "v141";
   this->DefaultCSharpFlagTableName = "v141";
   this->DefaultLinkFlagTableName = "v141";
-  this->Version = VS15;
+  this->Version = version;
 }
 
 bool cmGlobalVisualStudioVersionedGenerator::MatchesGeneratorName(
   const std::string& name) const
 {
   std::string genName;
-  if (cmVS15GenName(name, genName)) {
-    return genName == this->GetName();
+  switch (this->Version) {
+    case cmGlobalVisualStudioGenerator::VS9:
+    case cmGlobalVisualStudioGenerator::VS10:
+    case cmGlobalVisualStudioGenerator::VS11:
+    case cmGlobalVisualStudioGenerator::VS12:
+    case cmGlobalVisualStudioGenerator::VS14:
+      break;
+    case cmGlobalVisualStudioGenerator::VS15:
+      if (cmVS15GenName(name, genName)) {
+        return genName == this->GetName();
+      }
+      break;
   }
   return false;
 }
