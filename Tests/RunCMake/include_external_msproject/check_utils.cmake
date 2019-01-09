@@ -100,6 +100,8 @@ function(check_project test name guid type platform imported_release_config_name
       set(platform "${RunCMake_GENERATOR_PLATFORM}")
     elseif("${RunCMake_GENERATOR}" MATCHES "Win64")
       set(platform "x64")
+    elseif(VS_PLATFORM_NAME)
+      set(platform "${VS_PLATFORM_NAME}")
     else()
       set(platform "Win32")
     endif()

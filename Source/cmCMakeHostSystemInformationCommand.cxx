@@ -145,6 +145,22 @@ bool cmCMakeHostSystemInformationCommand::GetValue(
     if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
       cmSystemTools::ConvertToUnixSlashes(value);
     }
+  } else if (key == "VS_16_DIR") {
+    // If generating for the VS 16 IDE, use the same instance.
+    cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
+    if (cmHasLiteralPrefix(gg->GetName(), "Visual Studio 16 ")) {
+      cmGlobalVisualStudioVersionedGenerator* vs16gen =
+        static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
+      if (vs16gen->GetVSInstance(value)) {
+        return true;
+      }
+    }
+
+    // Otherwise, find a VS 16 instance ourselves.
+    cmVSSetupAPIHelper vsSetupAPIHelper(16);
+    if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
+      cmSystemTools::ConvertToUnixSlashes(value);
+    }
 #endif
   } else {
     std::string e = "does not recognize <key> " + key;

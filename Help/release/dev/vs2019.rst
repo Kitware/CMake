@@ -1,0 +1,13 @@
+vs2019
+------
+
+* The :generator:`Visual Studio 16 2019` generator was added.  This is
+  experimental and based on "Visual Studio 2019 Preview 1.1" because this
+  version of VS has not been released.
+
+  The VS 2019 generator differs from generators for earlier versions
+  in that it does not provide variants that specify the target platform
+  in the generator name.  Instead :variable:`CMAKE_GENERATOR_PLATFORM`
+  must be used, e.g. through the ``-A`` command-line option.  Furthermore,
+  the default target platform (architecture) is now based on the *host*
+  platform.

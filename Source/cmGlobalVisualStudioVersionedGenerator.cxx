@@ -8,6 +8,16 @@
 #include "cmMakefile.h"
 #include "cmVSSetupHelper.h"
 
+#if defined(_M_ARM64)
+#  define HOST_PLATFORM_NAME "ARM64";
+#elif defined(_M_ARM)
+#  define HOST_PLATFORM_NAME "ARM";
+#elif defined(_M_IA64)
+#  define HOST_PLATFORM_NAME "Itanium";
+#else
+#  include "cmsys/SystemInformation.hxx"
+#endif
+
 static unsigned int VSVersionToMajor(
   cmGlobalVisualStudioGenerator::VSVersion v)
 {
@@ -24,8 +34,33 @@ static unsigned int VSVersionToMajor(
       return 14;
     case cmGlobalVisualStudioGenerator::VS15:
       return 15;
+    case cmGlobalVisualStudioGenerator::VS16:
+      return 16;
   }
   return 0;
+}
+
+static const char* VSVersionToToolset(
+  cmGlobalVisualStudioGenerator::VSVersion v)
+{
+  switch (v) {
+    case cmGlobalVisualStudioGenerator::VS9:
+      return "v90";
+    case cmGlobalVisualStudioGenerator::VS10:
+      return "v100";
+    case cmGlobalVisualStudioGenerator::VS11:
+      return "v110";
+    case cmGlobalVisualStudioGenerator::VS12:
+      return "v120";
+    case cmGlobalVisualStudioGenerator::VS14:
+      return "v140";
+    case cmGlobalVisualStudioGenerator::VS15:
+      return "v141";
+    case cmGlobalVisualStudioGenerator::VS16:
+      // FIXME: VS 2019 Preview 1.1 uses v141 but preview 2 will use v142.
+      return "v141";
+  }
+  return "";
 }
 
 static const char vs15generatorName[] = "Visual Studio 15 2017";
@@ -99,18 +134,88 @@ cmGlobalVisualStudioVersionedGenerator::NewFactory15()
   return new Factory15;
 }
 
+static const char vs16generatorName[] = "Visual Studio 16 2019";
+
+// Map generator name without year to name with year.
+static const char* cmVS16GenName(const std::string& name, std::string& genName)
+{
+  if (strncmp(name.c_str(), vs16generatorName,
+              sizeof(vs16generatorName) - 6) != 0) {
+    return 0;
+  }
+  const char* p = name.c_str() + sizeof(vs16generatorName) - 6;
+  if (cmHasLiteralPrefix(p, " 2019")) {
+    p += 5;
+  }
+  genName = std::string(vs16generatorName) + p;
+  return p;
+}
+
+class cmGlobalVisualStudioVersionedGenerator::Factory16
+  : public cmGlobalGeneratorFactory
+{
+public:
+  virtual cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
+                                                   cmake* cm) const
+  {
+    std::string genName;
+    const char* p = cmVS16GenName(name, genName);
+    if (!p) {
+      return 0;
+    }
+    if (!*p) {
+      return new cmGlobalVisualStudioVersionedGenerator(
+        cmGlobalVisualStudioGenerator::VS16, cm, genName, "");
+    }
+    return 0;
+  }
+
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const
+  {
+    entry.Name = std::string(vs16generatorName);
+    entry.Brief = "Generates Visual Studio 2019 project files.  "
+                  "Use -A option to specify architecture.";
+  }
+
+  virtual void GetGenerators(std::vector<std::string>& names) const
+  {
+    names.push_back(vs16generatorName);
+  }
+
+  bool SupportsToolset() const override { return true; }
+  bool SupportsPlatform() const override { return true; }
+};
+
+cmGlobalGeneratorFactory*
+cmGlobalVisualStudioVersionedGenerator::NewFactory16()
+{
+  return new Factory16;
+}
+
 cmGlobalVisualStudioVersionedGenerator::cmGlobalVisualStudioVersionedGenerator(
   VSVersion version, cmake* cm, const std::string& name,
   std::string const& platformInGeneratorName)
   : cmGlobalVisualStudio14Generator(cm, name, platformInGeneratorName)
   , vsSetupAPIHelper(VSVersionToMajor(version))
 {
-  this->ExpressEdition = false;
-  this->DefaultPlatformToolset = "v141";
-  this->DefaultCLFlagTableName = "v141";
-  this->DefaultCSharpFlagTableName = "v141";
-  this->DefaultLinkFlagTableName = "v141";
   this->Version = version;
+  this->ExpressEdition = false;
+  this->DefaultPlatformToolset = VSVersionToToolset(this->Version);
+  this->DefaultCLFlagTableName = VSVersionToToolset(this->Version);
+  this->DefaultCSharpFlagTableName = VSVersionToToolset(this->Version);
+  this->DefaultLinkFlagTableName = VSVersionToToolset(this->Version);
+  if (this->Version >= cmGlobalVisualStudioGenerator::VS16) {
+#ifdef HOST_PLATFORM_NAME
+    this->DefaultPlatformName = HOST_PLATFORM_NAME;
+#else
+    cmsys::SystemInformation info;
+    if (info.Is64Bits()) {
+      this->DefaultPlatformName = "x64";
+    } else {
+      this->DefaultPlatformName = "Win32";
+    }
+#endif
+  }
 }
 
 bool cmGlobalVisualStudioVersionedGenerator::MatchesGeneratorName(
@@ -126,6 +231,11 @@ bool cmGlobalVisualStudioVersionedGenerator::MatchesGeneratorName(
       break;
     case cmGlobalVisualStudioGenerator::VS15:
       if (cmVS15GenName(name, genName)) {
+        return genName == this->GetName();
+      }
+      break;
+    case cmGlobalVisualStudioGenerator::VS16:
+      if (cmVS16GenName(name, genName)) {
         return genName == this->GetName();
       }
       break;
@@ -239,7 +349,7 @@ bool cmGlobalVisualStudioVersionedGenerator::SelectWindowsStoreToolset(
   if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
     if (this->IsWindowsStoreToolsetInstalled() &&
         this->IsWindowsDesktopToolsetInstalled()) {
-      toolset = "v141"; // VS 15 uses v141 toolset
+      toolset = VSVersionToToolset(this->Version);
       return true;
     } else {
       return false;
@@ -296,6 +406,10 @@ std::string cmGlobalVisualStudioVersionedGenerator::FindMSBuildCommand()
   // Ask Visual Studio Installer tool.
   std::string vs;
   if (vsSetupAPIHelper.GetVSInstanceInfo(vs)) {
+    msbuild = vs + "/MSBuild/Current/Bin/MSBuild.exe";
+    if (cmSystemTools::FileExists(msbuild)) {
+      return msbuild;
+    }
     msbuild = vs + "/MSBuild/15.0/Bin/MSBuild.exe";
     if (cmSystemTools::FileExists(msbuild)) {
       return msbuild;
