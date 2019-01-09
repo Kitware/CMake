@@ -37,7 +37,7 @@ if (RUN_TEST STREQUAL "NO_FLAGS")
   endif()
 else()
   unset(fileName CACHE)
-  find_file (fileName exe1.gpj
+  find_file(fileName exe1.gpj
     ${CMAKE_CURRENT_BINARY_DIR}/link_build
     ${CMAKE_CURRENT_BINARY_DIR}/link_build/exe1
     )
@@ -50,12 +50,12 @@ else()
     -lcsl1 csl2
     -clinkexe1 -clinkexe2
     -special-lib2-public-link)
-  foreach( opt IN LISTS expected_flags )
+  foreach(opt IN LISTS expected_flags)
     string(FIND "${fileText}" "${opt}" opt_found)
     if ( opt_found EQUAL -1 )
       message(SEND_ERROR "Could not find: ${opt}")
     endif()
-  endforeach(opt)
+  endforeach()
 
   unset(fileName CACHE)
   find_file (fileName lib1.gpj
@@ -67,12 +67,12 @@ else()
   set(expected_flags
     -clinkexeA1 -clinkexeA2
     -static-lib-flags1 -static-lib-flags2)
-  foreach( opt IN LISTS expected_flags )
+  foreach(opt IN LISTS expected_flags)
     string(FIND "${fileText}" "${opt}" opt_found)
-    if ( opt_found EQUAL -1 )
+    if (opt_found EQUAL -1)
       message(SEND_ERROR "Could not find: ${opt}")
     endif()
-  endforeach(opt)
+  endforeach()
 
   unset(fileName CACHE)
   find_file (fileName lib2.gpj
@@ -83,10 +83,10 @@ else()
   file(STRINGS ${fileName} fileText)
   set(expected_flags
     -clinkexeA1 -clinkexeA2)
-  foreach( opt IN LISTS expected_flags )
+  foreach(opt IN LISTS expected_flags)
     string(FIND "${fileText}" "${opt}" opt_found)
     if ( opt_found EQUAL -1 )
       message(SEND_ERROR "Could not find: ${opt}")
     endif()
-  endforeach(opt)
+  endforeach()
 endif()

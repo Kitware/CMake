@@ -3,6 +3,8 @@
 
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
+add_link_options("-non_shared")
+
 project(test C)
 
 # create virtual AS

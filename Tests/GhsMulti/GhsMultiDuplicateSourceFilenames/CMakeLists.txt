@@ -12,6 +12,6 @@ add_library(libdemo
 
 add_executable(demo main.c)
 target_link_libraries(demo libdemo)
-if(GHSMULTI)
-    target_compile_options(demo PUBLIC "-non_shared")
+if(CMAKE_C_COMPILER_ID STREQUAL "GHS")
+  target_link_options(demo PRIVATE "-non_shared")
 endif()

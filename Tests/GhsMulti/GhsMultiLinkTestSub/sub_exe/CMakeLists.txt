@@ -7,3 +7,6 @@ project(test C)
 
 add_executable(exe1 exe1.c)
 target_link_libraries(exe1 lib1)
+if(CMAKE_C_COMPILER_ID STREQUAL "GHS")
+  target_link_options(exe1 PRIVATE "-non_shared")
+endif()

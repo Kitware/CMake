@@ -3,13 +3,13 @@
 
 #test project was generated
 unset(fileName CACHE)
-find_file (fileName lib3.gpj
+find_file(fileName lib3.gpj
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/lib3
   ${CMAKE_CURRENT_BINARY_DIR}/examples
   )
 
-if ( fileName )
+if (fileName)
   message("Found target lib3: ${fileName}")
 else()
   message(SEND_ERROR "Could not find target lib3: ${fileName}")
@@ -23,7 +23,7 @@ find_file (fileName exe3.gpj
   ${CMAKE_CURRENT_BINARY_DIR}/examples
   )
 
-if ( fileName )
+if (fileName)
   message("Found target exe3: ${fileName}")
 else()
   message(SEND_ERROR "Could not find target exe3: ${fileName}")
@@ -37,7 +37,7 @@ find_file (fileName lib3.a
   ${CMAKE_CURRENT_BINARY_DIR}/examples
   )
 
-if ( fileName )
+if (fileName)
   message(SEND_ERROR "Found target lib3: ${fileName}")
 else()
   message("Could not find target lib3: ${fileName}")
@@ -51,7 +51,7 @@ find_file (fileName NAMES exe3.as exe3
   ${CMAKE_CURRENT_BINARY_DIR}/examples
   )
 
-if ( fileName )
+if (fileName)
   message(SEND_ERROR "Found target exe3: ${fileName}")
 else()
   message("Could not find target exe3: ${fileName}")

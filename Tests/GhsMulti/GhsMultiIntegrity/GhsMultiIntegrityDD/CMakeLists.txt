@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 project(test C)
 
+add_link_options("-non_shared")
+
 # create virtual AS
 add_executable(vas exe.c)
 target_link_libraries(vas lib)

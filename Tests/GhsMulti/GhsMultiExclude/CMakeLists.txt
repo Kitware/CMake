@@ -5,6 +5,10 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 project(test C)
 
+if(CMAKE_C_COMPILER_ID STREQUAL "GHS")
+  add_link_options("-non_shared")
+endif()
+
 add_library(lib1 lib1.c)
 set_target_properties( lib1 PROPERTIES EXCLUDE_FROM_ALL yes )
 

@@ -8,3 +8,6 @@ project(test C)
 add_library(obj1 OBJECT testObj.c testObj.h sub/testObj.c testObj2.c)
 
 add_executable(exe1 exe.c $<TARGET_OBJECTS:obj1>)
+if(CMAKE_C_COMPILER_ID STREQUAL "GHS")
+  target_link_options(exe1 PRIVATE "-non_shared")
+endif()

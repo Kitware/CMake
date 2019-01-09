@@ -532,6 +532,7 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
     }
   }
 }
+
 void cmGhsMultiTargetGenerator::WriteReferences(std::ostream& fout)
 {
   // This only applies to INTEGRITY Applications
