@@ -488,16 +488,6 @@ std::string cmGlobalVisualStudio10Generator::SelectWindowsCEToolset() const
   return "";
 }
 
-void cmGlobalVisualStudio10Generator::WriteSLNHeader(std::ostream& fout)
-{
-  fout << "Microsoft Visual Studio Solution File, Format Version 11.00\n";
-  if (this->ExpressEdition) {
-    fout << "# Visual C++ Express 2010\n";
-  } else {
-    fout << "# Visual Studio 2010\n";
-  }
-}
-
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator* cmGlobalVisualStudio10Generator::CreateLocalGenerator(
   cmMakefile* mf)

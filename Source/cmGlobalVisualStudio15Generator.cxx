@@ -97,17 +97,6 @@ bool cmGlobalVisualStudio15Generator::MatchesGeneratorName(
   return false;
 }
 
-void cmGlobalVisualStudio15Generator::WriteSLNHeader(std::ostream& fout)
-{
-  // Visual Studio 15 writes .sln format 12.00
-  fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
-  if (this->ExpressEdition) {
-    fout << "# Visual Studio Express 15 for Windows Desktop\n";
-  } else {
-    fout << "# Visual Studio 15\n";
-  }
-}
-
 bool cmGlobalVisualStudio15Generator::SetGeneratorInstance(
   std::string const& i, cmMakefile* mf)
 {

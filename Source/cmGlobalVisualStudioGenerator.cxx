@@ -62,6 +62,58 @@ const char* cmGlobalVisualStudioGenerator::GetIDEVersion() const
   return "";
 }
 
+void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
+{
+  switch (this->Version) {
+    case cmGlobalVisualStudioGenerator::VS9:
+      fout << "Microsoft Visual Studio Solution File, Format Version 10.00\n";
+      fout << "# Visual Studio 2008\n";
+      break;
+    case cmGlobalVisualStudioGenerator::VS10:
+      fout << "Microsoft Visual Studio Solution File, Format Version 11.00\n";
+      if (this->ExpressEdition) {
+        fout << "# Visual C++ Express 2010\n";
+      } else {
+        fout << "# Visual Studio 2010\n";
+      }
+      break;
+    case cmGlobalVisualStudioGenerator::VS11:
+      fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
+      if (this->ExpressEdition) {
+        fout << "# Visual Studio Express 2012 for Windows Desktop\n";
+      } else {
+        fout << "# Visual Studio 2012\n";
+      }
+      break;
+    case cmGlobalVisualStudioGenerator::VS12:
+      fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
+      if (this->ExpressEdition) {
+        fout << "# Visual Studio Express 2013 for Windows Desktop\n";
+      } else {
+        fout << "# Visual Studio 2013\n";
+      }
+      break;
+    case cmGlobalVisualStudioGenerator::VS14:
+      // Visual Studio 14 writes .sln format 12.00
+      fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
+      if (this->ExpressEdition) {
+        fout << "# Visual Studio Express 14 for Windows Desktop\n";
+      } else {
+        fout << "# Visual Studio 14\n";
+      }
+      break;
+    case cmGlobalVisualStudioGenerator::VS15:
+      // Visual Studio 15 writes .sln format 12.00
+      fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
+      if (this->ExpressEdition) {
+        fout << "# Visual Studio Express 15 for Windows Desktop\n";
+      } else {
+        fout << "# Visual Studio 15\n";
+      }
+      break;
+  }
+}
+
 std::string cmGlobalVisualStudioGenerator::GetRegistryBase()
 {
   return cmGlobalVisualStudioGenerator::GetRegistryBase(this->GetIDEVersion());

@@ -217,9 +217,3 @@ void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
     }
   }
 }
-
-// output standard header for dsw file
-void cmGlobalVisualStudio71Generator::WriteSLNHeader(std::ostream& fout)
-{
-  fout << "Microsoft Visual Studio Solution File, Format Version 8.00\n";
-}

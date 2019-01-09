@@ -134,7 +134,6 @@ protected:
   virtual void WriteSLNGlobalSections(std::ostream& fout,
                                       cmLocalGenerator* root);
   virtual void WriteSLNFooter(std::ostream& fout);
-  virtual void WriteSLNHeader(std::ostream& fout) = 0;
   std::string WriteUtilityDepend(const cmGeneratorTarget* target) override;
 
   virtual void WriteTargetsToSolution(

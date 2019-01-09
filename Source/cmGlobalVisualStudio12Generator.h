@@ -24,8 +24,6 @@ public:
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
-  void WriteSLNHeader(std::ostream& fout) override;
-
 protected:
   bool ProcessGeneratorToolsetField(std::string const& key,
                                     std::string const& value) override;

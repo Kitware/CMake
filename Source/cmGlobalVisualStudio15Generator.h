@@ -24,8 +24,6 @@ public:
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
-  void WriteSLNHeader(std::ostream& fout) override;
-
   bool SetGeneratorInstance(std::string const& i, cmMakefile* mf) override;
 
   bool GetVSInstance(std::string& dir) const;

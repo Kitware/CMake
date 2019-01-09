@@ -26,8 +26,6 @@ public:
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
-  void WriteSLNHeader(std::ostream& fout) override;
-
 protected:
   bool InitializeWindowsPhone(cmMakefile* mf) override;
   bool InitializeWindowsStore(cmMakefile* mf) override;

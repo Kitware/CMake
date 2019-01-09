@@ -43,7 +43,6 @@ public:
    */
   void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
                       bool optional) override;
-  void WriteSLNHeader(std::ostream& fout) override;
 
   bool IsCudaEnabled() const { return this->CudaEnabled; }
 

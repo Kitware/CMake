@@ -142,6 +142,8 @@ protected:
 
   const char* GetIDEVersion() const;
 
+  void WriteSLNHeader(std::ostream& fout);
+
   bool ComputeTargetDepends() override;
   class VSDependSet : public std::set<std::string>
   {
