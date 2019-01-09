@@ -23,9 +23,9 @@ Finds and loads settings from an external project.  ``<PackageName>_FOUND``
 will be set to indicate whether the package was found.  When the
 package is found package-specific information is provided through
 variables and :ref:`Imported Targets` documented by the package itself.  The
-``QUIET`` option disables messages if the package cannot be found.  The
-``REQUIRED`` option stops processing with an error message if the package
-cannot be found.
+``QUIET`` option disables informational messages, including those indicating
+that the package cannot be found if it is not ``REQUIRED``.  The ``REQUIRED``
+option stops processing with an error message if the package cannot be found.
 
 A package-specific list of required components may be listed after the
 ``COMPONENTS`` option (or after the ``REQUIRED`` option if present).
