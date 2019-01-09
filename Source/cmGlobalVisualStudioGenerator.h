@@ -47,6 +47,9 @@ public:
   VSVersion GetVersion() const;
   void SetVersion(VSVersion v);
 
+  /** Is the installed VS an Express edition?  */
+  bool IsExpressEdition() const { return this->ExpressEdition; }
+
   /**
    * Configure CMake's Visual Studio macros file into the user's Visual
    * Studio macros directory.
@@ -159,6 +162,7 @@ protected:
 
 protected:
   VSVersion Version;
+  bool ExpressEdition;
 
 private:
   virtual std::string GetVSMakeProgram() = 0;
