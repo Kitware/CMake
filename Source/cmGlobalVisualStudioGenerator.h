@@ -137,7 +137,7 @@ protected:
   // below 8.
   virtual bool VSLinksDependencies() const { return true; }
 
-  virtual const char* GetIDEVersion() const = 0;
+  const char* GetIDEVersion() const;
 
   bool ComputeTargetDepends() override;
   class VSDependSet : public std::set<std::string>

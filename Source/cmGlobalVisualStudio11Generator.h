@@ -43,7 +43,6 @@ protected:
   bool IsWindowsPhoneToolsetInstalled() const;
   bool IsWindowsStoreToolsetInstalled() const;
 
-  const char* GetIDEVersion() const override { return "11.0"; }
   bool UseFolderProperty() const override;
   static std::set<std::string> GetInstalledWindowsCESDKs();
 

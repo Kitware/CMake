@@ -43,6 +43,25 @@ void cmGlobalVisualStudioGenerator::SetVersion(VSVersion v)
   this->Version = v;
 }
 
+const char* cmGlobalVisualStudioGenerator::GetIDEVersion() const
+{
+  switch (this->Version) {
+    case cmGlobalVisualStudioGenerator::VS9:
+      return "9.0";
+    case cmGlobalVisualStudioGenerator::VS10:
+      return "10.0";
+    case cmGlobalVisualStudioGenerator::VS11:
+      return "11.0";
+    case cmGlobalVisualStudioGenerator::VS12:
+      return "12.0";
+    case cmGlobalVisualStudioGenerator::VS14:
+      return "14.0";
+    case cmGlobalVisualStudioGenerator::VS15:
+      return "15.0";
+  }
+  return "";
+}
+
 std::string cmGlobalVisualStudioGenerator::GetRegistryBase()
 {
   return cmGlobalVisualStudioGenerator::GetRegistryBase(this->GetIDEVersion());
