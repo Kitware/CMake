@@ -29,9 +29,12 @@ caller can set
 
   THREADS_PREFER_PTHREAD_FLAG
 
-Please note that the compiler flag can only be used with the imported
+The compiler flag can only be used with the imported
 target. Use of both the imported target as well as this switch is highly
 recommended for new code.
+
+This module is not needed for C++11 and later if threading is done using
+``std::thread`` from the standard library.
 #]=======================================================================]
 
 include (CheckLibraryExists)
