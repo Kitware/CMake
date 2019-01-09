@@ -26,8 +26,6 @@ public:
 
   void WriteSLNHeader(std::ostream& fout) override;
 
-  const char* GetToolsVersion() override { return "15.0"; }
-
   bool SetGeneratorInstance(std::string const& i, cmMakefile* mf) override;
 
   bool GetVSInstance(std::string& dir) const;

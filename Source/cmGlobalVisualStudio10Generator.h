@@ -104,7 +104,7 @@ public:
                    std::string const& sfRel);
 
   std::string Encoding() override;
-  virtual const char* GetToolsVersion() { return "4.0"; }
+  const char* GetToolsVersion() const;
 
   virtual bool IsDefaultToolset(const std::string& version) const;
   virtual std::string GetAuxiliaryToolset() const;

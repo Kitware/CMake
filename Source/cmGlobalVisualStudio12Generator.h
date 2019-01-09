@@ -26,11 +26,6 @@ public:
 
   void WriteSLNHeader(std::ostream& fout) override;
 
-  // in Visual Studio 2013 they detached the MSBuild tools version
-  // from the .Net Framework version and instead made it have it's own
-  // version number
-  const char* GetToolsVersion() override { return "12.0"; }
-
 protected:
   bool ProcessGeneratorToolsetField(std::string const& key,
                                     std::string const& value) override;
