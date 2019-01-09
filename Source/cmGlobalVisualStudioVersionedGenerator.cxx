@@ -1,6 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmGlobalVisualStudio15Generator.h"
+#include "cmGlobalVisualStudioVersionedGenerator.h"
 
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
@@ -25,7 +25,7 @@ static const char* cmVS15GenName(const std::string& name, std::string& genName)
   return p;
 }
 
-class cmGlobalVisualStudio15Generator::Factory
+class cmGlobalVisualStudioVersionedGenerator::Factory15
   : public cmGlobalGeneratorFactory
 {
 public:
@@ -38,16 +38,16 @@ public:
       return 0;
     }
     if (!*p) {
-      return new cmGlobalVisualStudio15Generator(cm, genName, "");
+      return new cmGlobalVisualStudioVersionedGenerator(cm, genName, "");
     }
     if (*p++ != ' ') {
       return 0;
     }
     if (strcmp(p, "Win64") == 0) {
-      return new cmGlobalVisualStudio15Generator(cm, genName, "x64");
+      return new cmGlobalVisualStudioVersionedGenerator(cm, genName, "x64");
     }
     if (strcmp(p, "ARM") == 0) {
-      return new cmGlobalVisualStudio15Generator(cm, genName, "ARM");
+      return new cmGlobalVisualStudioVersionedGenerator(cm, genName, "ARM");
     }
     return 0;
   }
@@ -70,12 +70,13 @@ public:
   bool SupportsPlatform() const override { return true; }
 };
 
-cmGlobalGeneratorFactory* cmGlobalVisualStudio15Generator::NewFactory()
+cmGlobalGeneratorFactory*
+cmGlobalVisualStudioVersionedGenerator::NewFactory15()
 {
-  return new Factory;
+  return new Factory15;
 }
 
-cmGlobalVisualStudio15Generator::cmGlobalVisualStudio15Generator(
+cmGlobalVisualStudioVersionedGenerator::cmGlobalVisualStudioVersionedGenerator(
   cmake* cm, const std::string& name,
   std::string const& platformInGeneratorName)
   : cmGlobalVisualStudio14Generator(cm, name, platformInGeneratorName)
@@ -89,7 +90,7 @@ cmGlobalVisualStudio15Generator::cmGlobalVisualStudio15Generator(
   this->Version = VS15;
 }
 
-bool cmGlobalVisualStudio15Generator::MatchesGeneratorName(
+bool cmGlobalVisualStudioVersionedGenerator::MatchesGeneratorName(
   const std::string& name) const
 {
   std::string genName;
@@ -99,7 +100,7 @@ bool cmGlobalVisualStudio15Generator::MatchesGeneratorName(
   return false;
 }
 
-bool cmGlobalVisualStudio15Generator::SetGeneratorInstance(
+bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
   std::string const& i, cmMakefile* mf)
 {
   if (!i.empty()) {
@@ -141,12 +142,13 @@ bool cmGlobalVisualStudio15Generator::SetGeneratorInstance(
   return true;
 }
 
-bool cmGlobalVisualStudio15Generator::GetVSInstance(std::string& dir) const
+bool cmGlobalVisualStudioVersionedGenerator::GetVSInstance(
+  std::string& dir) const
 {
   return vsSetupAPIHelper.GetVSInstanceInfo(dir);
 }
 
-bool cmGlobalVisualStudio15Generator::IsDefaultToolset(
+bool cmGlobalVisualStudioVersionedGenerator::IsDefaultToolset(
   const std::string& version) const
 {
   if (version.empty()) {
@@ -167,7 +169,7 @@ bool cmGlobalVisualStudio15Generator::IsDefaultToolset(
   return false;
 }
 
-std::string cmGlobalVisualStudio15Generator::GetAuxiliaryToolset() const
+std::string cmGlobalVisualStudioVersionedGenerator::GetAuxiliaryToolset() const
 {
   const char* version = this->GetPlatformToolsetVersion();
   if (version) {
@@ -186,7 +188,7 @@ std::string cmGlobalVisualStudio15Generator::GetAuxiliaryToolset() const
   return {};
 }
 
-bool cmGlobalVisualStudio15Generator::InitializeWindows(cmMakefile* mf)
+bool cmGlobalVisualStudioVersionedGenerator::InitializeWindows(cmMakefile* mf)
 {
   // If the Win 8.1 SDK is installed then we can select a SDK matching
   // the target Windows version.
@@ -198,7 +200,7 @@ bool cmGlobalVisualStudio15Generator::InitializeWindows(cmMakefile* mf)
   return this->SelectWindows10SDK(mf, false);
 }
 
-bool cmGlobalVisualStudio15Generator::SelectWindowsStoreToolset(
+bool cmGlobalVisualStudioVersionedGenerator::SelectWindowsStoreToolset(
   std::string& toolset) const
 {
   if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
@@ -214,17 +216,19 @@ bool cmGlobalVisualStudio15Generator::SelectWindowsStoreToolset(
     toolset);
 }
 
-bool cmGlobalVisualStudio15Generator::IsWindowsDesktopToolsetInstalled() const
+bool cmGlobalVisualStudioVersionedGenerator::IsWindowsDesktopToolsetInstalled()
+  const
 {
   return vsSetupAPIHelper.IsVSInstalled();
 }
 
-bool cmGlobalVisualStudio15Generator::IsWindowsStoreToolsetInstalled() const
+bool cmGlobalVisualStudioVersionedGenerator::IsWindowsStoreToolsetInstalled()
+  const
 {
   return vsSetupAPIHelper.IsWin10SDKInstalled();
 }
 
-bool cmGlobalVisualStudio15Generator::IsWin81SDKInstalled() const
+bool cmGlobalVisualStudioVersionedGenerator::IsWin81SDKInstalled() const
 {
   // Does the VS installer tool know about one?
   if (vsSetupAPIHelper.IsWin81SDKInstalled()) {
@@ -246,12 +250,13 @@ bool cmGlobalVisualStudio15Generator::IsWin81SDKInstalled() const
   return false;
 }
 
-std::string cmGlobalVisualStudio15Generator::GetWindows10SDKMaxVersion() const
+std::string cmGlobalVisualStudioVersionedGenerator::GetWindows10SDKMaxVersion()
+  const
 {
   return std::string();
 }
 
-std::string cmGlobalVisualStudio15Generator::FindMSBuildCommand()
+std::string cmGlobalVisualStudioVersionedGenerator::FindMSBuildCommand()
 {
   std::string msbuild;
 
@@ -268,7 +273,7 @@ std::string cmGlobalVisualStudio15Generator::FindMSBuildCommand()
   return msbuild;
 }
 
-std::string cmGlobalVisualStudio15Generator::FindDevEnvCommand()
+std::string cmGlobalVisualStudioVersionedGenerator::FindDevEnvCommand()
 {
   std::string devenv;
 

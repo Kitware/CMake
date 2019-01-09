@@ -10,7 +10,7 @@
 #if defined(_WIN32)
 #  include "cmAlgorithms.h"
 #  include "cmGlobalGenerator.h"
-#  include "cmGlobalVisualStudio15Generator.h"
+#  include "cmGlobalVisualStudioVersionedGenerator.h"
 #  include "cmSystemTools.h"
 #  include "cmVSSetupHelper.h"
 #  define HAVE_VS_SETUP_HELPER
@@ -133,8 +133,8 @@ bool cmCMakeHostSystemInformationCommand::GetValue(
     // If generating for the VS 15 IDE, use the same instance.
     cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
     if (cmHasLiteralPrefix(gg->GetName(), "Visual Studio 15 ")) {
-      cmGlobalVisualStudio15Generator* vs15gen =
-        static_cast<cmGlobalVisualStudio15Generator*>(gg);
+      cmGlobalVisualStudioVersionedGenerator* vs15gen =
+        static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
       if (vs15gen->GetVSInstance(value)) {
         return true;
       }

@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGlobalVisualStudio15Generator_h
-#define cmGlobalVisualStudio15Generator_h
+#ifndef cmGlobalVisualStudioVersionedGenerator_h
+#define cmGlobalVisualStudioVersionedGenerator_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -14,11 +14,12 @@
 class cmGlobalGeneratorFactory;
 class cmake;
 
-/** \class cmGlobalVisualStudio15Generator  */
-class cmGlobalVisualStudio15Generator : public cmGlobalVisualStudio14Generator
+/** \class cmGlobalVisualStudioVersionedGenerator  */
+class cmGlobalVisualStudioVersionedGenerator
+  : public cmGlobalVisualStudio14Generator
 {
 public:
-  static cmGlobalGeneratorFactory* NewFactory();
+  static cmGlobalGeneratorFactory* NewFactory15();
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
@@ -30,8 +31,9 @@ public:
   std::string GetAuxiliaryToolset() const override;
 
 protected:
-  cmGlobalVisualStudio15Generator(cmake* cm, const std::string& name,
-                                  std::string const& platformInGeneratorName);
+  cmGlobalVisualStudioVersionedGenerator(
+    cmake* cm, const std::string& name,
+    std::string const& platformInGeneratorName);
 
   bool InitializeWindows(cmMakefile* mf) override;
   bool SelectWindowsStoreToolset(std::string& toolset) const override;
@@ -53,8 +55,8 @@ protected:
   std::string FindDevEnvCommand() override;
 
 private:
-  class Factory;
-  friend class Factory;
+  class Factory15;
+  friend class Factory15;
   mutable cmVSSetupAPIHelper vsSetupAPIHelper;
 };
 #endif

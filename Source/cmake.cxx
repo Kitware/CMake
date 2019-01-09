@@ -55,8 +55,8 @@
 #    include "cmGlobalVisualStudio11Generator.h"
 #    include "cmGlobalVisualStudio12Generator.h"
 #    include "cmGlobalVisualStudio14Generator.h"
-#    include "cmGlobalVisualStudio15Generator.h"
 #    include "cmGlobalVisualStudio9Generator.h"
+#    include "cmGlobalVisualStudioVersionedGenerator.h"
 #    include "cmVSSetupHelper.h"
 
 #    define CMAKE_HAVE_VS_GENERATORS
@@ -1792,7 +1792,8 @@ void cmake::AddDefaultGenerators()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #  if !defined(CMAKE_BOOT_MINGW)
-  this->Generators.push_back(cmGlobalVisualStudio15Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudioVersionedGenerator::NewFactory15());
   this->Generators.push_back(cmGlobalVisualStudio14Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio12Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio11Generator::NewFactory());

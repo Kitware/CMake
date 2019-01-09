@@ -696,10 +696,10 @@ if (WIN32)
       cmGlobalVisualStudio12Generator.cxx
       cmGlobalVisualStudio14Generator.h
       cmGlobalVisualStudio14Generator.cxx
-      cmGlobalVisualStudio15Generator.h
-      cmGlobalVisualStudio15Generator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
+      cmGlobalVisualStudioVersionedGenerator.h
+      cmGlobalVisualStudioVersionedGenerator.cxx
       cmIDEFlagTable.h
       cmIDEOptions.cxx
       cmIDEOptions.h
