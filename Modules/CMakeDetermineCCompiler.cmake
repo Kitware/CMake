@@ -31,6 +31,7 @@ if(NOT CMAKE_C_COMPILER_NAMES)
 endif()
 
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+elseif("${CMAKE_GENERATOR}" MATCHES "Green Hills MULTI")
 elseif("${CMAKE_GENERATOR}" MATCHES "Xcode")
   set(CMAKE_C_COMPILER_XCODE_TYPE sourcecode.c.c)
   _cmake_find_compiler_path(C)

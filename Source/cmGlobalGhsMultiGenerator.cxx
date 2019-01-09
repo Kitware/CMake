@@ -104,24 +104,6 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
 
   mf->AddDefinition("CMAKE_SYSTEM_VERSION", tsp.c_str());
 
-  // FIXME: compiler detection not implemented
-  // gbuild uses the primaryTarget setting in the top-level project
-  // file to determine which compiler to use. Because compiler
-  // detection is not implemented these variables must be
-  // set to skip past these tests. However cmake will verify that
-  // the executable pointed to by CMAKE_<LANG>_COMPILER exists.
-  // To pass this additional check gbuild is used as a place holder for the
-  // actual compiler.
-  mf->AddDefinition("CMAKE_C_COMPILER", gbuild.c_str());
-  mf->AddDefinition("CMAKE_C_COMPILER_ID_RUN", "TRUE");
-  mf->AddDefinition("CMAKE_C_COMPILER_ID", "GHS");
-  mf->AddDefinition("CMAKE_C_COMPILER_FORCED", "TRUE");
-
-  mf->AddDefinition("CMAKE_CXX_COMPILER", gbuild.c_str());
-  mf->AddDefinition("CMAKE_CXX_COMPILER_ID_RUN", "TRUE");
-  mf->AddDefinition("CMAKE_CXX_COMPILER_ID", "GHS");
-  mf->AddDefinition("CMAKE_CXX_COMPILER_FORCED", "TRUE");
-
   return true;
 }
 

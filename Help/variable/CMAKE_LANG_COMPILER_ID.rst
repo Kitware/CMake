@@ -19,6 +19,7 @@ include:
   Embarcadero, Borland = Embarcadero (embarcadero.com)
   G95 = G95 Fortran (g95.org)
   GNU = GNU Compiler Collection (gcc.gnu.org)
+  GHS = Green Hills Software (www.ghs.com)
   HP = Hewlett-Packard Compiler (hp.com)
   IAR = IAR Systems (iar.com)
   Intel = Intel Compiler (intel.com)
