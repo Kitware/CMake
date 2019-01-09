@@ -141,7 +141,7 @@ bool cmCMakeHostSystemInformationCommand::GetValue(
     }
 
     // Otherwise, find a VS 15 instance ourselves.
-    cmVSSetupAPIHelper vsSetupAPIHelper;
+    cmVSSetupAPIHelper vsSetupAPIHelper(15);
     if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
       cmSystemTools::ConvertToUnixSlashes(value);
     }

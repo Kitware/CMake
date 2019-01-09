@@ -79,6 +79,7 @@ cmGlobalVisualStudio15Generator::cmGlobalVisualStudio15Generator(
   cmake* cm, const std::string& name,
   std::string const& platformInGeneratorName)
   : cmGlobalVisualStudio14Generator(cm, name, platformInGeneratorName)
+  , vsSetupAPIHelper(15)
 {
   this->ExpressEdition = false;
   this->DefaultPlatformToolset = "v141";
@@ -215,7 +216,7 @@ bool cmGlobalVisualStudio15Generator::SelectWindowsStoreToolset(
 
 bool cmGlobalVisualStudio15Generator::IsWindowsDesktopToolsetInstalled() const
 {
-  return vsSetupAPIHelper.IsVS2017Installed();
+  return vsSetupAPIHelper.IsVSInstalled();
 }
 
 bool cmGlobalVisualStudio15Generator::IsWindowsStoreToolsetInstalled() const

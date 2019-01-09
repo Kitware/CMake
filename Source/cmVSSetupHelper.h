@@ -120,12 +120,12 @@ struct VSInstanceInfo
 class cmVSSetupAPIHelper
 {
 public:
-  cmVSSetupAPIHelper();
+  cmVSSetupAPIHelper(unsigned int version);
   ~cmVSSetupAPIHelper();
 
   bool SetVSInstance(std::string const& vsInstallLocation);
 
-  bool IsVS2017Installed();
+  bool IsVSInstalled();
   bool GetVSInstanceInfo(std::string& vsInstallLocation);
   bool GetVCToolsetVersion(std::string& vsToolsetVersion);
   bool IsWin10SDKInstalled();
@@ -139,6 +139,8 @@ private:
                                bool& bWin10SDK, bool& bWin81SDK);
   int ChooseVSInstance(const std::vector<VSInstanceInfo>& vecVSInstances);
   bool EnumerateAndChooseVSInstance();
+
+  unsigned int Version;
 
   // COM ptrs to query about VS instances
   SmartCOMPtr<ISetupConfiguration> setupConfig;

@@ -1538,8 +1538,7 @@ void cmake::CreateDefaultGlobalGenerator()
     "\\Setup\\VC;ProductDir", //
     ";InstallDir"             //
   };
-  cmVSSetupAPIHelper vsSetupAPIHelper;
-  if (vsSetupAPIHelper.IsVS2017Installed()) {
+  if (cmVSSetupAPIHelper(15).IsVSInstalled()) {
     found = "Visual Studio 15 2017";
   } else {
     for (VSVersionedGenerator const* g = cm::cbegin(vsGenerators);

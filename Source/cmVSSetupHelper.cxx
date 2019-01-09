@@ -57,8 +57,9 @@ std::string VSInstanceInfo::GetInstallLocation() const
   return loc;
 }
 
-cmVSSetupAPIHelper::cmVSSetupAPIHelper()
-  : setupConfig(NULL)
+cmVSSetupAPIHelper::cmVSSetupAPIHelper(unsigned int version)
+  : Version(version)
+  , setupConfig(NULL)
   , setupConfig2(NULL)
   , setupHelper(NULL)
   , initializationFailure(false)
@@ -88,7 +89,7 @@ bool cmVSSetupAPIHelper::SetVSInstance(std::string const& vsInstallLocation)
   return this->EnumerateAndChooseVSInstance();
 }
 
-bool cmVSSetupAPIHelper::IsVS2017Installed()
+bool cmVSSetupAPIHelper::IsVSInstalled()
 {
   return this->EnumerateAndChooseVSInstance();
 }
@@ -312,11 +313,11 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
     return false;
 
   std::string envVSCommonToolsDir;
+  std::string envVSCommonToolsDirEnvName =
+    "VS" + std::to_string(this->Version) + "0COMNTOOLS";
 
-  // FIXME: When we support VS versions beyond 2017, the version
-  // to choose will be passed in by the caller.  We need to map that
-  // to a per-version name of this environment variable.
-  if (cmSystemTools::GetEnv("VS150COMNTOOLS", envVSCommonToolsDir)) {
+  if (cmSystemTools::GetEnv(envVSCommonToolsDirEnvName.c_str(),
+                            envVSCommonToolsDir)) {
     cmSystemTools::ConvertToUnixSlashes(envVSCommonToolsDir);
   }
 
@@ -328,8 +329,7 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
     return false;
   }
 
-  // FIXME: Add a way for caller to specify other versions.
-  std::wstring wantVersion = std::to_wstring(15) + L'.';
+  std::wstring const wantVersion = std::to_wstring(this->Version) + L'.';
 
   SmartCOMPtr<ISetupInstance> instance;
   while (SUCCEEDED(enumInstances->Next(1, &instance, NULL)) && instance) {
