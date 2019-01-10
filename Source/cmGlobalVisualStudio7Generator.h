@@ -20,9 +20,6 @@ class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 public:
   ~cmGlobalVisualStudio7Generator();
 
-  ///! Get the name for the platform.
-  std::string const& GetPlatformName() const;
-
   ///! Create a local generator appropriate to this Global Generator
   cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
@@ -31,8 +28,6 @@ public:
 #endif
 
   bool SetSystemName(std::string const& s, cmMakefile* mf) override;
-
-  bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
 
   /**
    * Utilized by the generator factory to determine if this generator
@@ -167,8 +162,6 @@ protected:
   // Set during OutputSLNFile with the name of the current project.
   // There is one SLN file per project.
   std::string CurrentProject;
-  std::string GeneratorPlatform;
-  std::string DefaultPlatformName;
   bool MasmEnabled;
   bool NasmEnabled;
 

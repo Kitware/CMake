@@ -49,6 +49,14 @@ public:
   /** Is the installed VS an Express edition?  */
   bool IsExpressEdition() const { return this->ExpressEdition; }
 
+  bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
+
+  /**
+   * Get the name of the target platform (architecture) for which we generate.
+   * The names are as defined by VS, e.g. "Win32", "x64", "Itanium", "ARM".
+   */
+  std::string const& GetPlatformName() const;
+
   /**
    * Configure CMake's Visual Studio macros file into the user's Visual
    * Studio macros directory.
@@ -132,7 +140,8 @@ public:
             bool dryRun) override;
 
 protected:
-  cmGlobalVisualStudioGenerator(cmake* cm);
+  cmGlobalVisualStudioGenerator(cmake* cm,
+                                std::string const& platformInGeneratorName);
 
   void AddExtraIDETargets() override;
 
@@ -166,6 +175,9 @@ protected:
 protected:
   VSVersion Version;
   bool ExpressEdition;
+
+  std::string GeneratorPlatform;
+  std::string DefaultPlatformName;
 
 private:
   virtual std::string GetVSMakeProgram() = 0;
