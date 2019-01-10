@@ -6,9 +6,13 @@
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestTestHandler.h"
+#include "cmDuration.h"
+#include "cmListFileCache.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
+#include "cm_jsoncpp_value.h"
+#include "cm_jsoncpp_writer.h"
 #include "cm_uv.h"
 
 #include "cmUVSignalHackRAII.h" // IWYU pragma: keep
@@ -20,12 +24,18 @@
 #include <chrono>
 #include <cstring>
 #include <iomanip>
+#include <iostream>
 #include <list>
 #include <math.h>
 #include <sstream>
 #include <stack>
 #include <stdlib.h>
+#include <unordered_map>
 #include <utility>
+
+namespace cmsys {
+class RegularExpression;
+}
 
 class TestComparator
 {
@@ -725,9 +735,330 @@ void cmCTestMultiProcessHandler::MarkFinished()
   cmSystemTools::RemoveFile(fname);
 }
 
+static Json::Value DumpToJsonArray(const std::set<std::string>& values)
+{
+  Json::Value jsonArray = Json::arrayValue;
+  for (auto& it : values) {
+    jsonArray.append(it);
+  }
+  return jsonArray;
+}
+
+static Json::Value DumpToJsonArray(const std::vector<std::string>& values)
+{
+  Json::Value jsonArray = Json::arrayValue;
+  for (auto& it : values) {
+    jsonArray.append(it);
+  }
+  return jsonArray;
+}
+
+static Json::Value DumpRegExToJsonArray(
+  const std::vector<std::pair<cmsys::RegularExpression, std::string>>& values)
+{
+  Json::Value jsonArray = Json::arrayValue;
+  for (auto& it : values) {
+    jsonArray.append(it.second);
+  }
+  return jsonArray;
+}
+
+static Json::Value DumpMeasurementToJsonArray(
+  const std::map<std::string, std::string>& values)
+{
+  Json::Value jsonArray = Json::arrayValue;
+  for (auto& it : values) {
+    Json::Value measurement = Json::objectValue;
+    measurement["measurement"] = it.first;
+    measurement["value"] = it.second;
+    jsonArray.append(measurement);
+  }
+  return jsonArray;
+}
+
+static Json::Value DumpTimeoutAfterMatch(
+  cmCTestTestHandler::cmCTestTestProperties& testProperties)
+{
+  Json::Value timeoutAfterMatch = Json::objectValue;
+  timeoutAfterMatch["timeout"] = testProperties.AlternateTimeout.count();
+  timeoutAfterMatch["regex"] =
+    DumpRegExToJsonArray(testProperties.TimeoutRegularExpressions);
+  return timeoutAfterMatch;
+}
+
+static Json::Value DumpCTestProperty(std::string const& name,
+                                     Json::Value value)
+{
+  Json::Value property = Json::objectValue;
+  property["name"] = name;
+  property["value"] = std::move(value);
+  return property;
+}
+
+static Json::Value DumpCTestProperties(
+  cmCTestTestHandler::cmCTestTestProperties& testProperties)
+{
+  Json::Value properties = Json::arrayValue;
+  if (!testProperties.AttachOnFail.empty()) {
+    properties.append(DumpCTestProperty(
+      "ATTACHED_FILES_ON_FAIL", DumpToJsonArray(testProperties.AttachOnFail)));
+  }
+  if (!testProperties.AttachedFiles.empty()) {
+    properties.append(DumpCTestProperty(
+      "ATTACHED_FILES", DumpToJsonArray(testProperties.AttachedFiles)));
+  }
+  if (testProperties.Cost != 0.0f) {
+    properties.append(
+      DumpCTestProperty("COST", static_cast<double>(testProperties.Cost)));
+  }
+  if (!testProperties.Depends.empty()) {
+    properties.append(
+      DumpCTestProperty("DEPENDS", DumpToJsonArray(testProperties.Depends)));
+  }
+  if (testProperties.Disabled) {
+    properties.append(DumpCTestProperty("DISABLED", testProperties.Disabled));
+  }
+  if (!testProperties.Environment.empty()) {
+    properties.append(DumpCTestProperty(
+      "ENVIRONMENT", DumpToJsonArray(testProperties.Environment)));
+  }
+  if (!testProperties.ErrorRegularExpressions.empty()) {
+    properties.append(DumpCTestProperty(
+      "FAIL_REGULAR_EXPRESSION",
+      DumpRegExToJsonArray(testProperties.ErrorRegularExpressions)));
+  }
+  if (!testProperties.FixturesCleanup.empty()) {
+    properties.append(DumpCTestProperty(
+      "FIXTURES_CLEANUP", DumpToJsonArray(testProperties.FixturesCleanup)));
+  }
+  if (!testProperties.FixturesRequired.empty()) {
+    properties.append(DumpCTestProperty(
+      "FIXTURES_REQUIRED", DumpToJsonArray(testProperties.FixturesRequired)));
+  }
+  if (!testProperties.FixturesSetup.empty()) {
+    properties.append(DumpCTestProperty(
+      "FIXTURES_SETUP", DumpToJsonArray(testProperties.FixturesSetup)));
+  }
+  if (!testProperties.Labels.empty()) {
+    properties.append(
+      DumpCTestProperty("LABELS", DumpToJsonArray(testProperties.Labels)));
+  }
+  if (!testProperties.Measurements.empty()) {
+    properties.append(DumpCTestProperty(
+      "MEASUREMENT", DumpMeasurementToJsonArray(testProperties.Measurements)));
+  }
+  if (!testProperties.RequiredRegularExpressions.empty()) {
+    properties.append(DumpCTestProperty(
+      "PASS_REGULAR_EXPRESSION",
+      DumpRegExToJsonArray(testProperties.RequiredRegularExpressions)));
+  }
+  if (testProperties.WantAffinity) {
+    properties.append(
+      DumpCTestProperty("PROCESSOR_AFFINITY", testProperties.WantAffinity));
+  }
+  if (testProperties.Processors != 1) {
+    properties.append(
+      DumpCTestProperty("PROCESSORS", testProperties.Processors));
+  }
+  if (!testProperties.RequiredFiles.empty()) {
+    properties["REQUIRED_FILES"] =
+      DumpToJsonArray(testProperties.RequiredFiles);
+  }
+  if (!testProperties.LockedResources.empty()) {
+    properties.append(DumpCTestProperty(
+      "RESOURCE_LOCK", DumpToJsonArray(testProperties.LockedResources)));
+  }
+  if (testProperties.RunSerial) {
+    properties.append(
+      DumpCTestProperty("RUN_SERIAL", testProperties.RunSerial));
+  }
+  if (testProperties.SkipReturnCode != -1) {
+    properties.append(
+      DumpCTestProperty("SKIP_RETURN_CODE", testProperties.SkipReturnCode));
+  }
+  if (testProperties.ExplicitTimeout) {
+    properties.append(
+      DumpCTestProperty("TIMEOUT", testProperties.Timeout.count()));
+  }
+  if (!testProperties.TimeoutRegularExpressions.empty()) {
+    properties.append(DumpCTestProperty(
+      "TIMEOUT_AFTER_MATCH", DumpTimeoutAfterMatch(testProperties)));
+  }
+  if (testProperties.WillFail) {
+    properties.append(DumpCTestProperty("WILL_FAIL", testProperties.WillFail));
+  }
+  if (!testProperties.Directory.empty()) {
+    properties.append(
+      DumpCTestProperty("WORKING_DIRECTORY", testProperties.Directory));
+  }
+  return properties;
+}
+
+class BacktraceData
+{
+  std::unordered_map<std::string, Json::ArrayIndex> CommandMap;
+  std::unordered_map<std::string, Json::ArrayIndex> FileMap;
+  std::unordered_map<cmListFileContext const*, Json::ArrayIndex> NodeMap;
+  Json::Value Commands = Json::arrayValue;
+  Json::Value Files = Json::arrayValue;
+  Json::Value Nodes = Json::arrayValue;
+
+  Json::ArrayIndex AddCommand(std::string const& command)
+  {
+    auto i = this->CommandMap.find(command);
+    if (i == this->CommandMap.end()) {
+      i = this->CommandMap.emplace(command, this->Commands.size()).first;
+      this->Commands.append(command);
+    }
+    return i->second;
+  }
+
+  Json::ArrayIndex AddFile(std::string const& file)
+  {
+    auto i = this->FileMap.find(file);
+    if (i == this->FileMap.end()) {
+      i = this->FileMap.emplace(file, this->Files.size()).first;
+      this->Files.append(file);
+    }
+    return i->second;
+  }
+
+public:
+  bool Add(cmListFileBacktrace const& bt, Json::ArrayIndex& index);
+  Json::Value Dump();
+};
+
+bool BacktraceData::Add(cmListFileBacktrace const& bt, Json::ArrayIndex& index)
+{
+  if (bt.Empty()) {
+    return false;
+  }
+  cmListFileContext const* top = &bt.Top();
+  auto found = this->NodeMap.find(top);
+  if (found != this->NodeMap.end()) {
+    index = found->second;
+    return true;
+  }
+  Json::Value entry = Json::objectValue;
+  entry["file"] = this->AddFile(top->FilePath);
+  if (top->Line) {
+    entry["line"] = static_cast<int>(top->Line);
+  }
+  if (!top->Name.empty()) {
+    entry["command"] = this->AddCommand(top->Name);
+  }
+  Json::ArrayIndex parent;
+  if (this->Add(bt.Pop(), parent)) {
+    entry["parent"] = parent;
+  }
+  index = this->NodeMap[top] = this->Nodes.size();
+  this->Nodes.append(std::move(entry)); // NOLINT(*)
+  return true;
+}
+
+Json::Value BacktraceData::Dump()
+{
+  Json::Value backtraceGraph;
+  this->CommandMap.clear();
+  this->FileMap.clear();
+  this->NodeMap.clear();
+  backtraceGraph["commands"] = std::move(this->Commands);
+  backtraceGraph["files"] = std::move(this->Files);
+  backtraceGraph["nodes"] = std::move(this->Nodes);
+  return backtraceGraph;
+}
+
+static void AddBacktrace(BacktraceData& backtraceGraph, Json::Value& object,
+                         cmListFileBacktrace const& bt)
+{
+  Json::ArrayIndex backtrace;
+  if (backtraceGraph.Add(bt, backtrace)) {
+    object["backtrace"] = backtrace;
+  }
+}
+
+static Json::Value DumpCTestInfo(
+  cmCTestRunTest& testRun,
+  cmCTestTestHandler::cmCTestTestProperties& testProperties,
+  BacktraceData& backtraceGraph)
+{
+  Json::Value testInfo = Json::objectValue;
+  // test name should always be present
+  testInfo["name"] = testProperties.Name;
+  std::string const& config = testRun.GetCTest()->GetConfigType();
+  if (!config.empty()) {
+    testInfo["config"] = config;
+  }
+  std::string const& command = testRun.GetActualCommand();
+  if (!command.empty()) {
+    std::vector<std::string> commandAndArgs;
+    commandAndArgs.push_back(command);
+    const std::vector<std::string>& args = testRun.GetArguments();
+    if (!args.empty()) {
+      commandAndArgs.reserve(args.size() + 1);
+      commandAndArgs.insert(commandAndArgs.end(), args.begin(), args.end());
+    }
+    testInfo["command"] = DumpToJsonArray(commandAndArgs);
+  }
+  Json::Value properties = DumpCTestProperties(testProperties);
+  if (!properties.empty()) {
+    testInfo["properties"] = properties;
+  }
+  if (!testProperties.Backtrace.Empty()) {
+    AddBacktrace(backtraceGraph, testInfo, testProperties.Backtrace);
+  }
+  return testInfo;
+}
+
+static Json::Value DumpVersion(int major, int minor)
+{
+  Json::Value version = Json::objectValue;
+  version["major"] = major;
+  version["minor"] = minor;
+  return version;
+}
+
+void cmCTestMultiProcessHandler::PrintOutputAsJson()
+{
+  this->TestHandler->SetMaxIndex(this->FindMaxIndex());
+
+  Json::Value result = Json::objectValue;
+  result["kind"] = "ctestInfo";
+  result["version"] = DumpVersion(1, 0);
+
+  BacktraceData backtraceGraph;
+  Json::Value tests = Json::arrayValue;
+  for (auto& it : this->Properties) {
+    cmCTestTestHandler::cmCTestTestProperties& p = *it.second;
+
+    // Don't worry if this fails, we are only showing the test list, not
+    // running the tests
+    cmWorkingDirectory workdir(p.Directory);
+    cmCTestRunTest testRun(*this);
+    testRun.SetIndex(p.Index);
+    testRun.SetTestProperties(&p);
+    testRun.ComputeArguments();
+
+    Json::Value testInfo = DumpCTestInfo(testRun, p, backtraceGraph);
+    tests.append(testInfo);
+  }
+  result["backtraceGraph"] = backtraceGraph.Dump();
+  result["tests"] = std::move(tests);
+
+  Json::StreamWriterBuilder builder;
+  builder["indentation"] = "  ";
+  std::unique_ptr<Json::StreamWriter> jout(builder.newStreamWriter());
+  jout->write(result, &std::cout);
+}
+
 // For ShowOnly mode
 void cmCTestMultiProcessHandler::PrintTestList()
 {
+  if (this->CTest->GetOutputAsJson()) {
+    PrintOutputAsJson();
+    return;
+  }
+
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
   int count = 0;
 

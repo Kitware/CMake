@@ -7,13 +7,15 @@
 
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
-#include "cmPropertyMap.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
+
+class cmPropertyMap;
 
 cmTestGenerator::cmTestGenerator(
   cmTest* test, std::vector<std::string> const& configurations)
@@ -121,16 +123,15 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
   // Output properties for the test.
   cmPropertyMap& pm = this->Test->GetProperties();
-  if (!pm.empty()) {
-    os << indent << "set_tests_properties(" << this->Test->GetName()
-       << " PROPERTIES ";
-    for (auto const& i : pm) {
-      os << " " << i.first << " "
-         << cmOutputConverter::EscapeForCMake(
-              ge.Parse(i.second.GetValue())->Evaluate(this->LG, config));
-    }
-    os << ")" << std::endl;
+  os << indent << "set_tests_properties(" << this->Test->GetName()
+     << " PROPERTIES ";
+  for (auto const& i : pm) {
+    os << " " << i.first << " "
+       << cmOutputConverter::EscapeForCMake(
+            ge.Parse(i.second.GetValue())->Evaluate(this->LG, config));
   }
+  this->GenerateInternalProperties(os);
+  os << ")" << std::endl;
 }
 
 void cmTestGenerator::GenerateScriptNoConfig(std::ostream& os, Indent indent)
@@ -179,13 +180,37 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
 
   // Output properties for the test.
   cmPropertyMap& pm = this->Test->GetProperties();
-  if (!pm.empty()) {
-    fout << indent << "set_tests_properties(" << this->Test->GetName()
-         << " PROPERTIES ";
-    for (auto const& i : pm) {
-      fout << " " << i.first << " "
-           << cmOutputConverter::EscapeForCMake(i.second.GetValue());
-    }
-    fout << ")" << std::endl;
+  fout << indent << "set_tests_properties(" << this->Test->GetName()
+       << " PROPERTIES ";
+  for (auto const& i : pm) {
+    fout << " " << i.first << " "
+         << cmOutputConverter::EscapeForCMake(i.second.GetValue());
   }
+  this->GenerateInternalProperties(fout);
+  fout << ")" << std::endl;
+}
+
+void cmTestGenerator::GenerateInternalProperties(std::ostream& os)
+{
+  cmListFileBacktrace bt = this->Test->GetBacktrace();
+  if (bt.Empty()) {
+    return;
+  }
+
+  os << " "
+     << "_BACKTRACE_TRIPLES"
+     << " \"";
+
+  bool prependTripleSeparator = false;
+  while (!bt.Empty()) {
+    const auto& entry = bt.Top();
+    if (prependTripleSeparator) {
+      os << ";";
+    }
+    os << entry.FilePath << ";" << entry.Line << ";" << entry.Name;
+    bt = bt.Pop();
+    prependTripleSeparator = true;
+  }
+
+  os << "\"";
 }

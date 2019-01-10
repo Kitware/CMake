@@ -35,6 +35,9 @@ public:
 
   cmTest* GetTest() const;
 
+private:
+  void GenerateInternalProperties(std::ostream& os);
+
 protected:
   void GenerateScriptConfigs(std::ostream& os, Indent indent) override;
   void GenerateScriptActions(std::ostream& os, Indent indent) override;
