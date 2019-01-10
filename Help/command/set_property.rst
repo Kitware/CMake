@@ -24,17 +24,19 @@ It must be one of the following:
   Scope is unique and does not accept a name.
 
 ``DIRECTORY``
-  Scope defaults to the current directory but another
-  directory (already processed by CMake) may be named by full or
-  relative path.
+  Scope defaults to the current directory but another directory
+  (already processed by CMake) may be named by full or relative path.
+  See also the :command:`set_directory_properties` command.
 
 ``TARGET``
   Scope may name zero or more existing targets.
+  See also the :command:`set_target_properties` command.
 
 ``SOURCE``
   Scope may name zero or more source files.  Note that source
   file properties are visible only to targets added in the same
   directory (CMakeLists.txt).
+  See also the :command:`set_source_files_properties` command.
 
 ``INSTALL``
   Scope may name zero or more installed file paths.
@@ -54,6 +56,7 @@ It must be one of the following:
 
 ``TEST``
   Scope may name zero or more existing tests.
+  See also the :command:`set_tests_properties` command.
 
 ``CACHE``
   Scope must name zero or more cache existing entries.
