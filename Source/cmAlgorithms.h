@@ -396,6 +396,12 @@ constexpr
 
 #endif
 
+template <typename T>
+int isize(const T& t)
+{
+  return static_cast<int>(cm::size(t));
+}
+
 #if __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L
 
 using std::cbegin;
