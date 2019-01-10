@@ -14,14 +14,14 @@ class CMakeTemplateStyle(Style):
     styles = {
         Whitespace:                "#bbbbbb",
         Comment:                   "italic #408080",
-        Operator:                  "bold #000000",
+        Operator:                  "#555555",
         String:                    "#217A21",
         Number:                    "#105030",
-        Name.Builtin:              "#400080",          # anything lowercase
-        Name.Function:             "bold #1010A0",     # function
+        Name.Builtin:              "#333333",          # anything lowercase
+        Name.Function:             "#007020",          # function
         Name.Variable:             "#1080B0",          # <..>
-        Name.Tag:                  "#19177C",          # ${..}
-        Name.Constant:             "#6020E0",          # uppercase only
+        Name.Tag:                  "#bb60d5",          # ${..}
+        Name.Constant:             "#4070a0",          # uppercase only
         Name.Entity:               "italic #70A020",   # @..@
         Name.Attribute:            "#906060",          # paths, URLs
         Name.Label:                "#A0A000",          # anything left over
