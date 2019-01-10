@@ -13,6 +13,7 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmake.h"
 
 #include <memory>
 #include <utility>
@@ -86,10 +87,43 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
         auto qtVersion = cmQtAutoGenInitializer::GetQtVersion(target);
         bool const validQt = (qtVersion.Major == 4) ||
           (qtVersion.Major == 5) || (qtVersion.Major == 6);
-        bool const mocIsValid = moc && (validQt || !mocExec.empty());
-        bool const uicIsValid = uic && (validQt || !uicExec.empty());
-        bool const rccIsValid = rcc && (validQt || !rccExec.empty());
 
+        bool const mocAvailable = (validQt || !mocExec.empty());
+        bool const uicAvailable = (validQt || !uicExec.empty());
+        bool const rccAvailable = (validQt || !rccExec.empty());
+        bool const mocIsValid = (moc && mocAvailable);
+        bool const uicIsValid = (uic && uicAvailable);
+        bool const rccIsValid = (rcc && uicAvailable);
+        // Disabled AUTOMOC/UIC/RCC warning
+        bool const mocDisabled = (moc && !mocAvailable);
+        bool const uicDisabled = (uic && !uicAvailable);
+        bool const rccDisabled = (rcc && !rccAvailable);
+        if (mocDisabled || uicDisabled || rccDisabled) {
+          std::string msg = "AUTOGEN: No valid Qt version found for target ";
+          msg += target->GetName();
+          msg += ". ";
+          {
+            std::vector<std::string> lst;
+            if (mocDisabled) {
+              lst.emplace_back("AUTOMOC");
+            }
+            if (uicDisabled) {
+              lst.emplace_back("AUTOUIC");
+            }
+            if (rccDisabled) {
+              lst.emplace_back("AUTORCC");
+            }
+            msg += cmJoin(lst, ", ");
+          }
+          msg += " disabled.  Consider adding:\n";
+          if (uicDisabled) {
+            msg += "  find_package(Qt5 COMPONENTS Widgets)\n";
+          } else {
+            msg += "  find_package(Qt5 COMPONENTS Core)\n";
+          }
+          msg += "to your CMakeLists.txt file.";
+          target->Makefile->IssueMessage(cmake::AUTHOR_WARNING, msg);
+        }
         if (mocIsValid || uicIsValid || rccIsValid) {
           // Create autogen target initializer
           Initializers_.emplace_back(cm::make_unique<cmQtAutoGenInitializer>(
