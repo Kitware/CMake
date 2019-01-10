@@ -18,8 +18,6 @@ struct cmIDEFlagTable;
 class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 {
 public:
-  cmGlobalVisualStudio7Generator(cmake* cm,
-                                 const std::string& platformName = "");
   ~cmGlobalVisualStudio7Generator();
 
   ///! Get the name for the platform.
@@ -110,6 +108,9 @@ public:
   cmIDEFlagTable const* ExtraFlagTable;
 
 protected:
+  cmGlobalVisualStudio7Generator(cmake* cm,
+                                 std::string const& platformInGeneratorName);
+
   void Generate() override;
 
   std::string const& GetDevEnvCommand();

@@ -14,8 +14,6 @@
 class cmGlobalVisualStudio10Generator : public cmGlobalVisualStudio8Generator
 {
 public:
-  cmGlobalVisualStudio10Generator(cmake* cm, const std::string& name,
-                                  const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   bool MatchesGeneratorName(const std::string& name) const override;
@@ -125,6 +123,9 @@ public:
   cmIDEFlagTable const* GetNasmFlagTable() const;
 
 protected:
+  cmGlobalVisualStudio10Generator(cmake* cm, const std::string& name,
+                                  std::string const& platformInGeneratorName);
+
   void Generate() override;
   virtual bool InitializeSystem(cmMakefile* mf);
   virtual bool InitializeWindows(cmMakefile* mf);
@@ -168,6 +169,8 @@ protected:
 
 private:
   class Factory;
+  friend class Factory;
+
   struct LongestSourcePath
   {
     LongestSourcePath()

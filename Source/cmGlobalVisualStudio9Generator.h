@@ -13,8 +13,6 @@
 class cmGlobalVisualStudio9Generator : public cmGlobalVisualStudio8Generator
 {
 public:
-  cmGlobalVisualStudio9Generator(cmake* cm, const std::string& name,
-                                 const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   /**
@@ -29,6 +27,10 @@ public:
    * Studio?
    */
   std::string GetUserMacrosRegKeyBase() override;
+
+protected:
+  cmGlobalVisualStudio9Generator(cmake* cm, const std::string& name,
+                                 std::string const& platformInGeneratorName);
 
 private:
   class Factory;

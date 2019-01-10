@@ -83,8 +83,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio9Generator::NewFactory()
 }
 
 cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(
-  cmake* cm, const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio8Generator(cm, name, platformName)
+  cmake* cm, const std::string& name,
+  std::string const& platformInGeneratorName)
+  : cmGlobalVisualStudio8Generator(cm, name, platformInGeneratorName)
 {
   this->Version = VS9;
   std::string vc9Express;

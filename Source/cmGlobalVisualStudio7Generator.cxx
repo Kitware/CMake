@@ -41,7 +41,7 @@ static cmVS7FlagTable cmVS7ExtraFlagTable[] = {
 };
 
 cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
-  cmake* cm, const std::string& platformName)
+  cmake* cm, std::string const& platformInGeneratorName)
   : cmGlobalVisualStudioGenerator(cm)
 {
   this->IntelProjectVersion = 0;
@@ -49,10 +49,10 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   this->MasmEnabled = false;
   this->NasmEnabled = false;
 
-  if (platformName.empty()) {
+  if (platformInGeneratorName.empty()) {
     this->DefaultPlatformName = "Win32";
   } else {
-    this->DefaultPlatformName = platformName;
+    this->DefaultPlatformName = platformInGeneratorName;
   }
   this->ExtraFlagTable = cmVS7ExtraFlagTable;
 }

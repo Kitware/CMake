@@ -90,8 +90,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio10Generator::NewFactory()
 }
 
 cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
-  cmake* cm, const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio8Generator(cm, name, platformName)
+  cmake* cm, const std::string& name,
+  std::string const& platformInGeneratorName)
+  : cmGlobalVisualStudio8Generator(cm, name, platformInGeneratorName)
 {
   std::string vc10Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(

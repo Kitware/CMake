@@ -41,7 +41,6 @@ public:
     VS15 = 150
   };
 
-  cmGlobalVisualStudioGenerator(cmake* cm);
   virtual ~cmGlobalVisualStudioGenerator();
 
   VSVersion GetVersion() const;
@@ -133,6 +132,8 @@ public:
             bool dryRun) override;
 
 protected:
+  cmGlobalVisualStudioGenerator(cmake* cm);
+
   void AddExtraIDETargets() override;
 
   // Does this VS version link targets to each other if there are

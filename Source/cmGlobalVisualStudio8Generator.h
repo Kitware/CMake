@@ -13,9 +13,6 @@
 class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
-  cmGlobalVisualStudio8Generator(cmake* cm, const std::string& name,
-                                 const std::string& platformName);
-
   ///! Get the name for the generator.
   std::string GetName() const override { return this->Name; }
 
@@ -45,6 +42,9 @@ public:
   }
 
 protected:
+  cmGlobalVisualStudio8Generator(cmake* cm, const std::string& name,
+                                 std::string const& platformInGeneratorName);
+
   void AddExtraIDETargets() override;
 
   std::string FindDevEnvCommand() override;

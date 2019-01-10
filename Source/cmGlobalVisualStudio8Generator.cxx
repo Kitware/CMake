@@ -12,8 +12,9 @@
 #include "cmake.h"
 
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
-  cmake* cm, const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio71Generator(cm, platformName)
+  cmake* cm, const std::string& name,
+  std::string const& platformInGeneratorName)
+  : cmGlobalVisualStudio71Generator(cm, platformInGeneratorName)
 {
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
