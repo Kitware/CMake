@@ -188,16 +188,6 @@ bool cmGlobalVisualStudio11Generator::SelectWindowsStoreToolset(
     toolset);
 }
 
-void cmGlobalVisualStudio11Generator::WriteSLNHeader(std::ostream& fout)
-{
-  fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
-  if (this->ExpressEdition) {
-    fout << "# Visual Studio Express 2012 for Windows Desktop\n";
-  } else {
-    fout << "# Visual Studio 2012\n";
-  }
-}
-
 bool cmGlobalVisualStudio11Generator::UseFolderProperty() const
 {
   // Intentionally skip up to the top-level class implementation.

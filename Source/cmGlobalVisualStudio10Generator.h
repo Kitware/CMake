@@ -43,7 +43,6 @@ public:
    */
   void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
                       bool optional) override;
-  void WriteSLNHeader(std::ostream& fout) override;
 
   bool IsCudaEnabled() const { return this->CudaEnabled; }
 
@@ -104,7 +103,7 @@ public:
                    std::string const& sfRel);
 
   std::string Encoding() override;
-  virtual const char* GetToolsVersion() { return "4.0"; }
+  const char* GetToolsVersion() const;
 
   virtual bool IsDefaultToolset(const std::string& version) const;
   virtual std::string GetAuxiliaryToolset() const;
@@ -139,8 +138,6 @@ protected:
   virtual std::string SelectWindowsCEToolset() const;
   virtual bool SelectWindowsPhoneToolset(std::string& toolset) const;
   virtual bool SelectWindowsStoreToolset(std::string& toolset) const;
-
-  const char* GetIDEVersion() const override { return "10.0"; }
 
   std::string const& GetMSBuildCommand();
 

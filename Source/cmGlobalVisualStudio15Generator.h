@@ -24,10 +24,6 @@ public:
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
-  void WriteSLNHeader(std::ostream& fout) override;
-
-  const char* GetToolsVersion() override { return "15.0"; }
-
   bool SetGeneratorInstance(std::string const& i, cmMakefile* mf) override;
 
   bool GetVSInstance(std::string& dir) const;
@@ -38,8 +34,6 @@ public:
 protected:
   bool InitializeWindows(cmMakefile* mf) override;
   bool SelectWindowsStoreToolset(std::string& toolset) const override;
-
-  const char* GetIDEVersion() const override { return "15.0"; }
 
   // Used to verify that the Desktop toolset for the current generator is
   // installed on the machine.

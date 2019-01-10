@@ -24,10 +24,6 @@ public:
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
-  void WriteSLNHeader(std::ostream& fout) override;
-
-  const char* GetToolsVersion() override { return "14.0"; }
-
 protected:
   bool InitializeWindows(cmMakefile* mf) override;
   bool InitializeWindowsStore(cmMakefile* mf) override;
@@ -41,7 +37,6 @@ protected:
   // version of the toolset.
   virtual std::string GetWindows10SDKMaxVersion() const;
 
-  const char* GetIDEVersion() const override { return "14.0"; }
   virtual bool SelectWindows10SDK(cmMakefile* mf, bool required);
 
   // Used to verify that the Desktop toolset for the current generator is

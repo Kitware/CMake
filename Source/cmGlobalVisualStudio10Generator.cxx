@@ -488,16 +488,6 @@ std::string cmGlobalVisualStudio10Generator::SelectWindowsCEToolset() const
   return "";
 }
 
-void cmGlobalVisualStudio10Generator::WriteSLNHeader(std::ostream& fout)
-{
-  fout << "Microsoft Visual Studio Solution File, Format Version 11.00\n";
-  if (this->ExpressEdition) {
-    fout << "# Visual C++ Express 2010\n";
-  } else {
-    fout << "# Visual Studio 2010\n";
-  }
-}
-
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator* cmGlobalVisualStudio10Generator::CreateLocalGenerator(
   cmMakefile* mf)
@@ -1022,6 +1012,27 @@ void cmGlobalVisualStudio10Generator::PathTooLong(cmGeneratorTarget* target,
 std::string cmGlobalVisualStudio10Generator::Encoding()
 {
   return "utf-8";
+}
+
+const char* cmGlobalVisualStudio10Generator::GetToolsVersion() const
+{
+  switch (this->Version) {
+    case cmGlobalVisualStudioGenerator::VS9:
+    case cmGlobalVisualStudioGenerator::VS10:
+    case cmGlobalVisualStudioGenerator::VS11:
+      return "4.0";
+
+      // in Visual Studio 2013 they detached the MSBuild tools version
+      // from the .Net Framework version and instead made it have it's own
+      // version number
+    case cmGlobalVisualStudioGenerator::VS12:
+      return "12.0";
+    case cmGlobalVisualStudioGenerator::VS14:
+      return "14.0";
+    case cmGlobalVisualStudioGenerator::VS15:
+      return "15.0";
+  }
+  return "";
 }
 
 bool cmGlobalVisualStudio10Generator::IsNsightTegra() const

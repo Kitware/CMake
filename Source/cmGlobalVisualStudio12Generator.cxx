@@ -186,16 +186,6 @@ bool cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset(
     toolset);
 }
 
-void cmGlobalVisualStudio12Generator::WriteSLNHeader(std::ostream& fout)
-{
-  fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
-  if (this->ExpressEdition) {
-    fout << "# Visual Studio Express 2013 for Windows Desktop\n";
-  } else {
-    fout << "# Visual Studio 2013\n";
-  }
-}
-
 bool cmGlobalVisualStudio12Generator::IsWindowsDesktopToolsetInstalled() const
 {
   const char desktop81Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"

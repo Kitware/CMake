@@ -174,17 +174,6 @@ bool cmGlobalVisualStudio14Generator::SelectWindowsStoreToolset(
     toolset);
 }
 
-void cmGlobalVisualStudio14Generator::WriteSLNHeader(std::ostream& fout)
-{
-  // Visual Studio 14 writes .sln format 12.00
-  fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
-  if (this->ExpressEdition) {
-    fout << "# Visual Studio Express 14 for Windows Desktop\n";
-  } else {
-    fout << "# Visual Studio 14\n";
-  }
-}
-
 bool cmGlobalVisualStudio14Generator::IsWindowsDesktopToolsetInstalled() const
 {
   const char desktop10Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"

@@ -47,6 +47,9 @@ public:
   VSVersion GetVersion() const;
   void SetVersion(VSVersion v);
 
+  /** Is the installed VS an Express edition?  */
+  bool IsExpressEdition() const { return this->ExpressEdition; }
+
   /**
    * Configure CMake's Visual Studio macros file into the user's Visual
    * Studio macros directory.
@@ -137,7 +140,9 @@ protected:
   // below 8.
   virtual bool VSLinksDependencies() const { return true; }
 
-  virtual const char* GetIDEVersion() const = 0;
+  const char* GetIDEVersion() const;
+
+  void WriteSLNHeader(std::ostream& fout);
 
   bool ComputeTargetDepends() override;
   class VSDependSet : public std::set<std::string>
@@ -159,6 +164,7 @@ protected:
 
 protected:
   VSVersion Version;
+  bool ExpressEdition;
 
 private:
   virtual std::string GetVSMakeProgram() = 0;

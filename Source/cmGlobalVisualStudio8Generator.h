@@ -44,12 +44,8 @@ public:
     return !this->WindowsCEVersion.empty();
   }
 
-  /** Is the installed VS an Express edition?  */
-  bool IsExpressEdition() const { return this->ExpressEdition; }
-
 protected:
   void AddExtraIDETargets() override;
-  const char* GetIDEVersion() const override { return "8.0"; }
 
   std::string FindDevEnvCommand() override;
 
@@ -77,6 +73,5 @@ protected:
 
   std::string Name;
   std::string WindowsCEVersion;
-  bool ExpressEdition;
 };
 #endif

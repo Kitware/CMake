@@ -18,12 +18,6 @@ public:
   static cmGlobalGeneratorFactory* NewFactory();
 
   /**
-   * Try to determine system information such as shared library
-   * extension, pthreads, byte order etc.
-   */
-  void WriteSLNHeader(std::ostream& fout) override;
-
-  /**
    * Where does this version of Visual Studio look for macros for the
    * current user? Returns the empty string if this version of Visual
    * Studio does not implement support for VB macros.
@@ -35,9 +29,6 @@ public:
    * Studio?
    */
   std::string GetUserMacrosRegKeyBase() override;
-
-protected:
-  const char* GetIDEVersion() const override { return "9.0"; }
 
 private:
   class Factory;

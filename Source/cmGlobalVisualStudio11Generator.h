@@ -26,8 +26,6 @@ public:
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
-  void WriteSLNHeader(std::ostream& fout) override;
-
 protected:
   bool InitializeWindowsPhone(cmMakefile* mf) override;
   bool InitializeWindowsStore(cmMakefile* mf) override;
@@ -43,7 +41,6 @@ protected:
   bool IsWindowsPhoneToolsetInstalled() const;
   bool IsWindowsStoreToolsetInstalled() const;
 
-  const char* GetIDEVersion() const override { return "11.0"; }
   bool UseFolderProperty() const override;
   static std::set<std::string> GetInstalledWindowsCESDKs();
 
