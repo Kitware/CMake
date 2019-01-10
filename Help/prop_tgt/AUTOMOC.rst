@@ -58,6 +58,9 @@ source files at build time and invoke moc accordingly.
 This property is initialized by the value of the :variable:`CMAKE_AUTOMOC`
 variable if it is set when a target is created.
 
+The ``moc`` executable will be detected automatically, but can be forced to
+a certain binary using the :prop_tgt:`AUTOMOC_EXECUTABLE` property.
+
 Additional command line options for ``moc`` can be set via the
 :prop_tgt:`AUTOMOC_MOC_OPTIONS` property.
 

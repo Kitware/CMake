@@ -75,13 +75,26 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
       bool const uic = target->GetPropertyAsBool("AUTOUIC");
       bool const rcc = target->GetPropertyAsBool("AUTORCC");
       if (moc || uic || rcc) {
-        // We support Qt4 and Qt5
+        std::string const mocExec =
+          target->GetSafeProperty("AUTOMOC_EXECUTABLE");
+        std::string const uicExec =
+          target->GetSafeProperty("AUTOUIC_EXECUTABLE");
+        std::string const rccExec =
+          target->GetSafeProperty("AUTORCC_EXECUTABLE");
+
+        // We support Qt4, Qt5 and Qt6
         auto qtVersion = cmQtAutoGenInitializer::GetQtVersion(target);
-        if ((qtVersion.Major == 4) || (qtVersion.Major == 5)) {
+        bool const validQt = (qtVersion.Major == 4) ||
+          (qtVersion.Major == 5) || (qtVersion.Major == 6);
+        bool const mocIsValid = moc && (validQt || !mocExec.empty());
+        bool const uicIsValid = uic && (validQt || !uicExec.empty());
+        bool const rccIsValid = rcc && (validQt || !rccExec.empty());
+
+        if (mocIsValid || uicIsValid || rccIsValid) {
           // Create autogen target initializer
           Initializers_.emplace_back(cm::make_unique<cmQtAutoGenInitializer>(
-            this, target, qtVersion, moc, uic, rcc, globalAutoGenTarget,
-            globalAutoRccTarget));
+            this, target, qtVersion, mocIsValid, uicIsValid, rccIsValid,
+            globalAutoGenTarget, globalAutoRccTarget));
         }
       }
     }
