@@ -407,7 +407,7 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
       return false;
     }
   } else if (this->SystemName == "Android") {
-    if (this->DefaultPlatformName != "Win32") {
+    if (this->PlatformInGeneratorName) {
       std::ostringstream e;
       e << "CMAKE_SYSTEM_NAME is 'Android' but CMAKE_GENERATOR "
         << "specifies a platform too: '" << this->GetName() << "'";
@@ -438,7 +438,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindows(cmMakefile*)
 
 bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
 {
-  if (this->DefaultPlatformName != "Win32") {
+  if (this->PlatformInGeneratorName) {
     std::ostringstream e;
     e << "CMAKE_SYSTEM_NAME is 'WindowsCE' but CMAKE_GENERATOR "
       << "specifies a platform too: '" << this->GetName() << "'";

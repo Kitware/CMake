@@ -61,7 +61,7 @@ void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
                                                           cmMakefile* mf)
 {
-  if (this->DefaultPlatformName == "Win32") {
+  if (!this->PlatformInGeneratorName) {
     this->GeneratorPlatform = p;
     return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform("", mf);
   } else {

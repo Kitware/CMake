@@ -178,6 +178,7 @@ protected:
 
   std::string GeneratorPlatform;
   std::string DefaultPlatformName;
+  bool PlatformInGeneratorName = false;
 
 private:
   virtual std::string GetVSMakeProgram() = 0;

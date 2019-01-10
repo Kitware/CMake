@@ -32,6 +32,7 @@ cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(
     this->DefaultPlatformName = "Win32";
   } else {
     this->DefaultPlatformName = platformInGeneratorName;
+    this->PlatformInGeneratorName = true;
   }
 }
 
