@@ -1500,6 +1500,31 @@ bool cmGlobalGenerator::QtAutoGen()
       auto qtVersion = cmQtAutoGenInitializer::GetQtVersion(target);
       // don't do anything if there is no Qt4 or Qt5Core (which contains moc)
       if (qtVersion.Major != 4 && qtVersion.Major != 5) {
+        std::string msg = "AUTOGEN: No valid Qt version found for target ";
+        msg += target->GetName();
+        msg += ". ";
+        {
+          std::vector<std::string> lst;
+          if (mocEnabled) {
+            lst.emplace_back("AUTOMOC");
+          }
+          if (uicEnabled) {
+            lst.emplace_back("AUTOUIC");
+          }
+          if (rccEnabled) {
+            lst.emplace_back("AUTORCC");
+          }
+          msg += cmJoin(lst, ", ");
+        }
+        msg += " disabled.  ";
+        msg += "Consider adding:\n";
+        if (uicEnabled) {
+          msg += "  find_package(Qt5 COMPONENTS Widgets)\n";
+        } else {
+          msg += "  find_package(Qt5 COMPONENTS Core)\n";
+        }
+        msg += "to your CMakeLists.txt file.";
+        target->Makefile->IssueMessage(cmake::AUTHOR_WARNING, msg);
         continue;
       }
 
