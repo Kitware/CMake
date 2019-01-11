@@ -40,6 +40,7 @@ Where ``<C>`` is the name of an Ice component, for example
 
 Ice slice programs are reported in::
 
+  Ice_SLICE2CONFLUENCE_EXECUTABLE - path to slice2confluence executable
   Ice_SLICE2CPP_EXECUTABLE - path to slice2cpp executable
   Ice_SLICE2CS_EXECUTABLE - path to slice2cs executable
   Ice_SLICE2FREEZEJ_EXECUTABLE - path to slice2freezej executable
@@ -47,6 +48,7 @@ Ice slice programs are reported in::
   Ice_SLICE2HTML_EXECUTABLE - path to slice2html executable
   Ice_SLICE2JAVA_EXECUTABLE - path to slice2java executable
   Ice_SLICE2JS_EXECUTABLE - path to slice2js executable
+  Ice_SLICE2MATLAB_EXECUTABLE - path to slice2matlab executable
   Ice_SLICE2OBJC_EXECUTABLE - path to slice2objc executable
   Ice_SLICE2PHP_EXECUTABLE - path to slice2php executable
   Ice_SLICE2PY_EXECUTABLE - path to slice2py executable
@@ -185,6 +187,7 @@ Other variables one may set to control this module are::
       icestormmigrate)
 
   set(_Ice_slice_programs
+      slice2confluence
       slice2cpp
       slice2cs
       slice2freezej
@@ -192,6 +195,7 @@ Other variables one may set to control this module are::
       slice2html
       slice2java
       slice2js
+      slice2matlab
       slice2objc
       slice2php
       slice2py
