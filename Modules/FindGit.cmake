@@ -5,6 +5,11 @@
 FindGit
 -------
 
+The module defines the following ``IMPORTED`` targets:
+
+``Git::Git``
+  Executable of the Git command-line client.
+
 The module defines the following variables:
 
 ``GIT_EXECUTABLE``
@@ -78,6 +83,12 @@ if(GIT_EXECUTABLE)
     string(REPLACE "git version " "" GIT_VERSION_STRING "${git_version}")
   endif()
   unset(git_version)
+
+  get_property(_findgit_role GLOBAL PROPERTY CMAKE_ROLE)
+  if(_findgit_role STREQUAL "PROJECT" AND NOT TARGET Git::Git)
+    add_executable(Git::Git IMPORTED)
+    set_property(TARGET Git::Git PROPERTY IMPORTED_LOCATION "${GIT_EXECUTABLE}")
+  endif()
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
