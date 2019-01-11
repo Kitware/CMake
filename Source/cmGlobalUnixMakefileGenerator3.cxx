@@ -7,6 +7,7 @@
 #include <sstream>
 #include <utility>
 
+#include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -494,6 +495,7 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
   const std::string& targetName, const std::string& /*config*/, bool fast,
   int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
 {
+  std::unique_ptr<cmMakefile> mfu;
   cmMakefile* mf;
   if (!this->Makefiles.empty()) {
     mf = this->Makefiles[0];
@@ -504,7 +506,8 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     snapshot.GetDirectory().SetCurrentBinary(
       this->CMakeInstance->GetHomeOutputDirectory());
     snapshot.SetDefaultDefinitions();
-    mf = new cmMakefile(this, snapshot);
+    mfu = cm::make_unique<cmMakefile>(this, snapshot);
+    mf = mfu.get();
   }
 
   makeCommand.push_back(this->SelectMakeProgram(makeProgram));
@@ -528,9 +531,6 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
       conv.ConvertToRelativePath(mf->GetState()->GetBinaryDirectory(), tname);
     cmSystemTools::ConvertToOutputSlashes(tname);
     makeCommand.push_back(std::move(tname));
-  }
-  if (this->Makefiles.empty()) {
-    delete mf;
   }
 }
 
