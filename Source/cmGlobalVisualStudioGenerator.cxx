@@ -20,12 +20,20 @@
 #include "cmState.h"
 #include "cmTarget.h"
 
-cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(cmake* cm)
+cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(
+  cmake* cm, std::string const& platformInGeneratorName)
   : cmGlobalGenerator(cm)
 {
   cm->GetState()->SetIsGeneratorMultiConfig(true);
   cm->GetState()->SetWindowsShell(true);
   cm->GetState()->SetWindowsVSIDE(true);
+
+  if (platformInGeneratorName.empty()) {
+    this->DefaultPlatformName = "Win32";
+  } else {
+    this->DefaultPlatformName = platformInGeneratorName;
+    this->PlatformInGeneratorName = true;
+  }
 }
 
 cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator()
@@ -41,6 +49,26 @@ cmGlobalVisualStudioGenerator::GetVersion() const
 void cmGlobalVisualStudioGenerator::SetVersion(VSVersion v)
 {
   this->Version = v;
+}
+
+bool cmGlobalVisualStudioGenerator::SetGeneratorPlatform(std::string const& p,
+                                                         cmMakefile* mf)
+{
+  if (this->GetPlatformName() == "x64") {
+    mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
+  } else if (this->GetPlatformName() == "Itanium") {
+    mf->AddDefinition("CMAKE_FORCE_IA64", "TRUE");
+  }
+  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName().c_str());
+  return this->cmGlobalGenerator::SetGeneratorPlatform(p, mf);
+}
+
+std::string const& cmGlobalVisualStudioGenerator::GetPlatformName() const
+{
+  if (!this->GeneratorPlatform.empty()) {
+    return this->GeneratorPlatform;
+  }
+  return this->DefaultPlatformName;
 }
 
 const char* cmGlobalVisualStudioGenerator::GetIDEVersion() const

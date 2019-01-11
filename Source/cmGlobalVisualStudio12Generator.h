@@ -18,13 +18,14 @@ class cmake;
 class cmGlobalVisualStudio12Generator : public cmGlobalVisualStudio11Generator
 {
 public:
-  cmGlobalVisualStudio12Generator(cmake* cm, const std::string& name,
-                                  const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
 protected:
+  cmGlobalVisualStudio12Generator(cmake* cm, const std::string& name,
+                                  std::string const& platformInGeneratorName);
+
   bool ProcessGeneratorToolsetField(std::string const& key,
                                     std::string const& value) override;
 
@@ -44,5 +45,6 @@ protected:
 
 private:
   class Factory;
+  friend class Factory;
 };
 #endif

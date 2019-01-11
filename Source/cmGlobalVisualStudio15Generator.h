@@ -18,8 +18,6 @@ class cmake;
 class cmGlobalVisualStudio15Generator : public cmGlobalVisualStudio14Generator
 {
 public:
-  cmGlobalVisualStudio15Generator(cmake* cm, const std::string& name,
-                                  const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   bool MatchesGeneratorName(const std::string& name) const override;
@@ -32,6 +30,9 @@ public:
   std::string GetAuxiliaryToolset() const override;
 
 protected:
+  cmGlobalVisualStudio15Generator(cmake* cm, const std::string& name,
+                                  std::string const& platformInGeneratorName);
+
   bool InitializeWindows(cmMakefile* mf) override;
   bool SelectWindowsStoreToolset(std::string& toolset) const override;
 
@@ -53,6 +54,7 @@ protected:
 
 private:
   class Factory;
+  friend class Factory;
   mutable cmVSSetupAPIHelper vsSetupAPIHelper;
 };
 #endif

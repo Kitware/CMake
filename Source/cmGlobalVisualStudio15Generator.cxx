@@ -76,8 +76,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio15Generator::NewFactory()
 }
 
 cmGlobalVisualStudio15Generator::cmGlobalVisualStudio15Generator(
-  cmake* cm, const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio14Generator(cm, name, platformName)
+  cmake* cm, const std::string& name,
+  std::string const& platformInGeneratorName)
+  : cmGlobalVisualStudio14Generator(cm, name, platformInGeneratorName)
 {
   this->ExpressEdition = false;
   this->DefaultPlatformToolset = "v141";

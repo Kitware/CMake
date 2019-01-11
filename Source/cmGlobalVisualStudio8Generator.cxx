@@ -12,8 +12,9 @@
 #include "cmake.h"
 
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
-  cmake* cm, const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio71Generator(cm, platformName)
+  cmake* cm, const std::string& name,
+  std::string const& platformInGeneratorName)
+  : cmGlobalVisualStudio71Generator(cm, platformInGeneratorName)
 {
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
@@ -60,7 +61,7 @@ void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
                                                           cmMakefile* mf)
 {
-  if (this->DefaultPlatformName == "Win32") {
+  if (!this->PlatformInGeneratorName) {
     this->GeneratorPlatform = p;
     return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform("", mf);
   } else {

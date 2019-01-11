@@ -90,8 +90,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio10Generator::NewFactory()
 }
 
 cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
-  cmake* cm, const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio8Generator(cm, name, platformName)
+  cmake* cm, const std::string& name,
+  std::string const& platformInGeneratorName)
+  : cmGlobalVisualStudio8Generator(cm, name, platformInGeneratorName)
 {
   std::string vc10Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
@@ -406,7 +407,7 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
       return false;
     }
   } else if (this->SystemName == "Android") {
-    if (this->DefaultPlatformName != "Win32") {
+    if (this->PlatformInGeneratorName) {
       std::ostringstream e;
       e << "CMAKE_SYSTEM_NAME is 'Android' but CMAKE_GENERATOR "
         << "specifies a platform too: '" << this->GetName() << "'";
@@ -437,7 +438,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindows(cmMakefile*)
 
 bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
 {
-  if (this->DefaultPlatformName != "Win32") {
+  if (this->PlatformInGeneratorName) {
     std::ostringstream e;
     e << "CMAKE_SYSTEM_NAME is 'WindowsCE' but CMAKE_GENERATOR "
       << "specifies a platform too: '" << this->GetName() << "'";
