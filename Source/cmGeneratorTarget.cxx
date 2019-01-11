@@ -435,14 +435,14 @@ static void handleSystemIncludesDep(
 
 /* clang-format off */
 #define IMPLEMENT_VISIT(KIND)                                                 \
-  {                                                                           \
+  do {                                                                        \
     KindedSources const& kinded = this->GetKindedSources(config);             \
     for (SourceAndKind const& s : kinded.Sources) {                           \
       if (s.Kind == KIND) {                                                   \
         data.push_back(s.Source.Value);                                       \
       }                                                                       \
     }                                                                         \
-  }
+  } while (false)
 /* clang-format on */
 
 void cmGeneratorTarget::GetObjectSources(

@@ -198,12 +198,12 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   std::cout << "Reading GraphViz options file: " << inFileName << std::endl;
 
 #define __set_if_set(var, cmakeDefinition)                                    \
-  {                                                                           \
+  do {                                                                        \
     const char* value = mf.GetDefinition(cmakeDefinition);                    \
     if (value) {                                                              \
       (var) = value;                                                          \
     }                                                                         \
-  }
+  } while (false)
 
   __set_if_set(this->GraphType, "GRAPHVIZ_GRAPH_TYPE");
   __set_if_set(this->GraphName, "GRAPHVIZ_GRAPH_NAME");
@@ -211,12 +211,12 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   __set_if_set(this->GraphNodePrefix, "GRAPHVIZ_NODE_PREFIX");
 
 #define __set_bool_if_set(var, cmakeDefinition)                               \
-  {                                                                           \
+  do {                                                                        \
     const char* value = mf.GetDefinition(cmakeDefinition);                    \
     if (value) {                                                              \
       (var) = mf.IsOn(cmakeDefinition);                                       \
     }                                                                         \
-  }
+  } while (false)
 
   __set_bool_if_set(this->GenerateForExecutables, "GRAPHVIZ_EXECUTABLES");
   __set_bool_if_set(this->GenerateForStaticLibs, "GRAPHVIZ_STATIC_LIBS");

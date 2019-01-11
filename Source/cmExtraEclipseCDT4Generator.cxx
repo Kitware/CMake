@@ -382,7 +382,6 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   xml.StartElement("natures");
   xml.Element("nature", "org.eclipse.cdt.make.core.makeNature");
   xml.Element("nature", "org.eclipse.cdt.make.core.ScannerConfigNature");
-  ;
 
   for (std::string const& n : this->Natures) {
     xml.Element("nature", n);

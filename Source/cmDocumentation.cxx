@@ -139,10 +139,12 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
 }
 
 #define GET_OPT_ARGUMENT(target)                                              \
-  if ((i + 1 < argc) && !this->IsOption(argv[i + 1])) {                       \
-    (target) = argv[i + 1];                                                   \
-    i = i + 1;                                                                \
-  };
+  do {                                                                        \
+    if ((i + 1 < argc) && !this->IsOption(argv[i + 1])) {                     \
+      (target) = argv[i + 1];                                                 \
+      i = i + 1;                                                              \
+    };                                                                        \
+  } while (false)
 
 void cmDocumentation::WarnFormFromFilename(
   cmDocumentation::RequestedHelpItem& request, bool& result)

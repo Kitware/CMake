@@ -37,7 +37,7 @@ Modify cmFortranLexer.cxx:
 /* Replace the lexer input function.  */
 #undef YY_INPUT
 #define YY_INPUT(buf, result, max_size) \
-  { result = cmFortranParser_Input(yyextra, buf, max_size); }
+  do { result = cmFortranParser_Input(yyextra, buf, max_size); } while (0)
 
 /* Include the set of tokens from the parser.  */
 #include "cmFortranParserTokens.h"

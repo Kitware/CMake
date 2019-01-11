@@ -112,13 +112,15 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
     return 0;                                                                 \
   }                                                                           \
   cmArchiveWrite archive(gf, this->Compress, this->ArchiveFormat);            \
-  if (!(archive)) {                                                           \
-    cmCPackLogger(cmCPackLog::LOG_ERROR,                                      \
-                  "Problem to create archive <"                               \
-                    << (filename) << ">, ERROR = " << (archive).GetError()    \
-                    << std::endl);                                            \
-    return 0;                                                                 \
-  }
+  do {                                                                        \
+    if (!(archive)) {                                                         \
+      cmCPackLogger(cmCPackLog::LOG_ERROR,                                    \
+                    "Problem to create archive <"                             \
+                      << (filename) << ">, ERROR = " << (archive).GetError()  \
+                      << std::endl);                                          \
+      return 0;                                                               \
+    }                                                                         \
+  } while (false)
 
 int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
 {

@@ -14,11 +14,13 @@
 #endif
 
 #define check_curl_result(result, errstr)                                     \
-  if ((result) != CURLE_OK && (result) != CURLE_NOT_BUILT_IN) {               \
-    e += e.empty() ? "" : "\n";                                               \
-    e += (errstr);                                                            \
-    e += ::curl_easy_strerror(result);                                        \
-  }
+  do {                                                                        \
+    if ((result) != CURLE_OK && (result) != CURLE_NOT_BUILT_IN) {             \
+      e += e.empty() ? "" : "\n";                                             \
+      e += (errstr);                                                          \
+      e += ::curl_easy_strerror(result);                                      \
+    }                                                                         \
+  } while (false)
 
 std::string cmCurlSetCAInfo(::CURL* curl, const char* cafile)
 {

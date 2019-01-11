@@ -57,7 +57,6 @@ public:
   {
     this->CommandLineStrings.clear();
     this->CommandLineStrings.push_back(command);
-    ;
   }
   void AddArgument(const char* arg)
   {
