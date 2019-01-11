@@ -28,10 +28,7 @@ To enable submissions to a CDash server, create a ``CTestConfig.cmake``
 file at the top of the project with content such as::
 
   set(CTEST_NIGHTLY_START_TIME "01:00:00 UTC")
-  set(CTEST_DROP_METHOD "http")
-  set(CTEST_DROP_SITE "my.cdash.org")
-  set(CTEST_DROP_LOCATION "/submit.php?project=MyProject")
-  set(CTEST_DROP_SITE_CDASH TRUE)
+  set(CTEST_SUBMIT_URL "http://my.cdash.org/submit.php?project=MyProject")
 
 (the CDash server can provide the file to a project administrator who
 configures ``MyProject``).  Settings in the config file are shared by

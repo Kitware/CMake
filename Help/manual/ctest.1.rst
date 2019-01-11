@@ -1109,38 +1109,45 @@ Configuration settings include:
   * :module:`CTest` module variable: ``CTEST_CURL_OPTIONS``
 
 ``DropLocation``
-  The path on the dashboard server to send the submission.
+  Legacy option.  When ``SubmitURL`` is not set, it is constructed from
+  ``DropMethod``, ``DropSiteUser``, ``DropSitePassword``, ``DropSite``, and
+  ``DropLocation``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_LOCATION`
   * :module:`CTest` module variable: ``DROP_LOCATION`` if set,
     else ``CTEST_DROP_LOCATION``
 
 ``DropMethod``
-  Specify the method by which results should be submitted to the
-  dashboard server.  The value may be ``http`` or ``https``.
+  Legacy option.  When ``SubmitURL`` is not set, it is constructed from
+  ``DropMethod``, ``DropSiteUser``, ``DropSitePassword``, ``DropSite``, and
+  ``DropLocation``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_METHOD`
   * :module:`CTest` module variable: ``DROP_METHOD`` if set,
     else ``CTEST_DROP_METHOD``
 
 ``DropSite``
-  The dashboard server name.
+  Legacy option.  When ``SubmitURL`` is not set, it is constructed from
+  ``DropMethod``, ``DropSiteUser``, ``DropSitePassword``, ``DropSite``, and
+  ``DropLocation``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE`
   * :module:`CTest` module variable: ``DROP_SITE`` if set,
     else ``CTEST_DROP_SITE``
 
 ``DropSitePassword``
-  The dashboard server login password, if any
-  (for ``ftp``, ``http``, and ``https``).
+  Legacy option.  When ``SubmitURL`` is not set, it is constructed from
+  ``DropMethod``, ``DropSiteUser``, ``DropSitePassword``, ``DropSite``, and
+  ``DropLocation``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_PASSWORD`
   * :module:`CTest` module variable: ``DROP_SITE_PASSWORD`` if set,
     else ``CTEST_DROP_SITE_PASWORD``
 
 ``DropSiteUser``
-  The dashboard server login user name, if any
-  (for ``ftp``, ``http``, and ``https``).
+  Legacy option.  When ``SubmitURL`` is not set, it is constructed from
+  ``DropMethod``, ``DropSiteUser``, ``DropSitePassword``, ``DropSite``, and
+  ``DropLocation``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_USER`
   * :module:`CTest` module variable: ``DROP_SITE_USER`` if set,
@@ -1165,6 +1172,14 @@ Configuration settings include:
   * `CTest Script`_ variable: :variable:`CTEST_SITE`
   * :module:`CTest` module variable: ``SITE``,
     initialized by the :command:`site_name` command
+
+``SubmitURL``
+  The ``http`` or ``https`` URL of the dashboard server to send the submission
+  to.
+
+  * `CTest Script`_ variable: :variable:`CTEST_SUBMIT_URL`
+  * :module:`CTest` module variable: ``SUBMIT_URL`` if set,
+    else ``CTEST_SUBMIT_URL``
 
 ``TriggerSite``
   Legacy option.  Not used.
