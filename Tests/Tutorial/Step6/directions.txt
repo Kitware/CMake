@@ -16,24 +16,21 @@ MathFunctions subdirectory a new source file named MakeTable.cxx will do just th
   int main (int argc, char *argv[])
   {
     // make sure we have enough arguments
-    if (argc < 2)
-      {
+    if (argc < 2) {
       return 1;
-      }
+    }
 
     std::ofstream fout(argv[1],std::ios_base::out);
     const bool fileOpen = fout.is_open();
-    if(fileOpen)
-      {
+    if(fileOpen) {
       fout << "double sqrtTable[] = {" << std::endl;
-      for (int i = 0; i < 10; ++i)
-        {
+      for (int i = 0; i < 10; ++i) {
         fout << sqrt(static_cast<double>(i)) << "," << std::endl;
-        }
+      }
       // close the table with a zero
       fout << "0};" << std::endl;
       fout.close();
-      }
+    }
     return fileOpen ? 0 : 1; // return 0 if wrote the file
   }
 
@@ -81,29 +78,25 @@ found and included by mysqrt.cxx.
 Now let's use the generated table. First, modify mysqrt.cxx to include Table.h.
 Next, we can rewrite the mysqrt function to use the table:
 
-  if (x <= 0)
-      {
-      return 0;
-      }
+  if (x <= 0) {
+    return 0;
+  }
 
   // use the table to help find an initial value
   double result = x;
-  if (x >= 1 && x < 10)
-    {
+  if (x >= 1 && x < 10) {
     result = sqrtTable[static_cast<int>(x)];
-    }
+  }
 
   // do ten iterations
-  for (int i = 0; i < 10; ++i)
-    {
-    if (result <= 0)
-      {
+  for (int i = 0; i < 10; ++i) {
+    if (result <= 0) {
       result = 0.1;
-      }
+    }
     double delta = x - (result*result);
     result = result + 0.5*delta/result;
     std::cout << "Computing sqrt of " << x << " to be " << result << std::endl;
-    }
+  }
 
 Run cmake or cmake-gui to configure the project and then build it with your
 chosen build tool. When this project is built it will first build the MakeTable
