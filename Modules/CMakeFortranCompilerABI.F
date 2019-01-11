@@ -33,13 +33,7 @@
 #if 0
 ! Application Binary Interface
 #endif
-#if defined(__sgi) && defined(_ABIO32)
-        PRINT *, 'INFO:abi[ELF O32]'
-#elif defined(__sgi) && defined(_ABIN32)
-        PRINT *, 'INFO:abi[ELF N32]'
-#elif defined(__sgi) && defined(_ABI64)
-        PRINT *, 'INFO:abi[ELF 64]'
-#elif defined(__ELF__)
+#if defined(__ELF__)
         PRINT *, 'INFO:abi[ELF]'
 #endif
         PRINT *, 'ABI Detection'
