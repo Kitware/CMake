@@ -270,9 +270,12 @@ static int HandleCppLint(const std::string& runCmd,
               << "\n";
     return 1;
   }
-  std::cerr << "Warning: cpplint diagnostics:\n";
-  // Output the output from cpplint to stderr
-  std::cerr << stdOut;
+  if (!stdOut.empty()) {
+    std::cerr << "Warning: cpplint diagnostics:\n";
+    // Output the output from cpplint to stderr
+    std::cerr << stdOut;
+  }
+
   // always return 0 so the build can continue as cpplint returns non-zero
   // for any warning
   return 0;
