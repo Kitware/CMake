@@ -4232,7 +4232,11 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 
   // Deprecate old policies, especially those that require a lot
   // of code to maintain the old behavior.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0063) {
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0065 &&
+      !(this->GetCMakeInstance()->GetIsInTryCompile() &&
+        (
+          // Policies set by cmCoreTryCompile::TryCompileCode.
+          id == cmPolicies::CMP0065))) {
     this->IssueMessage(cmake::DEPRECATION_WARNING,
                        cmPolicies::GetPolicyDeprecatedWarning(id));
   }
