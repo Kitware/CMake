@@ -56,6 +56,8 @@ run_cmake_command(GLOB-error-CONFIGURE_DEPENDS-SCRIPT_MODE ${CMAKE_COMMAND} -P
   ${RunCMake_SOURCE_DIR}/GLOB-error-CONFIGURE_DEPENDS-SCRIPT_MODE.cmake)
 
 if(NOT WIN32 OR CYGWIN)
+  run_cmake(CREATE_LINK-SYMBOLIC)
+  run_cmake(CREATE_LINK-SYMBOLIC-noexist)
   run_cmake(GLOB_RECURSE-cyclic-recursion)
   run_cmake(INSTALL-SYMLINK)
   run_cmake(READ_SYMLINK)
