@@ -860,6 +860,8 @@ Modify cmDependsJavaLexer.cxx:
 
 /* IWYU pragma: no_forward_declare yyguts_t */
 
+#ifndef __clang_analyzer__ /* Suppress clang scan-build warnings */
+
 #include <iostream>
 
 #include "cmDependsJavaParserHelper.h"
@@ -2811,3 +2813,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 }
 
 #define YYTABLES_NAME "yytables"
+
+/*--------------------------------------------------------------------------*/
+
+#endif /* __clang_analyzer__ */

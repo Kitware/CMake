@@ -838,6 +838,8 @@ Modify cmFortranLexer.cxx:
 
 /* IWYU pragma: no_forward_declare yyguts_t */
 
+#ifndef __clang_analyzer__ /* Suppress clang scan-build warnings */
+
 #undef YY_NO_UNPUT
 
 #define cmFortranLexer_cxx
@@ -2610,3 +2612,5 @@ YY_BUFFER_STATE cmFortranLexer_GetCurrentBuffer(yyscan_t yyscanner)
   struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
   return YY_CURRENT_BUFFER;
 }
+
+#endif /* __clang_analyzer__ */

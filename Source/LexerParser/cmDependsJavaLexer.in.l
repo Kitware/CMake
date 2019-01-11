@@ -18,6 +18,8 @@ Modify cmDependsJavaLexer.cxx:
 
 /* IWYU pragma: no_forward_declare yyguts_t */
 
+#ifndef __clang_analyzer__ /* Suppress clang scan-build warnings */
+
 #include <iostream>
 
 #include "cmDependsJavaParserHelper.h"
@@ -173,3 +175,7 @@ null { PRIMITIVE; return jp_NULLLITERAL; }
 }
 
 %%
+
+/*--------------------------------------------------------------------------*/
+
+#endif /* __clang_analyzer__ */

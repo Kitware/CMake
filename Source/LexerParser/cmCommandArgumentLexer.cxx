@@ -664,6 +664,8 @@ Modify cmCommandArgumentLexer.cxx:
 
 /* IWYU pragma: no_forward_declare yyguts_t */
 
+#ifndef __clang_analyzer__ /* Suppress clang scan-build warnings */
+
 #include "cmCommandArgumentParserHelper.h"
 
 /* Replace the lexer input function.  */
@@ -2246,3 +2248,5 @@ void cmCommandArgument_SetupEscapes(yyscan_t yyscanner, bool noEscapes)
     BEGIN(ESCAPES);
   }
 }
+
+#endif /* __clang_analyzer__ */

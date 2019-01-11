@@ -664,6 +664,8 @@ Modify cmExprLexer.cxx:
 
 /* IWYU pragma: no_forward_declare yyguts_t */
 
+#ifndef __clang_analyzer__ /* Suppress clang scan-build warnings */
+
 #include "cmExprParserHelper.h"
 
 /* Replace the lexer input function.  */
@@ -2223,3 +2225,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 }
 
 #define YYTABLES_NAME "yytables"
+
+/*--------------------------------------------------------------------------*/
+
+#endif /* __clang_analyzer__ */
