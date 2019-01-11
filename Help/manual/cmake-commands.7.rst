@@ -22,8 +22,8 @@ These commands are always available.
    /command/cmake_policy
    /command/configure_file
    /command/continue
-   /command/elseif
    /command/else
+   /command/elseif
    /command/endforeach
    /command/endfunction
    /command/endif
@@ -53,9 +53,9 @@ These commands are always available.
    /command/option
    /command/return
    /command/separate_arguments
+   /command/set
    /command/set_directory_properties
    /command/set_property
-   /command/set
    /command/site_name
    /command/string
    /command/unset
