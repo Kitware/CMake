@@ -145,6 +145,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
 endif()
 
 add_RunCMake_test(AndroidTestUtilities)
+add_RunCMake_test(Autogen)
 add_RunCMake_test(BuildDepends)
 if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
   add_RunCMake_test(Byproducts)
