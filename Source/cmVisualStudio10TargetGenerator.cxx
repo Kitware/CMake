@@ -623,6 +623,7 @@ void cmVisualStudio10TargetGenerator::Generate()
     Elem(e0, "PropertyGroup").Attribute("Label", "UserMacros");
     this->WriteWinRTPackageCertificateKeyFile(e0);
     this->WritePathAndIncrementalLinkOptions(e0);
+    this->WriteCEDebugProjectConfigurationValues(e0);
     this->WriteItemDefinitionGroups(e0);
     this->WriteCustomCommands(e0);
     this->WriteAllSources(e0);
@@ -1067,6 +1068,32 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues(Elem& e0)
       }
     } else if (this->NsightTegra) {
       this->WriteNsightTegraConfigurationValues(e1, c);
+    }
+  }
+}
+
+void cmVisualStudio10TargetGenerator::WriteCEDebugProjectConfigurationValues(
+  Elem& e0)
+{
+  if (!this->GlobalGenerator->TargetsWindowsCE()) {
+    return;
+  }
+  const char* additionalFiles =
+    this->GeneratorTarget->GetProperty("DEPLOYMENT_ADDITIONAL_FILES");
+  const char* remoteDirectory =
+    this->GeneratorTarget->GetProperty("DEPLOYMENT_REMOTE_DIRECTORY");
+  if (!(additionalFiles || remoteDirectory)) {
+    return;
+  }
+  for (std::string const& c : this->Configurations) {
+    Elem e1(e0, "PropertyGroup");
+    e1.Attribute("Condition", this->CalcCondition(c));
+
+    if (remoteDirectory) {
+      e1.Element("RemoteDirectory", remoteDirectory);
+    }
+    if (additionalFiles) {
+      e1.Element("CEAdditionalFiles", additionalFiles);
     }
   }
 }
