@@ -42,7 +42,12 @@ function(add_RunCMake_test_group test types)
     # much system information so it is easier to set programs and environment
     # values here
     unset(${test}_${type}_FOUND_PREREQUIREMENTS)
-    include("${CMAKE_CURRENT_SOURCE_DIR}/${test}/${type}/Prerequirements.cmake")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${test}/${type}/Prerequirements.cmake")
+      include("${CMAKE_CURRENT_SOURCE_DIR}/${test}/${type}/Prerequirements.cmake")
+    else()
+      string(REGEX MATCH "^[^.]*" main_type "${type}")
+      include("${CMAKE_CURRENT_SOURCE_DIR}/${test}/${main_type}/Prerequirements.cmake")
+    endif()
     get_test_prerequirements("${test}_${type}_FOUND_PREREQUIREMENTS"
         "${TEST_CONFIG_DIR}/${type}_config.cmake")
 
@@ -456,7 +461,53 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   add_RunCMake_test(ctest_labels_for_subprojects)
 endif()
 
-add_RunCMake_test_group(CPack "DEB;RPM;7Z;TBZ2;TGZ;TXZ;TZ;ZIP;STGZ;External")
+set(cpack_tests
+  DEB.CUSTOM_NAMES
+  DEB.DEBUGINFO
+  DEB.DEFAULT_PERMISSIONS
+  DEB.DEPENDENCIES
+  DEB.EMPTY_DIR
+  DEB.VERSION
+  DEB.EXTRA
+  DEB.GENERATE_SHLIBS
+  DEB.GENERATE_SHLIBS_LDCONFIG
+  DEB.LONG_FILENAMES
+  DEB.MINIMAL
+  DEB.PER_COMPONENT_FIELDS
+  DEB.TIMESTAMPS
+  DEB.MD5SUMS
+  DEB.DEB_PACKAGE_VERSION_BACK_COMPATIBILITY
+
+  RPM.CUSTOM_BINARY_SPEC_FILE
+  RPM.CUSTOM_NAMES
+  RPM.DEBUGINFO
+  RPM.DEFAULT_PERMISSIONS
+  RPM.DEPENDENCIES
+  RPM.DIST
+  RPM.EMPTY_DIR
+  RPM.VERSION
+  RPM.INSTALL_SCRIPTS
+  RPM.MAIN_COMPONENT
+  RPM.MINIMAL
+  RPM.PARTIALLY_RELOCATABLE_WARNING
+  RPM.PER_COMPONENT_FIELDS
+  RPM.SINGLE_DEBUGINFO
+  RPM.EXTRA_SLASH_IN_PATH
+  RPM.SOURCE_PACKAGE
+  RPM.SUGGESTS
+  RPM.SYMLINKS
+  RPM.USER_FILELIST
+
+  7Z
+  TBZ2
+  TGZ
+  TXZ
+  TZ
+  ZIP
+  STGZ
+  External
+  )
+add_RunCMake_test_group(CPack "${cpack_tests}")
 # add a test to make sure symbols are exported from a shared library
 # for MSVC compilers CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS property is used
 add_RunCMake_test(AutoExportDll)
