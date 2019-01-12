@@ -16,7 +16,7 @@ void cmProcessTools::RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
   cmProcessOutput processOutput(encoding);
   std::string strdata;
   while ((out || err) &&
-         (p = cmsysProcess_WaitForData(cp, &data, &length, nullptr), p)) {
+         (p = cmsysProcess_WaitForData(cp, &data, &length, nullptr))) {
     if (out && p == cmsysProcess_Pipe_STDOUT) {
       processOutput.DecodeText(data, length, strdata, 1);
       if (!out->Process(strdata.c_str(), int(strdata.size()))) {

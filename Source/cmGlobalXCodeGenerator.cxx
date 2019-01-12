@@ -176,12 +176,14 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
   std::string versionFile;
   {
     std::string out;
-    std::string::size_type pos = 0;
-    if (cmSystemTools::RunSingleCommand("xcode-select --print-path", &out,
-                                        nullptr, nullptr, nullptr,
-                                        cmSystemTools::OUTPUT_NONE) &&
-        (pos = out.find(".app/"), pos != std::string::npos)) {
-      versionFile = out.substr(0, pos + 5) + "Contents/version.plist";
+    bool commandResult = cmSystemTools::RunSingleCommand(
+      "xcode-select --print-path", &out, nullptr, nullptr, nullptr,
+      cmSystemTools::OUTPUT_NONE);
+    if (commandResult) {
+      std::string::size_type pos = out.find(".app/");
+      if (pos != std::string::npos) {
+        versionFile = out.substr(0, pos + 5) + "Contents/version.plist";
+      }
     }
   }
   if (!versionFile.empty() && cmSystemTools::FileExists(versionFile.c_str())) {

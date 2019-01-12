@@ -111,8 +111,8 @@ public:
     , Revisions(revs)
     , Section(SectionHeader)
   {
-    this->SetLog(&cvs->Log, prefix),
-      this->RegexRevision.compile("^revision +([^ ]*) *$");
+    this->SetLog(&cvs->Log, prefix);
+    this->RegexRevision.compile("^revision +([^ ]*) *$");
     this->RegexBranches.compile("^branches: .*$");
     this->RegexPerson.compile("^date: +([^;]+); +author: +([^;]+);");
   }
