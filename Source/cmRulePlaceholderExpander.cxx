@@ -162,6 +162,11 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       }
     }
   }
+  if (replaceValues.SwiftAuxiliarySources) {
+    if (variable == "SWIFT_AUXILIARY_SOURCES") {
+      return replaceValues.SwiftAuxiliarySources;
+    }
+  }
   if (variable == "TARGET_SONAME" || variable == "SONAME_FLAG" ||
       variable == "TARGET_INSTALLNAME_DIR") {
     // All these variables depend on TargetSOName
