@@ -93,7 +93,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
         bool const rccAvailable = (validQt || !rccExec.empty());
         bool const mocIsValid = (moc && mocAvailable);
         bool const uicIsValid = (uic && uicAvailable);
-        bool const rccIsValid = (rcc && uicAvailable);
+        bool const rccIsValid = (rcc && rccAvailable);
         // Disabled AUTOMOC/UIC/RCC warning
         bool const mocDisabled = (moc && !mocAvailable);
         bool const uicDisabled = (uic && !uicAvailable);
