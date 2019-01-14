@@ -691,6 +691,13 @@ function(__FetchContent_directPopulate contentName)
       BUILD_COMMAND
       INSTALL_COMMAND
       TEST_COMMAND
+      # We force both of these to be ON since we are always executing serially
+      # and we want all steps to have access to the terminal in case they
+      # need input from the command line (e.g. ask for a private key password)
+      # or they want to provide timely progress. We silently absorb and
+      # discard these if they are set by the caller.
+      USES_TERMINAL_DOWNLOAD
+      USES_TERMINAL_UPDATE
   )
   set(multiValueArgs "")
 
