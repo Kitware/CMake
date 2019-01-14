@@ -102,19 +102,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
           std::string msg = "AUTOGEN: No valid Qt version found for target ";
           msg += target->GetName();
           msg += ". ";
-          {
-            std::vector<std::string> lst;
-            if (mocDisabled) {
-              lst.emplace_back("AUTOMOC");
-            }
-            if (uicDisabled) {
-              lst.emplace_back("AUTOUIC");
-            }
-            if (rccDisabled) {
-              lst.emplace_back("AUTORCC");
-            }
-            msg += cmJoin(lst, ", ");
-          }
+          msg += cmQtAutoGen::Tools(mocDisabled, uicDisabled, rccDisabled);
           msg += " disabled.  Consider adding:\n";
           if (uicDisabled) {
             msg += "  find_package(Qt5 COMPONENTS Widgets)\n";
