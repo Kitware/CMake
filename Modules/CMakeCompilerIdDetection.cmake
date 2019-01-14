@@ -135,9 +135,6 @@ function(compiler_id_detection outvar lang)
 /* These compilers are either not known or too old to define an
   identification macro.  Try to identify the platform and guess that
   it is the native compiler.  */
-#elif defined(__sgi)
-# define ${CID_PREFIX}COMPILER_ID \"MIPSpro\"
-
 #elif defined(__hpux) || defined(__hpua)
 # define ${CID_PREFIX}COMPILER_ID \"HP\"
 

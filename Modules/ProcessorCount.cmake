@@ -12,7 +12,7 @@ Determine the number of processors/cores and save value in ${var}
 Sets the variable named ${var} to the number of physical cores
 available on the machine if the information can be determined.
 Otherwise it is set to 0.  Currently this functionality is implemented
-for AIX, cygwin, FreeBSD, HPUX, IRIX, Linux, macOS, QNX, Sun and
+for AIX, cygwin, FreeBSD, HPUX, Linux, macOS, QNX, Sun and
 Windows.
 
 This function is guaranteed to return a positive integer (>=1) if it
@@ -111,22 +111,6 @@ function(ProcessorCount var)
         set(count "${CMAKE_MATCH_1}")
         #message("ProcessorCount: trying mpsched -s '${ProcessorCount_cmd_mpsched}'")
       endif()
-    endif()
-  endif()
-
-  if(NOT count)
-    # IRIX (systems with hinv):
-    find_program(ProcessorCount_cmd_hinv hinv
-      PATHS /sbin)
-    mark_as_advanced(ProcessorCount_cmd_hinv)
-    if(ProcessorCount_cmd_hinv)
-      execute_process(COMMAND ${ProcessorCount_cmd_hinv}
-        ERROR_QUIET
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        OUTPUT_VARIABLE hinv_output)
-      string(REGEX MATCHALL "([0-9]+) .* Processors" procs "${hinv_output}")
-      set(count "${CMAKE_MATCH_1}")
-      #message("ProcessorCount: trying hinv '${ProcessorCount_cmd_hinv}'")
     endif()
   endif()
 

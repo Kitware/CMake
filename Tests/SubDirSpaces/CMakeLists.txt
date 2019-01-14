@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 project(SUBDIR)
 
 # Some systems do not seem to support rpath with spaces.
-if(CMAKE_SYSTEM_NAME MATCHES "IRIX|QNX")
+if(CMAKE_SYSTEM_NAME MATCHES "QNX")
   set(CMAKE_SKIP_BUILD_RPATH 1)
 endif()
 

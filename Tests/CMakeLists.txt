@@ -597,7 +597,6 @@ if(BUILD_TESTING)
   else()
     if (CMAKE_CXX_COMPILER_ID MATCHES "PGI"
         OR CMAKE_CXX_COMPILER_ID MATCHES "PathScale"
-        OR CMAKE_SYSTEM_NAME MATCHES "IRIX64"
         OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
       set(run_pic_test 0)
     else()
