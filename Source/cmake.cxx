@@ -610,16 +610,13 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
 }
 
 // Parse the args
-void cmake::SetArgs(const std::vector<std::string>& args,
-                    bool directoriesSetBefore)
+void cmake::SetArgs(const std::vector<std::string>& args)
 {
-  bool directoriesSet = directoriesSetBefore;
   bool haveToolset = false;
   bool havePlatform = false;
   for (unsigned int i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
     if (arg.find("-H", 0) == 0 || arg.find("-S", 0) == 0) {
-      directoriesSet = true;
       std::string path = arg.substr(2);
       if (path.empty()) {
         ++i;
@@ -640,7 +637,6 @@ void cmake::SetArgs(const std::vector<std::string>& args,
     } else if (arg.find("-O", 0) == 0) {
       // There is no local generate anymore.  Ignore -O option.
     } else if (arg.find("-B", 0) == 0) {
-      directoriesSet = true;
       std::string path = arg.substr(2);
       if (path.empty()) {
         ++i;
@@ -802,15 +798,26 @@ void cmake::SetArgs(const std::vector<std::string>& args,
         this->SetGlobalGenerator(gen);
       }
     }
-    // no option assume it is the path to the source
+    // no option assume it is the path to the source or an existing build
     else {
-      directoriesSet = true;
       this->SetDirectoriesFromFile(arg.c_str());
     }
   }
-  if (!directoriesSet) {
-    this->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
+
+  const bool haveSourceDir = !this->GetHomeDirectory().empty();
+  const bool haveBinaryDir = !this->GetHomeOutputDirectory().empty();
+
+  if (this->CurrentWorkingMode == cmake::NORMAL_MODE && !haveSourceDir &&
+      !haveBinaryDir) {
+    cmSystemTools::Error("No source or binary directory provided");
+    return;
+  }
+
+  if (!haveSourceDir) {
     this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
+  }
+  if (!haveBinaryDir) {
+    this->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
   }
 }
 
