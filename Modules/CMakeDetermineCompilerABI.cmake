@@ -30,6 +30,17 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       list(APPEND CMAKE_FLAGS "-DCMAKE_${lang}_STANDARD_LIBRARIES=")
     endif()
     __TestCompiler_setTryCompileTargetType()
+
+    # Save the current LC_ALL, LC_MESSAGES, and LANG environment variables
+    # and set them to "C" that way GCC's "search starts here" text is in
+    # English and we can grok it.
+    set(_orig_lc_all      $ENV{LC_ALL})
+    set(_orig_lc_messages $ENV{LC_MESSAGES})
+    set(_orig_lang        $ENV{LANG})
+    set(ENV{LC_ALL}      C)
+    set(ENV{LC_MESSAGES} C)
+    set(ENV{LANG}        C)
+
     try_compile(CMAKE_${lang}_ABI_COMPILED
       ${CMAKE_BINARY_DIR} ${src}
       CMAKE_FLAGS ${CMAKE_FLAGS}
@@ -40,6 +51,12 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       COPY_FILE "${BIN}"
       COPY_FILE_ERROR _copy_error
       )
+
+    # Restore original LC_ALL, LC_MESSAGES, and LANG
+    set(ENV{LC_ALL}      ${_orig_lc_all})
+    set(ENV{LC_MESSAGES} ${_orig_lc_messages})
+    set(ENV{LANG}        ${_orig_lang})
+
     # Move result from cache to normal variable.
     set(CMAKE_${lang}_ABI_COMPILED ${CMAKE_${lang}_ABI_COMPILED})
     unset(CMAKE_${lang}_ABI_COMPILED CACHE)
