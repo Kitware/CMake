@@ -1,6 +1,7 @@
 include(RunCMake)
 
 run_cmake(ExplicitCMakeLists)
+run_cmake(SourceGroupCMakeLists)
 
 run_cmake(VsConfigurationType)
 run_cmake(VsTargetsFileReferences)
