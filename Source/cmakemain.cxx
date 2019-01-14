@@ -285,12 +285,12 @@ int do_cmake(int ac, char const* const* av)
     } else if (cmHasLiteralPrefix(av[i], "-P")) {
       if (i == ac - 1) {
         cmSystemTools::Error("No script specified for argument -P");
-      } else {
-        workingMode = cmake::SCRIPT_MODE;
-        args.push_back(av[i]);
-        i++;
-        args.push_back(av[i]);
+        return 1;
       }
+      workingMode = cmake::SCRIPT_MODE;
+      args.push_back(av[i]);
+      i++;
+      args.push_back(av[i]);
     } else if (cmHasLiteralPrefix(av[i], "--find-package")) {
       workingMode = cmake::FIND_PACKAGE_MODE;
       args.push_back(av[i]);

@@ -275,8 +275,7 @@ public:
   int GetSystemInformation(std::vector<std::string>&);
 
   ///! Parse command line arguments
-  void SetArgs(const std::vector<std::string>&,
-               bool directoriesSetBefore = false);
+  void SetArgs(const std::vector<std::string>& args);
 
   ///! Is this cmake running as a result of a TRY_COMPILE command
   bool GetIsInTryCompile() const;
