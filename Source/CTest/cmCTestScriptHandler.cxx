@@ -280,7 +280,7 @@ void cmCTestScriptHandler::CreateCMake()
     delete this->GlobalGenerator;
     delete this->Makefile;
   }
-  this->CMake = new cmake(cmake::RoleScript);
+  this->CMake = new cmake(cmake::RoleScript, cmState::CTest);
   this->CMake->SetHomeDirectory("");
   this->CMake->SetHomeOutputDirectory("");
   this->CMake->GetCurrentSnapshot().SetDefaultDefinitions();

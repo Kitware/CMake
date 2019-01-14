@@ -15,6 +15,7 @@
 #include "cmInstalledFile.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
+#include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 
@@ -29,7 +30,6 @@ class cmGlobalGenerator;
 class cmGlobalGeneratorFactory;
 class cmMakefile;
 class cmMessenger;
-class cmState;
 class cmVariableWatch;
 struct cmDocumentationEntry;
 
@@ -113,7 +113,7 @@ public:
   static const int DEFAULT_BUILD_PARALLEL_LEVEL = 0;
 
   /// Default constructor
-  cmake(Role role);
+  cmake(Role role, cmState::Mode mode);
   /// Destructor
   ~cmake();
 

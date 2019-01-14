@@ -429,7 +429,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
     }
   }
 
-  cmake cm(cmake::RoleScript);
+  cmake cm(cmake::RoleScript, cmState::CTest);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();

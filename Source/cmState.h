@@ -35,6 +35,16 @@ public:
   cmState();
   ~cmState();
 
+  enum Mode
+  {
+    Unknown,
+    Project,
+    Script,
+    FindPackage,
+    CTest,
+    CPack,
+  };
+
   static const char* GetTargetTypeName(cmStateEnums::TargetType targetType);
 
   cmStateSnapshot CreateBaseSnapshot();
@@ -166,6 +176,12 @@ public:
   unsigned int GetCacheMajorVersion() const;
   unsigned int GetCacheMinorVersion() const;
 
+  Mode GetMode() const;
+  std::string GetModeString() const;
+  void SetMode(Mode mode);
+
+  static std::string ModeToString(Mode mode);
+
 private:
   friend class cmake;
   void AddCacheEntry(const std::string& key, const char* value,
@@ -210,6 +226,7 @@ private:
   bool MinGWMake = false;
   bool NMake = false;
   bool MSYSShell = false;
+  Mode CurrentMode = Unknown;
 };
 
 #endif

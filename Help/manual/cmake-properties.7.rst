@@ -23,6 +23,7 @@ Properties of Global Scope
    /prop_gbl/AUTORCC_SOURCE_GROUP
    /prop_gbl/CMAKE_C_KNOWN_FEATURES
    /prop_gbl/CMAKE_CXX_KNOWN_FEATURES
+   /prop_gbl/CMAKE_ROLE
    /prop_gbl/DEBUG_CONFIGURATIONS
    /prop_gbl/DISABLED_FEATURES
    /prop_gbl/ENABLED_FEATURES

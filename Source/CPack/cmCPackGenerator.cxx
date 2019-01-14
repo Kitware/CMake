@@ -18,6 +18,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmVersion.h"
 #include "cmWorkingDirectory.h"
@@ -690,7 +691,7 @@ int cmCPackGenerator::InstallCMakeProject(
                   "-   Install component: " << component << std::endl);
   }
 
-  cmake cm(cmake::RoleScript);
+  cmake cm(cmake::RoleScript, cmState::CPack);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();

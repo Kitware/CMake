@@ -6,6 +6,7 @@
 #include "cmCursesStandardIncludes.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -83,7 +84,7 @@ int main(int argc, char const* const* argv)
   cmDocumentation doc;
   doc.addCMakeStandardDocSections();
   if (doc.CheckOptions(argc, argv)) {
-    cmake hcm(cmake::RoleInternal);
+    cmake hcm(cmake::RoleInternal, cmState::Unknown);
     hcm.SetHomeDirectory("");
     hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();

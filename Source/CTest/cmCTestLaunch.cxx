@@ -15,6 +15,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
+#include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
@@ -610,7 +611,7 @@ int cmCTestLaunch::Main(int argc, const char* const argv[])
 
 void cmCTestLaunch::LoadConfig()
 {
-  cmake cm(cmake::RoleScript);
+  cmake cm(cmake::RoleScript, cmState::CTest);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
