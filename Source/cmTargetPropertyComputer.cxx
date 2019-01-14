@@ -65,6 +65,7 @@ bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
     builtIns.insert("EXPORT_NAME");
     builtIns.insert("IMPORTED");
     builtIns.insert("IMPORTED_GLOBAL");
+    builtIns.insert("MANUALLY_ADDED_DEPENDENCIES");
     builtIns.insert("NAME");
     builtIns.insert("TYPE");
   }
