@@ -70,8 +70,15 @@ if(NOT CMAKE_Fortran_COMPILER_ID STREQUAL XL)
   include(CheckFortranCompilerFlag)
   CHECK_Fortran_COMPILER_FLAG(-_this_is_not_a_flag_ Fortran_BOGUS_FLAG)
   if (Fortran_BOGUS_FLAG)
-    message (SEND_ERROR "CHECK_Fortran_COMPILER_FLAG() succeeded, but should have failed")
-  endif ()
+    message(SEND_ERROR "CHECK_Fortran_COMPILER_FLAG() succeeded, but should have failed")
+  endif()
+
+  unset(Fortran_RUN_FLAG CACHE)
+  include(CheckFortranSourceRuns)
+  check_fortran_source_runs("program a; end program" Fortran_RUN_FLAG SRC_EXT F90)
+  if(NOT Fortran_RUN_FLAG)
+    message(SEND_ERROR "CHECK_Fortran_SOURCE_RUNS() failed")
+  endif()
 endif()
 
 # Test generation of preprocessed sources.
