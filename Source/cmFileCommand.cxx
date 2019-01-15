@@ -3760,34 +3760,32 @@ bool cmFileCommand::HandleCreateLinkCommand(
 
   // Check if the command requires a symbolic link.
   if (symbolicArg.IsEnabled()) {
-    completed = cmSystemTools::CreateSymlink(fileName, newFileName);
+    completed = cmSystemTools::CreateSymlink(fileName, newFileName, &result);
   } else {
-    completed = cmSystemTools::CreateLink(fileName, newFileName);
+    completed = cmSystemTools::CreateLink(fileName, newFileName, &result);
   }
 
-  if (!completed) {
-    // The link method did not succeed. Get the error message.
-    result = "Link failed: " + cmSystemTools::GetLastSystemError();
-
-    // Check if copy-on-error is enabled in the arguments.
-    if (copyOnErrorArg.IsEnabled()) {
-      completed =
-        cmSystemTools::cmCopyFile(fileName.c_str(), newFileName.c_str());
-      if (!completed) {
-        result = "Copy failed: " + cmSystemTools::GetLastSystemError();
-      }
+  // Check if copy-on-error is enabled in the arguments.
+  if (!completed && copyOnErrorArg.IsEnabled()) {
+    completed =
+      cmSystemTools::cmCopyFile(fileName.c_str(), newFileName.c_str());
+    if (!completed) {
+      result = "Copy failed: " + cmSystemTools::GetLastSystemError();
     }
   }
 
   // Check if the operation was successful.
   if (completed) {
     result = "0";
+  } else if (resultVar.empty()) {
+    // The operation failed and the result is not reported in a variable.
+    this->SetError(result);
+    return false;
   }
 
   if (!resultVar.empty()) {
     this->Makefile->AddDefinition(resultVar, result.c_str());
-    return true;
   }
 
-  return completed;
+  return true;
 }
