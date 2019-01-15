@@ -297,6 +297,11 @@ std::ostream& cmVisualStudio10TargetGenerator::Elem::WriteString(
   "$(UserRootDir)\\Microsoft.CSharp.$(Platform).user.props"
 #define VS10_CSharp_TARGETS "$(MSBuildToolsPath)\\Microsoft.CSharp.targets"
 
+#define VS10_CSharp_NETCF_TARGETS                                             \
+  "$(MSBuildExtensionsPath)\\Microsoft\\$(TargetFrameworkIdentifier)\\"       \
+  "$(TargetFrameworkTargetsVersion)\\Microsoft.$(TargetFrameworkIdentifier)"  \
+  ".CSharp.targets"
+
 void cmVisualStudio10TargetGenerator::Generate()
 {
   // do not generate external ms projects
@@ -480,8 +485,30 @@ void cmVisualStudio10TargetGenerator::Generate()
           targetFrameworkVersion = this->GeneratorTarget->GetProperty(
             "DOTNET_TARGET_FRAMEWORK_VERSION");
         }
+        if (!targetFrameworkVersion && this->ProjectType == csproj &&
+            this->GlobalGenerator->TargetsWindowsCE() &&
+            this->GlobalGenerator->GetVersion() ==
+              cmGlobalVisualStudioGenerator::VS12) {
+          // VS12 .NETCF default to .NET framework 3.9
+          targetFrameworkVersion = "v3.9";
+        }
         if (targetFrameworkVersion) {
           e1.Element("TargetFrameworkVersion", targetFrameworkVersion);
+        }
+        if (this->ProjectType == csproj &&
+            this->GlobalGenerator->TargetsWindowsCE()) {
+          const char* targetFrameworkId = this->GeneratorTarget->GetProperty(
+            "VS_TARGET_FRAMEWORK_IDENTIFIER");
+          if (!targetFrameworkId) {
+            targetFrameworkId = "WindowsEmbeddedCompact";
+          }
+          e1.Element("TargetFrameworkIdentifier", targetFrameworkId);
+          const char* targetFrameworkVer = this->GeneratorTarget->GetProperty(
+            "VS_TARGET_FRAMEWORKS_TARGET_VERSION");
+          if (!targetFrameworkVer) {
+            targetFrameworkVer = "v8.0";
+          }
+          e1.Element("TargetFrameworkTargetsVersion", targetFrameworkVer);
         }
       }
 
@@ -638,7 +665,11 @@ void cmVisualStudio10TargetGenerator::Generate()
         Elem(e0, "Import").Attribute("Project", VS10_CXX_TARGETS);
         break;
       case csproj:
-        Elem(e0, "Import").Attribute("Project", VS10_CSharp_TARGETS);
+        if (this->GlobalGenerator->TargetsWindowsCE()) {
+          Elem(e0, "Import").Attribute("Project", VS10_CSharp_NETCF_TARGETS);
+        } else {
+          Elem(e0, "Import").Attribute("Project", VS10_CSharp_TARGETS);
+        }
         break;
     }
 

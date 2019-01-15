@@ -6,3 +6,4 @@ set(RunCMake_GENERATOR_INSTANCE "")
 set(RunCMake_TEST_OPTIONS -DCMAKE_SYSTEM_NAME=WindowsCE  )
 
 run_cmake(VsCEDebuggerDeploy)
+run_cmake(VSCSharpCFProject)
