@@ -188,6 +188,37 @@ find_package(ArchC 3.1 EXACT NAMES zot)
 find_package(ArchD 4.0 EXACT NAMES zot)
 unset(CMAKE_LIBRARY_ARCHITECTURE)
 
+# Test find_package() with CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS enabled
+if(UNIX)
+  # Create ./symlink pointing back here.
+  execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+      . "${CMAKE_CURRENT_SOURCE_DIR}/symlink")
+  # Make find_package search through the symlink
+  set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/symlink")
+
+  # First, test the default behavior where symlinks are preserved.
+  set(SetFoundResolved_DIR "")
+  find_package(SetFoundResolved)
+  # The result must preserve the /symlink/ path.
+  set(SetFoundResolved_EXPECTED "${CMAKE_CURRENT_SOURCE_DIR}/symlink/cmake")
+  if(NOT "${SetFoundResolved_DIR}" STREQUAL "${SetFoundResolved_EXPECTED}")
+    message(SEND_ERROR "SetFoundResolved_DIR set by find_package() is set to \"${SetFoundResolved_DIR}\" (expected \"${SetFoundResolved_EXPECTED}\")")
+  endif()
+
+  # Resolve symlinks when finding the package.
+  set(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS TRUE)
+  set(SetFoundResolved_DIR "")
+  find_package(SetFoundResolved)
+  # ./symlink points back here so it should be gone when resolved.
+  set(SetFoundResolved_EXPECTED "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+  if(NOT "${SetFoundResolved_DIR}" STREQUAL "${SetFoundResolved_EXPECTED}")
+    message(SEND_ERROR "SetFoundResolved_DIR set by find_package() is set to \"${SetFoundResolved_DIR}\" (expected \"${SetFoundResolved_EXPECTED}\")")
+  endif()
+  # Cleanup.
+  unset(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS)
+  file(REMOVE "${CMAKE_CURRENT_SOURCE_DIR}/symlink")
+endif()
+
 # Test <PackageName>_DIR environment variable.
 # We erase the main prefix path to ensure the env var is used.
 set(CMAKE_PREFIX_PATH)
