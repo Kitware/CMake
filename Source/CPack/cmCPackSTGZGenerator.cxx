@@ -6,6 +6,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"

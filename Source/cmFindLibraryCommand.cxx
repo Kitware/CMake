@@ -7,6 +7,7 @@
 #include <set>
 #include <stdio.h>
 #include <string.h>
+#include <utility>
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"

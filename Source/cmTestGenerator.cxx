@@ -11,11 +11,10 @@
 #include "cmLocalGenerator.h"
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
+#include "cmPropertyMap.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
-
-class cmPropertyMap;
 
 cmTestGenerator::cmTestGenerator(
   cmTest* test, std::vector<std::string> const& configurations)

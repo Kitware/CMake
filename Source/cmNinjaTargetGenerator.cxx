@@ -10,6 +10,7 @@
 #include <map>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"

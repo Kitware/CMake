@@ -1,19 +1,21 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGeneratorMocUic.h"
-#include "cmQtAutoGen.h"
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <functional>
 #include <list>
 #include <memory>
+#include <set>
 #include <sstream>
 #include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmMakefile.h"
+#include "cmQtAutoGen.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 

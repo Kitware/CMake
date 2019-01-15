@@ -3,6 +3,7 @@
 #include "cmInstallExportGenerator.h"
 
 #include <algorithm>
+#include <map>
 #include <sstream>
 #include <utility>
 

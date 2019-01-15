@@ -10,6 +10,7 @@
 #include "cmWorkingDirectory.h"
 
 #include <cstring>
+#include <map>
 #include <ostream>
 #include <utility>
 #include <vector>

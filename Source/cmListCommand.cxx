@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h> // required for atoi
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
