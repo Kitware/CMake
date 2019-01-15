@@ -335,7 +335,7 @@ if (GTK2_FOUND)
 endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
-  add_RunCMake_test(include_external_msproject)
+  add_RunCMake_test(include_external_msproject -DVS_PLATFORM_NAME=${CMAKE_VS_PLATFORM_NAME})
   if("${CMAKE_GENERATOR}" MATCHES "Visual Studio (9|10)" AND NOT CMAKE_VS_DEVENV_COMMAND)
     set(NO_USE_FOLDERS 1)
   endif()

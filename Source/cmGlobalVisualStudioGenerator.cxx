@@ -86,6 +86,8 @@ const char* cmGlobalVisualStudioGenerator::GetIDEVersion() const
       return "14.0";
     case cmGlobalVisualStudioGenerator::VS15:
       return "15.0";
+    case cmGlobalVisualStudioGenerator::VS16:
+      return "16.0";
   }
   return "";
 }
@@ -137,6 +139,15 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
         fout << "# Visual Studio Express 15 for Windows Desktop\n";
       } else {
         fout << "# Visual Studio 15\n";
+      }
+      break;
+    case cmGlobalVisualStudioGenerator::VS16:
+      // Visual Studio 16 writes .sln format 12.00
+      fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
+      if (this->ExpressEdition) {
+        fout << "# Visual Studio Express 16 for Windows Desktop\n";
+      } else {
+        fout << "# Visual Studio 16\n";
       }
       break;
   }

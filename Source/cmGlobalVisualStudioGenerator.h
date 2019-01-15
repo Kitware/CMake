@@ -38,7 +38,8 @@ public:
     VS12 = 120,
     /* VS13 = 130 was skipped */
     VS14 = 140,
-    VS15 = 150
+    VS15 = 150,
+    VS16 = 160
   };
 
   virtual ~cmGlobalVisualStudioGenerator();

@@ -55,8 +55,8 @@
 #    include "cmGlobalVisualStudio11Generator.h"
 #    include "cmGlobalVisualStudio12Generator.h"
 #    include "cmGlobalVisualStudio14Generator.h"
-#    include "cmGlobalVisualStudio15Generator.h"
 #    include "cmGlobalVisualStudio9Generator.h"
+#    include "cmGlobalVisualStudioVersionedGenerator.h"
 #    include "cmVSSetupHelper.h"
 
 #    define CMAKE_HAVE_VS_GENERATORS
@@ -1545,8 +1545,9 @@ void cmake::CreateDefaultGlobalGenerator()
     "\\Setup\\VC;ProductDir", //
     ";InstallDir"             //
   };
-  cmVSSetupAPIHelper vsSetupAPIHelper;
-  if (vsSetupAPIHelper.IsVS2017Installed()) {
+  if (cmVSSetupAPIHelper(16).IsVSInstalled()) {
+    found = "Visual Studio 16 2019";
+  } else if (cmVSSetupAPIHelper(15).IsVSInstalled()) {
     found = "Visual Studio 15 2017";
   } else {
     for (VSVersionedGenerator const* g = cm::cbegin(vsGenerators);
@@ -1800,7 +1801,10 @@ void cmake::AddDefaultGenerators()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #  if !defined(CMAKE_BOOT_MINGW)
-  this->Generators.push_back(cmGlobalVisualStudio15Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudioVersionedGenerator::NewFactory16());
+  this->Generators.push_back(
+    cmGlobalVisualStudioVersionedGenerator::NewFactory15());
   this->Generators.push_back(cmGlobalVisualStudio14Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio12Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio11Generator::NewFactory());
