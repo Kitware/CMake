@@ -1450,6 +1450,14 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     groupsUsed.insert(sourceGroup);
   }
 
+  if (cmSourceFile const* srcCMakeLists =
+        this->LocalGenerator->CreateVCProjBuildRule()) {
+    std::string const& source = srcCMakeLists->GetFullPath();
+    cmSourceGroup* sourceGroup =
+      this->Makefile->FindSourceGroup(source, sourceGroups);
+    groupsUsed.insert(sourceGroup);
+  }
+
   this->AddMissingSourceGroups(groupsUsed, sourceGroups);
 
   // Write out group file
