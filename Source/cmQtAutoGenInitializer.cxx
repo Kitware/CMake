@@ -1231,11 +1231,7 @@ bool cmQtAutoGenInitializer::SetupCustomTargets()
   }
 
   // Write AUTORCC info files
-  if (this->Rcc.Enabled && !this->SetupWriteRccInfo()) {
-    return false;
-  }
-
-  return true;
+  return !this->Rcc.Enabled || this->SetupWriteRccInfo();
 }
 
 bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()

@@ -55,7 +55,7 @@ void cmGeneratorExpressionDAGChecker::Initialize()
 
   if (CheckResult == DAG &&
       (CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
-        TEST_TRANSITIVE_PROPERTY_METHOD) false)) // NOLINT(clang-tidy)
+        TEST_TRANSITIVE_PROPERTY_METHOD) false)) // NOLINT(*)
 #undef TEST_TRANSITIVE_PROPERTY_METHOD
   {
     std::map<cmGeneratorTarget const*, std::set<std::string>>::const_iterator
