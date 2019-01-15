@@ -72,7 +72,9 @@ char* uv__strndup(const char* s, size_t n) {
 }
 
 void* uv__malloc(size_t size) {
-  return uv__allocator.local_malloc(size);
+  if (size > 0)
+    return uv__allocator.local_malloc(size);
+  return NULL;
 }
 
 void uv__free(void* ptr) {
@@ -91,7 +93,10 @@ void* uv__calloc(size_t count, size_t size) {
 }
 
 void* uv__realloc(void* ptr, size_t size) {
-  return uv__allocator.local_realloc(ptr, size);
+  if (size > 0)
+    return uv__allocator.local_realloc(ptr, size);
+  uv__free(ptr);
+  return NULL;
 }
 
 int uv_replace_allocator(uv_malloc_func malloc_func,
@@ -155,6 +160,18 @@ static const char* uv__unknown_err_code(int err) {
   return copy != NULL ? copy : "Unknown system error";
 }
 
+#define UV_ERR_NAME_GEN_R(name, _) \
+case UV_## name: \
+  uv__strscpy(buf, #name, buflen); break;
+char* uv_err_name_r(int err, char* buf, size_t buflen) {
+  switch (err) {
+    UV_ERRNO_MAP(UV_ERR_NAME_GEN_R)
+    default: snprintf(buf, buflen, "Unknown system error %d", err);
+  }
+  return buf;
+}
+#undef UV_ERR_NAME_GEN_R
+
 
 #define UV_ERR_NAME_GEN(name, _) case UV_ ## name: return #name;
 const char* uv_err_name(int err) {
@@ -164,6 +181,19 @@ const char* uv_err_name(int err) {
   return uv__unknown_err_code(err);
 }
 #undef UV_ERR_NAME_GEN
+
+
+#define UV_STRERROR_GEN_R(name, msg) \
+case UV_ ## name: \
+  snprintf(buf, buflen, "%s", msg); break;
+char* uv_strerror_r(int err, char* buf, size_t buflen) {
+  switch (err) {
+    UV_ERRNO_MAP(UV_STRERROR_GEN_R)
+    default: snprintf(buf, buflen, "Unknown system error %d", err);
+  }
+  return buf;
+}
+#undef UV_STRERROR_GEN_R
 
 
 #define UV_STRERROR_GEN(name, msg) case UV_ ## name: return msg;
@@ -357,7 +387,7 @@ void uv_walk(uv_loop_t* loop, uv_walk_cb walk_cb, void* arg) {
     QUEUE_REMOVE(q);
     QUEUE_INSERT_TAIL(&loop->handle_queue, q);
 
-    if (h->flags & UV__HANDLE_INTERNAL) continue;
+    if (h->flags & UV_HANDLE_INTERNAL) continue;
     walk_cb(h, arg);
   }
 }
@@ -386,9 +416,9 @@ static void uv__print_handles(uv_loop_t* loop, int only_active, FILE* stream) {
 
     fprintf(stream,
             "[%c%c%c] %-8s %p\n",
-            "R-"[!(h->flags & UV__HANDLE_REF)],
-            "A-"[!(h->flags & UV__HANDLE_ACTIVE)],
-            "I-"[!(h->flags & UV__HANDLE_INTERNAL)],
+            "R-"[!(h->flags & UV_HANDLE_REF)],
+            "A-"[!(h->flags & UV_HANDLE_ACTIVE)],
+            "I-"[!(h->flags & UV_HANDLE_INTERNAL)],
             type,
             (void*)h);
   }
@@ -632,7 +662,7 @@ int uv_loop_close(uv_loop_t* loop) {
 
   QUEUE_FOREACH(q, &loop->handle_queue) {
     h = QUEUE_DATA(q, uv_handle_t, handle_queue);
-    if (!(h->flags & UV__HANDLE_INTERNAL))
+    if (!(h->flags & UV_HANDLE_INTERNAL))
       return UV_EBUSY;
   }
 
