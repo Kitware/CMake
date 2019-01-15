@@ -201,7 +201,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
               tgt->IsImported()) {
             continue;
           }
-          if (!this->IsExcluded(gen[0], tgt)) {
+          if (!this->IsExcluded(tgt)) {
             allBuild->AddUtility(tgt->GetName());
           }
         }

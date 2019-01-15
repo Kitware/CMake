@@ -2034,17 +2034,10 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
   return this->IsExcluded(rootSnp, snp);
 }
 
-bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
-                                   cmGeneratorTarget* target) const
+bool cmGlobalGenerator::IsExcluded(cmGeneratorTarget* target) const
 {
-  if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-      target->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
-    // This target is excluded from its directory.
-    return true;
-  }
-  // This target is included in its directory.  Check whether the
-  // directory is excluded.
-  return this->IsExcluded(root, target->GetLocalGenerator());
+  return target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+    target->GetPropertyAsBool("EXCLUDE_FROM_ALL");
 }
 
 void cmGlobalGenerator::GetEnabledLanguages(
