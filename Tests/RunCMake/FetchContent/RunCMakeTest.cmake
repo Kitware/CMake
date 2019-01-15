@@ -10,6 +10,7 @@ run_cmake(SameGenerator)
 run_cmake(VarDefinitions)
 run_cmake(GetProperties)
 run_cmake(DirOverrides)
+run_cmake(UsesTerminalOverride)
 
 # We need to pass through CMAKE_GENERATOR and CMAKE_MAKE_PROGRAM
 # to ensure the test can run on machines where the build tool
