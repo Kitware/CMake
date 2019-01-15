@@ -165,25 +165,26 @@ int testCommandLineArguments(int argc, char* argv[])
   }
   size_t cc;
 #define CompareTwoLists(list1, list_valid, lsize)                             \
-  if (list1.size() != lsize) {                                                \
-    std::cerr << "Problem setting " #list1 ". Size is: " << list1.size()      \
-              << " should be: " << lsize << std::endl;                        \
-    res = 1;                                                                  \
-  } else {                                                                    \
-    std::cout << #list1 " argument set:";                                     \
-    for (cc = 0; cc < lsize; ++cc) {                                          \
-      std::cout << " " << list1[cc];                                          \
-      if (!CompareTwoItemsOnList(list1[cc], list_valid[cc])) {                \
-        std::cerr << "Problem setting " #list1 ". Value of " << cc            \
-                  << " is: [" << list1[cc] << "] <> [" << list_valid[cc]      \
-                  << "]" << std::endl;                                        \
-        res = 1;                                                              \
-        break;                                                                \
+  do {                                                                        \
+    if (list1.size() != lsize) {                                              \
+      std::cerr << "Problem setting " #list1 ". Size is: " << list1.size()    \
+                << " should be: " << lsize << std::endl;                      \
+      res = 1;                                                                \
+    } else {                                                                  \
+      std::cout << #list1 " argument set:";                                   \
+      for (cc = 0; cc < lsize; ++cc) {                                        \
+        std::cout << " " << list1[cc];                                        \
+        if (!CompareTwoItemsOnList(list1[cc], list_valid[cc])) {              \
+          std::cerr << "Problem setting " #list1 ". Value of " << cc          \
+                    << " is: [" << list1[cc] << "] <> [" << list_valid[cc]    \
+                    << "]" << std::endl;                                      \
+          res = 1;                                                            \
+          break;                                                              \
+        }                                                                     \
       }                                                                       \
+      std::cout << std::endl;                                                 \
     }                                                                         \
-    std::cout << std::endl;                                                   \
-  }
-
+  } while (0)
   CompareTwoLists(numbers_argument, valid_numbers, 10);
   CompareTwoLists(doubles_argument, valid_doubles, 3);
   CompareTwoLists(bools_argument, valid_bools, 3);
