@@ -14,6 +14,7 @@
 #include "cmake.h"
 
 #include <algorithm>
+#include <utility>
 
 // -- Class methods
 

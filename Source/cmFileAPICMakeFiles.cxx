@@ -12,6 +12,7 @@
 #include "cm_jsoncpp_value.h"
 
 #include <string>
+#include <vector>
 
 namespace {
 

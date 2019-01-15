@@ -11,7 +11,6 @@
 #include "cm_uv.h"
 #include "cmsys/RegularExpression.hxx"
 
-#include <algorithm>
 #include <condition_variable>
 #include <cstddef>
 #include <deque>
@@ -21,6 +20,7 @@
 #include <set>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 class cmMakefile;

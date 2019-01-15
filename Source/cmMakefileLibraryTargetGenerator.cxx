@@ -6,6 +6,7 @@
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stddef.h>
+#include <utility>
 #include <vector>
 
 #include "cmGeneratedFileStream.h"

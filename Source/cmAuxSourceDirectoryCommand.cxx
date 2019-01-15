@@ -5,6 +5,7 @@
 #include "cmsys/Directory.hxx"
 #include <algorithm>
 #include <stddef.h>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"

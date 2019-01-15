@@ -4,6 +4,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmExportSet.h"
+#include "cmExportSetMap.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -20,8 +21,6 @@
 
 #include <sstream>
 #include <utility>
-
-class cmExportSetMap;
 
 cmExportInstallFileGenerator::cmExportInstallFileGenerator(
   cmInstallExportGenerator* iegen)

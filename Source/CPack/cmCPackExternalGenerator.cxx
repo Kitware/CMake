@@ -13,6 +13,7 @@
 
 #include "cmsys/FStream.hxx"
 
+#include <map>
 #include <utility>
 #include <vector>
 

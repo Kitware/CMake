@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmPipeConnection.h"
 
-#include <algorithm>
+#include <utility>
 
 #include "cmServer.h"
 
