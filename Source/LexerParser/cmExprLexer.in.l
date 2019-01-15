@@ -18,6 +18,8 @@ Modify cmExprLexer.cxx:
 
 /* IWYU pragma: no_forward_declare yyguts_t */
 
+#ifndef __clang_analyzer__ /* Suppress clang scan-build warnings */
+
 #include "cmExprParserHelper.h"
 
 /* Replace the lexer input function.  */
@@ -61,3 +63,7 @@ Modify cmExprLexer.cxx:
 . { yyextra->UnexpectedChar(yytext[0]); }
 
 %%
+
+/*--------------------------------------------------------------------------*/
+
+#endif /* __clang_analyzer__ */
