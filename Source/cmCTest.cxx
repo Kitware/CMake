@@ -1944,6 +1944,9 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       this->Quiet = true;
       this->OutputAsJson = true;
       this->OutputAsJsonVersion = 1;
+    } else if (format != "human") {
+      errormsg = "'--show-only=' given unknown value '" + format + "'";
+      return false;
     }
   }
 
