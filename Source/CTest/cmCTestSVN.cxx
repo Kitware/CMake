@@ -521,7 +521,7 @@ private:
     } else {
       local_path = path;
     }
-    this->SVN->Repositories.emplace_back(local_path.c_str());
+    this->SVN->Repositories.emplace_back(local_path);
   }
 };
 
