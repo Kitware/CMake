@@ -19,6 +19,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
+#include "cmListFileCache.h" // for BT
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
@@ -430,6 +431,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
   vars.ObjectDir = "$OBJECT_DIR";
   vars.ObjectFileDir = "$OBJECT_FILE_DIR";
+  if (lang == "Swift") {
+    vars.SwiftAuxiliarySources = "$SWIFT_AUXILIARY_SOURCES";
+  }
 
   // For some cases we do an explicit preprocessor invocation.
   bool const explicitPP = this->NeedExplicitPreprocessing(lang);
@@ -900,6 +904,20 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
   vars["INCLUDES"] = this->ComputeIncludes(source, language);
+  // The swift compiler needs all the sources besides the one being compiled in
+  // order to do the type checking.  List all these "auxiliary" sources.
+  if (language == "Swift") {
+    std::string aux_sources;
+    cmGeneratorTarget::KindedSources const& sources =
+      this->GeneratorTarget->GetKindedSources(this->GetConfigName());
+    for (cmGeneratorTarget::SourceAndKind const& src : sources.Sources) {
+      if (src.Source.Value == source) {
+        continue;
+      }
+      aux_sources += " " + this->GetSourceFilePath(src.Source.Value);
+    }
+    vars["SWIFT_AUXILIARY_SOURCES"] = aux_sources;
+  }
 
   if (!this->NeedDepTypeMSVC(language)) {
     bool replaceExt(false);
