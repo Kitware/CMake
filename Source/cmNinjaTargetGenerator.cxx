@@ -919,7 +919,12 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
     vars["SWIFT_AUXILIARY_SOURCES"] = aux_sources;
 
-    vars["SWIFT_MODULE_NAME"] = this->GeneratorTarget->GetName();
+    if (const char* name =
+          this->GeneratorTarget->GetProperty("SWIFT_MODULE_NAME")) {
+      vars["SWIFT_MODULE_NAME"] = name;
+    } else {
+      vars["SWIFT_MODULE_NAME"] = this->GeneratorTarget->GetName();
+    }
   }
 
   if (!this->NeedDepTypeMSVC(language)) {
