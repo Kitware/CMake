@@ -1039,6 +1039,11 @@ void cmCTestMultiProcessHandler::PrintOutputAsJson()
     testRun.SetTestProperties(&p);
     testRun.ComputeArguments();
 
+    // Skip tests not available in this configuration.
+    if (p.Args.size() >= 2 && p.Args[1] == "NOT_AVAILABLE") {
+      continue;
+    }
+
     Json::Value testInfo = DumpCTestInfo(testRun, p, backtraceGraph);
     tests.append(testInfo);
   }
