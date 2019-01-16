@@ -135,7 +135,7 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
         return;
       }
       break;
-  };
+  }
 #if !defined(_WIN32) || defined(__CYGWIN__)
   if (archive_read_disk_set_standard_lookup(this->Disk) != ARCHIVE_OK) {
     this->Error = "archive_read_disk_set_standard_lookup: ";

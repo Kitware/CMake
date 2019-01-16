@@ -357,14 +357,18 @@ int cmCTestBuildHandler::ProcessHandler()
   // Pre-compile regular expressions objects for all regular expressions
 
 #define cmCTestBuildHandlerPopulateRegexVector(strings, regexes)              \
-  regexes.clear();                                                            \
-  cmCTestOptionalLog(this->CTest, DEBUG,                                      \
-                     this << "Add " #regexes << std::endl, this->Quiet);      \
-  for (std::string const& s : (strings)) {                                    \
+  do {                                                                        \
+    regexes.clear();                                                          \
     cmCTestOptionalLog(this->CTest, DEBUG,                                    \
-                       "Add " #strings ": " << s << std::endl, this->Quiet);  \
-    (regexes).push_back(s.c_str());                                           \
-  }
+                       this << "Add " #regexes << std::endl, this->Quiet);    \
+    for (std::string const& s : (strings)) {                                  \
+      cmCTestOptionalLog(this->CTest, DEBUG,                                  \
+                         "Add " #strings ": " << s << std::endl,              \
+                         this->Quiet);                                        \
+      (regexes).push_back(s.c_str());                                         \
+    }                                                                         \
+  } while (false)
+
   cmCTestBuildHandlerPopulateRegexVector(this->CustomErrorMatches,
                                          this->ErrorMatchRegex);
   cmCTestBuildHandlerPopulateRegexVector(this->CustomErrorExceptions,

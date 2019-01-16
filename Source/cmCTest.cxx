@@ -2853,9 +2853,11 @@ static const char* cmCTestStringLogType[] = { "DEBUG",
                                               nullptr };
 
 #define cmCTestLogOutputFileLine(stream)                                      \
-  if (this->ShowLineNumbers) {                                                \
-    (stream) << std::endl << file << ":" << line << " ";                      \
-  }
+  do {                                                                        \
+    if (this->ShowLineNumbers) {                                              \
+      (stream) << std::endl << file << ":" << line << " ";                    \
+    }                                                                         \
+  } while (false)
 
 void cmCTest::InitStreams()
 {

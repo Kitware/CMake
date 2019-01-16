@@ -2700,12 +2700,14 @@ private:
 #endif
 
 #define check_curl_result(result, errstr)                                     \
-  if (result != CURLE_OK) {                                                   \
-    std::string e(errstr);                                                    \
-    e += ::curl_easy_strerror(result);                                        \
-    this->SetError(e);                                                        \
-    return false;                                                             \
-  }
+  do {                                                                        \
+    if (result != CURLE_OK) {                                                 \
+      std::string e(errstr);                                                  \
+      e += ::curl_easy_strerror(result);                                      \
+      this->SetError(e);                                                      \
+      return false;                                                           \
+    }                                                                         \
+  } while (false)
 
 bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 {

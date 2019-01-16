@@ -16,10 +16,12 @@
 #include <utility>
 
 #define ASSERT_TRUE(x)                                                        \
-  if (!(x)) {                                                                 \
-    std::cout << "ASSERT_TRUE(" #x ") failed on line " << __LINE__ << "\n";   \
-    return false;                                                             \
-  }
+  do {                                                                        \
+    if (!(x)) {                                                               \
+      std::cout << "ASSERT_TRUE(" #x ") failed on line " << __LINE__ << "\n"; \
+      return false;                                                           \
+    }                                                                         \
+  } while (false)
 
 static bool testConstructDefault()
 {
@@ -144,7 +146,6 @@ static bool testConstructFromCStr()
 {
   std::cout << "testConstructFromCStr()\n";
   return testFromCStr(cstr);
-  ;
 }
 
 static bool testAssignFromCStr()
@@ -153,7 +154,6 @@ static bool testAssignFromCStr()
   cm::String str;
   str = cstr;
   return testFromCStr(str);
-  ;
 }
 
 static const std::string stdstr = "abc";

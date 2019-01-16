@@ -1021,7 +1021,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string config;
       if (args.size() > 3) {
         config = args[3];
-      };
+      }
       return autoGen.Run(infoFile, config) ? 0 : 1;
     }
 #endif
@@ -1485,7 +1485,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
         break;
       default:
         break;
-    };
+    }
   }
 
   // Free the process instance.
