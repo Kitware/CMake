@@ -85,15 +85,15 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
 
         // We support Qt4, Qt5 and Qt6
         auto qtVersion = cmQtAutoGenInitializer::GetQtVersion(target);
-        bool const validQt = (qtVersion.Major == 4) ||
-          (qtVersion.Major == 5) || (qtVersion.Major == 6);
+        bool const validQt = (qtVersion.first.Major == 4) ||
+          (qtVersion.first.Major == 5) || (qtVersion.first.Major == 6);
 
         bool const mocAvailable = (validQt || !mocExec.empty());
         bool const uicAvailable = (validQt || !uicExec.empty());
         bool const rccAvailable = (validQt || !rccExec.empty());
         bool const mocIsValid = (moc && mocAvailable);
         bool const uicIsValid = (uic && uicAvailable);
-        bool const rccIsValid = (rcc && uicAvailable);
+        bool const rccIsValid = (rcc && rccAvailable);
         // Disabled AUTOMOC/UIC/RCC warning
         bool const mocDisabled = (moc && !mocAvailable);
         bool const uicDisabled = (uic && !uicAvailable);
@@ -102,24 +102,18 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
           std::string msg = "AUTOGEN: No valid Qt version found for target ";
           msg += target->GetName();
           msg += ". ";
-          {
-            std::vector<std::string> lst;
-            if (mocDisabled) {
-              lst.emplace_back("AUTOMOC");
-            }
-            if (uicDisabled) {
-              lst.emplace_back("AUTOUIC");
-            }
-            if (rccDisabled) {
-              lst.emplace_back("AUTORCC");
-            }
-            msg += cmJoin(lst, ", ");
-          }
+          msg += cmQtAutoGen::Tools(mocDisabled, uicDisabled, rccDisabled);
           msg += " disabled.  Consider adding:\n";
-          if (uicDisabled) {
-            msg += "  find_package(Qt5 COMPONENTS Widgets)\n";
-          } else {
-            msg += "  find_package(Qt5 COMPONENTS Core)\n";
+          {
+            std::string version = (qtVersion.second == 0)
+              ? std::string("<QTVERSION>")
+              : std::to_string(qtVersion.second);
+            std::string comp = uicDisabled ? "Widgets" : "Core";
+            msg += "  find_package(Qt";
+            msg += version;
+            msg += " COMPONENTS ";
+            msg += comp;
+            msg += ")\n";
           }
           msg += "to your CMakeLists.txt file.";
           target->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg);
@@ -127,7 +121,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
         if (mocIsValid || uicIsValid || rccIsValid) {
           // Create autogen target initializer
           Initializers_.emplace_back(cm::make_unique<cmQtAutoGenInitializer>(
-            this, target, qtVersion, mocIsValid, uicIsValid, rccIsValid,
+            this, target, qtVersion.first, mocIsValid, uicIsValid, rccIsValid,
             globalAutoGenTarget, globalAutoRccTarget));
         }
       }

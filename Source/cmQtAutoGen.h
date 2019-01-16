@@ -60,6 +60,9 @@ public:
   /// @brief Returns the generator name in upper case
   static std::string GeneratorNameUpper(GeneratorT genType);
 
+  /// @brief Returns a string with the requested tool names
+  static std::string Tools(bool moc, bool uic, bool rcc);
+
   /// @brief Returns the string escaped and enclosed in quotes
   static std::string Quoted(std::string const& text);
 

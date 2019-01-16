@@ -11,6 +11,7 @@
 #include <ostream>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 class cmGeneratorTarget;
@@ -76,7 +77,9 @@ public:
   };
 
 public:
-  static IntegerVersion GetQtVersion(cmGeneratorTarget const* target);
+  /// @return The detected Qt version and the required Qt major version
+  static std::pair<IntegerVersion, unsigned int> GetQtVersion(
+    cmGeneratorTarget const* target);
 
   cmQtAutoGenInitializer(cmQtAutoGenGlobalInitializer* globalInitializer,
                          cmGeneratorTarget* target,
