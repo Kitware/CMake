@@ -1482,7 +1482,7 @@ std::pair<bool, std::string> GetQtExecutable(
     if (cmSystemTools::FileExists(result, true)) {
       std::vector<std::string> command;
       command.push_back(result);
-      command.push_back("-h");
+      command.emplace_back("-h");
       std::string stdOut;
       std::string stdErr;
       int retVal = 0;
@@ -1546,9 +1546,9 @@ bool cmQtAutoGenInitializer::GetRccExecutable()
 
   if (this->QtVersion.Major == 5 || this->QtVersion.Major == 6) {
     if (stdOut.find("--list") != std::string::npos) {
-      this->Rcc.ListOptions.push_back("--list");
+      this->Rcc.ListOptions.emplace_back("--list");
     } else {
-      this->Rcc.ListOptions.push_back("-list");
+      this->Rcc.ListOptions.emplace_back("-list");
     }
   }
   return true;

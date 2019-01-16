@@ -884,12 +884,12 @@ void cmComputeLinkInformation::AddLinkExtension(const char* e, LinkType type)
 {
   if (e && *e) {
     if (type == LinkStatic) {
-      this->StaticLinkExtensions.push_back(e);
+      this->StaticLinkExtensions.emplace_back(e);
     }
     if (type == LinkShared) {
-      this->SharedLinkExtensions.push_back(e);
+      this->SharedLinkExtensions.emplace_back(e);
     }
-    this->LinkExtensions.push_back(e);
+    this->LinkExtensions.emplace_back(e);
   }
 }
 

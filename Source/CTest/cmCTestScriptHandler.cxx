@@ -135,7 +135,7 @@ cmCTestScriptHandler::~cmCTestScriptHandler()
 void cmCTestScriptHandler::AddConfigurationScript(const char* script,
                                                   bool pscope)
 {
-  this->ConfigurationScripts.push_back(script);
+  this->ConfigurationScripts.emplace_back(script);
   this->ScriptProcessScope.push_back(pscope);
 }
 
@@ -450,7 +450,7 @@ int cmCTestScriptHandler::ExtractVariables()
           updateVar, " specified without specifying CTEST_CVS_COMMAND.");
         return 12;
       }
-      this->ExtraUpdates.push_back(updateVal);
+      this->ExtraUpdates.emplace_back(updateVal);
     }
   }
 

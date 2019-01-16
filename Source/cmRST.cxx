@@ -178,7 +178,7 @@ void cmRST::ProcessLine(std::string const& line)
       // Record the literal lines to output after whole block.
       // Ignore the language spec and record the opening line as blank.
       this->Directive = DirectiveCodeBlock;
-      this->MarkupLines.push_back("");
+      this->MarkupLines.emplace_back();
     } else if (this->ReplaceDirective.find(line)) {
       // Record the replace directive content.
       this->Directive = DirectiveReplace;
@@ -221,7 +221,7 @@ void cmRST::ProcessLine(std::string const& line)
     // Record the literal lines to output after whole block.
     this->Markup = MarkupNormal;
     this->Directive = DirectiveLiteralBlock;
-    this->MarkupLines.push_back("");
+    this->MarkupLines.emplace_back();
     this->OutputLine("", false);
   }
   // Print non-markup lines.

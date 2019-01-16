@@ -1036,7 +1036,8 @@ int cmCPackGenerator::DoPackage()
    * may update this during PackageFiles.
    * (either putting several names or updating the provided one)
    */
-  packageFileNames.push_back(tempPackageFileName ? tempPackageFileName : "");
+  packageFileNames.emplace_back(tempPackageFileName ? tempPackageFileName
+                                                    : "");
   toplevel = tempDirectory;
   { // scope that enables package generators to run internal scripts with
     // latest CMake policies enabled

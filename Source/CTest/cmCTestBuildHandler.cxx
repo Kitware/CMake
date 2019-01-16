@@ -341,17 +341,17 @@ int cmCTestBuildHandler::ProcessHandler()
   // warnings and warning exceptions.
   std::vector<std::string>::size_type cc;
   for (cc = 0; cmCTestErrorMatches[cc]; cc++) {
-    this->CustomErrorMatches.push_back(cmCTestErrorMatches[cc]);
+    this->CustomErrorMatches.emplace_back(cmCTestErrorMatches[cc]);
   }
   for (cc = 0; cmCTestErrorExceptions[cc]; cc++) {
-    this->CustomErrorExceptions.push_back(cmCTestErrorExceptions[cc]);
+    this->CustomErrorExceptions.emplace_back(cmCTestErrorExceptions[cc]);
   }
   for (cc = 0; cmCTestWarningMatches[cc]; cc++) {
-    this->CustomWarningMatches.push_back(cmCTestWarningMatches[cc]);
+    this->CustomWarningMatches.emplace_back(cmCTestWarningMatches[cc]);
   }
 
   for (cc = 0; cmCTestWarningExceptions[cc]; cc++) {
-    this->CustomWarningExceptions.push_back(cmCTestWarningExceptions[cc]);
+    this->CustomWarningExceptions.emplace_back(cmCTestWarningExceptions[cc]);
   }
 
   // Pre-compile regular expressions objects for all regular expressions
@@ -365,7 +365,7 @@ int cmCTestBuildHandler::ProcessHandler()
       cmCTestOptionalLog(this->CTest, DEBUG,                                  \
                          "Add " #strings ": " << s << std::endl,              \
                          this->Quiet);                                        \
-      (regexes).push_back(s.c_str());                                         \
+      (regexes).emplace_back(s);                                              \
     }                                                                         \
   } while (false)
 
@@ -1034,7 +1034,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
           }
         } else {
           // Otherwise store pre-context for the next error
-          this->PreContext.push_back(line);
+          this->PreContext.emplace_back(line);
           if (this->PreContext.size() > this->MaxPreContext) {
             this->PreContext.erase(this->PreContext.begin(),
                                    this->PreContext.end() -

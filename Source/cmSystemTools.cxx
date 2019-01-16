@@ -534,7 +534,7 @@ public:
   void Store(std::vector<std::string>& args) const
   {
     for (char** arg = this->ArgV; arg && *arg; ++arg) {
-      args.push_back(*arg);
+      args.emplace_back(*arg);
     }
   }
 };
@@ -1586,7 +1586,7 @@ std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
   std::vector<std::string> env;
   int cc;
   for (cc = 0; environ[cc]; ++cc) {
-    env.push_back(environ[cc]);
+    env.emplace_back(environ[cc]);
   }
   return env;
 }
@@ -3063,7 +3063,7 @@ std::vector<std::string> cmSystemTools::tokenize(const std::string& str,
   } while (tokend != std::string::npos);
 
   if (tokens.empty()) {
-    tokens.push_back("");
+    tokens.emplace_back();
   }
   return tokens;
 }

@@ -20,8 +20,8 @@ std::vector<cmGeneratorExpressionToken> cmGeneratorExpressionLexer::Tokenize(
   std::vector<cmGeneratorExpressionToken> result;
 
   if (input.find('$') == std::string::npos) {
-    result.push_back(cmGeneratorExpressionToken(
-      cmGeneratorExpressionToken::Text, input.c_str(), input.size()));
+    result.emplace_back(cmGeneratorExpressionToken::Text, input.c_str(),
+                        input.size());
     return result;
   }
 

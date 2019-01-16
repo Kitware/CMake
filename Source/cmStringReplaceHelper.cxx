@@ -85,10 +85,12 @@ void cmStringReplaceHelper::ParseReplaceExpression()
     auto r = this->ReplaceExpression.find('\\', l);
     if (r == std::string::npos) {
       r = this->ReplaceExpression.length();
-      this->Replacements.push_back(this->ReplaceExpression.substr(l, r - l));
+      this->Replacements.emplace_back(
+        this->ReplaceExpression.substr(l, r - l));
     } else {
       if (r - l > 0) {
-        this->Replacements.push_back(this->ReplaceExpression.substr(l, r - l));
+        this->Replacements.emplace_back(
+          this->ReplaceExpression.substr(l, r - l));
       }
       if (r == (this->ReplaceExpression.length() - 1)) {
         this->ValidReplaceExpression = false;
@@ -97,11 +99,11 @@ void cmStringReplaceHelper::ParseReplaceExpression()
       }
       if ((this->ReplaceExpression[r + 1] >= '0') &&
           (this->ReplaceExpression[r + 1] <= '9')) {
-        this->Replacements.push_back(this->ReplaceExpression[r + 1] - '0');
+        this->Replacements.emplace_back(this->ReplaceExpression[r + 1] - '0');
       } else if (this->ReplaceExpression[r + 1] == 'n') {
-        this->Replacements.push_back("\n");
+        this->Replacements.emplace_back("\n");
       } else if (this->ReplaceExpression[r + 1] == '\\') {
-        this->Replacements.push_back("\\");
+        this->Replacements.emplace_back("\\");
       } else {
         this->ValidReplaceExpression = false;
         std::ostringstream error;

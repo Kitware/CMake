@@ -181,7 +181,7 @@ void CCONV cmAddExecutable(void* arg, const char* exename, int numSrcs,
   std::vector<std::string> srcs2;
   int i;
   for (i = 0; i < numSrcs; ++i) {
-    srcs2.push_back(srcs[i]);
+    srcs2.emplace_back(srcs[i]);
   }
   cmTarget* tg = mf->AddExecutable(exename, srcs2);
   if (win32) {
@@ -393,7 +393,7 @@ void CCONV cmAddLibrary(void* arg, const char* libname, int shared,
   std::vector<std::string> srcs2;
   int i;
   for (i = 0; i < numSrcs; ++i) {
-    srcs2.push_back(srcs[i]);
+    srcs2.emplace_back(srcs[i]);
   }
   mf->AddLibrary(
     libname,
@@ -419,8 +419,7 @@ int CCONV cmExecuteCommand(void* arg, const char* name, int numArgs,
   lff.Name = name;
   for (int i = 0; i < numArgs; ++i) {
     // Assume all arguments are quoted.
-    lff.Arguments.push_back(
-      cmListFileArgument(args[i], cmListFileArgument::Quoted, 0));
+    lff.Arguments.emplace_back(args[i], cmListFileArgument::Quoted, 0);
   }
   cmExecutionStatus status;
   return mf->ExecuteCommand(lff, status);
@@ -436,7 +435,7 @@ void CCONV cmExpandSourceListArguments(void* arg, int numArgs,
   std::vector<std::string> result;
   int i;
   for (i = 0; i < numArgs; ++i) {
-    result.push_back(args[i]);
+    result.emplace_back(args[i]);
   }
   int resargc = static_cast<int>(result.size());
   char** resargv = nullptr;
@@ -627,7 +626,7 @@ void CCONV cmSourceFileAddDepend(void* arg, const char* depend)
   if (cmSourceFile* rsf = sf->RealSourceFile) {
     rsf->AddDepend(depend);
   } else {
-    sf->Depends.push_back(depend);
+    sf->Depends.emplace_back(depend);
   }
 }
 
@@ -647,10 +646,10 @@ void CCONV cmSourceFileSetName(void* arg, const char* name, const char* dir,
   std::vector<std::string> headerExts;
   int i;
   for (i = 0; i < numSourceExtensions; ++i) {
-    sourceExts.push_back(sourceExtensions[i]);
+    sourceExts.emplace_back(sourceExtensions[i]);
   }
   for (i = 0; i < numHeaderExtensions; ++i) {
-    headerExts.push_back(headerExtensions[i]);
+    headerExts.emplace_back(headerExtensions[i]);
   }
 
   // Save the original name given.

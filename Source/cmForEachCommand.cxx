@@ -164,7 +164,7 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,
           break;
         }
         sprintf(buffer, "%d", cc);
-        range.push_back(buffer);
+        range.emplace_back(buffer);
         if (cc == stop) {
           break;
         }

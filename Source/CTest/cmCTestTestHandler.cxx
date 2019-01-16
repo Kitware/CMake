@@ -1524,7 +1524,7 @@ void cmCTestTestHandler::AddConfigurations(
   }
   tempPath = filepath + filename;
   attempted.push_back(tempPath);
-  attemptedConfigs.push_back("");
+  attemptedConfigs.emplace_back();
 
   if (!ctest->GetConfigType().empty()) {
     tempPath = filepath;
@@ -1547,32 +1547,32 @@ void cmCTestTestHandler::AddConfigurations(
     tempPath += "Release/";
     tempPath += filename;
     attempted.push_back(tempPath);
-    attemptedConfigs.push_back("Release");
+    attemptedConfigs.emplace_back("Release");
     tempPath = filepath;
     tempPath += "Debug/";
     tempPath += filename;
     attempted.push_back(tempPath);
-    attemptedConfigs.push_back("Debug");
+    attemptedConfigs.emplace_back("Debug");
     tempPath = filepath;
     tempPath += "MinSizeRel/";
     tempPath += filename;
     attempted.push_back(tempPath);
-    attemptedConfigs.push_back("MinSizeRel");
+    attemptedConfigs.emplace_back("MinSizeRel");
     tempPath = filepath;
     tempPath += "RelWithDebInfo/";
     tempPath += filename;
     attempted.push_back(tempPath);
-    attemptedConfigs.push_back("RelWithDebInfo");
+    attemptedConfigs.emplace_back("RelWithDebInfo");
     tempPath = filepath;
     tempPath += "Deployment/";
     tempPath += filename;
     attempted.push_back(tempPath);
-    attemptedConfigs.push_back("Deployment");
+    attemptedConfigs.emplace_back("Deployment");
     tempPath = filepath;
     tempPath += "Development/";
     tempPath += filename;
     attempted.push_back(tempPath);
-    attemptedConfigs.push_back("Deployment");
+    attemptedConfigs.emplace_back("Deployment");
   }
 }
 

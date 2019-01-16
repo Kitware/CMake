@@ -550,7 +550,7 @@ bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
     this->NinjaCommand = ninjaCommand;
     std::vector<std::string> command;
     command.push_back(this->NinjaCommand);
-    command.push_back("--version");
+    command.emplace_back("--version");
     std::string version;
     std::string error;
     if (!cmSystemTools::RunSingleCommand(command, &version, &error, nullptr,
@@ -681,12 +681,12 @@ void cmGlobalNinjaGenerator::GenerateBuildCommand(
   makeCommand.push_back(this->SelectMakeProgram(makeProgram));
 
   if (verbose) {
-    makeCommand.push_back("-v");
+    makeCommand.emplace_back("-v");
   }
 
   if ((jobs != cmake::NO_BUILD_PARALLEL_LEVEL) &&
       (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL)) {
-    makeCommand.push_back("-j");
+    makeCommand.emplace_back("-j");
     makeCommand.push_back(std::to_string(jobs));
   }
 
@@ -694,8 +694,8 @@ void cmGlobalNinjaGenerator::GenerateBuildCommand(
                      makeOptions.end());
   if (!targetName.empty()) {
     if (targetName == "clean") {
-      makeCommand.push_back("-t");
-      makeCommand.push_back("clean");
+      makeCommand.emplace_back("-t");
+      makeCommand.emplace_back("clean");
     } else {
       makeCommand.push_back(targetName);
     }

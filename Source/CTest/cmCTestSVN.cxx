@@ -532,7 +532,7 @@ bool cmCTestSVN::LoadRepositories()
   }
 
   // Info for root repository
-  this->Repositories.emplace_back("");
+  this->Repositories.emplace_back();
   this->RootInfo = &(this->Repositories.back());
 
   // Run "svn status" to get the list of external repositories

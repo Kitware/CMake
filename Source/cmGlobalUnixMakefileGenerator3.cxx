@@ -216,7 +216,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
   // Just depend on the all target to drive the build.
   std::vector<std::string> depends;
   std::vector<std::string> no_commands;
-  depends.push_back("all");
+  depends.emplace_back("all");
 
   // Write the rule.
   lg->WriteMakeRule(makefileStream,
@@ -513,7 +513,7 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
   makeCommand.push_back(this->SelectMakeProgram(makeProgram));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    makeCommand.push_back("-j");
+    makeCommand.emplace_back("-j");
     if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
       makeCommand.push_back(std::to_string(jobs));
     }
@@ -542,7 +542,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(
 
   bool regenerate = !this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION");
   if (regenerate) {
-    depends.push_back("cmake_check_build_system");
+    depends.emplace_back("cmake_check_build_system");
   }
 
   // write the target convenience rules
@@ -577,7 +577,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(
         commands.push_back(lg->GetRecursiveMakeCall(tmp.c_str(), name));
         depends.clear();
         if (regenerate) {
-          depends.push_back("cmake_check_build_system");
+          depends.emplace_back("cmake_check_build_system");
         }
         lg->WriteMakeRule(ruleFileStream, "Build rule for target.", name,
                           depends, commands, true);
@@ -631,7 +631,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
 
   bool regenerate = !this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION");
   if (regenerate) {
-    depends.push_back("cmake_check_build_system");
+    depends.emplace_back("cmake_check_build_system");
   }
 
   // for each target Generate the rule files for each target.
@@ -740,7 +740,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       }
       depends.clear();
       if (regenerate) {
-        depends.push_back("cmake_check_build_system");
+        depends.emplace_back("cmake_check_build_system");
       }
       localName = lg->GetRelativeTargetDirectory(gtarget);
       localName += "/rule";

@@ -610,7 +610,7 @@ bool cmCPackNSISGenerator::GetListOfSubdirectories(
       }
     }
   }
-  dirs.push_back(topdir);
+  dirs.emplace_back(topdir);
   return true;
 }
 

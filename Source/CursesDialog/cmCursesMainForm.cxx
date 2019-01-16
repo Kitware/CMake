@@ -37,10 +37,10 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> const& args,
   this->AdvancedMode = false;
   this->NumberOfVisibleEntries = 0;
   this->OkToGenerate = false;
-  this->HelpMessage.push_back(
+  this->HelpMessage.emplace_back(
     "Welcome to ccmake, curses based user interface for CMake.");
-  this->HelpMessage.push_back("");
-  this->HelpMessage.push_back(s_ConstHelpMessage);
+  this->HelpMessage.emplace_back();
+  this->HelpMessage.emplace_back(s_ConstHelpMessage);
   this->CMakeInstance = new cmake(cmake::RoleProject, cmState::Project);
   this->CMakeInstance->SetCMakeEditCommand(
     cmSystemTools::GetCMakeCursesCommand());
@@ -652,7 +652,7 @@ int cmCursesMainForm::Generate()
 
 void cmCursesMainForm::AddError(const char* message, const char* /*unused*/)
 {
-  this->Errors.push_back(message);
+  this->Errors.emplace_back(message);
 }
 
 void cmCursesMainForm::RemoveEntry(const char* value)

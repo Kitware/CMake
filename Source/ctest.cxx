@@ -208,7 +208,7 @@ int main(int argc, char const* const* argv)
   std::vector<std::string> args;
   args.reserve(argc);
   for (int i = 0; i < argc; ++i) {
-    args.push_back(argv[i]);
+    args.emplace_back(argv[i]);
   }
   // run ctest
   std::string output;

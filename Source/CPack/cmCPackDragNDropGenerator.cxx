@@ -71,8 +71,8 @@ int cmCPackDragNDropGenerator::InitializeInternal()
   // Starting with Xcode 4.3, look in "/Applications/Xcode.app" first:
   //
   std::vector<std::string> paths;
-  paths.push_back("/Applications/Xcode.app/Contents/Developer/Tools");
-  paths.push_back("/Developer/Tools");
+  paths.emplace_back("/Applications/Xcode.app/Contents/Developer/Tools");
+  paths.emplace_back("/Developer/Tools");
 
   const std::string hdiutil_path =
     cmSystemTools::FindProgram("hdiutil", std::vector<std::string>(), false);

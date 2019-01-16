@@ -109,7 +109,7 @@ int main(int argc, char const* const* argv)
     if (strcmp(argv[j], "-debug") == 0) {
       debug = true;
     } else {
-      args.push_back(argv[j]);
+      args.emplace_back(argv[j]);
     }
   }
 
