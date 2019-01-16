@@ -17,6 +17,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
@@ -99,7 +100,7 @@ const char* cmTargetPropertyComputer::GetSources<cmTarget>(
         bool addContent = false;
         bool noMessage = true;
         std::ostringstream e;
-        cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+        MessageType messageType = MessageType::AUTHOR_WARNING;
         switch (context.GetBottom().GetPolicy(cmPolicies::CMP0051)) {
           case cmPolicies::WARN:
             e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0051) << "\n";
@@ -570,7 +571,7 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
   if (src != s) {
     std::ostringstream e;
     bool noMessage = false;
-    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    MessageType messageType = MessageType::AUTHOR_WARNING;
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0049)) {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0049) << "\n";
@@ -581,7 +582,7 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
       case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW:
-        messageType = cmake::FATAL_ERROR;
+        messageType = MessageType::FATAL_ERROR;
     }
     if (!noMessage) {
       e << "Legacy variable expansion in source file \"" << s
@@ -589,7 +590,7 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
         << "\".  This behavior will be removed in a "
            "future version of CMake.";
       this->Makefile->IssueMessage(messageType, e.str());
-      if (messageType == cmake::FATAL_ERROR) {
+      if (messageType == MessageType::FATAL_ERROR) {
         return "";
       }
     }
@@ -933,40 +934,40 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
     std::ostringstream e;
     e << "MANUALLY_ADDED_DEPENDENCIES property is read-only\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == propNAME) {
     std::ostringstream e;
     e << "NAME property is read-only\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == propTYPE) {
     std::ostringstream e;
     e << "TYPE property is read-only\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == propEXPORT_NAME && this->IsImported()) {
     std::ostringstream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
       << this->Name << "\")\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == propSOURCES && this->IsImported()) {
     std::ostringstream e;
     e << "SOURCES property can't be set on imported targets (\"" << this->Name
       << "\")\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == propIMPORTED_GLOBAL && !this->IsImported()) {
     std::ostringstream e;
     e << "IMPORTED_GLOBAL property can't be set on non-imported targets (\""
       << this->Name << "\")\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
 
@@ -1039,7 +1040,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       std::ostringstream e;
       e << "IMPORTED_GLOBAL property can't be set to FALSE on targets (\""
         << this->Name << "\")\n";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return;
     }
     /* no need to change anything if value does not change */
@@ -1056,7 +1057,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     e << "CUDA_PTX_COMPILATION property can only be applied to OBJECT "
          "targets (\""
       << this->Name << "\")\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   } else {
     this->Properties.SetProperty(prop, value);
@@ -1074,21 +1075,21 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
   if (prop == "NAME") {
     std::ostringstream e;
     e << "NAME property is read-only\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == "EXPORT_NAME" && this->IsImported()) {
     std::ostringstream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
       << this->Name << "\")\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == "SOURCES" && this->IsImported()) {
     std::ostringstream e;
     e << "SOURCES property can't be set on imported targets (\"" << this->Name
       << "\")\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == "IMPORTED_GLOBAL") {
@@ -1096,7 +1097,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     e << "IMPORTED_GLOBAL property can't be appended, only set on imported "
          "targets (\""
       << this->Name << "\")\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == "INCLUDE_DIRECTORIES") {
@@ -1146,7 +1147,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     this->Internal->SourceEntries.push_back(value);
     this->Internal->SourceBacktraces.push_back(lfbt);
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME")) {
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  prop + " property may not be APPENDed.");
   } else {
     this->Properties.AppendProperty(prop, value, asString);
@@ -1283,7 +1284,7 @@ static void cmTargetCheckLINK_INTERFACE_LIBRARIES(const std::string& prop,
       << "the LINK_INTERFACE_LIBRARIES and LINK_INTERFACE_LIBRARIES_DEBUG "
       << "properties accordingly.";
   }
-  context->IssueMessage(cmake::FATAL_ERROR, e.str());
+  context->IssueMessage(MessageType::FATAL_ERROR, e.str());
 }
 
 static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const char* value,
@@ -1305,7 +1306,7 @@ static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const char* value,
        "property may contain configuration-sensitive generator-expressions "
        "which may be used to specify per-configuration rules.";
 
-  context->IssueMessage(cmake::FATAL_ERROR, e.str());
+  context->IssueMessage(MessageType::FATAL_ERROR, e.str());
 }
 
 static void cmTargetCheckIMPORTED_GLOBAL(const cmTarget* target,
@@ -1319,7 +1320,7 @@ static void cmTargetCheckIMPORTED_GLOBAL(const cmTarget* target,
     e << "Attempt to promote imported target \"" << target->GetName()
       << "\" to global scope (by setting IMPORTED_GLOBAL) "
          "which is not built in this directory.";
-    context->IssueMessage(cmake::FATAL_ERROR, e.str());
+    context->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
 }
 
@@ -1683,21 +1684,21 @@ bool cmTarget::CheckImportedLibName(std::string const& prop,
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY ||
       !this->IsImported()) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       prop +
         " property may be set only on imported INTERFACE library targets.");
     return false;
   }
   if (!value.empty()) {
     if (value[0] == '-') {
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                    prop + " property value\n  " + value +
                                      "\nmay not start with '-'.");
       return false;
     }
     std::string::size_type bad = value.find_first_of(":/\\;");
     if (bad != std::string::npos) {
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                    prop + " property value\n  " + value +
                                      "\nmay not contain '" +
                                      value.substr(bad, 1) + "'.");

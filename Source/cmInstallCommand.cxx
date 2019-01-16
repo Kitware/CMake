@@ -23,12 +23,12 @@
 #include "cmInstallTargetGenerator.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -864,7 +864,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
     if (gg->IsExportedTargetsFile(file)) {
       const char* modal = nullptr;
       std::ostringstream e;
-      cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+      MessageType messageType = MessageType::AUTHOR_WARNING;
 
       switch (status) {
         case cmPolicies::WARN:
@@ -876,7 +876,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
         case cmPolicies::REQUIRED_ALWAYS:
         case cmPolicies::NEW:
           modal = "may";
-          messageType = cmake::FATAL_ERROR;
+          messageType = MessageType::FATAL_ERROR;
       }
       if (modal) {
         e << "The file\n  " << file
@@ -887,7 +887,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
              "install() command.  Use the install(EXPORT) mechanism "
              "instead.  See the cmake-packages(7) manual for more.\n";
         this->Makefile->IssueMessage(messageType, e.str());
-        if (messageType == cmake::FATAL_ERROR) {
+        if (messageType == MessageType::FATAL_ERROR) {
           return false;
         }
       }
@@ -1495,7 +1495,7 @@ bool cmInstallCommand::CheckCMP0006(bool& failure)
   switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0006)) {
     case cmPolicies::WARN:
       this->Makefile->IssueMessage(
-        cmake::AUTHOR_WARNING,
+        MessageType::AUTHOR_WARNING,
         cmPolicies::GetPolicyWarning(cmPolicies::CMP0006));
       CM_FALLTHROUGH;
     case cmPolicies::OLD:
@@ -1508,7 +1508,7 @@ bool cmInstallCommand::CheckCMP0006(bool& failure)
     case cmPolicies::REQUIRED_ALWAYS:
       failure = true;
       this->Makefile->IssueMessage(
-        cmake::FATAL_ERROR,
+        MessageType::FATAL_ERROR,
         cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0006));
       break;
   }

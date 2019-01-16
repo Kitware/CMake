@@ -13,6 +13,7 @@
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmState.h"
@@ -96,7 +97,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       targetType = cmStateEnums::STATIC_LIBRARY;
     } else {
       this->Makefile->IssueMessage(
-        cmake::FATAL_ERROR,
+        MessageType::FATAL_ERROR,
         std::string("Invalid value '") + tt +
           "' for "
           "CMAKE_TRY_COMPILE_TARGET_TYPE.  Only "
@@ -238,7 +239,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
             CM_FALLTHROUGH;
           default:
             this->Makefile->IssueMessage(
-              cmake::FATAL_ERROR,
+              MessageType::FATAL_ERROR,
               "Only libraries may be used as try_compile or try_run IMPORTED "
               "LINK_LIBRARIES.  Got " +
                 std::string(tgt->GetName()) +
@@ -297,93 +298,95 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else {
       std::ostringstream m;
       m << "try_compile given unknown argument \"" << argv[i] << "\".";
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str());
+      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m.str());
     }
   }
 
   if (didCopyFile && copyFile.empty()) {
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  "COPY_FILE must be followed by a file path");
     return -1;
   }
 
   if (didCopyFileError && copyFileError.empty()) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "COPY_FILE_ERROR must be followed by a variable name");
     return -1;
   }
 
   if (didCopyFileError && !didCopyFile) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR, "COPY_FILE_ERROR may be used only with COPY_FILE");
+      MessageType::FATAL_ERROR,
+      "COPY_FILE_ERROR may be used only with COPY_FILE");
     return -1;
   }
 
   if (didOutputVariable && outputVariable.empty()) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "OUTPUT_VARIABLE must be followed by a variable name");
     return -1;
   }
 
   if (useSources && sources.empty()) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "SOURCES must be followed by at least one source file");
     return -1;
   }
 
   if (didCStandard && !this->SrcFileSignature) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR, "C_STANDARD allowed only in source file signature.");
+      MessageType::FATAL_ERROR,
+      "C_STANDARD allowed only in source file signature.");
     return -1;
   }
   if (didCxxStandard && !this->SrcFileSignature) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "CXX_STANDARD allowed only in source file signature.");
     return -1;
   }
   if (didCudaStandard && !this->SrcFileSignature) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "CUDA_STANDARD allowed only in source file signature.");
     return -1;
   }
   if (didCStandardRequired && !this->SrcFileSignature) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "C_STANDARD_REQUIRED allowed only in source file signature.");
     return -1;
   }
   if (didCxxStandardRequired && !this->SrcFileSignature) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "CXX_STANDARD_REQUIRED allowed only in source file signature.");
     return -1;
   }
   if (didCudaStandardRequired && !this->SrcFileSignature) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "CUDA_STANDARD_REQUIRED allowed only in source file signature.");
     return -1;
   }
   if (didCExtensions && !this->SrcFileSignature) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "C_EXTENSIONS allowed only in source file signature.");
     return -1;
   }
   if (didCxxExtensions && !this->SrcFileSignature) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "CXX_EXTENSIONS allowed only in source file signature.");
     return -1;
   }
   if (didCudaExtensions && !this->SrcFileSignature) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "CUDA_EXTENSIONS allowed only in source file signature.");
     return -1;
   }
@@ -397,13 +400,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     // only valid for srcfile signatures
     if (!compileDefs.empty()) {
       this->Makefile->IssueMessage(
-        cmake::FATAL_ERROR,
+        MessageType::FATAL_ERROR,
         "COMPILE_DEFINITIONS specified on a srcdir type TRY_COMPILE");
       return -1;
     }
     if (!copyFile.empty()) {
       this->Makefile->IssueMessage(
-        cmake::FATAL_ERROR,
+        MessageType::FATAL_ERROR,
         "COPY_FILE specified on a srcdir type TRY_COMPILE");
       return -1;
     }
@@ -416,7 +419,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     std::ostringstream e;
     e << "Attempt at a recursive or nested TRY_COMPILE in directory\n"
       << "  " << this->BinaryDirectory << "\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return -1;
   }
 
@@ -450,7 +453,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         gg->GetEnabledLanguages(langs);
         err << cmJoin(langs, " ");
         err << "\nSee project() command to enable other languages.";
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR, err.str());
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, err.str());
         return -1;
       }
     }
@@ -471,7 +474,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         << "  " << outFileName << "\n"
         << cmSystemTools::GetLastSystemError();
       /* clang-format on */
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return -1;
     }
 
@@ -522,7 +525,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
             "(e.g. CMAKE_C_FLAGS_DEBUG) in the test project."
             ;
           /* clang-format on */
-          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+          this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
         }
       case cmPolicies::OLD:
         // OLD behavior is to do nothing.
@@ -530,7 +533,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0066));
         CM_FALLTHROUGH;
       case cmPolicies::NEW: {
@@ -559,7 +562,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
             "in the test project."
             ;
           /* clang-format on */
-          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+          this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
         }
       case cmPolicies::OLD:
         // OLD behavior is to do nothing.
@@ -567,7 +570,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0056));
         CM_FALLTHROUGH;
       case cmPolicies::NEW:
@@ -606,7 +609,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       tcfg.SetConfig(tcConfig);
 
       if (!tcfg.GenerateImportFile()) {
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                      "could not write export file.");
         fclose(fout);
         return -1;
@@ -734,7 +737,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
           this->Makefile->IssueMessage(
-            cmake::FATAL_ERROR,
+            MessageType::FATAL_ERROR,
             cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0067));
         case cmPolicies::NEW:
           // NEW behavior is to honor the language standard variables.
@@ -796,7 +799,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       for (std::string const& vi : this->WarnCMP0067) {
         w << "  " << vi << "\n";
       }
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
     }
 
     if (testC) {
@@ -905,7 +908,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
           emsg << this->FindErrorMessage.c_str();
         }
         if (copyFileError.empty()) {
-          this->Makefile->IssueMessage(cmake::FATAL_ERROR, emsg.str());
+          this->Makefile->IssueMessage(MessageType::FATAL_ERROR, emsg.str());
           return -1;
         }
         copyFileErrorMessage = emsg.str();

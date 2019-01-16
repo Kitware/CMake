@@ -3,11 +3,11 @@
 #include "cmListFileCache.h"
 
 #include "cmListFileLexer.h"
+#include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmOutputConverter.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 #include <assert.h>
 #include <memory>
@@ -66,7 +66,8 @@ cmListFileParser::~cmListFileParser()
 
 void cmListFileParser::IssueFileOpenError(const std::string& text) const
 {
-  this->Messenger->IssueMessage(cmake::FATAL_ERROR, text, this->Backtrace);
+  this->Messenger->IssueMessage(MessageType::FATAL_ERROR, text,
+                                this->Backtrace);
 }
 
 void cmListFileParser::IssueError(const std::string& text) const
@@ -76,7 +77,7 @@ void cmListFileParser::IssueError(const std::string& text) const
   lfc.Line = cmListFileLexer_GetCurrentLine(this->Lexer);
   cmListFileBacktrace lfbt = this->Backtrace;
   lfbt = lfbt.Push(lfc);
-  this->Messenger->IssueMessage(cmake::FATAL_ERROR, text, lfbt);
+  this->Messenger->IssueMessage(MessageType::FATAL_ERROR, text, lfbt);
   cmSystemTools::SetFatalErrorOccured();
 }
 
@@ -254,7 +255,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
   lfbt = lfbt.Push(lfc);
   error << "Parse error.  Function missing ending \")\".  "
         << "End of file reached.";
-  this->Messenger->IssueMessage(cmake::FATAL_ERROR, error.str(), lfbt);
+  this->Messenger->IssueMessage(MessageType::FATAL_ERROR, error.str(), lfbt);
   return false;
 }
 
@@ -279,10 +280,10 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
     << "Argument not separated from preceding token by whitespace.";
   /* clang-format on */
   if (isError) {
-    this->Messenger->IssueMessage(cmake::FATAL_ERROR, m.str(), lfbt);
+    this->Messenger->IssueMessage(MessageType::FATAL_ERROR, m.str(), lfbt);
     return false;
   }
-  this->Messenger->IssueMessage(cmake::AUTHOR_WARNING, m.str(), lfbt);
+  this->Messenger->IssueMessage(MessageType::AUTHOR_WARNING, m.str(), lfbt);
   return true;
 }
 

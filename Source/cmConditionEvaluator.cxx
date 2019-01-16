@@ -11,8 +11,10 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 class cmCommand;
 class cmTest;
@@ -81,7 +83,7 @@ cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
 
 bool cmConditionEvaluator::IsTrue(
   const std::vector<cmExpandedCommandArgument>& args, std::string& errorString,
-  cmake::MessageType& status)
+  MessageType& status)
 {
   errorString.clear();
 
@@ -123,7 +125,7 @@ bool cmConditionEvaluator::IsTrue(
   // now at the end there should only be one argument left
   if (newArgs.size() != 1) {
     errorString = "Unknown arguments specified";
-    status = cmake::FATAL_ERROR;
+    status = MessageType::FATAL_ERROR;
     return false;
   }
 
@@ -155,7 +157,7 @@ const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
            "Since the policy is not set the OLD behavior will be used.";
 
       this->Makefile.GetCMakeInstance()->IssueMessage(
-        cmake::AUTHOR_WARNING, e.str(), this->Backtrace);
+        MessageType::AUTHOR_WARNING, e.str(), this->Backtrace);
     }
   }
 
@@ -199,7 +201,7 @@ bool cmConditionEvaluator::IsKeyword(std::string const& keyword,
            "Since the policy is not set the OLD behavior will be used.";
 
       this->Makefile.GetCMakeInstance()->IssueMessage(
-        cmake::AUTHOR_WARNING, e.str(), this->Backtrace);
+        MessageType::AUTHOR_WARNING, e.str(), this->Backtrace);
     }
   }
 
@@ -269,7 +271,7 @@ bool cmConditionEvaluator::GetBooleanValueOld(
 // returns the resulting boolean value
 bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
   cmExpandedCommandArgument& newArg, std::string& errorString,
-  cmake::MessageType& status, bool oneArg) const
+  MessageType& status, bool oneArg) const
 {
   // Use the policy if it is set.
   if (this->Policy12Status == cmPolicies::NEW) {
@@ -288,7 +290,7 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
         errorString = "An argument named \"" + newArg.GetValue() +
           "\" appears in a conditional statement.  " +
           cmPolicies::GetPolicyWarning(cmPolicies::CMP0012);
-        status = cmake::AUTHOR_WARNING;
+        status = MessageType::AUTHOR_WARNING;
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
         return oldResult;
@@ -297,7 +299,7 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
         errorString = "An argument named \"" + newArg.GetValue() +
           "\" appears in a conditional statement.  " +
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0012);
-        status = cmake::FATAL_ERROR;
+        status = MessageType::FATAL_ERROR;
       }
       case cmPolicies::NEW:
         break;
@@ -362,7 +364,7 @@ void cmConditionEvaluator::HandleBinaryOp(bool value, int& reducible,
 // level 0 processes parenthetical expressions
 bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
                                         std::string& errorString,
-                                        cmake::MessageType& status)
+                                        MessageType& status)
 {
   int reducible;
   do {
@@ -386,7 +388,7 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
         }
         if (depth) {
           errorString = "mismatched parenthesis in condition";
-          status = cmake::FATAL_ERROR;
+          status = MessageType::FATAL_ERROR;
           return false;
         }
         // store the reduced args in this vector
@@ -419,7 +421,7 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
 //=========================================================================
 // level one handles most predicates except for NOT
 bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
-                                        cmake::MessageType&)
+                                        MessageType&)
 {
   int reducible;
   do {
@@ -485,7 +487,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
              "when the policy is set to NEW.  "
              "Since the policy is not set the OLD behavior will be used.";
 
-        this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
+        this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
       }
       // is a variable defined
       if (this->IsKeyword(keyDEFINED, *arg) && argP1 != newArgs.end()) {
@@ -516,7 +518,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
 // level two handles most binary operations except for AND  OR
 bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                                         std::string& errorString,
-                                        cmake::MessageType& status)
+                                        MessageType& status)
 {
   int reducible;
   std::string def_buf;
@@ -547,7 +549,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
           std::ostringstream error;
           error << "Regular expression \"" << rex << "\" cannot compile";
           errorString = error.str();
-          status = cmake::FATAL_ERROR;
+          status = MessageType::FATAL_ERROR;
           return false;
         }
         if (regEntry.find(def)) {
@@ -682,7 +684,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                "when the policy is set to NEW.  "
                "Since the policy is not set the OLD behavior will be used.";
 
-          this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
+          this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
         }
       }
 
@@ -696,7 +698,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 // level 3 handles NOT
 bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
                                         std::string& errorString,
-                                        cmake::MessageType& status)
+                                        MessageType& status)
 {
   int reducible;
   do {
@@ -722,7 +724,7 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
 // level 4 handles AND OR
 bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
                                         std::string& errorString,
-                                        cmake::MessageType& status)
+                                        MessageType& status)
 {
   int reducible;
   bool lhs;

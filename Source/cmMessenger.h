@@ -6,7 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmListFileCache.h"
-#include "cmake.h"
+#include "cmMessageType.h"
 
 #include <string>
 
@@ -14,10 +14,10 @@ class cmMessenger
 {
 public:
   void IssueMessage(
-    cmake::MessageType t, std::string const& text,
+    MessageType t, std::string const& text,
     cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
 
-  void DisplayMessage(cmake::MessageType t, std::string const& text,
+  void DisplayMessage(MessageType t, std::string const& text,
                       cmListFileBacktrace const& backtrace) const;
 
   void SetSuppressDevWarnings(bool suppress)
@@ -49,8 +49,8 @@ public:
   }
 
 private:
-  bool IsMessageTypeVisible(cmake::MessageType t) const;
-  cmake::MessageType ConvertMessageType(cmake::MessageType t) const;
+  bool IsMessageTypeVisible(MessageType t) const;
+  MessageType ConvertMessageType(MessageType t) const;
 
   bool SuppressDevWarnings = false;
   bool SuppressDeprecatedWarnings = false;

@@ -6,7 +6,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
-#include "cmake.h"
+#include "cmMessageType.h"
 
 cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
   cmake* cm, const std::string& platformName)

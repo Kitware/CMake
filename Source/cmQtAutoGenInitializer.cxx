@@ -16,6 +16,7 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmProcessOutput.h"
@@ -842,7 +843,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           msg += ":\n  set_property(SOURCE file.h PROPERTY ";
           msg += property;
           msg += " ON)\n";
-          makefile->IssueMessage(cmake::AUTHOR_WARNING, msg);
+          makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg);
         }
       }
     }

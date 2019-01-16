@@ -7,6 +7,7 @@
 #include "cmCustomCommand.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmProperty.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
@@ -179,7 +180,8 @@ bool cmSourceFile::FindFullPath(std::string* error)
   if (error) {
     *error = e.str();
   } else {
-    this->Location.GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Location.GetMakefile()->IssueMessage(MessageType::FATAL_ERROR,
+                                               e.str());
   }
   this->FindFullPathFailed = true;
   return false;

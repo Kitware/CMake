@@ -6,9 +6,9 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -84,7 +84,7 @@ bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
 
   if (!project_name.empty()) {
     this->Makefile->IssueMessage(
-      cmake::AUTHOR_WARNING,
+      MessageType::AUTHOR_WARNING,
       "Ignoring PROJECT_NAME option because it has no effect.");
   }
 

@@ -7,6 +7,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
 #include "cmVisualStudioSlnData.h"
@@ -179,7 +180,7 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     std::ostringstream e;
     e << this->GetName() << " Windows CE version '" << this->SystemVersion
       << "' requires CMAKE_GENERATOR_TOOLSET to be set.";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
 
@@ -252,7 +253,7 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
         "contains an invalid version specification."
       ;
       /* clang-format on */
-      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
 
       // Clear the configured tool-set
       this->GeneratorToolsetVersion.clear();
@@ -279,7 +280,7 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
           "  " << toolsetPath;
         ;
         /* clang-format on */
-        mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+        mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
 
         // Clear the configured tool-set
         this->GeneratorToolsetVersion.clear();
@@ -333,7 +334,7 @@ bool cmGlobalVisualStudio10Generator::ParseGeneratorToolset(
         "that contains a field after the first ',' with no '='."
         ;
       /* clang-format on */
-      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
     std::string const key = fi->substr(0, pos);
@@ -349,7 +350,7 @@ bool cmGlobalVisualStudio10Generator::ParseGeneratorToolset(
         "that contains duplicate field key '" << key << "'."
         ;
       /* clang-format on */
-      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
     if (!this->ProcessGeneratorToolsetField(key, value)) {
@@ -363,7 +364,7 @@ bool cmGlobalVisualStudio10Generator::ParseGeneratorToolset(
         "that contains invalid field '" << *fi << "'."
         ;
       /* clang-format on */
-      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
   }
@@ -411,12 +412,12 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
       std::ostringstream e;
       e << "CMAKE_SYSTEM_NAME is 'Android' but CMAKE_GENERATOR "
         << "specifies a platform too: '" << this->GetName() << "'";
-      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
     std::string v = this->GetInstalledNsightTegraVersion();
     if (v.empty()) {
-      mf->IssueMessage(cmake::FATAL_ERROR,
+      mf->IssueMessage(MessageType::FATAL_ERROR,
                        "CMAKE_SYSTEM_NAME is 'Android' but "
                        "'NVIDIA Nsight Tegra Visual Studio Edition' "
                        "is not installed.");
@@ -442,7 +443,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
     std::ostringstream e;
     e << "CMAKE_SYSTEM_NAME is 'WindowsCE' but CMAKE_GENERATOR "
       << "specifies a platform too: '" << this->GetName() << "'";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
 
@@ -455,7 +456,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsPhone(cmMakefile* mf)
 {
   std::ostringstream e;
   e << this->GetName() << " does not support Windows Phone.";
-  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
   return false;
 }
 
@@ -463,7 +464,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
 {
   std::ostringstream e;
   e << this->GetName() << " does not support Windows Store.";
-  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
   return false;
 }
 
@@ -524,7 +525,7 @@ void cmGlobalVisualStudio10Generator::Generate()
       "To avoid this problem CMake must use a full path for this file "
       "which then triggers the VS 10 property dialog bug.";
     /* clang-format on */
-    lg->IssueMessage(cmake::WARNING, e.str().c_str());
+    lg->IssueMessage(MessageType::WARNING, e.str().c_str());
   }
 }
 
@@ -707,7 +708,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
   // Prepare the work directory.
   if (!cmSystemTools::MakeDirectory(wd)) {
     std::string e = "Failed to make directory:\n  " + wd;
-    mf->IssueMessage(cmake::FATAL_ERROR, e.c_str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.c_str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -829,7 +830,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
     if (ret != 0) {
       e << "Exit code: " << ret << "\n";
     }
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str().c_str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -973,7 +974,7 @@ bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
       << "Install the Microsoft Windows SDK v7.1 to get 64-bit tools:\n"
       << "  http://msdn.microsoft.com/en-us/windows/bb980924.aspx";
     /* clang-format on */
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str().c_str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -1154,7 +1155,7 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
     e << "JSON flag table \"" << filename <<
       "\" could not be loaded.\n";
     /* clang-format on */
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str().c_str());
   }
   return ret;
 }

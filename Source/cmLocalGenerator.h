@@ -14,10 +14,10 @@
 #include <vector>
 
 #include "cmListFileCache.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmStateSnapshot.h"
-#include "cmake.h"
 
 class cmComputeLinkInformation;
 class cmCustomCommandGenerator;
@@ -28,6 +28,7 @@ class cmMakefile;
 class cmRulePlaceholderExpander;
 class cmSourceFile;
 class cmState;
+class cmake;
 
 /** \class cmLocalGenerator
  * \brief Create required build files for a directory.
@@ -359,7 +360,7 @@ public:
   bool IsMinGWMake() const;
   bool IsNMake() const;
 
-  void IssueMessage(cmake::MessageType t, std::string const& text) const;
+  void IssueMessage(MessageType t, std::string const& text) const;
 
   void CreateEvaluationFileOutputs(const std::string& config);
   void ProcessEvaluationFiles(std::vector<std::string>& generatedFiles);

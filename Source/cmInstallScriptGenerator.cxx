@@ -7,9 +7,9 @@
 
 #include "cmGeneratorExpression.h"
 #include "cmLocalGenerator.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmScriptGenerator.h"
-#include "cmake.h"
 
 cmInstallScriptGenerator::cmInstallScriptGenerator(const char* script,
                                                    bool code,
@@ -39,7 +39,7 @@ void cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
     switch (this->LocalGenerator->GetPolicyStatus(cmPolicies::CMP0087)) {
       case cmPolicies::WARN:
         this->LocalGenerator->IssueMessage(
-          cmake::AUTHOR_WARNING,
+          MessageType::AUTHOR_WARNING,
           cmPolicies::GetPolicyWarning(cmPolicies::CMP0087));
         CM_FALLTHROUGH;
       case cmPolicies::OLD:

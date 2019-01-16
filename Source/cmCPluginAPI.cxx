@@ -347,7 +347,7 @@ static void addLinkLibrary(cmMakefile* mf, std::string const& target,
     std::ostringstream e;
     e << "Attempt to add link library \"" << lib << "\" to target \"" << target
       << "\" which is not built in this directory.";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
 
@@ -362,7 +362,7 @@ static void addLinkLibrary(cmMakefile* mf, std::string const& target,
       << " may not be linked into another target.  "
       << "One may link only to STATIC or SHARED libraries, or "
       << "to executables with the ENABLE_EXPORTS property set.";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
 
   t->AddLinkLibrary(*mf, lib, llt);

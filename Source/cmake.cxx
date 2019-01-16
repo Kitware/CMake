@@ -2465,7 +2465,7 @@ static bool cmakeCheckStampList(const char* stampList, bool verbose)
   return true;
 }
 
-void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
+void cmake::IssueMessage(MessageType t, std::string const& text,
                          cmListFileBacktrace const& backtrace) const
 {
   this->Messenger->IssueMessage(t, text, backtrace);
@@ -2692,7 +2692,7 @@ void cmake::RunCheckForUnusedVariables()
     }
   }
   if (haveUnused) {
-    this->IssueMessage(cmake::WARNING, msg.str());
+    this->IssueMessage(MessageType::WARNING, msg.str());
   }
 #endif
 }

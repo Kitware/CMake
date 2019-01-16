@@ -21,6 +21,7 @@
 #include "cmLocalGenerator.h"
 #include "cmLocalXCodeGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
@@ -201,7 +202,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
   unsigned int version_number = 10 * v[0] + v[1];
 
   if (version_number < 30) {
-    cm->IssueMessage(cmake::FATAL_ERROR,
+    cm->IssueMessage(MessageType::FATAL_ERROR,
                      "Xcode " + version_string + " not supported.");
     return nullptr;
   }
@@ -263,7 +264,7 @@ bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
       "  " << ts << "\n"
       "that was specified.";
     /* clang-format on */
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
   this->GeneratorToolset = ts;
@@ -774,7 +775,7 @@ public:
           "specified for source:\n"
           "  " << this->SourceFile->GetFullPath() << "\n";
       /* clang-format on */
-      this->LocalGenerator->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->LocalGenerator->IssueMessage(MessageType::FATAL_ERROR, e.str());
     }
 
     return processed;

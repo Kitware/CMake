@@ -19,6 +19,7 @@
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmTarget.h"
+#include "cmake.h"
 
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(
   cmake* cm, std::string const& platformInGeneratorName)
@@ -523,7 +524,7 @@ std::string cmGlobalVisualStudioGenerator::GetStartupProjectName(
       return startup;
     } else {
       root->GetMakefile()->IssueMessage(
-        cmake::AUTHOR_WARNING,
+        MessageType::AUTHOR_WARNING,
         "Directory property VS_STARTUP_PROJECT specifies target "
         "'" +
           startup + "' that does not exist.  Ignoring.");

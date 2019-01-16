@@ -6,8 +6,8 @@
 #include "cmCTestGenericHandler.h"
 #include "cmCTestSubmitHandler.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 #include <sstream>
 
@@ -203,7 +203,7 @@ bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
     } else {
       std::ostringstream e;
       e << "Part name \"" << arg << "\" is invalid.";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       this->ArgumentDoing = ArgumentDoingError;
     }
     return true;
@@ -216,7 +216,7 @@ bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
       std::ostringstream e;
       e << "File \"" << arg << "\" does not exist. Cannot submit "
         << "a non-existent file.";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       this->ArgumentDoing = ArgumentDoingError;
     }
     return true;

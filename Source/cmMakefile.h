@@ -18,13 +18,13 @@
 
 #include "cmAlgorithms.h"
 #include "cmListFileCache.h"
+#include "cmMessageType.h"
 #include "cmNewLineStyle.h"
 #include "cmPolicies.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  include "cmSourceGroup.h"
@@ -46,6 +46,7 @@ class cmState;
 class cmTest;
 class cmTestGenerator;
 class cmVariableWatch;
+class cmake;
 
 /** A type-safe wrapper for a string representing a directory id.  */
 class cmDirectoryId
@@ -793,7 +794,7 @@ public:
     cmMakefile* Makefile;
   };
 
-  void IssueMessage(cmake::MessageType t, std::string const& text) const;
+  void IssueMessage(MessageType t, std::string const& text) const;
 
   /** Set whether or not to report a CMP0000 violation.  */
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }
@@ -982,15 +983,18 @@ private:
   friend class BuildsystemFileScope;
 
   // CMP0053 == old
-  cmake::MessageType ExpandVariablesInStringOld(
-    std::string& errorstr, std::string& source, bool escapeQuotes,
-    bool noEscapes, bool atOnly, const char* filename, long line,
-    bool removeEmpty, bool replaceAt) const;
+  MessageType ExpandVariablesInStringOld(std::string& errorstr,
+                                         std::string& source,
+                                         bool escapeQuotes, bool noEscapes,
+                                         bool atOnly, const char* filename,
+                                         long line, bool removeEmpty,
+                                         bool replaceAt) const;
   // CMP0053 == new
-  cmake::MessageType ExpandVariablesInStringNew(
-    std::string& errorstr, std::string& source, bool escapeQuotes,
-    bool noEscapes, bool atOnly, const char* filename, long line,
-    bool replaceAt) const;
+  MessageType ExpandVariablesInStringNew(std::string& errorstr,
+                                         std::string& source,
+                                         bool escapeQuotes, bool noEscapes,
+                                         bool atOnly, const char* filename,
+                                         long line, bool replaceAt) const;
   /**
    * Old version of GetSourceFileWithOutput(const std::string&) kept for
    * backward-compatibility. It implements a linear search and support

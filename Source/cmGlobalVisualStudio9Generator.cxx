@@ -5,8 +5,8 @@
 #include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmVisualStudioWCEPlatformParser.h"
-#include "cmake.h"
 
 static const char vs9generatorName[] = "Visual Studio 9 2008";
 

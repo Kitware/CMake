@@ -12,6 +12,7 @@
 #include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
@@ -304,7 +305,7 @@ static const struct InListNode : public cmGeneratorExpressionNode
             << "\nSearch Item:\n  \"" << parameters.front()
             << "\"\nList:\n  \"" << parameters[1] << "\"\n";
           context->LG->GetCMakeInstance()->IssueMessage(
-            cmake::AUTHOR_WARNING, e.str(), context->Backtrace);
+            MessageType ::AUTHOR_WARNING, e.str(), context->Backtrace);
           return "0";
         }
         if (values.empty()) {
@@ -632,7 +633,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
           std::ostringstream e;
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0044);
           context->LG->GetCMakeInstance()->IssueMessage(
-            cmake::AUTHOR_WARNING, e.str(), context->Backtrace);
+            MessageType::AUTHOR_WARNING, e.str(), context->Backtrace);
           CM_FALLTHROUGH;
         }
         case cmPolicies::OLD:
@@ -1654,7 +1655,7 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
         switch (statusForTarget(context->HeadTarget, policy)) {
           case cmPolicies::WARN:
             lg->IssueMessage(
-              cmake::AUTHOR_WARNING,
+              MessageType::AUTHOR_WARNING,
               cmPolicies::GetPolicyWarning(policyForString(policy)));
             CM_FALLTHROUGH;
           case cmPolicies::REQUIRED_IF_USED:
@@ -2096,6 +2097,6 @@ void reportError(cmGeneratorExpressionContext* context,
     << "  " << expr << "\n"
     << result;
   /* clang-format on */
-  context->LG->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                                context->Backtrace);
+  context->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                                e.str(), context->Backtrace);
 }

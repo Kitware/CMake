@@ -23,6 +23,7 @@
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmNinjaLinkLineComputer.h"
 #include "cmOutputConverter.h"
 #include "cmState.h"
@@ -502,7 +503,8 @@ void cmGlobalNinjaGenerator::Generate()
     msg << "The detected version of Ninja (" << this->NinjaVersion;
     msg << ") is less than the version of Ninja required by CMake (";
     msg << cmGlobalNinjaGenerator::RequiredNinjaVersion() << ").";
-    this->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, msg.str());
+    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                           msg.str());
     return;
   }
   this->OpenBuildFileStream();
@@ -554,7 +556,7 @@ bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
     if (!cmSystemTools::RunSingleCommand(command, &version, &error, nullptr,
                                          nullptr,
                                          cmSystemTools::OUTPUT_NONE)) {
-      mf->IssueMessage(cmake::FATAL_ERROR,
+      mf->IssueMessage(MessageType::FATAL_ERROR,
                        "Running\n '" + cmJoin(command, "' '") +
                          "'\n"
                          "failed with:\n " +
@@ -634,7 +636,7 @@ bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
       ;
     /* clang-format on */
   }
-  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
   cmSystemTools::SetFatalErrorOccured();
   return false;
 }
@@ -1300,7 +1302,8 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
       "options to the custom commands that produce these files."
       ;
     /* clang-format on */
-    this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+    this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
+                                           w.str());
   }
 }
 
@@ -1428,7 +1431,8 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
         << "\n";
     msg << "Any pre-check scripts, such as those generated for file(GLOB "
            "CONFIGURE_DEPENDS), will not be run by Ninja.";
-    this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, msg.str());
+    this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
+                                           msg.str());
   }
 
   std::sort(implicitDeps.begin(), implicitDeps.end());

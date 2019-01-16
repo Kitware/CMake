@@ -14,6 +14,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
@@ -154,7 +155,7 @@ void cmExtraSublimeTextGenerator::CreateNewProjectFile(
         e << "Could not parse Env Vars specified in "
              "\"CMAKE_SUBLIME_TEXT_2_ENV_SETTINGS\""
           << ", corrupted string " << t;
-        mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+        mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       }
     }
     fout << "\n\t\t}";

@@ -9,6 +9,7 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
@@ -217,7 +218,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
                 depender->GetType() != cmStateEnums::MODULE_LIBRARY &&
                 depender->GetType() != cmStateEnums::OBJECT_LIBRARY) {
               this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
-                cmake::FATAL_ERROR,
+                MessageType::FATAL_ERROR,
                 "Only executables and libraries may reference target objects.",
                 depender->GetBacktrace());
               return;
@@ -314,7 +315,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
 
   if (!dependee && !linking &&
       (depender->GetType() != cmStateEnums::GLOBAL_TARGET)) {
-    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    MessageType messageType = MessageType::AUTHOR_WARNING;
     bool issueMessage = false;
     std::ostringstream e;
     switch (depender->GetPolicyStatusCMP0046()) {
@@ -327,7 +328,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         issueMessage = true;
-        messageType = cmake::FATAL_ERROR;
+        messageType = MessageType::FATAL_ERROR;
     }
     if (issueMessage) {
       cmake* cm = this->GlobalGenerator->GetCMakeInstance();

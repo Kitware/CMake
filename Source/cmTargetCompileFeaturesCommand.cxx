@@ -6,7 +6,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
-#include "cmake.h"
+#include "cmMessageType.h"
 
 class cmExecutionStatus;
 class cmTarget;
@@ -24,7 +24,7 @@ void cmTargetCompileFeaturesCommand::HandleMissingTarget(
   e << "Cannot specify compile features for target \"" << name
     << "\" "
        "which is not built by this project.";
-  this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+  this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
 }
 
 std::string cmTargetCompileFeaturesCommand::Join(

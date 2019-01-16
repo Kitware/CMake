@@ -7,10 +7,10 @@
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -34,7 +34,7 @@ void cmTargetSourcesCommand::HandleMissingTarget(const std::string& name)
   e << "Cannot specify sources for target \"" << name
     << "\" "
        "which is not built by this project.";
-  this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+  this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
 }
 
 std::string cmTargetSourcesCommand::Join(
@@ -99,7 +99,7 @@ std::vector<std::string> cmTargetSourcesCommand::ConvertToAbsoluteContent(
     case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::REQUIRED_IF_USED:
       this->Makefile->IssueMessage(
-        cmake::FATAL_ERROR,
+        MessageType::FATAL_ERROR,
         cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0076));
       break;
     case cmPolicies::NEW: {
@@ -117,7 +117,7 @@ std::vector<std::string> cmTargetSourcesCommand::ConvertToAbsoluteContent(
       e << "A private source from a directory other than that of target \""
         << tgt->GetName() << "\" has a relative path.";
     }
-    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
   }
 
   return useAbsoluteContent ? absoluteContent : content;

@@ -21,12 +21,12 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmVersion.h"
-#include "cmake.h"
 
 #if defined(__HAIKU__)
 #  include <FindDirectory.h>
@@ -384,7 +384,8 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
   if (this->Version.empty() && this->VersionExact) {
     this->VersionExact = false;
     this->Makefile->IssueMessage(
-      cmake::AUTHOR_WARNING, "Ignoring EXACT since no version is requested.");
+      MessageType::AUTHOR_WARNING,
+      "Ignoring EXACT since no version is requested.");
   }
 
   if (this->Version.empty() || components.empty()) {
@@ -473,7 +474,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0074));
         break;
       case cmPolicies::NEW: {
@@ -536,7 +537,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
     }
     aw << "\n"
           "(Variable CMAKE_FIND_PACKAGE_WARN_NO_MODULE enabled this warning.)";
-    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, aw.str());
+    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, aw.str());
   }
 
   // No find module.  Assume the project has a CMake config file.  Use
@@ -667,7 +668,7 @@ bool cmFindPackageCommand::FindModule(bool& found)
           case cmPolicies::WARN: {
             std::ostringstream e;
             e << cmPolicies::GetPolicyWarning(it->second) << "\n";
-            this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+            this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
             CM_FALLTHROUGH;
           }
           case cmPolicies::OLD:
@@ -736,7 +737,8 @@ bool cmFindPackageCommand::HandlePackageMode()
     // Sanity check.
     if (fileFound && this->FileFound.empty()) {
       this->Makefile->IssueMessage(
-        cmake::INTERNAL_ERROR, "fileFound is true but FileFound is empty!");
+        MessageType::INTERNAL_ERROR,
+        "fileFound is true but FileFound is empty!");
       fileFound = false;
     }
   }
@@ -887,14 +889,15 @@ bool cmFindPackageCommand::HandlePackageMode()
         }
       }
 
-      this->Makefile->IssueMessage(
-        this->Required ? cmake::FATAL_ERROR : cmake::WARNING, e.str());
+      this->Makefile->IssueMessage(this->Required ? MessageType::FATAL_ERROR
+                                                  : MessageType::WARNING,
+                                   e.str());
       if (this->Required) {
         cmSystemTools::SetFatalErrorOccured();
       }
 
       if (!aw.str().empty()) {
-        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, aw.str());
+        this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, aw.str());
       }
     }
     // output result if in config mode but not in quiet mode

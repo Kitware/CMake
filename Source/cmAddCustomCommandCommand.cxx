@@ -10,11 +10,11 @@
 #include "cmCustomCommandLines.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -361,7 +361,7 @@ bool cmAddCustomCommandCommand::InitialPass(
   } else {
     bool issueMessage = true;
     std::ostringstream e;
-    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    MessageType messageType = MessageType::AUTHOR_WARNING;
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0050)) {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0050) << "\n";
@@ -372,7 +372,7 @@ bool cmAddCustomCommandCommand::InitialPass(
       case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW:
-        messageType = cmake::FATAL_ERROR;
+        messageType = MessageType::FATAL_ERROR;
         break;
     }
 
@@ -380,7 +380,7 @@ bool cmAddCustomCommandCommand::InitialPass(
       e << "The SOURCE signatures of add_custom_command are no longer "
            "supported.";
       this->Makefile->IssueMessage(messageType, e.str());
-      if (messageType == cmake::FATAL_ERROR) {
+      if (messageType == MessageType::FATAL_ERROR) {
         return false;
       }
     }

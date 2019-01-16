@@ -11,11 +11,11 @@
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 cmExportBuildAndroidMKGenerator::cmExportBuildAndroidMKGenerator()
 {
@@ -92,7 +92,7 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
     }
     w << " set to OLD for target " << target->Target->GetName() << ". "
       << "The export will only work with CMP0022 set to NEW.";
-    target->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+    target->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
   }
   if (!properties.empty()) {
     os << "LOCAL_CPP_FEATURES := rtti exceptions\n";

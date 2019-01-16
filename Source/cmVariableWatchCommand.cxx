@@ -7,6 +7,7 @@
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
 #include "cmVariableWatch.h"
 #include "cmake.h"
@@ -70,7 +71,7 @@ static void cmVariableWatchCommandVariableAccessed(const std::string& variable,
     msg << "Variable \"" << variable << "\" was accessed using "
         << accessString << " with value \"" << (newValue ? newValue : "")
         << "\".";
-    makefile->IssueMessage(cmake::LOG, msg.str());
+    makefile->IssueMessage(MessageType::LOG, msg.str());
   }
 
   data->InCallback = false;

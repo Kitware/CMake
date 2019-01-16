@@ -3,7 +3,7 @@
 #include "cmDisallowedCommand.h"
 
 #include "cmMakefile.h"
-#include "cmake.h"
+#include "cmMessageType.h"
 
 class cmExecutionStatus;
 
@@ -12,7 +12,7 @@ bool cmDisallowedCommand::InitialPass(std::vector<std::string> const& args,
 {
   switch (this->Makefile->GetPolicyStatus(this->Policy)) {
     case cmPolicies::WARN:
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING,
                                    cmPolicies::GetPolicyWarning(this->Policy));
       break;
     case cmPolicies::OLD:
@@ -20,7 +20,7 @@ bool cmDisallowedCommand::InitialPass(std::vector<std::string> const& args,
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, this->Message);
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, this->Message);
       return true;
   }
 

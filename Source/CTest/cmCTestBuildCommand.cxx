@@ -7,6 +7,7 @@
 #include "cmCTestGenericHandler.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -95,7 +96,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
           std::string e = "could not create generator named \"";
           e += cmakeGeneratorName;
           e += "\"";
-          this->Makefile->IssueMessage(cmake::FATAL_ERROR, e);
+          this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
           cmSystemTools::SetFatalErrorOccured();
           return nullptr;
         }

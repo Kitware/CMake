@@ -32,6 +32,7 @@
 #include "cmInstallType.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
@@ -834,13 +835,13 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
       // Generated build system depends on glob results
       if (!configureDepends && warnConfigureLate) {
         this->Makefile->IssueMessage(
-          cmake::AUTHOR_WARNING,
+          MessageType::AUTHOR_WARNING,
           "CONFIGURE_DEPENDS flag was given after a glob expression was "
           "already evaluated.");
       }
       if (workingMode != cmake::NORMAL_MODE) {
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           "CONFIGURE_DEPENDS is invalid for script and find package modes.");
         return false;
       }
@@ -871,12 +872,12 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         for (cmsys::Glob::Message const& globMessage : globMessages) {
           if (globMessage.type == cmsys::Glob::cyclicRecursion) {
             this->Makefile->IssueMessage(
-              cmake::AUTHOR_WARNING,
+              MessageType::AUTHOR_WARNING,
               "Cyclic recursion detected while globbing for '" + *i + "':\n" +
                 globMessage.content);
           } else {
             this->Makefile->IssueMessage(
-              cmake::FATAL_ERROR,
+              MessageType::FATAL_ERROR,
               "Error has occurred while globbing for '" + *i + "' - " +
                 globMessage.content);
             shouldExit = true;
@@ -925,7 +926,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
       // symlinks without being explicitly asked to: warn the author.
       if (warnFollowedSymlinks) {
         this->Makefile->IssueMessage(
-          cmake::AUTHOR_WARNING,
+          MessageType::AUTHOR_WARNING,
           cmPolicies::GetPolicyWarning(cmPolicies::CMP0009));
       }
       break;
@@ -2853,7 +2854,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       // Do not return error for compatibility reason.
       std::string err = "Unexpected argument: ";
       err += *i;
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, err);
+      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, err);
     }
     ++i;
   }
@@ -3169,7 +3170,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
       // Do not return error for compatibility reason.
       std::string err = "Unexpected argument: ";
       err += *i;
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, err);
+      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, err);
     }
 
     ++i;
@@ -3427,7 +3428,8 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
   // Parse arguments
   if (args.size() < 2) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR, "sub-command LOCK requires at least two arguments.");
+      MessageType::FATAL_ERROR,
+      "sub-command LOCK requires at least two arguments.");
     return false;
   }
 
@@ -3441,7 +3443,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
       ++i;
       const char* merr = "expected FUNCTION, FILE or PROCESS after GUARD";
       if (i >= args.size()) {
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR, merr);
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, merr);
         return false;
       }
       if (args[i] == "FUNCTION") {
@@ -3453,7 +3455,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
       } else {
         std::ostringstream e;
         e << merr << ", but got:\n  \"" << args[i] << "\".";
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
         return false;
       }
 
@@ -3461,14 +3463,15 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
       ++i;
       if (i >= args.size()) {
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR, "expected variable name after RESULT_VARIABLE");
+          MessageType::FATAL_ERROR,
+          "expected variable name after RESULT_VARIABLE");
         return false;
       }
       resultVariable = args[i];
     } else if (args[i] == "TIMEOUT") {
       ++i;
       if (i >= args.size()) {
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                      "expected timeout value after TIMEOUT");
         return false;
       }
@@ -3477,7 +3480,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
           scanned < 0) {
         std::ostringstream e;
         e << "TIMEOUT value \"" << args[i] << "\" is not an unsigned integer.";
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
         return false;
       }
       timeout = static_cast<unsigned long>(scanned);
@@ -3485,7 +3488,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
       std::ostringstream e;
       e << "expected DIRECTORY, RELEASE, GUARD, RESULT_VARIABLE or TIMEOUT\n";
       e << "but got: \"" << args[i] << "\".";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
   }
@@ -3507,7 +3510,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
     std::ostringstream e;
     e << "directory\n  \"" << parentDir << "\"\ncreation failed ";
     e << "(check permissions).";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -3515,7 +3518,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
   if (!file) {
     std::ostringstream e;
     e << "file\n  \"" << path << "\"\ncreation failed (check permissions).";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -3550,7 +3553,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
   if (resultVariable.empty() && !fileLockResult.IsOk()) {
     std::ostringstream e;
     e << "error locking file\n  \"" << path << "\"\n" << result << ".";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
