@@ -360,6 +360,31 @@ int do_cmake(int ac, char const* const* av)
   return 0;
 }
 
+namespace {
+int extract_job_number(int& index, char const* current, char const* next,
+                       int len_of_flag)
+{
+  std::string command(current);
+  std::string jobString = command.substr(len_of_flag);
+  if (jobString.empty() && next && isdigit(next[0])) {
+    ++index; // skip parsing the job number
+    jobString = std::string(next);
+  }
+
+  int jobs = -1;
+  unsigned long numJobs = 0;
+  if (jobString.empty()) {
+    jobs = cmake::DEFAULT_BUILD_PARALLEL_LEVEL;
+  } else if (cmSystemTools::StringToULong(jobString.c_str(), &numJobs)) {
+    jobs = int(numJobs);
+  } else {
+    std::cerr << "'" << command.substr(0, len_of_flag) << "' invalid number '"
+              << jobString << "' given.\n\n";
+  }
+  return jobs;
+}
+}
+
 static int do_build(int ac, char const* const* av)
 {
 #ifndef CMAKE_BUILD_WITH_CMAKE
@@ -377,7 +402,6 @@ static int do_build(int ac, char const* const* av)
   enum Doing
   {
     DoingNone,
-    DoingJobs,
     DoingDir,
     DoingTarget,
     DoingConfig,
@@ -387,12 +411,17 @@ static int do_build(int ac, char const* const* av)
   for (int i = 2; i < ac; ++i) {
     if (doing == DoingNative) {
       nativeOptions.emplace_back(av[i]);
-    } else if ((strcmp(av[i], "-j") == 0) ||
-               (strcmp(av[i], "--parallel") == 0)) {
-      jobs = cmake::DEFAULT_BUILD_PARALLEL_LEVEL;
-      /* does the next argument start with a number? */
-      if ((i + 1 < ac) && (isdigit(*av[i + 1]))) {
-        doing = DoingJobs;
+    } else if (cmHasLiteralPrefix(av[i], "-j")) {
+      const char* nextArg = ((i + 1 < ac) ? av[i + 1] : nullptr);
+      jobs = extract_job_number(i, av[i], nextArg, sizeof("-j") - 1);
+      if (jobs < 0) {
+        dir.clear();
+      }
+    } else if (cmHasLiteralPrefix(av[i], "--parallel")) {
+      const char* nextArg = ((i + 1 < ac) ? av[i + 1] : nullptr);
+      jobs = extract_job_number(i, av[i], nextArg, sizeof("--parallel") - 1);
+      if (jobs < 0) {
+        dir.clear();
       }
     } else if (strcmp(av[i], "--target") == 0) {
       if (!hasTarget) {
@@ -414,18 +443,6 @@ static int do_build(int ac, char const* const* av)
       doing = DoingNative;
     } else {
       switch (doing) {
-        case DoingJobs: {
-          unsigned long numJobs = 0;
-          if (cmSystemTools::StringToULong(av[i], &numJobs)) {
-            jobs = int(numJobs);
-            doing = DoingNone;
-          } else {
-            std::cerr << "'" << av[i - 1] << "' invalid number '" << av[i]
-                      << "' given.\n\n";
-            dir.clear();
-            break;
-          }
-        } break;
         case DoingDir:
           dir = cmSystemTools::CollapseFullPath(av[i]);
           doing = DoingNone;
