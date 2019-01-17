@@ -102,7 +102,8 @@ private:
   bool SetupWriteAutogenInfo();
   bool SetupWriteRccInfo();
 
-  void AddGeneratedSource(std::string const& filename, GeneratorT genType);
+  void AddGeneratedSource(std::string const& filename, GeneratorT genType,
+                          bool prepend = false);
 
   bool GetMocExecutable();
   bool GetUicExecutable();
