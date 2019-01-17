@@ -2620,6 +2620,10 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   }
   clOptions.AddDefines(targetDefines);
 
+  if (this->ProjectType == csproj) {
+    clOptions.AppendFlag("DefineConstants", targetDefines);
+  }
+
   // Get includes for this target
   if (!this->LangForClCompile.empty()) {
     clOptions.AddIncludes(
