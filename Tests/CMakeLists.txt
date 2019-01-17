@@ -1362,18 +1362,18 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Targets")
 
     if(Qt5Widgets_FOUND AND NOT Qt5Widgets_VERSION VERSION_LESS 5.1.0)
-      add_test(Qt4And5Automoc ${CMAKE_CTEST_COMMAND}
+      add_test(Qt4And5AutomocForward ${CMAKE_CTEST_COMMAND}
         --build-and-test
         "${CMake_SOURCE_DIR}/Tests/Qt4And5Automoc"
-        "${CMake_BINARY_DIR}/Tests/Qt4And5Automoc"
+        "${CMake_BINARY_DIR}/Tests/Qt4And5AutomocForward"
         ${build_generator_args}
         --build-project Qt4And5Automoc
-        --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4And5Automoc"
+        --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4And5AutomocForward"
         --force-new-ctest-process
         --build-options ${build_options}
         --test-command ${CMAKE_CTEST_COMMAND} -V
         )
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4And5Automoc")
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4And5AutomocForward")
       add_test(Qt4And5AutomocReverse ${CMAKE_CTEST_COMMAND}
         --build-and-test
         "${CMake_SOURCE_DIR}/Tests/Qt4And5Automoc"
