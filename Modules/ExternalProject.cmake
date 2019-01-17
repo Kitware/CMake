@@ -425,7 +425,9 @@ External Project Definition
       can be used to point to an alternative directory within the source tree
       to use as the top of the CMake source tree instead. This must be a
       relative path and it will be interpreted as being relative to
-      ``SOURCE_DIR``.
+      ``SOURCE_DIR``.  When ``BUILD_IN_SOURCE 1`` is specified, the
+      ``BUILD_COMMAND`` is used to point to an alternative directory within the
+      source tree.
 
   **Build Step Options:**
     If the configure step assumed the external project uses CMake as its build
@@ -1676,7 +1678,11 @@ function(_ep_set_directories name)
   endif()
   if(build_in_source)
     get_property(source_dir TARGET ${name} PROPERTY _EP_SOURCE_DIR)
-    set_property(TARGET ${name} PROPERTY _EP_BINARY_DIR "${source_dir}")
+    if(source_subdir)
+      set_property(TARGET ${name} PROPERTY _EP_BINARY_DIR "${source_dir}/${source_subdir}")
+    else()
+      set_property(TARGET ${name} PROPERTY _EP_BINARY_DIR "${source_dir}")
+    endif()
   endif()
 
   # Make the directories at CMake configure time *and* add a custom command
