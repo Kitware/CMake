@@ -126,7 +126,7 @@ void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
   cm->MarkCliAsUsed(variable);
 }
 
-cmake::cmake(Role role)
+cmake::cmake(Role role, cmState::Mode mode)
 {
   this->Trace = false;
   this->TraceExpand = false;
@@ -140,6 +140,7 @@ cmake::cmake(Role role)
   this->FileComparison = new cmFileTimeComparison;
 
   this->State = new cmState;
+  this->State->SetMode(mode);
   this->CurrentSnapshot = this->State->CreateBaseSnapshot();
   this->Messenger = new cmMessenger;
 
@@ -2023,7 +2024,8 @@ int cmake::CheckBuildSystem()
 
   // Read the rerun check file and use it to decide whether to do the
   // global generate.
-  cmake cm(RoleScript); // Actually, all we need is the `set` command.
+  // Actually, all we need is the `set` command.
+  cmake cm(RoleScript, cmState::Unknown);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();

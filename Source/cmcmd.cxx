@@ -9,6 +9,7 @@
 #include "cmMakefile.h"
 #include "cmQtAutoGeneratorMocUic.h"
 #include "cmQtAutoGeneratorRcc.h"
+#include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
@@ -721,7 +722,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         std::cerr << "-E capabilities accepts no additional arguments\n";
         return 1;
       }
-      cmake cm(cmake::RoleInternal);
+      cmake cm(cmake::RoleInternal, cmState::Unknown);
 #if defined(CMAKE_BUILD_WITH_CMAKE)
       std::cout << cm.ReportCapabilities(true);
 #else
@@ -898,7 +899,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       const bool verbose = isCMakeVerbose();
 
       // Create a cmake object instance to process dependencies.
-      cmake cm(cmake::RoleScript); // All we need is the `set` command.
+      // All we need is the `set` command.
+      cmake cm(cmake::RoleScript, cmState::Unknown);
       std::string gen;
       std::string homeDir;
       std::string startDir;

@@ -539,6 +539,9 @@ const char* cmState::GetGlobalProperty(const std::string& prop)
     std::string langs;
     langs = cmJoin(this->EnabledLanguages, ";");
     this->SetGlobalProperty("ENABLED_LANGUAGES", langs.c_str());
+  } else if (prop == "CMAKE_ROLE") {
+    std::string mode = this->GetModeString();
+    this->SetGlobalProperty("CMAKE_ROLE", mode.c_str());
   }
 #define STRING_LIST_ELEMENT(F) ";" #F
   if (prop == "CMAKE_C_KNOWN_FEATURES") {
@@ -641,6 +644,40 @@ unsigned int cmState::GetCacheMajorVersion() const
 unsigned int cmState::GetCacheMinorVersion() const
 {
   return this->CacheManager->GetCacheMinorVersion();
+}
+
+cmState::Mode cmState::GetMode() const
+{
+  return this->CurrentMode;
+}
+
+std::string cmState::GetModeString() const
+{
+  return ModeToString(this->CurrentMode);
+}
+
+void cmState::SetMode(cmState::Mode mode)
+{
+  this->CurrentMode = mode;
+}
+
+std::string cmState::ModeToString(cmState::Mode mode)
+{
+  switch (mode) {
+    case Project:
+      return "PROJECT";
+    case Script:
+      return "SCRIPT";
+    case FindPackage:
+      return "FIND_PACKAGE";
+    case CTest:
+      return "CTEST";
+    case CPack:
+      return "CPACK";
+    case Unknown:
+      return "UNKNOWN";
+  }
+  return "UNKNOWN";
 }
 
 std::string const& cmState::GetBinaryDirectory() const

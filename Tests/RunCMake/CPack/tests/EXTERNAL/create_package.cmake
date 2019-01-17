@@ -1,5 +1,10 @@
 message("This script could run an external packaging tool")
 
+get_property(role GLOBAL PROPERTY CMAKE_ROLE)
+if(NOT role STREQUAL "CPACK")
+  message(SEND_ERROR "CMAKE_ROLE property is \"${role}\", should be \"CPACK\"")
+endif()
+
 function(expect_variable VAR)
   if(NOT ${VAR})
     message(FATAL_ERROR "${VAR} is unexpectedly not set")

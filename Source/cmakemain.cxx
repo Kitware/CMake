@@ -217,7 +217,7 @@ int do_cmake(int ac, char const* const* av)
   doc.addCMakeStandardDocSections();
   if (doc.CheckOptions(ac, av)) {
     // Construct and print requested documentation.
-    cmake hcm(cmake::RoleInternal);
+    cmake hcm(cmake::RoleInternal, cmState::Unknown);
     hcm.SetHomeDirectory("");
     hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();
@@ -299,7 +299,7 @@ int do_cmake(int ac, char const* const* av)
     }
   }
   if (sysinfo) {
-    cmake cm(cmake::RoleProject);
+    cmake cm(cmake::RoleProject, cmState::Project);
     cm.SetHomeDirectory("");
     cm.SetHomeOutputDirectory("");
     int ret = cm.GetSystemInformation(args);
@@ -307,7 +307,19 @@ int do_cmake(int ac, char const* const* av)
   }
   cmake::Role const role =
     workingMode == cmake::SCRIPT_MODE ? cmake::RoleScript : cmake::RoleProject;
-  cmake cm(role);
+  cmState::Mode mode = cmState::Unknown;
+  switch (workingMode) {
+    case cmake::NORMAL_MODE:
+      mode = cmState::Project;
+      break;
+    case cmake::SCRIPT_MODE:
+      mode = cmState::Script;
+      break;
+    case cmake::FIND_PACKAGE_MODE:
+      mode = cmState::FindPackage;
+      break;
+  }
+  cmake cm(role, mode);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cmSystemTools::SetMessageCallback(cmakemainMessageCallback, &cm);
@@ -463,7 +475,7 @@ static int do_build(int ac, char const* const* av)
     return 1;
   }
 
-  cmake cm(cmake::RoleInternal);
+  cmake cm(cmake::RoleInternal, cmState::Unknown);
   cmSystemTools::SetMessageCallback(cmakemainMessageCallback, &cm);
   cm.SetProgressCallback(cmakemainProgressCallback, &cm);
   return cm.Build(jobs, dir, target, config, nativeOptions, clean);
@@ -501,7 +513,7 @@ static int do_open(int ac, char const* const* av)
     return 1;
   }
 
-  cmake cm(cmake::RoleInternal);
+  cmake cm(cmake::RoleInternal, cmState::Unknown);
   cmSystemTools::SetMessageCallback(cmakemainMessageCallback, &cm);
   cm.SetProgressCallback(cmakemainProgressCallback, &cm);
   return cm.Open(dir, false) ? 0 : 1;

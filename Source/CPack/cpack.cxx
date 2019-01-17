@@ -24,6 +24,7 @@
 #include "cmDocumentationFormatter.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
@@ -208,7 +209,7 @@ int main(int argc, char const* const* argv)
   cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
               "Read CPack config file: " << cpackConfigFile << std::endl);
 
-  cmake cminst(cmake::RoleScript);
+  cmake cminst(cmake::RoleScript, cmState::CPack);
   cminst.SetHomeDirectory("");
   cminst.SetHomeOutputDirectory("");
   cminst.SetProgressCallback(cpackProgressCallback, nullptr);

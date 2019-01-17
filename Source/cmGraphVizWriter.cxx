@@ -13,6 +13,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -172,7 +173,7 @@ cmGraphVizWriter::cmGraphVizWriter(const cmGlobalGenerator* globalGenerator)
 void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
                                     const char* fallbackSettingsFileName)
 {
-  cmake cm(cmake::RoleScript);
+  cmake cm(cmake::RoleScript, cmState::Unknown);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
