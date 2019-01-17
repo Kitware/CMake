@@ -536,7 +536,7 @@ public:
    */
   void ClearSourcesCache();
 
-  void AddSource(const std::string& src);
+  void AddSource(const std::string& src, bool before = false);
   void AddTracedSources(std::vector<std::string> const& srcs);
 
   /**
@@ -694,7 +694,7 @@ public:
   const char* GetSourcesProperty() const;
 
 private:
-  void AddSourceCommon(const std::string& src);
+  void AddSourceCommon(const std::string& src, bool before = false);
 
   std::string CreateFortranModuleDirectory(
     std::string const& working_dir) const;

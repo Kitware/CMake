@@ -355,20 +355,22 @@ void cmGeneratorTarget::ClearSourcesCache()
   this->Objects.clear();
 }
 
-void cmGeneratorTarget::AddSourceCommon(const std::string& src)
+void cmGeneratorTarget::AddSourceCommon(const std::string& src, bool before)
 {
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
   cmGeneratorExpression ge(lfbt);
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(src);
   cge->SetEvaluateForBuildsystem(true);
-  this->SourceEntries.push_back(new TargetPropertyEntry(std::move(cge)));
+  this->SourceEntries.insert(before ? this->SourceEntries.begin()
+                                    : this->SourceEntries.end(),
+                             new TargetPropertyEntry(std::move(cge)));
   this->ClearSourcesCache();
 }
 
-void cmGeneratorTarget::AddSource(const std::string& src)
+void cmGeneratorTarget::AddSource(const std::string& src, bool before)
 {
-  this->Target->AddSource(src);
-  this->AddSourceCommon(src);
+  this->Target->AddSource(src, before);
+  this->AddSourceCommon(src, before);
 }
 
 void cmGeneratorTarget::AddTracedSources(std::vector<std::string> const& srcs)
@@ -387,12 +389,10 @@ void cmGeneratorTarget::AddIncludeDirectory(const std::string& src,
   cmGeneratorExpression ge(lfbt);
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(src);
   cge->SetEvaluateForBuildsystem(true);
-  // Insert before begin/end
-  std::vector<TargetPropertyEntry*>::iterator pos = before
-    ? this->IncludeDirectoriesEntries.begin()
-    : this->IncludeDirectoriesEntries.end();
   this->IncludeDirectoriesEntries.insert(
-    pos, new TargetPropertyEntry(std::move(cge)));
+    before ? this->IncludeDirectoriesEntries.begin()
+           : this->IncludeDirectoriesEntries.end(),
+    new TargetPropertyEntry(std::move(cge)));
 }
 
 std::vector<cmSourceFile*> const* cmGeneratorTarget::GetSourceDepends(
