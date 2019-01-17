@@ -120,8 +120,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args,
     return true;
   }
 
-  bool readit =
-    this->Makefile->ReadDependentFile(listFile.c_str(), noPolicyScope);
+  bool readit = this->Makefile->ReadDependentFile(listFile, noPolicyScope);
 
   // add the location of the included file if a result variable was given
   if (!resultVarName.empty()) {

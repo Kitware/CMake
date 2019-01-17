@@ -355,7 +355,7 @@ bool cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
     std::string setMakeProgram =
       mf->GetModulesFile(this->FindMakeProgramFile.c_str());
     if (!setMakeProgram.empty()) {
-      mf->ReadListFile(setMakeProgram.c_str());
+      mf->ReadListFile(setMakeProgram);
     }
   }
   if (!mf->GetDefinition("CMAKE_MAKE_PROGRAM") ||
@@ -522,7 +522,7 @@ void cmGlobalGenerator::EnableLanguage(
   if (readCMakeSystem) {
     fpath += "/CMakeSystem.cmake";
     if (cmSystemTools::FileExists(fpath)) {
-      mf->ReadListFile(fpath.c_str());
+      mf->ReadListFile(fpath);
     }
   }
   //  Load the CMakeDetermineSystem.cmake file and find out
@@ -551,12 +551,12 @@ void cmGlobalGenerator::EnableLanguage(
 #endif
     // Read the DetermineSystem file
     std::string systemFile = mf->GetModulesFile("CMakeDetermineSystem.cmake");
-    mf->ReadListFile(systemFile.c_str());
+    mf->ReadListFile(systemFile);
     // load the CMakeSystem.cmake from the binary directory
     // this file is configured by the CMakeDetermineSystem.cmake file
     fpath = rootBin;
     fpath += "/CMakeSystem.cmake";
-    mf->ReadListFile(fpath.c_str());
+    mf->ReadListFile(fpath);
   }
 
   if (readCMakeSystem) {
@@ -603,7 +603,7 @@ void cmGlobalGenerator::EnableLanguage(
   // **** Load the system specific initialization if not yet loaded
   if (!mf->GetDefinition("CMAKE_SYSTEM_SPECIFIC_INITIALIZE_LOADED")) {
     fpath = mf->GetModulesFile("CMakeSystemSpecificInitialize.cmake");
-    if (!mf->ReadListFile(fpath.c_str())) {
+    if (!mf->ReadListFile(fpath)) {
       cmSystemTools::Error("Could not find cmake module file: "
                            "CMakeSystemSpecificInitialize.cmake");
     }
@@ -635,7 +635,7 @@ void cmGlobalGenerator::EnableLanguage(
       // version of CMake then try to load the configured file first
       // to avoid duplicate compiler tests.
       if (cmSystemTools::FileExists(fpath)) {
-        if (!mf->ReadListFile(fpath.c_str())) {
+        if (!mf->ReadListFile(fpath)) {
           cmSystemTools::Error("Could not find cmake module file: ",
                                fpath.c_str());
         }
@@ -662,7 +662,7 @@ void cmGlobalGenerator::EnableLanguage(
       determineCompiler += "Compiler.cmake";
       std::string determineFile =
         mf->GetModulesFile(determineCompiler.c_str());
-      if (!mf->ReadListFile(determineFile.c_str())) {
+      if (!mf->ReadListFile(determineFile)) {
         cmSystemTools::Error("Could not find cmake module file: ",
                              determineCompiler.c_str());
       }
@@ -696,7 +696,7 @@ void cmGlobalGenerator::EnableLanguage(
       fpath += "/CMake";
       fpath += lang;
       fpath += "Compiler.cmake";
-      if (!mf->ReadListFile(fpath.c_str())) {
+      if (!mf->ReadListFile(fpath)) {
         cmSystemTools::Error("Could not find cmake module file: ",
                              fpath.c_str());
       }
@@ -713,7 +713,7 @@ void cmGlobalGenerator::EnableLanguage(
   // **** Load the system specific information if not yet loaded
   if (!mf->GetDefinition("CMAKE_SYSTEM_SPECIFIC_INFORMATION_LOADED")) {
     fpath = mf->GetModulesFile("CMakeSystemSpecificInformation.cmake");
-    if (!mf->ReadListFile(fpath.c_str())) {
+    if (!mf->ReadListFile(fpath)) {
       cmSystemTools::Error("Could not find cmake module file: "
                            "CMakeSystemSpecificInformation.cmake");
     }
@@ -793,7 +793,7 @@ void cmGlobalGenerator::EnableLanguage(
       if (informationFile.empty()) {
         cmSystemTools::Error("Could not find cmake module file: ",
                              fpath.c_str());
-      } else if (!mf->ReadListFile(informationFile.c_str())) {
+      } else if (!mf->ReadListFile(informationFile)) {
         cmSystemTools::Error("Could not process cmake module file: ",
                              informationFile.c_str());
       }
@@ -814,7 +814,7 @@ void cmGlobalGenerator::EnableLanguage(
         testLang += lang;
         testLang += "Compiler.cmake";
         std::string ifpath = mf->GetModulesFile(testLang.c_str());
-        if (!mf->ReadListFile(ifpath.c_str())) {
+        if (!mf->ReadListFile(ifpath)) {
           cmSystemTools::Error("Could not find cmake module file: ",
                                testLang.c_str());
         }
@@ -852,7 +852,7 @@ void cmGlobalGenerator::EnableLanguage(
   projectCompatibility += mf->GetSafeDefinition("PROJECT_NAME");
   projectCompatibility += "Compatibility.cmake";
   if (cmSystemTools::FileExists(projectCompatibility)) {
-    mf->ReadListFile(projectCompatibility.c_str());
+    mf->ReadListFile(projectCompatibility);
   }
   // Inform any extra generator of the new language.
   if (this->ExtraGenerator) {

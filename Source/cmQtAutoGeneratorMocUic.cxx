@@ -1213,7 +1213,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
   };
 
   // -- Read info file
-  if (!makefile->ReadListFile(InfoFile().c_str())) {
+  if (!makefile->ReadListFile(InfoFile())) {
     Log().ErrorFile(GeneratorT::GEN, InfoFile(), "File processing failed");
     return false;
   }

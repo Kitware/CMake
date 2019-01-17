@@ -533,7 +533,8 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
   }
 }
 
-bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
+bool cmMakefile::ReadDependentFile(const std::string& filename,
+                                   bool noPolicyScope)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE",
                       this->GetDefinition("CMAKE_CURRENT_LIST_FILE"));
@@ -586,7 +587,7 @@ private:
   bool ReportError;
 };
 
-bool cmMakefile::ReadListFile(const char* filename)
+bool cmMakefile::ReadListFile(const std::string& filename)
 {
   std::string filenametoread = cmSystemTools::CollapseFullPath(
     filename, this->GetCurrentSourceDirectory());

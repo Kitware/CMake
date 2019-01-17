@@ -533,7 +533,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   mf->SetArgcArgv(args);
 
   std::string systemFile = mf->GetModulesFile("CMakeFindPackageMode.cmake");
-  mf->ReadListFile(systemFile.c_str());
+  mf->ReadListFile(systemFile);
 
   std::string language = mf->GetSafeDefinition("LANGUAGE");
   std::string mode = mf->GetSafeDefinition("MODE");
@@ -2031,7 +2031,7 @@ int cmake::CheckBuildSystem()
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
-  if (!mf.ReadListFile(this->CheckBuildSystemArgument.c_str()) ||
+  if (!mf.ReadListFile(this->CheckBuildSystemArgument) ||
       cmSystemTools::GetErrorOccuredFlag()) {
     if (verbose) {
       std::ostringstream msg;

@@ -1364,8 +1364,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   std::string dirInfoFile = this->GetCurrentBinaryDirectory();
   dirInfoFile += cmake::GetCMakeFilesDirectory();
   dirInfoFile += "/CMakeDirectoryInformation.cmake";
-  if (mf->ReadListFile(dirInfoFile.c_str()) &&
-      !cmSystemTools::GetErrorOccuredFlag()) {
+  if (mf->ReadListFile(dirInfoFile) && !cmSystemTools::GetErrorOccuredFlag()) {
     haveDirectoryInfo = true;
   }
 

@@ -640,7 +640,7 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
                        "   Reading ctest configuration file: " << fname
                                                                << std::endl,
                        command->ShouldBeQuiet());
-    bool readit = mf->ReadDependentFile(fname.c_str());
+    bool readit = mf->ReadDependentFile(fname);
     if (!readit) {
       std::string m = "Could not find include file: ";
       m += fname;
@@ -2469,8 +2469,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
     bool erroroc = cmSystemTools::GetErrorOccuredFlag();
     cmSystemTools::ResetErrorOccuredFlag();
 
-    if (!mf->ReadListFile(fname.c_str()) ||
-        cmSystemTools::GetErrorOccuredFlag()) {
+    if (!mf->ReadListFile(fname) || cmSystemTools::GetErrorOccuredFlag()) {
       cmCTestLog(this, ERROR_MESSAGE,
                  "Problem reading custom configuration: " << fname
                                                           << std::endl);
@@ -2489,15 +2488,13 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
     gl.RecurseOn();
     gl.FindFiles(rexpr);
     std::vector<std::string>& files = gl.GetFiles();
-    std::vector<std::string>::iterator fileIt;
-    for (fileIt = files.begin(); fileIt != files.end(); ++fileIt) {
+    for (const std::string& file : files) {
       cmCTestLog(this, DEBUG,
-                 "* Read custom CTest configuration file: " << *fileIt
+                 "* Read custom CTest configuration file: " << file
                                                             << std::endl);
-      if (!mf->ReadListFile(fileIt->c_str()) ||
-          cmSystemTools::GetErrorOccuredFlag()) {
+      if (!mf->ReadListFile(file) || cmSystemTools::GetErrorOccuredFlag()) {
         cmCTestLog(this, ERROR_MESSAGE,
-                   "Problem reading custom configuration: " << *fileIt
+                   "Problem reading custom configuration: " << file
                                                             << std::endl);
       }
     }
