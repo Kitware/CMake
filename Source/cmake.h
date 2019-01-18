@@ -104,6 +104,7 @@ public:
     std::string extraName;
     bool supportsToolset;
     bool supportsPlatform;
+    std::vector<std::string> supportedPlatforms;
     bool isAlias;
   };
 

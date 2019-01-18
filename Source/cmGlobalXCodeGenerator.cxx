@@ -147,6 +147,11 @@ public:
 
   bool SupportsToolset() const override { return true; }
   bool SupportsPlatform() const override { return false; }
+
+  std::vector<std::string> GetKnownPlatforms() const override
+  {
+    return std::vector<std::string>();
+  }
 };
 
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(

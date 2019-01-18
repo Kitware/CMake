@@ -38,6 +38,9 @@ public:
 
   /** Determine whether or not this generator supports platforms */
   virtual bool SupportsPlatform() const = 0;
+
+  /** Get the list of supported platforms name for this generator */
+  virtual std::vector<std::string> GetKnownPlatforms() const = 0;
 };
 
 template <class T>
@@ -77,6 +80,13 @@ public:
 
   /** Determine whether or not this generator supports platforms */
   bool SupportsPlatform() const override { return T::SupportsPlatform(); }
+
+  /** Get the list of supported platforms name for this generator */
+  std::vector<std::string> GetKnownPlatforms() const override
+  {
+    // default is no platform supported
+    return std::vector<std::string>();
+  }
 };
 
 #endif

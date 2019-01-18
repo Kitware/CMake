@@ -83,6 +83,22 @@ public:
 
   bool SupportsToolset() const override { return false; }
   bool SupportsPlatform() const override { return true; }
+
+  std::vector<std::string> GetKnownPlatforms() const override
+  {
+    std::vector<std::string> platforms;
+    platforms.emplace_back("x64");
+    platforms.emplace_back("Win32");
+    platforms.emplace_back("Itanium");
+    cmVisualStudioWCEPlatformParser parser;
+    parser.ParseVersion("9.0");
+    const std::vector<std::string>& availablePlatforms =
+      parser.GetAvailablePlatforms();
+    for (std::string const& i : availablePlatforms) {
+      platforms.emplace_back(i);
+    }
+    return platforms;
+  }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio9Generator::NewFactory()

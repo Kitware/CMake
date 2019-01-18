@@ -93,6 +93,22 @@ public:
 
   bool SupportsToolset() const override { return true; }
   bool SupportsPlatform() const override { return true; }
+
+  std::vector<std::string> GetKnownPlatforms() const override
+  {
+    std::vector<std::string> platforms;
+    platforms.emplace_back("x64");
+    platforms.emplace_back("Win32");
+    platforms.emplace_back("ARM");
+
+    std::set<std::string> installedSDKs =
+      cmGlobalVisualStudio11Generator::GetInstalledWindowsCESDKs();
+    for (std::string const& i : installedSDKs) {
+      platforms.emplace_back(i);
+    }
+
+    return platforms;
+  }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio11Generator::NewFactory()
