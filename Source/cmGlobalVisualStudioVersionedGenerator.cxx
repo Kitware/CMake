@@ -19,6 +19,20 @@
 #  include "cmsys/SystemInformation.hxx"
 #endif
 
+static std::string VSHostPlatformName()
+{
+#ifdef HOST_PLATFORM_NAME
+  return HOST_PLATFORM_NAME;
+#else
+  cmsys::SystemInformation info;
+  if (info.Is64Bits()) {
+    return "x64";
+  } else {
+    return "Win32";
+  }
+#endif
+}
+
 static unsigned int VSVersionToMajor(
   cmGlobalVisualStudioGenerator::VSVersion v)
 {
@@ -206,16 +220,7 @@ cmGlobalVisualStudioVersionedGenerator::cmGlobalVisualStudioVersionedGenerator(
   this->DefaultCSharpFlagTableName = VSVersionToToolset(this->Version);
   this->DefaultLinkFlagTableName = VSVersionToToolset(this->Version);
   if (this->Version >= cmGlobalVisualStudioGenerator::VS16) {
-#ifdef HOST_PLATFORM_NAME
-    this->DefaultPlatformName = HOST_PLATFORM_NAME;
-#else
-    cmsys::SystemInformation info;
-    if (info.Is64Bits()) {
-      this->DefaultPlatformName = "x64";
-    } else {
-      this->DefaultPlatformName = "Win32";
-    }
-#endif
+    this->DefaultPlatformName = VSHostPlatformName();
   }
 }
 
