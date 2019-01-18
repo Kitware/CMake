@@ -22,6 +22,7 @@ unset(CMAKE_C_COMPILER_WORKS CACHE)
 # any makefiles or projects.
 if(NOT CMAKE_C_COMPILER_WORKS)
   PrintTestCompilerStatus("C" "")
+  __TestCompiler_setTryCompileTargetType()
   file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler.c
     "#ifdef __cplusplus\n"
     "# error \"The CMAKE_C_COMPILER is set to a C++ compiler\"\n"
@@ -41,6 +42,7 @@ if(NOT CMAKE_C_COMPILER_WORKS)
   set(CMAKE_C_COMPILER_WORKS ${CMAKE_C_COMPILER_WORKS})
   unset(CMAKE_C_COMPILER_WORKS CACHE)
   set(C_TEST_WAS_RUN 1)
+  __TestCompiler_restoreTryCompileTargetType()
 endif()
 
 if(NOT CMAKE_C_COMPILER_WORKS)

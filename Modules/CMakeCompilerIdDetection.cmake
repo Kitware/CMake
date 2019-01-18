@@ -63,6 +63,7 @@ function(compiler_id_detection outvar lang)
       Cray
       TI
       Fujitsu
+      GHS
     )
     if (lang STREQUAL C)
       list(APPEND ordered_compilers

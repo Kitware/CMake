@@ -164,6 +164,8 @@ public:
   bool UseWindowsShell() const;
   void SetWindowsVSIDE(bool windowsVSIDE);
   bool UseWindowsVSIDE() const;
+  void SetGhsMultiIDE(bool ghsMultiIDE);
+  bool UseGhsMultiIDE() const;
   void SetWatcomWMake(bool watcomWMake);
   bool UseWatcomWMake() const;
   void SetMinGWMake(bool minGWMake);
@@ -222,6 +224,7 @@ private:
   bool IsGeneratorMultiConfig = false;
   bool WindowsShell = false;
   bool WindowsVSIDE = false;
+  bool GhsMultiIDE = false;
   bool WatcomWMake = false;
   bool MinGWMake = false;
   bool NMake = false;

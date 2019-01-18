@@ -13,7 +13,7 @@ class cmGeneratedFileStream;
 class cmGlobalGhsMultiGenerator : public cmGlobalGenerator
 {
 public:
-  /// The default name of GHS MULTI's build file. Typically: monolith.gpj.
+  // The default filename extension of GHS MULTI's build files.
   static const char* FILE_EXTENSION;
 
   cmGlobalGhsMultiGenerator(cmake* cm);
@@ -63,29 +63,28 @@ public:
    */
   bool FindMakeProgram(cmMakefile* mf) override;
 
-  cmGeneratedFileStream* GetBuildFileStream()
+  void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;
+
+  // Write the common disclaimer text at the top of each build file.
+  void WriteFileHeader(std::ostream& fout);
+
+  // Target dependency sorting
+  class TargetSet : public std::set<cmGeneratorTarget const*>
   {
-    return this->TargetFolderBuildStreams[""];
-  }
+  };
+  class TargetCompare
+  {
+    std::string First;
 
-  static void OpenBuildFileStream(std::string const& filepath,
-                                  cmGeneratedFileStream** filestream);
-  static void OpenBuildFileStream(cmGeneratedFileStream* filestream);
-  static void CloseBuildFileStream(cmGeneratedFileStream** filestream);
-  /// Write the common disclaimer text at the top of each build file.
-  static void WriteDisclaimer(std::ostream* os);
-  std::vector<std::string> GetLibDirs() { return this->LibDirs; }
-
-  static void AddFilesUpToPath(
-    cmGeneratedFileStream* mainBuildFile,
-    std::map<std::string, cmGeneratedFileStream*>* targetFolderBuildStreams,
-    char const* homeOutputDirectory, std::string const& path,
-    GhsMultiGpj::Types projType, std::string const& relPath = "");
-  static void Open(std::string const& mapKeyName, std::string const& fileName,
-                   std::map<std::string, cmGeneratedFileStream*>* fileMap);
-
-  static std::string trimQuotes(std::string const& str);
-  inline bool IsOSDirRelative() { return this->OSDirRelative; }
+  public:
+    TargetCompare(std::string const& first)
+      : First(first)
+    {
+    }
+    bool operator()(cmGeneratorTarget const* l,
+                    cmGeneratorTarget const* r) const;
+  };
+  class OrderedTargetDependSet;
 
 protected:
   void Generate() override;
@@ -100,35 +99,35 @@ protected:
                               std::vector<std::string>()) override;
 
 private:
-  void GetToolset(cmMakefile* mf, std::string& tsd, std::string& ts);
-  void OpenBuildFileStream();
+  void GetToolset(cmMakefile* mf, std::string& tsd, const std::string& ts);
 
-  void WriteMacros();
-  void WriteHighLevelDirectives();
-  void WriteCompilerOptions(std::string const& fOSDir);
+  /* top-level project */
+  void OutputTopLevelProject(cmLocalGenerator* root,
+                             std::vector<cmLocalGenerator*>& generators);
+  void WriteTopLevelProject(std::ostream& fout, cmLocalGenerator* root,
+                            std::vector<cmLocalGenerator*>& generators);
+  void WriteMacros(std::ostream& fout);
+  void WriteHighLevelDirectives(std::ostream& fout);
+  void WriteSubProjects(std::ostream& fout, cmLocalGenerator* root,
+                        std::vector<cmLocalGenerator*>& generators);
 
-  static void AddFilesUpToPathNewBuildFile(
-    cmGeneratedFileStream* mainBuildFile,
-    std::map<std::string, cmGeneratedFileStream*>* targetFolderBuildStreams,
-    char const* homeOutputDirectory, std::string const& pathUpTo, bool isFirst,
-    std::string const& relPath, GhsMultiGpj::Types projType);
-  static void AddFilesUpToPathAppendNextFile(
-    std::map<std::string, cmGeneratedFileStream*>* targetFolderBuildStreams,
-    std::string const& pathUpTo,
-    std::vector<std::string>::const_iterator splitPathI,
-    std::vector<std::string>::const_iterator end, GhsMultiGpj::Types projType);
-  static std::string GetFileNameFromPath(std::string const& path);
-  void UpdateBuildFiles(const std::vector<cmGeneratorTarget*>& tgts);
-  bool IsTgtForBuild(const cmGeneratorTarget* tgt);
+  std::string trimQuotes(std::string const& str);
 
-  std::vector<cmGeneratedFileStream*> TargetSubProjects;
-  std::map<std::string, cmGeneratedFileStream*> TargetFolderBuildStreams;
-
-  std::vector<std::string> LibDirs;
-
-  bool OSDirRelative;
   static const char* DEFAULT_BUILD_PROGRAM;
   static const char* DEFAULT_TOOLSET_ROOT;
+};
+
+class cmGlobalGhsMultiGenerator::OrderedTargetDependSet
+  : public std::multiset<cmTargetDepend,
+                         cmGlobalGhsMultiGenerator::TargetCompare>
+{
+  typedef std::multiset<cmTargetDepend,
+                        cmGlobalGhsMultiGenerator::TargetCompare>
+    derived;
+
+public:
+  typedef cmGlobalGenerator::TargetDependSet TargetDependSet;
+  OrderedTargetDependSet(TargetDependSet const&, std::string const& first);
 };
 
 #endif

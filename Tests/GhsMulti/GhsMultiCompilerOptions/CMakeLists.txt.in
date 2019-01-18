@@ -1,0 +1,32 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+
+project(test C)
+
+if(CMAKE_C_COMPILER_ID STREQUAL "GHS")
+  add_link_options("-non_shared")
+endif()
+
+if(RUN_TEST STREQUAL "RELEASE_FLAGS")
+  #RELEASE flags used when CMAKE_BUILD_TYPE is undefined
+  string(APPEND CMAKE_C_FLAGS_RELEASE " -unexpected_release_option")
+  add_executable(test_none test.c)
+endif()
+
+if(RUN_TEST STREQUAL "KERNEL_FLAGS")
+  #DEBUG flag missing when -kernel is added as a compile option
+  string(APPEND CMAKE_C_FLAGS_DEBUG " -required-debug-option")
+
+  add_executable(K1 test.c)
+
+  add_executable(K2 test.c)
+  target_compile_options(K2 PRIVATE -kernel)
+
+  add_executable(K3 test.c)
+  target_compile_options(K3 PRIVATE -kernel=fast)
+
+  add_executable(K4 test.c)
+  target_link_options(K4 PRIVATE -kernel)
+endif()

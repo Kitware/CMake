@@ -4,31 +4,34 @@
 
 #include "cmGeneratedFileStream.h"
 
-void GhsMultiGpj::WriteGpjTag(Types const gpjType,
-                              cmGeneratedFileStream* const filestream)
+static const char* GHS_TAG[] = { "[INTEGRITY Application]",
+                                 "[Library]",
+                                 "[Project]",
+                                 "[Program]",
+                                 "[Reference]",
+                                 "[Subproject]" };
+
+const char* GhsMultiGpj::GetGpjTag(Types const gpjType)
 {
   char const* tag;
   switch (gpjType) {
     case INTERGRITY_APPLICATION:
-      tag = "INTEGRITY Application";
-      break;
     case LIBRARY:
-      tag = "Library";
-      break;
     case PROJECT:
-      tag = "Project";
-      break;
     case PROGRAM:
-      tag = "Program";
-      break;
     case REFERENCE:
-      tag = "Reference";
-      break;
     case SUBPROJECT:
-      tag = "Subproject";
+      tag = GHS_TAG[gpjType];
       break;
     default:
       tag = "";
   }
-  *filestream << "[" << tag << "]" << std::endl;
+  return tag;
+}
+
+void GhsMultiGpj::WriteGpjTag(Types const gpjType, std::ostream& fout)
+{
+  char const* tag;
+  tag = GhsMultiGpj::GetGpjTag(gpjType);
+  fout << tag << std::endl;
 }

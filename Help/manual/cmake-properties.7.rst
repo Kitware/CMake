@@ -194,6 +194,7 @@ Properties on Targets
    /prop_tgt/FRAMEWORK
    /prop_tgt/FRAMEWORK_VERSION
    /prop_tgt/GENERATOR_FILE_NAME
+   /prop_tgt/GHS_INTEGRITY_APP
    /prop_tgt/GNUtoMS
    /prop_tgt/HAS_CXX
    /prop_tgt/IMPLICIT_DEPENDS_INCLUDE_TRANSFORM

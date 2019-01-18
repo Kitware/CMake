@@ -57,6 +57,12 @@ static std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
   "CMAKE_TRY_COMPILE_PLATFORM_VARIABLES";
 static std::string const kCMAKE_WARN_DEPRECATED = "CMAKE_WARN_DEPRECATED";
 
+/* GHS Multi platform variables */
+static std::set<std::string> ghs_platform_vars{
+  "GHS_TARGET_PLATFORM", "GHS_PRIMARY_TARGET", "GHS_TOOLSET_ROOT",
+  "GHS_OS_ROOT",         "GHS_OS_DIR",         "GHS_BSP_NAME"
+};
+
 static void writeProperty(FILE* fout, std::string const& targetName,
                           std::string const& prop, std::string const& value)
 {
@@ -867,6 +873,16 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     }
     fclose(fout);
     projectName = "CMAKE_TRY_COMPILE";
+  }
+
+  if (this->Makefile->GetState()->UseGhsMultiIDE()) {
+    // Forward the GHS variables to the inner project cache.
+    for (std::string const& var : ghs_platform_vars) {
+      if (const char* val = this->Makefile->GetDefinition(var)) {
+        std::string flag = "-D" + var + "=" + val;
+        cmakeFlags.push_back(std::move(flag));
+      }
+    }
   }
 
   bool erroroc = cmSystemTools::GetErrorOccuredFlag();

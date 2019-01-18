@@ -7,6 +7,7 @@
 # code.
 
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
+include(CMakeTestCompilerCommon)
 
 function(CMAKE_DETERMINE_COMPILER_ABI lang src)
   if(NOT DEFINED CMAKE_${lang}_ABI_COMPILED)
@@ -23,6 +24,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       # from which we might detect implicit link libraries.
       list(APPEND CMAKE_FLAGS "-DCMAKE_${lang}_STANDARD_LIBRARIES=")
     endif()
+    __TestCompiler_setTryCompileTargetType()
     try_compile(CMAKE_${lang}_ABI_COMPILED
       ${CMAKE_BINARY_DIR} ${src}
       CMAKE_FLAGS ${CMAKE_FLAGS}

@@ -168,3 +168,6 @@ then the language standard variables are honored:
 
 Their values are used to set the corresponding target properties in
 the generated project (unless overridden by an explicit option).
+
+For the :generator:`Green Hills MULTI` generator the GHS toolset and target
+system customization cache variables are also propagated into the test project.
