@@ -30,7 +30,8 @@ public:
   virtual void GetDocumentation(cmDocumentationEntry& entry) const = 0;
 
   /** Get the names of the current registered generators */
-  virtual void GetGenerators(std::vector<std::string>& names) const = 0;
+  virtual std::vector<std::string> GetGeneratorNames() const = 0;
+  virtual std::vector<std::string> GetGeneratorNamesWithPlatform() const = 0;
 
   /** Determine whether or not this generator supports toolsets */
   virtual bool SupportsToolset() const = 0;
@@ -60,9 +61,15 @@ public:
   }
 
   /** Get the names of the current registered generators */
-  void GetGenerators(std::vector<std::string>& names) const override
+  std::vector<std::string> GetGeneratorNames() const override
   {
+    std::vector<std::string> names;
     names.push_back(T::GetActualName());
+    return names;
+  }
+  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
+  {
+    return std::vector<std::string>();
   }
 
   /** Determine whether or not this generator supports toolsets */

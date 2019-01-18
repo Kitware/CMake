@@ -69,9 +69,16 @@ public:
                   "Optional [arch] can be \"Win64\" or \"ARM\".";
   }
 
-  void GetGenerators(std::vector<std::string>& names) const override
+  std::vector<std::string> GetGeneratorNames() const override
   {
+    std::vector<std::string> names;
     names.push_back(vs11generatorName);
+    return names;
+  }
+
+  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
+  {
+    std::vector<std::string> names;
     names.push_back(vs11generatorName + std::string(" ARM"));
     names.push_back(vs11generatorName + std::string(" Win64"));
 
@@ -80,6 +87,8 @@ public:
     for (std::string const& i : installedSDKs) {
       names.push_back(std::string(vs11generatorName) + " " + i);
     }
+
+    return names;
   }
 
   bool SupportsToolset() const override { return true; }

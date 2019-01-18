@@ -59,9 +59,16 @@ public:
                   "Optional [arch] can be \"Win64\" or \"IA64\".";
   }
 
-  void GetGenerators(std::vector<std::string>& names) const override
+  std::vector<std::string> GetGeneratorNames() const override
   {
+    std::vector<std::string> names;
     names.push_back(vs9generatorName);
+    return names;
+  }
+
+  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
+  {
+    std::vector<std::string> names;
     names.push_back(vs9generatorName + std::string(" Win64"));
     names.push_back(vs9generatorName + std::string(" IA64"));
     cmVisualStudioWCEPlatformParser parser;
@@ -71,6 +78,7 @@ public:
     for (std::string const& i : availablePlatforms) {
       names.push_back("Visual Studio 9 2008 " + i);
     }
+    return names;
   }
 
   bool SupportsToolset() const override { return false; }

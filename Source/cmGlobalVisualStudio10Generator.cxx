@@ -74,11 +74,19 @@ public:
                   "Optional [arch] can be \"Win64\" or \"IA64\".";
   }
 
-  void GetGenerators(std::vector<std::string>& names) const override
+  std::vector<std::string> GetGeneratorNames() const override
   {
+    std::vector<std::string> names;
     names.push_back(vs10generatorName);
+    return names;
+  }
+
+  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
+  {
+    std::vector<std::string> names;
     names.push_back(vs10generatorName + std::string(" IA64"));
     names.push_back(vs10generatorName + std::string(" Win64"));
+    return names;
   }
 
   bool SupportsToolset() const override { return true; }

@@ -959,12 +959,18 @@ void cmake::AddDefaultExtraGenerators()
 #endif
 }
 
-void cmake::GetRegisteredGenerators(
-  std::vector<GeneratorInfo>& generators) const
+void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators,
+                                    bool includeNamesWithPlatform) const
 {
   for (cmGlobalGeneratorFactory* gen : this->Generators) {
-    std::vector<std::string> names;
-    gen->GetGenerators(names);
+    std::vector<std::string> names = gen->GetGeneratorNames();
+
+    if (includeNamesWithPlatform) {
+      std::vector<std::string> namesWithPlatform =
+        gen->GetGeneratorNamesWithPlatform();
+      names.insert(names.end(), namesWithPlatform.begin(),
+                   namesWithPlatform.end());
+    }
 
     for (std::string const& name : names) {
       GeneratorInfo info;
