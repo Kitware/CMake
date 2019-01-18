@@ -84,6 +84,8 @@ public:
     platforms.emplace_back("ARM");
     return platforms;
   }
+
+  std::string GetDefaultPlatformName() const override { return "Win32"; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio12Generator::NewFactory()

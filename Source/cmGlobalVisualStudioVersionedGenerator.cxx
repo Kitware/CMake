@@ -159,6 +159,8 @@ public:
     platforms.emplace_back("ARM64");
     return platforms;
   }
+
+  std::string GetDefaultPlatformName() const override { return "Win32"; }
 };
 
 cmGlobalGeneratorFactory*
@@ -233,6 +235,11 @@ public:
     platforms.emplace_back("ARM");
     platforms.emplace_back("ARM64");
     return platforms;
+  }
+
+  std::string GetDefaultPlatformName() const override
+  {
+    return VSHostPlatformName();
   }
 };
 

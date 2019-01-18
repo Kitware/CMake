@@ -152,6 +152,8 @@ public:
   {
     return std::vector<std::string>();
   }
+
+  std::string GetDefaultPlatformName() const override { return std::string(); }
 };
 
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(

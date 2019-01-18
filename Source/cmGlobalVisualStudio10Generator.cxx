@@ -100,6 +100,8 @@ public:
     platforms.emplace_back("Itanium");
     return platforms;
   }
+
+  std::string GetDefaultPlatformName() const override { return "Win32"; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio10Generator::NewFactory()

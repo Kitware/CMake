@@ -105,6 +105,7 @@ public:
     bool supportsToolset;
     bool supportsPlatform;
     std::vector<std::string> supportedPlatforms;
+    std::string defaultPlatform;
     bool isAlias;
   };
 

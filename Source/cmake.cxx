@@ -977,6 +977,7 @@ void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators,
       info.supportsToolset = gen->SupportsToolset();
       info.supportsPlatform = gen->SupportsPlatform();
       info.supportedPlatforms = gen->GetKnownPlatforms();
+      info.defaultPlatform = gen->GetDefaultPlatformName();
       info.name = name;
       info.baseName = name;
       info.isAlias = false;

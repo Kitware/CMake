@@ -109,6 +109,8 @@ public:
 
     return platforms;
   }
+
+  std::string GetDefaultPlatformName() const override { return "Win32"; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio11Generator::NewFactory()
