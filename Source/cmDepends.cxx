@@ -13,7 +13,7 @@
 #include <string.h>
 #include <utility>
 
-cmDepends::cmDepends(cmLocalGenerator* lg, const char* targetDir)
+cmDepends::cmDepends(cmLocalGenerator* lg, const std::string& targetDir)
   : LocalGenerator(lg)
   , TargetDirectory(targetDir)
   , Dependee(new char[MaxPath])
@@ -65,12 +65,13 @@ bool cmDepends::Finalize(std::ostream& /*unused*/, std::ostream& /*unused*/)
   return true;
 }
 
-bool cmDepends::Check(const char* makeFile, const char* internalFile,
+bool cmDepends::Check(const std::string& makeFile,
+                      const std::string& internalFile,
                       std::map<std::string, DependencyVector>& validDeps)
 {
   // Check whether dependencies must be regenerated.
   bool okay = true;
-  cmsys::ifstream fin(internalFile);
+  cmsys::ifstream fin(internalFile.c_str());
   if (!(fin && this->CheckDependencies(fin, internalFile, validDeps))) {
     // Clear all dependencies so they will be regenerated.
     this->Clear(makeFile);
@@ -81,7 +82,7 @@ bool cmDepends::Check(const char* makeFile, const char* internalFile,
   return okay;
 }
 
-void cmDepends::Clear(const char* file)
+void cmDepends::Clear(const std::string& file)
 {
   // Print verbose output.
   if (this->Verbose) {
@@ -107,7 +108,7 @@ bool cmDepends::WriteDependencies(const std::set<std::string>& /*unused*/,
 }
 
 bool cmDepends::CheckDependencies(
-  std::istream& internalDepends, const char* internalDependsFileName,
+  std::istream& internalDepends, const std::string& internalDependsFileName,
   std::map<std::string, DependencyVector>& validDeps)
 {
   // Parse dependencies from the stream.  If any dependee is missing
@@ -194,8 +195,8 @@ bool cmDepends::CheckDependencies(
         // The dependee exists, but the depender doesn't. Regenerate if the
         // internalDepends file is older than the dependee.
         int result = 0;
-        if ((!this->FileComparison->FileTimeCompare(internalDependsFileName,
-                                                    dependee, &result) ||
+        if ((!this->FileComparison->FileTimeCompare(
+               internalDependsFileName.c_str(), dependee, &result) ||
              result < 0)) {
           // The depends-file is older than the dependee.
           regenerate = true;

@@ -1333,8 +1333,8 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
     // dependency vector. This means that in the normal case, when only
     // few or one file have been edited, then also only this one file is
     // actually scanned again, instead of all files for this target.
-    needRescanDependencies = !checker.Check(
-      dependFile.c_str(), internalDependFile.c_str(), validDependencies);
+    needRescanDependencies =
+      !checker.Check(dependFile, internalDependFile, validDependencies);
   }
 
   if (needRescanDependInfo || needRescanDirInfo || needRescanDependencies) {
@@ -1347,7 +1347,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
                                        cmsysTerminal_Color_ForegroundBold,
                                      message.c_str(), true, color);
 
-    return this->ScanDependencies(dir.c_str(), validDependencies);
+    return this->ScanDependencies(dir, validDependencies);
   }
 
   // The dependencies are already up-to-date.
@@ -1355,7 +1355,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
 }
 
 bool cmLocalUnixMakefileGenerator3::ScanDependencies(
-  const char* targetDir,
+  const std::string& targetDir,
   std::map<std::string, cmDepends::DependencyVector>& validDeps)
 {
   // Read the directory information file.
@@ -1393,12 +1393,9 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
     cmSystemTools::Error("Directory Information file not found");
   }
 
-  // create the file stream for the depends file
-  std::string dir = targetDir;
-
   // Open the make depends file.  This should be copy-if-different
   // because the make tool may try to reload it needlessly otherwise.
-  std::string ruleFileNameFull = dir;
+  std::string ruleFileNameFull = targetDir;
   ruleFileNameFull += "/depend.make";
   cmGeneratedFileStream ruleFileStream(
     ruleFileNameFull, false, this->GlobalGenerator->GetMakefileEncoding());
@@ -1410,7 +1407,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   // Open the cmake dependency tracking file.  This should not be
   // copy-if-different because dependencies are re-scanned when it is
   // older than the DependInfo.cmake.
-  std::string internalRuleFileNameFull = dir;
+  std::string internalRuleFileNameFull = targetDir;
   internalRuleFileNameFull += "/depend.internal";
   cmGeneratedFileStream internalRuleFileStream(
     internalRuleFileNameFull, false,
@@ -1451,7 +1448,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
       scanner->SetFileComparison(
         this->GlobalGenerator->GetCMakeInstance()->GetFileComparison());
       scanner->SetLanguage(lang);
-      scanner->SetTargetDirectory(dir.c_str());
+      scanner->SetTargetDirectory(targetDir);
       scanner->Write(ruleFileStream, internalRuleFileStream);
 
       // free the scanner for this language
@@ -1720,7 +1717,7 @@ void cmLocalUnixMakefileGenerator3::ClearDependencies(cmMakefile* mf,
 
     // Clear the implicit dependency makefile.
     std::string dependFile = dir + "/depend.make";
-    clearer.Clear(dependFile.c_str());
+    clearer.Clear(dependFile);
 
     // Remove the internal dependency check file to force
     // regeneration.

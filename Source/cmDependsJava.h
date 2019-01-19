@@ -33,7 +33,7 @@ protected:
                          const std::string& file, std::ostream& makeDepends,
                          std::ostream& internalDepends) override;
   bool CheckDependencies(
-    std::istream& internalDepends, const char* internalDependsFileName,
+    std::istream& internalDepends, const std::string& internalDependsFileName,
     std::map<std::string, DependencyVector>& validDeps) override;
 };
 
