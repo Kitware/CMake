@@ -302,33 +302,21 @@ void cmSystemTools::SetStderrCallback(OutputCallback f, void* clientData)
   s_StderrCallbackClientData = clientData;
 }
 
-void cmSystemTools::Stdout(const char* s)
-{
-  cmSystemTools::Stdout(s, strlen(s));
-}
-
-void cmSystemTools::Stderr(const char* s)
-{
-  cmSystemTools::Stderr(s, strlen(s));
-}
-
-void cmSystemTools::Stderr(const char* s, size_t length)
+void cmSystemTools::Stderr(const std::string& s)
 {
   if (s_StderrCallback) {
-    (*s_StderrCallback)(s, length, s_StderrCallbackClientData);
+    (*s_StderrCallback)(s.c_str(), s.length(), s_StderrCallbackClientData);
   } else {
-    std::cerr.write(s, length);
-    std::cerr.flush();
+    std::cerr << s << std::flush;
   }
 }
 
-void cmSystemTools::Stdout(const char* s, size_t length)
+void cmSystemTools::Stdout(const std::string& s)
 {
   if (s_StdoutCallback) {
-    (*s_StdoutCallback)(s, length, s_StdoutCallbackClientData);
+    (*s_StdoutCallback)(s.c_str(), s.length(), s_StdoutCallbackClientData);
   } else {
-    std::cout.write(s, length);
-    std::cout.flush();
+    std::cout << s << std::flush;
   }
 }
 
@@ -792,7 +780,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
       if (pipe == cmsysProcess_Pipe_STDOUT) {
         if (outputflag != OUTPUT_NONE) {
           processOutput.DecodeText(data, length, strdata, 1);
-          cmSystemTools::Stdout(strdata.c_str(), strdata.size());
+          cmSystemTools::Stdout(strdata);
         }
         if (captureStdOut) {
           tempStdOut.insert(tempStdOut.end(), data, data + length);
@@ -800,7 +788,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
       } else if (pipe == cmsysProcess_Pipe_STDERR) {
         if (outputflag != OUTPUT_NONE) {
           processOutput.DecodeText(data, length, strdata, 2);
-          cmSystemTools::Stderr(strdata.c_str(), strdata.size());
+          cmSystemTools::Stderr(strdata);
         }
         if (captureStdErr) {
           tempStdErr.insert(tempStdErr.end(), data, data + length);
@@ -811,11 +799,11 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
     if (outputflag != OUTPUT_NONE) {
       processOutput.DecodeText(std::string(), strdata, 1);
       if (!strdata.empty()) {
-        cmSystemTools::Stdout(strdata.c_str(), strdata.size());
+        cmSystemTools::Stdout(strdata);
       }
       processOutput.DecodeText(std::string(), strdata, 2);
       if (!strdata.empty()) {
-        cmSystemTools::Stderr(strdata.c_str(), strdata.size());
+        cmSystemTools::Stderr(strdata);
       }
     }
   }
@@ -1899,13 +1887,13 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
     if (verbose) {
       if (extract) {
         cmSystemTools::Stdout("x ");
-        cmSystemTools::Stdout(cm_archive_entry_pathname(entry).c_str());
+        cmSystemTools::Stdout(cm_archive_entry_pathname(entry));
       } else {
         list_item_verbose(stdout, entry);
       }
       cmSystemTools::Stdout("\n");
     } else if (!extract) {
-      cmSystemTools::Stdout(cm_archive_entry_pathname(entry).c_str());
+      cmSystemTools::Stdout(cm_archive_entry_pathname(entry));
       cmSystemTools::Stdout("\n");
     }
     if (extract) {

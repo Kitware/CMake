@@ -54,7 +54,7 @@ void cmQtAutoGenerator::Logger::Info(GeneratorT genType,
   }
   {
     std::lock_guard<std::mutex> lock(Mutex_);
-    cmSystemTools::Stdout(msg.c_str(), msg.size());
+    cmSystemTools::Stdout(msg);
   }
 }
 
@@ -78,7 +78,7 @@ void cmQtAutoGenerator::Logger::Warning(GeneratorT genType,
   msg.push_back('\n');
   {
     std::lock_guard<std::mutex> lock(Mutex_);
-    cmSystemTools::Stdout(msg.c_str(), msg.size());
+    cmSystemTools::Stdout(msg);
   }
 }
 
@@ -107,7 +107,7 @@ void cmQtAutoGenerator::Logger::Error(GeneratorT genType,
   msg.push_back('\n');
   {
     std::lock_guard<std::mutex> lock(Mutex_);
-    cmSystemTools::Stderr(msg.c_str(), msg.size());
+    cmSystemTools::Stderr(msg);
   }
 }
 
@@ -149,7 +149,7 @@ void cmQtAutoGenerator::Logger::ErrorCommand(
   msg.push_back('\n');
   {
     std::lock_guard<std::mutex> lock(Mutex_);
-    cmSystemTools::Stderr(msg.c_str(), msg.size());
+    cmSystemTools::Stderr(msg);
   }
 }
 

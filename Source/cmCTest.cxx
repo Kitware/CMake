@@ -2781,13 +2781,13 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
     if ((res == cmsysProcess_Pipe_STDOUT || res == cmsysProcess_Pipe_STDERR) &&
         this->ExtraVerbose) {
       processOutput.DecodeText(data, length, strdata);
-      cmSystemTools::Stdout(strdata.c_str(), strdata.size());
+      cmSystemTools::Stdout(strdata);
     }
   }
   if (this->ExtraVerbose) {
     processOutput.DecodeText(std::string(), strdata);
     if (!strdata.empty()) {
-      cmSystemTools::Stdout(strdata.c_str(), strdata.size());
+      cmSystemTools::Stdout(strdata);
     }
   }
 

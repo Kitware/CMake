@@ -79,13 +79,11 @@ public:
   typedef void (*OutputCallback)(const char*, size_t length, void*);
 
   ///! Send a string to stdout
-  static void Stdout(const char* s);
-  static void Stdout(const char* s, size_t length);
+  static void Stdout(const std::string& s);
   static void SetStdoutCallback(OutputCallback, void* clientData = nullptr);
 
   ///! Send a string to stderr
-  static void Stderr(const char* s);
-  static void Stderr(const char* s, size_t length);
+  static void Stderr(const std::string& s);
   static void SetStderrCallback(OutputCallback, void* clientData = nullptr);
 
   typedef bool (*InterruptCallback)(void*);

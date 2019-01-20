@@ -1286,7 +1286,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
         std::ostringstream msg;
         msg << "Dependee \"" << tgtInfo << "\" is newer than depender \""
             << internalDependFile << "\"." << std::endl;
-        cmSystemTools::Stdout(msg.str().c_str());
+        cmSystemTools::Stdout(msg.str());
       }
       needRescanDependInfo = true;
     }
@@ -1307,7 +1307,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
         std::ostringstream msg;
         msg << "Dependee \"" << dirInfoFile << "\" is newer than depender \""
             << internalDependFile << "\"." << std::endl;
-        cmSystemTools::Stdout(msg.str().c_str());
+        cmSystemTools::Stdout(msg.str());
       }
       needRescanDirInfo = true;
     }
@@ -1489,7 +1489,7 @@ void cmLocalUnixMakefileGenerator3::CheckMultipleOutputs(bool verbose)
         msg << "Deleting primary custom command output \"" << dependee
             << "\" because another output \"" << depender
             << "\" does not exist." << std::endl;
-        cmSystemTools::Stdout(msg.str().c_str());
+        cmSystemTools::Stdout(msg.str());
       }
       cmSystemTools::RemoveFile(dependee);
     }
