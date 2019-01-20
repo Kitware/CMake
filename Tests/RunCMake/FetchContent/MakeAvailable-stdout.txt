@@ -1,0 +1,2 @@
+Confirmation project has been added
+.*Confirmation script has been called

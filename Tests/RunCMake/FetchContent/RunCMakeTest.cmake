@@ -11,6 +11,9 @@ run_cmake(VarDefinitions)
 run_cmake(GetProperties)
 run_cmake(DirOverrides)
 run_cmake(UsesTerminalOverride)
+run_cmake(MakeAvailable)
+run_cmake(MakeAvailableTwice)
+run_cmake(MakeAvailableUndeclared)
 
 # We need to pass through CMAKE_GENERATOR and CMAKE_MAKE_PROGRAM
 # to ensure the test can run on machines where the build tool
