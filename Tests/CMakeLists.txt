@@ -1704,18 +1704,37 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     DEPENDS ExternalProjectUpdateSetup )
 
   # do each of the tutorial steps
-  foreach(STP RANGE 1 7)
-    add_test(TutorialStep${STP} ${CMAKE_CTEST_COMMAND}
+  function(add_tutorial_test step_name use_mymath)
+    set(tutorial_test_name Tutorial${step_name})
+    set(tutorial_build_dir "${CMake_BINARY_DIR}/Tests/Tutorial/${step_name}")
+    if (use_mymath)
+      set(tutorial_build_options "")
+    else()
+      set(tutorial_test_name ${tutorial_test_name}_MYMATH)
+      set(tutorial_build_dir "${tutorial_build_dir}_MYMATH")
+      set(tutorial_build_options -DUSE_MYMATH:BOOL=OFF)
+    endif()
+    add_test(${tutorial_test_name} ${CMAKE_CTEST_COMMAND}
       --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/Tutorial/Step${STP}"
-      "${CMake_BINARY_DIR}/Tests/Tutorial/Step${STP}"
-      --build-two-config
+      "${CMake_SOURCE_DIR}/Tests/Tutorial/${step_name}"
+      ${tutorial_build_dir}_Build
       ${build_generator_args}
       --build-project Tutorial
-      --build-options ${build_options}
+      --build-options ${build_options} ${tutorial_build_options}
       --test-command Tutorial 25.0)
-  endforeach()
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Tutorial")
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/${tutorial_build_dir}_Build")
+  endfunction()
+
+  if(NOT CMake_TEST_EXTERNAL_CMAKE)
+    foreach(STP RANGE 1 11)
+      add_tutorial_test(Step${STP} TRUE)
+    endforeach()
+    add_tutorial_test(Complete TRUE)
+    foreach(STP RANGE 3 11)
+      add_tutorial_test(Step${STP} FALSE)
+    endforeach()
+    add_tutorial_test(Complete FALSE)
+  endif()
 
   add_test(testing ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
     --build-and-test
