@@ -360,7 +360,7 @@ Examples
 ^^^^^^^^
 
 Consider a project hierarchy where ``projA`` is the top level project and it
-depends on projects ``projB`` and ``projC``. Both ``projB`` and ``projC``
+depends on projects ``projB`` and ``projC``.  Both ``projB`` and ``projC``
 can be built standalone and they also both depend on another project
 ``projD``.  For simplicity, this example will assume that all four projects
 are available on a company git server.  The ``CMakeLists.txt`` of each project
@@ -373,17 +373,17 @@ might have sections like the following:
   include(FetchContent)
   FetchContent_Declare(
     projB
-    GIT_REPOSITORY git@mycompany.com/git/projB.git
+    GIT_REPOSITORY git@mycompany.com:git/projB.git
     GIT_TAG        4a89dc7e24ff212a7b5167bef7ab079d
   )
   FetchContent_Declare(
     projC
-    GIT_REPOSITORY git@mycompany.com/git/projC.git
+    GIT_REPOSITORY git@mycompany.com:git/projC.git
     GIT_TAG        4ad4016bd1d8d5412d135cf8ceea1bb9
   )
   FetchContent_Declare(
     projD
-    GIT_REPOSITORY git@mycompany.com/git/projD.git
+    GIT_REPOSITORY git@mycompany.com:git/projD.git
     GIT_TAG        origin/integrationBranch
   )
 
@@ -406,7 +406,7 @@ might have sections like the following:
   include(FetchContent)
   FetchContent_Declare(
     projD
-    GIT_REPOSITORY git@mycompany.com/git/projD.git
+    GIT_REPOSITORY git@mycompany.com:git/projD.git
     GIT_TAG        20b415f9034bbd2a2e8216e9a5c9e632
   )
 
@@ -424,7 +424,7 @@ might have sections like the following:
   include(FetchContent)
   FetchContent_Declare(
     projD
-    GIT_REPOSITORY git@mycompany.com/git/projD.git
+    GIT_REPOSITORY git@mycompany.com:git/projD.git
     GIT_TAG        7d9a17ad2c962aa13e2fbb8043fb6b8a
   )
 
