@@ -179,31 +179,31 @@ cmake::cmake(Role role, cmState::Mode mode)
   // these are used to find files when the extension
   // is not given
   // The "c" extension MUST precede the "C" extension.
-  this->SourceFileExtensions.push_back("c");
-  this->SourceFileExtensions.push_back("C");
+  this->SourceFileExtensions.emplace_back("c");
+  this->SourceFileExtensions.emplace_back("C");
 
-  this->SourceFileExtensions.push_back("c++");
-  this->SourceFileExtensions.push_back("cc");
-  this->SourceFileExtensions.push_back("cpp");
-  this->SourceFileExtensions.push_back("cxx");
-  this->SourceFileExtensions.push_back("cu");
-  this->SourceFileExtensions.push_back("m");
-  this->SourceFileExtensions.push_back("M");
-  this->SourceFileExtensions.push_back("mm");
+  this->SourceFileExtensions.emplace_back("c++");
+  this->SourceFileExtensions.emplace_back("cc");
+  this->SourceFileExtensions.emplace_back("cpp");
+  this->SourceFileExtensions.emplace_back("cxx");
+  this->SourceFileExtensions.emplace_back("cu");
+  this->SourceFileExtensions.emplace_back("m");
+  this->SourceFileExtensions.emplace_back("M");
+  this->SourceFileExtensions.emplace_back("mm");
 
   std::copy(this->SourceFileExtensions.begin(),
             this->SourceFileExtensions.end(),
             std::inserter(this->SourceFileExtensionsSet,
                           this->SourceFileExtensionsSet.end()));
 
-  this->HeaderFileExtensions.push_back("h");
-  this->HeaderFileExtensions.push_back("hh");
-  this->HeaderFileExtensions.push_back("h++");
-  this->HeaderFileExtensions.push_back("hm");
-  this->HeaderFileExtensions.push_back("hpp");
-  this->HeaderFileExtensions.push_back("hxx");
-  this->HeaderFileExtensions.push_back("in");
-  this->HeaderFileExtensions.push_back("txx");
+  this->HeaderFileExtensions.emplace_back("h");
+  this->HeaderFileExtensions.emplace_back("hh");
+  this->HeaderFileExtensions.emplace_back("h++");
+  this->HeaderFileExtensions.emplace_back("hm");
+  this->HeaderFileExtensions.emplace_back("hpp");
+  this->HeaderFileExtensions.emplace_back("hxx");
+  this->HeaderFileExtensions.emplace_back("in");
+  this->HeaderFileExtensions.emplace_back("txx");
 
   std::copy(this->HeaderFileExtensions.begin(),
             this->HeaderFileExtensions.end(),
@@ -2485,7 +2485,7 @@ std::vector<std::string> cmake::GetDebugConfigs()
   }
   // If no configurations were specified, use a default list.
   if (configs.empty()) {
-    configs.push_back("DEBUG");
+    configs.emplace_back("DEBUG");
   }
   return configs;
 }

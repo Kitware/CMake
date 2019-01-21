@@ -1176,12 +1176,12 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
         if (strcmp(i, "--build-generator") == 0 &&
             timeout != cmCTest::MaxDuration() &&
             timeout > cmDuration::zero()) {
-          args.push_back("--test-timeout");
+          args.emplace_back("--test-timeout");
           std::ostringstream msg;
           msg << cmDurationTo<unsigned int>(timeout);
           args.push_back(msg.str());
         }
-        args.push_back(i);
+        args.emplace_back(i);
       }
     }
     if (log) {
@@ -2719,7 +2719,7 @@ void cmCTest::SetSpecificTrack(const char* track)
 
 void cmCTest::AddSubmitFile(Part part, const char* name)
 {
-  this->Parts[part].SubmitFiles.push_back(name);
+  this->Parts[part].SubmitFiles.emplace_back(name);
 }
 
 void cmCTest::AddCTestConfigurationOverwrite(const std::string& overStr)

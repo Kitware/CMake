@@ -329,14 +329,14 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
   int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
 {
   // now build the test
-  makeCommand.push_back(
+  makeCommand.emplace_back(
     this->SelectMakeProgram(makeProgram, this->GetXcodeBuildCommand()));
 
-  makeCommand.push_back("-project");
+  makeCommand.emplace_back("-project");
   std::string projectArg = projectName;
   projectArg += ".xcode";
   projectArg += "proj";
-  makeCommand.push_back(projectArg);
+  makeCommand.emplace_back(projectArg);
 
   bool clean = false;
   std::string realTarget = targetName;
@@ -345,23 +345,23 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
     realTarget = "ALL_BUILD";
   }
   if (clean) {
-    makeCommand.push_back("clean");
+    makeCommand.emplace_back("clean");
   } else {
-    makeCommand.push_back("build");
+    makeCommand.emplace_back("build");
   }
-  makeCommand.push_back("-target");
+  makeCommand.emplace_back("-target");
   if (!realTarget.empty()) {
-    makeCommand.push_back(realTarget);
+    makeCommand.emplace_back(realTarget);
   } else {
-    makeCommand.push_back("ALL_BUILD");
+    makeCommand.emplace_back("ALL_BUILD");
   }
-  makeCommand.push_back("-configuration");
-  makeCommand.push_back(!config.empty() ? config : "Debug");
+  makeCommand.emplace_back("-configuration");
+  makeCommand.emplace_back(!config.empty() ? config : "Debug");
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    makeCommand.push_back("-jobs");
+    makeCommand.emplace_back("-jobs");
     if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.push_back(std::to_string(jobs));
+      makeCommand.emplace_back(std::to_string(jobs));
     }
   }
 
@@ -1051,7 +1051,7 @@ void cmGlobalXCodeGenerator::SetCurrentLocalGenerator(cmLocalGenerator* gen)
   this->CurrentConfigurationTypes.clear();
   this->CurrentMakefile->GetConfigurations(this->CurrentConfigurationTypes);
   if (this->CurrentConfigurationTypes.empty()) {
-    this->CurrentConfigurationTypes.push_back("");
+    this->CurrentConfigurationTypes.emplace_back();
   }
 }
 

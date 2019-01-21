@@ -1021,12 +1021,12 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
     tmp += config;
     searchDirs.push_back(std::move(tmp));
   }
-  searchDirs.push_back("/Debug");
+  searchDirs.emplace_back("/Debug");
 #if defined(__APPLE__)
   std::string app = "/Debug/" + targetName + ".app";
   searchDirs.push_back(std::move(app));
 #endif
-  searchDirs.push_back("/Development");
+  searchDirs.emplace_back("/Development");
 
   for (std::string const& sdir : searchDirs) {
     std::string command = this->BinaryDirectory;

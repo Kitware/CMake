@@ -56,12 +56,12 @@ public:
   void SetCommand(const char* command)
   {
     this->CommandLineStrings.clear();
-    this->CommandLineStrings.push_back(command);
+    this->CommandLineStrings.emplace_back(command);
   }
   void AddArgument(const char* arg)
   {
     if (arg) {
-      this->CommandLineStrings.push_back(arg);
+      this->CommandLineStrings.emplace_back(arg);
     }
   }
   void SetWorkingDirectory(const char* dir) { this->WorkingDirectory = dir; }
@@ -316,8 +316,7 @@ int cmCTestCoverageHandler::ProcessHandler()
   // setup the regex exclude stuff
   this->CustomCoverageExcludeRegex.clear();
   for (std::string const& rex : this->CustomCoverageExclude) {
-    this->CustomCoverageExcludeRegex.push_back(
-      cmsys::RegularExpression(rex.c_str()));
+    this->CustomCoverageExcludeRegex.emplace_back(rex);
   }
 
   if (this->HandleBullseyeCoverage(&cont)) {
@@ -1005,7 +1004,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
   std::vector<std::string> basecovargs =
     cmSystemTools::ParseArguments(gcovExtraFlags.c_str());
   basecovargs.insert(basecovargs.begin(), gcovCommand);
-  basecovargs.push_back("-o");
+  basecovargs.emplace_back("-o");
 
   // files is a list of *.da and *.gcda files with coverage data in them.
   // These are binary files that you give as input to gcov so that it will

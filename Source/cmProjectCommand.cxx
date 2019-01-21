@@ -198,7 +198,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     return true;
   }
   if (haveLanguages && languages.empty()) {
-    languages.push_back("NONE");
+    languages.emplace_back("NONE");
   }
 
   cmPolicies::PolicyStatus cmp0048 =
@@ -264,22 +264,22 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
   } else if (cmp0048 != cmPolicies::OLD) {
     // Set project VERSION variables to empty
     std::vector<std::string> vv;
-    vv.push_back("PROJECT_VERSION");
-    vv.push_back("PROJECT_VERSION_MAJOR");
-    vv.push_back("PROJECT_VERSION_MINOR");
-    vv.push_back("PROJECT_VERSION_PATCH");
-    vv.push_back("PROJECT_VERSION_TWEAK");
+    vv.emplace_back("PROJECT_VERSION");
+    vv.emplace_back("PROJECT_VERSION_MAJOR");
+    vv.emplace_back("PROJECT_VERSION_MINOR");
+    vv.emplace_back("PROJECT_VERSION_PATCH");
+    vv.emplace_back("PROJECT_VERSION_TWEAK");
     vv.push_back(projectName + "_VERSION");
     vv.push_back(projectName + "_VERSION_MAJOR");
     vv.push_back(projectName + "_VERSION_MINOR");
     vv.push_back(projectName + "_VERSION_PATCH");
     vv.push_back(projectName + "_VERSION_TWEAK");
     if (this->Makefile->IsRootMakefile()) {
-      vv.push_back("CMAKE_PROJECT_VERSION");
-      vv.push_back("CMAKE_PROJECT_VERSION_MAJOR");
-      vv.push_back("CMAKE_PROJECT_VERSION_MINOR");
-      vv.push_back("CMAKE_PROJECT_VERSION_PATCH");
-      vv.push_back("CMAKE_PROJECT_VERSION_TWEAK");
+      vv.emplace_back("CMAKE_PROJECT_VERSION");
+      vv.emplace_back("CMAKE_PROJECT_VERSION_MAJOR");
+      vv.emplace_back("CMAKE_PROJECT_VERSION_MINOR");
+      vv.emplace_back("CMAKE_PROJECT_VERSION_PATCH");
+      vv.emplace_back("CMAKE_PROJECT_VERSION_TWEAK");
     }
     std::string vw;
     for (std::string const& i : vv) {
@@ -315,8 +315,8 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
 
   if (languages.empty()) {
     // if no language is specified do c and c++
-    languages.push_back("C");
-    languages.push_back("CXX");
+    languages.emplace_back("C");
+    languages.emplace_back("CXX");
   }
   this->Makefile->EnableLanguage(languages, false);
   std::string extraInclude = "CMAKE_PROJECT_" + projectName + "_INCLUDE";

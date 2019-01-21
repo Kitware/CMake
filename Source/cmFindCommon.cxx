@@ -178,13 +178,13 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
     cmSystemTools::ExpandListArgument(rootPath, roots);
   }
   if (sysrootCompile) {
-    roots.push_back(sysrootCompile);
+    roots.emplace_back(sysrootCompile);
   }
   if (sysrootLink) {
-    roots.push_back(sysrootLink);
+    roots.emplace_back(sysrootLink);
   }
   if (sysroot) {
-    roots.push_back(sysroot);
+    roots.emplace_back(sysroot);
   }
   for (std::string& r : roots) {
     cmSystemTools::ConvertToUnixSlashes(r);

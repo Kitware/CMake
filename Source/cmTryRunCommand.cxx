@@ -101,11 +101,11 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
   bool captureRunOutput = false;
   if (!this->OutputVariable.empty()) {
     captureRunOutput = true;
-    tryCompile.push_back("OUTPUT_VARIABLE");
+    tryCompile.emplace_back("OUTPUT_VARIABLE");
     tryCompile.push_back(this->OutputVariable);
   }
   if (!this->CompileOutputVariable.empty()) {
-    tryCompile.push_back("OUTPUT_VARIABLE");
+    tryCompile.emplace_back("OUTPUT_VARIABLE");
     tryCompile.push_back(this->CompileOutputVariable);
   }
   if (!this->RunOutputVariable.empty()) {

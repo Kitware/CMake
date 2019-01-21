@@ -816,7 +816,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     lang_has_assembly && this->LocalGenerator->GetCreateAssemblySourceRules();
   if (do_preprocess_rules || do_assembly_rules) {
     std::vector<std::string> force_depends;
-    force_depends.push_back("cmake_force");
+    force_depends.emplace_back("cmake_force");
     std::string::size_type dot_pos = relativeObj.rfind('.');
     std::string relativeObjBase = relativeObj.substr(0, dot_pos);
     dot_pos = obj.rfind('.');

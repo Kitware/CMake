@@ -318,7 +318,7 @@ void cmLocalUnixMakefileGenerator3::WriteObjectConvenienceRule(
 
     // Add a rule to drive the rule below.
     std::vector<std::string> depends;
-    depends.push_back(output);
+    depends.emplace_back(output);
     std::vector<std::string> no_commands;
     this->WriteMakeRule(ruleFileStream, nullptr, outNoExt, depends,
                         no_commands, true, true);
@@ -685,7 +685,7 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsTop(
   }
   // Add a fake suffix to keep HP happy.  Must be max 32 chars for SGI make.
   std::vector<std::string> depends;
-  depends.push_back(".hpux_make_needs_suffix_list");
+  depends.emplace_back(".hpux_make_needs_suffix_list");
   this->WriteMakeRule(makefileStream, nullptr, ".SUFFIXES", depends,
                       no_commands, false);
   if (this->IsWatcomWMake()) {
@@ -852,7 +852,7 @@ void cmLocalUnixMakefileGenerator3::AppendRuleDepend(
   const char* nodep =
     this->Makefile->GetDefinition("CMAKE_SKIP_RULE_DEPENDENCY");
   if (!nodep || cmSystemTools::IsOff(nodep)) {
-    depends.push_back(ruleFileName);
+    depends.emplace_back(ruleFileName);
   }
 }
 
@@ -1507,7 +1507,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
     // Just depend on the all target to drive the build.
     std::vector<std::string> depends;
     std::vector<std::string> no_commands;
-    depends.push_back("all");
+    depends.emplace_back("all");
 
     // Write the rule.
     this->WriteMakeRule(ruleFileStream,
@@ -1571,7 +1571,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
           (targetName == "install/strip")) {
         // Provide a fast install target that does not depend on all
         // but has the same command.
-        depends.push_back("preinstall/fast");
+        depends.emplace_back("preinstall/fast");
       } else {
         // Just forward to the real target so at least it will work.
         depends.push_back(targetName);
@@ -1593,7 +1593,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   bool regenerate =
     !this->GlobalGenerator->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION");
   if (regenerate) {
-    depends.push_back("cmake_check_build_system");
+    depends.emplace_back("cmake_check_build_system");
   }
 
   std::string progressDir = this->GetBinaryDirectory();
@@ -1643,7 +1643,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
                       depends, commands, true);
   commands.clear();
   depends.clear();
-  depends.push_back("clean");
+  depends.emplace_back("clean");
   this->WriteMakeRule(ruleFileStream, "The main clean target", "clean/fast",
                       depends, commands, true);
 
@@ -1656,10 +1656,10 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
     this->Makefile->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
   if (!noall || cmSystemTools::IsOff(noall)) {
     // Drive the build before installing.
-    depends.push_back("all");
+    depends.emplace_back("all");
   } else if (regenerate) {
     // At least make sure the build system is up to date.
-    depends.push_back("cmake_check_build_system");
+    depends.emplace_back("cmake_check_build_system");
   }
   commands.push_back(
     this->GetRecursiveMakeCall(mf2Dir.c_str(), recursiveTarget));

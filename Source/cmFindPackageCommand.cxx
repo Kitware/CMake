@@ -1858,7 +1858,7 @@ private:
       }
       for (std::string const& n : this->Names) {
         if (cmsysString_strncasecmp(fname, n.c_str(), n.length()) == 0) {
-          matches.push_back(fname);
+          matches.emplace_back(fname);
         }
       }
     }
@@ -1917,7 +1917,7 @@ private:
       for (std::string name : this->Names) {
         name += this->Extension;
         if (cmsysString_strcasecmp(fname, name.c_str()) == 0) {
-          matches.push_back(fname);
+          matches.emplace_back(fname);
         }
       }
     }
@@ -2080,16 +2080,16 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     common.push_back("lib/" + this->LibraryArchitecture);
   }
   if (this->UseLib32Paths) {
-    common.push_back("lib32");
+    common.emplace_back("lib32");
   }
   if (this->UseLib64Paths) {
-    common.push_back("lib64");
+    common.emplace_back("lib64");
   }
   if (this->UseLibx32Paths) {
-    common.push_back("libx32");
+    common.emplace_back("libx32");
   }
-  common.push_back("lib");
-  common.push_back("share");
+  common.emplace_back("lib");
+  common.emplace_back("share");
 
   //  PREFIX/(lib/ARCH|lib*|share)/cmake/(Foo|foo|FOO).*/
   {

@@ -603,7 +603,7 @@ bool cmQtAutoGeneratorRcc::GenerateRcc()
     std::vector<std::string> cmd;
     cmd.push_back(RccExecutable_);
     cmd.insert(cmd.end(), Options_.begin(), Options_.end());
-    cmd.push_back("-o");
+    cmd.emplace_back("-o");
     cmd.push_back(RccFileOutput_);
     cmd.push_back(QrcFile_);
     // We're done here if the process fails to start

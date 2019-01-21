@@ -838,7 +838,7 @@ int cmCTestSubmitHandler::ProcessHandler()
 
   // Submit Done.xml last
   if (this->SubmitPart[cmCTest::PartDone]) {
-    files.push_back("Done.xml");
+    files.emplace_back("Done.xml");
   }
 
   if (ofs) {

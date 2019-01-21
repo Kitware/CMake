@@ -106,7 +106,7 @@ static int do_command(int ac, char const* const* av)
 {
   std::vector<std::string> args;
   args.reserve(ac - 1);
-  args.push_back(av[0]);
+  args.emplace_back(av[0]);
   args.insert(args.end(), av + 2, av + ac);
   return cmcmd::ExecuteCMakeCommand(args);
 }
@@ -288,14 +288,14 @@ int do_cmake(int ac, char const* const* av)
         return 1;
       }
       workingMode = cmake::SCRIPT_MODE;
-      args.push_back(av[i]);
+      args.emplace_back(av[i]);
       i++;
-      args.push_back(av[i]);
+      args.emplace_back(av[i]);
     } else if (cmHasLiteralPrefix(av[i], "--find-package")) {
       workingMode = cmake::FIND_PACKAGE_MODE;
-      args.push_back(av[i]);
+      args.emplace_back(av[i]);
     } else {
-      args.push_back(av[i]);
+      args.emplace_back(av[i]);
     }
   }
   if (sysinfo) {
@@ -386,7 +386,7 @@ static int do_build(int ac, char const* const* av)
   Doing doing = DoingDir;
   for (int i = 2; i < ac; ++i) {
     if (doing == DoingNative) {
-      nativeOptions.push_back(av[i]);
+      nativeOptions.emplace_back(av[i]);
     } else if ((strcmp(av[i], "-j") == 0) ||
                (strcmp(av[i], "--parallel") == 0)) {
       jobs = cmake::DEFAULT_BUILD_PARALLEL_LEVEL;

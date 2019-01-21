@@ -49,7 +49,7 @@ std::vector<std::string> getConfigurations(const cmake* cm)
 
   makefiles[0]->GetConfigurations(configurations);
   if (configurations.empty()) {
-    configurations.push_back("");
+    configurations.emplace_back();
   }
   return configurations;
 }
@@ -292,10 +292,10 @@ static Json::Value DumpSourceFilesList(
         lg->AppendIncludeDirectories(includes, evaluatedIncludes, *file);
 
         for (const auto& include : includes) {
-          fileData.IncludePathList.push_back(
-            std::make_pair(include,
-                           target->IsSystemIncludeDirectory(
-                             include, config, fileData.Language)));
+          fileData.IncludePathList.emplace_back(
+            include,
+            target->IsSystemIncludeDirectory(include, config,
+                                             fileData.Language));
         }
       }
 
@@ -580,8 +580,8 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
     std::vector<std::string> includePathList;
     lg->GetIncludeDirectories(includePathList, target, lang, config, true);
     for (std::string const& i : includePathList) {
-      ld.IncludePathList.push_back(
-        std::make_pair(i, target->IsSystemIncludeDirectory(i, config, lang)));
+      ld.IncludePathList.emplace_back(
+        i, target->IsSystemIncludeDirectory(i, config, lang));
     }
   }
 

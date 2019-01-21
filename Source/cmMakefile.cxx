@@ -2099,7 +2099,7 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   if (i == -1) {
     // group does not exist nor belong to any existing group
     // add its first component
-    this->SourceGroups.push_back(cmSourceGroup(name[0], regex));
+    this->SourceGroups.emplace_back(name[0], regex);
     sg = this->GetSourceGroup(currentName);
     i = 0; // last component found
   }

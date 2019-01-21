@@ -201,7 +201,7 @@ static int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
   std::vector<std::string> tidy_cmd;
   cmSystemTools::ExpandListArgument(runCmd, tidy_cmd, true);
   tidy_cmd.push_back(sourceFile);
-  tidy_cmd.push_back("--");
+  tidy_cmd.emplace_back("--");
   tidy_cmd.insert(tidy_cmd.end(), orig_cmd.begin(), orig_cmd.end());
 
   // Run the tidy command line.  Capture its stdout and hide its stderr.
@@ -228,9 +228,9 @@ static int HandleLWYU(const std::string& runCmd,
   // Construct the ldd -r -u (link what you use lwyu) command line
   // ldd -u -r lwuy target
   std::vector<std::string> lwyu_cmd;
-  lwyu_cmd.push_back("ldd");
-  lwyu_cmd.push_back("-u");
-  lwyu_cmd.push_back("-r");
+  lwyu_cmd.emplace_back("ldd");
+  lwyu_cmd.emplace_back("-u");
+  lwyu_cmd.emplace_back("-r");
   lwyu_cmd.push_back(runCmd);
 
   // Run the ldd -u -r command line.
@@ -1733,7 +1733,7 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
   }
 
   if (this->LinkGeneratesManifest) {
-    this->LinkCommand.push_back("/MANIFEST");
+    this->LinkCommand.emplace_back("/MANIFEST");
     this->LinkCommand.push_back("/MANIFESTFILE:" + this->LinkerManifestFile);
   }
 
@@ -1881,8 +1881,8 @@ int cmVSLink::RunMT(std::string const& out, bool notify)
 {
   std::vector<std::string> mtCommand;
   mtCommand.push_back(this->MtPath.empty() ? "mt" : this->MtPath);
-  mtCommand.push_back("/nologo");
-  mtCommand.push_back("/manifest");
+  mtCommand.emplace_back("/nologo");
+  mtCommand.emplace_back("/manifest");
   if (this->LinkGeneratesManifest) {
     mtCommand.push_back(this->LinkerManifestFile);
   }
@@ -1892,7 +1892,7 @@ int cmVSLink::RunMT(std::string const& out, bool notify)
   if (notify) {
     // Add an undocumented option that enables a special return
     // code to notify us when the manifest is modified.
-    mtCommand.push_back("/notify_update");
+    mtCommand.emplace_back("/notify_update");
   }
   int mtRet = 0;
   if (!RunCommand("MT", mtCommand, this->Verbose, FORMAT_HEX, &mtRet,

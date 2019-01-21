@@ -54,7 +54,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
     if (args[i] == "COMMAND") {
       doing_command = true;
       command_index = cmds.size();
-      cmds.push_back(std::vector<const char*>());
+      cmds.emplace_back();
     } else if (args[i] == "OUTPUT_VARIABLE") {
       doing_command = false;
       if (++i < args.size()) {
@@ -327,15 +327,15 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
                 cmsysProcess_GetExitValueByIndex(cp, static_cast<int>(i));
               char buf[16];
               sprintf(buf, "%d", exitCode);
-              res.push_back(buf);
+              res.emplace_back(buf);
             } break;
             case kwsysProcess_StateByIndex_Exception:
-              res.push_back(cmsysProcess_GetExceptionStringByIndex(
+              res.emplace_back(cmsysProcess_GetExceptionStringByIndex(
                 cp, static_cast<int>(i)));
               break;
             case kwsysProcess_StateByIndex_Error:
             default:
-              res.push_back("Error getting the child return code");
+              res.emplace_back("Error getting the child return code");
               break;
           }
         }

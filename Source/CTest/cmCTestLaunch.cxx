@@ -146,7 +146,7 @@ void cmCTestLaunch::HandleRealArg(const char* arg)
     return;
   }
 #endif
-  this->RealArgs.push_back(arg);
+  this->RealArgs.emplace_back(arg);
 }
 
 void cmCTestLaunch::ComputeFileNames()
@@ -534,9 +534,9 @@ void cmCTestLaunch::LoadScrapeRules()
   // Common compiler warning formats.  These are much simpler than the
   // full log-scraping expressions because we do not need to extract
   // file and line information.
-  this->RegexWarning.push_back("(^|[ :])[Ww][Aa][Rr][Nn][Ii][Nn][Gg]");
-  this->RegexWarning.push_back("(^|[ :])[Rr][Ee][Mm][Aa][Rr][Kk]");
-  this->RegexWarning.push_back("(^|[ :])[Nn][Oo][Tt][Ee]");
+  this->RegexWarning.emplace_back("(^|[ :])[Ww][Aa][Rr][Nn][Ii][Nn][Gg]");
+  this->RegexWarning.emplace_back("(^|[ :])[Rr][Ee][Mm][Aa][Rr][Kk]");
+  this->RegexWarning.emplace_back("(^|[ :])[Nn][Oo][Tt][Ee]");
 
   // Load custom match rules given to us by CTest.
   this->LoadScrapeRules("Warning", this->RegexWarning);

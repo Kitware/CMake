@@ -1684,19 +1684,19 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
   static std::map<std::string, std::vector<std::string>> langStdMap;
   if (langStdMap.empty()) {
     // Maintain sorted order, most recent first.
-    langStdMap["CXX"].push_back("20");
-    langStdMap["CXX"].push_back("17");
-    langStdMap["CXX"].push_back("14");
-    langStdMap["CXX"].push_back("11");
-    langStdMap["CXX"].push_back("98");
+    langStdMap["CXX"].emplace_back("20");
+    langStdMap["CXX"].emplace_back("17");
+    langStdMap["CXX"].emplace_back("14");
+    langStdMap["CXX"].emplace_back("11");
+    langStdMap["CXX"].emplace_back("98");
 
-    langStdMap["C"].push_back("11");
-    langStdMap["C"].push_back("99");
-    langStdMap["C"].push_back("90");
+    langStdMap["C"].emplace_back("11");
+    langStdMap["C"].emplace_back("99");
+    langStdMap["C"].emplace_back("90");
 
-    langStdMap["CUDA"].push_back("14");
-    langStdMap["CUDA"].push_back("11");
-    langStdMap["CUDA"].push_back("98");
+    langStdMap["CUDA"].emplace_back("14");
+    langStdMap["CUDA"].emplace_back("11");
+    langStdMap["CUDA"].emplace_back("98");
   }
 
   std::string standard(standardProp);

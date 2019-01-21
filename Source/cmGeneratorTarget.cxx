@@ -319,7 +319,7 @@ std::string cmGeneratorTarget::GetOutputName(
       props.push_back(configUpper + "_OUTPUT_NAME");
     }
     // OUTPUT_NAME
-    props.push_back("OUTPUT_NAME");
+    props.emplace_back("OUTPUT_NAME");
 
     std::string outName;
     for (std::string const& p : props) {
@@ -988,7 +988,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
             item.back() == '>') {
           continue;
         }
-        files.push_back(item);
+        files.emplace_back(item);
       }
     }
     return files;
@@ -3260,7 +3260,7 @@ void processLinkDirectories(
       // in case projects set the LINK_DIRECTORIES property directly.
       cmSystemTools::ConvertToUnixSlashes(entryDirectory);
       if (uniqueDirectories.insert(entryDirectory).second) {
-        directories.push_back(entryDirectory);
+        directories.emplace_back(entryDirectory);
         if (debugDirectories) {
           usedDirectories += " * " + entryDirectory + "\n";
         }
@@ -3838,7 +3838,7 @@ std::string cmGeneratorTarget::GetPDBName(const std::string& config) const
   }
 
   // PDB_NAME
-  props.push_back("PDB_NAME");
+  props.emplace_back("PDB_NAME");
 
   for (std::string const& p : props) {
     if (const char* outName = this->GetProperty(p)) {

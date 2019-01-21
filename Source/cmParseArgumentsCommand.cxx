@@ -151,7 +151,7 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
         cmSystemTools::SetFatalErrorOccured();
         return true;
       }
-      list.push_back(arg);
+      list.emplace_back(arg);
     }
   }
 

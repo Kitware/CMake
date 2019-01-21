@@ -844,10 +844,10 @@ void cmQtAutoGeneratorMocUic::JobMocT::GenerateMoc(WorkerT& wrk)
                wrk.Moc().AllOptions.end());
     // Add predefs include
     if (!wrk.Moc().PredefsFileAbs.empty()) {
-      cmd.push_back("--include");
+      cmd.emplace_back("--include");
       cmd.push_back(wrk.Moc().PredefsFileAbs);
     }
-    cmd.push_back("-o");
+    cmd.emplace_back("-o");
     cmd.push_back(BuildFile);
     cmd.push_back(SourceFile);
 
@@ -963,7 +963,7 @@ void cmQtAutoGeneratorMocUic::JobUicT::GenerateUic(WorkerT& wrk)
       }
       cmd.insert(cmd.end(), allOpts.begin(), allOpts.end());
     }
-    cmd.push_back("-o");
+    cmd.emplace_back("-o");
     cmd.push_back(BuildFile);
     cmd.push_back(SourceFile);
 
@@ -1288,7 +1288,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
                                std::string& error) {
         if (!key.empty()) {
           if (!exp.empty()) {
-            Moc_.DependFilters.push_back(KeyExpT());
+            Moc_.DependFilters.emplace_back();
             KeyExpT& filter(Moc_.DependFilters.back());
             if (filter.Exp.compile(exp)) {
               filter.Key = key;
@@ -1506,7 +1506,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
       }
       // Append framework includes
       for (std::string const& path : frameworkPaths) {
-        Moc_.Includes.push_back("-F");
+        Moc_.Includes.emplace_back("-F");
         Moc_.Includes.push_back(path);
       }
     }

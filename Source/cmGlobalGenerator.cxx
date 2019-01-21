@@ -1762,7 +1762,7 @@ void cmGlobalGenerator::GenerateBuildCommand(
   bool /*unused*/, int /*unused*/, bool /*unused*/,
   std::vector<std::string> const& /*unused*/)
 {
-  makeCommand.push_back(
+  makeCommand.emplace_back(
     "cmGlobalGenerator::GenerateBuildCommand not implemented");
 }
 
@@ -2314,12 +2314,12 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
   singleLine.push_back("./CPackConfig.cmake");
   gti.CommandLines.push_back(std::move(singleLine));
   if (this->GetPreinstallTargetName()) {
-    gti.Depends.push_back(this->GetPreinstallTargetName());
+    gti.Depends.emplace_back(this->GetPreinstallTargetName());
   } else {
     const char* noPackageAll =
       mf->GetDefinition("CMAKE_SKIP_PACKAGE_ALL_DEPENDENCY");
     if (!noPackageAll || cmSystemTools::IsOff(noPackageAll)) {
-      gti.Depends.push_back(this->GetAllTargetName());
+      gti.Depends.emplace_back(this->GetAllTargetName());
     }
   }
   targets.push_back(std::move(gti));
@@ -2484,12 +2484,12 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
     gti.UsesTerminal = true;
     cmCustomCommandLine singleLine;
     if (this->GetPreinstallTargetName()) {
-      gti.Depends.push_back(this->GetPreinstallTargetName());
+      gti.Depends.emplace_back(this->GetPreinstallTargetName());
     } else {
       const char* noall =
         mf->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
       if (!noall || cmSystemTools::IsOff(noall)) {
-        gti.Depends.push_back(this->GetAllTargetName());
+        gti.Depends.emplace_back(this->GetAllTargetName());
       }
     }
     if (mf->GetDefinition("CMake_BINARY_DIR") &&

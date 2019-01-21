@@ -232,7 +232,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   // do the build
   if (this->BuildTargets.empty()) {
-    this->BuildTargets.push_back("");
+    this->BuildTargets.emplace_back();
   }
   for (std::string const& tar : this->BuildTargets) {
     cmDuration remainingTime = std::chrono::seconds(0);
