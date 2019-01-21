@@ -1,4 +1,4 @@
-from ShowAsJson_check import *
+from show_only_json_check import *
 
 def check_kind(k):
     assert is_string(k)
@@ -77,7 +77,7 @@ def check_workingdir_property(p):
     assert is_string(p["name"])
     assert is_string(p["value"])
     assert p["name"] == "WORKING_DIRECTORY"
-    assert p["value"].endswith("Tests/RunCMake/CTestCommandLine/ShowAsJson")
+    assert p["value"].endswith("Tests/RunCMake/CTestCommandLine/ShowOnly")
 
 def check_properties(p):
     assert is_list(p)
@@ -95,7 +95,7 @@ def check_tests(t):
     assert test["backtrace"] == 1
     check_command(test["command"])
     assert is_string(test["name"])
-    assert test["name"] == "ShowAsJson"
+    assert test["name"] == "ShowOnly"
     check_properties(test["properties"])
 
 assert is_dict(ctest_json)
