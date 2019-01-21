@@ -16,8 +16,13 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     # Compile the ABI identification source.
     set(BIN "${CMAKE_PLATFORM_INFO_DIR}/CMakeDetermineCompilerABI_${lang}.bin")
     set(CMAKE_FLAGS )
+    set(COMPILE_DEFINITIONS )
     if(DEFINED CMAKE_${lang}_VERBOSE_FLAG)
       set(CMAKE_FLAGS "-DEXE_LINKER_FLAGS=${CMAKE_${lang}_VERBOSE_FLAG}")
+      set(COMPILE_DEFINITIONS "${CMAKE_${lang}_VERBOSE_FLAG}")
+    endif()
+    if(DEFINED CMAKE_${lang}_VERBOSE_COMPILE_FLAG)
+      set(COMPILE_DEFINITIONS "${CMAKE_${lang}_VERBOSE_COMPILE_FLAG}")
     endif()
     if(NOT "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xMSVC")
       # Avoid adding our own platform standard libraries for compilers
@@ -30,6 +35,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       CMAKE_FLAGS ${CMAKE_FLAGS}
                   # Ignore unused flags when we are just determining the ABI.
                   "--no-warn-unused-cli"
+      COMPILE_DEFINITIONS ${COMPILE_DEFINITIONS}
       OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${BIN}"
       COPY_FILE_ERROR _copy_error
