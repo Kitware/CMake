@@ -55,13 +55,13 @@ private:
     const bool FollowSymlinks;
     const std::string Relative;
     const std::string Expression;
-    CacheEntryKey(const bool rec, const bool l, const bool s,
-                  const std::string& rel, const std::string& e)
+    CacheEntryKey(const bool rec, const bool l, const bool s, std::string rel,
+                  std::string e)
       : Recurse(rec)
       , ListDirectories(l)
       , FollowSymlinks(s)
-      , Relative(rel)
-      , Expression(e)
+      , Relative(std::move(rel))
+      , Expression(std::move(e))
     {
     }
     bool operator<(const CacheEntryKey& r) const;

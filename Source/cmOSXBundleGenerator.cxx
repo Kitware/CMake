@@ -10,15 +10,16 @@
 #include "cmTarget.h"
 
 #include <cassert>
+#include <utility>
 
 class cmSourceFile;
 
 cmOSXBundleGenerator::cmOSXBundleGenerator(cmGeneratorTarget* target,
-                                           const std::string& configName)
+                                           std::string configName)
   : GT(target)
   , Makefile(target->Target->GetMakefile())
   , LocalGenerator(target->GetLocalGenerator())
-  , ConfigName(configName)
+  , ConfigName(std::move(configName))
   , MacContentFolders(nullptr)
 {
   if (this->MustSkip()) {

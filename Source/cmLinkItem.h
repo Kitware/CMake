@@ -24,8 +24,8 @@ class cmLinkItem
 
 public:
   cmLinkItem();
-  cmLinkItem(std::string const& s, cmListFileBacktrace const& bt);
-  cmLinkItem(cmGeneratorTarget const* t, cmListFileBacktrace const& bt);
+  cmLinkItem(std::string s, cmListFileBacktrace bt);
+  cmLinkItem(cmGeneratorTarget const* t, cmListFileBacktrace bt);
   std::string const& AsStr() const;
   cmGeneratorTarget const* Target = nullptr;
   cmListFileBacktrace Backtrace;

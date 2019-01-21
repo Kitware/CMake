@@ -4,17 +4,19 @@
 
 #include "cmMakefile.h"
 
+#include <utility>
+
 cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
-                                 const std::vector<std::string>& outputs,
-                                 const std::vector<std::string>& byproducts,
-                                 const std::vector<std::string>& depends,
-                                 const cmCustomCommandLines& commandLines,
+                                 std::vector<std::string> outputs,
+                                 std::vector<std::string> byproducts,
+                                 std::vector<std::string> depends,
+                                 cmCustomCommandLines commandLines,
                                  const char* comment,
                                  const char* workingDirectory)
-  : Outputs(outputs)
-  , Byproducts(byproducts)
-  , Depends(depends)
-  , CommandLines(commandLines)
+  : Outputs(std::move(outputs))
+  , Byproducts(std::move(byproducts))
+  , Depends(std::move(depends))
+  , CommandLines(std::move(commandLines))
   , Comment(comment ? comment : "")
   , WorkingDirectory(workingDirectory ? workingDirectory : "")
   , HaveComment(comment != nullptr)

@@ -10,16 +10,15 @@ cmLinkItem::cmLinkItem()
 {
 }
 
-cmLinkItem::cmLinkItem(std::string const& n, cmListFileBacktrace const& bt)
-  : String(n)
-  , Backtrace(bt)
+cmLinkItem::cmLinkItem(std::string n, cmListFileBacktrace bt)
+  : String(std::move(n))
+  , Backtrace(std::move(bt))
 {
 }
 
-cmLinkItem::cmLinkItem(cmGeneratorTarget const* t,
-                       cmListFileBacktrace const& bt)
+cmLinkItem::cmLinkItem(cmGeneratorTarget const* t, cmListFileBacktrace bt)
   : Target(t)
-  , Backtrace(bt)
+  , Backtrace(std::move(bt))
 {
 }
 

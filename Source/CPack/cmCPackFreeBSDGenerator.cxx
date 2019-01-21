@@ -17,6 +17,7 @@
 #include <pkg.h>
 
 #include <algorithm>
+#include <utility>
 
 cmCPackFreeBSDGenerator::cmCPackFreeBSDGenerator()
   : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr")
@@ -97,8 +98,8 @@ class ManifestKey
 public:
   std::string key;
 
-  ManifestKey(const std::string& k)
-    : key(k)
+  ManifestKey(std::string k)
+    : key(std::move(k))
   {
   }
 
@@ -115,9 +116,9 @@ class ManifestKeyValue : public ManifestKey
 public:
   std::string value;
 
-  ManifestKeyValue(const std::string& k, const std::string& v)
+  ManifestKeyValue(const std::string& k, std::string v)
     : ManifestKey(k)
-    , value(v)
+    , value(std::move(v))
   {
   }
 

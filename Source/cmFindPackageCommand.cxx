@@ -1760,8 +1760,8 @@ bool cmFileListGeneratorBase::Consider(std::string const& fullPath,
 class cmFileListGeneratorFixed : public cmFileListGeneratorBase
 {
 public:
-  cmFileListGeneratorFixed(std::string const& str)
-    : String(str)
+  cmFileListGeneratorFixed(std::string str)
+    : String(std::move(str))
   {
   }
   cmFileListGeneratorFixed(cmFileListGeneratorFixed const& r)
@@ -1940,8 +1940,8 @@ private:
 class cmFileListGeneratorCaseInsensitive : public cmFileListGeneratorBase
 {
 public:
-  cmFileListGeneratorCaseInsensitive(std::string const& str)
-    : String(str)
+  cmFileListGeneratorCaseInsensitive(std::string str)
+    : String(std::move(str))
   {
   }
   cmFileListGeneratorCaseInsensitive(
@@ -1982,8 +1982,8 @@ private:
 class cmFileListGeneratorGlob : public cmFileListGeneratorBase
 {
 public:
-  cmFileListGeneratorGlob(std::string const& str)
-    : Pattern(str)
+  cmFileListGeneratorGlob(std::string str)
+    : Pattern(std::move(str))
   {
   }
   cmFileListGeneratorGlob(cmFileListGeneratorGlob const& r)

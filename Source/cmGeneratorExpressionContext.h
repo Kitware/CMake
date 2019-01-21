@@ -14,12 +14,12 @@ class cmLocalGenerator;
 
 struct cmGeneratorExpressionContext
 {
-  cmGeneratorExpressionContext(cmLocalGenerator* lg, std::string const& config,
+  cmGeneratorExpressionContext(cmLocalGenerator* lg, std::string config,
                                bool quiet, const cmGeneratorTarget* headTarget,
                                cmGeneratorTarget const* currentTarget,
                                bool evaluateForBuildsystem,
-                               cmListFileBacktrace const& backtrace,
-                               std::string const& language);
+                               cmListFileBacktrace backtrace,
+                               std::string language);
 
   cmListFileBacktrace Backtrace;
   std::set<cmGeneratorTarget*> DependTargets;

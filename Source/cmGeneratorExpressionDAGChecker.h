@@ -42,13 +42,13 @@ class cmGeneratorTarget;
 
 struct cmGeneratorExpressionDAGChecker
 {
-  cmGeneratorExpressionDAGChecker(const cmListFileBacktrace& backtrace,
+  cmGeneratorExpressionDAGChecker(cmListFileBacktrace backtrace,
                                   cmGeneratorTarget const* target,
-                                  const std::string& property,
+                                  std::string property,
                                   const GeneratorExpressionContent* content,
                                   cmGeneratorExpressionDAGChecker* parent);
   cmGeneratorExpressionDAGChecker(cmGeneratorTarget const* target,
-                                  const std::string& property,
+                                  std::string property,
                                   const GeneratorExpressionContent* content,
                                   cmGeneratorExpressionDAGChecker* parent);
 

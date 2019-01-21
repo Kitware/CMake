@@ -2,8 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmPathLabel.h"
 
-cmPathLabel::cmPathLabel(const std::string& label)
-  : Label(label)
+#include <utility>
+
+cmPathLabel::cmPathLabel(std::string label)
+  : Label(std::move(label))
   , Hash(0)
 {
   // Use a Jenkins one-at-a-time hash with under/over-flow protection

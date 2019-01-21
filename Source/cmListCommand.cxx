@@ -659,15 +659,14 @@ bool cmListCommand::HandleTransformCommand(
   // Transform: lambda function implementing the action
   struct ActionDescriptor
   {
-    ActionDescriptor(const std::string& name)
-      : Name(name)
+    ActionDescriptor(std::string name)
+      : Name(std::move(name))
     {
     }
-    ActionDescriptor(const std::string& name, int arity,
-                     const transform_type& transform)
-      : Name(name)
+    ActionDescriptor(std::string name, int arity, transform_type transform)
+      : Name(std::move(name))
       , Arity(arity)
-      , Transform(transform)
+      , Transform(std::move(transform))
     {
     }
 

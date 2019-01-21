@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unordered_set>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
@@ -1805,10 +1806,10 @@ class cmTargetCollectLinkLanguages
 {
 public:
   cmTargetCollectLinkLanguages(cmGeneratorTarget const* target,
-                               const std::string& config,
+                               std::string config,
                                std::unordered_set<std::string>& languages,
                                cmGeneratorTarget const* head)
-    : Config(config)
+    : Config(std::move(config))
     , Languages(languages)
     , HeadTarget(head)
     , Target(target)

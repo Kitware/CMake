@@ -49,8 +49,8 @@ public:
     {
     }
 
-    KeyExpT(std::string const& key, std::string const& exp)
-      : Key(key)
+    KeyExpT(std::string key, std::string const& exp)
+      : Key(std::move(key))
       , Exp(exp)
     {
     }
@@ -240,10 +240,10 @@ public:
   class JobMocT : public JobT
   {
   public:
-    JobMocT(std::string&& sourceFile, std::string const& includerFile,
+    JobMocT(std::string&& sourceFile, std::string includerFile,
             std::string&& includeString)
       : SourceFile(std::move(sourceFile))
-      , IncluderFile(includerFile)
+      , IncluderFile(std::move(includerFile))
       , IncludeString(std::move(includeString))
     {
     }
@@ -269,10 +269,10 @@ public:
   class JobUicT : public JobT
   {
   public:
-    JobUicT(std::string&& sourceFile, std::string const& includerFile,
+    JobUicT(std::string&& sourceFile, std::string includerFile,
             std::string&& includeString)
       : SourceFile(std::move(sourceFile))
-      , IncluderFile(includerFile)
+      , IncluderFile(std::move(includerFile))
       , IncludeString(std::move(includeString))
     {
     }

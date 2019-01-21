@@ -13,9 +13,9 @@
 #include <string.h>
 #include <utility>
 
-cmDepends::cmDepends(cmLocalGenerator* lg, const std::string& targetDir)
+cmDepends::cmDepends(cmLocalGenerator* lg, std::string targetDir)
   : LocalGenerator(lg)
-  , TargetDirectory(targetDir)
+  , TargetDirectory(std::move(targetDir))
   , Dependee(new char[MaxPath])
   , Depender(new char[MaxPath])
 {

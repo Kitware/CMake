@@ -7,6 +7,7 @@
 
 #include "cmListFileCache.h"
 
+#include <utility>
 #include <vector>
 
 /**
@@ -17,10 +18,10 @@
 class cmGraphEdge
 {
 public:
-  cmGraphEdge(int n, bool s, cmListFileBacktrace const& bt)
+  cmGraphEdge(int n, bool s, cmListFileBacktrace bt)
     : Dest(n)
     , Strong(s)
-    , Backtrace(bt)
+    , Backtrace(std::move(bt))
   {
   }
   operator int() const { return this->Dest; }

@@ -12,10 +12,9 @@
 class cmGlobalGenerator;
 
 cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
-                                               cmMakefile* mf,
-                                               std::string const& wd)
+                                               cmMakefile* mf, std::string wd)
   : cmLocalGenerator(gg, mf)
-  , WorkingDirectory(wd)
+  , WorkingDirectory(std::move(wd))
 {
   // Store the configuration name that will be generated.
   if (const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {

@@ -11,6 +11,7 @@
 #include <memory> // IWYU pragma: keep
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 class cmCompiledGeneratorExpression;
@@ -35,8 +36,7 @@ class cmGeneratorExpression
 
 public:
   /** Construct. */
-  cmGeneratorExpression(
-    cmListFileBacktrace const& backtrace = cmListFileBacktrace());
+  cmGeneratorExpression(cmListFileBacktrace backtrace = cmListFileBacktrace());
   ~cmGeneratorExpression();
 
   std::unique_ptr<cmCompiledGeneratorExpression> Parse(
@@ -140,8 +140,8 @@ private:
     cmGeneratorExpressionContext& context,
     cmGeneratorExpressionDAGChecker* dagChecker) const;
 
-  cmCompiledGeneratorExpression(cmListFileBacktrace const& backtrace,
-                                const std::string& input);
+  cmCompiledGeneratorExpression(cmListFileBacktrace backtrace,
+                                std::string input);
 
   friend class cmGeneratorExpression;
 
@@ -169,13 +169,13 @@ class cmGeneratorExpressionInterpreter
 
 public:
   cmGeneratorExpressionInterpreter(cmLocalGenerator* localGenerator,
-                                   std::string const& config,
+                                   std::string config,
                                    cmGeneratorTarget const* headTarget,
-                                   std::string const& lang = std::string())
+                                   std::string lang = std::string())
     : LocalGenerator(localGenerator)
-    , Config(config)
+    , Config(std::move(config))
     , HeadTarget(headTarget)
-    , Language(lang)
+    , Language(std::move(lang))
   {
   }
 

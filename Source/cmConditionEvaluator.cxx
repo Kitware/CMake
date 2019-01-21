@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
@@ -53,11 +54,11 @@ static std::string const keyVERSION_LESS = "VERSION_LESS";
 static std::string const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL";
 
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
-                                           const cmListFileContext& context,
-                                           const cmListFileBacktrace& bt)
+                                           cmListFileContext context,
+                                           cmListFileBacktrace bt)
   : Makefile(makefile)
-  , ExecutionContext(context)
-  , Backtrace(bt)
+  , ExecutionContext(std::move(context))
+  , Backtrace(std::move(bt))
   , Policy12Status(makefile.GetPolicyStatus(cmPolicies::CMP0012))
   , Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054))
   , Policy57Status(makefile.GetPolicyStatus(cmPolicies::CMP0057))

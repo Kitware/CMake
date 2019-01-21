@@ -61,8 +61,8 @@ struct cmStrCmp
     : m_test(test)
   {
   }
-  cmStrCmp(const std::string& test)
-    : m_test(test)
+  cmStrCmp(std::string test)
+    : m_test(std::move(test))
   {
   }
 

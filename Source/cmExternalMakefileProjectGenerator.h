@@ -70,8 +70,7 @@ protected:
 class cmExternalMakefileProjectGeneratorFactory
 {
 public:
-  cmExternalMakefileProjectGeneratorFactory(const std::string& n,
-                                            const std::string& doc);
+  cmExternalMakefileProjectGeneratorFactory(std::string n, std::string doc);
   virtual ~cmExternalMakefileProjectGeneratorFactory();
 
   std::string GetName() const;
