@@ -528,7 +528,14 @@ public:
   /** Create a symbolic link if the platform supports it.  Returns whether
       creation succeeded. */
   static bool CreateSymlink(const std::string& origName,
-                            const std::string& newName);
+                            const std::string& newName,
+                            std::string* errorMessage = nullptr);
+
+  /** Create a hard link if the platform supports it.  Returns whether
+      creation succeeded. */
+  static bool CreateLink(const std::string& origName,
+                         const std::string& newName,
+                         std::string* errorMessage = nullptr);
 
 private:
   static bool s_ForceUnixPaths;
