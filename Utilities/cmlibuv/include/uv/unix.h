@@ -42,34 +42,32 @@
 #include <pthread.h>
 #include <signal.h>
 
-#include "uv-threadpool.h"
+#include "threadpool.h"
 
 #ifdef CMAKE_BOOTSTRAP
-# include "uv-posix.h"
+# include "posix.h"
 #elif defined(__linux__)
-# include "uv-linux.h"
+# include "linux.h"
 #elif defined (__MVS__)
-# include "uv-os390.h"
+# include "os390.h"
 #elif defined(__PASE__)
-# include "uv-posix.h"
+# include "posix.h"
 #elif defined(_AIX)
-# include "uv-aix.h"
+# include "aix.h"
 #elif defined(__sun)
-# include "uv-sunos.h"
+# include "sunos.h"
 #elif defined(__APPLE__)
-# include "uv-darwin.h"
+# include "darwin.h"
 #elif defined(__DragonFly__)       || \
       defined(__FreeBSD__)         || \
       defined(__FreeBSD_kernel__)  || \
       defined(__OpenBSD__)         || \
       defined(__NetBSD__)
-# include "uv-bsd.h"
+# include "bsd.h"
 #elif defined(__CYGWIN__) || defined(__MSYS__)
-# include "uv-posix.h"
-#endif
-
-#ifndef PTHREAD_BARRIER_SERIAL_THREAD
-# include "pthread-barrier.h"
+# include "posix.h"
+#elif defined(__GNU__)
+# include "posix.h"
 #endif
 
 #ifndef NI_MAXHOST
@@ -149,9 +147,30 @@ typedef pthread_rwlock_t uv_rwlock_t;
 typedef UV_PLATFORM_SEM_T uv_sem_t;
 typedef pthread_cond_t uv_cond_t;
 typedef pthread_key_t uv_key_t;
+
+/* Note: guard clauses should match uv_barrier_init's in src/unix/thread.c. */
+#if defined(_AIX) || !defined(PTHREAD_BARRIER_SERIAL_THREAD)
+/* TODO(bnoordhuis) Merge into uv_barrier_t in v2. */
+struct _uv_barrier {
+  uv_mutex_t mutex;
+  uv_cond_t cond;
+  unsigned threshold;
+  unsigned in;
+  unsigned out;
+};
+
+typedef struct {
+  struct _uv_barrier* b;
+# if defined(PTHREAD_BARRIER_SERIAL_THREAD)
+  /* TODO(bnoordhuis) Remove padding in v2. */
+  char pad[sizeof(pthread_barrier_t) - sizeof(struct _uv_barrier*)];
+# endif
+} uv_barrier_t;
+#else
 typedef pthread_barrier_t uv_barrier_t;
 #endif
 
+#endif
 
 /* Platform-specific definitions for uv_spawn support. */
 typedef gid_t uv_gid_t;

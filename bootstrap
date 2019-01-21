@@ -491,8 +491,11 @@ KWSYS_FILES="\
 if ${cmake_system_mingw}; then
   LIBUV_C_SOURCES="\
     src/fs-poll.c \
+    src/idna.c
     src/inet.c \
     src/threadpool.c \
+    src/strscpy.c \
+    src/timer.c \
     src/uv-common.c \
     src/win/async.c \
     src/win/core.c \
@@ -509,12 +512,10 @@ if ${cmake_system_mingw}; then
     src/win/poll.c \
     src/win/process-stdio.c \
     src/win/process.c \
-    src/win/req.c \
     src/win/signal.c \
     src/win/stream.c \
     src/win/tcp.c \
     src/win/thread.c \
-    src/win/timer.c \
     src/win/tty.c \
     src/win/udp.c \
     src/win/util.c \
@@ -523,6 +524,8 @@ if ${cmake_system_mingw}; then
     "
 else
   LIBUV_C_SOURCES="\
+    src/strscpy.c \
+    src/timer.c \
     src/uv-common.c \
     src/unix/cmake-bootstrap.c \
     src/unix/core.c \
@@ -537,7 +540,6 @@ else
     src/unix/process.c \
     src/unix/signal.c \
     src/unix/stream.c \
-    src/unix/timer.c \
     "
 fi
 
