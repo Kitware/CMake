@@ -20,12 +20,7 @@ BuildName: @BUILDNAME@
 LabelsForSubprojects: @CTEST_LABELS_FOR_SUBPROJECTS@
 
 # Submission information
-DropSite: @DROP_SITE@
-DropLocation: @DROP_LOCATION@
-DropSiteUser: @DROP_SITE_USER@
-DropSitePassword: @DROP_SITE_PASSWORD@
-DropSiteMode: @DROP_SITE_MODE@
-DropMethod: @DROP_METHOD@
+SubmitURL: @SUBMIT_URL@
 
 # Dashboard start time
 NightlyStartTime: @NIGHTLY_START_TIME@

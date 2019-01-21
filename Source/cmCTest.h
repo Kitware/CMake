@@ -176,6 +176,8 @@ public:
                              bool suppress = false);
   void EmptyCTestConfiguration();
 
+  std::string GetSubmitURL();
+
   /**
    * constructor and destructor
    */

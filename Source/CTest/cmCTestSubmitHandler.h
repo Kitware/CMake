@@ -48,8 +48,6 @@ public:
     this->HttpHeaders = v;
   }
 
-  void ConstructCDashURL(std::string& dropMethod, std::string& url);
-
 private:
   void SetLogFile(std::ostream* ost) { this->LogFile = ost; }
 

@@ -162,7 +162,6 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
-  std::string dropMethod(this->CTest->GetCTestConfiguration("DropMethod"));
   std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
   std::vector<std::string> args;
   cmSystemTools::ExpandListArgument(curlopt, args);
@@ -495,27 +494,6 @@ void cmCTestSubmitHandler::ParseResponse(
   }
 }
 
-void cmCTestSubmitHandler::ConstructCDashURL(std::string& dropMethod,
-                                             std::string& url)
-{
-  dropMethod = this->CTest->GetCTestConfiguration("DropMethod");
-  url = dropMethod;
-  url += "://";
-  if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty()) {
-    url += this->CTest->GetCTestConfiguration("DropSiteUser");
-    cmCTestOptionalLog(
-      this->CTest, HANDLER_OUTPUT,
-      this->CTest->GetCTestConfiguration("DropSiteUser").c_str(), this->Quiet);
-    if (!this->CTest->GetCTestConfiguration("DropSitePassword").empty()) {
-      url += ":" + this->CTest->GetCTestConfiguration("DropSitePassword");
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, ":******", this->Quiet);
-    }
-    url += "@";
-  }
-  url += this->CTest->GetCTestConfiguration("DropSite") +
-    this->CTest->GetCTestConfiguration("DropLocation");
-}
-
 int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
                                                 std::string const& typeString)
 {
@@ -536,16 +514,15 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   curl.SetCurlOptions(args);
   curl.SetTimeOutSeconds(SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT);
   curl.SetHttpHeaders(this->HttpHeaders);
-  std::string dropMethod;
-  std::string url;
-  this->ConstructCDashURL(dropMethod, url);
+  std::string url = this->CTest->GetSubmitURL();
   std::string fields;
   std::string::size_type pos = url.find('?');
   if (pos != std::string::npos) {
     fields = url.substr(pos + 1);
     url = url.substr(0, pos);
   }
-  if (!(dropMethod == "http" || dropMethod == "https")) {
+  if (!cmHasLiteralPrefix(url, "http://") &&
+      !cmHasLiteralPrefix(url, "https://")) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Only http and https are supported for CDASH_UPLOAD\n");
     return -1;
@@ -872,10 +849,7 @@ int cmCTestSubmitHandler::ProcessHandler()
       cnt++;
     }
   }
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     "Submit files (using "
-                       << this->CTest->GetCTestConfiguration("DropMethod")
-                       << ")" << std::endl,
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Submit files\n",
                      this->Quiet);
   const char* specificTrack = this->CTest->GetSpecificTrack();
   if (specificTrack) {
@@ -885,72 +859,32 @@ int cmCTestSubmitHandler::ProcessHandler()
   }
   this->SetLogFile(&ofs);
 
-  std::string dropMethod(this->CTest->GetCTestConfiguration("DropMethod"));
-
-  if (dropMethod.empty()) {
-    dropMethod = "http";
+  std::string url = this->CTest->GetSubmitURL();
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                     "   SubmitURL: " << url << '\n', this->Quiet);
+  if (!this->SubmitUsingHTTP(buildDirectory + "/Testing/" +
+                               this->CTest->GetCurrentTag(),
+                             files, prefix, url)) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "   Problems when submitting via HTTP\n");
+    ofs << "   Problems when submitting via HTTP\n";
+    return -1;
   }
-
-  if (dropMethod == "http" || dropMethod == "https") {
-    std::string url = dropMethod;
-    url += "://";
-    ofs << "Using drop method: " << dropMethod << std::endl;
+  if (this->HasErrors) {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               "   Errors occurred during submission.\n");
+    ofs << "   Errors occurred during submission.\n";
+  } else {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Using HTTP submit method" << std::endl
-                                                     << "   Drop site:" << url,
-                       this->Quiet);
-    if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty()) {
-      url += this->CTest->GetCTestConfiguration("DropSiteUser");
-      cmCTestOptionalLog(
-        this->CTest, HANDLER_OUTPUT,
-        this->CTest->GetCTestConfiguration("DropSiteUser").c_str(),
-        this->Quiet);
-      if (!this->CTest->GetCTestConfiguration("DropSitePassword").empty()) {
-        url += ":" + this->CTest->GetCTestConfiguration("DropSitePassword");
-        cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, ":******",
-                           this->Quiet);
-      }
-      url += "@";
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "@", this->Quiet);
-    }
-    url += this->CTest->GetCTestConfiguration("DropSite") +
-      this->CTest->GetCTestConfiguration("DropLocation");
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       this->CTest->GetCTestConfiguration("DropSite")
-                         << this->CTest->GetCTestConfiguration("DropLocation")
+                       "   Submission successful"
+                         << (this->HasWarnings ? ", with warnings." : "")
                          << std::endl,
                        this->Quiet);
-    if (!this->SubmitUsingHTTP(buildDirectory + "/Testing/" +
-                                 this->CTest->GetCurrentTag(),
-                               files, prefix, url)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "   Problems when submitting via HTTP" << std::endl);
-      ofs << "   Problems when submitting via HTTP" << std::endl;
-      return -1;
-    }
-    if (this->HasErrors) {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT,
-                 "   Errors occurred during "
-                 "submission."
-                   << std::endl);
-      ofs << "   Errors occurred during submission. " << std::endl;
-    } else {
-      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                         "   Submission successful"
-                           << (this->HasWarnings ? ", with warnings." : "")
-                           << std::endl,
-                         this->Quiet);
-      ofs << "   Submission successful"
-          << (this->HasWarnings ? ", with warnings." : "") << std::endl;
-    }
-
-    return 0;
+    ofs << "   Submission successful"
+        << (this->HasWarnings ? ", with warnings." : "") << std::endl;
   }
 
-  cmCTestLog(this->CTest, ERROR_MESSAGE,
-             "   Unknown submission method: \"" << dropMethod << "\""
-                                                << std::endl);
-  return -1;
+  return 0;
 }
 
 std::string cmCTestSubmitHandler::GetSubmitResultsPrefix()
