@@ -58,7 +58,7 @@ bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
   };
 
   // -- Read info file
-  if (!makefile->ReadListFile(InfoFile().c_str())) {
+  if (!makefile->ReadListFile(InfoFile())) {
     Log().ErrorFile(GeneratorT::RCC, InfoFile(), "File processing failed");
     return false;
   }

@@ -104,7 +104,7 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
       }
       fname += "/";
       fname += testFilename;
-      readit = this->Makefile->ReadDependentFile(fname.c_str());
+      readit = this->Makefile->ReadDependentFile(fname);
     }
     if (!readit) {
       std::string m = "Could not find include file: ";
@@ -170,7 +170,7 @@ bool cmCTestAddSubdirectoryCommand::InitialPass(
     }
     fname += "/";
     fname += testFilename;
-    readit = this->Makefile->ReadDependentFile(fname.c_str());
+    readit = this->Makefile->ReadDependentFile(fname);
   }
   if (!readit) {
     std::string m = "Could not find include file: ";

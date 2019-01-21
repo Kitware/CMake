@@ -68,7 +68,7 @@ int cmCPackExternalGenerator::PackageFiles()
       return 0;
     }
 
-    int res = this->MakefileMap->ReadListFile(packageScript);
+    bool res = this->MakefileMap->ReadListFile(packageScript);
 
     if (cmSystemTools::GetErrorOccuredFlag() || !res) {
       return 0;

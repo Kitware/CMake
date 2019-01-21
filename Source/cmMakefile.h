@@ -86,11 +86,10 @@ public:
 
   cmDirectoryId GetDirectoryId() const;
 
-  bool ReadListFile(const char* filename);
+  bool ReadListFile(const std::string& filename);
 
-  bool ReadDependentFile(const char* filename, bool noPolicyScope = true);
-
-  bool ProcessBuildsystemFile(const char* filename);
+  bool ReadDependentFile(const std::string& filename,
+                         bool noPolicyScope = true);
 
   /**
    * Add a function blocker to this makefile
