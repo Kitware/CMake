@@ -353,8 +353,7 @@ bool cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
   }
   if (!mf->GetDefinition("CMAKE_MAKE_PROGRAM") ||
       cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
-    std::string setMakeProgram =
-      mf->GetModulesFile(this->FindMakeProgramFile.c_str());
+    std::string setMakeProgram = mf->GetModulesFile(this->FindMakeProgramFile);
     if (!setMakeProgram.empty()) {
       mf->ReadListFile(setMakeProgram);
     }
@@ -464,11 +463,10 @@ void cmGlobalGenerator::EnableLanguage(
 
   if (this->TryCompileOuterMakefile) {
     // In a try-compile we can only enable languages provided by caller.
-    for (std::string const& li : languages) {
-      if (li == "NONE") {
+    for (std::string const& lang : languages) {
+      if (lang == "NONE") {
         this->SetLanguageEnabled("NONE", mf);
       } else {
-        const char* lang = li.c_str();
         if (this->LanguagesReady.find(lang) == this->LanguagesReady.end()) {
           std::ostringstream e;
           e << "The test project needs language " << lang
@@ -616,10 +614,9 @@ void cmGlobalGenerator::EnableLanguage(
   // load the CMakeDetermine(LANG)Compiler.cmake file to find
   // the compiler
 
-  for (std::string const& l : languages) {
-    const char* lang = l.c_str();
+  for (std::string const& lang : languages) {
     needSetLanguageEnabledMaps[lang] = false;
-    if (l == "NONE") {
+    if (lang == "NONE") {
       this->SetLanguageEnabled("NONE", mf);
       continue;
     }
@@ -661,8 +658,7 @@ void cmGlobalGenerator::EnableLanguage(
       std::string determineCompiler = "CMakeDetermine";
       determineCompiler += lang;
       determineCompiler += "Compiler.cmake";
-      std::string determineFile =
-        mf->GetModulesFile(determineCompiler.c_str());
+      std::string determineFile = mf->GetModulesFile(determineCompiler);
       if (!mf->ReadListFile(determineFile)) {
         cmSystemTools::Error("Could not find cmake module file: ",
                              determineCompiler.c_str());
@@ -721,9 +717,8 @@ void cmGlobalGenerator::EnableLanguage(
   }
   // loop over languages again loading CMake(LANG)Information.cmake
   //
-  for (std::string const& l : languages) {
-    const char* lang = l.c_str();
-    if (l == "NONE") {
+  for (std::string const& lang : languages) {
+    if (lang == "NONE") {
       this->SetLanguageEnabled("NONE", mf);
       continue;
     }
@@ -744,7 +739,7 @@ void cmGlobalGenerator::EnableLanguage(
         "No " << compilerName << " could be found.\n"
         ;
       /* clang-format on */
-    } else if (strcmp(lang, "RC") != 0 && strcmp(lang, "ASM_MASM") != 0) {
+    } else if ((lang != "RC") && (lang != "ASM_MASM")) {
       if (!cmSystemTools::FileIsFullPath(compilerFile)) {
         /* clang-format off */
         noCompiler <<
@@ -790,7 +785,7 @@ void cmGlobalGenerator::EnableLanguage(
       fpath = "CMake";
       fpath += lang;
       fpath += "Information.cmake";
-      std::string informationFile = mf->GetModulesFile(fpath.c_str());
+      std::string informationFile = mf->GetModulesFile(fpath);
       if (informationFile.empty()) {
         cmSystemTools::Error("Could not find cmake module file: ",
                              fpath.c_str());
@@ -814,7 +809,7 @@ void cmGlobalGenerator::EnableLanguage(
         std::string testLang = "CMakeTest";
         testLang += lang;
         testLang += "Compiler.cmake";
-        std::string ifpath = mf->GetModulesFile(testLang.c_str());
+        std::string ifpath = mf->GetModulesFile(testLang);
         if (!mf->ReadListFile(ifpath)) {
           cmSystemTools::Error("Could not find cmake module file: ",
                                testLang.c_str());
@@ -2861,7 +2856,7 @@ void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
       if (strncmp(line.c_str(), rhi->second.Data, 32) != 0) {
         // The rule has changed.  Delete the output so it will be
         // built again.
-        fname = cmSystemTools::CollapseFullPath(fname, home.c_str());
+        fname = cmSystemTools::CollapseFullPath(fname, home);
         cmSystemTools::RemoveFile(fname);
       }
     } else {
@@ -2871,7 +2866,7 @@ void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
       // Instead, we keep the rule hash as long as the file exists so
       // that if the feature is turned back on and the rule has
       // changed the file is still rebuilt.
-      std::string fpath = cmSystemTools::CollapseFullPath(fname, home.c_str());
+      std::string fpath = cmSystemTools::CollapseFullPath(fname, home);
       if (cmSystemTools::FileExists(fpath)) {
         RuleHash hash;
         memcpy(hash.Data, line.c_str(), 32);
