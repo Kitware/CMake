@@ -433,6 +433,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   vars.ObjectFileDir = "$OBJECT_FILE_DIR";
   if (lang == "Swift") {
     vars.SwiftAuxiliarySources = "$SWIFT_AUXILIARY_SOURCES";
+    vars.SwiftModuleName = "$SWIFT_MODULE_NAME";
   }
 
   // For some cases we do an explicit preprocessor invocation.
@@ -904,9 +905,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
   vars["INCLUDES"] = this->ComputeIncludes(source, language);
-  // The swift compiler needs all the sources besides the one being compiled in
-  // order to do the type checking.  List all these "auxiliary" sources.
   if (language == "Swift") {
+    // The swift compiler needs all the sources besides the one being compiled
+    // in order to do the type checking.  List all these "auxiliary" sources.
     std::string aux_sources;
     cmGeneratorTarget::KindedSources const& sources =
       this->GeneratorTarget->GetKindedSources(this->GetConfigName());
@@ -917,6 +918,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       aux_sources += " " + this->GetSourceFilePath(src.Source.Value);
     }
     vars["SWIFT_AUXILIARY_SOURCES"] = aux_sources;
+
+    vars["SWIFT_MODULE_NAME"] = this->GeneratorTarget->GetName();
   }
 
   if (!this->NeedDepTypeMSVC(language)) {
