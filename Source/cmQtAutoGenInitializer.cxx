@@ -963,7 +963,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   // Files provided by the autogen target
   std::vector<std::string> autogenProvides;
   if (this->Moc.Enabled) {
-    this->AddGeneratedSource(this->Moc.MocsCompilation, GeneratorT::MOC);
+    this->AddGeneratedSource(this->Moc.MocsCompilation, GeneratorT::MOC, true);
     autogenProvides.push_back(this->Moc.MocsCompilation);
   }
 
@@ -1356,7 +1356,8 @@ bool cmQtAutoGenInitializer::SetupWriteRccInfo()
 }
 
 void cmQtAutoGenInitializer::AddGeneratedSource(std::string const& filename,
-                                                GeneratorT genType)
+                                                GeneratorT genType,
+                                                bool prepend)
 {
   // Register source file in makefile
   cmMakefile* makefile = this->Target->Target->GetMakefile();
@@ -1370,7 +1371,7 @@ void cmQtAutoGenInitializer::AddGeneratedSource(std::string const& filename,
   AddToSourceGroup(makefile, filename, genType);
 
   // Add source file to target
-  this->Target->AddSource(filename);
+  this->Target->AddSource(filename, prepend);
 }
 
 static unsigned int CharPtrToInt(const char* const input)
