@@ -63,6 +63,7 @@ protected:
   QStringList GeneratorsSupportingToolset;
   QStringList GeneratorsSupportingPlatform;
   QMultiMap<QString, QString> GeneratorSupportedPlatforms;
+  QMap<QString, QString> GeneratorDefaultPlatform;
 
 private:
   QFrame* CreateToolsetWidgets();

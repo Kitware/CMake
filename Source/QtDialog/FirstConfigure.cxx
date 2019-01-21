@@ -75,8 +75,7 @@ QFrame* StartCompilerSetup::CreatePlatformWidgets()
   QVBoxLayout* l = new QVBoxLayout(frame);
   l->setContentsMargins(0, 0, 0, 0);
 
-  this->PlatformLabel =
-    new QLabel(tr("Specify the platform for this generator"));
+  this->PlatformLabel = new QLabel(tr("Optional platform for generator"));
   l->addWidget(this->PlatformLabel);
 
   this->PlatformOptions = new QComboBox(frame);
@@ -105,6 +104,10 @@ void StartCompilerSetup::setGenerators(
     if (it->supportsPlatform) {
       this->GeneratorsSupportingPlatform.append(
         QString::fromLocal8Bit(it->name.c_str()));
+
+      this
+        ->GeneratorDefaultPlatform[QString::fromLocal8Bit(it->name.c_str())] =
+        QString::fromLocal8Bit(it->defaultPlatform.c_str());
 
       std::vector<std::string>::const_iterator platformIt =
         it->supportedPlatforms.cbegin();
@@ -181,6 +184,13 @@ void StartCompilerSetup::onGeneratorChanged(QString const& name)
 {
   // Display the generator platform for the generators supporting it
   if (GeneratorsSupportingPlatform.contains(name)) {
+
+    // Change the label title to include the default platform
+    std::string label = "Optional platform for generator";
+    label += "(if empty, generator uses: ";
+    label += this->GeneratorDefaultPlatform[name].toStdString();
+    label += ")";
+    this->PlatformLabel->setText(tr(label.c_str()));
 
     // Regenerate the list of supported platform
     this->PlatformOptions->clear();
