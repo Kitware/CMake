@@ -178,6 +178,7 @@ private:
   bool UseLib32Paths;
   bool UseLib64Paths;
   bool UseLibx32Paths;
+  bool UseRealPath;
   bool PolicyScope;
   std::string LibraryArchitecture;
   std::vector<std::string> Names;
