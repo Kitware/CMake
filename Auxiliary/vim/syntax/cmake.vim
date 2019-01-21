@@ -2212,6 +2212,8 @@ syn keyword cmakeGeneratorExpressions contained
             \ DEBUG_MODE
             \ EXPORT
             \ FOO_EXTRA_THINGS
+            \ Fortran_COMPILER_ID
+            \ Fortran_COMPILER_VERSION
             \ GENEX_EVAL
             \ GNU
             \ IF

@@ -692,6 +692,28 @@ static const struct CXXCompilerIdNode : public CompilerIdNode
   }
 } cxxCompilerIdNode;
 
+static const struct FortranCompilerIdNode : public CompilerIdNode
+{
+  FortranCompilerIdNode() {}
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<Fortran_COMPILER_ID> may only be used with binary targets.  It may "
+        "not be used with add_custom_command or add_custom_target.");
+      return std::string();
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      "Fortran");
+  }
+} fortranCompilerIdNode;
+
 struct CompilerVersionNode : public cmGeneratorExpressionNode
 {
   CompilerVersionNode() {}
@@ -772,6 +794,28 @@ static const struct CxxCompilerVersionNode : public CompilerVersionNode
                                       "CXX");
   }
 } cxxCompilerVersionNode;
+
+static const struct FortranCompilerVersionNode : public CompilerVersionNode
+{
+  FortranCompilerVersionNode() {}
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<Fortran_COMPILER_VERSION> may only be used with binary targets.  "
+        "It may not be used with add_custom_command or add_custom_target.");
+      return std::string();
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      "Fortran");
+  }
+} fortranCompilerVersionNode;
 
 struct PlatformIdNode : public cmGeneratorExpressionNode
 {
@@ -2024,6 +2068,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     nodeMap["NOT"] = &notNode;
     nodeMap["C_COMPILER_ID"] = &cCompilerIdNode;
     nodeMap["CXX_COMPILER_ID"] = &cxxCompilerIdNode;
+    nodeMap["Fortran_COMPILER_ID"] = &fortranCompilerIdNode;
     nodeMap["VERSION_GREATER"] = &versionGreaterNode;
     nodeMap["VERSION_GREATER_EQUAL"] = &versionGreaterEqNode;
     nodeMap["VERSION_LESS"] = &versionLessNode;
@@ -2031,6 +2076,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     nodeMap["VERSION_EQUAL"] = &versionEqualNode;
     nodeMap["C_COMPILER_VERSION"] = &cCompilerVersionNode;
     nodeMap["CXX_COMPILER_VERSION"] = &cxxCompilerVersionNode;
+    nodeMap["Fortran_COMPILER_VERSION"] = &fortranCompilerVersionNode;
     nodeMap["PLATFORM_ID"] = &platformIdNode;
     nodeMap["COMPILE_FEATURES"] = &compileFeaturesNode;
     nodeMap["CONFIGURATION"] = &configurationNode;

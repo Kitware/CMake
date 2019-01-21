@@ -122,11 +122,18 @@ Variable Queries
   ``1`` if the CMake-id of the CXX compiler matches ``compiler_id``,
   otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<Fortran_COMPILER_ID:compiler_id>``
+  ``1`` if the CMake-id of the Fortran compiler matches ``compiler_id``,
+  otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<C_COMPILER_VERSION:version>``
   ``1`` if the version of the C compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<CXX_COMPILER_VERSION:version>``
   ``1`` if the version of the CXX compiler matches ``version``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<Fortran_COMPILER_VERSION:version>``
+  ``1`` if the version of the Fortran compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<TARGET_POLICY:policy>``
   ``1`` if the ``policy`` was NEW when the 'head' target was created,
@@ -339,11 +346,17 @@ Variable Queries
 ``$<CXX_COMPILER_ID>``
   The CMake-id of the CXX compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<Fortran_COMPILER_ID>``
+  The CMake-id of the Fortran compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<C_COMPILER_VERSION>``
   The version of the C compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<CXX_COMPILER_VERSION>``
   The version of the CXX compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<Fortran_COMPILER_VERSION>``
+  The version of the Fortran compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<COMPILE_LANGUAGE>``
   The compile language of source files when evaluating compile options.
