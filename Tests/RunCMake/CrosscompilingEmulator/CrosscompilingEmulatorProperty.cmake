@@ -26,3 +26,9 @@ get_property(emulator TARGET target_without_emulator
 if(NOT "${emulator}" STREQUAL "")
   message(SEND_ERROR "Default CROSSCOMPILING_EMULATOR property not set to null")
 endif()
+
+add_executable(target_with_empty_emulator simple_src_exiterror.cxx)
+set_property(TARGET target_with_empty_emulator PROPERTY CROSSCOMPILING_EMULATOR "")
+
+enable_testing()
+add_test(NAME test_target_with_empty_emulator COMMAND target_with_empty_emulator)
