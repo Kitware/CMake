@@ -599,7 +599,9 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     fprintf(fout, "link_directories(${LINK_DIRECTORIES})\n");
     // handle any compile flags we need to pass on
     if (!compileDefs.empty()) {
-      fprintf(fout, "add_definitions(%s)\n", cmJoin(compileDefs, " ").c_str());
+      // Pass using bracket arguments to preserve content.
+      fprintf(fout, "add_definitions([==[%s]==])\n",
+              cmJoin(compileDefs, "]==] [==[").c_str());
     }
 
     /* Use a random file name to avoid rapid creation and deletion

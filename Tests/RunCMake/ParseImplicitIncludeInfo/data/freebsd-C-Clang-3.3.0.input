@@ -1,0 +1,38 @@
+CMAKE_LANG=C
+CMAKE_C_COMPILER_ABI=ELF
+CMAKE_C_COMPILER_AR=
+CMAKE_C_COMPILER_ARCHITECTURE_ID=
+CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_C_COMPILER_ID=Clang
+CMAKE_C_COMPILER_LAUNCHER=
+CMAKE_C_COMPILER_LOADED=1
+CMAKE_C_COMPILER_RANLIB=
+CMAKE_C_COMPILER_TARGET=
+CMAKE_C_COMPILER_VERSION=3.3.0
+CMAKE_C_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/local/bin/gmake" "cmTC_0c44b/fast"
+/usr/local/bin/gmake -f CMakeFiles/cmTC_0c44b.dir/build.make CMakeFiles/cmTC_0c44b.dir/build
+gmake[1]: Entering directory `/tmp/ii/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_0c44b.dir/CMakeCCompilerABI.c.o
+/usr/bin/cc    -v -o CMakeFiles/cmTC_0c44b.dir/CMakeCCompilerABI.c.o   -c /usr/local/share/cmake-3.7/Modules/CMakeCCompilerABI.c
+FreeBSD clang version 3.3 (tags/RELEASE_33/final 183502) 20130610
+Target: x86_64-unknown-freebsd10.0
+Thread model: posix
+ "/usr/bin/cc" -cc1 -triple x86_64-unknown-freebsd10.0 -emit-obj -mrelax-all -disable-free -disable-llvm-verifier -main-file-name CMakeCCompilerABI.c -mrelocation-model static -mdisable-fp-elim -masm-verbose -mconstructor-aliases -munwind-tables -target-cpu x86-64 -v -coverage-file /tmp/ii/CMakeFiles/cmTC_0c44b.dir/CMakeCCompilerABI.c.o -resource-dir /usr/bin/../lib/clang/3.3 -fdebug-compilation-dir /tmp/ii/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -mstackrealign -fobjc-runtime=gnustep -fobjc-default-synthesize-properties -fdiagnostics-show-option -backend-option -vectorize-loops -o CMakeFiles/cmTC_0c44b.dir/CMakeCCompilerABI.c.o -x c /usr/local/share/cmake-3.7/Modules/CMakeCCompilerABI.c
+clang -cc1 version 3.3 based upon LLVM 3.3 default target x86_64-unknown-freebsd10.0
+ignoring nonexistent directory "/usr/bin/../lib/clang/3.3/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/include/clang/3.3
+ /usr/include
+End of search list.
+Linking C executable cmTC_0c44b
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0c44b.dir/link.txt --verbose=1
+/usr/bin/cc      -v CMakeFiles/cmTC_0c44b.dir/CMakeCCompilerABI.c.o  -o cmTC_0c44b
+FreeBSD clang version 3.3 (tags/RELEASE_33/final 183502) 20130610
+Target: x86_64-unknown-freebsd10.0
+Thread model: posix
+ "/usr/bin/ld" --eh-frame-hdr -dynamic-linker /libexec/ld-elf.so.1 --hash-style=both --enable-new-dtags -o cmTC_0c44b /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/crtbegin.o -L/usr/lib CMakeFiles/cmTC_0c44b.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/crtend.o /usr/lib/crtn.o
+gmake[1]: Leaving directory `/tmp/ii/CMakeFiles/CMakeTmp'

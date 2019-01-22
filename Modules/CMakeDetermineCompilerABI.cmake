@@ -6,6 +6,7 @@
 # This is used internally by CMake and should not be included by user
 # code.
 
+include(${CMAKE_ROOT}/Modules/CMakeParseImplicitIncludeInfo.cmake)
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
 include(CMakeTestCompilerCommon)
 
@@ -16,8 +17,13 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     # Compile the ABI identification source.
     set(BIN "${CMAKE_PLATFORM_INFO_DIR}/CMakeDetermineCompilerABI_${lang}.bin")
     set(CMAKE_FLAGS )
+    set(COMPILE_DEFINITIONS )
     if(DEFINED CMAKE_${lang}_VERBOSE_FLAG)
       set(CMAKE_FLAGS "-DEXE_LINKER_FLAGS=${CMAKE_${lang}_VERBOSE_FLAG}")
+      set(COMPILE_DEFINITIONS "${CMAKE_${lang}_VERBOSE_FLAG}")
+    endif()
+    if(DEFINED CMAKE_${lang}_VERBOSE_COMPILE_FLAG)
+      set(COMPILE_DEFINITIONS "${CMAKE_${lang}_VERBOSE_COMPILE_FLAG}")
     endif()
     if(NOT "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xMSVC")
       # Avoid adding our own platform standard libraries for compilers
@@ -25,15 +31,33 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       list(APPEND CMAKE_FLAGS "-DCMAKE_${lang}_STANDARD_LIBRARIES=")
     endif()
     __TestCompiler_setTryCompileTargetType()
+
+    # Save the current LC_ALL, LC_MESSAGES, and LANG environment variables
+    # and set them to "C" that way GCC's "search starts here" text is in
+    # English and we can grok it.
+    set(_orig_lc_all      $ENV{LC_ALL})
+    set(_orig_lc_messages $ENV{LC_MESSAGES})
+    set(_orig_lang        $ENV{LANG})
+    set(ENV{LC_ALL}      C)
+    set(ENV{LC_MESSAGES} C)
+    set(ENV{LANG}        C)
+
     try_compile(CMAKE_${lang}_ABI_COMPILED
       ${CMAKE_BINARY_DIR} ${src}
       CMAKE_FLAGS ${CMAKE_FLAGS}
                   # Ignore unused flags when we are just determining the ABI.
                   "--no-warn-unused-cli"
+      COMPILE_DEFINITIONS ${COMPILE_DEFINITIONS}
       OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${BIN}"
       COPY_FILE_ERROR _copy_error
       )
+
+    # Restore original LC_ALL, LC_MESSAGES, and LANG
+    set(ENV{LC_ALL}      ${_orig_lc_all})
+    set(ENV{LC_MESSAGES} ${_orig_lc_messages})
+    set(ENV{LANG}        ${_orig_lang})
+
     # Move result from cache to normal variable.
     set(CMAKE_${lang}_ABI_COMPILED ${CMAKE_${lang}_ABI_COMPILED})
     unset(CMAKE_${lang}_ABI_COMPILED CACHE)
@@ -62,6 +86,18 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
 
       if(ABI_NAME)
         set(CMAKE_${lang}_COMPILER_ABI "${ABI_NAME}" PARENT_SCOPE)
+      endif()
+
+      # Parse implicit include directory for this language, if available.
+      set (implicit_incdirs "")
+      if(CMAKE_${lang}_VERBOSE_FLAG)
+        cmake_parse_implicit_include_info("${OUTPUT}" "${lang}"
+          implicit_incdirs log rv)
+        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+          "Parsed ${lang} implicit include dir info from above output: rv=${rv}\n${log}\n\n")
+        if("${rv}" STREQUAL "done")  # update parent if parse completed ok
+          set(CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES "${implicit_incdirs}" PARENT_SCOPE)
+        endif()
       endif()
 
       # Parse implicit linker information for this language, if available.

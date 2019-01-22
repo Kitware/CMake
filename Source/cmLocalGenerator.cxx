@@ -947,21 +947,29 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectories(
       rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
     }
 
+    std::vector<std::string> impDirVec;
+
+    // Get platform-wide implicit directories.
+    if (const char* implicitIncludes = (this->Makefile->GetDefinition(
+          "CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES"))) {
+      cmSystemTools::ExpandListArgument(implicitIncludes, impDirVec);
+    }
+
     // Load implicit include directories for this language.
     std::string key = "CMAKE_";
     key += lang;
     key += "_IMPLICIT_INCLUDE_DIRECTORIES";
     if (const char* value = this->Makefile->GetDefinition(key)) {
-      std::vector<std::string> impDirVec;
       cmSystemTools::ExpandListArgument(value, impDirVec);
-      for (std::string const& i : impDirVec) {
-        {
-          std::string d = rootPath + i;
-          cmSystemTools::ConvertToUnixSlashes(d);
-          emitted.insert(std::move(d));
-        }
-        implicitDirs.push_back(i);
+    }
+
+    for (std::string const& i : impDirVec) {
+      {
+        std::string d = rootPath + i;
+        cmSystemTools::ConvertToUnixSlashes(d);
+        emitted.insert(std::move(d));
       }
+      implicitDirs.push_back(i);
     }
   }
 
