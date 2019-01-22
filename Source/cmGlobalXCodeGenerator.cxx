@@ -133,13 +133,27 @@ public:
     cmGlobalXCodeGenerator::GetDocumentation(entry);
   }
 
-  void GetGenerators(std::vector<std::string>& names) const override
+  std::vector<std::string> GetGeneratorNames() const override
   {
+    std::vector<std::string> names;
     names.push_back(cmGlobalXCodeGenerator::GetActualName());
+    return names;
+  }
+
+  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
+  {
+    return std::vector<std::string>();
   }
 
   bool SupportsToolset() const override { return true; }
   bool SupportsPlatform() const override { return false; }
+
+  std::vector<std::string> GetKnownPlatforms() const override
+  {
+    return std::vector<std::string>();
+  }
+
+  std::string GetDefaultPlatformName() const override { return std::string(); }
 };
 
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(

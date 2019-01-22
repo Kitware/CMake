@@ -104,6 +104,8 @@ public:
     std::string extraName;
     bool supportsToolset;
     bool supportsPlatform;
+    std::vector<std::string> supportedPlatforms;
+    std::string defaultPlatform;
     bool isAlias;
   };
 
@@ -196,7 +198,8 @@ public:
   void SetGlobalGenerator(cmGlobalGenerator*);
 
   ///! Get the names of the current registered generators
-  void GetRegisteredGenerators(std::vector<GeneratorInfo>& generators) const;
+  void GetRegisteredGenerators(std::vector<GeneratorInfo>& generators,
+                               bool includeNamesWithPlatform = true) const;
 
   ///! Set the name of the selected generator-specific instance.
   void SetGeneratorInstance(std::string const& instance)

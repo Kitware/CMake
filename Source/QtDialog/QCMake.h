@@ -75,6 +75,8 @@ public slots:
   /// set the desired generator to use
   void setGenerator(const QString& generator);
   /// set the desired generator to use
+  void setPlatform(const QString& platform);
+  /// set the desired generator to use
   void setToolset(const QString& toolset);
   /// do the configure step
   void configure();
@@ -155,6 +157,8 @@ signals:
   void debugOutputChanged(bool);
   /// signal when the toolset changes
   void toolsetChanged(const QString& toolset);
+  /// signal when the platform changes
+  void platformChanged(const QString& platform);
   /// signal when open is done
   void openDone(bool successful);
   /// signal when open is done
@@ -175,6 +179,7 @@ protected:
   QString SourceDirectory;
   QString BinaryDirectory;
   QString Generator;
+  QString Platform;
   QString Toolset;
   std::vector<cmake::GeneratorInfo> AvailableGenerators;
   QString CMakeExecutable;

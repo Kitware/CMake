@@ -58,15 +58,34 @@ public:
                   "Optional [arch] can be \"Win64\" or \"ARM\".";
   }
 
-  void GetGenerators(std::vector<std::string>& names) const override
+  std::vector<std::string> GetGeneratorNames() const override
   {
+    std::vector<std::string> names;
     names.push_back(vs14generatorName);
+    return names;
+  }
+
+  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
+  {
+    std::vector<std::string> names;
     names.push_back(vs14generatorName + std::string(" ARM"));
     names.push_back(vs14generatorName + std::string(" Win64"));
+    return names;
   }
 
   bool SupportsToolset() const override { return true; }
   bool SupportsPlatform() const override { return true; }
+
+  std::vector<std::string> GetKnownPlatforms() const override
+  {
+    std::vector<std::string> platforms;
+    platforms.emplace_back("x64");
+    platforms.emplace_back("Win32");
+    platforms.emplace_back("ARM");
+    return platforms;
+  }
+
+  std::string GetDefaultPlatformName() const override { return "Win32"; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio14Generator::NewFactory()

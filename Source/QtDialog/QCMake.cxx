@@ -35,7 +35,8 @@ QCMake::QCMake(QObject* p)
   cmSystemTools::SetInterruptCallback(QCMake::interruptCallback, this);
 
   std::vector<cmake::GeneratorInfo> generators;
-  this->CMakeInstance->GetRegisteredGenerators(generators);
+  this->CMakeInstance->GetRegisteredGenerators(
+    generators, /*includeNamesWithPlatform=*/false);
 
   std::vector<cmake::GeneratorInfo>::const_iterator it;
   for (it = generators.begin(); it != generators.end(); ++it) {
@@ -74,6 +75,7 @@ void QCMake::setBinaryDirectory(const QString& _dir)
     cmState* state = this->CMakeInstance->GetState();
     this->setGenerator(QString());
     this->setToolset(QString());
+    this->setPlatform(QString());
     if (!this->CMakeInstance->LoadCache(
           this->BinaryDirectory.toLocal8Bit().data())) {
       QDir testDir(this->BinaryDirectory);
@@ -102,6 +104,12 @@ void QCMake::setBinaryDirectory(const QString& _dir)
       this->setGenerator(QString::fromLocal8Bit(curGen.c_str()));
     }
 
+    const char* platform =
+      state->GetCacheEntryValue("CMAKE_GENERATOR_PLATFORM");
+    if (platform) {
+      this->setPlatform(QString::fromLocal8Bit(platform));
+    }
+
     const char* toolset = state->GetCacheEntryValue("CMAKE_GENERATOR_TOOLSET");
     if (toolset) {
       this->setToolset(QString::fromLocal8Bit(toolset));
@@ -116,6 +124,14 @@ void QCMake::setGenerator(const QString& gen)
   if (this->Generator != gen) {
     this->Generator = gen;
     emit this->generatorChanged(this->Generator);
+  }
+}
+
+void QCMake::setPlatform(const QString& platform)
+{
+  if (this->Platform != platform) {
+    this->Platform = platform;
+    emit this->platformChanged(this->Platform);
   }
 }
 
@@ -140,7 +156,8 @@ void QCMake::configure()
   this->CMakeInstance->SetGlobalGenerator(
     this->CMakeInstance->CreateGlobalGenerator(
       this->Generator.toLocal8Bit().data()));
-  this->CMakeInstance->SetGeneratorPlatform("");
+  this->CMakeInstance->SetGeneratorPlatform(
+    this->Platform.toLocal8Bit().data());
   this->CMakeInstance->SetGeneratorToolset(this->Toolset.toLocal8Bit().data());
   this->CMakeInstance->LoadCache();
   this->CMakeInstance->SetWarnUninitialized(this->WarnUninitializedMode);
