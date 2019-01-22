@@ -245,7 +245,7 @@ protected:
 
   // Helper methods for dependency updates.
   bool ScanDependencies(
-    const char* targetDir,
+    const std::string& targetDir,
     std::map<std::string, cmDepends::DependencyVector>& validDeps);
   void CheckMultipleOutputs(bool verbose);
 
