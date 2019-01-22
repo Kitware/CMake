@@ -3871,7 +3871,8 @@ SystemInformation::LongLong SystemInformationImplementation::GetProcessId()
 {
 #if defined(_WIN32)
   return GetCurrentProcessId();
-#elif defined(__linux) || defined(__APPLE__)
+#elif defined(__linux) || defined(__APPLE__) || defined(__OpenBSD__) ||       \
+  defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
   return getpid();
 #else
   return -1;
