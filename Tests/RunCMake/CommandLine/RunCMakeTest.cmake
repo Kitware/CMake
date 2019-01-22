@@ -56,12 +56,22 @@ run_cmake_command(cache-empty-entry
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-empty-entry/)
 
 function(run_ExplicitDirs)
+  set(source_dir ${RunCMake_BINARY_DIR}/ExplicitDirsMissing)
+
+  file(REMOVE_RECURSE "${source_dir}")
+  file(MAKE_DIRECTORY "${source_dir}")
+  file(WRITE ${source_dir}/CMakeLists.txt [=[
+cmake_minimum_required(VERSION 3.13)
+project(ExplicitDirsMissing LANGUAGES NONE)
+]=])
+  run_cmake_command(no-S-B ${CMAKE_COMMAND} -E chdir ${source_dir}
+    ${CMAKE_COMMAND} -DFOO=BAR)
+
   set(source_dir ${RunCMake_SOURCE_DIR}/ExplicitDirs)
   set(binary_dir ${RunCMake_BINARY_DIR}/ExplicitDirs-build)
 
   file(REMOVE_RECURSE "${binary_dir}")
   file(MAKE_DIRECTORY "${binary_dir}")
-  run_cmake_command(no-S-B ${CMAKE_COMMAND} -DFOO=BAR)
   run_cmake_command(S-arg ${CMAKE_COMMAND} -S ${source_dir} ${binary_dir})
   run_cmake_command(S-arg-reverse-order ${CMAKE_COMMAND} ${binary_dir} -S${source_dir} )
   run_cmake_command(S-no-arg ${CMAKE_COMMAND} -S )
