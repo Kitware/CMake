@@ -217,7 +217,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
   int p;
   cmProcessOutput processOutput(encoding);
   std::string strdata;
-  while ((p = cmsysProcess_WaitForData(cp, &data, &length, nullptr), p)) {
+  while ((p = cmsysProcess_WaitForData(cp, &data, &length, nullptr))) {
     if (p == cmsysProcess_Pipe_STDOUT || p == cmsysProcess_Pipe_STDERR) {
       if (verbose) {
         processOutput.DecodeText(data, length, strdata);

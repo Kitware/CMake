@@ -244,7 +244,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   int p;
   cmProcessOutput processOutput(encoding);
   std::string strdata;
-  while ((p = cmsysProcess_WaitForData(cp, &data, &length, nullptr), p)) {
+  while ((p = cmsysProcess_WaitForData(cp, &data, &length, nullptr))) {
     // Put the output in the right place.
     if (p == cmsysProcess_Pipe_STDOUT && !output_quiet) {
       if (output_variable.empty()) {
