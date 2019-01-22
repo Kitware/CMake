@@ -249,14 +249,14 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
     if (p == cmsysProcess_Pipe_STDOUT && !output_quiet) {
       if (output_variable.empty()) {
         processOutput.DecodeText(data, length, strdata, 1);
-        cmSystemTools::Stdout(strdata.c_str(), strdata.size());
+        cmSystemTools::Stdout(strdata);
       } else {
         cmExecuteProcessCommandAppend(tempOutput, data, length);
       }
     } else if (p == cmsysProcess_Pipe_STDERR && !error_quiet) {
       if (error_variable.empty()) {
         processOutput.DecodeText(data, length, strdata, 2);
-        cmSystemTools::Stderr(strdata.c_str(), strdata.size());
+        cmSystemTools::Stderr(strdata);
       } else {
         cmExecuteProcessCommandAppend(tempError, data, length);
       }
@@ -265,13 +265,13 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   if (!output_quiet && output_variable.empty()) {
     processOutput.DecodeText(std::string(), strdata, 1);
     if (!strdata.empty()) {
-      cmSystemTools::Stdout(strdata.c_str(), strdata.size());
+      cmSystemTools::Stdout(strdata);
     }
   }
   if (!error_quiet && error_variable.empty()) {
     processOutput.DecodeText(std::string(), strdata, 2);
     if (!strdata.empty()) {
-      cmSystemTools::Stderr(strdata.c_str(), strdata.size());
+      cmSystemTools::Stderr(strdata);
     }
   }
 

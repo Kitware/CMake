@@ -2014,7 +2014,7 @@ int cmake::CheckBuildSystem()
     if (verbose) {
       std::ostringstream msg;
       msg << "Re-run cmake no build system arguments\n";
-      cmSystemTools::Stdout(msg.str().c_str());
+      cmSystemTools::Stdout(msg.str());
     }
     return 1;
   }
@@ -2025,7 +2025,7 @@ int cmake::CheckBuildSystem()
       std::ostringstream msg;
       msg << "Re-run cmake missing file: " << this->CheckBuildSystemArgument
           << "\n";
-      cmSystemTools::Stdout(msg.str().c_str());
+      cmSystemTools::Stdout(msg.str());
     }
     return 1;
   }
@@ -2045,7 +2045,7 @@ int cmake::CheckBuildSystem()
       std::ostringstream msg;
       msg << "Re-run cmake error reading : " << this->CheckBuildSystemArgument
           << "\n";
-      cmSystemTools::Stdout(msg.str().c_str());
+      cmSystemTools::Stdout(msg.str());
     }
     // There was an error reading the file.  Just rerun.
     return 1;
@@ -2079,7 +2079,7 @@ int cmake::CheckBuildSystem()
       if (verbose) {
         std::ostringstream msg;
         msg << "Re-run cmake, missing byproduct: " << p << "\n";
-        cmSystemTools::Stdout(msg.str().c_str());
+        cmSystemTools::Stdout(msg.str());
       }
       return 1;
     }
@@ -2100,7 +2100,7 @@ int cmake::CheckBuildSystem()
       std::ostringstream msg;
       msg << "Re-run cmake no CMAKE_MAKEFILE_DEPENDS "
              "or CMAKE_MAKEFILE_OUTPUTS :\n";
-      cmSystemTools::Stdout(msg.str().c_str());
+      cmSystemTools::Stdout(msg.str());
     }
     return 1;
   }
@@ -2119,7 +2119,7 @@ int cmake::CheckBuildSystem()
       if (verbose) {
         std::ostringstream msg;
         msg << "Re-run cmake: build system dependency is missing\n";
-        cmSystemTools::Stdout(msg.str().c_str());
+        cmSystemTools::Stdout(msg.str());
       }
       return 1;
     }
@@ -2139,7 +2139,7 @@ int cmake::CheckBuildSystem()
       if (verbose) {
         std::ostringstream msg;
         msg << "Re-run cmake: build system output is missing\n";
-        cmSystemTools::Stdout(msg.str().c_str());
+        cmSystemTools::Stdout(msg.str());
       }
       return 1;
     }
@@ -2155,7 +2155,7 @@ int cmake::CheckBuildSystem()
         std::ostringstream msg;
         msg << "Re-run cmake file: " << out_oldest
             << " older than: " << dep_newest << "\n";
-        cmSystemTools::Stdout(msg.str().c_str());
+        cmSystemTools::Stdout(msg.str());
       }
       return 1;
     }

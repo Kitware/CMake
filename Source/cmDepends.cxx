@@ -88,7 +88,7 @@ void cmDepends::Clear(const std::string& file)
   if (this->Verbose) {
     std::ostringstream msg;
     msg << "Clearing dependencies in \"" << file << "\"." << std::endl;
-    cmSystemTools::Stdout(msg.str().c_str());
+    cmSystemTools::Stdout(msg.str());
   }
 
   // Write an empty dependency file.
@@ -171,7 +171,7 @@ bool cmDepends::CheckDependencies(
         std::ostringstream msg;
         msg << "Dependee \"" << dependee << "\" does not exist for depender \""
             << depender << "\"." << std::endl;
-        cmSystemTools::Stdout(msg.str().c_str());
+        cmSystemTools::Stdout(msg.str());
       }
     } else {
       if (dependerExists) {
@@ -188,7 +188,7 @@ bool cmDepends::CheckDependencies(
             std::ostringstream msg;
             msg << "Dependee \"" << dependee << "\" is newer than depender \""
                 << depender << "\"." << std::endl;
-            cmSystemTools::Stdout(msg.str().c_str());
+            cmSystemTools::Stdout(msg.str());
           }
         }
       } else {
@@ -207,7 +207,7 @@ bool cmDepends::CheckDependencies(
             msg << "Dependee \"" << dependee
                 << "\" is newer than depends file \""
                 << internalDependsFileName << "\"." << std::endl;
-            cmSystemTools::Stdout(msg.str().c_str());
+            cmSystemTools::Stdout(msg.str());
           }
         }
       }
