@@ -19,7 +19,7 @@ class cmMacroFunctionBlocker : public cmFunctionBlocker
 {
 public:
   cmMacroFunctionBlocker() { this->Depth = 0; }
-  ~cmMacroFunctionBlocker() override {}
+  ~cmMacroFunctionBlocker() override = default;
   bool IsFunctionBlocked(const cmListFileFunction&, cmMakefile& mf,
                          cmExecutionStatus&) override;
   bool ShouldRemove(const cmListFileFunction&, cmMakefile& mf) override;

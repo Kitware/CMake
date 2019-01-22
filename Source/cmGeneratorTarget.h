@@ -111,7 +111,7 @@ public:
     std::set<std::string> ExpectedXamlHeaders;
     std::set<std::string> ExpectedXamlSources;
     bool Initialized = false;
-    KindedSources() {}
+    KindedSources() = default;
   };
 
   /** Get all sources needed for a configuration with kinds assigned.  */
@@ -562,7 +562,7 @@ public:
   };
   struct SourceFileFlags
   {
-    SourceFileFlags() {}
+    SourceFileFlags() = default;
     SourceFileType Type = SourceFileTypeNormal;
     const char* MacFolder = nullptr; // location inside Mac content folders
   };
@@ -750,7 +750,7 @@ private:
 
   struct CompatibleInterfaces : public CompatibleInterfacesBase
   {
-    CompatibleInterfaces() {}
+    CompatibleInterfaces() = default;
     bool Done = false;
   };
   mutable std::map<std::string, CompatibleInterfaces> CompatibleInterfacesMap;
@@ -764,7 +764,7 @@ private:
 
   struct LinkImplClosure : public std::vector<cmGeneratorTarget const*>
   {
-    LinkImplClosure() {}
+    LinkImplClosure() = default;
     bool Done = false;
   };
   mutable std::map<std::string, LinkImplClosure> LinkImplClosureMap;
@@ -784,7 +784,7 @@ private:
   // Cache import information from properties for each configuration.
   struct ImportInfo
   {
-    ImportInfo() {}
+    ImportInfo() = default;
     bool NoSOName = false;
     ManagedType Managed = Native;
     unsigned int Multiplicity = 0;

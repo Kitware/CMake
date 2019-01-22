@@ -86,9 +86,7 @@ QFrame* StartCompilerSetup::CreatePlatformWidgets()
   return frame;
 }
 
-StartCompilerSetup::~StartCompilerSetup()
-{
-}
+StartCompilerSetup::~StartCompilerSetup() = default;
 
 void StartCompilerSetup::setGenerators(
   std::vector<cmake::GeneratorInfo> const& gens)
@@ -237,9 +235,7 @@ NativeCompilerSetup::NativeCompilerSetup(QWidget* p)
   this->setupUi(c);
 }
 
-NativeCompilerSetup::~NativeCompilerSetup()
-{
-}
+NativeCompilerSetup::~NativeCompilerSetup() = default;
 
 QString NativeCompilerSetup::getCCompiler() const
 {
@@ -301,9 +297,7 @@ CrossCompilerSetup::CrossCompilerSetup(QWidget* p)
   this->registerField("systemName*", this->systemName);
 }
 
-CrossCompilerSetup::~CrossCompilerSetup()
-{
-}
+CrossCompilerSetup::~CrossCompilerSetup() = default;
 
 QString CrossCompilerSetup::getCCompiler() const
 {
@@ -414,9 +408,7 @@ ToolchainCompilerSetup::ToolchainCompilerSetup(QWidget* p)
   l->addWidget(this->ToolchainFile);
 }
 
-ToolchainCompilerSetup::~ToolchainCompilerSetup()
-{
-}
+ToolchainCompilerSetup::~ToolchainCompilerSetup() = default;
 
 QString ToolchainCompilerSetup::toolchainFile() const
 {
@@ -446,9 +438,7 @@ FirstConfigure::FirstConfigure()
   this->setPage(ToolchainSetup, this->mToolchainCompilerSetupPage);
 }
 
-FirstConfigure::~FirstConfigure()
-{
-}
+FirstConfigure::~FirstConfigure() = default;
 
 void FirstConfigure::setGenerators(
   std::vector<cmake::GeneratorInfo> const& gens)

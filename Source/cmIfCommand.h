@@ -25,7 +25,7 @@ public:
     this->ElseSeen = false;
     this->ScopeDepth = 0;
   }
-  ~cmIfFunctionBlocker() override {}
+  ~cmIfFunctionBlocker() override = default;
   bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
                          cmExecutionStatus&) override;
   bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;

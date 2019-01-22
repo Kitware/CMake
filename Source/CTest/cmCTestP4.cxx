@@ -19,9 +19,7 @@ cmCTestP4::cmCTestP4(cmCTest* ct, std::ostream& log)
   this->PriorRev = this->Unknown;
 }
 
-cmCTestP4::~cmCTestP4()
-{
-}
+cmCTestP4::~cmCTestP4() = default;
 
 class cmCTestP4::IdentifyParser : public cmCTestVC::LineParser
 {

@@ -26,9 +26,7 @@ cmCTestSVN::cmCTestSVN(cmCTest* ct, std::ostream& log)
   this->PriorRev = this->Unknown;
 }
 
-cmCTestSVN::~cmCTestSVN()
-{
-}
+cmCTestSVN::~cmCTestSVN() = default;
 
 void cmCTestSVN::CleanupImpl()
 {

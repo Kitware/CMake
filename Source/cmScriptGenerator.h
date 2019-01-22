@@ -12,7 +12,7 @@
 class cmScriptGeneratorIndent
 {
 public:
-  cmScriptGeneratorIndent() {}
+  cmScriptGeneratorIndent() = default;
   cmScriptGeneratorIndent(int level)
     : Level(level)
   {

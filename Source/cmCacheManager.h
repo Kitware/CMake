@@ -42,7 +42,7 @@ private:
     void AppendProperty(const std::string& property, const char* value,
                         bool asString = false);
     bool Initialized = false;
-    CacheEntry() {}
+    CacheEntry() = default;
   };
 
 public:

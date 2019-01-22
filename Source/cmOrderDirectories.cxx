@@ -48,7 +48,7 @@ public:
       this->FileName = cmSystemTools::GetFilenameName(file);
     }
   }
-  virtual ~cmOrderDirectoriesConstraint() {}
+  virtual ~cmOrderDirectoriesConstraint() = default;
 
   void AddDirectory()
   {

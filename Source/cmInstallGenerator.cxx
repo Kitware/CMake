@@ -18,9 +18,7 @@ cmInstallGenerator::cmInstallGenerator(
 {
 }
 
-cmInstallGenerator::~cmInstallGenerator()
-{
-}
+cmInstallGenerator::~cmInstallGenerator() = default;
 
 bool cmInstallGenerator::HaveInstall()
 {

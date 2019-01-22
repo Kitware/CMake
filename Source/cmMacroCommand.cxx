@@ -17,10 +17,10 @@
 class cmMacroHelperCommand : public cmCommand
 {
 public:
-  cmMacroHelperCommand() {}
+  cmMacroHelperCommand() = default;
 
   ///! clean up any memory allocated by the macro
-  ~cmMacroHelperCommand() override {}
+  ~cmMacroHelperCommand() override = default;
 
   /**
    * This is a virtual constructor for the command.

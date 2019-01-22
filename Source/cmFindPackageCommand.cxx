@@ -1671,7 +1671,7 @@ void cmFindPackageCommand::StoreVersionFound()
 class cmFileListGeneratorBase
 {
 public:
-  virtual ~cmFileListGeneratorBase() {}
+  virtual ~cmFileListGeneratorBase() = default;
 
 protected:
   bool Consider(std::string const& fullPath, cmFileList& listing);
@@ -1688,8 +1688,8 @@ private:
 class cmFileList
 {
 public:
-  cmFileList() {}
-  virtual ~cmFileList() {}
+  cmFileList() = default;
+  virtual ~cmFileList() = default;
   cmFileList& operator/(cmFileListGeneratorBase const& rhs)
   {
     if (this->Last) {

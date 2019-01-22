@@ -16,8 +16,8 @@ struct cmGeneratorExpressionNode;
 
 struct cmGeneratorExpressionEvaluator
 {
-  cmGeneratorExpressionEvaluator() {}
-  virtual ~cmGeneratorExpressionEvaluator() {}
+  cmGeneratorExpressionEvaluator() = default;
+  virtual ~cmGeneratorExpressionEvaluator() = default;
 
   enum Type
   {

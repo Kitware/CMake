@@ -17,9 +17,7 @@ cmCPackProductBuildGenerator::cmCPackProductBuildGenerator()
   this->componentPackageMethod = ONE_PACKAGE;
 }
 
-cmCPackProductBuildGenerator::~cmCPackProductBuildGenerator()
-{
-}
+cmCPackProductBuildGenerator::~cmCPackProductBuildGenerator() = default;
 
 int cmCPackProductBuildGenerator::PackageFiles()
 {

@@ -78,12 +78,12 @@ struct cmLinkInterface : public cmLinkInterfaceLibraries
 
   bool ImplementationIsInterface = false;
 
-  cmLinkInterface() {}
+  cmLinkInterface() = default;
 };
 
 struct cmOptionalLinkInterface : public cmLinkInterface
 {
-  cmOptionalLinkInterface() {}
+  cmOptionalLinkInterface() = default;
   bool LibrariesDone = false;
   bool AllDone = false;
   bool Exists = false;
@@ -105,7 +105,7 @@ struct cmLinkImplementation : public cmLinkImplementationLibraries
 // Cache link implementation computation from each configuration.
 struct cmOptionalLinkImplementation : public cmLinkImplementation
 {
-  cmOptionalLinkImplementation() {}
+  cmOptionalLinkImplementation() = default;
   bool LibrariesDone = false;
   bool LanguagesDone = false;
   bool HadHeadSensitiveCondition = false;

@@ -22,9 +22,7 @@ cmCPackArchiveGenerator::cmCPackArchiveGenerator(cmArchiveWrite::Compress t,
   this->ArchiveFormat = format;
 }
 
-cmCPackArchiveGenerator::~cmCPackArchiveGenerator()
-{
-}
+cmCPackArchiveGenerator::~cmCPackArchiveGenerator() = default;
 
 std::string cmCPackArchiveGenerator::GetArchiveComponentFileName(
   const std::string& component, bool isGroupName)

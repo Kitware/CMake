@@ -28,8 +28,8 @@ public:
   static void FlushCache();
 
 protected:
-  cmDynamicLoader() {}
-  ~cmDynamicLoader() {}
+  cmDynamicLoader() = default;
+  ~cmDynamicLoader() = default;
 };
 
 #endif

@@ -86,8 +86,8 @@ public:
   }
 
   // Dtor and ctor need to be inline defined like this for default ctors and
-  // dtors to work.
-  uv_handle_ptr_base_() {}
+  // dtors to work.  Some compilers do not like '= default' here.
+  uv_handle_ptr_base_() {} // NOLINT(modernize-use-equals-default)
   uv_handle_ptr_base_(std::nullptr_t) {}
   ~uv_handle_ptr_base_() { reset(); }
 

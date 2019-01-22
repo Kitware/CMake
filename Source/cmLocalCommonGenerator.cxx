@@ -26,9 +26,7 @@ cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
   }
 }
 
-cmLocalCommonGenerator::~cmLocalCommonGenerator()
-{
-}
+cmLocalCommonGenerator::~cmLocalCommonGenerator() = default;
 
 std::string cmLocalCommonGenerator::GetTargetFortranFlags(
   cmGeneratorTarget const* target, std::string const& config)

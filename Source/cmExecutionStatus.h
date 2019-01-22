@@ -11,7 +11,7 @@
 class cmExecutionStatus
 {
 public:
-  cmExecutionStatus() {}
+  cmExecutionStatus() = default;
 
   void Clear()
   {

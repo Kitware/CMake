@@ -22,7 +22,7 @@
 class cmGlobVerificationManager
 {
 public:
-  cmGlobVerificationManager() {}
+  cmGlobVerificationManager() = default;
 
 protected:
   ///! Save verification script for given makefile.
@@ -73,7 +73,7 @@ private:
     bool Initialized = false;
     std::vector<std::string> Files;
     std::vector<std::pair<std::string, cmListFileBacktrace>> Backtraces;
-    CacheEntryValue() {}
+    CacheEntryValue() = default;
   };
 
   typedef std::map<CacheEntryKey, CacheEntryValue> CacheEntryMap;

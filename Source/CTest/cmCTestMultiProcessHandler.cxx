@@ -44,7 +44,7 @@ public:
     : Handler(handler)
   {
   }
-  ~TestComparator() {}
+  ~TestComparator() = default;
 
   // Sorts tests in descending order of cost
   bool operator()(int index1, int index2) const
@@ -70,9 +70,7 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
   this->SerialTestRunning = false;
 }
 
-cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler()
-{
-}
+cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler() = default;
 
 // Set the tests
 void cmCTestMultiProcessHandler::SetTests(TestMap& tests,

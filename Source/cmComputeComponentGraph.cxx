@@ -18,9 +18,7 @@ cmComputeComponentGraph::cmComputeComponentGraph(Graph const& input)
   this->TransferEdges();
 }
 
-cmComputeComponentGraph::~cmComputeComponentGraph()
-{
-}
+cmComputeComponentGraph::~cmComputeComponentGraph() = default;
 
 void cmComputeComponentGraph::Tarjan()
 {

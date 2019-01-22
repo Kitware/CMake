@@ -20,9 +20,7 @@ cmInstallSubdirectoryGenerator::cmInstallSubdirectoryGenerator(
 {
 }
 
-cmInstallSubdirectoryGenerator::~cmInstallSubdirectoryGenerator()
-{
-}
+cmInstallSubdirectoryGenerator::~cmInstallSubdirectoryGenerator() = default;
 
 bool cmInstallSubdirectoryGenerator::HaveInstall()
 {

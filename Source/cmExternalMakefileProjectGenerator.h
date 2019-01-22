@@ -26,7 +26,7 @@ class cmMakefile;
 class cmExternalMakefileProjectGenerator
 {
 public:
-  virtual ~cmExternalMakefileProjectGenerator() {}
+  virtual ~cmExternalMakefileProjectGenerator() = default;
 
   virtual void EnableLanguage(std::vector<std::string> const& languages,
                               cmMakefile*, bool optional);

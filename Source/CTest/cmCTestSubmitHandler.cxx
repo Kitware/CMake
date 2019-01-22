@@ -31,7 +31,7 @@ class cmCTestSubmitHandler::ResponseParser : public cmXMLParser
 {
 public:
   ResponseParser() { this->Status = STATUS_OK; }
-  ~ResponseParser() override {}
+  ~ResponseParser() override = default;
 
 public:
   enum StatusType

@@ -183,7 +183,7 @@ public:
     return new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaGenerator>();
   }
 
-  ~cmGlobalNinjaGenerator() override {}
+  ~cmGlobalNinjaGenerator() override = default;
 
   cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 

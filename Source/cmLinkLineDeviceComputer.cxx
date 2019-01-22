@@ -21,9 +21,7 @@ cmLinkLineDeviceComputer::cmLinkLineDeviceComputer(
 {
 }
 
-cmLinkLineDeviceComputer::~cmLinkLineDeviceComputer()
-{
-}
+cmLinkLineDeviceComputer::~cmLinkLineDeviceComputer() = default;
 
 static bool cmLinkItemValidForDevice(std::string const& item)
 {

@@ -31,7 +31,7 @@ public:
 
   struct Item
   {
-    Item() {}
+    Item() = default;
     Item(std::string v, bool p, cmGeneratorTarget const* target = nullptr)
       : Value(std::move(v))
       , IsPath(p)

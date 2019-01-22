@@ -18,9 +18,7 @@ cmParseMumpsCoverage::cmParseMumpsCoverage(
 {
 }
 
-cmParseMumpsCoverage::~cmParseMumpsCoverage()
-{
-}
+cmParseMumpsCoverage::~cmParseMumpsCoverage() = default;
 
 bool cmParseMumpsCoverage::ReadCoverageFile(const char* file)
 {

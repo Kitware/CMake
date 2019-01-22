@@ -150,10 +150,7 @@ public:
     p->AddChildWatcher(ps, this);
   }
 
-  ~cmRealDirectoryWatcher() override
-  {
-    // Handle is freed via uv_handle_close callback!
-  }
+  ~cmRealDirectoryWatcher() override = default;
 
   void StartWatching() final
   {

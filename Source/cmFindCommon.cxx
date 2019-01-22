@@ -48,9 +48,7 @@ cmFindCommon::cmFindCommon()
   this->InitializeSearchPathGroups();
 }
 
-cmFindCommon::~cmFindCommon()
-{
-}
+cmFindCommon::~cmFindCommon() = default;
 
 void cmFindCommon::InitializeSearchPathGroups()
 {

@@ -33,9 +33,7 @@ std::unique_ptr<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
   return this->Parse(std::string(input ? input : ""));
 }
 
-cmGeneratorExpression::~cmGeneratorExpression()
-{
-}
+cmGeneratorExpression::~cmGeneratorExpression() = default;
 
 const std::string& cmCompiledGeneratorExpression::Evaluate(
   cmLocalGenerator* lg, const std::string& config, bool quiet,

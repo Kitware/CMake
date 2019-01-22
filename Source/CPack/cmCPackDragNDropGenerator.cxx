@@ -62,9 +62,7 @@ cmCPackDragNDropGenerator::cmCPackDragNDropGenerator()
   this->componentPackageMethod = ONE_PACKAGE;
 }
 
-cmCPackDragNDropGenerator::~cmCPackDragNDropGenerator()
-{
-}
+cmCPackDragNDropGenerator::~cmCPackDragNDropGenerator() = default;
 
 int cmCPackDragNDropGenerator::InitializeInternal()
 {

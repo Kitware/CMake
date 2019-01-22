@@ -24,9 +24,7 @@ cmCTestVC::cmCTestVC(cmCTest* ct, std::ostream& log)
   this->Unknown.Rev = "Unknown";
 }
 
-cmCTestVC::~cmCTestVC()
-{
-}
+cmCTestVC::~cmCTestVC() = default;
 
 void cmCTestVC::SetCommandLineTool(std::string const& tool)
 {

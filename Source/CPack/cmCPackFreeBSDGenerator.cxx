@@ -31,9 +31,7 @@ int cmCPackFreeBSDGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-cmCPackFreeBSDGenerator::~cmCPackFreeBSDGenerator()
-{
-}
+cmCPackFreeBSDGenerator::~cmCPackFreeBSDGenerator() = default;
 
 // This is a wrapper, for use only in stream-based output,
 // that will output a string in UCL escaped fashion (in particular,
@@ -103,7 +101,7 @@ public:
   {
   }
 
-  virtual ~ManifestKey() {}
+  virtual ~ManifestKey() = default;
 
   // Output the value associated with this key to the stream @p s.
   // Format is to be decided by subclasses.

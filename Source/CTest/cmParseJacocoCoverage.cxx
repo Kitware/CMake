@@ -23,7 +23,7 @@ public:
     this->PackageName.clear();
   }
 
-  ~XMLParser() override {}
+  ~XMLParser() override = default;
 
 protected:
   void EndElement(const std::string& /*name*/) override {}

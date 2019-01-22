@@ -27,9 +27,7 @@ cmNinjaUtilityTargetGenerator::cmNinjaUtilityTargetGenerator(
 {
 }
 
-cmNinjaUtilityTargetGenerator::~cmNinjaUtilityTargetGenerator()
-{
-}
+cmNinjaUtilityTargetGenerator::~cmNinjaUtilityTargetGenerator() = default;
 
 void cmNinjaUtilityTargetGenerator::Generate()
 {

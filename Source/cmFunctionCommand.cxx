@@ -14,10 +14,10 @@
 class cmFunctionHelperCommand : public cmCommand
 {
 public:
-  cmFunctionHelperCommand() {}
+  cmFunctionHelperCommand() = default;
 
   ///! clean up any memory allocated by the function
-  ~cmFunctionHelperCommand() override {}
+  ~cmFunctionHelperCommand() override = default;
 
   /**
    * This is a virtual constructor for the command.

@@ -432,13 +432,9 @@ bool DebGenerator::generateDeb() const
 
 } // end anonymous namespace
 
-cmCPackDebGenerator::cmCPackDebGenerator()
-{
-}
+cmCPackDebGenerator::cmCPackDebGenerator() = default;
 
-cmCPackDebGenerator::~cmCPackDebGenerator()
-{
-}
+cmCPackDebGenerator::~cmCPackDebGenerator() = default;
 
 int cmCPackDebGenerator::InitializeInternal()
 {

@@ -1144,9 +1144,7 @@ cmQtAutoGeneratorMocUic::cmQtAutoGeneratorMocUic()
   UVRequest().init(*UVLoop(), &cmQtAutoGeneratorMocUic::UVPollStage, this);
 }
 
-cmQtAutoGeneratorMocUic::~cmQtAutoGeneratorMocUic()
-{
-}
+cmQtAutoGeneratorMocUic::~cmQtAutoGeneratorMocUic() = default;
 
 bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
 {

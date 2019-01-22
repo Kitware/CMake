@@ -4,13 +4,9 @@
 
 #include "cmSystemTools.h"
 
-cmDependsJava::cmDependsJava()
-{
-}
+cmDependsJava::cmDependsJava() = default;
 
-cmDependsJava::~cmDependsJava()
-{
-}
+cmDependsJava::~cmDependsJava() = default;
 
 bool cmDependsJava::WriteDependencies(const std::set<std::string>& sources,
                                       const std::string& /*obj*/,

@@ -267,7 +267,7 @@ private:
   {
     cmGeneratorTarget* Target = nullptr;
     std::string Language;
-    LocalObjectEntry() {}
+    LocalObjectEntry() = default;
     LocalObjectEntry(cmGeneratorTarget* t, std::string lang)
       : Target(t)
       , Language(std::move(lang))
@@ -279,7 +279,7 @@ private:
     bool HasSourceExtension = false;
     bool HasPreprocessRule = false;
     bool HasAssembleRule = false;
-    LocalObjectInfo() {}
+    LocalObjectInfo() = default;
   };
   void GetLocalObjectFiles(
     std::map<std::string, LocalObjectInfo>& localObjectFiles);

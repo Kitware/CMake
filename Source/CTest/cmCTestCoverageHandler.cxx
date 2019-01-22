@@ -112,9 +112,7 @@ private:
   cmDuration TimeOut;
 };
 
-cmCTestCoverageHandler::cmCTestCoverageHandler()
-{
-}
+cmCTestCoverageHandler::cmCTestCoverageHandler() = default;
 
 void cmCTestCoverageHandler::Initialize()
 {

@@ -84,9 +84,7 @@ static void deleteVariableWatchCallbackData(void* client_data)
   delete data;
 }
 
-cmVariableWatchCommand::cmVariableWatchCommand()
-{
-}
+cmVariableWatchCommand::cmVariableWatchCommand() = default;
 
 cmVariableWatchCommand::~cmVariableWatchCommand()
 {

@@ -68,9 +68,7 @@ public:
   }
 };
 
-cmDependsFortran::cmDependsFortran()
-{
-}
+cmDependsFortran::cmDependsFortran() = default;
 
 cmDependsFortran::cmDependsFortran(cmLocalGenerator* lg)
   : cmDepends(lg)

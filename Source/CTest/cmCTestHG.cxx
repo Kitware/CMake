@@ -18,9 +18,7 @@ cmCTestHG::cmCTestHG(cmCTest* ct, std::ostream& log)
   this->PriorRev = this->Unknown;
 }
 
-cmCTestHG::~cmCTestHG()
-{
-}
+cmCTestHG::~cmCTestHG() = default;
 
 class cmCTestHG::IdentifyParser : public cmCTestVC::LineParser
 {

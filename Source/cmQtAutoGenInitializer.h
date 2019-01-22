@@ -26,7 +26,7 @@ public:
   class Qrc
   {
   public:
-    Qrc() {}
+    Qrc() = default;
 
   public:
     std::string LockFile;

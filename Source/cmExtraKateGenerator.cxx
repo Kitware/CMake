@@ -16,9 +16,7 @@
 #include <string.h>
 #include <vector>
 
-cmExtraKateGenerator::cmExtraKateGenerator()
-{
-}
+cmExtraKateGenerator::cmExtraKateGenerator() = default;
 
 cmExternalMakefileProjectGeneratorFactory* cmExtraKateGenerator::GetFactory()
 {

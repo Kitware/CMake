@@ -2,9 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionLexer.h"
 
-cmGeneratorExpressionLexer::cmGeneratorExpressionLexer()
-{
-}
+cmGeneratorExpressionLexer::cmGeneratorExpressionLexer() = default;
 
 static void InsertText(const char* upto, const char* c,
                        std::vector<cmGeneratorExpressionToken>& result)

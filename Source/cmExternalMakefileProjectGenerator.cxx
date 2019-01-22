@@ -41,9 +41,7 @@ cmExternalMakefileProjectGeneratorFactory::
 }
 
 cmExternalMakefileProjectGeneratorFactory::
-  ~cmExternalMakefileProjectGeneratorFactory()
-{
-}
+  ~cmExternalMakefileProjectGeneratorFactory() = default;
 
 std::string cmExternalMakefileProjectGeneratorFactory::GetName() const
 {

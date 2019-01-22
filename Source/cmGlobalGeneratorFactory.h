@@ -20,7 +20,7 @@ struct cmDocumentationEntry;
 class cmGlobalGeneratorFactory
 {
 public:
-  virtual ~cmGlobalGeneratorFactory() {}
+  virtual ~cmGlobalGeneratorFactory() = default;
 
   /** Create a GlobalGenerator */
   virtual cmGlobalGenerator* CreateGlobalGenerator(const std::string& n,

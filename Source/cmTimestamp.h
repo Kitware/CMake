@@ -15,7 +15,7 @@
 class cmTimestamp
 {
 public:
-  cmTimestamp() {}
+  cmTimestamp() = default;
 
   std::string CurrentTime(const std::string& formatString, bool utcFlag);
 

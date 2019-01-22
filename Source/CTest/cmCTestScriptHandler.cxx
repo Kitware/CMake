@@ -53,8 +53,8 @@ struct cmListFileFunction;
 class cmCTestScriptFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmCTestScriptFunctionBlocker() {}
-  ~cmCTestScriptFunctionBlocker() override {}
+  cmCTestScriptFunctionBlocker() = default;
+  ~cmCTestScriptFunctionBlocker() override = default;
   bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
                          cmExecutionStatus& /*status*/) override;
   // virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);

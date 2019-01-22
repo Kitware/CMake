@@ -28,7 +28,7 @@ public:
    * Construct with dependency generation marked not done; instance
    * not placed in cmMakefile's list.
    */
-  cmDependInformation() {}
+  cmDependInformation() = default;
 
   /**
    * The set of files on which this one depends.

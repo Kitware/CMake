@@ -20,7 +20,7 @@ public:
   {
   }
 
-  virtual ~HTMLParser() {}
+  virtual ~HTMLParser() = default;
 
   bool initializeDelphiFile(
     std::string const& filename,

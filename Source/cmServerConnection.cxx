@@ -119,9 +119,7 @@ cmServerStdIoConnection::cmServerStdIoConnection()
 {
 }
 
-cmConnectionBufferStrategy::~cmConnectionBufferStrategy()
-{
-}
+cmConnectionBufferStrategy::~cmConnectionBufferStrategy() = default;
 
 void cmConnectionBufferStrategy::clear()
 {

@@ -202,7 +202,7 @@ struct cmFindLibraryHelper
     bool TryRaw = false;
     std::string Raw;
     cmsys::RegularExpression Regex;
-    Name() {}
+    Name() = default;
   };
   std::vector<Name> Names;
 

@@ -27,9 +27,7 @@ cmInstallScriptGenerator::cmInstallScriptGenerator(const char* script,
   }
 }
 
-cmInstallScriptGenerator::~cmInstallScriptGenerator()
-{
-}
+cmInstallScriptGenerator::~cmInstallScriptGenerator() = default;
 
 void cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
 {

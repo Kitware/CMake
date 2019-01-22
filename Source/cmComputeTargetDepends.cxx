@@ -103,9 +103,7 @@ cmComputeTargetDepends::cmComputeTargetDepends(cmGlobalGenerator* gg)
     cm->GetState()->GetGlobalPropertyAsBool("GLOBAL_DEPENDS_NO_CYCLES");
 }
 
-cmComputeTargetDepends::~cmComputeTargetDepends()
-{
-}
+cmComputeTargetDepends::~cmComputeTargetDepends() = default;
 
 bool cmComputeTargetDepends::Compute()
 {
