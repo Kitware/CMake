@@ -276,6 +276,10 @@ def validateGlobalSettings(cmakeCommand, cmakeCommandPath, data):
   index = cmakeoutput.index('\nGenerators\n\n')
   cmakeGenerators = []
   for line in cmakeoutput[index + 12:].splitlines():
+    if not line:
+      continue
+    if line[0] == '*': # default generator marker
+      line = ' ' + line[1:]
     if not line.startswith('  '):
       continue
     if line.startswith('    '):

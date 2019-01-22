@@ -1527,7 +1527,7 @@ int cmake::ActualConfigure()
   return 0;
 }
 
-void cmake::CreateDefaultGlobalGenerator()
+std::unique_ptr<cmGlobalGenerator> cmake::EvaluateDefaultGlobalGenerator()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
   std::string found;
@@ -1580,11 +1580,20 @@ void cmake::CreateDefaultGlobalGenerator()
   if (!gen) {
     gen = new cmGlobalNMakeMakefileGenerator(this);
   }
-  this->SetGlobalGenerator(gen);
-  std::cout << "-- Building for: " << gen->GetName() << "\n";
+  return std::unique_ptr<cmGlobalGenerator>(gen);
 #else
-  this->SetGlobalGenerator(new cmGlobalUnixMakefileGenerator3(this));
+  return cm::make_unique<cmGlobalUnixMakefileGenerator3>(this);
 #endif
+}
+
+void cmake::CreateDefaultGlobalGenerator()
+{
+  auto gen = this->EvaluateDefaultGlobalGenerator();
+#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
+  // This print could be unified for all platforms
+  std::cout << "-- Building for: " << gen->GetName() << "\n";
+#endif
+  this->SetGlobalGenerator(gen.release());
 }
 
 void cmake::PreLoadCMakeFiles()
@@ -1932,13 +1941,28 @@ void cmake::SetIsInTryCompile(bool b)
   this->State->SetIsInTryCompile(b);
 }
 
-void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
+void cmake::AppendGlobalGeneratorsDocumentation(
+  std::vector<cmDocumentationEntry>& v)
 {
+  const auto defaultGenerator = this->EvaluateDefaultGlobalGenerator();
+  const std::string defaultName = defaultGenerator->GetName();
+  bool foundDefaultOne = false;
+
   for (cmGlobalGeneratorFactory* g : this->Generators) {
     cmDocumentationEntry e;
     g->GetDocumentation(e);
+    if (!foundDefaultOne &&
+        cmSystemTools::StringStartsWith(e.Name, defaultName.c_str())) {
+      e.CustomNamePrefix = '*';
+      foundDefaultOne = true;
+    }
     v.push_back(std::move(e));
   }
+}
+
+void cmake::AppendExtraGeneratorsDocumentation(
+  std::vector<cmDocumentationEntry>& v)
+{
   for (cmExternalMakefileProjectGeneratorFactory* eg : this->ExtraGenerators) {
     const std::string doc = eg->GetDocumentation();
     const std::string name = eg->GetName();
@@ -1964,12 +1988,19 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
   }
 }
 
+std::vector<cmDocumentationEntry> cmake::GetGeneratorsDocumentation()
+{
+  std::vector<cmDocumentationEntry> v;
+  this->AppendGlobalGeneratorsDocumentation(v);
+  this->AppendExtraGeneratorsDocumentation(v);
+  return v;
+}
+
 void cmake::PrintGeneratorList()
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDocumentation doc;
-  std::vector<cmDocumentationEntry> generators;
-  this->GetGeneratorDocumentation(generators);
+  auto generators = this->GetGeneratorsDocumentation();
   doc.AppendSection("Generators", generators);
   std::cerr << "\n";
   doc.PrintDocumentation(cmDocumentation::ListGenerators, std::cerr);

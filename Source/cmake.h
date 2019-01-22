@@ -295,7 +295,7 @@ public:
   cmVariableWatch* GetVariableWatch() { return this->VariableWatch; }
 #endif
 
-  void GetGeneratorDocumentation(std::vector<cmDocumentationEntry>&);
+  std::vector<cmDocumentationEntry> GetGeneratorsDocumentation();
 
   ///! Set/Get a property of this target file
   void SetProperty(const std::string& prop, const char* value);
@@ -534,7 +534,11 @@ private:
   // Print a list of valid generators to stderr.
   void PrintGeneratorList();
 
+  std::unique_ptr<cmGlobalGenerator> EvaluateDefaultGlobalGenerator();
   void CreateDefaultGlobalGenerator();
+
+  void AppendGlobalGeneratorsDocumentation(std::vector<cmDocumentationEntry>&);
+  void AppendExtraGeneratorsDocumentation(std::vector<cmDocumentationEntry>&);
 
   /**
    * Convert a message type between a warning and an error, based on the state

@@ -69,8 +69,7 @@ int main(int argc, char** argv)
     hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();
 
-    std::vector<cmDocumentationEntry> generators;
-    hcm.GetGeneratorDocumentation(generators);
+    auto generators = hcm.GetGeneratorsDocumentation();
     doc.SetName("cmake");
     doc.SetSection("Name", cmDocumentationName);
     doc.SetSection("Usage", cmDocumentationUsage);

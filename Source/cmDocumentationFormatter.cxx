@@ -5,6 +5,7 @@
 #include "cmDocumentationEntry.h"
 #include "cmDocumentationSection.h"
 
+#include <iomanip>
 #include <ostream>
 #include <string.h>
 #include <string>
@@ -168,7 +169,7 @@ void cmDocumentationFormatter::PrintSection(
   const std::vector<cmDocumentationEntry>& entries = section.GetEntries();
   for (cmDocumentationEntry const& entry : entries) {
     if (!entry.Name.empty()) {
-      os << "  " << entry.Name;
+      os << std::setw(2) << std::left << entry.CustomNamePrefix << entry.Name;
       this->TextIndent = "                                 ";
       int align = static_cast<int>(strlen(this->TextIndent)) - 4;
       for (int i = static_cast<int>(entry.Name.size()); i < align; ++i) {
