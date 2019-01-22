@@ -1688,7 +1688,6 @@ private:
 class cmFileList
 {
 public:
-  cmFileList() = default;
   virtual ~cmFileList() = default;
   cmFileList& operator/(cmFileListGeneratorBase const& rhs)
   {

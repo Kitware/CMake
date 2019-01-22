@@ -172,8 +172,6 @@ class cmCommandArgumentGroup
   friend class cmCommandArgument;
 
 public:
-  cmCommandArgumentGroup() = default;
-
   /// All members of this group may follow the given argument
   void Follows(const cmCommandArgument* arg);
 

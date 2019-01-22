@@ -21,9 +21,6 @@
  */
 class cmGlobVerificationManager
 {
-public:
-  cmGlobVerificationManager() = default;
-
 protected:
   ///! Save verification script for given makefile.
   ///! Saves to output <path>/<CMakeFilesDirectory>/VerifyGlobs.cmake
@@ -73,7 +70,6 @@ private:
     bool Initialized = false;
     std::vector<std::string> Files;
     std::vector<std::pair<std::string, cmListFileBacktrace>> Backtraces;
-    CacheEntryValue() = default;
   };
 
   typedef std::map<CacheEntryKey, CacheEntryValue> CacheEntryMap;

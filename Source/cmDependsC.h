@@ -75,7 +75,6 @@ public:
 
   struct cmIncludeLines
   {
-    cmIncludeLines() = default;
     std::vector<UnscannedEntry> UnscannedEntries;
     bool Used = false;
   };

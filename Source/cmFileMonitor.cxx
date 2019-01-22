@@ -19,7 +19,6 @@ void on_fs_close(uv_handle_t* handle);
 class cmIBaseWatcher
 {
 public:
-  cmIBaseWatcher() = default;
   virtual ~cmIBaseWatcher() = default;
 
   virtual void Trigger(const std::string& pathSegment, int events,
@@ -149,8 +148,6 @@ public:
 
     p->AddChildWatcher(ps, this);
   }
-
-  ~cmRealDirectoryWatcher() override = default;
 
   void StartWatching() final
   {

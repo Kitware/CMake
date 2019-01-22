@@ -73,7 +73,6 @@ public:
   std::string Name;
   std::string FilePath;
   long Line = 0;
-  cmListFileContext() = default;
 
   static cmListFileContext FromCommandContext(cmCommandContext const& lfcc,
                                               std::string const& fileName)
@@ -109,15 +108,6 @@ public:
   // Construct an empty backtrace whose bottom sits in the directory
   // indicated by the given valid snapshot.
   cmListFileBacktrace(cmStateSnapshot const& snapshot);
-
-  // Backtraces may be copied, moved, and assigned as values.
-  cmListFileBacktrace(cmListFileBacktrace const&) = default;
-  cmListFileBacktrace(cmListFileBacktrace&&) // NOLINT(clang-tidy)
-    noexcept = default;
-  cmListFileBacktrace& operator=(cmListFileBacktrace const&) = default;
-  cmListFileBacktrace& operator=(cmListFileBacktrace&&) // NOLINT(clang-tidy)
-    noexcept = default;
-  ~cmListFileBacktrace() = default;
 
   cmStateSnapshot GetBottom() const;
 

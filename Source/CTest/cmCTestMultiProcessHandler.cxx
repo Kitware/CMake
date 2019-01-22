@@ -44,7 +44,6 @@ public:
     : Handler(handler)
   {
   }
-  ~TestComparator() = default;
 
   // Sorts tests in descending order of cost
   bool operator()(int index1, int index2) const

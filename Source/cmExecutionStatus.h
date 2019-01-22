@@ -11,8 +11,6 @@
 class cmExecutionStatus
 {
 public:
-  cmExecutionStatus() = default;
-
   void Clear()
   {
     this->ReturnInvoked = false;

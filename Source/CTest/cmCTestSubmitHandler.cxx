@@ -30,10 +30,6 @@ typedef std::vector<char> cmCTestSubmitHandlerVectorOfChar;
 class cmCTestSubmitHandler::ResponseParser : public cmXMLParser
 {
 public:
-  ResponseParser() { this->Status = STATUS_OK; }
-  ~ResponseParser() override = default;
-
-public:
   enum StatusType
   {
     STATUS_OK,
@@ -41,7 +37,7 @@ public:
     STATUS_ERROR
   };
 
-  StatusType Status;
+  StatusType Status = STATUS_OK;
   std::string Filename;
   std::string MD5;
   std::string Message;

@@ -38,8 +38,6 @@ public:
     cmGeneratorTarget const* Target = nullptr;
     bool IsSharedDep = false;
     bool IsFlag = false;
-    LinkEntry() = default;
-    LinkEntry(LinkEntry const& r) = default;
   };
 
   typedef std::vector<LinkEntry> EntryVector;

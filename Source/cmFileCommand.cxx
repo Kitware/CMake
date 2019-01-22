@@ -1102,7 +1102,6 @@ protected:
   {
     bool Exclude = false;
     mode_t Permissions = 0;
-    MatchProperties() = default;
   };
   struct MatchRule
   {

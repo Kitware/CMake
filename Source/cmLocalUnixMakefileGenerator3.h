@@ -279,7 +279,6 @@ private:
     bool HasSourceExtension = false;
     bool HasPreprocessRule = false;
     bool HasAssembleRule = false;
-    LocalObjectInfo() = default;
   };
   void GetLocalObjectFiles(
     std::map<std::string, LocalObjectInfo>& localObjectFiles);

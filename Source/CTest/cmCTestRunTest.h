@@ -27,8 +27,6 @@ class cmCTestRunTest
 public:
   explicit cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler);
 
-  ~cmCTestRunTest() = default;
-
   void SetNumberOfRuns(int n) { this->NumberOfRunsLeft = n; }
   void SetRunUntilFailOn() { this->RunUntilFail = true; }
   void SetTestProperties(cmCTestTestHandler::cmCTestTestProperties* prop)

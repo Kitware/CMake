@@ -77,13 +77,10 @@ struct cmLinkInterface : public cmLinkInterfaceLibraries
   std::vector<cmLinkItem> WrongConfigLibraries;
 
   bool ImplementationIsInterface = false;
-
-  cmLinkInterface() = default;
 };
 
 struct cmOptionalLinkInterface : public cmLinkInterface
 {
-  cmOptionalLinkInterface() = default;
   bool LibrariesDone = false;
   bool AllDone = false;
   bool Exists = false;
@@ -105,7 +102,6 @@ struct cmLinkImplementation : public cmLinkImplementationLibraries
 // Cache link implementation computation from each configuration.
 struct cmOptionalLinkImplementation : public cmLinkImplementation
 {
-  cmOptionalLinkImplementation() = default;
   bool LibrariesDone = false;
   bool LanguagesDone = false;
   bool HadHeadSensitiveCondition = false;

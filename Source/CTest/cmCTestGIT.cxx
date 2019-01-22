@@ -475,7 +475,6 @@ private:
     std::string EMail;
     unsigned long Time = 0;
     long TimeZone = 0;
-    Person() = default;
   };
 
   void ParsePerson(const char* str, Person& person)
