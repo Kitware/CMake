@@ -808,8 +808,11 @@ void cmake::SetArgs(const std::vector<std::string>& args)
 
   if (this->CurrentWorkingMode == cmake::NORMAL_MODE && !haveSourceDir &&
       !haveBinaryDir) {
-    cmSystemTools::Error("No source or binary directory provided");
-    return;
+    this->IssueMessage(
+      cmake::WARNING,
+      "No source or binary directory provided. Both will be assumed to be "
+      "the same as the current working directory, but note that this "
+      "warning will become a fatal error in future CMake releases.");
   }
 
   if (!haveSourceDir) {
