@@ -233,8 +233,8 @@ public:
   virtual void ClearDependencies(cmMakefile* /* mf */, bool /* verbose */) {}
 
   /** Called from command-line hook to update dependencies.  */
-  virtual bool UpdateDependencies(const char* /* tgtInfo */, bool /*verbose*/,
-                                  bool /*color*/)
+  virtual bool UpdateDependencies(const std::string& /* tgtInfo */,
+                                  bool /*verbose*/, bool /*color*/)
   {
     return true;
   }

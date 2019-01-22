@@ -248,8 +248,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   for (auto& localObjectFile : localObjectFiles) {
     // Add a convenience rule for building the object file.
     this->WriteObjectConvenienceRule(
-      ruleFileStream, "target to build an object file",
-      localObjectFile.first.c_str(), localObjectFile.second);
+      ruleFileStream, "target to build an object file", localObjectFile.first,
+      localObjectFile.second);
 
     // Check whether preprocessing and assembly rules make sense.
     // They make sense only for C and C++ sources.
@@ -271,9 +271,9 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
     if (lang_has_preprocessor && do_preprocess_rules) {
       std::string::size_type dot_pos = localObjectFile.first.rfind(".");
       std::string base = localObjectFile.first.substr(0, dot_pos);
-      this->WriteObjectConvenienceRule(
-        ruleFileStream, "target to preprocess a source file",
-        (base + ".i").c_str(), localObjectFile.second);
+      this->WriteObjectConvenienceRule(ruleFileStream,
+                                       "target to preprocess a source file",
+                                       (base + ".i"), localObjectFile.second);
       localObjectFile.second.HasPreprocessRule = true;
     }
 
@@ -282,7 +282,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
       std::string base = localObjectFile.first.substr(0, dot_pos);
       this->WriteObjectConvenienceRule(
         ruleFileStream, "target to generate assembly for a file",
-        (base + ".s").c_str(), localObjectFile.second);
+        (base + ".s"), localObjectFile.second);
       localObjectFile.second.HasAssembleRule = true;
     }
   }
@@ -298,7 +298,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 }
 
 void cmLocalUnixMakefileGenerator3::WriteObjectConvenienceRule(
-  std::ostream& ruleFileStream, const char* comment, const char* output,
+  std::ostream& ruleFileStream, const char* comment, const std::string& output,
   LocalObjectInfo const& info)
 {
   // If the rule includes the source file extension then create a
@@ -334,7 +334,7 @@ void cmLocalUnixMakefileGenerator3::WriteObjectConvenienceRule(
     targetName += "/";
     targetName += output;
     commands.push_back(
-      this->GetRecursiveMakeCall(tgtMakefileName.c_str(), targetName));
+      this->GetRecursiveMakeCall(tgtMakefileName, targetName));
   }
   this->CreateCDCommand(commands, this->GetBinaryDirectory(),
                         this->GetCurrentBinaryDirectory());
@@ -373,8 +373,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefileTargets(
       // Build the target for this pass.
       std::string makefile2 = cmake::GetCMakeFilesDirectoryPostSlash();
       makefile2 += "Makefile2";
-      commands.push_back(
-        this->GetRecursiveMakeCall(makefile2.c_str(), localName));
+      commands.push_back(this->GetRecursiveMakeCall(makefile2, localName));
       this->CreateCDCommand(commands, this->GetBinaryDirectory(),
                             this->GetCurrentBinaryDirectory());
       this->WriteMakeRule(ruleFileStream, "Convenience name for target.",
@@ -399,7 +398,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefileTargets(
       depends.clear();
       commands.clear();
       commands.push_back(
-        this->GetRecursiveMakeCall(makefileName.c_str(), makeTargetName));
+        this->GetRecursiveMakeCall(makefileName, makeTargetName));
       this->CreateCDCommand(commands, this->GetBinaryDirectory(),
                             this->GetCurrentBinaryDirectory());
       this->WriteMakeRule(ruleFileStream, "fast build rule for target.",
@@ -415,7 +414,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefileTargets(
         depends.clear();
         commands.clear();
         commands.push_back(
-          this->GetRecursiveMakeCall(makefile2.c_str(), makeTargetName));
+          this->GetRecursiveMakeCall(makefile2, makeTargetName));
         this->CreateCDCommand(commands, this->GetBinaryDirectory(),
                               this->GetCurrentBinaryDirectory());
         this->WriteMakeRule(ruleFileStream,
@@ -1254,9 +1253,8 @@ std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
   return ret;
 }
 
-bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
-                                                       bool verbose,
-                                                       bool color)
+bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
+  const std::string& tgtInfo, bool verbose, bool color)
 {
   // read in the target info file
   if (!this->Makefile->ReadListFile(tgtInfo) ||
@@ -1280,7 +1278,8 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
     this->GlobalGenerator->GetCMakeInstance()->GetFileComparison();
   {
     int result;
-    if (!ftc->FileTimeCompare(internalDependFile.c_str(), tgtInfo, &result) ||
+    if (!ftc->FileTimeCompare(internalDependFile.c_str(), tgtInfo.c_str(),
+                              &result) ||
         result < 0) {
       if (verbose) {
         std::ostringstream msg;
@@ -1611,8 +1610,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   }
   std::string mf2Dir = cmake::GetCMakeFilesDirectoryPostSlash();
   mf2Dir += "Makefile2";
-  commands.push_back(
-    this->GetRecursiveMakeCall(mf2Dir.c_str(), recursiveTarget));
+  commands.push_back(this->GetRecursiveMakeCall(mf2Dir, recursiveTarget));
   this->CreateCDCommand(commands, this->GetBinaryDirectory(),
                         this->GetCurrentBinaryDirectory());
   {
@@ -1631,8 +1629,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   recursiveTarget += "/clean";
   commands.clear();
   depends.clear();
-  commands.push_back(
-    this->GetRecursiveMakeCall(mf2Dir.c_str(), recursiveTarget));
+  commands.push_back(this->GetRecursiveMakeCall(mf2Dir, recursiveTarget));
   this->CreateCDCommand(commands, this->GetBinaryDirectory(),
                         this->GetCurrentBinaryDirectory());
   this->WriteMakeRule(ruleFileStream, "The main clean target", "clean",
@@ -1657,8 +1654,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
     // At least make sure the build system is up to date.
     depends.emplace_back("cmake_check_build_system");
   }
-  commands.push_back(
-    this->GetRecursiveMakeCall(mf2Dir.c_str(), recursiveTarget));
+  commands.push_back(this->GetRecursiveMakeCall(mf2Dir, recursiveTarget));
   this->CreateCDCommand(commands, this->GetBinaryDirectory(),
                         this->GetCurrentBinaryDirectory());
   this->WriteMakeRule(ruleFileStream, "Prepare targets for installation.",
@@ -1886,7 +1882,7 @@ void cmLocalUnixMakefileGenerator3::WriteDisclaimer(std::ostream& os)
 }
 
 std::string cmLocalUnixMakefileGenerator3::GetRecursiveMakeCall(
-  const char* makefile, const std::string& tgt)
+  const std::string& makefile, const std::string& tgt)
 {
   // Call make on the given file.
   std::string cmd;
@@ -1956,7 +1952,7 @@ void cmLocalUnixMakefileGenerator3::WriteCMakeArgument(std::ostream& os,
 }
 
 std::string cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
-  const char* p, bool useWatcomQuote)
+  const std::string& p, bool useWatcomQuote)
 {
   // Split the path into its components.
   std::vector<std::string> components;
@@ -2040,8 +2036,8 @@ cmLocalUnixMakefileGenerator3::GetImplicitDepends(const cmGeneratorTarget* tgt)
 }
 
 void cmLocalUnixMakefileGenerator3::AddImplicitDepends(
-  const cmGeneratorTarget* tgt, const std::string& lang, const char* obj,
-  const char* src)
+  const cmGeneratorTarget* tgt, const std::string& lang,
+  const std::string& obj, const std::string& src)
 {
   this->ImplicitDepends[tgt->GetName()][lang][obj].push_back(src);
 }
