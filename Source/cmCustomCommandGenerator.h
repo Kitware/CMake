@@ -29,8 +29,8 @@ class cmCustomCommandGenerator
   const char* GetArgv0Location(unsigned int c) const;
 
 public:
-  cmCustomCommandGenerator(cmCustomCommand const& cc,
-                           const std::string& config, cmLocalGenerator* lg);
+  cmCustomCommandGenerator(cmCustomCommand const& cc, std::string config,
+                           cmLocalGenerator* lg);
   ~cmCustomCommandGenerator();
   cmCustomCommand const& GetCC() const { return this->CC; }
   unsigned int GetNumberOfCommands() const;

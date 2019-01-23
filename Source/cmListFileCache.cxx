@@ -24,7 +24,7 @@ cmCommandContext::cmCommandName& cmCommandContext::cmCommandName::operator=(
 
 struct cmListFileParser
 {
-  cmListFileParser(cmListFile* lf, cmListFileBacktrace const& lfbt,
+  cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
                    cmMessenger* messenger, const char* filename);
   ~cmListFileParser();
   void IssueFileOpenError(std::string const& text) const;
@@ -47,12 +47,11 @@ struct cmListFileParser
   } Separation;
 };
 
-cmListFileParser::cmListFileParser(cmListFile* lf,
-                                   cmListFileBacktrace const& lfbt,
+cmListFileParser::cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
                                    cmMessenger* messenger,
                                    const char* filename)
   : ListFile(lf)
-  , Backtrace(lfbt)
+  , Backtrace(std::move(lfbt))
   , Messenger(messenger)
   , FileName(filename)
   , Lexer(cmListFileLexer_New())

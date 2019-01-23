@@ -5,13 +5,14 @@
 
 #include "cmMakefile.h"
 #include <sstream>
+#include <utility>
 
 cmStringReplaceHelper::cmStringReplaceHelper(const std::string& regex,
-                                             const std::string& replace_expr,
+                                             std::string replace_expr,
                                              cmMakefile* makefile)
   : RegExString(regex)
   , RegularExpression(regex)
-  , ReplaceExpression(replace_expr)
+  , ReplaceExpression(std::move(replace_expr))
   , Makefile(makefile)
 {
   this->ParseReplaceExpression();

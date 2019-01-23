@@ -13,9 +13,9 @@
 #include <stddef.h>
 #include <utility>
 
-cmRST::cmRST(std::ostream& os, std::string const& docroot)
+cmRST::cmRST(std::ostream& os, std::string docroot)
   : OS(os)
-  , DocRoot(docroot)
+  , DocRoot(std::move(docroot))
   , IncludeDepth(0)
   , OutputLinePending(false)
   , LastLineEndedInColonColon(false)

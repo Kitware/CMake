@@ -15,26 +15,26 @@
 #include <utility>
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
-  const cmListFileBacktrace& backtrace, cmGeneratorTarget const* target,
-  const std::string& property, const GeneratorExpressionContent* content,
+  cmListFileBacktrace backtrace, cmGeneratorTarget const* target,
+  std::string property, const GeneratorExpressionContent* content,
   cmGeneratorExpressionDAGChecker* parent)
   : Parent(parent)
   , Target(target)
-  , Property(property)
+  , Property(std::move(property))
   , Content(content)
-  , Backtrace(backtrace)
+  , Backtrace(std::move(backtrace))
   , TransitivePropertiesOnly(false)
 {
   Initialize();
 }
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
-  cmGeneratorTarget const* target, const std::string& property,
+  cmGeneratorTarget const* target, std::string property,
   const GeneratorExpressionContent* content,
   cmGeneratorExpressionDAGChecker* parent)
   : Parent(parent)
   , Target(target)
-  , Property(property)
+  , Property(std::move(property))
   , Content(content)
   , Backtrace()
   , TransitivePropertiesOnly(false)

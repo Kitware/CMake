@@ -22,7 +22,7 @@ class cmLocalCommonGenerator : public cmLocalGenerator
 {
 public:
   cmLocalCommonGenerator(cmGlobalGenerator* gg, cmMakefile* mf,
-                         std::string const& wd);
+                         std::string wd);
   ~cmLocalCommonGenerator() override;
 
   std::string const& GetConfigName() { return this->ConfigName; }

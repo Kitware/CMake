@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmCommand.h"
@@ -15,8 +16,8 @@ class cmExecutionStatus;
 class cmUnexpectedCommand : public cmCommand
 {
 public:
-  cmUnexpectedCommand(std::string const& name, const char* error)
-    : Name(name)
+  cmUnexpectedCommand(std::string name, const char* error)
+    : Name(std::move(name))
     , Error(error)
   {
   }

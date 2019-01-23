@@ -6,10 +6,10 @@
 
 #include "cmServer.h"
 
-cmPipeConnection::cmPipeConnection(const std::string& name,
+cmPipeConnection::cmPipeConnection(std::string name,
                                    cmConnectionBufferStrategy* bufferStrategy)
   : cmEventBasedConnection(bufferStrategy)
-  , PipeName(name)
+  , PipeName(std::move(name))
 {
 }
 

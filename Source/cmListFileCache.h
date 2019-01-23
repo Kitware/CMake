@@ -51,8 +51,8 @@ struct cmListFileArgument
     Bracket
   };
   cmListFileArgument() {}
-  cmListFileArgument(const std::string& v, Delimiter d, long line)
-    : Value(v)
+  cmListFileArgument(std::string v, Delimiter d, long line)
+    : Value(std::move(v))
     , Delim(d)
     , Line(line)
   {

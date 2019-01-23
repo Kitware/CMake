@@ -20,15 +20,16 @@
 #include <algorithm>
 #include <stdio.h>
 #include <string.h>
+#include <utility>
 
 inline int ctrl(int z)
 {
   return (z & 037);
 }
 
-cmCursesMainForm::cmCursesMainForm(std::vector<std::string> const& args,
+cmCursesMainForm::cmCursesMainForm(std::vector<std::string> args,
                                    int initWidth)
-  : Args(args)
+  : Args(std::move(args))
   , InitialWidth(initWidth)
 {
   this->NumberOfPages = 0;

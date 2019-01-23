@@ -10,13 +10,13 @@
 #include "cmSystemTools.h"
 
 cmRulePlaceholderExpander::cmRulePlaceholderExpander(
-  std::map<std::string, std::string> const& compilers,
-  std::map<std::string, std::string> const& variableMappings,
-  std::string const& compilerSysroot, std::string const& linkerSysroot)
-  : Compilers(compilers)
-  , VariableMappings(variableMappings)
-  , CompilerSysroot(compilerSysroot)
-  , LinkerSysroot(linkerSysroot)
+  std::map<std::string, std::string> compilers,
+  std::map<std::string, std::string> variableMappings,
+  std::string compilerSysroot, std::string linkerSysroot)
+  : Compilers(std::move(compilers))
+  , VariableMappings(std::move(variableMappings))
+  , CompilerSysroot(std::move(compilerSysroot))
+  , LinkerSysroot(std::move(linkerSysroot))
 {
 }
 

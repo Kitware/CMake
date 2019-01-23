@@ -29,7 +29,7 @@ class cmDepends
 public:
   /** Instances need to know the build directory name and the relative
       path from the build directory to the target file.  */
-  cmDepends(cmLocalGenerator* lg = nullptr, const std::string& targetDir = "");
+  cmDepends(cmLocalGenerator* lg = nullptr, std::string targetDir = "");
 
   /** Set the local generator for the directory in which we are
       scanning dependencies.  This is not a full local generator; it

@@ -13,7 +13,7 @@
 class cmInstallCommandArguments
 {
 public:
-  cmInstallCommandArguments(const std::string& defaultComponent);
+  cmInstallCommandArguments(std::string defaultComponent);
   void SetGenericArguments(cmInstallCommandArguments* args)
   {
     this->GenericArguments = args;

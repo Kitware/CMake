@@ -8,6 +8,7 @@
 
 #  include <set>
 #  include <string>
+#  include <utility>
 #  include <vector>
 #endif
 
@@ -114,10 +115,10 @@ int cmFortran_yyparse(yyscan_t);
 // Define parser object internal structure.
 struct cmFortranFile
 {
-  cmFortranFile(FILE* file, YY_BUFFER_STATE buffer, const std::string& dir)
+  cmFortranFile(FILE* file, YY_BUFFER_STATE buffer, std::string dir)
     : File(file)
     , Buffer(buffer)
-    , Directory(dir)
+    , Directory(std::move(dir))
     , LastCharWasNewline(false)
   {
   }
@@ -129,9 +130,8 @@ struct cmFortranFile
 
 struct cmFortranParser_s
 {
-  cmFortranParser_s(std::vector<std::string> const& includes,
-                    std::set<std::string> const& defines,
-                    cmFortranSourceInfo& info);
+  cmFortranParser_s(std::vector<std::string> includes,
+                    std::set<std::string> defines, cmFortranSourceInfo& info);
   ~cmFortranParser_s();
 
   bool FindIncludeFile(const char* dir, const char* includeName,

@@ -22,18 +22,18 @@
 #include "cmake.h"
 
 cmInstallTargetGenerator::cmInstallTargetGenerator(
-  const std::string& targetName, const char* dest, bool implib,
+  std::string targetName, const char* dest, bool implib,
   const char* file_permissions, std::vector<std::string> const& configurations,
   const char* component, MessageLevel message, bool exclude_from_all,
-  bool optional, cmListFileBacktrace const& backtrace)
+  bool optional, cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all)
-  , TargetName(targetName)
+  , TargetName(std::move(targetName))
   , Target(nullptr)
   , FilePermissions(file_permissions)
   , ImportLibrary(implib)
   , Optional(optional)
-  , Backtrace(backtrace)
+  , Backtrace(std::move(backtrace))
 {
   this->ActionsPerConfig = true;
   this->NamelinkMode = NamelinkModeNone;

@@ -23,11 +23,11 @@ class cmInstallTargetGenerator : public cmInstallGenerator
 {
 public:
   cmInstallTargetGenerator(
-    std::string const& targetName, const char* dest, bool implib,
+    std::string targetName, const char* dest, bool implib,
     const char* file_permissions,
     std::vector<std::string> const& configurations, const char* component,
     MessageLevel message, bool exclude_from_all, bool optional,
-    cmListFileBacktrace const& backtrace = cmListFileBacktrace());
+    cmListFileBacktrace backtrace = cmListFileBacktrace());
   ~cmInstallTargetGenerator() override;
 
   /** Select the policy for installing shared library linkable name

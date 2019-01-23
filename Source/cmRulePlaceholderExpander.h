@@ -15,9 +15,9 @@ class cmRulePlaceholderExpander
 {
 public:
   cmRulePlaceholderExpander(
-    std::map<std::string, std::string> const& compilers,
-    std::map<std::string, std::string> const& variableMappings,
-    std::string const& compilerSysroot, std::string const& linkerSysroot);
+    std::map<std::string, std::string> compilers,
+    std::map<std::string, std::string> variableMappings,
+    std::string compilerSysroot, std::string linkerSysroot);
 
   void SetTargetImpLib(std::string const& targetImpLib)
   {

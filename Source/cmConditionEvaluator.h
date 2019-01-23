@@ -21,8 +21,8 @@ class cmConditionEvaluator
 public:
   typedef std::list<cmExpandedCommandArgument> cmArgumentList;
 
-  cmConditionEvaluator(cmMakefile& makefile, cmListFileContext const& context,
-                       cmListFileBacktrace const& bt);
+  cmConditionEvaluator(cmMakefile& makefile, cmListFileContext context,
+                       cmListFileBacktrace bt);
 
   // this is a shared function for both If and Else to determine if the
   // arguments were valid, and if so, was the response true. If there is

@@ -8,6 +8,7 @@
 #include <stack>
 #include <stdio.h>
 #include <string>
+#include <utility>
 #include <vector>
 
 bool cmFortranParser_s::FindIncludeFile(const char* dir,
@@ -42,11 +43,11 @@ bool cmFortranParser_s::FindIncludeFile(const char* dir,
   return false;
 }
 
-cmFortranParser_s::cmFortranParser_s(std::vector<std::string> const& includes,
-                                     std::set<std::string> const& defines,
+cmFortranParser_s::cmFortranParser_s(std::vector<std::string> includes,
+                                     std::set<std::string> defines,
                                      cmFortranSourceInfo& info)
-  : IncludePath(includes)
-  , PPDefinitions(defines)
+  : IncludePath(std::move(includes))
+  , PPDefinitions(std::move(defines))
   , Info(info)
 {
   this->InInterface = false;

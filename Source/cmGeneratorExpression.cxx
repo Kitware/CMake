@@ -15,9 +15,8 @@
 #include "cmGeneratorExpressionParser.h"
 #include "cmSystemTools.h"
 
-cmGeneratorExpression::cmGeneratorExpression(
-  const cmListFileBacktrace& backtrace)
-  : Backtrace(backtrace)
+cmGeneratorExpression::cmGeneratorExpression(cmListFileBacktrace backtrace)
+  : Backtrace(std::move(backtrace))
 {
 }
 
@@ -96,9 +95,9 @@ const std::string& cmCompiledGeneratorExpression::EvaluateWithContext(
 }
 
 cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
-  cmListFileBacktrace const& backtrace, const std::string& input)
-  : Backtrace(backtrace)
-  , Input(input)
+  cmListFileBacktrace backtrace, std::string input)
+  : Backtrace(std::move(backtrace))
+  , Input(std::move(input))
   , HadContextSensitiveCondition(false)
   , HadHeadSensitiveCondition(false)
   , EvaluateForBuildsystem(false)

@@ -1733,9 +1733,9 @@ class NotInProjectDir
 {
 public:
   // Constructor with the source and binary directory's path
-  NotInProjectDir(const std::string& sourceDir, const std::string& binaryDir)
-    : SourceDir(sourceDir)
-    , BinaryDir(binaryDir)
+  NotInProjectDir(std::string sourceDir, std::string binaryDir)
+    : SourceDir(std::move(sourceDir))
+    , BinaryDir(std::move(binaryDir))
   {
   }
 

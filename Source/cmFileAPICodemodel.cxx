@@ -166,13 +166,13 @@ class BacktraceData
   }
 
 public:
-  BacktraceData(std::string const& topSource);
+  BacktraceData(std::string topSource);
   bool Add(cmListFileBacktrace const& bt, Json::ArrayIndex& index);
   Json::Value Dump();
 };
 
-BacktraceData::BacktraceData(std::string const& topSource)
-  : TopSource(topSource)
+BacktraceData::BacktraceData(std::string topSource)
+  : TopSource(std::move(topSource))
 {
 }
 

@@ -9,8 +9,8 @@
 #include <utility>
 
 cmGeneratorExpressionParser::cmGeneratorExpressionParser(
-  const std::vector<cmGeneratorExpressionToken>& tokens)
-  : Tokens(tokens)
+  std::vector<cmGeneratorExpressionToken> tokens)
+  : Tokens(std::move(tokens))
   , NestingLevel(0)
 {
 }

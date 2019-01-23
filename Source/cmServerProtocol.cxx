@@ -20,6 +20,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 // Get rid of some windows macros:
@@ -39,11 +40,10 @@ std::vector<std::string> toStringList(const Json::Value& in)
 } // namespace
 
 cmServerRequest::cmServerRequest(cmServer* server, cmConnection* connection,
-                                 const std::string& t, const std::string& c,
-                                 const Json::Value& d)
-  : Type(t)
-  , Cookie(c)
-  , Data(d)
+                                 std::string t, std::string c, Json::Value d)
+  : Type(std::move(t))
+  , Cookie(std::move(c))
+  , Data(std::move(d))
   , Connection(connection)
   , m_Server(server)
 {
@@ -707,15 +707,15 @@ cmServerResponse cmServerProtocol1::ProcessCTests(
 }
 
 cmServerProtocol1::GeneratorInformation::GeneratorInformation(
-  const std::string& generatorName, const std::string& extraGeneratorName,
-  const std::string& toolset, const std::string& platform,
-  const std::string& sourceDirectory, const std::string& buildDirectory)
-  : GeneratorName(generatorName)
-  , ExtraGeneratorName(extraGeneratorName)
-  , Toolset(toolset)
-  , Platform(platform)
-  , SourceDirectory(sourceDirectory)
-  , BuildDirectory(buildDirectory)
+  std::string generatorName, std::string extraGeneratorName,
+  std::string toolset, std::string platform, std::string sourceDirectory,
+  std::string buildDirectory)
+  : GeneratorName(std::move(generatorName))
+  , ExtraGeneratorName(std::move(extraGeneratorName))
+  , Toolset(std::move(toolset))
+  , Platform(std::move(platform))
+  , SourceDirectory(std::move(sourceDirectory))
+  , BuildDirectory(std::move(buildDirectory))
 {
 }
 

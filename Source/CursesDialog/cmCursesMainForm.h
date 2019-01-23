@@ -26,7 +26,7 @@ class cmCursesMainForm : public cmCursesForm
   CM_DISABLE_COPY(cmCursesMainForm)
 
 public:
-  cmCursesMainForm(std::vector<std::string> const& args, int initwidth);
+  cmCursesMainForm(std::vector<std::string> args, int initwidth);
   ~cmCursesMainForm() override;
 
   /**

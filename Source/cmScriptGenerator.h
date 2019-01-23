@@ -47,8 +47,8 @@ class cmScriptGenerator
   CM_DISABLE_COPY(cmScriptGenerator)
 
 public:
-  cmScriptGenerator(const std::string& config_var,
-                    std::vector<std::string> const& configurations);
+  cmScriptGenerator(std::string config_var,
+                    std::vector<std::string> configurations);
   virtual ~cmScriptGenerator();
 
   void Generate(std::ostream& os, const std::string& config,

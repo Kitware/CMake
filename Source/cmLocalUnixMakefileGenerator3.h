@@ -12,6 +12,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 class cmCustomCommand;
@@ -267,9 +268,9 @@ private:
     cmGeneratorTarget* Target = nullptr;
     std::string Language;
     LocalObjectEntry() {}
-    LocalObjectEntry(cmGeneratorTarget* t, const std::string& lang)
+    LocalObjectEntry(cmGeneratorTarget* t, std::string lang)
       : Target(t)
-      , Language(lang)
+      , Language(std::move(lang))
     {
     }
   };

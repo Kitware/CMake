@@ -20,7 +20,7 @@ class cmXCodeScheme
 public:
   typedef std::vector<const cmXCodeObject*> TestObjects;
 
-  cmXCodeScheme(cmXCodeObject* xcObj, const TestObjects& tests,
+  cmXCodeScheme(cmXCodeObject* xcObj, TestObjects tests,
                 const std::vector<std::string>& configList,
                 unsigned int xcVersion);
 
