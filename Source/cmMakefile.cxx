@@ -3516,7 +3516,7 @@ void cmMakefile::DisplayStatus(const char* message, float s) const
   cm->UpdateProgress(message, s);
 }
 
-std::string cmMakefile::GetModulesFile(const char* filename,
+std::string cmMakefile::GetModulesFile(const std::string& filename,
                                        bool& system) const
 {
   std::string result;

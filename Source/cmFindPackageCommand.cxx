@@ -663,7 +663,7 @@ bool cmFindPackageCommand::FindModule(bool& found)
   module += this->Name;
   module += ".cmake";
   bool system = false;
-  std::string mfile = this->Makefile->GetModulesFile(module.c_str(), system);
+  std::string mfile = this->Makefile->GetModulesFile(module, system);
   if (!mfile.empty()) {
     if (system) {
       auto it = this->DeprecatedFindModules.find(this->Name);

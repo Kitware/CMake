@@ -67,7 +67,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args,
     // Not a path. Maybe module.
     std::string module = fname;
     module += ".cmake";
-    std::string mfile = this->Makefile->GetModulesFile(module.c_str());
+    std::string mfile = this->Makefile->GetModulesFile(module);
     if (!mfile.empty()) {
       fname = mfile;
     }

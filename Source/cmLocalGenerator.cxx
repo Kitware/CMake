@@ -2791,7 +2791,7 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmGeneratorTarget* target,
   const char* in = target->GetProperty("MACOSX_BUNDLE_INFO_PLIST");
   std::string inFile = (in && *in) ? in : "MacOSXBundleInfo.plist.in";
   if (!cmSystemTools::FileIsFullPath(inFile)) {
-    std::string inMod = this->Makefile->GetModulesFile(inFile.c_str());
+    std::string inMod = this->Makefile->GetModulesFile(inFile);
     if (!inMod.empty()) {
       inFile = inMod;
     }
@@ -2829,7 +2829,7 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(
   const char* in = target->GetProperty("MACOSX_FRAMEWORK_INFO_PLIST");
   std::string inFile = (in && *in) ? in : "MacOSXFrameworkInfo.plist.in";
   if (!cmSystemTools::FileIsFullPath(inFile)) {
-    std::string inMod = this->Makefile->GetModulesFile(inFile.c_str());
+    std::string inMod = this->Makefile->GetModulesFile(inFile);
     if (!inMod.empty()) {
       inFile = inMod;
     }
