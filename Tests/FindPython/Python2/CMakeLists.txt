@@ -14,6 +14,14 @@ if (NOT Python2_FOUND)
   message (FATAL_ERROR "Fail to found Python 2")
 endif()
 
+if(NOT TARGET Python2::Interpreter)
+  message(SEND_ERROR "Python2::Interpreter not found")
+endif()
+
+if(NOT TARGET Python2::Python)
+  message(SEND_ERROR "Python2::Python not found")
+endif()
+
 Python2_add_library (spam2 MODULE ../spam.c)
 target_compile_definitions (spam2 PRIVATE PYTHON2)
 

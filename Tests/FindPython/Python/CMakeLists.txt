@@ -9,6 +9,14 @@ if (NOT Python_FOUND)
   message (FATAL_ERROR "Fail to found Python 3")
 endif()
 
+if(NOT TARGET Python::Interpreter)
+  message(SEND_ERROR "Python::Interpreter not found")
+endif()
+
+if(NOT TARGET Python::Python)
+  message(SEND_ERROR "Python::Python not found")
+endif()
+
 Python_add_library (spam3 MODULE ../spam.c)
 target_compile_definitions (spam3 PRIVATE PYTHON3)
 
