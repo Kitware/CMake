@@ -34,6 +34,8 @@ public:
   cmSourceFileLocation();
   cmSourceFileLocation(const cmSourceFileLocation& loc);
 
+  cmSourceFileLocation& operator=(cmSourceFileLocation const&) = delete;
+
   /**
    * Return whether the given source file location could refers to the
    * same source file as this location given the level of ambiguity in
@@ -94,8 +96,6 @@ private:
   // Update the location with additional knowledge.
   void Update(cmSourceFileLocation const& loc);
   void UpdateExtension(const std::string& name);
-
-  cmSourceFileLocation& operator=(const cmSourceFileLocation& loc) = delete;
 };
 
 #endif

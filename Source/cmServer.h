@@ -88,13 +88,14 @@ protected:
 
 class cmServer : public cmServerBase
 {
-  CM_DISABLE_COPY(cmServer)
-
 public:
   class DebugInfo;
 
   cmServer(cmConnection* conn, bool supportExperimental);
   ~cmServer() override;
+
+  cmServer(cmServer const&) = delete;
+  cmServer& operator=(cmServer const&) = delete;
 
   bool Serve(std::string* errorMessage) override;
 

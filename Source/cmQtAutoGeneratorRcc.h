@@ -17,10 +17,12 @@ class cmMakefile;
 // @brief AUTORCC generator
 class cmQtAutoGeneratorRcc : public cmQtAutoGenerator
 {
-  CM_DISABLE_COPY(cmQtAutoGeneratorRcc)
 public:
   cmQtAutoGeneratorRcc();
   ~cmQtAutoGeneratorRcc() override;
+
+  cmQtAutoGeneratorRcc(cmQtAutoGeneratorRcc const&) = delete;
+  cmQtAutoGeneratorRcc& operator=(cmQtAutoGeneratorRcc const&) = delete;
 
 private:
   // -- Types

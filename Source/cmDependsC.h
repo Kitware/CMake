@@ -22,8 +22,6 @@ class cmLocalGenerator;
  */
 class cmDependsC : public cmDepends
 {
-  CM_DISABLE_COPY(cmDependsC)
-
 public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
@@ -34,6 +32,9 @@ public:
 
   /** Virtual destructor to cleanup subclasses properly.  */
   ~cmDependsC() override;
+
+  cmDependsC(cmDependsC const&) = delete;
+  cmDependsC& operator=(cmDependsC const&) = delete;
 
 protected:
   // Implement writing/checking methods required by superclass.

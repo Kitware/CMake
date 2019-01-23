@@ -15,8 +15,6 @@
  */
 class cmCryptoHash
 {
-  CM_DISABLE_COPY(cmCryptoHash)
-
 public:
   enum Algo
   {
@@ -34,6 +32,9 @@ public:
 
   cmCryptoHash(Algo algo);
   ~cmCryptoHash();
+
+  cmCryptoHash(cmCryptoHash const&) = delete;
+  cmCryptoHash& operator=(cmCryptoHash const&) = delete;
 
   /// @brief Returns a new hash generator of the requested type
   /// @arg algo Hash type name. Supported hash types are

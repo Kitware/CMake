@@ -97,6 +97,8 @@ public:
    */
   ~cmGeneratedFileStream() override;
 
+  cmGeneratedFileStream(cmGeneratedFileStream const&) = delete;
+
   /**
    * Open an output file by name.  This should be used only with a
    * non-open stream.  It automatically generates a name for the
@@ -134,9 +136,6 @@ public:
    * the output file to be changed during the use of cmGeneratedFileStream.
    */
   void SetName(const std::string& fname);
-
-private:
-  cmGeneratedFileStream(cmGeneratedFileStream const&); // not implemented
 };
 
 #endif

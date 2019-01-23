@@ -21,11 +21,12 @@ class cmFileLockResult;
  */
 class cmFileLock
 {
-  CM_DISABLE_COPY(cmFileLock)
-
 public:
   cmFileLock();
   ~cmFileLock();
+
+  cmFileLock(cmFileLock const&) = delete;
+  cmFileLock& operator=(cmFileLock const&) = delete;
 
   /**
    * @brief Lock the file.

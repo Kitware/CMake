@@ -27,11 +27,12 @@ class cmTarget;
 
 class cmGeneratorTarget
 {
-  CM_DISABLE_COPY(cmGeneratorTarget)
-
 public:
   cmGeneratorTarget(cmTarget*, cmLocalGenerator* lg);
   ~cmGeneratorTarget();
+
+  cmGeneratorTarget(cmGeneratorTarget const&) = delete;
+  cmGeneratorTarget& operator=(cmGeneratorTarget const&) = delete;
 
   cmLocalGenerator* GetLocalGenerator() const;
 

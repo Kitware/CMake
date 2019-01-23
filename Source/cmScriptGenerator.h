@@ -44,12 +44,13 @@ inline std::ostream& operator<<(std::ostream& os,
  */
 class cmScriptGenerator
 {
-  CM_DISABLE_COPY(cmScriptGenerator)
-
 public:
   cmScriptGenerator(std::string config_var,
                     std::vector<std::string> configurations);
   virtual ~cmScriptGenerator();
+
+  cmScriptGenerator(cmScriptGenerator const&) = delete;
+  cmScriptGenerator& operator=(cmScriptGenerator const&) = delete;
 
   void Generate(std::ostream& os, const std::string& config,
                 std::vector<std::string> const& configurationTypes);

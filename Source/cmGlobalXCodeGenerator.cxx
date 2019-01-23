@@ -752,8 +752,6 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFileFromPath(
 class XCodeGeneratorExpressionInterpreter
   : public cmGeneratorExpressionInterpreter
 {
-  CM_DISABLE_COPY(XCodeGeneratorExpressionInterpreter)
-
 public:
   XCodeGeneratorExpressionInterpreter(cmSourceFile* sourceFile,
                                       cmLocalGenerator* localGenerator,
@@ -764,6 +762,11 @@ public:
     , SourceFile(sourceFile)
   {
   }
+
+  XCodeGeneratorExpressionInterpreter(
+    XCodeGeneratorExpressionInterpreter const&) = delete;
+  XCodeGeneratorExpressionInterpreter& operator=(
+    XCodeGeneratorExpressionInterpreter const&) = delete;
 
   using cmGeneratorExpressionInterpreter::Evaluate;
 

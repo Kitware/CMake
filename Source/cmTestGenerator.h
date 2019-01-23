@@ -20,13 +20,14 @@ class cmTest;
  */
 class cmTestGenerator : public cmScriptGenerator
 {
-  CM_DISABLE_COPY(cmTestGenerator)
-
 public:
   cmTestGenerator(cmTest* test,
                   std::vector<std::string> const& configurations =
                     std::vector<std::string>());
   ~cmTestGenerator() override;
+
+  cmTestGenerator(cmTestGenerator const&) = delete;
+  cmTestGenerator& operator=(cmTestGenerator const&) = delete;
 
   void Compute(cmLocalGenerator* lg);
 

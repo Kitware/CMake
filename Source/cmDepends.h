@@ -24,12 +24,13 @@ class cmLocalGenerator;
  */
 class cmDepends
 {
-  CM_DISABLE_COPY(cmDepends)
-
 public:
   /** Instances need to know the build directory name and the relative
       path from the build directory to the target file.  */
   cmDepends(cmLocalGenerator* lg = nullptr, std::string targetDir = "");
+
+  cmDepends(cmDepends const&) = delete;
+  cmDepends& operator=(cmDepends const&) = delete;
 
   /** Set the local generator for the directory in which we are
       scanning dependencies.  This is not a full local generator; it

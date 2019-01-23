@@ -13,14 +13,17 @@ class cmake;
 
 class cmCursesCacheEntryComposite
 {
-  CM_DISABLE_COPY(cmCursesCacheEntryComposite)
-
 public:
   cmCursesCacheEntryComposite(const std::string& key, int labelwidth,
                               int entrywidth);
   cmCursesCacheEntryComposite(const std::string& key, cmake* cm, bool isNew,
                               int labelwidth, int entrywidth);
   ~cmCursesCacheEntryComposite();
+
+  cmCursesCacheEntryComposite(cmCursesCacheEntryComposite const&) = delete;
+  cmCursesCacheEntryComposite& operator=(cmCursesCacheEntryComposite const&) =
+    delete;
+
   const char* GetValue();
 
   friend class cmCursesMainForm;

@@ -45,7 +45,6 @@ public:
   cmCommandArgumentGroup ArgumentGroup;
 
 private:
-  cmInstallCommandArguments(); // disabled
   cmCAString Destination;
   cmCAString Component;
   cmCAString NamelinkComponent;

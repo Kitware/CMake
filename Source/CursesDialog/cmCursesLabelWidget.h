@@ -14,12 +14,13 @@ class cmCursesMainForm;
 
 class cmCursesLabelWidget : public cmCursesWidget
 {
-  CM_DISABLE_COPY(cmCursesLabelWidget)
-
 public:
   cmCursesLabelWidget(int width, int height, int left, int top,
                       const std::string& name);
   ~cmCursesLabelWidget() override;
+
+  cmCursesLabelWidget(cmCursesLabelWidget const&) = delete;
+  cmCursesLabelWidget& operator=(cmCursesLabelWidget const&) = delete;
 
   // Description:
   // Handle user input. Called by the container of this widget
