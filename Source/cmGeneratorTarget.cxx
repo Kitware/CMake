@@ -203,7 +203,7 @@ std::string cmGeneratorTarget::GetExportName() const
       std::ostringstream e;
       e << "EXPORT_NAME property \"" << exportName << "\" for \""
         << this->GetName() << "\": is not valid.";
-      cmSystemTools::Error(e.str().c_str());
+      cmSystemTools::Error(e.str());
       return "";
     }
     return exportName;
@@ -4587,7 +4587,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
             << " property requirement\nof "
                "dependency \""
             << theTarget->GetName() << "\".\n";
-          cmSystemTools::Error(e.str().c_str());
+          cmSystemTools::Error(e.str());
           break;
         }
         propContent = consistent.second;
@@ -4612,7 +4612,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
                "already. The INTERFACE_"
             << p << " property on\ndependency \"" << theTarget->GetName()
             << "\" is in conflict.\n";
-          cmSystemTools::Error(e.str().c_str());
+          cmSystemTools::Error(e.str());
           break;
         }
         propContent = consistent.second;
@@ -4632,7 +4632,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
           e << "The INTERFACE_" << p << " property of \""
             << theTarget->GetName() << "\" does\nnot agree with the value of "
             << p << " already determined\nfor \"" << tgt->GetName() << "\".\n";
-          cmSystemTools::Error(e.str().c_str());
+          cmSystemTools::Error(e.str());
           break;
         }
         propContent = consistent.second;

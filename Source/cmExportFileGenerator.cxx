@@ -83,7 +83,7 @@ bool cmExportFileGenerator::GenerateImportFile()
     std::string se = cmSystemTools::GetLastSystemError();
     std::ostringstream e;
     e << "cannot write to file \"" << this->MainImportFile << "\": " << se;
-    cmSystemTools::Error(e.str().c_str());
+    cmSystemTools::Error(e.str());
     return false;
   }
   std::ostream& os = *foutPtr;

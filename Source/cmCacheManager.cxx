@@ -123,7 +123,7 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
       std::ostringstream error;
       error << "Parse error in cache file " << cacheFile;
       error << " on line " << lineno << ". Offending entry: " << realbuffer;
-      cmSystemTools::Error(error.str().c_str());
+      cmSystemTools::Error(error.str());
     }
   }
   this->CacheMajorVersion = 0;
@@ -171,7 +171,7 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
               << " where CMakeCache.txt was created. This may result "
                  "in binaries being created in the wrong place. If you "
                  "are not sure, reedit the CMakeCache.txt";
-      cmSystemTools::Error(message.str().c_str());
+      cmSystemTools::Error(message.str());
     }
   }
   return true;

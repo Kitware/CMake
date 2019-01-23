@@ -93,7 +93,7 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
     message += prevTool;
     message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
                "directory or choose a different binary directory.";
-    cmSystemTools::Error(message.c_str());
+    cmSystemTools::Error(message);
     return false;
   } else {
     /* store the toolset that is being used for this build */
@@ -178,7 +178,7 @@ void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsd,
     if (output.empty()) {
       std::string msg =
         "No GHS toolsets found in GHS_TOOLSET_ROOT \"" + tsd + "\".";
-      cmSystemTools::Error(msg.c_str());
+      cmSystemTools::Error(msg);
       tsd = "";
     } else {
       tsd += output.back();
@@ -189,7 +189,7 @@ void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsd,
     tryPath = cmSystemTools::CollapseCombinedPath(tsd, ts);
     if (!cmSystemTools::FileExists(tryPath)) {
       std::string msg = "GHS toolset \"" + tryPath + "\" not found.";
-      cmSystemTools::Error(msg.c_str());
+      cmSystemTools::Error(msg);
       tsd = "";
     } else {
       tsd = tryPath;

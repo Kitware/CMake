@@ -1794,7 +1794,7 @@ static void AddVisibilityCompileOption(std::string& flags,
     std::ostringstream e;
     e << "Target " << target->GetName() << " uses unsupported value \"" << prop
       << "\" for " << flagDefine << ".";
-    cmSystemTools::Error(e.str().c_str());
+    cmSystemTools::Error(e.str());
     return;
   }
   std::string option = std::string(opt) + prop;
@@ -2800,7 +2800,7 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmGeneratorTarget* target,
     std::ostringstream e;
     e << "Target " << target->GetName() << " Info.plist template \"" << inFile
       << "\" could not be found.";
-    cmSystemTools::Error(e.str().c_str());
+    cmSystemTools::Error(e.str());
     return;
   }
 
@@ -2838,7 +2838,7 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(
     std::ostringstream e;
     e << "Target " << target->GetName() << " Info.plist template \"" << inFile
       << "\" could not be found.";
-    cmSystemTools::Error(e.str().c_str());
+    cmSystemTools::Error(e.str());
     return;
   }
 

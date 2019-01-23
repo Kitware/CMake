@@ -165,7 +165,7 @@ void cmGlobVerificationManager::AddCacheEntry(
       message << "\n  " << std::get<0>(bt);
       std::get<1>(bt).PrintTitle(message);
     }
-    cmSystemTools::Error(message.str().c_str());
+    cmSystemTools::Error(message.str());
   } else {
     value.Backtraces.emplace_back(variable, backtrace);
   }

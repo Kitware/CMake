@@ -149,7 +149,7 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(
       m += target->GetName();
       m += " depends on unknown target: ";
       m += name;
-      cmSystemTools::Error(m.c_str());
+      cmSystemTools::Error(m);
     }
     fout << "\t\t{" << guid << "} = {" << guid << "}\n";
   }

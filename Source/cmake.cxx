@@ -1172,7 +1172,7 @@ int cmake::DoPreConfigureChecks()
     }
     err << "Specify --help for usage, or press the help button on the CMake "
            "GUI.";
-    cmSystemTools::Error(err.str().c_str());
+    cmSystemTools::Error(err.str());
     return -2;
   }
 
@@ -1190,7 +1190,7 @@ int cmake::DoPreConfigureChecks()
       message += cacheStart;
       message += "\" used to generate cache.  ";
       message += "Re-run cmake with a different source directory.";
-      cmSystemTools::Error(message.c_str());
+      cmSystemTools::Error(message);
       return -2;
     }
   } else {
@@ -1400,7 +1400,7 @@ int cmake::ActualConfigure()
       message += *genName;
       message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
                  "directory or choose a different binary directory.";
-      cmSystemTools::Error(message.c_str());
+      cmSystemTools::Error(message);
       return -2;
     }
   }
@@ -1424,7 +1424,7 @@ int cmake::ActualConfigure()
       message += *instance;
       message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
                  "directory or choose a different binary directory.";
-      cmSystemTools::Error(message.c_str());
+      cmSystemTools::Error(message);
       return -2;
     }
   } else {
@@ -1443,7 +1443,7 @@ int cmake::ActualConfigure()
       message += *platformName;
       message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
                  "directory or choose a different binary directory.";
-      cmSystemTools::Error(message.c_str());
+      cmSystemTools::Error(message);
       return -2;
     }
   } else {
@@ -1461,7 +1461,7 @@ int cmake::ActualConfigure()
       message += *tsName;
       message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
                  "directory or choose a different binary directory.";
-      cmSystemTools::Error(message.c_str());
+      cmSystemTools::Error(message);
       return -2;
     }
   } else {

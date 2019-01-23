@@ -2173,7 +2173,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     // handle the simple commandline arguments
     std::string errormsg;
     if (!this->HandleCommandLineArguments(i, args, errormsg)) {
-      cmSystemTools::Error(errormsg.c_str());
+      cmSystemTools::Error(errormsg);
       return 1;
     }
 

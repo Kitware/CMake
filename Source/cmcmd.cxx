@@ -123,7 +123,7 @@ void CMakeCommandUsage(const char* program)
     ;
   /* clang-format on */
 
-  cmSystemTools::Error(errorStream.str().c_str());
+  cmSystemTools::Error(errorStream.str());
 }
 
 static bool cmTarFilesFrom(std::string const& file,
@@ -132,14 +132,14 @@ static bool cmTarFilesFrom(std::string const& file,
   if (cmSystemTools::FileIsDirectory(file)) {
     std::ostringstream e;
     e << "-E tar --files-from= file '" << file << "' is a directory";
-    cmSystemTools::Error(e.str().c_str());
+    cmSystemTools::Error(e.str());
     return false;
   }
   cmsys::ifstream fin(file.c_str());
   if (!fin) {
     std::ostringstream e;
     e << "-E tar --files-from= file '" << file << "' not found";
-    cmSystemTools::Error(e.str().c_str());
+    cmSystemTools::Error(e.str());
     return false;
   }
   std::string line;
@@ -153,7 +153,7 @@ static bool cmTarFilesFrom(std::string const& file,
       std::ostringstream e;
       e << "-E tar --files-from='" << file << "' file invalid line:\n"
         << line << "\n";
-      cmSystemTools::Error(e.str().c_str());
+      cmSystemTools::Error(e.str());
       return false;
     } else {
       files.push_back(line);
@@ -1173,7 +1173,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       if (server.Serve(&errorMessage)) {
         return 0;
       }
-      cmSystemTools::Error(errorMessage.c_str());
+      cmSystemTools::Error(errorMessage);
 #else
       static_cast<void>(supportExperimental);
       static_cast<void>(isDebug);

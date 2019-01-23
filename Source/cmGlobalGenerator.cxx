@@ -364,7 +364,7 @@ bool cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
     err << "CMake was unable to find a build program corresponding to \""
         << this->GetName() << "\".  CMAKE_MAKE_PROGRAM is not set.  You "
         << "probably need to select a different build tool.";
-    cmSystemTools::Error(err.str().c_str());
+    cmSystemTools::Error(err.str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -1282,7 +1282,7 @@ bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
     << "duplicate custom targets.  "
     << "Consider using a Makefiles generator or fix the project to not "
     << "use duplicate target names.";
-  cmSystemTools::Error(e.str().c_str());
+  cmSystemTools::Error(e.str());
   return false;
 }
 

@@ -121,7 +121,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
   // now try running the command if it compiled
   if (!res) {
     if (this->OutputFile.empty()) {
-      cmSystemTools::Error(this->FindErrorMessage.c_str());
+      cmSystemTools::Error(this->FindErrorMessage);
     } else {
       // "run" it and capture the output
       std::string runOutputContents;
@@ -354,7 +354,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
       errorMessage += "   " + internalRunOutputName + " (advanced)\n";
     }
     errorMessage += detailsString;
-    cmSystemTools::Error(errorMessage.c_str());
+    cmSystemTools::Error(errorMessage);
     return;
   }
 
