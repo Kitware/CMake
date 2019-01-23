@@ -28,3 +28,7 @@ target_compile_definitions (spam2 PRIVATE PYTHON2)
 add_test (NAME python2_spam2
           COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:spam2>"
           "${Python2_EXECUTABLE}" -c "import spam2; spam2.system(\"cd\")")
+
+add_test(NAME findpython2_script
+         COMMAND "${CMAKE_COMMAND}" -DPYTHON_PACKAGE_NAME=Python2
+         -P "${CMAKE_CURRENT_LIST_DIR}/../FindPythonScript.cmake")
