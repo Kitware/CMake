@@ -538,7 +538,7 @@ void cmCTestMultiProcessHandler::UpdateCostData()
     fout << f << "\n";
   }
   fout.close();
-  cmSystemTools::RenameFile(tmpout.c_str(), fname.c_str());
+  cmSystemTools::RenameFile(tmpout, fname);
 }
 
 void cmCTestMultiProcessHandler::ReadCostData()

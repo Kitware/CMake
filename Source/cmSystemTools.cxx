@@ -1028,7 +1028,8 @@ void cmSystemTools::InitializeLibUV()
 #endif
 }
 
-bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
+bool cmSystemTools::RenameFile(const std::string& oldname,
+                               const std::string& newname)
 {
 #ifdef _WIN32
 #  ifndef INVALID_FILE_ATTRIBUTES
@@ -1066,7 +1067,7 @@ bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
   return retry.Count > 0;
 #else
   /* On UNIX we have an OS-provided call to do this atomically.  */
-  return rename(oldname, newname) == 0;
+  return rename(oldname.c_str(), newname.c_str()) == 0;
 #endif
 }
 

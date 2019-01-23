@@ -2461,7 +2461,7 @@ bool cmFileCommand::HandleRename(std::vector<std::string> const& args)
     newname += "/" + args[2];
   }
 
-  if (!cmSystemTools::RenameFile(oldname.c_str(), newname.c_str())) {
+  if (!cmSystemTools::RenameFile(oldname, newname)) {
     std::string err = cmSystemTools::GetLastSystemError();
     std::ostringstream e;
     /* clang-format off */

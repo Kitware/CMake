@@ -210,7 +210,7 @@ int cmGeneratedFileStreamBase::CompressFile(std::string const&,
 int cmGeneratedFileStreamBase::RenameFile(std::string const& oldname,
                                           std::string const& newname)
 {
-  return cmSystemTools::RenameFile(oldname.c_str(), newname.c_str());
+  return cmSystemTools::RenameFile(oldname, newname);
 }
 
 void cmGeneratedFileStream::SetName(const std::string& fname)

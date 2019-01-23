@@ -169,7 +169,7 @@ std::string cmFileAPI::WriteJsonFile(
   // If the final name already exists then assume it has proper content.
   // Otherwise, atomically place the reply file at its final name
   if (cmSystemTools::FileExists(file, true) ||
-      !cmSystemTools::RenameFile(tmpFile.c_str(), file.c_str())) {
+      !cmSystemTools::RenameFile(tmpFile, file)) {
     cmSystemTools::RemoveFile(tmpFile);
   }
 

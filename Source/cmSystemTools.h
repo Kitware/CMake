@@ -179,7 +179,8 @@ public:
 
   /** Rename a file or directory within a single disk volume (atomic
       if possible).  */
-  static bool RenameFile(const char* oldname, const char* newname);
+  static bool RenameFile(const std::string& oldname,
+                         const std::string& newname);
 
   ///! Compute the hash of a file
   static std::string ComputeFileHash(const std::string& source,
