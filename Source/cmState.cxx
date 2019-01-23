@@ -545,10 +545,10 @@ const char* cmState::GetGlobalProperty(const std::string& prop)
   }
 #define STRING_LIST_ELEMENT(F) ";" #F
   if (prop == "CMAKE_C_KNOWN_FEATURES") {
-    return FOR_EACH_C_FEATURE(STRING_LIST_ELEMENT) + 1;
+    return &FOR_EACH_C_FEATURE(STRING_LIST_ELEMENT)[1];
   }
   if (prop == "CMAKE_CXX_KNOWN_FEATURES") {
-    return FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT) + 1;
+    return &FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT)[1];
   }
 #undef STRING_LIST_ELEMENT
   return this->GlobalProperties.GetPropertyValue(prop);
