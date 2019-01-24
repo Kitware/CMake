@@ -16,8 +16,20 @@ subsequently be run.
         [SRC_EXT <extension>])
 
   Check that the source supplied in ``<code>`` can be compiled as a Fortran source
-  file, linked as an executable and then run. The ``<code>`` must contain at
-  least ``program; end program`` statements. If the ``<code>`` could be built and run
+  file, linked as an executable and then run. The ``<code>`` must be a Fortran program
+  containing at least an ``end`` statement--for example:
+
+  .. code-block:: cmake
+
+    check_fortran_source_runs("real :: x[*]; call co_sum(x); end" F2018coarrayOK)
+
+  This command can help avoid costly build processes when a compiler lacks support
+  for a necessary feature, or a particular vendor library is not compatible with
+  the Fortran compiler version being used. Some of these failures only occur at runtime
+  instead of linktime, and a trivial runtime example can catch the issue before the
+  main build process.
+
+  If the ``<code>`` could be built and run
   successfully, the internal cache variable specified by ``<resultVar>`` will
   be set to 1, otherwise it will be set to an value that evaluates to boolean
   false (e.g. an empty string or an error message).
