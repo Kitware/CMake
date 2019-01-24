@@ -5,7 +5,8 @@
 FindGit
 -------
 
-The module defines the following ``IMPORTED`` targets:
+The module defines the following ``IMPORTED`` targets (when
+:prop_gbl:`CMAKE_ROLE` is ``PROJECT``):
 
 ``Git::Git``
   Executable of the Git command-line client.
