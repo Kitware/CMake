@@ -2906,10 +2906,6 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   check_curl_result(res, "DOWNLOAD cannot set url: ");
 
-  // enable auth
-  res = ::curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-  check_curl_result(res, "DOWNLOAD cannot set httpauth: ");
-
   // enable HTTP ERROR parsing
   res = ::curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
   check_curl_result(res, "DOWNLOAD cannot set http failure option: ");
@@ -3208,10 +3204,6 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
 
   res = ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   check_curl_result(res, "UPLOAD cannot set url: ");
-
-  // enable auth
-  res = ::curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-  check_curl_result(res, "UPLOAD cannot set httpauth: ");
 
   res =
     ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cmWriteToMemoryCallback);
