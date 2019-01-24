@@ -15,6 +15,8 @@ Sets ``<var>`` to a component of ``<FileName>``, where ``<mode>`` is one of:
  NAME      = File name without directory
  EXT       = File name longest extension (.b.c from d/a.b.c)
  NAME_WE   = File name without directory or longest extension
+ LAST_EXT  = File name last extention (.c from d/a.b.c)
+ NAME_WLE  = File name without directory or last extension
  PATH      = Legacy alias for DIRECTORY (use for CMake <= 2.8.11)
 
 Paths are returned with forward slashes and have no trailing slashes.
