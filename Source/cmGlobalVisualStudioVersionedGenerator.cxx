@@ -72,8 +72,7 @@ static const char* VSVersionToToolset(
     case cmGlobalVisualStudioGenerator::VS15:
       return "v141";
     case cmGlobalVisualStudioGenerator::VS16:
-      // FIXME: VS 2019 Preview 1.1 uses v141 but preview 2 will use v142.
-      return "v141";
+      return "v142";
   }
   return "";
 }

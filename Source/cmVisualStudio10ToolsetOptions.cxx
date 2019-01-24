@@ -11,7 +11,9 @@ std::string cmVisualStudio10ToolsetOptions::GetClFlagTableName(
 {
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
-  if (toolset == "v141") {
+  if (toolset == "v142") {
+    return "v142";
+  } else if (toolset == "v141") {
     return "v141";
   } else if (useToolset == "v140") {
     return "v140";
@@ -31,7 +33,10 @@ std::string cmVisualStudio10ToolsetOptions::GetCSharpFlagTableName(
 {
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
-  if ((useToolset == "v141")) {
+  if (useToolset == "v142") {
+    // FIXME: Add CSharp flag table for v142.
+    return "v141";
+  } else if (useToolset == "v141") {
     return "v141";
   } else if (useToolset == "v140") {
     return "v140";
@@ -51,7 +56,8 @@ std::string cmVisualStudio10ToolsetOptions::GetRcFlagTableName(
 {
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
-  if ((useToolset == "v140") || (useToolset == "v141")) {
+  if ((useToolset == "v140") || (useToolset == "v141") ||
+      (useToolset == "v142")) {
     return "v14";
   } else if (useToolset == "v120") {
     return "v12";
@@ -69,7 +75,8 @@ std::string cmVisualStudio10ToolsetOptions::GetLibFlagTableName(
 {
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
-  if ((useToolset == "v140") || (useToolset == "v141")) {
+  if ((useToolset == "v140") || (useToolset == "v141") ||
+      (useToolset == "v142")) {
     return "v14";
   } else if (useToolset == "v120") {
     return "v12";
@@ -87,7 +94,9 @@ std::string cmVisualStudio10ToolsetOptions::GetLinkFlagTableName(
 {
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
-  if (useToolset == "v141") {
+  if (useToolset == "v142") {
+    return "v142";
+  } else if (useToolset == "v141") {
     return "v141";
   } else if (useToolset == "v140") {
     return "v140";
@@ -107,7 +116,8 @@ std::string cmVisualStudio10ToolsetOptions::GetMasmFlagTableName(
 {
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
-  if ((useToolset == "v140") || (useToolset == "v141")) {
+  if ((useToolset == "v140") || (useToolset == "v141") ||
+      (useToolset == "v142")) {
     return "v14";
   } else if (useToolset == "v120") {
     return "v12";
