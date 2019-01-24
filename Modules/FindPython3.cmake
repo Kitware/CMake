@@ -31,7 +31,8 @@ for you.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :ref:`Imported Targets <Imported Targets>`:
+This module defines the following :ref:`Imported Targets <Imported Targets>`
+(when :prop_gbl:`CMAKE_ROLE` is ``PROJECT``):
 
 ``Python3::Interpreter``
   Python 3 interpreter. Target defined if component ``Interpreter`` is found.
@@ -145,9 +146,10 @@ Hints
 Commands
 ^^^^^^^^
 
-This module defines the command ``Python3_add_library`` which have the same
-semantic as :command:`add_library` but take care of Python module naming rules
-(only applied if library is of type ``MODULE``) and add dependency to target
+This module defines the command ``Python3_add_library`` (when
+:prop_gbl:`CMAKE_ROLE` is ``PROJECT``), which has the same semantics as
+:command:`add_library`, but takes care of Python module naming rules
+(only applied if library is of type ``MODULE``), and adds a dependency to target
 ``Python3::Python``::
 
   Python3_add_library (my_module MODULE src1.cpp)
