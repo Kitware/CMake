@@ -1,0 +1,40 @@
+CMAKE_LANG=C
+CMAKE_C_COMPILER_ABI=ELF
+CMAKE_C_COMPILER_AR=
+CMAKE_C_COMPILER_ARCHITECTURE_ID=
+CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_C_COMPILER_ID=XL
+CMAKE_C_COMPILER_LAUNCHER=
+CMAKE_C_COMPILER_LOADED=1
+CMAKE_C_COMPILER_RANLIB=
+CMAKE_C_COMPILER_TARGET=
+CMAKE_C_COMPILER_VERSION=16.1.0.0
+CMAKE_C_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_56ad1/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_56ad1.dir/build.make CMakeFiles/cmTC_56ad1.dir/build
+gmake[1]: Entering directory `/tmp/ii/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_56ad1.dir/CMakeCCompilerABI.c.o
+/opt/ibm/xlC/16.1.0/bin/xlc   -qthreaded    -V -o CMakeFiles/cmTC_56ad1.dir/CMakeCCompilerABI.c.o   -c "/tmp/CMake/Modules/CMakeCCompilerABI.c"
+export XL_CONFIG=/opt/ibm/xlC/16.1.0/etc/xlc.cfg.centos.7.gcc.4.8.5:xlc
+export XL_ASMOBJFILES=/tmp/xlcASSb1cI4
+export "XL_DIS=/opt/ibm/xlC/16.1.0/exe/dis -o "CMakeFiles/cmTC_56ad1.dir/CMakeCCompilerABI.c.o" "CMakeCCompilerABI.o""
+/opt/ibm/xlC/16.1.0/exe/xlCentry -qosvar=centos.7.0 -qlanglvl=extc99 -qalias=ansi -qthreaded -D_REENTRANT -D__VACPP_MULTI__ -qtls -q64 -D_CALL_SYSV -D__NO_MATH_INLINES -D_CALL_ELF=2 -Wno-parentheses -Wno-unused-value -maltivec -qtls -q64 -qgnu_version=4.8.5 -qthreaded -qasm_as=/usr/bin/as -qc_stdinc=/opt/ibm/xlsmp/5.1.0/include:/opt/ibm/xlsmp/5.1.0/include:/opt/ibm/xlmass/9.1.0/include:/opt/ibm/xlC/16.1.0/include -qgcc_c_stdinc=/opt/ibm/xlC/16.1.0/include:/usr/local/include:/opt/ibm/xlC/16.1.0/include:/usr/include -qcomplexgccincl=/opt/ibm/xlsmp/5.1.0/include:/opt/ibm/xlmass/9.1.0/include:/opt/ibm/xlC/16.1.0/include:/opt/ibm/xlC/16.1.0/include:/usr/local/include:/opt/ibm/xlC/16.1.0/include:/usr/include -qvac_include_path=/opt/ibm/xlC/16.1.0/include -oCMakeFiles/cmTC_56ad1.dir/CMakeCCompilerABI.c.o "/tmp/CMake/Modules/CMakeCCompilerABI.c" /tmp/xlcW0T1FYwj /tmp/xlcW1fu4lVT /dev/null /tmp/xlcLWBpG6EF.lst /dev/null /tmp/xlcW2TKQJju
+export XL_BACKEND=/opt/ibm/xlC/16.1.0/exe/xlCcode
+export XL_LINKER=/usr/bin/ld
+/opt/ibm/xlC/16.1.0/exe/xlCcode -qlanglvl=extc99 -qalias=ansi -qthreaded -qtls -maltivec -qtls -qthreaded /tmp/xlcW0T1FYwj /tmp/xlcW1fu4lVT CMakeFiles/cmTC_56ad1.dir/CMakeCCompilerABI.c.o /tmp/xlcLWBpG6EB.lst /tmp/xlcW2TKQJju
+rm /tmp/xlcASSb1cI4
+rm /tmp/xlcLWBpG6E
+rm /tmp/xlcW0T1FYwj
+rm /tmp/xlcW1fu4lVT
+rm /tmp/xlcW2TKQJju
+Linking C executable cmTC_56ad1
+"/tmp/CMake/bin/cmake" -E cmake_link_script CMakeFiles/cmTC_56ad1.dir/link.txt --verbose=1
+/opt/ibm/xlC/16.1.0/bin/xlc -qthreaded    -V -Wl,-export-dynamic CMakeFiles/cmTC_56ad1.dir/CMakeCCompilerABI.c.o  -o cmTC_56ad1
+export XL_CONFIG=/opt/ibm/xlC/16.1.0/etc/xlc.cfg.centos.7.gcc.4.8.5:xlc
+/usr/bin/ld --eh-frame-hdr -Qy -melf64lppc -dynamic-linker /lib64/ld64.so.2 --enable-new-dtags /usr/lib/gcc/ppc64le-redhat-linux/4.8.5/../../../../lib64/crt1.o /usr/lib/gcc/ppc64le-redhat-linux/4.8.5/../../../../lib64/crti.o /usr/lib/gcc/ppc64le-redhat-linux/4.8.5/crtbegin.o -L/opt/ibm/xlsmp/5.1.0/lib -L/opt/ibm/xlmass/9.1.0/lib -L/opt/ibm/xlC/16.1.0/lib -R/opt/ibm/lib -L/usr/lib/gcc/ppc64le-redhat-linux/4.8.5 -L/usr/lib/gcc/ppc64le-redhat-linux/4.8.5/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/ppc64le-redhat-linux/4.8.5/../../.. -export-dynamic CMakeFiles/cmTC_56ad1.dir/CMakeCCompilerABI.c.o -o cmTC_56ad1 -lxlopt -lxl --as-needed -ldl --no-as-needed -lgcc_s --as-needed -lpthread --no-as-needed -lgcc -lm -lc -lgcc_s -lgcc /usr/lib/gcc/ppc64le-redhat-linux/4.8.5/crtend.o /usr/lib/gcc/ppc64le-redhat-linux/4.8.5/../../../../lib64/crtn.o
+rm /tmp/xlcW0S2fv6n
+rm /tmp/xlcW11wDdxY
+rm /tmp/xlcW2JqnWXy
+gmake[1]: Leaving directory `/tmp/ii/CMakeFiles/CMakeTmp'
