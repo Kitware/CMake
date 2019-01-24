@@ -666,7 +666,12 @@ bool cmListCommand::HandleTransformCommand(
     ActionDescriptor(std::string name, int arity, transform_type transform)
       : Name(std::move(name))
       , Arity(arity)
+#if defined(__GNUC__) && __GNUC__ == 6 && defined(__aarch64__)
+      // std::function move constructor miscompiles on this architecture
+      , Transform(transform)
+#else
       , Transform(std::move(transform))
+#endif
     {
     }
 
