@@ -2539,7 +2539,8 @@ cmMessenger* cmake::GetMessenger() const
 
 int cmake::Build(int jobs, const std::string& dir, const std::string& target,
                  const std::string& config,
-                 const std::vector<std::string>& nativeOptions, bool clean)
+                 const std::vector<std::string>& nativeOptions, bool clean,
+                 bool verbose)
 {
 
   this->SetHomeDirectory("");
@@ -2592,11 +2593,11 @@ int cmake::Build(int jobs, const std::string& dir, const std::string& target,
     return 1;
   }
   projName = cachedProjectName;
-  bool verbose = false;
+
   const char* cachedVerbose =
     this->State->GetCacheEntryValue("CMAKE_VERBOSE_MAKEFILE");
-  if (cachedVerbose) {
-    verbose = cmSystemTools::IsOn(cachedVerbose);
+  if (cmSystemTools::IsOn(cachedVerbose)) {
+    verbose = true;
   }
 
 #ifdef CMAKE_HAVE_VS_GENERATORS

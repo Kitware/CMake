@@ -68,6 +68,8 @@ static const char* cmDocumentationUsageNote[][2] = {
     "  --clean-first  = Build target 'clean' first, then build.\n"            \
     "                   (To clean only, use --target 'clean'.)\n"             \
     "  --use-stderr   = Ignored.  Behavior is default in CMake >= 3.0.\n"     \
+    "  -v --verbose   = Enable verbose output - if supported - including\n"   \
+    "                   the build commands to be executed. \n"                \
     "  --             = Pass remaining options to the native tool.\n"
 
 static const char* cmDocumentationOptions[][2] = {
@@ -395,6 +397,7 @@ static int do_build(int ac, char const* const* av)
   std::string dir;
   std::vector<std::string> nativeOptions;
   bool clean = false;
+  bool verbose = cmSystemTools::HasEnv("VERBOSE");
   bool hasTarget = false;
 
   enum Doing
@@ -434,6 +437,10 @@ static int do_build(int ac, char const* const* av)
       doing = DoingConfig;
     } else if (strcmp(av[i], "--clean-first") == 0) {
       clean = true;
+      doing = DoingNone;
+    } else if ((strcmp(av[i], "--verbose") == 0) ||
+               (strcmp(av[i], "-v") == 0)) {
+      verbose = true;
       doing = DoingNone;
     } else if (strcmp(av[i], "--use-stderr") == 0) {
       /* tolerate legacy option */
@@ -493,7 +500,7 @@ static int do_build(int ac, char const* const* av)
   cmake cm(cmake::RoleInternal, cmState::Unknown);
   cmSystemTools::SetMessageCallback(cmakemainMessageCallback, &cm);
   cm.SetProgressCallback(cmakemainProgressCallback, &cm);
-  return cm.Build(jobs, dir, target, config, nativeOptions, clean);
+  return cm.Build(jobs, dir, target, config, nativeOptions, clean, verbose);
 #endif
 }
 

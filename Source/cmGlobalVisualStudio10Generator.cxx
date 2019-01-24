@@ -961,6 +961,10 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     makeCommand.add("/p:CL_MPCount=1");
   }
 
+  // Respect the verbosity: 'n' normal will show build commands
+  //                        'm' minimal only the build step's title
+  makeCommand.add(std::string("/v:") + ((verbose) ? "n" : "m"));
+
   makeCommand.add(makeOptions.begin(), makeOptions.end());
 }
 

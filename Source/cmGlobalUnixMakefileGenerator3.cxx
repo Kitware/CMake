@@ -493,7 +493,7 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
   GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
   const std::string& /*projectName*/, const std::string& /*projectDir*/,
   const std::string& targetName, const std::string& /*config*/, bool fast,
-  int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
+  int jobs, bool verbose, std::vector<std::string> const& makeOptions)
 {
   std::unique_ptr<cmMakefile> mfu;
   cmMakefile* mf;
@@ -510,6 +510,13 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     mf = mfu.get();
   }
 
+  // Make it possible to set verbosity also from command line
+  if (verbose) {
+    makeCommand.add(cmSystemTools::GetCMakeCommand());
+    makeCommand.add("-E");
+    makeCommand.add("env");
+    makeCommand.add("VERBOSE=1");
+  }
   makeCommand.add(this->SelectMakeProgram(makeProgram));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
