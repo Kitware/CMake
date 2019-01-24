@@ -2161,6 +2161,32 @@ bool SystemTools::FilesDiffer(const std::string& source,
   return false;
 }
 
+bool SystemTools::TextFilesDiffer(const std::string& path1,
+                                  const std::string& path2)
+{
+  kwsys::ifstream if1(path1.c_str());
+  kwsys::ifstream if2(path2.c_str());
+  if (!if1 || !if2) {
+    return true;
+  }
+
+  for (;;) {
+    std::string line1, line2;
+    bool hasData1 = GetLineFromStream(if1, line1);
+    bool hasData2 = GetLineFromStream(if2, line2);
+    if (hasData1 != hasData2) {
+      return true;
+    }
+    if (!hasData1) {
+      break;
+    }
+    if (line1 != line2) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Blockwise copy source to destination file
  */
@@ -2979,10 +3005,36 @@ bool SystemTools::FileIsDirectory(const std::string& inName)
 bool SystemTools::FileIsSymlink(const std::string& name)
 {
 #if defined(_WIN32)
-  DWORD attr =
-    GetFileAttributesW(Encoding::ToWindowsExtendedPath(name).c_str());
+  std::wstring path = Encoding::ToWindowsExtendedPath(name);
+  DWORD attr = GetFileAttributesW(path.c_str());
   if (attr != INVALID_FILE_ATTRIBUTES) {
-    return (attr & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
+    if ((attr & FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
+      // FILE_ATTRIBUTE_REPARSE_POINT means:
+      // * a file or directory that has an associated reparse point, or
+      // * a file that is a symbolic link.
+      HANDLE hFile = CreateFileW(
+        path.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+        FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, NULL);
+      if (hFile == INVALID_HANDLE_VALUE) {
+        return false;
+      }
+      byte buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
+      DWORD bytesReturned = 0;
+      if (!DeviceIoControl(hFile, FSCTL_GET_REPARSE_POINT, NULL, 0, buffer,
+                           MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &bytesReturned,
+                           NULL)) {
+        CloseHandle(hFile);
+        // Since FILE_ATTRIBUTE_REPARSE_POINT is set this file must be
+        // a symbolic link if it is not a reparse point.
+        return GetLastError() == ERROR_NOT_A_REPARSE_POINT;
+      }
+      CloseHandle(hFile);
+      ULONG reparseTag =
+        reinterpret_cast<PREPARSE_GUID_DATA_BUFFER>(&buffer[0])->ReparseTag;
+      return (reparseTag == IO_REPARSE_TAG_SYMLINK) ||
+        (reparseTag == IO_REPARSE_TAG_MOUNT_POINT);
+    }
+    return false;
   } else {
     return false;
   }
