@@ -887,9 +887,20 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   bool appendAllImplicitDirs) const
 {
   std::vector<BT<std::string>> result;
-
   // Do not repeat an include path.
   std::set<std::string> emitted;
+
+  auto emitDir = [&result, &emitted](std::string const& dir) {
+    if (emitted.insert(dir).second) {
+      result.emplace_back(dir);
+    }
+  };
+
+  auto emitBT = [&result, &emitted](BT<std::string> const& dir) {
+    if (emitted.insert(dir.Value).second) {
+      result.emplace_back(dir);
+    }
+  };
 
   // When automatic include directories are requested for a build then
   // include the source and binary directories at the beginning of the
@@ -900,21 +911,9 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   // per-source-file include paths.
   if (this->Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR")) {
     // Current binary directory
-    {
-      std::string binDir =
-        this->StateSnapshot.GetDirectory().GetCurrentBinary();
-      if (emitted.insert(binDir).second) {
-        result.emplace_back(std::move(binDir));
-      }
-    }
+    emitDir(this->StateSnapshot.GetDirectory().GetCurrentBinary());
     // Current source directory
-    {
-      std::string srcDir =
-        this->StateSnapshot.GetDirectory().GetCurrentSource();
-      if (emitted.insert(srcDir).second) {
-        result.emplace_back(std::move(srcDir));
-      }
-    }
+    emitDir(this->StateSnapshot.GetDirectory().GetCurrentSource());
   }
 
   if (!target) {
@@ -923,6 +922,11 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
 
   // Implicit include directories
   std::vector<std::string> implicitDirs;
+  std::set<std::string> implicitSet;
+  // Checks if this is not an implicit include directory
+  auto notImplicit = [&implicitSet](std::string const& dir) {
+    return (implicitSet.find(dir) == implicitSet.end());
+  };
   {
     std::string rootPath;
     if (const char* sysrootCompile =
@@ -932,6 +936,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
       rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
     }
 
+    // Raw list of implicit include directories
     std::vector<std::string> impDirVec;
 
     // Get platform-wide implicit directories.
@@ -949,12 +954,11 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     }
 
     for (std::string const& i : impDirVec) {
-      {
-        std::string d = rootPath + i;
-        cmSystemTools::ConvertToUnixSlashes(d);
-        emitted.insert(std::move(d));
+      std::string imd = rootPath + i;
+      cmSystemTools::ConvertToUnixSlashes(imd);
+      if (implicitSet.insert(imd).second) {
+        implicitDirs.emplace_back(std::move(imd));
       }
-      implicitDirs.push_back(i);
     }
   }
 
@@ -967,30 +971,31 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   if (this->Makefile->IsOn("CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE")) {
     std::string const &topSourceDir = this->GetState()->GetSourceDirectory(),
                       &topBinaryDir = this->GetState()->GetBinaryDirectory();
-    for (BT<std::string> const& i : userDirs) {
+    for (BT<std::string> const& udr : userDirs) {
       // Emit this directory only if it is a subdirectory of the
       // top-level source or binary tree.
-      if (cmSystemTools::ComparePath(i.Value, topSourceDir) ||
-          cmSystemTools::ComparePath(i.Value, topBinaryDir) ||
-          cmSystemTools::IsSubDirectory(i.Value, topSourceDir) ||
-          cmSystemTools::IsSubDirectory(i.Value, topBinaryDir)) {
-        if (emitted.insert(i.Value).second) {
-          result.push_back(i);
+      if (cmSystemTools::ComparePath(udr.Value, topSourceDir) ||
+          cmSystemTools::ComparePath(udr.Value, topBinaryDir) ||
+          cmSystemTools::IsSubDirectory(udr.Value, topSourceDir) ||
+          cmSystemTools::IsSubDirectory(udr.Value, topBinaryDir)) {
+        if (notImplicit(udr.Value)) {
+          emitBT(udr);
         }
       }
     }
   }
 
-  // Construct the final ordered include directory list.
-  for (BT<std::string> const& i : userDirs) {
-    if (emitted.insert(i.Value).second) {
-      result.push_back(i);
+  // Emit remaining non implicit user direcories.
+  for (BT<std::string> const& udr : userDirs) {
+    if (notImplicit(udr.Value)) {
+      emitBT(udr);
     }
   }
 
+  // Sort result
   MoveSystemIncludesToEnd(result, config, lang, target);
 
-  // Add standard include directories for this language.
+  // Append standard include directories for this language.
   {
     std::vector<std::string> userStandardDirs;
     {
@@ -1001,26 +1006,27 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
       cmSystemTools::ExpandListArgument(value, userStandardDirs);
     }
     userDirs.reserve(userDirs.size() + userStandardDirs.size());
-    for (std::string& d : userStandardDirs) {
-      cmSystemTools::ConvertToUnixSlashes(d);
-      result.emplace_back(d);
-      userDirs.emplace_back(std::move(d));
+    for (std::string& usd : userStandardDirs) {
+      cmSystemTools::ConvertToUnixSlashes(usd);
+      if (notImplicit(usd)) {
+        emitDir(usd);
+      }
+      userDirs.emplace_back(std::move(usd));
     }
   }
 
+  // Append compiler implicit include directories
   if (!stripImplicitDirs) {
-    // Append only implicit directories that were requested by the user
-    for (std::string const& i : implicitDirs) {
-      if (std::find(userDirs.begin(), userDirs.end(), i) != userDirs.end()) {
-        result.emplace_back(i);
+    // Append implicit directories that were requested by the user only
+    for (BT<std::string> const& udr : userDirs) {
+      if (!notImplicit(udr.Value)) {
+        emitBT(udr);
       }
     }
-    // Append remaining implicit directories on demand
+    // Append remaining implicit directories (on demand)
     if (appendAllImplicitDirs) {
-      for (std::string const& i : implicitDirs) {
-        if (std::find(result.begin(), result.end(), i) == result.end()) {
-          result.emplace_back(i);
-        }
+      for (std::string& imd : implicitDirs) {
+        emitDir(imd);
       }
     }
   }
