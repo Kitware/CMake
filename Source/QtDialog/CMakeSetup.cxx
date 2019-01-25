@@ -30,7 +30,8 @@ static const char* cmDocumentationUsage[][2] = {
   { nullptr,
     "  cmake-gui [options]\n"
     "  cmake-gui [options] <path-to-source>\n"
-    "  cmake-gui [options] <path-to-existing-build>" },
+    "  cmake-gui [options] <path-to-existing-build>\n"
+    "  cmake-gui [options] -S <path-to-source> -B <path-to-build>\n" },
   { nullptr, nullptr }
 };
 
@@ -142,23 +143,53 @@ int main(int argc, char** argv)
   CMakeSetupDialog dialog;
   dialog.show();
 
-  cmsys::CommandLineArguments arg;
-  arg.Initialize(argc2, argv2);
+  QStringList args = QApplication::arguments();
   std::string binaryDirectory;
   std::string sourceDirectory;
-  typedef cmsys::CommandLineArguments argT;
-  arg.AddArgument("-B", argT::CONCAT_ARGUMENT, &binaryDirectory,
-                  "Binary Directory");
-  arg.AddArgument("-S", argT::CONCAT_ARGUMENT, &sourceDirectory,
-                  "Source Directory");
-  // do not complain about unknown options
-  arg.StoreUnusedArguments(true);
-  arg.Parse();
+  for (int i = 1; i < args.size(); ++i) {
+    const QString& arg = args[i];
+    if (arg.startsWith("-S")) {
+      QString path = arg.mid(2);
+      if (path.isEmpty()) {
+        ++i;
+        if (i >= args.size()) {
+          std::cerr << "No source directory specified for -S" << std::endl;
+          return 1;
+        }
+        path = args[i];
+        if (path[0] == '-') {
+          std::cerr << "No source directory specified for -S" << std::endl;
+          return 1;
+        }
+      }
+
+      sourceDirectory =
+        cmSystemTools::CollapseFullPath(path.toLocal8Bit().data());
+      cmSystemTools::ConvertToUnixSlashes(sourceDirectory);
+    } else if (arg.startsWith("-B")) {
+      QString path = arg.mid(2);
+      if (path.isEmpty()) {
+        ++i;
+        if (i >= args.size()) {
+          std::cerr << "No build directory specified for -B" << std::endl;
+          return 1;
+        }
+        path = args[i];
+        if (path[0] == '-') {
+          std::cerr << "No build directory specified for -B" << std::endl;
+          return 1;
+        }
+      }
+
+      binaryDirectory =
+        cmSystemTools::CollapseFullPath(path.toLocal8Bit().data());
+      cmSystemTools::ConvertToUnixSlashes(binaryDirectory);
+    }
+  }
   if (!sourceDirectory.empty() && !binaryDirectory.empty()) {
     dialog.setSourceDirectory(QString::fromLocal8Bit(sourceDirectory.c_str()));
     dialog.setBinaryDirectory(QString::fromLocal8Bit(binaryDirectory.c_str()));
   } else {
-    QStringList args = QApplication::arguments();
     if (args.count() == 2) {
       std::string filePath =
         cmSystemTools::CollapseFullPath(args[1].toLocal8Bit().data());
