@@ -193,8 +193,9 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
   unsigned long lastLine;
   unsigned long parenDepth = 0;
   this->Separation = SeparationOkay;
-  while ((lastLine = cmListFileLexer_GetCurrentLine(this->Lexer),
-          token = cmListFileLexer_Scan(this->Lexer))) {
+  while (
+    (static_cast<void>(lastLine = cmListFileLexer_GetCurrentLine(this->Lexer)),
+     token = cmListFileLexer_Scan(this->Lexer))) {
     if (token->type == cmListFileLexer_Token_Space ||
         token->type == cmListFileLexer_Token_Newline) {
       this->Separation = SeparationOkay;
