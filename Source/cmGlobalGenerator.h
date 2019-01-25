@@ -432,6 +432,8 @@ public:
 
   std::string MakeSilentFlag;
 
+  int RecursionDepth;
+
 protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend

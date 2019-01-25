@@ -78,6 +78,7 @@ cmCTestScriptHandler::cmCTestScriptHandler()
   this->EmptyBinDir = false;
   this->EmptyBinDirOnce = false;
   this->Makefile = nullptr;
+  this->ParentMakefile = nullptr;
   this->CMake = nullptr;
   this->GlobalGenerator = nullptr;
 
@@ -117,6 +118,7 @@ void cmCTestScriptHandler::Initialize()
 
   delete this->Makefile;
   this->Makefile = nullptr;
+  this->ParentMakefile = nullptr;
 
   delete this->GlobalGenerator;
   this->GlobalGenerator = nullptr;
@@ -292,6 +294,10 @@ void cmCTestScriptHandler::CreateCMake()
   snapshot.GetDirectory().SetCurrentSource(cwd);
   snapshot.GetDirectory().SetCurrentBinary(cwd);
   this->Makefile = new cmMakefile(this->GlobalGenerator, snapshot);
+  if (this->ParentMakefile) {
+    this->Makefile->SetRecursionDepth(
+      this->ParentMakefile->GetRecursionDepth());
+  }
 
   this->CMake->SetProgressCallback(ctestScriptProgressCallback, this->CTest);
 
@@ -891,11 +897,13 @@ void cmCTestScriptHandler::RestoreBackupDirectories()
   }
 }
 
-bool cmCTestScriptHandler::RunScript(cmCTest* ctest, const char* sname,
-                                     bool InProcess, int* returnValue)
+bool cmCTestScriptHandler::RunScript(cmCTest* ctest, cmMakefile* mf,
+                                     const char* sname, bool InProcess,
+                                     int* returnValue)
 {
   cmCTestScriptHandler* sh = new cmCTestScriptHandler();
   sh->SetCTestInstance(ctest);
+  sh->ParentMakefile = mf;
   sh->AddConfigurationScript(sname, InProcess);
   int res = sh->ProcessHandler();
   if (returnValue) {
