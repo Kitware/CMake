@@ -10,17 +10,18 @@ project(Minimal NONE)
 #
 set(targets
   aix-C-XL-13.1.3 aix-CXX-XL-13.1.3
-  craype-C-Cray-8.7 craype-CXX-Cray-8.7
-  craype-C-GNU-7.3.0 craype-CXX-GNU-7.3.0
+  craype-C-Cray-8.7 craype-CXX-Cray-8.7 craype-Fortran-Cray-8.7
+  craype-C-GNU-7.3.0 craype-CXX-GNU-7.3.0 craype-Fortran-GNU-7.3.0
   craype-C-Intel-18.0.2.20180210 craype-CXX-Intel-18.0.2.20180210
+    craype-Fortran-Intel-18.0.2.20180210
   darwin-C-AppleClang-8.0.0.8000042 darwin-CXX-AppleClang-8.0.0.8000042
     darwin_nostdinc-C-AppleClang-8.0.0.8000042
     darwin_nostdinc-CXX-AppleClang-8.0.0.8000042
   empty-C empty-CXX
-  freebsd-C-Clang-3.3.0 freebsd-CXX-Clang-3.3.0
-  linux-C-GNU-7.3.0 linux-CXX-GNU-7.3.0
+  freebsd-C-Clang-3.3.0 freebsd-CXX-Clang-3.3.0 freebsd-Fortran-GNU-4.6.4
+  linux-C-GNU-7.3.0 linux-CXX-GNU-7.3.0 linux-Fortran-GNU-7.3.0
   linux-C-Intel-18.0.0.20170811 linux-CXX-Intel-18.0.0.20170811
-  linux-C-XL-12.1.0 linux-CXX-XL-12.1.0
+  linux-C-XL-12.1.0 linux-CXX-XL-12.1.0 linux-Fortran-XL-14.1.0
     linux_nostdinc-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
     linux_nostdinc_i-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
   linux-C-XL-16.1.0.0 linux-CXX-XL-16.1.0.0

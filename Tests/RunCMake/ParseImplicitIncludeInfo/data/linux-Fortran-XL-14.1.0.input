@@ -1,0 +1,50 @@
+CMAKE_LANG=Fortran
+CMAKE_Fortran_COMPILER_ABI=ELF
+CMAKE_Fortran_COMPILER_AR=
+CMAKE_Fortran_COMPILER_ARCHITECTURE_ID=
+CMAKE_Fortran_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_Fortran_COMPILER_ID=XL
+CMAKE_Fortran_COMPILER_LAUNCHER=
+CMAKE_Fortran_COMPILER_LOADED=1
+CMAKE_Fortran_COMPILER_RANLIB=
+CMAKE_Fortran_COMPILER_TARGET=
+CMAKE_Fortran_COMPILER_VERSION=14.1.0
+CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_d05a9/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_d05a9.dir/build.make CMakeFiles/cmTC_d05a9.dir/build
+gmake[1]: Entering directory `/tmp/ii/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_d05a9.dir/CMakeFortranCompilerABI.F.o
+/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/bin/xlf    -qthreaded -qhalt=e    -V -c /soft/buildtools/cmake/3.5.2/share/cmake-3.5/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_d05a9.dir/CMakeFortranCompilerABI.F.o
+export XL_CONFIG=/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/etc/xlf.cfg.rhel6.9.gcc447:xlf
+export XLF_USR_CONFIG=/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/etc/V1R2M4.xlf.cfg.rhel6.9.gcc447
+export "XL_DIS=/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/exe/dis -o "CMakeFiles/cmTC_d05a9.dir/CMakeFortranCompilerABI.F.o" "CMakeFortranCompilerABI.o""
+/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/exe/cpp /soft/buildtools/cmake/3.5.2/share/cmake-3.5/Modules/CMakeFortranCompilerABI.F /tmp/F841970obBXFf -C -I/soft/compilers/ibmcmp-oct2017/xlmass/bg/7.3/include -I/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/include
+/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/exe/xlfentry /tmp/F841970obBXFf /tmp/F841970QXWvB4 /tmp/F841970QXWvB4F.lst xlfsmsg.cat xlfmsg.cat /soft/buildtools/cmake/3.5.2/share/cmake-3.5/Modules/CMakeFortranCompilerABI.F "OSVAR(rhel.6.9)" NOZEROSIZE SAVE "ALIAS(intptr)" "POSITION(appendold)" "XLF90(noautodealloc,nosignedzero,oldpad)" "XLF77(intarg,intxor,persistent,noleadzero,gedit77,noblankpad,oldboz,softeof)" "XLF2003(nopolymorphic,nobozlitargs,nostopexcept,novolatile,noautorealloc,oldnaninf)" "XLF2008(nocheckpresence)" 64 "GNU_VERSION(4.4.7)" "SAVEOPTFILE(/tmp/optf.41970mydp8V)" "SAVEVERSIONFILE(/tmp/version.41970sjsfYH)" THREADED "HALT(e)" "WSTREAMS(/tmp/F8419704oFzOth1,/tmp/F8419704oFzOtb1,/tmp/F8419704oFzOts1)" "DEFMSG(/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/msg/en_US)" -I/soft/compilers/ibmcmp-oct2017/xlmass/bg/7.3/include -I/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/include
+COMMAND LINE  1520-061 (W) The XLF77(PERSISTENT) option stores entities in static storage.  This may affect the thread safety of your code.
+COMMAND LINE  1520-061 (W) The SAVE option stores entities in static storage.  This may affect the thread safety of your code.
+** cmakefortrancompilerabi   === End of Compilation 1 ===
+rm /tmp/F841970obBXFf
+export XL_FRONTEND=/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/exe/xlfentry
+export XL_ASTI=/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/exe/xlfhot
+export XL_BACKEND=/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/exe/xlfcode
+export XL_LINKER=/usr/bin/ld
+export XL_BOLT=/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/exe/bolt
+/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/exe/xlfhot /tmp/F8419704oFzOth1 /tmp/F8419704oFzOth2 /tmp/F8419704oFzOtb1 /tmp/F8419704oFzOtb2 /tmp/F8419704oFzOts1 /tmp/F8419704oFzOts2 /tmp/F841970QXWvB4 /tmp/F841970QXWvB4A.lst
+export XL_FRONTEND=/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/exe/xlfentry
+export XL_ASTI=/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/exe/xlfhot
+export XL_BACKEND=/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/exe/xlfcode
+export XL_LINKER=/usr/bin/ld
+export XL_BOLT=/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/exe/bolt
+/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/exe/xlfcode /tmp/F8419704oFzOth2 /tmp/F8419704oFzOtb2 CMakeFiles/cmTC_d05a9.dir/CMakeFortranCompilerABI.F.o /tmp/F841970QXWvB4B.lst /tmp/F8419704oFzOts2
+1501-510  Compilation successful for file CMakeFortranCompilerABI.F.
+rm /tmp/optf.41970mydp8V
+Linking Fortran executable cmTC_d05a9
+/soft/buildtools/cmake/3.5.2/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d05a9.dir/link.txt --verbose=1
+/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/bin/xlf    -V  -qthreaded -qhalt=e  CMakeFiles/cmTC_d05a9.dir/CMakeFortranCompilerABI.F.o  -o cmTC_d05a9 -Wl,-export-dynamic
+export XL_CONFIG=/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/etc/xlf.cfg.rhel6.9.gcc447:xlf
+export XLF_USR_CONFIG=/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/etc/V1R2M4.xlf.cfg.rhel6.9.gcc447
+/usr/bin/ld --eh-frame-hdr -Qy -melf64ppc /usr/lib/gcc/ppc64-redhat-linux/4.4.7/../../../../lib64/crt1.o /usr/lib/gcc/ppc64-redhat-linux/4.4.7/../../../../lib64/crti.o /usr/lib/gcc/ppc64-redhat-linux/4.4.7/crtbegin.o -L/soft/compilers/ibmcmp-oct2017/xlsmp/bg/3.1/lib64 -L/soft/compilers/ibmcmp-oct2017/xlmass/bg/7.3/lib64 -L/soft/compilers/ibmcmp-oct2017/xlf/bg/14.1/lib64 -R/soft/compilers/ibmcmp-oct2017/lib64/bg -L/usr/lib/gcc/ppc64-redhat-linux/4.4.7 -L/usr/lib/gcc/ppc64-redhat-linux/4.4.7 -L/usr/lib/gcc/ppc64-redhat-linux/4.4.7/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/ppc64-redhat-linux/4.4.7/../../.. CMakeFiles/cmTC_d05a9.dir/CMakeFortranCompilerABI.F.o -o cmTC_d05a9 -export-dynamic -dynamic-linker /lib64/ld64.so.1 -lxlf90 -lxlopt -lxlomp_ser -lxl -lxlfmath -lgcc_s -ldl -lrt -lpthread -lgcc -lm -lc -lgcc_s -lgcc /usr/lib/gcc/ppc64-redhat-linux/4.4.7/crtend.o /usr/lib/gcc/ppc64-redhat-linux/4.4.7/../../../../lib64/crtn.o
+rm /tmp/optf.419839KEged
+gmake[1]: Leaving directory `/tmp/ii/CMakeFiles/CMakeTmp'

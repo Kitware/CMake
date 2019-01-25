@@ -13,8 +13,8 @@ function(cmake_parse_implicit_include_line line lang id_var log_var state_var)
 
   # Cray compiler (from cray wrapper, via PrgEnv-cray)
   if("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "Cray" AND
-     "${line}" MATCHES "^/" AND "${line}" MATCHES "/ccfe " AND
-     "${line}" MATCHES "-isystem")
+     "${line}" MATCHES "^/" AND "${line}" MATCHES "/ccfe |/ftnfe " AND
+     "${line}" MATCHES " -isystem| -I")
     string(REGEX MATCHALL " (-I ?|-isystem )([^ ]*)" incs "${line}")
     foreach(inc IN LISTS incs)
       string(REGEX REPLACE " (-I ?|-isystem )([^ ]*)" "\\2" idir "${inc}")
@@ -46,10 +46,16 @@ function(cmake_parse_implicit_include_line line lang id_var log_var state_var)
     endif()
   endif()
 
-  # XL C/CXX compiler
-  if("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "XL" AND
-     "${line}" MATCHES "^/" AND "${line}" MATCHES "/xlcentry |/xlCentry " AND
-     "${line}" MATCHES " -qosvar=")
+  # XL compiler
+  if("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "XL" AND "${line}" MATCHES "^/"
+     AND ( ("${lang}" STREQUAL "Fortran" AND
+            "${line}" MATCHES "/xl[fF]entry " AND
+            "${line}" MATCHES "OSVAR\\([^ ]+\\)")
+           OR
+            (  ("${lang}" STREQUAL "C" OR "${lang}" STREQUAL "CXX") AND
+            "${line}" MATCHES "/xl[cC]entry " AND
+            "${line}" MATCHES " -qosvar=")
+         )  )
     # -qnostdinc cancels other stdinc flags, even if present
     string(FIND "${line}" " -qnostdinc" nostd)
     if(NOT ${nostd} EQUAL -1)
