@@ -115,8 +115,10 @@ typedef std::unordered_map<std::string, Json::Value> JsonValueMapType;
 
 } // namespace
 
-static bool cmakeCheckStampFile(const char* stampName, bool verbose = true);
-static bool cmakeCheckStampList(const char* stampList, bool verbose = true);
+static bool cmakeCheckStampFile(const std::string& stampName,
+                                bool verbose = true);
+static bool cmakeCheckStampList(const std::string& stampList,
+                                bool verbose = true);
 
 void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
                             void* ctx, const char* /*unused*/,
@@ -1629,13 +1631,13 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
 
   // If we are given a stamp list file check if it is really out of date.
   if (!this->CheckStampList.empty() &&
-      cmakeCheckStampList(this->CheckStampList.c_str())) {
+      cmakeCheckStampList(this->CheckStampList)) {
     return 0;
   }
 
   // If we are given a stamp file check if it is really out of date.
   if (!this->CheckStampFile.empty() &&
-      cmakeCheckStampFile(this->CheckStampFile.c_str())) {
+      cmakeCheckStampFile(this->CheckStampFile)) {
     return 0;
   }
 
@@ -2416,7 +2418,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   return 0;
 }
 
-static bool cmakeCheckStampFile(const char* stampName, bool verbose)
+static bool cmakeCheckStampFile(const std::string& stampName, bool verbose)
 {
   // The stamp file does not exist.  Use the stamp dependencies to
   // determine whether it is really out of date.  This works in
@@ -2461,12 +2463,11 @@ static bool cmakeCheckStampFile(const char* stampName, bool verbose)
   // by the VS IDE due to a "rebuild" request.  Restore it atomically.
   std::ostringstream stampTempStream;
   stampTempStream << stampName << ".tmp" << cmSystemTools::RandomSeed();
-  std::string stampTempString = stampTempStream.str();
-  const char* stampTemp = stampTempString.c_str();
+  std::string stampTemp = stampTempStream.str();
   {
     // TODO: Teach cmGeneratedFileStream to use a random temp file (with
     // multiple tries in unlikely case of conflict) and use that here.
-    cmsys::ofstream stamp(stampTemp);
+    cmsys::ofstream stamp(stampTemp.c_str());
     stamp << "# CMake generation timestamp file for this directory.\n";
   }
   if (cmSystemTools::RenameFile(stampTemp, stampName)) {
@@ -2480,11 +2481,11 @@ static bool cmakeCheckStampFile(const char* stampName, bool verbose)
     return true;
   }
   cmSystemTools::RemoveFile(stampTemp);
-  cmSystemTools::Error("Cannot restore timestamp ", stampName);
+  cmSystemTools::Error("Cannot restore timestamp ", stampName.c_str());
   return false;
 }
 
-static bool cmakeCheckStampList(const char* stampList, bool verbose)
+static bool cmakeCheckStampList(const std::string& stampList, bool verbose)
 {
   // If the stamp list does not exist CMake must rerun to generate it.
   if (!cmSystemTools::FileExists(stampList)) {
@@ -2492,7 +2493,7 @@ static bool cmakeCheckStampList(const char* stampList, bool verbose)
               << "is missing.\n";
     return false;
   }
-  cmsys::ifstream fin(stampList);
+  cmsys::ifstream fin(stampList.c_str());
   if (!fin) {
     std::cout << "CMake is re-running because generate.stamp.list "
               << "could not be read.\n";
@@ -2502,7 +2503,7 @@ static bool cmakeCheckStampList(const char* stampList, bool verbose)
   // Check each stamp.
   std::string stampName;
   while (cmSystemTools::GetLineFromStream(fin, stampName)) {
-    if (!cmakeCheckStampFile(stampName.c_str(), verbose)) {
+    if (!cmakeCheckStampFile(stampName, verbose)) {
       return false;
     }
   }
@@ -2623,7 +2624,7 @@ int cmake::Build(int jobs, const std::string& dir, const std::string& target,
       }
     }
 
-    if (!cmakeCheckStampList(stampList.c_str(), false)) {
+    if (!cmakeCheckStampList(stampList, false)) {
       // Correctly initialize the home (=source) and home output (=binary)
       // directories, which is required for running the generation step.
       std::string homeOrig = this->GetHomeDirectory();

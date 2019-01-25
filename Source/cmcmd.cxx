@@ -530,7 +530,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
     // Rename a file or directory
     if (args[1] == "rename" && args.size() == 4) {
-      if (!cmSystemTools::RenameFile(args[2].c_str(), args[3].c_str())) {
+      if (!cmSystemTools::RenameFile(args[2], args[3])) {
         std::string e = cmSystemTools::GetLastSystemError();
         std::cerr << "Error renaming from \"" << args[2] << "\" to \""
                   << args[3] << "\": " << e << "\n";
