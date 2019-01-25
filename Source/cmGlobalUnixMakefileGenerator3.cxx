@@ -574,7 +574,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(
         commands.clear();
         std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
         tmp += "Makefile2";
-        commands.push_back(lg->GetRecursiveMakeCall(tmp.c_str(), name));
+        commands.push_back(lg->GetRecursiveMakeCall(tmp, name));
         depends.clear();
         if (regenerate) {
           depends.emplace_back("cmake_check_build_system");
@@ -594,7 +594,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(
         localName = name;
         localName += "/fast";
         commands.push_back(
-          lg->GetRecursiveMakeCall(makefileName.c_str(), makeTargetName));
+          lg->GetRecursiveMakeCall(makefileName, makeTargetName));
         lg->WriteMakeRule(ruleFileStream, "fast build rule for target.",
                           localName, depends, commands, true);
 
@@ -608,7 +608,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(
           depends.clear();
           commands.clear();
           commands.push_back(
-            lg->GetRecursiveMakeCall(makefileName.c_str(), makeTargetName));
+            lg->GetRecursiveMakeCall(makefileName, makeTargetName));
           lg->WriteMakeRule(ruleFileStream,
                             "Manual pre-install relink rule for target.",
                             localName, depends, commands, true);
@@ -659,12 +659,12 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       makeTargetName = localName;
       makeTargetName += "/depend";
       commands.push_back(
-        lg->GetRecursiveMakeCall(makefileName.c_str(), makeTargetName));
+        lg->GetRecursiveMakeCall(makefileName, makeTargetName));
 
       makeTargetName = localName;
       makeTargetName += "/build";
       commands.push_back(
-        lg->GetRecursiveMakeCall(makefileName.c_str(), makeTargetName));
+        lg->GetRecursiveMakeCall(makefileName, makeTargetName));
 
       // Write the rule.
       localName += "/all";
@@ -728,7 +728,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       }
       std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
       tmp += "Makefile2";
-      commands.push_back(lg->GetRecursiveMakeCall(tmp.c_str(), localName));
+      commands.push_back(lg->GetRecursiveMakeCall(tmp, localName));
       {
         std::ostringstream progCmd;
         progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
@@ -761,8 +761,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
         localName += "/preinstall";
         depends.clear();
         commands.clear();
-        commands.push_back(
-          lg->GetRecursiveMakeCall(makefileName.c_str(), localName));
+        commands.push_back(lg->GetRecursiveMakeCall(makefileName, localName));
         lg->WriteMakeRule(ruleFileStream,
                           "Pre-install relink rule for target.", localName,
                           depends, commands, true);
@@ -783,7 +782,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       depends.clear();
       commands.clear();
       commands.push_back(
-        lg->GetRecursiveMakeCall(makefileName.c_str(), makeTargetName));
+        lg->GetRecursiveMakeCall(makefileName, makeTargetName));
       lg->WriteMakeRule(ruleFileStream, "clean rule for target.",
                         makeTargetName, depends, commands, true);
       commands.clear();

@@ -435,8 +435,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   objFullPath = cmSystemTools::CollapseFullPath(objFullPath);
   std::string srcFullPath =
     cmSystemTools::CollapseFullPath(source.GetFullPath());
-  this->LocalGenerator->AddImplicitDepends(
-    this->GeneratorTarget, lang, objFullPath.c_str(), srcFullPath.c_str());
+  this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, lang,
+                                           objFullPath, srcFullPath);
 }
 
 void cmMakefileTargetGenerator::WriteObjectBuildFile(
@@ -1213,8 +1213,7 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
     std::string objFullPath = cmSystemTools::CollapseFullPath(outputs[0]);
     std::string srcFullPath = cmSystemTools::CollapseFullPath(idi.second);
     this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, idi.first,
-                                             objFullPath.c_str(),
-                                             srcFullPath.c_str());
+                                             objFullPath, srcFullPath);
   }
 }
 
@@ -1249,7 +1248,7 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
     *this->BuildFileStream << " " << lineContinue << "\n";
     *this->BuildFileStream
       << cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
-           obj.c_str(), useWatcomQuote);
+           obj, useWatcomQuote);
   }
   *this->BuildFileStream << "\n";
 
@@ -1272,7 +1271,7 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
     *this->BuildFileStream << " " << lineContinue << "\n";
     *this->BuildFileStream
       << cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
-           obj.c_str(), useWatcomQuote);
+           obj, useWatcomQuote);
   }
   *this->BuildFileStream << "\n"
                          << "\n";

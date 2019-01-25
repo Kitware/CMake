@@ -964,8 +964,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         std::unique_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator(&mf));
 
         // Actually scan dependencies.
-        return lgd->UpdateDependencies(depInfo.c_str(), verbose, color) ? 0
-                                                                        : 2;
+        return lgd->UpdateDependencies(depInfo, verbose, color) ? 0 : 2;
       }
       return 1;
     }
