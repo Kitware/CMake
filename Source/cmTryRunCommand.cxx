@@ -217,7 +217,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
   // removed at the end of TRY_RUN and the user can run it manually
   // on the target platform.
   std::string copyDest = this->Makefile->GetHomeOutputDirectory();
-  copyDest += cmake::GetCMakeFilesDirectory();
+  copyDest += "/CMakeFiles";
   copyDest += "/";
   copyDest += cmSystemTools::GetFilenameWithoutExtension(this->OutputFile);
   copyDest += "-";

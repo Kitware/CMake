@@ -25,7 +25,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 cmMakefileExecutableTargetGenerator::cmMakefileExecutableTargetGenerator(
   cmGeneratorTarget* target)
@@ -317,7 +316,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string outpathImp;
   if (relink) {
     outpath = this->Makefile->GetCurrentBinaryDirectory();
-    outpath += cmake::GetCMakeFilesDirectory();
+    outpath += "/CMakeFiles";
     outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath);
     outpath += "/";

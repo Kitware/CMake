@@ -623,7 +623,7 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
 
   std::string checkCache = root->GetBinaryDirectory();
   checkCache += "/";
-  checkCache += cmake::GetCMakeFilesDirectoryPostSlash();
+  checkCache += "CMakeFiles/";
   checkCache += "cmake.check_cache";
 
   if (cm->DoWriteGlobVerifyTarget()) {
@@ -1413,7 +1413,7 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
   // language.
   cmMakefile* mf = gtgt->Target->GetMakefile();
   std::string fname = gtgt->GetLocalGenerator()->GetCurrentBinaryDirectory();
-  fname += cmake::GetCMakeFilesDirectory();
+  fname += "/CMakeFiles";
   fname += "/";
   fname += gtgt->GetName();
   fname += "-CMakeForceLinker";
@@ -3721,7 +3721,7 @@ std::string cmGlobalXCodeGenerator::ComputeInfoPListLocation(
   cmGeneratorTarget* target)
 {
   std::string plist = target->GetLocalGenerator()->GetCurrentBinaryDirectory();
-  plist += cmake::GetCMakeFilesDirectory();
+  plist += "/CMakeFiles";
   plist += "/";
   plist += target->GetName();
   plist += ".dir/Info.plist";

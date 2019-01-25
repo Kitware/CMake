@@ -2605,8 +2605,7 @@ int cmake::Build(int jobs, const std::string& dir, const std::string& target,
   // actually starting the build. If not done separately from the build
   // itself, there is the risk of building an out-of-date solution file due
   // to limitations of the underlying build system.
-  std::string const stampList = cachePath + "/" +
-    GetCMakeFilesDirectoryPostSlash() +
+  std::string const stampList = cachePath + "/" + "CMakeFiles/" +
     cmGlobalVisualStudio9Generator::GetGenerateStampList();
 
   // Note that the stampList file only exists for VS generators.
@@ -2616,8 +2615,8 @@ int cmake::Build(int jobs, const std::string& dir, const std::string& target,
     // the glob verification script before starting the build
     this->AddScriptingCommands();
     if (this->GlobalGenerator->MatchesGeneratorName("Visual Studio 9 2008")) {
-      std::string const globVerifyScript = cachePath + "/" +
-        GetCMakeFilesDirectoryPostSlash() + "VerifyGlobs.cmake";
+      std::string const globVerifyScript =
+        cachePath + "/" + "CMakeFiles/" + "VerifyGlobs.cmake";
       if (cmSystemTools::FileExists(globVerifyScript)) {
         std::vector<std::string> args;
         this->ReadListFile(args, globVerifyScript.c_str());

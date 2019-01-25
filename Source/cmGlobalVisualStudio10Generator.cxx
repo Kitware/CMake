@@ -706,7 +706,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
     wd = this->ConfiguredFilesPath;
   } else {
     wd = this->GetCMakeInstance()->GetHomeOutputDirectory();
-    wd += cmake::GetCMakeFilesDirectory();
+    wd += "/CMakeFiles";
   }
   wd += "/";
   wd += cmVersion::GetCMakeVersion();
@@ -1005,7 +1005,7 @@ std::string cmGlobalVisualStudio10Generator::GenerateRuleFile(
   // The VS 10 generator needs to create the .rule files on disk.
   // Hide them away under the CMakeFiles directory.
   std::string ruleDir = this->GetCMakeInstance()->GetHomeOutputDirectory();
-  ruleDir += cmake::GetCMakeFilesDirectory();
+  ruleDir += "/CMakeFiles";
   ruleDir += "/";
   ruleDir += cmSystemTools::ComputeStringMD5(
     cmSystemTools::GetFilenamePath(output).c_str());

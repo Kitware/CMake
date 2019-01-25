@@ -97,7 +97,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       force_commands.push_back(force_command);
       std::string no_main_dependency;
       std::string force = this->GetCurrentBinaryDirectory();
-      force += cmake::GetCMakeFilesDirectory();
+      force += "/CMakeFiles";
       force += "/";
       force += l->GetName();
       force += "_force";
@@ -144,7 +144,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
   // Touch a timestamp file used to determine when the project file is
   // out of date.
   std::string stampName = this->GetCurrentBinaryDirectory();
-  stampName += cmake::GetCMakeFilesDirectory();
+  stampName += "/CMakeFiles";
   cmSystemTools::MakeDirectory(stampName.c_str());
   stampName += "/";
   stampName += "generate.stamp";
@@ -254,7 +254,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 
   std::string stampName = this->GetCurrentBinaryDirectory();
   stampName += "/";
-  stampName += cmake::GetCMakeFilesDirectoryPostSlash();
+  stampName += "CMakeFiles/";
   stampName += "generate.stamp";
   cmCustomCommandLine commandLine;
   commandLine.push_back(cmSystemTools::GetCMakeCommand());

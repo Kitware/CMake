@@ -125,12 +125,6 @@ public:
 #endif
   std::string ReportCapabilities(bool haveServerMode) const;
 
-  static const char* GetCMakeFilesDirectory() { return "/CMakeFiles"; }
-  static const char* GetCMakeFilesDirectoryPostSlash()
-  {
-    return "CMakeFiles/";
-  }
-
   //@{
   /**
    * Set/Get the home directory (or output directory) in the project. The

@@ -26,7 +26,6 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmake.h"
 #include "cmsys/FStream.hxx"
 #include "cmsys/SystemInformation.hxx"
 
@@ -352,7 +351,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
     // Info directory
     this->Dir.Info = cbd;
-    this->Dir.Info += cmake::GetCMakeFilesDirectory();
+    this->Dir.Info += "/CMakeFiles";
     this->Dir.Info += '/';
     this->Dir.Info += this->Target->GetName();
     this->Dir.Info += "_autogen";

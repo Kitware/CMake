@@ -1139,7 +1139,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
   // Store the custom command in the target.
   if (!commandLines.empty() || !depends.empty()) {
     std::string force = this->GetCurrentBinaryDirectory();
-    force += cmake::GetCMakeFilesDirectory();
+    force += "/CMakeFiles";
     force += "/";
     force += utilityName;
     std::vector<std::string> forced;
@@ -1493,7 +1493,7 @@ void cmMakefile::Configure()
 
   // make sure the CMakeFiles dir is there
   std::string filesDir = this->StateSnapshot.GetDirectory().GetCurrentBinary();
-  filesDir += cmake::GetCMakeFilesDirectory();
+  filesDir += "/CMakeFiles";
   cmSystemTools::MakeDirectory(filesDir);
 
   assert(cmSystemTools::FileExists(currentStart, true));
@@ -2721,8 +2721,7 @@ bool cmMakefile::IsProjectFile(const char* filename) const
 {
   return cmSystemTools::IsSubDirectory(filename, this->GetHomeDirectory()) ||
     (cmSystemTools::IsSubDirectory(filename, this->GetHomeOutputDirectory()) &&
-     !cmSystemTools::IsSubDirectory(filename,
-                                    cmake::GetCMakeFilesDirectory()));
+     !cmSystemTools::IsSubDirectory(filename, "/CMakeFiles"));
 }
 
 MessageType cmMakefile::ExpandVariablesInStringNew(

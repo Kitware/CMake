@@ -15,7 +15,6 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
-#include "cmake.h"
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
@@ -2226,7 +2225,7 @@ int cmCTestCoverageHandler::GetLabelId(std::string const& label)
 void cmCTestCoverageHandler::LoadLabels()
 {
   std::string fileList = this->CTest->GetBinaryDir();
-  fileList += cmake::GetCMakeFilesDirectory();
+  fileList += "/CMakeFiles";
   fileList += "/TargetDirectories.txt";
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      " target directory list [" << fileList << "]\n",

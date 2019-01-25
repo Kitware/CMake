@@ -14,7 +14,6 @@
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 #include <algorithm>
 #include <iterator>
@@ -35,7 +34,7 @@ void cmNinjaUtilityTargetGenerator::Generate()
 {
   std::string utilCommandName =
     this->GetLocalGenerator()->GetCurrentBinaryDirectory();
-  utilCommandName += cmake::GetCMakeFilesDirectory();
+  utilCommandName += "/CMakeFiles";
   utilCommandName += "/";
   utilCommandName += this->GetTargetName() + ".util";
   utilCommandName = this->ConvertToNinjaPath(utilCommandName);

@@ -15,7 +15,6 @@
 #include "cmInstallType.h"
 #include "cmLocalGenerator.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 cmInstallExportGenerator::cmInstallExportGenerator(
   cmExportSet* exportSet, const char* destination,
@@ -57,7 +56,7 @@ void cmInstallExportGenerator::ComputeTempDir()
   // Choose a temporary directory in which to generate the import
   // files to be installed.
   this->TempDir = this->LocalGenerator->GetCurrentBinaryDirectory();
-  this->TempDir += cmake::GetCMakeFilesDirectory();
+  this->TempDir += "/CMakeFiles";
   this->TempDir += "/Export";
   if (this->Destination.empty()) {
     return;

@@ -16,7 +16,6 @@
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
-#include "cmake.h"
 
 cmCacheManager::cmCacheManager()
 {
@@ -27,7 +26,7 @@ cmCacheManager::cmCacheManager()
 void cmCacheManager::CleanCMakeFiles(const std::string& path)
 {
   std::string glob = path;
-  glob += cmake::GetCMakeFilesDirectory();
+  glob += "/CMakeFiles";
   glob += "/*.cmake";
   cmsys::Glob globIt;
   globIt.FindFiles(glob);
@@ -360,7 +359,7 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
   fout << "\n";
   fout.Close();
   std::string checkCacheFile = path;
-  checkCacheFile += cmake::GetCMakeFilesDirectory();
+  checkCacheFile += "/CMakeFiles";
   cmSystemTools::MakeDirectory(checkCacheFile);
   checkCacheFile += "/cmake.check_cache";
   cmsys::ofstream checkCache(checkCacheFile.c_str());
@@ -384,7 +383,7 @@ bool cmCacheManager::DeleteCache(const std::string& path)
     cmSystemTools::RemoveFile(cacheFile);
     // now remove the files in the CMakeFiles directory
     // this cleans up language cache files
-    cmakeFiles += cmake::GetCMakeFilesDirectory();
+    cmakeFiles += "/CMakeFiles";
     if (cmSystemTools::FileIsDirectory(cmakeFiles)) {
       cmSystemTools::RemoveADirectory(cmakeFiles);
     }
