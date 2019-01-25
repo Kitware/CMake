@@ -239,22 +239,46 @@ public:
     return true;
   }
 
-  /** @brief Get the include directories for the current makefile and language.
+  /** @brief Get the include directories for the current makefile and language
+   * and optional the compiler implicit include directories.
+   *
    * @arg stripImplicitDirs Strip all directories found in
    *      CMAKE_<LANG>_IMPLICIT_INCLUDE_DIRECTORIES from the result.
    * @arg appendAllImplicitDirs Append all directories found in
    *      CMAKE_<LANG>_IMPLICIT_INCLUDE_DIRECTORIES to the result.
    */
-  void GetIncludeDirectories(std::vector<std::string>& dirs,
-                             cmGeneratorTarget const* target,
-                             const std::string& lang = "C",
-                             const std::string& config = "",
-                             bool stripImplicitDirs = true,
-                             bool appendAllImplicitDirs = false) const;
-  std::vector<BT<std::string>> GetIncludeDirectories(
+  std::vector<BT<std::string>> GetIncludeDirectoriesImplicit(
     cmGeneratorTarget const* target, std::string const& lang = "C",
     std::string const& config = "", bool stripImplicitDirs = true,
     bool appendAllImplicitDirs = false) const;
+
+  /** @brief Get the include directories for the current makefile and language
+   * and optional the compiler implicit include directories.
+   *
+   * @arg dirs Directories are appended to this list
+   */
+  void GetIncludeDirectoriesImplicit(std::vector<std::string>& dirs,
+                                     cmGeneratorTarget const* target,
+                                     const std::string& lang = "C",
+                                     const std::string& config = "",
+                                     bool stripImplicitDirs = true,
+                                     bool appendAllImplicitDirs = false) const;
+
+  /** @brief Get the include directories for the current makefile and language.
+   * @arg dirs Include directories are appended to this list
+   */
+  void GetIncludeDirectories(std::vector<std::string>& dirs,
+                             cmGeneratorTarget const* target,
+                             const std::string& lang = "C",
+                             const std::string& config = "") const;
+
+  /** @brief Get the include directories for the current makefile and language.
+   * @return The include directory list
+   */
+  std::vector<BT<std::string>> GetIncludeDirectories(
+    cmGeneratorTarget const* target, std::string const& lang = "C",
+    std::string const& config = "") const;
+
   void AddCompileOptions(std::string& flags, cmGeneratorTarget* target,
                          const std::string& lang, const std::string& config);
 

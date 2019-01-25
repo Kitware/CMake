@@ -578,7 +578,7 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
     lg->GetTargetDefines(target, config, lang, defines);
     ld.SetDefines(defines);
     std::vector<std::string> includePathList;
-    lg->GetIncludeDirectories(includePathList, target, lang, config, true);
+    lg->GetIncludeDirectories(includePathList, target, lang, config);
     for (std::string const& i : includePathList) {
       ld.IncludePathList.emplace_back(
         i, target->IsSystemIncludeDirectory(i, config, lang));

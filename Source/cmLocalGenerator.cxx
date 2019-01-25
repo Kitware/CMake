@@ -881,22 +881,7 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
   this->AddCompilerRequirementFlag(flags, target, lang);
 }
 
-void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
-                                             cmGeneratorTarget const* target,
-                                             const std::string& lang,
-                                             const std::string& config,
-                                             bool stripImplicitDirs,
-                                             bool appendAllImplicitDirs) const
-{
-  std::vector<BT<std::string>> tmp = this->GetIncludeDirectories(
-    target, lang, config, stripImplicitDirs, appendAllImplicitDirs);
-  dirs.reserve(tmp.size());
-  for (BT<std::string>& v : tmp) {
-    dirs.emplace_back(std::move(v.Value));
-  }
-}
-
-std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectories(
+std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   cmGeneratorTarget const* target, std::string const& lang,
   std::string const& config, bool stripImplicitDirs,
   bool appendAllImplicitDirs) const
@@ -1041,6 +1026,34 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectories(
   }
 
   return result;
+}
+
+void cmLocalGenerator::GetIncludeDirectoriesImplicit(
+  std::vector<std::string>& dirs, cmGeneratorTarget const* target,
+  const std::string& lang, const std::string& config, bool stripImplicitDirs,
+  bool appendAllImplicitDirs) const
+{
+  std::vector<BT<std::string>> tmp = this->GetIncludeDirectoriesImplicit(
+    target, lang, config, stripImplicitDirs, appendAllImplicitDirs);
+  dirs.reserve(dirs.size() + tmp.size());
+  for (BT<std::string>& v : tmp) {
+    dirs.emplace_back(std::move(v.Value));
+  }
+}
+
+std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectories(
+  cmGeneratorTarget const* target, std::string const& lang,
+  std::string const& config) const
+{
+  return this->GetIncludeDirectoriesImplicit(target, lang, config);
+}
+
+void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
+                                             cmGeneratorTarget const* target,
+                                             const std::string& lang,
+                                             const std::string& config) const
+{
+  this->GetIncludeDirectoriesImplicit(dirs, target, lang, config);
 }
 
 void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,

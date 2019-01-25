@@ -531,8 +531,8 @@ bool cmQtAutoGenInitializer::InitMoc()
       // include dirs off, see
       // https://gitlab.kitware.com/cmake/cmake/issues/13667
       std::vector<std::string> dirs;
-      localGen->GetIncludeDirectories(dirs, this->Target, "CXX", cfg, false,
-                                      appendImplicit);
+      localGen->GetIncludeDirectoriesImplicit(dirs, this->Target, "CXX", cfg,
+                                              false, appendImplicit);
       return dirs;
     };
 
