@@ -538,10 +538,6 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   // now make the allbuild depend on all the non-utility targets
   // in the project
   for (auto& gen : gens) {
-    if (this->IsExcluded(root, gen)) {
-      continue;
-    }
-
     for (auto target : gen->GetGeneratorTargets()) {
       if (target->GetType() == cmStateEnums::GLOBAL_TARGET) {
         continue;
@@ -574,8 +570,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
           false, "", false, cmMakefile::AcceptObjectLibraryCommands);
       }
 
-      if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-          !target->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
+      if (!this->IsExcluded(target)) {
         allbuild->AddUtility(target->GetName());
       }
     }

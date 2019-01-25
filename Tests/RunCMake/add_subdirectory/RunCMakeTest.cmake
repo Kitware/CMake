@@ -33,6 +33,7 @@ file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
 file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
 run_cmake(ExcludeFromAll)
+set(RunCMake-check-file ExcludeFromAll/check.cmake)
 run_cmake_command(ExcludeFromAll-build ${CMAKE_COMMAND} --build .)
 
 unset(RunCMake_TEST_BINARY_DIR)

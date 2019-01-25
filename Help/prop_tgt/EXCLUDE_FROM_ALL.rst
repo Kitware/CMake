@@ -8,3 +8,6 @@ the default build target.  If it is not, then with a Makefile for
 example typing make will cause this target to be built.  The same
 concept applies to the default build of other generators.  Installing
 a target with EXCLUDE_FROM_ALL set to true has undefined behavior.
+
+This property is enabled by default for targets that are created in
+directories that have :prop_dir:`EXCLUDE_FROM_ALL` set to ``TRUE``.
