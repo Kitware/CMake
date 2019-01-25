@@ -14,11 +14,12 @@ Three components are supported:
 * ``Compiler``: search for Python compiler. Only offered by IronPython.
 * ``Development``: search for development artifacts (include directories and
   libraries).
+* ``NumPy``: search for NumPy include directories.
 
 If no ``COMPONENTS`` is specified, ``Interpreter`` is assumed.
 
-To ensure consistent versions between components ``Interpreter``, ``Compiler``
-and ``Development``, specify all components at the same time::
+To ensure consistent versions between components ``Interpreter``, ``Compiler``,
+``Development`` and ``NumPy``, specify all components at the same time::
 
   find_package (Python COMPONENTS Interpreter Development)
 
@@ -39,6 +40,8 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`
   Python compiler. Target defined if component ``Compiler`` is found.
 ``Python::Python``
   Python library. Target defined if component ``Development`` is found.
+``Python::NumPy``
+  NumPy Python library. Target defined if component ``NumPy`` is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -104,6 +107,12 @@ This module will set the following variables in your project
   Python minor version.
 ``Python_VERSION_PATCH``
   Python patch version.
+``Python_NumPy_FOUND``
+  System has the NumPy.
+``Python_NumPy_INCLUDE_DIRS``
+  The NumPy include directries.
+``Python_NumPy_VERSION``
+  The NumPy version.
 
 Hints
 ^^^^^

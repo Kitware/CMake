@@ -209,6 +209,10 @@ if (NOT ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   set (${_PYTHON_PREFIX}_FIND_COMPONENTS Interpreter)
   set (${_PYTHON_PREFIX}_FIND_REQUIRED_Interpreter TRUE)
 endif()
+if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
+  list (APPEND ${_PYTHON_PREFIX}_FIND_COMPONENTS "Interpreter" "Development")
+  list (REMOVE_DUPLICATES ${_PYTHON_PREFIX}_FIND_COMPONENTS)
+endif()
 foreach (_${_PYTHON_PREFIX}_COMPONENT IN LISTS ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   set (${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_COMPONENT}_FOUND FALSE)
 endforeach()
@@ -1122,6 +1126,41 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
   endif()
 endif()
 
+if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Interpreter_FOUND)
+  if (${_PYTHON_PREFIX}_FIND_REQUIRED_NumPy)
+    list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
+    list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS ${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
+  endif()
+  execute_process(
+      COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
+              "from __future__ import print_function\ntry: import numpy; print(numpy.get_include(), end='')\nexcept:pass\n"
+      RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+      OUTPUT_VARIABLE _${_PYTHON_PREFIX}_NumPy_PATH
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if (NOT _${_PYTHON_PREFIX}_RESULT)
+    find_path(${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR
+              NAMES arrayobject.h numpyconfig.h
+              HINTS "${_${_PYTHON_PREFIX}_NumPy_PATH}"
+              PATH_SUFFIXES numpy
+              NO_DEFAULT_PATH)
+  endif()
+  if(${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
+    set(${_PYTHON_PREFIX}_NumPy_INCLUDE_DIRS "${${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}")
+    set(${_PYTHON_PREFIX}_NumPy_FOUND TRUE)
+  endif()
+  if(${_PYTHON_PREFIX}_NumPy_FOUND)
+    execute_process(
+            COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
+            "from __future__ import print_function\ntry: import numpy; print(numpy.__version__, end='')\nexcept:pass\n"
+            RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+            OUTPUT_VARIABLE _${_PYTHON_PREFIX}_NumPy_VERSION)
+    if (NOT _${_PYTHON_PREFIX}_RESULT)
+       set(${_PYTHON_PREFIX}_NumPy_VERSION "${_${_PYTHON_PREFIX}_NumPy_VERSION}")
+    endif()
+  endif()
+endif()
+
 # final validation
 if (${_PYTHON_PREFIX}_VERSION_MAJOR AND
     NOT ${_PYTHON_PREFIX}_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
@@ -1248,6 +1287,14 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
         endif()
       endif()
     endfunction()
+  endif()
+
+  if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_NumPy_FOUND
+      AND NOT TARGET ${_PYTHON_PREFIX}::NumPy AND TARGET ${_PYTHON_PREFIX}::Python)
+    add_library (${_PYTHON_PREFIX}::NumPy INTERFACE IMPORTED)
+    set_property (TARGET ${_PYTHON_PREFIX}::NumPy
+                  PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}")
+    target_link_libraries (${_PYTHON_PREFIX}::NumPy INTERFACE ${_PYTHON_PREFIX}::Python)
   endif()
 endif()
 
