@@ -1237,7 +1237,7 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
     std::ostringstream e;
     e << "Could not parse framework path \"" << item << "\" "
       << "linked by target " << this->Target->GetName() << ".";
-    cmSystemTools::Error(e.str().c_str());
+    cmSystemTools::Error(e.str());
     return;
   }
 

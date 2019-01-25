@@ -60,7 +60,7 @@ static void cmVariableWatchCommandVariableAccessed(const std::string& variable,
       error << "Error in cmake code at\nUnknown:0:\n"
             << "A command failed during the invocation of callback \""
             << data->Command << "\".";
-      cmSystemTools::Error(error.str().c_str());
+      cmSystemTools::Error(error.str());
       data->InCallback = false;
       return;
     }

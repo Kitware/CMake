@@ -495,7 +495,7 @@ void cmComputeTargetDepends::ComplainAboutBadComponent(
     e << "At least one of these targets is not a STATIC_LIBRARY.  "
       << "Cyclic dependencies are allowed only among static libraries.";
   }
-  cmSystemTools::Error(e.str().c_str());
+  cmSystemTools::Error(e.str());
 }
 
 bool cmComputeTargetDepends::IntraComponent(std::vector<int> const& cmap,

@@ -111,7 +111,7 @@ static bool AddToSourceGroup(cmMakefile* makefile, std::string const& fileName,
         ost << ": " << property;
         ost << ": Could not find or create the source group ";
         ost << cmQtAutoGen::Quoted(groupName);
-        cmSystemTools::Error(ost.str().c_str());
+        cmSystemTools::Error(ost.str());
         return false;
       }
     }
@@ -941,7 +941,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       if (!qrc.Generated) {
         std::string error;
         if (!RccListInputs(qrc.QrcFile, qrc.Resources, error)) {
-          cmSystemTools::Error(error.c_str());
+          cmSystemTools::Error(error);
           return false;
         }
       }
@@ -1219,7 +1219,7 @@ bool cmQtAutoGenInitializer::SetupCustomTargets()
   if (!cmSystemTools::MakeDirectory(this->Dir.Info)) {
     std::string emsg = ("AutoGen: Could not create directory: ");
     emsg += Quoted(this->Dir.Info);
-    cmSystemTools::Error(emsg.c_str());
+    cmSystemTools::Error(emsg);
     return false;
   }
 
@@ -1307,7 +1307,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
   } else {
     std::string err = "AutoGen: Could not write file ";
     err += this->AutogenTarget.InfoFile;
-    cmSystemTools::Error(err.c_str());
+    cmSystemTools::Error(err);
     return false;
   }
 
@@ -1347,7 +1347,7 @@ bool cmQtAutoGenInitializer::SetupWriteRccInfo()
     } else {
       std::string err = "AutoRcc: Could not write file ";
       err += qrc.InfoFile;
-      cmSystemTools::Error(err.c_str());
+      cmSystemTools::Error(err);
       return false;
     }
   }
@@ -1512,7 +1512,7 @@ std::pair<bool, std::string> GetQtExecutable(
     msg += target->GetName();
     msg += "): ";
     msg += err;
-    cmSystemTools::Error(msg.c_str());
+    cmSystemTools::Error(msg);
     return std::make_pair(false, "");
   }
 

@@ -54,7 +54,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
           << "\" ...) "
           << "includes target \"" << te->Target->GetName()
           << "\" more than once in the export set.";
-        cmSystemTools::Error(e.str().c_str());
+        cmSystemTools::Error(e.str());
         return false;
       }
     }
@@ -112,7 +112,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
     std::string errorMessage;
     if (!this->PopulateExportProperties(gt, properties, errorMessage)) {
-      cmSystemTools::Error(errorMessage.c_str());
+      cmSystemTools::Error(errorMessage);
       return false;
     }
 
@@ -294,7 +294,7 @@ bool cmExportInstallFileGenerator::GenerateImportFileConfig(
     std::string se = cmSystemTools::GetLastSystemError();
     std::ostringstream e;
     e << "cannot write to file \"" << fileName << "\": " << se;
-    cmSystemTools::Error(e.str().c_str());
+    cmSystemTools::Error(e.str());
     return false;
   }
   std::ostream& os = exportFileStream;
@@ -518,7 +518,7 @@ void cmExportInstallFileGenerator::ComplainAboutMissingTarget(
     e << "that is not in this export set, but " << occurrences
       << " times in others.";
   }
-  cmSystemTools::Error(e.str().c_str());
+  cmSystemTools::Error(e.str());
 }
 
 std::string cmExportInstallFileGenerator::InstallNameDir(

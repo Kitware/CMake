@@ -194,7 +194,7 @@ protected:
             message += includeFile;
             message += " for file ";
             message += info->FullPath;
-            cmSystemTools::Error(message.c_str(), nullptr);
+            cmSystemTools::Error(message);
           }
           continue;
         }

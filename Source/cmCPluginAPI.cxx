@@ -720,7 +720,7 @@ void CCONV cmSourceFileSetName(void* arg, const char* name, const char* dir,
        ext != headerExts.end(); ++ext) {
     e << " ." << *ext;
   }
-  cmSystemTools::Error(e.str().c_str());
+  cmSystemTools::Error(e.str());
 }
 
 void CCONV cmSourceFileSetName2(void* arg, const char* name, const char* dir,
