@@ -167,12 +167,12 @@ signals:
 protected:
   cmake* CMakeInstance;
 
-  static bool interruptCallback(void*);
-  static void progressCallback(const char* msg, float percent, void* cd);
-  static void messageCallback(const char* msg, const char* title, bool&,
-                              void* cd);
-  static void stdoutCallback(const char* msg, size_t len, void* cd);
-  static void stderrCallback(const char* msg, size_t len, void* cd);
+  bool interruptCallback();
+  void progressCallback(const char* msg, float percent);
+  void messageCallback(const char* msg, const char* title, bool&);
+  void stdoutCallback(const char* msg, size_t len);
+  void stderrCallback(const char* msg, size_t len);
+
   bool WarnUninitializedMode;
   bool WarnUnusedMode;
   bool WarnUnusedAllMode;

@@ -118,9 +118,10 @@ public:
   void OnConnected(cmConnection* connection) override;
 
 private:
-  static void reportProgress(const char* msg, float progress, void* data);
+  static void reportProgress(const char* msg, float progress,
+                             const cmServerRequest& request);
   static void reportMessage(const char* msg, const char* title, bool& cancel,
-                            void* data);
+                            const cmServerRequest& request);
 
   // Handle requests:
   cmServerResponse SetProtocolVersion(const cmServerRequest& request);

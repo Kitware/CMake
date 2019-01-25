@@ -265,15 +265,6 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   return retVal;
 }
 
-static void ctestScriptProgressCallback(const char* m, float /*unused*/,
-                                        void* cd)
-{
-  cmCTest* ctest = static_cast<cmCTest*>(cd);
-  if (m && *m) {
-    cmCTestLog(ctest, HANDLER_OUTPUT, "-- " << m << std::endl);
-  }
-}
-
 void cmCTestScriptHandler::CreateCMake()
 {
   // create a cmake instance to read the configuration script
@@ -299,7 +290,11 @@ void cmCTestScriptHandler::CreateCMake()
       this->ParentMakefile->GetRecursionDepth());
   }
 
-  this->CMake->SetProgressCallback(ctestScriptProgressCallback, this->CTest);
+  this->CMake->SetProgressCallback([this](const char* m, float /*unused*/) {
+    if (m && *m) {
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "-- " << m << std::endl);
+    }
+  });
 
   this->AddCTestCommand("ctest_build", new cmCTestBuildCommand);
   this->AddCTestCommand("ctest_configure", new cmCTestConfigureCommand);

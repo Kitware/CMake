@@ -157,8 +157,6 @@ cmake::cmake(Role role, cmState::Mode mode)
 #endif
 
   this->GlobalGenerator = nullptr;
-  this->ProgressCallback = nullptr;
-  this->ProgressCallbackClientData = nullptr;
   this->CurrentWorkingMode = NORMAL_MODE;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -1922,17 +1920,15 @@ bool cmake::DeleteCache(const std::string& path)
   return this->State->DeleteCache(path);
 }
 
-void cmake::SetProgressCallback(ProgressCallbackType f, void* cd)
+void cmake::SetProgressCallback(ProgressCallbackType f)
 {
-  this->ProgressCallback = f;
-  this->ProgressCallbackClientData = cd;
+  this->ProgressCallback = std::move(f);
 }
 
 void cmake::UpdateProgress(const char* msg, float prog)
 {
   if (this->ProgressCallback && !this->State->GetIsInTryCompile()) {
-    (*this->ProgressCallback)(msg, prog, this->ProgressCallbackClientData);
-    return;
+    this->ProgressCallback(msg, prog);
   }
 }
 

@@ -506,12 +506,8 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
   pos_form_cursor(this->Form);
 }
 
-void cmCursesMainForm::UpdateProgress(const char* msg, float prog, void* vp)
+void cmCursesMainForm::UpdateProgress(const char* msg, float prog)
 {
-  cmCursesMainForm* cm = static_cast<cmCursesMainForm*>(vp);
-  if (!cm) {
-    return;
-  }
   char tmp[1024];
   const char* cmsg = tmp;
   if (prog >= 0) {
@@ -519,8 +515,8 @@ void cmCursesMainForm::UpdateProgress(const char* msg, float prog, void* vp)
   } else {
     cmsg = msg;
   }
-  cm->UpdateStatusBar(cmsg);
-  cm->PrintKeys(1);
+  this->UpdateStatusBar(cmsg);
+  this->PrintKeys(1);
   curses_move(1, 1);
   touchwin(stdscr);
   refresh();
@@ -536,8 +532,8 @@ int cmCursesMainForm::Configure(int noconfigure)
   this->PrintKeys(1);
   touchwin(stdscr);
   refresh();
-  this->CMakeInstance->SetProgressCallback(cmCursesMainForm::UpdateProgress,
-                                           this);
+  this->CMakeInstance->SetProgressCallback(
+    [this](const char* msg, float prog) { this->UpdateProgress(msg, prog); });
 
   // always save the current gui values to disk
   this->FillCacheManagerFromUI();
@@ -560,7 +556,7 @@ int cmCursesMainForm::Configure(int noconfigure)
   } else {
     retVal = this->CMakeInstance->Configure();
   }
-  this->CMakeInstance->SetProgressCallback(nullptr, nullptr);
+  this->CMakeInstance->SetProgressCallback(nullptr);
 
   keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
 
@@ -606,8 +602,8 @@ int cmCursesMainForm::Generate()
   this->PrintKeys(1);
   touchwin(stdscr);
   refresh();
-  this->CMakeInstance->SetProgressCallback(cmCursesMainForm::UpdateProgress,
-                                           this);
+  this->CMakeInstance->SetProgressCallback(
+    [this](const char* msg, float prog) { this->UpdateProgress(msg, prog); });
 
   // Get rid of previous errors
   this->Errors = std::vector<std::string>();
@@ -615,7 +611,7 @@ int cmCursesMainForm::Generate()
   // run the generate process
   int retVal = this->CMakeInstance->Generate();
 
-  this->CMakeInstance->SetProgressCallback(nullptr, nullptr);
+  this->CMakeInstance->SetProgressCallback(nullptr);
   keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
 
   if (retVal != 0 || !this->Errors.empty()) {

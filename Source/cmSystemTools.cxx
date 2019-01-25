@@ -76,6 +76,15 @@
 #  include <malloc.h> /* for malloc/free on QNX */
 #endif
 
+namespace {
+
+cmSystemTools::InterruptCallback s_InterruptCallback;
+cmSystemTools::MessageCallback s_MessageCallback;
+cmSystemTools::OutputCallback s_StderrCallback;
+cmSystemTools::OutputCallback s_StdoutCallback;
+
+} // namespace
+
 static bool cm_isspace(char c)
 {
   return ((c & 0x80) == 0) && isspace(c);
@@ -160,15 +169,6 @@ bool cmSystemTools::s_ErrorOccured = false;
 bool cmSystemTools::s_FatalErrorOccured = false;
 bool cmSystemTools::s_DisableMessages = false;
 bool cmSystemTools::s_ForceUnixPaths = false;
-
-cmSystemTools::MessageCallback cmSystemTools::s_MessageCallback;
-cmSystemTools::OutputCallback cmSystemTools::s_StdoutCallback;
-cmSystemTools::OutputCallback cmSystemTools::s_StderrCallback;
-cmSystemTools::InterruptCallback cmSystemTools::s_InterruptCallback;
-void* cmSystemTools::s_MessageCallbackClientData;
-void* cmSystemTools::s_StdoutCallbackClientData;
-void* cmSystemTools::s_StderrCallbackClientData;
-void* cmSystemTools::s_InterruptCallbackClientData;
 
 // replace replace with with as many times as it shows up in source.
 // write the result into source.
@@ -277,42 +277,38 @@ void cmSystemTools::Error(const std::string& m)
   cmSystemTools::Message(message, "Error");
 }
 
-void cmSystemTools::SetInterruptCallback(InterruptCallback f, void* clientData)
+void cmSystemTools::SetInterruptCallback(InterruptCallback f)
 {
-  s_InterruptCallback = f;
-  s_InterruptCallbackClientData = clientData;
+  s_InterruptCallback = std::move(f);
 }
 
 bool cmSystemTools::GetInterruptFlag()
 {
   if (s_InterruptCallback) {
-    return (*s_InterruptCallback)(s_InterruptCallbackClientData);
+    return s_InterruptCallback();
   }
   return false;
 }
 
-void cmSystemTools::SetMessageCallback(MessageCallback f, void* clientData)
+void cmSystemTools::SetMessageCallback(MessageCallback f)
 {
-  s_MessageCallback = f;
-  s_MessageCallbackClientData = clientData;
+  s_MessageCallback = std::move(f);
 }
 
-void cmSystemTools::SetStdoutCallback(OutputCallback f, void* clientData)
+void cmSystemTools::SetStdoutCallback(OutputCallback f)
 {
-  s_StdoutCallback = f;
-  s_StdoutCallbackClientData = clientData;
+  s_StdoutCallback = std::move(f);
 }
 
-void cmSystemTools::SetStderrCallback(OutputCallback f, void* clientData)
+void cmSystemTools::SetStderrCallback(OutputCallback f)
 {
-  s_StderrCallback = f;
-  s_StderrCallbackClientData = clientData;
+  s_StderrCallback = std::move(f);
 }
 
 void cmSystemTools::Stderr(const std::string& s)
 {
   if (s_StderrCallback) {
-    (*s_StderrCallback)(s.c_str(), s.length(), s_StderrCallbackClientData);
+    s_StderrCallback(s.c_str(), s.length());
   } else {
     std::cerr << s << std::flush;
   }
@@ -321,7 +317,7 @@ void cmSystemTools::Stderr(const std::string& s)
 void cmSystemTools::Stdout(const std::string& s)
 {
   if (s_StdoutCallback) {
-    (*s_StdoutCallback)(s.c_str(), s.length(), s_StdoutCallbackClientData);
+    s_StdoutCallback(s.c_str(), s.length());
   } else {
     std::cout << s << std::flush;
   }
@@ -333,8 +329,7 @@ void cmSystemTools::Message(const char* m1, const char* title)
     return;
   }
   if (s_MessageCallback) {
-    (*s_MessageCallback)(m1, title, s_DisableMessages,
-                         s_MessageCallbackClientData);
+    s_MessageCallback(m1, title, s_DisableMessages);
     return;
   }
   std::cerr << m1 << std::endl << std::flush;
