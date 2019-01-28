@@ -58,6 +58,7 @@ public:
 
   /** The toolset host architecture name (e.g. x64 for 64-bit host tools).  */
   const char* GetPlatformToolsetHostArchitecture() const;
+  std::string const& GetPlatformToolsetHostArchitectureString() const;
 
   /** The cuda toolset version.  */
   const char* GetPlatformToolsetCuda() const;
@@ -152,6 +153,7 @@ protected:
   std::string GeneratorToolsetHostArchitecture;
   std::string GeneratorToolsetCuda;
   std::string DefaultPlatformToolset;
+  std::string DefaultPlatformToolsetHostArchitecture;
   std::string WindowsTargetPlatformVersion;
   std::string SystemName;
   std::string SystemVersion;
