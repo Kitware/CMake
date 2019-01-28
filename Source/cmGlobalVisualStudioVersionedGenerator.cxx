@@ -10,11 +10,11 @@
 #include "cmake.h"
 
 #if defined(_M_ARM64)
-#  define HOST_PLATFORM_NAME "ARM64";
+#  define HOST_PLATFORM_NAME "ARM64"
 #elif defined(_M_ARM)
-#  define HOST_PLATFORM_NAME "ARM";
+#  define HOST_PLATFORM_NAME "ARM"
 #elif defined(_M_IA64)
-#  define HOST_PLATFORM_NAME "Itanium";
+#  define HOST_PLATFORM_NAME "Itanium"
 #else
 #  include "cmsys/SystemInformation.hxx"
 #endif
