@@ -130,7 +130,9 @@ if(PYTHON_EXECUTABLE)
         endif()
     else()
         # sys.version predates sys.version_info, so use that
-        execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c "import sys; sys.stdout.write(sys.version)"
+        # sys.version was first documented for Python 1.5, so assume version 1.4
+        # if retrieving sys.version fails.
+        execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c "try: import sys; sys.stdout.write(sys.version)\nexcept: sys.stdout.write(\"1.4.0\")"
                         OUTPUT_VARIABLE _VERSION
                         RESULT_VARIABLE _PYTHON_VERSION_RESULT
                         ERROR_QUIET)
@@ -144,12 +146,10 @@ if(PYTHON_EXECUTABLE)
                 set(PYTHON_VERSION_PATCH "0")
             endif()
         else()
-            # sys.version was first documented for Python 1.5, so assume
-            # this is older.
-            set(PYTHON_VERSION_STRING "1.4")
-            set(PYTHON_VERSION_MAJOR "1")
-            set(PYTHON_VERSION_MINOR "4")
-            set(PYTHON_VERSION_PATCH "0")
+            unset(PYTHON_VERSION_STRING)
+            unset(PYTHON_VERSION_MAJOR)
+            unset(PYTHON_VERSION_MINOR)
+            unset(PYTHON_VERSION_PATCH)
         endif()
     endif()
     unset(_PYTHON_VERSION_RESULT)
