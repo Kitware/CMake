@@ -46,4 +46,7 @@ The ``v142`` toolset that comes with Visual Studio 16 2019 is selected by
 default.  The :variable:`CMAKE_GENERATOR_TOOLSET` option may be set, perhaps
 via the :manual:`cmake(1)` ``-T`` option, to specify another toolset.
 
+.. |VS_TOOLSET_HOST_ARCH_DEFAULT| replace::
+   By default this generator uses the 32-bit variant even on a 64-bit host.
+
 .. include:: VS_TOOLSET_HOST_ARCH.txt

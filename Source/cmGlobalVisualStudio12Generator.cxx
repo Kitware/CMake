@@ -126,8 +126,8 @@ bool cmGlobalVisualStudio12Generator::MatchesGeneratorName(
 bool cmGlobalVisualStudio12Generator::ProcessGeneratorToolsetField(
   std::string const& key, std::string const& value)
 {
-  if (key == "host" && value == "x64") {
-    this->GeneratorToolsetHostArchitecture = "x64";
+  if (key == "host" && (value == "x64" || value == "x86")) {
+    this->GeneratorToolsetHostArchitecture = value;
     return true;
   }
   return this->cmGlobalVisualStudio11Generator::ProcessGeneratorToolsetField(
