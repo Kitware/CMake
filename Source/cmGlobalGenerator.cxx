@@ -568,11 +568,6 @@ void cmGlobalGenerator::EnableLanguage(
       return;
     }
 
-    // Find the native build tool for this generator.
-    if (!this->FindMakeProgram(mf)) {
-      return;
-    }
-
     // Tell the generator about the target system.
     std::string system = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
     if (!this->SetSystemName(system, mf)) {
@@ -591,6 +586,11 @@ void cmGlobalGenerator::EnableLanguage(
     std::string toolset = mf->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET");
     if (!this->SetGeneratorToolset(toolset, mf)) {
       cmSystemTools::SetFatalErrorOccured();
+      return;
+    }
+
+    // Find the native build tool for this generator.
+    if (!this->FindMakeProgram(mf)) {
       return;
     }
   }
