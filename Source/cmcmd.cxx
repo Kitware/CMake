@@ -78,7 +78,8 @@ void CMakeCommandUsage(const char* program)
     << "  capabilities              - Report capabilities built into cmake "
        "in JSON format\n"
     << "  chdir dir cmd [args...]   - run command in a given directory\n"
-    << "  compare_files file1 file2 - check if file1 is same as file2\n"
+    << "  compare_files [--ignore-eol] file1 file2\n"
+    << "                              - check if file1 is same as file2\n"
     << "  copy <file>... destination  - copy files to destination "
        "(either file or directory)\n"
     << "  copy_directory <dir>... destination   - copy content of <dir>... "
@@ -540,10 +541,20 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
     // Compare files
-    if (args[1] == "compare_files" && args.size() == 4) {
-      if (cmSystemTools::FilesDiffer(args[2], args[3])) {
-        std::cerr << "Files \"" << args[2] << "\" to \"" << args[3]
-                  << "\" are different.\n";
+    if (args[1] == "compare_files" && (args.size() == 4 || args.size() == 5)) {
+      bool filesDiffer;
+      if (args.size() == 4) {
+        filesDiffer = cmSystemTools::FilesDiffer(args[2], args[3]);
+      } else if (args[2] == "--ignore-eol") {
+        filesDiffer = cmsys::SystemTools::TextFilesDiffer(args[3], args[4]);
+      } else {
+        ::CMakeCommandUsage(args[0].c_str());
+        return 1;
+      }
+
+      if (filesDiffer) {
+        std::cerr << "Files \"" << args[args.size() - 2] << "\" to \""
+                  << args[args.size() - 1] << "\" are different.\n";
         return 1;
       }
       return 0;
