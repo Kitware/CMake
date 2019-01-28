@@ -1,0 +1,42 @@
+CMAKE_LANG=C
+CMAKE_C_COMPILER_ABI=ELF
+CMAKE_C_COMPILER_AR=
+CMAKE_C_COMPILER_ARCHITECTURE_ID=
+CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_C_COMPILER_ID=XL
+CMAKE_C_COMPILER_LAUNCHER=
+CMAKE_C_COMPILER_LOADED=1
+CMAKE_C_COMPILER_RANLIB=
+CMAKE_C_COMPILER_TARGET=
+CMAKE_C_COMPILER_VERSION=12.1.0
+CMAKE_C_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_b8c4a/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_b8c4a.dir/build.make CMakeFiles/cmTC_b8c4a.dir/build
+gmake[1]: Entering directory `/tmp/ii/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_b8c4a.dir/CMakeCCompilerABI.c.o
+/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/bin/xlc    -qnostdinc -V   -o CMakeFiles/cmTC_b8c4a.dir/CMakeCCompilerABI.c.o   -c /soft/buildtools/cmake/3.5.2/share/cmake-3.5/Modules/CMakeCCompilerABI.c
+export XL_CONFIG=/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/etc/vac.cfg.rhel6.9.gcc447:xlc
+export XLC_USR_CONFIG=/soft/compilers/ibmcmp-oct2017/vacpp/bg/12.1/etc/V1R2M4.vac.cfg.rhel6.9.gcc447
+export XL_ASMOBJFILES=/tmp/xlcASEFMkoN
+export "XL_DIS=/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/exe/dis -o "CMakeFiles/cmTC_b8c4a.dir/CMakeCCompilerABI.c.o" "CMakeCCompilerABI.o""
+/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/exe/xlcentry -qosvar=rhel.6.9 -qlanglvl=extc99 -qcpluscmt -qkeyword=inline -qalias=ansi -qtls -D_CALL_SYSV -D__null=0 -D__NO_MATH_INLINES -qtls -q64 -qgnu_version=4.4.7 -qnostdinc -qasm_as=/usr/bin/as -qc_stdinc=/soft/compilers/ibmcmp-oct2017/xlsmp/bg/3.1/include:/soft/compilers/ibmcmp-oct2017/xlmass/bg/7.3/include:/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/include -qgcc_c_stdinc=/usr/local/include:/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/crt/include:/usr/include -qcomplexgccincl=/soft/compilers/ibmcmp-oct2017/xlsmp/bg/3.1/include:/soft/compilers/ibmcmp-oct2017/xlmass/bg/7.3/include:/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/include:/usr/local/include:/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/crt/include:/usr/include -qvac_include_path=/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/include -oCMakeFiles/cmTC_b8c4a.dir/CMakeCCompilerABI.c.o /soft/buildtools/cmake/3.5.2/share/cmake-3.5/Modules/CMakeCCompilerABI.c /tmp/xlcW0cUFNRj /tmp/xlcW1YJsgzt /dev/null /tmp/xlcLI4MvwXF.lst /dev/null /tmp/xlcW2sIonhD
+export XL_BACKEND=/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/exe/xlCcode
+export XL_LINKER=/usr/bin/ld
+/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/exe/xlCcode -qlanglvl=extc99 -qcpluscmt -qkeyword=inline -qalias=ansi -qtls -qtls -qnostdinc /tmp/xlcW0cUFNRj /tmp/xlcW1YJsgzt CMakeFiles/cmTC_b8c4a.dir/CMakeCCompilerABI.c.o /tmp/xlcLI4MvwXB.lst /tmp/xlcW2sIonhD
+rm /tmp/xlcASEFMkoN
+rm /tmp/xlcLI4MvwX
+rm /tmp/xlcW0cUFNRj
+rm /tmp/xlcW1YJsgzt
+rm /tmp/xlcW2sIonhD
+Linking C executable cmTC_b8c4a
+/soft/buildtools/cmake/3.5.2/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b8c4a.dir/link.txt --verbose=1
+/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/bin/xlc  -qnostdinc -V    CMakeFiles/cmTC_b8c4a.dir/CMakeCCompilerABI.c.o  -o cmTC_b8c4a -Wl,-export-dynamic
+export XL_CONFIG=/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/etc/vac.cfg.rhel6.9.gcc447:xlc
+export XLC_USR_CONFIG=/soft/compilers/ibmcmp-oct2017/vacpp/bg/12.1/etc/V1R2M4.vac.cfg.rhel6.9.gcc447
+/usr/bin/ld --eh-frame-hdr -Qy -melf64ppc /usr/lib/gcc/ppc64-redhat-linux/4.4.7/../../../../lib64/crt1.o /usr/lib/gcc/ppc64-redhat-linux/4.4.7/../../../../lib64/crti.o /usr/lib/gcc/ppc64-redhat-linux/4.4.7/crtbegin.o -L/soft/compilers/ibmcmp-oct2017/xlsmp/bg/3.1/lib64 -L/soft/compilers/ibmcmp-oct2017/xlmass/bg/7.3/lib64 -L/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/lib64 -L/soft/compilers/ibmcmp-oct2017/vacpp/bg/12.1/lib64 -R/soft/compilers/ibmcmp-oct2017/lib64/bg -L/usr/lib/gcc/ppc64-redhat-linux/4.4.7 -L/usr/lib/gcc/ppc64-redhat-linux/4.4.7 -L/usr/lib/gcc/ppc64-redhat-linux/4.4.7/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/ppc64-redhat-linux/4.4.7/../../.. CMakeFiles/cmTC_b8c4a.dir/CMakeCCompilerABI.c.o -o cmTC_b8c4a -export-dynamic -dynamic-linker /lib64/ld64.so.1 -lxlopt -lxl -ldl -lgcc_s -lgcc -lm -lc -lgcc_s -lgcc /usr/lib/gcc/ppc64-redhat-linux/4.4.7/crtend.o /usr/lib/gcc/ppc64-redhat-linux/4.4.7/../../../../lib64/crtn.o
+rm /tmp/xlcW03gDCly
+rm /tmp/xlcW1oa6XxW
+rm /tmp/xlcW2fQXnKk
+gmake[1]: Leaving directory `/tmp/ii/CMakeFiles/CMakeTmp'

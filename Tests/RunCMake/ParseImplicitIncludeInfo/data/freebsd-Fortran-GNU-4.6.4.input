@@ -1,0 +1,78 @@
+CMAKE_LANG=Fortran
+CMAKE_Fortran_COMPILER_ABI=
+CMAKE_Fortran_COMPILER_AR=
+CMAKE_Fortran_COMPILER_ARCHITECTURE_ID=
+CMAKE_Fortran_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_Fortran_COMPILER_ID=GNU
+CMAKE_Fortran_COMPILER_LAUNCHER=
+CMAKE_Fortran_COMPILER_LOADED=1
+CMAKE_Fortran_COMPILER_RANLIB=
+CMAKE_Fortran_COMPILER_TARGET=
+CMAKE_Fortran_COMPILER_VERSION=4.6.4
+CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/local/bin/gmake" "cmTC_9ec75/fast"
+/usr/local/bin/gmake -f CMakeFiles/cmTC_9ec75.dir/build.make CMakeFiles/cmTC_9ec75.dir/build
+gmake[1]: Entering directory `/tmp/ii/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_9ec75.dir/CMakeFortranCompilerABI.F.o
+/usr/local/bin/gfortran46    -v -c /usr/local/share/cmake-3.7/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_9ec75.dir/CMakeFortranCompilerABI.F.o
+Using built-in specs.
+COLLECT_GCC=/usr/local/bin/gfortran46
+COLLECT_LTO_WRAPPER=/usr/local/libexec/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/lto-wrapper
+Target: x86_64-portbld-freebsd10.0
+Configured with: ./../gcc-4.6.4/configure --disable-bootstrap --disable-nls --libdir=/usr/local/lib/gcc46 --libexecdir=/usr/local/libexec/gcc46 --program-suffix=46 --with-as=/usr/local/bin/as --with-gmp=/usr/local --with-gxx-include-dir=/usr/local/lib/gcc46/include/c++/ --with-ld=/usr/local/bin/ld --with-pkgversion='FreeBSD Ports Collection' --with-system-zlib --disable-libgcj --enable-languages=c,c++,objc,fortran --prefix=/usr/local --mandir=/usr/local/man --infodir=/usr/local/info/gcc46 --build=x86_64-portbld-freebsd10.0
+Thread model: posix
+gcc version 4.6.4 (FreeBSD Ports Collection)
+COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_9ec75.dir/CMakeFortranCompilerABI.F.o' '-mtune=generic' '-march=x86-64'
+ /usr/local/libexec/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/f951 /usr/local/share/cmake-3.7/Modules/CMakeFortranCompilerABI.F -ffixed-form -cpp=/tmp//ccp5PsLd.f90 -quiet -v /usr/local/share/cmake-3.7/Modules/CMakeFortranCompilerABI.F -quiet -dumpbase CMakeFortranCompilerABI.F -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_9ec75.dir/CMakeFortranCompilerABI.F.o -version -fintrinsic-modules-path /usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/finclude -o /tmp//ccGWxrQ5.s
+GNU Fortran (FreeBSD Ports Collection) version 4.6.4 (x86_64-portbld-freebsd10.0)
+	compiled by GNU C version 4.2.1 Compatible FreeBSD Clang 3.3 (tags/RELEASE_33/final 183502), GMP version 5.1.3, MPFR version 3.1.2, MPC version 1.0.1
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/../../../../../x86_64-portbld-freebsd10.0/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/finclude
+ /usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/include
+ /usr/local/include
+ /usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/include-fixed
+ /usr/include
+End of search list.
+GNU Fortran (FreeBSD Ports Collection) version 4.6.4 (x86_64-portbld-freebsd10.0)
+	compiled by GNU C version 4.2.1 Compatible FreeBSD Clang 3.3 (tags/RELEASE_33/final 183502), GMP version 5.1.3, MPFR version 3.1.2, MPC version 1.0.1
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_9ec75.dir/CMakeFortranCompilerABI.F.o' '-mtune=generic' '-march=x86-64'
+ /usr/local/bin/as -v -o CMakeFiles/cmTC_9ec75.dir/CMakeFortranCompilerABI.F.o /tmp//ccGWxrQ5.s
+GNU assembler version 2.23.2 (x86_64-portbld-freebsd10.0) using BFD version (GNU Binutils) 2.23.2
+COMPILER_PATH=/usr/local/libexec/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/:/usr/local/libexec/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/:/usr/local/libexec/gcc46/gcc/x86_64-portbld-freebsd10.0/:/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/:/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/:/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/../../../../../x86_64-portbld-freebsd10.0/bin/
+LIBRARY_PATH=/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/:/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/../../../../../x86_64-portbld-freebsd10.0/lib/:/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_9ec75.dir/CMakeFortranCompilerABI.F.o' '-mtune=generic' '-march=x86-64'
+Linking Fortran executable cmTC_9ec75
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9ec75.dir/link.txt --verbose=1
+/usr/local/bin/gfortran46    -v   CMakeFiles/cmTC_9ec75.dir/CMakeFortranCompilerABI.F.o  -o cmTC_9ec75
+Driving: /usr/local/bin/gfortran46 -v CMakeFiles/cmTC_9ec75.dir/CMakeFortranCompilerABI.F.o -o cmTC_9ec75 -l gfortran -l m -shared-libgcc
+Using built-in specs.
+COLLECT_GCC=/usr/local/bin/gfortran46
+COLLECT_LTO_WRAPPER=/usr/local/libexec/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/lto-wrapper
+Target: x86_64-portbld-freebsd10.0
+Configured with: ./../gcc-4.6.4/configure --disable-bootstrap --disable-nls --libdir=/usr/local/lib/gcc46 --libexecdir=/usr/local/libexec/gcc46 --program-suffix=46 --with-as=/usr/local/bin/as --with-gmp=/usr/local --with-gxx-include-dir=/usr/local/lib/gcc46/include/c++/ --with-ld=/usr/local/bin/ld --with-pkgversion='FreeBSD Ports Collection' --with-system-zlib --disable-libgcj --enable-languages=c,c++,objc,fortran --prefix=/usr/local --mandir=/usr/local/man --infodir=/usr/local/info/gcc46 --build=x86_64-portbld-freebsd10.0
+Thread model: posix
+gcc version 4.6.4 (FreeBSD Ports Collection)
+Reading specs from /usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/../../../libgfortran.spec
+rename spec lib to liborig
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_9ec75' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+COMPILER_PATH=/usr/local/libexec/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/:/usr/local/libexec/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/:/usr/local/libexec/gcc46/gcc/x86_64-portbld-freebsd10.0/:/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/:/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/:/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/../../../../../x86_64-portbld-freebsd10.0/bin/
+LIBRARY_PATH=/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/:/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/../../../../../x86_64-portbld-freebsd10.0/lib/:/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_9ec75' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/local/libexec/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/collect2 --eh-frame-hdr -V -dynamic-linker /libexec/ld-elf.so.1 -o cmTC_9ec75 /usr/lib/crt1.o /usr/lib/crti.o /usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/crtbegin.o -L/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4 -L/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/../../../../../x86_64-portbld-freebsd10.0/lib -L/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/../../.. CMakeFiles/cmTC_9ec75.dir/CMakeFortranCompilerABI.F.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4/crtend.o /usr/lib/crtn.o
+GNU ld (GNU Binutils) 2.23.2
+  Supported emulations:
+   elf_x86_64_fbsd
+   elf_i386_fbsd
+   elf_x86_64
+   elf_i386
+   elf_l1om
+   elf_l1om_fbsd
+   elf_k1om
+   elf_k1om_fbsd
+gmake[1]: Leaving directory `/tmp/ii/CMakeFiles/CMakeTmp'
