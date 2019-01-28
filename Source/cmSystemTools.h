@@ -76,6 +76,10 @@ public:
    * Display a message.
    */
   static void Message(const char* m, const char* title = nullptr);
+  static void Message(const std::string& m, const char* title = nullptr)
+  {
+    Message(m.c_str(), title);
+  }
 
   typedef void (*OutputCallback)(const char*, size_t length, void*);
 

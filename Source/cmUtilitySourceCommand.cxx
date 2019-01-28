@@ -40,7 +40,7 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
       msg += ". If your intention is to run this executable, you need to "
              "preload the cache with the full path to a version of that "
              "program, which runs on this build machine.";
-      cmSystemTools::Message(msg.c_str(), "Warning");
+      cmSystemTools::Message(msg, "Warning");
     }
   } else {
     cmState* state = this->Makefile->GetState();

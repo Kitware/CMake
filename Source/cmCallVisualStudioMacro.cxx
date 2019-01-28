@@ -46,7 +46,7 @@ static bool LogErrorsAsMessages;
                      << std::endl;                                            \
         _hresult_oss.flags(std::ios::dec);                                    \
         _hresult_oss << __FILE__ << "(" << __LINE__ << ")";                   \
-        cmSystemTools::Message(_hresult_oss.str().c_str());                   \
+        cmSystemTools::Message(_hresult_oss.str());                           \
       }                                                                       \
     }
 
@@ -446,7 +446,7 @@ int cmCallVisualStudioMacro::CallMacro(const std::string& slnFile,
   if (err && LogErrorsAsMessages) {
     std::ostringstream oss;
     oss << "cmCallVisualStudioMacro::CallMacro failed, err = " << err;
-    cmSystemTools::Message(oss.str().c_str());
+    cmSystemTools::Message(oss.str());
   }
 
   return 0;

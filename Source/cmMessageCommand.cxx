@@ -70,7 +70,7 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
     if (status) {
       this->Makefile->DisplayStatus(message.c_str(), -1);
     } else {
-      cmSystemTools::Message(message.c_str());
+      cmSystemTools::Message(message);
     }
   }
   if (fatal) {

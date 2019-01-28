@@ -1252,7 +1252,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
   for (SaveCacheEntry const& i : saved) {
     this->AddCacheEntry(i.key, i.value.c_str(), i.help.c_str(), i.type);
   }
-  cmSystemTools::Message(warning.str().c_str());
+  cmSystemTools::Message(warning.str());
   // avoid reconfigure if there were errors
   if (!cmSystemTools::GetErrorOccuredFlag()) {
     // re-run configure

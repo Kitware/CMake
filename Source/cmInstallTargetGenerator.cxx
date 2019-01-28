@@ -51,7 +51,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
         << "\" has EXCLUDE_FROM_ALL set and will not be built by default "
         << "but an install rule has been provided for it.  CMake does "
         << "not define behavior for this case.";
-    cmSystemTools::Message(msg.str().c_str(), "Warning");
+    cmSystemTools::Message(msg.str(), "Warning");
   }
 
   // Perform the main install script generation.

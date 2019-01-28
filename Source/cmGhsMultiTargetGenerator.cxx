@@ -67,7 +67,7 @@ void cmGhsMultiTargetGenerator::Generate()
     case cmStateEnums::SHARED_LIBRARY: {
       std::string msg = "add_library(<name> SHARED ...) not supported: ";
       msg += this->Name;
-      cmSystemTools::Message(msg.c_str());
+      cmSystemTools::Message(msg);
       return;
     }
     case cmStateEnums::OBJECT_LIBRARY: {
@@ -84,13 +84,13 @@ void cmGhsMultiTargetGenerator::Generate()
     case cmStateEnums::MODULE_LIBRARY: {
       std::string msg = "add_library(<name> MODULE ...) not supported: ";
       msg += this->Name;
-      cmSystemTools::Message(msg.c_str());
+      cmSystemTools::Message(msg);
       return;
     }
     case cmStateEnums::UTILITY: {
       std::string msg = "add_custom_target(<name> ...) not supported: ";
       msg += this->Name;
-      cmSystemTools::Message(msg.c_str());
+      cmSystemTools::Message(msg);
       return;
     }
     default:

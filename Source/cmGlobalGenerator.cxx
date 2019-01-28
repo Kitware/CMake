@@ -1060,7 +1060,7 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(const std::string& l,
   if (preference < 0) {
     std::string msg = linkerPrefVar;
     msg += " is negative, adjusting it to 0";
-    cmSystemTools::Message(msg.c_str(), "Warning");
+    cmSystemTools::Message(msg, "Warning");
     preference = 0;
   }
 

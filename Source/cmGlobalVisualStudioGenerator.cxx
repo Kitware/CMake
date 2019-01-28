@@ -268,7 +268,7 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
         std::ostringstream oss;
         oss << "Could not copy from: " << src << std::endl;
         oss << "                 to: " << dst << std::endl;
-        cmSystemTools::Message(oss.str().c_str(), "Warning");
+        cmSystemTools::Message(oss.str(), "Warning");
       }
     }
 
@@ -783,7 +783,7 @@ void RegisterVisualStudioMacros(const std::string& macrosFile,
           << "CMake needs to register Visual Studio macros when its macros"
           << " file is updated or when it detects that its current macros file"
           << " is no longer registered with Visual Studio." << std::endl;
-      cmSystemTools::Message(oss.str().c_str(), "Warning");
+      cmSystemTools::Message(oss.str(), "Warning");
 
       // Count them again now that the warning is over. In the case of a GUI
       // warning, the user may have gone to close Visual Studio and then come

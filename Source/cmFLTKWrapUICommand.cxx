@@ -117,7 +117,7 @@ void cmFLTKWrapUICommand::FinalPass()
     msg += ".  The problem was found while processing the source directory: ";
     msg += this->Makefile->GetCurrentSourceDirectory();
     msg += ".  This FLTK_WRAP_UI call will be ignored.";
-    cmSystemTools::Message(msg.c_str(), "Warning");
+    cmSystemTools::Message(msg, "Warning");
     return;
   }
 }

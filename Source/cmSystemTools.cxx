@@ -267,14 +267,14 @@ void cmSystemTools::Error(const char* m1, const char* m2, const char* m3,
     message += m4;
   }
   cmSystemTools::s_ErrorOccured = true;
-  cmSystemTools::Message(message.c_str(), "Error");
+  cmSystemTools::Message(message, "Error");
 }
 
 void cmSystemTools::Error(const std::string& m)
 {
   std::string message = "CMake Error: " + m;
   cmSystemTools::s_ErrorOccured = true;
-  cmSystemTools::Message(message.c_str(), "Error");
+  cmSystemTools::Message(message, "Error");
 }
 
 void cmSystemTools::SetInterruptCallback(InterruptCallback f, void* clientData)
