@@ -88,6 +88,10 @@ bool cmGetFilenameComponentCommand::InitialPass(
     result = cmSystemTools::GetFilenameExtension(filename);
   } else if (args[2] == "NAME_WE") {
     result = cmSystemTools::GetFilenameWithoutExtension(filename);
+  } else if (args[2] == "LAST_EXT") {
+    result = cmSystemTools::GetFilenameLastExtension(filename);
+  } else if (args[2] == "NAME_WLE") {
+    result = cmSystemTools::GetFilenameWithoutLastExtension(filename);
   } else if (args[2] == "ABSOLUTE" || args[2] == "REALPATH") {
     // If the path given is relative, evaluate it relative to the
     // current source directory unless the user passes a different
