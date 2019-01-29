@@ -1,0 +1,38 @@
+# Adding Generator Expressions #
+
+Generator expressions are evaluated during build system generation to produce
+information specific to each build configuration.
+
+Generator expressions are allowed in the context of many target properties, such
+as LINK_LIBRARIES, INCLUDE_DIRECTORIES, COMPILE_DEFINITIONS and others. They may
+also be used when using commands to populate those properties, such as
+target_link_libraries(), target_include_directories(),
+target_compile_definitions() and others.
+
+Generator expressions may to used to enable conditional linking, conditional
+definitions used when compiling, and conditional include directories and more.
+The conditions may be based on the build configuration, target properties,
+platform information or any other queryable information.
+
+There are different types of generator expressions including Logical,
+Informational, and Output expressions.
+
+Logical expressions are used to create conditional output. The basic expressions
+are the 0 and 1 expressions. A "$<0:...>" results in the empty string, and
+"$<1:...>" results in the content of "...".  They can also be nested.
+For example:
+
+  if(HAVE_LOG AND HAVE_EXP)
+    target_compile_definitions(SqrtLibrary
+                               PRIVATE "HAVE_LOG" "HAVE_EXP")
+  endif()
+
+Can be rewritten with generator expressions:
+
+  target_compile_definitions(SqrtLibrary PRIVATE
+                             "$<$<BOOL:${HAVE_LOG}>:HAVE_LOG>"
+                             "$<$<BOOL:${HAVE_EXP}>:HAVE_EXP>"
+                            )
+
+Note that "${HAVE_LOG}" is evaluated at CMake configure time while
+"$<$<BOOL:${HAVE_LOG}>:HAVE_LOG>" is evaluated at build system generation time.
