@@ -38,9 +38,7 @@ codecvt::codecvt(Encoding e)
   }
 }
 
-codecvt::~codecvt()
-{
-}
+codecvt::~codecvt() = default;
 
 bool codecvt::do_always_noconv() const throw()
 {

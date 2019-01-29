@@ -23,9 +23,7 @@ cmLinkLineComputer::cmLinkLineComputer(cmOutputConverter* outputConverter,
 {
 }
 
-cmLinkLineComputer::~cmLinkLineComputer()
-{
-}
+cmLinkLineComputer::~cmLinkLineComputer() = default;
 
 void cmLinkLineComputer::SetUseWatcomQuote(bool useWatcomQuote)
 {

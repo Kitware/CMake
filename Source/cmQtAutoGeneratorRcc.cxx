@@ -20,9 +20,7 @@ cmQtAutoGeneratorRcc::cmQtAutoGeneratorRcc()
   UVRequest().init(*UVLoop(), &cmQtAutoGeneratorRcc::UVPollStage, this);
 }
 
-cmQtAutoGeneratorRcc::~cmQtAutoGeneratorRcc()
-{
-}
+cmQtAutoGeneratorRcc::~cmQtAutoGeneratorRcc() = default;
 
 bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
 {

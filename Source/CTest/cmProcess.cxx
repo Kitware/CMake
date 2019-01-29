@@ -69,9 +69,7 @@ cmProcess::cmProcess(cmCTestRunTest& runner)
   this->StartTime = std::chrono::steady_clock::time_point();
 }
 
-cmProcess::~cmProcess()
-{
-}
+cmProcess::~cmProcess() = default;
 
 void cmProcess::SetCommand(const char* command)
 {

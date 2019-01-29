@@ -11,13 +11,9 @@
 #include "cmSystemTools.h"
 #include "cm_sys_stat.h"
 
-cmCPackOSXX11Generator::cmCPackOSXX11Generator()
-{
-}
+cmCPackOSXX11Generator::cmCPackOSXX11Generator() = default;
 
-cmCPackOSXX11Generator::~cmCPackOSXX11Generator()
-{
-}
+cmCPackOSXX11Generator::~cmCPackOSXX11Generator() = default;
 
 int cmCPackOSXX11Generator::PackageFiles()
 {

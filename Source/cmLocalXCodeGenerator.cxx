@@ -19,9 +19,7 @@ cmLocalXCodeGenerator::cmLocalXCodeGenerator(cmGlobalGenerator* gg,
   this->EmitUniversalBinaryFlags = false;
 }
 
-cmLocalXCodeGenerator::~cmLocalXCodeGenerator()
-{
-}
+cmLocalXCodeGenerator::~cmLocalXCodeGenerator() = default;
 
 std::string cmLocalXCodeGenerator::GetTargetDirectory(
   cmGeneratorTarget const*) const

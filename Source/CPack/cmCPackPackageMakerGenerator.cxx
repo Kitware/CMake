@@ -30,9 +30,7 @@ cmCPackPackageMakerGenerator::cmCPackPackageMakerGenerator()
   this->PackageCompatibilityVersion = getVersion(10, 4);
 }
 
-cmCPackPackageMakerGenerator::~cmCPackPackageMakerGenerator()
-{
-}
+cmCPackPackageMakerGenerator::~cmCPackPackageMakerGenerator() = default;
 
 bool cmCPackPackageMakerGenerator::SupportsComponentInstallation() const
 {

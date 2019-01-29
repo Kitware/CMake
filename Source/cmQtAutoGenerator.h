@@ -206,9 +206,6 @@ public:
       bool MergedOutput = false;
     };
 
-    // -- Constructor
-    ReadOnlyProcessT() = default;
-
     // -- Const accessors
     const SetupT& Setup() const { return Setup_; }
     ProcessResultT* Result() const { return Setup_.Result; }

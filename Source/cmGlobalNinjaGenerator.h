@@ -183,8 +183,6 @@ public:
     return new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaGenerator>();
   }
 
-  ~cmGlobalNinjaGenerator() override {}
-
   cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
   std::string GetName() const override

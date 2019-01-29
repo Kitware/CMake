@@ -48,7 +48,7 @@ private:
       : Number(n)
     {
     }
-    RegexReplacement() {}
+    RegexReplacement() = default;
 
     int Number;
     std::string Value;

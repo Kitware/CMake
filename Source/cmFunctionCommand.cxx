@@ -14,11 +14,6 @@
 class cmFunctionHelperCommand : public cmCommand
 {
 public:
-  cmFunctionHelperCommand() {}
-
-  ///! clean up any memory allocated by the function
-  ~cmFunctionHelperCommand() override {}
-
   /**
    * This is a virtual constructor for the command.
    */

@@ -32,9 +32,7 @@ Discussion:
 http://forums.codeblocks.org/index.php/topic,6789.0.html
 */
 
-cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator()
-{
-}
+cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator() = default;
 
 cmExternalMakefileProjectGeneratorFactory*
 cmExtraCodeBlocksGenerator::GetFactory()

@@ -4,9 +4,7 @@
 
 #include <utility>
 
-cmExpandedCommandArgument::cmExpandedCommandArgument()
-{
-}
+cmExpandedCommandArgument::cmExpandedCommandArgument() = default;
 
 cmExpandedCommandArgument::cmExpandedCommandArgument(std::string value,
                                                      bool quoted)

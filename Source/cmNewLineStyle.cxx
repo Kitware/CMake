@@ -4,9 +4,7 @@
 
 #include <stddef.h>
 
-cmNewLineStyle::cmNewLineStyle()
-{
-}
+cmNewLineStyle::cmNewLineStyle() = default;
 
 bool cmNewLineStyle::IsValid() const
 {

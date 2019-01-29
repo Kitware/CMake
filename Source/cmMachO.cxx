@@ -91,7 +91,7 @@ public:
     : Swap(_swap)
   {
   }
-  virtual ~cmMachOHeaderAndLoadCommands() {}
+  virtual ~cmMachOHeaderAndLoadCommands() = default;
 
   virtual bool read_mach_o(cmsys::ifstream& fin) = 0;
 

@@ -186,9 +186,7 @@ QCMakeCacheModel::QCMakeCacheModel(QObject* p)
   this->setHorizontalHeaderLabels(labels);
 }
 
-QCMakeCacheModel::~QCMakeCacheModel()
-{
-}
+QCMakeCacheModel::~QCMakeCacheModel() = default;
 
 static uint qHash(const QCMakeProperty& p)
 {

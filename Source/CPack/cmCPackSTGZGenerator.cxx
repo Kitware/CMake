@@ -13,13 +13,9 @@
 #include "cmSystemTools.h"
 #include "cm_sys_stat.h"
 
-cmCPackSTGZGenerator::cmCPackSTGZGenerator()
-{
-}
+cmCPackSTGZGenerator::cmCPackSTGZGenerator() = default;
 
-cmCPackSTGZGenerator::~cmCPackSTGZGenerator()
-{
-}
+cmCPackSTGZGenerator::~cmCPackSTGZGenerator() = default;
 
 int cmCPackSTGZGenerator::InitializeInternal()
 {

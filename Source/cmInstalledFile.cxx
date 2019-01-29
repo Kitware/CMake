@@ -9,18 +9,14 @@
 
 #include <utility>
 
-cmInstalledFile::cmInstalledFile()
-{
-}
+cmInstalledFile::cmInstalledFile() = default;
 
 cmInstalledFile::~cmInstalledFile()
 {
   delete NameExpression;
 }
 
-cmInstalledFile::Property::Property()
-{
-}
+cmInstalledFile::Property::Property() = default;
 
 cmInstalledFile::Property::~Property()
 {

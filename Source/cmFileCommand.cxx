@@ -1079,7 +1079,7 @@ struct cmFileCopier
     , Doing(DoingNone)
   {
   }
-  virtual ~cmFileCopier() {}
+  virtual ~cmFileCopier() = default;
 
   bool Run(std::vector<std::string> const& args);
 
@@ -1102,7 +1102,6 @@ protected:
   {
     bool Exclude = false;
     mode_t Permissions = 0;
-    MatchProperties() {}
   };
   struct MatchRule
   {

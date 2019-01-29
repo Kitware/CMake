@@ -15,8 +15,6 @@
 class cmTimestamp
 {
 public:
-  cmTimestamp() {}
-
   std::string CurrentTime(const std::string& formatString, bool utcFlag);
 
   std::string FileModificationTime(const char* path,

@@ -26,9 +26,7 @@ cmTestGenerator::cmTestGenerator(
   this->LG = nullptr;
 }
 
-cmTestGenerator::~cmTestGenerator()
-{
-}
+cmTestGenerator::~cmTestGenerator() = default;
 
 void cmTestGenerator::Compute(cmLocalGenerator* lg)
 {

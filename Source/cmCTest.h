@@ -57,8 +57,6 @@ public:
   /** Representation of one part.  */
   struct PartInfo
   {
-    PartInfo() {}
-
     void SetName(const std::string& name) { this->Name = name; }
     const std::string& GetName() const { return this->Name; }
 

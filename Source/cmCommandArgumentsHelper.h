@@ -39,7 +39,7 @@ class cmCommandArgument
 public:
   cmCommandArgument(cmCommandArgumentsHelper* args, const char* key,
                     cmCommandArgumentGroup* group = nullptr);
-  virtual ~cmCommandArgument() {}
+  virtual ~cmCommandArgument() = default;
 
   /// this argument may follow after arg. 0 means it comes first.
   void Follows(const cmCommandArgument* arg);
@@ -172,8 +172,6 @@ class cmCommandArgumentGroup
   friend class cmCommandArgument;
 
 public:
-  cmCommandArgumentGroup() {}
-
   /// All members of this group may follow the given argument
   void Follows(const cmCommandArgument* arg);
 

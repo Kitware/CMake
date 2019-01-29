@@ -19,13 +19,9 @@ const char* cmVariableWatch::GetAccessAsString(int access_type)
   return cmVariableWatchAccessStrings[access_type];
 }
 
-cmVariableWatch::cmVariableWatch()
-{
-}
+cmVariableWatch::cmVariableWatch() = default;
 
-cmVariableWatch::~cmVariableWatch()
-{
-}
+cmVariableWatch::~cmVariableWatch() = default;
 
 bool cmVariableWatch::AddWatch(const std::string& variable, WatchMethod method,
                                void* client_data /*=0*/,

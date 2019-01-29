@@ -129,9 +129,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
   }
 }
 
-cmQtAutoGenGlobalInitializer::~cmQtAutoGenGlobalInitializer()
-{
-}
+cmQtAutoGenGlobalInitializer::~cmQtAutoGenGlobalInitializer() = default;
 
 void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
   cmLocalGenerator* localGen, std::string const& name,

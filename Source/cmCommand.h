@@ -30,12 +30,12 @@ public:
   /**
    * Construct the command. By default it has no makefile.
    */
-  cmCommand() {}
+  cmCommand() = default;
 
   /**
    * Need virtual destructor to destroy real command type.
    */
-  virtual ~cmCommand() {}
+  virtual ~cmCommand() = default;
 
   /**
    * Specify the makefile.

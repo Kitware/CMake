@@ -533,7 +533,6 @@ protected:
     std::vector<std::string> Depends;
     std::string WorkingDir;
     bool UsesTerminal = false;
-    GlobalTargetInfo() {}
   };
 
   void CreateDefaultGlobalTargets(std::vector<GlobalTargetInfo>& targets);
@@ -662,7 +661,6 @@ private:
     long LastDiskTime = -1;
     std::set<std::string> All;
     std::set<std::string> Generated;
-    DirectoryContent() {}
   };
   std::map<std::string, DirectoryContent> DirectoryContentMap;
 

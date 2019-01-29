@@ -206,9 +206,7 @@ bool cmInstallCommandArguments::CheckPermissions(
   return false;
 }
 
-cmInstallCommandIncludesArgument::cmInstallCommandIncludesArgument()
-{
-}
+cmInstallCommandIncludesArgument::cmInstallCommandIncludesArgument() = default;
 
 const std::vector<std::string>&
 cmInstallCommandIncludesArgument::GetIncludeDirs() const

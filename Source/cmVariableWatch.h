@@ -66,7 +66,6 @@ protected:
     WatchMethod Method = nullptr;
     void* ClientData = nullptr;
     DeleteData DeleteDataCall = nullptr;
-    Pair() {}
     ~Pair()
     {
       if (this->DeleteDataCall && this->ClientData) {

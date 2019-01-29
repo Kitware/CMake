@@ -38,9 +38,7 @@ cmInstallTargetGenerator::cmInstallTargetGenerator(
   this->NamelinkMode = NamelinkModeNone;
 }
 
-cmInstallTargetGenerator::~cmInstallTargetGenerator()
-{
-}
+cmInstallTargetGenerator::~cmInstallTargetGenerator() = default;
 
 void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
 {

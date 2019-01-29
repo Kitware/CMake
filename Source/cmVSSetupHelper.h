@@ -112,8 +112,6 @@ struct VSInstanceInfo
   bool IsWin10SDKInstalled = false;
   bool IsWin81SDKInstalled = false;
 
-  VSInstanceInfo() = default;
-
   std::string GetInstallLocation() const;
 };
 

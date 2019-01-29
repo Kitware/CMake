@@ -17,11 +17,6 @@
 class cmMacroHelperCommand : public cmCommand
 {
 public:
-  cmMacroHelperCommand() {}
-
-  ///! clean up any memory allocated by the macro
-  ~cmMacroHelperCommand() override {}
-
   /**
    * This is a virtual constructor for the command.
    */

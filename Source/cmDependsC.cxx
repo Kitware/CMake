@@ -19,9 +19,7 @@
 #define INCLUDE_REGEX_COMPLAIN_MARKER "#IncludeRegexComplain: "
 #define INCLUDE_REGEX_TRANSFORM_MARKER "#IncludeRegexTransform: "
 
-cmDependsC::cmDependsC()
-{
-}
+cmDependsC::cmDependsC() = default;
 
 cmDependsC::cmDependsC(
   cmLocalGenerator* lg, const std::string& targetDir, const std::string& lang,

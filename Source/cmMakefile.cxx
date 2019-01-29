@@ -2738,7 +2738,6 @@ typedef enum
 } t_domain;
 struct t_lookup
 {
-  t_lookup() {}
   t_domain domain = NORMAL;
   size_t loc = 0;
 };

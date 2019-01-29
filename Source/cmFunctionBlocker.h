@@ -26,7 +26,7 @@ public:
     return false;
   }
 
-  virtual ~cmFunctionBlocker() {}
+  virtual ~cmFunctionBlocker() = default;
 
   /** Set/Get the context in which this blocker is created.  */
   void SetStartingContext(cmListFileContext const& lfc)

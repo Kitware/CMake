@@ -16,9 +16,7 @@ cmScriptGenerator::cmScriptGenerator(std::string config_var,
 {
 }
 
-cmScriptGenerator::~cmScriptGenerator()
-{
-}
+cmScriptGenerator::~cmScriptGenerator() = default;
 
 void cmScriptGenerator::Generate(
   std::ostream& os, const std::string& config,

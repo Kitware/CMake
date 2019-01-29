@@ -15,9 +15,7 @@ cmCPackPKGGenerator::cmCPackPKGGenerator()
   this->componentPackageMethod = ONE_PACKAGE;
 }
 
-cmCPackPKGGenerator::~cmCPackPKGGenerator()
-{
-}
+cmCPackPKGGenerator::~cmCPackPKGGenerator() = default;
 
 bool cmCPackPKGGenerator::SupportsComponentInstallation() const
 {

@@ -29,9 +29,7 @@ cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
 {
 }
 
-cmCommonTargetGenerator::~cmCommonTargetGenerator()
-{
-}
+cmCommonTargetGenerator::~cmCommonTargetGenerator() = default;
 
 std::string const& cmCommonTargetGenerator::GetConfigName() const
 {

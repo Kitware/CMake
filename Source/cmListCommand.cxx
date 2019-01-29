@@ -426,7 +426,7 @@ public:
 class TransformSelector
 {
 public:
-  virtual ~TransformSelector() {}
+  virtual ~TransformSelector() = default;
 
   std::string Tag;
 
@@ -580,7 +580,7 @@ private:
 class TransformAction
 {
 public:
-  virtual ~TransformAction() {}
+  virtual ~TransformAction() = default;
 
   virtual std::string Transform(const std::string& input) = 0;
 };

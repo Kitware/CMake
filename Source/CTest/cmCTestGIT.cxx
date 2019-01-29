@@ -31,9 +31,7 @@ cmCTestGIT::cmCTestGIT(cmCTest* ct, std::ostream& log)
   this->CurrentGitVersion = 0;
 }
 
-cmCTestGIT::~cmCTestGIT()
-{
-}
+cmCTestGIT::~cmCTestGIT() = default;
 
 class cmCTestGIT::OneLineParser : public cmCTestVC::LineParser
 {
@@ -477,7 +475,6 @@ private:
     std::string EMail;
     unsigned long Time = 0;
     long TimeZone = 0;
-    Person() {}
   };
 
   void ParsePerson(const char* str, Person& person)

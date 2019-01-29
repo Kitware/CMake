@@ -6,9 +6,7 @@
 
 #include <utility> // IWYU pragma: keep
 
-cmLinkItem::cmLinkItem()
-{
-}
+cmLinkItem::cmLinkItem() = default;
 
 cmLinkItem::cmLinkItem(std::string n, cmListFileBacktrace bt)
   : String(std::move(n))

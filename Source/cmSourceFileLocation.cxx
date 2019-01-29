@@ -11,9 +11,7 @@
 
 #include <assert.h>
 
-cmSourceFileLocation::cmSourceFileLocation()
-{
-}
+cmSourceFileLocation::cmSourceFileLocation() = default;
 
 cmSourceFileLocation::cmSourceFileLocation(const cmSourceFileLocation& loc)
   : Makefile(loc.Makefile)

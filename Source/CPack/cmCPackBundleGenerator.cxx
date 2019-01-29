@@ -8,13 +8,9 @@
 #include "cmCPackLog.h"
 #include "cmSystemTools.h"
 
-cmCPackBundleGenerator::cmCPackBundleGenerator()
-{
-}
+cmCPackBundleGenerator::cmCPackBundleGenerator() = default;
 
-cmCPackBundleGenerator::~cmCPackBundleGenerator()
-{
-}
+cmCPackBundleGenerator::~cmCPackBundleGenerator() = default;
 
 int cmCPackBundleGenerator::InitializeInternal()
 {

@@ -98,9 +98,7 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3(
   this->BorlandMakeCurlyHack = false;
 }
 
-cmLocalUnixMakefileGenerator3::~cmLocalUnixMakefileGenerator3()
-{
-}
+cmLocalUnixMakefileGenerator3::~cmLocalUnixMakefileGenerator3() = default;
 
 void cmLocalUnixMakefileGenerator3::Generate()
 {

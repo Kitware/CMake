@@ -39,9 +39,7 @@ cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   }
 }
 
-cmInstallDirectoryGenerator::~cmInstallDirectoryGenerator()
-{
-}
+cmInstallDirectoryGenerator::~cmInstallDirectoryGenerator() = default;
 
 void cmInstallDirectoryGenerator::Compute(cmLocalGenerator* lg)
 {

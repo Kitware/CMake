@@ -47,7 +47,7 @@ private:
     typedef std::string std_string;
 
   public:
-    Def() {}
+    Def() = default;
     Def(const char* v)
       : std_string(v ? v : "")
       , Exists(v ? true : false)

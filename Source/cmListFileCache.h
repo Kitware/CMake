@@ -29,12 +29,12 @@ struct cmCommandContext
   {
     std::string Lower;
     std::string Original;
-    cmCommandName() {}
+    cmCommandName() = default;
     cmCommandName(std::string const& name) { *this = name; }
     cmCommandName& operator=(std::string const& name);
   } Name;
   long Line = 0;
-  cmCommandContext() {}
+  cmCommandContext() = default;
   cmCommandContext(const char* name, int line)
     : Name(name)
     , Line(line)
@@ -50,7 +50,7 @@ struct cmListFileArgument
     Quoted,
     Bracket
   };
-  cmListFileArgument() {}
+  cmListFileArgument() = default;
   cmListFileArgument(std::string v, Delimiter d, long line)
     : Value(std::move(v))
     , Delim(d)
@@ -73,7 +73,6 @@ public:
   std::string Name;
   std::string FilePath;
   long Line = 0;
-  cmListFileContext() {}
 
   static cmListFileContext FromCommandContext(cmCommandContext const& lfcc,
                                               std::string const& fileName)
@@ -109,15 +108,6 @@ public:
   // Construct an empty backtrace whose bottom sits in the directory
   // indicated by the given valid snapshot.
   cmListFileBacktrace(cmStateSnapshot const& snapshot);
-
-  // Backtraces may be copied, moved, and assigned as values.
-  cmListFileBacktrace(cmListFileBacktrace const&) = default;
-  cmListFileBacktrace(cmListFileBacktrace&&) // NOLINT(clang-tidy)
-    noexcept = default;
-  cmListFileBacktrace& operator=(cmListFileBacktrace const&) = default;
-  cmListFileBacktrace& operator=(cmListFileBacktrace&&) // NOLINT(clang-tidy)
-    noexcept = default;
-  ~cmListFileBacktrace() = default;
 
   cmStateSnapshot GetBottom() const;
 

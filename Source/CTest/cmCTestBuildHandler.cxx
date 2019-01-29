@@ -507,7 +507,7 @@ public:
     : FTC(ftc)
   {
   }
-  FragmentCompare() {}
+  FragmentCompare() = default;
   bool operator()(std::string const& l, std::string const& r) const
   {
     // Order files by modification time.  Use lexicographic order

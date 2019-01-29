@@ -16,9 +16,7 @@
 #include <stddef.h>
 #include <utility>
 
-cmCPackIFWInstaller::cmCPackIFWInstaller()
-{
-}
+cmCPackIFWInstaller::cmCPackIFWInstaller() = default;
 
 void cmCPackIFWInstaller::printSkippedOptionWarning(
   const std::string& optionName, const std::string& optionValue)

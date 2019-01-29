@@ -115,7 +115,6 @@ private:
 
   struct RequestedHelpItem
   {
-    RequestedHelpItem() {}
     cmDocumentationEnums::Type HelpType = None;
     std::string Filename;
     std::string Argument;

@@ -38,9 +38,7 @@ cmInstallFilesGenerator::cmInstallFilesGenerator(
   }
 }
 
-cmInstallFilesGenerator::~cmInstallFilesGenerator()
-{
-}
+cmInstallFilesGenerator::~cmInstallFilesGenerator() = default;
 
 void cmInstallFilesGenerator::Compute(cmLocalGenerator* lg)
 {

@@ -46,9 +46,7 @@ cmLocalNinjaGenerator::CreateRulePlaceholderExpander() const
   return ret;
 }
 
-cmLocalNinjaGenerator::~cmLocalNinjaGenerator()
-{
-}
+cmLocalNinjaGenerator::~cmLocalNinjaGenerator() = default;
 
 void cmLocalNinjaGenerator::Generate()
 {

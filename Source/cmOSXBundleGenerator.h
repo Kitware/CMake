@@ -31,7 +31,7 @@ public:
 
   struct MacOSXContentGeneratorType
   {
-    virtual ~MacOSXContentGeneratorType() {}
+    virtual ~MacOSXContentGeneratorType() = default;
     virtual void operator()(cmSourceFile const& source,
                             const char* pkgloc) = 0;
   };

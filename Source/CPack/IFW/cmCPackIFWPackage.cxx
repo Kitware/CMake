@@ -24,9 +24,7 @@ cmCPackIFWPackage::CompareStruct::CompareStruct()
 }
 
 //------------------------------------------------------- DependenceStruct ---
-cmCPackIFWPackage::DependenceStruct::DependenceStruct()
-{
-}
+cmCPackIFWPackage::DependenceStruct::DependenceStruct() = default;
 
 cmCPackIFWPackage::DependenceStruct::DependenceStruct(
   const std::string& dependence)

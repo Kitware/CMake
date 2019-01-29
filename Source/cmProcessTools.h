@@ -34,7 +34,7 @@ public:
       return this->Process(data, static_cast<int>(strlen(data)));
     }
 
-    virtual ~OutputParser() {}
+    virtual ~OutputParser() = default;
 
   protected:
     /** Implement in a subclass to process a chunk of data.  It should
