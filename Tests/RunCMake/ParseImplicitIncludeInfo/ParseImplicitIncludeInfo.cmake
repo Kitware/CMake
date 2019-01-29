@@ -21,6 +21,10 @@ set(targets
   freebsd-C-Clang-3.3.0 freebsd-CXX-Clang-3.3.0 freebsd-Fortran-GNU-4.6.4
   linux-C-GNU-7.3.0 linux-CXX-GNU-7.3.0 linux-Fortran-GNU-7.3.0
   linux-C-Intel-18.0.0.20170811 linux-CXX-Intel-18.0.0.20170811
+  linux-C-PGI-18.10.1 linux-CXX-PGI-18.10.1
+    linux-Fortran-PGI-18.10.1 linux_pgf77-Fortran-PGI-18.10.1
+    linux_nostdinc-C-PGI-18.10.1 linux_nostdinc-CXX-PGI-18.10.1
+    linux_nostdinc-Fortran-PGI-18.10.1
   linux-C-XL-12.1.0 linux-CXX-XL-12.1.0 linux-Fortran-XL-14.1.0
     linux_nostdinc-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
     linux_nostdinc_i-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
@@ -30,7 +34,7 @@ set(targets
   netbsd-C-GNU-4.8.5 netbsd-CXX-GNU-4.8.5
     netbsd_nostdinc-C-GNU-4.8.5 netbsd_nostdinc-CXX-GNU-4.8.5
   openbsd-C-Clang-5.0.1 openbsd-CXX-Clang-5.0.1
-  sunos-C-SunPro-5.13.0 sunos-CXX-SunPro-5.13.0
+  sunos-C-SunPro-5.13.0 sunos-CXX-SunPro-5.13.0 sunos-Fortran-SunPro-8.8.0
   )
 
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitIncludeInfo.cmake)
