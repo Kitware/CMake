@@ -120,7 +120,7 @@ public:
 private:
   static void reportProgress(const char* msg, float progress,
                              const cmServerRequest& request);
-  static void reportMessage(const char* msg, const char* title, bool& cancel,
+  static void reportMessage(const char* msg, const char* title,
                             const cmServerRequest& request);
 
   // Handle requests:

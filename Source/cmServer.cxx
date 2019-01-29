@@ -97,8 +97,8 @@ void cmServer::ProcessRequest(cmConnection* connection,
   }
 
   cmSystemTools::SetMessageCallback(
-    [&request](const char* msg, const char* title, bool& cancel) {
-      reportMessage(msg, title, cancel, request);
+    [&request](const char* msg, const char* title) {
+      reportMessage(msg, title, request);
     });
 
   if (this->Protocol) {
@@ -166,7 +166,7 @@ void cmServer::reportProgress(const char* msg, float progress,
 }
 
 void cmServer::reportMessage(const char* msg, const char* title,
-                             bool& /*cancel*/, const cmServerRequest& request)
+                             const cmServerRequest& request)
 {
   assert(msg);
   std::string titleString;

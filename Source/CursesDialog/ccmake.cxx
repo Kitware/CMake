@@ -150,7 +150,7 @@ int main(int argc, char const* const* argv)
   }
 
   cmSystemTools::SetMessageCallback(
-    [myform](const char* message, const char* title, bool& /*unused*/) {
+    [myform](const char* message, const char* title) {
       myform->AddError(message, title);
     });
 

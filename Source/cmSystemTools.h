@@ -56,12 +56,11 @@ public:
    */
   static std::string TrimWhitespace(const std::string& s);
 
-  using MessageCallback = std::function<void(const char*, const char*, bool&)>;
+  using MessageCallback = std::function<void(const char*, const char*)>;
   /**
    *  Set the function used by GUIs to display error messages
    *  Function gets passed: message as a const char*,
-   *  title as a const char*, and a reference to bool that when
-   *  set to false, will disable further messages (cancel).
+   *  title as a const char*.
    */
   static void SetMessageCallback(MessageCallback f);
 

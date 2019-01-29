@@ -329,7 +329,7 @@ void cmSystemTools::Message(const char* m1, const char* title)
     return;
   }
   if (s_MessageCallback) {
-    s_MessageCallback(m1, title, s_DisableMessages);
+    s_MessageCallback(m1, title);
     return;
   }
   std::cerr << m1 << std::endl << std::flush;

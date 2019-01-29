@@ -25,8 +25,8 @@ QCMake::QCMake(QObject* p)
   cmSystemTools::SetRunCommandHideConsole(true);
 
   cmSystemTools::SetMessageCallback(
-    [this](const char* msg, const char* title, bool& cancel) {
-      this->messageCallback(msg, title, cancel);
+    [this](const char* msg, const char* title) {
+      this->messageCallback(msg, title);
     });
   cmSystemTools::SetStdoutCallback(
     [this](const char* msg, size_t len) { this->stdoutCallback(msg, len); });
@@ -359,8 +359,7 @@ void QCMake::progressCallback(const char* msg, float percent)
   QCoreApplication::processEvents();
 }
 
-void QCMake::messageCallback(const char* msg, const char* /*title*/,
-                             bool& /*stop*/)
+void QCMake::messageCallback(const char* msg, const char* /*title*/)
 {
   emit this->errorMessage(QString::fromLocal8Bit(msg));
   QCoreApplication::processEvents();
