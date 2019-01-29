@@ -24,11 +24,13 @@ Environment Variables that Control the Build
    /envvar/CMAKE_BUILD_PARALLEL_LEVEL
    /envvar/CMAKE_CONFIG_TYPE
    /envvar/CMAKE_MSVCIDE_RUN_PATH
+   /envvar/CMAKE_NO_VERBOSE
    /envvar/CMAKE_OSX_ARCHITECTURES
    /envvar/DESTDIR
    /envvar/LDFLAGS
    /envvar/MACOSX_DEPLOYMENT_TARGET
    /envvar/PackageName_ROOT
+   /envvar/VERBOSE
 
 Environment Variables for Languages
 ===================================

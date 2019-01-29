@@ -289,6 +289,14 @@ following options:
 ``--use-stderr``
   Ignored.  Behavior is default in CMake >= 3.0.
 
+``-v, --verbose``
+  Enable verbose output - if supported - including the build commands to be
+  executed.
+
+  This option can be omitted if :envvar:`VERBOSE` environment variable or
+  :variable:`CMAKE_VERBOSE_MAKEFILE` cached variable is set.
+
+
 ``--``
   Pass remaining options to the native tool.
 

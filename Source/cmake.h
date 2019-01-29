@@ -424,7 +424,8 @@ public:
   ///! run the --build option
   int Build(int jobs, const std::string& dir, const std::string& target,
             const std::string& config,
-            const std::vector<std::string>& nativeOptions, bool clean);
+            const std::vector<std::string>& nativeOptions, bool clean,
+            bool verbose);
 
   ///! run the --open option
   bool Open(const std::string& dir, bool dryRun);

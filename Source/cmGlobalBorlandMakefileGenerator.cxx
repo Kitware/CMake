@@ -54,7 +54,7 @@ void cmGlobalBorlandMakefileGenerator::GetDocumentation(
 }
 
 void cmGlobalBorlandMakefileGenerator::GenerateBuildCommand(
-  std::vector<std::string>& makeCommand, const std::string& makeProgram,
+  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
   const std::string& projectName, const std::string& projectDir,
   const std::string& targetName, const std::string& config, bool fast,
   int /*jobs*/, bool verbose, std::vector<std::string> const& makeOptions)

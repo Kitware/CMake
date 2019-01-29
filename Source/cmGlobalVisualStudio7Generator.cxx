@@ -191,7 +191,7 @@ const char* cmGlobalVisualStudio7Generator::ExternalProjectType(
   return "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942";
 }
 void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
-  std::vector<std::string>& makeCommand, const std::string& makeProgram,
+  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
   const std::string& projectName, const std::string& /*projectDir*/,
   const std::string& targetName, const std::string& config, bool /*fast*/,
   int /*jobs*/, bool /*verbose*/, std::vector<std::string> const& makeOptions)
@@ -209,35 +209,25 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
     makeProgramSelected = this->GetDevEnvCommand();
   }
 
-  makeCommand.push_back(makeProgramSelected);
+  // Workaround to convince VCExpress.exe to produce output.
+  makeCommand.RequiresOutputForward =
+    (makeProgramLower.find("vcexpress") != std::string::npos);
 
-  makeCommand.push_back(std::string(projectName) + ".sln");
+  makeCommand.add(makeProgramSelected);
+
+  makeCommand.add(std::string(projectName) + ".sln");
   std::string realTarget = targetName;
   bool clean = false;
   if (realTarget == "clean") {
     clean = true;
     realTarget = "ALL_BUILD";
   }
-  if (clean) {
-    makeCommand.push_back("/clean");
-  } else {
-    makeCommand.push_back("/build");
-  }
 
-  if (!config.empty()) {
-    makeCommand.push_back(config);
-  } else {
-    makeCommand.push_back("Debug");
-  }
-  makeCommand.push_back("/project");
-
-  if (!realTarget.empty()) {
-    makeCommand.push_back(realTarget);
-  } else {
-    makeCommand.push_back("ALL_BUILD");
-  }
-  makeCommand.insert(makeCommand.end(), makeOptions.begin(),
-                     makeOptions.end());
+  makeCommand.add((clean ? "/clean" : "/build"));
+  makeCommand.add((config.empty() ? "Debug" : config));
+  makeCommand.add("/project");
+  makeCommand.add((realTarget.empty() ? "ALL_BUILD" : realTarget));
+  makeCommand.add(makeOptions.begin(), makeOptions.end());
 }
 
 ///! Create a local generator appropriate to this Global Generator

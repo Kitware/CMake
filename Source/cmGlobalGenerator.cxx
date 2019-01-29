@@ -1753,14 +1753,13 @@ int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
 }
 
 void cmGlobalGenerator::GenerateBuildCommand(
-  std::vector<std::string>& makeCommand, const std::string& /*unused*/,
+  GeneratedMakeCommand& makeCommand, const std::string& /*unused*/,
   const std::string& /*unused*/, const std::string& /*unused*/,
   const std::string& /*unused*/, const std::string& /*unused*/,
   bool /*unused*/, int /*unused*/, bool /*unused*/,
   std::vector<std::string> const& /*unused*/)
 {
-  makeCommand.emplace_back(
-    "cmGlobalGenerator::GenerateBuildCommand not implemented");
+  makeCommand.add("cmGlobalGenerator::GenerateBuildCommand not implemented");
 }
 
 void cmGlobalGenerator::PrintBuildCommandAdvice(std::ostream& /*os*/,
@@ -1804,31 +1803,29 @@ int cmGlobalGenerator::Build(int jobs, const std::string& /*unused*/,
   std::string outputBuffer;
   std::string* outputPtr = &outputBuffer;
 
-  std::vector<std::string> makeCommand;
+  GeneratedMakeCommand makeCommand;
   this->GenerateBuildCommand(makeCommand, makeCommandCSTR, projectName, bindir,
                              target, config, fast, jobs, verbose,
                              nativeOptions);
 
-  // Workaround to convince VCExpress.exe to produce output.
+  // Workaround to convince some commands to produce output.
   if (outputflag == cmSystemTools::OUTPUT_PASSTHROUGH &&
-      !makeCommand.empty() &&
-      cmSystemTools::LowerCase(
-        cmSystemTools::GetFilenameName(makeCommand[0])) == "vcexpress.exe") {
+      makeCommand.RequiresOutputForward) {
     outputflag = cmSystemTools::OUTPUT_FORWARD;
   }
 
   // should we do a clean first?
   if (clean) {
-    std::vector<std::string> cleanCommand;
+    GeneratedMakeCommand cleanCommand;
     this->GenerateBuildCommand(cleanCommand, makeCommandCSTR, projectName,
                                bindir, "clean", config, fast, jobs, verbose);
     output += "\nRun Clean Command:";
-    output += cmSystemTools::PrintSingleCommand(cleanCommand);
+    output += cleanCommand.printable();
     output += "\n";
 
-    if (!cmSystemTools::RunSingleCommand(cleanCommand, outputPtr, outputPtr,
-                                         &retVal, nullptr, outputflag,
-                                         timeout)) {
+    if (!cmSystemTools::RunSingleCommand(cleanCommand.PrimaryCommand,
+                                         outputPtr, outputPtr, &retVal,
+                                         nullptr, outputflag, timeout)) {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error("Generator: execution of make clean failed.");
       output += *outputPtr;
@@ -1840,13 +1837,13 @@ int cmGlobalGenerator::Build(int jobs, const std::string& /*unused*/,
   }
 
   // now build
-  std::string makeCommandStr = cmSystemTools::PrintSingleCommand(makeCommand);
-  output += "\nRun Build Command:";
+  std::string makeCommandStr = makeCommand.printable();
+  output += "\nRun Build Command(s):";
   output += makeCommandStr;
   output += "\n";
 
-  if (!cmSystemTools::RunSingleCommand(makeCommand, outputPtr, outputPtr,
-                                       &retVal, nullptr, outputflag,
+  if (!cmSystemTools::RunSingleCommand(makeCommand.PrimaryCommand, outputPtr,
+                                       outputPtr, &retVal, nullptr, outputflag,
                                        timeout)) {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
     cmSystemTools::Error(

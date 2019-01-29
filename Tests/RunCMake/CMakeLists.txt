@@ -123,7 +123,7 @@ if(NOT CMAKE_GENERATOR MATCHES "Visual Studio|Xcode")
   add_RunCMake_test(CMP0065)
 endif()
 if(CMAKE_GENERATOR MATCHES "Make")
-  add_RunCMake_test(Make)
+  add_RunCMake_test(Make -DMAKE_IS_GNU=${MAKE_IS_GNU})
 endif()
 if(CMAKE_GENERATOR STREQUAL "Ninja")
   set(Ninja_ARGS
