@@ -791,9 +791,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "sparc"
   endif()
 endif()
 
-# On Apple we need CoreFoundation
+# On Apple we need CoreFoundation and CoreServices
 if(APPLE)
   target_link_libraries(CMakeLib "-framework CoreFoundation")
+  target_link_libraries(CMakeLib "-framework CoreServices")
 endif()
 
 if(WIN32 AND NOT UNIX)
