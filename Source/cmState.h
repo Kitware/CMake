@@ -65,6 +65,8 @@ public:
   cmStateSnapshot Pop(cmStateSnapshot const& originSnapshot);
 
   static cmStateEnums::CacheEntryType StringToCacheEntryType(const char*);
+  static bool StringToCacheEntryType(const char*,
+                                     cmStateEnums::CacheEntryType& type);
   static const char* CacheEntryTypeToString(cmStateEnums::CacheEntryType);
   static bool IsCacheEntryType(std::string const& key);
 

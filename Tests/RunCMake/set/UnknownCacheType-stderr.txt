@@ -1,0 +1,5 @@
+CMake Warning \(dev\) at UnknownCacheType.cmake:1 \(set\):
+  implicitly converting 'unknown_type_sample' to 'STRING' type.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.

@@ -75,14 +75,23 @@ const char* cmState::CacheEntryTypeToString(cmStateEnums::CacheEntryType type)
 
 cmStateEnums::CacheEntryType cmState::StringToCacheEntryType(const char* s)
 {
+  cmStateEnums::CacheEntryType type = cmStateEnums::STRING;
+  StringToCacheEntryType(s, type);
+  return type;
+}
+
+bool cmState::StringToCacheEntryType(const char* s,
+                                     cmStateEnums::CacheEntryType& type)
+{
   int i = 0;
   while (cmCacheEntryTypes[i]) {
     if (strcmp(s, cmCacheEntryTypes[i]) == 0) {
-      return static_cast<cmStateEnums::CacheEntryType>(i);
+      type = static_cast<cmStateEnums::CacheEntryType>(i);
+      return true;
     }
     ++i;
   }
-  return cmStateEnums::STRING;
+  return false;
 }
 
 bool cmState::IsCacheEntryType(std::string const& key)
