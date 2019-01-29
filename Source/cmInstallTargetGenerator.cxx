@@ -210,8 +210,29 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       // An import library looks like a static library.
       type = cmInstallType_STATIC_LIBRARY;
     } else if (this->Target->IsFrameworkOnApple()) {
-      // There is a bug in cmInstallCommand if this fails.
-      assert(this->NamelinkMode == NamelinkModeNone);
+      // FIXME: In principle we should be able to
+      //   assert(this->NamelinkMode == NamelinkModeNone);
+      // but since the current install() command implementation checks
+      // the FRAMEWORK property immediately instead of delaying until
+      // generate time, it is possible for project code to set the
+      // property after calling install().  In such a case, the install()
+      // command will use the LIBRARY code path and create two install
+      // generators, one for the namelink component (NamelinkModeOnly)
+      // and one for the primary artifact component (NamelinkModeSkip).
+      // Historically this was not diagnosed and resulted in silent
+      // installation of a framework to the LIBRARY destination.
+      // Retain that behavior.
+      switch (this->NamelinkMode) {
+        case NamelinkModeNone:
+          // Normal case.
+          break;
+        case NamelinkModeOnly:
+          // Assume the NamelinkModeSkip instance will install.
+          return;
+        case NamelinkModeSkip: {
+          // Proceed to install in the LIBRARY destination for compatibility.
+        } break;
+      }
 
       // Install the whole framework directory.
       type = cmInstallType_DIRECTORY;
