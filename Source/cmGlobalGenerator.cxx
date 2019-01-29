@@ -33,7 +33,6 @@
 #include "cmMSVC60LinkLineComputer.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
@@ -2794,8 +2793,9 @@ void cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
   }
 
   // Shorten the output name (in expected use case).
-  cmOutputConverter converter(this->GetMakefiles()[0]->GetStateSnapshot());
-  std::string fname = converter.ConvertToRelativePath(
+  cmStateDirectory cmDir =
+    this->GetMakefiles()[0]->GetStateSnapshot().GetDirectory();
+  std::string fname = cmDir.ConvertToRelPathIfNotContained(
     this->GetMakefiles()[0]->GetState()->GetBinaryDirectory(), outputs[0]);
 
   // Associate the hash with this output.

@@ -155,6 +155,15 @@ bool cmStateDirectory::ContainsBoth(std::string const& local_path,
   return bothInBinary || bothInSource;
 }
 
+std::string cmStateDirectory::ConvertToRelPathIfNotContained(
+  std::string const& local_path, std::string const& remote_path) const
+{
+  if (!this->ContainsBoth(local_path, remote_path)) {
+    return remote_path;
+  }
+  return cmSystemTools::ForceToRelativePath(local_path, remote_path);
+}
+
 cmStateDirectory::cmStateDirectory(
   cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator iter,
   const cmStateSnapshot& snapshot)

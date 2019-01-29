@@ -100,7 +100,8 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // Compute a path to the object file to write to the internal depend file.
   // Any existing content of the internal depend file has already been
   // loaded in ValidDeps with this path as a key.
-  std::string obj_i = this->LocalGenerator->ConvertToRelativePath(binDir, obj);
+  std::string obj_i =
+    this->LocalGenerator->MaybeConvertToRelativePath(binDir, obj);
 
   if (this->ValidDeps != nullptr) {
     std::map<std::string, DependencyVector>::const_iterator tmpIt =
@@ -234,7 +235,8 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   for (std::string const& dep : dependencies) {
     makeDepends << obj_m << ": "
                 << cmSystemTools::ConvertToOutputPath(
-                     this->LocalGenerator->ConvertToRelativePath(binDir, dep))
+                     this->LocalGenerator->MaybeConvertToRelativePath(binDir,
+                                                                      dep))
                 << std::endl;
     internalDepends << " " << dep << std::endl;
   }

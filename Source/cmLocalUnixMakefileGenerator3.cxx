@@ -2079,12 +2079,3 @@ void cmLocalUnixMakefileGenerator3::CreateCDCommand(
                    [&prefix](std::string const& s) { return prefix + s; });
   }
 }
-
-std::string cmLocalUnixMakefileGenerator3::MaybeConvertToRelativePath(
-  std::string const& base, std::string const& path)
-{
-  if (!this->GetStateSnapshot().GetDirectory().ContainsBoth(base, path)) {
-    return path;
-  }
-  return cmSystemTools::ForceToRelativePath(base, path);
-}

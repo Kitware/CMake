@@ -326,6 +326,16 @@ public:
   std::string const& GetCurrentSourceDirectory() const;
 
   /**
+   * Convert the given remote path to a relative path with respect to
+   * the given local path.  Both paths must use forward slashes and not
+   * already be escaped or quoted.
+   * The conversion is skipped if the paths are not both in the source
+   * or both in the binary tree.
+   */
+  std::string MaybeConvertToRelativePath(std::string const& local_path,
+                                         std::string const& remote_path) const;
+
+  /**
    * Generate a macOS application bundle Info.plist file.
    */
   void GenerateAppleInfoPList(cmGeneratorTarget* target,
