@@ -1111,8 +1111,7 @@ void cmQtAutoGeneratorMocUic::WorkerT::UVProcessStart(uv_async_t* handle)
   {
     std::lock_guard<std::mutex> lock(wrk.ProcessMutex_);
     if (wrk.Process_ && !wrk.Process_->IsStarted()) {
-      wrk.Process_->start(handle->loop,
-                          std::bind(&WorkerT::UVProcessFinished, &wrk));
+      wrk.Process_->start(handle->loop, [&wrk] { wrk.UVProcessFinished(); });
     }
   }
 }

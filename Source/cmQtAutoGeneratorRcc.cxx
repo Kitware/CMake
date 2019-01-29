@@ -10,8 +10,6 @@
 #include "cmSystemTools.h"
 #include "cmUVHandlePtr.h"
 
-#include <functional>
-
 // -- Class methods
 
 cmQtAutoGeneratorRcc::cmQtAutoGeneratorRcc()
@@ -662,8 +660,7 @@ bool cmQtAutoGeneratorRcc::StartProcess(
   Process_ = cm::make_unique<ReadOnlyProcessT>();
   Process_->setup(&ProcessResult_, mergedOutput, command, workingDirectory);
   // Start process
-  if (!Process_->start(UVLoop(),
-                       std::bind(&cm::uv_async_ptr::send, &UVRequest()))) {
+  if (!Process_->start(UVLoop(), [this] { UVRequest().send(); })) {
     Log().ErrorFile(GeneratorT::RCC, QrcFile_, ProcessResult_.ErrorMessage);
     Error_ = true;
     // Clean up
