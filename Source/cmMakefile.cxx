@@ -3750,8 +3750,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
   }
 
   if (copyonly) {
-    if (!cmSystemTools::CopyFileIfDifferent(sinfile.c_str(),
-                                            soutfile.c_str())) {
+    if (!cmSystemTools::CopyFileIfDifferent(sinfile, soutfile)) {
       return 0;
     }
   } else {
@@ -3802,8 +3801,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     // close the files before attempting to copy
     fin.close();
     fout.close();
-    if (!cmSystemTools::CopyFileIfDifferent(tempOutputFile.c_str(),
-                                            soutfile.c_str())) {
+    if (!cmSystemTools::CopyFileIfDifferent(tempOutputFile, soutfile)) {
       res = 0;
     } else {
       cmSystemTools::SetPermissions(soutfile, perm);

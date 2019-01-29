@@ -179,8 +179,8 @@ public:
                          std::vector<std::string>& files, int type = 0);
 
   ///! Copy a file.
-  static bool cmCopyFile(const char* source, const char* destination);
-  static bool CopyFileIfDifferent(const char* source, const char* destination);
+  static bool cmCopyFile(const std::string& source,
+                         const std::string& destination);
 
   /** Rename a file or directory within a single disk volume (atomic
       if possible).  */

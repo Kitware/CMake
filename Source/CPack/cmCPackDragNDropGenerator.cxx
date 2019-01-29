@@ -212,8 +212,7 @@ int cmCPackDragNDropGenerator::PackageFiles()
 bool cmCPackDragNDropGenerator::CopyFile(std::ostringstream& source,
                                          std::ostringstream& target)
 {
-  if (!cmSystemTools::CopyFileIfDifferent(source.str().c_str(),
-                                          target.str().c_str())) {
+  if (!cmSystemTools::CopyFileIfDifferent(source.str(), target.str())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error copying " << source.str() << " to " << target.str()
                                    << std::endl);

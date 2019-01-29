@@ -3759,8 +3759,7 @@ bool cmFileCommand::HandleCreateLinkCommand(
 
   // Check if copy-on-error is enabled in the arguments.
   if (!completed && copyOnErrorArg.IsEnabled()) {
-    completed =
-      cmSystemTools::cmCopyFile(fileName.c_str(), newFileName.c_str());
+    completed = cmSystemTools::cmCopyFile(fileName, newFileName);
     if (!completed) {
       result = "Copy failed: " + cmSystemTools::GetLastSystemError();
     }
