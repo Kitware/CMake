@@ -156,8 +156,8 @@ bool cmDepends::CheckDependencies(
     // * if the depender does not exist, but the dependee is newer than the
     //   depends file
     bool regenerate = false;
-    const char* dependee = this->Dependee + 1;
-    const char* depender = this->Depender;
+    const std::string dependee(this->Dependee + 1);
+    const std::string depender(this->Depender);
     if (currentDependencies != nullptr) {
       currentDependencies->push_back(dependee);
     }
@@ -195,8 +195,8 @@ bool cmDepends::CheckDependencies(
         // The dependee exists, but the depender doesn't. Regenerate if the
         // internalDepends file is older than the dependee.
         int result = 0;
-        if ((!this->FileComparison->FileTimeCompare(
-               internalDependsFileName.c_str(), dependee, &result) ||
+        if ((!this->FileComparison->FileTimeCompare(internalDependsFileName,
+                                                    dependee, &result) ||
              result < 0)) {
           // The depends-file is older than the dependee.
           regenerate = true;

@@ -2146,8 +2146,7 @@ int cmake::CheckBuildSystem()
   std::string dep_newest = *dep++;
   for (; dep != depends.end(); ++dep) {
     int result = 0;
-    if (this->FileComparison->FileTimeCompare(dep_newest.c_str(), dep->c_str(),
-                                              &result)) {
+    if (this->FileComparison->FileTimeCompare(dep_newest, *dep, &result)) {
       if (result < 0) {
         dep_newest = *dep;
       }
@@ -2166,8 +2165,7 @@ int cmake::CheckBuildSystem()
   std::string out_oldest = *out++;
   for (; out != outputs.end(); ++out) {
     int result = 0;
-    if (this->FileComparison->FileTimeCompare(out_oldest.c_str(), out->c_str(),
-                                              &result)) {
+    if (this->FileComparison->FileTimeCompare(out_oldest, *out, &result)) {
       if (result > 0) {
         out_oldest = *out;
       }
@@ -2184,8 +2182,8 @@ int cmake::CheckBuildSystem()
   // If any output is older than any dependency then rerun.
   {
     int result = 0;
-    if (!this->FileComparison->FileTimeCompare(out_oldest.c_str(),
-                                               dep_newest.c_str(), &result) ||
+    if (!this->FileComparison->FileTimeCompare(out_oldest, dep_newest,
+                                               &result) ||
         result < 0) {
       if (verbose) {
         std::ostringstream msg;
@@ -2446,8 +2444,7 @@ static bool cmakeCheckStampFile(const std::string& stampName, bool verbose)
   while (cmSystemTools::GetLineFromStream(fin, dep)) {
     int result;
     if (!dep.empty() && dep[0] != '#' &&
-        (!ftc.FileTimeCompare(stampDepends.c_str(), dep.c_str(), &result) ||
-         result < 0)) {
+        (!ftc.FileTimeCompare(stampDepends, dep, &result) || result < 0)) {
       // The stamp depends file is older than this dependency.  The
       // build system is really out of date.
       std::cout << "CMake is re-running because " << stampName
