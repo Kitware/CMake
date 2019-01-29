@@ -712,7 +712,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           std::ostringstream e;
           e << "INSTALL TARGETS - target " << target.GetName() << " has "
             << "RESOURCE files but no RESOURCE DESTINATION.";
-          cmSystemTools::Message(e.str().c_str(), "Warning");
+          cmSystemTools::Message(e.str(), "Warning");
         }
       }
     }

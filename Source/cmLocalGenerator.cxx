@@ -2771,7 +2771,7 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
         << "CMake is dropping a preprocessor definition: " << define << "\n"
         << "Consider defining the macro in a (configured) header file.\n";
       /* clang-format on */
-      cmSystemTools::Message(e.str().c_str());
+      cmSystemTools::Message(e.str());
       return false;
     }
   }
@@ -2786,7 +2786,7 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
       << "CMake is dropping a preprocessor definition: " << define << "\n"
       << "Consider defining the macro in a (configured) header file.\n";
     /* clang-format on */
-    cmSystemTools::Message(e.str().c_str());
+    cmSystemTools::Message(e.str());
     return false;
   }
 

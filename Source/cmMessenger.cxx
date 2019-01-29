@@ -124,9 +124,9 @@ void displayMessage(MessageType t, std::ostringstream& msg)
   if (t == MessageType::FATAL_ERROR || t == MessageType::INTERNAL_ERROR ||
       t == MessageType::DEPRECATION_ERROR || t == MessageType::AUTHOR_ERROR) {
     cmSystemTools::SetErrorOccured();
-    cmSystemTools::Message(msg.str().c_str(), "Error");
+    cmSystemTools::Message(msg.str(), "Error");
   } else {
-    cmSystemTools::Message(msg.str().c_str(), "Warning");
+    cmSystemTools::Message(msg.str(), "Warning");
   }
 }
 

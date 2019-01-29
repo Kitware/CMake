@@ -70,7 +70,7 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
       "Green Hills MULTI: -T <toolset> not specified; defaulting to \"";
     message += tsp;
     message += "\"";
-    cmSystemTools::Message(message.c_str());
+    cmSystemTools::Message(message);
 
     /* store the full toolset for later use
      * -- already done if -T<toolset> was specified

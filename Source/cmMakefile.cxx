@@ -322,7 +322,7 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
     msg << " ";
   }
   msg << ")";
-  cmSystemTools::Message(msg.str().c_str());
+  cmSystemTools::Message(msg.str());
 }
 
 // Helper class to make sure the call stack is valid.
@@ -1622,7 +1622,7 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
   if (this->GetCMakeInstance()->GetDebugOutput()) {
     std::string msg = "   Entering             ";
     msg += currentStart;
-    cmSystemTools::Message(msg.c_str());
+    cmSystemTools::Message(msg);
   }
 
   std::string const currentStartFile = currentStart + "/CMakeLists.txt";
@@ -1665,7 +1665,7 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
   if (this->GetCMakeInstance()->GetDebugOutput()) {
     std::string msg = "   Returning to         ";
     msg += this->GetCurrentSourceDirectory();
-    cmSystemTools::Message(msg.c_str());
+    cmSystemTools::Message(msg);
   }
 }
 

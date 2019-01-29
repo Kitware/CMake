@@ -1282,7 +1282,7 @@ void cmComputeLinkInformation::DropDirectoryItem(std::string const& item)
     << "\" requests linking to directory \"" << item << "\".  "
     << "Targets may link only to libraries.  "
     << "CMake is dropping the item.";
-  cmSystemTools::Message(e.str().c_str());
+  cmSystemTools::Message(e.str());
 }
 
 void cmComputeLinkInformation::ComputeFrameworkInfo()

@@ -403,7 +403,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     err << "Warning: Source file \"" << source.GetFullPath()
         << "\" is listed multiple times for target \""
         << this->GeneratorTarget->GetName() << "\".";
-    cmSystemTools::Message(err.str().c_str(), "Warning");
+    cmSystemTools::Message(err.str(), "Warning");
     return;
   }
 
