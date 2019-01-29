@@ -10,11 +10,14 @@
 #include "cmake.h"
 
 #if defined(_M_ARM64)
-#  define HOST_PLATFORM_NAME "ARM64";
+#  define HOST_PLATFORM_NAME "ARM64"
+#  define HOST_TOOLS_ARCH ""
 #elif defined(_M_ARM)
-#  define HOST_PLATFORM_NAME "ARM";
+#  define HOST_PLATFORM_NAME "ARM"
+#  define HOST_TOOLS_ARCH ""
 #elif defined(_M_IA64)
-#  define HOST_PLATFORM_NAME "Itanium";
+#  define HOST_PLATFORM_NAME "Itanium"
+#  define HOST_TOOLS_ARCH ""
 #else
 #  include "cmsys/SystemInformation.hxx"
 #endif
@@ -29,6 +32,20 @@ static std::string VSHostPlatformName()
     return "x64";
   } else {
     return "Win32";
+  }
+#endif
+}
+
+static std::string VSHostArchitecture()
+{
+#ifdef HOST_TOOLS_ARCH
+  return HOST_TOOLS_ARCH;
+#else
+  cmsys::SystemInformation info;
+  if (info.Is64Bits()) {
+    return "x64";
+  } else {
+    return "x86";
   }
 #endif
 }
@@ -262,6 +279,7 @@ cmGlobalVisualStudioVersionedGenerator::cmGlobalVisualStudioVersionedGenerator(
   this->DefaultLinkFlagTableName = VSVersionToToolset(this->Version);
   if (this->Version >= cmGlobalVisualStudioGenerator::VS16) {
     this->DefaultPlatformName = VSHostPlatformName();
+    this->DefaultPlatformToolsetHostArchitecture = VSHostArchitecture();
   }
 }
 

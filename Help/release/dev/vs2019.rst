@@ -10,4 +10,5 @@ vs2019
   in the generator name.  Instead :variable:`CMAKE_GENERATOR_PLATFORM`
   must be used, e.g. through the ``-A`` command-line option.  Furthermore,
   the default target platform (architecture) is now based on the *host*
-  platform.
+  platform.  The VS host toolset selection is now based on the host
+  architecture as well.
