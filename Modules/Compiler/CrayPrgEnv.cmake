@@ -4,54 +4,7 @@ if(__craylinux_crayprgenv)
 endif()
 set(__craylinux_crayprgenv 1)
 
-macro(__cray_extract_args cmd tag_regex out_var make_absolute)
-  string(REGEX MATCHALL "${tag_regex}" args "${cmd}")
-  foreach(arg IN LISTS args)
-    string(REGEX REPLACE "^${tag_regex}$" "\\2" param "${arg}")
-    if(make_absolute)
-      get_filename_component(param "${param}" ABSOLUTE)
-    endif()
-    list(APPEND ${out_var} ${param})
-  endforeach()
-endmacro()
-
-function(__cray_extract_implicit src compiler_cmd link_cmd lang include_dirs_var link_dirs_var link_libs_var)
-  set(BIN "${CMAKE_PLATFORM_INFO_DIR}/CrayExtractImplicit_${lang}.bin")
-  execute_process(
-    COMMAND ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_VERBOSE_FLAG} -o ${BIN}
-    RESULT_VARIABLE result
-    OUTPUT_VARIABLE output
-    ERROR_VARIABLE error
-    )
-  if(EXISTS "${BIN}")
-    file(REMOVE "${BIN}")
-  endif()
-  set(include_dirs)
-  set(link_dirs)
-  set(link_libs)
-  string(REGEX REPLACE "\r?\n" ";" output_lines "${output}\n${error}")
-  foreach(line IN LISTS output_lines)
-    if("${line}" MATCHES "${compiler_cmd}")
-      __cray_extract_args("${line}" " -(I ?|isystem )([^ ]*)" include_dirs 1)
-      set(processed_include 1)
-    endif()
-    if("${line}" MATCHES "${link_cmd}")
-      __cray_extract_args("${line}" " -(L ?)([^ ]*)" link_dirs 1)
-      __cray_extract_args("${line}" " -(l ?)([^ ]*)" link_libs 0)
-      set(processed_link 1)
-    endif()
-    if(processed_include AND processed_link)
-      break()
-    endif()
-  endforeach()
-
-  set(${include_dirs_var} "${include_dirs}" PARENT_SCOPE)
-  set(${link_dirs_var}    "${link_dirs}" PARENT_SCOPE)
-  set(${link_libs_var}    "${link_libs}" PARENT_SCOPE)
-  set(CRAY_${lang}_EXTRACTED_IMPLICIT 1 CACHE INTERNAL "" FORCE)
-endfunction()
-
-macro(__CrayPrgEnv_setup lang test_src compiler_cmd link_cmd)
+macro(__CrayPrgEnv_setup lang)
   if(DEFINED ENV{CRAYPE_VERSION})
     message(STATUS "Cray Programming Environment $ENV{CRAYPE_VERSION} ${lang}")
   elseif(DEFINED ENV{ASYNCPE_VERSION})
@@ -80,13 +33,5 @@ macro(__CrayPrgEnv_setup lang test_src compiler_cmd link_cmd)
     set(BUILD_SHARED_LIBS FALSE CACHE BOOL "")
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
     set(CMAKE_LINK_SEARCH_START_STATIC TRUE)
-  endif()
-  if(NOT CRAY_${lang}_EXTRACTED_IMPLICIT)
-    __cray_extract_implicit(
-      ${test_src} ${compiler_cmd} ${link_cmd} ${lang}
-      CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES
-      CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES
-      CMAKE_${lang}_IMPLICIT_LINK_LIBRARIES
-      )
   endif()
 endmacro()
