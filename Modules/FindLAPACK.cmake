@@ -59,6 +59,17 @@ This module defines the following variables:
   to use LAPACK95
 ``LAPACK95_FOUND``
   library implementing the LAPACK95 interface is found
+
+.. note::
+
+  C or CXX must be enabled to use Intel MKL
+
+  For example, to use Intel MKL libraries and/or Intel compiler:
+
+  .. code-block:: cmake
+
+    set(BLA_VENDOR Intel10_64lp)
+    find_package(LAPACK)
 #]=======================================================================]
 
 set(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})

@@ -72,6 +72,17 @@ This module defines the following variables:
   to use BLAS95 interface
 ``BLAS95_FOUND``
   library implementing the BLAS95 interface is found
+
+.. note::
+
+  C or CXX must be enabled to use Intel MKL
+
+  For example, to use Intel MKL libraries and/or Intel compiler:
+
+  .. code-block:: cmake
+
+    set(BLA_VENDOR Intel10_64lp)
+    find_package(BLAS)
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
