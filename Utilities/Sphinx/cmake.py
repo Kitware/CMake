@@ -21,6 +21,8 @@ from pygments.lexer import bygroups
 # - Unix paths are recognized by '/'; support for Windows paths may be added if needed
 # - (\\.) allows for \-escapes (used in manual/cmake-language.7)
 # - $<..$<..$>..> nested occurence in cmake-buildsystem
+# - Nested variable evaluations are only supported in a limited capacity. Only
+#   one level of nesting is supported and at most one nested variable can be present.
 
 CMakeLexer.tokens["root"] = [
   (r'\b(\w+)([ \t]*)(\()', bygroups(Name.Function, Text, Name.Function), '#push'),     # fctn(
@@ -34,7 +36,8 @@ CMakeLexer.tokens["root"] = [
   (r'[<>]=', Punctuation),                                  # used in FindPkgConfig.cmake
   (r'\$<', Operator, '#push'),                              # $<...>
   (r'<[^<|]+?>(\w*\.\.\.)?', Name.Variable),                # <expr>
-  (r'(\$\w*\{)(.+?)(\})', bygroups(Operator, Name.Tag, Operator)),   # ${..} $ENV{..}
+  (r'(\$\w*\{)([^\}\$]*)?(?:(\$\w*\{)([^\}]+?)(\}))?([^\}]*?)(\})',  # ${..} $ENV{..}, possibly nested
+    bygroups(Operator, Name.Tag, Operator, Name.Tag, Operator, Name.Tag, Operator)),
   (r'([A-Z]+\{)(.+?)(\})', bygroups(Operator, Name.Tag, Operator)),  # DATA{ ...}
   (r'[a-z]+(@|(://))((\\.)|[\w.+-:/\\])+', Name.Attribute),          # URL, git@, ...
   (r'/\w[\w\.\+-/\\]*', Name.Attribute),                    # absolute path
