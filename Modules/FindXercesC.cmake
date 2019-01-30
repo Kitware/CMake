@@ -74,7 +74,7 @@ find_path(XercesC_INCLUDE_DIR
           DOC "Xerces-C++ include directory")
 mark_as_advanced(XercesC_INCLUDE_DIR)
 
-if(XercesC_INCLUDE_DIR)
+if(XercesC_INCLUDE_DIR AND EXISTS "${XercesC_INCLUDE_DIR}/xercesc/util/XercesVersion.hpp")
   _XercesC_GET_VERSION("${XercesC_INCLUDE_DIR}/xercesc/util/XercesVersion.hpp")
 endif()
 
