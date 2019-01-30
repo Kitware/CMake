@@ -308,7 +308,7 @@ void cmSystemTools::SetStderrCallback(OutputCallback f)
 void cmSystemTools::Stderr(const std::string& s)
 {
   if (s_StderrCallback) {
-    s_StderrCallback(s.c_str(), s.length());
+    s_StderrCallback(s);
   } else {
     std::cerr << s << std::flush;
   }
@@ -317,7 +317,7 @@ void cmSystemTools::Stderr(const std::string& s)
 void cmSystemTools::Stdout(const std::string& s)
 {
   if (s_StdoutCallback) {
-    s_StdoutCallback(s.c_str(), s.length());
+    s_StdoutCallback(s);
   } else {
     std::cout << s << std::flush;
   }

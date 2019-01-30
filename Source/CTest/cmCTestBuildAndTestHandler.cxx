@@ -123,11 +123,8 @@ public:
         s += "\n";
       });
 
-    cmSystemTools::SetStdoutCallback(
-      [&s](const char* m, size_t len) { s.append(m, len); });
-
-    cmSystemTools::SetStderrCallback(
-      [&s](const char* m, size_t len) { s.append(m, len); });
+    cmSystemTools::SetStdoutCallback([&s](std::string const& m) { s += m; });
+    cmSystemTools::SetStderrCallback([&s](std::string const& m) { s += m; });
 
     this->CM.SetProgressCallback([&s](const char* msg, float /*unused*/) {
       s += msg;
