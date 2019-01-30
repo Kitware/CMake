@@ -69,14 +69,17 @@ list(APPEND CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES
   )
 
 # Default per-language values.  These may be later replaced after
-# parsing the implicit link directories from compiler output.
-list(APPEND CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES
+# parsing the implicit directory information from compiler output.
+set(_CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES_INIT
+  ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}
   /usr/include
   )
-list(APPEND CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES
+set(_CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES_INIT
+  ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
   /usr/include
   )
-list(APPEND CMAKE_CUDA_IMPLICIT_INCLUDE_DIRECTORIES
+set(_CMAKE_CUDA_IMPLICIT_INCLUDE_DIRECTORIES_INIT
+  ${CMAKE_CUDA_IMPLICIT_INCLUDE_DIRECTORIES}
   /usr/include
   )
 

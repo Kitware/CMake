@@ -89,16 +89,18 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       endif()
 
       # Parse implicit include directory for this language, if available.
-      set (implicit_incdirs "")
       if(CMAKE_${lang}_VERBOSE_FLAG)
+        set (implicit_incdirs "")
         cmake_parse_implicit_include_info("${OUTPUT}" "${lang}"
           implicit_incdirs log rv)
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
           "Parsed ${lang} implicit include dir info from above output: rv=${rv}\n${log}\n\n")
-        if("${rv}" STREQUAL "done")  # update parent if parse completed ok
-          set(CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES "${implicit_incdirs}" PARENT_SCOPE)
+        if("${rv}" STREQUAL "done")
+          # We parsed implicit include directories, so override the default initializer.
+          set(_CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES_INIT "${implicit_incdirs}")
         endif()
       endif()
+      set(CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES "${_CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES_INIT}" PARENT_SCOPE)
 
       # Parse implicit linker information for this language, if available.
       set(implicit_dirs "")
