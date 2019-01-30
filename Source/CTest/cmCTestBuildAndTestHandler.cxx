@@ -109,27 +109,6 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
   return 0;
 }
 
-void CMakeMessageCallback(const char* m, const char* /*unused*/,
-                          bool& /*unused*/, void* s)
-{
-  std::string* out = static_cast<std::string*>(s);
-  *out += m;
-  *out += "\n";
-}
-
-void CMakeProgressCallback(const char* msg, float /*unused*/, void* s)
-{
-  std::string* out = static_cast<std::string*>(s);
-  *out += msg;
-  *out += "\n";
-}
-
-void CMakeOutputCallback(const char* m, size_t len, void* s)
-{
-  std::string* out = static_cast<std::string*>(s);
-  out->append(m, len);
-}
-
 class cmCTestBuildAndTestCaptureRAII
 {
   cmake& CM;
@@ -138,17 +117,30 @@ public:
   cmCTestBuildAndTestCaptureRAII(cmake& cm, std::string& s)
     : CM(cm)
   {
-    cmSystemTools::SetMessageCallback(CMakeMessageCallback, &s);
-    cmSystemTools::SetStdoutCallback(CMakeOutputCallback, &s);
-    cmSystemTools::SetStderrCallback(CMakeOutputCallback, &s);
-    this->CM.SetProgressCallback(CMakeProgressCallback, &s);
+    cmSystemTools::SetMessageCallback(
+      [&s](const char* msg, const char* /*unused*/) {
+        s += msg;
+        s += "\n";
+      });
+
+    cmSystemTools::SetStdoutCallback(
+      [&s](const char* m, size_t len) { s.append(m, len); });
+
+    cmSystemTools::SetStderrCallback(
+      [&s](const char* m, size_t len) { s.append(m, len); });
+
+    this->CM.SetProgressCallback([&s](const char* msg, float /*unused*/) {
+      s += msg;
+      s += "\n";
+    });
   }
+
   ~cmCTestBuildAndTestCaptureRAII()
   {
-    this->CM.SetProgressCallback(nullptr, nullptr);
-    cmSystemTools::SetStderrCallback(nullptr, nullptr);
-    cmSystemTools::SetStdoutCallback(nullptr, nullptr);
-    cmSystemTools::SetMessageCallback(nullptr, nullptr);
+    this->CM.SetProgressCallback(nullptr);
+    cmSystemTools::SetStderrCallback(nullptr);
+    cmSystemTools::SetStdoutCallback(nullptr);
+    cmSystemTools::SetMessageCallback(nullptr);
   }
 };
 

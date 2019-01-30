@@ -96,11 +96,16 @@ void cmServer::ProcessRequest(cmConnection* connection,
     return;
   }
 
-  cmSystemTools::SetMessageCallback(reportMessage,
-                                    const_cast<cmServerRequest*>(&request));
+  cmSystemTools::SetMessageCallback(
+    [&request](const char* msg, const char* title) {
+      reportMessage(msg, title, request);
+    });
+
   if (this->Protocol) {
     this->Protocol->CMakeInstance()->SetProgressCallback(
-      reportProgress, const_cast<cmServerRequest*>(&request));
+      [&request](const char* msg, float prog) {
+        reportProgress(msg, prog, request);
+      });
     this->WriteResponse(connection, this->Protocol->Process(request),
                         debug.get());
   } else {
@@ -150,28 +155,25 @@ void cmServer::PrintHello(cmConnection* connection) const
   this->WriteJsonObject(connection, hello, nullptr);
 }
 
-void cmServer::reportProgress(const char* msg, float progress, void* data)
+void cmServer::reportProgress(const char* msg, float progress,
+                              const cmServerRequest& request)
 {
-  const cmServerRequest* request = static_cast<const cmServerRequest*>(data);
-  assert(request);
   if (progress < 0.0f || progress > 1.0f) {
-    request->ReportMessage(msg, "");
+    request.ReportMessage(msg, "");
   } else {
-    request->ReportProgress(0, static_cast<int>(progress * 1000), 1000, msg);
+    request.ReportProgress(0, static_cast<int>(progress * 1000), 1000, msg);
   }
 }
 
 void cmServer::reportMessage(const char* msg, const char* title,
-                             bool& /* cancel */, void* data)
+                             const cmServerRequest& request)
 {
-  const cmServerRequest* request = static_cast<const cmServerRequest*>(data);
-  assert(request);
   assert(msg);
   std::string titleString;
   if (title) {
     titleString = title;
   }
-  request->ReportMessage(std::string(msg), titleString);
+  request.ReportMessage(std::string(msg), titleString);
 }
 
 cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)

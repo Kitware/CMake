@@ -10,6 +10,7 @@
 #include "cmProcessOutput.h"
 #include "cmsys/Process.h"
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
+#include <functional>
 #include <stddef.h>
 #include <string>
 #include <vector>
@@ -55,15 +56,13 @@ public:
    */
   static std::string TrimWhitespace(const std::string& s);
 
-  typedef void (*MessageCallback)(const char*, const char*, bool&, void*);
+  using MessageCallback = std::function<void(const char*, const char*)>;
   /**
    *  Set the function used by GUIs to display error messages
    *  Function gets passed: message as a const char*,
-   *  title as a const char*, and a reference to bool that when
-   *  set to false, will disable further messages (cancel).
+   *  title as a const char*.
    */
-  static void SetMessageCallback(MessageCallback f,
-                                 void* clientData = nullptr);
+  static void SetMessageCallback(MessageCallback f);
 
   /**
    * Display an error message.
@@ -81,19 +80,18 @@ public:
     Message(m.c_str(), title);
   }
 
-  typedef void (*OutputCallback)(const char*, size_t length, void*);
+  using OutputCallback = std::function<void(const char*, size_t)>;
 
   ///! Send a string to stdout
   static void Stdout(const std::string& s);
-  static void SetStdoutCallback(OutputCallback, void* clientData = nullptr);
+  static void SetStdoutCallback(OutputCallback f);
 
   ///! Send a string to stderr
   static void Stderr(const std::string& s);
-  static void SetStderrCallback(OutputCallback, void* clientData = nullptr);
+  static void SetStderrCallback(OutputCallback f);
 
-  typedef bool (*InterruptCallback)(void*);
-  static void SetInterruptCallback(InterruptCallback f,
-                                   void* clientData = nullptr);
+  using InterruptCallback = std::function<bool()>;
+  static void SetInterruptCallback(InterruptCallback f);
   static bool GetInterruptFlag();
 
   ///! Return true if there was an error at any point.
@@ -548,14 +546,6 @@ private:
   static bool s_FatalErrorOccured;
   static bool s_DisableMessages;
   static bool s_DisableRunCommandOutput;
-  static MessageCallback s_MessageCallback;
-  static OutputCallback s_StdoutCallback;
-  static OutputCallback s_StderrCallback;
-  static InterruptCallback s_InterruptCallback;
-  static void* s_MessageCallbackClientData;
-  static void* s_StdoutCallbackClientData;
-  static void* s_StderrCallbackClientData;
-  static void* s_InterruptCallbackClientData;
 };
 
 #endif

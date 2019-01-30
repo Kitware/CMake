@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <functional>
 #include <map>
 #include <memory> // IWYU pragma: keep
 #include <set>
@@ -271,7 +272,7 @@ public:
   ///! Parse command line arguments that might set cache values
   bool SetCacheArgs(const std::vector<std::string>&);
 
-  typedef void (*ProgressCallbackType)(const char* msg, float progress, void*);
+  using ProgressCallbackType = std::function<void(const char*, float)>;
   /**
    *  Set the function used by GUIs to receive progress updates
    *  Function gets passed: message as a const char*, a progress
@@ -279,7 +280,7 @@ public:
    *  number provided may be negative in cases where a message is
    *  to be displayed without any progress percentage.
    */
-  void SetProgressCallback(ProgressCallbackType f, void* clientData = nullptr);
+  void SetProgressCallback(ProgressCallbackType f);
 
   ///! this is called by generators to update the progress
   void UpdateProgress(const char* msg, float prog);
@@ -485,7 +486,6 @@ protected:
 
 private:
   ProgressCallbackType ProgressCallback;
-  void* ProgressCallbackClientData;
   bool InTryCompile;
   WorkingMode CurrentWorkingMode;
   bool DebugOutput;

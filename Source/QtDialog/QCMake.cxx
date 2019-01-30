@@ -23,16 +23,26 @@ QCMake::QCMake(QObject* p)
 
   cmSystemTools::DisableRunCommandOutput();
   cmSystemTools::SetRunCommandHideConsole(true);
-  cmSystemTools::SetMessageCallback(QCMake::messageCallback, this);
-  cmSystemTools::SetStdoutCallback(QCMake::stdoutCallback, this);
-  cmSystemTools::SetStderrCallback(QCMake::stderrCallback, this);
+
+  cmSystemTools::SetMessageCallback(
+    [this](const char* msg, const char* title) {
+      this->messageCallback(msg, title);
+    });
+  cmSystemTools::SetStdoutCallback(
+    [this](const char* msg, size_t len) { this->stdoutCallback(msg, len); });
+  cmSystemTools::SetStderrCallback(
+    [this](const char* msg, size_t len) { this->stderrCallback(msg, len); });
 
   this->CMakeInstance = new cmake(cmake::RoleProject, cmState::Project);
   this->CMakeInstance->SetCMakeEditCommand(
     cmSystemTools::GetCMakeGUICommand());
-  this->CMakeInstance->SetProgressCallback(QCMake::progressCallback, this);
+  this->CMakeInstance->SetProgressCallback(
+    [this](const char* msg, float percent) {
+      this->progressCallback(msg, percent);
+    });
 
-  cmSystemTools::SetInterruptCallback(QCMake::interruptCallback, this);
+  cmSystemTools::SetInterruptCallback(
+    [this] { return this->interruptCallback(); });
 
   std::vector<cmake::GeneratorInfo> generators;
   this->CMakeInstance->GetRegisteredGenerators(
@@ -330,46 +340,40 @@ void QCMake::interrupt()
   this->InterruptFlag.ref();
 }
 
-bool QCMake::interruptCallback(void* cd)
+bool QCMake::interruptCallback()
 {
-  QCMake* self = reinterpret_cast<QCMake*>(cd);
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  return self->InterruptFlag;
+  return this->InterruptFlag;
 #else
-  return self->InterruptFlag.load();
+  return this->InterruptFlag.load();
 #endif
 }
 
-void QCMake::progressCallback(const char* msg, float percent, void* cd)
+void QCMake::progressCallback(const char* msg, float percent)
 {
-  QCMake* self = reinterpret_cast<QCMake*>(cd);
   if (percent >= 0) {
-    emit self->progressChanged(QString::fromLocal8Bit(msg), percent);
+    emit this->progressChanged(QString::fromLocal8Bit(msg), percent);
   } else {
-    emit self->outputMessage(QString::fromLocal8Bit(msg));
+    emit this->outputMessage(QString::fromLocal8Bit(msg));
   }
   QCoreApplication::processEvents();
 }
 
-void QCMake::messageCallback(const char* msg, const char* /*title*/,
-                             bool& /*stop*/, void* cd)
+void QCMake::messageCallback(const char* msg, const char* /*title*/)
 {
-  QCMake* self = reinterpret_cast<QCMake*>(cd);
-  emit self->errorMessage(QString::fromLocal8Bit(msg));
+  emit this->errorMessage(QString::fromLocal8Bit(msg));
   QCoreApplication::processEvents();
 }
 
-void QCMake::stdoutCallback(const char* msg, size_t len, void* cd)
+void QCMake::stdoutCallback(const char* msg, size_t len)
 {
-  QCMake* self = reinterpret_cast<QCMake*>(cd);
-  emit self->outputMessage(QString::fromLocal8Bit(msg, int(len)));
+  emit this->outputMessage(QString::fromLocal8Bit(msg, int(len)));
   QCoreApplication::processEvents();
 }
 
-void QCMake::stderrCallback(const char* msg, size_t len, void* cd)
+void QCMake::stderrCallback(const char* msg, size_t len)
 {
-  QCMake* self = reinterpret_cast<QCMake*>(cd);
-  emit self->outputMessage(QString::fromLocal8Bit(msg, int(len)));
+  emit this->outputMessage(QString::fromLocal8Bit(msg, int(len)));
   QCoreApplication::processEvents();
 }
 

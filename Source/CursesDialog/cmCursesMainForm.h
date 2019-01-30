@@ -101,8 +101,7 @@ public:
   /**
    * Progress callback
    */
-  static void UpdateProgressOld(const char* msg, float prog, void*);
-  static void UpdateProgress(const char* msg, float prog, void*);
+  void UpdateProgress(const char* msg, float prog);
 
 protected:
   // Copy the cache values from the user interface to the actual

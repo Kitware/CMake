@@ -117,9 +117,8 @@ int do_cmake(int ac, char const* const* av);
 static int do_build(int ac, char const* const* av);
 static int do_open(int ac, char const* const* av);
 
-static cmMakefile* cmakemainGetMakefile(void* clientdata)
+static cmMakefile* cmakemainGetMakefile(cmake* cm)
 {
-  cmake* cm = static_cast<cmake*>(clientdata);
   if (cm && cm->GetDebugOutput()) {
     cmGlobalGenerator* gg = cm->GetGlobalGenerator();
     if (gg) {
@@ -129,10 +128,10 @@ static cmMakefile* cmakemainGetMakefile(void* clientdata)
   return nullptr;
 }
 
-static std::string cmakemainGetStack(void* clientdata)
+static std::string cmakemainGetStack(cmake* cm)
 {
   std::string msg;
-  cmMakefile* mf = cmakemainGetMakefile(clientdata);
+  cmMakefile* mf = cmakemainGetMakefile(cm);
   if (mf) {
     msg = mf->FormatListFileStack();
     if (!msg.empty()) {
@@ -144,15 +143,14 @@ static std::string cmakemainGetStack(void* clientdata)
 }
 
 static void cmakemainMessageCallback(const char* m, const char* /*unused*/,
-                                     bool& /*unused*/, void* clientdata)
+                                     cmake* cm)
 {
-  std::cerr << m << cmakemainGetStack(clientdata) << std::endl << std::flush;
+  std::cerr << m << cmakemainGetStack(cm) << std::endl << std::flush;
 }
 
-static void cmakemainProgressCallback(const char* m, float prog,
-                                      void* clientdata)
+static void cmakemainProgressCallback(const char* m, float prog, cmake* cm)
 {
-  cmMakefile* mf = cmakemainGetMakefile(clientdata);
+  cmMakefile* mf = cmakemainGetMakefile(cm);
   std::string dir;
   if ((mf) && (strstr(m, "Configuring") == m) && (prog < 0)) {
     dir = " ";
@@ -163,8 +161,7 @@ static void cmakemainProgressCallback(const char* m, float prog,
   }
 
   if ((prog < 0) || (!dir.empty())) {
-    std::cout << "-- " << m << dir << cmakemainGetStack(clientdata)
-              << std::endl;
+    std::cout << "-- " << m << dir << cmakemainGetStack(cm) << std::endl;
   }
 
   std::cout.flush();
@@ -322,8 +319,12 @@ int do_cmake(int ac, char const* const* av)
   cmake cm(role, mode);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
-  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, &cm);
-  cm.SetProgressCallback(cmakemainProgressCallback, &cm);
+  cmSystemTools::SetMessageCallback([&cm](const char* msg, const char* title) {
+    cmakemainMessageCallback(msg, title, &cm);
+  });
+  cm.SetProgressCallback([&cm](const char* msg, float prog) {
+    cmakemainProgressCallback(msg, prog, &cm);
+  });
   cm.SetWorkingMode(workingMode);
 
   int res = cm.Run(args, view_only);
@@ -498,8 +499,12 @@ static int do_build(int ac, char const* const* av)
   }
 
   cmake cm(cmake::RoleInternal, cmState::Unknown);
-  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, &cm);
-  cm.SetProgressCallback(cmakemainProgressCallback, &cm);
+  cmSystemTools::SetMessageCallback([&cm](const char* msg, const char* title) {
+    cmakemainMessageCallback(msg, title, &cm);
+  });
+  cm.SetProgressCallback([&cm](const char* msg, float prog) {
+    cmakemainProgressCallback(msg, prog, &cm);
+  });
   return cm.Build(jobs, dir, target, config, nativeOptions, clean, verbose);
 #endif
 }
@@ -536,8 +541,12 @@ static int do_open(int ac, char const* const* av)
   }
 
   cmake cm(cmake::RoleInternal, cmState::Unknown);
-  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, &cm);
-  cm.SetProgressCallback(cmakemainProgressCallback, &cm);
+  cmSystemTools::SetMessageCallback([&cm](const char* msg, const char* title) {
+    cmakemainMessageCallback(msg, title, &cm);
+  });
+  cm.SetProgressCallback([&cm](const char* msg, float prog) {
+    cmakemainProgressCallback(msg, prog, &cm);
+  });
   return cm.Open(dir, false) ? 0 : 1;
 #endif
 }
