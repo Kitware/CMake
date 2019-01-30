@@ -392,8 +392,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
                                       std::move(inFileRelative));
         }
         /* If it is not a symlink then do a plain copy */
-        else if (!(cmSystemTools::CopyFileIfDifferent(inFile.c_str(),
-                                                      filePath.c_str()) &&
+        else if (!(cmSystemTools::CopyFileIfDifferent(inFile, filePath) &&
                    cmSystemTools::CopyFileTime(inFile.c_str(),
                                                filePath.c_str()))) {
           cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -1077,8 +1076,7 @@ int cmCPackGenerator::DoPackage()
                     << (tempPackageFileName ? tempPackageFileName : "(NULL)")
                     << " to " << (packageFileName ? packageFileName : "(NULL)")
                     << std::endl);
-    if (!cmSystemTools::CopyFileIfDifferent(tempPackageFileName,
-                                            packageFileName)) {
+    if (!cmSystemTools::CopyFileIfDifferent(pkgFileName, tmpPF)) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
         "Problem copying the package: "

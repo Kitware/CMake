@@ -262,9 +262,8 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
     // purposes but newer versions distributed with CMake will replace
     // older versions in user directories.
     int res;
-    if (!cmSystemTools::FileTimeCompare(src.c_str(), dst.c_str(), &res) ||
-        res > 0) {
-      if (!cmSystemTools::CopyFileAlways(src.c_str(), dst.c_str())) {
+    if (!cmSystemTools::FileTimeCompare(src, dst, &res) || res > 0) {
+      if (!cmSystemTools::CopyFileAlways(src, dst)) {
         std::ostringstream oss;
         oss << "Could not copy from: " << src << std::endl;
         oss << "                 to: " << dst << std::endl;

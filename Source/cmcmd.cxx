@@ -482,8 +482,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       // If error occurs we want to continue copying next files.
       bool return_value = false;
       for (std::string::size_type cc = 2; cc < args.size() - 1; cc++) {
-        if (!cmSystemTools::cmCopyFile(args[cc].c_str(),
-                                       args.back().c_str())) {
+        if (!cmSystemTools::cmCopyFile(args[cc], args.back())) {
           std::cerr << "Error copying file \"" << args[cc] << "\" to \""
                     << args.back() << "\".\n";
           return_value = true;
@@ -505,8 +504,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       // If error occurs we want to continue copying next files.
       bool return_value = false;
       for (std::string::size_type cc = 2; cc < args.size() - 1; cc++) {
-        if (!cmSystemTools::CopyFileIfDifferent(args[cc].c_str(),
-                                                args.back().c_str())) {
+        if (!cmSystemTools::CopyFileIfDifferent(args[cc], args.back())) {
           std::cerr << "Error copying file (if different) from \"" << args[cc]
                     << "\" to \"" << args.back() << "\".\n";
           return_value = true;
@@ -1304,7 +1302,7 @@ bool cmcmd::SymlinkInternal(std::string const& file, std::string const& link)
     cmSystemTools::RemoveFile(link);
   }
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  return cmSystemTools::CopyFileAlways(file.c_str(), link.c_str());
+  return cmSystemTools::CopyFileAlways(file, link);
 #else
   std::string linktext = cmSystemTools::GetFilenameName(file);
   return cmSystemTools::CreateSymlink(linktext, link);

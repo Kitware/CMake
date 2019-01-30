@@ -940,15 +940,10 @@ std::string cmSystemTools::FileExistsInParentDirectories(const char* fname,
   return "";
 }
 
-bool cmSystemTools::cmCopyFile(const char* source, const char* destination)
+bool cmSystemTools::cmCopyFile(const std::string& source,
+                               const std::string& destination)
 {
   return Superclass::CopyFileAlways(source, destination);
-}
-
-bool cmSystemTools::CopyFileIfDifferent(const char* source,
-                                        const char* destination)
-{
-  return Superclass::CopyFileIfDifferent(source, destination);
 }
 
 #ifdef _WIN32
