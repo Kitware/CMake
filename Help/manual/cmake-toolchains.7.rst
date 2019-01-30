@@ -564,6 +564,8 @@ code signing.  If the :generator:`Xcode` generator is being used and
 code signing is required or desired, the developmemt team ID can be
 specified via the ``CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM`` CMake variable.
 This team ID will then be included in the generated Xcode project.
+By default, CMake avoids the need for code signing during the internal
+configuration phase (i.e compiler ID and feature detection).
 
 .. _`Switching Between Device and Simulator`:
 
