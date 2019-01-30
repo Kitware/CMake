@@ -55,7 +55,6 @@ Variables that Provide Information
    /variable/CMAKE_GENERATOR_INSTANCE
    /variable/CMAKE_GENERATOR_PLATFORM
    /variable/CMAKE_GENERATOR_TOOLSET
-   /variable/CMAKE_HOME_DIRECTORY
    /variable/CMAKE_IMPORT_LIBRARY_PREFIX
    /variable/CMAKE_IMPORT_LIBRARY_SUFFIX
    /variable/CMAKE_JOB_POOL_COMPILE
@@ -608,3 +607,11 @@ Variable Expansion Operators
 
    /variable/CACHE
    /variable/ENV
+
+Obsolete Variables
+==================
+
+.. toctree::
+   :maxdepth: 1
+
+   /variable/CMAKE_HOME_DIRECTORY
