@@ -630,10 +630,6 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     }
   } else {
     deptype = "gcc";
-    const char* langdeptype = mf->GetDefinition("CMAKE_NINJA_DEPTYPE_" + lang);
-    if (langdeptype) {
-      deptype = langdeptype;
-    }
     depfile = "$DEP_FILE";
     const std::string flagsName = "CMAKE_DEPFILE_FLAGS_" + lang;
     std::string depfileFlags = mf->GetSafeDefinition(flagsName);
