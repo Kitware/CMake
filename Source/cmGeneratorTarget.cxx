@@ -3859,6 +3859,13 @@ std::string cmGeneratorTarget::GetObjectDirectory(
   // find and replace $(PROJECT_NAME) xcode placeholder
   const std::string projectName = this->LocalGenerator->GetProjectName();
   cmSystemTools::ReplaceString(obj_dir, "$(PROJECT_NAME)", projectName);
+  // Replace Xcode's placeholder for the object file directory since
+  // installation and export scripts need to know the real directory.
+  // Xcode has build-time settings (e.g. for sanitizers) that affect this,
+  // but we use the default here.  Users that want to enable sanitizers
+  // will do so at the cost of object library installation and export.
+  cmSystemTools::ReplaceString(obj_dir, "$(OBJECT_FILE_DIR_normal:base)",
+                               "Objects-normal");
 #endif
   return obj_dir;
 }

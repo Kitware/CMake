@@ -510,6 +510,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   makeHelper.push_back(dir);
   makeHelper.push_back("-f");
   makeHelper.push_back(this->CurrentXCodeHackMakefile);
+  makeHelper.push_back("OBJDIR=$(OBJDIR)");
   makeHelper.push_back(""); // placeholder, see below
 
   // Add ZERO_CHECK
@@ -1662,6 +1663,7 @@ void cmGlobalXCodeGenerator::AddCommandsToBuildPhase(
   makecmd += cdir;
   makecmd += " -f ";
   makecmd += this->ConvertToRelativeForMake((makefile + "$CONFIGURATION"));
+  makecmd += " OBJDIR=$(basename \"$OBJECT_FILE_DIR_normal\")";
   makecmd += " all";
   buildphase->AddAttribute("shellScript", this->CreateString(makecmd));
   buildphase->AddAttribute("showEnvVarsInLog", this->CreateString("0"));
@@ -3359,7 +3361,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         // then remove those executables as well
         if (this->Architectures.size() > 1) {
           std::string universal = this->GetObjectsDirectory(
-            this->CurrentProject, configName, gt, "Objects-normal/");
+            this->CurrentProject, configName, gt, "$(OBJDIR)/");
           for (const auto& architecture : this->Architectures) {
             std::string universalFile = universal;
             universalFile += architecture;
@@ -3763,8 +3765,8 @@ void cmGlobalXCodeGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
 {
   std::string configName = this->GetCMakeCFGIntDir();
-  std::string dir = this->GetObjectsDirectory("$(PROJECT_NAME)", configName,
-                                              gt, "Objects-normal/");
+  std::string dir = this->GetObjectsDirectory(
+    "$(PROJECT_NAME)", configName, gt, "$(OBJECT_FILE_DIR_normal:base)/");
   dir += this->ObjectDirArch;
   dir += "/";
   gt->ObjectDirectory = dir;
