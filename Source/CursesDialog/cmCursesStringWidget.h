@@ -20,10 +20,11 @@ class cmCursesMainForm;
 
 class cmCursesStringWidget : public cmCursesWidget
 {
-  CM_DISABLE_COPY(cmCursesStringWidget)
-
 public:
   cmCursesStringWidget(int width, int height, int left, int top);
+
+  cmCursesStringWidget(cmCursesStringWidget const&) = delete;
+  cmCursesStringWidget& operator=(cmCursesStringWidget const&) = delete;
 
   /**
    * Handle user input. Called by the container of this widget

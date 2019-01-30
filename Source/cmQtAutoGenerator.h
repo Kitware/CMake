@@ -24,7 +24,6 @@ class cmMakefile;
 /// @brief Base class for QtAutoGen gernerators
 class cmQtAutoGenerator : public cmQtAutoGen
 {
-  CM_DISABLE_COPY(cmQtAutoGenerator)
 public:
   // -- Types
 
@@ -244,6 +243,9 @@ public:
   // -- Constructors
   cmQtAutoGenerator();
   virtual ~cmQtAutoGenerator();
+
+  cmQtAutoGenerator(cmQtAutoGenerator const&) = delete;
+  cmQtAutoGenerator& operator=(cmQtAutoGenerator const&) = delete;
 
   // -- Run
   bool Run(std::string const& infoFile, std::string const& config);

@@ -21,8 +21,6 @@ class cmLocalGenerator;
  */
 class cmDependsFortran : public cmDepends
 {
-  CM_DISABLE_COPY(cmDependsFortran)
-
 public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
@@ -36,6 +34,9 @@ public:
 
   /** Virtual destructor to cleanup subclasses properly.  */
   ~cmDependsFortran() override;
+
+  cmDependsFortran(cmDependsFortran const&) = delete;
+  cmDependsFortran& operator=(cmDependsFortran const&) = delete;
 
   /** Callback from build system after a .mod file has been generated
       by a Fortran90 compiler to copy the .mod file to the

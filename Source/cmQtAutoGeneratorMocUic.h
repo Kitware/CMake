@@ -28,10 +28,12 @@ class cmMakefile;
 // @brief AUTOMOC and AUTOUIC generator
 class cmQtAutoGeneratorMocUic : public cmQtAutoGenerator
 {
-  CM_DISABLE_COPY(cmQtAutoGeneratorMocUic)
 public:
   cmQtAutoGeneratorMocUic();
   ~cmQtAutoGeneratorMocUic() override;
+
+  cmQtAutoGeneratorMocUic(cmQtAutoGeneratorMocUic const&) = delete;
+  cmQtAutoGeneratorMocUic& operator=(cmQtAutoGeneratorMocUic const&) = delete;
 
 public:
   // -- Types
@@ -63,7 +65,6 @@ public:
   ///
   class BaseSettingsT
   {
-    CM_DISABLE_COPY(BaseSettingsT)
   public:
     // -- Volatile methods
     BaseSettingsT(FileSystem* fileSystem)
@@ -74,6 +75,9 @@ public:
       , FileSys(fileSystem)
     {
     }
+
+    BaseSettingsT(BaseSettingsT const&) = delete;
+    BaseSettingsT& operator=(BaseSettingsT const&) = delete;
 
     // -- Const methods
     std::string AbsoluteBuildPath(std::string const& relativePath) const;
@@ -103,12 +107,14 @@ public:
   ///
   class MocSettingsT
   {
-    CM_DISABLE_COPY(MocSettingsT)
   public:
     MocSettingsT(FileSystem* fileSys)
       : FileSys(fileSys)
     {
     }
+
+    MocSettingsT(MocSettingsT const&) = delete;
+    MocSettingsT& operator=(MocSettingsT const&) = delete;
 
     // -- Const methods
     bool skipped(std::string const& fileName) const;
@@ -145,9 +151,12 @@ public:
   ///
   class UicSettingsT
   {
-    CM_DISABLE_COPY(UicSettingsT)
   public:
     UicSettingsT() = default;
+
+    UicSettingsT(UicSettingsT const&) = delete;
+    UicSettingsT& operator=(UicSettingsT const&) = delete;
+
     // -- Const methods
     bool skipped(std::string const& fileName) const;
 
@@ -166,10 +175,13 @@ public:
   ///
   class JobT
   {
-    CM_DISABLE_COPY(JobT)
   public:
     JobT() = default;
     virtual ~JobT() = default;
+
+    JobT(JobT const&) = delete;
+    JobT& operator=(JobT const&) = delete;
+
     // -- Abstract processing interface
     virtual void Process(WorkerT& wrk) = 0;
   };
@@ -293,10 +305,12 @@ public:
   ///
   class WorkerT
   {
-    CM_DISABLE_COPY(WorkerT)
   public:
     WorkerT(cmQtAutoGeneratorMocUic* gen, uv_loop_t* uvLoop);
     ~WorkerT();
+
+    WorkerT(WorkerT const&) = delete;
+    WorkerT& operator=(WorkerT const&) = delete;
 
     // -- Const accessors
     cmQtAutoGeneratorMocUic& Gen() const { return *Gen_; }

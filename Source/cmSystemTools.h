@@ -408,10 +408,12 @@ public:
       original environment. */
   class SaveRestoreEnvironment
   {
-    CM_DISABLE_COPY(SaveRestoreEnvironment)
   public:
     SaveRestoreEnvironment();
     ~SaveRestoreEnvironment();
+
+    SaveRestoreEnvironment(SaveRestoreEnvironment const&) = delete;
+    SaveRestoreEnvironment& operator=(SaveRestoreEnvironment const&) = delete;
 
   private:
     std::vector<std::string> Env;

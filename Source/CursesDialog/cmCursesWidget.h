@@ -14,11 +14,12 @@ class cmCursesMainForm;
 
 class cmCursesWidget
 {
-  CM_DISABLE_COPY(cmCursesWidget)
-
 public:
   cmCursesWidget(int width, int height, int left, int top);
   virtual ~cmCursesWidget();
+
+  cmCursesWidget(cmCursesWidget const&) = delete;
+  cmCursesWidget& operator=(cmCursesWidget const&) = delete;
 
   /**
    * Handle user input. Called by the container of this widget

@@ -12,8 +12,6 @@ class cmMakefile;
 
 class cmCommandArgumentParserHelper
 {
-  CM_DISABLE_COPY(cmCommandArgumentParserHelper)
-
 public:
   struct ParserType
   {
@@ -22,6 +20,10 @@ public:
 
   cmCommandArgumentParserHelper();
   ~cmCommandArgumentParserHelper();
+
+  cmCommandArgumentParserHelper(cmCommandArgumentParserHelper const&) = delete;
+  cmCommandArgumentParserHelper& operator=(
+    cmCommandArgumentParserHelper const&) = delete;
 
   int ParseString(const char* str, int verb);
 

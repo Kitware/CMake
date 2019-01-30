@@ -23,11 +23,12 @@ class cmake;
  */
 class cmCursesMainForm : public cmCursesForm
 {
-  CM_DISABLE_COPY(cmCursesMainForm)
-
 public:
   cmCursesMainForm(std::vector<std::string> args, int initwidth);
   ~cmCursesMainForm() override;
+
+  cmCursesMainForm(cmCursesMainForm const&) = delete;
+  cmCursesMainForm& operator=(cmCursesMainForm const&) = delete;
 
   /**
    * Set the widgets which represent the cache entries.

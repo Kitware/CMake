@@ -26,8 +26,4 @@
 
 #define CM_FALLTHROUGH cmsys_FALLTHROUGH
 
-#define CM_DISABLE_COPY(Class)                                                \
-  Class(Class const&) = delete;                                               \
-  Class& operator=(Class const&) = delete;
-
 #endif

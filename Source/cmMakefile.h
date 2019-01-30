@@ -65,8 +65,6 @@ public:
  */
 class cmMakefile
 {
-  CM_DISABLE_COPY(cmMakefile)
-
 public:
   /* Mark a variable as used */
   void MarkVariableAsUsed(const std::string& var);
@@ -83,6 +81,9 @@ public:
    * Destructor.
    */
   ~cmMakefile();
+
+  cmMakefile(cmMakefile const&) = delete;
+  cmMakefile& operator=(cmMakefile const&) = delete;
 
   cmDirectoryId GetDirectoryId() const;
 
@@ -780,14 +781,17 @@ public:
   /** Helper class to push and pop scopes automatically.  */
   class ScopePushPop
   {
-    CM_DISABLE_COPY(ScopePushPop)
   public:
     ScopePushPop(cmMakefile* m)
       : Makefile(m)
     {
       this->Makefile->PushScope();
     }
+
     ~ScopePushPop() { this->Makefile->PopScope(); }
+
+    ScopePushPop(ScopePushPop const&) = delete;
+    ScopePushPop& operator=(ScopePushPop const&) = delete;
 
   private:
     cmMakefile* Makefile;

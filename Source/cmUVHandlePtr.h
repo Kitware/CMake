@@ -61,7 +61,8 @@ protected:
   void allocate(void* data = nullptr);
 
 public:
-  CM_DISABLE_COPY(uv_handle_ptr_base_)
+  uv_handle_ptr_base_(uv_handle_ptr_base_ const&) = delete;
+  uv_handle_ptr_base_& operator=(uv_handle_ptr_base_ const&) = delete;
   uv_handle_ptr_base_(uv_handle_ptr_base_&&) noexcept;
   uv_handle_ptr_base_& operator=(uv_handle_ptr_base_&&) noexcept;
 

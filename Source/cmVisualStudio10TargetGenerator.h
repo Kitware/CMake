@@ -25,12 +25,16 @@ class cmVS10GeneratorOptions;
 
 class cmVisualStudio10TargetGenerator
 {
-  CM_DISABLE_COPY(cmVisualStudio10TargetGenerator)
-
 public:
   cmVisualStudio10TargetGenerator(cmGeneratorTarget* target,
                                   cmGlobalVisualStudio10Generator* gg);
   ~cmVisualStudio10TargetGenerator();
+
+  cmVisualStudio10TargetGenerator(cmVisualStudio10TargetGenerator const&) =
+    delete;
+  cmVisualStudio10TargetGenerator& operator=(
+    cmVisualStudio10TargetGenerator const&) = delete;
+
   void Generate();
 
 private:

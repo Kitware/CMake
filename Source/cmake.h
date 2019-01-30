@@ -60,8 +60,6 @@ struct cmDocumentationEntry;
 
 class cmake
 {
-  CM_DISABLE_COPY(cmake)
-
 public:
   enum Role
   {
@@ -119,6 +117,9 @@ public:
   cmake(Role role, cmState::Mode mode);
   /// Destructor
   ~cmake();
+
+  cmake(cmake const&) = delete;
+  cmake& operator=(cmake const&) = delete;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   Json::Value ReportVersionJson() const;

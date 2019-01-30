@@ -14,11 +14,13 @@ class cmRootWatcher;
 
 class cmFileMonitor
 {
-  CM_DISABLE_COPY(cmFileMonitor)
 
 public:
   cmFileMonitor(uv_loop_t* l);
   ~cmFileMonitor();
+
+  cmFileMonitor(cmFileMonitor const&) = delete;
+  cmFileMonitor& operator=(cmFileMonitor const&) = delete;
 
   using Callback = std::function<void(const std::string&, int, int)>;
   void MonitorPaths(const std::vector<std::string>& paths, Callback const& cb);

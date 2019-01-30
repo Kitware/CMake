@@ -71,11 +71,12 @@ private:
 
 class cmServerProtocol
 {
-  CM_DISABLE_COPY(cmServerProtocol)
-
 public:
   cmServerProtocol() = default;
   virtual ~cmServerProtocol() = default;
+
+  cmServerProtocol(cmServerProtocol const&) = delete;
+  cmServerProtocol& operator=(cmServerProtocol const&) = delete;
 
   virtual std::pair<int, int> ProtocolVersion() const = 0;
   virtual bool IsExperimental() const = 0;
