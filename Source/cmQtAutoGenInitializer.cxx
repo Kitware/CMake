@@ -1370,7 +1370,7 @@ void cmQtAutoGenInitializer::AddGeneratedSource(std::string const& filename,
   this->Target->AddSource(filename, prepend);
 }
 
-static unsigned int CharPtrToInt(const char* const input)
+static unsigned int CharPtrToUInt(const char* const input)
 {
   unsigned long tmp = 0;
   if (input != nullptr && cmSystemTools::StringToULong(input, &tmp)) {
@@ -1379,36 +1379,43 @@ static unsigned int CharPtrToInt(const char* const input)
   return 0;
 }
 
-static unsigned int StringToInt(const std::string& input)
-{
-  return input.empty() ? 0 : CharPtrToInt(input.c_str());
-}
-
-static std::vector<cmQtAutoGenInitializer::IntegerVersion> GetKnownQtVersions(
+static std::vector<cmQtAutoGen::IntegerVersion> GetKnownQtVersions(
   cmGeneratorTarget const* target)
 {
   cmMakefile* makefile = target->Target->GetMakefile();
-
-  std::vector<cmQtAutoGenInitializer::IntegerVersion> result;
-  for (const std::string& prefix :
-       std::vector<std::string>({ "Qt6Core", "Qt5Core", "QT" })) {
-    auto tmp = cmQtAutoGenInitializer::IntegerVersion(
-      StringToInt(makefile->GetSafeDefinition(prefix + "_VERSION_MAJOR")),
-      StringToInt(makefile->GetSafeDefinition(prefix + "_VERSION_MINOR")));
-    if (tmp.Major != 0) {
-      result.push_back(tmp);
+  std::vector<cmQtAutoGen::IntegerVersion> result;
+  // Adds a version to the result (nullptr safe)
+  auto addVersion = [&result](const char* major, const char* minor) {
+    cmQtAutoGen::IntegerVersion ver(CharPtrToUInt(major),
+                                    CharPtrToUInt(minor));
+    if (ver.Major != 0) {
+      result.emplace_back(ver);
     }
+  };
+  // Qt version variable prefixes
+  std::array<std::string, 3> const prefixes{ { "Qt6Core", "Qt5Core", "QT" } };
+
+  // Read versions from variables
+  for (const std::string& prefix : prefixes) {
+    addVersion(makefile->GetDefinition(prefix + "_VERSION_MAJOR"),
+               makefile->GetDefinition(prefix + "_VERSION_MINOR"));
+  }
+
+  // Read versions from directory properties
+  for (const std::string& prefix : prefixes) {
+    addVersion(makefile->GetProperty(prefix + "_VERSION_MAJOR"),
+               makefile->GetProperty(prefix + "_VERSION_MINOR"));
   }
 
   return result;
 }
 
-std::pair<cmQtAutoGenInitializer::IntegerVersion, unsigned int>
+std::pair<cmQtAutoGen::IntegerVersion, unsigned int>
 cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target)
 {
   std::pair<IntegerVersion, unsigned int> res(
     IntegerVersion(),
-    CharPtrToInt(target->GetLinkInterfaceDependentStringProperty(
+    CharPtrToUInt(target->GetLinkInterfaceDependentStringProperty(
       "QT_MAJOR_VERSION", "")));
 
   auto knownQtVersions = GetKnownQtVersions(target);
