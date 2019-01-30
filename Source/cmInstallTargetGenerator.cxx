@@ -765,10 +765,22 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os, Indent indent,
     return;
   }
 
+  std::string stripArgs;
+
+  // macOS 'strip' is picky, executables need '-u -r' and dylibs need '-x'.
+  if (this->Target->Target->GetMakefile()->IsOn("APPLE")) {
+    if (this->Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
+        this->Target->GetType() == cmStateEnums::MODULE_LIBRARY) {
+      stripArgs = "-x ";
+    } else if (this->Target->GetType() == cmStateEnums::EXECUTABLE) {
+      stripArgs = "-u -r ";
+    }
+  }
+
   os << indent << "if(CMAKE_INSTALL_DO_STRIP)\n";
   os << indent << "  execute_process(COMMAND \""
      << this->Target->Target->GetMakefile()->GetDefinition("CMAKE_STRIP")
-     << "\" \"" << toDestDirPath << "\")\n";
+     << "\" " << stripArgs << "\"" << toDestDirPath << "\")\n";
   os << indent << "endif()\n";
 }
 
