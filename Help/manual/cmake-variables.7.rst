@@ -608,8 +608,13 @@ Variable Expansion Operators
    /variable/CACHE
    /variable/ENV
 
-Obsolete Variables
+Internal Variables
 ==================
+
+CMake has many internal variables.  Most of them are undocumented.
+Some of them, however, were at some point described as normal
+variables, and therefore may be encountered in legacy code. They
+are subject to change, and not recommended for use in project code.
 
 .. toctree::
    :maxdepth: 1
