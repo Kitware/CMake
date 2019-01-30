@@ -1281,6 +1281,12 @@ cmQtAutoGenInitializer::IntegerVersion cmQtAutoGenInitializer::GetQtVersion(
   if (qtMajor.empty()) {
     qtMajor = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
   }
+  if (qtMajor.empty()) {
+    const char* dirprop = makefile->GetProperty("Qt5Core_VERSION_MAJOR");
+    if (dirprop) {
+      qtMajor = dirprop;
+    }
+  }
   {
     const char* targetQtVersion =
       target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", "");
@@ -1294,6 +1300,12 @@ cmQtAutoGenInitializer::IntegerVersion cmQtAutoGenInitializer::GetQtVersion(
   if (!qtMajor.empty()) {
     if (qtMajor == "5") {
       qtMinor = makefile->GetSafeDefinition("Qt5Core_VERSION_MINOR");
+      if (qtMinor.empty()) {
+        const char* dirprop = makefile->GetProperty("Qt5Core_VERSION_MINOR");
+        if (dirprop) {
+          qtMinor = dirprop;
+        }
+      }
     }
     if (qtMinor.empty()) {
       qtMinor = makefile->GetSafeDefinition("QT_VERSION_MINOR");
