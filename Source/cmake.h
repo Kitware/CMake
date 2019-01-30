@@ -463,7 +463,8 @@ protected:
   std::string GeneratorToolset;
 
   ///! read in a cmake list file to initialize the cache
-  void ReadListFile(const std::vector<std::string>& args, const char* path);
+  void ReadListFile(const std::vector<std::string>& args,
+                    const std::string& path);
   bool FindPackage(const std::vector<std::string>& args);
 
   ///! Check if CMAKE_CACHEFILE_DIR is set. If it is not, delete the log file.

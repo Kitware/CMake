@@ -437,7 +437,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         }
       }
       std::cout << "loading initial cache file " << path << "\n";
-      this->ReadListFile(args, path.c_str());
+      this->ReadListFile(args, path);
     } else if (arg.find("-P", 0) == 0) {
       i++;
       if (i >= args.size()) {
@@ -451,7 +451,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       }
       // Register fake project commands that hint misuse in script mode.
       GetProjectCommandsInScriptMode(this->State);
-      this->ReadListFile(args, path.c_str());
+      this->ReadListFile(args, path);
     } else if (arg.find("--find-package", 0) == 0) {
       findPackageMode = true;
     }
@@ -465,7 +465,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 }
 
 void cmake::ReadListFile(const std::vector<std::string>& args,
-                         const char* path)
+                         const std::string& path)
 {
   // if a generator was not yet created, temporarily create one
   cmGlobalGenerator* gg = this->GetGlobalGenerator();
@@ -478,7 +478,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
   }
 
   // read in the list file to fill the cache
-  if (path) {
+  if (!path.empty()) {
     this->CurrentSnapshot = this->State->Reset();
     std::string homeDir = this->GetHomeDirectory();
     std::string homeOutputDir = this->GetHomeOutputDirectory();
@@ -499,7 +499,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
       mf.SetArgcArgv(args);
     }
     if (!mf.ReadListFile(path)) {
-      cmSystemTools::Error("Error processing file: ", path);
+      cmSystemTools::Error("Error processing file: " + path);
     }
     this->SetHomeDirectory(homeDir);
     this->SetHomeOutputDirectory(homeOutputDir);
@@ -1606,14 +1606,14 @@ void cmake::PreLoadCMakeFiles()
   if (!pre_load.empty()) {
     pre_load += "/PreLoad.cmake";
     if (cmSystemTools::FileExists(pre_load)) {
-      this->ReadListFile(args, pre_load.c_str());
+      this->ReadListFile(args, pre_load);
     }
   }
   pre_load = this->GetHomeOutputDirectory();
   if (!pre_load.empty()) {
     pre_load += "/PreLoad.cmake";
     if (cmSystemTools::FileExists(pre_load)) {
-      this->ReadListFile(args, pre_load.c_str());
+      this->ReadListFile(args, pre_load);
     }
   }
 }
@@ -2613,7 +2613,7 @@ int cmake::Build(int jobs, const std::string& dir, const std::string& target,
         cachePath + "/" + "CMakeFiles/" + "VerifyGlobs.cmake";
       if (cmSystemTools::FileExists(globVerifyScript)) {
         std::vector<std::string> args;
-        this->ReadListFile(args, globVerifyScript.c_str());
+        this->ReadListFile(args, globVerifyScript);
       }
     }
 
