@@ -55,7 +55,6 @@ Variables that Provide Information
    /variable/CMAKE_GENERATOR_INSTANCE
    /variable/CMAKE_GENERATOR_PLATFORM
    /variable/CMAKE_GENERATOR_TOOLSET
-   /variable/CMAKE_HOME_DIRECTORY
    /variable/CMAKE_IMPORT_LIBRARY_PREFIX
    /variable/CMAKE_IMPORT_LIBRARY_SUFFIX
    /variable/CMAKE_JOB_POOL_COMPILE
@@ -103,7 +102,6 @@ Variables that Provide Information
    /variable/CMAKE_VERBOSE_MAKEFILE
    /variable/CMAKE_VERSION
    /variable/CMAKE_VS_DEVENV_COMMAND
-   /variable/CMAKE_VS_INTEL_Fortran_PROJECT_VERSION
    /variable/CMAKE_VS_MSBUILD_COMMAND
    /variable/CMAKE_VS_NsightTegra_VERSION
    /variable/CMAKE_VS_PLATFORM_NAME
@@ -192,7 +190,6 @@ Variables that Change Behavior
    /variable/CMAKE_MFC_FLAG
    /variable/CMAKE_MAXIMUM_RECURSION_DEPTH
    /variable/CMAKE_MODULE_PATH
-   /variable/CMAKE_NOT_USING_CONFIG_FLAGS
    /variable/CMAKE_POLICY_DEFAULT_CMPNNNN
    /variable/CMAKE_POLICY_WARNING_CMPNNNN
    /variable/CMAKE_PREFIX_PATH
@@ -452,7 +449,6 @@ Variables for Languages
    /variable/CMAKE_Fortran_MODDIR_DEFAULT
    /variable/CMAKE_Fortran_MODDIR_FLAG
    /variable/CMAKE_Fortran_MODOUT_FLAG
-   /variable/CMAKE_INTERNAL_PLATFORM_ABI
    /variable/CMAKE_LANG_ANDROID_TOOLCHAIN_MACHINE
    /variable/CMAKE_LANG_ANDROID_TOOLCHAIN_PREFIX
    /variable/CMAKE_LANG_ANDROID_TOOLCHAIN_SUFFIX
@@ -460,15 +456,12 @@ Variables for Languages
    /variable/CMAKE_LANG_ARCHIVE_CREATE
    /variable/CMAKE_LANG_ARCHIVE_FINISH
    /variable/CMAKE_LANG_COMPILER
-   /variable/CMAKE_LANG_COMPILER_ABI
-   /variable/CMAKE_LANG_COMPILER_ARCHITECTURE_ID
    /variable/CMAKE_LANG_COMPILER_EXTERNAL_TOOLCHAIN
    /variable/CMAKE_LANG_COMPILER_ID
    /variable/CMAKE_LANG_COMPILER_LOADED
    /variable/CMAKE_LANG_COMPILER_PREDEFINES_COMMAND
    /variable/CMAKE_LANG_COMPILER_TARGET
    /variable/CMAKE_LANG_COMPILER_VERSION
-   /variable/CMAKE_LANG_COMPILER_VERSION_INTERNAL
    /variable/CMAKE_LANG_COMPILE_OBJECT
    /variable/CMAKE_LANG_CREATE_SHARED_LIBRARY
    /variable/CMAKE_LANG_CREATE_SHARED_MODULE
@@ -497,7 +490,6 @@ Variables for Languages
    /variable/CMAKE_LANG_LINKER_WRAPPER_FLAG_SEP
    /variable/CMAKE_LANG_LINK_EXECUTABLE
    /variable/CMAKE_LANG_OUTPUT_EXTENSION
-   /variable/CMAKE_LANG_PLATFORM_ID
    /variable/CMAKE_LANG_SIMULATE_ID
    /variable/CMAKE_LANG_SIMULATE_VERSION
    /variable/CMAKE_LANG_SIZEOF_DATA_PTR
@@ -609,3 +601,23 @@ Variable Expansion Operators
 
    /variable/CACHE
    /variable/ENV
+
+Internal Variables
+==================
+
+CMake has many internal variables.  Most of them are undocumented.
+Some of them, however, were at some point described as normal
+variables, and therefore may be encountered in legacy code. They
+are subject to change, and not recommended for use in project code.
+
+.. toctree::
+   :maxdepth: 1
+
+   /variable/CMAKE_HOME_DIRECTORY
+   /variable/CMAKE_INTERNAL_PLATFORM_ABI
+   /variable/CMAKE_LANG_COMPILER_ABI
+   /variable/CMAKE_LANG_COMPILER_ARCHITECTURE_ID
+   /variable/CMAKE_LANG_COMPILER_VERSION_INTERNAL
+   /variable/CMAKE_LANG_PLATFORM_ID
+   /variable/CMAKE_NOT_USING_CONFIG_FLAGS
+   /variable/CMAKE_VS_INTEL_Fortran_PROJECT_VERSION
