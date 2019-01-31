@@ -173,8 +173,28 @@ void cmNinjaTargetGenerator::AddIncludeFlags(std::string& languageFlags,
 
 bool cmNinjaTargetGenerator::NeedDepTypeMSVC(const std::string& lang) const
 {
-  return (this->GetMakefile()->GetSafeDefinition("CMAKE_NINJA_DEPTYPE_" +
-                                                 lang) == "msvc");
+  std::string const& deptype =
+    this->GetMakefile()->GetSafeDefinition("CMAKE_NINJA_DEPTYPE_" + lang);
+  if (deptype == "msvc") {
+    return true;
+  }
+  if (deptype == "intel") {
+    // Ninja does not really define "intel", but we use it to switch based
+    // on whether this environment supports "gcc" or "msvc" deptype.
+    if (!this->GetGlobalGenerator()->SupportsMultilineDepfile()) {
+      // This ninja version is too old to support the Intel depfile format.
+      // Fall back to msvc deptype.
+      return true;
+    }
+    if ((this->Makefile->GetHomeDirectory().find(' ') != std::string::npos) ||
+        (this->Makefile->GetHomeOutputDirectory().find(' ') !=
+         std::string::npos)) {
+      // The Intel compiler does not properly escape spaces in a depfile.
+      // Fall back to msvc deptype.
+      return true;
+    }
+  }
+  return false;
 }
 
 // TODO: Refactor with
@@ -630,10 +650,6 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     }
   } else {
     deptype = "gcc";
-    const char* langdeptype = mf->GetDefinition("CMAKE_NINJA_DEPTYPE_" + lang);
-    if (langdeptype) {
-      deptype = langdeptype;
-    }
     depfile = "$DEP_FILE";
     const std::string flagsName = "CMAKE_DEPFILE_FLAGS_" + lang;
     std::string depfileFlags = mf->GetSafeDefinition(flagsName);

@@ -454,6 +454,7 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
   , NinjaSupportsConsolePool(false)
   , NinjaSupportsImplicitOuts(false)
   , NinjaSupportsManifestRestat(false)
+  , NinjaSupportsMultilineDepfile(false)
   , NinjaSupportsDyndeps(0)
 {
 #ifdef _WIN32
@@ -581,6 +582,9 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
   this->NinjaSupportsManifestRestat = !cmSystemTools::VersionCompare(
     cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
     RequiredNinjaVersionForManifestRestat().c_str());
+  this->NinjaSupportsMultilineDepfile = !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+    RequiredNinjaVersionForMultilineDepfile().c_str());
   {
     // Our ninja branch adds ".dyndep-#" to its version number,
     // where '#' is a feature-specific version number.  Extract it.
@@ -1476,6 +1480,11 @@ bool cmGlobalNinjaGenerator::SupportsImplicitOuts() const
 bool cmGlobalNinjaGenerator::SupportsManifestRestat() const
 {
   return this->NinjaSupportsManifestRestat;
+}
+
+bool cmGlobalNinjaGenerator::SupportsMultilineDepfile() const
+{
+  return this->NinjaSupportsMultilineDepfile;
 }
 
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
