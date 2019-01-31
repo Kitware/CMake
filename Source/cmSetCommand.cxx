@@ -4,6 +4,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
@@ -112,7 +113,15 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
 
   if (cache) {
     std::string::size_type cacheStart = args.size() - 3 - (force ? 1 : 0);
-    type = cmState::StringToCacheEntryType(args[cacheStart + 1].c_str());
+    if (!cmState::StringToCacheEntryType(args[cacheStart + 1].c_str(), type)) {
+      std::string m = "implicitly converting '" + args[cacheStart + 1] +
+        "' to 'STRING' type.";
+      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m);
+      // Setting this may not be required, since it's
+      // initialized as a string. Keeping this here to
+      // ensure that the type is actually converting to a string.
+      type = cmStateEnums::STRING;
+    }
     docstring = args[cacheStart + 2].c_str();
   }
 
