@@ -76,7 +76,7 @@ find_path(XalanC_INCLUDE_DIR
           DOC "Xalan-C++ include directory")
 mark_as_advanced(XalanC_INCLUDE_DIR)
 
-if(XalanC_INCLUDE_DIR)
+if(XalanC_INCLUDE_DIR AND EXISTS "${XalanC_INCLUDE_DIR}/xalanc/Include/XalanVersion.hpp")
   _XalanC_GET_VERSION("${XalanC_INCLUDE_DIR}/xalanc/Include/XalanVersion.hpp")
 endif()
 
