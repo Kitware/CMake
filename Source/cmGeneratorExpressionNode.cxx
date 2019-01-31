@@ -95,7 +95,7 @@ static const struct ZeroNode installInterfaceNode;
 #define BOOLEAN_OP_NODE(OPNAME, OP, SUCCESS_VALUE, FAILURE_VALUE)             \
   static const struct OP##Node : public cmGeneratorExpressionNode             \
   {                                                                           \
-    OP##Node() {}                                                             \
+    OP##Node() {} /* NOLINT(modernize-use-equals-default) */                  \
     virtual int NumExpectedParameters() const { return OneOrMoreParameters; } \
                                                                               \
     std::string Evaluate(const std::vector<std::string>& parameters,          \
