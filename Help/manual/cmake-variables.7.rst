@@ -276,6 +276,7 @@ Variables that Describe the System
    /variable/MSVC_IDE
    /variable/MSVC_TOOLSET_VERSION
    /variable/MSVC_VERSION
+   /variable/MSYS
    /variable/UNIX
    /variable/WIN32
    /variable/WINCE
