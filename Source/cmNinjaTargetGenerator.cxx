@@ -454,6 +454,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   if (lang == "Swift") {
     vars.SwiftAuxiliarySources = "$SWIFT_AUXILIARY_SOURCES";
     vars.SwiftModuleName = "$SWIFT_MODULE_NAME";
+    vars.SwiftLibraryName = "$SWIFT_LIBRARY_NAME";
   }
 
   // For some cases we do an explicit preprocessor invocation.
@@ -940,6 +941,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     } else {
       vars["SWIFT_MODULE_NAME"] = this->GeneratorTarget->GetName();
     }
+
+    cmGeneratorTarget::Names targetNames =
+      this->GeneratorTarget->GetLibraryNames(this->GetConfigName());
+    vars["SWIFT_LIBRARY_NAME"] = targetNames.Base;
   }
 
   if (!this->NeedDepTypeMSVC(language)) {

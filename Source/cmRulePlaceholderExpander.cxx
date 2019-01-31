@@ -172,6 +172,11 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       return replaceValues.SwiftModuleName;
     }
   }
+  if (replaceValues.SwiftLibraryName) {
+    if (variable == "SWIFT_LIBRARY_NAME") {
+      return replaceValues.SwiftLibraryName;
+    }
+  }
   if (variable == "TARGET_SONAME" || variable == "SONAME_FLAG" ||
       variable == "TARGET_INSTALLNAME_DIR") {
     // All these variables depend on TargetSOName
