@@ -29,9 +29,9 @@ QCMake::QCMake(QObject* p)
       this->messageCallback(msg, title);
     });
   cmSystemTools::SetStdoutCallback(
-    [this](const char* msg, size_t len) { this->stdoutCallback(msg, len); });
+    [this](std::string const& msg) { this->stdoutCallback(msg); });
   cmSystemTools::SetStderrCallback(
-    [this](const char* msg, size_t len) { this->stderrCallback(msg, len); });
+    [this](std::string const& msg) { this->stderrCallback(msg); });
 
   this->CMakeInstance = new cmake(cmake::RoleProject, cmState::Project);
   this->CMakeInstance->SetCMakeEditCommand(
@@ -365,15 +365,15 @@ void QCMake::messageCallback(const char* msg, const char* /*title*/)
   QCoreApplication::processEvents();
 }
 
-void QCMake::stdoutCallback(const char* msg, size_t len)
+void QCMake::stdoutCallback(std::string const& msg)
 {
-  emit this->outputMessage(QString::fromLocal8Bit(msg, int(len)));
+  emit this->outputMessage(QString::fromStdString(msg));
   QCoreApplication::processEvents();
 }
 
-void QCMake::stderrCallback(const char* msg, size_t len)
+void QCMake::stderrCallback(std::string const& msg)
 {
-  emit this->outputMessage(QString::fromLocal8Bit(msg, int(len)));
+  emit this->outputMessage(QString::fromStdString(msg));
   QCoreApplication::processEvents();
 }
 

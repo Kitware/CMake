@@ -80,7 +80,7 @@ public:
     Message(m.c_str(), title);
   }
 
-  using OutputCallback = std::function<void(const char*, size_t)>;
+  using OutputCallback = std::function<void(std::string const&)>;
 
   ///! Send a string to stdout
   static void Stdout(const std::string& s);
