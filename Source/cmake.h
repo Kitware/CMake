@@ -443,7 +443,6 @@ public:
 
 protected:
   void RunCheckForUnusedVariables();
-  void InitializeProperties();
   int HandleDeleteCacheVariables(const std::string& var);
 
   typedef std::vector<cmGlobalGeneratorFactory*> RegisteredGeneratorsVector;
@@ -486,7 +485,6 @@ protected:
 
 private:
   ProgressCallbackType ProgressCallback;
-  bool InTryCompile;
   WorkingMode CurrentWorkingMode;
   bool DebugOutput;
   bool Trace;
@@ -534,18 +532,6 @@ private:
 
   void AppendGlobalGeneratorsDocumentation(std::vector<cmDocumentationEntry>&);
   void AppendExtraGeneratorsDocumentation(std::vector<cmDocumentationEntry>&);
-
-  /**
-   * Convert a message type between a warning and an error, based on the state
-   * of the error output CMake variables, in the cache.
-   */
-  MessageType ConvertMessageType(MessageType t) const;
-
-  /*
-   * Check if messages of this type should be output, based on the state of the
-   * warning and error output CMake variables, in the cache.
-   */
-  bool IsMessageTypeVisible(MessageType t) const;
 };
 
 #define CMAKE_STANDARD_OPTIONS_TABLE                                          \
