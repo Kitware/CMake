@@ -316,7 +316,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
     if (NOT ${_LIBRARIES})
       check_lapack_libraries(
         ${_LIBRARIES}
-        BLAS
+        LAPACK
         ${LAPACK_mkl_SEARCH_SYMBOL}
         ""
         ""
@@ -329,7 +329,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       if (NOT ${_LIBRARIES})
         check_lapack_libraries(
           ${_LIBRARIES}
-          BLAS
+          LAPACK
           ${LAPACK_mkl_SEARCH_SYMBOL}
           ""
           "${IT}"
