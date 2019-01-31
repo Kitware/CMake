@@ -566,22 +566,23 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
     (std::find(closure->Languages.begin(), closure->Languages.end(),
                cuda_lang) != closure->Languages.end());
 
-  bool shouldHaveDeviceLinking = false;
-  switch (genTarget.GetType()) {
-    case cmStateEnums::SHARED_LIBRARY:
-    case cmStateEnums::MODULE_LIBRARY:
-    case cmStateEnums::EXECUTABLE:
-      shouldHaveDeviceLinking = true;
-      break;
-    case cmStateEnums::STATIC_LIBRARY:
-      shouldHaveDeviceLinking =
-        genTarget.GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
-      break;
-    default:
-      break;
+  bool doDeviceLinking = false;
+  if (const char* resolveDeviceSymbols =
+        genTarget.GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
+    doDeviceLinking = cmSystemTools::IsOn(resolveDeviceSymbols);
+  } else {
+    switch (genTarget.GetType()) {
+      case cmStateEnums::SHARED_LIBRARY:
+      case cmStateEnums::MODULE_LIBRARY:
+      case cmStateEnums::EXECUTABLE:
+        doDeviceLinking = true;
+        break;
+      default:
+        break;
+    }
   }
 
-  if (!(shouldHaveDeviceLinking && hasCUDA)) {
+  if (!(doDeviceLinking && hasCUDA)) {
     return;
   }
 
