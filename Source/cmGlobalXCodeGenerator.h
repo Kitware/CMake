@@ -264,9 +264,10 @@ private:
   {
   }
 
-  std::string GetObjectsNormalDirectory(const std::string& projName,
-                                        const std::string& configName,
-                                        const cmGeneratorTarget* t) const;
+  std::string GetObjectsDirectory(const std::string& projName,
+                                  const std::string& configName,
+                                  const cmGeneratorTarget* t,
+                                  const std::string& variant) const;
 
   static std::string GetDeploymentPlatform(const cmMakefile* mf);
 
