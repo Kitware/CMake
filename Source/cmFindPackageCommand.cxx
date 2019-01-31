@@ -693,7 +693,7 @@ bool cmFindPackageCommand::FindModule(bool& found)
     std::string var = this->Name;
     var += "_FIND_MODULE";
     this->Makefile->AddDefinition(var, "1");
-    bool result = this->ReadListFile(mfile.c_str(), DoPolicyScope);
+    bool result = this->ReadListFile(mfile, DoPolicyScope);
     this->Makefile->RemoveDefinition(var);
     return result;
   }
@@ -776,7 +776,7 @@ bool cmFindPackageCommand::HandlePackageMode()
     this->StoreVersionFound();
 
     // Parse the configuration file.
-    if (this->ReadListFile(this->FileFound.c_str(), DoPolicyScope)) {
+    if (this->ReadListFile(this->FileFound, DoPolicyScope)) {
       // The package has been found.
       found = true;
 
@@ -1036,7 +1036,8 @@ bool cmFindPackageCommand::FindAppBundleConfig()
   return false;
 }
 
-bool cmFindPackageCommand::ReadListFile(const char* f, PolicyScopeRule psr)
+bool cmFindPackageCommand::ReadListFile(const std::string& f,
+                                        PolicyScopeRule psr)
 {
   const bool noPolicyScope = !this->PolicyScope || psr == NoPolicyScope;
   if (this->Makefile->ReadDependentFile(f, noPolicyScope)) {
@@ -1590,7 +1591,7 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file,
   // Load the version check file.  Pass NoPolicyScope because we do
   // our own policy push/pop independent of CMP0011.
   bool suitable = false;
-  if (this->ReadListFile(version_file.c_str(), NoPolicyScope)) {
+  if (this->ReadListFile(version_file, NoPolicyScope)) {
     // Check the output variables.
     bool okay = this->Makefile->IsOn("PACKAGE_VERSION_EXACT");
     bool unsuitable = this->Makefile->IsOn("PACKAGE_VERSION_UNSUITABLE");
