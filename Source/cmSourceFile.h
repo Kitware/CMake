@@ -120,6 +120,8 @@ private:
   void CheckLanguage(std::string const& ext);
 
   static const std::string propLANGUAGE;
+  static const std::string propLOCATION;
+  static const std::string propGENERATED;
 };
 
 // TODO: Factor out into platform information modules.

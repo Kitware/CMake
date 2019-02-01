@@ -32,6 +32,8 @@ std::string const& cmSourceFile::GetExtension() const
 }
 
 const std::string cmSourceFile::propLANGUAGE = "LANGUAGE";
+const std::string cmSourceFile::propLOCATION = "LOCATION";
+const std::string cmSourceFile::propGENERATED = "GENERATED";
 
 void cmSourceFile::SetObjectLibrary(std::string const& objlib)
 {
@@ -119,7 +121,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
 
   // If the file is generated compute the location without checking on
   // disk.
-  if (this->GetPropertyAsBool("GENERATED")) {
+  if (this->GetPropertyAsBool(propGENERATED)) {
     // The file is either already a full path or is relative to the
     // build directory for the target.
     this->Location.DirectoryUseBinary();
@@ -266,7 +268,7 @@ const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
   // cmSourceFileLocation class to commit to a particular full path to
   // the source file as late as possible.  If the users requests the
   // LOCATION property we must commit now.
-  if (prop == "LOCATION") {
+  if (prop == propLOCATION) {
     // Commit to a location.
     this->GetFullPath();
   }
@@ -278,7 +280,7 @@ const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
 const char* cmSourceFile::GetProperty(const std::string& prop) const
 {
   // Check for computed properties.
-  if (prop == "LOCATION") {
+  if (prop == propLOCATION) {
     if (this->FullPath.empty()) {
       return nullptr;
     }
