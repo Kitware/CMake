@@ -376,7 +376,13 @@ void cmVisualStudio10TargetGenerator::Generate()
   {
     Elem e0(BuildFileStream, "Project");
     e0.Attribute("DefaultTargets", "Build");
-    e0.Attribute("ToolsVersion", this->GlobalGenerator->GetToolsVersion());
+    const char* toolsVersion = this->GlobalGenerator->GetToolsVersion();
+    if (this->GlobalGenerator->GetVersion() ==
+          cmGlobalVisualStudioGenerator::VS12 &&
+        this->GlobalGenerator->TargetsWindowsCE()) {
+      toolsVersion = "4.0";
+    }
+    e0.Attribute("ToolsVersion", toolsVersion);
     e0.Attribute("xmlns",
                  "http://schemas.microsoft.com/developer/msbuild/2003");
 
