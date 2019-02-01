@@ -17,8 +17,6 @@ cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name,
                            cmSourceFileLocationKind kind)
   : Location(mf, name, kind)
 {
-  this->CustomCommand = nullptr;
-  this->FindFullPathFailed = false;
 }
 
 cmSourceFile::~cmSourceFile()
@@ -244,12 +242,22 @@ bool cmSourceFile::Matches(cmSourceFileLocation const& loc)
 void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 {
   this->Properties.SetProperty(prop, value);
+
+  // Update IsGenerated flag
+  if (prop == propGENERATED) {
+    this->IsGenerated = cmSystemTools::IsOn(value);
+  }
 }
 
 void cmSourceFile::AppendProperty(const std::string& prop, const char* value,
                                   bool asString)
 {
   this->Properties.AppendProperty(prop, value, asString);
+
+  // Update IsGenerated flag
+  if (prop == propGENERATED) {
+    this->IsGenerated = this->GetPropertyAsBool(propGENERATED);
+  }
 }
 
 const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
