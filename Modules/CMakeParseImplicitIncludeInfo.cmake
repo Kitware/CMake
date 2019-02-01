@@ -27,9 +27,52 @@ function(cmake_parse_implicit_include_line line lang id_var log_var state_var)
     endif()
   endif()
 
+  # PGI compiler
+  if("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "PGI")
+    # pgc++ verbose output differs
+    if(("${lang}" STREQUAL "C" OR "${lang}" STREQUAL "Fortran") AND
+        "${line}" MATCHES "^/" AND
+        "${line}" MATCHES "/pgc |/pgf901 |/pgftnc " AND
+        "${line}" MATCHES " -cmdline ")
+      # cmdline has unparsed cmdline, remove it
+      string(REGEX REPLACE "-cmdline .*" "" line "${line}")
+      if("${line}" MATCHES " -nostdinc ")
+        set(rv "")    # defined, but empty
+      else()
+        string(REGEX MATCHALL " -stdinc ([^ ]*)" incs "${line}")
+        foreach(inc IN LISTS incs)
+          string(REGEX REPLACE " -stdinc ([^ ]*)" "\\1" idir "${inc}")
+          string(REPLACE ":" ";" idir "${idir}")
+          list(APPEND rv ${idir})
+        endforeach()
+      endif()
+      if(DEFINED rv)
+        string(APPEND log "  got implicit includes via PGI C/F parser!\n")
+      else()
+        string(APPEND log "  warning: PGI C/F parse failed!\n")
+      endif()
+    elseif("${lang}" STREQUAL "CXX" AND "${line}" MATCHES "^/" AND
+           "${line}" MATCHES "/pggpp1 " AND "${line}" MATCHES " -I")
+      # oddly, -Mnostdinc does not get rid of system -I's, at least in
+      # PGI 18.10.1 ...
+      string(REGEX MATCHALL " (-I ?)([^ ]*)" incs "${line}")
+      foreach(inc IN LISTS incs)
+        string(REGEX REPLACE " (-I ?)([^ ]*)" "\\2" idir "${inc}")
+        if(NOT "${idir}" STREQUAL "-")   # filter out "-I-"
+          list(APPEND rv "${idir}")
+        endif()
+      endforeach()
+      if(DEFINED rv)
+        string(APPEND log "  got implicit includes via PGI CXX parser!\n")
+      else()
+        string(APPEND log "  warning: PGI CXX parse failed!\n")
+      endif()
+    endif()
+  endif()
+
   # SunPro compiler
   if("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "SunPro" AND
-     "${line}" MATCHES "-D__SUNPRO_C")
+     ("${line}" MATCHES "-D__SUNPRO_C" OR "${line}" MATCHES "-D__SUNPRO_F") )
     string(REGEX MATCHALL " (-I ?)([^ ]*)" incs "${line}")
     foreach(inc IN LISTS incs)
       string(REGEX REPLACE " (-I ?)([^ ]*)" "\\2" idir "${inc}")
@@ -38,8 +81,10 @@ function(cmake_parse_implicit_include_line line lang id_var log_var state_var)
       endif()
     endforeach()
     if(rv)
-      # /usr/include appears to be hardwired in
-      list(APPEND rv "/usr/include")
+      if ("${lang}" STREQUAL "C" OR "${lang}" STREQUAL "CXX")
+        # /usr/include appears to be hardwired in
+        list(APPEND rv "/usr/include")
+      endif()
       string(APPEND log "  got implicit includes via sunpro parser!\n")
     else()
       string(APPEND log "  warning: sunpro parse failed!\n")

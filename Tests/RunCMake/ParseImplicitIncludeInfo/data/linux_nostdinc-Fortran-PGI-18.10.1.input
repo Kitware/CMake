@@ -1,0 +1,47 @@
+CMAKE_LANG=Fortran
+CMAKE_Fortran_COMPILER_ABI=
+CMAKE_Fortran_COMPILER_AR=
+CMAKE_Fortran_COMPILER_ARCHITECTURE_ID=
+CMAKE_Fortran_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_Fortran_COMPILER_ID=PGI
+CMAKE_Fortran_COMPILER_LAUNCHER=
+CMAKE_Fortran_COMPILER_LOADED=1
+CMAKE_Fortran_COMPILER_RANLIB=
+CMAKE_Fortran_COMPILER_TARGET=
+CMAKE_Fortran_COMPILER_VERSION=18.10.1
+CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_b7462/fast"
+/usr/bin/make -f CMakeFiles/cmTC_b7462.dir/build.make CMakeFiles/cmTC_b7462.dir/build
+make[1]: Entering directory '/tmp/ii/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_b7462.dir/CMakeFortranCompilerABI.F.o
+/mnt/pgi/linux86-64/2018/bin/pgfortran   -Mnostdinc    -v -c /usr/share/cmake-3.10/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_b7462.dir/CMakeFortranCompilerABI.F.o
+Export PGI_CURR_CUDA_HOME=/mnt/pgi/linux86-64/2018/cuda/9.1
+Export PGI=/mnt/pgi
+
+/mnt/pgi/linux86-64/18.10/bin/pgf901 /usr/share/cmake-3.10/Modules/CMakeFortranCompilerABI.F -opt 1 -nohpf -nostatic -x 19 0x400000 -quad -x 59 4 -x 15 2 -x 49 0x400004 -x 51 0x20 -x 57 0x4c -x 58 0x10000 -x 124 0x1000 -tp k8 -x 57 0xfb0000 -x 58 0x78031040 -x 47 0x08 -x 48 4608 -x 49 0x100 -x 120 0x200 -nostdinc -cmdline '+pgfortran /usr/share/cmake-3.10/Modules/CMakeFortranCompilerABI.F -Mnostdinc -v -c -o CMakeFiles/cmTC_b7462.dir/CMakeFortranCompilerABI.F.o' -def unix -def __unix -def __unix__ -def linux -def __linux -def __linux__ -def __NO_MATH_INLINES -def __LP64__ -def __x86_64 -def __x86_64__ -def __LONG_MAX__=9223372036854775807L -def '__SIZE_TYPE__=unsigned long int' -def '__PTRDIFF_TYPE__=long int' -def __extension__= -def __amd_64__amd64__ -def __k8 -def __k8__ -def __SSE__ -def __MMX__ -def __SSE2__ -def __SSE3__ -preprocess -nofreeform -vect 48 -x 54 1 -x 70 0x40000000 -y 163 0xc0000000 -x 189 0x10 -modexport /tmp/pgfortranoelfQQWHVV3l.cmod -modindex /tmp/pgfortran_elf6-1UcVhp.cmdx -output /tmp/pgfortranUelfk_cqURUw.ilm
+  0 inform,   0 warnings,   0 severes, 0 fatal for cmakefortrancompilerabi
+PGF90/x86-64 Linux 18.10-1: compilation successful
+
+/mnt/pgi/linux86-64/18.10/bin/pgf902 /tmp/pgfortranUelfk_cqURUw.ilm -fn /usr/share/cmake-3.10/Modules/CMakeFortranCompilerABI.F -opt 1 -x 51 0x20 -x 119 0xa10000 -x 122 0x40 -x 123 0x1000 -x 127 4 -x 127 17 -x 19 0x400000 -x 28 0x40000 -x 120 0x10000000 -x 70 0x8000 -x 122 1 -x 125 0x20000 -quad -x 59 4 -tp k8 -x 120 0x1000 -x 124 0x1400 -y 15 2 -x 57 0x3b0000 -x 58 0x48000000 -x 49 0x100 -x 120 0x200 -astype 0 -x 68 0x20 -x 70 0x40000000 -x 164 0x800000 -x 124 1 -y 163 0xc0000000 -x 189 0x10 -y 189 0x4000000 -cmdline '+pgfortran /usr/share/cmake-3.10/Modules/CMakeFortranCompilerABI.F -Mnostdinc -v -c -o CMakeFiles/cmTC_b7462.dir/CMakeFortranCompilerABI.F.o' -asm /tmp/pgfortranUelfk-LC2Ixm.s
+  0 inform,   0 warnings,   0 severes, 0 fatal for cmakefortrancompilerabi
+PGF90/x86-64 Linux 18.10-1: compilation successful
+
+/usr/bin/as /tmp/pgfortranUelfk-LC2Ixm.s -o CMakeFiles/cmTC_b7462.dir/CMakeFortranCompilerABI.F.o
+
+/mnt/pgi/linux86-64/18.10/bin/pgappend -noerror CMakeFiles/cmTC_b7462.dir/CMakeFortranCompilerABI.F.o -name .IPDINFO /tmp/pgfortranoelfQQWHVV3l.cmod -name .IPEINFO /tmp/pgfortran_elf6-1UcVhp.cmdx
+Unlinking /tmp/pgfortranUelfk_cqURUw.ilm
+Unlinking /tmp/pgfortranEelfAVAFcE2q.stb
+Unlinking /tmp/pgfortranoelfQQWHVV3l.cmod
+Unlinking /tmp/pgfortran_elf6-1UcVhp.cmdx
+Unlinking /tmp/pgfortranUelfk-LC2Ixm.s
+Unlinking /tmp/pgfortranEelfA4vWZ2Nt.ll
+Linking Fortran executable cmTC_b7462
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b7462.dir/link.txt --verbose=1
+/mnt/pgi/linux86-64/2018/bin/pgfortran   -v   -Mnostdinc  CMakeFiles/cmTC_b7462.dir/CMakeFortranCompilerABI.F.o  -o cmTC_b7462
+Export PGI_CURR_CUDA_HOME=/mnt/pgi/linux86-64/2018/cuda/9.1
+Export PGI=/mnt/pgi
+
+/usr/bin/ld /usr/lib/x86_64-linux-gnu/crt1.o /usr/lib/x86_64-linux-gnu/crti.o /mnt/pgi/linux86-64/18.10/lib/trace_init.o /usr/lib/gcc/x86_64-linux-gnu/7/crtbegin.o /mnt/pgi/linux86-64/18.10/lib/initmp.o /mnt/pgi/linux86-64/18.10/lib/f90main.o --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 /mnt/pgi/linux86-64/18.10/lib/pgi.ld -L/mnt/pgi/linux86-64/18.10/lib -L/usr/lib64 -L/usr/lib/gcc/x86_64-linux-gnu/7 CMakeFiles/cmTC_b7462.dir/CMakeFortranCompilerABI.F.o -rpath /mnt/pgi/linux86-64/18.10/lib -rpath /usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib64 -o cmTC_b7462 -L/usr/lib/gcc/x86_64-linux-gnu/7/../../../../lib64 -lpgf90rtl -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl -lpgmp -lnuma -lpthread --start-group -lpgmath -lnspgc -lpgc --end-group -lrt -lpthread -lm -lgcc -lc -lgcc -lgcc_s /usr/lib/gcc/x86_64-linux-gnu/7/crtend.o /usr/lib/x86_64-linux-gnu/crtn.o
+make[1]: Leaving directory '/tmp/ii/CMakeFiles/CMakeTmp'
