@@ -113,11 +113,6 @@ std::string const& cmSourceFile::GetFullPath() const
 
 bool cmSourceFile::FindFullPath(std::string* error)
 {
-  // If this method has already failed once do not try again.
-  if (this->FindFullPathFailed) {
-    return false;
-  }
-
   // If the file is generated compute the location without checking on disk.
   if (this->GetIsGenerated()) {
     // The file is either already a full path or is relative to the
@@ -125,6 +120,11 @@ bool cmSourceFile::FindFullPath(std::string* error)
     this->Location.DirectoryUseBinary();
     this->FullPath = this->Location.GetFullPath();
     return true;
+  }
+
+  // If this method has already failed once do not try again.
+  if (this->FindFullPathFailed) {
+    return false;
   }
 
   // The file is not generated.  It must exist on disk.
