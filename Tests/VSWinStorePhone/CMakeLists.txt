@@ -8,6 +8,8 @@ elseif(MSVC_VERSION GREATER 1600)
   set(COMPILER_VERSION "11")
 endif()
 
+add_subdirectory(WinRT)
+
 set (APP_MANIFEST_NAME Package.appxmanifest)
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "WindowsPhone")
   set(PLATFORM WP)
@@ -149,5 +151,4 @@ if("${SHORT_VERSION}" STREQUAL "10.0")
   set_property(TARGET ${EXE_NAME} PROPERTY VS_SDK_REFERENCES "Microsoft.UniversalCRT.Debug, Version=${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
 endif()
 
-
-target_link_libraries(${EXE_NAME} d3d11)
+target_link_libraries(${EXE_NAME} d3d11 JusticeLeagueWinRT)
