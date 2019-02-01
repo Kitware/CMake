@@ -119,7 +119,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
 
   // If the file is generated compute the location without checking on
   // disk.
-  if (this->GetPropertyAsBool(propGENERATED)) {
+  if (this->GetIsGenerated()) {
     // The file is either already a full path or is relative to the
     // build directory for the target.
     this->Location.DirectoryUseBinary();

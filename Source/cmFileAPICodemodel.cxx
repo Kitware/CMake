@@ -882,7 +882,7 @@ Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
 
   std::string const path = sk.Source.Value->GetFullPath();
   source["path"] = RelativeIfUnder(this->TopSource, path);
-  if (sk.Source.Value->GetPropertyAsBool("GENERATED")) {
+  if (sk.Source.Value->GetIsGenerated()) {
     source["isGenerated"] = true;
   }
   this->AddBacktrace(source, sk.Source.Backtrace);
