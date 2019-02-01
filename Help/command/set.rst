@@ -86,7 +86,7 @@ Set Environment Variable
 
 .. code-block:: cmake
 
-  set(ENV{<variable>} <value>...)
+  set(ENV{<variable>} [<value>])
 
 Sets an :manual:`Environment Variable <cmake-env-variables(7)>`
 to the given value.
@@ -95,3 +95,10 @@ Subsequent calls of ``$ENV{<variable>}`` will return this new value.
 This command affects only the current CMake process, not the process
 from which CMake was called, nor the system environment at large,
 nor the environment of subsequent build or test processes.
+
+If no argument is given after ``ENV{<variable>}`` or if ``<value>`` is
+an empty string, then this command will clear any existing value of the
+environment variable.
+
+Arguments after ``<value>`` are ignored. If extra arguments are found,
+then an author warning is issued.

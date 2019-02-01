@@ -38,6 +38,14 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
         putEnvArg += args[1];
         cmSystemTools::PutEnv(putEnvArg);
       }
+      // if there's extra arguments, warn user
+      // that they are ignored by this command.
+      if (args.size() > 2) {
+        std::string m = "Only the first value argument is used when setting "
+                        "an environment variable.  Argument '" +
+          args[2] + "' and later are unused.";
+        this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m);
+      }
       return true;
     }
 
