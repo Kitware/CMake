@@ -80,6 +80,11 @@ public:
   const std::string& GetName() const { return this->Name; }
 
   /**
+   * Get the full file path composed of GetDirectory() and GetName().
+   */
+  std::string GetFullPath() const;
+
+  /**
    * Get the cmMakefile instance for which the source file was created.
    */
   cmMakefile const* GetMakefile() const { return this->Makefile; }

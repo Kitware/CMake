@@ -120,7 +120,6 @@ private:
   bool IsGenerated = false;
 
   bool FindFullPath(std::string* error);
-  bool TryFullPath(const std::string& path, const std::string& ext);
   void CheckExtension();
   void CheckLanguage(std::string const& ext);
 
