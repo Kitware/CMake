@@ -222,12 +222,21 @@ bool cmServerProtocol1::DoActivate(const cmServerRequest& request,
                                    std::string* errorMessage)
 {
   std::string sourceDirectory = request.Data[kSOURCE_DIRECTORY_KEY].asString();
-  const std::string buildDirectory =
-    request.Data[kBUILD_DIRECTORY_KEY].asString();
+  std::string buildDirectory = request.Data[kBUILD_DIRECTORY_KEY].asString();
   std::string generator = request.Data[kGENERATOR_KEY].asString();
   std::string extraGenerator = request.Data[kEXTRA_GENERATOR_KEY].asString();
   std::string toolset = request.Data[kTOOLSET_KEY].asString();
   std::string platform = request.Data[kPLATFORM_KEY].asString();
+
+  // normalize source and build directory
+  if (!sourceDirectory.empty()) {
+    sourceDirectory = cmSystemTools::CollapseFullPath(sourceDirectory);
+    cmSystemTools::ConvertToUnixSlashes(sourceDirectory);
+  }
+  if (!buildDirectory.empty()) {
+    buildDirectory = cmSystemTools::CollapseFullPath(buildDirectory);
+    cmSystemTools::ConvertToUnixSlashes(buildDirectory);
+  }
 
   if (buildDirectory.empty()) {
     setErrorMessage(errorMessage,
