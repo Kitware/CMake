@@ -34,6 +34,9 @@ class cmFileTimeCache;
 class cmGlobalGenerator;
 class cmGlobalGeneratorFactory;
 class cmMakefile;
+#if !defined(CMAKE_BOOTSTRAP)
+class cmMakefileProfilingData;
+#endif
 class cmMessenger;
 class cmVariableWatch;
 struct cmDocumentationEntry;
@@ -549,6 +552,11 @@ public:
 
   bool GetRegenerateDuringBuild() const { return this->RegenerateDuringBuild; }
 
+#if !defined(CMAKE_BOOTSTRAP)
+  cmMakefileProfilingData& GetProfilingOutput();
+  bool IsProfilingEnabled() const;
+#endif
+
 protected:
   void RunCheckForUnusedVariables();
   int HandleDeleteCacheVariables(const std::string& var);
@@ -657,6 +665,10 @@ private:
 
   void AppendGlobalGeneratorsDocumentation(std::vector<cmDocumentationEntry>&);
   void AppendExtraGeneratorsDocumentation(std::vector<cmDocumentationEntry>&);
+
+#if !defined(CMAKE_BOOTSTRAP)
+  std::unique_ptr<cmMakefileProfilingData> ProfilingOutput;
+#endif
 };
 
 #define CMAKE_STANDARD_OPTIONS_TABLE                                          \
