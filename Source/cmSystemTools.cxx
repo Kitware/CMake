@@ -1330,13 +1330,11 @@ bool cmSystemTools::SimpleGlob(const std::string& glob,
   return res;
 }
 
-cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
+cmSystemTools::FileFormat cmSystemTools::GetFileFormat(std::string const& ext)
 {
-  if (!cext || *cext == 0) {
+  if (ext.empty()) {
     return cmSystemTools::NO_FILE_FORMAT;
   }
-  // std::string ext = cmSystemTools::LowerCase(cext);
-  std::string ext = cext;
   if (ext == "c" || ext == ".c" || ext == "m" || ext == ".m") {
     return cmSystemTools::C_FILE_FORMAT;
   }

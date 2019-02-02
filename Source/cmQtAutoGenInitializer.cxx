@@ -679,7 +679,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       // Register generated files that will be scanned by moc or uic
       if (this->Moc.Enabled || this->Uic.Enabled) {
         cmSystemTools::FileFormat const fileType =
-          cmSystemTools::GetFileFormat(ext.c_str());
+          cmSystemTools::GetFileFormat(ext);
         if ((fileType == cmSystemTools::CXX_FILE_FORMAT) ||
             (fileType == cmSystemTools::HEADER_FILE_FORMAT)) {
           std::string const absPath = cmSystemTools::GetRealPath(fPath);
@@ -745,7 +745,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           continue;
         }
         cmSystemTools::FileFormat const fileType =
-          cmSystemTools::GetFileFormat(sf->GetExtension().c_str());
+          cmSystemTools::GetFileFormat(sf->GetExtension());
         if (!(fileType == cmSystemTools::CXX_FILE_FORMAT) &&
             !(fileType == cmSystemTools::HEADER_FILE_FORMAT)) {
           continue;
