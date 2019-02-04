@@ -3142,6 +3142,8 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     if (const char* vers = this->CurrentMakefile->GetDefinition(
           "CMAKE_Swift_LANGUAGE_VERSION")) {
       swiftVersion = vers;
+    } else if (this->XcodeVersion >= 102) {
+      swiftVersion = "4.0";
     } else if (this->XcodeVersion >= 83) {
       swiftVersion = "3.0";
     } else {

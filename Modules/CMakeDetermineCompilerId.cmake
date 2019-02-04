@@ -332,6 +332,8 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     if("${lang}" STREQUAL "Swift")
       if(CMAKE_Swift_LANGUAGE_VERSION)
         set(id_lang_version "SWIFT_VERSION = ${CMAKE_Swift_LANGUAGE_VERSION};")
+      elseif(XCODE_VERSION VERSION_GREATER_EQUAL 10.2)
+        set(id_lang_version "SWIFT_VERSION = 4.0;")
       elseif(XCODE_VERSION VERSION_GREATER_EQUAL 8.3)
         set(id_lang_version "SWIFT_VERSION = 3.0;")
       else()
