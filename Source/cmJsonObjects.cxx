@@ -323,7 +323,7 @@ static Json::Value DumpSourceFilesList(
       fileData.SetDefines(defines);
     }
 
-    fileData.IsGenerated = file->GetPropertyAsBool("GENERATED");
+    fileData.IsGenerated = file->GetIsGenerated();
     std::vector<std::string>& groupFileList = fileGroups[fileData];
     groupFileList.push_back(file->GetFullPath());
   }

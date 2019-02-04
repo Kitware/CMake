@@ -686,7 +686,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           if ((this->Moc.Enabled && !sf->GetPropertyAsBool("SKIP_AUTOMOC")) ||
               (this->Uic.Enabled && !sf->GetPropertyAsBool("SKIP_AUTOUIC"))) {
             // Register source
-            const bool generated = sf->GetPropertyAsBool("GENERATED");
+            const bool generated = sf->GetIsGenerated();
             if (fileType == cmSystemTools::HEADER_FILE_FORMAT) {
               if (generated) {
                 this->AutogenTarget.HeadersGenerated.push_back(absPath);
@@ -712,7 +712,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           qrc.QrcFile = cmSystemTools::GetRealPath(fPath);
           qrc.QrcName =
             cmSystemTools::GetFilenameWithoutLastExtension(qrc.QrcFile);
-          qrc.Generated = sf->GetPropertyAsBool("GENERATED");
+          qrc.Generated = sf->GetIsGenerated();
           // RCC options
           {
             std::string const opts = sf->GetSafeProperty("AUTORCC_OPTIONS");

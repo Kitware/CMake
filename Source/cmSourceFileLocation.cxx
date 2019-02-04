@@ -42,6 +42,16 @@ cmSourceFileLocation::cmSourceFileLocation(cmMakefile const* mf,
   }
 }
 
+std::string cmSourceFileLocation::GetFullPath() const
+{
+  std::string path = this->GetDirectory();
+  if (!path.empty()) {
+    path += '/';
+  }
+  path += this->GetName();
+  return path;
+}
+
 void cmSourceFileLocation::Update(cmSourceFileLocation const& loc)
 {
   if (this->AmbiguousDirectory && !loc.AmbiguousDirectory) {

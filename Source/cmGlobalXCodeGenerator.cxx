@@ -2460,7 +2460,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
     this->AddXCodeProjBuildRule(gtgt, sources);
 
     for (auto sourceFile : sources) {
-      if (!sourceFile->GetPropertyAsBool("GENERATED")) {
+      if (!sourceFile->GetIsGenerated()) {
         this->CreateXCodeFileReference(sourceFile, gtgt);
       }
     }

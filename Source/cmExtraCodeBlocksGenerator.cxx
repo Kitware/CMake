@@ -362,7 +362,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
             // don't add source files from UTILITY target which have the
             // GENERATED property set:
             if (gt->GetType() == cmStateEnums::UTILITY &&
-                s->GetPropertyAsBool("GENERATED")) {
+                s->GetIsGenerated()) {
               continue;
             }
 
