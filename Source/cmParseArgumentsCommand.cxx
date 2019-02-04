@@ -27,6 +27,56 @@ static std::string escape_arg(const std::string& arg)
   return escapedArg;
 }
 
+namespace {
+enum InsideValues
+{
+  NONE,
+  SINGLE,
+  MULTI
+};
+
+typedef std::map<std::string, bool> options_map;
+typedef std::map<std::string, std::string> single_map;
+typedef std::map<std::string, std::vector<std::string>> multi_map;
+}
+
+static void PassParsedArguments(const std::string& prefix,
+                                cmMakefile& makefile,
+                                const options_map& options,
+                                const single_map& singleValArgs,
+                                const multi_map& multiValArgs,
+                                const std::vector<std::string>& unparsed)
+{
+  for (auto const& iter : options) {
+    makefile.AddDefinition(prefix + iter.first,
+                           iter.second ? "TRUE" : "FALSE");
+  }
+
+  for (auto const& iter : singleValArgs) {
+    if (!iter.second.empty()) {
+      makefile.AddDefinition(prefix + iter.first, iter.second.c_str());
+    } else {
+      makefile.RemoveDefinition(prefix + iter.first);
+    }
+  }
+
+  for (auto const& iter : multiValArgs) {
+    if (!iter.second.empty()) {
+      makefile.AddDefinition(prefix + iter.first,
+                             cmJoin(cmMakeRange(iter.second), ";").c_str());
+    } else {
+      makefile.RemoveDefinition(prefix + iter.first);
+    }
+  }
+
+  if (!unparsed.empty()) {
+    makefile.AddDefinition(prefix + "UNPARSED_ARGUMENTS",
+                           cmJoin(cmMakeRange(unparsed), ";").c_str());
+  } else {
+    makefile.RemoveDefinition(prefix + "UNPARSED_ARGUMENTS");
+  }
+}
+
 bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
                                           cmExecutionStatus&)
 {
@@ -67,9 +117,6 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
 
   // define the result maps holding key/value pairs for
   // options, single values and multi values
-  typedef std::map<std::string, bool> options_map;
-  typedef std::map<std::string, std::string> single_map;
-  typedef std::map<std::string, std::vector<std::string>> multi_map;
   options_map options;
   single_map singleValArgs;
   multi_map multiValArgs;
@@ -114,12 +161,7 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
     multiValArgs[iter]; // default initialize
   }
 
-  enum insideValues
-  {
-    NONE,
-    SINGLE,
-    MULTI
-  } insideValues = NONE;
+  InsideValues insideValues = NONE;
   std::string currentArgName;
 
   list.clear();
@@ -200,36 +242,8 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
 
-  // now iterate over the collected values and update their definition
-  // within the current scope. undefine if necessary.
-
-  for (auto const& iter : options) {
-    this->Makefile->AddDefinition(prefix + iter.first,
-                                  iter.second ? "TRUE" : "FALSE");
-  }
-  for (auto const& iter : singleValArgs) {
-    if (!iter.second.empty()) {
-      this->Makefile->AddDefinition(prefix + iter.first, iter.second.c_str());
-    } else {
-      this->Makefile->RemoveDefinition(prefix + iter.first);
-    }
-  }
-
-  for (auto const& iter : multiValArgs) {
-    if (!iter.second.empty()) {
-      this->Makefile->AddDefinition(
-        prefix + iter.first, cmJoin(cmMakeRange(iter.second), ";").c_str());
-    } else {
-      this->Makefile->RemoveDefinition(prefix + iter.first);
-    }
-  }
-
-  if (!unparsed.empty()) {
-    this->Makefile->AddDefinition(prefix + "UNPARSED_ARGUMENTS",
-                                  cmJoin(cmMakeRange(unparsed), ";").c_str());
-  } else {
-    this->Makefile->RemoveDefinition(prefix + "UNPARSED_ARGUMENTS");
-  }
+  PassParsedArguments(prefix, *this->Makefile, options, singleValArgs,
+                      multiValArgs, unparsed);
 
   return true;
 }
