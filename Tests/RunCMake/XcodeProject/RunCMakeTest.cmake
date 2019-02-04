@@ -25,6 +25,40 @@ run_cmake(PerConfigPerSourceOptions)
 run_cmake(PerConfigPerSourceDefinitions)
 run_cmake(PerConfigPerSourceIncludeDirs)
 
+function(XcodeSchemaGeneration)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeSchemaGeneration-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_XCODE_GENERATE_SCHEME=ON")
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake(XcodeSchemaGeneration)
+  run_cmake_command(XcodeSchemaGeneration-build xcodebuild -scheme foo build)
+endfunction()
+
+if(NOT XCODE_VERSION VERSION_LESS 7)
+  XcodeSchemaGeneration()
+  run_cmake(XcodeSchemaProperty)
+endif()
+
+function(XcodeDependOnZeroCheck)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeDependOnZeroCheck-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake(XcodeDependOnZeroCheck)
+  run_cmake_command(XcodeDependOnZeroCheck-build ${CMAKE_COMMAND} --build . --target parentdirlib)
+  run_cmake_command(XcodeDependOnZeroCheck-build ${CMAKE_COMMAND} --build . --target subdirlib)
+endfunction()
+
+XcodeDependOnZeroCheck()
+
+# Isolate device tests from host architecture selection.
+unset(ENV{CMAKE_OSX_ARCHITECTURES})
+
 # Use a single build tree for a few tests without cleaning.
 
 if(NOT XCODE_VERSION VERSION_LESS 5)
@@ -205,23 +239,6 @@ if(NOT XCODE_VERSION VERSION_LESS 5)
   unset(RunCMake_TEST_OPTIONS)
 endif()
 
-function(XcodeSchemaGeneration)
-  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeSchemaGeneration-build)
-  set(RunCMake_TEST_NO_CLEAN 1)
-  set(RunCMake_TEST_OPTIONS "-DCMAKE_XCODE_GENERATE_SCHEME=ON")
-
-  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
-  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
-
-  run_cmake(XcodeSchemaGeneration)
-  run_cmake_command(XcodeSchemaGeneration-build xcodebuild -scheme foo build)
-endfunction()
-
-if(NOT XCODE_VERSION VERSION_LESS 7)
-  XcodeSchemaGeneration()
-  run_cmake(XcodeSchemaProperty)
-endif()
-
 if(XCODE_VERSION VERSION_GREATER_EQUAL 8)
   function(deploymeny_target_test SDK)
     set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/DeploymentTarget-${SDK}-build)
@@ -240,16 +257,4 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 8)
   endforeach()
 endif()
 
-function(XcodeDependOnZeroCheck)
-  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeDependOnZeroCheck-build)
-  set(RunCMake_TEST_NO_CLEAN 1)
-
-  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
-  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
-
-  run_cmake(XcodeDependOnZeroCheck)
-  run_cmake_command(XcodeDependOnZeroCheck-build ${CMAKE_COMMAND} --build . --target parentdirlib)
-  run_cmake_command(XcodeDependOnZeroCheck-build ${CMAKE_COMMAND} --build . --target subdirlib)
-endfunction()
-
-XcodeDependOnZeroCheck()
+# Please add macOS-only tests above before the device-specific tests.
