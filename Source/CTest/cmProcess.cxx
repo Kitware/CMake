@@ -199,7 +199,7 @@ bool cmProcess::Buffer::GetLine(std::string& line)
   for (size_type sz = this->size(); this->Last != sz; ++this->Last) {
     if ((*this)[this->Last] == '\n' || (*this)[this->Last] == '\0') {
       // Extract the range first..last as a line.
-      const char* text = &*this->begin() + this->First;
+      const char* text = this->data() + this->First;
       size_type length = this->Last - this->First;
       while (length && text[length - 1] == '\r') {
         length--;
@@ -229,7 +229,7 @@ bool cmProcess::Buffer::GetLast(std::string& line)
 {
   // Return the partial last line, if any.
   if (!this->empty()) {
-    line.assign(&*this->begin(), this->size());
+    line.assign(this->data(), this->size());
     this->First = this->Last = 0;
     this->clear();
     return true;

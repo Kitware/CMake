@@ -130,8 +130,8 @@ bool cmConditionEvaluator::IsTrue(
     return false;
   }
 
-  return this->GetBooleanValueWithAutoDereference(*(newArgs.begin()),
-                                                  errorString, status, true);
+  return this->GetBooleanValueWithAutoDereference(newArgs.front(), errorString,
+                                                  status, true);
 }
 
 //=========================================================================

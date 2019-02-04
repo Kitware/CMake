@@ -2389,7 +2389,7 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
   std::set<cmGeneratorTarget*> targets;
 
   for (cmCustomCommandLine const& cCmdLine : cc.GetCommandLines()) {
-    std::string const& command = *cCmdLine.begin();
+    std::string const& command = cCmdLine.front();
     // Check for a target with this name.
     if (cmGeneratorTarget* t =
           this->LocalGenerator->FindGeneratorTargetToUse(command)) {

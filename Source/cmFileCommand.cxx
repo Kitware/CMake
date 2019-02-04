@@ -3067,7 +3067,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 
   if (!logVar.empty()) {
     chunkDebug.push_back(0);
-    this->Makefile->AddDefinition(logVar, &*chunkDebug.begin());
+    this->Makefile->AddDefinition(logVar, chunkDebug.data());
   }
 
   return true;
@@ -3326,14 +3326,14 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
     if (!chunkResponse.empty()) {
       chunkResponse.push_back(0);
       log += "Response:\n";
-      log += &*chunkResponse.begin();
+      log += chunkResponse.data();
       log += "\n";
     }
 
     if (!chunkDebug.empty()) {
       chunkDebug.push_back(0);
       log += "Debug:\n";
-      log += &*chunkDebug.begin();
+      log += chunkDebug.data();
       log += "\n";
     }
 

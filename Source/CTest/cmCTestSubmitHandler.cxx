@@ -343,7 +343,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
       if (!chunk.empty()) {
         cmCTestOptionalLog(this->CTest, DEBUG,
                            "CURL output: ["
-                             << cmCTestLogWrite(&*chunk.begin(), chunk.size())
+                             << cmCTestLogWrite(chunk.data(), chunk.size())
                              << "]" << std::endl,
                            this->Quiet);
         this->ParseResponse(chunk);
@@ -352,7 +352,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
         cmCTestOptionalLog(
           this->CTest, DEBUG,
           "CURL debug output: ["
-            << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]"
+            << cmCTestLogWrite(chunkDebug.data(), chunkDebug.size()) << "]"
             << std::endl,
           this->Quiet);
       }
@@ -404,12 +404,11 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
           res = ::curl_easy_perform(curl);
 
           if (!chunk.empty()) {
-            cmCTestOptionalLog(
-              this->CTest, DEBUG,
-              "CURL output: ["
-                << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
-                << std::endl,
-              this->Quiet);
+            cmCTestOptionalLog(this->CTest, DEBUG,
+                               "CURL output: ["
+                                 << cmCTestLogWrite(chunk.data(), chunk.size())
+                                 << "]" << std::endl,
+                               this->Quiet);
             this->ParseResponse(chunk);
           }
 
@@ -433,11 +432,11 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
         // avoid deref of begin for zero size array
         if (!chunk.empty()) {
           *this->LogFile << "   Curl output was: "
-                         << cmCTestLogWrite(&*chunk.begin(), chunk.size())
+                         << cmCTestLogWrite(chunk.data(), chunk.size())
                          << std::endl;
           cmCTestLog(this->CTest, ERROR_MESSAGE,
                      "CURL output: ["
-                       << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
+                       << cmCTestLogWrite(chunk.data(), chunk.size()) << "]"
                        << std::endl);
         }
         ::curl_easy_cleanup(curl);
@@ -486,7 +485,7 @@ void cmCTestSubmitHandler::ParseResponse(
   if (this->HasWarnings || this->HasErrors) {
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
                "   Server Response:\n"
-                 << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "\n");
+                 << cmCTestLogWrite(chunk.data(), chunk.size()) << "\n");
   }
 }
 

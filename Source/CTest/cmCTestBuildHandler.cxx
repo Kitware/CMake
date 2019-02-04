@@ -800,7 +800,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 
   // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetCommand(cp, argv.data());
   cmsysProcess_SetWorkingDirectory(cp, dir);
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   cmsysProcess_SetTimeout(cp, timeout);
@@ -978,7 +978,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
       this->CurrentProcessingLine.insert(this->CurrentProcessingLine.end(),
                                          queue->begin(), it);
       this->CurrentProcessingLine.push_back(0);
-      const char* line = &*this->CurrentProcessingLine.begin();
+      const char* line = this->CurrentProcessingLine.data();
 
       // Process the line
       int lineType = this->ProcessSingleLine(line);

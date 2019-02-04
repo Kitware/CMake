@@ -193,7 +193,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
 
   // Set the command sequence.
   for (auto const& cmd : cmds) {
-    cmsysProcess_AddCommand(cp, &*cmd.begin());
+    cmsysProcess_AddCommand(cp, cmd.data());
   }
 
   // Set the process working directory.
@@ -286,10 +286,10 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
 
   // Store the output obtained.
   if (!output_variable.empty() && !tempOutput.empty()) {
-    this->Makefile->AddDefinition(output_variable, &*tempOutput.begin());
+    this->Makefile->AddDefinition(output_variable, tempOutput.data());
   }
   if (!merge_output && !error_variable.empty() && !tempError.empty()) {
-    this->Makefile->AddDefinition(error_variable, &*tempError.begin());
+    this->Makefile->AddDefinition(error_variable, tempError.data());
   }
 
   // Store the result of running the process.

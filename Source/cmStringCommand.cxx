@@ -771,7 +771,7 @@ bool cmStringCommand::HandleRandomCommand(std::vector<std::string> const& args)
   }
   result.push_back(0);
 
-  this->Makefile->AddDefinition(variableName, &*result.begin());
+  this->Makefile->AddDefinition(variableName, result.data());
   return true;
 }
 
