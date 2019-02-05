@@ -3,27 +3,12 @@
 cmake_minimum_required(VERSION 3.3)
 enable_language(C)
 
-# due to lack of toolchain file it might point to running macOS version
-unset(CMAKE_OSX_DEPLOYMENT_TARGET CACHE)
-
-if(TEST_IOS)
-  set(CMAKE_OSX_SYSROOT iphoneos)
-  set(CMAKE_OSX_ARCHITECTURES "armv7")
+if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
   set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "NO")
-endif(TEST_IOS)
-
-if(TEST_WATCHOS)
-  set(CMAKE_OSX_SYSROOT watchos)
-  set(CMAKE_OSX_ARCHITECTURES "armv7k")
-  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
-  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
-  set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
 endif()
 
-if(TEST_TVOS)
-  set(CMAKE_OSX_SYSROOT appletvos)
-  set(CMAKE_OSX_ARCHITECTURES "arm64")
+if(CMAKE_SYSTEM_NAME STREQUAL "tvOS" OR CMAKE_SYSTEM_NAME STREQUAL "watchOS")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
   set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
@@ -41,7 +26,7 @@ add_dependencies(AppBundleTest AppBundle)
 
 # with custom extension
 
-if (NOT TEST_IOS AND NOT TEST_WATCHOS AND NOT TEST_TVOS)
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   add_executable(AppBundleExt MACOSX_BUNDLE main.m)
   set_target_properties(AppBundleExt PROPERTIES BUNDLE_EXTENSION "foo")
   install(TARGETS AppBundleExt BUNDLE DESTINATION FooExtension)
@@ -55,7 +40,7 @@ endif()
 
 # Shared Framework (not supported for iOS on Xcode < 6)
 
-if(NOT TEST_IOS OR NOT XCODE_VERSION VERSION_LESS 6)
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" OR NOT XCODE_VERSION VERSION_LESS 6)
   add_library(SharedFramework SHARED main.c)
   set_target_properties(SharedFramework PROPERTIES FRAMEWORK TRUE)
 
