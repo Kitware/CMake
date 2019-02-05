@@ -389,7 +389,7 @@ public:
   bool ParallelJobPushMoc(JobHandleT& jobHandle);
   bool ParallelJobPushUic(JobHandleT& jobHandle);
   bool ParallelMocIncluded(std::string const& sourceFile);
-  void ParallelMocAutoRegister(std::string const& mocFile);
+  std::string ParallelMocAutoRegister(std::string const& baseName);
   void ParallelMocAutoUpdated();
 
 private:
