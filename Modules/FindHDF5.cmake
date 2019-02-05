@@ -322,20 +322,22 @@ macro( _HDF5_invoke_compiler language output return_value version is_parallel)
     elseif("${language}" STREQUAL "Fortran")
         set(test_file ${scratch_dir}/cmake_hdf5_test.f90)
     endif()
-    exec_program( ${HDF5_${language}_COMPILER_EXECUTABLE}
-        ARGS -show ${lib_type_args} ${test_file}
-        OUTPUT_VARIABLE ${output}
-        RETURN_VALUE ${return_value}
-    )
+    execute_process(
+      COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} -show ${lib_type_args} ${test_file}
+      OUTPUT_VARIABLE ${output}
+      ERROR_VARIABLE ${output}
+      RESULT_VARIABLE ${return_value}
+      )
     if(NOT ${${return_value}} EQUAL 0)
         message(STATUS
           "Unable to determine HDF5 ${language} flags from HDF5 wrapper.")
     endif()
-    exec_program( ${HDF5_${language}_COMPILER_EXECUTABLE}
-        ARGS -showconfig
-        OUTPUT_VARIABLE config_output
-        RETURN_VALUE config_return
-    )
+    execute_process(
+      COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} -showconfig
+      OUTPUT_VARIABLE config_output
+      ERROR_VARIABLE config_output
+      RESULT_VARIABLE config_return
+      )
     if(NOT ${return_value} EQUAL 0)
         message( STATUS
           "Unable to determine HDF5 ${language} version from HDF5 wrapper.")
