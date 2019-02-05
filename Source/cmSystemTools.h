@@ -334,7 +334,7 @@ public:
   /**
    * Determine the file type based on the extension
    */
-  static FileFormat GetFileFormat(const char* ext);
+  static FileFormat GetFileFormat(std::string const& ext);
 
   /** Windows if this is true, the CreateProcess in RunCommand will
    *  not show new console windows when running programs.

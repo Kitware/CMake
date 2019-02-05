@@ -616,40 +616,6 @@ bool cmQtAutoGenInitializer::InitUic()
       }
     }
   }
-  // .ui files skip and options
-  {
-    std::string const uiExt = "ui";
-    std::string pathError;
-    for (cmSourceFile* sf : makefile->GetSourceFiles()) {
-      // sf->GetExtension() is only valid after sf->GetFullPath() ...
-      // Since we're iterating over source files that might be not in the
-      // target we need to check for path errors (not existing files).
-      std::string const& fPath = sf->GetFullPath(&pathError);
-      if (!pathError.empty()) {
-        pathError.clear();
-        continue;
-      }
-      if (sf->GetExtension() == uiExt) {
-        std::string const absFile = cmSystemTools::GetRealPath(fPath);
-        // Check if the .ui file should be skipped
-        if (sf->GetPropertyAsBool("SKIP_AUTOUIC") ||
-            sf->GetPropertyAsBool("SKIP_AUTOGEN")) {
-          this->Uic.Skip.insert(absFile);
-        }
-        // Check if the .ui file has uic options
-        std::string const uicOpts = sf->GetSafeProperty("AUTOUIC_OPTIONS");
-        if (!uicOpts.empty()) {
-          // Check if file isn't skipped
-          if (this->Uic.Skip.count(absFile) == 0) {
-            this->Uic.FileFiles.push_back(absFile);
-            std::vector<std::string> optsVec;
-            cmSystemTools::ExpandListArgument(uicOpts, optsVec);
-            this->Uic.FileOptions.push_back(std::move(optsVec));
-          }
-        }
-      }
-    }
-  }
 
   // Uic executable
   return GetUicExecutable();
@@ -664,27 +630,41 @@ bool cmQtAutoGenInitializer::InitScanFiles()
 {
   cmMakefile* makefile = this->Target->Target->GetMakefile();
 
+  // String constants
+  std::string const SKIP_AUTOGEN_str = "SKIP_AUTOGEN";
+  std::string const SKIP_AUTOMOC_str = "SKIP_AUTOMOC";
+  std::string const SKIP_AUTOUIC_str = "SKIP_AUTOUIC";
+
   // Scan through target files
   {
-    std::string const qrcExt = "qrc";
+    // String constants
+    std::string const qrc_str = "qrc";
+    std::string const SKIP_AUTORCC_str = "SKIP_AUTORCC";
+    std::string const AUTORCC_OPTIONS_str = "AUTORCC_OPTIONS";
+
+    // Scan through target files
     std::vector<cmSourceFile*> srcFiles;
     this->Target->GetConfigCommonSourceFiles(srcFiles);
     for (cmSourceFile* sf : srcFiles) {
-      if (sf->GetPropertyAsBool("SKIP_AUTOGEN")) {
+      if (sf->GetPropertyAsBool(SKIP_AUTOGEN_str)) {
         continue;
       }
+
       // sf->GetExtension() is only valid after sf->GetFullPath() ...
       std::string const& fPath = sf->GetFullPath();
       std::string const& ext = sf->GetExtension();
+
       // Register generated files that will be scanned by moc or uic
       if (this->Moc.Enabled || this->Uic.Enabled) {
         cmSystemTools::FileFormat const fileType =
-          cmSystemTools::GetFileFormat(ext.c_str());
+          cmSystemTools::GetFileFormat(ext);
         if ((fileType == cmSystemTools::CXX_FILE_FORMAT) ||
             (fileType == cmSystemTools::HEADER_FILE_FORMAT)) {
           std::string const absPath = cmSystemTools::GetRealPath(fPath);
-          if ((this->Moc.Enabled && !sf->GetPropertyAsBool("SKIP_AUTOMOC")) ||
-              (this->Uic.Enabled && !sf->GetPropertyAsBool("SKIP_AUTOUIC"))) {
+          if ((this->Moc.Enabled &&
+               !sf->GetPropertyAsBool(SKIP_AUTOMOC_str)) ||
+              (this->Uic.Enabled &&
+               !sf->GetPropertyAsBool(SKIP_AUTOUIC_str))) {
             // Register source
             const bool generated = sf->GetIsGenerated();
             if (fileType == cmSystemTools::HEADER_FILE_FORMAT) {
@@ -704,10 +684,9 @@ bool cmQtAutoGenInitializer::InitScanFiles()
         }
       }
       // Register rcc enabled files
-      if (this->Rcc.Enabled && (ext == qrcExt) &&
-          !sf->GetPropertyAsBool("SKIP_AUTORCC")) {
-        // Register qrc file
-        {
+      if (this->Rcc.Enabled) {
+        if ((ext == qrc_str) && !sf->GetPropertyAsBool(SKIP_AUTORCC_str)) {
+          // Register qrc file
           Qrc qrc;
           qrc.QrcFile = cmSystemTools::GetRealPath(fPath);
           qrc.QrcName =
@@ -715,7 +694,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           qrc.Generated = sf->GetIsGenerated();
           // RCC options
           {
-            std::string const opts = sf->GetSafeProperty("AUTORCC_OPTIONS");
+            std::string const opts = sf->GetSafeProperty(AUTORCC_OPTIONS_str);
             if (!opts.empty()) {
               cmSystemTools::ExpandListArgument(opts, qrc.Options);
             }
@@ -731,43 +710,65 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   // mocs_compilation.cpp source acknowledged by this target.
   this->Target->ClearSourcesCache();
 
+  // Scan through all source files in the makefile to extract moc and uic
+  // parameters.  Historically we support non target source file parameters.
+  // The reason is that their file names might be discovered from source files
+  // at generation time.
   if (this->Moc.Enabled || this->Uic.Enabled) {
-    // Read skip files from makefile sources
-    {
+    // String constants
+    std::string const ui_str = "ui";
+    std::string const AUTOUIC_OPTIONS_str = "AUTOUIC_OPTIONS";
+
+    for (cmSourceFile* sf : makefile->GetSourceFiles()) {
+      // sf->GetExtension() is only valid after sf->GetFullPath() ...
+      // Since we're iterating over source files that might be not in the
+      // target we need to check for path errors (not existing files).
       std::string pathError;
-      for (cmSourceFile* sf : makefile->GetSourceFiles()) {
-        // sf->GetExtension() is only valid after sf->GetFullPath() ...
-        // Since we're iterating over source files that might be not in the
-        // target we need to check for path errors (not existing files).
-        std::string const& fPath = sf->GetFullPath(&pathError);
-        if (!pathError.empty()) {
-          pathError.clear();
-          continue;
+      std::string const& fullPath = sf->GetFullPath(&pathError);
+      if (!pathError.empty() || fullPath.empty()) {
+        continue;
+      }
+
+      // Check file type
+      auto const fileType = cmSystemTools::GetFileFormat(sf->GetExtension());
+      bool const isSource = (fileType == cmSystemTools::CXX_FILE_FORMAT) ||
+        (fileType == cmSystemTools::HEADER_FILE_FORMAT);
+      bool const isUi = (this->Moc.Enabled && sf->GetExtension() == ui_str);
+
+      // Process only certain file types
+      if (isSource || isUi) {
+        std::string const absFile = cmSystemTools::GetRealPath(fullPath);
+        // Acquire file properties
+        bool const skipAUTOGEN = sf->GetPropertyAsBool(SKIP_AUTOGEN_str);
+        bool const skipMoc = (this->Moc.Enabled && isSource) &&
+          (skipAUTOGEN || sf->GetPropertyAsBool(SKIP_AUTOMOC_str));
+        bool const skipUic = this->Uic.Enabled &&
+          (skipAUTOGEN || sf->GetPropertyAsBool(SKIP_AUTOUIC_str));
+
+        // Register moc and uic skipped file
+        if (skipMoc) {
+          this->Moc.Skip.insert(absFile);
         }
-        cmSystemTools::FileFormat const fileType =
-          cmSystemTools::GetFileFormat(sf->GetExtension().c_str());
-        if (!(fileType == cmSystemTools::CXX_FILE_FORMAT) &&
-            !(fileType == cmSystemTools::HEADER_FILE_FORMAT)) {
-          continue;
+        if (skipUic) {
+          this->Uic.Skip.insert(absFile);
         }
-        const bool skipAll = sf->GetPropertyAsBool("SKIP_AUTOGEN");
-        const bool mocSkip = this->Moc.Enabled &&
-          (skipAll || sf->GetPropertyAsBool("SKIP_AUTOMOC"));
-        const bool uicSkip = this->Uic.Enabled &&
-          (skipAll || sf->GetPropertyAsBool("SKIP_AUTOUIC"));
-        if (mocSkip || uicSkip) {
-          std::string const absFile = cmSystemTools::GetRealPath(fPath);
-          if (mocSkip) {
-            this->Moc.Skip.insert(absFile);
-          }
-          if (uicSkip) {
-            this->Uic.Skip.insert(absFile);
+
+        // Check if the .ui file has uic options
+        if (isUi && !skipUic) {
+          std::string const uicOpts = sf->GetSafeProperty(AUTOUIC_OPTIONS_str);
+          if (!uicOpts.empty()) {
+            this->Uic.FileFiles.push_back(absFile);
+            std::vector<std::string> optsVec;
+            cmSystemTools::ExpandListArgument(uicOpts, optsVec);
+            this->Uic.FileOptions.push_back(std::move(optsVec));
           }
         }
       }
     }
+  }
 
-    // Process GENERATED sources and headers
+  // Process GENERATED sources and headers
+  if (this->Moc.Enabled || this->Uic.Enabled) {
     if (!this->AutogenTarget.SourcesGenerated.empty() ||
         !this->AutogenTarget.HeadersGenerated.empty()) {
       // Check status of policy CMP0071
@@ -843,13 +844,14 @@ bool cmQtAutoGenInitializer::InitScanFiles()
         }
       }
     }
-    // Sort headers and sources
-    if (this->Moc.Enabled || this->Uic.Enabled) {
-      std::sort(this->AutogenTarget.Headers.begin(),
-                this->AutogenTarget.Headers.end());
-      std::sort(this->AutogenTarget.Sources.begin(),
-                this->AutogenTarget.Sources.end());
-    }
+  }
+
+  // Sort headers and sources
+  if (this->Moc.Enabled || this->Uic.Enabled) {
+    std::sort(this->AutogenTarget.Headers.begin(),
+              this->AutogenTarget.Headers.end());
+    std::sort(this->AutogenTarget.Sources.begin(),
+              this->AutogenTarget.Sources.end());
   }
 
   // Process qrc files

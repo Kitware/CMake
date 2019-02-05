@@ -223,7 +223,7 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
       for (cmSourceFile* s : sources) {
         // check whether it is a source or a include file
         // then put it accordingly into one of the two containers
-        switch (cmSystemTools::GetFileFormat(s->GetExtension().c_str())) {
+        switch (cmSystemTools::GetFileFormat(s->GetExtension())) {
           case cmSystemTools::C_FILE_FORMAT:
           case cmSystemTools::CXX_FILE_FORMAT:
           case cmSystemTools::CUDA_FILE_FORMAT:
