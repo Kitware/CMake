@@ -813,7 +813,6 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   cmGeneratorTarget const* gt)
 {
   // check to see if this is a fortran build
-  std::set<std::string> languages;
   {
     // Issue diagnostic if the source files depend on the config.
     std::vector<cmSourceFile*> sources;
@@ -821,27 +820,21 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
       return false;
     }
   }
+
   // If there's only one source language, Fortran has to be used
   // in order for the sources to compile.
-  // Note: Via linker propagation, LINKER_LANGUAGE could become CXX in
-  // this situation and mismatch from the actual language of the linker.
+  std::set<std::string> languages;
   gt->GetLanguages(languages, "");
-  if (languages.size() == 1) {
-    if (*languages.begin() == "Fortran") {
-      return true;
-    }
+  // Consider an explicit linker language property, but *not* the
+  // computed linker language that may depend on linked targets.
+  // This allows the project to control the language choice in
+  // a target with none of its own sources, e.g. when also using
+  // object libraries.
+  const char* linkLang = gt->GetProperty("LINKER_LANGUAGE");
+  if (linkLang && *linkLang) {
+    languages.insert(linkLang);
   }
-
-  // In the case of mixed object files or sources mixed with objects,
-  // decide the language based on the value of LINKER_LANGUAGE.
-  // This will not make it possible to mix source files of different
-  // languages, but object libraries will be linked together in the
-  // same fashion as other generators do.
-  if (gt->GetLinkerLanguage("") == "Fortran") {
-    return true;
-  }
-
-  return false;
+  return languages.size() == 1 && *languages.begin() == "Fortran";
 }
 
 bool cmGlobalVisualStudioGenerator::TargetCompare::operator()(
