@@ -38,4 +38,4 @@ if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.1)
   endif ()
 endif()
 
-__compiler_check_default_language_standard(C 10.1 90)
+__compiler_check_default_language_standard(C 10.1 90 11.1 99)
