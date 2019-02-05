@@ -1,5 +1,6 @@
 include(RunCMake)
 
+run_cmake(VsCSharpCompilerOpts)
 run_cmake(ExplicitCMakeLists)
 run_cmake(SourceGroupCMakeLists)
 

@@ -29,6 +29,9 @@ struct cmIDEFlagTable
     SpaceAppendable = (1 << 7),     // a flag that if specified multiple times
                                     // should have its value appended to the
                                     // old value with spaces
+    CommaAppendable = (1 << 8),     // a flag that if specified multiple times
+                                    // should have its value appended to the
+                                    // old value with commas (e.g. C# /nowarn
 
     UserValueIgnored = UserValue | UserIgnored,
     UserValueRequired = UserValue | UserRequired
