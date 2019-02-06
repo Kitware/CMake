@@ -17,6 +17,10 @@ add_executable(sameName
   ccc/item.cpp
   ccc/data.qrc
   item.cpp
+  object.h
+  object.h++
+  object.hpp
+  object.hxx
   data.qrc
   main.cpp
 )
