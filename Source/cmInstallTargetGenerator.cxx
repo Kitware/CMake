@@ -825,7 +825,7 @@ void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os, Indent indent,
     return;
   }
 
-  std::string ranlib =
+  const std::string& ranlib =
     this->Target->Target->GetMakefile()->GetRequiredDefinition("CMAKE_RANLIB");
   if (ranlib.empty()) {
     return;

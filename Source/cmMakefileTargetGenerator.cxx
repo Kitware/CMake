@@ -654,19 +654,20 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       std::string cmdVar;
       if (this->GeneratorTarget->GetPropertyAsBool(
             "CUDA_SEPARABLE_COMPILATION")) {
-        cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+        cmdVar = "CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION";
       } else if (this->GeneratorTarget->GetPropertyAsBool(
                    "CUDA_PTX_COMPILATION")) {
-        cmdVar = std::string("CMAKE_CUDA_COMPILE_PTX_COMPILATION");
+        cmdVar = "CMAKE_CUDA_COMPILE_PTX_COMPILATION";
       } else {
-        cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
+        cmdVar = "CMAKE_CUDA_COMPILE_WHOLE_COMPILATION";
       }
-      std::string compileRule = this->Makefile->GetRequiredDefinition(cmdVar);
+      const std::string& compileRule =
+        this->Makefile->GetRequiredDefinition(cmdVar);
       cmSystemTools::ExpandListArgument(compileRule, compileCommands);
     } else {
-      const std::string cmdVar =
-        std::string("CMAKE_") + lang + "_COMPILE_OBJECT";
-      std::string compileRule = this->Makefile->GetRequiredDefinition(cmdVar);
+      const std::string cmdVar = "CMAKE_" + lang + "_COMPILE_OBJECT";
+      const std::string& compileRule =
+        this->Makefile->GetRequiredDefinition(cmdVar);
       cmSystemTools::ExpandListArgument(compileRule, compileCommands);
     }
 

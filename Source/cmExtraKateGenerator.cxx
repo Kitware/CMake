@@ -75,8 +75,8 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
                                         cmGeneratedFileStream& fout) const
 {
   cmMakefile const* mf = lg->GetMakefile();
-  const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-  const std::string makeArgs =
+  const std::string& make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& makeArgs =
     mf->GetSafeDefinition("CMAKE_KATE_MAKE_ARGUMENTS");
   std::string const& homeOutputDir = lg->GetBinaryDirectory();
 

@@ -878,8 +878,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   xml.Attribute("moduleId", "org.eclipse.cdt.make.core.buildtargets");
   xml.StartElement("buildTargets");
   emmited.clear();
-  const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-  const std::string makeArgs =
+  const std::string& make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& makeArgs =
     mf->GetSafeDefinition("CMAKE_ECLIPSE_MAKE_ARGUMENTS");
 
   cmGlobalGenerator* generator =
@@ -1074,7 +1074,8 @@ void cmExtraEclipseCDT4Generator::AppendStorageScanners(
   cmXMLWriter& xml, const cmMakefile& makefile)
 {
   // we need the "make" and the C (or C++) compiler which are used, Alex
-  std::string make = makefile.GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& make =
+    makefile.GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::string compiler = makefile.GetSafeDefinition("CMAKE_C_COMPILER");
   std::string arg1 = makefile.GetSafeDefinition("CMAKE_C_COMPILER_ARG1");
   if (compiler.empty()) {

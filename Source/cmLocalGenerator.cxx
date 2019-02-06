@@ -1364,9 +1364,9 @@ void cmLocalGenerator::OutputLinkLibraries(
 
   std::string linkLanguage = cli.GetLinkLanguage();
 
-  std::string libPathFlag =
+  const std::string& libPathFlag =
     this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
-  std::string libPathTerminator =
+  const std::string& libPathTerminator =
     this->Makefile->GetSafeDefinition("CMAKE_LIBRARY_PATH_TERMINATOR");
 
   // Add standard libraries for this language.
