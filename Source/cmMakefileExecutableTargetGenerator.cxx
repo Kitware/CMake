@@ -95,7 +95,13 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   const bool hasCUDA =
     (std::find(closure->Languages.begin(), closure->Languages.end(),
                cuda_lang) != closure->Languages.end());
-  if (!hasCUDA) {
+
+  bool doDeviceLinking = true;
+  if (const char* resolveDeviceSymbols =
+        this->GeneratorTarget->GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
+    doDeviceLinking = cmSystemTools::IsOn(resolveDeviceSymbols);
+  }
+  if (!hasCUDA || !doDeviceLinking) {
     return;
   }
 
