@@ -224,7 +224,7 @@ public:
     OUTPUT_FORWARD,
     OUTPUT_PASSTHROUGH
   };
-  static bool RunSingleCommand(const char* command,
+  static bool RunSingleCommand(const std::string& command,
                                std::string* captureStdOut = nullptr,
                                std::string* captureStdErr = nullptr,
                                int* retVal = nullptr,

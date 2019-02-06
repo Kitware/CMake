@@ -1486,7 +1486,7 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
     int retVal = 0;
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "Run command: " << it << std::endl, this->Quiet);
-    if (!cmSystemTools::RunSingleCommand(it.c_str(), nullptr, nullptr, &retVal,
+    if (!cmSystemTools::RunSingleCommand(it, nullptr, nullptr, &retVal,
                                          nullptr, cmSystemTools::OUTPUT_MERGE
                                          /*this->Verbose*/) ||
         retVal != 0) {

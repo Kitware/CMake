@@ -826,7 +826,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         cmWrap('"', cmMakeRange(args).advance(3), '"', " ");
       int retval = 0;
       if (cmSystemTools::RunSingleCommand(
-            command.c_str(), nullptr, nullptr, &retval, directory.c_str(),
+            command, nullptr, nullptr, &retval, directory.c_str(),
             cmSystemTools::OUTPUT_PASSTHROUGH, cmDuration::zero())) {
         return retval;
       }
