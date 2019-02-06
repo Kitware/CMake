@@ -169,7 +169,7 @@ protected:
 
   bool interruptCallback();
   void progressCallback(const char* msg, float percent);
-  void messageCallback(const char* msg, const char* title);
+  void messageCallback(std::string const& msg, const char* title);
   void stdoutCallback(std::string const& msg);
   void stderrCallback(std::string const& msg);
 

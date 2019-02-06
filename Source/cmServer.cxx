@@ -97,7 +97,7 @@ void cmServer::ProcessRequest(cmConnection* connection,
   }
 
   cmSystemTools::SetMessageCallback(
-    [&request](const char* msg, const char* title) {
+    [&request](const std::string& msg, const char* title) {
       reportMessage(msg, title, request);
     });
 
@@ -165,15 +165,14 @@ void cmServer::reportProgress(const char* msg, float progress,
   }
 }
 
-void cmServer::reportMessage(const char* msg, const char* title,
+void cmServer::reportMessage(const std::string& msg, const char* title,
                              const cmServerRequest& request)
 {
-  assert(msg);
   std::string titleString;
   if (title) {
     titleString = title;
   }
-  request.ReportMessage(std::string(msg), titleString);
+  request.ReportMessage(msg, titleString);
 }
 
 cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
