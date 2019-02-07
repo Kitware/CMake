@@ -2193,7 +2193,7 @@ cmSourceGroup* cmMakefile::FindSourceGroup(
   }
 
   // Shouldn't get here, but just in case, return the default group.
-  return &groups.front();
+  return groups.data();
 }
 #endif
 

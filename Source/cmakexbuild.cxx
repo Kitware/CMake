@@ -22,7 +22,7 @@ int RunXCode(std::vector<const char*>& argv, bool& hitbug)
 {
   hitbug = false;
   cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetCommand(cp, argv.data());
   cmsysProcess_SetTimeout(cp, 0);
   cmsysProcess_Execute(cp);
   std::vector<char> out;

@@ -72,7 +72,7 @@ public:
       args.push_back(cl.c_str());
     }
     args.push_back(nullptr); // null terminate
-    cmsysProcess_SetCommand(this->Process, &*args.begin());
+    cmsysProcess_SetCommand(this->Process, args.data());
     if (!this->WorkingDirectory.empty()) {
       cmsysProcess_SetWorkingDirectory(this->Process,
                                        this->WorkingDirectory.c_str());

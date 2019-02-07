@@ -447,7 +447,7 @@ void cmQtAutoGenerator::ReadOnlyProcessT::PipeT::UVAlloc(uv_handle_t* handle,
 {
   auto& pipe = *reinterpret_cast<PipeT*>(handle->data);
   pipe.Buffer_.resize(suggestedSize);
-  buf->base = &pipe.Buffer_.front();
+  buf->base = pipe.Buffer_.data();
   buf->len = pipe.Buffer_.size();
 }
 
@@ -555,11 +555,11 @@ bool cmQtAutoGenerator::ReadOnlyProcessT::start(
     std::fill_n(reinterpret_cast<char*>(&UVOptions_), sizeof(UVOptions_), 0);
     UVOptions_.exit_cb = &ReadOnlyProcessT::UVExit;
     UVOptions_.file = CommandPtr_[0];
-    UVOptions_.args = const_cast<char**>(&CommandPtr_.front());
+    UVOptions_.args = const_cast<char**>(CommandPtr_.data());
     UVOptions_.cwd = Setup_.WorkingDirectory.c_str();
     UVOptions_.flags = UV_PROCESS_WINDOWS_HIDE;
     UVOptions_.stdio_count = static_cast<int>(UVOptionsStdIO_.size());
-    UVOptions_.stdio = &UVOptionsStdIO_.front();
+    UVOptions_.stdio = UVOptionsStdIO_.data();
 
     // -- Spawn process
     if (UVProcess_.spawn(*uv_loop, UVOptions_, this) != 0) {

@@ -1039,7 +1039,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string& output,
 
   // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetCommand(cp, argv.data());
   cmsysProcess_SetWorkingDirectory(cp, dir);
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   cmsysProcess_SetTimeout(cp, timeout.count());
@@ -1222,7 +1222,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
   }
 
   cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetCommand(cp, argv.data());
   cmCTestLog(this, DEBUG, "Command is: " << argv[0] << std::endl);
   if (cmSystemTools::GetRunCommandHideConsole()) {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
@@ -1258,7 +1258,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
   cmsysProcess_WaitForExit(cp, nullptr);
   processOutput.DecodeText(tempOutput, tempOutput);
   if (output && tempOutput.begin() != tempOutput.end()) {
-    output->append(&*tempOutput.begin(), tempOutput.size());
+    output->append(tempOutput.data(), tempOutput.size());
   }
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
              "-- Process completed" << std::endl);
@@ -2776,7 +2776,7 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
   stdErr->clear();
 
   cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetCommand(cp, argv.data());
   cmsysProcess_SetWorkingDirectory(cp, dir);
   if (cmSystemTools::GetRunCommandHideConsole()) {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
@@ -2820,11 +2820,11 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
   cmsysProcess_WaitForExit(cp, nullptr);
   if (!tempOutput.empty()) {
     processOutput.DecodeText(tempOutput, tempOutput);
-    stdOut->append(&*tempOutput.begin(), tempOutput.size());
+    stdOut->append(tempOutput.data(), tempOutput.size());
   }
   if (!tempError.empty()) {
     processOutput.DecodeText(tempError, tempError);
-    stdErr->append(&*tempError.begin(), tempError.size());
+    stdErr->append(tempError.data(), tempError.size());
   }
 
   bool result = true;
@@ -3048,7 +3048,7 @@ void cmCTest::OutputTestErrors(std::vector<char> const& process_output)
 {
   std::string test_outputs("\n*** Test Failed:\n");
   if (!process_output.empty()) {
-    test_outputs.append(&*process_output.begin(), process_output.size());
+    test_outputs.append(process_output.data(), process_output.size());
   }
   cmCTestLog(this, HANDLER_OUTPUT, test_outputs << std::endl << std::flush);
 }

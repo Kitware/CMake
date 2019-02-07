@@ -199,7 +199,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
 
   // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetCommand(cp, argv.data());
   // cmsysProcess_SetWorkingDirectory(cp, dir);
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   // cmsysProcess_SetTimeout(cp, timeout);

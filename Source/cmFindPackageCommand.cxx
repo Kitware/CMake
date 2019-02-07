@@ -466,7 +466,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
     // Allocate a PACKAGE_ROOT_PATH for the current find_package call.
     this->Makefile->FindPackageRootPathStack.emplace_back();
     std::vector<std::string>& rootPaths =
-      *this->Makefile->FindPackageRootPathStack.rbegin();
+      this->Makefile->FindPackageRootPathStack.back();
 
     // Add root paths from <PackageName>_ROOT CMake and environment variables,
     // subject to CMP0074.
