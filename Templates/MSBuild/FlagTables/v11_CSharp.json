@@ -299,11 +299,15 @@
     "flags": []
   },
   {
-    "name":  "DisabledWarnings",
-    "switch": "nowarn",
+    "name":  "NoWarn",
+    "switch": "nowarn:",
     "comment": "",
     "value": "",
-    "flags": []
+    "flags": [
+      "UserValue",
+      "UserRequired",
+      "CommaAppendable"
+    ]
   },
   {
     "name":  "CheckForOverflowUnderflow",
