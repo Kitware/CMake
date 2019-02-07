@@ -310,8 +310,8 @@ Deprecated and Removed Features
 Other Changes
 =============
 
-* Object library linking has been fixed to propagate transitive link
-  dependencies of object libraries to consuming targets.
+* Object library linking has been fixed to propagate private link libraries
+  of object libraries to consuming targets.
 
 * Install rules under :command:`add_subdirectory` now interleave with those in
   the calling directory. See policy :policy:`CMP0082` for details.
