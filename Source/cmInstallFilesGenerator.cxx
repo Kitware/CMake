@@ -29,11 +29,13 @@ cmInstallFilesGenerator::cmInstallFilesGenerator(
     this->ActionsPerConfig = true;
   }
 
-  // We need per-config actions if any files have generator expressions.
-  for (std::vector<std::string>::const_iterator i = files.begin();
-       !this->ActionsPerConfig && i != files.end(); ++i) {
-    if (cmGeneratorExpression::Find(*i) != std::string::npos) {
-      this->ActionsPerConfig = true;
+  // We need per-config actions if any directories have generator expressions.
+  if (!this->ActionsPerConfig) {
+    for (std::string const& file : files) {
+      if (cmGeneratorExpression::Find(file) != std::string::npos) {
+        this->ActionsPerConfig = true;
+        break;
+      }
     }
   }
 }

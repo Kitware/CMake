@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallCommandArguments.h"
 
+#include "cmAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <utility>
@@ -220,10 +221,7 @@ void cmInstallCommandIncludesArgument::Parse(
   if (args->empty()) {
     return;
   }
-  std::vector<std::string>::const_iterator it = args->begin();
-  ++it;
-  for (; it != args->end(); ++it) {
-    std::string dir = *it;
+  for (std::string dir : cmMakeRange(*args).advance(1)) {
     cmSystemTools::ConvertToUnixSlashes(dir);
     this->IncludeDirs.push_back(std::move(dir));
   }

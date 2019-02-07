@@ -683,26 +683,24 @@ void CCONV cmSourceFileSetName(void* arg, const char* name, const char* dir,
   }
 
   // Next, try the various source extensions
-  for (std::vector<std::string>::const_iterator ext = sourceExts.begin();
-       ext != sourceExts.end(); ++ext) {
+  for (std::string const& ext : sourceExts) {
     hname = pathname;
     hname += ".";
-    hname += *ext;
+    hname += ext;
     if (cmSystemTools::FileExists(hname)) {
-      sf->SourceExtension = *ext;
+      sf->SourceExtension = ext;
       sf->FullPath = hname;
       return;
     }
   }
 
   // Finally, try the various header extensions
-  for (std::vector<std::string>::const_iterator ext = headerExts.begin();
-       ext != headerExts.end(); ++ext) {
+  for (std::string const& ext : headerExts) {
     hname = pathname;
     hname += ".";
-    hname += *ext;
+    hname += ext;
     if (cmSystemTools::FileExists(hname)) {
-      sf->SourceExtension = *ext;
+      sf->SourceExtension = ext;
       sf->FullPath = hname;
       return;
     }
@@ -711,13 +709,11 @@ void CCONV cmSourceFileSetName(void* arg, const char* name, const char* dir,
   std::ostringstream e;
   e << "Cannot find source file \"" << pathname << "\"";
   e << "\n\nTried extensions";
-  for (std::vector<std::string>::const_iterator ext = sourceExts.begin();
-       ext != sourceExts.end(); ++ext) {
-    e << " ." << *ext;
+  for (std::string const& ext : sourceExts) {
+    e << " ." << ext;
   }
-  for (std::vector<std::string>::const_iterator ext = headerExts.begin();
-       ext != headerExts.end(); ++ext) {
-    e << " ." << *ext;
+  for (std::string const& ext : headerExts) {
+    e << " ." << ext;
   }
   cmSystemTools::Error(e.str());
 }

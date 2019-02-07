@@ -827,10 +827,10 @@ bool cmFindPackageCommand::HandlePackageMode()
           << " requested version \"" << this->Version << "\".\n"
           << "The following configuration files were considered but not "
              "accepted:\n";
-        for (std::vector<ConfigFileInfo>::const_iterator i =
-               this->ConsideredConfigs.begin();
-             i != duplicate_end; ++i) {
-          e << "  " << i->filename << ", version: " << i->version << "\n";
+
+        for (ConfigFileInfo const& info :
+             cmMakeRange(this->ConsideredConfigs.cbegin(), duplicate_end)) {
+          e << "  " << info.filename << ", version: " << info.version << "\n";
         }
       } else {
         std::string requestedVersionString;

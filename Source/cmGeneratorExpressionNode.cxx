@@ -103,13 +103,11 @@ static const struct ZeroNode installInterfaceNode;
                          const GeneratorExpressionContent* content,           \
                          cmGeneratorExpressionDAGChecker*) const              \
     {                                                                         \
-      std::vector<std::string>::const_iterator it = parameters.begin();       \
-      const std::vector<std::string>::const_iterator end = parameters.end();  \
-      for (; it != end; ++it) {                                               \
-        if (*it == #FAILURE_VALUE) {                                          \
+      for (std::string const& param : parameters) {                           \
+        if (param == #FAILURE_VALUE) {                                        \
           return #FAILURE_VALUE;                                              \
         }                                                                     \
-        if (*it != #SUCCESS_VALUE) {                                          \
+        if (param != #SUCCESS_VALUE) {                                        \
           reportError(context, content->GetOriginalExpression(),              \
                       "Parameters to $<" #OP                                  \
                       "> must resolve to either '0' or '1'.");                \

@@ -19,9 +19,8 @@ cmCursesLongMessageForm::cmCursesLongMessageForm(
   std::vector<std::string> const& messages, const char* title)
 {
   // Append all messages into on big string
-  std::vector<std::string>::const_iterator it;
-  for (it = messages.begin(); it != messages.end(); it++) {
-    this->Messages += (*it);
+  for (std::string const& message : messages) {
+    this->Messages += message;
     // Add one blank line after each message
     this->Messages += "\n\n";
   }

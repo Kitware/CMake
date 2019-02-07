@@ -238,10 +238,8 @@ void cmGhsMultiTargetGenerator::WriteCompilerDefinitions(
   std::vector<std::string> compileDefinitions;
   this->GeneratorTarget->GetCompileDefinitions(compileDefinitions, config,
                                                language);
-  for (std::vector<std::string>::const_iterator cdI =
-         compileDefinitions.begin();
-       cdI != compileDefinitions.end(); ++cdI) {
-    fout << "    -D" << (*cdI) << std::endl;
+  for (std::string const& compileDefinition : compileDefinitions) {
+    fout << "    -D" << compileDefinition << std::endl;
   }
 }
 
@@ -253,9 +251,8 @@ void cmGhsMultiTargetGenerator::WriteIncludes(std::ostream& fout,
   this->LocalGenerator->GetIncludeDirectories(includes, this->GeneratorTarget,
                                               language, config);
 
-  for (std::vector<std::string>::const_iterator includes_i = includes.begin();
-       includes_i != includes.end(); ++includes_i) {
-    fout << "    -I\"" << *includes_i << "\"" << std::endl;
+  for (std::string const& include : includes) {
+    fout << "    -I\"" << include << "\"" << std::endl;
   }
 }
 
@@ -324,12 +321,9 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
   std::ostream& fout, std::vector<cmCustomCommand> const& commandsSet,
   cmTarget::CustomCommandType const commandType)
 {
-  for (std::vector<cmCustomCommand>::const_iterator commandsSetI =
-         commandsSet.begin();
-       commandsSetI != commandsSet.end(); ++commandsSetI) {
-    cmCustomCommandLines const& commands = commandsSetI->GetCommandLines();
-    for (cmCustomCommandLines::const_iterator commandI = commands.begin();
-         commandI != commands.end(); ++commandI) {
+  for (cmCustomCommand const& customCommand : commandsSet) {
+    cmCustomCommandLines const& commandLines = customCommand.GetCommandLines();
+    for (cmCustomCommandLine const& command : commandLines) {
       switch (commandType) {
         case cmTarget::PRE_BUILD:
           fout << "    :preexecShellSafe=";
@@ -340,17 +334,16 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
         default:
           assert("Only pre and post are supported");
       }
-      cmCustomCommandLine const& command = *commandI;
-      for (cmCustomCommandLine::const_iterator commandLineI = command.begin();
-           commandLineI != command.end(); ++commandLineI) {
+
+      bool firstIteration = true;
+      for (std::string const& commandLine : command) {
         std::string subCommandE =
-          this->LocalGenerator->EscapeForShell(*commandLineI, true);
-        if (!command.empty()) {
-          fout << (command.begin() == commandLineI ? "'" : " ");
-          // Need to double escape backslashes
-          cmSystemTools::ReplaceString(subCommandE, "\\", "\\\\");
-        }
+          this->LocalGenerator->EscapeForShell(commandLine, true);
+        fout << (firstIteration ? "'" : " ");
+        // Need to double escape backslashes
+        cmSystemTools::ReplaceString(subCommandE, "\\", "\\\\");
         fout << subCommandE;
+        firstIteration = false;
       }
       if (!command.empty()) {
         fout << "'" << std::endl;

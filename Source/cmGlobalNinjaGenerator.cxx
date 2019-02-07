@@ -1640,8 +1640,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
   std::string arg_dep;
   std::string arg_obj;
   std::string arg_ddi;
-  for (std::vector<std::string>::const_iterator a = argBeg; a != argEnd; ++a) {
-    std::string const& arg = *a;
+  for (std::string const& arg : cmMakeRange(argBeg, argEnd)) {
     if (cmHasLiteralPrefix(arg, "--tdi=")) {
       arg_tdi = arg.substr(6);
     } else if (cmHasLiteralPrefix(arg, "--pp=")) {
