@@ -8,7 +8,6 @@ FindHDF5
 Find HDF5, a library for reading and writing self describing array data.
 
 
-
 This module invokes the HDF5 wrapper compiler that should be installed
 alongside HDF5.  Depending upon the HDF5 Configuration, the wrapper
 compiler is called either h5cc or h5pcc.  If this succeeds, the module
@@ -45,54 +44,75 @@ an HDF5 client application, this module also makes an effort to find
 tools that come with the HDF5 distribution that may be useful for
 regression testing.
 
-This module will define the following variables:
+Result Variables
+^^^^^^^^^^^^^^^^
 
-::
+This module will set the following variables in your project:
 
-  HDF5_FOUND - true if HDF5 was found on the system
-  HDF5_VERSION - HDF5 version in format Major.Minor.Release
-  HDF5_INCLUDE_DIRS - Location of the hdf5 includes
-  HDF5_INCLUDE_DIR - Location of the hdf5 includes (deprecated)
-  HDF5_DEFINITIONS - Required compiler definitions for HDF5
-  HDF5_LIBRARIES - Required libraries for all requested bindings
-  HDF5_HL_LIBRARIES - Required libraries for the HDF5 high level API for all
-                      bindings, if the HL component is enabled
+``HDF5_FOUND``
+  HDF5 was found on the system
+``HDF5_VERSION``
+  HDF5 library version
+``HDF5_INCLUDE_DIRS``
+  Location of the HDF5 header files
+``HDF5_DEFINITIONS``
+  Required compiler definitions for HDF5
+``HDF5_LIBRARIES``
+  Required libraries for all requested bindings
+``HDF5_HL_LIBRARIES``
+  Required libraries for the HDF5 high level API for all bindings,
+  if the ``HL`` component is enabled
 
-Available components are: C CXX Fortran and HL.  For each enabled language
-binding, a corresponding HDF5_${LANG}_LIBRARIES variable, and potentially
-HDF5_${LANG}_DEFINITIONS, will be defined.
-If the HL component is enabled, then an HDF5_${LANG}_HL_LIBRARIES will
+Available components are: ``C`` ``CXX`` ``Fortran`` and ``HL``.
+For each enabled language binding, a corresponding ``HDF5_${LANG}_LIBRARIES``
+variable, and potentially ``HDF5_${LANG}_DEFINITIONS``, will be defined.
+If the ``HL`` component is enabled, then an ``HDF5_${LANG}_HL_LIBRARIES`` will
 also be defined.  With all components enabled, the following variables will be defined:
 
-::
+``HDF5_C_DEFINITIONS``
+  Required compiler definitions for HDF5 C bindings
+``HDF5_CXX_DEFINITIONS``
+  Required compiler definitions for HDF5 C++ bindings
+``HDF5_Fortran_DEFINITIONS``
+  Required compiler definitions for HDF5 Fortran bindings
+``HDF5_C_INCLUDE_DIRS``
+  Required include directories for HDF5 C bindings
+``HDF5_CXX_INCLUDE_DIRS``
+  Required include directories for HDF5 C++ bindings
+``HDF5_Fortran_INCLUDE_DIRS``
+  Required include directories for HDF5 Fortran bindings
+``HDF5_C_LIBRARIES``
+  Required libraries for the HDF5 C bindings
+``HDF5_CXX_LIBRARIES``
+  Required libraries for the HDF5 C++ bindings
+``HDF5_Fortran_LIBRARIES``
+  Required libraries for the HDF5 Fortran bindings
+``HDF5_C_HL_LIBRARIES``
+  Required libraries for the high level C bindings
+``HDF5_CXX_HL_LIBRARIES``
+  Required libraries for the high level C++ bindings
+``HDF5_Fortran_HL_LIBRARIES``
+  Required libraries for the high level Fortran bindings.
 
-  HDF5_C_DEFINITIONS -- Required compiler definitions for HDF5 C bindings
-  HDF5_CXX_DEFINITIONS -- Required compiler definitions for HDF5 C++ bindings
-  HDF5_Fortran_DEFINITIONS -- Required compiler definitions for HDF5 Fortran bindings
-  HDF5_C_INCLUDE_DIRS -- Required include directories for HDF5 C bindings
-  HDF5_CXX_INCLUDE_DIRS -- Required include directories for HDF5 C++ bindings
-  HDF5_Fortran_INCLUDE_DIRS -- Required include directories for HDF5 Fortran bindings
-  HDF5_C_LIBRARIES - Required libraries for the HDF5 C bindings
-  HDF5_CXX_LIBRARIES - Required libraries for the HDF5 C++ bindings
-  HDF5_Fortran_LIBRARIES - Required libraries for the HDF5 Fortran bindings
-  HDF5_C_HL_LIBRARIES - Required libraries for the high level C bindings
-  HDF5_CXX_HL_LIBRARIES - Required libraries for the high level C++ bindings
-  HDF5_Fortran_HL_LIBRARIES - Required libraries for the high level Fortran
-                              bindings.
+``HDF5_IS_PARALLEL``
+  HDF5 library has parallel IO support
+``HDF5_C_COMPILER_EXECUTABLE``
+  path to the HDF5 C wrapper compiler
+``HDF5_CXX_COMPILER_EXECUTABLE``
+  path to the HDF5 C++ wrapper compiler
+``HDF5_Fortran_COMPILER_EXECUTABLE``
+  path to the HDF5 Fortran wrapper compiler
+``HDF5_C_COMPILER_EXECUTABLE_NO_INTERROGATE``
+  path to the primary C compiler which is also the HDF5 wrapper
+``HDF5_CXX_COMPILER_EXECUTABLE_NO_INTERROGATE``
+  path to the primary C++ compiler which is also the HDF5 wrapper
+``HDF5_Fortran_COMPILER_EXECUTABLE_NO_INTERROGATE``
+  path to the primary Fortran compiler which is also the HDF5 wrapper
+``HDF5_DIFF_EXECUTABLE``
+  path to the HDF5 dataset comparison tool
 
-  HDF5_IS_PARALLEL - Whether or not HDF5 was found with parallel IO support
-  HDF5_C_COMPILER_EXECUTABLE - the path to the HDF5 C wrapper compiler
-  HDF5_CXX_COMPILER_EXECUTABLE - the path to the HDF5 C++ wrapper compiler
-  HDF5_Fortran_COMPILER_EXECUTABLE - the path to the HDF5 Fortran wrapper compiler
-  HDF5_C_COMPILER_EXECUTABLE_NO_INTERROGATE - path to the primary C compiler
-                                              which is also the HDF5 wrapper
-  HDF5_CXX_COMPILER_EXECUTABLE_NO_INTERROGATE - path to the primary C++
-                                                compiler which is also
-                                                the HDF5 wrapper
-  HDF5_Fortran_COMPILER_EXECUTABLE_NO_INTERROGATE - path to the primary
-                                                    Fortran compiler which
-                                                    is also the HDF5 wrapper
-  HDF5_DIFF_EXECUTABLE - the path to the HDF5 dataset comparison tool
+Hints
+^^^^^
 
 The following variable can be set to guide the search for HDF5 libraries and includes:
 
@@ -100,10 +120,10 @@ The following variable can be set to guide the search for HDF5 libraries and inc
   Specify the path to the HDF5 installation to use.
 
 ``HDF5_FIND_DEBUG``
-  Set to a true value to get some extra debugging output.
+  Set ``true`` to get extra debugging output.
 
 ``HDF5_NO_FIND_PACKAGE_CONFIG_FILE``
-  Set to a true value to skip trying to find ``hdf5-config.cmake``.
+  Set ``true`` to skip trying to find ``hdf5-config.cmake``.
 #]=======================================================================]
 
 # This module is maintained by Will Dicharry <wdicharry@stellarscience.com>.
@@ -322,20 +342,22 @@ macro( _HDF5_invoke_compiler language output return_value version is_parallel)
     elseif("${language}" STREQUAL "Fortran")
         set(test_file ${scratch_dir}/cmake_hdf5_test.f90)
     endif()
-    exec_program( ${HDF5_${language}_COMPILER_EXECUTABLE}
-        ARGS -show ${lib_type_args} ${test_file}
-        OUTPUT_VARIABLE ${output}
-        RETURN_VALUE ${return_value}
-    )
+    execute_process(
+      COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} -show ${lib_type_args} ${test_file}
+      OUTPUT_VARIABLE ${output}
+      ERROR_VARIABLE ${output}
+      RESULT_VARIABLE ${return_value}
+      )
     if(NOT ${${return_value}} EQUAL 0)
         message(STATUS
           "Unable to determine HDF5 ${language} flags from HDF5 wrapper.")
     endif()
-    exec_program( ${HDF5_${language}_COMPILER_EXECUTABLE}
-        ARGS -showconfig
-        OUTPUT_VARIABLE config_output
-        RETURN_VALUE config_return
-    )
+    execute_process(
+      COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} -showconfig
+      OUTPUT_VARIABLE config_output
+      ERROR_VARIABLE config_output
+      RESULT_VARIABLE config_return
+      )
     if(NOT ${return_value} EQUAL 0)
         message( STATUS
           "Unable to determine HDF5 ${language} version from HDF5 wrapper.")
