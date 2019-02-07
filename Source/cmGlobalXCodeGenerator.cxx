@@ -2254,6 +2254,22 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     debugStr = "NO";
   }
 
+  // extract C++ stdlib
+  for (auto const& language : languages) {
+    if (language != "CXX") {
+      continue;
+    }
+    std::string& flags = cflags[language];
+
+    auto stdlib =
+      this->ExtractFlagRegex("(^| )(-stdlib=[^ ]+)( |$)", 2, flags);
+    if (stdlib.size() > 8) {
+      const auto cxxLibrary = stdlib.substr(8);
+      buildSettings->AddAttribute("CLANG_CXX_LIBRARY",
+                                  this->CreateString(cxxLibrary));
+    }
+  }
+
   buildSettings->AddAttribute("COMBINE_HIDPI_IMAGES",
                               this->CreateString("YES"));
   buildSettings->AddAttribute("GCC_GENERATE_DEBUGGING_SYMBOLS",
