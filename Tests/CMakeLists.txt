@@ -1413,6 +1413,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindCURL)
   endif()
 
+  if(CMake_TEST_FindCups)
+    add_subdirectory(FindCups)
+  endif()
+
   if(CMake_TEST_FindDoxygen)
     add_subdirectory(FindDoxygen)
   endif()
