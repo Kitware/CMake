@@ -148,6 +148,8 @@ void cmIDEOptions::FlagMapUpdate(cmIDEFlagTable const* entry,
     this->FlagMap[entry->IDEName].push_back(new_value);
   } else if (entry->special & cmIDEFlagTable::SpaceAppendable) {
     this->FlagMap[entry->IDEName].append_with_space(new_value);
+  } else if (entry->special & cmIDEFlagTable::CommaAppendable) {
+    this->FlagMap[entry->IDEName].append_with_comma(new_value);
   } else {
     // Use the user-specified value.
     this->FlagMap[entry->IDEName] = new_value;

@@ -1136,6 +1136,8 @@ static unsigned int cmLoadFlagTableSpecial(Json::Value entry,
           value |= cmIDEFlagTable::CaseInsensitive;
         } else if (s == "SpaceAppendable") {
           value |= cmIDEFlagTable::SpaceAppendable;
+        } else if (s == "CommaAppendable") {
+          value |= cmIDEFlagTable::CommaAppendable;
         }
       }
     }
