@@ -2368,7 +2368,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       add_test_GhsMulti_rename_install(EXEC_AND_LIB)
       add_test_GhsMulti(multiple_source_groups GhsMultiSrcGroups Default "")
       add_test_GhsMulti(multiple_source_groups_folders GhsMultiSrcGroups PropFolders "-DTEST_PROP=ON")
-      add_test_GhsMulti(multiple_source_groups_all_folders GhsMultiSrcGroups AllFolders "-DGHS_NO_SOURCE_GROUP_FILE=ON")
+      add_test_GhsMulti(multiple_source_groups_all_folders GhsMultiSrcGroups AllFolders "-DCMAKE_GHS_NO_SOURCE_GROUP_FILE=ON")
       add_test_GhsMulti(unsupported_targets GhsMultiUnsupportedTargets "" "")
       add_test_GhsMulti(object_library GhsMultiObjectLibrary "" "")
       add_test_GhsMulti(exclude GhsMultiExclude "" ""
