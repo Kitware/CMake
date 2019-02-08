@@ -494,11 +494,13 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
   this->WriteDirectoryRule2(ruleFileStream, lg, "preinstall", true, true);
 }
 
-void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
-  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
-  const std::string& /*projectName*/, const std::string& /*projectDir*/,
-  const std::string& targetName, const std::string& /*config*/, bool fast,
-  int jobs, bool verbose, std::vector<std::string> const& makeOptions)
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
+  const std::string& makeProgram, const std::string& /*projectName*/,
+  const std::string& /*projectDir*/,
+  std::vector<std::string> const& targetNames, const std::string& /*config*/,
+  bool fast, int jobs, bool verbose,
+  std::vector<std::string> const& makeOptions)
 {
   std::unique_ptr<cmMakefile> mfu;
   cmMakefile* mf;
@@ -514,6 +516,8 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     mfu = cm::make_unique<cmMakefile>(this, snapshot);
     mf = mfu.get();
   }
+
+  GeneratedMakeCommand makeCommand;
 
   // Make it possible to set verbosity also from command line
   if (verbose) {
@@ -532,17 +536,19 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
   }
 
   makeCommand.Add(makeOptions.begin(), makeOptions.end());
-  if (!targetName.empty()) {
-    std::string tname = targetName;
-    if (fast) {
-      tname += "/fast";
+  for (auto tname : targetNames) {
+    if (!tname.empty()) {
+      if (fast) {
+        tname += "/fast";
+      }
+      tname =
+        mf->GetStateSnapshot().GetDirectory().ConvertToRelPathIfNotContained(
+          mf->GetState()->GetBinaryDirectory(), tname);
+      cmSystemTools::ConvertToOutputSlashes(tname);
+      makeCommand.Add(std::move(tname));
     }
-    tname =
-      mf->GetStateSnapshot().GetDirectory().ConvertToRelPathIfNotContained(
-        mf->GetState()->GetBinaryDirectory(), tname);
-    cmSystemTools::ConvertToOutputSlashes(tname);
-    makeCommand.Add(std::move(tname));
   }
+  return { std::move(makeCommand) };
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(

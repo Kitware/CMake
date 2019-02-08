@@ -2529,7 +2529,8 @@ cmMessenger* cmake::GetMessenger() const
   return this->Messenger;
 }
 
-int cmake::Build(int jobs, const std::string& dir, const std::string& target,
+int cmake::Build(int jobs, const std::string& dir,
+                 const std::vector<std::string>& targets,
                  const std::string& config,
                  const std::vector<std::string>& nativeOptions, bool clean,
                  bool verbose)
@@ -2648,9 +2649,8 @@ int cmake::Build(int jobs, const std::string& dir, const std::string& target,
 #endif
 
   gen->PrintBuildCommandAdvice(std::cerr, jobs);
-
-  return gen->Build(jobs, "", dir, projName, target, output, "", config, clean,
-                    false, verbose, cmDuration::zero(),
+  return gen->Build(jobs, "", dir, projName, targets, output, "", config,
+                    clean, false, verbose, cmDuration::zero(),
                     cmSystemTools::OUTPUT_PASSTHROUGH, nativeOptions);
 }
 

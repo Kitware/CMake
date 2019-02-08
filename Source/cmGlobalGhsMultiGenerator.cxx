@@ -369,12 +369,14 @@ void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
   fout.Close();
 }
 
-void cmGlobalGhsMultiGenerator::GenerateBuildCommand(
-  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
-  const std::string& projectName, const std::string& projectDir,
-  const std::string& targetName, const std::string& /*config*/, bool /*fast*/,
-  int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalGhsMultiGenerator::GenerateBuildCommand(
+  const std::string& makeProgram, const std::string& projectName,
+  const std::string& projectDir, std::vector<std::string> const& targetNames,
+  const std::string& /*config*/, bool /*fast*/, int jobs, bool /*verbose*/,
+  std::vector<std::string> const& makeOptions)
 {
+  GeneratedMakeCommand makeCommand = {};
   const char* gbuild =
     this->CMakeInstance->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
   makeCommand.Add(this->SelectMakeProgram(makeProgram, (std::string)gbuild));
@@ -400,17 +402,23 @@ void cmGlobalGhsMultiGenerator::GenerateBuildCommand(
   }
 
   makeCommand.Add("-top", proj);
-  if (!targetName.empty()) {
-    if (targetName == "clean") {
+  if (!targetNames.empty()) {
+    if (std::find(targetNames.begin(), targetNames.end(), "clean") !=
+        targetNames.end()) {
       makeCommand.Add("-clean");
     } else {
-      if (targetName.compare(targetName.size() - 4, 4, ".gpj") == 0) {
-        makeCommand.Add(targetName);
-      } else {
-        makeCommand.Add(targetName + ".gpj");
+      for (const auto& tname : targetNames) {
+        if (!tname.empty()) {
+          if (tname.compare(tname.size() - 4, 4, ".gpj") == 0) {
+            makeCommand.Add(tname);
+          } else {
+            makeCommand.Add(tname + ".gpj");
+          }
+        }
       }
     }
   }
+  return { makeCommand };
 }
 
 void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout)

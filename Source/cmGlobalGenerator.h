@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+#include "cmAlgorithms.h"
 #include "cmCustomCommandLines.h"
 #include "cmDuration.h"
 #include "cmExportSetMap.h"
@@ -203,10 +204,10 @@ public:
    */
   int Build(
     int jobs, const std::string& srcdir, const std::string& bindir,
-    const std::string& projectName, const std::string& targetName,
-    std::string& output, const std::string& makeProgram,
-    const std::string& config, bool clean, bool fast, bool verbose,
-    cmDuration timeout,
+    const std::string& projectName,
+    std::vector<std::string> const& targetNames, std::string& output,
+    const std::string& makeProgram, const std::string& config, bool clean,
+    bool fast, bool verbose, cmDuration timeout,
     cmSystemTools::OutputOption outputflag = cmSystemTools::OUTPUT_NONE,
     std::vector<std::string> const& nativeOptions =
       std::vector<std::string>());
@@ -221,11 +222,10 @@ public:
   {
   };
 
-  virtual void GenerateBuildCommand(
-    GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
-    const std::string& projectName, const std::string& projectDir,
-    const std::string& targetName, const std::string& config, bool fast,
-    int jobs, bool verbose,
+  virtual std::vector<GeneratedMakeCommand> GenerateBuildCommand(
+    const std::string& makeProgram, const std::string& projectName,
+    const std::string& projectDir, std::vector<std::string> const& targetNames,
+    const std::string& config, bool fast, int jobs, bool verbose,
     std::vector<std::string> const& makeOptions = std::vector<std::string>());
 
   virtual void PrintBuildCommandAdvice(std::ostream& os, int jobs) const;

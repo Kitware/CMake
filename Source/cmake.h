@@ -424,8 +424,8 @@ public:
     cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
 
   ///! run the --build option
-  int Build(int jobs, const std::string& dir, const std::string& target,
-            const std::string& config,
+  int Build(int jobs, const std::string& dir,
+            const std::vector<std::string>& targets, const std::string& config,
             const std::vector<std::string>& nativeOptions, bool clean,
             bool verbose);
 

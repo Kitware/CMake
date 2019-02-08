@@ -334,12 +334,15 @@ bool cmGlobalXCodeGenerator::Open(const std::string& bindir,
   return ret;
 }
 
-void cmGlobalXCodeGenerator::GenerateBuildCommand(
-  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
-  const std::string& projectName, const std::string& /*projectDir*/,
-  const std::string& targetName, const std::string& config, bool /*fast*/,
-  int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalXCodeGenerator::GenerateBuildCommand(
+  const std::string& makeProgram, const std::string& projectName,
+  const std::string& /*projectDir*/,
+  std::vector<std::string> const& targetNames, const std::string& config,
+  bool /*fast*/, int jobs, bool /*verbose*/,
+  std::vector<std::string> const& makeOptions)
 {
+  GeneratedMakeCommand makeCommand;
   // now build the test
   makeCommand.Add(
     this->SelectMakeProgram(makeProgram, this->GetXcodeBuildCommand()));
@@ -351,16 +354,24 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
     projectArg += "proj";
     makeCommand.Add(projectArg);
   }
-
-  bool clean = false;
-  std::string realTarget = targetName;
-  if (realTarget == "clean") {
-    clean = true;
-    realTarget = "ALL_BUILD";
+  if (std::find(targetNames.begin(), targetNames.end(), "clean") !=
+      targetNames.end()) {
+    makeCommand.Add("clean");
+    makeCommand.Add("-target", "ALL_BUILD");
+  } else {
+    makeCommand.Add("build");
+    if (targetNames.empty() ||
+        ((targetNames.size() == 1) && targetNames.front().empty())) {
+      makeCommand.Add("-target", "ALL_BUILD");
+    } else {
+      for (const auto& tname : targetNames) {
+        if (!tname.empty()) {
+          makeCommand.Add("-target", tname);
+        }
+      }
+    }
   }
 
-  makeCommand.Add((clean ? "clean" : "build"));
-  makeCommand.Add("-target", (realTarget.empty() ? "ALL_BUILD" : realTarget));
   makeCommand.Add("-configuration", (config.empty() ? "Debug" : config));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
@@ -374,6 +385,7 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
     makeCommand.Add("-hideShellScriptEnvironment");
   }
   makeCommand.Add(makeOptions.begin(), makeOptions.end());
+  return { std::move(makeCommand) };
 }
 
 ///! Create a local generator appropriate to this Global Generator
