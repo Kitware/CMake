@@ -323,16 +323,16 @@ void cmSystemTools::Stdout(const std::string& s)
   }
 }
 
-void cmSystemTools::Message(const char* m1, const char* title)
+void cmSystemTools::Message(const std::string& m, const char* title)
 {
   if (s_DisableMessages) {
     return;
   }
   if (s_MessageCallback) {
-    s_MessageCallback(m1, title);
+    s_MessageCallback(m, title);
     return;
   }
-  std::cerr << m1 << std::endl << std::flush;
+  std::cerr << m << std::endl << std::flush;
 }
 
 void cmSystemTools::ReportLastSystemError(const char* msg)

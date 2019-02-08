@@ -56,7 +56,7 @@ public:
    */
   static std::string TrimWhitespace(const std::string& s);
 
-  using MessageCallback = std::function<void(const char*, const char*)>;
+  using MessageCallback = std::function<void(const std::string&, const char*)>;
   /**
    *  Set the function used by GUIs to display error messages
    *  Function gets passed: message as a const char*,
@@ -74,11 +74,7 @@ public:
   /**
    * Display a message.
    */
-  static void Message(const char* m, const char* title = nullptr);
-  static void Message(const std::string& m, const char* title = nullptr)
-  {
-    Message(m.c_str(), title);
-  }
+  static void Message(const std::string& m, const char* title = nullptr);
 
   using OutputCallback = std::function<void(std::string const&)>;
 

@@ -142,8 +142,8 @@ static std::string cmakemainGetStack(cmake* cm)
   return msg;
 }
 
-static void cmakemainMessageCallback(const char* m, const char* /*unused*/,
-                                     cmake* cm)
+static void cmakemainMessageCallback(const std::string& m,
+                                     const char* /*unused*/, cmake* cm)
 {
   std::cerr << m << cmakemainGetStack(cm) << std::endl << std::flush;
 }
@@ -319,9 +319,10 @@ int do_cmake(int ac, char const* const* av)
   cmake cm(role, mode);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
-  cmSystemTools::SetMessageCallback([&cm](const char* msg, const char* title) {
-    cmakemainMessageCallback(msg, title, &cm);
-  });
+  cmSystemTools::SetMessageCallback(
+    [&cm](const std::string& msg, const char* title) {
+      cmakemainMessageCallback(msg, title, &cm);
+    });
   cm.SetProgressCallback([&cm](const char* msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
   });
@@ -499,9 +500,10 @@ static int do_build(int ac, char const* const* av)
   }
 
   cmake cm(cmake::RoleInternal, cmState::Unknown);
-  cmSystemTools::SetMessageCallback([&cm](const char* msg, const char* title) {
-    cmakemainMessageCallback(msg, title, &cm);
-  });
+  cmSystemTools::SetMessageCallback(
+    [&cm](const std::string& msg, const char* title) {
+      cmakemainMessageCallback(msg, title, &cm);
+    });
   cm.SetProgressCallback([&cm](const char* msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
   });
@@ -541,9 +543,10 @@ static int do_open(int ac, char const* const* av)
   }
 
   cmake cm(cmake::RoleInternal, cmState::Unknown);
-  cmSystemTools::SetMessageCallback([&cm](const char* msg, const char* title) {
-    cmakemainMessageCallback(msg, title, &cm);
-  });
+  cmSystemTools::SetMessageCallback(
+    [&cm](const std::string& msg, const char* title) {
+      cmakemainMessageCallback(msg, title, &cm);
+    });
   cm.SetProgressCallback([&cm](const char* msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
   });

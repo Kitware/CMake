@@ -118,7 +118,7 @@ public:
     : CM(cm)
   {
     cmSystemTools::SetMessageCallback(
-      [&s](const char* msg, const char* /*unused*/) {
+      [&s](const std::string& msg, const char* /*unused*/) {
         s += msg;
         s += "\n";
       });

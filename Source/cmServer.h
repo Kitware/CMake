@@ -121,7 +121,7 @@ public:
 private:
   static void reportProgress(const char* msg, float progress,
                              const cmServerRequest& request);
-  static void reportMessage(const char* msg, const char* title,
+  static void reportMessage(const std::string& msg, const char* title,
                             const cmServerRequest& request);
 
   // Handle requests:

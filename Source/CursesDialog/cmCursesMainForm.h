@@ -81,7 +81,7 @@ public:
    * During a CMake run, an error handle should add errors
    * to be displayed afterwards.
    */
-  void AddError(const char* message, const char* title) override;
+  void AddError(const std::string& message, const char* title) override;
 
   /**
    * Used to do a configure. If argument is specified, it does only the check

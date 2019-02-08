@@ -647,7 +647,8 @@ int cmCursesMainForm::Generate()
   return 0;
 }
 
-void cmCursesMainForm::AddError(const char* message, const char* /*unused*/)
+void cmCursesMainForm::AddError(const std::string& message,
+                                const char* /*unused*/)
 {
   this->Errors.emplace_back(message);
 }
