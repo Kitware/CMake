@@ -278,7 +278,7 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
       std::string output;
       int retVal = 1;
       bool resB = cmSystemTools::RunSingleCommand(
-        ic.c_str(), &output, &output, &retVal, nullptr, this->GeneratorVerbose,
+        ic, &output, &output, &retVal, nullptr, this->GeneratorVerbose,
         cmDuration::zero());
       if (!resB || retVal) {
         std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
@@ -647,8 +647,8 @@ int cmCPackGenerator::RunPreinstallTarget(
     std::string output;
     int retVal = 1;
     bool resB = cmSystemTools::RunSingleCommand(
-      buildCommand.c_str(), &output, &output, &retVal,
-      installDirectory.c_str(), this->GeneratorVerbose, cmDuration::zero());
+      buildCommand, &output, &output, &retVal, installDirectory.c_str(),
+      this->GeneratorVerbose, cmDuration::zero());
     if (!resB || retVal) {
       std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
       tmpFile += "/PreinstallOutput.log";

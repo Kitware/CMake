@@ -189,8 +189,8 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
     finalCommand += runArgs;
   }
   bool worked = cmSystemTools::RunSingleCommand(
-    finalCommand.c_str(), out, out, &retVal, nullptr,
-    cmSystemTools::OUTPUT_NONE, cmDuration::zero());
+    finalCommand, out, out, &retVal, nullptr, cmSystemTools::OUTPUT_NONE,
+    cmDuration::zero());
   // set the run var
   char retChar[16];
   const char* retStr;

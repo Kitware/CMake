@@ -155,8 +155,8 @@ int cmCPackOSXX11Generator::PackageFiles()
   bool res = false;
   while (numTries > 0) {
     res = cmSystemTools::RunSingleCommand(
-      dmgCmd.str().c_str(), &output, &output, &retVal, nullptr,
-      this->GeneratorVerbose, cmDuration::zero());
+      dmgCmd.str(), &output, &output, &retVal, nullptr, this->GeneratorVerbose,
+      cmDuration::zero());
     if (res && !retVal) {
       numTries = -1;
       break;

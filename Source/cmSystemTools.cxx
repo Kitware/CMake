@@ -867,7 +867,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
   return result;
 }
 
-bool cmSystemTools::RunSingleCommand(const char* command,
+bool cmSystemTools::RunSingleCommand(const std::string& command,
                                      std::string* captureStdOut,
                                      std::string* captureStdErr, int* retVal,
                                      const char* dir, OutputOption outputflag,
@@ -877,7 +877,8 @@ bool cmSystemTools::RunSingleCommand(const char* command,
     outputflag = OUTPUT_NONE;
   }
 
-  std::vector<std::string> args = cmSystemTools::ParseArguments(command);
+  std::vector<std::string> args =
+    cmSystemTools::ParseArguments(command.c_str());
 
   if (args.empty()) {
     return false;
