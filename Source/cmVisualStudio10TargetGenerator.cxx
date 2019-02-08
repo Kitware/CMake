@@ -3439,18 +3439,11 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   linkDirs.push_back("%(AdditionalLibraryDirectories)");
   linkOptions.AddFlag("AdditionalLibraryDirectories", linkDirs);
 
-  std::string targetName;
-  std::string targetNameSO;
-  std::string targetNameFull;
-  std::string targetNameImport;
-  std::string targetNamePDB;
+  cmGeneratorTarget::Names targetNames;
   if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-    this->GeneratorTarget->GetExecutableNames(
-      targetName, targetNameFull, targetNameImport, targetNamePDB, config);
+    targetNames = this->GeneratorTarget->GetExecutableNames(config);
   } else {
-    this->GeneratorTarget->GetLibraryNames(targetName, targetNameSO,
-                                           targetNameFull, targetNameImport,
-                                           targetNamePDB, config);
+    targetNames = this->GeneratorTarget->GetLibraryNames(config);
   }
 
   if (this->MSTools) {
@@ -3491,11 +3484,11 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
 
     std::string pdb = this->GeneratorTarget->GetPDBDirectory(config);
     pdb += "/";
-    pdb += targetNamePDB;
+    pdb += targetNames.PDB;
     std::string imLib = this->GeneratorTarget->GetDirectory(
       config, cmStateEnums::ImportLibraryArtifact);
     imLib += "/";
-    imLib += targetNameImport;
+    imLib += targetNames.ImportLibrary;
 
     linkOptions.AddFlag("ImportLibrary", imLib);
     linkOptions.AddFlag("ProgramDataBaseFile", pdb);
@@ -3519,7 +3512,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
       linkOptions.AppendFlag("IgnoreSpecificDefaultLibraries", "ole32.lib");
     }
   } else if (this->NsightTegra) {
-    linkOptions.AddFlag("SoName", targetNameSO);
+    linkOptions.AddFlag("SoName", targetNames.SharedObject);
   }
 
   linkOptions.Parse(flags);

@@ -1043,13 +1043,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
     }
     case cmStateEnums::SHARED_LIBRARY:
     case cmStateEnums::MODULE_LIBRARY: {
-      std::string targetName;
-      std::string targetNameSO;
-      std::string targetNameFull;
-      std::string targetNameImport;
-      std::string targetNamePDB;
-      target->GetLibraryNames(targetName, targetNameSO, targetNameFull,
-                              targetNameImport, targetNamePDB, configName);
+      cmGeneratorTarget::Names targetNames =
+        target->GetLibraryNames(configName);
 
       // Compute the link library and directory information.
       cmComputeLinkInformation* pcli = target->GetLinkInformation(configName);
@@ -1085,7 +1080,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       fout << "\"\n";
       temp = target->GetDirectory(configName);
       temp += "/";
-      temp += targetNameFull;
+      temp += targetNames.Output;
       fout << "\t\t\t\tOutputFile=\""
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       this->WriteTargetVersionAttribute(fout, target);
@@ -1095,7 +1090,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       fout << "\"\n";
       temp = target->GetPDBDirectory(configName);
       temp += "/";
-      temp += targetNamePDB;
+      temp += targetNames.PDB;
       fout << "\t\t\t\tProgramDatabaseFile=\""
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       if (targetOptions.IsDebug()) {
@@ -1118,7 +1113,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       temp =
         target->GetDirectory(configName, cmStateEnums::ImportLibraryArtifact);
       temp += "/";
-      temp += targetNameImport;
+      temp += targetNames.ImportLibrary;
       fout << "\t\t\t\tImportLibrary=\""
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"";
       if (this->FortranProject) {
@@ -1127,12 +1122,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       fout << "/>\n";
     } break;
     case cmStateEnums::EXECUTABLE: {
-      std::string targetName;
-      std::string targetNameFull;
-      std::string targetNameImport;
-      std::string targetNamePDB;
-      target->GetExecutableNames(targetName, targetNameFull, targetNameImport,
-                                 targetNamePDB, configName);
+      cmGeneratorTarget::Names targetNames =
+        target->GetExecutableNames(configName);
 
       // Compute the link library and directory information.
       cmComputeLinkInformation* pcli = target->GetLinkInformation(configName);
@@ -1170,7 +1161,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       fout << "\"\n";
       temp = target->GetDirectory(configName);
       temp += "/";
-      temp += targetNameFull;
+      temp += targetNames.Output;
       fout << "\t\t\t\tOutputFile=\""
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       this->WriteTargetVersionAttribute(fout, target);
@@ -1180,8 +1171,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       fout << "\"\n";
       std::string path = this->ConvertToXMLOutputPathSingle(
         target->GetPDBDirectory(configName).c_str());
-      fout << "\t\t\t\tProgramDatabaseFile=\"" << path << "/" << targetNamePDB
-           << "\"\n";
+      fout << "\t\t\t\tProgramDatabaseFile=\"" << path << "/"
+           << targetNames.PDB << "\"\n";
       if (targetOptions.IsDebug()) {
         fout << "\t\t\t\tGenerateDebugInformation=\"true\"\n";
       }
@@ -1216,7 +1207,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       temp =
         target->GetDirectory(configName, cmStateEnums::ImportLibraryArtifact);
       temp += "/";
-      temp += targetNameImport;
+      temp += targetNames.ImportLibrary;
       fout << "\t\t\t\tImportLibrary=\""
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
       break;

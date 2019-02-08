@@ -1617,13 +1617,7 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
     return "";
   }
   // Compute the soname that will be built.
-  std::string name;
-  std::string soName;
-  std::string realName;
-  std::string impName;
-  std::string pdbName;
-  this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
-  return soName;
+  return this->GetLibraryNames(config).SharedObject;
 }
 
 static bool shouldAddFullLevel(cmGeneratorTarget::BundleDirectoryLevel level)
@@ -3394,17 +3388,13 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
   cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
 
   // Get the names.
-  std::string name;
-  std::string soName;
-  std::string realName;
-  std::string impName;
-  std::string pdbName;
+  cmGeneratorTarget::Names targetNames;
   if (this->GetType() == cmStateEnums::EXECUTABLE) {
-    this->GetExecutableNames(name, realName, impName, pdbName, config);
+    targetNames = this->GetExecutableNames(config);
   } else if (this->GetType() == cmStateEnums::STATIC_LIBRARY ||
              this->GetType() == cmStateEnums::SHARED_LIBRARY ||
              this->GetType() == cmStateEnums::MODULE_LIBRARY) {
-    this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
+    targetNames = this->GetLibraryNames(config);
   } else {
     return;
   }
@@ -3415,34 +3405,34 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
 
   // Add each name.
   std::string f;
-  if (!name.empty()) {
+  if (!targetNames.Output.empty()) {
     f = dir;
     f += "/";
-    f += name;
+    f += targetNames.Output;
     gg->AddToManifest(f);
   }
-  if (!soName.empty()) {
+  if (!targetNames.SharedObject.empty()) {
     f = dir;
     f += "/";
-    f += soName;
+    f += targetNames.SharedObject;
     gg->AddToManifest(f);
   }
-  if (!realName.empty()) {
+  if (!targetNames.Real.empty()) {
     f = dir;
     f += "/";
-    f += realName;
+    f += targetNames.Real;
     gg->AddToManifest(f);
   }
-  if (!pdbName.empty()) {
+  if (!targetNames.PDB.empty()) {
     f = dir;
     f += "/";
-    f += pdbName;
+    f += targetNames.PDB;
     gg->AddToManifest(f);
   }
-  if (!impName.empty()) {
+  if (!targetNames.ImportLibrary.empty()) {
     f = this->GetDirectory(config, cmStateEnums::ImportLibraryArtifact);
     f += "/";
-    f += impName;
+    f += targetNames.ImportLibrary;
     gg->AddToManifest(f);
   }
 }
@@ -3520,29 +3510,17 @@ std::string cmGeneratorTarget::NormalGetRealName(
 
   if (this->GetType() == cmStateEnums::EXECUTABLE) {
     // Compute the real name that will be built.
-    std::string name;
-    std::string realName;
-    std::string impName;
-    std::string pdbName;
-    this->GetExecutableNames(name, realName, impName, pdbName, config);
-    return realName;
+    return this->GetExecutableNames(config).Real;
   }
   // Compute the real name that will be built.
-  std::string name;
-  std::string soName;
-  std::string realName;
-  std::string impName;
-  std::string pdbName;
-  this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
-  return realName;
+  return this->GetLibraryNames(config).Real;
 }
 
-void cmGeneratorTarget::GetLibraryNames(std::string& name, std::string& soName,
-                                        std::string& realName,
-                                        std::string& impName,
-                                        std::string& pdbName,
-                                        const std::string& config) const
+cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
+  const std::string& config) const
 {
+  cmGeneratorTarget::Names targetNames;
+
   // This should not be called for imported targets.
   // TODO: Split cmTarget into a class hierarchy to get compile-time
   // enforcement of the limited imported target API.
@@ -3550,7 +3528,6 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name, std::string& soName,
     std::string msg = "GetLibraryNames called on imported target: ";
     msg += this->GetName();
     this->LocalGenerator->IssueMessage(MessageType::INTERNAL_ERROR, msg);
-    return;
   }
 
   // Check for library version properties.
@@ -3576,50 +3553,51 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name, std::string& soName,
 
   // Get the components of the library name.
   std::string prefix;
-  std::string base;
   std::string suffix;
   this->GetFullNameInternal(config, cmStateEnums::RuntimeBinaryArtifact,
-                            prefix, base, suffix);
+                            prefix, targetNames.Base, suffix);
 
   // The library name.
-  name = prefix + base + suffix;
+  targetNames.Output = prefix + targetNames.Base + suffix;
 
   if (this->IsFrameworkOnApple()) {
-    realName = prefix;
+    targetNames.Real = prefix;
     if (!this->Makefile->PlatformIsAppleEmbedded()) {
-      realName += "Versions/";
-      realName += this->GetFrameworkVersion();
-      realName += "/";
+      targetNames.Real += "Versions/";
+      targetNames.Real += this->GetFrameworkVersion();
+      targetNames.Real += "/";
     }
-    realName += base;
-    soName = realName;
+    targetNames.Real += targetNames.Base;
+    targetNames.SharedObject = targetNames.Real;
   } else {
     // The library's soname.
-    this->ComputeVersionedName(soName, prefix, base, suffix, name, soversion);
+    this->ComputeVersionedName(targetNames.SharedObject, prefix,
+                               targetNames.Base, suffix, targetNames.Output,
+                               soversion);
 
     // The library's real name on disk.
-    this->ComputeVersionedName(realName, prefix, base, suffix, name, version);
+    this->ComputeVersionedName(targetNames.Real, prefix, targetNames.Base,
+                               suffix, targetNames.Output, version);
   }
 
   // The import library name.
   if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
       this->GetType() == cmStateEnums::MODULE_LIBRARY) {
-    impName =
+    targetNames.ImportLibrary =
       this->GetFullNameInternal(config, cmStateEnums::ImportLibraryArtifact);
-  } else {
-    impName.clear();
   }
 
   // The program database file name.
-  pdbName = this->GetPDBName(config);
+  targetNames.PDB = this->GetPDBName(config);
+
+  return targetNames;
 }
 
-void cmGeneratorTarget::GetExecutableNames(std::string& name,
-                                           std::string& realName,
-                                           std::string& impName,
-                                           std::string& pdbName,
-                                           const std::string& config) const
+cmGeneratorTarget::Names cmGeneratorTarget::GetExecutableNames(
+  const std::string& config) const
 {
+  cmGeneratorTarget::Names targetNames;
+
   // This should not be called for imported targets.
   // TODO: Split cmTarget into a class hierarchy to get compile-time
   // enforcement of the limited imported target API.
@@ -3644,34 +3622,35 @@ void cmGeneratorTarget::GetExecutableNames(std::string& name,
 
   // Get the components of the executable name.
   std::string prefix;
-  std::string base;
   std::string suffix;
   this->GetFullNameInternal(config, cmStateEnums::RuntimeBinaryArtifact,
-                            prefix, base, suffix);
+                            prefix, targetNames.Base, suffix);
 
   // The executable name.
-  name = prefix + base + suffix;
+  targetNames.Output = prefix + targetNames.Base + suffix;
 
 // The executable's real name on disk.
 #if defined(__CYGWIN__)
-  realName = prefix + base;
+  targetNames.Real = prefix + targetNames.Base;
 #else
-  realName = name;
+  targetNames.Real = targetNames.Output;
 #endif
   if (version) {
-    realName += "-";
-    realName += version;
+    targetNames.Real += "-";
+    targetNames.Real += version;
   }
 #if defined(__CYGWIN__)
-  realName += suffix;
+  targetNames.Real += suffix;
 #endif
 
   // The import library name.
-  impName =
+  targetNames.ImportLibrary =
     this->GetFullNameInternal(config, cmStateEnums::ImportLibraryArtifact);
 
   // The program database file name.
-  pdbName = this->GetPDBName(config);
+  targetNames.PDB = this->GetPDBName(config);
+
+  return targetNames;
 }
 
 std::string cmGeneratorTarget::GetFullNameInternal(
