@@ -931,7 +931,7 @@ std::string cmLocalVisualStudio7Generator::GetBuildTypeLinkerFlags(
   std::string extraLinkOptionsBuildTypeDef =
     rootLinkerFlags + "_" + configTypeUpper;
 
-  std::string extraLinkOptionsBuildType =
+  const std::string& extraLinkOptionsBuildType =
     this->Makefile->GetRequiredDefinition(extraLinkOptionsBuildTypeDef);
 
   return extraLinkOptionsBuildType;
@@ -947,21 +947,18 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
   std::string extraLinkOptions;
   if (target->GetType() == cmStateEnums::EXECUTABLE) {
     extraLinkOptions =
-      this->Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS") +
-      std::string(" ") +
+      this->Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS") + " " +
       GetBuildTypeLinkerFlags("CMAKE_EXE_LINKER_FLAGS", configName);
   }
   if (target->GetType() == cmStateEnums::SHARED_LIBRARY) {
     extraLinkOptions =
       this->Makefile->GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS") +
-      std::string(" ") +
-      GetBuildTypeLinkerFlags("CMAKE_SHARED_LINKER_FLAGS", configName);
+      " " + GetBuildTypeLinkerFlags("CMAKE_SHARED_LINKER_FLAGS", configName);
   }
   if (target->GetType() == cmStateEnums::MODULE_LIBRARY) {
     extraLinkOptions =
       this->Makefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS") +
-      std::string(" ") +
-      GetBuildTypeLinkerFlags("CMAKE_MODULE_LINKER_FLAGS", configName);
+      " " + GetBuildTypeLinkerFlags("CMAKE_MODULE_LINKER_FLAGS", configName);
   }
 
   const char* targetLinkFlags = target->GetProperty("LINK_FLAGS");

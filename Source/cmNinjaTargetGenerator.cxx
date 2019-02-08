@@ -493,7 +493,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   if (explicitPP) {
     // Lookup the explicit preprocessing rule.
     std::string const ppVar = "CMAKE_" + lang + "_PREPROCESS_SOURCE";
-    std::string const ppCmd =
+    std::string const& ppCmd =
       this->GetMakefile()->GetRequiredDefinition(ppVar);
 
     // Explicit preprocessing always uses a depfile.
@@ -671,19 +671,18 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     std::string cmdVar;
     if (this->GeneratorTarget->GetPropertyAsBool(
           "CUDA_SEPARABLE_COMPILATION")) {
-      cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+      cmdVar = "CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION";
     } else if (this->GeneratorTarget->GetPropertyAsBool(
                  "CUDA_PTX_COMPILATION")) {
-      cmdVar = std::string("CMAKE_CUDA_COMPILE_PTX_COMPILATION");
+      cmdVar = "CMAKE_CUDA_COMPILE_PTX_COMPILATION";
     } else {
-      cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
+      cmdVar = "CMAKE_CUDA_COMPILE_WHOLE_COMPILATION";
     }
-    std::string compileCmd = mf->GetRequiredDefinition(cmdVar);
+    const std::string& compileCmd = mf->GetRequiredDefinition(cmdVar);
     cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
   } else {
-    const std::string cmdVar =
-      std::string("CMAKE_") + lang + "_COMPILE_OBJECT";
-    std::string compileCmd = mf->GetRequiredDefinition(cmdVar);
+    const std::string cmdVar = "CMAKE_" + lang + "_COMPILE_OBJECT";
+    const std::string& compileCmd = mf->GetRequiredDefinition(cmdVar);
     cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
   }
 
@@ -1213,20 +1212,19 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
     std::string cmdVar;
     if (this->GeneratorTarget->GetPropertyAsBool(
           "CUDA_SEPARABLE_COMPILATION")) {
-      cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+      cmdVar = "CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION";
     } else if (this->GeneratorTarget->GetPropertyAsBool(
                  "CUDA_PTX_COMPILATION")) {
-      cmdVar = std::string("CMAKE_CUDA_COMPILE_PTX_COMPILATION");
+      cmdVar = "CMAKE_CUDA_COMPILE_PTX_COMPILATION";
     } else {
-      cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
+      cmdVar = "CMAKE_CUDA_COMPILE_WHOLE_COMPILATION";
     }
-    std::string compileCmd =
+    const std::string& compileCmd =
       this->GetMakefile()->GetRequiredDefinition(cmdVar);
     cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
   } else {
-    const std::string cmdVar =
-      std::string("CMAKE_") + language + "_COMPILE_OBJECT";
-    std::string compileCmd =
+    const std::string cmdVar = "CMAKE_" + language + "_COMPILE_OBJECT";
+    const std::string& compileCmd =
       this->GetMakefile()->GetRequiredDefinition(cmdVar);
     cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
   }
