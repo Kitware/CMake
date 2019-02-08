@@ -345,6 +345,7 @@ Variables that Control the Build
    /variable/CMAKE_FOLDER
    /variable/CMAKE_Fortran_FORMAT
    /variable/CMAKE_Fortran_MODULE_DIRECTORY
+   /variable/CMAKE_GHS_NO_SOURCE_GROUP_FILE
    /variable/CMAKE_GLOBAL_AUTOGEN_TARGET
    /variable/CMAKE_GLOBAL_AUTOGEN_TARGET_NAME
    /variable/CMAKE_GLOBAL_AUTORCC_TARGET

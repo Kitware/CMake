@@ -59,6 +59,7 @@ Customizations are available through the following cache variables:
 The following properties are available:
 
 * :prop_tgt:`GHS_INTEGRITY_APP`
+* :prop_tgt:`GHS_NO_SOURCE_GROUP_FILE`
 
 .. note::
   This generator is deemed experimental as of CMake |release|
