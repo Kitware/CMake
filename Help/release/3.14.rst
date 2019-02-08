@@ -56,6 +56,9 @@ Command-Line
 Commands
 --------
 
+* The :command:`file` command learned a new sub-command, ``CREATE_LINK``,
+  which can be used to create hard or symbolic links.
+
 * The :command:`file` command learned a new sub-command, ``READ_SYMLINK``,
   which can be used to determine the path that a symlink points to.
 
