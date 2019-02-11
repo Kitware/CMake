@@ -11,7 +11,9 @@
 #include <iostream>
 #include <signal.h>
 #include <string>
-#if !defined(_WIN32)
+#if defined(_WIN32)
+#  include "cm_kwiml.h"
+#else
 #  include <unistd.h>
 #endif
 #include <utility>
@@ -353,7 +355,7 @@ void cmProcess::OnExit(int64_t exit_status, int term_signal)
   }
 
   // Record exit information.
-  this->ExitValue = static_cast<int>(exit_status);
+  this->ExitValue = exit_status;
   this->Signal = term_signal;
   this->TotalTime = std::chrono::steady_clock::now() - this->StartTime;
   // Because of a processor clock scew the runtime may become slightly
@@ -539,7 +541,8 @@ std::string cmProcess::GetExitExceptionString()
     case STATUS_NO_MEMORY:
     default:
       char buf[1024];
-      _snprintf(buf, 1024, "Exit code 0x%x\n", this->ExitValue);
+      const char* fmt = "Exit code 0x%" KWIML_INT_PRIx64 "\n";
+      _snprintf(buf, 1024, fmt, this->ExitValue);
       exception_str.assign(buf);
   }
 #else

@@ -53,7 +53,7 @@ public:
   State GetProcessStatus();
   int GetId() { return this->Id; }
   void SetId(int id) { this->Id = id; }
-  int GetExitValue() { return this->ExitValue; }
+  int64_t GetExitValue() { return this->ExitValue; }
   cmDuration GetTotalTime() { return this->TotalTime; }
 
   enum class Exception
@@ -122,7 +122,7 @@ private:
   std::vector<std::string> Arguments;
   std::vector<const char*> ProcessArgs;
   int Id;
-  int ExitValue;
+  int64_t ExitValue;
 };
 
 #endif
