@@ -23,7 +23,7 @@ Otherwise, optional ``elseif`` blocks are processed in the same way.
 Finally, if no ``condition`` is true, ``commands`` in the optional ``else``
 block are executed.
 
-Per legacy, the :command:`else` and :command:`elseif` commands admit
+Per legacy, the :command:`else` and :command:`endif` commands admit
 an optional ``<condition>`` argument.
 If used, it must be a verbatim
 repeat of the argument of the opening
