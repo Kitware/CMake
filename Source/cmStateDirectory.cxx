@@ -8,6 +8,7 @@
 #include <iterator>
 #include <utility>
 
+#include "cmAlgorithms.h"
 #include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmState.h"
@@ -40,9 +41,8 @@ void cmStateDirectory::ComputeRelativePathTopSource()
 
   std::string result = snapshots.front().GetDirectory().GetCurrentSource();
 
-  for (std::vector<cmStateSnapshot>::const_iterator it = snapshots.begin() + 1;
-       it != snapshots.end(); ++it) {
-    std::string currentSource = it->GetDirectory().GetCurrentSource();
+  for (cmStateSnapshot const& snp : cmMakeRange(snapshots).advance(1)) {
+    std::string currentSource = snp.GetDirectory().GetCurrentSource();
     if (cmSystemTools::IsSubDirectory(result, currentSource)) {
       result = currentSource;
     }
@@ -66,9 +66,8 @@ void cmStateDirectory::ComputeRelativePathTopBinary()
 
   std::string result = snapshots.front().GetDirectory().GetCurrentBinary();
 
-  for (std::vector<cmStateSnapshot>::const_iterator it = snapshots.begin() + 1;
-       it != snapshots.end(); ++it) {
-    std::string currentBinary = it->GetDirectory().GetCurrentBinary();
+  for (cmStateSnapshot const& snp : cmMakeRange(snapshots).advance(1)) {
+    std::string currentBinary = snp.GetDirectory().GetCurrentBinary();
     if (cmSystemTools::IsSubDirectory(result, currentBinary)) {
       result = currentBinary;
     }

@@ -107,10 +107,9 @@ void cmCursesMainForm::InitializeUI()
   // Count non-internal and non-static entries
   int count = 0;
 
-  for (std::vector<std::string>::const_iterator it = cacheKeys.begin();
-       it != cacheKeys.end(); ++it) {
+  for (std::string const& key : cacheKeys) {
     cmStateEnums::CacheEntryType t =
-      this->CMakeInstance->GetState()->GetCacheEntryType(*it);
+      this->CMakeInstance->GetState()->GetCacheEntryType(key);
     if (t != cmStateEnums::INTERNAL && t != cmStateEnums::STATIC &&
         t != cmStateEnums::UNINITIALIZED) {
       ++count;
@@ -130,11 +129,9 @@ void cmCursesMainForm::InitializeUI()
     // Create the composites.
 
     // First add entries which are new
-    for (std::vector<std::string>::const_iterator it = cacheKeys.begin();
-         it != cacheKeys.end(); ++it) {
-      std::string key = *it;
+    for (std::string const& key : cacheKeys) {
       cmStateEnums::CacheEntryType t =
-        this->CMakeInstance->GetState()->GetCacheEntryType(*it);
+        this->CMakeInstance->GetState()->GetCacheEntryType(key);
       if (t == cmStateEnums::INTERNAL || t == cmStateEnums::STATIC ||
           t == cmStateEnums::UNINITIALIZED) {
         continue;
@@ -148,11 +145,9 @@ void cmCursesMainForm::InitializeUI()
     }
 
     // then add entries which are old
-    for (std::vector<std::string>::const_iterator it = cacheKeys.begin();
-         it != cacheKeys.end(); ++it) {
-      std::string key = *it;
+    for (std::string const& key : cacheKeys) {
       cmStateEnums::CacheEntryType t =
-        this->CMakeInstance->GetState()->GetCacheEntryType(*it);
+        this->CMakeInstance->GetState()->GetCacheEntryType(key);
       if (t == cmStateEnums::INTERNAL || t == cmStateEnums::STATIC ||
           t == cmStateEnums::UNINITIALIZED) {
         continue;

@@ -314,9 +314,11 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
       if (configs.empty()) {
         target->GetSourceFiles(srcs, "");
       } else {
-        for (std::vector<std::string>::const_iterator ci = configs.begin();
-             ci != configs.end() && srcs.empty(); ++ci) {
-          target->GetSourceFiles(srcs, *ci);
+        for (std::string const& config : configs) {
+          target->GetSourceFiles(srcs, config);
+          if (srcs.empty()) {
+            break;
+          }
         }
       }
       if (srcs.empty()) {
@@ -2984,10 +2986,8 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     }
     std::vector<cmSourceFile*>::const_iterator sourcesEnd =
       cmRemoveDuplicates(sources);
-    for (std::vector<cmSourceFile*>::const_iterator si = sources.begin();
-         si != sourcesEnd; ++si) {
+    for (cmSourceFile* sf : cmMakeRange(sources.cbegin(), sourcesEnd)) {
       Json::Value& lj_source = lj_sources.append(Json::objectValue);
-      cmSourceFile* sf = *si;
       std::string const& sfp = sf->GetFullPath();
       fout << sfp << "\n";
       lj_source["file"] = sfp;

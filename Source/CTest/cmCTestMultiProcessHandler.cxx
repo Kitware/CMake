@@ -3,6 +3,7 @@
 #include "cmCTestMultiProcessHandler.h"
 
 #include "cmAffinity.h"
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestTestHandler.h"
@@ -651,9 +652,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
 
   // Reverse iterate over the different dependency levels (deepest first).
   // Sort tests within each level by COST and append them to the cost list.
-  for (std::list<TestSet>::reverse_iterator i = priorityStack.rbegin();
-       i != priorityStack.rend(); ++i) {
-    TestSet const& currentSet = *i;
+  for (TestSet const& currentSet : cmReverseRange(priorityStack)) {
     TestComparator comp(this);
 
     TestList sortedCopy;

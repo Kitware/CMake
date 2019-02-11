@@ -95,33 +95,32 @@ void StartCompilerSetup::setGenerators(
 
   QStringList generator_list;
 
-  std::vector<cmake::GeneratorInfo>::const_iterator it;
-  for (it = gens.begin(); it != gens.end(); ++it) {
-    generator_list.append(QString::fromLocal8Bit(it->name.c_str()));
+  for (cmake::GeneratorInfo const& gen : gens) {
+    generator_list.append(QString::fromLocal8Bit(gen.name.c_str()));
 
-    if (it->supportsPlatform) {
+    if (gen.supportsPlatform) {
       this->GeneratorsSupportingPlatform.append(
-        QString::fromLocal8Bit(it->name.c_str()));
+        QString::fromLocal8Bit(gen.name.c_str()));
 
       this
-        ->GeneratorDefaultPlatform[QString::fromLocal8Bit(it->name.c_str())] =
-        QString::fromLocal8Bit(it->defaultPlatform.c_str());
+        ->GeneratorDefaultPlatform[QString::fromLocal8Bit(gen.name.c_str())] =
+        QString::fromLocal8Bit(gen.defaultPlatform.c_str());
 
       std::vector<std::string>::const_iterator platformIt =
-        it->supportedPlatforms.cbegin();
-      while (platformIt != it->supportedPlatforms.cend()) {
+        gen.supportedPlatforms.cbegin();
+      while (platformIt != gen.supportedPlatforms.cend()) {
 
         this->GeneratorSupportedPlatforms.insert(
-          QString::fromLocal8Bit(it->name.c_str()),
+          QString::fromLocal8Bit(gen.name.c_str()),
           QString::fromLocal8Bit((*platformIt).c_str()));
 
         platformIt++;
       }
     }
 
-    if (it->supportsToolset) {
+    if (gen.supportsToolset) {
       this->GeneratorsSupportingToolset.append(
-        QString::fromLocal8Bit(it->name.c_str()));
+        QString::fromLocal8Bit(gen.name.c_str()));
     }
   }
 

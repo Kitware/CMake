@@ -542,8 +542,7 @@ std::vector<std::string> cmSystemTools::HandleResponseFile(
   std::vector<std::string>::const_iterator argEnd)
 {
   std::vector<std::string> arg_full;
-  for (std::vector<std::string>::const_iterator a = argBeg; a != argEnd; ++a) {
-    std::string const& arg = *a;
+  for (std::string const& arg : cmMakeRange(argBeg, argEnd)) {
     if (cmHasLiteralPrefix(arg, "@")) {
       cmsys::ifstream responseFile(arg.substr(1).c_str(), std::ios::in);
       if (!responseFile) {
@@ -1220,9 +1219,8 @@ void cmSystemTools::GlobDirs(const std::string& path,
 void cmSystemTools::ExpandList(std::vector<std::string> const& arguments,
                                std::vector<std::string>& newargs)
 {
-  std::vector<std::string>::const_iterator i;
-  for (i = arguments.begin(); i != arguments.end(); ++i) {
-    cmSystemTools::ExpandListArgument(*i, newargs);
+  for (std::string const& arg : arguments) {
+    cmSystemTools::ExpandListArgument(arg, newargs);
   }
 }
 

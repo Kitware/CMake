@@ -31,10 +31,12 @@ cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   }
 
   // We need per-config actions if any directories have generator expressions.
-  for (std::vector<std::string>::const_iterator i = dirs.begin();
-       !this->ActionsPerConfig && i != dirs.end(); ++i) {
-    if (cmGeneratorExpression::Find(*i) != std::string::npos) {
-      this->ActionsPerConfig = true;
+  if (!this->ActionsPerConfig) {
+    for (std::string const& dir : dirs) {
+      if (cmGeneratorExpression::Find(dir) != std::string::npos) {
+        this->ActionsPerConfig = true;
+        break;
+      }
     }
   }
 }

@@ -947,16 +947,14 @@ bool cmFileCommand::HandleMakeDirectoryCommand(
   // File command has at least one argument
   assert(args.size() > 1);
 
-  std::vector<std::string>::const_iterator i = args.begin();
-
-  i++; // Get rid of subcommand
-
   std::string expr;
-  for (; i != args.end(); ++i) {
-    const std::string* cdir = &(*i);
-    if (!cmsys::SystemTools::FileIsFullPath(*i)) {
+  for (std::string const& arg :
+       cmMakeRange(args).advance(1)) // Get rid of subcommand
+  {
+    const std::string* cdir = &arg;
+    if (!cmsys::SystemTools::FileIsFullPath(arg)) {
       expr = this->Makefile->GetCurrentSourceDirectory();
-      expr += "/" + *i;
+      expr += "/" + arg;
       cdir = &expr;
     }
     if (!this->Makefile->CanIWriteThisFile(*cdir)) {
@@ -981,15 +979,13 @@ bool cmFileCommand::HandleTouchCommand(std::vector<std::string> const& args,
   // File command has at least one argument
   assert(args.size() > 1);
 
-  std::vector<std::string>::const_iterator i = args.begin();
-
-  i++; // Get rid of subcommand
-
-  for (; i != args.end(); ++i) {
-    std::string tfile = *i;
+  for (std::string const& arg :
+       cmMakeRange(args).advance(1)) // Get rid of subcommand
+  {
+    std::string tfile = arg;
     if (!cmsys::SystemTools::FileIsFullPath(tfile)) {
       tfile = this->Makefile->GetCurrentSourceDirectory();
-      tfile += "/" + *i;
+      tfile += "/" + arg;
     }
     if (!this->Makefile->CanIWriteThisFile(tfile)) {
       std::string e =
@@ -2481,14 +2477,14 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
 {
 
   std::string message;
-  std::vector<std::string>::const_iterator i = args.begin();
 
-  i++; // Get rid of subcommand
-  for (; i != args.end(); ++i) {
-    std::string fileName = *i;
+  for (std::string const& arg :
+       cmMakeRange(args).advance(1)) // Get rid of subcommand
+  {
+    std::string fileName = arg;
     if (!cmsys::SystemTools::FileIsFullPath(fileName)) {
       fileName = this->Makefile->GetCurrentSourceDirectory();
-      fileName += "/" + *i;
+      fileName += "/" + arg;
     }
 
     if (cmSystemTools::FileIsDirectory(fileName) &&

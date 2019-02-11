@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmComputeTargetDepends.h"
 
+#include "cmAlgorithms.h"
 #include "cmComputeComponentGraph.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -549,10 +550,9 @@ bool cmComputeTargetDepends::ComputeFinalDepends(
     int head = -1;
     std::set<int> emitted;
     NodeList const& nl = components[c];
-    for (NodeList::const_reverse_iterator ni = nl.rbegin(); ni != nl.rend();
-         ++ni) {
+    for (int ni : cmReverseRange(nl)) {
       std::set<int> visited;
-      if (!this->IntraComponent(cmap, c, *ni, &head, emitted, visited)) {
+      if (!this->IntraComponent(cmap, c, ni, &head, emitted, visited)) {
         // Cycle in add_dependencies within component!
         this->ComplainAboutBadComponent(ccg, c, true);
         return false;

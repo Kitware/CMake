@@ -707,10 +707,8 @@ std::string cmTarget::GetDebugGeneratorExpressions(
   std::string configString = "$<CONFIG:" + debugConfigs[0] + ">";
 
   if (debugConfigs.size() > 1) {
-    for (std::vector<std::string>::const_iterator li =
-           debugConfigs.begin() + 1;
-         li != debugConfigs.end(); ++li) {
-      configString += ",$<CONFIG:" + *li + ">";
+    for (std::string const& conf : cmMakeRange(debugConfigs).advance(1)) {
+      configString += ",$<CONFIG:" + conf + ">";
     }
     configString = "$<OR:" + configString + ">";
   }

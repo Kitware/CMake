@@ -2223,11 +2223,8 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
       dflag = df;
     }
   }
-
-  std::set<std::string>::const_iterator defineIt = defines.begin();
-  const std::set<std::string>::const_iterator defineEnd = defines.end();
   const char* itemSeparator = definesString.empty() ? "" : " ";
-  for (; defineIt != defineEnd; ++defineIt) {
+  for (std::string const& define : defines) {
     // Append the definition with proper escaping.
     std::string def = dflag;
     if (this->GetState()->UseWatcomWMake()) {
@@ -2241,7 +2238,7 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
       // command line without any escapes.  However we still have to
       // get the '$' and '#' characters through WMake as '$$' and
       // '$#'.
-      for (const char* c = defineIt->c_str(); *c; ++c) {
+      for (const char* c = define.c_str(); *c; ++c) {
         if (*c == '$' || *c == '#') {
           def += '$';
         }
@@ -2250,11 +2247,11 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
     } else {
       // Make the definition appear properly on the command line.  Use
       // -DNAME="value" instead of -D"NAME=value" for historical reasons.
-      std::string::size_type eq = defineIt->find("=");
-      def += defineIt->substr(0, eq);
+      std::string::size_type eq = define.find('=');
+      def += define.substr(0, eq);
       if (eq != std::string::npos) {
         def += "=";
-        def += this->EscapeForShell(defineIt->c_str() + eq + 1, true);
+        def += this->EscapeForShell(define.c_str() + eq + 1, true);
       }
     }
     definesString += itemSeparator;

@@ -438,14 +438,13 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   const char* sep = "";
   std::vector<std::string>::const_iterator de =
     cmRemoveDuplicates(this->Defines);
-  for (std::vector<std::string>::const_iterator di = this->Defines.begin();
-       di != de; ++di) {
+  for (std::string const& di : cmMakeRange(this->Defines.cbegin(), de)) {
     // Escape the definition for the compiler.
     std::string define;
     if (this->Version < cmGlobalVisualStudioGenerator::VS10) {
-      define = this->LocalGenerator->EscapeForShell(*di, true);
+      define = this->LocalGenerator->EscapeForShell(di, true);
     } else {
-      define = *di;
+      define = di;
     }
     // Escape this flag for the MSBuild.
     if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
