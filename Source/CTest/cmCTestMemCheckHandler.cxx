@@ -725,7 +725,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
   cmsys::RegularExpression leakWarning("(Direct|Indirect) leak of .*");
   int defects = 0;
   std::vector<std::string> lines;
-  cmSystemTools::Split(str.c_str(), lines);
+  cmsys::SystemTools::Split(str, lines);
   std::ostringstream ostr;
   log.clear();
   for (std::string const& l : lines) {
@@ -755,7 +755,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
   const std::string& str, std::string& log, std::vector<int>& results)
 {
   std::vector<std::string> lines;
-  cmSystemTools::Split(str.c_str(), lines);
+  cmsys::SystemTools::Split(str, lines);
   std::ostringstream ostr;
   log.clear();
 
@@ -798,7 +798,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
   const std::string& str, std::string& log, std::vector<int>& results)
 {
   std::vector<std::string> lines;
-  cmSystemTools::Split(str.c_str(), lines);
+  cmsys::SystemTools::Split(str, lines);
   bool unlimitedOutput = false;
   if (str.find("CTEST_FULL_OUTPUT") != std::string::npos ||
       this->CustomMaximumFailedTestOutputSize == 0) {
@@ -937,7 +937,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
   log.clear();
   auto sttime = std::chrono::steady_clock::now();
   std::vector<std::string> lines;
-  cmSystemTools::Split(str.c_str(), lines);
+  cmsys::SystemTools::Split(str, lines);
   cmCTestOptionalLog(this->CTest, DEBUG,
                      "Start test: " << lines.size() << std::endl, this->Quiet);
   std::vector<std::string>::size_type cc;

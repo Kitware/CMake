@@ -1105,7 +1105,7 @@ std::string cmake::FindCacheFile(const std::string& binaryDir)
     if (cmSystemTools::FileExists(cmakeFiles)) {
       std::string cachePathFound =
         cmSystemTools::FileExistsInParentDirectories("CMakeCache.txt",
-                                                     cachePath.c_str(), "/");
+                                                     cachePath, "/");
       if (!cachePathFound.empty()) {
         cachePath = cmSystemTools::GetFilenamePath(cachePathFound);
       }
