@@ -1985,7 +1985,9 @@ cmTarget* cmMakefile::AddLibrary(const std::string& lname,
   // over changes in CMakeLists.txt, making the information stale and
   // hence useless.
   target->ClearDependencyInformation(*this);
-  if (excludeFromAll || this->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
+  if (excludeFromAll ||
+      (type != cmStateEnums::INTERFACE_LIBRARY &&
+       this->GetPropertyAsBool("EXCLUDE_FROM_ALL"))) {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
   target->AddSources(srcs);

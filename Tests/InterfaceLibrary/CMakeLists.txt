@@ -47,6 +47,7 @@ target_link_libraries(InterfaceLibrary
 add_dependencies(InterfaceLibrary item_fake_tgt)
 
 add_subdirectory(libsdir)
+add_subdirectory(excluded EXCLUDE_FROM_ALL)
 
 add_executable(sharedlibtestexe sharedlibtestexe.cpp)
 target_link_libraries(sharedlibtestexe shared_iface imported::iface)
