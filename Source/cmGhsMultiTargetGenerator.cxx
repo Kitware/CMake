@@ -454,7 +454,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       cmSystemTools::IsOn(
         this->GeneratorTarget->GetProperty("GHS_NO_SOURCE_GROUP_FILE")) ||
       cmSystemTools::IsOn(
-        this->Makefile->GetDefinition("GHS_NO_SOURCE_GROUP_FILE"));
+        this->Makefile->GetDefinition("CMAKE_GHS_NO_SOURCE_GROUP_FILE"));
     if (useProjectFile || sg.empty()) {
       fout = &fout_proj;
     } else {
