@@ -1834,7 +1834,7 @@ protected:
     if (!this->MessageNever && (copy || !this->MessageLazy)) {
       std::string message = (copy ? "Installing: " : "Up-to-date: ");
       message += toFile;
-      this->Makefile->DisplayStatus(message.c_str(), -1);
+      this->Makefile->DisplayStatus(message, -1);
     }
     if (type != TypeDir) {
       // Add the file to the manifest.
@@ -2214,7 +2214,7 @@ bool cmFileCommand::HandleRPathChangeCommand(
       message += "\" to \"";
       message += newRPath;
       message += "\"";
-      this->Makefile->DisplayStatus(message.c_str(), -1);
+      this->Makefile->DisplayStatus(message, -1);
     }
     if (have_ft) {
       cmSystemTools::FileTimeSet(file, ft);
@@ -2278,7 +2278,7 @@ bool cmFileCommand::HandleRPathRemoveCommand(
       std::string message = "Removed runtime path from \"";
       message += file;
       message += "\"";
-      this->Makefile->DisplayStatus(message.c_str(), -1);
+      this->Makefile->DisplayStatus(message, -1);
     }
     if (have_ft) {
       cmSystemTools::FileTimeSet(file, ft);
@@ -2647,7 +2647,7 @@ int cmFileDownloadProgressCallback(void* clientp, double dltotal, double dlnow,
   if (helper->UpdatePercentage(dlnow, dltotal, status)) {
     cmFileCommand* fc = helper->GetFileCommand();
     cmMakefile* mf = fc->GetMakefile();
-    mf->DisplayStatus(status.c_str(), -1);
+    mf->DisplayStatus(status, -1);
   }
 
   return 0;
@@ -2665,7 +2665,7 @@ int cmFileUploadProgressCallback(void* clientp, double dltotal, double dlnow,
   if (helper->UpdatePercentage(ulnow, ultotal, status)) {
     cmFileCommand* fc = helper->GetFileCommand();
     cmMakefile* mf = fc->GetMakefile();
-    mf->DisplayStatus(status.c_str(), -1);
+    mf->DisplayStatus(status, -1);
   }
 
   return 0;

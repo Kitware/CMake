@@ -1006,7 +1006,7 @@ bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
         winSDK_7_1)) {
     std::ostringstream m;
     m << "Found Windows SDK v7.1: " << winSDK_7_1;
-    mf->DisplayStatus(m.str().c_str(), -1);
+    mf->DisplayStatus(m.str(), -1);
     this->DefaultPlatformToolset = "Windows7.1SDK";
     return true;
   } else {

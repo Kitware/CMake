@@ -1705,7 +1705,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   ret = this->Generate();
   std::string message = "Build files have been written to: ";
   message += this->GetHomeOutputDirectory();
-  this->UpdateProgress(message.c_str(), -1);
+  this->UpdateProgress(message, -1);
   return ret;
 }
 
@@ -1925,7 +1925,7 @@ void cmake::SetProgressCallback(ProgressCallbackType f)
   this->ProgressCallback = std::move(f);
 }
 
-void cmake::UpdateProgress(const char* msg, float prog)
+void cmake::UpdateProgress(const std::string& msg, float prog)
 {
   if (this->ProgressCallback && !this->State->GetIsInTryCompile()) {
     this->ProgressCallback(msg, prog);
@@ -2640,7 +2640,7 @@ int cmake::Build(int jobs, const std::string& dir, const std::string& target,
       }
       std::string message = "Build files have been written to: ";
       message += this->GetHomeOutputDirectory();
-      this->UpdateProgress(message.c_str(), -1);
+      this->UpdateProgress(message, -1);
 
       // Restore the previously set directories to their original value.
       this->SetHomeDirectory(homeOrig);

@@ -148,14 +148,15 @@ static void cmakemainMessageCallback(const std::string& m,
   std::cerr << m << cmakemainGetStack(cm) << std::endl << std::flush;
 }
 
-static void cmakemainProgressCallback(const char* m, float prog, cmake* cm)
+static void cmakemainProgressCallback(const std::string& m, float prog,
+                                      cmake* cm)
 {
   cmMakefile* mf = cmakemainGetMakefile(cm);
   std::string dir;
-  if ((mf) && (strstr(m, "Configuring") == m) && (prog < 0)) {
+  if (mf && cmHasLiteralPrefix(m, "Configuring") && (prog < 0)) {
     dir = " ";
     dir += mf->GetCurrentSourceDirectory();
-  } else if ((mf) && (strstr(m, "Generating") == m)) {
+  } else if (mf && cmHasLiteralPrefix(m, "Generating")) {
     dir = " ";
     dir += mf->GetCurrentBinaryDirectory();
   }
@@ -323,7 +324,7 @@ int do_cmake(int ac, char const* const* av)
     [&cm](const std::string& msg, const char* title) {
       cmakemainMessageCallback(msg, title, &cm);
     });
-  cm.SetProgressCallback([&cm](const char* msg, float prog) {
+  cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
   });
   cm.SetWorkingMode(workingMode);
@@ -504,7 +505,7 @@ static int do_build(int ac, char const* const* av)
     [&cm](const std::string& msg, const char* title) {
       cmakemainMessageCallback(msg, title, &cm);
     });
-  cm.SetProgressCallback([&cm](const char* msg, float prog) {
+  cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
   });
   return cm.Build(jobs, dir, target, config, nativeOptions, clean, verbose);
@@ -547,7 +548,7 @@ static int do_open(int ac, char const* const* av)
     [&cm](const std::string& msg, const char* title) {
       cmakemainMessageCallback(msg, title, &cm);
     });
-  cm.SetProgressCallback([&cm](const char* msg, float prog) {
+  cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
   });
   return cm.Open(dir, false) ? 0 : 1;

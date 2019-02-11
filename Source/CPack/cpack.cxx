@@ -90,7 +90,7 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
   return 1;
 }
 
-static void cpackProgressCallback(const char* message, float /*unused*/)
+static void cpackProgressCallback(const std::string& message, float /*unused*/)
 {
   std::cout << "-- " << message << std::endl;
 }

@@ -43,7 +43,8 @@ cmCPackGenerator::~cmCPackGenerator()
   this->MakefileMap = nullptr;
 }
 
-void cmCPackGenerator::DisplayVerboseOutput(const char* msg, float progress)
+void cmCPackGenerator::DisplayVerboseOutput(const std::string& msg,
+                                            float progress)
 {
   (void)progress;
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "" << msg << std::endl);
@@ -689,7 +690,7 @@ int cmCPackGenerator::InstallCMakeProject(
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cm.AddCMakePaths();
-  cm.SetProgressCallback([this](const char* msg, float prog) {
+  cm.SetProgressCallback([this](const std::string& msg, float prog) {
     this->DisplayVerboseOutput(msg, prog);
   });
   cm.SetTrace(this->Trace);

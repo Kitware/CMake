@@ -501,14 +501,14 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
   pos_form_cursor(this->Form);
 }
 
-void cmCursesMainForm::UpdateProgress(const char* msg, float prog)
+void cmCursesMainForm::UpdateProgress(const std::string& msg, float prog)
 {
   char tmp[1024];
   const char* cmsg = tmp;
   if (prog >= 0) {
-    sprintf(tmp, "%s %i%%", msg, static_cast<int>(100 * prog));
+    sprintf(tmp, "%s %i%%", msg.c_str(), static_cast<int>(100 * prog));
   } else {
-    cmsg = msg;
+    cmsg = msg.c_str();
   }
   this->UpdateStatusBar(cmsg);
   this->PrintKeys(1);
@@ -528,7 +528,9 @@ int cmCursesMainForm::Configure(int noconfigure)
   touchwin(stdscr);
   refresh();
   this->CMakeInstance->SetProgressCallback(
-    [this](const char* msg, float prog) { this->UpdateProgress(msg, prog); });
+    [this](const std::string& msg, float prog) {
+      this->UpdateProgress(msg, prog);
+    });
 
   // always save the current gui values to disk
   this->FillCacheManagerFromUI();
@@ -598,7 +600,9 @@ int cmCursesMainForm::Generate()
   touchwin(stdscr);
   refresh();
   this->CMakeInstance->SetProgressCallback(
-    [this](const char* msg, float prog) { this->UpdateProgress(msg, prog); });
+    [this](const std::string& msg, float prog) {
+      this->UpdateProgress(msg, prog);
+    });
 
   // Get rid of previous errors
   this->Errors = std::vector<std::string>();

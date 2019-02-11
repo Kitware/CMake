@@ -288,11 +288,12 @@ void cmCTestScriptHandler::CreateCMake()
       this->ParentMakefile->GetRecursionDepth());
   }
 
-  this->CMake->SetProgressCallback([this](const char* m, float /*unused*/) {
-    if (m && *m) {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "-- " << m << std::endl);
-    }
-  });
+  this->CMake->SetProgressCallback(
+    [this](const std::string& m, float /*unused*/) {
+      if (!m.empty()) {
+        cmCTestLog(this->CTest, HANDLER_OUTPUT, "-- " << m << std::endl);
+      }
+    });
 
   this->AddCTestCommand("ctest_build", new cmCTestBuildCommand);
   this->AddCTestCommand("ctest_configure", new cmCTestConfigureCommand);

@@ -102,7 +102,7 @@ public:
   /**
    * Progress callback
    */
-  void UpdateProgress(const char* msg, float prog);
+  void UpdateProgress(const std::string& msg, float prog);
 
 protected:
   // Copy the cache values from the user interface to the actual

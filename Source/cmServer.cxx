@@ -103,7 +103,7 @@ void cmServer::ProcessRequest(cmConnection* connection,
 
   if (this->Protocol) {
     this->Protocol->CMakeInstance()->SetProgressCallback(
-      [&request](const char* msg, float prog) {
+      [&request](const std::string& msg, float prog) {
         reportProgress(msg, prog, request);
       });
     this->WriteResponse(connection, this->Protocol->Process(request),
@@ -155,7 +155,7 @@ void cmServer::PrintHello(cmConnection* connection) const
   this->WriteJsonObject(connection, hello, nullptr);
 }
 
-void cmServer::reportProgress(const char* msg, float progress,
+void cmServer::reportProgress(const std::string& msg, float progress,
                               const cmServerRequest& request)
 {
   if (progress < 0.0f || progress > 1.0f) {

@@ -639,7 +639,7 @@ public:
 #endif
 
   ///! Display progress or status message.
-  void DisplayStatus(const char*, float) const;
+  void DisplayStatus(const std::string&, float) const;
 
   /**
    * Expand the given list file arguments into the full set after
