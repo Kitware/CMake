@@ -40,6 +40,27 @@ public:
     std::vector<std::string> Resources;
   };
 
+  /// @brief Abstract moc/uic/rcc generator variables base class
+  struct GenVarsT
+  {
+    bool Enabled = false;
+    // Generator type/name
+    GenT Gen;
+    std::string const& GenName;
+    std::string const& GenNameUpper;
+    // Executable
+    std::string ExecutableTargetName;
+    cmGeneratorTarget* ExecutableTarget = nullptr;
+    std::string Executable;
+
+    /// @brief Constructor
+    GenVarsT(GenT gen, std::string const& genName,
+             std::string const& genNameUpper)
+      : Gen(gen)
+      , GenName(genName)
+      , GenNameUpper(genNameUpper){};
+  };
+
   /// @brief Writes a CMake info file
   class InfoWriter
   {
@@ -102,17 +123,12 @@ private:
   void AddGeneratedSource(std::string const& filename, GenT genType,
                           bool prepend = false);
 
-  bool GetMocExecutable();
-  bool GetUicExecutable();
-  bool GetRccExecutable();
+  bool GetQtExecutable(GenVarsT& genVars, const std::string& executable,
+                       bool ignoreMissingTarget, std::string* output) const;
 
   bool RccListInputs(std::string const& fileName,
                      std::vector<std::string>& files,
                      std::string& errorMessage);
-
-  std::pair<bool, std::string> GetQtExecutable(const std::string& executable,
-                                               bool ignoreMissingTarget,
-                                               std::string* output);
 
 private:
   cmQtAutoGenGlobalInitializer* GlobalInitializer;
@@ -159,10 +175,8 @@ private:
   } AutogenTarget;
 
   /// @brief Moc only variables
-  struct
+  struct MocT : public GenVarsT
   {
-    bool Enabled = false;
-    std::string Executable;
     std::string PredefsCmd;
     std::set<std::string> Skip;
     std::vector<std::string> Includes;
@@ -170,29 +184,40 @@ private:
     std::set<std::string> Defines;
     std::map<std::string, std::set<std::string>> ConfigDefines;
     std::string MocsCompilation;
+
+    /// @brief Constructor
+    MocT()
+      : GenVarsT(cmQtAutoGen::GenT::MOC, cmQtAutoGen::GenNameMoc,
+                 cmQtAutoGen::GenNameMocUpper){};
   } Moc;
 
-  ///@brief Uic only variables
-  struct
+  /// @brief Uic only variables
+  struct UicT : public GenVarsT
   {
-    bool Enabled = false;
-    std::string Executable;
     std::set<std::string> Skip;
     std::vector<std::string> SearchPaths;
     std::vector<std::string> Options;
     std::map<std::string, std::vector<std::string>> ConfigOptions;
     std::vector<std::string> FileFiles;
     std::vector<std::vector<std::string>> FileOptions;
+
+    /// @brief Constructor
+    UicT()
+      : GenVarsT(cmQtAutoGen::GenT::UIC, cmQtAutoGen::GenNameUic,
+                 cmQtAutoGen::GenNameUicUpper){};
   } Uic;
 
   /// @brief Rcc only variables
-  struct
+  struct RccT : public GenVarsT
   {
-    bool Enabled = false;
     bool GlobalTarget = false;
-    std::string Executable;
     std::vector<std::string> ListOptions;
     std::vector<Qrc> Qrcs;
+
+    /// @brief Constructor
+    RccT()
+      : GenVarsT(cmQtAutoGen::GenT::RCC, cmQtAutoGen::GenNameRcc,
+                 cmQtAutoGen::GenNameRccUpper){};
   } Rcc;
 };
 
