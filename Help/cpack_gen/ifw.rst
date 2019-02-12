@@ -135,6 +135,10 @@ Package
 
  Wizard style to be used ("Modern", "Mac", "Aero" or "Classic").
 
+.. variable:: CPACK_IFW_PACKAGE_STYLESHEET
+
+ Set the stylesheet file.
+
 .. variable:: CPACK_IFW_PACKAGE_WIZARD_DEFAULT_WIDTH
 
  Default width of the wizard in pixels. Setting a banner image will override this.
