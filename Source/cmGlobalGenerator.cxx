@@ -1225,7 +1225,7 @@ void cmGlobalGenerator::Configure()
     } else {
       msg << "Configuring done";
     }
-    this->CMakeInstance->UpdateProgress(msg.str().c_str(), -1);
+    this->CMakeInstance->UpdateProgress(msg.str(), -1);
   }
 }
 

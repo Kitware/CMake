@@ -37,7 +37,7 @@ QCMake::QCMake(QObject* p)
   this->CMakeInstance->SetCMakeEditCommand(
     cmSystemTools::GetCMakeGUICommand());
   this->CMakeInstance->SetProgressCallback(
-    [this](const char* msg, float percent) {
+    [this](const std::string& msg, float percent) {
       this->progressCallback(msg, percent);
     });
 
@@ -346,12 +346,12 @@ bool QCMake::interruptCallback()
 #endif
 }
 
-void QCMake::progressCallback(const char* msg, float percent)
+void QCMake::progressCallback(const std::string& msg, float percent)
 {
   if (percent >= 0) {
-    emit this->progressChanged(QString::fromLocal8Bit(msg), percent);
+    emit this->progressChanged(QString::fromStdString(msg), percent);
   } else {
-    emit this->outputMessage(QString::fromLocal8Bit(msg));
+    emit this->outputMessage(QString::fromStdString(msg));
   }
   QCoreApplication::processEvents();
 }

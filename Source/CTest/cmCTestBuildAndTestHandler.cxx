@@ -126,10 +126,11 @@ public:
     cmSystemTools::SetStdoutCallback([&s](std::string const& m) { s += m; });
     cmSystemTools::SetStderrCallback([&s](std::string const& m) { s += m; });
 
-    this->CM.SetProgressCallback([&s](const char* msg, float /*unused*/) {
-      s += msg;
-      s += "\n";
-    });
+    this->CM.SetProgressCallback(
+      [&s](const std::string& msg, float /*unused*/) {
+        s += msg;
+        s += "\n";
+      });
   }
 
   ~cmCTestBuildAndTestCaptureRAII()

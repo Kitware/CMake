@@ -96,7 +96,7 @@ public:
   void SetLogger(cmCPackLog* log) { this->Logger = log; }
 
   //! Display verbose information via logger
-  void DisplayVerboseOutput(const char* msg, float progress);
+  void DisplayVerboseOutput(const std::string& msg, float progress);
 
   bool ReadListFile(const char* moduleName);
 

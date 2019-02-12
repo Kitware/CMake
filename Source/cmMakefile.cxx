@@ -3547,7 +3547,7 @@ cmState* cmMakefile::GetState() const
   return this->GetCMakeInstance()->GetState();
 }
 
-void cmMakefile::DisplayStatus(const char* message, float s) const
+void cmMakefile::DisplayStatus(const std::string& message, float s) const
 {
   cmake* cm = this->GetCMakeInstance();
   if (cm->GetWorkingMode() == cmake::FIND_PACKAGE_MODE) {
