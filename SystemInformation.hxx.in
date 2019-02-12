@@ -56,6 +56,9 @@ public:
   SystemInformation();
   ~SystemInformation();
 
+  SystemInformation(const SystemInformation&) = delete;
+  SystemInformation& operator=(const SystemInformation&) = delete;
+
   const char* GetVendorString();
   const char* GetVendorID();
   std::string GetTypeID();

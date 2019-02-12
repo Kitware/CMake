@@ -416,6 +416,9 @@ public:
     {
     }
     ~Free() { free(const_cast<envchar*>(this->Env)); }
+
+    Free(const Free&) = delete;
+    Free& operator=(const Free&) = delete;
   };
 
   const envchar* Release(const envchar* env)
@@ -473,7 +476,7 @@ void SystemTools::GetPath(std::vector<std::string>& path, const char* env)
   }
 
   // A hack to make the below algorithm work.
-  if (!pathEnv.empty() && *pathEnv.rbegin() != pathSep) {
+  if (!pathEnv.empty() && pathEnv.back() != pathSep) {
     pathEnv += pathSep;
   }
   std::string::size_type start = 0;
@@ -1943,7 +1946,7 @@ void SystemTools::ConvertToUnixSlashes(std::string& path)
   // a single /
   pathCString = path.c_str();
   size_t size = path.size();
-  if (size > 1 && *path.rbegin() == '/') {
+  if (size > 1 && path.back() == '/') {
     // if it is c:/ then do not remove the trailing slash
     if (!((size == 3 && pathCString[1] == ':'))) {
       path.resize(size - 1);
@@ -2692,7 +2695,7 @@ std::string SystemTools::FindName(const std::string& name,
     for (std::vector<std::string>::iterator i = path.begin(); i != path.end();
          ++i) {
       std::string& p = *i;
-      if (p.empty() || *p.rbegin() != '/') {
+      if (p.empty() || p.back() != '/') {
         p += "/";
       }
     }
@@ -2810,7 +2813,7 @@ std::string SystemTools::FindProgram(const std::string& name,
     for (std::vector<std::string>::iterator i = path.begin(); i != path.end();
          ++i) {
       std::string& p = *i;
-      if (p.empty() || *p.rbegin() != '/') {
+      if (p.empty() || p.back() != '/') {
         p += "/";
       }
     }
@@ -2888,7 +2891,7 @@ std::string SystemTools::FindLibrary(const std::string& name,
     for (std::vector<std::string>::iterator i = path.begin(); i != path.end();
          ++i) {
       std::string& p = *i;
-      if (p.empty() || *p.rbegin() != '/') {
+      if (p.empty() || p.back() != '/') {
         p += "/";
       }
     }
@@ -3234,10 +3237,10 @@ void SystemTools::AddTranslationPath(const std::string& a,
     if (SystemTools::FileIsFullPath(path_b) &&
         path_b.find("..") == std::string::npos) {
       // Before inserting make sure path ends with '/'
-      if (!path_a.empty() && *path_a.rbegin() != '/') {
+      if (!path_a.empty() && path_a.back() != '/') {
         path_a += '/';
       }
-      if (!path_b.empty() && *path_b.rbegin() != '/') {
+      if (!path_b.empty() && path_b.back() != '/') {
         path_b += '/';
       }
       if (!(path_a == path_b)) {
@@ -3446,7 +3449,7 @@ std::string SystemTools::RelativePath(const std::string& local,
   // between each entry that does not already have one
   for (std::vector<std::string>::iterator vit1 = finalPath.begin();
        vit1 != finalPath.end(); ++vit1) {
-    if (!relativePath.empty() && *relativePath.rbegin() != '/') {
+    if (!relativePath.empty() && relativePath.back() != '/') {
       relativePath += "/";
     }
     relativePath += *vit1;
@@ -3648,7 +3651,7 @@ void SystemTools::SplitPath(const std::string& p,
       }
 #endif
       if (!homedir.empty() &&
-          (*homedir.rbegin() == '/' || *homedir.rbegin() == '\\')) {
+          (homedir.back() == '/' || homedir.back() == '\\')) {
         homedir.resize(homedir.size() - 1);
       }
       SystemTools::SplitPath(homedir, components);
@@ -4016,7 +4019,7 @@ bool SystemTools::LocateFileInDir(const char* filename, const char* dir,
         filename_dir = SystemTools::GetFilenamePath(filename_dir);
         filename_dir_base = SystemTools::GetFilenameName(filename_dir);
 #if defined(_WIN32)
-        if (filename_dir_base.empty() || *filename_dir_base.rbegin() == ':')
+        if (filename_dir_base.empty() || filename_dir_base.back() == ':')
 #else
         if (filename_dir_base.empty())
 #endif
@@ -4092,7 +4095,7 @@ bool SystemTools::GetShortPath(const std::string& path, std::string& shortPath)
   std::string tempPath = path; // create a buffer
 
   // if the path passed in has quotes around it, first remove the quotes
-  if (!path.empty() && path[0] == '"' && *path.rbegin() == '"') {
+  if (!path.empty() && path[0] == '"' && path.back() == '"') {
     tempPath = path.substr(1, path.length() - 2);
   }
 
@@ -4169,7 +4172,7 @@ bool SystemTools::GetLineFromStream(std::istream& is, std::string& line,
   bool haveData = !line.empty() || !is.eof();
   if (!line.empty()) {
     // Avoid storing a carriage return character.
-    if (*line.rbegin() == '\r') {
+    if (line.back() == '\r') {
       line.resize(line.size() - 1);
     }
 
@@ -4307,7 +4310,7 @@ bool SystemTools::IsSubDirectory(const std::string& cSubdir,
   if (subdir.size() <= dir.size() || dir.empty()) {
     return false;
   }
-  bool isRootPath = *dir.rbegin() == '/'; // like "/" or "C:/"
+  bool isRootPath = dir.back() == '/'; // like "/" or "C:/"
   size_t expectedSlashPosition = isRootPath ? dir.size() - 1u : dir.size();
   if (subdir[expectedSlashPosition] != '/') {
     return false;
