@@ -15,7 +15,10 @@ This module defines the following :prop_tgt:`IMPORTED` targets:
 ``Octave::Interpreter``
   Octave interpreter (the main program)
 ``Octave::Octave``
-  include directories and libraries
+  include directories and the octave library
+``Octave::Octinterp``
+  include directories and the octinterp library including the dependency on
+  Octave::Octave
 
 If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 
@@ -142,6 +145,15 @@ if(Octave_Development_FOUND)
                           IMPORTED_LOCATION ${Octave_OCTAVE_LIBRARY}
                           INTERFACE_INCLUDE_DIRECTORIES ${Octave_INCLUDE_DIR}
                          )
+  endif()
+
+  if(NOT TARGET Octave::Octinterp)
+    add_library(Octave::Octinterp UNKNOWN IMPORTED)
+    set_target_properties(Octave::Octinterp PROPERTIES
+                          IMPORTED_LOCATION ${Octave_INTERP_LIBRARY}
+                          INTERFACE_INCLUDE_DIRECTORIES ${Octave_INCLUDE_DIR})
+    target_link_libraries(Octave::Octinterp INTERFACE
+                          Octave::Octave)
   endif()
 
 endif()

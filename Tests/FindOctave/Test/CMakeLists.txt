@@ -10,6 +10,10 @@ add_executable(test_tgt main.cpp)
 target_link_libraries(test_tgt Octave::Octave)
 add_test(NAME test_tgt COMMAND test_tgt)
 
+add_executable(test_octinterp_tgt interp_main.cpp)
+target_link_libraries(test_octinterp_tgt Octave::Octinterp)
+add_test(NAME test_octinterp_tgt COMMAND test_octinterp_tgt)
+
 add_test(NAME test_tgt_exe
          COMMAND Octave::Interpreter -q --eval "runtests('.')"
          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
