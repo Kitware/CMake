@@ -50,8 +50,9 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
   // Use copy-if-different if not appending.
   std::unique_ptr<cmsys::ofstream> foutPtr;
   if (this->Append) {
+    const auto openmodeApp = std::ios::app;
     foutPtr =
-      cm::make_unique<cmsys::ofstream>(this->Filename.c_str(), std::ios::app);
+      cm::make_unique<cmsys::ofstream>(this->Filename.c_str(), openmodeApp);
   } else {
     std::unique_ptr<cmGeneratedFileStream> ap(
       new cmGeneratedFileStream(this->Filename, true));
