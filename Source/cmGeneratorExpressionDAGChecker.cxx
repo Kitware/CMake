@@ -157,14 +157,8 @@ bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnly()
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingGenexExpression()
 {
-  const cmGeneratorExpressionDAGChecker* top = this;
-  const cmGeneratorExpressionDAGChecker* parent = this->Parent;
-  while (parent) {
-    top = parent;
-    parent = parent->Parent;
-  }
-
-  return top->Property == "TARGET_GENEX_EVAL" || top->Property == "GENEX_EVAL";
+  return this->Property.find("TARGET_GENEX_EVAL:") == 0 ||
+    this->Property.find("GENEX_EVAL:", 0) == 0;
 }
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingPICExpression()
