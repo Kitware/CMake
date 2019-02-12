@@ -766,7 +766,7 @@ Modify cmListFileLexer.c:
 
 /* IWYU pragma: no_forward_declare yyguts_t */
 
-#ifdef WIN32
+#ifdef _WIN32
 #include "cmsys/Encoding.h"
 #endif
 
