@@ -4620,7 +4620,7 @@ std::string SystemInformationImplementation::RunProcess(
 
   // Run the application
   kwsysProcess* gp = kwsysProcess_New();
-  kwsysProcess_SetCommand(gp, &*args.begin());
+  kwsysProcess_SetCommand(gp, args.data());
   kwsysProcess_SetOption(gp, kwsysProcess_Option_HideWindow, 1);
 
   kwsysProcess_Execute(gp);

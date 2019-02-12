@@ -54,6 +54,9 @@ class @KWSYS_NAMESPACE@_EXPORT SystemToolsManager
 public:
   SystemToolsManager();
   ~SystemToolsManager();
+
+  SystemToolsManager(const SystemToolsManager&) = delete;
+  SystemToolsManager& operator=(const SystemToolsManager&) = delete;
 };
 
 // This instance will show up in any translation unit that uses
