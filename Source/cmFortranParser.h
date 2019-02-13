@@ -137,6 +137,10 @@ struct cmFortranParser_s
   bool FindIncludeFile(const char* dir, const char* includeName,
                        std::string& fileName);
 
+  std::string ModName(std::string const& mod_name) const;
+  std::string SModName(std::string const& mod_name,
+                       std::string const& sub_name) const;
+
   // The include file search path.
   std::vector<std::string> IncludePath;
 
