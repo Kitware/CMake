@@ -40,12 +40,8 @@ void cmGhsMultiTargetGenerator::Generate()
   switch (this->GeneratorTarget->GetType()) {
     case cmStateEnums::EXECUTABLE: {
       // Get the name of the executable to generate.
-      std::string targetName;
-      std::string targetNameImport;
-      std::string targetNamePDB;
-      this->GeneratorTarget->GetExecutableNames(
-        targetName, this->TargetNameReal, targetNameImport, targetNamePDB,
-        this->ConfigName);
+      this->TargetNameReal =
+        this->GeneratorTarget->GetExecutableNames(this->ConfigName).Real;
       if (cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()) {
         this->TagType = GhsMultiGpj::INTERGRITY_APPLICATION;
       } else {
@@ -54,13 +50,8 @@ void cmGhsMultiTargetGenerator::Generate()
       break;
     }
     case cmStateEnums::STATIC_LIBRARY: {
-      std::string targetName;
-      std::string targetNameSO;
-      std::string targetNameImport;
-      std::string targetNamePDB;
-      this->GeneratorTarget->GetLibraryNames(
-        targetName, targetNameSO, this->TargetNameReal, targetNameImport,
-        targetNamePDB, this->ConfigName);
+      this->TargetNameReal =
+        this->GeneratorTarget->GetLibraryNames(this->ConfigName).Real;
       this->TagType = GhsMultiGpj::LIBRARY;
       break;
     }
@@ -71,13 +62,8 @@ void cmGhsMultiTargetGenerator::Generate()
       return;
     }
     case cmStateEnums::OBJECT_LIBRARY: {
-      std::string targetName;
-      std::string targetNameSO;
-      std::string targetNameImport;
-      std::string targetNamePDB;
-      this->GeneratorTarget->GetLibraryNames(
-        targetName, targetNameSO, this->TargetNameReal, targetNameImport,
-        targetNamePDB, this->ConfigName);
+      this->TargetNameReal =
+        this->GeneratorTarget->GetLibraryNames(this->ConfigName).Real;
       this->TagType = GhsMultiGpj::SUBPROJECT;
       break;
     }

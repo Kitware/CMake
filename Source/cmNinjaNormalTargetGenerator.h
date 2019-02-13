@@ -5,12 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmGeneratorTarget.h"
 #include "cmNinjaTargetGenerator.h"
 
 #include <string>
 #include <vector>
-
-class cmGeneratorTarget;
 
 class cmNinjaNormalTargetGenerator : public cmNinjaTargetGenerator
 {
@@ -40,11 +39,7 @@ private:
 
 private:
   // Target name info.
-  std::string TargetNameOut;
-  std::string TargetNameSO;
-  std::string TargetNameReal;
-  std::string TargetNameImport;
-  std::string TargetNamePDB;
+  cmGeneratorTarget::Names TargetNames;
   std::string TargetLinkLanguage;
   std::string DeviceLinkObject;
 };

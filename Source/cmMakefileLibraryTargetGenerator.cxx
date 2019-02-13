@@ -32,9 +32,8 @@ cmMakefileLibraryTargetGenerator::cmMakefileLibraryTargetGenerator(
 {
   this->CustomCommandDriver = OnDepends;
   if (this->GeneratorTarget->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-    this->GeneratorTarget->GetLibraryNames(
-      this->TargetNameOut, this->TargetNameSO, this->TargetNameReal,
-      this->TargetNameImport, this->TargetNamePDB, this->ConfigName);
+    this->TargetNames =
+      this->GeneratorTarget->GetLibraryNames(this->ConfigName);
   }
 
   this->OSXBundleGenerator =
@@ -489,25 +488,20 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   }
 
   // Construct the name of the library.
-  std::string targetName;
-  std::string targetNameSO;
-  std::string targetNameReal;
-  std::string targetNameImport;
-  std::string targetNamePDB;
-  this->GeneratorTarget->GetLibraryNames(targetName, targetNameSO,
-                                         targetNameReal, targetNameImport,
-                                         targetNamePDB, this->ConfigName);
+  this->GeneratorTarget->GetLibraryNames(this->ConfigName);
 
   // Construct the full path version of the names.
   std::string outpath;
   std::string outpathImp;
   if (this->GeneratorTarget->IsFrameworkOnApple()) {
     outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
-    this->OSXBundleGenerator->CreateFramework(targetName, outpath);
+    this->OSXBundleGenerator->CreateFramework(this->TargetNames.Output,
+                                              outpath);
     outpath += "/";
   } else if (this->GeneratorTarget->IsCFBundleOnApple()) {
     outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
-    this->OSXBundleGenerator->CreateCFBundle(targetName, outpath);
+    this->OSXBundleGenerator->CreateCFBundle(this->TargetNames.Output,
+                                             outpath);
     outpath += "/";
   } else if (relink) {
     outpath = this->Makefile->GetCurrentBinaryDirectory();
@@ -515,14 +509,14 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath);
     outpath += "/";
-    if (!targetNameImport.empty()) {
+    if (!this->TargetNames.ImportLibrary.empty()) {
       outpathImp = outpath;
     }
   } else {
     outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
     cmSystemTools::MakeDirectory(outpath);
     outpath += "/";
-    if (!targetNameImport.empty()) {
+    if (!this->TargetNames.ImportLibrary.empty()) {
       outpathImp = this->GeneratorTarget->GetDirectory(
         this->ConfigName, cmStateEnums::ImportLibraryArtifact);
       cmSystemTools::MakeDirectory(outpathImp);
@@ -539,11 +533,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   cmSystemTools::MakeDirectory(pdbOutputPath);
   pdbOutputPath += "/";
 
-  std::string targetFullPath = outpath + targetName;
-  std::string targetFullPathPDB = pdbOutputPath + targetNamePDB;
-  std::string targetFullPathSO = outpath + targetNameSO;
-  std::string targetFullPathReal = outpath + targetNameReal;
-  std::string targetFullPathImport = outpathImp + targetNameImport;
+  std::string targetFullPath = outpath + this->TargetNames.Output;
+  std::string targetFullPathPDB = pdbOutputPath + this->TargetNames.PDB;
+  std::string targetFullPathSO = outpath + this->TargetNames.SharedObject;
+  std::string targetFullPathReal = outpath + this->TargetNames.Real;
+  std::string targetFullPathImport =
+    outpathImp + this->TargetNames.ImportLibrary;
 
   // Construct the output path version of the names for use in command
   // arguments.
@@ -616,15 +611,16 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     commands1.clear();
   }
 
-  if (targetName != targetNameReal) {
+  if (this->TargetNames.Output != this->TargetNames.Real) {
     libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath));
   }
-  if (targetNameSO != targetNameReal && targetNameSO != targetName) {
+  if (this->TargetNames.SharedObject != this->TargetNames.Real &&
+      this->TargetNames.SharedObject != this->TargetNames.Output) {
     libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathSO));
   }
-  if (!targetNameImport.empty()) {
+  if (!this->TargetNames.ImportLibrary.empty()) {
     libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetCurrentBinaryDirectory(),
       targetFullPathImport));
@@ -820,7 +816,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     vars.ObjectsQuoted = buildObjs.c_str();
     if (this->GeneratorTarget->HasSOName(this->ConfigName)) {
       vars.SONameFlag = this->Makefile->GetSONameFlag(linkLanguage);
-      vars.TargetSOName = targetNameSO.c_str();
+      vars.TargetSOName = this->TargetNames.SharedObject.c_str();
     }
     vars.LinkFlags = linkFlags.c_str();
 
@@ -981,10 +977,11 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
   // Compute the list of outputs.
   std::vector<std::string> outputs(1, targetFullPathReal);
-  if (targetNameSO != targetNameReal) {
+  if (this->TargetNames.SharedObject != this->TargetNames.Real) {
     outputs.push_back(targetFullPathSO);
   }
-  if (targetName != targetNameSO && targetName != targetNameReal) {
+  if (this->TargetNames.Output != this->TargetNames.SharedObject &&
+      this->TargetNames.Output != this->TargetNames.Real) {
     outputs.push_back(targetFullPath);
   }
 
