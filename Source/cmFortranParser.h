@@ -131,6 +131,8 @@ struct cmFortranFile
 struct cmFortranCompiler
 {
   std::string Id;
+  std::string SModSep;
+  std::string SModExt;
 };
 
 struct cmFortranParser_s

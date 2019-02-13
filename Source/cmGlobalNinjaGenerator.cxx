@@ -1704,6 +1704,12 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
 
     Json::Value const& tdi_compiler_id = tdi["compiler-id"];
     fc.Id = tdi_compiler_id.asString();
+
+    Json::Value const& tdi_submodule_sep = tdi["submodule-sep"];
+    fc.SModSep = tdi_submodule_sep.asString();
+
+    Json::Value const& tdi_submodule_ext = tdi["submodule-ext"];
+    fc.SModExt = tdi_submodule_ext.asString();
   }
 
   cmFortranSourceInfo info;

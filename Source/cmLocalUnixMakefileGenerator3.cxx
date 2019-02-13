@@ -1808,6 +1808,17 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
                       << "_COMPILER_ID \"" << cid << "\")\n";
     }
 
+    if (implicitLang.first == "Fortran") {
+      std::string smodSep =
+        this->Makefile->GetSafeDefinition("CMAKE_Fortran_SUBMODULE_SEP");
+      std::string smodExt =
+        this->Makefile->GetSafeDefinition("CMAKE_Fortran_SUBMODULE_EXT");
+      cmakefileStream << "set(CMAKE_Fortran_SUBMODULE_SEP \"" << smodSep
+                      << "\")\n";
+      cmakefileStream << "set(CMAKE_Fortran_SUBMODULE_EXT \"" << smodExt
+                      << "\")\n";
+    }
+
     // Build a list of preprocessor definitions for the target.
     std::set<std::string> defines;
     this->GetTargetDefines(target, this->ConfigName, implicitLang.first,

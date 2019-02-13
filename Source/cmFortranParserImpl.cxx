@@ -79,7 +79,7 @@ std::string cmFortranParser_s::ModName(std::string const& mod_name) const
 std::string cmFortranParser_s::SModName(std::string const& mod_name,
                                         std::string const& sub_name) const
 {
-  return mod_name + "@" + sub_name + ".smod";
+  return mod_name + this->Compiler.SModSep + sub_name + this->Compiler.SModExt;
 }
 
 bool cmFortranParser_FilePush(cmFortranParser* parser, const char* fname)
