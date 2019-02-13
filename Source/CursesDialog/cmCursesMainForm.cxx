@@ -647,11 +647,12 @@ void cmCursesMainForm::RemoveEntry(const char* value)
     return;
   }
 
-  auto removeIt = std::find_if(this->Entries->begin(), this->Entries->end(),
-                               [value](cmCursesCacheEntryComposite* entry) {
-                                 const char* val = entry->GetValue();
-                                 return val && !strcmp(value, val);
-                               });
+  auto removeIt =
+    std::find_if(this->Entries->begin(), this->Entries->end(),
+                 [value](cmCursesCacheEntryComposite* entry) -> bool {
+                   const char* val = entry->GetValue();
+                   return val != nullptr && !strcmp(value, val);
+                 });
 
   if (removeIt != this->Entries->end()) {
     this->CMakeInstance->UnwatchUnusedCli(value);
