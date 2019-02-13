@@ -63,11 +63,6 @@ list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
   /lib /lib32 /lib64 /usr/lib /usr/lib32 /usr/lib64
   )
 
-# Platform-wide directories to avoid adding via -I<dir>.
-list(APPEND CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES
-  /usr/include
-  )
-
 # Default per-language values.  These may be later replaced after
 # parsing the implicit directory information from compiler output.
 set(_CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES_INIT

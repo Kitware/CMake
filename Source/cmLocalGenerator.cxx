@@ -935,15 +935,10 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     } else {
       rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
     }
+    cmSystemTools::ConvertToUnixSlashes(rootPath);
 
     // Raw list of implicit include directories
     std::vector<std::string> impDirVec;
-
-    // Get platform-wide implicit directories.
-    if (const char* implicitIncludes = (this->Makefile->GetDefinition(
-          "CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES"))) {
-      cmSystemTools::ExpandListArgument(implicitIncludes, impDirVec);
-    }
 
     // Load implicit include directories for this language.
     std::string key = "CMAKE_";
@@ -953,9 +948,28 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
       cmSystemTools::ExpandListArgument(value, impDirVec);
     }
 
+    // The Platform/UnixPaths module used to hard-code /usr/include for C, CXX,
+    // and CUDA in CMAKE_<LANG>_IMPLICIT_INCLUDE_DIRECTORIES, but those
+    // variables are now computed.  On macOS the /usr/include directory is
+    // inside the platform SDK so the computed value does not contain it
+    // directly.  In this case adding -I/usr/include can hide SDK headers so we
+    // must still exclude it.
+    if ((lang == "C" || lang == "CXX" || lang == "CUDA") &&
+        std::find(impDirVec.begin(), impDirVec.end(), "/usr/include") ==
+          impDirVec.end() &&
+        std::find_if(impDirVec.begin(), impDirVec.end(),
+                     [](std::string const& d) {
+                       return cmHasLiteralSuffix(d, "/usr/include");
+                     }) != impDirVec.end()) {
+      impDirVec.emplace_back("/usr/include");
+    }
+
     for (std::string const& i : impDirVec) {
-      std::string imd = rootPath + i;
+      std::string imd = i;
       cmSystemTools::ConvertToUnixSlashes(imd);
+      if (!rootPath.empty() && !cmHasPrefix(imd, rootPath)) {
+        imd = rootPath + imd;
+      }
       if (implicitSet.insert(imd).second) {
         implicitDirs.emplace_back(std::move(imd));
       }
