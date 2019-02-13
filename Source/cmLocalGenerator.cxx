@@ -935,6 +935,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     } else {
       rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
     }
+    cmSystemTools::ConvertToUnixSlashes(rootPath);
 
     // Raw list of implicit include directories
     std::vector<std::string> impDirVec;
@@ -964,8 +965,11 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     }
 
     for (std::string const& i : impDirVec) {
-      std::string imd = rootPath + i;
+      std::string imd = i;
       cmSystemTools::ConvertToUnixSlashes(imd);
+      if (!rootPath.empty() && !cmHasPrefix(imd, rootPath)) {
+        imd = rootPath + imd;
+      }
       if (implicitSet.insert(imd).second) {
         implicitDirs.emplace_back(std::move(imd));
       }
