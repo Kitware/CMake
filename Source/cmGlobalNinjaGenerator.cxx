@@ -1679,6 +1679,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
     return 1;
   }
 
+  cmFortranCompiler fc;
   std::vector<std::string> includes;
   {
     Json::Value tdio;
@@ -1700,11 +1701,14 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
         includes.push_back(tdi_include_dir.asString());
       }
     }
+
+    Json::Value const& tdi_compiler_id = tdi["compiler-id"];
+    fc.Id = tdi_compiler_id.asString();
   }
 
   cmFortranSourceInfo info;
   std::set<std::string> defines;
-  cmFortranParser parser(includes, defines, info);
+  cmFortranParser parser(fc, includes, defines, info);
   if (!cmFortranParser_FilePush(&parser, arg_pp.c_str())) {
     cmSystemTools::Error("-E cmake_ninja_depends failed to open ",
                          arg_pp.c_str());

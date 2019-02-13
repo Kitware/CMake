@@ -128,9 +128,14 @@ struct cmFortranFile
   bool LastCharWasNewline;
 };
 
+struct cmFortranCompiler
+{
+  std::string Id;
+};
+
 struct cmFortranParser_s
 {
-  cmFortranParser_s(std::vector<std::string> includes,
+  cmFortranParser_s(cmFortranCompiler fc, std::vector<std::string> includes,
                     std::set<std::string> defines, cmFortranSourceInfo& info);
   ~cmFortranParser_s();
 
@@ -140,6 +145,9 @@ struct cmFortranParser_s
   std::string ModName(std::string const& mod_name) const;
   std::string SModName(std::string const& mod_name,
                        std::string const& sub_name) const;
+
+  // What compiler.
+  cmFortranCompiler Compiler;
 
   // The include file search path.
   std::vector<std::string> IncludePath;
