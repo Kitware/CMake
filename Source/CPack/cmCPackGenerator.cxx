@@ -388,8 +388,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         }
         /* If it is not a symlink then do a plain copy */
         else if (!(cmSystemTools::CopyFileIfDifferent(inFile, filePath) &&
-                   cmSystemTools::CopyFileTime(inFile.c_str(),
-                                               filePath.c_str()))) {
+                   cmSystemTools::CopyFileTime(inFile, filePath))) {
           cmCPackLogger(cmCPackLog::LOG_ERROR,
                         "Problem copying file: " << inFile << " -> "
                                                  << filePath << std::endl);
