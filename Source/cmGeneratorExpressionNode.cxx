@@ -402,8 +402,8 @@ protected:
   {
     if (context->HeadTarget) {
       cmGeneratorExpressionDAGChecker dagChecker(
-        context->Backtrace, context->HeadTarget, genexOperator, content,
-        dagCheckerParent);
+        context->Backtrace, context->HeadTarget,
+        genexOperator + ":" + expression, content, dagCheckerParent);
       switch (dagChecker.Check()) {
         case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
         case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE: {
