@@ -453,7 +453,8 @@ bool cmGlobalVisualStudioVersionedGenerator::IsWin81SDKInstalled() const
         "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\"
         "Windows Kits\\Installed Roots;KitsRoot81",
         win81Root, cmSystemTools::KeyWOW64_32)) {
-    return cmSystemTools::FileExists(win81Root + "/um/windows.h", true);
+    return cmSystemTools::FileExists(win81Root + "/include/um/windows.h",
+                                     true);
   }
   return false;
 }
