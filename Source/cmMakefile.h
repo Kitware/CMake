@@ -313,6 +313,9 @@ public:
     PolicyPushPop(cmMakefile* m);
     ~PolicyPushPop();
 
+    PolicyPushPop(const PolicyPushPop&) = delete;
+    PolicyPushPop& operator=(const PolicyPushPop&) = delete;
+
   private:
     cmMakefile* Makefile;
   };
@@ -743,6 +746,9 @@ public:
                     cmPolicies::PolicyMap const& pm);
     ~FunctionPushPop();
 
+    FunctionPushPop(const FunctionPushPop&) = delete;
+    FunctionPushPop& operator=(const FunctionPushPop&) = delete;
+
     void Quiet() { this->ReportError = false; }
 
   private:
@@ -756,6 +762,9 @@ public:
     MacroPushPop(cmMakefile* mf, std::string const& fileName,
                  cmPolicies::PolicyMap const& pm);
     ~MacroPushPop();
+
+    MacroPushPop(const MacroPushPop&) = delete;
+    MacroPushPop& operator=(const MacroPushPop&) = delete;
 
     void Quiet() { this->ReportError = false; }
 

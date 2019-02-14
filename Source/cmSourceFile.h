@@ -34,6 +34,9 @@ public:
 
   ~cmSourceFile();
 
+  cmSourceFile(const cmSourceFile&) = delete;
+  cmSourceFile& operator=(const cmSourceFile&) = delete;
+
   /**
    * Get the list of the custom commands for this source file
    */

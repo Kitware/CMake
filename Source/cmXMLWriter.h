@@ -146,6 +146,8 @@ public:
     xmlwr.StartDocument();
   }
   ~cmXMLDocument() { xmlwr.EndDocument(); }
+  cmXMLDocument(const cmXMLDocument&) = delete;
+  cmXMLDocument& operator=(const cmXMLDocument&) = delete;
 
 private:
   friend class cmXMLElement;
@@ -171,6 +173,9 @@ public:
     xmlwr.StartElement(tag);
   }
   ~cmXMLElement() { xmlwr.EndElement(); }
+
+  cmXMLElement(const cmXMLElement&) = delete;
+  cmXMLElement& operator=(const cmXMLElement&) = delete;
 
   template <typename T>
   cmXMLElement& Attribute(const char* name, T const& value)

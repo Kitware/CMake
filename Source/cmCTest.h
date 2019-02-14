@@ -182,6 +182,9 @@ public:
   cmCTest();
   ~cmCTest();
 
+  cmCTest(const cmCTest&) = delete;
+  cmCTest& operator=(const cmCTest&) = delete;
+
   /** Set the notes files to be created. */
   void SetNotesFiles(const char* notes);
 

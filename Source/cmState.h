@@ -35,6 +35,9 @@ public:
   cmState();
   ~cmState();
 
+  cmState(const cmState&) = delete;
+  cmState& operator=(const cmState&) = delete;
+
   enum Mode
   {
     Unknown,

@@ -141,6 +141,9 @@ struct cmFortranParser_s
                     std::set<std::string> defines, cmFortranSourceInfo& info);
   ~cmFortranParser_s();
 
+  cmFortranParser_s(const cmFortranParser_s&) = delete;
+  cmFortranParser_s& operator=(const cmFortranParser_s&) = delete;
+
   bool FindIncludeFile(const char* dir, const char* includeName,
                        std::string& fileName);
 

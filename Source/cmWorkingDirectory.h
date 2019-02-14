@@ -22,6 +22,9 @@ public:
   cmWorkingDirectory(std::string const& newdir);
   ~cmWorkingDirectory();
 
+  cmWorkingDirectory(const cmWorkingDirectory&) = delete;
+  cmWorkingDirectory& operator=(const cmWorkingDirectory&) = delete;
+
   bool SetDirectory(std::string const& newdir);
   void Pop();
   bool Failed() const { return ResultCode != 0; }

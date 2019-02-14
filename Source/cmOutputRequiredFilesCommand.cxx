@@ -92,6 +92,9 @@ public:
    */
   ~cmLBDepend() { cmDeleteAll(this->DependInformationMap); }
 
+  cmLBDepend(const cmLBDepend&) = delete;
+  cmLBDepend& operator=(const cmLBDepend&) = delete;
+
   /**
    * Set the makefile that is used as a source of classes.
    */

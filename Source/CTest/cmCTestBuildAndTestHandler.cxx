@@ -140,6 +140,11 @@ public:
     cmSystemTools::SetStdoutCallback(nullptr);
     cmSystemTools::SetMessageCallback(nullptr);
   }
+
+  cmCTestBuildAndTestCaptureRAII(const cmCTestBuildAndTestCaptureRAII&) =
+    delete;
+  cmCTestBuildAndTestCaptureRAII& operator=(
+    const cmCTestBuildAndTestCaptureRAII&) = delete;
 };
 
 int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)

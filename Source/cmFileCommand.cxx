@@ -2691,6 +2691,9 @@ public:
     }
   }
 
+  cURLEasyGuard(const cURLEasyGuard&) = delete;
+  cURLEasyGuard& operator=(const cURLEasyGuard&) = delete;
+
   void release() { this->Easy = nullptr; }
 
 private:

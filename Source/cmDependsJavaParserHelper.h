@@ -24,6 +24,10 @@ public:
   cmDependsJavaParserHelper();
   ~cmDependsJavaParserHelper();
 
+  cmDependsJavaParserHelper(const cmDependsJavaParserHelper&) = delete;
+  cmDependsJavaParserHelper& operator=(const cmDependsJavaParserHelper&) =
+    delete;
+
   int ParseString(const char* str, int verb);
   int ParseFile(const char* file);
 

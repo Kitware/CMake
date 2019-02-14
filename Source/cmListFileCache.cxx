@@ -27,6 +27,8 @@ struct cmListFileParser
   cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
                    cmMessenger* messenger, const char* filename);
   ~cmListFileParser();
+  cmListFileParser(const cmListFileParser&) = delete;
+  cmListFileParser& operator=(const cmListFileParser&) = delete;
   void IssueFileOpenError(std::string const& text) const;
   void IssueError(std::string const& text) const;
   bool ParseFile();
