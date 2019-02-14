@@ -14,15 +14,13 @@
 class cmQtAutoGen
 {
 public:
-  /// @brief Nested lists separator
-  static std::string const ListSep;
   /// @brief Maximum number of parallel threads/processes in a generator
   static unsigned int const ParallelMax;
 
   /// @brief AutoGen generator type
   enum class GeneratorT
   {
-    GEN, // General
+    GEN, // AUTOGEN
     MOC,
     UIC,
     RCC
@@ -54,11 +52,23 @@ public:
     }
   };
 
+  /// @brief Nested lists separator
+  static std::string const ListSep;
+  // Generator names
+  static std::string const GenNameGen;
+  static std::string const GenNameMoc;
+  static std::string const GenNameUic;
+  static std::string const GenNameRcc;
+  static std::string const GenNameGenUpper;
+  static std::string const GenNameMocUpper;
+  static std::string const GenNameUicUpper;
+  static std::string const GenNameRccUpper;
+
 public:
   /// @brief Returns the generator name
   static std::string const& GeneratorName(GeneratorT genType);
   /// @brief Returns the generator name in upper case
-  static std::string GeneratorNameUpper(GeneratorT genType);
+  static std::string const& GeneratorNameUpper(GeneratorT genType);
 
   /// @brief Returns a string with the requested tool names
   static std::string Tools(bool moc, bool uic, bool rcc);
