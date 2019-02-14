@@ -18,7 +18,7 @@ Result variables
 
 This module will set the following variables in your project:
 
-``LIBXML2_FOUND``
+``LibXml2_FOUND``
   true if libxml2 headers and libraries were found
 ``LIBXML2_INCLUDE_DIR``
   the directory containing LibXml2 headers
