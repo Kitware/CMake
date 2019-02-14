@@ -226,7 +226,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (doing == DoingCMakeFlags) {
       cmakeFlags.push_back(argv[i]);
     } else if (doing == DoingCompileDefinitions) {
-      compileDefs.push_back(argv[i]);
+      cmSystemTools::ExpandListArgument(argv[i], compileDefs);
     } else if (doing == DoingLinkOptions) {
       linkOptions.push_back(argv[i]);
     } else if (doing == DoingLinkLibraries) {
