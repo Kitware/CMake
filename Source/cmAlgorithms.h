@@ -348,6 +348,14 @@ std::reverse_iterator<Iter> cmMakeReverseIterator(Iter it)
   return std::reverse_iterator<Iter>(it);
 }
 
+inline bool cmHasPrefix(std::string const& str, std::string const& prefix)
+{
+  if (str.size() < prefix.size()) {
+    return false;
+  }
+  return str.compare(0, prefix.size(), prefix) == 0;
+}
+
 inline bool cmHasSuffix(const std::string& str, const std::string& suffix)
 {
   if (str.size() < suffix.size()) {
