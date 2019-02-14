@@ -3272,12 +3272,14 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest/testOutput.log"
       )
 
-    configure_file("${CMake_SOURCE_DIR}/Tests/CTestTest2/test.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" @ONLY ESCAPE_QUOTES)
-    add_test(CTestTest2 ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" -V
-      --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
-      )
+    if(NOT CMake_TEST_EXTERNAL_CMAKE)
+      configure_file("${CMake_SOURCE_DIR}/Tests/CTestTest2/test.cmake.in"
+        "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" @ONLY ESCAPE_QUOTES)
+      add_test(CTestTest2 ${CMAKE_CTEST_COMMAND}
+        -S "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" -V
+        --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
+        )
+    endif()
 
     if("${CMAKE_GENERATOR}" MATCHES "Makefiles" OR "${CMAKE_GENERATOR}" MATCHES "Ninja")
       configure_file("${CMake_SOURCE_DIR}/Tests/CTestTestLaunchers/test.cmake.in"
@@ -3309,11 +3311,13 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
     endif ()
 
-    get_test_property(CTestTest2 TIMEOUT PREVIOUS_TIMEOUT)
-    if ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
-      set_tests_properties ( CTestTest2
-        PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
-    endif ()
+    if(NOT CMake_TEST_EXTERNAL_CMAKE)
+      get_test_property(CTestTest2 TIMEOUT PREVIOUS_TIMEOUT)
+      if("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
+        set_tests_properties ( CTestTest2
+          PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
+      endif()
+    endif()
   endif ()
 
   if(CMake_TEST_EXTERNAL_CMAKE)
