@@ -482,7 +482,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       // If error occurs we want to continue copying next files.
       bool return_value = false;
       for (std::string::size_type cc = 2; cc < args.size() - 1; cc++) {
-        if (!cmSystemTools::cmCopyFile(args[cc], args.back())) {
+        if (!cmsys::SystemTools::CopyFileAlways(args[cc], args.back())) {
           std::cerr << "Error copying file \"" << args[cc] << "\" to \""
                     << args.back() << "\".\n";
           return_value = true;
