@@ -1,6 +1,9 @@
 include(Compiler/Intel)
 __compiler_intel(Fortran)
 
+set(CMAKE_Fortran_SUBMODULE_SEP "@")
+set(CMAKE_Fortran_SUBMODULE_EXT ".smod")
+
 set(CMAKE_Fortran_MODDIR_FLAG "-module ")
 set(CMAKE_Fortran_FORMAT_FIXED_FLAG "-fixed")
 set(CMAKE_Fortran_FORMAT_FREE_FLAG "-free")

@@ -77,6 +77,10 @@ protected:
   // The source file from which to start scanning.
   std::string SourceFile;
 
+  std::string CompilerId;
+  std::string SModSep;
+  std::string SModExt;
+
   std::set<std::string> PPDefinitions;
 
   // Internal implementation details.

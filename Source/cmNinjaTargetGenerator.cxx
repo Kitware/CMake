@@ -1143,6 +1143,10 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang)
       mod_dir = this->Makefile->GetCurrentBinaryDirectory();
     }
     tdi["module-dir"] = mod_dir;
+    tdi["submodule-sep"] =
+      this->Makefile->GetSafeDefinition("CMAKE_Fortran_SUBMODULE_SEP");
+    tdi["submodule-ext"] =
+      this->Makefile->GetSafeDefinition("CMAKE_Fortran_SUBMODULE_EXT");
   }
 
   tdi["dir-cur-bld"] = this->Makefile->GetCurrentBinaryDirectory();
