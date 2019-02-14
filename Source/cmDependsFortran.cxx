@@ -94,6 +94,10 @@ cmDependsFortran::cmDependsFortran(cmLocalGenerator* lg)
     }
     this->PPDefinitions.insert(def);
   }
+
+  this->CompilerId = mf->GetSafeDefinition("CMAKE_Fortran_COMPILER_ID");
+  this->SModSep = mf->GetSafeDefinition("CMAKE_Fortran_SUBMODULE_SEP");
+  this->SModExt = mf->GetSafeDefinition("CMAKE_Fortran_SUBMODULE_EXT");
 }
 
 cmDependsFortran::~cmDependsFortran()
@@ -116,6 +120,11 @@ bool cmDependsFortran::WriteDependencies(const std::set<std::string>& sources,
     return false;
   }
 
+  cmFortranCompiler fc;
+  fc.Id = this->CompilerId;
+  fc.SModSep = this->SModSep;
+  fc.SModExt = this->SModExt;
+
   bool okay = true;
   for (std::string const& src : sources) {
     // Get the information object for this source.
@@ -123,7 +132,7 @@ bool cmDependsFortran::WriteDependencies(const std::set<std::string>& sources,
 
     // Create the parser object. The constructor takes info by reference,
     // so we may look into the resulting objects later.
-    cmFortranParser parser(this->IncludePath, this->PPDefinitions, info);
+    cmFortranParser parser(fc, this->IncludePath, this->PPDefinitions, info);
 
     // Push on the starting file.
     cmFortranParser_FilePush(&parser, src.c_str());
