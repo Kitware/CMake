@@ -7,7 +7,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include <algorithm>
-#include <iterator>
+#include <array>
 #include <sstream>
 #include <utility>
 
@@ -137,13 +137,21 @@ std::string cmQtAutoGen::Tools(bool moc, bool uic, bool rcc)
 
 std::string cmQtAutoGen::Quoted(std::string const& text)
 {
-  static const char* rep[18] = { "\\", "\\\\", "\"", "\\\"", "\a", "\\a",
-                                 "\b", "\\b",  "\f", "\\f",  "\n", "\\n",
-                                 "\r", "\\r",  "\t", "\\t",  "\v", "\\v" };
+  const std::array<std::pair<const char*, const char*>, 9> replaces = {
+    { { "\\", "\\\\" },
+      { "\"", "\\\"" },
+      { "\a", "\\a" },
+      { "\b", "\\b" },
+      { "\f", "\\f" },
+      { "\n", "\\n" },
+      { "\r", "\\r" },
+      { "\t", "\\t" },
+      { "\v", "\\v" } }
+  };
 
   std::string res = text;
-  for (const char* const* it = cm::cbegin(rep); it != cm::cend(rep); it += 2) {
-    cmSystemTools::ReplaceString(res, *it, *(it + 1));
+  for (auto const& pair : replaces) {
+    cmSystemTools::ReplaceString(res, pair.first, pair.second);
   }
   res = '"' + res;
   res += '"';
