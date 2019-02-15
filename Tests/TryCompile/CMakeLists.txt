@@ -165,6 +165,35 @@ try_compile(TEST_INNER
   OUTPUT_VARIABLE output)
 TEST_ASSERT(TEST_INNER "try_compile project mode failed:\n${output}")
 
+try_compile(COMPILE_DEFINITIONS_LIST_EXPANDED
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_SOURCE_DIR}/check_a_b.c
+    OUTPUT_VARIABLE output
+    COMPILE_DEFINITIONS "-DDEF_A;-DDEF_B"
+    )
+if(COMPILE_DEFINITIONS_LIST_EXPANDED)
+  message(STATUS "COMPILE_DEFINITIONS list expanded correctly")
+else()
+  string(REPLACE "\n" "\n  " output "  ${output}")
+  message(SEND_ERROR "COMPILE_DEFINITIONS list did not expand correctly\n${output}")
+endif()
+
+try_compile(SHOULD_FAIL_DUE_TO_BAD_SOURCE
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_SOURCE_DIR}/pass.c
+    OUTPUT_VARIABLE output
+    COMPILE_DEFINITIONS "bad#source.c"
+    )
+if(SHOULD_FAIL_DUE_TO_BAD_SOURCE AND NOT CMAKE_GENERATOR MATCHES "Watcom WMake|NMake Makefiles")
+  string(REPLACE "\n" "\n  " output "  ${output}")
+  message(SEND_ERROR "try_compile with bad#source.c did not fail:\n${output}")
+elseif(NOT output MATCHES [[(bad#source\.c|bad\\)]])
+  string(REPLACE "\n" "\n  " output "  ${output}")
+  message(SEND_ERROR "try_compile with bad#source.c failed without mentioning bad source:\n${output}")
+else()
+  message(STATUS "try_compile with bad#source.c correctly failed")
+endif()
+
 add_executable(TryCompile pass.c)
 
 ######################################
