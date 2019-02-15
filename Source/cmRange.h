@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 
 template <typename Iter>
@@ -53,6 +54,24 @@ public:
   {
     std::advance(this->End, -amount);
     return std::move(*this);
+  }
+
+  template <typename UnaryPredicate>
+  bool all_of(UnaryPredicate p) const
+  {
+    return std::all_of(this->Begin, this->End, std::ref(p));
+  }
+
+  template <typename UnaryPredicate>
+  bool any_of(UnaryPredicate p) const
+  {
+    return std::any_of(this->Begin, this->End, std::ref(p));
+  }
+
+  template <typename UnaryPredicate>
+  bool none_of(UnaryPredicate p) const
+  {
+    return std::none_of(this->Begin, this->End, std::ref(p));
   }
 
 private:
