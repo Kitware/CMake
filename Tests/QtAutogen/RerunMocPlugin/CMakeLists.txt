@@ -80,17 +80,10 @@ find_library(plEFile "PlugE" PATHS "${mocPlugBinDir}/Debug" "${mocPlugBinDir}" N
 # To avoid a race condition where the library has the same timestamp
 # as a source file and therefore gets rebuild
 # - sleep to ensure a timestamp change
-# - touch library to ensure it has a new timestamp
-acquire_timestamps(Before)
+# - rebuild library to ensure it has a new timestamp
 sleep()
-message(STATUS "Touching library files to ensure new timestamps")
-file(TOUCH_NOCREATE "${plAFile}" "${plBFile}" "${plCFile}" "${plDFile}" "${plEFile}")
-acquire_timestamps(After)
-require_change(A)
-require_change(B)
-require_change(C)
-require_change(D)
-require_change(E)
+message(STATUS "Rebuilding library files to ensure new timestamps")
+rebuild(1)
 
 
 # - Ensure that the timestamp will change.
@@ -98,7 +91,7 @@ require_change(E)
 # - Rebuild
 acquire_timestamps(Before)
 sleep()
-message(STATUS "Changing json files")
+message(STATUS "Changing json files.")
 configure_file("${mocPlugSrcDir}/jsonIn/StyleD.json" "${mocPlugBinDir}/jsonFiles/StyleC.json")
 configure_file("${mocPlugSrcDir}/jsonIn/StyleE.json" "${mocPlugBinDir}/jsonFiles/sub/StyleD.json")
 configure_file("${mocPlugSrcDir}/jsonIn/StyleC.json" "${mocPlugBinDir}/jsonFiles/StyleE.json")
