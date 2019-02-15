@@ -1020,20 +1020,20 @@ cmQtAutoGeneratorMocUic::WorkerT::~WorkerT()
 void cmQtAutoGeneratorMocUic::WorkerT::LogInfo(
   GeneratorT genType, std::string const& message) const
 {
-  return Log().Info(genType, message);
+  Log().Info(genType, message);
 }
 
 void cmQtAutoGeneratorMocUic::WorkerT::LogWarning(
   GeneratorT genType, std::string const& message) const
 {
-  return Log().Warning(genType, message);
+  Log().Warning(genType, message);
 }
 
 void cmQtAutoGeneratorMocUic::WorkerT::LogFileWarning(
   GeneratorT genType, std::string const& filename,
   std::string const& message) const
 {
-  return Log().WarningFile(genType, filename, message);
+  Log().WarningFile(genType, filename, message);
 }
 
 void cmQtAutoGeneratorMocUic::WorkerT::LogError(
