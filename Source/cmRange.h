@@ -5,73 +5,77 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_kwiml.h"
 #include <algorithm>
 #include <iterator>
 
-template <typename const_iterator_>
-struct cmRange
+template <typename Iter>
+class cmRange
 {
-  typedef const_iterator_ const_iterator;
-  typedef typename std::iterator_traits<const_iterator>::value_type value_type;
-  typedef typename std::iterator_traits<const_iterator>::difference_type
-    difference_type;
-  cmRange(const_iterator begin_, const_iterator end_)
-    : Begin(begin_)
-    , End(end_)
+public:
+  using const_iterator = Iter;
+  using value_type = typename std::iterator_traits<Iter>::value_type;
+  using difference_type = typename std::iterator_traits<Iter>::difference_type;
+
+  cmRange(Iter b, Iter e)
+    : Begin(std::move(b))
+    , End(std::move(e))
   {
   }
-  const_iterator begin() const { return Begin; }
-  const_iterator end() const { return End; }
-  bool empty() const { return std::distance(Begin, End) == 0; }
-  difference_type size() const { return std::distance(Begin, End); }
 
-  cmRange& advance(KWIML_INT_intptr_t amount) &
+  Iter begin() const { return this->Begin; }
+  Iter end() const { return this->End; }
+  bool empty() const { return this->Begin == this->End; }
+
+  difference_type size() const
+  {
+    return std::distance(this->Begin, this->End);
+  }
+
+  cmRange& advance(difference_type amount) &
   {
     std::advance(this->Begin, amount);
     return *this;
   }
-  cmRange advance(KWIML_INT_intptr_t amount) &&
+
+  cmRange advance(difference_type amount) &&
   {
     std::advance(this->Begin, amount);
     return std::move(*this);
   }
 
-  cmRange& retreat(KWIML_INT_intptr_t amount) &
+  cmRange& retreat(difference_type amount) &
   {
-    std::advance(End, -amount);
+    std::advance(this->End, -amount);
     return *this;
   }
 
-  cmRange retreat(KWIML_INT_intptr_t amount) &&
+  cmRange retreat(difference_type amount) &&
   {
-    std::advance(End, -amount);
+    std::advance(this->End, -amount);
     return std::move(*this);
   }
 
 private:
-  const_iterator Begin;
-  const_iterator End;
+  Iter Begin;
+  Iter End;
 };
 
 template <typename Iter1, typename Iter2>
-cmRange<Iter1> cmMakeRange(Iter1 begin, Iter2 end)
+auto cmMakeRange(Iter1 begin, Iter2 end) -> cmRange<Iter1>
 {
-  return cmRange<Iter1>(begin, end);
+  return { begin, end };
 }
 
 template <typename Range>
-cmRange<typename Range::const_iterator> cmMakeRange(Range const& range)
+auto cmMakeRange(Range const& range) -> cmRange<decltype(range.begin())>
 {
-  return cmRange<typename Range::const_iterator>(range.begin(), range.end());
+  return { range.begin(), range.end() };
 }
 
 template <typename Range>
-cmRange<typename Range::const_reverse_iterator> cmReverseRange(
-  Range const& range)
+auto cmReverseRange(Range const& range) -> cmRange<decltype(range.rbegin())>
 {
-  return cmRange<typename Range::const_reverse_iterator>(range.rbegin(),
-                                                         range.rend());
+  return { range.rbegin(), range.rend() };
 }
 
 #endif
