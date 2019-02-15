@@ -935,12 +935,6 @@ std::string cmSystemTools::FileExistsInParentDirectories(
   return "";
 }
 
-bool cmSystemTools::cmCopyFile(const std::string& source,
-                               const std::string& destination)
-{
-  return Superclass::CopyFileAlways(source, destination);
-}
-
 #ifdef _WIN32
 cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsFileRetry()
 {
@@ -1386,14 +1380,6 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(std::string const& ext)
   }
 #endif // __APPLE__
   return cmSystemTools::UNKNOWN_FILE_FORMAT;
-}
-
-bool cmSystemTools::Split(const char* s, std::vector<std::string>& l)
-{
-  std::vector<std::string> temp;
-  bool res = Superclass::Split(s, temp);
-  l.insert(l.end(), temp.begin(), temp.end());
-  return res;
 }
 
 std::string cmSystemTools::ConvertToOutputPath(std::string const& path)

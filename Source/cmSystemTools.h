@@ -172,10 +172,6 @@ public:
   static bool SimpleGlob(const std::string& glob,
                          std::vector<std::string>& files, int type = 0);
 
-  ///! Copy a file.
-  static bool cmCopyFile(const std::string& source,
-                         const std::string& destination);
-
   /** Rename a file or directory within a single disk volume (atomic
       if possible).  */
   static bool RenameFile(const std::string& oldname,
@@ -347,9 +343,6 @@ public:
                          cmDuration timeout, std::vector<char>& out,
                          std::vector<char>& err);
 
-  /** Split a string on its newlines into multiple lines.  Returns
-      false only if the last line stored had no newline.  */
-  static bool Split(const char* s, std::vector<std::string>& l);
   static void SetForceUnixPaths(bool v) { s_ForceUnixPaths = v; }
   static bool GetForceUnixPaths() { return s_ForceUnixPaths; }
 

@@ -2354,7 +2354,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   outFile += "/CMakeLists.txt";
 
   // Copy file
-  if (!cmSystemTools::cmCopyFile(inFile, outFile)) {
+  if (!cmsys::SystemTools::CopyFileAlways(inFile, outFile)) {
     std::cerr << "Error copying file \"" << inFile << "\" to \"" << outFile
               << "\".\n";
     return 1;
