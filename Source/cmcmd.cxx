@@ -9,6 +9,7 @@
 #include "cmMakefile.h"
 #include "cmQtAutoGeneratorMocUic.h"
 #include "cmQtAutoGeneratorRcc.h"
+#include "cmRange.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"

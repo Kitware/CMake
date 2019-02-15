@@ -11,6 +11,7 @@
 #include "cmAlgorithms.h"
 #include "cmProperty.h"
 #include "cmPropertyMap.h"
+#include "cmRange.h"
 #include "cmState.h"
 #include "cmStatePrivate.h"
 #include "cmStateTypes.h"

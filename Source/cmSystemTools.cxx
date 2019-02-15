@@ -5,6 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
+#include "cmRange.h"
 #include "cm_sys_stat.h"
 #include "cm_uv.h"
 

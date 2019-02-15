@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQTWrapCPPCommand.h"
 
-#include "cmAlgorithms.h"
 #include "cmCustomCommandLines.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 

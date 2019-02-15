@@ -21,6 +21,7 @@
 #include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmProperty.h"
+#include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"

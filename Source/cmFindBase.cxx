@@ -9,6 +9,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"

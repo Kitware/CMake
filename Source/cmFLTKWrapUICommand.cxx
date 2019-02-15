@@ -4,9 +4,9 @@
 
 #include <stddef.h>
 
-#include "cmAlgorithms.h"
 #include "cmCustomCommandLines.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 

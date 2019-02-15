@@ -13,6 +13,7 @@
 #include "cmCryptoHash.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"

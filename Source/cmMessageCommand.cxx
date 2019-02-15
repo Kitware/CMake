@@ -6,6 +6,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;

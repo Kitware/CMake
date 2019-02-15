@@ -5,8 +5,8 @@
 #include <sstream>
 #include <string.h>
 
-#include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;

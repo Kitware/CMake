@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallCommandArguments.h"
 
-#include "cmAlgorithms.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 
 #include <utility>
