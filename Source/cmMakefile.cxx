@@ -3729,22 +3729,23 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
                                 lineNumber, true, true);
 }
 
-int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
-                              bool copyonly, bool atOnly, bool escapeQuotes,
+int cmMakefile::ConfigureFile(const std::string& infile,
+                              const std::string& outfile, bool copyonly,
+                              bool atOnly, bool escapeQuotes,
                               cmNewLineStyle newLine)
 {
   int res = 1;
   if (!this->CanIWriteThisFile(outfile)) {
-    cmSystemTools::Error("Attempt to write file: ", outfile,
+    cmSystemTools::Error("Attempt to write file: " + outfile +
                          " into a source directory.");
     return 0;
   }
   if (!cmSystemTools::FileExists(infile)) {
-    cmSystemTools::Error("File ", infile, " does not exist.");
+    cmSystemTools::Error("File " + infile + " does not exist.");
     return 0;
   }
   std::string soutfile = outfile;
-  std::string sinfile = infile;
+  const std::string& sinfile = infile;
   this->AddCMakeDependFile(sinfile);
   cmSystemTools::ConvertToUnixSlashes(soutfile);
 

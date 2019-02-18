@@ -292,9 +292,8 @@ int cmCPackNSISGenerator::PackageFiles()
     this->SetOption("CPACK_NSIS_DEFINES", defines.c_str());
   }
 
-  this->ConfigureFile(nsisInInstallOptions.c_str(),
-                      nsisInstallOptions.c_str());
-  this->ConfigureFile(nsisInFileName.c_str(), nsisFileName.c_str());
+  this->ConfigureFile(nsisInInstallOptions, nsisInstallOptions);
+  this->ConfigureFile(nsisInFileName, nsisFileName);
   std::string nsisCmd = "\"";
   nsisCmd += this->GetOption("CPACK_INSTALLER_PROGRAM");
   nsisCmd += "\" \"" + nsisFileName + "\"";

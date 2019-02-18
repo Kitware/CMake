@@ -2002,7 +2002,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         // so let it replace the framework name. This avoids creating
         // a per-configuration Info.plist file.
         this->CurrentLocalGenerator->GenerateFrameworkInfoPList(
-          gtgt, "$(EXECUTABLE_NAME)", plist.c_str());
+          gtgt, "$(EXECUTABLE_NAME)", plist);
         buildSettings->AddAttribute("INFOPLIST_FILE",
                                     this->CreateString(plist));
         buildSettings->AddAttribute("MACH_O_TYPE",
@@ -2043,7 +2043,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         // a per-configuration Info.plist file. The cfbundle plist
         // is very similar to the application bundle plist
         this->CurrentLocalGenerator->GenerateAppleInfoPList(
-          gtgt, "$(EXECUTABLE_NAME)", plist.c_str());
+          gtgt, "$(EXECUTABLE_NAME)", plist);
         buildSettings->AddAttribute("INFOPLIST_FILE",
                                     this->CreateString(plist));
       } else {
@@ -2077,7 +2077,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         // so let it replace the framework name. This avoids creating
         // a per-configuration Info.plist file.
         this->CurrentLocalGenerator->GenerateFrameworkInfoPList(
-          gtgt, "$(EXECUTABLE_NAME)", plist.c_str());
+          gtgt, "$(EXECUTABLE_NAME)", plist);
         buildSettings->AddAttribute("INFOPLIST_FILE",
                                     this->CreateString(plist));
       } else {
@@ -2115,7 +2115,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         // so let it replace the executable name.  This avoids creating
         // a per-configuration Info.plist file.
         this->CurrentLocalGenerator->GenerateAppleInfoPList(
-          gtgt, "$(EXECUTABLE_NAME)", plist.c_str());
+          gtgt, "$(EXECUTABLE_NAME)", plist);
         buildSettings->AddAttribute("INFOPLIST_FILE",
                                     this->CreateString(plist));
       }

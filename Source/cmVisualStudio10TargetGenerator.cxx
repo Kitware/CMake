@@ -622,8 +622,8 @@ void cmVisualStudio10TargetGenerator::Generate()
         propsLocal += this->DefaultArtifactDir;
         propsLocal += "\\nasm.props";
         ConvertToWindowsSlash(propsLocal);
-        this->Makefile->ConfigureFile(propsTemplate.c_str(),
-                                      propsLocal.c_str(), false, true, true);
+        this->Makefile->ConfigureFile(propsTemplate, propsLocal, false, true,
+                                      true);
         Elem(e1, "Import").Attribute("Project", propsLocal);
       }
     }

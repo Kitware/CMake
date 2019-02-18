@@ -2822,7 +2822,7 @@ static void cmLGInfoProp(cmMakefile* mf, cmGeneratorTarget* target,
 
 void cmLocalGenerator::GenerateAppleInfoPList(cmGeneratorTarget* target,
                                               const std::string& targetName,
-                                              const char* fname)
+                                              const std::string& fname)
 {
   // Find the Info.plist template.
   const char* in = target->GetProperty("MACOSX_BUNDLE_INFO_PLIST");
@@ -2856,11 +2856,12 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmGeneratorTarget* target,
   cmLGInfoProp(mf, target, "MACOSX_BUNDLE_SHORT_VERSION_STRING");
   cmLGInfoProp(mf, target, "MACOSX_BUNDLE_BUNDLE_VERSION");
   cmLGInfoProp(mf, target, "MACOSX_BUNDLE_COPYRIGHT");
-  mf->ConfigureFile(inFile.c_str(), fname, false, false, false);
+  mf->ConfigureFile(inFile, fname, false, false, false);
 }
 
 void cmLocalGenerator::GenerateFrameworkInfoPList(
-  cmGeneratorTarget* target, const std::string& targetName, const char* fname)
+  cmGeneratorTarget* target, const std::string& targetName,
+  const std::string& fname)
 {
   // Find the Info.plist template.
   const char* in = target->GetProperty("MACOSX_FRAMEWORK_INFO_PLIST");
@@ -2890,5 +2891,5 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_IDENTIFIER");
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_SHORT_VERSION_STRING");
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_BUNDLE_VERSION");
-  mf->ConfigureFile(inFile.c_str(), fname, false, false, false);
+  mf->ConfigureFile(inFile, fname, false, false, false);
 }
