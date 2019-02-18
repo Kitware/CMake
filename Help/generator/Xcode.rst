@@ -3,9 +3,7 @@ Xcode
 
 Generate Xcode project files.
 
-This supports Xcode 3.0 and above.  Support for Xcode versions prior
-to Xcode 5 is deprecated and will be dropped in a future version of
-CMake.
+This supports Xcode 5.0 and above.
 
 Toolset Selection
 ^^^^^^^^^^^^^^^^^

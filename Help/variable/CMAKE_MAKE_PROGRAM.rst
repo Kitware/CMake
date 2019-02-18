@@ -19,15 +19,11 @@ to configure the project:
   This generator stores ``CMAKE_MAKE_PROGRAM`` in the CMake cache
   so that it may be edited by the user.
 
-* The :generator:`Xcode` generator sets this to ``xcodebuild`` (or possibly an
-  otherwise undocumented ``cmakexbuild`` wrapper implementing some
-  workarounds).
+* The :generator:`Xcode` generator sets this to ``xcodebuild``.
 
   This generator prefers to lookup the build tool at build time
   rather than to store ``CMAKE_MAKE_PROGRAM`` in the CMake cache
-  ahead of time.  This is because ``xcodebuild`` is easy to find,
-  the ``cmakexbuild`` wrapper is needed only for older Xcode versions,
-  and the path to ``cmakexbuild`` may be outdated if CMake itself moves.
+  ahead of time.  This is because ``xcodebuild`` is easy to find.
 
   For compatibility with versions of CMake prior to 3.2, if
   a user or project explicitly adds ``CMAKE_MAKE_PROGRAM`` to
