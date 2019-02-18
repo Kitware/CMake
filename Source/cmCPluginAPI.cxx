@@ -491,12 +491,16 @@ public:
   typedef std::map<cmSourceFile*, cmCPluginAPISourceFile*> derived;
   typedef derived::iterator iterator;
   typedef derived::value_type value_type;
+  cmCPluginAPISourceFileMap() = default;
   ~cmCPluginAPISourceFileMap()
   {
     for (auto const& i : *this) {
       delete i.second;
     }
   }
+  cmCPluginAPISourceFileMap(const cmCPluginAPISourceFileMap&) = delete;
+  cmCPluginAPISourceFileMap& operator=(const cmCPluginAPISourceFileMap&) =
+    delete;
 };
 cmCPluginAPISourceFileMap cmCPluginAPISourceFiles;
 

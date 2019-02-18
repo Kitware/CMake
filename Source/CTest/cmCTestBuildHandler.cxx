@@ -680,6 +680,8 @@ class cmCTestBuildHandler::LaunchHelper
 public:
   LaunchHelper(cmCTestBuildHandler* handler);
   ~LaunchHelper();
+  LaunchHelper(const LaunchHelper&) = delete;
+  LaunchHelper& operator=(const LaunchHelper&) = delete;
 
 private:
   cmCTestBuildHandler* Handler;

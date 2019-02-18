@@ -52,6 +52,8 @@ public:
     }
     cmsysProcess_Delete(this->Process);
   }
+  cmCTestRunProcess(const cmCTestRunProcess&) = delete;
+  cmCTestRunProcess& operator=(const cmCTestRunProcess&) = delete;
   void SetCommand(const char* command)
   {
     this->CommandLineStrings.clear();
@@ -786,6 +788,9 @@ struct cmCTestCoverageHandlerLocale
       cmSystemTools::UnsetEnv("LC_ALL");
     }
   }
+  cmCTestCoverageHandlerLocale(const cmCTestCoverageHandlerLocale&) = delete;
+  cmCTestCoverageHandlerLocale& operator=(
+    const cmCTestCoverageHandlerLocale&) = delete;
   std::string lc_all;
 };
 

@@ -348,6 +348,9 @@ public:
     this->Makefile->Backtrace = this->Makefile->Backtrace.Pop();
   }
 
+  cmMakefileCall(const cmMakefileCall&) = delete;
+  cmMakefileCall& operator=(const cmMakefileCall&) = delete;
+
 private:
   cmMakefile* Makefile;
 };
@@ -438,6 +441,9 @@ public:
                bool noPolicyScope);
   ~IncludeScope();
   void Quiet() { this->ReportError = false; }
+
+  IncludeScope(const IncludeScope&) = delete;
+  IncludeScope& operator=(const IncludeScope&) = delete;
 
 private:
   cmMakefile* Makefile;
@@ -605,6 +611,9 @@ public:
   }
 
   void Quiet() { this->ReportError = false; }
+
+  ListFileScope(const ListFileScope&) = delete;
+  ListFileScope& operator=(const ListFileScope&) = delete;
 
 private:
   cmMakefile* Makefile;
@@ -1496,6 +1505,9 @@ public:
   }
 
   void Quiet() { this->ReportError = false; }
+
+  BuildsystemFileScope(const BuildsystemFileScope&) = delete;
+  BuildsystemFileScope& operator=(const BuildsystemFileScope&) = delete;
 
 private:
   cmMakefile* Makefile;

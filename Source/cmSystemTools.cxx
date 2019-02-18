@@ -521,6 +521,8 @@ public:
     }
     free(this->ArgV);
   }
+  cmSystemToolsArgV(const cmSystemToolsArgV&) = delete;
+  cmSystemToolsArgV& operator=(const cmSystemToolsArgV&) = delete;
   void Store(std::vector<std::string>& args) const
   {
     for (char** arg = this->ArgV; arg && *arg; ++arg) {
@@ -533,7 +535,7 @@ void cmSystemTools::ParseUnixCommandLine(const char* command,
                                          std::vector<std::string>& args)
 {
   // Invoke the underlying parser.
-  cmSystemToolsArgV argv = cmsysSystem_Parse_CommandForUnix(command, 0);
+  cmSystemToolsArgV argv(cmsysSystem_Parse_CommandForUnix(command, 0));
   argv.Store(args);
 }
 

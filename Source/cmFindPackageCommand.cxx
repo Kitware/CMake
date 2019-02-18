@@ -1372,6 +1372,9 @@ public:
       cmSystemTools::RemoveFile(this->File);
     }
   }
+  cmFindPackageCommandHoldFile(const cmFindPackageCommandHoldFile&) = delete;
+  cmFindPackageCommandHoldFile& operator=(
+    const cmFindPackageCommandHoldFile&) = delete;
   void Release() { this->File = nullptr; }
 };
 
