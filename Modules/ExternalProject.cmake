@@ -550,7 +550,8 @@ External Project Definition
       When enabled, the output of the test step is logged to files.
 
     ``LOG_MERGED_STDOUTERR <bool>``
-      When enabled, the output the step is not split by stdout and stderr.
+      When enabled, stdout and stderr will be merged for any step whose
+      output is being logged to files.
 
     ``LOG_OUTPUT_ON_FAILURE <bool>``
       This option only has an effect if at least one of the other ``LOG_<step>``
