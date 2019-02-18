@@ -1010,9 +1010,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     userDirs.reserve(userDirs.size() + userStandardDirs.size());
     for (std::string& usd : userStandardDirs) {
       cmSystemTools::ConvertToUnixSlashes(usd);
-      if (notImplicit(usd)) {
-        emitDir(usd);
-      }
+      emitDir(usd);
       userDirs.emplace_back(std::move(usd));
     }
   }
