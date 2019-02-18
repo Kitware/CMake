@@ -920,6 +920,20 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     return result;
   }
 
+  // Standard include directories to be added unconditionally at the end.
+  // These are intended to simulate additional implicit include directories.
+  std::vector<std::string> userStandardDirs;
+  {
+    std::string key = "CMAKE_";
+    key += lang;
+    key += "_STANDARD_INCLUDE_DIRECTORIES";
+    std::string const value = this->Makefile->GetSafeDefinition(key);
+    cmSystemTools::ExpandListArgument(value, userStandardDirs);
+    for (std::string& usd : userStandardDirs) {
+      cmSystemTools::ConvertToUnixSlashes(usd);
+    }
+  }
+
   // Implicit include directories
   std::vector<std::string> implicitDirs;
   std::set<std::string> implicitSet;
@@ -929,14 +943,20 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   };
   {
     // Raw list of implicit include directories
-    std::vector<std::string> impDirVec;
+    // Start with "standard" directories that we unconditionally add below.
+    std::vector<std::string> impDirVec = userStandardDirs;
 
     // Load implicit include directories for this language.
     std::string key = "CMAKE_";
     key += lang;
     key += "_IMPLICIT_INCLUDE_DIRECTORIES";
     if (const char* value = this->Makefile->GetDefinition(key)) {
+      size_t const impDirVecOldSize = impDirVec.size();
       cmSystemTools::ExpandListArgument(value, impDirVec);
+      // FIXME: Use cmRange with 'advance()' when it supports non-const.
+      for (size_t i = impDirVecOldSize; i < impDirVec.size(); ++i) {
+        cmSystemTools::ConvertToUnixSlashes(impDirVec[i]);
+      }
     }
 
     // The Platform/UnixPaths module used to hard-code /usr/include for C, CXX,
@@ -956,10 +976,8 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     }
 
     for (std::string const& i : impDirVec) {
-      std::string imd = i;
-      cmSystemTools::ConvertToUnixSlashes(imd);
-      if (implicitSet.insert(imd).second) {
-        implicitDirs.emplace_back(std::move(imd));
+      if (implicitSet.insert(i).second) {
+        implicitDirs.emplace_back(i);
       }
     }
   }
@@ -998,21 +1016,10 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   MoveSystemIncludesToEnd(result, config, lang, target);
 
   // Append standard include directories for this language.
-  {
-    std::vector<std::string> userStandardDirs;
-    {
-      std::string key = "CMAKE_";
-      key += lang;
-      key += "_STANDARD_INCLUDE_DIRECTORIES";
-      std::string const value = this->Makefile->GetSafeDefinition(key);
-      cmSystemTools::ExpandListArgument(value, userStandardDirs);
-    }
-    userDirs.reserve(userDirs.size() + userStandardDirs.size());
-    for (std::string& usd : userStandardDirs) {
-      cmSystemTools::ConvertToUnixSlashes(usd);
-      emitDir(usd);
-      userDirs.emplace_back(std::move(usd));
-    }
+  userDirs.reserve(userDirs.size() + userStandardDirs.size());
+  for (std::string& usd : userStandardDirs) {
+    emitDir(usd);
+    userDirs.emplace_back(std::move(usd));
   }
 
   // Append compiler implicit include directories

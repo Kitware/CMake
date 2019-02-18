@@ -96,6 +96,12 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
           "Parsed ${lang} implicit include dir info from above output: rv=${rv}\n${log}\n\n")
         if("${rv}" STREQUAL "done")
+          # Entries that we have been told to explicitly pass as standard include
+          # directories will not be implicitly added by the compiler.
+          if(CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES)
+            list(REMOVE_ITEM implicit_incdirs ${CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES})
+          endif()
+
           # We parsed implicit include directories, so override the default initializer.
           set(_CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES_INIT "${implicit_incdirs}")
         endif()
