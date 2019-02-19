@@ -8,6 +8,7 @@
 #include <map>
 #include <memory> // IWYU pragma: keep
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class cmLocalGenerator;
@@ -38,10 +39,15 @@ private:
   void AddToGlobalAutoRcc(cmLocalGenerator* localGen,
                           std::string const& targetName);
 
+  bool GetExecutableTestOutput(std::string const& generator,
+                               std::string const& executable,
+                               std::string& error, std::string* output);
+
 private:
   std::vector<std::unique_ptr<cmQtAutoGenInitializer>> Initializers_;
   std::map<cmLocalGenerator*, std::string> GlobalAutoGenTargets_;
   std::map<cmLocalGenerator*, std::string> GlobalAutoRccTargets_;
+  std::unordered_map<std::string, std::string> ExecutableTestOutputs_;
 };
 
 #endif
