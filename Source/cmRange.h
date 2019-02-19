@@ -212,6 +212,13 @@ private:
 };
 
 template <typename Iter1, typename Iter2>
+bool operator==(cmRange<Iter1> const& left, cmRange<Iter2> const& right)
+{
+  return left.size() == right.size() &&
+    std::equal(left.begin(), left.end(), right.begin());
+}
+
+template <typename Iter1, typename Iter2>
 auto cmMakeRange(Iter1 begin, Iter2 end) -> cmRange<Iter1>
 {
   return { begin, end };
