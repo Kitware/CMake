@@ -40,6 +40,9 @@ protected:
 
   virtual bool SelectWindows10SDK(cmMakefile* mf, bool required);
 
+  void SetWindowsTargetPlatformVersion(std::string const& version,
+                                       cmMakefile* mf);
+
   // Used to verify that the Desktop toolset for the current generator is
   // installed on the machine.
   bool IsWindowsDesktopToolsetInstalled() const override;
