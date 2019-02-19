@@ -34,6 +34,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <initializer_list>
 #include <iterator>
 #include <sstream>
 #include <stdio.h>
@@ -51,25 +52,23 @@
 // replaced in the form <var> with GetSafeDefinition(var).
 // ${LANG} is replaced in the variable first with all enabled
 // languages.
-static const char* ruleReplaceVars[] = {
-  "CMAKE_${LANG}_COMPILER",
-  "CMAKE_SHARED_LIBRARY_CREATE_${LANG}_FLAGS",
-  "CMAKE_SHARED_MODULE_CREATE_${LANG}_FLAGS",
-  "CMAKE_SHARED_MODULE_${LANG}_FLAGS",
-  "CMAKE_SHARED_LIBRARY_${LANG}_FLAGS",
-  "CMAKE_${LANG}_LINK_FLAGS",
-  "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
-  "CMAKE_${LANG}_ARCHIVE",
-  "CMAKE_AR",
-  "CMAKE_CURRENT_SOURCE_DIR",
-  "CMAKE_CURRENT_BINARY_DIR",
-  "CMAKE_RANLIB",
-  "CMAKE_LINKER",
-  "CMAKE_MT",
-  "CMAKE_CUDA_HOST_COMPILER",
-  "CMAKE_CUDA_HOST_LINK_LAUNCHER",
-  "CMAKE_CL_SHOWINCLUDES_PREFIX"
-};
+static auto ruleReplaceVars = { "CMAKE_${LANG}_COMPILER",
+                                "CMAKE_SHARED_LIBRARY_CREATE_${LANG}_FLAGS",
+                                "CMAKE_SHARED_MODULE_CREATE_${LANG}_FLAGS",
+                                "CMAKE_SHARED_MODULE_${LANG}_FLAGS",
+                                "CMAKE_SHARED_LIBRARY_${LANG}_FLAGS",
+                                "CMAKE_${LANG}_LINK_FLAGS",
+                                "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
+                                "CMAKE_${LANG}_ARCHIVE",
+                                "CMAKE_AR",
+                                "CMAKE_CURRENT_SOURCE_DIR",
+                                "CMAKE_CURRENT_BINARY_DIR",
+                                "CMAKE_RANLIB",
+                                "CMAKE_LINKER",
+                                "CMAKE_MT",
+                                "CMAKE_CUDA_HOST_COMPILER",
+                                "CMAKE_CUDA_HOST_LINK_LAUNCHER",
+                                "CMAKE_CL_SHOWINCLUDES_PREFIX" };
 
 cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   : cmOutputConverter(makefile->GetStateSnapshot())
@@ -138,15 +137,13 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
     this->VariableMappings[compilerOptionSysroot] =
       this->Makefile->GetSafeDefinition(compilerOptionSysroot);
 
-    for (const char* const* replaceIter = cm::cbegin(ruleReplaceVars);
-         replaceIter != cm::cend(ruleReplaceVars); ++replaceIter) {
-      std::string actualReplace = *replaceIter;
-      if (actualReplace.find("${LANG}") != std::string::npos) {
-        cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
+    for (std::string replaceVar : ruleReplaceVars) {
+      if (replaceVar.find("${LANG}") != std::string::npos) {
+        cmSystemTools::ReplaceString(replaceVar, "${LANG}", lang);
       }
 
-      this->VariableMappings[actualReplace] =
-        this->Makefile->GetSafeDefinition(actualReplace);
+      this->VariableMappings[replaceVar] =
+        this->Makefile->GetSafeDefinition(replaceVar);
     }
   }
 }

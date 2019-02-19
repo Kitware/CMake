@@ -99,6 +99,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <cstring>
+#include <initializer_list>
 #include <iostream>
 #include <iterator>
 #include <memory> // IWYU pragma: keep
@@ -1892,11 +1893,10 @@ bool cmake::LoadCache(const std::string& path, bool internal,
                       std::set<std::string>& includes)
 {
   bool result = this->State->LoadCache(path, internal, excludes, includes);
-  static const char* entries[] = { "CMAKE_CACHE_MAJOR_VERSION",
-                                   "CMAKE_CACHE_MINOR_VERSION" };
-  for (const char* const* nameIt = cm::cbegin(entries);
-       nameIt != cm::cend(entries); ++nameIt) {
-    this->UnwatchUnusedCli(*nameIt);
+  static const auto entries = { "CMAKE_CACHE_MAJOR_VERSION",
+                                "CMAKE_CACHE_MINOR_VERSION" };
+  for (auto const& entry : entries) {
+    this->UnwatchUnusedCli(entry);
   }
   return result;
 }
@@ -1904,13 +1904,12 @@ bool cmake::LoadCache(const std::string& path, bool internal,
 bool cmake::SaveCache(const std::string& path)
 {
   bool result = this->State->SaveCache(path, this->GetMessenger());
-  static const char* entries[] = { "CMAKE_CACHE_MAJOR_VERSION",
-                                   "CMAKE_CACHE_MINOR_VERSION",
-                                   "CMAKE_CACHE_PATCH_VERSION",
-                                   "CMAKE_CACHEFILE_DIR" };
-  for (const char* const* nameIt = cm::cbegin(entries);
-       nameIt != cm::cend(entries); ++nameIt) {
-    this->UnwatchUnusedCli(*nameIt);
+  static const auto entries = { "CMAKE_CACHE_MAJOR_VERSION",
+                                "CMAKE_CACHE_MINOR_VERSION",
+                                "CMAKE_CACHE_PATCH_VERSION",
+                                "CMAKE_CACHEFILE_DIR" };
+  for (auto const& entry : entries) {
+    this->UnwatchUnusedCli(entry);
   }
   return result;
 }

@@ -37,6 +37,7 @@
 #include "cmsys/Process.h"
 #include "cmsys/Terminal.h"
 #include <algorithm>
+#include <array>
 #include <iostream>
 #include <iterator>
 #include <memory> // IWYU pragma: keep
@@ -350,12 +351,13 @@ struct CoCompiler
   bool NoOriginalCommand;
 };
 
-static CoCompiler CoCompilers[] = { // Table of options and handlers.
-  { "--cppcheck=", HandleCppCheck, false },
-  { "--cpplint=", HandleCppLint, false },
-  { "--iwyu=", HandleIWYU, false },
-  { "--lwyu=", HandleLWYU, true },
-  { "--tidy=", HandleTidy, false }
+static const std::array<CoCompiler, 5> CoCompilers = {
+  { // Table of options and handlers.
+    { "--cppcheck=", HandleCppCheck, false },
+    { "--cpplint=", HandleCppLint, false },
+    { "--iwyu=", HandleIWYU, false },
+    { "--lwyu=", HandleLWYU, true },
+    { "--tidy=", HandleTidy, false } }
 };
 
 struct CoCompileJob
@@ -386,16 +388,15 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
       doing_options = false;
     } else if (doing_options) {
       bool optionFound = false;
-      for (CoCompiler const* cc = cm::cbegin(CoCompilers);
-           cc != cm::cend(CoCompilers); ++cc) {
-        size_t optionLen = strlen(cc->Option);
-        if (arg.compare(0, optionLen, cc->Option) == 0) {
+      for (CoCompiler const& cc : CoCompilers) {
+        size_t optionLen = strlen(cc.Option);
+        if (arg.compare(0, optionLen, cc.Option) == 0) {
           optionFound = true;
           CoCompileJob job;
           job.Command = arg.substr(optionLen);
-          job.Handler = cc->Handler;
+          job.Handler = cc.Handler;
           jobs.push_back(std::move(job));
-          if (cc->NoOriginalCommand) {
+          if (cc.NoOriginalCommand) {
             runOriginalCmd = false;
           }
         }
@@ -419,9 +420,8 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
   if (jobs.empty()) {
     std::cerr << "__run_co_compile missing command to run. "
                  "Looking for one or more of the following:\n";
-    for (CoCompiler const* cc = cm::cbegin(CoCompilers);
-         cc != cm::cend(CoCompilers); ++cc) {
-      std::cerr << cc->Option << "\n";
+    for (CoCompiler const& cc : CoCompilers) {
+      std::cerr << cc.Option << "\n";
     }
     return 1;
   }

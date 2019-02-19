@@ -5,6 +5,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <initializer_list>
 #include <iterator>
 #include <set>
 #include <sstream>
@@ -312,23 +313,23 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   // Setup per-configuration property default values.
   if (this->GetType() != cmStateEnums::UTILITY) {
-    const char* configProps[] = {
+    static const auto configProps = {
       /* clang-format needs this comment to break after the opening brace */
       "ARCHIVE_OUTPUT_DIRECTORY_",     "LIBRARY_OUTPUT_DIRECTORY_",
       "RUNTIME_OUTPUT_DIRECTORY_",     "PDB_OUTPUT_DIRECTORY_",
       "COMPILE_PDB_OUTPUT_DIRECTORY_", "MAP_IMPORTED_CONFIG_",
-      "INTERPROCEDURAL_OPTIMIZATION_", nullptr
+      "INTERPROCEDURAL_OPTIMIZATION_"
     };
     for (std::string const& configName : configNames) {
       std::string configUpper = cmSystemTools::UpperCase(configName);
-      for (const char** p = configProps; *p; ++p) {
+      for (auto const& prop : configProps) {
         // Interface libraries have no output locations, so honor only
         // the configuration map.
         if (this->TargetTypeValue == cmStateEnums::INTERFACE_LIBRARY &&
-            strcmp(*p, "MAP_IMPORTED_CONFIG_") != 0) {
+            strcmp(prop, "MAP_IMPORTED_CONFIG_") != 0) {
           continue;
         }
-        std::string property = *p;
+        std::string property = prop;
         property += configUpper;
         this->SetPropertyDefault(property, nullptr);
       }
