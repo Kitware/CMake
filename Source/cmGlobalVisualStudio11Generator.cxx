@@ -252,15 +252,10 @@ cmGlobalVisualStudio11Generator::GetInstalledWindowsCESDKs()
   return ret;
 }
 
-bool cmGlobalVisualStudio11Generator::NeedsDeploy(
-  cmStateEnums::TargetType type) const
+bool cmGlobalVisualStudio11Generator::TargetSystemSupportsDeployment() const
 {
-  if ((type == cmStateEnums::EXECUTABLE ||
-       type == cmStateEnums::SHARED_LIBRARY) &&
-      (this->SystemIsWindowsPhone || this->SystemIsWindowsStore)) {
-    return true;
-  }
-  return cmGlobalVisualStudio10Generator::NeedsDeploy(type);
+  return this->SystemIsWindowsPhone || this->SystemIsWindowsStore ||
+    cmGlobalVisualStudio10Generator::TargetSystemSupportsDeployment();
 }
 
 bool cmGlobalVisualStudio11Generator::IsWindowsDesktopToolsetInstalled() const
