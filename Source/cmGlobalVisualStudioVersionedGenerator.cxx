@@ -401,6 +401,12 @@ bool cmGlobalVisualStudioVersionedGenerator::InitializeWindows(cmMakefile* mf)
   // If the Win 8.1 SDK is installed then we can select a SDK matching
   // the target Windows version.
   if (this->IsWin81SDKInstalled()) {
+    // VS 2019 does not default to 8.1 so specify it explicitly when needed.
+    if (this->Version >= cmGlobalVisualStudioGenerator::VS16 &&
+        !cmSystemTools::VersionCompareGreater(this->SystemVersion, "8.1")) {
+      this->SetWindowsTargetPlatformVersion("8.1", mf);
+      return true;
+    }
     return cmGlobalVisualStudio14Generator::InitializeWindows(mf);
   }
   // Otherwise we must choose a Win 10 SDK even if we are not targeting
