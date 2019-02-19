@@ -9,7 +9,6 @@
 #include <memory>
 #include <set>
 #include <sstream>
-#include <unordered_set>
 #include <utility>
 
 #include "cmAlgorithms.h"
@@ -1374,35 +1373,11 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
 
   // - Headers and sources
   {
-    std::unordered_set<std::string> headers;
-    auto addHeader = [this, &headers](std::string&& hdr, bool moc, bool uic) {
-      if (headers.emplace(hdr).second) {
-        this->JobQueues_.Headers.emplace_back(
-          cm::make_unique<JobParseT>(std::move(hdr), moc, uic, true));
-      }
+    auto addHeader = [this](std::string&& hdr, bool moc, bool uic) {
+      this->JobQueues_.Headers.emplace_back(
+        cm::make_unique<JobParseT>(std::move(hdr), moc, uic, true));
     };
-    auto addSource = [this, &addHeader](std::string&& src, bool moc,
-                                        bool uic) {
-      // Search for the default header file and a private header
-      {
-        std::array<std::string, 2> bases;
-        bases[0] = FileSys().SubDirPrefix(src);
-        bases[0] += FileSys().GetFilenameWithoutLastExtension(src);
-        bases[1] = bases[0];
-        bases[1] += "_p";
-        for (std::string const& headerBase : bases) {
-          std::string header;
-          if (Base().FindHeader(header, headerBase)) {
-            bool const hdrMoc = moc && !Moc().skipped(header);
-            bool const hdrUic = uic && !Uic().skipped(header);
-            if (hdrMoc || hdrUic) {
-              // Add additional header job
-              addHeader(std::move(header), hdrMoc, hdrUic);
-            }
-          }
-        }
-      }
-      // Add actual source job
+    auto addSource = [this](std::string&& src, bool moc, bool uic) {
       this->JobQueues_.Sources.emplace_back(
         cm::make_unique<JobParseT>(std::move(src), moc, uic, false));
     };

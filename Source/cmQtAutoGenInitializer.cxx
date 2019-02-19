@@ -704,6 +704,67 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   // mocs_compilation.cpp source acknowledged by this target.
   this->Target->ClearSourcesCache();
 
+  // For source files find additional headers and private headers
+  if (this->MocOrUicEnabled()) {
+    std::vector<MUFileHandle> extraHeaders;
+    extraHeaders.reserve(this->AutogenTarget.Sources.size() * 2);
+    // Header search suffixes and extensions
+    std::array<std::string, 2> const suffixes{ { "", "_p" } };
+    auto const& exts = makefile->GetCMakeInstance()->GetHeaderExtensions();
+    // Scan through sources
+    for (auto const& pair : this->AutogenTarget.Sources) {
+      MUFile const& muf = *pair.second;
+      if (muf.MocIt || muf.UicIt) {
+        // Search for the default header file and a private header
+        std::string const& realPath = muf.RealPath;
+        std::string basePath = cmQtAutoGen::SubDirPrefix(realPath);
+        basePath += cmSystemTools::GetFilenameWithoutLastExtension(realPath);
+        for (auto const& suffix : suffixes) {
+          std::string const suffixedPath = basePath + suffix;
+          for (auto const& ext : exts) {
+            std::string fullPath = suffixedPath;
+            fullPath += '.';
+            fullPath += ext;
+
+            auto constexpr locationKind = cmSourceFileLocationKind::Known;
+            cmSourceFile* sf = makefile->GetSource(fullPath, locationKind);
+            if (sf != nullptr) {
+              // Check if we know about this header already
+              if (this->AutogenTarget.Headers.find(sf) !=
+                  this->AutogenTarget.Headers.end()) {
+                continue;
+              }
+              // We only accept not-GENERATED files that do exist.
+              if (!sf->GetIsGenerated() &&
+                  !cmSystemTools::FileExists(fullPath)) {
+                continue;
+              }
+            } else if (cmSystemTools::FileExists(fullPath)) {
+              // Create a new source file for the existing file
+              sf = makefile->CreateSource(fullPath, false, locationKind);
+            }
+
+            if (sf != nullptr) {
+              auto eMuf = makeMUFile(sf, fullPath, true);
+              // Ony process moc/uic when the parent is processed as well
+              if (!muf.MocIt) {
+                eMuf->MocIt = false;
+              }
+              if (!muf.UicIt) {
+                eMuf->UicIt = false;
+              }
+              extraHeaders.emplace_back(std::move(eMuf));
+            }
+          }
+        }
+      }
+    }
+    // Move generated files to main headers list
+    for (auto& eMuf : extraHeaders) {
+      addMUFile(std::move(eMuf), true);
+    }
+  }
+
   // Scan through all source files in the makefile to extract moc and uic
   // parameters.  Historically we support non target source file parameters.
   // The reason is that their file names might be discovered from source files
