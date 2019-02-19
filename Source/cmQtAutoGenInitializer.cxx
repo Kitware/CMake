@@ -21,11 +21,13 @@
 #include "cmPolicies.h"
 #include "cmProcessOutput.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocationKind.h"
 #include "cmSourceGroup.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmake.h"
 #include "cmsys/FStream.hxx"
 #include "cmsys/SystemInformation.hxx"
 
@@ -275,6 +277,26 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     }
   }
 
+  // Check status of policy CMP0071
+  {
+    cmPolicies::PolicyStatus const CMP0071_status =
+      makefile->GetPolicyStatus(cmPolicies::CMP0071);
+    switch (CMP0071_status) {
+      case cmPolicies::WARN:
+        this->CMP0071Warn = true;
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        // Ignore GENERATED file
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::NEW:
+        // Process GENERATED file
+        this->CMP0071Accept = true;
+        break;
+    }
+  }
+
   // Common directories
   {
     // Collapsed current binary directory
@@ -324,7 +346,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
   }
 
   // Moc, Uic and _autogen target settings
-  if (this->Moc.Enabled || this->Uic.Enabled) {
+  if (this->MocOrUicEnabled()) {
     // Init moc specific settings
     if (this->Moc.Enabled && !InitMoc()) {
       return false;
@@ -397,8 +419,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
   }
 
   // Add autogen include directory to the origin target INCLUDE_DIRECTORIES
-  if (this->Moc.Enabled || this->Uic.Enabled ||
-      (this->Rcc.Enabled && this->MultiConfig)) {
+  if (this->MocOrUicEnabled() || (this->Rcc.Enabled && this->MultiConfig)) {
     this->Target->AddIncludeDirectory(this->Dir.Include, true);
   }
 
@@ -408,7 +429,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
   }
 
   // Create autogen target
-  if ((this->Moc.Enabled || this->Uic.Enabled) && !this->InitAutogenTarget()) {
+  if (this->MocOrUicEnabled() && !this->InitAutogenTarget()) {
     return false;
   }
 
@@ -590,61 +611,78 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   std::string const SKIP_AUTOGEN_str = "SKIP_AUTOGEN";
   std::string const SKIP_AUTOMOC_str = "SKIP_AUTOMOC";
   std::string const SKIP_AUTOUIC_str = "SKIP_AUTOUIC";
+  std::string const SKIP_AUTORCC_str = "SKIP_AUTORCC";
+  std::string const AUTOUIC_OPTIONS_str = "AUTOUIC_OPTIONS";
+  std::string const AUTORCC_OPTIONS_str = "AUTORCC_OPTIONS";
+  std::string const qrc_str = "qrc";
+  std::string const ui_str = "ui";
+
+  auto makeMUFile = [&](cmSourceFile* sf, std::string const& fullPath,
+                        bool muIt) -> MUFileHandle {
+    MUFileHandle muf = cm::make_unique<MUFile>();
+    muf->RealPath = cmSystemTools::GetRealPath(fullPath);
+    muf->SF = sf;
+    muf->Generated = sf->GetIsGenerated();
+    bool const skipAutogen = sf->GetPropertyAsBool(SKIP_AUTOGEN_str);
+    muf->SkipMoc = this->Moc.Enabled &&
+      (skipAutogen || sf->GetPropertyAsBool(SKIP_AUTOMOC_str));
+    muf->SkipUic = this->Uic.Enabled &&
+      (skipAutogen || sf->GetPropertyAsBool(SKIP_AUTOUIC_str));
+    if (muIt) {
+      muf->MocIt = this->Moc.Enabled && !muf->SkipMoc;
+      muf->UicIt = this->Uic.Enabled && !muf->SkipUic;
+    }
+    return muf;
+  };
+
+  auto addMUFile = [&](MUFileHandle&& muf, bool isHeader) {
+    if ((muf->MocIt || muf->UicIt) && muf->Generated) {
+      this->AutogenTarget.FilesGenerated.emplace_back(muf.get());
+    }
+    if (isHeader) {
+      this->AutogenTarget.Headers.emplace(muf->SF, std::move(muf));
+    } else {
+      this->AutogenTarget.Sources.emplace(muf->SF, std::move(muf));
+    }
+  };
 
   // Scan through target files
   {
-    // String constants
-    std::string const qrc_str = "qrc";
-    std::string const SKIP_AUTORCC_str = "SKIP_AUTORCC";
-    std::string const AUTORCC_OPTIONS_str = "AUTORCC_OPTIONS";
-
     // Scan through target files
     std::vector<cmSourceFile*> srcFiles;
     this->Target->GetConfigCommonSourceFiles(srcFiles);
     for (cmSourceFile* sf : srcFiles) {
-      if (sf->GetPropertyAsBool(SKIP_AUTOGEN_str)) {
+      // sf->GetExtension() is only valid after sf->GetFullPath() ...
+      // Since we're iterating over source files that might be not in the
+      // target we need to check for path errors (not existing files).
+      std::string pathError;
+      std::string const& fullPath = sf->GetFullPath(&pathError);
+      if (!pathError.empty() || fullPath.empty()) {
         continue;
       }
-
-      // sf->GetExtension() is only valid after sf->GetFullPath() ...
-      std::string const& fPath = sf->GetFullPath();
       std::string const& ext = sf->GetExtension();
 
-      // Register generated files that will be scanned by moc or uic
-      if (this->Moc.Enabled || this->Uic.Enabled) {
-        cmSystemTools::FileFormat const fileType =
-          cmSystemTools::GetFileFormat(ext);
-        if ((fileType == cmSystemTools::CXX_FILE_FORMAT) ||
-            (fileType == cmSystemTools::HEADER_FILE_FORMAT)) {
-          std::string const absPath = cmSystemTools::GetRealPath(fPath);
-          if ((this->Moc.Enabled &&
-               !sf->GetPropertyAsBool(SKIP_AUTOMOC_str)) ||
-              (this->Uic.Enabled &&
-               !sf->GetPropertyAsBool(SKIP_AUTOUIC_str))) {
-            // Register source
-            const bool generated = sf->GetIsGenerated();
-            if (fileType == cmSystemTools::HEADER_FILE_FORMAT) {
-              if (generated) {
-                this->AutogenTarget.HeadersGenerated.push_back(absPath);
-              } else {
-                this->AutogenTarget.Headers.push_back(absPath);
-              }
-            } else {
-              if (generated) {
-                this->AutogenTarget.SourcesGenerated.push_back(absPath);
-              } else {
-                this->AutogenTarget.Sources.push_back(absPath);
-              }
-            }
-          }
+      // Register files that will be scanned by moc or uic
+      if (this->MocOrUicEnabled()) {
+        switch (cmSystemTools::GetFileFormat(ext)) {
+          case cmSystemTools::HEADER_FILE_FORMAT:
+            addMUFile(makeMUFile(sf, fullPath, true), true);
+            break;
+          case cmSystemTools::CXX_FILE_FORMAT:
+            addMUFile(makeMUFile(sf, fullPath, true), false);
+            break;
+          default:
+            break;
         }
       }
+
       // Register rcc enabled files
       if (this->Rcc.Enabled) {
-        if ((ext == qrc_str) && !sf->GetPropertyAsBool(SKIP_AUTORCC_str)) {
+        if ((ext == qrc_str) && !sf->GetPropertyAsBool(SKIP_AUTOGEN_str) &&
+            !sf->GetPropertyAsBool(SKIP_AUTORCC_str)) {
           // Register qrc file
           Qrc qrc;
-          qrc.QrcFile = cmSystemTools::GetRealPath(fPath);
+          qrc.QrcFile = cmSystemTools::GetRealPath(fullPath);
           qrc.QrcName =
             cmSystemTools::GetFilenameWithoutLastExtension(qrc.QrcFile);
           qrc.Generated = sf->GetIsGenerated();
@@ -670,11 +708,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   // parameters.  Historically we support non target source file parameters.
   // The reason is that their file names might be discovered from source files
   // at generation time.
-  if (this->Moc.Enabled || this->Uic.Enabled) {
-    // String constants
-    std::string const ui_str = "ui";
-    std::string const AUTOUIC_OPTIONS_str = "AUTOUIC_OPTIONS";
-
+  if (this->MocOrUicEnabled()) {
     for (cmSourceFile* sf : makefile->GetSourceFiles()) {
       // sf->GetExtension() is only valid after sf->GetFullPath() ...
       // Since we're iterating over source files that might be not in the
@@ -684,130 +718,85 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       if (!pathError.empty() || fullPath.empty()) {
         continue;
       }
+      std::string const& ext = sf->GetExtension();
 
-      // Check file type
-      auto const fileType = cmSystemTools::GetFileFormat(sf->GetExtension());
-      bool const isSource = (fileType == cmSystemTools::CXX_FILE_FORMAT) ||
-        (fileType == cmSystemTools::HEADER_FILE_FORMAT);
-      bool const isUi = (this->Moc.Enabled && sf->GetExtension() == ui_str);
-
-      // Process only certain file types
-      if (isSource || isUi) {
-        std::string const absFile = cmSystemTools::GetRealPath(fullPath);
-        // Acquire file properties
-        bool const skipAUTOGEN = sf->GetPropertyAsBool(SKIP_AUTOGEN_str);
-        bool const skipMoc = (this->Moc.Enabled && isSource) &&
-          (skipAUTOGEN || sf->GetPropertyAsBool(SKIP_AUTOMOC_str));
-        bool const skipUic = this->Uic.Enabled &&
-          (skipAUTOGEN || sf->GetPropertyAsBool(SKIP_AUTOUIC_str));
-
-        // Register moc and uic skipped file
-        if (skipMoc) {
-          this->Moc.Skip.insert(absFile);
+      auto const fileFormat = cmSystemTools::GetFileFormat(ext);
+      if (fileFormat == cmSystemTools::HEADER_FILE_FORMAT) {
+        if (this->AutogenTarget.Headers.find(sf) ==
+            this->AutogenTarget.Headers.end()) {
+          auto muf = makeMUFile(sf, fullPath, false);
+          if (muf->SkipMoc || muf->SkipUic) {
+            this->AutogenTarget.Headers.emplace(sf, std::move(muf));
+          }
         }
-        if (skipUic) {
-          this->Uic.Skip.insert(absFile);
+      } else if (fileFormat == cmSystemTools::CXX_FILE_FORMAT) {
+        if (this->AutogenTarget.Sources.find(sf) ==
+            this->AutogenTarget.Sources.end()) {
+          auto muf = makeMUFile(sf, fullPath, false);
+          if (muf->SkipMoc || muf->SkipUic) {
+            this->AutogenTarget.Sources.emplace(sf, std::move(muf));
+          }
         }
-
-        // Check if the .ui file has uic options
-        if (isUi && !skipUic) {
+      } else if (this->Uic.Enabled && (ext == ui_str)) {
+        // .ui file
+        std::string realPath = cmSystemTools::GetRealPath(fullPath);
+        bool const skipAutogen = sf->GetPropertyAsBool(SKIP_AUTOGEN_str);
+        bool const skipUic =
+          (skipAutogen || sf->GetPropertyAsBool(SKIP_AUTOUIC_str));
+        if (!skipUic) {
+          // Check if the .ui file has uic options
           std::string const uicOpts = sf->GetSafeProperty(AUTOUIC_OPTIONS_str);
           if (!uicOpts.empty()) {
-            this->Uic.FileFiles.push_back(absFile);
+            this->Uic.FileFiles.push_back(std::move(realPath));
             std::vector<std::string> optsVec;
             cmSystemTools::ExpandListArgument(uicOpts, optsVec);
             this->Uic.FileOptions.push_back(std::move(optsVec));
           }
+        } else {
+          // Register skipped .ui file
+          this->Uic.SkipUi.insert(std::move(realPath));
         }
       }
     }
   }
 
   // Process GENERATED sources and headers
-  if (this->Moc.Enabled || this->Uic.Enabled) {
-    if (!this->AutogenTarget.SourcesGenerated.empty() ||
-        !this->AutogenTarget.HeadersGenerated.empty()) {
-      // Check status of policy CMP0071
-      bool policyAccept = false;
-      bool policyWarn = false;
-      cmPolicies::PolicyStatus const CMP0071_status =
-        makefile->GetPolicyStatus(cmPolicies::CMP0071);
-      switch (CMP0071_status) {
-        case cmPolicies::WARN:
-          policyWarn = true;
-          CM_FALLTHROUGH;
-        case cmPolicies::OLD:
-          // Ignore GENERATED file
-          break;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
-        case cmPolicies::NEW:
-          // Process GENERATED file
-          policyAccept = true;
-          break;
+  if (this->MocOrUicEnabled() && !this->AutogenTarget.FilesGenerated.empty()) {
+    if (this->CMP0071Accept) {
+      // Let the autogen target depend on the GENERATED files
+      for (MUFile* muf : this->AutogenTarget.FilesGenerated) {
+        this->AutogenTarget.DependFiles.insert(muf->RealPath);
       }
-
-      if (policyAccept) {
-        // Accept GENERATED sources
-        for (std::string const& absFile :
-             this->AutogenTarget.HeadersGenerated) {
-          this->AutogenTarget.Headers.push_back(absFile);
-          this->AutogenTarget.DependFiles.insert(absFile);
-        }
-        for (std::string const& absFile :
-             this->AutogenTarget.SourcesGenerated) {
-          this->AutogenTarget.Sources.push_back(absFile);
-          this->AutogenTarget.DependFiles.insert(absFile);
-        }
-      } else {
-        if (policyWarn) {
-          std::string msg;
-          msg += cmPolicies::GetPolicyWarning(cmPolicies::CMP0071);
-          msg += "\n";
-          std::string tools;
-          std::string property;
-          if (this->Moc.Enabled && this->Uic.Enabled) {
-            tools = "AUTOMOC and AUTOUIC";
-            property = "SKIP_AUTOGEN";
-          } else if (this->Moc.Enabled) {
-            tools = "AUTOMOC";
-            property = "SKIP_AUTOMOC";
-          } else if (this->Uic.Enabled) {
-            tools = "AUTOUIC";
-            property = "SKIP_AUTOUIC";
-          }
-          msg += "For compatibility, CMake is excluding the GENERATED source "
-                 "file(s):\n";
-          for (const std::string& absFile :
-               this->AutogenTarget.HeadersGenerated) {
-            msg.append("  ").append(Quoted(absFile)).append("\n");
-          }
-          for (const std::string& absFile :
-               this->AutogenTarget.SourcesGenerated) {
-            msg.append("  ").append(Quoted(absFile)).append("\n");
-          }
-          msg += "from processing by ";
-          msg += tools;
-          msg +=
-            ". If any of the files should be processed, set CMP0071 to NEW. "
-            "If any of the files should not be processed, "
-            "explicitly exclude them by setting the source file property ";
-          msg += property;
-          msg += ":\n  set_property(SOURCE file.h PROPERTY ";
-          msg += property;
-          msg += " ON)\n";
-          makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg);
-        }
+    } else if (this->CMP0071Warn) {
+      std::string msg;
+      msg += cmPolicies::GetPolicyWarning(cmPolicies::CMP0071);
+      msg += '\n';
+      std::string property;
+      if (this->Moc.Enabled && this->Uic.Enabled) {
+        property = "SKIP_AUTOGEN";
+      } else if (this->Moc.Enabled) {
+        property = "SKIP_AUTOMOC";
+      } else if (this->Uic.Enabled) {
+        property = "SKIP_AUTOUIC";
       }
+      msg += "For compatibility, CMake is excluding the GENERATED source "
+             "file(s):\n";
+      for (MUFile* muf : this->AutogenTarget.FilesGenerated) {
+        msg += "  ";
+        msg += Quoted(muf->RealPath);
+        msg += '\n';
+      }
+      msg += "from processing by ";
+      msg += cmQtAutoGen::Tools(this->Moc.Enabled, this->Uic.Enabled, false);
+      msg += ". If any of the files should be processed, set CMP0071 to NEW. "
+             "If any of the files should not be processed, "
+             "explicitly exclude them by setting the source file property ";
+      msg += property;
+      msg += ":\n  set_property(SOURCE file.h PROPERTY ";
+      msg += property;
+      msg += " ON)\n";
+      makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg);
     }
-  }
-
-  // Sort headers and sources
-  if (this->Moc.Enabled || this->Uic.Enabled) {
-    std::sort(this->AutogenTarget.Headers.begin(),
-              this->AutogenTarget.Headers.end());
-    std::sort(this->AutogenTarget.Sources.begin(),
-              this->AutogenTarget.Sources.end());
   }
 
   // Process qrc files
@@ -1177,7 +1166,7 @@ bool cmQtAutoGenInitializer::SetupCustomTargets()
   }
 
   // Generate autogen target info file
-  if (this->Moc.Enabled || this->Uic.Enabled) {
+  if (this->MocOrUicEnabled()) {
     // Write autogen target info files
     if (!this->SetupWriteAutogenInfo()) {
       return false;
@@ -1217,22 +1206,74 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     ofs.Write("AM_INCLUDE_DIR", this->Dir.Include);
     ofs.WriteConfig("AM_INCLUDE_DIR", this->Dir.ConfigInclude);
 
-    ofs.Write("# Files\n");
-    ofs.WriteStrings("AM_SOURCES", this->AutogenTarget.Sources);
-    ofs.WriteStrings("AM_HEADERS", this->AutogenTarget.Headers);
-    ofs.Write("AM_SETTINGS_FILE", this->AutogenTarget.SettingsFile);
-    ofs.WriteConfig("AM_SETTINGS_FILE",
-                    this->AutogenTarget.ConfigSettingsFile);
+    // Use sorted sets
+    std::set<std::string> headers;
+    std::set<std::string> sources;
+    std::set<std::string> moc_headers;
+    std::set<std::string> moc_sources;
+    std::set<std::string> moc_skip;
+    std::set<std::string> uic_headers;
+    std::set<std::string> uic_sources;
+    std::set<std::string> uic_skip;
+    // Filter headers
+    for (auto const& pair : this->AutogenTarget.Headers) {
+      MUFile const& muf = *pair.second;
+      if (muf.Generated && !this->CMP0071Accept) {
+        continue;
+      }
+      if (muf.SkipMoc) {
+        moc_skip.insert(muf.RealPath);
+      }
+      if (muf.SkipUic) {
+        uic_skip.insert(muf.RealPath);
+      }
+      if (muf.MocIt && muf.UicIt) {
+        headers.insert(muf.RealPath);
+      } else if (muf.MocIt) {
+        moc_headers.insert(muf.RealPath);
+      } else if (muf.UicIt) {
+        uic_headers.insert(muf.RealPath);
+      }
+    }
+    // Filter sources
+    for (auto const& pair : this->AutogenTarget.Sources) {
+      MUFile const& muf = *pair.second;
+      if (muf.Generated && !this->CMP0071Accept) {
+        continue;
+      }
+      if (muf.SkipMoc) {
+        moc_skip.insert(muf.RealPath);
+      }
+      if (muf.SkipUic) {
+        uic_skip.insert(muf.RealPath);
+      }
+      if (muf.MocIt && muf.UicIt) {
+        sources.insert(muf.RealPath);
+      } else if (muf.MocIt) {
+        moc_sources.insert(muf.RealPath);
+      } else if (muf.UicIt) {
+        uic_sources.insert(muf.RealPath);
+      }
+    }
 
     ofs.Write("# Qt\n");
     ofs.WriteUInt("AM_QT_VERSION_MAJOR", this->QtVersion.Major);
     ofs.Write("AM_QT_MOC_EXECUTABLE", this->Moc.Executable);
     ofs.Write("AM_QT_UIC_EXECUTABLE", this->Uic.Executable);
 
+    ofs.Write("# Files\n");
+    ofs.Write("AM_SETTINGS_FILE", this->AutogenTarget.SettingsFile);
+    ofs.WriteConfig("AM_SETTINGS_FILE",
+                    this->AutogenTarget.ConfigSettingsFile);
+    ofs.WriteStrings("AM_HEADERS", headers);
+    ofs.WriteStrings("AM_SOURCES", sources);
+
     // Write moc settings
     if (this->Moc.Enabled) {
       ofs.Write("# MOC settings\n");
-      ofs.WriteStrings("AM_MOC_SKIP", this->Moc.Skip);
+      ofs.WriteStrings("AM_MOC_HEADERS", moc_headers);
+      ofs.WriteStrings("AM_MOC_SOURCES", moc_sources);
+      ofs.WriteStrings("AM_MOC_SKIP", moc_skip);
       ofs.WriteStrings("AM_MOC_DEFINITIONS", this->Moc.Defines);
       ofs.WriteConfigStrings("AM_MOC_DEFINITIONS", this->Moc.ConfigDefines);
       ofs.WriteStrings("AM_MOC_INCLUDES", this->Moc.Includes);
@@ -1249,8 +1290,13 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
 
     // Write uic settings
     if (this->Uic.Enabled) {
+      // Add skipped .ui files
+      uic_skip.insert(this->Uic.SkipUi.begin(), this->Uic.SkipUi.end());
+
       ofs.Write("# UIC settings\n");
-      ofs.WriteStrings("AM_UIC_SKIP", this->Uic.Skip);
+      ofs.WriteStrings("AM_UIC_HEADERS", uic_headers);
+      ofs.WriteStrings("AM_UIC_SOURCES", uic_sources);
+      ofs.WriteStrings("AM_UIC_SKIP", uic_skip);
       ofs.WriteStrings("AM_UIC_TARGET_OPTIONS", this->Uic.Options);
       ofs.WriteConfigStrings("AM_UIC_TARGET_OPTIONS", this->Uic.ConfigOptions);
       ofs.WriteStrings("AM_UIC_OPTIONS_FILES", this->Uic.FileFiles);

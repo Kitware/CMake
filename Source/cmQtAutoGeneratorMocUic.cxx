@@ -5,11 +5,11 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
-#include <functional>
 #include <list>
 #include <memory>
 #include <set>
 #include <sstream>
+#include <unordered_set>
 #include <utility>
 
 #include "cmAlgorithms.h"
@@ -1261,9 +1261,8 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
   Moc_.Executable = InfoGet("AM_QT_MOC_EXECUTABLE");
   Moc_.Enabled = !Moc().Executable.empty();
   if (Moc().Enabled) {
-    {
-      auto lst = InfoGetList("AM_MOC_SKIP");
-      Moc_.SkipList.insert(lst.begin(), lst.end());
+    for (std::string& sfl : InfoGetList("AM_MOC_SKIP")) {
+      Moc_.SkipList.insert(std::move(sfl));
     }
     Moc_.Definitions = InfoGetConfigList("AM_MOC_DEFINITIONS");
     Moc_.IncludePaths = InfoGetConfigList("AM_MOC_INCLUDES");
@@ -1346,9 +1345,8 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
   Uic_.Executable = InfoGet("AM_QT_UIC_EXECUTABLE");
   Uic_.Enabled = !Uic().Executable.empty();
   if (Uic().Enabled) {
-    {
-      auto lst = InfoGetList("AM_UIC_SKIP");
-      Uic_.SkipList.insert(lst.begin(), lst.end());
+    for (std::string& sfl : InfoGetList("AM_UIC_SKIP")) {
+      Uic_.SkipList.insert(std::move(sfl));
     }
     Uic_.SearchPaths = InfoGetList("AM_UIC_SEARCH_PATHS");
     Uic_.TargetOptions = InfoGetConfigList("AM_UIC_TARGET_OPTIONS");
@@ -1374,53 +1372,68 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
     }
   }
 
-  // Initialize source file jobs
+  // - Headers and sources
   {
-    std::hash<std::string> stringHash;
-    std::set<std::size_t> uniqueHeaders;
-
-    // Add header jobs
-    for (std::string& hdr : InfoGetList("AM_HEADERS")) {
-      const bool moc = !Moc().skipped(hdr);
-      const bool uic = !Uic().skipped(hdr);
-      if ((moc || uic) && uniqueHeaders.emplace(stringHash(hdr)).second) {
-        JobQueues_.Headers.emplace_back(
+    std::unordered_set<std::string> headers;
+    auto addHeader = [this, &headers](std::string&& hdr, bool moc, bool uic) {
+      if (headers.emplace(hdr).second) {
+        this->JobQueues_.Headers.emplace_back(
           cm::make_unique<JobParseT>(std::move(hdr), moc, uic, true));
       }
-    }
-    // Add source jobs
-    {
-      std::vector<std::string> sources = InfoGetList("AM_SOURCES");
-      // Add header(s) for the source file
-      for (std::string& src : sources) {
-        const bool srcMoc = !Moc().skipped(src);
-        const bool srcUic = !Uic().skipped(src);
-        if (!srcMoc && !srcUic) {
-          continue;
-        }
-        // Search for the default header file and a private header
-        {
-          std::array<std::string, 2> bases;
-          bases[0] = FileSys().SubDirPrefix(src);
-          bases[0] += FileSys().GetFilenameWithoutLastExtension(src);
-          bases[1] = bases[0];
-          bases[1] += "_p";
-          for (std::string const& headerBase : bases) {
-            std::string header;
-            if (Base().FindHeader(header, headerBase)) {
-              const bool moc = srcMoc && !Moc().skipped(header);
-              const bool uic = srcUic && !Uic().skipped(header);
-              if ((moc || uic) &&
-                  uniqueHeaders.emplace(stringHash(header)).second) {
-                JobQueues_.Headers.emplace_back(cm::make_unique<JobParseT>(
-                  std::move(header), moc, uic, true));
-              }
+    };
+    auto addSource = [this, &addHeader](std::string&& src, bool moc,
+                                        bool uic) {
+      // Search for the default header file and a private header
+      {
+        std::array<std::string, 2> bases;
+        bases[0] = FileSys().SubDirPrefix(src);
+        bases[0] += FileSys().GetFilenameWithoutLastExtension(src);
+        bases[1] = bases[0];
+        bases[1] += "_p";
+        for (std::string const& headerBase : bases) {
+          std::string header;
+          if (Base().FindHeader(header, headerBase)) {
+            bool const hdrMoc = moc && !Moc().skipped(header);
+            bool const hdrUic = uic && !Uic().skipped(header);
+            if (hdrMoc || hdrUic) {
+              // Add additional header job
+              addHeader(std::move(header), hdrMoc, hdrUic);
             }
           }
         }
-        // Add source job
-        JobQueues_.Sources.emplace_back(
-          cm::make_unique<JobParseT>(std::move(src), srcMoc, srcUic));
+      }
+      // Add actual source job
+      this->JobQueues_.Sources.emplace_back(
+        cm::make_unique<JobParseT>(std::move(src), moc, uic, false));
+    };
+
+    // Add headers
+    for (std::string& hdr : InfoGetList("AM_HEADERS")) {
+      addHeader(std::move(hdr), true, true);
+    }
+    if (Moc().Enabled) {
+      for (std::string& hdr : InfoGetList("AM_MOC_HEADERS")) {
+        addHeader(std::move(hdr), true, false);
+      }
+    }
+    if (Uic().Enabled) {
+      for (std::string& hdr : InfoGetList("AM_UIC_HEADERS")) {
+        addHeader(std::move(hdr), false, true);
+      }
+    }
+
+    // Add sources
+    for (std::string& src : InfoGetList("AM_SOURCES")) {
+      addSource(std::move(src), true, true);
+    }
+    if (Moc().Enabled) {
+      for (std::string& src : InfoGetList("AM_MOC_SOURCES")) {
+        addSource(std::move(src), true, false);
+      }
+    }
+    if (Uic().Enabled) {
+      for (std::string& src : InfoGetList("AM_UIC_SOURCES")) {
+        addSource(std::move(src), false, true);
       }
     }
   }

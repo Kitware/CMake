@@ -8,15 +8,18 @@
 #include "cmQtAutoGen.h"
 
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <ostream>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 class cmGeneratorTarget;
 class cmTarget;
 class cmQtAutoGenGlobalInitializer;
+class cmSourceFile;
 
 /// @brief Initializes the QtAutoGen generators
 class cmQtAutoGenInitializer : public cmQtAutoGen
@@ -39,6 +42,19 @@ public:
     std::vector<std::string> Options;
     std::vector<std::string> Resources;
   };
+
+  /// @brief Moc/Uic file
+  struct MUFile
+  {
+    std::string RealPath;
+    cmSourceFile* SF = nullptr;
+    bool Generated = false;
+    bool SkipMoc = false;
+    bool SkipUic = false;
+    bool MocIt = false;
+    bool UicIt = false;
+  };
+  typedef std::unique_ptr<MUFile> MUFileHandle;
 
   /// @brief Abstract moc/uic/rcc generator variables base class
   struct GenVarsT
@@ -109,6 +125,12 @@ public:
   bool SetupCustomTargets();
 
 private:
+  /// @brief If moc or uic is enabled, the autogen target will be generated
+  bool MocOrUicEnabled() const
+  {
+    return (this->Moc.Enabled || this->Uic.Enabled);
+  }
+
   bool InitMoc();
   bool InitUic();
   bool InitRcc();
@@ -144,6 +166,8 @@ private:
   std::vector<std::string> ConfigsList;
   std::string Verbosity;
   std::string TargetsFolder;
+  bool CMP0071Accept = false;
+  bool CMP0071Warn = false;
 
   /// @brief Common directories
   struct
@@ -171,17 +195,15 @@ private:
     std::set<std::string> DependFiles;
     std::set<cmTarget*> DependTargets;
     // Sources to process
-    std::vector<std::string> Headers;
-    std::vector<std::string> Sources;
-    std::vector<std::string> HeadersGenerated;
-    std::vector<std::string> SourcesGenerated;
+    std::unordered_map<cmSourceFile*, MUFileHandle> Headers;
+    std::unordered_map<cmSourceFile*, MUFileHandle> Sources;
+    std::vector<MUFile*> FilesGenerated;
   } AutogenTarget;
 
   /// @brief Moc only variables
   struct MocT : public GenVarsT
   {
     std::string PredefsCmd;
-    std::set<std::string> Skip;
     std::vector<std::string> Includes;
     std::map<std::string, std::vector<std::string>> ConfigIncludes;
     std::set<std::string> Defines;
@@ -197,7 +219,7 @@ private:
   /// @brief Uic only variables
   struct UicT : public GenVarsT
   {
-    std::set<std::string> Skip;
+    std::set<std::string> SkipUi;
     std::vector<std::string> SearchPaths;
     std::vector<std::string> Options;
     std::map<std::string, std::vector<std::string>> ConfigOptions;
