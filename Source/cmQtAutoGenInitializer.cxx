@@ -1439,18 +1439,18 @@ cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target)
   return res;
 }
 
-std::pair<bool, std::string> GetQtExecutable(
-  const cmQtAutoGen::IntegerVersion& qtVersion, cmGeneratorTarget* target,
+std::pair<bool, std::string> cmQtAutoGenInitializer::GetQtExecutable(
   const std::string& executable, bool ignoreMissingTarget, std::string* output)
 {
   const std::string upperExecutable = cmSystemTools::UpperCase(executable);
-  std::string result =
-    target->Target->GetSafeProperty("AUTO" + upperExecutable + "_EXECUTABLE");
+  std::string result = this->Target->Target->GetSafeProperty(
+    "AUTO" + upperExecutable + "_EXECUTABLE");
   if (!result.empty()) {
-    cmListFileBacktrace lfbt = target->Target->GetMakefile()->GetBacktrace();
+    cmListFileBacktrace lfbt =
+      this->Target->Target->GetMakefile()->GetBacktrace();
     cmGeneratorExpression ge(lfbt);
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(result);
-    result = cge->Evaluate(target->GetLocalGenerator(), "");
+    result = cge->Evaluate(this->Target->GetLocalGenerator(), "");
 
     return std::make_pair(true, result);
   }
@@ -1460,12 +1460,12 @@ std::pair<bool, std::string> GetQtExecutable(
   // Find executable
   {
     const std::string targetName =
-      GetQtExecutableTargetName(qtVersion, executable);
+      GetQtExecutableTargetName(this->QtVersion, executable);
     if (targetName.empty()) {
       err = "The AUTO" + upperExecutable + " feature ";
       err += "supports only Qt 4, Qt 5 and Qt 6.";
     } else {
-      cmLocalGenerator* localGen = target->GetLocalGenerator();
+      cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
       cmGeneratorTarget* tgt = localGen->FindGeneratorTargetToUse(targetName);
       if (tgt != nullptr) {
         if (tgt->IsImported()) {
@@ -1485,36 +1485,14 @@ std::pair<bool, std::string> GetQtExecutable(
 
   // Test executable
   if (err.empty()) {
-    if (cmSystemTools::FileExists(result, true)) {
-      std::vector<std::string> command;
-      command.push_back(result);
-      command.emplace_back("-h");
-      std::string stdOut;
-      std::string stdErr;
-      int retVal = 0;
-      const bool runResult = cmSystemTools::RunSingleCommand(
-        command, &stdOut, &stdErr, &retVal, nullptr,
-        cmSystemTools::OUTPUT_NONE, cmDuration::zero(), cmProcessOutput::Auto);
-      if (!runResult) {
-        err = "Test of \"" + executable + "\" binary ";
-        err += cmQtAutoGen::Quoted(result) + " failed: ";
-        err += cmQtAutoGen::QuotedCommand(command);
-      } else {
-        if (output != nullptr) {
-          *output = stdOut;
-        }
-      }
-    } else {
-      err = "The \"" + executable + "\" binary ";
-      err += cmQtAutoGen::Quoted(result);
-      err += " does not exist";
-    }
+    this->GlobalInitializer->GetExecutableTestOutput(executable, result, err,
+                                                     output);
   }
 
   // Print error
   if (!err.empty()) {
     std::string msg = "AutoGen (";
-    msg += target->GetName();
+    msg += this->Target->GetName();
     msg += "): ";
     msg += err;
     cmSystemTools::Error(msg);
@@ -1526,16 +1504,14 @@ std::pair<bool, std::string> GetQtExecutable(
 
 bool cmQtAutoGenInitializer::GetMocExecutable()
 {
-  const auto result =
-    GetQtExecutable(this->QtVersion, this->Target, "moc", false, nullptr);
+  const auto result = this->GetQtExecutable("moc", false, nullptr);
   this->Moc.Executable = result.second;
   return result.first;
 }
 
 bool cmQtAutoGenInitializer::GetUicExecutable()
 {
-  const auto result =
-    GetQtExecutable(this->QtVersion, this->Target, "uic", true, nullptr);
+  const auto result = this->GetQtExecutable("uic", true, nullptr);
   this->Uic.Executable = result.second;
   return result.first;
 }
@@ -1543,8 +1519,7 @@ bool cmQtAutoGenInitializer::GetUicExecutable()
 bool cmQtAutoGenInitializer::GetRccExecutable()
 {
   std::string stdOut;
-  const auto result =
-    GetQtExecutable(this->QtVersion, this->Target, "rcc", false, &stdOut);
+  const auto result = this->GetQtExecutable("rcc", false, &stdOut);
   this->Rcc.Executable = result.second;
   if (!result.first) {
     return false;
