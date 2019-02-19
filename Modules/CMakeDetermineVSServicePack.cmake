@@ -79,7 +79,7 @@ endfunction()
 function(_DetermineVSServicePack_FastCheckVersionWithCompiler _SUCCESS_VAR  _VERSION_VAR)
     if(EXISTS ${CMAKE_CXX_COMPILER})
       execute_process(
-          COMMAND ${CMAKE_CXX_COMPILER} /?
+          COMMAND ${CMAKE_CXX_COMPILER} -?
           ERROR_VARIABLE _output
           OUTPUT_QUIET
         )
