@@ -67,11 +67,24 @@ choice. Once this has finished successfully, run ``make`` and
 Windows
 ^^^^^^^
 
-You need to download and install a binary release of CMake in order to build
-CMake.  You can get these releases from the `CMake Download Page`_.  Then
-proceed with the instructions below.
+There are two ways for building CMake under Windows:
+
+1. Compile with MSVC from VS 2015 or later.
+   You need to download and install a binary release of CMake.  You can get
+   these releases from the `CMake Download Page`_.  Then proceed with the
+   instructions below for `Building CMake with CMake`_.
+
+2. Bootstrap with MinGW under MSYS2.
+   Download and install `MSYS2`_.  Then install the required build tools::
+
+     $ pacman -S --needed git base-devel mingw-w64-x86_64-gcc
+
+   and bootstrap as above::
+
+     $ ./bootstrap && make
 
 .. _`CMake Download Page`: https://cmake.org/cmake/resources/software.html
+.. _`MSYS2`: https://www.msys2.org/
 
 Building CMake with CMake
 -------------------------
