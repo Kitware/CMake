@@ -2200,7 +2200,7 @@ cmGeneratorTarget* cmGlobalGenerator::FindGeneratorTarget(
 bool cmGlobalGenerator::NameResolvesToFramework(
   const std::string& libname) const
 {
-  if (cmSystemTools::IsPathToFramework(libname.c_str())) {
+  if (cmSystemTools::IsPathToFramework(libname)) {
     return true;
   }
 

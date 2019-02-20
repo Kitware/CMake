@@ -210,7 +210,7 @@ void cmGhsMultiTargetGenerator::WriteCompilerFlags(std::ostream& fout,
   if (flagsByLangI != this->FlagsByLanguage.end()) {
     if (!flagsByLangI->second.empty()) {
       std::vector<std::string> ghsCompFlags =
-        cmSystemTools::ParseArguments(flagsByLangI->second.c_str());
+        cmSystemTools::ParseArguments(flagsByLangI->second);
       for (auto& f : ghsCompFlags) {
         fout << "    " << f << std::endl;
       }
@@ -265,16 +265,14 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
     frameworkPath, linkPath, this->GeneratorTarget);
 
   // write out link options
-  std::vector<std::string> lopts =
-    cmSystemTools::ParseArguments(linkFlags.c_str());
+  std::vector<std::string> lopts = cmSystemTools::ParseArguments(linkFlags);
   for (auto& l : lopts) {
     fout << "    " << l << std::endl;
   }
 
   // write out link search paths
   // must be quoted for paths that contain spaces
-  std::vector<std::string> lpath =
-    cmSystemTools::ParseArguments(linkPath.c_str());
+  std::vector<std::string> lpath = cmSystemTools::ParseArguments(linkPath);
   for (auto& l : lpath) {
     fout << "    -L\"" << l << "\"" << std::endl;
   }
@@ -284,7 +282,7 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
   std::string cbd = this->LocalGenerator->GetCurrentBinaryDirectory();
 
   std::vector<std::string> llibs =
-    cmSystemTools::ParseArguments(linkLibraries.c_str());
+    cmSystemTools::ParseArguments(linkLibraries);
   for (auto& l : llibs) {
     if (l.compare(0, 2, "-l") == 0) {
       fout << "    \"" << l << "\"" << std::endl;

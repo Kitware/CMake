@@ -520,7 +520,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->CTest->GetCTestConfiguration("ValgrindCommandOptions");
   }
   this->MemoryTesterOptions =
-    cmSystemTools::ParseArguments(memoryTesterOptions.c_str());
+    cmSystemTools::ParseArguments(memoryTesterOptions);
 
   this->MemoryTesterOutputFile =
     this->CTest->GetBinaryDir() + "/Testing/Temporary/MemoryChecker.??.log";

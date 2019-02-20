@@ -144,7 +144,7 @@ bool cmCTestHG::UpdateImpl()
   if (opts.empty()) {
     opts = this->CTest->GetCTestConfiguration("HGUpdateOptions");
   }
-  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
   for (std::string const& arg : args) {
     hg_update.push_back(arg.c_str());
   }

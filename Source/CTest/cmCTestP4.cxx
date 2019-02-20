@@ -324,8 +324,7 @@ void cmCTestP4::SetP4Options(std::vector<char const*>& CommandOptions)
     // The CTEST_P4_OPTIONS variable adds additional Perforce command line
     // options before the main command
     std::string opts = this->CTest->GetCTestConfiguration("P4Options");
-    std::vector<std::string> args =
-      cmSystemTools::ParseArguments(opts.c_str());
+    std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
 
     P4Options.insert(P4Options.end(), args.begin(), args.end());
   }
@@ -501,7 +500,7 @@ bool cmCTestP4::UpdateImpl()
   if (opts.empty()) {
     opts = this->CTest->GetCTestConfiguration("P4UpdateOptions");
   }
-  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
   for (std::string const& arg : args) {
     p4_sync.push_back(arg.c_str());
   }

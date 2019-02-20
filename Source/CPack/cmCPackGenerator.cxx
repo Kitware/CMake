@@ -1255,9 +1255,8 @@ bool cmCPackGenerator::ConfigureFile(const std::string& inName,
 
 int cmCPackGenerator::CleanTemporaryDirectory()
 {
-  std::string tempInstallDirectoryWithPostfix =
+  std::string tempInstallDirectory =
     this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
-  const char* tempInstallDirectory = tempInstallDirectoryWithPostfix.c_str();
   if (cmsys::SystemTools::FileExists(tempInstallDirectory)) {
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "- Clean temporary : " << tempInstallDirectory << std::endl);

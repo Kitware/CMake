@@ -1009,7 +1009,7 @@ int cmCTest::GetTestModelFromString(const char* str)
 //######################################################################
 //######################################################################
 
-int cmCTest::RunMakeCommand(const char* command, std::string& output,
+int cmCTest::RunMakeCommand(const std::string& command, std::string& output,
                             int* retVal, const char* dir, cmDuration timeout,
                             std::ostream& ofs, Encoding encoding)
 {

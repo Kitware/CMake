@@ -418,8 +418,8 @@ int cmCTestBuildHandler::ProcessHandler()
   int retVal = 0;
   int res = cmsysProcess_State_Exited;
   if (!this->CTest->GetShowOnly()) {
-    res = this->RunMakeCommand(makeCommand.c_str(), &retVal,
-                               buildDirectory.c_str(), 0, ofs);
+    res = this->RunMakeCommand(makeCommand, &retVal, buildDirectory.c_str(), 0,
+                               ofs);
   } else {
     cmCTestOptionalLog(this->CTest, DEBUG,
                        "Build with command: " << makeCommand << std::endl,
@@ -766,9 +766,10 @@ void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers(
   }
 }
 
-int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
-                                        const char* dir, int timeout,
-                                        std::ostream& ofs, Encoding encoding)
+int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
+                                        int* retVal, const char* dir,
+                                        int timeout, std::ostream& ofs,
+                                        Encoding encoding)
 {
   // First generate the command and arguments
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);

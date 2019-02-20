@@ -141,7 +141,7 @@ public:
   ///! Return true if value is NOTFOUND or ends in -NOTFOUND.
   static bool IsNOTFOUND(const char* value);
   ///! Return true if the path is a framework
-  static bool IsPathToFramework(const char* value);
+  static bool IsPathToFramework(const std::string& value);
 
   static bool DoesFileExistWithExtensions(
     const std::string& name, const std::vector<std::string>& sourceExts);
@@ -242,7 +242,7 @@ public:
   /**
    * Parse arguments out of a single string command
    */
-  static std::vector<std::string> ParseArguments(const char* command);
+  static std::vector<std::string> ParseArguments(const std::string& command);
 
   /** Parse arguments out of a windows command line string.  */
   static void ParseWindowsCommandLine(const char* command,
@@ -353,7 +353,7 @@ public:
   // ConvertToRunCommandPath does not use s_ForceUnixPaths and should
   // be used when RunCommand is called from cmake, because the
   // running cmake needs paths to be in its format
-  static std::string ConvertToRunCommandPath(const char* path);
+  static std::string ConvertToRunCommandPath(const std::string& path);
 
   /** compute the relative path from local to remote.  local must
       be a directory.  remote can be a file or a directory.
@@ -488,7 +488,7 @@ public:
   static bool CheckRPath(std::string const& file, std::string const& newRPath);
 
   /** Remove a directory; repeat a few times in case of locked files.  */
-  static bool RepeatedRemoveDirectory(const char* dir);
+  static bool RepeatedRemoveDirectory(const std::string& dir);
 
   /** Tokenize a string */
   static std::vector<std::string> tokenize(const std::string& str,

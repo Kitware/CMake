@@ -67,7 +67,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
 
   std::string command;
   if (!arguments.empty()) {
-    command = cmSystemTools::ConvertToRunCommandPath(args[0].c_str());
+    command = cmSystemTools::ConvertToRunCommandPath(args[0]);
     command += " ";
     command += arguments;
   } else {

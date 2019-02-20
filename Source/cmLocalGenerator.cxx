@@ -776,7 +776,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
 #endif
   for (std::string const& i : includes) {
     if (fwSearchFlag && *fwSearchFlag && this->Makefile->IsOn("APPLE") &&
-        cmSystemTools::IsPathToFramework(i.c_str())) {
+        cmSystemTools::IsPathToFramework(i)) {
       std::string frameworkDir = i;
       frameworkDir += "/../";
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
