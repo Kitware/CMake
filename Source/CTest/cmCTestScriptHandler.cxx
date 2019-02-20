@@ -331,7 +331,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   }
   // make sure the file exists
   if (!cmSystemTools::FileExists(script)) {
-    cmSystemTools::Error("Cannot find file: ", script.c_str());
+    cmSystemTools::Error("Cannot find file: " + script);
     return 1;
   }
 
@@ -471,8 +471,8 @@ int cmCTestScriptHandler::ExtractVariables()
     msg += "\nCTEST_COMMAND = ";
     msg += (!this->CTestCmd.empty()) ? this->CTestCmd.c_str() : "(Null)";
     cmSystemTools::Error(
-      "Some required settings in the configuration file were missing:\n",
-      msg.c_str());
+      "Some required settings in the configuration file were missing:\n" +
+      msg);
     return 4;
   }
 
@@ -611,8 +611,7 @@ int cmCTestScriptHandler::CheckOutSourceDir()
       this->CVSCheckOut, &output, &output, &retVal, this->CTestRoot.c_str(),
       this->HandlerVerbose, cmDuration::zero() /*this->TimeOut*/);
     if (!res || retVal != 0) {
-      cmSystemTools::Error("Unable to perform cvs checkout:\n",
-                           output.c_str());
+      cmSystemTools::Error("Unable to perform cvs checkout:\n" + output);
       return 6;
     }
   }
@@ -678,8 +677,8 @@ int cmCTestScriptHandler::PerformExtraUpdates()
         fullCommand, &output, &output, &retVal, cvsArgs[0].c_str(),
         this->HandlerVerbose, cmDuration::zero() /*this->TimeOut*/);
       if (!res || retVal != 0) {
-        cmSystemTools::Error("Unable to perform extra updates:\n", eu.c_str(),
-                             "\nWith output:\n", output.c_str());
+        cmSystemTools::Error("Unable to perform extra updates:\n" + eu +
+                             "\nWith output:\n" + output);
         return 0;
       }
     }
@@ -721,8 +720,8 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   if (!cmSystemTools::FileExists(this->BinaryDir) &&
       this->SourceDir != this->BinaryDir) {
     if (!cmSystemTools::MakeDirectory(this->BinaryDir)) {
-      cmSystemTools::Error("Unable to create the binary directory:\n",
-                           this->BinaryDir.c_str());
+      cmSystemTools::Error("Unable to create the binary directory:\n" +
+                           this->BinaryDir);
       this->RestoreBackupDirectories();
       return 7;
     }

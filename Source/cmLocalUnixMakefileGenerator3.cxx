@@ -1054,7 +1054,7 @@ void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
   std::string cleanfilePath = cmSystemTools::CollapseFullPath(cleanfile);
   cmsys::ofstream fout(cleanfilePath.c_str());
   if (!fout) {
-    cmSystemTools::Error("Could not create ", cleanfilePath.c_str());
+    cmSystemTools::Error("Could not create " + cleanfilePath);
   }
   if (!files.empty()) {
     fout << "file(REMOVE_RECURSE\n";

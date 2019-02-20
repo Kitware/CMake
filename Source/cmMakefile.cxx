@@ -959,9 +959,8 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
     if (file && file->GetCustomCommand() && !replace) {
       // The rule file already exists.
       if (commandLines != file->GetCustomCommand()->GetCommandLines()) {
-        cmSystemTools::Error("Attempt to add a custom rule to output \"",
-                             outName.c_str(),
-                             "\" which already has a custom rule.");
+        cmSystemTools::Error("Attempt to add a custom rule to output \"" +
+                             outName + "\" which already has a custom rule.");
       }
       return file;
     }
@@ -1101,8 +1100,8 @@ void cmMakefile::AddCustomCommandOldStyle(
         ti->second.AddSource(sf->GetFullPath());
       } else {
         cmSystemTools::Error("Attempt to add a custom rule to a target "
-                             "that does not exist yet for target ",
-                             target.c_str());
+                             "that does not exist yet for target " +
+                             target);
         return;
       }
     }
@@ -1189,8 +1188,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
     if (sf) {
       sf->SetProperty("SYMBOLIC", "1");
     } else {
-      cmSystemTools::Error("Could not get source file entry for ",
-                           force.c_str());
+      cmSystemTools::Error("Could not get source file entry for " + force);
     }
 
     // Always create the byproduct sources and mark them generated.
@@ -2445,8 +2443,9 @@ const std::string& cmMakefile::GetRequiredDefinition(
   const std::string* def = GetDef(name);
   if (!def) {
     cmSystemTools::Error("Error required internal CMake variable not "
-                         "set, cmake may not be built correctly.\n",
-                         "Missing variable is:\n", name.c_str());
+                         "set, cmake may not be built correctly.\n"
+                         "Missing variable is:\n" +
+                         name);
     return empty;
   }
   return *def;
@@ -3779,15 +3778,15 @@ int cmMakefile::ConfigureFile(const std::string& infile,
     tempOutputFile += ".tmp";
     cmsys::ofstream fout(tempOutputFile.c_str(), omode);
     if (!fout) {
-      cmSystemTools::Error("Could not open file for write in copy operation ",
-                           tempOutputFile.c_str());
+      cmSystemTools::Error("Could not open file for write in copy operation " +
+                           tempOutputFile);
       cmSystemTools::ReportLastSystemError("");
       return 0;
     }
     cmsys::ifstream fin(sinfile.c_str());
     if (!fin) {
-      cmSystemTools::Error("Could not open file for read in copy operation ",
-                           sinfile.c_str());
+      cmSystemTools::Error("Could not open file for read in copy operation " +
+                           sinfile);
       return 0;
     }
 

@@ -136,16 +136,16 @@ void cmGlobalNinjaGenerator::WriteBuild(
   // Make sure there is a rule.
   if (rule.empty()) {
     cmSystemTools::Error("No rule for WriteBuildStatement! called "
-                         "with comment: ",
-                         comment.c_str());
+                         "with comment: " +
+                         comment);
     return;
   }
 
   // Make sure there is at least one output file.
   if (outputs.empty()) {
     cmSystemTools::Error("No output files for WriteBuildStatement! called "
-                         "with comment: ",
-                         comment.c_str());
+                         "with comment: " +
+                         comment);
     return;
   }
 
@@ -334,16 +334,16 @@ void cmGlobalNinjaGenerator::WriteRule(
   // Make sure the rule has a name.
   if (name.empty()) {
     cmSystemTools::Error("No name given for WriteRuleStatement! called "
-                         "with comment: ",
-                         comment.c_str());
+                         "with comment: " +
+                         comment);
     return;
   }
 
   // Make sure a command is given.
   if (command.empty()) {
     cmSystemTools::Error("No command given for WriteRuleStatement! called "
-                         "with comment: ",
-                         comment.c_str());
+                         "with comment: " +
+                         comment);
     return;
   }
 
@@ -376,7 +376,7 @@ void cmGlobalNinjaGenerator::WriteRule(
 
   if (!rspfile.empty()) {
     if (rspcontent.empty()) {
-      cmSystemTools::Error("No rspfile_content given!", comment.c_str());
+      cmSystemTools::Error("No rspfile_content given!" + comment);
       return;
     }
     cmGlobalNinjaGenerator::Indent(os, 1);
@@ -407,8 +407,8 @@ void cmGlobalNinjaGenerator::WriteVariable(std::ostream& os,
   // Make sure we have a name.
   if (name.empty()) {
     cmSystemTools::Error("No name given for WriteVariable! called "
-                         "with comment: ",
-                         comment.c_str());
+                         "with comment: " +
+                         comment);
     return;
   }
 
@@ -1652,8 +1652,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
     } else if (cmHasLiteralPrefix(arg, "--ddi=")) {
       arg_ddi = arg.substr(6);
     } else {
-      cmSystemTools::Error("-E cmake_ninja_depends unknown argument: ",
-                           arg.c_str());
+      cmSystemTools::Error("-E cmake_ninja_depends unknown argument: " + arg);
       return 1;
     }
   }
@@ -1687,9 +1686,8 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
       cmsys::ifstream tdif(arg_tdi.c_str(), std::ios::in | std::ios::binary);
       Json::Reader reader;
       if (!reader.parse(tdif, tdio, false)) {
-        cmSystemTools::Error("-E cmake_ninja_depends failed to parse ",
-                             arg_tdi.c_str(),
-                             reader.getFormattedErrorMessages().c_str());
+        cmSystemTools::Error("-E cmake_ninja_depends failed to parse " +
+                             arg_tdi + reader.getFormattedErrorMessages());
         return 1;
       }
     }
@@ -1715,8 +1713,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
   std::set<std::string> defines;
   cmFortranParser parser(fc, includes, defines, info);
   if (!cmFortranParser_FilePush(&parser, arg_pp.c_str())) {
-    cmSystemTools::Error("-E cmake_ninja_depends failed to open ",
-                         arg_pp.c_str());
+    cmSystemTools::Error("-E cmake_ninja_depends failed to open " + arg_pp);
     return 1;
   }
   if (cmFortran_yyparse(parser.Scanner) != 0) {
@@ -1751,8 +1748,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
   cmGeneratedFileStream ddif(arg_ddi);
   ddif << ddi;
   if (!ddif) {
-    cmSystemTools::Error("-E cmake_ninja_depends failed to write ",
-                         arg_ddi.c_str());
+    cmSystemTools::Error("-E cmake_ninja_depends failed to write " + arg_ddi);
     return 1;
   }
   return 0;
@@ -1795,9 +1791,8 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     cmsys::ifstream ddif(arg_ddi.c_str(), std::ios::in | std::ios::binary);
     Json::Reader reader;
     if (!reader.parse(ddif, ddio, false)) {
-      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse ",
-                           arg_ddi.c_str(),
-                           reader.getFormattedErrorMessages().c_str());
+      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse " + arg_ddi +
+                           reader.getFormattedErrorMessages());
       return false;
     }
 
@@ -1828,9 +1823,9 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     cmsys::ifstream ltmf(ltmn.c_str(), std::ios::in | std::ios::binary);
     Json::Reader reader;
     if (ltmf && !reader.parse(ltmf, ltm, false)) {
-      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse ",
-                           linked_target_dir.c_str(),
-                           reader.getFormattedErrorMessages().c_str());
+      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse " +
+                           linked_target_dir +
+                           reader.getFormattedErrorMessages());
       return false;
     }
     if (ltm.isObject()) {
@@ -1911,8 +1906,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
                cmHasLiteralSuffix(arg, ".ddi")) {
       arg_ddis.push_back(arg);
     } else {
-      cmSystemTools::Error("-E cmake_ninja_dyndep unknown argument: ",
-                           arg.c_str());
+      cmSystemTools::Error("-E cmake_ninja_dyndep unknown argument: " + arg);
       return 1;
     }
   }
@@ -1931,9 +1925,8 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
     cmsys::ifstream tdif(arg_tdi.c_str(), std::ios::in | std::ios::binary);
     Json::Reader reader;
     if (!reader.parse(tdif, tdio, false)) {
-      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse ",
-                           arg_tdi.c_str(),
-                           reader.getFormattedErrorMessages().c_str());
+      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse " + arg_tdi +
+                           reader.getFormattedErrorMessages());
       return 1;
     }
   }

@@ -462,8 +462,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
   // Make sure we have a link language.
   if (linkLanguage.empty()) {
-    cmSystemTools::Error("Cannot determine link language for target \"",
-                         this->GeneratorTarget->GetName().c_str(), "\".");
+    cmSystemTools::Error("Cannot determine link language for target \"" +
+                         this->GeneratorTarget->GetName() + "\".");
     return;
   }
 

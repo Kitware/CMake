@@ -109,8 +109,8 @@ void cmCTestMultiProcessHandler::SetTestLoad(unsigned long load)
                             fake_load_value)) {
     if (!cmSystemTools::StringToULong(fake_load_value.c_str(),
                                       &this->FakeLoadForTesting)) {
-      cmSystemTools::Error("Failed to parse fake load value: ",
-                           fake_load_value.c_str());
+      cmSystemTools::Error("Failed to parse fake load value: " +
+                           fake_load_value);
     }
   }
 }

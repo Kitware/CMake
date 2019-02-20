@@ -788,13 +788,13 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       }
       cmGlobalGenerator* gen = this->CreateGlobalGenerator(value);
       if (!gen) {
-        const char* kdevError = nullptr;
+        std::string kdevError;
         if (value.find("KDevelop3", 0) != std::string::npos) {
           kdevError = "\nThe KDevelop3 generator is not supported anymore.";
         }
 
-        cmSystemTools::Error("Could not create named generator ",
-                             value.c_str(), kdevError);
+        cmSystemTools::Error("Could not create named generator " + value +
+                             kdevError);
         this->PrintGeneratorList();
       } else {
         this->SetGlobalGenerator(gen);
@@ -938,8 +938,8 @@ int cmake::AddCMakePaths()
     cmSystemTools::Error(
       "Could not find CMAKE_ROOT !!!\n"
       "CMake has most likely not been installed correctly.\n"
-      "Modules directory not found in\n",
-      cmSystemTools::GetCMakeRoot().c_str());
+      "Modules directory not found in\n" +
+      cmSystemTools::GetCMakeRoot());
     return 0;
   }
   this->AddCacheEntry("CMAKE_ROOT", cmSystemTools::GetCMakeRoot().c_str(),
@@ -2016,8 +2016,8 @@ void cmake::UpdateConversionPathTable()
   if (tablepath) {
     cmsys::ifstream table(tablepath->c_str());
     if (!table) {
-      cmSystemTools::Error("CMAKE_PATH_TRANSLATION_FILE set to ",
-                           tablepath->c_str(), ". CMake can not open file.");
+      cmSystemTools::Error("CMAKE_PATH_TRANSLATION_FILE set to " + *tablepath +
+                           ". CMake can not open file.");
       cmSystemTools::ReportLastSystemError("CMake can not open file.");
     } else {
       std::string a, b;
@@ -2325,8 +2325,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
       }
       cmGlobalGenerator* gen = this->CreateGlobalGenerator(value);
       if (!gen) {
-        cmSystemTools::Error("Could not create named generator ",
-                             value.c_str());
+        cmSystemTools::Error("Could not create named generator " + value);
         this->PrintGeneratorList();
       } else {
         this->SetGlobalGenerator(gen);
@@ -2473,7 +2472,7 @@ static bool cmakeCheckStampFile(const std::string& stampName, bool verbose)
     return true;
   }
   cmSystemTools::RemoveFile(stampTemp);
-  cmSystemTools::Error("Cannot restore timestamp ", stampName.c_str());
+  cmSystemTools::Error("Cannot restore timestamp " + stampName);
   return false;
 }
 

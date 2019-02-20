@@ -1425,12 +1425,12 @@ std::string cmSystemTools::RelativePath(std::string const& local,
                                         std::string const& remote)
 {
   if (!cmSystemTools::FileIsFullPath(local)) {
-    cmSystemTools::Error("RelativePath must be passed a full path to local: ",
-                         local.c_str());
+    cmSystemTools::Error("RelativePath must be passed a full path to local: " +
+                         local);
   }
   if (!cmSystemTools::FileIsFullPath(remote)) {
-    cmSystemTools::Error("RelativePath must be passed a full path to remote: ",
-                         remote.c_str());
+    cmSystemTools::Error(
+      "RelativePath must be passed a full path to remote: " + remote);
   }
   return cmsys::SystemTools::RelativePath(local, remote);
 }
@@ -1909,8 +1909,8 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
       else {
         cmSystemTools::Error("Problem with archive_write_header(): ",
                              archive_error_string(ext));
-        cmSystemTools::Error("Current file: ",
-                             cm_archive_entry_pathname(entry).c_str());
+        cmSystemTools::Error("Current file: " +
+                             cm_archive_entry_pathname(entry));
         break;
       }
     }
