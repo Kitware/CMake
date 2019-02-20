@@ -1574,7 +1574,8 @@ Compilation of source files within a target is split into the following steps:
       command = gfortran -cpp $DEFINES $INCLUDES $FLAGS -E $in -o $out &&
                 cmake -E cmake_ninja_depends \
                   --tdi=FortranDependInfo.json --pp=$out --dep=$DEP_FILE \
-                  --obj=$OBJ_FILE --ddi=$DYNDEP_INTERMEDIATE_FILE
+                  --obj=$OBJ_FILE --ddi=$DYNDEP_INTERMEDIATE_FILE \
+                  --lang=Fortran
 
     build src.f90-pp.f90 | src.f90-pp.f90.ddi: Fortran_PREPROCESS src.f90
       OBJ_FILE = src.f90.o
@@ -1633,6 +1634,19 @@ Compilation of source files within a target is split into the following steps:
    (because the latter consumes the module).
 */
 
+struct cmSourceInfo
+{
+  // Set of provided and required modules.
+  std::set<std::string> Provides;
+  std::set<std::string> Requires;
+
+  // Set of files included in the translation unit.
+  std::set<std::string> Includes;
+};
+
+static std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
+  std::string const& arg_tdi, std::string const& arg_pp);
+
 int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
                               std::vector<std::string>::const_iterator argEnd)
 {
@@ -1641,6 +1655,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
   std::string arg_dep;
   std::string arg_obj;
   std::string arg_ddi;
+  std::string arg_lang;
   for (std::string const& arg : cmMakeRange(argBeg, argEnd)) {
     if (cmHasLiteralPrefix(arg, "--tdi=")) {
       arg_tdi = arg.substr(6);
@@ -1652,6 +1667,8 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
       arg_obj = arg.substr(6);
     } else if (cmHasLiteralPrefix(arg, "--ddi=")) {
       arg_ddi = arg.substr(6);
+    } else if (cmHasLiteralPrefix(arg, "--lang=")) {
+      arg_lang = arg.substr(7);
     } else {
       cmSystemTools::Error("-E cmake_ninja_depends unknown argument: " + arg);
       return 1;
@@ -1677,7 +1694,61 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
     cmSystemTools::Error("-E cmake_ninja_depends requires value for --ddi=");
     return 1;
   }
+  if (arg_lang.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_depends requires value for --lang=");
+    return 1;
+  }
 
+  std::unique_ptr<cmSourceInfo> info;
+  if (arg_lang == "Fortran") {
+    info = cmcmd_cmake_ninja_depends_fortran(arg_tdi, arg_pp);
+  } else {
+    cmSystemTools::Error("-E cmake_ninja_depends does not understand the " +
+                         arg_lang + " language");
+    return 1;
+  }
+
+  if (!info) {
+    // The error message is already expected to have been output.
+    return 1;
+  }
+
+  {
+    cmGeneratedFileStream depfile(arg_dep);
+    depfile << cmSystemTools::ConvertToUnixOutputPath(arg_pp) << ":";
+    for (std::string const& include : info->Includes) {
+      depfile << " \\\n " << cmSystemTools::ConvertToUnixOutputPath(include);
+    }
+    depfile << "\n";
+  }
+
+  Json::Value ddi(Json::objectValue);
+  ddi["object"] = arg_obj;
+
+  Json::Value& ddi_provides = ddi["provides"] = Json::arrayValue;
+  for (std::string const& provide : info->Provides) {
+    ddi_provides.append(provide);
+  }
+  Json::Value& ddi_requires = ddi["requires"] = Json::arrayValue;
+  for (std::string const& r : info->Requires) {
+    // Require modules not provided in the same source.
+    if (!info->Provides.count(r)) {
+      ddi_requires.append(r);
+    }
+  }
+
+  cmGeneratedFileStream ddif(arg_ddi);
+  ddif << ddi;
+  if (!ddif) {
+    cmSystemTools::Error("-E cmake_ninja_depends failed to write " + arg_ddi);
+    return 1;
+  }
+  return 0;
+}
+
+std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
+  std::string const& arg_tdi, std::string const& arg_pp)
+{
   cmFortranCompiler fc;
   std::vector<std::string> includes;
   {
@@ -1689,7 +1760,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
       if (!reader.parse(tdif, tdio, false)) {
         cmSystemTools::Error("-E cmake_ninja_depends failed to parse " +
                              arg_tdi + reader.getFormattedErrorMessages());
-        return 1;
+        return nullptr;
       }
     }
 
@@ -1710,49 +1781,23 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
     fc.SModExt = tdi_submodule_ext.asString();
   }
 
-  cmFortranSourceInfo info;
+  cmFortranSourceInfo finfo;
   std::set<std::string> defines;
-  cmFortranParser parser(fc, includes, defines, info);
+  cmFortranParser parser(fc, includes, defines, finfo);
   if (!cmFortranParser_FilePush(&parser, arg_pp.c_str())) {
     cmSystemTools::Error("-E cmake_ninja_depends failed to open " + arg_pp);
-    return 1;
+    return nullptr;
   }
   if (cmFortran_yyparse(parser.Scanner) != 0) {
     // Failed to parse the file.
-    return 1;
+    return nullptr;
   }
 
-  {
-    cmGeneratedFileStream depfile(arg_dep);
-    depfile << cmSystemTools::ConvertToUnixOutputPath(arg_pp) << ":";
-    for (std::string const& include : info.Includes) {
-      depfile << " \\\n " << cmSystemTools::ConvertToUnixOutputPath(include);
-    }
-    depfile << "\n";
-  }
-
-  Json::Value ddi(Json::objectValue);
-  ddi["object"] = arg_obj;
-
-  Json::Value& ddi_provides = ddi["provides"] = Json::arrayValue;
-  for (std::string const& provide : info.Provides) {
-    ddi_provides.append(provide);
-  }
-  Json::Value& ddi_requires = ddi["requires"] = Json::arrayValue;
-  for (std::string const& r : info.Requires) {
-    // Require modules not provided in the same source.
-    if (!info.Provides.count(r)) {
-      ddi_requires.append(r);
-    }
-  }
-
-  cmGeneratedFileStream ddif(arg_ddi);
-  ddif << ddi;
-  if (!ddif) {
-    cmSystemTools::Error("-E cmake_ninja_depends failed to write " + arg_ddi);
-    return 1;
-  }
-  return 0;
+  auto info = cm::make_unique<cmSourceInfo>();
+  info->Provides = finfo.Provides;
+  info->Requires = finfo.Requires;
+  info->Includes = finfo.Includes;
+  return info;
 }
 
 struct cmDyndepObjectInfo

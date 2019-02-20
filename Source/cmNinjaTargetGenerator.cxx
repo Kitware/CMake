@@ -558,7 +558,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
       cmake +
       " -E cmake_ninja_depends"
       " --tdi=" +
-      tdi +
+      tdi + " --lang=" + lang +
       " --pp=$out"
       " --dep=$DEP_FILE" +
       (needDyndep ? " --obj=$OBJ_FILE --ddi=$DYNDEP_INTERMEDIATE_FILE" : ""));
@@ -1062,8 +1062,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     // In case compilation requires flags that are incompatible with
     // preprocessing, include them here.
-    std::string const postFlag =
-      this->Makefile->GetSafeDefinition("CMAKE_Fortran_POSTPROCESS_FLAG");
+    std::string const postFlag = this->Makefile->GetSafeDefinition(
+      "CMAKE_" + language + "_POSTPROCESS_FLAG");
     this->LocalGenerator->AppendFlags(vars["FLAGS"], postFlag);
 
     // Move preprocessor definitions to the preprocessor build statement.
