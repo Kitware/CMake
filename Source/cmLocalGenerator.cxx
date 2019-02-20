@@ -947,15 +947,21 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     std::vector<std::string> impDirVec = userStandardDirs;
 
     // Load implicit include directories for this language.
-    std::string key = "CMAKE_";
-    key += lang;
-    key += "_IMPLICIT_INCLUDE_DIRECTORIES";
-    if (const char* value = this->Makefile->GetDefinition(key)) {
-      size_t const impDirVecOldSize = impDirVec.size();
-      cmSystemTools::ExpandListArgument(value, impDirVec);
-      // FIXME: Use cmRange with 'advance()' when it supports non-const.
-      for (size_t i = impDirVecOldSize; i < impDirVec.size(); ++i) {
-        cmSystemTools::ConvertToUnixSlashes(impDirVec[i]);
+    // We ignore this for Fortran because:
+    // * There are no standard library headers to avoid overriding.
+    // * Compilers like gfortran do not search their own implicit include
+    //   directories for modules ('.mod' files).
+    if (lang != "Fortran") {
+      std::string key = "CMAKE_";
+      key += lang;
+      key += "_IMPLICIT_INCLUDE_DIRECTORIES";
+      if (const char* value = this->Makefile->GetDefinition(key)) {
+        size_t const impDirVecOldSize = impDirVec.size();
+        cmSystemTools::ExpandListArgument(value, impDirVec);
+        // FIXME: Use cmRange with 'advance()' when it supports non-const.
+        for (size_t i = impDirVecOldSize; i < impDirVec.size(); ++i) {
+          cmSystemTools::ConvertToUnixSlashes(impDirVec[i]);
+        }
       }
     }
 
