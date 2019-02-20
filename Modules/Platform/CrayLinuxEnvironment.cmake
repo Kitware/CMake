@@ -1,6 +1,5 @@
-# Compute Node Linux doesn't quite work the same as native Linux so all of this
-# needs to be custom.  We use the variables defined through Cray's environment
-# modules to set up the right paths for things.
+# CrayLinuxEnvironment: loaded by users cross-compiling on a Cray front-end
+# node by specifying "-DCMAKE_SYSTEM_NAME=CrayLinuxEnvironment" to cmake
 
 set(UNIX 1)
 
@@ -30,13 +29,6 @@ endif()
 # Note: this may need to change in the future with 64-bit ARM
 set(CMAKE_SYSTEM_PROCESSOR "x86_64")
 
-set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
-set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
-set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
-set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
-
-set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
-
 # Don't override shared lib support if it's already been set and possibly
 # overridden elsewhere by the CrayPrgEnv module
 if(NOT CMAKE_FIND_LIBRARY_SUFFIXES)
@@ -44,12 +36,9 @@ if(NOT CMAKE_FIND_LIBRARY_SUFFIXES)
   set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 endif()
 
-set(CMAKE_DL_LIBS dl)
+# The rest of this file is based on UnixPaths.cmake, adjusted for Cray
 
-# Note: Much of this is pulled from UnixPaths.cmake but adjusted to the Cray
-# environment accordingly
-
-# Get the install directory of the running cmake to the search directories
+# add the install directory of the running cmake to the search directories
 # CMAKE_ROOT is CMAKE_INSTALL_PREFIX/share/cmake, so we need to go two levels up
 get_filename_component(__cmake_install_dir "${CMAKE_ROOT}" PATH)
 get_filename_component(__cmake_install_dir "${__cmake_install_dir}" PATH)
@@ -81,7 +70,6 @@ if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
 endif()
 
 list(APPEND CMAKE_SYSTEM_INCLUDE_PATH
-  $ENV{SYSROOT_DIR}/usr/include
   $ENV{SYSROOT_DIR}/usr/include/X11
 )
 list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
@@ -94,58 +82,6 @@ list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
   $ENV{SYSROOT_DIR}/usr/lib64
   $ENV{SYSROOT_DIR}/lib64
 )
-
-# Compute the intersection of several lists
-function(__cray_list_intersect OUTPUT INPUT0)
-  if(ARGC EQUAL 2)
-    list(APPEND ${OUTPUT} ${${INPUT0}})
-  else()
-    foreach(I IN LISTS ${INPUT0})
-      set(__is_common 1)
-      foreach(L IN LISTS ARGN)
-        list(FIND ${L} "${I}" __idx)
-        if(__idx EQUAL -1)
-          set(__is_common 0)
-          break()
-        endif()
-      endforeach()
-      if(__is_common)
-        list(APPEND ${OUTPUT}  "${I}")
-      endif()
-    endforeach()
-  endif()
-  set(${OUTPUT} ${${OUTPUT}} PARENT_SCOPE)
-endfunction()
-
-macro(__list_clean_dupes var)
-  if(${var})
-    list(REMOVE_DUPLICATES ${var})
-  endif()
-endmacro()
-
-get_property(__langs GLOBAL PROPERTY ENABLED_LANGUAGES)
-set(__cray_inc_path_vars)
-set(__cray_lib_path_vars)
-foreach(__lang IN LISTS __langs)
-  list(APPEND __cray_inc_path_vars CMAKE_${__lang}_IMPLICIT_INCLUDE_DIRECTORIES)
-  list(APPEND __cray_lib_path_vars CMAKE_${__lang}_IMPLICIT_LINK_DIRECTORIES)
-endforeach()
-if(__cray_inc_path_vars)
-  __cray_list_intersect(__cray_implicit_include_dirs ${__cray_inc_path_vars})
-  if(__cray_implicit_include_dirs)
-    list(INSERT CMAKE_SYSTEM_INCLUDE_PATH 0 ${__cray_implicit_include_dirs})
-  endif()
-endif()
-if(__cray_lib_path_vars)
-  __cray_list_intersect(__cray_implicit_library_dirs ${__cray_lib_path_vars})
-  if(__cray_implicit_library_dirs)
-    list(INSERT CMAKE_SYSTEM_LIBRARY_PATH 0 ${__cray_implicit_library_dirs})
-  endif()
-endif()
-__list_clean_dupes(CMAKE_SYSTEM_PREFIX_PATH)
-__list_clean_dupes(CMAKE_SYSTEM_INCLUDE_PATH)
-__list_clean_dupes(CMAKE_SYSTEM_LIBRARY_PATH)
-__list_clean_dupes(CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES)
 
 # Enable use of lib64 search path variants by default.
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)
