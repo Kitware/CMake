@@ -102,6 +102,12 @@ bool cmNinjaTargetGenerator::NeedExplicitPreprocessing(
   return lang == "Fortran";
 }
 
+bool cmNinjaTargetGenerator::UsePreprocessedSource(
+  std::string const& lang) const
+{
+  return lang == "Fortran";
+}
+
 std::string cmNinjaTargetGenerator::LanguageDyndepRule(
   const std::string& lang) const
 {
@@ -1035,6 +1041,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // For some cases we do an explicit preprocessor invocation.
   bool const explicitPP = this->NeedExplicitPreprocessing(language);
   if (explicitPP) {
+    bool const compilePP = this->UsePreprocessedSource(language);
     std::string const ppComment;
     std::string const ppRule = this->LanguagePreprocessRule(language);
     cmNinjaDeps ppOutputs;
@@ -1048,50 +1055,69 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       this->ConvertToNinjaPath(this->GetPreprocessedFilePath(source));
     ppOutputs.push_back(ppFileName);
 
-    // Move compilation dependencies to the preprocessing build statement.
-    std::swap(ppExplicitDeps, explicitDeps);
-    std::swap(ppImplicitDeps, implicitDeps);
-    std::swap(ppOrderOnlyDeps, orderOnlyDeps);
-    std::swap(ppVars["IN_ABS"], vars["IN_ABS"]);
+    if (compilePP) {
+      // Move compilation dependencies to the preprocessing build statement.
+      std::swap(ppExplicitDeps, explicitDeps);
+      std::swap(ppImplicitDeps, implicitDeps);
+      std::swap(ppOrderOnlyDeps, orderOnlyDeps);
+      std::swap(ppVars["IN_ABS"], vars["IN_ABS"]);
 
-    // The actual compilation will now use the preprocessed source.
-    explicitDeps.push_back(ppFileName);
+      // The actual compilation will now use the preprocessed source.
+      explicitDeps.push_back(ppFileName);
+    } else {
+      // Copy compilation dependencies to the preprocessing build statement.
+      ppExplicitDeps = explicitDeps;
+      ppImplicitDeps = implicitDeps;
+      ppOrderOnlyDeps = orderOnlyDeps;
+      ppVars["IN_ABS"] = vars["IN_ABS"];
+    }
 
     // Preprocessing and compilation generally use the same flags.
     ppVars["FLAGS"] = vars["FLAGS"];
 
-    // In case compilation requires flags that are incompatible with
-    // preprocessing, include them here.
-    std::string const postFlag = this->Makefile->GetSafeDefinition(
-      "CMAKE_" + language + "_POSTPROCESS_FLAG");
-    this->LocalGenerator->AppendFlags(vars["FLAGS"], postFlag);
+    if (compilePP) {
+      // In case compilation requires flags that are incompatible with
+      // preprocessing, include them here.
+      std::string const postFlag = this->Makefile->GetSafeDefinition(
+        "CMAKE_" + language + "_POSTPROCESS_FLAG");
+      this->LocalGenerator->AppendFlags(vars["FLAGS"], postFlag);
+    }
 
-    // Move preprocessor definitions to the preprocessor build statement.
-    std::swap(ppVars["DEFINES"], vars["DEFINES"]);
+    if (compilePP) {
+      // Move preprocessor definitions to the preprocessor build statement.
+      std::swap(ppVars["DEFINES"], vars["DEFINES"]);
+    } else {
+      // Copy preprocessor definitions to the preprocessor build statement.
+      ppVars["DEFINES"] = vars["DEFINES"];
+    }
 
     // Copy include directories to the preprocessor build statement.  The
     // Fortran compilation build statement still needs them for the INCLUDE
     // directive.
     ppVars["INCLUDES"] = vars["INCLUDES"];
 
-    // Prepend source file's original directory as an include directory
-    // so e.g. Fortran INCLUDE statements can look for files in it.
-    std::vector<std::string> sourceDirectory;
-    sourceDirectory.push_back(
-      cmSystemTools::GetParentDirectory(source->GetFullPath()));
+    if (compilePP) {
+      // Prepend source file's original directory as an include directory
+      // so e.g. Fortran INCLUDE statements can look for files in it.
+      std::vector<std::string> sourceDirectory;
+      sourceDirectory.push_back(
+        cmSystemTools::GetParentDirectory(source->GetFullPath()));
 
-    std::string sourceDirectoryFlag = this->LocalGenerator->GetIncludeFlags(
-      sourceDirectory, this->GeneratorTarget, language, false, false,
-      this->GetConfigName());
+      std::string sourceDirectoryFlag = this->LocalGenerator->GetIncludeFlags(
+        sourceDirectory, this->GeneratorTarget, language, false, false,
+        this->GetConfigName());
 
-    vars["INCLUDES"] = sourceDirectoryFlag + " " + vars["INCLUDES"];
+      vars["INCLUDES"] = sourceDirectoryFlag + " " + vars["INCLUDES"];
+    }
 
     // Explicit preprocessing always uses a depfile.
     ppVars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
       ppFileName + ".d", cmOutputConverter::SHELL);
-    // The actual compilation does not need a depfile because it
-    // depends on the already-preprocessed source.
-    vars.erase("DEP_FILE");
+    if (compilePP) {
+      // The actual compilation does not need a depfile because it
+      // depends on the already-preprocessed source.
+      vars.erase("DEP_FILE");
+    }
 
     if (needDyndep) {
       // Tell dependency scanner the object file that will result from
