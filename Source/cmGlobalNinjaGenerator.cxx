@@ -1577,10 +1577,10 @@ Compilation of source files within a target is split into the following steps:
                   --obj=$OBJ_FILE --ddi=$DYNDEP_INTERMEDIATE_FILE \
                   --lang=Fortran
 
-    build src.f90-pp.f90 | src.f90-pp.f90.ddi: Fortran_PREPROCESS src.f90
+    build src.f90-pp.f90 | src.f90.o.ddi: Fortran_PREPROCESS src.f90
       OBJ_FILE = src.f90.o
-      DEP_FILE = src.f90-pp.f90.d
-      DYNDEP_INTERMEDIATE_FILE = src.f90-pp.f90.ddi
+      DEP_FILE = src.f90.o.d
+      DYNDEP_INTERMEDIATE_FILE = src.f90.o.ddi
 
    The ``cmake -E cmake_ninja_depends`` tool reads the preprocessed output
    and generates the ninja depfile for preprocessor dependencies.  It also
@@ -1596,7 +1596,7 @@ Compilation of source files within a target is split into the following steps:
       command = cmake -E cmake_ninja_dyndep \
                   --tdi=FortranDependInfo.json --lang=Fortran --dd=$out $in
 
-    build Fortran.dd: Fortran_DYNDEP src1.f90-pp.f90.ddi src2.f90-pp.f90.ddi
+    build Fortran.dd: Fortran_DYNDEP src1.f90.o.ddi src2.f90.o.ddi
 
    The ``cmake -E cmake_ninja_dyndep`` tool reads the "ddi" files from all
    sources in the target and the ``FortranModules.json`` files from targets

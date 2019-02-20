@@ -1113,7 +1113,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     // Explicit preprocessing always uses a depfile.
     ppVars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-      ppFileName + ".d", cmOutputConverter::SHELL);
+      objectFileName + ".d", cmOutputConverter::SHELL);
     if (compilePP) {
       // The actual compilation does not need a depfile because it
       // depends on the already-preprocessed source.
@@ -1126,7 +1126,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       ppVars["OBJ_FILE"] = objectFileName;
 
       // Tell dependency scanner where to store dyndep intermediate results.
-      std::string const ddiFile = ppFileName + ".ddi";
+      std::string const ddiFile = objectFileName + ".ddi";
       ppVars["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
       ppImplicitOuts.push_back(ddiFile);
       this->DDIFiles[language].push_back(ddiFile);
