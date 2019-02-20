@@ -455,6 +455,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     vars.SwiftAuxiliarySources = "$SWIFT_AUXILIARY_SOURCES";
     vars.SwiftModuleName = "$SWIFT_MODULE_NAME";
     vars.SwiftLibraryName = "$SWIFT_LIBRARY_NAME";
+    vars.SwiftPartialModule = "$SWIFT_PARTIAL_MODULE";
+    vars.SwiftPartialDoc = "$SWIFT_PARTIAL_DOC";
   }
 
   // For some cases we do an explicit preprocessor invocation.
@@ -945,6 +947,18 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     cmGeneratorTarget::Names targetNames =
       this->GeneratorTarget->GetLibraryNames(this->GetConfigName());
     vars["SWIFT_LIBRARY_NAME"] = targetNames.Base;
+
+    if (const char* partial = source->GetProperty("SWIFT_PARTIAL_MODULE")) {
+      vars["SWIFT_PARTIAL_MODULE"] = partial;
+    } else {
+      vars["SWIFT_PARTIAL_MODULE"] = objectFileName + ".swiftmodule";
+    }
+
+    if (const char* partial = source->GetProperty("SWIFT_PARTIAL_DOC")) {
+      vars["SWIFT_PARTIAL_DOC"] = partial;
+    } else {
+      vars["SWIFT_PARTIAL_DOC"] = objectFileName + ".swiftdoc";
+    }
   }
 
   if (!this->NeedDepTypeMSVC(language)) {
