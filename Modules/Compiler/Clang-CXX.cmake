@@ -1,7 +1,7 @@
 include(Compiler/Clang)
 __compiler_clang(CXX)
 
-if(NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
+if("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
   set(CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN "-fvisibility-inlines-hidden")
 endif()
 
@@ -10,7 +10,8 @@ if(APPLE AND NOT appleClangPolicy STREQUAL NEW)
   return()
 endif()
 
-if(NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
+
+if("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
   if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 2.1)
     set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "-std=c++98")
     set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION "-std=gnu++98")
@@ -55,6 +56,14 @@ if(NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
   endif()
 
   unset(_clang_version_std17)
+
+  if("x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
+    # This clang++ is missing some features because of MSVC compatibility.
+    unset(CMAKE_CXX11_STANDARD__HAS_FULL_SUPPORT)
+    unset(CMAKE_CXX14_STANDARD__HAS_FULL_SUPPORT)
+    unset(CMAKE_CXX17_STANDARD__HAS_FULL_SUPPORT)
+    unset(CMAKE_CXX20_STANDARD__HAS_FULL_SUPPORT)
+  endif()
 
   __compiler_check_default_language_standard(CXX 2.1 98)
 elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 3.9
