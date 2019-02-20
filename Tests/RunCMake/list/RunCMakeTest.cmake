@@ -98,3 +98,15 @@ run_cmake(SORT-NoCaseOption)
 
 # Successful tests
 run_cmake(SORT)
+
+# argument tests
+run_cmake(PREPEND-NoArgs)
+# Successful tests
+run_cmake(PREPEND)
+
+# argument tests
+run_cmake(POP_BACK-NoArgs)
+run_cmake(POP_FRONT-NoArgs)
+# Successful tests
+run_cmake(POP_BACK)
+run_cmake(POP_FRONT)
