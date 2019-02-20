@@ -6,10 +6,12 @@
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommandLines.h"
+#include "cmDuration.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProcessOutput.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
@@ -181,6 +183,68 @@ void cmQtAutoGenGlobalInitializer::AddToGlobalAutoRcc(
       target->Target->AddUtility(targetName, localGen->GetMakefile());
     }
   }
+}
+
+bool cmQtAutoGenGlobalInitializer::GetExecutableTestOutput(
+  std::string const& generator, std::string const& executable,
+  std::string& error, std::string* output)
+{
+  // Check if we have cached output
+  {
+    auto it = this->ExecutableTestOutputs_.find(executable);
+    if (it != this->ExecutableTestOutputs_.end()) {
+      // Return output on demand
+      if (output != nullptr) {
+        *output = it->second;
+      }
+      return true;
+    }
+  }
+
+  // Check if the executable exists
+  if (!cmSystemTools::FileExists(executable, true)) {
+    error = "The \"";
+    error += generator;
+    error += "\" executable ";
+    error += cmQtAutoGen::Quoted(executable);
+    error += " does not exist.";
+    return false;
+  }
+
+  // Test the executable
+  std::string stdOut;
+  {
+    std::string stdErr;
+    std::vector<std::string> command;
+    command.push_back(executable);
+    command.emplace_back("-h");
+    int retVal = 0;
+    const bool runResult = cmSystemTools::RunSingleCommand(
+      command, &stdOut, &stdErr, &retVal, nullptr, cmSystemTools::OUTPUT_NONE,
+      cmDuration::zero(), cmProcessOutput::Auto);
+    if (!runResult) {
+      error = "Test run of \"";
+      error += generator;
+      error += "\" executable ";
+      error += cmQtAutoGen::Quoted(executable) + " failed.\n";
+      error += cmQtAutoGen::QuotedCommand(command);
+      error += "\n";
+      error += stdOut;
+      error += "\n";
+      error += stdErr;
+      return false;
+    }
+  }
+
+  // Return executable output on demand
+  if (output != nullptr) {
+    *output = stdOut;
+  }
+
+  // Register executable and output
+  this->ExecutableTestOutputs_.emplace(executable, std::move(stdOut));
+
+  return true;
 }
 
 bool cmQtAutoGenGlobalInitializer::generate()

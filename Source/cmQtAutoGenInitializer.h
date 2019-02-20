@@ -110,6 +110,10 @@ private:
                      std::vector<std::string>& files,
                      std::string& errorMessage);
 
+  std::pair<bool, std::string> GetQtExecutable(const std::string& executable,
+                                               bool ignoreMissingTarget,
+                                               std::string* output);
+
 private:
   cmQtAutoGenGlobalInitializer* GlobalInitializer;
   cmGeneratorTarget* Target;
