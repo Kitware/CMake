@@ -10,6 +10,7 @@
 #include "cmNinjaTypes.h"
 #include "cmOSXBundleGenerator.h"
 
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -165,7 +166,7 @@ private:
   cmLocalNinjaGenerator* LocalGenerator;
   /// List of object files for this target.
   cmNinjaDeps Objects;
-  cmNinjaDeps DDIFiles; // TODO: Make per-language.
+  std::map<std::string, cmNinjaDeps> DDIFiles;
   std::vector<cmCustomCommand const*> CustomCommands;
   cmNinjaDeps ExtraFiles;
 };

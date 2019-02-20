@@ -1593,7 +1593,7 @@ Compilation of source files within a target is split into the following steps:
 
     rule Fortran_DYNDEP
       command = cmake -E cmake_ninja_dyndep \
-                  --tdi=FortranDependInfo.json --dd=$out $in
+                  --tdi=FortranDependInfo.json --lang=Fortran --dd=$out $in
 
     build Fortran.dd: Fortran_DYNDEP src1.f90-pp.f90.ddi src2.f90-pp.f90.ddi
 
@@ -1755,7 +1755,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
   return 0;
 }
 
-struct cmFortranObjectInfo
+struct cmDyndepObjectInfo
 {
   std::string Object;
   std::vector<std::string> Provides;
@@ -1767,7 +1767,8 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   std::string const& dir_cur_src, std::string const& dir_cur_bld,
   std::string const& arg_dd, std::vector<std::string> const& arg_ddis,
   std::string const& module_dir,
-  std::vector<std::string> const& linked_target_dirs)
+  std::vector<std::string> const& linked_target_dirs,
+  std::string const& arg_lang)
 {
   // Setup path conversions.
   {
@@ -1784,7 +1785,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     this->LocalGenerators.push_back(lgd.release());
   }
 
-  std::vector<cmFortranObjectInfo> objects;
+  std::vector<cmDyndepObjectInfo> objects;
   for (std::string const& arg_ddi : arg_ddis) {
     // Load the ddi file and compute the module file paths it provides.
     Json::Value ddio;
@@ -1797,7 +1798,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
       return false;
     }
 
-    cmFortranObjectInfo info;
+    cmDyndepObjectInfo info;
     info.Object = ddi["object"].asString();
     Json::Value const& ddi_provides = ddi["provides"];
     if (ddi_provides.isArray()) {
@@ -1819,7 +1820,8 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
 
   // Populate the module map with those provided by linked targets first.
   for (std::string const& linked_target_dir : linked_target_dirs) {
-    std::string const ltmn = linked_target_dir + "/FortranModules.json";
+    std::string const ltmn =
+      linked_target_dir + "/" + arg_lang + "Modules.json";
     Json::Value ltm;
     cmsys::ifstream ltmf(ltmn.c_str(), std::ios::in | std::ios::binary);
     Json::Reader reader;
@@ -1840,7 +1842,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   // We do this after loading the modules provided by linked targets
   // in case we have one of the same name that must be preferred.
   Json::Value tm = Json::objectValue;
-  for (cmFortranObjectInfo const& object : objects) {
+  for (cmDyndepObjectInfo const& object : objects) {
     for (std::string const& p : object.Provides) {
       std::string const mod = module_dir + p;
       mod_files[p] = mod;
@@ -1851,7 +1853,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   cmGeneratedFileStream ddf(arg_dd);
   ddf << "ninja_dyndep_version = 1.0\n";
 
-  for (cmFortranObjectInfo const& object : objects) {
+  for (cmDyndepObjectInfo const& object : objects) {
     std::string const ddComment;
     std::string const ddRule = "dyndep";
     cmNinjaDeps ddOutputs;
@@ -1882,7 +1884,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   // Store the map of modules provided by this target in a file for
   // use by dependents that reference this target in linked-target-dirs.
   std::string const target_mods_file =
-    cmSystemTools::GetFilenamePath(arg_dd) + "/FortranModules.json";
+    cmSystemTools::GetFilenamePath(arg_dd) + "/" + arg_lang + "Modules.json";
   cmGeneratedFileStream tmf(target_mods_file);
   tmf << tm;
 
@@ -1896,11 +1898,14 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
     cmSystemTools::HandleResponseFile(argBeg, argEnd);
 
   std::string arg_dd;
+  std::string arg_lang;
   std::string arg_tdi;
   std::vector<std::string> arg_ddis;
   for (std::string const& arg : arg_full) {
     if (cmHasLiteralPrefix(arg, "--tdi=")) {
       arg_tdi = arg.substr(6);
+    } else if (cmHasLiteralPrefix(arg, "--lang=")) {
+      arg_lang = arg.substr(7);
     } else if (cmHasLiteralPrefix(arg, "--dd=")) {
       arg_dd = arg.substr(5);
     } else if (!cmHasLiteralPrefix(arg, "--") &&
@@ -1913,6 +1918,10 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   }
   if (arg_tdi.empty()) {
     cmSystemTools::Error("-E cmake_ninja_dyndep requires value for --tdi=");
+    return 1;
+  }
+  if (arg_lang.empty()) {
+    cmSystemTools::Error("-E cmake_ninja_dyndep requires value for --lang=");
     return 1;
   }
   if (arg_dd.empty()) {
@@ -1955,8 +1964,8 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
     static_cast<cmGlobalNinjaGenerator*>(cm.CreateGlobalGenerator("Ninja")));
   if (!ggd ||
       !ggd->WriteDyndepFile(dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld,
-                            arg_dd, arg_ddis, module_dir,
-                            linked_target_dirs)) {
+                            arg_dd, arg_ddis, module_dir, linked_target_dirs,
+                            arg_lang)) {
     return 1;
   }
   return 0;

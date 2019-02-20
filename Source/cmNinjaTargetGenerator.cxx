@@ -594,7 +594,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     ddCmds.push_back(cmake +
                      " -E cmake_ninja_dyndep"
                      " --tdi=" +
-                     tdi +
+                     tdi + " --lang=" + lang +
                      " --dd=$out"
                      " " +
                      ddInput);
@@ -868,24 +868,27 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
     this->WriteObjectBuildStatement(sf);
   }
 
-  if (!this->DDIFiles.empty()) {
+  for (auto const& langDDIFiles : this->DDIFiles) {
+    std::string const& language = langDDIFiles.first;
+    cmNinjaDeps const& ddiFiles = langDDIFiles.second;
+
     std::string const ddComment;
-    std::string const ddRule = this->LanguageDyndepRule("Fortran");
+    std::string const ddRule = this->LanguageDyndepRule(language);
     cmNinjaDeps ddOutputs;
     cmNinjaDeps ddImplicitOuts;
-    cmNinjaDeps const& ddExplicitDeps = this->DDIFiles;
+    cmNinjaDeps const& ddExplicitDeps = ddiFiles;
     cmNinjaDeps ddImplicitDeps;
     cmNinjaDeps ddOrderOnlyDeps;
     cmNinjaVars ddVars;
 
-    this->WriteTargetDependInfo("Fortran");
+    this->WriteTargetDependInfo(language);
 
-    ddOutputs.push_back(this->GetDyndepFilePath("Fortran"));
+    ddOutputs.push_back(this->GetDyndepFilePath(language));
 
     // Make sure dyndep files for all our dependencies have already
-    // been generated so that the 'FortranModules.json' files they
+    // been generated so that the '<LANG>Modules.json' files they
     // produced as side-effects are available for us to read.
-    // Ideally we should depend on the 'FortranModules.json' files
+    // Ideally we should depend on the '<LANG>Modules.json' files
     // from our dependencies directly, but we don't know which of
     // our dependencies produces them.  Fixing this will require
     // refactoring the Ninja generator to generate targets in
@@ -1099,7 +1102,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       std::string const ddiFile = ppFileName + ".ddi";
       ppVars["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
       ppImplicitOuts.push_back(ddiFile);
-      this->DDIFiles.push_back(ddiFile);
+      this->DDIFiles[language].push_back(ddiFile);
     }
 
     this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
