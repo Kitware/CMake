@@ -510,21 +510,10 @@ const char* cmGeneratorTarget::GetLinkPIEProperty(
     return nullptr;
   }
 
-  switch (this->GetPolicyStatusCMP0083()) {
-    case cmPolicies::WARN: {
-      std::ostringstream e;
-      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0083);
-      this->LocalGenerator->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-      CM_FALLTHROUGH;
-    }
-    case cmPolicies::OLD:
-      return nullptr;
-    default:
-      // nothing to do
-      break;
-  }
-
-  return PICValue.c_str();
+  auto status = this->GetPolicyStatusCMP0083();
+  return (status != cmPolicies::WARN && status != cmPolicies::OLD)
+    ? PICValue.c_str()
+    : nullptr;
 }
 
 bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
