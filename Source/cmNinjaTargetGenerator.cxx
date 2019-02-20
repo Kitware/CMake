@@ -594,7 +594,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     std::string ddRspContent = "$in";
     std::string ddInput = "@" + ddRspFile;
 
-    // Run CMake dependency scanner on preprocessed output.
+    // Run CMake dependency scanner on the source file (using the preprocessed
+    // source if that was performed).
     std::string const cmake = this->GetLocalGenerator()->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
     ddCmds.push_back(cmake +
@@ -1121,7 +1122,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     if (needDyndep) {
       // Tell dependency scanner the object file that will result from
-      // compiling the preprocessed source.
+      // compiling the source.
       ppVars["OBJ_FILE"] = objectFileName;
 
       // Tell dependency scanner where to store dyndep intermediate results.
