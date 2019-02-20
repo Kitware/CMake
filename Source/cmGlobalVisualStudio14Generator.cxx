@@ -158,14 +158,22 @@ bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf,
                                                          bool required)
 {
   // Find the default version of the Windows 10 SDK.
-  this->WindowsTargetPlatformVersion = this->GetWindows10SDKVersion();
-  if (required && this->WindowsTargetPlatformVersion.empty()) {
+  std::string const version = this->GetWindows10SDKVersion();
+  if (required && version.empty()) {
     std::ostringstream e;
     e << "Could not find an appropriate version of the Windows 10 SDK"
       << " installed on this machine";
     mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
+  this->SetWindowsTargetPlatformVersion(version, mf);
+  return true;
+}
+
+void cmGlobalVisualStudio14Generator::SetWindowsTargetPlatformVersion(
+  std::string const& version, cmMakefile* mf)
+{
+  this->WindowsTargetPlatformVersion = version;
   if (!cmSystemTools::VersionCompareEqual(this->WindowsTargetPlatformVersion,
                                           this->SystemVersion)) {
     std::ostringstream e;
@@ -175,7 +183,6 @@ bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf,
   }
   mf->AddDefinition("CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION",
                     this->WindowsTargetPlatformVersion.c_str());
-  return true;
 }
 
 bool cmGlobalVisualStudio14Generator::SelectWindowsStoreToolset(
