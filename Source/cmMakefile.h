@@ -610,8 +610,8 @@ public:
   /**
    * Copy file but change lines according to ConfigureString
    */
-  int ConfigureFile(const char* infile, const char* outfile, bool copyonly,
-                    bool atOnly, bool escapeQuotes,
+  int ConfigureFile(const std::string& infile, const std::string& outfile,
+                    bool copyonly, bool atOnly, bool escapeQuotes,
                     cmNewLineStyle = cmNewLineStyle());
 
   /**

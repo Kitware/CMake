@@ -340,14 +340,14 @@ public:
    */
   void GenerateAppleInfoPList(cmGeneratorTarget* target,
                               const std::string& targetName,
-                              const char* fname);
+                              const std::string& fname);
 
   /**
    * Generate a macOS framework Info.plist file.
    */
   void GenerateFrameworkInfoPList(cmGeneratorTarget* target,
                                   const std::string& targetName,
-                                  const char* fname);
+                                  const std::string& fname);
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(cmCustomCommandGenerator const& ccg,
                                const char* default_comment = "");

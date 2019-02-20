@@ -105,7 +105,7 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
 
   // Create the distribution.dist file in the metapackage to turn it
   // into a distribution package.
-  this->ConfigureFile(distributionTemplate.c_str(), distributionFile.c_str());
+  this->ConfigureFile(distributionTemplate, distributionFile);
 }
 
 void cmCPackPKGGenerator::CreateChoiceOutline(
@@ -294,7 +294,7 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Configure file: " << (inFileName ? inFileName : "(NULL)")
                                    << " to " << destFileName << std::endl);
-  this->ConfigureFile(inFileName, destFileName.c_str());
+  this->ConfigureFile(inFileName, destFileName);
   return true;
 }
 
@@ -322,7 +322,7 @@ bool cmCPackPKGGenerator::CopyResourcePlistFile(const std::string& name,
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Configure file: " << inFileName << " to " << destFileName
                                    << std::endl);
-  this->ConfigureFile(inFileName.c_str(), destFileName.c_str());
+  this->ConfigureFile(inFileName, destFileName);
   return true;
 }
 

@@ -1245,7 +1245,8 @@ bool cmCPackGenerator::ConfigureString(const std::string& inString,
   return true;
 }
 
-bool cmCPackGenerator::ConfigureFile(const char* inName, const char* outName,
+bool cmCPackGenerator::ConfigureFile(const std::string& inName,
+                                     const std::string& outName,
                                      bool copyOnly /* = false */)
 {
   return this->MakefileMap->ConfigureFile(inName, outName, copyOnly, true,
