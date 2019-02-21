@@ -187,15 +187,8 @@ public:
     virtual void Process(WorkerT& wrk) = 0;
   };
 
-  /// @brief Deleter for classes derived from Job
-  ///
-  struct JobDeleterT
-  {
-    void operator()(JobT* job);
-  };
-
   // Job management types
-  typedef std::unique_ptr<JobT, JobDeleterT> JobHandleT;
+  typedef std::unique_ptr<JobT> JobHandleT;
   typedef std::deque<JobHandleT> JobQueueT;
 
   /// @brief Parse source job

@@ -432,8 +432,8 @@ bool cmQtAutoGeneratorMocUic::JobParseT::ParseMocSource(WorkerT& wrk,
 
   // Convert pre jobs to actual jobs
   for (JobPre& jobPre : jobs) {
-    JobHandleT jobHandle(new JobMocT(std::move(jobPre.SourceFile), FileName,
-                                     std::move(jobPre.IncludeString)));
+    JobHandleT jobHandle = cm::make_unique<JobMocT>(
+      std::move(jobPre.SourceFile), FileName, std::move(jobPre.IncludeString));
     if (jobPre.self) {
       // Read dependencies from this source
       static_cast<JobMocT&>(*jobHandle).FindDependencies(wrk, meta.Content);
@@ -451,8 +451,8 @@ bool cmQtAutoGeneratorMocUic::JobParseT::ParseMocHeader(WorkerT& wrk,
   bool success = true;
   std::string const macroName = wrk.Moc().FindMacro(meta.Content);
   if (!macroName.empty()) {
-    JobHandleT jobHandle(
-      new JobMocT(std::string(FileName), std::string(), std::string()));
+    JobHandleT jobHandle = cm::make_unique<JobMocT>(
+      std::string(FileName), std::string(), std::string());
     // Read dependencies from this source
     static_cast<JobMocT&>(*jobHandle).FindDependencies(wrk, meta.Content);
     success = wrk.Gen().ParallelJobPushMoc(jobHandle);
@@ -518,8 +518,8 @@ bool cmQtAutoGeneratorMocUic::JobParseT::ParseUicInclude(
   std::string uiInputFile = UicFindIncludedFile(wrk, meta, includeString);
   if (!uiInputFile.empty()) {
     if (!wrk.Uic().skipped(uiInputFile)) {
-      JobHandleT jobHandle(new JobUicT(std::move(uiInputFile), FileName,
-                                       std::move(includeString)));
+      JobHandleT jobHandle = cm::make_unique<JobUicT>(
+        std::move(uiInputFile), FileName, std::move(includeString));
       success = wrk.Gen().ParallelJobPushUic(jobHandle);
     } else {
       // A skipped file is successful
@@ -993,11 +993,6 @@ void cmQtAutoGeneratorMocUic::JobUicT::GenerateUic(WorkerT& wrk)
   }
 }
 
-void cmQtAutoGeneratorMocUic::JobDeleterT::operator()(JobT* job)
-{
-  delete job;
-}
-
 cmQtAutoGeneratorMocUic::WorkerT::WorkerT(cmQtAutoGeneratorMocUic* gen,
                                           uv_loop_t* uvLoop)
   : Gen_(gen)
@@ -1343,7 +1338,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
     Moc_.PredefsCmd = InfoGetList("AM_MOC_PREDEFS_CMD");
     // Install moc predefs job
     if (!Moc().PredefsCmd.empty()) {
-      JobQueues_.MocPredefs.emplace_back(new JobMocPredefsT());
+      JobQueues_.MocPredefs.emplace_back(cm::make_unique<JobMocPredefsT>());
     }
   }
 
@@ -1390,7 +1385,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
       const bool uic = !Uic().skipped(hdr);
       if ((moc || uic) && uniqueHeaders.emplace(stringHash(hdr)).second) {
         JobQueues_.Headers.emplace_back(
-          new JobParseT(std::move(hdr), moc, uic, true));
+          cm::make_unique<JobParseT>(std::move(hdr), moc, uic, true));
       }
     }
     // Add source jobs
@@ -1417,15 +1412,15 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
               const bool uic = srcUic && !Uic().skipped(header);
               if ((moc || uic) &&
                   uniqueHeaders.emplace(stringHash(header)).second) {
-                JobQueues_.Headers.emplace_back(
-                  new JobParseT(std::move(header), moc, uic, true));
+                JobQueues_.Headers.emplace_back(cm::make_unique<JobParseT>(
+                  std::move(header), moc, uic, true));
               }
             }
           }
         }
         // Add source job
         JobQueues_.Sources.emplace_back(
-          new JobParseT(std::move(src), srcMoc, srcUic));
+          cm::make_unique<JobParseT>(std::move(src), srcMoc, srcUic));
       }
     }
   }
@@ -1797,7 +1792,7 @@ void cmQtAutoGeneratorMocUic::WorkerSwapJob(JobHandleT& jobHandle)
 {
   bool const jobProcessed(jobHandle);
   if (jobProcessed) {
-    jobHandle.reset(nullptr);
+    jobHandle.reset();
   }
   {
     std::unique_lock<std::mutex> jobsLock(JobsMutex_);
