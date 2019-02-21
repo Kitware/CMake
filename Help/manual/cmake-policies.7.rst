@@ -51,6 +51,14 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.15
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0089: Compiler id for IBM Clang-based XL compilers is now XLClang. </policy/CMP0089>
+
 Policies Introduced by CMake 3.14
 =================================
 

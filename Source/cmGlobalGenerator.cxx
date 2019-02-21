@@ -956,6 +956,36 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
         break;
     }
   }
+
+  if (strcmp(compilerId, "XLClang") == 0) {
+    switch (mf->GetPolicyStatus(cmPolicies::CMP0089)) {
+      case cmPolicies::WARN:
+        if (!this->CMakeInstance->GetIsInTryCompile() &&
+            mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0089")) {
+          std::ostringstream w;
+          /* clang-format off */
+          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0089) << "\n"
+            "Converting " << lang <<
+            " compiler id \"XLClang\" to \"XL\" for compatibility."
+            ;
+          /* clang-format on */
+          mf->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
+        }
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        // OLD behavior is to convert XLClang to XL.
+        mf->AddDefinition(compilerIdVar, "XL");
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        mf->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0089));
+      case cmPolicies::NEW:
+        // NEW behavior is to keep AppleClang.
+        break;
+    }
+  }
 }
 
 std::string cmGlobalGenerator::GetLanguageOutputExtension(
