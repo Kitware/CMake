@@ -370,3 +370,7 @@ Other Changes
   :variable:`CPACK_DEBIAN_ARCHIVE_TYPE` variable, because ``dpkg`` has
   never supported the PAX tar format. The ``paxr`` value will be mapped
   to ``gnutar`` and a deprecation message emitted.
+
+* CMake no longer issues a warning if a target listed in an
+  :command:`install(TARGETS)` command has its :prop_tgt:`EXCLUDE_FROM_ALL`
+  property set to true.
