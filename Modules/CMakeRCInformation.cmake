@@ -32,7 +32,7 @@ set(CMAKE_INCLUDE_FLAG_RC "-I")
 # compile a Resource file into an object file
 if(NOT CMAKE_RC_COMPILE_OBJECT)
   set(CMAKE_RC_COMPILE_OBJECT
-    "<CMAKE_RC_COMPILER> <DEFINES> <INCLUDES> <FLAGS> /fo<OBJECT> <SOURCE>")
+    "<CMAKE_RC_COMPILER> <DEFINES> <INCLUDES> <FLAGS> /fo <OBJECT> <SOURCE>")
 endif()
 
 # set this variable so we can avoid loading this more than once.

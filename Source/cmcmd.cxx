@@ -1830,7 +1830,8 @@ int cmVSLink::LinkIncremental()
   // Compile the resource file.
   std::vector<std::string> rcCommand;
   rcCommand.push_back(this->RcPath.empty() ? "rc" : this->RcPath);
-  rcCommand.push_back("/fo" + this->ManifestFileRes);
+  rcCommand.emplace_back("/fo");
+  rcCommand.push_back(this->ManifestFileRes);
   rcCommand.push_back(this->ManifestFileRC);
   if (!RunCommand("RC Pass 1", rcCommand, this->Verbose, FORMAT_DECIMAL)) {
     return -1;
