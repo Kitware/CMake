@@ -83,31 +83,31 @@ std::string const cmQtAutoGen::GenNameMocUpper = "AUTOMOC";
 std::string const cmQtAutoGen::GenNameUicUpper = "AUTOUIC";
 std::string const cmQtAutoGen::GenNameRccUpper = "AUTORCC";
 
-std::string const& cmQtAutoGen::GeneratorName(GeneratorT genType)
+std::string const& cmQtAutoGen::GeneratorName(GenT genType)
 {
   switch (genType) {
-    case GeneratorT::GEN:
+    case GenT::GEN:
       return GenNameGen;
-    case GeneratorT::MOC:
+    case GenT::MOC:
       return GenNameMoc;
-    case GeneratorT::UIC:
+    case GenT::UIC:
       return GenNameUic;
-    case GeneratorT::RCC:
+    case GenT::RCC:
       return GenNameRcc;
   }
   return GenNameGen;
 }
 
-std::string const& cmQtAutoGen::GeneratorNameUpper(GeneratorT genType)
+std::string const& cmQtAutoGen::GeneratorNameUpper(GenT genType)
 {
   switch (genType) {
-    case GeneratorT::GEN:
+    case GenT::GEN:
       return GenNameGenUpper;
-    case GeneratorT::MOC:
+    case GenT::MOC:
       return GenNameMocUpper;
-    case GeneratorT::UIC:
+    case GenT::UIC:
       return GenNameUicUpper;
-    case GeneratorT::RCC:
+    case GenT::RCC:
       return GenNameRccUpper;
   }
   return GenNameGenUpper;

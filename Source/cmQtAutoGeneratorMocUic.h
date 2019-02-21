@@ -321,22 +321,22 @@ public:
     const UicSettingsT& Uic() const { return Gen_->Uic(); }
 
     // -- Log info
-    void LogInfo(GeneratorT genType, std::string const& message) const;
+    void LogInfo(GenT genType, std::string const& message) const;
     // -- Log warning
-    void LogWarning(GeneratorT genType, std::string const& message) const;
-    void LogFileWarning(GeneratorT genType, std::string const& filename,
+    void LogWarning(GenT genType, std::string const& message) const;
+    void LogFileWarning(GenT genType, std::string const& filename,
                         std::string const& message) const;
     // -- Log error
-    void LogError(GeneratorT genType, std::string const& message) const;
-    void LogFileError(GeneratorT genType, std::string const& filename,
+    void LogError(GenT genType, std::string const& message) const;
+    void LogFileError(GenT genType, std::string const& filename,
                       std::string const& message) const;
-    void LogCommandError(GeneratorT genType, std::string const& message,
+    void LogCommandError(GenT genType, std::string const& message,
                          std::vector<std::string> const& command,
                          std::string const& output) const;
 
     // -- External processes
     /// @brief Verbose logging version
-    bool RunProcess(GeneratorT genType, ProcessResultT& result,
+    bool RunProcess(GenT genType, ProcessResultT& result,
                     std::vector<std::string> const& command);
 
   private:

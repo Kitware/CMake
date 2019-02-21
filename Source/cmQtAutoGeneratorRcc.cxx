@@ -55,7 +55,7 @@ bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
 
   // -- Read info file
   if (!makefile->ReadListFile(InfoFile())) {
-    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "File processing failed");
+    Log().ErrorFile(GenT::RCC, InfoFile(), "File processing failed");
     return false;
   }
 
@@ -66,13 +66,13 @@ bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
   // - Directories
   AutogenBuildDir_ = InfoGet("ARCC_BUILD_DIR");
   if (AutogenBuildDir_.empty()) {
-    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "Build directory empty");
+    Log().ErrorFile(GenT::RCC, InfoFile(), "Build directory empty");
     return false;
   }
 
   IncludeDir_ = InfoGetConfig("ARCC_INCLUDE_DIR");
   if (IncludeDir_.empty()) {
-    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "Include directory empty");
+    Log().ErrorFile(GenT::RCC, InfoFile(), "Include directory empty");
     return false;
   }
 
@@ -95,28 +95,27 @@ bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
 
   // - Validity checks
   if (LockFile_.empty()) {
-    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "Lock file name missing");
+    Log().ErrorFile(GenT::RCC, InfoFile(), "Lock file name missing");
     return false;
   }
   if (SettingsFile_.empty()) {
-    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "Settings file name missing");
+    Log().ErrorFile(GenT::RCC, InfoFile(), "Settings file name missing");
     return false;
   }
   if (AutogenBuildDir_.empty()) {
-    Log().ErrorFile(GeneratorT::RCC, InfoFile(),
-                    "Autogen build directory missing");
+    Log().ErrorFile(GenT::RCC, InfoFile(), "Autogen build directory missing");
     return false;
   }
   if (RccExecutable_.empty()) {
-    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "rcc executable missing");
+    Log().ErrorFile(GenT::RCC, InfoFile(), "rcc executable missing");
     return false;
   }
   if (QrcFile_.empty()) {
-    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "rcc input file missing");
+    Log().ErrorFile(GenT::RCC, InfoFile(), "rcc input file missing");
     return false;
   }
   if (RccFileName_.empty()) {
-    Log().ErrorFile(GeneratorT::RCC, InfoFile(), "rcc output file missing");
+    Log().ErrorFile(GenT::RCC, InfoFile(), "rcc output file missing");
     return false;
   }
 
@@ -287,8 +286,7 @@ bool cmQtAutoGeneratorRcc::SettingsFileRead()
     // Make sure the lock file exists
     if (!FileSys().FileExists(LockFile_, true)) {
       if (!FileSys().Touch(LockFile_, true)) {
-        Log().ErrorFile(GeneratorT::RCC, LockFile_,
-                        "Lock file creation failed");
+        Log().ErrorFile(GenT::RCC, LockFile_, "Lock file creation failed");
         Error_ = true;
         return false;
       }
@@ -297,7 +295,7 @@ bool cmQtAutoGeneratorRcc::SettingsFileRead()
     cmFileLockResult lockResult =
       LockFileLock_.Lock(LockFile_, static_cast<unsigned long>(-1));
     if (!lockResult.IsOk()) {
-      Log().ErrorFile(GeneratorT::RCC, LockFile_,
+      Log().ErrorFile(GenT::RCC, LockFile_,
                       "File lock failed: " + lockResult.GetOutputMessage());
       Error_ = true;
       return false;
@@ -313,7 +311,7 @@ bool cmQtAutoGeneratorRcc::SettingsFileRead()
       // This triggers a full rebuild on the next run if the current
       // build is aborted before writing the current settings in the end.
       if (SettingsChanged_) {
-        FileSys().FileWrite(GeneratorT::RCC, SettingsFile_, "");
+        FileSys().FileWrite(GenT::RCC, SettingsFile_, "");
       }
     } else {
       SettingsChanged_ = true;
@@ -328,15 +326,14 @@ void cmQtAutoGeneratorRcc::SettingsFileWrite()
   // Only write if any setting changed
   if (SettingsChanged_) {
     if (Log().Verbose()) {
-      Log().Info(GeneratorT::RCC,
-                 "Writing settings file " + Quoted(SettingsFile_));
+      Log().Info(GenT::RCC, "Writing settings file " + Quoted(SettingsFile_));
     }
     // Write settings file
     std::string content = "rcc:";
     content += SettingsString_;
     content += '\n';
-    if (!FileSys().FileWrite(GeneratorT::RCC, SettingsFile_, content)) {
-      Log().ErrorFile(GeneratorT::RCC, SettingsFile_,
+    if (!FileSys().FileWrite(GenT::RCC, SettingsFile_, content)) {
+      Log().ErrorFile(GenT::RCC, SettingsFile_,
                       "Settings file writing failed");
       // Remove old settings file to trigger a full rebuild on the next run
       FileSys().FileRemove(SettingsFile_);
@@ -360,7 +357,7 @@ bool cmQtAutoGeneratorRcc::TestQrcRccFiles()
       reason += " from its source file ";
       reason += Quoted(QrcFile_);
       reason += " because it doesn't exist";
-      Log().Info(GeneratorT::RCC, reason);
+      Log().Info(GenT::RCC, reason);
     }
     Generate_ = true;
     return Generate_;
@@ -374,7 +371,7 @@ bool cmQtAutoGeneratorRcc::TestQrcRccFiles()
       reason += " from ";
       reason += Quoted(QrcFile_);
       reason += " because the RCC settings changed";
-      Log().Info(GeneratorT::RCC, reason);
+      Log().Info(GenT::RCC, reason);
     }
     Generate_ = true;
     return Generate_;
@@ -387,7 +384,7 @@ bool cmQtAutoGeneratorRcc::TestQrcRccFiles()
       std::string error;
       isOlder = FileSys().FileIsOlderThan(RccFileOutput_, QrcFile_, &error);
       if (!error.empty()) {
-        Log().ErrorFile(GeneratorT::RCC, QrcFile_, error);
+        Log().ErrorFile(GenT::RCC, QrcFile_, error);
         Error_ = true;
       }
     }
@@ -397,7 +394,7 @@ bool cmQtAutoGeneratorRcc::TestQrcRccFiles()
         reason += Quoted(RccFileOutput_);
         reason += " because it is older than ";
         reason += Quoted(QrcFile_);
-        Log().Info(GeneratorT::RCC, reason);
+        Log().Info(GenT::RCC, reason);
       }
       Generate_ = true;
     }
@@ -424,12 +421,11 @@ bool cmQtAutoGeneratorRcc::TestResourcesRead()
           std::string parseError;
           if (!RccListParseOutput(ProcessResult_.StdOut, ProcessResult_.StdErr,
                                   Inputs_, parseError)) {
-            Log().ErrorFile(GeneratorT::RCC, QrcFile_, parseError);
+            Log().ErrorFile(GenT::RCC, QrcFile_, parseError);
             Error_ = true;
           }
         } else {
-          Log().ErrorFile(GeneratorT::RCC, QrcFile_,
-                          ProcessResult_.ErrorMessage);
+          Log().ErrorFile(GenT::RCC, QrcFile_, ProcessResult_.ErrorMessage);
           Error_ = true;
         }
         // Clean up
@@ -457,7 +453,7 @@ bool cmQtAutoGeneratorRcc::TestResourcesRead()
     // rcc does not support the --list command.
     // Read the qrc file content and parse it.
     std::string qrcContent;
-    if (FileSys().FileRead(GeneratorT::RCC, qrcContent, QrcFile_)) {
+    if (FileSys().FileRead(GenT::RCC, qrcContent, QrcFile_)) {
       RccListParseContent(qrcContent, Inputs_);
     }
   }
@@ -483,7 +479,7 @@ bool cmQtAutoGeneratorRcc::TestResources()
         error = "Could not find the resource file\n  ";
         error += Quoted(resFile);
         error += '\n';
-        Log().ErrorFile(GeneratorT::RCC, QrcFile_, error);
+        Log().ErrorFile(GenT::RCC, QrcFile_, error);
         Error_ = true;
         break;
       }
@@ -496,14 +492,14 @@ bool cmQtAutoGeneratorRcc::TestResources()
           reason += Quoted(QrcFile_);
           reason += " because it is older than ";
           reason += Quoted(resFile);
-          Log().Info(GeneratorT::RCC, reason);
+          Log().Info(GenT::RCC, reason);
         }
         Generate_ = true;
         break;
       }
       // Print error and break on demand
       if (!error.empty()) {
-        Log().ErrorFile(GeneratorT::RCC, QrcFile_, error);
+        Log().ErrorFile(GenT::RCC, QrcFile_, error);
         Error_ = true;
         break;
       }
@@ -522,7 +518,7 @@ void cmQtAutoGeneratorRcc::TestInfoFile()
       std::string error;
       isOlder = FileSys().FileIsOlderThan(RccFileOutput_, InfoFile(), &error);
       if (!error.empty()) {
-        Log().ErrorFile(GeneratorT::RCC, QrcFile_, error);
+        Log().ErrorFile(GenT::RCC, QrcFile_, error);
         Error_ = true;
       }
     }
@@ -532,7 +528,7 @@ void cmQtAutoGeneratorRcc::TestInfoFile()
         reason += Quoted(RccFileOutput_);
         reason += " because it is older than ";
         reason += Quoted(InfoFile());
-        Log().Info(GeneratorT::RCC, reason);
+        Log().Info(GenT::RCC, reason);
       }
       // Touch build file
       FileSys().Touch(RccFileOutput_);
@@ -544,7 +540,7 @@ void cmQtAutoGeneratorRcc::TestInfoFile()
 void cmQtAutoGeneratorRcc::GenerateParentDir()
 {
   // Make sure the parent directory exists
-  if (!FileSys().MakeParentDirectory(GeneratorT::RCC, RccFileOutput_)) {
+  if (!FileSys().MakeParentDirectory(GenT::RCC, RccFileOutput_)) {
     Error_ = true;
   }
 }
@@ -567,7 +563,7 @@ bool cmQtAutoGeneratorRcc::GenerateRcc()
         // Rcc process success
         // Print rcc output
         if (!ProcessResult_.StdOut.empty()) {
-          Log().Info(GeneratorT::RCC, ProcessResult_.StdOut);
+          Log().Info(GenT::RCC, ProcessResult_.StdOut);
         }
         BuildFileChanged_ = true;
       } else {
@@ -581,7 +577,7 @@ bool cmQtAutoGeneratorRcc::GenerateRcc()
             emsg += "\n";
             emsg += ProcessResult_.ErrorMessage;
           }
-          Log().ErrorCommand(GeneratorT::RCC, emsg, Process_->Setup().Command,
+          Log().ErrorCommand(GenT::RCC, emsg, Process_->Setup().Command,
                              ProcessResult_.StdOut);
         }
         FileSys().FileRemove(RccFileOutput_);
@@ -625,19 +621,17 @@ void cmQtAutoGeneratorRcc::GenerateWrapper()
     if (FileSys().FileDiffers(RccFilePublic_, content)) {
       // Write new wrapper file
       if (Log().Verbose()) {
-        Log().Info(GeneratorT::RCC,
-                   "Generating RCC wrapper file " + RccFilePublic_);
+        Log().Info(GenT::RCC, "Generating RCC wrapper file " + RccFilePublic_);
       }
-      if (!FileSys().FileWrite(GeneratorT::RCC, RccFilePublic_, content)) {
-        Log().ErrorFile(GeneratorT::RCC, RccFilePublic_,
+      if (!FileSys().FileWrite(GenT::RCC, RccFilePublic_, content)) {
+        Log().ErrorFile(GenT::RCC, RccFilePublic_,
                         "RCC wrapper file writing failed");
         Error_ = true;
       }
     } else if (BuildFileChanged_) {
       // Just touch the wrapper file
       if (Log().Verbose()) {
-        Log().Info(GeneratorT::RCC,
-                   "Touching RCC wrapper file " + RccFilePublic_);
+        Log().Info(GenT::RCC, "Touching RCC wrapper file " + RccFilePublic_);
       }
       FileSys().Touch(RccFilePublic_);
     }
@@ -653,7 +647,7 @@ bool cmQtAutoGeneratorRcc::StartProcess(
     std::string msg = "Running command:\n";
     msg += QuotedCommand(command);
     msg += '\n';
-    Log().Info(GeneratorT::RCC, msg);
+    Log().Info(GenT::RCC, msg);
   }
 
   // Create process handler
@@ -661,7 +655,7 @@ bool cmQtAutoGeneratorRcc::StartProcess(
   Process_->setup(&ProcessResult_, mergedOutput, command, workingDirectory);
   // Start process
   if (!Process_->start(UVLoop(), [this] { UVRequest().send(); })) {
-    Log().ErrorFile(GeneratorT::RCC, QrcFile_, ProcessResult_.ErrorMessage);
+    Log().ErrorFile(GenT::RCC, QrcFile_, ProcessResult_.ErrorMessage);
     Error_ = true;
     // Clean up
     Process_.reset();
