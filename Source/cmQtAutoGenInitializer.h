@@ -120,8 +120,11 @@ private:
   bool SetupWriteAutogenInfo();
   bool SetupWriteRccInfo();
 
-  void AddGeneratedSource(std::string const& filename, GenT genType,
+  void RegisterGeneratedSource(std::string const& filename);
+  bool AddGeneratedSource(std::string const& filename, GenVarsT const& genVars,
                           bool prepend = false);
+  bool AddToSourceGroup(std::string const& fileName,
+                        std::string const& genNameUpper);
 
   bool GetQtExecutable(GenVarsT& genVars, const std::string& executable,
                        bool ignoreMissingTarget, std::string* output) const;
