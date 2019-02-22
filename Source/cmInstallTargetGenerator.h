@@ -69,7 +69,6 @@ public:
   cmListFileBacktrace const& GetBacktrace() const { return this->Backtrace; }
 
 protected:
-  void GenerateScript(std::ostream& os) override;
   void GenerateScriptForConfig(std::ostream& os, const std::string& config,
                                Indent indent) override;
   void GenerateScriptForConfigObjectLibrary(std::ostream& os,
