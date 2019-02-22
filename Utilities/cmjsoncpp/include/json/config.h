@@ -5,12 +5,13 @@
 
 #ifndef JSON_CONFIG_H_INCLUDED
 #define JSON_CONFIG_H_INCLUDED
-#include <stddef.h>
-#include <string> //typedef String
-#include <stdint.h> //typedef int64_t, uint64_t
 
 // Include KWSys Large File Support configuration.
 #include <cmsys/Configure.h>
+
+#include <stddef.h>
+#include <string> //typedef String
+#include <stdint.h> //typedef int64_t, uint64_t
 
 #if defined(_MSC_VER)
 # pragma warning(push,1)
