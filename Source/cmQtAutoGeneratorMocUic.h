@@ -20,6 +20,7 @@
 #include <set>
 #include <string>
 #include <thread>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -133,7 +134,7 @@ public:
     std::string CompFileAbs;
     std::string PredefsFileRel;
     std::string PredefsFileAbs;
-    std::set<std::string> SkipList;
+    std::unordered_set<std::string> SkipList;
     std::vector<std::string> IncludePaths;
     std::vector<std::string> Includes;
     std::vector<std::string> Definitions;
@@ -164,7 +165,7 @@ public:
     bool Enabled = false;
     bool SettingsChanged = false;
     std::string Executable;
-    std::set<std::string> SkipList;
+    std::unordered_set<std::string> SkipList;
     std::vector<std::string> TargetOptions;
     std::map<std::string, std::vector<std::string>> Options;
     std::vector<std::string> SearchPaths;
