@@ -2118,17 +2118,24 @@ void cmGlobalGenerator::IndexGeneratorTarget(cmGeneratorTarget* gt)
   }
 }
 
+static char const hexDigits[] = "0123456789abcdef";
+
 std::string cmGlobalGenerator::IndexGeneratorTargetUniquely(
   cmGeneratorTarget const* gt)
 {
   // Use the pointer value to uniquely identify the target instance.
-  // Use a "T" prefix to indicate that this identifier is for a target.
+  // Use a ":" prefix to avoid conflict with project-defined targets.
   // We must satisfy cmGeneratorExpression::IsValidTargetName so use no
   // other special characters.
-  char buf[64];
-  sprintf(buf, "::T%p",
-          static_cast<void const*>(gt)); // cast avoids format warning
-  std::string id = gt->GetName() + buf;
+  char buf[1 + sizeof(gt) * 2];
+  char* b = buf;
+  *b++ = ':';
+  for (size_t i = 0; i < sizeof(gt); ++i) {
+    unsigned char const c = reinterpret_cast<unsigned char const*>(&gt)[i];
+    *b++ = hexDigits[(c & 0xf0) >> 4];
+    *b++ = hexDigits[(c & 0x0f)];
+  }
+  std::string id(buf, sizeof(buf));
   // We internally index pointers to non-const generator targets
   // but our callers only have pointers to const generator targets.
   // They will give up non-const privileges when looking up anyway.
