@@ -156,7 +156,9 @@ the type of target used for the source file signature.
 
 Set the :variable:`CMAKE_TRY_COMPILE_PLATFORM_VARIABLES` variable to specify
 variables that must be propagated into the test project.  This variable is
-meant for use only in toolchain files.
+meant for use only in toolchain files and is only honored by the
+``try_compile()`` command for the source files form, not when given a whole
+project.
 
 If :policy:`CMP0067` is set to ``NEW``, or any of the ``<LANG>_STANDARD``,
 ``<LANG>_STANDARD_REQUIRED``, or ``<LANG>_EXTENSIONS`` options are used,
