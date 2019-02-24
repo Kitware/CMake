@@ -88,12 +88,12 @@ The options are:
   given to the ``CMAKE_FLAGS`` option will be ignored.
 
 ``LINK_OPTIONS <options>...``
-  Specify link step options to pass to :command:`target_link_options` or
-  to :prop_tgt:`STATIC_LIBRARY_OPTIONS` target property in the generated
-  project, depending of the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable.
+  Specify link step options to pass to :command:`target_link_options` or to
+  set the :prop_tgt:`STATIC_LIBRARY_OPTIONS` target property in the generated
+  project, depending on the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable.
 
 ``OUTPUT_VARIABLE <var>``
-  Store the output from the build process the given variable.
+  Store the output from the build process in the given variable.
 
 ``<LANG>_STANDARD <std>``
   Specify the :prop_tgt:`C_STANDARD`, :prop_tgt:`CXX_STANDARD`,
@@ -139,8 +139,8 @@ behavior at link time, the ``check_pie_supported()`` command from the
 :module:`CheckPIESupported` module must be called before using the
 :command:`try_compile` command.
 
-The current settings of :policy:`CMP0065` and :policy:`CMP0083` are set in the
-generated project.
+The current settings of :policy:`CMP0065` and :policy:`CMP0083` are propagated
+through to the generated test project.
 
 Set the :variable:`CMAKE_TRY_COMPILE_CONFIGURATION` variable to choose
 a build configuration.
