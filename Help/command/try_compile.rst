@@ -42,13 +42,19 @@ Try Compiling Source Files
               [<LANG>_EXTENSIONS <bool>]
               )
 
-Try building an executable from one or more source files.  The success or
-failure of the ``try_compile``, i.e. ``TRUE`` or ``FALSE`` respectively, is
-returned in ``<resultVar>``.
+Try building an executable or static library from one or more source files
+(which one is determined by the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE`
+variable).  The success or failure of the ``try_compile``, i.e. ``TRUE`` or
+``FALSE`` respectively, is returned in ``<resultVar>``.
 
-In this form the user need only supply one or more source files that include a
-definition for ``main``.  CMake will create a ``CMakeLists.txt`` file to build
-the source(s) as an executable that looks something like this:
+In this form, one or more source files must be provided.  If
+:variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` is unset or is set to ``EXECUTABLE``,
+the sources must include a definition for ``main`` and CMake will create a
+``CMakeLists.txt`` file to build the source(s) as an executable.
+If :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` is set to ``STATIC_LIBRARY``,
+a static library will be built instead and no definition for ``main`` is
+required.  For an executable, the generated ``CMakeLists.txt`` file would
+contain something like the following:
 
 .. code-block:: cmake
 
@@ -73,7 +79,7 @@ The options are:
   in the generated test project.
 
 ``COPY_FILE <fileName>``
-  Copy the linked executable to the given ``<fileName>``.
+  Copy the built executable or static library to the given ``<fileName>``.
 
 ``COPY_FILE_ERROR <var>``
   Use after ``COPY_FILE`` to capture into variable ``<var>`` any error
