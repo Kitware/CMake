@@ -445,14 +445,6 @@ macro (CMAKE_BUILD_UTILITIES)
   endif()
 
   #---------------------------------------------------------------------
-  # Build Compress library for CTest.
-  set(CMAKE_COMPRESS_INCLUDES
-    "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmcompress")
-  set(CMAKE_COMPRESS_LIBRARIES "cmcompress")
-  add_subdirectory(Utilities/cmcompress)
-  CMAKE_SET_TARGET_FOLDER(cmcompress "Utilities/3rdParty")
-
-  #---------------------------------------------------------------------
   # Build expat library for CMake, CTest, and libarchive.
   if(CMAKE_USE_SYSTEM_EXPAT)
     find_package(EXPAT)
