@@ -12,8 +12,8 @@ Try Compiling and Running Source Files
 
 .. code-block:: cmake
 
-  try_run(RUN_RESULT_VAR COMPILE_RESULT_VAR
-          bindir srcfile [CMAKE_FLAGS <flags>...]
+  try_run(<runResultVar> <compileResultVar>
+          <bindir> <srcfile> [CMAKE_FLAGS <flags>...]
           [COMPILE_DEFINITIONS <defs>...]
           [LINK_OPTIONS <options>...]
           [LINK_LIBRARIES <libs>...]
@@ -23,9 +23,9 @@ Try Compiling and Running Source Files
           [ARGS <args>...])
 
 Try compiling a ``<srcfile>``.  Returns ``TRUE`` or ``FALSE`` for success
-or failure in ``COMPILE_RESULT_VAR``.  If the compile succeeded, runs the
-executable and returns its exit code in ``RUN_RESULT_VAR``.  If the
-executable was built, but failed to run, then ``RUN_RESULT_VAR`` will be
+or failure in ``<compileResultVar>``.  If the compile succeeded, runs the
+executable and returns its exit code in ``<runResultVar>``.  If the
+executable was built, but failed to run, then ``<runResultVar>`` will be
 set to ``FAILED_TO_RUN``.  See the :command:`try_compile` command for
 information on how the test project is constructed to build the source file.
 
@@ -85,10 +85,10 @@ presetting them in some CMake script file to the values the executable
 would have produced if it had been run on its actual target platform.
 These cache entries are:
 
-``<RUN_RESULT_VAR>``
+``<runResultVar>``
   Exit code if the executable were to be run on the target platform.
 
-``<RUN_RESULT_VAR>__TRYRUN_OUTPUT``
+``<runResultVar>__TRYRUN_OUTPUT``
   Output from stdout and stderr if the executable were to be run on
   the target platform.  This is created only if the
   ``RUN_OUTPUT_VARIABLE`` or ``OUTPUT_VARIABLE`` option was used.

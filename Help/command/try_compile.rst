@@ -12,12 +12,12 @@ Try Compiling Whole Projects
 
 .. code-block:: cmake
 
-  try_compile(RESULT_VAR <bindir> <srcdir>
+  try_compile(<resultVar> <bindir> <srcdir>
               <projectName> [<targetName>] [CMAKE_FLAGS <flags>...]
               [OUTPUT_VARIABLE <var>])
 
 Try building a project.  The success or failure of the ``try_compile``,
-i.e. ``TRUE`` or ``FALSE`` respectively, is returned in ``RESULT_VAR``.
+i.e. ``TRUE`` or ``FALSE`` respectively, is returned in ``<resultVar>``.
 
 In this form, ``<srcdir>`` should contain a complete CMake project with a
 ``CMakeLists.txt`` file and all sources.  The ``<bindir>`` and ``<srcdir>``
@@ -30,7 +30,7 @@ Try Compiling Source Files
 
 .. code-block:: cmake
 
-  try_compile(RESULT_VAR <bindir> <srcfile|SOURCES srcfile...>
+  try_compile(<resultVar> <bindir> <srcfile|SOURCES srcfile...>
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
               [LINK_OPTIONS <options>...]
@@ -44,7 +44,7 @@ Try Compiling Source Files
 
 Try building an executable from one or more source files.  The success or
 failure of the ``try_compile``, i.e. ``TRUE`` or ``FALSE`` respectively, is
-returned in ``RESULT_VAR``.
+returned in ``<resultVar>``.
 
 In this form the user need only supply one or more source files that include a
 definition for ``main``.  CMake will create a ``CMakeLists.txt`` file to build
@@ -114,7 +114,7 @@ passed to ``cmake`` to avoid this clean.  However, multiple sequential
 ``try_compile`` operations reuse this single output directory.  If you use
 ``--debug-trycompile``, you can only debug one ``try_compile`` call at a time.
 The recommended procedure is to protect all ``try_compile`` calls in your
-project by ``if(NOT DEFINED RESULT_VAR)`` logic, configure with cmake
+project by ``if(NOT DEFINED <resultVar>)`` logic, configure with cmake
 all the way through once, then delete the cache entry associated with
 the try_compile call of interest, and then re-run cmake again with
 ``--debug-trycompile``.
