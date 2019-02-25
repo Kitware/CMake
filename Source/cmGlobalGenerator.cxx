@@ -1860,13 +1860,6 @@ int cmGlobalGenerator::Build(int jobs, const std::string& /*unused*/,
   output += *outputPtr;
   cmSystemTools::SetRunCommandHideConsole(hideconsole);
 
-  // The SGI MipsPro 7.3 compiler does not return an error code when
-  // the source has a #error in it!  This is a work-around for such
-  // compilers.
-  if ((retVal == 0) && (output.find("#error") != std::string::npos)) {
-    retVal = 1;
-  }
-
   // The OpenWatcom tools do not return an error code when a link
   // library is not found!
   if (this->CMakeInstance->GetState()->UseWatcomWMake() && retVal == 0 &&
