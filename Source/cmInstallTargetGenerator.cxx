@@ -41,22 +41,6 @@ cmInstallTargetGenerator::cmInstallTargetGenerator(
 
 cmInstallTargetGenerator::~cmInstallTargetGenerator() = default;
 
-void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
-{
-  // Warn if installing an exclude-from-all target.
-  if (this->Target->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
-    std::ostringstream msg;
-    msg << "WARNING: Target \"" << this->Target->GetName()
-        << "\" has EXCLUDE_FROM_ALL set and will not be built by default "
-        << "but an install rule has been provided for it.  CMake does "
-        << "not define behavior for this case.";
-    cmSystemTools::Message(msg.str(), "Warning");
-  }
-
-  // Perform the main install script generation.
-  this->cmInstallGenerator::GenerateScript(os);
-}
-
 void cmInstallTargetGenerator::GenerateScriptForConfig(
   std::ostream& os, const std::string& config, Indent indent)
 {
