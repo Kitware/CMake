@@ -166,6 +166,11 @@ Modules
   :command:`check_fortran_source_runs` command to check if a Fortran
   source snippet compiles and runs.
 
+* The :module:`CMakePackageConfigHelpers` module's
+  :command:`write_basic_package_version_file` command gained a new
+  ``ARCH_INDEPENDENT`` option for supporting architecture-independent
+  packages.
+
 * The :module:`ExternalProject` module :command:`ExternalProject_Add` command
   gained ``LOG_DIR`` and ``LOG_MERGED_STDOUTERR`` options to control logging.
 
