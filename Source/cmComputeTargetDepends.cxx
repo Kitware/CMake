@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmComputeTargetDepends.h"
 
-#include "cmAlgorithms.h"
 #include "cmComputeComponentGraph.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -12,6 +11,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"

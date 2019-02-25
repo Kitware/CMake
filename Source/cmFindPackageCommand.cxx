@@ -23,6 +23,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"

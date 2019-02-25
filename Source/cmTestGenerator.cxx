@@ -5,7 +5,6 @@
 #include <ostream>
 #include <utility>
 
-#include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmListFileCache.h"
@@ -13,6 +12,7 @@
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
 #include "cmPropertyMap.h"
+#include "cmRange.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"

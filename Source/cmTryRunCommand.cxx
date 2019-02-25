@@ -5,10 +5,10 @@
 #include "cmsys/FStream.hxx"
 #include <stdio.h>
 
-#include "cmAlgorithms.h"
 #include "cmDuration.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"

@@ -34,6 +34,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cm_sys_stat.h"

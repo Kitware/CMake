@@ -31,6 +31,7 @@
 #include "cmInstallSubdirectoryGenerator.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
+#include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmState.h"

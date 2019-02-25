@@ -28,6 +28,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPropertyMap.h"
+#include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmState.h"

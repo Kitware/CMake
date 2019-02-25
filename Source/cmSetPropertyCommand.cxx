@@ -4,11 +4,11 @@
 
 #include <sstream>
 
-#include "cmAlgorithms.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstalledFile.h"
 #include "cmMakefile.h"
 #include "cmProperty.h"
+#include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmSystemTools.h"

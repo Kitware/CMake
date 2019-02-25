@@ -26,6 +26,7 @@
 #include "cmMessageType.h"
 #include "cmNinjaLinkLineComputer.h"
 #include "cmOutputConverter.h"
+#include "cmRange.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"

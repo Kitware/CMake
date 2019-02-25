@@ -19,6 +19,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
 

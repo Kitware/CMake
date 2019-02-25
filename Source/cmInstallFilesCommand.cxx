@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallFilesCommand.h"
 
-#include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallGenerator.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;

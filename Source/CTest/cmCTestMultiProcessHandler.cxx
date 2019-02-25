@@ -3,12 +3,12 @@
 #include "cmCTestMultiProcessHandler.h"
 
 #include "cmAffinity.h"
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestTestHandler.h"
 #include "cmDuration.h"
 #include "cmListFileCache.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 

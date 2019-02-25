@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestP4.h"
 
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 
 #include "cmsys/RegularExpression.hxx"

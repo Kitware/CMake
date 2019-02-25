@@ -11,6 +11,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 
 cmForEachFunctionBlocker::cmForEachFunctionBlocker(cmMakefile* mf)
