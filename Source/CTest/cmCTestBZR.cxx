@@ -365,7 +365,7 @@ bool cmCTestBZR::UpdateImpl()
   if (opts.empty()) {
     opts = this->CTest->GetCTestConfiguration("BZRUpdateOptions");
   }
-  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
 
   // TODO: if(this->CTest->GetTestModel() == cmCTest::NIGHTLY)
 

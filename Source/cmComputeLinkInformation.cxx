@@ -1266,7 +1266,7 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
 void cmComputeLinkInformation::AddDirectoryItem(std::string const& item)
 {
   if (this->Makefile->IsOn("APPLE") &&
-      cmSystemTools::IsPathToFramework(item.c_str())) {
+      cmSystemTools::IsPathToFramework(item)) {
     this->AddFrameworkItem(item);
   } else {
     this->DropDirectoryItem(item);
