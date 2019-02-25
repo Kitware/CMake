@@ -29,7 +29,7 @@ cm::uv_stream_ptr cmStdIoConnection::SetupStream(int file_id)
       tty.init(*this->Server->GetLoop(), file_id, file_id == 0,
                static_cast<cmEventBasedConnection*>(this));
       uv_tty_set_mode(tty, UV_TTY_MODE_NORMAL);
-      return std::move(tty);
+      return { std::move(tty) };
     }
     case UV_FILE:
       if (file_id == 0) {
@@ -43,7 +43,7 @@ cm::uv_stream_ptr cmStdIoConnection::SetupStream(int file_id)
       pipe.init(*this->Server->GetLoop(), 0,
                 static_cast<cmEventBasedConnection*>(this));
       uv_pipe_open(pipe, file_id);
-      return std::move(pipe);
+      return { std::move(pipe) };
     }
     default:
       assert(false && "Unable to determine stream type");
