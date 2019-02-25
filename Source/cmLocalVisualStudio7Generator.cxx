@@ -118,8 +118,8 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
   // If not an in source build, then create the output directory
   if (this->GetCurrentBinaryDirectory() != this->GetSourceDirectory()) {
     if (!cmSystemTools::MakeDirectory(this->GetCurrentBinaryDirectory())) {
-      cmSystemTools::Error("Error creating directory ",
-                           this->GetCurrentBinaryDirectory().c_str());
+      cmSystemTools::Error("Error creating directory " +
+                           this->GetCurrentBinaryDirectory());
     }
   }
 
@@ -283,7 +283,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     file->GetFullPath();
     return file;
   } else {
-    cmSystemTools::Error("Error adding rule for ", makefileIn.c_str());
+    cmSystemTools::Error("Error adding rule for " + makefileIn);
     return nullptr;
   }
 }
@@ -654,8 +654,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
                             : target->GetLinkerLanguage(configName));
     if (linkLanguage.empty()) {
       cmSystemTools::Error(
-        "CMake can not determine linker language for target: ",
-        target->GetName().c_str());
+        "CMake can not determine linker language for target: " +
+        target->GetName());
       return;
     }
     langForClCompile = linkLanguage;

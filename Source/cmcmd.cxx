@@ -817,8 +817,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     if (args[1] == "chdir" && args.size() >= 4) {
       std::string const& directory = args[2];
       if (!cmSystemTools::FileExists(directory)) {
-        cmSystemTools::Error("Directory does not exist for chdir command: ",
-                             args[2].c_str());
+        cmSystemTools::Error("Directory does not exist for chdir command: " +
+                             args[2]);
         return 1;
       }
 
@@ -1065,12 +1065,12 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
                         format) != cm::cend(knownFormats);
 
             if (!isKnown) {
-              cmSystemTools::Error("Unknown -E tar --format= argument: ",
-                                   format.c_str());
+              cmSystemTools::Error("Unknown -E tar --format= argument: " +
+                                   format);
               return 1;
             }
           } else {
-            cmSystemTools::Error("Unknown option to -E tar: ", arg.c_str());
+            cmSystemTools::Error("Unknown option to -E tar: " + arg);
             return 1;
           }
         } else {
@@ -1094,8 +1094,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         ++nCompress;
       }
       if ((format == "7zip" || format == "zip") && nCompress > 0) {
-        cmSystemTools::Error("Can not use compression flags with format: ",
-                             format.c_str());
+        cmSystemTools::Error("Can not use compression flags with format: " +
+                             format);
         return 1;
       }
       if (nCompress > 1) {
@@ -1109,18 +1109,18 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
       if (flags.find_first_of('t') != std::string::npos) {
         if (!cmSystemTools::ListTar(outFile.c_str(), verbose)) {
-          cmSystemTools::Error("Problem listing tar: ", outFile.c_str());
+          cmSystemTools::Error("Problem listing tar: " + outFile);
           return 1;
         }
       } else if (flags.find_first_of('c') != std::string::npos) {
         if (!cmSystemTools::CreateTar(outFile.c_str(), files, compress,
                                       verbose, mtime, format)) {
-          cmSystemTools::Error("Problem creating tar: ", outFile.c_str());
+          cmSystemTools::Error("Problem creating tar: " + outFile);
           return 1;
         }
       } else if (flags.find_first_of('x') != std::string::npos) {
         if (!cmSystemTools::ExtractTar(outFile.c_str(), verbose)) {
-          cmSystemTools::Error("Problem extracting tar: ", outFile.c_str());
+          cmSystemTools::Error("Problem extracting tar: " + outFile);
           return 1;
         }
 #ifdef WIN32

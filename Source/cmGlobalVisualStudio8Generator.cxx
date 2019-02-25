@@ -205,7 +205,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
           "Checking Build System", no_working_directory, true, false)) {
       gt->AddSource(file->GetFullPath());
     } else {
-      cmSystemTools::Error("Error adding rule for ", stamps[0].c_str());
+      cmSystemTools::Error("Error adding rule for " + stamps[0]);
     }
   }
 

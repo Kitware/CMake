@@ -19,7 +19,7 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError("called with incorrect number of arguments");
     return false;
   }
-  const char* inputDir = args[0].c_str();
+  const std::string& inputDir = args[0];
   std::string glh = inputDir;
   glh += "/";
   glh += "gl.h";
@@ -34,7 +34,7 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
   std::vector<std::string> files;
   cmSystemTools::Glob(inputDir, "\\.h$", files);
   if (files.empty()) {
-    cmSystemTools::Error("Could not open Mesa Directory ", inputDir);
+    cmSystemTools::Error("Could not open Mesa Directory " + inputDir);
     return false;
   }
   cmSystemTools::MakeDirectory(destDir);
@@ -60,8 +60,8 @@ void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(const char* source,
   tempOutputFile += ".tmp";
   cmsys::ofstream fout(tempOutputFile.c_str());
   if (!fout) {
-    cmSystemTools::Error("Could not open file for write in copy operation: ",
-                         tempOutputFile.c_str(), outdir);
+    cmSystemTools::Error("Could not open file for write in copy operation: " +
+                         tempOutputFile + outdir);
     cmSystemTools::ReportLastSystemError("");
     return;
   }

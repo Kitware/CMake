@@ -212,7 +212,7 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string& lang,
 
   if (!mf->GetDefinition(langComp)) {
     if (!optional) {
-      cmSystemTools::Error(langComp.c_str(), " not set, after EnableLanguage");
+      cmSystemTools::Error(langComp + " not set, after EnableLanguage");
     }
     return;
   }
@@ -638,8 +638,7 @@ void cmGlobalGenerator::EnableLanguage(
       // to avoid duplicate compiler tests.
       if (cmSystemTools::FileExists(fpath)) {
         if (!mf->ReadListFile(fpath)) {
-          cmSystemTools::Error("Could not find cmake module file: ",
-                               fpath.c_str());
+          cmSystemTools::Error("Could not find cmake module file: " + fpath);
         }
         // if this file was found then the language was already determined
         // to be working
@@ -664,8 +663,8 @@ void cmGlobalGenerator::EnableLanguage(
       determineCompiler += "Compiler.cmake";
       std::string determineFile = mf->GetModulesFile(determineCompiler);
       if (!mf->ReadListFile(determineFile)) {
-        cmSystemTools::Error("Could not find cmake module file: ",
-                             determineCompiler.c_str());
+        cmSystemTools::Error("Could not find cmake module file: " +
+                             determineCompiler);
       }
       if (cmSystemTools::GetFatalErrorOccured()) {
         return;
@@ -699,8 +698,7 @@ void cmGlobalGenerator::EnableLanguage(
       fpath += lang;
       fpath += "Compiler.cmake";
       if (!mf->ReadListFile(fpath)) {
-        cmSystemTools::Error("Could not find cmake module file: ",
-                             fpath.c_str());
+        cmSystemTools::Error("Could not find cmake module file: " + fpath);
       }
       this->SetLanguageEnabledFlag(lang, mf);
       needSetLanguageEnabledMaps[lang] = true;
@@ -792,11 +790,10 @@ void cmGlobalGenerator::EnableLanguage(
       fpath += "Information.cmake";
       std::string informationFile = mf->GetModulesFile(fpath);
       if (informationFile.empty()) {
-        cmSystemTools::Error("Could not find cmake module file: ",
-                             fpath.c_str());
+        cmSystemTools::Error("Could not find cmake module file: " + fpath);
       } else if (!mf->ReadListFile(informationFile)) {
-        cmSystemTools::Error("Could not process cmake module file: ",
-                             informationFile.c_str());
+        cmSystemTools::Error("Could not process cmake module file: " +
+                             informationFile);
       }
     }
     if (needSetLanguageEnabledMaps[lang]) {
@@ -816,8 +813,8 @@ void cmGlobalGenerator::EnableLanguage(
         testLang += "Compiler.cmake";
         std::string ifpath = mf->GetModulesFile(testLang);
         if (!mf->ReadListFile(ifpath)) {
-          cmSystemTools::Error("Could not find cmake module file: ",
-                               testLang.c_str());
+          cmSystemTools::Error("Could not find cmake module file: " +
+                               testLang);
         }
         std::string compilerWorks = "CMAKE_";
         compilerWorks += lang;
@@ -1706,8 +1703,8 @@ void cmGlobalGenerator::CheckTargetProperties()
     cmSystemTools::Error("The following variables are used in this project, "
                          "but they are set to NOTFOUND.\n"
                          "Please set them or make sure they are set and "
-                         "tested correctly in the CMake files:\n",
-                         notFoundVars.c_str());
+                         "tested correctly in the CMake files:\n" +
+                         notFoundVars);
   }
 }
 
@@ -1851,8 +1848,8 @@ int cmGlobalGenerator::Build(int jobs, const std::string& /*unused*/,
                                        timeout)) {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
     cmSystemTools::Error(
-      "Generator: execution of make failed. Make command was: ",
-      makeCommandStr.c_str());
+      "Generator: execution of make failed. Make command was: " +
+      makeCommandStr);
     output += *outputPtr;
     output += "\nGenerator: execution of make failed. Make command was: " +
       makeCommandStr + "\n";

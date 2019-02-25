@@ -62,7 +62,7 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
   std::ostream& fout = *foutPtr;
 
   if (!fout) {
-    cmSystemTools::Error("Error Writing ", this->Filename.c_str());
+    cmSystemTools::Error("Error Writing " + this->Filename);
     cmSystemTools::ReportLastSystemError("");
     return;
   }

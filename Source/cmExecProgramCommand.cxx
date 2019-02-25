@@ -152,7 +152,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
         if (!cmSystemTools::FileExists(cmd)) {
           shortCmd = cmd;
         } else if (!cmSystemTools::GetShortPath(cmd.c_str(), shortCmd)) {
-          cmSystemTools::Error("GetShortPath failed for ", cmd.c_str());
+          cmSystemTools::Error("GetShortPath failed for " + cmd);
           return false;
         }
         shortCmd += " ";

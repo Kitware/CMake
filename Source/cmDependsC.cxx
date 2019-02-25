@@ -173,8 +173,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
       // regex.
       if (fullName.empty() &&
           this->IncludeRegexComplain.find(current.FileName)) {
-        cmSystemTools::Error("Cannot find file \"", current.FileName.c_str(),
-                             "\".");
+        cmSystemTools::Error("Cannot find file \"" + current.FileName + "\".");
         return false;
       }
 

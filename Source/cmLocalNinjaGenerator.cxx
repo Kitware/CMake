@@ -232,8 +232,8 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
         os << "  depth = " << jobs << std::endl;
         os << std::endl;
       } else {
-        cmSystemTools::Error("Invalid pool defined by property 'JOB_POOLS': ",
-                             pool.c_str());
+        cmSystemTools::Error("Invalid pool defined by property 'JOB_POOLS': " +
+                             pool);
       }
     }
   }
