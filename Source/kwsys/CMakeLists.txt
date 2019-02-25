@@ -179,13 +179,6 @@ IF(KWSYS_USE_ConsoleBuf)
   SET(KWSYS_USE_Encoding 1)
 ENDIF()
 
-# Setup the large file support default.
-IF(KWSYS_LFS_DISABLE)
-  SET(KWSYS_LFS_REQUESTED 0)
-ELSE()
-  SET(KWSYS_LFS_REQUESTED 1)
-ENDIF()
-
 # Specify default 8 bit encoding for Windows
 IF(NOT KWSYS_ENCODING_DEFAULT_CODEPAGE)
   SET(KWSYS_ENCODING_DEFAULT_CODEPAGE CP_ACP)
@@ -350,30 +343,6 @@ IF(KWSYS_STANDALONE)
       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -library=stlport4")
     ENDIF()
   ENDIF()
-ENDIF()
-
-#-----------------------------------------------------------------------------
-# Configure Large File Support.
-KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_CSTDIO
-  "Checking whether header cstdio is available" DIRECT)
-SET(KWSYS_LFS_AVAILABLE 0)
-IF(KWSYS_LFS_REQUESTED)
-  # Large File Support is requested.
-  SET(KWSYS_LFS_REQUESTED 1)
-
-  # Check for large file support.
-  SET(KWSYS_PLATFORM_CXX_TEST_DEFINES
-    -DKWSYS_CXX_HAS_CSTDIO=${KWSYS_CXX_HAS_CSTDIO})
-  KWSYS_PLATFORM_CXX_TEST_RUN(KWSYS_LFS_WORKS
-    "Checking for Large File Support" DIRECT)
-  SET(KWSYS_PLATFORM_CXX_TEST_DEFINES)
-
-  IF(KWSYS_LFS_WORKS)
-    SET(KWSYS_LFS_AVAILABLE 1)
-  ENDIF()
-ELSE()
-  # Large File Support is not requested.
-  SET(KWSYS_LFS_REQUESTED 0)
 ENDIF()
 
 #-----------------------------------------------------------------------------
@@ -574,9 +543,6 @@ IF(KWSYS_USE_SystemInformation)
       SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
         COMPILE_DEFINITIONS KWSYS_SYS_HAS_MACHINE_CPU_H=1)
     ENDIF()
-  ENDIF()
-  IF(KWSYS_LFS_AVAILABLE AND NOT KWSYS_LFS_DISABLE)
-    SET(KWSYS_PLATFORM_CXX_TEST_DEFINES -DKWSYS_HAS_LFS=1)
   ENDIF()
   KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_RLIMIT64
     "Checking whether CXX compiler has rlimit64" DIRECT)
