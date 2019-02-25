@@ -187,6 +187,21 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       return replaceValues.SwiftPartialModule;
     }
   }
+  if (replaceValues.SwiftPartialModules) {
+    if (variable == "SWIFT_PARTIAL_MODULES") {
+      return replaceValues.SwiftPartialModules;
+    }
+  }
+  if (replaceValues.TargetSwiftDoc) {
+    if (variable == "TARGET_SWIFT_DOC") {
+      return replaceValues.TargetSwiftDoc;
+    }
+  }
+  if (replaceValues.TargetSwiftModule) {
+    if (variable == "TARGET_SWIFT_MODULE") {
+      return replaceValues.TargetSwiftModule;
+    }
+  }
   if (variable == "TARGET_SONAME" || variable == "SONAME_FLAG" ||
       variable == "TARGET_INSTALLNAME_DIR") {
     // All these variables depend on TargetSOName
