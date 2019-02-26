@@ -73,44 +73,44 @@ void MergeOptions(std::vector<std::string>& baseOpts,
 unsigned int const cmQtAutoGen::ParallelMax = 64;
 std::string const cmQtAutoGen::ListSep = "<<<S>>>";
 
-std::string const cmQtAutoGen::GenNameGen = "AutoGen";
-std::string const cmQtAutoGen::GenNameMoc = "AutoMoc";
-std::string const cmQtAutoGen::GenNameUic = "AutoUic";
-std::string const cmQtAutoGen::GenNameRcc = "AutoRcc";
+std::string const cmQtAutoGen::GenAutoGen = "AutoGen";
+std::string const cmQtAutoGen::GenAutoMoc = "AutoMoc";
+std::string const cmQtAutoGen::GenAutoUic = "AutoUic";
+std::string const cmQtAutoGen::GenAutoRcc = "AutoRcc";
 
-std::string const cmQtAutoGen::GenNameGenUpper = "AUTOGEN";
-std::string const cmQtAutoGen::GenNameMocUpper = "AUTOMOC";
-std::string const cmQtAutoGen::GenNameUicUpper = "AUTOUIC";
-std::string const cmQtAutoGen::GenNameRccUpper = "AUTORCC";
+std::string const cmQtAutoGen::GenAUTOGEN = "AUTOGEN";
+std::string const cmQtAutoGen::GenAUTOMOC = "AUTOMOC";
+std::string const cmQtAutoGen::GenAUTOUIC = "AUTOUIC";
+std::string const cmQtAutoGen::GenAUTORCC = "AUTORCC";
 
 std::string const& cmQtAutoGen::GeneratorName(GenT genType)
 {
   switch (genType) {
     case GenT::GEN:
-      return GenNameGen;
+      return GenAutoGen;
     case GenT::MOC:
-      return GenNameMoc;
+      return GenAutoMoc;
     case GenT::UIC:
-      return GenNameUic;
+      return GenAutoUic;
     case GenT::RCC:
-      return GenNameRcc;
+      return GenAutoRcc;
   }
-  return GenNameGen;
+  return GenAutoGen;
 }
 
 std::string const& cmQtAutoGen::GeneratorNameUpper(GenT genType)
 {
   switch (genType) {
     case GenT::GEN:
-      return GenNameGenUpper;
+      return GenAUTOGEN;
     case GenT::MOC:
-      return GenNameMocUpper;
+      return GenAUTOMOC;
     case GenT::UIC:
-      return GenNameUicUpper;
+      return GenAUTOUIC;
     case GenT::RCC:
-      return GenNameRccUpper;
+      return GenAUTORCC;
   }
-  return GenNameGenUpper;
+  return GenAUTOGEN;
 }
 
 std::string cmQtAutoGen::Tools(bool moc, bool uic, bool rcc)
@@ -118,13 +118,13 @@ std::string cmQtAutoGen::Tools(bool moc, bool uic, bool rcc)
   std::string res;
   std::vector<std::string> lst;
   if (moc) {
-    lst.emplace_back("AUTOMOC");
+    lst.emplace_back(GenAUTOMOC);
   }
   if (uic) {
-    lst.emplace_back("AUTOUIC");
+    lst.emplace_back(GenAUTOUIC);
   }
   if (rcc) {
-    lst.emplace_back("AUTORCC");
+    lst.emplace_back(GenAUTORCC);
   }
   switch (lst.size()) {
     case 1:
