@@ -85,10 +85,12 @@ bool cmIncludeExternalMSProjectCommand::InitialPass(
     // Create a target instance for this utility.
     cmTarget* target = this->Makefile->AddNewTarget(cmStateEnums::UTILITY,
                                                     utility_name.c_str());
+    if (this->Makefile->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
+      target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
+    }
 
     target->SetProperty("GENERATOR_FILE_NAME", utility_name.c_str());
     target->SetProperty("EXTERNAL_MSPROJECT", path.c_str());
-    target->SetProperty("EXCLUDE_FROM_ALL", "FALSE");
 
     if (!customType.empty())
       target->SetProperty("VS_PROJECT_TYPE", customType.c_str());
