@@ -125,8 +125,10 @@ if(CMAKE_HAVE_PTHREAD_H)
     # libc(libasan). However, it doesn't have the full pthread implementation.
     # So, we can't assume that we have the pthread implementation in libc
     # using the pthread_create() checking here. Then, we turn to check the
-    # pthread_kill() symbol instead.
-    CHECK_SYMBOL_EXISTS(pthread_kill pthread.h CMAKE_HAVE_LIBC_PTHREAD_KILL)
+    # pthread_kill() symbol instead.  It is in the "signal.h" header, but
+    # the purpose of this check is to verify that the pthread API works with
+    # pure libc, so verify that "pthread.h" can be included too.
+    CHECK_SYMBOL_EXISTS(pthread_kill "signal.h;pthread.h" CMAKE_HAVE_LIBC_PTHREAD_KILL)
     if(CMAKE_HAVE_LIBC_PTHREAD_KILL)
       set(CMAKE_THREAD_LIBS_INIT "")
       set(CMAKE_HAVE_THREADS_LIBRARY 1)
