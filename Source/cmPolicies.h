@@ -261,7 +261,10 @@ class cmMakefile;
          3, 14, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0088,                                                     \
          "FindBISON runs bison in CMAKE_CURRENT_BINARY_DIR when executing.",  \
-         3, 14, 0, cmPolicies::WARN)
+         3, 14, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0089,                                                     \
+         "Compiler id for IBM Clang-based XL compilers is now XLClang.", 3,   \
+         15, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

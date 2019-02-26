@@ -10,6 +10,7 @@ project(Minimal NONE)
 #
 set(targets
   aix-C-XL-13.1.3 aix-CXX-XL-13.1.3
+  aix-C-XLClang-16.1.0.1 aix-CXX-XLClang-16.1.0.1
   craype-C-Cray-8.7 craype-CXX-Cray-8.7 craype-Fortran-Cray-8.7
   craype-C-GNU-7.3.0 craype-CXX-GNU-7.3.0 craype-Fortran-GNU-7.3.0
   craype-C-Intel-18.0.2.20180210 craype-CXX-Intel-18.0.2.20180210

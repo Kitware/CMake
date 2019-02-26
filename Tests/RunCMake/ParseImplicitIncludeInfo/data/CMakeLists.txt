@@ -12,6 +12,9 @@
 #
 
 cmake_minimum_required(VERSION 3.3)
+if(POLICY CMP0089)
+  cmake_policy(SET CMP0089 NEW)
+endif()
 
 set(lngs C CXX)
 set(LANGUAGES "${lngs}" CACHE STRING "List of languages to generate inputs for")

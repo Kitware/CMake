@@ -92,13 +92,15 @@ function(cmake_parse_implicit_include_line line lang id_var log_var state_var)
   endif()
 
   # XL compiler
-  if("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "XL" AND "${line}" MATCHES "^/"
+  if(("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "XL"
+      OR "${CMAKE_${lang}_COMPILER_ID}" STREQUAL "XLClang")
+     AND "${line}" MATCHES "^/"
      AND ( ("${lang}" STREQUAL "Fortran" AND
             "${line}" MATCHES "/xl[fF]entry " AND
             "${line}" MATCHES "OSVAR\\([^ ]+\\)")
            OR
             (  ("${lang}" STREQUAL "C" OR "${lang}" STREQUAL "CXX") AND
-            "${line}" MATCHES "/xl[cC]entry " AND
+            "${line}" MATCHES "/xl[cC]2?entry " AND
             "${line}" MATCHES " -qosvar=")
          )  )
     # -qnostdinc cancels other stdinc flags, even if present
