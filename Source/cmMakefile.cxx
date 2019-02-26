@@ -4725,6 +4725,13 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
                                needCxx17, needCxx20);
 
   const char* existingCxxStandard = target->GetProperty("CXX_STANDARD");
+  if (existingCxxStandard == nullptr) {
+    const char* defaultCxxStandard =
+      this->GetDefinition("CMAKE_CXX_STANDARD_DEFAULT");
+    if (defaultCxxStandard && *defaultCxxStandard) {
+      existingCxxStandard = defaultCxxStandard;
+    }
+  }
   const char* const* existingCxxLevel = nullptr;
   if (existingCxxStandard) {
     existingCxxLevel =
@@ -4827,6 +4834,13 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
   this->CheckNeededCLanguage(feature, needC90, needC99, needC11);
 
   const char* existingCStandard = target->GetProperty("C_STANDARD");
+  if (existingCStandard == nullptr) {
+    const char* defaultCStandard =
+      this->GetDefinition("CMAKE_C_STANDARD_DEFAULT");
+    if (defaultCStandard && *defaultCStandard) {
+      existingCStandard = defaultCStandard;
+    }
+  }
   if (existingCStandard) {
     if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
                      cmStrCmp(existingCStandard)) == cm::cend(C_STANDARDS)) {
