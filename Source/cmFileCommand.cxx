@@ -2500,44 +2500,43 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
   return true;
 }
 
+namespace {
+std::string ToNativePath(const std::string& path)
+{
+  const auto& outPath = cmSystemTools::ConvertToOutputPath(path);
+  if (outPath.size() > 1 && outPath.front() == '\"' &&
+      outPath.back() == '\"') {
+    return outPath.substr(1, outPath.size() - 2);
+  }
+  return outPath;
+}
+
+std::string ToCMakePath(const std::string& path)
+{
+  auto temp = path;
+  cmSystemTools::ConvertToUnixSlashes(temp);
+  return temp;
+}
+}
+
 bool cmFileCommand::HandleCMakePathCommand(
   std::vector<std::string> const& args, bool nativePath)
 {
-  std::vector<std::string>::const_iterator i = args.begin();
   if (args.size() != 3) {
     this->SetError("FILE([TO_CMAKE_PATH|TO_NATIVE_PATH] path result) must be "
                    "called with exactly three arguments.");
     return false;
   }
-  i++; // Get rid of subcommand
 #if defined(_WIN32) && !defined(__CYGWIN__)
   char pathSep = ';';
 #else
   char pathSep = ':';
 #endif
-  std::vector<std::string> path = cmSystemTools::SplitString(*i, pathSep);
-  i++;
-  const char* var = i->c_str();
-  std::string value;
-  for (std::vector<std::string>::iterator j = path.begin(); j != path.end();
-       ++j) {
-    if (j != path.begin()) {
-      value += ";";
-    }
-    if (!nativePath) {
-      cmSystemTools::ConvertToUnixSlashes(*j);
-    } else {
-      *j = cmSystemTools::ConvertToOutputPath(*j);
-      // remove double quotes in the path
-      std::string& s = *j;
+  std::vector<std::string> path = cmSystemTools::SplitString(args[1], pathSep);
 
-      if (s.size() > 1 && s.front() == '\"' && s.back() == '\"') {
-        s = s.substr(1, s.size() - 2);
-      }
-    }
-    value += *j;
-  }
-  this->Makefile->AddDefinition(var, value.c_str());
+  std::string value = cmJoin(
+    cmMakeRange(path).transform(nativePath ? ToNativePath : ToCMakePath), ";");
+  this->Makefile->AddDefinition(args[2], value.c_str());
   return true;
 }
 
