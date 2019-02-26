@@ -11,8 +11,9 @@ Synopsis
 .. parsed-literal::
 
  ctest [<options>]
- ctest <path-to-source> <path-to-build> --build-generator <generator>
-       [<options>...] [-- <build-options>...] [--test-command <test>]
+ ctest --build-and-test <path-to-source> <path-to-build>
+       --build-generator <generator> [<options>...]
+       [--build-options <opts>...] [--test-command <command> [<args>...]]
  ctest {-D <dashboard> | -M <model> -T <action> | -S <script> | -SP <script>}
        [-- <dashboard-options>...]
 
