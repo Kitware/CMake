@@ -56,7 +56,7 @@ public:
    */
   static std::string TrimWhitespace(const std::string& s);
 
-  using MessageCallback = std::function<void(const char*, const char*)>;
+  using MessageCallback = std::function<void(const std::string&, const char*)>;
   /**
    *  Set the function used by GUIs to display error messages
    *  Function gets passed: message as a const char*,
@@ -74,11 +74,7 @@ public:
   /**
    * Display a message.
    */
-  static void Message(const char* m, const char* title = nullptr);
-  static void Message(const std::string& m, const char* title = nullptr)
-  {
-    Message(m.c_str(), title);
-  }
+  static void Message(const std::string& m, const char* title = nullptr);
 
   using OutputCallback = std::function<void(std::string const&)>;
 
@@ -145,19 +141,19 @@ public:
   ///! Return true if value is NOTFOUND or ends in -NOTFOUND.
   static bool IsNOTFOUND(const char* value);
   ///! Return true if the path is a framework
-  static bool IsPathToFramework(const char* value);
+  static bool IsPathToFramework(const std::string& value);
 
   static bool DoesFileExistWithExtensions(
-    const char* name, const std::vector<std::string>& sourceExts);
+    const std::string& name, const std::vector<std::string>& sourceExts);
 
   /**
    * Check if the given file exists in one of the parent directory of the
    * given file or directory and if it does, return the name of the file.
    * Toplevel specifies the top-most directory to where it will look.
    */
-  static std::string FileExistsInParentDirectories(const char* fname,
-                                                   const char* directory,
-                                                   const char* toplevel);
+  static std::string FileExistsInParentDirectories(
+    const std::string& fname, const std::string& directory,
+    const std::string& toplevel);
 
   static void Glob(const std::string& directory, const std::string& regexp,
                    std::vector<std::string>& files);
@@ -175,10 +171,6 @@ public:
    */
   static bool SimpleGlob(const std::string& glob,
                          std::vector<std::string>& files, int type = 0);
-
-  ///! Copy a file.
-  static bool cmCopyFile(const std::string& source,
-                         const std::string& destination);
 
   /** Rename a file or directory within a single disk volume (atomic
       if possible).  */
@@ -224,7 +216,7 @@ public:
     OUTPUT_FORWARD,
     OUTPUT_PASSTHROUGH
   };
-  static bool RunSingleCommand(const char* command,
+  static bool RunSingleCommand(const std::string& command,
                                std::string* captureStdOut = nullptr,
                                std::string* captureStdErr = nullptr,
                                int* retVal = nullptr,
@@ -250,7 +242,7 @@ public:
   /**
    * Parse arguments out of a single string command
    */
-  static std::vector<std::string> ParseArguments(const char* command);
+  static std::vector<std::string> ParseArguments(const std::string& command);
 
   /** Parse arguments out of a windows command line string.  */
   static void ParseWindowsCommandLine(const char* command,
@@ -351,9 +343,6 @@ public:
                          cmDuration timeout, std::vector<char>& out,
                          std::vector<char>& err);
 
-  /** Split a string on its newlines into multiple lines.  Returns
-      false only if the last line stored had no newline.  */
-  static bool Split(const char* s, std::vector<std::string>& l);
   static void SetForceUnixPaths(bool v) { s_ForceUnixPaths = v; }
   static bool GetForceUnixPaths() { return s_ForceUnixPaths; }
 
@@ -364,7 +353,7 @@ public:
   // ConvertToRunCommandPath does not use s_ForceUnixPaths and should
   // be used when RunCommand is called from cmake, because the
   // running cmake needs paths to be in its format
-  static std::string ConvertToRunCommandPath(const char* path);
+  static std::string ConvertToRunCommandPath(const std::string& path);
 
   /** compute the relative path from local to remote.  local must
       be a directory.  remote can be a file or a directory.
@@ -447,13 +436,15 @@ public:
 
   /** Copy the file create/access/modify times from the file named by
       the first argument to that named by the second.  */
-  static bool CopyFileTime(const char* fromFile, const char* toFile);
+  static bool CopyFileTime(const std::string& fromFile,
+                           const std::string& toFile);
 
   /** Save and restore file times.  */
   static cmSystemToolsFileTime* FileTimeNew();
   static void FileTimeDelete(cmSystemToolsFileTime*);
-  static bool FileTimeGet(const char* fname, cmSystemToolsFileTime* t);
-  static bool FileTimeSet(const char* fname, cmSystemToolsFileTime* t);
+  static bool FileTimeGet(const std::string& fname, cmSystemToolsFileTime* t);
+  static bool FileTimeSet(const std::string& fname,
+                          const cmSystemToolsFileTime* t);
 
   /** Random seed generation.  */
   static unsigned int RandomSeed();
@@ -497,7 +488,7 @@ public:
   static bool CheckRPath(std::string const& file, std::string const& newRPath);
 
   /** Remove a directory; repeat a few times in case of locked files.  */
-  static bool RepeatedRemoveDirectory(const char* dir);
+  static bool RepeatedRemoveDirectory(const std::string& dir);
 
   /** Tokenize a string */
   static std::vector<std::string> tokenize(const std::string& str,

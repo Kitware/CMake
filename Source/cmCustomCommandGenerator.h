@@ -32,6 +32,9 @@ public:
   cmCustomCommandGenerator(cmCustomCommand const& cc, std::string config,
                            cmLocalGenerator* lg);
   ~cmCustomCommandGenerator();
+  cmCustomCommandGenerator(const cmCustomCommandGenerator&) = delete;
+  cmCustomCommandGenerator& operator=(const cmCustomCommandGenerator&) =
+    delete;
   cmCustomCommand const& GetCC() const { return this->CC; }
   unsigned int GetNumberOfCommands() const;
   std::string GetCommand(unsigned int c) const;

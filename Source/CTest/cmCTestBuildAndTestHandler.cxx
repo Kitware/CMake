@@ -118,7 +118,7 @@ public:
     : CM(cm)
   {
     cmSystemTools::SetMessageCallback(
-      [&s](const char* msg, const char* /*unused*/) {
+      [&s](const std::string& msg, const char* /*unused*/) {
         s += msg;
         s += "\n";
       });
@@ -126,10 +126,11 @@ public:
     cmSystemTools::SetStdoutCallback([&s](std::string const& m) { s += m; });
     cmSystemTools::SetStderrCallback([&s](std::string const& m) { s += m; });
 
-    this->CM.SetProgressCallback([&s](const char* msg, float /*unused*/) {
-      s += msg;
-      s += "\n";
-    });
+    this->CM.SetProgressCallback(
+      [&s](const std::string& msg, float /*unused*/) {
+        s += msg;
+        s += "\n";
+      });
   }
 
   ~cmCTestBuildAndTestCaptureRAII()
@@ -139,6 +140,11 @@ public:
     cmSystemTools::SetStdoutCallback(nullptr);
     cmSystemTools::SetMessageCallback(nullptr);
   }
+
+  cmCTestBuildAndTestCaptureRAII(const cmCTestBuildAndTestCaptureRAII&) =
+    delete;
+  cmCTestBuildAndTestCaptureRAII& operator=(
+    const cmCTestBuildAndTestCaptureRAII&) = delete;
 };
 
 int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)

@@ -4,12 +4,12 @@
 
 #include <deque>
 #include <iostream>
-#include <iterator>
 #include <map>
 #include <stddef.h>
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -205,11 +205,9 @@ void cmFindBase::FillPackageRootPath()
   cmSearchPath& paths = this->LabeledPaths[PathLabel::PackageRoot];
 
   // Add the PACKAGE_ROOT_PATH from each enclosing find_package call.
-  for (std::deque<std::vector<std::string>>::const_reverse_iterator pkgPaths =
-         this->Makefile->FindPackageRootPathStack.rbegin();
-       pkgPaths != this->Makefile->FindPackageRootPathStack.rend();
-       ++pkgPaths) {
-    paths.AddPrefixPaths(*pkgPaths);
+  for (std::vector<std::string> const& pkgPaths :
+       cmReverseRange(this->Makefile->FindPackageRootPathStack)) {
+    paths.AddPrefixPaths(pkgPaths);
   }
 
   paths.AddSuffixes(this->SearchPathSuffixes);

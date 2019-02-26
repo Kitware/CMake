@@ -11,7 +11,9 @@
 #include <iostream>
 #include <signal.h>
 #include <string>
-#if !defined(_WIN32)
+#if defined(_WIN32)
+#  include "cm_kwiml.h"
+#else
 #  include <unistd.h>
 #endif
 #include <utility>
@@ -199,7 +201,7 @@ bool cmProcess::Buffer::GetLine(std::string& line)
   for (size_type sz = this->size(); this->Last != sz; ++this->Last) {
     if ((*this)[this->Last] == '\n' || (*this)[this->Last] == '\0') {
       // Extract the range first..last as a line.
-      const char* text = &*this->begin() + this->First;
+      const char* text = this->data() + this->First;
       size_type length = this->Last - this->First;
       while (length && text[length - 1] == '\r') {
         length--;
@@ -229,7 +231,7 @@ bool cmProcess::Buffer::GetLast(std::string& line)
 {
   // Return the partial last line, if any.
   if (!this->empty()) {
-    line.assign(&*this->begin(), this->size());
+    line.assign(this->data(), this->size());
     this->First = this->Last = 0;
     this->clear();
     return true;
@@ -353,7 +355,7 @@ void cmProcess::OnExit(int64_t exit_status, int term_signal)
   }
 
   // Record exit information.
-  this->ExitValue = static_cast<int>(exit_status);
+  this->ExitValue = exit_status;
   this->Signal = term_signal;
   this->TotalTime = std::chrono::steady_clock::now() - this->StartTime;
   // Because of a processor clock scew the runtime may become slightly
@@ -539,7 +541,8 @@ std::string cmProcess::GetExitExceptionString()
     case STATUS_NO_MEMORY:
     default:
       char buf[1024];
-      _snprintf(buf, 1024, "Exit code 0x%x\n", this->ExitValue);
+      const char* fmt = "Exit code 0x%" KWIML_INT_PRIx64 "\n";
+      _snprintf(buf, 1024, fmt, this->ExitValue);
       exception_str.assign(buf);
   }
 #else

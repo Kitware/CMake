@@ -622,8 +622,8 @@ void cmVisualStudio10TargetGenerator::Generate()
         propsLocal += this->DefaultArtifactDir;
         propsLocal += "\\nasm.props";
         ConvertToWindowsSlash(propsLocal);
-        this->Makefile->ConfigureFile(propsTemplate.c_str(),
-                                      propsLocal.c_str(), false, true, true);
+        this->Makefile->ConfigureFile(propsTemplate, propsLocal, false, true,
+                                      true);
         Elem(e1, "Import").Attribute("Project", propsLocal);
       }
     }
@@ -1321,8 +1321,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
         std::string error = "Could not create file: [";
         error += sourcePath;
         error += "]  ";
-        cmSystemTools::Error(error.c_str(),
-                             cmSystemTools::GetLastSystemError().c_str());
+        cmSystemTools::Error(error + cmSystemTools::GetLastSystemError());
       }
     }
   }
@@ -2514,8 +2513,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     this->GeneratorTarget->GetLinkerLanguage(configName);
   if (linkLanguage.empty()) {
     cmSystemTools::Error(
-      "CMake can not determine linker language for target: ",
-      this->Name.c_str());
+      "CMake can not determine linker language for target: " + this->Name);
     return false;
   }
 
@@ -3345,8 +3343,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   const std::string& linkLanguage = linkClosure->LinkerLanguage;
   if (linkLanguage.empty()) {
     cmSystemTools::Error(
-      "CMake can not determine linker language for target: ",
-      this->Name.c_str());
+      "CMake can not determine linker language for target: " + this->Name);
     return false;
   }
 
@@ -3391,8 +3388,8 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     this->GeneratorTarget->GetLinkInformation(config);
   if (!pcli) {
     cmSystemTools::Error(
-      "CMake can not compute cmComputeLinkInformation for target: ",
-      this->Name.c_str());
+      "CMake can not compute cmComputeLinkInformation for target: " +
+      this->Name);
     return false;
   }
   cmComputeLinkInformation& cli = *pcli;
@@ -3439,18 +3436,11 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   linkDirs.push_back("%(AdditionalLibraryDirectories)");
   linkOptions.AddFlag("AdditionalLibraryDirectories", linkDirs);
 
-  std::string targetName;
-  std::string targetNameSO;
-  std::string targetNameFull;
-  std::string targetNameImport;
-  std::string targetNamePDB;
+  cmGeneratorTarget::Names targetNames;
   if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-    this->GeneratorTarget->GetExecutableNames(
-      targetName, targetNameFull, targetNameImport, targetNamePDB, config);
+    targetNames = this->GeneratorTarget->GetExecutableNames(config);
   } else {
-    this->GeneratorTarget->GetLibraryNames(targetName, targetNameSO,
-                                           targetNameFull, targetNameImport,
-                                           targetNamePDB, config);
+    targetNames = this->GeneratorTarget->GetLibraryNames(config);
   }
 
   if (this->MSTools) {
@@ -3491,11 +3481,11 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
 
     std::string pdb = this->GeneratorTarget->GetPDBDirectory(config);
     pdb += "/";
-    pdb += targetNamePDB;
+    pdb += targetNames.PDB;
     std::string imLib = this->GeneratorTarget->GetDirectory(
       config, cmStateEnums::ImportLibraryArtifact);
     imLib += "/";
-    imLib += targetNameImport;
+    imLib += targetNames.ImportLibrary;
 
     linkOptions.AddFlag("ImportLibrary", imLib);
     linkOptions.AddFlag("ProgramDataBaseFile", pdb);
@@ -3519,7 +3509,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
       linkOptions.AppendFlag("IgnoreSpecificDefaultLibraries", "ole32.lib");
     }
   } else if (this->NsightTegra) {
-    linkOptions.AddFlag("SoName", targetNameSO);
+    linkOptions.AddFlag("SoName", targetNames.SharedObject);
   }
 
   linkOptions.Parse(flags);
@@ -3579,8 +3569,8 @@ bool cmVisualStudio10TargetGenerator::ComputeLibOptions(
     this->GeneratorTarget->GetLinkInformation(config);
   if (!pcli) {
     cmSystemTools::Error(
-      "CMake can not compute cmComputeLinkInformation for target: ",
-      this->Name.c_str());
+      "CMake can not compute cmComputeLinkInformation for target: " +
+      this->Name);
     return false;
   }
 

@@ -21,6 +21,9 @@ Synopsis
     list(`APPEND`_ <list> [<element>...])
     list(`FILTER`_ <list> {INCLUDE | EXCLUDE} REGEX <regex>)
     list(`INSERT`_ <list> <index> [<element>...])
+    list(`POP_BACK`_ <list> [<out-var>...])
+    list(`POP_FRONT`_ <list> [<out-var>...])
+    list(`PREPEND`_ <list> [<element>...])
     list(`REMOVE_ITEM`_ <list> <value>...)
     list(`REMOVE_AT`_ <list> <index>...)
     list(`REMOVE_DUPLICATES`_ <list>)
@@ -33,8 +36,9 @@ Synopsis
 Introduction
 ^^^^^^^^^^^^
 
-The list subcommands ``APPEND``, ``INSERT``, ``FILTER``, ``REMOVE_AT``,
-``REMOVE_ITEM``, ``REMOVE_DUPLICATES``, ``REVERSE`` and ``SORT`` may create
+The list subcommands ``APPEND``, ``INSERT``, ``FILTER``, ``PREPEND``,
+``POP_BACK``, ``POP_FRONT``, ``REMOVE_AT``, ``REMOVE_ITEM``,
+``REMOVE_DUPLICATES``, ``REVERSE`` and ``SORT`` may create
 new values for the list within the current CMake variable scope.  Similar to
 the :command:`set` command, the LIST command creates new variable values in
 the current scope, even if the list itself is actually defined in a parent
@@ -141,6 +145,34 @@ For more information on regular expressions see also the
   list(INSERT <list> <element_index> <element> [<element> ...])
 
 Inserts elements to the list to the specified location.
+
+.. _POP_BACK:
+
+.. code-block:: cmake
+
+  list(POP_BACK <list> [<out-var>...])
+
+If no variable name is given, removes exactly one element. Otherwise,
+assign the last element's value to the given variable and removes it,
+up to the last variable name given.
+
+.. _POP_FRONT:
+
+.. code-block:: cmake
+
+  list(POP_FRONT <list> [<out-var>...])
+
+If no variable name is given, removes exactly one element. Otherwise,
+assign the first element's value to the given variable and removes it,
+up to the last variable name given.
+
+.. _PREPEND:
+
+.. code-block:: cmake
+
+  list(PREPEND <list> [<element> ...])
+
+Insert elements to the 0th position in the list.
 
 .. _REMOVE_ITEM:
 

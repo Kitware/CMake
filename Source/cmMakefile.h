@@ -313,6 +313,9 @@ public:
     PolicyPushPop(cmMakefile* m);
     ~PolicyPushPop();
 
+    PolicyPushPop(const PolicyPushPop&) = delete;
+    PolicyPushPop& operator=(const PolicyPushPop&) = delete;
+
   private:
     cmMakefile* Makefile;
   };
@@ -436,7 +439,7 @@ public:
   const char* GetDefinition(const std::string&) const;
   const std::string* GetDef(const std::string&) const;
   const std::string& GetSafeDefinition(const std::string&) const;
-  std::string GetRequiredDefinition(const std::string& name) const;
+  const std::string& GetRequiredDefinition(const std::string& name) const;
   bool IsDefinitionSet(const std::string&) const;
   /**
    * Get the list of all variables in the current space. If argument
@@ -607,8 +610,8 @@ public:
   /**
    * Copy file but change lines according to ConfigureString
    */
-  int ConfigureFile(const char* infile, const char* outfile, bool copyonly,
-                    bool atOnly, bool escapeQuotes,
+  int ConfigureFile(const std::string& infile, const std::string& outfile,
+                    bool copyonly, bool atOnly, bool escapeQuotes,
                     cmNewLineStyle = cmNewLineStyle());
 
   /**
@@ -639,7 +642,7 @@ public:
 #endif
 
   ///! Display progress or status message.
-  void DisplayStatus(const char*, float) const;
+  void DisplayStatus(const std::string&, float) const;
 
   /**
    * Expand the given list file arguments into the full set after
@@ -743,6 +746,9 @@ public:
                     cmPolicies::PolicyMap const& pm);
     ~FunctionPushPop();
 
+    FunctionPushPop(const FunctionPushPop&) = delete;
+    FunctionPushPop& operator=(const FunctionPushPop&) = delete;
+
     void Quiet() { this->ReportError = false; }
 
   private:
@@ -756,6 +762,9 @@ public:
     MacroPushPop(cmMakefile* mf, std::string const& fileName,
                  cmPolicies::PolicyMap const& pm);
     ~MacroPushPop();
+
+    MacroPushPop(const MacroPushPop&) = delete;
+    MacroPushPop& operator=(const MacroPushPop&) = delete;
 
     void Quiet() { this->ReportError = false; }
 

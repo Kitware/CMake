@@ -628,8 +628,8 @@ std::string cmExtraCodeLiteGenerator::GetConfigurationName(
 std::string cmExtraCodeLiteGenerator::GetBuildCommand(
   const cmMakefile* mf, const std::string& targetName) const
 {
-  std::string generator = mf->GetSafeDefinition("CMAKE_GENERATOR");
-  std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& generator = mf->GetSafeDefinition("CMAKE_GENERATOR");
+  const std::string& make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::string buildCommand = make; // Default
   std::ostringstream ss;
   if (generator == "NMake Makefiles" || generator == "Ninja") {
@@ -669,8 +669,8 @@ std::string cmExtraCodeLiteGenerator::GetSingleFileBuildCommand(
   const cmMakefile* mf) const
 {
   std::string buildCommand;
-  std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-  std::string generator = mf->GetSafeDefinition("CMAKE_GENERATOR");
+  const std::string& make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& generator = mf->GetSafeDefinition("CMAKE_GENERATOR");
   if (generator == "Unix Makefiles" || generator == "MinGW Makefiles") {
     std::ostringstream ss;
 #if defined(_WIN32)

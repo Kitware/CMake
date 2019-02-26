@@ -179,7 +179,7 @@ void cmGlobalVisualStudio14Generator::SetWindowsTargetPlatformVersion(
     std::ostringstream e;
     e << "Selecting Windows SDK version " << this->WindowsTargetPlatformVersion
       << " to target Windows " << this->SystemVersion << ".";
-    mf->DisplayStatus(e.str().c_str(), -1);
+    mf->DisplayStatus(e.str(), -1);
   }
   mf->AddDefinition("CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION",
                     this->WindowsTargetPlatformVersion.c_str());

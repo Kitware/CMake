@@ -3,6 +3,7 @@
 #include "cmRST.h"
 
 #include "cmAlgorithms.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 

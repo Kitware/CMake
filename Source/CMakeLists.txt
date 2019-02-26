@@ -1060,9 +1060,6 @@ if(CPACK_ENABLE_FREEBSD_PKG AND FREEBSD_PKG_INCLUDE_DIRS AND FREEBSD_PKG_LIBRARI
 endif()
 
 if(APPLE)
-  add_executable(cmakexbuild cmakexbuild.cxx)
-  list(APPEND _tools cmakexbuild)
-  target_link_libraries(cmakexbuild CMakeLib)
   add_executable(OSXScriptLauncher
     CPack/OSXScriptLauncher.cxx)
   target_link_libraries(OSXScriptLauncher cmsys)

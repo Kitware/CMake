@@ -182,6 +182,9 @@ public:
   cmCTest();
   ~cmCTest();
 
+  cmCTest(const cmCTest&) = delete;
+  cmCTest& operator=(const cmCTest&) = delete;
+
   /** Set the notes files to be created. */
   void SetNotesFiles(const char* notes);
 
@@ -277,8 +280,9 @@ public:
    * Run command specialized for make and configure. Returns process status
    * and retVal is return value or exception.
    */
-  int RunMakeCommand(const char* command, std::string& output, int* retVal,
-                     const char* dir, cmDuration timeout, std::ostream& ofs,
+  int RunMakeCommand(const std::string& command, std::string& output,
+                     int* retVal, const char* dir, cmDuration timeout,
+                     std::ostream& ofs,
                      Encoding encoding = cmProcessOutput::Auto);
 
   /** Return the current tag */

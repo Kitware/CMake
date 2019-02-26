@@ -8,6 +8,7 @@
 #include "cmCTestTestHandler.h"
 #include "cmDuration.h"
 #include "cmListFileCache.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
@@ -108,8 +109,8 @@ void cmCTestMultiProcessHandler::SetTestLoad(unsigned long load)
                             fake_load_value)) {
     if (!cmSystemTools::StringToULong(fake_load_value.c_str(),
                                       &this->FakeLoadForTesting)) {
-      cmSystemTools::Error("Failed to parse fake load value: ",
-                           fake_load_value.c_str());
+      cmSystemTools::Error("Failed to parse fake load value: " +
+                           fake_load_value);
     }
   }
 }
@@ -651,9 +652,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
 
   // Reverse iterate over the different dependency levels (deepest first).
   // Sort tests within each level by COST and append them to the cost list.
-  for (std::list<TestSet>::reverse_iterator i = priorityStack.rbegin();
-       i != priorityStack.rend(); ++i) {
-    TestSet const& currentSet = *i;
+  for (TestSet const& currentSet : cmReverseRange(priorityStack)) {
     TestComparator comp(this);
 
     TestList sortedCopy;

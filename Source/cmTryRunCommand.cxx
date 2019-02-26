@@ -8,6 +8,7 @@
 #include "cmDuration.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
@@ -172,25 +173,22 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
     std::vector<std::string> emulatorWithArgs;
     cmSystemTools::ExpandListArgument(emulator, emulatorWithArgs);
     finalCommand +=
-      cmSystemTools::ConvertToRunCommandPath(emulatorWithArgs[0].c_str());
+      cmSystemTools::ConvertToRunCommandPath(emulatorWithArgs[0]);
     finalCommand += " ";
-    for (std::vector<std::string>::const_iterator ei =
-           emulatorWithArgs.begin() + 1;
-         ei != emulatorWithArgs.end(); ++ei) {
+    for (std::string const& arg : cmMakeRange(emulatorWithArgs).advance(1)) {
       finalCommand += "\"";
-      finalCommand += *ei;
+      finalCommand += arg;
       finalCommand += "\"";
       finalCommand += " ";
     }
   }
-  finalCommand +=
-    cmSystemTools::ConvertToRunCommandPath(this->OutputFile.c_str());
+  finalCommand += cmSystemTools::ConvertToRunCommandPath(this->OutputFile);
   if (!runArgs.empty()) {
     finalCommand += runArgs;
   }
   bool worked = cmSystemTools::RunSingleCommand(
-    finalCommand.c_str(), out, out, &retVal, nullptr,
-    cmSystemTools::OUTPUT_NONE, cmDuration::zero());
+    finalCommand, out, out, &retVal, nullptr, cmSystemTools::OUTPUT_NONE,
+    cmDuration::zero());
   // set the run var
   char retChar[16];
   const char* retStr;

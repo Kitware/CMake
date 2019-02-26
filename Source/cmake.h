@@ -273,7 +273,7 @@ public:
   ///! Parse command line arguments that might set cache values
   bool SetCacheArgs(const std::vector<std::string>&);
 
-  using ProgressCallbackType = std::function<void(const char*, float)>;
+  using ProgressCallbackType = std::function<void(const std::string&, float)>;
   /**
    *  Set the function used by GUIs to receive progress updates
    *  Function gets passed: message as a const char*, a progress
@@ -284,7 +284,7 @@ public:
   void SetProgressCallback(ProgressCallbackType f);
 
   ///! this is called by generators to update the progress
-  void UpdateProgress(const char* msg, float prog);
+  void UpdateProgress(const std::string& msg, float prog);
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   ///! Get the variable watch object

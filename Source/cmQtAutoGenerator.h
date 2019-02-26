@@ -40,16 +40,16 @@ public:
     bool ColorOutput() const { return this->ColorOutput_; }
     void SetColorOutput(bool value);
     // -- Log info
-    void Info(GeneratorT genType, std::string const& message);
+    void Info(GenT genType, std::string const& message);
     // -- Log warning
-    void Warning(GeneratorT genType, std::string const& message);
-    void WarningFile(GeneratorT genType, std::string const& filename,
+    void Warning(GenT genType, std::string const& message);
+    void WarningFile(GenT genType, std::string const& filename,
                      std::string const& message);
     // -- Log error
-    void Error(GeneratorT genType, std::string const& message);
-    void ErrorFile(GeneratorT genType, std::string const& filename,
+    void Error(GenT genType, std::string const& message);
+    void ErrorFile(GenT genType, std::string const& filename,
                    std::string const& message);
-    void ErrorCommand(GeneratorT genType, std::string const& message,
+    void ErrorCommand(GenT genType, std::string const& message,
                       std::vector<std::string> const& command,
                       std::string const& output);
 
@@ -114,13 +114,13 @@ public:
     bool FileRead(std::string& content, std::string const& filename,
                   std::string* error = nullptr);
     /// @brief Error logging version
-    bool FileRead(GeneratorT genType, std::string& content,
+    bool FileRead(GenT genType, std::string& content,
                   std::string const& filename);
 
     bool FileWrite(std::string const& filename, std::string const& content,
                    std::string* error = nullptr);
     /// @brief Error logging version
-    bool FileWrite(GeneratorT genType, std::string const& filename,
+    bool FileWrite(GenT genType, std::string const& filename,
                    std::string const& content);
 
     bool FileDiffers(std::string const& filename, std::string const& content);
@@ -131,11 +131,11 @@ public:
     // -- Directory access
     bool MakeDirectory(std::string const& dirname);
     /// @brief Error logging version
-    bool MakeDirectory(GeneratorT genType, std::string const& dirname);
+    bool MakeDirectory(GenT genType, std::string const& dirname);
 
     bool MakeParentDirectory(std::string const& filename);
     /// @brief Error logging version
-    bool MakeParentDirectory(GeneratorT genType, std::string const& filename);
+    bool MakeParentDirectory(GenT genType, std::string const& filename);
 
   private:
     std::mutex Mutex_;

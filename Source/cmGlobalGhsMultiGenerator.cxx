@@ -420,10 +420,8 @@ void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout)
   if (NULL != ghsGpjMacros) {
     std::vector<std::string> expandedList;
     cmSystemTools::ExpandListArgument(std::string(ghsGpjMacros), expandedList);
-    for (std::vector<std::string>::const_iterator expandedListI =
-           expandedList.begin();
-         expandedListI != expandedList.end(); ++expandedListI) {
-      fout << "macro " << *expandedListI << std::endl;
+    for (std::string const& arg : expandedList) {
+      fout << "macro " << arg << std::endl;
     }
   }
 }

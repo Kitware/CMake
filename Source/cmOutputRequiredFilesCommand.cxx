@@ -92,6 +92,9 @@ public:
    */
   ~cmLBDepend() { cmDeleteAll(this->DependInformationMap); }
 
+  cmLBDepend(const cmLBDepend&) = delete;
+  cmLBDepend& operator=(const cmLBDepend&) = delete;
+
   /**
    * Set the makefile that is used as a source of classes.
    */
@@ -163,7 +166,7 @@ protected:
   {
     cmsys::ifstream fin(info->FullPath.c_str());
     if (!fin) {
-      cmSystemTools::Error("error can not open ", info->FullPath.c_str());
+      cmSystemTools::Error("error can not open " + info->FullPath);
       return;
     }
 
@@ -178,7 +181,7 @@ protected:
           qstart = line.find('<', 8);
           // if a < is not found then move on
           if (qstart == std::string::npos) {
-            cmSystemTools::Error("unknown include directive ", line.c_str());
+            cmSystemTools::Error("unknown include directive " + line);
             continue;
           }
           qend = line.find('>', qstart + 1);

@@ -11,6 +11,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
+#include <cstdint>
 #include <iosfwd>
 #include <map>
 #include <set>
@@ -153,7 +154,7 @@ public:
     std::string Reason;
     std::string FullCommandLine;
     cmDuration ExecutionTime;
-    int ReturnValue;
+    std::int64_t ReturnValue;
     int Status;
     std::string ExceptionStatus;
     bool CompressOutput;

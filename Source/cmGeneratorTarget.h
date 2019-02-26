@@ -568,19 +568,25 @@ public:
   void GetAutoUicOptions(std::vector<std::string>& result,
                          const std::string& config) const;
 
+  struct Names
+  {
+    std::string Base;
+    std::string Output;
+    std::string Real;
+    std::string ImportLibrary;
+    std::string PDB;
+    std::string SharedObject;
+  };
+
   /** Get the names of the executable needed to generate a build rule
       that takes into account executable version numbers.  This should
       be called only on an executable target.  */
-  void GetExecutableNames(std::string& name, std::string& realName,
-                          std::string& impName, std::string& pdbName,
-                          const std::string& config) const;
+  Names GetExecutableNames(const std::string& config) const;
 
   /** Get the names of the library needed to generate a build rule
       that takes into account shared library version numbers.  This
       should be called only on a library target.  */
-  void GetLibraryNames(std::string& name, std::string& soName,
-                       std::string& realName, std::string& impName,
-                       std::string& pdbName, const std::string& config) const;
+  Names GetLibraryNames(const std::string& config) const;
 
   /**
    * Compute whether this target must be relinked before installing.

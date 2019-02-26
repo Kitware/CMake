@@ -103,13 +103,11 @@ static const struct ZeroNode installInterfaceNode;
                          const GeneratorExpressionContent* content,           \
                          cmGeneratorExpressionDAGChecker*) const              \
     {                                                                         \
-      std::vector<std::string>::const_iterator it = parameters.begin();       \
-      const std::vector<std::string>::const_iterator end = parameters.end();  \
-      for (; it != end; ++it) {                                               \
-        if (*it == #FAILURE_VALUE) {                                          \
+      for (std::string const& param : parameters) {                           \
+        if (param == #FAILURE_VALUE) {                                        \
           return #FAILURE_VALUE;                                              \
         }                                                                     \
-        if (*it != #SUCCESS_VALUE) {                                          \
+        if (param != #SUCCESS_VALUE) {                                        \
           reportError(context, content->GetOriginalExpression(),              \
                       "Parameters to $<" #OP                                  \
                       "> must resolve to either '0' or '1'.");                \
@@ -135,13 +133,13 @@ static const struct NotNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    if (*parameters.begin() != "0" && *parameters.begin() != "1") {
+    if (parameters.front() != "0" && parameters.front() != "1") {
       reportError(
         context, content->GetOriginalExpression(),
         "$<NOT> parameter must resolve to exactly one '0' or '1' value.");
       return std::string();
     }
-    return *parameters.begin() == "0" ? "1" : "0";
+    return parameters.front() == "0" ? "1" : "0";
   }
 } notNode;
 
@@ -157,7 +155,7 @@ static const struct BoolNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    return !cmSystemTools::IsOff(*parameters.begin()) ? "1" : "0";
+    return !cmSystemTools::IsOff(parameters.front()) ? "1" : "0";
   }
 } boolNode;
 
@@ -194,7 +192,7 @@ static const struct StrEqualNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    return *parameters.begin() == parameters[1] ? "1" : "0";
+    return parameters.front() == parameters[1] ? "1" : "0";
   }
 } strEqualNode;
 
@@ -613,7 +611,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
       return compilerId;
     }
     static cmsys::RegularExpression compilerIdValidator("^[A-Za-z0-9_]*$");
-    if (!compilerIdValidator.find(*parameters.begin())) {
+    if (!compilerIdValidator.find(parameters.front())) {
       reportError(context, content->GetOriginalExpression(),
                   "Expression syntax not recognized.");
       return std::string();
@@ -622,11 +620,11 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
       return parameters.front().empty() ? "1" : "0";
     }
 
-    if (strcmp(parameters.begin()->c_str(), compilerId.c_str()) == 0) {
+    if (strcmp(parameters.front().c_str(), compilerId.c_str()) == 0) {
       return "1";
     }
 
-    if (cmsysString_strcasecmp(parameters.begin()->c_str(),
+    if (cmsysString_strcasecmp(parameters.front().c_str(),
                                compilerId.c_str()) == 0) {
       switch (context->LG->GetPolicyStatus(cmPolicies::CMP0044)) {
         case cmPolicies::WARN: {
@@ -734,7 +732,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
     }
 
     static cmsys::RegularExpression compilerIdValidator("^[0-9\\.]*$");
-    if (!compilerIdValidator.find(*parameters.begin())) {
+    if (!compilerIdValidator.find(parameters.front())) {
       reportError(context, content->GetOriginalExpression(),
                   "Expression syntax not recognized.");
       return std::string();
@@ -744,7 +742,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
     }
 
     return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
-                                         parameters.begin()->c_str(),
+                                         parameters.front().c_str(),
                                          compilerVersion.c_str())
       ? "1"
       : "0";
@@ -839,7 +837,7 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
       return parameters.front().empty() ? "1" : "0";
     }
 
-    if (*parameters.begin() == platformId) {
+    if (parameters.front() == platformId) {
       return "1";
     }
     return "0";
@@ -1001,7 +999,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return configurationNode.Evaluate(parameters, context, content, nullptr);
     }
     static cmsys::RegularExpression configValidator("^[A-Za-z0-9_]*$");
-    if (!configValidator.find(*parameters.begin())) {
+    if (!configValidator.find(parameters.front())) {
       reportError(context, content->GetOriginalExpression(),
                   "Expression syntax not recognized.");
       return std::string();
@@ -1011,7 +1009,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return parameters.front().empty() ? "1" : "0";
     }
 
-    if (cmsysString_strcasecmp(parameters.begin()->c_str(),
+    if (cmsysString_strcasecmp(parameters.front().c_str(),
                                context->Config.c_str()) == 0) {
       return "1";
     }
@@ -1166,7 +1164,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
 
     cmGeneratorTarget const* target = context->HeadTarget;
-    std::string propertyName = *parameters.begin();
+    std::string propertyName = parameters.front();
 
     if (parameters.size() == 1) {
       context->HadHeadSensitiveCondition = true;
@@ -1182,14 +1180,14 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     }
 
     if (parameters.size() == 2) {
-      if (parameters.begin()->empty() && parameters[1].empty()) {
+      if (parameters.front().empty() && parameters[1].empty()) {
         reportError(
           context, content->GetOriginalExpression(),
           "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
           "target name and property name.");
         return std::string();
       }
-      if (parameters.begin()->empty()) {
+      if (parameters.front().empty()) {
         reportError(
           context, content->GetOriginalExpression(),
           "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
@@ -1964,7 +1962,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
     // Lookup the referenced target.
-    std::string name = *parameters.begin();
+    std::string name = parameters.front();
 
     if (!cmGeneratorExpression::IsValidTargetName(name)) {
       ::reportError(context, content->GetOriginalExpression(),

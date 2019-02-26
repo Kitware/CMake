@@ -44,10 +44,9 @@ int cmCPackCygwinBinaryGenerator::PackageFiles()
   // to create the file before the super class is called
   {
     cmGeneratedFileStream ofs(manifestFile.c_str());
-    for (std::vector<std::string>::const_iterator i = files.begin();
-         i != files.end(); ++i) {
+    for (std::string const& file : files) {
       // remove the temp dir and replace with /usr
-      ofs << (*i).substr(tempdir.size()) << "\n";
+      ofs << file.substr(tempdir.size()) << "\n";
     }
     ofs << manifest << "\n";
   }

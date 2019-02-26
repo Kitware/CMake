@@ -21,6 +21,7 @@
 #include "cmMakefileLibraryTargetGenerator.h"
 #include "cmMakefileUtilityTargetGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
@@ -654,19 +655,20 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       std::string cmdVar;
       if (this->GeneratorTarget->GetPropertyAsBool(
             "CUDA_SEPARABLE_COMPILATION")) {
-        cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+        cmdVar = "CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION";
       } else if (this->GeneratorTarget->GetPropertyAsBool(
                    "CUDA_PTX_COMPILATION")) {
-        cmdVar = std::string("CMAKE_CUDA_COMPILE_PTX_COMPILATION");
+        cmdVar = "CMAKE_CUDA_COMPILE_PTX_COMPILATION";
       } else {
-        cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
+        cmdVar = "CMAKE_CUDA_COMPILE_WHOLE_COMPILATION";
       }
-      std::string compileRule = this->Makefile->GetRequiredDefinition(cmdVar);
+      const std::string& compileRule =
+        this->Makefile->GetRequiredDefinition(cmdVar);
       cmSystemTools::ExpandListArgument(compileRule, compileCommands);
     } else {
-      const std::string cmdVar =
-        std::string("CMAKE_") + lang + "_COMPILE_OBJECT";
-      std::string compileRule = this->Makefile->GetRequiredDefinition(cmdVar);
+      const std::string cmdVar = "CMAKE_" + lang + "_COMPILE_OBJECT";
+      const std::string& compileRule =
+        this->Makefile->GetRequiredDefinition(cmdVar);
       cmSystemTools::ExpandListArgument(compileRule, compileCommands);
     }
 
@@ -974,18 +976,17 @@ bool cmMakefileTargetGenerator::WriteMakeRule(
   // For multiple outputs, make the extra ones depend on the first one.
   std::vector<std::string> const output_depends(1, outputs[0]);
   std::string binDir = this->LocalGenerator->GetBinaryDirectory();
-  for (std::vector<std::string>::const_iterator o = outputs.begin() + 1;
-       o != outputs.end(); ++o) {
+  for (std::string const& output : cmMakeRange(outputs).advance(1)) {
     // Touch the extra output so "make" knows that it was updated,
     // but only if the output was actually created.
     std::string const out = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(binDir, *o),
+      this->LocalGenerator->MaybeConvertToRelativePath(binDir, output),
       cmOutputConverter::SHELL);
     std::vector<std::string> output_commands;
 
     bool o_symbolic = false;
     if (need_symbolic) {
-      if (cmSourceFile* sf = this->Makefile->GetSource(*o)) {
+      if (cmSourceFile* sf = this->Makefile->GetSource(output)) {
         o_symbolic = sf->GetPropertyAsBool("SYMBOLIC");
       }
     }
@@ -994,13 +995,13 @@ bool cmMakefileTargetGenerator::WriteMakeRule(
     if (!o_symbolic) {
       output_commands.push_back("@$(CMAKE_COMMAND) -E touch_nocreate " + out);
     }
-    this->LocalGenerator->WriteMakeRule(os, nullptr, *o, output_depends,
+    this->LocalGenerator->WriteMakeRule(os, nullptr, output, output_depends,
                                         output_commands, o_symbolic, in_help);
 
     if (!o_symbolic) {
       // At build time, remove the first output if this one does not exist
       // so that "make" will rerun the real commands that create this one.
-      MultipleOutputPairsType::value_type p(*o, outputs[0]);
+      MultipleOutputPairsType::value_type p(output, outputs[0]);
       this->MultipleOutputPairs.insert(p);
     }
   }

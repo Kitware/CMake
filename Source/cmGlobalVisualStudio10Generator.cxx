@@ -913,10 +913,11 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     if (parser.ParseFile(slnFile, slnData,
                          cmVisualStudioSlnParser::DataGroupProjects)) {
       std::vector<cmSlnProjectEntry> slnProjects = slnData.GetProjects();
-      for (std::vector<cmSlnProjectEntry>::const_iterator i =
-             slnProjects.cbegin();
-           !useDevEnv && i != slnProjects.cend(); ++i) {
-        std::string proj = i->GetRelativePath();
+      for (cmSlnProjectEntry const& project : slnProjects) {
+        if (useDevEnv) {
+          break;
+        }
+        std::string proj = project.GetRelativePath();
         if (proj.size() > 7 && proj.substr(proj.size() - 7) == ".vfproj") {
           useDevEnv = true;
         }
@@ -1005,7 +1006,7 @@ bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
         winSDK_7_1)) {
     std::ostringstream m;
     m << "Found Windows SDK v7.1: " << winSDK_7_1;
-    mf->DisplayStatus(m.str().c_str(), -1);
+    mf->DisplayStatus(m.str(), -1);
     this->DefaultPlatformToolset = "Windows7.1SDK";
     return true;
   } else {

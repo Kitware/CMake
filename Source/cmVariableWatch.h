@@ -72,6 +72,9 @@ protected:
         this->DeleteDataCall(this->ClientData);
       }
     }
+    Pair() = default;
+    Pair(const Pair&) = delete;
+    Pair& operator=(const Pair&) = delete;
   };
 
   typedef std::vector<std::shared_ptr<Pair>> VectorOfPairs;

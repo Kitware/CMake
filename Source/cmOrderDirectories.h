@@ -25,6 +25,8 @@ public:
   cmOrderDirectories(cmGlobalGenerator* gg, cmGeneratorTarget const* target,
                      const char* purpose);
   ~cmOrderDirectories();
+  cmOrderDirectories(const cmOrderDirectories&) = delete;
+  cmOrderDirectories& operator=(const cmOrderDirectories&) = delete;
   void AddRuntimeLibrary(std::string const& fullPath,
                          const char* soname = nullptr);
   void AddLinkLibrary(std::string const& fullPath);

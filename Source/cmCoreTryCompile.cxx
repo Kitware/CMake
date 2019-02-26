@@ -950,8 +950,8 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
   if (binDir.find("CMakeTmp") == std::string::npos) {
     cmSystemTools::Error(
       "TRY_COMPILE attempt to remove -rf directory that does not contain "
-      "CMakeTmp:",
-      binDir.c_str());
+      "CMakeTmp:" +
+      binDir);
     return;
   }
 

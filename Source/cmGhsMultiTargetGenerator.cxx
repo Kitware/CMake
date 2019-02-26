@@ -40,12 +40,8 @@ void cmGhsMultiTargetGenerator::Generate()
   switch (this->GeneratorTarget->GetType()) {
     case cmStateEnums::EXECUTABLE: {
       // Get the name of the executable to generate.
-      std::string targetName;
-      std::string targetNameImport;
-      std::string targetNamePDB;
-      this->GeneratorTarget->GetExecutableNames(
-        targetName, this->TargetNameReal, targetNameImport, targetNamePDB,
-        this->ConfigName);
+      this->TargetNameReal =
+        this->GeneratorTarget->GetExecutableNames(this->ConfigName).Real;
       if (cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()) {
         this->TagType = GhsMultiGpj::INTERGRITY_APPLICATION;
       } else {
@@ -54,13 +50,8 @@ void cmGhsMultiTargetGenerator::Generate()
       break;
     }
     case cmStateEnums::STATIC_LIBRARY: {
-      std::string targetName;
-      std::string targetNameSO;
-      std::string targetNameImport;
-      std::string targetNamePDB;
-      this->GeneratorTarget->GetLibraryNames(
-        targetName, targetNameSO, this->TargetNameReal, targetNameImport,
-        targetNamePDB, this->ConfigName);
+      this->TargetNameReal =
+        this->GeneratorTarget->GetLibraryNames(this->ConfigName).Real;
       this->TagType = GhsMultiGpj::LIBRARY;
       break;
     }
@@ -71,13 +62,8 @@ void cmGhsMultiTargetGenerator::Generate()
       return;
     }
     case cmStateEnums::OBJECT_LIBRARY: {
-      std::string targetName;
-      std::string targetNameSO;
-      std::string targetNameImport;
-      std::string targetNamePDB;
-      this->GeneratorTarget->GetLibraryNames(
-        targetName, targetNameSO, this->TargetNameReal, targetNameImport,
-        targetNamePDB, this->ConfigName);
+      this->TargetNameReal =
+        this->GeneratorTarget->GetLibraryNames(this->ConfigName).Real;
       this->TagType = GhsMultiGpj::SUBPROJECT;
       break;
     }
@@ -224,7 +210,7 @@ void cmGhsMultiTargetGenerator::WriteCompilerFlags(std::ostream& fout,
   if (flagsByLangI != this->FlagsByLanguage.end()) {
     if (!flagsByLangI->second.empty()) {
       std::vector<std::string> ghsCompFlags =
-        cmSystemTools::ParseArguments(flagsByLangI->second.c_str());
+        cmSystemTools::ParseArguments(flagsByLangI->second);
       for (auto& f : ghsCompFlags) {
         fout << "    " << f << std::endl;
       }
@@ -238,10 +224,8 @@ void cmGhsMultiTargetGenerator::WriteCompilerDefinitions(
   std::vector<std::string> compileDefinitions;
   this->GeneratorTarget->GetCompileDefinitions(compileDefinitions, config,
                                                language);
-  for (std::vector<std::string>::const_iterator cdI =
-         compileDefinitions.begin();
-       cdI != compileDefinitions.end(); ++cdI) {
-    fout << "    -D" << (*cdI) << std::endl;
+  for (std::string const& compileDefinition : compileDefinitions) {
+    fout << "    -D" << compileDefinition << std::endl;
   }
 }
 
@@ -253,9 +237,8 @@ void cmGhsMultiTargetGenerator::WriteIncludes(std::ostream& fout,
   this->LocalGenerator->GetIncludeDirectories(includes, this->GeneratorTarget,
                                               language, config);
 
-  for (std::vector<std::string>::const_iterator includes_i = includes.begin();
-       includes_i != includes.end(); ++includes_i) {
-    fout << "    -I\"" << *includes_i << "\"" << std::endl;
+  for (std::string const& include : includes) {
+    fout << "    -I\"" << include << "\"" << std::endl;
   }
 }
 
@@ -282,16 +265,14 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
     frameworkPath, linkPath, this->GeneratorTarget);
 
   // write out link options
-  std::vector<std::string> lopts =
-    cmSystemTools::ParseArguments(linkFlags.c_str());
+  std::vector<std::string> lopts = cmSystemTools::ParseArguments(linkFlags);
   for (auto& l : lopts) {
     fout << "    " << l << std::endl;
   }
 
   // write out link search paths
   // must be quoted for paths that contain spaces
-  std::vector<std::string> lpath =
-    cmSystemTools::ParseArguments(linkPath.c_str());
+  std::vector<std::string> lpath = cmSystemTools::ParseArguments(linkPath);
   for (auto& l : lpath) {
     fout << "    -L\"" << l << "\"" << std::endl;
   }
@@ -301,7 +282,7 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
   std::string cbd = this->LocalGenerator->GetCurrentBinaryDirectory();
 
   std::vector<std::string> llibs =
-    cmSystemTools::ParseArguments(linkLibraries.c_str());
+    cmSystemTools::ParseArguments(linkLibraries);
   for (auto& l : llibs) {
     if (l.compare(0, 2, "-l") == 0) {
       fout << "    \"" << l << "\"" << std::endl;
@@ -324,12 +305,9 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
   std::ostream& fout, std::vector<cmCustomCommand> const& commandsSet,
   cmTarget::CustomCommandType const commandType)
 {
-  for (std::vector<cmCustomCommand>::const_iterator commandsSetI =
-         commandsSet.begin();
-       commandsSetI != commandsSet.end(); ++commandsSetI) {
-    cmCustomCommandLines const& commands = commandsSetI->GetCommandLines();
-    for (cmCustomCommandLines::const_iterator commandI = commands.begin();
-         commandI != commands.end(); ++commandI) {
+  for (cmCustomCommand const& customCommand : commandsSet) {
+    cmCustomCommandLines const& commandLines = customCommand.GetCommandLines();
+    for (cmCustomCommandLine const& command : commandLines) {
       switch (commandType) {
         case cmTarget::PRE_BUILD:
           fout << "    :preexecShellSafe=";
@@ -340,17 +318,16 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
         default:
           assert("Only pre and post are supported");
       }
-      cmCustomCommandLine const& command = *commandI;
-      for (cmCustomCommandLine::const_iterator commandLineI = command.begin();
-           commandLineI != command.end(); ++commandLineI) {
+
+      bool firstIteration = true;
+      for (std::string const& commandLine : command) {
         std::string subCommandE =
-          this->LocalGenerator->EscapeForShell(*commandLineI, true);
-        if (!command.empty()) {
-          fout << (command.begin() == commandLineI ? "'" : " ");
-          // Need to double escape backslashes
-          cmSystemTools::ReplaceString(subCommandE, "\\", "\\\\");
-        }
+          this->LocalGenerator->EscapeForShell(commandLine, true);
+        fout << (firstIteration ? "'" : " ");
+        // Need to double escape backslashes
+        cmSystemTools::ReplaceString(subCommandE, "\\", "\\\\");
         fout << subCommandE;
+        firstIteration = false;
       }
       if (!command.empty()) {
         fout << "'" << std::endl;

@@ -6,6 +6,7 @@
 
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmRange.h"
 #include "cmTarget.h"
 
 class cmExecutionStatus;
@@ -27,10 +28,10 @@ bool cmAddDependenciesCommand::InitialPass(
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
   if (cmTarget* target = this->Makefile->FindTargetToUse(target_name)) {
-    std::vector<std::string>::const_iterator s = args.begin();
-    ++s; // skip over target_name
-    for (; s != args.end(); ++s) {
-      target->AddUtility(*s, this->Makefile);
+
+    // skip over target_name
+    for (std::string const& arg : cmMakeRange(args).advance(1)) {
+      target->AddUtility(arg, this->Makefile);
     }
   } else {
     std::ostringstream e;

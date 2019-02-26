@@ -13,6 +13,7 @@
 #include "cmCryptoHash.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
@@ -771,7 +772,7 @@ bool cmStringCommand::HandleRandomCommand(std::vector<std::string> const& args)
   }
   result.push_back(0);
 
-  this->Makefile->AddDefinition(variableName, &*result.begin());
+  this->Makefile->AddDefinition(variableName, result.data());
   return true;
 }
 

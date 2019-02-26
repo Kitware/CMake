@@ -23,6 +23,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -466,7 +467,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
     // Allocate a PACKAGE_ROOT_PATH for the current find_package call.
     this->Makefile->FindPackageRootPathStack.emplace_back();
     std::vector<std::string>& rootPaths =
-      *this->Makefile->FindPackageRootPathStack.rbegin();
+      this->Makefile->FindPackageRootPathStack.back();
 
     // Add root paths from <PackageName>_ROOT CMake and environment variables,
     // subject to CMP0074.
@@ -827,10 +828,10 @@ bool cmFindPackageCommand::HandlePackageMode()
           << " requested version \"" << this->Version << "\".\n"
           << "The following configuration files were considered but not "
              "accepted:\n";
-        for (std::vector<ConfigFileInfo>::const_iterator i =
-               this->ConsideredConfigs.begin();
-             i != duplicate_end; ++i) {
-          e << "  " << i->filename << ", version: " << i->version << "\n";
+
+        for (ConfigFileInfo const& info :
+             cmMakeRange(this->ConsideredConfigs.cbegin(), duplicate_end)) {
+          e << "  " << info.filename << ", version: " << info.version << "\n";
         }
       } else {
         std::string requestedVersionString;
@@ -911,7 +912,7 @@ bool cmFindPackageCommand::HandlePackageMode()
       std::ostringstream aw;
       aw << "Could NOT find " << this->Name << " (missing: " << this->Name
          << "_DIR)";
-      this->Makefile->DisplayStatus(aw.str().c_str(), -1);
+      this->Makefile->DisplayStatus(aw.str(), -1);
     }
   }
 
@@ -1372,6 +1373,9 @@ public:
       cmSystemTools::RemoveFile(this->File);
     }
   }
+  cmFindPackageCommandHoldFile(const cmFindPackageCommandHoldFile&) = delete;
+  cmFindPackageCommandHoldFile& operator=(
+    const cmFindPackageCommandHoldFile&) = delete;
   void Release() { this->File = nullptr; }
 };
 

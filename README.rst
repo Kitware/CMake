@@ -57,21 +57,39 @@ You need to have a C++ compiler (supporting C++11) and a ``make`` installed.
 Run the ``bootstrap`` script you find in the source directory of CMake.
 You can use the ``--help`` option to see the supported options.
 You may use the ``--prefix=<install_prefix>`` option to specify a custom
-installation directory for CMake. You can run the ``bootstrap`` script from
-within the CMake source directory or any other build directory of your
-choice. Once this has finished successfully, run ``make`` and
-``make install``.  In summary::
+installation directory for CMake.  Once this has finished successfully,
+run ``make`` and ``make install``.
 
- $ ./bootstrap && make && sudo make install
+For example, if you simply want to build and install CMake from source,
+you can build directly in the source tree::
+
+  $ ./bootstrap && make && sudo make install
+
+Or, if you plan to develop CMake or otherwise run the test suite, create
+a separate build tree::
+
+  $ mkdir cmake-build && cd cmake-build
+  $ ../cmake-source/bootstrap && make
 
 Windows
 ^^^^^^^
 
-You need to download and install a binary release of CMake in order to build
-CMake.  You can get these releases from the `CMake Download Page`_.  Then
-proceed with the instructions below.
+There are two ways for building CMake under Windows:
+
+1. Compile with MSVC from VS 2015 or later.
+   You need to download and install a binary release of CMake.  You can get
+   these releases from the `CMake Download Page`_.  Then proceed with the
+   instructions below for `Building CMake with CMake`_.
+
+2. Bootstrap with MinGW under MSYS2.
+   Download and install `MSYS2`_.  Then install the required build tools::
+
+     $ pacman -S --needed git base-devel mingw-w64-x86_64-gcc
+
+   and bootstrap as above.
 
 .. _`CMake Download Page`: https://cmake.org/cmake/resources/software.html
+.. _`MSYS2`: https://www.msys2.org/
 
 Building CMake with CMake
 -------------------------

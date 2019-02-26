@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
   args.push_back(nullptr);
 
   cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, &*args.begin());
+  cmsysProcess_SetCommand(cp, args.data());
   cmsysProcess_SetWorkingDirectory(cp, scriptDirectory.c_str());
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   cmsysProcess_SetTimeout(cp, 0);

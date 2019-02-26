@@ -34,6 +34,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cm_sys_stat.h"
@@ -223,7 +224,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   bool writable = false;
 
   // Set permissions to writable
-  if (cmSystemTools::GetPermissions(fileName.c_str(), mode)) {
+  if (cmSystemTools::GetPermissions(fileName, mode)) {
 #if defined(_MSC_VER) || defined(__MINGW32__)
     writable = (mode & S_IWRITE) != 0;
     mode_t newMode = mode | S_IWRITE;
@@ -232,7 +233,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
     mode_t newMode = mode | S_IWUSR | S_IWGRP;
 #endif
     if (!writable) {
-      cmSystemTools::SetPermissions(fileName.c_str(), newMode);
+      cmSystemTools::SetPermissions(fileName, newMode);
     }
   }
   // If GetPermissions fails, pretend like it is ok. File open will fail if
@@ -259,7 +260,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   }
   file.close();
   if (mode && !writable) {
-    cmSystemTools::SetPermissions(fileName.c_str(), mode);
+    cmSystemTools::SetPermissions(fileName, mode);
   }
   return true;
 }
@@ -393,7 +394,7 @@ bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args)
 #else
   std::ostringstream e;
   e << args[0] << " not available during bootstrap";
-  this->SetError(e.str().c_str());
+  this->SetError(e.str());
   return false;
 #endif
 }
@@ -523,7 +524,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       maxlen = len;
       arg_mode = arg_none;
     } else if (arg_mode == arg_regex) {
-      if (!regex.compile(args[i].c_str())) {
+      if (!regex.compile(args[i])) {
         std::ostringstream e;
         e << "STRINGS option REGEX value \"" << args[i]
           << "\" could not be compiled.";
@@ -947,16 +948,14 @@ bool cmFileCommand::HandleMakeDirectoryCommand(
   // File command has at least one argument
   assert(args.size() > 1);
 
-  std::vector<std::string>::const_iterator i = args.begin();
-
-  i++; // Get rid of subcommand
-
   std::string expr;
-  for (; i != args.end(); ++i) {
-    const std::string* cdir = &(*i);
-    if (!cmsys::SystemTools::FileIsFullPath(*i)) {
+  for (std::string const& arg :
+       cmMakeRange(args).advance(1)) // Get rid of subcommand
+  {
+    const std::string* cdir = &arg;
+    if (!cmsys::SystemTools::FileIsFullPath(arg)) {
       expr = this->Makefile->GetCurrentSourceDirectory();
-      expr += "/" + *i;
+      expr += "/" + arg;
       cdir = &expr;
     }
     if (!this->Makefile->CanIWriteThisFile(*cdir)) {
@@ -981,15 +980,13 @@ bool cmFileCommand::HandleTouchCommand(std::vector<std::string> const& args,
   // File command has at least one argument
   assert(args.size() > 1);
 
-  std::vector<std::string>::const_iterator i = args.begin();
-
-  i++; // Get rid of subcommand
-
-  for (; i != args.end(); ++i) {
-    std::string tfile = *i;
+  for (std::string const& arg :
+       cmMakeRange(args).advance(1)) // Get rid of subcommand
+  {
+    std::string tfile = arg;
     if (!cmsys::SystemTools::FileIsFullPath(tfile)) {
       tfile = this->Makefile->GetCurrentSourceDirectory();
-      tfile += "/" + *i;
+      tfile += "/" + arg;
     }
     if (!this->Makefile->CanIWriteThisFile(tfile)) {
       std::string e =
@@ -1109,7 +1106,7 @@ protected:
     MatchProperties Properties;
     std::string RegexString;
     MatchRule(std::string const& regex)
-      : Regex(regex.c_str())
+      : Regex(regex)
       , RegexString(regex)
     {
     }
@@ -1117,14 +1114,13 @@ protected:
   std::vector<MatchRule> MatchRules;
 
   // Get the properties from rules matching this input file.
-  MatchProperties CollectMatchProperties(const char* file)
+  MatchProperties CollectMatchProperties(const std::string& file)
   {
 // Match rules are case-insensitive on some platforms.
 #if defined(_WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
-    std::string lower = cmSystemTools::LowerCase(file);
-    const char* file_to_match = lower.c_str();
+    const std::string file_to_match = cmSystemTools::LowerCase(file);
 #else
-    const char* file_to_match = file;
+    const std::string& file_to_match = file;
 #endif
 
     // Collect properties from all matching rules.
@@ -1143,14 +1139,13 @@ protected:
     return result;
   }
 
-  bool SetPermissions(const char* toFile, mode_t permissions)
+  bool SetPermissions(const std::string& toFile, mode_t permissions)
   {
     if (permissions) {
 #ifdef WIN32
       if (Makefile->IsOn("CMAKE_CROSSCOMPILING")) {
         // Store the mode in an NTFS alternate stream.
-        std::string mode_t_adt_filename =
-          std::string(toFile) + ":cmake_mode_t";
+        std::string mode_t_adt_filename = toFile + ":cmake_mode_t";
 
         // Writing to an NTFS alternate stream changes the modification
         // time, so we need to save and restore its original value.
@@ -1193,12 +1188,13 @@ protected:
     return true;
   }
 
-  bool InstallSymlink(const char* fromFile, const char* toFile);
-  bool InstallFile(const char* fromFile, const char* toFile,
+  bool InstallSymlink(const std::string& fromFile, const std::string& toFile);
+  bool InstallFile(const std::string& fromFile, const std::string& toFile,
                    MatchProperties match_properties);
-  bool InstallDirectory(const char* source, const char* destination,
+  bool InstallDirectory(const std::string& source,
+                        const std::string& destination,
                         MatchProperties match_properties);
-  virtual bool Install(const char* fromFile, const char* toFile);
+  virtual bool Install(const std::string& fromFile, const std::string& toFile);
   virtual std::string const& ToName(std::string const& fromName)
   {
     return fromName;
@@ -1210,8 +1206,8 @@ protected:
     TypeDir,
     TypeLink
   };
-  virtual void ReportCopy(const char*, Type, bool) {}
-  virtual bool ReportMissing(const char* fromFile)
+  virtual void ReportCopy(const std::string&, Type, bool) {}
+  virtual bool ReportMissing(const std::string& fromFile)
   {
     // The input file does not exist and installation is not optional.
     std::ostringstream e;
@@ -1555,16 +1551,17 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
       fromFile += fromName;
     }
 
-    if (!this->Install(fromFile.c_str(), toFile.c_str())) {
+    if (!this->Install(fromFile, toFile)) {
       return false;
     }
   }
   return true;
 }
 
-bool cmFileCopier::Install(const char* fromFile, const char* toFile)
+bool cmFileCopier::Install(const std::string& fromFile,
+                           const std::string& toFile)
 {
-  if (!*fromFile) {
+  if (fromFile.empty()) {
     std::ostringstream e;
     e << "INSTALL encountered an empty string input file name.";
     this->FileCommand->SetError(e.str());
@@ -1594,7 +1591,8 @@ bool cmFileCopier::Install(const char* fromFile, const char* toFile)
   return this->ReportMissing(fromFile);
 }
 
-bool cmFileCopier::InstallSymlink(const char* fromFile, const char* toFile)
+bool cmFileCopier::InstallSymlink(const std::string& fromFile,
+                                  const std::string& toFile)
 {
   // Read the original symlink.
   std::string symlinkTarget;
@@ -1641,7 +1639,8 @@ bool cmFileCopier::InstallSymlink(const char* fromFile, const char* toFile)
   return true;
 }
 
-bool cmFileCopier::InstallFile(const char* fromFile, const char* toFile,
+bool cmFileCopier::InstallFile(const std::string& fromFile,
+                               const std::string& toFile,
                                MatchProperties match_properties)
 {
   // Determine whether we will copy the file.
@@ -1694,8 +1693,8 @@ bool cmFileCopier::InstallFile(const char* fromFile, const char* toFile,
   return this->SetPermissions(toFile, permissions);
 }
 
-bool cmFileCopier::InstallDirectory(const char* source,
-                                    const char* destination,
+bool cmFileCopier::InstallDirectory(const std::string& source,
+                                    const std::string& destination,
                                     MatchProperties match_properties)
 {
   // Inform the user about this directory installation.
@@ -1752,7 +1751,7 @@ bool cmFileCopier::InstallDirectory(const char* source,
 
   // Load the directory contents to traverse it recursively.
   cmsys::Directory dir;
-  if (source && *source) {
+  if (!source.empty()) {
     dir.Load(source);
   }
   unsigned long numFiles = static_cast<unsigned long>(dir.GetNumberOfFiles());
@@ -1765,7 +1764,7 @@ bool cmFileCopier::InstallDirectory(const char* source,
       std::string toPath = destination;
       toPath += "/";
       toPath += dir.GetFile(fileNum);
-      if (!this->Install(fromPath.c_str(), toPath.c_str())) {
+      if (!this->Install(fromPath, toPath)) {
         return false;
       }
     }
@@ -1833,26 +1832,26 @@ protected:
     return this->Rename.empty() ? fromName : this->Rename;
   }
 
-  void ReportCopy(const char* toFile, Type type, bool copy) override
+  void ReportCopy(const std::string& toFile, Type type, bool copy) override
   {
     if (!this->MessageNever && (copy || !this->MessageLazy)) {
       std::string message = (copy ? "Installing: " : "Up-to-date: ");
       message += toFile;
-      this->Makefile->DisplayStatus(message.c_str(), -1);
+      this->Makefile->DisplayStatus(message, -1);
     }
     if (type != TypeDir) {
       // Add the file to the manifest.
       this->ManifestAppend(toFile);
     }
   }
-  bool ReportMissing(const char* fromFile) override
+  bool ReportMissing(const std::string& fromFile) override
   {
     return (this->Optional || this->cmFileCopier::ReportMissing(fromFile));
   }
-  bool Install(const char* fromFile, const char* toFile) override
+  bool Install(const std::string& fromFile, const std::string& toFile) override
   {
     // Support installing from empty source to make a directory.
-    if (this->InstallType == cmInstallType_DIRECTORY && !*fromFile) {
+    if (this->InstallType == cmInstallType_DIRECTORY && fromFile.empty()) {
       return this->InstallDirectory(fromFile, toFile, MatchProperties());
     }
     return this->cmFileCopier::Install(fromFile, toFile);
@@ -2142,7 +2141,7 @@ bool cmFileCommand::HandleRPathChangeCommand(
   std::vector<std::string> const& args)
 {
   // Evaluate arguments.
-  const char* file = nullptr;
+  std::string file;
   const char* oldRPath = nullptr;
   const char* newRPath = nullptr;
   enum Doing
@@ -2161,7 +2160,7 @@ bool cmFileCommand::HandleRPathChangeCommand(
     } else if (args[i] == "FILE") {
       doing = DoingFile;
     } else if (doing == DoingFile) {
-      file = args[i].c_str();
+      file = args[i];
       doing = DoingNone;
     } else if (doing == DoingOld) {
       oldRPath = args[i].c_str();
@@ -2176,7 +2175,7 @@ bool cmFileCommand::HandleRPathChangeCommand(
       return false;
     }
   }
-  if (!file) {
+  if (file.empty()) {
     this->SetError("RPATH_CHANGE not given FILE option.");
     return false;
   }
@@ -2218,7 +2217,7 @@ bool cmFileCommand::HandleRPathChangeCommand(
       message += "\" to \"";
       message += newRPath;
       message += "\"";
-      this->Makefile->DisplayStatus(message.c_str(), -1);
+      this->Makefile->DisplayStatus(message, -1);
     }
     if (have_ft) {
       cmSystemTools::FileTimeSet(file, ft);
@@ -2232,7 +2231,7 @@ bool cmFileCommand::HandleRPathRemoveCommand(
   std::vector<std::string> const& args)
 {
   // Evaluate arguments.
-  const char* file = nullptr;
+  std::string file;
   enum Doing
   {
     DoingNone,
@@ -2243,7 +2242,7 @@ bool cmFileCommand::HandleRPathRemoveCommand(
     if (args[i] == "FILE") {
       doing = DoingFile;
     } else if (doing == DoingFile) {
-      file = args[i].c_str();
+      file = args[i];
       doing = DoingNone;
     } else {
       std::ostringstream e;
@@ -2252,7 +2251,7 @@ bool cmFileCommand::HandleRPathRemoveCommand(
       return false;
     }
   }
-  if (!file) {
+  if (file.empty()) {
     this->SetError("RPATH_REMOVE not given FILE option.");
     return false;
   }
@@ -2282,7 +2281,7 @@ bool cmFileCommand::HandleRPathRemoveCommand(
       std::string message = "Removed runtime path from \"";
       message += file;
       message += "\"";
-      this->Makefile->DisplayStatus(message.c_str(), -1);
+      this->Makefile->DisplayStatus(message, -1);
     }
     if (have_ft) {
       cmSystemTools::FileTimeSet(file, ft);
@@ -2296,7 +2295,7 @@ bool cmFileCommand::HandleRPathCheckCommand(
   std::vector<std::string> const& args)
 {
   // Evaluate arguments.
-  const char* file = nullptr;
+  std::string file;
   const char* rpath = nullptr;
   enum Doing
   {
@@ -2311,7 +2310,7 @@ bool cmFileCommand::HandleRPathCheckCommand(
     } else if (args[i] == "FILE") {
       doing = DoingFile;
     } else if (doing == DoingFile) {
-      file = args[i].c_str();
+      file = args[i];
       doing = DoingNone;
     } else if (doing == DoingRPath) {
       rpath = args[i].c_str();
@@ -2323,7 +2322,7 @@ bool cmFileCommand::HandleRPathCheckCommand(
       return false;
     }
   }
-  if (!file) {
+  if (file.empty()) {
     this->SetError("RPATH_CHECK not given FILE option.");
     return false;
   }
@@ -2481,14 +2480,14 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
 {
 
   std::string message;
-  std::vector<std::string>::const_iterator i = args.begin();
 
-  i++; // Get rid of subcommand
-  for (; i != args.end(); ++i) {
-    std::string fileName = *i;
+  for (std::string const& arg :
+       cmMakeRange(args).advance(1)) // Get rid of subcommand
+  {
+    std::string fileName = arg;
     if (!cmsys::SystemTools::FileIsFullPath(fileName)) {
       fileName = this->Makefile->GetCurrentSourceDirectory();
-      fileName += "/" + *i;
+      fileName += "/" + arg;
     }
 
     if (cmSystemTools::FileIsDirectory(fileName) &&
@@ -2651,7 +2650,7 @@ int cmFileDownloadProgressCallback(void* clientp, double dltotal, double dlnow,
   if (helper->UpdatePercentage(dlnow, dltotal, status)) {
     cmFileCommand* fc = helper->GetFileCommand();
     cmMakefile* mf = fc->GetMakefile();
-    mf->DisplayStatus(status.c_str(), -1);
+    mf->DisplayStatus(status, -1);
   }
 
   return 0;
@@ -2669,7 +2668,7 @@ int cmFileUploadProgressCallback(void* clientp, double dltotal, double dlnow,
   if (helper->UpdatePercentage(ulnow, ultotal, status)) {
     cmFileCommand* fc = helper->GetFileCommand();
     cmMakefile* mf = fc->GetMakefile();
-    mf->DisplayStatus(status.c_str(), -1);
+    mf->DisplayStatus(status, -1);
   }
 
   return 0;
@@ -2692,6 +2691,9 @@ public:
       ::curl_easy_cleanup(this->Easy);
     }
   }
+
+  cURLEasyGuard(const cURLEasyGuard&) = delete;
+  cURLEasyGuard& operator=(const cURLEasyGuard&) = delete;
 
   void release() { this->Easy = nullptr; }
 
@@ -3067,7 +3069,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 
   if (!logVar.empty()) {
     chunkDebug.push_back(0);
-    this->Makefile->AddDefinition(logVar, &*chunkDebug.begin());
+    this->Makefile->AddDefinition(logVar, chunkDebug.data());
   }
 
   return true;
@@ -3326,14 +3328,14 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
     if (!chunkResponse.empty()) {
       chunkResponse.push_back(0);
       log += "Response:\n";
-      log += &*chunkResponse.begin();
+      log += chunkResponse.data();
       log += "\n";
     }
 
     if (!chunkDebug.empty()) {
       chunkDebug.push_back(0);
       log += "Debug:\n";
-      log += &*chunkDebug.begin();
+      log += chunkDebug.data();
       log += "\n";
     }
 
@@ -3758,7 +3760,7 @@ bool cmFileCommand::HandleCreateLinkCommand(
 
   // Check if copy-on-error is enabled in the arguments.
   if (!completed && copyOnErrorArg.IsEnabled()) {
-    completed = cmSystemTools::cmCopyFile(fileName, newFileName);
+    completed = cmsys::SystemTools::CopyFileAlways(fileName, newFileName);
     if (!completed) {
       result = "Copy failed: " + cmSystemTools::GetLastSystemError();
     }

@@ -11,6 +11,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 
 cmForEachFunctionBlocker::cmForEachFunctionBlocker(cmMakefile* mf)
@@ -48,12 +49,10 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       if (mf.GetDefinition(this->Args[0])) {
         oldDef = mf.GetDefinition(this->Args[0]);
       }
-      std::vector<std::string>::const_iterator j = this->Args.begin();
-      ++j;
 
-      for (; j != this->Args.end(); ++j) {
+      for (std::string const& arg : cmMakeRange(this->Args).advance(1)) {
         // set the variable to the loop value
-        mf.AddDefinition(this->Args[0], j->c_str());
+        mf.AddDefinition(this->Args[0], arg.c_str());
         // Invoke all the functions that were collected in the block.
         cmExecutionStatus status;
         for (cmListFileFunction const& func : this->Functions) {

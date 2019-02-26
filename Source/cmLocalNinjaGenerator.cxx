@@ -232,8 +232,8 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
         os << "  depth = " << jobs << std::endl;
         os << std::endl;
       } else {
-        cmSystemTools::Error("Invalid pool defined by property 'JOB_POOLS': ",
-                             pool.c_str());
+        cmSystemTools::Error("Invalid pool defined by property 'JOB_POOLS': " +
+                             pool);
       }
     }
   }
@@ -466,10 +466,12 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   cmNinjaDeps ninjaOutputs(outputs.size() + byproducts.size()), ninjaDeps;
 
   bool symbolic = false;
-  for (std::vector<std::string>::const_iterator o = outputs.begin();
-       !symbolic && o != outputs.end(); ++o) {
-    if (cmSourceFile* sf = this->Makefile->GetSource(*o)) {
+  for (std::string const& output : outputs) {
+    if (cmSourceFile* sf = this->Makefile->GetSource(output)) {
       symbolic = sf->GetPropertyAsBool("SYMBOLIC");
+      if (symbolic) {
+        break;
+      }
     }
   }
 

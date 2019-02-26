@@ -13,6 +13,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
@@ -247,8 +248,8 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
 
   // figure out the compiler
   std::string compiler = this->GetCBCompilerId(mf);
-  std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-  const std::string makeArgs =
+  const std::string& make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& makeArgs =
     mf->GetSafeDefinition("CMAKE_CODEBLOCKS_MAKE_ARGUMENTS");
 
   cmXMLWriter xml(fout);
@@ -589,10 +590,9 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
     std::vector<std::string>::const_iterator end =
       cmRemoveDuplicates(allIncludeDirs);
 
-    for (std::vector<std::string>::const_iterator i = allIncludeDirs.begin();
-         i != end; ++i) {
+    for (std::string const& str : cmMakeRange(allIncludeDirs.cbegin(), end)) {
       xml.StartElement("Add");
-      xml.Attribute("directory", *i);
+      xml.Attribute("directory", str);
       xml.EndElement();
     }
 

@@ -205,7 +205,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
           "Checking Build System", no_working_directory, true, false)) {
       gt->AddSource(file->GetFullPath());
     } else {
-      cmSystemTools::Error("Error adding rule for ", stamps[0].c_str());
+      cmSystemTools::Error("Error adding rule for " + stamps[0]);
     }
   }
 
@@ -273,7 +273,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
                                         : this->GetPlatformName())
            << "\n";
     }
-    if (this->NeedsDeploy(target.GetType())) {
+    if (this->NeedsDeploy(target, dstConfig)) {
       fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
            << ".Deploy.0 = " << dstConfig << "|"
            << (!platformMapping.empty() ? platformMapping
@@ -284,11 +284,32 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
 }
 
 bool cmGlobalVisualStudio8Generator::NeedsDeploy(
-  cmStateEnums::TargetType type) const
+  cmGeneratorTarget const& target, const char* config) const
 {
-  bool needsDeploy =
-    (type == cmStateEnums::EXECUTABLE || type == cmStateEnums::SHARED_LIBRARY);
-  return this->TargetsWindowsCE() && needsDeploy;
+  cmStateEnums::TargetType type = target.GetType();
+  bool noDeploy = DeployInhibited(target, config);
+  return !noDeploy &&
+    (type == cmStateEnums::EXECUTABLE ||
+     type == cmStateEnums::SHARED_LIBRARY) &&
+    this->TargetSystemSupportsDeployment();
+}
+
+bool cmGlobalVisualStudio8Generator::DeployInhibited(
+  cmGeneratorTarget const& target, const char* config) const
+{
+  bool rVal = false;
+  if (const char* propStr = target.GetProperty("VS_NO_SOLUTION_DEPLOY")) {
+    cmGeneratorExpression ge;
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(propStr);
+    std::string prop = cge->Evaluate(target.LocalGenerator, config);
+    rVal = cmSystemTools::IsOn(prop);
+  }
+  return rVal;
+}
+
+bool cmGlobalVisualStudio8Generator::TargetSystemSupportsDeployment() const
+{
+  return this->TargetsWindowsCE();
 }
 
 bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()

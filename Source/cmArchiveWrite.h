@@ -58,6 +58,9 @@ public:
 
   ~cmArchiveWrite();
 
+  cmArchiveWrite(const cmArchiveWrite&) = delete;
+  cmArchiveWrite& operator=(const cmArchiveWrite&) = delete;
+
   /**
    * Add a path (file or directory) to the archive.  Directories are
    * added recursively.  The "path" must be readable on disk, either

@@ -67,7 +67,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
 
   std::string command;
   if (!arguments.empty()) {
-    command = cmSystemTools::ConvertToRunCommandPath(args[0].c_str());
+    command = cmSystemTools::ConvertToRunCommandPath(args[0]);
     command += " ";
     command += arguments;
   } else {
@@ -152,7 +152,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
         if (!cmSystemTools::FileExists(cmd)) {
           shortCmd = cmd;
         } else if (!cmSystemTools::GetShortPath(cmd.c_str(), shortCmd)) {
-          cmSystemTools::Error("GetShortPath failed for ", cmd.c_str());
+          cmSystemTools::Error("GetShortPath failed for " + cmd);
           return false;
         }
         shortCmd += " ";

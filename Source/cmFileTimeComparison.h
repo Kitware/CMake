@@ -20,6 +20,9 @@ public:
   cmFileTimeComparison();
   ~cmFileTimeComparison();
 
+  cmFileTimeComparison(const cmFileTimeComparison&) = delete;
+  cmFileTimeComparison& operator=(const cmFileTimeComparison&) = delete;
+
   /**
    *  Compare file modification times.
    *  Return true for successful comparison and false for error.

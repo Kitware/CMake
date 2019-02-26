@@ -29,8 +29,7 @@ cmGeneratedFileStream::cmGeneratedFileStream(std::string const& name,
 {
   // Check if the file opened.
   if (!*this && !quiet) {
-    cmSystemTools::Error("Cannot open file for write: ",
-                         this->TempName.c_str());
+    cmSystemTools::Error("Cannot open file for write: " + this->TempName);
     cmSystemTools::ReportLastSystemError("");
   }
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -68,8 +67,7 @@ cmGeneratedFileStream& cmGeneratedFileStream::Open(std::string const& name,
 
   // Check if the file opened.
   if (!*this && !quiet) {
-    cmSystemTools::Error("Cannot open file for write: ",
-                         this->TempName.c_str());
+    cmSystemTools::Error("Cannot open file for write: " + this->TempName);
     cmSystemTools::ReportLastSystemError("");
   }
   return *this;

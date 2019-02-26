@@ -25,6 +25,9 @@ public:
   /// Destructor
   ~cmExportSet();
 
+  cmExportSet(const cmExportSet&) = delete;
+  cmExportSet& operator=(const cmExportSet&) = delete;
+
   void Compute(cmLocalGenerator* lg);
 
   void AddTargetExport(cmTargetExport* tgt);

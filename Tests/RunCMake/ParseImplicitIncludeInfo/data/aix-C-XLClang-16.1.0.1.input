@@ -1,0 +1,40 @@
+CMAKE_LANG=C
+CMAKE_C_COMPILER_ABI=
+CMAKE_C_COMPILER_AR=
+CMAKE_C_COMPILER_ARCHITECTURE_ID=
+CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_C_COMPILER_ID=XLClang
+CMAKE_C_COMPILER_LAUNCHER=
+CMAKE_C_COMPILER_LOADED=1
+CMAKE_C_COMPILER_RANLIB=
+CMAKE_C_COMPILER_TARGET=
+CMAKE_C_COMPILER_VERSION=16.1.0.1
+CMAKE_C_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_fcf21/fast
+/usr/bin/gmake -f CMakeFiles/cmTC_fcf21.dir/build.make CMakeFiles/cmTC_fcf21.dir/build
+gmake[1]: Entering directory '/tmp/ii/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_fcf21.dir/CMakeCCompilerABI.c.o
+/opt/IBM/xlC/16.1.0/bin/xlclang   -V -o CMakeFiles/cmTC_fcf21.dir/CMakeCCompilerABI.c.o   -c /tmp/CMake/Modules/CMakeCCompilerABI.c
+export XL_CONFIG=/opt/IBM/xlc/16.1.0/etc/xlc.cfg.72:xlclang
+export XL_ASMOBJFILES=/tmp/xlcASuz87id
+export "XL_DIS=/opt/IBM/xlc/16.1.0/exe/dis -o "CMakeFiles/cmTC_fcf21.dir/CMakeCCompilerABI.c.o" "CMakeCCompilerABI.o""
+/opt/IBM/xlC/16.1.0/exe/xlC2entry -qosvar=aix.7.2 -qalias=ansi -qthreaded -D_THREAD_SAFE -Wno-parentheses -Wno-unused-value -D_AIX -D_AIX32 -D_AIX41 -D_AIX43 -D_AIX50 -D_AIX51 -D_AIX52 -D_AIX53 -D_AIX61 -D_AIX71 -D_AIX72 -D_IBMR2 -D_POWER -xc -qasm_as=/bin/as -qc_stdinc=/opt/IBM/xlC/16.1.0/include2:/opt/IBM/xlC/16.1.0/include2/aix:/opt/IBM/xlmass/9.1.0/include:/usr/include -qvac_include_path=/opt/IBM/xlc/16.1.0/include -oCMakeFiles/cmTC_fcf21.dir/CMakeCCompilerABI.c.o /tmp/CMake/Modules/CMakeCCompilerABI.c /tmp/xlcW0tZ87ia /tmp/xlcW1ub87ib /dev/null /tmp/xlcLu487ieF.lst /dev/null /tmp/xlcW2uj87ic
+export XL_BACKEND=/opt/IBM/xlc/16.1.0/exe/xlCcode
+export XL_LINKER=/bin/ld
+/opt/IBM/xlc/16.1.0/exe/xlCcode -qalias=ansi -qthreaded /tmp/xlcW0tZ87ia /tmp/xlcW1ub87ib CMakeFiles/cmTC_fcf21.dir/CMakeCCompilerABI.c.o /tmp/xlcLu487ieB.lst /tmp/xlcW2uj87ic
+rm /tmp/xlcASuz87id
+rm /tmp/xlcLu487ie
+rm /tmp/xlcW0tZ87ia
+rm /tmp/xlcW1ub87ib
+rm /tmp/xlcW2uj87ic
+Linking C executable cmTC_fcf21
+/tmp/CMake/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fcf21.dir/link.txt --verbose=1
+/opt/IBM/xlC/16.1.0/bin/xlclang   -Wl,-bnoipath -Wl,-brtl -V -Wl,-bexpall CMakeFiles/cmTC_fcf21.dir/CMakeCCompilerABI.c.o  -o cmTC_fcf21 -Wl,-blibpath:/usr/lib:/lib
+export XL_CONFIG=/opt/IBM/xlc/16.1.0/etc/xlc.cfg.72:xlclang
+/bin/ld -b32 /lib/crt0.o -bpT:0x10000000 -bpD:0x20000000 -bnoipath -brtl -bexpall CMakeFiles/cmTC_fcf21.dir/CMakeCCompilerABI.c.o -o cmTC_fcf21 -blibpath:/usr/lib:/lib -L/opt/IBM/xlmass/9.1.0/lib/aix61 -L/opt/IBM/xlc/16.1.0/lib -lxlopt -lxlipa -lxl -lc -lpthreads
+rm /tmp/xlcW0vJG7ia
+rm /tmp/xlcW1vNG7ib
+rm /tmp/xlcW2vRG7ic
+gmake[1]: Leaving directory '/tmp/ii/CMakeFiles/CMakeTmp'

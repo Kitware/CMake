@@ -4,16 +4,10 @@
 
 #include "cmCryptoHash.h"
 
+#include <array>
 #include <string.h>
 
-cmUuid::cmUuid()
-{
-  Groups.push_back(4);
-  Groups.push_back(2);
-  Groups.push_back(2);
-  Groups.push_back(2);
-  Groups.push_back(6);
-}
+static const std::array<int, 5> kUuidGroups = { { 4, 2, 2, 2, 6 } };
 
 std::string cmUuid::FromMd5(std::vector<unsigned char> const& uuidNamespace,
                             std::string const& name) const
@@ -83,11 +77,11 @@ bool cmUuid::StringToBinary(std::string const& input,
     return false;
   }
   size_t index = 0;
-  for (size_t i = 0; i < this->Groups.size(); ++i) {
+  for (size_t i = 0; i < kUuidGroups.size(); ++i) {
     if (i != 0 && input[index++] != '-') {
       return false;
     }
-    size_t digits = this->Groups[i] * 2;
+    size_t digits = kUuidGroups[i] * 2;
     if (!StringToBinaryImpl(input.substr(index, digits), output)) {
       return false;
     }
@@ -103,12 +97,12 @@ std::string cmUuid::BinaryToString(const unsigned char* input) const
   std::string output;
 
   size_t inputIndex = 0;
-  for (size_t i = 0; i < this->Groups.size(); ++i) {
+  for (size_t i = 0; i < kUuidGroups.size(); ++i) {
     if (i != 0) {
       output += '-';
     }
 
-    size_t bytes = this->Groups[i];
+    size_t bytes = kUuidGroups[i];
     for (size_t j = 0; j < bytes; ++j) {
       unsigned char byte = input[inputIndex++];
       output += this->ByteToHex(byte);

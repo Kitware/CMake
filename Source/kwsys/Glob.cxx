@@ -263,7 +263,7 @@ bool Glob::RecurseDirectory(std::string::size_type start,
       }
     } else {
       if (!this->Internals->Expressions.empty() &&
-          this->Internals->Expressions.rbegin()->find(fname)) {
+          this->Internals->Expressions.back().find(fname)) {
         this->AddFile(this->Internals->Files, realname);
       }
     }

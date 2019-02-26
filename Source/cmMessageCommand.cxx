@@ -6,6 +6,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -68,7 +69,7 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
     m->DisplayMessage(type, message, this->Makefile->GetBacktrace());
   } else {
     if (status) {
-      this->Makefile->DisplayStatus(message.c_str(), -1);
+      this->Makefile->DisplayStatus(message, -1);
     } else {
       cmSystemTools::Message(message);
     }

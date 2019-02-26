@@ -418,8 +418,8 @@ int cmCTestBuildHandler::ProcessHandler()
   int retVal = 0;
   int res = cmsysProcess_State_Exited;
   if (!this->CTest->GetShowOnly()) {
-    res = this->RunMakeCommand(makeCommand.c_str(), &retVal,
-                               buildDirectory.c_str(), 0, ofs);
+    res = this->RunMakeCommand(makeCommand, &retVal, buildDirectory.c_str(), 0,
+                               ofs);
   } else {
     cmCTestOptionalLog(this->CTest, DEBUG,
                        "Build with command: " << makeCommand << std::endl,
@@ -680,6 +680,8 @@ class cmCTestBuildHandler::LaunchHelper
 public:
   LaunchHelper(cmCTestBuildHandler* handler);
   ~LaunchHelper();
+  LaunchHelper(const LaunchHelper&) = delete;
+  LaunchHelper& operator=(const LaunchHelper&) = delete;
 
 private:
   cmCTestBuildHandler* Handler;
@@ -764,9 +766,10 @@ void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers(
   }
 }
 
-int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
-                                        const char* dir, int timeout,
-                                        std::ostream& ofs, Encoding encoding)
+int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
+                                        int* retVal, const char* dir,
+                                        int timeout, std::ostream& ofs,
+                                        Encoding encoding)
 {
   // First generate the command and arguments
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
@@ -800,7 +803,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 
   // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetCommand(cp, argv.data());
   cmsysProcess_SetWorkingDirectory(cp, dir);
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   cmsysProcess_SetTimeout(cp, timeout);
@@ -978,7 +981,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
       this->CurrentProcessingLine.insert(this->CurrentProcessingLine.end(),
                                          queue->begin(), it);
       this->CurrentProcessingLine.push_back(0);
-      const char* line = &*this->CurrentProcessingLine.begin();
+      const char* line = this->CurrentProcessingLine.data();
 
       // Process the line
       int lineType = this->ProcessSingleLine(line);

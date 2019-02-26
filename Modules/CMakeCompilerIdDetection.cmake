@@ -57,6 +57,7 @@ function(compiler_id_detection outvar lang)
       HP
       Compaq
       zOS
+      XLClang
       XL
       VisualAge
       PGI
@@ -86,8 +87,6 @@ function(compiler_id_detection outvar lang)
         SDCC
       )
     endif()
-    list(APPEND ordered_compilers
-      MIPSpro)
 
     #Currently the only CUDA compilers are NVIDIA
     if(lang STREQUAL CUDA)

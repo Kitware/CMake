@@ -26,6 +26,9 @@ public:
   cmCPackLog();
   ~cmCPackLog();
 
+  cmCPackLog(const cmCPackLog&) = delete;
+  cmCPackLog& operator=(const cmCPackLog&) = delete;
+
   enum __log_tags
   {
     NOTAG = 0,
