@@ -20,6 +20,7 @@
 #include <set>
 #include <string>
 #include <thread>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -133,7 +134,7 @@ public:
     std::string CompFileAbs;
     std::string PredefsFileRel;
     std::string PredefsFileAbs;
-    std::set<std::string> SkipList;
+    std::unordered_set<std::string> SkipList;
     std::vector<std::string> IncludePaths;
     std::vector<std::string> Includes;
     std::vector<std::string> Definitions;
@@ -164,7 +165,7 @@ public:
     bool Enabled = false;
     bool SettingsChanged = false;
     std::string Executable;
-    std::set<std::string> SkipList;
+    std::unordered_set<std::string> SkipList;
     std::vector<std::string> TargetOptions;
     std::map<std::string, std::vector<std::string>> Options;
     std::vector<std::string> SearchPaths;
@@ -186,15 +187,8 @@ public:
     virtual void Process(WorkerT& wrk) = 0;
   };
 
-  /// @brief Deleter for classes derived from Job
-  ///
-  struct JobDeleterT
-  {
-    void operator()(JobT* job);
-  };
-
   // Job management types
-  typedef std::unique_ptr<JobT, JobDeleterT> JobHandleT;
+  typedef std::unique_ptr<JobT> JobHandleT;
   typedef std::deque<JobHandleT> JobQueueT;
 
   /// @brief Parse source job
@@ -321,22 +315,22 @@ public:
     const UicSettingsT& Uic() const { return Gen_->Uic(); }
 
     // -- Log info
-    void LogInfo(GeneratorT genType, std::string const& message) const;
+    void LogInfo(GenT genType, std::string const& message) const;
     // -- Log warning
-    void LogWarning(GeneratorT genType, std::string const& message) const;
-    void LogFileWarning(GeneratorT genType, std::string const& filename,
+    void LogWarning(GenT genType, std::string const& message) const;
+    void LogFileWarning(GenT genType, std::string const& filename,
                         std::string const& message) const;
     // -- Log error
-    void LogError(GeneratorT genType, std::string const& message) const;
-    void LogFileError(GeneratorT genType, std::string const& filename,
+    void LogError(GenT genType, std::string const& message) const;
+    void LogFileError(GenT genType, std::string const& filename,
                       std::string const& message) const;
-    void LogCommandError(GeneratorT genType, std::string const& message,
+    void LogCommandError(GenT genType, std::string const& message,
                          std::vector<std::string> const& command,
                          std::string const& output) const;
 
     // -- External processes
     /// @brief Verbose logging version
-    bool RunProcess(GeneratorT genType, ProcessResultT& result,
+    bool RunProcess(GenT genType, ProcessResultT& result,
                     std::vector<std::string> const& command);
 
   private:
