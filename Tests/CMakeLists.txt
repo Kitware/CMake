@@ -1498,10 +1498,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindODBC)
   endif()
 
-  if(CMake_TEST_FindOctave)
-    add_subdirectory(FindOctave)
-  endif()
-
   if(CMake_TEST_FindOpenCL)
     add_subdirectory(FindOpenCL)
   endif()
