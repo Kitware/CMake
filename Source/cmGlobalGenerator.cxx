@@ -1766,17 +1766,6 @@ int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
   std::string newTarget;
   if (!target.empty()) {
     newTarget += target;
-#if 0
-#  if defined(_WIN32) || defined(__CYGWIN__)
-    std::string tmp = target;
-    // if the target does not already end in . something
-    // then assume .exe
-    if(tmp.size() < 4 || tmp[tmp.size()-4] != '.')
-      {
-      newTarget += ".exe";
-      }
-#  endif // WIN32
-#endif
   }
   std::string config =
     mf->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
