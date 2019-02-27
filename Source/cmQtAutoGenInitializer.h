@@ -212,8 +212,8 @@ private:
 
     /// @brief Constructor
     MocT()
-      : GenVarsT(cmQtAutoGen::GenT::MOC, cmQtAutoGen::GenNameMoc,
-                 cmQtAutoGen::GenNameMocUpper){};
+      : GenVarsT(cmQtAutoGen::GenT::MOC, cmQtAutoGen::GenAutoMoc,
+                 cmQtAutoGen::GenAUTOMOC){};
   } Moc;
 
   /// @brief Uic only variables
@@ -228,8 +228,8 @@ private:
 
     /// @brief Constructor
     UicT()
-      : GenVarsT(cmQtAutoGen::GenT::UIC, cmQtAutoGen::GenNameUic,
-                 cmQtAutoGen::GenNameUicUpper){};
+      : GenVarsT(cmQtAutoGen::GenT::UIC, cmQtAutoGen::GenAutoUic,
+                 cmQtAutoGen::GenAUTOUIC){};
   } Uic;
 
   /// @brief Rcc only variables
@@ -241,8 +241,8 @@ private:
 
     /// @brief Constructor
     RccT()
-      : GenVarsT(cmQtAutoGen::GenT::RCC, cmQtAutoGen::GenNameRcc,
-                 cmQtAutoGen::GenNameRccUpper){};
+      : GenVarsT(cmQtAutoGen::GenT::RCC, cmQtAutoGen::GenAutoRcc,
+                 cmQtAutoGen::GenAUTORCC){};
   } Rcc;
 };
 

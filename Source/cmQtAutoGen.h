@@ -52,14 +52,14 @@ public:
   /// @brief Nested lists separator
   static std::string const ListSep;
   // Generator names
-  static std::string const GenNameGen;
-  static std::string const GenNameMoc;
-  static std::string const GenNameUic;
-  static std::string const GenNameRcc;
-  static std::string const GenNameGenUpper;
-  static std::string const GenNameMocUpper;
-  static std::string const GenNameUicUpper;
-  static std::string const GenNameRccUpper;
+  static std::string const GenAutoGen;
+  static std::string const GenAutoMoc;
+  static std::string const GenAutoUic;
+  static std::string const GenAutoRcc;
+  static std::string const GenAUTOGEN;
+  static std::string const GenAUTOMOC;
+  static std::string const GenAUTOUIC;
+  static std::string const GenAUTORCC;
   /// @brief Maximum number of parallel threads/processes in a generator
   static unsigned int const ParallelMax;
 
