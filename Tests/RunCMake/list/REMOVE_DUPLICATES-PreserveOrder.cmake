@@ -1,0 +1,5 @@
+set(mylist "b;c;b;a;a;c;b;a;c;b")
+list(REMOVE_DUPLICATES mylist)
+if(NOT mylist STREQUAL "b;c;a")
+  message(SEND_ERROR "Expected b;c;a, got ${mylist}")
+endif()
