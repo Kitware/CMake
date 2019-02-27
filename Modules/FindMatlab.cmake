@@ -107,9 +107,9 @@ Result variables
   Matlab matrix library. Available only if the component ``MAT_LIBRARY``
   is requested.
 ``Matlab_ENGINE_LIBRARY``
-  Matlab C++ engine library, always available for R2018a and newer.
+  Matlab C++ engine library, always available for R2017b and newer.
 ``Matlab_DATAARRAY_LIBRARY``
-  Matlab C++ data array library, always available for R2018a and newer.
+  Matlab C++ data array library, always available for R2017b and newer.
 ``Matlab_LIBRARIES``
   the whole set of libraries of Matlab
 ``Matlab_MEX_COMPILER``
@@ -1725,7 +1725,7 @@ unset(_matlab_find_mcc_compiler)
 
 if(Matlab_HAS_CPP_API)
 
-  # The MatlabEngine library is required for R2018a+
+  # The MatlabEngine library is required for R2017b+
   _Matlab_find_library(
     ${_matlab_lib_prefix_for_search}
     Matlab_ENGINE_LIBRARY
@@ -1739,7 +1739,7 @@ if(Matlab_HAS_CPP_API)
     set(Matlab_ENGINE_LIBRARY_FOUND TRUE)
   endif()
 
-  # The MatlabDataArray library is required for R2018a+
+  # The MatlabDataArray library is required for R2017b+
   _Matlab_find_library(
     ${_matlab_lib_prefix_for_search}
     Matlab_DATAARRAY_LIBRARY
