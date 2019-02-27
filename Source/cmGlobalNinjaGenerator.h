@@ -365,7 +365,8 @@ public:
                        std::string const& arg_dd,
                        std::vector<std::string> const& arg_ddis,
                        std::string const& module_dir,
-                       std::vector<std::string> const& linked_target_dirs);
+                       std::vector<std::string> const& linked_target_dirs,
+                       std::string const& arg_lang);
 
 protected:
   void Generate() override;

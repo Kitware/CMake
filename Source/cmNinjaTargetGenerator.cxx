@@ -102,6 +102,12 @@ bool cmNinjaTargetGenerator::NeedExplicitPreprocessing(
   return lang == "Fortran";
 }
 
+bool cmNinjaTargetGenerator::UsePreprocessedSource(
+  std::string const& lang) const
+{
+  return lang == "Fortran";
+}
+
 std::string cmNinjaTargetGenerator::LanguageDyndepRule(
   const std::string& lang) const
 {
@@ -558,7 +564,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
       cmake +
       " -E cmake_ninja_depends"
       " --tdi=" +
-      tdi +
+      tdi + " --lang=" + lang +
       " --pp=$out"
       " --dep=$DEP_FILE" +
       (needDyndep ? " --obj=$OBJ_FILE --ddi=$DYNDEP_INTERMEDIATE_FILE" : ""));
@@ -588,13 +594,14 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     std::string ddRspContent = "$in";
     std::string ddInput = "@" + ddRspFile;
 
-    // Run CMake dependency scanner on preprocessed output.
+    // Run CMake dependency scanner on the source file (using the preprocessed
+    // source if that was performed).
     std::string const cmake = this->GetLocalGenerator()->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
     ddCmds.push_back(cmake +
                      " -E cmake_ninja_dyndep"
                      " --tdi=" +
-                     tdi +
+                     tdi + " --lang=" + lang +
                      " --dd=$out"
                      " " +
                      ddInput);
@@ -868,24 +875,27 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
     this->WriteObjectBuildStatement(sf);
   }
 
-  if (!this->DDIFiles.empty()) {
+  for (auto const& langDDIFiles : this->DDIFiles) {
+    std::string const& language = langDDIFiles.first;
+    cmNinjaDeps const& ddiFiles = langDDIFiles.second;
+
     std::string const ddComment;
-    std::string const ddRule = this->LanguageDyndepRule("Fortran");
+    std::string const ddRule = this->LanguageDyndepRule(language);
     cmNinjaDeps ddOutputs;
     cmNinjaDeps ddImplicitOuts;
-    cmNinjaDeps const& ddExplicitDeps = this->DDIFiles;
+    cmNinjaDeps const& ddExplicitDeps = ddiFiles;
     cmNinjaDeps ddImplicitDeps;
     cmNinjaDeps ddOrderOnlyDeps;
     cmNinjaVars ddVars;
 
-    this->WriteTargetDependInfo("Fortran");
+    this->WriteTargetDependInfo(language);
 
-    ddOutputs.push_back(this->GetDyndepFilePath("Fortran"));
+    ddOutputs.push_back(this->GetDyndepFilePath(language));
 
     // Make sure dyndep files for all our dependencies have already
-    // been generated so that the 'FortranModules.json' files they
+    // been generated so that the '<LANG>Modules.json' files they
     // produced as side-effects are available for us to read.
-    // Ideally we should depend on the 'FortranModules.json' files
+    // Ideally we should depend on the '<LANG>Modules.json' files
     // from our dependencies directly, but we don't know which of
     // our dependencies produces them.  Fixing this will require
     // refactoring the Ninja generator to generate targets in
@@ -1032,6 +1042,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // For some cases we do an explicit preprocessor invocation.
   bool const explicitPP = this->NeedExplicitPreprocessing(language);
   if (explicitPP) {
+    bool const compilePP = this->UsePreprocessedSource(language);
     std::string const ppComment;
     std::string const ppRule = this->LanguagePreprocessRule(language);
     cmNinjaDeps ppOutputs;
@@ -1045,61 +1056,80 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       this->ConvertToNinjaPath(this->GetPreprocessedFilePath(source));
     ppOutputs.push_back(ppFileName);
 
-    // Move compilation dependencies to the preprocessing build statement.
-    std::swap(ppExplicitDeps, explicitDeps);
-    std::swap(ppImplicitDeps, implicitDeps);
-    std::swap(ppOrderOnlyDeps, orderOnlyDeps);
-    std::swap(ppVars["IN_ABS"], vars["IN_ABS"]);
+    if (compilePP) {
+      // Move compilation dependencies to the preprocessing build statement.
+      std::swap(ppExplicitDeps, explicitDeps);
+      std::swap(ppImplicitDeps, implicitDeps);
+      std::swap(ppOrderOnlyDeps, orderOnlyDeps);
+      std::swap(ppVars["IN_ABS"], vars["IN_ABS"]);
 
-    // The actual compilation will now use the preprocessed source.
-    explicitDeps.push_back(ppFileName);
+      // The actual compilation will now use the preprocessed source.
+      explicitDeps.push_back(ppFileName);
+    } else {
+      // Copy compilation dependencies to the preprocessing build statement.
+      ppExplicitDeps = explicitDeps;
+      ppImplicitDeps = implicitDeps;
+      ppOrderOnlyDeps = orderOnlyDeps;
+      ppVars["IN_ABS"] = vars["IN_ABS"];
+    }
 
     // Preprocessing and compilation generally use the same flags.
     ppVars["FLAGS"] = vars["FLAGS"];
 
-    // In case compilation requires flags that are incompatible with
-    // preprocessing, include them here.
-    std::string const postFlag =
-      this->Makefile->GetSafeDefinition("CMAKE_Fortran_POSTPROCESS_FLAG");
-    this->LocalGenerator->AppendFlags(vars["FLAGS"], postFlag);
+    if (compilePP) {
+      // In case compilation requires flags that are incompatible with
+      // preprocessing, include them here.
+      std::string const postFlag = this->Makefile->GetSafeDefinition(
+        "CMAKE_" + language + "_POSTPROCESS_FLAG");
+      this->LocalGenerator->AppendFlags(vars["FLAGS"], postFlag);
+    }
 
-    // Move preprocessor definitions to the preprocessor build statement.
-    std::swap(ppVars["DEFINES"], vars["DEFINES"]);
+    if (compilePP) {
+      // Move preprocessor definitions to the preprocessor build statement.
+      std::swap(ppVars["DEFINES"], vars["DEFINES"]);
+    } else {
+      // Copy preprocessor definitions to the preprocessor build statement.
+      ppVars["DEFINES"] = vars["DEFINES"];
+    }
 
     // Copy include directories to the preprocessor build statement.  The
     // Fortran compilation build statement still needs them for the INCLUDE
     // directive.
     ppVars["INCLUDES"] = vars["INCLUDES"];
 
-    // Prepend source file's original directory as an include directory
-    // so e.g. Fortran INCLUDE statements can look for files in it.
-    std::vector<std::string> sourceDirectory;
-    sourceDirectory.push_back(
-      cmSystemTools::GetParentDirectory(source->GetFullPath()));
+    if (compilePP) {
+      // Prepend source file's original directory as an include directory
+      // so e.g. Fortran INCLUDE statements can look for files in it.
+      std::vector<std::string> sourceDirectory;
+      sourceDirectory.push_back(
+        cmSystemTools::GetParentDirectory(source->GetFullPath()));
 
-    std::string sourceDirectoryFlag = this->LocalGenerator->GetIncludeFlags(
-      sourceDirectory, this->GeneratorTarget, language, false, false,
-      this->GetConfigName());
+      std::string sourceDirectoryFlag = this->LocalGenerator->GetIncludeFlags(
+        sourceDirectory, this->GeneratorTarget, language, false, false,
+        this->GetConfigName());
 
-    vars["INCLUDES"] = sourceDirectoryFlag + " " + vars["INCLUDES"];
+      vars["INCLUDES"] = sourceDirectoryFlag + " " + vars["INCLUDES"];
+    }
 
     // Explicit preprocessing always uses a depfile.
     ppVars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-      ppFileName + ".d", cmOutputConverter::SHELL);
-    // The actual compilation does not need a depfile because it
-    // depends on the already-preprocessed source.
-    vars.erase("DEP_FILE");
+      objectFileName + ".d", cmOutputConverter::SHELL);
+    if (compilePP) {
+      // The actual compilation does not need a depfile because it
+      // depends on the already-preprocessed source.
+      vars.erase("DEP_FILE");
+    }
 
     if (needDyndep) {
       // Tell dependency scanner the object file that will result from
-      // compiling the preprocessed source.
+      // compiling the source.
       ppVars["OBJ_FILE"] = objectFileName;
 
       // Tell dependency scanner where to store dyndep intermediate results.
-      std::string const ddiFile = ppFileName + ".ddi";
+      std::string const ddiFile = objectFileName + ".ddi";
       ppVars["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
       ppImplicitOuts.push_back(ddiFile);
-      this->DDIFiles.push_back(ddiFile);
+      this->DDIFiles[language].push_back(ddiFile);
     }
 
     this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
