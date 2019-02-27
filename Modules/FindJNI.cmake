@@ -185,40 +185,57 @@ if (WIN32)
     )
 endif()
 
-JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
-  /usr/lib/jvm/java/lib
-  /usr/lib/java/jre/lib/{libarch}
-  /usr/lib/jvm/jre/lib/{libarch}
-  /usr/local/lib/java/jre/lib/{libarch}
-  /usr/local/share/java/jre/lib/{libarch}
-  /usr/lib/j2sdk1.4-sun/jre/lib/{libarch}
-  /usr/lib/j2sdk1.5-sun/jre/lib/{libarch}
-  /opt/sun-jdk-1.5.0.04/jre/lib/{libarch}
-  /usr/lib/jvm/java-6-sun/jre/lib/{libarch}
-  /usr/lib/jvm/java-1.5.0-sun/jre/lib/{libarch}
-  /usr/lib/jvm/java-6-sun-1.6.0.00/jre/lib/{libarch}       # can this one be removed according to #8821 ? Alex
-  /usr/lib/jvm/java-6-openjdk/jre/lib/{libarch}
-  /usr/lib/jvm/java-1.6.0-openjdk-1.6.0.0/jre/lib/{libarch}        # fedora
+set(_JNI_JAVA_DIRECTORIES_BASE
+  /usr/lib/jvm/java
+  /usr/lib/java
+  /usr/lib/jvm
+  /usr/local/lib/java
+  /usr/local/share/java
+  /usr/lib/j2sdk1.4-sun
+  /usr/lib/j2sdk1.5-sun
+  /opt/sun-jdk-1.5.0.04
+  /usr/lib/jvm/java-6-sun
+  /usr/lib/jvm/java-1.5.0-sun
+  /usr/lib/jvm/java-6-sun-1.6.0.00       # can this one be removed according to #8821 ? Alex
+  /usr/lib/jvm/java-6-openjdk
+  /usr/lib/jvm/java-1.6.0-openjdk-1.6.0.0        # fedora
   # Debian specific paths for default JVM
-  /usr/lib/jvm/default-java/jre/lib/{libarch}
-  /usr/lib/jvm/default-java/jre/lib
-  /usr/lib/jvm/default-java/lib
+  /usr/lib/jvm/default-java
   # Arch Linux specific paths for default JVM
-  /usr/lib/jvm/default/jre/lib/{libarch}
-  /usr/lib/jvm/default/lib/{libarch}
+  /usr/lib/jvm/default
   # Ubuntu specific paths for default JVM
-  /usr/lib/jvm/java-11-openjdk-{libarch}/jre/lib/{libarch}    # Ubuntu 18.04 LTS
-  /usr/lib/jvm/java-8-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
-  /usr/lib/jvm/java-7-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
-  /usr/lib/jvm/java-6-openjdk-{libarch}/jre/lib/{libarch}     # Ubuntu 15.10
+  /usr/lib/jvm/java-11-openjdk-{libarch}    # Ubuntu 18.04 LTS
+  /usr/lib/jvm/java-8-openjdk-{libarch}     # Ubuntu 15.10
+  /usr/lib/jvm/java-7-openjdk-{libarch}     # Ubuntu 15.10
+  /usr/lib/jvm/java-6-openjdk-{libarch}     # Ubuntu 15.10
   # OpenBSD specific paths for default JVM
-  /usr/local/jdk-1.7.0/jre/lib/{libarch}
-  /usr/local/jre-1.7.0/lib/{libarch}
-  /usr/local/jdk-1.6.0/jre/lib/{libarch}
-  /usr/local/jre-1.6.0/lib/{libarch}
+  /usr/local/jdk-1.7.0
+  /usr/local/jre-1.7.0
+  /usr/local/jdk-1.6.0
+  /usr/local/jre-1.6.0
   # SuSE specific paths for default JVM
-  /usr/lib64/jvm/java/jre/lib/{libarch}
-  /usr/lib64/jvm/jre/lib/{libarch}
+  /usr/lib64/jvm/java
+  /usr/lib64/jvm/jre
+  )
+
+set(_JNI_JAVA_AWT_LIBRARY_TRIES)
+set(_JNI_JAVA_INCLUDE_TRIES)
+
+foreach(_java_dir IN LISTS _JNI_JAVA_DIRECTORIES_BASE)
+  list(APPEND _JNI_JAVA_AWT_LIBRARY_TRIES
+    ${_java_dir}/jre/lib/{libarch}
+    ${_java_dir}/jre/lib
+    ${_java_dir}/lib/{libarch}
+    ${_java_dir}/lib
+    ${_java_dir}
+  )
+  list(APPEND _JNI_JAVA_INCLUDE_TRIES
+    ${_java_dir}/include
+  )
+endforeach()
+
+JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
+    ${_JNI_JAVA_AWT_LIBRARY_TRIES}
   )
 
 set(JAVA_JVM_LIBRARY_DIRECTORIES)
@@ -254,29 +271,7 @@ if (WIN32)
 endif()
 
 JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_INCLUDE_DIRECTORIES
-  /usr/lib/java/include
-  /usr/local/lib/java/include
-  /usr/lib/jvm/java/include
-  /usr/lib/jvm/java-6-sun/include
-  /usr/lib/jvm/java-1.5.0-sun/include
-  /usr/lib/jvm/java-6-sun-1.6.0.00/include       # can this one be removed according to #8821 ? Alex
-  /usr/lib/jvm/java-6-openjdk/include
-  /usr/lib/jvm/java-8-openjdk-{libarch}/include  # ubuntu 15.10
-  /usr/lib/jvm/java-7-openjdk-{libarch}/include  # ubuntu 15.10
-  /usr/lib/jvm/java-6-openjdk-{libarch}/include  # ubuntu 15.10
-  /usr/local/share/java/include
-  /usr/lib/j2sdk1.4-sun/include
-  /usr/lib/j2sdk1.5-sun/include
-  /opt/sun-jdk-1.5.0.04/include
-  # Debian specific path for default JVM
-  /usr/lib/jvm/default-java/include
-  # Arch specific path for default JVM
-  /usr/lib/jvm/default/include
-  # OpenBSD specific path for default JVM
-  /usr/local/jdk-1.7.0/include
-  /usr/local/jdk-1.6.0/include
-  # SuSE specific paths for default JVM
-  /usr/lib64/jvm/java/include
+  ${_JNI_JAVA_INCLUDE_TRIES}
   )
 
 foreach(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
