@@ -216,8 +216,6 @@ Modules
   mirror the new options to the ``mex`` command in MATLAB R2018a.
   The option ``MX_LIBRARY`` is no longer needed.
 
-* A :module:`FindOctave` module was added to find GNU octave.
-
 * The :module:`FindPostgreSQL` module now provides imported targets.
 
 * The :module:`FindPython`, :module:`FindPython2`, and :module:`FindPython3`
