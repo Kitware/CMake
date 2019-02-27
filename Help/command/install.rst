@@ -99,6 +99,7 @@ Windows platforms are unaffected.
 Installing Targets
 ^^^^^^^^^^^^^^^^^^
 
+.. _`install(TARGETS)`:
 .. _TARGETS:
 
 .. code-block:: cmake
@@ -327,6 +328,8 @@ use "generator expressions" with the syntax ``$<...>``.  See the
 Installing Files
 ^^^^^^^^^^^^^^^^
 
+.. _`install(FILES)`:
+.. _`install(PROGRAMS)`:
 .. _FILES:
 .. _PROGRAMS:
 
@@ -404,6 +407,7 @@ use "generator expressions" with the syntax ``$<...>``.  See the
 Installing Directories
 ^^^^^^^^^^^^^^^^^^^^^^
 
+.. _`install(DIRECTORY)`:
 .. _DIRECTORY:
 
 .. code-block:: cmake
@@ -528,6 +532,8 @@ manual for available expressions.
 Custom Installation Logic
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. _`install(CODE)`:
+.. _`install(SCRIPT)`:
 .. _CODE:
 .. _SCRIPT:
 
@@ -557,6 +563,7 @@ name, not the file's contents).  See the
 Installing Exports
 ^^^^^^^^^^^^^^^^^^
 
+.. _`install(EXPORT)`:
 .. _EXPORT:
 
 .. code-block:: cmake
