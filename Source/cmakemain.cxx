@@ -500,7 +500,7 @@ static int do_build(int ac, char const* const* av)
     return 1;
   }
 
-  cmake cm(cmake::RoleInternal, cmState::Unknown);
+  cmake cm(cmake::RoleInternal, cmState::Project);
   cmSystemTools::SetMessageCallback(
     [&cm](const std::string& msg, const char* title) {
       cmakemainMessageCallback(msg, title, &cm);
