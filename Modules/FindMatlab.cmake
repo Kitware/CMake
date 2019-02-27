@@ -1503,7 +1503,7 @@ if(MATLAB_FIND_DEBUG)
   message(STATUS "[MATLAB] Current version is ${Matlab_VERSION_STRING} located ${Matlab_ROOT_DIR}")
 endif()
 
-if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.4") # MATLAB 9.4 (R2018a) and newer have a new C++ API
+if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.3") # MATLAB 9.3 (R2017b) and newer have a new C++ API
   set(Matlab_HAS_CPP_API 1)
 endif()
 
