@@ -67,7 +67,6 @@ static const char* cmDocumentationUsageNote[][2] = {
     "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"       \
     "  --clean-first  = Build target 'clean' first, then build.\n"            \
     "                   (To clean only, use --target 'clean'.)\n"             \
-    "  --use-stderr   = Ignored.  Behavior is default in CMake >= 3.0.\n"     \
     "  -v --verbose   = Enable verbose output - if supported - including\n"   \
     "                   the build commands to be executed. \n"                \
     "  --             = Pass remaining options to the native tool.\n"
