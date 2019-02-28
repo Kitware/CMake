@@ -14,7 +14,7 @@ Generators
 ----------
 
 * The :generator:`Visual Studio 16 2019` generator was added.  This is
-  experimental and based on "Visual Studio 2019 Preview 2" because this
+  experimental and based on "Visual Studio 2019 Preview 4" because this
   version of VS has not been released.
 
   The VS 2019 generator differs from generators for earlier versions
