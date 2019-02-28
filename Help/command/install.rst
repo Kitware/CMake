@@ -272,6 +272,8 @@ top level:
   This option associates the installed target files with an export called
   ``<export-name>``.  It must appear before any target options.  To actually
   install the export file itself, call ``install(EXPORT)``, documented below.
+  See documentation of the :prop_tgt:`EXPORT_NAME` target property to change
+  the name of the exported target.
 
 ``INCLUDES DESTINATION``
   This option specifies a list of directories which will be added to the
