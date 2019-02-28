@@ -338,11 +338,11 @@ else()
 
   add_executable(CompileFeaturesGenex2 genex_test.cpp)
   target_compile_features(CompileFeaturesGenex2 PRIVATE cxx_std_11)
-  target_compile_definitions(CompileFeaturesGenex2 PRIVATE ${genex_test_defs})
+  target_compile_definitions(CompileFeaturesGenex2 PRIVATE ${genex_test_defs} ALLOW_LATER_STANDARDS=1)
 
   add_library(std_11_iface INTERFACE)
   target_compile_features(std_11_iface INTERFACE cxx_std_11)
   add_executable(CompileFeaturesGenex3 genex_test.cpp)
   target_link_libraries(CompileFeaturesGenex3 PRIVATE std_11_iface)
-  target_compile_definitions(CompileFeaturesGenex3 PRIVATE ${genex_test_defs})
+  target_compile_definitions(CompileFeaturesGenex3 PRIVATE ${genex_test_defs} ALLOW_LATER_STANDARDS=1)
 endif()
