@@ -118,16 +118,8 @@ if(CMAKE_HAVE_PTHREAD_H)
   set(CMAKE_HAVE_THREADS_LIBRARY)
   if(NOT THREADS_HAVE_PTHREAD_ARG)
     # Check if pthread functions are in normal C library.
-    # If the pthread functions already exist in C library, we could just use
-    # them instead of linking to the additional pthread library. We could
-    # try to check any pthread symbol name, but here is an exception. If we
-    # use clang asan build, we will find the pthread_create() symbol in the
-    # libc(libasan). However, it doesn't have the full pthread implementation.
-    # So, we can't assume that we have the pthread implementation in libc
-    # using the pthread_create() checking here. Then, we turn to check the
-    # pthread_kill() symbol instead.
-    CHECK_SYMBOL_EXISTS(pthread_kill pthread.h CMAKE_HAVE_LIBC_PTHREAD_KILL)
-    if(CMAKE_HAVE_LIBC_PTHREAD_KILL)
+    CHECK_SYMBOL_EXISTS(pthread_create pthread.h CMAKE_HAVE_LIBC_CREATE)
+    if(CMAKE_HAVE_LIBC_CREATE)
       set(CMAKE_THREAD_LIBS_INIT "")
       set(CMAKE_HAVE_THREADS_LIBRARY 1)
       set(Threads_FOUND TRUE)
@@ -152,7 +144,7 @@ if(CMAKE_HAVE_PTHREAD_H)
   _check_pthreads_flag()
 endif()
 
-if(CMAKE_THREAD_LIBS_INIT OR CMAKE_HAVE_LIBC_PTHREAD_KILL)
+if(CMAKE_THREAD_LIBS_INIT OR CMAKE_HAVE_LIBC_CREATE)
   set(CMAKE_USE_PTHREADS_INIT 1)
   set(Threads_FOUND TRUE)
 endif()
