@@ -24,6 +24,8 @@ run_cmake(SUBLIST-TooManyArguments)
 
 run_cmake(REMOVE_AT-EmptyList)
 
+run_cmake(REMOVE_DUPLICATES-PreserveOrder)
+
 run_cmake(FILTER-NotList)
 run_cmake(REMOVE_AT-NotList)
 run_cmake(REMOVE_DUPLICATES-NotList)

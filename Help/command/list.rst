@@ -196,7 +196,8 @@ Removes items at given indices from the list.
 
   list(REMOVE_DUPLICATES <list>)
 
-Removes duplicated items in the list.
+Removes duplicated items in the list. The relative order of items is preserved,
+but if duplicates are encountered, only the first instance is preserved.
 
 .. _TRANSFORM:
 
