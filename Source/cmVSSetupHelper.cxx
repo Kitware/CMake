@@ -190,14 +190,6 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
     std::string const vcRoot = vsInstanceInfo.GetInstallLocation();
     std::string vcToolsVersionFile =
       vcRoot + "/VC/Auxiliary/Build/Microsoft.VCToolsVersion.default.txt";
-    if (!cmSystemTools::PathExists(vcToolsVersionFile)) {
-      // FIXME: VS 2019 Preview 2 installs the v142 toolset and does not
-      // provide the plain `Microsoft.VCToolsVersion.default.txt` that v141
-      // does.  This should be fixed in preview 3 and this workaround can
-      // be dropped.  Otherwise, we may need to switch to globbing.
-      vcToolsVersionFile = vcRoot +
-        "/VC/Auxiliary/Build/Microsoft.VCToolsVersion.v142.default.txt";
-    }
     std::string vcToolsVersion;
     cmsys::ifstream fin(vcToolsVersionFile.c_str());
     if (!fin || !cmSystemTools::GetLineFromStream(fin, vcToolsVersion)) {
