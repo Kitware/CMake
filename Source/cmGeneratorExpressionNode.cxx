@@ -2058,75 +2058,76 @@ static const struct ShellPathNode : public cmGeneratorExpressionNode
 const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
   const std::string& identifier)
 {
-  typedef std::map<std::string, const cmGeneratorExpressionNode*> NodeMap;
-  static NodeMap nodeMap;
-  if (nodeMap.empty()) {
-    nodeMap["0"] = &zeroNode;
-    nodeMap["1"] = &oneNode;
-    nodeMap["AND"] = &andNode;
-    nodeMap["OR"] = &orNode;
-    nodeMap["NOT"] = &notNode;
-    nodeMap["C_COMPILER_ID"] = &cCompilerIdNode;
-    nodeMap["CXX_COMPILER_ID"] = &cxxCompilerIdNode;
-    nodeMap["Fortran_COMPILER_ID"] = &fortranCompilerIdNode;
-    nodeMap["VERSION_GREATER"] = &versionGreaterNode;
-    nodeMap["VERSION_GREATER_EQUAL"] = &versionGreaterEqNode;
-    nodeMap["VERSION_LESS"] = &versionLessNode;
-    nodeMap["VERSION_LESS_EQUAL"] = &versionLessEqNode;
-    nodeMap["VERSION_EQUAL"] = &versionEqualNode;
-    nodeMap["C_COMPILER_VERSION"] = &cCompilerVersionNode;
-    nodeMap["CXX_COMPILER_VERSION"] = &cxxCompilerVersionNode;
-    nodeMap["Fortran_COMPILER_VERSION"] = &fortranCompilerVersionNode;
-    nodeMap["PLATFORM_ID"] = &platformIdNode;
-    nodeMap["COMPILE_FEATURES"] = &compileFeaturesNode;
-    nodeMap["CONFIGURATION"] = &configurationNode;
-    nodeMap["CONFIG"] = &configurationTestNode;
-    nodeMap["TARGET_FILE"] = &targetNodeGroup.File;
-    nodeMap["TARGET_LINKER_FILE"] = &targetLinkerNodeGroup.File;
-    nodeMap["TARGET_SONAME_FILE"] = &targetSoNameNodeGroup.File;
-    nodeMap["TARGET_PDB_FILE"] = &targetPdbNodeGroup.File;
-    nodeMap["TARGET_FILE_NAME"] = &targetNodeGroup.FileName;
-    nodeMap["TARGET_LINKER_FILE_NAME"] = &targetLinkerNodeGroup.FileName;
-    nodeMap["TARGET_SONAME_FILE_NAME"] = &targetSoNameNodeGroup.FileName;
-    nodeMap["TARGET_PDB_FILE_NAME"] = &targetPdbNodeGroup.FileName;
-    nodeMap["TARGET_FILE_DIR"] = &targetNodeGroup.FileDir;
-    nodeMap["TARGET_LINKER_FILE_DIR"] = &targetLinkerNodeGroup.FileDir;
-    nodeMap["TARGET_SONAME_FILE_DIR"] = &targetSoNameNodeGroup.FileDir;
-    nodeMap["TARGET_PDB_FILE_DIR"] = &targetPdbNodeGroup.FileDir;
-    nodeMap["TARGET_BUNDLE_DIR"] = &targetBundleDirNode;
-    nodeMap["TARGET_BUNDLE_CONTENT_DIR"] = &targetBundleContentDirNode;
-    nodeMap["STREQUAL"] = &strEqualNode;
-    nodeMap["EQUAL"] = &equalNode;
-    nodeMap["IN_LIST"] = &inListNode;
-    nodeMap["LOWER_CASE"] = &lowerCaseNode;
-    nodeMap["UPPER_CASE"] = &upperCaseNode;
-    nodeMap["MAKE_C_IDENTIFIER"] = &makeCIdentifierNode;
-    nodeMap["BOOL"] = &boolNode;
-    nodeMap["IF"] = &ifNode;
-    nodeMap["ANGLE-R"] = &angle_rNode;
-    nodeMap["COMMA"] = &commaNode;
-    nodeMap["SEMICOLON"] = &semicolonNode;
-    nodeMap["TARGET_PROPERTY"] = &targetPropertyNode;
-    nodeMap["TARGET_NAME"] = &targetNameNode;
-    nodeMap["TARGET_OBJECTS"] = &targetObjectsNode;
-    nodeMap["TARGET_POLICY"] = &targetPolicyNode;
-    nodeMap["TARGET_EXISTS"] = &targetExistsNode;
-    nodeMap["TARGET_NAME_IF_EXISTS"] = &targetNameIfExistsNode;
-    nodeMap["TARGET_GENEX_EVAL"] = &targetGenexEvalNode;
-    nodeMap["GENEX_EVAL"] = &genexEvalNode;
-    nodeMap["BUILD_INTERFACE"] = &buildInterfaceNode;
-    nodeMap["INSTALL_INTERFACE"] = &installInterfaceNode;
-    nodeMap["INSTALL_PREFIX"] = &installPrefixNode;
-    nodeMap["JOIN"] = &joinNode;
-    nodeMap["LINK_ONLY"] = &linkOnlyNode;
-    nodeMap["COMPILE_LANGUAGE"] = &languageNode;
-    nodeMap["SHELL_PATH"] = &shellPathNode;
+  static std::map<std::string, cmGeneratorExpressionNode const*> const nodeMap{
+    { "0", &zeroNode },
+    { "1", &oneNode },
+    { "AND", &andNode },
+    { "OR", &orNode },
+    { "NOT", &notNode },
+    { "C_COMPILER_ID", &cCompilerIdNode },
+    { "CXX_COMPILER_ID", &cxxCompilerIdNode },
+    { "Fortran_COMPILER_ID", &fortranCompilerIdNode },
+    { "VERSION_GREATER", &versionGreaterNode },
+    { "VERSION_GREATER_EQUAL", &versionGreaterEqNode },
+    { "VERSION_LESS", &versionLessNode },
+    { "VERSION_LESS_EQUAL", &versionLessEqNode },
+    { "VERSION_EQUAL", &versionEqualNode },
+    { "C_COMPILER_VERSION", &cCompilerVersionNode },
+    { "CXX_COMPILER_VERSION", &cxxCompilerVersionNode },
+    { "Fortran_COMPILER_VERSION", &fortranCompilerVersionNode },
+    { "PLATFORM_ID", &platformIdNode },
+    { "COMPILE_FEATURES", &compileFeaturesNode },
+    { "CONFIGURATION", &configurationNode },
+    { "CONFIG", &configurationTestNode },
+    { "TARGET_FILE", &targetNodeGroup.File },
+    { "TARGET_LINKER_FILE", &targetLinkerNodeGroup.File },
+    { "TARGET_SONAME_FILE", &targetSoNameNodeGroup.File },
+    { "TARGET_PDB_FILE", &targetPdbNodeGroup.File },
+    { "TARGET_FILE_NAME", &targetNodeGroup.FileName },
+    { "TARGET_LINKER_FILE_NAME", &targetLinkerNodeGroup.FileName },
+    { "TARGET_SONAME_FILE_NAME", &targetSoNameNodeGroup.FileName },
+    { "TARGET_PDB_FILE_NAME", &targetPdbNodeGroup.FileName },
+    { "TARGET_FILE_DIR", &targetNodeGroup.FileDir },
+    { "TARGET_LINKER_FILE_DIR", &targetLinkerNodeGroup.FileDir },
+    { "TARGET_SONAME_FILE_DIR", &targetSoNameNodeGroup.FileDir },
+    { "TARGET_PDB_FILE_DIR", &targetPdbNodeGroup.FileDir },
+    { "TARGET_BUNDLE_DIR", &targetBundleDirNode },
+    { "TARGET_BUNDLE_CONTENT_DIR", &targetBundleContentDirNode },
+    { "STREQUAL", &strEqualNode },
+    { "EQUAL", &equalNode },
+    { "IN_LIST", &inListNode },
+    { "LOWER_CASE", &lowerCaseNode },
+    { "UPPER_CASE", &upperCaseNode },
+    { "MAKE_C_IDENTIFIER", &makeCIdentifierNode },
+    { "BOOL", &boolNode },
+    { "IF", &ifNode },
+    { "ANGLE-R", &angle_rNode },
+    { "COMMA", &commaNode },
+    { "SEMICOLON", &semicolonNode },
+    { "TARGET_PROPERTY", &targetPropertyNode },
+    { "TARGET_NAME", &targetNameNode },
+    { "TARGET_OBJECTS", &targetObjectsNode },
+    { "TARGET_POLICY", &targetPolicyNode },
+    { "TARGET_EXISTS", &targetExistsNode },
+    { "TARGET_NAME_IF_EXISTS", &targetNameIfExistsNode },
+    { "TARGET_GENEX_EVAL", &targetGenexEvalNode },
+    { "GENEX_EVAL", &genexEvalNode },
+    { "BUILD_INTERFACE", &buildInterfaceNode },
+    { "INSTALL_INTERFACE", &installInterfaceNode },
+    { "INSTALL_PREFIX", &installPrefixNode },
+    { "JOIN", &joinNode },
+    { "LINK_ONLY", &linkOnlyNode },
+    { "COMPILE_LANGUAGE", &languageNode },
+    { "SHELL_PATH", &shellPathNode }
+  };
+
+  {
+    auto itr = nodeMap.find(identifier);
+    if (itr != nodeMap.end()) {
+      return itr->second;
+    }
   }
-  NodeMap::const_iterator i = nodeMap.find(identifier);
-  if (i == nodeMap.end()) {
-    return nullptr;
-  }
-  return i->second;
+  return nullptr;
 }
 
 void reportError(cmGeneratorExpressionContext* context,
