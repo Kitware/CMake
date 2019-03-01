@@ -70,6 +70,20 @@ function(ProcessorCount var)
   endif()
 
   if(NOT count)
+    # Linux (systems with nproc):
+    # Prefer nproc to getconf if available as getconf may return the host CPU count in Linux containers
+    find_program(ProcessorCount_cmd_nproc nproc)
+    mark_as_advanced(ProcessorCount_cmd_nproc)
+    if(ProcessorCount_cmd_nproc)
+      execute_process(COMMAND ${ProcessorCount_cmd_nproc}
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE count)
+      #message("ProcessorCount: trying nproc '${ProcessorCount_cmd_nproc}'")
+    endif()
+  endif()
+
+  if(NOT count)
     # Linux (systems with getconf):
     find_program(ProcessorCount_cmd_getconf getconf)
     mark_as_advanced(ProcessorCount_cmd_getconf)
