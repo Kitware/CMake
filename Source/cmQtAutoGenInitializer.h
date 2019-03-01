@@ -68,6 +68,7 @@ public:
     std::string ExecutableTargetName;
     cmGeneratorTarget* ExecutableTarget = nullptr;
     std::string Executable;
+    bool ExecutableExists = false;
 
     /// @brief Constructor
     GenVarsT(GenT gen, std::string const& genName,
