@@ -99,6 +99,7 @@ Windows platforms are unaffected.
 Installing Targets
 ^^^^^^^^^^^^^^^^^^
 
+.. _`install(TARGETS)`:
 .. _TARGETS:
 
 .. code-block:: cmake
@@ -265,20 +266,20 @@ the following additional arguments:
   is not recommended to use ``NAMELINK_SKIP`` in conjunction with
   ``NAMELINK_COMPONENT``.
 
-The ``install(TARGETS)`` command can also accept the following options at the
+The `install(TARGETS)`_ command can also accept the following options at the
 top level:
 
 ``EXPORT``
   This option associates the installed target files with an export called
   ``<export-name>``.  It must appear before any target options.  To actually
-  install the export file itself, call ``install(EXPORT)``, documented below.
+  install the export file itself, call `install(EXPORT)`_, documented below.
   See documentation of the :prop_tgt:`EXPORT_NAME` target property to change
   the name of the exported target.
 
 ``INCLUDES DESTINATION``
   This option specifies a list of directories which will be added to the
   :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target property of the
-  ``<targets>`` when exported by the :command:`install(EXPORT)` command. If a
+  ``<targets>`` when exported by the `install(EXPORT)`_ command. If a
   relative path is specified, it is treated as relative to the
   ``$<INSTALL_PREFIX>``.
 
@@ -312,7 +313,7 @@ targets that link to the object libraries in their implementation.
 Installing a target with the :prop_tgt:`EXCLUDE_FROM_ALL` target property
 set to ``TRUE`` has undefined behavior.
 
-:command:`install(TARGETS)` can install targets that were created in
+`install(TARGETS)`_ can install targets that were created in
 other directories.  When using such cross-directory install rules, running
 ``make install`` (or similar) from a subdirectory will not guarantee that
 targets from other directories are up-to-date.  You can use
@@ -327,6 +328,8 @@ use "generator expressions" with the syntax ``$<...>``.  See the
 Installing Files
 ^^^^^^^^^^^^^^^^
 
+.. _`install(FILES)`:
+.. _`install(PROGRAMS)`:
 .. _FILES:
 .. _PROGRAMS:
 
@@ -404,6 +407,7 @@ use "generator expressions" with the syntax ``$<...>``.  See the
 Installing Directories
 ^^^^^^^^^^^^^^^^^^^^^^
 
+.. _`install(DIRECTORY)`:
 .. _DIRECTORY:
 
 .. code-block:: cmake
@@ -528,6 +532,8 @@ manual for available expressions.
 Custom Installation Logic
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. _`install(CODE)`:
+.. _`install(SCRIPT)`:
 .. _CODE:
 .. _SCRIPT:
 
@@ -557,6 +563,7 @@ name, not the file's contents).  See the
 Installing Exports
 ^^^^^^^^^^^^^^^^^^
 
+.. _`install(EXPORT)`:
 .. _EXPORT:
 
 .. code-block:: cmake
@@ -573,7 +580,7 @@ Installing Exports
 The ``EXPORT`` form generates and installs a CMake file containing code to
 import targets from the installation tree into another project.
 Target installations are associated with the export ``<export-name>``
-using the ``EXPORT`` option of the ``install(TARGETS)`` signature
+using the ``EXPORT`` option of the `install(TARGETS)`_ signature
 documented above.  The ``NAMESPACE`` option will prepend ``<namespace>`` to
 the target names as they are written to the import file.  By default
 the generated file will be called ``<export-name>.cmake`` but the ``FILE``
