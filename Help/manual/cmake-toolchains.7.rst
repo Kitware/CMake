@@ -592,4 +592,14 @@ Please note that checks made during configuration were performed against
 the configure-time SDK and might not hold true for other SDKs.  Commands
 like :command:`find_package`, :command:`find_library`, etc. store and use
 details only for the configured SDK/platform, so they can be problematic
-if wanting to switch between device and simulator builds.
+if wanting to switch between device and simulator builds. You can follow
+the next rules to make device + simulator configuration work:
+
+- Use explicit ``-l`` linker flag,
+  e.g. ``target_link_libraries(foo PUBLIC "-lz")``
+
+- Use explicit ``-framework`` linker flag,
+  e.g. ``target_link_libraries(foo PUBLIC "-framework CoreFoundation")``
+
+- Use :command:`find_package` only for libraries installed with
+  :variable:`CMAKE_IOS_INSTALL_COMBINED` feature
