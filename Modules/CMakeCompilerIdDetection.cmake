@@ -97,6 +97,8 @@ function(compiler_id_detection outvar lang)
       foreach(Id ${ordered_compilers})
         string(APPEND CMAKE_${lang}_COMPILER_ID_CONTENT "# define ${CID_PREFIX}COMPILER_IS_${Id} 0\n")
       endforeach()
+      # Hard-code definitions for compilers that are no longer supported.
+      string(APPEND CMAKE_${lang}_COMPILER_ID_CONTENT "# define ${CID_PREFIX}COMPILER_IS_MIPSpro 0\n")
     endif()
 
     set(pp_if "#if")
