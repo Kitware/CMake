@@ -12,6 +12,12 @@ add_executable(FortranOnly1 testf.f)
 set_property(TARGET FortranOnly1 PROPERTY OUTPUT_NAME FortranOnly)
 target_link_libraries(FortranOnly1 FortranOnlylib)
 
+# Test that Fortran+RC work together.
+# FIXME: Add .rc in more cases.
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
+  set(test_rc testRC.rc)
+endif()
+
 # create a custom command that runs FortranOnly1 and puts
 # the output into the file testfhello.txt
 add_custom_command(OUTPUT ${FortranOnly_BINARY_DIR}/testfhello.txt
@@ -20,7 +26,7 @@ add_custom_command(OUTPUT ${FortranOnly_BINARY_DIR}/testfhello.txt
 # create a second executable FortranOnly2 that has
 # testfhello.txt has an source file so that it will
 # run the above custom command.
-add_executable(FortranOnly2 testfhello.txt testf.f)
+add_executable(FortranOnly2 testfhello.txt testf.f ${test_rc})
 target_link_libraries(FortranOnly2 FortranOnlylib)
 # create a custom target to check the content of testfhello.txt
 # by running the cmake script checktestf2.cmake

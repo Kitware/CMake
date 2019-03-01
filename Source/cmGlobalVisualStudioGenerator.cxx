@@ -834,6 +834,10 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   if (linkLang && *linkLang) {
     languages.insert(linkLang);
   }
+
+  // Intel Fortran .vfproj files do support the resource compiler.
+  languages.erase("RC");
+
   return languages.size() == 1 && *languages.begin() == "Fortran";
 }
 
