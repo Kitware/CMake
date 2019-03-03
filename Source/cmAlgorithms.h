@@ -233,27 +233,45 @@ typename Range::const_iterator cmRemoveMatching(Range& r, MatchRange const& m)
                         ContainerAlgorithms::BinarySearcher<MatchRange>(m));
 }
 
+template <typename ForwardIterator>
+ForwardIterator cmRemoveDuplicates(ForwardIterator first, ForwardIterator last)
+{
+  using Value = typename std::iterator_traits<ForwardIterator>::value_type;
+  using Hash = struct
+  {
+    std::size_t operator()(ForwardIterator it) const
+    {
+      return std::hash<Value>{}(*it);
+    }
+  };
+
+  using Equal = struct
+  {
+    bool operator()(ForwardIterator it1, ForwardIterator it2) const
+    {
+      return *it1 == *it2;
+    }
+  };
+  std::unordered_set<ForwardIterator, Hash, Equal> uniq;
+
+  ForwardIterator result = first;
+  while (first != last) {
+    if (uniq.find(first) == uniq.end()) {
+      if (result != first) {
+        *result = std::move(*first);
+      }
+      uniq.insert(result);
+      ++result;
+    }
+    ++first;
+  }
+  return result;
+}
+
 template <typename Range>
 typename Range::const_iterator cmRemoveDuplicates(Range& r)
 {
-  typedef typename Range::value_type T;
-  std::unordered_set<T> unique;
-  std::vector<size_t> indices;
-  size_t count = 0;
-  const typename Range::const_iterator end = r.end();
-  for (typename Range::const_iterator it = r.begin(); it != end;
-       ++it, ++count) {
-    const typename std::unordered_set<T>::iterator occur = unique.find(*it);
-    if (occur == unique.end()) {
-      unique.insert(*it);
-    } else {
-      indices.push_back(count);
-    }
-  }
-  if (indices.empty()) {
-    return end;
-  }
-  return cmRemoveIndices(r, indices);
+  return cmRemoveDuplicates(r.begin(), r.end());
 }
 
 template <typename Range>
