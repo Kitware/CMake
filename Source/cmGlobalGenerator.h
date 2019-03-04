@@ -69,20 +69,7 @@ struct GeneratedMakeCommand
     PrimaryCommand.insert(PrimaryCommand.end(), start, end);
   }
 
-  std::string Printable() const
-  {
-    std::size_t size = PrimaryCommand.size();
-    for (auto&& i : PrimaryCommand) {
-      size += i.size();
-    }
-    std::string buffer;
-    buffer.reserve(size);
-    for (auto&& i : PrimaryCommand) {
-      buffer.append(i);
-      buffer.append(1, ' ');
-    }
-    return buffer;
-  }
+  std::string Printable() const { return cmJoin(PrimaryCommand, " "); }
 
   std::vector<std::string> PrimaryCommand;
   bool RequiresOutputForward = false;
