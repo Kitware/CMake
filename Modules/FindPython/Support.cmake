@@ -1140,9 +1140,8 @@ if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Inte
       OUTPUT_STRIP_TRAILING_WHITESPACE)
   if (NOT _${_PYTHON_PREFIX}_RESULT)
     find_path(${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR
-              NAMES arrayobject.h numpyconfig.h
+              NAMES "numpy/arrayobject.h" "numpy/numpyconfig.h"
               HINTS "${_${_PYTHON_PREFIX}_NumPy_PATH}"
-              PATH_SUFFIXES numpy
               NO_DEFAULT_PATH)
   endif()
   if(${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
