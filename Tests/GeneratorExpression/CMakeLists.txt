@@ -256,8 +256,10 @@ add_custom_target(check-part3 ALL
 
 if(WIN32)
   set(test_shell_path c:/shell/path)
+  set(test_shell_path2 c:/shell/path d:/another/path)
 else()
   set(test_shell_path /shell/path)
+  set(test_shell_path2 /shell/path /another/path)
 endif()
 
 add_custom_target(check-part4 ALL
@@ -266,6 +268,7 @@ add_custom_target(check-part4 ALL
     # CMake as command-line argument
     -Dmsys1_prefix=${msys1_prefix}
     -Dtest_shell_path=${msys1_prefix}$<SHELL_PATH:${test_shell_path}>
+    "-Dtest_shell_path2=$<SHELL_PATH:${test_shell_path2}>"
     -Dif_1=$<IF:1,a,b>
     -Dif_2=$<IF:0,a,b>
     -Dif_3=$<IF:$<EQUAL:10,30>,a,b>
