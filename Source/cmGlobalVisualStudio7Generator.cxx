@@ -213,9 +213,9 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   makeCommand.RequiresOutputForward =
     (makeProgramLower.find("vcexpress") != std::string::npos);
 
-  makeCommand.add(makeProgramSelected);
+  makeCommand.Add(makeProgramSelected);
 
-  makeCommand.add(std::string(projectName) + ".sln");
+  makeCommand.Add(std::string(projectName) + ".sln");
   std::string realTarget = targetName;
   bool clean = false;
   if (realTarget == "clean") {
@@ -223,11 +223,11 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
     realTarget = "ALL_BUILD";
   }
 
-  makeCommand.add((clean ? "/clean" : "/build"));
-  makeCommand.add((config.empty() ? "Debug" : config));
-  makeCommand.add("/project");
-  makeCommand.add((realTarget.empty() ? "ALL_BUILD" : realTarget));
-  makeCommand.add(makeOptions.begin(), makeOptions.end());
+  makeCommand.Add((clean ? "/clean" : "/build"));
+  makeCommand.Add((config.empty() ? "Debug" : config));
+  makeCommand.Add("/project");
+  makeCommand.Add((realTarget.empty() ? "ALL_BUILD" : realTarget));
+  makeCommand.Add(makeOptions.begin(), makeOptions.end());
 }
 
 ///! Create a local generator appropriate to this Global Generator

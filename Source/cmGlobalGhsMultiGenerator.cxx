@@ -377,16 +377,16 @@ void cmGlobalGhsMultiGenerator::GenerateBuildCommand(
 {
   const char* gbuild =
     this->CMakeInstance->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
-  makeCommand.add(this->SelectMakeProgram(makeProgram, (std::string)gbuild));
+  makeCommand.Add(this->SelectMakeProgram(makeProgram, (std::string)gbuild));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    makeCommand.add("-parallel");
+    makeCommand.Add("-parallel");
     if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.add(std::to_string(jobs));
+      makeCommand.Add(std::to_string(jobs));
     }
   }
 
-  makeCommand.add(makeOptions.begin(), makeOptions.end());
+  makeCommand.Add(makeOptions.begin(), makeOptions.end());
 
   /* determine which top-project file to use */
   std::string proj = projectName + ".top" + FILE_EXTENSION;
@@ -399,15 +399,15 @@ void cmGlobalGhsMultiGenerator::GenerateBuildCommand(
     }
   }
 
-  makeCommand.add("-top", proj);
+  makeCommand.Add("-top", proj);
   if (!targetName.empty()) {
     if (targetName == "clean") {
-      makeCommand.add("-clean");
+      makeCommand.Add("-clean");
     } else {
       if (targetName.compare(targetName.size() - 4, 4, ".gpj") == 0) {
-        makeCommand.add(targetName);
+        makeCommand.Add(targetName);
       } else {
-        makeCommand.add(targetName + ".gpj");
+        makeCommand.Add(targetName + ".gpj");
       }
     }
   }

@@ -1780,7 +1780,7 @@ void cmGlobalGenerator::GenerateBuildCommand(
   bool /*unused*/, int /*unused*/, bool /*unused*/,
   std::vector<std::string> const& /*unused*/)
 {
-  makeCommand.add("cmGlobalGenerator::GenerateBuildCommand not implemented");
+  makeCommand.Add("cmGlobalGenerator::GenerateBuildCommand not implemented");
 }
 
 void cmGlobalGenerator::PrintBuildCommandAdvice(std::ostream& /*os*/,
@@ -1841,7 +1841,7 @@ int cmGlobalGenerator::Build(int jobs, const std::string& /*unused*/,
     this->GenerateBuildCommand(cleanCommand, makeCommandCSTR, projectName,
                                bindir, "clean", config, fast, jobs, verbose);
     output += "\nRun Clean Command:";
-    output += cleanCommand.printable();
+    output += cleanCommand.Printable();
     output += "\n";
 
     if (!cmSystemTools::RunSingleCommand(cleanCommand.PrimaryCommand,
@@ -1858,7 +1858,7 @@ int cmGlobalGenerator::Build(int jobs, const std::string& /*unused*/,
   }
 
   // now build
-  std::string makeCommandStr = makeCommand.printable();
+  std::string makeCommandStr = makeCommand.Printable();
   output += "\nRun Build Command(s):";
   output += makeCommandStr;
   output += "\n";

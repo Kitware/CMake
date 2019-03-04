@@ -341,15 +341,15 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
   int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
 {
   // now build the test
-  makeCommand.add(
+  makeCommand.Add(
     this->SelectMakeProgram(makeProgram, this->GetXcodeBuildCommand()));
 
   if (!projectName.empty()) {
-    makeCommand.add("-project");
+    makeCommand.Add("-project");
     std::string projectArg = projectName;
     projectArg += ".xcode";
     projectArg += "proj";
-    makeCommand.add(projectArg);
+    makeCommand.Add(projectArg);
   }
 
   bool clean = false;
@@ -359,21 +359,21 @@ void cmGlobalXCodeGenerator::GenerateBuildCommand(
     realTarget = "ALL_BUILD";
   }
 
-  makeCommand.add((clean ? "clean" : "build"));
-  makeCommand.add("-target", (realTarget.empty() ? "ALL_BUILD" : realTarget));
-  makeCommand.add("-configuration", (config.empty() ? "Debug" : config));
+  makeCommand.Add((clean ? "clean" : "build"));
+  makeCommand.Add("-target", (realTarget.empty() ? "ALL_BUILD" : realTarget));
+  makeCommand.Add("-configuration", (config.empty() ? "Debug" : config));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    makeCommand.add("-jobs");
+    makeCommand.Add("-jobs");
     if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.add(std::to_string(jobs));
+      makeCommand.Add(std::to_string(jobs));
     }
   }
 
   if (this->XcodeVersion >= 70) {
-    makeCommand.add("-hideShellScriptEnvironment");
+    makeCommand.Add("-hideShellScriptEnvironment");
   }
-  makeCommand.add(makeOptions.begin(), makeOptions.end());
+  makeCommand.Add(makeOptions.begin(), makeOptions.end());
 }
 
 ///! Create a local generator appropriate to this Global Generator

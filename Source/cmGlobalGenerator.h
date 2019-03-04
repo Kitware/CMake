@@ -56,20 +56,20 @@ struct GeneratedMakeCommand
 {
   // Add each argument as a separate element to the vector
   template <typename... T>
-  void add(T&&... args)
+  void Add(T&&... args)
   {
     // iterate the args and append each one
     AppendStrs(PrimaryCommand, std::forward<T>(args)...);
   }
 
   // Add each value in the iterators as a separate element to the vector
-  void add(std::vector<std::string>::const_iterator start,
+  void Add(std::vector<std::string>::const_iterator start,
            std::vector<std::string>::const_iterator end)
   {
     PrimaryCommand.insert(PrimaryCommand.end(), start, end);
   }
 
-  std::string printable() const
+  std::string Printable() const
   {
     std::size_t size = PrimaryCommand.size();
     for (auto&& i : PrimaryCommand) {

@@ -517,21 +517,21 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
 
   // Make it possible to set verbosity also from command line
   if (verbose) {
-    makeCommand.add(cmSystemTools::GetCMakeCommand());
-    makeCommand.add("-E");
-    makeCommand.add("env");
-    makeCommand.add("VERBOSE=1");
+    makeCommand.Add(cmSystemTools::GetCMakeCommand());
+    makeCommand.Add("-E");
+    makeCommand.Add("env");
+    makeCommand.Add("VERBOSE=1");
   }
-  makeCommand.add(this->SelectMakeProgram(makeProgram));
+  makeCommand.Add(this->SelectMakeProgram(makeProgram));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    makeCommand.add("-j");
+    makeCommand.Add("-j");
     if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.add(std::to_string(jobs));
+      makeCommand.Add(std::to_string(jobs));
     }
   }
 
-  makeCommand.add(makeOptions.begin(), makeOptions.end());
+  makeCommand.Add(makeOptions.begin(), makeOptions.end());
   if (!targetName.empty()) {
     std::string tname = targetName;
     if (fast) {
@@ -541,7 +541,7 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
       mf->GetStateSnapshot().GetDirectory().ConvertToRelPathIfNotContained(
         mf->GetState()->GetBinaryDirectory(), tname);
     cmSystemTools::ConvertToOutputSlashes(tname);
-    makeCommand.add(std::move(tname));
+    makeCommand.Add(std::move(tname));
   }
 }
 

@@ -932,7 +932,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     return;
   }
 
-  makeCommand.add(makeProgramSelected);
+  makeCommand.Add(makeProgramSelected);
 
   std::string realTarget = targetName;
   // msbuild.exe CxxOnly.sln /t:Build /p:Configuration=Debug /target:ALL_BUILD
@@ -941,8 +941,8 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     realTarget = "ALL_BUILD";
   }
   if (realTarget == "clean") {
-    makeCommand.add(std::string(projectName) + ".sln");
-    makeCommand.add("/t:Clean");
+    makeCommand.Add(std::string(projectName) + ".sln");
+    makeCommand.Add("/t:Clean");
   } else {
     std::string targetProject(realTarget);
     targetProject += ".vcxproj";
@@ -954,7 +954,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
         cmSystemTools::ConvertToUnixSlashes(targetProject);
       }
     }
-    makeCommand.add(std::move(targetProject));
+    makeCommand.Add(std::move(targetProject));
   }
   std::string configArg = "/p:Configuration=";
   if (!config.empty()) {
@@ -962,26 +962,26 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   } else {
     configArg += "Debug";
   }
-  makeCommand.add(configArg);
-  makeCommand.add(std::string("/p:Platform=") + this->GetPlatformName());
-  makeCommand.add(std::string("/p:VisualStudioVersion=") +
+  makeCommand.Add(configArg);
+  makeCommand.Add(std::string("/p:Platform=") + this->GetPlatformName());
+  makeCommand.Add(std::string("/p:VisualStudioVersion=") +
                   this->GetIDEVersion());
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
     if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.add("/m");
+      makeCommand.Add("/m");
     } else {
-      makeCommand.add(std::string("/m:") + std::to_string(jobs));
+      makeCommand.Add(std::string("/m:") + std::to_string(jobs));
     }
     // Having msbuild.exe and cl.exe using multiple jobs is discouraged
-    makeCommand.add("/p:CL_MPCount=1");
+    makeCommand.Add("/p:CL_MPCount=1");
   }
 
   // Respect the verbosity: 'n' normal will show build commands
   //                        'm' minimal only the build step's title
-  makeCommand.add(std::string("/v:") + ((verbose) ? "n" : "m"));
+  makeCommand.Add(std::string("/v:") + ((verbose) ? "n" : "m"));
 
-  makeCommand.add(makeOptions.begin(), makeOptions.end());
+  makeCommand.Add(makeOptions.begin(), makeOptions.end());
 }
 
 bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
