@@ -73,7 +73,7 @@ cmProcess::cmProcess(cmCTestRunTest& runner)
 
 cmProcess::~cmProcess() = default;
 
-void cmProcess::SetCommand(const char* command)
+void cmProcess::SetCommand(std::string const& command)
 {
   this->Command = command;
 }
@@ -81,6 +81,11 @@ void cmProcess::SetCommand(const char* command)
 void cmProcess::SetCommandArguments(std::vector<std::string> const& args)
 {
   this->Arguments = args;
+}
+
+void cmProcess::SetWorkingDirectory(std::string const& dir)
+{
+  this->WorkingDirectory = dir;
 }
 
 bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)

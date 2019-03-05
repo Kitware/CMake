@@ -432,32 +432,26 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
 
   this->ProcessOutput.clear();
 
+  this->TestResult.Properties = this->TestProperties;
+  this->TestResult.ExecutionTime = cmDuration::zero();
+  this->TestResult.CompressOutput = false;
+  this->TestResult.ReturnValue = -1;
+  this->TestResult.TestCount = this->TestProperties->Index;
+  this->TestResult.Name = this->TestProperties->Name;
+  this->TestResult.Path = this->TestProperties->Directory;
+
   // Return immediately if test is disabled
   if (this->TestProperties->Disabled) {
-    this->TestResult.Properties = this->TestProperties;
-    this->TestResult.ExecutionTime = cmDuration::zero();
-    this->TestResult.CompressOutput = false;
-    this->TestResult.ReturnValue = -1;
     this->TestResult.CompletionStatus = "Disabled";
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
-    this->TestResult.TestCount = this->TestProperties->Index;
-    this->TestResult.Name = this->TestProperties->Name;
-    this->TestResult.Path = this->TestProperties->Directory;
     this->TestProcess = cm::make_unique<cmProcess>(*this);
     this->TestResult.Output = "Disabled";
     this->TestResult.FullCommandLine.clear();
     return false;
   }
 
-  this->TestResult.Properties = this->TestProperties;
-  this->TestResult.ExecutionTime = cmDuration::zero();
-  this->TestResult.CompressOutput = false;
-  this->TestResult.ReturnValue = -1;
   this->TestResult.CompletionStatus = "Failed to start";
   this->TestResult.Status = cmCTestTestHandler::BAD_COMMAND;
-  this->TestResult.TestCount = this->TestProperties->Index;
-  this->TestResult.Name = this->TestProperties->Name;
-  this->TestResult.Path = this->TestProperties->Directory;
 
   // Check for failed fixture dependencies before we even look at the command
   // arguments because if we are not going to run the test, the command and
@@ -635,9 +629,8 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
 {
   this->TestProcess = cm::make_unique<cmProcess>(*this);
   this->TestProcess->SetId(this->Index);
-  this->TestProcess->SetWorkingDirectory(
-    this->TestProperties->Directory.c_str());
-  this->TestProcess->SetCommand(this->ActualCommand.c_str());
+  this->TestProcess->SetWorkingDirectory(this->TestProperties->Directory);
+  this->TestProcess->SetCommand(this->ActualCommand);
   this->TestProcess->SetCommandArguments(this->Arguments);
 
   // determine how much time we have
