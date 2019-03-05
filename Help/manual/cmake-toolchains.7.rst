@@ -556,6 +556,54 @@ command is sufficient:
 
   cmake .. -GXcode -DCMAKE_SYSTEM_NAME=iOS
 
+Variable :variable:`CMAKE_OSX_ARCHITECTURES` can be used to set architectures
+for both device and simulator. Variable :variable:`CMAKE_OSX_DEPLOYMENT_TARGET`
+can be used to set an iOS/tvOS/watchOS deployment target.
+
+Next configuration will install fat 5 architectures iOS library
+and add the ``-miphoneos-version-min=9.3``/``-mios-simulator-version-min=9.3``
+flags to the compiler:
+
+.. code-block:: console
+
+  $ cmake -S. -B_builds -GXcode \
+      -DCMAKE_SYSTEM_NAME=iOS \
+      "-DCMAKE_OSX_ARCHITECTURES=armv7;armv7s;arm64;i386;x86_64" \
+      -DCMAKE_OSX_DEPLOYMENT_TARGET=9.3 \
+      -DCMAKE_INSTALL_PREFIX=`pwd`/_install \
+      -DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH=NO \
+      -DCMAKE_IOS_INSTALL_COMBINED=YES
+
+Example:
+
+.. code-block:: cmake
+
+  # CMakeLists.txt
+  cmake_minimum_required(VERSION 3.14)
+  project(foo)
+  add_library(foo foo.cpp)
+  install(TARGETS foo DESTINATION lib)
+
+Install:
+
+.. code-block:: console
+
+    $ cmake --build _builds --config Release --target install
+
+Check library:
+
+.. code-block:: console
+
+    $ lipo -info _install/lib/libfoo.a
+    Architectures in the fat file: _install/lib/libfoo.a are: i386 armv7 armv7s x86_64 arm64
+
+.. code-block:: console
+
+    $ otool -l _install/lib/libfoo.a | grep -A2 LC_VERSION_MIN_IPHONEOS
+          cmd LC_VERSION_MIN_IPHONEOS
+      cmdsize 16
+      version 9.3
+
 Code Signing
 ^^^^^^^^^^^^
 
@@ -592,4 +640,14 @@ Please note that checks made during configuration were performed against
 the configure-time SDK and might not hold true for other SDKs.  Commands
 like :command:`find_package`, :command:`find_library`, etc. store and use
 details only for the configured SDK/platform, so they can be problematic
-if wanting to switch between device and simulator builds.
+if wanting to switch between device and simulator builds. You can follow
+the next rules to make device + simulator configuration work:
+
+- Use explicit ``-l`` linker flag,
+  e.g. ``target_link_libraries(foo PUBLIC "-lz")``
+
+- Use explicit ``-framework`` linker flag,
+  e.g. ``target_link_libraries(foo PUBLIC "-framework CoreFoundation")``
+
+- Use :command:`find_package` only for libraries installed with
+  :variable:`CMAKE_IOS_INSTALL_COMBINED` feature
