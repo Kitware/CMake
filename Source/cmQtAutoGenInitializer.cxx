@@ -594,7 +594,7 @@ bool cmQtAutoGenInitializer::InitRcc()
     if (this->QtVersion.Major == 5 || this->QtVersion.Major == 6) {
       if (stdOut.find("--list") != std::string::npos) {
         this->Rcc.ListOptions.emplace_back("--list");
-      } else {
+      } else if (stdOut.find("-list") != std::string::npos) {
         this->Rcc.ListOptions.emplace_back("-list");
       }
     }
@@ -1581,6 +1581,10 @@ bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
         print_err(prop + " evaluates to an empty value");
         return false;
       }
+
+      // Check if the provided executable already exists (it's possible for it
+      // not to exist when building Qt itself).
+      genVars.ExecutableExists = cmSystemTools::FileExists(genVars.Executable);
       return true;
     }
   }
@@ -1630,6 +1634,7 @@ bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
       print_err(err);
       return false;
     }
+    genVars.ExecutableExists = true;
   }
 
   return true;
@@ -1648,7 +1653,7 @@ bool cmQtAutoGenInitializer::RccListInputs(std::string const& fileName,
     error += "\n";
     return false;
   }
-  if (!this->Rcc.ListOptions.empty()) {
+  if (this->Rcc.ExecutableExists && !this->Rcc.ListOptions.empty()) {
     // Use rcc for file listing
     if (this->Rcc.Executable.empty()) {
       error = "rcc executable not available";
