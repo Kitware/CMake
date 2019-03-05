@@ -35,6 +35,7 @@ static std::string cmVS10EscapeAttr(std::string arg)
   cmSystemTools::ReplaceString(arg, "<", "&lt;");
   cmSystemTools::ReplaceString(arg, ">", "&gt;");
   cmSystemTools::ReplaceString(arg, "\"", "&quot;");
+  cmSystemTools::ReplaceString(arg, "\n", "&#10;");
   return arg;
 }
 
