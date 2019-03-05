@@ -2,9 +2,11 @@ include(Platform/Linux)
 
 set(ANDROID 1)
 
-# Android has soname, but binary names must end in ".so" so we cannot append
-# a version number.  Also we cannot portably represent symlinks on the host.
-set(CMAKE_PLATFORM_NO_VERSIONED_SONAME 1)
+# Conventionally Android does not use versioned soname
+# But in modern versions it is acceptable
+if(NOT DEFINED CMAKE_PLATFORM_NO_VERSIONED_SONAME)
+  set(CMAKE_PLATFORM_NO_VERSIONED_SONAME 1)
+endif()
 
 # Android reportedly ignores RPATH, and we cannot predict the install
 # location anyway.
