@@ -266,8 +266,6 @@ public:
 
   static size_t CalculateCommandLineLengthLimit();
 
-  static void EnableMessages() { s_DisableMessages = false; }
-  static void DisableMessages() { s_DisableMessages = true; }
   static void DisableRunCommandOutput() { s_DisableRunCommandOutput = true; }
   static void EnableRunCommandOutput() { s_DisableRunCommandOutput = false; }
   static bool GetRunCommandOutput() { return s_DisableRunCommandOutput; }
@@ -540,7 +538,6 @@ private:
   static bool s_RunCommandHideConsole;
   static bool s_ErrorOccured;
   static bool s_FatalErrorOccured;
-  static bool s_DisableMessages;
   static bool s_DisableRunCommandOutput;
 };
 
