@@ -16,6 +16,9 @@ Synopsis
  `Build a Project`_
   cmake --build <dir> [<options>] [-- <build-tool-options>]
 
+ `Install a Project`_
+  cmake --install <dir> [<options>]
+
  `Open a Project`_
   cmake --open <dir>
 
@@ -39,8 +42,8 @@ buildsystem generator CMake.  The above `Synopsis`_ lists various actions
 the tool can perform as described in sections below.
 
 To build a software project with CMake, `Generate a Project Buildsystem`_.
-Optionally use **cmake** to `Build a Project`_ or just run the
-corresponding build tool (e.g. ``make``) directly.  **cmake** can also
+Optionally use **cmake** to `Build a Project`_, `Install a Project`_ or just
+run the corresponding build tool (e.g. ``make``) directly.  **cmake** can also
 be used to `View Help`_.
 
 The other actions are meant for use by software developers writing
@@ -302,6 +305,41 @@ following options:
 
 Run ``cmake --build`` with no options for quick help.
 
+Install a Project
+=================
+
+CMake provides a command-line signature to install an already-generated
+project binary tree:
+
+.. code-block:: shell
+
+  cmake --install <dir> [<options>]
+
+This may be used after building a project to run installation without
+using the generated build system or the native build tool.
+The options are:
+
+``--install <dir>``
+  Project binary directory to install. This is required and must be first.
+
+``--config <cfg>``
+  For multi-configuration tools, choose configuration ``<cfg>``.
+
+``--component <comp>``
+  Component-based install. Only install component ``<comp>``.
+
+``--prefix <prefix>``
+  The installation prefix CMAKE_INSTALL_PREFIX.
+
+``--strip``
+  Strip before installing by setting CMAKE_INSTALL_DO_STRIP.
+
+``-v, --verbose``
+  Enable verbose output.
+
+  This option can be omitted if :envvar:`VERBOSE` environment variable is set.
+
+Run ``cmake --install`` with no options for quick help.
 
 Open a Project
 ==============
