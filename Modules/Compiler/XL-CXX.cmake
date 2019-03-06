@@ -16,6 +16,8 @@ if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10.1)
   endif()
   set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-qlanglvl=extended0x")
   set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "-qlanglvl=extended0x")
+  set(CMAKE_CXX98_STANDARD__HAS_FULL_SUPPORT ON)
+  set(CMAKE_CXX11_STANDARD__HAS_FULL_SUPPORT ON)
 endif ()
 
 __compiler_check_default_language_standard(CXX 10.1 98)
