@@ -116,10 +116,8 @@ typedef std::unordered_map<std::string, Json::Value> JsonValueMapType;
 
 } // namespace
 
-static bool cmakeCheckStampFile(const std::string& stampName,
-                                bool verbose = true);
-static bool cmakeCheckStampList(const std::string& stampList,
-                                bool verbose = true);
+static bool cmakeCheckStampFile(const std::string& stampName);
+static bool cmakeCheckStampList(const std::string& stampList);
 
 void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
                             void* ctx, const char* /*unused*/,
@@ -2410,7 +2408,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   return 0;
 }
 
-static bool cmakeCheckStampFile(const std::string& stampName, bool verbose)
+static bool cmakeCheckStampFile(const std::string& stampName)
 {
   // The stamp file does not exist.  Use the stamp dependencies to
   // determine whether it is really out of date.  This works in
@@ -2462,13 +2460,7 @@ static bool cmakeCheckStampFile(const std::string& stampName, bool verbose)
     stamp << "# CMake generation timestamp file for this directory.\n";
   }
   if (cmSystemTools::RenameFile(stampTemp, stampName)) {
-    if (verbose) {
-      // Notify the user why CMake is not re-running.  It is safe to
-      // just print to stdout here because this code is only reachable
-      // through an undocumented flag used by the VS generator.
-      std::cout << "CMake does not need to re-run because " << stampName
-                << " is up-to-date.\n";
-    }
+    // CMake does not need to re-run because the stamp file is up-to-date.
     return true;
   }
   cmSystemTools::RemoveFile(stampTemp);
@@ -2476,7 +2468,7 @@ static bool cmakeCheckStampFile(const std::string& stampName, bool verbose)
   return false;
 }
 
-static bool cmakeCheckStampList(const std::string& stampList, bool verbose)
+static bool cmakeCheckStampList(const std::string& stampList)
 {
   // If the stamp list does not exist CMake must rerun to generate it.
   if (!cmSystemTools::FileExists(stampList)) {
@@ -2494,7 +2486,7 @@ static bool cmakeCheckStampList(const std::string& stampList, bool verbose)
   // Check each stamp.
   std::string stampName;
   while (cmSystemTools::GetLineFromStream(fin, stampName)) {
-    if (!cmakeCheckStampFile(stampName, verbose)) {
+    if (!cmakeCheckStampFile(stampName)) {
       return false;
     }
   }
@@ -2616,7 +2608,7 @@ int cmake::Build(int jobs, const std::string& dir,
       }
     }
 
-    if (!cmakeCheckStampList(stampList, false)) {
+    if (!cmakeCheckStampList(stampList)) {
       // Correctly initialize the home (=source) and home output (=binary)
       // directories, which is required for running the generation step.
       std::string homeOrig = this->GetHomeDirectory();
