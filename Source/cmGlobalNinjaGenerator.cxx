@@ -677,31 +677,37 @@ void cmGlobalNinjaGenerator::EnableLanguage(
 //   cmGlobalXCodeGenerator
 // Called by:
 //   cmGlobalGenerator::Build()
-void cmGlobalNinjaGenerator::GenerateBuildCommand(
-  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
-  const std::string& /*projectName*/, const std::string& /*projectDir*/,
-  const std::string& targetName, const std::string& /*config*/, bool /*fast*/,
-  int jobs, bool verbose, std::vector<std::string> const& makeOptions)
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalNinjaGenerator::GenerateBuildCommand(
+  const std::string& makeProgram, const std::string& /*projectName*/,
+  const std::string& /*projectDir*/,
+  std::vector<std::string> const& targetNames, const std::string& /*config*/,
+  bool /*fast*/, int jobs, bool verbose,
+  std::vector<std::string> const& makeOptions)
 {
-  makeCommand.add(this->SelectMakeProgram(makeProgram));
+  GeneratedMakeCommand makeCommand;
+  makeCommand.Add(this->SelectMakeProgram(makeProgram));
 
   if (verbose) {
-    makeCommand.add("-v");
+    makeCommand.Add("-v");
   }
 
   if ((jobs != cmake::NO_BUILD_PARALLEL_LEVEL) &&
       (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL)) {
-    makeCommand.add("-j", std::to_string(jobs));
+    makeCommand.Add("-j", std::to_string(jobs));
   }
 
-  makeCommand.add(makeOptions.begin(), makeOptions.end());
-  if (!targetName.empty()) {
-    if (targetName == "clean") {
-      makeCommand.add("-t", "clean");
-    } else {
-      makeCommand.add(targetName);
+  makeCommand.Add(makeOptions.begin(), makeOptions.end());
+  for (const auto& tname : targetNames) {
+    if (!tname.empty()) {
+      if (tname == "clean") {
+        makeCommand.Add("-t", "clean");
+      } else {
+        makeCommand.Add(tname);
+      }
     }
   }
+  return { std::move(makeCommand) };
 }
 
 // Non-virtual public methods.

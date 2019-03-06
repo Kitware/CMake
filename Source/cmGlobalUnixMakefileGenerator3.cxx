@@ -494,11 +494,13 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
   this->WriteDirectoryRule2(ruleFileStream, lg, "preinstall", true, true);
 }
 
-void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
-  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
-  const std::string& /*projectName*/, const std::string& /*projectDir*/,
-  const std::string& targetName, const std::string& /*config*/, bool fast,
-  int jobs, bool verbose, std::vector<std::string> const& makeOptions)
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
+  const std::string& makeProgram, const std::string& /*projectName*/,
+  const std::string& /*projectDir*/,
+  std::vector<std::string> const& targetNames, const std::string& /*config*/,
+  bool fast, int jobs, bool verbose,
+  std::vector<std::string> const& makeOptions)
 {
   std::unique_ptr<cmMakefile> mfu;
   cmMakefile* mf;
@@ -515,34 +517,38 @@ void cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     mf = mfu.get();
   }
 
+  GeneratedMakeCommand makeCommand;
+
   // Make it possible to set verbosity also from command line
   if (verbose) {
-    makeCommand.add(cmSystemTools::GetCMakeCommand());
-    makeCommand.add("-E");
-    makeCommand.add("env");
-    makeCommand.add("VERBOSE=1");
+    makeCommand.Add(cmSystemTools::GetCMakeCommand());
+    makeCommand.Add("-E");
+    makeCommand.Add("env");
+    makeCommand.Add("VERBOSE=1");
   }
-  makeCommand.add(this->SelectMakeProgram(makeProgram));
+  makeCommand.Add(this->SelectMakeProgram(makeProgram));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    makeCommand.add("-j");
+    makeCommand.Add("-j");
     if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.add(std::to_string(jobs));
+      makeCommand.Add(std::to_string(jobs));
     }
   }
 
-  makeCommand.add(makeOptions.begin(), makeOptions.end());
-  if (!targetName.empty()) {
-    std::string tname = targetName;
-    if (fast) {
-      tname += "/fast";
+  makeCommand.Add(makeOptions.begin(), makeOptions.end());
+  for (auto tname : targetNames) {
+    if (!tname.empty()) {
+      if (fast) {
+        tname += "/fast";
+      }
+      tname =
+        mf->GetStateSnapshot().GetDirectory().ConvertToRelPathIfNotContained(
+          mf->GetState()->GetBinaryDirectory(), tname);
+      cmSystemTools::ConvertToOutputSlashes(tname);
+      makeCommand.Add(std::move(tname));
     }
-    tname =
-      mf->GetStateSnapshot().GetDirectory().ConvertToRelPathIfNotContained(
-        mf->GetState()->GetBinaryDirectory(), tname);
-    cmSystemTools::ConvertToOutputSlashes(tname);
-    makeCommand.add(std::move(tname));
   }
+  return { std::move(makeCommand) };
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(

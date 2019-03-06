@@ -334,46 +334,58 @@ bool cmGlobalXCodeGenerator::Open(const std::string& bindir,
   return ret;
 }
 
-void cmGlobalXCodeGenerator::GenerateBuildCommand(
-  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
-  const std::string& projectName, const std::string& /*projectDir*/,
-  const std::string& targetName, const std::string& config, bool /*fast*/,
-  int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalXCodeGenerator::GenerateBuildCommand(
+  const std::string& makeProgram, const std::string& projectName,
+  const std::string& /*projectDir*/,
+  std::vector<std::string> const& targetNames, const std::string& config,
+  bool /*fast*/, int jobs, bool /*verbose*/,
+  std::vector<std::string> const& makeOptions)
 {
+  GeneratedMakeCommand makeCommand;
   // now build the test
-  makeCommand.add(
+  makeCommand.Add(
     this->SelectMakeProgram(makeProgram, this->GetXcodeBuildCommand()));
 
   if (!projectName.empty()) {
-    makeCommand.add("-project");
+    makeCommand.Add("-project");
     std::string projectArg = projectName;
     projectArg += ".xcode";
     projectArg += "proj";
-    makeCommand.add(projectArg);
+    makeCommand.Add(projectArg);
+  }
+  if (std::find(targetNames.begin(), targetNames.end(), "clean") !=
+      targetNames.end()) {
+    makeCommand.Add("clean");
+    makeCommand.Add("-target", "ALL_BUILD");
+  } else {
+    makeCommand.Add("build");
+    if (targetNames.empty() ||
+        ((targetNames.size() == 1) && targetNames.front().empty())) {
+      makeCommand.Add("-target", "ALL_BUILD");
+    } else {
+      for (const auto& tname : targetNames) {
+        if (!tname.empty()) {
+          makeCommand.Add("-target", tname);
+        }
+      }
+    }
   }
 
-  bool clean = false;
-  std::string realTarget = targetName;
-  if (realTarget == "clean") {
-    clean = true;
-    realTarget = "ALL_BUILD";
-  }
-
-  makeCommand.add((clean ? "clean" : "build"));
-  makeCommand.add("-target", (realTarget.empty() ? "ALL_BUILD" : realTarget));
-  makeCommand.add("-configuration", (config.empty() ? "Debug" : config));
+  makeCommand.Add("-configuration", (config.empty() ? "Debug" : config));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    makeCommand.add("-jobs");
+    makeCommand.Add("-jobs");
     if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.add(std::to_string(jobs));
+      makeCommand.Add(std::to_string(jobs));
     }
   }
 
   if (this->XcodeVersion >= 70) {
-    makeCommand.add("-hideShellScriptEnvironment");
+    makeCommand.Add("-hideShellScriptEnvironment");
   }
-  makeCommand.add(makeOptions.begin(), makeOptions.end());
+  makeCommand.Add(makeOptions.begin(), makeOptions.end());
+  return { std::move(makeCommand) };
 }
 
 ///! Create a local generator appropriate to this Global Generator

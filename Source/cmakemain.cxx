@@ -63,11 +63,10 @@ static const char* cmDocumentationUsageNote[][2] = {
     "option\n"                                                                \
     "                   is not given.\n"                                      \
     "  --target <tgt> = Build <tgt> instead of default targets.\n"            \
-    "                   May only be specified once.\n"                        \
+    "                   May be specified multiple times.\n"                   \
     "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"       \
     "  --clean-first  = Build target 'clean' first, then build.\n"            \
     "                   (To clean only, use --target 'clean'.)\n"             \
-    "  --use-stderr   = Ignored.  Behavior is default in CMake >= 3.0.\n"     \
     "  -v --verbose   = Enable verbose output - if supported - including\n"   \
     "                   the build commands to be executed. \n"                \
     "  --             = Pass remaining options to the native tool.\n"
@@ -395,13 +394,14 @@ static int do_build(int ac, char const* const* av)
   return -1;
 #else
   int jobs = cmake::NO_BUILD_PARALLEL_LEVEL;
-  std::string target;
+  std::vector<std::string> targets;
   std::string config = "Debug";
   std::string dir;
   std::vector<std::string> nativeOptions;
-  bool clean = false;
+  bool cleanFirst = false;
+  bool foundClean = false;
+  bool foundNonClean = false;
   bool verbose = cmSystemTools::HasEnv("VERBOSE");
-  bool hasTarget = false;
 
   enum Doing
   {
@@ -421,25 +421,20 @@ static int do_build(int ac, char const* const* av)
       if (jobs < 0) {
         dir.clear();
       }
+      doing = DoingNone;
     } else if (cmHasLiteralPrefix(av[i], "--parallel")) {
       const char* nextArg = ((i + 1 < ac) ? av[i + 1] : nullptr);
       jobs = extract_job_number(i, av[i], nextArg, sizeof("--parallel") - 1);
       if (jobs < 0) {
         dir.clear();
       }
+      doing = DoingNone;
     } else if (strcmp(av[i], "--target") == 0) {
-      if (!hasTarget) {
-        doing = DoingTarget;
-        hasTarget = true;
-      } else {
-        std::cerr << "'--target' may not be specified more than once.\n\n";
-        dir.clear();
-        break;
-      }
+      doing = DoingTarget;
     } else if (strcmp(av[i], "--config") == 0) {
       doing = DoingConfig;
     } else if (strcmp(av[i], "--clean-first") == 0) {
-      clean = true;
+      cleanFirst = true;
       doing = DoingNone;
     } else if ((strcmp(av[i], "--verbose") == 0) ||
                (strcmp(av[i], "-v") == 0)) {
@@ -456,8 +451,23 @@ static int do_build(int ac, char const* const* av)
           doing = DoingNone;
           break;
         case DoingTarget:
-          target = av[i];
-          doing = DoingNone;
+          if (strlen(av[i]) == 0) {
+            std::cerr << "Warning: Argument number " << i
+                      << " after --target option is empty." << std::endl;
+          } else {
+            targets.emplace_back(av[i]);
+            if (strcmp(av[i], "clean") == 0) {
+              foundClean = true;
+            } else {
+              foundNonClean = true;
+            }
+          }
+          if (foundClean && foundNonClean) {
+            std::cerr << "Error: Building 'clean' and other targets together "
+                         "is not supported."
+                      << std::endl;
+            dir.clear();
+          }
           break;
         case DoingConfig:
           config = av[i];
@@ -508,7 +518,8 @@ static int do_build(int ac, char const* const* av)
   cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
   });
-  return cm.Build(jobs, dir, target, config, nativeOptions, clean, verbose);
+  return cm.Build(jobs, dir, targets, config, nativeOptions, cleanFirst,
+                  verbose);
 #endif
 }
 

@@ -369,24 +369,26 @@ void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
   fout.Close();
 }
 
-void cmGlobalGhsMultiGenerator::GenerateBuildCommand(
-  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
-  const std::string& projectName, const std::string& projectDir,
-  const std::string& targetName, const std::string& /*config*/, bool /*fast*/,
-  int jobs, bool /*verbose*/, std::vector<std::string> const& makeOptions)
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalGhsMultiGenerator::GenerateBuildCommand(
+  const std::string& makeProgram, const std::string& projectName,
+  const std::string& projectDir, std::vector<std::string> const& targetNames,
+  const std::string& /*config*/, bool /*fast*/, int jobs, bool /*verbose*/,
+  std::vector<std::string> const& makeOptions)
 {
+  GeneratedMakeCommand makeCommand = {};
   const char* gbuild =
     this->CMakeInstance->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
-  makeCommand.add(this->SelectMakeProgram(makeProgram, (std::string)gbuild));
+  makeCommand.Add(this->SelectMakeProgram(makeProgram, (std::string)gbuild));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    makeCommand.add("-parallel");
+    makeCommand.Add("-parallel");
     if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.add(std::to_string(jobs));
+      makeCommand.Add(std::to_string(jobs));
     }
   }
 
-  makeCommand.add(makeOptions.begin(), makeOptions.end());
+  makeCommand.Add(makeOptions.begin(), makeOptions.end());
 
   /* determine which top-project file to use */
   std::string proj = projectName + ".top" + FILE_EXTENSION;
@@ -399,18 +401,24 @@ void cmGlobalGhsMultiGenerator::GenerateBuildCommand(
     }
   }
 
-  makeCommand.add("-top", proj);
-  if (!targetName.empty()) {
-    if (targetName == "clean") {
-      makeCommand.add("-clean");
+  makeCommand.Add("-top", proj);
+  if (!targetNames.empty()) {
+    if (std::find(targetNames.begin(), targetNames.end(), "clean") !=
+        targetNames.end()) {
+      makeCommand.Add("-clean");
     } else {
-      if (targetName.compare(targetName.size() - 4, 4, ".gpj") == 0) {
-        makeCommand.add(targetName);
-      } else {
-        makeCommand.add(targetName + ".gpj");
+      for (const auto& tname : targetNames) {
+        if (!tname.empty()) {
+          if (tname.compare(tname.size() - 4, 4, ".gpj") == 0) {
+            makeCommand.Add(tname);
+          } else {
+            makeCommand.Add(tname + ".gpj");
+          }
+        }
       }
     }
   }
+  return { makeCommand };
 }
 
 void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout)

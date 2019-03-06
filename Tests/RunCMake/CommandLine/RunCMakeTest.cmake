@@ -107,6 +107,12 @@ function(run_BuildDir)
     ${CMAKE_COMMAND} --build BuildDir-build --target CustomTarget)
   run_cmake_command(BuildDir--build-multiple-targets ${CMAKE_COMMAND} -E chdir ..
     ${CMAKE_COMMAND} --build BuildDir-build --target CustomTarget2 --target CustomTarget3)
+  run_cmake_command(BuildDir--build-multiple-targets-jobs ${CMAKE_COMMAND} -E chdir ..
+    ${CMAKE_COMMAND} --build BuildDir-build --target CustomTarget CustomTarget2 -j2 --target CustomTarget3)
+  run_cmake_command(BuildDir--build-multiple-targets-with-clean-first ${CMAKE_COMMAND} -E chdir ..
+    ${CMAKE_COMMAND} --build BuildDir-build --target clean CustomTarget)
+  run_cmake_command(BuildDir--build-multiple-targets-with-clean-second ${CMAKE_COMMAND} -E chdir ..
+    ${CMAKE_COMMAND} --build BuildDir-build --target CustomTarget clean)
   run_cmake_command(BuildDir--build-jobs-bad-number ${CMAKE_COMMAND} -E chdir ..
     ${CMAKE_COMMAND} --build BuildDir-build -j 12ab)
   run_cmake_command(BuildDir--build-jobs-good-number ${CMAKE_COMMAND} -E chdir ..

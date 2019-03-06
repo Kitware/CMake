@@ -1763,20 +1763,9 @@ int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
                                         this->FirstTimeProgress);
   }
 
-  std::string newTarget;
+  std::vector<std::string> newTarget = {};
   if (!target.empty()) {
-    newTarget += target;
-#if 0
-#  if defined(_WIN32) || defined(__CYGWIN__)
-    std::string tmp = target;
-    // if the target does not already end in . something
-    // then assume .exe
-    if(tmp.size() < 4 || tmp[tmp.size()-4] != '.')
-      {
-      newTarget += ".exe";
-      }
-#  endif // WIN32
-#endif
+    newTarget = { target };
   }
   std::string config =
     mf->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
@@ -1784,14 +1773,16 @@ int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
                      config, false, fast, false, this->TryCompileTimeout);
 }
 
-void cmGlobalGenerator::GenerateBuildCommand(
-  GeneratedMakeCommand& makeCommand, const std::string& /*unused*/,
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalGenerator::GenerateBuildCommand(
   const std::string& /*unused*/, const std::string& /*unused*/,
-  const std::string& /*unused*/, const std::string& /*unused*/,
-  bool /*unused*/, int /*unused*/, bool /*unused*/,
-  std::vector<std::string> const& /*unused*/)
+  const std::string& /*unused*/, std::vector<std::string> const& /*unused*/,
+  const std::string& /*unused*/, bool /*unused*/, int /*unused*/,
+  bool /*unused*/, std::vector<std::string> const& /*unused*/)
 {
-  makeCommand.add("cmGlobalGenerator::GenerateBuildCommand not implemented");
+  GeneratedMakeCommand makeCommand;
+  makeCommand.Add("cmGlobalGenerator::GenerateBuildCommand not implemented");
+  return { std::move(makeCommand) };
 }
 
 void cmGlobalGenerator::PrintBuildCommandAdvice(std::ostream& /*os*/,
@@ -1801,15 +1792,13 @@ void cmGlobalGenerator::PrintBuildCommandAdvice(std::ostream& /*os*/,
   // they do not support certain build command line options
 }
 
-int cmGlobalGenerator::Build(int jobs, const std::string& /*unused*/,
-                             const std::string& bindir,
-                             const std::string& projectName,
-                             const std::string& target, std::string& output,
-                             const std::string& makeCommandCSTR,
-                             const std::string& config, bool clean, bool fast,
-                             bool verbose, cmDuration timeout,
-                             cmSystemTools::OutputOption outputflag,
-                             std::vector<std::string> const& nativeOptions)
+int cmGlobalGenerator::Build(
+  int jobs, const std::string& /*unused*/, const std::string& bindir,
+  const std::string& projectName, const std::vector<std::string>& targets,
+  std::string& output, const std::string& makeCommandCSTR,
+  const std::string& config, bool clean, bool fast, bool verbose,
+  cmDuration timeout, cmSystemTools::OutputOption outputflag,
+  std::vector<std::string> const& nativeOptions)
 {
   bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
 
@@ -1830,32 +1819,37 @@ int cmGlobalGenerator::Build(int jobs, const std::string& /*unused*/,
     return 1;
   }
 
-  int retVal;
+  int retVal = 0;
   cmSystemTools::SetRunCommandHideConsole(true);
   std::string outputBuffer;
   std::string* outputPtr = &outputBuffer;
 
-  GeneratedMakeCommand makeCommand;
-  this->GenerateBuildCommand(makeCommand, makeCommandCSTR, projectName, bindir,
-                             target, config, fast, jobs, verbose,
-                             nativeOptions);
+  std::vector<GeneratedMakeCommand> makeCommand =
+    this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir, targets,
+                               config, fast, jobs, verbose, nativeOptions);
 
   // Workaround to convince some commands to produce output.
   if (outputflag == cmSystemTools::OUTPUT_PASSTHROUGH &&
-      makeCommand.RequiresOutputForward) {
+      makeCommand.back().RequiresOutputForward) {
     outputflag = cmSystemTools::OUTPUT_FORWARD;
   }
 
   // should we do a clean first?
   if (clean) {
-    GeneratedMakeCommand cleanCommand;
-    this->GenerateBuildCommand(cleanCommand, makeCommandCSTR, projectName,
-                               bindir, "clean", config, fast, jobs, verbose);
+    std::vector<GeneratedMakeCommand> cleanCommand =
+      this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir,
+                                 { "clean" }, config, fast, jobs, verbose);
     output += "\nRun Clean Command:";
-    output += cleanCommand.printable();
+    output += cleanCommand.front().Printable();
     output += "\n";
-
-    if (!cmSystemTools::RunSingleCommand(cleanCommand.PrimaryCommand,
+    if (cleanCommand.size() != 1) {
+      this->GetCMakeInstance()->IssueMessage(MessageType::INTERNAL_ERROR,
+                                             "The generator did not produce "
+                                             "exactly one command for the "
+                                             "'clean' target");
+      return 1;
+    }
+    if (!cmSystemTools::RunSingleCommand(cleanCommand.front().PrimaryCommand,
                                          outputPtr, outputPtr, &retVal,
                                          nullptr, outputflag, timeout)) {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
@@ -1869,25 +1863,33 @@ int cmGlobalGenerator::Build(int jobs, const std::string& /*unused*/,
   }
 
   // now build
-  std::string makeCommandStr = makeCommand.printable();
+  std::string makeCommandStr;
   output += "\nRun Build Command(s):";
-  output += makeCommandStr;
-  output += "\n";
 
-  if (!cmSystemTools::RunSingleCommand(makeCommand.PrimaryCommand, outputPtr,
-                                       outputPtr, &retVal, nullptr, outputflag,
-                                       timeout)) {
-    cmSystemTools::SetRunCommandHideConsole(hideconsole);
-    cmSystemTools::Error(
-      "Generator: execution of make failed. Make command was: " +
-      makeCommandStr);
+  for (auto command = makeCommand.begin(); command != makeCommand.end();
+       ++command) {
+    makeCommandStr = command->Printable();
+    if (command != makeCommand.end()) {
+      makeCommandStr += " && ";
+    }
+
+    output += makeCommandStr;
+    if (!cmSystemTools::RunSingleCommand(command->PrimaryCommand, outputPtr,
+                                         outputPtr, &retVal, nullptr,
+                                         outputflag, timeout)) {
+      cmSystemTools::SetRunCommandHideConsole(hideconsole);
+      cmSystemTools::Error(
+        "Generator: execution of make failed. Make command was: " +
+        makeCommandStr);
+      output += *outputPtr;
+      output += "\nGenerator: execution of make failed. Make command was: " +
+        makeCommandStr + "\n";
+
+      return 1;
+    }
     output += *outputPtr;
-    output += "\nGenerator: execution of make failed. Make command was: " +
-      makeCommandStr + "\n";
-
-    return 1;
   }
-  output += *outputPtr;
+  output += "\n";
   cmSystemTools::SetRunCommandHideConsole(hideconsole);
 
   // The OpenWatcom tools do not return an error code when a link

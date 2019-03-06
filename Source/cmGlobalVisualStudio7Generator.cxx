@@ -190,11 +190,14 @@ const char* cmGlobalVisualStudio7Generator::ExternalProjectType(
   }
   return "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942";
 }
-void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
-  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
-  const std::string& projectName, const std::string& /*projectDir*/,
-  const std::string& targetName, const std::string& config, bool /*fast*/,
-  int /*jobs*/, bool /*verbose*/, std::vector<std::string> const& makeOptions)
+
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalVisualStudio7Generator::GenerateBuildCommand(
+  const std::string& makeProgram, const std::string& projectName,
+  const std::string& /*projectDir*/,
+  std::vector<std::string> const& targetNames, const std::string& config,
+  bool /*fast*/, int /*jobs*/, bool /*verbose*/,
+  std::vector<std::string> const& makeOptions)
 {
   // Select the caller- or user-preferred make program, else devenv.
   std::string makeProgramSelected =
@@ -210,24 +213,39 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   }
 
   // Workaround to convince VCExpress.exe to produce output.
-  makeCommand.RequiresOutputForward =
+  const bool requiresOutputForward =
     (makeProgramLower.find("vcexpress") != std::string::npos);
+  std::vector<GeneratedMakeCommand> makeCommands;
 
-  makeCommand.add(makeProgramSelected);
-
-  makeCommand.add(std::string(projectName) + ".sln");
-  std::string realTarget = targetName;
-  bool clean = false;
-  if (realTarget == "clean") {
-    clean = true;
-    realTarget = "ALL_BUILD";
+  std::vector<std::string> realTargetNames = targetNames;
+  if (targetNames.empty() ||
+      ((targetNames.size() == 1) && targetNames.front().empty())) {
+    realTargetNames = { "ALL_BUILD" };
   }
-
-  makeCommand.add((clean ? "/clean" : "/build"));
-  makeCommand.add((config.empty() ? "Debug" : config));
-  makeCommand.add("/project");
-  makeCommand.add((realTarget.empty() ? "ALL_BUILD" : realTarget));
-  makeCommand.add(makeOptions.begin(), makeOptions.end());
+  for (const auto& tname : realTargetNames) {
+    std::string realTarget;
+    if (!tname.empty()) {
+      realTarget = tname;
+    } else {
+      continue;
+    }
+    bool clean = false;
+    if (realTarget == "clean") {
+      clean = true;
+      realTarget = "ALL_BUILD";
+    }
+    GeneratedMakeCommand makeCommand;
+    makeCommand.RequiresOutputForward = requiresOutputForward;
+    makeCommand.Add(makeProgramSelected);
+    makeCommand.Add(std::string(projectName) + ".sln");
+    makeCommand.Add((clean ? "/clean" : "/build"));
+    makeCommand.Add((config.empty() ? "Debug" : config));
+    makeCommand.Add("/project");
+    makeCommand.Add(realTarget);
+    makeCommand.Add(makeOptions.begin(), makeOptions.end());
+    makeCommands.emplace_back(std::move(makeCommand));
+  }
+  return makeCommands;
 }
 
 ///! Create a local generator appropriate to this Global Generator

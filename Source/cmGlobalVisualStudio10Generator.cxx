@@ -878,12 +878,14 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
   return true;
 }
 
-void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
-  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
-  const std::string& projectName, const std::string& projectDir,
-  const std::string& targetName, const std::string& config, bool fast,
-  int jobs, bool verbose, std::vector<std::string> const& makeOptions)
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalVisualStudio10Generator::GenerateBuildCommand(
+  const std::string& makeProgram, const std::string& projectName,
+  const std::string& projectDir, std::vector<std::string> const& targetNames,
+  const std::string& config, bool fast, int jobs, bool verbose,
+  std::vector<std::string> const& makeOptions)
 {
+  std::vector<GeneratedMakeCommand> makeCommands;
   // Select the caller- or user-preferred make program, else MSBuild.
   std::string makeProgramSelected =
     this->SelectMakeProgram(makeProgram, this->GetMSBuildCommand());
@@ -895,7 +897,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
                     makeProgramLower.find("vcexpress") != std::string::npos);
 
   // Workaround to convince VCExpress.exe to produce output.
-  makeCommand.RequiresOutputForward =
+  const bool requiresOutputForward =
     (makeProgramLower.find("vcexpress") != std::string::npos);
 
   // MSBuild is preferred (and required for VS Express), but if the .sln has
@@ -926,62 +928,71 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   }
   if (useDevEnv) {
     // Use devenv to build solutions containing Intel Fortran projects.
-    cmGlobalVisualStudio7Generator::GenerateBuildCommand(
-      makeCommand, makeProgram, projectName, projectDir, targetName, config,
-      fast, jobs, verbose, makeOptions);
-    return;
+    return cmGlobalVisualStudio7Generator::GenerateBuildCommand(
+      makeProgram, projectName, projectDir, targetNames, config, fast, jobs,
+      verbose, makeOptions);
   }
 
-  makeCommand.add(makeProgramSelected);
-
-  std::string realTarget = targetName;
-  // msbuild.exe CxxOnly.sln /t:Build /p:Configuration=Debug /target:ALL_BUILD
-  //                         /m
-  if (realTarget.empty()) {
-    realTarget = "ALL_BUILD";
+  std::vector<std::string> realTargetNames = targetNames;
+  if (targetNames.empty() ||
+      ((targetNames.size() == 1) && targetNames.front().empty())) {
+    realTargetNames = { "ALL_BUILD" };
   }
-  if (realTarget == "clean") {
-    makeCommand.add(std::string(projectName) + ".sln");
-    makeCommand.add("/t:Clean");
-  } else {
-    std::string targetProject(realTarget);
-    targetProject += ".vcxproj";
-    if (targetProject.find('/') == std::string::npos) {
-      // it might be in a subdir
-      if (cmSlnProjectEntry const* proj =
-            slnData.GetProjectByName(realTarget)) {
-        targetProject = proj->GetRelativePath();
-        cmSystemTools::ConvertToUnixSlashes(targetProject);
-      }
+  for (const auto& tname : realTargetNames) {
+    // msbuild.exe CxxOnly.sln /t:Build /p:Configuration=Debug
+    // /target:ALL_BUILD
+    //                         /m
+    if (tname.empty()) {
+      continue;
     }
-    makeCommand.add(std::move(targetProject));
-  }
-  std::string configArg = "/p:Configuration=";
-  if (!config.empty()) {
-    configArg += config;
-  } else {
-    configArg += "Debug";
-  }
-  makeCommand.add(configArg);
-  makeCommand.add(std::string("/p:Platform=") + this->GetPlatformName());
-  makeCommand.add(std::string("/p:VisualStudioVersion=") +
-                  this->GetIDEVersion());
 
-  if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.add("/m");
+    GeneratedMakeCommand makeCommand;
+    makeCommand.RequiresOutputForward = requiresOutputForward;
+    makeCommand.Add(makeProgramSelected);
+
+    if (tname == "clean") {
+      makeCommand.Add(std::string(projectName) + ".sln");
+      makeCommand.Add("/t:Clean");
     } else {
-      makeCommand.add(std::string("/m:") + std::to_string(jobs));
+      std::string targetProject(tname);
+      targetProject += ".vcxproj";
+      if (targetProject.find('/') == std::string::npos) {
+        // it might be in a subdir
+        if (cmSlnProjectEntry const* proj = slnData.GetProjectByName(tname)) {
+          targetProject = proj->GetRelativePath();
+          cmSystemTools::ConvertToUnixSlashes(targetProject);
+        }
+      }
+      makeCommand.Add(std::move(targetProject));
     }
-    // Having msbuild.exe and cl.exe using multiple jobs is discouraged
-    makeCommand.add("/p:CL_MPCount=1");
+    std::string configArg = "/p:Configuration=";
+    if (!config.empty()) {
+      configArg += config;
+    } else {
+      configArg += "Debug";
+    }
+    makeCommand.Add(configArg);
+    makeCommand.Add(std::string("/p:Platform=") + this->GetPlatformName());
+    makeCommand.Add(std::string("/p:VisualStudioVersion=") +
+                    this->GetIDEVersion());
+
+    if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
+      if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
+        makeCommand.Add("/m");
+      } else {
+        makeCommand.Add(std::string("/m:") + std::to_string(jobs));
+      }
+      // Having msbuild.exe and cl.exe using multiple jobs is discouraged
+      makeCommand.Add("/p:CL_MPCount=1");
+    }
+
+    // Respect the verbosity: 'n' normal will show build commands
+    //                        'm' minimal only the build step's title
+    makeCommand.Add(std::string("/v:") + ((verbose) ? "n" : "m"));
+    makeCommand.Add(makeOptions.begin(), makeOptions.end());
+    makeCommands.emplace_back(std::move(makeCommand));
   }
-
-  // Respect the verbosity: 'n' normal will show build commands
-  //                        'm' minimal only the build step's title
-  makeCommand.add(std::string("/v:") + ((verbose) ? "n" : "m"));
-
-  makeCommand.add(makeOptions.begin(), makeOptions.end());
+  return makeCommands;
 }
 
 bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
