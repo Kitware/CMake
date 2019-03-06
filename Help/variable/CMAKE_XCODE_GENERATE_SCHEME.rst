@@ -5,11 +5,6 @@ If enabled, the Xcode generator will generate schema files.  These
 are useful to invoke analyze, archive, build-for-testing and test
 actions from the command line.
 
-.. note::
-
-  The Xcode Schema Generator is still experimental and subject to
-  change.
-
 The following target properties overwrite the default of the
 corresponding settings on the "Diagnostic" tab for each schema file.
 Each of those is initialized by the respective ``CMAKE_`` variable
