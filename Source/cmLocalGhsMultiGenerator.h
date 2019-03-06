@@ -23,7 +23,7 @@ public:
   /**
    * Generate the makefile for this directory.
    */
-  virtual void Generate();
+  void Generate() override;
 
   std::string GetTargetDirectory(
     cmGeneratorTarget const* target) const override;
