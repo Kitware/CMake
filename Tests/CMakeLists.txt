@@ -1421,6 +1421,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindDoxygen)
   endif()
 
+  if(CMake_TEST_FindEnvModules)
+    add_subdirectory(FindEnvModules)
+  endif()
+
   if(CMake_TEST_FindEXPAT)
     add_subdirectory(FindEXPAT)
   endif()
