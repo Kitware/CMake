@@ -50,7 +50,7 @@ The options are:
   authenticated clients. In this case, you should provide a bearer token in your
   header:
 
-  ::
+  .. code-block:: cmake
 
     ctest_submit(HTTPHEADER "Authorization: Bearer <auth-token>")
 
