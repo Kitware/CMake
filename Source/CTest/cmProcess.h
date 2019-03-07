@@ -28,10 +28,9 @@ class cmProcess
 public:
   explicit cmProcess(cmCTestRunTest& runner);
   ~cmProcess();
-  const char* GetCommand() { return this->Command.c_str(); }
-  void SetCommand(const char* command);
+  void SetCommand(std::string const& command);
   void SetCommandArguments(std::vector<std::string> const& arg);
-  void SetWorkingDirectory(const char* dir) { this->WorkingDirectory = dir; }
+  void SetWorkingDirectory(std::string const& dir);
   void SetTimeout(cmDuration t) { this->Timeout = t; }
   void ChangeTimeout(cmDuration t);
   void ResetStartTime();
