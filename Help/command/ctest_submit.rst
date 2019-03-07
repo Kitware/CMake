@@ -46,7 +46,15 @@ The options are:
 
 ``HTTPHEADER <HTTP-header>``
   Specify HTTP header to be included in the request to CDash during submission.
-  This suboption can be repeated several times.
+  For example, CDash can be configured to only accept submissions from
+  authenticated clients. In this case, you should provide a bearer token in your
+  header:
+
+  ::
+
+    ctest_submit(HTTPHEADER "Authorization: Bearer <auth-token>")
+
+  This suboption can be repeated several times for multiple headers.
 
 ``RETRY_COUNT <count>``
   Specify how many times to retry a timed-out submission.
