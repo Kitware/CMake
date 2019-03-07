@@ -402,7 +402,11 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     cmTarget* target = this->Makefile->FindLocalNonAliasTarget(tgt);
     if (!target) {
       // If no local target has been found, find it in the global scope.
-      target = this->Makefile->GetGlobalGenerator()->FindTarget(tgt, true);
+      cmTarget* const global_target =
+        this->Makefile->GetGlobalGenerator()->FindTarget(tgt, true);
+      if (global_target && !global_target->IsImported()) {
+        target = global_target;
+      }
     }
     if (target) {
       // Found the target.  Check its type.
