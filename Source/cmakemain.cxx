@@ -58,12 +58,13 @@ static const char* cmDocumentationUsageNote[][2] = {
     "                 = Build in parallel using the given number of jobs. \n" \
     "                   If <jobs> is omitted the native build tool's \n"      \
     "                   default number is used.\n"                            \
+    "                   The CMAKE_BUILD_PARALLEL_LEVEL environment "          \
     "variable\n"                                                              \
     "                   specifies a default parallel level when this "        \
     "option\n"                                                                \
     "                   is not given.\n"                                      \
-    "  --target <tgt> = Build <tgt> instead of default targets.\n"            \
-    "                   May be specified multiple times.\n"                   \
+    "  --target <tgt>..., -t <tgt>... \n"                                     \
+    "                 = Build <tgt> instead of default targets.\n"            \
     "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"       \
     "  --clean-first  = Build target 'clean' first, then build.\n"            \
     "                   (To clean only, use --target 'clean'.)\n"             \
@@ -429,7 +430,8 @@ static int do_build(int ac, char const* const* av)
         dir.clear();
       }
       doing = DoingNone;
-    } else if (strcmp(av[i], "--target") == 0) {
+    } else if ((strcmp(av[i], "--target") == 0) ||
+               (strcmp(av[i], "-t") == 0)) {
       doing = DoingTarget;
     } else if (strcmp(av[i], "--config") == 0) {
       doing = DoingConfig;

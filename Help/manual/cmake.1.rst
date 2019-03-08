@@ -276,7 +276,7 @@ following options:
   The :envvar:`CMAKE_BUILD_PARALLEL_LEVEL` environment variable, if set,
   specifies a default parallel level when this option is not given.
 
-``--target <tgt>...``
+``--target <tgt>..., -t <tgt>...``
   Build ``<tgt>`` instead of default targets.  May be specified multiple times.
 
 ``--config <cfg>``
