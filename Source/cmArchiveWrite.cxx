@@ -179,12 +179,10 @@ cmArchiveWrite::~cmArchiveWrite()
 bool cmArchiveWrite::Add(std::string path, size_t skip, const char* prefix,
                          bool recursive)
 {
-  if (this->Okay()) {
-    if (!path.empty() && path.back() == '/') {
-      path.erase(path.size() - 1);
-    }
-    this->AddPath(path.c_str(), skip, prefix, recursive);
+  if (!path.empty() && path.back() == '/') {
+    path.erase(path.size() - 1);
   }
+  this->AddPath(path.c_str(), skip, prefix, recursive);
   return this->Okay();
 }
 
@@ -220,6 +218,7 @@ bool cmArchiveWrite::AddPath(const char* path, size_t skip, const char* prefix,
 
 bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
 {
+  this->Error = "";
   // Skip the file if we have no name for it.  This may happen on a
   // top-level directory, which does not need to be included anyway.
   if (skip >= strlen(file)) {
@@ -241,7 +240,7 @@ bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
   cm_archive_entry_copy_pathname(e, dest);
   if (archive_read_disk_entry_from_file(this->Disk, e, -1, nullptr) !=
       ARCHIVE_OK) {
-    this->Error = "archive_read_disk_entry_from_file '";
+    this->Error = "Unable to read from file '";
     this->Error += file;
     this->Error += "': ";
     this->Error += cm_archive_error_string(this->Disk);
