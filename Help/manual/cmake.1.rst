@@ -483,6 +483,21 @@ Available commands are:
 ``tar [cxt][vf][zjJ] file.tar [<options>] [--] [<file>...]``
   Create or extract a tar or zip archive.  Options are:
 
+  ``c``
+    Create a new archive containing the specified files.
+    If used, the <file> argument is mandatory.
+  ``x``
+    Extract to disk from the archive.
+  ``t``
+    List archive contents to stdout.
+  ``v``
+    Produce verbose output.
+  ``z``
+    Compress the resulting archive with gzip.
+  ``j``
+    Compress the resulting archive with bzip2.
+  ``J``
+    Compress the resulting archive with XZ.
   ``--``
     Stop interpreting options and treat all remaining arguments
     as file names even if they start in ``-``.
