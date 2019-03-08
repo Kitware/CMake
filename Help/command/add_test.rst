@@ -55,7 +55,8 @@ file produced by target ``myexe``.
 
   CMake will generate tests only if the :command:`enable_testing`
   command has been invoked.  The :module:`CTest` module invokes the
-  command automatically when the ``BUILD_TESTING`` option is ``ON``.
+  command automatically unless the ``BUILD_TESTING`` option is turned
+  ``OFF``.
 
 ---------------------------------------------------------------------
 
