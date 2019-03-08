@@ -412,6 +412,14 @@ public:
   /** Setup the environment to enable VS 8 IDE output.  */
   static void EnableVSConsoleOutput();
 
+  enum cmTarAction
+  {
+    TarActionCreate,
+    TarActionList,
+    TarActionExtract,
+    TarActionNone
+  };
+
   /** Create tar */
   enum cmTarCompression
   {
@@ -420,6 +428,7 @@ public:
     TarCompressXZ,
     TarCompressNone
   };
+
   static bool ListTar(const char* outFileName, bool verbose);
   static bool CreateTar(const char* outFileName,
                         const std::vector<std::string>& files,

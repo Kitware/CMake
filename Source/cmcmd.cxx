@@ -1078,21 +1078,47 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           files.push_back(arg);
         }
       }
+      cmSystemTools::cmTarAction action = cmSystemTools::TarActionNone;
       cmSystemTools::cmTarCompression compress =
         cmSystemTools::TarCompressNone;
       bool verbose = false;
       int nCompress = 0;
-      if (flags.find_first_of('j') != std::string::npos) {
-        compress = cmSystemTools::TarCompressBZip2;
-        ++nCompress;
-      }
-      if (flags.find_first_of('J') != std::string::npos) {
-        compress = cmSystemTools::TarCompressXZ;
-        ++nCompress;
-      }
-      if (flags.find_first_of('z') != std::string::npos) {
-        compress = cmSystemTools::TarCompressGZip;
-        ++nCompress;
+
+      for (auto flag : flags) {
+        switch (flag) {
+          case '-':
+          case 'f': {
+            // Keep for backward compatibility. Ignored
+          } break;
+          case 'j': {
+            compress = cmSystemTools::TarCompressBZip2;
+            ++nCompress;
+          } break;
+          case 'J': {
+            compress = cmSystemTools::TarCompressXZ;
+            ++nCompress;
+          } break;
+          case 'z': {
+            compress = cmSystemTools::TarCompressGZip;
+            ++nCompress;
+          } break;
+          case 'v': {
+            verbose = true;
+          } break;
+          case 't': {
+            action = cmSystemTools::TarActionList;
+          } break;
+          case 'c': {
+            action = cmSystemTools::TarActionCreate;
+          } break;
+          case 'x': {
+            action = cmSystemTools::TarActionExtract;
+          } break;
+          default: {
+            cmSystemTools::Message(
+              std::string("tar: Unknown argument: ") + flag, "Warning");
+          }
+        }
       }
       if ((format == "7zip" || format == "zip") && nCompress > 0) {
         cmSystemTools::Error("Can not use compression flags with format: " +
@@ -1104,16 +1130,12 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
                              "at most one flag of z, j, or J may be used");
         return 1;
       }
-      if (flags.find_first_of('v') != std::string::npos) {
-        verbose = true;
-      }
-
-      if (flags.find_first_of('t') != std::string::npos) {
+      if (action == cmSystemTools::TarActionList) {
         if (!cmSystemTools::ListTar(outFile.c_str(), verbose)) {
           cmSystemTools::Error("Problem listing tar: " + outFile);
           return 1;
         }
-      } else if (flags.find_first_of('c') != std::string::npos) {
+      } else if (action == cmSystemTools::TarActionCreate) {
         if (files.empty()) {
           cmSystemTools::Message("tar: No files or directories specified",
                                  "Warning");
@@ -1123,7 +1145,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           cmSystemTools::Error("Problem creating tar: " + outFile);
           return 1;
         }
-      } else if (flags.find_first_of('x') != std::string::npos) {
+      } else if (action == cmSystemTools::TarActionExtract) {
         if (!cmSystemTools::ExtractTar(outFile.c_str(), verbose)) {
           cmSystemTools::Error("Problem extracting tar: " + outFile);
           return 1;
@@ -1144,6 +1166,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           cmSystemTools::Delay(delay);
         }
 #endif
+      } else {
+        cmSystemTools::Error("tar: No action specified. Please choose: 't' "
+                             "(list), 'c' (create) or 'x' (extract)");
+        return 1;
       }
       return 0;
     }

@@ -1,9 +1,9 @@
 set(OUTPUT_NAME "test.tar")
 
-set(COMPRESSION_FLAGS cvf)
+set(COMPRESSION_FLAGS -cvf)
 set(COMPRESSION_OPTIONS --format=pax)
 
-set(DECOMPRESSION_FLAGS xvf)
+set(DECOMPRESSION_FLAGS -xvf)
 
 include(${CMAKE_CURRENT_LIST_DIR}/roundtrip.cmake)
 
