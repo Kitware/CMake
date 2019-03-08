@@ -31,7 +31,7 @@ CMAKE_PREFIX_PATH:STRING=${qt_prefix}
 CMake_TEST_Qt4:BOOL=OFF
 CMake_TEST_Qt5:BOOL=OFF
 ")
-set(ppflags "-D_WIN32_WINNT=0x601 -DNTDDI_VERSION=0x06010000 -D_USING_V110_SDK71_")
+set(ppflags "-D_WIN32_WINNT=0x601 -DNTDDI_VERSION=0x06010000")
 set(CFLAGS "${ppflags}")
 set(CXXFLAGS "${ppflags}")
 set(ENV ". ~/rel/env32")
