@@ -109,3 +109,24 @@ pkg_check_modules(FakePackage2 REQUIRED QUIET IMPORTED_TARGET cmakeinternalfakep
 if (NOT FakePackage2_LINK_LIBRARIES STREQUAL "${fakePkgDir}/lib/libcmakeinternalfakepackage2.a")
   message(FATAL_ERROR "FakePackage2_LINK_LIBRARIES has bad content on second run: ${FakePackage2_LINK_LIBRARIES}")
 endif()
+
+set(pname fakelinkoptionspackage)
+file(WRITE ${fakePkgDir}/lib/pkgconfig/${pname}.pc
+"Name: FakeLinkOptionsPackage
+Description: Dummy package for FindPkgConfig IMPORTED_TARGET INTERFACE_LINK_OPTIONS test
+Version: 1.2.3
+Libs: -e dummy_main
+")
+
+set(expected_link_options -e dummy_main)
+pkg_check_modules(FakeLinkOptionsPackage REQUIRED QUIET IMPORTED_TARGET fakelinkoptionspackage)
+if (NOT TARGET PkgConfig::FakeLinkOptionsPackage)
+  message(FATAL_ERROR "No import target for fake link options package")
+endif()
+get_target_property(link_options PkgConfig::FakeLinkOptionsPackage INTERFACE_LINK_OPTIONS)
+if (NOT link_options STREQUAL expected_link_options)
+  message(FATAL_ERROR
+    "Additional link options not present in INTERFACE_LINK_OPTIONS property"
+    "expected: \"${expected_link_options}\", but got \"${link_options}\""
+  )
+endif()
