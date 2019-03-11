@@ -1415,26 +1415,25 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   this->WriteDisclaimer(internalRuleFileStream);
 
   // for each language we need to scan, scan it
-  std::string const& langStr =
-    mf->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES");
   std::vector<std::string> langs;
-  cmSystemTools::ExpandListArgument(langStr, langs);
+  cmSystemTools::ExpandListArgument(
+    mf->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES"), langs);
   for (std::string const& lang : langs) {
     // construct the checker
     // Create the scanner for this language
-    cmDepends* scanner = nullptr;
+    std::unique_ptr<cmDepends> scanner;
     if (lang == "C" || lang == "CXX" || lang == "RC" || lang == "ASM" ||
         lang == "CUDA") {
       // TODO: Handle RC (resource files) dependencies correctly.
-      scanner = new cmDependsC(this, targetDir, lang, &validDeps);
+      scanner = cm::make_unique<cmDependsC>(this, targetDir, lang, &validDeps);
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if (lang == "Fortran") {
       ruleFileStream << "# Note that incremental build could trigger "
                      << "a call to cmake_copy_f90_mod on each re-build\n";
-      scanner = new cmDependsFortran(this);
+      scanner = cm::make_unique<cmDependsFortran>(this);
     } else if (lang == "Java") {
-      scanner = new cmDependsJava();
+      scanner = cm::make_unique<cmDependsJava>();
     }
 #endif
 
@@ -1445,9 +1444,6 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
       scanner->SetLanguage(lang);
       scanner->SetTargetDirectory(targetDir);
       scanner->Write(ruleFileStream, internalRuleFileStream);
-
-      // free the scanner for this language
-      delete scanner;
     }
   }
 
