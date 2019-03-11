@@ -64,4 +64,4 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SWIG  REQUIRED_VARS SWIG_EXECUTABLE SWIG_DIR
                                         VERSION_VAR SWIG_VERSION )
 
-mark_as_advanced(SWIG_DIR SWIG_VERSION)
+mark_as_advanced(SWIG_DIR SWIG_VERSION SWIG_EXECUTABLE)
