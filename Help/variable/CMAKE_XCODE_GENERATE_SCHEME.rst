@@ -30,5 +30,6 @@ The following target properties will be applied on the
 "Info" and "Arguments" tab:
 
 - :prop_tgt:`XCODE_SCHEME_ARGUMENTS`
+- :prop_tgt:`XCODE_SCHEME_DEBUG_AS_ROOT`
 - :prop_tgt:`XCODE_SCHEME_ENVIRONMENT`
 - :prop_tgt:`XCODE_SCHEME_EXECUTABLE`

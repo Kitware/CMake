@@ -177,6 +177,11 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
   WriteLaunchActionAttribute(xout, "stopOnEveryMainThreadCheckerIssue",
                              "XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP");
 
+  if (this->Target->GetTarget()->GetPropertyAsBool(
+        "XCODE_SCHEME_DEBUG_AS_ROOT")) {
+    xout.Attribute("debugAsWhichUser", "root");
+  }
+
   // Diagnostics tab end
 
   if (IsExecutable(this->Target)) {
