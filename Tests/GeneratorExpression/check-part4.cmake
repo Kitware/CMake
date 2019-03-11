@@ -1,6 +1,8 @@
 include(${CMAKE_CURRENT_LIST_DIR}/check-common.cmake)
 
-string(REPLACE ${path_prefix} "" test_shell_path ${test_shell_path})
+if(msys1_prefix)
+  string(REPLACE "${msys1_prefix}" "" test_shell_path ${test_shell_path})
+endif()
 
 if(WIN32)
   if(CMAKE_GENERATOR STREQUAL "MSYS Makefiles")
