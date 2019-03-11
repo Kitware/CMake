@@ -771,9 +771,9 @@ static const struct CCompilerVersionNode : public CompilerVersionNode
   }
 } cCompilerVersionNode;
 
-static const struct CxxCompilerVersionNode : public CompilerVersionNode
+static const struct CXXCompilerVersionNode : public CompilerVersionNode
 {
-  CxxCompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
+  CXXCompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
