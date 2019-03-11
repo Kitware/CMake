@@ -451,6 +451,7 @@ public:
     TarCompressGZip,
     TarCompressBZip2,
     TarCompressXZ,
+    TarCompressZstd,
     TarCompressNone
   };
 

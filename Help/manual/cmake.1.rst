@@ -546,20 +546,23 @@ Available commands are:
     Compress the resulting archive with bzip2.
   ``J``
     Compress the resulting archive with XZ.
-  ``--``
-    Stop interpreting options and treat all remaining arguments
-    as file names even if they start in ``-``.
+  ``--zstd``
+    Compress the resulting archive with Zstandard.
   ``--files-from=<file>``
     Read file names from the given file, one per line.
     Blank lines are ignored.  Lines may not start in ``-``
     except for ``--add-file=<name>`` to add files whose
     names start in ``-``.
-  ``--mtime=<date>``
-    Specify modification time recorded in tarball entries.
   ``--format=<format>``
     Specify the format of the archive to be created.
     Supported formats are: ``7zip``, ``gnutar``, ``pax``,
     ``paxr`` (restricted pax, default), and ``zip``.
+  ``--mtime=<date>``
+    Specify modification time recorded in tarball entries.
+  ``--``
+    Stop interpreting options and treat all remaining arguments
+    as file names, even if they start with ``-``.
+
 
 ``time <command> [<args>...]``
   Run command and display elapsed time.
