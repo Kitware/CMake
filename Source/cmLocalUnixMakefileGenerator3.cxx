@@ -1292,10 +1292,10 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
   // If the directory information is newer than depend.internal, include dirs
   // may have changed. In this case discard all old dependencies.
   bool needRescanDirInfo = false;
-  std::string dirInfoFile = this->GetCurrentBinaryDirectory();
-  dirInfoFile += "/CMakeFiles";
-  dirInfoFile += "/CMakeDirectoryInformation.cmake";
   {
+    std::string dirInfoFile = this->GetCurrentBinaryDirectory();
+    dirInfoFile += "/CMakeFiles";
+    dirInfoFile += "/CMakeDirectoryInformation.cmake";
     int result;
     if (!ftc->FileTimeCompare(internalDependFile, dirInfoFile, &result) ||
         result < 0) {
@@ -1357,11 +1357,14 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   // Read the directory information file.
   cmMakefile* mf = this->Makefile;
   bool haveDirectoryInfo = false;
-  std::string dirInfoFile = this->GetCurrentBinaryDirectory();
-  dirInfoFile += "/CMakeFiles";
-  dirInfoFile += "/CMakeDirectoryInformation.cmake";
-  if (mf->ReadListFile(dirInfoFile) && !cmSystemTools::GetErrorOccuredFlag()) {
-    haveDirectoryInfo = true;
+  {
+    std::string dirInfoFile = this->GetCurrentBinaryDirectory();
+    dirInfoFile += "/CMakeFiles";
+    dirInfoFile += "/CMakeDirectoryInformation.cmake";
+    if (mf->ReadListFile(dirInfoFile) &&
+        !cmSystemTools::GetErrorOccuredFlag()) {
+      haveDirectoryInfo = true;
+    }
   }
 
   // Lookup useful directory information.
