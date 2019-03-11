@@ -283,6 +283,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("FOLDER", nullptr);
 #ifdef __APPLE__
     if (this->GetGlobalGenerator()->IsXcode()) {
+      this->SetPropertyDefault("XCODE_GENERATE_SCHEME", nullptr);
       this->SetPropertyDefault("XCODE_SCHEME_ADDRESS_SANITIZER", nullptr);
       this->SetPropertyDefault(
         "XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN", nullptr);

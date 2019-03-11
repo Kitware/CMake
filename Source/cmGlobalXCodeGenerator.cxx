@@ -3402,10 +3402,8 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
   }
   this->WriteXCodePBXProj(fout, root, generators);
 
-  if (this->IsGeneratingScheme(root)) {
-    this->OutputXCodeSharedSchemes(xcodeDir);
-  }
-  this->OutputXCodeWorkspaceSettings(xcodeDir, root);
+  bool hasGeneratedSchemes = this->OutputXCodeSharedSchemes(xcodeDir, root);
+  this->OutputXCodeWorkspaceSettings(xcodeDir, hasGeneratedSchemes);
 
   this->ClearXCodeObjects();
 
@@ -3415,17 +3413,8 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
     root->GetBinaryDirectory());
 }
 
-bool cmGlobalXCodeGenerator::IsGeneratingScheme(cmLocalGenerator* root) const
-{
-  // Since the lowest available Xcode version for testing was 6.4,
-  // I'm setting this as a limit then
-  return this->XcodeVersion >= 64 &&
-    (root->GetMakefile()->GetCMakeInstance()->GetIsInTryCompile() ||
-     root->GetMakefile()->IsOn("CMAKE_XCODE_GENERATE_SCHEME"));
-}
-
-void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
-  const std::string& xcProjDir)
+bool cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
+  const std::string& xcProjDir, cmLocalGenerator* root)
 {
   // collect all tests for the targets
   std::map<std::string, cmXCodeScheme::TestObjects> testables;
@@ -3449,21 +3438,33 @@ void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
   }
 
   // generate scheme
-  for (auto obj : this->XCodeObjects) {
-    if (obj->GetType() == cmXCodeObject::OBJECT &&
-        (obj->GetIsA() == cmXCodeObject::PBXNativeTarget ||
-         obj->GetIsA() == cmXCodeObject::PBXAggregateTarget)) {
-      const std::string& targetName = obj->GetTarget()->GetName();
-      cmXCodeScheme schm(obj, testables[targetName],
-                         this->CurrentConfigurationTypes, this->XcodeVersion);
-      schm.WriteXCodeSharedScheme(xcProjDir,
-                                  this->RelativeToSource(xcProjDir));
+  bool ret = false;
+
+  // Since the lowest available Xcode version for testing was 6.4,
+  // I'm setting this as a limit then
+  if (this->XcodeVersion >= 64) {
+    for (auto obj : this->XCodeObjects) {
+      if (obj->GetType() == cmXCodeObject::OBJECT &&
+          (obj->GetIsA() == cmXCodeObject::PBXNativeTarget ||
+           obj->GetIsA() == cmXCodeObject::PBXAggregateTarget) &&
+          (root->GetMakefile()->GetCMakeInstance()->GetIsInTryCompile() ||
+           obj->GetTarget()->GetPropertyAsBool("XCODE_GENERATE_SCHEME"))) {
+        const std::string& targetName = obj->GetTarget()->GetName();
+        cmXCodeScheme schm(obj, testables[targetName],
+                           this->CurrentConfigurationTypes,
+                           this->XcodeVersion);
+        schm.WriteXCodeSharedScheme(xcProjDir,
+                                    this->RelativeToSource(xcProjDir));
+        ret = true;
+      }
     }
   }
+
+  return ret;
 }
 
 void cmGlobalXCodeGenerator::OutputXCodeWorkspaceSettings(
-  const std::string& xcProjDir, cmLocalGenerator* root)
+  const std::string& xcProjDir, bool hasGeneratedSchemes)
 {
   std::string xcodeSharedDataDir = xcProjDir;
   xcodeSharedDataDir += "/project.xcworkspace/xcshareddata";
@@ -3489,7 +3490,7 @@ void cmGlobalXCodeGenerator::OutputXCodeWorkspaceSettings(
     xout.Element("key", "BuildSystemType");
     xout.Element("string", "Original");
   }
-  if (this->IsGeneratingScheme(root)) {
+  if (hasGeneratedSchemes) {
     xout.Element("key",
                  "IDEWorkspaceSharedSettings_AutocreateContextsIfNeeded");
     xout.Element("false");
