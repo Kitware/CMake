@@ -269,7 +269,7 @@ following options:
 ``--build <dir>``
   Project binary directory to be built.  This is required and must be first.
 
-``-j [<jobs>], --parallel [<jobs>]``
+``--parallel [<jobs>], -j [<jobs>]``
   The maximum number of concurrent processes to use when building.
   If ``<jobs>`` is omitted the native build tool's default number is used.
 
@@ -289,7 +289,7 @@ following options:
 ``--use-stderr``
   Ignored.  Behavior is default in CMake >= 3.0.
 
-``-v, --verbose``
+``--verbose, -v``
   Enable verbose output - if supported - including the build commands to be
   executed.
 
