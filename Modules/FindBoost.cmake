@@ -1201,6 +1201,8 @@ if(NOT TARGET Boost::diagnostic_definitions)
   add_library(Boost::diagnostic_definitions INTERFACE IMPORTED)
   add_library(Boost::disable_autolinking INTERFACE IMPORTED)
   add_library(Boost::dynamic_linking INTERFACE IMPORTED)
+  set_target_properties(Boost::dynamic_linking PROPERTIES
+    INTERFACE_COMPILE_DEFINITIONS "BOOST_ALL_DYN_LINK")
 endif()
 if(WIN32)
   # In windows, automatic linking is performed, so you do not have
@@ -1225,8 +1227,6 @@ if(WIN32)
     INTERFACE_COMPILE_DEFINITIONS "BOOST_LIB_DIAGNOSTIC")
   set_target_properties(Boost::disable_autolinking PROPERTIES
     INTERFACE_COMPILE_DEFINITIONS "BOOST_ALL_NO_LIB")
-  set_target_properties(Boost::dynamic_linking PROPERTIES
-    INTERFACE_COMPILE_DEFINITIONS "BOOST_ALL_DYN_LINK")
 endif()
 
 _Boost_CHECK_SPELLING(Boost_ROOT)
