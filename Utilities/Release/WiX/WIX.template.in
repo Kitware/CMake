@@ -20,6 +20,8 @@
             Schedule="afterInstallInitialize"
             AllowDowngrades="yes"/>
 
+        <Property Id="REINSTALLMODE" Value="amus"/>
+
         <WixVariable Id="WixUILicenseRtf" Value="$(var.CPACK_WIX_LICENSE_RTF)"/>
         <Property Id="WIXUI_INSTALLDIR" Value="INSTALL_ROOT"/>
 
