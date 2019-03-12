@@ -1113,7 +1113,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     // Explicit preprocessing always uses a depfile.
     ppVars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-      objectFileName + ".d", cmOutputConverter::SHELL);
+      objectFileName + ".pp.d", cmOutputConverter::SHELL);
     if (compilePP) {
       // The actual compilation does not need a depfile because it
       // depends on the already-preprocessed source.
