@@ -478,18 +478,6 @@ std::string cmGlobalVisualStudioVersionedGenerator::FindMSBuildCommand()
   // Ask Visual Studio Installer tool.
   std::string vs;
   if (vsSetupAPIHelper.GetVSInstanceInfo(vs)) {
-    std::string const& hostArch =
-      this->GetPlatformToolsetHostArchitectureString();
-    if (hostArch == "x64") {
-      msbuild = vs + "/MSBuild/Current/Bin/amd64/MSBuild.exe";
-      if (cmSystemTools::FileExists(msbuild)) {
-        return msbuild;
-      }
-      msbuild = vs + "/MSBuild/15.0/Bin/amd64/MSBuild.exe";
-      if (cmSystemTools::FileExists(msbuild)) {
-        return msbuild;
-      }
-    }
     msbuild = vs + "/MSBuild/Current/Bin/MSBuild.exe";
     if (cmSystemTools::FileExists(msbuild)) {
       return msbuild;
