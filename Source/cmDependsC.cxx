@@ -141,7 +141,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
         // the source containing the include statement.
         fullName = current.QuotedLocation;
       } else {
-        std::map<std::string, std::string>::iterator headerLocationIt =
+        auto headerLocationIt =
           this->HeaderLocationCache.find(current.FileName);
         if (headerLocationIt != this->HeaderLocationCache.end()) {
           fullName = headerLocationIt->second;
@@ -176,8 +176,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
         scanned.insert(fullName);
 
         // Check whether this file is already in the cache
-        std::map<std::string, cmIncludeLines*>::iterator fileIt =
-          this->FileCache.find(fullName);
+        auto fileIt = this->FileCache.find(fullName);
         if (fileIt != this->FileCache.end()) {
           fileIt->second->Used = true;
           dependencies.insert(fullName);
