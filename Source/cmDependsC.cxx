@@ -6,7 +6,6 @@
 #include <utility>
 
 #include "cmAlgorithms.h"
-#include "cmFileTimeComparison.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
@@ -258,8 +257,8 @@ void cmDependsC::ReadCacheFile()
     if (!haveFileName) {
       haveFileName = true;
       int newer = 0;
-      cmFileTimeComparison comp;
-      bool res = comp.FileTimeCompare(this->CacheFileName, line, &newer);
+      bool res =
+        cmSystemTools::FileTimeCompare(this->CacheFileName, line, &newer);
 
       if (res && newer == 1) // cache is newer than the parsed file
       {
