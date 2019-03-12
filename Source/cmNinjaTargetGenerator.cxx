@@ -529,7 +529,7 @@ cmNinjaRule GetScanRule(
   scanVars.CMTargetName = vars.CMTargetName;
   scanVars.CMTargetType = vars.CMTargetType;
   scanVars.Language = vars.Language;
-  scanVars.Object = "$out"; // for RULE_LAUNCH_COMPILE
+  scanVars.Object = "$OBJ_FILE";
   scanVars.PreprocessedSource = "$out";
   scanVars.DependencyFile = rule.DepFile.c_str();
   scanVars.DependencyTarget = "$out";
