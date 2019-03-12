@@ -123,12 +123,6 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
     }
 
     std::set<std::string> scanned;
-
-    // Use reserve to allocate enough memory for tempPathStr
-    // so that during the loops no memory is allocated or freed
-    std::string tempPathStr;
-    tempPathStr.reserve(4 * 1024);
-
     while (!this->Unscanned.empty()) {
       // Get the next file to scan.
       UnscannedEntry current = this->Unscanned.front();
@@ -152,17 +146,16 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
         if (headerLocationIt != this->HeaderLocationCache.end()) {
           fullName = headerLocationIt->second;
         } else {
-          for (std::string const& i : this->IncludePath) {
+          for (std::string const& iPath : this->IncludePath) {
             // Construct the name of the file as if it were in the current
             // include directory.  Avoid using a leading "./".
-
-            tempPathStr =
-              cmSystemTools::CollapseCombinedPath(i, current.FileName);
+            std::string tmpPath =
+              cmSystemTools::CollapseCombinedPath(iPath, current.FileName);
 
             // Look for the file in this location.
-            if (cmSystemTools::FileExists(tempPathStr, true)) {
-              fullName = tempPathStr;
-              HeaderLocationCache[current.FileName] = fullName;
+            if (cmSystemTools::FileExists(tmpPath, true)) {
+              fullName = tmpPath;
+              this->HeaderLocationCache[current.FileName] = std::move(tmpPath);
               break;
             }
           }
