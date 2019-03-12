@@ -3,11 +3,26 @@ project(GeneratorExpression)
 
 include(CTest)
 
+# Real projects normally want the MSYS shell path conversion, but for this test
+# we need to verify that the command line is constructed with the proper string.
+set(msys1_prefix "")
+set(msys2_no_conv "")
+if(CMAKE_GENERATOR STREQUAL "MSYS Makefiles")
+  execute_process(COMMAND "uname" OUTPUT_VARIABLE uname)
+  if("${uname}" MATCHES "^MINGW32")
+    # MinGW.org MSYS 1.0 does not support generic path conversion suppression
+    set(msys1_prefix MSYS1_PREFIX)
+  else()
+    # msys2 supports generic path conversion suppression
+    set(msys2_no_conv env MSYS2_ARG_CONV_EXCL=-D)
+  endif()
+endif()
+
 # This test is split into multiple parts as needed to avoid NMake command
 # length limits.
 
 add_custom_target(check-part1 ALL
-  COMMAND ${CMAKE_COMMAND}
+  COMMAND ${msys2_no_conv} ${CMAKE_COMMAND}
     -Dtest_0=$<0:nothing>
     -Dtest_0_with_comma=$<0:-Wl,--no-undefined>
     -Dtest_1=$<1:content>
@@ -97,7 +112,7 @@ add_library(empty5 empty.cpp)
 target_include_directories(empty5 PRIVATE /empty5/private1 /empty5/private2)
 
 add_custom_target(check-part2 ALL
-  COMMAND ${CMAKE_COMMAND}
+  COMMAND ${msys2_no_conv} ${CMAKE_COMMAND}
     -Dtest_incomplete_1=$<
     -Dtest_incomplete_2=$<something
     -Dtest_incomplete_3=$<something:
@@ -188,7 +203,7 @@ set_property(TARGET importedFallback PROPERTY MAP_IMPORTED_CONFIG_DEBUG "" DEBUG
 set_property(TARGET importedFallback PROPERTY MAP_IMPORTED_CONFIG_RELEASE "")
 
 add_custom_target(check-part3 ALL
-  COMMAND ${CMAKE_COMMAND}
+  COMMAND ${msys2_no_conv} ${CMAKE_COMMAND}
     -Dtest_version_greater_1=$<VERSION_GREATER:1.0,1.1.1>
     -Dtest_version_greater_2=$<VERSION_GREATER:1.1.1,1.0>
     -Dtest_version_less_1=$<VERSION_LESS:1.1.1,1.0>
@@ -241,17 +256,19 @@ add_custom_target(check-part3 ALL
 
 if(WIN32)
   set(test_shell_path c:/shell/path)
+  set(test_shell_path2 c:/shell/path d:/another/path)
 else()
   set(test_shell_path /shell/path)
+  set(test_shell_path2 /shell/path /another/path)
 endif()
-set(path_prefix BYPASS_FURTHER_CONVERSION)
 
 add_custom_target(check-part4 ALL
-  COMMAND ${CMAKE_COMMAND}
+  COMMAND ${msys2_no_conv} ${CMAKE_COMMAND}
     # Prefix path to bypass its further conversion when being processed by
     # CMake as command-line argument
-    -Dtest_shell_path=${path_prefix}$<SHELL_PATH:${test_shell_path}>
-    -Dpath_prefix=${path_prefix}
+    -Dmsys1_prefix=${msys1_prefix}
+    -Dtest_shell_path=${msys1_prefix}$<SHELL_PATH:${test_shell_path}>
+    "-Dtest_shell_path2=$<SHELL_PATH:${test_shell_path2}>"
     -Dif_1=$<IF:1,a,b>
     -Dif_2=$<IF:0,a,b>
     -Dif_3=$<IF:$<EQUAL:10,30>,a,b>

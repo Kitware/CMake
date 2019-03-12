@@ -15,6 +15,8 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmState.h"
+#include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -2045,13 +2047,27 @@ static const struct ShellPathNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    if (!cmSystemTools::FileIsFullPath(parameters.front())) {
+    std::vector<std::string> listIn;
+    cmSystemTools::ExpandListArgument(parameters.front(), listIn);
+    if (listIn.empty()) {
       reportError(context, content->GetOriginalExpression(),
-                  "\"" + parameters.front() + "\" is not an absolute path.");
+                  "\"\" is not an absolute path.");
       return std::string();
     }
-    cmOutputConverter converter(context->LG->GetStateSnapshot());
-    return converter.ConvertDirectorySeparatorsForShell(parameters.front());
+    cmStateSnapshot snapshot = context->LG->GetStateSnapshot();
+    cmOutputConverter converter(snapshot);
+    const char* separator = snapshot.GetState()->UseWindowsShell() ? ";" : ":";
+    std::vector<std::string> listOut;
+    listOut.reserve(listIn.size());
+    for (auto const& in : listIn) {
+      if (!cmSystemTools::FileIsFullPath(in)) {
+        reportError(context, content->GetOriginalExpression(),
+                    "\"" + in + "\" is not an absolute path.");
+        return std::string();
+      }
+      listOut.emplace_back(converter.ConvertDirectorySeparatorsForShell(in));
+    }
+    return cmJoin(listOut, separator);
   }
 } shellPathNode;
 
