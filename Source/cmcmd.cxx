@@ -111,8 +111,8 @@ void CMakeCommandUsage(const char* program)
     << "  tar [cxt][vf][zjJ] file.tar [file/dir1 file/dir2 ...]\n"
     << "                            - create or extract a tar or zip archive\n"
     << "  time command [args...]    - run command and display elapsed time\n"
-    << "  touch file                - touch a file.\n"
-    << "  touch_nocreate file       - touch a file but do not create it.\n"
+    << "  touch <file>...           - touch a <file>.\n"
+    << "  touch_nocreate <file>...  - touch a <file> but do not create it.\n"
     << "  create_symlink old new    - create a symbolic link new -> old\n"
 #if defined(_WIN32) && !defined(__CYGWIN__)
     << "Available on Windows only:\n"
