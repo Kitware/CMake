@@ -2460,7 +2460,30 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         // nothing to do.
       } else {
         std::stringstream mm;
-        if (false) {
+        if (arg_modmapfmt == "gcc") {
+          // Documented in GCC's documentation. The format is a series of lines
+          // with a module name and the associated filename separated by
+          // spaces. The first line may use `$root` as the module name to
+          // specify a "repository root". That is used to anchor any relative
+          // paths present in the file (CMake should never generate any).
+
+          // Write the root directory to use for module paths.
+          mm << "$root .\n";
+
+          for (auto const& l : object.Provides) {
+            auto m = mod_files.find(l.LogicalName);
+            if (m != mod_files.end()) {
+              mm << l.LogicalName << " " << this->ConvertToNinjaPath(m->second)
+                 << "\n";
+            }
+          }
+          for (auto const& r : object.Requires) {
+            auto m = mod_files.find(r.LogicalName);
+            if (m != mod_files.end()) {
+              mm << r.LogicalName << " " << this->ConvertToNinjaPath(m->second)
+                 << "\n";
+            }
+          }
         } else {
           cmSystemTools::Error(
             cmStrCat("-E cmake_ninja_dyndep does not understand the ",

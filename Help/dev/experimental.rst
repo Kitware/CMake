@@ -45,6 +45,26 @@ Compiler writers may try out their scanning functionality using
 the `cxx-modules-sandbox`_ test project, modified to set variables
 as above for their compiler.
 
+For compilers that generate module maps, tell CMake as follows:
+
+.. code-block:: cmake
+
+  set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FORMAT "gcc")
+  set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG
+    "${compiler_flags_for_module_map} -fmodule-mapper=<MODULE_MAP_FILE>")
+
+Currently, the only supported format is ``gcc``.  The format is described in
+the GCC documentation, but the relevant section for the purposes of CMake is:
+
+    A mapping file consisting of space-separated module-name, filename
+    pairs, one per line.  Only the mappings for the direct imports and any
+    module export name need be provided.  If other mappings are provided,
+    they override those stored in any imported CMI files.  A repository
+    root may be specified in the mapping file by using ``$root`` as the
+    module name in the first active line.
+
+    -- GCC module mapper documentation
+
 .. _`D1483r1`: https://mathstuf.fedorapeople.org/fortran-modules/fortran-modules.html
 .. _`P1689r3`: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1689r3.html
 .. _`cxx-modules-sandbox`: https://github.com/mathstuf/cxx-modules-sandbox
