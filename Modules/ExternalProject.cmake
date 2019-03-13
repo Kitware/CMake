@@ -1142,15 +1142,6 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" \${git_options} submodule init ${git_submodules}
-  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
-  RESULT_VARIABLE error_code
-  )
-if(error_code)
-  message(FATAL_ERROR \"Failed to init submodules in: '${work_dir}/${src_name}'\")
-endif()
-
-execute_process(
   COMMAND \"${git_EXECUTABLE}\" \${git_options} submodule update --recursive --init ${git_submodules}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
