@@ -390,16 +390,20 @@ Available commands are:
   Copy files to ``<destination>`` (either file or directory).
   If multiple files are specified, the ``<destination>`` must be
   directory and it must exist. Wildcards are not supported.
+  ``copy`` does follow symlinks. That means it does not copy symlinks,
+  but the files or directories it point to.
 
 ``copy_directory <dir>... <destination>``
   Copy directories to ``<destination>`` directory.
   If ``<destination>`` directory does not exist it will be created.
+  ``copy_directory`` does follow symlinks.
 
 ``copy_if_different <file>... <destination>``
   Copy files to ``<destination>`` (either file or directory) if
   they have changed.
   If multiple files are specified, the ``<destination>`` must be
   directory and it must exist.
+  ``copy_if_different`` does follow symlinks.
 
 ``echo [<string>...]``
   Displays arguments as text.
@@ -459,13 +463,16 @@ Available commands are:
   exist, the command returns a non-zero exit code, but no message
   is logged. The ``-f`` option changes the behavior to return a
   zero exit code (i.e. success) in such situations instead.
+  ``remove`` does not follow symlinks. That means it remove only symlinks
+  and not files it point to.
 
 ``remove_directory <dir>``
   Remove a directory and its contents.  If a directory does
   not exist it will be silently ignored.
 
 ``rename <oldname> <newname>``
-  Rename a file or directory (on one volume).
+  Rename a file or directory (on one volume). If file with the ``<newname>`` name
+  already exists, then it will be silently replaced.
 
 ``server``
   Launch :manual:`cmake-server(7)` mode.
@@ -494,10 +501,11 @@ Available commands are:
 ``time <command> [<args>...]``
   Run command and display elapsed time.
 
-``touch <file>``
-  Touch a file.
+``touch <file>...``
+  Creates ``<file>`` if file do not exist.
+  If ``<file>`` exists, it is changing ``<file>`` access and modification times.
 
-``touch_nocreate <file>``
+``touch_nocreate <file>...``
   Touch a file if it exists but do not create it.  If a file does
   not exist it will be silently ignored.
 
