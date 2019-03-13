@@ -302,6 +302,8 @@ CMAKE_CXX_SOURCES="\
   cmExprParserHelper \
   cmExternalMakefileProjectGenerator \
   cmFileCommand \
+  cmFileCopier \
+  cmFileInstaller \
   cmFileTimeComparison \
   cmFindBase \
   cmFindCommon \

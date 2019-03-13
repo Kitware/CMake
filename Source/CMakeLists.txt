@@ -224,6 +224,10 @@ set(SRCS
   cmFileAPICodemodel.h
   cmFileAPICMakeFiles.cxx
   cmFileAPICMakeFiles.h
+  cmFileCopier.cxx
+  cmFileCopier.h
+  cmFileInstaller.cxx
+  cmFileInstaller.h
   cmFileLock.cxx
   cmFileLock.h
   cmFileLockPool.cxx
