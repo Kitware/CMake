@@ -5,14 +5,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmFileTime.h"
 #include <string>
 
 class cmFileTimeComparisonInternal;
 
 /** \class cmFileTimeComparison
- * \brief Helper class for comparing file modification times.
- *
- * Compare file modification times or test if file modification times differ.
+ * \brief Caches file modification times in an internal map for fast lookups.
  */
 class cmFileTimeComparison
 {
@@ -24,19 +23,27 @@ public:
   cmFileTimeComparison& operator=(const cmFileTimeComparison&) = delete;
 
   /**
-   *  Compare file modification times.
-   *  Return true for successful comparison and false for error.
-   *  When true is returned, result has -1, 0, +1 for
-   *  f1 older, same, or newer than f2.
+   * @brief Loads the file time from the cache or the file system.
+   * @return true on success
    */
-  bool FileTimeCompare(const std::string& f1, const std::string& f2,
+  bool Load(std::string const& fileName, cmFileTime& fileTime);
+
+  /**
+   * @brief Compare file modification times.
+   * @return true for successful comparison and false for error.
+   *
+   * When true is returned, result has -1, 0, +1 for
+   * f1 older, same, or newer than f2.
+   */
+  bool FileTimeCompare(std::string const& f1, std::string const& f2,
                        int* result);
 
   /**
-   *  Compare file modification times.  Return true unless both files
-   *  exist and have modification times less than 1 second apart.
+   * @brief Compare file modification times.
+   * @return true unless both files exist and have modification times less
+   *         than 1 second apart.
    */
-  bool FileTimesDiffer(const std::string& f1, const std::string& f2);
+  bool FileTimesDiffer(std::string const& f1, std::string const& f2);
 
 protected:
   cmFileTimeComparisonInternal* Internals;

@@ -800,8 +800,6 @@ foreach(check
   endif()
   set_property(SOURCE cmFileTime.cxx APPEND PROPERTY
     COMPILE_DEFINITIONS CMake_${check}=${CMake_${check}})
-  set_property(SOURCE cmFileTimeComparison.cxx APPEND PROPERTY
-    COMPILE_DEFINITIONS CMake_${check}=${CMake_${check}})
 endforeach()
 
 # create a library used by the command line and the GUI
