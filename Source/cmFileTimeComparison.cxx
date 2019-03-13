@@ -6,71 +6,32 @@
 #include <unordered_map>
 #include <utility>
 
-class cmFileTimeComparisonInternal
-{
-public:
-  inline bool Load(std::string const& fname, cmFileTime& ftm);
-  inline bool FileTimeCompare(std::string const& f1, std::string const& f2,
-                              int* result);
+cmFileTimeComparison::cmFileTimeComparison() = default;
 
-  bool FileTimesDiffer(std::string const& f1, std::string const& f2);
-
-private:
-  typedef std::unordered_map<std::string, cmFileTime> FileStatsMap;
-  FileStatsMap Files;
-};
-
-bool cmFileTimeComparisonInternal::Load(std::string const& fname,
-                                        cmFileTime& ftm)
-{
-  // Use the stored time if available.
-  {
-    auto fit = this->Files.find(fname);
-    if (fit != this->Files.end()) {
-      ftm = fit->second;
-      return true;
-    }
-  }
-  // Read file time from OS
-  if (!ftm.Load(fname)) {
-    return false;
-  }
-  // Store file time in cache
-  this->Files[fname] = ftm;
-  return true;
-}
-
-cmFileTimeComparison::cmFileTimeComparison()
-{
-  this->Internals = new cmFileTimeComparisonInternal;
-}
-
-cmFileTimeComparison::~cmFileTimeComparison()
-{
-  delete this->Internals;
-}
+cmFileTimeComparison::~cmFileTimeComparison() = default;
 
 bool cmFileTimeComparison::Load(std::string const& fileName,
                                 cmFileTime& fileTime)
 {
-  return this->Internals->Load(fileName, fileTime);
+  // Use the stored time if available.
+  {
+    auto fit = this->FileTimes.find(fileName);
+    if (fit != this->FileTimes.end()) {
+      fileTime = fit->second;
+      return true;
+    }
+  }
+  // Read file time from OS
+  if (!fileTime.Load(fileName)) {
+    return false;
+  }
+  // Store file time in cache
+  this->FileTimes[fileName] = fileTime;
+  return true;
 }
 
 bool cmFileTimeComparison::FileTimeCompare(std::string const& f1,
                                            std::string const& f2, int* result)
-{
-  return this->Internals->FileTimeCompare(f1, f2, result);
-}
-
-bool cmFileTimeComparison::FileTimesDiffer(std::string const& f1,
-                                           std::string const& f2)
-{
-  return this->Internals->FileTimesDiffer(f1, f2);
-}
-
-bool cmFileTimeComparisonInternal::FileTimeCompare(std::string const& f1,
-                                                   std::string const& f2,
-                                                   int* result)
 {
   // Get the modification time for each file.
   cmFileTime ft1, ft2;
@@ -84,8 +45,8 @@ bool cmFileTimeComparisonInternal::FileTimeCompare(std::string const& f1,
   return false;
 }
 
-bool cmFileTimeComparisonInternal::FileTimesDiffer(std::string const& f1,
-                                                   std::string const& f2)
+bool cmFileTimeComparison::FileTimesDiffer(std::string const& f1,
+                                           std::string const& f2)
 {
   // Get the modification time for each file.
   cmFileTime ft1, ft2;

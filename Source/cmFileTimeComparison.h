@@ -7,8 +7,7 @@
 
 #include "cmFileTime.h"
 #include <string>
-
-class cmFileTimeComparisonInternal;
+#include <unordered_map>
 
 /** \class cmFileTimeComparison
  * \brief Caches file modification times in an internal map for fast lookups.
@@ -45,8 +44,9 @@ public:
    */
   bool FileTimesDiffer(std::string const& f1, std::string const& f2);
 
-protected:
-  cmFileTimeComparisonInternal* Internals;
+private:
+  typedef std::unordered_map<std::string, cmFileTime> FileTimeMap;
+  FileTimeMap FileTimes;
 };
 
 #endif
