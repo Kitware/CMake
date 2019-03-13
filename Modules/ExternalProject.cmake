@@ -1053,11 +1053,6 @@ define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
   )
 
 function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name git_submodules git_shallow git_progress git_config src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
-  if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.10)
-    set(git_clone_shallow_options "--depth 1 --no-single-branch")
-  else()
-    set(git_clone_shallow_options "--depth 1")
-  endif()
   if(NOT GIT_VERSION_STRING VERSION_LESS 1.8.5)
     # Use `git checkout <tree-ish> --` to avoid ambiguity with a local path.
     set(git_checkout_explicit-- "--")
@@ -1067,12 +1062,30 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
     # because that will not search for remote branch names, a common use case.
     set(git_checkout_explicit-- "")
   endif()
-  file(WRITE ${script_filename}
-"if(\"${git_tag}\" STREQUAL \"\")
-  message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
-endif()
+  if("${git_tag}" STREQUAL "")
+    message(FATAL_ERROR "Tag for git checkout should not be empty.")
+  endif()
 
-set(run 0)
+  set(git_clone_options)
+  if(git_shallow)
+    if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.10)
+      list(APPEND git_clone_options "--depth 1 --no-single-branch")
+    else()
+      list(APPEND git_clone_options "--depth 1")
+    endif()
+  endif()
+  if(git_progress)
+    list(APPEND git_clone_options --progress)
+  endif()
+  foreach(config IN LISTS git_config)
+    list(APPEND git_clone_options --config ${config})
+  endforeach()
+  if(NOT ${git_remote_name} STREQUAL "origin")
+    list(APPEND git_clone_options --origin \"${git_remote_name}\")
+  endif()
+  string (REPLACE ";" " " git_clone_options "${git_clone_options}")
+  file(WRITE ${script_filename}
+"set(run 0)
 
 if(\"${gitclone_infofile}\" IS_NEWER_THAN \"${gitclone_stampfile}\")
   set(run 1)
@@ -1100,29 +1113,12 @@ if(NOT \"x${tls_verify}\" STREQUAL \"x\" AND NOT tls_verify)
     -c http.sslVerify=false)
 endif()
 
-set(git_clone_options)
-
-set(git_shallow \"${git_shallow}\")
-if(git_shallow)
-  list(APPEND git_clone_options ${git_clone_shallow_options})
-endif()
-
-set(git_progress \"${git_progress}\")
-if(git_progress)
-  list(APPEND git_clone_options --progress)
-endif()
-
-set(git_config \"${git_config}\")
-foreach(config IN LISTS git_config)
-  list(APPEND git_clone_options --config \${config})
-endforeach()
-
 # try the clone 3 times in case there is an odd git clone issue
 set(error_code 1)
 set(number_of_tries 0)
 while(error_code AND number_of_tries LESS 3)
   execute_process(
-    COMMAND \"${git_EXECUTABLE}\" \${git_options} clone \${git_clone_options} --origin \"${git_remote_name}\" \"${git_repository}\" \"${src_name}\"
+    COMMAND \"${git_EXECUTABLE}\" \${git_options} clone ${git_clone_options} \"${git_repository}\" \"${src_name}\"
     WORKING_DIRECTORY \"${work_dir}\"
     RESULT_VARIABLE error_code
     )
