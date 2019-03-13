@@ -538,6 +538,10 @@ macro (CMAKE_BUILD_UTILITIES)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_JSONCPP is ON but a JsonCpp is not found!")
     endif()
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+      set_property(TARGET JsonCpp::JsonCpp APPEND PROPERTY
+        INTERFACE_COMPILE_OPTIONS -Wno-deprecated-declarations)
+    endif()
     set(CMAKE_JSONCPP_LIBRARIES JsonCpp::JsonCpp)
   else()
     set(CMAKE_JSONCPP_LIBRARIES cmjsoncpp)
