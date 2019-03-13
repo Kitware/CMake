@@ -1,17 +1,16 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmFileTimeComparison.h"
+#include "cmFileTimeCache.h"
 
 #include <string>
 #include <unordered_map>
 #include <utility>
 
-cmFileTimeComparison::cmFileTimeComparison() = default;
+cmFileTimeCache::cmFileTimeCache() = default;
 
-cmFileTimeComparison::~cmFileTimeComparison() = default;
+cmFileTimeCache::~cmFileTimeCache() = default;
 
-bool cmFileTimeComparison::Load(std::string const& fileName,
-                                cmFileTime& fileTime)
+bool cmFileTimeCache::Load(std::string const& fileName, cmFileTime& fileTime)
 {
   // Use the stored time if available.
   {
@@ -30,8 +29,8 @@ bool cmFileTimeComparison::Load(std::string const& fileName,
   return true;
 }
 
-bool cmFileTimeComparison::FileTimeCompare(std::string const& f1,
-                                           std::string const& f2, int* result)
+bool cmFileTimeCache::FileTimeCompare(std::string const& f1,
+                                      std::string const& f2, int* result)
 {
   // Get the modification time for each file.
   cmFileTime ft1, ft2;
@@ -45,8 +44,8 @@ bool cmFileTimeComparison::FileTimeCompare(std::string const& f1,
   return false;
 }
 
-bool cmFileTimeComparison::FileTimesDiffer(std::string const& f1,
-                                           std::string const& f2)
+bool cmFileTimeCache::FileTimesDiffer(std::string const& f1,
+                                      std::string const& f2)
 {
   // Get the modification time for each file.
   cmFileTime ft1, ft2;

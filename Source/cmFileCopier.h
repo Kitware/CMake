@@ -5,7 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmFileTimeComparison.h"
+#include "cmFileTimeCache.h"
 #include "cm_sys_stat.h"
 #include "cmsys/RegularExpression.hxx"
 
@@ -28,7 +28,7 @@ protected:
   cmMakefile* Makefile;
   const char* Name;
   bool Always;
-  cmFileTimeComparison FileTimes;
+  cmFileTimeCache FileTimes;
 
   // Whether to install a file not matching any expression.
   bool MatchlessFiles;

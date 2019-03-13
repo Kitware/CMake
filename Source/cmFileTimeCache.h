@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmFileTimeComparison_h
-#define cmFileTimeComparison_h
+#ifndef cmFileTimeCache_h
+#define cmFileTimeCache_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -9,17 +9,17 @@
 #include <string>
 #include <unordered_map>
 
-/** \class cmFileTimeComparison
+/** \class cmFileTimeCache
  * \brief Caches file modification times in an internal map for fast lookups.
  */
-class cmFileTimeComparison
+class cmFileTimeCache
 {
 public:
-  cmFileTimeComparison();
-  ~cmFileTimeComparison();
+  cmFileTimeCache();
+  ~cmFileTimeCache();
 
-  cmFileTimeComparison(const cmFileTimeComparison&) = delete;
-  cmFileTimeComparison& operator=(const cmFileTimeComparison&) = delete;
+  cmFileTimeCache(const cmFileTimeCache&) = delete;
+  cmFileTimeCache& operator=(const cmFileTimeCache&) = delete;
 
   /**
    * @brief Loads the file time from the cache or the file system.

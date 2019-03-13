@@ -12,7 +12,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommandGenerator.h"
-#include "cmFileTimeComparison.h"
+#include "cmFileTimeCache.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -1273,7 +1273,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
   // happen when a new source file is added and CMake regenerates the
   // project but no other sources were touched.
   bool needRescanDependInfo = false;
-  cmFileTimeComparison* ftc =
+  cmFileTimeCache* ftc =
     this->GlobalGenerator->GetCMakeInstance()->GetFileComparison();
   {
     int result;

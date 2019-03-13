@@ -238,8 +238,8 @@ set(SRCS
   cmFilePathChecksum.h
   cmFileTime.cxx
   cmFileTime.h
-  cmFileTimeComparison.cxx
-  cmFileTimeComparison.h
+  cmFileTimeCache.cxx
+  cmFileTimeCache.h
   cmFortranParserImpl.cxx
   cmFSPermissions.cxx
   cmFSPermissions.h

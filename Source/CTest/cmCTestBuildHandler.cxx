@@ -5,7 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmDuration.h"
-#include "cmFileTimeComparison.h"
+#include "cmFileTimeCache.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
@@ -503,7 +503,7 @@ void cmCTestBuildHandler::GenerateXMLHeader(cmXMLWriter& xml)
 class cmCTestBuildHandler::FragmentCompare
 {
 public:
-  FragmentCompare(cmFileTimeComparison* ftc)
+  FragmentCompare(cmFileTimeCache* ftc)
     : FTC(ftc)
   {
   }
@@ -520,7 +520,7 @@ public:
   }
 
 private:
-  cmFileTimeComparison* FTC = nullptr;
+  cmFileTimeCache* FTC = nullptr;
 };
 
 void cmCTestBuildHandler::GenerateXMLLaunched(cmXMLWriter& xml)
@@ -530,7 +530,7 @@ void cmCTestBuildHandler::GenerateXMLLaunched(cmXMLWriter& xml)
   }
 
   // Sort XML fragments in chronological order.
-  cmFileTimeComparison ftc;
+  cmFileTimeCache ftc;
   FragmentCompare fragmentCompare(&ftc);
   typedef std::set<std::string, FragmentCompare> Fragments;
   Fragments fragments(fragmentCompare);

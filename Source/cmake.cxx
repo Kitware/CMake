@@ -9,7 +9,7 @@
 #include "cmDocumentationFormatter.h"
 #include "cmDuration.h"
 #include "cmExternalMakefileProjectGenerator.h"
-#include "cmFileTimeComparison.h"
+#include "cmFileTimeCache.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
@@ -138,7 +138,7 @@ cmake::cmake(Role role, cmState::Mode mode)
   this->DebugOutput = false;
   this->DebugTryCompile = false;
   this->ClearBuildSystem = false;
-  this->FileComparison = new cmFileTimeComparison;
+  this->FileComparison = new cmFileTimeCache;
 
   this->State = new cmState;
   this->State->SetMode(mode);
@@ -2431,7 +2431,7 @@ static bool cmakeCheckStampFile(const std::string& stampName)
   }
 
   // Compare the stamp dependencies against the dependency file itself.
-  cmFileTimeComparison ftc;
+  cmFileTimeCache ftc;
   std::string dep;
   while (cmSystemTools::GetLineFromStream(fin, dep)) {
     int result;
