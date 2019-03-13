@@ -2460,7 +2460,7 @@ function(_ep_add_download_command name)
     #
     set(repository ${git_repository})
     set(module)
-    set(tag)
+    set(tag ${git_remote_name})
     configure_file(
       "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-gitinfo.txt"
