@@ -236,6 +236,8 @@ set(SRCS
   cmFileLockResult.h
   cmFilePathChecksum.cxx
   cmFilePathChecksum.h
+  cmFileTime.cxx
+  cmFileTime.h
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmFortranParserImpl.cxx
@@ -796,6 +798,8 @@ foreach(check
   else()
     set(CMake_${check} 0)
   endif()
+  set_property(SOURCE cmFileTime.cxx APPEND PROPERTY
+    COMPILE_DEFINITIONS CMake_${check}=${CMake_${check}})
   set_property(SOURCE cmFileTimeComparison.cxx APPEND PROPERTY
     COMPILE_DEFINITIONS CMake_${check}=${CMake_${check}})
 endforeach()
