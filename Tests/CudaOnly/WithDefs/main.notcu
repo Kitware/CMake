@@ -39,6 +39,14 @@
 #  error "Expected DEF_LANG_IS_CUDA"
 #endif
 
+#ifndef DEF_CUDA_COMPILER
+#  error "DEF_CUDA_COMPILER not defined!"
+#endif
+
+#ifndef DEF_CUDA_COMPILER_VERSION
+#  error "DEF_CUDA_COMPILER_VERSION not defined!"
+#endif
+
 static __global__ void DetermineIfValidCudaDevice()
 {
 }
