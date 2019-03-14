@@ -71,6 +71,11 @@ const char* cm_utf8_decode_character(const char* first, const char* last,
       return 0;
     }
 
+    /* UTF-16 surrogate halves. */
+    if (0xD800 <= uc && uc <= 0xDFFF) {
+      return 0;
+    }
+
     *pc = uc;
     return first;
   }
