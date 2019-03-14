@@ -11,7 +11,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <unordered_set>
 
 #include "cmStateSnapshot.h"
 
@@ -75,19 +74,15 @@ public:
   std::string FilePath;
   long Line = 0;
 
-  void UpdateFilePath(const std::string& newFile);
-
-  bool HasName() const { return NameId != 0; }
-  bool HasFilePath() const { return FilePathId != 0; }
-
-  friend bool operator<(const cmListFileContext& lhs,
-                        const cmListFileContext& rhs);
-  friend bool operator==(const cmListFileContext& lhs,
-                         const cmListFileContext& rhs);
-
-private:
-  size_t NameId;
-  size_t FilePathId;
+  static cmListFileContext FromCommandContext(cmCommandContext const& lfcc,
+                                              std::string const& fileName)
+  {
+    cmListFileContext lfc;
+    lfc.FilePath = fileName;
+    lfc.Line = lfcc.Line;
+    lfc.Name = lfcc.Name.Original;
+    return lfc;
+  }
 };
 
 std::ostream& operator<<(std::ostream&, cmListFileContext const&);
@@ -140,22 +135,9 @@ public:
 
   // Get the number of 'frames' in this backtrace
   size_t Depth() const;
-  
-  // Return a list of ids that can be used to query for traces later
-  std::vector<size_t> const& GetFrameIds() const;
 
-  // Convert a list of frame ids into their actual representation
-  static std::vector<std::pair<size_t, cmListFileContext>> ConvertFrameIds(
-    std::unordered_set<size_t> const& frameIds);
-  
   // Return true if this backtrace is empty.
   bool Empty() const;
-
-  static const cmListFileBacktrace& EmptyBacktrace()
-  {
-    static cmListFileBacktrace empty;
-    return empty;
-  }
 
 private:
   struct Entry;
@@ -163,8 +145,6 @@ private:
   cmListFileBacktrace(std::shared_ptr<Entry const> parent,
                       cmListFileContext const& lfc);
   cmListFileBacktrace(std::shared_ptr<Entry const> top);
-
-  std::vector<size_t> mutable FrameIds;
 };
 
 // Wrap type T as a value with a backtrace.  For purposes of

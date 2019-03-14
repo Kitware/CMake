@@ -365,8 +365,6 @@ set(SRCS
   cmStateSnapshot.cxx
   cmStateSnapshot.h
   cmStateTypes.h
-  cmStringTable.cxx
-  cmStringTable.h
   cmSystemTools.cxx
   cmSystemTools.h
   cmTarget.cxx

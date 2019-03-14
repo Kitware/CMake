@@ -18,16 +18,12 @@ public:
 
   std::vector<std::string> GetPropertyList() const;
 
-  void SetProperty(const std::string& name, const char* value, const cmListFileBacktrace & backtrace);
+  void SetProperty(const std::string& name, const char* value);
 
-  void AppendProperty(const std::string& name, const char* value, const cmListFileBacktrace & backtrace,
+  void AppendProperty(const std::string& name, const char* value,
                       bool asString = false);
 
   const char* GetPropertyValue(const std::string& name) const;
-
-  const cmListFileBacktrace & GetPropertyBacktrace(const std::string & name) const;
-
-  bool HasProperty(const std::string & name) const;
 };
 
 #endif

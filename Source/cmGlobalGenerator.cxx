@@ -251,7 +251,7 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string& lang,
       changeVars += ";";
       changeVars += *cname;
       this->GetCMakeInstance()->GetState()->SetGlobalProperty(
-        "__CMAKE_DELETE_CACHE_CHANGE_VARS_", changeVars.c_str(), cmListFileBacktrace());
+        "__CMAKE_DELETE_CACHE_CHANGE_VARS_", changeVars.c_str());
     }
   }
 }
@@ -1539,7 +1539,7 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         for (std::string const& c : configs) {
           std::string defPropName = "COMPILE_DEFINITIONS_";
           defPropName += cmSystemTools::UpperCase(c);
-          t->AppendProperty(defPropName, mf->GetProperty(defPropName), t->GetPropertyBacktrace(defPropName));
+          t->AppendProperty(defPropName, mf->GetProperty(defPropName));
         }
       }
     }
@@ -2573,7 +2573,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
   // Package
   cmTarget target(gti.Name, cmStateEnums::GLOBAL_TARGET,
                   cmTarget::VisibilityNormal, mf);
-  target.SetProperty("EXCLUDE_FROM_ALL", "TRUE", target.GetBacktrace());
+  target.SetProperty("EXCLUDE_FROM_ALL", "TRUE");
 
   std::vector<std::string> no_outputs;
   std::vector<std::string> no_byproducts;
@@ -2584,7 +2584,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
   cc.SetUsesTerminal(gti.UsesTerminal);
   target.AddPostBuildCommand(cc);
   if (!gti.Message.empty()) {
-    target.SetProperty("EchoString", gti.Message.c_str(), target.GetBacktrace());
+    target.SetProperty("EchoString", gti.Message.c_str());
   }
   for (std::string const& d : gti.Depends) {
     target.AddUtility(d);
@@ -2593,7 +2593,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
   // Organize in the "predefined targets" folder:
   //
   if (this->UseFolderProperty()) {
-    target.SetProperty("FOLDER", this->GetPredefinedTargetsFolder(), target.GetBacktrace());
+    target.SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
   }
 
   return target;

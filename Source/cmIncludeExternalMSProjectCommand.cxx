@@ -93,9 +93,9 @@ bool cmIncludeExternalMSProjectCommand::InitialPass(
     target->SetProperty("EXTERNAL_MSPROJECT", path.c_str());
 
     if (!customType.empty())
-      target->SetProperty("VS_PROJECT_TYPE", customType.c_str(), target->GetBacktrace());
+      target->SetProperty("VS_PROJECT_TYPE", customType.c_str());
     if (!platformMapping.empty())
-      target->SetProperty("VS_PLATFORM_MAPPING", platformMapping.c_str(), target->GetBacktrace());
+      target->SetProperty("VS_PLATFORM_MAPPING", platformMapping.c_str());
 
     for (std::string const& d : depends) {
       target->AddUtility(d.c_str());

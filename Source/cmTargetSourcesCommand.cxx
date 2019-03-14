@@ -48,8 +48,7 @@ bool cmTargetSourcesCommand::HandleDirectContent(
 {
   tgt->AppendProperty(
     "SOURCES",
-    this->Join(ConvertToAbsoluteContent(tgt, content, false)).c_str(),
-	this->GetBacktrace());
+    this->Join(ConvertToAbsoluteContent(tgt, content, false)).c_str());
   return true; // Successfully handled.
 }
 

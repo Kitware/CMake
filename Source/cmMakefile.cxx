@@ -266,14 +266,20 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
 
 cmListFileBacktrace cmMakefile::GetBacktrace(cmCommandContext const& cc) const
 {
-  cmListFileContext lfc(cc.Name.Original, this->StateSnapshot.GetExecutionListFile(), cc.Line);
+  cmListFileContext lfc;
+  lfc.Name = cc.Name.Original;
+  lfc.Line = cc.Line;
+  lfc.FilePath = this->StateSnapshot.GetExecutionListFile();
   return this->Backtrace.Push(lfc);
 }
 
 cmListFileContext cmMakefile::GetExecutionContext() const
 {
   cmListFileContext const& cur = this->Backtrace.Top();
-  cmListFileContext lfc(cur.Name(), this->StateSnapshot.GetExecutionListFile(), cur.Line);
+  cmListFileContext lfc;
+  lfc.Name = cur.Name;
+  lfc.Line = cur.Line;
+  lfc.FilePath = this->StateSnapshot.GetExecutionListFile();
   return lfc;
 }
 
@@ -384,9 +390,6 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
     // Clone the prototype.
     std::unique_ptr<cmCommand> pcmd(proto->Clone());
     pcmd->SetMakefile(this);
-    if (this->GetCMakeInstance()->IsServerMode()) {
-      pcmd->SetBacktrace(this->Backtrace);
-    }
 
     // Decide whether to invoke the command.
     if (!cmSystemTools::GetFatalErrorOccured()) {
@@ -1884,7 +1887,7 @@ void cmMakefile::LogUnused(const char* reason, const std::string& name) const
   if (this->WarnUnused) {
     std::string path;
     if (!this->ExecutionStatusStack.empty()) {
-      path = this->GetExecutionContext().FilePath();
+      path = this->GetExecutionContext().FilePath;
     } else {
       path = this->GetCurrentSourceDirectory();
       path += "/CMakeLists.txt";
@@ -1937,7 +1940,6 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
   if (const char* linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
     std::vector<std::string> linkLibs;
     cmSystemTools::ExpandListArgument(linkLibsProp, linkLibs);
-    auto & linkLibsBacktrace = this->GetPropertyBacktrace("LINK_LIBRARIES");
 
     for (std::vector<std::string>::iterator j = linkLibs.begin();
          j != linkLibs.end(); ++j) {
@@ -1953,11 +1955,10 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
         libraryName = *j;
       }
       // This is equivalent to the target_link_libraries plain signature.
-      target.AddLinkLibrary(*this, libraryName, libType, linkLibsBacktrace);
+      target.AddLinkLibrary(*this, libraryName, libType);
       target.AppendProperty(
         "INTERFACE_LINK_LIBRARIES",
-        target.GetDebugGeneratorExpressions(libraryName, libType).c_str(),
-        linkLibsBacktrace);
+        target.GetDebugGeneratorExpressions(libraryName, libType).c_str());
     }
   }
 }
@@ -2235,7 +2236,6 @@ void cmMakefile::ExpandVariablesCMP0019()
       continue;
     }
     includeDirs = t.GetProperty("INCLUDE_DIRECTORIES");
-    auto & bt = t.GetPropertyBacktrace("INCLUDE_DIRECTORIES");
     if (mightExpandVariablesCMP0019(includeDirs)) {
       std::string dirs = includeDirs;
       this->ExpandVariablesInString(dirs, true, true);
@@ -2247,7 +2247,7 @@ void cmMakefile::ExpandVariablesCMP0019()
           << "  " << dirs << "\n";
         /* clang-format on */
       }
-      t.SetProperty("INCLUDE_DIRECTORIES", dirs.c_str(), bt);
+      t.SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
     }
   }
 
@@ -3234,7 +3234,7 @@ std::unique_ptr<cmFunctionBlocker> cmMakefile::RemoveFunctionBlocker(
       if (!(*pos)->ShouldRemove(lff, *this)) {
         cmListFileContext const& lfc = fb->GetStartingContext();
         cmListFileContext closingContext =
-          cmListFileContext::FromCommandContext(lff, lfc.FilePath());
+          cmListFileContext::FromCommandContext(lff, lfc.FilePath);
         std::ostringstream e;
         /* clang-format off */
         e << "A logical block opening on the line\n"
@@ -3860,12 +3860,6 @@ std::vector<std::string> cmMakefile::GetPropertyKeys() const
   return this->StateSnapshot.GetDirectory().GetPropertyKeys();
 }
 
-const cmListFileBacktrace & cmMakefile::GetPropertyBacktrace(const std::string & prop) const
-{
-  return this->StateSnapshot.GetDirectory().GetPropertyBacktrace(prop);
-}
-
-
 cmTarget* cmMakefile::FindLocalNonAliasTarget(const std::string& name) const
 {
   cmTargets::iterator i = this->Targets.find(name);
@@ -4391,8 +4385,7 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
                                           std::string* error) const
 {
   if (cmGeneratorExpression::Find(feature) != std::string::npos) {
-    target->AppendProperty("COMPILE_FEATURES", feature.c_str(), 
-                           target->GetPropertyBacktrace("COMPILE_FEATURES"));
+    target->AppendProperty("COMPILE_FEATURES", feature.c_str());
     return true;
   }
 
@@ -4425,7 +4418,7 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
     return false;
   }
 
-  target->AppendProperty("COMPILE_FEATURES", feature.c_str(), target->GetPropertyBacktrace("COMPILE_FEATURES"));
+  target->AppendProperty("COMPILE_FEATURES", feature.c_str());
 
   return lang == "C"
     ? this->AddRequiredTargetCFeature(target, feature, error)
@@ -4774,15 +4767,13 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
     // Ensure the C++ language level is high enough to support
     // the needed C++ features.
     if (!existingCxxLevel || existingCxxLevel < needCxxLevel) {
-      target->SetProperty(
-        "CXX_STANDARD", *needCxxLevel, target->GetBacktrace());
+      target->SetProperty("CXX_STANDARD", *needCxxLevel);
     }
 
     // Ensure the CUDA language level is high enough to support
     // the needed C++ features.
     if (!existingCudaLevel || existingCudaLevel < needCxxLevel) {
-      target->SetProperty(
-        "CUDA_STANDARD", *needCxxLevel, target->GetBacktrace());
+      target->SetProperty("CUDA_STANDARD", *needCxxLevel);
     }
   }
 
@@ -4865,11 +4856,11 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
   }
 
   if (setC11) {
-    target->SetProperty("C_STANDARD", "11", target->GetBacktrace());
+    target->SetProperty("C_STANDARD", "11");
   } else if (setC99) {
-    target->SetProperty("C_STANDARD", "99", target->GetBacktrace());
+    target->SetProperty("C_STANDARD", "99");
   } else if (setC90) {
-    target->SetProperty("C_STANDARD", "90", target->GetBacktrace());
+    target->SetProperty("C_STANDARD", "90");
   }
   return true;
 }

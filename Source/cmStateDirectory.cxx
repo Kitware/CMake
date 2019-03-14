@@ -530,7 +530,7 @@ void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
     return;
   }
 
-  this->DirectoryState->Properties.SetProperty(prop, value, lfbt);
+  this->DirectoryState->Properties.SetProperty(prop, value);
 }
 
 void cmStateDirectory::AppendProperty(const std::string& prop,
@@ -558,7 +558,7 @@ void cmStateDirectory::AppendProperty(const std::string& prop,
     return;
   }
 
-  this->DirectoryState->Properties.AppendProperty(prop, value, lfbt, asString);
+  this->DirectoryState->Properties.AppendProperty(prop, value, asString);
 }
 
 const char* cmStateDirectory::GetProperty(const std::string& prop) const
@@ -675,27 +675,6 @@ std::vector<std::string> cmStateDirectory::GetPropertyKeys() const
     keys.push_back(it.first);
   }
   return keys;
-}
-
-const cmListFileBacktrace & cmStateDirectory::GetPropertyBacktrace(const std::string & prop) const
-{
-  const bool chain =
-    this->Snapshot_.State->IsPropertyChained(prop, cmProperty::DIRECTORY);
-  const bool hasProperty = this->DirectoryState->Properties.HasProperty(prop);
-
-  if (!hasProperty && chain) {
-    cmStateSnapshot parentSnapshot =
-      this->Snapshot_.GetBuildsystemDirectoryParent();
-    if (parentSnapshot.IsValid()) {
-      return parentSnapshot.GetDirectory().GetPropertyBacktrace(prop);
-    }
-  }
-
-  if (hasProperty) {
-    return this->DirectoryState->Properties.GetPropertyBacktrace(prop);
-  }
-
-  return cmListFileBacktrace::EmptyBacktrace();
 }
 
 void cmStateDirectory::AddNormalTargetName(std::string const& name)

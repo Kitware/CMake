@@ -40,16 +40,13 @@ void cmExportInstallAndroidMKGenerator::GenerateImportHeaderCode(
       continue;
     }
     std::string dest;
-    cmListFileBacktrace backtrace;
     if (te->LibraryGenerator) {
       dest = te->LibraryGenerator->GetDestination("");
-      backtrace = te->LibraryGenerator->GetTarget()->GetBacktrace();
     }
     if (te->ArchiveGenerator) {
       dest = te->ArchiveGenerator->GetDestination("");
-      backtrace = te->ArchiveGenerator->GetTarget()->GetBacktrace();
     }
-    te->Target->Target->SetProperty("__dest", dest.c_str(), backtrace);
+    te->Target->Target->SetProperty("__dest", dest.c_str());
   }
 }
 

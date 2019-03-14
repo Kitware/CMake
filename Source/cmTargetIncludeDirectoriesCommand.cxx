@@ -80,7 +80,6 @@ void cmTargetIncludeDirectoriesCommand::HandleInterfaceContent(
   if (system) {
     std::string joined = this->Join(content);
     tgt->AppendProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES",
-                        joined.c_str(),
-                        this->GetBacktrace());
+                        joined.c_str());
   }
 }

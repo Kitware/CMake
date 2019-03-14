@@ -130,7 +130,6 @@ void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
 
 cmake::cmake(Role role, cmState::Mode mode)
 {
-  this->RoleVal = role;
   this->Trace = false;
   this->TraceExpand = false;
   this->WarnUninitialized = false;
@@ -566,13 +565,13 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     const char* targetName = "dummy";
     std::vector<std::string> srcs;
     cmTarget* tgt = mf->AddExecutable(targetName, srcs, true);
-    tgt->SetProperty("LINKER_LANGUAGE", language.c_str(), tgt->GetBacktrace());
+    tgt->SetProperty("LINKER_LANGUAGE", language.c_str());
 
     std::string libs = mf->GetSafeDefinition("PACKAGE_LIBRARIES");
     std::vector<std::string> libList;
     cmSystemTools::ExpandListArgument(libs, libList);
     for (std::string const& lib : libList) {
-      tgt->AddLinkLibrary(*mf, lib, GENERAL_LibraryType, mf->GetBacktrace());
+      tgt->AddLinkLibrary(*mf, lib, GENERAL_LibraryType);
     }
 
     std::string buildType = mf->GetSafeDefinition("CMAKE_BUILD_TYPE");
@@ -1212,7 +1211,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
   std::vector<std::string> argsSplit;
   cmSystemTools::ExpandListArgument(std::string(var), argsSplit, true);
   // erase the property to avoid infinite recursion
-  this->State->SetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "", cmListFileBacktrace());
+  this->State->SetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
   if (this->State->GetIsInTryCompile()) {
     return 0;
   }
@@ -2249,15 +2248,15 @@ void cmake::GenerateGraphViz(const char* fileName) const
 #endif
 }
 
-void cmake::SetProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace)
+void cmake::SetProperty(const std::string& prop, const char* value)
 {
-  this->State->SetGlobalProperty(prop, value, backtrace);
+  this->State->SetGlobalProperty(prop, value);
 }
 
-void cmake::AppendProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace,
+void cmake::AppendProperty(const std::string& prop, const char* value,
                            bool asString)
 {
-  this->State->AppendGlobalProperty(prop, value, backtrace, asString);
+  this->State->AppendGlobalProperty(prop, value, asString);
 }
 
 const char* cmake::GetProperty(const std::string& prop)

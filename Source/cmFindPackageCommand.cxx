@@ -1087,11 +1087,11 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
   }
 
   std::string tmp = cmJoin(foundContents, ";");
-  this->Makefile->GetState()->SetGlobalProperty("PACKAGES_FOUND", tmp.c_str(), this->Makefile->GetBacktrace());
+  this->Makefile->GetState()->SetGlobalProperty("PACKAGES_FOUND", tmp.c_str());
 
   tmp = cmJoin(notFoundContents, ";");
   this->Makefile->GetState()->SetGlobalProperty("PACKAGES_NOT_FOUND",
-                                                tmp.c_str(), this->Makefile->GetBacktrace());
+                                                tmp.c_str());
 }
 
 void cmFindPackageCommand::AppendSuccessInformation()
@@ -1099,7 +1099,7 @@ void cmFindPackageCommand::AppendSuccessInformation()
   {
     std::string transitivePropName = "_CMAKE_";
     transitivePropName += this->Name + "_TRANSITIVE_DEPENDENCY";
-    this->Makefile->GetState()->SetGlobalProperty(transitivePropName, "False", this->Makefile->GetBacktrace());
+    this->Makefile->GetState()->SetGlobalProperty(transitivePropName, "False");
   }
   std::string found = this->Name;
   found += "_FOUND";
@@ -1118,7 +1118,7 @@ void cmFindPackageCommand::AppendSuccessInformation()
   quietInfoPropName += this->Name;
   quietInfoPropName += "_QUIET";
   this->Makefile->GetState()->SetGlobalProperty(
-    quietInfoPropName, this->Quiet ? "TRUE" : "FALSE", this->Makefile->GetBacktrace());
+    quietInfoPropName, this->Quiet ? "TRUE" : "FALSE");
 
   // set a global property to record the required version of this package
   std::string versionInfoPropName = "_CMAKE_";
@@ -1131,13 +1131,13 @@ void cmFindPackageCommand::AppendSuccessInformation()
     versionInfo += this->Version;
   }
   this->Makefile->GetState()->SetGlobalProperty(versionInfoPropName,
-                                                versionInfo.c_str(), this->Makefile->GetBacktrace());
+                                                versionInfo.c_str());
   if (this->Required) {
     std::string requiredInfoPropName = "_CMAKE_";
     requiredInfoPropName += this->Name;
     requiredInfoPropName += "_TYPE";
     this->Makefile->GetState()->SetGlobalProperty(requiredInfoPropName,
-                                                  "REQUIRED", this->Makefile->GetBacktrace());
+                                                  "REQUIRED");
   }
 
   // Restore original state of "_FIND_" variables we set.

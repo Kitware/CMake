@@ -279,10 +279,6 @@ Giving the "major" version of the requested protocol version will make the serve
 use the latest minor version of that protocol. Use this if you do not explicitly
 need to depend on a specific minor version.
 
-If the build directory already contains a CMake cache, it is sufficient to set
-the "buildDirectory" attribute. To create a fresh build directory, additional
-attributes are required depending on the protocol version.
-
 Protocol version 1.0 requires the following attributes to be set:
 
   * "sourceDirectory" with a path to the sources
@@ -446,22 +442,6 @@ The "codemodel" request can be used after a project was "compute"d successfully.
 
 It will list the complete project structure as it is known to cmake.
 
-If the optional parameter "includeTraces" is set to true, traces will be added
-to responses and a "referenceTraces" key will also be included in the reply. 
-Reference traces contain an id to file/line/name location mapping for converting
-embedded backtraces in other data to actual file/line/name locations.
-
-Example:
-
-    "referencedTraces": [
-        {
-            "id": 1
-            "line": 3,
-            "name": "add_library",
-            "path": "D:/src/CMakeLists.txt"
-        }
-     ]
-
 The reply will contain a key "configurations", which will contain a list of
 configuration objects. Configuration objects are used to destinquish between
 different configurations the build directory might have enabled. While most
@@ -539,9 +519,6 @@ Each target object can have the following keys:
   with the sysroot path.
 "fileGroups"
   contains the source files making up the target.
-  "crossReferences"
-  contains the location of the target in the corresponding CMakeLists.txt
-  file and the locations of the related statements like "target_link_libraries"
 
 FileGroups are used to group sources using similar settings together.
 
@@ -567,20 +544,10 @@ Each fileGroup object may contain the following keys:
 All file paths in the fileGroup are either absolute or relative to the
 sourceDirectory of the target.
 
-CrossReferences object is used to report the location of the target (including
-the entire call stack if the target is defined in a function) and the related
-"target_link_libraries", "target_include_directories", "target_compile_definitions"
-and "target_compile_options" statements.
-
-See the example below for details on the internal format of the "crossReferences" object.
-Line numbers stated in the "backtrace" entries are 1-based. The last entry of a backtrace
-is a special entry with missing "line" and "name" fields that specifies the initial
-CMakeLists.txt file.
-
 Example::
 
   [== "CMake Server" ==[
-  {"type":"codemodel", "includeTraces" : "true"}
+  {"type":"codemodel"}
   ]== "CMake Server" ==]
 
 CMake will reply::
@@ -613,22 +580,7 @@ CMake will reply::
                 "linkerLanguage": "C",
                 "name": "cmForm",
                 "sourceDirectory": "/home/code/src/cmake/Source/CursesDialog/form",
-                "type": "STATIC_LIBRARY",
-                "crossReferences": {
-                   "backtrace": [ 
-                      1, 
-                      2
-                   ],
-                   "relatedStatements": [
-                      {
-                         "backtrace": [
-                           3,
-                           4,
-                         ],
-                         "type": "target_link_libraries"
-                      }
-                   ]
-                 }
+                "type": "STATIC_LIBRARY"
               }
             ]
           },
@@ -636,18 +588,6 @@ CMake will reply::
         ]
       }
     ],
-    "referencedTraces": [
-        {
-            "id" : 1
-            "line": 3,
-            "name": "add_library",
-            "path": "F:/CMake/HelloWorldWithLib/Lib/CMakeLists.txt"
-        },
-        {
-            "id" : 2
-            "path": "F:/CMake/HelloWorldWithLib/Lib/CMakeLists.txt"
-        },
-    ] 
     "cookie": "",
     "inReplyTo": "codemodel",
     "type": "reply"
@@ -691,17 +631,6 @@ Each test object can have the following keys:
   contains the test command.
 "properties"
   contains a list of test property objects.
-"backtrace"
-  contains a list of backtrace objects that specify where the test was defined.
-
-Each backtrace object can have the following keys:
-
-"path"
-  contains the full path to the file containing the statement.
-"line"
-  contains the line number in the file where the statement was defined.
-"name"
-  contains the name of the statement that added the test.
 
 Each test property object can have the following keys:
 

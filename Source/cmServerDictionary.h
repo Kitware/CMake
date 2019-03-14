@@ -4,7 +4,7 @@
 
 #include <string>
 
-   // Vocabulary:
+// Vocabulary:
 
 static const std::string kDIRTY_SIGNAL = "dirty";
 static const std::string kFILE_CHANGE_SIGNAL = "fileChange";

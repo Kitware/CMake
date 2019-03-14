@@ -345,68 +345,6 @@ See `Build and Test Mode`_.
 
 .. include:: OPTIONS_HELP.txt
 
-.. _`Show as json Object Model`:
-
-Show as JSON Object Model
-=========================
-
-Show as JSON Object Model
-=========================
-
-When the ``--show-only=json-v1`` command line option is given, the test
-information is output in JSON format.  Version 1.0 of the JSON object
-model is defined as follows:
-
-``kind``
-  The string "ctestInfo".
-
-``version``
-  A JSON object specifying the version components.  Its members are
-
-  ``major``
-    A non-negative integer specifying the major version component.
-  ``minor``
-    A non-negative integer specifying the minor version component.
-
-``backtraceGraph``
-    JSON object representing backtrace information with the
-    following members:
-
-    ``commands``
-      List of command names.
-    ``files``
-      List of file names.
-    ``nodes``
-      List of node JSON objects with members:
-
-      ``command``
-        Index into the ``commands`` member of the ``backtraceGraph``.
-      ``file``
-        Index into the ``files`` member of the ``backtraceGraph``.
-      ``line``
-        Line number in the file where the backtrace was added.
-      ``parent``
-        Index into the ``nodes`` member of the ``backtraceGraph``
-        representing the parent in the graph.
-
-``tests``
-  A JSON array listing information about each test.  Each entry
-  is a JSON object with members:
-
-  ``name``
-    Test name.
-  ``config``
-    Configuration that the test can run on.
-    Empty string means any config.
-  ``command``
-    List where the first element is the test command and the
-    remaining elements are the command arguments.
-  ``backtrace``
-    Index into the ``nodes`` member of the ``backtraceGraph``.
-  ``properties``
-    Test properties.
-    Can contain keys for each of the supported test properties.
-
 .. _`Label and Subproject Summary`:
 
 Label and Subproject Summary

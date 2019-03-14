@@ -423,7 +423,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
   if (this->TargetTypeValue == cmStateEnums::SHARED_LIBRARY ||
       this->TargetTypeValue == cmStateEnums::MODULE_LIBRARY) {
-    this->SetProperty("POSITION_INDEPENDENT_CODE", "True", this->Backtrace);
+    this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
   }
   if (this->TargetTypeValue == cmStateEnums::SHARED_LIBRARY ||
       this->TargetTypeValue == cmStateEnums::EXECUTABLE) {
@@ -759,16 +759,14 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
 }
 
 void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
-                              cmTargetLinkLibraryType llt,
-                              const cmListFileBacktrace & bt)
+                              cmTargetLinkLibraryType llt)
 {
-  this->AddLinkLibrary(mf, lib, lib, llt, bt);
+  this->AddLinkLibrary(mf, lib, lib, llt);
 }
 
 void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
                               std::string const& libRef,
-                              cmTargetLinkLibraryType llt,
-                              const cmListFileBacktrace& bt)
+                              cmTargetLinkLibraryType llt)
 {
   cmTarget* tgt = mf.FindTargetToUse(lib);
   {
@@ -780,8 +778,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
       : libRef;
     this->AppendProperty(
       "LINK_LIBRARIES",
-      this->GetDebugGeneratorExpressions(libName, llt).c_str(),
-      bt);
+      this->GetDebugGeneratorExpressions(libName, llt).c_str());
   }
 
   if (cmGeneratorExpression::Find(lib) != std::string::npos || lib != libRef ||
@@ -917,7 +914,7 @@ cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
   return cmMakeRange(this->Internal->LinkImplementationPropertyBacktraces);
 }
 
-void cmTarget::SetProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace)
+void cmTarget::SetProperty(const std::string& prop, const char* value)
 {
   if (!cmTargetPropertyComputer::PassesWhitelist(
         this->GetType(), prop, this->Makefile->GetMessenger(),
@@ -1069,16 +1066,16 @@ void cmTarget::SetProperty(const std::string& prop, const char* value, const cmL
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   } else {
-    this->Properties.SetProperty(prop, value, backtrace);
+    this->Properties.SetProperty(prop, value);
   }
 }
 
-void cmTarget::AppendProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace,
+void cmTarget::AppendProperty(const std::string& prop, const char* value,
                               bool asString)
 {
   if (!cmTargetPropertyComputer::PassesWhitelist(
         this->GetType(), prop, this->Makefile->GetMessenger(),
-        backtrace)) {
+        this->Makefile->GetBacktrace())) {
     return;
   }
   if (prop == "NAME") {
@@ -1159,7 +1156,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value, const 
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  prop + " property may not be APPENDed.");
   } else {
-    this->Properties.AppendProperty(prop, value, backtrace, asString);
+    this->Properties.AppendProperty(prop, value, asString);
   }
 }
 
@@ -1185,8 +1182,7 @@ void cmTarget::AppendBuildInterfaceIncludes()
     dirs += this->Makefile->GetCurrentSourceDirectory();
     if (!dirs.empty()) {
       this->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                           ("$<BUILD_INTERFACE:" + dirs + ">").c_str(),
-                           this->GetPropertyBacktrace("INTERFACE_INCLUDE_DIRECTORIES"));
+                           ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
     }
   }
 }
@@ -1519,23 +1515,6 @@ const char* cmTarget::GetProperty(const std::string& prop) const
   return retVal;
 }
 
-const cmListFileBacktrace & cmTarget::GetPropertyBacktrace(const std::string & prop) const
-{
-  bool haveProperty = this->Properties.HasProperty(prop);
-  if (!haveProperty) {
-    const bool chain = this->GetMakefile()->GetState()->IsPropertyChained(
-      prop, cmProperty::TARGET);
-    if (chain) {
-      return this->Makefile->GetStateSnapshot().GetDirectory().GetPropertyBacktrace(
-        prop);
-    } else {
-      return Backtrace;
-    }
-  } else {
-    return this->Properties.GetPropertyBacktrace(prop);
-  }
-}
-
 const char* cmTarget::GetSafeProperty(const std::string& prop) const
 {
   const char* ret = this->GetProperty(prop);
@@ -1699,9 +1678,9 @@ void cmTarget::SetPropertyDefault(const std::string& property,
   var += property;
 
   if (const char* value = this->Makefile->GetDefinition(var)) {
-    this->SetProperty(property, value, this->Backtrace);
+    this->SetProperty(property, value);
   } else if (default_value) {
-    this->SetProperty(property, default_value, this->Backtrace);
+    this->SetProperty(property, default_value);
   }
 }
 

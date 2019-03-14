@@ -10,8 +10,6 @@ add_executable(main main.cpp)
 
 add_executable(m_other main.cpp)
 
-add_test(dummytest main)
-
 add_library(foo foo.cpp)
 
 function(f1)

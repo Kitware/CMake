@@ -165,16 +165,7 @@ bool cmServerProtocol::DoActivate(const cmServerRequest& /*request*/,
 
 std::pair<int, int> cmServerProtocol1::ProtocolVersion() const
 {
-  return std::make_pair(1, 4);
-}
-
-std::pair<int, int> cmServerProtocol2::ProtocolVersion() const
-{
-  // Revision history
-  // 2, 1 - simplified backtraces
-  // 2, 2 - direct dependencies of targets
-  // 2, 3 - target properties, global properties
-  return std::make_pair(2, 3); 
+  return std::make_pair(1, 2);
 }
 
 static void setErrorMessage(std::string* errorMessage, const std::string& text)
@@ -500,19 +491,6 @@ cmServerResponse cmServerProtocol1::ProcessCodeModel(
   return request.Reply(cmDumpCodeModel(this->CMakeInstance()));
 }
 
-cmServerResponse cmServerProtocol2::ProcessCodeModel(
-  const cmServerRequest& request)
-
-{
-  if (this->m_State != STATE_COMPUTED) {
-    return request.ReportError("No build system was generated yet.");
-  }
-  auto includeTraces = request.Data[kINCLUDE_TRACES_KEY].asBool();
-  auto includeSourceGroups = request.Data[KINCLUDE_SOURCE_GROUPS_KEY].asBool();
-  return request.Reply(
-    cmDumpCodeModel2(this->CMakeInstance(), includeTraces, includeSourceGroups));
-}
-
 cmServerResponse cmServerProtocol1::ProcessCompute(
   const cmServerRequest& request)
 {
@@ -664,17 +642,6 @@ cmServerResponse cmServerProtocol1::ProcessGlobalSettings(
   obj[kGENERATOR_KEY] = this->GeneratorInfo.GeneratorName;
   obj[kEXTRA_GENERATOR_KEY] = this->GeneratorInfo.ExtraGeneratorName;
 
-  // Global properties
-  Json::Value properties = Json::arrayValue;
-  for (const auto& prop : cm->GetState()->GetGlobalProperties()) {
-    Json::Value entry = Json::objectValue;
-    entry[kKEY_KEY] = prop.first;
-    entry[kVALUE_KEY] = prop.second.GetValue();
-    properties.append(entry);
-  }
-  obj[kPROPERTIES_KEY] = properties;
-
-
   return request.Reply(obj);
 }
 
@@ -746,17 +713,6 @@ cmServerResponse cmServerProtocol1::ProcessCTests(
   }
 
   return request.Reply(cmDumpCTestInfo(this->CMakeInstance()));
-}
-
-cmServerResponse cmServerProtocol2::ProcessCTests(
-  const cmServerRequest& request)
-{
-  if (this->m_State < STATE_COMPUTED) {
-    return request.ReportError("This instance was not yet computed.");
-  }
-
-  auto includeTraces = request.Data[kINCLUDE_TRACES_KEY].asBool();
-  return request.Reply(cmDumpCTestInfo2(this->CMakeInstance(), includeTraces));
 }
 
 cmServerProtocol1::GeneratorInformation::GeneratorInformation(

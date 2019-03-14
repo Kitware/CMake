@@ -112,7 +112,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   // Organize in the "predefined targets" folder:
   //
   if (this->UseFolderProperty()) {
-    tgt->SetProperty("FOLDER", this->GetPredefinedTargetsFolder(), tgt->GetBacktrace());
+    tgt->SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
   }
 
   // Create a list of all stamp files for this project.
@@ -166,8 +166,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 
       // Ensure ZERO_CHECK always runs in Visual Studio using MSBuild,
       // otherwise the prebuild command will not be run.
-      tgt->SetProperty("VS_GLOBAL_DisableFastUpToDateCheck", "true",
-                       tgt->GetBacktrace());
+      tgt->SetProperty("VS_GLOBAL_DisableFastUpToDateCheck", "true");
       listFiles.push_back(cm->GetGlobVerifyStamp());
     }
 

@@ -275,7 +275,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
        policy22Status == cmPolicies::WARN) &&
       this->CurrentProcessingState != ProcessingLinkLibraries &&
       !this->Target->GetProperty("LINK_INTERFACE_LIBRARIES")) {
-    this->Target->SetProperty("LINK_INTERFACE_LIBRARIES", "", this->GetBacktrace());
+    this->Target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
   }
 
   return true;
@@ -430,7 +430,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     }
 
-    this->Target->AddLinkLibrary(*this->Makefile, lib, libRef, llt, this->GetBacktrace());
+    this->Target->AddLinkLibrary(*this->Makefile, lib, libRef, llt);
   }
 
   if (warnRemoteInterface) {
@@ -461,8 +461,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
         configLib = "$<LINK_ONLY:" + configLib + ">";
       }
       this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
-                                   configLib.c_str(),
-		                           this->GetBacktrace());
+                                   configLib.c_str());
     }
     return true;
   }
@@ -472,7 +471,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
   // property of the target on the LHS shall be populated.)
   this->Target->AppendProperty(
     "INTERFACE_LINK_LIBRARIES",
-    this->Target->GetDebugGeneratorExpressions(libRef, llt).c_str(), this->GetBacktrace());
+    this->Target->GetDebugGeneratorExpressions(libRef, llt).c_str());
 
   // Stop processing if called without any keyword.
   if (this->CurrentProcessingState == ProcessingLinkLibraries) {
@@ -505,21 +504,21 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       for (std::string const& dc : debugConfigs) {
         prop = "LINK_INTERFACE_LIBRARIES_";
         prop += dc;
-        this->Target->AppendProperty(prop, libRef.c_str(), this->GetBacktrace());
+        this->Target->AppendProperty(prop, libRef.c_str());
       }
     }
     if (llt == OPTIMIZED_LibraryType || llt == GENERAL_LibraryType) {
       // Put in the non-DEBUG configuration interfaces.
-      this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", libRef.c_str(), this->GetBacktrace());
+      this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", libRef.c_str());
 
-    // Make sure the DEBUG configuration interfaces exist so that the
-    // general one will not be used as a fall-back.
-    for (std::string const& dc : debugConfigs) {
-      prop = "LINK_INTERFACE_LIBRARIES_";
-      prop += dc;
-      if (!this->Target->GetProperty(prop)) {
-        this->Target->SetProperty(prop, "", this->GetBacktrace());
-		}
+      // Make sure the DEBUG configuration interfaces exist so that the
+      // general one will not be used as a fall-back.
+      for (std::string const& dc : debugConfigs) {
+        prop = "LINK_INTERFACE_LIBRARIES_";
+        prop += dc;
+        if (!this->Target->GetProperty(prop)) {
+          this->Target->SetProperty(prop, "");
+        }
       }
     }
   }

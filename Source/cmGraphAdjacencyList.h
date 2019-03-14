@@ -4,7 +4,6 @@
 #define cmGraphAdjacencyList_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
-#include "cmListFileCache.h"
 
 #include "cmListFileCache.h"
 
@@ -24,27 +23,7 @@ public:
     , Strong(s)
     , Backtrace(std::move(bt))
   {
-    if (pbt != nullptr) {
-      backtrace = *pbt;
-    }
   }
-
-  // Graph edges may be copied and assigned as values.
-  cmGraphEdge(cmGraphEdge const& r)
-     : Dest(r.Dest)
-     , Strong(r.Strong)
-     , backtrace(r.backtrace)
-  {
-     
-  }
-  cmGraphEdge& operator=(cmGraphEdge const& r)
-  {
-      this->Dest = r.Dest;
-      this->Strong = r.Strong;
-      this->backtrace = r.backtrace;
-      return *this;
-  }
-
   operator int() const { return this->Dest; }
 
   bool IsStrong() const { return this->Strong; }
