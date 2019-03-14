@@ -339,8 +339,7 @@ if(PKG_CONFIG_FOUND)
   add_RunCMake_test(FindPkgConfig)
 endif()
 
-find_package(GTK2 QUIET)
-if (GTK2_FOUND)
+if(CMake_TEST_FindGTK2)
   add_RunCMake_test(FindGTK2)
 endif()
 
