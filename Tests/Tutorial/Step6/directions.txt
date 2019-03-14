@@ -1,0 +1,104 @@
+# Adding a Custom Command and Generated File #
+
+In this section we will show how you can add a generated source file into the
+build process of an application. For this example, we will create a table of
+precomputed square roots as part of the build process, and then compile that
+table into our application.
+
+To accomplish this, we first need a program that will generate the table. In the
+MathFunctions subdirectory a new source file named MakeTable.cxx will do just that.
+
+  // A simple program that builds a sqrt table
+  #include <iostream>
+  #include <fstream>
+  #include <cmath>
+
+  int main (int argc, char *argv[])
+  {
+    // make sure we have enough arguments
+    if (argc < 2) {
+      return 1;
+    }
+
+    std::ofstream fout(argv[1],std::ios_base::out);
+    const bool fileOpen = fout.is_open();
+    if(fileOpen) {
+      fout << "double sqrtTable[] = {" << std::endl;
+      for (int i = 0; i < 10; ++i) {
+        fout << sqrt(static_cast<double>(i)) << "," << std::endl;
+      }
+      // close the table with a zero
+      fout << "0};" << std::endl;
+      fout.close();
+    }
+    return fileOpen ? 0 : 1; // return 0 if wrote the file
+  }
+
+Note that the table is produced as valid C++ code and that the output filename
+is passed in as an argument.
+
+The next step is to add the appropriate commands to MathFunctions’ CMakeLists
+file to build the MakeTable executable and then run it as part of the build
+process. A few commands are needed to accomplish this, as shown below:
+
+  # first we add the executable that generates the table
+  add_executable(MakeTable MakeTable.cxx)
+
+  # add the command to generate the source code
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Table.h
+    COMMAND MakeTable ${CMAKE_CURRENT_BINARY_DIR}/Table.h
+    DEPENDS MakeTable
+    )
+
+  # add the main library
+  add_library(MathFunctions
+              mysqrt.cxx
+              ${CMAKE_CURRENT_BINARY_DIR}/Table.h
+              )
+
+  target_include_directories(MathFunctions
+          INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+          PUBLIC ${Tutorial_BINARY_DIR}
+                 # add the binary tree directory to the search path for include files
+                 ${CMAKE_CURRENT_BINARY_DIR}
+          )
+
+  install(TARGETS MathFunctions DESTINATION lib)
+  install(FILES MathFunctions.h DESTINATION include)
+
+First, the executable for MakeTable is added as any other executable would be
+added. Then we add a custom command that specifies how to produce Table.h by
+running MakeTable. Next we have to let CMake know that mysqrt.cxx depends on
+the generated file Table.h. This is done by adding the generated Table.h to the
+list of sources for the library MathFunctions. We also have to add the current
+binary directory to the list of include directories so that Table.h can be
+found and included by mysqrt.cxx.
+
+Now let's use the generated table. First, modify mysqrt.cxx to include Table.h.
+Next, we can rewrite the mysqrt function to use the table:
+
+  if (x <= 0) {
+    return 0;
+  }
+
+  // use the table to help find an initial value
+  double result = x;
+  if (x >= 1 && x < 10) {
+    result = sqrtTable[static_cast<int>(x)];
+  }
+
+  // do ten iterations
+  for (int i = 0; i < 10; ++i) {
+    if (result <= 0) {
+      result = 0.1;
+    }
+    double delta = x - (result*result);
+    result = result + 0.5*delta/result;
+    std::cout << "Computing sqrt of " << x << " to be " << result << std::endl;
+  }
+
+Run cmake or cmake-gui to configure the project and then build it with your
+chosen build tool. When this project is built it will first build the MakeTable
+executable. It will then run MakeTable to produce Table.h. Finally, it will
+compile mysqrt.cxx which includes Table.h to produce the MathFunctions library.

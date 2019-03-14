@@ -11,15 +11,16 @@ Synopsis
 .. parsed-literal::
 
  ctest [<options>]
- ctest <path-to-source> <path-to-build> --build-generator <generator>
-       [<options>...] [-- <build-options>...] [--test-command <test>]
+ ctest --build-and-test <path-to-source> <path-to-build>
+       --build-generator <generator> [<options>...]
+       [--build-options <opts>...] [--test-command <command> [<args>...]]
  ctest {-D <dashboard> | -M <model> -T <action> | -S <script> | -SP <script>}
        [-- <dashboard-options>...]
 
 Description
 ===========
 
-The "ctest" executable is the CMake test driver program.
+The **ctest** executable is the CMake test driver program.
 CMake-generated build trees created for projects that use the
 ENABLE_TESTING and ADD_TEST commands have testing support.  This
 program will run the tests and report results.
@@ -38,7 +39,7 @@ Options
 ``--progress``
  Enable short progress output from tests.
 
- When the output of ``ctest`` is being sent directly to a terminal, the
+ When the output of **ctest** is being sent directly to a terminal, the
  progress through the set of tests is reported by updating the same line
  rather than printing start and end messages for each test on new lines.
  This can significantly reduce the verbosity of the test output.
@@ -323,10 +324,11 @@ See `Build and Test Mode`_.
  Do not use.
 
 ``--timeout <seconds>``
- Set a global timeout on all tests.
+ Set the default test timeout.
 
- This option will set a global timeout on all tests that do not
- already have a timeout set on them.
+ This option effectively sets a timeout on all tests that do not
+ already have a timeout set on them via the :prop_test:`TIMEOUT`
+ property.
 
 ``--stop-time <time>``
  Set a time at which all tests should stop running.
@@ -342,68 +344,6 @@ See `Build and Test Mode`_.
  all labels associated with the test set.
 
 .. include:: OPTIONS_HELP.txt
-
-.. _`Show as json Object Model`:
-
-Show as JSON Object Model
-=========================
-
-Show as JSON Object Model
-=========================
-
-When the ``--show-only=json-v1`` command line option is given, the test
-information is output in JSON format.  Version 1.0 of the JSON object
-model is defined as follows:
-
-``kind``
-  The string "ctestInfo".
-
-``version``
-  A JSON object specifying the version components.  Its members are
-
-  ``major``
-    A non-negative integer specifying the major version component.
-  ``minor``
-    A non-negative integer specifying the minor version component.
-
-``backtraceGraph``
-    JSON object representing backtrace information with the
-    following members:
-
-    ``commands``
-      List of command names.
-    ``files``
-      List of file names.
-    ``nodes``
-      List of node JSON objects with members:
-
-      ``command``
-        Index into the ``commands`` member of the ``backtraceGraph``.
-      ``file``
-        Index into the ``files`` member of the ``backtraceGraph``.
-      ``line``
-        Line number in the file where the backtrace was added.
-      ``parent``
-        Index into the ``nodes`` member of the ``backtraceGraph``
-        representing the parent in the graph.
-
-``tests``
-  A JSON array listing information about each test.  Each entry
-  is a JSON object with members:
-
-  ``name``
-    Test name.
-  ``config``
-    Configuration that the test can run on.
-    Empty string means any config.
-  ``command``
-    List where the first element is the test command and the
-    remaining elements are the command arguments.
-  ``backtrace``
-    Index into the ``nodes`` member of the ``backtraceGraph``.
-  ``properties``
-    Test properties.
-    Can contain keys for each of the supported test properties.
 
 .. _`Label and Subproject Summary`:
 
@@ -1141,7 +1081,7 @@ Configuration settings include:
   * :module:`CTest` module variable: ``BUILDNAME``
 
 ``CDashVersion``
-  Specify the version of `CDash`_ on the server.
+  Legacy option.  Not used.
 
   * `CTest Script`_ variable: none, detected from server
   * :module:`CTest` module variable: ``CTEST_CDASH_VERSION``
@@ -1170,55 +1110,58 @@ Configuration settings include:
   * :module:`CTest` module variable: ``CTEST_CURL_OPTIONS``
 
 ``DropLocation``
-  The path on the dashboard server to send the submission.
+  Legacy option.  When ``SubmitURL`` is not set, it is constructed from
+  ``DropMethod``, ``DropSiteUser``, ``DropSitePassword``, ``DropSite``, and
+  ``DropLocation``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_LOCATION`
   * :module:`CTest` module variable: ``DROP_LOCATION`` if set,
     else ``CTEST_DROP_LOCATION``
 
 ``DropMethod``
-  Specify the method by which results should be submitted to the
-  dashboard server.  The value may be ``cp``, ``ftp``, ``http``,
-  ``https``, ``scp``, or ``xmlrpc`` (if CMake was built with
-  support for it).
+  Legacy option.  When ``SubmitURL`` is not set, it is constructed from
+  ``DropMethod``, ``DropSiteUser``, ``DropSitePassword``, ``DropSite``, and
+  ``DropLocation``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_METHOD`
   * :module:`CTest` module variable: ``DROP_METHOD`` if set,
     else ``CTEST_DROP_METHOD``
 
 ``DropSite``
-  The dashboard server name
-  (for ``ftp``, ``http``, and ``https``, ``scp``, and ``xmlrpc``).
+  Legacy option.  When ``SubmitURL`` is not set, it is constructed from
+  ``DropMethod``, ``DropSiteUser``, ``DropSitePassword``, ``DropSite``, and
+  ``DropLocation``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE`
   * :module:`CTest` module variable: ``DROP_SITE`` if set,
     else ``CTEST_DROP_SITE``
 
 ``DropSitePassword``
-  The dashboard server login password, if any
-  (for ``ftp``, ``http``, and ``https``).
+  Legacy option.  When ``SubmitURL`` is not set, it is constructed from
+  ``DropMethod``, ``DropSiteUser``, ``DropSitePassword``, ``DropSite``, and
+  ``DropLocation``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_PASSWORD`
   * :module:`CTest` module variable: ``DROP_SITE_PASSWORD`` if set,
     else ``CTEST_DROP_SITE_PASWORD``
 
 ``DropSiteUser``
-  The dashboard server login user name, if any
-  (for ``ftp``, ``http``, and ``https``).
+  Legacy option.  When ``SubmitURL`` is not set, it is constructed from
+  ``DropMethod``, ``DropSiteUser``, ``DropSitePassword``, ``DropSite``, and
+  ``DropLocation``.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_USER`
   * :module:`CTest` module variable: ``DROP_SITE_USER`` if set,
     else ``CTEST_DROP_SITE_USER``
 
 ``IsCDash``
-  Specify whether the dashboard server is `CDash`_ or an older
-  dashboard server implementation requiring ``TriggerSite``.
+  Legacy option.  Not used.
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_CDASH`
   * :module:`CTest` module variable: ``CTEST_DROP_SITE_CDASH``
 
 ``ScpCommand``
-  ``scp`` command-line tool to use when ``DropMethod`` is ``scp``.
+  Legacy option.  Not used.
 
   * `CTest Script`_ variable: :variable:`CTEST_SCP_COMMAND`
   * :module:`CTest` module variable: ``SCPCOMMAND``
@@ -1231,13 +1174,79 @@ Configuration settings include:
   * :module:`CTest` module variable: ``SITE``,
     initialized by the :command:`site_name` command
 
+``SubmitURL``
+  The ``http`` or ``https`` URL of the dashboard server to send the submission
+  to.
+
+  * `CTest Script`_ variable: :variable:`CTEST_SUBMIT_URL`
+  * :module:`CTest` module variable: ``SUBMIT_URL`` if set,
+    else ``CTEST_SUBMIT_URL``
+
 ``TriggerSite``
-  Legacy option to support older dashboard server implementations.
-  Not used when ``IsCDash`` is true.
+  Legacy option.  Not used.
 
   * `CTest Script`_ variable: :variable:`CTEST_TRIGGER_SITE`
   * :module:`CTest` module variable: ``TRIGGER_SITE`` if set,
     else ``CTEST_TRIGGER_SITE``
+
+.. _`Show as JSON Object Model`:
+
+Show as JSON Object Model
+=========================
+
+When the ``--show-only=json-v1`` command line option is given, the test
+information is output in JSON format.  Version 1.0 of the JSON object
+model is defined as follows:
+
+``kind``
+  The string "ctestInfo".
+
+``version``
+  A JSON object specifying the version components.  Its members are
+
+  ``major``
+    A non-negative integer specifying the major version component.
+  ``minor``
+    A non-negative integer specifying the minor version component.
+
+``backtraceGraph``
+    JSON object representing backtrace information with the
+    following members:
+
+    ``commands``
+      List of command names.
+    ``files``
+      List of file names.
+    ``nodes``
+      List of node JSON objects with members:
+
+      ``command``
+        Index into the ``commands`` member of the ``backtraceGraph``.
+      ``file``
+        Index into the ``files`` member of the ``backtraceGraph``.
+      ``line``
+        Line number in the file where the backtrace was added.
+      ``parent``
+        Index into the ``nodes`` member of the ``backtraceGraph``
+        representing the parent in the graph.
+
+``tests``
+  A JSON array listing information about each test.  Each entry
+  is a JSON object with members:
+
+  ``name``
+    Test name.
+  ``config``
+    Configuration that the test can run on.
+    Empty string means any config.
+  ``command``
+    List where the first element is the test command and the
+    remaining elements are the command arguments.
+  ``backtrace``
+    Index into the ``nodes`` member of the ``backtraceGraph``.
+  ``properties``
+    Test properties.
+    Can contain keys for each of the supported test properties.
 
 See Also
 ========

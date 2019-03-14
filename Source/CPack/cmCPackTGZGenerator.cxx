@@ -10,6 +10,4 @@ cmCPackTGZGenerator::cmCPackTGZGenerator()
 {
 }
 
-cmCPackTGZGenerator::~cmCPackTGZGenerator()
-{
-}
+cmCPackTGZGenerator::~cmCPackTGZGenerator() = default;

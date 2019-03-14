@@ -32,10 +32,7 @@ Discussion:
 http://forums.codeblocks.org/index.php/topic,6789.0.html
 */
 
-cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator()
-  : cmExternalMakefileProjectGenerator()
-{
-}
+cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator() = default;
 
 cmExternalMakefileProjectGeneratorFactory*
 cmExtraCodeBlocksGenerator::GetFactory()
@@ -365,7 +362,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
             // don't add source files from UTILITY target which have the
             // GENERATED property set:
             if (gt->GetType() == cmStateEnums::UTILITY &&
-                s->GetPropertyAsBool("GENERATED")) {
+                s->GetIsGenerated()) {
               continue;
             }
 

@@ -6,7 +6,6 @@
 #include <windows.h> // CreateFileW
 
 cmFileLock::cmFileLock()
-  : File(INVALID_HANDLE_VALUE)
 {
 }
 

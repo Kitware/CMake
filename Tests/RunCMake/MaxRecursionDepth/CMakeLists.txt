@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.13)
+if(DEFINED CMAKE_GENERATOR)
+  project(${RunCMake_TEST} NONE)
+endif()
+include("${CMAKE_CURRENT_LIST_DIR}/${TEST_NAME}.cmake")

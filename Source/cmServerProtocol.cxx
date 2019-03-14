@@ -20,6 +20,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 // Get rid of some windows macros:
@@ -39,11 +40,10 @@ std::vector<std::string> toStringList(const Json::Value& in)
 } // namespace
 
 cmServerRequest::cmServerRequest(cmServer* server, cmConnection* connection,
-                                 const std::string& t, const std::string& c,
-                                 const Json::Value& d)
-  : Type(t)
-  , Cookie(c)
-  , Data(d)
+                                 std::string t, std::string c, Json::Value d)
+  : Type(std::move(t))
+  , Cookie(std::move(c))
+  , Data(std::move(d))
   , Connection(connection)
   , m_Server(server)
 {
@@ -130,7 +130,8 @@ bool cmServerProtocol::Activate(cmServer* server,
 {
   assert(server);
   this->m_Server = server;
-  this->m_CMakeInstance = cm::make_unique<cmake>(cmake::RoleProject);
+  this->m_CMakeInstance =
+    cm::make_unique<cmake>(cmake::RoleProject, cmState::Project);
   const bool result = this->DoActivate(request, errorMessage);
   if (!result) {
     this->m_CMakeInstance = nullptr;
@@ -164,16 +165,7 @@ bool cmServerProtocol::DoActivate(const cmServerRequest& /*request*/,
 
 std::pair<int, int> cmServerProtocol1::ProtocolVersion() const
 {
-  return std::make_pair(1, 4);
-}
-
-std::pair<int, int> cmServerProtocol2::ProtocolVersion() const
-{
-  // Revision history
-  // 2, 1 - simplified backtraces
-  // 2, 2 - direct dependencies of targets
-  // 2, 3 - target properties, global properties
-  return std::make_pair(2, 3); 
+  return std::make_pair(1, 2);
 }
 
 static void setErrorMessage(std::string* errorMessage, const std::string& text)
@@ -230,12 +222,21 @@ bool cmServerProtocol1::DoActivate(const cmServerRequest& request,
                                    std::string* errorMessage)
 {
   std::string sourceDirectory = request.Data[kSOURCE_DIRECTORY_KEY].asString();
-  const std::string buildDirectory =
-    request.Data[kBUILD_DIRECTORY_KEY].asString();
+  std::string buildDirectory = request.Data[kBUILD_DIRECTORY_KEY].asString();
   std::string generator = request.Data[kGENERATOR_KEY].asString();
   std::string extraGenerator = request.Data[kEXTRA_GENERATOR_KEY].asString();
   std::string toolset = request.Data[kTOOLSET_KEY].asString();
   std::string platform = request.Data[kPLATFORM_KEY].asString();
+
+  // normalize source and build directory
+  if (!sourceDirectory.empty()) {
+    sourceDirectory = cmSystemTools::CollapseFullPath(sourceDirectory);
+    cmSystemTools::ConvertToUnixSlashes(sourceDirectory);
+  }
+  if (!buildDirectory.empty()) {
+    buildDirectory = cmSystemTools::CollapseFullPath(buildDirectory);
+    cmSystemTools::ConvertToUnixSlashes(buildDirectory);
+  }
 
   if (buildDirectory.empty()) {
     setErrorMessage(errorMessage,
@@ -253,7 +254,7 @@ bool cmServerProtocol1::DoActivate(const cmServerRequest& request,
       return false;
     }
 
-    const std::string cachePath = cm->FindCacheFile(buildDirectory);
+    const std::string cachePath = cmake::FindCacheFile(buildDirectory);
     if (cm->LoadCache(cachePath)) {
       cmState* state = cm->GetState();
 
@@ -490,19 +491,6 @@ cmServerResponse cmServerProtocol1::ProcessCodeModel(
   return request.Reply(cmDumpCodeModel(this->CMakeInstance()));
 }
 
-cmServerResponse cmServerProtocol2::ProcessCodeModel(
-  const cmServerRequest& request)
-
-{
-  if (this->m_State != STATE_COMPUTED) {
-    return request.ReportError("No build system was generated yet.");
-  }
-  auto includeTraces = request.Data[kINCLUDE_TRACES_KEY].asBool();
-  auto includeSourceGroups = request.Data[KINCLUDE_SOURCE_GROUPS_KEY].asBool();
-  return request.Reply(
-    cmDumpCodeModel2(this->CMakeInstance(), includeTraces, includeSourceGroups));
-}
-
 cmServerResponse cmServerProtocol1::ProcessCompute(
   const cmServerRequest& request)
 {
@@ -654,17 +642,6 @@ cmServerResponse cmServerProtocol1::ProcessGlobalSettings(
   obj[kGENERATOR_KEY] = this->GeneratorInfo.GeneratorName;
   obj[kEXTRA_GENERATOR_KEY] = this->GeneratorInfo.ExtraGeneratorName;
 
-  // Global properties
-  Json::Value properties = Json::arrayValue;
-  for (const auto& prop : cm->GetState()->GetGlobalProperties()) {
-    Json::Value entry = Json::objectValue;
-    entry[kKEY_KEY] = prop.first;
-    entry[kVALUE_KEY] = prop.second.GetValue();
-    properties.append(entry);
-  }
-  obj[kPROPERTIES_KEY] = properties;
-
-
   return request.Reply(obj);
 }
 
@@ -738,27 +715,16 @@ cmServerResponse cmServerProtocol1::ProcessCTests(
   return request.Reply(cmDumpCTestInfo(this->CMakeInstance()));
 }
 
-cmServerResponse cmServerProtocol2::ProcessCTests(
-  const cmServerRequest& request)
-{
-  if (this->m_State < STATE_COMPUTED) {
-    return request.ReportError("This instance was not yet computed.");
-  }
-
-  auto includeTraces = request.Data[kINCLUDE_TRACES_KEY].asBool();
-  return request.Reply(cmDumpCTestInfo2(this->CMakeInstance(), includeTraces));
-}
-
 cmServerProtocol1::GeneratorInformation::GeneratorInformation(
-  const std::string& generatorName, const std::string& extraGeneratorName,
-  const std::string& toolset, const std::string& platform,
-  const std::string& sourceDirectory, const std::string& buildDirectory)
-  : GeneratorName(generatorName)
-  , ExtraGeneratorName(extraGeneratorName)
-  , Toolset(toolset)
-  , Platform(platform)
-  , SourceDirectory(sourceDirectory)
-  , BuildDirectory(buildDirectory)
+  std::string generatorName, std::string extraGeneratorName,
+  std::string toolset, std::string platform, std::string sourceDirectory,
+  std::string buildDirectory)
+  : GeneratorName(std::move(generatorName))
+  , ExtraGeneratorName(std::move(extraGeneratorName))
+  , Toolset(std::move(toolset))
+  , Platform(std::move(platform))
+  , SourceDirectory(std::move(sourceDirectory))
+  , BuildDirectory(std::move(buildDirectory))
 {
 }
 

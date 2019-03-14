@@ -1,4 +1,4 @@
 CMake Error at UuidBadType.cmake:3 \(string\):
   string UUID sub-command, unknown TYPE 'FOO'.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

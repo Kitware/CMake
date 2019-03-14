@@ -7,10 +7,10 @@
 #include <sstream>
 #include <unordered_set>
 
+#include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmPolicies.h"
 #include "cmStateSnapshot.h"
-#include "cmake.h"
 
 bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
   std::string const& tgtName, cmMessenger* messenger,
@@ -18,7 +18,7 @@ bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
 {
   std::ostringstream e;
   const char* modal = nullptr;
-  cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+  MessageType messageType = MessageType::AUTHOR_WARNING;
   switch (context.GetBottom().GetPolicy(cmPolicies::CMP0026)) {
     case cmPolicies::WARN:
       e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0026) << "\n";
@@ -29,7 +29,7 @@ bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::NEW:
       modal = "may";
-      messageType = cmake::FATAL_ERROR;
+      messageType = MessageType::FATAL_ERROR;
   }
 
   if (modal) {
@@ -41,7 +41,7 @@ bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
     messenger->IssueMessage(messageType, e.str(), context);
   }
 
-  return messageType != cmake::FATAL_ERROR;
+  return messageType != MessageType::FATAL_ERROR;
 }
 
 bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
@@ -65,6 +65,7 @@ bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
     builtIns.insert("EXPORT_NAME");
     builtIns.insert("IMPORTED");
     builtIns.insert("IMPORTED_GLOBAL");
+    builtIns.insert("MANUALLY_ADDED_DEPENDENCIES");
     builtIns.insert("NAME");
     builtIns.insert("TYPE");
   }
@@ -100,7 +101,7 @@ bool cmTargetPropertyComputer::PassesWhitelist(
     e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
          "The property \""
       << prop << "\" is not allowed.";
-    messenger->IssueMessage(cmake::FATAL_ERROR, e.str(), context);
+    messenger->IssueMessage(MessageType::FATAL_ERROR, e.str(), context);
     return false;
   }
   return true;

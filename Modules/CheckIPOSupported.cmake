@@ -51,8 +51,6 @@ Examples
 
 #]=======================================================================]
 
-include(CMakeParseArguments) # cmake_parse_arguments
-
 # X_RESULT - name of the final result variable
 # X_OUTPUT - name of the variable with information about error
 macro(_ipo_not_supported output)

@@ -9,8 +9,8 @@
 #include <memory> // IWYU pragma: keep
 #include <stddef.h>
 #include <string>
+#include <utility>
 #include <vector>
-#include <unordered_set>
 
 #include "cmStateSnapshot.h"
 
@@ -29,15 +29,12 @@ struct cmCommandContext
   {
     std::string Lower;
     std::string Original;
-    cmCommandName() {}
+    cmCommandName() = default;
     cmCommandName(std::string const& name) { *this = name; }
     cmCommandName& operator=(std::string const& name);
   } Name;
-  long Line;
-  cmCommandContext()
-    : Line(0)
-  {
-  }
+  long Line = 0;
+  cmCommandContext() = default;
   cmCommandContext(const char* name, int line)
     : Name(name)
     , Line(line)
@@ -53,14 +50,9 @@ struct cmListFileArgument
     Quoted,
     Bracket
   };
-  cmListFileArgument()
-    : Value()
-    , Delim(Unquoted)
-    , Line(0)
-  {
-  }
-  cmListFileArgument(const std::string& v, Delimiter d, long line)
-    : Value(v)
+  cmListFileArgument() = default;
+  cmListFileArgument(std::string v, Delimiter d, long line)
+    : Value(std::move(v))
     , Delim(d)
     , Line(line)
   {
@@ -71,41 +63,26 @@ struct cmListFileArgument
   }
   bool operator!=(const cmListFileArgument& r) const { return !(*this == r); }
   std::string Value;
-  Delimiter Delim;
-  long Line;
+  Delimiter Delim = Unquoted;
+  long Line = 0;
 };
 
 class cmListFileContext
 {
 public:
-  const std::string& Name() const;
-  const std::string& FilePath() const;
-  long Line;
-  cmListFileContext()
-    : NameId(0)
-    , FilePathId(0)
-    , Line(0)
-  {
-  }
-  cmListFileContext(const std::string& name, const std::string& file,
-                    long line);
-  cmListFileContext(const std::string& file, long line);
+  std::string Name;
+  std::string FilePath;
+  long Line = 0;
+
   static cmListFileContext FromCommandContext(cmCommandContext const& lfcc,
-                                              std::string const& fileName);
-
-  void UpdateFilePath(const std::string& newFile);
-
-  bool HasName() const { return NameId != 0; }
-  bool HasFilePath() const { return FilePathId != 0; }
-
-  friend bool operator<(const cmListFileContext& lhs,
-                        const cmListFileContext& rhs);
-  friend bool operator==(const cmListFileContext& lhs,
-                         const cmListFileContext& rhs);
-
-private:
-  size_t NameId;
-  size_t FilePathId;
+                                              std::string const& fileName)
+  {
+    cmListFileContext lfc;
+    lfc.FilePath = fileName;
+    lfc.Line = lfcc.Line;
+    lfc.Name = lfcc.Name.Original;
+    return lfc;
+  }
 };
 
 std::ostream& operator<<(std::ostream&, cmListFileContext const&);
@@ -131,15 +108,6 @@ public:
   // Construct an empty backtrace whose bottom sits in the directory
   // indicated by the given valid snapshot.
   cmListFileBacktrace(cmStateSnapshot const& snapshot);
-
-  // Backtraces may be copied, moved, and assigned as values.
-  cmListFileBacktrace(cmListFileBacktrace const&) = default;
-  cmListFileBacktrace(cmListFileBacktrace&&) // NOLINT(clang-tidy)
-    noexcept = default;
-  cmListFileBacktrace& operator=(cmListFileBacktrace const&) = default;
-  cmListFileBacktrace& operator=(cmListFileBacktrace&&) // NOLINT(clang-tidy)
-    noexcept = default;
-  ~cmListFileBacktrace() = default;
 
   cmStateSnapshot GetBottom() const;
 
@@ -167,22 +135,9 @@ public:
 
   // Get the number of 'frames' in this backtrace
   size_t Depth() const;
-  
-  // Return a list of ids that can be used to query for traces later
-  std::vector<size_t> const& GetFrameIds() const;
 
-  // Convert a list of frame ids into their actual representation
-  static std::vector<std::pair<size_t, cmListFileContext>> ConvertFrameIds(
-    std::unordered_set<size_t> const& frameIds);
-  
   // Return true if this backtrace is empty.
   bool Empty() const;
-
-  static const cmListFileBacktrace& EmptyBacktrace()
-  {
-    static cmListFileBacktrace empty;
-    return empty;
-  }
 
 private:
   struct Entry;
@@ -190,9 +145,39 @@ private:
   cmListFileBacktrace(std::shared_ptr<Entry const> parent,
                       cmListFileContext const& lfc);
   cmListFileBacktrace(std::shared_ptr<Entry const> top);
-
-  std::vector<size_t> mutable FrameIds;
 };
+
+// Wrap type T as a value with a backtrace.  For purposes of
+// ordering and equality comparison, only the original value is
+// used.  The backtrace is considered incidental.
+template <typename T>
+class BT
+{
+public:
+  BT(T v = T(), cmListFileBacktrace bt = cmListFileBacktrace())
+    : Value(std::move(v))
+    , Backtrace(std::move(bt))
+  {
+  }
+  T Value;
+  cmListFileBacktrace Backtrace;
+  friend bool operator==(BT<T> const& l, BT<T> const& r)
+  {
+    return l.Value == r.Value;
+  }
+  friend bool operator<(BT<T> const& l, BT<T> const& r)
+  {
+    return l.Value < r.Value;
+  }
+  friend bool operator==(BT<T> const& l, T const& r) { return l.Value == r; }
+  friend bool operator==(T const& l, BT<T> const& r) { return l == r.Value; }
+};
+
+std::ostream& operator<<(std::ostream& os, BT<std::string> const& s);
+
+std::vector<BT<std::string>> ExpandListWithBacktrace(
+  std::string const& list,
+  cmListFileBacktrace const& bt = cmListFileBacktrace());
 
 struct cmListFile
 {

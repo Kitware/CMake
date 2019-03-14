@@ -24,12 +24,13 @@ class cmLocalGenerator;
  */
 class cmDepends
 {
-  CM_DISABLE_COPY(cmDepends)
-
 public:
   /** Instances need to know the build directory name and the relative
       path from the build directory to the target file.  */
-  cmDepends(cmLocalGenerator* lg = nullptr, const char* targetDir = "");
+  cmDepends(cmLocalGenerator* lg = nullptr, std::string targetDir = "");
+
+  cmDepends(cmDepends const&) = delete;
+  cmDepends& operator=(cmDepends const&) = delete;
 
   /** Set the local generator for the directory in which we are
       scanning dependencies.  This is not a full local generator; it
@@ -41,7 +42,10 @@ public:
   void SetLanguage(const std::string& lang) { this->Language = lang; }
 
   /** Set the target build directory.  */
-  void SetTargetDirectory(const char* dir) { this->TargetDirectory = dir; }
+  void SetTargetDirectory(const std::string& dir)
+  {
+    this->TargetDirectory = dir;
+  }
 
   /** should this be verbose in its output */
   void SetVerbose(bool verb) { this->Verbose = verb; }
@@ -61,11 +65,11 @@ public:
       they must be generated Clear has already been called to wipe out
       the old dependencies.
       Dependencies which are still valid will be stored in validDeps. */
-  bool Check(const char* makeFile, const char* internalFile,
+  bool Check(const std::string& makeFile, const std::string& internalFile,
              std::map<std::string, DependencyVector>& validDeps);
 
   /** Clear dependencies for the target file so they will be regenerated.  */
-  void Clear(const char* file);
+  void Clear(const std::string& file);
 
   /** Set the file comparison object */
   void SetFileComparison(cmFileTimeComparison* fc)
@@ -85,7 +89,7 @@ protected:
   // Return false if dependencies must be regenerated and true
   // otherwise.
   virtual bool CheckDependencies(
-    std::istream& internalDepends, const char* internalDependsFileName,
+    std::istream& internalDepends, const std::string& internalDependsFileName,
     std::map<std::string, DependencyVector>& validDeps);
 
   // Finalize the dependency information for the target.
@@ -96,15 +100,15 @@ protected:
   cmLocalGenerator* LocalGenerator;
 
   // Flag for verbose output.
-  bool Verbose;
-  cmFileTimeComparison* FileComparison;
+  bool Verbose = false;
+  cmFileTimeComparison* FileComparison = nullptr;
 
   std::string Language;
 
   // The full path to the target's build directory.
   std::string TargetDirectory;
 
-  size_t MaxPath;
+  size_t MaxPath = 16384;
   char* Dependee;
   char* Depender;
 

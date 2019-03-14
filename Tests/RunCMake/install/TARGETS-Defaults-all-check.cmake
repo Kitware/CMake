@@ -1,0 +1,49 @@
+if(WIN32)
+  set(_check_files
+    [[bin]]
+    [[bin/exe\.exe]]
+    [[bin/(lib)?lib1\.dll]]
+    [[include]]
+    [[include/obj4\.h]]
+    [[include/obj5\.h]]
+    [[lib]]
+    [[lib/(lib)?lib1\.(dll\.a|lib)]]
+    [[lib/(lib)?lib2\.(a|lib)]]
+    [[lib3]]
+    [[lib3/(lib)?lib3\.(dll\.a|lib)]]
+    [[lib4]]
+    [[lib4/(lib)?lib4\.dll]]
+    )
+elseif(CYGWIN)
+  set(_check_files
+    [[bin]]
+    [[bin/cyglib1\.dll]]
+    [[bin/exe\.exe]]
+    [[include]]
+    [[include/obj4\.h]]
+    [[include/obj5\.h]]
+    [[lib]]
+    [[lib/liblib1\.dll\.a]]
+    [[lib/liblib2\.a]]
+    [[lib3]]
+    [[lib3/liblib3\.dll\.a]]
+    [[lib4]]
+    [[lib4/cyglib4\.dll]]
+    )
+else()
+  set(_check_files
+    [[bin]]
+    [[bin/exe]]
+    [[include]]
+    [[include/obj4\.h]]
+    [[include/obj5\.h]]
+    [[lib]]
+    [[lib/liblib1\.(dylib|so)]]
+    [[lib/liblib2\.a]]
+    [[lib3]]
+    [[lib3/liblib3\.(dylib|so)]]
+    [[lib4]]
+    [[lib4/liblib4\.(dylib|so)]]
+    )
+endif()
+check_installed("^${_check_files}$")

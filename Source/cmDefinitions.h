@@ -47,26 +47,19 @@ private:
     typedef std::string std_string;
 
   public:
-    Def()
-      : std_string()
-      , Exists(false)
-      , Used(false)
-    {
-    }
+    Def() = default;
     Def(const char* v)
       : std_string(v ? v : "")
       , Exists(v ? true : false)
-      , Used(false)
     {
     }
     Def(const std_string& v)
       : std_string(v)
       , Exists(true)
-      , Used(false)
     {
     }
-    bool Exists;
-    bool Used;
+    bool Exists = false;
+    bool Used = false;
   };
   static Def NoDef;
 

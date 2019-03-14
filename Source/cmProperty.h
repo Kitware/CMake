@@ -4,7 +4,6 @@
 #define cmProperty_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
-#include "cmListFileCache.h"
 
 #include <string>
 
@@ -25,16 +24,13 @@ public:
   };
 
   // set this property
-  void Set(const char* value, const cmListFileBacktrace & backtrace);
+  void Set(const char* value);
 
   // append to this property
-  void Append(const char* value, const cmListFileBacktrace & backtrace, bool asString = false);
+  void Append(const char* value, bool asString = false);
 
   // get the value
   const char* GetValue() const;
-
-  // get the backtrace for last set or append
-  const cmListFileBacktrace & GetBacktrace() const { return Backtrace; }
 
   // construct with the value not set
   cmProperty() { this->ValueHasBeenSet = false; }
@@ -42,7 +38,6 @@ public:
 protected:
   std::string Value;
   bool ValueHasBeenSet;
-  cmListFileBacktrace Backtrace;
 };
 
 #endif

@@ -3,7 +3,6 @@
 #pragma once
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -11,12 +10,22 @@
 
 #include "cm_uv.h"
 
-#define CM_PERFECT_FWD_CTOR(Class, FwdTo)                                     \
-  template <typename... Args>                                                 \
-  Class(Args&&... args)                                                       \
-    : FwdTo(std::forward<Args>(args)...)                                      \
-  {                                                                           \
-  }
+#if defined(__SUNPRO_CC)
+
+#  include <utility>
+
+#  define CM_INHERIT_CTOR(Class, Base, Tpl)                                   \
+    template <typename... Args>                                               \
+    Class(Args&&... args)                                                     \
+      : Base Tpl(std::forward<Args>(args)...)                                 \
+    {                                                                         \
+    }
+
+#else
+
+#  define CM_INHERIT_CTOR(Class, Base, Tpl) using Base Tpl ::Base;
+
+#endif
 
 namespace cm {
 
@@ -52,7 +61,8 @@ protected:
   void allocate(void* data = nullptr);
 
 public:
-  CM_DISABLE_COPY(uv_handle_ptr_base_)
+  uv_handle_ptr_base_(uv_handle_ptr_base_ const&) = delete;
+  uv_handle_ptr_base_& operator=(uv_handle_ptr_base_ const&) = delete;
   uv_handle_ptr_base_(uv_handle_ptr_base_&&) noexcept;
   uv_handle_ptr_base_& operator=(uv_handle_ptr_base_&&) noexcept;
 
@@ -77,8 +87,8 @@ public:
   }
 
   // Dtor and ctor need to be inline defined like this for default ctors and
-  // dtors to work.
-  uv_handle_ptr_base_() {}
+  // dtors to work.  Some compilers do not like '= default' here.
+  uv_handle_ptr_base_() {} // NOLINT(modernize-use-equals-default)
   uv_handle_ptr_base_(std::nullptr_t) {}
   ~uv_handle_ptr_base_() { reset(); }
 
@@ -116,7 +126,7 @@ class uv_handle_ptr_ : public uv_handle_ptr_base_<T>
   friend class uv_handle_ptr_;
 
 public:
-  CM_PERFECT_FWD_CTOR(uv_handle_ptr_, uv_handle_ptr_base_<T>);
+  CM_INHERIT_CTOR(uv_handle_ptr_, uv_handle_ptr_base_, <T>);
 
   /***
    * Allow less verbose calling of uv_<T> functions
@@ -133,13 +143,13 @@ template <>
 class uv_handle_ptr_<uv_handle_t> : public uv_handle_ptr_base_<uv_handle_t>
 {
 public:
-  CM_PERFECT_FWD_CTOR(uv_handle_ptr_, uv_handle_ptr_base_<uv_handle_t>);
+  CM_INHERIT_CTOR(uv_handle_ptr_, uv_handle_ptr_base_, <uv_handle_t>);
 };
 
 class uv_async_ptr : public uv_handle_ptr_<uv_async_t>
 {
 public:
-  CM_PERFECT_FWD_CTOR(uv_async_ptr, uv_handle_ptr_<uv_async_t>);
+  CM_INHERIT_CTOR(uv_async_ptr, uv_handle_ptr_, <uv_async_t>);
 
   int init(uv_loop_t& loop, uv_async_cb async_cb, void* data = nullptr);
 
@@ -148,7 +158,7 @@ public:
 
 struct uv_signal_ptr : public uv_handle_ptr_<uv_signal_t>
 {
-  CM_PERFECT_FWD_CTOR(uv_signal_ptr, uv_handle_ptr_<uv_signal_t>);
+  CM_INHERIT_CTOR(uv_signal_ptr, uv_handle_ptr_, <uv_signal_t>);
 
   int init(uv_loop_t& loop, void* data = nullptr);
 
@@ -159,7 +169,7 @@ struct uv_signal_ptr : public uv_handle_ptr_<uv_signal_t>
 
 struct uv_pipe_ptr : public uv_handle_ptr_<uv_pipe_t>
 {
-  CM_PERFECT_FWD_CTOR(uv_pipe_ptr, uv_handle_ptr_<uv_pipe_t>);
+  CM_INHERIT_CTOR(uv_pipe_ptr, uv_handle_ptr_, <uv_pipe_t>);
 
   operator uv_stream_t*() const;
 
@@ -168,7 +178,7 @@ struct uv_pipe_ptr : public uv_handle_ptr_<uv_pipe_t>
 
 struct uv_process_ptr : public uv_handle_ptr_<uv_process_t>
 {
-  CM_PERFECT_FWD_CTOR(uv_process_ptr, uv_handle_ptr_<uv_process_t>);
+  CM_INHERIT_CTOR(uv_process_ptr, uv_handle_ptr_, <uv_process_t>);
 
   int spawn(uv_loop_t& loop, uv_process_options_t const& options,
             void* data = nullptr);
@@ -176,7 +186,7 @@ struct uv_process_ptr : public uv_handle_ptr_<uv_process_t>
 
 struct uv_timer_ptr : public uv_handle_ptr_<uv_timer_t>
 {
-  CM_PERFECT_FWD_CTOR(uv_timer_ptr, uv_handle_ptr_<uv_timer_t>);
+  CM_INHERIT_CTOR(uv_timer_ptr, uv_handle_ptr_, <uv_timer_t>);
 
   int init(uv_loop_t& loop, void* data = nullptr);
 
@@ -185,7 +195,7 @@ struct uv_timer_ptr : public uv_handle_ptr_<uv_timer_t>
 
 struct uv_tty_ptr : public uv_handle_ptr_<uv_tty_t>
 {
-  CM_PERFECT_FWD_CTOR(uv_tty_ptr, uv_handle_ptr_<uv_tty_t>);
+  CM_INHERIT_CTOR(uv_tty_ptr, uv_handle_ptr_, <uv_tty_t>);
 
   operator uv_stream_t*() const;
 

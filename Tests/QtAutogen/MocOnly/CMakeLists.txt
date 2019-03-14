@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(MocOnly)
-include("../AutogenTest.cmake")
+include("../AutogenCoreTest.cmake")
 
 add_executable(mocOnly
   main.cpp
@@ -13,3 +13,5 @@ add_executable(mocOnly
 )
 set_property(TARGET mocOnly PROPERTY AUTOMOC ON)
 target_link_libraries(mocOnly ${QT_LIBRARIES})
+# Add compile definitions with unusual characters
+target_compile_definitions(mocOnly PUBLIC "TOKEN=\"hello\;\"" )

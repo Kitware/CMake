@@ -16,9 +16,7 @@ cmCTestCVS::cmCTestCVS(cmCTest* ct, std::ostream& log)
 {
 }
 
-cmCTestCVS::~cmCTestCVS()
-{
-}
+cmCTestCVS::~cmCTestCVS() = default;
 
 class cmCTestCVS::UpdateParser : public cmCTestVC::LineParser
 {
@@ -111,8 +109,8 @@ public:
     , Revisions(revs)
     , Section(SectionHeader)
   {
-    this->SetLog(&cvs->Log, prefix),
-      this->RegexRevision.compile("^revision +([^ ]*) *$");
+    this->SetLog(&cvs->Log, prefix);
+    this->RegexRevision.compile("^revision +([^ ]*) *$");
     this->RegexBranches.compile("^branches: .*$");
     this->RegexPerson.compile("^date: +([^;]+); +author: +([^;]+);");
   }

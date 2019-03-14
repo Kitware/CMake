@@ -21,9 +21,7 @@ cmLinkLineDeviceComputer::cmLinkLineDeviceComputer(
 {
 }
 
-cmLinkLineDeviceComputer::~cmLinkLineDeviceComputer()
-{
-}
+cmLinkLineDeviceComputer::~cmLinkLineDeviceComputer() = default;
 
 static bool cmLinkItemValidForDevice(std::string const& item)
 {
@@ -36,6 +34,7 @@ static bool cmLinkItemValidForDevice(std::string const& item)
   // * '-lpthread' => pass-along
   // * '-pthread' => drop
   // * '-a' => drop
+  // * '-framework Name' (as one string) => drop
   return (!cmHasLiteralPrefix(item, "-") || //
           cmHasLiteralPrefix(item, "-l") || //
           cmHasLiteralPrefix(item, "-L") || //
@@ -56,7 +55,13 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
   typedef cmComputeLinkInformation::ItemVector ItemVector;
   ItemVector const& items = cli.GetItems();
   std::string config = cli.GetConfig();
+  bool skipItemAfterFramework = false;
   for (auto const& item : items) {
+    if (skipItemAfterFramework) {
+      skipItemAfterFramework = false;
+      continue;
+    }
+
     if (item.Target) {
       bool skip = false;
       switch (item.Target->GetType()) {
@@ -86,6 +91,11 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
         out += this->ConvertToOutputFormat(
           this->ConvertToLinkReference(item.Value));
       }
+    } else if (item.Value == "-framework") {
+      // This is the first part of '-framework Name' where the framework
+      // name is specified as a following item.  Ignore both.
+      skipItemAfterFramework = true;
+      continue;
     } else if (cmLinkItemValidForDevice(item.Value)) {
       out += item.Value;
     }

@@ -1,0 +1,35 @@
+CMAKE_LANG=C
+CMAKE_C_COMPILER_ABI=
+CMAKE_C_COMPILER_AR=
+CMAKE_C_COMPILER_ARCHITECTURE_ID=
+CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_C_COMPILER_ID=SunPro
+CMAKE_C_COMPILER_LAUNCHER=
+CMAKE_C_COMPILER_LOADED=1
+CMAKE_C_COMPILER_RANLIB=
+CMAKE_C_COMPILER_TARGET=
+CMAKE_C_COMPILER_VERSION=5.13.0
+CMAKE_C_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/opt/csw/bin/gmake" "cmTC_55079/fast"
+/opt/csw/bin/gmake -f CMakeFiles/cmTC_55079.dir/build.make CMakeFiles/cmTC_55079.dir/build
+gmake[1]: Entering directory '/tmp/ii/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_55079.dir/CMakeCCompilerABI.c.o
+/opt/solarisstudio12.4/bin/cc   -#   -o CMakeFiles/cmTC_55079.dir/CMakeCCompilerABI.c.o   -c /tmp/CMake/Modules/CMakeCCompilerABI.c
+### cc: Note: NLSPATH = /opt/solarisstudio12.4/bin/../lib/locale/%L/LC_MESSAGES/%N.cat:/opt/solarisstudio12.4/bin/../../lib/locale/%L/LC_MESSAGES/%N.cat
+###     command line files and options (expanded):
+### -# -oCMakeFiles/cmTC_55079.dir/CMakeCCompilerABI.c.o -c /tmp/CMake/Modules/CMakeCCompilerABI.c
+/opt/solarisstudio12.4/lib/compilers/acomp -Qy -std=c11 -i /tmp/CMake/Modules/CMakeCCompilerABI.c -D__SunOS_5_10 -D__SUNPRO_C=0x5130 -D__unix -D__SVR4 -D__sun -D__SunOS -D__sparcv8 -D__sparc -D__BUILTIN_VA_ARG_INCR -D__C11FEATURES__ -D__C99FEATURES__ -D__PRAGMA_REDEFINE_EXTNAME -Dunix -Dsun -Dsparc -D__RESTRICT -D__FLT_EVAL_METHOD__=0 -D__SUN_PREFETCH -D__NOVECTORSIZE__ -I-xbuiltin -I/opt/solarisstudio12.4/lib/compilers/include/cc -xbuiltin=%none -fsimple=0 -m32 -fparam_ir -fparam_ir -xdebuginfo=%none -xF=%none -xdbggen=dwarf+usedonly+incl -xldscope=global -xivdep=loop "-g/opt/solarisstudio12.4/bin/cc -c " -destination_ir=yabe -y-fbe -y/opt/solarisstudio12.4/bin/fbe -y-xmemalign=8i -y-verbose -y-comdat -y-xdebuginfo=%none -y-xarch=generic -y-m32 -y-comdat -y-xthreadvar=no%dynamic -y-xannotate=yes -y-o -yCMakeFiles/cmTC_55079.dir/CMakeCCompilerABI.c.o
+Linking C executable cmTC_55079
+/tmp/CMake/bin/cmake -E cmake_link_script CMakeFiles/cmTC_55079.dir/link.txt --verbose=1
+/opt/solarisstudio12.4/bin/cc  -#    CMakeFiles/cmTC_55079.dir/CMakeCCompilerABI.c.o  -o cmTC_55079
+### cc: Note: NLSPATH = /opt/solarisstudio12.4/bin/../lib/locale/%L/LC_MESSAGES/%N.cat:/opt/solarisstudio12.4/bin/../../lib/locale/%L/LC_MESSAGES/%N.cat
+###     command line files and options (expanded):
+### -# CMakeFiles/cmTC_55079.dir/CMakeCCompilerABI.c.o -ocmTC_55079
+### cc: Note: LD_LIBRARY_PATH = (null)
+### cc: Note: LD_RUN_PATH     = (null)
+### cc: Note: LD_OPTIONS      = (null)
+ln -s /opt/solarisstudio12.4/lib/compilers /tmp/lib_link.1547820951.9061.01
+/usr/ccs/bin/ld -zld32=-S/tmp/lib_link.1547820951.9061.01/libldstab_ws.so -zld64=-S/tmp/lib_link.1547820951.9061.01/sparcv9/libldstab_ws.so -zld32=-S/tmp/lib_link.1547820951.9061.01/libld_annotate.so -zld64=-S/tmp/lib_link.1547820951.9061.01/sparcv9/libld_annotate.so /opt/solarisstudio12.4/lib/compilers/crti.o /opt/solarisstudio12.4/lib/compilers/crt1.o /opt/solarisstudio12.4/lib/compilers/misalign.o /opt/solarisstudio12.4/lib/compilers/values-xa.o CMakeFiles/cmTC_55079.dir/CMakeCCompilerABI.c.o -o cmTC_55079 -Y "P,/opt/solarisstudio12.4/lib/compilers/staticlib:/opt/solarisstudio12.4/lib/compilers/sparc:/opt/solarisstudio12.4/lib/compilers:/usr/ccs/lib:/lib:/usr/lib" -Qy -lc /opt/solarisstudio12.4/lib/compilers/crtn.o
+gmake[1]: Leaving directory '/tmp/ii/CMakeFiles/CMakeTmp'

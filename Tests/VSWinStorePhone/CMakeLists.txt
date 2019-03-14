@@ -8,6 +8,8 @@ elseif(MSVC_VERSION GREATER 1600)
   set(COMPILER_VERSION "11")
 endif()
 
+add_subdirectory(WinRT)
+
 set (APP_MANIFEST_NAME Package.appxmanifest)
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "WindowsPhone")
   set(PLATFORM WP)
@@ -139,11 +141,14 @@ if("${SHORT_VERSION}" STREQUAL "10.0")
   message(STATUS "Targeting Windows 10. Setting Extensions to version ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
   set_property(TARGET ${EXE_NAME} PROPERTY VS_DESKTOP_EXTENSIONS_VERSION "${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
   set_property(TARGET ${EXE_NAME} PROPERTY VS_MOBILE_EXTENSIONS_VERSION "${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
-  set_property(TARGET ${EXE_NAME} PROPERTY VS_IOT_EXTENSIONS_VERSION "${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+
+  # The last IOT reference is on 10.0.17134.0, so only add it if supported
+  if("${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}" VERSION_LESS "10.0.17135.0")
+    set_property(TARGET ${EXE_NAME} PROPERTY VS_IOT_EXTENSIONS_VERSION "${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+  endif()
 
   # Add a reference to an SDK
   set_property(TARGET ${EXE_NAME} PROPERTY VS_SDK_REFERENCES "Microsoft.UniversalCRT.Debug, Version=${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
 endif()
 
-
-target_link_libraries(${EXE_NAME} d3d11)
+target_link_libraries(${EXE_NAME} d3d11 JusticeLeagueWinRT)

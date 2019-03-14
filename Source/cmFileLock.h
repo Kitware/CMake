@@ -21,11 +21,12 @@ class cmFileLockResult;
  */
 class cmFileLock
 {
-  CM_DISABLE_COPY(cmFileLock)
-
 public:
   cmFileLock();
   ~cmFileLock();
+
+  cmFileLock(cmFileLock const&) = delete;
+  cmFileLock& operator=(cmFileLock const&) = delete;
 
   /**
    * @brief Lock the file.
@@ -51,14 +52,13 @@ private:
   cmFileLockResult LockWithTimeout(unsigned long timeoutSec);
 
 #if defined(_WIN32)
-  typedef HANDLE FileId;
+  HANDLE File = INVALID_HANDLE_VALUE;
   BOOL LockFile(DWORD flags);
 #else
-  typedef int FileId;
+  int File = -1;
   int LockFile(int cmd, int type);
 #endif
 
-  FileId File;
   std::string Filename;
 };
 

@@ -52,6 +52,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "(Lexer|Parser).*warning.*conversion.*may (alter its value|change the sign)"
   "(Lexer|Parser).*warning.*(statement is unreachable|will never be executed)"
   "(Lexer|Parser).*warning.*variable.*was set but never used"
+  "LexerParser.*warning.*empty expression statement has no effect; remove unnecessary"
   "PGC-W-0095-Type cast required for this conversion.*ProcessUNIX.c"
   "[Qq]t([Cc]ore|[Gg]ui|[Ww]idgets).*warning.*conversion.*may alter its value"
   "warning:.*is.*very unsafe.*consider using.*"

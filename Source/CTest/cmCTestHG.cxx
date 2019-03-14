@@ -18,9 +18,7 @@ cmCTestHG::cmCTestHG(cmCTest* ct, std::ostream& log)
   this->PriorRev = this->Unknown;
 }
 
-cmCTestHG::~cmCTestHG()
-{
-}
+cmCTestHG::~cmCTestHG() = default;
 
 class cmCTestHG::IdentifyParser : public cmCTestVC::LineParser
 {
@@ -194,7 +192,8 @@ private:
     this->CData.clear();
     if (name == "logentry") {
       this->Rev = Revision();
-      if (const char* rev = this->FindAttribute(atts, "revision")) {
+      if (const char* rev =
+            cmCTestHG::LogParser::FindAttribute(atts, "revision")) {
         this->Rev.Rev = rev;
       }
       this->Changes.clear();

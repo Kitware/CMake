@@ -31,9 +31,7 @@ cmCTestGIT::cmCTestGIT(cmCTest* ct, std::ostream& log)
   this->CurrentGitVersion = 0;
 }
 
-cmCTestGIT::~cmCTestGIT()
-{
-}
+cmCTestGIT::~cmCTestGIT() = default;
 
 class cmCTestGIT::OneLineParser : public cmCTestVC::LineParser
 {
@@ -475,15 +473,8 @@ private:
   {
     std::string Name;
     std::string EMail;
-    unsigned long Time;
-    long TimeZone;
-    Person()
-      : Name()
-      , EMail()
-      , Time(0)
-      , TimeZone(0)
-    {
-    }
+    unsigned long Time = 0;
+    long TimeZone = 0;
   };
 
   void ParsePerson(const char* str, Person& person)
@@ -618,8 +609,8 @@ bool cmCTestGIT::LoadRevisions()
     git,  "diff-tree",    "--stdin",          "--always", "-z",
     "-r", "--pretty=raw", "--encoding=utf-8", nullptr
   };
-  this->Log << this->ComputeCommandLine(git_rev_list) << " | "
-            << this->ComputeCommandLine(git_diff_tree) << "\n";
+  this->Log << cmCTestGIT::ComputeCommandLine(git_rev_list) << " | "
+            << cmCTestGIT::ComputeCommandLine(git_diff_tree) << "\n";
 
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_AddCommand(cp, git_rev_list);
@@ -628,7 +619,7 @@ bool cmCTestGIT::LoadRevisions()
 
   CommitParser out(this, "dt-out> ");
   OutputLogger err(this->Log, "dt-err> ");
-  this->RunProcess(cp, &out, &err, cmProcessOutput::UTF8);
+  cmCTestGIT::RunProcess(cp, &out, &err, cmProcessOutput::UTF8);
 
   // Send one extra zero-byte to terminate the last record.
   out.Process("", 1);

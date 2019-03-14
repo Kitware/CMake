@@ -3,7 +3,7 @@ enable_testing
 
 Enable testing for current directory and below.
 
-::
+.. code-block:: cmake
 
   enable_testing()
 

@@ -1,0 +1,44 @@
+CMAKE_LANG=C
+CMAKE_C_COMPILER_ABI=
+CMAKE_C_COMPILER_AR=
+CMAKE_C_COMPILER_ARCHITECTURE_ID=
+CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_C_COMPILER_ID=AppleClang
+CMAKE_C_COMPILER_LAUNCHER=
+CMAKE_C_COMPILER_LOADED=1
+CMAKE_C_COMPILER_RANLIB=
+CMAKE_C_COMPILER_TARGET=
+CMAKE_C_COMPILER_VERSION=8.0.0.8000042
+CMAKE_C_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_ba7aa/fast"
+/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_ba7aa.dir/build.make CMakeFiles/cmTC_ba7aa.dir/build
+Building C object CMakeFiles/cmTC_ba7aa.dir/CMakeCCompilerABI.c.o
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -nostdinc -v -Wl,-v   -o CMakeFiles/cmTC_ba7aa.dir/CMakeCCompilerABI.c.o   -c /usr/local/pkg.1804/share/cmake-3.10/Modules/CMakeCCompilerABI.c
+Apple LLVM version 8.0.0 (clang-800.0.42.1)
+Target: x86_64-apple-darwin15.6.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+clang: warning: -Wl,-v: 'linker' input unused
+ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1 -triple x86_64-apple-macosx10.11.0 -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -emit-obj -mrelax-all -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -mthread-model posix -mdisable-fp-elim -masm-verbose -munwind-tables -target-cpu core2 -target-linker-version 274.2 -v -dwarf-column-info -debugger-tuning=lldb -coverage-file /private/tmp/ii/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_ba7aa.dir/CMakeCCompilerABI.c.o -nostdsysteminc -nobuiltininc -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.0.0 -fdebug-compilation-dir /private/tmp/ii/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -stack-protector 1 -fblocks -fobjc-runtime=macosx-10.11.0 -fencode-extended-block-signature -fmax-type-align=16 -fdiagnostics-show-option -o CMakeFiles/cmTC_ba7aa.dir/CMakeCCompilerABI.c.o -x c /usr/local/pkg.1804/share/cmake-3.10/Modules/CMakeCCompilerABI.c
+clang -cc1 version 8.0.0 (clang-800.0.42.1) default target x86_64-apple-darwin15.6.0
+#include "..." search starts here:
+End of search list.
+Linking C executable cmTC_ba7aa
+/usr/local/pkg.1804/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ba7aa.dir/link.txt --verbose=1
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -nostdinc -v -Wl,-v -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_ba7aa.dir/CMakeCCompilerABI.c.o  -o cmTC_ba7aa
+Apple LLVM version 8.0.0 (clang-800.0.42.1)
+Target: x86_64-apple-darwin15.6.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+clang: warning: argument unused during compilation: '-nostdinc'
+ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" -demangle -dynamic -arch x86_64 -macosx_version_min 10.11.0 -o cmTC_ba7aa -v -search_paths_first -headerpad_max_install_names CMakeFiles/cmTC_ba7aa.dir/CMakeCCompilerABI.c.o -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.0.0/lib/darwin/libclang_rt.osx.a
+@(#)PROGRAM:ld  PROJECT:ld64-274.2
+configured to support archs: armv6 armv7 armv7s arm64 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em (tvOS)
+Library search paths:
+	/usr/lib
+	/usr/local/lib
+Framework search paths:
+	/Library/Frameworks/
+	/System/Library/Frameworks/

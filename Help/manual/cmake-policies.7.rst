@@ -51,6 +51,20 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.14
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0088: FindBISON runs bison in CMAKE_CURRENT_BINARY_DIR when executing. </policy/CMP0088>
+   CMP0087: install(SCRIPT | CODE) supports generator expressions. </policy/CMP0087>
+   CMP0086: UseSWIG honors SWIG_MODULE_NAME via -module flag. </policy/CMP0086>
+   CMP0085: IN_LIST generator expression handles empty list items. </policy/CMP0085>
+   CMP0084: The FindQt module does not exist for find_package(). </policy/CMP0084>
+   CMP0083: Add PIE options when linking executable. </policy/CMP0083>
+   CMP0082: Install rules from add_subdirectory() are interleaved with those in caller. </policy/CMP0082>
+
 Policies Introduced by CMake 3.13
 =================================
 

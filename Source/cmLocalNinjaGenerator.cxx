@@ -17,6 +17,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmNinjaTargetGenerator.h"
 #include "cmRulePlaceholderExpander.h"
@@ -40,21 +41,18 @@ cmRulePlaceholderExpander*
 cmLocalNinjaGenerator::CreateRulePlaceholderExpander() const
 {
   cmRulePlaceholderExpander* ret =
-    new cmRulePlaceholderExpander(this->Compilers, this->VariableMappings,
-                                  this->CompilerSysroot, this->LinkerSysroot);
+    this->cmLocalGenerator::CreateRulePlaceholderExpander();
   ret->SetTargetImpLib("$TARGET_IMPLIB");
   return ret;
 }
 
-cmLocalNinjaGenerator::~cmLocalNinjaGenerator()
-{
-}
+cmLocalNinjaGenerator::~cmLocalNinjaGenerator() = default;
 
 void cmLocalNinjaGenerator::Generate()
 {
   // Compute the path to use when referencing the current output
   // directory from the top output directory.
-  this->HomeRelativeOutputPath = this->ConvertToRelativePath(
+  this->HomeRelativeOutputPath = this->MaybeConvertToRelativePath(
     this->GetBinaryDirectory(), this->GetCurrentBinaryDirectory());
   if (this->HomeRelativeOutputPath == ".") {
     this->HomeRelativeOutputPath.clear();
@@ -90,9 +88,7 @@ void cmLocalNinjaGenerator::Generate()
     if (tg) {
       tg->Generate();
       // Add the target to "all" if required.
-      if (!this->GetGlobalNinjaGenerator()->IsExcluded(
-            this->GetGlobalNinjaGenerator()->GetLocalGenerators()[0],
-            target)) {
+      if (!this->GetGlobalNinjaGenerator()->IsExcluded(target)) {
         this->GetGlobalNinjaGenerator()->AddDependencyToAll(target);
       }
       delete tg;
@@ -106,7 +102,7 @@ void cmLocalNinjaGenerator::Generate()
 std::string cmLocalNinjaGenerator::GetTargetDirectory(
   cmGeneratorTarget const* target) const
 {
-  std::string dir = cmake::GetCMakeFilesDirectoryPostSlash();
+  std::string dir = "CMakeFiles/";
   dir += target->GetName();
 #if defined(__VMS)
   dir += "_dir";
@@ -141,7 +137,8 @@ std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
                                        format);
   }
   return this->ConvertToOutputFormat(
-    this->ConvertToRelativePath(this->GetBinaryDirectory(), path), format);
+    this->MaybeConvertToRelativePath(this->GetBinaryDirectory(), path),
+    format);
 }
 
 // Private methods.
@@ -188,13 +185,12 @@ void cmLocalNinjaGenerator::WriteProjectHeader(std::ostream& os)
 void cmLocalNinjaGenerator::WriteNinjaRequiredVersion(std::ostream& os)
 {
   // Default required version
-  std::string requiredVersion =
-    this->GetGlobalNinjaGenerator()->RequiredNinjaVersion();
+  std::string requiredVersion = cmGlobalNinjaGenerator::RequiredNinjaVersion();
 
   // Ninja generator uses the 'console' pool if available (>= 1.5)
   if (this->GetGlobalNinjaGenerator()->SupportsConsolePool()) {
     requiredVersion =
-      this->GetGlobalNinjaGenerator()->RequiredNinjaVersionForConsolePool();
+      cmGlobalNinjaGenerator::RequiredNinjaVersionForConsolePool();
   }
 
   // The Ninja generator writes rules which require support for restat
@@ -204,7 +200,7 @@ void cmLocalNinjaGenerator::WriteNinjaRequiredVersion(std::ostream& os)
       !this->GetGlobalNinjaGenerator()->GlobalSettingIsOn(
         "CMAKE_SUPPRESS_REGENERATION")) {
     requiredVersion =
-      this->GetGlobalNinjaGenerator()->RequiredNinjaVersionForManifestRestat();
+      cmGlobalNinjaGenerator::RequiredNinjaVersionForManifestRestat();
   }
 
   cmGlobalNinjaGenerator::WriteComment(
@@ -306,7 +302,7 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
     scriptPath = target->GetSupportDirectory();
   } else {
     scriptPath = this->GetCurrentBinaryDirectory();
-    scriptPath += cmake::GetCMakeFilesDirectory();
+    scriptPath += "/CMakeFiles";
   }
   cmSystemTools::MakeDirectory(scriptPath);
   scriptPath += '/';
@@ -319,7 +315,10 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
 
   cmsys::ofstream script(scriptPath.c_str());
 
-#ifndef _WIN32
+#ifdef _WIN32
+  script << "@echo off\n";
+  int line = 1;
+#else
   script << "set -e\n\n";
 #endif
 
@@ -330,11 +329,21 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
     // for the raw shell script.
     cmSystemTools::ReplaceString(cmd, "$$", "$");
 #ifdef _WIN32
-    script << cmd << " || exit /b" << '\n';
+    script << cmd << " || (set FAIL_LINE=" << ++line << "& goto :ABORT)"
+           << '\n';
 #else
     script << cmd << '\n';
 #endif
   }
+
+#ifdef _WIN32
+  script << "goto :EOF\n\n"
+            ":ABORT\n"
+            "set ERROR_CODE=%ERRORLEVEL%\n"
+            "echo Batch file failed at line %FAIL_LINE% "
+            "with errorcode %ERRORLEVEL%\n"
+            "exit /b %ERROR_CODE%";
+#endif
 
   return scriptPath;
 }
@@ -572,8 +581,8 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   if (!outputs.empty()) {
     output = outputs[0];
     if (ccg.GetWorkingDirectory().empty()) {
-      output =
-        this->ConvertToRelativePath(this->GetCurrentBinaryDirectory(), output);
+      output = this->MaybeConvertToRelativePath(
+        this->GetCurrentBinaryDirectory(), output);
     }
     output = this->ConvertToOutputFormat(output, cmOutputConverter::SHELL);
   }

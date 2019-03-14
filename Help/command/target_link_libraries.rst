@@ -14,7 +14,9 @@ Overview
 ^^^^^^^^
 
 This command has several signatures as detailed in subsections below.
-All of them have the general form::
+All of them have the general form
+
+.. code-block:: cmake
 
   target_link_libraries(<target> ... <item>... ...)
 
@@ -92,7 +94,7 @@ Each ``<item>`` may be:
 
 * **A generator expression**: A ``$<...>`` :manual:`generator expression
   <cmake-generator-expressions(7)>` may evaluate to any of the above
-  items or to a :ref:`;-list <CMake Language Lists>` of them.
+  items or to a :ref:`semicolon-separated list <CMake Language Lists>` of them.
   If the ``...`` contains any ``;`` characters, e.g. after evaluation
   of a ``${list}`` variable, be sure to use an explicitly quoted
   argument ``"$<...>"`` so that this command receives it as a
@@ -128,7 +130,7 @@ buildsystem properties.
 Libraries for a Target and/or its Dependents
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   target_link_libraries(<target>
                         <PRIVATE|PUBLIC|INTERFACE> <item>...
@@ -145,7 +147,7 @@ used for linking ``<target>``.
 Libraries for both a Target and its Dependents
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   target_link_libraries(<target> <item>...)
 
@@ -163,7 +165,7 @@ exclusively by this signature private.
 Libraries for a Target and/or its Dependents (Legacy)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   target_link_libraries(<target>
                         <LINK_PRIVATE|LINK_PUBLIC> <lib>...
@@ -185,7 +187,7 @@ made part of the :prop_tgt:`INTERFACE_LINK_LIBRARIES`.  If policy
 Libraries for Dependents Only (Legacy)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   target_link_libraries(<target> LINK_INTERFACE_LIBRARIES <item>...)
 

@@ -1,0 +1,5 @@
+CMake Warning (dev) in CMakeLists.txt:
+  Policy CMP0087 is not set: Install CODE|SCRIPT allow the use of generator
+  expressions.  Run "cmake --help-policy CMP0087" for policy details.  Use
+  the cmake_policy command to set the policy and suppress this warning.
+This warning is for project developers.  Use -Wno-dev to suppress it.

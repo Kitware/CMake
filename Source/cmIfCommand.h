@@ -19,13 +19,6 @@ class cmMakefile;
 class cmIfFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmIfFunctionBlocker()
-  {
-    this->HasRun = false;
-    this->ElseSeen = false;
-    this->ScopeDepth = 0;
-  }
-  ~cmIfFunctionBlocker() override {}
   bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
                          cmExecutionStatus&) override;
   bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
@@ -33,9 +26,9 @@ public:
   std::vector<cmListFileArgument> Args;
   std::vector<cmListFileFunction> Functions;
   bool IsBlocking;
-  bool HasRun;
-  bool ElseSeen;
-  unsigned int ScopeDepth;
+  bool HasRun = false;
+  bool ElseSeen = false;
+  unsigned int ScopeDepth = 0;
 };
 
 /// Starts an if block

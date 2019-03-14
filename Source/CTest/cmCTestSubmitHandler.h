@@ -48,38 +48,16 @@ public:
     this->HttpHeaders = v;
   }
 
-  void ConstructCDashURL(std::string& dropMethod, std::string& url);
-
 private:
   void SetLogFile(std::ostream* ost) { this->LogFile = ost; }
 
   /**
    * Submit file using various ways
    */
-  bool SubmitUsingFTP(const std::string& localprefix,
-                      const std::set<std::string>& files,
-                      const std::string& remoteprefix, const std::string& url);
   bool SubmitUsingHTTP(const std::string& localprefix,
-                       const std::set<std::string>& files,
+                       const std::vector<std::string>& files,
                        const std::string& remoteprefix,
                        const std::string& url);
-  bool SubmitUsingSCP(const std::string& scp_command,
-                      const std::string& localprefix,
-                      const std::set<std::string>& files,
-                      const std::string& remoteprefix, const std::string& url);
-
-  bool SubmitUsingCP(const std::string& localprefix,
-                     const std::set<std::string>& files,
-                     const std::string& remoteprefix, const std::string& url);
-
-  bool TriggerUsingHTTP(const std::set<std::string>& files,
-                        const std::string& remoteprefix,
-                        const std::string& url);
-
-  bool SubmitUsingXMLRPC(const std::string& localprefix,
-                         const std::set<std::string>& files,
-                         const std::string& remoteprefix,
-                         const std::string& url);
 
   typedef std::vector<char> cmCTestSubmitHandlerVectorOfChar;
 
@@ -92,11 +70,8 @@ private:
   std::string HTTPProxy;
   int HTTPProxyType;
   std::string HTTPProxyAuth;
-  std::string FTPProxy;
-  int FTPProxyType;
   std::ostream* LogFile;
   bool SubmitPart[cmCTest::PartCount];
-  bool CDash;
   bool HasWarnings;
   bool HasErrors;
   cmCTest::SetOfStrings Files;

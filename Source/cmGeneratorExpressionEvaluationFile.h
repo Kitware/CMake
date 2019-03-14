@@ -20,7 +20,7 @@ class cmGeneratorExpressionEvaluationFile
 {
 public:
   cmGeneratorExpressionEvaluationFile(
-    const std::string& input,
+    std::string input,
     std::unique_ptr<cmCompiledGeneratorExpression> outputFileExpr,
     std::unique_ptr<cmCompiledGeneratorExpression> condition,
     bool inputIsContent, cmPolicies::PolicyStatus policyStatusCMP0070);

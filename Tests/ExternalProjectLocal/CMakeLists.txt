@@ -20,71 +20,55 @@ set(binary_base "${base}/Build")
 set_property(DIRECTORY PROPERTY EP_BASE ${base})
 set_property(DIRECTORY PROPERTY EP_STEP_TARGETS configure build test)
 
-if(NOT DEFINED can_build_tutorial_step5)
-  set(can_build_tutorial_step5 1)
-
-  # The ExternalProject builds of Tutorial Step5 cannot be built
-  # correctly 2nd and later times in an in-source build...
-  # (because the CMakeCache.txt from the real in-source build of
-  # the Tests/Tutorial/Step5 directory gets copied when we do
-  # the "source directory copy" step... but it still refers to
-  # its original path which yields a configure error.) So:
-  #
-  if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-    set(can_build_tutorial_step5 0)
-  endif()
-endif()
 
 # Local DIR:
 #
-if(can_build_tutorial_step5)
-  set(proj TutorialStep5-Local)
-  ExternalProject_Add(${proj}
-    URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
-    CMAKE_CACHE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    CMAKE_ARGS -G ${CMAKE_GENERATOR} <SOURCE_DIR>
-    TEST_BEFORE_INSTALL 1
-    LOG_INSTALL 1
-  )
-  set_property(TARGET ${proj} PROPERTY FOLDER "Local")
-  ExternalProject_Get_Property(${proj} install_dir)
-  set(TutorialStep5_install_dir ${install_dir})
+set(proj TutorialStep5-Local)
+ExternalProject_Add(${proj}
+URL "${CMAKE_CURRENT_SOURCE_DIR}/Step5"
+CMAKE_CACHE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+CMAKE_ARGS -G ${CMAKE_GENERATOR} <SOURCE_DIR>
+TEST_BEFORE_INSTALL 1
+LOG_INSTALL 1
+)
+set_property(TARGET ${proj} PROPERTY FOLDER "Local")
+ExternalProject_Get_Property(${proj} install_dir)
+set(TutorialStep5_install_dir ${install_dir})
 
-  set(proj TutorialStep5-Local-TestAfterInstall)
-  ExternalProject_Add(${proj}
-    URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
-    CMAKE_CACHE_DEFAULT_ARGS -DUSE_MYMATH:BOOL=OFF
-    TEST_AFTER_INSTALL 1
-    LOG_TEST 1
-  )
-  set_property(TARGET ${proj} PROPERTY FOLDER "Local")
+set(proj TutorialStep5-Local-TestAfterInstall)
+ExternalProject_Add(${proj}
+URL "${CMAKE_CURRENT_SOURCE_DIR}/Step5"
+CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
+CMAKE_CACHE_DEFAULT_ARGS -DUSE_MYMATH:BOOL=OFF
+TEST_AFTER_INSTALL 1
+LOG_TEST 1
+)
+set_property(TARGET ${proj} PROPERTY FOLDER "Local")
 
-  set(proj TutorialStep5-Local-TestExcludeFromMainBefore)
-  ExternalProject_Add(${proj}
-    URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>  -G ${CMAKE_GENERATOR} <SOURCE_DIR>
-    CMAKE_CACHE_DEFAULT_ARGS -DUSE_MYMATH:BOOL=OFF
-    TEST_BEFORE_INSTALL 1
-    TEST_EXCLUDE_FROM_MAIN 1
-    STEP_TARGETS test
-    LOG_TEST 1
-  )
-  set_property(TARGET ${proj} PROPERTY FOLDER "Local")
+set(proj TutorialStep5-Local-TestExcludeFromMainBefore)
+ExternalProject_Add(${proj}
+URL "${CMAKE_CURRENT_SOURCE_DIR}/Step5"
+CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>  -G ${CMAKE_GENERATOR} <SOURCE_DIR>
+CMAKE_CACHE_DEFAULT_ARGS -DUSE_MYMATH:BOOL=OFF
+TEST_BEFORE_INSTALL 1
+TEST_EXCLUDE_FROM_MAIN 1
+STEP_TARGETS test
+LOG_TEST 1
+)
+set_property(TARGET ${proj} PROPERTY FOLDER "Local")
 
-  set(proj TutorialStep5-Local-TestExcludeFromMainAfter)
-  ExternalProject_Add(${proj}
-    URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>  -G ${CMAKE_GENERATOR} <SOURCE_DIR>
-    CMAKE_CACHE_DEFAULT_ARGS -DUSE_MYMATH:BOOL=OFF
-    TEST_AFTER_INSTALL 1
-    TEST_EXCLUDE_FROM_MAIN 1
-    STEP_TARGETS test
-    LOG_TEST 1
-  )
-  set_property(TARGET ${proj} PROPERTY FOLDER "Local")
+set(proj TutorialStep5-Local-TestExcludeFromMainAfter)
+ExternalProject_Add(${proj}
+URL "${CMAKE_CURRENT_SOURCE_DIR}/Step5"
+CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>  -G ${CMAKE_GENERATOR} <SOURCE_DIR>
+CMAKE_CACHE_DEFAULT_ARGS -DUSE_MYMATH:BOOL=OFF
+TEST_AFTER_INSTALL 1
+TEST_EXCLUDE_FROM_MAIN 1
+STEP_TARGETS test
+LOG_TEST 1
+)
+set_property(TARGET ${proj} PROPERTY FOLDER "Local")
 
-endif()
 
 
 # Local TAR:
@@ -100,6 +84,7 @@ ExternalProject_Add(${proj}
              -DTEST_LIST:STRING=A::B::C
   INSTALL_COMMAND ""
   LOG_CONFIGURE 1
+  LOG_PATCH 1
 )
 set_property(TARGET ${proj} PROPERTY FOLDER "Local/TAR")
 
@@ -208,12 +193,10 @@ enable_testing()
 #
 # BuildTree tests:
 #
-if(can_build_tutorial_step5)
-  add_test(TutorialStep5-Local-BuildTreeTest
-    "${binary_base}/TutorialStep5-Local/Tutorial" 42)
-  set_property(TEST TutorialStep5-Local-BuildTreeTest
-    APPEND PROPERTY LABELS Step5 BuildTree)
-endif()
+add_test(TutorialStep5-Local-BuildTreeTest
+"${binary_base}/TutorialStep5-Local/Tutorial" 42)
+set_property(TEST TutorialStep5-Local-BuildTreeTest
+APPEND PROPERTY LABELS Step5 BuildTree)
 
 add_test(TutorialStep1-LocalTAR-BuildTreeTest
   "${binary_base}/TutorialStep1-LocalTAR/EP-Tutorial" 36)
@@ -233,12 +216,7 @@ add_test(TutorialStep1-LocalNoDirTGZ-BuildTreeTest
 
 # InstallTree tests:
 #
-if(can_build_tutorial_step5)
-  add_test(TutorialStep5-InstallTreeTest
-    "${TutorialStep5_install_dir}/bin/Tutorial" 49)
-  set_property(TEST TutorialStep5-InstallTreeTest
-    APPEND PROPERTY LABELS Step5 InstallTree)
-endif()
-
-
-message(STATUS "can_build_tutorial_step5='${can_build_tutorial_step5}'")
+add_test(TutorialStep5-InstallTreeTest
+"${TutorialStep5_install_dir}/bin/Tutorial" 49)
+set_property(TEST TutorialStep5-InstallTreeTest
+APPEND PROPERTY LABELS Step5 InstallTree)

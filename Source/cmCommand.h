@@ -4,7 +4,6 @@
 #define cmCommand_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
-#include "cmListFileCache.h"
 
 #include <string>
 #include <vector>
@@ -25,33 +24,25 @@ struct cmListFileArgument;
  */
 class cmCommand
 {
-  CM_DISABLE_COPY(cmCommand)
-
 public:
   /**
    * Construct the command. By default it has no makefile.
    */
-  cmCommand()
-    : Makefile(nullptr)
-  {
-  }
+  cmCommand() = default;
 
   /**
    * Need virtual destructor to destroy real command type.
    */
-  virtual ~cmCommand() {}
+  virtual ~cmCommand() = default;
+
+  cmCommand(cmCommand const&) = delete;
+  cmCommand& operator=(cmCommand const&) = delete;
 
   /**
    * Specify the makefile.
    */
   void SetMakefile(cmMakefile* m) { this->Makefile = m; }
   cmMakefile* GetMakefile() { return this->Makefile; }
-
-  /**
-   * Save the backtrace for the creation of the command
-   */
-  void SetBacktrace(const cmListFileBacktrace & bt) { this->backTrace = bt; }
-  const cmListFileBacktrace & GetBacktrace() const { return this->backTrace; }
 
   /**
    * This is called by the cmMakefile when the command is first
@@ -97,8 +88,7 @@ public:
   void SetError(const std::string& e);
 
 protected:
-  cmMakefile* Makefile;
-  cmListFileBacktrace backTrace;
+  cmMakefile* Makefile = nullptr;
 
 private:
   std::string Error;

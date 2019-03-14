@@ -12,7 +12,7 @@ bundles on the Mac and bundle-like directories on any OS.
 
 The following functions are provided by this module:
 
-::
+.. code-block:: cmake
 
    fixup_bundle
    copy_and_fixup_bundle
@@ -39,9 +39,9 @@ DO NOT USE THESE FUNCTIONS AT CONFIGURE TIME (from ``CMakeLists.txt``)!
 Instead, invoke them from an :command:`install(CODE)` or
 :command:`install(SCRIPT)` rule.
 
-::
+.. code-block:: cmake
 
-  FIXUP_BUNDLE(<app> <libs> <dirs>)
+  fixup_bundle(<app> <libs> <dirs>)
 
 Fix up a bundle in-place and make it standalone, such that it can be
 drag-n-drop copied to another machine and run on that machine as long
@@ -62,16 +62,16 @@ ensure that it is truly standalone.
 As an optional parameter (IGNORE_ITEM) a list of file names can be passed,
 which are then ignored (e.g. IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe")
 
-::
+.. code-block:: cmake
 
-  COPY_AND_FIXUP_BUNDLE(<src> <dst> <libs> <dirs>)
+  copy_and_fixup_bundle(<src> <dst> <libs> <dirs>)
 
 Makes a copy of the bundle <src> at location <dst> and then fixes up
 the new copied bundle in-place at <dst>...
 
-::
+.. code-block:: cmake
 
-  VERIFY_APP(<app>)
+  verify_app(<app>)
 
 Verifies that an application <app> appears valid based on running
 analysis tools on it.  Calls "message(FATAL_ERROR" if the application
@@ -80,16 +80,16 @@ is not verified.
 As an optional parameter (IGNORE_ITEM) a list of file names can be passed,
 which are then ignored (e.g. IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe")
 
-::
+.. code-block:: cmake
 
-  GET_BUNDLE_MAIN_EXECUTABLE(<bundle> <result_var>)
+  get_bundle_main_executable(<bundle> <result_var>)
 
 The result will be the full path name of the bundle's main executable
 file or an "error:" prefixed string if it could not be determined.
 
-::
+.. code-block:: cmake
 
-  GET_DOTAPP_DIR(<exe> <dotapp_dir_var>)
+  get_dotapp_dir(<exe> <dotapp_dir_var>)
 
 Returns the nearest parent dir whose name ends with ".app" given the
 full path to an executable.  If there is no such parent dir, then
@@ -97,25 +97,25 @@ simply return the dir containing the executable.
 
 The returned directory may or may not exist.
 
-::
+.. code-block:: cmake
 
-  GET_BUNDLE_AND_EXECUTABLE(<app> <bundle_var> <executable_var> <valid_var>)
+  get_bundle_and_executable(<app> <bundle_var> <executable_var> <valid_var>)
 
 Takes either a ".app" directory name or the name of an executable
 nested inside a ".app" directory and returns the path to the ".app"
 directory in <bundle_var> and the path to its main executable in
 <executable_var>
 
-::
+.. code-block:: cmake
 
-  GET_BUNDLE_ALL_EXECUTABLES(<bundle> <exes_var>)
+  get_bundle_all_executables(<bundle> <exes_var>)
 
 Scans the given bundle recursively for all executable files and
 accumulates them into a variable.
 
-::
+.. code-block:: cmake
 
-  GET_ITEM_KEY(<item> <key_var>)
+  get_item_key(<item> <key_var>)
 
 Given a file (item) name, generate a key that should be unique
 considering the set of libraries that need copying or fixing up to
@@ -125,9 +125,9 @@ extension with "." replaced by "_"
 This key is used as a prefix for CMake variables so that we can
 associate a set of variables with a given item based on its key.
 
-::
+.. code-block:: cmake
 
-  CLEAR_BUNDLE_KEYS(<keys_var>)
+  clear_bundle_keys(<keys_var>)
 
 Loop over the list of keys, clearing all the variables associated with
 each key.  After the loop, clear the list of keys itself.
@@ -135,17 +135,17 @@ each key.  After the loop, clear the list of keys itself.
 Caller of get_bundle_keys should call clear_bundle_keys when done with
 list of keys.
 
-::
+.. code-block:: cmake
 
-  SET_BUNDLE_KEY_VALUES(<keys_var> <context> <item> <exepath> <dirs>
+  set_bundle_key_values(<keys_var> <context> <item> <exepath> <dirs>
                         <copyflag> [<rpaths>])
 
 Add a key to the list (if necessary) for the given item.  If added,
 also set all the variables associated with that key.
 
-::
+.. code-block:: cmake
 
-  GET_BUNDLE_KEYS(<app> <libs> <dirs> <keys_var>)
+  get_bundle_keys(<app> <libs> <dirs> <keys_var>)
 
 Loop over all the executable and library files within the bundle (and
 given as extra <libs>) and accumulate a list of keys representing
@@ -156,17 +156,17 @@ appropriate install_name_tool fixups.
 As an optional parameter (IGNORE_ITEM) a list of file names can be passed,
 which are then ignored (e.g. IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe")
 
-::
+.. code-block:: cmake
 
-  COPY_RESOLVED_ITEM_INTO_BUNDLE(<resolved_item> <resolved_embedded_item>)
+  copy_resolved_item_into_bundle(<resolved_item> <resolved_embedded_item>)
 
 Copy a resolved item into the bundle if necessary.  Copy is not
 necessary if the resolved_item is "the same as" the
 resolved_embedded_item.
 
-::
+.. code-block:: cmake
 
-  COPY_RESOLVED_FRAMEWORK_INTO_BUNDLE(<resolved_item> <resolved_embedded_item>)
+  copy_resolved_framework_into_bundle(<resolved_item> <resolved_embedded_item>)
 
 Copy a resolved framework into the bundle if necessary.  Copy is not
 necessary if the resolved_item is "the same as" the
@@ -178,9 +178,9 @@ BU_COPY_FULL_FRAMEWORK_CONTENTS to ON before calling fixup_bundle.  By
 default, COPY_RESOLVED_FRAMEWORK_INTO_BUNDLE copies the framework
 dylib itself plus the framework Resources directory.
 
-::
+.. code-block:: cmake
 
-  FIXUP_BUNDLE_ITEM(<resolved_embedded_item> <exepath> <dirs>)
+  fixup_bundle_item(<resolved_embedded_item> <exepath> <dirs>)
 
 Get the direct/non-system prerequisites of the resolved embedded item.
 For each prerequisite, change the way it is referenced to the value of
@@ -204,9 +204,9 @@ once.
 If the BU_CHMOD_BUNDLE_ITEMS variable is set then bundle items will be
 marked writable before install_name_tool tries to change them.
 
-::
+.. code-block:: cmake
 
-  VERIFY_BUNDLE_PREREQUISITES(<bundle> <result_var> <info_var>)
+  verify_bundle_prerequisites(<bundle> <result_var> <info_var>)
 
 Verifies that the sum of all prerequisites of all files inside the
 bundle are contained within the bundle or are "system" libraries,
@@ -215,9 +215,9 @@ presumed to exist everywhere.
 As an optional parameter (IGNORE_ITEM) a list of file names can be passed,
 which are then ignored (e.g. IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe")
 
-::
+.. code-block:: cmake
 
-  VERIFY_BUNDLE_SYMLINKS(<bundle> <result_var> <info_var>)
+  verify_bundle_symlinks(<bundle> <result_var> <info_var>)
 
 Verifies that any symlinks found in the bundle point to other files
 that are already also in the bundle...  Anything that points to an
@@ -225,11 +225,8 @@ external file causes this function to fail the verification.
 #]=======================================================================]
 
 function(_warn_cmp0080)
-  message(AUTHOR_WARNING
-    "Policy CMP0080 is not set: BundleUtilities prefers not to be included at configure time. "
-    "Run \"cmake --help-policy CMP0080\" for policy details. "
-    "Use the cmake_policy command to set the policy and suppress this warning."
-    )
+  cmake_policy(GET_WARNING CMP0080 _cmp0080_warning)
+  message(AUTHOR_WARNING "${_cmp0080_warning}\n")
 endfunction()
 
 # Do not include this module at configure time!
@@ -720,6 +717,9 @@ function(link_resolved_item_into_bundle resolved_item resolved_embedded_item)
   else()
     get_filename_component(target_dir "${resolved_embedded_item}" DIRECTORY)
     file(RELATIVE_PATH symlink_target "${target_dir}" "${resolved_item}")
+    if (NOT EXISTS "${target_dir}")
+      file(MAKE_DIRECTORY "${target_dir}")
+    endif()
     execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${symlink_target}" "${resolved_embedded_item}")
   endif()
 endfunction()
@@ -880,9 +880,13 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
     execute_process(COMMAND chmod u+w "${resolved_embedded_item}")
   endif()
 
+  # CMAKE_INSTALL_NAME_TOOL may not be set if executed in script mode
+  # Duplicated from CMakeFindBinUtils.cmake
+  find_program(CMAKE_INSTALL_NAME_TOOL NAMES install_name_tool HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
+
   # Only if install_name_tool supports -delete_rpath:
   #
-  execute_process(COMMAND install_name_tool
+  execute_process(COMMAND ${CMAKE_INSTALL_NAME_TOOL}
     OUTPUT_VARIABLE install_name_tool_usage
     ERROR_VARIABLE  install_name_tool_usage
     )
@@ -900,7 +904,7 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
   # to install_name_tool:
   #
   if(changes)
-    set(cmd install_name_tool ${changes} "${resolved_embedded_item}")
+    set(cmd ${CMAKE_INSTALL_NAME_TOOL} ${changes} "${resolved_embedded_item}")
     execute_process(COMMAND ${cmd} RESULT_VARIABLE install_name_tool_result)
     if(NOT install_name_tool_result EQUAL 0)
       string(REPLACE ";" "' '" msg "'${cmd}'")

@@ -23,17 +23,15 @@ namespace {
 class DebGenerator
 {
 public:
-  DebGenerator(cmCPackLog* logger, std::string const& outputName,
-               std::string const& workDir, std::string const& topLevelDir,
-               std::string const& temporaryDir,
+  DebGenerator(cmCPackLog* logger, std::string outputName, std::string workDir,
+               std::string topLevelDir, std::string temporaryDir,
                const char* debianCompressionType,
                const char* debianArchiveType,
-               std::map<std::string, std::string> const& controlValues,
-               bool genShLibs, std::string const& shLibsFilename,
-               bool genPostInst, std::string const& postInst, bool genPostRm,
-               std::string const& postRm, const char* controlExtra,
-               bool permissionStrctPolicy,
-               std::vector<std::string> const& packageFiles);
+               std::map<std::string, std::string> controlValues,
+               bool genShLibs, std::string shLibsFilename, bool genPostInst,
+               std::string postInst, bool genPostRm, std::string postRm,
+               const char* controlExtra, bool permissionStrctPolicy,
+               std::vector<std::string> packageFiles);
 
   bool generate() const;
 
@@ -66,31 +64,29 @@ private:
 };
 
 DebGenerator::DebGenerator(
-  cmCPackLog* logger, std::string const& outputName,
-  std::string const& workDir, std::string const& topLevelDir,
-  std::string const& temporaryDir, const char* debianCompressionType,
-  const char* debianArchiveType,
-  std::map<std::string, std::string> const& controlValues, bool genShLibs,
-  std::string const& shLibsFilename, bool genPostInst,
-  std::string const& postInst, bool genPostRm, std::string const& postRm,
-  const char* controlExtra, bool permissionStrictPolicy,
-  std::vector<std::string> const& packageFiles)
+  cmCPackLog* logger, std::string outputName, std::string workDir,
+  std::string topLevelDir, std::string temporaryDir,
+  const char* debianCompressionType, const char* debianArchiveType,
+  std::map<std::string, std::string> controlValues, bool genShLibs,
+  std::string shLibsFilename, bool genPostInst, std::string postInst,
+  bool genPostRm, std::string postRm, const char* controlExtra,
+  bool permissionStrictPolicy, std::vector<std::string> packageFiles)
   : Logger(logger)
-  , OutputName(outputName)
-  , WorkDir(workDir)
-  , TopLevelDir(topLevelDir)
-  , TemporaryDir(temporaryDir)
-  , DebianArchiveType(debianArchiveType ? debianArchiveType : "paxr")
-  , ControlValues(controlValues)
+  , OutputName(std::move(outputName))
+  , WorkDir(std::move(workDir))
+  , TopLevelDir(std::move(topLevelDir))
+  , TemporaryDir(std::move(temporaryDir))
+  , DebianArchiveType(debianArchiveType ? debianArchiveType : "gnutar")
+  , ControlValues(std::move(controlValues))
   , GenShLibs(genShLibs)
-  , ShLibsFilename(shLibsFilename)
+  , ShLibsFilename(std::move(shLibsFilename))
   , GenPostInst(genPostInst)
-  , PostInst(postInst)
+  , PostInst(std::move(postInst))
   , GenPostRm(genPostRm)
-  , PostRm(postRm)
+  , PostRm(std::move(postRm))
   , ControlExtra(controlExtra)
   , PermissionStrictPolicy(permissionStrictPolicy)
-  , PackageFiles(packageFiles)
+  , PackageFiles(std::move(packageFiles))
 {
   if (!debianCompressionType) {
     debianCompressionType = "gzip";
@@ -436,13 +432,9 @@ bool DebGenerator::generateDeb() const
 
 } // end anonymous namespace
 
-cmCPackDebGenerator::cmCPackDebGenerator()
-{
-}
+cmCPackDebGenerator::cmCPackDebGenerator() = default;
 
-cmCPackDebGenerator::~cmCPackDebGenerator()
-{
-}
+cmCPackDebGenerator::~cmCPackDebGenerator() = default;
 
 int cmCPackDebGenerator::InitializeInternal()
 {

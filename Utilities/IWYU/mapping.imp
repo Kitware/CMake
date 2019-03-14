@@ -55,6 +55,9 @@
   # HACK: iwyu wrongly thinks that <system_error> is needed for std::hash
   { symbol: [ "std::hash", private, "<functional>", public ] },
 
+  # HACK: iwyu thinks we use a libstdc++ private type
+  { symbol: [ "__gnu_cxx::size_t", private, "<cstddef>", public ] },
+
   # __decay_and_strip is used internally in the C++11 standard library.
   # IWYU does not classify it as internal and suggests to add <type_traits>.
   # To ignore it, we simply map it to a file that is included anyway.
@@ -94,12 +97,9 @@
   { include: [ "<json/writer.h>", private, "\"cm_jsoncpp_writer.h\"", public ] },
   { include: [ "<rhash.h>", private, "\"cm_rhash.h\"", public ] },
   { include: [ "<uv.h>", private, "\"cm_uv.h\"", public ] },
-  { include: [ "@<uv-.+\\.h>", private, "\"cm_uv.h\"", public ] },
+  { include: [ "@<uv[/-].+\\.h>", private, "\"cm_uv.h\"", public ] },
   { include: [ "<kwiml/abi.h>", private, "\"cm_kwiml.h\"", public ] },
   { include: [ "<kwiml/int.h>", private, "\"cm_kwiml.h\"", public ] },
-  { include: [ "<xmlrpc.h>", private, "\"cm_xmlrpc.h\"", public ] },
-  { include: [ "<xmlrpc_client.h>", private, "\"cm_xmlrpc.h\"", public ] },
-  { include: [ "@<xmlrpc-c/.+\\.h>", private, "\"cm_xmlrpc.h\"", public ] },
   { include: [ "<zconf.h>", private, "\"cm_zlib.h\"", public ] },
   { include: [ "<zlib.h>", private, "\"cm_zlib.h\"", public ] },
 
@@ -114,7 +114,7 @@
   { include: [ "\"cmjsoncpp/include/json/writer.h\"", private, "\"cm_jsoncpp_writer.h\"", public ] },
   { include: [ "\"cmlibrhash/librhash/rhash.h\"", private, "\"cm_rhash.h\"", public ] },
   { include: [ "\"cmlibuv/include/uv.h\"", private, "\"cm_uv.h\"", public ] },
-  { include: [ "@\"cmlibuv/include/uv-.+\\.h\"", private, "\"cm_uv.h\"", public ] },
+  { include: [ "@\"cmlibuv/include/uv/.+\\.h\"", private, "\"cm_uv.h\"", public ] },
   { include: [ "\"KWIML/include/kwiml/abi.h\"", private, "\"cm_kwiml.h\"", public ] },
   { include: [ "\"KWIML/include/kwiml/int.h\"", private, "\"cm_kwiml.h\"", public ] },
   { include: [ "\"cmzlib/cm_zlib_mangle.h\"", private, "\"cm_zlib.h\"", public ] },
@@ -125,6 +125,8 @@
   { symbol: [ "SIGHUP", private, "\"cm_uv.h\"", public ] },
   { symbol: [ "SIGINT", private, "\"cm_uv.h\"", public ] },
   { symbol: [ "ssize_t", private, "\"cm_uv.h\"", public ] },
+
+  { symbol: [ "Json::ArrayIndex", private, "\"cm_jsoncpp_value.h\"", public ] },
 
   { symbol: [ "std::ifstream", private, "\"cmsys/FStream.hxx\"", public ] },
   { symbol: [ "std::ofstream", private, "\"cmsys/FStream.hxx\"", public ] },

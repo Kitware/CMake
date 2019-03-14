@@ -20,17 +20,7 @@ BuildName: @BUILDNAME@
 LabelsForSubprojects: @CTEST_LABELS_FOR_SUBPROJECTS@
 
 # Submission information
-IsCDash: @CTEST_DROP_SITE_CDASH@
-CDashVersion: @CTEST_CDASH_VERSION@
-QueryCDashVersion: @CTEST_CDASH_QUERY_VERSION@
-DropSite: @DROP_SITE@
-DropLocation: @DROP_LOCATION@
-DropSiteUser: @DROP_SITE_USER@
-DropSitePassword: @DROP_SITE_PASSWORD@
-DropSiteMode: @DROP_SITE_MODE@
-DropMethod: @DROP_METHOD@
-TriggerSite: @TRIGGER_SITE@
-ScpCommand: @SCPCOMMAND@
+SubmitURL: @SUBMIT_URL@
 
 # Dashboard start time
 NightlyStartTime: @NIGHTLY_START_TIME@

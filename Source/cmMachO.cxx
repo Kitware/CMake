@@ -52,10 +52,7 @@ bool peek(cmsys::ifstream& fin, T& v)
 template <typename T>
 bool read(cmsys::ifstream& fin, T& v)
 {
-  if (!fin.read(reinterpret_cast<char*>(&v), sizeof(T))) {
-    return false;
-  }
-  return true;
+  return !!fin.read(reinterpret_cast<char*>(&v), sizeof(T));
 }
 
 // read from the file and fill multiple data structures where
@@ -67,10 +64,7 @@ bool read(cmsys::ifstream& fin, std::vector<T>& v)
   if (v.empty()) {
     return true;
   }
-  if (!fin.read(reinterpret_cast<char*>(&v[0]), sizeof(T) * v.size())) {
-    return false;
-  }
-  return true;
+  return !!fin.read(reinterpret_cast<char*>(&v[0]), sizeof(T) * v.size());
 }
 }
 
@@ -97,7 +91,7 @@ public:
     : Swap(_swap)
   {
   }
-  virtual ~cmMachOHeaderAndLoadCommands() {}
+  virtual ~cmMachOHeaderAndLoadCommands() = default;
 
   virtual bool read_mach_o(cmsys::ifstream& fin) = 0;
 

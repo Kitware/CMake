@@ -1,4 +1,6 @@
+extern int libA(void);
+
 int main(void)
 {
-  return 0;
+  return libA();
 }

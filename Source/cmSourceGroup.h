@@ -26,7 +26,7 @@ class cmSourceGroupInternals;
 class cmSourceGroup
 {
 public:
-  cmSourceGroup(const std::string& name, const char* regex,
+  cmSourceGroup(std::string name, const char* regex,
                 const char* parentName = nullptr);
   cmSourceGroup(cmSourceGroup const& r);
   ~cmSourceGroup();

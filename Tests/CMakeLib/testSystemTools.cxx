@@ -16,11 +16,13 @@
   failed = 1
 
 #define cmAssert(exp, m)                                                      \
-  if ((exp)) {                                                                \
-    cmPassed(m);                                                              \
-  } else {                                                                    \
-    cmFailed(m);                                                              \
-  }
+  do {                                                                        \
+    if ((exp)) {                                                              \
+      cmPassed(m);                                                            \
+    } else {                                                                  \
+      cmFailed(m);                                                            \
+    }                                                                         \
+  } while (false)
 
 int testSystemTools(int /*unused*/, char* /*unused*/ [])
 {

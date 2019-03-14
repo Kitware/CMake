@@ -206,9 +206,10 @@ enclosed content, such as `Escape Sequences`_ or `Variable References`_,
 is performed.  A bracket argument is always given to the command
 invocation as exactly one argument.
 
-For example:
+.. No code-block syntax highlighting in the following example
+   (long string literal not supported by our cmake.py)
 
-.. code-block:: cmake
+For example::
 
  message([=[
  This is the first line in a bracket argument with bracket length 1.
@@ -253,16 +254,22 @@ closing quotes.  Both `Escape Sequences`_ and `Variable References`_
 are evaluated.  A quoted argument is always given to the command
 invocation as exactly one argument.
 
+.. No code-block syntax highlighting in the following example
+   (escape \" not supported by our cmake.py)
+
 For example:
 
-::
+.. code-block:: cmake
 
- message("This is a quoted argument containing multiple lines.
- This is always one argument even though it contains a ; character.
- Both \\-escape sequences and ${variable} references are evaluated.
- The text does not end on an escaped double-quote like \".
- It does end in an unescaped double quote.
- ")
+  message("This is a quoted argument containing multiple lines.
+  This is always one argument even though it contains a ; character.
+  Both \\-escape sequences and ${variable} references are evaluated.
+  The text does not end on an escaped double-quote like \".
+  It does end in an unescaped double quote.
+  ")
+
+.. No code-block syntax highlighting in the following example
+   (for conformity with the two above examples)
 
 The final ``\`` on any line ending in an odd number of backslashes
 is treated as a line continuation and ignored along with the
@@ -270,11 +277,11 @@ immediately following newline character.  For example:
 
 .. code-block:: cmake
 
- message("\
- This is the first line of a quoted argument. \
- In fact it is the only line but since it is long \
- the source code uses line continuation.\
- ")
+  message("\
+  This is the first line of a quoted argument. \
+  In fact it is the only line but since it is long \
+  the source code uses line continuation.\
+  ")
 
 .. note::
  CMake versions prior to 3.0 do not support continuation with ``\``.
@@ -382,7 +389,7 @@ historical considerations.)
 Variable References
 -------------------
 
-A *variable reference* has the form ``${variable_name}`` and is
+A *variable reference* has the form ``${<variable>}`` and is
 evaluated inside a `Quoted Argument`_ or an `Unquoted Argument`_.
 A variable reference is replaced by the value of the variable,
 or by the empty string if the variable is not set.
@@ -398,13 +405,17 @@ the ``$`` is also technically permitted but is discouraged.
 The `Variables`_ section documents the scope of variable names
 and how their values are set.
 
-An *environment variable reference* has the form ``$ENV{VAR}`` and
-is evaluated in the same contexts as a normal variable reference.
-See :variable:`ENV` for more information.
+An *environment variable reference* has the form ``$ENV{<variable>}``.
+See the `Environment Variables`_ section for more information.
 
-A *cache variable reference* has the form ``$CACHE{VAR}`` and
-is evaluated in the same contexts as a normal variable reference.
+A *cache variable reference* has the form ``$CACHE{<variable>}``.
 See :variable:`CACHE` for more information.
+
+The :command:`if` command has a special condition syntax that
+allows for variable references in the short form ``<variable>``
+instead of ``${<variable>}``.
+However, environment and cache variables always need to be
+referenced as ``$ENV{<variable>}`` or ``$CACHE{<variable>}``.
 
 Comments
 --------
@@ -552,9 +563,37 @@ Otherwise, the variable reference evaluates to an empty string.
 The ``$CACHE{VAR}`` syntax can be used to do direct cache entry
 lookups.
 
-The :manual:`cmake-variables(7)` manual documents many variables
+The :manual:`cmake-variables(7)` manual documents the many variables
 that are provided by CMake or have meaning to CMake when set
 by project code.
+
+.. _`CMake Language Environment Variables`:
+
+Environment Variables
+=====================
+
+Environment Variables are like ordinary `Variables`_, with the
+following differences:
+
+Scope
+ Environment variables have global scope in a CMake process.
+ They are never cached.
+
+References
+ `Variable References`_ have the form ``$ENV{<variable>}``.
+
+Initialization
+ Initial values of the CMake environment variables are those of
+ the calling process.
+ Values can be changed using the :command:`set` and :command:`unset`
+ commands.
+ These commands only affect the running CMake process,
+ not the system environment at large.
+ Changed values are not written back to the calling process,
+ and they are not seen by subsequent build or test processes.
+
+The :manual:`cmake-env-variables(7)` manual documents environment
+variables that have special meaning to CMake.
 
 .. _`CMake Language Lists`:
 

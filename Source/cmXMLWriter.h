@@ -16,11 +16,12 @@
 
 class cmXMLWriter
 {
-  CM_DISABLE_COPY(cmXMLWriter)
-
 public:
   cmXMLWriter(std::ostream& output, std::size_t level = 0);
   ~cmXMLWriter();
+
+  cmXMLWriter(cmXMLWriter const&) = delete;
+  cmXMLWriter& operator=(cmXMLWriter const&) = delete;
 
   void StartDocument(const char* encoding = "UTF-8");
   void EndDocument();

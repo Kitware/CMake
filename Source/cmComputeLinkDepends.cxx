@@ -6,6 +6,7 @@
 #include "cmComputeComponentGraph.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
@@ -419,7 +420,8 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 
   // This shared library dependency must follow the item that listed
   // it.
-  this->EntryConstraintGraph[dep.DependerIndex].push_back(cmGraphEdge(index, false, nullptr));
+  this->EntryConstraintGraph[dep.DependerIndex].emplace_back(
+    index, true, cmListFileBacktrace());
 
   // Target items may have their own dependencies.
   if (entry.Target) {
@@ -522,7 +524,8 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
 
     // The dependee must come after the depender.
     if (depender_index >= 0) {
-      this->EntryConstraintGraph[depender_index].push_back(cmGraphEdge(dependee_index, false, &item.Backtrace));
+      this->EntryConstraintGraph[depender_index].emplace_back(
+        dependee_index, false, cmListFileBacktrace());
     } else {
       // This is a direct dependency of the target being linked.
       this->OriginalEntries.push_back(dependee_index);
@@ -565,7 +568,7 @@ cmLinkItem cmComputeLinkDepends::ResolveLinkItem(int depender_index,
       from = depender;
     }
   }
-  return from->ResolveLinkItem(name);
+  return from->ResolveLinkItem(name, cmListFileBacktrace());
 }
 
 void cmComputeLinkDepends::InferDependencies()
@@ -594,8 +597,9 @@ void cmComputeLinkDepends::InferDependencies()
 
     // Add the inferred dependencies to the graph.
     cmGraphEdgeList& edges = this->EntryConstraintGraph[depender_index];
-    for (const auto & c : common) {
-        edges.push_back(cmGraphEdge(c, false, nullptr));
+    edges.reserve(edges.size() + common.size());
+    for (auto const& c : common) {
+      edges.emplace_back(c, true, cmListFileBacktrace());
     }
   }
 }

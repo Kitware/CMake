@@ -8,6 +8,7 @@
 #include "cmInstalledFile.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmPropertyDefinition.h"
@@ -230,7 +231,7 @@ bool cmGetPropertyCommand::HandleDirectoryMode()
   if (this->PropertyName == "DEFINITIONS") {
     switch (mf->GetPolicyStatus(cmPolicies::CMP0059)) {
       case cmPolicies::WARN:
-        mf->IssueMessage(cmake::AUTHOR_WARNING,
+        mf->IssueMessage(MessageType::AUTHOR_WARNING,
                          cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
         CM_FALLTHROUGH;
       case cmPolicies::OLD:

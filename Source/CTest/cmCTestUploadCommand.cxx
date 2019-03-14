@@ -9,8 +9,8 @@
 #include "cmCTestGenericHandler.h"
 #include "cmCTestUploadHandler.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 cmCTestGenericHandler* cmCTestUploadCommand::InitializeHandler()
 {
@@ -58,7 +58,7 @@ bool cmCTestUploadCommand::CheckArgumentValue(std::string const& arg)
     std::ostringstream e;
     e << "File \"" << arg << "\" does not exist. Cannot submit "
       << "a non-existent file.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     this->ArgumentDoing = ArgumentDoingError;
     return false;
   }

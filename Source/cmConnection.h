@@ -60,10 +60,11 @@ public:
 
 class cmConnection
 {
-  CM_DISABLE_COPY(cmConnection)
-
 public:
-  cmConnection() {}
+  cmConnection() = default;
+
+  cmConnection(cmConnection const&) = delete;
+  cmConnection& operator=(cmConnection const&) = delete;
 
   virtual void WriteData(const std::string& data) = 0;
 

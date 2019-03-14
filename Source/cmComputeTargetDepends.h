@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmGraphAdjacencyList.h"
+#include "cmListFileCache.h"
 
 #include <map>
 #include <set>
@@ -47,13 +48,15 @@ private:
   void AddTargetDepend(int depender_index, cmLinkItem const& dependee_name,
                        bool linking);
   void AddTargetDepend(int depender_index, cmGeneratorTarget const* dependee,
-                       bool linking, cmListFileBacktrace const & dependee_backtrace);
+                       cmListFileBacktrace const& dependee_backtrace,
+                       bool linking);
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
   void AddInterfaceDepends(int depender_index, cmLinkItem const& dependee_name,
                            const std::string& config,
                            std::set<cmLinkItem>& emitted);
   void AddInterfaceDepends(int depender_index,
                            cmGeneratorTarget const* dependee,
+                           cmListFileBacktrace const& dependee_backtrace,
                            const std::string& config,
                            std::set<cmLinkItem>& emitted);
   cmGlobalGenerator* GlobalGenerator;

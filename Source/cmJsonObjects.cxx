@@ -6,6 +6,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallGenerator.h"
+#include "cmInstallSubdirectoryGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmJsonObjectDictionary.h"
 #include "cmJsonObjects.h"
@@ -13,6 +14,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmProperty.h"
+#include "cmPropertyMap.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -47,7 +49,7 @@ std::vector<std::string> getConfigurations(const cmake* cm)
 
   makefiles[0]->GetConfigurations(configurations);
   if (configurations.empty()) {
-    configurations.push_back("");
+    configurations.emplace_back();
   }
   return configurations;
 }
@@ -208,9 +210,9 @@ struct hash<LanguageData>
 
 } // namespace std
 
-static Json::Value DumpSourceFileGroup(
-  const LanguageData& data, const std::vector<std::string>& files,
-  const std::vector<std::string>& sourceGroups, const std::string& baseDir)
+static Json::Value DumpSourceFileGroup(const LanguageData& data,
+                                       const std::vector<std::string>& files,
+                                       const std::string& baseDir)
 {
   Json::Value result = Json::objectValue;
 
@@ -245,40 +247,19 @@ static Json::Value DumpSourceFileGroup(
   }
 
   result[kSOURCES_KEY] = sourcesValue;
-
-  // Source groups are optional, check we have the data.
-  // In order to be backwards compatible, the source group is a parallel array
-  // and not part of each file.
-  if (!sourceGroups.empty()) {
-    Json::Value sourcesGroupsValue = Json::arrayValue;
-    for (auto const& groupPath : sourceGroups) {
-      sourcesGroupsValue.append(groupPath);
-    }
-
-    result[KSOURCE_GROUPS_KEY] = sourcesGroupsValue;
-  }
-
   return result;
 }
 
 static Json::Value DumpSourceFilesList(
   cmGeneratorTarget* target, const std::string& config,
-  const std::map<std::string, LanguageData>& languageDataMap,
-  bool includeSourceGroups)
+  const std::map<std::string, LanguageData>& languageDataMap)
 {
   // Collect sourcefile groups:
 
   std::vector<cmSourceFile*> files;
   target->GetSourceFiles(files, config);
 
-  // Apply source groups to each file if necessary
-  std::vector<cmSourceGroup> sourceGroups =
-    target->Makefile->GetSourceGroups();
-
-   std::unordered_map<
-    LanguageData,
-    std::pair<std::vector<std::string>, std::vector<std::string>>>
-    fileGroups;
+  std::unordered_map<LanguageData, std::vector<std::string>> fileGroups;
   for (cmSourceFile* file : files) {
     LanguageData fileData;
     fileData.Language = file->GetLanguage();
@@ -311,10 +292,10 @@ static Json::Value DumpSourceFilesList(
         lg->AppendIncludeDirectories(includes, evaluatedIncludes, *file);
 
         for (const auto& include : includes) {
-          fileData.IncludePathList.push_back(
-            std::make_pair(include,
-                           target->IsSystemIncludeDirectory(
-                             include, config, fileData.Language)));
+          fileData.IncludePathList.emplace_back(
+            include,
+            target->IsSystemIncludeDirectory(include, config,
+                                             fileData.Language));
         }
       }
 
@@ -342,28 +323,15 @@ static Json::Value DumpSourceFilesList(
       fileData.SetDefines(defines);
     }
 
-    fileData.IsGenerated = file->GetPropertyAsBool("GENERATED");
-    auto& groupFileList = fileGroups[fileData];
-    const std::string& filePath = file->GetFullPath();
-    groupFileList.first.push_back(filePath);
-
-	if (includeSourceGroups) {
-      cmSourceGroup* sourceGroup =
-        target->Makefile->FindSourceGroup(filePath.c_str(), sourceGroups);
-      if (sourceGroup != nullptr) {
-        groupFileList.second.push_back(sourceGroup->GetFullName());
-      } else {
-        // Don't forget the empty placeholder
-        groupFileList.second.push_back("");
-      }
-    }
+    fileData.IsGenerated = file->GetIsGenerated();
+    std::vector<std::string>& groupFileList = fileGroups[fileData];
+    groupFileList.push_back(file->GetFullPath());
   }
 
   const std::string& baseDir = target->Makefile->GetCurrentSourceDirectory();
   Json::Value result = Json::arrayValue;
   for (auto const& it : fileGroups) {
-    Json::Value group = DumpSourceFileGroup(it.first, it.second.first,
-                                            it.second.second, baseDir);
+    Json::Value group = DumpSourceFileGroup(it.first, it.second, baseDir);
     if (!group.isNull()) {
       result.append(group);
     }
@@ -372,68 +340,8 @@ static Json::Value DumpSourceFilesList(
   return result;
 }
 
-static Json::Value DumpBacktrace_Protocol1(
-  const cmListFileBacktrace& backtrace)
-{
-  Json::Value result = Json::arrayValue;
-  cmListFileBacktrace backtraceCopy = backtrace;
-  while (backtraceCopy.Top().HasFilePath()) {
-    Json::Value entry = Json::objectValue;
-    entry[kPATH_KEY] = backtraceCopy.Top().FilePath();
-    if (backtraceCopy.Top().Line) {
-      entry[kLINE_NUMBER_KEY] = static_cast<int>(backtraceCopy.Top().Line);
-    }
-
-    if (backtraceCopy.Top().HasName()) {
-      entry[kNAME_KEY] = backtraceCopy.Top().Name();
-    }
-
-    result.append(entry);
-    backtraceCopy = backtraceCopy.Pop();
-  }
-
-  return result;
-}
-
-static Json::Value DumpBacktrace_Protocol2(
-  const cmListFileBacktrace& backtrace,
-  std::unordered_set<size_t>* seenTraceIds)
-{
-  Json::Value result = Json::arrayValue;
-  auto ids = backtrace.GetFrameIds();
-  for (auto& id : ids) {
-    result.append(id);
-    seenTraceIds->emplace(id);
-  }
-
-  return std::move(result);
-}
-
-static Json::Value DumpBacktrace(const cmListFileBacktrace& backtrace,
-                                 std::unordered_set<size_t>* seenTraceIds)
-{
-  if (seenTraceIds == nullptr) {
-    return DumpBacktrace_Protocol1(backtrace);
-  }
-
-  return DumpBacktrace_Protocol2(backtrace, seenTraceIds);
-}
-
-static void DumpBacktraceRange(Json::Value& result, const std::string& type,
-                               cmBacktraceRange range,
-                               std::unordered_set<size_t>* seenTraceIds)
-{
-  for (auto const& bt : range) {
-    Json::Value obj = Json::objectValue;
-    obj[kTYPE_KEY] = type;
-    obj[kBACKTRACE_KEY] = DumpBacktrace(bt, seenTraceIds);
-    result.append(obj);
-  }
-}
-
 static Json::Value DumpCTestInfo(cmLocalGenerator* lg, cmTest* testInfo,
-                                 const std::string& config,
-                                 std::unordered_set<size_t>* seenTraceIds)
+                                 const std::string& config)
 {
   Json::Value result = Json::objectValue;
   result[kCTEST_NAME] = testInfo->GetName();
@@ -466,33 +374,25 @@ static Json::Value DumpCTestInfo(cmLocalGenerator* lg, cmTest* testInfo,
   }
   result[kPROPERTIES_KEY] = properties;
 
-  if (seenTraceIds != nullptr) {
-    // Need backtrace to figure out where this test was originally added
-    result[kBACKTRACE_KEY] =
-      DumpBacktrace(testInfo->GetBacktrace(), seenTraceIds);
-  }
-
   return result;
 }
 
 static void DumpMakefileTests(cmLocalGenerator* lg, const std::string& config,
-                              Json::Value* result,
-                              std::unordered_set<size_t>* seenTraceIds)
+                              Json::Value* result)
 {
   auto mf = lg->GetMakefile();
   std::vector<cmTest*> tests;
   mf->GetTests(config, tests);
   for (auto test : tests) {
-    Json::Value tmp = DumpCTestInfo(lg, test, config, seenTraceIds);
+    Json::Value tmp = DumpCTestInfo(lg, test, config);
     if (!tmp.isNull()) {
       result->append(tmp);
     }
   }
 }
 
-static Json::Value DumpCTestProjectList(
-  const cmake* cm, std::string const& config,
-  std::unordered_set<size_t>* seenTraceIds)
+static Json::Value DumpCTestProjectList(const cmake* cm,
+                                        std::string const& config)
 {
   Json::Value result = Json::arrayValue;
 
@@ -508,7 +408,7 @@ static Json::Value DumpCTestProjectList(
     for (const auto& lg : projectIt.second) {
       // Make sure they're generated.
       lg->GenerateTestFiles();
-      DumpMakefileTests(lg, config, &tests, seenTraceIds);
+      DumpMakefileTests(lg, config, &tests);
     }
 
     pObj[kCTEST_INFO] = tests;
@@ -519,55 +419,23 @@ static Json::Value DumpCTestProjectList(
   return result;
 }
 
-static Json::Value DumpCTestConfiguration(
-  const cmake* cm, const std::string& config,
-  std::unordered_set<size_t>* seenTraceIds)
+static Json::Value DumpCTestConfiguration(const cmake* cm,
+                                          const std::string& config)
 {
   Json::Value result = Json::objectValue;
   result[kNAME_KEY] = config;
 
-  result[kPROJECTS_KEY] = DumpCTestProjectList(cm, config, seenTraceIds);
+  result[kPROJECTS_KEY] = DumpCTestProjectList(cm, config);
 
   return result;
 }
 
-static Json::Value DumpCTestConfigurationsList(
-  const cmake* cm, std::unordered_set<size_t>* seenTraceIds)
+static Json::Value DumpCTestConfigurationsList(const cmake* cm)
 {
   Json::Value result = Json::arrayValue;
 
   for (const std::string& c : getConfigurations(cm)) {
-    result.append(DumpCTestConfiguration(cm, c, seenTraceIds));
-  }
-
-  return result;
-}
-
-static Json::Value DumpFrame(size_t id, const cmListFileContext& frame)
-{
-  Json::Value entry = Json::objectValue;
-  entry[kID_KEY] = id;
-  entry[kPATH_KEY] = frame.FilePath();
-
-  if (frame.Line) {
-    entry[kLINE_NUMBER_KEY] = static_cast<int>(frame.Line);
-  }
-
-  if (frame.HasName()) {
-    entry[kNAME_KEY] = frame.Name();
-  }
-
-  return entry;
-}
-
-static Json::Value DumpReferencedTraces(
-  std::unordered_set<size_t>& seenTraceIds)
-{
-  Json::Value result = Json::arrayValue;
-  auto frames = cmListFileBacktrace::ConvertFrameIds(seenTraceIds);
-
-  for (const auto& pair : frames) {
-    result.append(DumpFrame(pair.first, pair.second));
+    result.append(DumpCTestConfiguration(cm, c));
   }
 
   return result;
@@ -576,35 +444,17 @@ static Json::Value DumpReferencedTraces(
 Json::Value cmDumpCTestInfo(const cmake* cm)
 {
   Json::Value result = Json::objectValue;
-  result[kCONFIGURATIONS_KEY] = DumpCTestConfigurationsList(cm, nullptr);
-  return result;
-}
-
-Json::Value cmDumpCTestInfo2(const cmake* cm, bool includeTraces)
-{
-  Json::Value result = Json::objectValue;
-  std::unordered_set<size_t> seenTraceIds;
-  result[kCONFIGURATIONS_KEY] =
-    DumpCTestConfigurationsList(cm, includeTraces ? &seenTraceIds : nullptr);
-
-  if (includeTraces) {
-    result[KREFERENCED_TRACES_KEY] = DumpReferencedTraces(seenTraceIds);
-  }
-
+  result[kCONFIGURATIONS_KEY] = DumpCTestConfigurationsList(cm);
   return result;
 }
 
 static Json::Value DumpTarget(cmGeneratorTarget* target,
-                              const std::string& config,
-                              std::unordered_set<size_t>* seenTraceIds,
-                              bool includeSourceGroups)
+                              const std::string& config)
 {
-  cmGlobalGenerator* g = target->GetGlobalGenerator();
   cmLocalGenerator* lg = target->GetLocalGenerator();
-  const cmState* state = lg->GetState();
 
   const cmStateEnums::TargetType type = target->GetType();
-  const std::string typeName = state->GetTargetTypeName(type);
+  const std::string typeName = cmState::GetTargetTypeName(type);
 
   Json::Value ttl = Json::arrayValue;
   ttl.append("EXECUTABLE");
@@ -660,58 +510,7 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
 
     result[kINSTALL_PATHS] = installPaths;
   }
-  
-  if (seenTraceIds != nullptr) {
-    Json::Value crossRefs = Json::objectValue;
-    crossRefs[kBACKTRACE_KEY] =
-      DumpBacktrace(target->Target->GetBacktrace(), seenTraceIds);
 
-    Json::Value statements = Json::arrayValue;
-    DumpBacktraceRange(statements, "target_compile_definitions",
-                       target->Target->GetCompileDefinitionsBacktraces(),
-                       seenTraceIds);
-    DumpBacktraceRange(statements, "target_include_directories",
-                       target->Target->GetIncludeDirectoriesBacktraces(),
-                       seenTraceIds);
-    DumpBacktraceRange(statements, "target_compile_options",
-                       target->Target->GetCompileOptionsBacktraces(),
-                       seenTraceIds);
-    DumpBacktraceRange(statements, "target_link_libraries",
-                       target->Target->GetLinkImplementationBacktraces(),
-                       seenTraceIds);
-    crossRefs[kRELATED_STATEMENTS_KEY] = std::move(statements);
-    result[kTARGET_CROSS_REFERENCES_KEY] = std::move(crossRefs);
-  }
-  
-  if (seenTraceIds != nullptr) {
-    cmGlobalGenerator::TargetDependSet const& tgtdeps =
-      g->GetTargetDirectDepends(target);
-
-    Json::Value dependencies = Json::arrayValue;
-    for (auto const& depend : tgtdeps) {
-      Json::Value obj = Json::objectValue;
-      obj[kNAME_KEY] = depend->GetFullName(config);
-      obj[kBACKTRACE_KEY] = DumpBacktrace(depend.Backtrace(), seenTraceIds);
-      dependencies.append(obj);
-    }
-    result[KTARGET_DEPENDENCIES_KEY] = dependencies;
-  }
-  
-  // Build up the list of properties that may have been specified
-  cmGeneratorExpression ge;
-  Json::Value properties = Json::arrayValue;
-  for (auto& prop : target->Target->GetProperties()) {
-    Json::Value entry = Json::objectValue;
-    entry[kKEY_KEY] = prop.first;
-
-    // Remove config variables from the value too.
-    auto cge_value = ge.Parse(prop.second.GetValue());
-    const char* processed_value = cge_value->Evaluate(lg, config).c_str();
-    entry[kVALUE_KEY] = processed_value;
-    properties.append(entry);
-  }
-  result[kPROPERTIES_KEY] = properties;
-  
   if (target->HaveWellDefinedOutputFiles()) {
     Json::Value artifacts = Json::arrayValue;
     artifacts.append(
@@ -779,15 +578,15 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
     lg->GetTargetDefines(target, config, lang, defines);
     ld.SetDefines(defines);
     std::vector<std::string> includePathList;
-    lg->GetIncludeDirectories(includePathList, target, lang, config, true);
+    lg->GetIncludeDirectories(includePathList, target, lang, config);
     for (std::string const& i : includePathList) {
-      ld.IncludePathList.push_back(
-        std::make_pair(i, target->IsSystemIncludeDirectory(i, config, lang)));
+      ld.IncludePathList.emplace_back(
+        i, target->IsSystemIncludeDirectory(i, config, lang));
     }
   }
 
   Json::Value sourceGroupsValue =
-    DumpSourceFilesList(target, config, languageDataMap, includeSourceGroups);
+    DumpSourceFilesList(target, config, languageDataMap);
   if (!sourceGroupsValue.empty()) {
     result[kFILE_GROUPS_KEY] = sourceGroupsValue;
   }
@@ -796,8 +595,7 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
 }
 
 static Json::Value DumpTargetsList(
-  const std::vector<cmLocalGenerator*>& generators, const std::string& config,
-  std::unordered_set<size_t>* seenTraceIds, bool includeSourceGroups)
+  const std::vector<cmLocalGenerator*>& generators, const std::string& config)
 {
   Json::Value result = Json::arrayValue;
 
@@ -809,7 +607,7 @@ static Json::Value DumpTargetsList(
   std::sort(targetList.begin(), targetList.end());
 
   for (cmGeneratorTarget* target : targetList) {
-    Json::Value tmp = DumpTarget(target, config, seenTraceIds, includeSourceGroups);
+    Json::Value tmp = DumpTarget(target, config);
     if (!tmp.isNull()) {
       result.append(tmp);
     }
@@ -818,9 +616,7 @@ static Json::Value DumpTargetsList(
   return result;
 }
 
-static Json::Value DumpProjectList(const cmake* cm, std::string const& config,
-                                   std::unordered_set<size_t>* seenTraceIds,
-                                   bool includeSourceGroups)
+static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
 {
   Json::Value result = Json::arrayValue;
 
@@ -840,14 +636,19 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config,
     pObj[kMINIMUM_CMAKE_VERSION] = minVersion ? minVersion : "";
     pObj[kSOURCE_DIRECTORY_KEY] = mf->GetCurrentSourceDirectory();
     pObj[kBUILD_DIRECTORY_KEY] = mf->GetCurrentBinaryDirectory();
-    pObj[kTARGETS_KEY] = DumpTargetsList(projectIt.second, config, seenTraceIds, includeSourceGroups);
+    pObj[kTARGETS_KEY] = DumpTargetsList(projectIt.second, config);
 
     // For a project-level install rule it might be defined in any of its
     // associated generators.
     bool hasInstallRule = false;
     for (const auto generator : projectIt.second) {
-      hasInstallRule =
-        generator->GetMakefile()->GetInstallGenerators().empty() == false;
+      for (const auto installGen :
+           generator->GetMakefile()->GetInstallGenerators()) {
+        if (!dynamic_cast<cmInstallSubdirectoryGenerator*>(installGen)) {
+          hasInstallRule = true;
+          break;
+        }
+      }
 
       if (hasInstallRule) {
         break;
@@ -863,27 +664,22 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config,
 }
 
 static Json::Value DumpConfiguration(const cmake* cm,
-                                     const std::string& config,
-                                     std::unordered_set<size_t>* seenTraceIds,
-                                     bool includeSourceGroups)
+                                     const std::string& config)
 {
   Json::Value result = Json::objectValue;
   result[kNAME_KEY] = config;
 
-  result[kPROJECTS_KEY] =
-    DumpProjectList(cm, config, seenTraceIds, includeSourceGroups);
+  result[kPROJECTS_KEY] = DumpProjectList(cm, config);
 
   return result;
 }
 
-static Json::Value DumpConfigurationsList(
-  const cmake* cm, std::unordered_set<size_t>* seenTraceIds,
-  bool includeSourceGroups)
+static Json::Value DumpConfigurationsList(const cmake* cm)
 {
   Json::Value result = Json::arrayValue;
 
   for (std::string const& c : getConfigurations(cm)) {
-    result.append(DumpConfiguration(cm, c, seenTraceIds, includeSourceGroups));
+    result.append(DumpConfiguration(cm, c));
   }
 
   return result;
@@ -892,20 +688,6 @@ static Json::Value DumpConfigurationsList(
 Json::Value cmDumpCodeModel(const cmake* cm)
 {
   Json::Value result = Json::objectValue;
-  result[kCONFIGURATIONS_KEY] = DumpConfigurationsList(cm, nullptr, false);
-  return result;
-}
-
-Json::Value cmDumpCodeModel2(const cmake* cm, bool includeTraces,
-                             bool includeSourceGroups)
-{
-  std::unordered_set<size_t> seenTraceIds;
-  Json::Value result = Json::objectValue;
-  result[kCONFIGURATIONS_KEY] = DumpConfigurationsList(
-    cm, includeTraces ? &seenTraceIds : nullptr, includeSourceGroups);
-
-  if (includeTraces) {
-    result[KREFERENCED_TRACES_KEY] = DumpReferencedTraces(seenTraceIds);
-  }
+  result[kCONFIGURATIONS_KEY] = DumpConfigurationsList(cm);
   return result;
 }

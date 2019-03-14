@@ -1,4 +1,4 @@
 GHS-MULTI
 ---------
 
-True when using Green Hills MULTI
+``True`` when using :generator:`Green Hills MULTI` generator.

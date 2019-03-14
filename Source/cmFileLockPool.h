@@ -13,11 +13,12 @@ class cmFileLockResult;
 
 class cmFileLockPool
 {
-  CM_DISABLE_COPY(cmFileLockPool)
-
 public:
   cmFileLockPool();
   ~cmFileLockPool();
+
+  cmFileLockPool(cmFileLockPool const&) = delete;
+  cmFileLockPool& operator=(cmFileLockPool const&) = delete;
 
   //@{
   /**
@@ -58,11 +59,12 @@ private:
 
   class ScopePool
   {
-    CM_DISABLE_COPY(ScopePool)
-
   public:
     ScopePool();
     ~ScopePool();
+
+    ScopePool(ScopePool const&) = delete;
+    ScopePool& operator=(ScopePool const&) = delete;
 
     cmFileLockResult Lock(const std::string& filename,
                           unsigned long timeoutSec);

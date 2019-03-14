@@ -30,7 +30,7 @@ public:
   std::string const& GetErrorMessage() const;
 
   /** Boolean conversion.  True if the Mach-O file is valid.  */
-  operator bool() const { return this->Valid(); }
+  explicit operator bool() const { return this->Valid(); }
 
   /** Get Install name from binary **/
   bool GetInstallName(std::string& install_name);

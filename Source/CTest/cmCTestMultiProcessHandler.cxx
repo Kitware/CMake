@@ -6,6 +6,8 @@
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestTestHandler.h"
+#include "cmDuration.h"
+#include "cmListFileCache.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
@@ -31,6 +33,10 @@
 #include <unordered_map>
 #include <utility>
 
+namespace cmsys {
+class RegularExpression;
+}
+
 class TestComparator
 {
 public:
@@ -38,7 +44,6 @@ public:
     : Handler(handler)
   {
   }
-  ~TestComparator() {}
 
   // Sorts tests in descending order of cost
   bool operator()(int index1, int index2) const
@@ -64,9 +69,7 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
   this->SerialTestRunning = false;
 }
 
-cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler()
-{
-}
+cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler() = default;
 
 // Set the tests
 void cmCTestMultiProcessHandler::SetTests(TestMap& tests,
@@ -532,7 +535,7 @@ void cmCTestMultiProcessHandler::UpdateCostData()
     fout << f << "\n";
   }
   fout.close();
-  cmSystemTools::RenameFile(tmpout.c_str(), fname.c_str());
+  cmSystemTools::RenameFile(tmpout, fname);
 }
 
 void cmCTestMultiProcessHandler::ReadCostData()
@@ -801,8 +804,9 @@ static Json::Value DumpCTestProperties(
     properties.append(DumpCTestProperty(
       "ATTACHED_FILES", DumpToJsonArray(testProperties.AttachedFiles)));
   }
-  if (testProperties.Cost != 0.0) {
-    properties.append(DumpCTestProperty("COST", testProperties.Cost));
+  if (testProperties.Cost != 0.0f) {
+    properties.append(
+      DumpCTestProperty("COST", static_cast<double>(testProperties.Cost)));
   }
   if (!testProperties.Depends.empty()) {
     properties.append(
@@ -933,19 +937,19 @@ bool BacktraceData::Add(cmListFileBacktrace const& bt, Json::ArrayIndex& index)
     return true;
   }
   Json::Value entry = Json::objectValue;
-  entry["file"] = this->AddFile(top->FilePath());
+  entry["file"] = this->AddFile(top->FilePath);
   if (top->Line) {
     entry["line"] = static_cast<int>(top->Line);
   }
-  if (top->HasName()) {
-    entry["command"] = this->AddCommand(top->Name());
+  if (!top->Name.empty()) {
+    entry["command"] = this->AddCommand(top->Name);
   }
   Json::ArrayIndex parent;
   if (this->Add(bt.Pop(), parent)) {
     entry["parent"] = parent;
   }
   index = this->NodeMap[top] = this->Nodes.size();
-  this->Nodes.append(std::move(entry));
+  this->Nodes.append(std::move(entry)); // NOLINT(*)
   return true;
 }
 
@@ -1031,6 +1035,11 @@ void cmCTestMultiProcessHandler::PrintOutputAsJson()
     testRun.SetIndex(p.Index);
     testRun.SetTestProperties(&p);
     testRun.ComputeArguments();
+
+    // Skip tests not available in this configuration.
+    if (p.Args.size() >= 2 && p.Args[1] == "NOT_AVAILABLE") {
+      continue;
+    }
 
     Json::Value testInfo = DumpCTestInfo(testRun, p, backtraceGraph);
     tests.append(testInfo);

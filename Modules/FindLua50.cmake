@@ -1,36 +1,37 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindLua50
-# ---------
-#
-#
-#
-# Locate Lua library This module defines
-#
-# ::
-#
-#   LUA50_FOUND, if false, do not try to link to Lua
-#   LUA_LIBRARIES, both lua and lualib
-#   LUA_INCLUDE_DIR, where to find lua.h and lualib.h (and probably lauxlib.h)
-#
-#
-#
-# Note that the expected include convention is
-#
-# ::
-#
-#   #include "lua.h"
-#
-# and not
-#
-# ::
-#
-#   #include <lua/lua.h>
-#
-# This is because, the lua location is not standardized and may exist in
-# locations other than lua/
+#[=======================================================================[.rst:
+FindLua50
+---------
+
+
+
+Locate Lua library This module defines
+
+::
+
+  LUA50_FOUND, if false, do not try to link to Lua
+  LUA_LIBRARIES, both lua and lualib
+  LUA_INCLUDE_DIR, where to find lua.h and lualib.h (and probably lauxlib.h)
+
+
+
+Note that the expected include convention is
+
+::
+
+  #include "lua.h"
+
+and not
+
+::
+
+  #include <lua/lua.h>
+
+This is because, the lua location is not standardized and may exist in
+locations other than lua/
+#]=======================================================================]
 
 find_path(LUA_INCLUDE_DIR lua.h
   HINTS

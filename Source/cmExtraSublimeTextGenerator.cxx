@@ -14,6 +14,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
@@ -55,7 +56,6 @@ cmExtraSublimeTextGenerator::GetFactory()
 }
 
 cmExtraSublimeTextGenerator::cmExtraSublimeTextGenerator()
-  : cmExternalMakefileProjectGenerator()
 {
   this->ExcludeBuildFolder = false;
 }
@@ -155,7 +155,7 @@ void cmExtraSublimeTextGenerator::CreateNewProjectFile(
         e << "Could not parse Env Vars specified in "
              "\"CMAKE_SUBLIME_TEXT_2_ENV_SETTINGS\""
           << ", corrupted string " << t;
-        mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+        mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       }
     }
     fout << "\n\t\t}";
@@ -384,13 +384,8 @@ std::string cmExtraSublimeTextGenerator::ComputeDefines(
   cmGeneratorExpressionInterpreter genexInterpreter(lg, config, target,
                                                     language);
 
-  // Add the export symbol definition for shared library objects.
-  if (const char* exportMacro = target->GetExportMacro()) {
-    lg->AppendDefines(defines, exportMacro);
-  }
-
   // Add preprocessor definitions for this target and configuration.
-  lg->AddCompileDefinitions(defines, target, config, language);
+  lg->GetTargetDefines(target, config, language, defines);
   const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
   if (const char* compile_defs = source->GetProperty(COMPILE_DEFINITIONS)) {
     lg->AppendDefines(

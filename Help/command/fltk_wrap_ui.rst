@@ -3,7 +3,7 @@ fltk_wrap_ui
 
 Create FLTK user interfaces Wrappers.
 
-::
+.. code-block:: cmake
 
   fltk_wrap_ui(resultingLibraryName source1
                source2 ... sourceN )

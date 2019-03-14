@@ -27,6 +27,8 @@ Modify cmFortranLexer.cxx:
 
 /* IWYU pragma: no_forward_declare yyguts_t */
 
+#ifndef __clang_analyzer__ /* Suppress clang scan-build warnings */
+
 #undef YY_NO_UNPUT
 
 #define cmFortranLexer_cxx
@@ -35,7 +37,7 @@ Modify cmFortranLexer.cxx:
 /* Replace the lexer input function.  */
 #undef YY_INPUT
 #define YY_INPUT(buf, result, max_size) \
-  { result = cmFortranParser_Input(yyextra, buf, max_size); }
+  do { result = cmFortranParser_Input(yyextra, buf, max_size); } while (0)
 
 /* Include the set of tokens from the parser.  */
 #include "cmFortranParserTokens.h"
@@ -146,7 +148,7 @@ $[ \t]*endif    { return F90PPR_ENDIF; }
 [Ii][Nn][Cc][Ll][Uu][Dd][Ee] { return INCLUDE; }
 [Ii][Nn][Tt][Ee][Rr][Ff][Aa][Cc][Ee] { return INTERFACE; }
 [Mm][Oo][Dd][Uu][Ll][Ee] { return MODULE; }
-[Ss][Uu][bb][Mm][Oo][Dd][Uu][Ll][Ee] { return SUBMODULE; }
+[Ss][Uu][Bb][Mm][Oo][Dd][Uu][Ll][Ee] { return SUBMODULE; }
 [Uu][Ss][Ee] { return USE; }
 
 [a-zA-Z_][a-zA-Z_0-9]* {
@@ -183,3 +185,5 @@ YY_BUFFER_STATE cmFortranLexer_GetCurrentBuffer(yyscan_t yyscanner)
   struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
   return YY_CURRENT_BUFFER;
 }
+
+#endif /* __clang_analyzer__ */

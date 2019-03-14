@@ -2,15 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionContext.h"
 
+#include <utility>
+
 cmGeneratorExpressionContext::cmGeneratorExpressionContext(
-  cmLocalGenerator* lg, std::string const& config, bool quiet,
+  cmLocalGenerator* lg, std::string config, bool quiet,
   cmGeneratorTarget const* headTarget, const cmGeneratorTarget* currentTarget,
-  bool evaluateForBuildsystem, cmListFileBacktrace const& backtrace,
-  std::string const& language)
-  : Backtrace(backtrace)
+  bool evaluateForBuildsystem, cmListFileBacktrace backtrace,
+  std::string language)
+  : Backtrace(std::move(backtrace))
   , LG(lg)
-  , Config(config)
-  , Language(language)
+  , Config(std::move(config))
+  , Language(std::move(language))
   , HeadTarget(headTarget)
   , CurrentTarget(currentTarget)
   , Quiet(quiet)

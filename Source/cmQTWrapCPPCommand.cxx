@@ -50,7 +50,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
       if (cmSystemTools::FileIsFullPath(*j)) {
         hname = *j;
       } else {
-        if (curr && curr->GetPropertyAsBool("GENERATED")) {
+        if (curr && curr->GetIsGenerated()) {
           hname = this->Makefile->GetCurrentBinaryDirectory();
         } else {
           hname = this->Makefile->GetCurrentSourceDirectory();

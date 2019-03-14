@@ -49,21 +49,21 @@ extern "C" {
 # define UV_EXTERN /* nothing */
 #endif
 
-#include "uv-errno.h"
-#include "uv-version.h"
+#include "uv/errno.h"
+#include "uv/version.h"
 #include <stddef.h>
 #include <stdio.h>
 
 #if defined(_MSC_VER) && _MSC_VER < 1600
-# include "stdint-msvc2008.h"
+# include "uv/stdint-msvc2008.h"
 #else
 # include <stdint.h>
 #endif
 
 #if defined(_WIN32)
-# include "uv-win.h"
+# include "uv/win.h"
 #else
-# include "uv-unix.h"
+# include "uv/unix.h"
 #endif
 
 /* Expand this list if necessary. */
@@ -146,6 +146,7 @@ extern "C" {
   XX(EHOSTDOWN, "host is down")                                               \
   XX(EREMOTEIO, "remote I/O error")                                           \
   XX(ENOTTY, "inappropriate ioctl for device")                                \
+  XX(EFTYPE, "inappropriate file type or format")                             \
 
 #define UV_HANDLE_TYPE_MAP(XX)                                                \
   XX(ASYNC, async)                                                            \
@@ -237,6 +238,7 @@ typedef struct uv_cpu_info_s uv_cpu_info_t;
 typedef struct uv_interface_address_s uv_interface_address_t;
 typedef struct uv_dirent_s uv_dirent_t;
 typedef struct uv_passwd_s uv_passwd_t;
+typedef struct uv_utsname_s uv_utsname_t;
 
 typedef enum {
   UV_LOOP_BLOCK_SIGNAL
@@ -373,7 +375,10 @@ typedef enum {
 UV_EXTERN int uv_translate_sys_error(int sys_errno);
 
 UV_EXTERN const char* uv_strerror(int err);
+UV_EXTERN char* uv_strerror_r(int err, char* buf, size_t buflen);
+
 UV_EXTERN const char* uv_err_name(int err);
+UV_EXTERN char* uv_err_name_r(int err, char* buf, size_t buflen);
 
 
 #define UV_REQ_FIELDS                                                         \
@@ -507,7 +512,7 @@ UV_EXTERN int uv_try_write(uv_stream_t* handle,
 struct uv_write_s {
   UV_REQ_FIELDS
   uv_write_cb cb;
-  uv_stream_t* send_handle;
+  uv_stream_t* send_handle; /* TODO: make private and unix-only in v2.x. */
   uv_stream_t* handle;
   UV_WRITE_PRIVATE_FIELDS
 };
@@ -869,7 +874,13 @@ typedef enum {
    * flags may be specified to create a duplex data stream.
    */
   UV_READABLE_PIPE  = 0x10,
-  UV_WRITABLE_PIPE  = 0x20
+  UV_WRITABLE_PIPE  = 0x20,
+
+  /*
+   * Open the child pipe handle in overlapped mode on Windows.
+   * On Unix it is silently ignored.
+   */
+  UV_OVERLAPPED_PIPE = 0x40
 } uv_stdio_flags;
 
 typedef struct uv_stdio_container_s {
@@ -970,11 +981,22 @@ enum uv_process_flags {
    */
   UV_PROCESS_DETACHED = (1 << 3),
   /*
+   * Hide the subprocess window that would normally be created. This option is
+   * only meaningful on Windows systems. On Unix it is silently ignored.
+   */
+  UV_PROCESS_WINDOWS_HIDE = (1 << 4),
+  /*
    * Hide the subprocess console window that would normally be created. This
    * option is only meaningful on Windows systems. On Unix it is silently
    * ignored.
    */
-  UV_PROCESS_WINDOWS_HIDE = (1 << 4)
+  UV_PROCESS_WINDOWS_HIDE_CONSOLE = (1 << 5),
+  /*
+   * Hide the subprocess GUI window that would normally be created. This
+   * option is only meaningful on Windows systems. On Unix it is silently
+   * ignored.
+   */
+  UV_PROCESS_WINDOWS_HIDE_GUI = (1 << 6)
 };
 
 /*
@@ -1014,16 +1036,18 @@ UV_EXTERN int uv_queue_work(uv_loop_t* loop,
 UV_EXTERN int uv_cancel(uv_req_t* req);
 
 
+struct uv_cpu_times_s {
+  uint64_t user;
+  uint64_t nice;
+  uint64_t sys;
+  uint64_t idle;
+  uint64_t irq;
+};
+
 struct uv_cpu_info_s {
   char* model;
   int speed;
-  struct uv_cpu_times_s {
-    uint64_t user;
-    uint64_t nice;
-    uint64_t sys;
-    uint64_t idle;
-    uint64_t irq;
-  } cpu_times;
+  struct uv_cpu_times_s cpu_times;
 };
 
 struct uv_interface_address_s {
@@ -1048,6 +1072,16 @@ struct uv_passwd_s {
   char* homedir;
 };
 
+struct uv_utsname_s {
+  char sysname[256];
+  char release[256];
+  char version[256];
+  char machine[256];
+  /* This struct does not contain the nodename and domainname fields present in
+     the utsname type. domainname is a GNU extension. Both fields are referred
+     to as meaningless in the docs. */
+};
+
 typedef enum {
   UV_DIRENT_UNKNOWN,
   UV_DIRENT_FILE,
@@ -1070,6 +1104,7 @@ UV_EXTERN int uv_set_process_title(const char* title);
 UV_EXTERN int uv_resident_set_memory(size_t* rss);
 UV_EXTERN int uv_uptime(double* uptime);
 UV_EXTERN uv_os_fd_t uv_get_osfhandle(int fd);
+UV_EXTERN int uv_open_osfhandle(uv_os_fd_t os_fd);
 
 typedef struct {
   long tv_sec;
@@ -1104,6 +1139,16 @@ UV_EXTERN void uv_os_free_passwd(uv_passwd_t* pwd);
 UV_EXTERN uv_pid_t uv_os_getpid(void);
 UV_EXTERN uv_pid_t uv_os_getppid(void);
 
+#define UV_PRIORITY_LOW 19
+#define UV_PRIORITY_BELOW_NORMAL 10
+#define UV_PRIORITY_NORMAL 0
+#define UV_PRIORITY_ABOVE_NORMAL -7
+#define UV_PRIORITY_HIGH -14
+#define UV_PRIORITY_HIGHEST -20
+
+UV_EXTERN int uv_os_getpriority(uv_pid_t pid, int* priority);
+UV_EXTERN int uv_os_setpriority(uv_pid_t pid, int priority);
+
 UV_EXTERN int uv_cpu_info(uv_cpu_info_t** cpu_infos, int* count);
 UV_EXTERN void uv_free_cpu_info(uv_cpu_info_t* cpu_infos, int count);
 UV_EXTERN int uv_cpumask_size(void);
@@ -1118,6 +1163,8 @@ UV_EXTERN int uv_os_setenv(const char* name, const char* value);
 UV_EXTERN int uv_os_unsetenv(const char* name);
 
 UV_EXTERN int uv_os_gethostname(char* buffer, size_t* size);
+
+UV_EXTERN int uv_os_uname(uv_utsname_t* buffer);
 
 
 typedef enum {
@@ -1151,7 +1198,8 @@ typedef enum {
   UV_FS_CHOWN,
   UV_FS_FCHOWN,
   UV_FS_REALPATH,
-  UV_FS_COPYFILE
+  UV_FS_COPYFILE,
+  UV_FS_LCHOWN
 } uv_fs_type;
 
 /* uv_fs_t is a subclass of uv_req_t. */
@@ -1351,6 +1399,12 @@ UV_EXTERN int uv_fs_chown(uv_loop_t* loop,
 UV_EXTERN int uv_fs_fchown(uv_loop_t* loop,
                            uv_fs_t* req,
                            uv_file file,
+                           uv_uid_t uid,
+                           uv_gid_t gid,
+                           uv_fs_cb cb);
+UV_EXTERN int uv_fs_lchown(uv_loop_t* loop,
+                           uv_fs_t* req,
+                           const char* path,
                            uv_uid_t uid,
                            uv_gid_t gid,
                            uv_fs_cb cb);

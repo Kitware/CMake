@@ -2,11 +2,11 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
-#include "cmake.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -128,7 +128,7 @@ static void DiagnoseAncientPolicies(
     << "Please either update your CMakeLists.txt files to conform to "
     << "the new behavior or use an older version of CMake that still "
     << "supports the old behavior.";
-  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
 }
 
 static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
@@ -146,7 +146,7 @@ static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
     std::ostringstream e;
     e << defaultVar << " has value \"" << defaultValue
       << "\" but must be \"OLD\", \"NEW\", or \"\" (empty).";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
 
@@ -167,14 +167,14 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
     std::ostringstream e;
     e << "Invalid policy version value \"" << version_min << "\".  "
       << "A numeric major.minor[.patch[.tweak]] must be given.";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
 
   // it is an error if the policy version is less than 2.4
   if (minMajor < 2 || (minMajor == 2 && minMinor < 4)) {
     mf->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "Compatibility with CMake < 2.4 is not supported by CMake >= 3.0.  "
       "For compatibility with older versions please use any CMake 2.8.x "
       "release or lower.");
@@ -199,7 +199,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
       << "This is not allowed because the greater version may have new "
       << "policies not known to this CMake.  "
       << "You may need a newer CMake version to build this project.";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
 
@@ -218,7 +218,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
       std::ostringstream e;
       e << "Invalid policy max version value \"" << version_max << "\".  "
         << "A numeric major.minor[.patch[.tweak]] must be given.";
-      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
 
@@ -232,7 +232,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
       e << "Policy VERSION range \"" << version_min << "..." << version_max
         << "\""
         << " specifies a larger minimum than maximum.";
-      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
 

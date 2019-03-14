@@ -5,16 +5,17 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <utility>
 
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmXMLSafe.h"
 
-cmXCodeScheme::cmXCodeScheme(cmXCodeObject* xcObj, const TestObjects& tests,
+cmXCodeScheme::cmXCodeScheme(cmXCodeObject* xcObj, TestObjects tests,
                              const std::vector<std::string>& configList,
                              unsigned int xcVersion)
   : Target(xcObj)
-  , Tests(tests)
+  , Tests(std::move(tests))
   , TargetName(xcObj->GetTarget()->GetName())
   , ConfigList(configList)
   , XcodeVersion(xcVersion)
@@ -35,7 +36,7 @@ void cmXCodeScheme::WriteXCodeSharedScheme(const std::string& xcProjDir,
   xcodeSchemeFile += this->TargetName;
   xcodeSchemeFile += ".xcscheme";
 
-  cmGeneratedFileStream fout(xcodeSchemeFile.c_str());
+  cmGeneratedFileStream fout(xcodeSchemeFile);
   fout.SetCopyIfDifferent(true);
   if (!fout) {
     return;
@@ -216,7 +217,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
     if (!arguments.empty()) {
       xout.StartElement("CommandLineArguments");
 
-      for (auto argument : arguments) {
+      for (auto const& argument : arguments) {
         xout.StartElement("CommandLineArgument");
         xout.BreakAttributes();
 

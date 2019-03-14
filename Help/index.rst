@@ -30,6 +30,7 @@ Reference Manuals
    /manual/cmake-compile-features.7
    /manual/cmake-developer.7
    /manual/cmake-env-variables.7
+   /manual/cmake-file-api.7
    /manual/cmake-generator-expressions.7
    /manual/cmake-generators.7
    /manual/cmake-language.7

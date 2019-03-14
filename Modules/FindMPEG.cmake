@@ -1,26 +1,27 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindMPEG
-# --------
-#
-# Find the native MPEG includes and library
-#
-# This module defines
-#
-# ::
-#
-#   MPEG_INCLUDE_DIR, where to find MPEG.h, etc.
-#   MPEG_LIBRARIES, the libraries required to use MPEG.
-#   MPEG_FOUND, If false, do not try to use MPEG.
-#
-# also defined, but not for general use are
-#
-# ::
-#
-#   MPEG_mpeg2_LIBRARY, where to find the MPEG library.
-#   MPEG_vo_LIBRARY, where to find the vo library.
+#[=======================================================================[.rst:
+FindMPEG
+--------
+
+Find the native MPEG includes and library
+
+This module defines
+
+::
+
+  MPEG_INCLUDE_DIR, where to find MPEG.h, etc.
+  MPEG_LIBRARIES, the libraries required to use MPEG.
+  MPEG_FOUND, If false, do not try to use MPEG.
+
+also defined, but not for general use are
+
+::
+
+  MPEG_mpeg2_LIBRARY, where to find the MPEG library.
+  MPEG_vo_LIBRARY, where to find the vo library.
+#]=======================================================================]
 
 find_path(MPEG_INCLUDE_DIR
   NAMES mpeg2.h mpeg2dec/mpeg2.h mpeg2dec/include/video_out.h)

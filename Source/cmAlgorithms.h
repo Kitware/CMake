@@ -61,8 +61,8 @@ struct cmStrCmp
     : m_test(test)
   {
   }
-  cmStrCmp(const std::string& test)
-    : m_test(test)
+  cmStrCmp(std::string test)
+    : m_test(std::move(test))
   {
   }
 
@@ -336,6 +336,14 @@ std::reverse_iterator<Iter> cmMakeReverseIterator(Iter it)
   return std::reverse_iterator<Iter>(it);
 }
 
+inline bool cmHasPrefix(std::string const& str, std::string const& prefix)
+{
+  if (str.size() < prefix.size()) {
+    return false;
+  }
+  return str.compare(0, prefix.size(), prefix) == 0;
+}
+
 inline bool cmHasSuffix(const std::string& str, const std::string& suffix)
 {
   if (str.size() < suffix.size()) {
@@ -395,6 +403,12 @@ constexpr
 }
 
 #endif
+
+template <typename T>
+int isize(const T& t)
+{
+  return static_cast<int>(cm::size(t));
+}
 
 #if __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L
 

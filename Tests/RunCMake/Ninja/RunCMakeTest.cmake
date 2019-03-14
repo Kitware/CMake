@@ -30,6 +30,15 @@ function(run_NoWorkToDo)
 endfunction()
 run_NoWorkToDo()
 
+function(run_VerboseBuild)
+  run_cmake(VerboseBuild)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/VerboseBuild-build)
+  run_cmake_command(VerboseBuild-build ${CMAKE_COMMAND} --build . -v --clean-first)
+  run_cmake_command(VerboseBuild-nowork ${CMAKE_COMMAND} --build . --verbose)
+endfunction()
+run_VerboseBuild()
+
 function(run_CMP0058 case)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CMP0058-${case}-build)

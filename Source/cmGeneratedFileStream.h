@@ -45,16 +45,16 @@ protected:
   std::string TempName;
 
   // Whether to do a copy-if-different.
-  bool CopyIfDifferent;
+  bool CopyIfDifferent = false;
 
   // Whether the real file stream was valid when it was closed.
-  bool Okay;
+  bool Okay = false;
 
   // Whether the destination file is compressed
-  bool Compress;
+  bool Compress = false;
 
   // Whether the destination file is compressed
-  bool CompressExtraExtension;
+  bool CompressExtraExtension = true;
 };
 
 /** \class cmGeneratedFileStream
@@ -97,6 +97,8 @@ public:
    */
   ~cmGeneratedFileStream() override;
 
+  cmGeneratedFileStream(cmGeneratedFileStream const&) = delete;
+
   /**
    * Open an output file by name.  This should be used only with a
    * non-open stream.  It automatically generates a name for the
@@ -134,9 +136,6 @@ public:
    * the output file to be changed during the use of cmGeneratedFileStream.
    */
   void SetName(const std::string& fname);
-
-private:
-  cmGeneratedFileStream(cmGeneratedFileStream const&); // not implemented
 };
 
 #endif

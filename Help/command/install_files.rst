@@ -1,7 +1,9 @@
 install_files
 -------------
 
-Deprecated.  Use the :command:`install(FILES)` command instead.
+.. deprecated:: 3.0
+
+  Use the :command:`install(FILES)` command instead.
 
 This command has been superceded by the :command:`install` command.  It is
 provided for compatibility with older CMake code.  The ``FILES`` form is

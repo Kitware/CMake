@@ -71,6 +71,7 @@ protected:
     ArgumentDoingCDashUpload,
     ArgumentDoingCDashUploadType,
     ArgumentDoingHttpHeader,
+    ArgumentDoingSubmitURL,
     ArgumentDoingLast2
   };
 
@@ -85,6 +86,7 @@ protected:
   std::string CDashUploadFile;
   std::string CDashUploadType;
   std::vector<std::string> HttpHeaders;
+  std::string SubmitURL;
 };
 
 #endif

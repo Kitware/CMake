@@ -1,0 +1,10 @@
+CMake Warning at SetFoundResolved.cmake:10 \(message\):
+  .*/Tests/RunCMake/find_package/symlink
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Warning at SetFoundResolved.cmake:15 \(message\):
+  .*/Tests/RunCMake/find_package/PackageRoot
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

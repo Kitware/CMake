@@ -21,8 +21,6 @@ class cmLocalGenerator;
  */
 class cmDependsFortran : public cmDepends
 {
-  CM_DISABLE_COPY(cmDependsFortran)
-
 public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
@@ -37,6 +35,9 @@ public:
   /** Virtual destructor to cleanup subclasses properly.  */
   ~cmDependsFortran() override;
 
+  cmDependsFortran(cmDependsFortran const&) = delete;
+  cmDependsFortran& operator=(cmDependsFortran const&) = delete;
+
   /** Callback from build system after a .mod file has been generated
       by a Fortran90 compiler to copy the .mod file to the
       corresponding stamp file.  */
@@ -44,8 +45,9 @@ public:
 
   /** Determine if a mod file and the corresponding mod.stamp file
       are representing  different module information. */
-  static bool ModulesDiffer(const char* modFile, const char* stampFile,
-                            const char* compilerId);
+  static bool ModulesDiffer(const std::string& modFile,
+                            const std::string& stampFile,
+                            const std::string& compilerId);
 
 protected:
   // Finalize the dependency information for the target.
@@ -55,8 +57,8 @@ protected:
   // Find all the modules required by the target.
   void LocateModules();
   void MatchLocalModules();
-  void MatchRemoteModules(std::istream& fin, const char* stampDir);
-  void ConsiderModule(const char* name, const char* stampDir);
+  void MatchRemoteModules(std::istream& fin, const std::string& stampDir);
+  void ConsiderModule(const std::string& name, const std::string& stampDir);
   bool FindModule(std::string const& name, std::string& module);
 
   // Implement writing/checking methods required by superclass.
@@ -65,18 +67,24 @@ protected:
                          std::ostream& internalDepends) override;
 
   // Actually write the dependencies to the streams.
-  bool WriteDependenciesReal(const char* obj, cmFortranSourceInfo const& info,
-                             std::string const& mod_dir, const char* stamp_dir,
+  bool WriteDependenciesReal(std::string const& obj,
+                             cmFortranSourceInfo const& info,
+                             std::string const& mod_dir,
+                             std::string const& stamp_dir,
                              std::ostream& makeDepends,
                              std::ostream& internalDepends);
 
   // The source file from which to start scanning.
   std::string SourceFile;
 
+  std::string CompilerId;
+  std::string SModSep;
+  std::string SModExt;
+
   std::set<std::string> PPDefinitions;
 
   // Internal implementation details.
-  cmDependsFortranInternals* Internal;
+  cmDependsFortranInternals* Internal = nullptr;
 
 private:
   std::string MaybeConvertToRelativePath(std::string const& base,

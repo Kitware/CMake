@@ -1,33 +1,34 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindIntl
-# --------
-#
-# Find the Gettext libintl headers and libraries.
-#
-# This module reports information about the Gettext libintl
-# installation in several variables.  General variables::
-#
-#   Intl_FOUND - true if the libintl headers and libraries were found
-#   Intl_INCLUDE_DIRS - the directory containing the libintl headers
-#   Intl_LIBRARIES - libintl libraries to be linked
-#
-# The following cache variables may also be set::
-#
-#   Intl_INCLUDE_DIR - the directory containing the libintl headers
-#   Intl_LIBRARY - the libintl library (if any)
-#
-# .. note::
-#   On some platforms, such as Linux with GNU libc, the gettext
-#   functions are present in the C standard library and libintl
-#   is not required.  ``Intl_LIBRARIES`` will be empty in this
-#   case.
-#
-# .. note::
-#   If you wish to use the Gettext tools (``msgmerge``,
-#   ``msgfmt``, etc.), use :module:`FindGettext`.
+#[=======================================================================[.rst:
+FindIntl
+--------
+
+Find the Gettext libintl headers and libraries.
+
+This module reports information about the Gettext libintl
+installation in several variables.  General variables::
+
+  Intl_FOUND - true if the libintl headers and libraries were found
+  Intl_INCLUDE_DIRS - the directory containing the libintl headers
+  Intl_LIBRARIES - libintl libraries to be linked
+
+The following cache variables may also be set::
+
+  Intl_INCLUDE_DIR - the directory containing the libintl headers
+  Intl_LIBRARY - the libintl library (if any)
+
+.. note::
+  On some platforms, such as Linux with GNU libc, the gettext
+  functions are present in the C standard library and libintl
+  is not required.  ``Intl_LIBRARIES`` will be empty in this
+  case.
+
+.. note::
+  If you wish to use the Gettext tools (``msgmerge``,
+  ``msgfmt``, etc.), use :module:`FindGettext`.
+#]=======================================================================]
 
 
 # Written by Roger Leigh <rleigh@codelibre.net>

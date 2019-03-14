@@ -6,6 +6,8 @@ Generates Visual Studio 9 2008 project files.
 Platform Selection
 ^^^^^^^^^^^^^^^^^^
 
+The default target platform name (architecture) is ``Win32``.
+
 The :variable:`CMAKE_GENERATOR_PLATFORM` variable may be set, perhaps
 via the :manual:`cmake(1)` ``-A`` option, to specify a target platform
 name (architecture).  For example:

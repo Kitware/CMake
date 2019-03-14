@@ -9,11 +9,11 @@ Synopsis
 .. parsed-literal::
 
   install(`TARGETS`_ <target>... [...])
-  install({`FILES`_ | `PROGRAMS`_} <file>... DESTINATION <dir> [...])
-  install(`DIRECTORY`_ <dir>... DESTINATION <dir> [...])
+  install({`FILES`_ | `PROGRAMS`_} <file>... [...])
+  install(`DIRECTORY`_ <dir>... [...])
   install(`SCRIPT`_ <file> [...])
   install(`CODE`_ <code> [...])
-  install(`EXPORT`_ <export-name> DESTINATION <dir> [...])
+  install(`EXPORT`_ <export-name> [...])
 
 Introduction
 ^^^^^^^^^^^^
@@ -101,7 +101,7 @@ Installing Targets
 
 .. _TARGETS:
 
-::
+.. code-block:: cmake
 
   install(TARGETS targets... [EXPORT <export-name>]
           [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
@@ -172,6 +172,54 @@ installation properties apply to all target types. If only one is given then
 only targets of that type will be installed (which can be used to install
 just a DLL or just an import library.)
 
+For regular executables, static libraries and shared libraries, the
+``DESTINATION`` argument is not required.  For these target types, when
+``DESTINATION`` is omitted, a default destination will be taken from the
+appropriate variable from :module:`GNUInstallDirs`, or set to a built-in
+default value if that variable is not defined.  The same is true for the
+public and private headers associated with the installed targets through the
+:prop_tgt:`PUBLIC_HEADER` and :prop_tgt:`PRIVATE_HEADER` target properties.
+A destination must always be provided for module libraries, Apple bundles and
+frameworks.  A destination can be omitted for interface and object libraries,
+but they are handled differently (see the discussion of this topic toward the
+end of this section).
+
+The following table shows the target types with their associated variables and
+built-in defaults that apply when no destination is given:
+
+================== =============================== ======================
+   Target Type         GNUInstallDirs Variable        Built-In Default
+================== =============================== ======================
+``RUNTIME``        ``${CMAKE_INSTALL_BINDIR}``     ``bin``
+``LIBRARY``        ``${CMAKE_INSTALL_LIBDIR}``     ``lib``
+``ARCHIVE``        ``${CMAKE_INSTALL_LIBDIR}``     ``lib``
+``PRIVATE_HEADER`` ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
+``PUBLIC_HEADER``  ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
+================== =============================== ======================
+
+Projects wishing to follow the common practice of installing headers into a
+project-specific subdirectory will need to provide a destination rather than
+rely on the above.
+
+To make packages compliant with distribution filesystem layout policies, if
+projects must specify a ``DESTINATION``, it is recommended that they use a
+path that begins with the appropriate :module:`GNUInstallDirs` variable.
+This allows package maintainers to control the install destination by setting
+the appropriate cache variables.  The following example shows a static library
+being installed to the default destination provided by
+:module:`GNUInstallDirs`, but with its headers installed to a project-specific
+subdirectory that follows the above recommendation:
+
+.. code-block:: cmake
+
+  add_library(mylib STATIC ...)
+  set_target_properties(mylib PROPERTIES PUBLIC_HEADER mylib.h)
+  include(GNUInstallDirs)
+  install(TARGETS mylib
+          PUBLIC_HEADER
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/myproj
+  )
+
 In addition to the common options listed above, each target can accept
 the following additional arguments:
 
@@ -195,11 +243,9 @@ the following additional arguments:
 
     install(TARGETS mylib
             LIBRARY
-              DESTINATION lib
               COMPONENT Libraries
               NAMELINK_COMPONENT Development
             PUBLIC_HEADER
-              DESTINATION include
               COMPONENT Development
            )
 
@@ -295,7 +341,7 @@ targets from other directories are up-to-date.  You can use
 to ensure that such out-of-directory targets are built before the
 subdirectory-specific install rules are run.
 
-The install destination given to the target install ``DESTINATION`` may
+An install destination given as a ``DESTINATION`` argument may
 use "generator expressions" with the syntax ``$<...>``.  See the
 :manual:`cmake-generator-expressions(7)` manual for available expressions.
 
@@ -305,9 +351,10 @@ Installing Files
 .. _FILES:
 .. _PROGRAMS:
 
-::
+.. code-block:: cmake
 
-  install(<FILES|PROGRAMS> files... DESTINATION <dir>
+  install(<FILES|PROGRAMS> files...
+          TYPE <type> | DESTINATION <dir>
           [PERMISSIONS permissions...]
           [CONFIGURATIONS [Debug|Release|...]]
           [COMPONENT <component>]
@@ -331,7 +378,58 @@ The list of ``files...`` given to ``FILES`` or ``PROGRAMS`` may use
 However, if any item begins in a generator expression it must evaluate
 to a full path.
 
-The install destination given to the files install ``DESTINATION`` may
+Either a ``TYPE`` or a ``DESTINATION`` must be provided, but not both.
+A ``TYPE`` argument specifies the generic file type of the files being
+installed.  A destination will then be set automatically by taking the
+corresponding variable from :module:`GNUInstallDirs`, or by using a
+built-in default if that variable is not defined.  See the table below for
+the supported file types and their corresponding variables and built-in
+defaults.  Projects can provide a ``DESTINATION`` argument instead of a
+file type if they wish to explicitly define the install destination.
+
+======================= ================================== =========================
+   ``TYPE`` Argument         GNUInstallDirs Variable           Built-In Default
+======================= ================================== =========================
+``BIN``                 ``${CMAKE_INSTALL_BINDIR}``        ``bin``
+``SBIN``                ``${CMAKE_INSTALL_SBINDIR}``       ``sbin``
+``LIB``                 ``${CMAKE_INSTALL_LIBDIR}``        ``lib``
+``INCLUDE``             ``${CMAKE_INSTALL_INCLUDEDIR}``    ``include``
+``SYSCONF``             ``${CMAKE_INSTALL_SYSCONFDIR}``    ``etc``
+``SHAREDSTATE``         ``${CMAKE_INSTALL_SHARESTATEDIR}`` ``com``
+``LOCALSTATE``          ``${CMAKE_INSTALL_LOCALSTATEDIR}`` ``var``
+``RUNSTATE``            ``${CMAKE_INSTALL_RUNSTATEDIR}``   ``<LOCALSTATE dir>/run``
+``DATA``                ``${CMAKE_INSTALL_DATADIR}``       ``<DATAROOT dir>``
+``INFO``                ``${CMAKE_INSTALL_INFODIR}``       ``<DATAROOT dir>/info``
+``LOCALE``              ``${CMAKE_INSTALL_LOCALEDIR}``     ``<DATAROOT dir>/locale``
+``MAN``                 ``${CMAKE_INSTALL_MANDIR}``        ``<DATAROOT dir>/man``
+``DOC``                 ``${CMAKE_INSTALL_DOCDIR}``        ``<DATAROOT dir>/doc``
+======================= ================================== =========================
+
+Projects wishing to follow the common practice of installing headers into a
+project-specific subdirectory will need to provide a destination rather than
+rely on the above.
+
+Note that some of the types' built-in defaults use the ``DATAROOT`` directory as
+a prefix. The ``DATAROOT`` prefix is calculated similarly to the types, with
+``CMAKE_INSTALL_DATAROOTDIR`` as the variable and ``share`` as the built-in
+default. You cannot use ``DATAROOT`` as a ``TYPE`` parameter; please use
+``DATA`` instead.
+
+To make packages compliant with distribution filesystem layout policies, if
+projects must specify a ``DESTINATION``, it is recommended that they use a
+path that begins with the appropriate :module:`GNUInstallDirs` variable.
+This allows package maintainers to control the install destination by setting
+the appropriate cache variables.  The following example shows how to follow
+this advice while installing headers to a project-specific subdirectory:
+
+.. code-block:: cmake
+
+  include(GNUInstallDirs)
+  install(FILES mylib.h
+          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/myproj
+  )
+
+An install destination given as a ``DESTINATION`` argument may
 use "generator expressions" with the syntax ``$<...>``.  See the
 :manual:`cmake-generator-expressions(7)` manual for available expressions.
 
@@ -340,9 +438,10 @@ Installing Directories
 
 .. _DIRECTORY:
 
-::
+.. code-block:: cmake
 
-  install(DIRECTORY dirs... DESTINATION <dir>
+  install(DIRECTORY dirs...
+          TYPE <type> | DESTINATION <dir>
           [FILE_PERMISSIONS permissions...]
           [DIRECTORY_PERMISSIONS permissions...]
           [USE_SOURCE_PERMISSIONS] [OPTIONAL] [MESSAGE_NEVER]
@@ -413,8 +512,48 @@ will install the ``icons`` directory to ``share/myproj/icons`` and the
 file permissions, the scripts will be given specific permissions, and any
 ``CVS`` directories will be excluded.
 
-The list of ``dirs...`` given to ``DIRECTORY`` and the install destination
-given to the directory install ``DESTINATION`` may use "generator expressions"
+Either a ``TYPE`` or a ``DESTINATION`` must be provided, but not both.
+A ``TYPE`` argument specifies the generic file type of the files within the
+listed directories being installed.  A destination will then be set
+automatically by taking the corresponding variable from
+:module:`GNUInstallDirs`, or by using a built-in default if that variable
+is not defined.  See the table below for the supported file types and their
+corresponding variables and built-in defaults.  Projects can provide a
+``DESTINATION`` argument instead of a file type if they wish to explicitly
+define the install destination.
+
+======================= ================================== =========================
+   ``TYPE`` Argument         GNUInstallDirs Variable           Built-In Default
+======================= ================================== =========================
+``BIN``                 ``${CMAKE_INSTALL_BINDIR}``        ``bin``
+``SBIN``                ``${CMAKE_INSTALL_SBINDIR}``       ``sbin``
+``LIB``                 ``${CMAKE_INSTALL_LIBDIR}``        ``lib``
+``INCLUDE``             ``${CMAKE_INSTALL_INCLUDEDIR}``    ``include``
+``SYSCONF``             ``${CMAKE_INSTALL_SYSCONFDIR}``    ``etc``
+``SHAREDSTATE``         ``${CMAKE_INSTALL_SHARESTATEDIR}`` ``com``
+``LOCALSTATE``          ``${CMAKE_INSTALL_LOCALSTATEDIR}`` ``var``
+``RUNSTATE``            ``${CMAKE_INSTALL_RUNSTATEDIR}``   ``<LOCALSTATE dir>/run``
+``DATA``                ``${CMAKE_INSTALL_DATADIR}``       ``<DATAROOT dir>``
+``INFO``                ``${CMAKE_INSTALL_INFODIR}``       ``<DATAROOT dir>/info``
+``LOCALE``              ``${CMAKE_INSTALL_LOCALEDIR}``     ``<DATAROOT dir>/locale``
+``MAN``                 ``${CMAKE_INSTALL_MANDIR}``        ``<DATAROOT dir>/man``
+``DOC``                 ``${CMAKE_INSTALL_DOCDIR}``        ``<DATAROOT dir>/doc``
+======================= ================================== =========================
+
+Note that some of the types' built-in defaults use the ``DATAROOT`` directory as
+a prefix. The ``DATAROOT`` prefix is calculated similarly to the types, with
+``CMAKE_INSTALL_DATAROOTDIR`` as the variable and ``share`` as the built-in
+default. You cannot use ``DATAROOT`` as a ``TYPE`` parameter; please use
+``DATA`` instead.
+
+To make packages compliant with distribution filesystem layout policies, if
+projects must specify a ``DESTINATION``, it is recommended that they use a
+path that begins with the appropriate :module:`GNUInstallDirs` variable.
+This allows package maintainers to control the install destination by setting
+the appropriate cache variables.
+
+The list of ``dirs...`` given to ``DIRECTORY`` and an install destination
+given as a ``DESTINATION`` argument may use "generator expressions"
 with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.
 
@@ -424,7 +563,7 @@ Custom Installation Logic
 .. _CODE:
 .. _SCRIPT:
 
-::
+.. code-block:: cmake
 
   install([[SCRIPT <file>] [CODE <code>]]
           [COMPONENT <component>] [EXCLUDE_FROM_ALL] [...])
@@ -442,12 +581,17 @@ example, the code
 
 will print a message during installation.
 
+``<file>`` or ``<code>`` may use "generator expressions" with the syntax
+``$<...>`` (in the case of ``<file>``, this refers to their use in the file
+name, not the file's contents).  See the
+:manual:`cmake-generator-expressions(7)` manual for available expressions.
+
 Installing Exports
 ^^^^^^^^^^^^^^^^^^
 
 .. _EXPORT:
 
-::
+.. code-block:: cmake
 
   install(EXPORT <export-name> DESTINATION <dir>
           [NAMESPACE <namespace>] [[FILE <name>.cmake]|

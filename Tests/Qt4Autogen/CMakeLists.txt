@@ -6,4 +6,4 @@ include("../QtAutogen/TestMacros.cmake")
 ADD_AUTOGEN_TEST(DefinesTest)
 
 # Common tests
-include("../QtAutogen/CommonTests.cmake")
+include("../QtAutogen/Tests.cmake")

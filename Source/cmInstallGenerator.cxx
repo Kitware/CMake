@@ -18,8 +18,19 @@ cmInstallGenerator::cmInstallGenerator(
 {
 }
 
-cmInstallGenerator::~cmInstallGenerator()
+cmInstallGenerator::~cmInstallGenerator() = default;
+
+bool cmInstallGenerator::HaveInstall()
 {
+  return true;
+}
+
+void cmInstallGenerator::CheckCMP0082(bool& haveSubdirectoryInstall,
+                                      bool& haveInstallAfterSubdirectory)
+{
+  if (haveSubdirectoryInstall) {
+    haveInstallAfterSubdirectory = true;
+  }
 }
 
 void cmInstallGenerator::AddInstallRule(

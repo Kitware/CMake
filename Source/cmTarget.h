@@ -6,7 +6,6 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
-#include <map>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -124,7 +123,7 @@ public:
   void AddSources(std::vector<std::string> const& srcs);
   void AddTracedSources(std::vector<std::string> const& srcs);
   cmSourceFile* AddSourceCMP0049(const std::string& src);
-  cmSourceFile* AddSource(const std::string& src);
+  cmSourceFile* AddSource(const std::string& src, bool before = false);
 
   //* how we identify a library, by name and type
   typedef std::pair<std::string, cmTargetLinkLibraryType> LibraryID;
@@ -141,11 +140,9 @@ public:
   void ClearDependencyInformation(cmMakefile& mf);
 
   void AddLinkLibrary(cmMakefile& mf, const std::string& lib,
-                      cmTargetLinkLibraryType llt,
-	                  const cmListFileBacktrace & bt);
+                      cmTargetLinkLibraryType llt);
   void AddLinkLibrary(cmMakefile& mf, std::string const& lib,
-                      std::string const& libRef, cmTargetLinkLibraryType llt,
-	                  const cmListFileBacktrace & bt);
+                      std::string const& libRef, cmTargetLinkLibraryType llt);
 
   enum TLLSignature
   {
@@ -192,14 +189,16 @@ public:
    * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
    * commands. It is not a full path nor does it have an extension.
    */
-  void AddUtility(const std::string& u, cmMakefile* makefile = nullptr);
+  void AddUtility(std::string const& u, cmMakefile* mf = nullptr);
   ///! Get the utilities used by this target
-  std::set<std::string> const& GetUtilities() const { return this->Utilities; }
-  cmListFileBacktrace const* GetUtilityBacktrace(const std::string& u) const;
+  std::set<BT<std::string>> const& GetUtilities() const
+  {
+    return this->Utilities;
+  }
 
   ///! Set/Get a property of this target file
-  void SetProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace);
-  void AppendProperty(const std::string& prop, const char* value, const cmListFileBacktrace & backtrace,
+  void SetProperty(const std::string& prop, const char* value);
+  void AppendProperty(const std::string& prop, const char* value,
                       bool asString = false);
   ///! Might return a nullptr if the property is not set or invalid
   const char* GetProperty(const std::string& prop) const;
@@ -210,7 +209,6 @@ public:
   const char* GetComputedProperty(const std::string& prop,
                                   cmMessenger* messenger,
                                   cmListFileBacktrace const& context) const;
-  const cmListFileBacktrace & GetPropertyBacktrace(const std::string & prop) const;
 
   bool IsImported() const { return this->IsImportedTarget; }
   bool IsImportedGloballyVisible() const
@@ -310,8 +308,7 @@ private:
   bool IsGeneratorProvided;
   cmPropertyMap Properties;
   std::set<std::string> SystemIncludeDirectories;
-  std::set<std::string> Utilities;
-  std::map<std::string, cmListFileBacktrace> UtilityBacktraces;
+  std::set<BT<std::string>> Utilities;
   cmPolicies::PolicyMap PolicyMap;
   std::string Name;
   std::string InstallPath;
@@ -345,12 +342,5 @@ private:
 };
 
 typedef std::unordered_map<std::string, cmTarget> cmTargets;
-
-class cmTargetSet : public std::set<std::string>
-{
-};
-class cmTargetManifest : public std::map<std::string, cmTargetSet>
-{
-};
 
 #endif

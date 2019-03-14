@@ -482,13 +482,16 @@ function(cpack_deb_prepare_package_vars)
   endif()
 
   if(CPACK_DEBIAN_ARCHIVE_TYPE)
-    set(archive_types_ "paxr;gnutar")
-    if(NOT CPACK_DEBIAN_ARCHIVE_TYPE IN_LIST archive_types_)
+    if(CPACK_DEBIAN_ARCHIVE_TYPE STREQUAL "paxr")
+      message(DEPRECATION "CPACK_DEBIAN_ARCHIVE_TYPE set to old and invalid "
+        "type 'paxr', mapping to 'gnutar'")
+      set(CPACK_DEBIAN_ARCHIVE_TYPE "gnutar")
+    elseif(NOT CPACK_DEBIAN_ARCHIVE_TYPE STREQUAL "gnutar")
       message(FATAL_ERROR "CPACK_DEBIAN_ARCHIVE_TYPE set to unsupported"
         "type ${CPACK_DEBIAN_ARCHIVE_TYPE}")
     endif()
   else()
-    set(CPACK_DEBIAN_ARCHIVE_TYPE "paxr")
+    set(CPACK_DEBIAN_ARCHIVE_TYPE "gnutar")
   endif()
 
   # Compression: (recommended)

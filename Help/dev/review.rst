@@ -238,12 +238,10 @@ Referencing Commits in Commit Messages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The preferred form for references to other commits is
-``commit <commit> (<subject>, <date>)``, where:
+``commit <shorthash> (<subject>, <date>)``, where:
 
-* ``<commit>``:
-  If available, a tag-relative name of the commit produced by
-  ``git describe --contains <commit-ish>``.  Otherwise, the first
-  8-10 characters of the commit ``<hash>``.
+* ``<shorthash>``:
+  The abbreviated hash of the commit.
 
 * ``<subject>``:
   The first line of the commit message.
@@ -251,6 +249,17 @@ The preferred form for references to other commits is
 * ``<date>``:
   The author date of the commit, in its original time zone, formatted as
   ``CCYY-MM-DD``.  ``git-log(1)`` shows the original time zone by default.
+
+This may be generated with
+``git show -s --date=short --pretty="format:%h (%s, %ad)" <commit>``.
+
+If the commit is a fix for the mentioned commit, consider using a ``Fixes:``
+trailer in the commit message with the specified format. This trailer should
+not be word-wrapped. Note that if there is also an issue for what is being
+fixed, it is preferrable to link to the issue instead.
+
+If relevant, add the first release tag of CMake containing the commit after
+the ``<date>``, i.e., ``commit <shorthash> (<subject>, <date>, <tag>)``.
 
 Alternatively, the full commit ``<hash>`` may be used.
 
@@ -323,6 +332,14 @@ branch (e.g. ``master``) branch followed by a sequence of merges each
 integrating changes from an open MR that has been staged for integration
 testing.  Each time the target integration branch is updated the stage
 is rebuilt automatically by merging the staged MR topics again.
+The branch is stored in the upstream repository by special refs:
+
+* ``refs/stage/master/head``: The current topic stage branch.
+  This is used by continuous builds that report to CDash.
+* ``refs/stage/master/nightly/latest``: Topic stage as of 1am UTC each night.
+  This is used by most nightly builds that report to CDash.
+* ``refs/stage/master/nightly/<yyyy>/<mm>/<dd>``: Topic stage as of 1am UTC
+  on the date specified. This is used for historical reference.
 
 `CMake GitLab Project Developers`_ may stage a MR for integration testing
 by adding a comment with a command among the `comment trailing lines`_::

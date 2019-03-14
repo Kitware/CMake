@@ -24,6 +24,7 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  include "cmFileLockPool.h"
+#  include "cm_jsoncpp_value.h"
 #endif
 
 #define CMAKE_DIRECTORY_ID_SEP "::@"
@@ -39,6 +40,54 @@ class cmOutputConverter;
 class cmSourceFile;
 class cmStateDirectory;
 class cmake;
+
+namespace detail {
+inline void AppendStrs(std::vector<std::string>&)
+{
+}
+template <typename T, typename... Ts>
+inline void AppendStrs(std::vector<std::string>& command, T&& s, Ts&&... ts)
+{
+  command.emplace_back(std::forward<T>(s));
+  AppendStrs(command, std::forward<Ts>(ts)...);
+}
+
+struct GeneratedMakeCommand
+{
+  // Add each argument as a separate element to the vector
+  template <typename... T>
+  void add(T&&... args)
+  {
+    // iterate the args and append each one
+    AppendStrs(PrimaryCommand, std::forward<T>(args)...);
+  }
+
+  // Add each value in the iterators as a separate element to the vector
+  void add(std::vector<std::string>::const_iterator start,
+           std::vector<std::string>::const_iterator end)
+  {
+    PrimaryCommand.insert(PrimaryCommand.end(), start, end);
+  }
+
+  std::string printable() const
+  {
+    std::size_t size = PrimaryCommand.size();
+    for (auto&& i : PrimaryCommand) {
+      size += i.size();
+    }
+    std::string buffer;
+    buffer.reserve(size);
+    for (auto&& i : PrimaryCommand) {
+      buffer.append(i);
+      buffer.append(1, ' ');
+    }
+    return buffer;
+  }
+
+  std::vector<std::string> PrimaryCommand;
+  bool RequiresOutputForward = false;
+};
+}
 
 /** \class cmGlobalGenerator
  * \brief Responsible for overseeing the generation process for the entire tree
@@ -69,6 +118,11 @@ public:
   {
     return codecvt::None;
   }
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  /** Get a JSON object describing the generator.  */
+  virtual Json::Value GetJson() const;
+#endif
 
   /** Tell the generator about the target system.  */
   virtual bool SetSystemName(std::string const&, cmMakefile*) { return true; }
@@ -176,8 +230,12 @@ public:
   virtual bool Open(const std::string& bindir, const std::string& projectName,
                     bool dryRun);
 
+  struct GeneratedMakeCommand final : public detail::GeneratedMakeCommand
+  {
+  };
+
   virtual void GenerateBuildCommand(
-    std::vector<std::string>& makeCommand, const std::string& makeProgram,
+    GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
     const std::string& projectName, const std::string& projectDir,
     const std::string& targetName, const std::string& config, bool fast,
     int jobs, bool verbose,
@@ -426,6 +484,8 @@ public:
 
   std::string MakeSilentFlag;
 
+  int RecursionDepth;
+
 protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
@@ -462,7 +522,7 @@ protected:
   bool IsExcluded(cmStateSnapshot const& root,
                   cmStateSnapshot const& snp) const;
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
-  bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target) const;
+  bool IsExcluded(cmGeneratorTarget* target) const;
   virtual void InitializeProgressMarks() {}
 
   struct GlobalTargetInfo
@@ -472,11 +532,7 @@ protected:
     cmCustomCommandLines CommandLines;
     std::vector<std::string> Depends;
     std::string WorkingDir;
-    bool UsesTerminal;
-    GlobalTargetInfo()
-      : UsesTerminal(false)
-    {
-    }
+    bool UsesTerminal = false;
   };
 
   void CreateDefaultGlobalTargets(std::vector<GlobalTargetInfo>& targets);
@@ -602,13 +658,9 @@ private:
   // Cache directory content and target files to be built.
   struct DirectoryContent
   {
-    long LastDiskTime;
+    long LastDiskTime = -1;
     std::set<std::string> All;
     std::set<std::string> Generated;
-    DirectoryContent()
-      : LastDiskTime(-1)
-    {
-    }
   };
   std::map<std::string, DirectoryContent> DirectoryContentMap;
 

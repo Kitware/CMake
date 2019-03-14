@@ -7,7 +7,6 @@
 #include "cmCTestTestHandler.h"
 #include "cmsys/Process.h"
 
-#include <algorithm>
 #include <fcntl.h>
 #include <iostream>
 #include <signal.h>
@@ -15,6 +14,7 @@
 #if !defined(_WIN32)
 #  include <unistd.h>
 #endif
+#include <utility>
 
 #define CM_PROCESS_BUF_SIZE 65536
 
@@ -69,9 +69,7 @@ cmProcess::cmProcess(cmCTestRunTest& runner)
   this->StartTime = std::chrono::steady_clock::time_point();
 }
 
-cmProcess::~cmProcess()
-{
-}
+cmProcess::~cmProcess() = default;
 
 void cmProcess::SetCommand(const char* command)
 {

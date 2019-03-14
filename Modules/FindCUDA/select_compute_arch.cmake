@@ -5,9 +5,9 @@
 #       - "Auto" detects local machine GPU compute arch at runtime.
 #       - "Common" and "All" cover common and entire subsets of architectures
 #      ARCH_AND_PTX : NAME | NUM.NUM | NUM.NUM(NUM.NUM) | NUM.NUM+PTX
-#      NAME: Fermi Kepler Maxwell Kepler+Tegra Kepler+Tesla Maxwell+Tegra Pascal
+#      NAME: Fermi Kepler Maxwell Kepler+Tegra Kepler+Tesla Maxwell+Tegra Pascal Volta Turing
 #      NUM: Any number. Only those pairs are currently accepted by NVCC though:
-#            2.0 2.1 3.0 3.2 3.5 3.7 5.0 5.2 5.3 6.0 6.2
+#            2.0 2.1 3.0 3.2 3.5 3.7 5.0 5.2 5.3 6.0 6.2 7.0 7.2 7.5
 #      Returns LIST of flags to be added to CUDA_NVCC_FLAGS in ${out_variable}
 #      Additionally, sets ${out_variable}_readable to the resulting numeric list
 #      Example:
@@ -63,9 +63,20 @@ endif ()
 if(CUDA_VERSION VERSION_GREATER_EQUAL "9.0")
   list(APPEND CUDA_KNOWN_GPU_ARCHITECTURES "Volta")
   list(APPEND CUDA_COMMON_GPU_ARCHITECTURES "7.0" "7.0+PTX")
+  list(APPEND CUDA_ALL_GPU_ARCHITECTURES "7.0" "7.0+PTX" "7.2" "7.2+PTX")
 
   if(CUDA_VERSION VERSION_LESS "10.0")
     set(CUDA_LIMIT_GPU_ARCHITECTURE "8.0")
+  endif()
+endif()
+
+if(CUDA_VERSION VERSION_GREATER_EQUAL "10.0")
+  list(APPEND CUDA_KNOWN_GPU_ARCHITECTURES "Turing")
+  list(APPEND CUDA_COMMON_GPU_ARCHITECTURES "7.5" "7.5+PTX")
+  list(APPEND CUDA_ALL_GPU_ARCHITECTURES "7.5" "7.5+PTX")
+
+  if(CUDA_VERSION VERSION_LESS "11.0")
+    set(CUDA_LIMIT_GPU_ARCHITECTURE "9.0")
   endif()
 endif()
 
@@ -200,6 +211,9 @@ function(CUDA_SELECT_NVCC_ARCH_FLAGS out_variable)
       elseif(${arch_name} STREQUAL "Volta")
         set(arch_bin 7.0 7.0)
         set(arch_ptx 7.0)
+      elseif(${arch_name} STREQUAL "Turing")
+        set(arch_bin 7.5)
+        set(arch_ptx 7.5)
       else()
         message(SEND_ERROR "Unknown CUDA Architecture Name ${arch_name} in CUDA_SELECT_NVCC_ARCH_FLAGS")
       endif()

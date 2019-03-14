@@ -50,9 +50,7 @@ The options are:
   for an example.
 
 ``PROJECT_NAME <project-name>``
-  Set the name of the project to build.  This should correspond
-  to the top-level call to the :command:`project` command.
-  If not specified the ``CTEST_PROJECT_NAME`` variable will be checked.
+  Ignored.  This was once used but is no longer needed.
 
 ``TARGET <target-name>``
   Specify the name of a target to build.  If not specified the

@@ -22,16 +22,12 @@ class cmMakefile;
 class cmCustomCommand
 {
 public:
-  /** Default and copy constructors for STL containers.  */
-  cmCustomCommand();
-
   /** Main constructor specifies all information for the command.  */
-  cmCustomCommand(cmMakefile const* mf,
-                  const std::vector<std::string>& outputs,
-                  const std::vector<std::string>& byproducts,
-                  const std::vector<std::string>& depends,
-                  const cmCustomCommandLines& commandLines,
-                  const char* comment, const char* workingDirectory);
+  cmCustomCommand(cmMakefile const* mf, std::vector<std::string> outputs,
+                  std::vector<std::string> byproducts,
+                  std::vector<std::string> depends,
+                  cmCustomCommandLines commandLines, const char* comment,
+                  const char* workingDirectory);
 
   /** Get the output file produced by the command.  */
   const std::vector<std::string>& GetOutputs() const;
@@ -103,11 +99,11 @@ private:
   std::string Comment;
   std::string WorkingDirectory;
   std::string Depfile;
-  bool HaveComment;
-  bool EscapeAllowMakeVars;
-  bool EscapeOldStyle;
-  bool UsesTerminal;
-  bool CommandExpandLists;
+  bool HaveComment = false;
+  bool EscapeAllowMakeVars = false;
+  bool EscapeOldStyle = true;
+  bool UsesTerminal = false;
+  bool CommandExpandLists = false;
 };
 
 #endif

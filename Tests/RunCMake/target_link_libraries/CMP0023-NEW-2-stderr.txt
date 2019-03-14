@@ -8,4 +8,4 @@ CMake Error at CMP0023-NEW-2.cmake:11 \(target_link_libraries\):
    \* CMP0023-NEW-2.cmake:10 \(target_link_libraries\)
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

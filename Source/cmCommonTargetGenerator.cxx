@@ -29,9 +29,7 @@ cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
 {
 }
 
-cmCommonTargetGenerator::~cmCommonTargetGenerator()
-{
-}
+cmCommonTargetGenerator::~cmCommonTargetGenerator() = default;
 
 std::string const& cmCommonTargetGenerator::GetConfigName() const
 {
@@ -198,7 +196,7 @@ std::string cmCommonTargetGenerator::GetManifests()
   manifests.reserve(manifest_srcs.size());
   for (cmSourceFile const* manifest_src : manifest_srcs) {
     manifests.push_back(this->LocalCommonGenerator->ConvertToOutputFormat(
-      this->LocalCommonGenerator->ConvertToRelativePath(
+      this->LocalCommonGenerator->MaybeConvertToRelativePath(
         this->LocalCommonGenerator->GetWorkingDirectory(),
         manifest_src->GetFullPath()),
       cmOutputConverter::SHELL));

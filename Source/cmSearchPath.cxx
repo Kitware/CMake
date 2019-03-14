@@ -16,9 +16,7 @@ cmSearchPath::cmSearchPath(cmFindCommon* findCmd)
 {
 }
 
-cmSearchPath::~cmSearchPath()
-{
-}
+cmSearchPath::~cmSearchPath() = default;
 
 void cmSearchPath::ExtractWithout(const std::set<std::string>& ignore,
                                   std::vector<std::string>& outPaths,

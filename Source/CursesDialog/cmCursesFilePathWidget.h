@@ -9,10 +9,11 @@
 
 class cmCursesFilePathWidget : public cmCursesPathWidget
 {
-  CM_DISABLE_COPY(cmCursesFilePathWidget)
-
 public:
   cmCursesFilePathWidget(int width, int height, int left, int top);
+
+  cmCursesFilePathWidget(cmCursesFilePathWidget const&) = delete;
+  cmCursesFilePathWidget& operator=(cmCursesFilePathWidget const&) = delete;
 };
 
 #endif // cmCursesFilePathWidget_h

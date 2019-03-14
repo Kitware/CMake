@@ -7,4 +7,4 @@ CMake Error at LinkImplementationCycle2.cmake:5 \(target_link_libraries\):
   target property which is transitive over the link libraries, creating a
   recursion.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:8 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

@@ -72,8 +72,8 @@ public:
   /*
    * Run a script
    */
-  static bool RunScript(cmCTest* ctest, const char* script, bool InProcess,
-                        int* returnValue);
+  static bool RunScript(cmCTest* ctest, cmMakefile* mf, const char* script,
+                        bool InProcess, int* returnValue);
   int RunCurrentScript();
 
   /*
@@ -166,6 +166,7 @@ private:
   std::chrono::steady_clock::time_point ScriptStartTime;
 
   cmMakefile* Makefile;
+  cmMakefile* ParentMakefile;
   cmGlobalGenerator* GlobalGenerator;
   cmake* CMake;
 };

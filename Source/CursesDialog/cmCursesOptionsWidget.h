@@ -15,10 +15,11 @@ class cmCursesMainForm;
 
 class cmCursesOptionsWidget : public cmCursesWidget
 {
-  CM_DISABLE_COPY(cmCursesOptionsWidget)
-
 public:
   cmCursesOptionsWidget(int width, int height, int left, int top);
+
+  cmCursesOptionsWidget(cmCursesOptionsWidget const&) = delete;
+  cmCursesOptionsWidget& operator=(cmCursesOptionsWidget const&) = delete;
 
   // Description:
   // Handle user input. Called by the container of this widget

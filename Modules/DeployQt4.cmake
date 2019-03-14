@@ -26,13 +26,13 @@ PARENT_SCOPE.  Also depends on BundleUtilities.cmake.
 
 ::
 
-  WRITE_QT4_CONF(<qt_conf_dir> <qt_conf_contents>)
+  write_qt4_conf(<qt_conf_dir> <qt_conf_contents>)
 
 Writes a qt.conf file with the <qt_conf_contents> into <qt_conf_dir>.
 
 ::
 
-  RESOLVE_QT4_PATHS(<paths_var> [<executable_path>])
+  resolve_qt4_paths(<paths_var> [<executable_path>])
 
 Loop through <paths_var> list and if any don't exist resolve them
 relative to the <executable_path> (if supplied) or the
@@ -40,7 +40,7 @@ CMAKE_INSTALL_PREFIX.
 
 ::
 
-  FIXUP_QT4_EXECUTABLE(<executable>
+  fixup_qt4_executable(<executable>
     [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf>])
 
 Copies Qt plugins, writes a Qt configuration file (if needed) and
@@ -67,7 +67,7 @@ needed.
 
 ::
 
-  INSTALL_QT4_PLUGIN_PATH(plugin executable copy installed_plugin_path_var
+  install_qt4_plugin_path(plugin executable copy installed_plugin_path_var
                           <plugins_dir> <component> <configurations>)
 
 Install (or copy) a resolved <plugin> to the default plugins directory
@@ -82,7 +82,7 @@ If <component> is set then anything installed will use this COMPONENT.
 
 ::
 
-  INSTALL_QT4_PLUGIN(plugin executable copy installed_plugin_path_var
+  install_qt4_plugin(plugin executable copy installed_plugin_path_var
                      <plugins_dir> <component>)
 
 Install (or copy) an unresolved <plugin> to the default plugins
@@ -92,7 +92,7 @@ INSTALL_QT4_PLUGIN_PATH.
 
 ::
 
-  INSTALL_QT4_EXECUTABLE(<executable>
+  install_qt4_executable(<executable>
     [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf> <component>])
 
 Installs Qt plugins, writes a Qt configuration file (if needed) and

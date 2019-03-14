@@ -30,9 +30,7 @@ cmCPackPackageMakerGenerator::cmCPackPackageMakerGenerator()
   this->PackageCompatibilityVersion = getVersion(10, 4);
 }
 
-cmCPackPackageMakerGenerator::~cmCPackPackageMakerGenerator()
-{
-}
+cmCPackPackageMakerGenerator::~cmCPackPackageMakerGenerator() = default;
 
 bool cmCPackPackageMakerGenerator::SupportsComponentInstallation() const
 {
@@ -307,7 +305,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     numTries--;
   }
   if (!res || retVal) {
-    cmGeneratedFileStream ofs(tmpFile.c_str());
+    cmGeneratedFileStream ofs(tmpFile);
     ofs << "# Run command: " << dmgCmd.str() << std::endl
         << "# Output:" << std::endl
         << output << std::endl;
@@ -340,16 +338,16 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   // If found, save result in the CPACK_INSTALLER_PROGRAM variable.
 
   std::vector<std::string> paths;
-  paths.push_back("/Applications/Xcode.app/Contents/Applications"
-                  "/PackageMaker.app/Contents/MacOS");
-  paths.push_back("/Applications/Utilities"
-                  "/PackageMaker.app/Contents/MacOS");
-  paths.push_back("/Applications"
-                  "/PackageMaker.app/Contents/MacOS");
-  paths.push_back("/Developer/Applications/Utilities"
-                  "/PackageMaker.app/Contents/MacOS");
-  paths.push_back("/Developer/Applications"
-                  "/PackageMaker.app/Contents/MacOS");
+  paths.emplace_back("/Applications/Xcode.app/Contents/Applications"
+                     "/PackageMaker.app/Contents/MacOS");
+  paths.emplace_back("/Applications/Utilities"
+                     "/PackageMaker.app/Contents/MacOS");
+  paths.emplace_back("/Applications"
+                     "/PackageMaker.app/Contents/MacOS");
+  paths.emplace_back("/Developer/Applications/Utilities"
+                     "/PackageMaker.app/Contents/MacOS");
+  paths.emplace_back("/Developer/Applications"
+                     "/PackageMaker.app/Contents/MacOS");
 
   std::string pkgPath;
   const char* inst_program = this->GetOption("CPACK_INSTALLER_PROGRAM");
@@ -475,7 +473,7 @@ bool cmCPackPackageMakerGenerator::RunPackageMaker(const char* command,
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Done running package maker" << std::endl);
   if (!res || retVal) {
-    cmGeneratedFileStream ofs(tmpFile.c_str());
+    cmGeneratedFileStream ofs(tmpFile);
     ofs << "# Run command: " << command << std::endl
         << "# Output:" << std::endl
         << output << std::endl;

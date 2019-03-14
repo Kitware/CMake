@@ -8,7 +8,6 @@
 #include "cmCTestGenericHandler.h"
 #include "cmDuration.h"
 #include "cmListFileCache.h"
-#include "cmState.h"
 
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
@@ -278,7 +277,7 @@ private:
    */
   std::string FindTheExecutable(const char* exe);
 
-  const char* GetTestStatus(cmCTestTestResult const&);
+  std::string GetTestStatus(cmCTestTestResult const&);
   void ExpandTestsToRunInformation(size_t numPossibleTests);
   void ExpandTestsToRunInformationForRerunFailed();
 

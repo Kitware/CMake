@@ -15,6 +15,7 @@ endfunction()
 
 run_cppcheck(C)
 run_cppcheck(CXX)
+run_cppcheck(C-error)
 run_cppcheck(C-bad)
 
 if(NOT RunCMake_GENERATOR STREQUAL "Watcom WMake")

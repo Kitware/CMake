@@ -1,32 +1,33 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# UseEcos
-# -------
-#
-# This module defines variables and macros required to build eCos application.
-#
-# This file contains the following macros:
-# ECOS_ADD_INCLUDE_DIRECTORIES() - add the eCos include dirs
-# ECOS_ADD_EXECUTABLE(name source1 ...  sourceN ) - create an eCos
-# executable ECOS_ADJUST_DIRECTORY(VAR source1 ...  sourceN ) - adjusts
-# the path of the source files and puts the result into VAR
-#
-# Macros for selecting the toolchain: ECOS_USE_ARM_ELF_TOOLS() - enable
-# the ARM ELF toolchain for the directory where it is called
-# ECOS_USE_I386_ELF_TOOLS() - enable the i386 ELF toolchain for the
-# directory where it is called ECOS_USE_PPC_EABI_TOOLS() - enable the
-# PowerPC toolchain for the directory where it is called
-#
-# It contains the following variables: ECOS_DEFINITIONS
-# ECOSCONFIG_EXECUTABLE ECOS_CONFIG_FILE - defaults to ecos.ecc, if your
-# eCos configuration file has a different name, adjust this variable for
-# internal use only:
-#
-# ::
-#
-#   ECOS_ADD_TARGET_LIB
+#[=======================================================================[.rst:
+UseEcos
+-------
+
+This module defines variables and macros required to build eCos application.
+
+This file contains the following macros:
+ECOS_ADD_INCLUDE_DIRECTORIES() - add the eCos include dirs
+ECOS_ADD_EXECUTABLE(name source1 ...  sourceN ) - create an eCos
+executable ECOS_ADJUST_DIRECTORY(VAR source1 ...  sourceN ) - adjusts
+the path of the source files and puts the result into VAR
+
+Macros for selecting the toolchain: ECOS_USE_ARM_ELF_TOOLS() - enable
+the ARM ELF toolchain for the directory where it is called
+ECOS_USE_I386_ELF_TOOLS() - enable the i386 ELF toolchain for the
+directory where it is called ECOS_USE_PPC_EABI_TOOLS() - enable the
+PowerPC toolchain for the directory where it is called
+
+It contains the following variables: ECOS_DEFINITIONS
+ECOSCONFIG_EXECUTABLE ECOS_CONFIG_FILE - defaults to ecos.ecc, if your
+eCos configuration file has a different name, adjust this variable for
+internal use only:
+
+::
+
+  ECOS_ADD_TARGET_LIB
+#]=======================================================================]
 
 # first check that ecosconfig is available
 find_program(ECOSCONFIG_EXECUTABLE NAMES ecosconfig)
@@ -190,8 +191,8 @@ macro(ECOS_ADD_EXECUTABLE _exe_NAME )
    set(CMAKE_CXX_LINK_EXECUTABLE  "<CMAKE_CXX_COMPILER> <CMAKE_CXX_LINK_FLAGS> <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
    set(CMAKE_C_LINK_EXECUTABLE    "<CMAKE_C_COMPILER>   <CMAKE_C_LINK_FLAGS>   <OBJECTS>  -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib  -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
 # some strict compiler flags
-   set (CMAKE_C_FLAGS "-Wstrict-prototypes")
-   set (CMAKE_CXX_FLAGS "-Woverloaded-virtual -fno-rtti -Wctor-dtor-privacy -fno-strict-aliasing -fno-exceptions")
+   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-prototypes")
+   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Woverloaded-virtual -fno-rtti -Wctor-dtor-privacy -fno-strict-aliasing -fno-exceptions")
 
    add_executable(${_exe_NAME} ${ARGN})
    set_target_properties(${_exe_NAME} PROPERTIES SUFFIX ".elf")

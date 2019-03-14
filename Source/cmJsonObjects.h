@@ -21,10 +21,7 @@ extern void cmGetCMakeInputs(const cmGlobalGenerator* gg,
                              std::vector<std::string>* tmpFiles);
 
 extern Json::Value cmDumpCodeModel(const cmake* cm);
-extern Json::Value cmDumpCodeModel2(const cmake* cm, bool includeTraces,
-                                    bool includeSourceGroups);
 extern Json::Value cmDumpCTestInfo(const cmake* cm);
-extern Json::Value cmDumpCTestInfo2(const cmake* cm, bool includeTraces);
 extern Json::Value cmDumpCMakeInputs(const cmake* cm);
 
 #endif

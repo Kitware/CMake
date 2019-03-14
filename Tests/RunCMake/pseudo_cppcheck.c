@@ -5,13 +5,16 @@
 int main(int argc, char* argv[])
 {
   int i;
+  int result = 0;
   for (i = 1; i < argc; ++i) {
-    if (strcmp(argv[i], "-bad") == 0)
-      if (strcmp(argv[i], "-bad") == 0) {
-        fprintf(stdout, "stdout from bad command line arg '-bad'\n");
-        fprintf(stderr, "stderr from bad command line arg '-bad'\n");
-        return 1;
-      }
+    if (strcmp(argv[i], "-bad") == 0) {
+      fprintf(stdout, "stdout from bad command line arg '-bad'\n");
+      fprintf(stderr, "stderr from bad command line arg '-bad'\n");
+      return 1;
+    } else if (strcmp(argv[i], "-error") == 0) {
+      // The real cppcheck allows to set the exitcode with --error-exitcode
+      result = 5;
+    }
   }
   fprintf(stderr,
           "[/foo/bar.c:2]: (error) Array 'abc[10]' accessed at index 12,"
@@ -31,6 +34,6 @@ int main(int argc, char* argv[])
   fprintf(stderr,
           "[/foo/bar.c:2]: (information) cannot find all the include "
           "files (use --check-config for details)\n");
-  // we allow this to return 1 as we ignore it
-  return 1;
+
+  return result;
 }

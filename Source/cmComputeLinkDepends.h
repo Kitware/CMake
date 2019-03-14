@@ -35,23 +35,9 @@ public:
   struct LinkEntry
   {
     std::string Item;
-    cmGeneratorTarget const* Target;
-    bool IsSharedDep;
-    bool IsFlag;
-    LinkEntry()
-      : Item()
-      , Target(nullptr)
-      , IsSharedDep(false)
-      , IsFlag(false)
-    {
-    }
-    LinkEntry(LinkEntry const& r)
-      : Item(r.Item)
-      , Target(r.Target)
-      , IsSharedDep(r.IsSharedDep)
-      , IsFlag(r.IsFlag)
-    {
-    }
+    cmGeneratorTarget const* Target = nullptr;
+    bool IsSharedDep = false;
+    bool IsFlag = false;
   };
 
   typedef std::vector<LinkEntry> EntryVector;

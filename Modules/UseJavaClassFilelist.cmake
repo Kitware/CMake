@@ -1,17 +1,18 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# UseJavaClassFilelist
-# --------------------
-#
-#
-#
-#
-#
-# This script create a list of compiled Java class files to be added to
-# a jar file.  This avoids including cmake files which get created in
-# the binary directory.
+#[=======================================================================[.rst:
+UseJavaClassFilelist
+--------------------
+
+
+
+
+
+This script create a list of compiled Java class files to be added to
+a jar file.  This avoids including cmake files which get created in
+the binary directory.
+#]=======================================================================]
 
 if (CMAKE_JAVA_CLASS_OUTPUT_PATH)
     if (EXISTS "${CMAKE_JAVA_CLASS_OUTPUT_PATH}")

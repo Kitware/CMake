@@ -34,9 +34,7 @@ static const char* cmCTestUpdateHandlerUpdateToString(int type)
   return cmCTestUpdateHandlerUpdateStrings[type];
 }
 
-cmCTestUpdateHandler::cmCTestUpdateHandler()
-{
-}
+cmCTestUpdateHandler::cmCTestUpdateHandler() = default;
 
 void cmCTestUpdateHandler::Initialize()
 {

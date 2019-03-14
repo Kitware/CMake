@@ -1,27 +1,28 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindCVS
-# -------
-#
-#
-#
-# The module defines the following variables:
-#
-# ::
-#
-#    CVS_EXECUTABLE - path to cvs command line client
-#    CVS_FOUND - true if the command line client was found
-#
-# Example usage:
-#
-# ::
-#
-#    find_package(CVS)
-#    if(CVS_FOUND)
-#      message("CVS found: ${CVS_EXECUTABLE}")
-#    endif()
+#[=======================================================================[.rst:
+FindCVS
+-------
+
+
+
+The module defines the following variables:
+
+::
+
+   CVS_EXECUTABLE - path to cvs command line client
+   CVS_FOUND - true if the command line client was found
+
+Example usage:
+
+::
+
+   find_package(CVS)
+   if(CVS_FOUND)
+     message("CVS found: ${CVS_EXECUTABLE}")
+   endif()
+#]=======================================================================]
 
 # CVSNT
 

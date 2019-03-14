@@ -129,13 +129,13 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       this->VariableDocumentation += "the (unknown) library be found";
     } else if (this->Names.size() == 1) {
       this->VariableDocumentation +=
-        "the " + this->Names[0] + " library be found";
+        "the " + this->Names.front() + " library be found";
     } else {
       this->VariableDocumentation += "one of the ";
       this->VariableDocumentation +=
         cmJoin(cmMakeRange(this->Names).retreat(1), ", ");
       this->VariableDocumentation +=
-        " or " + this->Names[this->Names.size() - 1] + " libraries be found";
+        " or " + this->Names.back() + " libraries be found";
     }
   }
 

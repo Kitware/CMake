@@ -7,6 +7,7 @@
 
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
@@ -25,9 +26,7 @@ cmTestGenerator::cmTestGenerator(
   this->LG = nullptr;
 }
 
-cmTestGenerator::~cmTestGenerator()
-{
-}
+cmTestGenerator::~cmTestGenerator() = default;
 
 void cmTestGenerator::Compute(cmLocalGenerator* lg)
 {
@@ -89,7 +88,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
     // Prepend with the emulator when cross compiling if required.
     const char* emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
-    if (emulator != nullptr) {
+    if (emulator != nullptr && *emulator) {
       std::vector<std::string> emulatorWithArgs;
       cmSystemTools::ExpandListArgument(emulator, emulatorWithArgs);
       std::string emulatorExe(emulatorWithArgs[0]);
@@ -128,7 +127,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
        << cmOutputConverter::EscapeForCMake(
             ge.Parse(i.second.GetValue())->Evaluate(this->LG, config));
   }
-  GenerateInternalProperties(os);
+  this->GenerateInternalProperties(os);
   os << ")" << std::endl;
 }
 
@@ -184,7 +183,7 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
     fout << " " << i.first << " "
          << cmOutputConverter::EscapeForCMake(i.second.GetValue());
   }
-  GenerateInternalProperties(fout);
+  this->GenerateInternalProperties(fout);
   fout << ")" << std::endl;
 }
 
@@ -205,7 +204,7 @@ void cmTestGenerator::GenerateInternalProperties(std::ostream& os)
     if (prependTripleSeparator) {
       os << ";";
     }
-    os << entry.FilePath() << ";" << entry.Line << ";" << entry.Name();
+    os << entry.FilePath << ";" << entry.Line << ";" << entry.Name;
     bt = bt.Pop();
     prependTripleSeparator = true;
   }

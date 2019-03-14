@@ -6,9 +6,9 @@
 #include <stdio.h>
 
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -96,7 +96,7 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,
     e << "CMake " << version_min
       << " or higher is required.  You are running version "
       << cmVersion::GetCMakeVersion();
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
     return true;
   }
@@ -108,7 +108,7 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,
 
   if (required_major < 2 || (required_major == 2 && required_minor < 4)) {
     this->Makefile->IssueMessage(
-      cmake::AUTHOR_WARNING,
+      MessageType::AUTHOR_WARNING,
       "Compatibility with CMake < 2.4 is not supported by CMake >= 3.0.");
     this->Makefile->SetPolicyVersion("2.4", version_max);
   } else {

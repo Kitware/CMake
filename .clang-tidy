@@ -1,5 +1,8 @@
 ---
 Checks: "-*,\
+bugprone-*,\
+-bugprone-macro-parentheses,\
+-bugprone-misplaced-widening-cast,\
 google-readability-casting,\
 misc-*,\
 -misc-incorrect-roundings,\
@@ -8,28 +11,28 @@ misc-*,\
 -misc-static-assert,\
 modernize-*,\
 -modernize-deprecated-headers,\
--modernize-pass-by-value,\
 -modernize-raw-string-literal,\
 -modernize-return-braced-init-list,\
 -modernize-use-auto,\
--modernize-use-default-member-init,\
--modernize-use-emplace,\
--modernize-use-equals-default,\
--modernize-use-equals-delete,\
 -modernize-use-noexcept,\
 -modernize-use-transparent-functors,\
 -modernize-use-using,\
 performance-*,\
 -performance-inefficient-string-concatenation,\
+-performance-inefficient-vector-operation,\
 readability-*,\
 -readability-function-size,\
 -readability-identifier-naming,\
 -readability-implicit-bool-cast,\
+-readability-implicit-bool-conversion,\
 -readability-inconsistent-declaration-parameter-name,\
 -readability-named-parameter,\
 -readability-redundant-declaration,\
--readability-redundant-member-init,\
--readability-simplify-boolean-expr,\
 "
 HeaderFilterRegex: 'Source/cm[^/]*\.(h|hxx|cxx)$'
+CheckOptions:
+  - key:   modernize-use-default-member-init.UseAssignment
+    value: '1'
+  - key:   modernize-use-equals-default.IgnoreMacros
+    value: '0'
 ...

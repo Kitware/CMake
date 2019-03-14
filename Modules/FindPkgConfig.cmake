@@ -9,12 +9,14 @@ A ``pkg-config`` module for CMake.
 
 Finds the ``pkg-config`` executable and adds the :command:`pkg_get_variable`,
 :command:`pkg_check_modules` and :command:`pkg_search_module` commands. The
-following variables will also be set::
+following variables will also be set:
 
-  PKG_CONFIG_FOUND          ... if pkg-config executable was found
-  PKG_CONFIG_EXECUTABLE     ... pathname of the pkg-config program
-  PKG_CONFIG_VERSION_STRING ... the version of the pkg-config program found
-                                (since CMake 2.8.8)
+``PKG_CONFIG_FOUND``
+  if pkg-config executable was found
+``PKG_CONFIG_EXECUTABLE``
+  pathname of the pkg-config program
+``PKG_CONFIG_VERSION_STRING``
+  version of pkg-config (since CMake 2.8.8)
 
 #]========================================]
 
@@ -86,7 +88,9 @@ endmacro()
 .. command:: pkg_get_variable
 
   Retrieves the value of a pkg-config variable ``varName`` and stores it in the
-  result variable ``resultVar`` in the calling scope. ::
+  result variable ``resultVar`` in the calling scope.
+
+  .. code-block:: cmake
 
     pkg_get_variable(<resultVar> <moduleName> <varName>)
 
@@ -227,6 +231,7 @@ function(_pkg_find_libs _prefix _no_cmake_path _no_cmake_environment_path)
     find_library(pkgcfg_lib_${_prefix}_${_pkg_search}
                  NAMES ${_pkg_search}
                  ${_find_opts})
+    mark_as_advanced(pkgcfg_lib_${_prefix}_${_pkg_search})
     list(APPEND _libs "${pkgcfg_lib_${_prefix}_${_pkg_search}}")
   endforeach()
 
@@ -512,7 +517,9 @@ endmacro()
 .. command:: pkg_check_modules
 
   Checks for all the given modules, setting a variety of result variables in
-  the calling scope. ::
+  the calling scope.
+
+  .. code-block:: cmake
 
     pkg_check_modules(<prefix>
                       [REQUIRED] [QUIET]
@@ -543,27 +550,36 @@ endmacro()
   Each ``<moduleSpec>`` can be either a bare module name or it can be a
   module name with a version constraint (operators ``=``, ``<``, ``>``,
   ``<=`` and ``>=`` are supported).  The following are examples for a module
-  named ``foo`` with various constraints::
+  named ``foo`` with various constraints:
 
-    foo           # Any version matches
-    foo<2         # Only match versions before 2
-    foo>=3.1      # Match any version from 3.1 or later
-    foo=1.2.3     # Foo must be exactly version 1.2.3
+  - ``foo`` matches any version.
+  - ``foo<2`` only matches versions before 2.
+  - ``foo>=3.1`` matches any version from 3.1 or later.
+  - ``foo=1.2.3`` requires that foo must be exactly version 1.2.3.
 
-  The following variables may be set upon return.  Two sets of values exist,
-  one for the common case (``<XXX> = <prefix>``) and another for the
-  information ``pkg-config`` provides when it is called with the ``--static``
-  option (``<XXX> = <prefix>_STATIC``)::
+  The following variables may be set upon return.  Two sets of values exist:
+  One for the common case (``<XXX> = <prefix>``) and another for the
+  information ``pkg-config`` provides when called with the ``--static``
+  option (``<XXX> = <prefix>_STATIC``).
 
-    <XXX>_FOUND          ... set to 1 if module(s) exist
-    <XXX>_LIBRARIES      ... only the libraries (without the '-l')
-    <XXX>_LINK_LIBRARIES ... the libraries and their absolute paths
-    <XXX>_LIBRARY_DIRS   ... the paths of the libraries (without the '-L')
-    <XXX>_LDFLAGS        ... all required linker flags
-    <XXX>_LDFLAGS_OTHER  ... all other linker flags
-    <XXX>_INCLUDE_DIRS   ... the '-I' preprocessor flags (without the '-I')
-    <XXX>_CFLAGS         ... all required cflags
-    <XXX>_CFLAGS_OTHER   ... the other compiler flags
+  ``<XXX>_FOUND``
+    set to 1 if module(s) exist
+  ``<XXX>_LIBRARIES``
+    only the libraries (without the '-l')
+  ``<XXX>_LINK_LIBRARIES``
+    the libraries and their absolute paths
+  ``<XXX>_LIBRARY_DIRS``
+    the paths of the libraries (without the '-L')
+  ``<XXX>_LDFLAGS``
+    all required linker flags
+  ``<XXX>_LDFLAGS_OTHER``
+    all other linker flags
+  ``<XXX>_INCLUDE_DIRS``
+    the '-I' preprocessor flags (without the '-I')
+  ``<XXX>_CFLAGS``
+    all required cflags
+  ``<XXX>_CFLAGS_OTHER``
+    the other compiler flags
 
   All but ``<XXX>_FOUND`` may be a :ref:`;-list <CMake Language Lists>` if the
   associated variable returned from ``pkg-config`` has multiple values.
@@ -571,14 +587,18 @@ endmacro()
   There are some special variables whose prefix depends on the number of
   ``<moduleSpec>`` given.  When there is only one ``<moduleSpec>``,
   ``<YYY>`` will simply be ``<prefix>``, but if two or more ``<moduleSpec>``
-  items are given, ``<YYY>`` will be ``<prefix>_<moduleName>``::
+  items are given, ``<YYY>`` will be ``<prefix>_<moduleName>``.
 
-    <YYY>_VERSION    ... version of the module
-    <YYY>_PREFIX     ... prefix directory of the module
-    <YYY>_INCLUDEDIR ... include directory of the module
-    <YYY>_LIBDIR     ... lib directory of the module
+  ``<YYY>_VERSION``
+    version of the module
+  ``<YYY>_PREFIX``
+    prefix directory of the module
+  ``<YYY>_INCLUDEDIR``
+    include directory of the module
+  ``<YYY>_LIBDIR``
+    lib directory of the module
 
-  Examples
+  Examples:
 
   .. code-block:: cmake
 
@@ -638,7 +658,9 @@ endmacro()
 
   The behavior of this command is the same as :command:`pkg_check_modules`,
   except that rather than checking for all the specified modules, it searches
-  for just the first successful match. ::
+  for just the first successful match.
+
+  .. code-block:: cmake
 
     pkg_search_module(<prefix>
                       [REQUIRED] [QUIET]
@@ -647,7 +669,7 @@ endmacro()
                       [IMPORTED_TARGET [GLOBAL]]
                       <moduleSpec> [<moduleSpec>...])
 
-  Examples
+  Example:
 
   .. code-block:: cmake
 

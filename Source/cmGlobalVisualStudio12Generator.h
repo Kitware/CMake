@@ -18,20 +18,14 @@ class cmake;
 class cmGlobalVisualStudio12Generator : public cmGlobalVisualStudio11Generator
 {
 public:
-  cmGlobalVisualStudio12Generator(cmake* cm, const std::string& name,
-                                  const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
-  void WriteSLNHeader(std::ostream& fout) override;
-
-  // in Visual Studio 2013 they detached the MSBuild tools version
-  // from the .Net Framework version and instead made it have it's own
-  // version number
-  const char* GetToolsVersion() override { return "12.0"; }
-
 protected:
+  cmGlobalVisualStudio12Generator(cmake* cm, const std::string& name,
+                                  std::string const& platformInGeneratorName);
+
   bool ProcessGeneratorToolsetField(std::string const& key,
                                     std::string const& value) override;
 
@@ -48,9 +42,9 @@ protected:
   // of the toolset is installed
   bool IsWindowsPhoneToolsetInstalled() const;
   bool IsWindowsStoreToolsetInstalled() const;
-  const char* GetIDEVersion() override { return "12.0"; }
 
 private:
   class Factory;
+  friend class Factory;
 };
 #endif

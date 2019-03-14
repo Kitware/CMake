@@ -1,0 +1,53 @@
+CMAKE_LANG=C
+CMAKE_C_COMPILER_ABI=ELF
+CMAKE_C_COMPILER_AR=
+CMAKE_C_COMPILER_ARCHITECTURE_ID=
+CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_C_COMPILER_ID=Cray
+CMAKE_C_COMPILER_LAUNCHER=
+CMAKE_C_COMPILER_LOADED=1
+CMAKE_C_COMPILER_RANLIB=
+CMAKE_C_COMPILER_TARGET=
+CMAKE_C_COMPILER_VERSION=8.7
+CMAKE_C_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_cb7b8/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_cb7b8.dir/build.make CMakeFiles/cmTC_cb7b8.dir/build
+gmake[1]: Entering directory '/tmp/ii/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_cb7b8.dir/CMakeCCompilerABI.c.o
+/opt/cray/pe/craype/2.5.15/bin/cc    -v -o CMakeFiles/cmTC_cb7b8.dir/CMakeCCompilerABI.c.o   -c /usr/share/cmake/Modules/CMakeCCompilerABI.c
+rm /tmp/pe_15430/CMakeCCompilerABI_1.s
+
+/opt/cray/pe/cce/8.7.4/cce/x86_64/bin/ccfe -hc -hcpu=haswell -D __CRAYXC -D __CRAY_HASWELL -D __CRAYXT_COMPUTE_LINUX_TARGET -hnetwork=aries -nostdinc -isystem /opt/cray/pe/cce/8.7.4/cce/x86_64/include/craylibs -isystem /opt/cray/pe/cce/8.7.4/cce/x86_64/include/basic -isystem /opt/gcc/6.1.0/snos/lib/gcc/x86_64-suse-linux/6.1.0/include -isystem /opt/gcc/6.1.0/snos/lib/gcc/x86_64-suse-linux/6.1.0/include-fixed -isystem /opt/gcc/6.1.0/snos/include -isystem /usr/include -I /opt/cray/pe/libsci/18.07.1/CRAY/8.6/x86_64/include -I /opt/cray/pe/mpt/7.7.3/gni/mpich-cray/8.6/include -I /opt/cray/rca/2.2.16-6.0.5.0_15.34__g5e09e6d.ari/include -I /opt/cray/alps/6.5.28-6.0.5.0_18.6__g13a91b6.ari/include -I /opt/cray/xpmem/2.2.4-6.0.5.1_8.26__g35d5e73.ari/include -I /opt/cray/gni-headers/5.0.12-6.0.5.0_2.15__g2ef1ebc.ari/include -I /opt/cray/dmapp/7.1.1-6.0.5.0_49.8__g1125556.ari/include -I /opt/cray/pe/pmi/5.0.14/include -I /opt/cray/ugni/6.0.14-6.0.5.0_16.9__g19583bb.ari/include -I /opt/cray/udreg/2.3.2-6.0.5.0_13.12__ga14955a.ari/include -I /opt/cray/wlm_detect/1.3.2-6.0.5.0_3.1__g388ccd5.ari/include -I /opt/cray/krca/2.2.2-6.0.5.1_13.47__g4614cf3.ari/include -I /opt/cray-hss-devel/8.0.0/include -D__PEDRVR_GCC_BASE_ACTIVE__ -hpl=/tmp/pe_15430//pldir -rx8503 -ru87000 -CZ /tmp/pe_15430/CMakeCCompilerABI.T -Cx -CX /tmp/pe_15430/CMakeCCompilerABI.xml -hdecompile=/tmp/ii/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_cb7b8.dir/CMakeCCompilerABI. -S /tmp/pe_15430/CMakeCCompilerABI_1.s -hipa3 -ufile_id=1 /usr/share/cmake/Modules/CMakeCCompilerABI.c
+
+/opt/cray/pe/cce/8.7.4/cce/x86_64/bin/optcg /tmp/pe_15430//pldir 1
+
+/opt/cray/pe/cce/8.7.4/binutils/x86_64/x86_64-pc-linux-gnu/bin/as -o CMakeFiles/cmTC_cb7b8.dir/CMakeCCompilerABI.c.o --64 /tmp/pe_15430/CMakeCCompilerABI_1.s
+rm /tmp/pe_15430/CMakeCCompilerABI_1.s
+rm /tmp/pe_15430//CMakeCCompilerABI_1.cif.Ttmp
+rm /tmp/pe_15430//CMakeCCompilerABI.Tfe
+rm /tmp/pe_15430//CMakeCCompilerABI.T
+rm /tmp/pe_15430//CMakeCCompilerABI_1.xml.Ttmp
+rm /tmp/pe_15430//pldir/PL_path
+rm /tmp/pe_15430//pldir/iline_1
+rm /tmp/pe_15430//pldir/PL_module_list
+rm /tmp/pe_15430//pldir/CMakeCCompilerABI_1.inl
+rm /tmp/pe_15430//pldir/gline_1
+rm /tmp/pe_15430//pldir/PL_global_data
+rmdir /tmp/pe_15430//pldir
+rm /tmp/pe_15430//CMakeCCompilerABI.xml
+rmdir /tmp/pe_15430/
+Linking C executable cmTC_cb7b8
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cb7b8.dir/link.txt --verbose=1
+/opt/cray/pe/craype/2.5.15/bin/cc      -v CMakeFiles/cmTC_cb7b8.dir/CMakeCCompilerABI.c.o  -o cmTC_cb7b8
+
+/opt/cray/pe/cce/8.7.4/binutils/x86_64/x86_64-pc-linux-gnu/bin/ld /usr/lib64//crt1.o /usr/lib64//crti.o /opt/gcc/6.1.0/snos/lib/gcc/x86_64-suse-linux/6.1.0//crtbeginT.o /opt/gcc/6.1.0/snos/lib/gcc/x86_64-suse-linux/6.1.0//crtfastmath.o /opt/cray/pe/cce/8.7.4/cce/x86_64/lib/no_mmap.o CMakeFiles/cmTC_cb7b8.dir/CMakeCCompilerABI.c.o -Bstatic -rpath=/opt/cray/pe/cce/8.7.4/cce/x86_64/lib -L /opt/gcc/6.1.0/snos/lib64 -rpath=/opt/cray/pe/gcc-libs -L /opt/cray/pe/libsci/18.07.1/CRAY/8.6/x86_64/lib -L /opt/cray/dmapp/default/lib64 -L /opt/cray/pe/mpt/7.7.3/gni/mpich-cray/8.6/lib -L /opt/cray/rca/2.2.16-6.0.5.0_15.34__g5e09e6d.ari/lib64 -L /opt/cray/alps/6.5.28-6.0.5.0_18.6__g13a91b6.ari/lib64 -L /opt/cray/xpmem/2.2.4-6.0.5.1_8.26__g35d5e73.ari/lib64 -L /opt/cray/dmapp/7.1.1-6.0.5.0_49.8__g1125556.ari/lib64 -L /opt/cray/pe/pmi/5.0.14/lib64 -L /opt/cray/ugni/6.0.14-6.0.5.0_16.9__g19583bb.ari/lib64 -L /opt/cray/udreg/2.3.2-6.0.5.0_13.12__ga14955a.ari/lib64 -L /opt/cray/pe/atp/2.1.3/libApp -L /opt/cray/pe/cce/8.7.4/cce/x86_64/lib/pkgconfig/../ -L /opt/cray/wlm_detect/1.3.2-6.0.5.0_3.1__g388ccd5.ari/lib64 --no-as-needed -lAtpSigHandler -lAtpSigHCommData --undefined=_ATP_Data_Globals --undefined=__atpHandlerInstall -L /usr/lib64 -L /lib64 -rpath=/usr/lib64 -rpath=/lib64 -lpthread -lsci_cray_mpi_mp -lm -lf -lsci_cray_mp -lcraymp -lm -lpthread -lf -lhugetlbfs -lmpich_cray -lrt -lpthread -lugni -lpmi -lpgas-dmapp -lfi -lu -lrt --undefined=dmapp_get_flag_nbi -ldmapp -lugni -ludreg -lpthread -lm -lcray-c++-rts -lstdc++ -lxpmem -ldmapp -lpthread -lpmi -lpthread -lalpslli -lpthread -lwlm_detect -lugni -lpthread -lalpsutil -lpthread -lrca -ludreg -lquadmath -lm -lomp -lrt -lcraymp -lpthread -lrt -ldl -lcray-c++-rts -lstdc++ -lm -lmodules -lm -lrt -lfi -lm -lquadmath -lrt -lcraymath -lm -lgfortran -lquadmath -lrt -lf -lm -lpthread -lrt -lu -lrt -ldl -lcray-c++-rts -lstdc++ -lm -lcsup -lrt --as-needed -latomic --no-as-needed -lstdc++ -lpthread --start-group -lc -lcsup -lgcc_eh -lm -lgcc --end-group -T/opt/cray/pe/cce/8.7.4/cce/x86_64/lib/2.23.1.cce.ld -L /opt/gcc/6.1.0/snos/lib/gcc/x86_64-suse-linux/6.1.0 -L /opt/cray/pe/cce/8.7.4/binutils/x86_64/x86_64-pc-linux-gnu/..//x86_64-unknown-linux-gnu/lib -EL -o cmTC_cb7b8 --undefined=__pthread_initialize_minimal /opt/gcc/6.1.0/snos/lib/gcc/x86_64-suse-linux/6.1.0//crtend.o /usr/lib64//crtn.o
+
+/opt/cray/pe/cce/8.7.4/binutils/x86_64/bin/objcopy --remove-section=.note.ftn_module_data cmTC_cb7b8
+rm /tmp/pe_15450//pldir/PL_path
+rm /tmp/pe_15450//pldir/PL_module_list
+rm /tmp/pe_15450//pldir/PL_global_data
+rmdir /tmp/pe_15450//pldir
+rmdir /tmp/pe_15450/
+gmake[1]: Leaving directory '/tmp/ii/CMakeFiles/CMakeTmp'

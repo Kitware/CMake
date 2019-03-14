@@ -12,10 +12,11 @@ class cmCursesMainForm;
 
 class cmCursesBoolWidget : public cmCursesWidget
 {
-  CM_DISABLE_COPY(cmCursesBoolWidget)
-
 public:
   cmCursesBoolWidget(int width, int height, int left, int top);
+
+  cmCursesBoolWidget(cmCursesBoolWidget const&) = delete;
+  cmCursesBoolWidget& operator=(cmCursesBoolWidget const&) = delete;
 
   // Description:
   // Handle user input. Called by the container of this widget

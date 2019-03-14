@@ -32,7 +32,7 @@ file(DOWNLOAD
   ${url}
   ${dir}/file3.png
   TIMEOUT 2
-  EXPECTED_MD5 d16778650db435bda3a8c3435c3ff5d1
+  EXPECTED_MD5 dbd330d52f4dbd60115d4191904ded92
   )
 
 message(STATUS "FileDownload:4")
@@ -41,7 +41,7 @@ file(DOWNLOAD
   ${dir}/file3.png
   TIMEOUT 2
   STATUS status
-  EXPECTED_HASH SHA1=50c614fc28b39c1281d0517bb6d5858b4359c9b7
+  EXPECTED_HASH SHA1=67eee17f79d9ac557284fc0b8ad19f25723fb578
   )
 
 message(STATUS "FileDownload:5")
@@ -50,7 +50,7 @@ file(DOWNLOAD
   ${dir}/file3.png
   TIMEOUT 2
   STATUS status
-  EXPECTED_HASH SHA224=73cd5f442b04e8320e4f907f8e1b21d4befff98b5bd77bc32526ea68
+  EXPECTED_HASH SHA224=ba283726bbb602776818b463943189afd91836cb7ee5dd6e2c7b5ae4
   )
 
 message(STATUS "FileDownload:6")
@@ -59,7 +59,7 @@ file(DOWNLOAD
   ${dir}/file3.png
   TIMEOUT 2
   STATUS status
-  EXPECTED_HASH SHA256=2e067f6c09cbc7cd619c8fbcc44eb64cd6b45a95e4cddb3a585eee1f731c4da9
+  EXPECTED_HASH SHA256=cf3334b1275071e1da6e8c396ccb72cf1b2388d8c937526f3af26230affb9423
   )
 
 message(STATUS "FileDownload:7")
@@ -68,7 +68,7 @@ file(DOWNLOAD
   ${dir}/file3.png
   TIMEOUT 2
   STATUS status
-  EXPECTED_HASH SHA384=398bf41902a7251c30e522b307e3e41e3fb617c765b3feaa99b2f7d063894708ad399267ccc25d877437a10e5e890d35
+  EXPECTED_HASH SHA384=43a5d13978d97c660db44481aee0604cb4ff6ca0775cd5c2cd68cd8000e107e507c4caf6c228941231041e282ffb8950
   )
 
 message(STATUS "FileDownload:8")
@@ -77,7 +77,7 @@ file(DOWNLOAD
   ${dir}/file3.png
   TIMEOUT 2
   STATUS status
-  EXPECTED_HASH SHA512=c51854d21052713968b849c2b4263cf54be03bc3a7e9847a6c71c6c8d1d13cd805fe1b9fa95f9ba1d0a5631513974f6fae21e34ab5b171d94bad48df5f073e48
+  EXPECTED_HASH SHA512=6984e0909a1018030ccaa418e3be1654223cdccff0fe6adc745f9aea7e377f178be53b9fc7d54a6f81c2b62ef9ddcd38ba1978fedf4c5e7139baaf355eefad5b
   )
 message(STATUS "FileDownload:9")
 file(DOWNLOAD
@@ -85,7 +85,7 @@ file(DOWNLOAD
   ${dir}/file3.png
   TIMEOUT 2
   STATUS status
-  EXPECTED_HASH MD5=d16778650db435bda3a8c3435c3ff5d1
+  EXPECTED_HASH MD5=dbd330d52f4dbd60115d4191904ded92
   )
 
 message(STATUS "FileDownload:10")
@@ -94,7 +94,7 @@ file(DOWNLOAD
   ${dir}/file3.png
   TIMEOUT 2
   STATUS status
-  EXPECTED_MD5 d16778650db435bda3a8c3435c3ff5d1
+  EXPECTED_MD5 dbd330d52f4dbd60115d4191904ded92
   )
 message(STATUS "${status}")
 

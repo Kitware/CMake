@@ -23,19 +23,30 @@ QCMake::QCMake(QObject* p)
 
   cmSystemTools::DisableRunCommandOutput();
   cmSystemTools::SetRunCommandHideConsole(true);
-  cmSystemTools::SetMessageCallback(QCMake::messageCallback, this);
-  cmSystemTools::SetStdoutCallback(QCMake::stdoutCallback, this);
-  cmSystemTools::SetStderrCallback(QCMake::stderrCallback, this);
 
-  this->CMakeInstance = new cmake(cmake::RoleProject);
+  cmSystemTools::SetMessageCallback(
+    [this](const char* msg, const char* title) {
+      this->messageCallback(msg, title);
+    });
+  cmSystemTools::SetStdoutCallback(
+    [this](std::string const& msg) { this->stdoutCallback(msg); });
+  cmSystemTools::SetStderrCallback(
+    [this](std::string const& msg) { this->stderrCallback(msg); });
+
+  this->CMakeInstance = new cmake(cmake::RoleProject, cmState::Project);
   this->CMakeInstance->SetCMakeEditCommand(
     cmSystemTools::GetCMakeGUICommand());
-  this->CMakeInstance->SetProgressCallback(QCMake::progressCallback, this);
+  this->CMakeInstance->SetProgressCallback(
+    [this](const char* msg, float percent) {
+      this->progressCallback(msg, percent);
+    });
 
-  cmSystemTools::SetInterruptCallback(QCMake::interruptCallback, this);
+  cmSystemTools::SetInterruptCallback(
+    [this] { return this->interruptCallback(); });
 
   std::vector<cmake::GeneratorInfo> generators;
-  this->CMakeInstance->GetRegisteredGenerators(generators);
+  this->CMakeInstance->GetRegisteredGenerators(
+    generators, /*includeNamesWithPlatform=*/false);
 
   std::vector<cmake::GeneratorInfo>::const_iterator it;
   for (it = generators.begin(); it != generators.end(); ++it) {
@@ -74,6 +85,7 @@ void QCMake::setBinaryDirectory(const QString& _dir)
     cmState* state = this->CMakeInstance->GetState();
     this->setGenerator(QString());
     this->setToolset(QString());
+    this->setPlatform(QString());
     if (!this->CMakeInstance->LoadCache(
           this->BinaryDirectory.toLocal8Bit().data())) {
       QDir testDir(this->BinaryDirectory);
@@ -102,6 +114,12 @@ void QCMake::setBinaryDirectory(const QString& _dir)
       this->setGenerator(QString::fromLocal8Bit(curGen.c_str()));
     }
 
+    const char* platform =
+      state->GetCacheEntryValue("CMAKE_GENERATOR_PLATFORM");
+    if (platform) {
+      this->setPlatform(QString::fromLocal8Bit(platform));
+    }
+
     const char* toolset = state->GetCacheEntryValue("CMAKE_GENERATOR_TOOLSET");
     if (toolset) {
       this->setToolset(QString::fromLocal8Bit(toolset));
@@ -116,6 +134,14 @@ void QCMake::setGenerator(const QString& gen)
   if (this->Generator != gen) {
     this->Generator = gen;
     emit this->generatorChanged(this->Generator);
+  }
+}
+
+void QCMake::setPlatform(const QString& platform)
+{
+  if (this->Platform != platform) {
+    this->Platform = platform;
+    emit this->platformChanged(this->Platform);
   }
 }
 
@@ -140,7 +166,8 @@ void QCMake::configure()
   this->CMakeInstance->SetGlobalGenerator(
     this->CMakeInstance->CreateGlobalGenerator(
       this->Generator.toLocal8Bit().data()));
-  this->CMakeInstance->SetGeneratorPlatform("");
+  this->CMakeInstance->SetGeneratorPlatform(
+    this->Platform.toLocal8Bit().data());
   this->CMakeInstance->SetGeneratorToolset(this->Toolset.toLocal8Bit().data());
   this->CMakeInstance->LoadCache();
   this->CMakeInstance->SetWarnUninitialized(this->WarnUninitializedMode);
@@ -313,46 +340,40 @@ void QCMake::interrupt()
   this->InterruptFlag.ref();
 }
 
-bool QCMake::interruptCallback(void* cd)
+bool QCMake::interruptCallback()
 {
-  QCMake* self = reinterpret_cast<QCMake*>(cd);
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  return self->InterruptFlag;
+  return this->InterruptFlag;
 #else
-  return self->InterruptFlag.load();
+  return this->InterruptFlag.load();
 #endif
 }
 
-void QCMake::progressCallback(const char* msg, float percent, void* cd)
+void QCMake::progressCallback(const char* msg, float percent)
 {
-  QCMake* self = reinterpret_cast<QCMake*>(cd);
   if (percent >= 0) {
-    emit self->progressChanged(QString::fromLocal8Bit(msg), percent);
+    emit this->progressChanged(QString::fromLocal8Bit(msg), percent);
   } else {
-    emit self->outputMessage(QString::fromLocal8Bit(msg));
+    emit this->outputMessage(QString::fromLocal8Bit(msg));
   }
   QCoreApplication::processEvents();
 }
 
-void QCMake::messageCallback(const char* msg, const char* /*title*/,
-                             bool& /*stop*/, void* cd)
+void QCMake::messageCallback(const char* msg, const char* /*title*/)
 {
-  QCMake* self = reinterpret_cast<QCMake*>(cd);
-  emit self->errorMessage(QString::fromLocal8Bit(msg));
+  emit this->errorMessage(QString::fromLocal8Bit(msg));
   QCoreApplication::processEvents();
 }
 
-void QCMake::stdoutCallback(const char* msg, size_t len, void* cd)
+void QCMake::stdoutCallback(std::string const& msg)
 {
-  QCMake* self = reinterpret_cast<QCMake*>(cd);
-  emit self->outputMessage(QString::fromLocal8Bit(msg, int(len)));
+  emit this->outputMessage(QString::fromStdString(msg));
   QCoreApplication::processEvents();
 }
 
-void QCMake::stderrCallback(const char* msg, size_t len, void* cd)
+void QCMake::stderrCallback(std::string const& msg)
 {
-  QCMake* self = reinterpret_cast<QCMake*>(cd);
-  emit self->outputMessage(QString::fromLocal8Bit(msg, int(len)));
+  emit this->outputMessage(QString::fromStdString(msg));
   QCoreApplication::processEvents();
 }
 

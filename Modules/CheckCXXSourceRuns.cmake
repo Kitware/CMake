@@ -10,16 +10,16 @@ subsequently be run.
 
 .. command:: check_cxx_source_runs
 
-  ::
+  .. code-block:: cmake
 
-    check_cxx_source_runs(code resultVar)
+    check_cxx_source_runs(<code> <resultVar>)
 
-  Check that the source supplied in ``code`` can be compiled as a C++ source
-  file, linked as an executable and then run. The ``code`` must contain at
-  least a ``main()`` function. If the code could be built and run successfully,
-  the internal cache variable specified by ``resultVar`` will be set to 1,
-  otherwise it will be set to an value that evaluates to boolean false (e.g.
-  an empty string or an error message).
+  Check that the source supplied in ``<code>`` can be compiled as a C++ source
+  file, linked as an executable and then run. The ``<code>`` must contain at
+  least a ``main()`` function. If the ``<code>`` could be built and run
+  successfully, the internal cache variable specified by ``<resultVar>`` will
+  be set to 1, otherwise it will be set to an value that evaluates to boolean
+  false (e.g. an empty string or an error message).
 
   The underlying check is performed by the :command:`try_run` command. The
   compile and link commands can be influenced by setting any of the following
@@ -34,13 +34,17 @@ subsequently be run.
   ``CMAKE_REQUIRED_DEFINITIONS``
     A :ref:`;-list <CMake Language Lists>` of compiler definitions of the form
     ``-DFOO`` or ``-DFOO=bar``. A definition for the name specified by
-    ``resultVar`` will also be added automatically.
+    ``<resultVar>`` will also be added automatically.
 
   ``CMAKE_REQUIRED_INCLUDES``
     A :ref:`;-list <CMake Language Lists>` of header search paths to pass to
     the compiler. These will be the only header search paths used by
     ``try_run()``, i.e. the contents of the :prop_dir:`INCLUDE_DIRECTORIES`
     directory property will be ignored.
+
+  ``CMAKE_REQUIRED_LINK_OPTIONS``
+    A :ref:`;-list <CMake Language Lists>` of options to add to the link
+    command (see :command:`try_run` for further details).
 
   ``CMAKE_REQUIRED_LIBRARIES``
     A :ref:`;-list <CMake Language Lists>` of libraries to add to the link
@@ -53,10 +57,10 @@ subsequently be run.
     associated with the check will be suppressed.
 
   The check is only performed once, with the result cached in the variable
-  named by ``resultVar``. Every subsequent CMake run will re-use this cached
-  value rather than performing the check again, even if the ``code`` changes.
+  named by ``<resultVar>``. Every subsequent CMake run will re-use this cached
+  value rather than performing the check again, even if the ``<code>`` changes.
   In order to force the check to be re-evaluated, the variable named by
-  ``resultVar`` must be manually removed from the cache.
+  ``<resultVar>`` must be manually removed from the cache.
 
 #]=======================================================================]
 
@@ -66,6 +70,12 @@ macro(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
   if(NOT DEFINED "${VAR}")
     set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
+    if(CMAKE_REQUIRED_LINK_OPTIONS)
+      set(CHECK_CXX_SOURCE_COMPILES_ADD_LINK_OPTIONS
+        LINK_OPTIONS ${CMAKE_REQUIRED_LINK_OPTIONS})
+    else()
+      set(CHECK_CXX_SOURCE_COMPILES_ADD_LINK_OPTIONS)
+    endif()
     if(CMAKE_REQUIRED_LIBRARIES)
       set(CHECK_CXX_SOURCE_COMPILES_ADD_LIBRARIES
         LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
@@ -88,11 +98,13 @@ macro(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.cxx
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
+      ${CHECK_CXX_SOURCE_COMPILES_ADD_LINK_OPTIONS}
       ${CHECK_CXX_SOURCE_COMPILES_ADD_LIBRARIES}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
       -DCMAKE_SKIP_RPATH:BOOL=${CMAKE_SKIP_RPATH}
       "${CHECK_CXX_SOURCE_COMPILES_ADD_INCLUDES}"
-      COMPILE_OUTPUT_VARIABLE OUTPUT)
+      COMPILE_OUTPUT_VARIABLE OUTPUT
+      RUN_OUTPUT_VARIABLE RUN_OUTPUT)
 
     # if it did not compile make the return value fail code of 1
     if(NOT ${VAR}_COMPILED)
@@ -107,6 +119,8 @@ macro(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing C++ SOURCE FILE Test ${VAR} succeeded with the following output:\n"
         "${OUTPUT}\n"
+        "...and run output:\n"
+        "${RUN_OUTPUT}\n"
         "Return value: ${${VAR}}\n"
         "Source file was:\n${SOURCE}\n")
     else()
@@ -122,9 +136,10 @@ macro(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing C++ SOURCE FILE Test ${VAR} failed with the following output:\n"
         "${OUTPUT}\n"
+        "...and run output:\n"
+        "${RUN_OUTPUT}\n"
         "Return value: ${${VAR}_EXITCODE}\n"
         "Source file was:\n${SOURCE}\n")
     endif()
   endif()
 endmacro()
-
