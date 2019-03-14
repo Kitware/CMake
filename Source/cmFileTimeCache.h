@@ -34,8 +34,7 @@ public:
    * When true is returned, result has -1, 0, +1 for
    * f1 older, same, or newer than f2.
    */
-  bool FileTimeCompare(std::string const& f1, std::string const& f2,
-                       int* result);
+  bool Compare(std::string const& f1, std::string const& f2, int* result);
 
   /**
    * @brief Compare file modification times.

@@ -29,8 +29,8 @@ bool cmFileTimeCache::Load(std::string const& fileName, cmFileTime& fileTime)
   return true;
 }
 
-bool cmFileTimeCache::FileTimeCompare(std::string const& f1,
-                                      std::string const& f2, int* result)
+bool cmFileTimeCache::Compare(std::string const& f1, std::string const& f2,
+                              int* result)
 {
   // Get the modification time for each file.
   cmFileTime ft1, ft2;

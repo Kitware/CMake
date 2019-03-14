@@ -1277,8 +1277,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
     this->GlobalGenerator->GetCMakeInstance()->GetFileTimeCache();
   {
     int result;
-    if (!ftc->FileTimeCompare(internalDependFile, tgtInfo, &result) ||
-        result < 0) {
+    if (!ftc->Compare(internalDependFile, tgtInfo, &result) || result < 0) {
       if (verbose) {
         std::ostringstream msg;
         msg << "Dependee \"" << tgtInfo << "\" is newer than depender \""
@@ -1297,7 +1296,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
     dirInfoFile += "/CMakeFiles";
     dirInfoFile += "/CMakeDirectoryInformation.cmake";
     int result;
-    if (!ftc->FileTimeCompare(internalDependFile, dirInfoFile, &result) ||
+    if (!ftc->Compare(internalDependFile, dirInfoFile, &result) ||
         result < 0) {
       if (verbose) {
         std::ostringstream msg;
