@@ -29,6 +29,13 @@ concurrently with :module:`FindPython3` module to use both Python versions.
 The :module:`FindPython` module can be used if Python version does not matter
 for you.
 
+.. note::
+
+  If components ``Interpreter`` and ``Development`` are both specified, this
+  module search only for interpreter with same platform architecture as the one
+  defined by ``CMake`` configuration. This contraint does not apply if only
+  ``Interpreter`` component is specified.
+
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
