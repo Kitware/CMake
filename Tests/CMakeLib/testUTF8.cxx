@@ -30,8 +30,12 @@ static test_utf8_entry const good_entry[] = {
 };
 
 static test_utf8_char const bad_chars[] = {
-  "\x80\x00\x00\x00", "\xC0\x00\x00\x00", "\xE0\x00\x00\x00",
-  "\xE0\x80\x80\x00", "\xF0\x80\x80\x80", { 0, 0, 0, 0, 0 }
+  "\x80\x00\x00\x00", /* Leading continuation byte. */
+  "\xC0\x00\x00\x00", /* Overlong encoding and missing continuation byte. */
+  "\xE0\x00\x00\x00", /* Missing continuation bytes. */
+  "\xE0\x80\x80\x00", /* Overlong encoding. */
+  "\xF0\x80\x80\x80", /* Overlong encoding. */
+  { 0, 0, 0, 0, 0 }
 };
 
 static void report_good(bool passed, test_utf8_char const c)
