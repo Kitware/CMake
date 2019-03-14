@@ -1264,9 +1264,9 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
   // Check if any multiple output pairs have a missing file.
   this->CheckMultipleOutputs(verbose);
 
-  std::string dir = cmSystemTools::GetFilenamePath(tgtInfo);
-  std::string internalDependFile = dir + "/depend.internal";
-  std::string dependFile = dir + "/depend.make";
+  std::string const targetDir = cmSystemTools::GetFilenamePath(tgtInfo);
+  std::string const internalDependFile = targetDir + "/depend.internal";
+  std::string const dependFile = targetDir + "/depend.make";
 
   // If the target DependInfo.cmake file has changed since the last
   // time dependencies were scanned then force rescanning.  This may
@@ -1292,10 +1292,10 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
   // If the directory information is newer than depend.internal, include dirs
   // may have changed. In this case discard all old dependencies.
   bool needRescanDirInfo = false;
-  std::string dirInfoFile = this->GetCurrentBinaryDirectory();
-  dirInfoFile += "/CMakeFiles";
-  dirInfoFile += "/CMakeDirectoryInformation.cmake";
   {
+    std::string dirInfoFile = this->GetCurrentBinaryDirectory();
+    dirInfoFile += "/CMakeFiles";
+    dirInfoFile += "/CMakeDirectoryInformation.cmake";
     int result;
     if (!ftc->FileTimeCompare(internalDependFile, dirInfoFile, &result) ||
         result < 0) {
@@ -1335,7 +1335,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
 
   if (needRescanDependInfo || needRescanDirInfo || needRescanDependencies) {
     // The dependencies must be regenerated.
-    std::string targetName = cmSystemTools::GetFilenameName(dir);
+    std::string targetName = cmSystemTools::GetFilenameName(targetDir);
     targetName = targetName.substr(0, targetName.length() - 4);
     std::string message = "Scanning dependencies of target ";
     message += targetName;
@@ -1343,7 +1343,8 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
                                        cmsysTerminal_Color_ForegroundBold,
                                      message.c_str(), true, color);
 
-    return this->ScanDependencies(dir, validDependencies);
+    return this->ScanDependencies(targetDir, dependFile, internalDependFile,
+                                  validDependencies);
   }
 
   // The dependencies are already up-to-date.
@@ -1351,17 +1352,21 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
 }
 
 bool cmLocalUnixMakefileGenerator3::ScanDependencies(
-  const std::string& targetDir,
+  std::string const& targetDir, std::string const& dependFile,
+  std::string const& internalDependFile,
   std::map<std::string, cmDepends::DependencyVector>& validDeps)
 {
   // Read the directory information file.
   cmMakefile* mf = this->Makefile;
   bool haveDirectoryInfo = false;
-  std::string dirInfoFile = this->GetCurrentBinaryDirectory();
-  dirInfoFile += "/CMakeFiles";
-  dirInfoFile += "/CMakeDirectoryInformation.cmake";
-  if (mf->ReadListFile(dirInfoFile) && !cmSystemTools::GetErrorOccuredFlag()) {
-    haveDirectoryInfo = true;
+  {
+    std::string dirInfoFile = this->GetCurrentBinaryDirectory();
+    dirInfoFile += "/CMakeFiles";
+    dirInfoFile += "/CMakeDirectoryInformation.cmake";
+    if (mf->ReadListFile(dirInfoFile) &&
+        !cmSystemTools::GetErrorOccuredFlag()) {
+      haveDirectoryInfo = true;
+    }
   }
 
   // Lookup useful directory information.
@@ -1390,10 +1395,8 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
 
   // Open the make depends file.  This should be copy-if-different
   // because the make tool may try to reload it needlessly otherwise.
-  std::string ruleFileNameFull = targetDir;
-  ruleFileNameFull += "/depend.make";
   cmGeneratedFileStream ruleFileStream(
-    ruleFileNameFull, false, this->GlobalGenerator->GetMakefileEncoding());
+    dependFile, false, this->GlobalGenerator->GetMakefileEncoding());
   ruleFileStream.SetCopyIfDifferent(true);
   if (!ruleFileStream) {
     return false;
@@ -1402,11 +1405,8 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   // Open the cmake dependency tracking file.  This should not be
   // copy-if-different because dependencies are re-scanned when it is
   // older than the DependInfo.cmake.
-  std::string internalRuleFileNameFull = targetDir;
-  internalRuleFileNameFull += "/depend.internal";
   cmGeneratedFileStream internalRuleFileStream(
-    internalRuleFileNameFull, false,
-    this->GlobalGenerator->GetMakefileEncoding());
+    internalDependFile, false, this->GlobalGenerator->GetMakefileEncoding());
   if (!internalRuleFileStream) {
     return false;
   }
@@ -1415,26 +1415,25 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   this->WriteDisclaimer(internalRuleFileStream);
 
   // for each language we need to scan, scan it
-  std::string const& langStr =
-    mf->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES");
   std::vector<std::string> langs;
-  cmSystemTools::ExpandListArgument(langStr, langs);
+  cmSystemTools::ExpandListArgument(
+    mf->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES"), langs);
   for (std::string const& lang : langs) {
     // construct the checker
     // Create the scanner for this language
-    cmDepends* scanner = nullptr;
+    std::unique_ptr<cmDepends> scanner;
     if (lang == "C" || lang == "CXX" || lang == "RC" || lang == "ASM" ||
         lang == "CUDA") {
       // TODO: Handle RC (resource files) dependencies correctly.
-      scanner = new cmDependsC(this, targetDir, lang, &validDeps);
+      scanner = cm::make_unique<cmDependsC>(this, targetDir, lang, &validDeps);
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if (lang == "Fortran") {
       ruleFileStream << "# Note that incremental build could trigger "
                      << "a call to cmake_copy_f90_mod on each re-build\n";
-      scanner = new cmDependsFortran(this);
+      scanner = cm::make_unique<cmDependsFortran>(this);
     } else if (lang == "Java") {
-      scanner = new cmDependsJava();
+      scanner = cm::make_unique<cmDependsJava>();
     }
 #endif
 
@@ -1445,9 +1444,6 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
       scanner->SetLanguage(lang);
       scanner->SetTargetDirectory(targetDir);
       scanner->Write(ruleFileStream, internalRuleFileStream);
-
-      // free the scanner for this language
-      delete scanner;
     }
   }
 

@@ -29,27 +29,27 @@ cmDepends::~cmDepends()
 
 bool cmDepends::Write(std::ostream& makeDepends, std::ostream& internalDepends)
 {
-  // Lookup the set of sources to scan.
-  std::string srcLang = "CMAKE_DEPENDS_CHECK_";
-  srcLang += this->Language;
-  cmMakefile* mf = this->LocalGenerator->GetMakefile();
-  std::string const& srcStr = mf->GetSafeDefinition(srcLang);
-  std::vector<std::string> pairs;
-  cmSystemTools::ExpandListArgument(srcStr, pairs);
-
   std::map<std::string, std::set<std::string>> dependencies;
-  for (std::vector<std::string>::iterator si = pairs.begin();
-       si != pairs.end();) {
-    // Get the source and object file.
-    std::string const& src = *si++;
-    if (si == pairs.end()) {
-      break;
+  {
+    // Lookup the set of sources to scan.
+    std::vector<std::string> pairs;
+    {
+      std::string const srcLang = "CMAKE_DEPENDS_CHECK_" + this->Language;
+      cmMakefile* mf = this->LocalGenerator->GetMakefile();
+      cmSystemTools::ExpandListArgument(mf->GetSafeDefinition(srcLang), pairs);
     }
-    std::string const& obj = *si++;
-    dependencies[obj].insert(src);
+    for (std::vector<std::string>::iterator si = pairs.begin();
+         si != pairs.end();) {
+      // Get the source and object file.
+      std::string const& src = *si++;
+      if (si == pairs.end()) {
+        break;
+      }
+      std::string const& obj = *si++;
+      dependencies[obj].insert(src);
+    }
   }
   for (auto const& d : dependencies) {
-
     // Write the dependencies for this pair.
     if (!this->WriteDependencies(d.second, d.first, makeDepends,
                                  internalDepends)) {
