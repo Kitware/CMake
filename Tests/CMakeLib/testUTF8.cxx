@@ -21,17 +21,27 @@ struct test_utf8_entry
 };
 
 static test_utf8_entry const good_entry[] = {
-  { 1, "\x20\x00\x00\x00", 0x0020 },  /* Space.  */
-  { 2, "\xC2\xA9\x00\x00", 0x00A9 },  /* Copyright.  */
-  { 3, "\xE2\x80\x98\x00", 0x2018 },  /* Open-single-quote.  */
-  { 3, "\xE2\x80\x99\x00", 0x2019 },  /* Close-single-quote.  */
-  { 4, "\xF0\xA3\x8E\xB4", 0x233B4 }, /* Example from RFC 3629.  */
+  { 1, "\x20\x00\x00\x00", 0x0020 },   /* Space.  */
+  { 2, "\xC2\xA9\x00\x00", 0x00A9 },   /* Copyright.  */
+  { 3, "\xE2\x80\x98\x00", 0x2018 },   /* Open-single-quote.  */
+  { 3, "\xE2\x80\x99\x00", 0x2019 },   /* Close-single-quote.  */
+  { 4, "\xF0\xA3\x8E\xB4", 0x233B4 },  /* Example from RFC 3629.  */
+  { 3, "\xED\x80\x80\x00", 0xD000 },   /* Valid 0xED prefixed codepoint.  */
+  { 4, "\xF4\x8F\xBF\xBF", 0x10FFFF }, /* Highest valid RFC codepoint. */
+  /* These are invalid according to the RFC, but accepted here. */
+  { 3, "\xED\xA0\x80\x00", 0xD800 },   /* UTF-16 surrogate half. */
+  { 3, "\xED\xBF\xBF\x00", 0xDFFF },   /* UTF-16 surrogate half. */
+  { 4, "\xF4\x90\x80\x80", 0x110000 }, /* Lowest out-of-range codepoint. */
+  { 4, "\xF5\x80\x80\x80",
+    0x140000 }, /* Prefix forces out-of-range codepoints. */
   { 0, { 0, 0, 0, 0, 0 }, 0 }
 };
 
 static test_utf8_char const bad_chars[] = {
   "\x80\x00\x00\x00", /* Leading continuation byte. */
-  "\xC0\x00\x00\x00", /* Overlong encoding and missing continuation byte. */
+  "\xC0\x80\x00\x00", /* Overlong encoding. */
+  "\xC1\x80\x00\x00", /* Overlong encoding. */
+  "\xC2\x00\x00\x00", /* Missing continuation byte. */
   "\xE0\x00\x00\x00", /* Missing continuation bytes. */
   "\xE0\x80\x80\x00", /* Overlong encoding. */
   "\xF0\x80\x80\x80", /* Overlong encoding. */
