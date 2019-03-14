@@ -408,7 +408,7 @@ else()
   set(NO_NAMELINK 0)
 endif()
 
-add_RunCMake_test(install -DNO_NAMELINK=${NO_NAMELINK} -DCYGWIN=${CYGWIN})
+add_RunCMake_test(install -DNO_NAMELINK=${NO_NAMELINK} -DCYGWIN=${CYGWIN} -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 add_RunCMake_test(CPackCommandLine)
 add_RunCMake_test(CPackConfig)
 add_RunCMake_test(CPackInstallProperties)

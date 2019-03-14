@@ -1,0 +1,5 @@
+^CMake Error at file-GET_RUNTIME_DEPENDENCIES-unsupported\.cmake:[0-9]+ \(file\):
+  file GET_RUNTIME_DEPENDENCIES is not supported on system "[^
+ ]+"
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

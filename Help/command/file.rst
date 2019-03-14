@@ -13,6 +13,7 @@ Synopsis
     file(`STRINGS`_ <filename> <out-var> [...])
     file(`\<HASH\> <HASH_>`_ <filename> <out-var>)
     file(`TIMESTAMP`_ <filename> <out-var> [...])
+    file(`GET_RUNTIME_DEPENDENCIES`_ [...])
 
   `Writing`_
     file({`WRITE`_ | `APPEND`_} <filename> <content>...)
@@ -129,6 +130,273 @@ timestamp variable will be set to the empty string ("").
 
 See the :command:`string(TIMESTAMP)` command for documentation of
 the ``<format>`` and ``UTC`` options.
+
+.. _GET_RUNTIME_DEPENDENCIES:
+
+.. code-block:: cmake
+
+  file(GET_RUNTIME_DEPENDENCIES
+    [RESOLVED_DEPENDENCIES_VAR <deps_var>]
+    [UNRESOLVED_DEPENDENCIES_VAR <unresolved_deps_var>]
+    [CONFLICTING_DEPENDENICES_PREFIX <conflicting_deps_prefix>]
+    [EXECUTABLES [<executable_files>...]]
+    [LIBRARIES [<library_files>...]]
+    [MODULES [<module_files>...]]
+    [DIRECTORIES [<directories>...]]
+    [BUNDLE_EXECUTABLE <bundle_executable_file>]
+    [PRE_INCLUDE_REGEXES [<regexes>...]]
+    [PRE_EXCLUDE_REGEXES [<regexes>...]]
+    [POST_INCLUDE_REGEXES [<regexes>...]]
+    [POST_EXCLUDE_REGEXES [<regexes>...]]
+    )
+
+Recursively get the list of libraries depended on by the given files.
+
+Please note that this sub-command is not intended to be used in project mode.
+Instead, use it in an :command:`install(CODE)` or :command:`install(SCRIPT)`
+block. For example:
+
+.. code-block:: cmake
+
+  install(CODE [[
+    file(GET_RUNTIME_DEPENDENCIES
+      # ...
+      )
+    ]])
+
+The arguments are as follows:
+
+``RESOLVED_DEPENDENCIES_VAR <deps_var>``
+  Name of the variable in which to store the list of resolved dependencies.
+
+``UNRESOLVED_DEPENDENCIES_VAR <unresolved_deps_var>``
+  Name of the variable in which to store the list of unresolved dependencies.
+  If this variable is not specified, and there are any unresolved dependencies,
+  an error is issued.
+
+``CONFLICTING_DEPENDENCIES_PREFIX <conflicting_deps_prefix>``
+  Variable prefix in which to store conflicting dependency information.
+  Dependencies are conflicting if two files with the same name are found in
+  two different directories. The list of filenames that conflict are stored in
+  ``<conflicting_deps_prefix>_FILENAMES``. For each filename, the list of paths
+  that were found for that filename are stored in
+  ``<conflicting_deps_prefix>_<filename>``.
+
+``EXECUTABLES <executable_files>``
+  List of executable files to read for dependencies. These are executables that
+  are typically created with :command:`add_executable`, but they do not have to
+  be created by CMake. On Apple platforms, the paths to these files determine
+  the value of ``@executable_path`` when recursively resolving the libraries.
+  Specifying ``STATIC`` libraries, ``MODULE`` s, or ``SHARED`` libraries here
+  will result in undefined behavior.
+
+``LIBRARIES <library_files>``
+  List of library files to read for dependencies. These are libraries that are
+  typically created with :command:`add_library(SHARED)`, but they do not have
+  to be created by CMake. Specifying ``STATIC`` libraries, ``MODULE`` s, or
+  executables here will result in undefined behavior.
+
+``MODULES <module_files>``
+  List of loadable module files to read for dependencies. These are modules
+  that are typically created with :command:`add_library(MODULE)`, but they do
+  not have to be created by CMake. They are typically used by calling
+  ``dlopen()`` at runtime rather than linked at link time with ``ld -l``.
+  Specifying ``STATIC`` libraries, ``SHARED`` libraries, or executables here
+  will result in undefined behavior.
+
+``DIRECTORIES <directories>``
+  List of additional directories to search for dependencies. On Linux
+  platforms, these directories are searched if the dependency is not found in
+  any of the other usual paths. If it is found in such a directory, a warning
+  is issued, because it means that the file is incomplete (it does not list all
+  of the directories that contain its dependencies.) On Windows platforms,
+  these directories are searched if the dependency is not found in any of the
+  other search paths, but no warning is issued, because searching other paths
+  is a normal part of Windows dependency resolution. On Apple platforms, this
+  argument has no effect.
+
+``BUNDLE_EXECTUBLE <bundle_executable_file>``
+  Executable to treat as the "bundle executable" when resolving libraries. On
+  Apple platforms, this argument determines the value of ``@executable_path``
+  when recursively resolving libraries for ``LIBRARIES`` and ``MODULES`` files.
+  It has no effect on ``EXECUTABLES`` files. On other platforms, it has no
+  effect. This is typically (but not always) one of the executables in the
+  ``EXECUTABLES`` argument which designates the "main" executable of the
+  package.
+
+The following arguments specify filters for including or excluding libraries to
+be resolved. See below for a full description of how they work.
+
+``PRE_INCLUDE_REGEXES <regexes>``
+  List of pre-include regexes through which to filter the names of
+  not-yet-resolved dependencies.
+
+``PRE_EXCLUDE_REGEXES <regexes>``
+  List of pre-exclude regexes through which to filter the names of
+  not-yet-resolved dependencies.
+
+``POST_INCLUDE_REGEXES <regexes>``
+  List of post-include regexes through which to filter the names of resolved
+  dependencies.
+
+``POST_EXCLUDE_REGEXES <regexes>``
+  List of post-exclude regexes through which to filter the names of resolved
+  dependencies.
+
+These arguments can be used to blacklist unwanted system libraries when
+resolving the dependencies, or to whitelist libraries from a specific
+directory. The filtering works as follows:
+
+1. If the not-yet-resolved dependency matches any of the
+   ``PRE_INCLUDE_REGEXES``, steps 2 and 3 are skipped, and the dependency
+   resolution proceeds to step 4.
+2. If the not-yet-resolved dependency matches any of the
+   ``PRE_EXCLUDE_REGEXES``, dependency resolution stops for that dependency.
+3. Otherwise, dependency resolution proceeds.
+4. ``file(GET_RUNTIME_DEPENDENCIES)`` searches for the dependency according to
+   the linking rules of the platform (see below).
+5. If the dependency is found, and its full path matches one of the
+   ``POST_INCLUDE_REGEXES``, the full path is added to the resolved
+   dependencies, and ``file(GET_RUNTIME_DEPENDENCIES)`` recursively resolves
+   that library's own dependencies. Otherwise, resolution proceeds to step 6.
+6. If the dependency is found, but its full path matches one of the
+   ``POST_EXCLUDE_REGEXES``, it is not added to the resolved dependencies, and
+   dependency resolution stops for that dependency.
+7. If the dependency is found, and its full path does not match either
+   ``POST_INCLUDE_REGEXES`` or ``POST_EXCLUDE_REGEXES``, the full path is added
+   to the resolved dependencies, and ``file(GET_RUNTIME_DEPENDENCIES)``
+   recursively resolves that library's own dependencies.
+
+Different platforms have different rules for how dependencies are resolved.
+These specifics are described here.
+
+On Linux platforms, library resolution works as follows:
+
+1. If the depending file does not have any ``RUNPATH`` entries, and the library
+   exists in one of the depending file's ``RPATH`` entries, or its parents', in
+   that order, the dependency is resolved to that file.
+2. Otherwise, if the depending file has any ``RUNPATH`` entries, and the
+   library exists in one of those entries, the dependency is resolved to that
+   file.
+3. Otherwise, if the library exists in one of the directories listed by
+   ``ldconfig``, the dependency is resolved to that file.
+4. Otherwise, if the library exists in one of the ``DIRECTORIES`` entries, the
+   dependency is resolved to that file. In this case, a warning is issued,
+   because finding a file in one of the ``DIRECTORIES`` means that the
+   depending file is not complete (it does not list all the directories from
+   which it pulls dependencies.)
+5. Otherwise, the dependency is unresolved.
+
+On Windows platforms, library resolution works as follows:
+
+1. The dependent DLL name is converted to lowercase. Windows DLL names are
+   case-insensitive, and some linkers mangle the case of the DLL dependency
+   names. However, this makes it more difficult for ``PRE_INCLUDE_REGEXES``,
+   ``PRE_EXCLUDE_REGEXES``, ``POST_INCLUDE_REGEXES``, and
+   ``POST_EXCLUDE_REGEXES`` to properly filter DLL names - every regex would
+   have to check for both uppercase and lowercase letters. For example:
+
+   .. code-block:: cmake
+
+     file(GET_RUNTIME_DEPENDENCIES
+       # ...
+       PRE_INCLUDE_REGEXES "^[Mm][Yy][Ll][Ii][Bb][Rr][Aa][Rr][Yy]\\.[Dd][Ll][Ll]$"
+       )
+
+   Converting the DLL name to lowercase allows the regexes to only match
+   lowercase names, thus simplifying the regex. For example:
+
+   .. code-block:: cmake
+
+     file(GET_RUNTIME_DEPENDENCIES
+       # ...
+       PRE_INCLUDE_REGEXES "^mylibrary\\.dll$"
+       )
+
+   This regex will match ``mylibrary.dll`` regardless of how it is cased,
+   either on disk or in the depending file. (For example, it will match
+   ``mylibrary.dll``, ``MyLibrary.dll``, and ``MYLIBRARY.DLL``.)
+
+   Please note that the directory portion of any resolved DLLs retains its
+   casing and is not converted to lowercase. Only the filename portion is
+   converted.
+
+2. (**Not yet implemented**) If the depending file is a Windows Store app, and
+   the dependency is listed as a dependency in the application's package
+   manifest, the dependency is resolved to that file.
+3. Otherwise, if the library exists in the same directory as the depending
+   file, the dependency is resolved to that file.
+4. Otherwise, if the library exists in either the operating system's
+   ``system32`` directory or the ``Windows`` directory, in that order, the
+   dependency is resolved to that file.
+5. Otherwise, if the library exists in one of the directories specified by
+   ``DIRECTORIES``, in the order they are listed, the dependency is resolved to
+   that file. (In this case, a warning is not issued, because searching other
+   directories is a normal part of Windows library resolution.)
+6. Otherwise, the dependency is unresolved.
+
+On Apple platforms, library resolution works as follows:
+
+1. If the dependency starts with ``@executable_path/``, and an ``EXECUTABLES``
+   argument is in the process of being resolved, and replacing
+   ``@executable_path/`` with the directory of the executable yields an
+   existing file, the dependency is resolved to that file.
+2. Otherwise, if the dependency starts with ``@executable_path/``, and there is
+   a ``BUNDLE_EXECUTABLE`` argument, and replacing ``@executable_path/`` with
+   the directory of the bundle executable yields an existing file, the
+   dependency is resolved to that file.
+3. Otherwise, if the dependency starts with ``@loader_path/``, and replacing
+   ``@loader_path/`` with the directory of the depending file yields an
+   existing file, the dependency is resolved to that file.
+4. Otherwise, if the dependency starts with ``@rpath/``, and replacing
+   ``@rpath/`` with one of the ``RPATH`` entries of the depending file yields
+   an existing file, the dependency is resolved to that file. (Note that
+   ``RPATH`` entries that start with ``@executable_path/`` or ``@loader_path/``
+   also have these items replaced with the appropriate path.)
+5. Otherwise, if the dependency is an absolute file that exists, the dependency
+   is resolved to that file.
+6. Otherwise, the dependency is unresolved.
+
+This function accepts several variables that determine which tool is used for
+dependency resolution:
+
+.. variable:: CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM
+
+  Determines which operating system and executable format the files are built
+  for. This could be one of several values:
+
+  * ``linux+elf``
+  * ``windows+pe``
+  * ``macos+macho``
+
+  If this variable is not specified, it is determined automatically by system
+  introspection.
+
+.. variable:: CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL
+
+  Determines the tool to use for dependency resolution. It could be one of
+  several values, depending on the value of
+  :variable:`CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM`:
+
+  ================================================= =============================================
+     ``CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM``       ``CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL``
+  ================================================= =============================================
+  ``linux+elf``                                     ``objdump``
+  ``windows+pe``                                    ``dumpbin``
+  ``windows+pe``                                    ``objdump``
+  ``macos+macho``                                   ``otool``
+  ================================================= =============================================
+
+  If this variable is not specified, it is determined automatically by system
+  introspection.
+
+.. variable:: CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND
+
+  Determines the path to the tool to use for dependency resolution. This is the
+  actual path to ``objdump``, ``dumpbin``, or ``otool``.
+
+  If this variable is not specified, it is determined automatically by system
+  introspection.
 
 Writing
 ^^^^^^^

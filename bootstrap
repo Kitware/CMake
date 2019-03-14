@@ -261,6 +261,17 @@ CMAKE_CXX_SOURCES="\
   cmAddSubDirectoryCommand \
   cmAddTestCommand \
   cmArgumentParser \
+  cmBinUtilsLinker \
+  cmBinUtilsLinuxELFGetRuntimeDependenciesTool \
+  cmBinUtilsLinuxELFLinker \
+  cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool \
+  cmBinUtilsMacOSMachOGetRuntimeDependenciesTool \
+  cmBinUtilsMacOSMachOLinker \
+  cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool \
+  cmBinUtilsWindowsPEGetRuntimeDependenciesTool \
+  cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool \
+  cmBinUtilsWindowsPELinker \
+  cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool \
   cmBreakCommand \
   cmBuildCommand \
   cmCMakeMinimumRequired \
@@ -357,6 +368,8 @@ CMAKE_CXX_SOURCES="\
   cmInstallTargetGenerator \
   cmInstallTargetsCommand \
   cmInstalledFile \
+  cmLDConfigLDConfigTool \
+  cmLDConfigTool \
   cmLinkDirectoriesCommand \
   cmLinkItem \
   cmLinkLineComputer \
@@ -394,6 +407,7 @@ CMAKE_CXX_SOURCES="\
   cmPropertyMap \
   cmReturnCommand \
   cmRulePlaceholderExpander \
+  cmRuntimeDependencyArchive \
   cmScriptGenerator \
   cmSearchPath \
   cmSeparateArgumentsCommand \
@@ -443,7 +457,9 @@ CMAKE_CXX_SOURCES="\
 if ${cmake_system_mingw}; then
   CMAKE_CXX_SOURCES="${CMAKE_CXX_SOURCES}\
     cmGlobalMSYSMakefileGenerator \
-    cmGlobalMinGWMakefileGenerator"
+    cmGlobalMinGWMakefileGenerator \
+    cmVSSetupHelper \
+  "
 fi
 
 LexerParser_CXX_SOURCES="\
@@ -1370,7 +1386,7 @@ libs=""
 uv_c_flags=""
 if ${cmake_system_mingw}; then
   uv_c_flags="${uv_c_flags} -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600"
-  libs="${libs} -lws2_32 -lpsapi -liphlpapi -lshell32 -luserenv"
+  libs="${libs} -lws2_32 -lpsapi -liphlpapi -lshell32 -luserenv -lole32 -loleaut32"
 else
   uv_c_flags="${uv_c_flags} -DCMAKE_BOOTSTRAP"
   case "${cmake_system}" in
