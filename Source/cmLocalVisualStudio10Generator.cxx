@@ -7,6 +7,7 @@
 #include "cmMakefile.h"
 #include "cmVisualStudio10TargetGenerator.h"
 #include "cmXMLParser.h"
+#include "cmake.h"
 
 #include "cm_expat.h"
 

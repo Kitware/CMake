@@ -5,5 +5,5 @@ CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
 
   The transform name must be a valid C identifier.
 Call Stack \(most recent call first\):
-  BadAlgoMap2.cmake:[0-9]+ \(ExternalData_Add_Target\)
-  CMakeLists.txt:3 \(include\)
+  BadAlgoMap2\.cmake:[0-9]+ \(ExternalData_Add_Target\)
+  CMakeLists\.txt:[0-9]+ \(include\)

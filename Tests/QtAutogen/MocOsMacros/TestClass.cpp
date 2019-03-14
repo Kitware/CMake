@@ -1,6 +1,11 @@
 #include "TestClass.hpp"
 #include <iostream>
 
+void TestClass::open()
+{
+  std::cout << "open\n";
+}
+
 // -- Mac
 #ifndef Q_OS_MAC
 void TestClass::MacNotDef()

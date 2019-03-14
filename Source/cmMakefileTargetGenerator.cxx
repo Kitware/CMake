@@ -97,6 +97,9 @@ void cmMakefileTargetGenerator::GetTargetLinkFlags(
   this->GeneratorTarget->GetLinkOptions(opts, this->ConfigName, linkLanguage);
   // LINK_OPTIONS are escaped.
   this->LocalGenerator->AppendCompileOptions(flags, opts);
+
+  this->LocalGenerator->AppendPositionIndependentLinkerFlags(
+    flags, this->GeneratorTarget, this->ConfigName, linkLanguage);
 }
 
 void cmMakefileTargetGenerator::CreateRuleFile()
@@ -400,7 +403,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     err << "Warning: Source file \"" << source.GetFullPath()
         << "\" is listed multiple times for target \""
         << this->GeneratorTarget->GetName() << "\".";
-    cmSystemTools::Message(err.str().c_str(), "Warning");
+    cmSystemTools::Message(err.str(), "Warning");
     return;
   }
 
@@ -432,8 +435,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   objFullPath = cmSystemTools::CollapseFullPath(objFullPath);
   std::string srcFullPath =
     cmSystemTools::CollapseFullPath(source.GetFullPath());
-  this->LocalGenerator->AddImplicitDepends(
-    this->GeneratorTarget, lang, objFullPath.c_str(), srcFullPath.c_str());
+  this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, lang,
+                                           objFullPath, srcFullPath);
 }
 
 void cmMakefileTargetGenerator::WriteObjectBuildFile(
@@ -590,7 +593,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       // mingw32-make incorrectly interprets 'a\ b c' as 'a b' and 'c'
       // (but 'a\ b "c"' as 'a\', 'b', and 'c'!).  Workaround this by
       // avoiding a trailing backslash in the argument.
-      targetOutPathCompilePDB[targetOutPathCompilePDB.size() - 1] = '/';
+      targetOutPathCompilePDB.back() = '/';
     }
   }
   cmRulePlaceholderExpander::RuleVariables vars;
@@ -684,6 +687,17 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       std::string langIncludes = std::string("$(") + lang + "_INCLUDES)";
       compileCommand.replace(compileCommand.find(langIncludes),
                              langIncludes.size(), this->GetIncludes(lang));
+
+      const char* eliminate[] = {
+        this->Makefile->GetDefinition("CMAKE_START_TEMP_FILE"),
+        this->Makefile->GetDefinition("CMAKE_END_TEMP_FILE")
+      };
+      for (const char* el : eliminate) {
+        if (el) {
+          cmSystemTools::ReplaceString(compileCommand, el, "");
+        }
+      }
+
       this->GlobalGenerator->AddCXXCompileCommand(
         source.GetFullPath(), workingDirectory, compileCommand);
     }
@@ -802,7 +816,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     lang_has_assembly && this->LocalGenerator->GetCreateAssemblySourceRules();
   if (do_preprocess_rules || do_assembly_rules) {
     std::vector<std::string> force_depends;
-    force_depends.push_back("cmake_force");
+    force_depends.emplace_back("cmake_force");
     std::string::size_type dot_pos = relativeObj.rfind('.');
     std::string relativeObjBase = relativeObj.substr(0, dot_pos);
     dot_pos = obj.rfind('.');
@@ -1199,8 +1213,7 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
     std::string objFullPath = cmSystemTools::CollapseFullPath(outputs[0]);
     std::string srcFullPath = cmSystemTools::CollapseFullPath(idi.second);
     this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, idi.first,
-                                             objFullPath.c_str(),
-                                             srcFullPath.c_str());
+                                             objFullPath, srcFullPath);
   }
 }
 
@@ -1208,7 +1221,7 @@ void cmMakefileTargetGenerator::MakeEchoProgress(
   cmLocalUnixMakefileGenerator3::EchoProgress& progress) const
 {
   progress.Dir = this->LocalGenerator->GetBinaryDirectory();
-  progress.Dir += cmake::GetCMakeFilesDirectory();
+  progress.Dir += "/CMakeFiles";
   std::ostringstream progressArg;
   progressArg << "$(CMAKE_PROGRESS_" << this->NumberOfProgressActions << ")";
   progress.Arg = progressArg.str();
@@ -1233,8 +1246,9 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
   }
   for (std::string const& obj : this->Objects) {
     *this->BuildFileStream << " " << lineContinue << "\n";
-    *this->BuildFileStream << this->LocalGenerator->ConvertToQuotedOutputPath(
-      obj.c_str(), useWatcomQuote);
+    *this->BuildFileStream
+      << cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
+           obj, useWatcomQuote);
   }
   *this->BuildFileStream << "\n";
 
@@ -1255,8 +1269,9 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
     object =
       this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir, obj);
     *this->BuildFileStream << " " << lineContinue << "\n";
-    *this->BuildFileStream << this->LocalGenerator->ConvertToQuotedOutputPath(
-      obj.c_str(), useWatcomQuote);
+    *this->BuildFileStream
+      << cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
+           obj, useWatcomQuote);
   }
   *this->BuildFileStream << "\n"
                          << "\n";
@@ -1303,11 +1318,10 @@ public:
 private:
   std::string MaybeConvertToRelativePath(std::string const& obj)
   {
-    if (!cmOutputConverter::ContainedInDirectory(
-          this->StateDir.GetCurrentBinary(), obj, this->StateDir)) {
+    if (!this->StateDir.ContainsBoth(this->StateDir.GetCurrentBinary(), obj)) {
       return obj;
     }
-    return cmOutputConverter::ForceToRelativePath(
+    return cmSystemTools::ForceToRelativePath(
       this->StateDir.GetCurrentBinary(), obj);
   }
 

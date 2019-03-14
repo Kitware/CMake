@@ -39,7 +39,7 @@ class cmCommandArgument
 public:
   cmCommandArgument(cmCommandArgumentsHelper* args, const char* key,
                     cmCommandArgumentGroup* group = nullptr);
-  virtual ~cmCommandArgument() {}
+  virtual ~cmCommandArgument() = default;
 
   /// this argument may follow after arg. 0 means it comes first.
   void Follows(const cmCommandArgument* arg);
@@ -103,7 +103,6 @@ private:
   std::vector<std::string> Vector;
   unsigned int DataStart;
   const char* Ignore;
-  cmCAStringVector();
   bool DoConsume(const std::string& arg, unsigned int index) override;
   void DoReset() override;
 };
@@ -125,7 +124,6 @@ private:
   unsigned int DataStart;
   bool DoConsume(const std::string& arg, unsigned int index) override;
   void DoReset() override;
-  cmCAString();
 };
 
 /** cmCAEnabler is to be used for options which are off by default and can be
@@ -143,7 +141,6 @@ private:
   bool Enabled;
   bool DoConsume(const std::string& arg, unsigned int index) override;
   void DoReset() override;
-  cmCAEnabler();
 };
 
 /** cmCADisable is to be used for options which are on by default and can be
@@ -161,7 +158,6 @@ private:
   bool Enabled;
   bool DoConsume(const std::string& arg, unsigned int index) override;
   void DoReset() override;
-  cmCADisabler();
 };
 
 /** Group of arguments, needed for ordering. E.g. WIN32, EXCLUDE_FROM_ALL and
@@ -172,8 +168,6 @@ class cmCommandArgumentGroup
   friend class cmCommandArgument;
 
 public:
-  cmCommandArgumentGroup() {}
-
   /// All members of this group may follow the given argument
   void Follows(const cmCommandArgument* arg);
 

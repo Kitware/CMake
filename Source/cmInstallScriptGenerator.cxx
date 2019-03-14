@@ -2,10 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallScriptGenerator.h"
 
-#include "cmScriptGenerator.h"
-
 #include <ostream>
 #include <vector>
+
+#include "cmGeneratorExpression.h"
+#include "cmLocalGenerator.h"
+#include "cmMessageType.h"
+#include "cmPolicies.h"
+#include "cmScriptGenerator.h"
 
 cmInstallScriptGenerator::cmInstallScriptGenerator(const char* script,
                                                    bool code,
@@ -15,25 +19,69 @@ cmInstallScriptGenerator::cmInstallScriptGenerator(const char* script,
                        MessageDefault, exclude_from_all)
   , Script(script)
   , Code(code)
+  , AllowGenex(false)
 {
-}
-
-cmInstallScriptGenerator::~cmInstallScriptGenerator()
-{
-}
-
-void cmInstallScriptGenerator::GenerateScript(std::ostream& os)
-{
-  Indent indent;
-  std::string component_test =
-    this->CreateComponentTest(this->Component.c_str(), this->ExcludeFromAll);
-  os << indent << "if(" << component_test << ")\n";
-
-  if (this->Code) {
-    os << indent.Next() << this->Script << "\n";
-  } else {
-    os << indent.Next() << "include(\"" << this->Script << "\")\n";
+  // We need per-config actions if the script has generator expressions.
+  if (cmGeneratorExpression::Find(Script) != std::string::npos) {
+    this->ActionsPerConfig = true;
   }
+}
 
-  os << indent << "endif()\n\n";
+cmInstallScriptGenerator::~cmInstallScriptGenerator() = default;
+
+void cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
+{
+  this->LocalGenerator = lg;
+
+  if (this->ActionsPerConfig) {
+    switch (this->LocalGenerator->GetPolicyStatus(cmPolicies::CMP0087)) {
+      case cmPolicies::WARN:
+        this->LocalGenerator->IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmPolicies::GetPolicyWarning(cmPolicies::CMP0087));
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        break;
+      case cmPolicies::NEW:
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::REQUIRED_IF_USED:
+        this->AllowGenex = true;
+        break;
+    }
+  }
+}
+
+void cmInstallScriptGenerator::AddScriptInstallRule(std::ostream& os,
+                                                    Indent indent,
+                                                    std::string const& script)
+{
+  if (this->Code) {
+    os << indent << script << "\n";
+  } else {
+    os << indent << "include(\"" << script << "\")\n";
+  }
+}
+
+void cmInstallScriptGenerator::GenerateScriptActions(std::ostream& os,
+                                                     Indent indent)
+{
+  if (this->AllowGenex && this->ActionsPerConfig) {
+    this->cmInstallGenerator::GenerateScriptActions(os, indent);
+  } else {
+    this->AddScriptInstallRule(os, indent, this->Script);
+  }
+}
+
+void cmInstallScriptGenerator::GenerateScriptForConfig(
+  std::ostream& os, const std::string& config, Indent indent)
+{
+  if (this->AllowGenex) {
+    cmGeneratorExpression ge;
+    std::unique_ptr<cmCompiledGeneratorExpression> cge =
+      ge.Parse(this->Script);
+    this->AddScriptInstallRule(os, indent,
+                               cge->Evaluate(this->LocalGenerator, config));
+  } else {
+    this->AddScriptInstallRule(os, indent, this->Script);
+  }
 }

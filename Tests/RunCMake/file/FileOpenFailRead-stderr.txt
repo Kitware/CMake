@@ -3,4 +3,4 @@ CMake Error at FileOpenFailRead.cmake:[0-9]+ \(file\):
 
     .*/Tests/RunCMake/file/does_not_exist/file.txt
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

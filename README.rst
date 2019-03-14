@@ -62,13 +62,13 @@ within the CMake source directory or any other build directory of your
 choice. Once this has finished successfully, run ``make`` and
 ``make install``.  In summary::
 
- $ ./bootstrap && make && make install
+ $ ./bootstrap && make && sudo make install
 
 Windows
 ^^^^^^^
 
 You need to download and install a binary release of CMake in order to build
-CMake.  You can get these releases from the `CMake Download Page`_ .  Then
+CMake.  You can get these releases from the `CMake Download Page`_.  Then
 proceed with the instructions below.
 
 .. _`CMake Download Page`: https://cmake.org/cmake/resources/software.html
@@ -82,6 +82,13 @@ options and generators. Then build it and install it.
 For instructions how to do this, see documentation on `Running CMake`_.
 
 .. _`Running CMake`: https://cmake.org/cmake/help/runningcmake.html
+
+To build the documentation, install `Sphinx`_ and configure CMake with
+``-DSPHINX_HTML=ON`` and/or ``-DSPHINX_MAN=ON`` to enable the "html" or
+"man" builder.  Add ``-DSPHINX_EXECUTABLE=/path/to/sphinx-build`` if the
+tool is not found automatically.
+
+.. _`Sphinx`: http://sphinx-doc.org
 
 Reporting Bugs
 ==============

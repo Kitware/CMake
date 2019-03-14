@@ -7,6 +7,7 @@
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
 #include "cmVariableWatch.h"
 #include "cmake.h"
@@ -59,7 +60,7 @@ static void cmVariableWatchCommandVariableAccessed(const std::string& variable,
       error << "Error in cmake code at\nUnknown:0:\n"
             << "A command failed during the invocation of callback \""
             << data->Command << "\".";
-      cmSystemTools::Error(error.str().c_str());
+      cmSystemTools::Error(error.str());
       data->InCallback = false;
       return;
     }
@@ -70,7 +71,7 @@ static void cmVariableWatchCommandVariableAccessed(const std::string& variable,
     msg << "Variable \"" << variable << "\" was accessed using "
         << accessString << " with value \"" << (newValue ? newValue : "")
         << "\".";
-    makefile->IssueMessage(cmake::LOG, msg.str());
+    makefile->IssueMessage(MessageType::LOG, msg.str());
   }
 
   data->InCallback = false;
@@ -83,9 +84,7 @@ static void deleteVariableWatchCallbackData(void* client_data)
   delete data;
 }
 
-cmVariableWatchCommand::cmVariableWatchCommand()
-{
-}
+cmVariableWatchCommand::cmVariableWatchCommand() = default;
 
 cmVariableWatchCommand::~cmVariableWatchCommand()
 {

@@ -15,9 +15,7 @@ cmCPackPKGGenerator::cmCPackPKGGenerator()
   this->componentPackageMethod = ONE_PACKAGE;
 }
 
-cmCPackPKGGenerator::~cmCPackPKGGenerator()
-{
-}
+cmCPackPKGGenerator::~cmCPackPKGGenerator() = default;
 
 bool cmCPackPKGGenerator::SupportsComponentInstallation() const
 {
@@ -225,7 +223,8 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
     xout.Content(this->GetPackageName(component));
   } else {
     xout.Content("file:./");
-    xout.Content(relativePackageLocation);
+    xout.Content(cmSystemTools::EncodeURL(relativePackageLocation,
+                                          /*escapeSlashes=*/false));
   }
   xout.EndElement(); // pkg-ref
 }

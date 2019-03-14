@@ -18,4 +18,6 @@ ExternalProject_Add(${contentName}-populate
                     BUILD_COMMAND       ""
                     INSTALL_COMMAND     ""
                     TEST_COMMAND        ""
+                    USES_TERMINAL_DOWNLOAD  YES
+                    USES_TERMINAL_UPDATE    YES
 )

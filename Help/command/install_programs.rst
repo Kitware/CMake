@@ -1,7 +1,9 @@
 install_programs
 ----------------
 
-Deprecated. Use the :command:`install(PROGRAMS)` command instead.
+.. deprecated:: 3.0
+
+  Use the :command:`install(PROGRAMS)` command instead.
 
 This command has been superceded by the :command:`install` command.  It is
 provided for compatibility with older CMake code.  The ``FILES`` form is

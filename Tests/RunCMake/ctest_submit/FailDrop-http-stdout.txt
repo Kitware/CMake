@@ -1,3 +1,2 @@
-Submit files \(using http\)
-   Using HTTP submit method
-   Drop site:http://
+Submit files
+   SubmitURL: http://-no-site-

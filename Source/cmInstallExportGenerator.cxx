@@ -3,6 +3,7 @@
 #include "cmInstallExportGenerator.h"
 
 #include <algorithm>
+#include <map>
 #include <sstream>
 #include <utility>
 
@@ -14,7 +15,6 @@
 #include "cmInstallType.h"
 #include "cmLocalGenerator.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 cmInstallExportGenerator::cmInstallExportGenerator(
   cmExportSet* exportSet, const char* destination,
@@ -56,7 +56,7 @@ void cmInstallExportGenerator::ComputeTempDir()
   // Choose a temporary directory in which to generate the import
   // files to be installed.
   this->TempDir = this->LocalGenerator->GetCurrentBinaryDirectory();
-  this->TempDir += cmake::GetCMakeFilesDirectory();
+  this->TempDir += "/CMakeFiles";
   this->TempDir += "/Export";
   if (this->Destination.empty()) {
     return;
@@ -126,7 +126,7 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
     std::ostringstream e;
     e << "INSTALL(EXPORT) given unknown export \"" << ExportSet->GetName()
       << "\"";
-    cmSystemTools::Error(e.str().c_str());
+    cmSystemTools::Error(e.str());
     return;
   }
 

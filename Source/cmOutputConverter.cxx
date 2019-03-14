@@ -9,9 +9,7 @@
 #include <string.h>
 #include <vector>
 
-#include "cmAlgorithms.h"
 #include "cmState.h"
-#include "cmStateDirectory.h"
 #include "cmSystemTools.h"
 
 cmOutputConverter::cmOutputConverter(cmStateSnapshot const& snapshot)
@@ -71,121 +69,6 @@ std::string cmOutputConverter::ConvertDirectorySeparatorsForShell(
     std::replace(result.begin(), result.end(), '/', '\\');
   }
   return result;
-}
-
-static bool cmOutputConverterNotAbove(const char* a, const char* b)
-{
-  return (cmSystemTools::ComparePath(a, b) ||
-          cmSystemTools::IsSubDirectory(a, b));
-}
-
-bool cmOutputConverter::ContainedInDirectory(std::string const& local_path,
-                                             std::string const& remote_path,
-                                             cmStateDirectory const& directory)
-{
-  const std::string& relativePathTopBinary =
-    directory.GetRelativePathTopBinary();
-  const std::string& relativePathTopSource =
-    directory.GetRelativePathTopSource();
-
-  const bool bothInBinary =
-    cmOutputConverterNotAbove(local_path.c_str(),
-                              relativePathTopBinary.c_str()) &&
-    cmOutputConverterNotAbove(remote_path.c_str(),
-                              relativePathTopBinary.c_str());
-
-  const bool bothInSource =
-    cmOutputConverterNotAbove(local_path.c_str(),
-                              relativePathTopSource.c_str()) &&
-    cmOutputConverterNotAbove(remote_path.c_str(),
-                              relativePathTopSource.c_str());
-
-  return bothInSource || bothInBinary;
-}
-
-std::string cmOutputConverter::ConvertToRelativePath(
-  std::string const& local_path, std::string const& remote_path) const
-{
-  if (!ContainedInDirectory(local_path, remote_path,
-                            this->StateSnapshot.GetDirectory())) {
-    return remote_path;
-  }
-
-  return this->ForceToRelativePath(local_path, remote_path);
-}
-
-std::string cmOutputConverter::ForceToRelativePath(
-  std::string const& local_path, std::string const& remote_path)
-{
-  // The paths should never be quoted.
-  assert(local_path[0] != '\"');
-  assert(remote_path[0] != '\"');
-
-  // The local path should never have a trailing slash.
-  assert(local_path.empty() || local_path[local_path.size() - 1] != '/');
-
-  // If the path is already relative then just return the path.
-  if (!cmSystemTools::FileIsFullPath(remote_path)) {
-    return remote_path;
-  }
-
-  // Identify the longest shared path component between the remote
-  // path and the local path.
-  std::vector<std::string> local;
-  cmSystemTools::SplitPath(local_path, local);
-  std::vector<std::string> remote;
-  cmSystemTools::SplitPath(remote_path, remote);
-  unsigned int common = 0;
-  while (common < remote.size() && common < local.size() &&
-         cmSystemTools::ComparePath(remote[common], local[common])) {
-    ++common;
-  }
-
-  // If no part of the path is in common then return the full path.
-  if (common == 0) {
-    return remote_path;
-  }
-
-  // If the entire path is in common then just return a ".".
-  if (common == remote.size() && common == local.size()) {
-    return ".";
-  }
-
-  // If the entire path is in common except for a trailing slash then
-  // just return a "./".
-  if (common + 1 == remote.size() && remote[common].empty() &&
-      common == local.size()) {
-    return "./";
-  }
-
-  // Construct the relative path.
-  std::string relative;
-
-  // First add enough ../ to get up to the level of the shared portion
-  // of the path.  Leave off the trailing slash.  Note that the last
-  // component of local will never be empty because local should never
-  // have a trailing slash.
-  for (unsigned int i = common; i < local.size(); ++i) {
-    relative += "..";
-    if (i < local.size() - 1) {
-      relative += "/";
-    }
-  }
-
-  // Now add the portion of the destination path that is not included
-  // in the shared portion of the path.  Add a slash the first time
-  // only if there was already something in the path.  If there was a
-  // trailing slash in the input then the last iteration of the loop
-  // will add a slash followed by an empty string which will preserve
-  // the trailing slash in the output.
-
-  if (!relative.empty() && !remote.empty()) {
-    relative += "/";
-  }
-  relative += cmJoin(cmMakeRange(remote).advance(common), "/");
-
-  // Finally return the path.
-  return relative;
 }
 
 static bool cmOutputConverterIsShellOperator(const std::string& str)

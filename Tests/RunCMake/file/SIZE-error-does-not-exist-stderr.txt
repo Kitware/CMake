@@ -1,0 +1,6 @@
+^CMake Error at SIZE-error-does-not-exist.cmake:[0-9]+ \(file\):
+  file SIZE requested of path that is not readable:
+
+    .*/Tests/RunCMake/file/SIZE-error-does-not-exist-build/does-not-exist
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

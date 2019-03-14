@@ -5,8 +5,8 @@ Execute one or more child processes.
 
 .. code-block:: cmake
 
-  execute_process(COMMAND <cmd1> [args1...]]
-                  [COMMAND <cmd2> [args2...] [...]]
+  execute_process(COMMAND <cmd1> [<arguments>]
+                  [COMMAND <cmd2> [<arguments>]]...
                   [WORKING_DIRECTORY <directory>]
                   [TIMEOUT <seconds>]
                   [RESULT_VARIABLE <variable>]
@@ -56,7 +56,7 @@ Options:
 
 ``RESULTS_VARIABLE <variable>``
  The variable will be set to contain the result of all processes as a
- :ref:`;-list <CMake Language Lists>`, in order of the given ``COMMAND``
+ :ref:`semicolon-separated list <CMake Language Lists>`, in order of the given ``COMMAND``
  arguments.  Each entry will be an integer return code from the
  corresponding child or a string describing an error condition.
 

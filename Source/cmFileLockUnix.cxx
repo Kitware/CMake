@@ -8,10 +8,7 @@
 #include <stdio.h> // SEEK_SET
 #include <unistd.h>
 
-cmFileLock::cmFileLock()
-  : File(-1)
-{
-}
+cmFileLock::cmFileLock() = default;
 
 cmFileLockResult cmFileLock::Release()
 {

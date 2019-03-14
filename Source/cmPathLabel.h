@@ -17,7 +17,7 @@
 class cmPathLabel
 {
 public:
-  cmPathLabel(const std::string& label);
+  cmPathLabel(std::string label);
 
   // The comparison operators are only for quick sorting and searching and
   // in no way imply any lexicographical order of the label

@@ -6,6 +6,7 @@
 #include "cmCTestTestHandler.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 #include "cmake.h"
@@ -108,27 +109,6 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
   return 0;
 }
 
-void CMakeMessageCallback(const char* m, const char* /*unused*/,
-                          bool& /*unused*/, void* s)
-{
-  std::string* out = static_cast<std::string*>(s);
-  *out += m;
-  *out += "\n";
-}
-
-void CMakeProgressCallback(const char* msg, float /*unused*/, void* s)
-{
-  std::string* out = static_cast<std::string*>(s);
-  *out += msg;
-  *out += "\n";
-}
-
-void CMakeOutputCallback(const char* m, size_t len, void* s)
-{
-  std::string* out = static_cast<std::string*>(s);
-  out->append(m, len);
-}
-
 class cmCTestBuildAndTestCaptureRAII
 {
   cmake& CM;
@@ -137,17 +117,27 @@ public:
   cmCTestBuildAndTestCaptureRAII(cmake& cm, std::string& s)
     : CM(cm)
   {
-    cmSystemTools::SetMessageCallback(CMakeMessageCallback, &s);
-    cmSystemTools::SetStdoutCallback(CMakeOutputCallback, &s);
-    cmSystemTools::SetStderrCallback(CMakeOutputCallback, &s);
-    this->CM.SetProgressCallback(CMakeProgressCallback, &s);
+    cmSystemTools::SetMessageCallback(
+      [&s](const char* msg, const char* /*unused*/) {
+        s += msg;
+        s += "\n";
+      });
+
+    cmSystemTools::SetStdoutCallback([&s](std::string const& m) { s += m; });
+    cmSystemTools::SetStderrCallback([&s](std::string const& m) { s += m; });
+
+    this->CM.SetProgressCallback([&s](const char* msg, float /*unused*/) {
+      s += msg;
+      s += "\n";
+    });
   }
+
   ~cmCTestBuildAndTestCaptureRAII()
   {
-    this->CM.SetProgressCallback(nullptr, nullptr);
-    cmSystemTools::SetStderrCallback(nullptr, nullptr);
-    cmSystemTools::SetStdoutCallback(nullptr, nullptr);
-    cmSystemTools::SetMessageCallback(nullptr, nullptr);
+    this->CM.SetProgressCallback(nullptr);
+    cmSystemTools::SetStderrCallback(nullptr);
+    cmSystemTools::SetStdoutCallback(nullptr);
+    cmSystemTools::SetMessageCallback(nullptr);
   }
 };
 
@@ -163,7 +153,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     return 1;
   }
 
-  cmake cm(cmake::RoleProject);
+  cmake cm(cmake::RoleProject, cmState::Project);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   std::string cmakeOutString;
@@ -231,7 +221,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   // do the build
   if (this->BuildTargets.empty()) {
-    this->BuildTargets.push_back("");
+    this->BuildTargets.emplace_back();
   }
   for (std::string const& tar : this->BuildTargets) {
     cmDuration remainingTime = std::chrono::seconds(0);

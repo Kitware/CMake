@@ -7,6 +7,6 @@
   specific short-term circumstances.  Projects should be ported to the NEW
   behavior and not rely on setting a policy to OLD.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
 Sources: "empty.cpp"$

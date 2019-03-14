@@ -1,5 +1,9 @@
 include(RunCMake)
 
+run_cmake(CREATE_LINK)
+run_cmake(CREATE_LINK-COPY_ON_ERROR)
+run_cmake(CREATE_LINK-noarg)
+run_cmake(CREATE_LINK-noexist)
 run_cmake(DOWNLOAD-hash-mismatch)
 run_cmake(DOWNLOAD-unused-argument)
 run_cmake(DOWNLOAD-httpheader-not-set)
@@ -36,6 +40,8 @@ run_cmake(READ_ELF)
 run_cmake(GLOB)
 run_cmake(GLOB_RECURSE)
 run_cmake(GLOB_RECURSE-noexp-FOLLOW_SYMLINKS)
+run_cmake(SIZE)
+run_cmake(SIZE-error-does-not-exist)
 
 # tests are valid both for GLOB and GLOB_RECURSE
 run_cmake(GLOB-sort-dedup)
@@ -51,8 +57,13 @@ run_cmake_command(GLOB-error-CONFIGURE_DEPENDS-SCRIPT_MODE ${CMAKE_COMMAND} -P
   ${RunCMake_SOURCE_DIR}/GLOB-error-CONFIGURE_DEPENDS-SCRIPT_MODE.cmake)
 
 if(NOT WIN32 OR CYGWIN)
+  run_cmake(CREATE_LINK-SYMBOLIC)
+  run_cmake(CREATE_LINK-SYMBOLIC-noexist)
   run_cmake(GLOB_RECURSE-cyclic-recursion)
   run_cmake(INSTALL-SYMLINK)
+  run_cmake(READ_SYMLINK)
+  run_cmake(READ_SYMLINK-noexist)
+  run_cmake(READ_SYMLINK-notsymlink)
 endif()
 
 if(RunCMake_GENERATOR STREQUAL "Ninja")

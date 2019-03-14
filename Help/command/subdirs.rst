@@ -1,7 +1,9 @@
 subdirs
 -------
 
-Deprecated. Use the :command:`add_subdirectory` command instead.
+.. deprecated:: 3.0
+
+  Use the :command:`add_subdirectory` command instead.
 
 Add a list of subdirectories to the build.
 

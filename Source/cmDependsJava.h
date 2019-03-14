@@ -17,8 +17,6 @@
  */
 class cmDependsJava : public cmDepends
 {
-  CM_DISABLE_COPY(cmDependsJava)
-
 public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
@@ -27,13 +25,16 @@ public:
   /** Virtual destructor to cleanup subclasses properly.  */
   ~cmDependsJava() override;
 
+  cmDependsJava(cmDependsJava const&) = delete;
+  cmDependsJava& operator=(cmDependsJava const&) = delete;
+
 protected:
   // Implement writing/checking methods required by superclass.
   bool WriteDependencies(const std::set<std::string>& sources,
                          const std::string& file, std::ostream& makeDepends,
                          std::ostream& internalDepends) override;
   bool CheckDependencies(
-    std::istream& internalDepends, const char* internalDependsFileName,
+    std::istream& internalDepends, const std::string& internalDependsFileName,
     std::map<std::string, DependencyVector>& validDeps) override;
 };
 

@@ -3,7 +3,7 @@ get_target_property
 
 Get a property from a target.
 
-::
+.. code-block:: cmake
 
   get_target_property(VAR target property)
 
@@ -23,3 +23,5 @@ target so far created.  The targets do not need to be in the current
 ``CMakeLists.txt`` file.
 
 See also the more general :command:`get_property` command.
+
+See :ref:`Target Properties` for the list of properties known to CMake.

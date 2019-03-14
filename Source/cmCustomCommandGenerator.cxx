@@ -16,10 +16,10 @@
 #include <utility>
 
 cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
-                                                   const std::string& config,
+                                                   std::string config,
                                                    cmLocalGenerator* lg)
   : CC(cc)
-  , Config(config)
+  , Config(std::move(config))
   , LG(lg)
   , OldStyle(cc.GetEscapeOldStyle())
   , MakeVars(cc.GetEscapeAllowMakeVars())

@@ -32,7 +32,7 @@ public:
   std::string const& GetErrorMessage() const { return this->ErrorMessage; }
 
   /** Boolean conversion.  True if the ELF file is valid.  */
-  operator bool() const { return this->Valid(); }
+  explicit operator bool() const { return this->Valid(); }
 
   /** Enumeration of ELF file types.  */
   enum FileType

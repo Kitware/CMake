@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include "cmAlgorithms.h"
-#include "cmDocumentationEntry.h"
+#include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
@@ -68,6 +68,8 @@ static const char* cmDocumentationUsageNote[][2] = {
     "  --clean-first  = Build target 'clean' first, then build.\n"            \
     "                   (To clean only, use --target 'clean'.)\n"             \
     "  --use-stderr   = Ignored.  Behavior is default in CMake >= 3.0.\n"     \
+    "  -v --verbose   = Enable verbose output - if supported - including\n"   \
+    "                   the build commands to be executed. \n"                \
     "  --             = Pass remaining options to the native tool.\n"
 
 static const char* cmDocumentationOptions[][2] = {
@@ -106,7 +108,7 @@ static int do_command(int ac, char const* const* av)
 {
   std::vector<std::string> args;
   args.reserve(ac - 1);
-  args.push_back(av[0]);
+  args.emplace_back(av[0]);
   args.insert(args.end(), av + 2, av + ac);
   return cmcmd::ExecuteCMakeCommand(args);
 }
@@ -115,9 +117,8 @@ int do_cmake(int ac, char const* const* av);
 static int do_build(int ac, char const* const* av);
 static int do_open(int ac, char const* const* av);
 
-static cmMakefile* cmakemainGetMakefile(void* clientdata)
+static cmMakefile* cmakemainGetMakefile(cmake* cm)
 {
-  cmake* cm = static_cast<cmake*>(clientdata);
   if (cm && cm->GetDebugOutput()) {
     cmGlobalGenerator* gg = cm->GetGlobalGenerator();
     if (gg) {
@@ -127,10 +128,10 @@ static cmMakefile* cmakemainGetMakefile(void* clientdata)
   return nullptr;
 }
 
-static std::string cmakemainGetStack(void* clientdata)
+static std::string cmakemainGetStack(cmake* cm)
 {
   std::string msg;
-  cmMakefile* mf = cmakemainGetMakefile(clientdata);
+  cmMakefile* mf = cmakemainGetMakefile(cm);
   if (mf) {
     msg = mf->FormatListFileStack();
     if (!msg.empty()) {
@@ -142,15 +143,14 @@ static std::string cmakemainGetStack(void* clientdata)
 }
 
 static void cmakemainMessageCallback(const char* m, const char* /*unused*/,
-                                     bool& /*unused*/, void* clientdata)
+                                     cmake* cm)
 {
-  std::cerr << m << cmakemainGetStack(clientdata) << std::endl << std::flush;
+  std::cerr << m << cmakemainGetStack(cm) << std::endl << std::flush;
 }
 
-static void cmakemainProgressCallback(const char* m, float prog,
-                                      void* clientdata)
+static void cmakemainProgressCallback(const char* m, float prog, cmake* cm)
 {
-  cmMakefile* mf = cmakemainGetMakefile(clientdata);
+  cmMakefile* mf = cmakemainGetMakefile(cm);
   std::string dir;
   if ((mf) && (strstr(m, "Configuring") == m) && (prog < 0)) {
     dir = " ";
@@ -161,8 +161,7 @@ static void cmakemainProgressCallback(const char* m, float prog,
   }
 
   if ((prog < 0) || (!dir.empty())) {
-    std::cout << "-- " << m << dir << cmakemainGetStack(clientdata)
-              << std::endl;
+    std::cout << "-- " << m << dir << cmakemainGetStack(cm) << std::endl;
   }
 
   std::cout.flush();
@@ -232,7 +231,7 @@ int do_cmake(int ac, char const* const* av)
   doc.addCMakeStandardDocSections();
   if (doc.CheckOptions(ac, av)) {
     // Construct and print requested documentation.
-    cmake hcm(cmake::RoleInternal);
+    cmake hcm(cmake::RoleInternal, cmState::Unknown);
     hcm.SetHomeDirectory("");
     hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();
@@ -242,9 +241,7 @@ int do_cmake(int ac, char const* const* av)
     std::vector<std::string> args(av, av + ac);
     hcm.SetCacheArgs(args);
 
-    std::vector<cmDocumentationEntry> generators;
-
-    hcm.GetGeneratorDocumentation(generators);
+    auto generators = hcm.GetGeneratorsDocumentation();
 
     doc.SetName("cmake");
     doc.SetSection("Name", cmDocumentationName);
@@ -300,21 +297,21 @@ int do_cmake(int ac, char const* const* av)
     } else if (cmHasLiteralPrefix(av[i], "-P")) {
       if (i == ac - 1) {
         cmSystemTools::Error("No script specified for argument -P");
-      } else {
-        workingMode = cmake::SCRIPT_MODE;
-        args.push_back(av[i]);
-        i++;
-        args.push_back(av[i]);
+        return 1;
       }
+      workingMode = cmake::SCRIPT_MODE;
+      args.emplace_back(av[i]);
+      i++;
+      args.emplace_back(av[i]);
     } else if (cmHasLiteralPrefix(av[i], "--find-package")) {
       workingMode = cmake::FIND_PACKAGE_MODE;
-      args.push_back(av[i]);
+      args.emplace_back(av[i]);
     } else {
-      args.push_back(av[i]);
+      args.emplace_back(av[i]);
     }
   }
   if (sysinfo) {
-    cmake cm(cmake::RoleProject);
+    cmake cm(cmake::RoleProject, cmState::Project);
     cm.SetHomeDirectory("");
     cm.SetHomeOutputDirectory("");
     int ret = cm.GetSystemInformation(args);
@@ -322,11 +319,27 @@ int do_cmake(int ac, char const* const* av)
   }
   cmake::Role const role =
     workingMode == cmake::SCRIPT_MODE ? cmake::RoleScript : cmake::RoleProject;
-  cmake cm(role);
+  cmState::Mode mode = cmState::Unknown;
+  switch (workingMode) {
+    case cmake::NORMAL_MODE:
+      mode = cmState::Project;
+      break;
+    case cmake::SCRIPT_MODE:
+      mode = cmState::Script;
+      break;
+    case cmake::FIND_PACKAGE_MODE:
+      mode = cmState::FindPackage;
+      break;
+  }
+  cmake cm(role, mode);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
-  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, &cm);
-  cm.SetProgressCallback(cmakemainProgressCallback, &cm);
+  cmSystemTools::SetMessageCallback([&cm](const char* msg, const char* title) {
+    cmakemainMessageCallback(msg, title, &cm);
+  });
+  cm.SetProgressCallback([&cm](const char* msg, float prog) {
+    cmakemainProgressCallback(msg, prog, &cm);
+  });
   cm.SetWorkingMode(workingMode);
 
   int res = cm.Run(args, view_only);
@@ -363,6 +376,31 @@ int do_cmake(int ac, char const* const* av)
   return 0;
 }
 
+namespace {
+int extract_job_number(int& index, char const* current, char const* next,
+                       int len_of_flag)
+{
+  std::string command(current);
+  std::string jobString = command.substr(len_of_flag);
+  if (jobString.empty() && next && isdigit(next[0])) {
+    ++index; // skip parsing the job number
+    jobString = std::string(next);
+  }
+
+  int jobs = -1;
+  unsigned long numJobs = 0;
+  if (jobString.empty()) {
+    jobs = cmake::DEFAULT_BUILD_PARALLEL_LEVEL;
+  } else if (cmSystemTools::StringToULong(jobString.c_str(), &numJobs)) {
+    jobs = int(numJobs);
+  } else {
+    std::cerr << "'" << command.substr(0, len_of_flag) << "' invalid number '"
+              << jobString << "' given.\n\n";
+  }
+  return jobs;
+}
+}
+
 static int do_build(int ac, char const* const* av)
 {
 #ifndef CMAKE_BUILD_WITH_CMAKE
@@ -375,12 +413,12 @@ static int do_build(int ac, char const* const* av)
   std::string dir;
   std::vector<std::string> nativeOptions;
   bool clean = false;
+  bool verbose = cmSystemTools::HasEnv("VERBOSE");
   bool hasTarget = false;
 
   enum Doing
   {
     DoingNone,
-    DoingJobs,
     DoingDir,
     DoingTarget,
     DoingConfig,
@@ -389,13 +427,18 @@ static int do_build(int ac, char const* const* av)
   Doing doing = DoingDir;
   for (int i = 2; i < ac; ++i) {
     if (doing == DoingNative) {
-      nativeOptions.push_back(av[i]);
-    } else if ((strcmp(av[i], "-j") == 0) ||
-               (strcmp(av[i], "--parallel") == 0)) {
-      jobs = cmake::DEFAULT_BUILD_PARALLEL_LEVEL;
-      /* does the next argument start with a number? */
-      if ((i + 1 < ac) && (isdigit(*av[i + 1]))) {
-        doing = DoingJobs;
+      nativeOptions.emplace_back(av[i]);
+    } else if (cmHasLiteralPrefix(av[i], "-j")) {
+      const char* nextArg = ((i + 1 < ac) ? av[i + 1] : nullptr);
+      jobs = extract_job_number(i, av[i], nextArg, sizeof("-j") - 1);
+      if (jobs < 0) {
+        dir.clear();
+      }
+    } else if (cmHasLiteralPrefix(av[i], "--parallel")) {
+      const char* nextArg = ((i + 1 < ac) ? av[i + 1] : nullptr);
+      jobs = extract_job_number(i, av[i], nextArg, sizeof("--parallel") - 1);
+      if (jobs < 0) {
+        dir.clear();
       }
     } else if (strcmp(av[i], "--target") == 0) {
       if (!hasTarget) {
@@ -411,24 +454,16 @@ static int do_build(int ac, char const* const* av)
     } else if (strcmp(av[i], "--clean-first") == 0) {
       clean = true;
       doing = DoingNone;
+    } else if ((strcmp(av[i], "--verbose") == 0) ||
+               (strcmp(av[i], "-v") == 0)) {
+      verbose = true;
+      doing = DoingNone;
     } else if (strcmp(av[i], "--use-stderr") == 0) {
       /* tolerate legacy option */
     } else if (strcmp(av[i], "--") == 0) {
       doing = DoingNative;
     } else {
       switch (doing) {
-        case DoingJobs: {
-          unsigned long numJobs = 0;
-          if (cmSystemTools::StringToULong(av[i], &numJobs)) {
-            jobs = int(numJobs);
-            doing = DoingNone;
-          } else {
-            std::cerr << "'" << av[i - 1] << "' invalid number '" << av[i]
-                      << "' given.\n\n";
-            dir.clear();
-            break;
-          }
-        } break;
         case DoingDir:
           dir = cmSystemTools::CollapseFullPath(av[i]);
           doing = DoingNone;
@@ -478,10 +513,14 @@ static int do_build(int ac, char const* const* av)
     return 1;
   }
 
-  cmake cm(cmake::RoleInternal);
-  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, &cm);
-  cm.SetProgressCallback(cmakemainProgressCallback, &cm);
-  return cm.Build(jobs, dir, target, config, nativeOptions, clean);
+  cmake cm(cmake::RoleInternal, cmState::Project);
+  cmSystemTools::SetMessageCallback([&cm](const char* msg, const char* title) {
+    cmakemainMessageCallback(msg, title, &cm);
+  });
+  cm.SetProgressCallback([&cm](const char* msg, float prog) {
+    cmakemainProgressCallback(msg, prog, &cm);
+  });
+  return cm.Build(jobs, dir, target, config, nativeOptions, clean, verbose);
 #endif
 }
 
@@ -516,9 +555,13 @@ static int do_open(int ac, char const* const* av)
     return 1;
   }
 
-  cmake cm(cmake::RoleInternal);
-  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, &cm);
-  cm.SetProgressCallback(cmakemainProgressCallback, &cm);
+  cmake cm(cmake::RoleInternal, cmState::Unknown);
+  cmSystemTools::SetMessageCallback([&cm](const char* msg, const char* title) {
+    cmakemainMessageCallback(msg, title, &cm);
+  });
+  cm.SetProgressCallback([&cm](const char* msg, float prog) {
+    cmakemainProgressCallback(msg, prog, &cm);
+  });
   return cm.Open(dir, false) ? 0 : 1;
 #endif
 }

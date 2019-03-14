@@ -22,8 +22,8 @@ These commands are always available.
    /command/cmake_policy
    /command/configure_file
    /command/continue
-   /command/elseif
    /command/else
+   /command/elseif
    /command/endforeach
    /command/endfunction
    /command/endif
@@ -53,9 +53,9 @@ These commands are always available.
    /command/option
    /command/return
    /command/separate_arguments
+   /command/set
    /command/set_directory_properties
    /command/set_property
-   /command/set
    /command/site_name
    /command/string
    /command/unset
@@ -100,8 +100,6 @@ These commands are available only in CMake projects.
    /command/link_libraries
    /command/load_cache
    /command/project
-   /command/qt_wrap_cpp
-   /command/qt_wrap_ui
    /command/remove_definitions
    /command/set_source_files_properties
    /command/set_target_properties
@@ -145,8 +143,10 @@ These commands are available only in CTest scripts.
 Deprecated Commands
 ===================
 
-These commands are available only for compatibility with older
-versions of CMake.  Do not use them in new code.
+These commands are deprecated and are only made available to maintain
+backward compatibility.  The documentation of each command states the
+CMake version in which it was deprecated.  Do not use these commands
+in new code.
 
 .. toctree::
    :maxdepth: 1
@@ -160,6 +160,8 @@ versions of CMake.  Do not use them in new code.
    /command/load_command
    /command/make_directory
    /command/output_required_files
+   /command/qt_wrap_cpp
+   /command/qt_wrap_ui
    /command/remove
    /command/subdir_depends
    /command/subdirs

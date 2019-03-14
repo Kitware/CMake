@@ -579,6 +579,13 @@ public:
                           const std::string& destination);
 
   /**
+   * Compare the contents of two files, ignoring line ending differences.
+   * Return true if different
+   */
+  static bool TextFilesDiffer(const std::string& path1,
+                              const std::string& path2);
+
+  /**
    * Return true if the two files are the same file
    */
   static bool SameFile(const std::string& file1, const std::string& file2);

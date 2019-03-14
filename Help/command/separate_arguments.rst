@@ -1,33 +1,43 @@
 separate_arguments
 ------------------
 
-Parse space-separated arguments into a semicolon-separated list.
+Parse command-line arguments into a semicolon-separated list.
 
-::
+.. code-block:: cmake
 
-  separate_arguments(<var> <NATIVE|UNIX|WINDOWS>_COMMAND "<args>")
+  separate_arguments(<variable> <mode> <args>)
 
-Parses a UNIX- or Windows-style command-line string "<args>" and
-stores a semicolon-separated list of the arguments in ``<var>``.  The
-entire command line must be given in one "<args>" argument.
+Parses a space-separated string ``<args>`` into a list of items,
+and stores this list in semicolon-separated standard form in ``<variable>``.
 
-The ``UNIX_COMMAND`` mode separates arguments by unquoted whitespace.  It
-recognizes both single-quote and double-quote pairs.  A backslash
-escapes the next literal character (``\"`` is ``"``); there are no special
-escapes (``\n`` is just ``n``).
+This function is intended for parsing command-line arguments.
+The entire command line must be passed as one string in the
+argument ``<args>``.
 
-The ``WINDOWS_COMMAND`` mode parses a Windows command-line using the same
-syntax the runtime library uses to construct argv at startup.  It
-separates arguments by whitespace that is not double-quoted.
-Backslashes are literal unless they precede double-quotes.  See the
-MSDN article `Parsing C Command-Line Arguments`_ for details.
+The exact parsing rules depend on the operating system.
+They are specified by the ``<mode>`` argument which must
+be one of the following keywords:
 
-The ``NATIVE_COMMAND`` mode parses a Windows command-line if the host
-system is Windows, and a UNIX command-line otherwise.
+``UNIX_COMMAND``
+  Arguments are separated by by unquoted whitespace.
+  Both single-quote and double-quote pairs are respected.
+  A backslash escapes the next literal character (``\"`` is ``"``);
+  there are no special escapes (``\n`` is just ``n``).
+
+``WINDOWS_COMMAND``
+  A Windows command-line is parsed using the same
+  syntax the runtime library uses to construct argv at startup.  It
+  separates arguments by whitespace that is not double-quoted.
+  Backslashes are literal unless they precede double-quotes.  See the
+  MSDN article `Parsing C Command-Line Arguments`_ for details.
+
+``NATIVE_COMMAND``
+  Proceeds as in ``WINDOWS_COMMAND`` mode if the host system is Windows.
+  Otherwise proceeds as in ``UNIX_COMMAND`` mode.
 
 .. _`Parsing C Command-Line Arguments`: https://msdn.microsoft.com/library/a1y7w461.aspx
 
-::
+.. code-block:: cmake
 
   separate_arguments(<var>)
 

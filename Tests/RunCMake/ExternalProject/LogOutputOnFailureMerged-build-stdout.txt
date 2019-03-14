@@ -1,0 +1,7 @@
+(  )?-- Log output is:
+(  )?This is some dummy output with some long lines to ensure formatting is preserved
+(  )?    Including lines with leading spaces
+(  )?
+(  )?And also blank lines[
+ ]+
+(  )?cmake -E env: no command given

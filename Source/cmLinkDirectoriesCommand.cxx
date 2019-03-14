@@ -7,9 +7,9 @@
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -59,7 +59,7 @@ void cmLinkDirectoriesCommand::AddLinkDir(
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0015)) {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0015);
-        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+        this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
         break;
       case cmPolicies::OLD:
         // OLD behavior does not convert
@@ -67,7 +67,7 @@ void cmLinkDirectoriesCommand::AddLinkDir(
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0015);
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
         CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior converts

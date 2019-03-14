@@ -19,7 +19,7 @@ class cmDocumentationSection
 {
 public:
   /** Create a cmSection, with a special name for man-output mode. */
-  cmDocumentationSection(const char* name, const char*)
+  explicit cmDocumentationSection(const char* name)
     : Name(name)
   {
   }

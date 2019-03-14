@@ -16,7 +16,6 @@
 #include "cmStateDirectory.h"
 #include "cmStatePrivate.h"
 #include "cmVersion.h"
-#include "cmake.h"
 
 #if !defined(_WIN32)
 #  include <sys/utsname.h>
@@ -28,7 +27,6 @@
 
 cmStateSnapshot::cmStateSnapshot(cmState* state)
   : State(state)
-  , Position()
 {
 }
 
@@ -64,6 +62,12 @@ bool cmStateSnapshot::IsValid() const
   return this->State && this->Position.IsValid()
     ? this->Position != this->State->SnapshotData.Root()
     : false;
+}
+
+cmStateSnapshot cmStateSnapshot::GetBuildsystemDirectory() const
+{
+  return cmStateSnapshot(this->State,
+                         this->Position->BuildSystemDirectory->DirectoryEnd);
 }
 
 cmStateSnapshot cmStateSnapshot::GetBuildsystemDirectoryParent() const
@@ -343,8 +347,7 @@ void cmStateSnapshot::SetDefaultDefinitions()
                       std::to_string(cmVersion::GetTweakVersion()));
   this->SetDefinition("CMAKE_VERSION", cmVersion::GetCMakeVersion());
 
-  this->SetDefinition("CMAKE_FILES_DIRECTORY",
-                      cmake::GetCMakeFilesDirectory());
+  this->SetDefinition("CMAKE_FILES_DIRECTORY", "/CMakeFiles");
 
   // Setup the default include file regular expression (match everything).
   this->Position->BuildSystemDirectory->Properties.SetProperty(

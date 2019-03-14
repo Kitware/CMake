@@ -21,6 +21,12 @@ else()
   macro(__compiler_clang lang)
     __compiler_gnu(${lang})
     set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "-fPIE")
+    # Link options for PIE are already set in 'Compiler/GNU.cmake'
+    # but clang may require alternate syntax on some platforms
+    if (APPLE)
+      set(CMAKE_${lang}_LINK_OPTIONS_PIE ${CMAKE_${lang}_COMPILE_OPTIONS_PIE} -Xlinker -pie)
+      set(CMAKE_${lang}_LINK_OPTIONS_NO_PIE -Xlinker -no_pie)
+    endif()
     set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-isystem ")
     set(CMAKE_${lang}_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")
     if(CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.4.0)

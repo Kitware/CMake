@@ -14,9 +14,7 @@ cmTest::cmTest(cmMakefile* mf)
   this->OldStyle = true;
 }
 
-cmTest::~cmTest()
-{
-}
+cmTest::~cmTest() = default;
 
 cmListFileBacktrace const& cmTest::GetBacktrace() const
 {

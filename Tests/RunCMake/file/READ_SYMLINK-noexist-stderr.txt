@@ -1,0 +1,6 @@
+^CMake Error at READ_SYMLINK-noexist\.cmake:[0-9]+ \(file\):
+  file READ_SYMLINK requested of path that is not a symlink:
+
+    .*/Tests/RunCMake/file/READ_SYMLINK-noexist-build/rel\.sym
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

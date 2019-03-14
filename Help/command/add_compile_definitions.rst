@@ -1,9 +1,9 @@
 add_compile_definitions
 -----------------------
 
-Adds preprocessor definitions to the compilation of source files.
+Add preprocessor definitions to the compilation of source files.
 
-::
+.. code-block:: cmake
 
   add_compile_definitions(<definition> ...)
 

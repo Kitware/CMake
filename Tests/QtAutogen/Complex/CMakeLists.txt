@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(Complex)
-include("../AutogenTest.cmake")
+include("../AutogenGuiTest.cmake")
 
 # -- Test: AUTOMOC AUTORCC AUTOUIC
 add_definitions(-DFOO -DSomeDefine="Barx")

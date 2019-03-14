@@ -20,6 +20,7 @@ class cmTargetDepend
   // mutable members to achieve a map with set syntax.
   mutable bool Link;
   mutable bool Util;
+  mutable cmListFileBacktrace Backtrace;
 
 public:
   cmTargetDepend(cmGeneratorTarget const* t)
@@ -44,13 +45,17 @@ public:
       this->Link = true;
     }
   }
+  void SetBacktrace(cmListFileBacktrace const& bt) const
+  {
+    this->Backtrace = bt;
+  }
   void SetBacktrace(cmListFileBacktrace const & bt) const
   {
     this->Bt = bt;
   }
   bool IsLink() const { return this->Link; }
   bool IsUtil() const { return this->Util; }
-  cmListFileBacktrace & Backtrace() const { return this->Bt; }
+  cmListFileBacktrace const& GetBacktrace() const { return this->Backtrace; }
 };
 
 /** Unordered set of (direct) dependencies of a target. */

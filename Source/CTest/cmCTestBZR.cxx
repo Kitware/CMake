@@ -77,9 +77,7 @@ cmCTestBZR::cmCTestBZR(cmCTest* ct, std::ostream& log)
   cmSystemTools::PutEnv("BZR_PROGRESS_BAR=none");
 }
 
-cmCTestBZR::~cmCTestBZR()
-{
-}
+cmCTestBZR::~cmCTestBZR() = default;
 
 class cmCTestBZR::InfoParser : public cmCTestVC::LineParser
 {

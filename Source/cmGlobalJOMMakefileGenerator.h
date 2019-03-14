@@ -40,7 +40,7 @@ public:
                       bool optional) override;
 
 protected:
-  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
+  void GenerateBuildCommand(GeneratedMakeCommand& makeCommand,
                             const std::string& makeProgram,
                             const std::string& projectName,
                             const std::string& projectDir,

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(ObjectLibrary)
-include("../AutogenTest.cmake")
+include("../AutogenCoreTest.cmake")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)

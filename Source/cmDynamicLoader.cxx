@@ -24,9 +24,7 @@ private:
 
 cmDynamicLoaderCache* cmDynamicLoaderCache::Instance = nullptr;
 
-cmDynamicLoaderCache::~cmDynamicLoaderCache()
-{
-}
+cmDynamicLoaderCache::~cmDynamicLoaderCache() = default;
 
 void cmDynamicLoaderCache::CacheFile(const char* path,
                                      cmsys::DynamicLoader::LibraryHandle p)

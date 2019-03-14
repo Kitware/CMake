@@ -3871,7 +3871,8 @@ SystemInformation::LongLong SystemInformationImplementation::GetProcessId()
 {
 #if defined(_WIN32)
   return GetCurrentProcessId();
-#elif defined(__linux) || defined(__APPLE__)
+#elif defined(__linux) || defined(__APPLE__) || defined(__OpenBSD__) ||       \
+  defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
   return getpid();
 #else
   return -1;
@@ -4423,7 +4424,8 @@ bool SystemInformationImplementation::ParseSysCtl()
                       &count) == KERN_SUCCESS) {
     len = sizeof(value);
     err = sysctlbyname("hw.pagesize", &value, &len, KWSYS_NULLPTR, 0);
-    int64_t available_memory = vmstat.free_count * value;
+    int64_t available_memory =
+      (vmstat.free_count + vmstat.inactive_count) * value;
     this->AvailablePhysicalMemory =
       static_cast<size_t>(available_memory / 1048576);
   }

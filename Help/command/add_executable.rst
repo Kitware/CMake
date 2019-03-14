@@ -3,7 +3,7 @@ add_executable
 
 Add an executable to the project using the specified source files.
 
-::
+.. code-block:: cmake
 
   add_executable(<name> [WIN32] [MACOSX_BUNDLE]
                  [EXCLUDE_FROM_ALL]
@@ -47,7 +47,7 @@ within IDE.
 
 --------------------------------------------------------------------------
 
-::
+.. code-block:: cmake
 
   add_executable(<name> IMPORTED [GLOBAL])
 
@@ -67,7 +67,7 @@ properties for more information.
 
 --------------------------------------------------------------------------
 
-::
+.. code-block:: cmake
 
   add_executable(<name> ALIAS <target>)
 

@@ -7,21 +7,27 @@ CPack
 
 Build binary and source package installers.
 
-Variables common to all CPack generators
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Introduction
+^^^^^^^^^^^^
 
-The CPack module generates binary and source installers in a variety of
-formats using the cpack program.  Inclusion of the CPack module adds
-two new build targets, ``package`` and ``package_source``, which build
-the binary and source installers respectively.  The generated binary
-installers contain everything installed via CMake's :command:`install`
-command (and the deprecated :command:`install_files`,
-:command:`install_programs` and :command:`install_targets` commands).
+The CPack module generates a file ``CPackConfig.cmake`` intended for
+use in a subsequent run of  the :manual:`cpack <cpack(1)>` program
+where it steers the generation of installers or/and source packages.
+
+Inclusion of the CPack module adds two new build targets, ``package``
+and ``package_source``, which build the binary and source installers
+respectively.  The generated binary installers contain everything
+installed via CMake's :command:`install` command (and the deprecated
+commands :command:`install_files`, :command:`install_programs`, and
+:command:`install_targets`).
 
 For certain kinds of binary installers (including the graphical
 installers on macOS and Windows), CPack generates installers that
 allow users to select individual application components to install.
 See :module:`CPackComponent` module for further details.
+
+CPack Generators
+^^^^^^^^^^^^^^^^
 
 The :variable:`CPACK_GENERATOR` variable has different meanings in different
 contexts.  In a ``CMakeLists.txt`` file, :variable:`CPACK_GENERATOR` is a
@@ -56,6 +62,9 @@ This is the key: For each generator listed in :variable:`CPACK_GENERATOR` in
 ``CPackConfig.cmake``, cpack will *reset* :variable:`CPACK_GENERATOR`
 internally to *the one currently being used* and then include the
 :variable:`CPACK_PROJECT_CONFIG_FILE`.
+
+Variables common to all CPack Generators
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Before including this CPack module in your ``CMakeLists.txt`` file, there
 are a variety of variables that can be set to customize the resulting
@@ -244,6 +253,9 @@ installers.  The most commonly-used variables are:
   received by the cpack program.  Defaults to ``FALSE`` for backwards
   compatibility.
 
+Variables for Source Package Generators
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 The following CPack variables are specific to source packages, and
 will not affect binary packages:
 
@@ -277,6 +289,9 @@ will not affect binary packages:
   a source package.  This is a list of regular expression patterns (that
   must be properly escaped), e.g.,
   ``/CVS/;/\\.svn/;\\.swp$;\\.#;/#;.*~;cscope.*``
+
+Variables for Advanced Use
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The following variables are for advanced uses of CPack:
 

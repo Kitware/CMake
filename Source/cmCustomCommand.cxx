@@ -4,34 +4,22 @@
 
 #include "cmMakefile.h"
 
-cmCustomCommand::cmCustomCommand()
-  : Backtrace()
-{
-  this->HaveComment = false;
-  this->EscapeOldStyle = true;
-  this->EscapeAllowMakeVars = false;
-  this->UsesTerminal = false;
-  this->CommandExpandLists = false;
-}
+#include <utility>
 
 cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
-                                 const std::vector<std::string>& outputs,
-                                 const std::vector<std::string>& byproducts,
-                                 const std::vector<std::string>& depends,
-                                 const cmCustomCommandLines& commandLines,
+                                 std::vector<std::string> outputs,
+                                 std::vector<std::string> byproducts,
+                                 std::vector<std::string> depends,
+                                 cmCustomCommandLines commandLines,
                                  const char* comment,
                                  const char* workingDirectory)
-  : Outputs(outputs)
-  , Byproducts(byproducts)
-  , Depends(depends)
-  , CommandLines(commandLines)
-  , Backtrace()
+  : Outputs(std::move(outputs))
+  , Byproducts(std::move(byproducts))
+  , Depends(std::move(depends))
+  , CommandLines(std::move(commandLines))
   , Comment(comment ? comment : "")
   , WorkingDirectory(workingDirectory ? workingDirectory : "")
   , HaveComment(comment != nullptr)
-  , EscapeAllowMakeVars(false)
-  , EscapeOldStyle(true)
-  , CommandExpandLists(false)
 {
   if (mf) {
     this->Backtrace = mf->GetBacktrace();

@@ -1,26 +1,45 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindLibLZMA
-# -----------
-#
-# Find LibLZMA
-#
-# Find LibLZMA headers and library
-#
-# ::
-#
-#   LIBLZMA_FOUND             - True if liblzma is found.
-#   LIBLZMA_INCLUDE_DIRS      - Directory where liblzma headers are located.
-#   LIBLZMA_LIBRARIES         - Lzma libraries to link against.
-#   LIBLZMA_HAS_AUTO_DECODER  - True if lzma_auto_decoder() is found (required).
-#   LIBLZMA_HAS_EASY_ENCODER  - True if lzma_easy_encoder() is found (required).
-#   LIBLZMA_HAS_LZMA_PRESET   - True if lzma_lzma_preset() is found (required).
-#   LIBLZMA_VERSION_MAJOR     - The major version of lzma
-#   LIBLZMA_VERSION_MINOR     - The minor version of lzma
-#   LIBLZMA_VERSION_PATCH     - The patch version of lzma
-#   LIBLZMA_VERSION_STRING    - version number as a string (ex: "5.0.3")
+#[=======================================================================[.rst:
+FindLibLZMA
+-----------
+
+Find LZMA compression algorithm headers and library.
+
+
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+This module defines :prop_tgt:`IMPORTED` target ``LibLZMA::LibLZMA``, if
+liblzma has been found.
+
+Result variables
+^^^^^^^^^^^^^^^^
+
+This module will set the following variables in your project:
+
+``LIBLZMA_FOUND``
+  True if liblzma headers and library were found.
+``LIBLZMA_INCLUDE_DIRS``
+  Directory where liblzma headers are located.
+``LIBLZMA_LIBRARIES``
+  Lzma libraries to link against.
+``LIBLZMA_HAS_AUTO_DECODER``
+  True if lzma_auto_decoder() is found (required).
+``LIBLZMA_HAS_EASY_ENCODER``
+  True if lzma_easy_encoder() is found (required).
+``LIBLZMA_HAS_LZMA_PRESET``
+  True if lzma_lzma_preset() is found (required).
+``LIBLZMA_VERSION_MAJOR``
+  The major version of lzma
+``LIBLZMA_VERSION_MINOR``
+  The minor version of lzma
+``LIBLZMA_VERSION_PATCH``
+  The patch version of lzma
+``LIBLZMA_VERSION_STRING``
+  version number as a string (ex: "5.0.3")
+#]=======================================================================]
 
 find_path(LIBLZMA_INCLUDE_DIR lzma.h )
 find_library(LIBLZMA_LIBRARY NAMES lzma liblzma)
@@ -50,17 +69,23 @@ if (LIBLZMA_LIBRARY)
 endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibLZMA  REQUIRED_VARS  LIBLZMA_INCLUDE_DIR
-                                                          LIBLZMA_LIBRARY
+find_package_handle_standard_args(LibLZMA  REQUIRED_VARS  LIBLZMA_LIBRARY
+                                                          LIBLZMA_INCLUDE_DIR
                                                           LIBLZMA_HAS_AUTO_DECODER
                                                           LIBLZMA_HAS_EASY_ENCODER
                                                           LIBLZMA_HAS_LZMA_PRESET
                                            VERSION_VAR    LIBLZMA_VERSION_STRING
                                  )
+mark_as_advanced( LIBLZMA_INCLUDE_DIR LIBLZMA_LIBRARY )
 
 if (LIBLZMA_FOUND)
     set(LIBLZMA_LIBRARIES ${LIBLZMA_LIBRARY})
     set(LIBLZMA_INCLUDE_DIRS ${LIBLZMA_INCLUDE_DIR})
+    if(NOT TARGET LibLZMA::LibLZMA)
+        add_library(LibLZMA::LibLZMA UNKNOWN IMPORTED)
+        set_target_properties(LibLZMA::LibLZMA PROPERTIES
+                              INTERFACE_INCLUDE_DIRECTORIES ${LIBLZMA_INCLUDE_DIR}
+                              IMPORTED_LINK_INTERFACE_LANGUAGES C
+                              IMPORTED_LOCATION ${LIBLZMA_LIBRARY})
+    endif()
 endif ()
-
-mark_as_advanced( LIBLZMA_INCLUDE_DIR LIBLZMA_LIBRARY )

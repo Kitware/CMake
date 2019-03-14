@@ -19,12 +19,12 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
   std::vector<std::string> paths;
-  paths.push_back("/usr/bsd");
-  paths.push_back("/usr/sbin");
-  paths.push_back("/usr/bin");
-  paths.push_back("/bin");
-  paths.push_back("/sbin");
-  paths.push_back("/usr/local/bin");
+  paths.emplace_back("/usr/bsd");
+  paths.emplace_back("/usr/sbin");
+  paths.emplace_back("/usr/bin");
+  paths.emplace_back("/bin");
+  paths.emplace_back("/sbin");
+  paths.emplace_back("/usr/local/bin");
 
   const char* cacheValue = this->Makefile->GetDefinition(args[0]);
   if (cacheValue) {

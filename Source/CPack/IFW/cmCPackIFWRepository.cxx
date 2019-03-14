@@ -200,7 +200,7 @@ bool cmCPackIFWRepository::PatchUpdatesXml()
 
   fout.Close();
 
-  return cmSystemTools::RenameFile(updatesPatchXml.data(), updatesXml.data());
+  return cmSystemTools::RenameFile(updatesPatchXml, updatesXml);
 }
 
 void cmCPackIFWRepository::WriteRepositoryConfig(cmXMLWriter& xout)

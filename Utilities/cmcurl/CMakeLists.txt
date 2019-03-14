@@ -29,7 +29,7 @@ set(DISABLED_THREADSAFE OFF CACHE INTERNAL "Curl can use thread-safe functions")
 set(ENABLE_ARES OFF CACHE INTERNAL "No curl c-ares support")
 set(ENABLE_CURLDEBUG OFF CACHE INTERNAL "No curl TrackMemory features")
 set(ENABLE_DEBUG OFF CACHE INTERNAL "No curl debug features")
-set(ENABLE_IPV6 OFF CACHE INTERNAL "No curl IPv6 support")
+set(ENABLE_IPV6 ON CACHE INTERNAL "Enable curl IPv6 support detection")
 set(ENABLE_MANUAL OFF CACHE INTERNAL "No curl built-in manual")
 set(ENABLE_THREADED_RESOLVER OFF CACHE INTERNAL "No curl POSIX threaded DNS lookup")
 set(ENABLE_UNIX_SOCKETS OFF CACHE INTERNAL "No curl Unix domain sockets support")
@@ -123,7 +123,6 @@ endif()
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)

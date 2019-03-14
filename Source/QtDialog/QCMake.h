@@ -75,6 +75,8 @@ public slots:
   /// set the desired generator to use
   void setGenerator(const QString& generator);
   /// set the desired generator to use
+  void setPlatform(const QString& platform);
+  /// set the desired generator to use
   void setToolset(const QString& toolset);
   /// do the configure step
   void configure();
@@ -155,6 +157,8 @@ signals:
   void debugOutputChanged(bool);
   /// signal when the toolset changes
   void toolsetChanged(const QString& toolset);
+  /// signal when the platform changes
+  void platformChanged(const QString& platform);
   /// signal when open is done
   void openDone(bool successful);
   /// signal when open is done
@@ -163,18 +167,19 @@ signals:
 protected:
   cmake* CMakeInstance;
 
-  static bool interruptCallback(void*);
-  static void progressCallback(const char* msg, float percent, void* cd);
-  static void messageCallback(const char* msg, const char* title, bool&,
-                              void* cd);
-  static void stdoutCallback(const char* msg, size_t len, void* cd);
-  static void stderrCallback(const char* msg, size_t len, void* cd);
+  bool interruptCallback();
+  void progressCallback(const char* msg, float percent);
+  void messageCallback(const char* msg, const char* title);
+  void stdoutCallback(std::string const& msg);
+  void stderrCallback(std::string const& msg);
+
   bool WarnUninitializedMode;
   bool WarnUnusedMode;
   bool WarnUnusedAllMode;
   QString SourceDirectory;
   QString BinaryDirectory;
   QString Generator;
+  QString Platform;
   QString Toolset;
   std::vector<cmake::GeneratorInfo> AvailableGenerators;
   QString CMakeExecutable;

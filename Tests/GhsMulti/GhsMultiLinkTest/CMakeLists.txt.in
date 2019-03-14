@@ -1,0 +1,43 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+
+project(test C)
+
+if(CMAKE_C_COMPILER_ID STREQUAL "GHS")
+  add_link_options("-non_shared")
+endif()
+
+if(RUN_TEST STREQUAL "CHECK_FLAGS")
+  add_link_options(-add-link-options1 -add-link-options2)
+  link_directories(link_directories_used1 link_directories_used2 "c:/absolute")
+  link_libraries(link_libraries_used1 link_libraries_used2 )
+  set( CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lcsl1 csl2" )
+  set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -clinkexe1 -clinkexe2")
+endif()
+
+add_executable(exe1 exe1.c)
+target_link_libraries(exe1 lib1)
+
+if(RUN_TEST STREQUAL "CHECK_FLAGS")
+  set_property(TARGET exe1 APPEND_STRING PROPERTY LINK_FLAGS "--link-flag-prop1 --link-flag-prop2")
+  set_property(TARGET exe1 APPEND PROPERTY LINK_OPTIONS --link-opt-prop1 --link-opt-prop2)
+endif()
+
+if(RUN_TEST STREQUAL "CHECK_FLAGS")
+  set(CMAKE_STATIC_LINKER_FLAGS ${CMAKE_STATIC_LINKER_FLAGS} "-clinkexeA1 -clinkexeA2")
+endif()
+
+add_library(lib1 STATIC func2.c func3.c func4.c)
+target_link_libraries(lib1 lib2)
+
+if(RUN_TEST STREQUAL "CHECK_FLAGS")
+  set_property(TARGET lib1 APPEND_STRING PROPERTY STATIC_LIBRARY_FLAGS "-static-lib-flags1 -static-lib-flags2")
+endif()
+
+add_library(lib2 STATIC func5.c func6.c func7.c)
+
+if(RUN_TEST STREQUAL "CHECK_FLAGS")
+  target_link_options(lib2 PUBLIC -special-lib2-public-link)
+endif()

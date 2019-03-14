@@ -20,7 +20,7 @@ The CPack FreeBSD generator should work on any host with libpkg installed. The
 packages it produces are specific to the host architecture and ABI.
 
 The CPack FreeBSD generator sets package-metadata through
-:code:`CPACK_FREEBSD_XXX` variables. The CPack FreeBSD generator, unlike the
+``CPACK_FREEBSD_XXX`` variables. The CPack FreeBSD generator, unlike the
 CPack Deb generator, does not specially support componentized packages; a
 single package is created from all the software artifacts created through
 CMake.

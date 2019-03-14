@@ -6,19 +6,16 @@
 #include <sstream>
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmSystemTools.h"
 #include "cm_sys_stat.h"
 
-cmCPackSTGZGenerator::cmCPackSTGZGenerator()
-{
-}
+cmCPackSTGZGenerator::cmCPackSTGZGenerator() = default;
 
-cmCPackSTGZGenerator::~cmCPackSTGZGenerator()
-{
-}
+cmCPackSTGZGenerator::~cmCPackSTGZGenerator() = default;
 
 int cmCPackSTGZGenerator::InitializeInternal()
 {

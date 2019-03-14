@@ -18,15 +18,13 @@ class cmMakefile;
 class cmMacroFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmMacroFunctionBlocker() { this->Depth = 0; }
-  ~cmMacroFunctionBlocker() override {}
   bool IsFunctionBlocked(const cmListFileFunction&, cmMakefile& mf,
                          cmExecutionStatus&) override;
   bool ShouldRemove(const cmListFileFunction&, cmMakefile& mf) override;
 
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
-  int Depth;
+  int Depth = 0;
 };
 
 /// Starts macro() ... endmacro() block

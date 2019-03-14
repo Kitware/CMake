@@ -1,0 +1,51 @@
+^2
+3
+4
+5
+6
+7
+8
+9
+10
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_11\.cmake:1 \(cmake_minimum_required\):
+  Maximum recursion depth of 10 exceeded
+
+
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_10\.cmake:13 \(message\):
+  Nested script failed
+
+
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_9\.cmake:13 \(message\):
+  Nested script failed
+
+
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_8\.cmake:13 \(message\):
+  Nested script failed
+
+
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_7\.cmake:13 \(message\):
+  Nested script failed
+
+
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_6\.cmake:13 \(message\):
+  Nested script failed
+
+
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_5\.cmake:13 \(message\):
+  Nested script failed
+
+
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_4\.cmake:13 \(message\):
+  Nested script failed
+
+
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_3\.cmake:13 \(message\):
+  Nested script failed
+
+
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_2\.cmake:13 \(message\):
+  Nested script failed
+
+
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script-var/test\.cmake:19 \(message\):
+  Nested script failed$

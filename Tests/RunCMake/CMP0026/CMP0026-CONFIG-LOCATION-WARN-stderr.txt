@@ -8,5 +8,5 @@ CMake Warning \(dev\) at CMP0026-CONFIG-LOCATION-WARN.cmake:5 \(get_target_prope
   expression \$<TARGET_FILE>, as appropriate.
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.

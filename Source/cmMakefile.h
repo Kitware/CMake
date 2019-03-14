@@ -18,13 +18,13 @@
 
 #include "cmAlgorithms.h"
 #include "cmListFileCache.h"
+#include "cmMessageType.h"
 #include "cmNewLineStyle.h"
 #include "cmPolicies.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  include "cmSourceGroup.h"
@@ -46,6 +46,7 @@ class cmState;
 class cmTest;
 class cmTestGenerator;
 class cmVariableWatch;
+class cmake;
 
 /** A type-safe wrapper for a string representing a directory id.  */
 class cmDirectoryId
@@ -64,8 +65,6 @@ public:
  */
 class cmMakefile
 {
-  CM_DISABLE_COPY(cmMakefile)
-
 public:
   /* Mark a variable as used */
   void MarkVariableAsUsed(const std::string& var);
@@ -83,13 +82,15 @@ public:
    */
   ~cmMakefile();
 
+  cmMakefile(cmMakefile const&) = delete;
+  cmMakefile& operator=(cmMakefile const&) = delete;
+
   cmDirectoryId GetDirectoryId() const;
 
-  bool ReadListFile(const char* filename);
+  bool ReadListFile(const std::string& filename);
 
-  bool ReadDependentFile(const char* filename, bool noPolicyScope = true);
-
-  bool ProcessBuildsystemFile(const char* filename);
+  bool ReadDependentFile(const std::string& filename,
+                         bool noPolicyScope = true);
 
   /**
    * Add a function blocker to this makefile
@@ -689,7 +690,13 @@ public:
   /**
    * Return a location of a file in cmake or custom modules directory
    */
-  std::string GetModulesFile(const char* name) const;
+  std::string GetModulesFile(const std::string& name) const
+  {
+    bool system;
+    return this->GetModulesFile(name, system);
+  }
+
+  std::string GetModulesFile(const std::string& name, bool& system) const;
 
   ///! Set/Get a property of this directory
   void SetProperty(const std::string& prop, const char* value);
@@ -775,20 +782,23 @@ public:
   /** Helper class to push and pop scopes automatically.  */
   class ScopePushPop
   {
-    CM_DISABLE_COPY(ScopePushPop)
   public:
     ScopePushPop(cmMakefile* m)
       : Makefile(m)
     {
       this->Makefile->PushScope();
     }
+
     ~ScopePushPop() { this->Makefile->PopScope(); }
+
+    ScopePushPop(ScopePushPop const&) = delete;
+    ScopePushPop& operator=(ScopePushPop const&) = delete;
 
   private:
     cmMakefile* Makefile;
   };
 
-  void IssueMessage(cmake::MessageType t, std::string const& text) const;
+  void IssueMessage(MessageType t, std::string const& text) const;
 
   /** Set whether or not to report a CMP0000 violation.  */
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }
@@ -861,6 +871,12 @@ public:
   std::deque<std::vector<std::string>> FindPackageRootPathStack;
 
   void MaybeWarnCMP0074(std::string const& pkg);
+  void MaybeWarnUninitialized(std::string const& variable,
+                              const char* sourceFilename) const;
+  bool IsProjectFile(const char* filename) const;
+
+  int GetRecursionDepth() const;
+  void SetRecursionDepth(int recursionDepth);
 
 protected:
   // add link libraries and directories to the target
@@ -922,6 +938,7 @@ protected:
 private:
   cmStateSnapshot StateSnapshot;
   cmListFileBacktrace Backtrace;
+  int RecursionDepth;
 
   void ReadListFile(cmListFile const& listFile,
                     const std::string& filenametoread);
@@ -974,15 +991,18 @@ private:
   friend class BuildsystemFileScope;
 
   // CMP0053 == old
-  cmake::MessageType ExpandVariablesInStringOld(
-    std::string& errorstr, std::string& source, bool escapeQuotes,
-    bool noEscapes, bool atOnly, const char* filename, long line,
-    bool removeEmpty, bool replaceAt) const;
+  MessageType ExpandVariablesInStringOld(std::string& errorstr,
+                                         std::string& source,
+                                         bool escapeQuotes, bool noEscapes,
+                                         bool atOnly, const char* filename,
+                                         long line, bool removeEmpty,
+                                         bool replaceAt) const;
   // CMP0053 == new
-  cmake::MessageType ExpandVariablesInStringNew(
-    std::string& errorstr, std::string& source, bool escapeQuotes,
-    bool noEscapes, bool atOnly, const char* filename, long line,
-    bool removeEmpty, bool replaceAt) const;
+  MessageType ExpandVariablesInStringNew(std::string& errorstr,
+                                         std::string& source,
+                                         bool escapeQuotes, bool noEscapes,
+                                         bool atOnly, const char* filename,
+                                         long line, bool replaceAt) const;
   /**
    * Old version of GetSourceFileWithOutput(const std::string&) kept for
    * backward-compatibility. It implements a linear search and support
@@ -1026,7 +1046,7 @@ private:
   bool CheckCMP0000;
   std::set<std::string> WarnedCMP0074;
   bool IsSourceFileTryCompile;
-  mutable bool SuppressWatches;
+  mutable bool SuppressSideEffects;
 };
 
 #endif

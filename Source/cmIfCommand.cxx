@@ -6,6 +6,7 @@
 #include "cmExecutionStatus.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
@@ -39,7 +40,7 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       // Remove the function blocker for this scope or bail.
       std::unique_ptr<cmFunctionBlocker> fb(
         mf.RemoveFunctionBlocker(this, lff));
-      if (!fb.get()) {
+      if (!fb) {
         return false;
       }
 
@@ -60,7 +61,7 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
           if (this->ElseSeen) {
             cmListFileBacktrace bt = mf.GetBacktrace(func);
             mf.GetCMakeInstance()->IssueMessage(
-              cmake::FATAL_ERROR,
+              MessageType::FATAL_ERROR,
               "A duplicate ELSE command was found inside an IF block.", bt);
             cmSystemTools::SetFatalErrorOccured();
             return true;
@@ -79,7 +80,7 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
           if (this->ElseSeen) {
             cmListFileBacktrace bt = mf.GetBacktrace(func);
             mf.GetCMakeInstance()->IssueMessage(
-              cmake::FATAL_ERROR,
+              MessageType::FATAL_ERROR,
               "An ELSEIF command was found after an ELSE command.", bt);
             cmSystemTools::SetFatalErrorOccured();
             return true;
@@ -98,7 +99,7 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
             std::vector<cmExpandedCommandArgument> expandedArguments;
             mf.ExpandArguments(func.Arguments, expandedArguments);
 
-            cmake::MessageType messType;
+            MessageType messType;
 
             cmListFileContext conditionContext =
               cmListFileContext::FromCommandContext(
@@ -115,7 +116,7 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
               err += errorString;
               cmListFileBacktrace bt = mf.GetBacktrace(func);
               mf.GetCMakeInstance()->IssueMessage(messType, err, bt);
-              if (messType == cmake::FATAL_ERROR) {
+              if (messType == MessageType::FATAL_ERROR) {
                 cmSystemTools::SetFatalErrorOccured();
                 return true;
               }
@@ -181,7 +182,7 @@ bool cmIfCommand::InvokeInitialPass(
   std::vector<cmExpandedCommandArgument> expandedArguments;
   this->Makefile->ExpandArguments(args, expandedArguments);
 
-  cmake::MessageType status;
+  MessageType status;
 
   cmConditionEvaluator conditionEvaluator(
     *(this->Makefile), this->Makefile->GetExecutionContext(),
@@ -193,8 +194,8 @@ bool cmIfCommand::InvokeInitialPass(
   if (!errorString.empty()) {
     std::string err = "if " + cmIfCommandError(expandedArguments);
     err += errorString;
-    if (status == cmake::FATAL_ERROR) {
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, err);
+    if (status == MessageType::FATAL_ERROR) {
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, err);
       cmSystemTools::SetFatalErrorOccured();
       return true;
     }

@@ -1,127 +1,128 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# GNUInstallDirs
-# --------------
-#
-# Define GNU standard installation directories
-#
-# Provides install directory variables as defined by the
-# `GNU Coding Standards`_.
-#
-# .. _`GNU Coding Standards`: https://www.gnu.org/prep/standards/html_node/Directory-Variables.html
-#
-# Result Variables
-# ^^^^^^^^^^^^^^^^
-#
-# Inclusion of this module defines the following variables:
-#
-# ``CMAKE_INSTALL_<dir>``
-#
-#   Destination for files of a given type.  This value may be passed to
-#   the ``DESTINATION`` options of :command:`install` commands for the
-#   corresponding file type.
-#
-# ``CMAKE_INSTALL_FULL_<dir>``
-#
-#   The absolute path generated from the corresponding ``CMAKE_INSTALL_<dir>``
-#   value.  If the value is not already an absolute path, an absolute path
-#   is constructed typically by prepending the value of the
-#   :variable:`CMAKE_INSTALL_PREFIX` variable.  However, there are some
-#   `special cases`_ as documented below.
-#
-# where ``<dir>`` is one of:
-#
-# ``BINDIR``
-#   user executables (``bin``)
-# ``SBINDIR``
-#   system admin executables (``sbin``)
-# ``LIBEXECDIR``
-#   program executables (``libexec``)
-# ``SYSCONFDIR``
-#   read-only single-machine data (``etc``)
-# ``SHAREDSTATEDIR``
-#   modifiable architecture-independent data (``com``)
-# ``LOCALSTATEDIR``
-#   modifiable single-machine data (``var``)
-# ``RUNSTATEDIR``
-#   run-time variable data (``LOCALSTATEDIR/run``)
-# ``LIBDIR``
-#   object code libraries (``lib`` or ``lib64``
-#   or ``lib/<multiarch-tuple>`` on Debian)
-# ``INCLUDEDIR``
-#   C header files (``include``)
-# ``OLDINCLUDEDIR``
-#   C header files for non-gcc (``/usr/include``)
-# ``DATAROOTDIR``
-#   read-only architecture-independent data root (``share``)
-# ``DATADIR``
-#   read-only architecture-independent data (``DATAROOTDIR``)
-# ``INFODIR``
-#   info documentation (``DATAROOTDIR/info``)
-# ``LOCALEDIR``
-#   locale-dependent data (``DATAROOTDIR/locale``)
-# ``MANDIR``
-#   man documentation (``DATAROOTDIR/man``)
-# ``DOCDIR``
-#   documentation root (``DATAROOTDIR/doc/PROJECT_NAME``)
-#
-# If the includer does not define a value the above-shown default will be
-# used and the value will appear in the cache for editing by the user.
-#
-# Special Cases
-# ^^^^^^^^^^^^^
-#
-# The following values of :variable:`CMAKE_INSTALL_PREFIX` are special:
-#
-# ``/``
-#
-#   For ``<dir>`` other than the ``SYSCONFDIR``, ``LOCALSTATEDIR`` and
-#   ``RUNSTATEDIR``, the value of ``CMAKE_INSTALL_<dir>`` is prefixed
-#   with ``usr/`` if it is not user-specified as an absolute path.
-#   For example, the ``INCLUDEDIR`` value ``include`` becomes ``usr/include``.
-#   This is required by the `GNU Coding Standards`_, which state:
-#
-#     When building the complete GNU system, the prefix will be empty
-#     and ``/usr`` will be a symbolic link to ``/``.
-#
-# ``/usr``
-#
-#   For ``<dir>`` equal to ``SYSCONFDIR``, ``LOCALSTATEDIR`` or
-#   ``RUNSTATEDIR``, the ``CMAKE_INSTALL_FULL_<dir>`` is computed by
-#   prepending just ``/`` to the value of ``CMAKE_INSTALL_<dir>``
-#   if it is not user-specified as an absolute path.
-#   For example, the ``SYSCONFDIR`` value ``etc`` becomes ``/etc``.
-#   This is required by the `GNU Coding Standards`_.
-#
-# ``/opt/...``
-#
-#   For ``<dir>`` equal to ``SYSCONFDIR``, ``LOCALSTATEDIR`` or
-#   ``RUNSTATEDIR``, the ``CMAKE_INSTALL_FULL_<dir>`` is computed by
-#   *appending* the prefix to the value of ``CMAKE_INSTALL_<dir>``
-#   if it is not user-specified as an absolute path.
-#   For example, the ``SYSCONFDIR`` value ``etc`` becomes ``/etc/opt/...``.
-#   This is defined by the `Filesystem Hierarchy Standard`_.
-#
-# .. _`Filesystem Hierarchy Standard`: https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html
-#
-# Macros
-# ^^^^^^
-#
-# .. command:: GNUInstallDirs_get_absolute_install_dir
-#
-#   ::
-#
-#     GNUInstallDirs_get_absolute_install_dir(absvar var)
-#
-#   Set the given variable ``absvar`` to the absolute path contained
-#   within the variable ``var``.  This is to allow the computation of an
-#   absolute path, accounting for all the special cases documented
-#   above.  While this macro is used to compute the various
-#   ``CMAKE_INSTALL_FULL_<dir>`` variables, it is exposed publicly to
-#   allow users who create additional path variables to also compute
-#   absolute paths where necessary, using the same logic.
+#[=======================================================================[.rst:
+GNUInstallDirs
+--------------
+
+Define GNU standard installation directories
+
+Provides install directory variables as defined by the
+`GNU Coding Standards`_.
+
+.. _`GNU Coding Standards`: https://www.gnu.org/prep/standards/html_node/Directory-Variables.html
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+Inclusion of this module defines the following variables:
+
+``CMAKE_INSTALL_<dir>``
+
+  Destination for files of a given type.  This value may be passed to
+  the ``DESTINATION`` options of :command:`install` commands for the
+  corresponding file type.
+
+``CMAKE_INSTALL_FULL_<dir>``
+
+  The absolute path generated from the corresponding ``CMAKE_INSTALL_<dir>``
+  value.  If the value is not already an absolute path, an absolute path
+  is constructed typically by prepending the value of the
+  :variable:`CMAKE_INSTALL_PREFIX` variable.  However, there are some
+  `special cases`_ as documented below.
+
+where ``<dir>`` is one of:
+
+``BINDIR``
+  user executables (``bin``)
+``SBINDIR``
+  system admin executables (``sbin``)
+``LIBEXECDIR``
+  program executables (``libexec``)
+``SYSCONFDIR``
+  read-only single-machine data (``etc``)
+``SHAREDSTATEDIR``
+  modifiable architecture-independent data (``com``)
+``LOCALSTATEDIR``
+  modifiable single-machine data (``var``)
+``RUNSTATEDIR``
+  run-time variable data (``LOCALSTATEDIR/run``)
+``LIBDIR``
+  object code libraries (``lib`` or ``lib64``
+  or ``lib/<multiarch-tuple>`` on Debian)
+``INCLUDEDIR``
+  C header files (``include``)
+``OLDINCLUDEDIR``
+  C header files for non-gcc (``/usr/include``)
+``DATAROOTDIR``
+  read-only architecture-independent data root (``share``)
+``DATADIR``
+  read-only architecture-independent data (``DATAROOTDIR``)
+``INFODIR``
+  info documentation (``DATAROOTDIR/info``)
+``LOCALEDIR``
+  locale-dependent data (``DATAROOTDIR/locale``)
+``MANDIR``
+  man documentation (``DATAROOTDIR/man``)
+``DOCDIR``
+  documentation root (``DATAROOTDIR/doc/PROJECT_NAME``)
+
+If the includer does not define a value the above-shown default will be
+used and the value will appear in the cache for editing by the user.
+
+Special Cases
+^^^^^^^^^^^^^
+
+The following values of :variable:`CMAKE_INSTALL_PREFIX` are special:
+
+``/``
+
+  For ``<dir>`` other than the ``SYSCONFDIR``, ``LOCALSTATEDIR`` and
+  ``RUNSTATEDIR``, the value of ``CMAKE_INSTALL_<dir>`` is prefixed
+  with ``usr/`` if it is not user-specified as an absolute path.
+  For example, the ``INCLUDEDIR`` value ``include`` becomes ``usr/include``.
+  This is required by the `GNU Coding Standards`_, which state:
+
+    When building the complete GNU system, the prefix will be empty
+    and ``/usr`` will be a symbolic link to ``/``.
+
+``/usr``
+
+  For ``<dir>`` equal to ``SYSCONFDIR``, ``LOCALSTATEDIR`` or
+  ``RUNSTATEDIR``, the ``CMAKE_INSTALL_FULL_<dir>`` is computed by
+  prepending just ``/`` to the value of ``CMAKE_INSTALL_<dir>``
+  if it is not user-specified as an absolute path.
+  For example, the ``SYSCONFDIR`` value ``etc`` becomes ``/etc``.
+  This is required by the `GNU Coding Standards`_.
+
+``/opt/...``
+
+  For ``<dir>`` equal to ``SYSCONFDIR``, ``LOCALSTATEDIR`` or
+  ``RUNSTATEDIR``, the ``CMAKE_INSTALL_FULL_<dir>`` is computed by
+  *appending* the prefix to the value of ``CMAKE_INSTALL_<dir>``
+  if it is not user-specified as an absolute path.
+  For example, the ``SYSCONFDIR`` value ``etc`` becomes ``/etc/opt/...``.
+  This is defined by the `Filesystem Hierarchy Standard`_.
+
+.. _`Filesystem Hierarchy Standard`: https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html
+
+Macros
+^^^^^^
+
+.. command:: GNUInstallDirs_get_absolute_install_dir
+
+  ::
+
+    GNUInstallDirs_get_absolute_install_dir(absvar var)
+
+  Set the given variable ``absvar`` to the absolute path contained
+  within the variable ``var``.  This is to allow the computation of an
+  absolute path, accounting for all the special cases documented
+  above.  While this macro is used to compute the various
+  ``CMAKE_INSTALL_FULL_<dir>`` variables, it is exposed publicly to
+  allow users who create additional path variables to also compute
+  absolute paths where necessary, using the same logic.
+#]=======================================================================]
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
@@ -276,14 +277,18 @@ _GNUInstallDirs_cache_path(CMAKE_INSTALL_DATAROOTDIR "share"
 _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATAROOTDIR}"
   "Read-only architecture-independent data (DATAROOTDIR)")
 
-if(CMAKE_SYSTEM_NAME MATCHES "^(([^k].*)?BSD|DragonFly)$")
+if(CMAKE_SYSTEM_NAME MATCHES "^(([^kF].*)?BSD|DragonFly)$")
   _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_INFODIR "info"
     "Info documentation (info)")
-  _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_MANDIR "man"
-    "Man documentation (man)")
 else()
   _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_INFODIR "${CMAKE_INSTALL_DATAROOTDIR}/info"
     "Info documentation (DATAROOTDIR/info)")
+endif()
+
+if(CMAKE_SYSTEM_NAME MATCHES "^(([^k].*)?BSD|DragonFly)$")
+  _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_MANDIR "man"
+    "Man documentation (man)")
+else()
   _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_MANDIR "${CMAKE_INSTALL_DATAROOTDIR}/man"
     "Man documentation (DATAROOTDIR/man)")
 endif()

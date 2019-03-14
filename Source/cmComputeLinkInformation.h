@@ -9,6 +9,7 @@
 #include <iosfwd>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 class cmGeneratorTarget;
@@ -30,22 +31,16 @@ public:
 
   struct Item
   {
-    Item()
-      : Value()
-      , IsPath(true)
-      , Target(nullptr)
-    {
-    }
-    Item(std::string const& v, bool p,
-         cmGeneratorTarget const* target = nullptr)
-      : Value(v)
+    Item() = default;
+    Item(std::string v, bool p, cmGeneratorTarget const* target = nullptr)
+      : Value(std::move(v))
       , IsPath(p)
       , Target(target)
     {
     }
     std::string Value;
-    bool IsPath;
-    cmGeneratorTarget const* Target;
+    bool IsPath = true;
+    cmGeneratorTarget const* Target = nullptr;
   };
   typedef std::vector<Item> ItemVector;
   ItemVector const& GetItems() const;

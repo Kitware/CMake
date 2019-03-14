@@ -6,34 +6,56 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmListFileCache.h"
-#include "cmake.h"
+#include "cmMessageType.h"
 
 #include <string>
-
-class cmState;
 
 class cmMessenger
 {
 public:
-  cmMessenger(cmState* state);
-
   void IssueMessage(
-    cmake::MessageType t, std::string const& text,
+    MessageType t, std::string const& text,
     cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
 
-  void DisplayMessage(cmake::MessageType t, std::string const& text,
+  void DisplayMessage(MessageType t, std::string const& text,
                       cmListFileBacktrace const& backtrace) const;
 
-  bool GetSuppressDevWarnings() const;
-  bool GetSuppressDeprecatedWarnings() const;
-  bool GetDevWarningsAsErrors() const;
-  bool GetDeprecatedWarningsAsErrors() const;
+  void SetSuppressDevWarnings(bool suppress)
+  {
+    this->SuppressDevWarnings = suppress;
+  }
+  void SetSuppressDeprecatedWarnings(bool suppress)
+  {
+    this->SuppressDeprecatedWarnings = suppress;
+  }
+  void SetDevWarningsAsErrors(bool error)
+  {
+    this->DevWarningsAsErrors = error;
+  }
+  void SetDeprecatedWarningsAsErrors(bool error)
+  {
+    this->DeprecatedWarningsAsErrors = error;
+  }
+
+  bool GetSuppressDevWarnings() const { return this->SuppressDevWarnings; }
+  bool GetSuppressDeprecatedWarnings() const
+  {
+    return this->SuppressDeprecatedWarnings;
+  }
+  bool GetDevWarningsAsErrors() const { return this->DevWarningsAsErrors; }
+  bool GetDeprecatedWarningsAsErrors() const
+  {
+    return this->DeprecatedWarningsAsErrors;
+  }
 
 private:
-  bool IsMessageTypeVisible(cmake::MessageType t) const;
-  cmake::MessageType ConvertMessageType(cmake::MessageType t) const;
+  bool IsMessageTypeVisible(MessageType t) const;
+  MessageType ConvertMessageType(MessageType t) const;
 
-  cmState* State;
+  bool SuppressDevWarnings = false;
+  bool SuppressDeprecatedWarnings = false;
+  bool DevWarningsAsErrors = false;
+  bool DeprecatedWarningsAsErrors = false;
 };
 
 #endif

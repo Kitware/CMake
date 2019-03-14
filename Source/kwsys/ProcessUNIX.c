@@ -1162,7 +1162,7 @@ static int kwsysProcessWaitForPipe(kwsysProcess* cp, char** data, int* length,
             case KWSYSPE_PIPE_STDERR:
               wd->PipeId = kwsysProcess_Pipe_STDERR;
               break;
-          };
+          }
           return 1;
         }
       } else if (n < 0 && errno == EAGAIN) {

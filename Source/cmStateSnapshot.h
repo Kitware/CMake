@@ -37,6 +37,7 @@ public:
   std::vector<cmStateSnapshot> GetChildren();
 
   bool IsValid() const;
+  cmStateSnapshot GetBuildsystemDirectory() const;
   cmStateSnapshot GetBuildsystemDirectoryParent() const;
   cmStateSnapshot GetCallStackParent() const;
   cmStateSnapshot GetCallStackBottom() const;

@@ -20,6 +20,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 // Get rid of some windows macros:
@@ -39,11 +40,10 @@ std::vector<std::string> toStringList(const Json::Value& in)
 } // namespace
 
 cmServerRequest::cmServerRequest(cmServer* server, cmConnection* connection,
-                                 const std::string& t, const std::string& c,
-                                 const Json::Value& d)
-  : Type(t)
-  , Cookie(c)
-  , Data(d)
+                                 std::string t, std::string c, Json::Value d)
+  : Type(std::move(t))
+  , Cookie(std::move(c))
+  , Data(std::move(d))
   , Connection(connection)
   , m_Server(server)
 {
@@ -130,7 +130,8 @@ bool cmServerProtocol::Activate(cmServer* server,
 {
   assert(server);
   this->m_Server = server;
-  this->m_CMakeInstance = cm::make_unique<cmake>(cmake::RoleProject);
+  this->m_CMakeInstance =
+    cm::make_unique<cmake>(cmake::RoleProject, cmState::Project);
   const bool result = this->DoActivate(request, errorMessage);
   if (!result) {
     this->m_CMakeInstance = nullptr;
@@ -230,12 +231,21 @@ bool cmServerProtocol1::DoActivate(const cmServerRequest& request,
                                    std::string* errorMessage)
 {
   std::string sourceDirectory = request.Data[kSOURCE_DIRECTORY_KEY].asString();
-  const std::string buildDirectory =
-    request.Data[kBUILD_DIRECTORY_KEY].asString();
+  std::string buildDirectory = request.Data[kBUILD_DIRECTORY_KEY].asString();
   std::string generator = request.Data[kGENERATOR_KEY].asString();
   std::string extraGenerator = request.Data[kEXTRA_GENERATOR_KEY].asString();
   std::string toolset = request.Data[kTOOLSET_KEY].asString();
   std::string platform = request.Data[kPLATFORM_KEY].asString();
+
+  // normalize source and build directory
+  if (!sourceDirectory.empty()) {
+    sourceDirectory = cmSystemTools::CollapseFullPath(sourceDirectory);
+    cmSystemTools::ConvertToUnixSlashes(sourceDirectory);
+  }
+  if (!buildDirectory.empty()) {
+    buildDirectory = cmSystemTools::CollapseFullPath(buildDirectory);
+    cmSystemTools::ConvertToUnixSlashes(buildDirectory);
+  }
 
   if (buildDirectory.empty()) {
     setErrorMessage(errorMessage,
@@ -253,7 +263,7 @@ bool cmServerProtocol1::DoActivate(const cmServerRequest& request,
       return false;
     }
 
-    const std::string cachePath = cm->FindCacheFile(buildDirectory);
+    const std::string cachePath = cmake::FindCacheFile(buildDirectory);
     if (cm->LoadCache(cachePath)) {
       cmState* state = cm->GetState();
 
@@ -750,15 +760,15 @@ cmServerResponse cmServerProtocol2::ProcessCTests(
 }
 
 cmServerProtocol1::GeneratorInformation::GeneratorInformation(
-  const std::string& generatorName, const std::string& extraGeneratorName,
-  const std::string& toolset, const std::string& platform,
-  const std::string& sourceDirectory, const std::string& buildDirectory)
-  : GeneratorName(generatorName)
-  , ExtraGeneratorName(extraGeneratorName)
-  , Toolset(toolset)
-  , Platform(platform)
-  , SourceDirectory(sourceDirectory)
-  , BuildDirectory(buildDirectory)
+  std::string generatorName, std::string extraGeneratorName,
+  std::string toolset, std::string platform, std::string sourceDirectory,
+  std::string buildDirectory)
+  : GeneratorName(std::move(generatorName))
+  , ExtraGeneratorName(std::move(extraGeneratorName))
+  , Toolset(std::move(toolset))
+  , Platform(std::move(platform))
+  , SourceDirectory(std::move(sourceDirectory))
+  , BuildDirectory(std::move(buildDirectory))
 {
 }
 

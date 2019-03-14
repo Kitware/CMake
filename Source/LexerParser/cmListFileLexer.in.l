@@ -18,7 +18,7 @@ Modify cmListFileLexer.c:
 
 /* IWYU pragma: no_forward_declare yyguts_t */
 
-#ifdef WIN32
+#ifdef _WIN32
 #include "cmsys/Encoding.h"
 #endif
 
@@ -57,7 +57,7 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 /* Replace the lexer input function.  */
 #undef YY_INPUT
 #define YY_INPUT(buf, result, max_size) \
-  { result = cmListFileLexerInput(cmListFileLexer_yyget_extra(yyscanner), buf, max_size); }
+  do { result = cmListFileLexerInput(cmListFileLexer_yyget_extra(yyscanner), buf, max_size); } while (0)
 
 /*--------------------------------------------------------------------------*/
 %}

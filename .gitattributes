@@ -21,6 +21,7 @@ configure        eol=lf
 
 *.pfx            -text
 *.png            -text
+*.png.in         -text
 
 *.c              our-c-style
 *.cc             our-c-style

@@ -19,8 +19,8 @@ bool cmGetFilenameComponentCommand::InitialPass(
 
   // Check and see if the value has been stored in the cache
   // already, if so use that value
-  if (args.size() >= 4 && args[args.size() - 1] == "CACHE") {
-    const char* cacheValue = this->Makefile->GetDefinition(args[0]);
+  if (args.size() >= 4 && args.back() == "CACHE") {
+    const char* cacheValue = this->Makefile->GetDefinition(args.front());
     if (cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue)) {
       return true;
     }
@@ -88,6 +88,10 @@ bool cmGetFilenameComponentCommand::InitialPass(
     result = cmSystemTools::GetFilenameExtension(filename);
   } else if (args[2] == "NAME_WE") {
     result = cmSystemTools::GetFilenameWithoutExtension(filename);
+  } else if (args[2] == "LAST_EXT") {
+    result = cmSystemTools::GetFilenameLastExtension(filename);
+  } else if (args[2] == "NAME_WLE") {
+    result = cmSystemTools::GetFilenameWithoutLastExtension(filename);
   } else if (args[2] == "ABSOLUTE" || args[2] == "REALPATH") {
     // If the path given is relative, evaluate it relative to the
     // current source directory unless the user passes a different
@@ -113,20 +117,20 @@ bool cmGetFilenameComponentCommand::InitialPass(
     return false;
   }
 
-  if (args.size() >= 4 && args[args.size() - 1] == "CACHE") {
+  if (args.size() >= 4 && args.back() == "CACHE") {
     if (!programArgs.empty() && !storeArgs.empty()) {
       this->Makefile->AddCacheDefinition(
         storeArgs, programArgs.c_str(), "",
         args[2] == "PATH" ? cmStateEnums::FILEPATH : cmStateEnums::STRING);
     }
     this->Makefile->AddCacheDefinition(
-      args[0], result.c_str(), "",
+      args.front(), result.c_str(), "",
       args[2] == "PATH" ? cmStateEnums::FILEPATH : cmStateEnums::STRING);
   } else {
     if (!programArgs.empty() && !storeArgs.empty()) {
       this->Makefile->AddDefinition(storeArgs, programArgs.c_str());
     }
-    this->Makefile->AddDefinition(args[0], result.c_str());
+    this->Makefile->AddDefinition(args.front(), result.c_str());
   }
 
   return true;

@@ -1,0 +1,52 @@
+CMAKE_LANG=Fortran
+CMAKE_Fortran_COMPILER_ABI=ELF
+CMAKE_Fortran_COMPILER_AR=
+CMAKE_Fortran_COMPILER_ARCHITECTURE_ID=
+CMAKE_Fortran_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_Fortran_COMPILER_ID=Cray
+CMAKE_Fortran_COMPILER_LAUNCHER=
+CMAKE_Fortran_COMPILER_LOADED=1
+CMAKE_Fortran_COMPILER_RANLIB=
+CMAKE_Fortran_COMPILER_TARGET=
+CMAKE_Fortran_COMPILER_VERSION=8.7
+CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/gmake" "cmTC_9c3ab/fast"
+/usr/bin/gmake -f CMakeFiles/cmTC_9c3ab.dir/build.make CMakeFiles/cmTC_9c3ab.dir/build
+gmake[1]: Entering directory '/tmp/ii/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_9c3ab.dir/CMakeFortranCompilerABI.F.o
+/opt/cray/pe/craype/2.5.15/bin/ftn   -em -J.   -v -c /usr/projects/hpcsoft/cle6.0/common/cmake/3.10.2/share/cmake-3.10/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_9c3ab.dir/CMakeFortranCompilerABI.F.o
+
+/opt/cray/pe/cce/8.7.4/cce/x86_64/bin/ftnfe -h cpu=haswell -D__CRAYXC -D__CRAY_HASWELL -D__CRAYXT_COMPUTE_LINUX_TARGET -h network=aries -em -J. -I/opt/cray/pe/cce/8.7.4/cce/x86_64/include/craylibs -I/usr/include -I/usr/include -I/opt/cray/pe/libsci/18.07.1/CRAY/8.6/x86_64/include -I/opt/cray/pe/mpt/7.7.3/gni/mpich-cray/8.6/include -I/opt/cray/rca/2.2.16-6.0.5.0_15.34__g5e09e6d.ari/include -I/opt/cray/alps/6.5.28-6.0.5.0_18.6__g13a91b6.ari/include -I/opt/cray/xpmem/2.2.4-6.0.5.1_8.26__g35d5e73.ari/include -I/opt/cray/gni-headers/5.0.12-6.0.5.0_2.15__g2ef1ebc.ari/include -I/opt/cray/dmapp/7.1.1-6.0.5.0_49.8__g1125556.ari/include -I/opt/cray/pe/pmi/5.0.14/include -I/opt/cray/ugni/6.0.14-6.0.5.0_16.9__g19583bb.ari/include -I/opt/cray/udreg/2.3.2-6.0.5.0_13.12__ga14955a.ari/include -I/opt/cray/wlm_detect/1.3.2-6.0.5.0_3.1__g388ccd5.ari/include -I/opt/cray/krca/2.2.2-6.0.5.1_13.47__g4614cf3.ari/include -I/opt/cray-hss-devel/8.0.0/include -hpl=/tmp/pe_32428//pldir -usystem_mod=/opt/cray/pe/cce/8.7.4/cce/x86_64/lib/libmodules.a -usystem_mod=/opt/cray/pe/cce/8.7.4/cce/x86_64/lib/libomp.a -usystem_mod=/opt/cray/pe/cce/8.7.4/cce/x86_64/lib/omp_lib.a -usystem_mod=/opt/cray/pe/cce/8.7.4/cce/x86_64/lib/libopenacc.a -usystem_mod=/opt/cray/pe/libsci/18.07.1/CRAY/8.6/x86_64/include -usystem_mod=/opt/cray/pe/mpt/7.7.3/gni/mpich-cray/8.6/include -usystem_mod=/opt/cray/rca/2.2.16-6.0.5.0_15.34__g5e09e6d.ari/include -usystem_mod=/opt/cray/alps/6.5.28-6.0.5.0_18.6__g13a91b6.ari/include -usystem_mod=/opt/cray/xpmem/2.2.4-6.0.5.1_8.26__g35d5e73.ari/include -usystem_mod=/opt/cray/gni-headers/5.0.12-6.0.5.0_2.15__g2ef1ebc.ari/include -usystem_mod=/opt/cray/dmapp/7.1.1-6.0.5.0_49.8__g1125556.ari/include -usystem_mod=/opt/cray/pe/pmi/5.0.14/include -usystem_mod=/opt/cray/ugni/6.0.14-6.0.5.0_16.9__g19583bb.ari/include -usystem_mod=/opt/cray/udreg/2.3.2-6.0.5.0_13.12__ga14955a.ari/include -usystem_mod=/opt/cray/wlm_detect/1.3.2-6.0.5.0_3.1__g388ccd5.ari/include -usystem_mod=/opt/cray/krca/2.2.2-6.0.5.1_13.47__g4614cf3.ari/include -usystem_mod=/opt/cray-hss-devel/8.0.0/include -ux=x8503 -udv=87000 -ffixed -CZ/tmp/pe_32428/CMakeFortranCompilerABI.T -Cx -CX/tmp/pe_32428/CMakeFortranCompilerABI.xml -hdecompile=/tmp/ii/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_9c3ab.dir/CMakeFortranCompilerABI. -S /tmp/pe_32428/CMakeFortranCompilerABI_1.s -Oipa3 -uo=/tmp/ii/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_9c3ab.dir/CMakeFortranCompilerABI.F.o -ufile_id=1 /usr/projects/hpcsoft/cle6.0/common/cmake/3.10.2/share/cmake-3.10/Modules/CMakeFortranCompilerABI.F
+
+/opt/cray/pe/cce/8.7.4/cce/x86_64/bin/optcg /tmp/pe_32428//pldir 1
+
+/opt/cray/pe/cce/8.7.4/binutils/x86_64/x86_64-pc-linux-gnu/bin/as -o CMakeFiles/cmTC_9c3ab.dir/CMakeFortranCompilerABI.F.o --64 /tmp/pe_32428/CMakeFortranCompilerABI_1.s
+rm /tmp/pe_32428/CMakeFortranCompilerABI_1.s
+rm /tmp/pe_32428//pldir/PL_path
+rm /tmp/pe_32428//pldir/iline_1
+rm /tmp/pe_32428//pldir/gline_1
+rm /tmp/pe_32428//pldir/PL_global_data
+rm /tmp/pe_32428//pldir/PL_module_list
+rm /tmp/pe_32428//pldir/CMakeFortranCompilerABI_1.inl
+rmdir /tmp/pe_32428//pldir
+rm /tmp/pe_32428//CMakeFortranCompilerABI_1.xml.Ttmp
+rm /tmp/pe_32428//CMakeFortranCompilerABI.T
+rm /tmp/pe_32428//CMakeFortranCompilerABI_1.cif.Ttmp
+rm /tmp/pe_32428//CMakeFortranCompilerABI.Tfe
+rm /tmp/pe_32428//CMakeFortranCompilerABI.xml
+rmdir /tmp/pe_32428/
+Linking Fortran executable cmTC_9c3ab
+/usr/projects/hpcsoft/cle6.0/common/cmake/3.10.2/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9c3ab.dir/link.txt --verbose=1
+/opt/cray/pe/craype/2.5.15/bin/ftn   -v -dynamic   CMakeFiles/cmTC_9c3ab.dir/CMakeFortranCompilerABI.F.o  -o cmTC_9c3ab
+
+/opt/cray/pe/cce/8.7.4/binutils/x86_64/x86_64-pc-linux-gnu/bin/ld --eh-frame-hdr -m elf_x86_64 --enable-new-dtags --dynamic-linker /lib64/ld-linux-x86-64.so.2 /usr/lib64//crt1.o /usr/lib64//crti.o /opt/gcc/6.1.0/snos/lib/gcc/x86_64-suse-linux/6.1.0//crtbegin.o /opt/gcc/6.1.0/snos/lib/gcc/x86_64-suse-linux/6.1.0//crtfastmath.o /opt/cray/pe/cce/8.7.4/cce/x86_64/lib/no_mmap.o CMakeFiles/cmTC_9c3ab.dir/CMakeFortranCompilerABI.F.o -Bdynamic -rpath=/opt/cray/pe/cce/8.7.4/cce/x86_64/lib -L/opt/gcc/6.1.0/snos/lib64 -rpath=/opt/cray/pe/gcc-libs -L/opt/cray/pe/libsci/18.07.1/CRAY/8.6/x86_64/lib -L/opt/cray/dmapp/default/lib64 -L/opt/cray/pe/mpt/7.7.3/gni/mpich-cray/8.6/lib -L/opt/cray/dmapp/default/lib64 -L/opt/cray/pe/mpt/7.7.3/gni/mpich-cray/8.6/lib -L/opt/cray/rca/2.2.16-6.0.5.0_15.34__g5e09e6d.ari/lib64 -L/opt/cray/pe/atp/2.1.3/libApp -L/opt/cray/pe/cce/8.7.4/cce/x86_64/lib/pkgconfig/../ --no-as-needed -lAtpSigHandler -lAtpSigHCommData --undefined=_ATP_Data_Globals --undefined=__atpHandlerInstall -L/usr/lib64 -L/lib64 -rpath=/usr/lib64 -rpath=/lib64 -lrca --as-needed -lsci_cray_mpi_mp --no-as-needed --as-needed -lsci_cray_mp --no-as-needed --as-needed -lmpich_cray --no-as-needed --as-needed -lmpichf90_cray --no-as-needed --as-needed -lpgas-dmapp --no-as-needed -lquadmath -lomp -lcraymp -lmodules -lfi -lcraymath -lf -lu -lcsup --as-needed -latomic --no-as-needed --as-needed -lgfortran --no-as-needed --whole-archive -ltcmalloc_minimal --no-whole-archive -lstdc++ -lpthread --start-group -lc -lcsup -lgcc_eh -lm -lgcc --end-group -L /opt/gcc/6.1.0/snos/lib/gcc/x86_64-suse-linux/6.1.0 -L /opt/cray/pe/cce/8.7.4/binutils/x86_64/x86_64-pc-linux-gnu/..//x86_64-unknown-linux-gnu/lib -EL -o cmTC_9c3ab /opt/gcc/6.1.0/snos/lib/gcc/x86_64-suse-linux/6.1.0//crtend.o /usr/lib64//crtn.o
+
+/opt/cray/pe/cce/8.7.4/binutils/x86_64/bin/objcopy --remove-section=.note.ftn_module_data cmTC_9c3ab
+rm /tmp/pe_32450//pldir/PL_path
+rm /tmp/pe_32450//pldir/PL_global_data
+rm /tmp/pe_32450//pldir/PL_module_list
+rmdir /tmp/pe_32450//pldir
+rmdir /tmp/pe_32450/
+gmake[1]: Leaving directory '/tmp/ii/CMakeFiles/CMakeTmp'

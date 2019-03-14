@@ -3,11 +3,11 @@ get_directory_property
 
 Get a property of ``DIRECTORY`` scope.
 
-::
+.. code-block:: cmake
 
   get_directory_property(<variable> [DIRECTORY <dir>] <prop-name>)
 
-Store a property of directory scope in the named ``<variable>``.
+Stores a property of directory scope in the named ``<variable>``.
 The ``DIRECTORY`` argument specifies another directory from which
 to retrieve the property value instead of the current directory.
 The specified directory must have already been traversed by CMake.
@@ -18,7 +18,7 @@ if the property is not found for the nominated directory scope,
 the search will chain to a parent scope as described for the
 :command:`define_property` command.
 
-::
+.. code-block:: cmake
 
   get_directory_property(<variable> [DIRECTORY <dir>]
                          DEFINITION <var-name>)

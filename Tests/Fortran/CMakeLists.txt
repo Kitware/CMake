@@ -99,6 +99,11 @@ function(test_fortran_c_interface_module)
   target_link_libraries(myc myfort)
   set_property(TARGET myc PROPERTY COMPILE_DEFINITIONS ${MYC_DEFS})
 
+  add_library(myfort_obj OBJECT mysub.f)
+  add_library(myc_use_obj myc.c $<TARGET_OBJECTS:myfort_obj>)
+  add_executable(mainc_use_obj mainc.c)
+  target_link_libraries(mainc_use_obj myc_use_obj)
+
   add_library(mycxx mycxx.cxx)
   target_link_libraries(mycxx myc)
 

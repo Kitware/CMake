@@ -10,11 +10,10 @@ set(MATLAB_FIND_DEBUG TRUE)
 # - on 64bits builds (cmake is building with 64 bits), it looks for 64 bits Matlab
 
 if(IS_MCR)
-    set(components MX_LIBRARY)
     set(RUN_UNIT_TESTS FALSE)
 else()
     set(RUN_UNIT_TESTS TRUE)
-    set(components MX_LIBRARY MAIN_PROGRAM)
+    set(components MAIN_PROGRAM)
 endif()
 
 if(NOT "${MCR_ROOT}" STREQUAL "")
@@ -34,7 +33,7 @@ matlab_add_mex(
     OUTPUT_NAME cmake_matlab_mex1
     SRC ${CMAKE_CURRENT_SOURCE_DIR}/../matlab_wrapper1.cpp
     DOCUMENTATION ${CMAKE_CURRENT_SOURCE_DIR}/../help_text1.m.txt
-  )
+    )
 
 if(RUN_UNIT_TESTS)
     matlab_add_unit_test(

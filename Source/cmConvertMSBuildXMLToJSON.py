@@ -96,7 +96,6 @@ def read_msbuild_json(path, values=[]):
 
     return values
 
-
 def main():
     """Script entrypoint."""
     # Parse the arguments
@@ -213,6 +212,14 @@ def __find_and_remove_value(list, compare):
     return found
 
 
+def __normalize_switch(switch, separator):
+    new = switch
+    if switch.startswith("/") or switch.startswith("-"):
+      new = switch[1:]
+    if new and separator:
+      new = new + separator
+    return new
+
 ###########################################################################################
 # private xml functions
 def __convert(root, tag, values, func):
@@ -257,6 +264,8 @@ def __convert_bool(node):
     reverse_switch = __get_attribute(node, 'ReverseSwitch')
 
     if reverse_switch:
+        __with_argument(node, converted)
+
         converted_reverse = copy.deepcopy(converted)
 
         converted_reverse['switch'] = reverse_switch
@@ -303,7 +312,11 @@ def __convert_node(node, default_value='', default_flags=vsflags()):
 
     converted = {}
     converted['name'] = name
-    converted['switch'] = __get_attribute(node, 'Switch')
+
+    switch = __get_attribute(node, 'Switch')
+    separator = __get_attribute(node, 'Separator')
+    converted['switch'] = __normalize_switch(switch, separator)
+
     converted['comment'] = __get_attribute(node, 'DisplayName')
     converted['value'] = default_value
 
@@ -435,7 +448,7 @@ def __write_json_file(path, values):
 
     with open(path, 'w') as f:
         json.dump(sorted_values, f, indent=2, separators=(',', ': '))
-
+        f.write("\n")
 
 ###########################################################################################
 # private list helpers

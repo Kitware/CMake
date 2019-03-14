@@ -3,13 +3,13 @@ target_link_directories
 
 Add link directories to a target.
 
-::
+.. code-block:: cmake
 
   target_link_directories(<target> [BEFORE]
     <INTERFACE|PUBLIC|PRIVATE> [items1...]
     [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
 
-Specify the paths in which the linker should search for libraries when
+Specifies the paths in which the linker should search for libraries when
 linking a given target.  Each item can be an absolute or relative path,
 with the latter being interpreted as relative to the current source
 directory.  These items will be added to the link command.

@@ -21,8 +21,6 @@ class cmMakefile;
  */
 class cmInstallGenerator : public cmScriptGenerator
 {
-  CM_DISABLE_COPY(cmInstallGenerator)
-
 public:
   enum MessageLevel
   {
@@ -37,6 +35,13 @@ public:
                      const char* component, MessageLevel message,
                      bool exclude_from_all);
   ~cmInstallGenerator() override;
+
+  cmInstallGenerator(cmInstallGenerator const&) = delete;
+  cmInstallGenerator& operator=(cmInstallGenerator const&) = delete;
+
+  virtual bool HaveInstall();
+  virtual void CheckCMP0082(bool& haveSubdirectoryInstall,
+                            bool& haveInstallAfterSubdirectory);
 
   void AddInstallRule(
     std::ostream& os, std::string const& dest, cmInstallType type,

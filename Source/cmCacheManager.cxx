@@ -11,11 +11,11 @@
 #include <string>
 
 #include "cmGeneratedFileStream.h"
+#include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
-#include "cmake.h"
 
 cmCacheManager::cmCacheManager()
 {
@@ -26,7 +26,7 @@ cmCacheManager::cmCacheManager()
 void cmCacheManager::CleanCMakeFiles(const std::string& path)
 {
   std::string glob = path;
-  glob += cmake::GetCMakeFilesDirectory();
+  glob += "/CMakeFiles";
   glob += "/*.cmake";
   cmsys::Glob globIt;
   globIt.FindFiles(glob);
@@ -122,7 +122,7 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
       std::ostringstream error;
       error << "Parse error in cache file " << cacheFile;
       error << " on line " << lineno << ". Offending entry: " << realbuffer;
-      cmSystemTools::Error(error.str().c_str());
+      cmSystemTools::Error(error.str());
     }
   }
   this->CacheMajorVersion = 0;
@@ -170,7 +170,7 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
               << " where CMakeCache.txt was created. This may result "
                  "in binaries being created in the wrong place. If you "
                  "are not sure, reedit the CMakeCache.txt";
-      cmSystemTools::Error(message.str().c_str());
+      cmSystemTools::Error(message.str());
     }
   }
   return true;
@@ -188,7 +188,7 @@ bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
   }
 
   const char* end = entryKey.c_str() + entryKey.size();
-  for (const char** p = this->PersistentProperties; *p; ++p) {
+  for (const char** p = cmCacheManager::PersistentProperties; *p; ++p) {
     std::string::size_type plen = strlen(*p) + 1;
     if (entryKey.size() > plen && *(end - plen) == '-' &&
         strcmp(end - plen + 1, *p) == 0) {
@@ -212,7 +212,7 @@ bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
 void cmCacheManager::WritePropertyEntries(std::ostream& os, CacheIterator i,
                                           cmMessenger* messenger)
 {
-  for (const char** p = this->PersistentProperties; *p; ++p) {
+  for (const char** p = cmCacheManager::PersistentProperties; *p; ++p) {
     if (const char* value = i.GetProperty(*p)) {
       std::string helpstring = *p;
       helpstring += " property for variable: ";
@@ -222,9 +222,9 @@ void cmCacheManager::WritePropertyEntries(std::ostream& os, CacheIterator i,
       std::string key = i.GetName();
       key += "-";
       key += *p;
-      this->OutputKey(os, key);
+      cmCacheManager::OutputKey(os, key);
       os << ":INTERNAL=";
-      this->OutputValue(os, value);
+      cmCacheManager::OutputValue(os, value);
       os << "\n";
       cmCacheManager::OutputNewlineTruncationWarning(os, key, value,
                                                      messenger);
@@ -319,9 +319,9 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
       } else {
         cmCacheManager::OutputHelpString(fout, "Missing description");
       }
-      this->OutputKey(fout, i.first);
+      cmCacheManager::OutputKey(fout, i.first);
       fout << ":" << cmState::CacheEntryTypeToString(t) << "=";
-      this->OutputValue(fout, ce.Value);
+      cmCacheManager::OutputValue(fout, ce.Value);
       fout << "\n";
       cmCacheManager::OutputNewlineTruncationWarning(fout, i.first, ce.Value,
                                                      messenger);
@@ -346,11 +346,11 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
     if (t == cmStateEnums::INTERNAL) {
       // Format is key:type=value
       if (const char* help = i.GetProperty("HELPSTRING")) {
-        this->OutputHelpString(fout, help);
+        cmCacheManager::OutputHelpString(fout, help);
       }
-      this->OutputKey(fout, i.GetName());
+      cmCacheManager::OutputKey(fout, i.GetName());
       fout << ":" << cmState::CacheEntryTypeToString(t) << "=";
-      this->OutputValue(fout, i.GetValue());
+      cmCacheManager::OutputValue(fout, i.GetValue());
       fout << "\n";
       cmCacheManager::OutputNewlineTruncationWarning(fout, i.GetName(),
                                                      i.GetValue(), messenger);
@@ -359,7 +359,7 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
   fout << "\n";
   fout.Close();
   std::string checkCacheFile = path;
-  checkCacheFile += cmake::GetCMakeFilesDirectory();
+  checkCacheFile += "/CMakeFiles";
   cmSystemTools::MakeDirectory(checkCacheFile);
   checkCacheFile += "/cmake.check_cache";
   cmsys::ofstream checkCache(checkCacheFile.c_str());
@@ -383,7 +383,7 @@ bool cmCacheManager::DeleteCache(const std::string& path)
     cmSystemTools::RemoveFile(cacheFile);
     // now remove the files in the CMakeFiles directory
     // this cleans up language cache files
-    cmakeFiles += cmake::GetCMakeFilesDirectory();
+    cmakeFiles += "/CMakeFiles";
     if (cmSystemTools::FileIsDirectory(cmakeFiles)) {
       cmSystemTools::RemoveADirectory(cmakeFiles);
     }
@@ -415,8 +415,7 @@ void cmCacheManager::OutputValueNoNewlines(std::ostream& fout,
                                            std::string const& value)
 {
   // if value has trailing space or tab, enclose it in single quotes
-  if (!value.empty() &&
-      (value[value.size() - 1] == ' ' || value[value.size() - 1] == '\t')) {
+  if (!value.empty() && (value.back() == ' ' || value.back() == '\t')) {
     fout << '\'' << value << '\'';
   } else {
     fout << value;
@@ -479,7 +478,7 @@ void cmCacheManager::OutputNewlineTruncationWarning(std::ostream& fout,
       std::string message = "Value of ";
       message += key;
       message += " contained a newline; truncating";
-      messenger->IssueMessage(cmake::WARNING, message);
+      messenger->IssueMessage(MessageType::WARNING, message);
     }
 
     std::string comment = "WARNING: Value of ";

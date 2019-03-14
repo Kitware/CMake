@@ -1,34 +1,50 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# CheckFortranFunctionExists
-# --------------------------
-#
-# macro which checks if the Fortran function exists
-#
-# CHECK_FORTRAN_FUNCTION_EXISTS(FUNCTION VARIABLE)
-#
-# ::
-#
-#   FUNCTION - the name of the Fortran function
-#   VARIABLE - variable to store the result
-#              Will be created as an internal cache variable.
-#
-#
-#
-# The following variables may be set before calling this macro to modify
-# the way the check is run:
-#
-# ::
-#
-#   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+#[=======================================================================[.rst:
+CheckFortranFunctionExists
+--------------------------
+
+Check if a Fortran function exists.
+
+.. command:: CHECK_FORTRAN_FUNCTION_EXISTS
+
+  .. code-block:: cmake
+
+    CHECK_FORTRAN_FUNCTION_EXISTS(<function> <result>)
+
+  where
+
+  ``<function>``
+    the name of the Fortran function
+  ``<result>``
+    variable to store the result; will be created as an internal cache variable.
+
+The following variables may be set before calling this macro to modify
+the way the check is run:
+
+``CMAKE_REQUIRED_LINK_OPTIONS``
+  A :ref:`;-list <CMake Language Lists>` of options to add to the link
+  command (see :command:`try_compile` for further details).
+
+``CMAKE_REQUIRED_LIBRARIES``
+  A :ref:`;-list <CMake Language Lists>` of libraries to add to the link
+  command. These can be the name of system libraries or they can be
+  :ref:`Imported Targets <Imported Targets>` (see :command:`try_compile` for
+  further details).
+#]=======================================================================]
 
 include_guard(GLOBAL)
 
 macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
   if(NOT DEFINED ${VARIABLE})
     message(STATUS "Looking for Fortran ${FUNCTION}")
+    if(CMAKE_REQUIRED_LINK_OPTIONS)
+      set(CHECK_FUNCTION_EXISTS_ADD_LINK_OPTIONS
+        LINK_OPTIONS ${CMAKE_REQUIRED_LINK_OPTIONS})
+    else()
+      set(CHECK_FUNCTION_EXISTS_ADD_LINK_OPTIONS)
+    endif()
     if(CMAKE_REQUIRED_LIBRARIES)
       set(CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
         LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
@@ -47,6 +63,7 @@ macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
     try_compile(${VARIABLE}
     ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f
+    ${CHECK_FUNCTION_EXISTS_ADD_LINK_OPTIONS}
     ${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}
     OUTPUT_VARIABLE OUTPUT
     )

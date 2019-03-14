@@ -14,8 +14,6 @@
 
 class cmDynamicLoader
 {
-  CM_DISABLE_COPY(cmDynamicLoader)
-
 public:
   // Description:
   // Load a dynamic library into the current process.
@@ -28,8 +26,8 @@ public:
   static void FlushCache();
 
 protected:
-  cmDynamicLoader() {}
-  ~cmDynamicLoader() {}
+  cmDynamicLoader() = default;
+  ~cmDynamicLoader() = default;
 };
 
 #endif

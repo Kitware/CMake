@@ -138,6 +138,32 @@ void cmStateDirectory::SetRelativePathTopBinary(const char* dir)
   this->DirectoryState->RelativePathTopBinary = dir;
 }
 
+bool cmStateDirectory::ContainsBoth(std::string const& local_path,
+                                    std::string const& remote_path) const
+{
+  auto PathEqOrSubDir = [](std::string const& a, std::string const& b) {
+    return (cmSystemTools::ComparePath(a, b) ||
+            cmSystemTools::IsSubDirectory(a, b));
+  };
+
+  bool bothInBinary = PathEqOrSubDir(local_path, GetRelativePathTopBinary()) &&
+    PathEqOrSubDir(remote_path, GetRelativePathTopBinary());
+
+  bool bothInSource = PathEqOrSubDir(local_path, GetRelativePathTopSource()) &&
+    PathEqOrSubDir(remote_path, GetRelativePathTopSource());
+
+  return bothInBinary || bothInSource;
+}
+
+std::string cmStateDirectory::ConvertToRelPathIfNotContained(
+  std::string const& local_path, std::string const& remote_path) const
+{
+  if (!this->ContainsBoth(local_path, remote_path)) {
+    return remote_path;
+  }
+  return cmSystemTools::ForceToRelativePath(local_path, remote_path);
+}
+
 cmStateDirectory::cmStateDirectory(
   cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator iter,
   const cmStateSnapshot& snapshot)

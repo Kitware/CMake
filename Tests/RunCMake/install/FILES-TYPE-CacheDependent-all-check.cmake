@@ -1,0 +1,17 @@
+set(_check_files
+  [[myshare]]
+  [[myshare/doc]]
+  [[myshare/doc/main\.c]]
+  [[myshare/info]]
+  [[myshare/info/main\.c]]
+  [[myshare/locale]]
+  [[myshare/locale/main\.c]]
+  [[myshare/main\.c]]
+  [[myshare/man]]
+  [[myshare/man/main\.c]]
+  [[myvar]]
+  [[myvar/main\.c]]
+  [[myvar/run]]
+  [[myvar/run/main\.c]]
+  )
+check_installed("^${_check_files}$")

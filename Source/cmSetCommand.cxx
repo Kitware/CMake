@@ -4,6 +4,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
@@ -37,6 +38,14 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
         putEnvArg += args[1];
         cmSystemTools::PutEnv(putEnvArg);
       }
+      // if there's extra arguments, warn user
+      // that they are ignored by this command.
+      if (args.size() > 2) {
+        std::string m = "Only the first value argument is used when setting "
+                        "an environment variable.  Argument '" +
+          args[2] + "' and later are unused.";
+        this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m);
+      }
       return true;
     }
 
@@ -54,7 +63,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   }
   // SET (VAR PARENT_SCOPE) // Removes the definition of VAR
   // in the parent scope.
-  if (args.size() == 2 && args[args.size() - 1] == "PARENT_SCOPE") {
+  if (args.size() == 2 && args.back() == "PARENT_SCOPE") {
     this->Makefile->RaiseScope(variable, nullptr);
     return true;
   }
@@ -74,12 +83,12 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
 
   unsigned int ignoreLastArgs = 0;
   // look for PARENT_SCOPE argument
-  if (args.size() > 1 && args[args.size() - 1] == "PARENT_SCOPE") {
+  if (args.size() > 1 && args.back() == "PARENT_SCOPE") {
     parentScope = true;
     ignoreLastArgs++;
   } else {
     // look for FORCE argument
-    if (args.size() > 4 && args[args.size() - 1] == "FORCE") {
+    if (args.size() > 4 && args.back() == "FORCE") {
       force = true;
       ignoreLastArgs++;
     }
@@ -103,7 +112,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   // we should be nice and try to catch some simple screwups if the last or
   // next to last args are CACHE then they screwed up.  If they used FORCE
   // without CACHE they screwed up
-  if ((args[args.size() - 1] == "CACHE") ||
+  if ((args.back() == "CACHE") ||
       (args.size() > 1 && args[args.size() - 2] == "CACHE") ||
       (force && !cache)) {
     this->SetError("given invalid arguments for CACHE mode.");
@@ -112,7 +121,15 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
 
   if (cache) {
     std::string::size_type cacheStart = args.size() - 3 - (force ? 1 : 0);
-    type = cmState::StringToCacheEntryType(args[cacheStart + 1].c_str());
+    if (!cmState::StringToCacheEntryType(args[cacheStart + 1].c_str(), type)) {
+      std::string m = "implicitly converting '" + args[cacheStart + 1] +
+        "' to 'STRING' type.";
+      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m);
+      // Setting this may not be required, since it's
+      // initialized as a string. Keeping this here to
+      // ensure that the type is actually converting to a string.
+      type = cmStateEnums::STRING;
+    }
     docstring = args[cacheStart + 2].c_str();
   }
 

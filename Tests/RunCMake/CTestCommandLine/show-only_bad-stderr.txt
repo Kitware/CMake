@@ -1,0 +1,1 @@
+^CMake Error: '--show-only=' given unknown value 'bad'$

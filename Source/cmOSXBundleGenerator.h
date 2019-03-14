@@ -17,8 +17,7 @@ class cmSourceFile;
 class cmOSXBundleGenerator
 {
 public:
-  cmOSXBundleGenerator(cmGeneratorTarget* target,
-                       const std::string& configName);
+  cmOSXBundleGenerator(cmGeneratorTarget* target, std::string configName);
 
   // create an app bundle at a given root, and return
   // the directory within the bundle that contains the executable
@@ -32,7 +31,7 @@ public:
 
   struct MacOSXContentGeneratorType
   {
-    virtual ~MacOSXContentGeneratorType() {}
+    virtual ~MacOSXContentGeneratorType() = default;
     virtual void operator()(cmSourceFile const& source,
                             const char* pkgloc) = 0;
   };

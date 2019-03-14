@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <iterator>
 #include <sstream>
+#include <utility>
 
 // - Static variables
 
@@ -97,6 +98,41 @@ std::string const& cmQtAutoGen::GeneratorName(GeneratorT type)
 std::string cmQtAutoGen::GeneratorNameUpper(GeneratorT genType)
 {
   return cmSystemTools::UpperCase(cmQtAutoGen::GeneratorName(genType));
+}
+
+std::string cmQtAutoGen::Tools(bool moc, bool uic, bool rcc)
+{
+  std::string res;
+  std::vector<std::string> lst;
+  if (moc) {
+    lst.emplace_back("AUTOMOC");
+  }
+  if (uic) {
+    lst.emplace_back("AUTOUIC");
+  }
+  if (rcc) {
+    lst.emplace_back("AUTORCC");
+  }
+  switch (lst.size()) {
+    case 1:
+      res += lst.at(0);
+      break;
+    case 2:
+      res += lst.at(0);
+      res += " and ";
+      res += lst.at(1);
+      break;
+    case 3:
+      res += lst.at(0);
+      res += ", ";
+      res += lst.at(1);
+      res += " and ";
+      res += lst.at(2);
+      break;
+    default:
+      break;
+  }
+  return res;
 }
 
 std::string cmQtAutoGen::Quoted(std::string const& text)

@@ -2,4 +2,4 @@ CMake Error at invalid_args_on_interface.cmake:[0-9]+ \(target_compile_features\
   target_compile_features may only set INTERFACE properties on INTERFACE
   targets
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

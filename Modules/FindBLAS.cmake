@@ -1,74 +1,89 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindBLAS
-# --------
-#
-# Find BLAS library
-#
-# This module finds an installed fortran library that implements the
-# BLAS linear-algebra interface (see http://www.netlib.org/blas/).  The
-# list of libraries searched for is taken from the autoconf macro file,
-# acx_blas.m4 (distributed at
-# http://ac-archive.sourceforge.net/ac-archive/acx_blas.html).
-#
-# This module sets the following variables:
-#
-# ::
-#
-#   BLAS_FOUND - set to true if a library implementing the BLAS interface
-#     is found
-#   BLAS_LINKER_FLAGS - uncached list of required linker flags (excluding -l
-#     and -L).
-#   BLAS_LIBRARIES - uncached list of libraries (using full path name) to
-#     link against to use BLAS (may be empty if compiler implicitly links
-#     BLAS)
-#   BLAS95_LIBRARIES - uncached list of libraries (using full path name)
-#     to link against to use BLAS95 interface
-#   BLAS95_FOUND - set to true if a library implementing the BLAS f95 interface
-#     is found
-#
-# The following variables can be used to control this module:
-#
-# ::
-#
-#   BLA_STATIC  if set on this determines what kind of linkage we do (static)
-#   BLA_VENDOR  if set checks only the specified vendor, if not set checks
-#      all the possibilities
-#   BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
-#   BLA_PREFER_PKGCONFIG  if set pkg-config will be used to search for a BLAS
-#      library first and if one is found that is preferred
-#
-# List of vendors (BLA_VENDOR) valid in this module:
-#
-# * Goto
-# * OpenBLAS
-# * FLAME
-# * ATLAS PhiPACK
-# * CXML
-# * DXML
-# * SunPerf
-# * SCSL
-# * SGIMATH
-# * IBMESSL
-# * Intel10_32 (intel mkl v10 32 bit)
-# * Intel10_64lp (intel mkl v10+ 64 bit, threaded code, lp64 model)
-# * Intel10_64lp_seq (intel mkl v10+ 64 bit, sequential code, lp64 model)
-# * Intel10_64ilp (intel mkl v10+ 64 bit, threaded code, ilp64 model)
-# * Intel10_64ilp_seq (intel mkl v10+ 64 bit, sequential code, ilp64 model)
-# * Intel (older versions of mkl 32 and 64 bit)
-# * ACML
-# * ACML_MP
-# * ACML_GPU
-# * Apple
-# * NAS
-# * Generic
-#
-# .. note::
-#
-#   C/CXX should be enabled to use Intel mkl
-#
+#[=======================================================================[.rst:
+FindBLAS
+--------
+
+Find BLAS library
+
+This module finds an installed fortran library that implements the
+BLAS linear-algebra interface (see http://www.netlib.org/blas/).  The
+list of libraries searched for is taken from the autoconf macro file,
+acx_blas.m4 (distributed at
+http://ac-archive.sourceforge.net/ac-archive/acx_blas.html).
+
+Input Variables
+^^^^^^^^^^^^^^^
+
+The following variables may be set to influence this module's behavior:
+
+``BLA_STATIC``
+  if ``ON`` use static linkage
+
+``BLA_VENDOR``
+  If set, checks only the specified vendor, if not set checks all the
+  possibilities.  List of vendors valid in this module:
+
+  * Goto
+  * OpenBLAS
+  * FLAME
+  * ATLAS PhiPACK
+  * CXML
+  * DXML
+  * SunPerf
+  * SCSL
+  * SGIMATH
+  * IBMESSL
+  * Intel10_32 (intel mkl v10 32 bit)
+  * Intel10_64lp (intel mkl v10+ 64 bit, threaded code, lp64 model)
+  * Intel10_64lp_seq (intel mkl v10+ 64 bit, sequential code, lp64 model)
+  * Intel10_64ilp (intel mkl v10+ 64 bit, threaded code, ilp64 model)
+  * Intel10_64ilp_seq (intel mkl v10+ 64 bit, sequential code, ilp64 model)
+  * Intel (obsolete versions of mkl 32 and 64 bit)
+  * ACML
+  * ACML_MP
+  * ACML_GPU
+  * Apple
+  * NAS
+  * Generic
+
+``BLA_F95``
+  if ``ON`` tries to find the BLAS95 interfaces
+
+``BLA_PREFER_PKGCONFIG``
+  if set pkg-config will be used to search for a BLAS library first
+  and if one is found that is preferred
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``BLAS_FOUND``
+  library implementing the BLAS interface is found
+``BLAS_LINKER_FLAGS``
+  uncached list of required linker flags (excluding -l and -L).
+``BLAS_LIBRARIES``
+  uncached list of libraries (using full path name) to link against
+  to use BLAS (may be empty if compiler implicitly links BLAS)
+``BLAS95_LIBRARIES``
+  uncached list of libraries (using full path name) to link against
+  to use BLAS95 interface
+``BLAS95_FOUND``
+  library implementing the BLAS95 interface is found
+
+.. note::
+
+  C or CXX must be enabled to use Intel MKL
+
+  For example, to use Intel MKL libraries and/or Intel compiler:
+
+  .. code-block:: cmake
+
+    set(BLA_VENDOR Intel10_64lp)
+    find_package(BLAS)
+#]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
@@ -126,6 +141,8 @@ macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _thread)
     endif ()
   endif ()
 
+  list(APPEND _libdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
+
   foreach(_library ${_list})
     set(_combined_name ${_combined_name}_${_library})
 
@@ -164,12 +181,13 @@ macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _thread)
       check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
     endif()
     set(CMAKE_REQUIRED_LIBRARIES)
-    mark_as_advanced(${_prefix}${_combined_name}_WORKS)
     set(_libraries_work ${${_prefix}${_combined_name}_WORKS})
   endif()
   if(_libraries_work)
     if("${_list}" STREQUAL "")
       set(${LIBRARIES} "${LIBRARIES}-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
+    else()
+      set(${LIBRARIES} ${${LIBRARIES}} ${_thread})  # for static link
     endif()
   else()
     set(${LIBRARIES} FALSE)
@@ -205,14 +223,34 @@ endif ()
 #BLAS in intel mkl 10+ library? (em64t 64bit)
 if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
   if (NOT BLAS_LIBRARIES)
+
+    # System-specific settings
+    if (WIN32)
+      if (BLA_STATIC)
+        set(BLAS_mkl_DLL_SUFFIX "")
+      else()
+        set(BLAS_mkl_DLL_SUFFIX "_dll")
+      endif()
+    else()
+      if(CMAKE_Fortran_COMPILER_LOADED AND CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+          set(BLAS_mkl_INTFACE "gf")
+          set(BLAS_mkl_THREADING "gnu")
+          set(BLAS_mkl_OMP "gomp")
+      else()
+          set(BLAS_mkl_INTFACE "intel")
+          set(BLAS_mkl_THREADING "intel")
+          set(BLAS_mkl_OMP "iomp5")
+      endif()
+      set(BLAS_mkl_LM "-lm")
+      set(BLAS_mkl_LDL "-ldl")
+    endif()
+
     if (BLA_VENDOR MATCHES "_64ilp")
       set(BLAS_mkl_ILP_MODE "ilp64")
     else ()
       set(BLAS_mkl_ILP_MODE "lp64")
     endif ()
-    if (NOT WIN32)
-      set(LM "-lm")
-    endif ()
+
     if (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED)
       if(BLAS_FIND_QUIETLY OR NOT BLAS_FIND_REQUIRED)
         find_package(Threads)
@@ -226,12 +264,6 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         set(BLAS_mkl_SEARCH_SYMBOL sgemm_f95)
         set(_LIBRARIES BLAS95_LIBRARIES)
         if (WIN32)
-          if (BLA_STATIC)
-            set(BLAS_mkl_DLL_SUFFIX "")
-          else()
-            set(BLAS_mkl_DLL_SUFFIX "_dll")
-          endif()
-
           # Find the main file (32-bit or 64-bit)
           set(BLAS_SEARCH_LIBS_WIN_MAIN "")
           if (BLA_VENDOR STREQUAL "Intel10_32" OR BLA_VENDOR STREQUAL "All")
@@ -267,38 +299,32 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
           endforeach()
         else ()
           if (BLA_VENDOR STREQUAL "Intel10_32" OR BLA_VENDOR STREQUAL "All")
+            # old version
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_blas95 mkl_intel mkl_intel_thread mkl_core guide")
+              "mkl_blas95 mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core guide")
+
+            # mkl >= 10.3
+            list(APPEND BLAS_SEARCH_LIBS
+              "mkl_blas95 mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_OMP}")
           endif ()
           if (BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
             # old version
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_blas95 mkl_intel_${BLAS_mkl_ILP_MODE} mkl_intel_thread mkl_core guide")
+              "mkl_blas95 mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_THREADING}_thread mkl_core guide")
 
             # mkl >= 10.3
-            if (CMAKE_C_COMPILER MATCHES ".+gcc")
-              list(APPEND BLAS_SEARCH_LIBS
-                "mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_intel_${BLAS_mkl_ILP_MODE} mkl_gnu_thread mkl_core gomp")
-            else ()
-              list(APPEND BLAS_SEARCH_LIBS
-                "mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_intel_${BLAS_mkl_ILP_MODE} mkl_intel_thread mkl_core iomp5")
-            endif ()
+            list(APPEND BLAS_SEARCH_LIBS
+              "mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_OMP}")
           endif ()
           if (BLA_VENDOR MATCHES "^Intel10_64i?lp_seq$" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_intel_${BLAS_mkl_ILP_MODE} mkl_sequential mkl_core")
+              "mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_sequential mkl_core")
           endif ()
         endif ()
       else ()
         set(BLAS_mkl_SEARCH_SYMBOL sgemm)
         set(_LIBRARIES BLAS_LIBRARIES)
         if (WIN32)
-          if (BLA_STATIC)
-            set(BLAS_mkl_DLL_SUFFIX "")
-          else()
-            set(BLAS_mkl_DLL_SUFFIX "_dll")
-          endif()
-
           # Find the main file (32-bit or 64-bit)
           set(BLAS_SEARCH_LIBS_WIN_MAIN "")
           if (BLA_VENDOR STREQUAL "Intel10_32" OR BLA_VENDOR STREQUAL "All")
@@ -334,27 +360,26 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
           endforeach()
         else ()
           if (BLA_VENDOR STREQUAL "Intel10_32" OR BLA_VENDOR STREQUAL "All")
-            list(APPEND BLAS_SEARCH_LIBS
-              "mkl_intel mkl_intel_thread mkl_core guide")
-          endif ()
-          if (BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
-
             # old version
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_intel_${BLAS_mkl_ILP_MODE} mkl_intel_thread mkl_core guide")
+              "mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core guide")
 
             # mkl >= 10.3
-            if (CMAKE_C_COMPILER MATCHES ".+gcc")
-              list(APPEND BLAS_SEARCH_LIBS
-                "mkl_intel_${BLAS_mkl_ILP_MODE} mkl_gnu_thread mkl_core gomp")
-            else ()
-              list(APPEND BLAS_SEARCH_LIBS
-                "mkl_intel_${BLAS_mkl_ILP_MODE} mkl_intel_thread mkl_core iomp5")
-            endif ()
+            list(APPEND BLAS_SEARCH_LIBS
+              "mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_OMP}")
+          endif ()
+          if (BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
+            # old version
+            list(APPEND BLAS_SEARCH_LIBS
+              "mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_THREADING}_thread mkl_core guide")
+
+            # mkl >= 10.3
+            list(APPEND BLAS_SEARCH_LIBS
+              "mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_OMP}")
           endif ()
           if (BLA_VENDOR MATCHES "^Intel10_64i?lp_seq$" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_intel_${BLAS_mkl_ILP_MODE} mkl_sequential mkl_core")
+              "mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_sequential mkl_core")
           endif ()
 
           #older vesions of intel mkl libs
@@ -378,15 +403,29 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
             ${BLAS_mkl_SEARCH_SYMBOL}
             ""
             "${SEARCH_LIBS}"
-            "${CMAKE_THREAD_LIBS_INIT};${LM}"
+            "${CMAKE_THREAD_LIBS_INIT};${BLAS_mkl_LM};${BLAS_mkl_LDL}"
             )
         endif ()
       endforeach ()
 
     endif ()
     unset(BLAS_mkl_ILP_MODE)
+    unset(BLAS_mkl_INTFACE)
+    unset(BLAS_mkl_THREADING)
+    unset(BLAS_mkl_OMP)
+    unset(BLAS_mkl_DLL_SUFFIX)
+    unset(BLAS_mkl_LM)
+    unset(BLAS_mkl_LDL)
   endif ()
 endif ()
+
+if(BLA_F95)
+  find_package_handle_standard_args(BLAS REQUIRED_VARS BLAS95_LIBRARIES)
+  set(BLAS95_FOUND ${BLAS_FOUND})
+  if(BLAS_FOUND)
+    set(BLAS_LIBRARIES "${BLAS95_LIBRARIES}")
+  endif()
+endif()
 
 if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
@@ -723,13 +762,7 @@ if (BLA_VENDOR STREQUAL "Generic" OR BLA_VENDOR STREQUAL "All")
   endif()
 endif ()
 
-if(BLA_F95)
-  find_package_handle_standard_args(BLAS REQUIRED_VARS BLAS95_LIBRARIES)
-  set(BLAS95_FOUND ${BLAS_FOUND})
-  if(BLAS_FOUND)
-    set(BLAS_LIBRARIES "${BLAS95_LIBRARIES}")
-  endif()
-else()
+if(NOT BLA_F95)
   find_package_handle_standard_args(BLAS REQUIRED_VARS BLAS_LIBRARIES)
 endif()
 

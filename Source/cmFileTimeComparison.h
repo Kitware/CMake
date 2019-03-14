@@ -5,6 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
+
 class cmFileTimeComparisonInternal;
 
 /** \class cmFileTimeComparison
@@ -24,13 +26,14 @@ public:
    *  When true is returned, result has -1, 0, +1 for
    *  f1 older, same, or newer than f2.
    */
-  bool FileTimeCompare(const char* f1, const char* f2, int* result);
+  bool FileTimeCompare(const std::string& f1, const std::string& f2,
+                       int* result);
 
   /**
    *  Compare file modification times.  Return true unless both files
    *  exist and have modification times less than 1 second apart.
    */
-  bool FileTimesDiffer(const char* f1, const char* f2);
+  bool FileTimesDiffer(const std::string& f1, const std::string& f2);
 
 protected:
   cmFileTimeComparisonInternal* Internals;

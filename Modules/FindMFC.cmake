@@ -1,20 +1,21 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindMFC
-# -------
-#
-# Find MFC on Windows
-#
-# Find the native MFC - i.e.  decide if an application can link to the
-# MFC libraries.
-#
-# ::
-#
-#   MFC_FOUND - Was MFC support found
-#
-# You don't need to include anything or link anything to use it.
+#[=======================================================================[.rst:
+FindMFC
+-------
+
+Find MFC on Windows
+
+Find the native MFC - i.e.  decide if an application can link to the
+MFC libraries.
+
+::
+
+  MFC_FOUND - Was MFC support found
+
+You don't need to include anything or link anything to use it.
+#]=======================================================================]
 
 # Assume no MFC support
 set(MFC_FOUND "NO")

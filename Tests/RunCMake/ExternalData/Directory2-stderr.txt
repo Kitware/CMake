@@ -6,5 +6,5 @@ CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
   must list associated files.
 Call Stack \(most recent call first\):
   .*
-  Directory2.cmake:3 \(ExternalData_Add_Test\)
-  CMakeLists.txt:3 \(include\)
+  Directory2\.cmake:[0-9]+ \(ExternalData_Add_Test\)
+  CMakeLists\.txt:[0-9]+ \(include\)

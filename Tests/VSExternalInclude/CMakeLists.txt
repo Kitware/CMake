@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 project(VSExternalInclude)
 
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio 1[01245]")
+if(${CMAKE_GENERATOR} MATCHES "Visual Studio 1[012456]")
   set(PROJECT_EXT vcxproj)
 else()
   set(PROJECT_EXT vcproj)
@@ -55,7 +55,7 @@ add_dependencies(VSExternalInclude lib2)
 # and the sln file can no longer be the only source
 # of that depend.  So, for VS 10 make the executable
 # depend on lib1 and lib2
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio 1[01245]")
+if(${CMAKE_GENERATOR} MATCHES "Visual Studio 1[012456]")
   add_dependencies(VSExternalInclude lib1)
 endif()
 

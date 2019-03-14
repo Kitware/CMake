@@ -107,7 +107,7 @@ static void cmDependsJava_yyerror(yyscan_t yyscanner, const char* message);
 #define YYMAXDEPTH 1000000
 
 
-#define jpCheckEmpty(cnt) yyGetParser->CheckEmpty(__LINE__, cnt, yyvsp);
+#define jpCheckEmpty(cnt) yyGetParser->CheckEmpty(__LINE__, cnt, yyvsp)
 #define jpElementStart(cnt) yyGetParser->PrepareElement(&yyval)
 #define jpStoreClass(str) yyGetParser->AddClassFound(str); yyGetParser->DeallocateParserType(&(str))
 /* Disable some warnings in the generated code.  */

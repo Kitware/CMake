@@ -6,6 +6,7 @@
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmGeneratedFileStream.h"
@@ -24,7 +25,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 cmMakefileExecutableTargetGenerator::cmMakefileExecutableTargetGenerator(
   cmGeneratorTarget* target)
@@ -84,6 +84,10 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   bool relink)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
+  if (!this->GlobalGenerator->GetLanguageEnabled("CUDA")) {
+    return;
+  }
+
   const std::string cuda_lang("CUDA");
   cmGeneratorTarget::LinkClosure const* closure =
     this->GeneratorTarget->GetLinkClosure(this->ConfigName);
@@ -91,7 +95,13 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   const bool hasCUDA =
     (std::find(closure->Languages.begin(), closure->Languages.end(),
                cuda_lang) != closure->Languages.end());
-  if (!hasCUDA) {
+
+  bool doDeviceLinking = true;
+  if (const char* resolveDeviceSymbols =
+        this->GeneratorTarget->GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
+    doDeviceLinking = cmSystemTools::IsOn(resolveDeviceSymbols);
+  }
+  if (!hasCUDA || !doDeviceLinking) {
     return;
   }
 
@@ -312,7 +322,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string outpathImp;
   if (relink) {
     outpath = this->Makefile->GetCurrentBinaryDirectory();
-    outpath += cmake::GetCMakeFilesDirectory();
+    outpath += "/CMakeFiles";
     outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath);
     outpath += "/";

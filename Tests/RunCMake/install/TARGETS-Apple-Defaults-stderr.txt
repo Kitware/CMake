@@ -1,0 +1,12 @@
+^CMake Error at TARGETS-Apple-Defaults\.cmake:[0-9]+ \(install\):
+  install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
+  target "exe"\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at TARGETS-Apple-Defaults\.cmake:[0-9]+ \(install\):
+  install TARGETS given no FRAMEWORK DESTINATION for shared library FRAMEWORK
+  target "lib1"\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

@@ -24,9 +24,7 @@ cmCPackIFWPackage::CompareStruct::CompareStruct()
 }
 
 //------------------------------------------------------- DependenceStruct ---
-cmCPackIFWPackage::DependenceStruct::DependenceStruct()
-{
-}
+cmCPackIFWPackage::DependenceStruct::DependenceStruct() = default;
 
 cmCPackIFWPackage::DependenceStruct::DependenceStruct(
   const std::string& dependence)
@@ -359,7 +357,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   if (this->IsSetToEmpty(option)) {
     this->DisplayName.clear();
   } else if (const char* value = this->GetOption(option)) {
-    this->ExpandListArgument(value, this->DisplayName);
+    cmCPackIFWPackage::ExpandListArgument(value, this->DisplayName);
   }
 
   // Description
@@ -367,7 +365,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   if (this->IsSetToEmpty(option)) {
     this->Description.clear();
   } else if (const char* value = this->GetOption(option)) {
-    this->ExpandListArgument(value, this->Description);
+    cmCPackIFWPackage::ExpandListArgument(value, this->Description);
   }
 
   // Release date

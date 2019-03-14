@@ -20,15 +20,14 @@ class cmake;
 class cmGlobalVisualStudio11Generator : public cmGlobalVisualStudio10Generator
 {
 public:
-  cmGlobalVisualStudio11Generator(cmake* cm, const std::string& name,
-                                  const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
-  void WriteSLNHeader(std::ostream& fout) override;
-
 protected:
+  cmGlobalVisualStudio11Generator(cmake* cm, const std::string& name,
+                                  std::string const& platformInGeneratorName);
+
   bool InitializeWindowsPhone(cmMakefile* mf) override;
   bool InitializeWindowsStore(cmMakefile* mf) override;
   bool SelectWindowsPhoneToolset(std::string& toolset) const override;
@@ -43,8 +42,7 @@ protected:
   bool IsWindowsPhoneToolsetInstalled() const;
   bool IsWindowsStoreToolsetInstalled() const;
 
-  const char* GetIDEVersion() override { return "11.0"; }
-  bool UseFolderProperty();
+  bool UseFolderProperty() const override;
   static std::set<std::string> GetInstalledWindowsCESDKs();
 
   /** Return true if the configuration needs to be deployed */

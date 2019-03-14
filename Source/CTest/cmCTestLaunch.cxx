@@ -15,6 +15,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
+#include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
@@ -145,7 +146,7 @@ void cmCTestLaunch::HandleRealArg(const char* arg)
     return;
   }
 #endif
-  this->RealArgs.push_back(arg);
+  this->RealArgs.emplace_back(arg);
 }
 
 void cmCTestLaunch::ComputeFileNames()
@@ -282,7 +283,7 @@ void cmCTestLaunch::LoadLabels()
 
   // Labels are listed in per-target files.
   std::string fname = this->OptionBuildDir;
-  fname += cmake::GetCMakeFilesDirectory();
+  fname += "/CMakeFiles";
   fname += "/";
   fname += this->OptionTargetName;
   fname += ".dir/Labels.txt";
@@ -533,9 +534,9 @@ void cmCTestLaunch::LoadScrapeRules()
   // Common compiler warning formats.  These are much simpler than the
   // full log-scraping expressions because we do not need to extract
   // file and line information.
-  this->RegexWarning.push_back("(^|[ :])[Ww][Aa][Rr][Nn][Ii][Nn][Gg]");
-  this->RegexWarning.push_back("(^|[ :])[Rr][Ee][Mm][Aa][Rr][Kk]");
-  this->RegexWarning.push_back("(^|[ :])[Nn][Oo][Tt][Ee]");
+  this->RegexWarning.emplace_back("(^|[ :])[Ww][Aa][Rr][Nn][Ii][Nn][Gg]");
+  this->RegexWarning.emplace_back("(^|[ :])[Rr][Ee][Mm][Aa][Rr][Kk]");
+  this->RegexWarning.emplace_back("(^|[ :])[Nn][Oo][Tt][Ee]");
 
   // Load custom match rules given to us by CTest.
   this->LoadScrapeRules("Warning", this->RegexWarning);
@@ -610,7 +611,7 @@ int cmCTestLaunch::Main(int argc, const char* const argv[])
 
 void cmCTestLaunch::LoadConfig()
 {
-  cmake cm(cmake::RoleScript);
+  cmake cm(cmake::RoleScript, cmState::CTest);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
@@ -618,7 +619,7 @@ void cmCTestLaunch::LoadConfig()
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
   std::string fname = this->LogDir;
   fname += "CTestLaunchConfig.cmake";
-  if (cmSystemTools::FileExists(fname) && mf.ReadListFile(fname.c_str())) {
+  if (cmSystemTools::FileExists(fname) && mf.ReadListFile(fname)) {
     this->SourceDir = mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
     cmSystemTools::ConvertToUnixSlashes(this->SourceDir);
   }

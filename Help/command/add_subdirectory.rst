@@ -3,12 +3,11 @@ add_subdirectory
 
 Add a subdirectory to the build.
 
-::
+.. code-block:: cmake
 
-  add_subdirectory(source_dir [binary_dir]
-                   [EXCLUDE_FROM_ALL])
+  add_subdirectory(source_dir [binary_dir] [EXCLUDE_FROM_ALL])
 
-Add a subdirectory to the build.  The source_dir specifies the
+Adds a subdirectory to the build.  The source_dir specifies the
 directory in which the source CMakeLists.txt and code files are
 located.  If it is a relative path it will be evaluated with respect
 to the current directory (the typical usage), but it may also be an

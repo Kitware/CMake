@@ -62,17 +62,15 @@ cmCPackDragNDropGenerator::cmCPackDragNDropGenerator()
   this->componentPackageMethod = ONE_PACKAGE;
 }
 
-cmCPackDragNDropGenerator::~cmCPackDragNDropGenerator()
-{
-}
+cmCPackDragNDropGenerator::~cmCPackDragNDropGenerator() = default;
 
 int cmCPackDragNDropGenerator::InitializeInternal()
 {
   // Starting with Xcode 4.3, look in "/Applications/Xcode.app" first:
   //
   std::vector<std::string> paths;
-  paths.push_back("/Applications/Xcode.app/Contents/Developer/Tools");
-  paths.push_back("/Developer/Tools");
+  paths.emplace_back("/Applications/Xcode.app/Contents/Developer/Tools");
+  paths.emplace_back("/Developer/Tools");
 
   const std::string hdiutil_path =
     cmSystemTools::FindProgram("hdiutil", std::vector<std::string>(), false);
@@ -212,8 +210,7 @@ int cmCPackDragNDropGenerator::PackageFiles()
 bool cmCPackDragNDropGenerator::CopyFile(std::ostringstream& source,
                                          std::ostringstream& target)
 {
-  if (!cmSystemTools::CopyFileIfDifferent(source.str().c_str(),
-                                          target.str().c_str())) {
+  if (!cmSystemTools::CopyFileIfDifferent(source.str(), target.str())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error copying " << source.str() << " to " << target.str()
                                    << std::endl);
@@ -533,7 +530,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       cmSystemTools::ExpandListArgument(cpack_dmg_languages, languages);
     }
 
-    cmGeneratedFileStream ofs(sla_r.c_str());
+    cmGeneratedFileStream ofs(sla_r);
     ofs << "#include <CoreServices/CoreServices.r>\n\n";
     if (oldStyle) {
       ofs << SLAHeader;

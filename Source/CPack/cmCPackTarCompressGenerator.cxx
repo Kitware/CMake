@@ -10,6 +10,4 @@ cmCPackTarCompressGenerator::cmCPackTarCompressGenerator()
 {
 }
 
-cmCPackTarCompressGenerator::~cmCPackTarCompressGenerator()
-{
-}
+cmCPackTarCompressGenerator::~cmCPackTarCompressGenerator() = default;

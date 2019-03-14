@@ -6,6 +6,9 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 #include "cmListFileCache.h"
 
+#include "cmListFileCache.h"
+
+#include <utility>
 #include <vector>
 
 /**
@@ -16,10 +19,10 @@
 class cmGraphEdge
 {
 public:
-  cmGraphEdge(int n, bool s, cmListFileBacktrace const * pbt)
+  cmGraphEdge(int n, bool s, cmListFileBacktrace bt)
     : Dest(n)
     , Strong(s)
-    , backtrace()
+    , Backtrace(std::move(bt))
   {
     if (pbt != nullptr) {
       backtrace = *pbt;
@@ -46,12 +49,12 @@ public:
 
   bool IsStrong() const { return this->Strong; }
 
-  cmListFileBacktrace const& Backtrace() const { return this->backtrace; }
+  cmListFileBacktrace const& GetBacktrace() const { return this->Backtrace; }
 
 private:
   int Dest;
   bool Strong;
-  cmListFileBacktrace backtrace;
+  cmListFileBacktrace Backtrace;
 };
 struct cmGraphEdgeList : public std::vector<cmGraphEdge>
 {

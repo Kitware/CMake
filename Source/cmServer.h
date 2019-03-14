@@ -88,13 +88,14 @@ protected:
 
 class cmServer : public cmServerBase
 {
-  CM_DISABLE_COPY(cmServer)
-
 public:
   class DebugInfo;
 
   cmServer(cmConnection* conn, bool supportExperimental);
   ~cmServer() override;
+
+  cmServer(cmServer const&) = delete;
+  cmServer& operator=(cmServer const&) = delete;
 
   bool Serve(std::string* errorMessage) override;
 
@@ -118,9 +119,10 @@ public:
   void OnConnected(cmConnection* connection) override;
 
 private:
-  static void reportProgress(const char* msg, float progress, void* data);
-  static void reportMessage(const char* msg, const char* title, bool& cancel,
-                            void* data);
+  static void reportProgress(const char* msg, float progress,
+                             const cmServerRequest& request);
+  static void reportMessage(const char* msg, const char* title,
+                            const cmServerRequest& request);
 
   // Handle requests:
   cmServerResponse SetProtocolVersion(const cmServerRequest& request);

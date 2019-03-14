@@ -1,0 +1,6 @@
+# Import a CMake Project#
+
+This examples shows how a project can find other CMake packages that
+generated Config.cmake files.
+
+It also shows how to state a projects external dependencies when generating a Config.cmake.

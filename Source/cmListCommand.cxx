@@ -12,14 +12,15 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h> // required for atoi
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -122,7 +123,7 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
       warn += " List has value = [";
       warn += listString;
       warn += "].";
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, warn);
+      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, warn);
       return true;
     }
     case cmPolicies::OLD:
@@ -137,7 +138,7 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
       this->Makefile->IssueMessage(
-        cmake::FATAL_ERROR,
+        MessageType::FATAL_ERROR,
         cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0007));
       return false;
   }
@@ -152,7 +153,7 @@ bool cmListCommand::HandleLengthCommand(std::vector<std::string> const& args)
   }
 
   const std::string& listName = args[1];
-  const std::string& variableName = args[args.size() - 1];
+  const std::string& variableName = args.back();
   std::vector<std::string> varArgsExpanded;
   // do not check the return value here
   // if the list var is not found varArgsExpanded will have size 0
@@ -174,7 +175,7 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
   }
 
   const std::string& listName = args[1];
-  const std::string& variableName = args[args.size() - 1];
+  const std::string& variableName = args.back();
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
@@ -243,7 +244,7 @@ bool cmListCommand::HandleFindCommand(std::vector<std::string> const& args)
   }
 
   const std::string& listName = args[1];
-  const std::string& variableName = args[args.size() - 1];
+  const std::string& variableName = args.back();
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
@@ -346,8 +347,7 @@ bool cmListCommand::HandleRemoveItemCommand(
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command REMOVE_ITEM requires list to be present.");
-    return false;
+    return true;
   }
 
   std::vector<std::string> remove(args.begin() + 2, args.end());
@@ -376,8 +376,7 @@ bool cmListCommand::HandleReverseCommand(std::vector<std::string> const& args)
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command REVERSE requires list to be present.");
-    return false;
+    return true;
   }
 
   std::string value = cmJoin(cmReverseRange(varArgsExpanded), ";");
@@ -399,9 +398,7 @@ bool cmListCommand::HandleRemoveDuplicatesCommand(
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError(
-      "sub-command REMOVE_DUPLICATES requires list to be present.");
-    return false;
+    return true;
   }
 
   std::vector<std::string>::const_iterator argsEnd =
@@ -429,7 +426,7 @@ public:
 class TransformSelector
 {
 public:
-  virtual ~TransformSelector() {}
+  virtual ~TransformSelector() = default;
 
   std::string Tag;
 
@@ -583,7 +580,7 @@ private:
 class TransformAction
 {
 public:
-  virtual ~TransformAction() {}
+  virtual ~TransformAction() = default;
 
   virtual std::string Transform(const std::string& input) = 0;
 };
@@ -662,15 +659,19 @@ bool cmListCommand::HandleTransformCommand(
   // Transform: lambda function implementing the action
   struct ActionDescriptor
   {
-    ActionDescriptor(const std::string& name)
-      : Name(name)
+    ActionDescriptor(std::string name)
+      : Name(std::move(name))
     {
     }
-    ActionDescriptor(const std::string& name, int arity,
-                     const transform_type& transform)
-      : Name(name)
+    ActionDescriptor(std::string name, int arity, transform_type transform)
+      : Name(std::move(name))
       , Arity(arity)
+#if defined(__GNUC__) && __GNUC__ == 6 && defined(__aarch64__)
+      // std::function move constructor miscompiles on this architecture
       , Transform(transform)
+#else
+      , Transform(std::move(transform))
+#endif
     {
     }
 
@@ -1152,8 +1153,7 @@ bool cmListCommand::HandleSortCommand(std::vector<std::string> const& args)
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command SORT requires list to be present.");
-    return false;
+    return true;
   }
 
   if ((sortCompare == cmStringSorter::Compare::STRING) &&
@@ -1181,7 +1181,7 @@ bool cmListCommand::HandleSublistCommand(std::vector<std::string> const& args)
   }
 
   const std::string& listName = args[1];
-  const std::string& variableName = args[args.size() - 1];
+  const std::string& variableName = args.back();
 
   // expand the variable
   std::vector<std::string> varArgsExpanded;
@@ -1230,13 +1230,17 @@ bool cmListCommand::HandleRemoveAtCommand(std::vector<std::string> const& args)
   const std::string& listName = args[1];
   // expand the variable
   std::vector<std::string> varArgsExpanded;
-  if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command REMOVE_AT requires list to be present.");
-    return false;
-  }
-  // FIXME: Add policy to make non-existing lists an error like empty lists.
-  if (varArgsExpanded.empty()) {
-    this->SetError("REMOVE_AT given empty list");
+  if (!this->GetList(varArgsExpanded, listName) || varArgsExpanded.empty()) {
+    std::ostringstream str;
+    str << "index: ";
+    for (size_t i = 1; i < args.size(); ++i) {
+      str << args[i];
+      if (i != args.size() - 1) {
+        str << ", ";
+      }
+    }
+    str << " out of range (0, 0)";
+    this->SetError(str.str());
     return false;
   }
 
@@ -1289,14 +1293,6 @@ bool cmListCommand::HandleFilterCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  const std::string& listName = args[1];
-  // expand the variable
-  std::vector<std::string> varArgsExpanded;
-  if (!this->GetList(varArgsExpanded, listName)) {
-    this->SetError("sub-command FILTER requires list to be present.");
-    return false;
-  }
-
   const std::string& op = args[2];
   bool includeMatches;
   if (op == "INCLUDE") {
@@ -1306,6 +1302,13 @@ bool cmListCommand::HandleFilterCommand(std::vector<std::string> const& args)
   } else {
     this->SetError("sub-command FILTER does not recognize operator " + op);
     return false;
+  }
+
+  const std::string& listName = args[1];
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  if (!this->GetList(varArgsExpanded, listName)) {
+    return true;
   }
 
   const std::string& mode = args[3];

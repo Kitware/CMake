@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <set>
+#include <utility>
 
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"

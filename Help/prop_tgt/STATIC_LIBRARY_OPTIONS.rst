@@ -5,7 +5,7 @@ Archiver (or MSVC librarian) flags for a static library target.
 Targets that are shared libraries, modules, or executables need to use
 the :prop_tgt:`LINK_OPTIONS` target property.
 
-This property holds a :ref:`;-list <CMake Language Lists>` of options
+This property holds a :ref:`semicolon-separated list <CMake Language Lists>` of options
 specified so far for its target.  Use :command:`set_target_properties` or
 :command:`set_property` commands to set its content.
 

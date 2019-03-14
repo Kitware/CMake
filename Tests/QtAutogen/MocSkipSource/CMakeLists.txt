@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(MocSkipSource)
-include("../AutogenTest.cmake")
+include("../AutogenCoreTest.cmake")
 
 # Test for SKIP_AUTOMOC and SKIP_AUTOGEN on an AUTOMOC enabled target
 

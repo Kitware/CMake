@@ -66,7 +66,7 @@ public:
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.
    */
-  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
+  void GenerateBuildCommand(GeneratedMakeCommand& makeCommand,
                             const std::string& makeProgram,
                             const std::string& projectName,
                             const std::string& projectDir,
@@ -171,6 +171,9 @@ private:
                                    const std::string& configName);
   cmXCodeObject* CreateUtilityTarget(cmGeneratorTarget* gtgt);
   void AddDependAndLinkInformation(cmXCodeObject* target);
+  void AddPositionIndependentLinkAttribute(cmGeneratorTarget* target,
+                                           cmXCodeObject* buildSettings,
+                                           const std::string& configName);
   void CreateBuildSettings(cmGeneratorTarget* gtgt,
                            cmXCodeObject* buildSettings,
                            const std::string& buildType);
@@ -261,9 +264,10 @@ private:
   {
   }
 
-  std::string GetObjectsNormalDirectory(const std::string& projName,
-                                        const std::string& configName,
-                                        const cmGeneratorTarget* t) const;
+  std::string GetObjectsDirectory(const std::string& projName,
+                                  const std::string& configName,
+                                  const cmGeneratorTarget* t,
+                                  const std::string& variant) const;
 
   static std::string GetDeploymentPlatform(const cmMakefile* mf);
 

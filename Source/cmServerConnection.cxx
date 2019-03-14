@@ -7,13 +7,13 @@
 #include "cmServerDictionary.h"
 #include "cm_uv.h"
 
-#include <algorithm>
 #ifdef _WIN32
 #  include "io.h"
 #else
 #  include <unistd.h>
 #endif
 #include <cassert>
+#include <utility>
 
 cmStdIoConnection::cmStdIoConnection(
   cmConnectionBufferStrategy* bufferStrategy)
@@ -119,9 +119,7 @@ cmServerStdIoConnection::cmServerStdIoConnection()
 {
 }
 
-cmConnectionBufferStrategy::~cmConnectionBufferStrategy()
-{
-}
+cmConnectionBufferStrategy::~cmConnectionBufferStrategy() = default;
 
 void cmConnectionBufferStrategy::clear()
 {

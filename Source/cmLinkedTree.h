@@ -6,7 +6,6 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <assert.h>
-#include <iterator>
 #include <vector>
 
 /**
@@ -33,7 +32,7 @@ class cmLinkedTree
   typedef T& ReferenceType;
 
 public:
-  class iterator : public std::iterator<std::forward_iterator_tag, T>
+  class iterator
   {
     friend class cmLinkedTree;
     cmLinkedTree* Tree;

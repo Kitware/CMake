@@ -68,7 +68,7 @@ public:
 
 private:
   std::string Name;
-  cmCompiledGeneratorExpression* NameExpression;
+  cmCompiledGeneratorExpression* NameExpression = nullptr;
   PropertyMapType Properties;
 };
 

@@ -1,30 +1,36 @@
 math
 ----
 
-Mathematical expressions.
+Evaluate a mathematical expression.
 
-::
+.. code-block:: cmake
 
-  math(EXPR <output-variable> <math-expression> [OUTPUT_FORMAT <format>])
+  math(EXPR <variable> "<expression>" [OUTPUT_FORMAT <format>])
 
-``EXPR`` evaluates mathematical expression and returns result in the
-output variable.  Example mathematical expression is ``5 * (10 + 13)``.
+Evaluates a mathematical ``<expression>`` and sets ``<variable>`` to the
+resulting value.
+
+The mathematical expression must be given as a string (i.e. enclosed in
+double quotation marks). An example is ``"5 * (10 + 13)"``.
 Supported operators are ``+``, ``-``, ``*``, ``/``, ``%``, ``|``, ``&``,
-``^``, ``~``, ``<<``, ``>>``, and ``(...)``.  They have the same meaning
-as they do in C code.
+``^``, ``~``, ``<<``, ``>>``, and ``(...)``; they have the same meaning
+as in C code.
 
-Numeric constants are evaluated in decimal or hexadecimal representation.
+Hexadecimal numbers are recognized when prefixed with "0x", as in C code.
 
-The result is formatted according to the option "OUTPUT_FORMAT" ,
-where ``<format>`` is one of:
-::
+The result is formatted according to the option ``OUTPUT_FORMAT``,
+where ``<format>`` is one of
 
- HEXADECIMAL = Result in output variable will be formatted in C code
- Hexadecimal notation.
- DECIMAL = Result in output variable will be formatted in decimal notation.
+``HEXADECIMAL``
+  Hexadecimal notation as in C code, i. e. starting with "0x".
+``DECIMAL``
+  Decimal notation. Which is also used if no ``OUTPUT_FORMAT`` option
+  is specified.
 
 
-For example::
+For example
 
-  math(EXPR value "100 * 0xA" DECIMAL)  results in value is set to "1000"
-  math(EXPR value "100 * 0xA" HEXADECIMAL)  results in value is set to "0x3e8"
+.. code-block:: cmake
+
+  math(EXPR value "100 * 0xA" OUTPUT_FORMAT DECIMAL)      # value is set to "1000"
+  math(EXPR value "100 * 0xA" OUTPUT_FORMAT HEXADECIMAL)  # value is set to "0x3e8"

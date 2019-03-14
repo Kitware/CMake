@@ -1,0 +1,7 @@
+CMake Warning \(dev\) in CMakeLists\.txt:
+  Policy CMP0082 is not set: Install rules from add_subdirectory\(\) are
+  interleaved with those in caller\.  Run "cmake --help-policy CMP0082" for
+  policy details\.  Use the cmake_policy command to set the policy and
+  suppress this warning\.
+
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

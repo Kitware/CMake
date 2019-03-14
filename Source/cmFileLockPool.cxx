@@ -8,9 +8,7 @@
 #include "cmFileLock.h"
 #include "cmFileLockResult.h"
 
-cmFileLockPool::cmFileLockPool()
-{
-}
+cmFileLockPool::cmFileLockPool() = default;
 
 cmFileLockPool::~cmFileLockPool()
 {
@@ -111,9 +109,7 @@ bool cmFileLockPool::IsAlreadyLocked(const std::string& filename) const
   return this->ProcessScope.IsAlreadyLocked(filename);
 }
 
-cmFileLockPool::ScopePool::ScopePool()
-{
-}
+cmFileLockPool::ScopePool::ScopePool() = default;
 
 cmFileLockPool::ScopePool::~ScopePool()
 {

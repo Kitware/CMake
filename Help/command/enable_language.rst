@@ -3,12 +3,12 @@ enable_language
 
 Enable a language (CXX/C/Fortran/etc)
 
-::
+.. code-block:: cmake
 
   enable_language(<lang> [OPTIONAL] )
 
-This command enables support for the named language in CMake.  This is
-the same as the project command but does not create any of the extra
+Enables support for the named language in CMake.  This is
+the same as the :command:`project` command but does not create any of the extra
 variables that are created by the project command.  Example languages
 are ``CXX``, ``C``, ``CUDA``, ``Fortran``, and ``ASM``.
 

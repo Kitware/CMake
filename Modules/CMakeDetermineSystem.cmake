@@ -13,7 +13,6 @@
 # BSD/OS                        BSD/OS
 # FreeBSD                       FreeBSD
 # HP-UX                         HP-UX
-# IRIX                          IRIX
 # Linux                         Linux
 # GNU/kFreeBSD                  GNU/kFreeBSD
 # NetBSD                        NetBSD

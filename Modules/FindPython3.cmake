@@ -14,11 +14,12 @@ Three components are supported:
 * ``Compiler``: search for Python 3 compiler. Only offered by IronPython.
 * ``Development``: search for development artifacts (include directories and
   libraries)
+* ``NumPy``: search for NumPy include directories.
 
 If no ``COMPONENTS`` is specified, ``Interpreter`` is assumed.
 
-To ensure consistent versions between components ``Interpreter``, ``Compiler``
-and ``Development``, specify all components at the same time::
+To ensure consistent versions between components ``Interpreter``, ``Compiler``,
+``Development`` and ``NumPy``, specify all components at the same time::
 
   find_package (Python3 COMPONENTS Interpreter Development)
 
@@ -31,7 +32,8 @@ for you.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :ref:`Imported Targets <Imported Targets>`:
+This module defines the following :ref:`Imported Targets <Imported Targets>`
+(when :prop_gbl:`CMAKE_ROLE` is ``PROJECT``):
 
 ``Python3::Interpreter``
   Python 3 interpreter. Target defined if component ``Interpreter`` is found.
@@ -39,6 +41,8 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`:
   Python 3 compiler. Target defined if component ``Compiler`` is found.
 ``Python3::Python``
   Python 3 library. Target defined if component ``Development`` is found.
+``Python3::NumPy``
+  NumPy library for Python 3. Target defined if component ``NumPy`` is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -104,6 +108,12 @@ This module will set the following variables in your project
   Python 3 minor version.
 ``Python3_VERSION_PATCH``
   Python 3 patch version.
+``Python3_NumPy_FOUND``
+  System has the NumPy.
+``Python3_NumPy_INCLUDE_DIRS``
+  The NumPy include directries.
+``Python3_NumPy_VERSION``
+  The NumPy version.
 
 Hints
 ^^^^^
@@ -145,9 +155,10 @@ Hints
 Commands
 ^^^^^^^^
 
-This module defines the command ``Python3_add_library`` which have the same
-semantic as :command:`add_library` but take care of Python module naming rules
-(only applied if library is of type ``MODULE``) and add dependency to target
+This module defines the command ``Python3_add_library`` (when
+:prop_gbl:`CMAKE_ROLE` is ``PROJECT``), which has the same semantics as
+:command:`add_library`, but takes care of Python module naming rules
+(only applied if library is of type ``MODULE``), and adds a dependency to target
 ``Python3::Python``::
 
   Python3_add_library (my_module MODULE src1.cpp)

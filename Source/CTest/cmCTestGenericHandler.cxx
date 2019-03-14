@@ -18,9 +18,7 @@ cmCTestGenericHandler::cmCTestGenericHandler()
   this->TestLoad = 0;
 }
 
-cmCTestGenericHandler::~cmCTestGenericHandler()
-{
-}
+cmCTestGenericHandler::~cmCTestGenericHandler() = default;
 
 void cmCTestGenericHandler::SetOption(const std::string& op, const char* value)
 {

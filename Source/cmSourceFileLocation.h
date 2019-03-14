@@ -34,6 +34,8 @@ public:
   cmSourceFileLocation();
   cmSourceFileLocation(const cmSourceFileLocation& loc);
 
+  cmSourceFileLocation& operator=(cmSourceFileLocation const&) = delete;
+
   /**
    * Return whether the given source file location could refers to the
    * same source file as this location given the level of ambiguity in
@@ -78,14 +80,19 @@ public:
   const std::string& GetName() const { return this->Name; }
 
   /**
+   * Get the full file path composed of GetDirectory() and GetName().
+   */
+  std::string GetFullPath() const;
+
+  /**
    * Get the cmMakefile instance for which the source file was created.
    */
   cmMakefile const* GetMakefile() const { return this->Makefile; }
 
 private:
-  cmMakefile const* const Makefile;
-  bool AmbiguousDirectory;
-  bool AmbiguousExtension;
+  cmMakefile const* const Makefile = nullptr;
+  bool AmbiguousDirectory = true;
+  bool AmbiguousExtension = true;
   std::string Directory;
   std::string Name;
 
@@ -94,8 +101,6 @@ private:
   // Update the location with additional knowledge.
   void Update(cmSourceFileLocation const& loc);
   void UpdateExtension(const std::string& name);
-
-  cmSourceFileLocation& operator=(const cmSourceFileLocation& loc) = delete;
 };
 
 #endif

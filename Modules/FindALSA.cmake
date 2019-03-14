@@ -1,44 +1,45 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindALSA
-# --------
-#
-# Find alsa
-#
-# Find the alsa libraries (asound)
-#
-# IMPORTED Targets
-# ^^^^^^^^^^^^^^^^
-#
-# This module defines :prop_tgt:`IMPORTED` target ``ALSA::ALSA``, if
-# ALSA has been found.
-#
-# Result Variables
-# ^^^^^^^^^^^^^^^^
-#
-# This module defines the following variables:
-#
-# ``ALSA_FOUND``
-#   True if ALSA_INCLUDE_DIR & ALSA_LIBRARY are found
-#
-# ``ALSA_LIBRARIES``
-#   List of libraries when using ALSA.
-#
-# ``ALSA_INCLUDE_DIRS``
-#   Where to find the ALSA headers.
-#
-# Cache variables
-# ^^^^^^^^^^^^^^^
-#
-# The following cache variables may also be set:
-#
-# ``ALSA_INCLUDE_DIR``
-#   the ALSA include directory
-#
-# ``ALSA_LIBRARY``
-#   the absolute path of the asound library
+#[=======================================================================[.rst:
+FindALSA
+--------
+
+Find alsa
+
+Find the alsa libraries (asound)
+
+IMPORTED Targets
+^^^^^^^^^^^^^^^^
+
+This module defines :prop_tgt:`IMPORTED` target ``ALSA::ALSA``, if
+ALSA has been found.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``ALSA_FOUND``
+  True if ALSA_INCLUDE_DIR & ALSA_LIBRARY are found
+
+``ALSA_LIBRARIES``
+  List of libraries when using ALSA.
+
+``ALSA_INCLUDE_DIRS``
+  Where to find the ALSA headers.
+
+Cache variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``ALSA_INCLUDE_DIR``
+  the ALSA include directory
+
+``ALSA_LIBRARY``
+  the absolute path of the asound library
+#]=======================================================================]
 
 find_path(ALSA_INCLUDE_DIR NAMES alsa/asoundlib.h
           DOC "The ALSA (asound) include directory"

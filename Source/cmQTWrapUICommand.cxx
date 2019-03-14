@@ -58,7 +58,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args,
       if (cmSystemTools::FileIsFullPath(*j)) {
         uiName = *j;
       } else {
-        if (curr && curr->GetPropertyAsBool("GENERATED")) {
+        if (curr && curr->GetIsGenerated()) {
           uiName = this->Makefile->GetCurrentBinaryDirectory();
         } else {
           uiName = this->Makefile->GetCurrentSourceDirectory();

@@ -1,6 +1,8 @@
 CXX
 ---
 
+.. include:: ENV_VAR.txt
+
 Preferred executable for compiling ``CXX`` language files. Will only be used by
 CMake on the first configuration to determine ``CXX`` compiler, after which the
 value for ``CXX`` is stored in the cache as

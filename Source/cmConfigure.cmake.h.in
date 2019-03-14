@@ -20,13 +20,10 @@
 #cmakedefine CMAKE_USE_ELF_PARSER
 #cmakedefine CMAKE_USE_MACH_PARSER
 #cmakedefine CMake_HAVE_CXX_MAKE_UNIQUE
+#define CMake_DEFAULT_RECURSION_LIMIT @CMake_DEFAULT_RECURSION_LIMIT@
 #define CMAKE_BIN_DIR "/@CMAKE_BIN_DIR@"
 #define CMAKE_DATA_DIR "/@CMAKE_DATA_DIR@"
 
 #define CM_FALLTHROUGH cmsys_FALLTHROUGH
-
-#define CM_DISABLE_COPY(Class)                                                \
-  Class(Class const&) = delete;                                               \
-  Class& operator=(Class const&) = delete;
 
 #endif
