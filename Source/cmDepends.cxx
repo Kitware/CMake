@@ -177,8 +177,8 @@ bool cmDepends::CheckDependencies(
       if (dependerExists) {
         // The dependee and depender both exist.  Compare file times.
         int result = 0;
-        if ((!this->FileComparison->FileTimeCompare(depender, dependee,
-                                                    &result) ||
+        if ((!this->FileTimeCache->FileTimeCompare(depender, dependee,
+                                                   &result) ||
              result < 0)) {
           // The depender is older than the dependee.
           regenerate = true;
@@ -195,8 +195,8 @@ bool cmDepends::CheckDependencies(
         // The dependee exists, but the depender doesn't. Regenerate if the
         // internalDepends file is older than the dependee.
         int result = 0;
-        if ((!this->FileComparison->FileTimeCompare(internalDependsFileName,
-                                                    dependee, &result) ||
+        if ((!this->FileTimeCache->FileTimeCompare(internalDependsFileName,
+                                                   dependee, &result) ||
              result < 0)) {
           // The depends-file is older than the dependee.
           regenerate = true;

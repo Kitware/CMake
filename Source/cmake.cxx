@@ -138,7 +138,7 @@ cmake::cmake(Role role, cmState::Mode mode)
   this->DebugOutput = false;
   this->DebugTryCompile = false;
   this->ClearBuildSystem = false;
-  this->FileComparison = new cmFileTimeCache;
+  this->FileTimeCache = new cmFileTimeCache;
 
   this->State = new cmState;
   this->State->SetMode(mode);
@@ -222,7 +222,7 @@ cmake::~cmake()
 #ifdef CMAKE_BUILD_WITH_CMAKE
   delete this->VariableWatch;
 #endif
-  delete this->FileComparison;
+  delete this->FileTimeCache;
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -2139,7 +2139,7 @@ int cmake::CheckBuildSystem()
   std::string dep_newest = *dep++;
   for (; dep != depends.end(); ++dep) {
     int result = 0;
-    if (this->FileComparison->FileTimeCompare(dep_newest, *dep, &result)) {
+    if (this->FileTimeCache->FileTimeCompare(dep_newest, *dep, &result)) {
       if (result < 0) {
         dep_newest = *dep;
       }
@@ -2158,7 +2158,7 @@ int cmake::CheckBuildSystem()
   std::string out_oldest = *out++;
   for (; out != outputs.end(); ++out) {
     int result = 0;
-    if (this->FileComparison->FileTimeCompare(out_oldest, *out, &result)) {
+    if (this->FileTimeCache->FileTimeCompare(out_oldest, *out, &result)) {
       if (result > 0) {
         out_oldest = *out;
       }
@@ -2175,8 +2175,8 @@ int cmake::CheckBuildSystem()
   // If any output is older than any dependency then rerun.
   {
     int result = 0;
-    if (!this->FileComparison->FileTimeCompare(out_oldest, dep_newest,
-                                               &result) ||
+    if (!this->FileTimeCache->FileTimeCompare(out_oldest, dep_newest,
+                                              &result) ||
         result < 0) {
       if (verbose) {
         std::ostringstream msg;

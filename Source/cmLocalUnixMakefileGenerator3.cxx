@@ -1274,7 +1274,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
   // project but no other sources were touched.
   bool needRescanDependInfo = false;
   cmFileTimeCache* ftc =
-    this->GlobalGenerator->GetCMakeInstance()->GetFileComparison();
+    this->GlobalGenerator->GetCMakeInstance()->GetFileTimeCache();
   {
     int result;
     if (!ftc->FileTimeCompare(internalDependFile, tgtInfo, &result) ||
@@ -1318,7 +1318,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
   if (!needRescanDirInfo) {
     cmDependsC checker;
     checker.SetVerbose(verbose);
-    checker.SetFileComparison(ftc);
+    checker.SetFileTimeCache(ftc);
     // cmDependsC::Check() fills the vector validDependencies() with the
     // dependencies for those files where they are still valid, i.e. neither
     // the files themselves nor any files they depend on have changed.
@@ -1439,8 +1439,8 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
 
     if (scanner) {
       scanner->SetLocalGenerator(this);
-      scanner->SetFileComparison(
-        this->GlobalGenerator->GetCMakeInstance()->GetFileComparison());
+      scanner->SetFileTimeCache(
+        this->GlobalGenerator->GetCMakeInstance()->GetFileTimeCache());
       scanner->SetLanguage(lang);
       scanner->SetTargetDirectory(targetDir);
       scanner->Write(ruleFileStream, internalRuleFileStream);
