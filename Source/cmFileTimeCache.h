@@ -42,7 +42,7 @@ public:
    * @return true unless both files exist and have modification times less
    *         than 1 second apart.
    */
-  bool FileTimesDiffer(std::string const& f1, std::string const& f2);
+  bool DifferS(std::string const& f1, std::string const& f2);
 
 private:
   typedef std::unordered_map<std::string, cmFileTime> FileTimeMap;

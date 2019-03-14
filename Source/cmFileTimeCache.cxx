@@ -44,8 +44,7 @@ bool cmFileTimeCache::FileTimeCompare(std::string const& f1,
   return false;
 }
 
-bool cmFileTimeCache::FileTimesDiffer(std::string const& f1,
-                                      std::string const& f2)
+bool cmFileTimeCache::DifferS(std::string const& f1, std::string const& f2)
 {
   // Get the modification time for each file.
   cmFileTime ft1, ft2;
