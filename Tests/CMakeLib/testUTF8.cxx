@@ -28,10 +28,6 @@ static test_utf8_entry const good_entry[] = {
   { 4, "\xF0\xA3\x8E\xB4", 0x233B4 },  /* Example from RFC 3629.  */
   { 3, "\xED\x80\x80\x00", 0xD000 },   /* Valid 0xED prefixed codepoint.  */
   { 4, "\xF4\x8F\xBF\xBF", 0x10FFFF }, /* Highest valid RFC codepoint. */
-  /* These are invalid according to the RFC, but accepted here. */
-  { 4, "\xF4\x90\x80\x80", 0x110000 }, /* Lowest out-of-range codepoint. */
-  { 4, "\xF5\x80\x80\x80",
-    0x140000 }, /* Prefix forces out-of-range codepoints. */
   { 0, { 0, 0, 0, 0, 0 }, 0 }
 };
 
@@ -45,6 +41,8 @@ static test_utf8_char const bad_chars[] = {
   "\xF0\x80\x80\x80", /* Overlong encoding. */
   "\xED\xA0\x80\x00", /* UTF-16 surrogate half. */
   "\xED\xBF\xBF\x00", /* UTF-16 surrogate half. */
+  "\xF4\x90\x80\x80", /* Lowest out-of-range codepoint. */
+  "\xF5\x80\x80\x80", /* Prefix forces out-of-range codepoints. */
   { 0, 0, 0, 0, 0 }
 };
 

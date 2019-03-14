@@ -76,6 +76,11 @@ const char* cm_utf8_decode_character(const char* first, const char* last,
       return 0;
     }
 
+    /* Invalid codepoints. */
+    if (0x10FFFF < uc) {
+      return 0;
+    }
+
     *pc = uc;
     return first;
   }
