@@ -2430,20 +2430,22 @@ static bool cmakeCheckStampFile(const std::string& stampName)
   }
 
   // Compare the stamp dependencies against the dependency file itself.
-  cmFileTimeCache ftc;
-  std::string dep;
-  while (cmSystemTools::GetLineFromStream(fin, dep)) {
-    int result;
-    if (!dep.empty() && dep[0] != '#' &&
-        (!ftc.Compare(stampDepends, dep, &result) || result < 0)) {
-      // The stamp depends file is older than this dependency.  The
-      // build system is really out of date.
-      std::cout << "CMake is re-running because " << stampName
-                << " is out-of-date.\n";
-      std::cout << "  the file '" << dep << "'\n";
-      std::cout << "  is newer than '" << stampDepends << "'\n";
-      std::cout << "  result='" << result << "'\n";
-      return false;
+  {
+    cmFileTimeCache ftc;
+    std::string dep;
+    while (cmSystemTools::GetLineFromStream(fin, dep)) {
+      int result;
+      if (!dep.empty() && dep[0] != '#' &&
+          (!ftc.Compare(stampDepends, dep, &result) || result < 0)) {
+        // The stamp depends file is older than this dependency.  The
+        // build system is really out of date.
+        std::cout << "CMake is re-running because " << stampName
+                  << " is out-of-date.\n";
+        std::cout << "  the file '" << dep << "'\n";
+        std::cout << "  is newer than '" << stampDepends << "'\n";
+        std::cout << "  result='" << result << "'\n";
+        return false;
+      }
     }
   }
 
