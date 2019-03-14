@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "cmAlgorithms.h"
+#include "cmFileTime.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
@@ -247,6 +248,8 @@ void cmDependsC::ReadCacheFile()
   cmIncludeLines* cacheEntry = nullptr;
   bool haveFileName = false;
 
+  cmFileTime cacheFileTime;
+  bool const cacheFileTimeGood = cacheFileTime.Load(this->CacheFileName);
   while (cmSystemTools::GetLineFromStream(fin, line)) {
     if (line.empty()) {
       cacheEntry = nullptr;
@@ -256,11 +259,12 @@ void cmDependsC::ReadCacheFile()
     // the first line after an empty line is the name of the parsed file
     if (!haveFileName) {
       haveFileName = true;
-      int newer = 0;
-      bool res =
-        cmSystemTools::FileTimeCompare(this->CacheFileName, line, &newer);
 
-      if (res && newer == 1) // cache is newer than the parsed file
+      cmFileTime fileTime;
+      bool const res = cacheFileTimeGood && fileTime.Load(line);
+      bool const newer = res && cacheFileTime.Newer(fileTime);
+
+      if (res && newer) // cache is newer than the parsed file
       {
         cacheEntry = new cmIncludeLines;
         this->FileCache[line] = cacheEntry;
