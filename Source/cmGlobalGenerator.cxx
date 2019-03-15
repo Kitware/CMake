@@ -1372,7 +1372,9 @@ bool cmGlobalGenerator::Compute()
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
     cmMakefile* mf = localGen->GetMakefile();
     for (cmInstallGenerator* g : mf->GetInstallGenerators()) {
-      g->Compute(localGen);
+      if (!g->Compute(localGen)) {
+        return false;
+      }
     }
   }
 

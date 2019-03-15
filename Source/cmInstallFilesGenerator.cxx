@@ -42,9 +42,10 @@ cmInstallFilesGenerator::cmInstallFilesGenerator(
 
 cmInstallFilesGenerator::~cmInstallFilesGenerator() = default;
 
-void cmInstallFilesGenerator::Compute(cmLocalGenerator* lg)
+bool cmInstallFilesGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
+  return true;
 }
 
 std::string cmInstallFilesGenerator::GetDestination(

@@ -430,7 +430,7 @@ std::string cmInstallTargetGenerator::GetInstallFilename(
   return fname;
 }
 
-void cmInstallTargetGenerator::Compute(cmLocalGenerator* lg)
+bool cmInstallTargetGenerator::Compute(cmLocalGenerator* lg)
 {
   // Lookup this target in the current directory.
   this->Target = lg->FindLocalNonAliasGeneratorTarget(this->TargetName);
@@ -439,6 +439,8 @@ void cmInstallTargetGenerator::Compute(cmLocalGenerator* lg)
     this->Target =
       lg->GetGlobalGenerator()->FindGeneratorTarget(this->TargetName);
   }
+
+  return true;
 }
 
 void cmInstallTargetGenerator::AddTweak(std::ostream& os, Indent indent,

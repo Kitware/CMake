@@ -29,7 +29,7 @@ cmInstallScriptGenerator::cmInstallScriptGenerator(const char* script,
 
 cmInstallScriptGenerator::~cmInstallScriptGenerator() = default;
 
-void cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
+bool cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
 
@@ -49,6 +49,8 @@ void cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
         break;
     }
   }
+
+  return true;
 }
 
 void cmInstallScriptGenerator::AddScriptInstallRule(std::ostream& os,
