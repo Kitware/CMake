@@ -1454,6 +1454,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(GoogleTest)
   endif()
 
+  if(CMake_TEST_FindGTK2)
+    add_subdirectory(FindGTK2)
+  endif()
+
   if(CMake_TEST_FindIconv)
     add_subdirectory(FindIconv)
   endif()
@@ -1595,11 +1599,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     ADD_TEST_MACRO(FindMatlab.failure_reports   ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>)
     set(FindMatlab.r2018a_check_BUILD_OPTIONS ${FindMatlab_additional_test_options})
     ADD_TEST_MACRO(FindMatlab.r2018a_check   ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>)
-  endif()
-
-  find_package(GTK2 QUIET)
-  if(GTK2_FOUND)
-    add_subdirectory(FindGTK2)
   endif()
 
   add_test(ExternalProject ${CMAKE_CTEST_COMMAND}
