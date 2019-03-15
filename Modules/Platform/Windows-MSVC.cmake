@@ -233,8 +233,11 @@ else()
     set(CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib")
   endif()
 
-  if(MSVC_VERSION GREATER_EQUAL 1915)
-    set(_JMC "/JMC")
+  # JMC only supported in MSVC
+  if("x${CMAKE_C_COMPILER_ID}" STREQUAL "xMSVC" OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC" )
+    if(MSVC_VERSION GREATER_EQUAL 1915)
+      set(_JMC "/JMC")
+    endif()
   endif()
 
   if(MSVC_VERSION LESS 1310)
