@@ -41,4 +41,7 @@ add_library(cmzstd STATIC
   lib/dictBuilder/zdict.c
   )
 
+# BMI2 instructions are not supported in older environments.
+set_property(TARGET cmzstd PROPERTY COMPILE_DEFINITIONS DYNAMIC_BMI2=0)
+
 install(FILES LICENSE DESTINATION ${CMAKE_DOC_DIR}/cmzstd)
