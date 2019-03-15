@@ -1,35 +1,38 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# CMakeDetermineVSServicePack
-# ---------------------------
-#
-# Deprecated.  Do not use.
-#
-# The functionality of this module has been superseded by the
-# :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable that contains
-# the compiler version number.
-#
-# Determine the Visual Studio service pack of the 'cl' in use.
-#
-# Usage::
-#
-#   if(MSVC)
-#     include(CMakeDetermineVSServicePack)
-#     DetermineVSServicePack( my_service_pack )
-#     if( my_service_pack )
-#       message(STATUS "Detected: ${my_service_pack}")
-#     endif()
-#   endif()
-#
-# Function DetermineVSServicePack sets the given variable to one of the
-# following values or an empty string if unknown::
-#
-#   vc80, vc80sp1
-#   vc90, vc90sp1
-#   vc100, vc100sp1
-#   vc110, vc110sp1, vc110sp2, vc110sp3, vc110sp4
+#[=======================================================================[.rst:
+CMakeDetermineVSServicePack
+---------------------------
+
+.. deprecated:: 3.0
+
+  Do not use.
+
+The functionality of this module has been superseded by the
+:variable:`CMAKE_<LANG>_COMPILER_VERSION` variable that contains
+the compiler version number.
+
+Determine the Visual Studio service pack of the 'cl' in use.
+
+Usage::
+
+  if(MSVC)
+    include(CMakeDetermineVSServicePack)
+    DetermineVSServicePack( my_service_pack )
+    if( my_service_pack )
+      message(STATUS "Detected: ${my_service_pack}")
+    endif()
+  endif()
+
+Function DetermineVSServicePack sets the given variable to one of the
+following values or an empty string if unknown::
+
+  vc80, vc80sp1
+  vc90, vc90sp1
+  vc100, vc100sp1
+  vc110, vc110sp1, vc110sp2, vc110sp3, vc110sp4
+#]=======================================================================]
 
 if(NOT CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 2.8.8)
   message(DEPRECATION
@@ -76,7 +79,7 @@ endfunction()
 function(_DetermineVSServicePack_FastCheckVersionWithCompiler _SUCCESS_VAR  _VERSION_VAR)
     if(EXISTS ${CMAKE_CXX_COMPILER})
       execute_process(
-          COMMAND ${CMAKE_CXX_COMPILER} /?
+          COMMAND ${CMAKE_CXX_COMPILER} -?
           ERROR_VARIABLE _output
           OUTPUT_QUIET
         )
@@ -169,4 +172,3 @@ function(DetermineVSServicePack _pack)
         endif()
     endif()
 endfunction()
-

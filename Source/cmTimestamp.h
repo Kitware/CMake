@@ -15,19 +15,17 @@
 class cmTimestamp
 {
 public:
-  cmTimestamp() {}
-
   std::string CurrentTime(const std::string& formatString, bool utcFlag);
 
   std::string FileModificationTime(const char* path,
                                    const std::string& formatString,
                                    bool utcFlag);
 
-private:
-  time_t CreateUtcTimeTFromTm(struct tm& timeStruct) const;
-
   std::string CreateTimestampFromTimeT(time_t timeT, std::string formatString,
                                        bool utcFlag) const;
+
+private:
+  time_t CreateUtcTimeTFromTm(struct tm& timeStruct) const;
 
   std::string AddTimestampComponent(char flag, struct tm& timeStruct,
                                     time_t timeT) const;

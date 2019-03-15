@@ -21,9 +21,7 @@ cmCPackIFWGenerator::cmCPackIFWGenerator()
   this->Generator = this;
 }
 
-cmCPackIFWGenerator::~cmCPackIFWGenerator()
-{
-}
+cmCPackIFWGenerator::~cmCPackIFWGenerator() = default;
 
 int cmCPackIFWGenerator::PackageFiles()
 {

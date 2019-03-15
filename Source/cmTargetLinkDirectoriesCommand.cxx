@@ -8,9 +8,9 @@
 #include "cmGeneratorExpression.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -26,7 +26,7 @@ void cmTargetLinkDirectoriesCommand::HandleMissingTarget(
   std::ostringstream e;
   e << "Cannot specify link directories for target \"" << name
     << "\" which is not built by this project.";
-  this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+  this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
 }
 
 std::string cmTargetLinkDirectoriesCommand::Join(

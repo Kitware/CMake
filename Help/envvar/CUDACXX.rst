@@ -1,6 +1,8 @@
 CUDACXX
 -------
 
+.. include:: ENV_VAR.txt
+
 Preferred executable for compiling ``CUDA`` language files. Will only be used by
 CMake on the first configuration to determine ``CUDA`` compiler, after which the
 value for ``CUDA`` is stored in the cache as

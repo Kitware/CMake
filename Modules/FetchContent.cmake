@@ -20,9 +20,12 @@ configure step to use the content in commands like :command:`add_subdirectory`,
 :command:`include` or :command:`file` operations.
 
 Content population details would normally be defined separately from the
-command that performs the actual population.  Projects should also
-check whether the content has already been populated somewhere else in the
-project hierarchy.  Typical usage would look something like this:
+command that performs the actual population.  This separation ensures that
+all of the dependency details are defined before anything may try to use those
+details to populate content.  This is particularly important in more complex
+project hierarchies where dependencies may be shared between multiple projects.
+
+The following shows a typical example of declaring content details:
 
 .. code-block:: cmake
 
@@ -32,21 +35,37 @@ project hierarchy.  Typical usage would look something like this:
     GIT_TAG        release-1.8.0
   )
 
+For most typical cases, populating the content can then be done with a single
+command like so:
+
+.. code-block:: cmake
+
+  FetchContent_MakeAvailable(googletest)
+
+The above command not only populates the content, it also adds it to the main
+build (if possible) so that the main build can use the populated project's
+targets, etc.  In some cases, the main project may need to have more precise
+control over the population or may be required to explicitly define the
+population steps (e.g. if CMake versions earlier than 3.14 need to be
+supported).  The typical pattern of such custom steps looks like this:
+
+.. code-block:: cmake
+
   FetchContent_GetProperties(googletest)
   if(NOT googletest_POPULATED)
     FetchContent_Populate(googletest)
     add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
   endif()
 
-When using the above pattern with a hierarchical project arrangement,
-projects at higher levels in the hierarchy are able to define or override
-the population details of content specified anywhere lower in the project
-hierarchy.  The ability to detect whether content has already been
-populated ensures that even if multiple child projects want certain content
-to be available, the first one to populate it wins.  The other child project
-can simply make use of the already available content instead of repeating
-the population for itself.  See the
-:ref:`Examples <fetch-content-examples>` section which demonstrates
+Regardless of which population method is used, when using the
+declare-populate pattern with a hierarchical project arrangement, projects at
+higher levels in the hierarchy are able to override the population details of
+content specified anywhere lower in the project hierarchy.  The ability to
+detect whether content has already been populated ensures that even if
+multiple child projects want certain content to be available, the first one
+to populate it wins.  The other child project can simply make use of the
+already available content instead of repeating the population for itself.
+See the :ref:`Examples <fetch-content-examples>` section which demonstrates
 this scenario.
 
 The ``FetchContent`` module also supports defining and populating
@@ -112,6 +131,38 @@ Declaring Content Details
 
 Populating The Content
 ^^^^^^^^^^^^^^^^^^^^^^
+
+For most common scenarios, population means making content available to the
+main build according to previously declared details for that dependency.
+There are two main patterns for populating content, one based on calling
+:command:`FetchContent_GetProperties` and
+:command:`FetchContent_Populate` for more precise control and the other on
+calling :command:`FetchContent_MakeAvailable` for a simpler, more automated
+approach.  The former generally follows this canonical pattern:
+
+.. _`fetch-content-canonical-pattern`:
+
+.. code-block:: cmake
+
+  # Check if population has already been performed
+  FetchContent_GetProperties(<name>)
+  string(TOLOWER "<name>" lcName)
+  if(NOT ${lcName}_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(<name>)
+
+    # Set custom variables, policies, etc.
+    # ...
+
+    # Bring the populated content into the build
+    add_subdirectory(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
+  endif()
+
+The above is such a common pattern that, where no custom steps are needed
+between the calls to :command:`FetchContent_Populate` and
+:command:`add_subdirectory`, equivalent logic can be obtained by calling
+:command:`FetchContent_MakeAvailable` instead (and should be preferred where
+it meets the needs of the project).
 
 .. command:: FetchContent_Populate
 
@@ -309,9 +360,6 @@ Populating The Content
   on the command line invoking the script.
 
 
-Retrieve Population Properties
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 .. command:: FetchContent_GetProperties
 
   When using saved content details, a call to :command:`FetchContent_Populate`
@@ -343,15 +391,29 @@ Retrieve Population Properties
     FetchContent_GetProperties(foobar)
     if(NOT foobar_POPULATED)
       FetchContent_Populate(foobar)
-
-      # Set any custom variables, etc. here, then
-      # populate the content as part of this build
-
-      add_subdirectory(${foobar_SOURCE_DIR} ${foobar_BINARY_DIR})
+      ...
     endif()
 
   The above pattern allows other parts of the overall project hierarchy to
   re-use the same content and ensure that it is only populated once.
+
+
+.. command:: FetchContent_MakeAvailable
+
+  .. code-block:: cmake
+
+    FetchContent_MakeAvailable( <name1> [<name2>...] )
+
+  This command implements the common pattern typically needed for most
+  dependencies.  It iterates over each of the named dependencies in turn
+  and for each one it loosely follows the same
+  :ref:`canonical pattern <fetch-content-canonical-pattern>` as
+  presented at the beginning of this section.  One small difference to
+  that pattern is that it will only call :command:`add_subdirectory` on the
+  populated content if there is a ``CMakeLists.txt`` file in its top level
+  source directory.  This allows the command to be used for dependencies
+  that make downloaded content available at a known location but which do
+  not need or support being added directly to the build.
 
 
 .. _`fetch-content-examples`:
@@ -359,12 +421,35 @@ Retrieve Population Properties
 Examples
 ^^^^^^^^
 
-Consider a project hierarchy where ``projA`` is the top level project and it
-depends on projects ``projB`` and ``projC``. Both ``projB`` and ``projC``
-can be built standalone and they also both depend on another project
-``projD``.  For simplicity, this example will assume that all four projects
-are available on a company git server.  The ``CMakeLists.txt`` of each project
-might have sections like the following:
+This first fairly straightforward example ensures that some popular testing
+frameworks are available to the main build:
+
+.. code-block:: cmake
+
+  include(FetchContent)
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        release-1.8.0
+  )
+  FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG        v2.5.0
+  )
+
+  # After the following call, the CMake targets defined by googletest and
+  # Catch2 will be defined and available to the rest of the build
+  FetchContent_MakeAvailable(googletest Catch2)
+
+
+In more complex project hierarchies, the dependency relationships can be more
+complicated.  Consider a hierarchy where ``projA`` is the top level project and
+it depends directly on projects ``projB`` and ``projC``.  Both ``projB`` and
+``projC`` can be built standalone and they also both depend on another project
+``projD``.  ``projB`` additionally depends on ``projE``.  This example assumes
+that all five projects are available on a company git server.  The
+``CMakeLists.txt`` of each project might have sections like the following:
 
 *projA*:
 
@@ -373,31 +458,27 @@ might have sections like the following:
   include(FetchContent)
   FetchContent_Declare(
     projB
-    GIT_REPOSITORY git@mycompany.com/git/projB.git
+    GIT_REPOSITORY git@mycompany.com:git/projB.git
     GIT_TAG        4a89dc7e24ff212a7b5167bef7ab079d
   )
   FetchContent_Declare(
     projC
-    GIT_REPOSITORY git@mycompany.com/git/projC.git
+    GIT_REPOSITORY git@mycompany.com:git/projC.git
     GIT_TAG        4ad4016bd1d8d5412d135cf8ceea1bb9
   )
   FetchContent_Declare(
     projD
-    GIT_REPOSITORY git@mycompany.com/git/projD.git
+    GIT_REPOSITORY git@mycompany.com:git/projD.git
     GIT_TAG        origin/integrationBranch
   )
+  FetchContent_Declare(
+    projE
+    GIT_REPOSITORY git@mycompany.com:git/projE.git
+    GIT_TAG        origin/release/2.3-rc1
+  )
 
-  FetchContent_GetProperties(projB)
-  if(NOT projb_POPULATED)
-    FetchContent_Populate(projB)
-    add_subdirectory(${projb_SOURCE_DIR} ${projb_BINARY_DIR})
-  endif()
-
-  FetchContent_GetProperties(projC)
-  if(NOT projc_POPULATED)
-    FetchContent_Populate(projC)
-    add_subdirectory(${projc_SOURCE_DIR} ${projc_BINARY_DIR})
-  endif()
+  # Order is important, see notes in the discussion further below
+  FetchContent_MakeAvailable(projD projB projC)
 
 *projB*:
 
@@ -406,16 +487,16 @@ might have sections like the following:
   include(FetchContent)
   FetchContent_Declare(
     projD
-    GIT_REPOSITORY git@mycompany.com/git/projD.git
+    GIT_REPOSITORY git@mycompany.com:git/projD.git
     GIT_TAG        20b415f9034bbd2a2e8216e9a5c9e632
   )
+  FetchContent_Declare(
+    projE
+    GIT_REPOSITORY git@mycompany.com:git/projE.git
+    GIT_TAG        68e20f674a48be38d60e129f600faf7d
+  )
 
-  FetchContent_GetProperties(projD)
-  if(NOT projd_POPULATED)
-    FetchContent_Populate(projD)
-    add_subdirectory(${projd_SOURCE_DIR} ${projd_BINARY_DIR})
-  endif()
-
+  FetchContent_MakeAvailable(projD projE)
 
 *projC*:
 
@@ -424,48 +505,77 @@ might have sections like the following:
   include(FetchContent)
   FetchContent_Declare(
     projD
-    GIT_REPOSITORY git@mycompany.com/git/projD.git
+    GIT_REPOSITORY git@mycompany.com:git/projD.git
     GIT_TAG        7d9a17ad2c962aa13e2fbb8043fb6b8a
   )
 
+  # This particular version of projD requires workarounds
   FetchContent_GetProperties(projD)
   if(NOT projd_POPULATED)
     FetchContent_Populate(projD)
+
+    # Copy an additional/replacement file into the populated source
+    file(COPY someFile.c DESTINATION ${projd_SOURCE_DIR}/src)
+
     add_subdirectory(${projd_SOURCE_DIR} ${projd_BINARY_DIR})
   endif()
 
 A few key points should be noted in the above:
 
 - ``projB`` and ``projC`` define different content details for ``projD``,
-  but ``projA`` also defines a set of content details for ``projD`` and
-  because ``projA`` will define them first, the details from ``projB`` and
+  but ``projA`` also defines a set of content details for ``projD``.
+  Because ``projA`` will define them first, the details from ``projB`` and
   ``projC`` will not be used.  The override details defined by ``projA``
   are not required to match either of those from ``projB`` or ``projC``, but
   it is up to the higher level project to ensure that the details it does
   define still make sense for the child projects.
-- While ``projA`` defined content details for ``projD``, it did not need
-  to explicitly call ``FetchContent_Populate(projD)`` itself.  Instead, it
-  leaves that to a child project to do (in this case it will be ``projB``
-  since it is added to the build ahead of ``projC``).  If ``projA`` needed to
-  customize how the ``projD`` content was brought into the build as well
-  (e.g. define some CMake variables before calling
-  :command:`add_subdirectory` after populating), it would do the call to
-  ``FetchContent_Populate()``, etc. just as it did for the ``projB`` and
-  ``projC`` content.  For higher level projects, it is usually enough to
-  just define the override content details and leave the actual population
-  to the child projects.  This saves repeating the same thing at each level
-  of the project hierarchy unnecessarily.
-- Even though ``projA`` is the top level project in this example, it still
-  checks whether ``projB`` and ``projC`` have already been populated before
-  going ahead to do those populations.  This makes ``projA`` able to be more
-  easily incorporated as a child of some other higher level project in the
-  future if required.  Always protect a call to
-  :command:`FetchContent_Populate` with a check to
-  :command:`FetchContent_GetProperties`, even in what may be considered a top
-  level project at the time.
+- In the ``projA`` call to :command:`FetchContent_MakeAvailable`, ``projD``
+  is listed ahead of ``projB`` and ``projC`` to ensure that ``projA`` is in
+  control of how ``projD`` is populated.
+- While ``projA`` defines content details for ``projE``, it does not need
+  to explicitly call ``FetchContent_MakeAvailable(projE)`` or
+  ``FetchContent_Populate(projD)`` itself.  Instead, it leaves that to the
+  child ``projB``.  For higher level projects, it is often enough to just
+  define the override content details and leave the actual population to the
+  child projects.  This saves repeating the same thing at each level of the
+  project hierarchy unnecessarily.
 
 
-The following example demonstrates how one might download and unpack a
+Projects don't always need to add the populated content to the build.
+Sometimes the project just wants to make the downloaded content available at
+a predictable location.  The next example ensures that a set of standard
+company toolchain files (and potentially even the toolchain binaries
+themselves) is available early enough to be used for that same build.
+
+.. code-block:: cmake
+
+  cmake_minimum_required(VERSION 3.14)
+
+  include(FetchContent)
+  FetchContent_Declare(
+    mycom_toolchains
+    URL  https://intranet.mycompany.com//toolchains_1.3.2.tar.gz
+  )
+  FetchContent_MakeAvailable(mycom_toolchains)
+
+  project(CrossCompileExample)
+
+The project could be configured to use one of the downloaded toolchains like
+so:
+
+.. code-block:: shell
+
+  cmake -DCMAKE_TOOLCHAIN_FILE=_deps/mycom_toolchains-src/toolchain_arm.cmake /path/to/src
+
+When CMake processes the ``CMakeLists.txt`` file, it will download and unpack
+the tarball into ``_deps/mycompany_toolchains-src`` relative to the build
+directory.  The :variable:`CMAKE_TOOLCHAIN_FILE` variable is not used until
+the :command:`project` command is reached, at which point CMake looks for the
+named toolchain file relative to the build directory.  Because the tarball has
+already been downloaded and unpacked by then, the toolchain file will be in
+place, even the very first time that ``cmake`` is run in the build directory.
+
+Lastly, the following example demonstrates how one might download and unpack a
 firmware tarball using CMake's :manual:`script mode <cmake(1)>`.  The call to
 :command:`FetchContent_Populate` specifies all the content details and the
 unpacked firmware will be placed in a ``firmware`` directory below the
@@ -691,6 +801,13 @@ function(__FetchContent_directPopulate contentName)
       BUILD_COMMAND
       INSTALL_COMMAND
       TEST_COMMAND
+      # We force both of these to be ON since we are always executing serially
+      # and we want all steps to have access to the terminal in case they
+      # need input from the command line (e.g. ask for a private key password)
+      # or they want to provide timely progress. We silently absorb and
+      # discard these if they are set by the caller.
+      USES_TERMINAL_DOWNLOAD
+      USES_TERMINAL_UPDATE
   )
   set(multiValueArgs "")
 
@@ -914,3 +1031,31 @@ function(FetchContent_Populate contentName)
   set(${contentNameLower}_POPULATED  True PARENT_SCOPE)
 
 endfunction()
+
+# Arguments are assumed to be the names of dependencies that have been
+# declared previously and should be populated. It is not an error if
+# any of them have already been populated (they will just be skipped in
+# that case). The command is implemented as a macro so that the variables
+# defined by the FetchContent_GetProperties() and FetchContent_Populate()
+# calls will be available to the caller.
+macro(FetchContent_MakeAvailable)
+
+  foreach(contentName IN ITEMS ${ARGV})
+    string(TOLOWER ${contentName} contentNameLower)
+    FetchContent_GetProperties(${contentName})
+    if(NOT ${contentNameLower}_POPULATED)
+      FetchContent_Populate(${contentName})
+
+      # Only try to call add_subdirectory() if the populated content
+      # can be treated that way. Protecting the call with the check
+      # allows this function to be used for projects that just want
+      # to ensure the content exists, such as to provide content at
+      # a known location.
+      if(EXISTS ${${contentNameLower}_SOURCE_DIR}/CMakeLists.txt)
+        add_subdirectory(${${contentNameLower}_SOURCE_DIR}
+                         ${${contentNameLower}_BINARY_DIR})
+      endif()
+    endif()
+  endforeach()
+
+endmacro()

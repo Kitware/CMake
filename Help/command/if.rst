@@ -3,41 +3,49 @@ if
 
 Conditionally execute a group of commands.
 
+Synopsis
+^^^^^^^^
+
 .. code-block:: cmake
 
- if(expression)
-   # then section.
-   COMMAND1(ARGS ...)
-   COMMAND2(ARGS ...)
-   #...
- elseif(expression2)
-   # elseif section.
-   COMMAND1(ARGS ...)
-   COMMAND2(ARGS ...)
-   #...
- else(expression)
-   # else section.
-   COMMAND1(ARGS ...)
-   COMMAND2(ARGS ...)
-   #...
- endif(expression)
+  if(<condition>)
+    <commands>
+  elseif(<condition>) # optional block, can be repeated
+    <commands>
+  else()              # optional block
+    <commands>
+  endif()
 
-Evaluates the given expression.  If the result is true, the commands
-in the THEN section are invoked.  Otherwise, the commands in the else
-section are invoked.  The elseif and else sections are optional.  You
-may have multiple elseif clauses.  Note that the expression in the
-else and endif clause is optional.  Long expressions can be used and
-there is a traditional order of precedence.  Parenthetical expressions
-are evaluated first followed by unary tests such as ``EXISTS``,
-``COMMAND``, and ``DEFINED``.  Then any binary tests such as
+Evaluates the ``condition`` argument of the ``if`` clause according to the
+`Condition syntax`_ described below. If the result is true, then the
+``commands`` in the ``if`` block are executed.
+Otherwise, optional ``elseif`` blocks are processed in the same way.
+Finally, if no ``condition`` is true, ``commands`` in the optional ``else``
+block are executed.
+
+Per legacy, the :command:`else` and :command:`endif` commands admit
+an optional ``<condition>`` argument.
+If used, it must be a verbatim
+repeat of the argument of the opening
+``if`` command.
+
+Condition Syntax
+^^^^^^^^^^^^^^^^
+
+The following syntax applies to the ``condition`` argument of
+the ``if``, ``elseif`` and :command:`while` clauses.
+
+Compound conditions are evaluated in the following order of precedence:
+Innermost parentheses are evaluated first. Next come unary tests such
+as ``EXISTS``, ``COMMAND``, and ``DEFINED``.  Then binary tests such as
 ``EQUAL``, ``LESS``, ``LESS_EQUAL``, ``GREATER``, ``GREATER_EQUAL``,
 ``STREQUAL``, ``STRLESS``, ``STRLESS_EQUAL``, ``STRGREATER``,
 ``STRGREATER_EQUAL``, ``VERSION_EQUAL``, ``VERSION_LESS``,
 ``VERSION_LESS_EQUAL``, ``VERSION_GREATER``, ``VERSION_GREATER_EQUAL``,
-and ``MATCHES`` will be evaluated.  Then boolean ``NOT`` operators and
-finally boolean ``AND`` and then ``OR`` operators will be evaluated.
+and ``MATCHES``.  Then the boolean operators in the order ``NOT``,  ``AND``,
+and finally ``OR``.
 
-Possible expressions are:
+Possible conditions are:
 
 ``if(<constant>)``
  True if the constant is ``1``, ``ON``, ``YES``, ``TRUE``, ``Y``,
@@ -52,14 +60,14 @@ Possible expressions are:
  True if given a variable that is defined to a value that is not a false
  constant.  False otherwise.  (Note macro arguments are not variables.)
 
-``if(NOT <expression>)``
- True if the expression is not true.
+``if(NOT <condition>)``
+ True if the condition is not true.
 
-``if(<expr1> AND <expr2>)``
- True if both expressions would be considered true individually.
+``if(<cond1> AND <cond2>)``
+ True if both conditions would be considered true individually.
 
-``if(<expr1> OR <expr2>)``
- True if either expression would be considered true individually.
+``if(<cond1> OR <cond2>)``
+ True if either condition would be considered true individually.
 
 ``if(COMMAND command-name)``
  True if the given name is a command, macro or function that can be
@@ -103,7 +111,7 @@ Possible expressions are:
 
 ``if(<variable|string> MATCHES regex)``
  True if the given string or variable's value matches the given regular
- expression.  See :ref:`Regex Specification` for regex format.
+ condition.  See :ref:`Regex Specification` for regex format.
  ``()`` groups are captured in :variable:`CMAKE_MATCH_<n>` variables.
 
 ``if(<variable|string> LESS <variable|string>)``
@@ -179,42 +187,51 @@ Possible expressions are:
 ``if(<variable|string> IN_LIST <variable>)``
  True if the given element is contained in the named list variable.
 
-``if(DEFINED <variable>)``
- True if the given variable is defined.  It does not matter if the
- variable is true or false just if it has been set.  (Note macro
- arguments are not variables.)
+``if(DEFINED <name>|CACHE{<name>}|ENV{<name>})``
+ True if a variable, cache variable or environment variable
+ with given ``<name>`` is defined. The value of the variable
+ does not matter. Note that macro arguments are not variables.
 
-``if((expression) AND (expression OR (expression)))``
- The expressions inside the parenthesis are evaluated first and then
- the remaining expression is evaluated as in the previous examples.
+``if((condition) AND (condition OR (condition)))``
+ The conditions inside the parenthesis are evaluated first and then
+ the remaining condition is evaluated as in the previous examples.
  Where there are nested parenthesis the innermost are evaluated as part
- of evaluating the expression that contains them.
+ of evaluating the condition that contains them.
+
+Variable Expansion
+^^^^^^^^^^^^^^^^^^
 
 The if command was written very early in CMake's history, predating
 the ``${}`` variable evaluation syntax, and for convenience evaluates
 variables named by its arguments as shown in the above signatures.
 Note that normal variable evaluation with ``${}`` applies before the if
-command even receives the arguments.  Therefore code like::
+command even receives the arguments.  Therefore code like
+
+.. code-block:: cmake
 
  set(var1 OFF)
  set(var2 "var1")
  if(${var2})
 
-appears to the if command as::
+appears to the if command as
 
- if(var1)
+.. code-block:: cmake
+
+  if(var1)
 
 and is evaluated according to the ``if(<variable>)`` case documented
 above.  The result is ``OFF`` which is false.  However, if we remove the
-``${}`` from the example then the command sees::
+``${}`` from the example then the command sees
 
- if(var2)
+.. code-block:: cmake
+
+  if(var2)
 
 which is true because ``var2`` is defined to "var1" which is not a false
 constant.
 
 Automatic evaluation applies in the other cases whenever the
-above-documented signature accepts ``<variable|string>``:
+above-documented condition syntax accepts ``<variable|string>``:
 
 * The left hand argument to ``MATCHES`` is first checked to see if it is
   a defined variable, if so the variable's value is used, otherwise the
@@ -252,3 +269,8 @@ specified in a :ref:`Quoted Argument` or a :ref:`Bracket Argument`.
 A quoted or bracketed variable or keyword will be interpreted as a
 string and not dereferenced or interpreted.
 See policy :policy:`CMP0054`.
+
+There is no automatic evaluation for environment or cache
+:ref:`Variable References`.  Their values must be referenced as
+``$ENV{<name>}`` or ``$CACHE{<name>}`` wherever the above-documented
+condition syntax accepts ``<variable|string>``.

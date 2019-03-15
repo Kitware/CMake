@@ -5,6 +5,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <map>
 #include <sstream>
 #include <stdio.h>
 #include <utility>
@@ -15,6 +16,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
 #include "cmState.h"
@@ -41,7 +43,6 @@ void AppendDictionary(cmXMLWriter& xml, const char* key, T const& value)
 }
 
 cmExtraEclipseCDT4Generator::cmExtraEclipseCDT4Generator()
-  : cmExternalMakefileProjectGenerator()
 {
   this->SupportsVirtualFolders = true;
   this->GenerateLinkedResources = true;
@@ -134,7 +135,7 @@ void cmExtraEclipseCDT4Generator::Generate()
   if (!this->GenerateSourceProject &&
       (mf->IsOn("ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT"))) {
     mf->IssueMessage(
-      cmake::WARNING,
+      MessageType::WARNING,
       "ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT is set to TRUE, "
       "but this variable is not supported anymore since CMake 2.8.7.\n"
       "Enable CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT instead.");
@@ -142,7 +143,7 @@ void cmExtraEclipseCDT4Generator::Generate()
 
   if (cmSystemTools::IsSubDirectory(this->HomeOutputDirectory,
                                     this->HomeDirectory)) {
-    mf->IssueMessage(cmake::WARNING,
+    mf->IssueMessage(MessageType::WARNING,
                      "The build directory is a subdirectory "
                      "of the source directory.\n"
                      "This is not supported well by Eclipse. It is strongly "
@@ -171,9 +172,9 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile()
 
   // set up the project name: <project>-Source@<baseSourcePathName>
   cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
-  std::string name =
-    this->GenerateProjectName(lg->GetProjectName(), "Source",
-                              this->GetPathBasename(this->HomeDirectory));
+  std::string name = cmExtraEclipseCDT4Generator::GenerateProjectName(
+    lg->GetProjectName(), "Source",
+    cmExtraEclipseCDT4Generator::GetPathBasename(this->HomeDirectory));
 
   const std::string filename = this->HomeDirectory + "/.project";
   cmGeneratedFileStream fout(filename);
@@ -278,10 +279,11 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   xml.StartElement("projectDescription");
 
   xml.Element("name",
-              this->GenerateProjectName(
+              cmExtraEclipseCDT4Generator::GenerateProjectName(
                 lg->GetProjectName(),
                 mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
-                this->GetPathBasename(this->HomeOutputDirectory)));
+                cmExtraEclipseCDT4Generator::GetPathBasename(
+                  this->HomeOutputDirectory)));
 
   xml.Element("comment", "");
   xml.Element("projects", "");
@@ -302,16 +304,17 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   // set the make command
   AppendDictionary(xml, "org.eclipse.cdt.make.core.enabledIncrementalBuild",
                    "true");
-  AppendDictionary(
-    xml, "org.eclipse.cdt.make.core.build.command",
-    this->GetEclipsePath(mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM")));
+  AppendDictionary(xml, "org.eclipse.cdt.make.core.build.command",
+                   cmExtraEclipseCDT4Generator::GetEclipsePath(
+                     mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM")));
   AppendDictionary(xml, "org.eclipse.cdt.make.core.contents",
                    "org.eclipse.cdt.make.core.activeConfigSettings");
   AppendDictionary(xml, "org.eclipse.cdt.make.core.build.target.inc", "all");
   AppendDictionary(xml, "org.eclipse.cdt.make.core.build.arguments",
                    mf->GetSafeDefinition("CMAKE_ECLIPSE_MAKE_ARGUMENTS"));
-  AppendDictionary(xml, "org.eclipse.cdt.make.core.buildLocation",
-                   this->GetEclipsePath(this->HomeOutputDirectory));
+  AppendDictionary(
+    xml, "org.eclipse.cdt.make.core.buildLocation",
+    cmExtraEclipseCDT4Generator::GetEclipsePath(this->HomeOutputDirectory));
   AppendDictionary(xml, "org.eclipse.cdt.make.core.useDefaultBuildCmd",
                    "false");
 
@@ -341,8 +344,9 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
                    "clean");
   AppendDictionary(xml, "org.eclipse.cdt.make.core.fullBuildTarget", "all");
   AppendDictionary(xml, "org.eclipse.cdt.make.core.buildArguments", "");
-  AppendDictionary(xml, "org.eclipse.cdt.make.core.build.location",
-                   this->GetEclipsePath(this->HomeOutputDirectory));
+  AppendDictionary(
+    xml, "org.eclipse.cdt.make.core.build.location",
+    cmExtraEclipseCDT4Generator::GetEclipsePath(this->HomeOutputDirectory));
   AppendDictionary(xml, "org.eclipse.cdt.make.core.autoBuildTarget", "all");
 
   // set error parsers
@@ -379,7 +383,6 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   xml.StartElement("natures");
   xml.Element("nature", "org.eclipse.cdt.make.core.makeNature");
   xml.Element("nature", "org.eclipse.cdt.make.core.ScannerConfigNature");
-  ;
 
   for (std::string const& n : this->Natures) {
     xml.Element("nature", n);
@@ -407,13 +410,15 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
     std::string sourceLinkedResourceName = "[Source directory]";
     std::string linkSourceDirectory =
-      this->GetEclipsePath(lg->GetCurrentSourceDirectory());
+      cmExtraEclipseCDT4Generator::GetEclipsePath(
+        lg->GetCurrentSourceDirectory());
     // .project dir can't be subdir of a linked resource dir
     if (!cmSystemTools::IsSubDirectory(this->HomeOutputDirectory,
                                        linkSourceDirectory)) {
-      this->AppendLinkedResource(xml, sourceLinkedResourceName,
-                                 this->GetEclipsePath(linkSourceDirectory),
-                                 LinkToFolder);
+      cmExtraEclipseCDT4Generator::AppendLinkedResource(
+        xml, sourceLinkedResourceName,
+        cmExtraEclipseCDT4Generator::GetEclipsePath(linkSourceDirectory),
+        LinkToFolder);
       this->SrcLinkedResources.push_back(std::move(sourceLinkedResourceName));
     }
   }
@@ -439,8 +444,8 @@ void cmExtraEclipseCDT4Generator::WriteGroups(
 
     std::replace(linkName3.begin(), linkName3.end(), '\\', '/');
 
-    this->AppendLinkedResource(xml, linkName3, "virtual:/virtual",
-                               VirtualFolder);
+    cmExtraEclipseCDT4Generator::AppendLinkedResource(
+      xml, linkName3, "virtual:/virtual", VirtualFolder);
     std::vector<cmSourceGroup> const& children = sg.GetGroupChildren();
     if (!children.empty()) {
       this->WriteGroups(children, linkName, xml);
@@ -453,8 +458,9 @@ void cmExtraEclipseCDT4Generator::WriteGroups(
         std::string linkName4 = linkName3;
         linkName4 += "/";
         linkName4 += cmSystemTools::GetFilenameName(fullPath);
-        this->AppendLinkedResource(xml, linkName4,
-                                   this->GetEclipsePath(fullPath), LinkToFile);
+        cmExtraEclipseCDT4Generator::AppendLinkedResource(
+          xml, linkName4,
+          cmExtraEclipseCDT4Generator::GetEclipsePath(fullPath), LinkToFile);
       }
     }
   }
@@ -463,7 +469,8 @@ void cmExtraEclipseCDT4Generator::WriteGroups(
 void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
 {
   std::string linkName = "[Targets]";
-  this->AppendLinkedResource(xml, linkName, "virtual:/virtual", VirtualFolder);
+  cmExtraEclipseCDT4Generator::AppendLinkedResource(
+    xml, linkName, "virtual:/virtual", VirtualFolder);
 
   for (cmLocalGenerator* lg : this->GlobalGenerator->GetLocalGenerators()) {
     cmMakefile* makefile = lg->GetMakefile();
@@ -483,8 +490,8 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
                                                            : "[lib] ");
           linkName2 += prefix;
           linkName2 += target->GetName();
-          this->AppendLinkedResource(xml, linkName2, "virtual:/virtual",
-                                     VirtualFolder);
+          cmExtraEclipseCDT4Generator::AppendLinkedResource(
+            xml, linkName2, "virtual:/virtual", VirtualFolder);
           if (!this->GenerateLinkedResources) {
             break; // skip generating the linked resources to the source files
           }
@@ -522,21 +529,23 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
 
   // for each sub project create a linked resource to the source dir
   // - only if it is an out-of-source build
-  this->AppendLinkedResource(xml, "[Subprojects]", "virtual:/virtual",
-                             VirtualFolder);
+  cmExtraEclipseCDT4Generator::AppendLinkedResource(
+    xml, "[Subprojects]", "virtual:/virtual", VirtualFolder);
 
   for (auto const& it : this->GlobalGenerator->GetProjectMap()) {
     std::string linkSourceDirectory =
-      this->GetEclipsePath(it.second[0]->GetCurrentSourceDirectory());
+      cmExtraEclipseCDT4Generator::GetEclipsePath(
+        it.second[0]->GetCurrentSourceDirectory());
     // a linked resource must not point to a parent directory of .project or
     // .project itself
     if ((baseDir != linkSourceDirectory) &&
         !cmSystemTools::IsSubDirectory(baseDir, linkSourceDirectory)) {
       std::string linkName = "[Subprojects]/";
       linkName += it.first;
-      this->AppendLinkedResource(xml, linkName,
-                                 this->GetEclipsePath(linkSourceDirectory),
-                                 LinkToFolder);
+      cmExtraEclipseCDT4Generator::AppendLinkedResource(
+        xml, linkName,
+        cmExtraEclipseCDT4Generator::GetEclipsePath(linkSourceDirectory),
+        LinkToFolder);
       // Don't add it to the srcLinkedResources, because listing multiple
       // directories confuses the Eclipse indexer (#13596).
     }
@@ -705,7 +714,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     xml.Attribute("path", p);
     xml.EndElement();
 
-    // exlude source directory from output search path
+    // exclude source directory from output search path
     // - only if not named the same as an output directory
     if (!cmSystemTools::FileIsDirectory(
           std::string(this->HomeOutputDirectory + "/" + p))) {
@@ -890,7 +899,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   for (cmLocalGenerator* lgen : this->GlobalGenerator->GetLocalGenerators()) {
     const std::vector<cmGeneratorTarget*>& targets =
       lgen->GetGeneratorTargets();
-    std::string subdir = lgen->ConvertToRelativePath(
+    std::string subdir = lgen->MaybeConvertToRelativePath(
       this->HomeOutputDirectory, lgen->GetCurrentBinaryDirectory());
     if (subdir == ".") {
       subdir.clear();
@@ -903,7 +912,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
           if (subdir.empty()) {
-            this->AppendTarget(xml, targetName, make, makeArgs, subdir, ": ");
+            cmExtraEclipseCDT4Generator::AppendTarget(xml, targetName, make,
+                                                      makeArgs, subdir, ": ");
           }
         } break;
         case cmStateEnums::UTILITY:
@@ -918,7 +928,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
             break;
           }
 
-          this->AppendTarget(xml, targetName, make, makeArgs, subdir, ": ");
+          cmExtraEclipseCDT4Generator::AppendTarget(xml, targetName, make,
+                                                    makeArgs, subdir, ": ");
           break;
         case cmStateEnums::EXECUTABLE:
         case cmStateEnums::STATIC_LIBRARY:
@@ -928,10 +939,12 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           const char* prefix =
             (target->GetType() == cmStateEnums::EXECUTABLE ? "[exe] "
                                                            : "[lib] ");
-          this->AppendTarget(xml, targetName, make, makeArgs, subdir, prefix);
+          cmExtraEclipseCDT4Generator::AppendTarget(xml, targetName, make,
+                                                    makeArgs, subdir, prefix);
           std::string fastTarget = targetName;
           fastTarget += "/fast";
-          this->AppendTarget(xml, fastTarget, make, makeArgs, subdir, prefix);
+          cmExtraEclipseCDT4Generator::AppendTarget(xml, fastTarget, make,
+                                                    makeArgs, subdir, prefix);
 
           // Add Build and Clean targets in the virtual folder of targets:
           if (this->SupportsVirtualFolders) {
@@ -942,8 +955,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
             buildArgs += lgen->GetBinaryDirectory();
             buildArgs += "\" ";
             buildArgs += makeArgs;
-            this->AppendTarget(xml, "Build", make, buildArgs, virtDir, "",
-                               targetName.c_str());
+            cmExtraEclipseCDT4Generator::AppendTarget(
+              xml, "Build", make, buildArgs, virtDir, "", targetName.c_str());
 
             std::string cleanArgs = "-E chdir \"";
             cleanArgs += lgen->GetCurrentBinaryDirectory();
@@ -953,8 +966,9 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
             cmGeneratorTarget* gt = target;
             cleanArgs += lgen->GetTargetDirectory(gt);
             cleanArgs += "/cmake_clean.cmake\"";
-            this->AppendTarget(xml, "Clean", cmSystemTools::GetCMakeCommand(),
-                               cleanArgs, virtDir, "", "");
+            cmExtraEclipseCDT4Generator::AppendTarget(
+              xml, "Clean", cmSystemTools::GetCMakeCommand(), cleanArgs,
+              virtDir, "", "");
           }
         } break;
         default:
@@ -964,10 +978,12 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 
     // insert the all and clean targets in every subdir
     if (!allTarget.empty()) {
-      this->AppendTarget(xml, allTarget, make, makeArgs, subdir, ": ");
+      cmExtraEclipseCDT4Generator::AppendTarget(xml, allTarget, make, makeArgs,
+                                                subdir, ": ");
     }
     if (!cleanTarget.empty()) {
-      this->AppendTarget(xml, cleanTarget, make, makeArgs, subdir, ": ");
+      cmExtraEclipseCDT4Generator::AppendTarget(xml, cleanTarget, make,
+                                                makeArgs, subdir, ": ");
     }
 
     // insert rules for compiling, preprocessing and assembling individual
@@ -976,19 +992,20 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     lg->GetIndividualFileTargets(objectFileTargets);
     for (std::string const& f : objectFileTargets) {
       const char* prefix = "[obj] ";
-      if (f[f.length() - 1] == 's') {
+      if (f.back() == 's') {
         prefix = "[to asm] ";
-      } else if (f[f.length() - 1] == 'i') {
+      } else if (f.back() == 'i') {
         prefix = "[pre] ";
       }
-      this->AppendTarget(xml, f, make, makeArgs, subdir, prefix);
+      cmExtraEclipseCDT4Generator::AppendTarget(xml, f, make, makeArgs, subdir,
+                                                prefix);
     }
   }
 
   xml.EndElement(); // buildTargets
   xml.EndElement(); // storageModule
 
-  this->AppendStorageScanners(xml, *mf);
+  cmExtraEclipseCDT4Generator::AppendStorageScanners(xml, *mf);
 
   xml.EndElement(); // cconfiguration
   xml.EndElement(); // storageModule
@@ -1035,8 +1052,7 @@ std::string cmExtraEclipseCDT4Generator::GetPathBasename(
 {
   std::string outputBasename = path;
   while (!outputBasename.empty() &&
-         (outputBasename[outputBasename.size() - 1] == '/' ||
-          outputBasename[outputBasename.size() - 1] == '\\')) {
+         (outputBasename.back() == '/' || outputBasename.back() == '\\')) {
     outputBasename.resize(outputBasename.size() - 1);
   }
   std::string::size_type loc = outputBasename.find_last_of("/\\");

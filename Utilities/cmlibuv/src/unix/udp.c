@@ -92,8 +92,8 @@ static void uv__udp_run_completed(uv_udp_t* handle) {
   uv_udp_send_t* req;
   QUEUE* q;
 
-  assert(!(handle->flags & UV_UDP_PROCESSING));
-  handle->flags |= UV_UDP_PROCESSING;
+  assert(!(handle->flags & UV_HANDLE_UDP_PROCESSING));
+  handle->flags |= UV_HANDLE_UDP_PROCESSING;
 
   while (!QUEUE_EMPTY(&handle->write_completed_queue)) {
     q = QUEUE_HEAD(&handle->write_completed_queue);
@@ -128,7 +128,7 @@ static void uv__udp_run_completed(uv_udp_t* handle) {
       uv__handle_stop(handle);
   }
 
-  handle->flags &= ~UV_UDP_PROCESSING;
+  handle->flags &= ~UV_HANDLE_UDP_PROCESSING;
 }
 
 
@@ -427,7 +427,7 @@ int uv__udp_send(uv_udp_send_t* req,
   QUEUE_INSERT_TAIL(&handle->write_queue, &req->queue);
   uv__handle_start(handle);
 
-  if (empty_queue && !(handle->flags & UV_UDP_PROCESSING)) {
+  if (empty_queue && !(handle->flags & UV_HANDLE_UDP_PROCESSING)) {
     uv__udp_sendmsg(handle);
 
     /* `uv__udp_sendmsg` may not be able to do non-blocking write straight
@@ -624,6 +624,9 @@ int uv_udp_open(uv_udp_t* handle, uv_os_sock_t sock) {
   if (handle->io_watcher.fd != -1)
     return UV_EBUSY;
 
+  if (uv__fd_exists(handle->loop, sock))
+    return UV_EEXIST;
+
   err = uv__nonblock(sock, 1);
   if (err)
     return err;
@@ -757,14 +760,16 @@ int uv_udp_set_multicast_ttl(uv_udp_t* handle, int ttl) {
  * IP_MULTICAST_TTL, so hardcode the size of the option in the IPv6 case,
  * and use the general uv__setsockopt_maybe_char call otherwise.
  */
-#if defined(__sun) || defined(_AIX) || defined(__MVS__)
+#if defined(__sun) || defined(_AIX) || defined(__OpenBSD__) || \
+    defined(__MVS__)
   if (handle->flags & UV_HANDLE_IPV6)
     return uv__setsockopt(handle,
                           IP_MULTICAST_TTL,
                           IPV6_MULTICAST_HOPS,
                           &ttl,
                           sizeof(ttl));
-#endif /* defined(__sun) || defined(_AIX) || defined(__MVS__) */
+#endif /* defined(__sun) || defined(_AIX) || defined(__OpenBSD__) || \
+    defined(__MVS__) */
 
   return uv__setsockopt_maybe_char(handle,
                                    IP_MULTICAST_TTL,
@@ -780,14 +785,16 @@ int uv_udp_set_multicast_loop(uv_udp_t* handle, int on) {
  * IP_MULTICAST_LOOP, so hardcode the size of the option in the IPv6 case,
  * and use the general uv__setsockopt_maybe_char call otherwise.
  */
-#if defined(__sun) || defined(_AIX) || defined(__MVS__)
+#if defined(__sun) || defined(_AIX) || defined(__OpenBSD__) || \
+    defined(__MVS__) 
   if (handle->flags & UV_HANDLE_IPV6)
     return uv__setsockopt(handle,
                           IP_MULTICAST_LOOP,
                           IPV6_MULTICAST_LOOP,
                           &on,
                           sizeof(on));
-#endif /* defined(__sun) || defined(_AIX) || defined(__MVS__) */
+#endif /* defined(__sun) || defined(_AIX) ||defined(__OpenBSD__) ||
+    defined(__MVS__) */
 
   return uv__setsockopt_maybe_char(handle,
                                    IP_MULTICAST_LOOP,

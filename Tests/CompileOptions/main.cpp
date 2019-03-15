@@ -47,10 +47,17 @@ int main()
 #endif
           &&
           strcmp(EXPECTED_C_COMPILER_VERSION, TEST_C_COMPILER_VERSION) == 0 &&
-          strcmp(EXPECTED_CXX_COMPILER_VERSION, TEST_CXX_COMPILER_VERSION) ==
-            0 &&
-          TEST_C_COMPILER_VERSION_EQUALITY == 1 &&
-          TEST_CXX_COMPILER_VERSION_EQUALITY == 1)
+          strcmp(EXPECTED_CXX_COMPILER_VERSION, TEST_CXX_COMPILER_VERSION) == 0
+#ifdef TEST_FORTRAN
+          && strcmp(EXPECTED_Fortran_COMPILER_VERSION,
+                    TEST_Fortran_COMPILER_VERSION) == 0
+#endif
+          && TEST_C_COMPILER_VERSION_EQUALITY == 1 &&
+          TEST_CXX_COMPILER_VERSION_EQUALITY == 1
+#ifdef TEST_FORTRAN
+          && TEST_Fortran_COMPILER_VERSION_EQUALITY == 1
+#endif
+          )
     ? 0
     : 1;
 }

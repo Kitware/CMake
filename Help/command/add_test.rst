@@ -3,13 +3,13 @@ add_test
 
 Add a test to the project to be run by :manual:`ctest(1)`.
 
-::
+.. code-block:: cmake
 
   add_test(NAME <name> COMMAND <command> [<arg>...]
            [CONFIGURATIONS <config>...]
            [WORKING_DIRECTORY <dir>])
 
-Add a test called ``<name>``.  The test name may not contain spaces,
+Adds a test called ``<name>``.  The test name may not contain spaces,
 quotes, or other characters special in CMake syntax.  The options are:
 
 ``COMMAND``
@@ -39,7 +39,9 @@ The ``COMMAND`` and ``WORKING_DIRECTORY`` options may use "generator
 expressions" with the syntax ``$<...>``.  See the
 :manual:`cmake-generator-expressions(7)` manual for available expressions.
 
-Example usage::
+Example usage:
+
+.. code-block:: cmake
 
   add_test(NAME mytest
            COMMAND testDriver --config $<CONFIGURATION>
@@ -57,7 +59,7 @@ file produced by target ``myexe``.
 
 ---------------------------------------------------------------------
 
-::
+.. code-block:: cmake
 
   add_test(<name> <command> [<arg>...])
 

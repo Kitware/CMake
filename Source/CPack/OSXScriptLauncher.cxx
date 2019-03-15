@@ -46,8 +46,7 @@ int main(int argc, char* argv[])
 
   // get the file system path of the url as a cstring
   // in an encoding suitable for posix apis
-  if (CFURLGetFileSystemRepresentation(scriptFileURL, true, path, PATH_MAX) ==
-      false) {
+  if (!CFURLGetFileSystemRepresentation(scriptFileURL, true, path, PATH_MAX)) {
     DebugError("CFURLGetFileSystemRepresentation failed");
     return 1;
   }

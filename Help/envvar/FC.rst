@@ -1,6 +1,8 @@
 FC
 --
 
+.. include:: ENV_VAR.txt
+
 Preferred executable for compiling ``Fortran`` language files. Will only be used
 by CMake on the first configuration to determine ``Fortran`` compiler, after
 which the value for ``Fortran`` is stored in the cache as

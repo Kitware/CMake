@@ -31,6 +31,16 @@ else()
   set(CMAKE_USE_ELF_PARSER)
 endif()
 
+if(NOT CMake_DEFAULT_RECURSION_LIMIT)
+  if(DEFINED ENV{DASHBOARD_TEST_FROM_CTEST})
+    set(CMake_DEFAULT_RECURSION_LIMIT 100)
+  elseif(MINGW)
+    set(CMake_DEFAULT_RECURSION_LIMIT 400)
+  else()
+    set(CMake_DEFAULT_RECURSION_LIMIT 1000)
+  endif()
+endif()
+
 if(APPLE)
   set(CMAKE_USE_MACH_PARSER 1)
 endif()
@@ -207,6 +217,14 @@ set(SRCS
   cmExtraKateGenerator.h
   cmExtraSublimeTextGenerator.cxx
   cmExtraSublimeTextGenerator.h
+  cmFileAPI.cxx
+  cmFileAPI.h
+  cmFileAPICache.cxx
+  cmFileAPICache.h
+  cmFileAPICodemodel.cxx
+  cmFileAPICodemodel.h
+  cmFileAPICMakeFiles.cxx
+  cmFileAPICMakeFiles.h
   cmFileLock.cxx
   cmFileLock.h
   cmFileLockPool.cxx
@@ -260,6 +278,8 @@ set(SRCS
   cmInstallFilesGenerator.cxx
   cmInstallScriptGenerator.h
   cmInstallScriptGenerator.cxx
+  cmInstallSubdirectoryGenerator.h
+  cmInstallSubdirectoryGenerator.cxx
   cmInstallTargetGenerator.h
   cmInstallTargetGenerator.cxx
   cmInstallDirectoryGenerator.h
@@ -288,6 +308,7 @@ set(SRCS
   cmMakefileExecutableTargetGenerator.cxx
   cmMakefileLibraryTargetGenerator.cxx
   cmMakefileUtilityTargetGenerator.cxx
+  cmMessageType.h
   cmMessenger.cxx
   cmMessenger.h
   cmMSVC60LinkLineComputer.cxx
@@ -318,6 +339,8 @@ set(SRCS
   cmQtAutoGen.h
   cmQtAutoGenerator.cxx
   cmQtAutoGenerator.h
+  cmQtAutoGenGlobalInitializer.cxx
+  cmQtAutoGenGlobalInitializer.h
   cmQtAutoGenInitializer.cxx
   cmQtAutoGenInitializer.h
   cmQtAutoGeneratorMocUic.cxx
@@ -342,8 +365,6 @@ set(SRCS
   cmStateSnapshot.cxx
   cmStateSnapshot.h
   cmStateTypes.h
-  cmStringTable.cxx
-  cmStringTable.h
   cmSystemTools.cxx
   cmSystemTools.h
   cmTarget.cxx
@@ -373,6 +394,9 @@ set(SRCS
   cmXMLWriter.h
   cmake.cxx
   cmake.h
+  cm_string_view.cxx
+  cm_string_view.hxx
+  cm_static_string_view.hxx
 
   cmCommand.cxx
   cmCommand.h
@@ -564,6 +588,8 @@ set(SRCS
   cmSiteNameCommand.h
   cmSourceGroupCommand.cxx
   cmSourceGroupCommand.h
+  cmString.cxx
+  cmString.hxx
   cmStringReplaceHelper.cxx
   cmStringCommand.cxx
   cmStringCommand.h
@@ -681,10 +707,10 @@ if (WIN32)
       cmGlobalVisualStudio12Generator.cxx
       cmGlobalVisualStudio14Generator.h
       cmGlobalVisualStudio14Generator.cxx
-      cmGlobalVisualStudio15Generator.h
-      cmGlobalVisualStudio15Generator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
+      cmGlobalVisualStudioVersionedGenerator.h
+      cmGlobalVisualStudioVersionedGenerator.cxx
       cmIDEFlagTable.h
       cmIDEOptions.cxx
       cmIDEOptions.h
@@ -793,9 +819,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "sparc"
   endif()
 endif()
 
-# On Apple we need CoreFoundation
+# On Apple we need CoreFoundation and CoreServices
 if(APPLE)
   target_link_libraries(CMakeLib "-framework CoreFoundation")
+  target_link_libraries(CMakeLib "-framework CoreServices")
 endif()
 
 if(WIN32 AND NOT UNIX)
@@ -811,7 +838,6 @@ target_compile_definitions(CMakeLib PUBLIC ${CLANG_TIDY_DEFINITIONS})
 #
 include_directories(
   "${CMake_SOURCE_DIR}/Source/CTest"
-  ${CMAKE_XMLRPC_INCLUDES}
   ${CMAKE_CURL_INCLUDES}
   )
 #
@@ -877,7 +903,7 @@ set(CTEST_SRCS cmCTest.cxx
 
 # Build CTestLib
 add_library(CTestLib ${CTEST_SRCS})
-target_link_libraries(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES} ${CMAKE_XMLRPC_LIBRARIES})
+target_link_libraries(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES})
 
 #
 # CPack

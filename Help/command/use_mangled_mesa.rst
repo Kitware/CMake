@@ -1,7 +1,7 @@
 use_mangled_mesa
 ----------------
 
-Disallowed.  See CMake Policy :policy:`CMP0030`.
+Disallowed since version 3.0.  See CMake Policy :policy:`CMP0030`.
 
 Copy mesa headers for use in combination with system GL.
 

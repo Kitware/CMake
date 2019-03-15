@@ -68,7 +68,7 @@ void cmDependsJavaParserHelper::AddClassFound(const char* sclass)
       return;
     }
   }
-  this->ClassesFound.push_back(sclass);
+  this->ClassesFound.emplace_back(sclass);
 }
 
 void cmDependsJavaParserHelper::AddPackagesImport(const char* sclass)
@@ -78,7 +78,7 @@ void cmDependsJavaParserHelper::AddPackagesImport(const char* sclass)
       return;
     }
   }
-  this->PackagesImport.push_back(sclass);
+  this->PackagesImport.emplace_back(sclass);
 }
 
 void cmDependsJavaParserHelper::SafePrintMissing(const char* str, int line,

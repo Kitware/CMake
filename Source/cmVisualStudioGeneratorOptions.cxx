@@ -70,6 +70,7 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
     case cmGlobalVisualStudioGenerator::VS12:
     case cmGlobalVisualStudioGenerator::VS14:
     case cmGlobalVisualStudioGenerator::VS15:
+    case cmGlobalVisualStudioGenerator::VS16:
       // by default VS puts <ExceptionHandling></ExceptionHandling> empty
       // for a project, to make our projects look the same put a new line
       // and space over for the closing </ExceptionHandling> as the default
@@ -269,7 +270,7 @@ void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
 
     if (keyValue[1].front() == '\'' && keyValue[1].back() == '\'') {
       keyValue[1] =
-        keyValue[1].substr(1, std::max<int>(0, keyValue[1].size() - 2));
+        keyValue[1].substr(1, std::max(0, cm::isize(keyValue[1]) - 2));
     }
 
     if (keyValue[0] == "level") {

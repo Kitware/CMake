@@ -10,11 +10,13 @@
 
 class cmCLocaleEnvironmentScope
 {
-  CM_DISABLE_COPY(cmCLocaleEnvironmentScope)
-
 public:
   cmCLocaleEnvironmentScope();
   ~cmCLocaleEnvironmentScope();
+
+  cmCLocaleEnvironmentScope(cmCLocaleEnvironmentScope const&) = delete;
+  cmCLocaleEnvironmentScope& operator=(cmCLocaleEnvironmentScope const&) =
+    delete;
 
 private:
   std::string GetEnv(std::string const& key);

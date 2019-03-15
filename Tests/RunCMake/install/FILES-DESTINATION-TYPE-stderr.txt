@@ -1,0 +1,5 @@
+^CMake Error at FILES-DESTINATION-TYPE\.cmake:[0-9]+ \(install\):
+  install FILES given both TYPE and DESTINATION arguments\.  You may only
+  specify one\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

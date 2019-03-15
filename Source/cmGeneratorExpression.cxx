@@ -15,9 +15,8 @@
 #include "cmGeneratorExpressionParser.h"
 #include "cmSystemTools.h"
 
-cmGeneratorExpression::cmGeneratorExpression(
-  const cmListFileBacktrace& backtrace)
-  : Backtrace(backtrace)
+cmGeneratorExpression::cmGeneratorExpression(cmListFileBacktrace backtrace)
+  : Backtrace(std::move(backtrace))
 {
 }
 
@@ -34,9 +33,7 @@ std::unique_ptr<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
   return this->Parse(std::string(input ? input : ""));
 }
 
-cmGeneratorExpression::~cmGeneratorExpression()
-{
-}
+cmGeneratorExpression::~cmGeneratorExpression() = default;
 
 const std::string& cmCompiledGeneratorExpression::Evaluate(
   cmLocalGenerator* lg, const std::string& config, bool quiet,
@@ -71,16 +68,11 @@ const std::string& cmCompiledGeneratorExpression::EvaluateWithContext(
 
   this->Output.clear();
 
-  std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it =
-    this->Evaluators.begin();
-  const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end =
-    this->Evaluators.end();
+  for (const cmGeneratorExpressionEvaluator* it : this->Evaluators) {
+    this->Output += it->Evaluate(&context, dagChecker);
 
-  for (; it != end; ++it) {
-    this->Output += (*it)->Evaluate(&context, dagChecker);
-
-    this->SeenTargetProperties.insert(context.SeenTargetProperties.begin(),
-                                      context.SeenTargetProperties.end());
+    this->SeenTargetProperties.insert(context.SeenTargetProperties.cbegin(),
+                                      context.SeenTargetProperties.cend());
     if (context.HadError) {
       this->Output.clear();
       break;
@@ -101,9 +93,9 @@ const std::string& cmCompiledGeneratorExpression::EvaluateWithContext(
 }
 
 cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
-  cmListFileBacktrace const& backtrace, const std::string& input)
-  : Backtrace(backtrace)
-  , Input(input)
+  cmListFileBacktrace backtrace, std::string input)
+  : Backtrace(std::move(backtrace))
+  , Input(std::move(input))
   , HadContextSensitiveCondition(false)
   , HadHeadSensitiveCondition(false)
   , EvaluateForBuildsystem(false)

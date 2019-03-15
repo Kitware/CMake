@@ -9,6 +9,4 @@ cmGlobalCommonGenerator::cmGlobalCommonGenerator(cmake* cm)
 {
 }
 
-cmGlobalCommonGenerator::~cmGlobalCommonGenerator()
-{
-}
+cmGlobalCommonGenerator::~cmGlobalCommonGenerator() = default;

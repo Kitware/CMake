@@ -42,6 +42,10 @@
 #      SET(KWSYS_HEADER_ROOT ${PROJECT_BINARY_DIR})
 #      INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
 #
+#  KWSYS_CXX_STANDARD         = A value for CMAKE_CXX_STANDARD within KWSys.
+#                               Set to empty string to use no default value.
+#  KWSYS_CXX_COMPILE_FEATURES = target_compile_features arguments for KWSys.
+#
 # Optional settings to setup install rules are as follows:
 #
 #  KWSYS_INSTALL_BIN_DIR     = The installation target directories into
@@ -82,24 +86,17 @@
 # any outside mailing list and no documentation of the change will be
 # written.
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1 FATAL_ERROR)
 FOREACH(p
-    CMP0022 # CMake 2.8, Define link interface - required by android_mk export
-    CMP0025 # CMake 3.0, Compiler id for Apple Clang is now AppleClang.
-    CMP0042 # CMake 3.0, MACOSX_RPATH is enabled by default.
-    CMP0048 # CMake 3.0, Let the project command manage version variables.
     CMP0056 # CMake 3.2, Honor link flags in try_compile() source-file signature.
     CMP0063 # CMake 3.3, Honor visibility properties for all target types.
+    CMP0067 # CMake 3.8, Honor language standard in try_compile source-file signature.
+    CMP0069 # CMake 3.9, INTERPROCEDURAL_OPTIMIZATION is enforced when enabled.
     )
   IF(POLICY ${p})
     CMAKE_POLICY(SET ${p} NEW)
   ENDIF()
 ENDFOREACH()
-SET(CMAKE_LEGACY_CYGWIN_WIN32 0)
-
-IF(CMAKE_VERSION VERSION_LESS 3.0)
-  SET(KWSYS_SPLIT_OBJECTS_FROM_INTERFACE 0)
-ENDIF()
 
 #-----------------------------------------------------------------------------
 # If a namespace is not specified, use "kwsys" and enable testing.
@@ -119,6 +116,12 @@ SET_PROPERTY(DIRECTORY
   PROPERTY IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
   "KWSYS_HEADER(%)=<${KWSYS_NAMESPACE}/%>"
   )
+
+if(KWSYS_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD "${KWSYS_CXX_STANDARD}")
+elseif(NOT DEFINED CMAKE_CXX_STANDARD AND NOT DEFINED KWSYS_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 11)
+endif()
 
 # Select library components.
 IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
@@ -452,6 +455,10 @@ ELSE()
   SET(KWSYS_BUILD_SHARED 0)
   SET(KWSYS_LIBRARY_TYPE STATIC)
 ENDIF()
+
+if(NOT DEFINED KWSYS_BUILD_PIC)
+  set(KWSYS_BUILD_PIC 0)
+endif()
 
 #-----------------------------------------------------------------------------
 # Configure some implementation details.
@@ -869,7 +876,7 @@ IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
     SET(KWSYS_LINK_DEPENDENCY INTERFACE)
     ADD_LIBRARY(${KWSYS_TARGET_OBJECT} OBJECT
       ${KWSYS_C_SRCS} ${KWSYS_CXX_SRCS})
-    IF(KWSYS_BUILD_SHARED)
+    IF(KWSYS_BUILD_SHARED OR KWSYS_BUILD_PIC)
       SET_PROPERTY(TARGET ${KWSYS_TARGET_OBJECT} PROPERTY
         POSITION_INDEPENDENT_CODE TRUE)
     ENDIF()
@@ -879,6 +886,8 @@ IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
       ${KWSYS_TARGET_INTERFACE})
     TARGET_SOURCES(${KWSYS_TARGET_LINK} INTERFACE
       $<TARGET_OBJECTS:${KWSYS_TARGET_OBJECT}>)
+    target_compile_features(${KWSYS_TARGET_OBJECT} PRIVATE ${KWSYS_CXX_COMPILE_FEATURES})
+    target_compile_features(${KWSYS_TARGET_INTERFACE} INTERFACE ${KWSYS_CXX_COMPILE_FEATURES})
   ELSE()
     SET(KWSYS_TARGET_INTERFACE ${KWSYS_NAMESPACE})
     SET(KWSYS_TARGET_OBJECT ${KWSYS_NAMESPACE})
@@ -887,6 +896,7 @@ IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
     SET(KWSYS_LINK_DEPENDENCY PUBLIC)
     ADD_LIBRARY(${KWSYS_TARGET_INTERFACE} ${KWSYS_LIBRARY_TYPE}
       ${KWSYS_C_SRCS} ${KWSYS_CXX_SRCS})
+    target_compile_features(${KWSYS_TARGET_INTERFACE} PUBLIC ${KWSYS_CXX_COMPILE_FEATURES})
   ENDIF()
   if (KWSYS_ALIAS_TARGET)
     add_library(${KWSYS_ALIAS_TARGET} ALIAS ${KWSYS_TARGET_INTERFACE})
@@ -964,7 +974,7 @@ IF(KWSYS_ENABLE_C AND KWSYS_C_SRCS)
       ${KWSYS_TARGET_C_INTERFACE} ${KWSYS_TARGET_C_LINK})
     SET(KWSYS_LINK_DEPENDENCY INTERFACE)
     ADD_LIBRARY(${KWSYS_TARGET_C_OBJECT} OBJECT ${KWSYS_C_SRCS})
-    IF(KWSYS_BUILD_SHARED)
+    IF(KWSYS_BUILD_SHARED OR KWSYS_BUILD_PIC)
       SET_PROPERTY(TARGET ${KWSYS_TARGET_C_OBJECT} PROPERTY
         POSITION_INDEPENDENT_CODE TRUE)
     ENDIF()

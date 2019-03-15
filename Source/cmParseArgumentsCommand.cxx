@@ -9,8 +9,8 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -46,7 +46,7 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
   if (*argIter == "PARSE_ARGV") {
     if (args.size() != 6) {
       this->Makefile->IssueMessage(
-        cmake::FATAL_ERROR,
+        MessageType::FATAL_ERROR,
         "PARSE_ARGV must be called with exactly 6 arguments.");
       cmSystemTools::SetFatalErrorOccured();
       return true;
@@ -54,7 +54,7 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
     parseFromArgV = true;
     argIter++; // move past PARSE_ARGV
     if (!cmSystemTools::StringToULong(argIter->c_str(), &argvStart)) {
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                    "PARSE_ARGV index '" + *argIter +
                                      "' is not an unsigned integer");
       cmSystemTools::SetFatalErrorOccured();
@@ -86,7 +86,8 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
   cmSystemTools::ExpandListArgument(*argIter++, list);
   for (std::string const& iter : list) {
     if (!used_keywords.insert(iter).second) {
-      this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + iter);
+      this->GetMakefile()->IssueMessage(MessageType::WARNING,
+                                        dup_warning + iter);
     }
     options[iter]; // default initialize
   }
@@ -96,7 +97,8 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
   cmSystemTools::ExpandListArgument(*argIter++, list);
   for (std::string const& iter : list) {
     if (!used_keywords.insert(iter).second) {
-      this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + iter);
+      this->GetMakefile()->IssueMessage(MessageType::WARNING,
+                                        dup_warning + iter);
     }
     singleValArgs[iter]; // default initialize
   }
@@ -106,7 +108,8 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
   cmSystemTools::ExpandListArgument(*argIter++, list);
   for (std::string const& iter : list) {
     if (!used_keywords.insert(iter).second) {
-      this->GetMakefile()->IssueMessage(cmake::WARNING, dup_warning + iter);
+      this->GetMakefile()->IssueMessage(MessageType::WARNING,
+                                        dup_warning + iter);
     }
     multiValArgs[iter]; // default initialize
   }
@@ -131,7 +134,7 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
     std::string argc = this->Makefile->GetSafeDefinition("ARGC");
     unsigned long count;
     if (!cmSystemTools::StringToULong(argc.c_str(), &count)) {
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                    "PARSE_ARGV called with ARGC='" + argc +
                                      "' that is not an unsigned integer");
       cmSystemTools::SetFatalErrorOccured();
@@ -142,13 +145,13 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
       argName << "ARGV" << i;
       const char* arg = this->Makefile->GetDefinition(argName.str());
       if (!arg) {
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                      "PARSE_ARGV called with " +
                                        argName.str() + " not set");
         cmSystemTools::SetFatalErrorOccured();
         return true;
       }
-      list.push_back(arg);
+      list.emplace_back(arg);
     }
   }
 

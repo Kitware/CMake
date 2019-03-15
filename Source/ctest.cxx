@@ -131,7 +131,7 @@ static const char* cmDocumentationOptions[][2] = {
   { "--schedule-random", "Use a random order for scheduling tests" },
   { "--submit-index",
     "Submit individual dashboard tests with specific index" },
-  { "--timeout <seconds>", "Set a global timeout on all tests." },
+  { "--timeout <seconds>", "Set the default test timeout." },
   { "--stop-time <time>",
     "Set a time at which all tests should stop running." },
   { "--http1.0", "Submit using HTTP 1.0." },
@@ -208,7 +208,7 @@ int main(int argc, char const* const* argv)
   std::vector<std::string> args;
   args.reserve(argc);
   for (int i = 0; i < argc; ++i) {
-    args.push_back(argv[i]);
+    args.emplace_back(argv[i]);
   }
   // run ctest
   std::string output;

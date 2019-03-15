@@ -11,6 +11,7 @@ set(__SUNOS_COMPILER_GNU 1)
 macro(__sunos_compiler_gnu lang)
   set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG "-Wl,-R")
   set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG_SEP ":")
+  set(CMAKE_SHARED_LIBRARY_RPATH_ORIGIN_TOKEN "\$ORIGIN")
   set(CMAKE_SHARED_LIBRARY_SONAME_${lang}_FLAG "-Wl,-h")
 
   # Initialize C link type selection flags.  These flags are used when

@@ -1,7 +1,7 @@
 IMPORTED_OBJECTS
 ----------------
 
-:ref:`;-list <CMake Language Lists>` of absolute paths to the object
+A :ref:`semicolon-separated list <CMake Language Lists>` of absolute paths to the object
 files on disk for an :ref:`imported <Imported targets>`
 :ref:`object library <object libraries>`.
 

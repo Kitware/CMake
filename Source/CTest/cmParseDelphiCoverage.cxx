@@ -20,7 +20,7 @@ public:
   {
   }
 
-  virtual ~HTMLParser() {}
+  virtual ~HTMLParser() = default;
 
   bool initializeDelphiFile(
     std::string const& filename,
@@ -44,7 +44,7 @@ public:
       // Check that the begin is the first non-space string on the line
       if ((beginPos == line.find_first_not_of(' ')) &&
           beginPos != std::string::npos) {
-        beginSet.push_back("begin");
+        beginSet.emplace_back("begin");
         coverageVector.push_back(-1);
         continue;
       }

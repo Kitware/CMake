@@ -1,6 +1,9 @@
 include(Compiler/GNU)
 __compiler_gnu(Fortran)
 
+set(CMAKE_Fortran_SUBMODULE_SEP "@")
+set(CMAKE_Fortran_SUBMODULE_EXT ".smod")
+
 set(CMAKE_Fortran_PREPROCESS_SOURCE
   "<CMAKE_Fortran_COMPILER> -cpp <DEFINES> <INCLUDES> <FLAGS> -E <SOURCE> -o <PREPROCESSED_SOURCE>")
 

@@ -239,3 +239,42 @@ Other Changes
   These internal implementation modules are also no longer available
   to scripts that may have been incorrectly including them, because
   they should never have been available in the first place.
+
+Updates
+=======
+
+Changes made since CMake 3.13.0 include the following.
+
+3.13.2
+------
+
+* CMake 3.13.0 included a change to pass compiler implicit include
+  directories to the ``moc`` tool for :prop_tgt:`AUTOMOC`.  This has
+  been reverted due to regressing existing builds and will need
+  further investigation before being re-introduced in a later release.
+
+3.13.3
+------
+
+* The :generator:`Visual Studio 15 2017` generator has been fixed to work
+  when VS 2019 is installed.
+
+* CMake now checks that at least one of the source or binary directory
+  is specified when running CMake and issues an error if both are missing.
+  This has always been a documented requirement, but the implementation
+  previously accidentally accepted cases in which neither are specified
+  so long as some other argument is given, and silently used the current
+  working directory as the source and build tree.
+
+3.13.4
+------
+
+* The error added by 3.13.3 in cases that neither a source or binary
+  directory is specified has been downgraded to a warning.  While this
+  was never intended, documented, nor supported behavior, some projects
+  relied on it.  The error has been downgraded to a warning for the
+  remainder of the 3.13.x release series to allow a transition period,
+  but it may become a fatal error again in a later release.  Scripts
+  relying on the old behavior can be trivially fixed by specifying
+  the path to the source tree (even if just ``.``) explicitly and
+  continue to work with all versions of CMake.

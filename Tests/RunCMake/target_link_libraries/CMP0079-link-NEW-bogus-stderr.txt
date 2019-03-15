@@ -3,4 +3,4 @@
   found.  Perhaps a find_package\(\) call is missing for an IMPORTED target, or
   an ALIAS target is missing\?
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

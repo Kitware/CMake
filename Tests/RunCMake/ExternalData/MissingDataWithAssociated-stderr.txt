@@ -10,6 +10,6 @@ CMake Warning \(dev\) at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
   that does not exist as a file \(with or without an extension\)!
 Call Stack \(most recent call first\):
   .*
-  MissingDataWithAssociated.cmake:4 \(ExternalData_Expand_Arguments\)
-  CMakeLists.txt:3 \(include\)
+  MissingDataWithAssociated\.cmake:[0-9]+ \(ExternalData_Expand_Arguments\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.

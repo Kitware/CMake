@@ -29,7 +29,19 @@ if("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
   __compiler_check_default_language_standard(C 1.10 90 6.10 99 8.10 11)
 
 elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR")
+  if(NOT CMAKE_C_COMPILER_VERSION)
+    message(FATAL_ERROR "CMAKE_C_COMPILER_VERSION not detected.  This should be automatic.")
+  endif()
+
+  set(CMAKE_C_EXTENSION_COMPILE_OPTION -e)
+
+  set(CMAKE_C90_STANDARD_COMPILE_OPTION --c89)
+  set(CMAKE_C90_EXTENSION_COMPILE_OPTION -e)
+  set(CMAKE_C99_STANDARD_COMPILE_OPTION "")
+  set(CMAKE_C99_EXTENSION_COMPILE_OPTION -e)
+
   __compiler_iar_AVR(C)
+  __compiler_check_default_language_standard(C 7.10 99)
   set(CMAKE_C_OUTPUT_EXTENSION ".r90")
 
   if(NOT CMAKE_C_LINK_FLAGS)
@@ -43,6 +55,7 @@ elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR")
   get_filename_component(_compilerDir "${CMAKE_C_COMPILER}" PATH)
   get_filename_component(_compilerDir "${_compilerDir}" PATH)
   include_directories("${_compilerDir}/inc" )
+  include_directories("${_compilerDir}/inc/Atmel" )
 
 else()
   message(FATAL_ERROR "CMAKE_C_COMPILER_ARCHITECTURE_ID not detected as \"AVR\" or \"ARM\".  This should be automatic.")

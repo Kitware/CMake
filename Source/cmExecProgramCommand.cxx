@@ -217,11 +217,11 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
   int p;
   cmProcessOutput processOutput(encoding);
   std::string strdata;
-  while ((p = cmsysProcess_WaitForData(cp, &data, &length, nullptr), p)) {
+  while ((p = cmsysProcess_WaitForData(cp, &data, &length, nullptr))) {
     if (p == cmsysProcess_Pipe_STDOUT || p == cmsysProcess_Pipe_STDERR) {
       if (verbose) {
         processOutput.DecodeText(data, length, strdata);
-        cmSystemTools::Stdout(strdata.c_str(), strdata.size());
+        cmSystemTools::Stdout(strdata);
       }
       output.append(data, length);
     }
@@ -230,7 +230,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
   if (verbose) {
     processOutput.DecodeText(std::string(), strdata);
     if (!strdata.empty()) {
-      cmSystemTools::Stdout(strdata.c_str(), strdata.size());
+      cmSystemTools::Stdout(strdata);
     }
   }
 
@@ -270,7 +270,7 @@ bool cmExecProgramCommand::RunCommand(const char* command, std::string& output,
     }
     msg += "\n";
     if (verbose) {
-      cmSystemTools::Stdout(msg.c_str());
+      cmSystemTools::Stdout(msg);
     }
     output += msg;
 #else

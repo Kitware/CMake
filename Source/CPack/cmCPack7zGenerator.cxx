@@ -10,6 +10,4 @@ cmCPack7zGenerator::cmCPack7zGenerator()
 {
 }
 
-cmCPack7zGenerator::~cmCPack7zGenerator()
-{
-}
+cmCPack7zGenerator::~cmCPack7zGenerator() = default;

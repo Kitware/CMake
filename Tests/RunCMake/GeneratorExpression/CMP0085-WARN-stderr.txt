@@ -1,0 +1,33 @@
+CMake Warning \(dev\) at CMP0085-WARN\.cmake:[0-9]+ \(file\):
+  Policy CMP0085 is not set: \$<IN_LIST:\.\.\.> handles empty list items\.  Run
+  "cmake --help-policy CMP0085" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+
+  Search Item:
+
+    ""
+
+  List:
+
+    ""
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) at CMP0085-WARN\.cmake:[0-9]+ \(file\):
+  Policy CMP0085 is not set: \$<IN_LIST:\.\.\.> handles empty list items\.  Run
+  "cmake --help-policy CMP0085" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+
+  Search Item:
+
+    ""
+
+  List:
+
+    ";a"
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

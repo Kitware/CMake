@@ -10,7 +10,7 @@ or macro in ``C``.
 
 .. command:: check_symbol_exists
 
-  ::
+  .. code-block:: cmake
 
     check_symbol_exists(<symbol> <files> <variable>)
 
@@ -32,15 +32,19 @@ The following variables may be set before calling this macro to modify
 the way the check is run:
 
 ``CMAKE_REQUIRED_FLAGS``
-  string of compile command line flags
+  string of compile command line flags.
 ``CMAKE_REQUIRED_DEFINITIONS``
-  list of macros to define (-DFOO=bar)
+  a :ref:`;-list <CMake Language Lists>` of macros to define (-DFOO=bar).
 ``CMAKE_REQUIRED_INCLUDES``
-  list of include directories
+  a :ref:`;-list <CMake Language Lists>` of header search paths to pass to
+  the compiler.
+``CMAKE_REQUIRED_LINK_OPTIONS``
+  a :ref:`;-list <CMake Language Lists>` of options to add to the link command.
 ``CMAKE_REQUIRED_LIBRARIES``
-  list of libraries to link
+  a :ref:`;-list <CMake Language Lists>` of libraries to add to the link
+  command. See policy :policy:`CMP0075`.
 ``CMAKE_REQUIRED_QUIET``
-  execute quietly without messages
+  execute quietly without messages.
 #]=======================================================================]
 
 include_guard(GLOBAL)
@@ -62,6 +66,12 @@ macro(__CHECK_SYMBOL_EXISTS_IMPL SOURCEFILE SYMBOL FILES VARIABLE)
   if(NOT DEFINED "${VARIABLE}" OR "x${${VARIABLE}}" STREQUAL "x${VARIABLE}")
     set(CMAKE_CONFIGURABLE_FILE_CONTENT "/* */\n")
     set(MACRO_CHECK_SYMBOL_EXISTS_FLAGS ${CMAKE_REQUIRED_FLAGS})
+    if(CMAKE_REQUIRED_LINK_OPTIONS)
+      set(CHECK_SYMBOL_EXISTS_LINK_OPTIONS
+        LINK_OPTIONS ${CMAKE_REQUIRED_LINK_OPTIONS})
+    else()
+      set(CHECK_SYMBOL_EXISTS_LINK_OPTIONS)
+    endif()
     if(CMAKE_REQUIRED_LIBRARIES)
       set(CHECK_SYMBOL_EXISTS_LIBS
         LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
@@ -91,6 +101,7 @@ macro(__CHECK_SYMBOL_EXISTS_IMPL SOURCEFILE SYMBOL FILES VARIABLE)
       ${CMAKE_BINARY_DIR}
       "${SOURCEFILE}"
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
+      ${CHECK_SYMBOL_EXISTS_LINK_OPTIONS}
       ${CHECK_SYMBOL_EXISTS_LIBS}
       CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_SYMBOL_EXISTS_FLAGS}

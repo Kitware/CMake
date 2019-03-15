@@ -1,9 +1,9 @@
 add_link_options
 ----------------
 
-Adds options to the link of shared library, module and executable targets.
+Add options to the link of shared library, module and executable targets.
 
-::
+.. code-block:: cmake
 
   add_link_options(<option> ...)
 

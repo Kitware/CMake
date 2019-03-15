@@ -127,7 +127,7 @@ public:
   std::string GetEmptyRuleHackDepends() { return this->EmptyRuleHackDepends; }
 
   // change the build command for speed
-  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
+  void GenerateBuildCommand(GeneratedMakeCommand& makeCommand,
                             const std::string& makeProgram,
                             const std::string& projectName,
                             const std::string& projectDir,
@@ -217,11 +217,7 @@ protected:
   // Store per-target progress counters.
   struct TargetProgress
   {
-    TargetProgress()
-      : NumberOfActions(0)
-    {
-    }
-    unsigned long NumberOfActions;
+    unsigned long NumberOfActions = 0;
     std::string VariableFile;
     std::vector<unsigned long> Marks;
     void WriteProgressVariables(unsigned long total, unsigned long& current);

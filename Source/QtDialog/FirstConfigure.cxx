@@ -16,8 +16,12 @@ StartCompilerSetup::StartCompilerSetup(QWidget* p)
   this->GeneratorOptions = new QComboBox(this);
   l->addWidget(this->GeneratorOptions);
 
+  // Add the generator platform
+  this->PlatformFrame = CreatePlatformWidgets();
+  l->addWidget(PlatformFrame);
+
   // Add the ability to specify toolset (-T parameter)
-  ToolsetFrame = CreateToolsetWidgets();
+  this->ToolsetFrame = CreateToolsetWidgets();
   l->addWidget(ToolsetFrame);
 
   l->addSpacing(6);
@@ -45,7 +49,7 @@ StartCompilerSetup::StartCompilerSetup(QWidget* p)
                    SLOT(onSelectionChanged(bool)));
   QObject::connect(this->CompilerSetupOptions[3], SIGNAL(toggled(bool)), this,
                    SLOT(onSelectionChanged(bool)));
-  QObject::connect(GeneratorOptions,
+  QObject::connect(this->GeneratorOptions,
                    SIGNAL(currentIndexChanged(QString const&)), this,
                    SLOT(onGeneratorChanged(QString const&)));
 }
@@ -65,9 +69,24 @@ QFrame* StartCompilerSetup::CreateToolsetWidgets()
   return frame;
 }
 
-StartCompilerSetup::~StartCompilerSetup()
+QFrame* StartCompilerSetup::CreatePlatformWidgets()
 {
+  QFrame* frame = new QFrame(this);
+  QVBoxLayout* l = new QVBoxLayout(frame);
+  l->setContentsMargins(0, 0, 0, 0);
+
+  this->PlatformLabel = new QLabel(tr("Optional platform for generator"));
+  l->addWidget(this->PlatformLabel);
+
+  this->PlatformOptions = new QComboBox(frame);
+  this->PlatformOptions->setEditable(true);
+
+  l->addWidget(this->PlatformOptions);
+
+  return frame;
 }
+
+StartCompilerSetup::~StartCompilerSetup() = default;
 
 void StartCompilerSetup::setGenerators(
   std::vector<cmake::GeneratorInfo> const& gens)
@@ -79,6 +98,26 @@ void StartCompilerSetup::setGenerators(
   std::vector<cmake::GeneratorInfo>::const_iterator it;
   for (it = gens.begin(); it != gens.end(); ++it) {
     generator_list.append(QString::fromLocal8Bit(it->name.c_str()));
+
+    if (it->supportsPlatform) {
+      this->GeneratorsSupportingPlatform.append(
+        QString::fromLocal8Bit(it->name.c_str()));
+
+      this
+        ->GeneratorDefaultPlatform[QString::fromLocal8Bit(it->name.c_str())] =
+        QString::fromLocal8Bit(it->defaultPlatform.c_str());
+
+      std::vector<std::string>::const_iterator platformIt =
+        it->supportedPlatforms.cbegin();
+      while (platformIt != it->supportedPlatforms.cend()) {
+
+        this->GeneratorSupportedPlatforms.insert(
+          QString::fromLocal8Bit(it->name.c_str()),
+          QString::fromLocal8Bit((*platformIt).c_str()));
+
+        platformIt++;
+      }
+    }
 
     if (it->supportsToolset) {
       this->GeneratorsSupportingToolset.append(
@@ -100,6 +139,11 @@ void StartCompilerSetup::setCurrentGenerator(const QString& gen)
 QString StartCompilerSetup::getGenerator() const
 {
   return this->GeneratorOptions->currentText();
+};
+
+QString StartCompilerSetup::getPlatform() const
+{
+  return this->PlatformOptions->currentText();
 };
 
 QString StartCompilerSetup::getToolset() const
@@ -136,6 +180,31 @@ void StartCompilerSetup::onSelectionChanged(bool on)
 
 void StartCompilerSetup::onGeneratorChanged(QString const& name)
 {
+  // Display the generator platform for the generators supporting it
+  if (GeneratorsSupportingPlatform.contains(name)) {
+
+    // Change the label title to include the default platform
+    std::string label = "Optional platform for generator";
+    label += "(if empty, generator uses: ";
+    label += this->GeneratorDefaultPlatform[name].toStdString();
+    label += ")";
+    this->PlatformLabel->setText(tr(label.c_str()));
+
+    // Regenerate the list of supported platform
+    this->PlatformOptions->clear();
+    QStringList platform_list;
+    platform_list.append("");
+
+    QList<QString> platforms = this->GeneratorSupportedPlatforms.values(name);
+    platform_list.append(platforms);
+
+    this->PlatformOptions->addItems(platform_list);
+    PlatformFrame->show();
+  } else {
+    PlatformFrame->hide();
+  }
+
+  // Display the toolset box for the generators supporting it
   if (GeneratorsSupportingToolset.contains(name)) {
     ToolsetFrame->show();
   } else {
@@ -166,9 +235,7 @@ NativeCompilerSetup::NativeCompilerSetup(QWidget* p)
   this->setupUi(c);
 }
 
-NativeCompilerSetup::~NativeCompilerSetup()
-{
-}
+NativeCompilerSetup::~NativeCompilerSetup() = default;
 
 QString NativeCompilerSetup::getCCompiler() const
 {
@@ -230,9 +297,7 @@ CrossCompilerSetup::CrossCompilerSetup(QWidget* p)
   this->registerField("systemName*", this->systemName);
 }
 
-CrossCompilerSetup::~CrossCompilerSetup()
-{
-}
+CrossCompilerSetup::~CrossCompilerSetup() = default;
 
 QString CrossCompilerSetup::getCCompiler() const
 {
@@ -343,9 +408,7 @@ ToolchainCompilerSetup::ToolchainCompilerSetup(QWidget* p)
   l->addWidget(this->ToolchainFile);
 }
 
-ToolchainCompilerSetup::~ToolchainCompilerSetup()
-{
-}
+ToolchainCompilerSetup::~ToolchainCompilerSetup() = default;
 
 QString ToolchainCompilerSetup::toolchainFile() const
 {
@@ -375,9 +438,7 @@ FirstConfigure::FirstConfigure()
   this->setPage(ToolchainSetup, this->mToolchainCompilerSetupPage);
 }
 
-FirstConfigure::~FirstConfigure()
-{
-}
+FirstConfigure::~FirstConfigure() = default;
 
 void FirstConfigure::setGenerators(
   std::vector<cmake::GeneratorInfo> const& gens)
@@ -388,6 +449,11 @@ void FirstConfigure::setGenerators(
 QString FirstConfigure::getGenerator() const
 {
   return this->mStartCompilerSetupPage->getGenerator();
+}
+
+QString FirstConfigure::getPlatform() const
+{
+  return this->mStartCompilerSetupPage->getPlatform();
 }
 
 QString FirstConfigure::getToolset() const

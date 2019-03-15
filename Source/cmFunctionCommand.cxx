@@ -14,11 +14,6 @@
 class cmFunctionHelperCommand : public cmCommand
 {
 public:
-  cmFunctionHelperCommand() {}
-
-  ///! clean up any memory allocated by the function
-  ~cmFunctionHelperCommand() override {}
-
   /**
    * This is a virtual constructor for the command.
    */
@@ -136,7 +131,7 @@ bool cmFunctionFunctionBlocker::IsFunctionBlocked(
       cmFunctionHelperCommand* f = new cmFunctionHelperCommand();
       f->Args = this->Args;
       f->Functions = this->Functions;
-      f->FilePath = this->GetStartingContext().FilePath();
+      f->FilePath = this->GetStartingContext().FilePath;
       mf.RecordPolicies(f->Policies);
       mf.GetState()->AddScriptedCommand(this->Args[0], f);
       // remove the function blocker now that the function is defined
@@ -159,7 +154,7 @@ bool cmFunctionFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
   if (lff.Name.Lower == "endfunction") {
     std::vector<std::string> expandedArguments;
     mf.ExpandArguments(lff.Arguments, expandedArguments,
-                       this->GetStartingContext().FilePath().c_str());
+                       this->GetStartingContext().FilePath.c_str());
     // if the endfunction has arguments then make sure
     // they match the ones in the opening function command
     if ((expandedArguments.empty() ||

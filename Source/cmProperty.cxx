@@ -2,21 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProperty.h"
 
-void cmProperty::Set(const char* value, const cmListFileBacktrace & backtrace)
+void cmProperty::Set(const char* value)
 {
   this->Value = value;
   this->ValueHasBeenSet = true;
-  this->Backtrace = backtrace;
 }
 
-void cmProperty::Append(const char* value, const cmListFileBacktrace & backtrace, bool asString)
+void cmProperty::Append(const char* value, bool asString)
 {
   if (!this->Value.empty() && *value && !asString) {
     this->Value += ";";
   }
   this->Value += value;
   this->ValueHasBeenSet = true;
-  this->Backtrace = backtrace;
 }
 
 const char* cmProperty::GetValue() const

@@ -97,8 +97,6 @@ Functions
 
 #]=======================================================================]
 
-include(CMakeParseArguments)
-
 function(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
 
   get_property(_fsPkgTypes GLOBAL PROPERTY FeatureSummary_PKG_TYPES)

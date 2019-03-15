@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(SameName)
-include("../AutogenTest.cmake")
+include("../AutogenGuiTest.cmake")
 
 # Test AUTOMOC and AUTORCC on source files with the same name
 # but in different subdirectories
@@ -17,6 +17,10 @@ add_executable(sameName
   ccc/item.cpp
   ccc/data.qrc
   item.cpp
+  object.h
+  object.h++
+  object.hpp
+  object.hxx
   data.qrc
   main.cpp
 )

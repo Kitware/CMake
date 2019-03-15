@@ -18,19 +18,16 @@ struct cmIDEFlagTable;
 class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 {
 public:
-  cmGlobalVisualStudio7Generator(cmake* cm,
-                                 const std::string& platformName = "");
   ~cmGlobalVisualStudio7Generator();
-
-  ///! Get the name for the platform.
-  std::string const& GetPlatformName() const;
 
   ///! Create a local generator appropriate to this Global Generator
   cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
-  bool SetSystemName(std::string const& s, cmMakefile* mf) override;
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  Json::Value GetJson() const override;
+#endif
 
-  bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
+  bool SetSystemName(std::string const& s, cmMakefile* mf) override;
 
   /**
    * Utilized by the generator factory to determine if this generator
@@ -55,7 +52,7 @@ public:
    * Try running cmake and building a file. This is used for dynamically
    * loaded commands, not as part of the usual build process.
    */
-  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
+  void GenerateBuildCommand(GeneratedMakeCommand& makeCommand,
                             const std::string& makeProgram,
                             const std::string& projectName,
                             const std::string& projectDir,
@@ -106,8 +103,10 @@ public:
   cmIDEFlagTable const* ExtraFlagTable;
 
 protected:
+  cmGlobalVisualStudio7Generator(cmake* cm,
+                                 std::string const& platformInGeneratorName);
+
   void Generate() override;
-  virtual const char* GetIDEVersion() = 0;
 
   std::string const& GetDevEnvCommand();
   virtual std::string FindDevEnvCommand();
@@ -131,7 +130,6 @@ protected:
   virtual void WriteSLNGlobalSections(std::ostream& fout,
                                       cmLocalGenerator* root);
   virtual void WriteSLNFooter(std::ostream& fout);
-  virtual void WriteSLNHeader(std::ostream& fout) = 0;
   std::string WriteUtilityDepend(const cmGeneratorTarget* target) override;
 
   virtual void WriteTargetsToSolution(
@@ -145,7 +143,7 @@ protected:
 
   virtual void WriteExternalProject(
     std::ostream& fout, const std::string& name, const char* path,
-    const char* typeGuid, const std::set<std::string>& dependencies) = 0;
+    const char* typeGuid, const std::set<BT<std::string>>& dependencies) = 0;
 
   std::string ConvertToSolutionPath(const char* path);
 
@@ -164,8 +162,6 @@ protected:
   // Set during OutputSLNFile with the name of the current project.
   // There is one SLN file per project.
   std::string CurrentProject;
-  std::string GeneratorPlatform;
-  std::string DefaultPlatformName;
   bool MasmEnabled;
   bool NasmEnabled;
 

@@ -16,7 +16,9 @@ External Project Definition
 
   The ``ExternalProject_Add()`` function creates a custom target to drive
   download, update/patch, configure, build, install and test steps of an
-  external project::
+  external project:
+
+  .. code-block:: cmake
 
     ExternalProject_Add(<name> [<option>...])
 
@@ -47,7 +49,11 @@ External Project Definition
 
     ``STAMP_DIR <dir>``
       Directory in which to store the timestamps of each step. Log files from
-      individual steps are also created in here (see *Logging Options* below).
+      individual steps are also created in here unless overriden by LOG_DIR
+      (see *Logging Options* below).
+
+    ``LOG_DIR <dir>``
+      Directory in which to store the logs of each step.
 
     ``DOWNLOAD_DIR <dir>``
       Directory in which to store downloaded files before unpacking them. This
@@ -90,6 +96,7 @@ External Project Definition
       SOURCE_DIR   = <prefix>/src/<name>
       BINARY_DIR   = <prefix>/src/<name>-build
       INSTALL_DIR  = <prefix>
+      LOG_DIR      = <STAMP_DIR>
 
     Otherwise, if the ``EP_BASE`` directory property is set then components
     of an external project are stored under the specified base::
@@ -100,6 +107,7 @@ External Project Definition
       SOURCE_DIR   = <base>/Source/<name>
       BINARY_DIR   = <base>/Build/<name>
       INSTALL_DIR  = <base>/Install/<name>
+      LOG_DIR      = <STAMP_DIR>
 
     If no ``PREFIX``, ``EP_PREFIX``, or ``EP_BASE`` is specified, then the
     default is to set ``PREFIX`` to ``<name>-prefix``. Relative paths are
@@ -417,7 +425,9 @@ External Project Definition
       can be used to point to an alternative directory within the source tree
       to use as the top of the CMake source tree instead. This must be a
       relative path and it will be interpreted as being relative to
-      ``SOURCE_DIR``.
+      ``SOURCE_DIR``.  When ``BUILD_IN_SOURCE 1`` is specified, the
+      ``BUILD_COMMAND`` is used to point to an alternative directory within the
+      source tree.
 
   **Build Step Options:**
     If the configure step assumed the external project uses CMake as its build
@@ -515,13 +525,17 @@ External Project Definition
   **Output Logging Options:**
     Each of the following ``LOG_...`` options can be used to wrap the relevant
     step in a script to capture its output to files. The log files will be
-    created in the ``STAMP_DIR`` directory with step-specific file names.
+    created in ``LOG_DIR`` if supplied or otherwise the ``STAMP_DIR``
+    directory with step-specific file names.
 
     ``LOG_DOWNLOAD <bool>``
       When enabled, the output of the download step is logged to files.
 
     ``LOG_UPDATE <bool>``
       When enabled, the output of the update step is logged to files.
+
+    ``LOG_PATCH <bool>``
+      When enabled, the output of the patch step is logged to files.
 
     ``LOG_CONFIGURE <bool>``
       When enabled, the output of the configure step is logged to files.
@@ -534,6 +548,18 @@ External Project Definition
 
     ``LOG_TEST <bool>``
       When enabled, the output of the test step is logged to files.
+
+    ``LOG_MERGED_STDOUTERR <bool>``
+      When enabled, stdout and stderr will be merged for any step whose
+      output is being logged to files.
+
+    ``LOG_OUTPUT_ON_FAILURE <bool>``
+      This option only has an effect if at least one of the other ``LOG_<step>``
+      options is enabled.  If an error occurs for a step which has logging to
+      file enabled, that step's output will be printed to the console if
+      ``LOG_OUTPUT_ON_FAILURE`` is set to true.  For cases where a large amount
+      of output is recorded, just the end of that output may be printed to the
+      console.
 
   **Terminal Access Options:**
     Steps can be given direct access to the terminal in some cases. Giving a
@@ -608,7 +634,9 @@ External Project Definition
       appended to them by following them with as many ``COMMAND ...`` options
       as needed
       (:manual:`generator expressions <cmake-generator-expressions(7)>` are
-      supported). For example::
+      supported). For example:
+
+      .. code-block:: cmake
 
         ExternalProject_Add(example
           ... # Download options, etc.
@@ -627,7 +655,9 @@ Obtaining Project Properties
 .. command:: ExternalProject_Get_Property
 
   The ``ExternalProject_Get_Property()`` function retrieves external project
-  target properties::
+  target properties:
+
+  .. code-block:: cmake
 
     ExternalProject_Get_Property(<name> <prop1> [<prop2>...])
 
@@ -655,7 +685,9 @@ control needed to implement such step-level capabilities.
 
   The ``ExternalProject_Add_Step()`` function specifies an additional custom
   step for an external project defined by an earlier call to
-  :command:`ExternalProject_Add`::
+  :command:`ExternalProject_Add`:
+
+  .. code-block:: cmake
 
     ExternalProject_Add_Step(<name> <step> [<option>...])
 
@@ -705,7 +737,7 @@ control needed to implement such step-level capabilities.
 
   ``LOG <bool>``
     If set, this causes the output from the custom step to be captured to files
-    in the external project's ``STAMP_DIR``.
+    in the external project's ``LOG_DIR`` if supplied or ``STAMP_DIR``.
 
   ``USES_TERMINAL <bool>``
     If enabled, this gives the custom step direct access to the terminal if
@@ -722,7 +754,9 @@ control needed to implement such step-level capabilities.
 
   The ``ExternalProject_Add_StepTargets()`` function generates targets for the
   steps listed. The name of each created target will be of the form
-  ``<name>-<step>``::
+  ``<name>-<step>``:
+
+  .. code-block:: cmake
 
     ExternalProject_Add_StepTargets(<name> [NO_DEPENDS] <step1> [<step2>...])
 
@@ -773,7 +807,9 @@ control needed to implement such step-level capabilities.
   The ``ExternalProject_Add_StepDependencies()`` function can be used to add
   dependencies to a step. The dependencies added must be targets CMake already
   knows about (these can be ordinary executable or library targets, custom
-  targets or even step targets of another external project)::
+  targets or even step targets of another external project):
+
+  .. code-block:: cmake
 
     ExternalProject_Add_StepDependencies(<name> <step> <target1> [<target2>...])
 
@@ -1617,6 +1653,8 @@ function(_ep_set_directories name)
     endif()
   endif()
   set(top "${CMAKE_CURRENT_BINARY_DIR}")
+
+  # Apply defaults and convert to absolute paths.
   set(places stamp download source binary install tmp)
   foreach(var ${places})
     string(TOUPPER "${var}" VAR)
@@ -1629,6 +1667,17 @@ function(_ep_set_directories name)
     endif()
     set_property(TARGET ${name} PROPERTY _EP_${VAR}_DIR "${${var}_dir}")
   endforeach()
+
+  # Special case for default log directory based on stamp directory.
+  get_property(log_dir TARGET ${name} PROPERTY _EP_LOG_DIR)
+  if(NOT log_dir)
+    get_property(log_dir TARGET ${name} PROPERTY _EP_STAMP_DIR)
+  endif()
+  if(NOT IS_ABSOLUTE "${log_dir}")
+    get_filename_component(log_dir "${top}/${log_dir}" ABSOLUTE)
+  endif()
+  set_property(TARGET ${name} PROPERTY _EP_LOG_DIR "${log_dir}")
+
   get_property(source_subdir TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR)
   if(NOT source_subdir)
     set_property(TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR "")
@@ -1642,7 +1691,11 @@ function(_ep_set_directories name)
   endif()
   if(build_in_source)
     get_property(source_dir TARGET ${name} PROPERTY _EP_SOURCE_DIR)
-    set_property(TARGET ${name} PROPERTY _EP_BINARY_DIR "${source_dir}")
+    if(source_subdir)
+      set_property(TARGET ${name} PROPERTY _EP_BINARY_DIR "${source_dir}/${source_subdir}")
+    else()
+      set_property(TARGET ${name} PROPERTY _EP_BINARY_DIR "${source_dir}")
+    endif()
   endif()
 
   # Make the directories at CMake configure time *and* add a custom command
@@ -1671,7 +1724,7 @@ macro(_ep_replace_location_tags target_name)
   set(vars ${ARGN})
   foreach(var ${vars})
     if(${var})
-      foreach(dir SOURCE_DIR SOURCE_SUBDIR BINARY_DIR INSTALL_DIR TMP_DIR DOWNLOAD_DIR DOWNLOADED_FILE)
+      foreach(dir SOURCE_DIR SOURCE_SUBDIR BINARY_DIR INSTALL_DIR TMP_DIR DOWNLOAD_DIR DOWNLOADED_FILE LOG_DIR)
         get_property(val TARGET ${target_name} PROPERTY _EP_${dir})
         string(REPLACE "<${dir}>" "${val}" ${var} "${${var}}")
       endforeach()
@@ -1853,6 +1906,7 @@ function(_ep_get_build_command name step cmd_var)
 endfunction()
 
 function(_ep_write_log_script name step cmd_var)
+  ExternalProject_Get_Property(${name} log_dir)
   ExternalProject_Get_Property(${name} stamp_dir)
   set(command "${${cmd_var}}")
 
@@ -1924,23 +1978,66 @@ endif()
 
   # Wrap the command in a script to log output to files.
   set(script ${stamp_dir}/${name}-${step}-$<CONFIG>.cmake)
-  set(logbase ${stamp_dir}/${name}-${step})
+  set(logbase ${log_dir}/${name}-${step})
+  get_property(log_merged TARGET ${name} PROPERTY _EP_LOG_MERGED_STDOUTERR)
+  get_property(log_output_on_failure TARGET ${name} PROPERTY _EP_LOG_OUTPUT_ON_FAILURE)
+  if (log_merged)
+    set(stdout_log "${logbase}.log")
+    set(stderr_log "${logbase}.log")
+  else()
+    set(stdout_log "${logbase}-out.log")
+    set(stderr_log "${logbase}-err.log")
+  endif()
   set(code "
+cmake_minimum_required(VERSION 3.13)
 ${code_cygpath_make}
 set(command \"${command}\")
+set(log_merged \"${log_merged}\")
+set(log_output_on_failure \"${log_output_on_failure}\")
+set(stdout_log \"${stdout_log}\")
+set(stderr_log \"${stderr_log}\")
 execute_process(
   COMMAND \${command}
   RESULT_VARIABLE result
-  OUTPUT_FILE \"${logbase}-out.log\"
-  ERROR_FILE \"${logbase}-err.log\"
+  OUTPUT_FILE \"\${stdout_log}\"
+  ERROR_FILE \"\${stderr_log}\"
   )
+macro(read_up_to_max_size log_file output_var)
+  file(SIZE \${log_file} determined_size)
+  set(max_size 10240)
+  if (determined_size GREATER max_size)
+    math(EXPR seek_position \"\${determined_size} - \${max_size}\")
+    file(READ \${log_file} \${output_var} OFFSET \${seek_position})
+    set(\${output_var} \"...skipping to end...\\n\${\${output_var}}\")
+  else()
+    file(READ \${log_file} \${output_var})
+  endif()
+endmacro()
 if(result)
   set(msg \"Command failed: \${result}\\n\")
   foreach(arg IN LISTS command)
     set(msg \"\${msg} '\${arg}'\")
   endforeach()
-  set(msg \"\${msg}\\nSee also\\n  ${logbase}-*.log\")
-  message(FATAL_ERROR \"\${msg}\")
+  if (\${log_merged})
+    set(msg \"\${msg}\\nSee also\\n  \${stderr_log}\")
+  else()
+    set(msg \"\${msg}\\nSee also\\n  ${logbase}-*.log\")
+  endif()
+  if (\${log_output_on_failure})
+    message(SEND_ERROR \"\${msg}\")
+    if (\${log_merged})
+      read_up_to_max_size(\"\${stderr_log}\" error_log_contents)
+      message(STATUS \"Log output is:\\n\${error_log_contents}\")
+    else()
+      read_up_to_max_size(\"\${stdout_log}\" out_log_contents)
+      read_up_to_max_size(\"\${stderr_log}\" err_log_contents)
+      message(STATUS \"stdout output is:\\n\${out_log_contents}\")
+      message(STATUS \"stderr output is:\\n\${err_log_contents}\")
+    endif()
+    message(FATAL_ERROR \"Stopping after outputting logs.\")
+  else()
+    message(FATAL_ERROR \"\${msg}\")
+  endif()
 else()
   set(msg \"${name} ${step} command succeeded.  See also ${logbase}-*.log\")
   message(STATUS \"\${msg}\")
@@ -2212,7 +2309,7 @@ endfunction()
 
 function(_ep_add_mkdir_command name)
   ExternalProject_Get_Property(${name}
-    source_dir binary_dir install_dir stamp_dir download_dir tmp_dir)
+    source_dir binary_dir install_dir stamp_dir download_dir tmp_dir log_dir)
 
   _ep_get_configuration_subdir_suffix(cfgdir)
 
@@ -2224,6 +2321,7 @@ function(_ep_add_mkdir_command name)
     COMMAND ${CMAKE_COMMAND} -E make_directory ${tmp_dir}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${stamp_dir}${cfgdir}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${download_dir}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${log_dir}
     )
 endfunction()
 
@@ -2727,10 +2825,18 @@ function(_ep_add_patch_command name)
     set(work_dir ${source_dir})
   endif()
 
+  get_property(log TARGET ${name} PROPERTY _EP_LOG_PATCH)
+  if(log)
+    set(log LOG 1)
+  else()
+    set(log "")
+  endif()
+
   ExternalProject_Add_Step(${name} patch
     COMMAND ${cmd}
     WORKING_DIRECTORY ${work_dir}
     DEPENDEES download
+    ${log}
     )
 endfunction()
 

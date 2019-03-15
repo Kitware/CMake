@@ -1,17 +1,22 @@
 AUTOGEN_TARGET_DEPENDS
 ----------------------
 
-Target dependencies of the corresponding ``_autogen`` target.
+Additional target dependencies of the corresponding ``_autogen`` target.
 
 Targets which have their :prop_tgt:`AUTOMOC` or :prop_tgt:`AUTOUIC` property
-``ON`` have a corresponding ``_autogen`` target which is used to auto generate
+``ON`` have a corresponding ``_autogen`` target which generates
 ``moc`` and ``uic`` files.  As this ``_autogen`` target is created at
-generate-time, it is not possible to define dependencies of it,
-such as to create inputs for the ``moc`` or ``uic`` executable.
+generate-time, it is not possible to define dependencies of it using
+e.g.  :command:`add_dependencies`.  Instead the
+:prop_tgt:`AUTOGEN_TARGET_DEPENDS` target property can be set to a
+:ref:`;-list <CMake Language Lists>` of additional dependencies for the
+``_autogen`` target.  Dependencies can be target names or file names.
 
-The :prop_tgt:`AUTOGEN_TARGET_DEPENDS` target property can be set instead to a
-list of dependencies of the ``_autogen`` target.  Dependencies can be target
-names or file names.
+In total the dependencies of the ``_autogen`` target are composed from
+
+- forwarded origin target dependencies
+  (enabled by default via :prop_tgt:`AUTOGEN_ORIGIN_DEPENDS`)
+- additional user defined dependencies from :prop_tgt:`AUTOGEN_TARGET_DEPENDS`
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
@@ -26,6 +31,6 @@ If :prop_tgt:`AUTOMOC` or :prop_tgt:`AUTOUIC` depends on a file that is either
 - a :prop_sf:`GENERATED` C++ file that isn't recognized by :prop_tgt:`AUTOMOC`
   and :prop_tgt:`AUTOUIC` because it's skipped by :prop_sf:`SKIP_AUTOMOC`,
   :prop_sf:`SKIP_AUTOUIC`, :prop_sf:`SKIP_AUTOGEN` or :policy:`CMP0071` or
-- a file that isn't in the target's sources
+- a file that isn't in the origin target's sources
 
 it must added to :prop_tgt:`AUTOGEN_TARGET_DEPENDS`.

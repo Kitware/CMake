@@ -22,10 +22,12 @@ function(cm_check_cxx_feature name)
     # Filter out warnings caused by local configuration.
     string(REGEX REPLACE "[^\n]*warning:[^\n]*directory not found for option[^\n]*" "" check_output "${check_output}")
     string(REGEX REPLACE "[^\n]*warning:[^\n]*object file compiled with -mlong-branch which is no longer needed[^\n]*" "" check_output "${check_output}")
+    # Filter out other warnings unrelated to feature checks.
+    string(REGEX REPLACE "[^\n]*warning:[^\n]*sprintf\\(\\) is often misused, please use snprintf[^\n]*" "" check_output "${check_output}")
     # Filter out xcodebuild warnings.
     string(REGEX REPLACE "[^\n]* xcodebuild\\[[0-9]*:[0-9]*\\] warning: [^\n]*" "" check_output "${check_output}")
     # If using the feature causes warnings, treat it as broken/unavailable.
-    if(check_output MATCHES "[Ww]arning")
+    if(check_output MATCHES "(^|[ :])[Ww][Aa][Rr][Nn][Ii][Nn][Gg]")
       set(CMake_HAVE_CXX_${FEATURE} OFF CACHE INTERNAL "TRY_COMPILE" FORCE)
     endif()
     if(CMake_HAVE_CXX_${FEATURE})

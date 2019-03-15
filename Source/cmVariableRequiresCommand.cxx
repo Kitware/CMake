@@ -57,7 +57,7 @@ bool cmVariableRequiresCommand::InitialPass(
         "One or more of the required variables is advanced."
         "  To set the variable, you must turn on advanced mode in cmake.";
     }
-    cmSystemTools::Error(message.c_str());
+    cmSystemTools::Error(message);
   }
 
   return true;

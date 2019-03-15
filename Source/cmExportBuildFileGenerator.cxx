@@ -9,6 +9,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
@@ -55,7 +56,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
         std::ostringstream e;
         e << "given target \"" << te->GetName() << "\" more than once.";
         this->LG->GetGlobalGenerator()->GetCMakeInstance()->IssueMessage(
-          cmake::FATAL_ERROR, e.str(),
+          MessageType::FATAL_ERROR, e.str(),
           this->LG->GetMakefile()->GetBacktrace());
         return false;
       }
@@ -110,7 +111,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     std::string errorMessage;
     if (!this->PopulateExportProperties(gte, properties, errorMessage)) {
       this->LG->GetGlobalGenerator()->GetCMakeInstance()->IssueMessage(
-        cmake::FATAL_ERROR, errorMessage,
+        MessageType::FATAL_ERROR, errorMessage,
         this->LG->GetMakefile()->GetBacktrace());
       return false;
     }
@@ -328,7 +329,8 @@ void cmExportBuildFileGenerator::ComplainAboutMissingTarget(
     << "consider using the APPEND option with multiple separate calls.";
 
   this->LG->GetGlobalGenerator()->GetCMakeInstance()->IssueMessage(
-    cmake::FATAL_ERROR, e.str(), this->LG->GetMakefile()->GetBacktrace());
+    MessageType::FATAL_ERROR, e.str(),
+    this->LG->GetMakefile()->GetBacktrace());
 }
 
 std::string cmExportBuildFileGenerator::InstallNameDir(

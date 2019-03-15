@@ -1,37 +1,46 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindQt
-# ------
-#
-# Searches for all installed versions of Qt.
-#
-# This should only be used if your project can work with multiple
-# versions of Qt.  If not, you should just directly use FindQt4 or
-# FindQt3.  If multiple versions of Qt are found on the machine, then
-# The user must set the option DESIRED_QT_VERSION to the version they
-# want to use.  If only one version of qt is found on the machine, then
-# the DESIRED_QT_VERSION is set to that version and the matching FindQt3
-# or FindQt4 module is included.  Once the user sets DESIRED_QT_VERSION,
-# then the FindQt3 or FindQt4 module is included.
-#
-# This module can only detect and switch between Qt versions 3 and 4. It
-# cannot handle Qt5 or any later versions.
-#
-# ::
-#
-#   QT_REQUIRED if this is set to TRUE then if CMake can
-#               not find Qt4 or Qt3 an error is raised
-#               and a message is sent to the user.
-#
-#
-#
-# ::
-#
-#   DESIRED_QT_VERSION OPTION is created
-#   QT4_INSTALLED is set to TRUE if qt4 is found.
-#   QT3_INSTALLED is set to TRUE if qt3 is found.
+#[=======================================================================[.rst:
+FindQt
+------
+
+Searches for all installed versions of Qt3 or Qt4.
+
+This module cannot handle Qt5 or any later versions.
+For those, see :manual:`cmake-qt(7)`.
+
+This module exists for the :command:`find_package` command only if
+policy :policy:`CMP0084` is not set to ``NEW``.
+
+This module should only be used if your project can work with multiple
+versions of Qt.  If not, you should just directly use FindQt4 or
+FindQt3.  If multiple versions of Qt are found on the machine, then
+The user must set the option DESIRED_QT_VERSION to the version they
+want to use.  If only one version of qt is found on the machine, then
+the DESIRED_QT_VERSION is set to that version and the matching FindQt3
+or FindQt4 module is included.  Once the user sets DESIRED_QT_VERSION,
+then the FindQt3 or FindQt4 module is included.
+
+::
+
+  QT_REQUIRED if this is set to TRUE then if CMake can
+              not find Qt4 or Qt3 an error is raised
+              and a message is sent to the user.
+
+
+
+::
+
+  DESIRED_QT_VERSION OPTION is created
+  QT4_INSTALLED is set to TRUE if qt4 is found.
+  QT3_INSTALLED is set to TRUE if qt3 is found.
+#]=======================================================================]
+
+if(_findqt_testing)
+  set(_findqt_included TRUE)
+  return()
+endif()
 
 # look for signs of qt3 installations
 file(GLOB GLOB_TEMP_VAR /usr/lib*/qt-3*/bin/qmake /usr/lib*/qt3*/bin/qmake)

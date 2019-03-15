@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCurl.h"
 
-#include "cmThirdParty.h"
-
 #if !defined(CMAKE_USE_SYSTEM_CURL) && !defined(_WIN32) &&                    \
   !defined(__APPLE__) && !defined(CURL_CA_BUNDLE) && !defined(CURL_CA_PATH)
 #  define CMAKE_FIND_CAFILE
@@ -16,11 +14,13 @@
 #endif
 
 #define check_curl_result(result, errstr)                                     \
-  if ((result) != CURLE_OK && (result) != CURLE_NOT_BUILT_IN) {               \
-    e += e.empty() ? "" : "\n";                                               \
-    e += (errstr);                                                            \
-    e += ::curl_easy_strerror(result);                                        \
-  }
+  do {                                                                        \
+    if ((result) != CURLE_OK && (result) != CURLE_NOT_BUILT_IN) {             \
+      e += e.empty() ? "" : "\n";                                             \
+      e += (errstr);                                                          \
+      e += ::curl_easy_strerror(result);                                      \
+    }                                                                         \
+  } while (false)
 
 std::string cmCurlSetCAInfo(::CURL* curl, const char* cafile)
 {

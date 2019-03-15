@@ -978,6 +978,7 @@ are:
 * Built-in properties matching ``COMPATIBLE_INTERFACE_*``
 * ``EXPORT_NAME``
 * ``IMPORTED``
+* ``MANUALLY_ADDED_DEPENDENCIES``
 * ``NAME``
 * Properties matching ``IMPORTED_LIBNAME_*``
 * Properties matching ``MAP_IMPORTED_CONFIG_*``

@@ -12,7 +12,7 @@ Find an external project, and load its settings.
 Basic Signature and Module Mode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   find_package(<PackageName> [version] [EXACT] [QUIET] [MODULE]
                [REQUIRED] [[COMPONENTS] [components...]]
@@ -23,9 +23,9 @@ Finds and loads settings from an external project.  ``<PackageName>_FOUND``
 will be set to indicate whether the package was found.  When the
 package is found package-specific information is provided through
 variables and :ref:`Imported Targets` documented by the package itself.  The
-``QUIET`` option disables messages if the package cannot be found.  The
-``REQUIRED`` option stops processing with an error message if the package
-cannot be found.
+``QUIET`` option disables informational messages, including those indicating
+that the package cannot be found if it is not ``REQUIRED``.  The ``REQUIRED``
+option stops processing with an error message if the package cannot be found.
 
 A package-specific list of required components may be listed after the
 ``COMPONENTS`` option (or after the ``REQUIRED`` option if present).
@@ -51,8 +51,9 @@ mode and "Config" mode.  The above signature selects Module mode.
 If no module is found the command falls back to Config mode, described
 below. This fall back is disabled if the ``MODULE`` option is given.
 
-In Module mode, CMake searches for a file called ``Find<PackageName>.cmake``
-in the :variable:`CMAKE_MODULE_PATH` followed by the CMake installation.
+In Module mode, CMake searches for a file called ``Find<PackageName>.cmake``.
+The file is first searched in the :variable:`CMAKE_MODULE_PATH`,
+then among the :ref:`Find Modules` provided by the CMake installation.
 If the file is found, it is read and processed by CMake.  It is responsible
 for finding the package, checking the version, and producing any needed
 messages.  Some find-modules provide limited or no support for versioning;
@@ -67,7 +68,9 @@ full command signature and details of the search process.  Project
 maintainers wishing to provide a package to be found by this command
 are encouraged to read on.
 
-The complete Config mode command signature is::
+The complete Config mode command signature is
+
+.. code-block:: cmake
 
   find_package(<PackageName> [version] [EXACT] [QUIET]
                [REQUIRED] [[COMPONENTS] [components...]]
@@ -202,7 +205,9 @@ is set no attempt is made to choose a highest or closest version number.
 To control the order in which ``find_package`` checks for compatibility use
 the two variables :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER` and
 :variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION`.
-For instance in order to select the highest version one can set::
+For instance in order to select the highest version one can set
+
+.. code-block:: cmake
 
   SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
   SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
@@ -286,7 +291,7 @@ enabled.
 
 2. Search paths specified in cmake-specific cache variables.  These
    are intended to be used on the command line with a ``-DVAR=value``.
-   The values are interpreted as :ref:`;-lists <CMake Language Lists>`.
+   The values are interpreted as :ref:`semicolon-separated lists <CMake Language Lists>`.
    This can be skipped if ``NO_CMAKE_PATH`` is passed::
 
      CMAKE_PREFIX_PATH
@@ -348,6 +353,11 @@ enabled.
 
 .. include:: FIND_XXX_ROOT.txt
 .. include:: FIND_XXX_ORDER.txt
+
+By default the value stored in the result variable will be the path at
+which the file is found.  The :variable:`CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS`
+variable may be set to ``TRUE`` before calling ``find_package`` in order
+to resolve symbolic links and store the real path to the file.
 
 Every non-REQUIRED ``find_package`` call can be disabled by setting the
 :variable:`CMAKE_DISABLE_FIND_PACKAGE_<PackageName>` variable to ``TRUE``.

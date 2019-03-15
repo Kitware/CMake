@@ -146,7 +146,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   this->CTest->SetSuppressUpdatingCTestConfiguration(true);
   int model;
   if (smodel) {
-    model = this->CTest->GetTestModelFromString(smodel);
+    model = cmCTest::GetTestModelFromString(smodel);
   } else {
     model = cmCTest::UNKNOWN;
   }

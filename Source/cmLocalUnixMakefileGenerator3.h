@@ -12,6 +12,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 class cmCustomCommand;
@@ -83,7 +84,7 @@ public:
   void WriteDivider(std::ostream& os);
 
   /** used to create a recursive make call */
-  std::string GetRecursiveMakeCall(const char* makefile,
+  std::string GetRecursiveMakeCall(const std::string& makefile,
                                    const std::string& tgt);
 
   // append flags to a string
@@ -120,7 +121,7 @@ public:
                        std::string const& targetDir,
                        std::string const& relDir);
 
-  static std::string ConvertToQuotedOutputPath(const char* p,
+  static std::string ConvertToQuotedOutputPath(const std::string& p,
                                                bool useWatcomQuote);
 
   std::string CreateMakeVariable(const std::string& sin,
@@ -128,7 +129,7 @@ public:
 
   /** Called from command-line hook to bring dependencies up to date
       for a target.  */
-  bool UpdateDependencies(const char* tgtInfo, bool verbose,
+  bool UpdateDependencies(const std::string& tgtInfo, bool verbose,
                           bool color) override;
 
   /** Called from command-line hook to clear dependencies.  */
@@ -158,8 +159,8 @@ public:
     cmGeneratorTarget const* tgt);
 
   void AddImplicitDepends(cmGeneratorTarget const* tgt,
-                          const std::string& lang, const char* obj,
-                          const char* src);
+                          const std::string& lang, const std::string& obj,
+                          const std::string& src);
 
   // write the target rules for the local Makefile into the stream
   void WriteLocalAllRules(std::ostream& ruleFileStream);
@@ -183,9 +184,6 @@ public:
   // Eclipse generator.
   void GetIndividualFileTargets(std::vector<std::string>& targets);
 
-  std::string MaybeConvertToRelativePath(std::string const& base,
-                                         std::string const& path);
-
 protected:
   void WriteLocalMakefile();
 
@@ -200,9 +198,6 @@ protected:
   void WriteDependLanguageInfo(std::ostream& cmakefileStream,
                                cmGeneratorTarget* tgt);
 
-  // write the local help rule
-  void WriteHelpRule(std::ostream& ruleFileStream);
-
   // this converts a file name that is relative to the StartOuputDirectory
   // into a full path
   std::string ConvertToFullPath(const std::string& localPath);
@@ -210,15 +205,6 @@ protected:
   void WriteConvenienceRule(std::ostream& ruleFileStream,
                             const std::string& realTarget,
                             const std::string& helpTarget);
-
-  void WriteTargetDependRule(std::ostream& ruleFileStream,
-                             cmGeneratorTarget* target);
-  void WriteTargetCleanRule(std::ostream& ruleFileStream,
-                            cmGeneratorTarget* target,
-                            const std::vector<std::string>& files);
-  void WriteTargetRequiresRule(std::ostream& ruleFileStream,
-                               cmGeneratorTarget* target,
-                               const std::vector<std::string>& objects);
 
   void AppendRuleDepend(std::vector<std::string>& depends,
                         const char* ruleFileName);
@@ -245,7 +231,7 @@ protected:
 
   // Helper methods for dependency updates.
   bool ScanDependencies(
-    const char* targetDir,
+    const std::string& targetDir,
     std::map<std::string, cmDepends::DependencyVector>& validDeps);
   void CheckMultipleOutputs(bool verbose);
 
@@ -264,36 +250,27 @@ private:
 
   struct LocalObjectEntry
   {
-    cmGeneratorTarget* Target;
+    cmGeneratorTarget* Target = nullptr;
     std::string Language;
-    LocalObjectEntry()
-      : Target(nullptr)
-      , Language()
-    {
-    }
-    LocalObjectEntry(cmGeneratorTarget* t, const std::string& lang)
+    LocalObjectEntry() = default;
+    LocalObjectEntry(cmGeneratorTarget* t, std::string lang)
       : Target(t)
-      , Language(lang)
+      , Language(std::move(lang))
     {
     }
   };
   struct LocalObjectInfo : public std::vector<LocalObjectEntry>
   {
-    bool HasSourceExtension;
-    bool HasPreprocessRule;
-    bool HasAssembleRule;
-    LocalObjectInfo()
-      : HasSourceExtension(false)
-      , HasPreprocessRule(false)
-      , HasAssembleRule(false)
-    {
-    }
+    bool HasSourceExtension = false;
+    bool HasPreprocessRule = false;
+    bool HasAssembleRule = false;
   };
   void GetLocalObjectFiles(
     std::map<std::string, LocalObjectInfo>& localObjectFiles);
 
   void WriteObjectConvenienceRule(std::ostream& ruleFileStream,
-                                  const char* comment, const char* output,
+                                  const char* comment,
+                                  const std::string& output,
                                   LocalObjectInfo const& info);
 
   std::vector<std::string> LocalHelp;

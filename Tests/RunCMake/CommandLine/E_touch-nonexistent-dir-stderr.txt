@@ -1,0 +1,1 @@
+^cmake -E touch: failed to update ".+/touch-nonexistent-dir/foo"\.$

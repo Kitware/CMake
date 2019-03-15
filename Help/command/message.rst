@@ -3,7 +3,7 @@ message
 
 Display a message to the user.
 
-::
+.. code-block:: cmake
 
   message([<mode>] "message to display" ...)
 

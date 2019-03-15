@@ -11,9 +11,7 @@
 #include <ostream>
 #include <string>
 
-cmCTestConfigureHandler::cmCTestConfigureHandler()
-{
-}
+cmCTestConfigureHandler::cmCTestConfigureHandler() = default;
 
 void cmCTestConfigureHandler::Initialize()
 {

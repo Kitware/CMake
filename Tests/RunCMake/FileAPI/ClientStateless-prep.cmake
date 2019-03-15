@@ -1,0 +1,5 @@
+file(WRITE "${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/query/client-foo/__test-v1" "")
+file(WRITE "${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/query/client-foo/__test-v2" "")
+file(WRITE "${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/query/client-foo/__test-v3" "")
+file(WRITE "${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/query/client-foo/unknown" "")
+file(WRITE "${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/reply/object-to-be-deleted.json" "")

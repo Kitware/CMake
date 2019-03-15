@@ -3,7 +3,7 @@ return
 
 Return from a file, directory or function.
 
-::
+.. code-block:: cmake
 
   return()
 
@@ -14,5 +14,6 @@ and control is returned to the including file.  If it is encountered in a
 file which is not included by another file, e.g.  a ``CMakeLists.txt``,
 control is returned to the parent directory if there is one.  If return is
 called in a function, control is returned to the caller of the function.
-Note that a macro is not a function and does not handle return like a
-function does.
+
+Note that a :command:`macro <macro>`, unlike a :command:`function <function>`,
+is expanded in place and therefore cannot handle ``return()``.

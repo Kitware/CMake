@@ -664,12 +664,14 @@ Modify cmCommandArgumentLexer.cxx:
 
 /* IWYU pragma: no_forward_declare yyguts_t */
 
+#ifndef __clang_analyzer__ /* Suppress clang scan-build warnings */
+
 #include "cmCommandArgumentParserHelper.h"
 
 /* Replace the lexer input function.  */
 #undef YY_INPUT
 #define YY_INPUT(buf, result, max_size) \
-  { result = yyextra->LexInput(buf, max_size); }
+  do { result = yyextra->LexInput(buf, max_size); } while (0)
 
 /* Include the set of tokens from the parser.  */
 #include "cmCommandArgumentParserTokens.h"
@@ -2246,3 +2248,5 @@ void cmCommandArgument_SetupEscapes(yyscan_t yyscanner, bool noEscapes)
     BEGIN(ESCAPES);
   }
 }
+
+#endif /* __clang_analyzer__ */

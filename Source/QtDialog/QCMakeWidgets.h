@@ -18,7 +18,7 @@ class QCMakeFileEditor : public QLineEdit
 {
   Q_OBJECT
 public:
-  QCMakeFileEditor(QWidget* p, const QString& var);
+  QCMakeFileEditor(QWidget* p, QString var);
 protected slots:
   virtual void chooseFile() = 0;
 signals:

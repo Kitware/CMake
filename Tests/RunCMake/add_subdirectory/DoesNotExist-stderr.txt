@@ -2,4 +2,4 @@
   add_subdirectory given source "DoesNotExist" which is not an existing
   directory.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

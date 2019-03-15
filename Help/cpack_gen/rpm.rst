@@ -11,9 +11,9 @@ The CPack RPM generator is a :module:`CPack` generator thus it uses the
 ``CPACK_XXX`` variables used by :module:`CPack`.
 
 The CPack RPM generator has specific features which are controlled by the specifics
-:code:`CPACK_RPM_XXX` variables.
+``CPACK_RPM_XXX`` variables.
 
-:code:`CPACK_RPM_<COMPONENT>_XXXX` variables may be used in order to have
+``CPACK_RPM_<COMPONENT>_XXXX`` variables may be used in order to have
 **component** specific values.  Note however that ``<COMPONENT>`` refers to the
 **grouping name** written in upper case. It may be either a component name or
 a component GROUP name. Usually those variables correspond to RPM spec file

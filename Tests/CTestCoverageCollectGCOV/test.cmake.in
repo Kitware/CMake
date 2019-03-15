@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.8.12)
-set(CTEST_PROJECT_NAME "TestProject")
 set(CTEST_SOURCE_DIRECTORY "@CMake_SOURCE_DIR@/Tests/CTestCoverageCollectGCOV/TestProject")
 set(CTEST_BINARY_DIRECTORY "@CMake_BINARY_DIR@/Tests/CTestCoverageCollectGCOV/TestProject")
 set(CTEST_CMAKE_GENERATOR "@CMAKE_GENERATOR@")

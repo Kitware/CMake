@@ -33,7 +33,7 @@ public:
   const std::string GetCharacters() const;
 
 private:
-  Style NewLineStyle;
+  Style NewLineStyle = Invalid;
 };
 
 #endif

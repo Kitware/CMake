@@ -4,7 +4,7 @@ source_group
 Define a grouping for source files in IDE project generation.
 There are two different signatures to create source groups.
 
-::
+.. code-block:: cmake
 
   source_group(<name> [FILES <src>...] [REGULAR_EXPRESSION <regex>])
   source_group(TREE <root> [PREFIX <prefix>] [FILES <src>...])

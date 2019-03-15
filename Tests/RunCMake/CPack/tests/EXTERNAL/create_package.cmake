@@ -1,5 +1,10 @@
 message("This script could run an external packaging tool")
 
+get_property(role GLOBAL PROPERTY CMAKE_ROLE)
+if(NOT role STREQUAL "CPACK")
+  message(SEND_ERROR "CMAKE_ROLE property is \"${role}\", should be \"CPACK\"")
+endif()
+
 function(expect_variable VAR)
   if(NOT ${VAR})
     message(FATAL_ERROR "${VAR} is unexpectedly not set")
@@ -22,3 +27,5 @@ expect_file(${CPACK_TEMPORARY_DIRECTORY}/f1/share/cpack-test/f1.txt)
 expect_file(${CPACK_TEMPORARY_DIRECTORY}/f2/share/cpack-test/f2.txt)
 expect_file(${CPACK_TEMPORARY_DIRECTORY}/f3/share/cpack-test/f3.txt)
 expect_file(${CPACK_TEMPORARY_DIRECTORY}/f4/share/cpack-test/f4.txt)
+
+message(STATUS "This status message is expected to be visible")

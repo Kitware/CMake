@@ -30,6 +30,7 @@ if(NOT CMAKE_CXX_COMPILER_NAMES)
 endif()
 
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+elseif("${CMAKE_GENERATOR}" MATCHES "Green Hills MULTI")
 elseif("${CMAKE_GENERATOR}" MATCHES "Xcode")
   set(CMAKE_CXX_COMPILER_XCODE_TYPE sourcecode.cpp.cpp)
   _cmake_find_compiler_path(CXX)
@@ -100,7 +101,7 @@ if(NOT CMAKE_CXX_COMPILER_ID_RUN)
   #      ...
   #      /path/to/cc ...CompilerIdCXX/...
   # to extract the compiler front-end for the language.
-  set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdCXX/(\\./)?(CompilerIdCXX.xctest/)?CompilerIdCXX[ \t\n\\\"]")
+  set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdCXX/(\\./)?(CompilerIdCXX.(framework|xctest)/)?CompilerIdCXX[ \t\n\\\"]")
   set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_INDEX 2)
 
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
@@ -133,7 +134,7 @@ endif ()
 
 if (CMAKE_CROSSCOMPILING  AND NOT  _CMAKE_TOOLCHAIN_PREFIX)
 
-  if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang|QCC")
     get_filename_component(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME)
     if (COMPILER_BASENAME MATCHES "^(.+-)(clan)?[gc]\\+\\+(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
       set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
@@ -142,7 +143,7 @@ if (CMAKE_CROSSCOMPILING  AND NOT  _CMAKE_TOOLCHAIN_PREFIX)
         set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_CXX_COMPILER_TARGET}-)
       endif()
     elseif(COMPILER_BASENAME MATCHES "QCC(\\.exe)?$")
-      if(CMAKE_CXX_COMPILER_TARGET MATCHES "gcc_nto([^_le]+)(le)?")
+      if(CMAKE_CXX_COMPILER_TARGET MATCHES "gcc_nto([a-z0-9]+_[0-9]+|[^_le]+)(le)")
         set(_CMAKE_TOOLCHAIN_PREFIX nto${CMAKE_MATCH_1}-)
       endif()
     endif ()

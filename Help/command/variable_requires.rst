@@ -1,7 +1,7 @@
 variable_requires
 -----------------
 
-Disallowed.  See CMake Policy :policy:`CMP0035`.
+Disallowed since version 3.0.  See CMake Policy :policy:`CMP0035`.
 
 Use the :command:`if` command instead.
 

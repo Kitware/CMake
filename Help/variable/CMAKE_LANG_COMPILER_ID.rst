@@ -17,8 +17,10 @@ include:
   Clang = LLVM Clang (clang.llvm.org)
   Cray = Cray Compiler (cray.com)
   Embarcadero, Borland = Embarcadero (embarcadero.com)
+  Flang = Flang LLVM Fortran Compiler
   G95 = G95 Fortran (g95.org)
   GNU = GNU Compiler Collection (gcc.gnu.org)
+  GHS = Green Hills Software (www.ghs.com)
   HP = Hewlett-Packard Compiler (hp.com)
   IAR = IAR Systems (iar.com)
   Intel = Intel Compiler (intel.com)
@@ -27,7 +29,6 @@ include:
   NVIDIA = NVIDIA CUDA Compiler (nvidia.com)
   OpenWatcom = Open Watcom (openwatcom.org)
   PGI = The Portland Group (pgroup.com)
-  Flang = Flang Fortran Compiler
   PathScale = PathScale (pathscale.com)
   SDCC = Small Device C Compiler (sdcc.sourceforge.net)
   SunPro = Oracle Solaris Studio (oracle.com)

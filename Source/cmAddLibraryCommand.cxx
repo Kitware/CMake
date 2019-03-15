@@ -7,11 +7,11 @@
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -259,7 +259,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
       << (type == cmStateEnums::SHARED_LIBRARY ? "SHARED" : "MODULE")
       << " option but the target platform does not support dynamic linking. "
          "Building a STATIC library instead. This may lead to problems.";
-    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
     type = cmStateEnums::STATIC_LIBRARY;
   }
 
@@ -275,7 +275,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
       if (!this->Makefile->GetGlobalGenerator()->HasKnownObjectFileLocation(
             &reason)) {
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           "The OBJECT library type may not be used for IMPORTED libraries" +
             reason + ".");
         return true;
@@ -307,7 +307,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
   // A non-imported target may not have UNKNOWN type.
   if (type == cmStateEnums::UNKNOWN_LIBRARY) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "The UNKNOWN library type may be used only for IMPORTED libraries.");
     return true;
   }

@@ -9,15 +9,16 @@ Check if given C++ source compiles and links into an executable.
 
 .. command:: check_cxx_source_compiles
 
-  ::
+  .. code-block:: cmake
 
-    check_cxx_source_compiles(code resultVar [FAIL_REGEX regex1 [regex2...]])
+    check_cxx_source_compiles(<code> <resultVar>
+                              [FAIL_REGEX <regex1> [<regex2>...]])
 
-  Check that the source supplied in ``code`` can be compiled as a C++ source
+  Check that the source supplied in ``<code>`` can be compiled as a C++ source
   file and linked as an executable (so it must contain at least a ``main()``
   function). The result will be stored in the internal cache variable specified
-  by ``resultVar``, with a boolean true value for success and boolean false for
-  failure. If ``FAIL_REGEX`` is provided, then failure is determined by
+  by ``<resultVar>``, with a boolean true value for success and boolean false
+  for failure. If ``FAIL_REGEX`` is provided, then failure is determined by
   checking if anything in the output matches any of the specified regular
   expressions.
 
@@ -34,13 +35,17 @@ Check if given C++ source compiles and links into an executable.
   ``CMAKE_REQUIRED_DEFINITIONS``
     A :ref:`;-list <CMake Language Lists>` of compiler definitions of the form
     ``-DFOO`` or ``-DFOO=bar``. A definition for the name specified by
-    ``resultVar`` will also be added automatically.
+    ``<resultVar>`` will also be added automatically.
 
   ``CMAKE_REQUIRED_INCLUDES``
     A :ref:`;-list <CMake Language Lists>` of header search paths to pass to
     the compiler. These will be the only header search paths used by
     ``try_compile()``, i.e. the contents of the :prop_dir:`INCLUDE_DIRECTORIES`
     directory property will be ignored.
+
+  ``CMAKE_REQUIRED_LINK_OPTIONS``
+    A :ref:`;-list <CMake Language Lists>` of options to add to the link
+    command (see :command:`try_compile` for further details).
 
   ``CMAKE_REQUIRED_LIBRARIES``
     A :ref:`;-list <CMake Language Lists>` of libraries to add to the link
@@ -53,10 +58,10 @@ Check if given C++ source compiles and links into an executable.
     associated with the check will be suppressed.
 
   The check is only performed once, with the result cached in the variable
-  named by ``resultVar``. Every subsequent CMake run will re-use this cached
-  value rather than performing the check again, even if the ``code`` changes.
+  named by ``<resultVar>``. Every subsequent CMake run will re-use this cached
+  value rather than performing the check again, even if the ``<code>`` changes.
   In order to force the check to be re-evaluated, the variable named by
-  ``resultVar`` must be manually removed from the cache.
+  ``<resultVar>`` must be manually removed from the cache.
 
 #]=======================================================================]
 
@@ -78,6 +83,12 @@ macro(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
 
     set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
+    if(CMAKE_REQUIRED_LINK_OPTIONS)
+      set(CHECK_CXX_SOURCE_COMPILES_ADD_LINK_OPTIONS
+        LINK_OPTIONS ${CMAKE_REQUIRED_LINK_OPTIONS})
+    else()
+      set(CHECK_CXX_SOURCE_COMPILES_ADD_LINK_OPTIONS)
+    endif()
     if(CMAKE_REQUIRED_LIBRARIES)
       set(CHECK_CXX_SOURCE_COMPILES_ADD_LIBRARIES
         LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
@@ -100,6 +111,7 @@ macro(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.cxx
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
+      ${CHECK_CXX_SOURCE_COMPILES_ADD_LINK_OPTIONS}
       ${CHECK_CXX_SOURCE_COMPILES_ADD_LIBRARIES}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
       "${CHECK_CXX_SOURCE_COMPILES_ADD_INCLUDES}"
@@ -132,4 +144,3 @@ macro(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
     endif()
   endif()
 endmacro()
-

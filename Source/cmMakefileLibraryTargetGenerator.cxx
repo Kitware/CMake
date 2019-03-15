@@ -6,6 +6,7 @@
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stddef.h>
+#include <utility>
 #include <vector>
 
 #include "cmGeneratedFileStream.h"
@@ -24,7 +25,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 cmMakefileLibraryTargetGenerator::cmMakefileLibraryTargetGenerator(
   cmGeneratorTarget* target)
@@ -133,9 +133,12 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
     (std::find(closure->Languages.begin(), closure->Languages.end(),
                cuda_lang) != closure->Languages.end());
 
-  const bool resolveDeviceSymbols =
-    this->GeneratorTarget->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
-  if (hasCUDA && resolveDeviceSymbols) {
+  bool doDeviceLinking = false;
+  if (const char* resolveDeviceSymbols =
+        this->GeneratorTarget->GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
+    doDeviceLinking = cmSystemTools::IsOn(resolveDeviceSymbols);
+  }
+  if (hasCUDA && doDeviceLinking) {
     std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_LIBRARY";
     this->WriteDeviceLibraryRules(linkRuleVar, false);
   }
@@ -168,7 +171,12 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
     const bool hasCUDA =
       (std::find(closure->Languages.begin(), closure->Languages.end(),
                  cuda_lang) != closure->Languages.end());
-    if (hasCUDA) {
+    bool doDeviceLinking = true;
+    if (const char* resolveDeviceSymbols =
+          this->GeneratorTarget->GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
+      doDeviceLinking = cmSystemTools::IsOn(resolveDeviceSymbols);
+    }
+    if (hasCUDA && doDeviceLinking) {
       std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_LIBRARY";
       this->WriteDeviceLibraryRules(linkRuleVar, relink);
     }
@@ -209,7 +217,12 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
     const bool hasCUDA =
       (std::find(closure->Languages.begin(), closure->Languages.end(),
                  cuda_lang) != closure->Languages.end());
-    if (hasCUDA) {
+    bool doDeviceLinking = true;
+    if (const char* resolveDeviceSymbols =
+          this->GeneratorTarget->GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
+      doDeviceLinking = cmSystemTools::IsOn(resolveDeviceSymbols);
+    }
+    if (hasCUDA && doDeviceLinking) {
       std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_LIBRARY";
       this->WriteDeviceLibraryRules(linkRuleVar, relink);
     }
@@ -498,7 +511,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     outpath += "/";
   } else if (relink) {
     outpath = this->Makefile->GetCurrentBinaryDirectory();
-    outpath += cmake::GetCMakeFilesDirectory();
+    outpath += "/CMakeFiles";
     outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath);
     outpath += "/";

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11.2)
 project(RccConfigChange)
-include("../../AutogenTest.cmake")
+include("../../AutogenCoreTest.cmake")
 
 # Enable AUTORCC for all targets
 set(CMAKE_AUTORCC ON)

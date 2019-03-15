@@ -1,7 +1,7 @@
 # Use a low minimum version
 cmake_minimum_required(VERSION 3.0)
 project(LowMinimumVersion)
-include("../AutogenTest.cmake")
+include("../AutogenGuiTest.cmake")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)

@@ -3,7 +3,7 @@ aux_source_directory
 
 Find all source files in a directory.
 
-::
+.. code-block:: cmake
 
   aux_source_directory(<dir> <variable>)
 

@@ -18,17 +18,14 @@ class cmake;
 class cmGlobalVisualStudio14Generator : public cmGlobalVisualStudio12Generator
 {
 public:
-  cmGlobalVisualStudio14Generator(cmake* cm, const std::string& name,
-                                  const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
-  void WriteSLNHeader(std::ostream& fout) override;
-
-  const char* GetToolsVersion() override { return "14.0"; }
-
 protected:
+  cmGlobalVisualStudio14Generator(cmake* cm, const std::string& name,
+                                  std::string const& platformInGeneratorName);
+
   bool InitializeWindows(cmMakefile* mf) override;
   bool InitializeWindowsStore(cmMakefile* mf) override;
   bool SelectWindowsStoreToolset(std::string& toolset) const override;
@@ -41,8 +38,10 @@ protected:
   // version of the toolset.
   virtual std::string GetWindows10SDKMaxVersion() const;
 
-  const char* GetIDEVersion() override { return "14.0"; }
   virtual bool SelectWindows10SDK(cmMakefile* mf, bool required);
+
+  void SetWindowsTargetPlatformVersion(std::string const& version,
+                                       cmMakefile* mf);
 
   // Used to verify that the Desktop toolset for the current generator is
   // installed on the machine.
@@ -52,5 +51,6 @@ protected:
 
 private:
   class Factory;
+  friend class Factory;
 };
 #endif

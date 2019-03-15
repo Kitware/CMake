@@ -11,11 +11,12 @@
 
 class cmCursesForm
 {
-  CM_DISABLE_COPY(cmCursesForm)
-
 public:
   cmCursesForm();
   virtual ~cmCursesForm();
+
+  cmCursesForm(cmCursesForm const&) = delete;
+  cmCursesForm& operator=(cmCursesForm const&) = delete;
 
   // Description:
   // Handle user input.

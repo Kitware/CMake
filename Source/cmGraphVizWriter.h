@@ -16,13 +16,14 @@
 class cmGeneratedFileStream;
 class cmGeneratorTarget;
 class cmLocalGenerator;
+class cmGlobalGenerator;
 
 /** This class implements writing files for graphviz (dot) for graphs
  * representing the dependencies between the targets in the project. */
 class cmGraphVizWriter
 {
 public:
-  cmGraphVizWriter(const std::vector<cmLocalGenerator*>& localGenerators);
+  cmGraphVizWriter(const cmGlobalGenerator* globalGenerator);
 
   void ReadSettings(const char* settingsFileName,
                     const char* fallbackSettingsFileName);
@@ -69,6 +70,7 @@ protected:
 
   std::vector<cmsys::RegularExpression> TargetsToIgnoreRegex;
 
+  const cmGlobalGenerator* GlobalGenerator;
   const std::vector<cmLocalGenerator*>& LocalGenerators;
 
   std::map<std::string, const cmGeneratorTarget*> TargetPtrs;

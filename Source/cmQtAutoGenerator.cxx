@@ -8,12 +8,14 @@
 #include "cmAlgorithms.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
 #include <algorithm>
+#include <utility>
 
 // -- Class methods
 
@@ -52,7 +54,7 @@ void cmQtAutoGenerator::Logger::Info(GeneratorT genType,
   }
   {
     std::lock_guard<std::mutex> lock(Mutex_);
-    cmSystemTools::Stdout(msg.c_str(), msg.size());
+    cmSystemTools::Stdout(msg);
   }
 }
 
@@ -76,7 +78,7 @@ void cmQtAutoGenerator::Logger::Warning(GeneratorT genType,
   msg.push_back('\n');
   {
     std::lock_guard<std::mutex> lock(Mutex_);
-    cmSystemTools::Stdout(msg.c_str(), msg.size());
+    cmSystemTools::Stdout(msg);
   }
 }
 
@@ -105,7 +107,7 @@ void cmQtAutoGenerator::Logger::Error(GeneratorT genType,
   msg.push_back('\n');
   {
     std::lock_guard<std::mutex> lock(Mutex_);
-    cmSystemTools::Stderr(msg.c_str(), msg.size());
+    cmSystemTools::Stderr(msg);
   }
 }
 
@@ -147,7 +149,7 @@ void cmQtAutoGenerator::Logger::ErrorCommand(
   msg.push_back('\n');
   {
     std::lock_guard<std::mutex> lock(Mutex_);
-    cmSystemTools::Stderr(msg.c_str(), msg.size());
+    cmSystemTools::Stderr(msg);
   }
 }
 
@@ -685,7 +687,7 @@ bool cmQtAutoGenerator::Run(std::string const& infoFile,
 
   bool success = false;
   {
-    cmake cm(cmake::RoleScript);
+    cmake cm(cmake::RoleScript, cmState::Unknown);
     cm.SetHomeOutputDirectory(InfoDir());
     cm.SetHomeDirectory(InfoDir());
     cm.GetCurrentSnapshot().SetDefaultDefinitions();

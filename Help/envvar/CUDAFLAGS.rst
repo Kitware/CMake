@@ -1,6 +1,8 @@
 CUDAFLAGS
 ---------
 
+.. include:: ENV_VAR.txt
+
 Default compilation flags to be used when compiling ``CUDA`` files. Will only be
 used by CMake on the first configuration to determine ``CUDA`` default
 compilation flags, after which the value for ``CUDAFLAGS`` is stored in the

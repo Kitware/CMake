@@ -1,6 +1,9 @@
 include(Compiler/XL)
 __compiler_xl(Fortran)
 
+set(CMAKE_Fortran_SUBMODULE_SEP "_")
+set(CMAKE_Fortran_SUBMODULE_EXT ".smod")
+
 set(CMAKE_Fortran_FORMAT_FIXED_FLAG "-qfixed") # [=<right_margin>]
 set(CMAKE_Fortran_FORMAT_FREE_FLAG "-qfree") # [=f90|ibm]
 

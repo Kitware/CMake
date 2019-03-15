@@ -3,7 +3,7 @@ create_test_sourcelist
 
 Create a test driver and source list for building test programs.
 
-::
+.. code-block:: cmake
 
   create_test_sourcelist(sourceListName driverName
                          test1 test2 test3

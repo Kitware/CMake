@@ -14,9 +14,7 @@ cmCursesLabelWidget::cmCursesLabelWidget(int width, int height, int left,
   this->SetValue(name);
 }
 
-cmCursesLabelWidget::~cmCursesLabelWidget()
-{
-}
+cmCursesLabelWidget::~cmCursesLabelWidget() = default;
 
 bool cmCursesLabelWidget::HandleInput(int& /*key*/, cmCursesMainForm* /*fm*/,
                                       WINDOW* /*w*/)

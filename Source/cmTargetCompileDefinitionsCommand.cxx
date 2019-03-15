@@ -6,8 +6,8 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -24,7 +24,7 @@ void cmTargetCompileDefinitionsCommand::HandleMissingTarget(
   e << "Cannot specify compile definitions for target \"" << name
     << "\" "
        "which is not built by this project.";
-  this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+  this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
 }
 
 std::string cmTargetCompileDefinitionsCommand::Join(
@@ -46,6 +46,6 @@ std::string cmTargetCompileDefinitionsCommand::Join(
 bool cmTargetCompileDefinitionsCommand::HandleDirectContent(
   cmTarget* tgt, const std::vector<std::string>& content, bool, bool)
 {
-  tgt->AppendProperty("COMPILE_DEFINITIONS", this->Join(content).c_str(), this->GetBacktrace());
+  tgt->AppendProperty("COMPILE_DEFINITIONS", this->Join(content).c_str());
   return true; // Successfully handled.
 }

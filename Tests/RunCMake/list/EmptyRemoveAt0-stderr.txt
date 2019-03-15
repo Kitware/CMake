@@ -1,4 +1,4 @@
 CMake Error at EmptyRemoveAt0.cmake:2 \(list\):
-  list REMOVE_AT given empty list
+  list index: mylist, 0 out of range \(0, 0\)
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)$

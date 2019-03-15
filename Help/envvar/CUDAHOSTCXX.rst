@@ -1,6 +1,8 @@
 CUDAHOSTCXX
 -----------
 
+.. include:: ENV_VAR.txt
+
 Preferred executable for compiling host code when compiling ``CUDA``
 language files. Will only be used by CMake on the first configuration to
 determine ``CUDA`` host compiler, after which the value for ``CUDAHOSTCXX`` is

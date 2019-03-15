@@ -3,11 +3,11 @@ link_directories
 
 Add directories in which the linker will look for libraries.
 
-::
+.. code-block:: cmake
 
   link_directories([AFTER|BEFORE] directory1 [directory2 ...])
 
-Add the paths in which the linker should search for libraries.
+Adds the paths in which the linker should search for libraries.
 Relative paths given to this command are interpreted as relative to
 the current source directory, see :policy:`CMP0015`.
 

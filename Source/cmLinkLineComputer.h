@@ -16,12 +16,13 @@ class cmOutputConverter;
 
 class cmLinkLineComputer
 {
-  CM_DISABLE_COPY(cmLinkLineComputer)
-
 public:
   cmLinkLineComputer(cmOutputConverter* outputConverter,
                      cmStateDirectory const& stateDir);
   virtual ~cmLinkLineComputer();
+
+  cmLinkLineComputer(cmLinkLineComputer const&) = delete;
+  cmLinkLineComputer& operator=(cmLinkLineComputer const&) = delete;
 
   void SetUseWatcomQuote(bool useWatcomQuote);
   void SetForResponse(bool forResponse);

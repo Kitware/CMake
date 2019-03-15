@@ -13,6 +13,9 @@ if(NOT Boost_PROGRAM_OPTIONS_FOUND)
   message(FATAL_ERROR "Optional Boost component \"program_options\" not found which is unexpected")
 endif(NOT Boost_PROGRAM_OPTIONS_FOUND)
 
+add_definitions(-DCMAKE_EXPECTED_BOOST_VERSION="${Boost_VERSION}")
+add_definitions(-DCMAKE_EXPECTED_BOOST_VERSION_COMPONENTS="${Boost_VERSION_STRING}")
+
 add_executable(test_boost_tgt main.cxx)
 target_link_libraries(test_boost_tgt
                       Boost::dynamic_linking

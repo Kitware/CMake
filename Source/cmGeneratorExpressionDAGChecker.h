@@ -42,13 +42,13 @@ class cmGeneratorTarget;
 
 struct cmGeneratorExpressionDAGChecker
 {
-  cmGeneratorExpressionDAGChecker(const cmListFileBacktrace& backtrace,
+  cmGeneratorExpressionDAGChecker(cmListFileBacktrace backtrace,
                                   cmGeneratorTarget const* target,
-                                  const std::string& property,
+                                  std::string property,
                                   const GeneratorExpressionContent* content,
                                   cmGeneratorExpressionDAGChecker* parent);
   cmGeneratorExpressionDAGChecker(cmGeneratorTarget const* target,
-                                  const std::string& property,
+                                  std::string property,
                                   const GeneratorExpressionContent* content,
                                   cmGeneratorExpressionDAGChecker* parent);
 
@@ -66,6 +66,7 @@ struct cmGeneratorExpressionDAGChecker
                    const std::string& expr);
 
   bool EvaluatingGenexExpression();
+  bool EvaluatingPICExpression();
   bool EvaluatingLinkLibraries(cmGeneratorTarget const* tgt = nullptr);
 
 #define DECLARE_TRANSITIVE_PROPERTY_METHOD(METHOD) bool METHOD() const;

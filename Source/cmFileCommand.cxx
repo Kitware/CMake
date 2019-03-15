@@ -10,12 +10,14 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <cmath>
 #include <ctype.h>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <utility>
 #include <vector>
 
 #include "cmAlgorithms.h"
@@ -30,6 +32,7 @@
 #include "cmInstallType.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
@@ -176,6 +179,15 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
   if (subCommand == "LOCK") {
     return this->HandleLockCommand(args);
   }
+  if (subCommand == "SIZE") {
+    return this->HandleSizeCommand(args);
+  }
+  if (subCommand == "READ_SYMLINK") {
+    return this->HandleReadSymlinkCommand(args);
+  }
+  if (subCommand == "CREATE_LINK") {
+    return this->HandleCreateLinkCommand(args);
+  }
 
   std::string e = "does not recognize sub-command " + subCommand;
   this->SetError(e);
@@ -213,7 +225,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   // Set permissions to writable
   if (cmSystemTools::GetPermissions(fileName.c_str(), mode)) {
 #if defined(_MSC_VER) || defined(__MINGW32__)
-    writable = mode & S_IWRITE;
+    writable = (mode & S_IWRITE) != 0;
     mode_t newMode = mode | S_IWRITE;
 #else
     writable = mode & S_IWUSR;
@@ -549,7 +561,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   if (hex_conversion_enabled) {
     // TODO: should work without temp file, but just on a memory buffer
     std::string binaryFileName = this->Makefile->GetCurrentBinaryDirectory();
-    binaryFileName += cmake::GetCMakeFilesDirectory();
+    binaryFileName += "/CMakeFiles";
     binaryFileName += "/FileCommandStringsBinaryFile";
     if (cmHexFileConverter::TryConvert(fileName.c_str(),
                                        binaryFileName.c_str())) {
@@ -826,13 +838,13 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
       // Generated build system depends on glob results
       if (!configureDepends && warnConfigureLate) {
         this->Makefile->IssueMessage(
-          cmake::AUTHOR_WARNING,
+          MessageType::AUTHOR_WARNING,
           "CONFIGURE_DEPENDS flag was given after a glob expression was "
           "already evaluated.");
       }
       if (workingMode != cmake::NORMAL_MODE) {
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR,
+          MessageType::FATAL_ERROR,
           "CONFIGURE_DEPENDS is invalid for script and find package modes.");
         return false;
       }
@@ -863,12 +875,12 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         for (cmsys::Glob::Message const& globMessage : globMessages) {
           if (globMessage.type == cmsys::Glob::cyclicRecursion) {
             this->Makefile->IssueMessage(
-              cmake::AUTHOR_WARNING,
+              MessageType::AUTHOR_WARNING,
               "Cyclic recursion detected while globbing for '" + *i + "':\n" +
                 globMessage.content);
           } else {
             this->Makefile->IssueMessage(
-              cmake::FATAL_ERROR,
+              MessageType::FATAL_ERROR,
               "Error has occurred while globbing for '" + *i + "' - " +
                 globMessage.content);
             shouldExit = true;
@@ -917,7 +929,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
       // symlinks without being explicitly asked to: warn the author.
       if (warnFollowedSymlinks) {
         this->Makefile->IssueMessage(
-          cmake::AUTHOR_WARNING,
+          MessageType::AUTHOR_WARNING,
           cmPolicies::GetPolicyWarning(cmPolicies::CMP0009));
       }
       break;
@@ -1067,7 +1079,7 @@ struct cmFileCopier
     , Doing(DoingNone)
   {
   }
-  virtual ~cmFileCopier() {}
+  virtual ~cmFileCopier() = default;
 
   bool Run(std::vector<std::string> const& args);
 
@@ -1088,13 +1100,8 @@ protected:
   // Properties set by pattern and regex match rules.
   struct MatchProperties
   {
-    bool Exclude;
-    mode_t Permissions;
-    MatchProperties()
-      : Exclude(false)
-      , Permissions(0)
-    {
-    }
+    bool Exclude = false;
+    mode_t Permissions = 0;
   };
   struct MatchRule
   {
@@ -2453,7 +2460,7 @@ bool cmFileCommand::HandleRename(std::vector<std::string> const& args)
     newname += "/" + args[2];
   }
 
-  if (!cmSystemTools::RenameFile(oldname.c_str(), newname.c_str())) {
+  if (!cmSystemTools::RenameFile(oldname, newname)) {
     std::string err = cmSystemTools::GetLastSystemError();
     std::ostringstream e;
     /* clang-format off */
@@ -2525,7 +2532,7 @@ bool cmFileCommand::HandleCMakePathCommand(
       // remove double quotes in the path
       std::string& s = *j;
 
-      if (s.size() > 1 && s[0] == '\"' && s[s.size() - 1] == '\"') {
+      if (s.size() > 1 && s.front() == '\"' && s.back() == '\"') {
         s = s.substr(1, s.size() - 2);
       }
     }
@@ -2602,10 +2609,10 @@ public:
 
   bool UpdatePercentage(double value, double total, std::string& status)
   {
-    int OldPercentage = this->CurrentPercentage;
+    long OldPercentage = this->CurrentPercentage;
 
     if (total > 0.0) {
-      this->CurrentPercentage = static_cast<int>(value / total * 100.0 + 0.5);
+      this->CurrentPercentage = std::lround(value / total * 100.0);
       if (this->CurrentPercentage > 100) {
         // Avoid extra progress reports for unexpected data beyond total.
         this->CurrentPercentage = 100;
@@ -2627,7 +2634,7 @@ public:
   cmFileCommand* GetFileCommand() { return this->FileCommand; }
 
 private:
-  int CurrentPercentage;
+  long CurrentPercentage;
   cmFileCommand* FileCommand;
   std::string Text;
 };
@@ -2695,12 +2702,14 @@ private:
 #endif
 
 #define check_curl_result(result, errstr)                                     \
-  if (result != CURLE_OK) {                                                   \
-    std::string e(errstr);                                                    \
-    e += ::curl_easy_strerror(result);                                        \
-    this->SetError(e);                                                        \
-    return false;                                                             \
-  }
+  do {                                                                        \
+    if (result != CURLE_OK) {                                                 \
+      std::string e(errstr);                                                  \
+      e += ::curl_easy_strerror(result);                                      \
+      this->SetError(e);                                                      \
+      return false;                                                           \
+    }                                                                         \
+  } while (false)
 
 bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 {
@@ -2824,7 +2833,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       std::string algo = i->substr(0, pos);
       expectedHash = cmSystemTools::LowerCase(i->substr(pos + 1));
       hash = std::unique_ptr<cmCryptoHash>(cmCryptoHash::New(algo.c_str()));
-      if (!hash.get()) {
+      if (!hash) {
         std::string err = "DOWNLOAD EXPECTED_HASH given unknown ALGO: ";
         err += algo;
         this->SetError(err);
@@ -2849,7 +2858,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       // Do not return error for compatibility reason.
       std::string err = "Unexpected argument: ";
       err += *i;
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, err);
+      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, err);
     }
     ++i;
   }
@@ -2905,10 +2914,6 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   cURLEasyGuard g_curl(curl);
   ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   check_curl_result(res, "DOWNLOAD cannot set url: ");
-
-  // enable auth
-  res = ::curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-  check_curl_result(res, "DOWNLOAD cannot set httpauth: ");
 
   // enable HTTP ERROR parsing
   res = ::curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
@@ -3165,7 +3170,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
       // Do not return error for compatibility reason.
       std::string err = "Unexpected argument: ";
       err += *i;
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, err);
+      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, err);
     }
 
     ++i;
@@ -3208,10 +3213,6 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
 
   res = ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   check_curl_result(res, "UPLOAD cannot set url: ");
-
-  // enable auth
-  res = ::curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-  check_curl_result(res, "UPLOAD cannot set httpauth: ");
 
   res =
     ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cmWriteToMemoryCallback);
@@ -3423,7 +3424,8 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
   // Parse arguments
   if (args.size() < 2) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR, "sub-command LOCK requires at least two arguments.");
+      MessageType::FATAL_ERROR,
+      "sub-command LOCK requires at least two arguments.");
     return false;
   }
 
@@ -3437,7 +3439,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
       ++i;
       const char* merr = "expected FUNCTION, FILE or PROCESS after GUARD";
       if (i >= args.size()) {
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR, merr);
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, merr);
         return false;
       }
       if (args[i] == "FUNCTION") {
@@ -3449,7 +3451,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
       } else {
         std::ostringstream e;
         e << merr << ", but got:\n  \"" << args[i] << "\".";
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
         return false;
       }
 
@@ -3457,14 +3459,15 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
       ++i;
       if (i >= args.size()) {
         this->Makefile->IssueMessage(
-          cmake::FATAL_ERROR, "expected variable name after RESULT_VARIABLE");
+          MessageType::FATAL_ERROR,
+          "expected variable name after RESULT_VARIABLE");
         return false;
       }
       resultVariable = args[i];
     } else if (args[i] == "TIMEOUT") {
       ++i;
       if (i >= args.size()) {
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                      "expected timeout value after TIMEOUT");
         return false;
       }
@@ -3473,7 +3476,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
           scanned < 0) {
         std::ostringstream e;
         e << "TIMEOUT value \"" << args[i] << "\" is not an unsigned integer.";
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
         return false;
       }
       timeout = static_cast<unsigned long>(scanned);
@@ -3481,7 +3484,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
       std::ostringstream e;
       e << "expected DIRECTORY, RELEASE, GUARD, RESULT_VARIABLE or TIMEOUT\n";
       e << "but got: \"" << args[i] << "\".";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
   }
@@ -3503,7 +3506,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
     std::ostringstream e;
     e << "directory\n  \"" << parentDir << "\"\ncreation failed ";
     e << "(check permissions).";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -3511,7 +3514,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
   if (!file) {
     std::ostringstream e;
     e << "file\n  \"" << path << "\"\ncreation failed (check permissions).";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -3546,7 +3549,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
   if (resultVariable.empty() && !fileLockResult.IsOk()) {
     std::ostringstream e;
     e << "error locking file\n  \"" << path << "\"\n" << result << ".";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -3602,6 +3605,177 @@ bool cmFileCommand::HandleTimestampCommand(
   std::string result =
     timestamp.FileModificationTime(filename.c_str(), formatString, utcFlag);
   this->Makefile->AddDefinition(outputVariable, result.c_str());
+
+  return true;
+}
+
+bool cmFileCommand::HandleSizeCommand(std::vector<std::string> const& args)
+{
+  if (args.size() != 3) {
+    std::ostringstream e;
+    e << args[0] << " requires a file name and output variable";
+    this->SetError(e.str());
+    return false;
+  }
+
+  unsigned int argsIndex = 1;
+
+  const std::string& filename = args[argsIndex++];
+
+  const std::string& outputVariable = args[argsIndex++];
+
+  if (!cmSystemTools::FileExists(filename, true)) {
+    std::ostringstream e;
+    e << "SIZE requested of path that is not readable:\n  " << filename;
+    this->SetError(e.str());
+    return false;
+  }
+
+  this->Makefile->AddDefinition(
+    outputVariable,
+    std::to_string(cmSystemTools::FileLength(filename)).c_str());
+
+  return true;
+}
+
+bool cmFileCommand::HandleReadSymlinkCommand(
+  std::vector<std::string> const& args)
+{
+  if (args.size() != 3) {
+    std::ostringstream e;
+    e << args[0] << " requires a file name and output variable";
+    this->SetError(e.str());
+    return false;
+  }
+
+  const std::string& filename = args[1];
+  const std::string& outputVariable = args[2];
+
+  std::string result;
+  if (!cmSystemTools::ReadSymlink(filename, result)) {
+    std::ostringstream e;
+    e << "READ_SYMLINK requested of path that is not a symlink:\n  "
+      << filename;
+    this->SetError(e.str());
+    return false;
+  }
+
+  this->Makefile->AddDefinition(outputVariable, result.c_str());
+
+  return true;
+}
+
+bool cmFileCommand::HandleCreateLinkCommand(
+  std::vector<std::string> const& args)
+{
+  if (args.size() < 3) {
+    this->SetError("CREATE_LINK must be called with at least two additional "
+                   "arguments");
+    return false;
+  }
+
+  cmCommandArgumentsHelper argHelper;
+  cmCommandArgumentGroup group;
+
+  cmCAString linkArg(&argHelper, "CREATE_LINK");
+  cmCAString fileArg(&argHelper, nullptr);
+  cmCAString newFileArg(&argHelper, nullptr);
+
+  cmCAString resultArg(&argHelper, "RESULT", &group);
+  cmCAEnabler copyOnErrorArg(&argHelper, "COPY_ON_ERROR", &group);
+  cmCAEnabler symbolicArg(&argHelper, "SYMBOLIC", &group);
+
+  linkArg.Follows(nullptr);
+  fileArg.Follows(&linkArg);
+  newFileArg.Follows(&fileArg);
+  group.Follows(&newFileArg);
+
+  std::vector<std::string> unconsumedArgs;
+  argHelper.Parse(&args, &unconsumedArgs);
+
+  if (!unconsumedArgs.empty()) {
+    this->SetError("unknown argument: \"" + unconsumedArgs.front() + '\"');
+    return false;
+  }
+
+  std::string fileName = fileArg.GetString();
+  std::string newFileName = newFileArg.GetString();
+
+  // Output variable for storing the result.
+  const std::string& resultVar = resultArg.GetString();
+
+  // The system error message generated in the operation.
+  std::string result;
+
+  // Check if the paths are distinct.
+  if (fileName == newFileName) {
+    result = "CREATE_LINK cannot use same file and newfile";
+    if (!resultVar.empty()) {
+      this->Makefile->AddDefinition(resultVar, result.c_str());
+      return true;
+    }
+    this->SetError(result);
+    return false;
+  }
+
+  // Hard link requires original file to exist.
+  if (!symbolicArg.IsEnabled() && !cmSystemTools::FileExists(fileName)) {
+    result = "Cannot hard link \'" + fileName + "\' as it does not exist.";
+    if (!resultVar.empty()) {
+      this->Makefile->AddDefinition(resultVar, result.c_str());
+      return true;
+    }
+    this->SetError(result);
+    return false;
+  }
+
+  // Check if the new file already exists and remove it.
+  if ((cmSystemTools::FileExists(newFileName) ||
+       cmSystemTools::FileIsSymlink(newFileName)) &&
+      !cmSystemTools::RemoveFile(newFileName)) {
+    std::ostringstream e;
+    e << "Failed to create link '" << newFileName
+      << "' because existing path cannot be removed: "
+      << cmSystemTools::GetLastSystemError() << "\n";
+
+    if (!resultVar.empty()) {
+      this->Makefile->AddDefinition(resultVar, e.str().c_str());
+      return true;
+    }
+    this->SetError(e.str());
+    return false;
+  }
+
+  // Whether the operation completed successfully.
+  bool completed = false;
+
+  // Check if the command requires a symbolic link.
+  if (symbolicArg.IsEnabled()) {
+    completed = cmSystemTools::CreateSymlink(fileName, newFileName, &result);
+  } else {
+    completed = cmSystemTools::CreateLink(fileName, newFileName, &result);
+  }
+
+  // Check if copy-on-error is enabled in the arguments.
+  if (!completed && copyOnErrorArg.IsEnabled()) {
+    completed = cmSystemTools::cmCopyFile(fileName, newFileName);
+    if (!completed) {
+      result = "Copy failed: " + cmSystemTools::GetLastSystemError();
+    }
+  }
+
+  // Check if the operation was successful.
+  if (completed) {
+    result = "0";
+  } else if (resultVar.empty()) {
+    // The operation failed and the result is not reported in a variable.
+    this->SetError(result);
+    return false;
+  }
+
+  if (!resultVar.empty()) {
+    this->Makefile->AddDefinition(resultVar, result.c_str());
+  }
 
   return true;
 }

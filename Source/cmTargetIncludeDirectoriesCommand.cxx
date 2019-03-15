@@ -8,9 +8,9 @@
 #include "cmGeneratorExpression.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -27,7 +27,7 @@ void cmTargetIncludeDirectoriesCommand::HandleMissingTarget(
   std::ostringstream e;
   e << "Cannot specify include directories for target \"" << name
     << "\" which is not built by this project.";
-  this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+  this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
 }
 
 std::string cmTargetIncludeDirectoriesCommand::Join(
@@ -80,7 +80,6 @@ void cmTargetIncludeDirectoriesCommand::HandleInterfaceContent(
   if (system) {
     std::string joined = this->Join(content);
     tgt->AppendProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES",
-                        joined.c_str(),
-                        this->GetBacktrace());
+                        joined.c_str());
   }
 }

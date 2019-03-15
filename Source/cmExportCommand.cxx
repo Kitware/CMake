@@ -12,10 +12,10 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -25,9 +25,7 @@ class cmExecutionStatus;
 #endif
 
 cmExportCommand::cmExportCommand()
-  : cmCommand()
-  , ArgumentGroup()
-  , Targets(&Helper, "TARGETS")
+  : Targets(&Helper, "TARGETS")
   , Append(&Helper, "APPEND", &ArgumentGroup)
   , ExportSetName(&Helper, "EXPORT", &ArgumentGroup)
   , Namespace(&Helper, "NAMESPACE", &ArgumentGroup)
@@ -281,7 +279,7 @@ void cmExportCommand::ReportRegistryError(std::string const& msg,
     e << "Windows reported:\n"
       << "  " << cmsys::Encoding::ToNarrow(winmsg);
   }
-  this->Makefile->IssueMessage(cmake::WARNING, e.str());
+  this->Makefile->IssueMessage(MessageType::WARNING, e.str());
 }
 
 void cmExportCommand::StorePackageRegistryWin(std::string const& package,
@@ -349,7 +347,7 @@ void cmExportCommand::StorePackageRegistryDir(std::string const& package,
         << "  " << fname << "\n"
         << cmSystemTools::GetLastSystemError() << "\n";
       /* clang-format on */
-      this->Makefile->IssueMessage(cmake::WARNING, e.str());
+      this->Makefile->IssueMessage(MessageType::WARNING, e.str());
     }
   }
 }

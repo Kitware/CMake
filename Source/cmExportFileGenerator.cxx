@@ -9,6 +9,7 @@
 #include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmProperty.h"
@@ -17,7 +18,6 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"
-#include "cmake.h"
 
 #include "cmsys/FStream.hxx"
 #include <assert.h>
@@ -79,11 +79,11 @@ bool cmExportFileGenerator::GenerateImportFile()
     ap->SetCopyIfDifferent(true);
     foutPtr = std::move(ap);
   }
-  if (!foutPtr.get() || !*foutPtr) {
+  if (!foutPtr || !*foutPtr) {
     std::string se = cmSystemTools::GetLastSystemError();
     std::ostringstream e;
     e << "cannot write to file \"" << this->MainImportFile << "\": " << se;
-    cmSystemTools::Error(e.str().c_str());
+    cmSystemTools::Error(e.str());
     return false;
   }
   std::ostream& os = *foutPtr;
@@ -214,13 +214,13 @@ static bool checkInterfaceDirs(const std::string& prepro,
     if (genexPos == 0) {
       continue;
     }
-    cmake::MessageType messageType = cmake::FATAL_ERROR;
+    MessageType messageType = MessageType::FATAL_ERROR;
     std::ostringstream e;
     if (genexPos != std::string::npos) {
       if (prop == "INTERFACE_INCLUDE_DIRECTORIES") {
         switch (target->GetPolicyStatusCMP0041()) {
           case cmPolicies::WARN:
-            messageType = cmake::WARNING;
+            messageType = MessageType::WARNING;
             e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0041) << "\n";
             break;
           case cmPolicies::OLD:
@@ -275,8 +275,8 @@ static bool checkInterfaceDirs(const std::string& prepro,
                 << (inBinary ? "build" : "source") << " tree:\n    \""
                 << (inBinary ? topBinaryDir : topSourceDir) << "\""
                 << std::endl;
-              target->GetLocalGenerator()->IssueMessage(cmake::AUTHOR_WARNING,
-                                                        s.str());
+              target->GetLocalGenerator()->IssueMessage(
+                MessageType::AUTHOR_WARNING, s.str());
               CM_FALLTHROUGH;
             }
             case cmPolicies::OLD:
@@ -390,7 +390,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
          "depend on the configuration, policy values or the link interface "
          "are "
          "not supported.  Consider using target_include_directories instead.";
-    lg->IssueMessage(cmake::FATAL_ERROR, e.str());
+    lg->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
 
@@ -520,7 +520,7 @@ void getCompatibleInterfaceProperties(cmGeneratorTarget* target,
     e << "Exporting the target \"" << target->GetName()
       << "\" is not "
          "allowed since its linker language cannot be determined";
-    lg->IssueMessage(cmake::FATAL_ERROR, e.str());
+    lg->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
 
@@ -727,7 +727,8 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
   this->ReplaceInstallPrefix(input);
 
   if (!errorString.empty()) {
-    target->GetLocalGenerator()->IssueMessage(cmake::FATAL_ERROR, errorString);
+    target->GetLocalGenerator()->IssueMessage(MessageType::FATAL_ERROR,
+                                              errorString);
   }
 }
 
@@ -780,7 +781,7 @@ void cmExportFileGenerator::SetImportLinkInterface(
          "but also has old-style LINK_INTERFACE_LIBRARIES properties "
          "populated, but it was exported without the "
          "EXPORT_LINK_INTERFACE_LIBRARIES to export the old-style properties";
-    lg->IssueMessage(cmake::FATAL_ERROR, e.str());
+    lg->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
 

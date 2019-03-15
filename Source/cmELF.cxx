@@ -684,7 +684,7 @@ cmELF::cmELF(const char* fname)
   std::unique_ptr<cmsys::ifstream> fin(new cmsys::ifstream(fname));
 
   // Quit now if the file could not be opened.
-  if (!fin.get() || !*fin) {
+  if (!fin || !*fin) {
     this->ErrorMessage = "Error opening input file.";
     return;
   }

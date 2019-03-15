@@ -32,6 +32,12 @@ public:
   void SetRelativePathTopSource(const char* dir);
   void SetRelativePathTopBinary(const char* dir);
 
+  bool ContainsBoth(std::string const& local_path,
+                    std::string const& remote_path) const;
+
+  std::string ConvertToRelPathIfNotContained(
+    std::string const& local_path, std::string const& remote_path) const;
+
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesEntryBacktraces() const;
   void AppendIncludeDirectoriesEntry(std::string const& vec,
@@ -83,7 +89,6 @@ public:
   const char* GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
-  const cmListFileBacktrace & GetPropertyBacktrace(const std::string & prop) const;
 
   void AddNormalTargetName(std::string const& name);
 

@@ -10,6 +10,4 @@ cmCPackTXZGenerator::cmCPackTXZGenerator()
 {
 }
 
-cmCPackTXZGenerator::~cmCPackTXZGenerator()
-{
-}
+cmCPackTXZGenerator::~cmCPackTXZGenerator() = default;

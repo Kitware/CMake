@@ -9,9 +9,7 @@
 
 #include <vector>
 
-cmFilePathChecksum::cmFilePathChecksum()
-{
-}
+cmFilePathChecksum::cmFilePathChecksum() = default;
 
 cmFilePathChecksum::cmFilePathChecksum(std::string const& currentSrcDir,
                                        std::string const& currentBinDir,

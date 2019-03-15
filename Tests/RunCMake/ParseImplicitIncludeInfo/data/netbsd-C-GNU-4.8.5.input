@@ -1,0 +1,60 @@
+CMAKE_LANG=C
+CMAKE_C_COMPILER_ABI=ELF
+CMAKE_C_COMPILER_AR=CMAKE_C_COMPILER_AR-NOTFOUND
+CMAKE_C_COMPILER_ARCHITECTURE_ID=
+CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_C_COMPILER_ID=GNU
+CMAKE_C_COMPILER_LAUNCHER=
+CMAKE_C_COMPILER_LOADED=1
+CMAKE_C_COMPILER_RANLIB=CMAKE_C_COMPILER_RANLIB-NOTFOUND
+CMAKE_C_COMPILER_TARGET=
+CMAKE_C_COMPILER_VERSION=4.8.5
+CMAKE_C_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/pkg/bin/gmake" "cmTC_9a517/fast"
+/usr/pkg/bin/gmake -f CMakeFiles/cmTC_9a517.dir/build.make CMakeFiles/cmTC_9a517.dir/build
+gmake[1]: Entering directory '/tmp/ii/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_9a517.dir/CMakeCCompilerABI.c.o
+/usr/bin/cc   -v -o CMakeFiles/cmTC_9a517.dir/CMakeCCompilerABI.c.o   -c /usr/pkg/share/cmake-3.9/Modules/CMakeCCompilerABI.c
+Using built-in specs.
+COLLECT_GCC=/usr/bin/cc
+Target: i486--netbsdelf
+Configured with: /usr/7/src/tools/gcc/../../external/gpl3/gcc/dist/configure --target=i486--netbsdelf --enable-long-long --enable-threads --with-bugurl=http://www.NetBSD.org/Misc/send-pr.html --with-pkgversion='NetBSD nb2 20150115' --with-system-zlib --enable-__cxa_atexit --enable-libstdcxx-threads --with-arch=i486 --with-tune=nocona --enable-libstdcxx-time=rt --enable-lto --with-mpc-lib=/var/obj/mknative/i386/usr/7/src/external/lgpl3/mpc/lib/libmpc --with-mpfr-lib=/var/obj/mknative/i386/usr/7/src/external/lgpl3/mpfr/lib/libmpfr --with-gmp-lib=/var/obj/mknative/i386/usr/7/src/external/lgpl3/gmp/lib/libgmp --with-mpc-include=/usr/7/src/external/lgpl3/mpc/dist/src --with-mpfr-include=/usr/7/src/external/lgpl3/mpfr/dist/src --with-gmp-include=/usr/7/src/external/lgpl3/gmp/lib/libgmp/arch/i386 --enable-tls --disable-multilib --disable-symvers --disable-libstdcxx-pch --build=x86_64-unknown-netbsd6.0. --host=i486--netbsdelf --with-sysroot=/var/obj/mknative/i386/usr/7/src/destdir.i386
+Thread model: posix
+gcc version 4.8.5 (nb2 20150115)
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_9a517.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=nocona' '-march=i486'
+ /usr/libexec/cc1 -quiet -v /usr/pkg/share/cmake-3.9/Modules/CMakeCCompilerABI.c -quiet -dumpbase CMakeCCompilerABI.c -mtune=nocona -march=i486 -auxbase-strip CMakeFiles/cmTC_9a517.dir/CMakeCCompilerABI.c.o -version -o /var/tmp//ccXQW9Zo.s
+GNU C (nb2 20150115) version 4.8.5 (i486--netbsdelf)
+	compiled by GNU C version 4.8.5, GMP version 5.1.3, MPFR version 3.1.2, MPC version 1.0.1
+GGC heuristics: --param ggc-min-expand=73 --param ggc-min-heapsize=81803
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/include/gcc-4.8
+ /usr/include
+End of search list.
+GNU C (nb2 20150115) version 4.8.5 (i486--netbsdelf)
+	compiled by GNU C version 4.8.5, GMP version 5.1.3, MPFR version 3.1.2, MPC version 1.0.1
+GGC heuristics: --param ggc-min-expand=73 --param ggc-min-heapsize=81803
+Compiler executable checksum: 468b91b49af5cfeb6bb696ad20c66c1c
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_9a517.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=nocona' '-march=i486'
+ as -v -o CMakeFiles/cmTC_9a517.dir/CMakeCCompilerABI.c.o /var/tmp//ccXQW9Zo.s
+GNU assembler version 2.23.2 (i486--netbsdelf) using BFD version (NetBSD Binutils nb1) 2.23.2
+COMPILER_PATH=/usr/libexec/
+LIBRARY_PATH=/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_9a517.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=nocona' '-march=i486'
+Linking C executable cmTC_9a517
+/usr/pkg/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9a517.dir/link.txt --verbose=1
+/usr/bin/cc     -v CMakeFiles/cmTC_9a517.dir/CMakeCCompilerABI.c.o  -o cmTC_9a517
+Using built-in specs.
+COLLECT_GCC=/usr/bin/cc
+COLLECT_LTO_WRAPPER=/usr/libexec/lto-wrapper
+Target: i486--netbsdelf
+Configured with: /usr/7/src/tools/gcc/../../external/gpl3/gcc/dist/configure --target=i486--netbsdelf --enable-long-long --enable-threads --with-bugurl=http://www.NetBSD.org/Misc/send-pr.html --with-pkgversion='NetBSD nb2 20150115' --with-system-zlib --enable-__cxa_atexit --enable-libstdcxx-threads --with-arch=i486 --with-tune=nocona --enable-libstdcxx-time=rt --enable-lto --with-mpc-lib=/var/obj/mknative/i386/usr/7/src/external/lgpl3/mpc/lib/libmpc --with-mpfr-lib=/var/obj/mknative/i386/usr/7/src/external/lgpl3/mpfr/lib/libmpfr --with-gmp-lib=/var/obj/mknative/i386/usr/7/src/external/lgpl3/gmp/lib/libgmp --with-mpc-include=/usr/7/src/external/lgpl3/mpc/dist/src --with-mpfr-include=/usr/7/src/external/lgpl3/mpfr/dist/src --with-gmp-include=/usr/7/src/external/lgpl3/gmp/lib/libgmp/arch/i386 --enable-tls --disable-multilib --disable-symvers --disable-libstdcxx-pch --build=x86_64-unknown-netbsd6.0. --host=i486--netbsdelf --with-sysroot=/var/obj/mknative/i386/usr/7/src/destdir.i386
+Thread model: posix
+gcc version 4.8.5 (nb2 20150115)
+COMPILER_PATH=/usr/libexec/
+LIBRARY_PATH=/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_9a517' '-mtune=nocona' '-march=i486'
+ ld --eh-frame-hdr -dc -dp -e __start -dynamic-linker /usr/libexec/ld.elf_so -o cmTC_9a517 /usr/lib/crt0.o /usr/lib/crti.o /usr/lib/crtbegin.o CMakeFiles/cmTC_9a517.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/crtend.o /usr/lib/crtn.o
+gmake[1]: Leaving directory '/tmp/ii/CMakeFiles/CMakeTmp'

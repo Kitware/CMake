@@ -5,7 +5,8 @@
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
 #include "cmDocumentation.h"
-#include "cmDocumentationEntry.h"
+#include "cmDocumentationEntry.h" // IWYU pragma: keep
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -64,13 +65,6 @@ void onsig(int /*unused*/)
 }
 }
 
-void CMakeMessageHandler(const char* message, const char* title,
-                         bool& /*unused*/, void* clientData)
-{
-  cmCursesForm* self = static_cast<cmCursesForm*>(clientData);
-  self->AddError(message, title);
-}
-
 int main(int argc, char const* const* argv)
 {
   cmsys::Encoding::CommandLineArguments encoding_args =
@@ -83,19 +77,18 @@ int main(int argc, char const* const* argv)
   cmDocumentation doc;
   doc.addCMakeStandardDocSections();
   if (doc.CheckOptions(argc, argv)) {
-    cmake hcm(cmake::RoleInternal);
+    cmake hcm(cmake::RoleInternal, cmState::Unknown);
     hcm.SetHomeDirectory("");
     hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();
-    std::vector<cmDocumentationEntry> generators;
-    hcm.GetGeneratorDocumentation(generators);
+    auto generators = hcm.GetGeneratorsDocumentation();
     doc.SetName("ccmake");
     doc.SetSection("Name", cmDocumentationName);
     doc.SetSection("Usage", cmDocumentationUsage);
     if (argc == 1) {
       doc.AppendSection("Usage", cmDocumentationUsageNote);
     }
-    doc.SetSection("Generators", generators);
+    doc.AppendSection("Generators", generators);
     doc.PrependSection("Options", cmDocumentationOptions);
     return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
   }
@@ -108,7 +101,7 @@ int main(int argc, char const* const* argv)
     if (strcmp(argv[j], "-debug") == 0) {
       debug = true;
     } else {
-      args.push_back(argv[j]);
+      args.emplace_back(argv[j]);
     }
   }
 
@@ -156,7 +149,10 @@ int main(int argc, char const* const* argv)
     return 1;
   }
 
-  cmSystemTools::SetMessageCallback(CMakeMessageHandler, myform);
+  cmSystemTools::SetMessageCallback(
+    [myform](const char* message, const char* title) {
+      myform->AddError(message, title);
+    });
 
   cmCursesForm::CurrentForm = myform;
 

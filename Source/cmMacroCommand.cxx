@@ -17,11 +17,6 @@
 class cmMacroHelperCommand : public cmCommand
 {
 public:
-  cmMacroHelperCommand() {}
-
-  ///! clean up any memory allocated by the macro
-  ~cmMacroHelperCommand() override {}
-
   /**
    * This is a virtual constructor for the command.
    */
@@ -94,7 +89,7 @@ bool cmMacroHelperCommand::InvokeInitialPass(
   char argvName[60];
   for (unsigned int j = 0; j < expandedArgs.size(); ++j) {
     sprintf(argvName, "${ARGV%u}", j);
-    argVs.push_back(argvName);
+    argVs.emplace_back(argvName);
   }
   // Invoke all the functions that were collected in the block.
   cmListFileFunction newLFF;
@@ -171,7 +166,7 @@ bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       cmMacroHelperCommand* f = new cmMacroHelperCommand();
       f->Args = this->Args;
       f->Functions = this->Functions;
-      f->FilePath = this->GetStartingContext().FilePath();
+      f->FilePath = this->GetStartingContext().FilePath;
       mf.RecordPolicies(f->Policies);
       mf.GetState()->AddScriptedCommand(this->Args[0], f);
       // remove the function blocker now that the macro is defined
@@ -194,7 +189,7 @@ bool cmMacroFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
   if (lff.Name.Lower == "endmacro") {
     std::vector<std::string> expandedArguments;
     mf.ExpandArguments(lff.Arguments, expandedArguments,
-                       this->GetStartingContext().FilePath().c_str());
+                       this->GetStartingContext().FilePath.c_str());
     // if the endmacro has arguments make sure they
     // match the arguments of the macro
     if ((expandedArguments.empty() ||

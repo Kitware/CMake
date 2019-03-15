@@ -10,6 +10,4 @@ cmCPackZIPGenerator::cmCPackZIPGenerator()
 {
 }
 
-cmCPackZIPGenerator::~cmCPackZIPGenerator()
-{
-}
+cmCPackZIPGenerator::~cmCPackZIPGenerator() = default;

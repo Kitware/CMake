@@ -63,15 +63,9 @@ public:
 protected:
   struct Pair
   {
-    WatchMethod Method;
-    void* ClientData;
-    DeleteData DeleteDataCall;
-    Pair()
-      : Method(nullptr)
-      , ClientData(nullptr)
-      , DeleteDataCall(nullptr)
-    {
-    }
+    WatchMethod Method = nullptr;
+    void* ClientData = nullptr;
+    DeleteData DeleteDataCall = nullptr;
     ~Pair()
     {
       if (this->DeleteDataCall && this->ClientData) {

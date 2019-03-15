@@ -20,61 +20,74 @@ commands to populate those properties, such as :command:`target_link_libraries`,
 :command:`target_include_directories`, :command:`target_compile_definitions`
 and others.
 
-This means that they enable conditional linking, conditional
-definitions used when compiling, and conditional include directories and
-more.  The conditions may be based on the build configuration, target
-properties, platform information or any other queryable information.
+They enable conditional linking, conditional definitions used when compiling,
+conditional include directories, and more.  The conditions may be based on
+the build configuration, target properties, platform information or any other
+queryable information.
 
-Logical Expressions
-===================
+Generator expressions have the form ``$<...>``.  To avoid confusion, this page
+deviates from most of the CMake documentation in that it omits angular brackets
+``<...>`` around placeholders like ``condition``, ``string``, ``target``,
+among others.
 
-Logical expressions are used to create conditional output.  The basic
-expressions are the ``0`` and ``1`` expressions.  Because other logical
-expressions evaluate to either ``0`` or ``1``, they can be composed to
-create conditional output::
+Generator expressions can be nested, as shown in most of the examples below.
 
-  $<$<CONFIG:Debug>:DEBUG_MODE>
+.. _`Boolean Generator Expressions`:
 
-expands to ``DEBUG_MODE`` when the ``Debug`` configuration is used, and
-otherwise expands to nothing.
+Boolean Generator Expressions
+=============================
 
-Available logical expressions are:
+Boolean expressions evaluate to either ``0`` or ``1``.
+They are typically used to construct the condition in a :ref:`conditional
+generator expression<Conditional Generator Expressions>`.
 
-``$<BOOL:...>``
-  ``1`` if the ``...`` is true, else ``0``
-``$<AND:?[,?]...>``
-  ``1`` if all ``?`` are ``1``, else ``0``
+Available boolean expressions are:
 
-  The ``?`` must always be either ``0`` or ``1`` in boolean expressions.
+Logical Operators
+-----------------
 
-``$<OR:?[,?]...>``
-  ``0`` if all ``?`` are ``0``, else ``1``
-``$<NOT:?>``
-  ``0`` if ``?`` is ``1``, else ``1``
-``$<IF:?,true-value...,false-value...>``
-  ``true-value...`` if ``?`` is ``1``, ``false-value...`` if ``?`` is ``0``
-``$<STREQUAL:a,b>``
-  ``1`` if ``a`` is STREQUAL ``b``, else ``0``
-``$<EQUAL:a,b>``
-  ``1`` if ``a`` is EQUAL ``b`` in a numeric comparison, else ``0``
-``$<IN_LIST:a,b>``
-  ``1`` if ``a`` is IN_LIST ``b``, else ``0``
-``$<TARGET_EXISTS:tgt>``
-  ``1`` if ``tgt`` is an existed target name, else ``0``.
-``$<CONFIG:cfg>``
-  ``1`` if config is ``cfg``, else ``0``. This is a case-insensitive comparison.
-  The mapping in :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by
-  this expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`
-  target.
-``$<PLATFORM_ID:comp>``
-  ``1`` if the CMake-id of the platform matches ``comp``, otherwise ``0``.
-  See also the :variable:`CMAKE_SYSTEM_NAME` variable.
-``$<C_COMPILER_ID:comp>``
-  ``1`` if the CMake-id of the C compiler matches ``comp``, otherwise ``0``.
-  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
-``$<CXX_COMPILER_ID:comp>``
-  ``1`` if the CMake-id of the CXX compiler matches ``comp``, otherwise ``0``.
-  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<BOOL:string>``
+  Converts ``string`` to ``0`` or ``1`` according to the rules of the
+  :command:`if()` command.  Evaluates to ``0`` if any of the following is true:
+
+  * ``string`` is empty,
+  * ``string`` is a case-insensitive equal of
+    ``0``, ``FALSE``, ``OFF``, ``N``, ``NO``, ``IGNORE``, or ``NOTFOUND``, or
+  * ``string`` ends in the suffix ``-NOTFOUND`` (case-sensitive).
+
+  Otherwise evaluates to ``1``.
+
+``$<AND:conditions>``
+  where ``conditions`` is a comma-separated list of boolean expressions.
+  Evaluates to ``1`` if all conditions are ``1``.
+  Otherwise evaluates to ``0``.
+
+``$<OR:conditions>``
+  where ``conditions`` is a comma-separated list of boolean expressions.
+  Evaluates to ``1`` if at least one of the conditions is ``1``.
+  Otherwise evaluates to ``0``.
+
+``$<NOT:condition>``
+  ``0`` if ``condition`` is ``1``, else ``1``.
+
+String Comparisons
+------------------
+
+``$<STREQUAL:string1,string2>``
+  ``1`` if ``string1`` and ``string2`` are equal, else ``0``.
+  The comparison is case-sensitive.  For a case-insensitive comparison,
+  combine with a :ref:`string transforming generator expression
+  <String Transforming Generator Expressions>`,
+
+  .. code-block:: cmake
+
+    $<STREQUAL:$<UPPER_CASE:${foo}>,"BAR"> # "1" if ${foo} is any of "BAR", "Bar", "bar", ...
+
+``$<EQUAL:value1,value2>``
+  ``1`` if ``value1`` and ``value2`` are numerically equal, else ``0``.
+``$<IN_LIST:string,list>``
+  ``1`` if ``string`` is member of the comma-separated ``list``, else ``0``.
+  Uses case-sensitive comparisons.
 ``$<VERSION_LESS:v1,v2>``
   ``1`` if ``v1`` is a version less than ``v2``, else ``0``.
 ``$<VERSION_GREATER:v1,v2>``
@@ -85,27 +98,62 @@ Available logical expressions are:
   ``1`` if ``v1`` is a version less than or equal to ``v2``, else ``0``.
 ``$<VERSION_GREATER_EQUAL:v1,v2>``
   ``1`` if ``v1`` is a version greater than or equal to ``v2``, else ``0``.
-``$<C_COMPILER_VERSION:ver>``
-  ``1`` if the version of the C compiler matches ``ver``, otherwise ``0``.
+
+
+Variable Queries
+----------------
+
+``$<TARGET_EXISTS:target>``
+  ``1`` if ``target`` exists, else ``0``.
+``$<CONFIG:cfg>``
+  ``1`` if config is ``cfg``, else ``0``. This is a case-insensitive comparison.
+  The mapping in :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by
+  this expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`
+  target.
+``$<PLATFORM_ID:platform_id>``
+  ``1`` if the CMake-id of the platform matches ``platform_id``
+  otherwise ``0``.
+  See also the :variable:`CMAKE_SYSTEM_NAME` variable.
+``$<C_COMPILER_ID:compiler_id>``
+  ``1`` if the CMake-id of the C compiler matches ``compiler_id``,
+  otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<CXX_COMPILER_ID:compiler_id>``
+  ``1`` if the CMake-id of the CXX compiler matches ``compiler_id``,
+  otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<Fortran_COMPILER_ID:compiler_id>``
+  ``1`` if the CMake-id of the Fortran compiler matches ``compiler_id``,
+  otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<C_COMPILER_VERSION:version>``
+  ``1`` if the version of the C compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
-``$<CXX_COMPILER_VERSION:ver>``
-  ``1`` if the version of the CXX compiler matches ``ver``, otherwise ``0``.
+``$<CXX_COMPILER_VERSION:version>``
+  ``1`` if the version of the CXX compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
-``$<TARGET_POLICY:pol>``
-  ``1`` if the policy ``pol`` was NEW when the 'head' target was created,
-  else ``0``.  If the policy was not set, the warning message for the policy
+``$<Fortran_COMPILER_VERSION:version>``
+  ``1`` if the version of the Fortran compiler matches ``version``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<TARGET_POLICY:policy>``
+  ``1`` if the ``policy`` was NEW when the 'head' target was created,
+  else ``0``.  If the ``policy`` was not set, the warning message for the policy
   will be emitted. This generator expression only works for a subset of
   policies.
-``$<COMPILE_FEATURES:feature[,feature]...>``
-  ``1`` if all of the ``feature`` features are available for the 'head'
+``$<COMPILE_FEATURES:features>``
+  where ``features`` is a comma-spearated list.
+  Evaluates to ``1`` if all of the ``features`` are available for the 'head'
   target, and ``0`` otherwise. If this expression is used while evaluating
   the link implementation of a target and if any dependency transitively
   increases the required :prop_tgt:`C_STANDARD` or :prop_tgt:`CXX_STANDARD`
   for the 'head' target, an error is reported.  See the
   :manual:`cmake-compile-features(7)` manual for information on
   compile features and a list of supported compilers.
-``$<COMPILE_LANGUAGE:lang>``
-  ``1`` when the language used for compilation unit matches ``lang``,
+
+.. _`Boolean COMPILE_LANGUAGE Generator Expression`:
+
+``$<COMPILE_LANGUAGE:language>``
+  ``1`` when the language used for compilation unit matches ``language``,
   otherwise ``0``.  This expression may be used to specify compile options,
   compile definitions, and include directories for source files of a
   particular language in a target. For example:
@@ -147,18 +195,24 @@ Available logical expressions are:
     add_executable(myapp main.cpp)
     target_link_libraries(myapp myapp_c myapp_cxx)
 
-Informational Expressions
-=========================
+String-Valued Generator Expressions
+===================================
 
-These expressions expand to some information. The information may be used
-directly, eg::
+These expressions expand to some string.
+For example,
+
+.. code-block:: cmake
 
   include_directories(/usr/include/$<CXX_COMPILER_ID>/)
 
 expands to ``/usr/include/GNU/`` or ``/usr/include/Clang/`` etc, depending on
-the Id of the compiler.
+the compiler identifier.
 
-These expressions may also may be combined with logical expressions::
+String-valued expressions may also be combined with other expressions.
+Here an example for a string-valued expression within a boolean expressions
+within a conditional expression:
+
+.. code-block:: cmake
 
   $<$<VERSION_LESS:$<CXX_COMPILER_VERSION>,4.2.0>:OLD_COMPILER>
 
@@ -166,12 +220,123 @@ expands to ``OLD_COMPILER`` if the
 :variable:`CMAKE_CXX_COMPILER_VERSION <CMAKE_<LANG>_COMPILER_VERSION>` is less
 than 4.2.0.
 
-Available informational expressions are:
+And here two nested string-valued expressions:
 
-``$<CONFIGURATION>``
-  Configuration name. Deprecated. Use ``CONFIG`` instead.
+.. code-block:: cmake
+
+  -I$<JOIN:$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>, -I>
+
+generates a string of the entries in the :prop_tgt:`INCLUDE_DIRECTORIES` target
+property with each entry preceded by ``-I``.
+
+Expanding on the previous example, if one first wants to check if the
+``INCLUDE_DIRECTORIES`` property is non-empty, then it is advisable to
+introduce a helper variable to keep the code readable:
+
+.. code-block:: cmake
+
+  set(prop "$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>") # helper variable
+  $<$<BOOL:${prop}>:-I$<JOIN:${prop}, -I>>
+
+The following string-valued generator expressions are available:
+
+Escaped Characters
+------------------
+
+String literals to escape the special meaning a character would otherwise have:
+
+``$<ANGLE-R>``
+  A literal ``>``. Used for example to compare strings that contain a ``>``.
+``$<COMMA>``
+  A literal ``,``. Used for example to compare strings which contain a ``,``.
+``$<SEMICOLON>``
+  A literal ``;``. Used to prevent list expansion on an argument with ``;``.
+
+.. _`Conditional Generator Expressions`:
+
+Conditional Expressions
+-----------------------
+
+Conditional generator expressions depend on a boolean condition
+that must be ``0`` or ``1``.
+
+``$<condition:true_string>``
+  Evaluates to ``true_string`` if ``condition`` is ``1``.
+  Otherwise evaluates to the empty string.
+
+``$<IF:condition,true_string,false_string>``
+  Evaluates to ``true_string`` if ``condition`` is ``1``.
+  Otherwise evaluates to ``false_string``.
+
+Typically, the ``condition`` is a :ref:`boolean generator expression
+<Boolean Generator Expressions>`.  For instance,
+
+.. code-block:: cmake
+
+  $<$<CONFIG:Debug>:DEBUG_MODE>
+
+expands to ``DEBUG_MODE`` when the ``Debug`` configuration is used, and
+otherwise expands to the empty string.
+
+.. _`String Transforming Generator Expressions`:
+
+String Transformations
+----------------------
+
+``$<JOIN:list,string>``
+  Joins the list with the content of ``string``.
+``$<LOWER_CASE:string>``
+  Content of ``string`` converted to lower case.
+``$<UPPER_CASE:string>``
+  Content of ``string`` converted to upper case.
+
+``$<GENEX_EVAL:expr>``
+  Content of ``expr`` evaluated as a generator expression in the current
+  context. This enables consumption of generator expressions whose
+  evaluation results itself in generator expressions.
+``$<TARGET_GENEX_EVAL:tgt,expr>``
+  Content of ``expr`` evaluated as a generator expression in the context of
+  ``tgt`` target. This enables consumption of custom target properties that
+  themselves contain generator expressions.
+
+  Having the capability to evaluate generator expressions is very useful when
+  you want to manage custom properties supporting generator expressions.
+  For example:
+
+  .. code-block:: cmake
+
+    add_library(foo ...)
+
+    set_property(TARGET foo PROPERTY
+      CUSTOM_KEYS $<$<CONFIG:DEBUG>:FOO_EXTRA_THINGS>
+    )
+
+    add_custom_target(printFooKeys
+      COMMAND ${CMAKE_COMMAND} -E echo $<TARGET_PROPERTY:foo,CUSTOM_KEYS>
+    )
+
+  This naive implementation of the ``printFooKeys`` custom command is wrong
+  because ``CUSTOM_KEYS`` target property is not evaluated and the content
+  is passed as is (i.e. ``$<$<CONFIG:DEBUG>:FOO_EXTRA_THINGS>``).
+
+  To have the expected result (i.e. ``FOO_EXTRA_THINGS`` if config is
+  ``Debug``), it is required to evaluate the output of
+  ``$<TARGET_PROPERTY:foo,CUSTOM_KEYS>``:
+
+  .. code-block:: cmake
+
+    add_custom_target(printFooKeys
+      COMMAND ${CMAKE_COMMAND} -E
+        echo $<TARGET_GENEX_EVAL:foo,$<TARGET_PROPERTY:foo,CUSTOM_KEYS>>
+    )
+
+Variable Queries
+----------------
+
 ``$<CONFIG>``
-  Configuration name
+  Configuration name.
+``$<CONFIGURATION>``
+  Configuration name. Deprecated since CMake 3.0. Use ``CONFIG`` instead.
 ``$<PLATFORM_ID>``
   The CMake-id of the platform.
   See also the :variable:`CMAKE_SYSTEM_NAME` variable.
@@ -181,12 +346,31 @@ Available informational expressions are:
 ``$<CXX_COMPILER_ID>``
   The CMake-id of the CXX compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<Fortran_COMPILER_ID>``
+  The CMake-id of the Fortran compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<C_COMPILER_VERSION>``
   The version of the C compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<CXX_COMPILER_VERSION>``
   The version of the CXX compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<Fortran_COMPILER_VERSION>``
+  The version of the Fortran compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<COMPILE_LANGUAGE>``
+  The compile language of source files when evaluating compile options.
+  See :ref:`the related boolean expression
+  <Boolean COMPILE_LANGUAGE Generator Expression>`
+  ``$<COMPILE_LANGUAGE:language>``
+  for notes about the portability of this generator expression.
+
+Target-Dependent Queries
+------------------------
+
+``$<TARGET_NAME_IF_EXISTS:tgt>``
+  Expands to the ``tgt`` if the given target exists, an empty string
+  otherwise.
 ``$<TARGET_FILE:tgt>``
   Full path to main file (.exe, .so.1.2, .a) where ``tgt`` is the name of a target.
 ``$<TARGET_FILE_NAME:tgt>``
@@ -232,56 +416,21 @@ Available informational expressions are:
   expression is evaluated on.
 ``$<TARGET_PROPERTY:prop>``
   Value of the property ``prop`` on the target on which the generator
-  expression is evaluated.
+  expression is evaluated. Note that for generator expressions in
+  :ref:`Target Usage Requirements` this is the value of the property
+  on the consuming target rather than the target specifying the
+  requirement.
 ``$<INSTALL_PREFIX>``
   Content of the install prefix when the target is exported via
   :command:`install(EXPORT)` and empty otherwise.
-``$<COMPILE_LANGUAGE>``
-  The compile language of source files when evaluating compile options. See
-  the unary version for notes about portability of this generator
-  expression.
 
-Output Expressions
-==================
+Output-Related Expressions
+--------------------------
 
-These expressions generate output, in some cases depending on an input. These
-expressions may be combined with other expressions for information or logical
-comparison::
-
-  -I$<JOIN:$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>, -I>
-
-generates a string of the entries in the :prop_tgt:`INCLUDE_DIRECTORIES` target
-property with each entry preceded by ``-I``. Note that a more-complete use
-in this situation would require first checking if the INCLUDE_DIRECTORIES
-property is non-empty::
-
-  $<$<BOOL:${prop}>:-I$<JOIN:${prop}, -I>>
-
-where ``${prop}`` refers to a helper variable::
-
-  set(prop "$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>")
-
-Available output expressions are:
-
-``$<0:...>``
-  Empty string (ignores ``...``)
-``$<1:...>``
-  Content of ``...``
-``$<JOIN:list,...>``
-  Joins the list with the content of ``...``
-``$<ANGLE-R>``
-  A literal ``>``. Used to compare strings which contain a ``>`` for example.
-``$<COMMA>``
-  A literal ``,``. Used to compare strings which contain a ``,`` for example.
-``$<SEMICOLON>``
-  A literal ``;``. Used to prevent list expansion on an argument with ``;``.
 ``$<TARGET_NAME:...>``
   Marks ``...`` as being the name of a target.  This is required if exporting
   targets to multiple dependent export sets.  The ``...`` must be a literal
   name of a target- it may not contain generator expressions.
-``$<TARGET_NAME_IF_EXISTS:...>``
-  Expands to the ``...`` if the given target exists, an empty string
-  otherwise.
 ``$<LINK_ONLY:...>``
   Content of ``...`` except when evaluated in a link interface while
   propagating :ref:`Target Usage Requirements`, in which case it is the
@@ -296,10 +445,6 @@ Available output expressions are:
   Content of ``...`` when the property is exported using :command:`export`, or
   when the target is used by another target in the same buildsystem. Expands to
   the empty string otherwise.
-``$<LOWER_CASE:...>``
-  Content of ``...`` converted to lower case.
-``$<UPPER_CASE:...>``
-  Content of ``...`` converted to upper case.
 ``$<MAKE_C_IDENTIFIER:...>``
   Content of ``...`` converted to a C identifier.  The conversion follows the
   same behavior as :command:`string(MAKE_C_IDENTIFIER)`.
@@ -310,42 +455,25 @@ Available output expressions are:
   Content of ``...`` converted to shell path style. For example, slashes are
   converted to backslashes in Windows shells and drive letters are converted
   to posix paths in MSYS shells. The ``...`` must be an absolute path.
-``$<GENEX_EVAL:...>``
-  Content of ``...`` evaluated as a generator expression in the current
-  context. This enables consumption of generator expressions
-  whose evaluation results itself in generator expressions.
-``$<TARGET_GENEX_EVAL:tgt,...>``
-  Content of ``...`` evaluated as a generator expression in the context of
-  ``tgt`` target. This enables consumption of custom target properties that
-  themselves contain generator expressions.
 
-  Having the capability to evaluate generator expressions is very useful when
-  you want to manage custom properties supporting generator expressions.
-  For example:
+Debugging
+=========
 
-  .. code-block:: cmake
+Since generator expressions are evaluated during generation of the buildsystem,
+and not during processing of ``CMakeLists.txt`` files, it is not possible to
+inspect their result with the :command:`message()` command.
 
-    add_library(foo ...)
+One possible way to generate debug messages is to add a custom target,
 
-    set_property(TARGET foo PROPERTY
-      CUSTOM_KEYS $<$<CONFIG:DEBUG>:FOO_EXTRA_THINGS>
-    )
+.. code-block:: cmake
 
-    add_custom_target(printFooKeys
-      COMMAND ${CMAKE_COMMAND} -E echo $<TARGET_PROPERTY:foo,CUSTOM_KEYS>
-    )
+  add_custom_target(genexdebug COMMAND ${CMAKE_COMMAND} -E echo "$<...>")
 
-  This naive implementation of the ``printFooKeys`` custom command is wrong
-  because ``CUSTOM_KEYS`` target property is not evaluated and the content
-  is passed as is (i.e. ``$<$<CONFIG:DEBUG>:FOO_EXTRA_THINGS>``).
+The shell command ``make genexdebug`` (invoked after execution of ``cmake``)
+would then print the result of ``$<...>``.
 
-  To have the expected result (i.e. ``FOO_EXTRA_THINGS`` if config is
-  ``Debug``), it is required to evaluate the output of
-  ``$<TARGET_PROPERTY:foo,CUSTOM_KEYS>``:
+Another way is to write debug messages to a file:
 
-  .. code-block:: cmake
+.. code-block:: cmake
 
-    add_custom_target(printFooKeys
-      COMMAND ${CMAKE_COMMAND} -E
-        echo $<TARGET_GENEX_EVAL:foo,$<TARGET_PROPERTY:foo,CUSTOM_KEYS>>
-    )
+  file(GENERATE OUTPUT filename CONTENT "$<...>")

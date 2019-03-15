@@ -1,4 +1,6 @@
 
+cmake_policy(SET CMP0086 NEW)
+
 set(SWIG_EXECUTABLE "swig")
 set(SWIG_DIR "/swig")
 include(UseSWIG)

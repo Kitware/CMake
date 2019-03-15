@@ -130,7 +130,6 @@ function(create_content dir)
   # An example CTest project configuration file.
   file(WRITE ${TOP}/${dir}/CTestConfig.cmake
     "# CTest Configuration File
-set(CTEST_PROJECT_NAME TestProject)
 set(CTEST_NIGHTLY_START_TIME \"21:00:00 EDT\")
 ")
 

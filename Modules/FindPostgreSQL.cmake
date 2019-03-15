@@ -1,20 +1,34 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindPostgreSQL
-# --------------
-#
-# Find the PostgreSQL installation.
-#
-# This module defines
-#
-# ::
-#
-#   PostgreSQL_LIBRARIES - the PostgreSQL libraries needed for linking
-#   PostgreSQL_INCLUDE_DIRS - the directories of the PostgreSQL headers
-#   PostgreSQL_LIBRARY_DIRS  - the link directories for PostgreSQL libraries
-#   PostgreSQL_VERSION_STRING - the version of PostgreSQL found (since CMake 2.8.8)
+#[=======================================================================[.rst:
+FindPostgreSQL
+--------------
+
+Find the PostgreSQL installation.
+
+IMPORTED Targets
+^^^^^^^^^^^^^^^^
+
+This module defines :prop_tgt:`IMPORTED` target ``PostgreSQL::PostgreSQL``
+if PostgreSQL has been found.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module will set the following variables in your project:
+
+``PostgreSQL_FOUND``
+  True if PostgreSQL is found.
+``PostgreSQL_LIBRARIES``
+  the PostgreSQL libraries needed for linking
+``PostgreSQL_INCLUDE_DIRS``
+  the directories of the PostgreSQL headers
+``PostgreSQL_LIBRARY_DIRS``
+  the link directories for PostgreSQL libraries
+``PostgreSQL_VERSION_STRING``
+  the version of PostgreSQL found
+#]=======================================================================]
 
 # ----------------------------------------------------------------------------
 # History:
@@ -47,6 +61,8 @@
 #  PostgreSQL_INCLUDE_DIRS  - Include directories for PostgreSQL
 #  PostgreSQL_LIBRARY_DIRS  - Link directories for PostgreSQL libraries
 #  PostgreSQL_LIBRARIES     - The PostgreSQL libraries.
+#
+# The ``PostgreSQL::PostgreSQL`` imported target is also created.
 #
 # ----------------------------------------------------------------------------
 # If you have installed PostgreSQL in a non-standard location.
@@ -159,14 +175,34 @@ if (PostgreSQL_INCLUDE_DIR)
   foreach(_PG_CONFIG_HEADER ${_PG_CONFIG_HEADERS})
     if(EXISTS "${_PG_CONFIG_HEADER}")
       file(STRINGS "${_PG_CONFIG_HEADER}" pgsql_version_str
-           REGEX "^#define[\t ]+PG_VERSION[\t ]+\".*\"")
+           REGEX "^#define[\t ]+PG_VERSION_NUM[\t ]+.*")
       if(pgsql_version_str)
-        string(REGEX REPLACE "^#define[\t ]+PG_VERSION[\t ]+\"([^\"]*)\".*"
-               "\\1" PostgreSQL_VERSION_STRING "${pgsql_version_str}")
+        string(REGEX REPLACE "^#define[\t ]+PG_VERSION_NUM[\t ]+([0-9]*).*"
+               "\\1" _PostgreSQL_VERSION_NUM "${pgsql_version_str}")
         break()
       endif()
     endif()
   endforeach()
+  if (_PostgreSQL_VERSION_NUM)
+    math(EXPR _PostgreSQL_major_version "${_PostgreSQL_VERSION_NUM} / 10000")
+    math(EXPR _PostgreSQL_minor_version "${_PostgreSQL_VERSION_NUM} % 10000")
+    set(PostgreSQL_VERSION_STRING "${_PostgreSQL_major_version}.${_PostgreSQL_minor_version}")
+    unset(_PostgreSQL_major_version)
+    unset(_PostgreSQL_minor_version)
+  else ()
+    foreach(_PG_CONFIG_HEADER ${_PG_CONFIG_HEADERS})
+      if(EXISTS "${_PG_CONFIG_HEADER}")
+        file(STRINGS "${_PG_CONFIG_HEADER}" pgsql_version_str
+             REGEX "^#define[\t ]+PG_VERSION[\t ]+\".*\"")
+        if(pgsql_version_str)
+          string(REGEX REPLACE "^#define[\t ]+PG_VERSION[\t ]+\"([^\"]*)\".*"
+                 "\\1" PostgreSQL_VERSION_STRING "${pgsql_version_str}")
+          break()
+        endif()
+      endif()
+    endforeach()
+  endif ()
+  unset(_PostgreSQL_VERSION_NUM)
   unset(pgsql_version_str)
 endif()
 
@@ -179,6 +215,12 @@ set(PostgreSQL_FOUND  ${POSTGRESQL_FOUND})
 
 # Now try to get the include and library path.
 if(PostgreSQL_FOUND)
+  if (NOT TARGET PostgreSQL::PostgreSQL)
+    add_library(PostgreSQL::PostgreSQL UNKNOWN IMPORTED)
+    set_target_properties(PostgreSQL::PostgreSQL PROPERTIES
+      IMPORTED_LOCATION "${PostgreSQL_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${PostgreSQL_INCLUDE_DIR};${PostgreSQL_TYPE_INCLUDE_DIR}")
+  endif ()
   set(PostgreSQL_INCLUDE_DIRS ${PostgreSQL_INCLUDE_DIR} ${PostgreSQL_TYPE_INCLUDE_DIR} )
   set(PostgreSQL_LIBRARY_DIRS ${PostgreSQL_LIBRARY_DIR} )
   set(PostgreSQL_LIBRARIES ${PostgreSQL_LIBRARY})

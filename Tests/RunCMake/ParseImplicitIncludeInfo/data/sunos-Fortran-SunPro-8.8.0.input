@@ -1,0 +1,40 @@
+CMAKE_LANG=Fortran
+CMAKE_Fortran_COMPILER_ABI=
+CMAKE_Fortran_COMPILER_AR=
+CMAKE_Fortran_COMPILER_ARCHITECTURE_ID=
+CMAKE_Fortran_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_Fortran_COMPILER_ID=SunPro
+CMAKE_Fortran_COMPILER_LAUNCHER=
+CMAKE_Fortran_COMPILER_LOADED=1
+CMAKE_Fortran_COMPILER_RANLIB=
+CMAKE_Fortran_COMPILER_TARGET=
+CMAKE_Fortran_COMPILER_VERSION=8.8.0
+CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"/opt/csw/bin/gmake" "cmTC_adcec/fast"
+/opt/csw/bin/gmake -f CMakeFiles/cmTC_adcec.dir/build.make CMakeFiles/cmTC_adcec.dir/build
+gmake[1]: Entering directory '/tmp/ii/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_adcec.dir/CMakeFortranCompilerABI.F.o
+/opt/developerstudio12.6/bin/sunf95   -v -c /tmp/CMake/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_adcec.dir/CMakeFortranCompilerABI.F.o
+### f90: Note: NLSPATH = /opt/developerstudio12.6/bin/../lib/locale/%L/LC_MESSAGES/%N.cat:/opt/developerstudio12.6/bin/../../lib/locale/%L/LC_MESSAGES/%N.cat
+###     command line files and options (expanded):
+### -v -c /tmp/CMake/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_adcec.dir/CMakeFortranCompilerABI.F.o
+/opt/developerstudio12.6/bin/fpp -undef -vax=bslash -Y/opt/developerstudio12.6/lib/compilers/include/f95 -D__SunOS_5_10 -D__SunOS_RELEASE=0x051000 -D__SUNPRO_F90=0x880 -D__SUNPRO_F95=0x880 -D__unix -D__SVR4__ -D__svr4__ -D__SVR4 -D__sun -D__sun__ -D__SunOS -D__sparcv8 -D__sparcv8plus -D__sparc -D__sparc__ -Dsun -Dunix -Dsparc -D__SUN_PREFETCH -I/opt/developerstudio12.6/lib/compilers/include/f95 /tmp/CMake/Modules/CMakeFortranCompilerABI.F /tmp/fpp.1548681160.26580.01.f
+/opt/developerstudio12.6/lib/compilers/bin/f90comp -E/tmp/CMake/Modules/CMakeFortranCompilerABI.F -m3 -ev -xall -xivdep=loop -H "/opt/developerstudio12.6/bin/f90 -v -c " -I/opt/developerstudio12.6/lib/compilers/include/f95 -p/opt/developerstudio12.6/lib/compilers/modules -m32 -y-m32 -xmemalign=8i -iorounding=processor-defined -xhasc=yes -xdebuginfo=%none -y-xdebuginfo=%none -y-xglobalize=no -xcache=generic -y-xcache=generic -y-xassume_control=optimize -xassume_control=optimize -y-xdbggen=dwarf+incl -keepmod=yes -y-ir -y/tmp/f90comp.1548681160.26580.02.ir /tmp/fpp.1548681160.26580.01.f
+/opt/developerstudio12.6/lib/compilers/bin/cg -Qy -fsimple=0 -xarch=sparcvis2 -m32 -xchip=generic -xcache=generic -comdat -ftrap=division,invalid,overflow -xdebuginfo=%none -xbuiltin=%none -xcode=abs32 -xannotate=yes -xmemalign=8i -xprefetch=auto,explicit -xprefetch_auto_type=no%indirect_array_access -xcheck=stkovf -xcheck=noreturn -xvector=no -oo CMakeFiles/cmTC_adcec.dir/CMakeFortranCompilerABI.F.o -ir /tmp/f90comp.1548681160.26580.02.ir
+rm /tmp/f90comp.1548681160.26580.02.ir
+rm /tmp/fpp.1548681160.26580.01.f
+Linking Fortran executable cmTC_adcec
+/tmp/CMake/bin/cmake -E cmake_link_script CMakeFiles/cmTC_adcec.dir/link.txt --verbose=1
+/opt/developerstudio12.6/bin/sunf95   -v   CMakeFiles/cmTC_adcec.dir/CMakeFortranCompilerABI.F.o  -o cmTC_adcec
+### f90: Note: NLSPATH = /opt/developerstudio12.6/bin/../lib/locale/%L/LC_MESSAGES/%N.cat:/opt/developerstudio12.6/bin/../../lib/locale/%L/LC_MESSAGES/%N.cat
+###     command line files and options (expanded):
+### -v CMakeFiles/cmTC_adcec.dir/CMakeFortranCompilerABI.F.o -o cmTC_adcec
+### f90: Note: LD_LIBRARY_PATH = (null)
+### f90: Note: LD_RUN_PATH     = (null)
+### f90: Note: LD_OPTIONS      = (null)
+ln -s /opt/developerstudio12.6/lib/compilers /tmp/lib_link.1548681161.26655.01
+/usr/ccs/bin/ld -zld32=-S/tmp/lib_link.1548681161.26655.01/libldstab_ws.so -zld64=-S/tmp/lib_link.1548681161.26655.01/sparcv9/libldstab_ws.so -zld32=-S/tmp/lib_link.1548681161.26655.01/libld_annotate.so -zld64=-S/tmp/lib_link.1548681161.26655.01/sparcv9/libld_annotate.so /opt/developerstudio12.6/lib/compilers/crti.o /opt/developerstudio12.6/lib/compilers/crt1.o /opt/developerstudio12.6/lib/compilers/misalign.o /opt/developerstudio12.6/lib/compilers/values-xi.o CMakeFiles/cmTC_adcec.dir/CMakeFortranCompilerABI.F.o -o cmTC_adcec -Y "P,/opt/developerstudio12.6/lib/compilers/sparcvis2:/opt/developerstudio12.6/lib/compilers:/opt/developerstudio12.6/lib:/usr/ccs/lib:/lib:/usr/lib" -Qy -R/opt/developerstudio12.6/lib -t -lfsu -lsunmath -lmtsk -lm -lc /opt/developerstudio12.6/lib/compilers/crtn.o
+rm /tmp/lib_link.1548681161.26655.01
+gmake[1]: Leaving directory '/tmp/ii/CMakeFiles/CMakeTmp'

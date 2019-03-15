@@ -100,7 +100,7 @@ bool cmIncludeGuardCommand::InitialPass(std::vector<std::string> const& args,
         status.SetReturnInvoked();
         return true;
       }
-      cm->SetProperty(includeGuardVar, "TRUE", mf->GetBacktrace());
+      cm->SetProperty(includeGuardVar, "TRUE");
       break;
   }
 

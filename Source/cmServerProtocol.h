@@ -56,9 +56,8 @@ public:
   cmConnection* Connection;
 
 private:
-  cmServerRequest(cmServer* server, cmConnection* connection,
-                  const std::string& t, const std::string& c,
-                  const Json::Value& d);
+  cmServerRequest(cmServer* server, cmConnection* connection, std::string t,
+                  std::string c, Json::Value d);
 
   void ReportProgress(int min, int current, int max,
                       const std::string& message) const;
@@ -72,11 +71,12 @@ private:
 
 class cmServerProtocol
 {
-  CM_DISABLE_COPY(cmServerProtocol)
-
 public:
   cmServerProtocol() = default;
   virtual ~cmServerProtocol() = default;
+
+  cmServerProtocol(cmServerProtocol const&) = delete;
+  cmServerProtocol& operator=(cmServerProtocol const&) = delete;
 
   virtual std::pair<int, int> ProtocolVersion() const = 0;
   virtual bool IsExperimental() const = 0;
@@ -114,17 +114,16 @@ private:
 
   void HandleCMakeFileChanges(const std::string& path, int event, int status);
 
-protected:
   // Handle requests:
-  virtual cmServerResponse ProcessCache(const cmServerRequest& request);
-  virtual cmServerResponse ProcessCMakeInputs(const cmServerRequest& request);
-  virtual cmServerResponse ProcessCodeModel(const cmServerRequest& request);
-  virtual cmServerResponse ProcessCompute(const cmServerRequest& request);
-  virtual cmServerResponse ProcessConfigure(const cmServerRequest& request);
-  virtual cmServerResponse ProcessGlobalSettings(const cmServerRequest& request);
-  virtual cmServerResponse ProcessSetGlobalSettings(const cmServerRequest& request);
-  virtual cmServerResponse ProcessFileSystemWatchers(const cmServerRequest& request);
-  virtual cmServerResponse ProcessCTests(const cmServerRequest& request);
+  cmServerResponse ProcessCache(const cmServerRequest& request);
+  cmServerResponse ProcessCMakeInputs(const cmServerRequest& request);
+  cmServerResponse ProcessCodeModel(const cmServerRequest& request);
+  cmServerResponse ProcessCompute(const cmServerRequest& request);
+  cmServerResponse ProcessConfigure(const cmServerRequest& request);
+  cmServerResponse ProcessGlobalSettings(const cmServerRequest& request);
+  cmServerResponse ProcessSetGlobalSettings(const cmServerRequest& request);
+  cmServerResponse ProcessFileSystemWatchers(const cmServerRequest& request);
+  cmServerResponse ProcessCTests(const cmServerRequest& request);
 
   enum State
   {
@@ -141,12 +140,10 @@ protected:
   {
   public:
     GeneratorInformation() = default;
-    GeneratorInformation(const std::string& generatorName,
-                         const std::string& extraGeneratorName,
-                         const std::string& toolset,
-                         const std::string& platform,
-                         const std::string& sourceDirectory,
-                         const std::string& buildDirectory);
+    GeneratorInformation(std::string generatorName,
+                         std::string extraGeneratorName, std::string toolset,
+                         std::string platform, std::string sourceDirectory,
+                         std::string buildDirectory);
 
     void SetupGenerator(cmake* cm, std::string* errorMessage);
 
@@ -160,16 +157,4 @@ protected:
   };
 
   GeneratorInformation GeneratorInfo;
-};
-
-class cmServerProtocol2 : public cmServerProtocol1
-{
-public:
-  std::pair<int, int> ProtocolVersion() const override;
-
-protected:
-  // Handle requests:
-  virtual cmServerResponse ProcessCodeModel(const cmServerRequest& request) override ;
-  virtual cmServerResponse ProcessCTests(const cmServerRequest& request) override ;
-
 };

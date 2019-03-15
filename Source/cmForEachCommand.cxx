@@ -10,8 +10,8 @@
 #include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 cmForEachFunctionBlocker::cmForEachFunctionBlocker(cmMakefile* mf)
   : Makefile(mf)
@@ -38,7 +38,7 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       // Remove the function blocker for this scope or bail.
       std::unique_ptr<cmFunctionBlocker> fb(
         mf.RemoveFunctionBlocker(this, lff));
-      if (!fb.get()) {
+      if (!fb) {
         return false;
       }
 
@@ -164,7 +164,7 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,
           break;
         }
         sprintf(buffer, "%d", cc);
-        range.push_back(buffer);
+        range.emplace_back(buffer);
         if (cc == stop) {
           break;
         }
@@ -210,7 +210,7 @@ bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
       std::ostringstream e;
       e << "Unknown argument:\n"
         << "  " << args[i] << "\n";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return true;
     }
   }
