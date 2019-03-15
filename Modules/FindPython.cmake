@@ -28,6 +28,13 @@ is searched.
 To manage concurrent versions 3 and 2 of Python, use :module:`FindPython3` and
 :module:`FindPython2` modules rather than this one.
 
+.. note::
+
+  If components ``Interpreter`` and ``Development`` are both specified, this
+  module search only for interpreter with same platform architecture as the one
+  defined by ``CMake`` configuration. This contraint does not apply if only
+  ``Interpreter`` component is specified.
+
 Imported Targets
 ^^^^^^^^^^^^^^^^
 

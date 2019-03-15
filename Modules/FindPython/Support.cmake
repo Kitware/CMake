@@ -341,14 +341,14 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                           ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                     NAMES_PER_DIR
                     HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                    PATHS [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
-                          [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+                    PATHS [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
+                          [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
                           [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
-                          [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
+                          [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\IronPython\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
@@ -402,14 +402,14 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                           python
                           ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                     NAMES_PER_DIR
-                    PATHS [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
-                          [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+                    PATHS [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
+                          [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
                           [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
-                          [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
+                          [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
                           [HKEY_LOCAL_MACHINE\\SOFTWARE\\IronPython\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
@@ -816,14 +816,14 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION})
 
       set (_${_PYTHON_PREFIX}_REGISTRY_PATHS
-        [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
         [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
         [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
+        [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
         [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
         [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
-        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
         [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
         [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
+        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
         [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
         [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath])
 
