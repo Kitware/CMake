@@ -251,6 +251,9 @@ External Project Definition
           The lack of such deterministic behavior makes the main project lose
           traceability and repeatability.
 
+        If ``GIT_SHALLOW`` is enabled then ``GIT_TAG`` works only with
+        branch names and tags.  A commit hash is not allowed.
+
       ``GIT_REMOTE_NAME <name>``
         The optional name of the remote. If this option is not specified, it
         defaults to ``origin``.
