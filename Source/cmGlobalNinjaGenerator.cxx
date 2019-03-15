@@ -1997,7 +1997,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   std::string const dir_top_bld = tdi["dir-top-bld"].asString();
   std::string const dir_top_src = tdi["dir-top-src"].asString();
   std::string module_dir = tdi["module-dir"].asString();
-  if (!module_dir.empty()) {
+  if (!module_dir.empty() && !cmHasLiteralSuffix(module_dir, "/")) {
     module_dir += "/";
   }
   std::vector<std::string> linked_target_dirs;
