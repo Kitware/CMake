@@ -5,4 +5,6 @@
 
   specified for source:
 
-    .*/Tests/RunCMake/XcodeProject/main.c$
+    .*/Tests/RunCMake/XcodeProject/main.c
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$
