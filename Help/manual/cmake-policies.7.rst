@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.15
 .. toctree::
    :maxdepth: 1
 
+   CMP0090: export(PACKAGE) does not populate package registry by default. </policy/CMP0090>
    CMP0089: Compiler id for IBM Clang-based XL compilers is now XLClang. </policy/CMP0089>
 
 Policies Introduced by CMake 3.14
@@ -72,6 +73,7 @@ Policies Introduced by CMake 3.14
    CMP0084: The FindQt module does not exist for find_package(). </policy/CMP0084>
    CMP0083: Add PIE options when linking executable. </policy/CMP0083>
    CMP0082: Install rules from add_subdirectory() are interleaved with those in caller. </policy/CMP0082>
+
 
 Policies Introduced by CMake 3.13
 =================================
