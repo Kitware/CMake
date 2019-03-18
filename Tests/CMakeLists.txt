@@ -1445,6 +1445,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindGit)
   endif()
 
+  if(CMake_TEST_FindGLEW)
+    add_subdirectory(FindGLEW)
+  endif()
+
   if(CMake_TEST_FindGSL)
     add_subdirectory(FindGSL)
   endif()
