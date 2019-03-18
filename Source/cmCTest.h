@@ -467,8 +467,6 @@ public:
 private:
   int GenerateNotesFile(const char* files);
 
-  void InitStreams();
-
   void BlockTestErrorDiagnostics();
 
   /**

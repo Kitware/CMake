@@ -87,26 +87,26 @@ struct cmCTest::Private
     std::string Name;
   };
 
-  int RepeatTests;
-  bool RepeatUntilFail;
+  int RepeatTests = 1; // default to run each test once
+  bool RepeatUntilFail = false;
   std::string ConfigType;
   std::string ScheduleType;
   std::chrono::system_clock::time_point StopTime;
-  bool TestProgressOutput;
-  bool Verbose;
-  bool ExtraVerbose;
-  bool ProduceXML;
-  bool LabelSummary;
-  bool SubprojectSummary;
-  bool UseHTTP10;
-  bool PrintLabels;
-  bool Failover;
+  bool TestProgressOutput = false;
+  bool Verbose = false;
+  bool ExtraVerbose = false;
+  bool ProduceXML = false;
+  bool LabelSummary = true;
+  bool SubprojectSummary = true;
+  bool UseHTTP10 = false;
+  bool PrintLabels = false;
+  bool Failover = false;
 
-  bool FlushTestProgressLine;
+  bool FlushTestProgressLine = false;
 
-  bool ForceNewCTestProcess;
+  bool ForceNewCTestProcess = false;
 
-  bool RunConfigurationScript;
+  bool RunConfigurationScript = false;
 
   // these are helper classes
   cmCTestBuildHandler BuildHandler;
@@ -143,9 +143,9 @@ struct cmCTest::Private
              { "upload", &this->UploadHandler } };
   }
 
-  bool ShowOnly;
-  bool OutputAsJson;
-  int OutputAsJsonVersion;
+  bool ShowOnly = false;
+  bool OutputAsJson = false;
+  int OutputAsJsonVersion = 1;
 
   /** Map of configuration properties */
   typedef std::map<std::string, std::string> CTestConfigurationMap;
@@ -161,21 +161,21 @@ struct cmCTest::Private
   PartMapType PartMap;
 
   std::string CurrentTag;
-  bool TomorrowTag;
+  bool TomorrowTag = false;
 
-  int TestModel;
+  int TestModel = cmCTest::EXPERIMENTAL;
   std::string SpecificTrack;
 
-  cmDuration TimeOut;
+  cmDuration TimeOut = cmDuration::zero();
 
-  cmDuration GlobalTimeout;
+  cmDuration GlobalTimeout = cmDuration::zero();
 
-  int MaxTestNameWidth;
+  int MaxTestNameWidth = 30;
 
-  int ParallelLevel;
-  bool ParallelLevelSetInCli;
+  int ParallelLevel = 1;
+  bool ParallelLevelSetInCli = false;
 
-  unsigned long TestLoad;
+  unsigned long TestLoad = 0;
 
   int CompatibilityMode;
 
@@ -184,33 +184,34 @@ struct cmCTest::Private
 
   std::string NotesFiles;
 
-  bool InteractiveDebugMode;
+  bool InteractiveDebugMode = true;
 
-  bool ShortDateFormat;
+  bool ShortDateFormat = true;
 
-  bool CompressXMLFiles;
-  bool CompressTestOutput;
+  bool CompressXMLFiles = false;
+  bool CompressTestOutput = true;
 
-  std::ostream* StreamOut;
-  std::ostream* StreamErr;
+  // By default we write output to the process output streams.
+  std::ostream* StreamOut = &std::cout;
+  std::ostream* StreamErr = &std::cerr;
 
-  bool SuppressUpdatingCTestConfiguration;
+  bool SuppressUpdatingCTestConfiguration = false;
 
-  bool Debug;
-  bool ShowLineNumbers;
-  bool Quiet;
+  bool Debug = false;
+  bool ShowLineNumbers = false;
+  bool Quiet = false;
 
   std::string BuildID;
 
   std::vector<std::string> InitialCommandLineArguments;
 
-  int SubmitIndex;
+  int SubmitIndex = 0;
 
-  cmGeneratedFileStream* OutputLogFile;
-  int OutputLogFileLastTag;
+  cmGeneratedFileStream* OutputLogFile = nullptr;
+  int OutputLogFileLastTag = -1;
 
-  bool OutputTestOutputOnTestFailure;
-  bool OutputColorCode;
+  bool OutputTestOutputOnTestFailure = false;
+  bool OutputColorCode = cmCTest::ColoredOutputSupportedByConsole();
 
   std::map<std::string, std::string> Definitions;
 };
@@ -411,47 +412,6 @@ std::string cmCTest::DecodeURL(const std::string& in)
 cmCTest::cmCTest()
   : Impl(new Private)
 {
-  this->Impl->LabelSummary = true;
-  this->Impl->SubprojectSummary = true;
-  this->Impl->ParallelLevel = 1;
-  this->Impl->ParallelLevelSetInCli = false;
-  this->Impl->TestLoad = 0;
-  this->Impl->SubmitIndex = 0;
-  this->Impl->Failover = false;
-  this->Impl->ForceNewCTestProcess = false;
-  this->Impl->TomorrowTag = false;
-  this->Impl->TestProgressOutput = false;
-  this->Impl->FlushTestProgressLine = false;
-  this->Impl->Verbose = false;
-
-  this->Impl->Debug = false;
-  this->Impl->ShowLineNumbers = false;
-  this->Impl->Quiet = false;
-  this->Impl->ExtraVerbose = false;
-  this->Impl->ProduceXML = false;
-  this->Impl->ShowOnly = false;
-  this->Impl->OutputAsJson = false;
-  this->Impl->OutputAsJsonVersion = 1;
-  this->Impl->RunConfigurationScript = false;
-  this->Impl->UseHTTP10 = false;
-  this->Impl->PrintLabels = false;
-  this->Impl->CompressTestOutput = true;
-  this->Impl->TestModel = cmCTest::EXPERIMENTAL;
-  this->Impl->MaxTestNameWidth = 30;
-  this->Impl->InteractiveDebugMode = true;
-  this->Impl->TimeOut = cmDuration::zero();
-  this->Impl->GlobalTimeout = cmDuration::zero();
-  this->Impl->CompressXMLFiles = false;
-  this->Impl->ScheduleType.clear();
-  this->Impl->OutputLogFile = nullptr;
-  this->Impl->OutputLogFileLastTag = -1;
-  this->Impl->SuppressUpdatingCTestConfiguration = false;
-  this->Impl->BuildID = "";
-  this->Impl->OutputTestOutputOnTestFailure = false;
-  this->Impl->OutputColorCode = cmCTest::ColoredOutputSupportedByConsole();
-  this->Impl->RepeatTests = 1; // default to run each test once
-  this->Impl->RepeatUntilFail = false;
-
   std::string envValue;
   if (cmSystemTools::GetEnv("CTEST_OUTPUT_ON_FAILURE", envValue)) {
     this->Impl->OutputTestOutputOnTestFailure =
@@ -461,8 +421,6 @@ cmCTest::cmCTest()
   if (cmSystemTools::GetEnv("CTEST_PROGRESS_OUTPUT", envValue)) {
     this->Impl->TestProgressOutput = !cmSystemTools::IsOff(envValue);
   }
-
-  this->InitStreams();
 
   this->Impl->Parts[PartStart].SetName("Start");
   this->Impl->Parts[PartUpdate].SetName("Update");
@@ -483,8 +441,6 @@ cmCTest::cmCTest()
       ->PartMap[cmSystemTools::LowerCase(this->Impl->Parts[p].GetName())] = p;
   }
 
-  this->Impl->ShortDateFormat = true;
-
   for (auto& handler : this->Impl->GetTestingHandlers()) {
     handler->SetCTestInstance(this);
   }
@@ -495,7 +451,7 @@ cmCTest::cmCTest()
 
 cmCTest::~cmCTest()
 {
-  this->SetOutputLogFileName(nullptr);
+  delete this->Impl->OutputLogFile;
 }
 
 int cmCTest::GetParallelLevel() const
@@ -3187,13 +3143,6 @@ static const char* cmCTestStringLogType[] = { "DEBUG",
       (stream) << std::endl << file << ":" << line << " ";                    \
     }                                                                         \
   } while (false)
-
-void cmCTest::InitStreams()
-{
-  // By default we write output to the process output streams.
-  this->Impl->StreamOut = &std::cout;
-  this->Impl->StreamErr = &std::cerr;
-}
 
 void cmCTest::Log(int logType, const char* file, int line, const char* msg,
                   bool suppress)
