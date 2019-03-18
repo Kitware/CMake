@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <set>
 #include <sstream>
 #include <string>
@@ -51,21 +52,6 @@ public:
     PartCount // Update names in constructor when adding a part
   };
 
-  /** Representation of one part.  */
-  struct PartInfo
-  {
-    void SetName(const std::string& name) { this->Name = name; }
-    const std::string& GetName() const { return this->Name; }
-
-    void Enable() { this->Enabled = true; }
-    explicit operator bool() const { return this->Enabled; }
-
-    std::vector<std::string> SubmitFiles;
-
-  private:
-    bool Enabled = false;
-    std::string Name;
-  };
 #ifdef CMAKE_BUILD_WITH_CMAKE
   enum HTTPMethod
   {
@@ -468,84 +454,9 @@ public:
   void SetRunCurrentScript(bool value);
 
 private:
-  int RepeatTests;
-  bool RepeatUntilFail;
-  std::string ConfigType;
-  std::string ScheduleType;
-  std::chrono::system_clock::time_point StopTime;
-  bool TestProgressOutput;
-  bool Verbose;
-  bool ExtraVerbose;
-  bool ProduceXML;
-  bool LabelSummary;
-  bool SubprojectSummary;
-  bool UseHTTP10;
-  bool PrintLabels;
-  bool Failover;
-
-  bool FlushTestProgressLine;
-
-  bool ForceNewCTestProcess;
-
-  bool RunConfigurationScript;
-
   int GenerateNotesFile(const char* files);
 
-  // these are helper classes
-  typedef std::map<std::string, cmCTestGenericHandler*> t_TestingHandlers;
-  t_TestingHandlers TestingHandlers;
-
-  bool ShowOnly;
-  bool OutputAsJson;
-  int OutputAsJsonVersion;
-
-  /** Map of configuration properties */
-  typedef std::map<std::string, std::string> CTestConfigurationMap;
-
-  // TODO: The ctest configuration should be a hierarchy of
-  // configuration option sources: command-line, script, ini file.
-  // Then the ini file can get re-loaded whenever it changes without
-  // affecting any higher-precedence settings.
-  CTestConfigurationMap CTestConfiguration;
-  CTestConfigurationMap CTestConfigurationOverwrites;
-  PartInfo Parts[PartCount];
-  typedef std::map<std::string, Part> PartMapType;
-  PartMapType PartMap;
-
-  std::string CurrentTag;
-  bool TomorrowTag;
-
-  int TestModel;
-  std::string SpecificTrack;
-
-  cmDuration TimeOut;
-
-  cmDuration GlobalTimeout;
-
-  int MaxTestNameWidth;
-
-  int ParallelLevel;
-  bool ParallelLevelSetInCli;
-
-  unsigned long TestLoad;
-
-  int CompatibilityMode;
-
-  // information for the --build-and-test options
-  std::string BinaryDir;
-
-  std::string NotesFiles;
-
-  bool InteractiveDebugMode;
-
-  bool ShortDateFormat;
-
-  bool CompressXMLFiles;
-  bool CompressTestOutput;
-
   void InitStreams();
-  std::ostream* StreamOut;
-  std::ostream* StreamErr;
 
   void BlockTestErrorDiagnostics();
 
@@ -611,25 +522,8 @@ private:
   int RunCMakeAndTest(std::string* output);
   int ExecuteTests();
 
-  bool SuppressUpdatingCTestConfiguration;
-
-  bool Debug;
-  bool ShowLineNumbers;
-  bool Quiet;
-
-  std::string BuildID;
-
-  std::vector<std::string> InitialCommandLineArguments;
-
-  int SubmitIndex;
-
-  cmGeneratedFileStream* OutputLogFile;
-  int OutputLogFileLastTag;
-
-  bool OutputTestOutputOnTestFailure;
-  bool OutputColorCode;
-
-  std::map<std::string, std::string> Definitions;
+  struct Private;
+  std::unique_ptr<Private> Impl;
 };
 
 class cmCTestLogWrite
