@@ -900,7 +900,7 @@ void cmCTestSubmitHandler::SelectParts(std::set<cmCTest::Part> const& parts)
   }
 }
 
-void cmCTestSubmitHandler::SelectFiles(cmCTest::SetOfStrings const& files)
+void cmCTestSubmitHandler::SelectFiles(std::set<std::string> const& files)
 {
   this->Files.insert(files.begin(), files.end());
 }

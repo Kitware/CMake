@@ -79,7 +79,7 @@ protected:
   std::set<cmCTest::Part> Parts;
   bool FilesMentioned;
   bool InternalTest;
-  cmCTest::SetOfStrings Files;
+  std::set<std::string> Files;
   std::string RetryCount;
   std::string RetryDelay;
   bool CDashUpload;

@@ -62,13 +62,6 @@
 #  include <be/kernel/OS.h> /* disable_debugger() API. */
 #endif
 
-#define DEBUGOUT                                                              \
-  std::cout << __LINE__ << " ";                                               \
-  std::cout
-#define DEBUGERR                                                              \
-  std::cerr << __LINE__ << " ";                                               \
-  std::cerr
-
 struct cmCTest::Private
 {
   /** Representation of one part.  */
@@ -147,18 +140,15 @@ struct cmCTest::Private
   bool OutputAsJson = false;
   int OutputAsJsonVersion = 1;
 
-  /** Map of configuration properties */
-  typedef std::map<std::string, std::string> CTestConfigurationMap;
-
   // TODO: The ctest configuration should be a hierarchy of
   // configuration option sources: command-line, script, ini file.
   // Then the ini file can get re-loaded whenever it changes without
   // affecting any higher-precedence settings.
-  CTestConfigurationMap CTestConfiguration;
-  CTestConfigurationMap CTestConfigurationOverwrites;
+  std::map<std::string, std::string> CTestConfiguration;
+  std::map<std::string, std::string> CTestConfigurationOverwrites;
+
   PartInfo Parts[PartCount];
-  typedef std::map<std::string, Part> PartMapType;
-  PartMapType PartMap;
+  std::map<std::string, Part> PartMap;
 
   std::string CurrentTag;
   bool TomorrowTag = false;
@@ -1601,7 +1591,7 @@ void cmCTest::EndXML(cmXMLWriter& xml)
 }
 
 int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
-                                      const cmCTest::VectorOfStrings& files)
+                                      std::vector<std::string> const& files)
 {
   std::string buildname =
     cmCTest::SafeBuildIdField(this->GetCTestConfiguration("BuildName"));
@@ -1651,7 +1641,7 @@ int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
   return 1;
 }
 
-int cmCTest::GenerateNotesFile(const VectorOfStrings& files)
+int cmCTest::GenerateNotesFile(std::vector<std::string> const& files)
 {
   cmGeneratedFileStream ofs;
   if (!this->OpenOutputFile(this->Impl->CurrentTag, "Notes.xml", ofs)) {
@@ -1669,11 +1659,10 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
     return 1;
   }
 
-  VectorOfStrings files;
-
   cmCTestLog(this, OUTPUT, "Create notes file" << std::endl);
 
-  files = cmSystemTools::SplitString(cfiles, ';');
+  std::vector<std::string> const files =
+    cmSystemTools::SplitString(cfiles, ';');
   if (files.empty()) {
     return 1;
   }
@@ -1740,7 +1729,7 @@ std::string cmCTest::Base64EncodeFile(std::string const& file)
   return std::string(&encoded_buffer[0], rlen);
 }
 
-bool cmCTest::SubmitExtraFiles(const VectorOfStrings& files)
+bool cmCTest::SubmitExtraFiles(std::vector<std::string> const& files)
 {
   for (std::string const& file : files) {
     if (!cmSystemTools::FileExists(file)) {
@@ -1760,11 +1749,10 @@ bool cmCTest::SubmitExtraFiles(const char* cfiles)
     return true;
   }
 
-  VectorOfStrings files;
-
   cmCTestLog(this, OUTPUT, "Submit extra files" << std::endl);
 
-  files = cmSystemTools::SplitString(cfiles, ';');
+  std::vector<std::string> const files =
+    cmSystemTools::SplitString(cfiles, ';');
   if (files.empty()) {
     return true;
   }
@@ -2594,8 +2582,6 @@ void cmCTest::SetScheduleType(std::string const& type)
 int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
 {
   bool found = false;
-  VectorOfStrings dirs;
-  VectorOfStrings ndirs;
   cmCTestLog(this, DEBUG,
              "* Read custom CTest configuration directory: " << dir
                                                              << std::endl);

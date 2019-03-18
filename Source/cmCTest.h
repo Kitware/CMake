@@ -11,7 +11,6 @@
 #include <chrono>
 #include <map>
 #include <memory> // IWYU pragma: keep
-#include <set>
 #include <sstream>
 #include <string>
 #include <time.h>
@@ -80,9 +79,6 @@ public:
   /** Get a testing part id from its string name.  Returns PartCount
       if the string does not name a valid part.  */
   Part GetPartFromName(const char* name);
-
-  typedef std::vector<std::string> VectorOfStrings;
-  typedef std::set<std::string> SetOfStrings;
 
   /** Process Command line arguments */
   int Run(std::vector<std::string>&, std::string* output = nullptr);
@@ -365,14 +361,14 @@ public:
   void AddCTestConfigurationOverwrite(const std::string& encstr);
 
   /** Create XML file that contains all the notes specified */
-  int GenerateNotesFile(const VectorOfStrings& files);
+  int GenerateNotesFile(std::vector<std::string> const& files);
 
   /** Create XML file to indicate that build is complete */
   int GenerateDoneFile();
 
   /** Submit extra files to the server */
   bool SubmitExtraFiles(const char* files);
-  bool SubmitExtraFiles(const VectorOfStrings& files);
+  bool SubmitExtraFiles(std::vector<std::string> const& files);
 
   /** Set the output log file name */
   void SetOutputLogFileName(const char* name);
@@ -511,7 +507,8 @@ private:
   bool UpdateCTestConfiguration();
 
   /** Create note from files. */
-  int GenerateCTestNotesOutput(cmXMLWriter& xml, const VectorOfStrings& files);
+  int GenerateCTestNotesOutput(cmXMLWriter& xml,
+                               std::vector<std::string> const& files);
 
   /** Check if the argument is the one specified */
   bool CheckArgument(const std::string& arg, const char* varg1,
