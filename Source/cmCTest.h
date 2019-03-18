@@ -31,9 +31,6 @@ class cmXMLWriter;
  */
 class cmCTest
 {
-  friend class cmCTestRunTest;
-  friend class cmCTestMultiProcessHandler;
-
 public:
   typedef cmProcessOutput::Encoding Encoding;
   /** Enumerate parts of the testing and submission process.  */
@@ -454,6 +451,8 @@ public:
   bool GetSubprojectSummary() const;
 
   std::string GetCostDataFile();
+
+  bool GetOutputTestOutputOnTestFailure() const;
 
   const std::map<std::string, std::string>& GetDefinitions() const;
 

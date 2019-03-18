@@ -2825,6 +2825,11 @@ bool cmCTest::GetSubprojectSummary() const
   return this->SubprojectSummary;
 }
 
+bool cmCTest::GetOutputTestOutputOnTestFailure() const
+{
+  return this->OutputTestOutputOnTestFailure;
+}
+
 const std::map<std::string, std::string>& cmCTest::GetDefinitions() const
 {
   return this->Definitions;
