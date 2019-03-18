@@ -123,6 +123,11 @@ struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
   return lctime;
 }
 
+bool cmCTest::GetTomorrowTag() const
+{
+  return this->TomorrowTag;
+}
+
 std::string cmCTest::CleanString(const std::string& str)
 {
   std::string::size_type spos = str.find_first_not_of(" \n\t\r\f\v");
@@ -356,9 +361,19 @@ cmCTest::~cmCTest()
   this->SetOutputLogFileName(nullptr);
 }
 
+int cmCTest::GetParallelLevel() const
+{
+  return this->ParallelLevel;
+}
+
 void cmCTest::SetParallelLevel(int level)
 {
   this->ParallelLevel = level < 1 ? 1 : level;
+}
+
+unsigned long cmCTest::GetTestLoad() const
+{
+  return this->TestLoad;
 }
 
 void cmCTest::SetTestLoad(unsigned long load)
@@ -762,6 +777,11 @@ void cmCTest::SetTestModel(int mode)
 {
   this->InteractiveDebugMode = false;
   this->TestModel = mode;
+}
+
+int cmCTest::GetTestModel() const
+{
+  return this->TestModel;
 }
 
 bool cmCTest::SetTest(const char* ttype, bool report)
@@ -2416,6 +2436,11 @@ void cmCTest::SetNotesFiles(const char* notes)
   this->NotesFiles = notes;
 }
 
+std::chrono::system_clock::time_point cmCTest::GetStopTime() const
+{
+  return this->StopTime;
+}
+
 void cmCTest::SetStopTime(std::string const& time_str)
 {
 
@@ -2451,6 +2476,16 @@ void cmCTest::SetStopTime(std::string const& time_str)
   if (stop_time < current_time) {
     this->StopTime += std::chrono::hours(24);
   }
+}
+
+std::string cmCTest::GetScheduleType() const
+{
+  return this->ScheduleType;
+}
+
+void cmCTest::SetScheduleType(std::string const& type)
+{
+  this->ScheduleType = type;
 }
 
 int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
@@ -2667,6 +2702,21 @@ std::string const& cmCTest::GetConfigType()
   return this->ConfigType;
 }
 
+cmDuration cmCTest::GetTimeOut() const
+{
+  return this->TimeOut;
+}
+
+void cmCTest::SetTimeOut(cmDuration t)
+{
+  this->TimeOut = t;
+}
+
+cmDuration cmCTest::GetGlobalTimeout() const
+{
+  return this->GlobalTimeout;
+}
+
 bool cmCTest::GetShowOnly()
 {
   return this->ShowOnly;
@@ -2682,9 +2732,24 @@ int cmCTest::GetOutputAsJsonVersion()
   return this->OutputAsJsonVersion;
 }
 
+bool cmCTest::ShouldUseHTTP10() const
+{
+  return this->UseHTTP10;
+}
+
+bool cmCTest::ShouldPrintLabels() const
+{
+  return this->PrintLabels;
+}
+
 int cmCTest::GetMaxTestNameWidth() const
 {
   return this->MaxTestNameWidth;
+}
+
+void cmCTest::SetMaxTestNameWidth(int w)
+{
+  this->MaxTestNameWidth = w;
 }
 
 void cmCTest::SetProduceXML(bool v)
@@ -2695,6 +2760,11 @@ void cmCTest::SetProduceXML(bool v)
 bool cmCTest::GetProduceXML()
 {
   return this->ProduceXML;
+}
+
+std::vector<std::string>& cmCTest::GetInitialCommandLineArguments()
+{
+  return this->InitialCommandLineArguments;
 }
 
 const char* cmCTest::GetSpecificTrack()
@@ -2714,9 +2784,90 @@ void cmCTest::SetSpecificTrack(const char* track)
   this->SpecificTrack = track;
 }
 
+void cmCTest::SetFailover(bool failover)
+{
+  this->Failover = failover;
+}
+
+bool cmCTest::GetFailover() const
+{
+  return this->Failover;
+}
+
+bool cmCTest::GetTestProgressOutput() const
+{
+  return this->TestProgressOutput;
+}
+
+bool cmCTest::GetVerbose() const
+{
+  return this->Verbose;
+}
+
+bool cmCTest::GetExtraVerbose() const
+{
+  return this->ExtraVerbose;
+}
+
+void cmCTest::SetStreams(std::ostream* out, std::ostream* err)
+{
+  this->StreamOut = out;
+  this->StreamErr = err;
+}
+
+bool cmCTest::GetLabelSummary() const
+{
+  return this->LabelSummary;
+}
+
+bool cmCTest::GetSubprojectSummary() const
+{
+  return this->SubprojectSummary;
+}
+
+const std::map<std::string, std::string>& cmCTest::GetDefinitions() const
+{
+  return this->Definitions;
+}
+
+int cmCTest::GetTestRepeat() const
+{
+  return this->RepeatTests;
+}
+
+bool cmCTest::GetRepeatUntilFail() const
+{
+  return this->RepeatUntilFail;
+}
+
+void cmCTest::SetBuildID(const std::string& id)
+{
+  this->BuildID = id;
+}
+
+std::string cmCTest::GetBuildID() const
+{
+  return this->BuildID;
+}
+
 void cmCTest::AddSubmitFile(Part part, const char* name)
 {
   this->Parts[part].SubmitFiles.emplace_back(name);
+}
+
+std::vector<std::string> const& cmCTest::GetSubmitFiles(Part part) const
+{
+  return this->Parts[part].SubmitFiles;
+}
+
+void cmCTest::ClearSubmitFiles(Part part)
+{
+  this->Parts[part].SubmitFiles.clear();
+}
+
+void cmCTest::SetSuppressUpdatingCTestConfiguration(bool val)
+{
+  this->SuppressUpdatingCTestConfiguration = val;
 }
 
 void cmCTest::AddCTestConfigurationOverwrite(const std::string& overStr)

@@ -128,7 +128,7 @@ public:
   /**
    * Is the tomorrow tag set?
    */
-  bool GetTomorrowTag() { return this->TomorrowTag; }
+  bool GetTomorrowTag() const;
 
   /**
    * Try to run tests of the project
@@ -137,16 +137,16 @@ public:
 
   /** what is the configuration type, e.g. Debug, Release etc. */
   std::string const& GetConfigType();
-  cmDuration GetTimeOut() { return this->TimeOut; }
-  void SetTimeOut(cmDuration t) { this->TimeOut = t; }
+  cmDuration GetTimeOut() const;
+  void SetTimeOut(cmDuration t);
 
-  cmDuration GetGlobalTimeout() { return this->GlobalTimeout; }
+  cmDuration GetGlobalTimeout() const;
 
   /** how many test to run at the same time */
-  int GetParallelLevel() { return this->ParallelLevel; }
+  int GetParallelLevel() const;
   void SetParallelLevel(int);
 
-  unsigned long GetTestLoad() { return this->TestLoad; }
+  unsigned long GetTestLoad() const;
   void SetTestLoad(unsigned long);
 
   /**
@@ -164,7 +164,7 @@ public:
    * Set the cmake test mode (experimental, nightly, continuous).
    */
   void SetTestModel(int mode);
-  int GetTestModel() { return this->TestModel; }
+  int GetTestModel() const;
 
   std::string GetTestModelString();
   static int GetTestModelFromString(const char* str);
@@ -222,26 +222,23 @@ public:
 
   int GetOutputAsJsonVersion();
 
-  bool ShouldUseHTTP10() { return this->UseHTTP10; }
+  bool ShouldUseHTTP10() const;
 
-  bool ShouldPrintLabels() { return this->PrintLabels; }
+  bool ShouldPrintLabels() const;
 
   bool ShouldCompressTestOutput();
   bool CompressString(std::string& str);
 
-  std::chrono::system_clock::time_point GetStopTime()
-  {
-    return this->StopTime;
-  }
+  std::chrono::system_clock::time_point GetStopTime() const;
   void SetStopTime(std::string const& time);
 
   /** Used for parallel ctest job scheduling */
-  std::string GetScheduleType() { return this->ScheduleType; }
-  void SetScheduleType(std::string const& type) { this->ScheduleType = type; }
+  std::string GetScheduleType() const;
+  void SetScheduleType(std::string const& type);
 
   /** The max output width */
   int GetMaxTestNameWidth() const;
-  void SetMaxTestNameWidth(int w) { this->MaxTestNameWidth = w; }
+  void SetMaxTestNameWidth(int w);
 
   /**
    * Run a single executable command and put the stdout and stderr
@@ -364,10 +361,7 @@ public:
    * Should ctect configuration be updated. When using new style ctest
    * script, this should be true.
    */
-  void SetSuppressUpdatingCTestConfiguration(bool val)
-  {
-    this->SuppressUpdatingCTestConfiguration = val;
-  }
+  void SetSuppressUpdatingCTestConfiguration(bool val);
 
   /**
    * Add overwrite to ctest configuration.
@@ -424,62 +418,50 @@ public:
   std::string GetColorCode(Color color) const;
 
   /** The Build ID is assigned by CDash */
-  void SetBuildID(const std::string& id) { this->BuildID = id; }
-  std::string GetBuildID() { return this->BuildID; }
+  void SetBuildID(const std::string& id);
+  std::string GetBuildID() const;
 
   /** Add file to be submitted */
   void AddSubmitFile(Part part, const char* name);
-  std::vector<std::string> const& GetSubmitFiles(Part part)
-  {
-    return this->Parts[part].SubmitFiles;
-  }
-  void ClearSubmitFiles(Part part) { this->Parts[part].SubmitFiles.clear(); }
+  std::vector<std::string> const& GetSubmitFiles(Part part) const;
+  void ClearSubmitFiles(Part part);
 
   /**
    * Read the custom configuration files and apply them to the current ctest
    */
   int ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf);
 
-  std::vector<std::string>& GetInitialCommandLineArguments()
-  {
-    return this->InitialCommandLineArguments;
-  }
+  std::vector<std::string>& GetInitialCommandLineArguments();
 
   /** Set the track to submit to */
   void SetSpecificTrack(const char* track);
   const char* GetSpecificTrack();
 
-  void SetFailover(bool failover) { this->Failover = failover; }
-  bool GetFailover() { return this->Failover; }
+  void SetFailover(bool failover);
+  bool GetFailover() const;
 
-  bool GetTestProgressOutput() const { return this->TestProgressOutput; }
+  bool GetTestProgressOutput() const;
 
-  bool GetVerbose() { return this->Verbose; }
-  bool GetExtraVerbose() { return this->ExtraVerbose; }
+  bool GetVerbose() const;
+  bool GetExtraVerbose() const;
 
   /** Direct process output to given streams.  */
-  void SetStreams(std::ostream* out, std::ostream* err)
-  {
-    this->StreamOut = out;
-    this->StreamErr = err;
-  }
+  void SetStreams(std::ostream* out, std::ostream* err);
+
   void AddSiteProperties(cmXMLWriter& xml);
 
-  bool GetLabelSummary() { return this->LabelSummary; }
-  bool GetSubprojectSummary() { return this->SubprojectSummary; }
+  bool GetLabelSummary() const;
+  bool GetSubprojectSummary() const;
 
   std::string GetCostDataFile();
 
-  const std::map<std::string, std::string>& GetDefinitions()
-  {
-    return this->Definitions;
-  }
+  const std::map<std::string, std::string>& GetDefinitions() const;
 
   /** Return the number of times a test should be run */
-  int GetTestRepeat() { return this->RepeatTests; }
+  int GetTestRepeat() const;
 
   /** Return true if test should run until fail */
-  bool GetRepeatUntilFail() { return this->RepeatUntilFail; }
+  bool GetRepeatUntilFail() const;
 
   void GenerateSubprojectsOutput(cmXMLWriter& xml);
   std::vector<std::string> GetLabelsForSubprojects();
