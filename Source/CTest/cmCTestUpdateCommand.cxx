@@ -3,7 +3,7 @@
 #include "cmCTestUpdateCommand.h"
 
 #include "cmCTest.h"
-#include "cmCTestGenericHandler.h"
+#include "cmCTestUpdateHandler.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
@@ -74,12 +74,8 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "P4Options", "CTEST_P4_OPTIONS", this->Quiet);
 
-  cmCTestGenericHandler* handler =
-    this->CTest->GetInitializedHandler("update");
-  if (!handler) {
-    this->SetError("internal CTest error. Cannot instantiate update handler");
-    return nullptr;
-  }
+  cmCTestUpdateHandler* handler = this->CTest->GetUpdateHandler();
+  handler->Initialize();
   handler->SetCommand(this);
   if (source_dir.empty()) {
     this->SetError("source directory not specified. Please use SOURCE tag");

@@ -17,7 +17,16 @@
 #include <time.h>
 #include <vector>
 
-class cmCTestGenericHandler;
+class cmCTestBuildHandler;
+class cmCTestBuildAndTestHandler;
+class cmCTestCoverageHandler;
+class cmCTestScriptHandler;
+class cmCTestTestHandler;
+class cmCTestUpdateHandler;
+class cmCTestConfigureHandler;
+class cmCTestMemCheckHandler;
+class cmCTestSubmitHandler;
+class cmCTestUploadHandler;
 class cmCTestStartCommand;
 class cmGeneratedFileStream;
 class cmMakefile;
@@ -315,16 +324,18 @@ public:
               Encoding encoding = cmProcessOutput::Auto);
 
   /**
-   * Execute handler and return its result. If the handler fails, it returns
-   * negative value.
-   */
-  int ExecuteHandler(const char* handler);
-
-  /**
    * Get the handler object
    */
-  cmCTestGenericHandler* GetHandler(const char* handler);
-  cmCTestGenericHandler* GetInitializedHandler(const char* handler);
+  cmCTestBuildHandler* GetBuildHandler();
+  cmCTestBuildAndTestHandler* GetBuildAndTestHandler();
+  cmCTestCoverageHandler* GetCoverageHandler();
+  cmCTestScriptHandler* GetScriptHandler();
+  cmCTestTestHandler* GetTestHandler();
+  cmCTestUpdateHandler* GetUpdateHandler();
+  cmCTestConfigureHandler* GetConfigureHandler();
+  cmCTestMemCheckHandler* GetMemCheckHandler();
+  cmCTestSubmitHandler* GetSubmitHandler();
+  cmCTestUploadHandler* GetUploadHandler();
 
   /**
    * Set the CTest variable from CMake variable

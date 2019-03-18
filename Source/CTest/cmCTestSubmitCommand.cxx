@@ -3,7 +3,6 @@
 #include "cmCTestSubmitCommand.h"
 
 #include "cmCTest.h"
-#include "cmCTestGenericHandler.h"
 #include "cmCTestSubmitHandler.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -63,12 +62,8 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     }
   }
 
-  cmCTestGenericHandler* handler =
-    this->CTest->GetInitializedHandler("submit");
-  if (!handler) {
-    this->SetError("internal CTest error. Cannot instantiate submit handler");
-    return nullptr;
-  }
+  cmCTestSubmitHandler* handler = this->CTest->GetSubmitHandler();
+  handler->Initialize();
 
   // If no FILES or PARTS given, *all* PARTS are submitted by default.
   //
@@ -90,38 +85,30 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     // But FILES with no PARTS mentioned should just submit the FILES
     // without any of the default parts.
     //
-    std::set<cmCTest::Part> noParts;
-    static_cast<cmCTestSubmitHandler*>(handler)->SelectParts(noParts);
-
-    static_cast<cmCTestSubmitHandler*>(handler)->SelectFiles(this->Files);
+    handler->SelectParts(std::set<cmCTest::Part>());
+    handler->SelectFiles(this->Files);
   }
 
   // If a PARTS option was given, select only the named parts for submission.
   //
   if (this->PartsMentioned) {
-    static_cast<cmCTestSubmitHandler*>(handler)->SelectParts(this->Parts);
+    handler->SelectParts(this->Parts);
   }
 
   // Pass along any HTTPHEADER to the handler if this option was given.
   if (!this->HttpHeaders.empty()) {
-    static_cast<cmCTestSubmitHandler*>(handler)->SetHttpHeaders(
-      this->HttpHeaders);
+    handler->SetHttpHeaders(this->HttpHeaders);
   }
 
-  static_cast<cmCTestSubmitHandler*>(handler)->SetOption(
-    "RetryDelay", this->RetryDelay.c_str());
-  static_cast<cmCTestSubmitHandler*>(handler)->SetOption(
-    "RetryCount", this->RetryCount.c_str());
-  static_cast<cmCTestSubmitHandler*>(handler)->SetOption(
-    "InternalTest", this->InternalTest ? "ON" : "OFF");
+  handler->SetOption("RetryDelay", this->RetryDelay.c_str());
+  handler->SetOption("RetryCount", this->RetryCount.c_str());
+  handler->SetOption("InternalTest", this->InternalTest ? "ON" : "OFF");
 
   handler->SetQuiet(this->Quiet);
 
   if (this->CDashUpload) {
-    static_cast<cmCTestSubmitHandler*>(handler)->SetOption(
-      "CDashUploadFile", this->CDashUploadFile.c_str());
-    static_cast<cmCTestSubmitHandler*>(handler)->SetOption(
-      "CDashUploadType", this->CDashUploadType.c_str());
+    handler->SetOption("CDashUploadFile", this->CDashUploadFile.c_str());
+    handler->SetOption("CDashUploadType", this->CDashUploadType.c_str());
   }
   return handler;
 }

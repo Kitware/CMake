@@ -4,6 +4,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
+#include "cmCTestTestHandler.h"
 #include "cmDuration.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
@@ -140,5 +141,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
 
 cmCTestGenericHandler* cmCTestTestCommand::InitializeActualHandler()
 {
-  return this->CTest->GetInitializedHandler("test");
+  cmCTestTestHandler* handler = this->CTest->GetTestHandler();
+  handler->Initialize();
+  return handler;
 }

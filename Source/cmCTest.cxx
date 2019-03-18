@@ -1010,58 +1010,54 @@ bool cmCTest::CTestFileExists(const std::string& filename)
   return cmSystemTools::FileExists(testingDir);
 }
 
-cmCTestGenericHandler* cmCTest::GetInitializedHandler(const char* handler)
+cmCTestBuildHandler* cmCTest::GetBuildHandler()
 {
-  if (cmCTestGenericHandler* testHandler = this->GetHandler(handler)) {
-    testHandler->Initialize();
-    return testHandler;
-  }
-  return nullptr;
+  return &this->Impl->BuildHandler;
 }
 
-cmCTestGenericHandler* cmCTest::GetHandler(const char* handler)
+cmCTestBuildAndTestHandler* cmCTest::GetBuildAndTestHandler()
 {
-  if (strcmp(handler, "build") == 0) {
-    return &this->Impl->BuildHandler;
-  }
-  if (strcmp(handler, "buildtest") == 0) {
-    return &this->Impl->BuildAndTestHandler;
-  }
-  if (strcmp(handler, "coverage") == 0) {
-    return &this->Impl->CoverageHandler;
-  }
-  if (strcmp(handler, "script") == 0) {
-    return &this->Impl->ScriptHandler;
-  }
-  if (strcmp(handler, "test") == 0) {
-    return &this->Impl->TestHandler;
-  }
-  if (strcmp(handler, "update") == 0) {
-    return &this->Impl->UpdateHandler;
-  }
-  if (strcmp(handler, "configure") == 0) {
-    return &this->Impl->ConfigureHandler;
-  }
-  if (strcmp(handler, "memcheck") == 0) {
-    return &this->Impl->MemCheckHandler;
-  }
-  if (strcmp(handler, "submit") == 0) {
-    return &this->Impl->SubmitHandler;
-  }
-  if (strcmp(handler, "upload") == 0) {
-    return &this->Impl->UploadHandler;
-  }
-  return nullptr;
+  return &this->Impl->BuildAndTestHandler;
 }
 
-int cmCTest::ExecuteHandler(const char* shandler)
+cmCTestCoverageHandler* cmCTest::GetCoverageHandler()
 {
-  cmCTestGenericHandler* handler = this->GetHandler(shandler);
-  if (!handler) {
-    return -1;
-  }
-  handler->Initialize();
-  return handler->ProcessHandler();
+  return &this->Impl->CoverageHandler;
+}
+
+cmCTestScriptHandler* cmCTest::GetScriptHandler()
+{
+  return &this->Impl->ScriptHandler;
+}
+
+cmCTestTestHandler* cmCTest::GetTestHandler()
+{
+  return &this->Impl->TestHandler;
+}
+
+cmCTestUpdateHandler* cmCTest::GetUpdateHandler()
+{
+  return &this->Impl->UpdateHandler;
+}
+
+cmCTestConfigureHandler* cmCTest::GetConfigureHandler()
+{
+  return &this->Impl->ConfigureHandler;
+}
+
+cmCTestMemCheckHandler* cmCTest::GetMemCheckHandler()
+{
+  return &this->Impl->MemCheckHandler;
+}
+
+cmCTestSubmitHandler* cmCTest::GetSubmitHandler()
+{
+  return &this->Impl->SubmitHandler;
+}
+
+cmCTestUploadHandler* cmCTest::GetUploadHandler()
+{
+  return &this->Impl->UploadHandler;
 }
 
 int cmCTest::ProcessSteps()
@@ -1075,7 +1071,7 @@ int cmCTest::ProcessSteps()
   }
   if (this->Impl->Parts[PartUpdate] &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
-    cmCTestGenericHandler* uphandler = this->GetHandler("update");
+    cmCTestUpdateHandler* uphandler = this->GetUpdateHandler();
     uphandler->SetPersistentOption(
       "SourceDirectory",
       this->GetCTestConfiguration("SourceDirectory").c_str());
@@ -1089,35 +1085,35 @@ int cmCTest::ProcessSteps()
   }
   if (this->Impl->Parts[PartConfigure] &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
-    if (this->GetHandler("configure")->ProcessHandler() < 0) {
+    if (this->GetConfigureHandler()->ProcessHandler() < 0) {
       res |= cmCTest::CONFIGURE_ERRORS;
     }
   }
   if (this->Impl->Parts[PartBuild] &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
-    if (this->GetHandler("build")->ProcessHandler() < 0) {
+    if (this->GetBuildHandler()->ProcessHandler() < 0) {
       res |= cmCTest::BUILD_ERRORS;
     }
   }
   if ((this->Impl->Parts[PartTest] || notest) &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
-    if (this->GetHandler("test")->ProcessHandler() < 0) {
+    if (this->GetTestHandler()->ProcessHandler() < 0) {
       res |= cmCTest::TEST_ERRORS;
     }
   }
   if (this->Impl->Parts[PartCoverage] &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
-    if (this->GetHandler("coverage")->ProcessHandler() < 0) {
+    if (this->GetCoverageHandler()->ProcessHandler() < 0) {
       res |= cmCTest::COVERAGE_ERRORS;
     }
   }
   if (this->Impl->Parts[PartMemCheck] &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
-    if (this->GetHandler("memcheck")->ProcessHandler() < 0) {
+    if (this->GetMemCheckHandler()->ProcessHandler() < 0) {
       res |= cmCTest::MEMORY_ERRORS;
     }
   }
@@ -1149,7 +1145,7 @@ int cmCTest::ProcessSteps()
   }
   if (this->Impl->Parts[PartSubmit]) {
     this->UpdateCTestConfiguration();
-    if (this->GetHandler("submit")->ProcessHandler() < 0) {
+    if (this->GetSubmitHandler()->ProcessHandler() < 0) {
       res |= cmCTest::SUBMIT_ERRORS;
     }
   }
@@ -1579,8 +1575,7 @@ void cmCTest::StartXML(cmXMLWriter& xml, bool append)
 
 void cmCTest::AddSiteProperties(cmXMLWriter& xml)
 {
-  cmCTestScriptHandler* ch =
-    static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+  cmCTestScriptHandler* ch = this->GetScriptHandler();
   cmake* cm = ch->GetCMake();
   // if no CMake then this is the old style script and props like
   // this will not work anyway.
@@ -2172,78 +2167,75 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   if (this->CheckArgument(arg, "-I", "--tests-information") &&
       i < args.size() - 1) {
     i++;
-    this->GetHandler("test")->SetPersistentOption("TestsToRunInformation",
-                                                  args[i].c_str());
-    this->GetHandler("memcheck")
-      ->SetPersistentOption("TestsToRunInformation", args[i].c_str());
+    this->GetTestHandler()->SetPersistentOption("TestsToRunInformation",
+                                                args[i].c_str());
+    this->GetMemCheckHandler()->SetPersistentOption("TestsToRunInformation",
+                                                    args[i].c_str());
   }
   if (this->CheckArgument(arg, "-U", "--union")) {
-    this->GetHandler("test")->SetPersistentOption("UseUnion", "true");
-    this->GetHandler("memcheck")->SetPersistentOption("UseUnion", "true");
+    this->GetTestHandler()->SetPersistentOption("UseUnion", "true");
+    this->GetMemCheckHandler()->SetPersistentOption("UseUnion", "true");
   }
   if (this->CheckArgument(arg, "-R", "--tests-regex") && i < args.size() - 1) {
     i++;
-    this->GetHandler("test")->SetPersistentOption("IncludeRegularExpression",
-                                                  args[i].c_str());
-    this->GetHandler("memcheck")
-      ->SetPersistentOption("IncludeRegularExpression", args[i].c_str());
+    this->GetTestHandler()->SetPersistentOption("IncludeRegularExpression",
+                                                args[i].c_str());
+    this->GetMemCheckHandler()->SetPersistentOption("IncludeRegularExpression",
+                                                    args[i].c_str());
   }
   if (this->CheckArgument(arg, "-L", "--label-regex") && i < args.size() - 1) {
     i++;
-    this->GetHandler("test")->SetPersistentOption("LabelRegularExpression",
-                                                  args[i].c_str());
-    this->GetHandler("memcheck")
-      ->SetPersistentOption("LabelRegularExpression", args[i].c_str());
+    this->GetTestHandler()->SetPersistentOption("LabelRegularExpression",
+                                                args[i].c_str());
+    this->GetMemCheckHandler()->SetPersistentOption("LabelRegularExpression",
+                                                    args[i].c_str());
   }
   if (this->CheckArgument(arg, "-LE", "--label-exclude") &&
       i < args.size() - 1) {
     i++;
-    this->GetHandler("test")->SetPersistentOption(
+    this->GetTestHandler()->SetPersistentOption(
       "ExcludeLabelRegularExpression", args[i].c_str());
-    this->GetHandler("memcheck")
-      ->SetPersistentOption("ExcludeLabelRegularExpression", args[i].c_str());
+    this->GetMemCheckHandler()->SetPersistentOption(
+      "ExcludeLabelRegularExpression", args[i].c_str());
   }
 
   if (this->CheckArgument(arg, "-E", "--exclude-regex") &&
       i < args.size() - 1) {
     i++;
-    this->GetHandler("test")->SetPersistentOption("ExcludeRegularExpression",
-                                                  args[i].c_str());
-    this->GetHandler("memcheck")
-      ->SetPersistentOption("ExcludeRegularExpression", args[i].c_str());
+    this->GetTestHandler()->SetPersistentOption("ExcludeRegularExpression",
+                                                args[i].c_str());
+    this->GetMemCheckHandler()->SetPersistentOption("ExcludeRegularExpression",
+                                                    args[i].c_str());
   }
 
   if (this->CheckArgument(arg, "-FA", "--fixture-exclude-any") &&
       i < args.size() - 1) {
     i++;
-    this->GetHandler("test")->SetPersistentOption(
+    this->GetTestHandler()->SetPersistentOption(
       "ExcludeFixtureRegularExpression", args[i].c_str());
-    this->GetHandler("memcheck")
-      ->SetPersistentOption("ExcludeFixtureRegularExpression",
-                            args[i].c_str());
+    this->GetMemCheckHandler()->SetPersistentOption(
+      "ExcludeFixtureRegularExpression", args[i].c_str());
   }
   if (this->CheckArgument(arg, "-FS", "--fixture-exclude-setup") &&
       i < args.size() - 1) {
     i++;
-    this->GetHandler("test")->SetPersistentOption(
+    this->GetTestHandler()->SetPersistentOption(
       "ExcludeFixtureSetupRegularExpression", args[i].c_str());
-    this->GetHandler("memcheck")
-      ->SetPersistentOption("ExcludeFixtureSetupRegularExpression",
-                            args[i].c_str());
+    this->GetMemCheckHandler()->SetPersistentOption(
+      "ExcludeFixtureSetupRegularExpression", args[i].c_str());
   }
   if (this->CheckArgument(arg, "-FC", "--fixture-exclude-cleanup") &&
       i < args.size() - 1) {
     i++;
-    this->GetHandler("test")->SetPersistentOption(
+    this->GetTestHandler()->SetPersistentOption(
       "ExcludeFixtureCleanupRegularExpression", args[i].c_str());
-    this->GetHandler("memcheck")
-      ->SetPersistentOption("ExcludeFixtureCleanupRegularExpression",
-                            args[i].c_str());
+    this->GetMemCheckHandler()->SetPersistentOption(
+      "ExcludeFixtureCleanupRegularExpression", args[i].c_str());
   }
 
   if (this->CheckArgument(arg, "--rerun-failed")) {
-    this->GetHandler("test")->SetPersistentOption("RerunFailed", "true");
-    this->GetHandler("memcheck")->SetPersistentOption("RerunFailed", "true");
+    this->GetTestHandler()->SetPersistentOption("RerunFailed", "true");
+    this->GetMemCheckHandler()->SetPersistentOption("RerunFailed", "true");
   }
   return true;
 }
@@ -2292,8 +2284,7 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
       i < args.size() - 1) {
     this->Impl->RunConfigurationScript = true;
     i++;
-    cmCTestScriptHandler* ch =
-      static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+    cmCTestScriptHandler* ch = this->GetScriptHandler();
     // -SR is an internal argument, -SP should be ignored when it is passed
     if (!SRArgumentSpecified) {
       ch->AddConfigurationScript(args[i].c_str(), false);
@@ -2304,16 +2295,14 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
     SRArgumentSpecified = true;
     this->Impl->RunConfigurationScript = true;
     i++;
-    cmCTestScriptHandler* ch =
-      static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+    cmCTestScriptHandler* ch = this->GetScriptHandler();
     ch->AddConfigurationScript(args[i].c_str(), true);
   }
 
   if (this->CheckArgument(arg, "-S", "--script") && i < args.size() - 1) {
     this->Impl->RunConfigurationScript = true;
     i++;
-    cmCTestScriptHandler* ch =
-      static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+    cmCTestScriptHandler* ch = this->GetScriptHandler();
     // -SR is an internal argument, -S should be ignored when it is passed
     if (!SRArgumentSpecified) {
       ch->AddConfigurationScript(args[i].c_str(), true);
@@ -2537,8 +2526,8 @@ int cmCTest::ExecuteTests()
       handler->SetVerbose(this->Impl->ExtraVerbose);
       handler->SetSubmitIndex(this->Impl->SubmitIndex);
     }
-    this->GetHandler("script")->SetVerbose(this->Impl->Verbose);
-    res = this->GetHandler("script")->ProcessHandler();
+    this->GetScriptHandler()->SetVerbose(this->Impl->Verbose);
+    res = this->GetScriptHandler()->ProcessHandler();
     if (res != 0) {
       cmCTestLog(this, DEBUG,
                  "running script failing returning: " << res << std::endl);
@@ -2573,8 +2562,7 @@ int cmCTest::ExecuteTests()
 int cmCTest::RunCMakeAndTest(std::string* output)
 {
   this->Impl->Verbose = true;
-  cmCTestBuildAndTestHandler* handler =
-    static_cast<cmCTestBuildAndTestHandler*>(this->GetHandler("buildtest"));
+  cmCTestBuildAndTestHandler* handler = this->GetBuildAndTestHandler();
   int retv = handler->ProcessHandler();
   *output = handler->GetOutput();
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -3336,14 +3324,7 @@ std::string cmCTest::GetColorCode(Color color) const
 
 cmDuration cmCTest::GetRemainingTimeAllowed()
 {
-  if (!this->GetHandler("script")) {
-    return cmCTest::MaxDuration();
-  }
-
-  cmCTestScriptHandler* ch =
-    static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
-
-  return ch->GetRemainingTimeAllowed();
+  return this->GetScriptHandler()->GetRemainingTimeAllowed();
 }
 
 cmDuration cmCTest::MaxDuration()
@@ -3353,10 +3334,7 @@ cmDuration cmCTest::MaxDuration()
 
 void cmCTest::SetRunCurrentScript(bool value)
 {
-  cmCTestScriptHandler* ch =
-    static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
-
-  ch->SetRunCurrentScript(value);
+  this->GetScriptHandler()->SetRunCurrentScript(value);
 }
 
 void cmCTest::OutputTestErrors(std::vector<char> const& process_output)
