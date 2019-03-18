@@ -60,22 +60,6 @@ public:
     PartCount // Update names in constructor when adding a part
   };
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  enum HTTPMethod
-  {
-    HTTP_GET,
-    HTTP_POST,
-    HTTP_PUT
-  };
-
-  /**
-   * Perform an HTTP request.
-   */
-  static int HTTPRequest(std::string url, HTTPMethod method,
-                         std::string& response, std::string const& fields = "",
-                         std::string const& putFile = "", int timeout = 0);
-#endif
-
   /** Get a testing part id from its string name.  Returns PartCount
       if the string does not name a valid part.  */
   Part GetPartFromName(const char* name);
@@ -340,9 +324,6 @@ public:
                                               const char* dconfig,
                                               const std::string& cmake_var,
                                               bool suppress = false);
-
-  /** Make string safe to be sent as a URL */
-  static std::string MakeURLSafe(const std::string&);
 
   /** Decode a URL to the original string.  */
   static std::string DecodeURL(const std::string&);
