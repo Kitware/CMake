@@ -109,8 +109,39 @@ struct cmCTest::Private
   bool RunConfigurationScript;
 
   // these are helper classes
-  typedef std::map<std::string, cmCTestGenericHandler*> t_TestingHandlers;
-  t_TestingHandlers TestingHandlers;
+  cmCTestBuildHandler BuildHandler;
+  cmCTestBuildAndTestHandler BuildAndTestHandler;
+  cmCTestCoverageHandler CoverageHandler;
+  cmCTestScriptHandler ScriptHandler;
+  cmCTestTestHandler TestHandler;
+  cmCTestUpdateHandler UpdateHandler;
+  cmCTestConfigureHandler ConfigureHandler;
+  cmCTestMemCheckHandler MemCheckHandler;
+  cmCTestSubmitHandler SubmitHandler;
+  cmCTestUploadHandler UploadHandler;
+
+  std::vector<cmCTestGenericHandler*> GetTestingHandlers()
+  {
+    return { &this->BuildHandler,     &this->BuildAndTestHandler,
+             &this->CoverageHandler,  &this->ScriptHandler,
+             &this->TestHandler,      &this->UpdateHandler,
+             &this->ConfigureHandler, &this->MemCheckHandler,
+             &this->SubmitHandler,    &this->UploadHandler };
+  }
+
+  std::map<std::string, cmCTestGenericHandler*> GetNamedTestingHandlers()
+  {
+    return { { "build", &this->BuildHandler },
+             { "buildtest", &this->BuildAndTestHandler },
+             { "coverage", &this->CoverageHandler },
+             { "script", &this->ScriptHandler },
+             { "test", &this->TestHandler },
+             { "update", &this->UpdateHandler },
+             { "configure", &this->ConfigureHandler },
+             { "memcheck", &this->MemCheckHandler },
+             { "submit", &this->SubmitHandler },
+             { "upload", &this->UploadHandler } };
+  }
 
   bool ShowOnly;
   bool OutputAsJson;
@@ -454,19 +485,8 @@ cmCTest::cmCTest()
 
   this->Impl->ShortDateFormat = true;
 
-  this->Impl->TestingHandlers["build"] = new cmCTestBuildHandler;
-  this->Impl->TestingHandlers["buildtest"] = new cmCTestBuildAndTestHandler;
-  this->Impl->TestingHandlers["coverage"] = new cmCTestCoverageHandler;
-  this->Impl->TestingHandlers["script"] = new cmCTestScriptHandler;
-  this->Impl->TestingHandlers["test"] = new cmCTestTestHandler;
-  this->Impl->TestingHandlers["update"] = new cmCTestUpdateHandler;
-  this->Impl->TestingHandlers["configure"] = new cmCTestConfigureHandler;
-  this->Impl->TestingHandlers["memcheck"] = new cmCTestMemCheckHandler;
-  this->Impl->TestingHandlers["submit"] = new cmCTestSubmitHandler;
-  this->Impl->TestingHandlers["upload"] = new cmCTestUploadHandler;
-
-  for (auto& handler : this->Impl->TestingHandlers) {
-    handler.second->SetCTestInstance(this);
+  for (auto& handler : this->Impl->GetTestingHandlers()) {
+    handler->SetCTestInstance(this);
   }
 
   // Make sure we can capture the build tool output.
@@ -475,7 +495,6 @@ cmCTest::cmCTest()
 
 cmCTest::~cmCTest()
 {
-  cmDeleteAll(this->Impl->TestingHandlers);
   this->SetOutputLogFileName(nullptr);
 }
 
@@ -993,21 +1012,46 @@ bool cmCTest::CTestFileExists(const std::string& filename)
 
 cmCTestGenericHandler* cmCTest::GetInitializedHandler(const char* handler)
 {
-  auto const it = this->Impl->TestingHandlers.find(handler);
-  if (it == this->Impl->TestingHandlers.end()) {
-    return nullptr;
+  if (cmCTestGenericHandler* testHandler = this->GetHandler(handler)) {
+    testHandler->Initialize();
+    return testHandler;
   }
-  it->second->Initialize();
-  return it->second;
+  return nullptr;
 }
 
 cmCTestGenericHandler* cmCTest::GetHandler(const char* handler)
 {
-  auto const it = this->Impl->TestingHandlers.find(handler);
-  if (it == this->Impl->TestingHandlers.end()) {
-    return nullptr;
+  if (strcmp(handler, "build") == 0) {
+    return &this->Impl->BuildHandler;
   }
-  return it->second;
+  if (strcmp(handler, "buildtest") == 0) {
+    return &this->Impl->BuildAndTestHandler;
+  }
+  if (strcmp(handler, "coverage") == 0) {
+    return &this->Impl->CoverageHandler;
+  }
+  if (strcmp(handler, "script") == 0) {
+    return &this->Impl->ScriptHandler;
+  }
+  if (strcmp(handler, "test") == 0) {
+    return &this->Impl->TestHandler;
+  }
+  if (strcmp(handler, "update") == 0) {
+    return &this->Impl->UpdateHandler;
+  }
+  if (strcmp(handler, "configure") == 0) {
+    return &this->Impl->ConfigureHandler;
+  }
+  if (strcmp(handler, "memcheck") == 0) {
+    return &this->Impl->MemCheckHandler;
+  }
+  if (strcmp(handler, "submit") == 0) {
+    return &this->Impl->SubmitHandler;
+  }
+  if (strcmp(handler, "upload") == 0) {
+    return &this->Impl->UploadHandler;
+  }
+  return nullptr;
 }
 
 int cmCTest::ExecuteHandler(const char* shandler)
@@ -2045,11 +2089,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     i++;
     long outputSize;
     if (cmSystemTools::StringToLong(args[i].c_str(), &outputSize)) {
-      if (cmCTestTestHandler* pCTestTestHandler =
-            static_cast<cmCTestTestHandler*>(
-              this->Impl->TestingHandlers["test"])) {
-        pCTestTestHandler->SetTestOutputSizePassed(int(outputSize));
-      }
+      this->Impl->TestHandler.SetTestOutputSizePassed(int(outputSize));
     } else {
       cmCTestLog(this, WARNING,
                  "Invalid value for '--test-output-size-passed': " << args[i]
@@ -2061,11 +2101,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     i++;
     long outputSize;
     if (cmSystemTools::StringToLong(args[i].c_str(), &outputSize)) {
-      if (cmCTestTestHandler* pCTestTestHandler =
-            static_cast<cmCTestTestHandler*>(
-              this->Impl->TestingHandlers["test"])) {
-        pCTestTestHandler->SetTestOutputSizeFailed(int(outputSize));
-      }
+      this->Impl->TestHandler.SetTestOutputSizeFailed(int(outputSize));
     } else {
       cmCTestLog(this, WARNING,
                  "Invalid value for '--test-output-size-failed': " << args[i]
@@ -2383,8 +2419,8 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     // pass the argument to all the handlers as well, but i may no longer be
     // set to what it was originally so I'm not sure this is working as
     // intended
-    for (auto& handler : this->Impl->TestingHandlers) {
-      if (!handler.second->ProcessCommandLineArguments(arg, i, args)) {
+    for (auto& handler : this->Impl->GetTestingHandlers()) {
+      if (!handler->ProcessCommandLineArguments(arg, i, args)) {
         cmCTestLog(this, ERROR_MESSAGE,
                    "Problem parsing command line arguments within a handler");
         return 0;
@@ -2497,9 +2533,9 @@ int cmCTest::ExecuteTests()
     if (this->Impl->ExtraVerbose) {
       cmCTestLog(this, OUTPUT, "* Extra verbosity turned on" << std::endl);
     }
-    for (auto& handler : this->Impl->TestingHandlers) {
-      handler.second->SetVerbose(this->Impl->ExtraVerbose);
-      handler.second->SetSubmitIndex(this->Impl->SubmitIndex);
+    for (auto& handler : this->Impl->GetTestingHandlers()) {
+      handler->SetVerbose(this->Impl->ExtraVerbose);
+      handler->SetSubmitIndex(this->Impl->SubmitIndex);
     }
     this->GetHandler("script")->SetVerbose(this->Impl->Verbose);
     res = this->GetHandler("script")->ProcessHandler();
@@ -2513,9 +2549,9 @@ int cmCTest::ExecuteTests()
     // and Verbose is always on in this case
     this->Impl->ExtraVerbose = this->Impl->Verbose;
     this->Impl->Verbose = true;
-    for (auto& handler : this->Impl->TestingHandlers) {
-      handler.second->SetVerbose(this->Impl->Verbose);
-      handler.second->SetSubmitIndex(this->Impl->SubmitIndex);
+    for (auto& handler : this->Impl->GetTestingHandlers()) {
+      handler->SetVerbose(this->Impl->Verbose);
+      handler->SetSubmitIndex(this->Impl->SubmitIndex);
     }
     std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
     if (!this->Initialize(cwd.c_str(), nullptr)) {
@@ -2663,7 +2699,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
   }
 
   if (found) {
-    for (auto& handler : this->Impl->TestingHandlers) {
+    for (auto& handler : this->Impl->GetNamedTestingHandlers()) {
       cmCTestLog(this, DEBUG,
                  "* Read custom CTest configuration vectors for handler: "
                    << handler.first << " (" << handler.second << ")"
