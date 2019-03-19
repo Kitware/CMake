@@ -1114,6 +1114,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           return 1;
         }
       } else if (flags.find_first_of('c') != std::string::npos) {
+        if (files.empty()) {
+          cmSystemTools::Message("tar: No files or directories specified",
+                                 "Warning");
+        }
         if (!cmSystemTools::CreateTar(outFile.c_str(), files, compress,
                                       verbose, mtime, format)) {
           cmSystemTools::Error("Problem creating tar: " + outFile);

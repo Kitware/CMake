@@ -1658,20 +1658,18 @@ bool cmSystemTools::CreateTar(const char* outFileName,
 
   a.SetMTime(mtime);
   a.SetVerbose(verbose);
+  bool tarCreatedSuccessfully = true;
   for (auto path : files) {
     if (cmSystemTools::FileIsFullPath(path)) {
       // Get the relative path to the file.
       path = cmSystemTools::RelativePath(cwd, path);
     }
     if (!a.Add(path)) {
-      break;
+      cmSystemTools::Error(a.GetError());
+      tarCreatedSuccessfully = false;
     }
   }
-  if (!a) {
-    cmSystemTools::Error(a.GetError());
-    return false;
-  }
-  return true;
+  return tarCreatedSuccessfully;
 #else
   (void)outFileName;
   (void)files;
