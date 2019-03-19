@@ -1022,7 +1022,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
                         this->CreateString(fileType));
 
   // Store the file path relative to the top of the source tree.
-  std::string path = this->RelativeToSource(fullpath.c_str());
+  std::string path = this->RelativeToSource(fullpath);
   std::string name = cmSystemTools::GetFilenameName(path);
   const char* sourceTree =
     (cmSystemTools::FileIsFullPath(path.c_str()) ? "<absolute>"
@@ -3063,7 +3063,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   // Point Xcode at the top of the source tree.
   {
     std::string pdir =
-      this->RelativeToBinary(root->GetCurrentSourceDirectory().c_str());
+      this->RelativeToBinary(root->GetCurrentSourceDirectory());
     this->RootObject->AddAttribute("projectDirPath", this->CreateString(pdir));
     this->RootObject->AddAttribute("projectRoot", this->CreateString(""));
   }
@@ -3457,7 +3457,7 @@ void cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
       cmXCodeScheme schm(obj, testables[targetName],
                          this->CurrentConfigurationTypes, this->XcodeVersion);
       schm.WriteXCodeSharedScheme(xcProjDir,
-                                  this->RelativeToSource(xcProjDir.c_str()));
+                                  this->RelativeToSource(xcProjDir));
     }
   }
 }
@@ -3559,7 +3559,7 @@ std::string cmGlobalXCodeGenerator::ConvertToRelativeForMake(
   return cmSystemTools::ConvertToOutputPath(p);
 }
 
-std::string cmGlobalXCodeGenerator::RelativeToSource(const char* p)
+std::string cmGlobalXCodeGenerator::RelativeToSource(const std::string& p)
 {
   // We force conversion because Xcode breakpoints do not work unless
   // they are in a file named relative to the source tree.
@@ -3567,7 +3567,7 @@ std::string cmGlobalXCodeGenerator::RelativeToSource(const char* p)
     cmSystemTools::JoinPath(this->ProjectSourceDirectoryComponents), p);
 }
 
-std::string cmGlobalXCodeGenerator::RelativeToBinary(const char* p)
+std::string cmGlobalXCodeGenerator::RelativeToBinary(const std::string& p)
 {
   return this->CurrentLocalGenerator->MaybeConvertToRelativePath(
     cmSystemTools::JoinPath(this->ProjectOutputDirectoryComponents), p);
