@@ -208,9 +208,6 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
            ENV MIKMODDIR
            ENV SDLSOUNDDIR
            ENV SDLDIR
-           /sw
-           /opt/local
-           /opt/csw
            /opt
          PATH_SUFFIXES
            lib
@@ -228,9 +225,6 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
            ENV MODPLUGDIR
            ENV SDLSOUNDDIR
            ENV SDLDIR
-           /sw
-           /opt/local
-           /opt/csw
            /opt
          PATH_SUFFIXES
            lib
@@ -250,9 +244,6 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
            ENV OGGDIR
            ENV SDLSOUNDDIR
            ENV SDLDIR
-           /sw
-           /opt/local
-           /opt/csw
            /opt
          PATH_SUFFIXES
            lib
@@ -268,9 +259,6 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
            ENV VORBISDIR
            ENV SDLSOUNDDIR
            ENV SDLDIR
-           /sw
-           /opt/local
-           /opt/csw
            /opt
          PATH_SUFFIXES
            lib
@@ -289,9 +277,6 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
            ENV SMPEGDIR
            ENV SDLSOUNDDIR
            ENV SDLDIR
-           /sw
-           /opt/local
-           /opt/csw
            /opt
          PATH_SUFFIXES
            lib
@@ -310,9 +295,6 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
            ENV FLACDIR
            ENV SDLSOUNDDIR
            ENV SDLDIR
-           /sw
-           /opt/local
-           /opt/csw
            /opt
          PATH_SUFFIXES
            lib
@@ -334,9 +316,6 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
            ENV SPEEXDIR
            ENV SDLSOUNDDIR
            ENV SDLDIR
-           /sw
-           /opt/local
-           /opt/csw
            /opt
          PATH_SUFFIXES
            lib
@@ -356,9 +335,6 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
              ENV SPEEXDIR
              ENV SDLSOUNDDIR
              ENV SDLDIR
-             /sw
-             /opt/local
-             /opt/csw
              /opt
            PATH_SUFFIXES lib
            )

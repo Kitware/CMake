@@ -63,9 +63,6 @@ find_path(OPENAL_INCLUDE_DIR al.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
   /opt
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Creative\ Labs\\OpenAL\ 1.1\ Software\ Development\ Kit\\1.00.0000;InstallDir]
 )
@@ -84,9 +81,6 @@ find_library(OPENAL_LIBRARY
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
-  /sw
-  /opt/local
-  /opt/csw
   /opt
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Creative\ Labs\\OpenAL\ 1.1\ Software\ Development\ Kit\\1.00.0000;InstallDir]
 )
