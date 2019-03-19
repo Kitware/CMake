@@ -374,12 +374,6 @@ public:
   static std::string ForceToRelativePath(std::string const& local_path,
                                          std::string const& remote_path);
 
-  /** Joins two paths while collapsing x/../ parts
-   * For example CollapseCombinedPath("a/b/c", "../../d") results in "a/d"
-   */
-  static std::string CollapseCombinedPath(std::string const& dir,
-                                          std::string const& file);
-
 #ifdef CMAKE_BUILD_WITH_CMAKE
   /** Remove an environment variable */
   static bool UnsetEnv(const char* value);
