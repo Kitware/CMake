@@ -23,6 +23,7 @@
 #  include "cmsys/ConsoleBuf.hxx"
 #endif
 
+#include <cassert>
 #include <ctype.h>
 #include <iostream>
 #include <string.h>
@@ -72,11 +73,20 @@ static const char* cmDocumentationUsageNote[][2] = {
     "                   the build commands to be executed. \n"                \
     "  --             = Pass remaining options to the native tool.\n"
 
+#  define CMAKE_INSTALL_OPTIONS                                               \
+    "  <dir>              = Project binary directory to install.\n"           \
+    "  --config <cfg>     = For multi-configuration tools, choose <cfg>.\n"   \
+    "  --component <comp> = Component-based install. Only install <comp>.\n"  \
+    "  --prefix <prefix>  = The installation prefix CMAKE_INSTALL_PREFIX.\n"  \
+    "  --strip            = Performing install/strip.\n"                      \
+    "  -v --verbose       = Enable verbose output.\n"
+
 static const char* cmDocumentationOptions[][2] = {
   CMAKE_STANDARD_OPTIONS_TABLE,
   { "-E", "CMake command mode." },
   { "-L[A][H]", "List non-advanced cached variables." },
   { "--build <dir>", "Build a CMake-generated project binary tree." },
+  { "--install <dir>", "Install a CMake-generated project binary tree." },
   { "--open <dir>", "Open generated project in the associated application." },
   { "-N", "View mode only." },
   { "-P <file>", "Process script mode." },
@@ -115,6 +125,7 @@ static int do_command(int ac, char const* const* av)
 
 int do_cmake(int ac, char const* const* av);
 static int do_build(int ac, char const* const* av);
+static int do_install(int ac, char const* const* av);
 static int do_open(int ac, char const* const* av);
 
 static cmMakefile* cmakemainGetMakefile(cmake* cm)
@@ -188,6 +199,9 @@ int main(int ac, char const* const* av)
   if (ac > 1) {
     if (strcmp(av[1], "--build") == 0) {
       return do_build(ac, av);
+    }
+    if (strcmp(av[1], "--install") == 0) {
+      return do_install(ac, av);
     }
     if (strcmp(av[1], "--open") == 0) {
       return do_open(ac, av);
@@ -522,6 +536,117 @@ static int do_build(int ac, char const* const* av)
   });
   return cm.Build(jobs, dir, targets, config, nativeOptions, cleanFirst,
                   verbose);
+#endif
+}
+
+static int do_install(int ac, char const* const* av)
+{
+#ifndef CMAKE_BUILD_WITH_CMAKE
+  std::cerr << "This cmake does not support --install\n";
+  return -1;
+#else
+  assert(1 < ac);
+
+  std::string config;
+  std::string component;
+  std::string prefix;
+  std::string dir;
+  bool strip = false;
+  bool verbose = cmSystemTools::HasEnv("VERBOSE");
+
+  enum Doing
+  {
+    DoingNone,
+    DoingDir,
+    DoingConfig,
+    DoingComponent,
+    DoingPrefix,
+  };
+
+  Doing doing = DoingDir;
+
+  for (int i = 2; i < ac; ++i) {
+    if (strcmp(av[i], "--config") == 0) {
+      doing = DoingConfig;
+    } else if (strcmp(av[i], "--component") == 0) {
+      doing = DoingComponent;
+    } else if (strcmp(av[i], "--prefix") == 0) {
+      doing = DoingPrefix;
+    } else if (strcmp(av[i], "--strip") == 0) {
+      strip = true;
+      doing = DoingNone;
+    } else if ((strcmp(av[i], "--verbose") == 0) ||
+               (strcmp(av[i], "-v") == 0)) {
+      verbose = true;
+      doing = DoingNone;
+    } else {
+      switch (doing) {
+        case DoingDir:
+          dir = cmSystemTools::CollapseFullPath(av[i]);
+          doing = DoingNone;
+          break;
+        case DoingConfig:
+          config = av[i];
+          doing = DoingNone;
+          break;
+        case DoingComponent:
+          component = av[i];
+          doing = DoingNone;
+          break;
+        case DoingPrefix:
+          prefix = av[i];
+          doing = DoingNone;
+          break;
+        default:
+          std::cerr << "Unknown argument " << av[i] << std::endl;
+          dir.clear();
+          break;
+      }
+    }
+  }
+
+  if (dir.empty()) {
+    std::cerr << "Usage: cmake --install <dir> "
+                 "[options]\nOptions:\n" CMAKE_INSTALL_OPTIONS;
+    return 1;
+  }
+
+  cmake cm(cmake::RoleScript, cmState::Script);
+
+  cmSystemTools::SetMessageCallback(
+    [&cm](const std::string& msg, const char* title) {
+      cmakemainMessageCallback(msg, title, &cm);
+    });
+  cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
+    cmakemainProgressCallback(msg, prog, &cm);
+  });
+  cm.SetHomeDirectory("");
+  cm.SetHomeOutputDirectory("");
+  cm.SetDebugOutputOn(verbose);
+  cm.SetWorkingMode(cmake::SCRIPT_MODE);
+
+  std::vector<std::string> args{ av[0] };
+
+  if (!prefix.empty()) {
+    args.emplace_back("-DCMAKE_INSTALL_PREFIX=" + prefix);
+  }
+
+  if (!component.empty()) {
+    args.emplace_back("-DCMAKE_INSTALL_COMPONENT=" + component);
+  }
+
+  if (strip) {
+    args.emplace_back("-DCMAKE_INSTALL_DO_STRIP=1");
+  }
+
+  if (!config.empty()) {
+    args.emplace_back("-DCMAKE_INSTALL_CONFIG_NAME=" + config);
+  }
+
+  args.emplace_back("-P");
+  args.emplace_back(dir + "/cmake_install.cmake");
+
+  return cm.Run(args) ? 1 : 0;
 #endif
 }
 

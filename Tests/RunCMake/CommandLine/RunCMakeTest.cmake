@@ -54,6 +54,14 @@ run_cmake_command(build-bad-dir
 run_cmake_command(build-bad-generator
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-bad-generator)
 
+run_cmake_command(install-no-dir
+  ${CMAKE_COMMAND} --install)
+run_cmake_command(install-bad-dir
+  ${CMAKE_COMMAND} --install dir-does-not-exist)
+run_cmake_command(install-options-to-vars
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-install-options-to-vars
+  --strip --prefix /var/test --config sample --component pack)
+
 run_cmake_command(cache-bad-entry
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-bad-entry/)
 run_cmake_command(cache-empty-entry
