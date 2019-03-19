@@ -287,7 +287,7 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
     if (l.compare(0, 2, "-l") == 0) {
       fout << "    \"" << l << "\"" << std::endl;
     } else {
-      std::string rl = cmSystemTools::CollapseCombinedPath(cbd, l);
+      std::string rl = cmSystemTools::CollapseFullPath(l, cbd);
       fout << "    -l\"" << rl << "\"" << std::endl;
     }
   }

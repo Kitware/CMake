@@ -158,11 +158,11 @@ std::string cmQtAutoGenerator::FileSystem::GetRealPath(
   return cmSystemTools::GetRealPath(filename);
 }
 
-std::string cmQtAutoGenerator::FileSystem::CollapseCombinedPath(
-  std::string const& dir, std::string const& file)
+std::string cmQtAutoGenerator::FileSystem::CollapseFullPath(
+  std::string const& file, std::string const& dir)
 {
   std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::CollapseCombinedPath(dir, file);
+  return cmSystemTools::CollapseFullPath(file, dir);
 }
 
 void cmQtAutoGenerator::FileSystem::SplitPath(
