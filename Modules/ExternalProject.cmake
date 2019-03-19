@@ -1086,15 +1086,20 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
   if(NOT ${git_remote_name} STREQUAL "origin")
     list(APPEND git_clone_options --origin \"${git_remote_name}\")
   endif()
+
   string (REPLACE ";" " " git_clone_options "${git_clone_options}")
+
+  set(git_options)
+  # disable cert checking if explicitly told not to do it
+  if(NOT "x${tls_verify}" STREQUAL "x" AND NOT tls_verify)
+    set(git_options
+      -c http.sslVerify=false)
+  endif()
+  string (REPLACE ";" " " git_options "${git_options}")
+
   file(WRITE ${script_filename}
-"set(run 0)
-
-if(\"${gitclone_infofile}\" IS_NEWER_THAN \"${gitclone_stampfile}\")
-  set(run 1)
-endif()
-
-if(NOT run)
+"
+if(NOT \"${gitclone_infofile}\" IS_NEWER_THAN \"${gitclone_stampfile}\")
   message(STATUS \"Avoiding repeated git clone, stamp file is up to date: '${gitclone_stampfile}'\")
   return()
 endif()
@@ -1107,21 +1112,12 @@ if(error_code)
   message(FATAL_ERROR \"Failed to remove directory: '${source_dir}'\")
 endif()
 
-set(git_options)
-
-# disable cert checking if explicitly told not to do it
-set(tls_verify \"${tls_verify}\")
-if(NOT \"x${tls_verify}\" STREQUAL \"x\" AND NOT tls_verify)
-  list(APPEND git_options
-    -c http.sslVerify=false)
-endif()
-
 # try the clone 3 times in case there is an odd git clone issue
 set(error_code 1)
 set(number_of_tries 0)
 while(error_code AND number_of_tries LESS 3)
   execute_process(
-    COMMAND \"${git_EXECUTABLE}\" \${git_options} clone ${git_clone_options} \"${git_repository}\" \"${src_name}\"
+    COMMAND \"${git_EXECUTABLE}\" ${git_options} clone ${git_clone_options} \"${git_repository}\" \"${src_name}\"
     WORKING_DIRECTORY \"${work_dir}\"
     RESULT_VARIABLE error_code
     )
@@ -1136,7 +1132,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" \${git_options} checkout ${git_tag} ${git_checkout_explicit--}
+  COMMAND \"${git_EXECUTABLE}\" ${git_options} checkout ${git_tag} ${git_checkout_explicit--}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
@@ -1145,7 +1141,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" \${git_options} submodule update --recursive --init ${git_submodules}
+  COMMAND \"${git_EXECUTABLE}\" ${git_options} submodule update --recursive --init ${git_submodules}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
@@ -1159,7 +1155,6 @@ execute_process(
   COMMAND \${CMAKE_COMMAND} -E copy
     \"${gitclone_infofile}\"
     \"${gitclone_stampfile}\"
-  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
 if(error_code)
@@ -1234,16 +1229,16 @@ endfunction()
 
 
 function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name git_submodules git_repository work_dir)
+  if("${git_tag}" STREQUAL "")
+    message(FATAL_ERROR "Tag for git checkout should not be empty.")
+  endif()
   if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.6)
     set(git_stash_save_options --all --quiet)
   else()
     set(git_stash_save_options --quiet)
   endif()
   file(WRITE ${script_filename}
-"if(\"${git_tag}\" STREQUAL \"\")
-  message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
-endif()
-
+"
 execute_process(
   COMMAND \"${git_EXECUTABLE}\" rev-list --max-count=1 HEAD
   WORKING_DIRECTORY \"${work_dir}\"
