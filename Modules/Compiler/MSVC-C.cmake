@@ -31,3 +31,8 @@ macro(cmake_record_c_compile_features)
   endif()
   set(_result 0) # expected by cmake_determine_compile_features
 endmacro()
+
+# /JMC "Just My Code" is only supported by MSVC 19.05 onward.
+if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.05)
+  set(CMAKE_C_COMPILE_OPTIONS_JMC "-JMC")
+endif()

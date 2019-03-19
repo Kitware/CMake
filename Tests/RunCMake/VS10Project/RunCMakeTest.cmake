@@ -1,4 +1,5 @@
 include(RunCMake)
+cmake_policy(SET CMP0054 NEW)
 
 run_cmake(VsCSharpCompilerOpts)
 run_cmake(ExplicitCMakeLists)
@@ -20,3 +21,7 @@ run_cmake(VSCSharpDefines)
 run_cmake(VsSdkDirectories)
 run_cmake(VsGlobals)
 run_cmake(VsProjectImport)
+
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.05)
+  run_cmake(VsJustMyCode)
+endif()

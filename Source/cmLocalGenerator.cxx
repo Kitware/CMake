@@ -877,6 +877,32 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
     }
   }
   this->AddCompilerRequirementFlag(flags, target, lang);
+
+  // Add compile flag for the MSVC compiler only.
+  cmMakefile* mf = this->GetMakefile();
+  if (const char* jmc =
+        mf->GetDefinition("CMAKE_" + lang + "_COMPILE_OPTIONS_JMC")) {
+
+    // Handle Just My Code debugging flags, /JMC.
+    // If the target is a Managed C++ one, /JMC is not compatible.
+    if (target->GetManagedType(config) !=
+        cmGeneratorTarget::ManagedType::Managed) {
+      // add /JMC flags if target property VS_JUST_MY_CODE_DEBUGGING is set
+      // to ON
+      if (char const* jmcExprGen =
+            target->GetProperty("VS_JUST_MY_CODE_DEBUGGING")) {
+        cmGeneratorExpression ge;
+        std::unique_ptr<cmCompiledGeneratorExpression> cge =
+          ge.Parse(jmcExprGen);
+        std::string isJMCEnabled = cge->Evaluate(this, config);
+        if (cmSystemTools::IsOn(isJMCEnabled)) {
+          std::vector<std::string> optVec;
+          cmSystemTools::ExpandListArgument(jmc, optVec);
+          this->AppendCompileOptions(flags, optVec);
+        }
+      }
+    }
+  }
 }
 
 std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
