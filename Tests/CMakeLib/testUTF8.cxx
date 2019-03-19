@@ -13,6 +13,21 @@ static void test_utf8_char_print(test_utf8_char const c)
          static_cast<int>(d[3]));
 }
 
+static void byte_array_print(char const* s)
+{
+  unsigned char const* d = reinterpret_cast<unsigned char const*>(s);
+  bool started = false;
+  printf("[");
+  for (; *d; ++d) {
+    if (started) {
+      printf(",");
+    }
+    started = true;
+    printf("0x%02X", static_cast<int>(*d));
+  }
+  printf("]");
+}
+
 struct test_utf8_entry
 {
   int n;
@@ -44,6 +59,13 @@ static test_utf8_char const bad_chars[] = {
   "\xF4\x90\x80\x80", /* Lowest out-of-range codepoint. */
   "\xF5\x80\x80\x80", /* Prefix forces out-of-range codepoints. */
   { 0, 0, 0, 0, 0 }
+};
+
+static char const* good_strings[] = { "", "ASCII", "\xC2\xA9 Kitware", 0 };
+
+static char const* bad_strings[] = {
+  "\xC0\x80", /* Modified UTF-8 for embedded 0-byte. */
+  0
 };
 
 static void report_good(bool passed, test_utf8_char const c)
@@ -99,6 +121,46 @@ static bool decode_bad(test_utf8_char const s)
   return true;
 }
 
+static void report_valid(bool passed, char const* s)
+{
+  printf("%s: validity good ", passed ? "pass" : "FAIL");
+  byte_array_print(s);
+  printf(" (%s) ", s);
+}
+
+static void report_invalid(bool passed, char const* s)
+{
+  printf("%s: validity bad  ", passed ? "pass" : "FAIL");
+  byte_array_print(s);
+  printf(" ");
+}
+
+static bool is_valid(const char* s)
+{
+  bool valid = cm_utf8_is_valid(s) != 0;
+  if (!valid) {
+    report_valid(false, s);
+    printf("expected valid, reported as invalid\n");
+    return false;
+  }
+  report_valid(true, s);
+  printf("valid as expected\n");
+  return true;
+}
+
+static bool is_invalid(const char* s)
+{
+  bool valid = cm_utf8_is_valid(s) != 0;
+  if (valid) {
+    report_invalid(false, s);
+    printf("expected invalid, reported as valid\n");
+    return false;
+  }
+  report_invalid(true, s);
+  printf("invalid as expected\n");
+  return true;
+}
+
 int testUTF8(int /*unused*/, char* /*unused*/ [])
 {
   int result = 0;
@@ -106,9 +168,25 @@ int testUTF8(int /*unused*/, char* /*unused*/ [])
     if (!decode_good(*e)) {
       result = 1;
     }
+    if (!is_valid(e->str)) {
+      result = 1;
+    }
   }
   for (test_utf8_char const* c = bad_chars; (*c)[0]; ++c) {
     if (!decode_bad(*c)) {
+      result = 1;
+    }
+    if (!is_invalid(*c)) {
+      result = 1;
+    }
+  }
+  for (char const** s = good_strings; *s; ++s) {
+    if (!is_valid(*s)) {
+      result = 1;
+    }
+  }
+  for (char const** s = bad_strings; *s; ++s) {
+    if (!is_invalid(*s)) {
       result = 1;
     }
   }
