@@ -83,6 +83,13 @@ This module defines the following variables:
 
     set(BLA_VENDOR Intel10_64lp)
     find_package(BLAS)
+
+Hints
+^^^^^
+
+Set ``MKLROOT`` environment variable to a directory that contains an MKL
+installation.
+
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
@@ -394,6 +401,24 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         endif ()
       endif ()
 
+      if (DEFINED ENV{MKLROOT})
+        set(_BLAS_MKLROOT_LIB_DIR "$ENV{MKLROOT}")
+      endif ()
+      if (_BLAS_MKLROOT_LIB_DIR)
+        if( SIZEOF_INTEGER EQUAL 8 )
+          set( _BLAS_MKL_PATH_PREFIX "intel64" )
+        else()
+          set( _BLAS_MKL_PATH_PREFIX "ia32" )
+        endif()
+        if (WIN32)
+          string(APPEND _BLAS_MKLROOT_LIB_DIR "/lib/${_BLAS_MKL_PATH_PREFIX}_win")
+        elseif (APPLE)
+          string(APPEND _BLAS_MKLROOT_LIB_DIR "/lib/${_BLAS_MKL_PATH_PREFIX}_mac")
+        else ()
+          string(APPEND _BLAS_MKLROOT_LIB_DIR "/lib/${_BLAS_MKL_PATH_PREFIX}_lin")
+        endif ()
+      endif ()
+
       foreach (IT ${BLAS_SEARCH_LIBS})
         string(REPLACE " " ";" SEARCH_LIBS ${IT})
         if (NOT ${_LIBRARIES})
@@ -404,6 +429,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
             ""
             "${SEARCH_LIBS}"
             "${CMAKE_THREAD_LIBS_INIT};${BLAS_mkl_LM};${BLAS_mkl_LDL}"
+            "${_BLAS_MKLROOT_LIB_DIR}"
             )
         endif ()
       endforeach ()
