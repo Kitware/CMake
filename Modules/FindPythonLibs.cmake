@@ -1,48 +1,49 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindPythonLibs
-# --------------
-#
-# Find python libraries
-#
-# .. deprecated:: 3.12
-#
-#   Use :module:`FindPython3`, :module:`FindPython2` or :module:`FindPython` instead.
-#
-# This module finds if Python is installed and determines where the
-# include files and libraries are.  It also determines what the name of
-# the library is.  This code sets the following variables:
-#
-# ::
-#
-#   PYTHONLIBS_FOUND           - have the Python libs been found
-#   PYTHON_LIBRARIES           - path to the python library
-#   PYTHON_INCLUDE_PATH        - path to where Python.h is found (deprecated)
-#   PYTHON_INCLUDE_DIRS        - path to where Python.h is found
-#   PYTHON_DEBUG_LIBRARIES     - path to the debug library (deprecated)
-#   PYTHONLIBS_VERSION_STRING  - version of the Python libs found (since CMake 2.8.8)
-#
-#
-#
-# The Python_ADDITIONAL_VERSIONS variable can be used to specify a list
-# of version numbers that should be taken into account when searching
-# for Python.  You need to set this variable before calling
-# find_package(PythonLibs).
-#
-# If you'd like to specify the installation of Python to use, you should
-# modify the following cache variables:
-#
-# ::
-#
-#   PYTHON_LIBRARY             - path to the python library
-#   PYTHON_INCLUDE_DIR         - path to where Python.h is found
-#
-# If calling both ``find_package(PythonInterp)`` and
-# ``find_package(PythonLibs)``, call ``find_package(PythonInterp)`` first to
-# get the currently active Python version by default with a consistent version
-# of PYTHON_LIBRARIES.
+#[=======================================================================[.rst:
+FindPythonLibs
+--------------
+
+.. deprecated:: 3.12
+
+  Use :module:`FindPython3`, :module:`FindPython2` or :module:`FindPython` instead.
+
+Find python libraries
+
+This module finds if Python is installed and determines where the
+include files and libraries are.  It also determines what the name of
+the library is.  This code sets the following variables:
+
+::
+
+  PYTHONLIBS_FOUND           - have the Python libs been found
+  PYTHON_LIBRARIES           - path to the python library
+  PYTHON_INCLUDE_PATH        - path to where Python.h is found (deprecated)
+  PYTHON_INCLUDE_DIRS        - path to where Python.h is found
+  PYTHON_DEBUG_LIBRARIES     - path to the debug library (deprecated)
+  PYTHONLIBS_VERSION_STRING  - version of the Python libs found (since CMake 2.8.8)
+
+
+
+The Python_ADDITIONAL_VERSIONS variable can be used to specify a list
+of version numbers that should be taken into account when searching
+for Python.  You need to set this variable before calling
+find_package(PythonLibs).
+
+If you'd like to specify the installation of Python to use, you should
+modify the following cache variables:
+
+::
+
+  PYTHON_LIBRARY             - path to the python library
+  PYTHON_INCLUDE_DIR         - path to where Python.h is found
+
+If calling both ``find_package(PythonInterp)`` and
+``find_package(PythonLibs)``, call ``find_package(PythonInterp)`` first to
+get the currently active Python version by default with a consistent version
+of PYTHON_LIBRARIES.
+#]=======================================================================]
 
 # Use the executable's path as a hint
 set(_Python_LIBRARY_PATH_HINT)
@@ -121,6 +122,34 @@ unset(_PYTHON1_VERSIONS)
 unset(_PYTHON2_VERSIONS)
 unset(_PYTHON3_VERSIONS)
 
+# Python distribution: define which architectures can be used
+if (CMAKE_SIZEOF_VOID_P)
+  # In this case, search only for 64bit or 32bit
+  math (EXPR _PYTHON_ARCH "${CMAKE_SIZEOF_VOID_P} * 8")
+  set (_PYTHON_ARCH2 _PYTHON_PREFIX_ARCH})
+else()
+  if (PYTHON_EXECUTABLE)
+    # determine interpreter architecture
+    execute_process (COMMAND "${PYTHON_EXECUTABLE}" -c "import sys; print(sys.maxsize > 2**32)"
+                     RESULT_VARIABLE _PYTHON_RESULT
+                     OUTPUT_VARIABLE _PYTHON_IS64BIT
+                     ERROR_VARIABLE _PYTHON_IS64BIT)
+      if (NOT _PYTHON_RESULT)
+        if (_PYTHON_IS64BIT)
+          set (_PYTHON_ARCH 64)
+          set (_PYTHON_ARCH2 64)
+        else()
+          set (_PYTHON_ARCH 32)
+          set (_PYTHON_ARCH2 32)
+        endif()
+      endif()
+  else()
+    # architecture unknown, search for both 64bit and 32bit
+    set (_PYTHON_ARCH 64)
+    set (_PYTHON_ARCH2 32)
+  endif()
+endif()
+
 foreach(_CURRENT_VERSION ${_Python_VERSIONS})
   string(REPLACE "." "" _CURRENT_VERSION_NO_DOTS ${_CURRENT_VERSION})
   if(WIN32)
@@ -130,9 +159,17 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
       HINTS ${_Python_LIBRARY_PATH_HINT}
       PATHS
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/libs/Debug
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/libs/Debug
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
+      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/libs/Debug
+      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/libs/Debug
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/libs
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/libs
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/libs
+      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/libs
       )
   endif()
 
@@ -156,7 +193,11 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
     PATHS
       ${PYTHON_FRAMEWORK_LIBRARIES}
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/libs
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/libs
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/libs
+      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/libs
   )
   # Look for the static library in the Python config directory
   find_library(PYTHON_LIBRARY
@@ -201,7 +242,11 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
       PATHS
         ${PYTHON_FRAMEWORK_INCLUDES}
         [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
+        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/include
+        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/include
         [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
+        [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH}\\InstallPath]/include
+        [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}-${_PYTHON_ARCH2}\\InstallPath]/include
       PATH_SUFFIXES
         python${_CURRENT_VERSION}mu
         python${_CURRENT_VERSION}m

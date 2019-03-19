@@ -9,10 +9,10 @@
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -181,28 +181,21 @@ bool cmAddCustomTargetCommand::InitialPass(
     }
   }
 
-  // Convert working directory to a full path.
-  if (!working_directory.empty()) {
-    const std::string& build_dir = this->Makefile->GetCurrentBinaryDirectory();
-    working_directory =
-      cmSystemTools::CollapseFullPath(working_directory, build_dir);
-  }
-
   if (commandLines.empty() && !byproducts.empty()) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "BYPRODUCTS may not be specified without any COMMAND");
     return true;
   }
   if (commandLines.empty() && uses_terminal) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "USES_TERMINAL may not be specified without any COMMAND");
     return true;
   }
   if (commandLines.empty() && command_expand_lists) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "COMMAND_EXPAND_LISTS may not be specified without any COMMAND");
     return true;
   }

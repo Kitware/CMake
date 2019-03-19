@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11.2)
 project(RerunRccConfigChange)
-include("../AutogenTest.cmake")
+include("../AutogenCoreTest.cmake")
 
 # Tests rcc rebuilding after a configuration change
 
@@ -9,9 +9,22 @@ add_executable(dummy dummy.cpp)
 
 # When a .qrc or a file listed in a .qrc file changes,
 # the target must be rebuilt
-set(timeformat "%Y%j%H%M%S")
 set(rccDepSD "${CMAKE_CURRENT_SOURCE_DIR}/RccConfigChange")
 set(rccDepBD "${CMAKE_CURRENT_BINARY_DIR}/RccConfigChange")
+
+# Rebuild macro
+macro(rebuild CFG)
+  message(STATUS "Rebuilding rccConfigChange in ${CFG} configuration.")
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" --build . --config "${CFG}"
+    WORKING_DIRECTORY "${rccDepBD}"
+    RESULT_VARIABLE result)
+  if (result)
+    message(FATAL_ERROR "${CFG} build of rccConfigChange failed.")
+  else()
+    message(STATUS "${CFG} build of rccConfigChange finished.")
+  endif()
+endmacro()
 
 # Initial build
 try_compile(RCC_DEPENDS
@@ -24,19 +37,11 @@ try_compile(RCC_DEPENDS
   OUTPUT_VARIABLE output
 )
 if (NOT RCC_DEPENDS)
-  message(SEND_ERROR "Initial build of rccConfigChange failed. Output: ${output}")
+  message(FATAL_ERROR "Initial build of rccConfigChange failed. Output: ${output}")
 endif()
 
-# - Rebuild Release
-message("Rebuilding rccConfigChange in Release configuration")
-execute_process(COMMAND "${CMAKE_COMMAND}" --build . --config Release WORKING_DIRECTORY "${rccDepBD}" RESULT_VARIABLE result)
-if (result)
-  message(SEND_ERROR "Release build of rccConfigChange failed.")
-endif()
+# Rebuild: Release
+rebuild(Release)
 
-# - Rebuild Debug
-message("Rebuilding rccConfigChange in Debug configuration")
-execute_process(COMMAND "${CMAKE_COMMAND}" --build . --config Debug WORKING_DIRECTORY "${rccDepBD}" RESULT_VARIABLE result)
-if (result)
-  message(SEND_ERROR "Debug build of rccConfigChange failed.")
-endif()
+# Rebuild: Debug
+rebuild(Debug)

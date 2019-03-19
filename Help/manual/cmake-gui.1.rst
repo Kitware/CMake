@@ -10,11 +10,12 @@ Synopsis
 
  cmake-gui [<options>]
  cmake-gui [<options>] {<path-to-source> | <path-to-existing-build>}
+ cmake-gui [<options>] -S <path-to-source> -B <path-to-build>
 
 Description
 ===========
 
-The "cmake-gui" executable is the CMake GUI.  Project configuration
+The **cmake-gui** executable is the CMake GUI.  Project configuration
 settings may be specified interactively.  Brief instructions are
 provided at the bottom of the window when the program is running.
 
@@ -26,6 +27,14 @@ native tool on their platform.
 
 Options
 =======
+
+``-S <path-to-source>``
+ Path to root directory of the CMake project to build.
+
+``-B <path-to-build>``
+ Path to directory which CMake will use as the root of build directory.
+
+ If the directory doesn't already exist CMake will make it.
 
 .. include:: OPTIONS_HELP.txt
 

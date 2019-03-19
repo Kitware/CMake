@@ -9,11 +9,10 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
-#include "cm_zlib.h"
-#include "cmsys/Base64.h"
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
 #include <cmAlgorithms.h>
+#include <cstdint>
 #include <cstring>
 #include <iomanip>
 #include <ratio>
@@ -31,9 +30,6 @@ cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler)
   this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = 0;
   this->TestResult.Properties = nullptr;
-  this->ProcessOutput.clear();
-  this->CompressedOutput.clear();
-  this->CompressionRatio = 2;
   this->NumberOfRunsLeft = 1; // default to 1 run of the test
   this->RunUntilFail = false; // default to run the test once
   this->RunAgain = false;     // default to not having to run again
@@ -68,79 +64,17 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
   }
 }
 
-// Streamed compression of test output.  The compressed data
-// is appended to this->CompressedOutput
-void cmCTestRunTest::CompressOutput()
-{
-  int ret;
-  z_stream strm;
-
-  unsigned char* in = reinterpret_cast<unsigned char*>(
-    const_cast<char*>(this->ProcessOutput.c_str()));
-  // zlib makes the guarantee that this is the maximum output size
-  int outSize = static_cast<int>(
-    static_cast<double>(this->ProcessOutput.size()) * 1.001 + 13.0);
-  unsigned char* out = new unsigned char[outSize];
-
-  strm.zalloc = Z_NULL;
-  strm.zfree = Z_NULL;
-  strm.opaque = Z_NULL;
-  ret = deflateInit(&strm, -1); // default compression level
-  if (ret != Z_OK) {
-    delete[] out;
-    return;
-  }
-
-  strm.avail_in = static_cast<uInt>(this->ProcessOutput.size());
-  strm.next_in = in;
-  strm.avail_out = outSize;
-  strm.next_out = out;
-  ret = deflate(&strm, Z_FINISH);
-
-  if (ret != Z_STREAM_END) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Error during output compression. Sending uncompressed output."
-                 << std::endl);
-    delete[] out;
-    return;
-  }
-
-  (void)deflateEnd(&strm);
-
-  unsigned char* encoded_buffer =
-    new unsigned char[static_cast<int>(outSize * 1.5)];
-
-  size_t rlen = cmsysBase64_Encode(out, strm.total_out, encoded_buffer, 1);
-
-  this->CompressedOutput.clear();
-  for (size_t i = 0; i < rlen; i++) {
-    this->CompressedOutput += encoded_buffer[i];
-  }
-
-  if (strm.total_in) {
-    this->CompressionRatio =
-      static_cast<double>(strm.total_out) / static_cast<double>(strm.total_in);
-  }
-
-  delete[] encoded_buffer;
-  delete[] out;
-}
-
 bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
 {
-  if ((!this->TestHandler->MemCheck &&
-       this->CTest->ShouldCompressTestOutput()) ||
-      (this->TestHandler->MemCheck &&
-       this->CTest->ShouldCompressTestOutput())) {
-    this->CompressOutput();
-  }
-
   this->WriteLogOutputTop(completed, total);
   std::string reason;
   bool passed = true;
   cmProcess::State res =
     started ? this->TestProcess->GetProcessStatus() : cmProcess::State::Error;
-  int retVal = this->TestProcess->GetExitValue();
+  if (res != cmProcess::State::Expired) {
+    this->TimeoutIsForStopTime = false;
+  }
+  std::int64_t retVal = this->TestProcess->GetExitValue();
   bool forceFail = false;
   bool skipped = false;
   bool outputTestErrorsToConsole = false;
@@ -178,6 +112,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       }
     }
   }
+  std::ostringstream outputStream;
   if (res == cmProcess::State::Exited) {
     bool success = !forceFail &&
       (retVal == 0 ||
@@ -193,36 +128,36 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     } else if ((success && !this->TestProperties->WillFail) ||
                (!success && this->TestProperties->WillFail)) {
       this->TestResult.Status = cmCTestTestHandler::COMPLETED;
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Passed  ");
+      outputStream << "   Passed  ";
     } else {
       this->TestResult.Status = cmCTestTestHandler::FAILED;
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Failed  " << reason);
+      outputStream << "***Failed  " << reason;
       outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
     }
   } else if (res == cmProcess::State::Expired) {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Timeout ");
+    outputStream << "***Timeout ";
     this->TestResult.Status = cmCTestTestHandler::TIMEOUT;
     outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
   } else if (res == cmProcess::State::Exception) {
     outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Exception: ");
+    outputStream << "***Exception: ";
     this->TestResult.ExceptionStatus =
       this->TestProcess->GetExitExceptionString();
     switch (this->TestProcess->GetExitException()) {
       case cmProcess::Exception::Fault:
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "SegFault");
+        outputStream << "SegFault";
         this->TestResult.Status = cmCTestTestHandler::SEGFAULT;
         break;
       case cmProcess::Exception::Illegal:
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "Illegal");
+        outputStream << "Illegal";
         this->TestResult.Status = cmCTestTestHandler::ILLEGAL;
         break;
       case cmProcess::Exception::Interrupt:
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "Interrupt");
+        outputStream << "Interrupt";
         this->TestResult.Status = cmCTestTestHandler::INTERRUPT;
         break;
       case cmProcess::Exception::Numerical:
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "Numerical");
+        outputStream << "Numerical";
         this->TestResult.Status = cmCTestTestHandler::NUMERICAL;
         break;
       default:
@@ -231,16 +166,41 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         this->TestResult.Status = cmCTestTestHandler::OTHER_FAULT;
     }
   } else if ("Disabled" == this->TestResult.CompletionStatus) {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run (Disabled) ");
+    outputStream << "***Not Run (Disabled) ";
   } else // cmProcess::State::Error
   {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run ");
+    outputStream << "***Not Run ";
   }
 
   passed = this->TestResult.Status == cmCTestTestHandler::COMPLETED;
   char buf[1024];
   sprintf(buf, "%6.2f sec", this->TestProcess->GetTotalTime().count());
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, buf << "\n");
+  outputStream << buf << "\n";
+
+  if (this->CTest->GetTestProgressOutput()) {
+    if (!passed) {
+      // If the test did not pass, reprint test name and error
+      std::string output = GetTestPrefix(completed, total);
+      std::string testName = this->TestProperties->Name;
+      const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
+      testName.resize(maxTestNameWidth + 4, '.');
+
+      output += testName;
+      output += outputStream.str();
+      outputStream.str("");
+      outputStream.clear();
+      outputStream << output;
+      cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, "\n"); // flush
+    }
+    if (completed == total) {
+      std::string testName =
+        GetTestPrefix(completed, total) + this->TestProperties->Name + "\n";
+      cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, testName);
+    }
+  }
+  if (!this->CTest->GetTestProgressOutput() || !passed) {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, outputStream.str());
+  }
 
   if (outputTestErrorsToConsole) {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, this->ProcessOutput << std::endl);
@@ -306,10 +266,18 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   // if the test actually started and ran
   // record the results in TestResult
   if (started) {
-    bool compress = !this->TestHandler->MemCheck &&
-      this->CompressionRatio < 1 && this->CTest->ShouldCompressTestOutput();
+    std::string compressedOutput;
+    if (!this->TestHandler->MemCheck &&
+        this->CTest->ShouldCompressTestOutput()) {
+      std::string str = this->ProcessOutput;
+      if (this->CTest->CompressString(str)) {
+        compressedOutput = std::move(str);
+      }
+    }
+    bool compress = !compressedOutput.empty() &&
+      compressedOutput.length() < this->ProcessOutput.length();
     this->TestResult.Output =
-      compress ? this->CompressedOutput : this->ProcessOutput;
+      compress ? compressedOutput : this->ProcessOutput;
     this->TestResult.CompressOutput = compress;
     this->TestResult.ReturnValue = this->TestProcess->GetExitValue();
     if (!skipped) {
@@ -328,7 +296,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   return passed || skipped;
 }
 
-bool cmCTestRunTest::StartAgain()
+bool cmCTestRunTest::StartAgain(size_t completed)
 {
   if (!this->RunAgain) {
     return false;
@@ -343,7 +311,7 @@ bool cmCTestRunTest::StartAgain()
     return true;
   }
 
-  this->StartTest(this->TotalNumberOfTests);
+  this->StartTest(completed, this->TotalNumberOfTests);
   return true;
 }
 
@@ -395,12 +363,14 @@ void cmCTestRunTest::StartFailure(std::string const& output)
 {
   // Still need to log the Start message so the test summary records our
   // attempt to start this test
-  cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             std::setw(2 * getNumWidth(this->TotalNumberOfTests) + 8)
-               << "Start "
-               << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
-               << this->TestProperties->Index << ": "
-               << this->TestProperties->Name << std::endl);
+  if (!this->CTest->GetTestProgressOutput()) {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               std::setw(2 * getNumWidth(this->TotalNumberOfTests) + 8)
+                 << "Start "
+                 << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
+                 << this->TestProperties->Index << ": "
+                 << this->TestProperties->Name << std::endl);
+  }
 
   this->ProcessOutput.clear();
   if (!output.empty()) {
@@ -422,44 +392,66 @@ void cmCTestRunTest::StartFailure(std::string const& output)
   this->TestProcess = cm::make_unique<cmProcess>(*this);
 }
 
+std::string cmCTestRunTest::GetTestPrefix(size_t completed, size_t total) const
+{
+  std::ostringstream outputStream;
+  outputStream << std::setw(getNumWidth(total)) << completed << "/";
+  outputStream << std::setw(getNumWidth(total)) << total << " ";
+
+  if (this->TestHandler->MemCheck) {
+    outputStream << "MemCheck";
+  } else {
+    outputStream << "Test";
+  }
+
+  std::ostringstream indexStr;
+  indexStr << " #" << this->Index << ":";
+  outputStream << std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
+               << indexStr.str();
+  outputStream << " ";
+
+  return outputStream.str();
+}
+
 // Starts the execution of a test.  Returns once it has started
-bool cmCTestRunTest::StartTest(size_t total)
+bool cmCTestRunTest::StartTest(size_t completed, size_t total)
 {
   this->TotalNumberOfTests = total; // save for rerun case
-  cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             std::setw(2 * getNumWidth(total) + 8)
-               << "Start "
-               << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
-               << this->TestProperties->Index << ": "
-               << this->TestProperties->Name << std::endl);
+  if (!this->CTest->GetTestProgressOutput()) {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               std::setw(2 * getNumWidth(total) + 8)
+                 << "Start "
+                 << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
+                 << this->TestProperties->Index << ": "
+                 << this->TestProperties->Name << std::endl);
+  } else {
+    std::string testName =
+      GetTestPrefix(completed, total) + this->TestProperties->Name + "\n";
+    cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, testName);
+  }
+
   this->ProcessOutput.clear();
+
+  this->TestResult.Properties = this->TestProperties;
+  this->TestResult.ExecutionTime = cmDuration::zero();
+  this->TestResult.CompressOutput = false;
+  this->TestResult.ReturnValue = -1;
+  this->TestResult.TestCount = this->TestProperties->Index;
+  this->TestResult.Name = this->TestProperties->Name;
+  this->TestResult.Path = this->TestProperties->Directory;
 
   // Return immediately if test is disabled
   if (this->TestProperties->Disabled) {
-    this->TestResult.Properties = this->TestProperties;
-    this->TestResult.ExecutionTime = cmDuration::zero();
-    this->TestResult.CompressOutput = false;
-    this->TestResult.ReturnValue = -1;
     this->TestResult.CompletionStatus = "Disabled";
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
-    this->TestResult.TestCount = this->TestProperties->Index;
-    this->TestResult.Name = this->TestProperties->Name;
-    this->TestResult.Path = this->TestProperties->Directory;
     this->TestProcess = cm::make_unique<cmProcess>(*this);
     this->TestResult.Output = "Disabled";
     this->TestResult.FullCommandLine.clear();
     return false;
   }
 
-  this->TestResult.Properties = this->TestProperties;
-  this->TestResult.ExecutionTime = cmDuration::zero();
-  this->TestResult.CompressOutput = false;
-  this->TestResult.ReturnValue = -1;
   this->TestResult.CompletionStatus = "Failed to start";
   this->TestResult.Status = cmCTestTestHandler::BAD_COMMAND;
-  this->TestResult.TestCount = this->TestProperties->Index;
-  this->TestResult.Name = this->TestProperties->Name;
-  this->TestResult.Path = this->TestProperties->Directory;
 
   // Check for failed fixture dependencies before we even look at the command
   // arguments because if we are not going to run the test, the command and
@@ -537,6 +529,7 @@ bool cmCTestRunTest::StartTest(size_t total)
 
   auto timeout = this->TestProperties->Timeout;
 
+  this->TimeoutIsForStopTime = false;
   std::chrono::system_clock::time_point stop_time = this->CTest->GetStopTime();
   if (stop_time != std::chrono::system_clock::time_point()) {
     std::chrono::duration<double> stop_timeout =
@@ -547,6 +540,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     }
     if (timeout == std::chrono::duration<double>::zero() ||
         stop_timeout < timeout) {
+      this->TimeoutIsForStopTime = true;
       timeout = stop_timeout;
     }
   }
@@ -635,9 +629,8 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
 {
   this->TestProcess = cm::make_unique<cmProcess>(*this);
   this->TestProcess->SetId(this->Index);
-  this->TestProcess->SetWorkingDirectory(
-    this->TestProperties->Directory.c_str());
-  this->TestProcess->SetCommand(this->ActualCommand.c_str());
+  this->TestProcess->SetWorkingDirectory(this->TestProperties->Directory);
+  this->TestProcess->SetCommand(this->ActualCommand);
   this->TestProcess->SetCommandArguments(this->Arguments);
 
   // determine how much time we have
@@ -684,44 +677,41 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
 
 void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 {
-  // if this is the last or only run of this test
-  // then print out completed / total
+  std::ostringstream outputStream;
+
+  // If this is the last or only run of this test, or progress output is
+  // requested, then print out completed / total.
   // Only issue is if a test fails and we are running until fail
   // then it will never print out the completed / total, same would
   // got for run until pass.  Trick is when this is called we don't
   // yet know if we are passing or failing.
-  if (this->NumberOfRunsLeft == 1) {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               std::setw(getNumWidth(total)) << completed << "/");
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               std::setw(getNumWidth(total)) << total << " ");
+  if (this->NumberOfRunsLeft == 1 || this->CTest->GetTestProgressOutput()) {
+    outputStream << std::setw(getNumWidth(total)) << completed << "/";
+    outputStream << std::setw(getNumWidth(total)) << total << " ";
   }
   // if this is one of several runs of a test just print blank space
   // to keep things neat
   else {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               std::setw(getNumWidth(total)) << " "
-                                             << " ");
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               std::setw(getNumWidth(total)) << " "
-                                             << " ");
+    outputStream << std::setw(getNumWidth(total)) << "  ";
+    outputStream << std::setw(getNumWidth(total)) << "  ";
   }
 
   if (this->TestHandler->MemCheck) {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "MemCheck");
+    outputStream << "MemCheck";
   } else {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "Test");
+    outputStream << "Test";
   }
 
   std::ostringstream indexStr;
   indexStr << " #" << this->Index << ":";
-  cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
-               << indexStr.str());
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
+  outputStream << std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
+               << indexStr.str();
+  outputStream << " ";
+
   const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
   std::string outname = this->TestProperties->Name + " ";
   outname.resize(maxTestNameWidth + 4, '.');
+  outputStream << outname;
 
   *this->TestHandler->LogFile << this->TestProperties->Index << "/"
                               << this->TestHandler->TotalNumberOfTests
@@ -749,7 +739,10 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
   *this->TestHandler->LogFile << this->ProcessOutput << "<end of output>"
                               << std::endl;
 
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, outname.c_str());
+  if (!this->CTest->GetTestProgressOutput()) {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, outputStream.str());
+  }
+
   cmCTestLog(this->CTest, DEBUG,
              "Testing " << this->TestProperties->Name << " ... ");
 }

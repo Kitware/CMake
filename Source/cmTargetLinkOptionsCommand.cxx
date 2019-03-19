@@ -7,8 +7,8 @@
 #include "cmAlgorithms.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -23,7 +23,7 @@ void cmTargetLinkOptionsCommand::HandleMissingTarget(const std::string& name)
   std::ostringstream e;
   e << "Cannot specify link options for target \"" << name
     << "\" which is not built by this project.";
-  this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+  this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
 }
 
 std::string cmTargetLinkOptionsCommand::Join(
@@ -33,9 +33,9 @@ std::string cmTargetLinkOptionsCommand::Join(
 }
 
 bool cmTargetLinkOptionsCommand::HandleDirectContent(
-  cmTarget* tgt, const std::vector<std::string>& content, bool, bool)
+  cmTarget* tgt, const std::vector<std::string>& content, bool prepend, bool)
 {
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-  tgt->InsertLinkOption(this->Join(content), lfbt);
+  tgt->InsertLinkOption(this->Join(content), lfbt, prepend);
   return true; // Successfully handled.
 }

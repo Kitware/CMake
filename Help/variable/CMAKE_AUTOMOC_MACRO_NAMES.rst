@@ -1,7 +1,7 @@
 CMAKE_AUTOMOC_MACRO_NAMES
 ----------------------------
 
-A :ref:`;-list <CMake Language Lists>` list of macro names used by
+:ref:`Semicolon-separated list <CMake Language Lists>` list of macro names used by
 :variable:`CMAKE_AUTOMOC` to determine if a C++ file needs to be
 processed by ``moc``.
 

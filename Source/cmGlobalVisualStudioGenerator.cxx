@@ -19,13 +19,22 @@
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmTarget.h"
+#include "cmake.h"
 
-cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(cmake* cm)
+cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(
+  cmake* cm, std::string const& platformInGeneratorName)
   : cmGlobalGenerator(cm)
 {
   cm->GetState()->SetIsGeneratorMultiConfig(true);
   cm->GetState()->SetWindowsShell(true);
   cm->GetState()->SetWindowsVSIDE(true);
+
+  if (platformInGeneratorName.empty()) {
+    this->DefaultPlatformName = "Win32";
+  } else {
+    this->DefaultPlatformName = platformInGeneratorName;
+    this->PlatformInGeneratorName = true;
+  }
 }
 
 cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator()
@@ -41,6 +50,108 @@ cmGlobalVisualStudioGenerator::GetVersion() const
 void cmGlobalVisualStudioGenerator::SetVersion(VSVersion v)
 {
   this->Version = v;
+}
+
+bool cmGlobalVisualStudioGenerator::SetGeneratorPlatform(std::string const& p,
+                                                         cmMakefile* mf)
+{
+  if (this->GetPlatformName() == "x64") {
+    mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
+  } else if (this->GetPlatformName() == "Itanium") {
+    mf->AddDefinition("CMAKE_FORCE_IA64", "TRUE");
+  }
+  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName().c_str());
+  return this->cmGlobalGenerator::SetGeneratorPlatform(p, mf);
+}
+
+std::string const& cmGlobalVisualStudioGenerator::GetPlatformName() const
+{
+  if (!this->GeneratorPlatform.empty()) {
+    return this->GeneratorPlatform;
+  }
+  return this->DefaultPlatformName;
+}
+
+const char* cmGlobalVisualStudioGenerator::GetIDEVersion() const
+{
+  switch (this->Version) {
+    case cmGlobalVisualStudioGenerator::VS9:
+      return "9.0";
+    case cmGlobalVisualStudioGenerator::VS10:
+      return "10.0";
+    case cmGlobalVisualStudioGenerator::VS11:
+      return "11.0";
+    case cmGlobalVisualStudioGenerator::VS12:
+      return "12.0";
+    case cmGlobalVisualStudioGenerator::VS14:
+      return "14.0";
+    case cmGlobalVisualStudioGenerator::VS15:
+      return "15.0";
+    case cmGlobalVisualStudioGenerator::VS16:
+      return "16.0";
+  }
+  return "";
+}
+
+void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
+{
+  switch (this->Version) {
+    case cmGlobalVisualStudioGenerator::VS9:
+      fout << "Microsoft Visual Studio Solution File, Format Version 10.00\n";
+      fout << "# Visual Studio 2008\n";
+      break;
+    case cmGlobalVisualStudioGenerator::VS10:
+      fout << "Microsoft Visual Studio Solution File, Format Version 11.00\n";
+      if (this->ExpressEdition) {
+        fout << "# Visual C++ Express 2010\n";
+      } else {
+        fout << "# Visual Studio 2010\n";
+      }
+      break;
+    case cmGlobalVisualStudioGenerator::VS11:
+      fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
+      if (this->ExpressEdition) {
+        fout << "# Visual Studio Express 2012 for Windows Desktop\n";
+      } else {
+        fout << "# Visual Studio 2012\n";
+      }
+      break;
+    case cmGlobalVisualStudioGenerator::VS12:
+      fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
+      if (this->ExpressEdition) {
+        fout << "# Visual Studio Express 2013 for Windows Desktop\n";
+      } else {
+        fout << "# Visual Studio 2013\n";
+      }
+      break;
+    case cmGlobalVisualStudioGenerator::VS14:
+      // Visual Studio 14 writes .sln format 12.00
+      fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
+      if (this->ExpressEdition) {
+        fout << "# Visual Studio Express 14 for Windows Desktop\n";
+      } else {
+        fout << "# Visual Studio 14\n";
+      }
+      break;
+    case cmGlobalVisualStudioGenerator::VS15:
+      // Visual Studio 15 writes .sln format 12.00
+      fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
+      if (this->ExpressEdition) {
+        fout << "# Visual Studio Express 15 for Windows Desktop\n";
+      } else {
+        fout << "# Visual Studio 15\n";
+      }
+      break;
+    case cmGlobalVisualStudioGenerator::VS16:
+      // Visual Studio 16 writes .sln format 12.00
+      fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
+      if (this->ExpressEdition) {
+        fout << "# Visual Studio Express 16 for Windows Desktop\n";
+      } else {
+        fout << "# Visual Studio 16\n";
+      }
+      break;
+  }
 }
 
 std::string cmGlobalVisualStudioGenerator::GetRegistryBase()
@@ -90,7 +201,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
               tgt->IsImported()) {
             continue;
           }
-          if (!this->IsExcluded(gen[0], tgt)) {
+          if (!this->IsExcluded(tgt)) {
             allBuild->AddUtility(tgt->GetName());
           }
         }
@@ -151,13 +262,12 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
     // purposes but newer versions distributed with CMake will replace
     // older versions in user directories.
     int res;
-    if (!cmSystemTools::FileTimeCompare(src.c_str(), dst.c_str(), &res) ||
-        res > 0) {
-      if (!cmSystemTools::CopyFileAlways(src.c_str(), dst.c_str())) {
+    if (!cmSystemTools::FileTimeCompare(src, dst, &res) || res > 0) {
+      if (!cmSystemTools::CopyFileAlways(src, dst)) {
         std::ostringstream oss;
         oss << "Could not copy from: " << src << std::endl;
         oss << "                 to: " << dst << std::endl;
-        cmSystemTools::Message(oss.str().c_str(), "Warning");
+        cmSystemTools::Message(oss.str(), "Warning");
       }
     }
 
@@ -413,7 +523,7 @@ std::string cmGlobalVisualStudioGenerator::GetStartupProjectName(
       return startup;
     } else {
       root->GetMakefile()->IssueMessage(
-        cmake::AUTHOR_WARNING,
+        MessageType::AUTHOR_WARNING,
         "Directory property VS_STARTUP_PROJECT specifies target "
         "'" +
           startup + "' that does not exist.  Ignoring.");
@@ -672,7 +782,7 @@ void RegisterVisualStudioMacros(const std::string& macrosFile,
           << "CMake needs to register Visual Studio macros when its macros"
           << " file is updated or when it detects that its current macros file"
           << " is no longer registered with Visual Studio." << std::endl;
-      cmSystemTools::Message(oss.str().c_str(), "Warning");
+      cmSystemTools::Message(oss.str(), "Warning");
 
       // Count them again now that the warning is over. In the case of a GUI
       // warning, the user may have gone to close Visual Studio and then come
@@ -703,7 +813,6 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   cmGeneratorTarget const* gt)
 {
   // check to see if this is a fortran build
-  std::set<std::string> languages;
   {
     // Issue diagnostic if the source files depend on the config.
     std::vector<cmSourceFile*> sources;
@@ -711,27 +820,25 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
       return false;
     }
   }
+
   // If there's only one source language, Fortran has to be used
   // in order for the sources to compile.
-  // Note: Via linker propagation, LINKER_LANGUAGE could become CXX in
-  // this situation and mismatch from the actual language of the linker.
+  std::set<std::string> languages;
   gt->GetLanguages(languages, "");
-  if (languages.size() == 1) {
-    if (*languages.begin() == "Fortran") {
-      return true;
-    }
+  // Consider an explicit linker language property, but *not* the
+  // computed linker language that may depend on linked targets.
+  // This allows the project to control the language choice in
+  // a target with none of its own sources, e.g. when also using
+  // object libraries.
+  const char* linkLang = gt->GetProperty("LINKER_LANGUAGE");
+  if (linkLang && *linkLang) {
+    languages.insert(linkLang);
   }
 
-  // In the case of mixed object files or sources mixed with objects,
-  // decide the language based on the value of LINKER_LANGUAGE.
-  // This will not make it possible to mix source files of different
-  // languages, but object libraries will be linked together in the
-  // same fashion as other generators do.
-  if (gt->GetLinkerLanguage("") == "Fortran") {
-    return true;
-  }
+  // Intel Fortran .vfproj files do support the resource compiler.
+  languages.erase("RC");
 
-  return false;
+  return languages.size() == 1 && *languages.begin() == "Fortran";
 }
 
 bool cmGlobalVisualStudioGenerator::TargetCompare::operator()(
@@ -815,7 +922,7 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   cmdl.push_back(objs_file);
   cmGeneratedFileStream fout(objs_file.c_str());
   if (!fout) {
-    cmSystemTools::Error("could not open ", objs_file.c_str());
+    cmSystemTools::Error("could not open " + objs_file);
     return;
   }
 
@@ -878,12 +985,13 @@ bool cmGlobalVisualStudioGenerator::Open(const std::string& bindir,
                                          const std::string& projectName,
                                          bool dryRun)
 {
-  std::string buildDir = cmSystemTools::ConvertToOutputPath(bindir);
-  std::string sln = buildDir + "\\" + projectName + ".sln";
+  std::string sln = bindir + "/" + projectName + ".sln";
 
   if (dryRun) {
     return cmSystemTools::FileExists(sln, true);
   }
+
+  sln = cmSystemTools::ConvertToOutputPath(sln);
 
   return std::async(std::launch::async, OpenSolution, sln).get();
 }

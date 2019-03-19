@@ -27,8 +27,6 @@ class cmCTestRunTest
 public:
   explicit cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler);
 
-  ~cmCTestRunTest() = default;
-
   void SetNumberOfRuns(int n) { this->NumberOfRunsLeft = n; }
   void SetRunUntilFailOn() { this->RunUntilFail = true; }
   void SetTestProperties(cmCTestTestHandler::cmCTestTestProperties* prop)
@@ -60,11 +58,8 @@ public:
   // Read and store output.  Returns true if it must be called again.
   void CheckOutput(std::string const& line);
 
-  // Compresses the output, writing to CompressedOutput
-  void CompressOutput();
-
   // launch the test process, return whether it started correctly
-  bool StartTest(size_t total);
+  bool StartTest(size_t completed, size_t total);
   // capture and report the test results
   bool EndTest(size_t completed, size_t total, bool started);
   // Called by ctest -N to log the command string
@@ -72,13 +67,19 @@ public:
 
   void ComputeWeightedCost();
 
-  bool StartAgain();
+  bool StartAgain(size_t completed);
 
   void StartFailure(std::string const& output);
 
   cmCTest* GetCTest() const { return this->CTest; }
 
+  std::string& GetActualCommand() { return this->ActualCommand; }
+
+  const std::vector<std::string>& GetArguments() { return this->Arguments; }
+
   void FinalizeTest();
+
+  bool TimedOutForStopTime() const { return this->TimeoutIsForStopTime; }
 
 private:
   bool NeedsToRerun();
@@ -91,14 +92,16 @@ private:
   // Run post processing of the process output for MemCheck
   void MemCheckPostProcess();
 
+  // Returns "completed/total Test #Index: "
+  std::string GetTestPrefix(size_t completed, size_t total) const;
+
   cmCTestTestHandler::cmCTestTestProperties* TestProperties;
+  bool TimeoutIsForStopTime = false;
   // Pointer back to the "parent"; the handler that invoked this test run
   cmCTestTestHandler* TestHandler;
   cmCTest* CTest;
   std::unique_ptr<cmProcess> TestProcess;
   std::string ProcessOutput;
-  std::string CompressedOutput;
-  double CompressionRatio;
   // The test results
   cmCTestTestHandler::cmCTestTestResult TestResult;
   cmCTestMultiProcessHandler& MultiTestHandler;
@@ -115,14 +118,12 @@ private:
 
 inline int getNumWidth(size_t n)
 {
-  int numWidth = 1;
-  if (n >= 10) {
-    numWidth = 2;
+  int w = 1;
+  while (n >= 10) {
+    n /= 10;
+    ++w;
   }
-  if (n >= 100) {
-    numWidth = 3;
-  }
-  return numWidth;
+  return w;
 }
 
 #endif

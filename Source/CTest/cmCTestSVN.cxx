@@ -26,9 +26,7 @@ cmCTestSVN::cmCTestSVN(cmCTest* ct, std::ostream& log)
   this->PriorRev = this->Unknown;
 }
 
-cmCTestSVN::~cmCTestSVN()
-{
-}
+cmCTestSVN::~cmCTestSVN() = default;
 
 void cmCTestSVN::CleanupImpl()
 {
@@ -244,7 +242,7 @@ bool cmCTestSVN::UpdateImpl()
   if (opts.empty()) {
     opts = this->CTest->GetCTestConfiguration("SVNUpdateOptions");
   }
-  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
 
   // Specify the start time for nightly testing.
   if (this->CTest->GetTestModel() == cmCTest::NIGHTLY) {
@@ -279,7 +277,7 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
   std::string userOptions = this->CTest->GetCTestConfiguration("SVNOptions");
 
   std::vector<std::string> parsedUserOptions =
-    cmSystemTools::ParseArguments(userOptions.c_str());
+    cmSystemTools::ParseArguments(userOptions);
   for (std::string const& opt : parsedUserOptions) {
     args.push_back(opt.c_str());
   }
@@ -330,13 +328,15 @@ private:
     if (name == "logentry") {
       this->Rev = Revision();
       this->Rev.SVNInfo = &SVNRepo;
-      if (const char* rev = this->FindAttribute(atts, "revision")) {
+      if (const char* rev =
+            cmCTestSVN::LogParser::FindAttribute(atts, "revision")) {
         this->Rev.Rev = rev;
       }
       this->Changes.clear();
     } else if (name == "path") {
       this->CurChange = Change();
-      if (const char* action = this->FindAttribute(atts, "action")) {
+      if (const char* action =
+            cmCTestSVN::LogParser::FindAttribute(atts, "action")) {
         this->CurChange.Action = action[0];
       }
     }
@@ -519,7 +519,7 @@ private:
     } else {
       local_path = path;
     }
-    this->SVN->Repositories.emplace_back(local_path.c_str());
+    this->SVN->Repositories.emplace_back(local_path);
   }
 };
 
@@ -530,7 +530,7 @@ bool cmCTestSVN::LoadRepositories()
   }
 
   // Info for root repository
-  this->Repositories.emplace_back("");
+  this->Repositories.emplace_back();
   this->RootInfo = &(this->Repositories.back());
 
   // Run "svn status" to get the list of external repositories

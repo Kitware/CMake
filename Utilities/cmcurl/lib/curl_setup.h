@@ -44,6 +44,9 @@
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
+#  ifndef NOGDI
+#    define NOGDI
+#  endif
 #endif
 
 /*
@@ -221,7 +224,7 @@
 
 /*
  * Use getaddrinfo to resolve the IPv4 address literal. If the current network
- * interface doesn’t support IPv4, but supports IPv6, NAT64, and DNS64,
+ * interface doesn't support IPv4, but supports IPv6, NAT64, and DNS64,
  * performing this task will result in a synthesized IPv6 address.
  */
 #ifdef  __APPLE__
@@ -246,6 +249,7 @@
 #  if defined(_UNICODE) && !defined(UNICODE)
 #    define UNICODE
 #  endif
+#  include <winerror.h>
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
@@ -659,7 +663,7 @@ int netware_init(void);
 #if defined(USE_GNUTLS) || defined(USE_OPENSSL) || defined(USE_NSS) || \
     defined(USE_POLARSSL) || defined(USE_AXTLS) || defined(USE_MBEDTLS) || \
     defined(USE_CYASSL) || defined(USE_SCHANNEL) || \
-    defined(USE_DARWINSSL) || defined(USE_GSKIT)
+    defined(USE_DARWINSSL) || defined(USE_GSKIT) || defined(USE_MESALINK)
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
@@ -813,6 +817,18 @@ endings either CRLF or LF so 't' is appropriate.
 /* for systems that don't detect this in configure, use a sensible default */
 #ifndef CURL_SA_FAMILY_T
 #define CURL_SA_FAMILY_T unsigned short
+#endif
+
+/* Some convenience macros to get the larger/smaller value out of two given.
+   We prefix with CURL to prevent name collisions. */
+#define CURLMAX(x,y) ((x)>(y)?(x):(y))
+#define CURLMIN(x,y) ((x)<(y)?(x):(y))
+
+/* Some versions of the Android SDK is missing the declaration */
+#if defined(HAVE_GETPWUID_R) && defined(HAVE_DECL_GETPWUID_R_MISSING)
+struct passwd;
+int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
+               size_t buflen, struct passwd **result);
 #endif
 
 #endif /* HEADER_CURL_SETUP_H */

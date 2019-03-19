@@ -43,14 +43,14 @@ struct cmStateDetail::SnapshotDataType
   std::vector<std::string>::size_type CompileDefinitionsPosition;
   std::vector<std::string>::size_type CompileOptionsPosition;
   std::vector<std::string>::size_type LinkOptionsPosition;
+  std::vector<std::string>::size_type LinkDirectoriesPosition;
 };
 
 struct cmStateDetail::PolicyStackEntry : public cmPolicies::PolicyMap
 {
   typedef cmPolicies::PolicyMap derived;
   PolicyStackEntry(bool w = false)
-    : derived()
-    , Weak(w)
+    : Weak(w)
   {
   }
   PolicyStackEntry(derived const& d, bool w)
@@ -87,6 +87,9 @@ struct cmStateDetail::BuildsystemDirectoryStateType
 
   std::vector<std::string> LinkOptions;
   std::vector<cmListFileBacktrace> LinkOptionsBacktraces;
+
+  std::vector<std::string> LinkDirectories;
+  std::vector<cmListFileBacktrace> LinkDirectoriesBacktraces;
 
   std::vector<std::string> NormalTargetNames;
 

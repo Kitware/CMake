@@ -659,7 +659,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       libssh2_session_set_blocking(sshc->ssh_session, 0);
 
       state(conn, SSH_S_STARTUP);
-      /* fall-through */
+      /* FALLTHROUGH */
 
     case SSH_S_STARTUP:
       rc = libssh2_session_startup(sshc->ssh_session, (int)sock);
@@ -675,7 +675,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       state(conn, SSH_HOSTKEY);
 
-      /* fall-through */
+      /* FALLTHROUGH */
     case SSH_HOSTKEY:
       /*
        * Before we authenticate we should check the hostkey's fingerprint
@@ -1175,8 +1175,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         if(data->set.verbose) {
-          Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"PWD\n", 4, conn);
-          Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp), conn);
+          Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"PWD\n", 4);
+          Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp));
         }
         /* this sends an FTP-like "header" to the header callback so that the
            current directory can be read very similar to how it is read when
@@ -1933,17 +1933,17 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       break;
 
     case SSH_SFTP_READDIR:
-      sshc->readdir_len = libssh2_sftp_readdir_ex(sshc->sftp_handle,
-                                                  sshc->readdir_filename,
-                                                  PATH_MAX,
-                                                  sshc->readdir_longentry,
-                                                  PATH_MAX,
-                                                  &sshc->readdir_attrs);
-      if(sshc->readdir_len == LIBSSH2_ERROR_EAGAIN) {
-        rc = LIBSSH2_ERROR_EAGAIN;
+      rc = libssh2_sftp_readdir_ex(sshc->sftp_handle,
+                                   sshc->readdir_filename,
+                                   PATH_MAX,
+                                   sshc->readdir_longentry,
+                                   PATH_MAX,
+                                   &sshc->readdir_attrs);
+      if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
-      if(sshc->readdir_len > 0) {
+      if(rc > 0) {
+        sshc->readdir_len = (size_t) rc;
         sshc->readdir_filename[sshc->readdir_len] = '\0';
 
         if(data->set.ftp_list_only) {
@@ -1970,11 +1970,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           /* output debug output if that is requested */
           if(data->set.verbose) {
             Curl_debug(data, CURLINFO_DATA_OUT, sshc->readdir_filename,
-                       sshc->readdir_len, conn);
+                       sshc->readdir_len);
           }
         }
         else {
-          sshc->readdir_currLen = (int)strlen(sshc->readdir_longentry);
+          sshc->readdir_currLen = strlen(sshc->readdir_longentry);
           sshc->readdir_totalLen = 80 + sshc->readdir_currLen;
           sshc->readdir_line = calloc(sshc->readdir_totalLen, 1);
           if(!sshc->readdir_line) {
@@ -2008,13 +2008,13 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
       }
-      else if(sshc->readdir_len == 0) {
+      else if(rc == 0) {
         Curl_safefree(sshc->readdir_filename);
         Curl_safefree(sshc->readdir_longentry);
         state(conn, SSH_SFTP_READDIR_DONE);
         break;
       }
-      else if(sshc->readdir_len <= 0) {
+      else if(rc < 0) {
         err = sftp_libssh2_last_error(sshc->sftp_session);
         result = sftp_libssh2_error_to_CURLE(err);
         sshc->actualcode = result?result:CURLE_SSH;
@@ -2029,16 +2029,16 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       break;
 
     case SSH_SFTP_READDIR_LINK:
-      sshc->readdir_len =
+      rc =
         libssh2_sftp_symlink_ex(sshc->sftp_session,
                                 sshc->readdir_linkPath,
                                 curlx_uztoui(strlen(sshc->readdir_linkPath)),
                                 sshc->readdir_filename,
                                 PATH_MAX, LIBSSH2_SFTP_READLINK);
-      if(sshc->readdir_len == LIBSSH2_ERROR_EAGAIN) {
-        rc = LIBSSH2_ERROR_EAGAIN;
+      if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
+      sshc->readdir_len = (size_t) rc;
       Curl_safefree(sshc->readdir_linkPath);
 
       /* get room for the filename and extra output */
@@ -2079,7 +2079,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         /* output debug output if that is requested */
         if(data->set.verbose) {
           Curl_debug(data, CURLINFO_DATA_OUT, sshc->readdir_line,
-                     sshc->readdir_currLen, conn);
+                     sshc->readdir_currLen);
         }
         data->req.bytecount += sshc->readdir_currLen;
       }
@@ -2926,7 +2926,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
     int rc;
     ssh->kh = libssh2_knownhost_init(ssh->ssh_session);
     if(!ssh->kh) {
-      /* eeek. TODO: free the ssh_session! */
+      libssh2_session_free(ssh->ssh_session);
       return CURLE_FAILED_INIT;
     }
 
@@ -3219,7 +3219,8 @@ static CURLcode sftp_done(struct connectdata *conn, CURLcode status,
     /* Post quote commands are executed after the SFTP_CLOSE state to avoid
        errors that could happen due to open file handles during POSTQUOTE
        operation */
-    if(!status && !premature && conn->data->set.postquote) {
+    if(!status && !premature && conn->data->set.postquote &&
+       !conn->bits.retry) {
       sshc->nextstate = SSH_SFTP_POSTQUOTE_INIT;
       state(conn, SSH_SFTP_CLOSE);
     }

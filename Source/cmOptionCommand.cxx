@@ -6,12 +6,12 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -81,7 +81,7 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
            "For compatibility with older versions of CMake, option "
            "is clearing the normal variable '"
         << args[0] << "'.";
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
     }
   }
   return true;

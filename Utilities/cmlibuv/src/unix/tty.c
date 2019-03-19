@@ -92,13 +92,15 @@ static int uv__tty_is_slave(const int fd) {
   return result;
 }
 
-int uv_tty_init(uv_loop_t* loop, uv_tty_t* tty, int fd, int readable) {
+int uv_tty_init(uv_loop_t* loop, uv_tty_t* tty, int fd, int unused) {
   uv_handle_type type;
   int flags = 0;
   int newfd = -1;
   int r;
   int saved_flags;
+  int mode;
   char path[256];
+  (void)unused; /* deprecated parameter is no longer needed */
 
   /* File descriptors that refer to files cannot be monitored with epoll.
    * That restriction also applies to character devices like /dev/random
@@ -107,6 +109,15 @@ int uv_tty_init(uv_loop_t* loop, uv_tty_t* tty, int fd, int readable) {
   type = uv_guess_handle(fd);
   if (type == UV_FILE || type == UV_UNKNOWN_HANDLE)
     return UV_EINVAL;
+
+  /* Save the fd flags in case we need to restore them due to an error. */
+  do
+    saved_flags = fcntl(fd, F_GETFL);
+  while (saved_flags == -1 && errno == EINTR);
+
+  if (saved_flags == -1)
+    return UV__ERR(errno);
+  mode = saved_flags & O_ACCMODE;
 
   /* Reopen the file descriptor when it refers to a tty. This lets us put the
    * tty in non-blocking mode without affecting other processes that share it
@@ -125,14 +136,14 @@ int uv_tty_init(uv_loop_t* loop, uv_tty_t* tty, int fd, int readable) {
      * slave device.
      */
     if (uv__tty_is_slave(fd) && ttyname_r(fd, path, sizeof(path)) == 0)
-      r = uv__open_cloexec(path, O_RDWR);
+      r = uv__open_cloexec(path, mode);
     else
       r = -1;
 
     if (r < 0) {
       /* fallback to using blocking writes */
-      if (!readable)
-        flags |= UV_STREAM_BLOCKING;
+      if (mode != O_RDONLY)
+        flags |= UV_HANDLE_BLOCKING_WRITES;
       goto skip;
     }
 
@@ -151,22 +162,6 @@ int uv_tty_init(uv_loop_t* loop, uv_tty_t* tty, int fd, int readable) {
     fd = newfd;
   }
 
-#if defined(__APPLE__)
-  /* Save the fd flags in case we need to restore them due to an error. */
-  do
-    saved_flags = fcntl(fd, F_GETFL);
-  while (saved_flags == -1 && errno == EINTR);
-
-  if (saved_flags == -1) {
-    if (newfd != -1)
-      uv__close(newfd);
-    return UV__ERR(errno);
-  }
-#endif
-
-  /* Pacify the compiler. */
-  (void) &saved_flags;
-
 skip:
   uv__stream_init(loop, (uv_stream_t*) tty, UV_TTY);
 
@@ -174,7 +169,7 @@ skip:
    * the handle queue, since it was added by uv__handle_init in uv_stream_init.
    */
 
-  if (!(flags & UV_STREAM_BLOCKING))
+  if (!(flags & UV_HANDLE_BLOCKING_WRITES))
     uv__nonblock(fd, 1);
 
 #if defined(__APPLE__)
@@ -191,10 +186,10 @@ skip:
   }
 #endif
 
-  if (readable)
-    flags |= UV_STREAM_READABLE;
-  else
-    flags |= UV_STREAM_WRITABLE;
+  if (mode != O_WRONLY)
+    flags |= UV_HANDLE_READABLE;
+  if (mode != O_RDONLY)
+    flags |= UV_HANDLE_WRITABLE;
 
   uv__stream_open((uv_stream_t*) tty, fd, flags);
   tty->mode = UV_TTY_MODE_NORMAL;

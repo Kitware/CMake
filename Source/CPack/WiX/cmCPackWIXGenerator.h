@@ -28,20 +28,20 @@ public:
   ~cmCPackWIXGenerator();
 
 protected:
-  virtual int InitializeInternal();
+  int InitializeInternal() override;
 
-  virtual int PackageFiles();
+  int PackageFiles() override;
 
-  virtual const char* GetOutputExtension() { return ".msi"; }
+  const char* GetOutputExtension() override { return ".msi"; }
 
-  virtual enum CPackSetDestdirSupport SupportsSetDestdir() const
+  enum CPackSetDestdirSupport SupportsSetDestdir() const override
   {
     return SETDESTDIR_UNSUPPORTED;
   }
 
-  virtual bool SupportsAbsoluteDestination() const { return false; }
+  bool SupportsAbsoluteDestination() const override { return false; }
 
-  virtual bool SupportsComponentInstallation() const { return true; }
+  bool SupportsComponentInstallation() const override { return true; }
 
 private:
   typedef std::map<std::string, std::string> id_map_t;

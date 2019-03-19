@@ -182,8 +182,6 @@ static struct thread_sync_data *conn_thread_sync_data(struct connectdata *conn)
   return &(((struct thread_data *)conn->async.os_specific)->tsd);
 }
 
-#define CONN_THREAD_SYNC_DATA(conn) &(((conn)->async.os_specific)->tsd);
-
 /* Destroy resolver thread synchronization data */
 static
 void destroy_thread_sync_data(struct thread_sync_data * tsd)
@@ -481,8 +479,10 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   DEBUGASSERT(conn && td);
 
   /* wait for the thread to resolve the name */
-  if(Curl_thread_join(&td->thread_hnd))
-    result = getaddrinfo_complete(conn);
+  if(Curl_thread_join(&td->thread_hnd)) {
+    if(entry)
+      result = getaddrinfo_complete(conn);
+  }
   else
     DEBUGASSERT(0);
 
@@ -572,10 +572,10 @@ int Curl_resolver_getsock(struct connectdata *conn,
   (void)socks;
   (void)numsocks;
   ms = Curl_timediff(Curl_now(), reslv->start);
-  if(ms < 10)
-    milli = ms/3;
+  if(ms < 3)
+    milli = 0;
   else if(ms <= 50)
-    milli = 10;
+    milli = ms/3;
   else if(ms <= 250)
     milli = 50;
   else

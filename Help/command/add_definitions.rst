@@ -1,9 +1,9 @@
 add_definitions
 ---------------
 
-Adds -D define flags to the compilation of source files.
+Add -D define flags to the compilation of source files.
 
-::
+.. code-block:: cmake
 
   add_definitions(-DFOO -DBAR ...)
 

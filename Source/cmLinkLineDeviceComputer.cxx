@@ -21,8 +21,24 @@ cmLinkLineDeviceComputer::cmLinkLineDeviceComputer(
 {
 }
 
-cmLinkLineDeviceComputer::~cmLinkLineDeviceComputer()
+cmLinkLineDeviceComputer::~cmLinkLineDeviceComputer() = default;
+
+static bool cmLinkItemValidForDevice(std::string const& item)
 {
+  // Valid items are:
+  // * Non-flags (does not start in '-')
+  // * Specific flags --library, --library-path, -l, -L
+  // For example:
+  // * 'cublas_device' => pass-along
+  // * '--library pthread' => pass-along
+  // * '-lpthread' => pass-along
+  // * '-pthread' => drop
+  // * '-a' => drop
+  // * '-framework Name' (as one string) => drop
+  return (!cmHasLiteralPrefix(item, "-") || //
+          cmHasLiteralPrefix(item, "-l") || //
+          cmHasLiteralPrefix(item, "-L") || //
+          cmHasLiteralPrefix(item, "--library"));
 }
 
 std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
@@ -39,7 +55,13 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
   typedef cmComputeLinkInformation::ItemVector ItemVector;
   ItemVector const& items = cli.GetItems();
   std::string config = cli.GetConfig();
+  bool skipItemAfterFramework = false;
   for (auto const& item : items) {
+    if (skipItemAfterFramework) {
+      skipItemAfterFramework = false;
+      continue;
+    }
+
     if (item.Target) {
       bool skip = false;
       switch (item.Target->GetType()) {
@@ -60,16 +82,21 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
 
     std::string out;
     if (item.IsPath) {
-      // nvcc understands absolute paths to libraries ending in '.a' should
-      // be passed to nvlink.  Other extensions like '.so' or '.dylib' are
-      // rejected by the nvcc front-end even though nvlink knows to ignore
-      // them.  Bypass the front-end via '-Xnvlink'.
-      if (!cmHasLiteralSuffix(item.Value, ".a")) {
-        out += "-Xnvlink ";
+      // nvcc understands absolute paths to libraries ending in '.a' or '.lib'.
+      // These should be passed to nvlink.  Other extensions need to be left
+      // out because nvlink may not understand or need them.  Even though it
+      // can tolerate '.so' or '.dylib' it cannot tolerate '.so.1'.
+      if (cmHasLiteralSuffix(item.Value, ".a") ||
+          cmHasLiteralSuffix(item.Value, ".lib")) {
+        out += this->ConvertToOutputFormat(
+          this->ConvertToLinkReference(item.Value));
       }
-      out +=
-        this->ConvertToOutputFormat(this->ConvertToLinkReference(item.Value));
-    } else {
+    } else if (item.Value == "-framework") {
+      // This is the first part of '-framework Name' where the framework
+      // name is specified as a following item.  Ignore both.
+      skipItemAfterFramework = true;
+      continue;
+    } else if (cmLinkItemValidForDevice(item.Value)) {
       out += item.Value;
     }
 

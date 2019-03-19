@@ -1,0 +1,10 @@
+CMake Warning \(dev\) at .*/Modules/BundleUtilities\.cmake:[0-9]+ \(message\):
+  Policy CMP0080 is not set: BundleUtilities cannot be included at configure
+  time\.  Run "cmake --help-policy CMP0080" for policy details\.  Use the
+  cmake_policy command to set the policy and suppress this warning\.
+
+Call Stack \(most recent call first\):
+  .*/Modules/BundleUtilities\.cmake:[0-9]+ \(_warn_cmp0080\)
+  CMP0080-WARN\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

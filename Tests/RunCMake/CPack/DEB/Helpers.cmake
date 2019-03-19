@@ -1,4 +1,4 @@
-set(ALL_FILES_GLOB "*.deb")
+set(ALL_FILES_GLOB "*.deb" "*.ddeb")
 
 function(getPackageContent FILE RESULT_VAR)
   execute_process(COMMAND ${CMAKE_COMMAND} -E env TZ=Etc/UTC ${DPKG_EXECUTABLE} -c "${FILE}"

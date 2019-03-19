@@ -1,26 +1,28 @@
 cmake_parse_arguments
 ---------------------
 
-``cmake_parse_arguments`` is intended to be used in macros or functions for
-parsing the arguments given to that macro or function.  It processes the
-arguments and defines a set of variables which hold the values of the
-respective options.
+Parse function or macro arguments.
 
-::
+.. code-block:: cmake
 
   cmake_parse_arguments(<prefix> <options> <one_value_keywords>
-                        <multi_value_keywords> args...)
+                        <multi_value_keywords> <args>...)
 
-  cmake_parse_arguments(PARSE_ARGV N <prefix> <options> <one_value_keywords>
-                        <multi_value_keywords>)
+  cmake_parse_arguments(PARSE_ARGV <N> <prefix> <options>
+                        <one_value_keywords> <multi_value_keywords>)
 
-The first signature reads processes arguments passed in the ``args...``.
+This command is for use in macros or functions.
+It processes the arguments given to that macro or function,
+and defines a set of variables which hold the values of the
+respective options.
+
+The first signature reads processes arguments passed in the ``<args>...``.
 This may be used in either a :command:`macro` or a :command:`function`.
 
 The ``PARSE_ARGV`` signature is only for use in a :command:`function`
 body.  In this case the arguments that are parsed come from the
 ``ARGV#`` variables of the calling function.  The parsing starts with
-the Nth argument, where ``N`` is an unsigned integer.  This allows for
+the ``<N>``-th argument, where ``<N>`` is an unsigned integer.  This allows for
 the values to have special characters like ``;`` in them.
 
 The ``<options>`` argument contains all options for the respective macro,
@@ -57,6 +59,11 @@ All remaining arguments are collected in a variable
 where recognized. This can be checked afterwards to see
 whether your macro was called with unrecognized parameters.
 
+``<one_value_keywords>`` and ``<multi_value_keywords>`` that where given no
+values at all are collected in a variable ``<prefix>_KEYWORDS_MISSING_VALUES``
+that will be undefined if all keywords received values. This can be checked
+to see if there where keywords without any values given.
+
 As an example here a ``my_install()`` macro, which takes similar arguments
 as the real :command:`install` command:
 
@@ -75,7 +82,7 @@ Assume ``my_install()`` has been called like this:
 
 .. code-block:: cmake
 
-   my_install(TARGETS foo bar DESTINATION bin OPTIONAL blub)
+   my_install(TARGETS foo bar DESTINATION bin OPTIONAL blub CONFIGURATIONS)
 
 After the ``cmake_parse_arguments`` call the macro will have set or undefined
 the following variables::
@@ -87,6 +94,8 @@ the following variables::
    MY_INSTALL_TARGETS = "foo;bar"
    MY_INSTALL_CONFIGURATIONS <UNDEFINED> # was not used
    MY_INSTALL_UNPARSED_ARGUMENTS = "blub" # nothing expected after "OPTIONAL"
+   MY_INSTALL_KEYWORDS_MISSING_VALUES = "CONFIGURATIONS"
+            # No value for "CONFIGURATIONS" given
 
 You can then continue and process these variables.
 
@@ -95,5 +104,6 @@ one_value_keyword another recognized keyword follows, this is
 interpreted as the beginning of the new option.  E.g.
 ``my_install(TARGETS foo DESTINATION OPTIONAL)`` would result in
 ``MY_INSTALL_DESTINATION`` set to ``"OPTIONAL"``, but as ``OPTIONAL``
-is a keyword itself ``MY_INSTALL_DESTINATION`` will be empty and
-``MY_INSTALL_OPTIONAL`` will therefore be set to ``TRUE``.
+is a keyword itself ``MY_INSTALL_DESTINATION`` will be empty (but added
+to ``MY_INSTALL_KEYWORDS_MISSING_VALUES``) and ``MY_INSTALL_OPTIONAL`` will
+therefore be set to ``TRUE``.

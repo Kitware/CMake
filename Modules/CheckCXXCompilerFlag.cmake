@@ -9,7 +9,7 @@ Check whether the CXX compiler supports a given flag.
 
 .. command:: check_cxx_compiler_flag
 
-  ::
+  .. code-block:: cmake
 
     check_cxx_compiler_flag(<flag> <var>)
 
@@ -61,4 +61,3 @@ macro (CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
 
    set (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
 endmacro ()
-

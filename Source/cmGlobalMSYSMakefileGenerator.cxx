@@ -7,6 +7,7 @@
 #include "cmDocumentationEntry.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmState.h"
 #include "cmake.h"
 
@@ -44,7 +45,8 @@ void cmGlobalMSYSMakefileGenerator::EnableLanguage(
   std::vector<std::string> const& l, cmMakefile* mf, bool optional)
 {
   this->FindMakeProgram(mf);
-  std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& makeProgram =
+    mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::vector<std::string> locations;
   std::string makeloc = cmSystemTools::GetProgramPath(makeProgram.c_str());
   locations.push_back(this->FindMinGW(makeloc));

@@ -4,8 +4,8 @@
 
 #include "cmExprParserHelper.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cm_kwiml.h"
-#include "cmake.h"
 
 #include <stdio.h>
 
@@ -104,7 +104,7 @@ bool cmMathCommand::HandleExprCommand(std::vector<std::string> const& args)
 
   std::string const& w = helper.GetWarning();
   if (!w.empty()) {
-    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w);
+    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w);
   }
 
   this->Makefile->AddDefinition(outputVariable, buffer);

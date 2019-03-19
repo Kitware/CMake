@@ -2,11 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceFile.h"
 
-#include <sstream>
+#include <array>
+#include <utility>
 
 #include "cmCustomCommand.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmProperty.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
@@ -16,8 +18,6 @@ cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name,
                            cmSourceFileLocationKind kind)
   : Location(mf, name, kind)
 {
-  this->CustomCommand = nullptr;
-  this->FindFullPathFailed = false;
 }
 
 cmSourceFile::~cmSourceFile()
@@ -31,6 +31,8 @@ std::string const& cmSourceFile::GetExtension() const
 }
 
 const std::string cmSourceFile::propLANGUAGE = "LANGUAGE";
+const std::string cmSourceFile::propLOCATION = "LOCATION";
+const std::string cmSourceFile::propGENERATED = "GENERATED";
 
 void cmSourceFile::SetObjectLibrary(std::string const& objlib)
 {
@@ -111,91 +113,88 @@ std::string const& cmSourceFile::GetFullPath() const
 
 bool cmSourceFile::FindFullPath(std::string* error)
 {
+  // If the file is generated compute the location without checking on disk.
+  if (this->GetIsGenerated()) {
+    // The file is either already a full path or is relative to the
+    // build directory for the target.
+    this->Location.DirectoryUseBinary();
+    this->FullPath = this->Location.GetFullPath();
+    return true;
+  }
+
   // If this method has already failed once do not try again.
   if (this->FindFullPathFailed) {
     return false;
   }
 
-  // If the file is generated compute the location without checking on
-  // disk.
-  if (this->GetPropertyAsBool("GENERATED")) {
-    // The file is either already a full path or is relative to the
-    // build directory for the target.
-    this->Location.DirectoryUseBinary();
-    this->FullPath = this->Location.GetDirectory();
-    this->FullPath += "/";
-    this->FullPath += this->Location.GetName();
-    return true;
-  }
-
   // The file is not generated.  It must exist on disk.
-  cmMakefile const* mf = this->Location.GetMakefile();
-  const char* tryDirs[3] = { nullptr, nullptr, nullptr };
-  if (this->Location.DirectoryIsAmbiguous()) {
-    tryDirs[0] = mf->GetCurrentSourceDirectory().c_str();
-    tryDirs[1] = mf->GetCurrentBinaryDirectory().c_str();
-  } else {
-    tryDirs[0] = "";
-  }
+  cmMakefile const* makefile = this->Location.GetMakefile();
+  // Location path
+  std::string const lPath = this->Location.GetFullPath();
+  // List of extension lists
+  std::array<std::vector<std::string> const*, 2> const extsLists = {
+    { &makefile->GetCMakeInstance()->GetSourceExtensions(),
+      &makefile->GetCMakeInstance()->GetHeaderExtensions() }
+  };
 
-  cmake const* const cmakeInst = mf->GetCMakeInstance();
-  std::vector<std::string> const& srcExts = cmakeInst->GetSourceExtensions();
-  std::vector<std::string> const& hdrExts = cmakeInst->GetHeaderExtensions();
-  for (const char* const* di = tryDirs; *di; ++di) {
-    std::string tryPath = this->Location.GetDirectory();
-    if (!tryPath.empty()) {
-      tryPath += "/";
-    }
-    tryPath += this->Location.GetName();
-    tryPath = cmSystemTools::CollapseFullPath(tryPath, *di);
-    if (this->TryFullPath(tryPath, "")) {
+  // Tries to find the file in a given directory
+  auto findInDir = [this, &extsLists, &lPath](std::string const& dir) -> bool {
+    // Compute full path
+    std::string const fullPath = cmSystemTools::CollapseFullPath(lPath, dir);
+    // Try full path
+    if (cmSystemTools::FileExists(fullPath)) {
+      this->FullPath = fullPath;
       return true;
     }
-    for (std::string const& ext : srcExts) {
-      if (this->TryFullPath(tryPath, ext)) {
-        return true;
+    // Try full path with extension
+    for (auto exts : extsLists) {
+      for (std::string const& ext : *exts) {
+        if (!ext.empty()) {
+          std::string extPath = fullPath;
+          extPath += '.';
+          extPath += ext;
+          if (cmSystemTools::FileExists(extPath)) {
+            this->FullPath = extPath;
+            return true;
+          }
+        }
       }
     }
-    for (std::string const& ext : hdrExts) {
-      if (this->TryFullPath(tryPath, ext)) {
-        return true;
-      }
+    // File not found
+    return false;
+  };
+
+  // Try to find the file in various directories
+  if (this->Location.DirectoryIsAmbiguous()) {
+    if (findInDir(makefile->GetCurrentSourceDirectory()) ||
+        findInDir(makefile->GetCurrentBinaryDirectory())) {
+      return true;
+    }
+  } else {
+    if (findInDir({})) {
+      return true;
     }
   }
 
-  std::ostringstream e;
-  std::string missing = this->Location.GetDirectory();
-  if (!missing.empty()) {
-    missing += "/";
+  // Compose error
+  std::string err;
+  err += "Cannot find source file:\n  ";
+  err += lPath;
+  err += "\nTried extensions";
+  for (auto exts : extsLists) {
+    for (std::string const& ext : *exts) {
+      err += " .";
+      err += ext;
+    }
   }
-  missing += this->Location.GetName();
-  e << "Cannot find source file:\n  " << missing << "\nTried extensions";
-  for (std::string const& srcExt : srcExts) {
-    e << " ." << srcExt;
-  }
-  for (std::string const& ext : hdrExts) {
-    e << " ." << ext;
-  }
-  if (error) {
-    *error = e.str();
+  if (error != nullptr) {
+    *error = std::move(err);
   } else {
-    this->Location.GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+    makefile->IssueMessage(MessageType::FATAL_ERROR, err);
   }
   this->FindFullPathFailed = true;
-  return false;
-}
 
-bool cmSourceFile::TryFullPath(const std::string& path, const std::string& ext)
-{
-  std::string tryPath = path;
-  if (!ext.empty()) {
-    tryPath += ".";
-    tryPath += ext;
-  }
-  if (cmSystemTools::FileExists(tryPath)) {
-    this->FullPath = tryPath;
-    return true;
-  }
+  // File not found
   return false;
 }
 
@@ -240,12 +239,22 @@ bool cmSourceFile::Matches(cmSourceFileLocation const& loc)
 void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 {
   this->Properties.SetProperty(prop, value);
+
+  // Update IsGenerated flag
+  if (prop == propGENERATED) {
+    this->IsGenerated = cmSystemTools::IsOn(value);
+  }
 }
 
 void cmSourceFile::AppendProperty(const std::string& prop, const char* value,
                                   bool asString)
 {
   this->Properties.AppendProperty(prop, value, asString);
+
+  // Update IsGenerated flag
+  if (prop == propGENERATED) {
+    this->IsGenerated = this->GetPropertyAsBool(propGENERATED);
+  }
 }
 
 const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
@@ -264,7 +273,7 @@ const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
   // cmSourceFileLocation class to commit to a particular full path to
   // the source file as late as possible.  If the users requests the
   // LOCATION property we must commit now.
-  if (prop == "LOCATION") {
+  if (prop == propLOCATION) {
     // Commit to a location.
     this->GetFullPath();
   }
@@ -276,7 +285,7 @@ const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
 const char* cmSourceFile::GetProperty(const std::string& prop) const
 {
   // Check for computed properties.
-  if (prop == "LOCATION") {
+  if (prop == propLOCATION) {
     if (this->FullPath.empty()) {
       return nullptr;
     }

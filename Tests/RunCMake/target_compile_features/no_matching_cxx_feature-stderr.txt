@@ -5,4 +5,4 @@ CMake Error at no_matching_cxx_feature.cmake:[0-9]+ \((target_compile_features|m
 
   version *[.0-9]+\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

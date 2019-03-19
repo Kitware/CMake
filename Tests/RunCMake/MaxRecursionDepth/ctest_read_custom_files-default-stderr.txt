@@ -1,0 +1,5 @@
+[0-9]+
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/CTestCustom\.cmake:1 \(message\):
+  Maximum recursion depth of [0-9]+ exceeded
+Call Stack \(most recent call first\):
+  .*/Tests/RunCMake/MaxRecursionDepth/CTestCustom\.cmake:3 \(ctest_read_custom_files\)

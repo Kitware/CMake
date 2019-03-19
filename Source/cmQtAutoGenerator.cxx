@@ -8,12 +8,14 @@
 #include "cmAlgorithms.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
 #include <algorithm>
+#include <utility>
 
 // -- Class methods
 
@@ -41,8 +43,7 @@ std::string cmQtAutoGenerator::Logger::HeadLine(std::string const& title)
   return head;
 }
 
-void cmQtAutoGenerator::Logger::Info(GeneratorT genType,
-                                     std::string const& message)
+void cmQtAutoGenerator::Logger::Info(GenT genType, std::string const& message)
 {
   std::string msg = GeneratorName(genType);
   msg += ": ";
@@ -52,11 +53,11 @@ void cmQtAutoGenerator::Logger::Info(GeneratorT genType,
   }
   {
     std::lock_guard<std::mutex> lock(Mutex_);
-    cmSystemTools::Stdout(msg.c_str(), msg.size());
+    cmSystemTools::Stdout(msg);
   }
 }
 
-void cmQtAutoGenerator::Logger::Warning(GeneratorT genType,
+void cmQtAutoGenerator::Logger::Warning(GenT genType,
                                         std::string const& message)
 {
   std::string msg;
@@ -76,11 +77,11 @@ void cmQtAutoGenerator::Logger::Warning(GeneratorT genType,
   msg.push_back('\n');
   {
     std::lock_guard<std::mutex> lock(Mutex_);
-    cmSystemTools::Stdout(msg.c_str(), msg.size());
+    cmSystemTools::Stdout(msg);
   }
 }
 
-void cmQtAutoGenerator::Logger::WarningFile(GeneratorT genType,
+void cmQtAutoGenerator::Logger::WarningFile(GenT genType,
                                             std::string const& filename,
                                             std::string const& message)
 {
@@ -92,8 +93,7 @@ void cmQtAutoGenerator::Logger::WarningFile(GeneratorT genType,
   Warning(genType, msg);
 }
 
-void cmQtAutoGenerator::Logger::Error(GeneratorT genType,
-                                      std::string const& message)
+void cmQtAutoGenerator::Logger::Error(GenT genType, std::string const& message)
 {
   std::string msg;
   msg += HeadLine(GeneratorName(genType) + " error");
@@ -105,11 +105,11 @@ void cmQtAutoGenerator::Logger::Error(GeneratorT genType,
   msg.push_back('\n');
   {
     std::lock_guard<std::mutex> lock(Mutex_);
-    cmSystemTools::Stderr(msg.c_str(), msg.size());
+    cmSystemTools::Stderr(msg);
   }
 }
 
-void cmQtAutoGenerator::Logger::ErrorFile(GeneratorT genType,
+void cmQtAutoGenerator::Logger::ErrorFile(GenT genType,
                                           std::string const& filename,
                                           std::string const& message)
 {
@@ -122,7 +122,7 @@ void cmQtAutoGenerator::Logger::ErrorFile(GeneratorT genType,
 }
 
 void cmQtAutoGenerator::Logger::ErrorCommand(
-  GeneratorT genType, std::string const& message,
+  GenT genType, std::string const& message,
   std::vector<std::string> const& command, std::string const& output)
 {
   std::string msg;
@@ -147,7 +147,7 @@ void cmQtAutoGenerator::Logger::ErrorCommand(
   msg.push_back('\n');
   {
     std::lock_guard<std::mutex> lock(Mutex_);
-    cmSystemTools::Stderr(msg.c_str(), msg.size());
+    cmSystemTools::Stderr(msg);
   }
 }
 
@@ -295,7 +295,7 @@ bool cmQtAutoGenerator::FileSystem::FileRead(std::string& content,
   return success;
 }
 
-bool cmQtAutoGenerator::FileSystem::FileRead(GeneratorT genType,
+bool cmQtAutoGenerator::FileSystem::FileRead(GenT genType,
                                              std::string& content,
                                              std::string const& filename)
 {
@@ -341,7 +341,7 @@ bool cmQtAutoGenerator::FileSystem::FileWrite(std::string const& filename,
   return success;
 }
 
-bool cmQtAutoGenerator::FileSystem::FileWrite(GeneratorT genType,
+bool cmQtAutoGenerator::FileSystem::FileWrite(GenT genType,
                                               std::string const& filename,
                                               std::string const& content)
 {
@@ -385,7 +385,7 @@ bool cmQtAutoGenerator::FileSystem::MakeDirectory(std::string const& dirname)
   return cmSystemTools::MakeDirectory(dirname);
 }
 
-bool cmQtAutoGenerator::FileSystem::MakeDirectory(GeneratorT genType,
+bool cmQtAutoGenerator::FileSystem::MakeDirectory(GenT genType,
                                                   std::string const& dirname)
 {
   if (!MakeDirectory(dirname)) {
@@ -407,7 +407,7 @@ bool cmQtAutoGenerator::FileSystem::MakeParentDirectory(
 }
 
 bool cmQtAutoGenerator::FileSystem::MakeParentDirectory(
-  GeneratorT genType, std::string const& filename)
+  GenT genType, std::string const& filename)
 {
   if (!MakeParentDirectory(filename)) {
     Log()->ErrorFile(genType, filename, "Could not create parent directory");
@@ -445,7 +445,7 @@ void cmQtAutoGenerator::ReadOnlyProcessT::PipeT::UVAlloc(uv_handle_t* handle,
 {
   auto& pipe = *reinterpret_cast<PipeT*>(handle->data);
   pipe.Buffer_.resize(suggestedSize);
-  buf->base = &pipe.Buffer_.front();
+  buf->base = pipe.Buffer_.data();
   buf->len = pipe.Buffer_.size();
 }
 
@@ -553,11 +553,11 @@ bool cmQtAutoGenerator::ReadOnlyProcessT::start(
     std::fill_n(reinterpret_cast<char*>(&UVOptions_), sizeof(UVOptions_), 0);
     UVOptions_.exit_cb = &ReadOnlyProcessT::UVExit;
     UVOptions_.file = CommandPtr_[0];
-    UVOptions_.args = const_cast<char**>(&CommandPtr_.front());
+    UVOptions_.args = const_cast<char**>(CommandPtr_.data());
     UVOptions_.cwd = Setup_.WorkingDirectory.c_str();
     UVOptions_.flags = UV_PROCESS_WINDOWS_HIDE;
     UVOptions_.stdio_count = static_cast<int>(UVOptionsStdIO_.size());
-    UVOptions_.stdio = &UVOptionsStdIO_.front();
+    UVOptions_.stdio = UVOptionsStdIO_.data();
 
     // -- Spawn process
     if (UVProcess_.spawn(*uv_loop, UVOptions_, this) != 0) {
@@ -685,7 +685,7 @@ bool cmQtAutoGenerator::Run(std::string const& infoFile,
 
   bool success = false;
   {
-    cmake cm(cmake::RoleScript);
+    cmake cm(cmake::RoleScript, cmState::Unknown);
     cm.SetHomeOutputDirectory(InfoDir());
     cm.SetHomeDirectory(InfoDir());
     cm.GetCurrentSnapshot().SetDefaultDefinitions();

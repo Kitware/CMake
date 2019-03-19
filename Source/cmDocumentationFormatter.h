@@ -59,8 +59,8 @@ public:
   void SetIndent(const char* indent);
 
 private:
-  int TextWidth;
-  const char* TextIndent;
+  int TextWidth = 77;
+  const char* TextIndent = "";
 };
 
 #endif

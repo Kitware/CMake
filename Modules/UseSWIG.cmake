@@ -75,7 +75,8 @@ Defines the following command for use with ``SWIG``:
   ``SOURCES``
     List of sources for the library. Files with extension ``.i`` will be
     identified as sources for the ``SWIG`` tool. Other files will be handled in
-    the standard way.
+    the standard way. This behavior can be overriden by specifying the variable
+    ``SWIG_SOURCE_FILE_EXTENSIONS``.
 
   .. note::
 
@@ -122,7 +123,7 @@ ensure generated files will receive the required settings.
   If set to ``TRUE``, contents of target property
   :prop_tgt:`INCLUDE_DIRECTORIES` will be forwarded to ``SWIG`` compiler.
   If set to ``FALSE`` target property :prop_tgt:`INCLUDE_DIRECTORIES` will be
-  ignored. If not set, target property ``SWIG_USE_TARGT_INCLUDE_DIRECTORIES``
+  ignored. If not set, target property ``SWIG_USE_TARGET_INCLUDE_DIRECTORIES``
   will be considered.
 
 ``GENERATED_INCLUDE_DIRECTORIES``, ``GENERATED_COMPILE_DEFINITIONS`` and ``GENERATED_COMPILE_OPTIONS``
@@ -141,6 +142,11 @@ ensure generated files will receive the required settings.
   .. code-block:: cmake
 
     set_property(SOURCE mymod.i PROPERTY SWIG_MODULE_NAME mymod_realname)
+
+  .. note::
+
+    If policy :policy:`CMP0086` is set to ``NEW``, ``-module <module_name>``
+    is passed to ``SWIG`` compiler.
 
 Target library properties can be set to apply same configuration to all SWIG
 input files.
@@ -217,15 +223,31 @@ as well as ``SWIG``:
 
 ``SWIG_MODULE_<name>_EXTRA_DEPS``
   Specify extra dependencies for the generated module for ``<name>``.
+
+``SWIG_SOURCE_FILE_EXTENSIONS``
+  Specify a list of source file extensions to override the default
+  behavior of considering only ``.i`` files as sources for the ``SWIG``
+  tool. For example:
+
+  .. code-block:: cmake
+
+    set(SWIG_SOURCE_FILE_EXTENSIONS ".i" ".swg")
 #]=======================================================================]
 
 cmake_policy(GET CMP0078 target_name_policy)
+cmake_policy(GET CMP0086 module_name_policy)
+
 cmake_policy (VERSION 3.12)
 if (target_name_policy)
   # respect user choice regarding CMP0078 policy
   cmake_policy(SET CMP0078 ${target_name_policy})
 endif()
+if (module_name_policy)
+  # respect user choice regarding CMP0086 policy
+  cmake_policy(SET CMP0086 ${module_name_policy})
+endif()
 unset(target_name_policy)
+unset(module_name_policy)
 
 set(SWIG_CXX_EXTENSION "cxx")
 set(SWIG_EXTRA_LIBRARIES "")
@@ -233,6 +255,8 @@ set(SWIG_EXTRA_LIBRARIES "")
 set(SWIG_PYTHON_EXTRA_FILE_EXTENSIONS ".py")
 set(SWIG_JAVA_EXTRA_FILE_EXTENSIONS ".java" "JNI.java")
 set(SWIG_CSHARP_EXTRA_FILE_EXTENSIONS ".cs" "PINVOKE.cs")
+
+set(SWIG_MANAGE_SUPPORT_FILES_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/UseSWIG/ManageSupportFiles.cmake")
 
 ##
 ## PRIVATE functions
@@ -424,6 +448,19 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     list (APPEND swig_special_flags "-c++")
   endif()
 
+  cmake_policy(GET CMP0086 module_name_policy)
+  if (module_name_policy STREQUAL "NEW")
+    get_source_file_property(module_name "${infile}" SWIG_MODULE_NAME)
+    if (module_name)
+      list (APPEND swig_special_flags "-module" "${module_name}")
+    endif()
+  else()
+    if (NOT module_name_policy)
+      cmake_policy(GET_WARNING CMP0086 _cmp0086_warning)
+      message(AUTHOR_WARNING "${_cmp0086_warning}\n")
+    endif()
+  endif()
+
   set (swig_extra_flags)
   if(SWIG_MODULE_${name}_LANGUAGE STREQUAL "CSHARP")
     if(NOT ("-dllimport" IN_LIST swig_source_file_flags OR "-dllimport" IN_LIST SWIG_MODULE_${name}_EXTRA_FLAGS))
@@ -444,9 +481,13 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   if (UseSWIG_MODULE_VERSION VERSION_GREATER 1)
     # as part of custom command, start by removing old generated files
     # to ensure obsolete files do not stay
-    set (swig_cleanup_command COMMAND "${CMAKE_COMMAND}" -E remove_directory "${outdir}")
+    set (swig_file_outdir "${workingdir}/${swig_source_file_name_we}.files")
+    set (swig_cleanup_command COMMAND "${CMAKE_COMMAND}" "-DSUPPORT_FILES_WORKING_DIRECTORY=${swig_file_outdir}" "-DSUPPORT_FILES_OUTPUT_DIRECTORY=${outdir}" -DACTION=CLEAN -P "${SWIG_MANAGE_SUPPORT_FILES_SCRIPT}")
+    set (swig_copy_command COMMAND "${CMAKE_COMMAND}" "-DSUPPORT_FILES_WORKING_DIRECTORY=${swig_file_outdir}" "-DSUPPORT_FILES_OUTPUT_DIRECTORY=${outdir}" -DACTION=COPY -P "${SWIG_MANAGE_SUPPORT_FILES_SCRIPT}")
   else()
+    set (swig_file_outdir "${outdir}")
     unset (swig_cleanup_command)
+    unset (swig_copy_command)
   endif()
 
   # IMPLICIT_DEPENDS below can not handle situations where a dependent file is
@@ -476,16 +517,17 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     COMMAND "${CMAKE_COMMAND}" -E env "SWIG_LIB=${SWIG_DIR}" "${SWIG_EXECUTABLE}"
     "-${SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG}"
     "${swig_source_file_flags}"
-    -outdir "${outdir}"
+    -outdir "${swig_file_outdir}"
     ${swig_special_flags}
     ${swig_extra_flags}
     "${swig_include_dirs}"
     -o "${swig_generated_file_fullname}"
     "${swig_source_file_fullname}"
+    ${swig_copy_command}
     MAIN_DEPENDENCY "${swig_source_file_fullname}"
     DEPENDS ${swig_dependencies}
     IMPLICIT_DEPENDS CXX "${swig_source_file_fullname}"
-    COMMENT "Swig source"
+    COMMENT "Swig compile ${infile} for ${SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG}"
     COMMAND_EXPAND_LISTS)
   set_source_files_properties("${swig_generated_file_fullname}" ${swig_extra_generated_files}
     PROPERTIES GENERATED 1)
@@ -499,6 +541,10 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
 
   get_property (compile_options SOURCE "${infile}" PROPERTY GENERATED_COMPILE_OPTIONS)
   set_property (SOURCE "${swig_generated_file_fullname}" PROPERTY COMPILE_OPTIONS $<TARGET_GENEX_EVAL:${target_name},$<TARGET_PROPERTY:${target_name},SWIG_GENERATED_COMPILE_OPTIONS>> ${compile_options})
+
+  if (SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG MATCHES "php")
+    set_property (SOURCE "${swig_generated_file_fullname}" APPEND PROPERTY INCLUDE_DIRECTORIES "${outdir}")
+  endif()
 
   set(${outfiles} "${swig_generated_file_fullname}" ${swig_extra_generated_files} PARENT_SCOPE)
 
@@ -550,11 +596,8 @@ function(SWIG_ADD_LIBRARY name)
     set (UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
   else()
     if (NOT target_name_policy)
-      message(AUTHOR_WARNING
-        "Policy CMP0078 is not set.  "
-        "Run \"cmake --help-policy CMP0078\" for policy details.  "
-        "Use the cmake_policy command to set the policy and suppress this warning."
-        )
+      cmake_policy(GET_WARNING CMP0078 _cmp0078_warning)
+      message(AUTHOR_WARNING "${_cmp0078_warning}\n")
     endif()
     if (NOT DEFINED UseSWIG_TARGET_NAME_PREFERENCE)
       set (UseSWIG_TARGET_NAME_PREFERENCE LEGACY)
@@ -626,8 +669,20 @@ function(SWIG_ADD_LIBRARY name)
   set(CMAKE_SWIG_OUTDIR "${outputdir}")
   set(SWIG_OUTFILE_DIR "${outfiledir}")
 
+  # See if the user has specified source extensions for swig files?
+  if (NOT DEFINED SWIG_SOURCE_FILE_EXTENSIONS)
+    # Assume the default (*.i) file extension for Swig source files
+    set(SWIG_SOURCE_FILE_EXTENSIONS ".i")
+  endif()
+
+  # Generate a regex out of file extensions.
+  string(REGEX REPLACE "([$^.*+?|()-])" "\\\\\\1" swig_source_ext_regex "${SWIG_SOURCE_FILE_EXTENSIONS}")
+  list (JOIN swig_source_ext_regex "|" swig_source_ext_regex)
+  string (PREPEND swig_source_ext_regex "(")
+  string (APPEND swig_source_ext_regex ")$")
+
   set(swig_dot_i_sources ${_SAM_SOURCES})
-  list(FILTER swig_dot_i_sources INCLUDE REGEX "\\.i$")
+  list(FILTER swig_dot_i_sources INCLUDE REGEX ${swig_source_ext_regex})
   if (NOT swig_dot_i_sources)
     message(FATAL_ERROR "SWIG_ADD_LIBRARY: no SWIG interface files specified")
   endif()

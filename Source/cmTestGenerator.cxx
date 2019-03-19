@@ -7,10 +7,12 @@
 
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
 #include "cmPropertyMap.h"
+#include "cmRange.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
@@ -25,9 +27,7 @@ cmTestGenerator::cmTestGenerator(
   this->LG = nullptr;
 }
 
-cmTestGenerator::~cmTestGenerator()
-{
-}
+cmTestGenerator::~cmTestGenerator() = default;
 
 void cmTestGenerator::Compute(cmLocalGenerator* lg)
 {
@@ -89,16 +89,14 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
     // Prepend with the emulator when cross compiling if required.
     const char* emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
-    if (emulator != nullptr) {
+    if (emulator != nullptr && *emulator) {
       std::vector<std::string> emulatorWithArgs;
       cmSystemTools::ExpandListArgument(emulator, emulatorWithArgs);
       std::string emulatorExe(emulatorWithArgs[0]);
       cmSystemTools::ConvertToUnixSlashes(emulatorExe);
       os << cmOutputConverter::EscapeForCMake(emulatorExe) << " ";
-      for (std::vector<std::string>::const_iterator ei =
-             emulatorWithArgs.begin() + 1;
-           ei != emulatorWithArgs.end(); ++ei) {
-        os << cmOutputConverter::EscapeForCMake(*ei) << " ";
+      for (std::string const& arg : cmMakeRange(emulatorWithArgs).advance(1)) {
+        os << cmOutputConverter::EscapeForCMake(arg) << " ";
       }
     }
   } else {
@@ -109,11 +107,10 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
   // Generate the command line with full escapes.
   os << cmOutputConverter::EscapeForCMake(exe);
-  for (std::vector<std::string>::const_iterator ci = command.begin() + 1;
-       ci != command.end(); ++ci) {
+  for (std::string const& arg : cmMakeRange(command).advance(1)) {
     os << " "
        << cmOutputConverter::EscapeForCMake(
-            ge.Parse(*ci)->Evaluate(this->LG, config));
+            ge.Parse(arg)->Evaluate(this->LG, config));
   }
 
   // Finish the test command.
@@ -121,16 +118,15 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
   // Output properties for the test.
   cmPropertyMap& pm = this->Test->GetProperties();
-  if (!pm.empty()) {
-    os << indent << "set_tests_properties(" << this->Test->GetName()
-       << " PROPERTIES ";
-    for (auto const& i : pm) {
-      os << " " << i.first << " "
-         << cmOutputConverter::EscapeForCMake(
-              ge.Parse(i.second.GetValue())->Evaluate(this->LG, config));
-    }
-    os << ")" << std::endl;
+  os << indent << "set_tests_properties(" << this->Test->GetName()
+     << " PROPERTIES ";
+  for (auto const& i : pm) {
+    os << " " << i.first << " "
+       << cmOutputConverter::EscapeForCMake(
+            ge.Parse(i.second.GetValue())->Evaluate(this->LG, config));
   }
+  this->GenerateInternalProperties(os);
+  os << ")" << std::endl;
 }
 
 void cmTestGenerator::GenerateScriptNoConfig(std::ostream& os, Indent indent)
@@ -159,12 +155,11 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
   fout << "add_test(";
   fout << this->Test->GetName() << " \"" << exe << "\"";
 
-  for (std::vector<std::string>::const_iterator argit = command.begin() + 1;
-       argit != command.end(); ++argit) {
+  for (std::string const& arg : cmMakeRange(command).advance(1)) {
     // Just double-quote all arguments so they are re-parsed
     // correctly by the test system.
     fout << " \"";
-    for (char c : *argit) {
+    for (char c : arg) {
       // Escape quotes within arguments.  We should escape
       // backslashes too but we cannot because it makes the result
       // inconsistent with previous behavior of this command.
@@ -179,13 +174,37 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
 
   // Output properties for the test.
   cmPropertyMap& pm = this->Test->GetProperties();
-  if (!pm.empty()) {
-    fout << indent << "set_tests_properties(" << this->Test->GetName()
-         << " PROPERTIES ";
-    for (auto const& i : pm) {
-      fout << " " << i.first << " "
-           << cmOutputConverter::EscapeForCMake(i.second.GetValue());
-    }
-    fout << ")" << std::endl;
+  fout << indent << "set_tests_properties(" << this->Test->GetName()
+       << " PROPERTIES ";
+  for (auto const& i : pm) {
+    fout << " " << i.first << " "
+         << cmOutputConverter::EscapeForCMake(i.second.GetValue());
   }
+  this->GenerateInternalProperties(fout);
+  fout << ")" << std::endl;
+}
+
+void cmTestGenerator::GenerateInternalProperties(std::ostream& os)
+{
+  cmListFileBacktrace bt = this->Test->GetBacktrace();
+  if (bt.Empty()) {
+    return;
+  }
+
+  os << " "
+     << "_BACKTRACE_TRIPLES"
+     << " \"";
+
+  bool prependTripleSeparator = false;
+  while (!bt.Empty()) {
+    const auto& entry = bt.Top();
+    if (prependTripleSeparator) {
+      os << ";";
+    }
+    os << entry.FilePath << ";" << entry.Line << ";" << entry.Name;
+    bt = bt.Pop();
+    prependTripleSeparator = true;
+  }
+
+  os << "\"";
 }

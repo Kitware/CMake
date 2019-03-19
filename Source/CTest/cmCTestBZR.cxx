@@ -77,9 +77,7 @@ cmCTestBZR::cmCTestBZR(cmCTest* ct, std::ostream& log)
   cmSystemTools::PutEnv("BZR_PROGRESS_BAR=none");
 }
 
-cmCTestBZR::~cmCTestBZR()
-{
-}
+cmCTestBZR::~cmCTestBZR() = default;
 
 class cmCTestBZR::InfoParser : public cmCTestVC::LineParser
 {
@@ -367,7 +365,7 @@ bool cmCTestBZR::UpdateImpl()
   if (opts.empty()) {
     opts = this->CTest->GetCTestConfiguration("BZRUpdateOptions");
   }
-  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
 
   // TODO: if(this->CTest->GetTestModel() == cmCTest::NIGHTLY)
 

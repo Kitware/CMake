@@ -8,35 +8,166 @@ Synopsis
 
 .. parsed-literal::
 
- cmake [<options>] {<path-to-source> | <path-to-existing-build>}
- cmake [{-D <var>=<value>}...] -P <cmake-script-file>
- cmake --build <dir> [<options>...] [-- <build-tool-options>...]
- cmake --open <dir>
- cmake -E <command> [<options>...]
- cmake --find-package <options>...
+ `Generate a Project Buildsystem`_
+  cmake [<options>] <path-to-source>
+  cmake [<options>] <path-to-existing-build>
+  cmake [<options>] -S <path-to-source> -B <path-to-build>
+
+ `Build a Project`_
+  cmake --build <dir> [<options>] [-- <build-tool-options>]
+
+ `Install a Project`_
+  cmake --install <dir> [<options>]
+
+ `Open a Project`_
+  cmake --open <dir>
+
+ `Run a Script`_
+  cmake [{-D <var>=<value>}...] -P <cmake-script-file>
+
+ `Run a Command-Line Tool`_
+  cmake -E <command> [<options>]
+
+ `Run the Find-Package Tool`_
+  cmake --find-package [<options>]
+
+ `View Help`_
+  cmake --help[-<topic>]
 
 Description
 ===========
 
-The "cmake" executable is the CMake command-line interface.  It may be
-used to configure projects in scripts.  Project configuration settings
-may be specified on the command line with the -D option.
+The **cmake** executable is the command-line interface of the cross-platform
+buildsystem generator CMake.  The above `Synopsis`_ lists various actions
+the tool can perform as described in sections below.
 
-CMake is a cross-platform build system generator.  Projects specify
-their build process with platform-independent CMake listfiles included
-in each directory of a source tree with the name CMakeLists.txt.
-Users build a project by using CMake to generate a build system for a
-native tool on their platform.
+To build a software project with CMake, `Generate a Project Buildsystem`_.
+Optionally use **cmake** to `Build a Project`_, `Install a Project`_ or just
+run the corresponding build tool (e.g. ``make``) directly.  **cmake** can also
+be used to `View Help`_.
+
+The other actions are meant for use by software developers writing
+scripts in the :manual:`CMake language <cmake-language(7)>` to support
+their builds.
+
+For graphical user interfaces that may be used in place of **cmake**,
+see :manual:`ccmake <ccmake(1)>` and :manual:`cmake-gui <cmake-gui(1)>`.
+For command-line interfaces to the CMake testing and packaging facilities,
+see :manual:`ctest <ctest(1)>` and :manual:`cpack <cpack(1)>`.
+
+For more information on CMake at large, `see also`_ the links at the end
+of this manual.
+
+
+Introduction to CMake Buildsystems
+==================================
+
+A *buildsystem* describes how to build a project's executables and libraries
+from its source code using a *build tool* to automate the process.  For
+example, a buildsystem may be a ``Makefile`` for use with a command-line
+``make`` tool or a project file for an Integrated Development Environment
+(IDE).  In order to avoid maintaining multiple such buildsystems, a project
+may specify its buildsystem abstractly using files written in the
+:manual:`CMake language <cmake-language(7)>`.  From these files CMake
+generates a preferred buildsystem locally for each user through a backend
+called a *generator*.
+
+To generate a buildsystem with CMake, the following must be selected:
+
+Source Tree
+  The top-level directory containing source files provided by the project.
+  The project specifies its buildsystem using files as described in the
+  :manual:`cmake-language(7)` manual, starting with a top-level file named
+  ``CMakeLists.txt``.  These files specify build targets and their
+  dependencies as described in the :manual:`cmake-buildsystem(7)` manual.
+
+Build Tree
+  The top-level directory in which buildsystem files and build output
+  artifacts (e.g. executables and libraries) are to be stored.
+  CMake will write a ``CMakeCache.txt`` file to identify the directory
+  as a build tree and store persistent information such as buildsystem
+  configuration options.
+
+  To maintain a pristine source tree, perform an *out-of-source* build
+  by using a separate dedicated build tree.  An *in-source* build in
+  which the build tree is placed in the same directory as the source
+  tree is also supported, but discouraged.
+
+Generator
+  This chooses the kind of buildsystem to generate.  See the
+  :manual:`cmake-generators(7)` manual for documentation of all generators.
+  Run ``cmake --help`` to see a list of generators available locally.
+  Optionally use the ``-G`` option below to specify a generator, or simply
+  accept the default CMake chooses for the current platform.
+
+  When using one of the :ref:`Command-Line Build Tool Generators`
+  CMake expects that the environment needed by the compiler toolchain
+  is already configured in the shell.  When using one of the
+  :ref:`IDE Build Tool Generators`, no particular environment is needed.
+
+
+Generate a Project Buildsystem
+==============================
+
+Run CMake with one of the following command signatures to specify the
+source and build trees and generate a buildsystem:
+
+``cmake [<options>] <path-to-source>``
+  Uses the current working directory as the build tree, and
+  ``<path-to-source>`` as the source tree.  The specified path may
+  be absolute or relative to the current working directory.
+  The source tree must contain a ``CMakeLists.txt`` file and must
+  *not* contain a ``CMakeCache.txt`` file because the latter
+  identifies an existing build tree.  For example:
+
+  .. code-block:: console
+
+    $ mkdir build ; cd build
+    $ cmake ../src
+
+``cmake [<options>] <path-to-existing-build>``
+  Uses ``<path-to-existing-build>`` as the build tree, and loads the
+  path to the source tree from its ``CMakeCache.txt`` file, which must
+  have already been generated by a previous run of CMake.  The specified
+  path may be absolute or relative to the current working directory.
+  For example:
+
+  .. code-block:: console
+
+    $ cd build
+    $ cmake .
+
+``cmake [<options>] -S <path-to-source> -B <path-to-build>``
+  Uses ``<path-to-build>`` as the build tree and ``<path-to-source>``
+  as the source tree.  The specified paths may be absolute or relative
+  to the current working directory.  The source tree must contain a
+  ``CMakeLists.txt`` file.  The build tree will be created automatically
+  if it does not already exist.  For example:
+
+  .. code-block:: console
+
+    $ cmake -S src -B build
+
+In all cases the ``<options>`` may be zero or more of the `Options`_ below.
+
+After generating a buildsystem one may use the corresponding native
+build tool to build the project.  For example, after using the
+:generator:`Unix Makefiles` generator one may run ``make`` directly:
+
+  .. code-block:: console
+
+    $ make
+    $ make install
+
+Alternatively, one may use **cmake** to `Build a Project`_ by
+automatically choosing and invoking the appropriate native build tool.
 
 .. _`CMake Options`:
 
 Options
-=======
+-------
 
 .. include:: OPTIONS_BUILD.txt
-
-``-E <command> [<options>...]``
- See `Command-Line Tool Mode`_.
 
 ``-L[A][H]``
  List non-advanced cached variables.
@@ -49,29 +180,11 @@ Options
  display also advanced variables.  If H is specified, it will also
  display help for each variable.
 
-``--build <dir>``
- See `Build Tool Mode`_.
-
-``--open <dir>``
- Open the generated project in the associated application.  This is
- only supported by some generators.
-
 ``-N``
  View mode only.
 
  Only load the cache.  Do not actually run configure and generate
  steps.
-
-``-P <file>``
- Process script mode.
-
- Process the given cmake file as a script written in the CMake
- language.  No configure or generate step is performed and the cache
- is not modified.  If variables are defined using -D, this must be
- done before the -P argument.
-
-``--find-package``
- See `Find-Package Tool Mode`_.
 
 ``--graphviz=[file]``
  Generate graphviz of dependencies, see :module:`CMakeGraphVizOptions` for more.
@@ -141,17 +254,17 @@ Options
  in CMAKE_SOURCE_DIR and CMAKE_BINARY_DIR.  This flag tells CMake to
  warn about other files as well.
 
-.. include:: OPTIONS_HELP.txt
-
 .. _`Build Tool Mode`:
 
-Build Tool Mode
+Build a Project
 ===============
 
 CMake provides a command-line signature to build an already-generated
-project binary tree::
+project binary tree:
 
- cmake --build <dir> [<options>...] [-- <build-tool-options>...]
+.. code-block:: shell
+
+  cmake --build <dir> [<options>] [-- <build-tool-options>]
 
 This abstracts a native build tool's command-line interface with the
 following options:
@@ -159,15 +272,15 @@ following options:
 ``--build <dir>``
   Project binary directory to be built.  This is required and must be first.
 
-``-j [<jobs>], --parallel [<jobs>]``
+``--parallel [<jobs>], -j [<jobs>]``
   The maximum number of concurrent processes to use when building.
   If ``<jobs>`` is omitted the native build tool's default number is used.
 
   The :envvar:`CMAKE_BUILD_PARALLEL_LEVEL` environment variable, if set,
   specifies a default parallel level when this option is not given.
 
-``--target <tgt>``
-  Build ``<tgt>`` instead of default targets.  May only be specified once.
+``--target <tgt>..., -t <tgt>...``
+  Build ``<tgt>`` instead of default targets.  May be specified multiple times.
 
 ``--config <cfg>``
   For multi-configuration tools, choose configuration ``<cfg>``.
@@ -179,17 +292,89 @@ following options:
 ``--use-stderr``
   Ignored.  Behavior is default in CMake >= 3.0.
 
+``--verbose, -v``
+  Enable verbose output - if supported - including the build commands to be
+  executed.
+
+  This option can be omitted if :envvar:`VERBOSE` environment variable or
+  :variable:`CMAKE_VERBOSE_MAKEFILE` cached variable is set.
+
+
 ``--``
   Pass remaining options to the native tool.
 
 Run ``cmake --build`` with no options for quick help.
 
-Command-Line Tool Mode
-======================
+Install a Project
+=================
 
-CMake provides builtin command-line tools through the signature::
+CMake provides a command-line signature to install an already-generated
+project binary tree:
 
- cmake -E <command> [<options>...]
+.. code-block:: shell
+
+  cmake --install <dir> [<options>]
+
+This may be used after building a project to run installation without
+using the generated build system or the native build tool.
+The options are:
+
+``--install <dir>``
+  Project binary directory to install. This is required and must be first.
+
+``--config <cfg>``
+  For multi-configuration tools, choose configuration ``<cfg>``.
+
+``--component <comp>``
+  Component-based install. Only install component ``<comp>``.
+
+``--prefix <prefix>``
+  The installation prefix CMAKE_INSTALL_PREFIX.
+
+``--strip``
+  Strip before installing by setting CMAKE_INSTALL_DO_STRIP.
+
+``-v, --verbose``
+  Enable verbose output.
+
+  This option can be omitted if :envvar:`VERBOSE` environment variable is set.
+
+Run ``cmake --install`` with no options for quick help.
+
+Open a Project
+==============
+
+.. code-block:: shell
+
+  cmake --open <dir>
+
+Open the generated project in the associated application.  This is only
+supported by some generators.
+
+
+.. _`Script Processing Mode`:
+
+Run a Script
+============
+
+.. code-block:: shell
+
+  cmake [{-D <var>=<value>}...] -P <cmake-script-file>
+
+Process the given cmake file as a script written in the CMake
+language.  No configure or generate step is performed and the cache
+is not modified.  If variables are defined using -D, this must be
+done before the -P argument.
+
+
+Run a Command-Line Tool
+=======================
+
+CMake provides builtin command-line tools through the signature
+
+.. code-block:: shell
+
+  cmake -E <command> [<options>]
 
 Run ``cmake -E`` or ``cmake -E help`` for a summary of commands.
 Available commands are:
@@ -234,24 +419,29 @@ Available commands are:
 ``chdir <dir> <cmd> [<arg>...]``
   Change the current working directory and run a command.
 
-``compare_files <file1> <file2>``
+``compare_files [--ignore-eol] <file1> <file2>``
   Check if ``<file1>`` is same as ``<file2>``. If files are the same,
-  then returns 0, if not it returns 1.
+  then returns 0, if not it returns 1.  The ``--ignore-eol`` option
+  implies line-wise comparison and ignores LF/CRLF differences.
 
 ``copy <file>... <destination>``
   Copy files to ``<destination>`` (either file or directory).
   If multiple files are specified, the ``<destination>`` must be
   directory and it must exist. Wildcards are not supported.
+  ``copy`` does follow symlinks. That means it does not copy symlinks,
+  but the files or directories it point to.
 
 ``copy_directory <dir>... <destination>``
   Copy directories to ``<destination>`` directory.
   If ``<destination>`` directory does not exist it will be created.
+  ``copy_directory`` does follow symlinks.
 
 ``copy_if_different <file>... <destination>``
   Copy files to ``<destination>`` (either file or directory) if
   they have changed.
   If multiple files are specified, the ``<destination>`` must be
   directory and it must exist.
+  ``copy_if_different`` does follow symlinks.
 
 ``echo [<string>...]``
   Displays arguments as text.
@@ -311,13 +501,16 @@ Available commands are:
   exist, the command returns a non-zero exit code, but no message
   is logged. The ``-f`` option changes the behavior to return a
   zero exit code (i.e. success) in such situations instead.
+  ``remove`` does not follow symlinks. That means it remove only symlinks
+  and not files it point to.
 
 ``remove_directory <dir>``
   Remove a directory and its contents.  If a directory does
   not exist it will be silently ignored.
 
 ``rename <oldname> <newname>``
-  Rename a file or directory (on one volume).
+  Rename a file or directory (on one volume). If file with the ``<newname>`` name
+  already exists, then it will be silently replaced.
 
 ``server``
   Launch :manual:`cmake-server(7)` mode.
@@ -325,9 +518,24 @@ Available commands are:
 ``sleep <number>...``
   Sleep for given number of seconds.
 
-``tar [cxt][vf][zjJ] file.tar [<options>...] [--] [<file>...]``
+``tar [cxt][vf][zjJ] file.tar [<options>] [--] [<file>...]``
   Create or extract a tar or zip archive.  Options are:
 
+  ``c``
+    Create a new archive containing the specified files.
+    If used, the <file> argument is mandatory.
+  ``x``
+    Extract to disk from the archive.
+  ``t``
+    List archive contents to stdout.
+  ``v``
+    Produce verbose output.
+  ``z``
+    Compress the resulting archive with gzip.
+  ``j``
+    Compress the resulting archive with bzip2.
+  ``J``
+    Compress the resulting archive with XZ.
   ``--``
     Stop interpreting options and treat all remaining arguments
     as file names even if they start in ``-``.
@@ -346,17 +554,13 @@ Available commands are:
 ``time <command> [<args>...]``
   Run command and display elapsed time.
 
-``touch <file>``
-  Touch a file.
+``touch <file>...``
+  Creates ``<file>`` if file do not exist.
+  If ``<file>`` exists, it is changing ``<file>`` access and modification times.
 
-``touch_nocreate <file>``
+``touch_nocreate <file>...``
   Touch a file if it exists but do not create it.  If a file does
   not exist it will be silently ignored.
-
-UNIX-specific Command-Line Tools
---------------------------------
-
-The following ``cmake -E`` commands are available only on UNIX:
 
 ``create_symlink <old> <new>``
   Create a symbolic link ``<new>`` naming ``<old>``.
@@ -383,23 +587,39 @@ The following ``cmake -E`` commands are available only on Windows:
 ``write_regv <key> <value>``
   Write Windows registry value.
 
-Find-Package Tool Mode
-======================
 
-CMake provides a helper for Makefile-based projects with the signature::
+Run the Find-Package Tool
+=========================
 
-  cmake --find-package <options>...
+CMake provides a pkg-config like helper for Makefile-based projects:
 
-This runs in a pkg-config like mode.
+.. code-block:: shell
 
-Search a package using :command:`find_package()` and print the resulting flags
-to stdout.  This can be used to use cmake instead of pkg-config to find
-installed libraries in plain Makefile-based projects or in autoconf-based
-projects (via ``share/aclocal/cmake.m4``).
+  cmake --find-package [<options>]
+
+It searches a package using :command:`find_package()` and prints the
+resulting flags to stdout.  This can be used instead of pkg-config
+to find installed libraries in plain Makefile-based projects or in
+autoconf-based projects (via ``share/aclocal/cmake.m4``).
 
 .. note::
   This mode is not well-supported due to some technical limitations.
   It is kept for compatibility but should not be used in new projects.
+
+
+View Help
+=========
+
+To print selected pages from the CMake documentation, use
+
+.. code-block:: shell
+
+  cmake --help[-<topic>]
+
+with one of the following options:
+
+.. include:: OPTIONS_HELP.txt
+
 
 See Also
 ========

@@ -183,8 +183,6 @@ public:
     return new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaGenerator>();
   }
 
-  ~cmGlobalNinjaGenerator() override {}
-
   cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
   std::string GetName() const override
@@ -202,15 +200,12 @@ public:
   void EnableLanguage(std::vector<std::string> const& languages,
                       cmMakefile* mf, bool optional) override;
 
-  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
-                            const std::string& makeProgram,
-                            const std::string& projectName,
-                            const std::string& projectDir,
-                            const std::string& targetName,
-                            const std::string& config, bool fast, int jobs,
-                            bool verbose,
-                            std::vector<std::string> const& makeOptions =
-                              std::vector<std::string>()) override;
+  std::vector<GeneratedMakeCommand> GenerateBuildCommand(
+    const std::string& makeProgram, const std::string& projectName,
+    const std::string& projectDir, std::vector<std::string> const& targetNames,
+    const std::string& config, bool fast, int jobs, bool verbose,
+    std::vector<std::string> const& makeOptions =
+      std::vector<std::string>()) override;
 
   // Setup target names
   const char* GetAllTargetName() const override { return "all"; }
@@ -331,9 +326,9 @@ public:
     return LocalGenerators;
   }
 
-  bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target)
+  bool IsExcluded(cmGeneratorTarget* target)
   {
-    return cmGlobalGenerator::IsExcluded(root, target);
+    return cmGlobalGenerator::IsExcluded(target);
   }
 
   int GetRuleCmdLength(const std::string& name) { return RuleCmdLength[name]; }
@@ -347,9 +342,14 @@ public:
   static std::string RequiredNinjaVersionForConsolePool() { return "1.5"; }
   static std::string RequiredNinjaVersionForImplicitOuts() { return "1.7"; }
   static std::string RequiredNinjaVersionForManifestRestat() { return "1.8"; }
+  static std::string RequiredNinjaVersionForMultilineDepfile()
+  {
+    return "1.9";
+  }
   bool SupportsConsolePool() const;
   bool SupportsImplicitOuts() const;
   bool SupportsManifestRestat() const;
+  bool SupportsMultilineDepfile() const;
 
   std::string NinjaOutputPath(std::string const& path) const;
   bool HasOutputPathPrefix() const { return !this->OutputPathPrefix.empty(); }
@@ -362,7 +362,8 @@ public:
                        std::string const& arg_dd,
                        std::vector<std::string> const& arg_ddis,
                        std::string const& module_dir,
-                       std::vector<std::string> const& linked_target_dirs);
+                       std::vector<std::string> const& linked_target_dirs,
+                       std::string const& arg_lang);
 
 protected:
   void Generate() override;
@@ -463,6 +464,7 @@ private:
   bool NinjaSupportsConsolePool;
   bool NinjaSupportsImplicitOuts;
   bool NinjaSupportsManifestRestat;
+  bool NinjaSupportsMultilineDepfile;
   unsigned long NinjaSupportsDyndeps;
 
 private:

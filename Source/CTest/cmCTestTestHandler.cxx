@@ -3,6 +3,7 @@
 #include "cmCTestTestHandler.h"
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cmsys/Base64.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/RegularExpression.hxx>
@@ -103,7 +104,7 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
       }
       fname += "/";
       fname += testFilename;
-      readit = this->Makefile->ReadDependentFile(fname.c_str());
+      readit = this->Makefile->ReadDependentFile(fname);
     }
     if (!readit) {
       std::string m = "Could not find include file: ";
@@ -169,7 +170,7 @@ bool cmCTestAddSubdirectoryCommand::InitialPass(
     }
     fname += "/";
     fname += testFilename;
-    readit = this->Makefile->ReadDependentFile(fname.c_str());
+    readit = this->Makefile->ReadDependentFile(fname);
   }
   if (!readit) {
     std::string m = "Could not find include file: ";
@@ -535,11 +536,20 @@ int cmCTestTestHandler::ProcessHandler()
       percent = 99;
     }
 
+    std::string passColorCode;
+    std::string failedColorCode;
+    if (failed.empty()) {
+      passColorCode = this->CTest->GetColorCode(cmCTest::Color::GREEN);
+    } else {
+      failedColorCode = this->CTest->GetColorCode(cmCTest::Color::RED);
+    }
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
                std::endl
-                 << static_cast<int>(percent + .5f) << "% tests passed, "
-                 << failed.size() << " tests failed out of " << total
-                 << std::endl);
+                 << passColorCode << std::lround(percent) << "% tests passed"
+                 << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
+                 << ", " << failedColorCode << failed.size() << " tests failed"
+                 << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
+                 << " out of " << total << std::endl);
     if ((!this->CTest->GetLabelsForSubprojects().empty() &&
          this->CTest->GetSubprojectSummary())) {
       this->PrintLabelOrSubprojectSummary(true);
@@ -562,6 +572,8 @@ int cmCTestTestHandler::ProcessHandler()
       this->StartLogFile("TestsDisabled", ofs);
 
       const char* disabled_reason;
+      cmCTestLog(this->CTest, HANDLER_OUTPUT,
+                 this->CTest->GetColorCode(cmCTest::Color::BLUE));
       for (cmCTestTestResult const& dt : disabledTests) {
         ofs << dt.TestCount << ":" << dt.Name << std::endl;
         if (dt.CompletionStatus == "Disabled") {
@@ -573,6 +585,8 @@ int cmCTestTestHandler::ProcessHandler()
                    "\t" << std::setw(3) << dt.TestCount << " - " << dt.Name
                         << " (" << disabled_reason << ")" << std::endl);
       }
+      cmCTestLog(this->CTest, HANDLER_OUTPUT,
+                 this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR));
     }
 
     if (!failed.empty()) {
@@ -587,10 +601,17 @@ int cmCTestTestHandler::ProcessHandler()
             !cmHasLiteralPrefix(ft.CompletionStatus, "SKIP_RETURN_CODE=") &&
             ft.CompletionStatus != "Disabled") {
           ofs << ft.TestCount << ":" << ft.Name << std::endl;
-          cmCTestLog(this->CTest, HANDLER_OUTPUT,
-                     "\t" << std::setw(3) << ft.TestCount << " - " << ft.Name
-                          << " (" << this->GetTestStatus(ft) << ")"
-                          << std::endl);
+          auto testColor = cmCTest::Color::RED;
+          if (this->GetTestStatus(ft) == "Not Run") {
+            testColor = cmCTest::Color::YELLOW;
+          }
+          cmCTestLog(
+            this->CTest, HANDLER_OUTPUT,
+            "\t" << this->CTest->GetColorCode(testColor) << std::setw(3)
+                 << ft.TestCount << " - " << ft.Name << " ("
+                 << this->GetTestStatus(ft) << ")"
+                 << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
+                 << std::endl);
         }
       }
     }
@@ -1465,7 +1486,7 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
     int retVal = 0;
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "Run command: " << it << std::endl, this->Quiet);
-    if (!cmSystemTools::RunSingleCommand(it.c_str(), nullptr, nullptr, &retVal,
+    if (!cmSystemTools::RunSingleCommand(it, nullptr, nullptr, &retVal,
                                          nullptr, cmSystemTools::OUTPUT_MERGE
                                          /*this->Verbose*/) ||
         retVal != 0) {
@@ -1503,7 +1524,7 @@ void cmCTestTestHandler::AddConfigurations(
   }
   tempPath = filepath + filename;
   attempted.push_back(tempPath);
-  attemptedConfigs.push_back("");
+  attemptedConfigs.emplace_back();
 
   if (!ctest->GetConfigType().empty()) {
     tempPath = filepath;
@@ -1526,32 +1547,32 @@ void cmCTestTestHandler::AddConfigurations(
     tempPath += "Release/";
     tempPath += filename;
     attempted.push_back(tempPath);
-    attemptedConfigs.push_back("Release");
+    attemptedConfigs.emplace_back("Release");
     tempPath = filepath;
     tempPath += "Debug/";
     tempPath += filename;
     attempted.push_back(tempPath);
-    attemptedConfigs.push_back("Debug");
+    attemptedConfigs.emplace_back("Debug");
     tempPath = filepath;
     tempPath += "MinSizeRel/";
     tempPath += filename;
     attempted.push_back(tempPath);
-    attemptedConfigs.push_back("MinSizeRel");
+    attemptedConfigs.emplace_back("MinSizeRel");
     tempPath = filepath;
     tempPath += "RelWithDebInfo/";
     tempPath += filename;
     attempted.push_back(tempPath);
-    attemptedConfigs.push_back("RelWithDebInfo");
+    attemptedConfigs.emplace_back("RelWithDebInfo");
     tempPath = filepath;
     tempPath += "Deployment/";
     tempPath += filename;
     attempted.push_back(tempPath);
-    attemptedConfigs.push_back("Deployment");
+    attemptedConfigs.emplace_back("Deployment");
     tempPath = filepath;
     tempPath += "Development/";
     tempPath += filename;
     attempted.push_back(tempPath);
-    attemptedConfigs.push_back("Deployment");
+    attemptedConfigs.emplace_back("Deployment");
   }
 }
 
@@ -1655,7 +1676,7 @@ void cmCTestTestHandler::GetListOfTests()
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Constructing a list of tests" << std::endl, this->Quiet);
-  cmake cm(cmake::RoleScript);
+  cmake cm(cmake::RoleScript, cmState::CTest);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
@@ -1686,6 +1707,7 @@ void cmCTestTestHandler::GetListOfTests()
   cm.GetState()->AddBuiltinCommand("set_tests_properties", newCom4);
 
   // Add handler for SET_DIRECTORY_PROPERTIES
+  cm.GetState()->RemoveBuiltinCommand("set_directory_properties");
   cmCTestSetDirectoryPropertiesCommand* newCom5 =
     new cmCTestSetDirectoryPropertiesCommand;
   newCom5->TestHandler = this;
@@ -1724,7 +1746,7 @@ void cmCTestTestHandler::UseExcludeRegExp()
   this->UseExcludeRegExpFirst = !this->UseIncludeRegExpFlag;
 }
 
-const char* cmCTestTestHandler::GetTestStatus(cmCTestTestResult const& result)
+std::string cmCTestTestHandler::GetTestStatus(cmCTestTestResult const& result)
 {
   static const char* statuses[] = { "Not Run",     "Timeout",   "SEGFAULT",
                                     "ILLEGAL",     "INTERRUPT", "NUMERICAL",
@@ -1736,7 +1758,7 @@ const char* cmCTestTestHandler::GetTestStatus(cmCTestTestResult const& result)
     return "No Status";
   }
   if (status == cmCTestTestHandler::OTHER_FAULT) {
-    return result.ExceptionStatus.c_str();
+    return result.ExceptionStatus;
   }
   return statuses[status];
 }
@@ -2125,6 +2147,32 @@ bool cmCTestTestHandler::SetTestsProperties(
     for (std::string const& t : tests) {
       for (cmCTestTestProperties& rt : this->TestList) {
         if (t == rt.Name) {
+          if (key == "_BACKTRACE_TRIPLES") {
+            std::vector<std::string> triples;
+            // allow empty args in the triples
+            cmSystemTools::ExpandListArgument(val, triples, true);
+
+            // Ensure we have complete triples otherwise the data is corrupt.
+            if (triples.size() % 3 == 0) {
+              cmState state;
+              rt.Backtrace = cmListFileBacktrace(state.CreateBaseSnapshot());
+
+              // the first entry represents the top of the trace so we need to
+              // reconstruct the backtrace in reverse
+              for (size_t i = triples.size(); i >= 3; i -= 3) {
+                cmListFileContext fc;
+                fc.FilePath = triples[i - 3];
+                long line = 0;
+                if (!cmSystemTools::StringToLong(triples[i - 2].c_str(),
+                                                 &line)) {
+                  line = 0;
+                }
+                fc.Line = line;
+                fc.Name = triples[i - 1];
+                rt.Backtrace = rt.Backtrace.Push(fc);
+              }
+            }
+          }
           if (key == "WILL_FAIL") {
             rt.WillFail = cmSystemTools::IsOn(val);
           }

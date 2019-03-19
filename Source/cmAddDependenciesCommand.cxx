@@ -5,8 +5,9 @@
 #include <sstream>
 
 #include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmRange.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -24,13 +25,13 @@ bool cmAddDependenciesCommand::InitialPass(
     std::ostringstream e;
     e << "Cannot add target-level dependencies to alias target \""
       << target_name << "\".\n";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
   if (cmTarget* target = this->Makefile->FindTargetToUse(target_name)) {
-    std::vector<std::string>::const_iterator s = args.begin();
-    ++s; // skip over target_name
-    for (; s != args.end(); ++s) {
-      target->AddUtility(*s, this->Makefile);
+
+    // skip over target_name
+    for (std::string const& arg : cmMakeRange(args).advance(1)) {
+      target->AddUtility(arg, this->Makefile);
     }
   } else {
     std::ostringstream e;
@@ -40,7 +41,7 @@ bool cmAddDependenciesCommand::InitialPass(
       << "by the add_executable, add_library, or add_custom_target commands.  "
       << "If you want to add file-level dependencies see the DEPENDS option "
       << "of the add_custom_target and add_custom_command commands.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
 
   return true;

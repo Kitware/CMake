@@ -92,7 +92,7 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
   # check that there were no extra files generated
   foreach(all_files_glob_ IN LISTS ALL_FILES_GLOB)
     file(GLOB foundAll_ RELATIVE "${bin_dir}" "${all_files_glob_}")
-    list(APPEND allFoundFiles_ "${foundAll_}")
+    list(APPEND allFoundFiles_ ${foundAll_})
   endforeach()
 
   list(LENGTH foundFiles_ foundFilesCount_)

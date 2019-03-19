@@ -21,6 +21,7 @@
 #include "cmMakefileLibraryTargetGenerator.h"
 #include "cmMakefileUtilityTargetGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
@@ -97,6 +98,9 @@ void cmMakefileTargetGenerator::GetTargetLinkFlags(
   this->GeneratorTarget->GetLinkOptions(opts, this->ConfigName, linkLanguage);
   // LINK_OPTIONS are escaped.
   this->LocalGenerator->AppendCompileOptions(flags, opts);
+
+  this->LocalGenerator->AppendPositionIndependentLinkerFlags(
+    flags, this->GeneratorTarget, this->ConfigName, linkLanguage);
 }
 
 void cmMakefileTargetGenerator::CreateRuleFile()
@@ -180,6 +184,36 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
         this->CleanFiles.push_back(
           this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir,
                                                            output));
+      }
+      const std::vector<std::string>& byproducts = ccg.GetByproducts();
+      for (std::string const& byproduct : byproducts) {
+        this->CleanFiles.push_back(
+          this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir,
+                                                           byproduct));
+      }
+    }
+  }
+
+  // Add byproducts from build events to the clean rules
+  if (clean) {
+    std::vector<cmCustomCommand> buildEventCommands =
+      this->GeneratorTarget->GetPreBuildCommands();
+
+    buildEventCommands.insert(
+      buildEventCommands.end(),
+      this->GeneratorTarget->GetPreLinkCommands().begin(),
+      this->GeneratorTarget->GetPreLinkCommands().end());
+    buildEventCommands.insert(
+      buildEventCommands.end(),
+      this->GeneratorTarget->GetPostBuildCommands().begin(),
+      this->GeneratorTarget->GetPostBuildCommands().end());
+
+    for (const auto& be : buildEventCommands) {
+      const std::vector<std::string>& byproducts = be.GetByproducts();
+      for (std::string const& byproduct : byproducts) {
+        this->CleanFiles.push_back(
+          this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir,
+                                                           byproduct));
       }
     }
   }
@@ -370,7 +404,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     err << "Warning: Source file \"" << source.GetFullPath()
         << "\" is listed multiple times for target \""
         << this->GeneratorTarget->GetName() << "\".";
-    cmSystemTools::Message(err.str().c_str(), "Warning");
+    cmSystemTools::Message(err.str(), "Warning");
     return;
   }
 
@@ -402,8 +436,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   objFullPath = cmSystemTools::CollapseFullPath(objFullPath);
   std::string srcFullPath =
     cmSystemTools::CollapseFullPath(source.GetFullPath());
-  this->LocalGenerator->AddImplicitDepends(
-    this->GeneratorTarget, lang, objFullPath.c_str(), srcFullPath.c_str());
+  this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, lang,
+                                           objFullPath, srcFullPath);
 }
 
 void cmMakefileTargetGenerator::WriteObjectBuildFile(
@@ -560,7 +594,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       // mingw32-make incorrectly interprets 'a\ b c' as 'a b' and 'c'
       // (but 'a\ b "c"' as 'a\', 'b', and 'c'!).  Workaround this by
       // avoiding a trailing backslash in the argument.
-      targetOutPathCompilePDB[targetOutPathCompilePDB.size() - 1] = '/';
+      targetOutPathCompilePDB.back() = '/';
     }
   }
   cmRulePlaceholderExpander::RuleVariables vars;
@@ -621,19 +655,20 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       std::string cmdVar;
       if (this->GeneratorTarget->GetPropertyAsBool(
             "CUDA_SEPARABLE_COMPILATION")) {
-        cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+        cmdVar = "CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION";
       } else if (this->GeneratorTarget->GetPropertyAsBool(
                    "CUDA_PTX_COMPILATION")) {
-        cmdVar = std::string("CMAKE_CUDA_COMPILE_PTX_COMPILATION");
+        cmdVar = "CMAKE_CUDA_COMPILE_PTX_COMPILATION";
       } else {
-        cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
+        cmdVar = "CMAKE_CUDA_COMPILE_WHOLE_COMPILATION";
       }
-      std::string compileRule = this->Makefile->GetRequiredDefinition(cmdVar);
+      const std::string& compileRule =
+        this->Makefile->GetRequiredDefinition(cmdVar);
       cmSystemTools::ExpandListArgument(compileRule, compileCommands);
     } else {
-      const std::string cmdVar =
-        std::string("CMAKE_") + lang + "_COMPILE_OBJECT";
-      std::string compileRule = this->Makefile->GetRequiredDefinition(cmdVar);
+      const std::string cmdVar = "CMAKE_" + lang + "_COMPILE_OBJECT";
+      const std::string& compileRule =
+        this->Makefile->GetRequiredDefinition(cmdVar);
       cmSystemTools::ExpandListArgument(compileRule, compileCommands);
     }
 
@@ -654,6 +689,17 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       std::string langIncludes = std::string("$(") + lang + "_INCLUDES)";
       compileCommand.replace(compileCommand.find(langIncludes),
                              langIncludes.size(), this->GetIncludes(lang));
+
+      const char* eliminate[] = {
+        this->Makefile->GetDefinition("CMAKE_START_TEMP_FILE"),
+        this->Makefile->GetDefinition("CMAKE_END_TEMP_FILE")
+      };
+      for (const char* el : eliminate) {
+        if (el) {
+          cmSystemTools::ReplaceString(compileCommand, el, "");
+        }
+      }
+
       this->GlobalGenerator->AddCXXCompileCommand(
         source.GetFullPath(), workingDirectory, compileCommand);
     }
@@ -772,7 +818,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     lang_has_assembly && this->LocalGenerator->GetCreateAssemblySourceRules();
   if (do_preprocess_rules || do_assembly_rules) {
     std::vector<std::string> force_depends;
-    force_depends.push_back("cmake_force");
+    force_depends.emplace_back("cmake_force");
     std::string::size_type dot_pos = relativeObj.rfind('.');
     std::string relativeObjBase = relativeObj.substr(0, dot_pos);
     dot_pos = obj.rfind('.');
@@ -930,18 +976,17 @@ bool cmMakefileTargetGenerator::WriteMakeRule(
   // For multiple outputs, make the extra ones depend on the first one.
   std::vector<std::string> const output_depends(1, outputs[0]);
   std::string binDir = this->LocalGenerator->GetBinaryDirectory();
-  for (std::vector<std::string>::const_iterator o = outputs.begin() + 1;
-       o != outputs.end(); ++o) {
+  for (std::string const& output : cmMakeRange(outputs).advance(1)) {
     // Touch the extra output so "make" knows that it was updated,
     // but only if the output was actually created.
     std::string const out = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(binDir, *o),
+      this->LocalGenerator->MaybeConvertToRelativePath(binDir, output),
       cmOutputConverter::SHELL);
     std::vector<std::string> output_commands;
 
     bool o_symbolic = false;
     if (need_symbolic) {
-      if (cmSourceFile* sf = this->Makefile->GetSource(*o)) {
+      if (cmSourceFile* sf = this->Makefile->GetSource(output)) {
         o_symbolic = sf->GetPropertyAsBool("SYMBOLIC");
       }
     }
@@ -950,13 +995,13 @@ bool cmMakefileTargetGenerator::WriteMakeRule(
     if (!o_symbolic) {
       output_commands.push_back("@$(CMAKE_COMMAND) -E touch_nocreate " + out);
     }
-    this->LocalGenerator->WriteMakeRule(os, nullptr, *o, output_depends,
+    this->LocalGenerator->WriteMakeRule(os, nullptr, output, output_depends,
                                         output_commands, o_symbolic, in_help);
 
     if (!o_symbolic) {
       // At build time, remove the first output if this one does not exist
       // so that "make" will rerun the real commands that create this one.
-      MultipleOutputPairsType::value_type p(*o, outputs[0]);
+      MultipleOutputPairsType::value_type p(output, outputs[0]);
       this->MultipleOutputPairs.insert(p);
     }
   }
@@ -1169,8 +1214,7 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
     std::string objFullPath = cmSystemTools::CollapseFullPath(outputs[0]);
     std::string srcFullPath = cmSystemTools::CollapseFullPath(idi.second);
     this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, idi.first,
-                                             objFullPath.c_str(),
-                                             srcFullPath.c_str());
+                                             objFullPath, srcFullPath);
   }
 }
 
@@ -1178,7 +1222,7 @@ void cmMakefileTargetGenerator::MakeEchoProgress(
   cmLocalUnixMakefileGenerator3::EchoProgress& progress) const
 {
   progress.Dir = this->LocalGenerator->GetBinaryDirectory();
-  progress.Dir += cmake::GetCMakeFilesDirectory();
+  progress.Dir += "/CMakeFiles";
   std::ostringstream progressArg;
   progressArg << "$(CMAKE_PROGRESS_" << this->NumberOfProgressActions << ")";
   progress.Arg = progressArg.str();
@@ -1203,8 +1247,9 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
   }
   for (std::string const& obj : this->Objects) {
     *this->BuildFileStream << " " << lineContinue << "\n";
-    *this->BuildFileStream << this->LocalGenerator->ConvertToQuotedOutputPath(
-      obj.c_str(), useWatcomQuote);
+    *this->BuildFileStream
+      << cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
+           obj, useWatcomQuote);
   }
   *this->BuildFileStream << "\n";
 
@@ -1225,8 +1270,9 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
     object =
       this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir, obj);
     *this->BuildFileStream << " " << lineContinue << "\n";
-    *this->BuildFileStream << this->LocalGenerator->ConvertToQuotedOutputPath(
-      obj.c_str(), useWatcomQuote);
+    *this->BuildFileStream
+      << cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
+           obj, useWatcomQuote);
   }
   *this->BuildFileStream << "\n"
                          << "\n";
@@ -1273,11 +1319,10 @@ public:
 private:
   std::string MaybeConvertToRelativePath(std::string const& obj)
   {
-    if (!cmOutputConverter::ContainedInDirectory(
-          this->StateDir.GetCurrentBinary(), obj, this->StateDir)) {
+    if (!this->StateDir.ContainsBoth(this->StateDir.GetCurrentBinary(), obj)) {
       return obj;
     }
-    return cmOutputConverter::ForceToRelativePath(
+    return cmSystemTools::ForceToRelativePath(
       this->StateDir.GetCurrentBinary(), obj);
   }
 

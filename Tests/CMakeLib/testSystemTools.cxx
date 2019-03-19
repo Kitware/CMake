@@ -16,11 +16,13 @@
   failed = 1
 
 #define cmAssert(exp, m)                                                      \
-  if ((exp)) {                                                                \
-    cmPassed(m);                                                              \
-  } else {                                                                    \
-    cmFailed(m);                                                              \
-  }
+  do {                                                                        \
+    if ((exp)) {                                                              \
+      cmPassed(m);                                                            \
+    } else {                                                                  \
+      cmFailed(m);                                                            \
+    }                                                                         \
+  } while (false)
 
 int testSystemTools(int /*unused*/, char* /*unused*/ [])
 {
@@ -52,7 +54,7 @@ int testSystemTools(int /*unused*/, char* /*unused*/ [])
   cmAssert(cmSystemTools::strverscmp("99999999999999", "99999999999991") > 0,
            "strverscmp natural overflow");
   cmAssert(cmSystemTools::strverscmp("00000000000009", "00000000000001") > 0,
-           "strverscmp deciaml precision");
+           "strverscmp decimal precision");
   cmAssert(cmSystemTools::strverscmp("a.b.c.0", "a.b.c.000") > 0,
            "strverscmp multiple zeros");
   cmAssert(cmSystemTools::strverscmp("lib_1.2_10", "lib_1.2_2") > 0,

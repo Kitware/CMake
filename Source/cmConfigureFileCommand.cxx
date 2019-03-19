@@ -5,8 +5,8 @@
 #include <sstream>
 
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -20,11 +20,8 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   std::string const& inFile = args[0];
-  if (!cmSystemTools::FileIsFullPath(inFile)) {
-    this->InputFile = this->Makefile->GetCurrentSourceDirectory();
-    this->InputFile += "/";
-  }
-  this->InputFile += inFile;
+  this->InputFile = cmSystemTools::CollapseFullPath(
+    inFile, this->Makefile->GetCurrentSourceDirectory());
 
   // If the input location is a directory, error out.
   if (cmSystemTools::FileIsDirectory(this->InputFile)) {
@@ -39,11 +36,8 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   std::string const& outFile = args[1];
-  if (!cmSystemTools::FileIsFullPath(outFile)) {
-    this->OutputFile = this->Makefile->GetCurrentBinaryDirectory();
-    this->OutputFile += "/";
-  }
-  this->OutputFile += outFile;
+  this->OutputFile = cmSystemTools::CollapseFullPath(
+    outFile, this->Makefile->GetCurrentBinaryDirectory());
 
   // If the output location is already a directory put the file in it.
   if (cmSystemTools::FileIsDirectory(this->OutputFile)) {
@@ -95,7 +89,7 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args,
   if (!unknown_args.empty()) {
     std::string msg = "configure_file called with unknown argument(s):\n";
     msg += unknown_args;
-    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, msg);
+    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg);
   }
 
   if (!this->ConfigureFile()) {
@@ -108,7 +102,7 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args,
 
 int cmConfigureFileCommand::ConfigureFile()
 {
-  return this->Makefile->ConfigureFile(
-    this->InputFile.c_str(), this->OutputFile.c_str(), this->CopyOnly,
-    this->AtOnly, this->EscapeQuotes, this->NewLineStyle);
+  return this->Makefile->ConfigureFile(this->InputFile, this->OutputFile,
+                                       this->CopyOnly, this->AtOnly,
+                                       this->EscapeQuotes, this->NewLineStyle);
 }

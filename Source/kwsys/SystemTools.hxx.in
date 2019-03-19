@@ -54,6 +54,9 @@ class @KWSYS_NAMESPACE@_EXPORT SystemToolsManager
 public:
   SystemToolsManager();
   ~SystemToolsManager();
+
+  SystemToolsManager(const SystemToolsManager&) = delete;
+  SystemToolsManager& operator=(const SystemToolsManager&) = delete;
 };
 
 // This instance will show up in any translation unit that uses
@@ -577,6 +580,13 @@ public:
    */
   static bool FilesDiffer(const std::string& source,
                           const std::string& destination);
+
+  /**
+   * Compare the contents of two files, ignoring line ending differences.
+   * Return true if different
+   */
+  static bool TextFilesDiffer(const std::string& path1,
+                              const std::string& path2);
 
   /**
    * Return true if the two files are the same file

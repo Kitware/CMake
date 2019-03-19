@@ -42,7 +42,7 @@ class cmExportFileGenerator
 {
 public:
   cmExportFileGenerator();
-  virtual ~cmExportFileGenerator() {}
+  virtual ~cmExportFileGenerator() = default;
 
   /** Set the full path to the export file to generate.  */
   void SetExportFile(const char* mainFile);
@@ -144,6 +144,10 @@ protected:
     cmGeneratorExpression::PreprocessContext preprocessRule,
     ImportPropertyMap& properties, std::vector<std::string>& missingTargets);
   void PopulateSourcesInterface(
+    cmTargetExport* target,
+    cmGeneratorExpression::PreprocessContext preprocessRule,
+    ImportPropertyMap& properties, std::vector<std::string>& missingTargets);
+  void PopulateLinkDirectoriesInterface(
     cmTargetExport* target,
     cmGeneratorExpression::PreprocessContext preprocessRule,
     ImportPropertyMap& properties, std::vector<std::string>& missingTargets);

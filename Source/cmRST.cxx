@@ -3,6 +3,7 @@
 #include "cmRST.h"
 
 #include "cmAlgorithms.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
@@ -13,9 +14,9 @@
 #include <stddef.h>
 #include <utility>
 
-cmRST::cmRST(std::ostream& os, std::string const& docroot)
+cmRST::cmRST(std::ostream& os, std::string docroot)
   : OS(os)
-  , DocRoot(docroot)
+  , DocRoot(std::move(docroot))
   , IncludeDepth(0)
   , OutputLinePending(false)
   , LastLineEndedInColonColon(false)
@@ -122,7 +123,7 @@ void cmRST::ProcessModule(std::istream& is)
 void cmRST::Reset()
 {
   if (!this->MarkupLines.empty()) {
-    this->UnindentLines(this->MarkupLines);
+    cmRST::UnindentLines(this->MarkupLines);
   }
   switch (this->Directive) {
     case DirectiveNone:
@@ -178,7 +179,7 @@ void cmRST::ProcessLine(std::string const& line)
       // Record the literal lines to output after whole block.
       // Ignore the language spec and record the opening line as blank.
       this->Directive = DirectiveCodeBlock;
-      this->MarkupLines.push_back("");
+      this->MarkupLines.emplace_back();
     } else if (this->ReplaceDirective.find(line)) {
       // Record the replace directive content.
       this->Directive = DirectiveReplace;
@@ -221,15 +222,14 @@ void cmRST::ProcessLine(std::string const& line)
     // Record the literal lines to output after whole block.
     this->Markup = MarkupNormal;
     this->Directive = DirectiveLiteralBlock;
-    this->MarkupLines.push_back("");
+    this->MarkupLines.emplace_back();
     this->OutputLine("", false);
   }
   // Print non-markup lines.
   else {
     this->NormalLine(line);
     this->LastLineEndedInColonColon =
-      (line.size() >= 2 && line[line.size() - 2] == ':' &&
-       line[line.size() - 1] == ':');
+      (line.size() >= 2 && line[line.size() - 2] == ':' && line.back() == ':');
   }
 }
 

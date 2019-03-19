@@ -16,10 +16,7 @@
 #include <string.h>
 #include <vector>
 
-cmExtraKateGenerator::cmExtraKateGenerator()
-  : cmExternalMakefileProjectGenerator()
-{
-}
+cmExtraKateGenerator::cmExtraKateGenerator() = default;
 
 cmExternalMakefileProjectGeneratorFactory* cmExtraKateGenerator::GetFactory()
 {
@@ -78,8 +75,8 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
                                         cmGeneratedFileStream& fout) const
 {
   cmMakefile const* mf = lg->GetMakefile();
-  const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-  const std::string makeArgs =
+  const std::string& make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& makeArgs =
     mf->GetSafeDefinition("CMAKE_KATE_MAKE_ARGUMENTS");
   std::string const& homeOutputDir = lg->GetBinaryDirectory();
 
@@ -259,7 +256,7 @@ std::string cmExtraKateGenerator::GenerateFilesString(
 
     const std::vector<cmSourceFile*>& sources = makefile->GetSourceFiles();
     for (cmSourceFile* sf : sources) {
-      if (sf->GetPropertyAsBool("GENERATED")) {
+      if (sf->GetIsGenerated()) {
         continue;
       }
 
@@ -294,8 +291,7 @@ std::string cmExtraKateGenerator::GetPathBasename(
 {
   std::string outputBasename = path;
   while (!outputBasename.empty() &&
-         (outputBasename[outputBasename.size() - 1] == '/' ||
-          outputBasename[outputBasename.size() - 1] == '\\')) {
+         (outputBasename.back() == '/' || outputBasename.back() == '\\')) {
     outputBasename.resize(outputBasename.size() - 1);
   }
   std::string::size_type loc = outputBasename.find_last_of("/\\");

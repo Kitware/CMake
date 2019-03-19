@@ -23,11 +23,12 @@ class cmake;
  */
 class cmCursesMainForm : public cmCursesForm
 {
-  CM_DISABLE_COPY(cmCursesMainForm)
-
 public:
-  cmCursesMainForm(std::vector<std::string> const& args, int initwidth);
+  cmCursesMainForm(std::vector<std::string> args, int initwidth);
   ~cmCursesMainForm() override;
+
+  cmCursesMainForm(cmCursesMainForm const&) = delete;
+  cmCursesMainForm& operator=(cmCursesMainForm const&) = delete;
 
   /**
    * Set the widgets which represent the cache entries.
@@ -80,7 +81,7 @@ public:
    * During a CMake run, an error handle should add errors
    * to be displayed afterwards.
    */
-  void AddError(const char* message, const char* title) override;
+  void AddError(const std::string& message, const char* title) override;
 
   /**
    * Used to do a configure. If argument is specified, it does only the check
@@ -101,8 +102,7 @@ public:
   /**
    * Progress callback
    */
-  static void UpdateProgressOld(const char* msg, float prog, void*);
-  static void UpdateProgress(const char* msg, float prog, void*);
+  void UpdateProgress(const std::string& msg, float prog);
 
 protected:
   // Copy the cache values from the user interface to the actual

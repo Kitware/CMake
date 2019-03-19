@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -20,21 +21,19 @@ bool cmAddSubDirectoryCommand::InitialPass(
   }
 
   // store the binpath
-  std::string const& srcArg = args[0];
+  std::string const& srcArg = args.front();
   std::string binArg;
 
   bool excludeFromAll = false;
 
   // process the rest of the arguments looking for optional args
-  std::vector<std::string>::const_iterator i = args.begin();
-  ++i;
-  for (; i != args.end(); ++i) {
-    if (*i == "EXCLUDE_FROM_ALL") {
+  for (std::string const& arg : cmMakeRange(args).advance(1)) {
+    if (arg == "EXCLUDE_FROM_ALL") {
       excludeFromAll = true;
       continue;
     }
     if (binArg.empty()) {
-      binArg = *i;
+      binArg = arg;
     } else {
       this->SetError("called with incorrect number of arguments");
       return false;
@@ -84,10 +83,10 @@ bool cmAddSubDirectoryCommand::InitialPass(
     const std::string& bin = this->Makefile->GetCurrentBinaryDirectory();
     size_t srcLen = src.length();
     size_t binLen = bin.length();
-    if (srcLen > 0 && src[srcLen - 1] == '/') {
+    if (srcLen > 0 && src.back() == '/') {
       --srcLen;
     }
-    if (binLen > 0 && bin[binLen - 1] == '/') {
+    if (binLen > 0 && bin.back() == '/') {
       --binLen;
     }
     binPath = bin.substr(0, binLen) + srcPath.substr(srcLen);

@@ -1,0 +1,7 @@
+^CMake Warning \(dev\) at InstallBeforeFramework.cmake:4 \(install\):
+  Target 'foo' was changed to a FRAMEWORK sometime after install\(\).  This may
+  result in the wrong install DESTINATION.  Set the FRAMEWORK property
+  earlier.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.

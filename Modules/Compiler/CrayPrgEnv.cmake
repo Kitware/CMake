@@ -1,57 +1,95 @@
 # Guard against multiple inclusions
-if(__craylinux_crayprgenv)
+if(__cmake_craype_crayprgenv)
   return()
 endif()
-set(__craylinux_crayprgenv 1)
+set(__cmake_craype_crayprgenv 1)
 
-macro(__cray_extract_args cmd tag_regex out_var make_absolute)
-  string(REGEX MATCHALL "${tag_regex}" args "${cmd}")
-  foreach(arg IN LISTS args)
-    string(REGEX REPLACE "^${tag_regex}$" "\\2" param "${arg}")
-    if(make_absolute)
-      get_filename_component(param "${param}" ABSOLUTE)
+# CrayPrgEnv: loaded when compiling through the Cray compiler wrapper.
+# The compiler wrapper can run on a front-end node or a compute node.
+
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW)  # if IN_LIST
+
+# One-time setup of the craype environment.  First, check the wrapper config.
+# The wrapper's selection of a compiler (gcc, clang, intel, etc.) and
+# default include/library paths is selected using the "module" command.
+# The CRAYPE_LINK_TYPE environment variable partly controls if static
+# or dynamic binaries are generated (see __cmake_craype_linktype below).
+# Running cmake and then changing module and/or linktype configuration
+# may cause build problems (since the data in the cmake cache may no
+# longer be correct after the change).  We can look for this and warn
+# the user about it.  Second, use the "module" provided PKG_CONFIG_PATH-like
+# environment variable to add additional prefixes to the system prefix
+# path.
+function(__cmake_craype_setupenv)
+  if(NOT DEFINED __cmake_craype_setupenv_done)  # only done once per run
+    set(__cmake_craype_setupenv_done 1 PARENT_SCOPE)
+    unset(__cmake_check)
+    set(CMAKE_CRAYPE_LINKTYPE "$ENV{CRAYPE_LINK_TYPE}" CACHE STRING
+        "saved value of CRAYPE_LINK_TYPE environment variable")
+    set(CMAKE_CRAYPE_LOADEDMODULES "$ENV{LOADEDMODULES}" CACHE STRING
+        "saved value of LOADEDMODULES environment variable")
+    mark_as_advanced(CMAKE_CRAYPE_LINKTYPE CMAKE_CRAYPE_LOADEDMODULES)
+    if (NOT "${CMAKE_CRAYPE_LINKTYPE}" STREQUAL "$ENV{CRAYPE_LINK_TYPE}")
+      string(APPEND __cmake_check "CRAYPE_LINK_TYPE ")
     endif()
-    list(APPEND ${out_var} ${param})
-  endforeach()
-endmacro()
-
-function(__cray_extract_implicit src compiler_cmd link_cmd lang include_dirs_var link_dirs_var link_libs_var)
-  set(BIN "${CMAKE_PLATFORM_INFO_DIR}/CrayExtractImplicit_${lang}.bin")
-  execute_process(
-    COMMAND ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_VERBOSE_FLAG} -o ${BIN}
-    RESULT_VARIABLE result
-    OUTPUT_VARIABLE output
-    ERROR_VARIABLE error
-    )
-  if(EXISTS "${BIN}")
-    file(REMOVE "${BIN}")
+    if (NOT "${CMAKE_CRAYPE_LOADEDMODULES}" STREQUAL "$ENV{LOADEDMODULES}")
+      string(APPEND __cmake_check "LOADEDMODULES ")
+    endif()
+    if(DEFINED __cmake_check)
+      message(STATUS "NOTE: ${__cmake_check}changed since initial config!")
+      message(STATUS "NOTE: this may cause unexpected build errors.")
+    endif()
+    # loop over variables of interest
+    foreach(pkgcfgvar PKG_CONFIG_PATH PKG_CONFIG_PATH_DEFAULT
+            PE_PKG_CONFIG_PATH)
+      file(TO_CMAKE_PATH "$ENV{${pkgcfgvar}}" pkgcfg)
+      foreach(path ${pkgcfg})
+        string(REGEX REPLACE "(.*)/lib[^/]*/pkgconfig$" "\\1" path "${path}")
+        if(NOT "${path}" STREQUAL "" AND
+           NOT "${path}" IN_LIST CMAKE_SYSTEM_PREFIX_PATH)
+          list(APPEND CMAKE_SYSTEM_PREFIX_PATH "${path}")
+        endif()
+      endforeach()
+    endforeach()
+    # push it up out of this function into the parent scope
+    set(CMAKE_SYSTEM_PREFIX_PATH "${CMAKE_SYSTEM_PREFIX_PATH}" PARENT_SCOPE)
   endif()
-  set(include_dirs)
-  set(link_dirs)
-  set(link_libs)
-  string(REGEX REPLACE "\r?\n" ";" output_lines "${output}\n${error}")
-  foreach(line IN LISTS output_lines)
-    if("${line}" MATCHES "${compiler_cmd}")
-      __cray_extract_args("${line}" " -(I ?|isystem )([^ ]*)" include_dirs 1)
-      set(processed_include 1)
-    endif()
-    if("${line}" MATCHES "${link_cmd}")
-      __cray_extract_args("${line}" " -(L ?)([^ ]*)" link_dirs 1)
-      __cray_extract_args("${line}" " -(l ?)([^ ]*)" link_libs 0)
-      set(processed_link 1)
-    endif()
-    if(processed_include AND processed_link)
-      break()
-    endif()
-  endforeach()
-
-  set(${include_dirs_var} "${include_dirs}" PARENT_SCOPE)
-  set(${link_dirs_var}    "${link_dirs}" PARENT_SCOPE)
-  set(${link_libs_var}    "${link_libs}" PARENT_SCOPE)
-  set(CRAY_${lang}_EXTRACTED_IMPLICIT 1 CACHE INTERNAL "" FORCE)
 endfunction()
 
-macro(__CrayPrgEnv_setup lang test_src compiler_cmd link_cmd)
+# The wrapper disables dynamic linking by default.  Dynamic linking is
+# enabled either by setting $ENV{CRAYPE_LINK_TYPE} to "dynamic" or by
+# specifying "-dynamic" to the wrapper when linking.  Specifying "-static"
+# to the wrapper when linking takes priority over $ENV{CRAYPE_LINK_TYPE}.
+# Furthermore, if you specify multiple "-dynamic" and "-static" flags to
+# the wrapper when linking, the last one will win.  In this case, the
+# wrapper will also print a warning like:
+#  Warning: -dynamic was already seen on command line, overriding with -static.
+#
+# note that cmake applies both CMAKE_${lang}_FLAGS and CMAKE_EXE_LINKER_FLAGS
+# (in that order) to the linking command, so -dynamic can appear in either
+# variable.
+function(__cmake_craype_linktype lang rv)
+  # start with ENV, but allow flags to override
+  if("$ENV{CRAYPE_LINK_TYPE}" STREQUAL "dynamic")
+    set(linktype dynamic)
+  else()
+    set(linktype static)
+  endif()
+  # combine flags and convert to a list so we can apply the flags in order
+  set(linkflags "${CMAKE_${lang}_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
+  string(REPLACE " " ";" linkflags "${linkflags}")
+  foreach(flag IN LISTS linkflags)
+    if("${flag}" STREQUAL "-dynamic")
+      set(linktype dynamic)
+    elseif("${flag}" STREQUAL "-static")
+      set(linktype static)
+    endif()
+  endforeach()
+  set(${rv} ${linktype} PARENT_SCOPE)
+endfunction()
+
+macro(__CrayPrgEnv_setup lang)
   if(DEFINED ENV{CRAYPE_VERSION})
     message(STATUS "Cray Programming Environment $ENV{CRAYPE_VERSION} ${lang}")
   elseif(DEFINED ENV{ASYNCPE_VERSION})
@@ -60,33 +98,25 @@ macro(__CrayPrgEnv_setup lang test_src compiler_cmd link_cmd)
     message(STATUS "Cray Programming Environment (unknown version) ${lang}")
   endif()
 
+  # setup the craype environment
+  __cmake_craype_setupenv()
+
   # Flags for the Cray wrappers
   set(CMAKE_STATIC_LIBRARY_LINK_${lang}_FLAGS "-static")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
   set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS "-dynamic")
 
-  # If the link type is not explicitly specified in the environment then
-  # the Cray wrappers assume that the code will be built statically so
-  # we check the following condition(s) are NOT met
-  #  Compiler flags are explicitly dynamic
-  #  Env var is dynamic and compiler flags are not explicitly static
-  if(NOT (((CMAKE_${lang}_FLAGS MATCHES "(^| )-dynamic($| )") OR
-         (CMAKE_EXE_LINKER_FLAGS MATCHES "(^| )-dynamic($| )"))
-         OR
-         (("$ENV{CRAYPE_LINK_TYPE}" STREQUAL "dynamic") AND
-          NOT ((CMAKE_${lang}_FLAGS MATCHES "(^| )-static($| )") OR
-               (CMAKE_EXE_LINKER_FLAGS MATCHES "(^| )-static($| )")))))
+  # determine linktype from environment and compiler flags
+  __cmake_craype_linktype(${lang} __cmake_craype_${lang}_linktype)
+
+  # switch off shared libs if we get a static linktype
+  if("${__cmake_craype_${lang}_linktype}" STREQUAL "static")
     set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
     set(BUILD_SHARED_LIBS FALSE CACHE BOOL "")
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
     set(CMAKE_LINK_SEARCH_START_STATIC TRUE)
   endif()
-  if(NOT CRAY_${lang}_EXTRACTED_IMPLICIT)
-    __cray_extract_implicit(
-      ${test_src} ${compiler_cmd} ${link_cmd} ${lang}
-      CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES
-      CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES
-      CMAKE_${lang}_IMPLICIT_LINK_LIBRARIES
-      )
-  endif()
+
 endmacro()
+
+cmake_policy(POP)

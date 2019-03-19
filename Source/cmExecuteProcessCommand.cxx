@@ -54,7 +54,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
     if (args[i] == "COMMAND") {
       doing_command = true;
       command_index = cmds.size();
-      cmds.push_back(std::vector<const char*>());
+      cmds.emplace_back();
     } else if (args[i] == "OUTPUT_VARIABLE") {
       doing_command = false;
       if (++i < args.size()) {
@@ -193,7 +193,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
 
   // Set the command sequence.
   for (auto const& cmd : cmds) {
-    cmsysProcess_AddCommand(cp, &*cmd.begin());
+    cmsysProcess_AddCommand(cp, cmd.data());
   }
 
   // Set the process working directory.
@@ -244,19 +244,19 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   int p;
   cmProcessOutput processOutput(encoding);
   std::string strdata;
-  while ((p = cmsysProcess_WaitForData(cp, &data, &length, nullptr), p)) {
+  while ((p = cmsysProcess_WaitForData(cp, &data, &length, nullptr))) {
     // Put the output in the right place.
     if (p == cmsysProcess_Pipe_STDOUT && !output_quiet) {
       if (output_variable.empty()) {
         processOutput.DecodeText(data, length, strdata, 1);
-        cmSystemTools::Stdout(strdata.c_str(), strdata.size());
+        cmSystemTools::Stdout(strdata);
       } else {
         cmExecuteProcessCommandAppend(tempOutput, data, length);
       }
     } else if (p == cmsysProcess_Pipe_STDERR && !error_quiet) {
       if (error_variable.empty()) {
         processOutput.DecodeText(data, length, strdata, 2);
-        cmSystemTools::Stderr(strdata.c_str(), strdata.size());
+        cmSystemTools::Stderr(strdata);
       } else {
         cmExecuteProcessCommandAppend(tempError, data, length);
       }
@@ -265,13 +265,13 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   if (!output_quiet && output_variable.empty()) {
     processOutput.DecodeText(std::string(), strdata, 1);
     if (!strdata.empty()) {
-      cmSystemTools::Stdout(strdata.c_str(), strdata.size());
+      cmSystemTools::Stdout(strdata);
     }
   }
   if (!error_quiet && error_variable.empty()) {
     processOutput.DecodeText(std::string(), strdata, 2);
     if (!strdata.empty()) {
-      cmSystemTools::Stderr(strdata.c_str(), strdata.size());
+      cmSystemTools::Stderr(strdata);
     }
   }
 
@@ -286,10 +286,10 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
 
   // Store the output obtained.
   if (!output_variable.empty() && !tempOutput.empty()) {
-    this->Makefile->AddDefinition(output_variable, &*tempOutput.begin());
+    this->Makefile->AddDefinition(output_variable, tempOutput.data());
   }
   if (!merge_output && !error_variable.empty() && !tempError.empty()) {
-    this->Makefile->AddDefinition(error_variable, &*tempError.begin());
+    this->Makefile->AddDefinition(error_variable, tempError.data());
   }
 
   // Store the result of running the process.
@@ -327,15 +327,15 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
                 cmsysProcess_GetExitValueByIndex(cp, static_cast<int>(i));
               char buf[16];
               sprintf(buf, "%d", exitCode);
-              res.push_back(buf);
+              res.emplace_back(buf);
             } break;
             case kwsysProcess_StateByIndex_Exception:
-              res.push_back(cmsysProcess_GetExceptionStringByIndex(
+              res.emplace_back(cmsysProcess_GetExceptionStringByIndex(
                 cp, static_cast<int>(i)));
               break;
             case kwsysProcess_StateByIndex_Error:
             default:
-              res.push_back("Error getting the child return code");
+              res.emplace_back("Error getting the child return code");
               break;
           }
         }

@@ -232,12 +232,12 @@ CPack
 * The :cpack_gen:`CPack RPM Generator` learned to modify the ``debuginfo``
   package name.  See the :variable:`CPACK_RPM_DEBUGINFO_FILE_NAME` variable.
 
-* The :cpack_gen:`CPack WiX Generator` patching system now has the
+* The :cpack_gen:`CPack WIX Generator` patching system now has the
   ability to set additional attributes.  This can be done by specifying
   attributes with the ``CPackWiXFragment`` XML tag after the ``Id`` attribute.
   See the :variable:`CPACK_WIX_PATCH_FILE` variable.
 
-* The :cpack_gen:`CPack WiX Generator` implemented a new
+* The :cpack_gen:`CPack WIX Generator` implemented a new
   :variable:`CPACK_WIX_ROOT_FOLDER_ID` variable which allows
   using a custom root folder ID instead of the default
   ``ProgramFilesFolder`` / ``ProgramFiles64Folder``.

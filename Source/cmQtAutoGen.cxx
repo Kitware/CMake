@@ -7,15 +7,9 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include <algorithm>
-#include <iterator>
+#include <array>
 #include <sstream>
-
-// - Static variables
-
-std::string const genNameGen = "AutoGen";
-std::string const genNameMoc = "AutoMoc";
-std::string const genNameUic = "AutoUic";
-std::string const genNameRcc = "AutoRcc";
+#include <utility>
 
 // - Static functions
 
@@ -76,38 +70,101 @@ void MergeOptions(std::vector<std::string>& baseOpts,
 
 // - Class definitions
 
-std::string const cmQtAutoGen::ListSep = "<<<S>>>";
 unsigned int const cmQtAutoGen::ParallelMax = 64;
+std::string const cmQtAutoGen::ListSep = "<<<S>>>";
 
-std::string const& cmQtAutoGen::GeneratorName(GeneratorT type)
+std::string const cmQtAutoGen::GenAutoGen = "AutoGen";
+std::string const cmQtAutoGen::GenAutoMoc = "AutoMoc";
+std::string const cmQtAutoGen::GenAutoUic = "AutoUic";
+std::string const cmQtAutoGen::GenAutoRcc = "AutoRcc";
+
+std::string const cmQtAutoGen::GenAUTOGEN = "AUTOGEN";
+std::string const cmQtAutoGen::GenAUTOMOC = "AUTOMOC";
+std::string const cmQtAutoGen::GenAUTOUIC = "AUTOUIC";
+std::string const cmQtAutoGen::GenAUTORCC = "AUTORCC";
+
+std::string const& cmQtAutoGen::GeneratorName(GenT genType)
 {
-  switch (type) {
-    case GeneratorT::GEN:
-      return genNameGen;
-    case GeneratorT::MOC:
-      return genNameMoc;
-    case GeneratorT::UIC:
-      return genNameUic;
-    case GeneratorT::RCC:
-      return genNameRcc;
+  switch (genType) {
+    case GenT::GEN:
+      return GenAutoGen;
+    case GenT::MOC:
+      return GenAutoMoc;
+    case GenT::UIC:
+      return GenAutoUic;
+    case GenT::RCC:
+      return GenAutoRcc;
   }
-  return genNameGen;
+  return GenAutoGen;
 }
 
-std::string cmQtAutoGen::GeneratorNameUpper(GeneratorT genType)
+std::string const& cmQtAutoGen::GeneratorNameUpper(GenT genType)
 {
-  return cmSystemTools::UpperCase(cmQtAutoGen::GeneratorName(genType));
+  switch (genType) {
+    case GenT::GEN:
+      return GenAUTOGEN;
+    case GenT::MOC:
+      return GenAUTOMOC;
+    case GenT::UIC:
+      return GenAUTOUIC;
+    case GenT::RCC:
+      return GenAUTORCC;
+  }
+  return GenAUTOGEN;
+}
+
+std::string cmQtAutoGen::Tools(bool moc, bool uic, bool rcc)
+{
+  std::string res;
+  std::vector<std::string> lst;
+  if (moc) {
+    lst.emplace_back(GenAUTOMOC);
+  }
+  if (uic) {
+    lst.emplace_back(GenAUTOUIC);
+  }
+  if (rcc) {
+    lst.emplace_back(GenAUTORCC);
+  }
+  switch (lst.size()) {
+    case 1:
+      res += lst.at(0);
+      break;
+    case 2:
+      res += lst.at(0);
+      res += " and ";
+      res += lst.at(1);
+      break;
+    case 3:
+      res += lst.at(0);
+      res += ", ";
+      res += lst.at(1);
+      res += " and ";
+      res += lst.at(2);
+      break;
+    default:
+      break;
+  }
+  return res;
 }
 
 std::string cmQtAutoGen::Quoted(std::string const& text)
 {
-  static const char* rep[18] = { "\\", "\\\\", "\"", "\\\"", "\a", "\\a",
-                                 "\b", "\\b",  "\f", "\\f",  "\n", "\\n",
-                                 "\r", "\\r",  "\t", "\\t",  "\v", "\\v" };
+  const std::array<std::pair<const char*, const char*>, 9> replaces = {
+    { { "\\", "\\\\" },
+      { "\"", "\\\"" },
+      { "\a", "\\a" },
+      { "\b", "\\b" },
+      { "\f", "\\f" },
+      { "\n", "\\n" },
+      { "\r", "\\r" },
+      { "\t", "\\t" },
+      { "\v", "\\v" } }
+  };
 
   std::string res = text;
-  for (const char* const* it = cm::cbegin(rep); it != cm::cend(rep); it += 2) {
-    cmSystemTools::ReplaceString(res, *it, *(it + 1));
+  for (auto const& pair : replaces) {
+    cmSystemTools::ReplaceString(res, pair.first, pair.second);
   }
   res = '"' + res;
   res += '"';

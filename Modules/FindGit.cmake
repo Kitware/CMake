@@ -1,27 +1,34 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindGit
-# -------
-#
-# The module defines the following variables:
-#
-# ``GIT_EXECUTABLE``
-#   Path to Git command-line client.
-# ``Git_FOUND``, ``GIT_FOUND``
-#   True if the Git command-line client was found.
-# ``GIT_VERSION_STRING``
-#   The version of Git found.
-#
-# Example usage:
-#
-# .. code-block:: cmake
-#
-#    find_package(Git)
-#    if(Git_FOUND)
-#      message("Git found: ${GIT_EXECUTABLE}")
-#    endif()
+#[=======================================================================[.rst:
+FindGit
+-------
+
+The module defines the following ``IMPORTED`` targets (when
+:prop_gbl:`CMAKE_ROLE` is ``PROJECT``):
+
+``Git::Git``
+  Executable of the Git command-line client.
+
+The module defines the following variables:
+
+``GIT_EXECUTABLE``
+  Path to Git command-line client.
+``Git_FOUND``, ``GIT_FOUND``
+  True if the Git command-line client was found.
+``GIT_VERSION_STRING``
+  The version of Git found.
+
+Example usage:
+
+.. code-block:: cmake
+
+   find_package(Git)
+   if(Git_FOUND)
+     message("Git found: ${GIT_EXECUTABLE}")
+   endif()
+#]=======================================================================]
 
 # Look for 'git' or 'eg' (easy git)
 #
@@ -77,6 +84,12 @@ if(GIT_EXECUTABLE)
     string(REPLACE "git version " "" GIT_VERSION_STRING "${git_version}")
   endif()
   unset(git_version)
+
+  get_property(_findgit_role GLOBAL PROPERTY CMAKE_ROLE)
+  if(_findgit_role STREQUAL "PROJECT" AND NOT TARGET Git::Git)
+    add_executable(Git::Git IMPORTED)
+    set_property(TARGET Git::Git PROPERTY IMPORTED_LOCATION "${GIT_EXECUTABLE}")
+  endif()
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)

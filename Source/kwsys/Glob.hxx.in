@@ -41,17 +41,9 @@ public:
       , content(c)
     {
     }
-    Message(const Message& msg)
-      : type(msg.type)
-      , content(msg.content)
-    {
-    }
-    Message& operator=(Message const& msg)
-    {
-      this->type = msg.type;
-      this->content = msg.content;
-      return *this;
-    }
+    ~Message() = default;
+    Message(const Message& msg) = default;
+    Message& operator=(Message const& msg) = default;
   };
 
   typedef std::vector<Message> GlobMessages;

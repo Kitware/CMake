@@ -8,17 +8,14 @@
 #include <utility>
 
 #include "cmAlgorithms.h"
-#include "cmGeneratorExpression.h"
-#include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
-#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 cmExportBuildAndroidMKGenerator::cmExportBuildAndroidMKGenerator()
 {
@@ -95,7 +92,7 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
     }
     w << " set to OLD for target " << target->Target->GetName() << ". "
       << "The export will only work with CMP0022 set to NEW.";
-    target->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+    target->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
   }
   if (!properties.empty()) {
     os << "LOCAL_CPP_FEATURES := rtti exceptions\n";
@@ -104,27 +101,14 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
         os << "LOCAL_CPP_FEATURES += ";
         os << (property.second) << "\n";
       } else if (property.first == "INTERFACE_LINK_LIBRARIES") {
-        // evaluate any generator expressions with the current
-        // build type of the makefile
-        cmGeneratorExpression ge;
-        cmGeneratorExpressionDAGChecker dagChecker(
-          target, "INTERFACE_LINK_LIBRARIES", nullptr, nullptr);
-        std::unique_ptr<cmCompiledGeneratorExpression> cge =
-          ge.Parse(property.second);
-        std::string evaluated = cge->Evaluate(
-          target->GetLocalGenerator(), config, false, target, &dagChecker);
-        // need to look at list in pi->second and see if static or shared
-        // FindTargetToLink
-        // target->GetLocalGenerator()->FindGeneratorTargetToUse()
-        // then add to LOCAL_CPPFLAGS
-        std::vector<std::string> libraries;
-        cmSystemTools::ExpandListArgument(evaluated, libraries);
         std::string staticLibs;
         std::string sharedLibs;
         std::string ldlibs;
-        for (std::string const& lib : libraries) {
-          cmGeneratorTarget* gt =
-            target->GetLocalGenerator()->FindGeneratorTargetToUse(lib);
+        cmLinkInterfaceLibraries const* linkIFace =
+          target->GetLinkInterfaceLibraries(config, target, false);
+        for (cmLinkItem const& item : linkIFace->Libraries) {
+          cmGeneratorTarget const* gt = item.Target;
+          std::string const& lib = item.AsStr();
           if (gt) {
 
             if (gt->GetType() == cmStateEnums::SHARED_LIBRARY ||

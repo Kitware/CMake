@@ -41,7 +41,7 @@ private:
   struct SVNInfo
   {
 
-    SVNInfo(const char* path)
+    SVNInfo(std::string const& path = std::string())
       : LocalPath(path)
     {
     }

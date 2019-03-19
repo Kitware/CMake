@@ -7,6 +7,8 @@
 
 #include "cmDuration.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
@@ -25,7 +27,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
   if (this->Makefile->GetCMakeInstance()->GetWorkingMode() ==
       cmake::FIND_PACKAGE_MODE) {
     this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
+      MessageType::FATAL_ERROR,
       "The TRY_RUN() command is not supported in --find-package mode.");
     return false;
   }
@@ -45,7 +47,8 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
     if (argv[i] == "ARGS") {
       ++i;
       while (i < argv.size() && argv[i] != "COMPILE_DEFINITIONS" &&
-             argv[i] != "CMAKE_FLAGS" && argv[i] != "LINK_LIBRARIES") {
+             argv[i] != "CMAKE_FLAGS" && argv[i] != "LINK_OPTIONS" &&
+             argv[i] != "LINK_LIBRARIES") {
         runArgs += " ";
         runArgs += argv[i];
         ++i;
@@ -99,11 +102,11 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
   bool captureRunOutput = false;
   if (!this->OutputVariable.empty()) {
     captureRunOutput = true;
-    tryCompile.push_back("OUTPUT_VARIABLE");
+    tryCompile.emplace_back("OUTPUT_VARIABLE");
     tryCompile.push_back(this->OutputVariable);
   }
   if (!this->CompileOutputVariable.empty()) {
-    tryCompile.push_back("OUTPUT_VARIABLE");
+    tryCompile.emplace_back("OUTPUT_VARIABLE");
     tryCompile.push_back(this->CompileOutputVariable);
   }
   if (!this->RunOutputVariable.empty()) {
@@ -119,7 +122,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
   // now try running the command if it compiled
   if (!res) {
     if (this->OutputFile.empty()) {
-      cmSystemTools::Error(this->FindErrorMessage.c_str());
+      cmSystemTools::Error(this->FindErrorMessage);
     } else {
       // "run" it and capture the output
       std::string runOutputContents;
@@ -170,25 +173,22 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
     std::vector<std::string> emulatorWithArgs;
     cmSystemTools::ExpandListArgument(emulator, emulatorWithArgs);
     finalCommand +=
-      cmSystemTools::ConvertToRunCommandPath(emulatorWithArgs[0].c_str());
+      cmSystemTools::ConvertToRunCommandPath(emulatorWithArgs[0]);
     finalCommand += " ";
-    for (std::vector<std::string>::const_iterator ei =
-           emulatorWithArgs.begin() + 1;
-         ei != emulatorWithArgs.end(); ++ei) {
+    for (std::string const& arg : cmMakeRange(emulatorWithArgs).advance(1)) {
       finalCommand += "\"";
-      finalCommand += *ei;
+      finalCommand += arg;
       finalCommand += "\"";
       finalCommand += " ";
     }
   }
-  finalCommand +=
-    cmSystemTools::ConvertToRunCommandPath(this->OutputFile.c_str());
+  finalCommand += cmSystemTools::ConvertToRunCommandPath(this->OutputFile);
   if (!runArgs.empty()) {
     finalCommand += runArgs;
   }
   bool worked = cmSystemTools::RunSingleCommand(
-    finalCommand.c_str(), out, out, &retVal, nullptr,
-    cmSystemTools::OUTPUT_NONE, cmDuration::zero());
+    finalCommand, out, out, &retVal, nullptr, cmSystemTools::OUTPUT_NONE,
+    cmDuration::zero());
   // set the run var
   char retChar[16];
   const char* retStr;
@@ -215,7 +215,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
   // removed at the end of TRY_RUN and the user can run it manually
   // on the target platform.
   std::string copyDest = this->Makefile->GetHomeOutputDirectory();
-  copyDest += cmake::GetCMakeFilesDirectory();
+  copyDest += "/CMakeFiles";
   copyDest += "/";
   copyDest += cmSystemTools::GetFilenameWithoutExtension(this->OutputFile);
   copyDest += "-";
@@ -352,7 +352,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
       errorMessage += "   " + internalRunOutputName + " (advanced)\n";
     }
     errorMessage += detailsString;
-    cmSystemTools::Error(errorMessage.c_str());
+    cmSystemTools::Error(errorMessage);
     return;
   }
 

@@ -3,11 +3,11 @@ target_compile_features
 
 Add expected compiler features to a target.
 
-::
+.. code-block:: cmake
 
   target_compile_features(<target> <PRIVATE|PUBLIC|INTERFACE> <feature> [...])
 
-Specify compiler features required when compiling a given target.  If the
+Specifies compiler features required when compiling a given target.  If the
 feature is not listed in the :variable:`CMAKE_C_COMPILE_FEATURES` variable
 or :variable:`CMAKE_CXX_COMPILE_FEATURES` variable,
 then an error will be reported by CMake.  If the use of the feature requires

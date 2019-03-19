@@ -62,6 +62,9 @@ public:
   CommandLineArguments();
   ~CommandLineArguments();
 
+  CommandLineArguments(const CommandLineArguments&) = delete;
+  CommandLineArguments& operator=(const CommandLineArguments&) = delete;
+
   /**
    * Various argument types.
    */

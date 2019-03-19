@@ -22,7 +22,7 @@ struct cmGeneratorExpressionNode
     OneOrMoreParameters = -1,
     OneOrZeroParameters = -2
   };
-  virtual ~cmGeneratorExpressionNode() {}
+  virtual ~cmGeneratorExpressionNode() = default;
 
   virtual bool GeneratesContent() const { return true; }
 

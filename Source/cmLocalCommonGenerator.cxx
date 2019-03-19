@@ -12,10 +12,9 @@
 class cmGlobalGenerator;
 
 cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
-                                               cmMakefile* mf,
-                                               std::string const& wd)
+                                               cmMakefile* mf, std::string wd)
   : cmLocalGenerator(gg, mf)
-  , WorkingDirectory(wd)
+  , WorkingDirectory(std::move(wd))
 {
   // Store the configuration name that will be generated.
   if (const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
@@ -27,9 +26,7 @@ cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
   }
 }
 
-cmLocalCommonGenerator::~cmLocalCommonGenerator()
-{
-}
+cmLocalCommonGenerator::~cmLocalCommonGenerator() = default;
 
 std::string cmLocalCommonGenerator::GetTargetFortranFlags(
   cmGeneratorTarget const* target, std::string const& config)
@@ -47,7 +44,7 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
     target->GetFortranModuleDirectory(this->WorkingDirectory);
   if (!mod_dir.empty()) {
     mod_dir = this->ConvertToOutputFormat(
-      this->ConvertToRelativePath(this->WorkingDirectory, mod_dir),
+      this->MaybeConvertToRelativePath(this->WorkingDirectory, mod_dir),
       cmOutputConverter::SHELL);
   } else {
     mod_dir =

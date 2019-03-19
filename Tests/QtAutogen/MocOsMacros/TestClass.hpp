@@ -3,11 +3,16 @@
 
 #include <QObject>
 #include <QtGlobal>
+// include qplatformdefs.h for #18669
+#include <qplatformdefs.h>
 
 class TestClass : public QObject
 {
   Q_OBJECT
 public Q_SLOTS:
+
+  // Method named "open" to test if #18669 is fixed
+  void open();
 
 // -- Mac
 #ifndef Q_OS_MAC

@@ -77,7 +77,7 @@ struct cmFindProgramHelper
       this->TestNameExt = name;
       this->TestNameExt += ext;
       this->TestPath =
-        cmSystemTools::CollapseCombinedPath(path, this->TestNameExt);
+        cmSystemTools::CollapseFullPath(this->TestNameExt, path);
 
       if (cmSystemTools::FileExists(this->TestPath, true)) {
         this->BestPath = this->TestPath;

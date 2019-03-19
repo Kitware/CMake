@@ -4,6 +4,7 @@
 
 #include "cmCustomCommandLines.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 
@@ -33,13 +34,13 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args,
   std::string sourceListValue = this->Makefile->GetSafeDefinition(sourceList);
 
   // Create rules for all sources listed.
-  for (std::vector<std::string>::const_iterator j = (args.begin() + 3);
-       j != args.end(); ++j) {
-    cmSourceFile* curr = this->Makefile->GetSource(*j);
+  for (std::string const& arg : cmMakeRange(args).advance(3)) {
+    cmSourceFile* curr = this->Makefile->GetSource(arg);
     // if we should wrap the class
     if (!(curr && curr->GetPropertyAsBool("WRAP_EXCLUDE"))) {
       // Compute the name of the files to generate.
-      std::string srcName = cmSystemTools::GetFilenameWithoutLastExtension(*j);
+      std::string srcName =
+        cmSystemTools::GetFilenameWithoutLastExtension(arg);
       std::string hName = this->Makefile->GetCurrentBinaryDirectory();
       hName += "/";
       hName += srcName;
@@ -55,16 +56,16 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args,
 
       // Compute the name of the ui file from which to generate others.
       std::string uiName;
-      if (cmSystemTools::FileIsFullPath(*j)) {
-        uiName = *j;
+      if (cmSystemTools::FileIsFullPath(arg)) {
+        uiName = arg;
       } else {
-        if (curr && curr->GetPropertyAsBool("GENERATED")) {
+        if (curr && curr->GetIsGenerated()) {
           uiName = this->Makefile->GetCurrentBinaryDirectory();
         } else {
           uiName = this->Makefile->GetCurrentSourceDirectory();
         }
         uiName += "/";
-        uiName += *j;
+        uiName += arg;
       }
 
       // create the list of headers

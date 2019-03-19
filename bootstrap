@@ -302,7 +302,10 @@ CMAKE_CXX_SOURCES="\
   cmExprParserHelper \
   cmExternalMakefileProjectGenerator \
   cmFileCommand \
-  cmFileTimeComparison \
+  cmFileCopier \
+  cmFileInstaller \
+  cmFileTime \
+  cmFileTimeCache \
   cmFindBase \
   cmFindCommon \
   cmFindFileCommand \
@@ -348,6 +351,7 @@ CMAKE_CXX_SOURCES="\
   cmInstallFilesGenerator \
   cmInstallGenerator \
   cmInstallScriptGenerator \
+  cmInstallSubdirectoryGenerator \
   cmInstallTargetGenerator \
   cmInstallTargetsCommand \
   cmInstalledFile \
@@ -429,6 +433,7 @@ CMAKE_CXX_SOURCES="\
   cmake  \
   cmakemain \
   cmcmd  \
+  cm_string_view \
 "
 
 if ${cmake_system_mingw}; then
@@ -489,8 +494,11 @@ KWSYS_FILES="\
 if ${cmake_system_mingw}; then
   LIBUV_C_SOURCES="\
     src/fs-poll.c \
+    src/idna.c
     src/inet.c \
     src/threadpool.c \
+    src/strscpy.c \
+    src/timer.c \
     src/uv-common.c \
     src/win/async.c \
     src/win/core.c \
@@ -507,12 +515,10 @@ if ${cmake_system_mingw}; then
     src/win/poll.c \
     src/win/process-stdio.c \
     src/win/process.c \
-    src/win/req.c \
     src/win/signal.c \
     src/win/stream.c \
     src/win/tcp.c \
     src/win/thread.c \
-    src/win/timer.c \
     src/win/tty.c \
     src/win/udp.c \
     src/win/util.c \
@@ -521,6 +527,8 @@ if ${cmake_system_mingw}; then
     "
 else
   LIBUV_C_SOURCES="\
+    src/strscpy.c \
+    src/timer.c \
     src/uv-common.c \
     src/unix/cmake-bootstrap.c \
     src/unix/core.c \
@@ -535,7 +543,6 @@ else
     src/unix/process.c \
     src/unix/signal.c \
     src/unix/stream.c \
-    src/unix/timer.c \
     "
 fi
 
@@ -569,6 +576,8 @@ Configuration:
   --no-system-bzip2       use cmake-provided bzip2 library (default)
   --system-liblzma        use system-installed liblzma library
   --no-system-liblzma     use cmake-provided liblzma library (default)
+  --system-zstd           use system-installed zstd library
+  --no-system-zstd        use cmake-provided zstd library (default)
   --system-libarchive     use system-installed libarchive library
   --no-system-libarchive  use cmake-provided libarchive library (default)
   --system-librhash       use system-installed librhash library
@@ -810,10 +819,10 @@ while test $# != 0; do
   --init=*) cmake_init_file=`cmake_arg "$1"` ;;
   --system-libs) cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=1" ;;
   --no-system-libs) cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=0" ;;
-  --system-bzip2|--system-curl|--system-expat|--system-jsoncpp|--system-libarchive|--system-librhash|--system-zlib|--system-liblzma|--system-libuv)
+  --system-bzip2|--system-curl|--system-expat|--system-jsoncpp|--system-libarchive|--system-librhash|--system-zlib|--system-liblzma|--system-zstd|--system-libuv)
     lib=`cmake_arg "$1" "--system-"`
     cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper $lib`=1" ;;
-  --no-system-bzip2|--no-system-curl|--no-system-expat|--no-system-jsoncpp|--no-system-libarchive|--no-system-librhash|--no-system-zlib|--no-system-liblzma|--no-system-libuv)
+  --no-system-bzip2|--no-system-curl|--no-system-expat|--no-system-jsoncpp|--no-system-libarchive|--no-system-librhash|--no-system-zlib|--no-system-liblzma|--no-system-zstd|--no-system-libuv)
     lib=`cmake_arg "$1" "--no-system-"`
     cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper $lib`=0" ;;
   --qt-gui) cmake_bootstrap_qt_gui="1" ;;
@@ -1308,11 +1317,11 @@ cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_PATCH ${cmake_versi
 cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION \"${cmake_version}\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_SOURCE_DIR \"${CMAKE_BOOTSTRAP_SOURCE_DIR}\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_BINARY_DIR \"${CMAKE_BOOTSTRAP_BINARY_DIR}\""
+cmake_report cmConfigure.h${_tmp} "#define CMake_DEFAULT_RECURSION_LIMIT 400"
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BIN_DIR \"/bootstrap-not-insalled\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/bootstrap-not-insalled\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP"
 cmake_report cmConfigure.h${_tmp} "#define CM_FALLTHROUGH"
-cmake_report cmConfigure.h${_tmp} "#define CM_DISABLE_COPY(Class)"
 
 # Regenerate configured headers
 for h in Configure VersionConfig; do
@@ -1369,6 +1378,9 @@ else
     *Linux*)
       uv_c_flags="${uv_c_flags} -D_GNU_SOURCE"
       libs="${libs} -ldl -lrt"
+      ;;
+    *kFreeBSD*)
+      libs="${libs} -lkvm -lfreebsd-glue"
       ;;
     *BSD*)
       libs="${libs} -lkvm"

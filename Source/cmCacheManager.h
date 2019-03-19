@@ -34,20 +34,14 @@ private:
   struct CacheEntry
   {
     std::string Value;
-    cmStateEnums::CacheEntryType Type;
+    cmStateEnums::CacheEntryType Type = cmStateEnums::UNINITIALIZED;
     cmPropertyMap Properties;
     std::vector<std::string> GetPropertyList() const;
     const char* GetProperty(const std::string&) const;
     void SetProperty(const std::string& property, const char* value);
     void AppendProperty(const std::string& property, const char* value,
                         bool asString = false);
-    bool Initialized;
-    CacheEntry()
-      : Value("")
-      , Type(cmStateEnums::UNINITIALIZED)
-      , Initialized(false)
-    {
-    }
+    bool Initialized = false;
   };
 
 public:

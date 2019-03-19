@@ -13,8 +13,7 @@ struct cmGeneratorExpressionEvaluator;
 
 struct cmGeneratorExpressionParser
 {
-  cmGeneratorExpressionParser(
-    const std::vector<cmGeneratorExpressionToken>& tokens);
+  cmGeneratorExpressionParser(std::vector<cmGeneratorExpressionToken> tokens);
 
   void Parse(std::vector<cmGeneratorExpressionEvaluator*>& result);
 

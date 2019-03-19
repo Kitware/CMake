@@ -101,6 +101,7 @@
 #  include "cmRemoveDefinitionsCommand.h"
 #  include "cmSourceGroupCommand.h"
 #  include "cmSubdirDependsCommand.h"
+#  include "cmTargetLinkDirectoriesCommand.h"
 #  include "cmTargetLinkOptionsCommand.h"
 #  include "cmUseMangledMesaCommand.h"
 #  include "cmUtilitySourceCommand.h"
@@ -150,6 +151,8 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("separate_arguments",
                            new cmSeparateArgumentsCommand);
   state->AddBuiltinCommand("set", new cmSetCommand);
+  state->AddBuiltinCommand("set_directory_properties",
+                           new cmSetDirectoryPropertiesCommand);
   state->AddBuiltinCommand("set_property", new cmSetPropertyCommand);
   state->AddBuiltinCommand("site_name", new cmSiteNameCommand);
   state->AddBuiltinCommand("string", new cmStringCommand);
@@ -239,8 +242,6 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("install_targets", new cmInstallTargetsCommand);
   state->AddBuiltinCommand("link_directories", new cmLinkDirectoriesCommand);
   state->AddBuiltinCommand("project", new cmProjectCommand);
-  state->AddBuiltinCommand("set_directory_properties",
-                           new cmSetDirectoryPropertiesCommand);
   state->AddBuiltinCommand("set_source_files_properties",
                            new cmSetSourceFilesPropertiesCommand);
   state->AddBuiltinCommand("set_target_properties",
@@ -278,6 +279,8 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("link_libraries", new cmLinkLibrariesCommand);
   state->AddBuiltinCommand("target_link_options",
                            new cmTargetLinkOptionsCommand);
+  state->AddBuiltinCommand("target_link_directories",
+                           new cmTargetLinkDirectoriesCommand);
   state->AddBuiltinCommand("load_cache", new cmLoadCacheCommand);
   state->AddBuiltinCommand("qt_wrap_cpp", new cmQTWrapCPPCommand);
   state->AddBuiltinCommand("qt_wrap_ui", new cmQTWrapUICommand);

@@ -15,6 +15,6 @@
 #cmakedefine CMAKE_USE_SYSTEM_JSONCPP
 #cmakedefine CMAKE_USE_SYSTEM_LIBRHASH
 #cmakedefine CMAKE_USE_SYSTEM_LIBUV
-#cmakedefine CTEST_USE_XMLRPC
+#cmakedefine CMAKE_USE_SYSTEM_ZSTD
 
 #endif

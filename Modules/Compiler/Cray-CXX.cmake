@@ -2,7 +2,7 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 include(Compiler/Cray)
-__compiler_cray(C)
+__compiler_cray(CXX)
 
 string(APPEND CMAKE_CXX_FLAGS_MINSIZEREL_INIT " -DNDEBUG")
 string(APPEND CMAKE_CXX_FLAGS_RELEASE_INIT " -DNDEBUG")

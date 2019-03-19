@@ -10,7 +10,7 @@ Add a library to the project using the specified source files.
 Normal Libraries
 ^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   add_library(<name> [STATIC | SHARED | MODULE]
               [EXCLUDE_FROM_ALL]
@@ -67,7 +67,7 @@ within IDE.
 Imported Libraries
 ^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   add_library(<name> <SHARED|STATIC|MODULE|OBJECT|UNKNOWN> IMPORTED
               [GLOBAL])
@@ -92,7 +92,7 @@ for more information.
 Object Libraries
 ^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   add_library(<name> OBJECT <src>...)
 
@@ -121,7 +121,7 @@ consider adding at least one real source file to any target that references
 Alias Libraries
 ^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   add_library(<name> ALIAS <target>)
 
@@ -141,7 +141,7 @@ installed or exported.
 Interface Libraries
 ^^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   add_library(<name> INTERFACE [IMPORTED [GLOBAL]])
 

@@ -7,9 +7,11 @@
 
 #include "cmCTestGenericHandler.h"
 #include "cmDuration.h"
+#include "cmListFileCache.h"
 
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
+#include <cstdint>
 #include <iosfwd>
 #include <map>
 #include <set>
@@ -141,6 +143,8 @@ public:
     std::set<std::string> FixturesCleanup;
     std::set<std::string> FixturesRequired;
     std::set<std::string> RequireSuccessDepends;
+    // Private test generator properties used to track backtraces
+    cmListFileBacktrace Backtrace;
   };
 
   struct cmCTestTestResult
@@ -150,7 +154,7 @@ public:
     std::string Reason;
     std::string FullCommandLine;
     cmDuration ExecutionTime;
-    int ReturnValue;
+    std::int64_t ReturnValue;
     int Status;
     std::string ExceptionStatus;
     bool CompressOutput;
@@ -274,7 +278,7 @@ private:
    */
   std::string FindTheExecutable(const char* exe);
 
-  const char* GetTestStatus(cmCTestTestResult const&);
+  std::string GetTestStatus(cmCTestTestResult const&);
   void ExpandTestsToRunInformation(size_t numPossibleTests);
   void ExpandTestsToRunInformationForRerunFailed();
 

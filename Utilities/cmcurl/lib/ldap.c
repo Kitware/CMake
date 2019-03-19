@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -52,15 +52,6 @@
 # if (defined(HAVE_LDAP_SSL) && defined(HAVE_LDAP_SSL_H))
 #  include <ldap_ssl.h>
 # endif /* HAVE_LDAP_SSL && HAVE_LDAP_SSL_H */
-#endif
-
-/* These are macros in both <wincrypt.h> (in above <winldap.h>) and typedefs
- * in BoringSSL's <openssl/x509.h>
- */
-#ifdef HAVE_BORINGSSL
-# undef X509_NAME
-# undef X509_CERT_PAIR
-# undef X509_EXTENSIONS
 #endif
 
 #include "urldata.h"
@@ -483,7 +474,13 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 #endif
   }
   if(rc != 0) {
-    failf(data, "LDAP local: ldap_simple_bind_s %s", ldap_err2string(rc));
+#ifdef USE_WIN32_LDAP
+    failf(data, "LDAP local: bind via ldap_win_bind %s",
+          ldap_err2string(rc));
+#else
+    failf(data, "LDAP local: bind via ldap_simple_bind_s %s",
+          ldap_err2string(rc));
+#endif
     result = CURLE_LDAP_CANNOT_BIND;
     goto quit;
   }
@@ -847,9 +844,9 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
   size_t i;
 
   if(!conn->data ||
-     !conn->data->state.path ||
-     conn->data->state.path[0] != '/' ||
-     !checkprefix("LDAP", conn->data->change.url))
+     !conn->data->state.up.path ||
+     conn->data->state.up.path[0] != '/' ||
+     !strcasecompare("LDAP", conn->data->state.up.scheme))
     return LDAP_INVALID_SYNTAX;
 
   ludp->lud_scope = LDAP_SCOPE_BASE;
@@ -857,7 +854,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
   ludp->lud_host  = conn->host.name;
 
   /* Duplicate the path */
-  p = path = strdup(conn->data->state.path + 1);
+  p = path = strdup(conn->data->state.up.path + 1);
   if(!path)
     return LDAP_NO_MEMORY;
 

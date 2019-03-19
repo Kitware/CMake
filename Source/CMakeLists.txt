@@ -31,6 +31,16 @@ else()
   set(CMAKE_USE_ELF_PARSER)
 endif()
 
+if(NOT CMake_DEFAULT_RECURSION_LIMIT)
+  if(DEFINED ENV{DASHBOARD_TEST_FROM_CTEST})
+    set(CMake_DEFAULT_RECURSION_LIMIT 100)
+  elseif(MINGW)
+    set(CMake_DEFAULT_RECURSION_LIMIT 400)
+  else()
+    set(CMake_DEFAULT_RECURSION_LIMIT 1000)
+  endif()
+endif()
+
 if(APPLE)
   set(CMAKE_USE_MACH_PARSER 1)
 endif()
@@ -82,7 +92,6 @@ include_directories(
   ${CMAKE_ZLIB_INCLUDES}
   ${CMAKE_EXPAT_INCLUDES}
   ${CMAKE_TAR_INCLUDES}
-  ${CMAKE_COMPRESS_INCLUDES}
   ${CMake_HAIKU_INCLUDE_DIRS}
   )
 
@@ -209,6 +218,18 @@ set(SRCS
   cmExtraKateGenerator.h
   cmExtraSublimeTextGenerator.cxx
   cmExtraSublimeTextGenerator.h
+  cmFileAPI.cxx
+  cmFileAPI.h
+  cmFileAPICache.cxx
+  cmFileAPICache.h
+  cmFileAPICodemodel.cxx
+  cmFileAPICodemodel.h
+  cmFileAPICMakeFiles.cxx
+  cmFileAPICMakeFiles.h
+  cmFileCopier.cxx
+  cmFileCopier.h
+  cmFileInstaller.cxx
+  cmFileInstaller.h
   cmFileLock.cxx
   cmFileLock.h
   cmFileLockPool.cxx
@@ -217,8 +238,10 @@ set(SRCS
   cmFileLockResult.h
   cmFilePathChecksum.cxx
   cmFilePathChecksum.h
-  cmFileTimeComparison.cxx
-  cmFileTimeComparison.h
+  cmFileTime.cxx
+  cmFileTime.h
+  cmFileTimeCache.cxx
+  cmFileTimeCache.h
   cmFortranParserImpl.cxx
   cmFSPermissions.cxx
   cmFSPermissions.h
@@ -262,6 +285,8 @@ set(SRCS
   cmInstallFilesGenerator.cxx
   cmInstallScriptGenerator.h
   cmInstallScriptGenerator.cxx
+  cmInstallSubdirectoryGenerator.h
+  cmInstallSubdirectoryGenerator.cxx
   cmInstallTargetGenerator.h
   cmInstallTargetGenerator.cxx
   cmInstallDirectoryGenerator.h
@@ -290,6 +315,7 @@ set(SRCS
   cmMakefileExecutableTargetGenerator.cxx
   cmMakefileLibraryTargetGenerator.cxx
   cmMakefileUtilityTargetGenerator.cxx
+  cmMessageType.h
   cmMessenger.cxx
   cmMessenger.h
   cmMSVC60LinkLineComputer.cxx
@@ -320,6 +346,8 @@ set(SRCS
   cmQtAutoGen.h
   cmQtAutoGenerator.cxx
   cmQtAutoGenerator.h
+  cmQtAutoGenGlobalInitializer.cxx
+  cmQtAutoGenGlobalInitializer.h
   cmQtAutoGenInitializer.cxx
   cmQtAutoGenInitializer.h
   cmQtAutoGeneratorMocUic.cxx
@@ -373,6 +401,9 @@ set(SRCS
   cmXMLWriter.h
   cmake.cxx
   cmake.h
+  cm_string_view.cxx
+  cm_string_view.hxx
+  cm_static_string_view.hxx
 
   cmCommand.cxx
   cmCommand.h
@@ -564,6 +595,8 @@ set(SRCS
   cmSiteNameCommand.h
   cmSourceGroupCommand.cxx
   cmSourceGroupCommand.h
+  cmString.cxx
+  cmString.hxx
   cmStringReplaceHelper.cxx
   cmStringCommand.cxx
   cmStringCommand.h
@@ -581,6 +614,8 @@ set(SRCS
   cmTargetIncludeDirectoriesCommand.h
   cmTargetLinkOptionsCommand.cxx
   cmTargetLinkOptionsCommand.h
+  cmTargetLinkDirectoriesCommand.cxx
+  cmTargetLinkDirectoriesCommand.h
   cmTargetLinkLibrariesCommand.cxx
   cmTargetLinkLibrariesCommand.h
   cmTargetPropCommandBase.cxx
@@ -679,10 +714,10 @@ if (WIN32)
       cmGlobalVisualStudio12Generator.cxx
       cmGlobalVisualStudio14Generator.h
       cmGlobalVisualStudio14Generator.cxx
-      cmGlobalVisualStudio15Generator.h
-      cmGlobalVisualStudio15Generator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
+      cmGlobalVisualStudioVersionedGenerator.h
+      cmGlobalVisualStudioVersionedGenerator.cxx
       cmIDEFlagTable.h
       cmIDEOptions.cxx
       cmIDEOptions.h
@@ -765,7 +800,7 @@ foreach(check
   else()
     set(CMake_${check} 0)
   endif()
-  set_property(SOURCE cmFileTimeComparison.cxx APPEND PROPERTY
+  set_property(SOURCE cmFileTime.cxx APPEND PROPERTY
     COMPILE_DEFINITIONS CMake_${check}=${CMake_${check}})
 endforeach()
 
@@ -773,7 +808,7 @@ endforeach()
 add_library(CMakeLib ${SRCS})
 target_link_libraries(CMakeLib cmsys
   ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES}
-  ${CMAKE_TAR_LIBRARIES} ${CMAKE_COMPRESS_LIBRARIES}
+  ${CMAKE_TAR_LIBRARIES}
   ${CMAKE_CURL_LIBRARIES}
   ${CMAKE_JSONCPP_LIBRARIES}
   ${CMAKE_LIBUV_LIBRARIES}
@@ -791,9 +826,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "sparc"
   endif()
 endif()
 
-# On Apple we need CoreFoundation
+# On Apple we need CoreFoundation and CoreServices
 if(APPLE)
   target_link_libraries(CMakeLib "-framework CoreFoundation")
+  target_link_libraries(CMakeLib "-framework CoreServices")
 endif()
 
 if(WIN32 AND NOT UNIX)
@@ -809,7 +845,6 @@ target_compile_definitions(CMakeLib PUBLIC ${CLANG_TIDY_DEFINITIONS})
 #
 include_directories(
   "${CMake_SOURCE_DIR}/Source/CTest"
-  ${CMAKE_XMLRPC_INCLUDES}
   ${CMAKE_CURL_INCLUDES}
   )
 #
@@ -875,7 +910,7 @@ set(CTEST_SRCS cmCTest.cxx
 
 # Build CTestLib
 add_library(CTestLib ${CTEST_SRCS})
-target_link_libraries(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES} ${CMAKE_XMLRPC_LIBRARIES})
+target_link_libraries(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES})
 
 #
 # CPack
@@ -890,7 +925,7 @@ set(CPACK_SRCS
   CPack/cmCPackArchiveGenerator.cxx
   CPack/cmCPackComponentGroup.cxx
   CPack/cmCPackDebGenerator.cxx
-  CPack/cmCPackExtGenerator.cxx
+  CPack/cmCPackExternalGenerator.cxx
   CPack/cmCPackGeneratorFactory.cxx
   CPack/cmCPackGenerator.cxx
   CPack/cmCPackLog.cxx
@@ -1032,9 +1067,6 @@ if(CPACK_ENABLE_FREEBSD_PKG AND FREEBSD_PKG_INCLUDE_DIRS AND FREEBSD_PKG_LIBRARI
 endif()
 
 if(APPLE)
-  add_executable(cmakexbuild cmakexbuild.cxx)
-  list(APPEND _tools cmakexbuild)
-  target_link_libraries(cmakexbuild CMakeLib)
   add_executable(OSXScriptLauncher
     CPack/OSXScriptLauncher.cxx)
   target_link_libraries(OSXScriptLauncher cmsys)
@@ -1049,6 +1081,9 @@ target_link_libraries(cmake CMakeLib)
 add_library(CMakeServerLib
   cmConnection.h cmConnection.cxx
   cmFileMonitor.cxx cmFileMonitor.h
+  cmJsonObjectDictionary.h
+  cmJsonObjects.h
+  cmJsonObjects.cxx
   cmPipeConnection.cxx cmPipeConnection.h
   cmServer.cxx cmServer.h
   cmServerConnection.cxx cmServerConnection.h

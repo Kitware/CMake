@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.3)
 
 project(XcodeIOSInstallCombinedPrune CXX)
 
-# due to lack of toolchain file it might point to running macOS version
-unset(CMAKE_OSX_DEPLOYMENT_TARGET CACHE)
+if(XCODE_VERSION VERSION_GREATER_EQUAL 9)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET 10)
+endif()
 
-set(CMAKE_OSX_SYSROOT iphoneos)
 set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
 set(CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf")
 

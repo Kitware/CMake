@@ -1,20 +1,21 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindIcotool
-# -----------
-#
-# Find icotool
-#
-# This module looks for icotool.  This module defines the following
-# values:
-#
-# ::
-#
-#   ICOTOOL_EXECUTABLE: the full path to the icotool tool.
-#   ICOTOOL_FOUND: True if icotool has been found.
-#   ICOTOOL_VERSION_STRING: the version of icotool found.
+#[=======================================================================[.rst:
+FindIcotool
+-----------
+
+Find icotool
+
+This module looks for icotool.  This module defines the following
+values:
+
+::
+
+  ICOTOOL_EXECUTABLE: the full path to the icotool tool.
+  ICOTOOL_FOUND: True if icotool has been found.
+  ICOTOOL_VERSION_STRING: the version of icotool found.
+#]=======================================================================]
 
 find_program(ICOTOOL_EXECUTABLE
   icotool

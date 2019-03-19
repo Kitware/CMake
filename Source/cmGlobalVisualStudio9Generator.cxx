@@ -5,8 +5,8 @@
 #include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmVisualStudioWCEPlatformParser.h"
-#include "cmake.h"
 
 static const char vs9generatorName[] = "Visual Studio 9 2008";
 
@@ -59,9 +59,16 @@ public:
                   "Optional [arch] can be \"Win64\" or \"IA64\".";
   }
 
-  void GetGenerators(std::vector<std::string>& names) const override
+  std::vector<std::string> GetGeneratorNames() const override
   {
+    std::vector<std::string> names;
     names.push_back(vs9generatorName);
+    return names;
+  }
+
+  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
+  {
+    std::vector<std::string> names;
     names.push_back(vs9generatorName + std::string(" Win64"));
     names.push_back(vs9generatorName + std::string(" IA64"));
     cmVisualStudioWCEPlatformParser parser;
@@ -71,10 +78,29 @@ public:
     for (std::string const& i : availablePlatforms) {
       names.push_back("Visual Studio 9 2008 " + i);
     }
+    return names;
   }
 
   bool SupportsToolset() const override { return false; }
   bool SupportsPlatform() const override { return true; }
+
+  std::vector<std::string> GetKnownPlatforms() const override
+  {
+    std::vector<std::string> platforms;
+    platforms.emplace_back("x64");
+    platforms.emplace_back("Win32");
+    platforms.emplace_back("Itanium");
+    cmVisualStudioWCEPlatformParser parser;
+    parser.ParseVersion("9.0");
+    const std::vector<std::string>& availablePlatforms =
+      parser.GetAvailablePlatforms();
+    for (std::string const& i : availablePlatforms) {
+      platforms.emplace_back(i);
+    }
+    return platforms;
+  }
+
+  std::string GetDefaultPlatformName() const override { return "Win32"; }
 };
 
 cmGlobalGeneratorFactory* cmGlobalVisualStudio9Generator::NewFactory()
@@ -83,8 +109,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio9Generator::NewFactory()
 }
 
 cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(
-  cmake* cm, const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio8Generator(cm, name, platformName)
+  cmake* cm, const std::string& name,
+  std::string const& platformInGeneratorName)
+  : cmGlobalVisualStudio8Generator(cm, name, platformInGeneratorName)
 {
   this->Version = VS9;
   std::string vc9Express;
@@ -92,12 +119,6 @@ cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\9.0\\Setup\\VC;"
     "ProductDir",
     vc9Express, cmSystemTools::KeyWOW64_32);
-}
-
-void cmGlobalVisualStudio9Generator::WriteSLNHeader(std::ostream& fout)
-{
-  fout << "Microsoft Visual Studio Solution File, Format Version 10.00\n";
-  fout << "# Visual Studio 2008\n";
 }
 
 std::string cmGlobalVisualStudio9Generator::GetUserMacrosDirectory()

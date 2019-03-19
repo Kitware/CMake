@@ -1,43 +1,49 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# CheckPrototypeDefinition
-# ------------------------
-#
-# Check if the prototype we expect is correct.
-#
-# check_prototype_definition(FUNCTION PROTOTYPE RETURN HEADER VARIABLE)
-#
-# ::
-#
-#   FUNCTION - The name of the function (used to check if prototype exists)
-#   PROTOTYPE- The prototype to check.
-#   RETURN - The return value of the function.
-#   HEADER - The header files required.
-#   VARIABLE - The variable to store the result.
-#              Will be created as an internal cache variable.
-#
-# Example:
-#
-# ::
-#
-#   check_prototype_definition(getpwent_r
-#    "struct passwd *getpwent_r(struct passwd *src, char *buf, int buflen)"
-#    "NULL"
-#    "unistd.h;pwd.h"
-#    SOLARIS_GETPWENT_R)
-#
-# The following variables may be set before calling this macro to modify
-# the way the check is run:
-#
-# ::
-#
-#   CMAKE_REQUIRED_FLAGS = string of compile command line flags
-#   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-#   CMAKE_REQUIRED_INCLUDES = list of include directories
-#   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
-#   CMAKE_REQUIRED_QUIET = execute quietly without messages
+#[=======================================================================[.rst:
+CheckPrototypeDefinition
+------------------------
+
+Check if the prototype we expect is correct.
+
+.. command:: check_prototype_definition
+
+  .. code-block:: cmake
+
+    check_prototype_definition(FUNCTION PROTOTYPE RETURN HEADER VARIABLE)
+
+  ::
+
+    FUNCTION - The name of the function (used to check if prototype exists)
+    PROTOTYPE- The prototype to check.
+    RETURN - The return value of the function.
+    HEADER - The header files required.
+    VARIABLE - The variable to store the result.
+               Will be created as an internal cache variable.
+
+  Example:
+
+  .. code-block:: cmake
+
+    check_prototype_definition(getpwent_r
+     "struct passwd *getpwent_r(struct passwd *src, char *buf, int buflen)"
+     "NULL"
+     "unistd.h;pwd.h"
+     SOLARIS_GETPWENT_R)
+
+The following variables may be set before calling this function to modify
+the way the check is run:
+
+::
+
+  CMAKE_REQUIRED_FLAGS = string of compile command line flags
+  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+  CMAKE_REQUIRED_INCLUDES = list of include directories
+  CMAKE_REQUIRED_LINK_OPTIONS = list of options to pass to link command
+  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+  CMAKE_REQUIRED_QUIET = execute quietly without messages
+#]=======================================================================]
 
 #
 
@@ -45,12 +51,18 @@ get_filename_component(__check_proto_def_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 include_guard(GLOBAL)
 
-function(CHECK_PROTOTYPE_DEFINITION _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIABLE)
+function(check_prototype_definition _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIABLE)
 
   if (NOT DEFINED ${_VARIABLE})
     set(CHECK_PROTOTYPE_DEFINITION_CONTENT "/* */\n")
 
     set(CHECK_PROTOTYPE_DEFINITION_FLAGS ${CMAKE_REQUIRED_FLAGS})
+    if (CMAKE_REQUIRED_LINK_OPTIONS)
+      set(CHECK_PROTOTYPE_DEFINITION_LINK_OPTIONS
+        LINK_OPTIONS ${CMAKE_REQUIRED_LINK_OPTIONS})
+    else()
+      set(CHECK_PROTOTYPE_DEFINITION_LINK_OPTIONS)
+    endif()
     if (CMAKE_REQUIRED_LIBRARIES)
       set(CHECK_PROTOTYPE_DEFINITION_LIBS
         LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
@@ -82,6 +94,7 @@ function(CHECK_PROTOTYPE_DEFINITION _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIAB
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckPrototypeDefinition.c
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
+      ${CHECK_PROTOTYPE_DEFINITION_LINK_OPTIONS}
       ${CHECK_PROTOTYPE_DEFINITION_LIBS}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CHECK_PROTOTYPE_DEFINITION_FLAGS}
       "${CMAKE_SYMBOL_EXISTS_INCLUDES}"

@@ -1,53 +1,64 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindGLUT
-# --------
-#
-# try to find glut library and include files.
-#
-# IMPORTED Targets
-# ^^^^^^^^^^^^^^^^
-#
-# This module defines the :prop_tgt:`IMPORTED` targets:
-#
-# ``GLUT::GLUT``
-#  Defined if the system has GLUT.
-#
-# Result Variables
-# ^^^^^^^^^^^^^^^^
-#
-# This module sets the following variables:
-#
-# ::
-#
-#   GLUT_INCLUDE_DIR, where to find GL/glut.h, etc.
-#   GLUT_LIBRARIES, the libraries to link against
-#   GLUT_FOUND, If false, do not try to use GLUT.
-#
-# Also defined, but not for general use are:
-#
-# ::
-#
-#   GLUT_glut_LIBRARY = the full path to the glut library.
-#   GLUT_Xmu_LIBRARY  = the full path to the Xmu library.
-#   GLUT_Xi_LIBRARY   = the full path to the Xi Library.
+#[=======================================================================[.rst:
+FindGLUT
+--------
+
+try to find glut library and include files.
+
+IMPORTED Targets
+^^^^^^^^^^^^^^^^
+
+This module defines the :prop_tgt:`IMPORTED` targets:
+
+``GLUT::GLUT``
+ Defined if the system has GLUT.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module sets the following variables:
+
+::
+
+  GLUT_INCLUDE_DIR, where to find GL/glut.h, etc.
+  GLUT_LIBRARIES, the libraries to link against
+  GLUT_FOUND, If false, do not try to use GLUT.
+
+Also defined, but not for general use are:
+
+::
+
+  GLUT_glut_LIBRARY = the full path to the glut library.
+  GLUT_Xmu_LIBRARY  = the full path to the Xmu library.
+  GLUT_Xi_LIBRARY   = the full path to the Xi Library.
+#]=======================================================================]
+
+include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 
 if (WIN32)
   find_path( GLUT_INCLUDE_DIR NAMES GL/glut.h
     PATHS  ${GLUT_ROOT_PATH}/include )
-  find_library( GLUT_glut_LIBRARY NAMES glut glut32 freeglut
+  find_library( GLUT_glut_LIBRARY_RELEASE NAMES glut glut32 freeglut
     PATHS
     ${OPENGL_LIBRARY_DIR}
     ${GLUT_ROOT_PATH}/Release
     )
+  find_library( GLUT_glut_LIBRARY_DEBUG NAMES freeglutd
+    PATHS
+    ${OPENGL_LIBRARY_DIR}
+    ${GLUT_ROOT_PATH}/Debug
+    )
+  mark_as_advanced(GLUT_glut_LIBRARY_RELEASE GLUT_glut_LIBRARY_DEBUG)
+  select_library_configurations(GLUT_glut)
 else ()
 
   if (APPLE)
     find_path(GLUT_INCLUDE_DIR glut.h ${OPENGL_LIBRARY_DIR})
     find_library(GLUT_glut_LIBRARY GLUT DOC "GLUT library for OSX")
     find_library(GLUT_cocoa_LIBRARY Cocoa DOC "Cocoa framework for OSX")
+    mark_as_advanced(GLUT_glut_LIBRARY GLUT_cocoa_LIBRARY)
 
     if(GLUT_cocoa_LIBRARY AND NOT TARGET GLUT::Cocoa)
       add_library(GLUT::Cocoa UNKNOWN IMPORTED)
@@ -72,10 +83,12 @@ else ()
       find_library( GLUT_Xi_LIBRARY Xi
         /usr/openwin/lib
         )
+      mark_as_advanced(GLUT_Xi_LIBRARY)
 
       find_library( GLUT_Xmu_LIBRARY Xmu
         /usr/openwin/lib
         )
+      mark_as_advanced(GLUT_Xmu_LIBRARY)
 
       if(GLUT_Xi_LIBRARY AND NOT TARGET GLUT::Xi)
         add_library(GLUT::Xi UNKNOWN IMPORTED)
@@ -104,6 +117,7 @@ else ()
       /usr/openwin/lib
       ${_GLUT_glut_LIB_DIR}
       )
+    mark_as_advanced(GLUT_glut_LIBRARY)
 
     unset(_GLUT_INC_DIR)
     unset(_GLUT_glut_LIB_DIR)
@@ -135,8 +149,24 @@ if (GLUT_FOUND)
       set_target_properties(GLUT::GLUT PROPERTIES
         IMPORTED_LOCATION "${GLUT_glut_LIBRARY}/${CMAKE_MATCH_1}")
     else()
-      set_target_properties(GLUT::GLUT PROPERTIES
-        IMPORTED_LOCATION "${GLUT_glut_LIBRARY}")
+      if(GLUT_glut_LIBRARY_RELEASE)
+        set_property(TARGET GLUT::GLUT APPEND PROPERTY
+          IMPORTED_CONFIGURATIONS RELEASE)
+        set_target_properties(GLUT::GLUT PROPERTIES
+          IMPORTED_LOCATION_RELEASE "${GLUT_glut_LIBRARY_RELEASE}")
+      endif()
+
+      if(GLUT_glut_LIBRARY_DEBUG)
+        set_property(TARGET GLUT::GLUT APPEND PROPERTY
+          IMPORTED_CONFIGURATIONS DEBUG)
+        set_target_properties(GLUT::GLUT PROPERTIES
+          IMPORTED_LOCATION_DEBUG "${GLUT_glut_LIBRARY_DEBUG}")
+      endif()
+
+      if(NOT GLUT_glut_LIBRARY_RELEASE AND NOT GLUT_glut_LIBRARY_DEBUG)
+        set_property(TARGET GLUT::GLUT APPEND PROPERTY
+          IMPORTED_LOCATION "${GLUT_glut_LIBRARY}")
+      endif()
     endif()
 
     if(TARGET GLUT::Xmu)
@@ -160,9 +190,4 @@ if (GLUT_FOUND)
   set (GLUT_INCLUDE_PATH ${GLUT_INCLUDE_DIR})
 endif()
 
-mark_as_advanced(
-  GLUT_INCLUDE_DIR
-  GLUT_glut_LIBRARY
-  GLUT_Xmu_LIBRARY
-  GLUT_Xi_LIBRARY
-  )
+mark_as_advanced(GLUT_INCLUDE_DIR)

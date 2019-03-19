@@ -34,6 +34,9 @@ public:
 
   ~cmSourceFile();
 
+  cmSourceFile(const cmSourceFile&) = delete;
+  cmSourceFile& operator=(const cmSourceFile&) = delete;
+
   /**
    * Get the list of the custom commands for this source file
    */
@@ -54,6 +57,10 @@ public:
   /** Implement getting a property when called from a CMake language
       command like get_property or get_source_file_property.  */
   const char* GetPropertyForUser(const std::string& prop);
+
+  ///! Checks is the GENERATED property is set and true
+  /// @return Equivalent to GetPropertyAsBool("GENERATED")
+  bool GetIsGenerated() const { return this->IsGenerated; }
 
   /**
    * The full path to the file.  The non-const version of this method
@@ -106,20 +113,22 @@ public:
 private:
   cmSourceFileLocation Location;
   cmPropertyMap Properties;
-  cmCustomCommand* CustomCommand;
+  cmCustomCommand* CustomCommand = nullptr;
   std::string Extension;
   std::string Language;
   std::string FullPath;
   std::string ObjectLibrary;
   std::vector<std::string> Depends;
-  bool FindFullPathFailed;
+  bool FindFullPathFailed = false;
+  bool IsGenerated = false;
 
   bool FindFullPath(std::string* error);
-  bool TryFullPath(const std::string& path, const std::string& ext);
   void CheckExtension();
   void CheckLanguage(std::string const& ext);
 
   static const std::string propLANGUAGE;
+  static const std::string propLOCATION;
+  static const std::string propGENERATED;
 };
 
 // TODO: Factor out into platform information modules.

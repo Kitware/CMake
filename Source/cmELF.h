@@ -28,11 +28,14 @@ public:
   /** Destruct.   */
   ~cmELF();
 
+  cmELF(const cmELF&) = delete;
+  cmELF& operator=(const cmELF&) = delete;
+
   /** Get the error message if any.  */
   std::string const& GetErrorMessage() const { return this->ErrorMessage; }
 
   /** Boolean conversion.  True if the ELF file is valid.  */
-  operator bool() const { return this->Valid(); }
+  explicit operator bool() const { return this->Valid(); }
 
   /** Enumeration of ELF file types.  */
   enum FileType

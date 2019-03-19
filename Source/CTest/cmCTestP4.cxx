@@ -5,6 +5,7 @@
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 
 #include "cmsys/RegularExpression.hxx"
@@ -19,9 +20,7 @@ cmCTestP4::cmCTestP4(cmCTest* ct, std::ostream& log)
   this->PriorRev = this->Unknown;
 }
 
-cmCTestP4::~cmCTestP4()
-{
-}
+cmCTestP4::~cmCTestP4() = default;
 
 class cmCTestP4::IdentifyParser : public cmCTestVC::LineParser
 {
@@ -307,26 +306,25 @@ void cmCTestP4::SetP4Options(std::vector<char const*>& CommandOptions)
 {
   if (P4Options.empty()) {
     const char* p4 = this->CommandLineTool.c_str();
-    P4Options.push_back(p4);
+    P4Options.emplace_back(p4);
 
     // The CTEST_P4_CLIENT variable sets the P4 client used when issuing
     // Perforce commands, if it's different from the default one.
     std::string client = this->CTest->GetCTestConfiguration("P4Client");
     if (!client.empty()) {
-      P4Options.push_back("-c");
+      P4Options.emplace_back("-c");
       P4Options.push_back(client);
     }
 
     // Set the message language to be English, in case the P4 admin
     // has localized them
-    P4Options.push_back("-L");
-    P4Options.push_back("en");
+    P4Options.emplace_back("-L");
+    P4Options.emplace_back("en");
 
     // The CTEST_P4_OPTIONS variable adds additional Perforce command line
     // options before the main command
     std::string opts = this->CTest->GetCTestConfiguration("P4Options");
-    std::vector<std::string> args =
-      cmSystemTools::ParseArguments(opts.c_str());
+    std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
 
     P4Options.insert(P4Options.end(), args.begin(), args.end());
   }
@@ -427,12 +425,11 @@ bool cmCTestP4::LoadRevisions()
 
   // p4 describe -s ...@1111111,2222222
   std::vector<char const*> p4_describe;
-  for (std::vector<std::string>::reverse_iterator i = ChangeLists.rbegin();
-       i != ChangeLists.rend(); ++i) {
+  for (std::string const& i : cmReverseRange(ChangeLists)) {
     SetP4Options(p4_describe);
     p4_describe.push_back("describe");
     p4_describe.push_back("-s");
-    p4_describe.push_back(i->c_str());
+    p4_describe.push_back(i.c_str());
     p4_describe.push_back(nullptr);
 
     DescribeParser outDescribe(this, "p4_describe-out> ");
@@ -503,7 +500,7 @@ bool cmCTestP4::UpdateImpl()
   if (opts.empty()) {
     opts = this->CTest->GetCTestConfiguration("P4UpdateOptions");
   }
-  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
   for (std::string const& arg : args) {
     p4_sync.push_back(arg.c_str());
   }

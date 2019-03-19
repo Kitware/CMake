@@ -9,6 +9,7 @@ set(CTEST_CMAKE_GENERATOR_PLATFORM      "@RunCMake_GENERATOR_PLATFORM@")
 set(CTEST_CMAKE_GENERATOR_TOOLSET       "@RunCMake_GENERATOR_TOOLSET@")
 set(CTEST_BUILD_CONFIGURATION           "$ENV{CMAKE_CONFIG_TYPE}")
 
+set_property(GLOBAL PROPERTY SubProject "mysubproj")
 ctest_start(Experimental)
 ctest_configure()
 

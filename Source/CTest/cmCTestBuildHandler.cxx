@@ -5,7 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmDuration.h"
-#include "cmFileTimeComparison.h"
+#include "cmFileTimeCache.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
@@ -341,30 +341,34 @@ int cmCTestBuildHandler::ProcessHandler()
   // warnings and warning exceptions.
   std::vector<std::string>::size_type cc;
   for (cc = 0; cmCTestErrorMatches[cc]; cc++) {
-    this->CustomErrorMatches.push_back(cmCTestErrorMatches[cc]);
+    this->CustomErrorMatches.emplace_back(cmCTestErrorMatches[cc]);
   }
   for (cc = 0; cmCTestErrorExceptions[cc]; cc++) {
-    this->CustomErrorExceptions.push_back(cmCTestErrorExceptions[cc]);
+    this->CustomErrorExceptions.emplace_back(cmCTestErrorExceptions[cc]);
   }
   for (cc = 0; cmCTestWarningMatches[cc]; cc++) {
-    this->CustomWarningMatches.push_back(cmCTestWarningMatches[cc]);
+    this->CustomWarningMatches.emplace_back(cmCTestWarningMatches[cc]);
   }
 
   for (cc = 0; cmCTestWarningExceptions[cc]; cc++) {
-    this->CustomWarningExceptions.push_back(cmCTestWarningExceptions[cc]);
+    this->CustomWarningExceptions.emplace_back(cmCTestWarningExceptions[cc]);
   }
 
   // Pre-compile regular expressions objects for all regular expressions
 
 #define cmCTestBuildHandlerPopulateRegexVector(strings, regexes)              \
-  regexes.clear();                                                            \
-  cmCTestOptionalLog(this->CTest, DEBUG,                                      \
-                     this << "Add " #regexes << std::endl, this->Quiet);      \
-  for (std::string const& s : (strings)) {                                    \
+  do {                                                                        \
+    regexes.clear();                                                          \
     cmCTestOptionalLog(this->CTest, DEBUG,                                    \
-                       "Add " #strings ": " << s << std::endl, this->Quiet);  \
-    (regexes).push_back(s.c_str());                                           \
-  }
+                       this << "Add " #regexes << std::endl, this->Quiet);    \
+    for (std::string const& s : (strings)) {                                  \
+      cmCTestOptionalLog(this->CTest, DEBUG,                                  \
+                         "Add " #strings ": " << s << std::endl,              \
+                         this->Quiet);                                        \
+      (regexes).emplace_back(s);                                              \
+    }                                                                         \
+  } while (false)
+
   cmCTestBuildHandlerPopulateRegexVector(this->CustomErrorMatches,
                                          this->ErrorMatchRegex);
   cmCTestBuildHandlerPopulateRegexVector(this->CustomErrorExceptions,
@@ -414,8 +418,8 @@ int cmCTestBuildHandler::ProcessHandler()
   int retVal = 0;
   int res = cmsysProcess_State_Exited;
   if (!this->CTest->GetShowOnly()) {
-    res = this->RunMakeCommand(makeCommand.c_str(), &retVal,
-                               buildDirectory.c_str(), 0, ofs);
+    res = this->RunMakeCommand(makeCommand, &retVal, buildDirectory.c_str(), 0,
+                               ofs);
   } else {
     cmCTestOptionalLog(this->CTest, DEBUG,
                        "Build with command: " << makeCommand << std::endl,
@@ -499,28 +503,24 @@ void cmCTestBuildHandler::GenerateXMLHeader(cmXMLWriter& xml)
 class cmCTestBuildHandler::FragmentCompare
 {
 public:
-  FragmentCompare(cmFileTimeComparison* ftc)
+  FragmentCompare(cmFileTimeCache* ftc)
     : FTC(ftc)
   {
   }
-  FragmentCompare()
-    : FTC(nullptr)
-  {
-  }
+  FragmentCompare() = default;
   bool operator()(std::string const& l, std::string const& r) const
   {
     // Order files by modification time.  Use lexicographic order
     // among files with the same time.
     int result;
-    if (this->FTC->FileTimeCompare(l.c_str(), r.c_str(), &result) &&
-        result != 0) {
+    if (this->FTC->Compare(l, r, &result) && result != 0) {
       return result < 0;
     }
     return l < r;
   }
 
 private:
-  cmFileTimeComparison* FTC;
+  cmFileTimeCache* FTC = nullptr;
 };
 
 void cmCTestBuildHandler::GenerateXMLLaunched(cmXMLWriter& xml)
@@ -530,7 +530,7 @@ void cmCTestBuildHandler::GenerateXMLLaunched(cmXMLWriter& xml)
   }
 
   // Sort XML fragments in chronological order.
-  cmFileTimeComparison ftc;
+  cmFileTimeCache ftc;
   FragmentCompare fragmentCompare(&ftc);
   typedef std::set<std::string, FragmentCompare> Fragments;
   Fragments fragments(fragmentCompare);
@@ -680,6 +680,8 @@ class cmCTestBuildHandler::LaunchHelper
 public:
   LaunchHelper(cmCTestBuildHandler* handler);
   ~LaunchHelper();
+  LaunchHelper(const LaunchHelper&) = delete;
+  LaunchHelper& operator=(const LaunchHelper&) = delete;
 
 private:
   cmCTestBuildHandler* Handler;
@@ -764,9 +766,10 @@ void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers(
   }
 }
 
-int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
-                                        const char* dir, int timeout,
-                                        std::ostream& ofs, Encoding encoding)
+int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
+                                        int* retVal, const char* dir,
+                                        int timeout, std::ostream& ofs,
+                                        Encoding encoding)
 {
   // First generate the command and arguments
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
@@ -800,7 +803,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 
   // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetCommand(cp, argv.data());
   cmsysProcess_SetWorkingDirectory(cp, dir);
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   cmsysProcess_SetTimeout(cp, timeout);
@@ -978,7 +981,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
       this->CurrentProcessingLine.insert(this->CurrentProcessingLine.end(),
                                          queue->begin(), it);
       this->CurrentProcessingLine.push_back(0);
-      const char* line = &*this->CurrentProcessingLine.begin();
+      const char* line = this->CurrentProcessingLine.data();
 
       // Process the line
       int lineType = this->ProcessSingleLine(line);
@@ -1033,7 +1036,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
           }
         } else {
           // Otherwise store pre-context for the next error
-          this->PreContext.push_back(line);
+          this->PreContext.emplace_back(line);
           if (this->PreContext.size() > this->MaxPreContext) {
             this->PreContext.erase(this->PreContext.begin(),
                                    this->PreContext.end() -

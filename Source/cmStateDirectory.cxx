@@ -8,8 +8,10 @@
 #include <iterator>
 #include <utility>
 
+#include "cmAlgorithms.h"
 #include "cmProperty.h"
 #include "cmPropertyMap.h"
+#include "cmRange.h"
 #include "cmState.h"
 #include "cmStatePrivate.h"
 #include "cmStateTypes.h"
@@ -40,9 +42,8 @@ void cmStateDirectory::ComputeRelativePathTopSource()
 
   std::string result = snapshots.front().GetDirectory().GetCurrentSource();
 
-  for (std::vector<cmStateSnapshot>::const_iterator it = snapshots.begin() + 1;
-       it != snapshots.end(); ++it) {
-    std::string currentSource = it->GetDirectory().GetCurrentSource();
+  for (cmStateSnapshot const& snp : cmMakeRange(snapshots).advance(1)) {
+    std::string currentSource = snp.GetDirectory().GetCurrentSource();
     if (cmSystemTools::IsSubDirectory(result, currentSource)) {
       result = currentSource;
     }
@@ -66,9 +67,8 @@ void cmStateDirectory::ComputeRelativePathTopBinary()
 
   std::string result = snapshots.front().GetDirectory().GetCurrentBinary();
 
-  for (std::vector<cmStateSnapshot>::const_iterator it = snapshots.begin() + 1;
-       it != snapshots.end(); ++it) {
-    std::string currentBinary = it->GetDirectory().GetCurrentBinary();
+  for (cmStateSnapshot const& snp : cmMakeRange(snapshots).advance(1)) {
+    std::string currentBinary = snp.GetDirectory().GetCurrentBinary();
     if (cmSystemTools::IsSubDirectory(result, currentBinary)) {
       result = currentBinary;
     }
@@ -136,6 +136,32 @@ void cmStateDirectory::SetRelativePathTopSource(const char* dir)
 void cmStateDirectory::SetRelativePathTopBinary(const char* dir)
 {
   this->DirectoryState->RelativePathTopBinary = dir;
+}
+
+bool cmStateDirectory::ContainsBoth(std::string const& local_path,
+                                    std::string const& remote_path) const
+{
+  auto PathEqOrSubDir = [](std::string const& a, std::string const& b) {
+    return (cmSystemTools::ComparePath(a, b) ||
+            cmSystemTools::IsSubDirectory(a, b));
+  };
+
+  bool bothInBinary = PathEqOrSubDir(local_path, GetRelativePathTopBinary()) &&
+    PathEqOrSubDir(remote_path, GetRelativePathTopBinary());
+
+  bool bothInSource = PathEqOrSubDir(local_path, GetRelativePathTopSource()) &&
+    PathEqOrSubDir(remote_path, GetRelativePathTopSource());
+
+  return bothInBinary || bothInSource;
+}
+
+std::string cmStateDirectory::ConvertToRelPathIfNotContained(
+  std::string const& local_path, std::string const& remote_path) const
+{
+  if (!this->ContainsBoth(local_path, remote_path)) {
+    return remote_path;
+  }
+  return cmSystemTools::ForceToRelativePath(local_path, remote_path);
 }
 
 cmStateDirectory::cmStateDirectory(
@@ -396,6 +422,70 @@ void cmStateDirectory::ClearLinkOptions()
                this->Snapshot_.Position->LinkOptionsPosition);
 }
 
+cmStringRange cmStateDirectory::GetLinkDirectoriesEntries() const
+{
+  return GetPropertyContent(this->DirectoryState->LinkDirectories,
+                            this->Snapshot_.Position->LinkDirectoriesPosition);
+}
+
+cmBacktraceRange cmStateDirectory::GetLinkDirectoriesEntryBacktraces() const
+{
+  return GetPropertyBacktraces(
+    this->DirectoryState->LinkDirectories,
+    this->DirectoryState->LinkDirectoriesBacktraces,
+    this->Snapshot_.Position->LinkDirectoriesPosition);
+}
+
+void cmStateDirectory::AppendLinkDirectoriesEntry(
+  const std::string& vec, const cmListFileBacktrace& lfbt)
+{
+  AppendEntry(this->DirectoryState->LinkDirectories,
+              this->DirectoryState->LinkDirectoriesBacktraces,
+              this->Snapshot_.Position->LinkDirectoriesPosition, vec, lfbt);
+}
+void cmStateDirectory::PrependLinkDirectoriesEntry(
+  const std::string& vec, const cmListFileBacktrace& lfbt)
+{
+  std::vector<std::string>::iterator entryEnd =
+    this->DirectoryState->LinkDirectories.begin() +
+    this->Snapshot_.Position->LinkDirectoriesPosition;
+
+  std::vector<std::string>::reverse_iterator rend =
+    this->DirectoryState->LinkDirectories.rend();
+  std::vector<std::string>::reverse_iterator rbegin =
+    cmMakeReverseIterator(entryEnd);
+  rbegin = std::find(rbegin, rend, cmPropertySentinal);
+
+  std::vector<std::string>::iterator entryIt = rbegin.base();
+  std::vector<std::string>::iterator entryBegin =
+    this->DirectoryState->LinkDirectories.begin();
+
+  std::vector<cmListFileBacktrace>::iterator btIt =
+    this->DirectoryState->LinkDirectoriesBacktraces.begin() +
+    std::distance(entryBegin, entryIt);
+
+  this->DirectoryState->LinkDirectories.insert(entryIt, vec);
+  this->DirectoryState->LinkDirectoriesBacktraces.insert(btIt, lfbt);
+
+  this->Snapshot_.Position->LinkDirectoriesPosition =
+    this->DirectoryState->LinkDirectories.size();
+}
+
+void cmStateDirectory::SetLinkDirectories(const std::string& vec,
+                                          const cmListFileBacktrace& lfbt)
+{
+  SetContent(this->DirectoryState->LinkDirectories,
+             this->DirectoryState->LinkDirectoriesBacktraces,
+             this->Snapshot_.Position->LinkDirectoriesPosition, vec, lfbt);
+}
+
+void cmStateDirectory::ClearLinkDirectories()
+{
+  ClearContent(this->DirectoryState->LinkDirectories,
+               this->DirectoryState->LinkDirectoriesBacktraces,
+               this->Snapshot_.Position->LinkDirectoriesPosition);
+}
+
 void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
                                    cmListFileBacktrace const& lfbt)
 {
@@ -431,6 +521,14 @@ void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
     this->SetLinkOptions(value, lfbt);
     return;
   }
+  if (prop == "LINK_DIRECTORIES") {
+    if (!value) {
+      this->ClearLinkDirectories();
+      return;
+    }
+    this->SetLinkDirectories(value, lfbt);
+    return;
+  }
 
   this->DirectoryState->Properties.SetProperty(prop, value);
 }
@@ -453,6 +551,10 @@ void cmStateDirectory::AppendProperty(const std::string& prop,
   }
   if (prop == "LINK_OPTIONS") {
     this->AppendLinkOptionsEntry(value, lfbt);
+    return;
+  }
+  if (prop == "LINK_DIRECTORIES") {
+    this->AppendLinkDirectoriesEntry(value, lfbt);
     return;
   }
 
@@ -540,6 +642,10 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
   }
   if (prop == "LINK_OPTIONS") {
     output = cmJoin(this->GetLinkOptionsEntries(), ";");
+    return output.c_str();
+  }
+  if (prop == "LINK_DIRECTORIES") {
+    output = cmJoin(this->GetLinkDirectoriesEntries(), ";");
     return output.c_str();
   }
 

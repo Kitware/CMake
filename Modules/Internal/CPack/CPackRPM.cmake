@@ -3,6 +3,9 @@
 
 # Author: Eric Noulard with the help of Alexander Neundorf.
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 function(get_file_permissions FILE RETURN_VAR)
   execute_process(COMMAND ls -l ${FILE}
           OUTPUT_VARIABLE permissions_
@@ -58,6 +61,11 @@ function(get_unix_permissions_octal_notation PERMISSIONS_VAR RETURN_VAR)
   endforeach()
 
   set(${RETURN_VAR} "${OWNER_PERMISSIONS}${GROUP_PERMISSIONS}${WORLD_PERMISSIONS}" PARENT_SCOPE)
+endfunction()
+
+function(cpack_rpm_exact_regex regex_var string)
+  string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" regex "${string}")
+  set("${regex_var}" "${regex}" PARENT_SCOPE)
 endfunction()
 
 function(cpack_rpm_prepare_relocation_paths)
@@ -479,7 +487,9 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
         # recalculate path length after conversion to canonical form
         string(LENGTH "${SYMLINK_POINT_}" SYMLINK_POINT_LENGTH_)
 
-        if(SYMLINK_POINT_ MATCHES "${WDIR}/.*")
+        cpack_rpm_exact_regex(IN_SYMLINK_POINT_REGEX "${WDIR}")
+        string(APPEND IN_SYMLINK_POINT_REGEX "/.*")
+        if(SYMLINK_POINT_ MATCHES "${IN_SYMLINK_POINT_REGEX}")
           # only symlinks that are pointing inside the packaging structure should be checked for relocation
           string(SUBSTRING "${SYMLINK_POINT_}" ${WDR_LEN_} -1 SYMLINK_POINT_WD_)
           cpack_rpm_symlink_get_relocation_prefixes("${F}" "${PACKAGE_PREFIXES}" "SYMLINK_RELOCATIONS")
@@ -488,7 +498,7 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
           list(LENGTH SYMLINK_RELOCATIONS SYMLINK_RELOCATIONS_COUNT)
           list(LENGTH POINT_RELOCATIONS POINT_RELOCATIONS_COUNT)
         else()
-          # location pointed to is ouside WDR so it should be treated as a permanent symlink
+          # location pointed to is outside WDR so it should be treated as a permanent symlink
           set(SYMLINK_POINT_WD_ "${SYMLINK_POINT_}")
 
           unset(SYMLINK_RELOCATIONS)
@@ -1865,3 +1875,5 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
 endfunction()
 
 cpack_rpm_generate_package()
+
+cmake_policy(POP)

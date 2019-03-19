@@ -2,15 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceGroup.h"
 
+#include <utility>
+
 class cmSourceGroupInternals
 {
 public:
   std::vector<cmSourceGroup> GroupChildren;
 };
 
-cmSourceGroup::cmSourceGroup(const std::string& name, const char* regex,
+cmSourceGroup::cmSourceGroup(std::string name, const char* regex,
                              const char* parentName)
-  : Name(name)
+  : Name(std::move(name))
 {
   this->Internal = new cmSourceGroupInternals;
   this->SetGroupRegex(regex);

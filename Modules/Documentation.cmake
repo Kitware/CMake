@@ -1,14 +1,13 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# Documentation
-# -------------
-#
-# DocumentationVTK.cmake
-#
-# This file provides support for the VTK documentation framework.  It
-# relies on several tools (Doxygen, Perl, etc).
+#[=======================================================================[.rst:
+Documentation
+-------------
+
+This module provides support for the VTK documentation framework.  It
+relies on several tools (Doxygen, Perl, etc).
+#]=======================================================================]
 
 #
 # Build the documentation ?

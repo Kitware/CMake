@@ -9,6 +9,10 @@ foreach(arg
 endforeach()
 
 function(run_cmake test)
+  if(DEFINED ENV{RunCMake_TEST_FILTER} AND NOT test MATCHES "$ENV{RunCMake_TEST_FILTER}")
+    return()
+  endif()
+
   set(top_src "${RunCMake_SOURCE_DIR}")
   set(top_bin "${RunCMake_BINARY_DIR}")
   if(EXISTS ${top_src}/${test}-result.txt)
@@ -45,6 +49,11 @@ function(run_cmake test)
     file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   endif()
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  if(RunCMake-prep-file AND EXISTS ${top_src}/${RunCMake-prep-file})
+    include(${top_src}/${RunCMake-prep-file})
+  else()
+    include(${top_src}/${test}-prep.cmake OPTIONAL)
+  endif()
   if(NOT DEFINED RunCMake_TEST_OPTIONS)
     set(RunCMake_TEST_OPTIONS "")
   endif()
@@ -65,6 +74,13 @@ function(run_cmake test)
   else()
     set(maybe_timeout "")
   endif()
+  if(RunCMake-stdin-file AND EXISTS ${top_src}/${RunCMake-stdin-file})
+    set(maybe_input_file INPUT_FILE ${top_src}/${RunCMake-stdin-file})
+  elseif(EXISTS ${top_src}/${test}-stdin.txt)
+    set(maybe_input_file INPUT_FILE ${top_src}/${test}-stdin.txt)
+  else()
+    set(maybe_input_file "")
+  endif()
   if(RunCMake_TEST_COMMAND)
     execute_process(
       COMMAND ${RunCMake_TEST_COMMAND}
@@ -74,6 +90,7 @@ function(run_cmake test)
       RESULT_VARIABLE actual_result
       ENCODING UTF8
       ${maybe_timeout}
+      ${maybe_input_file}
       )
   else()
     if(RunCMake_GENERATOR_INSTANCE)
@@ -96,6 +113,7 @@ function(run_cmake test)
       RESULT_VARIABLE actual_result
       ENCODING UTF8
       ${maybe_timeout}
+      ${maybe_input_file}
       )
   endif()
   set(msg "")

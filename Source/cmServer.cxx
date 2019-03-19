@@ -5,6 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmConnection.h"
 #include "cmFileMonitor.h"
+#include "cmJsonObjectDictionary.h"
 #include "cmServerDictionary.h"
 #include "cmServerProtocol.h"
 #include "cmSystemTools.h"
@@ -95,11 +96,16 @@ void cmServer::ProcessRequest(cmConnection* connection,
     return;
   }
 
-  cmSystemTools::SetMessageCallback(reportMessage,
-                                    const_cast<cmServerRequest*>(&request));
+  cmSystemTools::SetMessageCallback(
+    [&request](const std::string& msg, const char* title) {
+      reportMessage(msg, title, request);
+    });
+
   if (this->Protocol) {
     this->Protocol->CMakeInstance()->SetProgressCallback(
-      reportProgress, const_cast<cmServerRequest*>(&request));
+      [&request](const std::string& msg, float prog) {
+        reportProgress(msg, prog, request);
+      });
     this->WriteResponse(connection, this->Protocol->Process(request),
                         debug.get());
   } else {
@@ -149,28 +155,24 @@ void cmServer::PrintHello(cmConnection* connection) const
   this->WriteJsonObject(connection, hello, nullptr);
 }
 
-void cmServer::reportProgress(const char* msg, float progress, void* data)
+void cmServer::reportProgress(const std::string& msg, float progress,
+                              const cmServerRequest& request)
 {
-  const cmServerRequest* request = static_cast<const cmServerRequest*>(data);
-  assert(request);
   if (progress < 0.0f || progress > 1.0f) {
-    request->ReportMessage(msg, "");
+    request.ReportMessage(msg, "");
   } else {
-    request->ReportProgress(0, static_cast<int>(progress * 1000), 1000, msg);
+    request.ReportProgress(0, static_cast<int>(progress * 1000), 1000, msg);
   }
 }
 
-void cmServer::reportMessage(const char* msg, const char* title,
-                             bool& /* cancel */, void* data)
+void cmServer::reportMessage(const std::string& msg, const char* title,
+                             const cmServerRequest& request)
 {
-  const cmServerRequest* request = static_cast<const cmServerRequest*>(data);
-  assert(request);
-  assert(msg);
   std::string titleString;
   if (title) {
     titleString = title;
   }
-  request->ReportMessage(std::string(msg), titleString);
+  request.ReportMessage(msg, titleString);
 }
 
 cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
@@ -215,7 +217,7 @@ cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)
   }
 
   this->Protocol =
-    this->FindMatchingProtocol(this->SupportedProtocols, major, minor);
+    cmServer::FindMatchingProtocol(this->SupportedProtocols, major, minor);
   if (!this->Protocol) {
     return request.ReportError("Protocol version not supported.");
   }
@@ -416,7 +418,7 @@ static void __start_thread(void* arg)
   auto server = static_cast<cmServerBase*>(arg);
   std::string error;
   bool success = server->Serve(&error);
-  if (!success || error.empty() == false) {
+  if (!success || !error.empty()) {
     std::cerr << "Error during serve: " << error << std::endl;
   }
 }

@@ -7,13 +7,15 @@
 #include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSourceFile.h"
 #include "cmVisualStudioWCEPlatformParser.h"
 #include "cmake.h"
 
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
-  cmake* cm, const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio71Generator(cm, platformName)
+  cmake* cm, const std::string& name,
+  std::string const& platformInGeneratorName)
+  : cmGlobalVisualStudio71Generator(cm, platformInGeneratorName)
 {
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
@@ -60,7 +62,7 @@ void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
                                                           cmMakefile* mf)
 {
-  if (this->DefaultPlatformName == "Win32") {
+  if (!this->PlatformInGeneratorName) {
     this->GeneratorPlatform = p;
     return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform("", mf);
   } else {
@@ -78,7 +80,7 @@ void cmGlobalVisualStudio8Generator::Configure()
   this->cmGlobalVisualStudio7Generator::Configure();
 }
 
-bool cmGlobalVisualStudio8Generator::UseFolderProperty()
+bool cmGlobalVisualStudio8Generator::UseFolderProperty() const
 {
   return IsExpressEdition() ? false : cmGlobalGenerator::UseFolderProperty();
 }
@@ -115,7 +117,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 
   // Create a list of all stamp files for this project.
   std::vector<std::string> stamps;
-  std::string stampList = cmake::GetCMakeFilesDirectoryPostSlash();
+  std::string stampList = "CMakeFiles/";
   stampList += cmGlobalVisualStudio8Generator::GetGenerateStampList();
   {
     std::string stampListFile =
@@ -127,7 +129,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     for (cmLocalGenerator const* gi : generators) {
       stampFile = gi->GetMakefile()->GetCurrentBinaryDirectory();
       stampFile += "/";
-      stampFile += cmake::GetCMakeFilesDirectoryPostSlash();
+      stampFile += "CMakeFiles/";
       stampFile += "generate.stamp";
       fout << stampFile << "\n";
       stamps.push_back(stampFile);
@@ -177,9 +179,9 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // Create a rule to re-run CMake.
     cmCustomCommandLine commandLine;
     commandLine.push_back(cmSystemTools::GetCMakeCommand());
-    std::string argH = "-H";
-    argH += lg->GetSourceDirectory();
-    commandLine.push_back(argH);
+    std::string argS = "-S";
+    argS += lg->GetSourceDirectory();
+    commandLine.push_back(argS);
     std::string argB = "-B";
     argB += lg->GetBinaryDirectory();
     commandLine.push_back(argB);
@@ -203,7 +205,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
           "Checking Build System", no_working_directory, true, false)) {
       gt->AddSource(file->GetFullPath());
     } else {
-      cmSystemTools::Error("Error adding rule for ", stamps[0].c_str());
+      cmSystemTools::Error("Error adding rule for " + stamps[0]);
     }
   }
 
@@ -271,7 +273,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
                                         : this->GetPlatformName())
            << "\n";
     }
-    if (this->NeedsDeploy(target.GetType())) {
+    if (this->NeedsDeploy(target, dstConfig)) {
       fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
            << ".Deploy.0 = " << dstConfig << "|"
            << (!platformMapping.empty() ? platformMapping
@@ -282,11 +284,32 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
 }
 
 bool cmGlobalVisualStudio8Generator::NeedsDeploy(
-  cmStateEnums::TargetType type) const
+  cmGeneratorTarget const& target, const char* config) const
 {
-  bool needsDeploy =
-    (type == cmStateEnums::EXECUTABLE || type == cmStateEnums::SHARED_LIBRARY);
-  return this->TargetsWindowsCE() && needsDeploy;
+  cmStateEnums::TargetType type = target.GetType();
+  bool noDeploy = DeployInhibited(target, config);
+  return !noDeploy &&
+    (type == cmStateEnums::EXECUTABLE ||
+     type == cmStateEnums::SHARED_LIBRARY) &&
+    this->TargetSystemSupportsDeployment();
+}
+
+bool cmGlobalVisualStudio8Generator::DeployInhibited(
+  cmGeneratorTarget const& target, const char* config) const
+{
+  bool rVal = false;
+  if (const char* propStr = target.GetProperty("VS_NO_SOLUTION_DEPLOY")) {
+    cmGeneratorExpression ge;
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(propStr);
+    std::string prop = cge->Evaluate(target.LocalGenerator, config);
+    rVal = cmSystemTools::IsOn(prop);
+  }
+  return rVal;
+}
+
+bool cmGlobalVisualStudio8Generator::TargetSystemSupportsDeployment() const
+{
+  return this->TargetsWindowsCE();
 }
 
 bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
@@ -315,9 +338,9 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
   cmGeneratorTarget* target)
 {
   // Look for utility dependencies that magically link.
-  for (std::string const& ui : target->GetUtilities()) {
+  for (BT<std::string> const& ui : target->GetUtilities()) {
     if (cmGeneratorTarget* depTarget =
-          target->GetLocalGenerator()->FindGeneratorTargetToUse(ui)) {
+          target->GetLocalGenerator()->FindGeneratorTargetToUse(ui.Value)) {
       if (depTarget->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
           depTarget->GetProperty("EXTERNAL_MSPROJECT")) {
         // This utility dependency names an external .vcproj target.
@@ -362,7 +385,7 @@ static cmVS7FlagTable cmVS8ExtraFlagTable[] = {
   { "TreatWChar_tAsBuiltInType", "Zc:wchar_t-",
     "wchar_t is not a built-in type", "false", 0 },
 
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };
 cmIDEFlagTable const* cmGlobalVisualStudio8Generator::GetExtraFlagTableVS8()
 {

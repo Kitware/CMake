@@ -10,7 +10,7 @@
 #include <map>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
-#include <string.h>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
@@ -19,6 +19,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
+#include "cmListFileCache.h" // for BT
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
@@ -55,10 +56,8 @@ cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmGeneratorTarget* target)
   : cmCommonTargetGenerator(target)
   , MacOSXContentGenerator(nullptr)
   , OSXBundleGenerator(nullptr)
-  , MacContentFolders()
   , LocalGenerator(
       static_cast<cmLocalNinjaGenerator*>(target->GetLocalGenerator()))
-  , Objects()
 {
   MacOSXContentGenerator = new MacOSXContentGeneratorType(this);
 }
@@ -98,6 +97,12 @@ std::string cmNinjaTargetGenerator::LanguagePreprocessRule(
 }
 
 bool cmNinjaTargetGenerator::NeedExplicitPreprocessing(
+  std::string const& lang) const
+{
+  return lang == "Fortran";
+}
+
+bool cmNinjaTargetGenerator::UsePreprocessedSource(
   std::string const& lang) const
 {
   return lang == "Fortran";
@@ -174,9 +179,28 @@ void cmNinjaTargetGenerator::AddIncludeFlags(std::string& languageFlags,
 
 bool cmNinjaTargetGenerator::NeedDepTypeMSVC(const std::string& lang) const
 {
-  return strcmp(this->GetMakefile()->GetSafeDefinition("CMAKE_NINJA_DEPTYPE_" +
-                                                       lang),
-                "msvc") == 0;
+  std::string const& deptype =
+    this->GetMakefile()->GetSafeDefinition("CMAKE_NINJA_DEPTYPE_" + lang);
+  if (deptype == "msvc") {
+    return true;
+  }
+  if (deptype == "intel") {
+    // Ninja does not really define "intel", but we use it to switch based
+    // on whether this environment supports "gcc" or "msvc" deptype.
+    if (!this->GetGlobalGenerator()->SupportsMultilineDepfile()) {
+      // This ninja version is too old to support the Intel depfile format.
+      // Fall back to msvc deptype.
+      return true;
+    }
+    if ((this->Makefile->GetHomeDirectory().find(' ') != std::string::npos) ||
+        (this->Makefile->GetHomeOutputDirectory().find(' ') !=
+         std::string::npos)) {
+      // The Intel compiler does not properly escape spaces in a depfile.
+      // Fall back to msvc deptype.
+      return true;
+    }
+  }
+  return false;
 }
 
 // TODO: Refactor with
@@ -433,6 +457,13 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
   vars.ObjectDir = "$OBJECT_DIR";
   vars.ObjectFileDir = "$OBJECT_FILE_DIR";
+  if (lang == "Swift") {
+    vars.SwiftAuxiliarySources = "$SWIFT_AUXILIARY_SOURCES";
+    vars.SwiftModuleName = "$SWIFT_MODULE_NAME";
+    vars.SwiftLibraryName = "$SWIFT_LIBRARY_NAME";
+    vars.SwiftPartialModule = "$SWIFT_PARTIAL_MODULE";
+    vars.SwiftPartialDoc = "$SWIFT_PARTIAL_DOC";
+  }
 
   // For some cases we do an explicit preprocessor invocation.
   bool const explicitPP = this->NeedExplicitPreprocessing(lang);
@@ -471,7 +502,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   if (explicitPP) {
     // Lookup the explicit preprocessing rule.
     std::string const ppVar = "CMAKE_" + lang + "_PREPROCESS_SOURCE";
-    std::string const ppCmd =
+    std::string const& ppCmd =
       this->GetMakefile()->GetRequiredDefinition(ppVar);
 
     // Explicit preprocessing always uses a depfile.
@@ -533,7 +564,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
       cmake +
       " -E cmake_ninja_depends"
       " --tdi=" +
-      tdi +
+      tdi + " --lang=" + lang +
       " --pp=$out"
       " --dep=$DEP_FILE" +
       (needDyndep ? " --obj=$OBJ_FILE --ddi=$DYNDEP_INTERMEDIATE_FILE" : ""));
@@ -563,13 +594,14 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     std::string ddRspContent = "$in";
     std::string ddInput = "@" + ddRspFile;
 
-    // Run CMake dependency scanner on preprocessed output.
+    // Run CMake dependency scanner on the source file (using the preprocessed
+    // source if that was performed).
     std::string const cmake = this->GetLocalGenerator()->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
     ddCmds.push_back(cmake +
                      " -E cmake_ninja_dyndep"
                      " --tdi=" +
-                     tdi +
+                     tdi + " --lang=" + lang +
                      " --dd=$out"
                      " " +
                      ddInput);
@@ -628,10 +660,6 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     }
   } else {
     deptype = "gcc";
-    const char* langdeptype = mf->GetDefinition("CMAKE_NINJA_DEPTYPE_" + lang);
-    if (langdeptype) {
-      deptype = langdeptype;
-    }
     depfile = "$DEP_FILE";
     const std::string flagsName = "CMAKE_DEPFILE_FLAGS_" + lang;
     std::string depfileFlags = mf->GetSafeDefinition(flagsName);
@@ -653,19 +681,18 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     std::string cmdVar;
     if (this->GeneratorTarget->GetPropertyAsBool(
           "CUDA_SEPARABLE_COMPILATION")) {
-      cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+      cmdVar = "CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION";
     } else if (this->GeneratorTarget->GetPropertyAsBool(
                  "CUDA_PTX_COMPILATION")) {
-      cmdVar = std::string("CMAKE_CUDA_COMPILE_PTX_COMPILATION");
+      cmdVar = "CMAKE_CUDA_COMPILE_PTX_COMPILATION";
     } else {
-      cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
+      cmdVar = "CMAKE_CUDA_COMPILE_WHOLE_COMPILATION";
     }
-    std::string compileCmd = mf->GetRequiredDefinition(cmdVar);
+    const std::string& compileCmd = mf->GetRequiredDefinition(cmdVar);
     cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
   } else {
-    const std::string cmdVar =
-      std::string("CMAKE_") + lang + "_COMPILE_OBJECT";
-    std::string compileCmd = mf->GetRequiredDefinition(cmdVar);
+    const std::string cmdVar = "CMAKE_" + lang + "_COMPILE_OBJECT";
+    const std::string& compileCmd = mf->GetRequiredDefinition(cmdVar);
     cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
   }
 
@@ -848,24 +875,27 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
     this->WriteObjectBuildStatement(sf);
   }
 
-  if (!this->DDIFiles.empty()) {
+  for (auto const& langDDIFiles : this->DDIFiles) {
+    std::string const& language = langDDIFiles.first;
+    cmNinjaDeps const& ddiFiles = langDDIFiles.second;
+
     std::string const ddComment;
-    std::string const ddRule = this->LanguageDyndepRule("Fortran");
+    std::string const ddRule = this->LanguageDyndepRule(language);
     cmNinjaDeps ddOutputs;
     cmNinjaDeps ddImplicitOuts;
-    cmNinjaDeps const& ddExplicitDeps = this->DDIFiles;
+    cmNinjaDeps const& ddExplicitDeps = ddiFiles;
     cmNinjaDeps ddImplicitDeps;
     cmNinjaDeps ddOrderOnlyDeps;
     cmNinjaVars ddVars;
 
-    this->WriteTargetDependInfo("Fortran");
+    this->WriteTargetDependInfo(language);
 
-    ddOutputs.push_back(this->GetDyndepFilePath("Fortran"));
+    ddOutputs.push_back(this->GetDyndepFilePath(language));
 
     // Make sure dyndep files for all our dependencies have already
-    // been generated so that the 'FortranModules.json' files they
+    // been generated so that the '<LANG>Modules.json' files they
     // produced as side-effects are available for us to read.
-    // Ideally we should depend on the 'FortranModules.json' files
+    // Ideally we should depend on the '<LANG>Modules.json' files
     // from our dependencies directly, but we don't know which of
     // our dependencies produces them.  Fixing this will require
     // refactoring the Ninja generator to generate targets in
@@ -903,6 +933,43 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
   vars["INCLUDES"] = this->ComputeIncludes(source, language);
+  if (language == "Swift") {
+    // The swift compiler needs all the sources besides the one being compiled
+    // in order to do the type checking.  List all these "auxiliary" sources.
+    std::string aux_sources;
+    cmGeneratorTarget::KindedSources const& sources =
+      this->GeneratorTarget->GetKindedSources(this->GetConfigName());
+    for (cmGeneratorTarget::SourceAndKind const& src : sources.Sources) {
+      if (src.Source.Value == source) {
+        continue;
+      }
+      aux_sources += " " + this->GetSourceFilePath(src.Source.Value);
+    }
+    vars["SWIFT_AUXILIARY_SOURCES"] = aux_sources;
+
+    if (const char* name =
+          this->GeneratorTarget->GetProperty("SWIFT_MODULE_NAME")) {
+      vars["SWIFT_MODULE_NAME"] = name;
+    } else {
+      vars["SWIFT_MODULE_NAME"] = this->GeneratorTarget->GetName();
+    }
+
+    cmGeneratorTarget::Names targetNames =
+      this->GeneratorTarget->GetLibraryNames(this->GetConfigName());
+    vars["SWIFT_LIBRARY_NAME"] = targetNames.Base;
+
+    if (const char* partial = source->GetProperty("SWIFT_PARTIAL_MODULE")) {
+      vars["SWIFT_PARTIAL_MODULE"] = partial;
+    } else {
+      vars["SWIFT_PARTIAL_MODULE"] = objectFileName + ".swiftmodule";
+    }
+
+    if (const char* partial = source->GetProperty("SWIFT_PARTIAL_DOC")) {
+      vars["SWIFT_PARTIAL_DOC"] = partial;
+    } else {
+      vars["SWIFT_PARTIAL_DOC"] = objectFileName + ".swiftdoc";
+    }
+  }
 
   if (!this->NeedDepTypeMSVC(language)) {
     bool replaceExt(false);
@@ -961,7 +1028,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // (either attached to this source file or another one), assume that one of
   // the target dependencies, OBJECT_DEPENDS or header file custom commands
   // will rebuild the file.
-  if (source->GetPropertyAsBool("GENERATED") &&
+  if (source->GetIsGenerated() &&
       !source->GetPropertyAsBool("__CMAKE_GENERATED_BY_CMAKE") &&
       !source->GetCustomCommand() &&
       !this->GetGlobalGenerator()->HasCustomCommandOutput(sourceFileName)) {
@@ -975,6 +1042,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // For some cases we do an explicit preprocessor invocation.
   bool const explicitPP = this->NeedExplicitPreprocessing(language);
   if (explicitPP) {
+    bool const compilePP = this->UsePreprocessedSource(language);
     std::string const ppComment;
     std::string const ppRule = this->LanguagePreprocessRule(language);
     cmNinjaDeps ppOutputs;
@@ -988,61 +1056,80 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       this->ConvertToNinjaPath(this->GetPreprocessedFilePath(source));
     ppOutputs.push_back(ppFileName);
 
-    // Move compilation dependencies to the preprocessing build statement.
-    std::swap(ppExplicitDeps, explicitDeps);
-    std::swap(ppImplicitDeps, implicitDeps);
-    std::swap(ppOrderOnlyDeps, orderOnlyDeps);
-    std::swap(ppVars["IN_ABS"], vars["IN_ABS"]);
+    if (compilePP) {
+      // Move compilation dependencies to the preprocessing build statement.
+      std::swap(ppExplicitDeps, explicitDeps);
+      std::swap(ppImplicitDeps, implicitDeps);
+      std::swap(ppOrderOnlyDeps, orderOnlyDeps);
+      std::swap(ppVars["IN_ABS"], vars["IN_ABS"]);
 
-    // The actual compilation will now use the preprocessed source.
-    explicitDeps.push_back(ppFileName);
+      // The actual compilation will now use the preprocessed source.
+      explicitDeps.push_back(ppFileName);
+    } else {
+      // Copy compilation dependencies to the preprocessing build statement.
+      ppExplicitDeps = explicitDeps;
+      ppImplicitDeps = implicitDeps;
+      ppOrderOnlyDeps = orderOnlyDeps;
+      ppVars["IN_ABS"] = vars["IN_ABS"];
+    }
 
     // Preprocessing and compilation generally use the same flags.
     ppVars["FLAGS"] = vars["FLAGS"];
 
-    // In case compilation requires flags that are incompatible with
-    // preprocessing, include them here.
-    std::string const postFlag =
-      this->Makefile->GetSafeDefinition("CMAKE_Fortran_POSTPROCESS_FLAG");
-    this->LocalGenerator->AppendFlags(vars["FLAGS"], postFlag);
+    if (compilePP) {
+      // In case compilation requires flags that are incompatible with
+      // preprocessing, include them here.
+      std::string const postFlag = this->Makefile->GetSafeDefinition(
+        "CMAKE_" + language + "_POSTPROCESS_FLAG");
+      this->LocalGenerator->AppendFlags(vars["FLAGS"], postFlag);
+    }
 
-    // Move preprocessor definitions to the preprocessor build statement.
-    std::swap(ppVars["DEFINES"], vars["DEFINES"]);
+    if (compilePP) {
+      // Move preprocessor definitions to the preprocessor build statement.
+      std::swap(ppVars["DEFINES"], vars["DEFINES"]);
+    } else {
+      // Copy preprocessor definitions to the preprocessor build statement.
+      ppVars["DEFINES"] = vars["DEFINES"];
+    }
 
     // Copy include directories to the preprocessor build statement.  The
     // Fortran compilation build statement still needs them for the INCLUDE
     // directive.
     ppVars["INCLUDES"] = vars["INCLUDES"];
 
-    // Prepend source file's original directory as an include directory
-    // so e.g. Fortran INCLUDE statements can look for files in it.
-    std::vector<std::string> sourceDirectory;
-    sourceDirectory.push_back(
-      cmSystemTools::GetParentDirectory(source->GetFullPath()));
+    if (compilePP) {
+      // Prepend source file's original directory as an include directory
+      // so e.g. Fortran INCLUDE statements can look for files in it.
+      std::vector<std::string> sourceDirectory;
+      sourceDirectory.push_back(
+        cmSystemTools::GetParentDirectory(source->GetFullPath()));
 
-    std::string sourceDirectoryFlag = this->LocalGenerator->GetIncludeFlags(
-      sourceDirectory, this->GeneratorTarget, language, false, false,
-      this->GetConfigName());
+      std::string sourceDirectoryFlag = this->LocalGenerator->GetIncludeFlags(
+        sourceDirectory, this->GeneratorTarget, language, false, false,
+        this->GetConfigName());
 
-    vars["INCLUDES"] = sourceDirectoryFlag + " " + vars["INCLUDES"];
+      vars["INCLUDES"] = sourceDirectoryFlag + " " + vars["INCLUDES"];
+    }
 
     // Explicit preprocessing always uses a depfile.
     ppVars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-      ppFileName + ".d", cmOutputConverter::SHELL);
-    // The actual compilation does not need a depfile because it
-    // depends on the already-preprocessed source.
-    vars.erase("DEP_FILE");
+      objectFileName + ".pp.d", cmOutputConverter::SHELL);
+    if (compilePP) {
+      // The actual compilation does not need a depfile because it
+      // depends on the already-preprocessed source.
+      vars.erase("DEP_FILE");
+    }
 
     if (needDyndep) {
       // Tell dependency scanner the object file that will result from
-      // compiling the preprocessed source.
+      // compiling the source.
       ppVars["OBJ_FILE"] = objectFileName;
 
       // Tell dependency scanner where to store dyndep intermediate results.
-      std::string const ddiFile = ppFileName + ".ddi";
+      std::string const ddiFile = objectFileName + ".ddi";
       ppVars["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
       ppImplicitOuts.push_back(ddiFile);
-      this->DDIFiles.push_back(ddiFile);
+      this->DDIFiles[language].push_back(ddiFile);
     }
 
     this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
@@ -1105,6 +1192,10 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang)
       mod_dir = this->Makefile->GetCurrentBinaryDirectory();
     }
     tdi["module-dir"] = mod_dir;
+    tdi["submodule-sep"] =
+      this->Makefile->GetSafeDefinition("CMAKE_Fortran_SUBMODULE_SEP");
+    tdi["submodule-ext"] =
+      this->Makefile->GetSafeDefinition("CMAKE_Fortran_SUBMODULE_EXT");
   }
 
   tdi["dir-cur-bld"] = this->Makefile->GetCurrentBinaryDirectory();
@@ -1174,20 +1265,19 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
     std::string cmdVar;
     if (this->GeneratorTarget->GetPropertyAsBool(
           "CUDA_SEPARABLE_COMPILATION")) {
-      cmdVar = std::string("CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION");
+      cmdVar = "CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION";
     } else if (this->GeneratorTarget->GetPropertyAsBool(
                  "CUDA_PTX_COMPILATION")) {
-      cmdVar = std::string("CMAKE_CUDA_COMPILE_PTX_COMPILATION");
+      cmdVar = "CMAKE_CUDA_COMPILE_PTX_COMPILATION";
     } else {
-      cmdVar = std::string("CMAKE_CUDA_COMPILE_WHOLE_COMPILATION");
+      cmdVar = "CMAKE_CUDA_COMPILE_WHOLE_COMPILATION";
     }
-    std::string compileCmd =
+    const std::string& compileCmd =
       this->GetMakefile()->GetRequiredDefinition(cmdVar);
     cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
   } else {
-    const std::string cmdVar =
-      std::string("CMAKE_") + language + "_COMPILE_OBJECT";
-    std::string compileCmd =
+    const std::string cmdVar = "CMAKE_" + language + "_COMPILE_OBJECT";
+    const std::string& compileCmd =
       this->GetMakefile()->GetRequiredDefinition(cmdVar);
     cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
   }

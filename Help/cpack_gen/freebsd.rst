@@ -13,14 +13,14 @@ depending on the installed package-management tools -- using :module:`CPack`.
 The CPack FreeBSD generator is a :module:`CPack` generator and uses the
 ``CPACK_XXX`` variables used by :module:`CPack`. It tries to re-use packaging
 information that may already be specified for Debian packages for the
-:cpack_gen:`CPack Deb Generator`. It also tries to re-use RPM packaging
+:cpack_gen:`CPack DEB Generator`. It also tries to re-use RPM packaging
 information when Debian does not specify.
 
 The CPack FreeBSD generator should work on any host with libpkg installed. The
 packages it produces are specific to the host architecture and ABI.
 
 The CPack FreeBSD generator sets package-metadata through
-:code:`CPACK_FREEBSD_XXX` variables. The CPack FreeBSD generator, unlike the
+``CPACK_FREEBSD_XXX`` variables. The CPack FreeBSD generator, unlike the
 CPack Deb generator, does not specially support componentized packages; a
 single package is created from all the software artifacts created through
 CMake.

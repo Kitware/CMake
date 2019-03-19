@@ -65,3 +65,14 @@ but do not actually build anything.  To add a test:
     Top of test binary tree
 
    and an failure must store a message in ``RunCMake_TEST_FAILED``.
+
+To speed up local testing, you can choose to run only a subset of
+``run_cmake()`` tests in a ``RunCMakeTest.cmake`` script by using the
+``RunCMake_TEST_FILTER`` environment variable. If this variable is set,
+it is treated as a regular expression, and any tests whose names don't
+match the regular expression are not run. For example::
+
+  $ RunCMake_TEST_FILTER="^example" ctest -R '^RunCMake\.Example$'
+
+This will only run subtests in ``RunCMake.Example`` that start with
+``example``.

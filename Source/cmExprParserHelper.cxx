@@ -18,9 +18,7 @@ cmExprParserHelper::cmExprParserHelper()
   this->Result = 0;
 }
 
-cmExprParserHelper::~cmExprParserHelper()
-{
-}
+cmExprParserHelper::~cmExprParserHelper() = default;
 
 int cmExprParserHelper::ParseString(const char* str, int verb)
 {

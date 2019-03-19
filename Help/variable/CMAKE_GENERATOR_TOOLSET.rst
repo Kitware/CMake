@@ -44,8 +44,8 @@ Supported pairs are:
   and above with the CUDA toolkit VS integration installed.
   See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_CUDA` variable.
 
-``host=x64``
-  Request use of the native ``x64`` toolchain on ``x64`` hosts.
+``host=<arch>``
+  Specify the host tools architecture as ``x64`` or ``x86``.
   Supported by VS 2013 and above.
   See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE`
   variable.

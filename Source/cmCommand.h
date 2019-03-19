@@ -24,21 +24,19 @@ struct cmListFileArgument;
  */
 class cmCommand
 {
-  CM_DISABLE_COPY(cmCommand)
-
 public:
   /**
    * Construct the command. By default it has no makefile.
    */
-  cmCommand()
-    : Makefile(nullptr)
-  {
-  }
+  cmCommand() = default;
 
   /**
    * Need virtual destructor to destroy real command type.
    */
-  virtual ~cmCommand() {}
+  virtual ~cmCommand() = default;
+
+  cmCommand(cmCommand const&) = delete;
+  cmCommand& operator=(cmCommand const&) = delete;
 
   /**
    * Specify the makefile.
@@ -90,7 +88,7 @@ public:
   void SetError(const std::string& e);
 
 protected:
-  cmMakefile* Makefile;
+  cmMakefile* Makefile = nullptr;
 
 private:
   std::string Error;

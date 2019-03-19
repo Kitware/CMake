@@ -14,13 +14,9 @@
 #include "cmCPackLog.h"
 #include "cmSystemTools.h"
 
-cmCPackRPMGenerator::cmCPackRPMGenerator()
-{
-}
+cmCPackRPMGenerator::cmCPackRPMGenerator() = default;
 
-cmCPackRPMGenerator::~cmCPackRPMGenerator()
-{
-}
+cmCPackRPMGenerator::~cmCPackRPMGenerator() = default;
 
 int cmCPackRPMGenerator::InitializeInternal()
 {

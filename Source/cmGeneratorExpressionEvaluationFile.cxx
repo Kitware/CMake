@@ -12,17 +12,17 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
-  const std::string& input,
+  std::string input,
   std::unique_ptr<cmCompiledGeneratorExpression> outputFileExpr,
   std::unique_ptr<cmCompiledGeneratorExpression> condition,
   bool inputIsContent, cmPolicies::PolicyStatus policyStatusCMP0070)
-  : Input(input)
+  : Input(std::move(input))
   , OutputFileExpr(std::move(outputFileExpr))
   , Condition(std::move(condition))
   , InputIsContent(inputIsContent)
@@ -48,7 +48,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(
         << "\" did "
            "not evaluate to valid content. Got \""
         << condResult << "\".";
-      lg->IssueMessage(cmake::FATAL_ERROR, e.str());
+      lg->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return;
     }
   }
@@ -77,7 +77,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(
          "This is generally caused by the content evaluating the "
          "configuration type, language, or location of object files:\n "
       << outputFileName;
-    lg->IssueMessage(cmake::FATAL_ERROR, e.str());
+    lg->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
 
@@ -137,7 +137,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
     if (!fin) {
       std::ostringstream e;
       e << "Evaluation file \"" << inputFileName << "\" cannot be read.";
-      lg->IssueMessage(cmake::FATAL_ERROR, e.str());
+      lg->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return;
     }
 
@@ -204,7 +204,7 @@ std::string cmGeneratorExpressionEvaluationFile::FixRelativePath(
         "undefined behavior will be used."
         ;
       /* clang-format on */
-      lg->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      lg->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
     }
       CM_FALLTHROUGH;
     case cmPolicies::OLD:

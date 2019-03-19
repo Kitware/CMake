@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+#include "cmAlgorithms.h"
 #include "cmCustomCommandLines.h"
 #include "cmDuration.h"
 #include "cmExportSetMap.h"
@@ -24,8 +25,12 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  include "cmFileLockPool.h"
+#  include "cm_jsoncpp_value.h"
 #endif
 
+#define CMAKE_DIRECTORY_ID_SEP "::@"
+
+class cmDirectoryId;
 class cmExportBuildFileGenerator;
 class cmExternalMakefileProjectGenerator;
 class cmGeneratorTarget;
@@ -36,6 +41,41 @@ class cmOutputConverter;
 class cmSourceFile;
 class cmStateDirectory;
 class cmake;
+
+namespace detail {
+inline void AppendStrs(std::vector<std::string>&)
+{
+}
+template <typename T, typename... Ts>
+inline void AppendStrs(std::vector<std::string>& command, T&& s, Ts&&... ts)
+{
+  command.emplace_back(std::forward<T>(s));
+  AppendStrs(command, std::forward<Ts>(ts)...);
+}
+
+struct GeneratedMakeCommand
+{
+  // Add each argument as a separate element to the vector
+  template <typename... T>
+  void Add(T&&... args)
+  {
+    // iterate the args and append each one
+    AppendStrs(PrimaryCommand, std::forward<T>(args)...);
+  }
+
+  // Add each value in the iterators as a separate element to the vector
+  void Add(std::vector<std::string>::const_iterator start,
+           std::vector<std::string>::const_iterator end)
+  {
+    PrimaryCommand.insert(PrimaryCommand.end(), start, end);
+  }
+
+  std::string Printable() const { return cmJoin(PrimaryCommand, " "); }
+
+  std::vector<std::string> PrimaryCommand;
+  bool RequiresOutputForward = false;
+};
+}
 
 /** \class cmGlobalGenerator
  * \brief Responsible for overseeing the generation process for the entire tree
@@ -66,6 +106,11 @@ public:
   {
     return codecvt::None;
   }
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  /** Get a JSON object describing the generator.  */
+  virtual Json::Value GetJson() const;
+#endif
 
   /** Tell the generator about the target system.  */
   virtual bool SetSystemName(std::string const&, cmMakefile*) { return true; }
@@ -159,10 +204,10 @@ public:
    */
   int Build(
     int jobs, const std::string& srcdir, const std::string& bindir,
-    const std::string& projectName, const std::string& targetName,
-    std::string& output, const std::string& makeProgram,
-    const std::string& config, bool clean, bool fast, bool verbose,
-    cmDuration timeout,
+    const std::string& projectName,
+    std::vector<std::string> const& targetNames, std::string& output,
+    const std::string& makeProgram, const std::string& config, bool clean,
+    bool fast, bool verbose, cmDuration timeout,
     cmSystemTools::OutputOption outputflag = cmSystemTools::OUTPUT_NONE,
     std::vector<std::string> const& nativeOptions =
       std::vector<std::string>());
@@ -173,11 +218,14 @@ public:
   virtual bool Open(const std::string& bindir, const std::string& projectName,
                     bool dryRun);
 
-  virtual void GenerateBuildCommand(
-    std::vector<std::string>& makeCommand, const std::string& makeProgram,
-    const std::string& projectName, const std::string& projectDir,
-    const std::string& targetName, const std::string& config, bool fast,
-    int jobs, bool verbose,
+  struct GeneratedMakeCommand final : public detail::GeneratedMakeCommand
+  {
+  };
+
+  virtual std::vector<GeneratedMakeCommand> GenerateBuildCommand(
+    const std::string& makeProgram, const std::string& projectName,
+    const std::string& projectDir, std::vector<std::string> const& targetNames,
+    const std::string& config, bool fast, int jobs, bool verbose,
     std::vector<std::string> const& makeOptions = std::vector<std::string>());
 
   virtual void PrintBuildCommandAdvice(std::ostream& os, int jobs) const;
@@ -230,7 +278,7 @@ public:
 
   const char* GetGlobalSetting(std::string const& name) const;
   bool GlobalSettingIsOn(std::string const& name) const;
-  const char* GetSafeGlobalSetting(std::string const& name) const;
+  std::string GetSafeGlobalSetting(std::string const& name) const;
 
   /** Add a file to the manifest of generated targets for a configuration.  */
   void AddToManifest(std::string const& f);
@@ -284,8 +332,7 @@ public:
   bool NameResolvesToFramework(const std::string& libname) const;
 
   cmMakefile* FindMakefile(const std::string& start_dir) const;
-  ///! Find a local generator by its startdirectory
-  cmLocalGenerator* FindLocalGenerator(const std::string& start_dir) const;
+  cmLocalGenerator* FindLocalGenerator(cmDirectoryId const& id) const;
 
   /** Append the subdirectory for the given configuration.  If anything is
       appended the given prefix and suffix will be appended around it, which
@@ -304,6 +351,10 @@ public:
 
   void IndexTarget(cmTarget* t);
   void IndexGeneratorTarget(cmGeneratorTarget* gt);
+
+  // Index the target using a name that is unique to that target
+  // even if other targets have the same name.
+  std::string IndexGeneratorTargetUniquely(cmGeneratorTarget const* gt);
 
   static bool IsReservedTarget(std::string const& name);
 
@@ -420,6 +471,8 @@ public:
 
   std::string MakeSilentFlag;
 
+  int RecursionDepth;
+
 protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
@@ -456,7 +509,7 @@ protected:
   bool IsExcluded(cmStateSnapshot const& root,
                   cmStateSnapshot const& snp) const;
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
-  bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target) const;
+  bool IsExcluded(cmGeneratorTarget* target) const;
   virtual void InitializeProgressMarks() {}
 
   struct GlobalTargetInfo
@@ -466,11 +519,7 @@ protected:
     cmCustomCommandLines CommandLines;
     std::vector<std::string> Depends;
     std::string WorkingDir;
-    bool UsesTerminal;
-    GlobalTargetInfo()
-      : UsesTerminal(false)
-    {
-    }
+    bool UsesTerminal = false;
   };
 
   void CreateDefaultGlobalTargets(std::vector<GlobalTargetInfo>& targets);
@@ -514,6 +563,7 @@ private:
   typedef std::unordered_map<std::string, cmGeneratorTarget*>
     GeneratorTargetMap;
   typedef std::unordered_map<std::string, cmMakefile*> MakefileMap;
+  typedef std::unordered_map<std::string, cmLocalGenerator*> LocalGeneratorMap;
   // Map efficiently from target name to cmTarget instance.
   // Do not use this structure for looping over all targets.
   // It contains both normal and globally visible imported targets.
@@ -524,6 +574,11 @@ private:
   // Do not use this structure for looping over all directories.
   // It may not contain all of them (see note in IndexMakefile method).
   MakefileMap MakefileSearchIndex;
+
+  // Map efficiently from source directory path to cmLocalGenerator instance.
+  // Do not use this structure for looping over all directories.
+  // Its order is not deterministic.
+  LocalGeneratorMap LocalGeneratorSearchIndex;
 
   cmMakefile* TryCompileOuterMakefile;
   // If you add a new map here, make sure it is copied
@@ -583,19 +638,16 @@ private:
                     std::string const& reason) const;
 
   void IndexMakefile(cmMakefile* mf);
+  void IndexLocalGenerator(cmLocalGenerator* lg);
 
   virtual const char* GetBuildIgnoreErrorsFlag() const { return nullptr; }
 
   // Cache directory content and target files to be built.
   struct DirectoryContent
   {
-    long LastDiskTime;
+    long LastDiskTime = -1;
     std::set<std::string> All;
     std::set<std::string> Generated;
-    DirectoryContent()
-      : LastDiskTime(-1)
-    {
-    }
   };
   std::map<std::string, DirectoryContent> DirectoryContentMap;
 

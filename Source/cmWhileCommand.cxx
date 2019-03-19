@@ -6,8 +6,8 @@
 #include "cmExecutionStatus.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 #include <memory> // IWYU pragma: keep
 
@@ -37,7 +37,7 @@ bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       // Remove the function blocker for this scope or bail.
       std::unique_ptr<cmFunctionBlocker> fb(
         mf.RemoveFunctionBlocker(this, lff));
-      if (!fb.get()) {
+      if (!fb) {
         return false;
       }
 
@@ -45,7 +45,7 @@ bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
 
       std::vector<cmExpandedCommandArgument> expandedArguments;
       mf.ExpandArguments(this->Args, expandedArguments);
-      cmake::MessageType messageType;
+      MessageType messageType;
 
       cmListFileContext execContext = this->GetStartingContext();
 
@@ -72,7 +72,7 @@ bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
           err += errorString;
           err += ").";
           mf.IssueMessage(messageType, err);
-          if (messageType == cmake::FATAL_ERROR) {
+          if (messageType == MessageType::FATAL_ERROR) {
             cmSystemTools::SetFatalErrorOccured();
             return true;
           }

@@ -294,11 +294,11 @@ CPack
 * :manual:`cpack(1)` gained ``7Z`` and ``TXZ`` generators supporting
   lzma-compressed archives.
 
-* The :cpack_gen:`CPack Deb Generator` learned a new
+* The :cpack_gen:`CPack DEB Generator` learned a new
   :variable:`CPACK_DEBIAN_COMPRESSION_TYPE` variable to set the
   tarball compression type.
 
-* The :manual:`cpack(1)` ``WiX`` generator learned to support
+* The :cpack_gen:`CPack WIX Generator` learned to support
   a :prop_inst:`CPACK_WIX_ACL` installed file property to
   specify an Access Control List.
 

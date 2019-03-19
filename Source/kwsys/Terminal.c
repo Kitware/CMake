@@ -103,6 +103,8 @@ static int kwsysTerminalStreamIsNotInteractive(FILE* stream)
 
 /* List of terminal names known to support VT100 color escape sequences.  */
 static const char* kwsysTerminalVT100Names[] = { "Eterm",
+                                                 "alacritty",
+                                                 "alacritty-direct",
                                                  "ansi",
                                                  "color-xterm",
                                                  "con132x25",

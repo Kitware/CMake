@@ -10,6 +10,4 @@ cmCPackTarBZip2Generator::cmCPackTarBZip2Generator()
 {
 }
 
-cmCPackTarBZip2Generator::~cmCPackTarBZip2Generator()
-{
-}
+cmCPackTarBZip2Generator::~cmCPackTarBZip2Generator() = default;

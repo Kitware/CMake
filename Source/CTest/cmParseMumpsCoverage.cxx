@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include <utility>
+#include <vector>
 
 cmParseMumpsCoverage::cmParseMumpsCoverage(
   cmCTestCoverageHandlerContainer& cont, cmCTest* ctest)
@@ -17,9 +18,7 @@ cmParseMumpsCoverage::cmParseMumpsCoverage(
 {
 }
 
-cmParseMumpsCoverage::~cmParseMumpsCoverage()
-{
-}
+cmParseMumpsCoverage::~cmParseMumpsCoverage() = default;
 
 bool cmParseMumpsCoverage::ReadCoverageFile(const char* file)
 {

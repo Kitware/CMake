@@ -10,6 +10,7 @@
 #include "cmProcessOutput.h"
 #include "cmsys/Process.h"
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
+#include <functional>
 #include <stddef.h>
 #include <string>
 #include <vector>
@@ -55,42 +56,38 @@ public:
    */
   static std::string TrimWhitespace(const std::string& s);
 
-  typedef void (*MessageCallback)(const char*, const char*, bool&, void*);
+  using MessageCallback = std::function<void(const std::string&, const char*)>;
   /**
    *  Set the function used by GUIs to display error messages
    *  Function gets passed: message as a const char*,
-   *  title as a const char*, and a reference to bool that when
-   *  set to false, will disable further messages (cancel).
+   *  title as a const char*.
    */
-  static void SetMessageCallback(MessageCallback f,
-                                 void* clientData = nullptr);
+  static void SetMessageCallback(MessageCallback f);
 
   /**
    * Display an error message.
    */
   static void Error(const char* m, const char* m2 = nullptr,
                     const char* m3 = nullptr, const char* m4 = nullptr);
+  static void Error(const std::string& m);
 
   /**
    * Display a message.
    */
-  static void Message(const char* m, const char* title = nullptr);
+  static void Message(const std::string& m, const char* title = nullptr);
 
-  typedef void (*OutputCallback)(const char*, size_t length, void*);
+  using OutputCallback = std::function<void(std::string const&)>;
 
   ///! Send a string to stdout
-  static void Stdout(const char* s);
-  static void Stdout(const char* s, size_t length);
-  static void SetStdoutCallback(OutputCallback, void* clientData = nullptr);
+  static void Stdout(const std::string& s);
+  static void SetStdoutCallback(OutputCallback f);
 
   ///! Send a string to stderr
-  static void Stderr(const char* s);
-  static void Stderr(const char* s, size_t length);
-  static void SetStderrCallback(OutputCallback, void* clientData = nullptr);
+  static void Stderr(const std::string& s);
+  static void SetStderrCallback(OutputCallback f);
 
-  typedef bool (*InterruptCallback)(void*);
-  static void SetInterruptCallback(InterruptCallback f,
-                                   void* clientData = nullptr);
+  using InterruptCallback = std::function<bool()>;
+  static void SetInterruptCallback(InterruptCallback f);
   static bool GetInterruptFlag();
 
   ///! Return true if there was an error at any point.
@@ -144,19 +141,19 @@ public:
   ///! Return true if value is NOTFOUND or ends in -NOTFOUND.
   static bool IsNOTFOUND(const char* value);
   ///! Return true if the path is a framework
-  static bool IsPathToFramework(const char* value);
+  static bool IsPathToFramework(const std::string& value);
 
   static bool DoesFileExistWithExtensions(
-    const char* name, const std::vector<std::string>& sourceExts);
+    const std::string& name, const std::vector<std::string>& sourceExts);
 
   /**
    * Check if the given file exists in one of the parent directory of the
    * given file or directory and if it does, return the name of the file.
    * Toplevel specifies the top-most directory to where it will look.
    */
-  static std::string FileExistsInParentDirectories(const char* fname,
-                                                   const char* directory,
-                                                   const char* toplevel);
+  static std::string FileExistsInParentDirectories(
+    const std::string& fname, const std::string& directory,
+    const std::string& toplevel);
 
   static void Glob(const std::string& directory, const std::string& regexp,
                    std::vector<std::string>& files);
@@ -175,13 +172,10 @@ public:
   static bool SimpleGlob(const std::string& glob,
                          std::vector<std::string>& files, int type = 0);
 
-  ///! Copy a file.
-  static bool cmCopyFile(const char* source, const char* destination);
-  static bool CopyFileIfDifferent(const char* source, const char* destination);
-
   /** Rename a file or directory within a single disk volume (atomic
       if possible).  */
-  static bool RenameFile(const char* oldname, const char* newname);
+  static bool RenameFile(const std::string& oldname,
+                         const std::string& newname);
 
   ///! Compute the hash of a file
   static std::string ComputeFileHash(const std::string& source,
@@ -222,7 +216,7 @@ public:
     OUTPUT_FORWARD,
     OUTPUT_PASSTHROUGH
   };
-  static bool RunSingleCommand(const char* command,
+  static bool RunSingleCommand(const std::string& command,
                                std::string* captureStdOut = nullptr,
                                std::string* captureStdErr = nullptr,
                                int* retVal = nullptr,
@@ -248,7 +242,7 @@ public:
   /**
    * Parse arguments out of a single string command
    */
-  static std::vector<std::string> ParseArguments(const char* command);
+  static std::vector<std::string> ParseArguments(const std::string& command);
 
   /** Parse arguments out of a windows command line string.  */
   static void ParseWindowsCommandLine(const char* command,
@@ -332,7 +326,7 @@ public:
   /**
    * Determine the file type based on the extension
    */
-  static FileFormat GetFileFormat(const char* ext);
+  static FileFormat GetFileFormat(std::string const& ext);
 
   /** Windows if this is true, the CreateProcess in RunCommand will
    *  not show new console windows when running programs.
@@ -349,9 +343,6 @@ public:
                          cmDuration timeout, std::vector<char>& out,
                          std::vector<char>& err);
 
-  /** Split a string on its newlines into multiple lines.  Returns
-      false only if the last line stored had no newline.  */
-  static bool Split(const char* s, std::vector<std::string>& l);
   static void SetForceUnixPaths(bool v) { s_ForceUnixPaths = v; }
   static bool GetForceUnixPaths() { return s_ForceUnixPaths; }
 
@@ -362,7 +353,7 @@ public:
   // ConvertToRunCommandPath does not use s_ForceUnixPaths and should
   // be used when RunCommand is called from cmake, because the
   // running cmake needs paths to be in its format
-  static std::string ConvertToRunCommandPath(const char* path);
+  static std::string ConvertToRunCommandPath(const std::string& path);
 
   /** compute the relative path from local to remote.  local must
       be a directory.  remote can be a file or a directory.
@@ -374,6 +365,14 @@ public:
   */
   static std::string RelativePath(std::string const& local,
                                   std::string const& remote);
+
+  /**
+   * Convert the given remote path to a relative path with respect to
+   * the given local path.  Both paths must use forward slashes and not
+   * already be escaped or quoted.
+   */
+  static std::string ForceToRelativePath(std::string const& local_path,
+                                         std::string const& remote_path);
 
   /** Joins two paths while collapsing x/../ parts
    * For example CollapseCombinedPath("a/b/c", "../../d") results in "a/d"
@@ -398,10 +397,12 @@ public:
       original environment. */
   class SaveRestoreEnvironment
   {
-    CM_DISABLE_COPY(SaveRestoreEnvironment)
   public:
     SaveRestoreEnvironment();
     ~SaveRestoreEnvironment();
+
+    SaveRestoreEnvironment(SaveRestoreEnvironment const&) = delete;
+    SaveRestoreEnvironment& operator=(SaveRestoreEnvironment const&) = delete;
 
   private:
     std::vector<std::string> Env;
@@ -435,13 +436,15 @@ public:
 
   /** Copy the file create/access/modify times from the file named by
       the first argument to that named by the second.  */
-  static bool CopyFileTime(const char* fromFile, const char* toFile);
+  static bool CopyFileTime(const std::string& fromFile,
+                           const std::string& toFile);
 
   /** Save and restore file times.  */
   static cmSystemToolsFileTime* FileTimeNew();
   static void FileTimeDelete(cmSystemToolsFileTime*);
-  static bool FileTimeGet(const char* fname, cmSystemToolsFileTime* t);
-  static bool FileTimeSet(const char* fname, cmSystemToolsFileTime* t);
+  static bool FileTimeGet(const std::string& fname, cmSystemToolsFileTime* t);
+  static bool FileTimeSet(const std::string& fname,
+                          const cmSystemToolsFileTime* t);
 
   /** Random seed generation.  */
   static unsigned int RandomSeed();
@@ -485,7 +488,7 @@ public:
   static bool CheckRPath(std::string const& file, std::string const& newRPath);
 
   /** Remove a directory; repeat a few times in case of locked files.  */
-  static bool RepeatedRemoveDirectory(const char* dir);
+  static bool RepeatedRemoveDirectory(const std::string& dir);
 
   /** Tokenize a string */
   static std::vector<std::string> tokenize(const std::string& str,
@@ -494,6 +497,10 @@ public:
   /** Convert string to long. Expected that the whole string is an integer */
   static bool StringToLong(const char* str, long* value);
   static bool StringToULong(const char* str, unsigned long* value);
+
+  /** Encode a string as a URL.  */
+  static std::string EncodeURL(std::string const& in,
+                               bool escapeSlashes = true);
 
 #ifdef _WIN32
   struct WindowsFileRetry
@@ -513,6 +520,18 @@ public:
   /** Perform one-time initialization of libuv.  */
   static void InitializeLibUV();
 
+  /** Create a symbolic link if the platform supports it.  Returns whether
+      creation succeeded. */
+  static bool CreateSymlink(const std::string& origName,
+                            const std::string& newName,
+                            std::string* errorMessage = nullptr);
+
+  /** Create a hard link if the platform supports it.  Returns whether
+      creation succeeded. */
+  static bool CreateLink(const std::string& origName,
+                         const std::string& newName,
+                         std::string* errorMessage = nullptr);
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;
@@ -520,14 +539,6 @@ private:
   static bool s_FatalErrorOccured;
   static bool s_DisableMessages;
   static bool s_DisableRunCommandOutput;
-  static MessageCallback s_MessageCallback;
-  static OutputCallback s_StdoutCallback;
-  static OutputCallback s_StderrCallback;
-  static InterruptCallback s_InterruptCallback;
-  static void* s_MessageCallbackClientData;
-  static void* s_StdoutCallbackClientData;
-  static void* s_StderrCallbackClientData;
-  static void* s_InterruptCallbackClientData;
 };
 
 #endif

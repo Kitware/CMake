@@ -3,7 +3,7 @@ add_custom_target
 
 Add a target with no output so it will always be built.
 
-::
+.. code-block:: cmake
 
   add_custom_target(Name [ALL] [command1 [args1...]]
                     [COMMAND command2 [args2...] ...]
@@ -121,3 +121,6 @@ The options are:
   Execute the command with the given current working directory.
   If it is a relative path it will be interpreted relative to the
   build tree directory corresponding to the current source directory.
+
+  Arguments to ``WORKING_DIRECTORY`` may use
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.

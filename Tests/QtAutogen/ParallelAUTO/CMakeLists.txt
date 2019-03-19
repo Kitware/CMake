@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(ParallelAUTO)
-include("../AutogenTest.cmake")
+include("../AutogenGuiTest.cmake")
 
 # Test different values for AUTOGEN_PARALLEL
 include("../Parallel/parallel.cmake")

@@ -35,6 +35,7 @@ protected:
   std::string Script;
   bool Code;
   cmLocalGenerator* LocalGenerator;
+  bool AllowGenex;
 };
 
 #endif

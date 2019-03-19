@@ -8,7 +8,9 @@ There are two main signatures for ``add_custom_command``.
 Generating Files
 ^^^^^^^^^^^^^^^^
 
-The first signature is for adding a custom command to produce an output::
+The first signature is for adding a custom command to produce an output:
+
+.. code-block:: cmake
 
   add_custom_command(OUTPUT output1 [output2 ...]
                      COMMAND command1 [ARGS] [args1...]
@@ -182,6 +184,9 @@ The options are:
   If it is a relative path it will be interpreted relative to the
   build tree directory corresponding to the current source directory.
 
+  Arguments to ``WORKING_DIRECTORY`` may use
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
 ``DEPFILE``
   Specify a ``.d`` depfile for the :generator:`Ninja` generator.
   A ``.d`` file holds dependencies usually emitted by the custom
@@ -197,7 +202,7 @@ before or after building the target.  The command becomes part of the
 target and will only execute when the target itself is built.  If the
 target is already built, the command will not execute.
 
-::
+.. code-block:: cmake
 
   add_custom_command(TARGET <target>
                      PRE_BUILD | PRE_LINK | POST_BUILD

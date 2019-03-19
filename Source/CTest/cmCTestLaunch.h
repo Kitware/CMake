@@ -28,6 +28,9 @@ private:
   cmCTestLaunch(int argc, const char* const* argv);
   ~cmCTestLaunch();
 
+  cmCTestLaunch(const cmCTestLaunch&) = delete;
+  cmCTestLaunch& operator=(const cmCTestLaunch&) = delete;
+
   // Run the real command.
   int Run();
   void RunChild();

@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.7)
-project (CudaOnlyWithDefs CUDA)
+project (WithDefs CUDA)
 
 #verify that we can pass explicit cuda arch flags
 string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=compute_30")
@@ -37,6 +37,8 @@ target_compile_definitions(CudaOnlyWithDefs
     $<$<CONFIG:RELEASE>:$<BUILD_INTERFACE:${release_compile_defs}>>
     -DDEF_COMPILE_LANG_$<COMPILE_LANGUAGE>
     -DDEF_LANG_IS_CUDA=$<COMPILE_LANGUAGE:CUDA>
+    -DDEF_CUDA_COMPILER=$<CUDA_COMPILER_ID>
+    -DDEF_CUDA_COMPILER_VERSION=$<CUDA_COMPILER_VERSION>
   )
 
 target_include_directories(CudaOnlyWithDefs

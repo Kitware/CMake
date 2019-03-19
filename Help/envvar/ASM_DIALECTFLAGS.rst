@@ -1,6 +1,8 @@
 ASM<DIALECT>FLAGS
 -----------------
 
+.. include:: ENV_VAR.txt
+
 Default compilation flags to be used when compiling a specific dialect of an
 assembly language. ``ASM<DIALECT>FLAGS`` can be ``ASMFLAGS``, ``ASM_NASMFLAGS``,
 ``ASM_MASMFLAGS`` or ``ASM-ATTFLAGS``. Will only be used by CMake on the

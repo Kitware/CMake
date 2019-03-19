@@ -12,8 +12,11 @@
 #include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmState.h"
+#include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -55,7 +58,7 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
 
 static const struct ZeroNode : public cmGeneratorExpressionNode
 {
-  ZeroNode() {}
+  ZeroNode() {} // NOLINT(modernize-use-equals-default)
 
   bool GeneratesContent() const override { return false; }
 
@@ -73,7 +76,7 @@ static const struct ZeroNode : public cmGeneratorExpressionNode
 
 static const struct OneNode : public cmGeneratorExpressionNode
 {
-  OneNode() {}
+  OneNode() {} // NOLINT(modernize-use-equals-default)
 
   bool AcceptsArbitraryContentParameter() const override { return true; }
 
@@ -94,7 +97,7 @@ static const struct ZeroNode installInterfaceNode;
 #define BOOLEAN_OP_NODE(OPNAME, OP, SUCCESS_VALUE, FAILURE_VALUE)             \
   static const struct OP##Node : public cmGeneratorExpressionNode             \
   {                                                                           \
-    OP##Node() {}                                                             \
+    OP##Node() {} /* NOLINT(modernize-use-equals-default) */                  \
     virtual int NumExpectedParameters() const { return OneOrMoreParameters; } \
                                                                               \
     std::string Evaluate(const std::vector<std::string>& parameters,          \
@@ -102,13 +105,11 @@ static const struct ZeroNode installInterfaceNode;
                          const GeneratorExpressionContent* content,           \
                          cmGeneratorExpressionDAGChecker*) const              \
     {                                                                         \
-      std::vector<std::string>::const_iterator it = parameters.begin();       \
-      const std::vector<std::string>::const_iterator end = parameters.end();  \
-      for (; it != end; ++it) {                                               \
-        if (*it == #FAILURE_VALUE) {                                          \
+      for (std::string const& param : parameters) {                           \
+        if (param == #FAILURE_VALUE) {                                        \
           return #FAILURE_VALUE;                                              \
         }                                                                     \
-        if (*it != #SUCCESS_VALUE) {                                          \
+        if (param != #SUCCESS_VALUE) {                                        \
           reportError(context, content->GetOriginalExpression(),              \
                       "Parameters to $<" #OP                                  \
                       "> must resolve to either '0' or '1'.");                \
@@ -126,7 +127,7 @@ BOOLEAN_OP_NODE(orNode, OR, 0, 1)
 
 static const struct NotNode : public cmGeneratorExpressionNode
 {
-  NotNode() {}
+  NotNode() {} // NOLINT(modernize-use-equals-default)
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -134,19 +135,19 @@ static const struct NotNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    if (*parameters.begin() != "0" && *parameters.begin() != "1") {
+    if (parameters.front() != "0" && parameters.front() != "1") {
       reportError(
         context, content->GetOriginalExpression(),
         "$<NOT> parameter must resolve to exactly one '0' or '1' value.");
       return std::string();
     }
-    return *parameters.begin() == "0" ? "1" : "0";
+    return parameters.front() == "0" ? "1" : "0";
   }
 } notNode;
 
 static const struct BoolNode : public cmGeneratorExpressionNode
 {
-  BoolNode() {}
+  BoolNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 1; }
 
@@ -156,13 +157,13 @@ static const struct BoolNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    return !cmSystemTools::IsOff(*parameters.begin()) ? "1" : "0";
+    return !cmSystemTools::IsOff(parameters.front()) ? "1" : "0";
   }
 } boolNode;
 
 static const struct IfNode : public cmGeneratorExpressionNode
 {
-  IfNode() {}
+  IfNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 3; }
 
@@ -183,7 +184,7 @@ static const struct IfNode : public cmGeneratorExpressionNode
 
 static const struct StrEqualNode : public cmGeneratorExpressionNode
 {
-  StrEqualNode() {}
+  StrEqualNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 2; }
 
@@ -193,13 +194,13 @@ static const struct StrEqualNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    return *parameters.begin() == parameters[1] ? "1" : "0";
+    return parameters.front() == parameters[1] ? "1" : "0";
   }
 } strEqualNode;
 
 static const struct EqualNode : public cmGeneratorExpressionNode
 {
-  EqualNode() {}
+  EqualNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 2; }
 
@@ -277,20 +278,45 @@ static const struct EqualNode : public cmGeneratorExpressionNode
 
 static const struct InListNode : public cmGeneratorExpressionNode
 {
-  InListNode() {}
+  InListNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 2; }
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* /*context*/,
+    cmGeneratorExpressionContext* context,
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    std::vector<std::string> values;
-    cmSystemTools::ExpandListArgument(parameters[1], values);
-    if (values.empty()) {
-      return "0";
+    std::vector<std::string> values, checkValues;
+    bool check = false;
+    switch (context->LG->GetPolicyStatus(cmPolicies::CMP0085)) {
+      case cmPolicies::WARN:
+        if (parameters.front().empty()) {
+          check = true;
+          cmSystemTools::ExpandListArgument(parameters[1], checkValues, true);
+        }
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        cmSystemTools::ExpandListArgument(parameters[1], values);
+        if (check && values != checkValues) {
+          std::ostringstream e;
+          e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0085)
+            << "\nSearch Item:\n  \"" << parameters.front()
+            << "\"\nList:\n  \"" << parameters[1] << "\"\n";
+          context->LG->GetCMakeInstance()->IssueMessage(
+            MessageType ::AUTHOR_WARNING, e.str(), context->Backtrace);
+          return "0";
+        }
+        if (values.empty()) {
+          return "0";
+        }
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::NEW:
+        cmSystemTools::ExpandListArgument(parameters[1], values, true);
+        break;
     }
 
     return std::find(values.cbegin(), values.cend(), parameters.front()) ==
@@ -302,7 +328,7 @@ static const struct InListNode : public cmGeneratorExpressionNode
 
 static const struct TargetExistsNode : public cmGeneratorExpressionNode
 {
-  TargetExistsNode() {}
+  TargetExistsNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 1; }
 
@@ -333,7 +359,7 @@ static const struct TargetExistsNode : public cmGeneratorExpressionNode
 
 static const struct TargetNameIfExistsNode : public cmGeneratorExpressionNode
 {
-  TargetNameIfExistsNode() {}
+  TargetNameIfExistsNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 1; }
 
@@ -367,7 +393,7 @@ static const struct TargetNameIfExistsNode : public cmGeneratorExpressionNode
 
 struct GenexEvaluator : public cmGeneratorExpressionNode
 {
-  GenexEvaluator() {}
+  GenexEvaluator() {} // NOLINT(modernize-use-equals-default)
 
 protected:
   std::string EvaluateExpression(
@@ -378,8 +404,8 @@ protected:
   {
     if (context->HeadTarget) {
       cmGeneratorExpressionDAGChecker dagChecker(
-        context->Backtrace, context->HeadTarget, genexOperator, content,
-        dagCheckerParent);
+        context->Backtrace, context->HeadTarget,
+        genexOperator + ":" + expression, content, dagCheckerParent);
       switch (dagChecker.Check()) {
         case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
         case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE: {
@@ -404,7 +430,7 @@ protected:
 
 static const struct TargetGenexEvalNode : public GenexEvaluator
 {
-  TargetGenexEvalNode() {}
+  TargetGenexEvalNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 2; }
 
@@ -450,7 +476,7 @@ static const struct TargetGenexEvalNode : public GenexEvaluator
 
 static const struct GenexEvalNode : public GenexEvaluator
 {
-  GenexEvalNode() {}
+  GenexEvalNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 1; }
 
@@ -474,7 +500,7 @@ static const struct GenexEvalNode : public GenexEvaluator
 
 static const struct LowerCaseNode : public cmGeneratorExpressionNode
 {
-  LowerCaseNode() {}
+  LowerCaseNode() {} // NOLINT(modernize-use-equals-default)
 
   bool AcceptsArbitraryContentParameter() const override { return true; }
 
@@ -490,7 +516,7 @@ static const struct LowerCaseNode : public cmGeneratorExpressionNode
 
 static const struct UpperCaseNode : public cmGeneratorExpressionNode
 {
-  UpperCaseNode() {}
+  UpperCaseNode() {} // NOLINT(modernize-use-equals-default)
 
   bool AcceptsArbitraryContentParameter() const override { return true; }
 
@@ -506,7 +532,7 @@ static const struct UpperCaseNode : public cmGeneratorExpressionNode
 
 static const struct MakeCIdentifierNode : public cmGeneratorExpressionNode
 {
-  MakeCIdentifierNode() {}
+  MakeCIdentifierNode() {} // NOLINT(modernize-use-equals-default)
 
   bool AcceptsArbitraryContentParameter() const override { return true; }
 
@@ -522,7 +548,7 @@ static const struct MakeCIdentifierNode : public cmGeneratorExpressionNode
 
 static const struct Angle_RNode : public cmGeneratorExpressionNode
 {
-  Angle_RNode() {}
+  Angle_RNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 0; }
 
@@ -538,7 +564,7 @@ static const struct Angle_RNode : public cmGeneratorExpressionNode
 
 static const struct CommaNode : public cmGeneratorExpressionNode
 {
-  CommaNode() {}
+  CommaNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 0; }
 
@@ -554,7 +580,7 @@ static const struct CommaNode : public cmGeneratorExpressionNode
 
 static const struct SemicolonNode : public cmGeneratorExpressionNode
 {
-  SemicolonNode() {}
+  SemicolonNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 0; }
 
@@ -570,7 +596,7 @@ static const struct SemicolonNode : public cmGeneratorExpressionNode
 
 struct CompilerIdNode : public cmGeneratorExpressionNode
 {
-  CompilerIdNode() {}
+  CompilerIdNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return OneOrZeroParameters; }
 
@@ -580,32 +606,34 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
                                    cmGeneratorExpressionDAGChecker* /*unused*/,
                                    const std::string& lang) const
   {
-    const char* compilerId = context->LG->GetMakefile()->GetSafeDefinition(
-      "CMAKE_" + lang + "_COMPILER_ID");
+    std::string const& compilerId =
+      context->LG->GetMakefile()->GetSafeDefinition("CMAKE_" + lang +
+                                                    "_COMPILER_ID");
     if (parameters.empty()) {
-      return compilerId ? compilerId : "";
+      return compilerId;
     }
     static cmsys::RegularExpression compilerIdValidator("^[A-Za-z0-9_]*$");
-    if (!compilerIdValidator.find(*parameters.begin())) {
+    if (!compilerIdValidator.find(parameters.front())) {
       reportError(context, content->GetOriginalExpression(),
                   "Expression syntax not recognized.");
       return std::string();
     }
-    if (!compilerId) {
+    if (compilerId.empty()) {
       return parameters.front().empty() ? "1" : "0";
     }
 
-    if (strcmp(parameters.begin()->c_str(), compilerId) == 0) {
+    if (strcmp(parameters.front().c_str(), compilerId.c_str()) == 0) {
       return "1";
     }
 
-    if (cmsysString_strcasecmp(parameters.begin()->c_str(), compilerId) == 0) {
+    if (cmsysString_strcasecmp(parameters.front().c_str(),
+                               compilerId.c_str()) == 0) {
       switch (context->LG->GetPolicyStatus(cmPolicies::CMP0044)) {
         case cmPolicies::WARN: {
           std::ostringstream e;
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0044);
           context->LG->GetCMakeInstance()->IssueMessage(
-            cmake::AUTHOR_WARNING, e.str(), context->Backtrace);
+            MessageType::AUTHOR_WARNING, e.str(), context->Backtrace);
           CM_FALLTHROUGH;
         }
         case cmPolicies::OLD:
@@ -622,7 +650,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
 
 static const struct CCompilerIdNode : public CompilerIdNode
 {
-  CCompilerIdNode() {}
+  CCompilerIdNode() {} // NOLINT(modernize-use-equals-default)
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -644,7 +672,7 @@ static const struct CCompilerIdNode : public CompilerIdNode
 
 static const struct CXXCompilerIdNode : public CompilerIdNode
 {
-  CXXCompilerIdNode() {}
+  CXXCompilerIdNode() {} // NOLINT(modernize-use-equals-default)
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -664,9 +692,53 @@ static const struct CXXCompilerIdNode : public CompilerIdNode
   }
 } cxxCompilerIdNode;
 
+static const struct CUDACompilerIdNode : public CompilerIdNode
+{
+  CUDACompilerIdNode() {} // NOLINT(modernize-use-equals-default)
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<CUDA_COMPILER_ID> may only be used with binary targets.  It may "
+        "not be used with add_custom_command or add_custom_target.");
+      return std::string();
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      "CUDA");
+  }
+} cudaCompilerIdNode;
+
+static const struct FortranCompilerIdNode : public CompilerIdNode
+{
+  FortranCompilerIdNode() {} // NOLINT(modernize-use-equals-default)
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<Fortran_COMPILER_ID> may only be used with binary targets.  It may "
+        "not be used with add_custom_command or add_custom_target.");
+      return std::string();
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      "Fortran");
+  }
+} fortranCompilerIdNode;
+
 struct CompilerVersionNode : public cmGeneratorExpressionNode
 {
-  CompilerVersionNode() {}
+  CompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return OneOrZeroParameters; }
 
@@ -676,26 +748,26 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
                                    cmGeneratorExpressionDAGChecker* /*unused*/,
                                    const std::string& lang) const
   {
-    const char* compilerVersion =
+    std::string const& compilerVersion =
       context->LG->GetMakefile()->GetSafeDefinition("CMAKE_" + lang +
                                                     "_COMPILER_VERSION");
     if (parameters.empty()) {
-      return compilerVersion ? compilerVersion : "";
+      return compilerVersion;
     }
 
     static cmsys::RegularExpression compilerIdValidator("^[0-9\\.]*$");
-    if (!compilerIdValidator.find(*parameters.begin())) {
+    if (!compilerIdValidator.find(parameters.front())) {
       reportError(context, content->GetOriginalExpression(),
                   "Expression syntax not recognized.");
       return std::string();
     }
-    if (!compilerVersion) {
+    if (compilerVersion.empty()) {
       return parameters.front().empty() ? "1" : "0";
     }
 
     return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
-                                         parameters.begin()->c_str(),
-                                         compilerVersion)
+                                         parameters.front().c_str(),
+                                         compilerVersion.c_str())
       ? "1"
       : "0";
   }
@@ -703,7 +775,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
 
 static const struct CCompilerVersionNode : public CompilerVersionNode
 {
-  CCompilerVersionNode() {}
+  CCompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -723,9 +795,9 @@ static const struct CCompilerVersionNode : public CompilerVersionNode
   }
 } cCompilerVersionNode;
 
-static const struct CxxCompilerVersionNode : public CompilerVersionNode
+static const struct CXXCompilerVersionNode : public CompilerVersionNode
 {
-  CxxCompilerVersionNode() {}
+  CXXCompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -745,9 +817,53 @@ static const struct CxxCompilerVersionNode : public CompilerVersionNode
   }
 } cxxCompilerVersionNode;
 
+static const struct CUDACompilerVersionNode : public CompilerVersionNode
+{
+  CUDACompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<CUDA_COMPILER_VERSION> may only be used with binary targets.  It "
+        "may not be used with add_custom_command or add_custom_target.");
+      return std::string();
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      "CUDA");
+  }
+} cudaCompilerVersionNode;
+
+static const struct FortranCompilerVersionNode : public CompilerVersionNode
+{
+  FortranCompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<Fortran_COMPILER_VERSION> may only be used with binary targets.  "
+        "It may not be used with add_custom_command or add_custom_target.");
+      return std::string();
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      "Fortran");
+  }
+} fortranCompilerVersionNode;
+
 struct PlatformIdNode : public cmGeneratorExpressionNode
 {
-  PlatformIdNode() {}
+  PlatformIdNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return OneOrZeroParameters; }
 
@@ -757,17 +873,17 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    const char* platformId =
+    std::string const& platformId =
       context->LG->GetMakefile()->GetSafeDefinition("CMAKE_SYSTEM_NAME");
     if (parameters.empty()) {
-      return platformId ? platformId : "";
+      return platformId;
     }
 
-    if (!platformId) {
+    if (platformId.empty()) {
       return parameters.front().empty() ? "1" : "0";
     }
 
-    if (strcmp(parameters.begin()->c_str(), platformId) == 0) {
+    if (parameters.front() == platformId) {
       return "1";
     }
     return "0";
@@ -776,7 +892,7 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
 
 static const struct VersionGreaterNode : public cmGeneratorExpressionNode
 {
-  VersionGreaterNode() {}
+  VersionGreaterNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 2; }
 
@@ -796,7 +912,7 @@ static const struct VersionGreaterNode : public cmGeneratorExpressionNode
 
 static const struct VersionGreaterEqNode : public cmGeneratorExpressionNode
 {
-  VersionGreaterEqNode() {}
+  VersionGreaterEqNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 2; }
 
@@ -816,7 +932,7 @@ static const struct VersionGreaterEqNode : public cmGeneratorExpressionNode
 
 static const struct VersionLessNode : public cmGeneratorExpressionNode
 {
-  VersionLessNode() {}
+  VersionLessNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 2; }
 
@@ -836,7 +952,7 @@ static const struct VersionLessNode : public cmGeneratorExpressionNode
 
 static const struct VersionLessEqNode : public cmGeneratorExpressionNode
 {
-  VersionLessEqNode() {}
+  VersionLessEqNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 2; }
 
@@ -856,7 +972,7 @@ static const struct VersionLessEqNode : public cmGeneratorExpressionNode
 
 static const struct VersionEqualNode : public cmGeneratorExpressionNode
 {
-  VersionEqualNode() {}
+  VersionEqualNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 2; }
 
@@ -876,7 +992,7 @@ static const struct VersionEqualNode : public cmGeneratorExpressionNode
 
 static const struct LinkOnlyNode : public cmGeneratorExpressionNode
 {
-  LinkOnlyNode() {}
+  LinkOnlyNode() {} // NOLINT(modernize-use-equals-default)
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -898,7 +1014,7 @@ static const struct LinkOnlyNode : public cmGeneratorExpressionNode
 
 static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
-  ConfigurationNode() {}
+  ConfigurationNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 0; }
 
@@ -915,7 +1031,7 @@ static const struct ConfigurationNode : public cmGeneratorExpressionNode
 
 static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 {
-  ConfigurationTestNode() {}
+  ConfigurationTestNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return OneOrZeroParameters; }
 
@@ -929,7 +1045,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return configurationNode.Evaluate(parameters, context, content, nullptr);
     }
     static cmsys::RegularExpression configValidator("^[A-Za-z0-9_]*$");
-    if (!configValidator.find(*parameters.begin())) {
+    if (!configValidator.find(parameters.front())) {
       reportError(context, content->GetOriginalExpression(),
                   "Expression syntax not recognized.");
       return std::string();
@@ -939,7 +1055,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return parameters.front().empty() ? "1" : "0";
     }
 
-    if (cmsysString_strcasecmp(parameters.begin()->c_str(),
+    if (cmsysString_strcasecmp(parameters.front().c_str(),
                                context->Config.c_str()) == 0) {
       return "1";
     }
@@ -974,7 +1090,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 
 static const struct JoinNode : public cmGeneratorExpressionNode
 {
-  JoinNode() {}
+  JoinNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 2; }
 
@@ -994,7 +1110,7 @@ static const struct JoinNode : public cmGeneratorExpressionNode
 
 static const struct CompileLanguageNode : public cmGeneratorExpressionNode
 {
-  CompileLanguageNode() {}
+  CompileLanguageNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return OneOrZeroParameters; }
 
@@ -1054,7 +1170,9 @@ std::string getLinkedTargetsContent(
     // Don't follow such link interface entries so as not to create a
     // self-referencing loop.
     if (l.Target && l.Target != target) {
-      depString += sep + "$<TARGET_PROPERTY:" + l.Target->GetName() + "," +
+      std::string uniqueName =
+        target->GetGlobalGenerator()->IndexGeneratorTargetUniquely(l.Target);
+      depString += sep + "$<TARGET_PROPERTY:" + std::move(uniqueName) + "," +
         interfacePropertyName + ">";
       sep = ";";
     }
@@ -1072,7 +1190,7 @@ std::string getLinkedTargetsContent(
 
 static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 {
-  TargetPropertyNode() {}
+  TargetPropertyNode() {} // NOLINT(modernize-use-equals-default)
 
   // This node handles errors on parameter count itself.
   int NumExpectedParameters() const override { return OneOrMoreParameters; }
@@ -1092,7 +1210,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
 
     cmGeneratorTarget const* target = context->HeadTarget;
-    std::string propertyName = *parameters.begin();
+    std::string propertyName = parameters.front();
 
     if (parameters.size() == 1) {
       context->HadHeadSensitiveCondition = true;
@@ -1108,14 +1226,14 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     }
 
     if (parameters.size() == 2) {
-      if (parameters.begin()->empty() && parameters[1].empty()) {
+      if (parameters.front().empty() && parameters[1].empty()) {
         reportError(
           context, content->GetOriginalExpression(),
           "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
           "target name and property name.");
         return std::string();
       }
-      if (parameters.begin()->empty()) {
+      if (parameters.front().empty()) {
         reportError(
           context, content->GetOriginalExpression(),
           "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
@@ -1221,13 +1339,14 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     const char* prop = target->GetProperty(propertyName);
 
     if (dagCheckerParent) {
-      if (dagCheckerParent->EvaluatingGenexExpression()) {
+      if (dagCheckerParent->EvaluatingGenexExpression() ||
+          dagCheckerParent->EvaluatingPICExpression()) {
         // No check required.
       } else if (dagCheckerParent->EvaluatingLinkLibraries()) {
 #define TRANSITIVE_PROPERTY_COMPARE(PROPERTY)                                 \
   (#PROPERTY == propertyName || "INTERFACE_" #PROPERTY == propertyName) ||
         if (CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(
-              TRANSITIVE_PROPERTY_COMPARE) false) { // NOLINT(clang-tidy)
+              TRANSITIVE_PROPERTY_COMPARE) false) { // NOLINT(*)
           reportError(
             context, content->GetOriginalExpression(),
             "$<TARGET_PROPERTY:...> expression in link libraries "
@@ -1367,7 +1486,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
 static const struct TargetNameNode : public cmGeneratorExpressionNode
 {
-  TargetNameNode() {}
+  TargetNameNode() {} // NOLINT(modernize-use-equals-default)
 
   bool GeneratesContent() const override { return true; }
 
@@ -1389,7 +1508,7 @@ static const struct TargetNameNode : public cmGeneratorExpressionNode
 
 static const struct TargetObjectsNode : public cmGeneratorExpressionNode
 {
-  TargetObjectsNode() {}
+  TargetObjectsNode() {} // NOLINT(modernize-use-equals-default)
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -1471,7 +1590,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
 
 static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
 {
-  CompileFeaturesNode() {}
+  CompileFeaturesNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return OneOrMoreParameters; }
 
@@ -1596,7 +1715,7 @@ cmPolicies::PolicyID policyForString(const char* policy_id)
 
 static const struct TargetPolicyNode : public cmGeneratorExpressionNode
 {
-  TargetPolicyNode() {}
+  TargetPolicyNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 1; }
 
@@ -1624,7 +1743,7 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
         switch (statusForTarget(context->HeadTarget, policy)) {
           case cmPolicies::WARN:
             lg->IssueMessage(
-              cmake::AUTHOR_WARNING,
+              MessageType::AUTHOR_WARNING,
               cmPolicies::GetPolicyWarning(policyForString(policy)));
             CM_FALLTHROUGH;
           case cmPolicies::REQUIRED_IF_USED:
@@ -1657,7 +1776,7 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
 
 static const struct InstallPrefixNode : public cmGeneratorExpressionNode
 {
-  InstallPrefixNode() {}
+  InstallPrefixNode() {} // NOLINT(modernize-use-equals-default)
 
   bool GeneratesContent() const override { return true; }
   int NumExpectedParameters() const override { return 0; }
@@ -1878,7 +1997,7 @@ struct TargetFilesystemArtifactResultGetter<ArtifactPathTag>
 template <typename ArtifactT, typename ComponentT>
 struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
 {
-  TargetFilesystemArtifact() {}
+  TargetFilesystemArtifact() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 1; }
 
@@ -1889,7 +2008,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
     // Lookup the referenced target.
-    std::string name = *parameters.begin();
+    std::string name = parameters.front();
 
     if (!cmGeneratorExpression::IsValidTargetName(name)) {
       ::reportError(context, content->GetOriginalExpression(),
@@ -1934,7 +2053,9 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
 template <typename ArtifactT>
 struct TargetFilesystemArtifactNodeGroup
 {
-  TargetFilesystemArtifactNodeGroup() {}
+  TargetFilesystemArtifactNodeGroup() // NOLINT(modernize-use-equals-default)
+  {
+  }
 
   TargetFilesystemArtifact<ArtifactT, ArtifactPathTag> File;
   TargetFilesystemArtifact<ArtifactT, ArtifactNameTag> FileName;
@@ -1962,7 +2083,7 @@ static const TargetFilesystemArtifact<ArtifactBundleContentDirTag,
 
 static const struct ShellPathNode : public cmGeneratorExpressionNode
 {
-  ShellPathNode() {}
+  ShellPathNode() {} // NOLINT(modernize-use-equals-default)
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -1970,86 +2091,105 @@ static const struct ShellPathNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    if (!cmSystemTools::FileIsFullPath(parameters.front())) {
+    std::vector<std::string> listIn;
+    cmSystemTools::ExpandListArgument(parameters.front(), listIn);
+    if (listIn.empty()) {
       reportError(context, content->GetOriginalExpression(),
-                  "\"" + parameters.front() + "\" is not an absolute path.");
+                  "\"\" is not an absolute path.");
       return std::string();
     }
-    cmOutputConverter converter(context->LG->GetStateSnapshot());
-    return converter.ConvertDirectorySeparatorsForShell(parameters.front());
+    cmStateSnapshot snapshot = context->LG->GetStateSnapshot();
+    cmOutputConverter converter(snapshot);
+    const char* separator = snapshot.GetState()->UseWindowsShell() ? ";" : ":";
+    std::vector<std::string> listOut;
+    listOut.reserve(listIn.size());
+    for (auto const& in : listIn) {
+      if (!cmSystemTools::FileIsFullPath(in)) {
+        reportError(context, content->GetOriginalExpression(),
+                    "\"" + in + "\" is not an absolute path.");
+        return std::string();
+      }
+      listOut.emplace_back(converter.ConvertDirectorySeparatorsForShell(in));
+    }
+    return cmJoin(listOut, separator);
   }
 } shellPathNode;
 
 const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
   const std::string& identifier)
 {
-  typedef std::map<std::string, const cmGeneratorExpressionNode*> NodeMap;
-  static NodeMap nodeMap;
-  if (nodeMap.empty()) {
-    nodeMap["0"] = &zeroNode;
-    nodeMap["1"] = &oneNode;
-    nodeMap["AND"] = &andNode;
-    nodeMap["OR"] = &orNode;
-    nodeMap["NOT"] = &notNode;
-    nodeMap["C_COMPILER_ID"] = &cCompilerIdNode;
-    nodeMap["CXX_COMPILER_ID"] = &cxxCompilerIdNode;
-    nodeMap["VERSION_GREATER"] = &versionGreaterNode;
-    nodeMap["VERSION_GREATER_EQUAL"] = &versionGreaterEqNode;
-    nodeMap["VERSION_LESS"] = &versionLessNode;
-    nodeMap["VERSION_LESS_EQUAL"] = &versionLessEqNode;
-    nodeMap["VERSION_EQUAL"] = &versionEqualNode;
-    nodeMap["C_COMPILER_VERSION"] = &cCompilerVersionNode;
-    nodeMap["CXX_COMPILER_VERSION"] = &cxxCompilerVersionNode;
-    nodeMap["PLATFORM_ID"] = &platformIdNode;
-    nodeMap["COMPILE_FEATURES"] = &compileFeaturesNode;
-    nodeMap["CONFIGURATION"] = &configurationNode;
-    nodeMap["CONFIG"] = &configurationTestNode;
-    nodeMap["TARGET_FILE"] = &targetNodeGroup.File;
-    nodeMap["TARGET_LINKER_FILE"] = &targetLinkerNodeGroup.File;
-    nodeMap["TARGET_SONAME_FILE"] = &targetSoNameNodeGroup.File;
-    nodeMap["TARGET_PDB_FILE"] = &targetPdbNodeGroup.File;
-    nodeMap["TARGET_FILE_NAME"] = &targetNodeGroup.FileName;
-    nodeMap["TARGET_LINKER_FILE_NAME"] = &targetLinkerNodeGroup.FileName;
-    nodeMap["TARGET_SONAME_FILE_NAME"] = &targetSoNameNodeGroup.FileName;
-    nodeMap["TARGET_PDB_FILE_NAME"] = &targetPdbNodeGroup.FileName;
-    nodeMap["TARGET_FILE_DIR"] = &targetNodeGroup.FileDir;
-    nodeMap["TARGET_LINKER_FILE_DIR"] = &targetLinkerNodeGroup.FileDir;
-    nodeMap["TARGET_SONAME_FILE_DIR"] = &targetSoNameNodeGroup.FileDir;
-    nodeMap["TARGET_PDB_FILE_DIR"] = &targetPdbNodeGroup.FileDir;
-    nodeMap["TARGET_BUNDLE_DIR"] = &targetBundleDirNode;
-    nodeMap["TARGET_BUNDLE_CONTENT_DIR"] = &targetBundleContentDirNode;
-    nodeMap["STREQUAL"] = &strEqualNode;
-    nodeMap["EQUAL"] = &equalNode;
-    nodeMap["IN_LIST"] = &inListNode;
-    nodeMap["LOWER_CASE"] = &lowerCaseNode;
-    nodeMap["UPPER_CASE"] = &upperCaseNode;
-    nodeMap["MAKE_C_IDENTIFIER"] = &makeCIdentifierNode;
-    nodeMap["BOOL"] = &boolNode;
-    nodeMap["IF"] = &ifNode;
-    nodeMap["ANGLE-R"] = &angle_rNode;
-    nodeMap["COMMA"] = &commaNode;
-    nodeMap["SEMICOLON"] = &semicolonNode;
-    nodeMap["TARGET_PROPERTY"] = &targetPropertyNode;
-    nodeMap["TARGET_NAME"] = &targetNameNode;
-    nodeMap["TARGET_OBJECTS"] = &targetObjectsNode;
-    nodeMap["TARGET_POLICY"] = &targetPolicyNode;
-    nodeMap["TARGET_EXISTS"] = &targetExistsNode;
-    nodeMap["TARGET_NAME_IF_EXISTS"] = &targetNameIfExistsNode;
-    nodeMap["TARGET_GENEX_EVAL"] = &targetGenexEvalNode;
-    nodeMap["GENEX_EVAL"] = &genexEvalNode;
-    nodeMap["BUILD_INTERFACE"] = &buildInterfaceNode;
-    nodeMap["INSTALL_INTERFACE"] = &installInterfaceNode;
-    nodeMap["INSTALL_PREFIX"] = &installPrefixNode;
-    nodeMap["JOIN"] = &joinNode;
-    nodeMap["LINK_ONLY"] = &linkOnlyNode;
-    nodeMap["COMPILE_LANGUAGE"] = &languageNode;
-    nodeMap["SHELL_PATH"] = &shellPathNode;
+  static std::map<std::string, cmGeneratorExpressionNode const*> const nodeMap{
+    { "0", &zeroNode },
+    { "1", &oneNode },
+    { "AND", &andNode },
+    { "OR", &orNode },
+    { "NOT", &notNode },
+    { "C_COMPILER_ID", &cCompilerIdNode },
+    { "CXX_COMPILER_ID", &cxxCompilerIdNode },
+    { "CUDA_COMPILER_ID", &cudaCompilerIdNode },
+    { "Fortran_COMPILER_ID", &fortranCompilerIdNode },
+    { "VERSION_GREATER", &versionGreaterNode },
+    { "VERSION_GREATER_EQUAL", &versionGreaterEqNode },
+    { "VERSION_LESS", &versionLessNode },
+    { "VERSION_LESS_EQUAL", &versionLessEqNode },
+    { "VERSION_EQUAL", &versionEqualNode },
+    { "C_COMPILER_VERSION", &cCompilerVersionNode },
+    { "CXX_COMPILER_VERSION", &cxxCompilerVersionNode },
+    { "CUDA_COMPILER_VERSION", &cudaCompilerVersionNode },
+    { "Fortran_COMPILER_VERSION", &fortranCompilerVersionNode },
+    { "PLATFORM_ID", &platformIdNode },
+    { "COMPILE_FEATURES", &compileFeaturesNode },
+    { "CONFIGURATION", &configurationNode },
+    { "CONFIG", &configurationTestNode },
+    { "TARGET_FILE", &targetNodeGroup.File },
+    { "TARGET_LINKER_FILE", &targetLinkerNodeGroup.File },
+    { "TARGET_SONAME_FILE", &targetSoNameNodeGroup.File },
+    { "TARGET_PDB_FILE", &targetPdbNodeGroup.File },
+    { "TARGET_FILE_NAME", &targetNodeGroup.FileName },
+    { "TARGET_LINKER_FILE_NAME", &targetLinkerNodeGroup.FileName },
+    { "TARGET_SONAME_FILE_NAME", &targetSoNameNodeGroup.FileName },
+    { "TARGET_PDB_FILE_NAME", &targetPdbNodeGroup.FileName },
+    { "TARGET_FILE_DIR", &targetNodeGroup.FileDir },
+    { "TARGET_LINKER_FILE_DIR", &targetLinkerNodeGroup.FileDir },
+    { "TARGET_SONAME_FILE_DIR", &targetSoNameNodeGroup.FileDir },
+    { "TARGET_PDB_FILE_DIR", &targetPdbNodeGroup.FileDir },
+    { "TARGET_BUNDLE_DIR", &targetBundleDirNode },
+    { "TARGET_BUNDLE_CONTENT_DIR", &targetBundleContentDirNode },
+    { "STREQUAL", &strEqualNode },
+    { "EQUAL", &equalNode },
+    { "IN_LIST", &inListNode },
+    { "LOWER_CASE", &lowerCaseNode },
+    { "UPPER_CASE", &upperCaseNode },
+    { "MAKE_C_IDENTIFIER", &makeCIdentifierNode },
+    { "BOOL", &boolNode },
+    { "IF", &ifNode },
+    { "ANGLE-R", &angle_rNode },
+    { "COMMA", &commaNode },
+    { "SEMICOLON", &semicolonNode },
+    { "TARGET_PROPERTY", &targetPropertyNode },
+    { "TARGET_NAME", &targetNameNode },
+    { "TARGET_OBJECTS", &targetObjectsNode },
+    { "TARGET_POLICY", &targetPolicyNode },
+    { "TARGET_EXISTS", &targetExistsNode },
+    { "TARGET_NAME_IF_EXISTS", &targetNameIfExistsNode },
+    { "TARGET_GENEX_EVAL", &targetGenexEvalNode },
+    { "GENEX_EVAL", &genexEvalNode },
+    { "BUILD_INTERFACE", &buildInterfaceNode },
+    { "INSTALL_INTERFACE", &installInterfaceNode },
+    { "INSTALL_PREFIX", &installPrefixNode },
+    { "JOIN", &joinNode },
+    { "LINK_ONLY", &linkOnlyNode },
+    { "COMPILE_LANGUAGE", &languageNode },
+    { "SHELL_PATH", &shellPathNode }
+  };
+
+  {
+    auto itr = nodeMap.find(identifier);
+    if (itr != nodeMap.end()) {
+      return itr->second;
+    }
   }
-  NodeMap::const_iterator i = nodeMap.find(identifier);
-  if (i == nodeMap.end()) {
-    return nullptr;
-  }
-  return i->second;
+  return nullptr;
 }
 
 void reportError(cmGeneratorExpressionContext* context,
@@ -2066,6 +2206,6 @@ void reportError(cmGeneratorExpressionContext* context,
     << "  " << expr << "\n"
     << result;
   /* clang-format on */
-  context->LG->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                                context->Backtrace);
+  context->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                                e.str(), context->Backtrace);
 }

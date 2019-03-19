@@ -11,7 +11,6 @@
 #include "cm_uv.h"
 #include "cmsys/RegularExpression.hxx"
 
-#include <algorithm>
 #include <condition_variable>
 #include <cstddef>
 #include <deque>
@@ -21,6 +20,8 @@
 #include <set>
 #include <string>
 #include <thread>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
 class cmMakefile;
@@ -28,10 +29,12 @@ class cmMakefile;
 // @brief AUTOMOC and AUTOUIC generator
 class cmQtAutoGeneratorMocUic : public cmQtAutoGenerator
 {
-  CM_DISABLE_COPY(cmQtAutoGeneratorMocUic)
 public:
   cmQtAutoGeneratorMocUic();
   ~cmQtAutoGeneratorMocUic() override;
+
+  cmQtAutoGeneratorMocUic(cmQtAutoGeneratorMocUic const&) = delete;
+  cmQtAutoGeneratorMocUic& operator=(cmQtAutoGeneratorMocUic const&) = delete;
 
 public:
   // -- Types
@@ -49,8 +52,8 @@ public:
     {
     }
 
-    KeyExpT(std::string const& key, std::string const& exp)
-      : Key(key)
+    KeyExpT(std::string key, std::string const& exp)
+      : Key(std::move(key))
       , Exp(exp)
     {
     }
@@ -63,7 +66,6 @@ public:
   ///
   class BaseSettingsT
   {
-    CM_DISABLE_COPY(BaseSettingsT)
   public:
     // -- Volatile methods
     BaseSettingsT(FileSystem* fileSystem)
@@ -74,6 +76,9 @@ public:
       , FileSys(fileSystem)
     {
     }
+
+    BaseSettingsT(BaseSettingsT const&) = delete;
+    BaseSettingsT& operator=(BaseSettingsT const&) = delete;
 
     // -- Const methods
     std::string AbsoluteBuildPath(std::string const& relativePath) const;
@@ -103,12 +108,14 @@ public:
   ///
   class MocSettingsT
   {
-    CM_DISABLE_COPY(MocSettingsT)
   public:
     MocSettingsT(FileSystem* fileSys)
       : FileSys(fileSys)
     {
     }
+
+    MocSettingsT(MocSettingsT const&) = delete;
+    MocSettingsT& operator=(MocSettingsT const&) = delete;
 
     // -- Const methods
     bool skipped(std::string const& fileName) const;
@@ -127,7 +134,7 @@ public:
     std::string CompFileAbs;
     std::string PredefsFileRel;
     std::string PredefsFileAbs;
-    std::set<std::string> SkipList;
+    std::unordered_set<std::string> SkipList;
     std::vector<std::string> IncludePaths;
     std::vector<std::string> Includes;
     std::vector<std::string> Definitions;
@@ -145,9 +152,12 @@ public:
   ///
   class UicSettingsT
   {
-    CM_DISABLE_COPY(UicSettingsT)
   public:
     UicSettingsT() = default;
+
+    UicSettingsT(UicSettingsT const&) = delete;
+    UicSettingsT& operator=(UicSettingsT const&) = delete;
+
     // -- Const methods
     bool skipped(std::string const& fileName) const;
 
@@ -155,7 +165,7 @@ public:
     bool Enabled = false;
     bool SettingsChanged = false;
     std::string Executable;
-    std::set<std::string> SkipList;
+    std::unordered_set<std::string> SkipList;
     std::vector<std::string> TargetOptions;
     std::map<std::string, std::vector<std::string>> Options;
     std::vector<std::string> SearchPaths;
@@ -166,23 +176,19 @@ public:
   ///
   class JobT
   {
-    CM_DISABLE_COPY(JobT)
   public:
     JobT() = default;
     virtual ~JobT() = default;
+
+    JobT(JobT const&) = delete;
+    JobT& operator=(JobT const&) = delete;
+
     // -- Abstract processing interface
     virtual void Process(WorkerT& wrk) = 0;
   };
 
-  /// @brief Deleter for classes derived from Job
-  ///
-  struct JobDeleterT
-  {
-    void operator()(JobT* job);
-  };
-
   // Job management types
-  typedef std::unique_ptr<JobT, JobDeleterT> JobHandleT;
+  typedef std::unique_ptr<JobT> JobHandleT;
   typedef std::deque<JobHandleT> JobQueueT;
 
   /// @brief Parse source job
@@ -240,10 +246,10 @@ public:
   class JobMocT : public JobT
   {
   public:
-    JobMocT(std::string&& sourceFile, std::string const& includerFile,
+    JobMocT(std::string&& sourceFile, std::string includerFile,
             std::string&& includeString)
       : SourceFile(std::move(sourceFile))
-      , IncluderFile(includerFile)
+      , IncluderFile(std::move(includerFile))
       , IncludeString(std::move(includeString))
     {
     }
@@ -269,10 +275,10 @@ public:
   class JobUicT : public JobT
   {
   public:
-    JobUicT(std::string&& sourceFile, std::string const& includerFile,
+    JobUicT(std::string&& sourceFile, std::string includerFile,
             std::string&& includeString)
       : SourceFile(std::move(sourceFile))
-      , IncluderFile(includerFile)
+      , IncluderFile(std::move(includerFile))
       , IncludeString(std::move(includeString))
     {
     }
@@ -293,10 +299,12 @@ public:
   ///
   class WorkerT
   {
-    CM_DISABLE_COPY(WorkerT)
   public:
     WorkerT(cmQtAutoGeneratorMocUic* gen, uv_loop_t* uvLoop);
     ~WorkerT();
+
+    WorkerT(WorkerT const&) = delete;
+    WorkerT& operator=(WorkerT const&) = delete;
 
     // -- Const accessors
     cmQtAutoGeneratorMocUic& Gen() const { return *Gen_; }
@@ -307,22 +315,22 @@ public:
     const UicSettingsT& Uic() const { return Gen_->Uic(); }
 
     // -- Log info
-    void LogInfo(GeneratorT genType, std::string const& message) const;
+    void LogInfo(GenT genType, std::string const& message) const;
     // -- Log warning
-    void LogWarning(GeneratorT genType, std::string const& message) const;
-    void LogFileWarning(GeneratorT genType, std::string const& filename,
+    void LogWarning(GenT genType, std::string const& message) const;
+    void LogFileWarning(GenT genType, std::string const& filename,
                         std::string const& message) const;
     // -- Log error
-    void LogError(GeneratorT genType, std::string const& message) const;
-    void LogFileError(GeneratorT genType, std::string const& filename,
+    void LogError(GenT genType, std::string const& message) const;
+    void LogFileError(GenT genType, std::string const& filename,
                       std::string const& message) const;
-    void LogCommandError(GeneratorT genType, std::string const& message,
+    void LogCommandError(GenT genType, std::string const& message,
                          std::vector<std::string> const& command,
                          std::string const& output) const;
 
     // -- External processes
     /// @brief Verbose logging version
-    bool RunProcess(GeneratorT genType, ProcessResultT& result,
+    bool RunProcess(GenT genType, ProcessResultT& result,
                     std::vector<std::string> const& command);
 
   private:
@@ -375,7 +383,7 @@ public:
   bool ParallelJobPushMoc(JobHandleT& jobHandle);
   bool ParallelJobPushUic(JobHandleT& jobHandle);
   bool ParallelMocIncluded(std::string const& sourceFile);
-  void ParallelMocAutoRegister(std::string const& mocFile);
+  std::string ParallelMocAutoRegister(std::string const& baseName);
   void ParallelMocAutoUpdated();
 
 private:
@@ -404,7 +412,7 @@ private:
   MocSettingsT Moc_;
   UicSettingsT Uic_;
   // -- Progress
-  StageT Stage_;
+  StageT Stage_ = StageT::SETTINGS_READ;
   // -- Job queues
   std::mutex JobsMutex_;
   struct
@@ -416,15 +424,15 @@ private:
     JobQueueT Uic;
   } JobQueues_;
   JobQueueT JobQueue_;
-  std::size_t volatile JobsRemain_;
-  bool volatile JobError_;
-  bool volatile JobThreadsAbort_;
+  std::size_t volatile JobsRemain_ = 0;
+  bool volatile JobError_ = false;
+  bool volatile JobThreadsAbort_ = false;
   std::condition_variable JobsConditionRead_;
   // -- Moc meta
   std::set<std::string> MocIncludedStrings_;
   std::set<std::string> MocIncludedFiles_;
   std::set<std::string> MocAutoFiles_;
-  bool volatile MocAutoFileUpdated_;
+  bool volatile MocAutoFileUpdated_ = false;
   // -- Settings file
   std::string SettingsFile_;
   std::string SettingsStringMoc_;

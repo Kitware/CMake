@@ -11,13 +11,9 @@
 #include "cmSystemTools.h"
 #include "cm_sys_stat.h"
 
-cmCPackOSXX11Generator::cmCPackOSXX11Generator()
-{
-}
+cmCPackOSXX11Generator::cmCPackOSXX11Generator() = default;
 
-cmCPackOSXX11Generator::~cmCPackOSXX11Generator()
-{
-}
+cmCPackOSXX11Generator::~cmCPackOSXX11Generator() = default;
 
 int cmCPackOSXX11Generator::PackageFiles()
 {
@@ -87,7 +83,7 @@ int cmCPackOSXX11Generator::PackageFiles()
       return 0;
     }
     std::string destFileName = resourcesDirectory + "/" + iconFileName;
-    this->ConfigureFile(iconFile, destFileName.c_str(), true);
+    this->ConfigureFile(iconFile, destFileName, true);
     this->SetOptionIfNotSet("CPACK_APPLE_GUI_ICON", iconFileName.c_str());
   }
 
@@ -159,8 +155,8 @@ int cmCPackOSXX11Generator::PackageFiles()
   bool res = false;
   while (numTries > 0) {
     res = cmSystemTools::RunSingleCommand(
-      dmgCmd.str().c_str(), &output, &output, &retVal, nullptr,
-      this->GeneratorVerbose, cmDuration::zero());
+      dmgCmd.str(), &output, &output, &retVal, nullptr, this->GeneratorVerbose,
+      cmDuration::zero());
     if (res && !retVal) {
       numTries = -1;
       break;
@@ -169,7 +165,7 @@ int cmCPackOSXX11Generator::PackageFiles()
     numTries--;
   }
   if (!res || retVal) {
-    cmGeneratedFileStream ofs(tmpFile.c_str());
+    cmGeneratedFileStream ofs(tmpFile);
     ofs << "# Run command: " << dmgCmd.str() << std::endl
         << "# Output:" << std::endl
         << output << std::endl;
@@ -240,7 +236,7 @@ bool cmCPackOSXX11Generator::CopyCreateResourceFile(const std::string& name)
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: "
                 << (inFileName ? inFileName : "(NULL)")
                 << " to " << destFileName << std::endl);
-  this->ConfigureFile(inFileName, destFileName.c_str());
+  this->ConfigureFile(inFileName, destFileName);
   return true;
 }
 */
@@ -270,7 +266,7 @@ bool cmCPackOSXX11Generator::CopyResourcePlistFile(
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Configure file: " << inFileName << " to " << destFileName
                                    << std::endl);
-  this->ConfigureFile(inFileName.c_str(), destFileName.c_str(), copyOnly);
+  this->ConfigureFile(inFileName, destFileName, copyOnly);
   return true;
 }
 

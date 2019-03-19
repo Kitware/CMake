@@ -1,9 +1,9 @@
 add_link_options
 ----------------
 
-Adds options to the link of shared library, module and executable targets.
+Add options to the link of shared library, module and executable targets.
 
-::
+.. code-block:: cmake
 
   add_link_options(<option> ...)
 
@@ -21,6 +21,6 @@ the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
 manual for more on defining buildsystem properties.
 
-.. include:: LINK_OPTIONS_LINKER.txt
-
 .. include:: OPTIONS_SHELL.txt
+
+.. include:: LINK_OPTIONS_LINKER.txt

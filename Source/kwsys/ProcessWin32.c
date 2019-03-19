@@ -973,8 +973,8 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     wchar_t* wstdin = kwsysEncoding_DupToWide(cp->PipeFileSTDIN);
     DWORD error;
     cp->PipeChildStd[0] =
-      CreateFileW(wstdin, GENERIC_READ | GENERIC_WRITE,
-                  FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
+      CreateFileW(wstdin, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
+                  OPEN_EXISTING, 0, 0);
     error = GetLastError(); /* Check now in case free changes this.  */
     free(wstdin);
     if (cp->PipeChildStd[0] == INVALID_HANDLE_VALUE) {

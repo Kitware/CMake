@@ -5,9 +5,9 @@
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
-#include "cmake.h"
 
 #include <cstring>
 #include <sstream>
@@ -76,6 +76,8 @@ public:
       }
     }
   }
+  SaveRestoreErrorState(const SaveRestoreErrorState&) = delete;
+  SaveRestoreErrorState& operator=(const SaveRestoreErrorState&) = delete;
 
 private:
   bool InitialErrorState;
@@ -151,9 +153,9 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
       cmSystemTools::CollapseFullPath(this->Values[ct_BUILD]).c_str(),
       this->Quiet);
   } else {
-    const char* bdir =
+    std::string const& bdir =
       this->Makefile->GetSafeDefinition("CTEST_BINARY_DIRECTORY");
-    if (bdir) {
+    if (!bdir.empty()) {
       this->CTest->SetCTestConfiguration(
         "BuildDirectory", cmSystemTools::CollapseFullPath(bdir).c_str(),
         this->Quiet);
@@ -206,18 +208,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
 
   handler->PopulateCustomVectors(this->Makefile);
   if (this->Values[ct_SUBMIT_INDEX]) {
-    if (!this->CTest->GetDropSiteCDash() &&
-        this->CTest->GetDartVersion() <= 1) {
-      cmCTestLog(
-        this->CTest, ERROR_MESSAGE,
-        "Dart before version 2.0 does not support collecting submissions."
-          << std::endl
-          << "Please upgrade the server to Dart 2 or higher, or do not use "
-             "SUBMIT_INDEX."
-          << std::endl);
-    } else {
-      handler->SetSubmitIndex(atoi(this->Values[ct_SUBMIT_INDEX]));
-    }
+    handler->SetSubmitIndex(atoi(this->Values[ct_SUBMIT_INDEX]));
   }
   cmWorkingDirectory workdir(
     this->CTest->GetCTestConfiguration("BuildDirectory"));
@@ -300,7 +291,7 @@ bool cmCTestHandlerCommand::CheckArgumentValue(std::string const& arg)
     if (this->Values[k]) {
       std::ostringstream e;
       e << "Called with more than one value for " << this->Arguments[k];
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       this->ArgumentDoing = ArgumentDoingError;
       return true;
     }

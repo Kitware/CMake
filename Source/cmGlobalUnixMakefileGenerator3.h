@@ -127,15 +127,12 @@ public:
   std::string GetEmptyRuleHackDepends() { return this->EmptyRuleHackDepends; }
 
   // change the build command for speed
-  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
-                            const std::string& makeProgram,
-                            const std::string& projectName,
-                            const std::string& projectDir,
-                            const std::string& targetName,
-                            const std::string& config, bool fast, int jobs,
-                            bool verbose,
-                            std::vector<std::string> const& makeOptions =
-                              std::vector<std::string>()) override;
+  std::vector<GeneratedMakeCommand> GenerateBuildCommand(
+    const std::string& makeProgram, const std::string& projectName,
+    const std::string& projectDir, std::vector<std::string> const& targetNames,
+    const std::string& config, bool fast, int jobs, bool verbose,
+    std::vector<std::string> const& makeOptions =
+      std::vector<std::string>()) override;
 
   /** Record per-target progress information.  */
   void RecordTargetProgress(cmMakefileTargetGenerator* tg);
@@ -217,11 +214,7 @@ protected:
   // Store per-target progress counters.
   struct TargetProgress
   {
-    TargetProgress()
-      : NumberOfActions(0)
-    {
-    }
-    unsigned long NumberOfActions;
+    unsigned long NumberOfActions = 0;
     std::string VariableFile;
     std::vector<unsigned long> Marks;
     void WriteProgressVariables(unsigned long total, unsigned long& current);

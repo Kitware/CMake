@@ -11,6 +11,12 @@ endif()
 
 include(CMakeTestCompilerCommon)
 
+# work around enforced code signing and / or missing exectuable target type
+set(__CMAKE_SAVED_TRY_COMPILE_TARGET_TYPE ${CMAKE_TRY_COMPILE_TARGET_TYPE})
+if(_CMAKE_FEATURE_DETECTION_TARGET_TYPE)
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE ${_CMAKE_FEATURE_DETECTION_TARGET_TYPE})
+endif()
+
 # Remove any cached result from an older CMake version.
 # We now store this in CMakeCCompiler.cmake.
 unset(CMAKE_C_COMPILER_WORKS CACHE)
@@ -22,6 +28,7 @@ unset(CMAKE_C_COMPILER_WORKS CACHE)
 # any makefiles or projects.
 if(NOT CMAKE_C_COMPILER_WORKS)
   PrintTestCompilerStatus("C" "")
+  __TestCompiler_setTryCompileTargetType()
   file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler.c
     "#ifdef __cplusplus\n"
     "# error \"The CMAKE_C_COMPILER is set to a C++ compiler\"\n"
@@ -41,6 +48,7 @@ if(NOT CMAKE_C_COMPILER_WORKS)
   set(CMAKE_C_COMPILER_WORKS ${CMAKE_C_COMPILER_WORKS})
   unset(CMAKE_C_COMPILER_WORKS CACHE)
   set(C_TEST_WAS_RUN 1)
+  __TestCompiler_restoreTryCompileTargetType()
 endif()
 
 if(NOT CMAKE_C_COMPILER_WORKS)
@@ -84,4 +92,6 @@ else()
   endif()
 endif()
 
+set(CMAKE_TRY_COMPILE_TARGET_TYPE ${__CMAKE_SAVED_TRY_COMPILE_TARGET_TYPE})
+unset(__CMAKE_SAVED_TRY_COMPILE_TARGET_TYPE)
 unset(__CMAKE_C_COMPILER_OUTPUT)

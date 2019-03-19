@@ -6,6 +6,7 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmake.h"
 
 cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator(cmake* cm)
   : cmGlobalUnixMakefileGenerator3(cm)
@@ -53,11 +54,12 @@ void cmGlobalNMakeMakefileGenerator::PrintCompilerAdvice(
   this->cmGlobalUnixMakefileGenerator3::PrintCompilerAdvice(os, lang, envVar);
 }
 
-void cmGlobalNMakeMakefileGenerator::GenerateBuildCommand(
-  std::vector<std::string>& makeCommand, const std::string& makeProgram,
-  const std::string& projectName, const std::string& projectDir,
-  const std::string& targetName, const std::string& config, bool fast,
-  int /*jobs*/, bool verbose, std::vector<std::string> const& makeOptions)
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalNMakeMakefileGenerator::GenerateBuildCommand(
+  const std::string& makeProgram, const std::string& projectName,
+  const std::string& projectDir, std::vector<std::string> const& targetNames,
+  const std::string& config, bool fast, int /*jobs*/, bool verbose,
+  std::vector<std::string> const& makeOptions)
 {
   std::vector<std::string> nmakeMakeOptions;
 
@@ -67,9 +69,9 @@ void cmGlobalNMakeMakefileGenerator::GenerateBuildCommand(
   nmakeMakeOptions.insert(nmakeMakeOptions.end(), makeOptions.begin(),
                           makeOptions.end());
 
-  this->cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
-    makeCommand, makeProgram, projectName, projectDir, targetName, config,
-    fast, cmake::NO_BUILD_PARALLEL_LEVEL, verbose, nmakeMakeOptions);
+  return this->cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
+    makeProgram, projectName, projectDir, targetNames, config, fast,
+    cmake::NO_BUILD_PARALLEL_LEVEL, verbose, nmakeMakeOptions);
 }
 
 void cmGlobalNMakeMakefileGenerator::PrintBuildCommandAdvice(std::ostream& os,

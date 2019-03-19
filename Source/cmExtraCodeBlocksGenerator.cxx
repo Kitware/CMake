@@ -13,6 +13,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
@@ -32,10 +33,7 @@ Discussion:
 http://forums.codeblocks.org/index.php/topic,6789.0.html
 */
 
-cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator()
-  : cmExternalMakefileProjectGenerator()
-{
-}
+cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator() = default;
 
 cmExternalMakefileProjectGeneratorFactory*
 cmExtraCodeBlocksGenerator::GetFactory()
@@ -250,8 +248,8 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
 
   // figure out the compiler
   std::string compiler = this->GetCBCompilerId(mf);
-  std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-  const std::string makeArgs =
+  const std::string& make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& makeArgs =
     mf->GetSafeDefinition("CMAKE_CODEBLOCKS_MAKE_ARGUMENTS");
 
   cmXMLWriter xml(fout);
@@ -365,7 +363,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
             // don't add source files from UTILITY target which have the
             // GENERATED property set:
             if (gt->GetType() == cmStateEnums::UTILITY &&
-                s->GetPropertyAsBool("GENERATED")) {
+                s->GetIsGenerated()) {
               continue;
             }
 
@@ -592,10 +590,9 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
     std::vector<std::string>::const_iterator end =
       cmRemoveDuplicates(allIncludeDirs);
 
-    for (std::vector<std::string>::const_iterator i = allIncludeDirs.begin();
-         i != end; ++i) {
+    for (std::string const& str : cmMakeRange(allIncludeDirs.cbegin(), end)) {
       xml.StartElement("Add");
-      xml.Attribute("directory", *i);
+      xml.Attribute("directory", str);
       xml.EndElement();
     }
 
@@ -666,7 +663,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
     pureFortran = true;
   }
 
-  std::string compilerId = mf->GetSafeDefinition(compilerIdVar);
+  std::string const& compilerId = mf->GetSafeDefinition(compilerIdVar);
   std::string compiler = "gcc"; // default to gcc
   if (compilerId == "MSVC") {
     if (mf->IsDefinitionSet("MSVC10")) {

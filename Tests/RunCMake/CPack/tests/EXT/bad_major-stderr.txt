@@ -1,6 +1,0 @@
-CMake Error at .*/Modules/Internal/CPack/CPackExt\.cmake:[0-9]+ \(message\):
-  Could not find a suitable version in CPACK_EXT_REQUESTED_VERSIONS
-
-
-CPack Error: Error while executing CPackExt\.cmake
-CPack Error: Cannot initialize the generator Ext

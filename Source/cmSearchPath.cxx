@@ -16,9 +16,7 @@ cmSearchPath::cmSearchPath(cmFindCommon* findCmd)
 {
 }
 
-cmSearchPath::~cmSearchPath()
-{
-}
+cmSearchPath::~cmSearchPath() = default;
 
 void cmSearchPath::ExtractWithout(const std::set<std::string>& ignore,
                                   std::vector<std::string>& outPaths,
@@ -146,7 +144,7 @@ void cmSearchPath::AddSuffixes(const std::vector<std::string>& suffixes)
     // this will get incorrectly considered a network
     // path on windows and cause huge delays.
     std::string p = inPath;
-    if (!p.empty() && *p.rbegin() != '/') {
+    if (!p.empty() && p.back() != '/') {
       p += "/";
     }
 
@@ -178,7 +176,7 @@ void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
 
   for (std::string const& path : paths) {
     std::string dir = path;
-    if (!subdir.empty() && !dir.empty() && *dir.rbegin() != '/') {
+    if (!subdir.empty() && !dir.empty() && dir.back() != '/') {
       dir += "/";
     }
     if (subdir == "include" || subdir == "lib") {

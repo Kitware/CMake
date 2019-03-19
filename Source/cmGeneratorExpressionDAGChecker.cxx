@@ -7,6 +7,7 @@
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
+#include "cmMessageType.h"
 #include "cmake.h"
 
 #include <sstream>
@@ -14,26 +15,26 @@
 #include <utility>
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
-  const cmListFileBacktrace& backtrace, cmGeneratorTarget const* target,
-  const std::string& property, const GeneratorExpressionContent* content,
+  cmListFileBacktrace backtrace, cmGeneratorTarget const* target,
+  std::string property, const GeneratorExpressionContent* content,
   cmGeneratorExpressionDAGChecker* parent)
   : Parent(parent)
   , Target(target)
-  , Property(property)
+  , Property(std::move(property))
   , Content(content)
-  , Backtrace(backtrace)
+  , Backtrace(std::move(backtrace))
   , TransitivePropertiesOnly(false)
 {
   Initialize();
 }
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
-  cmGeneratorTarget const* target, const std::string& property,
+  cmGeneratorTarget const* target, std::string property,
   const GeneratorExpressionContent* content,
   cmGeneratorExpressionDAGChecker* parent)
   : Parent(parent)
   , Target(target)
-  , Property(property)
+  , Property(std::move(property))
   , Content(content)
   , Backtrace()
   , TransitivePropertiesOnly(false)
@@ -55,7 +56,7 @@ void cmGeneratorExpressionDAGChecker::Initialize()
 
   if (CheckResult == DAG &&
       (CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
-        TEST_TRANSITIVE_PROPERTY_METHOD) false)) // NOLINT(clang-tidy)
+        TEST_TRANSITIVE_PROPERTY_METHOD) false)) // NOLINT(*)
 #undef TEST_TRANSITIVE_PROPERTY_METHOD
   {
     std::map<cmGeneratorTarget const*, std::set<std::string>>::const_iterator
@@ -99,8 +100,8 @@ void cmGeneratorExpressionDAGChecker::ReportError(
       << "  " << expr << "\n"
       << "Self reference on target \"" << context->HeadTarget->GetName()
       << "\".\n";
-    context->LG->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                                  parent->Backtrace);
+    context->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                                  e.str(), parent->Backtrace);
     return;
   }
 
@@ -111,8 +112,8 @@ void cmGeneratorExpressionDAGChecker::ReportError(
     << "  " << expr << "\n"
     << "Dependency loop found.";
     /* clang-format on */
-    context->LG->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                                  context->Backtrace);
+    context->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                                  e.str(), context->Backtrace);
   }
 
   int loopStep = 1;
@@ -122,8 +123,8 @@ void cmGeneratorExpressionDAGChecker::ReportError(
       << "  "
       << (parent->Content ? parent->Content->GetOriginalExpression() : expr)
       << "\n";
-    context->LG->GetCMakeInstance()->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                                  parent->Backtrace);
+    context->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                                  e.str(), parent->Backtrace);
     parent = parent->Parent;
     ++loopStep;
   }
@@ -156,6 +157,12 @@ bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnly()
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingGenexExpression()
 {
+  return this->Property.find("TARGET_GENEX_EVAL:") == 0 ||
+    this->Property.find("GENEX_EVAL:", 0) == 0;
+}
+
+bool cmGeneratorExpressionDAGChecker::EvaluatingPICExpression()
+{
   const cmGeneratorExpressionDAGChecker* top = this;
   const cmGeneratorExpressionDAGChecker* parent = this->Parent;
   while (parent) {
@@ -163,7 +170,7 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingGenexExpression()
     parent = parent->Parent;
   }
 
-  return top->Property == "TARGET_GENEX_EVAL" || top->Property == "GENEX_EVAL";
+  return top->Property == "INTERFACE_POSITION_INDEPENDENT_CODE";
 }
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(

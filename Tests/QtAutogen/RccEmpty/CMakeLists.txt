@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(RccEmpty)
-include("../AutogenTest.cmake")
+include("../AutogenCoreTest.cmake")
 
 # Test AUTORCC on a .qrc file with no resource files
 add_executable(rccEmpty rccEmpty.cpp rccEmptyRes.qrc)

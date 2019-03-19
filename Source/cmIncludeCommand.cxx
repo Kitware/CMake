@@ -6,9 +6,9 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -58,7 +58,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   if (fname.empty()) {
-    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING,
                                  "include() given empty file name (ignored).");
     return true;
   }
@@ -67,7 +67,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args,
     // Not a path. Maybe module.
     std::string module = fname;
     module += ".cmake";
-    std::string mfile = this->Makefile->GetModulesFile(module.c_str());
+    std::string mfile = this->Makefile->GetModulesFile(module);
     if (!mfile.empty()) {
       fname = mfile;
     }
@@ -80,7 +80,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args,
   if (gg->IsExportedTargetsFile(fname_abs)) {
     const char* modal = nullptr;
     std::ostringstream e;
-    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    MessageType messageType = MessageType::AUTHOR_WARNING;
 
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0024)) {
       case cmPolicies::WARN:
@@ -92,7 +92,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args,
       case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
         modal = "may";
-        messageType = cmake::FATAL_ERROR;
+        messageType = MessageType::FATAL_ERROR;
     }
     if (modal) {
       e << "The file\n  " << fname_abs
@@ -103,7 +103,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args,
            "include() command.  Use ALIAS targets instead to refer to targets "
            "by alternative names.\n";
       this->Makefile->IssueMessage(messageType, e.str());
-      if (messageType == cmake::FATAL_ERROR) {
+      if (messageType == MessageType::FATAL_ERROR) {
         return false;
       }
     }
@@ -120,8 +120,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args,
     return true;
   }
 
-  bool readit =
-    this->Makefile->ReadDependentFile(listFile.c_str(), noPolicyScope);
+  bool readit = this->Makefile->ReadDependentFile(listFile, noPolicyScope);
 
   // add the location of the included file if a result variable was given
   if (!resultVarName.empty()) {

@@ -8,3 +8,15 @@ driver option and the rest of the option string defines linker arguments using
 
 For example, ``"LINKER:-z,defs"`` becomes ``-Xlinker -z -Xlinker defs`` for
 ``Clang`` and ``-Wl,-z,defs`` for ``GNU GCC``.
+
+The ``LINKER:`` prefix can be specified as part of a ``SHELL:`` prefix
+expression.
+
+The ``LINKER:`` prefix supports, as alternate syntax, specification of
+arguments using ``SHELL:`` prefix and space as separator. Previous example
+becomes ``"LINKER:SHELL:-z defs"``.
+
+.. note::
+
+  Specifying ``SHELL:`` prefix elsewhere than at the beginning of the
+  ``LINKER:`` prefix is not supported.

@@ -35,7 +35,7 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E md5sum
   "@CMAKE_CURRENT_BINARY_DIR@/uploads/file1.png"
   OUTPUT_VARIABLE sum1
   OUTPUT_STRIP_TRAILING_WHITESPACE)
-if(NOT sum1 MATCHES "^d16778650db435bda3a8c3435c3ff5d1  .*/uploads/file1.png$")
+if(NOT sum1 MATCHES "^dbd330d52f4dbd60115d4191904ded92  .*/uploads/file1.png$")
   message(FATAL_ERROR "file1.png did not upload correctly (sum1='${sum1}')")
 endif()
 
@@ -43,7 +43,7 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E md5sum
   "@CMAKE_CURRENT_BINARY_DIR@/uploads/file2.png"
   OUTPUT_VARIABLE sum2
   OUTPUT_STRIP_TRAILING_WHITESPACE)
-if(NOT sum2 MATCHES "^d16778650db435bda3a8c3435c3ff5d1  .*/uploads/file2.png$")
+if(NOT sum2 MATCHES "^dbd330d52f4dbd60115d4191904ded92  .*/uploads/file2.png$")
   message(FATAL_ERROR "file2.png did not upload correctly (sum2='${sum2}')")
 endif()
 

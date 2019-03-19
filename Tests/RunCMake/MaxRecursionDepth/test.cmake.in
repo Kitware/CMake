@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.12)
+set(CTEST_RUN_CURRENT_SCRIPT 0)
+
+set(CTEST_SOURCE_DIRECTORY "@RunCMake_SOURCE_DIR@")
+set(CTEST_BINARY_DIRECTORY "@RunCMake_BINARY_DIR@")
+set(CTEST_COMMAND "${CMAKE_CTEST_COMMAND}")
+
+if(TEST_NAME STREQUAL "ctest_read_custom_files")
+  set(x 2)
+  ctest_read_custom_files("@RunCMake_SOURCE_DIR@")
+elseif(TEST_NAME STREQUAL "ctest_run_script")
+  foreach(LEVEL_CURRENT RANGE 2 15)
+    math(EXPR LEVEL_NEXT "${LEVEL_CURRENT} + 1")
+    configure_file("@RunCMake_SOURCE_DIR@/ctest_run_script.cmake.in" "@RunCMake_BINARY_DIR@/ctest_run_script_${LEVEL_CURRENT}.cmake" @ONLY)
+  endforeach()
+
+  ctest_run_script("@RunCMake_BINARY_DIR@/ctest_run_script_2.cmake" RETURN_VALUE val)
+  if(NOT val EQUAL 0)
+    message(FATAL_ERROR "Nested script failed")
+  endif()
+endif()

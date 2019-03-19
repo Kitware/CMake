@@ -7,6 +7,14 @@ cmake-env-variables(7)
 
    .. contents::
 
+This page lists environment variables that have special
+meaning to CMake.
+
+For general information on environment variables, see the
+:ref:`Environment Variables <CMake Language Environment Variables>`
+section in the cmake-language manual.
+
+
 Environment Variables that Control the Build
 ============================================
 
@@ -16,11 +24,13 @@ Environment Variables that Control the Build
    /envvar/CMAKE_BUILD_PARALLEL_LEVEL
    /envvar/CMAKE_CONFIG_TYPE
    /envvar/CMAKE_MSVCIDE_RUN_PATH
+   /envvar/CMAKE_NO_VERBOSE
    /envvar/CMAKE_OSX_ARCHITECTURES
    /envvar/DESTDIR
    /envvar/LDFLAGS
    /envvar/MACOSX_DEPLOYMENT_TARGET
    /envvar/PackageName_ROOT
+   /envvar/VERBOSE
 
 Environment Variables for Languages
 ===================================
@@ -53,5 +63,6 @@ Environment Variables for CTest
    /envvar/CTEST_INTERACTIVE_DEBUG_MODE
    /envvar/CTEST_OUTPUT_ON_FAILURE
    /envvar/CTEST_PARALLEL_LEVEL
+   /envvar/CTEST_PROGRESS_OUTPUT
    /envvar/CTEST_USE_LAUNCHERS_DEFAULT
    /envvar/DASHBOARD_TEST_FROM_CTEST

@@ -30,14 +30,15 @@
 #include "curl_setup.h"
 
 #ifdef USE_SCHANNEL
-
-#define EXPOSE_SCHANNEL_INTERNAL_STRUCTS
-
 #ifndef USE_WINDOWS_SSPI
 #  error "Can't compile SCHANNEL support without SSPI."
 #endif
 
+#define EXPOSE_SCHANNEL_INTERNAL_STRUCTS
 #include "schannel.h"
+
+#ifdef HAS_MANUAL_VERIFY_API
+
 #include "vtls.h"
 #include "sendf.h"
 #include "strerror.h"
@@ -53,7 +54,7 @@
 #define BACKEND connssl->backend
 
 #define MAX_CAFILE_SIZE 1048576 /* 1 MiB */
-#define BEGIN_CERT "-----BEGIN CERTIFICATE-----\n"
+#define BEGIN_CERT "-----BEGIN CERTIFICATE-----"
 #define END_CERT "\n-----END CERTIFICATE-----"
 
 typedef struct {
@@ -71,6 +72,10 @@ typedef struct {
   HCERTSTORE hExclusiveTrustedPeople;
 } CERT_CHAIN_ENGINE_CONFIG_WIN7, *PCERT_CHAIN_ENGINE_CONFIG_WIN7;
 
+static int is_cr_or_lf(char c)
+{
+  return c == '\r' || c == '\n';
+}
 
 static CURLcode add_certs_to_store(HCERTSTORE trust_store,
                                    const char *ca_file,
@@ -130,7 +135,7 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
     failf(data,
           "schannel: CA file exceeds max size of %u bytes",
           MAX_CAFILE_SIZE);
-    result = CURLE_OUT_OF_MEMORY;
+    result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
 
@@ -177,7 +182,7 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
   current_ca_file_ptr = ca_file_buffer;
   while(more_certs && *current_ca_file_ptr != '\0') {
     char *begin_cert_ptr = strstr(current_ca_file_ptr, BEGIN_CERT);
-    if(!begin_cert_ptr) {
+    if(!begin_cert_ptr || !is_cr_or_lf(begin_cert_ptr[strlen(BEGIN_CERT)])) {
       more_certs = 0;
     }
     else {
@@ -209,7 +214,7 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
                              NULL,
                              NULL,
                              NULL,
-                             &cert_context)) {
+                             (const void **)&cert_context)) {
 
           failf(data,
                 "schannel: failed to extract certificate from CA file "
@@ -239,7 +244,7 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
             CertFreeCertificateContext(cert_context);
             if(!add_cert_result) {
               failf(data,
-                    "schannel: failed to add certificate from CA file '%s'"
+                    "schannel: failed to add certificate from CA file '%s' "
                     "to certificate store: %s",
                     ca_file, Curl_strerror(conn, GetLastError()));
               result = CURLE_SSL_CACERT_BADFILE;
@@ -314,6 +319,10 @@ static CURLcode verify_host(struct Curl_easy *data,
    * embedded null bytes. This appears to be undocumented behavior.
    */
   cert_hostname_buff = (LPTSTR)malloc(len * sizeof(TCHAR));
+  if(!cert_hostname_buff) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto cleanup;
+  }
   actual_len = CertGetNameString(pCertContextServer,
                                  CERT_NAME_DNS_TYPE,
                                  name_flags,
@@ -548,4 +557,5 @@ CURLcode verify_certificate(struct connectdata *conn, int sockindex)
   return result;
 }
 
+#endif /* HAS_MANUAL_VERIFY_API */
 #endif /* USE_SCHANNEL */

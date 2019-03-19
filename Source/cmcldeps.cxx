@@ -221,7 +221,7 @@ static int process(const std::string& srcfilename, const std::string& dfile,
   while (std::getline(ss, line)) {
     if (startsWith(line, prefix)) {
       std::string inc = trimLeadingSpace(line.substr(prefix.size()).c_str());
-      if (inc[inc.size() - 1] == '\r') // blech, stupid \r\n
+      if (inc.back() == '\r') // blech, stupid \r\n
         inc = inc.substr(0, inc.size() - 1);
       includes.push_back(inc);
     } else {
@@ -276,7 +276,7 @@ int main()
 
     std::string clrest = rest;
     // rc: /fo x.dir\x.rc.res  ->  cl: /out:x.dir\x.rc.res.dep.obj
-    clrest = replace(clrest, "/fo", "/out:");
+    clrest = replace(clrest, "/fo ", "/out:");
     clrest = replace(clrest, objfile, objfile + ".dep.obj ");
 
     cl = "\"" + cl + "\" /P /DRC_INVOKED /TC ";

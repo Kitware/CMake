@@ -6,6 +6,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmState.h"
 #include "cmUuid.h"
 #include "cmake.h"
@@ -37,23 +38,17 @@ static cmVS7FlagTable cmVS7ExtraFlagTable[] = {
   // and have EHa passed on the command line by leaving out the table
   // entry.
 
-  { 0, 0, 0, 0, 0 }
+  { "", "", "", "", 0 }
 };
 
 cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
-  cmake* cm, const std::string& platformName)
-  : cmGlobalVisualStudioGenerator(cm)
+  cmake* cm, std::string const& platformInGeneratorName)
+  : cmGlobalVisualStudioGenerator(cm, platformInGeneratorName)
 {
   this->IntelProjectVersion = 0;
   this->DevEnvCommandInitialized = false;
   this->MasmEnabled = false;
   this->NasmEnabled = false;
-
-  if (platformName.empty()) {
-    this->DefaultPlatformName = "Win32";
-  } else {
-    this->DefaultPlatformName = platformName;
-  }
   this->ExtraFlagTable = cmVS7ExtraFlagTable;
 }
 
@@ -195,11 +190,14 @@ const char* cmGlobalVisualStudio7Generator::ExternalProjectType(
   }
   return "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942";
 }
-void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
-  std::vector<std::string>& makeCommand, const std::string& makeProgram,
-  const std::string& projectName, const std::string& /*projectDir*/,
-  const std::string& targetName, const std::string& config, bool /*fast*/,
-  int /*jobs*/, bool /*verbose*/, std::vector<std::string> const& makeOptions)
+
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalVisualStudio7Generator::GenerateBuildCommand(
+  const std::string& makeProgram, const std::string& projectName,
+  const std::string& /*projectDir*/,
+  std::vector<std::string> const& targetNames, const std::string& config,
+  bool /*fast*/, int /*jobs*/, bool /*verbose*/,
+  std::vector<std::string> const& makeOptions)
 {
   // Select the caller- or user-preferred make program, else devenv.
   std::string makeProgramSelected =
@@ -214,35 +212,40 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
     makeProgramSelected = this->GetDevEnvCommand();
   }
 
-  makeCommand.push_back(makeProgramSelected);
+  // Workaround to convince VCExpress.exe to produce output.
+  const bool requiresOutputForward =
+    (makeProgramLower.find("vcexpress") != std::string::npos);
+  std::vector<GeneratedMakeCommand> makeCommands;
 
-  makeCommand.push_back(std::string(projectName) + ".sln");
-  std::string realTarget = targetName;
-  bool clean = false;
-  if (realTarget == "clean") {
-    clean = true;
-    realTarget = "ALL_BUILD";
+  std::vector<std::string> realTargetNames = targetNames;
+  if (targetNames.empty() ||
+      ((targetNames.size() == 1) && targetNames.front().empty())) {
+    realTargetNames = { "ALL_BUILD" };
   }
-  if (clean) {
-    makeCommand.push_back("/clean");
-  } else {
-    makeCommand.push_back("/build");
+  for (const auto& tname : realTargetNames) {
+    std::string realTarget;
+    if (!tname.empty()) {
+      realTarget = tname;
+    } else {
+      continue;
+    }
+    bool clean = false;
+    if (realTarget == "clean") {
+      clean = true;
+      realTarget = "ALL_BUILD";
+    }
+    GeneratedMakeCommand makeCommand;
+    makeCommand.RequiresOutputForward = requiresOutputForward;
+    makeCommand.Add(makeProgramSelected);
+    makeCommand.Add(std::string(projectName) + ".sln");
+    makeCommand.Add((clean ? "/clean" : "/build"));
+    makeCommand.Add((config.empty() ? "Debug" : config));
+    makeCommand.Add("/project");
+    makeCommand.Add(realTarget);
+    makeCommand.Add(makeOptions.begin(), makeOptions.end());
+    makeCommands.emplace_back(std::move(makeCommand));
   }
-
-  if (!config.empty()) {
-    makeCommand.push_back(config);
-  } else {
-    makeCommand.push_back("Debug");
-  }
-  makeCommand.push_back("/project");
-
-  if (!realTarget.empty()) {
-    makeCommand.push_back(realTarget);
-  } else {
-    makeCommand.push_back("ALL_BUILD");
-  }
-  makeCommand.insert(makeCommand.end(), makeOptions.begin(),
-                     makeOptions.end());
+  return makeCommands;
 }
 
 ///! Create a local generator appropriate to this Global Generator
@@ -254,13 +257,14 @@ cmLocalGenerator* cmGlobalVisualStudio7Generator::CreateLocalGenerator(
   return lg;
 }
 
-std::string const& cmGlobalVisualStudio7Generator::GetPlatformName() const
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+Json::Value cmGlobalVisualStudio7Generator::GetJson() const
 {
-  if (!this->GeneratorPlatform.empty()) {
-    return this->GeneratorPlatform;
-  }
-  return this->DefaultPlatformName;
+  Json::Value generator = this->cmGlobalVisualStudioGenerator::GetJson();
+  generator["platform"] = this->GetPlatformName();
+  return generator;
 }
+#endif
 
 bool cmGlobalVisualStudio7Generator::SetSystemName(std::string const& s,
                                                    cmMakefile* mf)
@@ -268,18 +272,6 @@ bool cmGlobalVisualStudio7Generator::SetSystemName(std::string const& s,
   mf->AddDefinition("CMAKE_VS_INTEL_Fortran_PROJECT_VERSION",
                     this->GetIntelProjectVersion());
   return this->cmGlobalVisualStudioGenerator::SetSystemName(s, mf);
-}
-
-bool cmGlobalVisualStudio7Generator::SetGeneratorPlatform(std::string const& p,
-                                                          cmMakefile* mf)
-{
-  if (this->GetPlatformName() == "x64") {
-    mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
-  } else if (this->GetPlatformName() == "Itanium") {
-    mf->AddDefinition("CMAKE_FORCE_IA64", "TRUE");
-  }
-  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName().c_str());
-  return this->cmGlobalVisualStudioGenerator::SetGeneratorPlatform(p, mf);
 }
 
 void cmGlobalVisualStudio7Generator::Generate()
@@ -383,7 +375,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       if (vcprojName) {
         cmLocalGenerator* lg = target->GetLocalGenerator();
         std::string dir = lg->GetCurrentBinaryDirectory();
-        dir = root->ConvertToRelativePath(rootBinaryDir, dir.c_str());
+        dir = root->MaybeConvertToRelativePath(rootBinaryDir, dir.c_str());
         if (dir == ".") {
           dir.clear(); // msbuild cannot handle ".\" prefix
         }

@@ -1,6 +1,8 @@
 ASM<DIALECT>
 ------------
 
+.. include:: ENV_VAR.txt
+
 Preferred executable for compiling a specific dialect of assembly language
 files. ``ASM<DIALECT>`` can be ``ASM``, ``ASM_NASM``, ``ASM_MASM`` or
 ``ASM-ATT``. Will only be used by CMake on the first configuration to determine

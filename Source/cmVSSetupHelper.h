@@ -112,20 +112,18 @@ struct VSInstanceInfo
   bool IsWin10SDKInstalled = false;
   bool IsWin81SDKInstalled = false;
 
-  VSInstanceInfo() = default;
-
   std::string GetInstallLocation() const;
 };
 
 class cmVSSetupAPIHelper
 {
 public:
-  cmVSSetupAPIHelper();
+  cmVSSetupAPIHelper(unsigned int version);
   ~cmVSSetupAPIHelper();
 
   bool SetVSInstance(std::string const& vsInstallLocation);
 
-  bool IsVS2017Installed();
+  bool IsVSInstalled();
   bool GetVSInstanceInfo(std::string& vsInstallLocation);
   bool GetVCToolsetVersion(std::string& vsToolsetVersion);
   bool IsWin10SDKInstalled();
@@ -140,6 +138,8 @@ private:
   int ChooseVSInstance(const std::vector<VSInstanceInfo>& vecVSInstances);
   bool EnumerateAndChooseVSInstance();
 
+  unsigned int Version;
+
   // COM ptrs to query about VS instances
   SmartCOMPtr<ISetupConfiguration> setupConfig;
   SmartCOMPtr<ISetupConfiguration2> setupConfig2;
@@ -150,6 +150,7 @@ private:
   HRESULT comInitialized;
   // current best instance of VS selected
   VSInstanceInfo chosenInstanceInfo;
+  bool IsEWDKEnabled();
 
   std::string SpecifiedVSInstallLocation;
 };

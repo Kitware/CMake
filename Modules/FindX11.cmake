@@ -1,58 +1,59 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindX11
-# -------
-#
-# Find X11 installation
-#
-# Try to find X11 on UNIX systems. The following values are defined
-#
-# ::
-#
-#   X11_FOUND        - True if X11 is available
-#   X11_INCLUDE_DIR  - include directories to use X11
-#   X11_LIBRARIES    - link against these to use X11
-#
-# and also the following more fine grained variables:
-#
-# ::
-#
-#   X11_ICE_INCLUDE_PATH,          X11_ICE_LIB,        X11_ICE_FOUND
-#   X11_SM_INCLUDE_PATH,           X11_SM_LIB,         X11_SM_FOUND
-#   X11_X11_INCLUDE_PATH,          X11_X11_LIB
-#   X11_Xaccessrules_INCLUDE_PATH,                     X11_Xaccess_FOUND
-#   X11_Xaccessstr_INCLUDE_PATH,                       X11_Xaccess_FOUND
-#   X11_Xau_INCLUDE_PATH,          X11_Xau_LIB,        X11_Xau_FOUND
-#   X11_Xcomposite_INCLUDE_PATH,   X11_Xcomposite_LIB, X11_Xcomposite_FOUND
-#   X11_Xcursor_INCLUDE_PATH,      X11_Xcursor_LIB,    X11_Xcursor_FOUND
-#   X11_Xdamage_INCLUDE_PATH,      X11_Xdamage_LIB,    X11_Xdamage_FOUND
-#   X11_Xdmcp_INCLUDE_PATH,        X11_Xdmcp_LIB,      X11_Xdmcp_FOUND
-#   X11_Xext_LIB,       X11_Xext_FOUND
-#   X11_dpms_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_dpms_FOUND
-#   X11_XShm_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_XShm_FOUND
-#   X11_Xshape_INCLUDE_PATH,       (in X11_Xext_LIB),  X11_Xshape_FOUND
-#   X11_xf86misc_INCLUDE_PATH,     X11_Xxf86misc_LIB,  X11_xf86misc_FOUND
-#   X11_xf86vmode_INCLUDE_PATH,    X11_Xxf86vm_LIB     X11_xf86vmode_FOUND
-#   X11_Xfixes_INCLUDE_PATH,       X11_Xfixes_LIB,     X11_Xfixes_FOUND
-#   X11_Xft_INCLUDE_PATH,          X11_Xft_LIB,        X11_Xft_FOUND
-#   X11_Xi_INCLUDE_PATH,           X11_Xi_LIB,         X11_Xi_FOUND
-#   X11_Xinerama_INCLUDE_PATH,     X11_Xinerama_LIB,   X11_Xinerama_FOUND
-#   X11_Xinput_INCLUDE_PATH,       X11_Xinput_LIB,     X11_Xinput_FOUND
-#   X11_Xkb_INCLUDE_PATH,                              X11_Xkb_FOUND
-#   X11_Xkblib_INCLUDE_PATH,                           X11_Xkb_FOUND
-#   X11_Xkbfile_INCLUDE_PATH,      X11_Xkbfile_LIB,    X11_Xkbfile_FOUND
-#   X11_Xmu_INCLUDE_PATH,          X11_Xmu_LIB,        X11_Xmu_FOUND
-#   X11_Xpm_INCLUDE_PATH,          X11_Xpm_LIB,        X11_Xpm_FOUND
-#   X11_XTest_INCLUDE_PATH,        X11_XTest_LIB,      X11_XTest_FOUND
-#   X11_Xrandr_INCLUDE_PATH,       X11_Xrandr_LIB,     X11_Xrandr_FOUND
-#   X11_Xrender_INCLUDE_PATH,      X11_Xrender_LIB,    X11_Xrender_FOUND
-#   X11_Xscreensaver_INCLUDE_PATH, X11_Xscreensaver_LIB, X11_Xscreensaver_FOUND
-#   X11_Xt_INCLUDE_PATH,           X11_Xt_LIB,         X11_Xt_FOUND
-#   X11_Xutil_INCLUDE_PATH,                            X11_Xutil_FOUND
-#   X11_Xv_INCLUDE_PATH,           X11_Xv_LIB,         X11_Xv_FOUND
-#   X11_XSync_INCLUDE_PATH,        (in X11_Xext_LIB),  X11_XSync_FOUND
+#[=======================================================================[.rst:
+FindX11
+-------
+
+Find X11 installation
+
+Try to find X11 on UNIX systems. The following values are defined
+
+::
+
+  X11_FOUND        - True if X11 is available
+  X11_INCLUDE_DIR  - include directories to use X11
+  X11_LIBRARIES    - link against these to use X11
+
+and also the following more fine grained variables and targets:
+
+::
+
+  X11_ICE_INCLUDE_PATH,          X11_ICE_LIB,        X11_ICE_FOUND,        X11::ICE
+  X11_SM_INCLUDE_PATH,           X11_SM_LIB,         X11_SM_FOUND,         X11::SM
+  X11_X11_INCLUDE_PATH,          X11_X11_LIB,                              X11::X11
+  X11_Xaccessrules_INCLUDE_PATH,
+  X11_Xaccessstr_INCLUDE_PATH,                       X11_Xaccess_FOUND
+  X11_Xau_INCLUDE_PATH,          X11_Xau_LIB,        X11_Xau_FOUND,        X11::Xau
+  X11_Xcomposite_INCLUDE_PATH,   X11_Xcomposite_LIB, X11_Xcomposite_FOUND, X11::Xcomposite
+  X11_Xcursor_INCLUDE_PATH,      X11_Xcursor_LIB,    X11_Xcursor_FOUND,    X11::Xcursor
+  X11_Xdamage_INCLUDE_PATH,      X11_Xdamage_LIB,    X11_Xdamage_FOUND,    X11::Xdamage
+  X11_Xdmcp_INCLUDE_PATH,        X11_Xdmcp_LIB,      X11_Xdmcp_FOUND,      X11::Xdmcp
+  X11_Xext_INCLUDE_PATH,         X11_Xext_LIB,       X11_Xext_FOUND,       X11::Xext
+  X11_Xxf86misc_INCLUDE_PATH,    X11_Xxf86misc_LIB,  X11_Xxf86misc_FOUND,  X11::Xxf86misc
+  X11_Xxf86vm_INCLUDE_PATH,      X11_Xxf86vm_LIB     X11_Xxf86vm_FOUND,    X11::Xxf86vm
+  X11_Xfixes_INCLUDE_PATH,       X11_Xfixes_LIB,     X11_Xfixes_FOUND,     X11::Xfixes
+  X11_Xft_INCLUDE_PATH,          X11_Xft_LIB,        X11_Xft_FOUND,        X11::Xft
+  X11_Xi_INCLUDE_PATH,           X11_Xi_LIB,         X11_Xi_FOUND,         X11::Xi
+  X11_Xinerama_INCLUDE_PATH,     X11_Xinerama_LIB,   X11_Xinerama_FOUND,   X11::Xinerama
+  X11_Xkb_INCLUDE_PATH,
+  X11_Xkblib_INCLUDE_PATH,                           X11_Xkb_FOUND,        X11::Xkb
+  X11_xkbfile_INCLUDE_PATH,      X11_xkbfile_LIB,    X11_xkbfile_FOUND,    X11::xkbfile
+  X11_Xmu_INCLUDE_PATH,          X11_Xmu_LIB,        X11_Xmu_FOUND,        X11::Xmu
+  X11_Xpm_INCLUDE_PATH,          X11_Xpm_LIB,        X11_Xpm_FOUND,        X11::Xpm
+  X11_Xtst_INCLUDE_PATH,         X11_Xtst_LIB,       X11_Xtst_FOUND,       X11::Xtst
+  X11_Xrandr_INCLUDE_PATH,       X11_Xrandr_LIB,     X11_Xrandr_FOUND,     X11::Xrandr
+  X11_Xrender_INCLUDE_PATH,      X11_Xrender_LIB,    X11_Xrender_FOUND,    X11::Xrender
+  X11_XRes_INCLUDE_PATH,         X11_XRes_LIB,       X11_XRes_FOUND,       X11::XRes
+  X11_Xss_INCLUDE_PATH,          X11_Xss_LIB,        X11_Xss_FOUND,        X11::Xss
+  X11_Xt_INCLUDE_PATH,           X11_Xt_LIB,         X11_Xt_FOUND,         X11::Xt
+  X11_Xutil_INCLUDE_PATH,                            X11_Xutil_FOUND,      X11::Xutil
+  X11_Xv_INCLUDE_PATH,           X11_Xv_LIB,         X11_Xv_FOUND,         X11::Xv
+  X11_dpms_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_dpms_FOUND
+  X11_XShm_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_XShm_FOUND
+  X11_Xshape_INCLUDE_PATH,       (in X11_Xext_LIB),  X11_Xshape_FOUND
+  X11_XSync_INCLUDE_PATH,        (in X11_Xext_LIB),  X11_XSync_FOUND
+#]=======================================================================]
 
 if (UNIX)
   set(X11_FOUND 0)
@@ -97,31 +98,38 @@ if (UNIX)
   find_path(X11_Xcursor_INCLUDE_PATH X11/Xcursor/Xcursor.h           ${X11_INC_SEARCH_PATH})
   find_path(X11_Xdamage_INCLUDE_PATH X11/extensions/Xdamage.h        ${X11_INC_SEARCH_PATH})
   find_path(X11_Xdmcp_INCLUDE_PATH X11/Xdmcp.h                       ${X11_INC_SEARCH_PATH})
+  find_path(X11_Xext_INCLUDE_PATH X11/extensions/Xext.h              ${X11_INC_SEARCH_PATH})
   find_path(X11_dpms_INCLUDE_PATH X11/extensions/dpms.h              ${X11_INC_SEARCH_PATH})
-  find_path(X11_xf86misc_INCLUDE_PATH X11/extensions/xf86misc.h      ${X11_INC_SEARCH_PATH})
-  find_path(X11_xf86vmode_INCLUDE_PATH X11/extensions/xf86vmode.h    ${X11_INC_SEARCH_PATH})
+  find_path(X11_Xxf86misc_INCLUDE_PATH X11/extensions/xf86misc.h     ${X11_INC_SEARCH_PATH})
+  find_path(X11_Xxf86vm_INCLUDE_PATH X11/extensions/xf86vmode.h      ${X11_INC_SEARCH_PATH})
   find_path(X11_Xfixes_INCLUDE_PATH X11/extensions/Xfixes.h          ${X11_INC_SEARCH_PATH})
   find_path(X11_Xft_INCLUDE_PATH X11/Xft/Xft.h                       ${X11_INC_SEARCH_PATH})
   find_path(X11_Xi_INCLUDE_PATH X11/extensions/XInput.h              ${X11_INC_SEARCH_PATH})
   find_path(X11_Xinerama_INCLUDE_PATH X11/extensions/Xinerama.h      ${X11_INC_SEARCH_PATH})
-  find_path(X11_Xinput_INCLUDE_PATH X11/extensions/XInput.h          ${X11_INC_SEARCH_PATH})
   find_path(X11_Xkb_INCLUDE_PATH X11/extensions/XKB.h                ${X11_INC_SEARCH_PATH})
   find_path(X11_Xkblib_INCLUDE_PATH X11/XKBlib.h                     ${X11_INC_SEARCH_PATH})
-  find_path(X11_Xkbfile_INCLUDE_PATH X11/extensions/XKBfile.h        ${X11_INC_SEARCH_PATH})
+  find_path(X11_xkbfile_INCLUDE_PATH X11/extensions/XKBfile.h        ${X11_INC_SEARCH_PATH})
   find_path(X11_Xmu_INCLUDE_PATH X11/Xmu/Xmu.h                       ${X11_INC_SEARCH_PATH})
   find_path(X11_Xpm_INCLUDE_PATH X11/xpm.h                           ${X11_INC_SEARCH_PATH})
-  find_path(X11_XTest_INCLUDE_PATH X11/extensions/XTest.h            ${X11_INC_SEARCH_PATH})
+  find_path(X11_Xtst_INCLUDE_PATH X11/extensions/XTest.h             ${X11_INC_SEARCH_PATH})
   find_path(X11_XShm_INCLUDE_PATH X11/extensions/XShm.h              ${X11_INC_SEARCH_PATH})
   find_path(X11_Xrandr_INCLUDE_PATH X11/extensions/Xrandr.h          ${X11_INC_SEARCH_PATH})
   find_path(X11_Xrender_INCLUDE_PATH X11/extensions/Xrender.h        ${X11_INC_SEARCH_PATH})
   find_path(X11_XRes_INCLUDE_PATH X11/extensions/XRes.h              ${X11_INC_SEARCH_PATH})
-  find_path(X11_Xscreensaver_INCLUDE_PATH X11/extensions/scrnsaver.h ${X11_INC_SEARCH_PATH})
+  find_path(X11_Xss_INCLUDE_PATH X11/extensions/scrnsaver.h          ${X11_INC_SEARCH_PATH})
   find_path(X11_Xshape_INCLUDE_PATH X11/extensions/shape.h           ${X11_INC_SEARCH_PATH})
   find_path(X11_Xutil_INCLUDE_PATH X11/Xutil.h                       ${X11_INC_SEARCH_PATH})
   find_path(X11_Xt_INCLUDE_PATH X11/Intrinsic.h                      ${X11_INC_SEARCH_PATH})
   find_path(X11_Xv_INCLUDE_PATH X11/extensions/Xvlib.h               ${X11_INC_SEARCH_PATH})
   find_path(X11_XSync_INCLUDE_PATH X11/extensions/sync.h             ${X11_INC_SEARCH_PATH})
 
+  # Backwards compatibility.
+  set(X11_Xinput_INCLUDE_PATH "${X11_Xi_INCLUDE_PATH}")
+  set(X11_xf86misc_INCLUDE_PATH "${X11_Xxf86misc_INCLUDE_PATH}")
+  set(X11_xf86vmode_INCLUDE_PATH "${X11_Xxf8vm_INCLUDE_PATH}")
+  set(X11_Xkbfile_INCLUDE_PATH "${X11_xkbfile_INCLUDE_PATH}")
+  set(X11_XTest_INCLUDE_PATH "${X11_Xtst_INCLUDE_PATH}")
+  set(X11_Xscreensaver_INCLUDE_PATH "${X11_Xss_INCLUDE_PATH}")
 
   find_library(X11_X11_LIB X11               ${X11_LIB_SEARCH_PATH})
 
@@ -138,19 +146,24 @@ if (UNIX)
   find_library(X11_Xft_LIB Xft               ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xi_LIB Xi                 ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xinerama_LIB Xinerama     ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xinput_LIB Xi             ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xkbfile_LIB xkbfile       ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xkbfile_LIB xkbfile       ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xmu_LIB Xmu               ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xpm_LIB Xpm               ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xrandr_LIB Xrandr         ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xrender_LIB Xrender       ${X11_LIB_SEARCH_PATH})
   find_library(X11_XRes_LIB XRes             ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xscreensaver_LIB Xss      ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xss_LIB Xss               ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xt_LIB Xt                 ${X11_LIB_SEARCH_PATH})
-  find_library(X11_XTest_LIB Xtst            ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xtst_LIB Xtst             ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xv_LIB Xv                 ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xxf86misc_LIB Xxf86misc   ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xxf86vm_LIB Xxf86vm       ${X11_LIB_SEARCH_PATH})
+
+  # Backwards compatibility.
+  set(X11_Xinput_LIB "${X11_Xi_LIB}")
+  set(X11_Xkbfile_LIB "${X11_xkbfile_LIB}")
+  set(X11_XTest_LIB "${X11_Xtst_LIB}")
+  set(X11_Xscreensaver_LIB "${X11_Xss_LIB}")
 
   set(X11_LIBRARY_DIR "")
   if(X11_X11_LIB)
@@ -159,31 +172,31 @@ if (UNIX)
 
   set(X11_INCLUDE_DIR) # start with empty list
   if(X11_X11_INCLUDE_PATH)
-    set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_X11_INCLUDE_PATH})
+    list(APPEND X11_INCLUDE_DIR ${X11_X11_INCLUDE_PATH})
   endif()
 
   if(X11_Xlib_INCLUDE_PATH)
-    set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xlib_INCLUDE_PATH})
+    list(APPEND X11_INCLUDE_DIR ${X11_Xlib_INCLUDE_PATH})
   endif()
 
   if(X11_Xutil_INCLUDE_PATH)
     set(X11_Xutil_FOUND TRUE)
-    set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xutil_INCLUDE_PATH})
+    list(APPEND X11_INCLUDE_DIR ${X11_Xutil_INCLUDE_PATH})
   endif()
 
   if(X11_Xshape_INCLUDE_PATH)
     set(X11_Xshape_FOUND TRUE)
-    set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xshape_INCLUDE_PATH})
+    list(APPEND X11_INCLUDE_DIR ${X11_Xshape_INCLUDE_PATH})
   endif()
 
   set(X11_LIBRARIES) # start with empty list
   if(X11_X11_LIB)
-    set(X11_LIBRARIES ${X11_LIBRARIES} ${X11_X11_LIB})
+    list(APPEND X11_LIBRARIES ${X11_X11_LIB})
   endif()
 
   if(X11_Xext_LIB)
     set(X11_Xext_FOUND TRUE)
-    set(X11_LIBRARIES ${X11_LIBRARIES} ${X11_Xext_LIB})
+    list(APPEND X11_LIBRARIES ${X11_Xext_LIB})
   endif()
 
   if(X11_Xt_LIB AND X11_Xt_INCLUDE_PATH)
@@ -191,13 +204,17 @@ if (UNIX)
   endif()
 
   if(X11_Xft_LIB AND X11_Xft_INCLUDE_PATH)
-    set(X11_Xft_FOUND TRUE)
-    set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xft_INCLUDE_PATH})
+    find_package(Freetype QUIET)
+    find_package(Fontconfig QUIET)
+    if (FREETYPE_FOUND AND FONTCONFIG_FOUND)
+      set(X11_Xft_FOUND TRUE)
+    endif ()
+    list(APPEND X11_INCLUDE_DIR ${X11_Xft_INCLUDE_PATH})
   endif()
 
   if(X11_Xv_LIB AND X11_Xv_INCLUDE_PATH)
     set(X11_Xv_FOUND TRUE)
-    set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xv_INCLUDE_PATH})
+    list(APPEND X11_INCLUDE_DIR ${X11_Xv_INCLUDE_PATH})
   endif()
 
   if (X11_Xau_LIB AND X11_Xau_INCLUDE_PATH)
@@ -206,118 +223,124 @@ if (UNIX)
 
   if (X11_Xdmcp_INCLUDE_PATH AND X11_Xdmcp_LIB)
       set(X11_Xdmcp_FOUND TRUE)
-      set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xdmcp_INCLUDE_PATH})
+      list(APPEND X11_INCLUDE_DIR ${X11_Xdmcp_INCLUDE_PATH})
   endif ()
 
   if (X11_Xaccessrules_INCLUDE_PATH AND X11_Xaccessstr_INCLUDE_PATH)
       set(X11_Xaccess_FOUND TRUE)
       set(X11_Xaccess_INCLUDE_PATH ${X11_Xaccessstr_INCLUDE_PATH})
-      set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xaccess_INCLUDE_PATH})
+      list(APPEND X11_INCLUDE_DIR ${X11_Xaccess_INCLUDE_PATH})
   endif ()
 
   if (X11_Xpm_INCLUDE_PATH AND X11_Xpm_LIB)
       set(X11_Xpm_FOUND TRUE)
-      set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xpm_INCLUDE_PATH})
+      list(APPEND X11_INCLUDE_DIR ${X11_Xpm_INCLUDE_PATH})
   endif ()
 
   if (X11_Xcomposite_INCLUDE_PATH AND X11_Xcomposite_LIB)
      set(X11_Xcomposite_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xcomposite_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xcomposite_INCLUDE_PATH})
   endif ()
 
   if (X11_Xdamage_INCLUDE_PATH AND X11_Xdamage_LIB)
      set(X11_Xdamage_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xdamage_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xdamage_INCLUDE_PATH})
   endif ()
 
   if (X11_XShm_INCLUDE_PATH)
      set(X11_XShm_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_XShm_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_XShm_INCLUDE_PATH})
   endif ()
 
-  if (X11_XTest_INCLUDE_PATH AND X11_XTest_LIB)
+  if (X11_Xtst_INCLUDE_PATH AND X11_Xtst_LIB)
+      set(X11_Xtst_FOUND TRUE)
+      # Backwards compatibility.
       set(X11_XTest_FOUND TRUE)
-      set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_XTest_INCLUDE_PATH})
+      list(APPEND X11_INCLUDE_DIR ${X11_Xtst_INCLUDE_PATH})
   endif ()
 
   if (X11_Xi_INCLUDE_PATH AND X11_Xi_LIB)
      set(X11_Xi_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xi_INCLUDE_PATH})
+     # Backwards compatibility.
+     set(X11_Xinput_FOUND TRUE)
+     list(APPEND X11_INCLUDE_DIR ${X11_Xi_INCLUDE_PATH})
   endif ()
 
   if (X11_Xinerama_INCLUDE_PATH AND X11_Xinerama_LIB)
      set(X11_Xinerama_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xinerama_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xinerama_INCLUDE_PATH})
   endif ()
 
   if (X11_Xfixes_INCLUDE_PATH AND X11_Xfixes_LIB)
      set(X11_Xfixes_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xfixes_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xfixes_INCLUDE_PATH})
   endif ()
 
   if (X11_Xrender_INCLUDE_PATH AND X11_Xrender_LIB)
      set(X11_Xrender_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xrender_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xrender_INCLUDE_PATH})
   endif ()
 
   if (X11_XRes_INCLUDE_PATH AND X11_XRes_LIB)
      set(X11_XRes_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_XRes_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_XRes_INCLUDE_PATH})
   endif ()
 
   if (X11_Xrandr_INCLUDE_PATH AND X11_Xrandr_LIB)
      set(X11_Xrandr_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xrandr_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xrandr_INCLUDE_PATH})
   endif ()
 
-  if (X11_xf86misc_INCLUDE_PATH AND X11_Xxf86misc_LIB)
+  if (X11_Xxf86misc_INCLUDE_PATH AND X11_Xxf86misc_LIB)
+     set(X11_Xxf86misc_FOUND TRUE)
+     # Backwards compatibility.
      set(X11_xf86misc_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_xf86misc_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xxf86misc_INCLUDE_PATH})
   endif ()
 
-  if (X11_xf86vmode_INCLUDE_PATH AND X11_Xxf86vm_LIB)
+  if (X11_Xxf86vm_INCLUDE_PATH AND X11_Xxf86vm_LIB)
+     set(X11_Xxf86vm_FOUND TRUE)
+     # Backwards compatibility.
      set(X11_xf86vmode_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_xf86vmode_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xxf86vm_INCLUDE_PATH})
   endif ()
 
   if (X11_Xcursor_INCLUDE_PATH AND X11_Xcursor_LIB)
      set(X11_Xcursor_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xcursor_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xcursor_INCLUDE_PATH})
   endif ()
 
-  if (X11_Xscreensaver_INCLUDE_PATH AND X11_Xscreensaver_LIB)
+  if (X11_Xss_INCLUDE_PATH AND X11_Xss_LIB)
+     set(X11_Xss_FOUND TRUE)
      set(X11_Xscreensaver_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xscreensaver_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xss_INCLUDE_PATH})
   endif ()
 
   if (X11_dpms_INCLUDE_PATH)
      set(X11_dpms_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_dpms_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_dpms_INCLUDE_PATH})
   endif ()
 
   if (X11_Xkb_INCLUDE_PATH AND X11_Xkblib_INCLUDE_PATH AND X11_Xlib_INCLUDE_PATH)
      set(X11_Xkb_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xkb_INCLUDE_PATH} )
+     list(APPEND X11_INCLUDE_DIR ${X11_Xkb_INCLUDE_PATH} )
   endif ()
 
-  if (X11_Xkbfile_INCLUDE_PATH AND X11_Xkbfile_LIB AND X11_Xlib_INCLUDE_PATH)
+  if (X11_xkbfile_INCLUDE_PATH AND X11_xkbfile_LIB AND X11_Xlib_INCLUDE_PATH)
+     set(X11_xkbfile_FOUND TRUE)
+     # Backwards compatibility.
      set(X11_Xkbfile_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xkbfile_INCLUDE_PATH} )
+     list(APPEND X11_INCLUDE_DIR ${X11_xkbfile_INCLUDE_PATH} )
   endif ()
 
   if (X11_Xmu_INCLUDE_PATH AND X11_Xmu_LIB)
      set(X11_Xmu_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xmu_INCLUDE_PATH})
-  endif ()
-
-  if (X11_Xinput_INCLUDE_PATH AND X11_Xinput_LIB)
-     set(X11_Xinput_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xinput_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_Xmu_INCLUDE_PATH})
   endif ()
 
   if (X11_XSync_INCLUDE_PATH)
      set(X11_XSync_FOUND TRUE)
-     set(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_XSync_INCLUDE_PATH})
+     list(APPEND X11_INCLUDE_DIR ${X11_XSync_INCLUDE_PATH})
   endif ()
 
   if(X11_ICE_LIB AND X11_ICE_INCLUDE_PATH)
@@ -339,6 +362,11 @@ if (UNIX)
     set(X11_FOUND 1)
   endif ()
 
+  include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+  find_package_handle_standard_args(X11
+    REQUIRED_VARS X11_X11_INCLUDE_PATH X11_X11_LIB
+    HANDLE_COMPONENTS)
+
   if(X11_FOUND)
     include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
     include(${CMAKE_CURRENT_LIST_DIR}/CheckLibraryExists.cmake)
@@ -351,69 +379,69 @@ if (UNIX)
       set(X11_X_EXTRA_LIBS "")
 
       # See if XOpenDisplay in X11 works by itself.
-      CHECK_LIBRARY_EXISTS("${X11_LIBRARIES}" "XOpenDisplay" "${X11_LIBRARY_DIR}" X11_LIB_X11_SOLO)
+      check_library_exists("${X11_LIBRARIES}" "XOpenDisplay" "${X11_LIBRARY_DIR}" X11_LIB_X11_SOLO)
       if(NOT X11_LIB_X11_SOLO)
         # Find library needed for dnet_ntoa.
-        CHECK_LIBRARY_EXISTS("dnet" "dnet_ntoa" "" X11_LIB_DNET_HAS_DNET_NTOA)
+        check_library_exists("dnet" "dnet_ntoa" "" X11_LIB_DNET_HAS_DNET_NTOA)
         if (X11_LIB_DNET_HAS_DNET_NTOA)
-          set (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -ldnet)
+          list(APPEND X11_X_EXTRA_LIBS -ldnet)
         else ()
-          CHECK_LIBRARY_EXISTS("dnet_stub" "dnet_ntoa" "" X11_LIB_DNET_STUB_HAS_DNET_NTOA)
+          check_library_exists("dnet_stub" "dnet_ntoa" "" X11_LIB_DNET_STUB_HAS_DNET_NTOA)
           if (X11_LIB_DNET_STUB_HAS_DNET_NTOA)
-            set (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -ldnet_stub)
+            list(APPEND X11_X_EXTRA_LIBS -ldnet_stub)
           endif ()
         endif ()
       endif()
 
       # Find library needed for gethostbyname.
-      CHECK_FUNCTION_EXISTS("gethostbyname" CMAKE_HAVE_GETHOSTBYNAME)
+      check_function_exists("gethostbyname" CMAKE_HAVE_GETHOSTBYNAME)
       if(NOT CMAKE_HAVE_GETHOSTBYNAME)
-        CHECK_LIBRARY_EXISTS("nsl" "gethostbyname" "" CMAKE_LIB_NSL_HAS_GETHOSTBYNAME)
+        check_library_exists("nsl" "gethostbyname" "" CMAKE_LIB_NSL_HAS_GETHOSTBYNAME)
         if (CMAKE_LIB_NSL_HAS_GETHOSTBYNAME)
-          set (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -lnsl)
+          list(APPEND X11_X_EXTRA_LIBS -lnsl)
         else ()
-          CHECK_LIBRARY_EXISTS("bsd" "gethostbyname" "" CMAKE_LIB_BSD_HAS_GETHOSTBYNAME)
+          check_library_exists("bsd" "gethostbyname" "" CMAKE_LIB_BSD_HAS_GETHOSTBYNAME)
           if (CMAKE_LIB_BSD_HAS_GETHOSTBYNAME)
-            set (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -lbsd)
+            list(APPEND X11_X_EXTRA_LIBS -lbsd)
           endif ()
         endif ()
       endif()
 
       # Find library needed for connect.
-      CHECK_FUNCTION_EXISTS("connect" CMAKE_HAVE_CONNECT)
+      check_function_exists("connect" CMAKE_HAVE_CONNECT)
       if(NOT CMAKE_HAVE_CONNECT)
-        CHECK_LIBRARY_EXISTS("socket" "connect" "" CMAKE_LIB_SOCKET_HAS_CONNECT)
+        check_library_exists("socket" "connect" "" CMAKE_LIB_SOCKET_HAS_CONNECT)
         if (CMAKE_LIB_SOCKET_HAS_CONNECT)
-          set (X11_X_EXTRA_LIBS -lsocket ${X11_X_EXTRA_LIBS})
+          list(INSERT X11_X_EXTRA_LIBS 0 -lsocket)
         endif ()
       endif()
 
       # Find library needed for remove.
-      CHECK_FUNCTION_EXISTS("remove" CMAKE_HAVE_REMOVE)
+      check_function_exists("remove" CMAKE_HAVE_REMOVE)
       if(NOT CMAKE_HAVE_REMOVE)
-        CHECK_LIBRARY_EXISTS("posix" "remove" "" CMAKE_LIB_POSIX_HAS_REMOVE)
+        check_library_exists("posix" "remove" "" CMAKE_LIB_POSIX_HAS_REMOVE)
         if (CMAKE_LIB_POSIX_HAS_REMOVE)
-          set (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -lposix)
+          list(APPEND X11_X_EXTRA_LIBS -lposix)
         endif ()
       endif()
 
       # Find library needed for shmat.
-      CHECK_FUNCTION_EXISTS("shmat" CMAKE_HAVE_SHMAT)
+      check_function_exists("shmat" CMAKE_HAVE_SHMAT)
       if(NOT CMAKE_HAVE_SHMAT)
-        CHECK_LIBRARY_EXISTS("ipc" "shmat" "" CMAKE_LIB_IPS_HAS_SHMAT)
+        check_library_exists("ipc" "shmat" "" CMAKE_LIB_IPS_HAS_SHMAT)
         if (CMAKE_LIB_IPS_HAS_SHMAT)
-          set (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -lipc)
+          list(APPEND X11_X_EXTRA_LIBS -lipc)
         endif ()
       endif()
     endif()
 
     if (X11_ICE_FOUND)
-      CHECK_LIBRARY_EXISTS("ICE" "IceConnectionNumber" "${X11_LIBRARY_DIR}"
+      check_library_exists("ICE" "IceConnectionNumber" "${X11_LIBRARY_DIR}"
                             CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER)
       if(CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER)
         set (X11_X_PRE_LIBS ${X11_ICE_LIB})
         if(X11_SM_LIB)
-          set (X11_X_PRE_LIBS ${X11_SM_LIB} ${X11_X_PRE_LIBS})
+          list(INSERT X11_X_PRE_LIBS 0 ${X11_SM_LIB})
         endif()
       endif()
     endif ()
@@ -421,18 +449,222 @@ if (UNIX)
     # Build the final list of libraries.
     set(X11_LIBRARIES ${X11_X_PRE_LIBS} ${X11_LIBRARIES} ${X11_X_EXTRA_LIBS})
 
-    include(${CMAKE_CURRENT_LIST_DIR}/FindPackageMessage.cmake)
-    FIND_PACKAGE_MESSAGE(X11 "Found X11: ${X11_X11_LIB}"
-      "[${X11_X11_LIB}][${X11_INCLUDE_DIR}]")
-  else ()
-    if (X11_FIND_REQUIRED)
-      message(FATAL_ERROR "Could not find X11")
+    if (NOT TARGET X11::X11)
+      add_library(X11::X11 UNKNOWN IMPORTED)
+      set_target_properties(X11::X11 PROPERTIES
+        IMPORTED_LOCATION "${X11_X11_LIB}"
+        INTERFACE_INCLUDE_DIRECTORIES "${X11_X11_INCLUDE_PATH}")
     endif ()
+  endif ()
+
+  if (X11_ICE_FOUND AND NOT TARGET X11::ICE)
+    add_library(X11::ICE UNKNOWN IMPORTED)
+    set_target_properties(X11::ICE PROPERTIES
+      IMPORTED_LOCATION "${X11_ICE_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_ICE_INCLUDE_PATH}")
+  endif ()
+
+  if (X11_SM_FOUND AND NOT TARGET X11::SM)
+    add_library(X11::SM UNKNOWN IMPORTED)
+    set_target_properties(X11::SM PROPERTIES
+      IMPORTED_LOCATION "${X11_SM_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_SM_INCLUDE_PATH}")
+  endif ()
+
+  if (X11_Xau_FOUND AND NOT TARGET X11::Xau)
+    add_library(X11::Xau UNKNOWN IMPORTED)
+    set_target_properties(X11::Xau PROPERTIES
+      IMPORTED_LOCATION "${X11_Xau_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xau_INCLUDE_PATH}")
+  endif ()
+
+  if (X11_Xcomposite_FOUND AND NOT TARGET X11::Xcomposite)
+    add_library(X11::Xcomposite UNKNOWN IMPORTED)
+    set_target_properties(X11::Xcomposite PROPERTIES
+      IMPORTED_LOCATION "${X11_Xcomposite_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xcomposite_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::X11")
+  endif ()
+
+  if (X11_Xcursor_FOUND AND NOT TARGET X11::Xcursor)
+    add_library(X11::Xcursor UNKNOWN IMPORTED)
+    set_target_properties(X11::Xcursor PROPERTIES
+      IMPORTED_LOCATION "${X11_Xcursor_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xcursor_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::Xrender;X11::Xfixes;X11::X11")
+  endif ()
+
+  if (X11_Xdamage_FOUND AND NOT TARGET X11::Xdamage)
+    add_library(X11::Xdamage UNKNOWN IMPORTED)
+    set_target_properties(X11::Xdamage PROPERTIES
+      IMPORTED_LOCATION "${X11_Xdamage_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xdamage_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::Xfixes;X11::X11")
+  endif ()
+
+  if (X11_Xdmcp_FOUND AND NOT TARGET X11::Xdmcp)
+    add_library(X11::Xdmcp UNKNOWN IMPORTED)
+    set_target_properties(X11::Xdmcp PROPERTIES
+      IMPORTED_LOCATION "${X11_Xdmcp_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xdmcp_INCLUDE_PATH}")
+  endif ()
+
+  if (X11_Xext_FOUND AND NOT TARGET X11::Xext)
+    add_library(X11::Xext UNKNOWN IMPORTED)
+    set_target_properties(X11::Xext PROPERTIES
+      IMPORTED_LOCATION "${X11_Xext_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xext_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::X11")
+  endif ()
+
+  if (X11_Xxf86misc_FOUND AND NOT TARGET X11::Xxf86misc)
+    add_library(X11::Xxf86misc UNKNOWN IMPORTED)
+    set_target_properties(X11::Xxf86misc PROPERTIES
+      IMPORTED_LOCATION "${X11_Xxf86misc_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xxf86misc_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::X11;X11::Xext")
+  endif ()
+
+  if (X11_Xxf86vm_FOUND AND NOT TARGET X11::Xxf86vm)
+    add_library(X11::Xxf86vm UNKNOWN IMPORTED)
+    set_target_properties(X11::Xxf86vm PROPERTIES
+      IMPORTED_LOCATION "${X11_Xxf86vm_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xxf86vm_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::X11;X11::Xext")
+  endif ()
+
+  if (X11_Xfixes_FOUND AND NOT TARGET X11::Xfixes)
+    add_library(X11::Xfixes UNKNOWN IMPORTED)
+    set_target_properties(X11::Xfixes PROPERTIES
+      IMPORTED_LOCATION "${X11_Xfixes_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xfixes_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::X11")
+  endif ()
+
+  if (X11_Xft_FOUND AND NOT TARGET X11::Xft)
+    add_library(X11::Xft UNKNOWN IMPORTED)
+    set_target_properties(X11::Xft PROPERTIES
+      IMPORTED_LOCATION "${X11_Xft_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xft_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::Xrender;X11::X11;Fontconfig::Fontconfig;Freetype::Freetype")
+  endif ()
+
+  if (X11_Xi_FOUND AND NOT TARGET X11::Xi)
+    add_library(X11::Xi UNKNOWN IMPORTED)
+    set_target_properties(X11::Xi PROPERTIES
+      IMPORTED_LOCATION "${X11_Xi_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xi_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::Xext;X11::X11")
+  endif ()
+
+  if (X11_Xinerama_FOUND AND NOT TARGET X11::Xinerama)
+    add_library(X11::Xinerama UNKNOWN IMPORTED)
+    set_target_properties(X11::Xinerama PROPERTIES
+      IMPORTED_LOCATION "${X11_Xinerama_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xinerama_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::Xext;X11::X11")
+  endif ()
+
+  if (X11_Xkb_FOUND AND NOT TARGET X11::Xkb)
+    add_library(X11::Xkb INTERFACE IMPORTED)
+    set_target_properties(X11::Xkb PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xkb_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::X11")
+  endif ()
+
+  if (X11_xkbfile_FOUND AND NOT TARGET X11::xkbfile)
+    add_library(X11::xkbfile UNKNOWN IMPORTED)
+    set_target_properties(X11::xkbfile PROPERTIES
+      IMPORTED_LOCATION "${X11_xkbfile_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_xkbfile_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::X11")
+  endif ()
+
+  if (X11_Xmu_FOUND AND NOT TARGET X11::Xmu)
+    add_library(X11::Xmu UNKNOWN IMPORTED)
+    set_target_properties(X11::Xmu PROPERTIES
+      IMPORTED_LOCATION "${X11_Xmu_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xmu_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::Xt;X11::Xext;X11::X11")
+  endif ()
+
+  if (X11_Xpm_FOUND AND NOT TARGET X11::Xpm)
+    add_library(X11::Xpm UNKNOWN IMPORTED)
+    set_target_properties(X11::Xpm PROPERTIES
+      IMPORTED_LOCATION "${X11_Xpm_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xpm_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::X11")
+  endif ()
+
+  if (X11_Xtst_FOUND AND NOT TARGET X11::Xtst)
+    add_library(X11::Xtst UNKNOWN IMPORTED)
+    set_target_properties(X11::Xtst PROPERTIES
+      IMPORTED_LOCATION "${X11_Xtst_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xtst_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::Xi;X11::Xext;X11::X11")
+  endif ()
+
+  if (X11_Xrandr_FOUND AND NOT TARGET X11::Xrandr)
+    add_library(X11::Xrandr UNKNOWN IMPORTED)
+    set_target_properties(X11::Xrandr PROPERTIES
+      IMPORTED_LOCATION "${X11_Xrandr_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xrandr_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::Xrender;X11::Xext;X11::X11")
+  endif ()
+
+  if (X11_Xrender_FOUND AND NOT TARGET X11::Xrender)
+    add_library(X11::Xrender UNKNOWN IMPORTED)
+    set_target_properties(X11::Xrender PROPERTIES
+      IMPORTED_LOCATION "${X11_Xrender_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xrender_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::X11")
+  endif ()
+
+  if (X11_XRes_FOUND AND NOT TARGET X11::XRes)
+    add_library(X11::XRes UNKNOWN IMPORTED)
+    set_target_properties(X11::XRes PROPERTIES
+      IMPORTED_LOCATION "${X11_XRes_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_XRes_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::Xext;X11::X11")
+  endif ()
+
+  if (X11_Xss_FOUND AND NOT TARGET X11::Xss)
+    add_library(X11::Xss UNKNOWN IMPORTED)
+    set_target_properties(X11::Xss PROPERTIES
+      IMPORTED_LOCATION "${X11_Xss_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xss_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::Xext;X11::X11")
+  endif ()
+
+  if (X11_Xt_FOUND AND NOT TARGET X11::Xt)
+    add_library(X11::Xt UNKNOWN IMPORTED)
+    set_target_properties(X11::Xt PROPERTIES
+      IMPORTED_LOCATION "${X11_Xt_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xt_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::ICE;X11::SM;X11::X11")
+  endif ()
+
+  if (X11_Xutil_FOUND AND NOT TARGET X11::Xutil)
+    add_library(X11::Xutil INTERFACE IMPORTED)
+    set_target_properties(X11::Xutil PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xutil_INCLUDE_PATH}"
+      # libX11 contains the implementations for functions in the Xutil.h
+      # header.
+      INTERFACE_LINK_LIBRARIES "X11::X11")
+  endif ()
+
+  if (X11_Xv_FOUND AND NOT TARGET X11::Xv)
+    add_library(X11::Xv UNKNOWN IMPORTED)
+    set_target_properties(X11::Xv PROPERTIES
+      IMPORTED_LOCATION "${X11_Xv_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xv_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::Xext;X11::X11")
   endif ()
 
   mark_as_advanced(
     X11_X11_INCLUDE_PATH
     X11_X11_LIB
+    X11_Xext_INCLUDE_PATH
     X11_Xext_LIB
     X11_Xau_LIB
     X11_Xau_INCLUDE_PATH
@@ -440,7 +672,6 @@ if (UNIX)
     X11_Xutil_INCLUDE_PATH
     X11_Xcomposite_INCLUDE_PATH
     X11_Xcomposite_LIB
-    X11_Xaccess_INCLUDE_PATH
     X11_Xfixes_LIB
     X11_Xfixes_INCLUDE_PATH
     X11_Xrandr_LIB
@@ -452,15 +683,15 @@ if (UNIX)
     X11_XRes_LIB
     X11_XRes_INCLUDE_PATH
     X11_Xxf86misc_LIB
-    X11_xf86misc_INCLUDE_PATH
+    X11_Xxf86misc_INCLUDE_PATH
     X11_Xxf86vm_LIB
-    X11_xf86vmode_INCLUDE_PATH
+    X11_Xxf86vm_INCLUDE_PATH
     X11_Xi_LIB
     X11_Xi_INCLUDE_PATH
     X11_Xinerama_LIB
     X11_Xinerama_INCLUDE_PATH
-    X11_XTest_LIB
-    X11_XTest_INCLUDE_PATH
+    X11_Xtst_LIB
+    X11_Xtst_INCLUDE_PATH
     X11_Xcursor_LIB
     X11_Xcursor_INCLUDE_PATH
     X11_dpms_INCLUDE_PATH
@@ -473,16 +704,14 @@ if (UNIX)
     X11_Xdmcp_INCLUDE_PATH
     X11_Xkb_INCLUDE_PATH
     X11_Xkblib_INCLUDE_PATH
-    X11_Xkbfile_INCLUDE_PATH
-    X11_Xkbfile_LIB
+    X11_xkbfile_INCLUDE_PATH
+    X11_xkbfile_LIB
     X11_Xmu_INCLUDE_PATH
     X11_Xmu_LIB
-    X11_Xscreensaver_INCLUDE_PATH
-    X11_Xscreensaver_LIB
+    X11_Xss_INCLUDE_PATH
+    X11_Xss_LIB
     X11_Xpm_INCLUDE_PATH
     X11_Xpm_LIB
-    X11_Xinput_LIB
-    X11_Xinput_INCLUDE_PATH
     X11_Xft_LIB
     X11_Xft_INCLUDE_PATH
     X11_Xshape_INCLUDE_PATH
@@ -498,5 +727,3 @@ if (UNIX)
   set(CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK_SAVE})
   set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
 endif ()
-
-# X11_FIND_REQUIRED_<component> could be checked too

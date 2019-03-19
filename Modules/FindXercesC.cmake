@@ -1,43 +1,44 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#.rst:
-# FindXercesC
-# -----------
-#
-# Find the Apache Xerces-C++ validating XML parser headers and libraries.
-#
-# Imported targets
-# ^^^^^^^^^^^^^^^^
-#
-# This module defines the following :prop_tgt:`IMPORTED` targets:
-#
-# ``XercesC::XercesC``
-#   The Xerces-C++ ``xerces-c`` library, if found.
-#
-# Result variables
-# ^^^^^^^^^^^^^^^^
-#
-# This module will set the following variables in your project:
-#
-# ``XercesC_FOUND``
-#   true if the Xerces headers and libraries were found
-# ``XercesC_VERSION``
-#   Xerces release version
-# ``XercesC_INCLUDE_DIRS``
-#   the directory containing the Xerces headers
-# ``XercesC_LIBRARIES``
-#   Xerces libraries to be linked
-#
-# Cache variables
-# ^^^^^^^^^^^^^^^
-#
-# The following cache variables may also be set:
-#
-# ``XercesC_INCLUDE_DIR``
-#   the directory containing the Xerces headers
-# ``XercesC_LIBRARY``
-#   the Xerces library
+#[=======================================================================[.rst:
+FindXercesC
+-----------
+
+Find the Apache Xerces-C++ validating XML parser headers and libraries.
+
+Imported targets
+^^^^^^^^^^^^^^^^
+
+This module defines the following :prop_tgt:`IMPORTED` targets:
+
+``XercesC::XercesC``
+  The Xerces-C++ ``xerces-c`` library, if found.
+
+Result variables
+^^^^^^^^^^^^^^^^
+
+This module will set the following variables in your project:
+
+``XercesC_FOUND``
+  true if the Xerces headers and libraries were found
+``XercesC_VERSION``
+  Xerces release version
+``XercesC_INCLUDE_DIRS``
+  the directory containing the Xerces headers
+``XercesC_LIBRARIES``
+  Xerces libraries to be linked
+
+Cache variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``XercesC_INCLUDE_DIR``
+  the directory containing the Xerces headers
+``XercesC_LIBRARY``
+  the Xerces library
+#]=======================================================================]
 
 # Written by Roger Leigh <rleigh@codelibre.net>
 
@@ -73,7 +74,7 @@ find_path(XercesC_INCLUDE_DIR
           DOC "Xerces-C++ include directory")
 mark_as_advanced(XercesC_INCLUDE_DIR)
 
-if(XercesC_INCLUDE_DIR)
+if(XercesC_INCLUDE_DIR AND EXISTS "${XercesC_INCLUDE_DIR}/xercesc/util/XercesVersion.hpp")
   _XercesC_GET_VERSION("${XercesC_INCLUDE_DIR}/xercesc/util/XercesVersion.hpp")
 endif()
 

@@ -21,11 +21,11 @@ install and package files as required.
 
 Alternatively CPack can invoke an external packaging software
 through an optional custom CMake script in
-:variable:`CPACK_EXT_PACKAGE_SCRIPT` instead.
+:variable:`CPACK_EXTERNAL_PACKAGE_SCRIPT` instead.
 
 Staging of installation files may also optionally be
 taken care of by the generator when enabled through the
-:variable:`CPACK_EXT_ENABLE_STAGING` variable.
+:variable:`CPACK_EXTERNAL_ENABLE_STAGING` variable.
 
 JSON Format
 ^^^^^^^^^^^
@@ -46,10 +46,10 @@ always of the format ``major.minor``. In other words, it always has exactly two
 parts, separated by a period.
 
 You can request one or more specific versions of the output format as described
-below with :variable:`CPACK_EXT_REQUESTED_VERSIONS`. The output format will
+below with :variable:`CPACK_EXTERNAL_REQUESTED_VERSIONS`. The output format will
 have a major version that exactly matches the requested major version, and a
 minor version that is greater than or equal to the requested minor version. If
-no version is requested with :variable:`CPACK_EXT_REQUESTED_VERSIONS`, the
+no version is requested with :variable:`CPACK_EXTERNAL_REQUESTED_VERSIONS`, the
 latest known major version is used by default. Currently, the only supported
 format is 1.0, which is described below.
 
@@ -234,7 +234,7 @@ following fields in the root:
 Variables specific to CPack External generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. variable:: CPACK_EXT_REQUESTED_VERSIONS
+.. variable:: CPACK_EXTERNAL_REQUESTED_VERSIONS
 
   This variable is used to request a specific version of the CPack External
   generator. It is a list of ``major.minor`` values, separated by semicolons.
@@ -248,7 +248,7 @@ Variables specific to CPack External generator
   The generator knows how to generate the version if it has a versioned
   generator whose major version exactly matches the requested major version,
   and whose minor version is greater than or equal to the requested minor
-  version. For example, if ``CPACK_EXT_REQUESTED_VERSIONS`` contains 1.0, and
+  version. For example, if ``CPACK_EXTERNAL_REQUESTED_VERSIONS`` contains 1.0, and
   the CPack External generator knows how to generate 1.1, it will generate 1.1.
   If the generator doesn't know how to generate a version in the list, it skips
   the version and looks at the next one. If it doesn't know how to generate any
@@ -257,11 +257,11 @@ Variables specific to CPack External generator
   If this variable is not set, or is empty, the CPack External generator will
   generate the highest major and minor version that it knows how to generate.
 
-  If an invalid version is encountered in ``CPACK_EXT_REQUESTED_VERSIONS`` (one
+  If an invalid version is encountered in ``CPACK_EXTERNAL_REQUESTED_VERSIONS`` (one
   that doesn't match ``major.minor``, where ``major`` and ``minor`` are
   integers), it is ignored.
 
-.. variable:: CPACK_EXT_ENABLE_STAGING
+.. variable:: CPACK_EXTERNAL_ENABLE_STAGING
 
   This variable can be set to true to enable optional installation
   into a temporary staging area which can then be picked up
@@ -274,7 +274,7 @@ Variables specific to CPack External generator
   It also contains the staging area ``CPACK_TEMPORARY_DIRECTORY``
   into which CPack performs the installation when staging is enabled.
 
-.. variable:: CPACK_EXT_PACKAGE_SCRIPT
+.. variable:: CPACK_EXTERNAL_PACKAGE_SCRIPT
 
   This variable can optionally specify the full path to
   a CMake script file to be run as part of the CPack invocation.

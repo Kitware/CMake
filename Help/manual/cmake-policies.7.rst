@@ -51,12 +51,39 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.15
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0090: export(PACKAGE) does not populate package registry by default. </policy/CMP0090>
+   CMP0089: Compiler id for IBM Clang-based XL compilers is now XLClang. </policy/CMP0089>
+
+Policies Introduced by CMake 3.14
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0088: FindBISON runs bison in CMAKE_CURRENT_BINARY_DIR when executing. </policy/CMP0088>
+   CMP0087: install(SCRIPT | CODE) supports generator expressions. </policy/CMP0087>
+   CMP0086: UseSWIG honors SWIG_MODULE_NAME via -module flag. </policy/CMP0086>
+   CMP0085: IN_LIST generator expression handles empty list items. </policy/CMP0085>
+   CMP0084: The FindQt module does not exist for find_package(). </policy/CMP0084>
+   CMP0083: Add PIE options when linking executable. </policy/CMP0083>
+   CMP0082: Install rules from add_subdirectory() are interleaved with those in caller. </policy/CMP0082>
+
+
 Policies Introduced by CMake 3.13
 =================================
 
 .. toctree::
    :maxdepth: 1
 
+   CMP0081: Relative paths not allowed in LINK_DIRECTORIES target property. </policy/CMP0081>
+   CMP0080: BundleUtilities cannot be included at configure time. </policy/CMP0080>
+   CMP0079: target_link_libraries allows use with targets in other directories. </policy/CMP0079>
    CMP0078: UseSWIG generates standard target names. </policy/CMP0078>
    CMP0077: option() honors normal variables. </policy/CMP0077>
    CMP0076: target_sources() command converts relative paths to absolute. </policy/CMP0076>

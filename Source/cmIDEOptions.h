@@ -65,12 +65,22 @@ protected:
       this->derived::operator=(r);
       return *this;
     }
+    FlagValue& append_with_comma(std::string const& r)
+    {
+      return append_with_separator(r, ',');
+    }
     FlagValue& append_with_space(std::string const& r)
+    {
+      return append_with_separator(r, ' ');
+    }
+
+  private:
+    FlagValue& append_with_separator(std::string const& r, char separator)
     {
       this->resize(1);
       std::string& l = this->operator[](0);
       if (!l.empty()) {
-        l += " ";
+        l += separator;
       }
       l += r;
       return *this;

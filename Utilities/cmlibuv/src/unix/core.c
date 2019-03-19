@@ -41,6 +41,7 @@
 #include <sys/resource.h> /* getrusage */
 #include <pwd.h>
 #include <sched.h>
+#include <sys/utsname.h>
 
 #ifdef __sun
 # include <netdb.h> /* MAXHOSTNAMELEN on Solaris */
@@ -119,7 +120,7 @@ uint64_t uv_hrtime(void) {
 void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
   assert(!uv__is_closing(handle));
 
-  handle->flags |= UV_CLOSING;
+  handle->flags |= UV_HANDLE_CLOSING;
   handle->close_cb = close_cb;
 
   switch (handle->type) {
@@ -177,8 +178,8 @@ void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
 
   case UV_SIGNAL:
     uv__signal_close((uv_signal_t*) handle);
-    /* Signal handles may not be closed immediately. The signal code will */
-    /* itself close uv__make_close_pending whenever appropriate. */
+    /* Signal handles may not be closed immediately. The signal code will
+     * itself close uv__make_close_pending whenever appropriate. */
     return;
 
   default:
@@ -217,8 +218,8 @@ int uv__socket_sockopt(uv_handle_t* handle, int optname, int* value) {
 }
 
 void uv__make_close_pending(uv_handle_t* handle) {
-  assert(handle->flags & UV_CLOSING);
-  assert(!(handle->flags & UV_CLOSED));
+  assert(handle->flags & UV_HANDLE_CLOSING);
+  assert(!(handle->flags & UV_HANDLE_CLOSED));
   handle->next_closing = handle->loop->closing_handles;
   handle->loop->closing_handles = handle;
 }
@@ -244,15 +245,17 @@ int uv__getiovmax(void) {
 
 
 static void uv__finish_close(uv_handle_t* handle) {
-  /* Note: while the handle is in the UV_CLOSING state now, it's still possible
-   * for it to be active in the sense that uv__is_active() returns true.
+  /* Note: while the handle is in the UV_HANDLE_CLOSING state now, it's still
+   * possible for it to be active in the sense that uv__is_active() returns
+   * true.
+   *
    * A good example is when the user calls uv_shutdown(), immediately followed
    * by uv_close(). The handle is considered active at this point because the
    * completion of the shutdown req is still pending.
    */
-  assert(handle->flags & UV_CLOSING);
-  assert(!(handle->flags & UV_CLOSED));
-  handle->flags |= UV_CLOSED;
+  assert(handle->flags & UV_HANDLE_CLOSING);
+  assert(!(handle->flags & UV_HANDLE_CLOSED));
+  handle->flags |= UV_HANDLE_CLOSED;
 
   switch (handle->type) {
     case UV_PREPARE:
@@ -637,27 +640,6 @@ int uv__cloexec_fcntl(int fd, int set) {
 }
 
 
-/* This function is not execve-safe, there is a race window
- * between the call to dup() and fcntl(FD_CLOEXEC).
- */
-int uv__dup(int fd) {
-  int err;
-
-  fd = dup(fd);
-
-  if (fd == -1)
-    return UV__ERR(errno);
-
-  err = uv__cloexec(fd, 1);
-  if (err) {
-    uv__close(fd);
-    return err;
-  }
-
-  return fd;
-}
-
-
 ssize_t uv__recvmsg(int fd, struct msghdr* msg, int flags) {
   struct cmsghdr* cmsg;
   ssize_t rc;
@@ -927,6 +909,11 @@ int uv__io_active(const uv__io_t* w, unsigned int events) {
   assert(0 == (events & ~(POLLIN | POLLOUT | UV__POLLRDHUP | UV__POLLPRI)));
   assert(0 != events);
   return 0 != (w->pevents & events);
+}
+
+
+int uv__fd_exists(uv_loop_t* loop, int fd) {
+  return (unsigned) fd < loop->nwatchers && loop->watchers[fd] != NULL;
 }
 
 
@@ -1343,6 +1330,9 @@ uv_os_fd_t uv_get_osfhandle(int fd) {
   return fd;
 }
 
+int uv_open_osfhandle(uv_os_fd_t os_fd) {
+  return os_fd;
+}
 
 uv_pid_t uv_os_getpid(void) {
   return getpid();
@@ -1351,4 +1341,88 @@ uv_pid_t uv_os_getpid(void) {
 
 uv_pid_t uv_os_getppid(void) {
   return getppid();
+}
+
+
+int uv_os_getpriority(uv_pid_t pid, int* priority) {
+  int r;
+
+  if (priority == NULL)
+    return UV_EINVAL;
+
+  errno = 0;
+  r = getpriority(PRIO_PROCESS, (int) pid);
+
+  if (r == -1 && errno != 0)
+    return UV__ERR(errno);
+
+  *priority = r;
+  return 0;
+}
+
+
+int uv_os_setpriority(uv_pid_t pid, int priority) {
+  if (priority < UV_PRIORITY_HIGHEST || priority > UV_PRIORITY_LOW)
+    return UV_EINVAL;
+
+  if (setpriority(PRIO_PROCESS, (int) pid, priority) != 0)
+    return UV__ERR(errno);
+
+  return 0;
+}
+
+
+int uv_os_uname(uv_utsname_t* buffer) {
+  struct utsname buf;
+  int r;
+
+  if (buffer == NULL)
+    return UV_EINVAL;
+
+  if (uname(&buf) == -1) {
+    r = UV__ERR(errno);
+    goto error;
+  }
+
+  r = uv__strscpy(buffer->sysname, buf.sysname, sizeof(buffer->sysname));
+  if (r == UV_E2BIG)
+    goto error;
+
+#ifdef _AIX
+  r = snprintf(buffer->release,
+               sizeof(buffer->release),
+               "%s.%s",
+               buf.version,
+               buf.release);
+  if (r >= sizeof(buffer->release)) {
+    r = UV_E2BIG;
+    goto error;
+  }
+#else
+  r = uv__strscpy(buffer->release, buf.release, sizeof(buffer->release));
+  if (r == UV_E2BIG)
+    goto error;
+#endif
+
+  r = uv__strscpy(buffer->version, buf.version, sizeof(buffer->version));
+  if (r == UV_E2BIG)
+    goto error;
+
+#if defined(_AIX) || defined(__PASE__)
+  r = uv__strscpy(buffer->machine, "ppc64", sizeof(buffer->machine));
+#else
+  r = uv__strscpy(buffer->machine, buf.machine, sizeof(buffer->machine));
+#endif
+
+  if (r == UV_E2BIG)
+    goto error;
+
+  return 0;
+
+error:
+  buffer->sysname[0] = '\0';
+  buffer->release[0] = '\0';
+  buffer->version[0] = '\0';
+  buffer->machine[0] = '\0';
+  return r;
 }

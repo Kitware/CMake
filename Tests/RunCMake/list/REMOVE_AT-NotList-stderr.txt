@@ -1,4 +1,4 @@
 ^CMake Error at REMOVE_AT-NotList.cmake:2 \(list\):
-  list sub-command REMOVE_AT requires list to be present.
+  list index: nosuchlist, 0 out of range \(0, 0\)
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)$

@@ -30,9 +30,7 @@ cmCPackNSISGenerator::cmCPackNSISGenerator(bool nsis64)
   Nsis64 = nsis64;
 }
 
-cmCPackNSISGenerator::~cmCPackNSISGenerator()
-{
-}
+cmCPackNSISGenerator::~cmCPackNSISGenerator() = default;
 
 int cmCPackNSISGenerator::PackageFiles()
 {
@@ -223,7 +221,8 @@ int cmCPackNSISGenerator::PackageFiles()
       if (!group.second.Description.empty()) {
         groupDescriptions += "  !insertmacro MUI_DESCRIPTION_TEXT ${" +
           group.first + "} \"" +
-          this->TranslateNewlines(group.second.Description) + "\"\n";
+          cmCPackNSISGenerator::TranslateNewlines(group.second.Description) +
+          "\"\n";
       }
     }
 
@@ -253,7 +252,8 @@ int cmCPackNSISGenerator::PackageFiles()
       if (!comp.second.Description.empty()) {
         componentDescriptions += "  !insertmacro MUI_DESCRIPTION_TEXT ${" +
           comp.first + "} \"" +
-          this->TranslateNewlines(comp.second.Description) + "\"\n";
+          cmCPackNSISGenerator::TranslateNewlines(comp.second.Description) +
+          "\"\n";
       }
     }
 
@@ -292,9 +292,8 @@ int cmCPackNSISGenerator::PackageFiles()
     this->SetOption("CPACK_NSIS_DEFINES", defines.c_str());
   }
 
-  this->ConfigureFile(nsisInInstallOptions.c_str(),
-                      nsisInstallOptions.c_str());
-  this->ConfigureFile(nsisInFileName.c_str(), nsisFileName.c_str());
+  this->ConfigureFile(nsisInInstallOptions, nsisInstallOptions);
+  this->ConfigureFile(nsisInFileName, nsisFileName);
   std::string nsisCmd = "\"";
   nsisCmd += this->GetOption("CPACK_INSTALLER_PROGRAM");
   nsisCmd += "\" \"" + nsisFileName + "\"";
@@ -302,8 +301,8 @@ int cmCPackNSISGenerator::PackageFiles()
   std::string output;
   int retVal = 1;
   bool res = cmSystemTools::RunSingleCommand(
-    nsisCmd.c_str(), &output, &output, &retVal, nullptr,
-    this->GeneratorVerbose, cmDuration::zero());
+    nsisCmd, &output, &output, &retVal, nullptr, this->GeneratorVerbose,
+    cmDuration::zero());
   if (!res || retVal) {
     cmGeneratedFileStream ofs(tmpFile);
     ofs << "# Run command: " << nsisCmd << std::endl
@@ -407,8 +406,8 @@ int cmCPackNSISGenerator::InitializeInternal()
   std::string output;
   int retVal = 1;
   bool resS = cmSystemTools::RunSingleCommand(
-    nsisCmd.c_str(), &output, &output, &retVal, nullptr,
-    this->GeneratorVerbose, cmDuration::zero());
+    nsisCmd, &output, &output, &retVal, nullptr, this->GeneratorVerbose,
+    cmDuration::zero());
   cmsys::RegularExpression versionRex("v([0-9]+.[0-9]+)");
   cmsys::RegularExpression versionRexCVS("v(.*)\\.cvs");
   if (!resS || retVal ||
@@ -608,7 +607,7 @@ bool cmCPackNSISGenerator::GetListOfSubdirectories(
       }
     }
   }
-  dirs.push_back(topdir);
+  dirs.emplace_back(topdir);
   return true;
 }
 
@@ -749,7 +748,7 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     std::string output;
     int retVal = -1;
     int res = cmSystemTools::RunSingleCommand(
-      cmd.c_str(), &output, &output, &retVal, dirName.c_str(),
+      cmd, &output, &output, &retVal, dirName.c_str(),
       cmSystemTools::OUTPUT_NONE, cmDuration::zero());
     if (!res || retVal) {
       std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");

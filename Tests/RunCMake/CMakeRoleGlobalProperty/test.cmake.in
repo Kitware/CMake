@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.12)
+set(CTEST_RUN_CURRENT_SCRIPT 0)
+
+get_property(role GLOBAL PROPERTY CMAKE_ROLE)
+if(NOT role STREQUAL "CTEST")
+  message(SEND_ERROR "CMAKE_ROLE property is \"${role}\", should be \"CTEST\"")
+endif()

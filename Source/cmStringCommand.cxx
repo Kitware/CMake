@@ -13,6 +13,7 @@
 #include "cmCryptoHash.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
@@ -156,7 +157,7 @@ bool cmStringCommand::HandleAsciiCommand(std::vector<std::string> const& args)
     return false;
   }
   std::string::size_type cc;
-  std::string const& outvar = args[args.size() - 1];
+  std::string const& outvar = args.back();
   std::string output;
   for (cc = 1; cc < args.size() - 1; cc++) {
     int ch = atoi(args[cc].c_str());
@@ -755,7 +756,7 @@ bool cmStringCommand::HandleRandomCommand(std::vector<std::string> const& args)
     this->SetError("sub-command RANDOM invoked with bad length.");
     return false;
   }
-  const std::string& variableName = args[args.size() - 1];
+  const std::string& variableName = args.back();
 
   std::vector<char> result;
 
@@ -765,14 +766,13 @@ bool cmStringCommand::HandleRandomCommand(std::vector<std::string> const& args)
   }
 
   const char* alphaPtr = alphabet.c_str();
-  int cc;
-  for (cc = 0; cc < length; cc++) {
+  for (int cc = 0; cc < length; cc++) {
     int idx = static_cast<int>(sizeofAlphabet * rand() / (RAND_MAX + 1.0));
     result.push_back(*(alphaPtr + idx));
   }
   result.push_back(0);
 
-  this->Makefile->AddDefinition(variableName, &*result.begin());
+  this->Makefile->AddDefinition(variableName, result.data());
   return true;
 }
 

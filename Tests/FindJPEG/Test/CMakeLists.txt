@@ -4,6 +4,8 @@ include(CTest)
 
 find_package(JPEG)
 
+add_definitions(-DCMAKE_EXPECTED_JPEG_VERSION=${JPEG_VERSION})
+
 add_executable(test_jpeg_tgt main.c)
 target_link_libraries(test_jpeg_tgt JPEG::JPEG)
 add_test(NAME test_jpeg_tgt COMMAND test_jpeg_tgt)

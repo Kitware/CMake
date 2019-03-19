@@ -11,6 +11,7 @@
 #include <memory> // IWYU pragma: keep
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 class cmCompiledGeneratorExpression;
@@ -31,13 +32,13 @@ struct cmGeneratorExpressionEvaluator;
  */
 class cmGeneratorExpression
 {
-  CM_DISABLE_COPY(cmGeneratorExpression)
-
 public:
   /** Construct. */
-  cmGeneratorExpression(
-    cmListFileBacktrace const& backtrace = cmListFileBacktrace());
+  cmGeneratorExpression(cmListFileBacktrace backtrace = cmListFileBacktrace());
   ~cmGeneratorExpression();
+
+  cmGeneratorExpression(cmGeneratorExpression const&) = delete;
+  cmGeneratorExpression& operator=(cmGeneratorExpression const&) = delete;
 
   std::unique_ptr<cmCompiledGeneratorExpression> Parse(
     std::string const& input);
@@ -63,15 +64,28 @@ public:
 
   static std::string StripEmptyListElements(const std::string& input);
 
+  static inline bool StartsWithGeneratorExpression(const std::string& input)
+  {
+    return input.length() >= 2 && input[0] == '$' && input[1] == '<';
+  }
+  static inline bool StartsWithGeneratorExpression(const char* input)
+  {
+    return input != nullptr && input[0] == '$' && input[1] == '<';
+  }
+
 private:
   cmListFileBacktrace Backtrace;
 };
 
 class cmCompiledGeneratorExpression
 {
-  CM_DISABLE_COPY(cmCompiledGeneratorExpression)
-
 public:
+  ~cmCompiledGeneratorExpression();
+
+  cmCompiledGeneratorExpression(cmCompiledGeneratorExpression const&) = delete;
+  cmCompiledGeneratorExpression& operator=(
+    cmCompiledGeneratorExpression const&) = delete;
+
   const std::string& Evaluate(
     cmLocalGenerator* lg, const std::string& config, bool quiet = false,
     cmGeneratorTarget const* headTarget = nullptr,
@@ -99,8 +113,6 @@ public:
   {
     return this->AllTargetsSeen;
   }
-
-  ~cmCompiledGeneratorExpression();
 
   std::string const& GetInput() const { return this->Input; }
 
@@ -131,8 +143,8 @@ private:
     cmGeneratorExpressionContext& context,
     cmGeneratorExpressionDAGChecker* dagChecker) const;
 
-  cmCompiledGeneratorExpression(cmListFileBacktrace const& backtrace,
-                                const std::string& input);
+  cmCompiledGeneratorExpression(cmListFileBacktrace backtrace,
+                                std::string input);
 
   friend class cmGeneratorExpression;
 
@@ -156,19 +168,22 @@ private:
 
 class cmGeneratorExpressionInterpreter
 {
-  CM_DISABLE_COPY(cmGeneratorExpressionInterpreter)
-
 public:
   cmGeneratorExpressionInterpreter(cmLocalGenerator* localGenerator,
-                                   std::string const& config,
+                                   std::string config,
                                    cmGeneratorTarget const* headTarget,
-                                   std::string const& lang = std::string())
+                                   std::string lang = std::string())
     : LocalGenerator(localGenerator)
-    , Config(config)
+    , Config(std::move(config))
     , HeadTarget(headTarget)
-    , Language(lang)
+    , Language(std::move(lang))
   {
   }
+
+  cmGeneratorExpressionInterpreter(cmGeneratorExpressionInterpreter const&) =
+    delete;
+  cmGeneratorExpressionInterpreter& operator=(
+    cmGeneratorExpressionInterpreter const&) = delete;
 
   const std::string& Evaluate(const char* expression,
                               const std::string& property);

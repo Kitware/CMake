@@ -42,7 +42,12 @@ function(add_RunCMake_test_group test types)
     # much system information so it is easier to set programs and environment
     # values here
     unset(${test}_${type}_FOUND_PREREQUIREMENTS)
-    include("${CMAKE_CURRENT_SOURCE_DIR}/${test}/${type}/Prerequirements.cmake")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${test}/${type}/Prerequirements.cmake")
+      include("${CMAKE_CURRENT_SOURCE_DIR}/${test}/${type}/Prerequirements.cmake")
+    else()
+      string(REGEX MATCH "^[^.]*" main_type "${type}")
+      include("${CMAKE_CURRENT_SOURCE_DIR}/${test}/${main_type}/Prerequirements.cmake")
+    endif()
     get_test_prerequirements("${test}_${type}_FOUND_PREREQUIREMENTS"
         "${TEST_CONFIG_DIR}/${type}_config.cmake")
 
@@ -65,6 +70,9 @@ function(add_RunCMake_test_group test types)
     endif()
   endforeach()
 endfunction()
+
+# Some tests use python for extra checks.
+find_package(PythonInterp QUIET)
 
 if(XCODE_VERSION AND "${XCODE_VERSION}" VERSION_LESS 6.1)
   set(Swift_ARGS -DXCODE_BELOW_6_1=1)
@@ -106,6 +114,7 @@ if(CMAKE_SYSTEM_NAME MATCHES Darwin AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG)
   add_RunCMake_test(CMP0068)
 endif()
 add_RunCMake_test(CMP0069)
+add_RunCMake_test(CMP0081)
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
@@ -114,7 +123,7 @@ if(NOT CMAKE_GENERATOR MATCHES "Visual Studio|Xcode")
   add_RunCMake_test(CMP0065)
 endif()
 if(CMAKE_GENERATOR MATCHES "Make")
-  add_RunCMake_test(Make)
+  add_RunCMake_test(Make -DMAKE_IS_GNU=${MAKE_IS_GNU})
 endif()
 if(CMAKE_GENERATOR STREQUAL "Ninja")
   set(Ninja_ARGS
@@ -141,7 +150,19 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
 endif()
 
 add_RunCMake_test(AndroidTestUtilities)
+set(autogen_with_qt5 FALSE)
+if(CMake_TEST_Qt5)
+  find_package(Qt5Widgets QUIET NO_MODULE)
+endif()
+if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
+  set(autogen_with_qt5 TRUE)
+endif ()
+add_RunCMake_test(Autogen -Dwith_qt5=${autogen_with_qt5})
 add_RunCMake_test(BuildDepends)
+if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
+  add_RunCMake_test(Byproducts)
+endif()
+add_RunCMake_test(CMakeRoleGlobalProperty)
 if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
   add_RunCMake_test(CompilerChange)
 endif()
@@ -151,11 +172,12 @@ add_RunCMake_test(DisallowedCommands)
 add_RunCMake_test(ExternalData)
 add_RunCMake_test(FeatureSummary)
 add_RunCMake_test(FPHSA)
+add_RunCMake_test(FileAPI -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE})
 add_RunCMake_test(FindBoost)
 add_RunCMake_test(FindLua)
 add_RunCMake_test(FindOpenGL)
 if(CMake_TEST_UseSWIG)
-  add_RunCMake_test(UseSWIG)
+  add_RunCMake_test(UseSWIG -DCMake_TEST_FindPython=${CMake_TEST_FindPython})
 endif()
 if(NOT CMAKE_C_COMPILER_ID MATCHES "Watcom")
   add_RunCMake_test(GenerateExportHeader)
@@ -171,9 +193,11 @@ add_RunCMake_test(TargetPropertyGeneratorExpressions)
 add_RunCMake_test(Languages)
 add_RunCMake_test(LinkStatic)
 add_RunCMake_test(ObjectLibrary)
+add_RunCMake_test(ParseImplicitIncludeInfo)
 if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG AND CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
   add_RunCMake_test(RuntimePath)
 endif()
+add_RunCMake_test(ScriptMode)
 add_RunCMake_test(Swift)
 add_RunCMake_test(TargetObjects)
 add_RunCMake_test(TargetSources)
@@ -182,10 +206,12 @@ add_RunCMake_test(find_dependency)
 add_RunCMake_test(CompileDefinitions)
 add_RunCMake_test(CompileFeatures)
 add_RunCMake_test(PolicyScope)
+add_RunCMake_test(WriteBasicConfigVersionFile)
 add_RunCMake_test(WriteCompilerDetectionHeader)
 add_RunCMake_test(SourceProperties)
 if(NOT WIN32)
-  add_RunCMake_test(PositionIndependentCode)
+  add_RunCMake_test(PositionIndependentCode -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                                            -DCMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID})
 endif()
 if(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   add_RunCMake_test(VisibilityPreset)
@@ -196,6 +222,7 @@ endif()
 add_RunCMake_test(CompatibleInterface)
 add_RunCMake_test(Syntax)
 add_RunCMake_test(WorkingDirectory)
+add_RunCMake_test(MaxRecursionDepth)
 
 add_RunCMake_test(add_custom_command)
 add_RunCMake_test(add_custom_target)
@@ -251,22 +278,24 @@ add_RunCMake_test(separate_arguments)
 add_RunCMake_test(set_property)
 add_RunCMake_test(string)
 add_RunCMake_test(test_include_dirs)
+add_RunCMake_test(BundleUtilities)
 
 function(add_RunCMake_test_try_compile)
   if(CMAKE_VERSION VERSION_LESS 3.9.20170907 AND "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC")
     # Older CMake versions do not know about MSVC language standards.
     # Approximate our logic from MSVC-CXX.cmake.
-    if ((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.0.24215.1 AND
+    if ((NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.0.24215.1 AND
          CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10) OR
-       CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.10.25017)
+         NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10.25017)
       set(CMAKE_CXX_STANDARD_DEFAULT 14)
-    elseif (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0)
+    elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.0)
       set(CMAKE_CXX_STANDARD_DEFAULT "")
     else()
       unset(CMAKE_CXX_STANDARD_DEFAULT)
     endif()
   endif()
   foreach(var
+      CMAKE_SYSTEM_NAME
       CMAKE_C_COMPILER_ID
       CMAKE_C_COMPILER_VERSION
       CMAKE_C_STANDARD_DEFAULT
@@ -283,7 +312,8 @@ function(add_RunCMake_test_try_compile)
 endfunction()
 add_RunCMake_test_try_compile()
 
-add_RunCMake_test(try_run)
+add_RunCMake_test(try_run -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                          -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 add_RunCMake_test(set)
 add_RunCMake_test(variable_watch)
 add_RunCMake_test(while)
@@ -309,13 +339,12 @@ if(PKG_CONFIG_FOUND)
   add_RunCMake_test(FindPkgConfig)
 endif()
 
-find_package(GTK2 QUIET)
-if (GTK2_FOUND)
+if(CMake_TEST_FindGTK2)
   add_RunCMake_test(FindGTK2)
 endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
-  add_RunCMake_test(include_external_msproject)
+  add_RunCMake_test(include_external_msproject -DVS_PLATFORM_NAME=${CMAKE_VS_PLATFORM_NAME})
   if("${CMAKE_GENERATOR}" MATCHES "Visual Studio (9|10)" AND NOT CMAKE_VS_DEVENV_COMMAND)
     set(NO_USE_FOLDERS 1)
   endif()
@@ -324,10 +353,20 @@ endif()
 
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^9]|9[0-9])")
   add_RunCMake_test(VS10Project)
+  if( vs12 AND wince )
+    add_RunCMake_test( VS10ProjectWinCE "-DRunCMake_GENERATOR_PLATFORM=${wince_sdk}")
+  endif()
 endif()
 
 if(XCODE_VERSION)
   add_RunCMake_test(XcodeProject -DXCODE_VERSION=${XCODE_VERSION})
+
+  # This test can take a very long time due to lots of combinations.
+  # Use a long default timeout and provide an option to customize it.
+  if(NOT DEFINED CMake_TEST_XcodeProject_TIMEOUT)
+    set(CMake_TEST_XcodeProject_TIMEOUT 2000)
+  endif()
+  set_property(TEST RunCMake.XcodeProject PROPERTY TIMEOUT ${CMake_TEST_XcodeProject_TIMEOUT})
 endif()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
@@ -337,11 +376,16 @@ endif()
 
 add_RunCMake_test(File_Generate)
 add_RunCMake_test(ExportWithoutLanguage)
+add_RunCMake_test(target_link_directories)
 add_RunCMake_test(target_link_libraries)
 add_RunCMake_test(add_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 add_RunCMake_test(target_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 
+add_RunCMake_test(target_compile_definitions)
 add_RunCMake_test(target_compile_features)
+add_RunCMake_test(target_compile_options)
+add_RunCMake_test(target_include_directories)
+add_RunCMake_test(target_sources)
 add_RunCMake_test(CheckModules)
 add_RunCMake_test(CheckIPOSupported)
 add_RunCMake_test(CommandLine -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
@@ -359,10 +403,12 @@ add_RunCMake_test(CPackConfig)
 add_RunCMake_test(CPackInstallProperties)
 add_RunCMake_test(ExternalProject)
 add_RunCMake_test(FetchContent)
+set(CTestCommandLine_ARGS -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE})
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
-  set(CTestCommandLine_ARGS -DTEST_AFFINITY=$<TARGET_FILE:testAffinity>)
+  list(APPEND CTestCommandLine_ARGS -DTEST_AFFINITY=$<TARGET_FILE:testAffinity>)
 endif()
-add_RunCMake_test(CTestCommandLine)
+add_executable(print_stdin print_stdin.c)
+add_RunCMake_test(CTestCommandLine -DTEST_PRINT_STDIN=$<TARGET_FILE:print_stdin>)
 add_RunCMake_test(CacheNewline)
 # Only run this test on unix platforms that support
 # symbolic links
@@ -428,7 +474,53 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   add_RunCMake_test(ctest_labels_for_subprojects)
 endif()
 
-add_RunCMake_test_group(CPack "DEB;RPM;7Z;TBZ2;TGZ;TXZ;TZ;ZIP;STGZ;Ext")
+set(cpack_tests
+  DEB.CUSTOM_NAMES
+  DEB.DEBUGINFO
+  DEB.DEFAULT_PERMISSIONS
+  DEB.DEPENDENCIES
+  DEB.EMPTY_DIR
+  DEB.VERSION
+  DEB.EXTRA
+  DEB.GENERATE_SHLIBS
+  DEB.GENERATE_SHLIBS_LDCONFIG
+  DEB.LONG_FILENAMES
+  DEB.MINIMAL
+  DEB.PER_COMPONENT_FIELDS
+  DEB.TIMESTAMPS
+  DEB.MD5SUMS
+  DEB.DEB_PACKAGE_VERSION_BACK_COMPATIBILITY
+
+  RPM.CUSTOM_BINARY_SPEC_FILE
+  RPM.CUSTOM_NAMES
+  RPM.DEBUGINFO
+  RPM.DEFAULT_PERMISSIONS
+  RPM.DEPENDENCIES
+  RPM.DIST
+  RPM.EMPTY_DIR
+  RPM.VERSION
+  RPM.INSTALL_SCRIPTS
+  RPM.MAIN_COMPONENT
+  RPM.MINIMAL
+  RPM.PARTIALLY_RELOCATABLE_WARNING
+  RPM.PER_COMPONENT_FIELDS
+  RPM.SINGLE_DEBUGINFO
+  RPM.EXTRA_SLASH_IN_PATH
+  RPM.SOURCE_PACKAGE
+  RPM.SUGGESTS
+  RPM.SYMLINKS
+  RPM.USER_FILELIST
+
+  7Z
+  TBZ2
+  TGZ
+  TXZ
+  TZ
+  ZIP
+  STGZ
+  External
+  )
+add_RunCMake_test_group(CPack "${cpack_tests}")
 # add a test to make sure symbols are exported from a shared library
 # for MSVC compilers CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS property is used
 add_RunCMake_test(AutoExportDll)

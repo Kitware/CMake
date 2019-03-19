@@ -230,7 +230,44 @@ class cmMakefile;
   SELECT(POLICY, CMP0077, "option() honors normal variables.", 3, 13, 0,      \
          cmPolicies::WARN)                                                    \
   SELECT(POLICY, CMP0078, "UseSWIG generates standard target names.", 3, 13,  \
-         0, cmPolicies::WARN)
+         0, cmPolicies::WARN)                                                 \
+  SELECT(                                                                     \
+    POLICY, CMP0079,                                                          \
+    "target_link_libraries allows use with targets in other directories.", 3, \
+    13, 0, cmPolicies::WARN)                                                  \
+  SELECT(POLICY, CMP0080,                                                     \
+         "BundleUtilities cannot be included at configure time.", 3, 13, 0,   \
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0081,                                                     \
+         "Relative paths not allowed in LINK_DIRECTORIES target property.",   \
+         3, 13, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0082,                                                     \
+         "Install rules from add_subdirectory() are interleaved with those "  \
+         "in caller.",                                                        \
+         3, 14, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0083, "Add PIE options when linking executable.", 3, 14,  \
+         0, cmPolicies::WARN)                                                 \
+  SELECT(POLICY, CMP0084,                                                     \
+         "The FindQt module does not exist for find_package().", 3, 14, 0,    \
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0085, "$<IN_LIST:...> handles empty list items.", 3, 14,  \
+         0, cmPolicies::WARN)                                                 \
+  SELECT(POLICY, CMP0086,                                                     \
+         "UseSWIG honors SWIG_MODULE_NAME via -module flag.", 3, 14, 0,       \
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0087,                                                     \
+         "Install CODE|SCRIPT allow the use of generator "                    \
+         "expressions.",                                                      \
+         3, 14, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0088,                                                     \
+         "FindBISON runs bison in CMAKE_CURRENT_BINARY_DIR when executing.",  \
+         3, 14, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0089,                                                     \
+         "Compiler id for IBM Clang-based XL compilers is now XLClang.", 3,   \
+         15, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0090,                                                     \
+         "export(PACKAGE) does not populate package registry by default.", 3, \
+         15, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -256,7 +293,9 @@ class cmMakefile;
   F(CMP0068)                                                                  \
   F(CMP0069)                                                                  \
   F(CMP0073)                                                                  \
-  F(CMP0076)
+  F(CMP0076)                                                                  \
+  F(CMP0081)                                                                  \
+  F(CMP0083)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies

@@ -6,6 +6,7 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmake.h"
 
 cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator(cmake* cm)
   : cmGlobalUnixMakefileGenerator3(cm)
@@ -22,7 +23,8 @@ void cmGlobalMinGWMakefileGenerator::EnableLanguage(
   std::vector<std::string> const& l, cmMakefile* mf, bool optional)
 {
   this->FindMakeProgram(mf);
-  std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& makeProgram =
+    mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::vector<std::string> locations;
   locations.push_back(cmSystemTools::GetProgramPath(makeProgram));
   locations.push_back("/mingw/bin");

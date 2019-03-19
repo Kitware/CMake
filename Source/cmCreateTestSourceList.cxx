@@ -136,8 +136,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,
   this->Makefile->AddDefinition("CMAKE_FUNCTION_TABLE_ENTIRES",
                                 functionMapCode.c_str());
   bool res = true;
-  if (!this->Makefile->ConfigureFile(configFile.c_str(), driver.c_str(), false,
-                                     true, false)) {
+  if (!this->Makefile->ConfigureFile(configFile, driver, false, true, false)) {
     res = false;
   }
 

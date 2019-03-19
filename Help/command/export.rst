@@ -3,11 +3,11 @@ export
 
 Export targets from the build tree for use by outside projects.
 
-::
+.. code-block:: cmake
 
   export(EXPORT <export-name> [NAMESPACE <namespace>] [FILE <filename>])
 
-Create a file ``<filename>`` that may be included by outside projects to
+Creates a file ``<filename>`` that may be included by outside projects to
 import targets from the current project's build tree.  This is useful
 during cross-compiling to build utility executables that can run on
 the host platform in one project and then import them into another
@@ -25,7 +25,7 @@ export targets from an installation tree.
 The properties set on the generated IMPORTED targets will have the
 same values as the final values of the input TARGETS.
 
-::
+.. code-block:: cmake
 
   export(TARGETS [target1 [target2 [...]]] [NAMESPACE <namespace>]
          [APPEND] FILE <filename> [EXPORT_LINK_INTERFACE_LIBRARIES])
@@ -49,7 +49,7 @@ unspecified.
   transitive usage requirements of other targets that link to the
   object libraries in their implementation.
 
-::
+.. code-block:: cmake
 
   export(PACKAGE <PackageName>)
 
@@ -62,10 +62,15 @@ registry that this command creates works only in conjunction with a
 package configuration file (``<PackageName>Config.cmake``) that works with the
 build tree. In some cases, for example for packaging and for system
 wide installations, it is not desirable to write the user package
-registry. If the :variable:`CMAKE_EXPORT_NO_PACKAGE_REGISTRY` variable
-is enabled, the ``export(PACKAGE)`` command will do nothing.
+registry.
 
-::
+By default the ``export(PACKAGE)`` command does nothing (see policy
+:policy:`CMP0090`) because populating the user package registry has effects
+outside the source and build trees.  Set the
+:variable:`CMAKE_EXPORT_PACKAGE_REGISTRY` variable to add build directories to
+the CMake user package registry.
+
+.. code-block:: cmake
 
   export(TARGETS [target1 [target2 [...]]]  [ANDROID_MK <filename>])
 

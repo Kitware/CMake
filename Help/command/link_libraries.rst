@@ -3,7 +3,7 @@ link_libraries
 
 Link libraries to all targets added later.
 
-::
+.. code-block:: cmake
 
   link_libraries([item1 [item2 [...]]]
                  [[debug|optimized|general] <item>] ...)

@@ -14,20 +14,6 @@
 class cmQtAutoGen
 {
 public:
-  /// @brief Nested lists separator
-  static std::string const ListSep;
-  /// @brief Maximum number of parallel threads/processes in a generator
-  static unsigned int const ParallelMax;
-
-  /// @brief AutoGen generator type
-  enum class GeneratorT
-  {
-    GEN, // General
-    MOC,
-    UIC,
-    RCC
-  };
-
   /// @brief Integer version
   struct IntegerVersion
   {
@@ -54,11 +40,37 @@ public:
     }
   };
 
+  /// @brief AutoGen generator type
+  enum class GenT
+  {
+    GEN, // AUTOGEN
+    MOC, // AUTOMOC
+    UIC, // AUTOUIC
+    RCC  // AUTORCC
+  };
+
+  /// @brief Nested lists separator
+  static std::string const ListSep;
+  // Generator names
+  static std::string const GenAutoGen;
+  static std::string const GenAutoMoc;
+  static std::string const GenAutoUic;
+  static std::string const GenAutoRcc;
+  static std::string const GenAUTOGEN;
+  static std::string const GenAUTOMOC;
+  static std::string const GenAUTOUIC;
+  static std::string const GenAUTORCC;
+  /// @brief Maximum number of parallel threads/processes in a generator
+  static unsigned int const ParallelMax;
+
 public:
   /// @brief Returns the generator name
-  static std::string const& GeneratorName(GeneratorT genType);
+  static std::string const& GeneratorName(GenT genType);
   /// @brief Returns the generator name in upper case
-  static std::string GeneratorNameUpper(GeneratorT genType);
+  static std::string const& GeneratorNameUpper(GenT genType);
+
+  /// @brief Returns a string with the requested tool names
+  static std::string Tools(bool moc, bool uic, bool rcc);
 
   /// @brief Returns the string escaped and enclosed in quotes
   static std::string Quoted(std::string const& text);

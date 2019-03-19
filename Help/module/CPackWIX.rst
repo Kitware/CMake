@@ -1,4 +1,4 @@
 CPackWIX
 --------
 
-The documentation for the CPack WiX generator has moved here: :cpack_gen:`CPack WiX Generator`
+The documentation for the CPack WIX generator has moved here: :cpack_gen:`CPack WIX Generator`

@@ -24,10 +24,11 @@ class cmLinkItem
 
 public:
   cmLinkItem();
-  explicit cmLinkItem(std::string const& s);
-  explicit cmLinkItem(cmGeneratorTarget const* t);
+  cmLinkItem(std::string s, cmListFileBacktrace bt);
+  cmLinkItem(cmGeneratorTarget const* t, cmListFileBacktrace bt);
   std::string const& AsStr() const;
-  cmGeneratorTarget const* Target;
+  cmGeneratorTarget const* Target = nullptr;
+  cmListFileBacktrace Backtrace;
   friend bool operator<(cmLinkItem const& l, cmLinkItem const& r);
   friend bool operator==(cmLinkItem const& l, cmLinkItem const& r);
   friend std::ostream& operator<<(std::ostream& os, cmLinkItem const& item);
@@ -37,10 +38,8 @@ class cmLinkImplItem : public cmLinkItem
 {
 public:
   cmLinkImplItem();
-  cmLinkImplItem(cmLinkItem item, cmListFileBacktrace const& bt,
-                 bool fromGenex);
-  cmListFileBacktrace Backtrace;
-  bool FromGenex;
+  cmLinkImplItem(cmLinkItem item, bool fromGenex);
+  bool FromGenex = false;
 };
 
 /** The link implementation specifies the direct library
@@ -71,36 +70,22 @@ struct cmLinkInterface : public cmLinkInterfaceLibraries
 
   // Number of repetitions of a strongly connected component of two
   // or more static libraries.
-  unsigned int Multiplicity;
+  unsigned int Multiplicity = 0;
 
   // Libraries listed for other configurations.
   // Needed only for OLD behavior of CMP0003.
   std::vector<cmLinkItem> WrongConfigLibraries;
 
-  bool ImplementationIsInterface;
-
-  cmLinkInterface()
-    : Multiplicity(0)
-    , ImplementationIsInterface(false)
-  {
-  }
+  bool ImplementationIsInterface = false;
 };
 
 struct cmOptionalLinkInterface : public cmLinkInterface
 {
-  cmOptionalLinkInterface()
-    : LibrariesDone(false)
-    , AllDone(false)
-    , Exists(false)
-    , HadHeadSensitiveCondition(false)
-    , ExplicitLibraries(nullptr)
-  {
-  }
-  bool LibrariesDone;
-  bool AllDone;
-  bool Exists;
-  bool HadHeadSensitiveCondition;
-  const char* ExplicitLibraries;
+  bool LibrariesDone = false;
+  bool AllDone = false;
+  bool Exists = false;
+  bool HadHeadSensitiveCondition = false;
+  const char* ExplicitLibraries = nullptr;
 };
 
 struct cmHeadToLinkInterfaceMap
@@ -117,15 +102,9 @@ struct cmLinkImplementation : public cmLinkImplementationLibraries
 // Cache link implementation computation from each configuration.
 struct cmOptionalLinkImplementation : public cmLinkImplementation
 {
-  cmOptionalLinkImplementation()
-    : LibrariesDone(false)
-    , LanguagesDone(false)
-    , HadHeadSensitiveCondition(false)
-  {
-  }
-  bool LibrariesDone;
-  bool LanguagesDone;
-  bool HadHeadSensitiveCondition;
+  bool LibrariesDone = false;
+  bool LanguagesDone = false;
+  bool HadHeadSensitiveCondition = false;
 };
 
 /** Compute the link type to use for the given configuration.  */

@@ -1,0 +1,44 @@
+CMAKE_LANG=CXX
+CMAKE_CXX_COMPILER_ABI=
+CMAKE_CXX_COMPILER_AR=
+CMAKE_CXX_COMPILER_ARCHITECTURE_ID=
+CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CXX_COMPILER_ID=XLClang
+CMAKE_CXX_COMPILER_LAUNCHER=
+CMAKE_CXX_COMPILER_LOADED=1
+CMAKE_CXX_COMPILER_RANLIB=
+CMAKE_CXX_COMPILER_TARGET=
+CMAKE_CXX_COMPILER_VERSION=16.1.0.1
+CMAKE_CXX_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_b8490/fast
+/usr/bin/gmake -f CMakeFiles/cmTC_b8490.dir/build.make CMakeFiles/cmTC_b8490.dir/build
+gmake[1]: Entering directory '/tmp/ii/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_b8490.dir/CMakeCXXCompilerABI.cpp.o
+/opt/IBM/xlC/16.1.0/bin/xlclang++ -x c++   -V -o CMakeFiles/cmTC_b8490.dir/CMakeCXXCompilerABI.cpp.o -c /tmp/CMake/Modules/CMakeCXXCompilerABI.cpp
+export XL_CONFIG=/opt/IBM/xlc/16.1.0/etc/xlc.cfg.72:xlclang++
+export XL_XLCMP_PATH=/opt/IBM/xlc/16.1.0:/opt/IBM/xlC/16.1.0
+export XL_COMPILER=xlc++
+export XL_ASMOBJFILES=/tmp/xlcAS3IXqid
+export "XL_DIS=/opt/IBM/xlc/16.1.0/exe/dis -o "CMakeFiles/cmTC_b8490.dir/CMakeCXXCompilerABI.cpp.o" "CMakeCXXCompilerABI.o""
+/opt/IBM/xlC/16.1.0/exe/xlC2entry -qosvar=aix.7.2 -qalias=ansi -qthreaded -D_THREAD_SAFE -Wno-parentheses -Wno-unused-value -D_AIX -D_AIX32 -D_AIX41 -D_AIX43 -D_AIX50 -D_AIX51 -D_AIX52 -D_AIX53 -D_AIX61 -D_AIX71 -D_AIX72 -D_IBMR2 -D_POWER -xc++ -qasm_as=/bin/as -qcpp_stdinc=/opt/IBM/xlC/16.1.0/include2/c++:/opt/IBM/xlC/16.1.0/include2:/opt/IBM/xlC/16.1.0/include2/aix:/opt/IBM/xlmass/9.1.0/include:/usr/include -qc_stdinc=/opt/IBM/xlC/16.1.0/include2:/opt/IBM/xlC/16.1.0/include2/aix:/opt/IBM/xlmass/9.1.0/include:/usr/include -oCMakeFiles/cmTC_b8490.dir/CMakeCXXCompilerABI.cpp.o /tmp/CMake/Modules/CMakeCXXCompilerABI.cpp /tmp/xlcW03uXqia /tmp/xlcW137Xqib /dev/null /tmp/xlcL3QXqieF.lst /dev/null /tmp/xlcW23AXqic
+export XL_BACKEND=/opt/IBM/xlc/16.1.0/exe/xlCcode
+export XL_LINKER=/bin/ld
+/opt/IBM/xlc/16.1.0/exe/xlCcode -qalias=ansi -qthreaded /tmp/xlcW03uXqia /tmp/xlcW137Xqib CMakeFiles/cmTC_b8490.dir/CMakeCXXCompilerABI.cpp.o /tmp/xlcL3QXqieB.lst /tmp/xlcW23AXqic
+rm /tmp/xlcAS3IXqid
+rm /tmp/xlcL3QXqie
+rm /tmp/xlcW03uXqia
+rm /tmp/xlcW137Xqib
+rm /tmp/xlcW23AXqic
+Linking CXX executable cmTC_b8490
+/tmp/CMake/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b8490.dir/link.txt --verbose=1
+/opt/IBM/xlC/16.1.0/bin/xlclang++    -Wl,-bnoipath -Wl,-brtl -V -Wl,-bexpall CMakeFiles/cmTC_b8490.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_b8490 -Wl,-blibpath:/usr/lib:/lib
+export XL_CONFIG=/opt/IBM/xlc/16.1.0/etc/xlc.cfg.72:xlclang++
+/bin/ld -b32 /lib/crt0.o /lib/crti.o -bpT:0x10000000 -bpD:0x20000000 -bnoipath -brtl -bexpall CMakeFiles/cmTC_b8490.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_b8490 -blibpath:/usr/lib:/lib -bcdtors:all:0:s -btmplrename -L/opt/IBM/xlmass/9.1.0/lib/aix61 -L/opt/IBM/xlc/16.1.0/lib -lxlopt -lxlipa -lxl -L/opt/IBM/xlC/16.1.0/lib -lc++ -lCcore -lpthreads -lm -lc  |
+/opt/IBM/xlC/16.1.0/bin/c++filt -S |
+/bin/sed '/317.*::virtual-fn-table-ptr$/ s/^\(.*: \)*{*\([^}]*\)\(}*.*\)::virtual-fn-table-ptr$/\1Virtual table for class "\2": Some possible causes are: first non-inline virtual function in "\2" is not defined or the class is a template instantiation and an explicit instantiation definition of the class is missing./'
+rm /tmp/xlcW05fS7ia
+rm /tmp/xlcW15rS7ib
+rm /tmp/xlcW25vS7ic
+gmake[1]: Leaving directory '/tmp/ii/CMakeFiles/CMakeTmp'

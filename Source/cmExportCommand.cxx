@@ -12,10 +12,11 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -25,9 +26,7 @@ class cmExecutionStatus;
 #endif
 
 cmExportCommand::cmExportCommand()
-  : cmCommand()
-  , ArgumentGroup()
-  , Targets(&Helper, "TARGETS")
+  : Targets(&Helper, "TARGETS")
   , Append(&Helper, "APPEND", &ArgumentGroup)
   , ExportSetName(&Helper, "EXPORT", &ArgumentGroup)
   , Namespace(&Helper, "NAMESPACE", &ArgumentGroup)
@@ -245,10 +244,23 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
     return false;
   }
 
-  // If the CMAKE_EXPORT_NO_PACKAGE_REGISTRY variable is set the command
-  // export(PACKAGE) does nothing.
-  if (this->Makefile->IsOn("CMAKE_EXPORT_NO_PACKAGE_REGISTRY")) {
-    return true;
+  // CMP0090 decides both the default and what variable changes it.
+  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0090)) {
+    case cmPolicies::WARN:
+    case cmPolicies::OLD:
+      // Default is to export, but can be disabled.
+      if (this->Makefile->IsOn("CMAKE_EXPORT_NO_PACKAGE_REGISTRY")) {
+        return true;
+      }
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      // Default is to not export, but can be enabled.
+      if (!this->Makefile->IsOn("CMAKE_EXPORT_PACKAGE_REGISTRY")) {
+        return true;
+      }
+      break;
   }
 
   // We store the current build directory in the registry as a value
@@ -281,7 +293,7 @@ void cmExportCommand::ReportRegistryError(std::string const& msg,
     e << "Windows reported:\n"
       << "  " << cmsys::Encoding::ToNarrow(winmsg);
   }
-  this->Makefile->IssueMessage(cmake::WARNING, e.str());
+  this->Makefile->IssueMessage(MessageType::WARNING, e.str());
 }
 
 void cmExportCommand::StorePackageRegistryWin(std::string const& package,
@@ -349,7 +361,7 @@ void cmExportCommand::StorePackageRegistryDir(std::string const& package,
         << "  " << fname << "\n"
         << cmSystemTools::GetLastSystemError() << "\n";
       /* clang-format on */
-      this->Makefile->IssueMessage(cmake::WARNING, e.str());
+      this->Makefile->IssueMessage(MessageType::WARNING, e.str());
     }
   }
 }

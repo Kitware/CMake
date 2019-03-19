@@ -18,7 +18,7 @@ class cmExpandedCommandArgument
 {
 public:
   cmExpandedCommandArgument();
-  cmExpandedCommandArgument(std::string const& value, bool quoted);
+  cmExpandedCommandArgument(std::string value, bool quoted);
 
   std::string const& GetValue() const;
 
@@ -33,7 +33,7 @@ public:
 
 private:
   std::string Value;
-  bool Quoted;
+  bool Quoted = false;
 };
 
 #endif

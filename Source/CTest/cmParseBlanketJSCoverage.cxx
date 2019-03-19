@@ -20,7 +20,7 @@ public:
   {
   }
 
-  virtual ~JSONParser() {}
+  virtual ~JSONParser() = default;
 
   std::string getValue(std::string const& line, int type)
   {

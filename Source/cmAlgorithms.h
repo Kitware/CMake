@@ -5,6 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmRange.h"
+
 #include "cm_kwiml.h"
 #include <algorithm>
 #include <functional>
@@ -61,8 +63,8 @@ struct cmStrCmp
     : m_test(test)
   {
   }
-  cmStrCmp(const std::string& test)
-    : m_test(test)
+  cmStrCmp(std::string test)
+    : m_test(std::move(test))
   {
   }
 
@@ -156,56 +158,11 @@ private:
 };
 }
 
-template <typename const_iterator_>
-struct cmRange
-{
-  typedef const_iterator_ const_iterator;
-  typedef typename std::iterator_traits<const_iterator>::value_type value_type;
-  typedef typename std::iterator_traits<const_iterator>::difference_type
-    difference_type;
-  cmRange(const_iterator begin_, const_iterator end_)
-    : Begin(begin_)
-    , End(end_)
-  {
-  }
-  const_iterator begin() const { return Begin; }
-  const_iterator end() const { return End; }
-  bool empty() const { return std::distance(Begin, End) == 0; }
-  difference_type size() const { return std::distance(Begin, End); }
-  cmRange& advance(KWIML_INT_intptr_t amount)
-  {
-    std::advance(Begin, amount);
-    return *this;
-  }
-
-  cmRange& retreat(KWIML_INT_intptr_t amount)
-  {
-    std::advance(End, -amount);
-    return *this;
-  }
-
-private:
-  const_iterator Begin;
-  const_iterator End;
-};
-
 typedef cmRange<std::vector<std::string>::const_iterator> cmStringRange;
 
 class cmListFileBacktrace;
 typedef cmRange<std::vector<cmListFileBacktrace>::const_iterator>
   cmBacktraceRange;
-
-template <typename Iter1, typename Iter2>
-cmRange<Iter1> cmMakeRange(Iter1 begin, Iter2 end)
-{
-  return cmRange<Iter1>(begin, end);
-}
-
-template <typename Range>
-cmRange<typename Range::const_iterator> cmMakeRange(Range const& range)
-{
-  return cmRange<typename Range::const_iterator>(range.begin(), range.end());
-}
 
 template <typename Range>
 void cmDeleteAll(Range const& r)
@@ -276,27 +233,45 @@ typename Range::const_iterator cmRemoveMatching(Range& r, MatchRange const& m)
                         ContainerAlgorithms::BinarySearcher<MatchRange>(m));
 }
 
+template <typename ForwardIterator>
+ForwardIterator cmRemoveDuplicates(ForwardIterator first, ForwardIterator last)
+{
+  using Value = typename std::iterator_traits<ForwardIterator>::value_type;
+  using Hash = struct
+  {
+    std::size_t operator()(ForwardIterator it) const
+    {
+      return std::hash<Value>{}(*it);
+    }
+  };
+
+  using Equal = struct
+  {
+    bool operator()(ForwardIterator it1, ForwardIterator it2) const
+    {
+      return *it1 == *it2;
+    }
+  };
+  std::unordered_set<ForwardIterator, Hash, Equal> uniq;
+
+  ForwardIterator result = first;
+  while (first != last) {
+    if (uniq.find(first) == uniq.end()) {
+      if (result != first) {
+        *result = std::move(*first);
+      }
+      uniq.insert(result);
+      ++result;
+    }
+    ++first;
+  }
+  return result;
+}
+
 template <typename Range>
 typename Range::const_iterator cmRemoveDuplicates(Range& r)
 {
-  typedef typename Range::value_type T;
-  std::unordered_set<T> unique;
-  std::vector<size_t> indices;
-  size_t count = 0;
-  const typename Range::const_iterator end = r.end();
-  for (typename Range::const_iterator it = r.begin(); it != end;
-       ++it, ++count) {
-    const typename std::unordered_set<T>::iterator occur = unique.find(*it);
-    if (occur == unique.end()) {
-      unique.insert(*it);
-    } else {
-      indices.push_back(count);
-    }
-  }
-  if (indices.empty()) {
-    return end;
-  }
-  return cmRemoveIndices(r, indices);
+  return cmRemoveDuplicates(r.begin(), r.end());
 }
 
 template <typename Range>
@@ -322,18 +297,18 @@ typename Range::const_iterator cmFindNot(Range const& r, T const& t)
   return std::find_if(r.begin(), r.end(), [&t](T const& i) { return i != t; });
 }
 
-template <typename Range>
-cmRange<typename Range::const_reverse_iterator> cmReverseRange(
-  Range const& range)
-{
-  return cmRange<typename Range::const_reverse_iterator>(range.rbegin(),
-                                                         range.rend());
-}
-
 template <class Iter>
 std::reverse_iterator<Iter> cmMakeReverseIterator(Iter it)
 {
   return std::reverse_iterator<Iter>(it);
+}
+
+inline bool cmHasPrefix(std::string const& str, std::string const& prefix)
+{
+  if (str.size() < prefix.size()) {
+    return false;
+  }
+  return str.compare(0, prefix.size(), prefix) == 0;
 }
 
 inline bool cmHasSuffix(const std::string& str, const std::string& suffix)
@@ -395,6 +370,12 @@ constexpr
 }
 
 #endif
+
+template <typename T>
+int isize(const T& t)
+{
+  return static_cast<int>(cm::size(t));
+}
 
 #if __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L
 

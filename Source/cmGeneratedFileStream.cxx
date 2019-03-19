@@ -12,8 +12,6 @@
 #endif
 
 cmGeneratedFileStream::cmGeneratedFileStream(Encoding encoding)
-  : cmGeneratedFileStreamBase()
-  , Stream()
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
   if (encoding != codecvt::None) {
@@ -31,8 +29,7 @@ cmGeneratedFileStream::cmGeneratedFileStream(std::string const& name,
 {
   // Check if the file opened.
   if (!*this && !quiet) {
-    cmSystemTools::Error("Cannot open file for write: ",
-                         this->TempName.c_str());
+    cmSystemTools::Error("Cannot open file for write: " + this->TempName);
     cmSystemTools::ReportLastSystemError("");
   }
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -70,8 +67,7 @@ cmGeneratedFileStream& cmGeneratedFileStream::Open(std::string const& name,
 
   // Check if the file opened.
   if (!*this && !quiet) {
-    cmSystemTools::Error("Cannot open file for write: ",
-                         this->TempName.c_str());
+    cmSystemTools::Error("Cannot open file for write: " + this->TempName);
     cmSystemTools::ReportLastSystemError("");
   }
   return *this;
@@ -104,23 +100,9 @@ void cmGeneratedFileStream::SetCompressionExtraExtension(bool ext)
   this->CompressExtraExtension = ext;
 }
 
-cmGeneratedFileStreamBase::cmGeneratedFileStreamBase()
-  : Name()
-  , TempName()
-  , CopyIfDifferent(false)
-  , Okay(false)
-  , Compress(false)
-  , CompressExtraExtension(true)
-{
-}
+cmGeneratedFileStreamBase::cmGeneratedFileStreamBase() = default;
 
 cmGeneratedFileStreamBase::cmGeneratedFileStreamBase(std::string const& name)
-  : Name()
-  , TempName()
-  , CopyIfDifferent(false)
-  , Okay(false)
-  , Compress(false)
-  , CompressExtraExtension(true)
 {
   this->Open(name);
 }
@@ -224,7 +206,7 @@ int cmGeneratedFileStreamBase::CompressFile(std::string const&,
 int cmGeneratedFileStreamBase::RenameFile(std::string const& oldname,
                                           std::string const& newname)
 {
-  return cmSystemTools::RenameFile(oldname.c_str(), newname.c_str());
+  return cmSystemTools::RenameFile(oldname, newname);
 }
 
 void cmGeneratedFileStream::SetName(const std::string& fname)

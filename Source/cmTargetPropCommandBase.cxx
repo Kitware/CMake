@@ -84,15 +84,6 @@ bool cmTargetPropCommandBase::ProcessContentArgs(
     this->SetError("called with invalid arguments");
     return false;
   }
-  if (this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY &&
-      scope != "INTERFACE") {
-    this->SetError("may only set INTERFACE properties on INTERFACE targets");
-    return false;
-  }
-  if (this->Target->IsImported() && scope != "INTERFACE") {
-    this->SetError("may only set INTERFACE properties on IMPORTED targets");
-    return false;
-  }
 
   ++argIndex;
 
@@ -101,9 +92,20 @@ bool cmTargetPropCommandBase::ProcessContentArgs(
   for (unsigned int i = argIndex; i < args.size(); ++i, ++argIndex) {
     if (args[i] == "PUBLIC" || args[i] == "PRIVATE" ||
         args[i] == "INTERFACE") {
-      return this->PopulateTargetProperies(scope, content, prepend, system);
+      break;
     }
     content.push_back(args[i]);
+  }
+  if (!content.empty()) {
+    if (this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY &&
+        scope != "INTERFACE") {
+      this->SetError("may only set INTERFACE properties on INTERFACE targets");
+      return false;
+    }
+    if (this->Target->IsImported() && scope != "INTERFACE") {
+      this->SetError("may only set INTERFACE properties on IMPORTED targets");
+      return false;
+    }
   }
   return this->PopulateTargetProperies(scope, content, prepend, system);
 }
@@ -112,6 +114,9 @@ bool cmTargetPropCommandBase::PopulateTargetProperies(
   const std::string& scope, const std::vector<std::string>& content,
   bool prepend, bool system)
 {
+  if (content.empty()) {
+    return true;
+  }
   if (scope == "PRIVATE" || scope == "PUBLIC") {
     if (!this->HandleDirectContent(this->Target, content, prepend, system)) {
       return false;

@@ -308,9 +308,6 @@ which will result in a response type "reply"::
 
 indicating that the server is ready for action.
 
-Protocol version 1.3 introduces an optional flag on the target filegroup
-that indicates if the filegroup represents :prop_tgt:`INTERFACE_SOURCES`.
-
 
 Type "globalSettings"
 ^^^^^^^^^^^^^^^^^^^^^
@@ -527,8 +524,6 @@ FileGroups are used to group sources using similar settings together.
 
 Each fileGroup object may contain the following keys:
 
-"isInterfaceSources"
-  true if the fileGroup represents :prop_tgt:`INTERFACE_SOURCES`.
 "language"
   contains the programming language used by all files in the group.
 "compileFlags"
@@ -543,8 +538,6 @@ Each fileGroup object may contain the following keys:
 "defines"
   with a list of defines in the form "SOMEVALUE" or "SOMEVALUE=42". This
   value is encoded in the system's native shell format.
-"isGenerated"
-  true if the files were generated.
 "sources"
   with a list of source files.
 

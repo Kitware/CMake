@@ -186,15 +186,15 @@ CPack
 
 * A :cpack_gen:`CPack FreeBSD Generator` was added for FreeBSD ``pkg(8)``.
 
-* The :cpack_gen:`CPack Deb Generator` was enabled on Windows.  While not
+* The :cpack_gen:`CPack DEB Generator` was enabled on Windows.  While not
   fully featured (due to the lack of external UNIX tools) this will allow
   building basic cross-platform Debian packages.
 
-* The :cpack_gen:`CPack Deb Generator` learned to set package release
+* The :cpack_gen:`CPack DEB Generator` learned to set package release
   version in ``Version`` info property.
   See the :variable:`CPACK_DEBIAN_PACKAGE_RELEASE` variable.
 
-* The :cpack_gen:`CPack Deb Generator` learned more strict package
+* The :cpack_gen:`CPack DEB Generator` learned more strict package
   version checking that complies with Debian rules.
 
 * The :module:`CPackIFW` module :command:`cpack_ifw_configure_component` and
@@ -211,7 +211,7 @@ CPack
   repack dependent components. This feature is only available when
   using QtIFW 3.1 or later.
 
-* The :cpack_gen:`CPack RPM Generator` and :cpack_gen:`CPack Deb Generator`
+* The :cpack_gen:`CPack RPM Generator` and :cpack_gen:`CPack DEB Generator`
   learned to set the package epoch version.
   See :variable:`CPACK_RPM_PACKAGE_EPOCH` and
   :variable:`CPACK_DEBIAN_PACKAGE_EPOCH` variables.

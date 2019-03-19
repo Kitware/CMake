@@ -6,6 +6,7 @@
 
 #include "cmCustomCommandLines.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 
@@ -40,18 +41,17 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
     this->Makefile->AddIncludeDirectories(outputDirectories);
   }
 
-  for (std::vector<std::string>::const_iterator i = (args.begin() + 1);
-       i != args.end(); i++) {
-    cmSourceFile* curr = this->Makefile->GetSource(*i);
+  for (std::string const& arg : cmMakeRange(args).advance(1)) {
+    cmSourceFile* curr = this->Makefile->GetSource(arg);
     // if we should use the source GUI
     // to generate .cxx and .h files
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE")) {
       std::string outName = outputDirectory;
       outName += "/";
-      outName += cmSystemTools::GetFilenameWithoutExtension(*i);
+      outName += cmSystemTools::GetFilenameWithoutExtension(arg);
       std::string hname = outName;
       hname += ".h";
-      std::string origname = cdir + "/" + *i;
+      std::string origname = cdir + "/" + arg;
       // add starting depends
       std::vector<std::string> depends;
       depends.push_back(origname);
@@ -117,7 +117,7 @@ void cmFLTKWrapUICommand::FinalPass()
     msg += ".  The problem was found while processing the source directory: ";
     msg += this->Makefile->GetCurrentSourceDirectory();
     msg += ".  This FLTK_WRAP_UI call will be ignored.";
-    cmSystemTools::Message(msg.c_str(), "Warning");
+    cmSystemTools::Message(msg, "Warning");
     return;
   }
 }

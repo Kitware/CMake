@@ -21,15 +21,24 @@ set(x 43)
 if(NOT x EQUAL 43)
   message(FATAL_ERROR "x!=43")
 endif()
+if(DEFINED CACHE{x})
+  message(FATAL_ERROR "x shouldn't be found in the cache")
+endif()
+
 set(x)
 if(DEFINED x)
   message(FATAL_ERROR "x should be undefined now!")
 endif()
 
+
 # Cache variable
 set(BAR "test" CACHE STRING "documentation")
 if(NOT DEFINED BAR)
   message(FATAL_ERROR "BAR not defined")
+endif()
+
+if(NOT DEFINED CACHE{BAR})
+  message(FATAL_ERROR "BAR could not be found by CACHE{BAR}")
 endif()
 
 # Test interaction of cache entries with variables.

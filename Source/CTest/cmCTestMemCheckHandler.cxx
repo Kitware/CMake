@@ -261,8 +261,8 @@ void cmCTestMemCheckHandler::InitializeResultsVectors()
   };
   this->GlobalResults.clear();
   for (int i = 0; cmCTestMemCheckResultStrings[i] != nullptr; ++i) {
-    this->ResultStrings.push_back(cmCTestMemCheckResultStrings[i]);
-    this->ResultStringsLong.push_back(cmCTestMemCheckResultLongStrings[i]);
+    this->ResultStrings.emplace_back(cmCTestMemCheckResultStrings[i]);
+    this->ResultStringsLong.emplace_back(cmCTestMemCheckResultLongStrings[i]);
     this->GlobalResults.push_back(0);
   }
 }
@@ -520,7 +520,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->CTest->GetCTestConfiguration("ValgrindCommandOptions");
   }
   this->MemoryTesterOptions =
-    cmSystemTools::ParseArguments(memoryTesterOptions.c_str());
+    cmSystemTools::ParseArguments(memoryTesterOptions);
 
   this->MemoryTesterOutputFile =
     this->CTest->GetBinaryDir() + "/Testing/Temporary/MemoryChecker.??.log";
@@ -528,11 +528,11 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
   switch (this->MemoryTesterStyle) {
     case cmCTestMemCheckHandler::VALGRIND: {
       if (this->MemoryTesterOptions.empty()) {
-        this->MemoryTesterOptions.push_back("-q");
-        this->MemoryTesterOptions.push_back("--tool=memcheck");
-        this->MemoryTesterOptions.push_back("--leak-check=yes");
-        this->MemoryTesterOptions.push_back("--show-reachable=yes");
-        this->MemoryTesterOptions.push_back("--num-callers=50");
+        this->MemoryTesterOptions.emplace_back("-q");
+        this->MemoryTesterOptions.emplace_back("--tool=memcheck");
+        this->MemoryTesterOptions.emplace_back("--leak-check=yes");
+        this->MemoryTesterOptions.emplace_back("--show-reachable=yes");
+        this->MemoryTesterOptions.emplace_back("--num-callers=50");
       }
       if (!this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile")
              .empty()) {
@@ -586,11 +586,11 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       std::string dpbdFile = this->CTest->GetBinaryDir() +
         "/Testing/Temporary/MemoryChecker.??.DPbd";
       this->BoundsCheckerDPBDFile = dpbdFile;
-      this->MemoryTesterDynamicOptions.push_back("/B");
+      this->MemoryTesterDynamicOptions.emplace_back("/B");
       this->MemoryTesterDynamicOptions.push_back(std::move(dpbdFile));
-      this->MemoryTesterDynamicOptions.push_back("/X");
+      this->MemoryTesterDynamicOptions.emplace_back("/X");
       this->MemoryTesterDynamicOptions.push_back(this->MemoryTesterOutputFile);
-      this->MemoryTesterOptions.push_back("/M");
+      this->MemoryTesterOptions.emplace_back("/M");
       break;
     }
     // these are almost the same but the env var used is different
@@ -604,8 +604,8 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       // The MemoryTesterDynamicOptions is setup with the -E env
       // Then the MemoryTesterEnvironmentVariable gets the
       // TSAN_OPTIONS string with the log_path in it.
-      this->MemoryTesterDynamicOptions.push_back("-E");
-      this->MemoryTesterDynamicOptions.push_back("env");
+      this->MemoryTesterDynamicOptions.emplace_back("-E");
+      this->MemoryTesterDynamicOptions.emplace_back("env");
       std::string envVar;
       std::string extraOptions;
       std::string suppressionsOption;
@@ -725,7 +725,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
   cmsys::RegularExpression leakWarning("(Direct|Indirect) leak of .*");
   int defects = 0;
   std::vector<std::string> lines;
-  cmSystemTools::Split(str.c_str(), lines);
+  cmsys::SystemTools::Split(str, lines);
   std::ostringstream ostr;
   log.clear();
   for (std::string const& l : lines) {
@@ -755,7 +755,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
   const std::string& str, std::string& log, std::vector<int>& results)
 {
   std::vector<std::string> lines;
-  cmSystemTools::Split(str.c_str(), lines);
+  cmsys::SystemTools::Split(str, lines);
   std::ostringstream ostr;
   log.clear();
 
@@ -798,7 +798,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
   const std::string& str, std::string& log, std::vector<int>& results)
 {
   std::vector<std::string> lines;
-  cmSystemTools::Split(str.c_str(), lines);
+  cmsys::SystemTools::Split(str, lines);
   bool unlimitedOutput = false;
   if (str.find("CTEST_FULL_OUTPUT") != std::string::npos ||
       this->CustomMaximumFailedTestOutputSize == 0) {
@@ -937,7 +937,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
   log.clear();
   auto sttime = std::chrono::steady_clock::now();
   std::vector<std::string> lines;
-  cmSystemTools::Split(str.c_str(), lines);
+  cmsys::SystemTools::Split(str, lines);
   cmCTestOptionalLog(this->CTest, DEBUG,
                      "Start test: " << lines.size() << std::endl, this->Quiet);
   std::vector<std::string>::size_type cc;

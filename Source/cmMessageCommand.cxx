@@ -4,9 +4,10 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmMessenger.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -20,26 +21,26 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
   }
   std::vector<std::string>::const_iterator i = args.begin();
 
-  cmake::MessageType type = cmake::MESSAGE;
+  MessageType type = MessageType::MESSAGE;
   bool status = false;
   bool fatal = false;
   if (*i == "SEND_ERROR") {
-    type = cmake::FATAL_ERROR;
+    type = MessageType::FATAL_ERROR;
     ++i;
   } else if (*i == "FATAL_ERROR") {
     fatal = true;
-    type = cmake::FATAL_ERROR;
+    type = MessageType::FATAL_ERROR;
     ++i;
   } else if (*i == "WARNING") {
-    type = cmake::WARNING;
+    type = MessageType::WARNING;
     ++i;
   } else if (*i == "AUTHOR_WARNING") {
     if (this->Makefile->IsSet("CMAKE_SUPPRESS_DEVELOPER_ERRORS") &&
         !this->Makefile->IsOn("CMAKE_SUPPRESS_DEVELOPER_ERRORS")) {
       fatal = true;
-      type = cmake::AUTHOR_ERROR;
+      type = MessageType::AUTHOR_ERROR;
     } else if (!this->Makefile->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS")) {
-      type = cmake::AUTHOR_WARNING;
+      type = MessageType::AUTHOR_WARNING;
     } else {
       return true;
     }
@@ -50,10 +51,10 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
   } else if (*i == "DEPRECATION") {
     if (this->Makefile->IsOn("CMAKE_ERROR_DEPRECATED")) {
       fatal = true;
-      type = cmake::DEPRECATION_ERROR;
+      type = MessageType::DEPRECATION_ERROR;
     } else if ((!this->Makefile->IsSet("CMAKE_WARN_DEPRECATED") ||
                 this->Makefile->IsOn("CMAKE_WARN_DEPRECATED"))) {
-      type = cmake::DEPRECATION_WARNING;
+      type = MessageType::DEPRECATION_WARNING;
     } else {
       return true;
     }
@@ -62,15 +63,15 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
 
   std::string message = cmJoin(cmMakeRange(i, args.end()), std::string());
 
-  if (type != cmake::MESSAGE) {
+  if (type != MessageType::MESSAGE) {
     // we've overridden the message type, above, so display it directly
     cmMessenger* m = this->Makefile->GetMessenger();
     m->DisplayMessage(type, message, this->Makefile->GetBacktrace());
   } else {
     if (status) {
-      this->Makefile->DisplayStatus(message.c_str(), -1);
+      this->Makefile->DisplayStatus(message, -1);
     } else {
-      cmSystemTools::Message(message.c_str());
+      cmSystemTools::Message(message);
     }
   }
   if (fatal) {

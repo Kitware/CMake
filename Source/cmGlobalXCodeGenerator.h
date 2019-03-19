@@ -66,15 +66,12 @@ public:
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.
    */
-  void GenerateBuildCommand(std::vector<std::string>& makeCommand,
-                            const std::string& makeProgram,
-                            const std::string& projectName,
-                            const std::string& projectDir,
-                            const std::string& targetName,
-                            const std::string& config, bool fast, int jobs,
-                            bool verbose,
-                            std::vector<std::string> const& makeOptions =
-                              std::vector<std::string>()) override;
+  std::vector<GeneratedMakeCommand> GenerateBuildCommand(
+    const std::string& makeProgram, const std::string& projectName,
+    const std::string& projectDir, std::vector<std::string> const& targetNames,
+    const std::string& config, bool fast, int jobs, bool verbose,
+    std::vector<std::string> const& makeOptions =
+      std::vector<std::string>()) override;
 
   /** Append the subdirectory for the given configuration.  */
   void AppendDirectoryForConfig(const std::string& prefix,
@@ -122,8 +119,8 @@ private:
                                 const std::string& name);
   bool CreateGroups(std::vector<cmLocalGenerator*>& generators);
   std::string XCodeEscapePath(const std::string& p);
-  std::string RelativeToSource(const char* p);
-  std::string RelativeToBinary(const char* p);
+  std::string RelativeToSource(const std::string& p);
+  std::string RelativeToBinary(const std::string& p);
   std::string ConvertToRelativeForMake(std::string const& p);
   void CreateCustomCommands(cmXCodeObject* buildPhases,
                             cmXCodeObject* sourceBuildPhase,
@@ -171,6 +168,9 @@ private:
                                    const std::string& configName);
   cmXCodeObject* CreateUtilityTarget(cmGeneratorTarget* gtgt);
   void AddDependAndLinkInformation(cmXCodeObject* target);
+  void AddPositionIndependentLinkAttribute(cmGeneratorTarget* target,
+                                           cmXCodeObject* buildSettings,
+                                           const std::string& configName);
   void CreateBuildSettings(cmGeneratorTarget* gtgt,
                            cmXCodeObject* buildSettings,
                            const std::string& buildType);
@@ -261,9 +261,10 @@ private:
   {
   }
 
-  std::string GetObjectsNormalDirectory(const std::string& projName,
-                                        const std::string& configName,
-                                        const cmGeneratorTarget* t) const;
+  std::string GetObjectsDirectory(const std::string& projName,
+                                  const std::string& configName,
+                                  const cmGeneratorTarget* t,
+                                  const std::string& variant) const;
 
   static std::string GetDeploymentPlatform(const cmMakefile* mf);
 

@@ -3,15 +3,16 @@
 #include "cmListFileCache.h"
 
 #include "cmListFileLexer.h"
+#include "cmMessageType.h"
 #include "cmMessenger.h"
-#include "cmOutputConverter.h"
 #include "cmState.h"
+#include "cmStateDirectory.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
-#include <algorithm>
 #include <assert.h>
+#include <memory>
 #include <sstream>
+#include <utility>
 
 cmCommandContext::cmCommandName& cmCommandContext::cmCommandName::operator=(
   std::string const& name)
@@ -23,9 +24,11 @@ cmCommandContext::cmCommandName& cmCommandContext::cmCommandName::operator=(
 
 struct cmListFileParser
 {
-  cmListFileParser(cmListFile* lf, cmListFileBacktrace const& lfbt,
+  cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
                    cmMessenger* messenger, const char* filename);
   ~cmListFileParser();
+  cmListFileParser(const cmListFileParser&) = delete;
+  cmListFileParser& operator=(const cmListFileParser&) = delete;
   void IssueFileOpenError(std::string const& text) const;
   void IssueError(std::string const& text) const;
   bool ParseFile();
@@ -46,12 +49,11 @@ struct cmListFileParser
   } Separation;
 };
 
-cmListFileParser::cmListFileParser(cmListFile* lf,
-                                   cmListFileBacktrace const& lfbt,
+cmListFileParser::cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
                                    cmMessenger* messenger,
                                    const char* filename)
   : ListFile(lf)
-  , Backtrace(lfbt)
+  , Backtrace(std::move(lfbt))
   , Messenger(messenger)
   , FileName(filename)
   , Lexer(cmListFileLexer_New())
@@ -65,7 +67,8 @@ cmListFileParser::~cmListFileParser()
 
 void cmListFileParser::IssueFileOpenError(const std::string& text) const
 {
-  this->Messenger->IssueMessage(cmake::FATAL_ERROR, text, this->Backtrace);
+  this->Messenger->IssueMessage(MessageType::FATAL_ERROR, text,
+                                this->Backtrace);
 }
 
 void cmListFileParser::IssueError(const std::string& text) const
@@ -75,7 +78,7 @@ void cmListFileParser::IssueError(const std::string& text) const
   lfc.Line = cmListFileLexer_GetCurrentLine(this->Lexer);
   cmListFileBacktrace lfbt = this->Backtrace;
   lfbt = lfbt.Push(lfc);
-  this->Messenger->IssueMessage(cmake::FATAL_ERROR, text, lfbt);
+  this->Messenger->IssueMessage(MessageType::FATAL_ERROR, text, lfbt);
   cmSystemTools::SetFatalErrorOccured();
 }
 
@@ -192,8 +195,9 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
   unsigned long lastLine;
   unsigned long parenDepth = 0;
   this->Separation = SeparationOkay;
-  while ((lastLine = cmListFileLexer_GetCurrentLine(this->Lexer),
-          token = cmListFileLexer_Scan(this->Lexer))) {
+  while (
+    (static_cast<void>(lastLine = cmListFileLexer_GetCurrentLine(this->Lexer)),
+     token = cmListFileLexer_Scan(this->Lexer))) {
     if (token->type == cmListFileLexer_Token_Space ||
         token->type == cmListFileLexer_Token_Newline) {
       this->Separation = SeparationOkay;
@@ -253,7 +257,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
   lfbt = lfbt.Push(lfc);
   error << "Parse error.  Function missing ending \")\".  "
         << "End of file reached.";
-  this->Messenger->IssueMessage(cmake::FATAL_ERROR, error.str(), lfbt);
+  this->Messenger->IssueMessage(MessageType::FATAL_ERROR, error.str(), lfbt);
   return false;
 }
 
@@ -278,98 +282,73 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
     << "Argument not separated from preceding token by whitespace.";
   /* clang-format on */
   if (isError) {
-    this->Messenger->IssueMessage(cmake::FATAL_ERROR, m.str(), lfbt);
+    this->Messenger->IssueMessage(MessageType::FATAL_ERROR, m.str(), lfbt);
     return false;
   }
-  this->Messenger->IssueMessage(cmake::AUTHOR_WARNING, m.str(), lfbt);
+  this->Messenger->IssueMessage(MessageType::AUTHOR_WARNING, m.str(), lfbt);
   return true;
 }
 
-struct cmListFileBacktrace::Entry : public cmListFileContext
+// We hold either the bottom scope of a directory or a call/file context.
+// Discriminate these cases via the parent pointer.
+struct cmListFileBacktrace::Entry
 {
-  Entry(cmListFileContext const& lfc, Entry* up)
-    : cmListFileContext(lfc)
-    , Up(up)
-    , RefCount(0)
+  Entry(cmStateSnapshot bottom)
+    : Bottom(bottom)
   {
-    if (this->Up) {
-      this->Up->Ref();
-    }
   }
+
+  Entry(std::shared_ptr<Entry const> parent, cmListFileContext lfc)
+    : Context(std::move(lfc))
+    , Parent(std::move(parent))
+  {
+  }
+
   ~Entry()
   {
-    if (this->Up) {
-      this->Up->Unref();
+    if (this->Parent) {
+      this->Context.~cmListFileContext();
+    } else {
+      this->Bottom.~cmStateSnapshot();
     }
   }
-  void Ref() { ++this->RefCount; }
-  void Unref()
+
+  bool IsBottom() const { return !this->Parent; }
+
+  union
   {
-    if (--this->RefCount == 0) {
-      delete this;
-    }
-  }
-  Entry* Up;
-  unsigned int RefCount;
+    cmStateSnapshot Bottom;
+    cmListFileContext Context;
+  };
+  std::shared_ptr<Entry const> Parent;
 };
 
-cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& bottom,
-                                         Entry* up,
-                                         cmListFileContext const& lfc)
-  : Bottom(bottom)
-  , Cur(new Entry(lfc, up))
-{
-  assert(this->Bottom.IsValid());
-  this->Cur->Ref();
-}
-
-cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& bottom,
-                                         Entry* cur)
-  : Bottom(bottom)
-  , Cur(cur)
-{
-  if (this->Cur) {
-    assert(this->Bottom.IsValid());
-    this->Cur->Ref();
-  }
-}
-
-cmListFileBacktrace::cmListFileBacktrace()
-  : Bottom()
-  , Cur(nullptr)
-{
-}
-
 cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& snapshot)
-  : Bottom(snapshot.GetCallStackBottom())
-  , Cur(nullptr)
+  : TopEntry(std::make_shared<Entry const>(snapshot.GetCallStackBottom()))
 {
 }
 
-cmListFileBacktrace::cmListFileBacktrace(cmListFileBacktrace const& r)
-  : Bottom(r.Bottom)
-  , Cur(r.Cur)
+cmListFileBacktrace::cmListFileBacktrace(std::shared_ptr<Entry const> parent,
+                                         cmListFileContext const& lfc)
+  : TopEntry(std::make_shared<Entry const>(std::move(parent), lfc))
 {
-  if (this->Cur) {
-    assert(this->Bottom.IsValid());
-    this->Cur->Ref();
+}
+
+cmListFileBacktrace::cmListFileBacktrace(std::shared_ptr<Entry const> top)
+  : TopEntry(std::move(top))
+{
+}
+
+cmStateSnapshot cmListFileBacktrace::GetBottom() const
+{
+  cmStateSnapshot bottom;
+  if (Entry const* cur = this->TopEntry.get()) {
+    while (Entry const* parent = cur->Parent.get()) {
+      cur = parent;
+    }
+    bottom = cur->Bottom;
   }
-}
-
-cmListFileBacktrace& cmListFileBacktrace::operator=(
-  cmListFileBacktrace const& r)
-{
-  cmListFileBacktrace tmp(r);
-  std::swap(this->Cur, tmp.Cur);
-  std::swap(this->Bottom, tmp.Bottom);
-  return *this;
-}
-
-cmListFileBacktrace::~cmListFileBacktrace()
-{
-  if (this->Cur) {
-    this->Cur->Unref();
-  }
+  return bottom;
 }
 
 cmListFileBacktrace cmListFileBacktrace::Push(std::string const& file) const
@@ -380,54 +359,60 @@ cmListFileBacktrace cmListFileBacktrace::Push(std::string const& file) const
   // skipped during call stack printing.
   cmListFileContext lfc;
   lfc.FilePath = file;
-  return cmListFileBacktrace(this->Bottom, this->Cur, lfc);
+  return this->Push(lfc);
 }
 
 cmListFileBacktrace cmListFileBacktrace::Push(
   cmListFileContext const& lfc) const
 {
-  return cmListFileBacktrace(this->Bottom, this->Cur, lfc);
+  assert(this->TopEntry);
+  assert(!this->TopEntry->IsBottom() || this->TopEntry->Bottom.IsValid());
+  return cmListFileBacktrace(this->TopEntry, lfc);
 }
 
 cmListFileBacktrace cmListFileBacktrace::Pop() const
 {
-  assert(this->Cur);
-  return cmListFileBacktrace(this->Bottom, this->Cur->Up);
+  assert(this->TopEntry);
+  assert(!this->TopEntry->IsBottom());
+  return cmListFileBacktrace(this->TopEntry->Parent);
 }
 
 cmListFileContext const& cmListFileBacktrace::Top() const
 {
-  if (this->Cur) {
-    return *this->Cur;
-  }
-  static cmListFileContext const empty;
-  return empty;
+  assert(this->TopEntry);
+  assert(!this->TopEntry->IsBottom());
+  return this->TopEntry->Context;
 }
 
 void cmListFileBacktrace::PrintTitle(std::ostream& out) const
 {
-  if (!this->Cur) {
+  // The title exists only if we have a call on top of the bottom.
+  if (!this->TopEntry || this->TopEntry->IsBottom()) {
     return;
   }
-  cmOutputConverter converter(this->Bottom);
-  cmListFileContext lfc = *this->Cur;
-  if (!this->Bottom.GetState()->GetIsInTryCompile()) {
-    lfc.FilePath = converter.ConvertToRelativePath(
-      this->Bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
+  cmListFileContext lfc = this->TopEntry->Context;
+  cmStateSnapshot bottom = this->GetBottom();
+  if (!bottom.GetState()->GetIsInTryCompile()) {
+    lfc.FilePath = bottom.GetDirectory().ConvertToRelPathIfNotContained(
+      bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
   }
   out << (lfc.Line ? " at " : " in ") << lfc;
 }
 
 void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
 {
-  if (!this->Cur || !this->Cur->Up) {
+  // The call stack exists only if we have at least two calls on top
+  // of the bottom.
+  if (!this->TopEntry || this->TopEntry->IsBottom() ||
+      this->TopEntry->Parent->IsBottom()) {
     return;
   }
 
   bool first = true;
-  cmOutputConverter converter(this->Bottom);
-  for (Entry* i = this->Cur->Up; i; i = i->Up) {
-    if (i->Name.empty()) {
+  cmStateSnapshot bottom = this->GetBottom();
+  for (Entry const* cur = this->TopEntry->Parent.get(); !cur->IsBottom();
+       cur = cur->Parent.get()) {
+    if (cur->Context.Name.empty()) {
       // Skip this whole-file scope.  When we get here we already will
       // have printed a more-specific context within the file.
       continue;
@@ -436,10 +421,10 @@ void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
       first = false;
       out << "Call Stack (most recent call first):\n";
     }
-    cmListFileContext lfc = *i;
-    if (!this->Bottom.GetState()->GetIsInTryCompile()) {
-      lfc.FilePath = converter.ConvertToRelativePath(
-        this->Bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
+    cmListFileContext lfc = cur->Context;
+    if (!bottom.GetState()->GetIsInTryCompile()) {
+      lfc.FilePath = bottom.GetDirectory().ConvertToRelPathIfNotContained(
+        bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
     }
     out << "  " << lfc << "\n";
   }
@@ -448,14 +433,17 @@ void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
 size_t cmListFileBacktrace::Depth() const
 {
   size_t depth = 0;
-  if (this->Cur == nullptr) {
-    return 0;
-  }
-
-  for (Entry* i = this->Cur->Up; i; i = i->Up) {
-    depth++;
+  if (Entry const* cur = this->TopEntry.get()) {
+    for (; !cur->IsBottom(); cur = cur->Parent.get()) {
+      ++depth;
+    }
   }
   return depth;
+}
+
+bool cmListFileBacktrace::Empty() const
+{
+  return !this->TopEntry || this->TopEntry->IsBottom();
 }
 
 std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
@@ -486,4 +474,22 @@ bool operator==(const cmListFileContext& lhs, const cmListFileContext& rhs)
 bool operator!=(const cmListFileContext& lhs, const cmListFileContext& rhs)
 {
   return !(lhs == rhs);
+}
+
+std::ostream& operator<<(std::ostream& os, BT<std::string> const& s)
+{
+  return os << s.Value;
+}
+
+std::vector<BT<std::string>> ExpandListWithBacktrace(
+  std::string const& list, cmListFileBacktrace const& bt)
+{
+  std::vector<BT<std::string>> result;
+  std::vector<std::string> tmp;
+  cmSystemTools::ExpandListArgument(list, tmp);
+  result.reserve(tmp.size());
+  for (std::string& i : tmp) {
+    result.emplace_back(std::move(i), bt);
+  }
+  return result;
 }
