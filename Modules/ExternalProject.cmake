@@ -1167,18 +1167,12 @@ endif()
 endfunction()
 
 function(_ep_write_hgclone_script script_filename source_dir hg_EXECUTABLE hg_repository hg_tag src_name work_dir hgclone_infofile hgclone_stampfile)
+  if("${hg_tag}" STREQUAL "")
+    message(FATAL_ERROR "Tag for hg checkout should not be empty.")
+  endif()
   file(WRITE ${script_filename}
-"if(\"${hg_tag}\" STREQUAL \"\")
-  message(FATAL_ERROR \"Tag for hg checkout should not be empty.\")
-endif()
-
-set(run 0)
-
-if(\"${hgclone_infofile}\" IS_NEWER_THAN \"${hgclone_stampfile}\")
-  set(run 1)
-endif()
-
-if(NOT run)
+"
+if(NOT \"${hgclone_infofile}\" IS_NEWER_THAN \"${hgclone_stampfile}\")
   message(STATUS \"Avoiding repeated hg clone, stamp file is up to date: '${hgclone_stampfile}'\")
   return()
 endif()
@@ -1215,7 +1209,6 @@ execute_process(
   COMMAND \${CMAKE_COMMAND} -E copy
     \"${hgclone_infofile}\"
     \"${hgclone_stampfile}\"
-  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
 if(error_code)
