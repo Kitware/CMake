@@ -26,7 +26,7 @@
 
 class cmExternalMakefileProjectGeneratorFactory;
 class cmFileAPI;
-class cmFileTimeComparison;
+class cmFileTimeCache;
 class cmGlobalGenerator;
 class cmGlobalGeneratorFactory;
 class cmMakefile;
@@ -329,7 +329,7 @@ public:
   /**
    * Get the file comparison class
    */
-  cmFileTimeComparison* GetFileComparison() { return this->FileComparison; }
+  cmFileTimeCache* GetFileTimeCache() { return this->FileTimeCache; }
 
   // Do we want debug output during the cmake run.
   bool GetDebugOutput() { return this->DebugOutput; }
@@ -509,7 +509,7 @@ private:
   std::unordered_set<std::string> HeaderFileExtensionsSet;
   bool ClearBuildSystem;
   bool DebugTryCompile;
-  cmFileTimeComparison* FileComparison;
+  cmFileTimeCache* FileTimeCache;
   std::string GraphVizFile;
   InstalledFilesMap InstalledFiles;
 

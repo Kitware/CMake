@@ -304,7 +304,8 @@ CMAKE_CXX_SOURCES="\
   cmFileCommand \
   cmFileCopier \
   cmFileInstaller \
-  cmFileTimeComparison \
+  cmFileTime \
+  cmFileTimeCache \
   cmFindBase \
   cmFindCommon \
   cmFindFileCommand \

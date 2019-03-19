@@ -12,7 +12,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommandGenerator.h"
-#include "cmFileTimeComparison.h"
+#include "cmFileTimeCache.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -1273,12 +1273,11 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
   // happen when a new source file is added and CMake regenerates the
   // project but no other sources were touched.
   bool needRescanDependInfo = false;
-  cmFileTimeComparison* ftc =
-    this->GlobalGenerator->GetCMakeInstance()->GetFileComparison();
+  cmFileTimeCache* ftc =
+    this->GlobalGenerator->GetCMakeInstance()->GetFileTimeCache();
   {
     int result;
-    if (!ftc->FileTimeCompare(internalDependFile, tgtInfo, &result) ||
-        result < 0) {
+    if (!ftc->Compare(internalDependFile, tgtInfo, &result) || result < 0) {
       if (verbose) {
         std::ostringstream msg;
         msg << "Dependee \"" << tgtInfo << "\" is newer than depender \""
@@ -1297,7 +1296,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
     dirInfoFile += "/CMakeFiles";
     dirInfoFile += "/CMakeDirectoryInformation.cmake";
     int result;
-    if (!ftc->FileTimeCompare(internalDependFile, dirInfoFile, &result) ||
+    if (!ftc->Compare(internalDependFile, dirInfoFile, &result) ||
         result < 0) {
       if (verbose) {
         std::ostringstream msg;
@@ -1318,7 +1317,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
   if (!needRescanDirInfo) {
     cmDependsC checker;
     checker.SetVerbose(verbose);
-    checker.SetFileComparison(ftc);
+    checker.SetFileTimeCache(ftc);
     // cmDependsC::Check() fills the vector validDependencies() with the
     // dependencies for those files where they are still valid, i.e. neither
     // the files themselves nor any files they depend on have changed.
@@ -1439,8 +1438,8 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
 
     if (scanner) {
       scanner->SetLocalGenerator(this);
-      scanner->SetFileComparison(
-        this->GlobalGenerator->GetCMakeInstance()->GetFileComparison());
+      scanner->SetFileTimeCache(
+        this->GlobalGenerator->GetCMakeInstance()->GetFileTimeCache());
       scanner->SetLanguage(lang);
       scanner->SetTargetDirectory(targetDir);
       scanner->Write(ruleFileStream, internalRuleFileStream);

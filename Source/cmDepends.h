@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-class cmFileTimeComparison;
+class cmFileTimeCache;
 class cmLocalGenerator;
 
 /** \class cmDepends
@@ -72,10 +72,7 @@ public:
   void Clear(const std::string& file);
 
   /** Set the file comparison object */
-  void SetFileComparison(cmFileTimeComparison* fc)
-  {
-    this->FileComparison = fc;
-  }
+  void SetFileTimeCache(cmFileTimeCache* fc) { this->FileTimeCache = fc; }
 
 protected:
   // Write dependencies for the target file to the given stream.
@@ -101,7 +98,7 @@ protected:
 
   // Flag for verbose output.
   bool Verbose = false;
-  cmFileTimeComparison* FileComparison = nullptr;
+  cmFileTimeCache* FileTimeCache = nullptr;
 
   std::string Language;
 

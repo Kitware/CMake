@@ -532,7 +532,7 @@ bool cmFileCopier::InstallFile(const std::string& fromFile,
   bool copy = true;
   if (!this->Always) {
     // If both files exist with the same time do not copy.
-    if (!this->FileTimes.FileTimesDiffer(fromFile, toFile)) {
+    if (!this->FileTimes.DifferS(fromFile, toFile)) {
       copy = false;
     }
   }
