@@ -57,9 +57,9 @@ Options:
 
 ``RESULTS_VARIABLE <variable>``
  The variable will be set to contain the result of all processes as a
- :ref:`semicolon-separated list <CMake Language Lists>`, in order of the given ``COMMAND``
- arguments.  Each entry will be an integer return code from the
- corresponding child or a string describing an error condition.
+ :ref:`semicolon-separated list <CMake Language Lists>`, in order of the
+ given ``COMMAND`` arguments.  Each entry will be an integer return code
+ from the corresponding child or a string describing an error condition.
 
 ``OUTPUT_VARIABLE``, ``ERROR_VARIABLE``
  The variable named will be set with the contents of the standard output
