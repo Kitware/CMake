@@ -46,8 +46,9 @@ Options:
  the child processes.
 
 ``TIMEOUT``
- The child processes will be terminated if they do not finish in the
- specified number of seconds (fractions are allowed).
+ After the specified number of seconds (fractions allowed), all unfinished
+ child processes will be terminated, and the ``RESULT_VARIABLE`` will be
+ set to a string mentioning the "timeout".
 
 ``RESULT_VARIABLE``
  The variable will be set to contain the result of last child process.
