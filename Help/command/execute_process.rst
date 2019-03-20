@@ -22,7 +22,9 @@ Execute one or more child processes.
                   [ERROR_STRIP_TRAILING_WHITESPACE]
                   [ENCODING <name>])
 
-Runs the given sequence of one or more commands in parallel with the standard
+Runs the given sequence of one or more commands.
+
+Commands are executed concurrently as a pipeline, with the standard
 output of each process piped to the standard input of the next.
 A single standard error pipe is used for all processes.
 
