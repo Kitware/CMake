@@ -7,8 +7,12 @@
 
 #include "cmTarget.h"
 
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <vector>
+
 class cmCustomCommand;
-class cmGeneratedFileStream;
 class cmGeneratorTarget;
 class cmGlobalGhsMultiGenerator;
 class cmLocalGhsMultiGenerator;
@@ -51,12 +55,13 @@ private:
     cmTarget::CustomCommandType commandType);
   void WriteSources(std::ostream& fout_proj);
   void WriteSourceProperty(std::ostream& fout, const cmSourceFile* sf,
-                           std::string propName, std::string propFlag);
+                           std::string const& propName,
+                           std::string const& propFlag);
   void WriteReferences(std::ostream& fout);
   static void WriteObjectLangOverride(std::ostream& fout,
                                       const cmSourceFile* sourceFile);
 
-  bool DetermineIfIntegrityApp(void);
+  bool DetermineIfIntegrityApp();
   cmGeneratorTarget* GeneratorTarget;
   cmLocalGhsMultiGenerator* LocalGenerator;
   cmMakefile* Makefile;

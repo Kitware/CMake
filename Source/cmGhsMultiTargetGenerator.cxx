@@ -2,16 +2,29 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGhsMultiTargetGenerator.h"
 
-#include "cmComputeLinkInformation.h"
+#include "cmCustomCommand.h"
+#include "cmCustomCommandLines.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGhsMultiGenerator.h"
 #include "cmLinkLineComputer.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
+#include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmTargetDepend.h"
+
+#include <algorithm>
+#include <assert.h>
+#include <ostream>
+#include <set>
+#include <utility>
 
 cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
   : GeneratorTarget(target)
@@ -30,9 +43,7 @@ cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
   }
 }
 
-cmGhsMultiTargetGenerator::~cmGhsMultiTargetGenerator()
-{
-}
+cmGhsMultiTargetGenerator::~cmGhsMultiTargetGenerator() = default;
 
 void cmGhsMultiTargetGenerator::Generate()
 {
@@ -99,7 +110,7 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
   fname += "/";
   fname += this->Name;
   fname += cmGlobalGhsMultiGenerator::FILE_EXTENSION;
-  cmGeneratedFileStream fout(fname.c_str());
+  cmGeneratedFileStream fout(fname);
   fout.SetCopyIfDifferent(true);
 
   this->GetGlobalGenerator()->WriteFileHeader(fout);
@@ -336,10 +347,9 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
   }
 }
 
-void cmGhsMultiTargetGenerator::WriteSourceProperty(std::ostream& fout,
-                                                    const cmSourceFile* sf,
-                                                    std::string propName,
-                                                    std::string propFlag)
+void cmGhsMultiTargetGenerator::WriteSourceProperty(
+  std::ostream& fout, const cmSourceFile* sf, std::string const& propName,
+  std::string const& propFlag)
 {
   const char* prop = sf->GetProperty(propName);
   if (prop) {
@@ -370,7 +380,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       this->Makefile->FindSourceGroup(sf->GetFullPath(), sourceGroups);
     std::string gn = sourceGroup->GetFullName();
     groupFiles[gn].push_back(sf);
-    groupNames.insert(gn);
+    groupNames.insert(std::move(gn));
   }
 
   /* list of known groups and the order they are displayed in a project file */
@@ -397,7 +407,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
   }
 
   { /* catch-all group - is last item */
-    std::string gn = "";
+    std::string gn;
     auto n = groupNames.find(gn);
     if (n != groupNames.end()) {
       groupFilesList.back() = *n;
@@ -446,7 +456,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       std::string fpath = this->LocalGenerator->GetCurrentBinaryDirectory();
       fpath += "/";
       fpath += lpath;
-      cmGeneratedFileStream* f = new cmGeneratedFileStream(fpath.c_str());
+      cmGeneratedFileStream* f = new cmGeneratedFileStream(fpath);
       f->SetCopyIfDifferent(true);
       gfiles.push_back(f);
       fout = f;
@@ -476,7 +486,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 
       if ("ld" != si->GetExtension() && "int" != si->GetExtension() &&
           "bsp" != si->GetExtension()) {
-        this->WriteObjectLangOverride(*fout, si);
+        WriteObjectLangOverride(*fout, si);
       }
 
       this->WriteSourceProperty(*fout, si, "INCLUDE_DIRECTORIES", "-I");
@@ -502,9 +512,9 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
   std::ostream& fout, const cmSourceFile* sourceFile)
 {
   const char* rawLangProp = sourceFile->GetProperty("LANGUAGE");
-  if (NULL != rawLangProp) {
+  if (nullptr != rawLangProp) {
     std::string sourceLangProp(rawLangProp);
-    std::string extension(sourceFile->GetExtension());
+    std::string const& extension = sourceFile->GetExtension();
     if ("CXX" == sourceLangProp && ("c" == extension || "C" == extension)) {
       fout << "    -dotciscxx" << std::endl;
     }
@@ -540,20 +550,19 @@ void cmGhsMultiTargetGenerator::WriteReferences(std::ostream& fout)
   }
 }
 
-bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp(void)
+bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()
 {
   const char* p = this->GeneratorTarget->GetProperty("ghs_integrity_app");
   if (p) {
     return cmSystemTools::IsOn(
       this->GeneratorTarget->GetProperty("ghs_integrity_app"));
-  } else {
-    std::vector<cmSourceFile*> sources;
-    this->GeneratorTarget->GetSourceFiles(sources, this->ConfigName);
-    for (auto& sf : sources) {
-      if ("int" == sf->GetExtension()) {
-        return true;
-      }
-    }
-    return false;
   }
+  std::vector<cmSourceFile*> sources;
+  this->GeneratorTarget->GetSourceFiles(sources, this->ConfigName);
+  for (auto& sf : sources) {
+    if ("int" == sf->GetExtension()) {
+      return true;
+    }
+  }
+  return false;
 }

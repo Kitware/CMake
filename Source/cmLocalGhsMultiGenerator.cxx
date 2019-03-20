@@ -2,12 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalGhsMultiGenerator.h"
 
-#include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGhsMultiTargetGenerator.h"
-#include "cmGlobalGhsMultiGenerator.h"
-#include "cmMakefile.h"
+#include "cmGlobalGenerator.h"
 #include "cmSourceFile.h"
+#include "cmStateTypes.h"
+#include "cmSystemTools.h"
+
+#include <algorithm>
+#include <utility>
 
 cmLocalGhsMultiGenerator::cmLocalGhsMultiGenerator(cmGlobalGenerator* gg,
                                                    cmMakefile* mf)
@@ -15,9 +18,7 @@ cmLocalGhsMultiGenerator::cmLocalGhsMultiGenerator(cmGlobalGenerator* gg,
 {
 }
 
-cmLocalGhsMultiGenerator::~cmLocalGhsMultiGenerator()
-{
-}
+cmLocalGhsMultiGenerator::~cmLocalGhsMultiGenerator() = default;
 
 std::string cmLocalGhsMultiGenerator::GetTargetDirectory(
   cmGeneratorTarget const* target) const
