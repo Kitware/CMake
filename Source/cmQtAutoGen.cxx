@@ -309,7 +309,7 @@ void cmQtAutoGen::RccListConvertFullPath(std::string const& qrcFileDir,
                                          std::vector<std::string>& files)
 {
   for (std::string& entry : files) {
-    std::string tmp = cmSystemTools::CollapseCombinedPath(qrcFileDir, entry);
+    std::string tmp = cmSystemTools::CollapseFullPath(entry, qrcFileDir);
     entry = std::move(tmp);
   }
 }

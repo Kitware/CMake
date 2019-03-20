@@ -77,9 +77,9 @@ public:
     // -- Paths
     /// @brief Wrapper for cmSystemTools::GetRealPath
     std::string GetRealPath(std::string const& filename);
-    /// @brief Wrapper for cmSystemTools::CollapseCombinedPath
-    std::string CollapseCombinedPath(std::string const& dir,
-                                     std::string const& file);
+    /// @brief Wrapper for cmSystemTools::CollapseFullPath
+    std::string CollapseFullPath(std::string const& file,
+                                 std::string const& dir);
     /// @brief Wrapper for cmSystemTools::SplitPath
     void SplitPath(const std::string& p, std::vector<std::string>& components,
                    bool expand_home_dir = true);

@@ -150,7 +150,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
             // Construct the name of the file as if it were in the current
             // include directory.  Avoid using a leading "./".
             std::string tmpPath =
-              cmSystemTools::CollapseCombinedPath(iPath, current.FileName);
+              cmSystemTools::CollapseFullPath(current.FileName, iPath);
 
             // Look for the file in this location.
             if (cmSystemTools::FileExists(tmpPath, true)) {
@@ -362,7 +362,7 @@ void cmDependsC::Scan(std::istream& is, const std::string& directory,
         // must check for the file in the directory containing the
         // file we are scanning.
         entry.QuotedLocation =
-          cmSystemTools::CollapseCombinedPath(directory, entry.FileName);
+          cmSystemTools::CollapseFullPath(entry.FileName, directory);
       }
 
       // Queue the file if it has not yet been encountered and it

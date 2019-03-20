@@ -185,8 +185,7 @@ void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsd,
     }
   } else {
     std::string tryPath;
-    /* CollapseCombinedPath will check if ts is an absolute path */
-    tryPath = cmSystemTools::CollapseCombinedPath(tsd, ts);
+    tryPath = cmSystemTools::CollapseFullPath(ts, tsd);
     if (!cmSystemTools::FileExists(tryPath)) {
       std::string msg = "GHS toolset \"" + tryPath + "\" not found.";
       cmSystemTools::Error(msg);

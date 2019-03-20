@@ -27,7 +27,7 @@
 std::string cmQtAutoGeneratorMocUic::BaseSettingsT::AbsoluteBuildPath(
   std::string const& relativePath) const
 {
-  return FileSys->CollapseCombinedPath(AutogenBuildDir, relativePath);
+  return FileSys->CollapseFullPath(relativePath, AutogenBuildDir);
 }
 
 /**
