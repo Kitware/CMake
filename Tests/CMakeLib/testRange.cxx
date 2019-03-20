@@ -11,7 +11,7 @@
   do {                                                                        \
     if (!(x)) {                                                               \
       std::cout << "ASSERT_TRUE(" #x ") failed on line " << __LINE__ << "\n"; \
-      return false;                                                           \
+      return -1;                                                              \
     }                                                                         \
   } while (false)
 
