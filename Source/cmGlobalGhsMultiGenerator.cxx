@@ -132,17 +132,30 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
                            cmStateEnums::INTERNAL);
   }
 
-  const char* tgtPlatform = mf->GetDefinition("GHS_TARGET_PLATFORM");
-  if (tgtPlatform == nullptr) {
-    cmSystemTools::Message("Green Hills MULTI: GHS_TARGET_PLATFORM not "
-                           "specified; defaulting to \"integrity\"");
-    tgtPlatform = "integrity";
+  /* check if OS location has been updated by platform scripts */
+  std::string platform = mf->GetSafeDefinition("GHS_TARGET_PLATFORM");
+  std::string osdir = mf->GetSafeDefinition("GHS_OS_DIR");
+  if (cmSystemTools::IsOff(osdir.c_str()) &&
+      platform.find("integrity") != std::string::npos) {
+    if (!this->CMakeInstance->GetIsInTryCompile()) {
+      /* required OS location is not found */
+      std::string m =
+        "Green Hills MULTI: GHS_OS_DIR not specified; No OS found in \"";
+      m += mf->GetSafeDefinition("GHS_OS_ROOT");
+      m += "\"";
+      cmSystemTools::Message(m);
+    }
+    osdir = "GHS_OS_DIR-NOT-SPECIFIED";
+  } else if (!this->CMakeInstance->GetIsInTryCompile() &&
+             cmSystemTools::IsOff(this->OsDir) &&
+             !cmSystemTools::IsOff(osdir)) {
+    /* OS location was updated by auto-selection */
+    std::string m = "Green Hills MULTI: GHS_OS_DIR not specified; found \"";
+    m += osdir;
+    m += "\"";
+    cmSystemTools::Message(m);
   }
-
-  /* store the platform name for later use */
-  mf->AddCacheDefinition("GHS_TARGET_PLATFORM", tgtPlatform,
-                         "Name of GHS target platform.",
-                         cmStateEnums::INTERNAL);
+  this->OsDir = osdir;
 
   return true;
 }
@@ -153,6 +166,21 @@ void cmGlobalGhsMultiGenerator::EnableLanguage(
   mf->AddDefinition("CMAKE_SYSTEM_NAME", "GHS-MULTI");
 
   mf->AddDefinition("GHSMULTI", "1"); // identifier for user CMake files
+
+  const char* tgtPlatform = mf->GetDefinition("GHS_TARGET_PLATFORM");
+  if (!tgtPlatform) {
+    cmSystemTools::Message("Green Hills MULTI: GHS_TARGET_PLATFORM not "
+                           "specified; defaulting to \"integrity\"");
+    tgtPlatform = "integrity";
+  }
+
+  /* store the platform name for later use */
+  mf->AddCacheDefinition("GHS_TARGET_PLATFORM", tgtPlatform,
+                         "Name of GHS target platform.", cmStateEnums::STRING);
+
+  /* store original OS location */
+  this->OsDir = mf->GetSafeDefinition("GHS_OS_DIR");
+
   this->cmGlobalGenerator::EnableLanguage(l, mf, optional);
 }
 
@@ -261,22 +289,17 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(
 
   // Specify OS DIR if supplied by user
   // -- not all platforms require this entry in the project file
-  std::string osDir;
-  std::string osDirOption;
-  if (char const* osDirCache =
-        this->GetCMakeInstance()->GetCacheDefinition("GHS_OS_DIR")) {
-    osDir = osDirCache;
-  }
-
-  if (char const* osDirOptionCache =
-        this->GetCMakeInstance()->GetCacheDefinition("GHS_OS_DIR_OPTION")) {
-    osDirOption = osDirOptionCache;
-  }
-
-  if (!cmSystemTools::IsOff(osDir.c_str()) ||
-      platform.find("integrity") != std::string::npos) {
-    std::replace(osDir.begin(), osDir.end(), '\\', '/');
-    fout << "    " << osDirOption << "\"" << osDir << "\"" << std::endl;
+  if (!cmSystemTools::IsOff(this->OsDir.c_str())) {
+    const char* osDirOption =
+      this->GetCMakeInstance()->GetCacheDefinition("GHS_OS_DIR_OPTION");
+    std::replace(this->OsDir.begin(), this->OsDir.end(), '\\', '/');
+    fout << "    ";
+    if (cmSystemTools::IsOff(osDirOption)) {
+      fout << "";
+    } else {
+      fout << osDirOption;
+    }
+    fout << "\"" << this->OsDir << "\"" << std::endl;
   }
 
   WriteSubProjects(fout, root, generators);

@@ -120,6 +120,7 @@ private:
 
   std::string trimQuotes(std::string const& str);
 
+  std::string OsDir;
   static const char* DEFAULT_BUILD_PROGRAM;
   static const char* DEFAULT_TOOLSET_ROOT;
 };
