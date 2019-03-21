@@ -48,7 +48,6 @@
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #  if !defined(CMAKE_BOOT_MINGW)
 #    include "cmGlobalBorlandMakefileGenerator.h"
-#    include "cmGlobalGhsMultiGenerator.h"
 #    include "cmGlobalJOMMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
 #    include "cmGlobalVisualStudio10Generator.h"
@@ -82,6 +81,10 @@
 
 #ifdef CMAKE_USE_ECLIPSE
 #  include "cmExtraEclipseCDT4Generator.h"
+#endif
+
+#if defined(__linux__) || defined(_WIN32)
+#  include "cmGlobalGhsMultiGenerator.h"
 #endif
 
 #if defined(__APPLE__)
@@ -1833,13 +1836,15 @@ void cmake::AddDefaultGenerators()
   this->Generators.push_back(cmGlobalBorlandMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalNMakeMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalJOMMakefileGenerator::NewFactory());
-  this->Generators.push_back(cmGlobalGhsMultiGenerator::NewFactory());
 #  endif
   this->Generators.push_back(cmGlobalMSYSMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalMinGWMakefileGenerator::NewFactory());
 #endif
   this->Generators.push_back(cmGlobalUnixMakefileGenerator3::NewFactory());
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+#  if defined(__linux__) || defined(_WIN32)
+  this->Generators.push_back(cmGlobalGhsMultiGenerator::NewFactory());
+#  endif
   this->Generators.push_back(cmGlobalNinjaGenerator::NewFactory());
 #endif
 #if defined(CMAKE_USE_WMAKE)
