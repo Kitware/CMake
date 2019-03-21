@@ -1214,14 +1214,16 @@ void cmGlobalGenerator::Configure()
   this->ConfigureDoneCMP0026AndCMP0024 = true;
 
   // Put a copy of each global target in every directory.
-  std::vector<GlobalTargetInfo> globalTargets;
-  this->CreateDefaultGlobalTargets(globalTargets);
+  {
+    std::vector<GlobalTargetInfo> globalTargets;
+    this->CreateDefaultGlobalTargets(globalTargets);
 
-  for (cmMakefile* mf : this->Makefiles) {
-    cmTargets* targets = &(mf->GetTargets());
-    for (GlobalTargetInfo const& globalTarget : globalTargets) {
-      targets->insert(cmTargets::value_type(
-        globalTarget.Name, this->CreateGlobalTarget(globalTarget, mf)));
+    for (cmMakefile* mf : this->Makefiles) {
+      auto& targets = mf->GetTargets();
+      for (GlobalTargetInfo const& globalTarget : globalTargets) {
+        targets.emplace(globalTarget.Name,
+                        this->CreateGlobalTarget(globalTarget, mf));
+      }
     }
   }
 
