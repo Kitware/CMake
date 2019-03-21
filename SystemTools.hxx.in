@@ -41,9 +41,7 @@ typedef @KWSYS_NAMESPACE@_VA_LIST::hack_va_list va_list;
 
 namespace @KWSYS_NAMESPACE@ {
 
-class SystemToolsTranslationMap;
-class SystemToolsPathCaseMap;
-class SystemToolsEnvMap;
+class SystemToolsStatic;
 
 /** \class SystemToolsManager
  * \brief Use to make sure SystemTools is initialized before it is used
@@ -967,41 +965,8 @@ private:
     return &SystemToolsManagerInstance;
   }
 
-  /**
-   * Actual implementation of ReplaceString.
-   */
-  static void ReplaceString(std::string& source, const char* replace,
-                            size_t replaceSize, const std::string& with);
-
-  /**
-   * Actual implementation of FileIsFullPath.
-   */
-  static bool FileIsFullPath(const char*, size_t);
-
-  /**
-   * Find a filename (file or directory) in the system PATH, with
-   * optional extra paths.
-   */
-  static std::string FindName(
-    const std::string& name,
-    const std::vector<std::string>& path = std::vector<std::string>(),
-    bool no_system_path = false);
-
-  static const char* GetEnvImpl(const char* key);
-
-  /**
-   * Path translation table from dir to refdir
-   * Each time 'dir' will be found it will be replace by 'refdir'
-   */
-  static SystemToolsTranslationMap* TranslationMap;
-#ifdef _WIN32
-  static std::string GetActualCaseForPathCached(std::string const& path);
-  static SystemToolsPathCaseMap* PathCaseMap;
-  static SystemToolsEnvMap* EnvMap;
-#endif
-#ifdef __CYGWIN__
-  static SystemToolsTranslationMap* Cyg2Win32Map;
-#endif
+  static SystemToolsStatic* Statics;
+  friend class SystemToolsStatic;
   friend class SystemToolsManager;
 };
 
