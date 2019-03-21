@@ -74,13 +74,13 @@ function(compiler_id_detection outvar lang)
     endif()
     list(APPEND ordered_compilers
       SCO
+      ARMCC
       AppleClang
       Clang
       GNU
       MSVC
       ADSP
       IAR
-      ARMCC
     )
     if (lang STREQUAL C)
       list(APPEND ordered_compilers
