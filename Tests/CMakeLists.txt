@@ -2316,6 +2316,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         --build-generator "Green Hills MULTI"
         --build-project test
         --build-config $<CONFIGURATION>
+        --force-new-ctest-process
         --build-options ${ghs_target_arch} ${ghs_toolset_name} ${ghs_toolset_root} ${ghs_target_platform}
           ${ghs_os_root} ${ghs_os_dir} ${ghs_bsp_name} ${_ghs_build_opts} ${_ghs_toolset_extra}
           ${_ghs_test_command}
