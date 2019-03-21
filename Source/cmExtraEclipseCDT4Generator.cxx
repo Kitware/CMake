@@ -845,6 +845,9 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     const std::vector<cmGeneratorTarget*>& targets =
       lgen->GetGeneratorTargets();
     for (cmGeneratorTarget* target : targets) {
+      if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+        continue;
+      }
       std::vector<std::string> includeDirs;
       std::string config = mf->GetSafeDefinition("CMAKE_BUILD_TYPE");
       lgen->GetIncludeDirectories(includeDirs, target, "C", config);
@@ -971,6 +974,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
               virtDir, "", "");
           }
         } break;
+        case cmStateEnums::INTERFACE_LIBRARY:
+          break;
         default:
           break;
       }
