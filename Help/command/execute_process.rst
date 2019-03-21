@@ -22,7 +22,9 @@ Execute one or more child processes.
                   [ERROR_STRIP_TRAILING_WHITESPACE]
                   [ENCODING <name>])
 
-Runs the given sequence of one or more commands in parallel with the standard
+Runs the given sequence of one or more commands.
+
+Commands are executed concurrently as a pipeline, with the standard
 output of each process piped to the standard input of the next.
 A single standard error pipe is used for all processes.
 
@@ -46,8 +48,9 @@ Options:
  the child processes.
 
 ``TIMEOUT``
- The child processes will be terminated if they do not finish in the
- specified number of seconds (fractions are allowed).
+ After the specified number of seconds (fractions allowed), all unfinished
+ child processes will be terminated, and the ``RESULT_VARIABLE`` will be
+ set to a string mentioning the "timeout".
 
 ``RESULT_VARIABLE``
  The variable will be set to contain the result of last child process.
@@ -56,9 +59,9 @@ Options:
 
 ``RESULTS_VARIABLE <variable>``
  The variable will be set to contain the result of all processes as a
- :ref:`semicolon-separated list <CMake Language Lists>`, in order of the given ``COMMAND``
- arguments.  Each entry will be an integer return code from the
- corresponding child or a string describing an error condition.
+ :ref:`semicolon-separated list <CMake Language Lists>`, in order of the
+ given ``COMMAND`` arguments.  Each entry will be an integer return code
+ from the corresponding child or a string describing an error condition.
 
 ``OUTPUT_VARIABLE``, ``ERROR_VARIABLE``
  The variable named will be set with the contents of the standard output
