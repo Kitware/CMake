@@ -112,9 +112,6 @@ if(NOT SDL_BUILDING_LIBRARY)
         ENV SDLDIR
       PATH_SUFFIXES lib ${VC_LIB_PATH_SUFFIX}
       PATHS
-      /sw
-      /opt/local
-      /opt/csw
       /opt
     )
   endif()
