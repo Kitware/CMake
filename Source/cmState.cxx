@@ -556,9 +556,28 @@ const char* cmState::GetGlobalProperty(const std::string& prop)
   if (prop == "CMAKE_C_KNOWN_FEATURES") {
     return &FOR_EACH_C_FEATURE(STRING_LIST_ELEMENT)[1];
   }
+  if (prop == "CMAKE_C90_KNOWN_FEATURES") {
+    return &FOR_EACH_C90_FEATURE(STRING_LIST_ELEMENT)[1];
+  }
+  if (prop == "CMAKE_C99_KNOWN_FEATURES") {
+    return &FOR_EACH_C99_FEATURE(STRING_LIST_ELEMENT)[1];
+  }
+  if (prop == "CMAKE_C11_KNOWN_FEATURES") {
+    return &FOR_EACH_C11_FEATURE(STRING_LIST_ELEMENT)[1];
+  }
   if (prop == "CMAKE_CXX_KNOWN_FEATURES") {
     return &FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT)[1];
   }
+  if (prop == "CMAKE_CXX98_KNOWN_FEATURES") {
+    return &FOR_EACH_CXX98_FEATURE(STRING_LIST_ELEMENT)[1];
+  }
+  if (prop == "CMAKE_CXX11_KNOWN_FEATURES") {
+    return &FOR_EACH_CXX11_FEATURE(STRING_LIST_ELEMENT)[1];
+  }
+  if (prop == "CMAKE_CXX14_KNOWN_FEATURES") {
+    return &FOR_EACH_CXX14_FEATURE(STRING_LIST_ELEMENT)[1];
+  }
+
 #undef STRING_LIST_ELEMENT
   return this->GlobalProperties.GetPropertyValue(prop);
 }
