@@ -7,7 +7,7 @@ add_library(testc1 STATIC libc1.c)
 add_library(testc2 SHARED libc2.c)
 add_executable (COnly conly.c foo.c foo.h)
 target_link_libraries(COnly testc1 testc2)
-if(MSVC_VERSION)
+if(MSVC_VERSION AND NOT CMAKE_C_COMPILER_ID STREQUAL Clang OR "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
   set_target_properties(COnly PROPERTIES
     LINK_FLAGS " /NODEFAULTLIB:\"libcdg.lib\" /NODEFAULTLIB:\"libcmtg.lib\" /NODEFAULTLIB:\"foomsvcrt.lib\" /NODEFAULTLIB:\"libbar.lib\" /NODEFAULTLIB:\"libfooba.lib\"")
 endif()

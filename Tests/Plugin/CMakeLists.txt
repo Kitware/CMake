@@ -5,6 +5,17 @@ project(Plugin)
 # We need proper C++98 support from the compiler
 set(CMAKE_CXX_STANDARD 98)
 
+# Clang/C2 in C++98 mode cannot properly handle some of MSVC headers
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
+    CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+  set(CMAKE_CXX_STANDARD 11)
+endif()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
+    CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "GNU")
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
 # Test per-target output directory properties.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${Plugin_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${Plugin_BINARY_DIR}/lib/plugin)
@@ -28,12 +39,6 @@ include_directories(
   ${Plugin_BINARY_DIR}/include
   ${Plugin_SOURCE_DIR}/include
   )
-
-# Clang/C2 in C++98 mode cannot properly handle some of MSVC headers
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
-    CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
-  set(CMAKE_CXX_STANDARD 11)
-endif()
 
 # Create an executable that exports an API for use by plugins.
 add_executable(example_exe src/example_exe.cxx)

@@ -446,6 +446,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
   set(CMAKE_CXX_STANDARD 11)
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
+    CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "GNU")
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
 #
 # Create the libs and the main exe
 #
