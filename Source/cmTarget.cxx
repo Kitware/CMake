@@ -315,10 +315,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 #endif
   }
 
-  // Collect the set of configuration types.
-  std::vector<std::string> configNames;
-  mf->GetConfigurations(configNames);
-
   // Setup per-configuration property default values.
   if (this->GetType() != cmStateEnums::UTILITY) {
     static const auto configProps = {
@@ -328,6 +324,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       "COMPILE_PDB_OUTPUT_DIRECTORY_", "MAP_IMPORTED_CONFIG_",
       "INTERPROCEDURAL_OPTIMIZATION_"
     };
+    // Collect the set of configuration types.
+    std::vector<std::string> configNames;
+    mf->GetConfigurations(configNames);
     for (std::string const& configName : configNames) {
       std::string configUpper = cmSystemTools::UpperCase(configName);
       for (auto const& prop : configProps) {
