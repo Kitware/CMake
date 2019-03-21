@@ -19,12 +19,8 @@ cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "CoverageExtraFlags", "CTEST_COVERAGE_EXTRA_FLAGS",
     this->Quiet);
-  cmCTestCoverageHandler* handler = static_cast<cmCTestCoverageHandler*>(
-    this->CTest->GetInitializedHandler("coverage"));
-  if (!handler) {
-    this->SetError("internal CTest error. Cannot instantiate test handler");
-    return nullptr;
-  }
+  cmCTestCoverageHandler* handler = this->CTest->GetCoverageHandler();
+  handler->Initialize();
 
   // If a LABELS option was given, select only files with the labels.
   if (this->LabelsMentioned) {

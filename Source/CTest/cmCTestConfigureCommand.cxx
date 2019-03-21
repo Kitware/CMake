@@ -3,7 +3,7 @@
 #include "cmCTestConfigureCommand.h"
 
 #include "cmCTest.h"
-#include "cmCTestGenericHandler.h"
+#include "cmCTestConfigureHandler.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
@@ -142,13 +142,8 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
                                        labelsForSubprojects, this->Quiet);
   }
 
-  cmCTestGenericHandler* handler =
-    this->CTest->GetInitializedHandler("configure");
-  if (!handler) {
-    this->SetError(
-      "internal CTest error. Cannot instantiate configure handler");
-    return nullptr;
-  }
+  cmCTestConfigureHandler* handler = this->CTest->GetConfigureHandler();
+  handler->Initialize();
   handler->SetQuiet(this->Quiet);
   return handler;
 }

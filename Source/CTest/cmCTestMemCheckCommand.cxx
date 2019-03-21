@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "cmCTest.h"
-#include "cmCTestGenericHandler.h"
 #include "cmCTestMemCheckHandler.h"
 #include "cmMakefile.h"
 
@@ -20,8 +19,8 @@ cmCTestMemCheckCommand::cmCTestMemCheckCommand()
 
 cmCTestGenericHandler* cmCTestMemCheckCommand::InitializeActualHandler()
 {
-  cmCTestGenericHandler* handler =
-    this->CTest->GetInitializedHandler("memcheck");
+  cmCTestMemCheckHandler* handler = this->CTest->GetMemCheckHandler();
+  handler->Initialize();
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "MemoryCheckType", "CTEST_MEMORYCHECK_TYPE", this->Quiet);

@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestUploadHandler.h"
 
+#include "cmCTest.h"
 #include "cmGeneratedFileStream.h"
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
@@ -20,7 +21,7 @@ void cmCTestUploadHandler::Initialize()
   this->Files.clear();
 }
 
-void cmCTestUploadHandler::SetFiles(const cmCTest::SetOfStrings& files)
+void cmCTestUploadHandler::SetFiles(std::set<std::string> const& files)
 {
   this->Files = files;
 }

@@ -191,8 +191,7 @@ int main(int argc, char const* const* argv)
     doc.addCTestStandardDocSections();
     if (doc.CheckOptions(argc, argv)) {
       // Construct and print requested documentation.
-      cmCTestScriptHandler* ch =
-        static_cast<cmCTestScriptHandler*>(inst.GetHandler("script"));
+      cmCTestScriptHandler* ch = inst.GetScriptHandler();
       ch->CreateCMake();
 
       doc.SetShowGenerators(false);

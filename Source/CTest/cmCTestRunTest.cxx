@@ -132,14 +132,17 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     } else {
       this->TestResult.Status = cmCTestTestHandler::FAILED;
       outputStream << "***Failed  " << reason;
-      outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
+      outputTestErrorsToConsole =
+        this->CTest->GetOutputTestOutputOnTestFailure();
     }
   } else if (res == cmProcess::State::Expired) {
     outputStream << "***Timeout ";
     this->TestResult.Status = cmCTestTestHandler::TIMEOUT;
-    outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
+    outputTestErrorsToConsole =
+      this->CTest->GetOutputTestOutputOnTestFailure();
   } else if (res == cmProcess::State::Exception) {
-    outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
+    outputTestErrorsToConsole =
+      this->CTest->GetOutputTestOutputOnTestFailure();
     outputStream << "***Exception: ";
     this->TestResult.ExceptionStatus =
       this->TestProcess->GetExitExceptionString();

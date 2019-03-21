@@ -5,9 +5,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTest.h"
 #include "cmCTestHandlerCommand.h"
 
+#include <set>
 #include <string>
 
 class cmCTestGenericHandler;
@@ -22,8 +22,6 @@ class cmCommand;
 class cmCTestUploadCommand : public cmCTestHandlerCommand
 {
 public:
-  cmCTestUploadCommand() {}
-
   /**
    * This is a virtual constructor for the command.
    */
@@ -55,7 +53,7 @@ protected:
     ArgumentDoingLast2
   };
 
-  cmCTest::SetOfStrings Files;
+  std::set<std::string> Files;
 };
 
 #endif
