@@ -5,10 +5,20 @@
 
 #include "cmGlobalGenerator.h"
 
-#include "cmGhsMultiGpj.h"
 #include "cmGlobalGeneratorFactory.h"
+#include "cmTargetDepend.h"
 
-class cmGeneratedFileStream;
+#include <iosfwd>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
+class cmGeneratorTarget;
+class cmLocalGenerator;
+class cmMakefile;
+class cmake;
+struct cmDocumentationEntry;
 
 class cmGlobalGhsMultiGenerator : public cmGlobalGenerator
 {
@@ -17,7 +27,7 @@ public:
   static const char* FILE_EXTENSION;
 
   cmGlobalGhsMultiGenerator(cmake* cm);
-  ~cmGlobalGhsMultiGenerator();
+  ~cmGlobalGhsMultiGenerator() override;
 
   static cmGlobalGeneratorFactory* NewFactory()
   {
@@ -31,7 +41,7 @@ public:
   static std::string GetActualName() { return "Green Hills MULTI"; }
 
   ///! Get the name for this generator
-  std::string GetName() const override { return this->GetActualName(); }
+  std::string GetName() const override { return GetActualName(); }
 
   /// Overloaded methods. @see cmGlobalGenerator::GetDocumentation()
   static void GetDocumentation(cmDocumentationEntry& entry);
@@ -77,8 +87,8 @@ public:
     std::string First;
 
   public:
-    TargetCompare(std::string const& first)
-      : First(first)
+    TargetCompare(std::string first)
+      : First(std::move(first))
     {
     }
     bool operator()(cmGeneratorTarget const* l,

@@ -33,12 +33,12 @@ Cache variables that are used for toolset and target system customization:
 * ``GHS_TOOLSET_ROOT``
 
   | Root path for ``toolset`` searches.
-  | Defaults to ``C:/ghs``.
+  | Defaults to ``C:/ghs`` in Windows or ``/usr/ghs`` in Linux.
 
 * ``GHS_OS_ROOT``
 
   | Root path for RTOS searches.
-  | Defaults to ``C:/ghs``.
+  | Defaults to ``C:/ghs`` in Windows or ``/usr/ghs`` in Linux.
 
 * ``GHS_OS_DIR``
 

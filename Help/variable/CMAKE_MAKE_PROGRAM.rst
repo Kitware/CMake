@@ -52,7 +52,8 @@ to configure the project:
   possible.
 
 * The :generator:`Green Hills MULTI` generator sets this to the full
-  path to ``gbuild.exe`` based upon the toolset being used.
+  path to ``gbuild.exe(Windows)`` or ``gbuild(Linux)`` based upon
+  the toolset being used.
 
   Once the generator has initialized a particular value for this
   variable, changing the value has undefined behavior.
