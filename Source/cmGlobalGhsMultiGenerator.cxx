@@ -119,10 +119,11 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
 bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
                                                      cmMakefile* mf)
 {
+  std::string arch;
   if (p.empty()) {
     cmSystemTools::Message(
       "Green Hills MULTI: -A <arch> not specified; defaulting to \"arm\"");
-    std::string arch = "arm";
+    arch = "arm";
 
     /* store the platform name for later use
      * -- already done if -A<arch> was specified
@@ -130,6 +131,8 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
     mf->AddCacheDefinition("CMAKE_GENERATOR_PLATFORM", arch.c_str(),
                            "Name of generator platform.",
                            cmStateEnums::INTERNAL);
+  } else {
+    arch = p;
   }
 
   /* check if OS location has been updated by platform scripts */
@@ -156,6 +159,23 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
     cmSystemTools::Message(m);
   }
   this->OsDir = osdir;
+
+  // Determine GHS_BSP_NAME
+  std::string bspName = mf->GetSafeDefinition("GHS_BSP_NAME");
+
+  if (cmSystemTools::IsOff(bspName.c_str()) &&
+      platform.find("integrity") != std::string::npos) {
+    bspName = "sim" + arch;
+    /* write back the calculate name for next time */
+    mf->AddCacheDefinition("GHS_BSP_NAME", bspName.c_str(),
+                           "Name of GHS target platform.",
+                           cmStateEnums::STRING, true);
+    std::string m =
+      "Green Hills MULTI: GHS_BSP_NAME not specified; defaulting to \"";
+    m += bspName;
+    m += "\"";
+    cmSystemTools::Message(m);
+  }
 
   return true;
 }
@@ -258,32 +278,9 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(
   fout << "# Top Level Project File" << std::endl;
 
   // Specify BSP option if supplied by user
-  // -- not all platforms require this entry in the project file
-  //    integrity platforms require this field; use default if needed
-  std::string platform;
-  if (const char* p =
-        this->GetCMakeInstance()->GetCacheDefinition("GHS_TARGET_PLATFORM")) {
-    platform = p;
-  }
-
-  std::string bspName;
-  if (char const* bspCache =
-        this->GetCMakeInstance()->GetCacheDefinition("GHS_BSP_NAME")) {
-    bspName = bspCache;
-    this->GetCMakeInstance()->MarkCliAsUsed("GHS_BSP_NAME");
-  } else {
-    bspName = "IGNORE";
-  }
-
-  if (platform.find("integrity") != std::string::npos &&
-      cmSystemTools::IsOff(bspName.c_str())) {
-    const char* a =
-      this->GetCMakeInstance()->GetCacheDefinition("CMAKE_GENERATOR_PLATFORM");
-    bspName = "sim";
-    bspName += (a ? a : "");
-  }
-
-  if (!cmSystemTools::IsOff(bspName.c_str())) {
+  const char* bspName =
+    this->GetCMakeInstance()->GetCacheDefinition("GHS_BSP_NAME");
+  if (!cmSystemTools::IsOff(bspName)) {
     fout << "    -bsp " << bspName << std::endl;
   }
 
