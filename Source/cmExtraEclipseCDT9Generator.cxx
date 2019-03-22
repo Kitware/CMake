@@ -5,6 +5,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <map>
 #include <sstream>
 #include <stdio.h>
 #include <utility>
@@ -15,6 +16,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
 #include "cmState.h"
@@ -41,7 +43,6 @@ void AppendDictionary(cmXMLWriter& xml, const char* key, T const& value)
 }
 
 cmExtraEclipseCDT9Generator::cmExtraEclipseCDT9Generator()
-  : cmExternalMakefileProjectGenerator()
 {
   this->SupportsVirtualFolders = true;
   this->GenerateLinkedResources = true;
@@ -134,7 +135,7 @@ void cmExtraEclipseCDT9Generator::Generate()
   if (!this->GenerateSourceProject &&
       (mf->IsOn("ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT"))) {
     mf->IssueMessage(
-      cmake::WARNING,
+      MessageType::WARNING,
       "ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT is set to TRUE, "
       "but this variable is not supported anymore since CMake 2.8.7.\n"
       "Enable CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT instead.");
@@ -142,7 +143,7 @@ void cmExtraEclipseCDT9Generator::Generate()
 
   if (cmSystemTools::IsSubDirectory(this->HomeOutputDirectory,
                                     this->HomeDirectory)) {
-    mf->IssueMessage(cmake::WARNING,
+    mf->IssueMessage(MessageType::WARNING,
                      "The build directory is a subdirectory "
                      "of the source directory.\n"
                      "This is not supported well by Eclipse. It is strongly "
@@ -171,9 +172,9 @@ void cmExtraEclipseCDT9Generator::CreateSourceProjectFile()
 
   // set up the project name: <project>-Source@<baseSourcePathName>
   cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
-  std::string name =
-    this->GenerateProjectName(lg->GetProjectName(), "Source",
-                              this->GetPathBasename(this->HomeDirectory));
+  std::string name = cmExtraEclipseCDT9Generator::GenerateProjectName(
+    lg->GetProjectName(), "Source",
+    cmExtraEclipseCDT9Generator::GetPathBasename(this->HomeDirectory));
 
   const std::string filename = this->HomeDirectory + "/.project";
   cmGeneratedFileStream fout(filename);
@@ -278,10 +279,11 @@ void cmExtraEclipseCDT9Generator::CreateProjectFile()
   xml.StartElement("projectDescription");
 
   xml.Element("name",
-              this->GenerateProjectName(
+              cmExtraEclipseCDT9Generator::GenerateProjectName(
                 lg->GetProjectName(),
                 mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
-                this->GetPathBasename(this->HomeOutputDirectory)));
+                cmExtraEclipseCDT9Generator::GetPathBasename(
+                  this->HomeOutputDirectory)));
 
   xml.Element("comment", "");
   xml.Element("projects", "");
@@ -303,16 +305,16 @@ void cmExtraEclipseCDT9Generator::CreateProjectFile()
   // set natures for c/c++ projects
   xml.StartElement("natures");
   xml.Element("nature",
-          "org.eclipse.cdt.managedbuilder.core.managedBuildNature");
+              "org.eclipse.cdt.managedbuilder.core.managedBuildNature");
   xml.Element("nature",
-          "org.eclipse.cdt.managedbuilder.core.ScannerConfigNature");
+              "org.eclipse.cdt.managedbuilder.core.ScannerConfigNature");
 
   for (std::string const& n : this->Natures) {
     xml.Element("nature", n);
   }
 
   if (const char* extraNaturesProp =
-          mf->GetState()->GetGlobalProperty("ECLIPSE_EXTRA_NATURES")) {
+        mf->GetState()->GetGlobalProperty("ECLIPSE_EXTRA_NATURES")) {
     std::vector<std::string> extraNatures;
     cmSystemTools::ExpandListArgument(extraNaturesProp, extraNatures);
     for (std::string const& n : extraNatures) {
@@ -333,13 +335,15 @@ void cmExtraEclipseCDT9Generator::CreateProjectFile()
 
     std::string sourceLinkedResourceName = "[Source directory]";
     std::string linkSourceDirectory =
-      this->GetEclipsePath(lg->GetCurrentSourceDirectory());
+      cmExtraEclipseCDT9Generator::GetEclipsePath(
+        lg->GetCurrentSourceDirectory());
     // .project dir can't be subdir of a linked resource dir
     if (!cmSystemTools::IsSubDirectory(this->HomeOutputDirectory,
                                        linkSourceDirectory)) {
-      this->AppendLinkedResource(xml, sourceLinkedResourceName,
-                                 this->GetEclipsePath(linkSourceDirectory),
-                                 LinkToFolder);
+      cmExtraEclipseCDT9Generator::AppendLinkedResource(
+        xml, sourceLinkedResourceName,
+        cmExtraEclipseCDT9Generator::GetEclipsePath(linkSourceDirectory),
+        LinkToFolder);
       this->SrcLinkedResources.push_back(std::move(sourceLinkedResourceName));
     }
   }
@@ -365,8 +369,8 @@ void cmExtraEclipseCDT9Generator::WriteGroups(
 
     std::replace(linkName3.begin(), linkName3.end(), '\\', '/');
 
-    this->AppendLinkedResource(xml, linkName3, "virtual:/virtual",
-                               VirtualFolder);
+    cmExtraEclipseCDT9Generator::AppendLinkedResource(
+      xml, linkName3, "virtual:/virtual", VirtualFolder);
     std::vector<cmSourceGroup> const& children = sg.GetGroupChildren();
     if (!children.empty()) {
       this->WriteGroups(children, linkName, xml);
@@ -379,8 +383,9 @@ void cmExtraEclipseCDT9Generator::WriteGroups(
         std::string linkName4 = linkName3;
         linkName4 += "/";
         linkName4 += cmSystemTools::GetFilenameName(fullPath);
-        this->AppendLinkedResource(xml, linkName4,
-                                   this->GetEclipsePath(fullPath), LinkToFile);
+        cmExtraEclipseCDT9Generator::AppendLinkedResource(
+          xml, linkName4,
+          cmExtraEclipseCDT9Generator::GetEclipsePath(fullPath), LinkToFile);
       }
     }
   }
@@ -389,7 +394,8 @@ void cmExtraEclipseCDT9Generator::WriteGroups(
 void cmExtraEclipseCDT9Generator::CreateLinksForTargets(cmXMLWriter& xml)
 {
   std::string linkName = "[Targets]";
-  this->AppendLinkedResource(xml, linkName, "virtual:/virtual", VirtualFolder);
+  cmExtraEclipseCDT9Generator::AppendLinkedResource(
+    xml, linkName, "virtual:/virtual", VirtualFolder);
 
   for (cmLocalGenerator* lg : this->GlobalGenerator->GetLocalGenerators()) {
     cmMakefile* makefile = lg->GetMakefile();
@@ -409,8 +415,8 @@ void cmExtraEclipseCDT9Generator::CreateLinksForTargets(cmXMLWriter& xml)
                                                            : "[lib] ");
           linkName2 += prefix;
           linkName2 += target->GetName();
-          this->AppendLinkedResource(xml, linkName2, "virtual:/virtual",
-                                     VirtualFolder);
+          cmExtraEclipseCDT9Generator::AppendLinkedResource(
+            xml, linkName2, "virtual:/virtual", VirtualFolder);
           if (!this->GenerateLinkedResources) {
             break; // skip generating the linked resources to the source files
           }
@@ -448,21 +454,23 @@ void cmExtraEclipseCDT9Generator::CreateLinksToSubprojects(
 
   // for each sub project create a linked resource to the source dir
   // - only if it is an out-of-source build
-  this->AppendLinkedResource(xml, "[Subprojects]", "virtual:/virtual",
-                             VirtualFolder);
+  cmExtraEclipseCDT9Generator::AppendLinkedResource(
+    xml, "[Subprojects]", "virtual:/virtual", VirtualFolder);
 
   for (auto const& it : this->GlobalGenerator->GetProjectMap()) {
     std::string linkSourceDirectory =
-      this->GetEclipsePath(it.second[0]->GetCurrentSourceDirectory());
+      cmExtraEclipseCDT9Generator::GetEclipsePath(
+        it.second[0]->GetCurrentSourceDirectory());
     // a linked resource must not point to a parent directory of .project or
     // .project itself
     if ((baseDir != linkSourceDirectory) &&
         !cmSystemTools::IsSubDirectory(baseDir, linkSourceDirectory)) {
       std::string linkName = "[Subprojects]/";
       linkName += it.first;
-      this->AppendLinkedResource(xml, linkName,
-                                 this->GetEclipsePath(linkSourceDirectory),
-                                 LinkToFolder);
+      cmExtraEclipseCDT9Generator::AppendLinkedResource(
+        xml, linkName,
+        cmExtraEclipseCDT9Generator::GetEclipsePath(linkSourceDirectory),
+        LinkToFolder);
       // Don't add it to the srcLinkedResources, because listing multiple
       // directories confuses the Eclipse indexer (#13596).
     }
@@ -487,45 +495,16 @@ void cmExtraEclipseCDT9Generator::AppendIncludeDirectories(
 
       if (emittedDirs.find(dir) == emittedDirs.end()) {
         emittedDirs.insert(dir);
-        xml.StartElement("pathentry");
-        xml.Attribute("include",
-                      cmExtraEclipseCDT9Generator::GetEclipsePath(dir));
-        xml.Attribute("kind", "inc");
-        xml.Attribute("path", "");
-        xml.Attribute("system", "true");
-        xml.EndElement();
-      }
-    }
-  }
-}
-
-void cmExtraEclipseCDT9Generator::AppendIncludeDirectories_CDT9(
-  cmXMLWriter& xml, const std::vector<std::string>& includeDirs,
-  std::set<std::string>& emittedDirs)
-{
-  for (std::string const& inc : includeDirs) {
-    if (!inc.empty()) {
-      std::string dir = cmSystemTools::CollapseFullPath(inc);
-
-      // handle framework include dirs on OSX, the remainder after the
-      // Frameworks/ part has to be stripped
-      //   /System/Library/Frameworks/GLUT.framework/Headers
-      cmsys::RegularExpression frameworkRx("(.+/Frameworks)/.+\\.framework/");
-      if (frameworkRx.find(dir.c_str())) {
-        dir = frameworkRx.match(1);
-      }
-
-      if (emittedDirs.find(dir) == emittedDirs.end()) {
-        emittedDirs.insert(dir);
         xml.StartElement("listOptionValue");
         xml.Attribute("builtIn", "false");
         xml.Attribute("value",
-                cmExtraEclipseCDT9Generator::GetEclipsePath(dir));
+                      cmExtraEclipseCDT9Generator::GetEclipsePath(dir));
         xml.EndElement();
       }
     }
   }
 }
+
 void cmExtraEclipseCDT9Generator::CreateCProjectFile() const
 {
   std::set<std::string> emmited;
@@ -556,11 +535,12 @@ void cmExtraEclipseCDT9Generator::CreateCProjectFile() const
 
   // Configuration settings...
   xml.StartElement("storageModule");
-  xml.Attribute("buildSystemId",
-            "org.eclipse.cdt.managedbuilder.core.configurationDataProvider");
+  xml.Attribute(
+    "buildSystemId",
+    "org.eclipse.cdt.managedbuilder.core.configurationDataProvider");
   xml.Attribute("id", "cdt.managedbuild.toolchain.gnu.base.1802459151");
   xml.Attribute("moduleId", "org.eclipse.cdt.core.settings");
-  xml.Attribute("name", "Configuration");
+  xml.Attribute("name", "Default");
   xml.Element("externalSettings");
   xml.StartElement("extensions");
 
@@ -632,263 +612,236 @@ void cmExtraEclipseCDT9Generator::CreateCProjectFile() const
   xml.EndElement(); // storageModule
 
   // ???
-//   xml.StartElement("storageModule");
-//   xml.Attribute("moduleId", "org.eclipse.cdt.core.language.mapping");
-//   xml.Element("project-mappings");
-//   xml.EndElement(); // storageModule
-
-  // ???
   xml.StartElement("storageModule");
   xml.Attribute("moduleId", "cdtBuildSystem");
   xml.Attribute("version", "4.0.0");
 
-    xml.StartElement("configuration");
-    xml.Attribute("artifactName", "${ProjName}");
-    xml.Attribute("buildProperties", "");
-    xml.Attribute("description", "");
-    xml.Attribute("id", "cdt.managedbuild.toolchain.gnu.base.1802459151");
-    xml.Attribute("name", "Default");
-    xml.Attribute("optionalBuildProperties", "");
-    xml.Attribute("parent", "org.eclipse.cdt.build.core.emptycfg");
+  xml.StartElement("configuration");
+  xml.Attribute("artifactName", "${ProjName}");
+  xml.Attribute("buildProperties", "");
+  xml.Attribute("description", "");
+  xml.Attribute("id", "cdt.managedbuild.toolchain.gnu.base.1802459151");
+  xml.Attribute("name", "Default");
+  xml.Attribute("optionalBuildProperties", "");
+  xml.Attribute("parent", "org.eclipse.cdt.build.core.emptycfg");
 
-      xml.StartElement("folderInfo");
-      xml.Attribute("id",
-              "cdt.managedbuild.toolchain.gnu.base.1802459151.1444882859");
-      xml.Attribute("name", "/");
-      xml.Attribute("resourcePath", "");
+  xml.StartElement("folderInfo");
+  xml.Attribute("id",
+                "cdt.managedbuild.toolchain.gnu.base.1802459151.1444882859");
+  xml.Attribute("name", "/");
+  xml.Attribute("resourcePath", "");
 
-        xml.StartElement("toolChain");
-        xml.Attribute("id", "cdt.managedbuild.toolchain.gnu.base.238819452");
-        xml.Attribute("name", "Linux GCC");
-        xml.Attribute("superClass", "cdt.managedbuild.toolchain.gnu.base");
+  xml.StartElement("toolChain");
+  xml.Attribute("id", "cdt.managedbuild.toolchain.gnu.base.238819452");
+  xml.Attribute("name", "Linux GCC");
+  xml.Attribute("superClass", "cdt.managedbuild.toolchain.gnu.base");
 
-          xml.StartElement("targetPlatform");
-          xml.Attribute("archList", "all");
-          xml.Attribute("binaryParser", "org.eclipse.cdt.core.GNU_ELF");
-          xml.Attribute("id",
-                  "cdt.managedbuild.target.gnu.platform.base.1869015533");
-          xml.Attribute("name", "Debug Platform");
-          xml.Attribute("osList", "linux,hpux,aix,qnx");
-          xml.Attribute("superClass",
-                  "cdt.managedbuild.target.gnu.platform.base");
-          xml.EndElement(); // targetPlatform
+  xml.StartElement("targetPlatform");
+  xml.Attribute("archList", "all");
+  xml.Attribute("binaryParser", "org.eclipse.cdt.core.GNU_ELF");
+  xml.Attribute("id", "cdt.managedbuild.target.gnu.platform.base.1869015533");
+  xml.Attribute("name", "Debug Platform");
+  xml.Attribute("osList", "linux,hpux,aix,qnx");
+  xml.Attribute("superClass", "cdt.managedbuild.target.gnu.platform.base");
+  xml.EndElement(); // targetPlatform
 
-          xml.StartElement("builder");
+  xml.StartElement("builder");
 
-          const std::string& make =
-                  mf->GetSafeDefinition("CMAKE_ECLIPSE_MAKE_ARGUMENTS");
-          const std::string& makeArgs =
-                  mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-          xml.Attribute("arguments", make);
-          xml.Attribute("command", makeArgs);
-          xml.Attribute("id",
-                  "cdt.managedbuild.target.gnu.builder.base.1983775073");
-          xml.Attribute("keepEnvironmentInBuildfile", "false");
-          xml.Attribute("managedBuildOn", "false");
-          xml.Attribute("name", "Gnu Make Builder");
-          xml.Attribute("superClass",
-                  "cdt.managedbuild.target.gnu.builder.base");
-          xml.EndElement(); // builder
+  const std::string& make =
+    mf->GetSafeDefinition("CMAKE_ECLIPSE_MAKE_ARGUMENTS");
+  const std::string& makeArgs =
+    mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  xml.Attribute("arguments", make);
+  xml.Attribute("command", makeArgs);
+  xml.Attribute("id", "cdt.managedbuild.target.gnu.builder.base.1983775073");
+  xml.Attribute("keepEnvironmentInBuildfile", "false");
+  xml.Attribute("managedBuildOn", "false");
+  xml.Attribute("name", "Gnu Make Builder");
+  xml.Attribute("superClass", "cdt.managedbuild.target.gnu.builder.base");
+  xml.EndElement(); // builder
 
-          xml.StartElement("tool");
-          xml.Attribute("id",
-                  "cdt.managedbuild.tool.gnu.archiver.base.264314146");
-          xml.Attribute("name", "GCC Archiver");
-          xml.Attribute("superClass",
-                  "cdt.managedbuild.tool.gnu.archiver.base");
-          xml.EndElement(); // tool
+  xml.StartElement("tool");
+  xml.Attribute("id", "cdt.managedbuild.tool.gnu.archiver.base.264314146");
+  xml.Attribute("name", "GCC Archiver");
+  xml.Attribute("superClass", "cdt.managedbuild.tool.gnu.archiver.base");
+  xml.EndElement(); // tool
 
-          xml.StartElement("tool");
-          xml.Attribute("id",
-                  "cdt.managedbuild.tool.gnu.cpp.compiler.base.987241452");
-          xml.Attribute("name",
-                  "GCC C++ Compiler");
-          xml.Attribute("superClass",
-                  "cdt.managedbuild.tool.gnu.cpp.compiler.base");
+  xml.StartElement("tool");
+  xml.Attribute("id", "cdt.managedbuild.tool.gnu.cpp.compiler.base.987241452");
+  xml.Attribute("name", "GCC C++ Compiler");
+  xml.Attribute("superClass", "cdt.managedbuild.tool.gnu.cpp.compiler.base");
 
-            // Include path
-            xml.StartElement("option");
-            xml.Attribute("IS_BUILTIN_EMPTY", "false");
-            xml.Attribute("IS_VALUE_EMPTY", "false");
-            xml.Attribute("id",
-                    "gnu.cpp.compiler.option.include.paths.1525486168");
-            xml.Attribute("name",
-                    "Include paths (-I)");
-            xml.Attribute("superClass",
-                    "gnu.cpp.compiler.option.include.paths");
-            xml.Attribute("valueType", "includePath");
+  // Include path
+  xml.StartElement("option");
+  xml.Attribute("IS_BUILTIN_EMPTY", "false");
+  xml.Attribute("IS_VALUE_EMPTY", "false");
+  xml.Attribute("id", "gnu.cpp.compiler.option.include.paths.1525486168");
+  xml.Attribute("name", "Include paths (-I)");
+  xml.Attribute("superClass", "gnu.cpp.compiler.option.include.paths");
+  xml.Attribute("useByScannerDiscovery", "false");
+  xml.Attribute("valueType", "includePath");
 
-            for (cmLocalGenerator* lgen :
-                    this->GlobalGenerator->GetLocalGenerators()) {
-              const std::vector<cmGeneratorTarget*>& targets =
-                lgen->GetGeneratorTargets();
-              for (cmGeneratorTarget* target : targets) {
-                std::vector<std::string> includeDirs;
-                std::string config = mf->GetSafeDefinition("CMAKE_BUILD_TYPE");
-                lgen->GetIncludeDirectories(includeDirs, target, "C", config);
-                this->AppendIncludeDirectories_CDT9(xml, includeDirs, emmited);
-              }
-            }
+  for (cmLocalGenerator* lgen : this->GlobalGenerator->GetLocalGenerators()) {
+    const std::vector<cmGeneratorTarget*>& targets =
+      lgen->GetGeneratorTargets();
+    for (cmGeneratorTarget* target : targets) {
+      std::vector<std::string> includeDirs;
+      std::string config = mf->GetSafeDefinition("CMAKE_BUILD_TYPE");
+      lgen->GetIncludeDirectories(includeDirs, target, "C", config);
+      this->AppendIncludeDirectories(xml, includeDirs, emmited);
+    }
+  }
 
-            xml.EndElement(); // option
+  xml.EndElement(); // option
 
-            // Define
-            xml.StartElement("option");
-            xml.Attribute("IS_BUILTIN_EMPTY", "false");
-            xml.Attribute("IS_VALUE_EMPTY", "false");
-            xml.Attribute("id",
-                    "gnu.cpp.compiler.option.preprocessor.def.1541727279");
-            xml.Attribute("name", "Defined symbols (-D)");
-            xml.Attribute("superClass",
-                    "gnu.cpp.compiler.option.preprocessor.def");
-            xml.Attribute("valueType", "definedSymbols");
+  // Define
+  xml.StartElement("option");
+  xml.Attribute("id", "gnu.cpp.compiler.option.preprocessor.def.1541727279");
+  xml.Attribute("name", "Defined symbols (-D)");
+  xml.Attribute("superClass", "gnu.cpp.compiler.option.preprocessor.def");
+  xml.Attribute("useByScannerDiscovery", "false");
 
-              emmited.clear();
-              for (cmLocalGenerator* lgen :
-                      this->GlobalGenerator->GetLocalGenerators()) {
+  emmited.clear();
+  for (cmLocalGenerator* lgen : this->GlobalGenerator->GetLocalGenerators()) {
 
-                if (const char* cdefs =
-                    lgen->GetMakefile()->GetProperty("COMPILE_DEFINITIONS")) {
-                  // Expand the list.
-                  std::vector<std::string> defs;
-                  cmGeneratorExpression::Split(cdefs, defs);
+    if (const char* cdefs =
+          lgen->GetMakefile()->GetProperty("COMPILE_DEFINITIONS")) {
+      // Expand the list.
+      std::vector<std::string> defs;
+      cmGeneratorExpression::Split(cdefs, defs);
 
-                  for (std::string const& d : defs) {
-                    if (cmGeneratorExpression::Find(d) != std::string::npos) {
-                      continue;
-                    }
+      for (std::string const& d : defs) {
+        if (cmGeneratorExpression::Find(d) != std::string::npos) {
+          continue;
+        }
 
-                    std::string::size_type equals = d.find('=', 0);
-                    std::string::size_type enddef = d.length();
+        std::string::size_type equals = d.find('=', 0);
+        std::string::size_type enddef = d.length();
 
-                    std::string def;
-                    std::string val;
-                    if (equals != std::string::npos && equals < enddef) {
-                      // we have -DFOO=BAR
-                      def = d.substr(0, equals);
-                      val = d.substr(equals + 1, enddef - equals + 1);
-                    } else {
-                      // we have -DFOO
-                      def = d;
-                    }
+        std::string def;
+        std::string val;
+        if (equals != std::string::npos && equals < enddef) {
+          // we have -DFOO=BAR
+          def = d.substr(0, equals);
+          val = d.substr(equals + 1, enddef - equals + 1);
+        } else {
+          // we have -DFOO
+          def = d;
+        }
 
-                    // insert the definition if not already added.
-                    if (emmited.find(def) == emmited.end()) {
-                      emmited.insert(def);
-                      xml.StartElement("listOptionValue");
-                      xml.Attribute("builtIn", "false");
-                      if (val.empty()) {
-                          xml.Attribute("value", def);
-                      } else {
-                          xml.Attribute("value", def + "=" + val);
-                      }
-                      xml.EndElement();
-                    }
-                  }
-                }
-              }
-              // add system defined c macros
-              const char* cDefs = mf->GetDefinition
-                      ("CMAKE_EXTRA_GENERATOR_C_SYSTEM_DEFINED_MACROS");
-              if (this->CEnabled && cDefs) {
-                // Expand the list.
-                std::vector<std::string> defs;
-                cmSystemTools::ExpandListArgument(cDefs, defs, true);
+        // insert the definition if not already added.
+        if (emmited.find(def) == emmited.end()) {
+          emmited.insert(def);
+          xml.StartElement("listOptionValue");
+          xml.Attribute("builtIn", "false");
+          if (val.empty()) {
+            xml.Attribute("value", def);
+          } else {
+            xml.Attribute("value", def + "=" + val);
+          }
+          xml.EndElement();
+        }
+      }
+    }
+  }
+  // add system defined c macros
+  const char* cDefs =
+    mf->GetDefinition("CMAKE_EXTRA_GENERATOR_C_SYSTEM_DEFINED_MACROS");
+  if (this->CEnabled && cDefs) {
+    // Expand the list.
+    std::vector<std::string> defs;
+    cmSystemTools::ExpandListArgument(cDefs, defs, true);
 
-                // the list must contain only definition-value pairs:
-                if ((defs.size() % 2) == 0) {
-                  std::vector<std::string>::const_iterator di = defs.begin();
-                  while (di != defs.end()) {
-                    std::string def = *di;
-                    ++di;
-                    std::string val;
-                    if (di != defs.end()) {
-                      val = *di;
-                      ++di;
-                    }
+    // the list must contain only definition-value pairs:
+    if ((defs.size() % 2) == 0) {
+      std::vector<std::string>::const_iterator di = defs.begin();
+      while (di != defs.end()) {
+        std::string def = *di;
+        ++di;
+        std::string val;
+        if (di != defs.end()) {
+          val = *di;
+          ++di;
+        }
 
-                    // insert the definition if not already added.
-                    if (emmited.find(def) == emmited.end()) {
-                      emmited.insert(def);
-                      xml.StartElement("listOptionValue");
-                      xml.Attribute("builtIn", "false");
-                      if (val.empty()) {
-                          xml.Attribute("value", def);
-                      } else {
-                          xml.Attribute("value", def + "=" + val);
-                      }
-                      xml.EndElement();
-                    }
-                  }
-                }
-              }
-              // add system defined c++ macros
-              const char* cxxDefs =
-                mf->GetDefinition
-                      ("CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_DEFINED_MACROS");
-              if (this->CXXEnabled && cxxDefs) {
-                // Expand the list.
-                std::vector<std::string> defs;
-                cmSystemTools::ExpandListArgument(cxxDefs, defs, true);
+        // insert the definition if not already added.
+        if (emmited.find(def) == emmited.end()) {
+          emmited.insert(def);
+          xml.StartElement("listOptionValue");
+          xml.Attribute("builtIn", "false");
+          if (val.empty()) {
+            xml.Attribute("value", def);
+          } else {
+            xml.Attribute("value", def + "=" + val);
+          }
+          xml.EndElement();
+        }
+      }
+    }
+  }
+  // add system defined c++ macros
+  const char* cxxDefs =
+    mf->GetDefinition("CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_DEFINED_MACROS");
+  if (this->CXXEnabled && cxxDefs) {
+    // Expand the list.
+    std::vector<std::string> defs;
+    cmSystemTools::ExpandListArgument(cxxDefs, defs, true);
 
-                // the list must contain only definition-value pairs:
-                if ((defs.size() % 2) == 0) {
-                  std::vector<std::string>::const_iterator di = defs.begin();
-                  while (di != defs.end()) {
-                    std::string def = *di;
-                    ++di;
-                    std::string val;
-                    if (di != defs.end()) {
-                      val = *di;
-                      ++di;
-                    }
+    // the list must contain only definition-value pairs:
+    if ((defs.size() % 2) == 0) {
+      std::vector<std::string>::const_iterator di = defs.begin();
+      while (di != defs.end()) {
+        std::string def = *di;
+        ++di;
+        std::string val;
+        if (di != defs.end()) {
+          val = *di;
+          ++di;
+        }
 
-                    // insert the definition if not already added.
-                    if (emmited.find(def) == emmited.end()) {
-                      emmited.insert(def);
-                      xml.StartElement("listOptionValue");
-                      xml.Attribute("builtIn", "false");
-                      if (val.empty()) {
-                          xml.Attribute("value", def);
-                      } else {
-                          xml.Attribute("value", def + "=" + val);
-                      }
-                      xml.EndElement();
-                    }
-                  }
-                }
-              }
-            xml.EndElement(); // option
+        // insert the definition if not already added.
+        if (emmited.find(def) == emmited.end()) {
+          emmited.insert(def);
+          xml.StartElement("listOptionValue");
+          xml.Attribute("builtIn", "false");
+          if (val.empty()) {
+            xml.Attribute("value", def);
+          } else {
+            xml.Attribute("value", def + "=" + val);
+          }
+          xml.EndElement();
+        }
+      }
+    }
+  }
+  xml.EndElement(); // option
 
-            xml.StartElement("inputType");
-            xml.Attribute("id",
-                    "cdt.managedbuild.tool.gnu.cpp.compiler.input.86908675");
-            xml.Attribute("superClass",
-                    "cdt.managedbuild.tool.gnu.cpp.compiler.input");
-            xml.EndElement(); // inputType
+  xml.StartElement("inputType");
+  xml.Attribute("id", "cdt.managedbuild.tool.gnu.cpp.compiler.input.86908675");
+  xml.Attribute("superClass", "cdt.managedbuild.tool.gnu.cpp.compiler.input");
+  xml.EndElement(); // inputType
 
-          xml.EndElement(); // tool
+  xml.EndElement(); // tool
 
-        xml.EndElement(); // toolChain
+  xml.EndElement(); // toolChain
 
-      xml.EndElement(); // folderInfo
+  xml.EndElement(); // folderInfo
 
+  xml.StartElement("sourceEntries");
 
-      xml.StartElement("sourceEntries");
+  std::string excludeFromOut;
+  excludeFromOut += "**/CMakeFiles/";
 
-        std::string excludeFromOut;
-        excludeFromOut += "**/CMakeFiles/";
+  xml.StartElement("entry");
+  xml.Attribute("excluding", excludeFromOut);
+  xml.Attribute("flags", "VALUE_WORKSPACE_PATH");
+  xml.Attribute("kind", "sourcePath");
+  xml.Attribute("name", "");
+  xml.EndElement();
 
-        xml.StartElement("entry");
-        xml.Attribute("excluding", excludeFromOut);
-        xml.Attribute("flags", "VALUE_WORKSPACE_PATH");
-        xml.Attribute("kind", "sourcePath");
-        xml.Attribute("name", "");
-        xml.EndElement();
+  xml.EndElement(); // sourceEntries
 
-      xml.EndElement(); // sourceEntries
-
-    xml.EndElement(); // configuration
+  xml.EndElement(); // configuration
 
   xml.EndElement(); // storageModule
 
@@ -923,21 +876,22 @@ void cmExtraEclipseCDT9Generator::CreateCProjectFile() const
   xml.Attribute("moduleId", "refreshScope");
   xml.Attribute("versionNumber", "2");
 
-    xml.StartElement("configuration");
-    xml.Attribute("configurationName", "default");
+  xml.StartElement("configuration");
+  xml.Attribute("configurationName", "Default");
 
-      xml.StartElement("resource");
-      xml.Attribute("resourceType", "PROJECT");
-      xml.Attribute("workspacePath", "/" + lg->GetProjectName());
-      xml.EndElement(); // resource
+  xml.StartElement("resource");
+  xml.Attribute("resourceType", "PROJECT");
+  xml.Attribute("workspacePath", "/" + lg->GetProjectName());
+  xml.EndElement(); // resource
 
-    xml.EndElement(); // configuration
+  xml.EndElement(); // configuration
 
   xml.EndElement(); // storageModule
 
   xml.StartElement("storageModule");
-  xml.Attribute("moduleId",
-          "org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings");
+  xml.Attribute(
+    "moduleId",
+    "org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings");
   xml.EndElement(); // storageModule
 
   xml.StartElement("storageModule");
@@ -975,8 +929,8 @@ std::string cmExtraEclipseCDT9Generator::GetPathBasename(
 {
   std::string outputBasename = path;
   while (!outputBasename.empty() &&
-         (outputBasename[outputBasename.size() - 1] == '/' ||
-          outputBasename[outputBasename.size() - 1] == '\\')) {
+         (outputBasename.back() == '/' || outputBasename.back() == '\\')) {
+
     outputBasename.resize(outputBasename.size() - 1);
   }
   std::string::size_type loc = outputBasename.find_last_of("/\\");
@@ -998,7 +952,8 @@ void cmExtraEclipseCDT9Generator::AppendStorageScanners(
   cmXMLWriter& xml, const cmMakefile& makefile)
 {
   // we need the "make" and the C (or C++) compiler which are used, Alex
-  std::string make = makefile.GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& make =
+    makefile.GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::string compiler = makefile.GetSafeDefinition("CMAKE_C_COMPILER");
   std::string arg1 = makefile.GetSafeDefinition("CMAKE_C_COMPILER_ARG1");
   if (compiler.empty()) {

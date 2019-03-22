@@ -82,10 +82,6 @@ private:
     cmXMLWriter& xml, const std::vector<std::string>& includeDirs,
     std::set<std::string>& emittedDirs);
 
-  static void AppendIncludeDirectories_CDT9(
-    cmXMLWriter& xml, const std::vector<std::string>& includeDirs,
-    std::set<std::string>& emittedDirs);
-
   static void AddEnvVar(std::ostream& out, const char* envVar,
                         cmLocalGenerator* lg);
 
