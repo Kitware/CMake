@@ -15,6 +15,7 @@
 #include "cmake.h"
 
 #include <algorithm>
+#include <sstream>
 #include <utility>
 
 // -- Class methods
@@ -504,6 +505,13 @@ void cmQtAutoGenerator::ReadOnlyProcessT::setup(
   Setup_.MergedOutput = mergedOutput;
 }
 
+static std::string getUVError(const char* prefixString, int uvErrorCode)
+{
+  std::ostringstream ost;
+  ost << prefixString << ": " << uv_strerror(uvErrorCode);
+  return ost.str();
+}
+
 bool cmQtAutoGenerator::ReadOnlyProcessT::start(
   uv_loop_t* uv_loop, std::function<void()>&& finishedCallback)
 {
@@ -560,8 +568,10 @@ bool cmQtAutoGenerator::ReadOnlyProcessT::start(
     UVOptions_.stdio = UVOptionsStdIO_.data();
 
     // -- Spawn process
-    if (UVProcess_.spawn(*uv_loop, UVOptions_, this) != 0) {
-      Result()->ErrorMessage = "libuv process spawn failed";
+    int uvErrorCode = UVProcess_.spawn(*uv_loop, UVOptions_, this);
+    if (uvErrorCode != 0) {
+      Result()->ErrorMessage =
+        getUVError("libuv process spawn failed ", uvErrorCode);
     }
   }
   // -- Start reading from stdio streams
