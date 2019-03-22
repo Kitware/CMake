@@ -2023,8 +2023,7 @@ cmTarget* cmMakefile::AddNewTarget(cmStateEnums::TargetType type,
 {
   cmTargets::iterator it =
     this->Targets
-      .insert(cmTargets::value_type(
-        name, cmTarget(name, type, cmTarget::VisibilityNormal, this)))
+      .emplace(name, cmTarget(name, type, cmTarget::VisibilityNormal, this))
       .first;
   this->GetGlobalGenerator()->IndexTarget(&it->second);
   this->GetStateSnapshot().GetDirectory().AddNormalTargetName(name);
