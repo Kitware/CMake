@@ -32,6 +32,13 @@
 #include "cmTargetPropertyComputer.h"
 #include "cmake.h"
 
+///! Append all elements from the second container to the first container
+template <class C, class R>
+static inline void CApp(C& container, R const& range)
+{
+  container.insert(container.end(), range.begin(), range.end());
+}
+
 template <>
 const char* cmTargetPropertyComputer::ComputeLocationForBuild<cmTarget>(
   cmTarget const* tgt)
@@ -309,10 +316,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 #endif
   }
 
-  // Collect the set of configuration types.
-  std::vector<std::string> configNames;
-  mf->GetConfigurations(configNames);
-
   // Setup per-configuration property default values.
   if (this->GetType() != cmStateEnums::UTILITY) {
     static const auto configProps = {
@@ -322,6 +325,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       "COMPILE_PDB_OUTPUT_DIRECTORY_", "MAP_IMPORTED_CONFIG_",
       "INTERPROCEDURAL_OPTIMIZATION_"
     };
+    // Collect the set of configuration types.
+    std::vector<std::string> configNames;
+    mf->GetConfigurations(configNames);
     for (std::string const& configName : configNames) {
       std::string configUpper = cmSystemTools::UpperCase(configName);
       for (auto const& prop : configProps) {
@@ -356,59 +362,30 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   if (!this->IsImported()) {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
     // of the same directory property:
-    const cmStringRange parentIncludes =
-      this->Makefile->GetIncludeDirectoriesEntries();
-    const cmBacktraceRange parentIncludesBts =
-      this->Makefile->GetIncludeDirectoriesBacktraces();
+    CApp(this->Internal->IncludeDirectoriesEntries,
+         this->Makefile->GetIncludeDirectoriesEntries());
+    CApp(this->Internal->IncludeDirectoriesBacktraces,
+         this->Makefile->GetIncludeDirectoriesBacktraces());
 
-    this->Internal->IncludeDirectoriesEntries.insert(
-      this->Internal->IncludeDirectoriesEntries.end(), parentIncludes.begin(),
-      parentIncludes.end());
-    this->Internal->IncludeDirectoriesBacktraces.insert(
-      this->Internal->IncludeDirectoriesBacktraces.end(),
-      parentIncludesBts.begin(), parentIncludesBts.end());
+    {
+      auto const& sysInc = this->Makefile->GetSystemIncludeDirectories();
+      this->SystemIncludeDirectories.insert(sysInc.begin(), sysInc.end());
+    }
 
-    const std::set<std::string> parentSystemIncludes =
-      this->Makefile->GetSystemIncludeDirectories();
+    CApp(this->Internal->CompileOptionsEntries,
+         this->Makefile->GetCompileOptionsEntries());
+    CApp(this->Internal->CompileOptionsBacktraces,
+         this->Makefile->GetCompileOptionsBacktraces());
 
-    this->SystemIncludeDirectories.insert(parentSystemIncludes.begin(),
-                                          parentSystemIncludes.end());
+    CApp(this->Internal->LinkOptionsEntries,
+         this->Makefile->GetLinkOptionsEntries());
+    CApp(this->Internal->LinkOptionsBacktraces,
+         this->Makefile->GetLinkOptionsBacktraces());
 
-    const cmStringRange parentCompileOptions =
-      this->Makefile->GetCompileOptionsEntries();
-    const cmBacktraceRange parentCompileOptionsBts =
-      this->Makefile->GetCompileOptionsBacktraces();
-
-    this->Internal->CompileOptionsEntries.insert(
-      this->Internal->CompileOptionsEntries.end(),
-      parentCompileOptions.begin(), parentCompileOptions.end());
-    this->Internal->CompileOptionsBacktraces.insert(
-      this->Internal->CompileOptionsBacktraces.end(),
-      parentCompileOptionsBts.begin(), parentCompileOptionsBts.end());
-
-    const cmStringRange parentLinkOptions =
-      this->Makefile->GetLinkOptionsEntries();
-    const cmBacktraceRange parentLinkOptionsBts =
-      this->Makefile->GetLinkOptionsBacktraces();
-
-    this->Internal->LinkOptionsEntries.insert(
-      this->Internal->LinkOptionsEntries.end(), parentLinkOptions.begin(),
-      parentLinkOptions.end());
-    this->Internal->LinkOptionsBacktraces.insert(
-      this->Internal->LinkOptionsBacktraces.end(),
-      parentLinkOptionsBts.begin(), parentLinkOptionsBts.end());
-
-    const cmStringRange parentLinkDirectories =
-      this->Makefile->GetLinkDirectoriesEntries();
-    const cmBacktraceRange parentLinkDirectoriesBts =
-      this->Makefile->GetLinkDirectoriesBacktraces();
-
-    this->Internal->LinkDirectoriesEntries.insert(
-      this->Internal->LinkDirectoriesEntries.end(),
-      parentLinkDirectories.begin(), parentLinkDirectories.end());
-    this->Internal->LinkDirectoriesBacktraces.insert(
-      this->Internal->LinkDirectoriesBacktraces.end(),
-      parentLinkDirectoriesBts.begin(), parentLinkDirectoriesBts.end());
+    CApp(this->Internal->LinkDirectoriesEntries,
+         this->Makefile->GetLinkDirectoriesEntries());
+    CApp(this->Internal->LinkDirectoriesBacktraces,
+         this->Makefile->GetLinkDirectoriesBacktraces());
   }
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
