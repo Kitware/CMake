@@ -353,6 +353,7 @@ syn keyword cmakeProperty contained
             \ XCODE_EMIT_EFFECTIVE_PLATFORM_NAME
             \ XCODE_EXPLICIT_FILE_TYPE
             \ XCODE_FILE_ATTRIBUTES
+            \ XCODE_GENERATE_SCHEME
             \ XCODE_LAST_KNOWN_FILE_TYPE
             \ XCODE_PRODUCT_TYPE
             \ XCODE_SCHEME_ADDRESS_SANITIZER
