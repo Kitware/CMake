@@ -266,9 +266,6 @@ private:
   void SetPropertyDefault(const std::string& property,
                           const char* default_value);
 
-  bool CheckImportedLibName(std::string const& prop,
-                            std::string const& value) const;
-
 private:
   cmTargetInternalPointer impl;
 

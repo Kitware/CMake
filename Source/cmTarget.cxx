@@ -207,6 +207,9 @@ public:
   cmListFileBacktrace Backtrace;
 
 public:
+  bool CheckImportedLibName(std::string const& prop,
+                            std::string const& value) const;
+
   std::string ProcessSourceItemCMP0049(const std::string& s);
 };
 
@@ -1167,7 +1170,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       this->GetGlobalGenerator()->IndexTarget(this);
     }
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME") &&
-             !this->CheckImportedLibName(prop, value ? value : "")) {
+             !impl->CheckImportedLibName(prop, value ? value : "")) {
     /* error was reported by check method */
   } else if (prop == propCUDA_PTX_COMPILATION &&
              this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
@@ -1808,12 +1811,12 @@ void cmTarget::SetPropertyDefault(const std::string& property,
   }
 }
 
-bool cmTarget::CheckImportedLibName(std::string const& prop,
-                                    std::string const& value) const
+bool cmTargetInternals::CheckImportedLibName(std::string const& prop,
+                                             std::string const& value) const
 {
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY ||
-      !this->IsImported()) {
-    impl->Makefile->IssueMessage(
+  if (this->TargetType != cmStateEnums::INTERFACE_LIBRARY ||
+      !this->IsImportedTarget) {
+    this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       prop +
         " property may be set only on imported INTERFACE library targets.");
@@ -1821,14 +1824,14 @@ bool cmTarget::CheckImportedLibName(std::string const& prop,
   }
   if (!value.empty()) {
     if (value[0] == '-') {
-      impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                    prop + " property value\n  " + value +
                                      "\nmay not start with '-'.");
       return false;
     }
     std::string::size_type bad = value.find_first_of(":/\\;");
     if (bad != std::string::npos) {
-      impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                    prop + " property value\n  " + value +
                                      "\nmay not contain '" +
                                      value.substr(bad, 1) + "'.");
