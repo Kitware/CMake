@@ -215,6 +215,7 @@ public:
 
 cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
                    Visibility vis, cmMakefile* mf)
+  : impl(cm::make_unique<cmTargetInternals>())
 {
   assert(mf);
   impl->TargetType = type;
@@ -499,6 +500,11 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     }
   }
 }
+
+cmTarget::cmTarget(cmTarget&&) noexcept = default;
+cmTarget::~cmTarget() = default;
+
+cmTarget& cmTarget::operator=(cmTarget&&) noexcept = default;
 
 cmStateEnums::TargetType cmTarget::GetType() const
 {
@@ -1966,38 +1972,4 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   }
 
   return true;
-}
-
-cmTargetInternalPointer::cmTargetInternalPointer()
-{
-  this->Pointer = new cmTargetInternals;
-}
-
-cmTargetInternalPointer::cmTargetInternalPointer(
-  cmTargetInternalPointer const& r)
-{
-  // Ideally cmTarget instances should never be copied.  However until
-  // we can make a sweep to remove that, this copy constructor avoids
-  // allowing the resources (Internals) to be copied.
-  this->Pointer = new cmTargetInternals(*r.Pointer);
-}
-
-cmTargetInternalPointer::~cmTargetInternalPointer()
-{
-  delete this->Pointer;
-}
-
-cmTargetInternalPointer& cmTargetInternalPointer::operator=(
-  cmTargetInternalPointer const& r)
-{
-  if (this == &r) {
-    return *this;
-  } // avoid warning on HP about self check
-  // Ideally cmTarget instances should never be copied.  However until
-  // we can make a sweep to remove that, this copy constructor avoids
-  // allowing the resources (Internals) to be copied.
-  cmTargetInternals* oldPointer = this->Pointer;
-  this->Pointer = new cmTargetInternals(*r.Pointer);
-  delete oldPointer;
-  return *this;
 }

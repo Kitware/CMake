@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <memory> // IWYU pragma: keep
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -26,20 +27,6 @@ class cmPropertyMap;
 class cmSourceFile;
 class cmTargetInternals;
 
-class cmTargetInternalPointer
-{
-public:
-  cmTargetInternalPointer();
-  cmTargetInternalPointer(cmTargetInternalPointer const& r);
-  ~cmTargetInternalPointer();
-  cmTargetInternalPointer& operator=(cmTargetInternalPointer const& r);
-  cmTargetInternals* operator->() const { return this->Pointer; }
-  cmTargetInternals* Get() const { return this->Pointer; }
-
-private:
-  cmTargetInternals* Pointer;
-};
-
 /** \class cmTarget
  * \brief Represent a library or executable target loaded from a makefile.
  *
@@ -55,15 +42,22 @@ public:
     VisibilityImportedGlobally
   };
 
-  cmTarget(std::string const& name, cmStateEnums::TargetType type,
-           Visibility vis, cmMakefile* mf);
-
   enum CustomCommandType
   {
     PRE_BUILD,
     PRE_LINK,
     POST_BUILD
   };
+
+  cmTarget(std::string const& name, cmStateEnums::TargetType type,
+           Visibility vis, cmMakefile* mf);
+
+  cmTarget(cmTarget const&) = delete;
+  cmTarget(cmTarget&&) noexcept;
+  ~cmTarget();
+
+  cmTarget& operator=(cmTarget const&) = delete;
+  cmTarget& operator=(cmTarget&&) noexcept;
 
   ///! Return the type of target.
   cmStateEnums::TargetType GetType() const;
@@ -263,7 +257,7 @@ private:
     cmStateEnums::ArtifactType artifact) const;
 
 private:
-  cmTargetInternalPointer impl;
+  std::unique_ptr<cmTargetInternals> impl;
 };
 
 typedef std::unordered_map<std::string, cmTarget> cmTargets;
