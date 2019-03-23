@@ -250,11 +250,8 @@ public:
   std::string GetDebugGeneratorExpressions(const std::string& value,
                                            cmTargetLinkLibraryType llt) const;
 
-  void AddSystemIncludeDirectories(const std::set<std::string>& incs);
-  std::set<std::string> const& GetSystemIncludeDirectories() const
-  {
-    return this->SystemIncludeDirectories;
-  }
+  void AddSystemIncludeDirectories(std::set<std::string> const& incs);
+  std::set<std::string> const& GetSystemIncludeDirectories() const;
 
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
@@ -304,7 +301,6 @@ private:
 
 private:
   bool IsGeneratorProvided;
-  std::set<std::string> SystemIncludeDirectories;
   std::set<BT<std::string>> Utilities;
   cmPolicies::PolicyMap PolicyMap;
   std::string Name;

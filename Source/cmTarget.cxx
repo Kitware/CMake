@@ -168,6 +168,7 @@ public:
   cmStateEnums::TargetType TargetType;
   cmMakefile* Makefile;
   cmPropertyMap Properties;
+  std::set<std::string> SystemIncludeDirectories;
   std::vector<std::string> IncludeDirectoriesEntries;
   std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
   std::vector<std::string> CompileOptionsEntries;
@@ -373,7 +374,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
     {
       auto const& sysInc = impl->Makefile->GetSystemIncludeDirectories();
-      this->SystemIncludeDirectories.insert(sysInc.begin(), sysInc.end());
+      impl->SystemIncludeDirectories.insert(sysInc.begin(), sysInc.end());
     }
 
     CApp(impl->CompileOptionsEntries,
@@ -817,7 +818,12 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
 
 void cmTarget::AddSystemIncludeDirectories(const std::set<std::string>& incs)
 {
-  this->SystemIncludeDirectories.insert(incs.begin(), incs.end());
+  impl->SystemIncludeDirectories.insert(incs.begin(), incs.end());
+}
+
+std::set<std::string> const& cmTarget::GetSystemIncludeDirectories() const
+{
+  return impl->SystemIncludeDirectories;
 }
 
 cmStringRange cmTarget::GetIncludeDirectoriesEntries() const
