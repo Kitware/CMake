@@ -116,26 +116,18 @@ public:
     this->PostBuildCommands.push_back(cmd);
   }
 
-  /**
-   * Add sources to the target.
-   */
+  ///! Add sources to the target.
   void AddSources(std::vector<std::string> const& srcs);
   void AddTracedSources(std::vector<std::string> const& srcs);
   cmSourceFile* AddSourceCMP0049(const std::string& src);
   cmSourceFile* AddSource(const std::string& src, bool before = false);
 
-  //* how we identify a library, by name and type
+  ///! how we identify a library, by name and type
   typedef std::pair<std::string, cmTargetLinkLibraryType> LibraryID;
-
   typedef std::vector<LibraryID> LinkLibraryVectorType;
-  const LinkLibraryVectorType& GetOriginalLinkLibraries() const
-  {
-    return this->OriginalLinkLibraries;
-  }
+  LinkLibraryVectorType const& GetOriginalLinkLibraries() const;
 
-  /**
-   * Clear the dependency information recorded for this target, if any.
-   */
+  ///! Clear the dependency information recorded for this target, if any.
   void ClearDependencyInformation(cmMakefile& mf);
 
   void AddLinkLibrary(cmMakefile& mf, const std::string& lib,
@@ -307,7 +299,6 @@ private:
   std::vector<cmCustomCommand> PreLinkCommands;
   std::vector<cmCustomCommand> PostBuildCommands;
   std::vector<std::pair<TLLSignature, cmListFileContext>> TLLCommands;
-  LinkLibraryVectorType OriginalLinkLibraries;
   cmTargetInternalPointer impl;
   bool HaveInstallRule;
   bool DLLPlatform;

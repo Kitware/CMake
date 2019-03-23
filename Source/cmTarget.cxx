@@ -170,6 +170,7 @@ public:
   cmPropertyMap Properties;
   std::set<BT<std::string>> Utilities;
   std::set<std::string> SystemIncludeDirectories;
+  cmTarget::LinkLibraryVectorType OriginalLinkLibraries;
   std::vector<std::string> IncludeDirectoriesEntries;
   std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
   std::vector<std::string> CompileOptionsEntries;
@@ -751,6 +752,12 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
   }
 }
 
+cmTarget::LinkLibraryVectorType const& cmTarget::GetOriginalLinkLibraries()
+  const
+{
+  return impl->OriginalLinkLibraries;
+}
+
 void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
                               cmTargetLinkLibraryType llt)
 {
@@ -782,7 +789,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
     return;
   }
 
-  this->OriginalLinkLibraries.emplace_back(lib, llt);
+  impl->OriginalLinkLibraries.emplace_back(lib, llt);
 
   // Add the explicit dependency information for libraries. This is
   // simply a set of libraries separated by ";". There should always
