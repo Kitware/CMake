@@ -16,13 +16,13 @@
 #include "cmCustomCommand.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
-#include "cmPropertyMap.h"
 #include "cmStateTypes.h"
 #include "cmTargetLinkLibraryType.h"
 
 class cmGlobalGenerator;
 class cmMakefile;
 class cmMessenger;
+class cmPropertyMap;
 class cmSourceFile;
 class cmTargetInternals;
 
@@ -208,15 +208,14 @@ public:
   const char* GetComputedProperty(const std::string& prop,
                                   cmMessenger* messenger,
                                   cmListFileBacktrace const& context) const;
+  ///! Get all properties
+  cmPropertyMap const& GetProperties() const;
 
   bool IsImported() const { return this->IsImportedTarget; }
   bool IsImportedGloballyVisible() const
   {
     return this->ImportedGloballyVisible;
   }
-
-  // Get the properties
-  cmPropertyMap const& GetProperties() const { return this->Properties; }
 
   bool GetMappedConfig(std::string const& desired_config, const char** loc,
                        const char** imp, std::string& suffix) const;
@@ -305,7 +304,6 @@ private:
 
 private:
   bool IsGeneratorProvided;
-  cmPropertyMap Properties;
   std::set<std::string> SystemIncludeDirectories;
   std::set<BT<std::string>> Utilities;
   cmPolicies::PolicyMap PolicyMap;

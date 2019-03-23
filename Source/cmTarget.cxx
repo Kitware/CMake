@@ -21,6 +21,7 @@
 #include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmProperty.h"
+#include "cmPropertyMap.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
@@ -166,6 +167,7 @@ class cmTargetInternals
 public:
   cmStateEnums::TargetType TargetType;
   cmMakefile* Makefile;
+  cmPropertyMap Properties;
   std::vector<std::string> IncludeDirectoriesEntries;
   std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
   std::vector<std::string> CompileOptionsEntries;
@@ -1050,7 +1052,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   } else {
-    this->Properties.SetProperty(prop, value);
+    impl->Properties.SetProperty(prop, value);
   }
 }
 
@@ -1140,7 +1142,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  prop + " property may not be APPENDed.");
   } else {
-    this->Properties.AppendProperty(prop, value, asString);
+    impl->Properties.AppendProperty(prop, value, asString);
   }
 }
 
@@ -1484,7 +1486,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     }
   }
 
-  const char* retVal = this->Properties.GetPropertyValue(prop);
+  const char* retVal = impl->Properties.GetPropertyValue(prop);
   if (!retVal) {
     const bool chain =
       impl->Makefile->GetState()->IsPropertyChained(prop, cmProperty::TARGET);
@@ -1508,6 +1510,11 @@ const char* cmTarget::GetSafeProperty(const std::string& prop) const
 bool cmTarget::GetPropertyAsBool(const std::string& prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
+}
+
+cmPropertyMap const& cmTarget::GetProperties() const
+{
+  return impl->Properties;
 }
 
 const char* cmTarget::GetSuffixVariableInternal(
