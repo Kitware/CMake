@@ -69,13 +69,14 @@ public:
   ///! Return the type of target.
   cmStateEnums::TargetType GetType() const;
 
+  ///! Get the cmMakefile that owns this target.
+  cmMakefile* GetMakefile() const;
+
+  ///! Return the global generator.
   cmGlobalGenerator* GetGlobalGenerator() const;
 
   ///! Set/Get the name of the target
   const std::string& GetName() const { return this->Name; }
-
-  /** Get the cmMakefile that owns this target.  */
-  cmMakefile* GetMakefile() const { return this->Makefile; }
 
 #define DECLARE_TARGET_POLICY(POLICY)                                         \
   cmPolicies::PolicyStatus GetPolicyStatus##POLICY() const                    \
@@ -316,7 +317,6 @@ private:
   std::vector<cmCustomCommand> PostBuildCommands;
   std::vector<std::pair<TLLSignature, cmListFileContext>> TLLCommands;
   LinkLibraryVectorType OriginalLinkLibraries;
-  cmMakefile* Makefile;
   cmTargetInternalPointer impl;
   bool HaveInstallRule;
   bool DLLPlatform;

@@ -165,6 +165,7 @@ class cmTargetInternals
 {
 public:
   cmStateEnums::TargetType TargetType;
+  cmMakefile* Makefile;
   std::vector<std::string> IncludeDirectoriesEntries;
   std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
   std::vector<std::string> CompileOptionsEntries;
@@ -188,9 +189,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 {
   assert(mf);
   impl->TargetType = type;
+  impl->Makefile = mf;
   this->IsGeneratorProvided = false;
   this->Name = name;
-  this->Makefile = mf;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsAndroid = false;
@@ -201,11 +202,11 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   // Check whether this is a DLL platform.
   this->DLLPlatform =
-    !this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
+    !impl->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
 
   // Check whether we are targeting an Android platform.
   this->IsAndroid =
-    (this->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Android");
+    (impl->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Android");
 
   // Setup default property values.
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
@@ -358,34 +359,34 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
 
   // Save the backtrace of target construction.
-  this->Backtrace = this->Makefile->GetBacktrace();
+  this->Backtrace = impl->Makefile->GetBacktrace();
 
   if (!this->IsImported()) {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
     // of the same directory property:
     CApp(impl->IncludeDirectoriesEntries,
-         this->Makefile->GetIncludeDirectoriesEntries());
+         impl->Makefile->GetIncludeDirectoriesEntries());
     CApp(impl->IncludeDirectoriesBacktraces,
-         this->Makefile->GetIncludeDirectoriesBacktraces());
+         impl->Makefile->GetIncludeDirectoriesBacktraces());
 
     {
-      auto const& sysInc = this->Makefile->GetSystemIncludeDirectories();
+      auto const& sysInc = impl->Makefile->GetSystemIncludeDirectories();
       this->SystemIncludeDirectories.insert(sysInc.begin(), sysInc.end());
     }
 
     CApp(impl->CompileOptionsEntries,
-         this->Makefile->GetCompileOptionsEntries());
+         impl->Makefile->GetCompileOptionsEntries());
     CApp(impl->CompileOptionsBacktraces,
-         this->Makefile->GetCompileOptionsBacktraces());
+         impl->Makefile->GetCompileOptionsBacktraces());
 
-    CApp(impl->LinkOptionsEntries, this->Makefile->GetLinkOptionsEntries());
+    CApp(impl->LinkOptionsEntries, impl->Makefile->GetLinkOptionsEntries());
     CApp(impl->LinkOptionsBacktraces,
-         this->Makefile->GetLinkOptionsBacktraces());
+         impl->Makefile->GetLinkOptionsBacktraces());
 
     CApp(impl->LinkDirectoriesEntries,
-         this->Makefile->GetLinkDirectoriesEntries());
+         impl->Makefile->GetLinkDirectoriesEntries());
     CApp(impl->LinkDirectoriesBacktraces,
-         this->Makefile->GetLinkDirectoriesBacktraces());
+         impl->Makefile->GetLinkDirectoriesBacktraces());
   }
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
@@ -416,7 +417,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
 
   // Record current policies for later use.
-  this->Makefile->RecordPolicies(this->PolicyMap);
+  impl->Makefile->RecordPolicies(this->PolicyMap);
 
   if (impl->TargetType == cmStateEnums::INTERFACE_LIBRARY) {
     // This policy is checked in a few conditions. The properties relevant
@@ -467,9 +468,14 @@ cmStateEnums::TargetType cmTarget::GetType() const
   return impl->TargetType;
 }
 
+cmMakefile* cmTarget::GetMakefile() const
+{
+  return impl->Makefile;
+}
+
 cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
 {
-  return this->GetMakefile()->GetGlobalGenerator();
+  return impl->Makefile->GetGlobalGenerator();
 }
 
 void cmTarget::AddUtility(std::string const& u, cmMakefile* mf)
@@ -500,21 +506,21 @@ bool cmTarget::IsFrameworkOnApple() const
 {
   return ((this->GetType() == cmStateEnums::SHARED_LIBRARY ||
            this->GetType() == cmStateEnums::STATIC_LIBRARY) &&
-          this->Makefile->IsOn("APPLE") &&
+          impl->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("FRAMEWORK"));
 }
 
 bool cmTarget::IsAppBundleOnApple() const
 {
   return (this->GetType() == cmStateEnums::EXECUTABLE &&
-          this->Makefile->IsOn("APPLE") &&
+          impl->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("MACOSX_BUNDLE"));
 }
 
 void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
 {
   if (!srcs.empty()) {
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+    cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
     impl->SourceEntries.push_back(cmJoin(srcs, ";"));
     impl->SourceBacktraces.push_back(lfbt);
   }
@@ -532,14 +538,14 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
           return;
         }
       }
-      this->Makefile->GetOrCreateSource(filename);
+      impl->Makefile->GetOrCreateSource(filename);
     }
     srcFiles += sep;
     srcFiles += filename;
     sep = ";";
   }
   if (!srcFiles.empty()) {
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+    cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
     impl->SourceEntries.push_back(std::move(srcFiles));
     impl->SourceBacktraces.push_back(lfbt);
   }
@@ -551,12 +557,12 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
 
   // For backwards compatibility replace variables in source names.
   // This should eventually be removed.
-  this->Makefile->ExpandVariablesInString(src);
+  impl->Makefile->ExpandVariablesInString(src);
   if (src != s) {
     std::ostringstream e;
     bool noMessage = false;
     MessageType messageType = MessageType::AUTHOR_WARNING;
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0049)) {
+    switch (impl->Makefile->GetPolicyStatus(cmPolicies::CMP0049)) {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0049) << "\n";
         break;
@@ -573,7 +579,7 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
         << "\" expanded to \"" << src << "\" in target \"" << this->GetName()
         << "\".  This behavior will be removed in a "
            "future version of CMake.";
-      this->Makefile->IssueMessage(messageType, e.str());
+      impl->Makefile->IssueMessage(messageType, e.str());
       if (messageType == MessageType::FATAL_ERROR) {
         return "";
       }
@@ -648,12 +654,12 @@ public:
 
 cmSourceFile* cmTarget::AddSource(const std::string& src, bool before)
 {
-  cmSourceFileLocation sfl(this->Makefile, src,
+  cmSourceFileLocation sfl(impl->Makefile, src,
                            cmSourceFileLocationKind::Known);
   if (std::find_if(impl->SourceEntries.begin(), impl->SourceEntries.end(),
                    TargetPropertyEntryFinder(sfl)) ==
       impl->SourceEntries.end()) {
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+    cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
     impl->SourceEntries.insert(
       before ? impl->SourceEntries.begin() : impl->SourceEntries.end(), src);
     impl->SourceBacktraces.insert(before ? impl->SourceBacktraces.begin()
@@ -663,7 +669,7 @@ cmSourceFile* cmTarget::AddSource(const std::string& src, bool before)
   if (cmGeneratorExpression::Find(src) != std::string::npos) {
     return nullptr;
   }
-  return this->Makefile->GetOrCreateSource(src, false,
+  return impl->Makefile->GetOrCreateSource(src, false,
                                            cmSourceFileLocationKind::Known);
 }
 
@@ -683,7 +689,7 @@ std::string cmTarget::GetDebugGeneratorExpressions(
 
   // Get the list of configurations considered to be DEBUG.
   std::vector<std::string> debugConfigs =
-    this->Makefile->GetCMakeInstance()->GetDebugConfigs();
+    impl->Makefile->GetCMakeInstance()->GetDebugConfigs();
 
   std::string configString = "$<CONFIG:" + debugConfigs[0] + ">";
 
@@ -725,13 +731,12 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
   const char* sigString =
     (sig == cmTarget::KeywordTLLSignature ? "keyword" : "plain");
   s << "The uses of the " << sigString << " signature are here:\n";
-  cmStateDirectory cmDir =
-    this->GetMakefile()->GetStateSnapshot().GetDirectory();
+  cmStateDirectory cmDir = impl->Makefile->GetStateSnapshot().GetDirectory();
   for (auto const& cmd : this->TLLCommands) {
     if (cmd.first == sig) {
       cmListFileContext lfc = cmd.second;
       lfc.FilePath = cmDir.ConvertToRelPathIfNotContained(
-        this->Makefile->GetState()->GetSourceDirectory(), lfc.FilePath);
+        impl->Makefile->GetState()->GetSourceDirectory(), lfc.FilePath);
       s << " * " << lfc << std::endl;
     }
   }
@@ -896,8 +901,8 @@ cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
 void cmTarget::SetProperty(const std::string& prop, const char* value)
 {
   if (!cmTargetPropertyComputer::PassesWhitelist(
-        this->GetType(), prop, this->Makefile->GetMessenger(),
-        this->Makefile->GetBacktrace())) {
+        this->GetType(), prop, impl->Makefile->GetMessenger(),
+        impl->Makefile->GetBacktrace())) {
     return;
   }
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
@@ -919,40 +924,40 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
     std::ostringstream e;
     e << "MANUALLY_ADDED_DEPENDENCIES property is read-only\n";
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == propNAME) {
     std::ostringstream e;
     e << "NAME property is read-only\n";
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == propTYPE) {
     std::ostringstream e;
     e << "TYPE property is read-only\n";
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == propEXPORT_NAME && this->IsImported()) {
     std::ostringstream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
       << this->Name << "\")\n";
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == propSOURCES && this->IsImported()) {
     std::ostringstream e;
     e << "SOURCES property can't be set on imported targets (\"" << this->Name
       << "\")\n";
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == propIMPORTED_GLOBAL && !this->IsImported()) {
     std::ostringstream e;
     e << "IMPORTED_GLOBAL property can't be set on non-imported targets (\""
       << this->Name << "\")\n";
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
 
@@ -961,7 +966,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     impl->IncludeDirectoriesBacktraces.clear();
     if (value) {
       impl->IncludeDirectoriesEntries.emplace_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->IncludeDirectoriesBacktraces.push_back(lfbt);
     }
   } else if (prop == propCOMPILE_OPTIONS) {
@@ -969,7 +974,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     impl->CompileOptionsBacktraces.clear();
     if (value) {
       impl->CompileOptionsEntries.emplace_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->CompileOptionsBacktraces.push_back(lfbt);
     }
   } else if (prop == propCOMPILE_FEATURES) {
@@ -977,7 +982,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     impl->CompileFeaturesBacktraces.clear();
     if (value) {
       impl->CompileFeaturesEntries.emplace_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->CompileFeaturesBacktraces.push_back(lfbt);
     }
   } else if (prop == propCOMPILE_DEFINITIONS) {
@@ -985,7 +990,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     impl->CompileDefinitionsBacktraces.clear();
     if (value) {
       impl->CompileDefinitionsEntries.emplace_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->CompileDefinitionsBacktraces.push_back(lfbt);
     }
   } else if (prop == propLINK_OPTIONS) {
@@ -993,7 +998,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     impl->LinkOptionsBacktraces.clear();
     if (value) {
       impl->LinkOptionsEntries.emplace_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->LinkOptionsBacktraces.push_back(lfbt);
     }
   } else if (prop == propLINK_DIRECTORIES) {
@@ -1001,14 +1006,14 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     impl->LinkDirectoriesBacktraces.clear();
     if (value) {
       impl->LinkDirectoriesEntries.emplace_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->LinkDirectoriesBacktraces.push_back(lfbt);
     }
   } else if (prop == propLINK_LIBRARIES) {
     impl->LinkImplementationPropertyEntries.clear();
     impl->LinkImplementationPropertyBacktraces.clear();
     if (value) {
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->LinkImplementationPropertyEntries.emplace_back(value);
       impl->LinkImplementationPropertyBacktraces.push_back(lfbt);
     }
@@ -1016,7 +1021,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     impl->SourceEntries.clear();
     impl->SourceBacktraces.clear();
     if (value) {
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->SourceEntries.emplace_back(value);
       impl->SourceBacktraces.push_back(lfbt);
     }
@@ -1025,7 +1030,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       std::ostringstream e;
       e << "IMPORTED_GLOBAL property can't be set to FALSE on targets (\""
         << this->Name << "\")\n";
-      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return;
     }
     /* no need to change anything if value does not change */
@@ -1042,7 +1047,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     e << "CUDA_PTX_COMPILATION property can only be applied to OBJECT "
          "targets (\""
       << this->Name << "\")\n";
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   } else {
     this->Properties.SetProperty(prop, value);
@@ -1053,28 +1058,28 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
                               bool asString)
 {
   if (!cmTargetPropertyComputer::PassesWhitelist(
-        this->GetType(), prop, this->Makefile->GetMessenger(),
-        this->Makefile->GetBacktrace())) {
+        this->GetType(), prop, impl->Makefile->GetMessenger(),
+        impl->Makefile->GetBacktrace())) {
     return;
   }
   if (prop == "NAME") {
     std::ostringstream e;
     e << "NAME property is read-only\n";
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == "EXPORT_NAME" && this->IsImported()) {
     std::ostringstream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
       << this->Name << "\")\n";
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == "SOURCES" && this->IsImported()) {
     std::ostringstream e;
     e << "SOURCES property can't be set on imported targets (\"" << this->Name
       << "\")\n";
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == "IMPORTED_GLOBAL") {
@@ -1082,57 +1087,57 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     e << "IMPORTED_GLOBAL property can't be appended, only set on imported "
          "targets (\""
       << this->Name << "\")\n";
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == "INCLUDE_DIRECTORIES") {
     if (value && *value) {
       impl->IncludeDirectoriesEntries.emplace_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->IncludeDirectoriesBacktraces.push_back(lfbt);
     }
   } else if (prop == "COMPILE_OPTIONS") {
     if (value && *value) {
       impl->CompileOptionsEntries.emplace_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->CompileOptionsBacktraces.push_back(lfbt);
     }
   } else if (prop == "COMPILE_FEATURES") {
     if (value && *value) {
       impl->CompileFeaturesEntries.emplace_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->CompileFeaturesBacktraces.push_back(lfbt);
     }
   } else if (prop == "COMPILE_DEFINITIONS") {
     if (value && *value) {
       impl->CompileDefinitionsEntries.emplace_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->CompileDefinitionsBacktraces.push_back(lfbt);
     }
   } else if (prop == "LINK_OPTIONS") {
     if (value && *value) {
       impl->LinkOptionsEntries.emplace_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->LinkOptionsBacktraces.push_back(lfbt);
     }
   } else if (prop == "LINK_DIRECTORIES") {
     if (value && *value) {
       impl->LinkDirectoriesEntries.emplace_back(value);
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->LinkDirectoriesBacktraces.push_back(lfbt);
     }
   } else if (prop == "LINK_LIBRARIES") {
     if (value && *value) {
-      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->LinkImplementationPropertyEntries.emplace_back(value);
       impl->LinkImplementationPropertyBacktraces.push_back(lfbt);
     }
   } else if (prop == "SOURCES") {
-    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+    cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
     impl->SourceEntries.emplace_back(value);
     impl->SourceBacktraces.push_back(lfbt);
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME")) {
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  prop + " property may not be APPENDed.");
   } else {
     this->Properties.AppendProperty(prop, value, asString);
@@ -1153,12 +1158,12 @@ void cmTarget::AppendBuildInterfaceIncludes()
   }
   this->BuildInterfaceIncludesAppended = true;
 
-  if (this->Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE")) {
-    std::string dirs = this->Makefile->GetCurrentBinaryDirectory();
+  if (impl->Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE")) {
+    std::string dirs = impl->Makefile->GetCurrentBinaryDirectory();
     if (!dirs.empty()) {
       dirs += ';';
     }
-    dirs += this->Makefile->GetCurrentSourceDirectory();
+    dirs += impl->Makefile->GetCurrentSourceDirectory();
     if (!dirs.empty()) {
       this->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
                            ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
@@ -1466,15 +1471,13 @@ const char* cmTarget::GetProperty(const std::string& prop) const
       return this->GetName().c_str();
     }
     if (prop == propBINARY_DIR) {
-      return this->GetMakefile()
-        ->GetStateSnapshot()
+      return impl->Makefile->GetStateSnapshot()
         .GetDirectory()
         .GetCurrentBinary()
         .c_str();
     }
     if (prop == propSOURCE_DIR) {
-      return this->GetMakefile()
-        ->GetStateSnapshot()
+      return impl->Makefile->GetStateSnapshot()
         .GetDirectory()
         .GetCurrentSource()
         .c_str();
@@ -1483,10 +1486,10 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 
   const char* retVal = this->Properties.GetPropertyValue(prop);
   if (!retVal) {
-    const bool chain = this->GetMakefile()->GetState()->IsPropertyChained(
-      prop, cmProperty::TARGET);
+    const bool chain =
+      impl->Makefile->GetState()->IsPropertyChained(prop, cmProperty::TARGET);
     if (chain) {
-      return this->Makefile->GetStateSnapshot().GetDirectory().GetProperty(
+      return impl->Makefile->GetStateSnapshot().GetDirectory().GetProperty(
         prop, chain);
     }
   }
@@ -1655,7 +1658,7 @@ void cmTarget::SetPropertyDefault(const std::string& property,
   std::string var = "CMAKE_";
   var += property;
 
-  if (const char* value = this->Makefile->GetDefinition(var)) {
+  if (const char* value = impl->Makefile->GetDefinition(var)) {
     this->SetProperty(property, value);
   } else if (default_value) {
     this->SetProperty(property, default_value);
@@ -1667,7 +1670,7 @@ bool cmTarget::CheckImportedLibName(std::string const& prop,
 {
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY ||
       !this->IsImported()) {
-    this->Makefile->IssueMessage(
+    impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       prop +
         " property may be set only on imported INTERFACE library targets.");
@@ -1675,14 +1678,14 @@ bool cmTarget::CheckImportedLibName(std::string const& prop,
   }
   if (!value.empty()) {
     if (value[0] == '-') {
-      this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+      impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                    prop + " property value\n  " + value +
                                      "\nmay not start with '-'.");
       return false;
     }
     std::string::size_type bad = value.find_first_of(":/\\;");
     if (bad != std::string::npos) {
-      this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+      impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                    prop + " property value\n  " + value +
                                      "\nmay not contain '" +
                                      value.substr(bad, 1) + "'.");
