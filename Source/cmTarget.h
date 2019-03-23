@@ -264,11 +264,6 @@ private:
   const char* GetPrefixVariableInternal(
     cmStateEnums::ArtifactType artifact) const;
 
-  // Use a makefile variable to set a default for the given property.
-  // If the variable is not defined use the given default instead.
-  void SetPropertyDefault(const std::string& property,
-                          const char* default_value);
-
 private:
   cmTargetInternalPointer impl;
 };

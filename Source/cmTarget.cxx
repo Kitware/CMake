@@ -237,112 +237,120 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   impl->IsAndroid =
     (impl->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Android");
 
+  std::string gKey;
+  gKey.reserve(128);
+  gKey += "CMAKE_";
+  auto InitProperty = [this, mf, &gKey](const std::string& property,
+                                        const char* default_value) {
+    // Replace everything after "CMAKE_"
+    gKey.replace(gKey.begin() + 6, gKey.end(), property);
+    if (const char* value = mf->GetDefinition(gKey)) {
+      this->SetProperty(property, value);
+    } else if (default_value) {
+      this->SetProperty(property, default_value);
+    }
+  };
+
   // Setup default property values.
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetType() != cmStateEnums::UTILITY) {
-    this->SetPropertyDefault("ANDROID_API", nullptr);
-    this->SetPropertyDefault("ANDROID_API_MIN", nullptr);
-    this->SetPropertyDefault("ANDROID_ARCH", nullptr);
-    this->SetPropertyDefault("ANDROID_STL_TYPE", nullptr);
-    this->SetPropertyDefault("ANDROID_SKIP_ANT_STEP", nullptr);
-    this->SetPropertyDefault("ANDROID_PROCESS_MAX", nullptr);
-    this->SetPropertyDefault("ANDROID_PROGUARD", nullptr);
-    this->SetPropertyDefault("ANDROID_PROGUARD_CONFIG_PATH", nullptr);
-    this->SetPropertyDefault("ANDROID_SECURE_PROPS_PATH", nullptr);
-    this->SetPropertyDefault("ANDROID_NATIVE_LIB_DIRECTORIES", nullptr);
-    this->SetPropertyDefault("ANDROID_NATIVE_LIB_DEPENDENCIES", nullptr);
-    this->SetPropertyDefault("ANDROID_JAVA_SOURCE_DIR", nullptr);
-    this->SetPropertyDefault("ANDROID_JAR_DIRECTORIES", nullptr);
-    this->SetPropertyDefault("ANDROID_JAR_DEPENDENCIES", nullptr);
-    this->SetPropertyDefault("ANDROID_ASSETS_DIRECTORIES", nullptr);
-    this->SetPropertyDefault("ANDROID_ANT_ADDITIONAL_OPTIONS", nullptr);
-    this->SetPropertyDefault("BUILD_RPATH", nullptr);
-    this->SetPropertyDefault("BUILD_RPATH_USE_ORIGIN", nullptr);
-    this->SetPropertyDefault("INSTALL_NAME_DIR", nullptr);
-    this->SetPropertyDefault("INSTALL_RPATH", "");
-    this->SetPropertyDefault("INSTALL_RPATH_USE_LINK_PATH", "OFF");
-    this->SetPropertyDefault("INTERPROCEDURAL_OPTIMIZATION", nullptr);
-    this->SetPropertyDefault("SKIP_BUILD_RPATH", "OFF");
-    this->SetPropertyDefault("BUILD_WITH_INSTALL_RPATH", "OFF");
-    this->SetPropertyDefault("ARCHIVE_OUTPUT_DIRECTORY", nullptr);
-    this->SetPropertyDefault("LIBRARY_OUTPUT_DIRECTORY", nullptr);
-    this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", nullptr);
-    this->SetPropertyDefault("PDB_OUTPUT_DIRECTORY", nullptr);
-    this->SetPropertyDefault("COMPILE_PDB_OUTPUT_DIRECTORY", nullptr);
-    this->SetPropertyDefault("Fortran_FORMAT", nullptr);
-    this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", nullptr);
-    this->SetPropertyDefault("Fortran_COMPILER_LAUNCHER", nullptr);
-    this->SetPropertyDefault("GNUtoMS", nullptr);
-    this->SetPropertyDefault("OSX_ARCHITECTURES", nullptr);
-    this->SetPropertyDefault("IOS_INSTALL_COMBINED", nullptr);
-    this->SetPropertyDefault("AUTOMOC", nullptr);
-    this->SetPropertyDefault("AUTOUIC", nullptr);
-    this->SetPropertyDefault("AUTORCC", nullptr);
-    this->SetPropertyDefault("AUTOGEN_ORIGIN_DEPENDS", nullptr);
-    this->SetPropertyDefault("AUTOGEN_PARALLEL", nullptr);
-    this->SetPropertyDefault("AUTOMOC_COMPILER_PREDEFINES", nullptr);
-    this->SetPropertyDefault("AUTOMOC_DEPEND_FILTERS", nullptr);
-    this->SetPropertyDefault("AUTOMOC_MACRO_NAMES", nullptr);
-    this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", nullptr);
-    this->SetPropertyDefault("AUTOUIC_OPTIONS", nullptr);
-    this->SetPropertyDefault("AUTOUIC_SEARCH_PATHS", nullptr);
-    this->SetPropertyDefault("AUTORCC_OPTIONS", nullptr);
-    this->SetPropertyDefault("LINK_DEPENDS_NO_SHARED", nullptr);
-    this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", nullptr);
-    this->SetPropertyDefault("WIN32_EXECUTABLE", nullptr);
-    this->SetPropertyDefault("MACOSX_BUNDLE", nullptr);
-    this->SetPropertyDefault("MACOSX_RPATH", nullptr);
-    this->SetPropertyDefault("NO_SYSTEM_FROM_IMPORTED", nullptr);
-    this->SetPropertyDefault("BUILD_WITH_INSTALL_NAME_DIR", nullptr);
-    this->SetPropertyDefault("C_CLANG_TIDY", nullptr);
-    this->SetPropertyDefault("C_COMPILER_LAUNCHER", nullptr);
-    this->SetPropertyDefault("C_CPPLINT", nullptr);
-    this->SetPropertyDefault("C_CPPCHECK", nullptr);
-    this->SetPropertyDefault("C_INCLUDE_WHAT_YOU_USE", nullptr);
-    this->SetPropertyDefault("LINK_WHAT_YOU_USE", nullptr);
-    this->SetPropertyDefault("C_STANDARD", nullptr);
-    this->SetPropertyDefault("C_STANDARD_REQUIRED", nullptr);
-    this->SetPropertyDefault("C_EXTENSIONS", nullptr);
-    this->SetPropertyDefault("CXX_CLANG_TIDY", nullptr);
-    this->SetPropertyDefault("CXX_COMPILER_LAUNCHER", nullptr);
-    this->SetPropertyDefault("CXX_CPPLINT", nullptr);
-    this->SetPropertyDefault("CXX_CPPCHECK", nullptr);
-    this->SetPropertyDefault("CXX_INCLUDE_WHAT_YOU_USE", nullptr);
-    this->SetPropertyDefault("CXX_STANDARD", nullptr);
-    this->SetPropertyDefault("CXX_STANDARD_REQUIRED", nullptr);
-    this->SetPropertyDefault("CXX_EXTENSIONS", nullptr);
-    this->SetPropertyDefault("CUDA_STANDARD", nullptr);
-    this->SetPropertyDefault("CUDA_STANDARD_REQUIRED", nullptr);
-    this->SetPropertyDefault("CUDA_EXTENSIONS", nullptr);
-    this->SetPropertyDefault("CUDA_COMPILER_LAUNCHER", nullptr);
-    this->SetPropertyDefault("CUDA_SEPARABLE_COMPILATION", nullptr);
-    this->SetPropertyDefault("LINK_SEARCH_START_STATIC", nullptr);
-    this->SetPropertyDefault("LINK_SEARCH_END_STATIC", nullptr);
-    this->SetPropertyDefault("FOLDER", nullptr);
+    InitProperty("ANDROID_API", nullptr);
+    InitProperty("ANDROID_API_MIN", nullptr);
+    InitProperty("ANDROID_ARCH", nullptr);
+    InitProperty("ANDROID_STL_TYPE", nullptr);
+    InitProperty("ANDROID_SKIP_ANT_STEP", nullptr);
+    InitProperty("ANDROID_PROCESS_MAX", nullptr);
+    InitProperty("ANDROID_PROGUARD", nullptr);
+    InitProperty("ANDROID_PROGUARD_CONFIG_PATH", nullptr);
+    InitProperty("ANDROID_SECURE_PROPS_PATH", nullptr);
+    InitProperty("ANDROID_NATIVE_LIB_DIRECTORIES", nullptr);
+    InitProperty("ANDROID_NATIVE_LIB_DEPENDENCIES", nullptr);
+    InitProperty("ANDROID_JAVA_SOURCE_DIR", nullptr);
+    InitProperty("ANDROID_JAR_DIRECTORIES", nullptr);
+    InitProperty("ANDROID_JAR_DEPENDENCIES", nullptr);
+    InitProperty("ANDROID_ASSETS_DIRECTORIES", nullptr);
+    InitProperty("ANDROID_ANT_ADDITIONAL_OPTIONS", nullptr);
+    InitProperty("BUILD_RPATH", nullptr);
+    InitProperty("BUILD_RPATH_USE_ORIGIN", nullptr);
+    InitProperty("INSTALL_NAME_DIR", nullptr);
+    InitProperty("INSTALL_RPATH", "");
+    InitProperty("INSTALL_RPATH_USE_LINK_PATH", "OFF");
+    InitProperty("INTERPROCEDURAL_OPTIMIZATION", nullptr);
+    InitProperty("SKIP_BUILD_RPATH", "OFF");
+    InitProperty("BUILD_WITH_INSTALL_RPATH", "OFF");
+    InitProperty("ARCHIVE_OUTPUT_DIRECTORY", nullptr);
+    InitProperty("LIBRARY_OUTPUT_DIRECTORY", nullptr);
+    InitProperty("RUNTIME_OUTPUT_DIRECTORY", nullptr);
+    InitProperty("PDB_OUTPUT_DIRECTORY", nullptr);
+    InitProperty("COMPILE_PDB_OUTPUT_DIRECTORY", nullptr);
+    InitProperty("Fortran_FORMAT", nullptr);
+    InitProperty("Fortran_MODULE_DIRECTORY", nullptr);
+    InitProperty("Fortran_COMPILER_LAUNCHER", nullptr);
+    InitProperty("GNUtoMS", nullptr);
+    InitProperty("OSX_ARCHITECTURES", nullptr);
+    InitProperty("IOS_INSTALL_COMBINED", nullptr);
+    InitProperty("AUTOMOC", nullptr);
+    InitProperty("AUTOUIC", nullptr);
+    InitProperty("AUTORCC", nullptr);
+    InitProperty("AUTOGEN_ORIGIN_DEPENDS", nullptr);
+    InitProperty("AUTOGEN_PARALLEL", nullptr);
+    InitProperty("AUTOMOC_COMPILER_PREDEFINES", nullptr);
+    InitProperty("AUTOMOC_DEPEND_FILTERS", nullptr);
+    InitProperty("AUTOMOC_MACRO_NAMES", nullptr);
+    InitProperty("AUTOMOC_MOC_OPTIONS", nullptr);
+    InitProperty("AUTOUIC_OPTIONS", nullptr);
+    InitProperty("AUTOUIC_SEARCH_PATHS", nullptr);
+    InitProperty("AUTORCC_OPTIONS", nullptr);
+    InitProperty("LINK_DEPENDS_NO_SHARED", nullptr);
+    InitProperty("LINK_INTERFACE_LIBRARIES", nullptr);
+    InitProperty("WIN32_EXECUTABLE", nullptr);
+    InitProperty("MACOSX_BUNDLE", nullptr);
+    InitProperty("MACOSX_RPATH", nullptr);
+    InitProperty("NO_SYSTEM_FROM_IMPORTED", nullptr);
+    InitProperty("BUILD_WITH_INSTALL_NAME_DIR", nullptr);
+    InitProperty("C_CLANG_TIDY", nullptr);
+    InitProperty("C_COMPILER_LAUNCHER", nullptr);
+    InitProperty("C_CPPLINT", nullptr);
+    InitProperty("C_CPPCHECK", nullptr);
+    InitProperty("C_INCLUDE_WHAT_YOU_USE", nullptr);
+    InitProperty("LINK_WHAT_YOU_USE", nullptr);
+    InitProperty("C_STANDARD", nullptr);
+    InitProperty("C_STANDARD_REQUIRED", nullptr);
+    InitProperty("C_EXTENSIONS", nullptr);
+    InitProperty("CXX_CLANG_TIDY", nullptr);
+    InitProperty("CXX_COMPILER_LAUNCHER", nullptr);
+    InitProperty("CXX_CPPLINT", nullptr);
+    InitProperty("CXX_CPPCHECK", nullptr);
+    InitProperty("CXX_INCLUDE_WHAT_YOU_USE", nullptr);
+    InitProperty("CXX_STANDARD", nullptr);
+    InitProperty("CXX_STANDARD_REQUIRED", nullptr);
+    InitProperty("CXX_EXTENSIONS", nullptr);
+    InitProperty("CUDA_STANDARD", nullptr);
+    InitProperty("CUDA_STANDARD_REQUIRED", nullptr);
+    InitProperty("CUDA_EXTENSIONS", nullptr);
+    InitProperty("CUDA_COMPILER_LAUNCHER", nullptr);
+    InitProperty("CUDA_SEPARABLE_COMPILATION", nullptr);
+    InitProperty("LINK_SEARCH_START_STATIC", nullptr);
+    InitProperty("LINK_SEARCH_END_STATIC", nullptr);
+    InitProperty("FOLDER", nullptr);
 #ifdef __APPLE__
     if (this->GetGlobalGenerator()->IsXcode()) {
-      this->SetPropertyDefault("XCODE_GENERATE_SCHEME", nullptr);
-      this->SetPropertyDefault("XCODE_SCHEME_ADDRESS_SANITIZER", nullptr);
-      this->SetPropertyDefault(
-        "XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN", nullptr);
-      this->SetPropertyDefault("XCODE_SCHEME_THREAD_SANITIZER", nullptr);
-      this->SetPropertyDefault("XCODE_SCHEME_THREAD_SANITIZER_STOP", nullptr);
-      this->SetPropertyDefault("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER",
-                               nullptr);
-      this->SetPropertyDefault(
-        "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP", nullptr);
-      this->SetPropertyDefault("XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER",
-                               nullptr);
-      this->SetPropertyDefault("XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP",
-                               nullptr);
-      this->SetPropertyDefault("XCODE_SCHEME_MALLOC_SCRIBBLE", nullptr);
-      this->SetPropertyDefault("XCODE_SCHEME_MALLOC_GUARD_EDGES", nullptr);
-      this->SetPropertyDefault("XCODE_SCHEME_GUARD_MALLOC", nullptr);
-      this->SetPropertyDefault("XCODE_SCHEME_ZOMBIE_OBJECTS", nullptr);
-      this->SetPropertyDefault("XCODE_SCHEME_MALLOC_STACK", nullptr);
-      this->SetPropertyDefault("XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE",
-                               nullptr);
-      this->SetPropertyDefault("XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS", nullptr);
+      InitProperty("XCODE_GENERATE_SCHEME", nullptr);
+      InitProperty("XCODE_SCHEME_ADDRESS_SANITIZER", nullptr);
+      InitProperty("XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN", nullptr);
+      InitProperty("XCODE_SCHEME_THREAD_SANITIZER", nullptr);
+      InitProperty("XCODE_SCHEME_THREAD_SANITIZER_STOP", nullptr);
+      InitProperty("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER", nullptr);
+      InitProperty("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP", nullptr);
+      InitProperty("XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER", nullptr);
+      InitProperty("XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP", nullptr);
+      InitProperty("XCODE_SCHEME_MALLOC_SCRIBBLE", nullptr);
+      InitProperty("XCODE_SCHEME_MALLOC_GUARD_EDGES", nullptr);
+      InitProperty("XCODE_SCHEME_GUARD_MALLOC", nullptr);
+      InitProperty("XCODE_SCHEME_ZOMBIE_OBJECTS", nullptr);
+      InitProperty("XCODE_SCHEME_MALLOC_STACK", nullptr);
+      InitProperty("XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE", nullptr);
+      InitProperty("XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS", nullptr);
     }
 #endif
   }
@@ -370,7 +378,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
         }
         std::string property = prop;
         property += configUpper;
-        this->SetPropertyDefault(property, nullptr);
+        InitProperty(property, nullptr);
       }
 
       // Initialize per-configuration name postfix property from the
@@ -382,7 +390,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
           impl->TargetType != cmStateEnums::INTERFACE_LIBRARY) {
         std::string property = cmSystemTools::UpperCase(configName);
         property += "_POSTFIX";
-        this->SetPropertyDefault(property, nullptr);
+        InitProperty(property, nullptr);
       }
     }
   }
@@ -420,16 +428,16 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetType() != cmStateEnums::UTILITY) {
-    this->SetPropertyDefault("C_VISIBILITY_PRESET", nullptr);
-    this->SetPropertyDefault("CXX_VISIBILITY_PRESET", nullptr);
-    this->SetPropertyDefault("CUDA_VISIBILITY_PRESET", nullptr);
-    this->SetPropertyDefault("VISIBILITY_INLINES_HIDDEN", nullptr);
+    InitProperty("C_VISIBILITY_PRESET", nullptr);
+    InitProperty("CXX_VISIBILITY_PRESET", nullptr);
+    InitProperty("CUDA_VISIBILITY_PRESET", nullptr);
+    InitProperty("VISIBILITY_INLINES_HIDDEN", nullptr);
   }
 
   if (impl->TargetType == cmStateEnums::EXECUTABLE) {
-    this->SetPropertyDefault("ANDROID_GUI", nullptr);
-    this->SetPropertyDefault("CROSSCOMPILING_EMULATOR", nullptr);
-    this->SetPropertyDefault("ENABLE_EXPORTS", nullptr);
+    InitProperty("ANDROID_GUI", nullptr);
+    InitProperty("CROSSCOMPILING_EMULATOR", nullptr);
+    InitProperty("ENABLE_EXPORTS", nullptr);
   }
   if (impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
       impl->TargetType == cmStateEnums::MODULE_LIBRARY) {
@@ -437,12 +445,12 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
   if (impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
       impl->TargetType == cmStateEnums::EXECUTABLE) {
-    this->SetPropertyDefault("WINDOWS_EXPORT_ALL_SYMBOLS", nullptr);
+    InitProperty("WINDOWS_EXPORT_ALL_SYMBOLS", nullptr);
   }
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetType() != cmStateEnums::UTILITY) {
-    this->SetPropertyDefault("POSITION_INDEPENDENT_CODE", nullptr);
+    InitProperty("POSITION_INDEPENDENT_CODE", nullptr);
   }
 
   // Record current policies for later use.
@@ -458,12 +466,12 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetType() != cmStateEnums::UTILITY) {
-    this->SetPropertyDefault("JOB_POOL_COMPILE", nullptr);
-    this->SetPropertyDefault("JOB_POOL_LINK", nullptr);
+    InitProperty("JOB_POOL_COMPILE", nullptr);
+    InitProperty("JOB_POOL_LINK", nullptr);
   }
 
   if (impl->TargetType <= cmStateEnums::UTILITY) {
-    this->SetPropertyDefault("DOTNET_TARGET_FRAMEWORK_VERSION", nullptr);
+    InitProperty("DOTNET_TARGET_FRAMEWORK_VERSION", nullptr);
   }
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
@@ -484,7 +492,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
           if (assignment != std::string::npos) {
             const std::string propName = vsGlobal + i.substr(0, assignment);
             const std::string propValue = i.substr(assignment + 1);
-            this->SetPropertyDefault(propName, propValue.c_str());
+            InitProperty(propName, propValue.c_str());
           }
         }
       }
@@ -1788,20 +1796,6 @@ std::string cmTarget::ImportedGetFullPath(
     result += "-NOTFOUND";
   }
   return result;
-}
-
-void cmTarget::SetPropertyDefault(const std::string& property,
-                                  const char* default_value)
-{
-  // Compute the name of the variable holding the default value.
-  std::string var = "CMAKE_";
-  var += property;
-
-  if (const char* value = impl->Makefile->GetDefinition(var)) {
-    this->SetProperty(property, value);
-  } else if (default_value) {
-    this->SetProperty(property, default_value);
-  }
 }
 
 bool cmTargetInternals::CheckImportedLibName(std::string const& prop,
