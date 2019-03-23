@@ -188,6 +188,7 @@ public:
   std::vector<cmListFileBacktrace> LinkDirectoriesBacktraces;
   std::vector<std::string> LinkImplementationPropertyEntries;
   std::vector<cmListFileBacktrace> LinkImplementationPropertyBacktraces;
+  cmListFileBacktrace Backtrace;
 };
 
 cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
@@ -365,7 +366,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
 
   // Save the backtrace of target construction.
-  this->Backtrace = impl->Makefile->GetBacktrace();
+  impl->Backtrace = impl->Makefile->GetBacktrace();
 
   if (!this->IsImported()) {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
@@ -508,7 +509,7 @@ std::set<BT<std::string>> const& cmTarget::GetUtilities() const
 
 cmListFileBacktrace const& cmTarget::GetBacktrace() const
 {
-  return this->Backtrace;
+  return impl->Backtrace;
 }
 
 bool cmTarget::IsExecutableWithExports() const

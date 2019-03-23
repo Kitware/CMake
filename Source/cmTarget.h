@@ -321,8 +321,6 @@ private:
   friend class cmTargetInternals;
   friend class cmGeneratorTarget;
   friend class cmTargetTraceDependencies;
-
-  cmListFileBacktrace Backtrace;
 };
 
 typedef std::unordered_map<std::string, cmTarget> cmTargets;
