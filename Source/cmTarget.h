@@ -269,9 +269,6 @@ private:
 private:
   cmTargetInternalPointer impl;
 
-  ///! Return whether or not the target has a DLL import library.
-  bool HasImportLibrary() const;
-
   // Internal representation details.
   friend class cmTargetInternals;
   friend class cmGeneratorTarget;

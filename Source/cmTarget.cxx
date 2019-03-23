@@ -545,13 +545,6 @@ bool cmTarget::IsExecutableWithExports() const
           this->GetPropertyAsBool("ENABLE_EXPORTS"));
 }
 
-bool cmTarget::HasImportLibrary() const
-{
-  return (impl->DLLPlatform &&
-          (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
-           this->IsExecutableWithExports()));
-}
-
 bool cmTarget::IsFrameworkOnApple() const
 {
   return ((this->GetType() == cmStateEnums::SHARED_LIBRARY ||
@@ -1875,7 +1868,9 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   // If we needed to find one of the mapped configurations but did not
   // On a DLL platform there may be only IMPORTED_IMPLIB for a shared
   // library or an executable with exports.
-  bool allowImp = this->HasImportLibrary();
+  bool allowImp = (impl->DLLPlatform &&
+                   (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+                    this->IsExecutableWithExports()));
 
   // If a mapping was found, check its configurations.
   for (std::vector<std::string>::const_iterator mci = mappedConfigs.begin();
