@@ -188,6 +188,8 @@ public:
   std::vector<cmListFileBacktrace> LinkDirectoriesBacktraces;
   std::vector<std::string> LinkImplementationPropertyEntries;
   std::vector<cmListFileBacktrace> LinkImplementationPropertyBacktraces;
+  std::vector<std::pair<cmTarget::TLLSignature, cmListFileContext>>
+    TLLCommands;
   cmListFileBacktrace Backtrace;
 };
 
@@ -738,13 +740,13 @@ bool cmTarget::PushTLLCommandTrace(TLLSignature signature,
                                    cmListFileContext const& lfc)
 {
   bool ret = true;
-  if (!this->TLLCommands.empty()) {
-    if (this->TLLCommands.back().first != signature) {
+  if (!impl->TLLCommands.empty()) {
+    if (impl->TLLCommands.back().first != signature) {
       ret = false;
     }
   }
-  if (this->TLLCommands.empty() || this->TLLCommands.back().second != lfc) {
-    this->TLLCommands.emplace_back(signature, lfc);
+  if (impl->TLLCommands.empty() || impl->TLLCommands.back().second != lfc) {
+    impl->TLLCommands.emplace_back(signature, lfc);
   }
   return ret;
 }
@@ -755,7 +757,7 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
     (sig == cmTarget::KeywordTLLSignature ? "keyword" : "plain");
   s << "The uses of the " << sigString << " signature are here:\n";
   cmStateDirectory cmDir = impl->Makefile->GetStateSnapshot().GetDirectory();
-  for (auto const& cmd : this->TLLCommands) {
+  for (auto const& cmd : impl->TLLCommands) {
     if (cmd.first == sig) {
       cmListFileContext lfc = cmd.second;
       lfc.FilePath = cmDir.ConvertToRelPathIfNotContained(
