@@ -43,8 +43,7 @@ private:
 /** \class cmTarget
  * \brief Represent a library or executable target loaded from a makefile.
  *
- * cmTarget represents a target loaded from
- * a makefile.
+ * cmTarget represents a target loaded from a makefile.
  */
 class cmTarget
 {
@@ -273,9 +272,7 @@ private:
 private:
   cmTargetInternalPointer impl;
 
-  std::string ProcessSourceItemCMP0049(const std::string& s);
-
-  /** Return whether or not the target has a DLL import library.  */
+  ///! Return whether or not the target has a DLL import library.
   bool HasImportLibrary() const;
 
   // Internal representation details.

@@ -205,6 +205,9 @@ public:
   std::vector<std::pair<cmTarget::TLLSignature, cmListFileContext>>
     TLLCommands;
   cmListFileBacktrace Backtrace;
+
+public:
+  std::string ProcessSourceItemCMP0049(const std::string& s);
 };
 
 cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
@@ -607,7 +610,7 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
   for (auto filename : srcs) {
     if (!cmGeneratorExpression::StartsWithGeneratorExpression(filename)) {
       if (!filename.empty()) {
-        filename = this->ProcessSourceItemCMP0049(filename);
+        filename = impl->ProcessSourceItemCMP0049(filename);
         if (filename.empty()) {
           return;
         }
@@ -625,18 +628,18 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
   }
 }
 
-std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
+std::string cmTargetInternals::ProcessSourceItemCMP0049(const std::string& s)
 {
   std::string src = s;
 
   // For backwards compatibility replace variables in source names.
   // This should eventually be removed.
-  impl->Makefile->ExpandVariablesInString(src);
+  this->Makefile->ExpandVariablesInString(src);
   if (src != s) {
     std::ostringstream e;
     bool noMessage = false;
     MessageType messageType = MessageType::AUTHOR_WARNING;
-    switch (impl->Makefile->GetPolicyStatus(cmPolicies::CMP0049)) {
+    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0049)) {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0049) << "\n";
         break;
@@ -650,10 +653,10 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
     }
     if (!noMessage) {
       e << "Legacy variable expansion in source file \"" << s
-        << "\" expanded to \"" << src << "\" in target \"" << this->GetName()
+        << "\" expanded to \"" << src << "\" in target \"" << this->Name
         << "\".  This behavior will be removed in a "
            "future version of CMake.";
-      impl->Makefile->IssueMessage(messageType, e.str());
+      this->Makefile->IssueMessage(messageType, e.str());
       if (messageType == MessageType::FATAL_ERROR) {
         return "";
       }
@@ -664,7 +667,7 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
 
 cmSourceFile* cmTarget::AddSourceCMP0049(const std::string& s)
 {
-  std::string src = this->ProcessSourceItemCMP0049(s);
+  std::string src = impl->ProcessSourceItemCMP0049(s);
   if (!s.empty() && src.empty()) {
     return nullptr;
   }
