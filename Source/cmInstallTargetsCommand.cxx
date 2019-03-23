@@ -40,7 +40,7 @@ bool cmInstallTargetsCommand::InitialPass(std::vector<std::string> const& args,
     } else {
       cmTargets::iterator ti = tgts.find(*s);
       if (ti != tgts.end()) {
-        ti->second.SetInstallPath(args[0].c_str());
+        ti->second.SetInstallPath(args[0]);
         ti->second.SetRuntimeInstallPath(runtime_dir.c_str());
         ti->second.SetHaveInstallRule(true);
       } else {

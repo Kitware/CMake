@@ -154,8 +154,8 @@ public:
    * Set the path where this target should be installed. This is relative to
    * INSTALL_PREFIX
    */
-  std::string GetInstallPath() const { return this->InstallPath; }
-  void SetInstallPath(const char* name) { this->InstallPath = name; }
+  std::string const& GetInstallPath() const;
+  void SetInstallPath(std::string const& name);
 
   /**
    * Set the path where this target (if it has a runtime part) should be
@@ -297,7 +297,6 @@ private:
 
 private:
   bool IsGeneratorProvided;
-  std::string InstallPath;
   std::string RuntimeInstallPath;
   std::vector<cmCustomCommand> PreBuildCommands;
   std::vector<cmCustomCommand> PreLinkCommands;

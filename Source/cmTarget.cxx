@@ -169,6 +169,7 @@ public:
   cmMakefile* Makefile;
   cmPolicies::PolicyMap PolicyMap;
   std::string Name;
+  std::string InstallPath;
   cmPropertyMap Properties;
   std::set<BT<std::string>> Utilities;
   std::set<std::string> SystemIncludeDirectories;
@@ -771,6 +772,16 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
       s << " * " << lfc << std::endl;
     }
   }
+}
+
+std::string const& cmTarget::GetInstallPath() const
+{
+  return impl->InstallPath;
+}
+
+void cmTarget::SetInstallPath(std::string const& name)
+{
+  impl->InstallPath = name;
 }
 
 cmTarget::LinkLibraryVectorType const& cmTarget::GetOriginalLinkLibraries()
