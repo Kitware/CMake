@@ -170,6 +170,7 @@ public:
   cmPolicies::PolicyMap PolicyMap;
   std::string Name;
   std::string InstallPath;
+  std::string RuntimeInstallPath;
   cmPropertyMap Properties;
   std::set<BT<std::string>> Utilities;
   std::set<std::string> SystemIncludeDirectories;
@@ -782,6 +783,16 @@ std::string const& cmTarget::GetInstallPath() const
 void cmTarget::SetInstallPath(std::string const& name)
 {
   impl->InstallPath = name;
+}
+
+std::string const& cmTarget::GetRuntimeInstallPath() const
+{
+  return impl->RuntimeInstallPath;
+}
+
+void cmTarget::SetRuntimeInstallPath(std::string const& name)
+{
+  impl->RuntimeInstallPath = name;
 }
 
 cmTarget::LinkLibraryVectorType const& cmTarget::GetOriginalLinkLibraries()
