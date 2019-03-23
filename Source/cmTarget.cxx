@@ -164,6 +164,7 @@ const char* cmTargetPropertyComputer::GetSources<cmTarget>(
 class cmTargetInternals
 {
 public:
+  cmStateEnums::TargetType TargetType;
   std::vector<std::string> IncludeDirectoriesEntries;
   std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
   std::vector<std::string> CompileOptionsEntries;
@@ -186,9 +187,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
                    Visibility vis, cmMakefile* mf)
 {
   assert(mf);
+  impl->TargetType = type;
   this->IsGeneratorProvided = false;
   this->Name = name;
-  this->TargetTypeValue = type;
   this->Makefile = mf;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
@@ -333,7 +334,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       for (auto const& prop : configProps) {
         // Interface libraries have no output locations, so honor only
         // the configuration map.
-        if (this->TargetTypeValue == cmStateEnums::INTERFACE_LIBRARY &&
+        if (impl->TargetType == cmStateEnums::INTERFACE_LIBRARY &&
             strcmp(prop, "MAP_IMPORTED_CONFIG_") != 0) {
           continue;
         }
@@ -347,8 +348,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       // compatibility with previous CMake versions in which executables
       // did not support this variable.  Projects may still specify the
       // property directly.
-      if (this->TargetTypeValue != cmStateEnums::EXECUTABLE &&
-          this->TargetTypeValue != cmStateEnums::INTERFACE_LIBRARY) {
+      if (impl->TargetType != cmStateEnums::EXECUTABLE &&
+          impl->TargetType != cmStateEnums::INTERFACE_LIBRARY) {
         std::string property = cmSystemTools::UpperCase(configName);
         property += "_POSTFIX";
         this->SetPropertyDefault(property, nullptr);
@@ -395,17 +396,17 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("VISIBILITY_INLINES_HIDDEN", nullptr);
   }
 
-  if (this->TargetTypeValue == cmStateEnums::EXECUTABLE) {
+  if (impl->TargetType == cmStateEnums::EXECUTABLE) {
     this->SetPropertyDefault("ANDROID_GUI", nullptr);
     this->SetPropertyDefault("CROSSCOMPILING_EMULATOR", nullptr);
     this->SetPropertyDefault("ENABLE_EXPORTS", nullptr);
   }
-  if (this->TargetTypeValue == cmStateEnums::SHARED_LIBRARY ||
-      this->TargetTypeValue == cmStateEnums::MODULE_LIBRARY) {
+  if (impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
+      impl->TargetType == cmStateEnums::MODULE_LIBRARY) {
     this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
   }
-  if (this->TargetTypeValue == cmStateEnums::SHARED_LIBRARY ||
-      this->TargetTypeValue == cmStateEnums::EXECUTABLE) {
+  if (impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
+      impl->TargetType == cmStateEnums::EXECUTABLE) {
     this->SetPropertyDefault("WINDOWS_EXPORT_ALL_SYMBOLS", nullptr);
   }
 
@@ -417,7 +418,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   // Record current policies for later use.
   this->Makefile->RecordPolicies(this->PolicyMap);
 
-  if (this->TargetTypeValue == cmStateEnums::INTERFACE_LIBRARY) {
+  if (impl->TargetType == cmStateEnums::INTERFACE_LIBRARY) {
     // This policy is checked in a few conditions. The properties relevant
     // to the policy are always ignored for cmStateEnums::INTERFACE_LIBRARY
     // targets,
@@ -431,7 +432,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->SetPropertyDefault("JOB_POOL_LINK", nullptr);
   }
 
-  if (this->TargetTypeValue <= cmStateEnums::UTILITY) {
+  if (impl->TargetType <= cmStateEnums::UTILITY) {
     this->SetPropertyDefault("DOTNET_TARGET_FRAMEWORK_VERSION", nullptr);
   }
 
@@ -459,6 +460,11 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       }
     }
   }
+}
+
+cmStateEnums::TargetType cmTarget::GetType() const
+{
+  return impl->TargetType;
 }
 
 cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
@@ -772,8 +778,8 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
   // may be purposefully duplicated to handle recursive dependencies,
   // and we removing one instance will break the link line. Duplicates
   // will be appropriately eliminated at emit time.
-  if (this->TargetTypeValue >= cmStateEnums::STATIC_LIBRARY &&
-      this->TargetTypeValue <= cmStateEnums::MODULE_LIBRARY &&
+  if (impl->TargetType >= cmStateEnums::STATIC_LIBRARY &&
+      impl->TargetType <= cmStateEnums::MODULE_LIBRARY &&
       (this->GetPolicyStatusCMP0073() == cmPolicies::OLD ||
        this->GetPolicyStatusCMP0073() == cmPolicies::WARN)) {
     std::string targetEntry = this->Name;

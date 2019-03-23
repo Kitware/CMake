@@ -66,10 +66,8 @@ public:
     POST_BUILD
   };
 
-  /**
-   * Return the type of target.
-   */
-  cmStateEnums::TargetType GetType() const { return this->TargetTypeValue; }
+  ///! Return the type of target.
+  cmStateEnums::TargetType GetType() const;
 
   cmGlobalGenerator* GetGlobalGenerator() const;
 
@@ -320,7 +318,6 @@ private:
   LinkLibraryVectorType OriginalLinkLibraries;
   cmMakefile* Makefile;
   cmTargetInternalPointer impl;
-  cmStateEnums::TargetType TargetTypeValue;
   bool HaveInstallRule;
   bool DLLPlatform;
   bool IsAndroid;
