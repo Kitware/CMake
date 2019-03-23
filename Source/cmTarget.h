@@ -256,6 +256,9 @@ public:
                                   cmStateEnums::ArtifactType artifact) const;
 
 private:
+  // Internal representation details.
+  friend class cmGeneratorTarget;
+
   const char* GetSuffixVariableInternal(
     cmStateEnums::ArtifactType artifact) const;
   const char* GetPrefixVariableInternal(
@@ -268,11 +271,6 @@ private:
 
 private:
   cmTargetInternalPointer impl;
-
-  // Internal representation details.
-  friend class cmTargetInternals;
-  friend class cmGeneratorTarget;
-  friend class cmTargetTraceDependencies;
 };
 
 typedef std::unordered_map<std::string, cmTarget> cmTargets;
