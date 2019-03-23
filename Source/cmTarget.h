@@ -190,18 +190,16 @@ public:
   bool GetMappedConfig(std::string const& desired_config, const char** loc,
                        const char** imp, std::string& suffix) const;
 
-  /** Return whether this target is an executable with symbol exports
-      enabled.  */
+  ///! Return whether this target is an executable with symbol exports enabled.
   bool IsExecutableWithExports() const;
 
-  /** Return whether this target is a shared library Framework on
-      Apple.  */
+  ///! Return whether this target is a shared library Framework on Apple.
   bool IsFrameworkOnApple() const;
 
-  /** Return whether this target is an executable Bundle on Apple.  */
+  ///! Return whether this target is an executable Bundle on Apple.
   bool IsAppBundleOnApple() const;
 
-  /** Get a backtrace from the creation of the target.  */
+  ///! Get a backtrace from the creation of the target.
   cmListFileBacktrace const& GetBacktrace() const;
 
   void InsertInclude(std::string const& entry, cmListFileBacktrace const& bt,
@@ -247,13 +245,13 @@ public:
   cmStringRange GetLinkImplementationEntries() const;
   cmBacktraceRange GetLinkImplementationBacktraces() const;
 
+  std::string ImportedGetFullPath(const std::string& config,
+                                  cmStateEnums::ArtifactType artifact) const;
+
   struct StrictTargetComparison
   {
     bool operator()(cmTarget const* t1, cmTarget const* t2) const;
   };
-
-  std::string ImportedGetFullPath(const std::string& config,
-                                  cmStateEnums::ArtifactType artifact) const;
 
 private:
   // Internal representation details.
