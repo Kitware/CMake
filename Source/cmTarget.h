@@ -319,7 +319,7 @@ private:
   std::vector<std::pair<TLLSignature, cmListFileContext>> TLLCommands;
   LinkLibraryVectorType OriginalLinkLibraries;
   cmMakefile* Makefile;
-  cmTargetInternalPointer Internal;
+  cmTargetInternalPointer impl;
   cmStateEnums::TargetType TargetTypeValue;
   bool HaveInstallRule;
   bool DLLPlatform;
