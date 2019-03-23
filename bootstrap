@@ -269,7 +269,6 @@ CMAKE_CXX_SOURCES="\
   cmCacheManager \
   cmCommand \
   cmCommandArgumentParserHelper \
-  cmCommandArgumentsHelper \
   cmCommands \
   cmCommonTargetGenerator \
   cmComputeComponentGraph \

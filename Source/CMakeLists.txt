@@ -445,8 +445,6 @@ set(SRCS
   cmCMakeMinimumRequired.h
   cmCMakePolicyCommand.cxx
   cmCMakePolicyCommand.h
-  cmCommandArgumentsHelper.cxx
-  cmCommandArgumentsHelper.h
   cmConditionEvaluator.cxx
   cmConditionEvaluator.h
   cmConfigureFileCommand.cxx
