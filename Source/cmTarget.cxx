@@ -13,6 +13,7 @@
 #include <unordered_set>
 
 #include "cmAlgorithms.h"
+#include "cmCustomCommand.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -173,6 +174,9 @@ public:
   std::string RuntimeInstallPath;
   cmPropertyMap Properties;
   std::set<BT<std::string>> Utilities;
+  std::vector<cmCustomCommand> PreBuildCommands;
+  std::vector<cmCustomCommand> PreLinkCommands;
+  std::vector<cmCustomCommand> PostBuildCommands;
   std::set<std::string> SystemIncludeDirectories;
   cmTarget::LinkLibraryVectorType OriginalLinkLibraries;
   std::vector<std::string> IncludeDirectoriesEntries;
@@ -548,6 +552,36 @@ bool cmTarget::IsAppBundleOnApple() const
   return (this->GetType() == cmStateEnums::EXECUTABLE &&
           impl->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("MACOSX_BUNDLE"));
+}
+
+std::vector<cmCustomCommand> const& cmTarget::GetPreBuildCommands() const
+{
+  return impl->PreBuildCommands;
+}
+
+void cmTarget::AddPreBuildCommand(cmCustomCommand const& cmd)
+{
+  impl->PreBuildCommands.push_back(cmd);
+}
+
+std::vector<cmCustomCommand> const& cmTarget::GetPreLinkCommands() const
+{
+  return impl->PreLinkCommands;
+}
+
+void cmTarget::AddPreLinkCommand(cmCustomCommand const& cmd)
+{
+  impl->PreLinkCommands.push_back(cmd);
+}
+
+std::vector<cmCustomCommand> const& cmTarget::GetPostBuildCommands() const
+{
+  return impl->PostBuildCommands;
+}
+
+void cmTarget::AddPostBuildCommand(cmCustomCommand const& cmd)
+{
+  impl->PostBuildCommands.push_back(cmd);
 }
 
 void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)

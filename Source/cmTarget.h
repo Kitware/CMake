@@ -13,12 +13,12 @@
 #include <vector>
 
 #include "cmAlgorithms.h"
-#include "cmCustomCommand.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmTargetLinkLibraryType.h"
 
+class cmCustomCommand;
 class cmGlobalGenerator;
 class cmMakefile;
 class cmMessenger;
@@ -94,33 +94,17 @@ public:
 
 #undef DECLARE_TARGET_POLICY
 
-  /**
-   * Get the list of the custom commands for this target
-   */
-  std::vector<cmCustomCommand> const& GetPreBuildCommands() const
-  {
-    return this->PreBuildCommands;
-  }
-  std::vector<cmCustomCommand> const& GetPreLinkCommands() const
-  {
-    return this->PreLinkCommands;
-  }
-  std::vector<cmCustomCommand> const& GetPostBuildCommands() const
-  {
-    return this->PostBuildCommands;
-  }
-  void AddPreBuildCommand(cmCustomCommand const& cmd)
-  {
-    this->PreBuildCommands.push_back(cmd);
-  }
-  void AddPreLinkCommand(cmCustomCommand const& cmd)
-  {
-    this->PreLinkCommands.push_back(cmd);
-  }
-  void AddPostBuildCommand(cmCustomCommand const& cmd)
-  {
-    this->PostBuildCommands.push_back(cmd);
-  }
+  ///! Get the list of the PRE_BUILD custom commands for this target
+  std::vector<cmCustomCommand> const& GetPreBuildCommands() const;
+  void AddPreBuildCommand(cmCustomCommand const& cmd);
+
+  ///! Get the list of the PRE_LINK custom commands for this target
+  std::vector<cmCustomCommand> const& GetPreLinkCommands() const;
+  void AddPreLinkCommand(cmCustomCommand const& cmd);
+
+  ///! Get the list of the POST_BUILD custom commands for this target
+  std::vector<cmCustomCommand> const& GetPostBuildCommands() const;
+  void AddPostBuildCommand(cmCustomCommand const& cmd);
 
   ///! Add sources to the target.
   void AddSources(std::vector<std::string> const& srcs);
@@ -291,9 +275,6 @@ private:
 
 private:
   bool IsGeneratorProvided;
-  std::vector<cmCustomCommand> PreBuildCommands;
-  std::vector<cmCustomCommand> PreLinkCommands;
-  std::vector<cmCustomCommand> PostBuildCommands;
   cmTargetInternalPointer impl;
   bool HaveInstallRule;
   bool DLLPlatform;

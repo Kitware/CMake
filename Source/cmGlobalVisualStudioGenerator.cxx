@@ -12,6 +12,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmCallVisualStudioMacro.h"
+#include "cmCustomCommand.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudioGenerator.h"
