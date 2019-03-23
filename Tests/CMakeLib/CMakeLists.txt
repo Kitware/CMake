@@ -5,6 +5,7 @@ include_directories(
   )
 
 set(CMakeLib_TESTS
+  testArgumentParser.cxx
   testGeneratedFileStream.cxx
   testRST.cxx
   testRange.cxx

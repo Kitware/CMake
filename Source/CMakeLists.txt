@@ -143,6 +143,8 @@ set(SRCS
   cmAffinity.cxx
   cmAffinity.h
   cmArchiveWrite.cxx
+  cmArgumentParser.cxx
+  cmArgumentParser.h
   cmBase32.cxx
   cmCacheManager.cxx
   cmCacheManager.h

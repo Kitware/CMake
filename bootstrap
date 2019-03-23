@@ -260,6 +260,7 @@ CMAKE_CXX_SOURCES="\
   cmAddLibraryCommand \
   cmAddSubDirectoryCommand \
   cmAddTestCommand \
+  cmArgumentParser \
   cmBreakCommand \
   cmBuildCommand \
   cmCMakeMinimumRequired \
