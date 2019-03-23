@@ -167,6 +167,7 @@ class cmTargetInternals
 public:
   cmStateEnums::TargetType TargetType;
   cmMakefile* Makefile;
+  cmPolicies::PolicyMap PolicyMap;
   cmPropertyMap Properties;
   std::set<BT<std::string>> Utilities;
   std::set<std::string> SystemIncludeDirectories;
@@ -422,14 +423,14 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
 
   // Record current policies for later use.
-  impl->Makefile->RecordPolicies(this->PolicyMap);
+  impl->Makefile->RecordPolicies(impl->PolicyMap);
 
   if (impl->TargetType == cmStateEnums::INTERFACE_LIBRARY) {
     // This policy is checked in a few conditions. The properties relevant
     // to the policy are always ignored for cmStateEnums::INTERFACE_LIBRARY
     // targets,
     // so ensure that the conditions don't lead to nonsense.
-    this->PolicyMap.Set(cmPolicies::CMP0022, cmPolicies::NEW);
+    impl->PolicyMap.Set(cmPolicies::CMP0022, cmPolicies::NEW);
   }
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
@@ -476,6 +477,17 @@ cmStateEnums::TargetType cmTarget::GetType() const
 cmMakefile* cmTarget::GetMakefile() const
 {
   return impl->Makefile;
+}
+
+cmPolicies::PolicyMap const& cmTarget::GetPolicyMap() const
+{
+  return impl->PolicyMap;
+}
+
+cmPolicies::PolicyStatus cmTarget::GetPolicyStatus(
+  cmPolicies::PolicyID policy) const
+{
+  return impl->PolicyMap.Get(policy);
 }
 
 cmGlobalGenerator* cmTarget::GetGlobalGenerator() const

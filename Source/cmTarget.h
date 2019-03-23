@@ -78,10 +78,16 @@ public:
   ///! Set/Get the name of the target
   const std::string& GetName() const { return this->Name; }
 
+  ///! Get the policy map
+  cmPolicies::PolicyMap const& GetPolicyMap() const;
+
+  ///! Get policy status
+  cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID policy) const;
+
 #define DECLARE_TARGET_POLICY(POLICY)                                         \
   cmPolicies::PolicyStatus GetPolicyStatus##POLICY() const                    \
   {                                                                           \
-    return this->PolicyMap.Get(cmPolicies::POLICY);                           \
+    return this->GetPolicyStatus(cmPolicies::POLICY);                         \
   }
 
   CM_FOR_EACH_TARGET_POLICY(DECLARE_TARGET_POLICY)
@@ -291,7 +297,6 @@ private:
 
 private:
   bool IsGeneratorProvided;
-  cmPolicies::PolicyMap PolicyMap;
   std::string Name;
   std::string InstallPath;
   std::string RuntimeInstallPath;
