@@ -151,14 +151,14 @@ public:
   /**
    * Get/Set whether there is an install rule for this target.
    */
-  bool GetHaveInstallRule() const { return this->HaveInstallRule; }
-  void SetHaveInstallRule(bool h) { this->HaveInstallRule = h; }
+  bool GetHaveInstallRule() const;
+  void SetHaveInstallRule(bool hir);
 
   /**
    * Get/Set whether this target was auto-created by a generator.
    */
-  bool GetIsGeneratorProvided() const { return this->IsGeneratorProvided; }
-  void SetIsGeneratorProvided(bool igp) { this->IsGeneratorProvided = igp; }
+  bool GetIsGeneratorProvided() const;
+  void SetIsGeneratorProvided(bool igp);
 
   /**
    * Add a utility on which this project depends. A utility is an executable
@@ -185,11 +185,8 @@ public:
   ///! Get all properties
   cmPropertyMap const& GetProperties() const;
 
-  bool IsImported() const { return this->IsImportedTarget; }
-  bool IsImportedGloballyVisible() const
-  {
-    return this->ImportedGloballyVisible;
-  }
+  bool IsImported() const;
+  bool IsImportedGloballyVisible() const;
 
   bool GetMappedConfig(std::string const& desired_config, const char** loc,
                        const char** imp, std::string& suffix) const;
@@ -274,14 +271,7 @@ private:
                             std::string const& value) const;
 
 private:
-  bool IsGeneratorProvided;
   cmTargetInternalPointer impl;
-  bool HaveInstallRule;
-  bool DLLPlatform;
-  bool IsAndroid;
-  bool IsImportedTarget;
-  bool ImportedGloballyVisible;
-  bool BuildInterfaceIncludesAppended;
 
   std::string ProcessSourceItemCMP0049(const std::string& s);
 

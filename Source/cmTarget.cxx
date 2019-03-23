@@ -173,6 +173,13 @@ public:
   std::string InstallPath;
   std::string RuntimeInstallPath;
   cmPropertyMap Properties;
+  bool IsGeneratorProvided;
+  bool HaveInstallRule;
+  bool DLLPlatform;
+  bool IsAndroid;
+  bool IsImportedTarget;
+  bool ImportedGloballyVisible;
+  bool BuildInterfaceIncludesAppended;
   std::set<BT<std::string>> Utilities;
   std::vector<cmCustomCommand> PreBuildCommands;
   std::vector<cmCustomCommand> PreLinkCommands;
@@ -207,21 +214,21 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   impl->TargetType = type;
   impl->Makefile = mf;
   impl->Name = name;
-  this->IsGeneratorProvided = false;
-  this->HaveInstallRule = false;
-  this->DLLPlatform = false;
-  this->IsAndroid = false;
-  this->IsImportedTarget =
+  impl->IsGeneratorProvided = false;
+  impl->HaveInstallRule = false;
+  impl->DLLPlatform = false;
+  impl->IsAndroid = false;
+  impl->IsImportedTarget =
     (vis == VisibilityImported || vis == VisibilityImportedGlobally);
-  this->ImportedGloballyVisible = vis == VisibilityImportedGlobally;
-  this->BuildInterfaceIncludesAppended = false;
+  impl->ImportedGloballyVisible = vis == VisibilityImportedGlobally;
+  impl->BuildInterfaceIncludesAppended = false;
 
   // Check whether this is a DLL platform.
-  this->DLLPlatform =
+  impl->DLLPlatform =
     !impl->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
 
   // Check whether we are targeting an Android platform.
-  this->IsAndroid =
+  impl->IsAndroid =
     (impl->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Android");
 
   // Setup default property values.
@@ -534,7 +541,7 @@ bool cmTarget::IsExecutableWithExports() const
 
 bool cmTarget::HasImportLibrary() const
 {
-  return (this->DLLPlatform &&
+  return (impl->DLLPlatform &&
           (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
            this->IsExecutableWithExports()));
 }
@@ -827,6 +834,26 @@ std::string const& cmTarget::GetRuntimeInstallPath() const
 void cmTarget::SetRuntimeInstallPath(std::string const& name)
 {
   impl->RuntimeInstallPath = name;
+}
+
+bool cmTarget::GetHaveInstallRule() const
+{
+  return impl->HaveInstallRule;
+}
+
+void cmTarget::SetHaveInstallRule(bool hir)
+{
+  impl->HaveInstallRule = hir;
+}
+
+bool cmTarget::GetIsGeneratorProvided() const
+{
+  return impl->IsGeneratorProvided;
+}
+
+void cmTarget::SetIsGeneratorProvided(bool igp)
+{
+  impl->IsGeneratorProvided = igp;
 }
 
 cmTarget::LinkLibraryVectorType const& cmTarget::GetOriginalLinkLibraries()
@@ -1132,8 +1159,8 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       return;
     }
     /* no need to change anything if value does not change */
-    if (!this->ImportedGloballyVisible) {
-      this->ImportedGloballyVisible = true;
+    if (!impl->ImportedGloballyVisible) {
+      impl->ImportedGloballyVisible = true;
       this->GetGlobalGenerator()->IndexTarget(this);
     }
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME") &&
@@ -1251,10 +1278,10 @@ void cmTarget::AppendBuildInterfaceIncludes()
       !this->IsExecutableWithExports()) {
     return;
   }
-  if (this->BuildInterfaceIncludesAppended) {
+  if (impl->BuildInterfaceIncludesAppended) {
     return;
   }
-  this->BuildInterfaceIncludesAppended = true;
+  impl->BuildInterfaceIncludesAppended = true;
 
   if (impl->Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE")) {
     std::string dirs = impl->Makefile->GetCurrentBinaryDirectory();
@@ -1613,6 +1640,16 @@ cmPropertyMap const& cmTarget::GetProperties() const
   return impl->Properties;
 }
 
+bool cmTarget::IsImported() const
+{
+  return impl->IsImportedTarget;
+}
+
+bool cmTarget::IsImportedGloballyVisible() const
+{
+  return impl->ImportedGloballyVisible;
+}
+
 const char* cmTarget::GetSuffixVariableInternal(
   cmStateEnums::ArtifactType artifact) const
 {
@@ -1640,7 +1677,7 @@ const char* cmTarget::GetSuffixVariableInternal(
         case cmStateEnums::RuntimeBinaryArtifact:
           // Android GUI application packages store the native
           // binary as a shared library.
-          return (this->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
+          return (impl->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
                     ? "CMAKE_SHARED_LIBRARY_SUFFIX"
                     : "CMAKE_EXECUTABLE_SUFFIX");
         case cmStateEnums::ImportLibraryArtifact:
@@ -1680,7 +1717,7 @@ const char* cmTarget::GetPrefixVariableInternal(
         case cmStateEnums::RuntimeBinaryArtifact:
           // Android GUI application packages store the native
           // binary as a shared library.
-          return (this->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
+          return (impl->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
                     ? "CMAKE_SHARED_LIBRARY_PREFIX"
                     : "");
         case cmStateEnums::ImportLibraryArtifact:
