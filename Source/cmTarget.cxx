@@ -168,6 +168,7 @@ public:
   cmStateEnums::TargetType TargetType;
   cmMakefile* Makefile;
   cmPolicies::PolicyMap PolicyMap;
+  std::string Name;
   cmPropertyMap Properties;
   std::set<BT<std::string>> Utilities;
   std::set<std::string> SystemIncludeDirectories;
@@ -199,8 +200,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   assert(mf);
   impl->TargetType = type;
   impl->Makefile = mf;
+  impl->Name = name;
   this->IsGeneratorProvided = false;
-  this->Name = name;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsAndroid = false;
@@ -485,6 +486,11 @@ cmMakefile* cmTarget::GetMakefile() const
 cmPolicies::PolicyMap const& cmTarget::GetPolicyMap() const
 {
   return impl->PolicyMap;
+}
+
+const std::string& cmTarget::GetName() const
+{
+  return impl->Name;
 }
 
 cmPolicies::PolicyStatus cmTarget::GetPolicyStatus(
@@ -800,7 +806,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
       (tgt &&
        (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
         tgt->GetType() == cmStateEnums::OBJECT_LIBRARY)) ||
-      (this->Name == lib)) {
+      (impl->Name == lib)) {
     return;
   }
 
@@ -818,7 +824,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
       impl->TargetType <= cmStateEnums::MODULE_LIBRARY &&
       (this->GetPolicyStatusCMP0073() == cmPolicies::OLD ||
        this->GetPolicyStatusCMP0073() == cmPolicies::WARN)) {
-    std::string targetEntry = this->Name;
+    std::string targetEntry = impl->Name;
     targetEntry += "_LIB_DEPENDS";
     std::string dependencies;
     const char* old_val = mf.GetDefinition(targetEntry);
@@ -978,13 +984,13 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   if (prop == propEXPORT_NAME && this->IsImported()) {
     std::ostringstream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
-      << this->Name << "\")\n";
+      << impl->Name << "\")\n";
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == propSOURCES && this->IsImported()) {
     std::ostringstream e;
-    e << "SOURCES property can't be set on imported targets (\"" << this->Name
+    e << "SOURCES property can't be set on imported targets (\"" << impl->Name
       << "\")\n";
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
@@ -992,7 +998,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   if (prop == propIMPORTED_GLOBAL && !this->IsImported()) {
     std::ostringstream e;
     e << "IMPORTED_GLOBAL property can't be set on non-imported targets (\""
-      << this->Name << "\")\n";
+      << impl->Name << "\")\n";
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
@@ -1065,7 +1071,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     if (!cmSystemTools::IsOn(value)) {
       std::ostringstream e;
       e << "IMPORTED_GLOBAL property can't be set to FALSE on targets (\""
-        << this->Name << "\")\n";
+        << impl->Name << "\")\n";
       impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return;
     }
@@ -1082,7 +1088,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     std::ostringstream e;
     e << "CUDA_PTX_COMPILATION property can only be applied to OBJECT "
          "targets (\""
-      << this->Name << "\")\n";
+      << impl->Name << "\")\n";
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   } else {
@@ -1107,13 +1113,13 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
   if (prop == "EXPORT_NAME" && this->IsImported()) {
     std::ostringstream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
-      << this->Name << "\")\n";
+      << impl->Name << "\")\n";
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
   if (prop == "SOURCES" && this->IsImported()) {
     std::ostringstream e;
-    e << "SOURCES property can't be set on imported targets (\"" << this->Name
+    e << "SOURCES property can't be set on imported targets (\"" << impl->Name
       << "\")\n";
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
@@ -1122,7 +1128,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     std::ostringstream e;
     e << "IMPORTED_GLOBAL property can't be appended, only set on imported "
          "targets (\""
-      << this->Name << "\")\n";
+      << impl->Name << "\")\n";
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }

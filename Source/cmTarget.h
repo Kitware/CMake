@@ -76,7 +76,7 @@ public:
   cmGlobalGenerator* GetGlobalGenerator() const;
 
   ///! Set/Get the name of the target
-  const std::string& GetName() const { return this->Name; }
+  const std::string& GetName() const;
 
   ///! Get the policy map
   cmPolicies::PolicyMap const& GetPolicyMap() const;
@@ -297,7 +297,6 @@ private:
 
 private:
   bool IsGeneratorProvided;
-  std::string Name;
   std::string InstallPath;
   std::string RuntimeInstallPath;
   std::vector<cmCustomCommand> PreBuildCommands;
