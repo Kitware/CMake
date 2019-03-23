@@ -184,16 +184,14 @@ public:
   bool GetIsGeneratorProvided() const { return this->IsGeneratorProvided; }
   void SetIsGeneratorProvided(bool igp) { this->IsGeneratorProvided = igp; }
 
-  /** Add a utility on which this project depends. A utility is an executable
+  /**
+   * Add a utility on which this project depends. A utility is an executable
    * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
    * commands. It is not a full path nor does it have an extension.
    */
-  void AddUtility(std::string const& u, cmMakefile* mf = nullptr);
+  void AddUtility(std::string const& name, cmMakefile* mf = nullptr);
   ///! Get the utilities used by this target
-  std::set<BT<std::string>> const& GetUtilities() const
-  {
-    return this->Utilities;
-  }
+  std::set<BT<std::string>> const& GetUtilities() const;
 
   ///! Set/Get a property of this target file
   void SetProperty(const std::string& prop, const char* value);
@@ -301,7 +299,6 @@ private:
 
 private:
   bool IsGeneratorProvided;
-  std::set<BT<std::string>> Utilities;
   cmPolicies::PolicyMap PolicyMap;
   std::string Name;
   std::string InstallPath;

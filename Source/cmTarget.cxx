@@ -168,6 +168,7 @@ public:
   cmStateEnums::TargetType TargetType;
   cmMakefile* Makefile;
   cmPropertyMap Properties;
+  std::set<BT<std::string>> Utilities;
   std::set<std::string> SystemIncludeDirectories;
   std::vector<std::string> IncludeDirectoriesEntries;
   std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
@@ -481,10 +482,15 @@ cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
   return impl->Makefile->GetGlobalGenerator();
 }
 
-void cmTarget::AddUtility(std::string const& u, cmMakefile* mf)
+void cmTarget::AddUtility(std::string const& name, cmMakefile* mf)
 {
-  BT<std::string> util(u, mf ? mf->GetBacktrace() : cmListFileBacktrace());
-  this->Utilities.insert(util);
+  impl->Utilities.insert(
+    BT<std::string>(name, mf ? mf->GetBacktrace() : cmListFileBacktrace()));
+}
+
+std::set<BT<std::string>> const& cmTarget::GetUtilities() const
+{
+  return impl->Utilities;
 }
 
 cmListFileBacktrace const& cmTarget::GetBacktrace() const
@@ -1461,12 +1467,12 @@ const char* cmTarget::GetProperty(const std::string& prop) const
       return output.c_str();
     }
     if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
-      if (this->Utilities.empty()) {
+      if (impl->Utilities.empty()) {
         return nullptr;
       }
 
       static std::string output;
-      output = cmJoin(this->Utilities, ";");
+      output = cmJoin(impl->Utilities, ";");
       return output.c_str();
     }
     if (prop == propIMPORTED) {
