@@ -76,6 +76,7 @@ private:
   void WriteDotNetReference(Elem& e1, std::string const& ref,
                             std::string const& hint,
                             std::string const& config);
+  void WriteImports(Elem& e0);
   void WriteDotNetReferenceCustomTags(Elem& e2, std::string const& ref);
   void WriteEmbeddedResourceGroup(Elem& e0);
   void WriteWinRTReferences(Elem& e0);
