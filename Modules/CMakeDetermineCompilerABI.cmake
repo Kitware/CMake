@@ -51,6 +51,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${BIN}"
       COPY_FILE_ERROR _copy_error
+      __CMAKE_INTERNAL ABI
       )
 
     # Restore original LC_ALL, LC_MESSAGES, and LANG
