@@ -12,6 +12,29 @@
 
 class cmExecutionStatus;
 
+cmCTestSubmitCommand::cmCTestSubmitCommand()
+{
+  this->PartsMentioned = false;
+  this->FilesMentioned = false;
+  this->InternalTest = false;
+  this->RetryCount = "";
+  this->RetryDelay = "";
+  this->CDashUpload = false;
+  this->Arguments[cts_BUILD_ID] = "BUILD_ID";
+  this->Last = cts_LAST;
+}
+
+/**
+ * This is a virtual constructor for the command.
+ */
+cmCommand* cmCTestSubmitCommand::Clone()
+{
+  cmCTestSubmitCommand* ni = new cmCTestSubmitCommand;
+  ni->CTest = this->CTest;
+  ni->CTestScriptHandler = this->CTestScriptHandler;
+  return ni;
+}
+
 cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 {
   const char* submitURL = !this->SubmitURL.empty()
@@ -111,7 +134,15 @@ bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus& status)
 {
   this->CDashUpload = !args.empty() && args[0] == "CDASH_UPLOAD";
-  return this->cmCTestHandlerCommand::InitialPass(args, status);
+
+  bool ret = this->cmCTestHandlerCommand::InitialPass(args, status);
+
+  if (this->Values[cts_BUILD_ID] && *this->Values[cts_BUILD_ID]) {
+    this->Makefile->AddDefinition(this->Values[cts_BUILD_ID],
+                                  this->CTest->GetBuildID().c_str());
+  }
+
+  return ret;
 }
 
 bool cmCTestSubmitCommand::CheckArgumentKeyword(std::string const& arg)
