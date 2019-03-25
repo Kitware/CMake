@@ -272,8 +272,7 @@ void cmGlobalGenerator::AddBuildExportExportSet(
 
 bool cmGlobalGenerator::GenerateImportFile(const std::string& file)
 {
-  std::map<std::string, cmExportBuildFileGenerator*>::iterator it =
-    this->BuildExportSets.find(file);
+  auto const it = this->BuildExportSets.find(file);
   if (it != this->BuildExportSets.end()) {
     bool result = it->second->GenerateImportFile();
 
@@ -338,8 +337,7 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
 bool cmGlobalGenerator::IsExportedTargetsFile(
   const std::string& filename) const
 {
-  const std::map<std::string, cmExportBuildFileGenerator*>::const_iterator it =
-    this->BuildExportSets.find(filename);
+  auto const it = this->BuildExportSets.find(filename);
   if (it == this->BuildExportSets.end()) {
     return false;
   }
@@ -993,9 +991,7 @@ std::string cmGlobalGenerator::GetLanguageOutputExtension(
 {
   const std::string& lang = source.GetLanguage();
   if (!lang.empty()) {
-    std::map<std::string, std::string>::const_iterator it =
-      this->LanguageToOutputExtension.find(lang);
-
+    auto const it = this->LanguageToOutputExtension.find(lang);
     if (it != this->LanguageToOutputExtension.end()) {
       return it->second;
     }
@@ -1020,8 +1016,7 @@ std::string cmGlobalGenerator::GetLanguageFromExtension(const char* ext) const
   if (ext && *ext == '.') {
     ++ext;
   }
-  std::map<std::string, std::string>::const_iterator it =
-    this->ExtensionToLanguage.find(ext);
+  auto const it = this->ExtensionToLanguage.find(ext);
   if (it != this->ExtensionToLanguage.end()) {
     return it->second;
   }
@@ -1272,7 +1267,7 @@ void cmGlobalGenerator::CreateImportedGenerationObjects(
   std::vector<const cmGeneratorTarget*>& exports)
 {
   this->CreateGenerationObjects(ImportedOnly);
-  std::vector<cmMakefile*>::iterator mfit =
+  auto const mfit =
     std::find(this->Makefiles.begin(), this->Makefiles.end(), mf);
   cmLocalGenerator* lg =
     this->LocalGenerators[std::distance(this->Makefiles.begin(), mfit)];
@@ -1287,8 +1282,7 @@ void cmGlobalGenerator::CreateImportedGenerationObjects(
 cmExportBuildFileGenerator* cmGlobalGenerator::GetExportedTargetsFile(
   const std::string& filename) const
 {
-  std::map<std::string, cmExportBuildFileGenerator*>::const_iterator it =
-    this->BuildExportSets.find(filename);
+  auto const it = this->BuildExportSets.find(filename);
   return it == this->BuildExportSets.end() ? nullptr : it->second;
 }
 
@@ -1556,12 +1550,12 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         continue;
       }
 
-      cmBacktraceRange::const_iterator btIt =
-        noconfig_compile_definitions_bts.begin();
-      for (cmStringRange::const_iterator it =
-             noconfig_compile_definitions.begin();
-           it != noconfig_compile_definitions.end(); ++it, ++btIt) {
-        t->InsertCompileDefinition(*it, *btIt);
+      {
+        auto btIt = noconfig_compile_definitions_bts.begin();
+        auto it = noconfig_compile_definitions.begin();
+        for (; it != noconfig_compile_definitions.end(); ++it, ++btIt) {
+          t->InsertCompileDefinition(*it, *btIt);
+        }
       }
 
       cmPolicies::PolicyStatus polSt =
@@ -2072,8 +2066,7 @@ void cmGlobalGenerator::GetEnabledLanguages(
 
 int cmGlobalGenerator::GetLinkerPreference(const std::string& lang) const
 {
-  std::map<std::string, int>::const_iterator it =
-    this->LanguageToLinkerPreference.find(lang);
+  auto const it = this->LanguageToLinkerPreference.find(lang);
   if (it != this->LanguageToLinkerPreference.end()) {
     return it->second;
   }
@@ -2100,9 +2093,9 @@ void cmGlobalGenerator::FillProjectMap()
 
 cmMakefile* cmGlobalGenerator::FindMakefile(const std::string& start_dir) const
 {
-  MakefileMap::const_iterator i = this->MakefileSearchIndex.find(start_dir);
-  if (i != this->MakefileSearchIndex.end()) {
-    return i->second;
+  auto const it = this->MakefileSearchIndex.find(start_dir);
+  if (it != this->MakefileSearchIndex.end()) {
+    return it->second;
   }
   return nullptr;
 }
@@ -2110,10 +2103,9 @@ cmMakefile* cmGlobalGenerator::FindMakefile(const std::string& start_dir) const
 cmLocalGenerator* cmGlobalGenerator::FindLocalGenerator(
   cmDirectoryId const& id) const
 {
-  LocalGeneratorMap::const_iterator i =
-    this->LocalGeneratorSearchIndex.find(id.String);
-  if (i != this->LocalGeneratorSearchIndex.end()) {
-    return i->second;
+  auto const it = this->LocalGeneratorSearchIndex.find(id.String);
+  if (it != this->LocalGeneratorSearchIndex.end()) {
+    return it->second;
   }
   return nullptr;
 }
@@ -2187,9 +2179,9 @@ void cmGlobalGenerator::IndexLocalGenerator(cmLocalGenerator* lg)
 
 cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const
 {
-  TargetMap::const_iterator i = this->TargetSearchIndex.find(name);
-  if (i != this->TargetSearchIndex.end()) {
-    return i->second;
+  auto const it = this->TargetSearchIndex.find(name);
+  if (it != this->TargetSearchIndex.end()) {
+    return it->second;
   }
   return nullptr;
 }
@@ -2197,10 +2189,9 @@ cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const
 cmGeneratorTarget* cmGlobalGenerator::FindGeneratorTargetImpl(
   std::string const& name) const
 {
-  GeneratorTargetMap::const_iterator i =
-    this->GeneratorTargetSearchIndex.find(name);
-  if (i != this->GeneratorTargetSearchIndex.end()) {
-    return i->second;
+  auto const it = this->GeneratorTargetSearchIndex.find(name);
+  if (it != this->GeneratorTargetSearchIndex.end()) {
+    return it->second;
   }
   return nullptr;
 }
@@ -2209,8 +2200,7 @@ cmTarget* cmGlobalGenerator::FindTarget(const std::string& name,
                                         bool excludeAliases) const
 {
   if (!excludeAliases) {
-    std::map<std::string, std::string>::const_iterator ai =
-      this->AliasTargets.find(name);
+    auto const ai = this->AliasTargets.find(name);
     if (ai != this->AliasTargets.end()) {
       return this->FindTargetImpl(ai->second);
     }
@@ -2221,8 +2211,7 @@ cmTarget* cmGlobalGenerator::FindTarget(const std::string& name,
 cmGeneratorTarget* cmGlobalGenerator::FindGeneratorTarget(
   const std::string& name) const
 {
-  std::map<std::string, std::string>::const_iterator ai =
-    this->AliasTargets.find(name);
+  auto const ai = this->AliasTargets.find(name);
   if (ai != this->AliasTargets.end()) {
     return this->FindGeneratorTargetImpl(ai->second);
   }
@@ -2653,8 +2642,7 @@ bool cmGlobalGenerator::ShouldStripResourcePath(cmMakefile* mf) const
 std::string cmGlobalGenerator::GetSharedLibFlagsForLanguage(
   std::string const& l) const
 {
-  std::map<std::string, std::string>::const_iterator it =
-    this->LanguageToOriginalSharedLibFlags.find(l);
+  auto const it = this->LanguageToOriginalSharedLibFlags.find(l);
   if (it != this->LanguageToOriginalSharedLibFlags.end()) {
     return it->second;
   }
@@ -2875,8 +2863,7 @@ void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
     fname = line.substr(33);
 
     // Look for a hash for this file's rule.
-    std::map<std::string, RuleHash>::const_iterator rhi =
-      this->RuleHashes.find(fname);
+    auto const rhi = this->RuleHashes.find(fname);
     if (rhi != this->RuleHashes.end()) {
       // Compare the rule hash in the file to that we were given.
       if (strncmp(line.c_str(), rhi->second.Data, 32) != 0) {
@@ -3015,8 +3002,7 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     for (std::string const& c : configs) {
       target->GetSourceFiles(sources, c);
     }
-    std::vector<cmSourceFile*>::const_iterator sourcesEnd =
-      cmRemoveDuplicates(sources);
+    auto const sourcesEnd = cmRemoveDuplicates(sources);
     for (cmSourceFile* sf : cmMakeRange(sources.cbegin(), sourcesEnd)) {
       Json::Value& lj_source = lj_sources.append(Json::objectValue);
       std::string const& sfp = sf->GetFullPath();
