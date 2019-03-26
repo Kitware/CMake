@@ -15,13 +15,13 @@ As an additional diagnostic, the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` gener
 on an :prop_tgt:`IMPORTED` target for the install location should not contain
 paths in the source directory or the build directory.
 
-The OLD behavior for this policy is to ignore relative path entries if they
-contain a generator expression. The NEW behavior for this policy is to report
+The ``OLD`` behavior for this policy is to ignore relative path entries if they
+contain a generator expression. The ``NEW`` behavior for this policy is to report
 an error if a generator expression appears in another location and the path is
 relative.
 
 This policy was introduced in CMake version 3.0.  CMake version
-|release| warns when the policy is not set and uses OLD behavior.  Use
-the cmake_policy command to set it to OLD or NEW explicitly.
+|release| warns when the policy is not set and uses ``OLD`` behavior.  Use
+the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
 
 .. include:: DEPRECATED.txt

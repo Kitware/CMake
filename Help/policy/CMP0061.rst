@@ -21,6 +21,6 @@ add ``-i``.
 
 This policy was introduced in CMake version 3.3.  Unlike most policies,
 CMake version |release| does *not* warn when this policy is not set and
-simply uses OLD behavior.
+simply uses ``OLD`` behavior.
 
 .. include:: DEPRECATED.txt

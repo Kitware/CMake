@@ -21,7 +21,7 @@ source files.
 
 .. note::
 
-  To silence the CMP0071 warning source files can be excluded from
+  To silence the ``CMP0071`` warning source files can be excluded from
   :prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC` processing by setting the
   source file properties :prop_sf:`SKIP_AUTOMOC`, :prop_sf:`SKIP_AUTOUIC` or
   :prop_sf:`SKIP_AUTOGEN`.
