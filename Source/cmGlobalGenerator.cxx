@@ -272,8 +272,7 @@ void cmGlobalGenerator::AddBuildExportExportSet(
 
 bool cmGlobalGenerator::GenerateImportFile(const std::string& file)
 {
-  std::map<std::string, cmExportBuildFileGenerator*>::iterator it =
-    this->BuildExportSets.find(file);
+  auto const it = this->BuildExportSets.find(file);
   if (it != this->BuildExportSets.end()) {
     bool result = it->second->GenerateImportFile();
 
@@ -299,10 +298,7 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
 {
   bool failed = false;
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
-    const std::vector<cmGeneratorTarget*>& targets =
-      localGen->GetGeneratorTargets();
-
-    for (cmGeneratorTarget* target : targets) {
+    for (cmGeneratorTarget* target : localGen->GetGeneratorTargets()) {
       if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
           target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
           target->GetType() == cmStateEnums::TargetType::UTILITY ||
@@ -338,8 +334,7 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
 bool cmGlobalGenerator::IsExportedTargetsFile(
   const std::string& filename) const
 {
-  const std::map<std::string, cmExportBuildFileGenerator*>::const_iterator it =
-    this->BuildExportSets.find(filename);
+  auto const it = this->BuildExportSets.find(filename);
   if (it == this->BuildExportSets.end()) {
     return false;
   }
@@ -993,9 +988,7 @@ std::string cmGlobalGenerator::GetLanguageOutputExtension(
 {
   const std::string& lang = source.GetLanguage();
   if (!lang.empty()) {
-    std::map<std::string, std::string>::const_iterator it =
-      this->LanguageToOutputExtension.find(lang);
-
+    auto const it = this->LanguageToOutputExtension.find(lang);
     if (it != this->LanguageToOutputExtension.end()) {
       return it->second;
     }
@@ -1020,8 +1013,7 @@ std::string cmGlobalGenerator::GetLanguageFromExtension(const char* ext) const
   if (ext && *ext == '.') {
     ++ext;
   }
-  std::map<std::string, std::string>::const_iterator it =
-    this->ExtensionToLanguage.find(ext);
+  auto const it = this->ExtensionToLanguage.find(ext);
   if (it != this->ExtensionToLanguage.end()) {
     return it->second;
   }
@@ -1272,7 +1264,7 @@ void cmGlobalGenerator::CreateImportedGenerationObjects(
   std::vector<const cmGeneratorTarget*>& exports)
 {
   this->CreateGenerationObjects(ImportedOnly);
-  std::vector<cmMakefile*>::iterator mfit =
+  auto const mfit =
     std::find(this->Makefiles.begin(), this->Makefiles.end(), mf);
   cmLocalGenerator* lg =
     this->LocalGenerators[std::distance(this->Makefiles.begin(), mfit)];
@@ -1287,8 +1279,7 @@ void cmGlobalGenerator::CreateImportedGenerationObjects(
 cmExportBuildFileGenerator* cmGlobalGenerator::GetExportedTargetsFile(
   const std::string& filename) const
 {
-  std::map<std::string, cmExportBuildFileGenerator*>::const_iterator it =
-    this->BuildExportSets.find(filename);
+  auto const it = this->BuildExportSets.find(filename);
   return it == this->BuildExportSets.end() ? nullptr : it->second;
 }
 
@@ -1502,8 +1493,7 @@ bool cmGlobalGenerator::ComputeTargetDepends()
   if (!ctd.Compute()) {
     return false;
   }
-  std::vector<cmGeneratorTarget const*> const& targets = ctd.GetTargets();
-  for (cmGeneratorTarget const* target : targets) {
+  for (cmGeneratorTarget const* target : ctd.GetTargets()) {
     ctd.GetTargetDirectDepends(target, this->TargetDependencies[target]);
   }
   return true;
@@ -1543,8 +1533,7 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
     const cmBacktraceRange noconfig_compile_definitions_bts =
       mf->GetCompileDefinitionsBacktraces();
 
-    cmTargets& targets = mf->GetTargets();
-    for (auto& target : targets) {
+    for (auto& target : mf->GetTargets()) {
       cmTarget* t = &target.second;
       if (t->GetType() == cmStateEnums::GLOBAL_TARGET) {
         continue;
@@ -1556,12 +1545,12 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         continue;
       }
 
-      cmBacktraceRange::const_iterator btIt =
-        noconfig_compile_definitions_bts.begin();
-      for (cmStringRange::const_iterator it =
-             noconfig_compile_definitions.begin();
-           it != noconfig_compile_definitions.end(); ++it, ++btIt) {
-        t->InsertCompileDefinition(*it, *btIt);
+      {
+        auto btIt = noconfig_compile_definitions_bts.begin();
+        auto it = noconfig_compile_definitions.begin();
+        for (; it != noconfig_compile_definitions.end(); ++it, ++btIt) {
+          t->InsertCompileDefinition(*it, *btIt);
+        }
       }
 
       cmPolicies::PolicyStatus polSt =
@@ -1601,17 +1590,14 @@ void cmGlobalGenerator::CreateGeneratorTargets(
   std::map<cmTarget*, cmGeneratorTarget*> const& importedMap)
 {
   if (targetTypes == AllTargets) {
-    cmTargets& targets = mf->GetTargets();
-    for (auto& target : targets) {
+    for (auto& target : mf->GetTargets()) {
       cmTarget* t = &target.second;
       cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
       lg->AddGeneratorTarget(gt);
     }
   }
 
-  std::vector<cmTarget*> itgts = mf->GetImportedTargets();
-
-  for (cmTarget* t : itgts) {
+  for (cmTarget* t : mf->GetImportedTargets()) {
     lg->AddImportedGeneratorTarget(importedMap.find(t)->second);
   }
 }
@@ -1672,14 +1658,11 @@ void cmGlobalGenerator::CheckTargetProperties()
   cmState* state = this->GetCMakeInstance()->GetState();
   for (unsigned int i = 0; i < this->Makefiles.size(); ++i) {
     this->Makefiles[i]->ConfigureFinalPass();
-    cmTargets& targets = this->Makefiles[i]->GetTargets();
-    for (auto const& target : targets) {
+    for (auto const& target : this->Makefiles[i]->GetTargets()) {
       if (target.second.GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
-      const cmTarget::LinkLibraryVectorType& libs =
-        target.second.GetOriginalLinkLibraries();
-      for (auto const& lib : libs) {
+      for (auto const& lib : target.second.GetOriginalLinkLibraries()) {
         if (lib.first.size() > 9 &&
             cmSystemTools::IsNOTFOUND(lib.first.c_str())) {
           std::string varName = lib.first.substr(0, lib.first.size() - 9);
@@ -2072,8 +2055,7 @@ void cmGlobalGenerator::GetEnabledLanguages(
 
 int cmGlobalGenerator::GetLinkerPreference(const std::string& lang) const
 {
-  std::map<std::string, int>::const_iterator it =
-    this->LanguageToLinkerPreference.find(lang);
+  auto const it = this->LanguageToLinkerPreference.find(lang);
   if (it != this->LanguageToLinkerPreference.end()) {
     return it->second;
   }
@@ -2100,9 +2082,9 @@ void cmGlobalGenerator::FillProjectMap()
 
 cmMakefile* cmGlobalGenerator::FindMakefile(const std::string& start_dir) const
 {
-  MakefileMap::const_iterator i = this->MakefileSearchIndex.find(start_dir);
-  if (i != this->MakefileSearchIndex.end()) {
-    return i->second;
+  auto const it = this->MakefileSearchIndex.find(start_dir);
+  if (it != this->MakefileSearchIndex.end()) {
+    return it->second;
   }
   return nullptr;
 }
@@ -2110,10 +2092,9 @@ cmMakefile* cmGlobalGenerator::FindMakefile(const std::string& start_dir) const
 cmLocalGenerator* cmGlobalGenerator::FindLocalGenerator(
   cmDirectoryId const& id) const
 {
-  LocalGeneratorMap::const_iterator i =
-    this->LocalGeneratorSearchIndex.find(id.String);
-  if (i != this->LocalGeneratorSearchIndex.end()) {
-    return i->second;
+  auto const it = this->LocalGeneratorSearchIndex.find(id.String);
+  if (it != this->LocalGeneratorSearchIndex.end()) {
+    return it->second;
   }
   return nullptr;
 }
@@ -2187,9 +2168,9 @@ void cmGlobalGenerator::IndexLocalGenerator(cmLocalGenerator* lg)
 
 cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const
 {
-  TargetMap::const_iterator i = this->TargetSearchIndex.find(name);
-  if (i != this->TargetSearchIndex.end()) {
-    return i->second;
+  auto const it = this->TargetSearchIndex.find(name);
+  if (it != this->TargetSearchIndex.end()) {
+    return it->second;
   }
   return nullptr;
 }
@@ -2197,10 +2178,9 @@ cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const
 cmGeneratorTarget* cmGlobalGenerator::FindGeneratorTargetImpl(
   std::string const& name) const
 {
-  GeneratorTargetMap::const_iterator i =
-    this->GeneratorTargetSearchIndex.find(name);
-  if (i != this->GeneratorTargetSearchIndex.end()) {
-    return i->second;
+  auto const it = this->GeneratorTargetSearchIndex.find(name);
+  if (it != this->GeneratorTargetSearchIndex.end()) {
+    return it->second;
   }
   return nullptr;
 }
@@ -2209,8 +2189,7 @@ cmTarget* cmGlobalGenerator::FindTarget(const std::string& name,
                                         bool excludeAliases) const
 {
   if (!excludeAliases) {
-    std::map<std::string, std::string>::const_iterator ai =
-      this->AliasTargets.find(name);
+    auto const ai = this->AliasTargets.find(name);
     if (ai != this->AliasTargets.end()) {
       return this->FindTargetImpl(ai->second);
     }
@@ -2221,8 +2200,7 @@ cmTarget* cmGlobalGenerator::FindTarget(const std::string& name,
 cmGeneratorTarget* cmGlobalGenerator::FindGeneratorTarget(
   const std::string& name) const
 {
-  std::map<std::string, std::string>::const_iterator ai =
-    this->AliasTargets.find(name);
+  auto const ai = this->AliasTargets.find(name);
   if (ai != this->AliasTargets.end()) {
     return this->FindGeneratorTargetImpl(ai->second);
   }
@@ -2653,8 +2631,7 @@ bool cmGlobalGenerator::ShouldStripResourcePath(cmMakefile* mf) const
 std::string cmGlobalGenerator::GetSharedLibFlagsForLanguage(
   std::string const& l) const
 {
-  std::map<std::string, std::string>::const_iterator it =
-    this->LanguageToOriginalSharedLibFlags.find(l);
+  auto const it = this->LanguageToOriginalSharedLibFlags.find(l);
   if (it != this->LanguageToOriginalSharedLibFlags.end()) {
     return it->second;
   }
@@ -2732,11 +2709,8 @@ void cmGlobalGenerator::GetTargetSets(TargetDependSet& projectTargets,
     if (this->IsExcluded(root, generator)) {
       continue;
     }
-    // Get the targets in the makefile
-    const std::vector<cmGeneratorTarget*>& tgts =
-      generator->GetGeneratorTargets();
-    // loop over all the targets
-    for (cmGeneratorTarget* target : tgts) {
+    // loop over all the generator targets in the makefile
+    for (cmGeneratorTarget* target : generator->GetGeneratorTargets()) {
       if (this->IsRootOnlyTarget(target) &&
           target->GetLocalGenerator() != root) {
         continue;
@@ -2762,8 +2736,7 @@ void cmGlobalGenerator::AddTargetDepends(cmGeneratorTarget const* target,
   if (projectTargets.insert(target).second) {
     // This is the first time we have encountered the target.
     // Recursively follow its dependencies.
-    TargetDependSet const& ts = this->GetTargetDirectDepends(target);
-    for (auto const& t : ts) {
+    for (auto const& t : this->GetTargetDirectDepends(target)) {
       this->AddTargetDepends(t, projectTargets);
     }
   }
@@ -2875,8 +2848,7 @@ void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
     fname = line.substr(33);
 
     // Look for a hash for this file's rule.
-    std::map<std::string, RuleHash>::const_iterator rhi =
-      this->RuleHashes.find(fname);
+    auto const rhi = this->RuleHashes.find(fname);
     if (rhi != this->RuleHashes.end()) {
       // Compare the rule hash in the file to that we were given.
       if (strncmp(line.c_str(), rhi->second.Data, 32) != 0) {
@@ -2926,8 +2898,7 @@ void cmGlobalGenerator::WriteSummary()
   cmGeneratedFileStream fout(fname);
 
   for (cmLocalGenerator* lg : this->LocalGenerators) {
-    const std::vector<cmGeneratorTarget*>& tgts = lg->GetGeneratorTargets();
-    for (cmGeneratorTarget* tgt : tgts) {
+    for (cmGeneratorTarget* tgt : lg->GetGeneratorTargets()) {
       if (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
@@ -3015,8 +2986,7 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     for (std::string const& c : configs) {
       target->GetSourceFiles(sources, c);
     }
-    std::vector<cmSourceFile*>::const_iterator sourcesEnd =
-      cmRemoveDuplicates(sources);
+    auto const sourcesEnd = cmRemoveDuplicates(sources);
     for (cmSourceFile* sf : cmMakeRange(sources.cbegin(), sourcesEnd)) {
       Json::Value& lj_source = lj_sources.append(Json::objectValue);
       std::string const& sfp = sf->GetFullPath();
