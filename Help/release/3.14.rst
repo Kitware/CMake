@@ -377,3 +377,17 @@ Other Changes
 * CMake no longer issues a warning if a target listed in an
   :command:`install(TARGETS)` command has its :prop_tgt:`EXCLUDE_FROM_ALL`
   property set to true.
+
+Updates
+=======
+
+Changes made since CMake 3.14.0 include the following.
+
+3.14.1
+------
+
+* The :module:`FindFontconfig` module added by 3.14.0 accidentally
+  used uppercase ``FONTCONFIG_*`` variable names that do not match
+  our conventions.  3.14.1 revises the module to use ``Fontconfig_*``
+  variable names.  This is incompatible with 3.14.0 but since the
+  module is new in the 3.14 series usage should not yet be widespread.
