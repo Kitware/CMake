@@ -10,7 +10,8 @@
 #include "foo.h"
 #include "list.h"
 #include "prefix_foo_bar_bat.h"
-#include "target.h"
+#include "target1.h"
+#include "target2.h"
 #include "ting.h"
 
 int main(int, char**)
