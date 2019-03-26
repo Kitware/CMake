@@ -123,6 +123,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   std::string targetName;
   std::vector<std::string> cmakeFlags(1, "CMAKE_FLAGS"); // fake argv[0]
   std::vector<std::string> compileDefs;
+  std::string cmakeInternal;
   std::string outputVariable;
   std::string copyFile;
   std::string copyFileError;
@@ -174,7 +175,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     DoingCExtensions,
     DoingCxxExtensions,
     DoingCudaExtensions,
-    DoingSources
+    DoingSources,
+    DoingCMakeInternal
   };
   Doing doing = useSources ? DoingSources : DoingNone;
   for (size_t i = 3; i < argv.size(); ++i) {
@@ -223,6 +225,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (argv[i] == "CUDA_EXTENSIONS") {
       doing = DoingCudaExtensions;
       didCudaExtensions = true;
+    } else if (argv[i] == "__CMAKE_INTERNAL") {
+      doing = DoingCMakeInternal;
     } else if (doing == DoingCMakeFlags) {
       cmakeFlags.push_back(argv[i]);
     } else if (doing == DoingCompileDefinitions) {
@@ -296,6 +300,9 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       doing = DoingNone;
     } else if (doing == DoingSources) {
       sources.push_back(argv[i]);
+    } else if (doing == DoingCMakeInternal) {
+      cmakeInternal = argv[i];
+      doing = DoingNone;
     } else if (i == 3) {
       this->SrcFileSignature = false;
       projectName = argv[i].c_str();
@@ -508,6 +515,14 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       }
     }
     fprintf(fout, "project(CMAKE_TRY_COMPILE%s)\n", projectLangs.c_str());
+    if (cmakeInternal == "ABI") {
+      // This is the ABI detection step, also used for implicit includes.
+      // Erase any include_directories() calls from the toolchain file so
+      // that we do not see them as implicit.  Our ABI detection source
+      // does not include any system headers anyway.
+      fprintf(fout,
+              "set_property(DIRECTORY PROPERTY INCLUDE_DIRECTORIES \"\")\n");
+    }
     fprintf(fout, "set(CMAKE_VERBOSE_MAKEFILE 1)\n");
     for (std::string const& li : testLangs) {
       std::string langFlags = "CMAKE_" + li + "_FLAGS";
