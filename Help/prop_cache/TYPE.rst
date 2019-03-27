@@ -5,7 +5,7 @@ Widget type for entry in GUIs.
 
 Cache entry values are always strings, but CMake GUIs present widgets
 to help users set values.  The GUIs use this property as a hint to
-determine the widget type.  Valid TYPE values are:
+determine the widget type.  Valid ``TYPE`` values are:
 
 ::
 
@@ -17,5 +17,5 @@ determine the widget type.  Valid TYPE values are:
   STATIC        = Value managed by CMake, do not change.
   UNINITIALIZED = Type not yet specified.
 
-Generally the TYPE of a cache entry should be set by the command which
-creates it (set, option, find_library, etc.).
+Generally the ``TYPE`` of a cache entry should be set by the command which
+creates it ( :command:`set`, :command:`option`, :command:`find_library`, etc.).
