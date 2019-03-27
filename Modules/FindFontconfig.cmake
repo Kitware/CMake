@@ -18,15 +18,15 @@ Result Variables
 
 This will define the following variables in your project:
 
-``FONTCONFIG_FOUND``
+``Fontconfig_FOUND``
   true if (the requested version of) Fontconfig is available.
-``FONTCONFIG_VERSION``
+``Fontconfig_VERSION``
   the version of Fontconfig.
-``FONTCONFIG_LIBRARIES``
+``Fontconfig_LIBRARIES``
   the libraries to link against to use Fontconfig.
-``FONTCONFIG_INCLUDE_DIRS``
+``Fontconfig_INCLUDE_DIRS``
   where to find the Fontconfig headers.
-``FONTCONFIG_COMPILE_OPTIONS``
+``Fontconfig_COMPILE_OPTIONS``
   this should be passed to target_compile_options(), if the
   target is not used for linking
 
@@ -37,10 +37,10 @@ This will define the following variables in your project:
 # in the FIND_PATH() and FIND_LIBRARY() calls
 find_package(PkgConfig QUIET)
 pkg_check_modules(PKG_FONTCONFIG QUIET fontconfig)
-set(FONTCONFIG_COMPILE_OPTIONS ${PKG_FONTCONFIG_CFLAGS_OTHER})
-set(FONTCONFIG_VERSION ${PKG_FONTCONFIG_VERSION})
+set(Fontconfig_COMPILE_OPTIONS ${PKG_FONTCONFIG_CFLAGS_OTHER})
+set(Fontconfig_VERSION ${PKG_FONTCONFIG_VERSION})
 
-find_path( FONTCONFIG_INCLUDE_DIR
+find_path( Fontconfig_INCLUDE_DIR
   NAMES
     fontconfig/fontconfig.h
   HINTS
@@ -48,24 +48,24 @@ find_path( FONTCONFIG_INCLUDE_DIR
     /usr/X11/include
 )
 
-find_library( FONTCONFIG_LIBRARY
+find_library( Fontconfig_LIBRARY
   NAMES
     fontconfig
   PATHS
     ${PKG_FONTCONFIG_LIBRARY_DIRS}
 )
 
-if (FONTCONFIG_INCLUDE_DIR AND NOT FONTCONFIG_VERSION)
-  file(STRINGS ${FONTCONFIG_INCLUDE_DIR}/fontconfig/fontconfig.h _contents REGEX "^#define[ \t]+FC_[A-Z]+[ \t]+[0-9]+$")
-  unset(FONTCONFIG_VERSION)
+if (Fontconfig_INCLUDE_DIR AND NOT Fontconfig_VERSION)
+  file(STRINGS ${Fontconfig_INCLUDE_DIR}/fontconfig/fontconfig.h _contents REGEX "^#define[ \t]+FC_[A-Z]+[ \t]+[0-9]+$")
+  unset(Fontconfig_VERSION)
   foreach(VPART MAJOR MINOR REVISION)
     foreach(VLINE ${_contents})
       if(VLINE MATCHES "^#define[\t ]+FC_${VPART}[\t ]+([0-9]+)$")
-        set(FONTCONFIG_VERSION_PART "${CMAKE_MATCH_1}")
-        if(FONTCONFIG_VERSION)
-          string(APPEND FONTCONFIG_VERSION ".${FONTCONFIG_VERSION_PART}")
+        set(Fontconfig_VERSION_PART "${CMAKE_MATCH_1}")
+        if(Fontconfig_VERSION)
+          string(APPEND Fontconfig_VERSION ".${Fontconfig_VERSION_PART}")
         else()
-          set(FONTCONFIG_VERSION "${FONTCONFIG_VERSION_PART}")
+          set(Fontconfig_VERSION "${Fontconfig_VERSION_PART}")
         endif()
       endif()
     endforeach()
@@ -75,27 +75,27 @@ endif ()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Fontconfig
   FOUND_VAR
-    FONTCONFIG_FOUND
+    Fontconfig_FOUND
   REQUIRED_VARS
-    FONTCONFIG_LIBRARY
-    FONTCONFIG_INCLUDE_DIR
+    Fontconfig_LIBRARY
+    Fontconfig_INCLUDE_DIR
   VERSION_VAR
-    FONTCONFIG_VERSION
+    Fontconfig_VERSION
 )
 
 
-if(FONTCONFIG_FOUND AND NOT TARGET Fontconfig::Fontconfig)
+if(Fontconfig_FOUND AND NOT TARGET Fontconfig::Fontconfig)
   add_library(Fontconfig::Fontconfig UNKNOWN IMPORTED)
   set_target_properties(Fontconfig::Fontconfig PROPERTIES
-    IMPORTED_LOCATION "${FONTCONFIG_LIBRARY}"
-    INTERFACE_COMPILE_OPTIONS "${FONTCONFIG_COMPILE_OPTIONS}"
-    INTERFACE_INCLUDE_DIRECTORIES "${FONTCONFIG_INCLUDE_DIR}"
+    IMPORTED_LOCATION "${Fontconfig_LIBRARY}"
+    INTERFACE_COMPILE_OPTIONS "${Fontconfig_COMPILE_OPTIONS}"
+    INTERFACE_INCLUDE_DIRECTORIES "${Fontconfig_INCLUDE_DIR}"
   )
 endif()
 
-mark_as_advanced(FONTCONFIG_LIBRARY FONTCONFIG_INCLUDE_DIR)
+mark_as_advanced(Fontconfig_LIBRARY Fontconfig_INCLUDE_DIR)
 
-if(FONTCONFIG_FOUND)
-  set(FONTCONFIG_LIBRARIES ${FONTCONFIG_LIBRARY})
-  set(FONTCONFIG_INCLUDE_DIRS ${FONTCONFIG_INCLUDE_DIR})
+if(Fontconfig_FOUND)
+  set(Fontconfig_LIBRARIES ${Fontconfig_LIBRARY})
+  set(Fontconfig_INCLUDE_DIRS ${Fontconfig_INCLUDE_DIR})
 endif()
