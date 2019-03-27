@@ -143,8 +143,7 @@ public:
 
   // File pairs for implicit dependency scanning.  The key of the map
   // is the depender and the value is the explicit dependee.
-  struct ImplicitDependFileMap
-    : public std::map<std::string, cmDepends::DependencyVector>
+  struct ImplicitDependFileMap : public cmDepends::DependencyMap
   {
   };
   struct ImplicitDependLanguageMap
@@ -230,10 +229,10 @@ protected:
                           const char* filename = nullptr);
 
   // Helper methods for dependency updates.
-  bool ScanDependencies(
-    std::string const& targetDir, std::string const& dependFile,
-    std::string const& internalDependFile,
-    std::map<std::string, cmDepends::DependencyVector>& validDeps);
+  bool ScanDependencies(std::string const& targetDir,
+                        std::string const& dependFile,
+                        std::string const& internalDependFile,
+                        cmDepends::DependencyMap& validDeps);
   void CheckMultipleOutputs(bool verbose);
 
 private:

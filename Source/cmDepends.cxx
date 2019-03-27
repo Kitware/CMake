@@ -61,7 +61,7 @@ bool cmDepends::Finalize(std::ostream& /*unused*/, std::ostream& /*unused*/)
 
 bool cmDepends::Check(const std::string& makeFile,
                       const std::string& internalFile,
-                      std::map<std::string, DependencyVector>& validDeps)
+                      DependencyMap& validDeps)
 {
   // Check whether dependencies must be regenerated.
   bool okay = true;
@@ -101,9 +101,9 @@ bool cmDepends::WriteDependencies(const std::set<std::string>& /*unused*/,
   return false;
 }
 
-bool cmDepends::CheckDependencies(
-  std::istream& internalDepends, const std::string& internalDependsFileName,
-  std::map<std::string, DependencyVector>& validDeps)
+bool cmDepends::CheckDependencies(std::istream& internalDepends,
+                                  const std::string& internalDependsFileName,
+                                  DependencyMap& validDeps)
 {
   // Read internal depends file time
   cmFileTime internalDependsTime;
@@ -124,7 +124,7 @@ bool cmDepends::CheckDependencies(
   std::string dependee;
   cmFileTime dependerTime;
   cmFileTime dependeeTime;
-  DependencyVector* currentDependencies = nullptr;
+  std::vector<std::string>* currentDependencies = nullptr;
 
   while (std::getline(internalDepends, line)) {
     // Check if this an empty or a comment line

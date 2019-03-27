@@ -27,8 +27,7 @@ public:
       relative path from the build directory to the target file.  */
   cmDependsC();
   cmDependsC(cmLocalGenerator* lg, const std::string& targetDir,
-             const std::string& lang,
-             const std::map<std::string, DependencyVector>* validDeps);
+             const std::string& lang, const DependencyMap* validDeps);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   ~cmDependsC() override;
@@ -81,7 +80,7 @@ public:
   };
 
 protected:
-  const std::map<std::string, DependencyVector>* ValidDeps = nullptr;
+  const DependencyMap* ValidDeps = nullptr;
   std::set<std::string> Encountered;
   std::queue<UnscannedEntry> Unscanned;
 

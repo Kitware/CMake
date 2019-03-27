@@ -21,9 +21,8 @@
 
 cmDependsC::cmDependsC() = default;
 
-cmDependsC::cmDependsC(
-  cmLocalGenerator* lg, const std::string& targetDir, const std::string& lang,
-  const std::map<std::string, DependencyVector>* validDeps)
+cmDependsC::cmDependsC(cmLocalGenerator* lg, const std::string& targetDir,
+                       const std::string& lang, const DependencyMap* validDeps)
   : cmDepends(lg, targetDir)
   , ValidDeps(validDeps)
 {
@@ -102,8 +101,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
     this->LocalGenerator->MaybeConvertToRelativePath(binDir, obj);
 
   if (this->ValidDeps != nullptr) {
-    std::map<std::string, DependencyVector>::const_iterator tmpIt =
-      this->ValidDeps->find(obj_i);
+    auto const tmpIt = this->ValidDeps->find(obj_i);
     if (tmpIt != this->ValidDeps->end()) {
       dependencies.insert(tmpIt->second.begin(), tmpIt->second.end());
       haveDeps = true;
