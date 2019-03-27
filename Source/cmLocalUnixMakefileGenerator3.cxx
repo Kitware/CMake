@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "cmAlgorithms.h"
+#include "cmCustomCommand.h" // IWYU pragma: keep
 #include "cmCustomCommandGenerator.h"
 #include "cmFileTimeCache.h"
 #include "cmGeneratedFileStream.h"

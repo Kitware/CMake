@@ -262,7 +262,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   this->DLLPlatform =
     !this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
 
-  this->PolicyMap = t->PolicyMap;
+  this->PolicyMap = t->GetPolicyMap();
 }
 
 cmGeneratorTarget::~cmGeneratorTarget()
