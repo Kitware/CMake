@@ -8,7 +8,6 @@
 #include <iosfwd>
 #include <map>
 #include <set>
-#include <stddef.h>
 #include <string>
 #include <vector>
 
@@ -104,10 +103,6 @@ protected:
 
   // The full path to the target's build directory.
   std::string TargetDirectory;
-
-  size_t MaxPath = 16384;
-  char* Dependee;
-  char* Depender;
 
   // The include file search path.
   std::vector<std::string> IncludePath;
