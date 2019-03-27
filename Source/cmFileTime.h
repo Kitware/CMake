@@ -50,7 +50,7 @@ public:
    * @brief Compare file modification times.
    * @return -1, 0, +1 for this older, same, or newer than ftm.
    */
-  int Compare(cmFileTime const& ftm)
+  int Compare(cmFileTime const& ftm) const
   {
     NSC const diff = this->NS - ftm.NS;
     if (diff == 0) {
