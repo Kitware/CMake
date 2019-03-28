@@ -25,6 +25,10 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
+  if (!this->IncludeByVariable("CMAKE_PROJECT_INCLUDE_BEFORE")) {
+    return false;
+  }
+
   std::string const& projectName = args[0];
 
   this->Makefile->SetProjectName(projectName);
