@@ -616,6 +616,12 @@ macro(cpack_ifw_configure_component_group grpname)
 
   set(_CPACK_IFWGRP_STR "\n# Configuration for IFW component group \"${grpname}\"\n")
 
+  foreach(_IFW_ARG_NAME ${_IFW_OPT})
+  cpack_append_option_set_command(
+    CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_${_IFW_ARG_NAME}
+    _CPACK_IFWGRP_STR)
+  endforeach()
+
   foreach(_IFW_ARG_NAME ${_IFW_ARGS})
   cpack_append_string_variable_set_command(
     CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_${_IFW_ARG_NAME}
