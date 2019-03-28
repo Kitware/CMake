@@ -1,9 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
+#if defined(_WIN32)
+#  define NOMINMAX // hide min,max to not conflict with <limits>
+#endif
+
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(DynamicLoader.hxx)
 
 #include KWSYS_HEADER(Configure.hxx)
+#include KWSYS_HEADER(Encoding.hxx)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
@@ -25,6 +30,28 @@
 // Each part of the ifdef contains a complete implementation for
 // the static methods of DynamicLoader.
 
+#define CHECK_OPEN_FLAGS(var, supported, ret)                                 \
+  do {                                                                        \
+    /* Check for unknown flags. */                                            \
+    if ((var & AllOpenFlags) != var) {                                        \
+      return ret;                                                             \
+    }                                                                         \
+                                                                              \
+    /* Check for unsupported flags. */                                        \
+    if ((var & (supported)) != var) {                                         \
+      return ret;                                                             \
+    }                                                                         \
+  } while (0)
+
+namespace KWSYS_NAMESPACE {
+
+DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
+  const std::string& libname)
+{
+  return DynamicLoader::OpenLibrary(libname, 0);
+}
+}
+
 #if !KWSYS_SUPPORTS_SHARED_LIBS
 // Implementation for environments without dynamic libs
 #  include <string.h> // for strerror()
@@ -32,7 +59,7 @@
 namespace KWSYS_NAMESPACE {
 
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
+  const std::string& libname, int flags)
 {
   return 0;
 }
@@ -67,8 +94,10 @@ const char* DynamicLoader::LastError()
 namespace KWSYS_NAMESPACE {
 
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
+  const std::string& libname, int flags)
 {
+  CHECK_OPEN_FLAGS(flags, 0, 0);
+
   return shl_load(libname.c_str(), BIND_DEFERRED | DYNAMIC_PATH, 0L);
 }
 
@@ -130,8 +159,10 @@ const char* DynamicLoader::LastError()
 namespace KWSYS_NAMESPACE {
 
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
+  const std::string& libname, int flags)
 {
+  CHECK_OPEN_FLAGS(flags, 0, 0);
+
   NSObjectFileImageReturnCode rc;
   NSObjectFileImage image = 0;
 
@@ -185,19 +216,22 @@ const char* DynamicLoader::LastError()
 // Implementation for Windows win32 code but not cygwin
 #  include <windows.h>
 
+#  include <stdio.h>
+
 namespace KWSYS_NAMESPACE {
 
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
+  const std::string& libname, int flags)
 {
-  DynamicLoader::LibraryHandle lh;
-  int length = MultiByteToWideChar(CP_UTF8, 0, libname.c_str(), -1, NULL, 0);
-  wchar_t* wchars = new wchar_t[length + 1];
-  wchars[0] = '\0';
-  MultiByteToWideChar(CP_UTF8, 0, libname.c_str(), -1, wchars, length);
-  lh = LoadLibraryW(wchars);
-  delete[] wchars;
-  return lh;
+  CHECK_OPEN_FLAGS(flags, SearchBesideLibrary, NULL);
+
+  DWORD llFlags = 0;
+  if (flags & SearchBesideLibrary) {
+    llFlags |= LOAD_WITH_ALTERED_SEARCH_PATH;
+  }
+
+  return LoadLibraryExW(Encoding::ToWindowsExtendedPath(libname).c_str(), NULL,
+                        llFlags);
 }
 
 int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
@@ -247,24 +281,38 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
 #  endif
 }
 
+#  define DYNLOAD_ERROR_BUFFER_SIZE 1024
+
 const char* DynamicLoader::LastError()
 {
-  LPVOID lpMsgBuf = NULL;
+  wchar_t lpMsgBuf[DYNLOAD_ERROR_BUFFER_SIZE + 1];
 
-  FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                NULL, GetLastError(),
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-                (LPTSTR)&lpMsgBuf, 0, NULL);
+  DWORD error = GetLastError();
+  DWORD length = FormatMessageW(
+    FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, error,
+    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+    lpMsgBuf, DYNLOAD_ERROR_BUFFER_SIZE, NULL);
 
-  if (!lpMsgBuf) {
-    return NULL;
+  static char str[DYNLOAD_ERROR_BUFFER_SIZE + 1];
+
+  if (length < 1) {
+    /* FormatMessage failed.  Use a default message.  */
+    _snprintf(str, DYNLOAD_ERROR_BUFFER_SIZE,
+              "DynamicLoader encountered error 0x%X.  "
+              "FormatMessage failed with error 0x%X",
+              error, GetLastError());
+    return str;
   }
 
-  static char* str = 0;
-  delete[] str;
-  str = strcpy(new char[strlen((char*)lpMsgBuf) + 1], (char*)lpMsgBuf);
-  // Free the buffer.
-  LocalFree(lpMsgBuf);
+  if (!WideCharToMultiByte(CP_UTF8, 0, lpMsgBuf, -1, str,
+                           DYNLOAD_ERROR_BUFFER_SIZE, NULL, NULL)) {
+    /* WideCharToMultiByte failed.  Use a default message.  */
+    _snprintf(str, DYNLOAD_ERROR_BUFFER_SIZE,
+              "DynamicLoader encountered error 0x%X.  "
+              "WideCharToMultiByte failed with error 0x%X",
+              error, GetLastError());
+  }
+
   return str;
 }
 
@@ -282,8 +330,10 @@ namespace KWSYS_NAMESPACE {
 static image_id last_dynamic_err = B_OK;
 
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
+  const std::string& libname, int flags)
 {
+  CHECK_OPEN_FLAGS(flags, 0, 0);
+
   // image_id's are integers, errors are negative. Add one just in case we
   //  get a valid image_id of zero (is that even possible?).
   image_id rc = load_add_on(libname.c_str());
@@ -360,8 +410,10 @@ const char* DynamicLoader::LastError()
 namespace KWSYS_NAMESPACE {
 
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
+  const std::string& libname, int flags)
 {
+  CHECK_OPEN_FLAGS(flags, 0, NULL);
+
   char* name = (char*)calloc(1, libname.size() + 1);
   dld_init(program_invocation_name);
   strncpy(name, libname.c_str(), libname.size());
@@ -404,8 +456,10 @@ const char* DynamicLoader::LastError()
 namespace KWSYS_NAMESPACE {
 
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
+  const std::string& libname, int flags)
 {
+  CHECK_OPEN_FLAGS(flags, 0, NULL);
+
   return dlopen(libname.c_str(), RTLD_LAZY);
 }
 
