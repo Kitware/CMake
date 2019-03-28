@@ -2436,10 +2436,6 @@ static bool CloneFileContent(const std::string& source,
 bool SystemTools::CopyFileAlways(const std::string& source,
                                  const std::string& destination)
 {
-  // If files are the same do not copy
-  if (SystemTools::SameFile(source, destination)) {
-    return true;
-  }
   mode_t perm = 0;
   bool perms = SystemTools::GetPermissions(source, perm);
   std::string real_destination = destination;
@@ -2459,6 +2455,10 @@ bool SystemTools::CopyFileAlways(const std::string& source,
       real_destination += SystemTools::GetFilenameName(source_name);
     } else {
       destination_dir = SystemTools::GetFilenamePath(destination);
+    }
+    // If files are the same do not copy
+    if (SystemTools::SameFile(source, real_destination)) {
+      return true;
     }
 
     // Create destination directory
