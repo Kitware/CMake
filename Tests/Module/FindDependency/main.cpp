@@ -23,6 +23,18 @@
 #  error Expected HAVE_PACK6
 #endif
 
+#ifndef HAVE_PACK7
+#  error Expected HAVE_PACK7
+#endif
+
+#ifndef HAVE_PACK7_COMP1
+#  error Expected HAVE_PACK7_COMP1
+#endif
+
+#ifndef HAVE_PACK8
+#  error Expected HAVE_PACK8
+#endif
+
 int main(int argc, char** argv)
 {
   return 0;
