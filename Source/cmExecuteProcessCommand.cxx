@@ -6,11 +6,13 @@
 #include "cmsys/Process.h"
 #include <algorithm>
 #include <ctype.h> /* isspace */
+#include <iostream>
 #include <stdio.h>
 
 #include "cmAlgorithms.h"
 #include "cmArgumentParser.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmProcessOutput.h"
 #include "cmSystemTools.h"
 
@@ -47,6 +49,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
     std::string OutputFile;
     std::string ErrorFile;
     std::string Timeout;
+    std::string CommandEcho;
     bool OutputQuiet = false;
     bool ErrorQuiet = false;
     bool OutputStripTrailingWhitespace = false;
@@ -57,6 +60,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   static auto const parser =
     cmArgumentParser<Arguments>{}
       .Bind("COMMAND"_s, &Arguments::Commands)
+      .Bind("COMMAND_ECHO"_s, &Arguments::CommandEcho)
       .Bind("OUTPUT_VARIABLE"_s, &Arguments::OutputVariable)
       .Bind("ERROR_VARIABLE"_s, &Arguments::ErrorVariable)
       .Bind("RESULT_VARIABLE"_s, &Arguments::ResultVariable)
@@ -117,7 +121,6 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
       return false;
     }
   }
-
   // Create a process instance.
   std::unique_ptr<cmsysProcess, void (*)(cmsysProcess*)> cp_ptr(
     cmsysProcess_New(), cmsysProcess_Delete);
@@ -171,6 +174,51 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
     cmsysProcess_SetTimeout(cp, timeout);
   }
 
+  bool echo_stdout = false;
+  bool echo_stderr = false;
+  bool echo_output_from_variable = true;
+  std::string echo_output =
+    this->Makefile->GetSafeDefinition("CMAKE_EXECUTE_PROCESS_COMMAND_ECHO");
+  if (!arguments.CommandEcho.empty()) {
+    echo_output_from_variable = false;
+    echo_output = arguments.CommandEcho;
+  }
+
+  if (!echo_output.empty()) {
+    if (echo_output == "STDERR") {
+      echo_stderr = true;
+    } else if (echo_output == "STDOUT") {
+      echo_stdout = true;
+    } else if (echo_output != "NONE") {
+      std::string error;
+      if (echo_output_from_variable) {
+        error = "CMAKE_EXECUTE_PROCESS_COMMAND_ECHO set to '";
+      } else {
+        error = " called with '";
+      }
+      error += echo_output;
+      error += "' expected STDERR|STDOUT|NONE";
+      if (!echo_output_from_variable) {
+        error += " for COMMAND_ECHO.";
+      }
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, error);
+      return true;
+    }
+  }
+  if (echo_stdout || echo_stderr) {
+    std::string command;
+    for (auto& cmd : arguments.Commands) {
+      command += "'";
+      command += cmJoin(cmd, "' '");
+      command += "'";
+      command += "\n";
+    }
+    if (echo_stdout) {
+      std::cout << command;
+    } else if (echo_stderr) {
+      std::cerr << command;
+    }
+  }
   // Start the process.
   cmsysProcess_Execute(cp);
 
