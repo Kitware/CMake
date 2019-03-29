@@ -934,10 +934,8 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   // Implicit include directories
   std::vector<std::string> implicitDirs;
   std::set<std::string> implicitSet;
-  // Checks if this is not an implicit include directory
-  auto notImplicit = [&implicitSet](std::string const& dir) {
-    return (implicitSet.find(dir) == implicitSet.end());
-  };
+  // Include directories to be excluded as if they were implicit.
+  std::set<std::string> implicitExclude;
   {
     // Raw list of implicit include directories
     // Start with "standard" directories that we unconditionally add below.
@@ -975,7 +973,8 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
                      [](std::string const& d) {
                        return cmHasLiteralSuffix(d, "/usr/include");
                      }) != impDirVec.end()) {
-      impDirVec.emplace_back("/usr/include");
+      // Only exclude this hard coded path for backwards compatibility.
+      implicitExclude.emplace("/usr/include");
     }
 
     for (std::string const& i : impDirVec) {
@@ -984,6 +983,12 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
       }
     }
   }
+
+  // Checks if this is not an excluded (implicit) include directory.
+  auto notExcluded = [&implicitSet, &implicitExclude](std::string const& dir) {
+    return ((implicitSet.find(dir) == implicitSet.end()) &&
+            (implicitExclude.find(dir) == implicitExclude.end()));
+  };
 
   // Get the target-specific include directories.
   std::vector<BT<std::string>> userDirs =
@@ -1001,7 +1006,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
           cmSystemTools::ComparePath(udr.Value, topBinaryDir) ||
           cmSystemTools::IsSubDirectory(udr.Value, topSourceDir) ||
           cmSystemTools::IsSubDirectory(udr.Value, topBinaryDir)) {
-        if (notImplicit(udr.Value)) {
+        if (notExcluded(udr.Value)) {
           emitBT(udr);
         }
       }
@@ -1010,7 +1015,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
 
   // Emit remaining non implicit user direcories.
   for (BT<std::string> const& udr : userDirs) {
-    if (notImplicit(udr.Value)) {
+    if (notExcluded(udr.Value)) {
       emitBT(udr);
     }
   }
@@ -1029,7 +1034,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   if (!stripImplicitDirs) {
     // Append implicit directories that were requested by the user only
     for (BT<std::string> const& udr : userDirs) {
-      if (!notImplicit(udr.Value)) {
+      if (implicitSet.find(udr.Value) != implicitSet.end()) {
         emitBT(udr);
       }
     }
