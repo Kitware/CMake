@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.14)
 project(Minimal NONE)
 
 #
@@ -37,6 +37,14 @@ set(targets
   openbsd-C-Clang-5.0.1 openbsd-CXX-Clang-5.0.1
   sunos-C-SunPro-5.13.0 sunos-CXX-SunPro-5.13.0 sunos-Fortran-SunPro-8.8.0
   )
+
+if(CMAKE_HOST_WIN32)
+  # The KWSys actual-case cache breaks case sensitivity on Windows.
+  list(FILTER targets EXCLUDE REGEX "-XL|-SunPro")
+else()
+  # Windows drive letters are not recognized as absolute on other platforms.
+  list(FILTER targets EXCLUDE REGEX "mingw")
+endif()
 
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitIncludeInfo.cmake)
 

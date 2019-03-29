@@ -212,15 +212,27 @@ function(cmake_parse_implicit_include_info text lang dir_var log_var state_var)
     endif()
   endforeach()
 
+  set(implicit_dirs "")
+  foreach(d IN LISTS implicit_dirs_tmp)
+    if(IS_ABSOLUTE "${d}")
+      get_filename_component(dir "${d}" ABSOLUTE)
+      list(APPEND implicit_dirs "${dir}")
+      string(APPEND log "  collapse include dir [${d}] ==> [${dir}]\n")
+    else()
+      string(APPEND log "  skipping relative include dir [${d}]\n")
+    endif()
+  endforeach()
+  list(REMOVE_DUPLICATES implicit_dirs)
+
   # Log results.
   if(state STREQUAL done)
-    string(APPEND log "  implicit include dirs: [${implicit_dirs_tmp}]\n")
+    string(APPEND log "  implicit include dirs: [${implicit_dirs}]\n")
   else()
     string(APPEND log "  warn: unable to parse implicit include dirs!\n")
   endif()
 
   # Return results.
-  set(${dir_var} "${implicit_dirs_tmp}" PARENT_SCOPE)
+  set(${dir_var} "${implicit_dirs}" PARENT_SCOPE)
   set(${log_var} "${log}" PARENT_SCOPE)
   set(${state_var} "${state}" PARENT_SCOPE)
 
