@@ -15,6 +15,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${Plugin_BINARY_DIR}/lib/static)
 set(KWSYS_NAMESPACE kwsys)
 set(KWSYS_HEADER_ROOT ${Plugin_BINARY_DIR}/include)
 set(KWSYS_USE_DynamicLoader 1)
+set(KWSYS_ENCODING_DEFAULT_CODEPAGE CP_UTF8)
 add_subdirectory(${Plugin_SOURCE_DIR}/../../Source/kwsys src/kwsys)
 
 # Configure the location of plugins.
