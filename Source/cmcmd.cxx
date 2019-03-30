@@ -368,7 +368,7 @@ struct CoCompileJob
 };
 
 // called when args[0] == "__run_co_compile"
-int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
+int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
 {
   std::vector<CoCompileJob> jobs;
   std::string sourceFile;             // store --source=
@@ -466,7 +466,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
   return ret;
 }
 
-int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
+int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
 {
   // IF YOU ADD A NEW COMMAND, DOCUMENT IT ABOVE and in cmakemain.cxx
   if (args.size() > 1) {
@@ -1262,7 +1262,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
   return 1;
 }
 
-int cmcmd::HashSumFile(std::vector<std::string>& args, cmCryptoHash::Algo algo)
+int cmcmd::HashSumFile(std::vector<std::string> const& args,
+                       cmCryptoHash::Algo algo)
 {
   if (args.size() < 3) {
     return -1;
@@ -1289,7 +1290,7 @@ int cmcmd::HashSumFile(std::vector<std::string>& args, cmCryptoHash::Algo algo)
   return retval;
 }
 
-int cmcmd::SymlinkLibrary(std::vector<std::string>& args)
+int cmcmd::SymlinkLibrary(std::vector<std::string> const& args)
 {
   int result = 0;
   std::string realName = args[2];
@@ -1313,7 +1314,7 @@ int cmcmd::SymlinkLibrary(std::vector<std::string>& args)
   return result;
 }
 
-int cmcmd::SymlinkExecutable(std::vector<std::string>& args)
+int cmcmd::SymlinkExecutable(std::vector<std::string> const& args)
 {
   int result = 0;
   std::string const& realName = args[2];
@@ -1387,7 +1388,7 @@ static void cmcmdProgressReport(std::string const& dir, std::string const& num)
   }
 }
 
-int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
+int cmcmd::ExecuteEchoColor(std::vector<std::string> const& args)
 {
   // The arguments are
   //   args[0] == <cmake-executable>
@@ -1445,7 +1446,7 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
   return 0;
 }
 
-int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
+int cmcmd::ExecuteLinkScript(std::vector<std::string> const& args)
 {
   // The arguments are
   //   args[0] == <cmake-executable>
@@ -1658,9 +1659,9 @@ std::ostream& operator<<(std::ostream& stream,
   return stream;
 }
 
-static bool RunCommand(const char* comment, std::vector<std::string>& command,
-                       bool verbose, NumberFormat exitFormat,
-                       int* retCodeOut = nullptr,
+static bool RunCommand(const char* comment,
+                       std::vector<std::string> const& command, bool verbose,
+                       NumberFormat exitFormat, int* retCodeOut = nullptr,
                        bool (*retCodeOkay)(int) = nullptr)
 {
   if (verbose) {
