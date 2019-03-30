@@ -2266,7 +2266,7 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
       def += define.substr(0, eq);
       if (eq != std::string::npos) {
         def += "=";
-        def += this->EscapeForShell(define.c_str() + eq + 1, true);
+        def += this->EscapeForShell(define.substr(eq + 1), true);
       }
     }
     definesString += itemSeparator;

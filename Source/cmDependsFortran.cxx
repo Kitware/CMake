@@ -295,7 +295,7 @@ void cmDependsFortran::MatchRemoteModules(std::istream& fin,
           // They do not include the ".mod" extension.
           mod += ".mod";
         }
-        this->ConsiderModule(mod.c_str() + 1, stampDir);
+        this->ConsiderModule(mod.substr(1), stampDir);
       }
     } else if (line == "provides") {
       doing_provides = true;

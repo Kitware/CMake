@@ -2265,8 +2265,8 @@ bool cmCTestTestHandler::SetTestsProperties(
             size_t pos = val.find_first_of('=');
             if (pos != std::string::npos) {
               std::string mKey = val.substr(0, pos);
-              const char* mVal = val.c_str() + pos + 1;
-              rt.Measurements[mKey] = mVal;
+              std::string mVal = val.substr(pos + 1);
+              rt.Measurements[mKey] = std::move(mVal);
             } else {
               rt.Measurements[val] = "1";
             }
