@@ -107,7 +107,7 @@ public:
   void RemoveCacheEntryProperty(std::string const& key,
                                 std::string const& propertyName);
 
-  ///! Break up a line like VAR:type="value" into var, type and value
+  //! Break up a line like VAR:type="value" into var, type and value
   static bool ParseCacheEntry(const std::string& entry, std::string& var,
                               std::string& value,
                               cmStateEnums::CacheEntryType& type);

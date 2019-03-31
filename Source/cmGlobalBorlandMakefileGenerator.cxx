@@ -34,7 +34,7 @@ void cmGlobalBorlandMakefileGenerator::EnableLanguage(
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
-///! Create a local generator appropriate to this Global Generator
+//! Create a local generator appropriate to this Global Generator
 cmLocalGenerator* cmGlobalBorlandMakefileGenerator::CreateLocalGenerator(
   cmMakefile* mf)
 {

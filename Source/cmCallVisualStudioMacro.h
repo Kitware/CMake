@@ -16,16 +16,16 @@
 class cmCallVisualStudioMacro
 {
 public:
-  ///! Call the named macro in instances of Visual Studio with the
-  ///! given solution file open. Pass "ALL" for slnFile to call the
-  ///! macro in each Visual Studio instance.
+  //! Call the named macro in instances of Visual Studio with the
+  //! given solution file open. Pass "ALL" for slnFile to call the
+  //! macro in each Visual Studio instance.
   static int CallMacro(const std::string& slnFile, const std::string& macro,
                        const std::string& args,
                        const bool logErrorsAsMessages);
 
-  ///! Count the number of running instances of Visual Studio with the
-  ///! given solution file open. Pass "ALL" for slnFile to count all
-  ///! running Visual Studio instances.
+  //! Count the number of running instances of Visual Studio with the
+  //! given solution file open. Pass "ALL" for slnFile to count all
+  //! running Visual Studio instances.
   static int GetNumberOfRunningVisualStudioInstances(
     const std::string& slnFile);
 

@@ -162,7 +162,7 @@ public:
   int Configure();
   int ActualConfigure();
 
-  ///! Break up a line like VAR:type="value" into var, type and value
+  //! Break up a line like VAR:type="value" into var, type and value
   static bool ParseCacheEntry(const std::string& entry, std::string& var,
                               std::string& value,
                               cmStateEnums::CacheEntryType& type);
@@ -176,40 +176,40 @@ public:
   bool DeleteCache(const std::string& path);
   void PreLoadCMakeFiles();
 
-  ///! Create a GlobalGenerator
+  //! Create a GlobalGenerator
   cmGlobalGenerator* CreateGlobalGenerator(const std::string& name);
 
-  ///! Return the global generator assigned to this instance of cmake
+  //! Return the global generator assigned to this instance of cmake
   cmGlobalGenerator* GetGlobalGenerator() { return this->GlobalGenerator; }
-  ///! Return the global generator assigned to this instance of cmake, const
+  //! Return the global generator assigned to this instance of cmake, const
   const cmGlobalGenerator* GetGlobalGenerator() const
   {
     return this->GlobalGenerator;
   }
 
-  ///! Return the full path to where the CMakeCache.txt file should be.
+  //! Return the full path to where the CMakeCache.txt file should be.
   static std::string FindCacheFile(const std::string& binaryDir);
 
-  ///! Return the global generator assigned to this instance of cmake
+  //! Return the global generator assigned to this instance of cmake
   void SetGlobalGenerator(cmGlobalGenerator*);
 
-  ///! Get the names of the current registered generators
+  //! Get the names of the current registered generators
   void GetRegisteredGenerators(std::vector<GeneratorInfo>& generators,
                                bool includeNamesWithPlatform = true) const;
 
-  ///! Set the name of the selected generator-specific instance.
+  //! Set the name of the selected generator-specific instance.
   void SetGeneratorInstance(std::string const& instance)
   {
     this->GeneratorInstance = instance;
   }
 
-  ///! Set the name of the selected generator-specific platform.
+  //! Set the name of the selected generator-specific platform.
   void SetGeneratorPlatform(std::string const& ts)
   {
     this->GeneratorPlatform = ts;
   }
 
-  ///! Set the name of the selected generator-specific toolset.
+  //! Set the name of the selected generator-specific toolset.
   void SetGeneratorToolset(std::string const& ts)
   {
     this->GeneratorToolset = ts;
@@ -244,7 +244,7 @@ public:
    * Given a variable name, return its value (as a string).
    */
   const char* GetCacheDefinition(const std::string&) const;
-  ///! Add an entry into the cache
+  //! Add an entry into the cache
   void AddCacheEntry(const std::string& key, const char* value,
                      const char* helpString, int type);
 
@@ -263,14 +263,14 @@ public:
    */
   int GetSystemInformation(std::vector<std::string>&);
 
-  ///! Parse command line arguments
+  //! Parse command line arguments
   void SetArgs(const std::vector<std::string>& args);
 
-  ///! Is this cmake running as a result of a TRY_COMPILE command
+  //! Is this cmake running as a result of a TRY_COMPILE command
   bool GetIsInTryCompile() const;
   void SetIsInTryCompile(bool b);
 
-  ///! Parse command line arguments that might set cache values
+  //! Parse command line arguments that might set cache values
   bool SetCacheArgs(const std::vector<std::string>&);
 
   using ProgressCallbackType = std::function<void(const std::string&, float)>;
@@ -283,24 +283,24 @@ public:
    */
   void SetProgressCallback(ProgressCallbackType f);
 
-  ///! this is called by generators to update the progress
+  //! this is called by generators to update the progress
   void UpdateProgress(const std::string& msg, float prog);
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  ///! Get the variable watch object
+  //! Get the variable watch object
   cmVariableWatch* GetVariableWatch() { return this->VariableWatch; }
 #endif
 
   std::vector<cmDocumentationEntry> GetGeneratorsDocumentation();
 
-  ///! Set/Get a property of this target file
+  //! Set/Get a property of this target file
   void SetProperty(const std::string& prop, const char* value);
   void AppendProperty(const std::string& prop, const char* value,
                       bool asString = false);
   const char* GetProperty(const std::string& prop);
   bool GetPropertyAsBool(const std::string& prop);
 
-  ///! Get or create an cmInstalledFile instance and return a pointer to it
+  //! Get or create an cmInstalledFile instance and return a pointer to it
   cmInstalledFile* GetOrCreateInstalledFile(cmMakefile* mf,
                                             const std::string& name);
 
@@ -311,13 +311,13 @@ public:
     return this->InstalledFiles;
   }
 
-  ///! Do all the checks before running configure
+  //! Do all the checks before running configure
   int DoPreConfigureChecks();
 
   void SetWorkingMode(WorkingMode mode) { this->CurrentWorkingMode = mode; }
   WorkingMode GetWorkingMode() { return this->CurrentWorkingMode; }
 
-  ///! Debug the try compile stuff by not deleting the files
+  //! Debug the try compile stuff by not deleting the files
   bool GetDebugTryCompile() { return this->DebugTryCompile; }
   void DebugTryCompileOn() { this->DebugTryCompile = true; }
 
@@ -423,13 +423,13 @@ public:
     MessageType t, std::string const& text,
     cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
 
-  ///! run the --build option
+  //! run the --build option
   int Build(int jobs, const std::string& dir,
             const std::vector<std::string>& targets, const std::string& config,
             const std::vector<std::string>& nativeOptions, bool clean,
             bool verbose);
 
-  ///! run the --open option
+  //! run the --open option
   bool Open(const std::string& dir, bool dryRun);
 
   void UnwatchUnusedCli(const std::string& var);
@@ -462,12 +462,12 @@ protected:
   std::string GeneratorPlatform;
   std::string GeneratorToolset;
 
-  ///! read in a cmake list file to initialize the cache
+  //! read in a cmake list file to initialize the cache
   void ReadListFile(const std::vector<std::string>& args,
                     const std::string& path);
   bool FindPackage(const std::vector<std::string>& args);
 
-  ///! Check if CMAKE_CACHEFILE_DIR is set. If it is not, delete the log file.
+  //! Check if CMAKE_CACHEFILE_DIR is set. If it is not, delete the log file.
   ///  If it is set, truncate it to 50kb
   void TruncateOutputLog(const char* fname);
 

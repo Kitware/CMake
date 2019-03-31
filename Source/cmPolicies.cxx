@@ -299,7 +299,7 @@ bool cmPolicies::GetPolicyID(const char* id, cmPolicies::PolicyID& pid)
   return stringToId(id, pid);
 }
 
-///! return a warning string for a given policy
+//! return a warning string for a given policy
 std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 {
   std::ostringstream msg;
@@ -333,7 +333,7 @@ std::string cmPolicies::GetPolicyDeprecatedWarning(cmPolicies::PolicyID id)
   return msg.str();
 }
 
-///! return an error string for when a required policy is unspecified
+//! return an error string for when a required policy is unspecified
 std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 {
   std::ostringstream error;
@@ -359,7 +359,7 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
   return error.str();
 }
 
-///! Get the default status for a policy
+//! Get the default status for a policy
 cmPolicies::PolicyStatus cmPolicies::GetPolicyStatus(
   cmPolicies::PolicyID /*unused*/)
 {

@@ -389,7 +389,7 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
   return { std::move(makeCommand) };
 }
 
-///! Create a local generator appropriate to this Global Generator
+//! Create a local generator appropriate to this Global Generator
 cmLocalGenerator* cmGlobalXCodeGenerator::CreateLocalGenerator(cmMakefile* mf)
 {
   return new cmLocalXCodeGenerator(this, mf);

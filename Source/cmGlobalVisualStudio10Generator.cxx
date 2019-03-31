@@ -509,7 +509,7 @@ std::string cmGlobalVisualStudio10Generator::SelectWindowsCEToolset() const
   return "";
 }
 
-///! Create a local generator appropriate to this Global Generator
+//! Create a local generator appropriate to this Global Generator
 cmLocalGenerator* cmGlobalVisualStudio10Generator::CreateLocalGenerator(
   cmMakefile* mf)
 {

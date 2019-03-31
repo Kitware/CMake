@@ -86,13 +86,13 @@ struct GeneratedMakeCommand
 class cmGlobalGenerator
 {
 public:
-  ///! Free any memory allocated with the GlobalGenerator
+  //! Free any memory allocated with the GlobalGenerator
   cmGlobalGenerator(cmake* cm);
   virtual ~cmGlobalGenerator();
 
   virtual cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf);
 
-  ///! Get the name for this generator
+  //! Get the name for this generator
   virtual std::string GetName() const { return "Generic"; }
 
   /** Check whether the given name matches the current generator.  */
@@ -236,7 +236,7 @@ public:
                                         const std::string& native,
                                         bool ignoreErrors);
 
-  ///! Get the CMake instance
+  //! Get the CMake instance
   cmake* GetCMakeInstance() const { return this->CMakeInstance; }
 
   void SetConfiguredFilesPath(cmGlobalGenerator* gen);
@@ -261,7 +261,7 @@ public:
 
   void AddMakefile(cmMakefile* mf);
 
-  ///! Set an generator for an "external makefile based project"
+  //! Set an generator for an "external makefile based project"
   void SetExternalMakefileProjectGenerator(
     cmExternalMakefileProjectGenerator* extraGenerator);
 
@@ -290,19 +290,19 @@ public:
   bool GetForceUnixPaths() const { return this->ForceUnixPaths; }
   bool GetToolSupportsColor() const { return this->ToolSupportsColor; }
 
-  ///! return the language for the given extension
+  //! return the language for the given extension
   std::string GetLanguageFromExtension(const char* ext) const;
-  ///! is an extension to be ignored
+  //! is an extension to be ignored
   bool IgnoreFile(const char* ext) const;
-  ///! What is the preference for linkers and this language (None or Preferred)
+  //! What is the preference for linkers and this language (None or Preferred)
   int GetLinkerPreference(const std::string& lang) const;
-  ///! What is the object file extension for a given source file?
+  //! What is the object file extension for a given source file?
   std::string GetLanguageOutputExtension(cmSourceFile const&) const;
 
-  ///! What is the configurations directory variable called?
+  //! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGIntDir() const { return "."; }
 
-  ///! expand CFGIntDir for a configuration
+  //! expand CFGIntDir for a configuration
   virtual std::string ExpandCFGIntDir(const std::string& str,
                                       const std::string& config) const;
 
@@ -318,7 +318,7 @@ public:
    */
   virtual bool FindMakeProgram(cmMakefile*);
 
-  ///! Find a target by name by searching the local generators.
+  //! Find a target by name by searching the local generators.
   cmTarget* FindTarget(const std::string& name,
                        bool excludeAliases = false) const;
 

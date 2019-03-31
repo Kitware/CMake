@@ -34,13 +34,13 @@ public:
     return new cmGlobalGeneratorSimpleFactory<cmGlobalGhsMultiGenerator>();
   }
 
-  ///! create the correct local generator
+  //! create the correct local generator
   cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
   /// @return the name of this generator.
   static std::string GetActualName() { return "Green Hills MULTI"; }
 
-  ///! Get the name for this generator
+  //! Get the name for this generator
   std::string GetName() const override { return GetActualName(); }
 
   /// Overloaded methods. @see cmGlobalGenerator::GetDocumentation()

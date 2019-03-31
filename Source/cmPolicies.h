@@ -332,27 +332,27 @@ public:
     CMPCOUNT
   };
 
-  ///! convert a string policy ID into a number
+  //! convert a string policy ID into a number
   static bool GetPolicyID(const char* id, /* out */ cmPolicies::PolicyID& pid);
 
-  ///! Get the default status for a policy
+  //! Get the default status for a policy
   static cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
 
-  ///! Set a policy level for this listfile
+  //! Set a policy level for this listfile
   static bool ApplyPolicyVersion(cmMakefile* mf,
                                  std::string const& version_min,
                                  std::string const& version_max);
   static bool ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
                                  unsigned int minorVer, unsigned int patchVer);
 
-  ///! return a warning string for a given policy
+  //! return a warning string for a given policy
   static std::string GetPolicyWarning(cmPolicies::PolicyID id);
   static std::string GetPolicyDeprecatedWarning(cmPolicies::PolicyID id);
 
-  ///! return an error string for when a required policy is unspecified
+  //! return an error string for when a required policy is unspecified
   static std::string GetRequiredPolicyError(cmPolicies::PolicyID id);
 
-  ///! return an error string for when a required policy is unspecified
+  //! return an error string for when a required policy is unspecified
   static std::string GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id);
 
   /** Represent a set of policy values.  */

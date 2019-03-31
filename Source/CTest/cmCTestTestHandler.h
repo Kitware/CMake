@@ -59,7 +59,7 @@ public:
    */
   void PopulateCustomVectors(cmMakefile* mf) override;
 
-  ///! Control the use of the regular expresisons, call these methods to turn
+  //! Control the use of the regular expresisons, call these methods to turn
   /// them on
   void UseIncludeRegExp();
   void UseExcludeRegExp();
@@ -78,7 +78,7 @@ public:
     this->CustomMaximumFailedTestOutputSize = n;
   }
 
-  ///! pass the -I argument down
+  //! pass the -I argument down
   void SetTestsToRunInformation(const char*);
 
   cmCTestTestHandler();

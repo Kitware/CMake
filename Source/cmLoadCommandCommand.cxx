@@ -33,7 +33,7 @@ public:
     this->info.CAPI = &cmStaticCAPI;
   }
 
-  ///! clean up any memory allocated by the plugin
+  //! clean up any memory allocated by the plugin
   ~cmLoadedCommand() override;
 
   /**

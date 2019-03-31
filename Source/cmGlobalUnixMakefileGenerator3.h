@@ -67,7 +67,7 @@ public:
       cmGlobalUnixMakefileGenerator3>();
   }
 
-  ///! Get the name for the generator.
+  //! Get the name for the generator.
   std::string GetName() const override
   {
     return cmGlobalUnixMakefileGenerator3::GetActualName();

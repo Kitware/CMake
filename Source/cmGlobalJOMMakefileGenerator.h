@@ -20,7 +20,7 @@ public:
   {
     return new cmGlobalGeneratorSimpleFactory<cmGlobalJOMMakefileGenerator>();
   }
-  ///! Get the name for the generator.
+  //! Get the name for the generator.
   std::string GetName() const override
   {
     return cmGlobalJOMMakefileGenerator::GetActualName();

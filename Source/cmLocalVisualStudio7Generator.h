@@ -43,7 +43,7 @@ public:
 class cmLocalVisualStudio7Generator : public cmLocalVisualStudioGenerator
 {
 public:
-  ///! Set cache only and recurse to false by default.
+  //! Set cache only and recurse to false by default.
   cmLocalVisualStudio7Generator(cmGlobalGenerator* gg, cmMakefile* mf);
 
   virtual ~cmLocalVisualStudio7Generator();

@@ -76,13 +76,13 @@ public:
 
   bool IsRootMakefile() const;
 
-  ///! Get the makefile for this generator
+  //! Get the makefile for this generator
   cmMakefile* GetMakefile() { return this->Makefile; }
 
-  ///! Get the makefile for this generator, const version
+  //! Get the makefile for this generator, const version
   const cmMakefile* GetMakefile() const { return this->Makefile; }
 
-  ///! Get the GlobalGenerator this is associated with
+  //! Get the GlobalGenerator this is associated with
   cmGlobalGenerator* GetGlobalGenerator() { return this->GlobalGenerator; }
   const cmGlobalGenerator* GetGlobalGenerator() const
   {
@@ -118,7 +118,7 @@ public:
   void AddCompilerRequirementFlag(std::string& flags,
                                   cmGeneratorTarget const* target,
                                   const std::string& lang);
-  ///! Append flags to a string.
+  //! Append flags to a string.
   virtual void AppendFlags(std::string& flags,
                            const std::string& newFlags) const;
   virtual void AppendFlags(std::string& flags, const char* newFlags) const;
@@ -131,7 +131,7 @@ public:
                                             cmGeneratorTarget* target,
                                             const std::string& config,
                                             const std::string& lang);
-  ///! Get the include flags for the current makefile and language
+  //! Get the include flags for the current makefile and language
   std::string GetIncludeFlags(const std::vector<std::string>& includes,
                               cmGeneratorTarget* target,
                               const std::string& lang,
@@ -403,7 +403,7 @@ public:
                               const std::string& prop);
 
 protected:
-  ///! put all the libraries for a target on into the given stream
+  //! put all the libraries for a target on into the given stream
   void OutputLinkLibraries(cmComputeLinkInformation* pcli,
                            cmLinkLineComputer* linkLineComputer,
                            std::string& linkLibraries,

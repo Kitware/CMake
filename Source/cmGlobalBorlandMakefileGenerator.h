@@ -22,7 +22,7 @@ public:
       cmGlobalBorlandMakefileGenerator>();
   }
 
-  ///! Get the name for the generator.
+  //! Get the name for the generator.
   std::string GetName() const override
   {
     return cmGlobalBorlandMakefileGenerator::GetActualName();
@@ -32,7 +32,7 @@ public:
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 
-  ///! Create a local generator appropriate to this Global Generator
+  //! Create a local generator appropriate to this Global Generator
   cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
   /**
