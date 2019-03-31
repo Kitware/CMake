@@ -710,6 +710,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       this->GraphVizFile = path;
       if (this->GraphVizFile.empty()) {
         cmSystemTools::Error("No file specified for --graphviz");
+        return;
       }
     } else if (arg.find("--debug-trycompile", 0) == 0) {
       std::cout << "debug trycompile on\n";
@@ -797,9 +798,9 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         cmSystemTools::Error("Could not create named generator " + value +
                              kdevError);
         this->PrintGeneratorList();
-      } else {
-        this->SetGlobalGenerator(gen);
+        return;
       }
+      this->SetGlobalGenerator(gen);
     }
     // no option assume it is the path to the source or an existing build
     else {
