@@ -1313,7 +1313,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
   // The build.make file may have explicit dependencies for the object
   // files but these will not affect the scanning process so they need
   // not be considered.
-  std::map<std::string, cmDepends::DependencyVector> validDependencies;
+  cmDepends::DependencyMap validDependencies;
   bool needRescanDependencies = false;
   if (!needRescanDirInfo) {
     cmDependsC checker;
@@ -1353,8 +1353,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
 
 bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   std::string const& targetDir, std::string const& dependFile,
-  std::string const& internalDependFile,
-  std::map<std::string, cmDepends::DependencyVector>& validDeps)
+  std::string const& internalDependFile, cmDepends::DependencyMap& validDeps)
 {
   // Read the directory information file.
   cmMakefile* mf = this->Makefile;

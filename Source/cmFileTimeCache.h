@@ -5,7 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmFileTime.h"
+#include "cmFileTime.h" // IWYU pragma: keep
 #include <string>
 #include <unordered_map>
 
@@ -28,6 +28,12 @@ public:
   bool Load(std::string const& fileName, cmFileTime& fileTime);
 
   /**
+   * @brief Removes a file time from the cache
+   * @return true if the file was found in the cache and removed
+   */
+  bool Remove(std::string const& fileName);
+
+  /**
    * @brief Compare file modification times.
    * @return true for successful comparison and false for error.
    *
@@ -44,8 +50,7 @@ public:
   bool DifferS(std::string const& f1, std::string const& f2);
 
 private:
-  typedef std::unordered_map<std::string, cmFileTime> FileTimeMap;
-  FileTimeMap FileTimes;
+  std::unordered_map<std::string, cmFileTime> Cache;
 };
 
 #endif

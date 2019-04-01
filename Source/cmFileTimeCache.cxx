@@ -14,8 +14,8 @@ bool cmFileTimeCache::Load(std::string const& fileName, cmFileTime& fileTime)
 {
   // Use the stored time if available.
   {
-    auto fit = this->FileTimes.find(fileName);
-    if (fit != this->FileTimes.end()) {
+    auto fit = this->Cache.find(fileName);
+    if (fit != this->Cache.end()) {
       fileTime = fit->second;
       return true;
     }
@@ -25,8 +25,13 @@ bool cmFileTimeCache::Load(std::string const& fileName, cmFileTime& fileTime)
     return false;
   }
   // Store file time in cache
-  this->FileTimes[fileName] = fileTime;
+  this->Cache[fileName] = fileTime;
   return true;
+}
+
+bool cmFileTimeCache::Remove(std::string const& fileName)
+{
+  return (this->Cache.erase(fileName) != 0);
 }
 
 bool cmFileTimeCache::Compare(std::string const& f1, std::string const& f2,

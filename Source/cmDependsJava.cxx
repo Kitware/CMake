@@ -24,8 +24,7 @@ bool cmDependsJava::WriteDependencies(const std::set<std::string>& sources,
 
 bool cmDependsJava::CheckDependencies(
   std::istream& /*internalDepends*/,
-  const std::string& /*internalDependsFileName*/,
-  std::map<std::string, DependencyVector>& /*validDeps*/)
+  const std::string& /*internalDependsFileName*/, DependencyMap& /*validDeps*/)
 {
   return true;
 }
