@@ -368,7 +368,7 @@ struct CoCompileJob
 };
 
 // called when args[0] == "__run_co_compile"
-int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
+int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
 {
   std::vector<CoCompileJob> jobs;
   std::string sourceFile;             // store --source=
@@ -381,8 +381,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
 
   std::vector<std::string> orig_cmd;
   bool doing_options = true;
-  for (std::string::size_type i = 2; i < args.size(); ++i) {
-    std::string const& arg = args[i];
+  for (std::string const& arg : cmMakeRange(args).advance(2)) {
     // if the arg is -- then the rest of the args after
     // go into orig_cmd
     if (arg == "--") {
@@ -466,7 +465,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string>& args)
   return ret;
 }
 
-int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
+int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
 {
   // IF YOU ADD A NEW COMMAND, DOCUMENT IT ABOVE and in cmakemain.cxx
   if (args.size() > 1) {
@@ -482,9 +481,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
       // If error occurs we want to continue copying next files.
       bool return_value = false;
-      for (std::string::size_type cc = 2; cc < args.size() - 1; cc++) {
-        if (!cmsys::SystemTools::CopyFileAlways(args[cc], args.back())) {
-          std::cerr << "Error copying file \"" << args[cc] << "\" to \""
+      for (auto const& arg : cmMakeRange(args).advance(2).retreat(1)) {
+        if (!cmsys::SystemTools::CopyFileAlways(arg, args.back())) {
+          std::cerr << "Error copying file \"" << arg << "\" to \""
                     << args.back() << "\".\n";
           return_value = true;
         }
@@ -504,9 +503,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
       // If error occurs we want to continue copying next files.
       bool return_value = false;
-      for (std::string::size_type cc = 2; cc < args.size() - 1; cc++) {
-        if (!cmSystemTools::CopyFileIfDifferent(args[cc], args.back())) {
-          std::cerr << "Error copying file (if different) from \"" << args[cc]
+      for (auto const& arg : cmMakeRange(args).advance(2).retreat(1)) {
+        if (!cmSystemTools::CopyFileIfDifferent(arg, args.back())) {
+          std::cerr << "Error copying file (if different) from \"" << arg
                     << "\" to \"" << args.back() << "\".\n";
           return_value = true;
         }
@@ -518,10 +517,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     if (args[1] == "copy_directory" && args.size() > 3) {
       // If error occurs we want to continue copying next files.
       bool return_value = false;
-      for (std::string::size_type cc = 2; cc < args.size() - 1; cc++) {
-        if (!cmSystemTools::CopyADirectory(args[cc], args.back())) {
-          std::cerr << "Error copying directory from \"" << args[cc]
-                    << "\" to \"" << args.back() << "\".\n";
+      for (auto const& arg : cmMakeRange(args).advance(2).retreat(1)) {
+        if (!cmSystemTools::CopyADirectory(arg, args.back())) {
+          std::cerr << "Error copying directory from \"" << arg << "\" to \""
+                    << args.back() << "\".\n";
           return_value = true;
         }
       }
@@ -614,8 +613,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     }
 
     if (args[1] == "env") {
-      std::vector<std::string>::const_iterator ai = args.begin() + 2;
-      std::vector<std::string>::const_iterator ae = args.end();
+      auto ai = args.cbegin() + 2;
+      auto ae = args.cend();
       for (; ai != ae; ++ai) {
         std::string const& a = *ai;
         if (cmHasLiteralPrefix(a, "--unset=")) {
@@ -654,10 +653,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     if (args[1] == "environment") {
-      std::vector<std::string> env = cmSystemTools::GetEnvironmentVariables();
-      std::vector<std::string>::iterator it;
-      for (it = env.begin(); it != env.end(); ++it) {
-        std::cout << *it << std::endl;
+      for (auto const& env : cmSystemTools::GetEnvironmentVariables()) {
+        std::cout << env << std::endl;
       }
       return 0;
     }
@@ -666,9 +663,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     if (args[1] == "make_directory" && args.size() > 2) {
       // If error occurs we want to continue copying next files.
       bool return_value = false;
-      for (std::string::size_type cc = 2; cc < args.size(); cc++) {
-        if (!cmSystemTools::MakeDirectory(args[cc])) {
-          std::cerr << "Error creating directory \"" << args[cc] << "\".\n";
+      for (auto const& arg : cmMakeRange(args).advance(2)) {
+        if (!cmSystemTools::MakeDirectory(arg)) {
+          std::cerr << "Error creating directory \"" << arg << "\".\n";
           return_value = true;
         }
       }
@@ -687,14 +684,14 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Remove file
     if (args[1] == "remove" && args.size() > 2) {
       bool force = false;
-      for (std::string::size_type cc = 2; cc < args.size(); cc++) {
-        if (args[cc] == "\\-f" || args[cc] == "-f") {
+      for (auto const& arg : cmMakeRange(args).advance(2)) {
+        if (arg == "\\-f" || arg == "-f") {
           force = true;
         } else {
           // Complain if the file could not be removed, still exists,
           // and the -f option was not given.
-          if (!cmSystemTools::RemoveFile(args[cc]) && !force &&
-              cmSystemTools::FileExists(args[cc])) {
+          if (!cmSystemTools::RemoveFile(arg) && !force &&
+              cmSystemTools::FileExists(arg)) {
             return 1;
           }
         }
@@ -704,10 +701,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
     // Touch file
     if (args[1] == "touch" && args.size() > 2) {
-      for (std::string::size_type cc = 2; cc < args.size(); cc++) {
-        if (!cmSystemTools::Touch(args[cc], true)) {
+      for (auto const& arg : cmMakeRange(args).advance(2)) {
+        if (!cmSystemTools::Touch(arg, true)) {
           std::cerr << "cmake -E touch: failed to update \"";
-          std::cerr << args[cc] << "\".\n";
+          std::cerr << arg << "\".\n";
           return 1;
         }
       }
@@ -716,10 +713,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
     // Touch file
     if (args[1] == "touch_nocreate" && args.size() > 2) {
-      for (std::string::size_type cc = 2; cc < args.size(); cc++) {
-        if (!cmSystemTools::Touch(args[cc], false)) {
+      for (auto const& arg : cmMakeRange(args).advance(2)) {
+        if (!cmSystemTools::Touch(arg, false)) {
           std::cerr << "cmake -E touch_nocreate: failed to update \"";
-          std::cerr << args[cc] << "\".\n";
+          std::cerr << arg << "\".\n";
           return 1;
         }
       }
@@ -744,15 +741,15 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Sleep command
     if (args[1] == "sleep" && args.size() > 2) {
       double total = 0;
-      for (size_t i = 2; i < args.size(); ++i) {
+      for (auto const& arg : cmMakeRange(args).advance(2)) {
         double num = 0.0;
         char unit;
         char extra;
-        int n = sscanf(args[i].c_str(), "%lg%c%c", &num, &unit, &extra);
+        int n = sscanf(arg.c_str(), "%lg%c%c", &num, &unit, &extra);
         if ((n == 1 || (n == 2 && unit == 's')) && num >= 0) {
           total += num;
         } else {
-          std::cerr << "Unknown sleep time format \"" << args[i] << "\".\n";
+          std::cerr << "Unknown sleep time format \"" << arg << "\".\n";
           return 1;
         }
       }
@@ -1047,8 +1044,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string mtime;
       std::string format;
       bool doing_options = true;
-      for (std::string::size_type cc = 4; cc < args.size(); cc++) {
-        std::string const& arg = args[cc];
+      for (auto const& arg : cmMakeRange(args).advance(4)) {
         if (doing_options && cmHasLiteralPrefix(arg, "--")) {
           if (arg == "--") {
             doing_options = false;
@@ -1180,17 +1176,15 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       bool isDebug = false;
       std::string pipe;
 
-      for (size_t i = 2; i < args.size(); ++i) {
-        const std::string& a = args[i];
-
-        if (a == "--experimental") {
+      for (auto const& arg : cmMakeRange(args).advance(2)) {
+        if (arg == "--experimental") {
           supportExperimental = true;
-        } else if (a == "--debug") {
+        } else if (arg == "--debug") {
           pipe.clear();
           isDebug = true;
-        } else if (a.substr(0, pipePrefix.size()) == pipePrefix) {
+        } else if (arg.substr(0, pipePrefix.size()) == pipePrefix) {
           isDebug = false;
-          pipe = a.substr(pipePrefix.size());
+          pipe = arg.substr(pipePrefix.size());
           if (pipe.empty()) {
             cmSystemTools::Error("No pipe given after --pipe=");
             return 2;
@@ -1262,15 +1256,15 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
   return 1;
 }
 
-int cmcmd::HashSumFile(std::vector<std::string>& args, cmCryptoHash::Algo algo)
+int cmcmd::HashSumFile(std::vector<std::string> const& args,
+                       cmCryptoHash::Algo algo)
 {
   if (args.size() < 3) {
     return -1;
   }
   int retval = 0;
 
-  for (std::string::size_type cc = 2; cc < args.size(); cc++) {
-    const char* filename = args[cc].c_str();
+  for (auto const& filename : cmMakeRange(args).advance(2)) {
     // Cannot compute sum of a directory
     if (cmSystemTools::FileIsDirectory(filename)) {
       std::cerr << "Error: " << filename << " is a directory" << std::endl;
@@ -1289,7 +1283,7 @@ int cmcmd::HashSumFile(std::vector<std::string>& args, cmCryptoHash::Algo algo)
   return retval;
 }
 
-int cmcmd::SymlinkLibrary(std::vector<std::string>& args)
+int cmcmd::SymlinkLibrary(std::vector<std::string> const& args)
 {
   int result = 0;
   std::string realName = args[2];
@@ -1313,7 +1307,7 @@ int cmcmd::SymlinkLibrary(std::vector<std::string>& args)
   return result;
 }
 
-int cmcmd::SymlinkExecutable(std::vector<std::string>& args)
+int cmcmd::SymlinkExecutable(std::vector<std::string> const& args)
 {
   int result = 0;
   std::string const& realName = args[2];
@@ -1387,7 +1381,7 @@ static void cmcmdProgressReport(std::string const& dir, std::string const& num)
   }
 }
 
-int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
+int cmcmd::ExecuteEchoColor(std::vector<std::string> const& args)
 {
   // The arguments are
   //   args[0] == <cmake-executable>
@@ -1397,55 +1391,54 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
   int color = cmsysTerminal_Color_Normal;
   bool newline = true;
   std::string progressDir;
-  for (unsigned int i = 2; i < args.size(); ++i) {
-    if (args[i].find("--switch=") == 0) {
+  for (auto const& arg : cmMakeRange(args).advance(2)) {
+    if (arg.find("--switch=") == 0) {
       // Enable or disable color based on the switch value.
-      std::string value = args[i].substr(9);
+      std::string value = arg.substr(9);
       if (!value.empty()) {
         enabled = cmSystemTools::IsOn(value);
       }
-    } else if (cmHasLiteralPrefix(args[i], "--progress-dir=")) {
-      progressDir = args[i].substr(15);
-    } else if (cmHasLiteralPrefix(args[i], "--progress-num=")) {
+    } else if (cmHasLiteralPrefix(arg, "--progress-dir=")) {
+      progressDir = arg.substr(15);
+    } else if (cmHasLiteralPrefix(arg, "--progress-num=")) {
       if (!progressDir.empty()) {
-        std::string const& progressNum = args[i].substr(15);
+        std::string const& progressNum = arg.substr(15);
         cmcmdProgressReport(progressDir, progressNum);
       }
-    } else if (args[i] == "--normal") {
+    } else if (arg == "--normal") {
       color = cmsysTerminal_Color_Normal;
-    } else if (args[i] == "--black") {
+    } else if (arg == "--black") {
       color = cmsysTerminal_Color_ForegroundBlack;
-    } else if (args[i] == "--red") {
+    } else if (arg == "--red") {
       color = cmsysTerminal_Color_ForegroundRed;
-    } else if (args[i] == "--green") {
+    } else if (arg == "--green") {
       color = cmsysTerminal_Color_ForegroundGreen;
-    } else if (args[i] == "--yellow") {
+    } else if (arg == "--yellow") {
       color = cmsysTerminal_Color_ForegroundYellow;
-    } else if (args[i] == "--blue") {
+    } else if (arg == "--blue") {
       color = cmsysTerminal_Color_ForegroundBlue;
-    } else if (args[i] == "--magenta") {
+    } else if (arg == "--magenta") {
       color = cmsysTerminal_Color_ForegroundMagenta;
-    } else if (args[i] == "--cyan") {
+    } else if (arg == "--cyan") {
       color = cmsysTerminal_Color_ForegroundCyan;
-    } else if (args[i] == "--white") {
+    } else if (arg == "--white") {
       color = cmsysTerminal_Color_ForegroundWhite;
-    } else if (args[i] == "--bold") {
+    } else if (arg == "--bold") {
       color |= cmsysTerminal_Color_ForegroundBold;
-    } else if (args[i] == "--no-newline") {
+    } else if (arg == "--no-newline") {
       newline = false;
-    } else if (args[i] == "--newline") {
+    } else if (arg == "--newline") {
       newline = true;
     } else {
       // Color is enabled.  Print with the current color.
-      cmSystemTools::MakefileColorEcho(color, args[i].c_str(), newline,
-                                       enabled);
+      cmSystemTools::MakefileColorEcho(color, arg.c_str(), newline, enabled);
     }
   }
 
   return 0;
 }
 
-int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)
+int cmcmd::ExecuteLinkScript(std::vector<std::string> const& args)
 {
   // The arguments are
   //   args[0] == <cmake-executable>
@@ -1658,9 +1651,9 @@ std::ostream& operator<<(std::ostream& stream,
   return stream;
 }
 
-static bool RunCommand(const char* comment, std::vector<std::string>& command,
-                       bool verbose, NumberFormat exitFormat,
-                       int* retCodeOut = nullptr,
+static bool RunCommand(const char* comment,
+                       std::vector<std::string> const& command, bool verbose,
+                       NumberFormat exitFormat, int* retCodeOut = nullptr,
                        bool (*retCodeOkay)(int) = nullptr)
 {
   if (verbose) {
