@@ -15,6 +15,7 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
@@ -325,6 +326,34 @@ static const struct InListNode : public cmGeneratorExpressionNode
       : "1";
   }
 } inListNode;
+
+static const struct RemoveDuplicatesNode : public cmGeneratorExpressionNode
+{
+  RemoveDuplicatesNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 1; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    if (parameters.size() != 1) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<REMOVE_DUPLICATES:...> expression requires one parameter");
+    }
+
+    std::vector<std::string> values;
+    cmSystemTools::ExpandListArgument(parameters.front(), values, true);
+
+    auto valuesEnd = cmRemoveDuplicates(values);
+    auto valuesBegin = values.cbegin();
+    return cmJoin(cmMakeRange(valuesBegin, valuesEnd), ";");
+  }
+
+} removeDuplicatesNode;
 
 static const struct TargetExistsNode : public cmGeneratorExpressionNode
 {
@@ -2158,6 +2187,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "STREQUAL", &strEqualNode },
     { "EQUAL", &equalNode },
     { "IN_LIST", &inListNode },
+    { "REMOVE_DUPLICATES", &removeDuplicatesNode },
     { "LOWER_CASE", &lowerCaseNode },
     { "UPPER_CASE", &upperCaseNode },
     { "MAKE_C_IDENTIFIER", &makeCIdentifierNode },
