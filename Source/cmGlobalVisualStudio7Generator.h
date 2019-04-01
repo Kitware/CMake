@@ -20,7 +20,7 @@ class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 public:
   ~cmGlobalVisualStudio7Generator();
 
-  ///! Create a local generator appropriate to this Global Generator
+  //! Create a local generator appropriate to this Global Generator
   cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -64,7 +64,7 @@ public:
    */
   virtual void OutputSLNFile();
 
-  ///! Lookup a stored GUID or compute one deterministically.
+  //! Lookup a stored GUID or compute one deterministically.
   std::string GetGUID(std::string const& name);
 
   /** Append the subdirectory for the given configuration.  */
@@ -73,7 +73,7 @@ public:
                                 const std::string& suffix,
                                 std::string& dir) override;
 
-  ///! What is the configurations directory variable called?
+  //! What is the configurations directory variable called?
   const char* GetCMakeCFGIntDir() const override
   {
     return "$(ConfigurationName)";

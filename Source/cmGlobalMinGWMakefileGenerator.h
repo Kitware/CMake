@@ -19,7 +19,7 @@ public:
     return new cmGlobalGeneratorSimpleFactory<
       cmGlobalMinGWMakefileGenerator>();
   }
-  ///! Get the name for the generator.
+  //! Get the name for the generator.
   virtual std::string GetName() const
   {
     return cmGlobalMinGWMakefileGenerator::GetActualName();

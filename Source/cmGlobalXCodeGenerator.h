@@ -36,7 +36,7 @@ public:
                          unsigned int version_number);
   static cmGlobalGeneratorFactory* NewFactory();
 
-  ///! Get the name for the generator.
+  //! Get the name for the generator.
   std::string GetName() const override
   {
     return cmGlobalXCodeGenerator::GetActualName();
@@ -46,7 +46,7 @@ public:
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 
-  ///! Create a local generator appropriate to this Global Generator
+  //! Create a local generator appropriate to this Global Generator
   cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
   /**
@@ -81,9 +81,9 @@ public:
 
   bool FindMakeProgram(cmMakefile*) override;
 
-  ///! What is the configurations directory variable called?
+  //! What is the configurations directory variable called?
   const char* GetCMakeCFGIntDir() const override;
-  ///! expand CFGIntDir
+  //! expand CFGIntDir
   std::string ExpandCFGIntDir(const std::string& str,
                               const std::string& config) const override;
 

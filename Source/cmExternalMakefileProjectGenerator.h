@@ -31,13 +31,13 @@ public:
   virtual void EnableLanguage(std::vector<std::string> const& languages,
                               cmMakefile*, bool optional);
 
-  ///! set the global generator which will generate the makefiles
+  //! set the global generator which will generate the makefiles
   virtual void SetGlobalGenerator(cmGlobalGenerator* generator)
   {
     this->GlobalGenerator = generator;
   }
 
-  ///! Return the list of global generators supported by this extra generator
+  //! Return the list of global generators supported by this extra generator
   const std::vector<std::string>& GetSupportedGlobalGenerators() const
   {
     return this->SupportedGlobalGenerators;
@@ -49,7 +49,7 @@ public:
   static std::string CreateFullGeneratorName(
     const std::string& globalGenerator, const std::string& extraGenerator);
 
-  ///! Generate the project files, the Makefiles have already been generated
+  //! Generate the project files, the Makefiles have already been generated
   virtual void Generate() = 0;
 
   void SetName(const std::string& n) { Name = n; }
@@ -59,9 +59,9 @@ public:
                     bool dryRun);
 
 protected:
-  ///! Contains the names of the global generators support by this generator.
+  //! Contains the names of the global generators support by this generator.
   std::vector<std::string> SupportedGlobalGenerators;
-  ///! the global generator which creates the makefiles
+  //! the global generator which creates the makefiles
   const cmGlobalGenerator* GlobalGenerator = nullptr;
 
   std::string Name;

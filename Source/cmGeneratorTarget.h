@@ -69,9 +69,9 @@ public:
   std::string GetExportName() const;
 
   std::vector<std::string> GetPropertyKeys() const;
-  ///! Might return a nullptr if the property is not set or invalid
+  //! Might return a nullptr if the property is not set or invalid
   const char* GetProperty(const std::string& prop) const;
-  ///! Always returns a valid pointer
+  //! Always returns a valid pointer
   const char* GetSafeProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void GetSourceFiles(std::vector<cmSourceFile*>& files,
@@ -602,7 +602,7 @@ public:
       pdb output directory is given.  */
   std::string GetPDBDirectory(const std::string& config) const;
 
-  ///! Return the preferred linker language for this target
+  //! Return the preferred linker language for this target
   std::string GetLinkerLanguage(const std::string& config) const;
 
   /** Does this target have a GNU implib to convert to MS format?  */

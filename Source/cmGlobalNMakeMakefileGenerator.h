@@ -21,7 +21,7 @@ public:
     return new cmGlobalGeneratorSimpleFactory<
       cmGlobalNMakeMakefileGenerator>();
   }
-  ///! Get the name for the generator.
+  //! Get the name for the generator.
   std::string GetName() const override
   {
     return cmGlobalNMakeMakefileGenerator::GetActualName();

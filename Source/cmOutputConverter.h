@@ -27,7 +27,7 @@ public:
   std::string ConvertDirectorySeparatorsForShell(
     const std::string& source) const;
 
-  ///! for existing files convert to output path and short path if spaces
+  //! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const std::string& remote,
                                          OutputFormat format = SHELL) const;
 

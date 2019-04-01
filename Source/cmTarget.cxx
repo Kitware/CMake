@@ -34,7 +34,7 @@
 #include "cmTargetPropertyComputer.h"
 #include "cmake.h"
 
-///! Append all elements from the second container to the first container
+//! Append all elements from the second container to the first container
 template <class C, class R>
 static inline void CApp(C& container, R const& range)
 {

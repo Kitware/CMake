@@ -59,22 +59,22 @@ public:
   cmTarget& operator=(cmTarget const&) = delete;
   cmTarget& operator=(cmTarget&&) noexcept;
 
-  ///! Return the type of target.
+  //! Return the type of target.
   cmStateEnums::TargetType GetType() const;
 
-  ///! Get the cmMakefile that owns this target.
+  //! Get the cmMakefile that owns this target.
   cmMakefile* GetMakefile() const;
 
-  ///! Return the global generator.
+  //! Return the global generator.
   cmGlobalGenerator* GetGlobalGenerator() const;
 
-  ///! Set/Get the name of the target
+  //! Set/Get the name of the target
   const std::string& GetName() const;
 
-  ///! Get the policy map
+  //! Get the policy map
   cmPolicies::PolicyMap const& GetPolicyMap() const;
 
-  ///! Get policy status
+  //! Get policy status
   cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID policy) const;
 
 #define DECLARE_TARGET_POLICY(POLICY)                                         \
@@ -87,30 +87,30 @@ public:
 
 #undef DECLARE_TARGET_POLICY
 
-  ///! Get the list of the PRE_BUILD custom commands for this target
+  //! Get the list of the PRE_BUILD custom commands for this target
   std::vector<cmCustomCommand> const& GetPreBuildCommands() const;
   void AddPreBuildCommand(cmCustomCommand const& cmd);
 
-  ///! Get the list of the PRE_LINK custom commands for this target
+  //! Get the list of the PRE_LINK custom commands for this target
   std::vector<cmCustomCommand> const& GetPreLinkCommands() const;
   void AddPreLinkCommand(cmCustomCommand const& cmd);
 
-  ///! Get the list of the POST_BUILD custom commands for this target
+  //! Get the list of the POST_BUILD custom commands for this target
   std::vector<cmCustomCommand> const& GetPostBuildCommands() const;
   void AddPostBuildCommand(cmCustomCommand const& cmd);
 
-  ///! Add sources to the target.
+  //! Add sources to the target.
   void AddSources(std::vector<std::string> const& srcs);
   void AddTracedSources(std::vector<std::string> const& srcs);
   cmSourceFile* AddSourceCMP0049(const std::string& src);
   cmSourceFile* AddSource(const std::string& src, bool before = false);
 
-  ///! how we identify a library, by name and type
+  //! how we identify a library, by name and type
   typedef std::pair<std::string, cmTargetLinkLibraryType> LibraryID;
   typedef std::vector<LibraryID> LinkLibraryVectorType;
   LinkLibraryVectorType const& GetOriginalLinkLibraries() const;
 
-  ///! Clear the dependency information recorded for this target, if any.
+  //! Clear the dependency information recorded for this target, if any.
   void ClearDependencyInformation(cmMakefile& mf);
 
   void AddLinkLibrary(cmMakefile& mf, const std::string& lib,
@@ -159,23 +159,23 @@ public:
    * commands. It is not a full path nor does it have an extension.
    */
   void AddUtility(std::string const& name, cmMakefile* mf = nullptr);
-  ///! Get the utilities used by this target
+  //! Get the utilities used by this target
   std::set<BT<std::string>> const& GetUtilities() const;
 
-  ///! Set/Get a property of this target file
+  //! Set/Get a property of this target file
   void SetProperty(const std::string& prop, const char* value);
   void AppendProperty(const std::string& prop, const char* value,
                       bool asString = false);
-  ///! Might return a nullptr if the property is not set or invalid
+  //! Might return a nullptr if the property is not set or invalid
   const char* GetProperty(const std::string& prop) const;
-  ///! Always returns a valid pointer
+  //! Always returns a valid pointer
   const char* GetSafeProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
   const char* GetComputedProperty(const std::string& prop,
                                   cmMessenger* messenger,
                                   cmListFileBacktrace const& context) const;
-  ///! Get all properties
+  //! Get all properties
   cmPropertyMap const& GetProperties() const;
 
   bool IsImported() const;
@@ -184,16 +184,16 @@ public:
   bool GetMappedConfig(std::string const& desired_config, const char** loc,
                        const char** imp, std::string& suffix) const;
 
-  ///! Return whether this target is an executable with symbol exports enabled.
+  //! Return whether this target is an executable with symbol exports enabled.
   bool IsExecutableWithExports() const;
 
-  ///! Return whether this target is a shared library Framework on Apple.
+  //! Return whether this target is a shared library Framework on Apple.
   bool IsFrameworkOnApple() const;
 
-  ///! Return whether this target is an executable Bundle on Apple.
+  //! Return whether this target is an executable Bundle on Apple.
   bool IsAppBundleOnApple() const;
 
-  ///! Get a backtrace from the creation of the target.
+  //! Get a backtrace from the creation of the target.
   cmListFileBacktrace const& GetBacktrace() const;
 
   void InsertInclude(std::string const& entry, cmListFileBacktrace const& bt,

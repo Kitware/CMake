@@ -248,7 +248,7 @@ cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   return makeCommands;
 }
 
-///! Create a local generator appropriate to this Global Generator
+//! Create a local generator appropriate to this Global Generator
 cmLocalGenerator* cmGlobalVisualStudio7Generator::CreateLocalGenerator(
   cmMakefile* mf)
 {

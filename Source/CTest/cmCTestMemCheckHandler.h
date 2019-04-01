@@ -114,7 +114,7 @@ private:
   // this type of checker
   void InitializeResultsVectors();
 
-  ///! Initialize memory checking subsystem.
+  //! Initialize memory checking subsystem.
   bool InitializeMemoryChecking();
 
   /**
@@ -143,11 +143,11 @@ private:
   void PostProcessTest(cmCTestTestResult& res, int test);
   void PostProcessBoundsCheckerTest(cmCTestTestResult& res, int test);
 
-  ///! append MemoryTesterOutputFile to the test log
+  //! append MemoryTesterOutputFile to the test log
   void AppendMemTesterOutput(cmCTestTestHandler::cmCTestTestResult& res,
                              std::string const& filename);
 
-  ///! generate the output filename for the given test index
+  //! generate the output filename for the given test index
   void TestOutputFileNames(int test, std::vector<std::string>& files);
 };
 

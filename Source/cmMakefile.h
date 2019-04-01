@@ -257,7 +257,7 @@ public:
    * can be used in CMake to refer to lists, directories, etc.
    */
   void AddDefinition(const std::string& name, const char* value);
-  ///! Add a definition to this makefile and the global cmake cache.
+  //! Add a definition to this makefile and the global cmake cache.
   void AddCacheDefinition(const std::string& name, const char* value,
                           const char* doc, cmStateEnums::CacheEntryType type,
                           bool force = false);
@@ -272,7 +272,7 @@ public:
    * for cache entries, and will only affect the current makefile.
    */
   void RemoveDefinition(const std::string& name);
-  ///! Remove a definition from the cache.
+  //! Remove a definition from the cache.
   void RemoveCacheDefinition(const std::string& name);
 
   /**
@@ -548,7 +548,7 @@ public:
   {
     return this->ListFiles;
   }
-  ///! When the file changes cmake will be re-run from the build system.
+  //! When the file changes cmake will be re-run from the build system.
   void AddCMakeDependFile(const std::string& file)
   {
     this->ListFiles.push_back(file);
@@ -626,7 +626,7 @@ public:
   bool ExecuteCommand(const cmListFileFunction& lff,
                       cmExecutionStatus& status);
 
-  ///! Enable support for named language, if nil then all languages are
+  //! Enable support for named language, if nil then all languages are
   /// enabled.
   void EnableLanguage(std::vector<std::string> const& languages,
                       bool optional);
@@ -641,7 +641,7 @@ public:
   cmVariableWatch* GetVariableWatch() const;
 #endif
 
-  ///! Display progress or status message.
+  //! Display progress or status message.
   void DisplayStatus(const std::string&, float) const;
 
   /**
@@ -677,7 +677,7 @@ public:
    */
   cmSourceFile* GetSourceFileWithOutput(const std::string& outName) const;
 
-  ///! Add a new cmTest to the list of tests for this makefile.
+  //! Add a new cmTest to the list of tests for this makefile.
   cmTest* CreateTest(const std::string& testName);
 
   /** Get a cmTest pointer for a given test name, if the name is
@@ -701,7 +701,7 @@ public:
 
   std::string GetModulesFile(const std::string& name, bool& system) const;
 
-  ///! Set/Get a property of this directory
+  //! Set/Get a property of this directory
   void SetProperty(const std::string& prop, const char* value);
   void AppendProperty(const std::string& prop, const char* value,
                       bool asString = false);
@@ -710,7 +710,7 @@ public:
   bool GetPropertyAsBool(const std::string& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
 
-  ///! Initialize a makefile from its parent
+  //! Initialize a makefile from its parent
   void InitializeFromParent(cmMakefile* parent);
 
   void AddInstallGenerator(cmInstallGenerator* g)

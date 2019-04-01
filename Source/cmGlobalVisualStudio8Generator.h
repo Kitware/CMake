@@ -13,7 +13,7 @@
 class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
-  ///! Get the name for the generator.
+  //! Get the name for the generator.
   std::string GetName() const override { return this->Name; }
 
   /** Get the name of the main stamp list file. */

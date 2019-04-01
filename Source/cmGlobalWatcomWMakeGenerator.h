@@ -29,7 +29,7 @@ public:
   {
     return new cmGlobalGeneratorSimpleFactory<cmGlobalWatcomWMakeGenerator>();
   }
-  ///! Get the name for the generator.
+  //! Get the name for the generator.
   std::string GetName() const override
   {
     return cmGlobalWatcomWMakeGenerator::GetActualName();

@@ -57,7 +57,7 @@ void cmGlobalUnixMakefileGenerator3::EnableLanguage(
   }
 }
 
-///! Create a local generator appropriate to this Global Generator
+//! Create a local generator appropriate to this Global Generator
 cmLocalGenerator* cmGlobalUnixMakefileGenerator3::CreateLocalGenerator(
   cmMakefile* mf)
 {

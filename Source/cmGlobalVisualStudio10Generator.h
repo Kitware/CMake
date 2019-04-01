@@ -29,7 +29,7 @@ public:
     std::vector<std::string> const& makeOptions =
       std::vector<std::string>()) override;
 
-  ///! create the correct local generator
+  //! create the correct local generator
   cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
   /**

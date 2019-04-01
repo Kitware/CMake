@@ -45,7 +45,7 @@ public:
   static void ExpandRegistryValues(std::string& source,
                                    KeyWOW64 view = KeyWOW64_Default);
 
-  ///! Escape quotes in a string.
+  //! Escape quotes in a string.
   static std::string EscapeQuotes(const std::string& str);
 
   /** Map help document name to file name.  */
@@ -78,11 +78,11 @@ public:
 
   using OutputCallback = std::function<void(std::string const&)>;
 
-  ///! Send a string to stdout
+  //! Send a string to stdout
   static void Stdout(const std::string& s);
   static void SetStdoutCallback(OutputCallback f);
 
-  ///! Send a string to stderr
+  //! Send a string to stderr
   static void Stderr(const std::string& s);
   static void SetStderrCallback(OutputCallback f);
 
@@ -90,25 +90,25 @@ public:
   static void SetInterruptCallback(InterruptCallback f);
   static bool GetInterruptFlag();
 
-  ///! Return true if there was an error at any point.
+  //! Return true if there was an error at any point.
   static bool GetErrorOccuredFlag()
   {
     return cmSystemTools::s_ErrorOccured ||
       cmSystemTools::s_FatalErrorOccured || GetInterruptFlag();
   }
-  ///! If this is set to true, cmake stops processing commands.
+  //! If this is set to true, cmake stops processing commands.
   static void SetFatalErrorOccured()
   {
     cmSystemTools::s_FatalErrorOccured = true;
   }
   static void SetErrorOccured() { cmSystemTools::s_ErrorOccured = true; }
-  ///! Return true if there was an error at any point.
+  //! Return true if there was an error at any point.
   static bool GetFatalErrorOccured()
   {
     return cmSystemTools::s_FatalErrorOccured || GetInterruptFlag();
   }
 
-  ///! Set the error occurred flag and fatal error back to false
+  //! Set the error occurred flag and fatal error back to false
   static void ResetErrorOccuredFlag()
   {
     cmSystemTools::s_FatalErrorOccured = false;
@@ -138,9 +138,9 @@ public:
   static bool IsOff(const char* val);
   static bool IsOff(const std::string& val);
 
-  ///! Return true if value is NOTFOUND or ends in -NOTFOUND.
+  //! Return true if value is NOTFOUND or ends in -NOTFOUND.
   static bool IsNOTFOUND(const char* value);
-  ///! Return true if the path is a framework
+  //! Return true if the path is a framework
   static bool IsPathToFramework(const std::string& value);
 
   static bool DoesFileExistWithExtensions(
@@ -177,14 +177,14 @@ public:
   static bool RenameFile(const std::string& oldname,
                          const std::string& newname);
 
-  ///! Compute the hash of a file
+  //! Compute the hash of a file
   static std::string ComputeFileHash(const std::string& source,
                                      cmCryptoHash::Algo algo);
 
   /** Compute the md5sum of a string.  */
   static std::string ComputeStringMD5(const std::string& input);
 
-  ///! Get the SHA thumbprint for a certificate file
+  //! Get the SHA thumbprint for a certificate file
   static std::string ComputeCertificateThumbprint(const std::string& source);
 
   /**
