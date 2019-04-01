@@ -1258,6 +1258,10 @@ void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
   // Add language-specific flags.
   this->AddLanguageFlags(flags, target, lang, config);
 
+  if (target->IsIPOEnabled(lang, config)) {
+    this->AppendFeatureOptions(flags, lang, "IPO");
+  }
+
   this->AddArchitectureFlags(flags, target, lang, config);
 
   if (lang == "Fortran") {
@@ -1515,9 +1519,8 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   flagsVar += "_FLAGS";
   this->AddConfigVariableFlags(flags, flagsVar, config);
 
-  if (target->IsIPOEnabled(lang, config)) {
-    this->AppendFeatureOptions(flags, lang, "IPO");
-  }
+  // Placeholder for possible future per-target flags.
+  static_cast<void>(target);
 }
 
 void cmLocalGenerator::AddLanguageFlagsForLinking(
@@ -1534,6 +1537,10 @@ void cmLocalGenerator::AddLanguageFlagsForLinking(
   }
 
   this->AddLanguageFlags(flags, target, lang, config);
+
+  if (target->IsIPOEnabled(lang, config)) {
+    this->AppendFeatureOptions(flags, lang, "IPO");
+  }
 }
 
 cmGeneratorTarget* cmLocalGenerator::FindGeneratorTargetToUse(
