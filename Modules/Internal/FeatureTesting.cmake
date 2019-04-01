@@ -88,3 +88,14 @@ macro(_record_compiler_features_cxx std)
   endif()
   unset(lang_level_has_features)
 endmacro()
+
+macro(_has_compiler_features lang level compile_flags feature_list)
+  # presume all known features are supported
+  get_property(known_features GLOBAL PROPERTY CMAKE_${lang}${level}_KNOWN_FEATURES)
+  list(APPEND ${feature_list} ${known_features})
+endmacro()
+
+macro(_has_compiler_features_c std)
+  list(APPEND CMAKE_C${std}_COMPILE_FEATURES c_std_${std})
+  _has_compiler_features(C ${std} "${CMAKE_C${std}_STANDARD_COMPILE_OPTION}" CMAKE_C${std}_COMPILE_FEATURES)
+endmacro()
