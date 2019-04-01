@@ -662,14 +662,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     langForClCompile = linkLanguage;
     if (langForClCompile == "C" || langForClCompile == "CXX" ||
         langForClCompile == "Fortran") {
-      std::string baseFlagVar = "CMAKE_";
-      baseFlagVar += langForClCompile;
-      baseFlagVar += "_FLAGS";
-      flags = this->Makefile->GetRequiredDefinition(baseFlagVar);
-      std::string flagVar =
-        baseFlagVar + std::string("_") + cmSystemTools::UpperCase(configName);
-      flags += " ";
-      flags += this->Makefile->GetRequiredDefinition(flagVar);
+      this->AddLanguageFlags(flags, target, langForClCompile, configName);
     }
     // set the correct language
     if (linkLanguage == "C") {

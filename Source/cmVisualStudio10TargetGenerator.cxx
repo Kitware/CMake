@@ -2540,14 +2540,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   }
   this->LangForClCompile = langForClCompile;
   if (!langForClCompile.empty()) {
-    std::string baseFlagVar = "CMAKE_";
-    baseFlagVar += langForClCompile;
-    baseFlagVar += "_FLAGS";
-    flags = this->Makefile->GetRequiredDefinition(baseFlagVar);
-    std::string flagVar =
-      baseFlagVar + "_" + cmSystemTools::UpperCase(configName);
-    flags += " ";
-    flags += this->Makefile->GetRequiredDefinition(flagVar);
+    this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
+                                           langForClCompile, configName);
     this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
                                             langForClCompile, configName);
   }
