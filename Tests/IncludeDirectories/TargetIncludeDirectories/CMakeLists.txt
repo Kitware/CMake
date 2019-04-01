@@ -17,7 +17,8 @@ create_header(bing)
 create_header(bung)
 create_header(arguments)
 create_header(list)
-create_header(target)
+create_header(target1)
+create_header(target2)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -69,12 +70,21 @@ set_property(TARGET lib4 APPEND PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BI
 set_property(TARGET lib4 APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/foh;$<TARGET_PROPERTY:lib3,INTERFACE_INCLUDE_DIRECTORIES>")
 
 add_library(somelib::withcolons UNKNOWN IMPORTED)
-set_property(TARGET somelib::withcolons PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/target")
-set_property(TARGET somelib::withcolons PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/target")
+set_property(TARGET somelib::withcolons PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/target1")
+set_property(TARGET somelib::withcolons PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/target1")
 
 set_property(TARGET TargetIncludeDirectories
   APPEND PROPERTY INCLUDE_DIRECTORIES
   "$<TARGET_PROPERTY:somelib::withcolons,INTERFACE_INCLUDE_DIRECTORIES>"
+)
+
+add_library(somelib_aliased UNKNOWN IMPORTED GLOBAL)
+set_property(TARGET somelib_aliased PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/target2")
+add_library(somelib::withcolons2 ALIAS somelib_aliased)
+
+set_property(TARGET TargetIncludeDirectories
+  APPEND PROPERTY INCLUDE_DIRECTORIES
+  "$<TARGET_PROPERTY:somelib::withcolons2,INTERFACE_INCLUDE_DIRECTORIES>"
 )
 
 add_custom_target(test_custom_target

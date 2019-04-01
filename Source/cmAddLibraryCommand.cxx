@@ -222,7 +222,9 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
         aliasedType != cmStateEnums::STATIC_LIBRARY &&
         aliasedType != cmStateEnums::MODULE_LIBRARY &&
         aliasedType != cmStateEnums::OBJECT_LIBRARY &&
-        aliasedType != cmStateEnums::INTERFACE_LIBRARY) {
+        aliasedType != cmStateEnums::INTERFACE_LIBRARY &&
+        !(aliasedType == cmStateEnums::UNKNOWN_LIBRARY &&
+          aliasedTarget->IsImported())) {
       std::ostringstream e;
       e << "cannot create ALIAS target \"" << libName << "\" because target \""
         << aliasedName << "\" is not a library.";
