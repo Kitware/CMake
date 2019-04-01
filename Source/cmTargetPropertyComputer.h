@@ -81,7 +81,7 @@ private:
                                           context)) {
           return nullptr;
         }
-        const char* configName = prop.c_str() + 9;
+        std::string configName = prop.substr(9);
         return ComputeLocation(tgt, configName);
       }
 

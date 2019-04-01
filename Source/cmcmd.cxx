@@ -620,7 +620,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         std::string const& a = *ai;
         if (cmHasLiteralPrefix(a, "--unset=")) {
           // Unset environment variable.
-          cmSystemTools::UnPutEnv(a.c_str() + 8);
+          cmSystemTools::UnPutEnv(a.substr(8));
         } else if (!a.empty() && a[0] == '-') {
           // Environment variable and command names cannot start in '-',
           // so this must be an unknown option.

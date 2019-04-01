@@ -82,7 +82,7 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
     return 0;
   }
   std::string key = value.substr(0, pos);
-  value = value.c_str() + pos + 1;
+  value = value.substr(pos + 1);
   def->Map[key] = value;
   cmCPack_Log(def->Log, cmCPackLog::LOG_DEBUG,
               "Set CPack variable: " << key << " to \"" << value << "\""

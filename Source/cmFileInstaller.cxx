@@ -319,7 +319,7 @@ bool cmFileInstaller::HandleInstallDestination()
         return false;
       }
     }
-    destination = sdestdir + (destination.c_str() + skip);
+    destination = sdestdir + destination.substr(skip);
     this->DestDirLength = int(sdestdir.size());
   }
 
