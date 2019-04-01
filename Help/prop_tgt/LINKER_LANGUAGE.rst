@@ -8,7 +8,7 @@ whose compiler is used to link the target (such as "C" or "CXX").  A
 typical value for an executable is the language of the source file
 providing the program entry point (main).  If not set, the language
 with the highest linker preference value is the default.  See
-documentation of CMAKE_<LANG>_LINKER_PREFERENCE variables.
+documentation of :variable:`CMAKE_<LANG>_LINKER_PREFERENCE` variables.
 
 If this property is not set by the user, it will be calculated at
 generate-time by CMake.

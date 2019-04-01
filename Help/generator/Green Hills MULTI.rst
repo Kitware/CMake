@@ -9,8 +9,9 @@ via the :variable:`CMAKE_BUILD_TYPE` variable.
 Customizations that are used to pick toolset and target system:
 
 The ``-A <arch>`` can be supplied for setting the target architecture.
-``<arch>`` usually is one of "arm", "ppc", "86", etcetera.  If the target architecture
-is not specified then the default architecture of "arm" will be used.
+``<arch>`` usually is one of ``arm``, ``ppc``, ``86``, etcetera.
+If the target architecture is not specified then
+the default architecture of ``arm`` will be used.
 
 The ``-T <toolset>`` option can be used to set the directory location of the toolset.
 Both absolute and relative paths are valid. Relative paths use ``GHS_TOOLSET_ROOT``

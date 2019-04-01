@@ -14,6 +14,6 @@ more advanced scanner.
   output_required_files(srcfile outputfile)
 
 Outputs a list of all the source files that are required by the
-specified srcfile.  This list is written into outputfile.  This is
-similar to writing out the dependencies for srcfile except that it
-jumps from .h files into .cxx, .c and .cpp files if possible.
+specified ``srcfile``.  This list is written into ``outputfile``.  This is
+similar to writing out the dependencies for ``srcfile`` except that it
+jumps from ``.h`` files into ``.cxx``, ``.c`` and ``.cpp`` files if possible.
