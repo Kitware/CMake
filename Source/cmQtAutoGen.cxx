@@ -73,44 +73,44 @@ void MergeOptions(std::vector<std::string>& baseOpts,
 unsigned int const cmQtAutoGen::ParallelMax = 64;
 std::string const cmQtAutoGen::ListSep = "<<<S>>>";
 
-std::string const cmQtAutoGen::GenAutoGen = "AutoGen";
-std::string const cmQtAutoGen::GenAutoMoc = "AutoMoc";
-std::string const cmQtAutoGen::GenAutoUic = "AutoUic";
-std::string const cmQtAutoGen::GenAutoRcc = "AutoRcc";
-
-std::string const cmQtAutoGen::GenAUTOGEN = "AUTOGEN";
-std::string const cmQtAutoGen::GenAUTOMOC = "AUTOMOC";
-std::string const cmQtAutoGen::GenAUTOUIC = "AUTOUIC";
-std::string const cmQtAutoGen::GenAUTORCC = "AUTORCC";
-
 std::string const& cmQtAutoGen::GeneratorName(GenT genType)
 {
+  static const std::string AutoGen("AutoGen");
+  static const std::string AutoMoc("AutoMoc");
+  static const std::string AutoUic("AutoUic");
+  static const std::string AutoRcc("AutoRcc");
+
   switch (genType) {
     case GenT::GEN:
-      return GenAutoGen;
+      return AutoGen;
     case GenT::MOC:
-      return GenAutoMoc;
+      return AutoMoc;
     case GenT::UIC:
-      return GenAutoUic;
+      return AutoUic;
     case GenT::RCC:
-      return GenAutoRcc;
+      return AutoRcc;
   }
-  return GenAutoGen;
+  return AutoGen;
 }
 
 std::string const& cmQtAutoGen::GeneratorNameUpper(GenT genType)
 {
+  static const std::string AUTOGEN("AUTOGEN");
+  static const std::string AUTOMOC("AUTOMOC");
+  static const std::string AUTOUIC("AUTOUIC");
+  static const std::string AUTORCC("AUTORCC");
+
   switch (genType) {
     case GenT::GEN:
-      return GenAUTOGEN;
+      return AUTOGEN;
     case GenT::MOC:
-      return GenAUTOMOC;
+      return AUTOMOC;
     case GenT::UIC:
-      return GenAUTOUIC;
+      return AUTOUIC;
     case GenT::RCC:
-      return GenAUTORCC;
+      return AUTORCC;
   }
-  return GenAUTOGEN;
+  return AUTOGEN;
 }
 
 std::string cmQtAutoGen::Tools(bool moc, bool uic, bool rcc)
@@ -118,13 +118,13 @@ std::string cmQtAutoGen::Tools(bool moc, bool uic, bool rcc)
   std::string res;
   std::vector<std::string> lst;
   if (moc) {
-    lst.emplace_back(GenAUTOMOC);
+    lst.emplace_back("AUTOMOC");
   }
   if (uic) {
-    lst.emplace_back(GenAUTOUIC);
+    lst.emplace_back("AUTOUIC");
   }
   if (rcc) {
-    lst.emplace_back(GenAUTORCC);
+    lst.emplace_back("AUTORCC");
   }
   switch (lst.size()) {
     case 1:

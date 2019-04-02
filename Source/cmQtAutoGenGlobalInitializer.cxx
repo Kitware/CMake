@@ -81,9 +81,9 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
         continue;
       }
 
-      bool const moc = target->GetPropertyAsBool(cmQtAutoGen::GenAUTOMOC);
-      bool const uic = target->GetPropertyAsBool(cmQtAutoGen::GenAUTOUIC);
-      bool const rcc = target->GetPropertyAsBool(cmQtAutoGen::GenAUTORCC);
+      bool const moc = target->GetPropertyAsBool(kw().AUTOMOC);
+      bool const uic = target->GetPropertyAsBool(kw().AUTOUIC);
+      bool const rcc = target->GetPropertyAsBool(kw().AUTORCC);
       if (moc || uic || rcc) {
         std::string const mocExec =
           target->GetSafeProperty("AUTOMOC_EXECUTABLE");

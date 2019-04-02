@@ -34,7 +34,7 @@ public:
     std::vector<cmLocalGenerator*> const& localGenerators);
   ~cmQtAutoGenGlobalInitializer();
 
-  Keywords const* kw() const { return Keywords_.get(); };
+  Keywords const& kw() const { return Keywords_; };
 
   bool generate();
 
@@ -62,7 +62,7 @@ private:
   std::map<cmLocalGenerator*, std::string> GlobalAutoGenTargets_;
   std::map<cmLocalGenerator*, std::string> GlobalAutoRccTargets_;
   std::unordered_map<std::string, std::string> ExecutableTestOutputs_;
-  std::unique_ptr<Keywords> Keywords_;
+  Keywords const Keywords_;
 };
 
 #endif
