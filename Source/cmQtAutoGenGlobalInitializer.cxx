@@ -20,6 +20,13 @@
 #include <memory>
 #include <utility>
 
+cmQtAutoGenGlobalInitializer::Keywords::Keywords()
+  : AUTOMOC("AUTOMOC")
+  , AUTOUIC("AUTOUIC")
+  , AUTORCC("AUTORCC")
+{
+}
+
 cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
   std::vector<cmLocalGenerator*> const& localGenerators)
 {
