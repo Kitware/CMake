@@ -117,6 +117,8 @@ else()
 endif()
 
 
+set(__GLEW_CURRENT_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+
 __glew_set_find_library_suffix(SHARED)
 
 find_library(GLEW_SHARED_LIBRARY_RELEASE
@@ -141,6 +143,9 @@ find_library(GLEW_STATIC_LIBRARY_DEBUG
              NAMES GLEWds glewds glew32ds
              PATH_SUFFIXES lib lib64
              PATHS ENV GLEW_ROOT)
+
+set(CMAKE_FIND_LIBRARY_SUFFIXES ${__GLEW_CURRENT_FIND_LIBRARY_SUFFIXES})
+unset(__GLEW_CURRENT_FIND_LIBRARY_SUFFIXES)
 
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 
