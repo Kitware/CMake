@@ -457,7 +457,7 @@ void cmLocalGenerator::GenerateInstallRules()
        << "if(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
        << "  set(CMAKE_INSTALL_PREFIX \"" << prefix << "\")" << std::endl
        << "endif()" << std::endl
-       << "string(REGEX REPLACE \"/$\" \"\" CMAKE_INSTALL_PREFIX "
+       << R"(string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX )"
        << "\"${CMAKE_INSTALL_PREFIX}\")" << std::endl
        << std::endl;
 

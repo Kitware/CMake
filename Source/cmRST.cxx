@@ -33,7 +33,7 @@ cmRST::cmRST(std::ostream& os, std::string docroot)
   , TocTreeDirective("^.. toctree::[ \t]*(.*)$")
   , ProductionListDirective("^.. productionlist::[ \t]*(.*)$")
   , NoteDirective("^.. note::[ \t]*(.*)$")
-  , ModuleRST("^#\\[(=*)\\[\\.rst:$")
+  , ModuleRST(R"(^#\[(=*)\[\.rst:$)")
   , CMakeRole("(:cmake)?:("
               "command|cpack_gen|generator|variable|envvar|module|policy|"
               "prop_cache|prop_dir|prop_gbl|prop_inst|prop_sf|"

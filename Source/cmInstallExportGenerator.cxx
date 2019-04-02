@@ -202,7 +202,7 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
   os << indentNN << "file(GLOB OLD_CONFIG_FILES \"" << installedDir
      << this->EFGen->GetConfigImportFileGlob() << "\")\n";
   os << indentNN << "if(OLD_CONFIG_FILES)\n";
-  os << indentNNN << "message(STATUS \"Old export file \\\"" << installedFile
+  os << indentNNN << R"(message(STATUS "Old export file \")" << installedFile
      << "\\\" will be replaced.  Removing files [${OLD_CONFIG_FILES}].\")\n";
   os << indentNNN << "file(REMOVE ${OLD_CONFIG_FILES})\n";
   os << indentNN << "endif()\n";

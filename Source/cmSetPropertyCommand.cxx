@@ -335,7 +335,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
         !cmSystemTools::IsOff(this->PropertyValue)) {
       std::ostringstream e;
       e << "given non-boolean value \"" << this->PropertyValue
-        << "\" for CACHE property \"ADVANCED\".  ";
+        << R"(" for CACHE property "ADVANCED".  )";
       this->SetError(e.str());
       return false;
     }

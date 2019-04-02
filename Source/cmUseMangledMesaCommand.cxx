@@ -78,7 +78,7 @@ void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(const char* source,
   cmsys::RegularExpression includeLine(
     "^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
   // regular expression for gl/ or GL/ in a file (match(1) of above)
-  cmsys::RegularExpression glDirLine("(gl|GL)(/|\\\\)([^<\"]+)");
+  cmsys::RegularExpression glDirLine(R"((gl|GL)(/|\\)([^<"]+))");
   // regular expression for gl GL or xmesa in a file (match(1) of above)
   cmsys::RegularExpression glLine("(gl|GL|xmesa)");
   while (cmSystemTools::GetLineFromStream(fin, inLine)) {

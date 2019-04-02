@@ -513,7 +513,7 @@ static const yytype_uint8 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "cal_ENVCURLY", "cal_NCURLY",
-  "cal_DCURLY", "\"$\"", "\"{\"", "\"}\"", "cal_NAME", "\"\\\\\"",
+  "cal_DCURLY", "\"$\"", "\"{\"", "\"}\"", "cal_NAME", R"("\\")",
   "cal_SYMBOL", "\"@\"", "cal_ERROR", "cal_ATNAME", "$accept", "Start",
   "GoalWithOptionalBackSlash", "Goal", "String", "OuterText", "Variable",
   "EnvVarName", "MultipleIds", "ID", YY_NULLPTR

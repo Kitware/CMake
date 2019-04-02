@@ -906,11 +906,11 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
 
   /* clang-format off */
   *this->CompileCommandsStream << "\n{\n"
-     << "  \"directory\": \""
+     << R"(  "directory": ")"
      << cmGlobalGenerator::EscapeJSON(buildFileDir) << "\",\n"
-     << "  \"command\": \""
+     << R"(  "command": ")"
      << cmGlobalGenerator::EscapeJSON(commandLine) << "\",\n"
-     << "  \"file\": \""
+     << R"(  "file": ")"
      << cmGlobalGenerator::EscapeJSON(sourceFileName) << "\"\n"
      << "}";
   /* clang-format on */

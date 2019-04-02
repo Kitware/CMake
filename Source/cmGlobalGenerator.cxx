@@ -895,7 +895,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
           /* clang-format off */
           w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0025) << "\n"
             "Converting " << lang <<
-            " compiler id \"AppleClang\" to \"Clang\" for compatibility."
+            R"( compiler id "AppleClang" to "Clang" for compatibility.)"
             ;
           /* clang-format on */
           mf->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
@@ -925,7 +925,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
           /* clang-format off */
           w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0047) << "\n"
             "Converting " << lang <<
-            " compiler id \"QCC\" to \"GNU\" for compatibility."
+            R"( compiler id "QCC" to "GNU" for compatibility.)"
             ;
           /* clang-format on */
           mf->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
@@ -961,7 +961,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
           /* clang-format off */
           w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0089) << "\n"
             "Converting " << lang <<
-            " compiler id \"XLClang\" to \"XL\" for compatibility."
+            R"( compiler id "XLClang" to "XL" for compatibility.)"
             ;
           /* clang-format on */
           mf->IssueMessage(MessageType::AUTHOR_WARNING, w.str());

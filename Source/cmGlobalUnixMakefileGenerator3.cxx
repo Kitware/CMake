@@ -177,13 +177,13 @@ void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
     *this->CommandDatabase << "," << std::endl;
   }
   *this->CommandDatabase << "{" << std::endl
-                         << "  \"directory\": \""
+                         << R"(  "directory": ")"
                          << cmGlobalGenerator::EscapeJSON(workingDirectory)
                          << "\"," << std::endl
-                         << "  \"command\": \""
+                         << R"(  "command": ")"
                          << cmGlobalGenerator::EscapeJSON(compileCommand)
                          << "\"," << std::endl
-                         << "  \"file\": \""
+                         << R"(  "file": ")"
                          << cmGlobalGenerator::EscapeJSON(sourceFile) << "\""
                          << std::endl
                          << "}";
