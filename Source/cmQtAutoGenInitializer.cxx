@@ -606,28 +606,19 @@ bool cmQtAutoGenInitializer::InitRcc()
 bool cmQtAutoGenInitializer::InitScanFiles()
 {
   cmMakefile* makefile = this->Target->Target->GetMakefile();
+  auto const& kw = this->GlobalInitializer->kw();
 
-  // String constants
-  std::string const SKIP_AUTOGEN_str = "SKIP_AUTOGEN";
-  std::string const SKIP_AUTOMOC_str = "SKIP_AUTOMOC";
-  std::string const SKIP_AUTOUIC_str = "SKIP_AUTOUIC";
-  std::string const SKIP_AUTORCC_str = "SKIP_AUTORCC";
-  std::string const AUTOUIC_OPTIONS_str = "AUTOUIC_OPTIONS";
-  std::string const AUTORCC_OPTIONS_str = "AUTORCC_OPTIONS";
-  std::string const qrc_str = "qrc";
-  std::string const ui_str = "ui";
-
-  auto makeMUFile = [&](cmSourceFile* sf, std::string const& fullPath,
-                        bool muIt) -> MUFileHandle {
+  auto makeMUFile = [this, &kw](cmSourceFile* sf, std::string const& fullPath,
+                                bool muIt) -> MUFileHandle {
     MUFileHandle muf = cm::make_unique<MUFile>();
     muf->RealPath = cmSystemTools::GetRealPath(fullPath);
     muf->SF = sf;
     muf->Generated = sf->GetIsGenerated();
-    bool const skipAutogen = sf->GetPropertyAsBool(SKIP_AUTOGEN_str);
+    bool const skipAutogen = sf->GetPropertyAsBool(kw.SKIP_AUTOGEN);
     muf->SkipMoc = this->Moc.Enabled &&
-      (skipAutogen || sf->GetPropertyAsBool(SKIP_AUTOMOC_str));
+      (skipAutogen || sf->GetPropertyAsBool(kw.SKIP_AUTOMOC));
     muf->SkipUic = this->Uic.Enabled &&
-      (skipAutogen || sf->GetPropertyAsBool(SKIP_AUTOUIC_str));
+      (skipAutogen || sf->GetPropertyAsBool(kw.SKIP_AUTOUIC));
     if (muIt) {
       muf->MocIt = this->Moc.Enabled && !muf->SkipMoc;
       muf->UicIt = this->Uic.Enabled && !muf->SkipUic;
@@ -678,8 +669,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
 
       // Register rcc enabled files
       if (this->Rcc.Enabled) {
-        if ((ext == qrc_str) && !sf->GetPropertyAsBool(SKIP_AUTOGEN_str) &&
-            !sf->GetPropertyAsBool(SKIP_AUTORCC_str)) {
+        if ((ext == kw.qrc) && !sf->GetPropertyAsBool(kw.SKIP_AUTOGEN) &&
+            !sf->GetPropertyAsBool(kw.SKIP_AUTORCC)) {
           // Register qrc file
           Qrc qrc;
           qrc.QrcFile = cmSystemTools::GetRealPath(fullPath);
@@ -688,7 +679,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           qrc.Generated = sf->GetIsGenerated();
           // RCC options
           {
-            std::string const opts = sf->GetSafeProperty(AUTORCC_OPTIONS_str);
+            std::string const opts = sf->GetSafeProperty(kw.AUTORCC_OPTIONS);
             if (!opts.empty()) {
               cmSystemTools::ExpandListArgument(opts, qrc.Options);
             }
@@ -798,15 +789,15 @@ bool cmQtAutoGenInitializer::InitScanFiles()
             this->AutogenTarget.Sources.emplace(sf, std::move(muf));
           }
         }
-      } else if (this->Uic.Enabled && (ext == ui_str)) {
+      } else if (this->Uic.Enabled && (ext == kw.ui)) {
         // .ui file
         std::string realPath = cmSystemTools::GetRealPath(fullPath);
-        bool const skipAutogen = sf->GetPropertyAsBool(SKIP_AUTOGEN_str);
+        bool const skipAutogen = sf->GetPropertyAsBool(kw.SKIP_AUTOGEN);
         bool const skipUic =
-          (skipAutogen || sf->GetPropertyAsBool(SKIP_AUTOUIC_str));
+          (skipAutogen || sf->GetPropertyAsBool(kw.SKIP_AUTOUIC));
         if (!skipUic) {
           // Check if the .ui file has uic options
-          std::string const uicOpts = sf->GetSafeProperty(AUTOUIC_OPTIONS_str);
+          std::string const uicOpts = sf->GetSafeProperty(kw.AUTOUIC_OPTIONS);
           if (!uicOpts.empty()) {
             this->Uic.FileFiles.push_back(std::move(realPath));
             std::vector<std::string> optsVec;
@@ -834,11 +825,11 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       msg += '\n';
       std::string property;
       if (this->Moc.Enabled && this->Uic.Enabled) {
-        property = "SKIP_AUTOGEN";
+        property = kw.SKIP_AUTOGEN;
       } else if (this->Moc.Enabled) {
-        property = "SKIP_AUTOMOC";
+        property = kw.SKIP_AUTOMOC;
       } else if (this->Uic.Enabled) {
-        property = "SKIP_AUTOUIC";
+        property = kw.SKIP_AUTOUIC;
       }
       msg += "For compatibility, CMake is excluding the GENERATED source "
              "file(s):\n";
@@ -866,7 +857,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
     // Target rcc options
     std::vector<std::string> optionsTarget;
     cmSystemTools::ExpandListArgument(
-      this->Target->GetSafeProperty("AUTORCC_OPTIONS"), optionsTarget);
+      this->Target->GetSafeProperty(kw.AUTORCC_OPTIONS), optionsTarget);
 
     // Check if file name is unique
     for (Qrc& qrc : this->Rcc.Qrcs) {

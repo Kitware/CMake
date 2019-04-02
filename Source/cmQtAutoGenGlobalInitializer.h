@@ -31,6 +31,17 @@ public:
     std::string AUTOMOC_EXECUTABLE;
     std::string AUTOUIC_EXECUTABLE;
     std::string AUTORCC_EXECUTABLE;
+
+    std::string SKIP_AUTOGEN;
+    std::string SKIP_AUTOMOC;
+    std::string SKIP_AUTOUIC;
+    std::string SKIP_AUTORCC;
+
+    std::string AUTOUIC_OPTIONS;
+    std::string AUTORCC_OPTIONS;
+
+    std::string qrc;
+    std::string ui;
   };
 
 public:
