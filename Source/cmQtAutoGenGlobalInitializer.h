@@ -27,6 +27,10 @@ public:
     std::string AUTOMOC;
     std::string AUTOUIC;
     std::string AUTORCC;
+
+    std::string AUTOMOC_EXECUTABLE;
+    std::string AUTOUIC_EXECUTABLE;
+    std::string AUTORCC_EXECUTABLE;
   };
 
 public:
