@@ -71,7 +71,10 @@ if(NOT MSVC_VERSION)
     message(FATAL_ERROR "MSVC compiler version not detected properly: ${_compiler_version}")
   endif()
 
-  if(MSVC_VERSION GREATER_EQUAL 1910)
+  if(MSVC_VERSION GREATER_EQUAL 1920)
+    # VS 2019 or greater
+    set(MSVC_TOOLSET_VERSION 142)
+  elseif(MSVC_VERSION GREATER_EQUAL 1910)
     # VS 2017 or greater
     set(MSVC_TOOLSET_VERSION 141)
   elseif(MSVC_VERSION EQUAL 1900)
