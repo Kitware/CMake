@@ -293,6 +293,8 @@ String Transformations
   Joins the list with the content of ``string``.
 ``$<REMOVE_DUPLICATES:list>``
   Removes duplicated items in the given ``list``.
+``$<FILTER:list,INCLUDE|EXCLUDE,regex>``
+  Includes or removes items from ``list`` that match the regular expression ``regex``.
 ``$<LOWER_CASE:string>``
   Content of ``string`` converted to lower case.
 ``$<UPPER_CASE:string>``
