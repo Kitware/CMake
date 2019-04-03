@@ -1800,6 +1800,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     this->CurrentLocalGenerator->AddLanguageFlags(flags, gtgt, lang,
                                                   configName);
 
+    if (gtgt->IsIPOEnabled(lang, configName)) {
+      this->CurrentLocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
+    }
+
     // Add shared-library flags if needed.
     this->CurrentLocalGenerator->AddCMP0018Flags(flags, gtgt, lang,
                                                  configName);
