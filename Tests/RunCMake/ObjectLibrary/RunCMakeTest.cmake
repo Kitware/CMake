@@ -37,6 +37,10 @@ function (run_object_lib_build2 name)
   run_cmake_command(${name}-build ${CMAKE_COMMAND} --build .)
 endfunction ()
 
+if(NOT (RunCMake_GENERATOR STREQUAL "Xcode" AND "$ENV{CMAKE_OSX_ARCHITECTURES}" MATCHES "[;$]"))
+  run_object_lib_build(CheckTargetObjects)
+endif()
+
 run_object_lib_build(LinkObjLHSShared)
 run_object_lib_build(LinkObjLHSStatic)
 run_object_lib_build(LinkObjRHSShared)
@@ -53,6 +57,7 @@ run_cmake(OwnSources)
 run_cmake(PostBuild)
 run_cmake(PreBuild)
 run_cmake(PreLink)
+
 
 function(run_Dependencies)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Dependencies-build)

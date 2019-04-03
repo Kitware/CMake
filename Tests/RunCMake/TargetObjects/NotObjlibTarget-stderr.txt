@@ -1,8 +1,9 @@
-CMake Error at NotObjlibTarget.cmake:3 \(file\):
+CMake Error at NotObjlibTarget.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
-    \$<TARGET_OBJECTS:StaticLib>
+    \$<TARGET_OBJECTS:IFaceLib>
 
-  Objects of target "StaticLib" referenced but is not an OBJECT library.
+  Objects of target "IFaceLib" referenced but is not an allowed library types
+  \(EXECUTABLE, STATIC, SHARED, MODULE, OBJECT\).
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

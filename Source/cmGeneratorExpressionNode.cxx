@@ -1525,10 +1525,16 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       reportError(context, content->GetOriginalExpression(), e.str());
       return std::string();
     }
-    if (gt->GetType() != cmStateEnums::OBJECT_LIBRARY) {
+    cmStateEnums::TargetType type = gt->GetType();
+    if (type != cmStateEnums::EXECUTABLE &&
+        type != cmStateEnums::STATIC_LIBRARY &&
+        type != cmStateEnums::SHARED_LIBRARY &&
+        type != cmStateEnums::MODULE_LIBRARY &&
+        type != cmStateEnums::OBJECT_LIBRARY) {
       std::ostringstream e;
       e << "Objects of target \"" << tgtName
-        << "\" referenced but is not an OBJECT library.";
+        << "\" referenced but is not an allowed library types (EXECUTABLE, "
+        << "STATIC, SHARED, MODULE, OBJECT).";
       reportError(context, content->GetOriginalExpression(), e.str());
       return std::string();
     }

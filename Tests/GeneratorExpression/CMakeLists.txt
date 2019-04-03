@@ -374,4 +374,49 @@ if(NOT CMAKE_GENERATOR STREQUAL Xcode OR NOT CMAKE_OSX_ARCHITECTURES MATCHES "[;
       -P "${CMAKE_CURRENT_SOURCE_DIR}/check_object_files.cmake"
     DEPENDS objlib
   )
+
+
+  add_library(sharedlib SHARED objlib1.c objlib2.c)
+  file(GENERATE
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/sharedlib_files_$<CONFIGURATION>"
+    CONTENT "$<JOIN:$<TARGET_OBJECTS:sharedlib>,\n>\n"
+  )
+
+  add_custom_target(check_sharedlib_objs ALL
+    COMMAND ${CMAKE_COMMAND}
+      "-DOBJLIB_LISTFILE=${CMAKE_CURRENT_BINARY_DIR}/sharedlib_files_$<CONFIGURATION>"
+      -DEXPECTED_NUM_OBJECTFILES=2
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/check_object_files.cmake"
+    DEPENDS sharedlib
+  )
+
+
+  add_library(staticlib STATIC objlib1.c objlib2.c)
+  file(GENERATE
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/staticlib_files_$<CONFIGURATION>"
+    CONTENT "$<JOIN:$<TARGET_OBJECTS:staticlib>,\n>\n"
+  )
+
+  add_custom_target(check_staticlib_objs ALL
+    COMMAND ${CMAKE_COMMAND}
+      "-DOBJLIB_LISTFILE=${CMAKE_CURRENT_BINARY_DIR}/staticlib_files_$<CONFIGURATION>"
+      -DEXPECTED_NUM_OBJECTFILES=2
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/check_object_files.cmake"
+    DEPENDS staticlib
+  )
+
+
+  add_executable(execobjs objlib1.c objlib2.c echo.c)
+  file(GENERATE
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/execobjs_files_$<CONFIGURATION>"
+    CONTENT "$<JOIN:$<TARGET_OBJECTS:execobjs>,\n>\n"
+  )
+
+  add_custom_target(check_exec_objs ALL
+    COMMAND ${CMAKE_COMMAND}
+      "-DOBJLIB_LISTFILE=${CMAKE_CURRENT_BINARY_DIR}/execobjs_files_$<CONFIGURATION>"
+      -DEXPECTED_NUM_OBJECTFILES=3
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/check_object_files.cmake"
+    DEPENDS execobjs
+  )
 endif()
