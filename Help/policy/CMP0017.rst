@@ -5,12 +5,12 @@ Prefer files from the CMake module directory when including from there.
 
 Starting with CMake 2.8.4, if a cmake-module shipped with CMake (i.e.
 located in the CMake module directory) calls :command:`include` or
-find_package(), the files located in the CMake module directory are
+:command:`find_package`, the files located in the CMake module directory are
 preferred over the files in :variable:`CMAKE_MODULE_PATH`.  This makes sure
 that the modules belonging to CMake always get those files included which
 they expect, and against which they were developed and tested.  In all
 other cases, the files found in :variable:`CMAKE_MODULE_PATH` still take
-precedence over the ones in the CMake module directory.  The OLD
+precedence over the ones in the CMake module directory.  The ``OLD``
 behavior is to always prefer files from CMAKE_MODULE_PATH over files
 from the CMake modules directory.
 

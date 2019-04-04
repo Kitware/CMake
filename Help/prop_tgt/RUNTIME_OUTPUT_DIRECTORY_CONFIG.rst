@@ -6,7 +6,8 @@ Per-configuration output directory for
 
 This is a per-configuration version of the
 :prop_tgt:`RUNTIME_OUTPUT_DIRECTORY` target property, but
-multi-configuration generators (VS, Xcode) do NOT append a
+multi-configuration generators (:ref:`Visual Studio Generators`,
+:generator:`Xcode`) do NOT append a
 per-configuration subdirectory to the specified directory.  This
 property is initialized by the value of the
 :variable:`CMAKE_RUNTIME_OUTPUT_DIRECTORY_<CONFIG>` variable if

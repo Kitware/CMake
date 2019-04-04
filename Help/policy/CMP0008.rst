@@ -12,11 +12,12 @@ In CMake 2.4 and below it is possible to write code like
 where ``somelib`` is supposed to be a valid library file name such as
 ``libsomelib.a`` or ``somelib.lib``.  For Makefile generators this
 produces an error at build time because the dependency on the full
-path cannot be found.  For VS IDE and Xcode generators this used to
+path cannot be found.  For :ref:`Visual Studio Generators` IDE
+and :generator:`Xcode` generators this used to
 work by accident because CMake would always split off the library
 directory and ask the linker to search for the library by name
 (``-lsomelib`` or ``somelib.lib``).  Despite the failure with Makefiles, some
-projects have code like this and build only with VS and/or Xcode.
+projects have code like this and build only with Visual Studio and/or Xcode.
 This version of CMake prefers to pass the full path directly to the
 native build tool, which will fail in this case because it does not
 name a valid library file.

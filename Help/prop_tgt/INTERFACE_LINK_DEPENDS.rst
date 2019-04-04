@@ -3,9 +3,10 @@ INTERFACE_LINK_DEPENDS
 
 Additional public interface files on which a target binary depends for linking.
 
-This property is supported only by Makefile and Ninja generators.  It is
-intended to specify dependencies on "linker scripts" for custom Makefile link
-rules.
+This property is supported only by :generator:`Ninja` and
+:ref:`Makefile Generators`.
+It is intended to specify dependencies on "linker scripts" for
+custom Makefile link rules.
 
 When target dependencies are specified using :command:`target_link_libraries`,
 CMake will read this property from all target dependencies to determine the

@@ -10,8 +10,9 @@ as :manual:`cmake-generator-expressions(7)` and some
 diagnostics expect target names to match a restricted pattern.
 
 Target names may contain upper and lower case letters, numbers, the underscore
-character (_), dot(.), plus(+) and minus(-).  As a special case, ALIAS
-targets and ``IMPORTED`` targets may contain two consecutive colons.
+character (``_``), dot(``.``), plus(``+``) and minus(``-``).
+As a special case, ``ALIAS`` and ``IMPORTED`` targets may contain
+two consecutive colons.
 
 Target names reserved by one or more CMake generators are not allowed.
 Among others these include ``all``, ``clean``, ``help``, and ``install``.

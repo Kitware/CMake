@@ -1,14 +1,15 @@
 XCODE_EMIT_EFFECTIVE_PLATFORM_NAME
 ----------------------------------
 
-Control emission of ``EFFECTIVE_PLATFORM_NAME`` by the Xcode generator.
+Control emission of ``EFFECTIVE_PLATFORM_NAME`` by the :generator:`Xcode`
+generator.
 
 It is required for building the same target with multiple SDKs. A
 common use case is the parallel use of ``iphoneos`` and
 ``iphonesimulator`` SDKs.
 
-Three different states possible that control when the Xcode generator
-emits the ``EFFECTIVE_PLATFORM_NAME`` variable:
+Three different states possible that control when the :generator:`Xcode`
+generator emits the ``EFFECTIVE_PLATFORM_NAME`` variable:
 
 - If set to ``ON`` it will always be emitted
 - If set to ``OFF`` it will never be emitted

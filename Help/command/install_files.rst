@@ -21,7 +21,7 @@ or its corresponding location in the binary tree may be listed.  If a
 file specified already has an extension, that extension will be
 removed first.  This is useful for providing lists of source files
 such as foo.cxx when you want the corresponding foo.h to be installed.
-A typical extension is '.h'.
+A typical extension is ``.h``.
 
 ::
 

@@ -9,7 +9,7 @@ Get a global property of the CMake instance.
 
 Gets a global property from the CMake instance.  The value of
 the ``<property>`` is stored in the variable ``<var>``.
-If the property is not found, ``<var>`` will be set to ``"NOTFOUND"``.
+If the property is not found, ``<var>`` will be set to ``NOTFOUND``.
 See the :manual:`cmake-properties(7)` manual for available properties.
 
 See also the :command:`get_property` command ``GLOBAL`` option.

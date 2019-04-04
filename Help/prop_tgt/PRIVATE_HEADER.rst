@@ -8,4 +8,4 @@ frameworks on macOS, iOS and normal shared libraries on other platforms.
 This property may be set to a list of header files to be placed in the
 PrivateHeaders directory inside the framework folder.  On non-Apple
 platforms these headers may be installed using the ``PRIVATE_HEADER``
-option to the ``install(TARGETS)`` command.
+option to the :command:`install(TARGETS)` command.

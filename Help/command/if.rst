@@ -227,7 +227,7 @@ above.  The result is ``OFF`` which is false.  However, if we remove the
 
   if(var2)
 
-which is true because ``var2`` is defined to "var1" which is not a false
+which is true because ``var2`` is defined to ``var1`` which is not a false
 constant.
 
 Automatic evaluation applies in the other cases whenever the
