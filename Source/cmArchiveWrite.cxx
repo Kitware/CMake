@@ -369,3 +369,16 @@ bool cmArchiveWrite::AddData(const char* file, size_t size)
   }
   return true;
 }
+
+bool cmArchiveWrite::SetFilterOption(const char* module, const char* key,
+                                     const char* value)
+{
+  if (archive_write_set_filter_option(this->Archive, module, key, value) !=
+      ARCHIVE_OK) {
+    this->Error = "archive_write_set_filter_option: ";
+    this->Error += cm_archive_error_string(this->Archive);
+    return false;
+  }
+
+  return true;
+}
