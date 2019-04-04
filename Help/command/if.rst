@@ -88,7 +88,9 @@ Possible conditions are:
 
 ``if(EXISTS path-to-file-or-directory)``
  True if the named file or directory exists.  Behavior is well-defined
- only for full paths.
+ only for full paths. Resolves symbolic links, i.e. if the named file or
+ directory is a symbolic link, returns true if the target of the
+ symbolic link exists.
 
 ``if(file1 IS_NEWER_THAN file2)``
  True if ``file1`` is newer than ``file2`` or if one of the two files doesn't
