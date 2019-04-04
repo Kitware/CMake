@@ -154,6 +154,13 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
   }                                                                           \
   cmArchiveWrite archive(gf, this->Compress, this->ArchiveFormat);            \
   do {                                                                        \
+    if (!archive.Open()) {                                                    \
+      cmCPackLogger(cmCPackLog::LOG_ERROR,                                    \
+                    "Problem to open archive <"                               \
+                      << (filename) << ">, ERROR = " << (archive).GetError()  \
+                      << std::endl);                                          \
+      return 0;                                                               \
+    }                                                                         \
     if (!(archive)) {                                                         \
       cmCPackLogger(cmCPackLog::LOG_ERROR,                                    \
                     "Problem to create archive <"                             \
