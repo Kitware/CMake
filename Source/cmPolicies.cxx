@@ -145,7 +145,7 @@ static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
   } else {
     std::ostringstream e;
     e << defaultVar << " has value \"" << defaultValue
-      << "\" but must be \"OLD\", \"NEW\", or \"\" (empty).";
+      << R"(" but must be "OLD", "NEW", or "" (empty).)";
     mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }

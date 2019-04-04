@@ -196,7 +196,7 @@ void cmExtraKateGenerator::AppendTarget(cmGeneratedFileStream& fout,
 {
   static char JsonSep = ' ';
 
-  fout << "\t\t\t" << JsonSep << "{\"name\":\"" << target
+  fout << "\t\t\t" << JsonSep << R"({"name":")" << target
        << "\", "
           "\"build_cmd\":\""
        << make << " -C \\\"" << (this->UseNinja ? homeOutputDir : path)

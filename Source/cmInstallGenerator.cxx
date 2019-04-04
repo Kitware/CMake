@@ -142,7 +142,7 @@ void cmInstallGenerator::AddInstallRule(
 std::string cmInstallGenerator::CreateComponentTest(const char* component,
                                                     bool exclude_from_all)
 {
-  std::string result = "\"x${CMAKE_INSTALL_COMPONENT}x\" STREQUAL \"x";
+  std::string result = R"("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "x)";
   result += component;
   result += "x\"";
   if (!exclude_from_all) {

@@ -176,7 +176,7 @@ bool cmCMakePolicyCommand::HandleVersionMode(
       (version_min.empty() || version_max.empty())) {
     std::ostringstream e;
     e << "VERSION \"" << version_string
-      << "\" does not have a version on both sides of \"...\".";
+      << R"(" does not have a version on both sides of "...".)";
     this->SetError(e.str());
     return false;
   }

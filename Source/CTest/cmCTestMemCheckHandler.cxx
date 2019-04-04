@@ -815,9 +815,9 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
   cmsys::RegularExpression valgrindLine("^==[0-9][0-9]*==");
 
   cmsys::RegularExpression vgFIM(
-    "== .*Invalid free\\(\\) / delete / delete\\[\\]");
+    R"(== .*Invalid free\(\) / delete / delete\[\])");
   cmsys::RegularExpression vgFMM(
-    "== .*Mismatched free\\(\\) / delete / delete \\[\\]");
+    R"(== .*Mismatched free\(\) / delete / delete \[\])");
   cmsys::RegularExpression vgMLK1(
     "== .*[0-9,]+ bytes in [0-9,]+ blocks are definitely lost"
     " in loss record [0-9,]+ of [0-9,]+");
