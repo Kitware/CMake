@@ -153,11 +153,23 @@ Hints
 
     Value ``ONLY`` is not supported so ``FIRST`` will be used instead.
 
-.. note::
+``Python2_FIND_VIRTUALENV``
+  This variable defines the handling of virtual environments. It is meaningfull
+  only when a virtual environment is active (i.e. the ``activate`` script has
+  been evaluated). In this case, it takes precedence over
+  ``Python2_FIND_REGISTRY`` and ``CMAKE_FIND_FRAMEWORK`` variables.
+  The ``Python2_FIND_VIRTUALENV`` variable can be set to empty or one of the
+  following:
 
-  If a Python virtual environment is configured, set variable
-  ``Python_FIND_REGISTRY`` (Windows) or ``CMAKE_FIND_FRAMEWORK`` (macOS) with
-  value ``LAST`` or ``NEVER`` to select it preferably.
+  * ``FIRST``: The virtual environment is used before any other standard
+    paths to look-up for the interpreter. This is the default.
+  * ``ONLY``: Only the virtual environment is used to look-up for the
+    interpreter.
+  * ``STANDARD``: The virtual environment is not used to look-up for the
+    interpreter. In this case, variable ``Python2_FIND_REGISTRY`` (Windows)
+    or ``CMAKE_FIND_FRAMEWORK`` (macOS) can be set with value ``LAST`` or
+    ``NEVER`` to select preferably the interpreter from the virtual
+    environment.
 
 Commands
 ^^^^^^^^

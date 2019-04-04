@@ -68,6 +68,17 @@ if(CMake_TEST_FindPython)
     --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
+
+  add_test(NAME FindPython.VirtualEnv COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/VirtualEnv"
+    "${CMake_BINARY_DIR}/Tests/FindPython/VirtualEnv"
+    ${build_generator_args}
+    --build-project TestVirtualEnv
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
 endif()
 
 if(CMake_TEST_FindPython_NumPy)

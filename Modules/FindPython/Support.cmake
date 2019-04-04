@@ -298,6 +298,22 @@ else()
   set (_${_PYTHON_PREFIX}_FIND_REGISTRY "FIRST")
 endif()
 
+# virtual environments handling
+if (DEFINED ENV{VIRTUAL_ENV})
+  if (DEFINED ${_PYTHON_PREFIX}_FIND_VIRTUALENV)
+    if (NOT ${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY|STANDARD)$")
+      message (AUTHOR_WARNING "Find${_PYTHON_PREFIX}: ${${_PYTHON_PREFIX}_FIND_VIRTUALENV}: invalid value for '${_PYTHON_PREFIX}_FIND_VIRTUALENV'. 'FIRST', 'ONLY' or 'IGNORE' expected.")
+      set (_${_PYTHON_PREFIX}_FIND_VIRTUALENV "FIRST")
+    else()
+      set (_${_PYTHON_PREFIX}_FIND_VIRTUALENV ${${_PYTHON_PREFIX}_FIND_VIRTUALENV})
+    endif()
+  else()
+    set (_${_PYTHON_PREFIX}_FIND_VIRTUALENV FIRST)
+  endif()
+else()
+  set (_${_PYTHON_PREFIX}_FIND_VIRTUALENV STANDARD)
+endif()
+
 
 unset (_${_PYTHON_PREFIX}_REQUIRED_VARS)
 unset (_${_PYTHON_PREFIX}_CACHED_VARS)
@@ -317,6 +333,30 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     string (REPLACE "." "" _${_PYTHON_PREFIX}_VERSION_NO_DOTS ${_${_PYTHON_PREFIX}_VERSION})
 
     _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION})
+
+    # Virtual environments handling
+    if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
+      find_program (${_PYTHON_PREFIX}_EXECUTABLE
+                    NAMES python${_${_PYTHON_PREFIX}_VERSION}
+                          python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
+                          python
+                    NAMES_PER_DIR
+                    HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                    PATHS ENV VIRTUAL_ENV
+                    PATH_SUFFIXES bin Scripts
+                    NO_CMAKE_PATH
+                    NO_CMAKE_ENVIRONMENT_PATH
+                    NO_SYSTEM_ENVIRONMENT_PATH
+                    NO_CMAKE_SYSTEM_PATH)
+
+      _python_validate_interpreter (${_${_PYTHON_PREFIX}_VERSION})
+      if (${_PYTHON_PREFIX}_EXECUTABLE)
+        break()
+      endif()
+      if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV STREQUAL "ONLY")
+        continue()
+      endif()
+    endif()
 
     # Apple frameworks handling
     if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
@@ -423,7 +463,8 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     endif()
   endforeach()
 
-  if (NOT ${_PYTHON_PREFIX}_EXECUTABLE)
+  if (NOT ${_PYTHON_PREFIX}_EXECUTABLE AND
+      NOT _${_PYTHON_PREFIX}_FIND_VIRTUALENV STREQUAL "ONLY")
     # No specific version found. Retry with generic names
     # try using HINTS
     find_program (${_PYTHON_PREFIX}_EXECUTABLE
@@ -685,18 +726,32 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
   # if python interpreter is found, use its location and version to ensure consistency
   # between interpreter and development environment
   unset (_${_PYTHON_PREFIX}_PREFIX)
+  unset (_${_PYTHON_PREFIX}_EXEC_PREFIX)
+  unset (_${_PYTHON_PREFIX}_BASE_EXEC_PREFIX)
   if (${_PYTHON_PREFIX}_Interpreter_FOUND)
     execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                             "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.PREFIX)"
+                             "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.EXEC_PREFIX)"
                      RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_PREFIX
+                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_EXEC_PREFIX
                      ERROR_QUIET
                      OUTPUT_STRIP_TRAILING_WHITESPACE)
     if (_${_PYTHON_PREFIX}_RESULT)
-      unset (_${_PYTHON_PREFIX}_PREFIX)
+      unset (_${_PYTHON_PREFIX}_EXEC_PREFIX)
+    endif()
+
+    if (NOT ${_PYTHON_PREFIX}_FIND_VIRTUALENV STREQUAL "STANDARD")
+      execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
+                               "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.BASE_EXEC_PREFIX)"
+                       RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                       OUTPUT_VARIABLE _${_PYTHON_PREFIX}_BASE_EXEC_PREFIX
+                       ERROR_QUIET
+                       OUTPUT_STRIP_TRAILING_WHITESPACE)
+      if (_${_PYTHON_PREFIX}_RESULT)
+        unset (_${_PYTHON_PREFIX}_BASE_EXEC_PREFIX)
+      endif()
     endif()
   endif()
-  set (_${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_PREFIX}" "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+  set (_${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_EXEC_PREFIX}" "${_${_PYTHON_PREFIX}_BASE_EXEC_PREFIX}" "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
 
   foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
     string (REPLACE "." "" _${_PYTHON_PREFIX}_VERSION_NO_DOTS ${_${_PYTHON_PREFIX}_VERSION})
