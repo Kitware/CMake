@@ -31,6 +31,10 @@ Further variables are set by the optional arguments described in the following.
 If any of these arguments is not used, then the corresponding variables are
 set to the empty string.
 
+If the variable :variable:`CMAKE_PROJECT_INCLUDE_BEFORE` exists, the file
+pointed to by that variable will be included as the first step of the project
+command.
+
 If the variable :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`
 or :variable:`CMAKE_PROJECT_INCLUDE` exists, the file pointed to by that
 variable will be included as the last step of the project command.

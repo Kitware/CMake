@@ -196,6 +196,7 @@ Variables that Change Behavior
    /variable/CMAKE_PREFIX_PATH
    /variable/CMAKE_PROGRAM_PATH
    /variable/CMAKE_PROJECT_INCLUDE
+   /variable/CMAKE_PROJECT_INCLUDE_BEFORE
    /variable/CMAKE_PROJECT_PROJECT-NAME_INCLUDE
    /variable/CMAKE_SKIP_INSTALL_ALL_DEPENDENCY
    /variable/CMAKE_STAGING_PREFIX
