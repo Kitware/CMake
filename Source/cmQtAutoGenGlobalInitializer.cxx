@@ -20,6 +20,24 @@
 #include <memory>
 #include <utility>
 
+cmQtAutoGenGlobalInitializer::Keywords::Keywords()
+  : AUTOMOC("AUTOMOC")
+  , AUTOUIC("AUTOUIC")
+  , AUTORCC("AUTORCC")
+  , AUTOMOC_EXECUTABLE("AUTOMOC_EXECUTABLE")
+  , AUTOUIC_EXECUTABLE("AUTOUIC_EXECUTABLE")
+  , AUTORCC_EXECUTABLE("AUTORCC_EXECUTABLE")
+  , SKIP_AUTOGEN("SKIP_AUTOGEN")
+  , SKIP_AUTOMOC("SKIP_AUTOMOC")
+  , SKIP_AUTOUIC("SKIP_AUTOUIC")
+  , SKIP_AUTORCC("SKIP_AUTORCC")
+  , AUTOUIC_OPTIONS("AUTOUIC_OPTIONS")
+  , AUTORCC_OPTIONS("AUTORCC_OPTIONS")
+  , qrc("qrc")
+  , ui("ui")
+{
+}
+
 cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
   std::vector<cmLocalGenerator*> const& localGenerators)
 {
@@ -74,16 +92,16 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
         continue;
       }
 
-      bool const moc = target->GetPropertyAsBool(cmQtAutoGen::GenAUTOMOC);
-      bool const uic = target->GetPropertyAsBool(cmQtAutoGen::GenAUTOUIC);
-      bool const rcc = target->GetPropertyAsBool(cmQtAutoGen::GenAUTORCC);
+      bool const moc = target->GetPropertyAsBool(kw().AUTOMOC);
+      bool const uic = target->GetPropertyAsBool(kw().AUTOUIC);
+      bool const rcc = target->GetPropertyAsBool(kw().AUTORCC);
       if (moc || uic || rcc) {
         std::string const mocExec =
-          target->GetSafeProperty("AUTOMOC_EXECUTABLE");
+          target->GetSafeProperty(kw().AUTOMOC_EXECUTABLE);
         std::string const uicExec =
-          target->GetSafeProperty("AUTOUIC_EXECUTABLE");
+          target->GetSafeProperty(kw().AUTOUIC_EXECUTABLE);
         std::string const rccExec =
-          target->GetSafeProperty("AUTORCC_EXECUTABLE");
+          target->GetSafeProperty(kw().AUTORCC_EXECUTABLE);
 
         // We support Qt4, Qt5 and Qt6
         auto qtVersion = cmQtAutoGenInitializer::GetQtVersion(target);

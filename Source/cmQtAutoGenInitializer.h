@@ -62,7 +62,6 @@ public:
     bool Enabled = false;
     // Generator type/name
     GenT Gen;
-    std::string const& GenName;
     std::string const& GenNameUpper;
     // Executable
     std::string ExecutableTargetName;
@@ -71,11 +70,9 @@ public:
     bool ExecutableExists = false;
 
     /// @brief Constructor
-    GenVarsT(GenT gen, std::string const& genName,
-             std::string const& genNameUpper)
+    GenVarsT(GenT gen)
       : Gen(gen)
-      , GenName(genName)
-      , GenNameUpper(genNameUpper){};
+      , GenNameUpper(cmQtAutoGen::GeneratorNameUpper(gen)){};
   };
 
   /// @brief Writes a CMake info file
@@ -213,8 +210,7 @@ private:
 
     /// @brief Constructor
     MocT()
-      : GenVarsT(cmQtAutoGen::GenT::MOC, cmQtAutoGen::GenAutoMoc,
-                 cmQtAutoGen::GenAUTOMOC){};
+      : GenVarsT(GenT::MOC){};
   } Moc;
 
   /// @brief Uic only variables
@@ -229,8 +225,7 @@ private:
 
     /// @brief Constructor
     UicT()
-      : GenVarsT(cmQtAutoGen::GenT::UIC, cmQtAutoGen::GenAutoUic,
-                 cmQtAutoGen::GenAUTOUIC){};
+      : GenVarsT(GenT::UIC){};
   } Uic;
 
   /// @brief Rcc only variables
@@ -242,8 +237,7 @@ private:
 
     /// @brief Constructor
     RccT()
-      : GenVarsT(cmQtAutoGen::GenT::RCC, cmQtAutoGen::GenAutoRcc,
-                 cmQtAutoGen::GenAUTORCC){};
+      : GenVarsT(GenT::RCC){};
   } Rcc;
 };
 

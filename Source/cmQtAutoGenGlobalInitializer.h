@@ -18,9 +18,38 @@ class cmQtAutoGenInitializer;
 class cmQtAutoGenGlobalInitializer
 {
 public:
+  /// @brief Collection of QtAutogen related keywords
+  class Keywords
+  {
+  public:
+    Keywords();
+
+    std::string AUTOMOC;
+    std::string AUTOUIC;
+    std::string AUTORCC;
+
+    std::string AUTOMOC_EXECUTABLE;
+    std::string AUTOUIC_EXECUTABLE;
+    std::string AUTORCC_EXECUTABLE;
+
+    std::string SKIP_AUTOGEN;
+    std::string SKIP_AUTOMOC;
+    std::string SKIP_AUTOUIC;
+    std::string SKIP_AUTORCC;
+
+    std::string AUTOUIC_OPTIONS;
+    std::string AUTORCC_OPTIONS;
+
+    std::string qrc;
+    std::string ui;
+  };
+
+public:
   cmQtAutoGenGlobalInitializer(
     std::vector<cmLocalGenerator*> const& localGenerators);
   ~cmQtAutoGenGlobalInitializer();
+
+  Keywords const& kw() const { return Keywords_; };
 
   bool generate();
 
@@ -48,6 +77,7 @@ private:
   std::map<cmLocalGenerator*, std::string> GlobalAutoGenTargets_;
   std::map<cmLocalGenerator*, std::string> GlobalAutoRccTargets_;
   std::unordered_map<std::string, std::string> ExecutableTestOutputs_;
+  Keywords const Keywords_;
 };
 
 #endif
