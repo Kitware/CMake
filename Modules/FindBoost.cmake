@@ -465,7 +465,7 @@ function(_Boost_GUESS_COMPILER_PREFIX _ret)
     endif()
   elseif (GHSMULTI)
     set(_boost_COMPILER "-ghs")
-  elseif("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC")
+  elseif("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC" OR "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
     if(MSVC_TOOLSET_VERSION GREATER_EQUAL 141)
       set(_boost_COMPILER "-vc141;-vc140")
     elseif(MSVC_TOOLSET_VERSION GREATER_EQUAL 80)
@@ -476,6 +476,12 @@ function(_Boost_GUESS_COMPILER_PREFIX _ret)
       set(_boost_COMPILER "-vc7") # yes, this is correct
     else() # VS 6.0 Good luck!
       set(_boost_COMPILER "-vc6") # yes, this is correct
+    endif()
+
+    if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xClang")
+      string(REPLACE "." ";" VERSION_LIST "${CMAKE_CXX_COMPILER_VERSION}")
+      list(GET VERSION_LIST 0 CLANG_VERSION_MAJOR)
+      set(_boost_COMPILER "-clangw${CLANG_VERSION_MAJOR};${_boost_COMPILER}")
     endif()
   elseif (BORLAND)
     set(_boost_COMPILER "-bcb")
