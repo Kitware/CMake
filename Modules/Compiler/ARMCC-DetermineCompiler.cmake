@@ -1,5 +1,5 @@
 # ARMCC Toolchain
-set(_compiler_id_pp_test "defined(__ARMCC_VERSION)")
+set(_compiler_id_pp_test "defined(__ARMCC_VERSION) && !defined(__clang__)")
 
 set(_compiler_id_version_compute "
 #if __ARMCC_VERSION >= 1000000
