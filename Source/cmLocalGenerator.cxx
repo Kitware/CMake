@@ -879,6 +879,27 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
     }
   }
   this->AddCompilerRequirementFlag(flags, target, lang);
+
+  cmMakefile* mf = this->GetMakefile();
+  if ((mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
+      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID") ||
+      mf->GetDefinition("MSVC_CUDA_ARCHITECTURE_ID"))) {
+    // If the target is a Managed C++ one, /ZI is not compatible.
+
+    if (flags.find("/clr") != std::string::npos ||
+        flags.find("-clr") != std::string::npos ||
+          target->GetManagedType(config) ==
+            cmGeneratorTarget::ManagedType::Mixed ||
+        target->GetManagedType(config) ==
+          cmGeneratorTarget::ManagedType::Managed)
+      {
+      // Since /ZI is the default for DEBUG configuration, replace it with /Zi
+      // when the project is a managed one (i.e. /clr passed in).
+      if (cmSystemTools::UpperCase(config) == "DEBUG") {
+        cmSystemTools::ReplaceString(flags, " /ZI ", " /Zi ");
+      }
+    }
+  }
 }
 
 std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(

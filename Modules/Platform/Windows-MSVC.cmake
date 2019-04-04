@@ -148,6 +148,11 @@ endif()
 # default to Debug builds
 set(CMAKE_BUILD_TYPE_INIT Debug)
 
+# default value for Just My Code flag
+set(_JMC "")
+# default value for Debug Information Format flag
+set(_DEBUGINFOFORMAT_DEBUG "/Zi")
+
 # Compute an architecture family from the architecture id.
 foreach(lang C CXX)
   set(_MSVC_${lang}_ARCHITECTURE_FAMILY "${MSVC_${lang}_ARCHITECTURE_ID}")
@@ -178,7 +183,6 @@ if(WINCE)
   set(_PLATFORM_DEFINES_CXX " /D${_MSVC_CXX_ARCHITECTURE_FAMILY} /D_${_MSVC_CXX_ARCHITECTURE_FAMILY_UPPER}_")
 
   set(_RTC1 "")
-  set(_JMC "")
   set(_FLAGS_C "")
   set(_FLAGS_CXX " /GR /EHsc")
 
@@ -233,11 +237,13 @@ else()
     set(CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib")
   endif()
 
-  # JMC only supported in MSVC
   if("x${CMAKE_C_COMPILER_ID}" STREQUAL "xMSVC" OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC" )
+    # JMC only supported in MSVC
     if(MSVC_VERSION GREATER_EQUAL 1915)
       set(_JMC "/JMC")
     endif()
+    # /ZI is supported by MSVC only, not by clang-cl for example.
+    set(_DEBUGINFOFORMAT_DEBUG "/ZI")
   endif()
 
   if(MSVC_VERSION LESS 1310)
@@ -366,7 +372,7 @@ macro(__windows_compiler_msvc lang)
       string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " /MD -DNDEBUG") # TODO: Add '-Os' once VS generator maps it properly for Clang
     else()
       string(APPEND CMAKE_${lang}_FLAGS_INIT " ${_PLATFORM_DEFINES}${_PLATFORM_DEFINES_${lang}} /D_WINDOWS /W3${_FLAGS_${lang}}")
-      string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " /MDd /Zi /Ob0 /Od ${_RTC1} ${_JMC}") 
+      string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " /MDd ${_DEBUGINFOFORMAT_DEBUG} /Ob0 /Od ${_RTC1} ${_JMC}")
       string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " /MD /O2 /Ob2 /DNDEBUG")
       string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " /MD /Zi /O2 /Ob1 /DNDEBUG")
       string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " /MD /O1 /Ob1 /DNDEBUG")
