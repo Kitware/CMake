@@ -2023,8 +2023,54 @@ struct TargetFilesystemArtifactResultGetter<ArtifactPathTag>
   static std::string Get(const std::string& result) { return result; }
 };
 
+struct TargetArtifactBase : public cmGeneratorExpressionNode
+{
+  TargetArtifactBase() {} // NOLINT(modernize-use-equals-default)
+
+protected:
+  cmGeneratorTarget* GetTarget(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const
+  {
+    // Lookup the referenced target.
+    std::string name = parameters.front();
+
+    if (!cmGeneratorExpression::IsValidTargetName(name)) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "Expression syntax not recognized.");
+      return nullptr;
+    }
+    cmGeneratorTarget* target = context->LG->FindGeneratorTargetToUse(name);
+    if (!target) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "No target \"" + name + "\"");
+      return nullptr;
+    }
+    if (target->GetType() >= cmStateEnums::OBJECT_LIBRARY &&
+        target->GetType() != cmStateEnums::UNKNOWN_LIBRARY) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "Target \"" + name +
+                      "\" is not an executable or library.");
+      return nullptr;
+    }
+    if (dagChecker &&
+        (dagChecker->EvaluatingLinkLibraries(target) ||
+         (dagChecker->EvaluatingSources() &&
+          target == dagChecker->TopTarget()))) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "Expressions which require the linker language may not "
+                    "be used while evaluating link libraries");
+      return nullptr;
+    }
+
+    return target;
+  }
+};
+
 template <typename ArtifactT, typename ComponentT>
-struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
+struct TargetFilesystemArtifact : public TargetArtifactBase
 {
   TargetFilesystemArtifact() {} // NOLINT(modernize-use-equals-default)
 
@@ -2036,34 +2082,9 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
-    // Lookup the referenced target.
-    std::string name = parameters.front();
-
-    if (!cmGeneratorExpression::IsValidTargetName(name)) {
-      ::reportError(context, content->GetOriginalExpression(),
-                    "Expression syntax not recognized.");
-      return std::string();
-    }
-    cmGeneratorTarget* target = context->LG->FindGeneratorTargetToUse(name);
+    cmGeneratorTarget* target =
+      this->GetTarget(parameters, context, content, dagChecker);
     if (!target) {
-      ::reportError(context, content->GetOriginalExpression(),
-                    "No target \"" + name + "\"");
-      return std::string();
-    }
-    if (target->GetType() >= cmStateEnums::OBJECT_LIBRARY &&
-        target->GetType() != cmStateEnums::UNKNOWN_LIBRARY) {
-      ::reportError(context, content->GetOriginalExpression(),
-                    "Target \"" + name +
-                      "\" is not an executable or library.");
-      return std::string();
-    }
-    if (dagChecker &&
-        (dagChecker->EvaluatingLinkLibraries(target) ||
-         (dagChecker->EvaluatingSources() &&
-          target == dagChecker->TopTarget()))) {
-      ::reportError(context, content->GetOriginalExpression(),
-                    "Expressions which require the linker language may not "
-                    "be used while evaluating link libraries");
       return std::string();
     }
     context->DependTargets.insert(target);
