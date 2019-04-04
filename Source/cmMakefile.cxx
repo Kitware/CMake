@@ -1216,9 +1216,10 @@ void cmMakefile::AddCustomCommandOldStyle(
   };
 
   // Each output must get its own copy of this rule.
-  cmsys::RegularExpression sourceFiles("\\.(C|M|c|c\\+\\+|cc|cpp|cxx|cu|m|mm|"
-                                       "rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|"
-                                       "hm|hpp|hxx|in|txx|inl)$");
+  cmsys::RegularExpression sourceFiles(
+    "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|mpp|cu|m|mm|"
+    "rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|"
+    "hm|hpp|hxx|in|txx|inl)$");
 
   // Choose whether to use a main dependency.
   if (sourceFiles.find(source)) {
