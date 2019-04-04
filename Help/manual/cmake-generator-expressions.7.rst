@@ -86,8 +86,10 @@ String Comparisons
 ``$<EQUAL:value1,value2>``
   ``1`` if ``value1`` and ``value2`` are numerically equal, else ``0``.
 ``$<IN_LIST:string,list>``
-  ``1`` if ``string`` is member of the comma-separated ``list``, else ``0``.
+  ``1`` if ``string`` is member of the semicolon-separated ``list``, else ``0``.
   Uses case-sensitive comparisons.
+``$<REMOVE_DUPLICATES:list>``
+  Removes duplicated items in the given ``list``.
 ``$<VERSION_LESS:v1,v2>``
   ``1`` if ``v1`` is a version less than ``v2``, else ``0``.
 ``$<VERSION_GREATER:v1,v2>``
