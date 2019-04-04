@@ -86,6 +86,8 @@ private:
     return this->OutputExtension.c_str();
   }
 
+  bool SetArchiveOptions(cmArchiveWrite* archive);
+
 private:
   cmArchiveWrite::Compress Compress;
   std::string ArchiveFormat;
