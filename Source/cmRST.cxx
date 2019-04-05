@@ -457,6 +457,12 @@ void cmRST::UnindentLines(std::vector<std::string>& lines)
   size_t trailingEmpty =
     std::distance(rit, cmFindNot(cmReverseRange(lines), std::string()));
 
+  if ((leadingEmpty + trailingEmpty) >= lines.size()) {
+    // All lines are empty.  The markup block is empty.  Leave only one.
+    lines.resize(1);
+    return;
+  }
+
   std::vector<std::string>::iterator contentEnd = cmRotate(
     lines.begin(), lines.begin() + leadingEmpty, lines.end() - trailingEmpty);
   lines.erase(contentEnd, lines.end());

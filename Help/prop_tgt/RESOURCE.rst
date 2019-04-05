@@ -11,7 +11,7 @@ directory (eg. ``Resources`` directory for macOS) inside the bundle.
 On non-Apple platforms these files may be installed using the ``RESOURCE``
 option to the :command:`install(TARGETS)` command.
 
-Following example of Application Bundle::
+Following example of Application Bundle:
 
 .. code-block:: cmake
 
