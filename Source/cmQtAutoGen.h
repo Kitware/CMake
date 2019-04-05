@@ -100,6 +100,45 @@ public:
   /// @brief Converts relative qrc entry paths to full paths
   static void RccListConvertFullPath(std::string const& qrcFileDir,
                                      std::vector<std::string>& files);
+
+  /** @class RccLister
+   * @brief Lists files in qrc resource files
+   */
+  class RccLister
+  {
+  public:
+    RccLister();
+    RccLister(std::string rccExecutable, std::vector<std::string> listOptions);
+
+    //! The rcc executable
+    std::string const& RccExcutable() const { return RccExcutable_; }
+    void SetRccExecutable(std::string const& rccExecutable)
+    {
+      RccExcutable_ = rccExecutable;
+    }
+
+    //! The rcc executable list options
+    std::vector<std::string> const& ListOptions() const
+    {
+      return ListOptions_;
+    }
+    void SetListOptions(std::vector<std::string> const& listOptions)
+    {
+      ListOptions_ = listOptions;
+    }
+
+    /**
+     * @brief Lists a files in the qrcFile
+     * @arg files The file names are appended to this list
+     * @arg error contains the error message when the function fails
+     */
+    bool list(std::string const& qrcFile, std::vector<std::string>& files,
+              std::string& error, bool verbose = false) const;
+
+  private:
+    std::string RccExcutable_;
+    std::vector<std::string> ListOptions_;
+  };
 };
 
 #endif

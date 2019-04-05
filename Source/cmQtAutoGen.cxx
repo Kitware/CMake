@@ -1,9 +1,12 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGen.h"
-#include "cmAlgorithms.h"
-#include "cmSystemTools.h"
 
+#include "cmAlgorithms.h"
+#include "cmDuration.h"
+#include "cmProcessOutput.h"
+#include "cmSystemTools.h"
+#include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
 #include <algorithm>
@@ -309,7 +312,106 @@ void cmQtAutoGen::RccListConvertFullPath(std::string const& qrcFileDir,
                                          std::vector<std::string>& files)
 {
   for (std::string& entry : files) {
-    std::string tmp = cmSystemTools::CollapseFullPath(entry, qrcFileDir);
-    entry = std::move(tmp);
+    entry = cmSystemTools::CollapseFullPath(entry, qrcFileDir);
   }
+}
+
+cmQtAutoGen::RccLister::RccLister() = default;
+
+cmQtAutoGen::RccLister::RccLister(std::string rccExecutable,
+                                  std::vector<std::string> listOptions)
+  : RccExcutable_(std::move(rccExecutable))
+  , ListOptions_(std::move(listOptions))
+{
+}
+
+bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
+                                  std::vector<std::string>& files,
+                                  std::string& error, bool verbose) const
+{
+  error.clear();
+
+  if (!cmSystemTools::FileExists(qrcFile, true)) {
+    error = "The resource file ";
+    error += Quoted(qrcFile);
+    error += " does not exist.";
+    return false;
+  }
+
+  // Run rcc list command in the directory of the qrc file with the pathless
+  // qrc file name argument.  This way rcc prints relative paths.
+  // This avoids issues on Windows when the qrc file is in a path that
+  // contains non-ASCII characters.
+  std::string const fileDir = cmSystemTools::GetFilenamePath(qrcFile);
+
+  if (!this->RccExcutable_.empty() &&
+      cmSystemTools::FileExists(this->RccExcutable_, true) &&
+      !this->ListOptions_.empty()) {
+
+    bool result = false;
+    int retVal = 0;
+    std::string rccStdOut;
+    std::string rccStdErr;
+    {
+      std::vector<std::string> cmd;
+      cmd.emplace_back(this->RccExcutable_);
+      cmd.insert(cmd.end(), this->ListOptions_.begin(),
+                 this->ListOptions_.end());
+      cmd.emplace_back(cmSystemTools::GetFilenameName(qrcFile));
+
+      // Log command
+      if (verbose) {
+        std::string msg = "Running command:\n";
+        msg += QuotedCommand(cmd);
+        msg += '\n';
+        cmSystemTools::Stdout(msg);
+      }
+
+      result = cmSystemTools::RunSingleCommand(
+        cmd, &rccStdOut, &rccStdErr, &retVal, fileDir.c_str(),
+        cmSystemTools::OUTPUT_NONE, cmDuration::zero(), cmProcessOutput::Auto);
+    }
+    if (!result || retVal) {
+      error = "The rcc list process failed for ";
+      error += Quoted(qrcFile);
+      error += "\n";
+      if (!rccStdOut.empty()) {
+        error += rccStdOut;
+        error += "\n";
+      }
+      if (!rccStdErr.empty()) {
+        error += rccStdErr;
+        error += "\n";
+      }
+      return false;
+    }
+    if (!RccListParseOutput(rccStdOut, rccStdErr, files, error)) {
+      return false;
+    }
+  } else {
+    // We can't use rcc for the file listing.
+    // Read the qrc file content into string and parse it.
+    {
+      std::string qrcContents;
+      {
+        cmsys::ifstream ifs(qrcFile.c_str());
+        if (ifs) {
+          std::ostringstream osst;
+          osst << ifs.rdbuf();
+          qrcContents = osst.str();
+        } else {
+          error = "The resource file ";
+          error += Quoted(qrcFile);
+          error += " is not readable\n";
+          return false;
+        }
+      }
+      // Parse string content
+      RccListParseContent(qrcContents, files);
+    }
+  }
+
+  // Convert relative paths to absolute paths
+  RccListConvertFullPath(fileDir, files);
+  return true;
 }
