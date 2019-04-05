@@ -172,12 +172,12 @@ Options
 ``-L[A][H]``
  List non-advanced cached variables.
 
- List cache variables will run CMake and list all the variables from
- the CMake cache that are not marked as INTERNAL or ADVANCED.  This
- will effectively display current CMake settings, which can then be
- changed with -D option.  Changing some of the variables may result
- in more variables being created.  If A is specified, then it will
- display also advanced variables.  If H is specified, it will also
+ List ``CACHE`` variables will run CMake and list all the variables from
+ the CMake ``CACHE`` that are not marked as ``INTERNAL`` or :prop_cache:`ADVANCED`.
+ This will effectively display current CMake settings, which can then be
+ changed with ``-D`` option.  Changing some of the variables may result
+ in more variables being created.  If ``A`` is specified, then it will
+ display also advanced variables.  If ``H`` is specified, it will also
  display help for each variable.
 
 ``-N``
@@ -201,9 +201,10 @@ Options
  additional information such as the cache, log files etc.
 
 ``--debug-trycompile``
- Do not delete the try_compile build tree. Only useful on one try_compile at a time.
+ Do not delete the :command:`try_compile` build tree.
+ Only useful on one :command:`try_compile` at a time.
 
- Do not delete the files and directories created for try_compile
+ Do not delete the files and directories created for :command:`try_compile`
  calls.  This is useful in debugging failed try_compiles.  It may
  however change the results of the try-compiles as old junk from a
  previous try-compile may cause a different test to either pass or
@@ -214,7 +215,7 @@ Options
  Put cmake in a debug mode.
 
  Print extra information during the cmake run like stack traces with
- message(send_error ) calls.
+ :command:`message(SEND_ERROR)` calls.
 
 ``--trace``
  Put cmake in trace mode.
@@ -251,8 +252,8 @@ Options
  Find problems with variable usage in system files.
 
  Normally, unused and uninitialized variables are searched for only
- in CMAKE_SOURCE_DIR and CMAKE_BINARY_DIR.  This flag tells CMake to
- warn about other files as well.
+ in :variable:`CMAKE_SOURCE_DIR` and :variable:`CMAKE_BINARY_DIR`.
+ This flag tells CMake to warn about other files as well.
 
 .. _`Build Tool Mode`:
 
@@ -329,10 +330,10 @@ The options are:
   Component-based install. Only install component ``<comp>``.
 
 ``--prefix <prefix>``
-  The installation prefix CMAKE_INSTALL_PREFIX.
+  The installation prefix :variable:`CMAKE_INSTALL_PREFIX`.
 
 ``--strip``
-  Strip before installing by setting CMAKE_INSTALL_DO_STRIP.
+  Strip before installing by setting ``CMAKE_INSTALL_DO_STRIP``.
 
 ``-v, --verbose``
   Enable verbose output.
@@ -363,8 +364,8 @@ Run a Script
 
 Process the given cmake file as a script written in the CMake
 language.  No configure or generate step is performed and the cache
-is not modified.  If variables are defined using -D, this must be
-done before the -P argument.
+is not modified.  If variables are defined using ``-D``, this must be
+done before the ``-P`` argument.
 
 
 Run a Command-Line Tool
@@ -421,7 +422,7 @@ Available commands are:
 
 ``compare_files [--ignore-eol] <file1> <file2>``
   Check if ``<file1>`` is same as ``<file2>``. If files are the same,
-  then returns 0, if not it returns 1.  The ``--ignore-eol`` option
+  then returns ``0``, if not it returns ``1``.  The ``--ignore-eol`` option
   implies line-wise comparison and ignores LF/CRLF differences.
 
 ``copy <file>... <destination>``

@@ -180,7 +180,7 @@ sets these variables:
 
 These variables are checked by the ``find_package`` command to determine
 whether the configuration file provides an acceptable version.  They
-are not available after the find_package call returns.  If the version
+are not available after the ``find_package`` call returns.  If the version
 is acceptable the following variables are set:
 
 ``<PackageName>_VERSION``
@@ -220,8 +220,8 @@ Search Procedure
 CMake constructs a set of possible installation prefixes for the
 package.  Under each prefix several directories are searched for a
 configuration file.  The tables below show the directories searched.
-Each entry is meant for installation trees following Windows (W), UNIX
-(U), or Apple (A) conventions::
+Each entry is meant for installation trees following Windows (``W``), UNIX
+(``U``), or Apple (``A``) conventions::
 
   <prefix>/                                                       (W)
   <prefix>/(cmake|CMake)/                                         (W)
@@ -234,8 +234,8 @@ Each entry is meant for installation trees following Windows (W), UNIX
   <prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/               (W/U)
   <prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/ (W/U)
 
-On systems supporting macOS Frameworks and Application Bundles the
-following directories are searched for frameworks or bundles
+On systems supporting macOS :prop_tgt:`FRAMEWORK`s and :prop_tgt:`BUNDLE`s the
+following directories are searched for Frameworks or Application Bundles
 containing a configuration file::
 
   <prefix>/<name>.framework/Resources/                    (A)
