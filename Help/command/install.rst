@@ -148,13 +148,13 @@ project.  There are several kinds of target files that may be installed:
   property are treated as ``FRAMEWORK`` targets on macOS.
 
 ``BUNDLE``
-  Executables marked with the ``MACOSX_BUNDLE`` property are treated as
+  Executables marked with the :prop_tgt:`MACOSX_BUNDLE` property are treated as
   ``BUNDLE`` targets on macOS.
 
 ``PUBLIC_HEADER``
-  Any ``PUBLIC_HEADER`` files associated with a library are installed in
+  Any :prop_tgt:`PUBLIC_HEADER` files associated with a library are installed in
   the destination specified by the ``PUBLIC_HEADER`` argument on non-Apple
-  platforms. Rules defined by this argument are ignored for ``FRAMEWORK``
+  platforms. Rules defined by this argument are ignored for :prop_tgt:`FRAMEWORK`
   libraries on Apple platforms because the associated files are installed
   into the appropriate locations inside the framework folder. See
   :prop_tgt:`PUBLIC_HEADER` for details.

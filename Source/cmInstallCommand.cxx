@@ -663,8 +663,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     // generators for them.
     bool createInstallGeneratorsForTargetFileSets = true;
 
-    if (target.IsFrameworkOnApple() ||
-        target.GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (target.IsFrameworkOnApple()) {
       createInstallGeneratorsForTargetFileSets = false;
     }
 
