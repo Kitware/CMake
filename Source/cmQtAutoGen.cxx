@@ -240,8 +240,8 @@ void cmQtAutoGen::RccMergeOptions(std::vector<std::string>& baseOpts,
   MergeOptions(baseOpts, newOpts, valueOpts, isQt5);
 }
 
-void cmQtAutoGen::RccListParseContent(std::string const& content,
-                                      std::vector<std::string>& files)
+static void RccListParseContent(std::string const& content,
+                                std::vector<std::string>& files)
 {
   cmsys::RegularExpression fileMatchRegex("(<file[^<]+)");
   cmsys::RegularExpression fileReplaceRegex("(^<file[^>]*>)");
@@ -258,10 +258,10 @@ void cmQtAutoGen::RccListParseContent(std::string const& content,
   }
 }
 
-bool cmQtAutoGen::RccListParseOutput(std::string const& rccStdOut,
-                                     std::string const& rccStdErr,
-                                     std::vector<std::string>& files,
-                                     std::string& error)
+static bool RccListParseOutput(std::string const& rccStdOut,
+                               std::string const& rccStdErr,
+                               std::vector<std::string>& files,
+                               std::string& error)
 {
   // Lambda to strip CR characters
   auto StripCR = [](std::string& line) {
@@ -306,14 +306,6 @@ bool cmQtAutoGen::RccListParseOutput(std::string const& rccStdOut,
   }
 
   return true;
-}
-
-void cmQtAutoGen::RccListConvertFullPath(std::string const& qrcFileDir,
-                                         std::vector<std::string>& files)
-{
-  for (std::string& entry : files) {
-    entry = cmSystemTools::CollapseFullPath(entry, qrcFileDir);
-  }
 }
 
 cmQtAutoGen::RccLister::RccLister() = default;
@@ -412,6 +404,8 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
   }
 
   // Convert relative paths to absolute paths
-  RccListConvertFullPath(fileDir, files);
+  for (std::string& entry : files) {
+    entry = cmSystemTools::CollapseFullPath(entry, fileDir);
+  }
   return true;
 }

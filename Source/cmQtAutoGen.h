@@ -85,22 +85,6 @@ public:
                               std::vector<std::string> const& newOpts,
                               bool isQt5);
 
-  /// @brief Parses the content of a qrc file
-  ///
-  /// Use when rcc does not support the "--list" option
-  static void RccListParseContent(std::string const& content,
-                                  std::vector<std::string>& files);
-
-  /// @brief Parses the output of the "rcc --list ..." command
-  static bool RccListParseOutput(std::string const& rccStdOut,
-                                 std::string const& rccStdErr,
-                                 std::vector<std::string>& files,
-                                 std::string& error);
-
-  /// @brief Converts relative qrc entry paths to full paths
-  static void RccListConvertFullPath(std::string const& qrcFileDir,
-                                     std::vector<std::string>& files);
-
   /** @class RccLister
    * @brief Lists files in qrc resource files
    */
