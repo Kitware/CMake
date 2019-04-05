@@ -410,59 +410,12 @@ bool cmQtAutoGeneratorRcc::TestResourcesRead()
     return true;
   }
 
-  if (!RccListOptions_.empty()) {
-    // Start a rcc list process and parse the output
-    if (Process_) {
-      // Process is running already
-      if (Process_->IsFinished()) {
-        // Process is finished
-        if (!ProcessResult_.error()) {
-          // Process success
-          std::string parseError;
-          if (!RccListParseOutput(ProcessResult_.StdOut, ProcessResult_.StdErr,
-                                  Inputs_, parseError)) {
-            Log().ErrorFile(GenT::RCC, QrcFile_, parseError);
-            Error_ = true;
-          }
-        } else {
-          Log().ErrorFile(GenT::RCC, QrcFile_, ProcessResult_.ErrorMessage);
-          Error_ = true;
-        }
-        // Clean up
-        Process_.reset();
-        ProcessResult_.reset();
-      } else {
-        // Process is not finished, yet.
-        return false;
-      }
-    } else {
-      // Start a new process
-      // rcc prints relative entry paths when started in the directory of the
-      // qrc file with a pathless qrc file name argument.
-      // This is important because on Windows absolute paths returned by rcc
-      // might contain bad multibyte characters when the qrc file path
-      // contains non-ASCII pcharacters.
-      std::vector<std::string> cmd;
-      cmd.push_back(RccExecutable_);
-      cmd.insert(cmd.end(), RccListOptions_.begin(), RccListOptions_.end());
-      cmd.push_back(QrcFileName_);
-      // We're done here if the process fails to start
-      return !StartProcess(QrcFileDir_, cmd, false);
-    }
-  } else {
-    // rcc does not support the --list command.
-    // Read the qrc file content and parse it.
-    std::string qrcContent;
-    if (FileSys().FileRead(GenT::RCC, qrcContent, QrcFile_)) {
-      RccListParseContent(qrcContent, Inputs_);
-    }
+  std::string error;
+  RccLister lister(RccExecutable_, RccListOptions_);
+  if (!lister.list(QrcFile_, Inputs_, error)) {
+    Log().ErrorFile(GenT::RCC, QrcFile_, error);
+    Error_ = true;
   }
-
-  if (!Inputs_.empty()) {
-    // Convert relative paths to absolute paths
-    RccListConvertFullPath(QrcFileDir_, Inputs_);
-  }
-
   return true;
 }
 

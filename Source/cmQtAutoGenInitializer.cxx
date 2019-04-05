@@ -7,7 +7,6 @@
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
-#include "cmDuration.h"
 #include "cmFilePathChecksum.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -19,7 +18,6 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmProcessOutput.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmSourceGroup.h"
@@ -28,7 +26,6 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
-#include "cmsys/FStream.hxx"
 #include "cmsys/SystemInformation.hxx"
 
 #include <algorithm>
@@ -36,7 +33,6 @@
 #include <deque>
 #include <map>
 #include <set>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -935,7 +931,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
     for (Qrc& qrc : this->Rcc.Qrcs) {
       if (!qrc.Generated) {
         std::string error;
-        if (!RccListInputs(qrc.QrcFile, qrc.Resources, error)) {
+        RccLister const lister(this->Rcc.Executable, this->Rcc.ListOptions);
+        if (!lister.list(qrc.QrcFile, qrc.Resources, error)) {
           cmSystemTools::Error(error);
           return false;
         }
@@ -1628,88 +1625,5 @@ bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
     genVars.ExecutableExists = true;
   }
 
-  return true;
-}
-
-/// @brief Reads the resource files list from from a .qrc file
-/// @arg fileName Must be the absolute path of the .qrc file
-/// @return True if the rcc file was successfully read
-bool cmQtAutoGenInitializer::RccListInputs(std::string const& fileName,
-                                           std::vector<std::string>& files,
-                                           std::string& error)
-{
-  if (!cmSystemTools::FileExists(fileName)) {
-    error = "rcc resource file does not exist:\n  ";
-    error += Quoted(fileName);
-    error += "\n";
-    return false;
-  }
-  if (this->Rcc.ExecutableExists && !this->Rcc.ListOptions.empty()) {
-    // Use rcc for file listing
-    if (this->Rcc.Executable.empty()) {
-      error = "rcc executable not available";
-      return false;
-    }
-
-    // Run rcc list command in the directory of the qrc file with the
-    // pathless
-    // qrc file name argument. This way rcc prints relative paths.
-    // This avoids issues on Windows when the qrc file is in a path that
-    // contains non-ASCII characters.
-    std::string const fileDir = cmSystemTools::GetFilenamePath(fileName);
-    std::string const fileNameName = cmSystemTools::GetFilenameName(fileName);
-
-    bool result = false;
-    int retVal = 0;
-    std::string rccStdOut;
-    std::string rccStdErr;
-    {
-      std::vector<std::string> cmd;
-      cmd.push_back(this->Rcc.Executable);
-      cmd.insert(cmd.end(), this->Rcc.ListOptions.begin(),
-                 this->Rcc.ListOptions.end());
-      cmd.push_back(fileNameName);
-      result = cmSystemTools::RunSingleCommand(
-        cmd, &rccStdOut, &rccStdErr, &retVal, fileDir.c_str(),
-        cmSystemTools::OUTPUT_NONE, cmDuration::zero(), cmProcessOutput::Auto);
-    }
-    if (!result || retVal) {
-      error = "rcc list process failed for:\n  ";
-      error += Quoted(fileName);
-      error += "\n";
-      error += rccStdOut;
-      error += "\n";
-      error += rccStdErr;
-      error += "\n";
-      return false;
-    }
-    if (!RccListParseOutput(rccStdOut, rccStdErr, files, error)) {
-      return false;
-    }
-  } else {
-    // We can't use rcc for the file listing.
-    // Read the qrc file content into string and parse it.
-    {
-      std::string qrcContents;
-      {
-        cmsys::ifstream ifs(fileName.c_str());
-        if (ifs) {
-          std::ostringstream osst;
-          osst << ifs.rdbuf();
-          qrcContents = osst.str();
-        } else {
-          error = "rcc file not readable:\n  ";
-          error += Quoted(fileName);
-          error += "\n";
-          return false;
-        }
-      }
-      // Parse string content
-      RccListParseContent(qrcContents, files);
-    }
-  }
-
-  // Convert relative paths to absolute paths
-  RccListConvertFullPath(cmSystemTools::GetFilenamePath(fileName), files);
   return true;
 }
