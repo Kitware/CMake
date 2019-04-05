@@ -5,12 +5,12 @@
 FindBLAS
 --------
 
-Find BLAS library
+Find Basic Linear Algebra Subprograms (BLAS) library
 
-This module finds an installed fortran library that implements the
+This module finds an installed Fortran library that implements the
 BLAS linear-algebra interface (see http://www.netlib.org/blas/).  The
-list of libraries searched for is taken from the autoconf macro file,
-acx_blas.m4 (distributed at
+list of libraries searched for is taken from the ``autoconf`` macro file,
+``acx_blas.m4`` (distributed at
 http://ac-archive.sourceforge.net/ac-archive/acx_blas.html).
 
 Input Variables
@@ -52,7 +52,7 @@ The following variables may be set to influence this module's behavior:
   if ``ON`` tries to find the BLAS95 interfaces
 
 ``BLA_PREFER_PKGCONFIG``
-  if set pkg-config will be used to search for a BLAS library first
+  if set ``pkg-config`` will be used to search for a BLAS library first
   and if one is found that is preferred
 
 Result Variables
@@ -63,7 +63,7 @@ This module defines the following variables:
 ``BLAS_FOUND``
   library implementing the BLAS interface is found
 ``BLAS_LINKER_FLAGS``
-  uncached list of required linker flags (excluding -l and -L).
+  uncached list of required linker flags (excluding ``-l`` and ``-L``).
 ``BLAS_LIBRARIES``
   uncached list of libraries (using full path name) to link against
   to use BLAS (may be empty if compiler implicitly links BLAS)
@@ -75,7 +75,7 @@ This module defines the following variables:
 
 .. note::
 
-  C or CXX must be enabled to use Intel MKL
+  C or CXX must be enabled to use Intel Math Kernel Library (MKL)
 
   For example, to use Intel MKL libraries and/or Intel compiler:
 

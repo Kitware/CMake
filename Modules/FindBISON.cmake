@@ -19,7 +19,7 @@ The module defines the following variables:
   true if the program was found
 
 The minimum required version of ``bison`` can be specified using the
-standard CMake syntax, e.g.  ``find_package(BISON 2.1.3)``.
+standard CMake syntax, e.g.  :command:`find_package(BISON 2.1.3)`.
 
 If ``bison`` is found, the module defines the macro::
 
@@ -55,7 +55,7 @@ The options are:
 The macro defines the following variables:
 
 ``BISON_<Name>_DEFINED``
-  true is the macro ran successfully
+  ``True`` is the macro ran successfully
 
 ``BISON_<Name>_INPUT``
   The input source file, an alias for <YaccInput>

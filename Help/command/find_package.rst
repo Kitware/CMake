@@ -234,7 +234,7 @@ Each entry is meant for installation trees following Windows (``W``), UNIX
   <prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/               (W/U)
   <prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/ (W/U)
 
-On systems supporting macOS :prop_tgt:`FRAMEWORK`s and :prop_tgt:`BUNDLE`s the
+On systems supporting macOS :prop_tgt:`FRAMEWORK` and :prop_tgt:`BUNDLE`, the
 following directories are searched for Frameworks or Application Bundles
 containing a configuration file::
 
@@ -262,16 +262,16 @@ that order).
 * The ``lib`` path is always searched.
 
 If ``PATH_SUFFIXES`` is specified, the suffixes are appended to each
-(W) or (U) directory entry one-by-one.
+(``W``) or (``U``) directory entry one-by-one.
 
 This set of directories is intended to work in cooperation with
 projects that provide configuration files in their installation trees.
-Directories above marked with (W) are intended for installations on
+Directories above marked with (``W``) are intended for installations on
 Windows where the prefix may point at the top of an application's
-installation directory.  Those marked with (U) are intended for
+installation directory.  Those marked with (``U``) are intended for
 installations on UNIX platforms where the prefix is shared by multiple
-packages.  This is merely a convention, so all (W) and (U) directories
-are still searched on all platforms.  Directories marked with (A) are
+packages.  This is merely a convention, so all (``W``) and (``U``) directories
+are still searched on all platforms.  Directories marked with (``A``) are
 intended for installations on Apple platforms.  The
 :variable:`CMAKE_FIND_FRAMEWORK` and :variable:`CMAKE_FIND_APPBUNDLE`
 variables determine the order of preference.

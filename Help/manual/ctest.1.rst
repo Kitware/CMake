@@ -369,11 +369,11 @@ is computed as::
 
 where:
 
-* ``raw_test_time[j,i]``: Wall-clock time for the ``i``th test
-  for the ``j``th label or subproject
+* ``raw_test_time[j,i]``: Wall-clock time for the ``i`` test
+  for the ``j`` label or subproject
 * ``num_processors[j,i]``: Value of the CTest :prop_test:`PROCESSORS` property
-  for the ``i``th test for the ``j``th label or subproject
-* ``num_tests[j]``: Number of tests associated with the ``j``th label or subproject
+  for the ``i`` test for the ``j`` label or subproject
+* ``num_tests[j]``: Number of tests associated with the ``j`` label or subproject
 * ``total``: Total number of labels or subprojects that have at least one test run
 
 Therefore, the weighted time summary for each label or subproject represents

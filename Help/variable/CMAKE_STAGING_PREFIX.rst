@@ -6,7 +6,7 @@ be useful if the path in :variable:`CMAKE_SYSROOT` is read-only, or otherwise
 should remain pristine.
 
 The :variable:`CMAKE_STAGING_PREFIX` location is also used as a search prefix
- by the ``find_*`` commands. This can be controlled by setting the
+by the ``find_*`` commands. This can be controlled by setting the
 :variable:`CMAKE_FIND_NO_INSTALL_PREFIX` variable.
 
 If any ``RPATH``/``RUNPATH`` entries passed to the linker contain the

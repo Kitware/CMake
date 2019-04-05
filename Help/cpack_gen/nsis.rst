@@ -54,7 +54,7 @@ on Windows Nullsoft Scriptable Install System.
 
 .. variable:: CPACK_NSIS_COMPRESSOR
 
- The arguments that will be passed to the NSIS `SetCompressor command.
+ The arguments that will be passed to the NSIS `SetCompressor` command.
 
 .. variable:: CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL
 
@@ -71,8 +71,8 @@ on Windows Nullsoft Scriptable Install System.
 
 .. variable:: CPACK_NSIS_DISPLAY_NAME
 
- The display name string that appears in the Windows `Add/Remove Program`
- control panel
+ The display name string that appears in the Windows `Apps & features`
+ in `Control Panel`
 
 .. variable:: CPACK_NSIS_PACKAGE_NAME
 
@@ -102,15 +102,15 @@ on Windows Nullsoft Scriptable Install System.
 
 .. variable:: CPACK_NSIS_CREATE_ICONS_EXTRA
 
- Additional NSIS commands for creating start menu shortcuts.
+ Additional NSIS commands for creating `Start Menu` shortcuts.
 
 .. variable:: CPACK_NSIS_DELETE_ICONS_EXTRA
 
- Additional NSIS commands to uninstall start menu shortcuts.
+ Additional NSIS commands to uninstall `Start Menu` shortcuts.
 
 .. variable:: CPACK_NSIS_EXECUTABLES_DIRECTORY
 
- Creating NSIS start menu links assumes that they are in ``bin`` unless this
+ Creating NSIS `Start Menu` links assumes that they are in ``bin`` unless this
  variable is set.  For example, you would set this to ``exec`` if your
  executables are in an exec directory.
 
