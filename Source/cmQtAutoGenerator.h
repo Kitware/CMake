@@ -62,6 +62,14 @@ public:
     bool ColorOutput_ = false;
   };
 
+  // -- File system methods
+  static bool MakeParentDirectory(std::string const& filename);
+  static bool FileRead(std::string& content, std::string const& filename,
+                       std::string* error = nullptr);
+  static bool FileWrite(std::string const& filename,
+                        std::string const& content,
+                        std::string* error = nullptr);
+
   /// @brief Thread safe file system interface
   class FileSystem
   {

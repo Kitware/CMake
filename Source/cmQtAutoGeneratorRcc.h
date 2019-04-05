@@ -36,7 +36,6 @@ private:
   bool TestResources(bool& generate);
   bool TestInfoFile();
   // -- Generation
-  bool GenerateParentDir();
   bool GenerateRcc();
   bool GenerateWrapper();
 
