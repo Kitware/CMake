@@ -391,6 +391,8 @@ set(SRCS
   cmVariableWatch.h
   cmVersion.cxx
   cmVersion.h
+  cmWorkerPool.cxx
+  cmWorkerPool.h
   cmWorkingDirectory.cxx
   cmWorkingDirectory.h
   cmXMLParser.cxx

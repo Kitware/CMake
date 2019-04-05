@@ -7,14 +7,8 @@
 
 #include "cmFilePathChecksum.h"
 #include "cmQtAutoGen.h"
-#include "cmUVHandlePtr.h"
-#include "cm_uv.h"
 
-#include <array>
-#include <functional>
 #include <mutex>
-#include <stddef.h>
-#include <stdint.h>
 #include <string>
 #include <vector>
 
@@ -135,102 +129,6 @@ public:
   private:
     std::mutex Mutex_;
     cmFilePathChecksum FilePathChecksum_;
-  };
-
-  /// @brief Return value and output of an external process
-  struct ProcessResultT
-  {
-    void reset();
-    bool error() const
-    {
-      return (ExitStatus != 0) || (TermSignal != 0) || !ErrorMessage.empty();
-    }
-
-    std::int64_t ExitStatus = 0;
-    int TermSignal = 0;
-    std::string StdOut;
-    std::string StdErr;
-    std::string ErrorMessage;
-  };
-
-  /// @brief External process management class
-  struct ReadOnlyProcessT
-  {
-    // -- Types
-
-    /// @brief libuv pipe buffer class
-    class PipeT
-    {
-    public:
-      int init(uv_loop_t* uv_loop, ReadOnlyProcessT* process);
-      int startRead(std::string* target);
-      void reset();
-
-      // -- Libuv casts
-      uv_pipe_t* uv_pipe() { return UVPipe_.get(); }
-      uv_stream_t* uv_stream()
-      {
-        return reinterpret_cast<uv_stream_t*>(uv_pipe());
-      }
-      uv_handle_t* uv_handle()
-      {
-        return reinterpret_cast<uv_handle_t*>(uv_pipe());
-      }
-
-      // -- Libuv callbacks
-      static void UVAlloc(uv_handle_t* handle, size_t suggestedSize,
-                          uv_buf_t* buf);
-      static void UVData(uv_stream_t* stream, ssize_t nread,
-                         const uv_buf_t* buf);
-
-    private:
-      ReadOnlyProcessT* Process_ = nullptr;
-      std::string* Target_ = nullptr;
-      std::vector<char> Buffer_;
-      cm::uv_pipe_ptr UVPipe_;
-    };
-
-    /// @brief Process settings
-    struct SetupT
-    {
-      std::string WorkingDirectory;
-      std::vector<std::string> Command;
-      ProcessResultT* Result = nullptr;
-      bool MergedOutput = false;
-    };
-
-    // -- Const accessors
-    const SetupT& Setup() const { return Setup_; }
-    ProcessResultT* Result() const { return Setup_.Result; }
-    bool IsStarted() const { return IsStarted_; }
-    bool IsFinished() const { return IsFinished_; }
-
-    // -- Runtime
-    void setup(ProcessResultT* result, bool mergedOutput,
-               std::vector<std::string> const& command,
-               std::string const& workingDirectory = std::string());
-    bool start(uv_loop_t* uv_loop, std::function<void()>&& finishedCallback);
-
-  private:
-    // -- Friends
-    friend class PipeT;
-    // -- Libuv callbacks
-    static void UVExit(uv_process_t* handle, int64_t exitStatus,
-                       int termSignal);
-    void UVTryFinish();
-
-    // -- Setup
-    SetupT Setup_;
-    // -- Runtime
-    bool IsStarted_ = false;
-    bool IsFinished_ = false;
-    std::function<void()> FinishedCallback_;
-    std::vector<const char*> CommandPtr_;
-    std::array<uv_stdio_container_t, 3> UVOptionsStdIO_;
-    uv_process_options_t UVOptions_;
-    cm::uv_process_ptr UVProcess_;
-    PipeT UVPipeOut_;
-    PipeT UVPipeErr_;
   };
 
 public:
