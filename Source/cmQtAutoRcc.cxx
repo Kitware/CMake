@@ -1,6 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmQtAutoGeneratorRcc.h"
+#include "cmQtAutoRcc.h"
 #include "cmQtAutoGen.h"
 
 #include "cmAlgorithms.h"
@@ -13,11 +13,11 @@
 
 // -- Class methods
 
-cmQtAutoGeneratorRcc::cmQtAutoGeneratorRcc() = default;
+cmQtAutoRcc::cmQtAutoRcc() = default;
 
-cmQtAutoGeneratorRcc::~cmQtAutoGeneratorRcc() = default;
+cmQtAutoRcc::~cmQtAutoRcc() = default;
 
-bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
+bool cmQtAutoRcc::Init(cmMakefile* makefile)
 {
   // -- Utility lambdas
   auto InfoGet = [makefile](std::string const& key) {
@@ -137,7 +137,7 @@ bool cmQtAutoGeneratorRcc::Init(cmMakefile* makefile)
   return true;
 }
 
-bool cmQtAutoGeneratorRcc::Process()
+bool cmQtAutoRcc::Process()
 {
   if (!SettingsFileRead()) {
     return false;
@@ -170,7 +170,7 @@ bool cmQtAutoGeneratorRcc::Process()
   return SettingsFileWrite();
 }
 
-std::string cmQtAutoGeneratorRcc::MultiConfigOutput() const
+std::string cmQtAutoRcc::MultiConfigOutput() const
 {
   static std::string const suffix = "_CMAKE_";
   std::string res;
@@ -180,7 +180,7 @@ std::string cmQtAutoGeneratorRcc::MultiConfigOutput() const
   return res;
 }
 
-bool cmQtAutoGeneratorRcc::SettingsFileRead()
+bool cmQtAutoRcc::SettingsFileRead()
 {
   // Compose current settings strings
   {
@@ -259,7 +259,7 @@ bool cmQtAutoGeneratorRcc::SettingsFileRead()
   return true;
 }
 
-bool cmQtAutoGeneratorRcc::SettingsFileWrite()
+bool cmQtAutoRcc::SettingsFileWrite()
 {
   // Only write if any setting changed
   if (SettingsChanged_) {
@@ -286,7 +286,7 @@ bool cmQtAutoGeneratorRcc::SettingsFileWrite()
 }
 
 /// Do basic checks if rcc generation is required
-bool cmQtAutoGeneratorRcc::TestQrcRccFiles(bool& generate)
+bool cmQtAutoRcc::TestQrcRccFiles(bool& generate)
 {
   // Test if the rcc input file exists
   if (!QrcFileTime_.Load(QrcFile_)) {
@@ -342,7 +342,7 @@ bool cmQtAutoGeneratorRcc::TestQrcRccFiles(bool& generate)
   return true;
 }
 
-bool cmQtAutoGeneratorRcc::TestResources(bool& generate)
+bool cmQtAutoRcc::TestResources(bool& generate)
 {
   // Read resource files list
   if (Inputs_.empty()) {
@@ -383,7 +383,7 @@ bool cmQtAutoGeneratorRcc::TestResources(bool& generate)
   return true;
 }
 
-bool cmQtAutoGeneratorRcc::TestInfoFile()
+bool cmQtAutoRcc::TestInfoFile()
 {
   // Test if the rcc output file is older than the info file
 
@@ -415,7 +415,7 @@ bool cmQtAutoGeneratorRcc::TestInfoFile()
   return true;
 }
 
-bool cmQtAutoGeneratorRcc::GenerateRcc()
+bool cmQtAutoRcc::GenerateRcc()
 {
   // Make parent directory
   if (!MakeParentDirectory(RccFileOutput_)) {
@@ -469,7 +469,7 @@ bool cmQtAutoGeneratorRcc::GenerateRcc()
   return true;
 }
 
-bool cmQtAutoGeneratorRcc::GenerateWrapper()
+bool cmQtAutoRcc::GenerateWrapper()
 {
   // Generate a wrapper source file on demand
   if (IsMultiConfig()) {

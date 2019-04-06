@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmQtAutoGeneratorRcc_h
-#define cmQtAutoGeneratorRcc_h
+#ifndef cmQtAutoRcc_h
+#define cmQtAutoRcc_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -15,14 +15,14 @@
 class cmMakefile;
 
 // @brief AUTORCC generator
-class cmQtAutoGeneratorRcc : public cmQtAutoGenerator
+class cmQtAutoRcc : public cmQtAutoGenerator
 {
 public:
-  cmQtAutoGeneratorRcc();
-  ~cmQtAutoGeneratorRcc() override;
+  cmQtAutoRcc();
+  ~cmQtAutoRcc() override;
 
-  cmQtAutoGeneratorRcc(cmQtAutoGeneratorRcc const&) = delete;
-  cmQtAutoGeneratorRcc& operator=(cmQtAutoGeneratorRcc const&) = delete;
+  cmQtAutoRcc(cmQtAutoRcc const&) = delete;
+  cmQtAutoRcc& operator=(cmQtAutoRcc const&) = delete;
 
 private:
   // -- Utility

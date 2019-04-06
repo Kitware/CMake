@@ -8,7 +8,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmQtAutoGeneratorMocUic.h"
-#include "cmQtAutoGeneratorRcc.h"
+#include "cmQtAutoRcc.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -1024,7 +1024,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       return autoGen.Run(infoDir, config) ? 0 : 1;
     }
     if ((args[1] == "cmake_autorcc") && (args.size() >= 3)) {
-      cmQtAutoGeneratorRcc autoGen;
+      cmQtAutoRcc autoGen;
       std::string const& infoFile = args[2];
       std::string config;
       if (args.size() > 3) {

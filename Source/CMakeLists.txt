@@ -350,8 +350,8 @@ set(SRCS
   cmQtAutoGenInitializer.h
   cmQtAutoGeneratorMocUic.cxx
   cmQtAutoGeneratorMocUic.h
-  cmQtAutoGeneratorRcc.cxx
-  cmQtAutoGeneratorRcc.h
+  cmQtAutoRcc.cxx
+  cmQtAutoRcc.h
   cmRST.cxx
   cmRST.h
   cmScriptGenerator.h
