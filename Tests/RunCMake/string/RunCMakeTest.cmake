@@ -33,3 +33,7 @@ run_cmake(UTF-16BE)
 run_cmake(UTF-16LE)
 run_cmake(UTF-32BE)
 run_cmake(UTF-32LE)
+
+run_cmake(Repeat)
+run_cmake(RepeatNoArgs)
+run_cmake(RepeatNegativeCount)

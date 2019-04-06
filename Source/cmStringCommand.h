@@ -51,6 +51,7 @@ protected:
   bool HandleConcatCommand(std::vector<std::string> const& args);
   bool HandleJoinCommand(std::vector<std::string> const& args);
   bool HandleStripCommand(std::vector<std::string> const& args);
+  bool HandleRepeatCommand(std::vector<std::string> const& args);
   bool HandleRandomCommand(std::vector<std::string> const& args);
   bool HandleFindCommand(std::vector<std::string> const& args);
   bool HandleTimestampCommand(std::vector<std::string> const& args);
