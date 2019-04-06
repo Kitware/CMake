@@ -88,8 +88,6 @@ String Comparisons
 ``$<IN_LIST:string,list>``
   ``1`` if ``string`` is member of the semicolon-separated ``list``, else ``0``.
   Uses case-sensitive comparisons.
-``$<REMOVE_DUPLICATES:list>``
-  Removes duplicated items in the given ``list``.
 ``$<VERSION_LESS:v1,v2>``
   ``1`` if ``v1`` is a version less than ``v2``, else ``0``.
 ``$<VERSION_GREATER:v1,v2>``
@@ -293,6 +291,8 @@ String Transformations
 
 ``$<JOIN:list,string>``
   Joins the list with the content of ``string``.
+``$<REMOVE_DUPLICATES:list>``
+  Removes duplicated items in the given ``list``.
 ``$<LOWER_CASE:string>``
   Content of ``string`` converted to lower case.
 ``$<UPPER_CASE:string>``
