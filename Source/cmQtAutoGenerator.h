@@ -8,7 +8,6 @@
 #include "cmFilePathChecksum.h"
 #include "cmQtAutoGen.h"
 #include "cmUVHandlePtr.h"
-#include "cmUVSignalHackRAII.h" // IWYU pragma: keep
 #include "cm_uv.h"
 
 #include <array>
@@ -249,9 +248,6 @@ public:
   std::string const& InfoFile() const { return InfoFile_; }
   std::string const& InfoDir() const { return InfoDir_; }
   std::string const& InfoConfig() const { return InfoConfig_; }
-  // libuv loop
-  uv_loop_t* UVLoop() { return UVLoop_.get(); }
-  cm::uv_async_ptr& UVRequest() { return UVRequest_; }
 
   // -- Utility
   static std::string SettingsFind(std::string const& content, const char* key);
@@ -266,12 +262,6 @@ private:
   std::string InfoFile_;
   std::string InfoDir_;
   std::string InfoConfig_;
-// -- libuv loop
-#ifdef CMAKE_UV_SIGNAL_HACK
-  std::unique_ptr<cmUVSignalHackRAII> UVHackRAII_;
-#endif
-  std::unique_ptr<uv_loop_t> UVLoop_;
-  cm::uv_async_ptr UVRequest_;
 };
 
 #endif

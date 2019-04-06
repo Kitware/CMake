@@ -657,22 +657,9 @@ void cmQtAutoGenerator::ReadOnlyProcessT::UVTryFinish()
   }
 }
 
-cmQtAutoGenerator::cmQtAutoGenerator()
-{
-  // Initialize libuv loop
-  uv_disable_stdio_inheritance();
-#ifdef CMAKE_UV_SIGNAL_HACK
-  UVHackRAII_ = cm::make_unique<cmUVSignalHackRAII>();
-#endif
-  UVLoop_ = cm::make_unique<uv_loop_t>();
-  uv_loop_init(UVLoop());
-}
+cmQtAutoGenerator::cmQtAutoGenerator() = default;
 
-cmQtAutoGenerator::~cmQtAutoGenerator()
-{
-  // Close libuv loop
-  uv_loop_close(UVLoop());
-}
+cmQtAutoGenerator::~cmQtAutoGenerator() = default;
 
 bool cmQtAutoGenerator::Run(std::string const& infoFile,
                             std::string const& config)

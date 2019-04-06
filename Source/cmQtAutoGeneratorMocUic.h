@@ -8,6 +8,7 @@
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
 #include "cmUVHandlePtr.h"
+#include "cmUVSignalHackRAII.h" // IWYU pragma: keep
 #include "cm_uv.h"
 #include "cmsys/RegularExpression.hxx"
 
@@ -390,6 +391,9 @@ private:
   // -- Utility accessors
   Logger& Log() { return Logger_; }
   FileSystem& FileSys() { return FileSys_; }
+  // -- libuv loop accessors
+  uv_loop_t* UVLoop() { return UVLoop_.get(); }
+  cm::uv_async_ptr& UVRequest() { return UVRequest_; }
   // -- Abstract processing interface
   bool Init(cmMakefile* makefile) override;
   bool Process() override;
@@ -417,7 +421,12 @@ private:
   BaseSettingsT Base_;
   MocSettingsT Moc_;
   UicSettingsT Uic_;
-  // -- Progress
+  // -- libuv loop
+#ifdef CMAKE_UV_SIGNAL_HACK
+  std::unique_ptr<cmUVSignalHackRAII> UVHackRAII_;
+#endif
+  std::unique_ptr<uv_loop_t> UVLoop_;
+  cm::uv_async_ptr UVRequest_;
   StageT Stage_ = StageT::SETTINGS_READ;
   // -- Job queues
   std::mutex JobsMutex_;

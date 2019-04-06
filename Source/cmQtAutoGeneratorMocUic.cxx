@@ -1148,11 +1148,23 @@ cmQtAutoGeneratorMocUic::cmQtAutoGeneratorMocUic()
   Uic_.RegExpInclude.compile("(^|\n)[ \t]*#[ \t]*include[ \t]+"
                              "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
 
+  // Initialize libuv loop
+  uv_disable_stdio_inheritance();
+#ifdef CMAKE_UV_SIGNAL_HACK
+  UVHackRAII_ = cm::make_unique<cmUVSignalHackRAII>();
+#endif
+  UVLoop_ = cm::make_unique<uv_loop_t>();
+  uv_loop_init(UVLoop());
+
   // Initialize libuv asynchronous iteration request
   UVRequest().init(*UVLoop(), &cmQtAutoGeneratorMocUic::UVPollStage, this);
 }
 
-cmQtAutoGeneratorMocUic::~cmQtAutoGeneratorMocUic() = default;
+cmQtAutoGeneratorMocUic::~cmQtAutoGeneratorMocUic()
+{
+  // Close libuv loop
+  uv_loop_close(UVLoop());
+}
 
 bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
 {
